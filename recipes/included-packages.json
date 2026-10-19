@@ -1,0 +1,282 @@
+{
+  "schemaVersion": 1,
+  "packages": [
+    {
+      "id": "ai5",
+      "version": "1.5.0-macos-v3",
+      "arch": "arm64",
+      "upstreamRevision": "1dfe835ceff2ecd62aa75ced91f11450dd75d1d2",
+      "directoryRelative": "ai5/1.5.0-macos-v3/arm64"
+    },
+    {
+      "id": "butterscotch",
+      "version": "d66464857303-appkit",
+      "arch": "arm64",
+      "upstreamRevision": "d66464857303a2840a5cc5141c0035440847f441",
+      "directoryRelative": "butterscotch/d66464857303-appkit/arm64"
+    },
+    {
+      "id": "fna",
+      "version": "26.10-net8-arm64-v2",
+      "arch": "arm64",
+      "upstreamRevision": "651c0ffdf4db43cd112865ad368c5d6cc3dc7558",
+      "directoryRelative": "fna/26.10-net8-arm64-v2/arm64"
+    },
+    {
+      "id": "gemrb",
+      "version": "0.9.5-cli-v4",
+      "arch": "arm64",
+      "upstreamRevision": "b33f0e7275ea1fc8a82459b418f6a7b5f1b40108",
+      "directoryRelative": "gemrb/0.9.5-cli-v4/arm64"
+    },
+    {
+      "id": "gm8-decompiler",
+      "version": "2.2.0-9ccc47a9",
+      "arch": "arm64",
+      "upstreamRevision": "9ccc47a9cab4681a889866f7233a6b016d36a15e",
+      "directoryRelative": "gm8-decompiler/2.2.0-9ccc47a9/arm64"
+    },
+    {
+      "id": "hashlink",
+      "version": "1.12-macos-v1",
+      "arch": "x64",
+      "upstreamRevision": "68daa125ad115a1f1d1db65d38e6045858d55013",
+      "directoryRelative": "hashlink/1.12-macos-v1/x64"
+    },
+    {
+      "id": "hashlink",
+      "version": "1.9-macos-v2",
+      "arch": "x64",
+      "upstreamRevision": "4a4cfe91f3388a0b05bf2e45e7c4e38bae686dc6",
+      "directoryRelative": "hashlink/1.9-macos-v2/x64"
+    },
+    {
+      "id": "impacto",
+      "version": "0.10.8.810-windows-v9",
+      "arch": "arm64",
+      "upstreamRevision": "ba51381fb65da70697be29e6a817dc4af5c98d19",
+      "directoryRelative": "impacto/0.10.8.810-windows-v9/arm64"
+    },
+    {
+      "id": "innoextract",
+      "version": "1.10-dev-6e9e34ed-macos-v1",
+      "arch": "arm64",
+      "upstreamRevision": "6e9e34ed0876014fdb46e684103ef8c3605e382e",
+      "directoryRelative": "innoextract/1.10-dev-6e9e34ed-macos-v1/arm64"
+    },
+    {
+      "id": "krkrsdl2",
+      "version": "snapshot-124bdf8-macos-v3",
+      "arch": "arm64",
+      "upstreamRevision": "124bdf841f09e7ce02aa99b7b55791a0f7a900ff",
+      "directoryRelative": "krkrsdl2/snapshot-124bdf8-macos-v3/arm64"
+    },
+    {
+      "id": "mkxpz",
+      "version": "2026-01-12T18-22-32Z_794d1897abe529a23f3f2f9c4f72d711a3b18391",
+      "arch": "arm64",
+      "upstreamRevision": "794d1897abe529a23f3f2f9c4f72d711a3b18391",
+      "directoryRelative": "mkxpz/2026-01-12T18-22-32Z_794d1897abe529a23f3f2f9c4f72d711a3b18391/arm64"
+    },
+    {
+      "id": "npengine",
+      "version": "0.5.3-macos-v8",
+      "arch": "arm64",
+      "upstreamRevision": "da1a175e6b497c37f9714b77510cb47c0930cd42",
+      "directoryRelative": "npengine/0.5.3-macos-v8/arm64"
+    },
+    {
+      "id": "onscripter-en",
+      "version": "2025-06-08-mac-v2",
+      "arch": "arm64",
+      "upstreamRevision": "0a725088e01919e0c206533c793a84f69f06b833",
+      "directoryRelative": "onscripter-en/2025-06-08-mac-v2/arm64"
+    },
+    {
+      "id": "onsyuri",
+      "version": "0.7.7beta-macos-v3",
+      "arch": "arm64",
+      "upstreamRevision": "08f744b31cc1907b66a15f0402e62321a131ed81",
+      "directoryRelative": "onsyuri/0.7.7beta-macos-v3/arm64"
+    },
+    {
+      "id": "opengmk",
+      "version": "0.2.0-9ccc47a9-macos-v7",
+      "arch": "arm64",
+      "upstreamRevision": "9ccc47a9cab4681a889866f7233a6b016d36a15e",
+      "directoryRelative": "opengmk/0.2.0-9ccc47a9-macos-v7/arm64"
+    },
+    {
+      "id": "reminori",
+      "version": "0.1.0-79b0099-macos-v2",
+      "arch": "arm64",
+      "upstreamRevision": "79b00990324404bfbd496e7fa76c690cf040f744",
+      "directoryRelative": "reminori/0.1.0-79b0099-macos-v2/arm64"
+    },
+    {
+      "id": "sys3-decompiler",
+      "version": "0.5.0",
+      "arch": "arm64",
+      "upstreamRevision": "cc7ceda1bae0a9886f4c56ee3ce031d139ee1764",
+      "directoryRelative": "sys3-decompiler/0.5.0/arm64"
+    },
+    {
+      "id": "system3",
+      "version": "1.8.0-macos-v2",
+      "arch": "arm64",
+      "upstreamRevision": "461673bec729e7e0ec905921fc3e03aecf977a70",
+      "directoryRelative": "system3/1.8.0-macos-v2/arm64"
+    },
+    {
+      "id": "xsys35-decompiler",
+      "version": "1.13.0",
+      "arch": "arm64",
+      "upstreamRevision": "c8ac28b83c034c1ec598266ab85daf75869359c8",
+      "directoryRelative": "xsys35-decompiler/1.13.0/arm64"
+    },
+    {
+      "id": "xsystem35",
+      "version": "2.20.0-macos-v2",
+      "arch": "arm64",
+      "upstreamRevision": "82c8b76a58a19ff1f87b4bdadbaef169c4b37f46",
+      "directoryRelative": "xsystem35/2.20.0-macos-v2/arm64"
+    },
+    {
+      "id": "xsystem4",
+      "version": "snapshot-04333ad-macos-v2",
+      "arch": "arm64",
+      "upstreamRevision": "04333ad689d7e517a93d58141bb214c19ba16129",
+      "directoryRelative": "xsystem4/snapshot-04333ad-macos-v2/arm64"
+    },
+    {
+      "id": "android-aim",
+      "version": "0.1.0-b46451d3-ml1",
+      "arch": "arm64",
+      "minimumMacOS": "26.0",
+      "directoryRelative": "android-aim/0.1.0-b46451d3-ml1/arm64",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "f749165514248602738dad2d5283517ad533d1d7db316027f1fdfbad43509c0e",
+      "sourceSha256": "42f63f8acb6c74340cba950c662d5910dda16a32c2a89ed162aa94393ea868e4"
+    },
+    {
+      "id": "android-privacy",
+      "version": "1.0.0-dc13b6b57101",
+      "arch": "arm64",
+      "minimumMacOS": "13.0",
+      "directoryRelative": "android-privacy/1.0.0-dc13b6b57101/arm64",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "746ae5f96aa4adcff4c2a603c36e749cf453916c59d53f69b790f0c60dee52c1",
+      "sourceSha256": "a95dfc40811e331ffde87ccca5e52e9bc1683bd3c90b09734bf1fcd46a3969ff"
+    },
+    {
+      "id": "android",
+      "version": "0.1.0-afdc510a-61332a65",
+      "arch": "arm64",
+      "minimumMacOS": "13.0",
+      "directoryRelative": "android/0.1.0-afdc510a-61332a65/arm64",
+      "manifestRelative": "runtime.json",
+      "manifestSha256": "dc1295f5fbc29b20917107e557de3b784736e4616d17e40b75aaf94ff95e0d8f",
+      "sourceSha256": "eed09d35c424923753fc33191b5bfb75602c53380d64ddcccbd3f5c2a904128b"
+    },
+    {
+      "id": "catsystem2-kif-crypto",
+      "version": "1.0.0-ml1",
+      "arch": "universal",
+      "minimumMacOS": "11.0",
+      "directoryRelative": "catsystem2-kif-crypto/1.0.0-ml1/universal",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "30c27a9906062148211134e46b687e9f724f58cbd3dc1d70c736ea74218c9bdd",
+      "sourceSha256": "325c23b2d1dab9c3c0818da1d9c64b20f21fc959181b25dbe6b7a32a8a792f0c"
+    },
+    {
+      "id": "ios-playtools-paths",
+      "version": "1.0.0-599ba0aa",
+      "arch": "arm64",
+      "minimumMacOS": "12.0",
+      "directoryRelative": "ios-playtools-paths/1.0.0-599ba0aa/arm64",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "faf5e6bcc57df1be10e98aa7de9b96a8a94bb8c2cf6da449af5289368f97bd98",
+      "sourceSha256": "2af09a89b7f8fd6f6814f023654ac9a503c59db7c950f960721a6846cc4ddb7e"
+    },
+    {
+      "id": "java-steamworks",
+      "version": "steamworks4j-1.10.0-ml1",
+      "arch": "universal",
+      "minimumMacOS": "11.0",
+      "directoryRelative": "java-steamworks/steamworks4j-1.10.0-ml1/universal",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "ea341da90fe54872c0b9b0d0d2d9f671992de1ebcb62017362dbe04bee315601",
+      "sourceSha256": "b92ea7eac757c843c358fd2de0103a0851d94f4f5a748dd0f56e7979f9daf141"
+    },
+    {
+      "id": "java-steamworks",
+      "version": "steamworks4j-1.9.0-ml1",
+      "arch": "x64",
+      "minimumMacOS": "10.9",
+      "directoryRelative": "java-steamworks/steamworks4j-1.9.0-ml1/x64",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "dd2ba652a52d8c347e2932c8df7a0aab34414bc2e058db4e5abef39340c1242c",
+      "sourceSha256": "b92ea7eac757c843c358fd2de0103a0851d94f4f5a748dd0f56e7979f9daf141"
+    },
+    {
+      "id": "love-luasteam",
+      "version": "luasteam-4.0.2-ml1-lua51-universal",
+      "arch": "universal",
+      "minimumMacOS": "13.0",
+      "directoryRelative": "love-luasteam/luasteam-4.0.2-ml1-lua51-universal/universal",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "7fd2a241239c17800a570b08e85191767015473cbb12ba9d48a5f1732c7369c2",
+      "sourceSha256": "d0ac298bbe9be101e9964ab2203b832930eeae56d95fced802ec8c81e24a66aa"
+    },
+    {
+      "id": "mkxpz-config-helper",
+      "version": "config-cwd-v2-universal",
+      "arch": "universal",
+      "minimumMacOS": "11.0",
+      "directoryRelative": "mkxpz-config-helper/config-cwd-v2-universal/universal",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "b24e044a9e8165246f94c608f0693e3a13b916463cccc395a2834b6cc02dc79b",
+      "sourceSha256": "fffb6bb5d01133bac1aaa16aa721f781186c50d12d2cf4f9abcc71c0688ac96a"
+    },
+    {
+      "id": "reshade",
+      "version": "0.1.0-84d86a87-fbdc36cb",
+      "arch": "universal",
+      "minimumMacOS": "13.0",
+      "directoryRelative": "reshade/0.1.0-84d86a87-fbdc36cb/universal",
+      "manifestRelative": "runtime.json",
+      "manifestSha256": "220d7cee8ab8d9423ee94fb427a0eddafe0aed8391d925246bcb74fb6ff001a1",
+      "sourceSha256": "188160a4547b4cbb9d9f60ac8c18ce45ec1bd8cad228e3b65fdb5a06ebad3096"
+    },
+    {
+      "id": "steam-api-helper",
+      "version": "maclauncher-offline-abi-0.5.0-universal",
+      "arch": "universal",
+      "minimumMacOS": "13.0",
+      "directoryRelative": "steam-api-helper/maclauncher-offline-abi-0.5.0-universal/universal",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "496eee1177f396b9e354299d9781cdb07d212fe0149dece6c89b89b86eb06363",
+      "sourceSha256": "40597e2596bf3df91e7a8d1be6939f75d2d427bbeb91d0ac2316420c1c0cb23e"
+    },
+    {
+      "id": "steam-ticket-loader",
+      "version": "maclauncher-ticket-unavailable-0.1.0-universal",
+      "arch": "universal",
+      "minimumMacOS": "13.0",
+      "directoryRelative": "steam-ticket-loader/maclauncher-ticket-unavailable-0.1.0-universal/universal",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "1d965237f2cc2b983ac17fbbd3540aa101c7b38fd5d5f7e5eb555c094119ccb1",
+      "sourceSha256": "5b5604323f8d6a016efb50056403fe504271ddbd70ba738b268eb3b4dc223f00"
+    },
+    {
+      "id": "vulkan-kosmickrisp-gles32",
+      "version": "0.1.0-70350106-d1679eba",
+      "arch": "arm64",
+      "minimumMacOS": "27.0.0",
+      "directoryRelative": "vulkan-kosmickrisp-gles32/0.1.0-70350106-d1679eba/arm64",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "7b3ef4cf60492d38a807e570cbf4c681def204c44f18bfb9324330bb64202856",
+      "sourceSha256": "7a0ece5ae14c5c0bc0d788c7ea1d80aaa2491e0b9c1b7e18073be11da8970cfa"
+    }
+  ]
+}

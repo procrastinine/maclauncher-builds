@@ -1,0 +1,3 @@
+[submodule "sources/maclauncher-android"]
+	path = sources/maclauncher-android
+	url = ../maclauncher-android
