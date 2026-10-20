@@ -4,6 +4,8 @@ import crypto from 'node:crypto';
 import zlib from 'node:zlib';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
+import {assetName,releaseTag,assetUrl,identity,projectId,releaseRecord,validateCatalog} from '../lib/project-identity.mjs';
+import {resolveProject} from '../lib/projects.mjs';
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs');
 const {validateDeclaration}=require('../lib/declaration.cjs');
 const A=require('../lib/archive.cjs'),SHA=/^[a-f0-9]{64}$/;
@@ -17,15 +19,18 @@ export function publicDeclaration(value){
  return value;
 }
 
-export async function pack({input,declaration,output}){
- declaration=publicDeclaration(declaration);input=fs.realpathSync(input);
+export async function pack({project,input,declaration,output}){
+ projectId(project);declaration=publicDeclaration(declaration);identity(declaration);
+ if(declaration.id!==project)throw Error(`Package belongs to ${declaration.id}; expected project ${project}.`);
+ if(path.basename(output)!==assetName(declaration))throw Error('Output filename must be '+assetName(declaration));
+ input=fs.realpathSync(input);
  B.verifyPayload(input,declaration);
  const bytes=Buffer.from(JSON.stringify(declaration,null,2)+'\n');
  const entries=[{name:'runtime-package.json',bytes,size:bytes.length,sha256:B.digest(bytes),mode:0o644},
   ...declaration.files.map(file=>({...file,name:'files/'+file.path,file:path.join(input,file.path)}))];
  const archive=await A.writeArchive(entries,output);
- await verify({archive:output,sha256:archive.sha256});
- const record={schemaVersion:1,id:declaration.id,version:declaration.version,arch:declaration.arch,
+ await verify({archive:output,sha256:archive.sha256,project,version:declaration.version,arch:declaration.arch});
+ const record={schemaVersion:2,id:declaration.id,version:declaration.version,arch:declaration.arch,
   launcherArchitectures:declaration.launcherArchitectures,minimumMacOS:declaration.minimumMacOS,
   manifestRelative:declaration.manifestRelative,manifestSha256:declaration.manifestSha256,
   sourceSha256:declaration.sourceSha256,updatePolicy:'manual',
@@ -36,7 +41,8 @@ export async function pack({input,declaration,output}){
 
 /** Validate downloads by streaming regular tar members; no extraction or guest
  * code execution is needed to reject traversal, links or extra payload files. */
-export async function verify({archive,sha256}){
+export async function verify({archive,sha256,project,version,arch}){
+ identity({id:project,version,arch});
  if(!SHA.test(sha256||''))throw Error('An exact expected archive SHA-256 is required.');
  const stat=fs.lstatSync(archive);if(!stat.isFile()||stat.isSymbolicLink()||stat.size>A.LIMITS.archiveBytes)throw Error('Invalid runtime archive file.');
  if(await A.checksum(archive)!==sha256)throw Error('Runtime archive checksum differs from the selected release.');
@@ -51,6 +57,7 @@ export async function verify({archive,sha256}){
    if(!declaration){
     if(entry.name!=='runtime-package.json'||entry.mode!==0o644||entry.size>A.LIMITS.metadataBytes)throw Error('Runtime inventory must be the first archive member.');
     declaration=publicDeclaration(JSON.parse((await reader.read(entry.size)).toString('utf8')));
+    if(declaration.id!==project||declaration.version!==version||declaration.arch!==arch)throw Error('Runtime archive belongs to a different project, version or architecture.');
     expected=new Map(declaration.files.map(file=>['files/'+file.path,file]));
    }else{
     const file=expected.get(entry.name);
@@ -66,45 +73,45 @@ export async function verify({archive,sha256}){
  }finally{input.destroy();stream.destroy();}
 }
 
-export function catalog(records,{repository}={}){
- if(repository&&!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository))throw Error('Use an explicit GitHub owner/repository.');
- const seen=new Set();const packages=records.map(record=>{
-  const key=[record.id,record.version,record.arch].join('/');
-  if(record.schemaVersion!==1||record.updatePolicy!=='manual'||seen.has(key)||
-   !/^[a-z0-9-]+$/.test(record.id||'')||!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(record.version||'')||
-   !['arm64','x64','universal'].includes(record.arch)||!/^\d{1,2}\.\d{1,2}(?:\.\d{1,2})?$/.test(record.minimumMacOS||'')||
-   !Array.isArray(record.launcherArchitectures)||!record.launcherArchitectures.length||
-   record.launcherArchitectures.some(arch=>!['arm64','x64'].includes(arch))||
-   !SHA.test(record.manifestSha256||'')||!SHA.test(record.sourceSha256||'')||
-   !SHA.test(record.asset?.sha256||'')||!Number.isSafeInteger(record.asset.bytes)||record.asset.bytes<1||record.asset.bytes>A.LIMITS.archiveBytes||
-   !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(record.asset.filename||''))throw Error('Invalid or duplicate runtime release record.');
-  A.safeFile(record.manifestRelative);
-  publicMetadata(record);
-  seen.add(key);const tag=[record.id,record.version,record.arch].join('-');
-  return {...record,...(repository?{tag,asset:{...record.asset,url:`https://github.com/${repository}/releases/download/${tag}/${record.asset.filename}`}}:{})};
+export function catalog(records,{project,repository,previous}={}){
+ projectId(project);if(!Array.isArray(records)||!records.length)throw Error('Select at least one project release record.');
+ if(previous)validateCatalog(previous,{project,repository});
+ const seen=new Set(),old=new Map((previous?.packages||[]).map(record=>[record.version+'/'+record.arch,record]));
+ const packages=records.map(record=>{
+  releaseRecord(record,{project,repository});const key=record.version+'/'+record.arch;
+  if(seen.has(key))throw Error('Duplicate project/version/architecture.');seen.add(key);
+  const result={...record,tag:releaseTag(record),asset:{...record.asset,url:assetUrl(record,repository)}};
+  if(old.has(key)&&stable(old.get(key))!==stable(result))throw Error('Published project versions are immutable; choose a new version.');
+  return result;
  });
- return {schemaVersion:1,updatePolicy:'manual',packages};
+ for(const record of previous?.packages||[])if(!seen.has(record.version+'/'+record.arch))packages.push(record);
+ return validateCatalog({schemaVersion:2,projectId:project,updatePolicy:'manual',packages},{project,repository});
 }
 
-function publicMetadata(value){if(/(?:\/Users\/|\/home\/|file:\/\/|(?:password|accessToken|refreshToken|logPath|evidenceSource)"\s*:)/i.test(JSON.stringify(value)))throw Error('Package metadata contains private paths or fields.');}
+function stable(value){return JSON.stringify(value,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))):v);}
 
 function argumentsFor(args){const options={};for(let n=0;n<args.length;n+=2){if(!args[n].startsWith('--')||!args[n+1])throw Error('Expected --option value pairs.');const name=args[n].slice(2);if(name==='package')(options.packages||=[]).push(args[n+1]);else if(Object.hasOwn(options,name))throw Error('Duplicate option: '+name);else options[name]=args[n+1];}return options;}
 export async function main([command,...args]){
  const o=argumentsFor(args);
- const allowed={pack:['input','declaration','output','id'],verify:['archive','sha256'],catalog:['packages','repository','output']}[command];
+ const allowed={pack:['project','input','declaration','output'],verify:['project','version','arch','archive','sha256'],catalog:['project','packages','output','previous']}[command];
  if(!allowed)throw Error('Use pack, verify or catalog.');
  for(const key of Object.keys(o))if(!allowed.includes(key))throw Error('Unknown option: '+key);
+ const project=resolveProject(o.project);
  if(command==='pack'){
   if(!o.input||!o.declaration||!o.output)throw Error('pack requires --input, --declaration and --output.');
   let declaration=JSON.parse(fs.readFileSync(o.declaration));
-  if(Array.isArray(declaration)){const matches=declaration.filter(item=>!o.id||item.id===o.id);if(matches.length!==1)throw Error('Select one package with --id.');declaration=matches[0];}
-  return pack({input:o.input,declaration,output:o.output});
+  if(Array.isArray(declaration)){const matches=declaration.filter(item=>item.id===o.project);if(matches.length!==1)throw Error('Declaration does not contain exactly one selected project.');declaration=matches[0];}
+  return pack({project:o.project,input:o.input,declaration,output:o.output});
  }
- if(command==='verify')return verify({archive:o.archive,sha256:o.sha256});
+ if(command==='verify')return verify({archive:o.archive,sha256:o.sha256,project:o.project,version:o.version,arch:o.arch});
  if(command==='catalog'){
   if(!o.packages?.length||!o.output)throw Error('catalog requires --package records and --output.');
-  const result=catalog(o.packages.map(file=>JSON.parse(fs.readFileSync(file))),{repository:o.repository});
-  fs.writeFileSync(o.output,JSON.stringify(result,null,2)+'\n',{flag:'wx'});return result;
+  if(path.basename(o.output)!==o.project+'.json')throw Error('Catalog filename must be '+o.project+'.json');
+  const previous=o.previous?JSON.parse(fs.readFileSync(o.previous)):undefined;
+  const result=catalog(o.packages.map(file=>JSON.parse(fs.readFileSync(file))),{project:o.project,repository:project.releaseRepository,previous});
+  if(fs.existsSync(o.output)&&(!o.previous||path.resolve(o.previous)!==path.resolve(o.output)))throw Error('Use --previous to retain existing published versions.');
+  fs.mkdirSync(path.dirname(path.resolve(o.output)),{recursive:true});
+  const temporary=o.output+'.tmp-'+process.pid;try{fs.writeFileSync(temporary,JSON.stringify(result,null,2)+'\n',{flag:'wx'});fs.renameSync(temporary,o.output);}finally{fs.rmSync(temporary,{force:true});}return result;
  }
  throw Error('Use pack, verify or catalog.');
 }

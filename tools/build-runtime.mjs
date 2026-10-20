@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {spawnSync,execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
+import {resolveProject} from '../lib/projects.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
 const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
@@ -25,13 +26,16 @@ export function verifyProducer(directory,recipe){
 export function main(args){
  const options={};for(let i=0;i<args.length;i++){
   if(args[i]==='--check'){if(options.check)throw Error('Duplicate --check.');options.check=true;continue;}
-  const key=args[i]?.slice(2);if(!args[i]?.startsWith('--')||!['runtime','inputs'].includes(key)||!args[i+1]||Object.hasOwn(options,key))throw Error('Use --runtime android with --check or --inputs /absolute/path.json.');
+  const key=args[i]?.slice(2);if(!args[i]?.startsWith('--')||!['project','runtime','inputs'].includes(key)||!args[i+1]||Object.hasOwn(options,key))throw Error('Use --project android with --check or --inputs /absolute/path.json.');
   options[key]=args[++i];
  }
- if(!/^[a-z0-9-]+$/.test(options.runtime||'')||(!options.check&&!options.inputs)||options.check&&options.inputs)throw Error('Choose one runtime and either --check or --inputs.');
+ if(options.project&&options.runtime)throw Error('Select one project.');options.project??=options.runtime;
+ if(!/^[a-z0-9-]+$/.test(options.project||'')||(!options.check&&!options.inputs)||options.check&&options.inputs)throw Error('Choose one project and either --check or --inputs.');
  if(options.inputs&&!path.isAbsolute(options.inputs))throw Error('Build inputs require an absolute JSON path.');
- const recipe=JSON.parse(fs.readFileSync(path.join(root,'runtimes',options.runtime,'source.json')));
- if(recipe.id!==options.runtime)throw Error('Runtime recipe identity differs.');
+ const project=resolveProject(options.project,root);
+ if(project.producer.kind!=='pinned-source')throw Error(project.producer.kind==='prebuilt'?project.name+' retains its supplied binary.':project.name+' producer is maintained in MacLauncher: '+project.producer.entries.join(', '));
+ const recipe=JSON.parse(fs.readFileSync(path.join(root,project.producer.recipe)));
+ if(recipe.id!==options.project)throw Error('Runtime recipe identity differs from the selected project.');
  const source=verifyProducer(root,recipe);
  const command=options.check?[path.join(source,recipe.checkEntry)]:[path.join(source,recipe.buildEntry),'--inputs',options.inputs];
  const result=spawnSync(process.execPath,command,{cwd:source,stdio:'inherit'});if(result.error)throw result.error;

@@ -1,0 +1,627 @@
+{
+  "schemaVersion": 1,
+  "repository": "procrastinine/maclauncher-builds",
+  "updatePolicy": "manual",
+  "projects": [
+    {
+      "id": "android",
+      "name": "MacLauncher Android",
+      "purpose": "Complete Android framework, JVM/ART and native host adaptations.",
+      "producer": {
+        "kind": "pinned-source",
+        "recipe": "runtimes/android/source.json"
+      },
+      "upstreams": [
+        {
+          "id": "klepton",
+          "provider": "github",
+          "url": "https://github.com/shinyquagsire23/Klepton",
+          "repository": "shinyquagsire23/Klepton",
+          "revision": "ce74582cb1e434db210014dbcd0ca0aad0e46ba2"
+        },
+        {
+          "id": "dex2jvm",
+          "provider": "github",
+          "url": "https://github.com/kksimp/dex2jvm",
+          "repository": "kksimp/dex2jvm",
+          "revision": "4c666fdc49fee8f61166fa943980e92a1368a15f"
+        },
+        {
+          "id": "aosp-framework",
+          "provider": "gitiles",
+          "url": "https://android.googlesource.com/platform/frameworks/base",
+          "revision": "4e43ad12e1b211f15152e9c5b16b0fe88e6b93f3"
+        },
+        {
+          "id": "aim",
+          "provider": "github",
+          "url": "https://github.com/hahnlee/aim",
+          "repository": "hahnlee/aim",
+          "revision": "9b5068fa8185d3f51f1862fe7c54d88d51f09ec8"
+        },
+        {
+          "id": "android-angle",
+          "provider": "gitiles",
+          "url": "https://chromium.googlesource.com/angle/angle",
+          "revision": "cbc4153da8d5796b0fbb3cf288e97bee19436191"
+        },
+        {
+          "id": "libvpx",
+          "provider": "github",
+          "url": "https://github.com/webmproject/libvpx",
+          "repository": "webmproject/libvpx",
+          "revision": "6df3ec34557879fff673706f4a1d9fbd0f3a6f0e"
+        }
+      ],
+      "compatibility": "Android 16 / API 36 framework and image contract; source updates are explicit adaptations."
+    },
+    {
+      "id": "android-aim",
+      "name": "AIM with MacLauncher integration",
+      "purpose": "Private runtime/data paths, display routing and process integration.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "scripts/build-android-aim.mjs"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "aim-runtime",
+          "provider": "github",
+          "url": "https://github.com/hahnlee/aim",
+          "repository": "hahnlee/aim",
+          "revision": "b46451d37987f63bc38d9af07672087fef97779e"
+        }
+      ]
+    },
+    {
+      "id": "ai5",
+      "name": "AI5 SDL2",
+      "purpose": "Disc/archive access, private saves and font routing.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/ai5/runtime/portable-build.js"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "ai5-sdl2",
+          "provider": "github",
+          "url": "https://github.com/nunuhara/ai5-sdl2",
+          "repository": "nunuhara/ai5-sdl2",
+          "revision": "1dfe835ceff2ecd62aa75ced91f11450dd75d1d2"
+        }
+      ]
+    },
+    {
+      "id": "fna",
+      "name": "FNA game host",
+      "purpose": "Managed game host, XNA facades and native graphics integration.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/fna/runtime/build.js"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "fna",
+          "provider": "github",
+          "url": "https://github.com/FNA-XNA/FNA",
+          "repository": "FNA-XNA/FNA",
+          "revision": "651c0ffdf4db43cd112865ad368c5d6cc3dc7558"
+        },
+        {
+          "id": "fna3d",
+          "provider": "github",
+          "url": "https://github.com/FNA-XNA/FNA3D",
+          "repository": "FNA-XNA/FNA3D",
+          "revision": "62a41708e975867e4fa7914aca55fdb13c36a0a1"
+        }
+      ]
+    },
+    {
+      "id": "gemrb",
+      "name": "GemRB",
+      "purpose": "Native command-line entry and scripting-symbol linkage.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/gemrb/runtime/portable-build-v4.js"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "gemrb",
+          "provider": "github",
+          "url": "https://github.com/gemrb/gemrb",
+          "repository": "gemrb/gemrb",
+          "revision": "b33f0e7275ea1fc8a82459b418f6a7b5f1b40108"
+        }
+      ]
+    },
+    {
+      "id": "gm8-decompiler",
+      "name": "GameMaker 8 decompiler",
+      "purpose": "Native macOS build of the original decompiler.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/gamemaker/overlays/opengmk-macos/source-build.js"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "opengmk",
+          "provider": "github",
+          "url": "https://github.com/OpenGMK/OpenGMK",
+          "repository": "OpenGMK/OpenGMK",
+          "revision": "9ccc47a9cab4681a889866f7233a6b016d36a15e"
+        }
+      ]
+    },
+    {
+      "id": "hashlink",
+      "name": "HashLink legacy profiles",
+      "purpose": "HashLink 1.9 and 1.12 VM/native-module ABI profiles.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/hashlink/runtime/legacy-build.js",
+          "src/modules/hashlink/runtime/dynamic-legacy-build.js"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "hashlink",
+          "provider": "github",
+          "url": "https://github.com/HaxeFoundation/hashlink",
+          "repository": "HaxeFoundation/hashlink",
+          "revision": "c3f2a1563cf7aa9f4076b0808a7eaf40e18e8f14"
+        },
+        {
+          "id": "hashlink-1-9",
+          "provider": "github",
+          "url": "https://github.com/HaxeFoundation/hashlink",
+          "repository": "HaxeFoundation/hashlink",
+          "revision": "4a4cfe91f3388a0b05bf2e45e7c4e38bae686dc6"
+        }
+      ]
+    },
+    {
+      "id": "impacto",
+      "name": "impacto Windows-game profile",
+      "purpose": "Windows scripts, input, audio, save and backlog adaptations.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/mages/native/portable-sfx-build.js"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "impacto",
+          "provider": "github",
+          "url": "https://github.com/CommitteeOfZero/impacto",
+          "repository": "CommitteeOfZero/impacto",
+          "revision": "ba51381fb65da70697be29e6a817dc4af5c98d19"
+        }
+      ]
+    },
+    {
+      "id": "innoextract",
+      "name": "Inno Setup extraction tools",
+      "purpose": "Structured installer inspection and bounded parser adaptations.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/shared/installers/runtime/innoextract-build.js"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "innoextract",
+          "provider": "github",
+          "url": "https://github.com/dscharrer/innoextract",
+          "repository": "dscharrer/innoextract",
+          "revision": "6e9e34ed0876014fdb46e684103ef8c3605e382e"
+        }
+      ]
+    },
+    {
+      "id": "krkrsdl2",
+      "name": "Kirikiri SDL2",
+      "purpose": "Archive/storage access, fonts and full-frame presentation.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/kirikiri/build.js"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "krkrsdl2",
+          "provider": "github",
+          "url": "https://github.com/krkrsdl2/krkrsdl2",
+          "repository": "krkrsdl2/krkrsdl2",
+          "revision": "124bdf841f09e7ce02aa99b7b55791a0f7a900ff"
+        }
+      ]
+    },
+    {
+      "id": "npengine",
+      "name": "libnpengine Mac runner",
+      "purpose": "Script compiler, choice handling, private files and native media runner.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/nitroplus/runtime/portable-build.js"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "libnpengine",
+          "provider": "github",
+          "url": "https://github.com/FGRE/libnpengine",
+          "repository": "FGRE/libnpengine",
+          "revision": "da1a175e6b497c37f9714b77510cb47c0930cd42"
+        }
+      ]
+    },
+    {
+      "id": "onscripter-en",
+      "name": "ONScripter-EN",
+      "purpose": "Native Cocoa shell and portable SDL/media closure.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/nscripter/runtime/onscripter-en-build.js"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "onscripter-en",
+          "provider": "github",
+          "url": "https://github.com/Galladite27/ONScripter-EN",
+          "repository": "Galladite27/ONScripter-EN",
+          "revision": "0a725088e01919e0c206533c793a84f69f06b833"
+        }
+      ]
+    },
+    {
+      "id": "onsyuri",
+      "name": "ONScripterYuri",
+      "purpose": "Empty-page state reset and portable macOS dependency closure.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/shared/onsyuri/runtime/portable-build-v3.js"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "onscripter-yuri",
+          "provider": "github",
+          "url": "https://github.com/YuriSizuku/OnscripterYuri",
+          "repository": "YuriSizuku/OnscripterYuri",
+          "revision": "08f744b31cc1907b66a15f0402e62321a131ed81"
+        }
+      ]
+    },
+    {
+      "id": "opengmk",
+      "name": "OpenGMK",
+      "purpose": "Native AppKit, graphics, audio and extension implementation.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/gamemaker/overlays/opengmk-macos/source-build.js"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "opengmk",
+          "provider": "github",
+          "url": "https://github.com/OpenGMK/OpenGMK",
+          "repository": "OpenGMK/OpenGMK",
+          "revision": "9ccc47a9cab4681a889866f7233a6b016d36a15e"
+        }
+      ]
+    },
+    {
+      "id": "reminori",
+      "name": "ReMinori",
+      "purpose": "Native fonts, movie/menu support, private saves and PAZ/PE profiles.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/minori/runtime/build.js"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "reminori",
+          "provider": "github",
+          "url": "https://github.com/luoyily/ReMinori",
+          "repository": "luoyily/ReMinori",
+          "revision": "79b00990324404bfbd496e7fa76c690cf040f744"
+        }
+      ]
+    },
+    {
+      "id": "sys3-decompiler",
+      "name": "System3 decompiler",
+      "purpose": "Native macOS build of the original decompiler.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/alicesoft/decompiler-build.js"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "sys3c",
+          "provider": "github",
+          "url": "https://github.com/kichikuou/sys3c",
+          "repository": "kichikuou/sys3c",
+          "revision": "cc7ceda1bae0a9886f4c56ee3ce031d139ee1764"
+        }
+      ]
+    },
+    {
+      "id": "system3",
+      "name": "System3 SDL2",
+      "purpose": "Executable-relative resources and portable native dependency closure.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/alicesoft/system3-portable.js"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "system3-sdl2",
+          "provider": "github",
+          "url": "https://github.com/kichikuou/system3-sdl2",
+          "repository": "kichikuou/system3-sdl2",
+          "revision": "461673bec729e7e0ec905921fc3e03aecf977a70"
+        }
+      ]
+    },
+    {
+      "id": "xsys35-decompiler",
+      "name": "System3.5 decompiler",
+      "purpose": "Native macOS build of the original decompiler.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/alicesoft/decompiler-build.js"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "xsys35c",
+          "provider": "github",
+          "url": "https://github.com/kichikuou/xsys35c",
+          "repository": "kichikuou/xsys35c",
+          "revision": "c8ac28b83c034c1ec598266ab85daf75869359c8"
+        }
+      ]
+    },
+    {
+      "id": "xsystem35",
+      "name": "xsystem35 SDL2",
+      "purpose": "Executable-relative fonts/resources and portable native dependencies.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/alicesoft/system35-portable.js"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "xsystem35-sdl2",
+          "provider": "github",
+          "url": "https://github.com/kichikuou/xsystem35-sdl2",
+          "repository": "kichikuou/xsystem35-sdl2",
+          "revision": "82c8b76a58a19ff1f87b4bdadbaef169c4b37f46"
+        }
+      ]
+    },
+    {
+      "id": "xsystem4",
+      "name": "xsystem4",
+      "purpose": "Mac OpenGL/shader support and executable-relative resources.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/alicesoft/system4-portable.js"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "xsystem4",
+          "provider": "github",
+          "url": "https://github.com/nunuhara/xsystem4",
+          "repository": "nunuhara/xsystem4",
+          "revision": "04333ad689d7e517a93d58141bb214c19ba16129"
+        }
+      ]
+    },
+    {
+      "id": "catsystem2-kif-crypto",
+      "name": "CatSystem2 KIF cryptography helper",
+      "purpose": "Owned CommonCrypto KIF block adapter.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/catsystem2/runtime/stage-crypto.cjs"
+        ]
+      },
+      "upstreams": []
+    },
+    {
+      "id": "android-privacy",
+      "name": "Android privacy helper",
+      "purpose": "Owned process-scoped clipboard broker.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "scripts/build-android-privacy.mjs"
+        ]
+      },
+      "upstreams": []
+    },
+    {
+      "id": "ios-playtools-paths",
+      "name": "PlayTools storage adapter",
+      "purpose": "Owned private-path and device-identity integration.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/ios/native/build.mjs"
+        ]
+      },
+      "upstreams": []
+    },
+    {
+      "id": "love-luasteam",
+      "name": "LÖVE LuaSteam bridge",
+      "purpose": "LuaSteam 4 binding against the selected host Lua VM.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/love/runtime/luasteam-build.js"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "luasteam",
+          "provider": "github",
+          "url": "https://github.com/uspgamedev/luasteam",
+          "repository": "uspgamedev/luasteam",
+          "revision": "fbb72bd22c0c526f4276800024967323acd9d10d"
+        }
+      ]
+    },
+    {
+      "id": "mkxpz-config-helper",
+      "name": "MKXP-Z configuration helper",
+      "purpose": "Owned per-game configuration-path adapter.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "scripts/stage-mkxpz-config-helper.cjs"
+        ]
+      },
+      "upstreams": []
+    },
+    {
+      "id": "reshade",
+      "name": "MacLauncher ReShade integration",
+      "purpose": "Native Metal/OpenGL presentation, compiler and effects integration.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/shared/reshade/native/build.mjs"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "reshade",
+          "provider": "github",
+          "url": "https://github.com/crosire/reshade",
+          "repository": "crosire/reshade",
+          "revision": "7bf9de8b33bcc76c3177007e65d73c72dd0f34c0"
+        }
+      ]
+    },
+    {
+      "id": "steam-api-helper",
+      "name": "Offline Steam API compatibility helper",
+      "purpose": "Owned local offline ABI and storage implementation.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/shared/runtime/steamworks/native/offline-0.5.0/build.cjs"
+        ]
+      },
+      "upstreams": []
+    },
+    {
+      "id": "steam-ticket-loader",
+      "name": "Steam ticket availability adapter",
+      "purpose": "Owned reject-only encrypted-ticket loader ABI.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/shared/runtime/steamworks/native/ticket-0.1.0/build.cjs"
+        ]
+      },
+      "upstreams": []
+    },
+    {
+      "id": "vulkan-kosmickrisp-gles32",
+      "name": "KosmicKrisp geometry/transform-feedback adaptation",
+      "purpose": "Owned Mesa Poly geometry-shader and transform-feedback implementation.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/shared/vulkan/native/kosmickrisp-build.mjs"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "mesa-kosmickrisp",
+          "provider": "git",
+          "url": "https://gitlab.freedesktop.org/mesa/mesa",
+          "revision": "af2f67b2b3671ce4d5f95bba611a01e7eae3c84f"
+        }
+      ]
+    },
+    {
+      "id": "flash-projector",
+      "name": "Universal Flash Player projector",
+      "purpose": "Supplied universal 35.0.0.60 app bundle.",
+      "producer": {
+        "kind": "prebuilt",
+        "version": "35.0.0.60",
+        "architectures": [
+          "arm64",
+          "x64"
+        ]
+      },
+      "upstreams": []
+    }
+  ]
+}

@@ -9,13 +9,6 @@
       "directoryRelative": "ai5/1.5.0-macos-v3/arm64"
     },
     {
-      "id": "butterscotch",
-      "version": "d66464857303-appkit",
-      "arch": "arm64",
-      "upstreamRevision": "d66464857303a2840a5cc5141c0035440847f441",
-      "directoryRelative": "butterscotch/d66464857303-appkit/arm64"
-    },
-    {
       "id": "fna",
       "version": "26.10-net8-arm64-v2",
       "arch": "arm64",
@@ -70,13 +63,6 @@
       "arch": "arm64",
       "upstreamRevision": "124bdf841f09e7ce02aa99b7b55791a0f7a900ff",
       "directoryRelative": "krkrsdl2/snapshot-124bdf8-macos-v3/arm64"
-    },
-    {
-      "id": "mkxpz",
-      "version": "2026-01-12T18-22-32Z_794d1897abe529a23f3f2f9c4f72d711a3b18391",
-      "arch": "arm64",
-      "upstreamRevision": "794d1897abe529a23f3f2f9c4f72d711a3b18391",
-      "directoryRelative": "mkxpz/2026-01-12T18-22-32Z_794d1897abe529a23f3f2f9c4f72d711a3b18391/arm64"
     },
     {
       "id": "npengine",
@@ -170,13 +156,13 @@
     },
     {
       "id": "android",
-      "version": "0.1.0-afdc510a-61332a65",
+      "version": "0.1.0-851880bf-ef42c0d3",
       "arch": "arm64",
       "minimumMacOS": "13.0",
-      "directoryRelative": "android/0.1.0-afdc510a-61332a65/arm64",
+      "directoryRelative": "android/0.1.0-851880bf-ef42c0d3/arm64",
       "manifestRelative": "runtime.json",
-      "manifestSha256": "dc1295f5fbc29b20917107e557de3b784736e4616d17e40b75aaf94ff95e0d8f",
-      "sourceSha256": "eed09d35c424923753fc33191b5bfb75602c53380d64ddcccbd3f5c2a904128b"
+      "manifestSha256": "5089e56062cb747373e3dc20d5efb103e7c0dd00db5c52af626d7f09909f35c2",
+      "sourceSha256": "e5d8e46093dd5c99a592e299a8216749bb56e3098909d58141604d9d49aa1667"
     },
     {
       "id": "catsystem2-kif-crypto",
@@ -197,26 +183,6 @@
       "manifestRelative": "helper.json",
       "manifestSha256": "faf5e6bcc57df1be10e98aa7de9b96a8a94bb8c2cf6da449af5289368f97bd98",
       "sourceSha256": "2af09a89b7f8fd6f6814f023654ac9a503c59db7c950f960721a6846cc4ddb7e"
-    },
-    {
-      "id": "java-steamworks",
-      "version": "steamworks4j-1.10.0-ml1",
-      "arch": "universal",
-      "minimumMacOS": "11.0",
-      "directoryRelative": "java-steamworks/steamworks4j-1.10.0-ml1/universal",
-      "manifestRelative": "helper.json",
-      "manifestSha256": "ea341da90fe54872c0b9b0d0d2d9f671992de1ebcb62017362dbe04bee315601",
-      "sourceSha256": "b92ea7eac757c843c358fd2de0103a0851d94f4f5a748dd0f56e7979f9daf141"
-    },
-    {
-      "id": "java-steamworks",
-      "version": "steamworks4j-1.9.0-ml1",
-      "arch": "x64",
-      "minimumMacOS": "10.9",
-      "directoryRelative": "java-steamworks/steamworks4j-1.9.0-ml1/x64",
-      "manifestRelative": "helper.json",
-      "manifestSha256": "dd2ba652a52d8c347e2932c8df7a0aab34414bc2e058db4e5abef39340c1242c",
-      "sourceSha256": "b92ea7eac757c843c358fd2de0103a0851d94f4f5a748dd0f56e7979f9daf141"
     },
     {
       "id": "love-luasteam",

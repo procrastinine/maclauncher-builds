@@ -4,7 +4,14 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
-import {verifyProducer} from '../tools/build-runtime.mjs';
+import {verifyProducer,main} from '../tools/build-runtime.mjs';
+
+test('producer routing never substitutes Android for a different project',()=>{
+ assert.throws(()=>main(['--project','fna','--check']),/FNA game host producer is maintained in MacLauncher/);
+ assert.throws(()=>main(['--project','flash-projector','--check']),/retains its supplied binary/);
+ assert.throws(()=>main(['--project','not-registered','--check']),/Unknown build project/);
+ assert.throws(()=>main(['--project','android','--runtime','fna','--check']),/Select one project/);
+});
 
 test('runtime builds require the exact clean source commit recorded by the hub',t=>{
  const root=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'runtime-producer-')));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
