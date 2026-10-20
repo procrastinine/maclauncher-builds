@@ -156,13 +156,13 @@
     },
     {
       "id": "android",
-      "version": "0.1.0-5c3e36bc-4eed4613",
+      "version": "0.1.0-4fc5ad9d-91b45191",
       "arch": "arm64",
       "minimumMacOS": "13.0",
-      "directoryRelative": "android/0.1.0-5c3e36bc-4eed4613/arm64",
+      "directoryRelative": "android/0.1.0-4fc5ad9d-91b45191/arm64",
       "manifestRelative": "runtime.json",
-      "manifestSha256": "0eebd1e11c2f20982e4ea3a46b498732fa3b0631ca6bbe768c86f1a3726f67dd",
-      "sourceSha256": "4acdcceff27991473e1b20ec7ae679f2a0fbe1c5bbd62800518c69a3c13e0d15"
+      "manifestSha256": "095ab0f6c335326185e97881aaccf40a475fa711b7417d52001b0452c4580361",
+      "sourceSha256": "e82f812fd32dacb1c6121e94745ab84f35b7d3ed7be76a21712599f128b17650"
     },
     {
       "id": "catsystem2-kif-crypto",
