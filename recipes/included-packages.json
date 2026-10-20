@@ -136,13 +136,13 @@
     },
     {
       "id": "android-aim",
-      "version": "0.1.0-b46451d3-ml1",
+      "version": "0.1.0-eb7b9a58-ml1",
       "arch": "arm64",
       "minimumMacOS": "26.0",
-      "directoryRelative": "android-aim/0.1.0-b46451d3-ml1/arm64",
+      "directoryRelative": "android-aim/0.1.0-eb7b9a58-ml1/arm64",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "f749165514248602738dad2d5283517ad533d1d7db316027f1fdfbad43509c0e",
-      "sourceSha256": "42f63f8acb6c74340cba950c662d5910dda16a32c2a89ed162aa94393ea868e4"
+      "manifestSha256": "e3a1e888a30f3fdbc5500429d6efaffb5b95b893fb23b6bb15723b42e50db117",
+      "sourceSha256": "931a39279b958c9270e4c0b1a966afa6b019a5503dafbf270cb27a2de69c1ea7"
     },
     {
       "id": "android-privacy",
@@ -206,12 +206,12 @@
     },
     {
       "id": "reshade",
-      "version": "0.1.0-26a366c2-0b6c3852",
+      "version": "0.1.0-26a366c2-b90f3357",
       "arch": "universal",
       "minimumMacOS": "13.0",
-      "directoryRelative": "reshade/0.1.0-26a366c2-0b6c3852/universal",
+      "directoryRelative": "reshade/0.1.0-26a366c2-b90f3357/universal",
       "manifestRelative": "runtime.json",
-      "manifestSha256": "eb2d697301e1189afc105353aff2742a1289449b5354eedc6252289c4ed47016",
+      "manifestSha256": "1111108044a6ba4063a0f734d761e08494337a3ec13b831bfc2191645f4894ab",
       "sourceSha256": "f8fe1024a2be466321018d492f67ce5af3e2064ca85170b5bd4af6e4d4f5c2a5"
     },
     {
