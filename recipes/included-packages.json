@@ -156,13 +156,13 @@
     },
     {
       "id": "android",
-      "version": "0.1.0-3a51714c-5478e127",
+      "version": "0.1.0-03f9998b-6f69611b",
       "arch": "arm64",
       "minimumMacOS": "13.0",
-      "directoryRelative": "android/0.1.0-3a51714c-5478e127/arm64",
+      "directoryRelative": "android/0.1.0-03f9998b-6f69611b/arm64",
       "manifestRelative": "runtime.json",
-      "manifestSha256": "afea3d021cbc07affd7ccc7396d463012bf6dff55d8b28678956d855172e684f",
-      "sourceSha256": "63fd92f2f8e97df1d29328f067c8d8a1bbbc72031ab7f25e28d4a6b424415389"
+      "manifestSha256": "d018f3fded105390160b25d62536aa37f29f9599d074d1526cbf474b9bb592d6",
+      "sourceSha256": "ef8a9f0c75ef4f3d8e053593622fc7f0fd238e25553f6fd2841966af95e6aa3a"
     },
     {
       "id": "catsystem2-kif-crypto",
@@ -206,13 +206,13 @@
     },
     {
       "id": "reshade",
-      "version": "0.1.0-84d86a87-fbdc36cb",
+      "version": "0.1.0-26a366c2-0b6c3852",
       "arch": "universal",
       "minimumMacOS": "13.0",
-      "directoryRelative": "reshade/0.1.0-84d86a87-fbdc36cb/universal",
+      "directoryRelative": "reshade/0.1.0-26a366c2-0b6c3852/universal",
       "manifestRelative": "runtime.json",
-      "manifestSha256": "220d7cee8ab8d9423ee94fb427a0eddafe0aed8391d925246bcb74fb6ff001a1",
-      "sourceSha256": "188160a4547b4cbb9d9f60ac8c18ce45ec1bd8cad228e3b65fdb5a06ebad3096"
+      "manifestSha256": "eb2d697301e1189afc105353aff2742a1289449b5354eedc6252289c4ed47016",
+      "sourceSha256": "f8fe1024a2be466321018d492f67ce5af3e2064ca85170b5bd4af6e4d4f5c2a5"
     },
     {
       "id": "steam-api-helper",
