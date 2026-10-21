@@ -22,7 +22,8 @@ selected versions and CPU architectures, including multiple HashLink profiles.
 
 | Project | Package ID | Build contents |
 | --- | --- | --- |
-| [MacLauncher Android](sources/maclauncher-android) | `android` | Android framework, JVM/ART and native host adaptations |
+| [MacLauncher Android](sources/maclauncher-android) | `android` | Shared Android framework, JVM execution and native host adaptations |
+| [MacLauncher Android ART adapter](sources/maclauncher-android) | `android-art` | ART execution, compiled framework data, native services and image reader |
 | [AIM](https://github.com/hahnlee/aim) | `android-aim` | Private storage, display routing and process integration |
 | [AI5 SDL2](https://github.com/nunuhara/ai5-sdl2) | `ai5` | Disc/archive access, save paths and font routing |
 | [FNA](https://github.com/FNA-XNA/FNA) | `fna` | Managed game host, XNA facades and native graphics integration |
@@ -118,6 +119,18 @@ node tools/build-runtime.mjs --project android --inputs /absolute/path/to/build-
 A build command resolves the selected project's registered producer. Projects
 maintained in MacLauncher identify their build entries; prebuilt projects retain
 the supplied artifact. A different project's producer is never substituted.
+
+The `android` catalog contains the shared framework and JVM runtime. The separate
+`android-art` catalog contains the ART adapter and its native services and helpers.
+The ART native core uses the same pinned MacLauncher Android source project.
+Adapter preparation and packaging are maintained in
+[MacLauncher](https://github.com/procrastinine/maclauncher), with their entries
+recorded in the project registry. Versions, release tags and archive names remain
+separate.
+
+The original Google Android system image is downloaded from upstream after
+explicit confirmation. It is not included in the `android-art` release payload.
+Installed adapters and previously acquired images remain available offline.
 
 The source project records its upstream checkouts and build prerequisites.
 Android images, toolchains and portable dependency artifacts are separate inputs;

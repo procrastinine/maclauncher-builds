@@ -56,6 +56,42 @@
       "compatibility": "Android 16 / API 36 framework and image contract; source updates are explicit adaptations."
     },
     {
+      "id": "android-art",
+      "name": "MacLauncher Android ART adapter",
+      "purpose": "ART execution adapters, compiled framework data and native services for MacLauncher Android; the original Android system image is acquired separately.",
+      "producer": {
+        "kind": "maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher",
+        "entries": [
+          "src/modules/android/art/build.mjs",
+          "src/modules/android/art/build-image-extractor.mjs",
+          "src/modules/android/art/package.mjs"
+        ]
+      },
+      "upstreams": [
+        {
+          "id": "aim",
+          "provider": "github",
+          "url": "https://github.com/hahnlee/aim",
+          "repository": "hahnlee/aim",
+          "revision": "9b5068fa8185d3f51f1862fe7c54d88d51f09ec8"
+        },
+        {
+          "id": "aosp-art",
+          "provider": "gitiles",
+          "url": "https://android.googlesource.com/platform/art",
+          "revision": "ed6c006bd06ae060bd9698fd2cb25c4865512ec3"
+        },
+        {
+          "id": "aosp-bionic",
+          "provider": "gitiles",
+          "url": "https://android.googlesource.com/platform/bionic",
+          "revision": "09a271af557444c9a6b3f3146d6d474156fd6cdb"
+        }
+      ],
+      "compatibility": "Android 16 / API 36; uses the matching Android common framework and a separately acquired original system image."
+    },
+    {
       "id": "android-aim",
       "name": "AIM with MacLauncher integration",
       "purpose": "Private runtime/data paths, display routing and process integration.",

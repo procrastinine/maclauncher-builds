@@ -156,13 +156,13 @@
     },
     {
       "id": "android",
-      "version": "0.1.0-e4fc1c8b-a0848795",
+      "version": "0.1.0-dab684be-1c5967cc",
       "arch": "arm64",
       "minimumMacOS": "13.0",
-      "directoryRelative": "android/0.1.0-e4fc1c8b-a0848795/arm64",
+      "directoryRelative": "android/0.1.0-dab684be-1c5967cc/arm64",
       "manifestRelative": "runtime.json",
-      "manifestSha256": "cd292859cabb86f050632d5cf28961f1bc2cca460a7e32af56685a69c2c898ec",
-      "sourceSha256": "053225d56e0853e53eaa79dbcabfd500b56ee29f7b87116451090af9c39e36ba"
+      "manifestSha256": "413137856b15e21d7618835d743c7fc9866af01a04f02712e33be53113c3565a",
+      "sourceSha256": "bab431663893696c50999f1b82847ec3e3d8f29b97ffa6841c9869675156a4dd"
     },
     {
       "id": "catsystem2-kif-crypto",
@@ -243,6 +243,16 @@
       "manifestRelative": "manifest.json",
       "manifestSha256": "7b3ef4cf60492d38a807e570cbf4c681def204c44f18bfb9324330bb64202856",
       "sourceSha256": "7a0ece5ae14c5c0bc0d788c7ea1d80aaa2491e0b9c1b7e18073be11da8970cfa"
+    },
+    {
+      "id": "android-art",
+      "version": "0.1.0-6d67d966-6bebc844",
+      "arch": "arm64",
+      "minimumMacOS": "13.0.0",
+      "directoryRelative": "android-art/0.1.0-6d67d966-6bebc844/arm64",
+      "manifestRelative": "runtime.json",
+      "manifestSha256": "0b22e7d48533fa2a9e3c0714bdb2021b600d63d1877e2fc43b6fb5d6b3ae1f7e",
+      "sourceSha256": "6d67d9663422aa82a2d244bf8f29d219d417fa40c92a16ab11f92b3605740c76"
     }
   ]
 }
