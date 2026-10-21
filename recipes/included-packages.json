@@ -136,13 +136,14 @@
     },
     {
       "id": "android-aim",
-      "version": "0.1.0-eb7b9a58-ml1",
+      "version": "0.1.0-93400928-ml4",
       "arch": "arm64",
       "minimumMacOS": "26.0",
-      "directoryRelative": "android-aim/0.1.0-eb7b9a58-ml1/arm64",
+      "directoryRelative": "android-aim/0.1.0-93400928-ml4/arm64",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "e3a1e888a30f3fdbc5500429d6efaffb5b95b893fb23b6bb15723b42e50db117",
-      "sourceSha256": "931a39279b958c9270e4c0b1a966afa6b019a5503dafbf270cb27a2de69c1ea7"
+      "manifestSha256": "13bfc3d5ceb6adf77cd4cdd59d13d015acd89fe106ea0d3c3fb89e80da9b0af1",
+      "sourceSha256": "adadcf9d13161fca78e735e59e6813a33013a1b2ac85bf14663e3831ee127e12",
+      "upstreamRevision": "934009283f69c251f57ed95ef1dff296546bb6ad"
     },
     {
       "id": "android-privacy",
