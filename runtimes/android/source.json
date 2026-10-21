@@ -3,7 +3,7 @@
   "id": "android",
   "path": "sources/maclauncher-android",
   "repository": "../maclauncher-android",
-  "revision": "82ffdafbcaf19efe1ca04a8c5415e03b97207cf2",
+  "revision": "675621c16fee97b40dc14bbe6ed599baef2f3eaf",
   "buildEntry": "tools/build.mjs",
   "checkEntry": "tools/check-sources.mjs"
 }

@@ -52,7 +52,7 @@ selected versions and CPU architectures, including multiple HashLink profiles.
 
 | Project | Package ID | Build contents |
 | --- | --- | --- |
-| MacLauncher ReShade integration | `reshade` | Native Metal/OpenGL presentation, compiler and effects integration |
+| MacLauncher graphics | `reshade` | Shared Metal/OpenGL/Quartz presentation and FX, Slang and MPV shader processing |
 | [KosmicKrisp](https://gitlab.freedesktop.org/mesa/mesa) geometry/transform-feedback adaptation | `vulkan-kosmickrisp-gles32` | MacLauncher geometry-shader and transform-feedback implementation |
 | Android privacy helper | `android-privacy` | Process-scoped clipboard broker |
 | CatSystem2 KIF cryptography helper | `catsystem2-kif-crypto` | CommonCrypto KIF block adapter |

@@ -544,13 +544,16 @@
     },
     {
       "id": "reshade",
-      "name": "MacLauncher ReShade integration",
-      "purpose": "Native Metal/OpenGL presentation, compiler and effects integration.",
+      "name": "MacLauncher graphics",
+      "purpose": "Shared Metal, OpenGL and Quartz presentation with FX, Slang and MPV shader processing.",
       "producer": {
         "kind": "maclauncher",
         "repository": "https://github.com/procrastinine/maclauncher",
         "entries": [
-          "src/modules/shared/reshade/native/build.mjs"
+          "src/modules/shared/reshade/native/build.mjs",
+          "src/modules/shared/reshade/native/build-retroarch.mjs",
+          "src/modules/shared/reshade/libplacebo-build.mjs",
+          "scripts/stage-reshade.mjs"
         ]
       },
       "upstreams": [
@@ -560,6 +563,54 @@
           "url": "https://github.com/crosire/reshade",
           "repository": "crosire/reshade",
           "revision": "7bf9de8b33bcc76c3177007e65d73c72dd0f34c0"
+        },
+        {
+          "id": "spirv-headers",
+          "provider": "github",
+          "url": "https://github.com/KhronosGroup/SPIRV-Headers",
+          "repository": "KhronosGroup/SPIRV-Headers",
+          "revision": "7845730cab6ebbdeb621e7349b7dc1a59c3377be"
+        },
+        {
+          "id": "spirv-cross",
+          "provider": "github",
+          "url": "https://github.com/KhronosGroup/SPIRV-Cross",
+          "repository": "KhronosGroup/SPIRV-Cross",
+          "revision": "aa217aeb6c9f0ace7a0ab233b28807edf45eb165"
+        },
+        {
+          "id": "reshade-shaders",
+          "provider": "github",
+          "url": "https://github.com/crosire/reshade-shaders",
+          "repository": "crosire/reshade-shaders",
+          "revision": "fd0022170615ce0d8162d219bff07232fa6dd84f"
+        },
+        {
+          "id": "mako",
+          "provider": "github",
+          "url": "https://github.com/eugeniosegala/MAKO",
+          "repository": "eugeniosegala/MAKO",
+          "revision": "06ecf6ee87e601f9f2a6990ae7c50a5da6137992"
+        },
+        {
+          "id": "vkd3d",
+          "provider": "git",
+          "url": "https://codeberg.org/vkd3d/vkd3d",
+          "revision": "fb7f9ff3c1f8d972ee6f1b8c6a92caf6c8ba1e10"
+        },
+        {
+          "id": "fsr1",
+          "provider": "github",
+          "url": "https://github.com/GPUOpen-Effects/FidelityFX-FSR",
+          "repository": "GPUOpen-Effects/FidelityFX-FSR",
+          "revision": "a21ffb8f6c13233ba336352bdff293894c706575"
+        },
+        {
+          "id": "librashader",
+          "provider": "github",
+          "url": "https://github.com/SnowflakePowered/librashader",
+          "repository": "SnowflakePowered/librashader",
+          "revision": "87e8a97b50516d997defeaa168173dcd185d4022"
         }
       ]
     },
