@@ -246,13 +246,13 @@
     },
     {
       "id": "android-art",
-      "version": "0.1.0-88f81f6b-4210ad7c",
+      "version": "0.1.0-e714e3d4-be72ec66",
       "arch": "arm64",
       "minimumMacOS": "13.0.0",
-      "directoryRelative": "android-art/0.1.0-88f81f6b-4210ad7c/arm64",
+      "directoryRelative": "android-art/0.1.0-e714e3d4-be72ec66/arm64",
       "manifestRelative": "runtime.json",
-      "manifestSha256": "286a4da2028981b5b09cb8abdd191a77fe771216611e13dcd91616bc0f68aa96",
-      "sourceSha256": "88f81f6b2a0f5ff430672dbcb49503cca9051cd0e60f6a60c70737355d766089"
+      "manifestSha256": "59edaf408bd10c90880e0fb81860be2ae497fed79506b9138770ff58cefc5226",
+      "sourceSha256": "e714e3d4bf6ce79e3fde704e9eab9f8a7cc6d64eb0fa93fc0c6b7d5f44657c5c"
     }
   ]
 }
