@@ -122,11 +122,11 @@ the supplied artifact. A different project's producer is never substituted.
 
 The `android` catalog contains the shared framework and JVM runtime. The separate
 `android-art` catalog contains the ART adapter and its native services and helpers.
-The ART native core uses the same pinned MacLauncher Android source project.
-Adapter preparation and packaging are maintained in
-[MacLauncher](https://github.com/procrastinine/maclauncher), with their entries
-recorded in the project registry. Versions, release tags and archive names remain
-separate.
+The pinned MacLauncher Android source project owns the native runtime, ART
+producers and ART package assembly. Adapters in
+[MacLauncher](https://github.com/procrastinine/maclauncher) bind launcher metadata
+and shared packaging services through the entries recorded in the project
+registry. Project routing, versions, release tags and archive names remain separate.
 
 The original Google Android system image is downloaded from upstream after
 explicit confirmation. It is not included in the `android-art` release payload.
