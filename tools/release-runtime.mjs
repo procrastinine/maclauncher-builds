@@ -124,12 +124,31 @@ export function releaseNotes(record,project){
  lines.push('','</details>');return lines.join('\n');
 }
 
-/** Explicit network action: upload one verified package as a new draft release. */
-export async function stageRelease({bundle,target,directory=root}){
+const runGitHub=(args,options={})=>execFileSync('gh',args,{encoding:'utf8',...options});
+function missingRef(error){return error.status===404||error.statusCode===404||/\bHTTP 404\b/.test(String(error.stderr||''));}
+async function ensureReleaseTag({repository,tag,target,runGh}){
+ const endpoint='repos/'+repository+'/git/',api=async args=>JSON.parse(await runGh(['api',...args]));
+ let ref;
+ try{ref=await api([endpoint+'ref/tags/'+tag]);}
+ catch(error){
+  if(!missingRef(error))throw error;
+  ref=await api(['--method','POST',endpoint+'refs','-f','ref=refs/tags/'+tag,'-f','sha='+target]);
+ }
+ const seen=new Set();let object=ref.object;
+ while(object?.type==='tag'){
+  if(seen.has(object.sha)||seen.size>=10)throw Error('Release tag annotation chain is invalid.');
+  seen.add(object.sha);object=(await api([endpoint+'tags/'+object.sha])).object;
+ }
+ if(object?.type!=='commit'||object.sha!==target)throw Error('Release tag differs from the exact source commit.');
+}
+
+/** Explicit network action: create or verify the source tag, then upload one draft. */
+export async function stageRelease({bundle,target,directory=root,runGh=runGitHub}){
  if(!/^[a-f0-9]{40}$/.test(target||''))throw Error('Staging requires an exact public source commit through --target.');
  const {release,record}=await verifyRelease({bundle,directory}),project=resolveProject(release.id,directory);
+ await ensureReleaseTag({repository:release.repository,tag:release.tag,target,runGh});
  const files=publicationAssets(release).map(name=>path.join(path.resolve(bundle),name));
- execFileSync('gh',['release','create',release.tag,'--repo',release.repository,'--draft','--latest=false','--target',target,'--title',project.name+' '+release.version+' ('+release.arch+')','--notes',releaseNotes({...record,source:{repository:release.repository,revision:target}},project),...files],{stdio:'inherit'});
+ await runGh(['release','create',release.tag,'--repo',release.repository,'--draft','--verify-tag','--latest=false','--target',target,'--title',project.name+' '+release.version+' ('+release.arch+')','--notes',releaseNotes({...record,source:{repository:release.repository,revision:target}},project),...files],{stdio:'inherit'});
  return {repository:release.repository,tag:release.tag,draft:true};
 }
 

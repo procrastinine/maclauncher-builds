@@ -49,8 +49,10 @@ archives. The corresponding source is supplied through the tagged repository.
 ## Draft upload and publication
 
 `stage` is an explicit network command using authenticated GitHub CLI access.
-It validates the local package and creates a draft release at the exact
-`--target` source commit. The only public attachment is the runtime archive.
+It validates the local package and creates the source tag at the exact
+`--target` commit before creating the draft. An existing tag must resolve to that
+same commit, including annotated tags; conflicting tags are never replaced.
+The only public attachment is the runtime archive.
 The release notes contain a collapsed Source section linking to the tagged
 source and upstream revisions. Existing releases and assets are not replaced.
 
@@ -63,7 +65,8 @@ The manual **Runtime release** workflow accepts a project, version and
 architecture. It checks out the selected tag's source commit, downloads only that
 draft's binary archive and validates it against the catalog at that commit. The
 `verify` operation retains the draft; `publish` publishes those same existing
-bytes. Neither operation builds native code.
+bytes. Neither operation builds native code. Source CI runs for pushes to
+`main`, pull requests and manual dispatch; runtime tag creation does not run it.
 
 `apply --bundle <directory>` updates the local project catalog and regenerates
 `catalogs/index.json`. Existing catalog versions remain present and immutable.
