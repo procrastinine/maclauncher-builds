@@ -6,23 +6,23 @@
     {
       "schemaVersion": 2,
       "id": "mkxpz",
-      "version": "2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb-nfc1-arm64",
+      "version": "MCLv1-1003",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "11.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "f576bbbba7cd2179876a5deea7417b6bf1a3d789f63b672bfa1812b808b81aee",
+      "manifestSha256": "fc37838f899a434690a3b8f3050317cbacaf4593558a5a74ab4be9e63707e5c3",
       "sourceSha256": "22b3838dff7968456d1d648587118e1506831788ce367fd98337462b4c76198f",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "mkxpz-2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb-nfc1-arm64-arm64.tar.gz",
-        "sha256": "7b3ee25ed59ed487f986110df2386da9e0e354acb04427598078091c155ffae9",
-        "bytes": 14431780,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mkxpz%2Fv2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb-nfc1-arm64%2Farm64/mkxpz-2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb-nfc1-arm64-arm64.tar.gz"
+        "filename": "mkxpz-MCLv1-1003-arm64.tar.gz",
+        "sha256": "837761f93ff172343caaf7cc94d67c7d67470b925b62febc0011377a7ac2cc25",
+        "bytes": 14431489,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mkxpz%2FvMCLv1-1003%2Farm64/mkxpz-MCLv1-1003-arm64.tar.gz"
       },
-      "tag": "mkxpz/v2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb-nfc1-arm64/arm64"
+      "tag": "mkxpz/vMCLv1-1003/arm64"
     }
   ]
 }

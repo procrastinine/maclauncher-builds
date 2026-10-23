@@ -6,23 +6,23 @@
     {
       "schemaVersion": 2,
       "id": "krkrsdl2",
-      "version": "snapshot-124bdf8-macos-v3",
+      "version": "MCLv1-1001",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "7d2a1cff74ebb35051ece7a667ec41c0893ad6e32a7f528da4588b8fbc7b78ba",
+      "manifestSha256": "c42b4581fc50c801452f9a068d30d440481f3272f27fa4c29817a79c4c1e5539",
       "sourceSha256": "cff10bee4d38e70e8cb6ae80ecec1d1110834612e0f7879bebdd9fcc1d442316",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "krkrsdl2-snapshot-124bdf8-macos-v3-arm64.tar.gz",
-        "sha256": "0098724dbbc0fe7f4a7720a792b5d28ba6993d9964f7d59dfc76721999cb0ecf",
-        "bytes": 2783974,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/krkrsdl2%2Fvsnapshot-124bdf8-macos-v3%2Farm64/krkrsdl2-snapshot-124bdf8-macos-v3-arm64.tar.gz"
+        "filename": "krkrsdl2-MCLv1-1001-arm64.tar.gz",
+        "sha256": "f9eadc89e6a377895c401d37782609b8577fc091ad5c7d2e3bed5f11e6cc0492",
+        "bytes": 2783881,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/krkrsdl2%2FvMCLv1-1001%2Farm64/krkrsdl2-MCLv1-1001-arm64.tar.gz"
       },
-      "tag": "krkrsdl2/vsnapshot-124bdf8-macos-v3/arm64"
+      "tag": "krkrsdl2/vMCLv1-1001/arm64"
     }
   ]
 }

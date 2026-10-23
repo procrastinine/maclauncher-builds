@@ -169,6 +169,12 @@
           "repository": "FNA-XNA/FNA3D",
           "revision": "fd1b24671fb0f5d1b544cd7843d3ad9e80d92219"
         }
+      ],
+      "packageProfiles": [
+        {
+          "version": "26.10-MCLv1",
+          "label": ".NET 8 host"
+        }
       ]
     },
     {
@@ -248,12 +254,12 @@
       ],
       "packageProfiles": [
         {
-          "version": "1.9-macos-v2",
+          "version": "1.9-MCLv1",
           "label": "HashLink 1.9 ABI",
           "anchor": "hashlink-1-9"
         },
         {
-          "version": "1.12-macos-v1",
+          "version": "1.12-MCLv1",
           "label": "HashLink 1.12 ABI",
           "anchor": "hashlink-1-12"
         }
@@ -612,6 +618,12 @@
           "repository": "uspgamedev/luasteam",
           "revision": "fbb72bd22c0c526f4276800024967323acd9d10d"
         }
+      ],
+      "packageProfiles": [
+        {
+          "version": "4.0.2-MCLv1",
+          "label": "Lua 5.1 host ABI"
+        }
       ]
     },
     {
@@ -820,7 +832,7 @@
       ],
       "packageProfiles": [
         {
-          "version": "2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb-nfc1-arm64",
+          "version": "MCLv1-1003",
           "label": "Unicode filename normalization"
         }
       ]
@@ -873,12 +885,12 @@
       ],
       "packageProfiles": [
         {
-          "version": "steamworks4j-1.9.0-ml1-content1",
+          "version": "1.9.0-MCLv1",
           "label": "Steamworks4j 1.9 JNI ABI",
           "anchor": "java-steamworks-1-9"
         },
         {
-          "version": "steamworks4j-1.10.0-ml1-content1",
+          "version": "1.10.0-MCLv1",
           "label": "Steamworks4j 1.10 JNI ABI",
           "anchor": "java-steamworks-1-10"
         }

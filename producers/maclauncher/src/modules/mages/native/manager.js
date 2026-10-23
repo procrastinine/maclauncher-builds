@@ -7,7 +7,7 @@ const WindowsVersions = require("./windows-versions.json");
 
 const VERSION = "0.10.8.810-windows-v9";
 const V9_VERSION = "0.10.8.810-windows-v9";
-const CURRENT_VERSION = "0.10.8.903-windows-v10";
+const CURRENT_VERSION = "0.10.8.903-MCLv1";
 const V9_PROFILE = "windows-mpk2-sc3-sfx-macos13-v9";
 const V8_VERSION = "0.10.8.810-windows-v8";
 const V8_PROFILE = "windows-mpk2-sc3-backlog-macos13-v8";

@@ -6,23 +6,23 @@
     {
       "schemaVersion": 2,
       "id": "gemrb",
-      "version": "0.9.5-git-bcb5cfaa9-cli-v5",
+      "version": "MCLv1-1020",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "c402ec29e6142a2f23cf73350c8c8f9416f962fc7d8e97d664c5c72784523db4",
+      "manifestSha256": "5cc4421e956d20767fdf7d8777e5259bff76c01f1881239a9b7ca58121df1b94",
       "sourceSha256": "bfde8c88a2240443cb0ccd58e276b8d0d19897485b3ead646b34671c0aed20ce",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "gemrb-0.9.5-git-bcb5cfaa9-cli-v5-arm64.tar.gz",
-        "sha256": "04518a5e9557b3db7a8957f2ffca564bd2be7e196c1a05170729d9b51fffdf60",
-        "bytes": 15312778,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gemrb%2Fv0.9.5-git-bcb5cfaa9-cli-v5%2Farm64/gemrb-0.9.5-git-bcb5cfaa9-cli-v5-arm64.tar.gz"
+        "filename": "gemrb-MCLv1-1020-arm64.tar.gz",
+        "sha256": "fc80bf3526d11e968120df674b706f40656473eb2a89c0225764fa2db90e5aa4",
+        "bytes": 15312763,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gemrb%2FvMCLv1-1020%2Farm64/gemrb-MCLv1-1020-arm64.tar.gz"
       },
-      "tag": "gemrb/v0.9.5-git-bcb5cfaa9-cli-v5/arm64"
+      "tag": "gemrb/vMCLv1-1020/arm64"
     }
   ]
 }

@@ -41,13 +41,13 @@ export async function pack({project,input,declaration,output}){
 
 /** Validate downloads by streaming regular tar members; no extraction or guest
  * code execution is needed to reject traversal, links or extra payload files. */
-export async function verify({archive,sha256,project,version,arch,includeDeclaration=false}){
+export async function verify({archive,sha256,project,version,arch,includeDeclaration=false,includeManifest=false}){
  identity({id:project,version,arch});
  if(!SHA.test(sha256||''))throw Error('An exact expected archive SHA-256 is required.');
  const stat=fs.lstatSync(archive);if(!stat.isFile()||stat.isSymbolicLink()||stat.size>A.LIMITS.archiveBytes)throw Error('Invalid runtime archive file.');
  if(await A.checksum(archive)!==sha256)throw Error('Runtime archive checksum differs from the selected release.');
  const input=fs.createReadStream(archive),stream=zlib.createGunzip();input.on('error',error=>stream.destroy(error));input.pipe(stream);
- const reader=new A.ArchiveReader(stream),seen=new Set();let declaration,expected,total=0;
+ const reader=new A.ArchiveReader(stream),seen=new Set();let declaration,expected,manifest,total=0;
  try{
   while(true){
    const header=await reader.read(512);
@@ -62,14 +62,16 @@ export async function verify({archive,sha256,project,version,arch,includeDeclara
    }else{
     const file=expected.get(entry.name);
     if(!file||file.size!==entry.size||file.mode!==entry.mode)throw Error('Runtime archive member differs from its inventory.');
-    const hash=crypto.createHash('sha256');let left=entry.size;
-    while(left){const chunk=await reader.read(Math.min(left,65536));left-=chunk.length;hash.update(chunk);}
+    const hash=crypto.createHash('sha256'),capture=includeManifest&&file.path===declaration.manifestRelative,chunks=[];let left=entry.size;
+    if(capture&&entry.size>A.LIMITS.metadataBytes)throw Error('Runtime manifest exceeds its metadata limit.');
+    while(left){const chunk=await reader.read(Math.min(left,65536));left-=chunk.length;hash.update(chunk);if(capture)chunks.push(chunk);}
+    if(capture)manifest=JSON.parse(Buffer.concat(chunks).toString('utf8'));
     if(hash.digest('hex')!==file.sha256)throw Error('Runtime file checksum differs from its inventory.');
    }
    if(entry.size%512&&(await reader.read(512-entry.size%512)).some(byte=>byte!==0))throw Error('Invalid archive padding.');
   }
   if(!declaration||[...expected.keys()].some(file=>!seen.has(file)))throw Error('Runtime archive is missing declared files.');
-  return {id:declaration.id,version:declaration.version,arch:declaration.arch,files:expected.size,sha256,...(includeDeclaration?{declaration}:{})};
+  return {id:declaration.id,version:declaration.version,arch:declaration.arch,files:expected.size,sha256,...(includeDeclaration?{declaration}:{}),...(includeManifest?{manifest}:{})};
  }finally{input.destroy();stream.destroy();}
 }
 

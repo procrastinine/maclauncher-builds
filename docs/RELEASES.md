@@ -47,19 +47,34 @@ source checksums remain provenance and do not require uploading duplicate source
 archives. The corresponding source is supplied through the tagged repository.
 
 Package identities use one naming rule: tag `<project>/v<version>/<arch>`,
-archive `<project>-<version>-<arch>.tar.gz`. The version is the producer's sealed
-version string; catalog display labels do not rename binaries or archives.
-Upstream release versions or exact source snapshots identify the base, and owned
-adaptation revisions identify the Mac build. A payload change receives a new
-version; existing tag, archive bytes and checksum remain immutable. Architecture
-is expressed by the final `arm64`, `x64` or `universal` component.
+archive `<project>-<version>-<arch>.tar.gz`. The package inventory and consumed
+runtime manifest contain that exact version. Architecture appears only in the
+final `arm64`, `x64` or `universal` component.
+
+Tagged upstream versions use `<upstream-version>-MCLvN`. The MacLauncher revision
+starts at 1 for each upstream version: `0.7.7-MCLv3` advances to
+`0.7.7-MCLv4` for an adaptation change, while upstream `0.7.8` starts at
+`0.7.8-MCLv1`. Commit snapshots use `MCLvN-MMDD`, with the month/day from the
+exact upstream commit's UTC timestamp. Their revision increases for each upstream
+or adaptation update across years: `MCLv9-1231` can advance to `MCLv10-0125`.
+Full timestamps and exact commits remain in source metadata. Owned components
+use their own version, and unchanged publisher binaries retain the vendor version.
+`lib/package-version.mjs` supplies both revision calculations.
+
+`tools/reversion-runtime.mjs` updates the package inventory and consumed manifest
+through a streaming archive rewrite. It retains all other file bytes, modes,
+source checksums, native signatures and dependency identities. It accepts
+`--archive`, `--record`, `--version` and a new `--output` path; the original
+archive remains unchanged. Compilation is a separate producer operation. New
+package bytes receive a new version and checksum; published identities remain
+immutable.
 
 The catalog lists the current working package for each runtime type. Separate
 HashLink 1.9/1.12 and Steamworks4j 1.9/1.10 packages preserve incompatible game
 ABIs. Superseded package generations are removed from the catalog and Releases;
 source tags remain available. MKXP-Z publisher updates use the upstream provider;
-the Builds catalog contains the patched Apple Silicon runtime. Its `nfc1` version
-component identifies the Unicode filename normalization adaptation.
+the Builds catalog contains the Apple Silicon Unicode filename normalization
+adaptation.
 
 ## Draft upload and publication
 

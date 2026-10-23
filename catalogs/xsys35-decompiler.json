@@ -6,23 +6,23 @@
     {
       "schemaVersion": 2,
       "id": "xsys35-decompiler",
-      "version": "1.13.0-5444fd18",
+      "version": "1.13.0-MCLv1",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "627fc077d1e4a2c31441574865e80802f6a89e97c46df353a5edb6f55512fe5a",
+      "manifestSha256": "cc8efa20be36081d1b7738f69d0253ec027095dbaa988a98ddb1e21a727b8e8d",
       "sourceSha256": "627fc077d1e4a2c31441574865e80802f6a89e97c46df353a5edb6f55512fe5a",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "xsys35-decompiler-1.13.0-5444fd18-arm64.tar.gz",
-        "sha256": "9ff522de90c6439b3ae444d2185c3a883d08deea0c45641d46f05aa2dbc16d7a",
-        "bytes": 62681,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsys35-decompiler%2Fv1.13.0-5444fd18%2Farm64/xsys35-decompiler-1.13.0-5444fd18-arm64.tar.gz"
+        "filename": "xsys35-decompiler-1.13.0-MCLv1-arm64.tar.gz",
+        "sha256": "355fb8ac882c5c932462e27dc7760907956b210f4ec71e45d7f4b255a1a1b579",
+        "bytes": 62739,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsys35-decompiler%2Fv1.13.0-MCLv1%2Farm64/xsys35-decompiler-1.13.0-MCLv1-arm64.tar.gz"
       },
-      "tag": "xsys35-decompiler/v1.13.0-5444fd18/arm64"
+      "tag": "xsys35-decompiler/v1.13.0-MCLv1/arm64"
     }
   ]
 }

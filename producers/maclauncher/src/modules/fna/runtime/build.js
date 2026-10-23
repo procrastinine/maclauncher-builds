@@ -7,7 +7,7 @@ const BuildTools = require("../../shared/runtime/native-build-tools");
 const Bundled = require("../../shared/runtime/bundled-native");
 const { downloadToFile, throwIfAborted } = require("../../shared/runtime/download-utils");
 
-const PROFILE = "26.10-net8-arm64-v3";
+const PROFILE = "26.10-MCLv1";
 const FNA_REVISION = "00498b0b81425b14bf8da23e68655215b9b5daa7";
 const FNA3D_REVISION = "fd1b24671fb0f5d1b544cd7843d3ad9e80d92219";
 const PREVIOUS_PROFILE = { profile: "26.10-net8-arm64-v2", revision: "651c0ffdf4db43cd112865ad368c5d6cc3dc7558", dotnetVersion: "8.0.31" };

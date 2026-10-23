@@ -44,7 +44,7 @@ bool xsys4_resource_path(char *output, size_t capacity, const char *relative)
 }
 `;
 
-function adapt(file, bytes, { version = "snapshot-de65718-macos-v3" } = {}) {
+function adapt(file, bytes, { version = "MCLv1-1021" } = {}) {
   if (!Object.hasOwn(SOURCE_HASHES, file) || digest(bytes) !== SOURCE_HASHES[file]) throw new Error("xsystem4 source checksum differs from the selected version.");
   if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(version)) throw new Error("Invalid xsystem4 runtime version.");
   let source = bytes.toString("utf8");

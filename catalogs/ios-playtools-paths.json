@@ -6,23 +6,23 @@
     {
       "schemaVersion": 2,
       "id": "ios-playtools-paths",
-      "version": "1.0.0-599ba0aa-content1",
+      "version": "1.0.0",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "12.0",
       "manifestRelative": "helper.json",
-      "manifestSha256": "305d6414df114c970829d771d456a793c84897536b688860db948d5ff3e52432",
+      "manifestSha256": "3475e35bf346bb2fd54e74cf56ebb3e063595dbb0ed2aecc8cab12d46ee480ea",
       "sourceSha256": "2af09a89b7f8fd6f6814f023654ac9a503c59db7c950f960721a6846cc4ddb7e",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "ios-playtools-paths-1.0.0-599ba0aa-content1-arm64.tar.gz",
-        "sha256": "92889b7ed790ff7596c8a6ecaf14d34647d2d97f1c5f4f07fb2e619023f2cbaf",
-        "bytes": 17230,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/ios-playtools-paths%2Fv1.0.0-599ba0aa-content1%2Farm64/ios-playtools-paths-1.0.0-599ba0aa-content1-arm64.tar.gz"
+        "filename": "ios-playtools-paths-1.0.0-arm64.tar.gz",
+        "sha256": "e5141c0b16ef785da831af39149b0dc9eb65bcbbe2a127f8603feb7fd7964a9f",
+        "bytes": 17213,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/ios-playtools-paths%2Fv1.0.0%2Farm64/ios-playtools-paths-1.0.0-arm64.tar.gz"
       },
-      "tag": "ios-playtools-paths/v1.0.0-599ba0aa-content1/arm64"
+      "tag": "ios-playtools-paths/v1.0.0/arm64"
     }
   ]
 }

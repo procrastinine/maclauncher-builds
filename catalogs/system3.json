@@ -6,23 +6,23 @@
     {
       "schemaVersion": 2,
       "id": "system3",
-      "version": "1.8.0-macos-v2",
+      "version": "1.8.0-MCLv1",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "dab7bb5dace6204175dfdc912759d5651976df0dd79c6e1d70c795474dfc58bd",
+      "manifestSha256": "769f00104e4ebfce029e1b8a8518ddec1111d916d0c5e3c9fa13d1b48d58eaa6",
       "sourceSha256": "4730f6ce3a71fb406350ab338c9d1eb7a187d2b27feeda0c8f218f722b34b376",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "system3-1.8.0-macos-v2-arm64.tar.gz",
-        "sha256": "0ccca505dcbdf645a26610d09249d32137b7552b5ccf3d27d072b2b5633665d0",
-        "bytes": 3455005,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/system3%2Fv1.8.0-macos-v2%2Farm64/system3-1.8.0-macos-v2-arm64.tar.gz"
+        "filename": "system3-1.8.0-MCLv1-arm64.tar.gz",
+        "sha256": "bad58c9a68011d81010ca09ee0be488eba30fb00283eeff50252ec5e1172c7d3",
+        "bytes": 3455003,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/system3%2Fv1.8.0-MCLv1%2Farm64/system3-1.8.0-MCLv1-arm64.tar.gz"
       },
-      "tag": "system3/v1.8.0-macos-v2/arm64"
+      "tag": "system3/v1.8.0-MCLv1/arm64"
     }
   ]
 }

@@ -112,8 +112,10 @@ architectures and minimum macOS version. Download URLs must match the registered
 release repository, project, tag and archive filename. Catalog generation rejects
 mixed projects and duplicate version/architecture pairs. Existing published
 versions are immutable: changed bytes or metadata require a new package version.
-A new package revision can retain the upstream version and append a MacLauncher
-revision, such as `1.2.3-ml2`.
+Tagged upstream packages use `1.2.3-MCLv1`, with the revision restarting at 1 for
+a new upstream version. Commit snapshots use `MCLv1-MMDD` and increase their
+revision across upstream and adaptation changes. The [release reference](RELEASES.md)
+defines these version rules and metadata-only package rewriting.
 
 Catalog generation can merge records through `--previous`. Published catalogs
 retain the current package per runtime or incompatible game ABI; retired

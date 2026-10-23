@@ -9,7 +9,7 @@ const Media = require("./portable-media");
 const Previous = require("./build");
 const { throwIfAborted } = require("../../shared/runtime/download-utils");
 
-const VERSION = "0.5.3-macos-v8";
+const VERSION = "0.5.3-MCLv1";
 const PROFILE_REVISION = "macos-npa-nss-private-v8";
 const REVISION = Previous.REVISION;
 const NPA_REVISION = Previous.NPA_REVISION;

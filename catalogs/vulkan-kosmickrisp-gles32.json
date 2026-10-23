@@ -6,23 +6,23 @@
     {
       "schemaVersion": 2,
       "id": "vulkan-kosmickrisp-gles32",
-      "version": "0.1.0-4fd08d3a-e6b7da9f",
+      "version": "MCLv1-1024",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "27.0.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "7df5c44641de3b29e5a7f3c31b5235592371091bfb98dba113345ddfc3ba10e2",
+      "manifestSha256": "ab785f70a5552114f617849e90772598adcdd1758900724e50643be3391e2d17",
       "sourceSha256": "e338e7b26ed208e8efb4dd3683a4c0e1a3d77059e8c8b95c2af0e1394438013d",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "vulkan-kosmickrisp-gles32-0.1.0-4fd08d3a-e6b7da9f-arm64.tar.gz",
-        "sha256": "2cbc883b0cd3c22fc77ae5426f52b8550b602fa1e32bd817e38231043843d97a",
-        "bytes": 3244352,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vulkan-kosmickrisp-gles32%2Fv0.1.0-4fd08d3a-e6b7da9f%2Farm64/vulkan-kosmickrisp-gles32-0.1.0-4fd08d3a-e6b7da9f-arm64.tar.gz"
+        "filename": "vulkan-kosmickrisp-gles32-MCLv1-1024-arm64.tar.gz",
+        "sha256": "544576660e6f52048ab06261df4a4afc3d52a8683e6b8c96d345ae3cfda9a0ae",
+        "bytes": 3244314,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vulkan-kosmickrisp-gles32%2FvMCLv1-1024%2Farm64/vulkan-kosmickrisp-gles32-MCLv1-1024-arm64.tar.gz"
       },
-      "tag": "vulkan-kosmickrisp-gles32/v0.1.0-4fd08d3a-e6b7da9f/arm64"
+      "tag": "vulkan-kosmickrisp-gles32/vMCLv1-1024/arm64"
     }
   ]
 }

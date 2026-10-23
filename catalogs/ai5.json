@@ -6,23 +6,23 @@
     {
       "schemaVersion": 2,
       "id": "ai5",
-      "version": "1.5.0-ad7a703f-macos-v4",
+      "version": "1.5.0-MCLv1",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "f58f52697a0442bc64f15c23f0fa835a758f821aae690f1a0b9a9d3ab36649da",
+      "manifestSha256": "d956d2ff98119c15cf4d7845adbfdc175518b06a8cbf419ad24ef8160e2958ef",
       "sourceSha256": "f58f52697a0442bc64f15c23f0fa835a758f821aae690f1a0b9a9d3ab36649da",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "ai5-1.5.0-ad7a703f-macos-v4-arm64.tar.gz",
-        "sha256": "82308d3356ca0bdb411f71db4db4942f28e69d6e331711375abd95a417942c50",
-        "bytes": 11244107,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/ai5%2Fv1.5.0-ad7a703f-macos-v4%2Farm64/ai5-1.5.0-ad7a703f-macos-v4-arm64.tar.gz"
+        "filename": "ai5-1.5.0-MCLv1-arm64.tar.gz",
+        "sha256": "4974882522f60e81a295c067c38d954cee086379ac07644188985f9d94a82ed0",
+        "bytes": 11244214,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/ai5%2Fv1.5.0-MCLv1%2Farm64/ai5-1.5.0-MCLv1-arm64.tar.gz"
       },
-      "tag": "ai5/v1.5.0-ad7a703f-macos-v4/arm64"
+      "tag": "ai5/v1.5.0-MCLv1/arm64"
     }
   ]
 }

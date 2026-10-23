@@ -6,23 +6,23 @@
     {
       "schemaVersion": 2,
       "id": "android-aim",
-      "version": "0.1.0-3136fe47-ml6",
+      "version": "MCLv1-1022",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "26.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "85f4c43032390496ed1f7eb2e143f2e20d1ecce48e0e09fffb28ca7760c8a62a",
+      "manifestSha256": "7cc110be6348cbbf3f5bed8a4452705fb44bac061ca03a5b0cf3700cca342c65",
       "sourceSha256": "3571320ece89f1c6fe3241ce19dc9c4351afd1da78544c943cd46b803d0bb0a5",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "android-aim-0.1.0-3136fe47-ml6-arm64.tar.gz",
-        "sha256": "ddd71e32243a7b16d7e9fbb240d5796df8f6c2d41ee91abd1f21d65653c4d070",
-        "bytes": 88939087,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-aim%2Fv0.1.0-3136fe47-ml6%2Farm64/android-aim-0.1.0-3136fe47-ml6-arm64.tar.gz"
+        "filename": "android-aim-MCLv1-1022-arm64.tar.gz",
+        "sha256": "7b305b4800aecf1473d793321e5d4b09356ac5835edaa5662deee496fe722278",
+        "bytes": 88939079,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-aim%2FvMCLv1-1022%2Farm64/android-aim-MCLv1-1022-arm64.tar.gz"
       },
-      "tag": "android-aim/v0.1.0-3136fe47-ml6/arm64"
+      "tag": "android-aim/vMCLv1-1022/arm64"
     }
   ]
 }

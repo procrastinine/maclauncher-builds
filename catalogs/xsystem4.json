@@ -6,23 +6,23 @@
     {
       "schemaVersion": 2,
       "id": "xsystem4",
-      "version": "snapshot-de65718-macos-v3",
+      "version": "MCLv1-1021",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "46d90ce63680684d4a18ddb75db308d9ce45f1ba8b4324f309acedc36a9858a8",
+      "manifestSha256": "312b8bd4f7d472b559b54c95016b631855d9ef3d716c3c972b19b6ae2d1326b5",
       "sourceSha256": "46d90ce63680684d4a18ddb75db308d9ce45f1ba8b4324f309acedc36a9858a8",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "xsystem4-snapshot-de65718-macos-v3-arm64.tar.gz",
-        "sha256": "6feb6ee7987cb5c65014475f8ef6ba2a929b5fd78fc9e7962626cd516f142b16",
-        "bytes": 21357706,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem4%2Fvsnapshot-de65718-macos-v3%2Farm64/xsystem4-snapshot-de65718-macos-v3-arm64.tar.gz"
+        "filename": "xsystem4-MCLv1-1021-arm64.tar.gz",
+        "sha256": "a805feb0438c5cc05e1f87e5c164b16111e27ac1893946ed24237f151d9fd0a4",
+        "bytes": 21357638,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem4%2FvMCLv1-1021%2Farm64/xsystem4-MCLv1-1021-arm64.tar.gz"
       },
-      "tag": "xsystem4/vsnapshot-de65718-macos-v3/arm64"
+      "tag": "xsystem4/vMCLv1-1021/arm64"
     }
   ]
 }

@@ -6,7 +6,7 @@
     {
       "schemaVersion": 2,
       "id": "steam-api-helper",
-      "version": "maclauncher-offline-abi-0.5.0-universal",
+      "version": "0.5.0",
       "arch": "universal",
       "launcherArchitectures": [
         "arm64",
@@ -14,16 +14,16 @@
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "helper.json",
-      "manifestSha256": "496eee1177f396b9e354299d9781cdb07d212fe0149dece6c89b89b86eb06363",
+      "manifestSha256": "14a494ccde3d18287d9ab5ab22d3275dfdf329f3b2a3937671aa4acbf6ba648b",
       "sourceSha256": "40597e2596bf3df91e7a8d1be6939f75d2d427bbeb91d0ac2316420c1c0cb23e",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "steam-api-helper-maclauncher-offline-abi-0.5.0-universal-universal.tar.gz",
-        "sha256": "9bfa656126e65469ad9aaa3462814b5d9dba982e5b25e86f290931b90315ad6d",
-        "bytes": 94615,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/steam-api-helper%2Fvmaclauncher-offline-abi-0.5.0-universal%2Funiversal/steam-api-helper-maclauncher-offline-abi-0.5.0-universal-universal.tar.gz"
+        "filename": "steam-api-helper-0.5.0-universal.tar.gz",
+        "sha256": "42731d9319406fce3814509c63c251fb6e5f40872577966b16dc7c960d728858",
+        "bytes": 94596,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/steam-api-helper%2Fv0.5.0%2Funiversal/steam-api-helper-0.5.0-universal.tar.gz"
       },
-      "tag": "steam-api-helper/vmaclauncher-offline-abi-0.5.0-universal/universal"
+      "tag": "steam-api-helper/v0.5.0/universal"
     }
   ]
 }

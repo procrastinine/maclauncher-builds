@@ -8,7 +8,7 @@ import {catalog} from '../tools/runtime-package.mjs';
 import {validateCatalog} from '../lib/project-identity.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 const baseline=JSON.parse(fs.readFileSync(path.join(root,'runtimes/mkxpz/baseline.json')));
-const adaptedVersion=baseline.version+'-nfc1-arm64';
+const adaptedVersion='MCLv1-1003';
 test('MKXP-Z uses its owned source recipe and preserves the universal publisher identity',()=>{
  const project=resolveProject('mkxpz',root);
  assert.equal(project.producer.kind,'maclauncher');
@@ -34,6 +34,6 @@ test('MKXP-Z catalog contains only the current patched Apple Silicon package',()
 test('MKXP-Z configuration helper has a separate source-free binary package',()=>{
  const value=JSON.parse(fs.readFileSync(path.join(root,'catalogs/mkxpz-config-helper.json')));
  validateCatalog(value,{project:'mkxpz-config-helper',repository:resolveProject('mkxpz-config-helper',root).releaseRepository});
- const helper=value.packages.find(row=>row.version==='config-identity-v7-universal-content1');
+ const helper=value.packages.find(row=>row.version==='1.0.0');
  assert.ok(helper);assert.equal(helper.arch,'universal');assert.equal(helper.minimumMacOS,'11.0');
 });

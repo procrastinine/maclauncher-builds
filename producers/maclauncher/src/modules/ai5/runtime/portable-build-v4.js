@@ -9,7 +9,7 @@ const Movie = require("../../shared/runtime/portable-ffmpeg");
 const Previous = require("./build");
 const { throwIfAborted } = require("../../shared/runtime/download-utils");
 
-const VERSION = "1.5.0-ad7a703f-macos-v4";
+const VERSION = "1.5.0-MCLv1";
 const REVISION = "ad7a703f1c9f56e127d23c10d54fec0dcd4eaef3";
 const SOURCE_SHA256 = "f09b2d16b42d3a29f10b5299a9b8731279786c3f693eb6f84268134b7c2dfbf0";
 const PROFILE = "macos13-original-disc-v4";
