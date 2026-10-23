@@ -127,7 +127,8 @@
         "kind": "maclauncher",
         "repository": "https://github.com/procrastinine/maclauncher-builds",
         "entries": [
-          "producers/maclauncher/src/modules/ai5/runtime/portable-build.js"
+          "producers/maclauncher/src/modules/ai5/runtime/portable-build.js",
+          "producers/maclauncher/src/modules/ai5/runtime/portable-build-v4.js"
         ],
         "sourceDirectory": "producers/maclauncher"
       },
@@ -137,7 +138,7 @@
           "provider": "github",
           "url": "https://github.com/nunuhara/ai5-sdl2",
           "repository": "nunuhara/ai5-sdl2",
-          "revision": "1dfe835ceff2ecd62aa75ced91f11450dd75d1d2"
+          "revision": "ad7a703f1c9f56e127d23c10d54fec0dcd4eaef3"
         }
       ]
     },
@@ -159,14 +160,14 @@
           "provider": "github",
           "url": "https://github.com/FNA-XNA/FNA",
           "repository": "FNA-XNA/FNA",
-          "revision": "651c0ffdf4db43cd112865ad368c5d6cc3dc7558"
+          "revision": "00498b0b81425b14bf8da23e68655215b9b5daa7"
         },
         {
           "id": "fna3d",
           "provider": "github",
           "url": "https://github.com/FNA-XNA/FNA3D",
           "repository": "FNA-XNA/FNA3D",
-          "revision": "62a41708e975867e4fa7914aca55fdb13c36a0a1"
+          "revision": "fd1b24671fb0f5d1b544cd7843d3ad9e80d92219"
         }
       ]
     },
@@ -178,7 +179,9 @@
         "kind": "maclauncher",
         "repository": "https://github.com/procrastinine/maclauncher-builds",
         "entries": [
-          "producers/maclauncher/src/modules/gemrb/runtime/portable-build-v4.js"
+          "producers/maclauncher/src/modules/gemrb/runtime/portable-build-v4.js",
+          "producers/maclauncher/src/modules/gemrb/runtime/portable-build-v5.js",
+          "producers/maclauncher/src/modules/gemrb/runtime/portable-overlay-v5.js"
         ],
         "sourceDirectory": "producers/maclauncher"
       },
@@ -188,7 +191,7 @@
           "provider": "github",
           "url": "https://github.com/gemrb/gemrb",
           "repository": "gemrb/gemrb",
-          "revision": "b33f0e7275ea1fc8a82459b418f6a7b5f1b40108"
+          "revision": "bcb5cfaa9f19ffbe8a51f25a3c014fa344173351"
         }
       ]
     },
@@ -252,6 +255,7 @@
         "kind": "maclauncher",
         "repository": "https://github.com/procrastinine/maclauncher-builds",
         "entries": [
+          "producers/maclauncher/src/modules/mages/native/current-build.js",
           "producers/maclauncher/src/modules/mages/native/portable-sfx-build.js"
         ],
         "sourceDirectory": "producers/maclauncher"
@@ -262,7 +266,7 @@
           "provider": "github",
           "url": "https://github.com/CommitteeOfZero/impacto",
           "repository": "CommitteeOfZero/impacto",
-          "revision": "ba51381fb65da70697be29e6a817dc4af5c98d19"
+          "revision": "914fae7cbb9583f8aa231569a03aab27d8c042f8"
         }
       ]
     },
@@ -340,7 +344,8 @@
         "kind": "maclauncher",
         "repository": "https://github.com/procrastinine/maclauncher-builds",
         "entries": [
-          "producers/maclauncher/src/modules/nscripter/runtime/onscripter-en-build.js"
+          "producers/maclauncher/src/modules/nscripter/runtime/onscripter-en-build.js",
+          "producers/maclauncher/src/modules/nscripter/runtime/onscripter-en-build-v3.js"
         ],
         "sourceDirectory": "producers/maclauncher"
       },
@@ -350,7 +355,7 @@
           "provider": "github",
           "url": "https://github.com/Galladite27/ONScripter-EN",
           "repository": "Galladite27/ONScripter-EN",
-          "revision": "0a725088e01919e0c206533c793a84f69f06b833"
+          "revision": "3854ae86c19337991722059d2bed07cbcc847f6f"
         }
       ]
     },
@@ -438,7 +443,7 @@
           "provider": "github",
           "url": "https://github.com/kichikuou/sys3c",
           "repository": "kichikuou/sys3c",
-          "revision": "cc7ceda1bae0a9886f4c56ee3ce031d139ee1764"
+          "revision": "7fb3814510255b964c855d1231543b442d051bb5"
         }
       ]
     },
@@ -482,7 +487,7 @@
           "provider": "github",
           "url": "https://github.com/kichikuou/xsys35c",
           "repository": "kichikuou/xsys35c",
-          "revision": "c8ac28b83c034c1ec598266ab85daf75869359c8"
+          "revision": "5444fd18e94db3a36feb3885b158ea45d606bc93"
         }
       ]
     },
@@ -494,7 +499,8 @@
         "kind": "maclauncher",
         "repository": "https://github.com/procrastinine/maclauncher-builds",
         "entries": [
-          "producers/maclauncher/src/modules/alicesoft/system35-portable.js"
+          "producers/maclauncher/src/modules/alicesoft/system35-portable.js",
+          "producers/maclauncher/src/modules/alicesoft/system35-portable-v3.js"
         ],
         "sourceDirectory": "producers/maclauncher"
       },
@@ -504,7 +510,7 @@
           "provider": "github",
           "url": "https://github.com/kichikuou/xsystem35-sdl2",
           "repository": "kichikuou/xsystem35-sdl2",
-          "revision": "82c8b76a58a19ff1f87b4bdadbaef169c4b37f46"
+          "revision": "fbb12f67950601d547f65ef37c4fba4a10cc3822"
         }
       ]
     },
@@ -516,7 +522,9 @@
         "kind": "maclauncher",
         "repository": "https://github.com/procrastinine/maclauncher-builds",
         "entries": [
-          "producers/maclauncher/src/modules/alicesoft/system4-portable.js"
+          "producers/maclauncher/src/modules/alicesoft/system4-portable.js",
+          "producers/maclauncher/src/modules/alicesoft/system4-portable-v3.js",
+          "producers/maclauncher/src/modules/alicesoft/system4-portable-overlay-v3.js"
         ],
         "sourceDirectory": "producers/maclauncher"
       },
@@ -526,7 +534,7 @@
           "provider": "github",
           "url": "https://github.com/nunuhara/xsystem4",
           "repository": "nunuhara/xsystem4",
-          "revision": "04333ad689d7e517a93d58141bb214c19ba16129"
+          "revision": "de65718ba72d5eb291a4d0ddb691627f1d401909"
         }
       ]
     },
@@ -616,6 +624,7 @@
         "kind": "maclauncher",
         "repository": "https://github.com/procrastinine/maclauncher-builds",
         "entries": [
+          "producers/maclauncher/src/modules/shared/reshade/native/materialize-source.mjs",
           "producers/maclauncher/src/modules/shared/reshade/native/build.mjs",
           "producers/maclauncher/src/modules/shared/reshade/native/build-retroarch.mjs",
           "producers/maclauncher/src/modules/shared/reshade/libplacebo-build.mjs",
@@ -652,7 +661,7 @@
           "provider": "github",
           "url": "https://github.com/KhronosGroup/SPIRV-Cross",
           "repository": "KhronosGroup/SPIRV-Cross",
-          "revision": "aa217aeb6c9f0ace7a0ab233b28807edf45eb165"
+          "revision": "300681bbcb8365a8d1eacdacdbdd0249bbf1d6b1"
         },
         {
           "id": "reshade-shaders",
@@ -666,7 +675,7 @@
           "provider": "github",
           "url": "https://github.com/eugeniosegala/MAKO",
           "repository": "eugeniosegala/MAKO",
-          "revision": "06ecf6ee87e601f9f2a6990ae7c50a5da6137992"
+          "revision": "522cccbee6caafc643d2ccfa4ee5c06e4c5ba533"
         },
         {
           "id": "vkd3d",
@@ -686,7 +695,7 @@
           "provider": "github",
           "url": "https://github.com/SnowflakePowered/librashader",
           "repository": "SnowflakePowered/librashader",
-          "revision": "87e8a97b50516d997defeaa168173dcd185d4022"
+          "revision": "07ac790cdb9826f37cf8e1daf5011f03e3c4daa7"
         },
         {
           "id": "godot-camera",
@@ -757,7 +766,7 @@
           "id": "mesa-kosmickrisp",
           "provider": "git",
           "url": "https://gitlab.freedesktop.org/mesa/mesa",
-          "revision": "af2f67b2b3671ce4d5f95bba611a01e7eae3c84f"
+          "revision": "19a135296672f24ec1699ada244d5b80ced371da"
         }
       ]
     },

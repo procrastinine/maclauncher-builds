@@ -1,1 +1,1 @@
-../../../external/maclauncher-android/src/modules/android/native/clipboard-gesture.h
+../../../../../../sources/maclauncher-android/src/modules/android/native/clipboard-gesture.h

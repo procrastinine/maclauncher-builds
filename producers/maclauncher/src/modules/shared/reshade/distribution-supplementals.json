@@ -1,23 +1,23 @@
 [
   {
     "id": "reshade",
-    "version": "0.1.0-58047b8b-eb4da378",
+    "version": "0.1.0-58047b8b-eb4da378-portable1-upstream1",
     "arch": "universal",
     "launcherArchitectures": [
       "arm64",
       "x64"
     ],
     "minimumMacOS": "13.0",
-    "sourceRelative": "source.tar.gz",
-    "sourceSha256": "09617ada1c492a668a3596811eef917c06856db11572ef47f1727f54f319ca1e",
-    "directoryRelative": "reshade/0.1.0-58047b8b-eb4da378/universal",
+    "sourceRelative": null,
+    "sourceSha256": "d7e9ac9e5292667b2d6d1b8ea1ab8eca4eed732270a01e0e8bb48c3b3fbbb0d9",
+    "directoryRelative": "reshade/0.1.0-58047b8b-eb4da378-portable1-upstream1/universal",
     "manifestRelative": "runtime.json",
-    "manifestSha256": "aad80e4b8ab2e9492307600e8c5e24c987488044e93c7e7c386703362e61a51a",
+    "manifestSha256": "8dd871061e913d18260da76a99f1ca9f8a7c956e9dac95d5356ec30d32962aaa",
     "files": [
       {
         "path": "libreshade-macos.dylib",
-        "sha256": "9a41c6c144075343b01d345cb61c23923fae67195c5196de2ebe3809305dc66a",
-        "size": 12166592,
+        "sha256": "28d4b27e2e39eea1127dc55cc80d5f569c6fcba0472ebd6978b31158ef06498a",
+        "size": 12240720,
         "mode": 493,
         "architectures": [
           "x86_64",
@@ -26,7 +26,7 @@
       },
       {
         "path": "libvkd3d-shader.dylib",
-        "sha256": "48338d187cf01a968ef98233cd37b1f7ef6ef64b5750a7411d669f7ae75b4ed4",
+        "sha256": "0136da16f778c32f696d22d09e2e630448dc01b8b5c0ab9bd16df01e9bf9cccd",
         "size": 1652848,
         "mode": 493,
         "architectures": [
@@ -36,8 +36,8 @@
       },
       {
         "path": "fx-compile",
-        "sha256": "72d7c2e7eb349b0954e8b6912f268f857053669dbe410ad80d4dcbe139ff7c50",
-        "size": 8616976,
+        "sha256": "10d05ead5d4cb151f84a3f7094e0ac28346f98a021174de6c271bad57eae1f28",
+        "size": 8674640,
         "mode": 493,
         "architectures": [
           "x86_64",
@@ -46,8 +46,8 @@
       },
       {
         "path": "maclauncher-graphics-video",
-        "sha256": "d955cb8e4640424bbf0b5beddf113654f3c4e1fb1c291d65e07d2e56a88a8722",
-        "size": 183488,
+        "sha256": "9ccc55536a5c1670f6216c6101cf7575a75464dad09e472f72cb324c73638994",
+        "size": 199872,
         "mode": 493,
         "architectures": [
           "x86_64",
@@ -63,8 +63,8 @@
       },
       {
         "path": "librashader.dylib",
-        "sha256": "33b44bbcd8d52ace5898f0b00e4debb59b67b3bfc0ac2f94f4ed0e822cfce4a7",
-        "size": 22096880,
+        "sha256": "de751135d8dc2db70f8cb4296bec4a5c4f34f7cd006e8d1ab2031b7c0dd2ddcd",
+        "size": 21357584,
         "mode": 493,
         "architectures": [
           "x86_64",
@@ -73,8 +73,8 @@
       },
       {
         "path": "retroarch-prepare",
-        "sha256": "a3db9e11bdc39745674141ab2de3c19603687076e7d3a5a65532206ee52bff8a",
-        "size": 6237824,
+        "sha256": "fa50b58fed591da6f4f2003a9d7ec09751c32f05da778782f3b8ccf5d9bb6f03",
+        "size": 6238592,
         "mode": 493,
         "architectures": [
           "x86_64",
@@ -83,7 +83,7 @@
       },
       {
         "path": "neural/libMacLauncherNeural.dylib",
-        "sha256": "a5a60f8b35ad202d82276291704afb1e9d8ed8da07b048ac0dcabc91716e28b7",
+        "sha256": "e242c07bdd0fd96feff89092c02e8d854217d3154eacc75f09d2433aaad21dae",
         "size": 26504000,
         "mode": 493,
         "architectures": [
@@ -98,7 +98,7 @@
       },
       {
         "path": "neural/maclauncher-neural-video",
-        "sha256": "f4c0972340e4691f2212ab854f3ec1e7396ee21836aebe73011cd993604cc00e",
+        "sha256": "39b16938616116107f0bbff52cb00b3e4125401a913a741376b49442595b89d3",
         "size": 26007248,
         "mode": 493,
         "architectures": [
@@ -245,7 +245,7 @@
       },
       {
         "path": "godot/libmaclauncher-godot-camera.dylib",
-        "sha256": "295a3fb50e732f6bb206e66ae2455ee5d8ebfaa18d5a0216364975a835eab8b3",
+        "sha256": "da6c856417dde120a1d4d6dd5ef91cc80e53460706fa43903f2c0463ea971fcd",
         "size": 68272,
         "mode": 493,
         "architectures": [
@@ -271,8 +271,8 @@
       },
       {
         "path": "notices/librashader/source.json",
-        "sha256": "16a7fa373e2e1e6b9d41d989c949286b8453ce46bc5c45644caceb2be03bcca7",
-        "size": 847,
+        "sha256": "f0b1d80199dbeb3111cc9723233d7f419410d6f7049f0ce6b2ca5f6f0014e927",
+        "size": 879,
         "mode": 420
       },
       {
@@ -331,7 +331,7 @@
       },
       {
         "path": "neural/provider.json",
-        "sha256": "84c798e125d79c330d727c5aded39d54bc93530f8b117013c5ce6590c9bd5301",
+        "sha256": "264e522b7af194f09ee5ba90127f3a4d9ced3b9831750e167f6ed956a4519f0f",
         "size": 1937,
         "mode": 420
       },
@@ -5964,12 +5964,6 @@
         "mode": 420
       },
       {
-        "path": "temporal/dxmt/source.tar.gz",
-        "sha256": "c0a52fae308e99182eb5cf9db38c688d01f3eb330b91ecf96318c8fe3d819953",
-        "size": 614578,
-        "mode": 420
-      },
-      {
         "path": "temporal/dxmt/camera-bridge.json",
         "sha256": "344197819e7d032051935003735774e0eecd92e464cffd79e48c7d407f25eae5",
         "size": 1034,
@@ -6090,15 +6084,9 @@
         "mode": 420
       },
       {
-        "path": "source.tar.gz",
-        "sha256": "09617ada1c492a668a3596811eef917c06856db11572ef47f1727f54f319ca1e",
-        "size": 5299172,
-        "mode": 420
-      },
-      {
         "path": "runtime.json",
-        "sha256": "aad80e4b8ab2e9492307600e8c5e24c987488044e93c7e7c386703362e61a51a",
-        "size": 203651,
+        "sha256": "8dd871061e913d18260da76a99f1ca9f8a7c956e9dac95d5356ec30d32962aaa",
+        "size": 203207,
         "mode": 420
       }
     ],

@@ -3,13 +3,14 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {readProjects,resolveProject} from '../lib/projects.mjs';
-import {releaseTag} from '../lib/project-identity.mjs';
+import {validateCatalog,releaseTag} from '../lib/project-identity.mjs';
 import {checkProjects,main} from '../tools/check-updates.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 test('project registry covers every selected package and excludes direct upstream binaries',()=>{
- const registry=readProjects(root),ids=new Set(registry.projects.map(value=>value.id)),packages=JSON.parse(fs.readFileSync(path.join(root,'recipes/included-packages.json'))).packages;
- for(const record of packages)assert.ok(ids.has(record.id));
- assert.equal(ids.size,new Set([...packages.map(value=>value.id),'flash-projector','android-art','android','android-aim','mkxpz']).size);
+ const registry=readProjects(root),ids=new Set(registry.projects.map(value=>value.id));
+ const catalogs=fs.readdirSync(path.join(root,'catalogs')).filter(name=>name.endsWith('.json')&&name!=='index.json');
+ assert.deepEqual(new Set(catalogs.map(name=>name.slice(0,-5))),ids);
+ for(const file of catalogs){const project=file.slice(0,-5);validateCatalog(JSON.parse(fs.readFileSync(path.join(root,'catalogs',file))),{project,repository:registry.repository});}
  for(const id of ['nwjs','renpy'])assert.throws(()=>resolveProject(id,root),/Unknown/);
  assert.equal(resolveProject('android',root).producer.recipe,'runtimes/android/source.json');
  assert.notEqual(releaseTag({id:'engine',version:'a-b-1',arch:'arm64'}),releaseTag({id:'engine-a',version:'b-1',arch:'arm64'}));

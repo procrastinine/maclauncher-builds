@@ -6,6 +6,27 @@
     {
       "schemaVersion": 2,
       "id": "xsystem35",
+      "version": "2.20.0-snapshot-fbb12f6-macos-v3-fonts1",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "366f7db8c0cc20ed0b983686c6074ec7032b3f3e4423980cc0d9a9fd5c1889fa",
+      "sourceSha256": "366f7db8c0cc20ed0b983686c6074ec7032b3f3e4423980cc0d9a9fd5c1889fa",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "xsystem35-2.20.0-snapshot-fbb12f6-macos-v3-fonts1-arm64.tar.gz",
+        "sha256": "324d3662bd82e465afa7c0bfd6c23deaa21c56c4efc84bbdcde820db5c132894",
+        "bytes": 7438368,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem35%2Fv2.20.0-snapshot-fbb12f6-macos-v3-fonts1%2Farm64/xsystem35-2.20.0-snapshot-fbb12f6-macos-v3-fonts1-arm64.tar.gz"
+      },
+      "tag": "xsystem35/v2.20.0-snapshot-fbb12f6-macos-v3-fonts1/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "xsystem35",
       "version": "2.20.0-macos-v2",
       "arch": "arm64",
       "launcherArchitectures": [

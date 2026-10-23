@@ -13,13 +13,14 @@ export function repackageAndroid({input,declaration,output}){
  if(fs.existsSync(output))throw Error('Choose a new runtime output directory.');
  B.verifyPayload(input,declaration);
  const prefix=declaration.id==='android-aim'?'files/':'',source=prefix+'source.tar.gz';
- if(declaration.sourceRelative!==source)throw Error('The Android input source layout differs from its declaration.');
- const omitted=name=>name===source||name.startsWith('native/SDL3.framework/Versions/A/Headers/');
+ if(declaration.sourceRelative!==source&&declaration.sourceRelative!==null)throw Error('The Android input source layout differs from its declaration.');
+ const frameworkBuildInput=name=>/^native\/SDL3\.framework\/Versions\/A\/(?:Headers|Resources\/CMake)\//.test(name);
+ const omitted=name=>name===source||frameworkBuildInput(name);
  const retained=declaration.files.filter(file=>!omitted(file.path));
  fs.mkdirSync(output,{recursive:true});
  try{
   for(const file of retained){const destination=path.join(output,file.path);fs.mkdirSync(path.dirname(destination),{recursive:true});fs.copyFileSync(path.join(input,file.path),destination,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);}
-  if(declaration.files.some(file=>file.path.startsWith('native/SDL3.framework/Versions/A/Headers/'))){
+  if(declaration.files.some(file=>frameworkBuildInput(file.path))){
    const framework=path.join(output,'native/SDL3.framework/Versions/A');
    execFileSync('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',framework],{stdio:['ignore','pipe','pipe']});
    execFileSync('/usr/bin/codesign',['--verify','--strict',framework],{stdio:['ignore','pipe','pipe']});

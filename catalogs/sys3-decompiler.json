@@ -6,6 +6,27 @@
     {
       "schemaVersion": 2,
       "id": "sys3-decompiler",
+      "version": "0.5.0-7fb38145",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "22ef599b9ab1cda5bdb32c1c138734b7e4ff38254b2cb05b4c4a2eaed8d31256",
+      "sourceSha256": "22ef599b9ab1cda5bdb32c1c138734b7e4ff38254b2cb05b4c4a2eaed8d31256",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "sys3-decompiler-0.5.0-7fb38145-arm64.tar.gz",
+        "sha256": "0921d22b62c4e726c4065fd1d49799728534f8bdcf83d9c5d83a61cc9c8b73a7",
+        "bytes": 48663,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/sys3-decompiler%2Fv0.5.0-7fb38145%2Farm64/sys3-decompiler-0.5.0-7fb38145-arm64.tar.gz"
+      },
+      "tag": "sys3-decompiler/v0.5.0-7fb38145/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "sys3-decompiler",
       "version": "0.5.0",
       "arch": "arm64",
       "launcherArchitectures": [

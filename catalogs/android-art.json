@@ -13,13 +13,13 @@
       ],
       "minimumMacOS": "13.0.0",
       "manifestRelative": "runtime.json",
-      "manifestSha256": "4745b734da5a1fbf5cd46621841a44ed9898608189139ba2094a4a61fa6185ef",
+      "manifestSha256": "1661678d0004a1a3af5bb2a438f4498c33cc698e011308e2ed01574b6a40cd33",
       "sourceSha256": "e5aa93c2acd428669e41f2e510ddb40a70ebbf8512b0f25202254428954b5c0d",
       "updatePolicy": "manual",
       "asset": {
         "filename": "android-art-0.1.0-e5aa93c2-0cc02a04-arm64.tar.gz",
-        "sha256": "f588d1a91e49b7217be33390810db3b0560f8b07a0b887f1d4b033ba0a1db433",
-        "bytes": 124573071,
+        "sha256": "8ec46ba0454628aba2aecc1179e7157d254d5fab21e443b9aac69d6d15d053ca",
+        "bytes": 124569796,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art%2Fv0.1.0-e5aa93c2-0cc02a04%2Farm64/android-art-0.1.0-e5aa93c2-0cc02a04-arm64.tar.gz"
       },
       "tag": "android-art/v0.1.0-e5aa93c2-0cc02a04/arm64"

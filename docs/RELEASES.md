@@ -60,10 +60,14 @@ node tools/release-runtime.mjs stage --bundle out/gemrb-release \
 ```
 
 The manual **Runtime release** workflow accepts a project, version and
-architecture. It resolves the selected tag's source commit, downloads only that
-draft's binary and validates it with the committed project catalog. The `verify` operation retains the draft; `publish` publishes
-those same existing bytes. Neither operation builds native code.
+architecture. It checks out the selected tag's source commit, downloads only that
+draft's binary archive and validates it against the catalog at that commit. The
+`verify` operation retains the draft; `publish` publishes those same existing
+bytes. Neither operation builds native code.
 
 `apply --bundle <directory>` updates the local project catalog and regenerates
 `catalogs/index.json`. Existing catalog versions remain present and immutable.
 It performs no network request, commit or publication. MacLauncher reads per-project Git catalogs directly; GitHub Pages is optional.
+
+Helper package projections use `tools/repackage-helpers.mjs` with a sealed input, its declaration and a fresh output directory. The resulting content version retains native images, consumed helper metadata and license notices. Source checksums remain provenance; the matching owned source and build recipes remain in the release commit. Existing source identities remain unchanged when a publication omits build-only files. Such declarations use `sourceRelative: null` and retain the original catalog source checksum. Native protocols, architectures and macOS requirements are preserved.
+

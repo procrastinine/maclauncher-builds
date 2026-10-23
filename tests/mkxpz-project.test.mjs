@@ -28,21 +28,17 @@ test('MKXP-Z catalog keeps adapted and publisher releases immutable and separate
  const original=value.packages.find(item=>item.version===baseline.version&&item.arch==='universal'),adapted=value.packages.find(item=>item.version===adaptedVersion);
  assert.ok(original);assert.ok(adapted);
  assert.equal(original.arch,'universal');assert.deepEqual(original.launcherArchitectures,baseline.launcherArchitectures);
- assert.equal(original.sourceSha256,baseline.upstream.sourceSha256);
- assert.equal(original.asset.sha256,'d08509ba216d8f19ee7761f8a22444868f02d6de84fd06970f418ea930114e61');
+ assert.equal(original.sourceSha256,original.manifestSha256);
+ assert.equal(original.asset.sha256,'85b3251bffff93f4224765c9b3f6095bf1521d06729270c78edb73fce220d509');
  assert.equal(adapted.arch,'arm64');assert.deepEqual(adapted.launcherArchitectures,['arm64']);
  assert.equal(adapted.minimumMacOS,'11.0');assert.equal(adapted.manifestRelative,'manifest.json');
  assert.notEqual(adapted.sourceSha256,original.sourceSha256);
  for(const record of [original,adapted])assert.throws(()=>catalog([{...record,asset:{...record.asset,sha256:'0'.repeat(64)}}],
    {project:'mkxpz',repository:project.releaseRepository,previous:value}),/immutable/);
 });
-test('included MKXP-Z and its related helper inventory identify the selected sealed packages',()=>{
- const packages=JSON.parse(fs.readFileSync(path.join(root,'recipes/included-packages.json'))).packages;
- const runtime=packages.find(item=>item.id==='mkxpz'&&item.version===adaptedVersion),helper=packages.find(item=>item.id==='mkxpz-config-helper');
- const record=JSON.parse(fs.readFileSync(path.join(root,'catalogs/mkxpz.json'))).packages.find(item=>item.version===adaptedVersion);
- assert.equal(runtime.version,record.version);assert.equal(runtime.arch,record.arch);
- assert.equal(runtime.directoryRelative,'mkxpz/'+adaptedVersion+'/arm64');
- assert.equal(runtime.manifestSha256,record.manifestSha256);assert.equal(runtime.sourceSha256,record.sourceSha256);
- assert.equal(helper.version,"config-identity-v7-universal");assert.equal(helper.arch,'universal');
- assert.equal(helper.minimumMacOS,'11.0');
+test('MKXP-Z configuration helper has a separate source-free binary package',()=>{
+ const value=JSON.parse(fs.readFileSync(path.join(root,'catalogs/mkxpz-config-helper.json')));
+ validateCatalog(value,{project:'mkxpz-config-helper',repository:resolveProject('mkxpz-config-helper',root).releaseRepository});
+ const helper=value.packages.find(row=>row.version==='config-identity-v7-universal-content1');
+ assert.ok(helper);assert.equal(helper.arch,'universal');assert.equal(helper.minimumMacOS,'11.0');
 });

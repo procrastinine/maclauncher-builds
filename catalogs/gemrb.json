@@ -6,6 +6,27 @@
     {
       "schemaVersion": 2,
       "id": "gemrb",
+      "version": "0.9.5-git-bcb5cfaa9-cli-v5",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "c402ec29e6142a2f23cf73350c8c8f9416f962fc7d8e97d664c5c72784523db4",
+      "sourceSha256": "bfde8c88a2240443cb0ccd58e276b8d0d19897485b3ead646b34671c0aed20ce",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "gemrb-0.9.5-git-bcb5cfaa9-cli-v5-arm64.tar.gz",
+        "sha256": "04518a5e9557b3db7a8957f2ffca564bd2be7e196c1a05170729d9b51fffdf60",
+        "bytes": 15312778,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gemrb%2Fv0.9.5-git-bcb5cfaa9-cli-v5%2Farm64/gemrb-0.9.5-git-bcb5cfaa9-cli-v5-arm64.tar.gz"
+      },
+      "tag": "gemrb/v0.9.5-git-bcb5cfaa9-cli-v5/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "gemrb",
       "version": "0.9.5-cli-v4-content1",
       "arch": "arm64",
       "launcherArchitectures": [
@@ -13,13 +34,13 @@
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "1ec9fac48f2c727888d50c2a3a968a0861e0d34c797422b717b936d5e846e68a",
+      "manifestSha256": "cbe07c80b5c1d1ed360eb1ec99392af6f6304852a10600dab6a5d79f34c2e6b2",
       "sourceSha256": "1ae870e8fea5b66cf5126fbd4f07329a02a63543d9f627c38e4245348fa76c9b",
       "updatePolicy": "manual",
       "asset": {
         "filename": "gemrb-0.9.5-cli-v4-content1-arm64.tar.gz",
-        "sha256": "80ca021408dfb5e2347408c488c61d9ae41a67e343e32435dcfad356daad084c",
-        "bytes": 14478958,
+        "sha256": "efde8285a84a09e71df0888eae3f28aad9c32e1092e46fb675ad8480b5fa5c3e",
+        "bytes": 14478435,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gemrb%2Fv0.9.5-cli-v4-content1%2Farm64/gemrb-0.9.5-cli-v4-content1-arm64.tar.gz"
       },
       "tag": "gemrb/v0.9.5-cli-v4-content1/arm64"

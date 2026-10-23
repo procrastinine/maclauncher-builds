@@ -13,13 +13,13 @@
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "0540830abcacaa57020be2568c8c8684d73da3a7e180fc407546a626d5f7e87c",
+      "manifestSha256": "dab7bb5dace6204175dfdc912759d5651976df0dd79c6e1d70c795474dfc58bd",
       "sourceSha256": "4730f6ce3a71fb406350ab338c9d1eb7a187d2b27feeda0c8f218f722b34b376",
       "updatePolicy": "manual",
       "asset": {
         "filename": "system3-1.8.0-macos-v2-arm64.tar.gz",
-        "sha256": "93377bd6c273f0de075ea3d3db470dcbe64d4fc67d3d38fcf80356c093eb0519",
-        "bytes": 3461184,
+        "sha256": "0ccca505dcbdf645a26610d09249d32137b7552b5ccf3d27d072b2b5633665d0",
+        "bytes": 3455005,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/system3%2Fv1.8.0-macos-v2%2Farm64/system3-1.8.0-macos-v2-arm64.tar.gz"
       },
       "tag": "system3/v1.8.0-macos-v2/arm64"

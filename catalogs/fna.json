@@ -6,6 +6,27 @@
     {
       "schemaVersion": 2,
       "id": "fna",
+      "version": "26.10-net8-arm64-v3",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "887f8e67a1b644f0541fe9b4b4c2ce9c496166497e11b73815a9b5f940e3c925",
+      "sourceSha256": "887f8e67a1b644f0541fe9b4b4c2ce9c496166497e11b73815a9b5f940e3c925",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "fna-26.10-net8-arm64-v3-arm64.tar.gz",
+        "sha256": "fb42d0ba4df05a3d715f17250dc5e5f1f8913bfa436fbbdc33285d8f6dab48f2",
+        "bytes": 33711714,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/fna%2Fv26.10-net8-arm64-v3%2Farm64/fna-26.10-net8-arm64-v3-arm64.tar.gz"
+      },
+      "tag": "fna/v26.10-net8-arm64-v3/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "fna",
       "version": "26.10-net8-arm64-v2",
       "arch": "arm64",
       "launcherArchitectures": [
