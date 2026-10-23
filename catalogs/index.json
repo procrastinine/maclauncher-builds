@@ -31,10 +31,22 @@
       "name": "MacLauncher Android",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/android.json",
-        "sha256": "a4ec354c1dd3d2fb13ffdf349c7dc10672fe43e764338bf311f404ea03e11cc3",
-        "bytes": 1009
+        "sha256": "6052eb07190bfb4e21c9295401f4cfd2bf13f29d66d7a3666eaed476944edd23",
+        "bytes": 1919
       },
       "releases": [
+        {
+          "version": "0.1.0-8a1e9807-847051ea",
+          "arch": "arm64",
+          "minimumMacOS": "13.0",
+          "tag": "android/v0.1.0-8a1e9807-847051ea/arm64",
+          "asset": {
+            "filename": "android-0.1.0-8a1e9807-847051ea-arm64.tar.gz",
+            "sha256": "9df1b9b1b83b73b72a7cc23bb21eb51da9f833ad41f2a85619d45bc5dc8503db",
+            "bytes": 295459282,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android%2Fv0.1.0-8a1e9807-847051ea%2Farm64/android-0.1.0-8a1e9807-847051ea-arm64.tar.gz"
+          }
+        },
         {
           "version": "0.1.0-459d808e-a0472047",
           "arch": "arm64",
