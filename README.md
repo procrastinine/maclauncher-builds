@@ -7,7 +7,9 @@ The repository contains MacLauncher adaptations and native builds without a
 suitable upstream macOS download. Compatible stock binaries are acquired from
 upstream. Large implementations have separate source projects, including
 `maclauncher-android`; smaller adaptations use pinned sources and owned patches
-under `producers/maclauncher/`. Compiled packages are release assets, excluded from Git history.
+under `producers/maclauncher/`. Each release attaches only its binary package;
+the release tag identifies the matching source, patches and pinned upstream
+repositories. Compiled packages are excluded from Git history.
 
 ## Projects and packages
 
@@ -82,8 +84,8 @@ retains both CPU slices and its included offline default in MacLauncher.
 The MKXP-Z baseline preserves the publisher app and its bundled Ruby, media and
 graphics libraries, runtime resources and notices. A single universal package serves
 Apple Silicon and Intel Macs on macOS 11 or later. Installation needs no compiler,
-Homebrew or GitHub CLI. The package also includes the original MKXP-Z source
-archive identified in `runtimes/mkxpz/baseline.json`. The included offline fallback
+Homebrew or GitHub CLI. `runtimes/mkxpz/baseline.json` records the original
+MKXP-Z source revision, download URL and checksum. The included offline fallback
 and optional authenticated publisher updates remain separate runtime sources.
 The project catalog uses manual installation and version selection.
 
@@ -91,10 +93,11 @@ The MacLauncher Apple Silicon build adds Unicode filename normalization at the
 original filesystem boundary. Its producer is
 `producers/maclauncher/scripts/build-mkxpz-nfc.cjs`, with the pinned patch recorded in
 `producers/maclauncher/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json`. The included runtime
-and managed package contain the same sealed runtime files. Complete corresponding
-source is a separate release asset identified by the package source checksum;
-it is excluded from runtime installation and app resources. The original universal
-publisher package retains its own version and checksum.
+and managed package contain the same sealed runtime files. The release tag
+identifies the Builds commit containing the matching recipe, owned patch and
+pinned MKXP-Z source. Source checksums remain provenance; no separate source
+archive is attached to the release. The original universal publisher package
+retains its own version and checksum.
 
 ## Project and version identities
 
