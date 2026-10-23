@@ -22,18 +22,13 @@ test('MKXP-Z uses its owned source recipe and preserves the universal publisher 
  assert.equal(baseline.minimumMacOS,'11.0');assert.equal(baseline.publisherFiles,1083);
  assert.equal(build(['--project','mkxpz','--check']).sourceDirectory,'producers/maclauncher');
 });
-test('MKXP-Z catalog keeps adapted and publisher releases immutable and separately selectable',()=>{
+test('MKXP-Z catalog contains only the current patched Apple Silicon package',()=>{
  const project=resolveProject('mkxpz',root),value=JSON.parse(fs.readFileSync(path.join(root,'catalogs/mkxpz.json')));
  validateCatalog(value,{project:'mkxpz',repository:project.releaseRepository});
- const original=value.packages.find(item=>item.version===baseline.version&&item.arch==='universal'),adapted=value.packages.find(item=>item.version===adaptedVersion);
- assert.ok(original);assert.ok(adapted);
- assert.equal(original.arch,'universal');assert.deepEqual(original.launcherArchitectures,baseline.launcherArchitectures);
- assert.equal(original.sourceSha256,original.manifestSha256);
- assert.equal(original.asset.sha256,'85b3251bffff93f4224765c9b3f6095bf1521d06729270c78edb73fce220d509');
+ assert.equal(value.packages.length,1);const adapted=value.packages[0];assert.equal(adapted.version,adaptedVersion);
  assert.equal(adapted.arch,'arm64');assert.deepEqual(adapted.launcherArchitectures,['arm64']);
  assert.equal(adapted.minimumMacOS,'11.0');assert.equal(adapted.manifestRelative,'manifest.json');
- assert.notEqual(adapted.sourceSha256,original.sourceSha256);
- for(const record of [original,adapted])assert.throws(()=>catalog([{...record,asset:{...record.asset,sha256:'0'.repeat(64)}}],
+ assert.throws(()=>catalog([{...adapted,asset:{...adapted.asset,sha256:'0'.repeat(64)}}],
    {project:'mkxpz',repository:project.releaseRepository,previous:value}),/immutable/);
 });
 test('MKXP-Z configuration helper has a separate source-free binary package',()=>{

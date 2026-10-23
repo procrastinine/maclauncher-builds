@@ -90,7 +90,7 @@ export function catalogIndex(directory=root){
  const registry=readProjects(directory),catalogs=path.join(directory,'catalogs');
  const projects=[];
  for(const p of registry.projects){const file=path.join(catalogs,p.id+'.json');if(!fs.existsSync(file))continue;const bytes=fs.readFileSync(file),c=validateCatalog(JSON.parse(bytes),{project:p.id,repository:registry.repository});
-  projects.push({projectId:p.id,name:p.name,catalog:{url:'https://raw.githubusercontent.com/'+registry.repository+'/main/catalogs/'+p.id+'.json',sha256:digest(bytes),bytes:bytes.length},releases:c.packages.map(r=>({version:r.version,arch:r.arch,minimumMacOS:r.minimumMacOS,tag:r.tag,asset:r.asset}))});
+  projects.push({projectId:p.id,name:p.name,catalog:{url:'https://raw.githubusercontent.com/'+registry.repository+'/main/catalogs/'+p.id+'.json',sha256:digest(bytes),bytes:bytes.length},releases:c.packages.map(r=>({version:r.version,arch:r.arch,minimumMacOS:r.minimumMacOS,tag:r.tag,asset:r.asset,...(p.packageProfiles?.find(profile=>profile.version===r.version)?{profile:p.packageProfiles.find(profile=>profile.version===r.version).label}:{})}))});
  }
  return {schemaVersion:1,repository:registry.repository,updatePolicy:'manual',projects:projects.sort((a,b)=>a.projectId.localeCompare(b.projectId))};
 }

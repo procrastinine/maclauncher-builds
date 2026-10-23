@@ -46,6 +46,20 @@ The archive checksum and size remain in `catalogs/<project>.json`. Archived
 source checksums remain provenance and do not require uploading duplicate source
 archives. The corresponding source is supplied through the tagged repository.
 
+Package identities use one naming rule: tag `<project>/v<version>/<arch>`,
+archive `<project>-<version>-<arch>.tar.gz`. The version is the producer's sealed
+version string; catalog display labels do not rename binaries or archives.
+Upstream release versions or exact source snapshots identify the base, and owned
+adaptation revisions identify the Mac build. A payload change receives a new
+version; existing tag, archive bytes and checksum remain immutable. Architecture
+is expressed by the final `arm64`, `x64` or `universal` component.
+
+The catalog lists the current working package for each runtime type. Separate
+HashLink 1.9/1.12 and Steamworks4j 1.9/1.10 packages preserve incompatible game
+ABIs. Superseded package generations are removed from the catalog and Releases;
+source tags remain available. MKXP-Z publisher updates use the upstream provider;
+the Builds catalog contains the patched Apple Silicon runtime.
+
 ## Draft upload and publication
 
 `stage` is an explicit network command using authenticated GitHub CLI access.
@@ -69,8 +83,19 @@ bytes. Neither operation builds native code. Source CI runs for pushes to
 `main`, pull requests and manual dispatch; runtime tag creation does not run it.
 
 `apply --bundle <directory>` updates the local project catalog and regenerates
-`catalogs/index.json`. Existing catalog versions remain present and immutable.
-It performs no network request, commit or publication. MacLauncher reads per-project Git catalogs directly; GitHub Pages is optional.
+`catalogs/index.json`. Existing package identities cannot be replaced. Catalog retirement is a separate,
+deliberate change applied together with the corresponding release removal.
+It performs no network request, commit or publication. MacLauncher reads per-project Git catalogs directly; the Pages browser uses the
+same committed catalog records.
 
 Helper package projections use `tools/repackage-helpers.mjs` with a sealed input, its declaration and a fresh output directory. The resulting content version retains native images, consumed helper metadata and license notices. Source checksums remain provenance; the matching owned source and build recipes remain in the release commit. Existing source identities remain unchanged when a publication omits build-only files. Such declarations use `sourceRelative: null` and retain the original catalog source checksum. Native protocols, architectures and macOS requirements are preserved.
 
+## Package browser
+
+[The package index](https://procrastinine.github.io/maclauncher-builds/) lists the
+committed catalogs, download links, architectures, minimum macOS versions, source
+tags and archive checksums. Its adjacent `index.json` exposes the same records.
+`npm run index:build` generates both files without compiling or downloading
+runtimes. The **Package index** workflow regenerates and deploys the site when
+catalogs or index inputs change on `main`. Individual runtime preparation and
+publication remain independent operations.

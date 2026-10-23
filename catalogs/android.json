@@ -23,48 +23,6 @@
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android%2Fv0.1.0-afa08284-7f7f8af9%2Farm64/android-0.1.0-afa08284-7f7f8af9-arm64.tar.gz"
       },
       "tag": "android/v0.1.0-afa08284-7f7f8af9/arm64"
-    },
-    {
-      "schemaVersion": 2,
-      "id": "android",
-      "version": "0.1.0-8a1e9807-847051ea",
-      "arch": "arm64",
-      "launcherArchitectures": [
-        "arm64"
-      ],
-      "minimumMacOS": "13.0",
-      "manifestRelative": "runtime.json",
-      "manifestSha256": "3bcb8bbd6c6abb4c6b3a35641d73666ca2b00cdb52568140d05cd8c147f0a4b0",
-      "sourceSha256": "5051abfd8964d7817ea383e23d525a4658c8019823c572010344a0e18d8b7bfd",
-      "updatePolicy": "manual",
-      "asset": {
-        "filename": "android-0.1.0-8a1e9807-847051ea-arm64.tar.gz",
-        "sha256": "5ef1b42cecedad066775e4992690d74d7224bef8b2824cddc371a8a86e9fb8d7",
-        "bytes": 295461954,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android%2Fv0.1.0-8a1e9807-847051ea%2Farm64/android-0.1.0-8a1e9807-847051ea-arm64.tar.gz"
-      },
-      "tag": "android/v0.1.0-8a1e9807-847051ea/arm64"
-    },
-    {
-      "schemaVersion": 2,
-      "id": "android",
-      "version": "0.1.0-459d808e-a0472047",
-      "arch": "arm64",
-      "launcherArchitectures": [
-        "arm64"
-      ],
-      "minimumMacOS": "13.0",
-      "manifestRelative": "runtime.json",
-      "manifestSha256": "5adf1bd872a46ed924d245684ed45910559f7e7a96715f397b025d8a67551830",
-      "sourceSha256": "8b3e32f8d6c428029ee8e34342088d9b0737547bd6621dffe67e0c2530233f27",
-      "updatePolicy": "manual",
-      "asset": {
-        "filename": "android-0.1.0-459d808e-a0472047-arm64.tar.gz",
-        "sha256": "b9ce624cabeb0de515b4347fece4ea441df09e513f044a7a15b35b53609a5ba0",
-        "bytes": 295517889,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android%2Fv0.1.0-459d808e-a0472047%2Farm64/android-0.1.0-459d808e-a0472047-arm64.tar.gz"
-      },
-      "tag": "android/v0.1.0-459d808e-a0472047/arm64"
     }
   ]
 }

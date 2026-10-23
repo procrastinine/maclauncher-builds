@@ -23,27 +23,6 @@
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/impacto%2Fv0.10.8.903-windows-v10%2Farm64/impacto-0.10.8.903-windows-v10-arm64.tar.gz"
       },
       "tag": "impacto/v0.10.8.903-windows-v10/arm64"
-    },
-    {
-      "schemaVersion": 2,
-      "id": "impacto",
-      "version": "0.10.8.810-windows-v9",
-      "arch": "arm64",
-      "launcherArchitectures": [
-        "arm64"
-      ],
-      "minimumMacOS": "13.0",
-      "manifestRelative": "manifest.json",
-      "manifestSha256": "4f219f06c3a7767810e8df7732510a469772a1785ac9c56bc14c0d3fc7a45976",
-      "sourceSha256": "1d2e60069f810b6d0d82bc70b48651025eb560547797e8eac9d9e9fbc3986e27",
-      "updatePolicy": "manual",
-      "asset": {
-        "filename": "impacto-0.10.8.810-windows-v9-arm64.tar.gz",
-        "sha256": "103c3299cb60b6408bfd357115bad56e20349daeb1927c8884ab35cfbd4d7ada",
-        "bytes": 92322633,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/impacto%2Fv0.10.8.810-windows-v9%2Farm64/impacto-0.10.8.810-windows-v9-arm64.tar.gz"
-      },
-      "tag": "impacto/v0.10.8.810-windows-v9/arm64"
     }
   ]
 }

@@ -14,6 +14,7 @@
     "release:prepare": "node tools/release-runtime.mjs prepare",
     "release:verify": "node tools/release-runtime.mjs verify",
     "release:catalog": "node tools/release-runtime.mjs apply",
-    "release:stage": "node tools/release-runtime.mjs stage"
+    "release:stage": "node tools/release-runtime.mjs stage",
+    "index:build": "node tools/package-index.mjs --output dist/package-index"
   }
 }

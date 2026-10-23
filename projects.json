@@ -245,6 +245,16 @@
           "repository": "HaxeFoundation/hashlink",
           "revision": "4a4cfe91f3388a0b05bf2e45e7c4e38bae686dc6"
         }
+      ],
+      "packageProfiles": [
+        {
+          "version": "1.9-macos-v2",
+          "label": "HashLink 1.9 ABI"
+        },
+        {
+          "version": "1.12-macos-v1",
+          "label": "HashLink 1.12 ABI"
+        }
       ]
     },
     {
@@ -851,6 +861,16 @@
           "url": "https://github.com/code-disaster/steamworks4j",
           "repository": "code-disaster/steamworks4j",
           "revision": "33ae54e87657afe8464eb01845e62b79403f5bfa"
+        }
+      ],
+      "packageProfiles": [
+        {
+          "version": "steamworks4j-1.9.0-ml1-content1",
+          "label": "Steamworks4j 1.9 JNI ABI"
+        },
+        {
+          "version": "steamworks4j-1.10.0-ml1-content1",
+          "label": "Steamworks4j 1.10 JNI ABI"
         }
       ]
     },

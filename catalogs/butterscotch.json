@@ -6,27 +6,6 @@
     {
       "schemaVersion": 2,
       "id": "butterscotch",
-      "version": "d66464857303-appkit",
-      "arch": "arm64",
-      "launcherArchitectures": [
-        "arm64"
-      ],
-      "minimumMacOS": "13.0",
-      "manifestRelative": "manifest.json",
-      "manifestSha256": "3a87556866094b565b7239f7a6d6751219f9213c7373abc48888874e5ab5223f",
-      "sourceSha256": "1c38099963ecebb1b285f95c9fa45c5580cb3e582ef37983952d7b42ceabc306",
-      "updatePolicy": "manual",
-      "asset": {
-        "filename": "butterscotch-d66464857303-appkit-arm64.tar.gz",
-        "sha256": "815477c3f03185096ea8185b59885d0614eae0d9361107d24e988e25bcd2e923",
-        "bytes": 1174213,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/butterscotch%2Fvd66464857303-appkit%2Farm64/butterscotch-d66464857303-appkit-arm64.tar.gz"
-      },
-      "tag": "butterscotch/vd66464857303-appkit/arm64"
-    },
-    {
-      "schemaVersion": 2,
-      "id": "butterscotch",
       "version": "d66464857303-appkit-args-v1",
       "arch": "arm64",
       "launcherArchitectures": [

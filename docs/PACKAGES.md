@@ -77,28 +77,20 @@ integration code. MKXP-Z runtime packages are described below.
 | Project | Package ID | Artifact |
 | --- | --- | --- |
 | Adobe Flash Player projector | `flash-projector` | Supplied 35.0.0.60 app, universal ARM64 and Intel |
-| [MKXP-Z publisher baseline](https://github.com/mkxp-z/mkxp-z) | `mkxpz` | Publisher app from commit `37a04d14`, universal ARM64 and Intel |
 
-The Flash projector preserves its supplied binary, app bundle and notices. It
-retains both CPU slices and its included offline default in MacLauncher.
+The Flash projector preserves its supplied universal binary, app bundle and
+notices. MacLauncher installs the package through managed runtime delivery and
+reuses an installed copy offline.
 
-The MKXP-Z baseline preserves the publisher app and its bundled Ruby, media and
-graphics libraries, runtime resources and notices. A single universal package serves
-Apple Silicon and Intel Macs on macOS 11 or later. Installation needs no compiler,
-Homebrew or GitHub CLI. `runtimes/mkxpz/baseline.json` records the original
-MKXP-Z source revision, download URL and checksum. The included offline fallback
-and optional authenticated publisher updates remain separate runtime sources.
-The project catalog uses manual installation and version selection.
-
-The MacLauncher Apple Silicon build adds Unicode filename normalization at the
-original filesystem boundary. Its producer is
+The MKXP-Z Builds package adds Unicode filename normalization for Apple Silicon
+at the original filesystem boundary. Its producer is
 `producers/maclauncher/scripts/build-mkxpz-nfc.cjs`, with the pinned patch recorded in
-`producers/maclauncher/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json`. The included runtime
-and managed package contain the same sealed runtime files. The release tag
-identifies the Builds commit containing the matching recipe, owned patch and
-pinned MKXP-Z source. Source checksums remain provenance; no separate source
-archive is attached to the release. The original universal publisher package
-retains its own version and checksum.
+`producers/maclauncher/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json`.
+The release tag contains the matching recipe, owned patch and pinned upstream
+source. Source checksums remain provenance; no source archive is attached to the
+binary release. `runtimes/mkxpz/baseline.json` records the publisher input identity.
+Publisher releases and optional authenticated downloads remain available through
+the upstream provider rather than duplicate Builds catalog entries.
 
 ## Project and version identities
 
@@ -123,8 +115,9 @@ versions are immutable: changed bytes or metadata require a new package version.
 A new package revision can retain the upstream version and append a MacLauncher
 revision, such as `1.2.3-ml2`.
 
-Catalog updates retain earlier versions through `--previous`. New records are
-listed first, followed by earlier records; publisher ordering is preserved.
+Catalog generation can merge records through `--previous`. Published catalogs
+retain the current package per runtime or incompatible game ABI; retired
+generations are removed deliberately along with their release assets.
 Neither the package tools nor MacLauncher's catalog reader infer an update from
 version text or select a different installed version automatically.
 
