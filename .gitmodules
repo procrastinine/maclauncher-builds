@@ -1,3 +1,247 @@
 [submodule "sources/maclauncher-android"]
 	path = sources/maclauncher-android
-	url = ../maclauncher-android
+	url = https://github.com/procrastinine/maclauncher-android
+
+[submodule "producers/maclauncher/src/external/ai5-sdl2"]
+	path = producers/maclauncher/src/external/ai5-sdl2
+	url = https://github.com/nunuhara/ai5-sdl2
+
+[submodule "producers/maclauncher/src/external/aim"]
+	path = producers/maclauncher/src/external/aim
+	url = https://github.com/hahnlee/aim
+
+[submodule "producers/maclauncher/src/external/atrac9"]
+	path = producers/maclauncher/src/external/atrac9
+	url = https://github.com/Thealexbarney/LibAtrac9.git
+
+[submodule "producers/maclauncher/src/external/avcpp"]
+	path = producers/maclauncher/src/external/avcpp
+	url = https://github.com/h4tr3d/avcpp.git
+
+[submodule "producers/maclauncher/src/external/boost-filesystem"]
+	path = producers/maclauncher/src/external/boost-filesystem
+	url = https://github.com/boostorg/filesystem.git
+
+[submodule "producers/maclauncher/src/external/boost-iostreams"]
+	path = producers/maclauncher/src/external/boost-iostreams
+	url = https://github.com/boostorg/iostreams.git
+
+[submodule "producers/maclauncher/src/external/boost-program-options"]
+	path = producers/maclauncher/src/external/boost-program-options
+	url = https://github.com/boostorg/program_options.git
+
+[submodule "producers/maclauncher/src/external/Butterscotch"]
+	path = producers/maclauncher/src/external/Butterscotch
+	url = https://github.com/ButterscotchRunner/Butterscotch
+
+[submodule "producers/maclauncher/src/external/ffmpeg-core-bink2"]
+	path = producers/maclauncher/src/external/ffmpeg-core-bink2
+	url = https://github.com/sharpemu/ffmpeg-core.git
+
+[submodule "producers/maclauncher/src/external/FNA"]
+	path = producers/maclauncher/src/external/FNA
+	url = https://github.com/FNA-XNA/FNA
+
+[submodule "producers/maclauncher/src/external/fsr2"]
+	path = producers/maclauncher/src/external/fsr2
+	url = https://github.com/GPUOpen-Effects/FidelityFX-FSR2
+
+[submodule "producers/maclauncher/src/external/fsr3-sdk"]
+	path = producers/maclauncher/src/external/fsr3-sdk
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK
+
+[submodule "producers/maclauncher/src/external/fsr4-int8"]
+	path = producers/maclauncher/src/external/fsr4-int8
+	url = https://github.com/int3rrobang/fsr4-int8-reverse-engineering
+
+[submodule "producers/maclauncher/src/external/fsr4-metal"]
+	path = producers/maclauncher/src/external/fsr4-metal
+	url = https://github.com/UzenUPoZiTiV4ik/fsr4-native-macos
+
+[submodule "producers/maclauncher/src/external/fsr4-sdk-headers"]
+	path = producers/maclauncher/src/external/fsr4-sdk-headers
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK
+
+[submodule "producers/maclauncher/src/external/fsr4-sdk-model"]
+	path = producers/maclauncher/src/external/fsr4-sdk-model
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK
+
+[submodule "producers/maclauncher/src/external/gemrb"]
+	path = producers/maclauncher/src/external/gemrb
+	url = https://github.com/gemrb/gemrb
+
+[submodule "producers/maclauncher/src/external/hashlink"]
+	path = producers/maclauncher/src/external/hashlink
+	url = https://github.com/HaxeFoundation/hashlink
+
+[submodule "producers/maclauncher/src/external/impacto"]
+	path = producers/maclauncher/src/external/impacto
+	url = https://github.com/CommitteeOfZero/impacto
+
+[submodule "producers/maclauncher/src/external/innoextract"]
+	path = producers/maclauncher/src/external/innoextract
+	url = https://github.com/dscharrer/innoextract
+
+[submodule "producers/maclauncher/src/external/krkrsdl2"]
+	path = producers/maclauncher/src/external/krkrsdl2
+	url = https://github.com/krkrsdl2/krkrsdl2
+
+[submodule "producers/maclauncher/src/external/libnpa"]
+	path = producers/maclauncher/src/external/libnpa
+	url = https://github.com/FGRE/libnpa.git
+
+[submodule "producers/maclauncher/src/external/libnpengine"]
+	path = producers/maclauncher/src/external/libnpengine
+	url = https://github.com/FGRE/libnpengine
+
+[submodule "producers/maclauncher/src/external/librashader"]
+	path = producers/maclauncher/src/external/librashader
+	url = https://github.com/SnowflakePowered/librashader
+
+[submodule "producers/maclauncher/src/external/luasteam"]
+	path = producers/maclauncher/src/external/luasteam
+	url = https://github.com/uspgamedev/luasteam
+
+[submodule "producers/maclauncher/src/external/macfx-fsr1"]
+	path = producers/maclauncher/src/external/macfx-fsr1
+	url = https://github.com/GPUOpen-Effects/FidelityFX-FSR
+
+[submodule "producers/maclauncher/src/external/macfx-mako"]
+	path = producers/maclauncher/src/external/macfx-mako
+	url = https://github.com/eugeniosegala/MAKO
+
+[submodule "producers/maclauncher/src/external/macfx-reshade"]
+	path = producers/maclauncher/src/external/macfx-reshade
+	url = https://github.com/crosire/reshade
+
+[submodule "producers/maclauncher/src/external/macfx-reshade-shaders"]
+	path = producers/maclauncher/src/external/macfx-reshade-shaders
+	url = https://github.com/crosire/reshade-shaders
+
+[submodule "producers/maclauncher/src/external/macfx-spirv-cross"]
+	path = producers/maclauncher/src/external/macfx-spirv-cross
+	url = https://github.com/KhronosGroup/SPIRV-Cross
+
+[submodule "producers/maclauncher/src/external/macfx-spirv-headers"]
+	path = producers/maclauncher/src/external/macfx-spirv-headers
+	url = https://github.com/KhronosGroup/SPIRV-Headers
+
+[submodule "producers/maclauncher/src/external/macfx-vkd3d"]
+	path = producers/maclauncher/src/external/macfx-vkd3d
+	url = https://codeberg.org/vkd3d/vkd3d
+
+[submodule "producers/maclauncher/src/external/magic-enum"]
+	path = producers/maclauncher/src/external/magic-enum
+	url = https://github.com/Neargye/magic_enum.git
+
+[submodule "producers/maclauncher/src/external/mesa"]
+	path = producers/maclauncher/src/external/mesa
+	url = https://gitlab.freedesktop.org/mesa/mesa
+
+[submodule "producers/maclauncher/src/external/mkxp-z"]
+	path = producers/maclauncher/src/external/mkxp-z
+	url = https://github.com/mkxp-z/mkxp-z
+
+[submodule "producers/maclauncher/src/external/MLX-DLSS"]
+	path = producers/maclauncher/src/external/MLX-DLSS
+	url = https://github.com/iamwavecut/MLX-DLSS
+
+[submodule "producers/maclauncher/src/external/mpv-anime4k"]
+	path = producers/maclauncher/src/external/mpv-anime4k
+	url = https://github.com/bloc97/Anime4K.git
+
+[submodule "producers/maclauncher/src/external/onscripter-en"]
+	path = producers/maclauncher/src/external/onscripter-en
+	url = https://github.com/Galladite27/ONScripter-EN
+
+[submodule "producers/maclauncher/src/external/onscripter-yuri"]
+	path = producers/maclauncher/src/external/onscripter-yuri
+	url = https://github.com/YuriSizuku/OnscripterYuri
+
+[submodule "producers/maclauncher/src/external/openal-soft"]
+	path = producers/maclauncher/src/external/openal-soft
+	url = https://github.com/kcat/openal-soft.git
+
+[submodule "producers/maclauncher/src/external/OpenGMK"]
+	path = producers/maclauncher/src/external/OpenGMK
+	url = https://github.com/OpenGMK/OpenGMK
+
+[submodule "producers/maclauncher/src/external/ramen"]
+	path = producers/maclauncher/src/external/ramen
+	url = https://github.com/viriuwu/ramen.git
+
+[submodule "producers/maclauncher/src/external/ReMinori"]
+	path = producers/maclauncher/src/external/ReMinori
+	url = https://github.com/luoyily/ReMinori
+
+[submodule "producers/maclauncher/src/external/reshade-crt-royale"]
+	path = producers/maclauncher/src/external/reshade-crt-royale
+	url = https://github.com/akgunter/crt-royale-reshade.git
+
+[submodule "producers/maclauncher/src/external/reshade-retroarch"]
+	path = producers/maclauncher/src/external/reshade-retroarch
+	url = https://github.com/Matsilagi/RSRetroArch
+
+[submodule "producers/maclauncher/src/external/reshade-sweetfx"]
+	path = producers/maclauncher/src/external/reshade-sweetfx
+	url = https://github.com/CeeJayDK/SweetFX
+
+[submodule "producers/maclauncher/src/external/RPGMakerDecrypter"]
+	path = producers/maclauncher/src/external/RPGMakerDecrypter
+	url = https://github.com/uuksu/RPGMakerDecrypter.git
+
+[submodule "producers/maclauncher/src/external/source-revisions/fna3d"]
+	path = producers/maclauncher/src/external/source-revisions/fna3d
+	url = https://github.com/FNA-XNA/FNA3D
+
+[submodule "producers/maclauncher/src/external/source-revisions/hashlink-1-9"]
+	path = producers/maclauncher/src/external/source-revisions/hashlink-1-9
+	url = https://github.com/HaxeFoundation/hashlink
+
+[submodule "producers/maclauncher/src/external/source-revisions/steamworks4j"]
+	path = producers/maclauncher/src/external/source-revisions/steamworks4j
+	url = https://github.com/code-disaster/steamworks4j
+
+[submodule "producers/maclauncher/src/external/SteamworksSDK"]
+	path = producers/maclauncher/src/external/SteamworksSDK
+	url = https://github.com/rlabrecque/SteamworksSDK.git
+
+[submodule "producers/maclauncher/src/external/sys3c"]
+	path = producers/maclauncher/src/external/sys3c
+	url = https://github.com/kichikuou/sys3c
+
+[submodule "producers/maclauncher/src/external/system3-sdl2"]
+	path = producers/maclauncher/src/external/system3-sdl2
+	url = https://github.com/kichikuou/system3-sdl2
+
+[submodule "producers/maclauncher/src/external/udon"]
+	path = producers/maclauncher/src/external/udon
+	url = https://github.com/Adamcake/udon.git
+
+[submodule "producers/maclauncher/src/external/UndertaleModTool"]
+	path = producers/maclauncher/src/external/UndertaleModTool
+	url = https://github.com/UnderminersTeam/UndertaleModTool.git
+
+[submodule "producers/maclauncher/src/external/xsys35c"]
+	path = producers/maclauncher/src/external/xsys35c
+	url = https://github.com/kichikuou/xsys35c
+
+[submodule "producers/maclauncher/src/external/xsystem35-sdl2"]
+	path = producers/maclauncher/src/external/xsystem35-sdl2
+	url = https://github.com/kichikuou/xsystem35-sdl2
+
+[submodule "producers/maclauncher/src/external/xsystem4"]
+	path = producers/maclauncher/src/external/xsystem4
+	url = https://github.com/nunuhara/xsystem4
+
+[submodule "producers/maclauncher/src/external/godot-camera"]
+	path = producers/maclauncher/src/external/godot-camera
+	url = https://github.com/godotengine/godot
+
+[submodule "producers/maclauncher/src/external/dxmt-camera"]
+	path = producers/maclauncher/src/external/dxmt-camera
+	url = https://github.com/3Shain/dxmt
+
+[submodule "producers/maclauncher/src/external/streamline-camera"]
+	path = producers/maclauncher/src/external/streamline-camera
+	url = https://github.com/NVIDIA-RTX/Streamline

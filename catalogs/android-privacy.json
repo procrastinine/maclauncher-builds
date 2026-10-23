@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "projectId": "android-privacy",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "android-privacy",
+      "version": "1.0.0-dc13b6b57101",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "746ae5f96aa4adcff4c2a603c36e749cf453916c59d53f69b790f0c60dee52c1",
+      "sourceSha256": "a95dfc40811e331ffde87ccca5e52e9bc1683bd3c90b09734bf1fcd46a3969ff",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "android-privacy-1.0.0-dc13b6b57101-arm64.tar.gz",
+        "sha256": "2f3822c725459c4ca66143144d36638894e7d3e5c371f20711c528e006092f4c",
+        "bytes": 24363,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-privacy%2Fv1.0.0-dc13b6b57101%2Farm64/android-privacy-1.0.0-dc13b6b57101-arm64.tar.gz"
+      },
+      "tag": "android-privacy/v1.0.0-dc13b6b57101/arm64"
+    }
+  ]
+}

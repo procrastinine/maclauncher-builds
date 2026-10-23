@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 2,
+  "projectId": "java-steamworks",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "java-steamworks",
+      "version": "steamworks4j-1.10.0-ml1-content1",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "11.0",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "a9df3c59a0fea06f8b5dae19f6cd2c6dce560e0b92df9b50f6afbf940c8ebaca",
+      "sourceSha256": "b92ea7eac757c843c358fd2de0103a0851d94f4f5a748dd0f56e7979f9daf141",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "java-steamworks-steamworks4j-1.10.0-ml1-content1-universal.tar.gz",
+        "sha256": "e0e81d772de3a3b7a68e0d5afcad9a315773e6f59b751ad8e7461fc40c4c47fc",
+        "bytes": 148659,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/java-steamworks%2Fvsteamworks4j-1.10.0-ml1-content1%2Funiversal/java-steamworks-steamworks4j-1.10.0-ml1-content1-universal.tar.gz"
+      },
+      "tag": "java-steamworks/vsteamworks4j-1.10.0-ml1-content1/universal"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "java-steamworks",
+      "version": "steamworks4j-1.9.0-ml1-content1",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "10.9",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "b0cfc73dc7562101a20706b88a4568a45c7d02c02d2e61a140b7f2c03f537f27",
+      "sourceSha256": "b92ea7eac757c843c358fd2de0103a0851d94f4f5a748dd0f56e7979f9daf141",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "java-steamworks-steamworks4j-1.9.0-ml1-content1-x64.tar.gz",
+        "sha256": "63360bc6670f20f316030468080ad567376ec116a75f17f7ff3ec044c184a98c",
+        "bytes": 87388,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/java-steamworks%2Fvsteamworks4j-1.9.0-ml1-content1%2Fx64/java-steamworks-steamworks4j-1.9.0-ml1-content1-x64.tar.gz"
+      },
+      "tag": "java-steamworks/vsteamworks4j-1.9.0-ml1-content1/x64"
+    }
+  ]
+}

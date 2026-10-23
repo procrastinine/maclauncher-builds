@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "projectId": "opengmk",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "opengmk",
+      "version": "0.2.0-9ccc47a9-macos-v7",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "5ac503fd990709b057cec282843ae8e0cb7badd8be5b3e965257bc4647426e3f",
+      "sourceSha256": "756c22fd212a6a6043eb7f1aecb785836d4cc180afeb4770a2f1befa801703a9",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "opengmk-0.2.0-9ccc47a9-macos-v7-arm64.tar.gz",
+        "sha256": "e57b9fb312abbd42da07af724eb3c35f9bb37d1dc3edc0ff13938d93bac50d25",
+        "bytes": 2512197,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/opengmk%2Fv0.2.0-9ccc47a9-macos-v7%2Farm64/opengmk-0.2.0-9ccc47a9-macos-v7-arm64.tar.gz"
+      },
+      "tag": "opengmk/v0.2.0-9ccc47a9-macos-v7/arm64"
+    }
+  ]
+}

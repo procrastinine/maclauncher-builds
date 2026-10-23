@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "mkxpz",
+  "version": "2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb",
+  "arch": "universal",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "11.0",
+  "appName": "mkxp-z.universal.app",
+  "executableRelative": "mkxp-z.universal.app/Contents/MacOS/bundle_mkxp-z",
+  "upstream": {
+    "repository": "https://github.com/mkxp-z/mkxp-z",
+    "revision": "37a04d14413454551a7b6aadbb4e93e67168accb",
+    "sourceUrl": "https://codeload.github.com/mkxp-z/mkxp-z/tar.gz/37a04d14413454551a7b6aadbb4e93e67168accb",
+    "sourceSha256": "364394e8cb3089b1f5adb12a4ab524770e743bf3973ec53e8f411ba5e11886d6",
+    "sourceBytes": 14544828
+  },
+  "publisherArtifact": {
+    "origin": "GitHub Actions binary archive",
+    "runId": 37110075912,
+    "artifactId": 11271002066,
+    "artifactName": "mkxp-z.macos.universal.app.dev-37a04d1",
+    "archiveSha256": "36350690194a9de4184cc2f91b059a2285e4c127f99e6f0e26b89a712db6af84",
+    "inputExecutableSha256": "3514341b5fff5b9410ff58f0e963d435a4ed1c7560008fb20e1a522e0e4a7f1c",
+    "inputArtifactTreeSha256": "ad18d34d1a9e707156b03380c875da7773e1238012f809b64c061b07f9cc7810",
+    "inputAppTreeSha256": "ab75188a1cae0d846294bca8aa53e204ce3865e36eec59afe897b97f6d1ae73a",
+    "packagedExecutableSha256": "c266975269340cf0359328215271510e1f239556f2a156e3f3bd3ec9382f2d0a"
+  },
+  "publisherFiles": 1083,
+  "publisherBytes": 82814450,
+  "payloadFiles": 1085,
+  "payloadBytes": 82970752,
+  "notice": "licenses/upstream/0-LICENSE.txt"
+}

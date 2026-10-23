@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 2,
+  "projectId": "mkxpz",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "mkxpz",
+      "version": "2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb-nfc1-arm64",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "11.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "f576bbbba7cd2179876a5deea7417b6bf1a3d789f63b672bfa1812b808b81aee",
+      "sourceSha256": "22b3838dff7968456d1d648587118e1506831788ce367fd98337462b4c76198f",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "mkxpz-2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb-nfc1-arm64-arm64.tar.gz",
+        "sha256": "7b3ee25ed59ed487f986110df2386da9e0e354acb04427598078091c155ffae9",
+        "bytes": 14431780,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mkxpz%2Fv2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb-nfc1-arm64%2Farm64/mkxpz-2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb-nfc1-arm64-arm64.tar.gz"
+      },
+      "tag": "mkxpz/v2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb-nfc1-arm64/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "mkxpz",
+      "version": "2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "11.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "2ae3b9212ccbad3e52915e972180f94db3ed306d337aa485134a5744da1e19c4",
+      "sourceSha256": "2ae3b9212ccbad3e52915e972180f94db3ed306d337aa485134a5744da1e19c4",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "mkxpz-2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb-arm64.tar.gz",
+        "sha256": "7a8a2b38559084d32ef1383811f5b087fefee1e190ebe02cdcb84cc686e5dbb0",
+        "bytes": 34594489,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mkxpz%2Fv2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb%2Farm64/mkxpz-2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb-arm64.tar.gz"
+      },
+      "tag": "mkxpz/v2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "mkxpz",
+      "version": "2026-01-12T18-22-32Z_794d1897abe529a23f3f2f9c4f72d711a3b18391",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "11.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "34e407ea4db46bab431a91d911d7453bf59aaf91edf6e2c980dbad21ab55a3c1",
+      "sourceSha256": "34e407ea4db46bab431a91d911d7453bf59aaf91edf6e2c980dbad21ab55a3c1",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "mkxpz-2026-01-12T18-22-32Z_794d1897abe529a23f3f2f9c4f72d711a3b18391-arm64.tar.gz",
+        "sha256": "095892a56091d6fa9dba76d10f595d41148dab517159aff3a351118b111e731a",
+        "bytes": 33096686,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mkxpz%2Fv2026-01-12T18-22-32Z_794d1897abe529a23f3f2f9c4f72d711a3b18391%2Farm64/mkxpz-2026-01-12T18-22-32Z_794d1897abe529a23f3f2f9c4f72d711a3b18391-arm64.tar.gz"
+      },
+      "tag": "mkxpz/v2026-01-12T18-22-32Z_794d1897abe529a23f3f2f9c4f72d711a3b18391/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "mkxpz",
+      "version": "2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "11.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "940751f4b794838b3a1c5dcd6c40e7ce869b9fba974ebfbc61a5c2afe7fb3f91",
+      "sourceSha256": "364394e8cb3089b1f5adb12a4ab524770e743bf3973ec53e8f411ba5e11886d6",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "mkxpz-2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb-universal.tar.gz",
+        "sha256": "d08509ba216d8f19ee7761f8a22444868f02d6de84fd06970f418ea930114e61",
+        "bytes": 49008063,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mkxpz%2Fv2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb%2Funiversal/mkxpz-2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb-universal.tar.gz"
+      },
+      "tag": "mkxpz/v2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb/universal"
+    }
+  ]
+}

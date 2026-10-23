@@ -10,6 +10,10 @@
     "pack": "node tools/runtime-package.mjs pack",
     "verify": "node tools/runtime-package.mjs verify",
     "catalog": "node tools/runtime-package.mjs catalog",
-    "check:updates": "node tools/check-updates.mjs"
+    "check:updates": "node tools/check-updates.mjs",
+    "release:prepare": "node tools/release-runtime.mjs prepare",
+    "release:verify": "node tools/release-runtime.mjs verify",
+    "release:catalog": "node tools/release-runtime.mjs apply",
+    "release:stage": "node tools/release-runtime.mjs stage"
   }
 }

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "projectId": "innoextract",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "innoextract",
+      "version": "1.10-dev-6e9e34ed-macos-v1",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "5dfe39c91087cc184a764dca8b0a2e35c6df4c585d767108a945781c2cf2cc7f",
+      "sourceSha256": "5dfe39c91087cc184a764dca8b0a2e35c6df4c585d767108a945781c2cf2cc7f",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "innoextract-1.10-dev-6e9e34ed-macos-v1-arm64.tar.gz",
+        "sha256": "d42572d621659fddf03474476eaa1dc1995e021ea703d76fbe360281ee5858c3",
+        "bytes": 599442,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/innoextract%2Fv1.10-dev-6e9e34ed-macos-v1%2Farm64/innoextract-1.10-dev-6e9e34ed-macos-v1-arm64.tar.gz"
+      },
+      "tag": "innoextract/v1.10-dev-6e9e34ed-macos-v1/arm64"
+    }
+  ]
+}

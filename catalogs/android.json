@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "projectId": "android",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "android",
+      "version": "0.1.0-459d808e-a0472047",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "runtime.json",
+      "manifestSha256": "96302adb71efa251cb30dc6f164052c8ab66da3a708020de4c9c6fd2d6ab514c",
+      "sourceSha256": "8b3e32f8d6c428029ee8e34342088d9b0737547bd6621dffe67e0c2530233f27",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "android-0.1.0-459d808e-a0472047-arm64.tar.gz",
+        "sha256": "1a36c48fd5632abec5692f9b6b83e5180889082a78732be74f245acedbd6a7d7",
+        "bytes": 295524213,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android%2Fv0.1.0-459d808e-a0472047%2Farm64/android-0.1.0-459d808e-a0472047-arm64.tar.gz"
+      },
+      "tag": "android/v0.1.0-459d808e-a0472047/arm64"
+    }
+  ]
+}

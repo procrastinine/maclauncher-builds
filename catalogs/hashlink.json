@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 2,
+  "projectId": "hashlink",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "hashlink",
+      "version": "1.9-macos-v2",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "63d822bf2109e4fb390fef91c3c146a1d6110fbc14dcf85fa34653e5237bcaf1",
+      "sourceSha256": "7a1b7b40995534903611887022b681f75d83edec0bef38844e287b0484cebbd5",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "hashlink-1.9-macos-v2-x64.tar.gz",
+        "sha256": "4c708d299053791f769dced67755e19ff470dcf58f5568a8ca3e28b3a50f63e4",
+        "bytes": 2109682,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/hashlink%2Fv1.9-macos-v2%2Fx64/hashlink-1.9-macos-v2-x64.tar.gz"
+      },
+      "tag": "hashlink/v1.9-macos-v2/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "hashlink",
+      "version": "1.12-macos-v1",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "a51b5f13dab33eb02a02517df4158ad028675d859b34538d6ffe5f931ea6fd52",
+      "sourceSha256": "4298cc441fc3ff096602792b289afdea2af153d43b48a19f1482551ee3cd42ff",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "hashlink-1.12-macos-v1-x64.tar.gz",
+        "sha256": "b30e0996c65d6b1ae8d0a52eb9946ca4a8680935bc767109b5c27f0b047f0bf9",
+        "bytes": 2173044,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/hashlink%2Fv1.12-macos-v1%2Fx64/hashlink-1.12-macos-v1-x64.tar.gz"
+      },
+      "tag": "hashlink/v1.12-macos-v1/x64"
+    }
+  ]
+}

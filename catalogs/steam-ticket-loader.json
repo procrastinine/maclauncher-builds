@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 2,
+  "projectId": "steam-ticket-loader",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "steam-ticket-loader",
+      "version": "maclauncher-ticket-unavailable-0.1.0-universal",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "1d965237f2cc2b983ac17fbbd3540aa101c7b38fd5d5f7e5eb555c094119ccb1",
+      "sourceSha256": "5b5604323f8d6a016efb50056403fe504271ddbd70ba738b268eb3b4dc223f00",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "steam-ticket-loader-maclauncher-ticket-unavailable-0.1.0-universal-universal.tar.gz",
+        "sha256": "8e758c44870f97d1be176300a3db02fa26ecc5639d02d90e756b1bf71f7101dc",
+        "bytes": 3120,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/steam-ticket-loader%2Fvmaclauncher-ticket-unavailable-0.1.0-universal%2Funiversal/steam-ticket-loader-maclauncher-ticket-unavailable-0.1.0-universal-universal.tar.gz"
+      },
+      "tag": "steam-ticket-loader/vmaclauncher-ticket-unavailable-0.1.0-universal/universal"
+    }
+  ]
+}

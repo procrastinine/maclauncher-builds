@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "projectId": "xsystem35",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "xsystem35",
+      "version": "2.20.0-macos-v2",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "b361ea0fe60201d1eb0cb47f364108f82c8763f9db0f8820f51915ed6f4c322c",
+      "sourceSha256": "ab9e241d7efa959c1821e3430ad42d36d4a798aa6a6609829a3938461c6efcd8",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "xsystem35-2.20.0-macos-v2-arm64.tar.gz",
+        "sha256": "6a1d590c3ee6fe8c204752be09ca19910a81508e6b178457f8b42046bf965767",
+        "bytes": 7450415,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem35%2Fv2.20.0-macos-v2%2Farm64/xsystem35-2.20.0-macos-v2-arm64.tar.gz"
+      },
+      "tag": "xsystem35/v2.20.0-macos-v2/arm64"
+    }
+  ]
+}

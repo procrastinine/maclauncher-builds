@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 2,
+  "projectId": "love-luasteam",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "love-luasteam",
+      "version": "luasteam-4.0.2-ml1-lua51-universal-content1",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "12a56cf5399811d494946bf27b63eb05b96d554415b8c3338779eadb0c86f503",
+      "sourceSha256": "881f6b866d8ba9474a311b4570bd5b0c32be587218ecde505b8d74a1c9ebef92",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "love-luasteam-luasteam-4.0.2-ml1-lua51-universal-content1-universal.tar.gz",
+        "sha256": "d6cf31fe93448ab29fd4947852593dffdf7929225a445ed322a37eb09f8413fb",
+        "bytes": 78586,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/love-luasteam%2Fvluasteam-4.0.2-ml1-lua51-universal-content1%2Funiversal/love-luasteam-luasteam-4.0.2-ml1-lua51-universal-content1-universal.tar.gz"
+      },
+      "tag": "love-luasteam/vluasteam-4.0.2-ml1-lua51-universal-content1/universal"
+    }
+  ]
+}

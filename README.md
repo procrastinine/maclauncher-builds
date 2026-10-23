@@ -7,14 +7,14 @@ The repository contains MacLauncher adaptations and native builds without a
 suitable upstream macOS download. Compatible stock binaries are acquired from
 upstream. Large implementations have separate source projects, including
 `maclauncher-android`; smaller adaptations use pinned sources and owned patches
-in MacLauncher. Compiled packages are release assets, excluded from Git history.
+under `producers/maclauncher/`. Compiled packages are release assets, excluded from Git history.
 
 ## Projects and packages
 
 [projects.json](projects.json) identifies each package, its producer, selected
 upstream revisions and release repository. The Android producer uses a pinned
-source submodule. Other source producers are maintained in MacLauncher; their
-exact build entries are recorded in the registry. The package tools accept their
+source submodule. Other producer sources and patches live under
+`producers/maclauncher/`; the registry records their exact build entries. The package tools accept their
 sealed outputs. [The package inventory](recipes/included-packages.json) records
 selected versions and CPU architectures, including multiple HashLink profiles.
 
@@ -31,6 +31,7 @@ selected versions and CPU architectures, including multiple HashLink profiles.
 | [HashLink](https://github.com/HaxeFoundation/hashlink) | `hashlink` | Legacy 1.9 and 1.12 VM/native-module ABI profiles |
 | [impacto](https://github.com/CommitteeOfZero/impacto) | `impacto` | Windows scripts, input, audio, saves and backlog adaptations |
 | [Kirikiri SDL2](https://github.com/krkrsdl2/krkrsdl2) | `krkrsdl2` | Storage access, fonts and full-frame presentation |
+| [MKXP-Z](https://github.com/mkxp-z/mkxp-z) | `mkxpz` | macOS filename normalization for Apple Silicon |
 | [libnpengine](https://github.com/FGRE/libnpengine) | `npengine` | Script compiler, choice handling and native media runner |
 | [ONScripter-EN](https://github.com/Galladite27/ONScripter-EN) | `onscripter-en` | Native Cocoa shell and portable SDL/media libraries |
 | [ONScripterYuri](https://github.com/YuriSizuku/OnscripterYuri) | `onsyuri` | Empty-page state reset and portable native libraries |
@@ -66,16 +67,34 @@ selected versions and CPU architectures, including multiple HashLink profiles.
 The KosmicKrisp entry contains the adapted driver; the stock driver uses upstream
 binary delivery. Integration helpers are internal dependencies and retain their
 associated runtime's installation flow. The MKXP-Z helper contains MacLauncher
-integration code; MKXP-Z itself uses publisher binaries.
+integration code. MKXP-Z runtime packages are described below.
 
-### Prebuilt runtime
+### Prebuilt runtimes
 
 | Project | Package ID | Artifact |
 | --- | --- | --- |
 | Adobe Flash Player projector | `flash-projector` | Supplied 35.0.0.60 app, universal ARM64 and Intel |
+| [MKXP-Z publisher baseline](https://github.com/mkxp-z/mkxp-z) | `mkxpz` | Publisher app from commit `37a04d14`, universal ARM64 and Intel |
 
 The Flash projector preserves its supplied binary, app bundle and notices. It
 retains both CPU slices and its included offline default in MacLauncher.
+
+The MKXP-Z baseline preserves the publisher app and its bundled Ruby, media and
+graphics libraries, runtime resources and notices. A single universal package serves
+Apple Silicon and Intel Macs on macOS 11 or later. Installation needs no compiler,
+Homebrew or GitHub CLI. The package also includes the original MKXP-Z source
+archive identified in `runtimes/mkxpz/baseline.json`. The included offline fallback
+and optional authenticated publisher updates remain separate runtime sources.
+The project catalog uses manual installation and version selection.
+
+The MacLauncher Apple Silicon build adds Unicode filename normalization at the
+original filesystem boundary. Its producer is
+`producers/maclauncher/scripts/build-mkxpz-nfc.cjs`, with the pinned patch recorded in
+`producers/maclauncher/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json`. The included runtime
+and managed package contain the same sealed runtime files. Complete corresponding
+source is a separate release asset identified by the package source checksum;
+it is excluded from runtime installation and app resources. The original universal
+publisher package retains its own version and checksum.
 
 ## Project and version identities
 
@@ -119,7 +138,7 @@ node tools/build-runtime.mjs --project android-art --inputs /absolute/path/to/ar
 ```
 
 A build command resolves the selected project's registered producer. Projects
-maintained in MacLauncher identify their build entries; prebuilt projects retain
+under `producers/maclauncher/` identify their build entries; prebuilt projects retain
 the supplied artifact. A different project's producer is never substituted.
 
 The ART command uses the same pinned Android source checkout and its ART

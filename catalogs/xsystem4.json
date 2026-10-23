@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "projectId": "xsystem4",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "xsystem4",
+      "version": "snapshot-04333ad-macos-v2",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "c72f587c0af3e4437b865861d484f1e0df2c7fdf39a02e1af3c73fe1e38295fb",
+      "sourceSha256": "7c2a9bee717b99d88bf7ff5a3a53b65bc43e33cf26cdd398113916a399e1437a",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "xsystem4-snapshot-04333ad-macos-v2-arm64.tar.gz",
+        "sha256": "eed7adcbf9722ac0a7ebfb7f80812fa3cd0615e8d8dccc3444f8ea9a3e8cc94c",
+        "bytes": 21320538,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem4%2Fvsnapshot-04333ad-macos-v2%2Farm64/xsystem4-snapshot-04333ad-macos-v2-arm64.tar.gz"
+      },
+      "tag": "xsystem4/vsnapshot-04333ad-macos-v2/arm64"
+    }
+  ]
+}

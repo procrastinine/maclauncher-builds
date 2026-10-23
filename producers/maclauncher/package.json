@@ -1,0 +1,9 @@
+{
+  "name": "maclauncher-runtime-producers",
+  "private": true,
+  "type": "commonjs",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  }
+}

@@ -1,0 +1,5 @@
+src/resources/
+node_modules/
+out/
+.cache/
+.local/

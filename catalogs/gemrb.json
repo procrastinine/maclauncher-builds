@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "projectId": "gemrb",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "gemrb",
+      "version": "0.9.5-cli-v4-content1",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "1ec9fac48f2c727888d50c2a3a968a0861e0d34c797422b717b936d5e846e68a",
+      "sourceSha256": "1ae870e8fea5b66cf5126fbd4f07329a02a63543d9f627c38e4245348fa76c9b",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "gemrb-0.9.5-cli-v4-content1-arm64.tar.gz",
+        "sha256": "80ca021408dfb5e2347408c488c61d9ae41a67e343e32435dcfad356daad084c",
+        "bytes": 14478958,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gemrb%2Fv0.9.5-cli-v4-content1%2Farm64/gemrb-0.9.5-cli-v4-content1-arm64.tar.gz"
+      },
+      "tag": "gemrb/v0.9.5-cli-v4-content1/arm64"
+    }
+  ]
+}

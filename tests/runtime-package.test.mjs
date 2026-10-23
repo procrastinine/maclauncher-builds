@@ -85,3 +85,14 @@ test('optional native providers retain platform requirements and exact sealed by
  assert.throws(()=>publicDeclaration({...f.declaration,files:f.declaration.files.map(file=>file.architectures?
   {...file,optionalLoad:{architectures:['arm64'],minimumMacOS:'15.0'}}:file)}),/incomplete/);
 });
+
+// Empty nested code-signature members are part of supplied macOS app bundles.
+test('zero-byte app signature members retain their exact bytes and inventory',async t=>{
+ const f=fixture(t),name='App.app/Contents/Resources/Assets.bundle/Contents/_CodeSignature/CodeSignature';
+ fs.mkdirSync(path.dirname(path.join(f.input,name)),{recursive:true});fs.writeFileSync(path.join(f.input,name),'',{mode:0o644});
+ f.declaration.files.push({path:name,size:0,mode:0o644,sha256:digest('')});
+ const record=await pack(f),result=await verify({...selected(f),archive:f.output,sha256:record.asset.sha256});
+ assert.equal(result.files,5);assert.throws(()=>publicDeclaration({...f.declaration,files:f.declaration.files.map(file=>file.path===name?{...file,size:-1}:file)}),/Invalid sealed/);
+ fs.writeFileSync(path.join(f.input,name),'changed');
+ await assert.rejects(pack({...f,output:path.join(f.root,'next',path.basename(f.output))}),/exceeds|checksum/);
+});

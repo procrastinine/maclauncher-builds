@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 2,
+  "projectId": "mkxpz-config-helper",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "mkxpz-config-helper",
+      "version": "config-identity-v7-universal",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "11.0",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "a82104f35392a81d872cb5996cbfb9cdc66506465e776bf63e436472ce5a6961",
+      "sourceSha256": "2d266fa0916eafa57826a153ae72519ea9c3b4df348cfe219b731b5ae8ac8515",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "mkxpz-config-helper-config-identity-v7-universal-universal.tar.gz",
+        "sha256": "e0102e474e6c43dd022d67f3b41a68a0946ef93e0ef6c3849bb0ae29e9d0340c",
+        "bytes": 17647,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mkxpz-config-helper%2Fvconfig-identity-v7-universal%2Funiversal/mkxpz-config-helper-config-identity-v7-universal-universal.tar.gz"
+      },
+      "tag": "mkxpz-config-helper/vconfig-identity-v7-universal/universal"
+    }
+  ]
+}

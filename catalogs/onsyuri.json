@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "projectId": "onsyuri",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "onsyuri",
+      "version": "0.7.7beta-macos-v3",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "e15fb9c94aeac7a9ac1882a2f722135e124365c8552cf238e82ee3d1817763ab",
+      "sourceSha256": "b4a15fe88d2492b33979d9093591b8436cd907c25232d302de9e5e269f6b96db",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "onsyuri-0.7.7beta-macos-v3-arm64.tar.gz",
+        "sha256": "e896ad2d033d6bb23a85a0fd16a8984effa104f2057d77c96b2fcc2c72ca0d46",
+        "bytes": 3805609,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onsyuri%2Fv0.7.7beta-macos-v3%2Farm64/onsyuri-0.7.7beta-macos-v3-arm64.tar.gz"
+      },
+      "tag": "onsyuri/v0.7.7beta-macos-v3/arm64"
+    }
+  ]
+}

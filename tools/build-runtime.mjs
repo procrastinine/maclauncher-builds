@@ -34,6 +34,15 @@ export function main(args,directory=root){
  if(options.inputs&&!path.isAbsolute(options.inputs))throw Error('Build inputs require an absolute JSON path.');
  const project=resolveProject(options.project,directory);
  const adapter=project.producer.kind==='maclauncher'&&project.producer.buildEntry;
+ if(project.producer.kind==='maclauncher'&&!adapter&&project.producer.sourceDirectory){
+  const source=fs.realpathSync(path.join(directory,project.producer.sourceDirectory));
+  for(const entry of project.producer.entries){
+   const file=path.join(directory,entry),actual=fs.realpathSync(file);
+   if(!actual.startsWith(source+path.sep)||!fs.statSync(actual).isFile())throw Error('Producer source entries must be contained regular files.');
+  }
+  if(!options.check)throw Error('Use the selected producer entry with its documented build arguments: '+project.producer.entries.join(', '));
+  return {id:project.id,action:'check',sourceDirectory:project.producer.sourceDirectory,entries:project.producer.entries};
+ }
  if(project.producer.kind!=='pinned-source'&&!adapter)throw Error(project.producer.kind==='prebuilt'?project.name+' retains its supplied binary.':project.name+' producer is maintained in MacLauncher: '+project.producer.entries.join(', '));
  if(adapter&&(!/^tools\/[a-z0-9-]+\.mjs$/.test(adapter)||!/^[a-z0-9-]+$/.test(project.producer.sourceProject||'')))throw Error('Invalid registered adapter build entry.');
  const sourceProject=adapter?resolveProject(project.producer.sourceProject,directory):project;

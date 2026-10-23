@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "projectId": "onscripter-en",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "onscripter-en",
+      "version": "2025-06-08-mac-v2",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "c8e7fc9366777610dd976fbccc5e0f0cba1001566c49a5b71c515708d54f0427",
+      "sourceSha256": "e22968f117627605cf2d7346d3da2d028b7a5321c3f5ea628da4d6607eeb2313",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "onscripter-en-2025-06-08-mac-v2-arm64.tar.gz",
+        "sha256": "30fe95daecc4321ce06e47caf95b71f0d336825c1fbdfa4e49cfabd8df73db3b",
+        "bytes": 1956384,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onscripter-en%2Fv2025-06-08-mac-v2%2Farm64/onscripter-en-2025-06-08-mac-v2-arm64.tar.gz"
+      },
+      "tag": "onscripter-en/v2025-06-08-mac-v2/arm64"
+    }
+  ]
+}

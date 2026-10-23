@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "projectId": "reminori",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "reminori",
+      "version": "0.1.0-79b0099-macos-v2",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "15751daa4f10c349e488d501480b269fe1b4dec4719ecedc42137963f4e393fd",
+      "sourceSha256": "46847dfbec612b5c73743b154d2b38d74b1b8cc0eeadbb13acb4cc05579b9425",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "reminori-0.1.0-79b0099-macos-v2-arm64.tar.gz",
+        "sha256": "87f7ebbed986c6875bfcde8ea91e09a158a77ba38f695a4c6e2a2cdc96ba2f95",
+        "bytes": 5473230,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reminori%2Fv0.1.0-79b0099-macos-v2%2Farm64/reminori-0.1.0-79b0099-macos-v2-arm64.tar.gz"
+      },
+      "tag": "reminori/v0.1.0-79b0099-macos-v2/arm64"
+    }
+  ]
+}

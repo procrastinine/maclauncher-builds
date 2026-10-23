@@ -13,8 +13,8 @@ test('Android ART has its own producer, release identity and catalog without rou
  const common=resolveProject('android'),art=resolveProject('android-art');
  assert.equal(common.producer.kind,'pinned-source');
  assert.equal(common.producer.recipe,'runtimes/android/source.json');
- assert.deepEqual(art.producer,{kind:'maclauncher',repository:'https://github.com/procrastinine/maclauncher-android',buildEntry:'tools/build-android-art.mjs',sourceProject:'android',entries:[
-  'tools/build-art.mjs','src/modules/android/art/source.mjs','src/modules/android/art/build-runner.mjs','src/modules/android/art/build.mjs','src/modules/android/art/build-image-extractor.mjs','src/modules/android/art/package.mjs'
+ assert.deepEqual(art.producer,{kind:'maclauncher',repository:'https://github.com/procrastinine/maclauncher-builds',sourceDirectory:'sources/maclauncher-android',buildEntry:'tools/build-android-art.mjs',sourceProject:'android',entries:[
+  'sources/maclauncher-android/tools/build-art.mjs','sources/maclauncher-android/src/modules/android/art/source.mjs','sources/maclauncher-android/src/modules/android/art/build-runner.mjs','sources/maclauncher-android/src/modules/android/art/build.mjs','sources/maclauncher-android/src/modules/android/art/build-image-extractor.mjs','sources/maclauncher-android/src/modules/android/art/package.mjs'
  ]});
  const identity={id:art.id,version:'1.2.3-ml1',arch:'arm64'};
  assert.equal(assetName(identity),'android-art-1.2.3-ml1-arm64.tar.gz');

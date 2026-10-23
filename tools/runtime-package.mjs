@@ -14,7 +14,7 @@ export function publicDeclaration(value){
  validateDeclaration(value);
  if(value.redistribution==='local-only')throw Error('This package is restricted to local use.');
  const text=JSON.stringify(value);
- if(/(?:\/Users\/|\/home\/|file:\/\/|(?:password|accessToken|refreshToken|logPath|evidenceSource)"\s*:)/i.test(text))throw Error('Package metadata contains private paths or fields.');
+ if(/(?:"(?:\/Users\/|\/home\/)|file:\/\/|(?:password|accessToken|refreshToken|logPath|evidenceSource)"\s*:)/i.test(text))throw Error('Package metadata contains private paths or fields.');
  for(const file of value.files)A.safeFile(file.path);
  return value;
 }
@@ -41,7 +41,7 @@ export async function pack({project,input,declaration,output}){
 
 /** Validate downloads by streaming regular tar members; no extraction or guest
  * code execution is needed to reject traversal, links or extra payload files. */
-export async function verify({archive,sha256,project,version,arch}){
+export async function verify({archive,sha256,project,version,arch,includeDeclaration=false}){
  identity({id:project,version,arch});
  if(!SHA.test(sha256||''))throw Error('An exact expected archive SHA-256 is required.');
  const stat=fs.lstatSync(archive);if(!stat.isFile()||stat.isSymbolicLink()||stat.size>A.LIMITS.archiveBytes)throw Error('Invalid runtime archive file.');
@@ -69,7 +69,7 @@ export async function verify({archive,sha256,project,version,arch}){
    if(entry.size%512&&(await reader.read(512-entry.size%512)).some(byte=>byte!==0))throw Error('Invalid archive padding.');
   }
   if(!declaration||[...expected.keys()].some(file=>!seen.has(file)))throw Error('Runtime archive is missing declared files.');
-  return {id:declaration.id,version:declaration.version,arch:declaration.arch,files:expected.size,sha256};
+  return {id:declaration.id,version:declaration.version,arch:declaration.arch,files:expected.size,sha256,...(includeDeclaration?{declaration}:{})};
  }finally{input.destroy();stream.destroy();}
 }
 

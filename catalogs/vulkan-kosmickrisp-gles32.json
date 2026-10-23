@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "projectId": "vulkan-kosmickrisp-gles32",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "vulkan-kosmickrisp-gles32",
+      "version": "0.1.0-70350106-d1679eba-portable1",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "27.0.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "0291347df638e72e653891f4ea1be63028cb040b397a58ff867eb0fdd5aa37fe",
+      "sourceSha256": "7a0ece5ae14c5c0bc0d788c7ea1d80aaa2491e0b9c1b7e18073be11da8970cfa",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "vulkan-kosmickrisp-gles32-0.1.0-70350106-d1679eba-portable1-arm64.tar.gz",
+        "sha256": "c1739b0422539c8459212bdda309bcc9ed23fc9c44c1ed397fcc022924922c83",
+        "bytes": 3242082,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vulkan-kosmickrisp-gles32%2Fv0.1.0-70350106-d1679eba-portable1%2Farm64/vulkan-kosmickrisp-gles32-0.1.0-70350106-d1679eba-portable1-arm64.tar.gz"
+      },
+      "tag": "vulkan-kosmickrisp-gles32/v0.1.0-70350106-d1679eba-portable1/arm64"
+    }
+  ]
+}

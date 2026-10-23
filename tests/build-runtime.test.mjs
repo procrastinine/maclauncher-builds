@@ -7,7 +7,7 @@ import {execFileSync} from 'node:child_process';
 import {verifyProducer,main} from '../tools/build-runtime.mjs';
 
 test('producer routing never substitutes Android for a different project',()=>{
- assert.throws(()=>main(['--project','fna','--check']),/FNA game host producer is maintained in MacLauncher/);
+ const selected=main(['--project','fna','--check']);assert.equal(selected.id,'fna');assert.equal(selected.sourceDirectory,'producers/maclauncher');assert.ok(selected.entries.every(entry=>entry.startsWith('producers/maclauncher/')));
  assert.throws(()=>main(['--project','flash-projector','--check']),/retains its supplied binary/);
  assert.throws(()=>main(['--project','not-registered','--check']),/Unknown build project/);
  assert.throws(()=>main(['--project','android','--runtime','fna','--check']),/Select one project/);
