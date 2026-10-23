@@ -58,7 +58,8 @@ starts at 1 for each upstream version: `0.7.7-MCLv3` advances to
 exact upstream commit's UTC timestamp. Their revision increases for each upstream
 or adaptation update across years: `MCLv9-1231` can advance to `MCLv10-0125`.
 Full timestamps and exact commits remain in source metadata. Owned components
-use their own version, and unchanged publisher binaries retain the vendor version.
+use their own version. Upstream publisher packages also use the MCL suffix for
+the packaging revision; embedded vendor versions remain unchanged.
 `lib/package-version.mjs` supplies both revision calculations.
 
 `tools/reversion-runtime.mjs` updates the package inventory and consumed manifest

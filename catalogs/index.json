@@ -209,20 +209,20 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#flash-projector",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/flash-projector.json",
-        "sha256": "5b11738acdb9608de4c22faab7f9880f4d075395ac0e5a8b2dace44a14b1dd9b",
-        "bytes": 1022
+        "sha256": "f46e66a98c5220c9e4edd96e881ce24161f36d432221726c3f7627f3dfc52af5",
+        "bytes": 1052
       },
       "releases": [
         {
-          "version": "35.0.0.60",
+          "version": "35.0.0.60-MCLv1",
           "arch": "universal",
           "minimumMacOS": "11.0",
-          "tag": "flash-projector/v35.0.0.60/universal",
+          "tag": "flash-projector/v35.0.0.60-MCLv1/universal",
           "asset": {
-            "filename": "flash-projector-35.0.0.60-universal.tar.gz",
-            "sha256": "c2375926ea29f480cb7830d2080f585982514875b10050c26bc0aa607a6a51bc",
-            "bytes": 12209394,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/flash-projector%2Fv35.0.0.60%2Funiversal/flash-projector-35.0.0.60-universal.tar.gz"
+            "filename": "flash-projector-35.0.0.60-MCLv1-universal.tar.gz",
+            "sha256": "189725d92f493d6794ead560d7fb551923855cea603672cd7f6995960a0b7cdb",
+            "bytes": 12209410,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/flash-projector%2Fv35.0.0.60-MCLv1%2Funiversal/flash-projector-35.0.0.60-MCLv1-universal.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#flash-projector"
         }
