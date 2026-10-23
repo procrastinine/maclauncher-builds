@@ -815,6 +815,12 @@
           "repository": "mkxp-z/mkxp-z",
           "revision": "37a04d14413454551a7b6aadbb4e93e67168accb"
         }
+      ],
+      "packageProfiles": [
+        {
+          "version": "2026-10-03T08-32-56Z_37a04d14413454551a7b6aadbb4e93e67168accb-nfc1-arm64",
+          "label": "Unicode filename normalization"
+        }
       ]
     },
     {

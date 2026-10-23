@@ -58,7 +58,8 @@ The catalog lists the current working package for each runtime type. Separate
 HashLink 1.9/1.12 and Steamworks4j 1.9/1.10 packages preserve incompatible game
 ABIs. Superseded package generations are removed from the catalog and Releases;
 source tags remain available. MKXP-Z publisher updates use the upstream provider;
-the Builds catalog contains the patched Apple Silicon runtime.
+the Builds catalog contains the patched Apple Silicon runtime. Its `nfc1` version
+component identifies the Unicode filename normalization adaptation.
 
 ## Draft upload and publication
 
