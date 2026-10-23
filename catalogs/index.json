@@ -6,6 +6,7 @@
     {
       "projectId": "ai5",
       "name": "AI5 SDL2",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#ai5",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/ai5.json",
@@ -31,6 +32,7 @@
     {
       "projectId": "android",
       "name": "MacLauncher Android",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/android.json",
@@ -56,6 +58,7 @@
     {
       "projectId": "android-aim",
       "name": "AIM with MacLauncher integration",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-aim",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/android-aim.json",
@@ -81,6 +84,7 @@
     {
       "projectId": "android-apk-metadata",
       "name": "Android package metadata helper",
+      "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-apk-metadata",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/android-apk-metadata.json",
@@ -106,6 +110,7 @@
     {
       "projectId": "android-art",
       "name": "MacLauncher Android ART adapter",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/android-art.json",
@@ -131,6 +136,7 @@
     {
       "projectId": "android-privacy",
       "name": "Android privacy helper",
+      "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-privacy",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/android-privacy.json",
@@ -156,6 +162,7 @@
     {
       "projectId": "butterscotch",
       "name": "Butterscotch",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#butterscotch",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/butterscotch.json",
@@ -181,6 +188,7 @@
     {
       "projectId": "catsystem2-kif-crypto",
       "name": "CatSystem2 KIF cryptography helper",
+      "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#catsystem2-kif-crypto",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/catsystem2-kif-crypto.json",
@@ -206,6 +214,7 @@
     {
       "projectId": "flash-projector",
       "name": "Universal Flash Player projector",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#flash-projector",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/flash-projector.json",
@@ -231,6 +240,7 @@
     {
       "projectId": "fna",
       "name": "FNA game host",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#fna",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/fna.json",
@@ -257,6 +267,7 @@
     {
       "projectId": "gemrb",
       "name": "GemRB",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gemrb",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/gemrb.json",
@@ -282,6 +293,7 @@
     {
       "projectId": "gm8-decompiler",
       "name": "GameMaker 8 decompiler",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gm8-decompiler",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/gm8-decompiler.json",
@@ -307,6 +319,7 @@
     {
       "projectId": "hashlink",
       "name": "HashLink legacy profiles",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#hashlink",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/hashlink.json",
@@ -349,6 +362,7 @@
     {
       "projectId": "impacto",
       "name": "impacto Windows-game profile",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#impacto",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/impacto.json",
@@ -374,6 +388,7 @@
     {
       "projectId": "innoextract",
       "name": "Inno Setup extraction tools",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#innoextract",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/innoextract.json",
@@ -399,6 +414,7 @@
     {
       "projectId": "ios-playtools-paths",
       "name": "PlayTools storage adapter",
+      "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#ios-playtools-paths",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/ios-playtools-paths.json",
@@ -424,6 +440,7 @@
     {
       "projectId": "java-steamworks",
       "name": "Java Steamworks compatibility",
+      "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#java-steamworks",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/java-steamworks.json",
@@ -466,6 +483,7 @@
     {
       "projectId": "krkrsdl2",
       "name": "Kirikiri SDL2",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#krkrsdl2",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/krkrsdl2.json",
@@ -491,6 +509,7 @@
     {
       "projectId": "love-luasteam",
       "name": "LÖVE LuaSteam bridge",
+      "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#love-luasteam",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/love-luasteam.json",
@@ -517,6 +536,7 @@
     {
       "projectId": "mkxpz",
       "name": "MKXP-Z",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#mkxpz",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/mkxpz.json",
@@ -543,6 +563,7 @@
     {
       "projectId": "mkxpz-config-helper",
       "name": "MKXP-Z configuration helper",
+      "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#mkxpz-config-helper",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/mkxpz-config-helper.json",
@@ -568,6 +589,7 @@
     {
       "projectId": "npengine",
       "name": "libnpengine Mac runner",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#npengine",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/npengine.json",
@@ -593,6 +615,7 @@
     {
       "projectId": "onscripter-en",
       "name": "ONScripter-EN",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#onscripter-en",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/onscripter-en.json",
@@ -618,6 +641,7 @@
     {
       "projectId": "onsyuri",
       "name": "ONScripterYuri",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#onsyuri",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/onsyuri.json",
@@ -643,6 +667,7 @@
     {
       "projectId": "opengmk",
       "name": "OpenGMK",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#opengmk",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/opengmk.json",
@@ -668,6 +693,7 @@
     {
       "projectId": "reminori",
       "name": "ReMinori",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reminori",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/reminori.json",
@@ -693,6 +719,7 @@
     {
       "projectId": "reshade",
       "name": "MacLauncher graphics",
+      "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reshade",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/reshade.json",
@@ -718,6 +745,7 @@
     {
       "projectId": "steam-api-helper",
       "name": "Offline Steam API compatibility helper",
+      "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#steam-api-helper",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/steam-api-helper.json",
@@ -743,6 +771,7 @@
     {
       "projectId": "steam-ticket-loader",
       "name": "Steam ticket availability adapter",
+      "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#steam-ticket-loader",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/steam-ticket-loader.json",
@@ -768,6 +797,7 @@
     {
       "projectId": "sys3-decompiler",
       "name": "System3 decompiler",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#sys3-decompiler",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/sys3-decompiler.json",
@@ -793,6 +823,7 @@
     {
       "projectId": "system3",
       "name": "System3 SDL2",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#system3",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/system3.json",
@@ -818,6 +849,7 @@
     {
       "projectId": "vulkan-kosmickrisp-gles32",
       "name": "KosmicKrisp geometry/transform-feedback adaptation",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#vulkan-kosmickrisp-gles32",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/vulkan-kosmickrisp-gles32.json",
@@ -843,6 +875,7 @@
     {
       "projectId": "xsys35-decompiler",
       "name": "System3.5 decompiler",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsys35-decompiler",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/xsys35-decompiler.json",
@@ -868,6 +901,7 @@
     {
       "projectId": "xsystem35",
       "name": "xsystem35 SDL2",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsystem35",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/xsystem35.json",
@@ -893,6 +927,7 @@
     {
       "projectId": "xsystem4",
       "name": "xsystem4",
+      "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsystem4",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/xsystem4.json",

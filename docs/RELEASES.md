@@ -4,7 +4,7 @@ Every runtime project has independent versions, tags and binary downloads.
 Preparing or releasing one runtime does not build other runtimes. Existing
 compatible sealed outputs and publisher binaries remain package inputs;
 compilation is a separate operation through the registered producer. Producer
-entries use the `sourceDirectory` in `projects.json`: owned launcher adaptations
+entries use the `sourceDirectory` in the [project registries](PACKAGES.md#projects-and-packages): owned launcher adaptations
 live under `producers/maclauncher`, and Android uses `sources/maclauncher-android`.
 
 ## Local preparation
@@ -111,11 +111,17 @@ Helper package projections use `tools/repackage-helpers.mjs` with a sealed input
 
 [The package index](https://procrastinine.github.io/maclauncher-builds/) lists the
 committed catalogs, download links, architectures, minimum macOS versions, source
-tags and archive checksums. Its adjacent `index.json` exposes the same records and explicit page URLs.
+tags and archive checksums. Downloadable runtimes and tools appear separately
+from included components. Included components ship with MacLauncher for offline
+use and require no separate installation or setup. Search filters the selected
+group. Project and ABI links open their matching group automatically.
+
+Its adjacent `index.json` exposes the same records, explicit page URLs and each
+project's `delivery` classification (`downloadable` or `bundled`).
 Project links use `#<project-id>`; incompatible ABI profiles also have stable
 anchors, including `#hashlink-1-9`, `#hashlink-1-12`,
 `#java-steamworks-1-9` and `#java-steamworks-1-10`.
 `npm run index:build` generates both files without compiling or downloading
 runtimes. The **Package index** workflow regenerates and deploys the site when
-catalogs or index inputs change on `main`. Individual runtime preparation and
+catalogs, either project registry or index inputs change on `main`. Individual runtime preparation and
 publication remain independent operations.

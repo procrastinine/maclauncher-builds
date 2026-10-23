@@ -1,0 +1,268 @@
+[
+  {
+    "id": "catsystem2-kif-crypto",
+    "name": "CatSystem2 KIF cryptography helper",
+    "purpose": "Owned CommonCrypto KIF block adapter.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "producers/maclauncher/src/modules/catsystem2/runtime/stage-crypto.cjs"
+      ],
+      "sourceDirectory": "producers/maclauncher"
+    },
+    "upstreams": []
+  },
+  {
+    "id": "android-privacy",
+    "name": "Android privacy helper",
+    "purpose": "Owned process-scoped clipboard broker.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "producers/maclauncher/scripts/build-android-privacy.mjs"
+      ],
+      "sourceDirectory": "producers/maclauncher"
+    },
+    "upstreams": []
+  },
+  {
+    "id": "ios-playtools-paths",
+    "name": "PlayTools storage adapter",
+    "purpose": "Owned private-path and device-identity integration.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "producers/maclauncher/src/modules/ios/native/build.mjs"
+      ],
+      "sourceDirectory": "producers/maclauncher"
+    },
+    "upstreams": []
+  },
+  {
+    "id": "love-luasteam",
+    "name": "LÖVE LuaSteam bridge",
+    "purpose": "LuaSteam 4 binding against the selected host Lua VM.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "producers/maclauncher/src/modules/love/runtime/luasteam-build.js"
+      ],
+      "sourceDirectory": "producers/maclauncher"
+    },
+    "upstreams": [
+      {
+        "id": "luasteam",
+        "provider": "github",
+        "url": "https://github.com/uspgamedev/luasteam",
+        "repository": "uspgamedev/luasteam",
+        "revision": "fbb72bd22c0c526f4276800024967323acd9d10d"
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "4.0.2-MCLv1",
+        "label": "Lua 5.1 host ABI"
+      }
+    ]
+  },
+  {
+    "id": "mkxpz-config-helper",
+    "name": "MKXP-Z configuration helper",
+    "purpose": "Owned per-game configuration-path adapter.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "producers/maclauncher/scripts/stage-mkxpz-config-helper.cjs"
+      ],
+      "sourceDirectory": "producers/maclauncher"
+    },
+    "upstreams": []
+  },
+  {
+    "id": "reshade",
+    "name": "MacLauncher graphics",
+    "purpose": "Shared Metal, OpenGL and Quartz presentation with FX, Slang and MPV shader processing.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "producers/maclauncher/src/modules/shared/reshade/native/materialize-source.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/native/build.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/native/build-retroarch.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/libplacebo-build.mjs",
+        "producers/maclauncher/scripts/stage-reshade.mjs",
+        "producers/maclauncher/scripts/repackage-graphics-runtime.mjs",
+        "producers/maclauncher/src/modules/godot/graphics/build.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/neural/native/build.sh",
+        "producers/maclauncher/src/modules/shared/reshade/native/build-vkd3d.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/neural/build.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/temporal/fsr/build.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/temporal/fsr4/build.mjs",
+        "producers/maclauncher/src/modules/crossover/temporal/dxmt/build.mjs",
+        "producers/maclauncher/src/modules/crossover/temporal/streamline/build.mjs"
+      ],
+      "sourceDirectory": "producers/maclauncher"
+    },
+    "upstreams": [
+      {
+        "id": "reshade",
+        "provider": "github",
+        "url": "https://github.com/crosire/reshade",
+        "repository": "crosire/reshade",
+        "revision": "7bf9de8b33bcc76c3177007e65d73c72dd0f34c0"
+      },
+      {
+        "id": "spirv-headers",
+        "provider": "github",
+        "url": "https://github.com/KhronosGroup/SPIRV-Headers",
+        "repository": "KhronosGroup/SPIRV-Headers",
+        "revision": "7845730cab6ebbdeb621e7349b7dc1a59c3377be"
+      },
+      {
+        "id": "spirv-cross",
+        "provider": "github",
+        "url": "https://github.com/KhronosGroup/SPIRV-Cross",
+        "repository": "KhronosGroup/SPIRV-Cross",
+        "revision": "300681bbcb8365a8d1eacdacdbdd0249bbf1d6b1"
+      },
+      {
+        "id": "reshade-shaders",
+        "provider": "github",
+        "url": "https://github.com/crosire/reshade-shaders",
+        "repository": "crosire/reshade-shaders",
+        "revision": "fd0022170615ce0d8162d219bff07232fa6dd84f"
+      },
+      {
+        "id": "mako",
+        "provider": "github",
+        "url": "https://github.com/eugeniosegala/MAKO",
+        "repository": "eugeniosegala/MAKO",
+        "revision": "522cccbee6caafc643d2ccfa4ee5c06e4c5ba533"
+      },
+      {
+        "id": "vkd3d",
+        "provider": "git",
+        "url": "https://codeberg.org/vkd3d/vkd3d",
+        "revision": "fb7f9ff3c1f8d972ee6f1b8c6a92caf6c8ba1e10"
+      },
+      {
+        "id": "fsr1",
+        "provider": "github",
+        "url": "https://github.com/GPUOpen-Effects/FidelityFX-FSR",
+        "repository": "GPUOpen-Effects/FidelityFX-FSR",
+        "revision": "a21ffb8f6c13233ba336352bdff293894c706575"
+      },
+      {
+        "id": "librashader",
+        "provider": "github",
+        "url": "https://github.com/SnowflakePowered/librashader",
+        "repository": "SnowflakePowered/librashader",
+        "revision": "07ac790cdb9826f37cf8e1daf5011f03e3c4daa7"
+      },
+      {
+        "id": "godot-camera",
+        "provider": "github",
+        "url": "https://github.com/godotengine/godot",
+        "repository": "godotengine/godot",
+        "revision": "4c311cbee68c0b66ff8ebb8b0defdd9979dd2a41"
+      },
+      {
+        "id": "dxmt-camera",
+        "provider": "github",
+        "url": "https://github.com/3Shain/dxmt",
+        "repository": "3Shain/dxmt",
+        "revision": "7c8dee1c2d73415301ceb7d1fa810861cef4cd67"
+      },
+      {
+        "id": "streamline-camera",
+        "provider": "github",
+        "url": "https://github.com/NVIDIA-RTX/Streamline",
+        "repository": "NVIDIA-RTX/Streamline",
+        "revision": "b998246a3d499c08765c5681b229c9e6b4513348"
+      }
+    ]
+  },
+  {
+    "id": "steam-api-helper",
+    "name": "Offline Steam API compatibility helper",
+    "purpose": "Owned local offline ABI and storage implementation.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "producers/maclauncher/src/modules/shared/runtime/steamworks/native/offline-0.5.0/build.cjs"
+      ],
+      "sourceDirectory": "producers/maclauncher"
+    },
+    "upstreams": []
+  },
+  {
+    "id": "steam-ticket-loader",
+    "name": "Steam ticket availability adapter",
+    "purpose": "Owned reject-only encrypted-ticket loader ABI.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "producers/maclauncher/src/modules/shared/runtime/steamworks/native/ticket-0.1.0/build.cjs"
+      ],
+      "sourceDirectory": "producers/maclauncher"
+    },
+    "upstreams": []
+  },
+  {
+    "id": "java-steamworks",
+    "name": "Java Steamworks compatibility",
+    "purpose": "Native macOS Steamworks4j ABI profiles.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "producers/maclauncher/src/modules/java/runtime/steamworks/stage-bridge.cjs",
+        "producers/maclauncher/src/modules/java/runtime/steamworks/build-agent.cjs",
+        "producers/maclauncher/src/modules/java/runtime/steamworks/versions.json"
+      ],
+      "sourceDirectory": "producers/maclauncher"
+    },
+    "upstreams": [
+      {
+        "id": "steamworks4j",
+        "provider": "github",
+        "url": "https://github.com/code-disaster/steamworks4j",
+        "repository": "code-disaster/steamworks4j",
+        "revision": "33ae54e87657afe8464eb01845e62b79403f5bfa"
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "1.9.0-MCLv1",
+        "label": "Steamworks4j 1.9 JNI ABI",
+        "anchor": "java-steamworks-1-9"
+      },
+      {
+        "version": "1.10.0-MCLv1",
+        "label": "Steamworks4j 1.10 JNI ABI",
+        "anchor": "java-steamworks-1-10"
+      }
+    ]
+  },
+  {
+    "id": "android-apk-metadata",
+    "name": "Android package metadata helper",
+    "purpose": "APK package metadata and native archive inspection.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "sources/maclauncher-android/src/modules/android/native/apk-metadata/build.mjs"
+      ],
+      "sourceDirectory": "sources/maclauncher-android"
+    },
+    "upstreams": []
+  }
+]

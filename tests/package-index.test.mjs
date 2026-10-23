@@ -17,19 +17,31 @@ test('the static browser and JSON use exactly the current catalog packages and i
   for(const release of project.releases){const identity={id:project.projectId,...release};assert.equal(release.asset.filename,assetName(identity));assert.equal(release.tag,releaseTag(identity));assert.ok(html.includes('href="'+release.asset.url+'"'));assert.ok(html.includes(release.asset.sha256));}
  }
  assert.equal((html.match(/<tr data-package/g)||[]).length,37);
+ assert.equal(index.projects.filter(project=>project.delivery==='downloadable').length,25);assert.equal(index.projects.filter(project=>project.delivery==='bundled').length,10);
+ assert.equal((html.match(/data-package data-project="[^"]+" data-delivery="downloadable"/g)||[]).length,26);assert.equal((html.match(/data-package data-project="[^"]+" data-delivery="bundled"/g)||[]).length,11);
+ assert.ok(html.includes('Downloadable runtimes and tools'));assert.ok(html.includes('Included components'));assert.ok(html.includes('Bundled with MacLauncher for offline use. No separate installation or setup.'));
+ assert.throws(()=>renderIndex({projects:[{delivery:'unknown'}]}),/delivery classification/);
  for(const project of index.projects){assert.ok(html.includes('id="'+project.projectId+'"'));assert.ok(project.pageUrl.endsWith('/#'+project.projectId));}
  for(const anchor of ['hashlink-1-9','hashlink-1-12','java-steamworks-1-9','java-steamworks-1-10'])assert.ok(html.includes('id="'+anchor+'"'));
  assert.equal(index.projects.find(p=>p.projectId==='hashlink').releases[0].pageUrl,'https://procrastinine.github.io/maclauncher-builds/#hashlink-1-9');
  for(const label of ['HashLink 1.9 ABI','HashLink 1.12 ABI','Steamworks4j 1.9 JNI ABI','Steamworks4j 1.10 JNI ABI'])assert.ok(html.includes(label));
  assert.ok(fs.existsSync(path.join(output,'.nojekyll')));
 });
-test('browser search combines runtime, ABI and architecture terms without any network request',()=>{
- const index={repository:'owner/builds',projects:[]},html=renderIndex(index),script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
- const rows=[{textContent:'HashLink 1.9 ABI x64'},{textContent:'HashLink 1.12 ABI x64'},{textContent:'FNA arm64'}],count={},empty={},input={addEventListener(name,fn){this.onInput=fn;}};
- vm.runInNewContext(script,{document:{querySelector:selector=>({'#search':input,'#count':count,'#empty':empty})[selector],querySelectorAll:()=>rows}});
- input.value='hashlink 1.12 x64';input.onInput();assert.deepEqual(rows.map(row=>row.hidden),[true,false,true]);assert.equal(count.textContent,'1 of 3 packages');assert.equal(empty.hidden,true);
- input.value='unavailable';input.onInput();assert.equal(empty.hidden,false);
- input.value='';input.onInput();assert.deepEqual(rows.map(row=>row.hidden),[false,false,false]);
+test('package groups, search, keyboard tabs and deep links operate entirely offline',()=>{
+ const html=renderIndex({repository:'owner/builds',projects:[]}),script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
+ const row=(textContent,delivery,project)=>({textContent,dataset:{delivery,project},closest(){return this;},scrollIntoView(){this.scrolled=true;}});
+ const rows=[row('HashLink 1.9 ABI x64','downloadable','hashlink'),row('HashLink 1.12 ABI x64','downloadable','hashlink'),row('Steamworks4j 1.10 JNI ABI arm64','bundled','java-steamworks')];
+ const tab=group=>({dataset:{group},handlers:{},addEventListener(name,fn){this.handlers[name]=fn;},setAttribute(name,value){this[name]=value;},focus(){this.focused=true;}});
+ const tabs=[tab('downloadable'),tab('bundled')],panels=tabs.map(tab=>({dataset:{delivery:tab.dataset.group}})),count={},empty={},input={value:'',addEventListener(name,fn){this.onInput=fn;}},location={hash:''},events={};
+ vm.runInNewContext(script,{document:{querySelector:selector=>({'#search':input,'#count':count,'#empty':empty})[selector],querySelectorAll:selector=>({'[data-package]':rows,'[role=tab]':tabs,'[data-panel]':panels})[selector],getElementById:id=>({'hashlink-1-12':rows[1],'java-steamworks-1-10':rows[2]})[id]},window:{location,addEventListener(name,fn){events[name]=fn;}},requestAnimationFrame:fn=>fn()});
+ assert.deepEqual(panels.map(panel=>panel.hidden),[false,true]);assert.equal(count.textContent,'2 of 2 packages · 1 project');
+ input.value='hashlink 1.12 x64';input.onInput();assert.deepEqual(rows.map(row=>row.hidden),[true,false,true]);assert.equal(count.textContent,'1 of 2 packages · 1 project');assert.equal(empty.hidden,true);
+ tabs[1].handlers.click();assert.deepEqual(panels.map(panel=>panel.hidden),[true,false]);assert.equal(empty.hidden,false);assert.equal(tabs[1]['aria-selected'],'true');assert.equal(tabs[0].tabIndex,-1);
+ input.value='Steamworks4j 1.10';input.onInput();assert.equal(empty.hidden,true);assert.equal(count.textContent,'1 of 1 packages · 1 project');
+ let prevented=false;tabs[1].handlers.keydown({key:'ArrowLeft',preventDefault(){prevented=true;}});assert.equal(prevented,true);assert.equal(tabs[0].focused,true);assert.deepEqual(panels.map(panel=>panel.hidden),[false,true]);
+ location.hash='#java-steamworks-1-10';events.hashchange();assert.equal(input.value,'');assert.deepEqual(panels.map(panel=>panel.hidden),[true,false]);assert.equal(rows[2].scrolled,true);
+ location.hash='#hashlink-1-12';events.hashchange();assert.deepEqual(panels.map(panel=>panel.hidden),[false,true]);assert.equal(rows[1].scrolled,true);
+ location.hash='#%invalid';assert.doesNotThrow(()=>events.hashchange());
 });
 test('package names and ABI labels are escaped before rendering public HTML',()=>{
  const index=JSON.parse(fs.readFileSync(path.join(root,'catalogs/index.json')));index.projects[0].name='<script>bad()</script>';index.projects[0].releases[0].profile='ABI <unsafe>';

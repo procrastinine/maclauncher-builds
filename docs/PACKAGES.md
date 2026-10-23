@@ -14,14 +14,25 @@ repositories. Compiled packages are excluded from Git history.
 
 ## Projects and packages
 
-[projects.json](../projects.json) identifies each package, its producer, selected
-upstream revisions and release repository. The Android producer uses a pinned
-source submodule. Other producer sources and patches live under
-`producers/maclauncher/`; the registry records their exact build entries. The package tools accept their
-sealed outputs. [Per-project catalogs](../catalogs) record published versions,
-CPU architectures and archive identities, including separate HashLink profiles.
+[projects.json](../projects.json) selects two project registries:
+[downloadable runtimes and tools](../projects/downloadable.json) and
+[included components](../projects/bundled.json). Each project belongs to exactly
+one registry, which determines its `delivery` classification: `downloadable` or
+`bundled`. Project records identify the producer, pinned upstream revisions and
+build entries. `readProjects()` resolves both registries into one validated list.
 
-### Runtime projects
+Downloadable runtimes and tools are acquired through MacLauncher when needed or
+through Runtimes. Included components are bundled with MacLauncher for offline
+use and require no separate installation or setup. The
+[package index](https://procrastinine.github.io/maclauncher-builds/) presents
+these groups separately; its JSON records expose each project's classification.
+
+The Android producer uses a pinned source submodule. Other producer sources and
+patches live under `producers/maclauncher/`. The package tools accept their sealed
+outputs. [Per-project catalogs](../catalogs) record published versions, CPU
+architectures and archive identities, including separate HashLink profiles.
+
+### Downloadable runtimes
 
 | Project | Package ID | Build contents |
 | --- | --- | --- |
@@ -29,6 +40,7 @@ CPU architectures and archive identities, including separate HashLink profiles.
 | [MacLauncher Android ART adapter](../sources/maclauncher-android) | `android-art` | ART execution, compiled framework data, native services and image reader |
 | [AIM](https://github.com/hahnlee/aim) | `android-aim` | Private storage, display routing and process integration |
 | [AI5 SDL2](https://github.com/nunuhara/ai5-sdl2) | `ai5` | Disc/archive access, save paths and font routing |
+| [Butterscotch](https://github.com/ButterscotchRunner/Butterscotch) | `butterscotch` | Native AppKit runner and game arguments |
 | [FNA](https://github.com/FNA-XNA/FNA) | `fna` | Managed game host, XNA facades and native graphics integration |
 | [GemRB](https://github.com/gemrb/gemrb) | `gemrb` | Native command-line entry and scripting-symbol linkage |
 | [HashLink](https://github.com/HaxeFoundation/hashlink) | `hashlink` | Legacy 1.9 and 1.12 VM/native-module ABI profiles |
@@ -53,24 +65,14 @@ CPU architectures and archive identities, including separate HashLink profiles.
 | [sys3c](https://github.com/kichikuou/sys3c) | `sys3-decompiler` | Native macOS build of the original decompiler |
 | [xsys35c](https://github.com/kichikuou/xsys35c) | `xsys35-decompiler` | Native macOS build of the original decompiler |
 
-### Graphics and integration packages
+### Downloadable graphics driver
 
 | Project | Package ID | Build contents |
 | --- | --- | --- |
-| MacLauncher graphics | `reshade` | Shared Metal/OpenGL/Quartz presentation and FX, Slang and MPV shader processing |
 | [KosmicKrisp](https://gitlab.freedesktop.org/mesa/mesa) geometry/transform-feedback adaptation | `vulkan-kosmickrisp-gles32` | MacLauncher geometry-shader and transform-feedback implementation |
-| Android privacy helper | `android-privacy` | Process-scoped clipboard broker |
-| CatSystem2 KIF cryptography helper | `catsystem2-kif-crypto` | CommonCrypto KIF block adapter |
-| PlayTools storage adapter | `ios-playtools-paths` | Private paths and device identity |
-| [LuaSteam](https://github.com/uspgamedev/luasteam) LÖVE bridge | `love-luasteam` | Version 4 binding against the selected host Lua VM |
-| MKXP-Z configuration helper | `mkxpz-config-helper` | Per-game configuration-path adapter |
-| Steam API compatibility helper | `steam-api-helper` | Local offline ABI and storage implementation |
-| Steam ticket availability adapter | `steam-ticket-loader` | Reject-only encrypted-ticket loader ABI |
 
-The KosmicKrisp entry contains the adapted driver; the stock driver uses upstream
-binary delivery. Integration helpers are internal dependencies and retain their
-associated runtime's installation flow. The MKXP-Z helper contains MacLauncher
-integration code. MKXP-Z runtime packages are described below.
+This package contains the adapted driver. The stock driver uses upstream binary
+delivery.
 
 ### Prebuilt runtimes
 
@@ -92,6 +94,28 @@ binary release. `runtimes/mkxpz/baseline.json` records the publisher input ident
 Publisher releases and optional authenticated downloads remain available through
 the upstream provider rather than duplicate Builds catalog entries.
 
+### Included components
+
+These components ship inside MacLauncher and work offline. They have no separate
+runtime installation or setup flow. Their versioned archives supply the app's
+build inputs.
+
+| Project | Package ID | Build contents |
+| --- | --- | --- |
+| MacLauncher graphics | `reshade` | Shared Metal/OpenGL/Quartz presentation and FX, Slang and MPV shader processing |
+| Android APK metadata reader | `android-apk-metadata` | Local APK package and manifest inspection |
+| Android privacy helper | `android-privacy` | Process-scoped clipboard broker |
+| CatSystem2 KIF cryptography helper | `catsystem2-kif-crypto` | CommonCrypto KIF block adapter |
+| PlayTools storage adapter | `ios-playtools-paths` | Private paths and device identity |
+| [LuaSteam](https://github.com/uspgamedev/luasteam) LÖVE bridge | `love-luasteam` | Version 4 binding against the selected host Lua VM |
+| MKXP-Z configuration helper | `mkxpz-config-helper` | Per-game configuration-path adapter |
+| Steam API compatibility helper | `steam-api-helper` | Local offline ABI and storage implementation |
+| Steam ticket availability adapter | `steam-ticket-loader` | Reject-only encrypted-ticket loader ABI |
+| Java Steamworks compatibility libraries | `java-steamworks` | Steamworks4j 1.9 and 1.10 JNI ABI profiles |
+
+The MKXP-Z helper contains MacLauncher integration code. The MKXP-Z runtime is a
+separate downloadable package.
+
 ## Project and version identities
 
 Each project has a separate catalog at `catalogs/<project-id>.json`. Catalog
@@ -101,10 +125,10 @@ The project, version and package architecture determine every release identity:
 | Field | Example |
 | --- | --- |
 | Project | `android` |
-| Version | `0.1.0-afdc510a-61332a65` |
+| Version | `0.1.0` |
 | Architecture | `arm64` |
-| Release tag | `android/v0.1.0-afdc510a-61332a65/arm64` |
-| Archive | `android-0.1.0-afdc510a-61332a65-arm64.tar.gz` |
+| Release tag | `android/v0.1.0/arm64` |
+| Archive | `android-0.1.0-arm64.tar.gz` |
 | Catalog | `catalogs/android.json` |
 
 Records include the archive size/checksum, manifest/source checksums, launcher
@@ -192,15 +216,15 @@ result without executing runtime code.
 node tools/runtime-package.mjs pack --project android \
   --input /absolute/path/to/sealed-runtime \
   --declaration /absolute/path/to/declaration.json \
-  --output out/android-0.1.0-afdc510a-61332a65-arm64.tar.gz
+  --output out/android-0.1.0-arm64.tar.gz
 
 node tools/runtime-package.mjs verify --project android \
-  --version 0.1.0-afdc510a-61332a65 --arch arm64 \
-  --archive out/android-0.1.0-afdc510a-61332a65-arm64.tar.gz \
+  --version 0.1.0 --arch arm64 \
+  --archive out/android-0.1.0-arm64.tar.gz \
   --sha256 <archive-sha256>
 
 node tools/runtime-package.mjs catalog --project android \
-  --package out/android-0.1.0-afdc510a-61332a65-arm64.tar.gz.json \
+  --package out/android-0.1.0-arm64.tar.gz.json \
   --output catalogs/android.json
 ```
 

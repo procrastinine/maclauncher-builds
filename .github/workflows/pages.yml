@@ -6,6 +6,7 @@ on:
     paths:
       - 'catalogs/**'
       - 'projects.json'
+      - 'projects/**'
       - 'tools/package-index.mjs'
       - 'tools/release-runtime.mjs'
       - 'lib/**'

@@ -60,7 +60,7 @@ export async function main(args){
  if(Boolean(options.all)===Boolean(options.project))throw Error('Select one project or --all.');
  const registry=readProjects(root),projects=options.all?registry.projects:[resolveProject(options.project,root)];
  const report=await checkProjects(projects);
- if(options.output){const output=path.resolve(options.output);if(output===path.join(root,'projects.json')||output.startsWith(path.join(root,'catalogs')+path.sep)||output.startsWith(path.join(root,'recipes')+path.sep))throw Error('Update reports cannot replace project pins or release catalogs.');fs.mkdirSync(path.dirname(output),{recursive:true});fs.writeFileSync(output,JSON.stringify(report,null,2)+'\n',{flag:'wx'});}
+ if(options.output){const output=path.resolve(options.output);if(output===path.join(root,'projects.json')||output.startsWith(path.join(root,'projects')+path.sep)||output.startsWith(path.join(root,'catalogs')+path.sep)||output.startsWith(path.join(root,'recipes')+path.sep))throw Error('Update reports cannot replace project pins or release catalogs.');fs.mkdirSync(path.dirname(output),{recursive:true});fs.writeFileSync(output,JSON.stringify(report,null,2)+'\n',{flag:'wx'});}
  if(report.projects.some(value=>value.status==='incomplete'))process.exitCode=1;return report;
 }
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)main(process.argv.slice(2)).then(value=>console.log(JSON.stringify(value,null,2))).catch(error=>{console.error(error.message);process.exitCode=1;});

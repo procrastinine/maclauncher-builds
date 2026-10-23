@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import {readProjects,resolveProject} from '../lib/projects.mjs';
 import {validateCatalog,releaseTag} from '../lib/project-identity.mjs';
@@ -16,10 +17,10 @@ test('project registry covers every selected package and excludes direct upstrea
  assert.notEqual(releaseTag({id:'engine',version:'a-b-1',arch:'arm64'}),releaseTag({id:'engine-a',version:'b-1',arch:'arm64'}));
 });
 test('manual update checks keep project identities, reuse source metadata and do not change pins',async()=>{
- const before=fs.readFileSync(path.join(root,'projects.json')),calls=[],revision='1'.repeat(40),upstream={id:'upstream',provider:'github',url:'https://github.com/owner/source',repository:'owner/source',revision};
+ const registryFiles=['projects.json',...Object.values(JSON.parse(fs.readFileSync(path.join(root,'projects.json'))).registries)],before=registryFiles.map(file=>fs.readFileSync(path.join(root,file))),calls=[],revision='1'.repeat(40),upstream={id:'upstream',provider:'github',url:'https://github.com/owner/source',repository:'owner/source',revision};
  const projects=[{id:'one',name:'One',producer:{kind:'maclauncher'},upstreams:[upstream]},{id:'two',name:'Two',producer:{kind:'maclauncher'},upstreams:[upstream]},{id:'helper',name:'Helper',producer:{kind:'maclauncher'},upstreams:[]}];
  const report=await checkProjects(projects,{request:async url=>{calls.push(url);return url.includes('/commits')?[{sha:revision,commit:{message:'Fix native behavior',committer:{date:'2026-10-19T00:00:00Z'}}}]:[{tag_name:'1.0',html_url:'https://github.com/owner/source/releases/tag/1.0',published_at:'2026-10-01T00:00:00Z',body:'Release notes'}];}});
- assert.equal(report.updatePolicy,'manual');assert.deepEqual(report.projects.map(value=>value.projectId),['one','two','helper']);assert.equal(calls.length,2);assert.equal(report.projects[0].upstreams[0].headChanged,false);assert.equal(report.projects[2].status,'owned-source');assert.deepEqual(fs.readFileSync(path.join(root,'projects.json')),before);
+ assert.equal(report.updatePolicy,'manual');assert.deepEqual(report.projects.map(value=>value.projectId),['one','two','helper']);assert.equal(calls.length,2);assert.equal(report.projects[0].upstreams[0].headChanged,false);assert.equal(report.projects[2].status,'owned-source');assert.deepEqual(registryFiles.map(file=>fs.readFileSync(path.join(root,file))),before);
  await assert.rejects(main([]),/Select/);await assert.rejects(main(['--project','wrong-project']),/Unknown/);
 });
 test('upstream checks retain prerelease candidates and report incomplete metadata',async()=>{
@@ -28,4 +29,24 @@ test('upstream checks retain prerelease candidates and report incomplete metadat
  assert.equal(report.projects[0].upstreams[0].release.tag,'2.0-rc1');assert.equal(report.projects[0].upstreams[0].release.prerelease,true);assert.equal(report.projects[0].upstreams[0].stableRelease.tag,'1.9');
  const failed=await checkProjects([project],{request:async()=>{throw Error('Unavailable');},gitHead:async()=>({revision:'2'.repeat(40)})});
  assert.equal(failed.projects[0].status,'incomplete');assert.equal(failed.projects[0].upstreams[0].releaseStatus,'unavailable');
+});
+
+test('delivery registries classify each project once and preserve a flat project API',t=>{
+ const registry=readProjects(root),manifest=JSON.parse(fs.readFileSync(path.join(root,'projects.json')));
+ assert.equal(registry.schemaVersion,1);assert.equal(manifest.schemaVersion,2);
+ assert.equal(registry.projects.filter(project=>project.delivery==='downloadable').length,25);
+ assert.equal(registry.projects.filter(project=>project.delivery==='bundled').length,10);
+ assert.equal(resolveProject('mkxpz',root).delivery,'downloadable');assert.equal(resolveProject('reshade',root).delivery,'bundled');
+ const directory=fs.mkdtempSync(path.join(os.tmpdir(),'project-delivery-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
+ fs.mkdirSync(path.join(directory,'projects'));
+ for(const file of Object.values(manifest.registries))fs.copyFileSync(path.join(root,file),path.join(directory,file));
+ const save=value=>fs.writeFileSync(path.join(directory,'projects.json'),JSON.stringify(value));save(manifest);
+ assert.deepEqual(readProjects(directory),registry);
+ const bundled=JSON.parse(fs.readFileSync(path.join(directory,manifest.registries.bundled)));
+ bundled.push(JSON.parse(fs.readFileSync(path.join(directory,manifest.registries.downloadable)))[0]);fs.writeFileSync(path.join(directory,manifest.registries.bundled),JSON.stringify(bundled));
+ assert.throws(()=>readProjects(directory),/duplicate project/);
+ save({...manifest,registries:{...manifest.registries,bundled:'../outside.json'}});assert.throws(()=>readProjects(directory),/registry path/);
+ save({...manifest,registries:{downloadable:manifest.registries.downloadable}});assert.throws(()=>readProjects(directory),/delivery registries/);
+ const flat=structuredClone(registry);delete flat.projects[0].delivery;save(flat);assert.throws(()=>readProjects(directory),/delivery classification/);
+ flat.projects[0].delivery='optional';save(flat);assert.throws(()=>readProjects(directory),/delivery classification/);
 });
