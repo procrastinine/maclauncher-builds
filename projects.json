@@ -115,7 +115,8 @@
           "provider": "github",
           "url": "https://github.com/hahnlee/aim",
           "repository": "hahnlee/aim",
-          "revision": "3136fe473714ec5cf8ad34323313174761d95139"
+          "revision": "3136fe473714ec5cf8ad34323313174761d95139",
+          "committedAt": "2026-10-22T13:00:18.000Z"
         }
       ]
     },
@@ -197,7 +198,8 @@
           "provider": "github",
           "url": "https://github.com/gemrb/gemrb",
           "repository": "gemrb/gemrb",
-          "revision": "bcb5cfaa9f19ffbe8a51f25a3c014fa344173351"
+          "revision": "bcb5cfaa9f19ffbe8a51f25a3c014fa344173351",
+          "committedAt": "2026-10-20T13:13:54.000Z"
         }
       ]
     },
@@ -306,7 +308,8 @@
           "provider": "github",
           "url": "https://github.com/dscharrer/innoextract",
           "repository": "dscharrer/innoextract",
-          "revision": "6e9e34ed0876014fdb46e684103ef8c3605e382e"
+          "revision": "6e9e34ed0876014fdb46e684103ef8c3605e382e",
+          "committedAt": "2025-02-06T21:27:33.000Z"
         }
       ]
     },
@@ -328,7 +331,8 @@
           "provider": "github",
           "url": "https://github.com/krkrsdl2/krkrsdl2",
           "repository": "krkrsdl2/krkrsdl2",
-          "revision": "124bdf841f09e7ce02aa99b7b55791a0f7a900ff"
+          "revision": "124bdf841f09e7ce02aa99b7b55791a0f7a900ff",
+          "committedAt": "2026-10-01T03:11:23.000Z"
         }
       ]
     },
@@ -373,7 +377,8 @@
           "provider": "github",
           "url": "https://github.com/Galladite27/ONScripter-EN",
           "repository": "Galladite27/ONScripter-EN",
-          "revision": "3854ae86c19337991722059d2bed07cbcc847f6f"
+          "revision": "3854ae86c19337991722059d2bed07cbcc847f6f",
+          "committedAt": "2026-01-26T10:05:38.000Z"
         }
       ]
     },
@@ -528,7 +533,8 @@
           "provider": "github",
           "url": "https://github.com/kichikuou/xsystem35-sdl2",
           "repository": "kichikuou/xsystem35-sdl2",
-          "revision": "fbb12f67950601d547f65ef37c4fba4a10cc3822"
+          "revision": "fbb12f67950601d547f65ef37c4fba4a10cc3822",
+          "committedAt": "2026-10-19T23:55:39.000Z"
         }
       ]
     },
@@ -552,7 +558,8 @@
           "provider": "github",
           "url": "https://github.com/nunuhara/xsystem4",
           "repository": "nunuhara/xsystem4",
-          "revision": "de65718ba72d5eb291a4d0ddb691627f1d401909"
+          "revision": "de65718ba72d5eb291a4d0ddb691627f1d401909",
+          "committedAt": "2026-10-21T00:53:25.000Z"
         }
       ]
     },
@@ -790,7 +797,8 @@
           "id": "mesa-kosmickrisp",
           "provider": "git",
           "url": "https://gitlab.freedesktop.org/mesa/mesa",
-          "revision": "19a135296672f24ec1699ada244d5b80ced371da"
+          "revision": "19a135296672f24ec1699ada244d5b80ced371da",
+          "committedAt": "2026-10-24T04:28:03.000Z"
         }
       ]
     },
@@ -827,7 +835,8 @@
           "provider": "github",
           "url": "https://github.com/mkxp-z/mkxp-z",
           "repository": "mkxp-z/mkxp-z",
-          "revision": "37a04d14413454551a7b6aadbb4e93e67168accb"
+          "revision": "37a04d14413454551a7b6aadbb4e93e67168accb",
+          "committedAt": "2026-10-03T08:32:53.000Z"
         }
       ],
       "packageProfiles": [
@@ -856,7 +865,8 @@
           "provider": "github",
           "url": "https://github.com/ButterscotchRunner/Butterscotch",
           "repository": "ButterscotchRunner/Butterscotch",
-          "revision": "d66464857303a2840a5cc5141c0035440847f441"
+          "revision": "d66464857303a2840a5cc5141c0035440847f441",
+          "committedAt": "2026-10-07T09:21:00.000Z"
         }
       ]
     },

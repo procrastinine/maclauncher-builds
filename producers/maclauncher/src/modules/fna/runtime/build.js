@@ -215,12 +215,13 @@ function verifyRuntime(install) {
     sealedPayload = path.join(install.installDir, "files");
   } else if (install.source === "download" && install.catalogEntry?.projectPackage) {
     const selected = install.catalogEntry.projectPackage;
-    if (selected.id !== "fna" || selected.version !== record.profile || selected.manifestRelative !== "manifest.json")
+    const matchingProfile = selected.version === record.profile || selected.version === PROFILE && record.profile === "26.10-net8-arm64-v3";
+    if (selected.id !== "fna" || !matchingProfile || selected.manifestRelative !== "manifest.json")
       throw new Error("FNA runtime package identity is invalid.");
     const directory = path.join(install.installDir, "project-payload");
     const sealed = Bundled.readRegular(path.join(directory, selected.manifestRelative), Bundled.LIMITS.manifestBytes);
     const manifest = Bundled.validateManifest(JSON.parse(sealed.bytes), {
-      managerId: "fna", version: record.profile, upstreamRevision: specification.revision, arch: "arm64"
+      managerId: "fna", version: selected.version, upstreamRevision: specification.revision, arch: "arm64"
     });
     if (sealed.sha256 !== selected.manifestSha256) throw new Error("FNA runtime package manifest changed.");
     sealedPayload = path.join(directory, "files");
