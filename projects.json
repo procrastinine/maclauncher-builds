@@ -61,12 +61,17 @@
       "purpose": "ART execution adapters, compiled framework data and native services for MacLauncher Android; the original Android system image is acquired separately.",
       "producer": {
         "kind": "maclauncher",
-        "repository": "https://github.com/procrastinine/maclauncher",
+        "repository": "https://github.com/procrastinine/maclauncher-android",
         "entries": [
+          "tools/build-art.mjs",
+          "src/modules/android/art/source.mjs",
+          "src/modules/android/art/build-runner.mjs",
           "src/modules/android/art/build.mjs",
           "src/modules/android/art/build-image-extractor.mjs",
           "src/modules/android/art/package.mjs"
-        ]
+        ],
+        "buildEntry": "tools/build-android-art.mjs",
+        "sourceProject": "android"
       },
       "upstreams": [
         {

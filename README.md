@@ -114,11 +114,36 @@ Builds require that original, clean checkout and explicit build input paths.
 git submodule update --init sources/maclauncher-android
 node tools/build-runtime.mjs --project android --check
 node tools/build-runtime.mjs --project android --inputs /absolute/path/to/build-inputs.json
+node tools/build-runtime.mjs --project android-art --check
+node tools/build-runtime.mjs --project android-art --inputs /absolute/path/to/art-inputs.json
 ```
 
 A build command resolves the selected project's registered producer. Projects
 maintained in MacLauncher identify their build entries; prebuilt projects retain
 the supplied artifact. A different project's producer is never substituted.
+
+The ART command uses the same pinned Android source checkout and its ART
+producer entries. ART inputs contain the existing `buildArt` options plus
+`sources` with absolute `source`, `klepton` and `glesHeaders` paths, and optional
+`runner` build options. The canonical `tools/build-art.mjs` producer returns the
+supplier root and its corresponding `sourceArchive`. Without an explicit archive,
+`sources.aosp` supplies the original AOSP source subsets selected by AIM's ART
+source lock. Registered additional component source checkouts can be supplied
+through `sourceCheckouts`. The source exporter reuses the normal HWUI and native
+bridge source inputs. `hwuiSources` and `nativeBridgeSources` select original
+inputs for retained components; an explicit complete `sourceArchive` remains
+unchanged. Source export performs no downloads.
+
+When `inputs.art` is omitted, `artBuild.sdk` and `artBuild.fetched` provide the
+pinned Android SDK/NDK and fetched source inputs for AIM's original ART graph.
+`buildWork` selects its reusable workspace; `artBuild.jobs` bounds compilation
+(default 4), and `artBuild.jdk`/`artBuild.python` select the declared build tools.
+The producer prepares original mutable-code ownership and supplies
+the bounded runner to the ART producer. Existing static CPU archives and notices
+can be reused through `runner.precise`; otherwise the pinned Unicorn source
+provides that component. Supplied translator, ARM32, framework and image inputs
+retain their existing producer roles. Building does not publish a package,
+change a catalog or select an installed runtime.
 
 The `android` catalog contains the shared framework and JVM runtime. The separate
 `android-art` catalog contains the ART adapter and its native services and helpers.

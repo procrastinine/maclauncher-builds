@@ -23,7 +23,7 @@ export function verifyProducer(directory,recipe){
  return source;
 }
 
-export function main(args){
+export function main(args,directory=root){
  const options={};for(let i=0;i<args.length;i++){
   if(args[i]==='--check'){if(options.check)throw Error('Duplicate --check.');options.check=true;continue;}
   const key=args[i]?.slice(2);if(!args[i]?.startsWith('--')||!['project','runtime','inputs'].includes(key)||!args[i+1]||Object.hasOwn(options,key))throw Error('Use --project android with --check or --inputs /absolute/path.json.');
@@ -32,15 +32,19 @@ export function main(args){
  if(options.project&&options.runtime)throw Error('Select one project.');options.project??=options.runtime;
  if(!/^[a-z0-9-]+$/.test(options.project||'')||(!options.check&&!options.inputs)||options.check&&options.inputs)throw Error('Choose one project and either --check or --inputs.');
  if(options.inputs&&!path.isAbsolute(options.inputs))throw Error('Build inputs require an absolute JSON path.');
- const project=resolveProject(options.project,root);
- if(project.producer.kind!=='pinned-source')throw Error(project.producer.kind==='prebuilt'?project.name+' retains its supplied binary.':project.name+' producer is maintained in MacLauncher: '+project.producer.entries.join(', '));
- const recipe=JSON.parse(fs.readFileSync(path.join(root,project.producer.recipe)));
- if(recipe.id!==options.project)throw Error('Runtime recipe identity differs from the selected project.');
- const source=verifyProducer(root,recipe);
- const command=options.check?[path.join(source,recipe.checkEntry)]:[path.join(source,recipe.buildEntry),'--inputs',options.inputs];
+ const project=resolveProject(options.project,directory);
+ const adapter=project.producer.kind==='maclauncher'&&project.producer.buildEntry;
+ if(project.producer.kind!=='pinned-source'&&!adapter)throw Error(project.producer.kind==='prebuilt'?project.name+' retains its supplied binary.':project.name+' producer is maintained in MacLauncher: '+project.producer.entries.join(', '));
+ if(adapter&&(!/^tools\/[a-z0-9-]+\.mjs$/.test(adapter)||!/^[a-z0-9-]+$/.test(project.producer.sourceProject||'')))throw Error('Invalid registered adapter build entry.');
+ const sourceProject=adapter?resolveProject(project.producer.sourceProject,directory):project;
+ if(sourceProject.producer.kind!=='pinned-source')throw Error('Adapter builds require a pinned source producer.');
+ const recipe=JSON.parse(fs.readFileSync(path.join(directory,sourceProject.producer.recipe)));
+ if(recipe.id!==sourceProject.id)throw Error('Runtime recipe identity differs from the selected source project.');
+ const source=verifyProducer(directory,recipe);
+ const command=adapter?[path.join(directory,adapter),'--source',source,...(options.check?['--check']:['--inputs',options.inputs])]:options.check?[path.join(source,recipe.checkEntry)]:[path.join(source,recipe.buildEntry),'--inputs',options.inputs];
  const result=spawnSync(process.execPath,command,{cwd:source,stdio:'inherit'});if(result.error)throw result.error;
  if(result.status!==0)throw Error('Runtime producer exited with status '+result.status);
- return {id:recipe.id,revision:recipe.revision,action:options.check?'check':'build'};
+ return {id:project.id,revision:recipe.revision,action:options.check?'check':'build'};
 }
 
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){
