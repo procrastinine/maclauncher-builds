@@ -249,11 +249,13 @@
       "packageProfiles": [
         {
           "version": "1.9-macos-v2",
-          "label": "HashLink 1.9 ABI"
+          "label": "HashLink 1.9 ABI",
+          "anchor": "hashlink-1-9"
         },
         {
           "version": "1.12-macos-v1",
-          "label": "HashLink 1.12 ABI"
+          "label": "HashLink 1.12 ABI",
+          "anchor": "hashlink-1-12"
         }
       ]
     },
@@ -872,11 +874,13 @@
       "packageProfiles": [
         {
           "version": "steamworks4j-1.9.0-ml1-content1",
-          "label": "Steamworks4j 1.9 JNI ABI"
+          "label": "Steamworks4j 1.9 JNI ABI",
+          "anchor": "java-steamworks-1-9"
         },
         {
           "version": "steamworks4j-1.10.0-ml1-content1",
-          "label": "Steamworks4j 1.10 JNI ABI"
+          "label": "Steamworks4j 1.10 JNI ABI",
+          "anchor": "java-steamworks-1-10"
         }
       ]
     },

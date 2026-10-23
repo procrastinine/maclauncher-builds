@@ -16,7 +16,10 @@ test('the static browser and JSON use exactly the current catalog packages and i
   assert.equal(project.releases.length,['hashlink','java-steamworks'].includes(project.projectId)?2:1);
   for(const release of project.releases){const identity={id:project.projectId,...release};assert.equal(release.asset.filename,assetName(identity));assert.equal(release.tag,releaseTag(identity));assert.ok(html.includes('href="'+release.asset.url+'"'));assert.ok(html.includes(release.asset.sha256));}
  }
- assert.equal((html.match(/<tr data-package>/g)||[]).length,37);
+ assert.equal((html.match(/<tr data-package/g)||[]).length,37);
+ for(const project of index.projects){assert.ok(html.includes('id="'+project.projectId+'"'));assert.ok(project.pageUrl.endsWith('/#'+project.projectId));}
+ for(const anchor of ['hashlink-1-9','hashlink-1-12','java-steamworks-1-9','java-steamworks-1-10'])assert.ok(html.includes('id="'+anchor+'"'));
+ assert.equal(index.projects.find(p=>p.projectId==='hashlink').releases[0].pageUrl,'https://procrastinine.github.io/maclauncher-builds/#hashlink-1-9');
  for(const label of ['HashLink 1.9 ABI','HashLink 1.12 ABI','Steamworks4j 1.9 JNI ABI','Steamworks4j 1.10 JNI ABI'])assert.ok(html.includes(label));
  assert.ok(fs.existsSync(path.join(output,'.nojekyll')));
 });

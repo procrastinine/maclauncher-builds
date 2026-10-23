@@ -95,7 +95,10 @@ Helper package projections use `tools/repackage-helpers.mjs` with a sealed input
 
 [The package index](https://procrastinine.github.io/maclauncher-builds/) lists the
 committed catalogs, download links, architectures, minimum macOS versions, source
-tags and archive checksums. Its adjacent `index.json` exposes the same records.
+tags and archive checksums. Its adjacent `index.json` exposes the same records and explicit page URLs.
+Project links use `#<project-id>`; incompatible ABI profiles also have stable
+anchors, including `#hashlink-1-9`, `#hashlink-1-12`,
+`#java-steamworks-1-9` and `#java-steamworks-1-10`.
 `npm run index:build` generates both files without compiling or downloading
 runtimes. The **Package index** workflow regenerates and deploys the site when
 catalogs or index inputs change on `main`. Individual runtime preparation and
