@@ -24,3 +24,5 @@ jobs:
         run: git submodule update --init --depth 1 -- sources/maclauncher-android
       - name: Check package and project contracts
         run: npm test
+      - name: Check declared release versions
+        run: npm run check:versions

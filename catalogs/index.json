@@ -37,8 +37,8 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/android.json",
-        "sha256": "20bd223b3d922aee9c4636e1c581f60a1864c5a3e88c8663f9acf76b1e9ba592",
-        "bytes": 3005
+        "sha256": "0b3c6445ee54e8827bac6c1d77e5d68c89cde3e7119d23c303dda4fe60faa9b3",
+        "bytes": 1917
       },
       "releases": [
         {
@@ -54,19 +54,6 @@
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android",
           "profile": "MacLauncher Android 0.2.0"
-        },
-        {
-          "version": "0.1.0-8da3e063-ba5d556d",
-          "arch": "arm64",
-          "minimumMacOS": "13.0",
-          "tag": "android/v0.1.0-8da3e063-ba5d556d/arm64",
-          "asset": {
-            "filename": "android-0.1.0-8da3e063-ba5d556d-arm64.tar.gz",
-            "sha256": "f4ecee5fba9c7b74cf83b17dad8710e2f2a0e96353ab1d9113eede2c80b8ab0d",
-            "bytes": 296899332,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android%2Fv0.1.0-8da3e063-ba5d556d%2Farm64/android-0.1.0-8da3e063-ba5d556d-arm64.tar.gz"
-          },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android"
         },
         {
           "version": "0.1.0",
@@ -159,8 +146,8 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/android-art.json",
-        "sha256": "ca8b8a6fa836155d224b19423b671ad85ed660b1cd470477bfadee041e6f62b9",
-        "bytes": 3075
+        "sha256": "d8742517aee4b77d33636d66fa674092344704a699cac0090ba094a2c2f0db26",
+        "bytes": 1965
       },
       "releases": [
         {
@@ -176,19 +163,6 @@
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art",
           "profile": "MacLauncher Android ART adapter 0.2.0"
-        },
-        {
-          "version": "0.1.0-92d448cf-1007121a",
-          "arch": "arm64",
-          "minimumMacOS": "13.0.0",
-          "tag": "android-art/v0.1.0-92d448cf-1007121a/arm64",
-          "asset": {
-            "filename": "android-art-0.1.0-92d448cf-1007121a-arm64.tar.gz",
-            "sha256": "b255eaae8fbc1d8f1e3f5ec315f833b09557f1fe1ba6027607c306d73fdc28db",
-            "bytes": 124678003,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art%2Fv0.1.0-92d448cf-1007121a%2Farm64/android-art-0.1.0-92d448cf-1007121a-arm64.tar.gz"
-          },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art"
         },
         {
           "version": "0.1.0",
@@ -934,8 +908,8 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reshade",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/reshade.json",
-        "sha256": "258c1850b274eb677ff8cd5dfa48fc400e4d10f7e486cc9eca5d370c3063fc4c",
-        "bytes": 2751
+        "sha256": "e2ffe56470aa90fdb867a7c0b50188bf6d814c2308adf707bfae83e504a0436b",
+        "bytes": 1807
       },
       "releases": [
         {
@@ -951,19 +925,6 @@
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reshade",
           "profile": "MacLauncher graphics 0.2.0"
-        },
-        {
-          "version": "0.1.0-d75a76f1-7a7f8293",
-          "arch": "universal",
-          "minimumMacOS": "13.0",
-          "tag": "reshade/v0.1.0-d75a76f1-7a7f8293/universal",
-          "asset": {
-            "filename": "reshade-0.1.0-d75a76f1-7a7f8293-universal.tar.gz",
-            "sha256": "101ea7ed97da86149fc039a43d71e82072a58960d590ade1f07f68af5d0b9248",
-            "bytes": 59444301,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reshade%2Fv0.1.0-d75a76f1-7a7f8293%2Funiversal/reshade-0.1.0-d75a76f1-7a7f8293-universal.tar.gz"
-          },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reshade"
         },
         {
           "version": "0.1.0",

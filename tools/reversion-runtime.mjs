@@ -23,7 +23,7 @@ export async function reversionPackage({archive,record,version,output,directory=
  if(!checked.manifest||checked.manifest.version!==record.version)throw Error('The consumed manifest differs from the original package version.');
  const manifest=bytes({...checked.manifest,version}),original=checked.declaration;
  const {sourceArtifact,...metadata}=original;
- const declaration=publicDeclaration({...metadata,version,directoryRelative:[record.id,version,record.arch].join('/'),sourceRelative:original.sourceRelative===original.manifestRelative?null:original.sourceRelative,manifestSha256:digest(manifest),files:original.files.map(file=>file.path===original.manifestRelative?{...file,size:manifest.length,sha256:digest(manifest)}:file)});
+ const declaration=publicDeclaration({...metadata,version,directoryRelative:[record.id,version,record.arch].join('/'),sourceRelative:original.sourceRelative==null||original.sourceRelative===original.manifestRelative?null:original.sourceRelative,manifestSha256:digest(manifest),files:original.files.map(file=>file.path===original.manifestRelative?{...file,size:manifest.length,sha256:digest(manifest)}:file)});
  delete declaration.sourceArtifact;
  const replacements=new Map([['runtime-package.json',bytes(declaration)],['files/'+declaration.manifestRelative,manifest]]);
  const compressed=fs.createReadStream(archive),unzip=zlib.createGunzip(),originalHash=crypto.createHash('sha256');compressed.on('data',chunk=>originalHash.update(chunk));compressed.on('error',error=>unzip.destroy(error));compressed.pipe(unzip);const reader=new A.ArchiveReader(unzip);let started=false;
