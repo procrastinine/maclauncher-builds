@@ -6,6 +6,7 @@ import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {pack,verify,catalog,publicDeclaration} from './runtime-package.mjs';
 import {resolveProject,readProjects} from '../lib/projects.mjs';
+import {releaseVersion} from '../lib/package-version.mjs';
 import {assetName,releaseTag,releaseRecord,validateCatalog,identity} from '../lib/project-identity.mjs';
 const require=createRequire(import.meta.url),A=require('../lib/archive.cjs'),B=require('../lib/bundled-native.cjs');
 const root=path.resolve(import.meta.dirname,'..');
@@ -53,6 +54,7 @@ export async function prepareRelease({project,input,declaration,archive,record,s
  if(!archive){declaration??=await managerDeclaration({project,input,source});declaration=publicDeclaration(declaration);if(declaration.id!==project)throw Error('Declaration belongs to another project.');}
  else releaseRecord(record,{project,repository:repo});
  const selected=archive?record:declaration;
+ releaseVersion(project,selected.version,directory);
  const previous=loadPrevious(project,directory);
  const parent=path.dirname(path.resolve(output));fs.mkdirSync(parent,{recursive:true});
  const staging=fs.mkdtempSync(path.join(parent,'.release-'));
@@ -82,6 +84,7 @@ export async function verifyRelease({bundle,project,version,arch,directory=root}
  const sidecars=fs.readdirSync(bundle).filter(name=>name.endsWith('.tar.gz.json'));if(sidecars.length!==1)throw Error('Select a directory containing exactly one runtime archive and its package record.');
  const record=read(path.join(bundle,sidecars[0]));identity(record);const registration=resolveProject(record.id,directory,{resolvePins:false}),repo=registration.releaseRepository;releaseRecord(record,{project:record.id,repository:repo});
  if(project&&record.id!==project||version&&record.version!==version||arch&&record.arch!==arch)throw Error('Release metadata differs from the selected project, version or architecture.');
+ releaseVersion(record.id,record.version,directory);
  const name=assetName(record);if(sidecars[0]!==name+'.json')throw Error('Release asset belongs to a different project or version.');
  const runtime=path.join(bundle,name);if(regular(runtime).size!==record.asset.bytes)throw Error('Release asset checksum or size changed.');
  const checked=await verify({archive:runtime,sha256:record.asset.sha256,project:record.id,version:record.version,arch:record.arch,includeDeclaration:true});

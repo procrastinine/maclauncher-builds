@@ -14,7 +14,7 @@ const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const write=(root,file,value)=>{const destination=path.join(root,file);fs.mkdirSync(path.dirname(destination),{recursive:true});fs.writeFileSync(destination,JSON.stringify(value,null,2)+'\n');};
 const moduleSource=(root,file,text)=>{const destination=path.join(root,file);fs.mkdirSync(path.dirname(destination),{recursive:true});fs.writeFileSync(destination,text);};
 const upstream=(id='engine',pointer='/source')=>({id,provider:'github',url:'https://github.com/owner/source',repository:'owner/source',pin:{file:pinFile,pointer}});
-const project=(upstreams=[upstream()],id='engine')=>({id,name:id,delivery:'downloadable',producer:{kind:'prebuilt',version:'1.0',architectures:['arm64']},upstreams});
+const project=(upstreams=[upstream()],id='engine')=>({id,name:id,delivery:'downloadable',packageProfiles:[{version:'1.0',label:'Engine 1.0'}],producer:{kind:'prebuilt',version:'1.0',architectures:['arm64']},upstreams});
 function fixture(t,{projects=[project()],source={source:{repository:'https://github.com/owner/source.git',revision:current,version:'1.0',committedAt:'2026-10-26T04:38:52.000Z'}}}={}){
  const root=fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()),'source-pin-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  const registry={schemaVersion:1,repository:'owner/builds',updatePolicy:'manual',projects};write(root,'projects.json',registry);if(source!==null)write(root,pinFile,source);

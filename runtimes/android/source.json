@@ -3,7 +3,7 @@
   "id": "android",
   "path": "sources/maclauncher-android",
   "repository": "https://github.com/procrastinine/maclauncher-android",
-  "revision": "af08a3508d3785b75d6707dadc20f99a2d2593f9",
+  "revision": "0d50c2f70d90549a18a69e51e33ed9308338f446",
   "buildEntry": "tools/build.mjs",
   "checkEntry": "tools/check-sources.mjs"
 }

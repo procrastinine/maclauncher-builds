@@ -9,7 +9,7 @@ import {prepareRelease,verifyRelease,applyRelease,catalogIndex,publicationAssets
 const digest=b=>crypto.createHash('sha256').update(b).digest('hex');
 function fixture(t,{external=false}={}){
  const directory=fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()),'runtime-release-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
- fs.writeFileSync(path.join(directory,'projects.json'),JSON.stringify({schemaVersion:1,repository:'owner/builds',updatePolicy:'manual',projects:[{id:'engine',name:'Engine',delivery:'downloadable',producer:{kind:'prebuilt',version:'1.0',architectures:['arm64']},upstreams:[]}]}));
+ fs.writeFileSync(path.join(directory,'projects.json'),JSON.stringify({schemaVersion:1,repository:'owner/builds',updatePolicy:'manual',projects:[{id:'engine',name:'Engine',delivery:'downloadable',packageProfiles:[{version:'1.0',label:'Engine 1.0'}],producer:{kind:'prebuilt',version:'1.0',architectures:['arm64']},upstreams:[]}]}));
  const input=path.join(directory,'input');fs.mkdirSync(input);
  const data={'runtime.json':'{"version":"1.0"}','LICENSE':'MIT','source.tar.gz':'source bytes'};
  if(external)delete data['source.tar.gz'];

@@ -68,7 +68,6 @@ jobs:
           git checkout --detach FETCH_HEAD
       - name: Download selected release assets
         run: |
-          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq '.isDraft' > "$RUNNER_TEMP/release-draft"
           mkdir -p "$RUNNER_TEMP/runtime-assets"
           gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir "$RUNNER_TEMP/runtime-assets"
       - name: Verify selected package

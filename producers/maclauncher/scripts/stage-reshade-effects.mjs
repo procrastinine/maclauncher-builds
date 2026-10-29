@@ -10,7 +10,6 @@ const repository = path.resolve(import.meta.dirname, "..");
 const digest = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 export function requirePreservedNativeFeatures(requested,sealed,key=""){
   if(isDeepStrictEqual(requested,sealed))return;
-  if(key==="graphics.simpleGenerationPlacementQualified"&&typeof requested==="boolean"&&typeof sealed==="boolean")return;
   if(typeof requested==="boolean"&&typeof sealed==="boolean"&&!requested)return;
   if(typeof requested==="number"&&typeof sealed==="number"&&requested>=0&&requested<=sealed)return;
   if(Array.isArray(requested)&&Array.isArray(sealed)&&requested.every(value=>sealed.some(existing=>isDeepStrictEqual(value,existing))))return;
@@ -30,6 +29,7 @@ export function stageReShadeEffects({
   declarationPath = path.join(repository, "src/modules/shared/reshade/distribution-supplementals.json"),
   effectsDirectory = path.join(repository, "src/modules/shared/reshade/effects"),
   features,
+  version: releaseVersion,
   effectSources,
   dependencies = {}
 } = {}) {
@@ -84,8 +84,7 @@ export function stageReShadeEffects({
     ...[...inputs].sort(([a], [b]) => a.localeCompare(b)).flatMap(([name, input]) =>
       [Buffer.from(name + "\0" + JSON.stringify(input.record) + "\0"), input.bytes])
   ]));
-  const releaseVersion = original.version.split("-")[0];
-  const version = `${releaseVersion}-${manifest.sourceHash.slice(0, 8)}-${payloadHash.slice(0, 8)}`;
+  const version = releaseVersion ?? `dev-${manifest.sourceHash.slice(0, 8)}-${payloadHash.slice(0, 8)}`;
   const directoryRelative = `reshade/${version}/universal`;
   const files = [...inputs.values()].map(input => input.record).sort((a, b) => a.path.localeCompare(b.path));
   const manifestBytes = Buffer.from(JSON.stringify({ ...manifest, version, files }, null, 2) + "\n");

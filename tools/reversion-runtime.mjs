@@ -7,20 +7,23 @@ import {pipeline} from 'node:stream/promises';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {assetName,identity} from '../lib/project-identity.mjs';
+import {releaseVersion} from '../lib/package-version.mjs';
 import {publicDeclaration,verify} from './runtime-package.mjs';
 const require=createRequire(import.meta.url),A=require('../lib/archive.cjs');
 const bytes=value=>Buffer.from(JSON.stringify(value,null,2)+'\n');
 const digest=value=>crypto.createHash('sha256').update(value).digest('hex');
 
 /** Rewrite the package and its consumed manifest without extracting or changing runtime files. */
-export async function reversionPackage({archive,record,version,output}){
+export async function reversionPackage({archive,record,version,output,directory=path.resolve(import.meta.dirname,'..')}){
+ releaseVersion(record.id,version,directory);
+ if(version===record.version)throw Error('Repacking requires a new immutable release version.');
  identity({...record,version});
  if(path.basename(output)!==assetName({...record,version})||path.resolve(archive)===path.resolve(output)||fs.existsSync(output))throw Error('Choose a new archive path matching the package version.');
  const checked=await verify({archive,sha256:record.asset.sha256,project:record.id,version:record.version,arch:record.arch,includeDeclaration:true,includeManifest:true});
  if(!checked.manifest||checked.manifest.version!==record.version)throw Error('The consumed manifest differs from the original package version.');
  const manifest=bytes({...checked.manifest,version}),original=checked.declaration;
  const {sourceArtifact,...metadata}=original;
- const declaration=publicDeclaration({...metadata,version,directoryRelative:[record.id,version,record.arch].join('/'),sourceRelative:null,manifestSha256:digest(manifest),files:original.files.map(file=>file.path===original.manifestRelative?{...file,size:manifest.length,sha256:digest(manifest)}:file)});
+ const declaration=publicDeclaration({...metadata,version,directoryRelative:[record.id,version,record.arch].join('/'),sourceRelative:original.sourceRelative===original.manifestRelative?null:original.sourceRelative,manifestSha256:digest(manifest),files:original.files.map(file=>file.path===original.manifestRelative?{...file,size:manifest.length,sha256:digest(manifest)}:file)});
  delete declaration.sourceArtifact;
  const replacements=new Map([['runtime-package.json',bytes(declaration)],['files/'+declaration.manifestRelative,manifest]]);
  const compressed=fs.createReadStream(archive),unzip=zlib.createGunzip(),originalHash=crypto.createHash('sha256');compressed.on('data',chunk=>originalHash.update(chunk));compressed.on('error',error=>unzip.destroy(error));compressed.pipe(unzip);const reader=new A.ArchiveReader(unzip);let started=false;

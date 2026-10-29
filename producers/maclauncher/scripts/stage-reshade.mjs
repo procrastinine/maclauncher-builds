@@ -35,9 +35,9 @@ const build = path.resolve(source, args[0] && !args[0].startsWith("--") ? args.s
 const options = {};
 while (args.length) {
   const key = args.shift(), value = args.shift();
-  if (!["--owned-source", "--isf", "--xess-host", "--xess-host-source", "--fsr", "--fsr4", "--fsr4-source", "--asr", "--asr-source", "--sgsr2", "--sgsr2-source", "--fsr3-generation", "--godot", "--streamline", "--dxmt", "--xess", "--retroarch", "--libplacebo", "--neural"].includes(key) || !value || value.startsWith("--") || options[key])
+  if (!["--version", "--owned-source", "--isf", "--xess-host", "--xess-host-source", "--fsr", "--fsr4", "--fsr4-source", "--asr", "--asr-source", "--sgsr2", "--sgsr2-source", "--fsr3-generation", "--godot", "--streamline", "--dxmt", "--xess", "--retroarch", "--libplacebo", "--neural"].includes(key) || !value || value.startsWith("--") || options[key])
     throw new Error("Usage: node scripts/stage-reshade.mjs <source> [build] [--owned-source <source>] [--isf <payload>] [--xess-host <payload>] [--xess-host-source <source>] [--fsr <payload>] [--fsr4 <payload>] [--fsr4-source <checkout>] [--asr <payload>] [--asr-source <checkout>] [--sgsr2 <payload>] [--sgsr2-source <checkout>] [--fsr3-generation <payload>] [--godot <payload>] [--streamline <payload>] [--dxmt <payload>] [--xess <payload>] [--retroarch <payload>] [--libplacebo <payload>] [--neural <payload>]");
-  options[key] = path.resolve(value);
+  options[key] = key === "--version" ? value : path.resolve(value);
 }
 if(options["--xess-host-source"]&&!options["--xess-host"])throw Error("An owned XeSS source snapshot requires its exact GPU host payload.");
 if(features.graphics.xessGenerationAPI===1&&!options["--xess-host"])throw Error("The declared XeSS frame-generation operation requires its complete original GPU host.");
@@ -596,7 +596,7 @@ const payloadHash = digest(Buffer.concat([Buffer.from("adhoc-signature-v1\0" + p
   ...[...extraOwned].flatMap(([relative,file])=>[Buffer.from(relative+'\0'),fs.readFileSync(file)]),
   ...[...inputs].sort(([a], [b]) => a.localeCompare(b)).flatMap(([relative, input]) =>
     [Buffer.from(relative + "\0"), fs.readFileSync(input)])]));
-const version = "0.1.0-" + sourceHash.slice(0, 8) + "-" + payloadHash.slice(0, 8);
+const version = options["--version"] ?? "dev-" + sourceHash.slice(0, 8) + "-" + payloadHash.slice(0, 8);
 const directoryRelative = `reshade/${version}/universal`;
 const destination = path.join(resourceRoot, directoryRelative);
 fs.mkdirSync(destination, { recursive: true });

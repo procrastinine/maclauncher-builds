@@ -6,6 +6,32 @@
     {
       "schemaVersion": 2,
       "id": "android",
+      "version": "0.2.0",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "runtime.json",
+      "manifestSha256": "cbfc509be310f09568cc03c842d73bc4b25216060cd91edebf4f98da621b8fb2",
+      "sourceSha256": "807fe51d777273c8651430845996bf5e00e3b5ea7ba46be89679e015352e907b",
+      "updatePolicy": "manual",
+      "launcherContract": 1,
+      "source": {
+        "repository": "procrastinine/maclauncher-android",
+        "revision": "af08a3508d3785b75d6707dadc20f99a2d2593f9"
+      },
+      "asset": {
+        "filename": "android-0.2.0-arm64.tar.gz",
+        "sha256": "01faee89379b50329f4bee917bf5c3d4ef186058f02380c2eb89ff10661dc2c7",
+        "bytes": 296899524,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android%2Fv0.2.0%2Farm64/android-0.2.0-arm64.tar.gz"
+      },
+      "tag": "android/v0.2.0/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "android",
       "version": "0.1.0-8da3e063-ba5d556d",
       "arch": "arm64",
       "launcherArchitectures": [

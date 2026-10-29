@@ -25,7 +25,8 @@
             "bytes": 11244214,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/ai5%2Fv1.5.0-MCLv1%2Farm64/ai5-1.5.0-MCLv1-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#ai5"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#ai5",
+          "profile": "AI5 SDL2 1.5.0-MCLv1"
         }
       ]
     },
@@ -36,10 +37,24 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/android.json",
-        "sha256": "f08d69477fd150578dd5877b34b6a6863daa7af1f372e42dee9933401b237d06",
-        "bytes": 2007
+        "sha256": "20bd223b3d922aee9c4636e1c581f60a1864c5a3e88c8663f9acf76b1e9ba592",
+        "bytes": 3005
       },
       "releases": [
+        {
+          "version": "0.2.0",
+          "arch": "arm64",
+          "minimumMacOS": "13.0",
+          "tag": "android/v0.2.0/arm64",
+          "asset": {
+            "filename": "android-0.2.0-arm64.tar.gz",
+            "sha256": "01faee89379b50329f4bee917bf5c3d4ef186058f02380c2eb89ff10661dc2c7",
+            "bytes": 296899524,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android%2Fv0.2.0%2Farm64/android-0.2.0-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android",
+          "profile": "MacLauncher Android 0.2.0"
+        },
         {
           "version": "0.1.0-8da3e063-ba5d556d",
           "arch": "arm64",
@@ -64,7 +79,8 @@
             "bytes": 295718423,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android%2Fv0.1.0%2Farm64/android-0.1.0-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android",
+          "profile": "MacLauncher Android 0.1.0"
         }
       ]
     },
@@ -90,7 +106,8 @@
             "bytes": 88939079,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-aim%2FvMCLv1-1022%2Farm64/android-aim-MCLv1-1022-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-aim"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-aim",
+          "profile": "AIM with MacLauncher integration MCLv1-1022"
         },
         {
           "version": "MCLv1-1028-6",
@@ -103,7 +120,8 @@
             "bytes": 90111764,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-aim%2FvMCLv1-1028-6%2Farm64/android-aim-MCLv1-1028-6-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-aim"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-aim",
+          "profile": "AIM with MacLauncher integration MCLv1-1028-6"
         }
       ]
     },
@@ -129,7 +147,8 @@
             "bytes": 448967,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-apk-metadata%2Fv1.0.0%2Farm64/android-apk-metadata-1.0.0-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-apk-metadata"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-apk-metadata",
+          "profile": "Android package metadata helper 1.0.0"
         }
       ]
     },
@@ -140,10 +159,24 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/android-art.json",
-        "sha256": "6f4537d763856d0430b4eb5b6355b16e071ed56c762d197dd86418832dd4d910",
-        "bytes": 2055
+        "sha256": "ca8b8a6fa836155d224b19423b671ad85ed660b1cd470477bfadee041e6f62b9",
+        "bytes": 3075
       },
       "releases": [
+        {
+          "version": "0.2.0",
+          "arch": "arm64",
+          "minimumMacOS": "13.0.0",
+          "tag": "android-art/v0.2.0/arm64",
+          "asset": {
+            "filename": "android-art-0.2.0-arm64.tar.gz",
+            "sha256": "ffb3306b5ce720eedbc88d310aab874ee3fb011b4385c36e49e51b96682a7f15",
+            "bytes": 124678081,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art%2Fv0.2.0%2Farm64/android-art-0.2.0-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art",
+          "profile": "MacLauncher Android ART adapter 0.2.0"
+        },
         {
           "version": "0.1.0-92d448cf-1007121a",
           "arch": "arm64",
@@ -168,7 +201,8 @@
             "bytes": 124569769,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art%2Fv0.1.0%2Farm64/android-art-0.1.0-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art",
+          "profile": "MacLauncher Android ART adapter 0.1.0"
         }
       ]
     },
@@ -194,7 +228,8 @@
             "bytes": 91092,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-launcher%2Fv1.0.0-MCLv3%2Funiversal/android-launcher-1.0.0-MCLv3-universal.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-launcher"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-launcher",
+          "profile": "Android launcher integrations 1.0.0-MCLv3"
         }
       ]
     },
@@ -220,7 +255,8 @@
             "bytes": 19515,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-privacy%2Fv1.0.0%2Farm64/android-privacy-1.0.0-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-privacy"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-privacy",
+          "profile": "Android privacy helper 1.0.0"
         }
       ]
     },
@@ -246,7 +282,8 @@
             "bytes": 37399676,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/anyps5%2FvMCLv1-1027-2%2Farm64/anyps5-MCLv1-1027-2-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#anyps5"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#anyps5",
+          "profile": "AnyPS5 MCLv1-1027-2"
         }
       ]
     },
@@ -272,7 +309,8 @@
             "bytes": 1174311,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/butterscotch%2FvMCLv1-1007%2Farm64/butterscotch-MCLv1-1007-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#butterscotch"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#butterscotch",
+          "profile": "Butterscotch MCLv1-1007"
         }
       ]
     },
@@ -298,7 +336,8 @@
             "bytes": 6454,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/catsystem2-kif-crypto%2Fv1.0.0%2Funiversal/catsystem2-kif-crypto-1.0.0-universal.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#catsystem2-kif-crypto"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#catsystem2-kif-crypto",
+          "profile": "CatSystem2 KIF cryptography helper 1.0.0"
         }
       ]
     },
@@ -324,7 +363,8 @@
             "bytes": 12209410,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/flash-projector%2Fv35.0.0.60-MCLv1%2Funiversal/flash-projector-35.0.0.60-MCLv1-universal.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#flash-projector"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#flash-projector",
+          "profile": "Universal Flash Player projector 35.0.0.60-MCLv1"
         }
       ]
     },
@@ -377,7 +417,8 @@
             "bytes": 11144,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gamemaker-opengl-helper%2Fvsoftware-gl-v3-MCLv2%2Funiversal/gamemaker-opengl-helper-software-gl-v3-MCLv2-universal.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gamemaker-opengl-helper"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gamemaker-opengl-helper",
+          "profile": "GameMaker OpenGL helper software-gl-v3-MCLv2"
         }
       ]
     },
@@ -403,7 +444,8 @@
             "bytes": 15312763,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gemrb%2FvMCLv1-1020%2Farm64/gemrb-MCLv1-1020-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gemrb"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gemrb",
+          "profile": "GemRB MCLv1-1020"
         }
       ]
     },
@@ -429,7 +471,8 @@
             "bytes": 457371,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gm8-decompiler%2Fv2.2.0-MCLv1%2Farm64/gm8-decompiler-2.2.0-MCLv1-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gm8-decompiler"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gm8-decompiler",
+          "profile": "GameMaker 8 decompiler 2.2.0-MCLv1"
         }
       ]
     },
@@ -498,7 +541,8 @@
             "bytes": 94878081,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/impacto%2Fv0.10.8.903-MCLv1%2Farm64/impacto-0.10.8.903-MCLv1-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#impacto"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#impacto",
+          "profile": "impacto Windows-game profile 0.10.8.903-MCLv1"
         }
       ]
     },
@@ -524,7 +568,8 @@
             "bytes": 599201,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/innoextract%2FvMCLv1-0206%2Farm64/innoextract-MCLv1-0206-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#innoextract"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#innoextract",
+          "profile": "Inno Setup extraction tools MCLv1-0206"
         }
       ]
     },
@@ -550,7 +595,8 @@
             "bytes": 17213,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/ios-playtools-paths%2Fv1.0.0%2Farm64/ios-playtools-paths-1.0.0-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#ios-playtools-paths"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#ios-playtools-paths",
+          "profile": "PlayTools storage adapter 1.0.0"
         }
       ]
     },
@@ -619,7 +665,8 @@
             "bytes": 4937863,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/krkrsdl2%2FvMCLv1-1028-kag3-1%2Farm64/krkrsdl2-MCLv1-1028-kag3-1-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#krkrsdl2"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#krkrsdl2",
+          "profile": "Kirikiri SDL2 MCLv1-1028-kag3-1"
         },
         {
           "version": "MCLv1-1001",
@@ -632,7 +679,8 @@
             "bytes": 2783881,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/krkrsdl2%2FvMCLv1-1001%2Farm64/krkrsdl2-MCLv1-1001-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#krkrsdl2"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#krkrsdl2",
+          "profile": "Kirikiri SDL2 MCLv1-1001"
         }
       ]
     },
@@ -712,7 +760,8 @@
             "bytes": 14773,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mkxpz-config-helper%2Fv1.0.0%2Funiversal/mkxpz-config-helper-1.0.0-universal.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#mkxpz-config-helper"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#mkxpz-config-helper",
+          "profile": "MKXP-Z configuration helper 1.0.0"
         }
       ]
     },
@@ -738,7 +787,8 @@
             "bytes": 17942804,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/npengine%2Fv0.5.3-MCLv1%2Farm64/npengine-0.5.3-MCLv1-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#npengine"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#npengine",
+          "profile": "libnpengine Mac runner 0.5.3-MCLv1"
         }
       ]
     },
@@ -764,7 +814,8 @@
             "bytes": 47926370,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/nxnative-tools%2FvMCLv1-1027-3%2Farm64/nxnative-tools-MCLv1-1027-3-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#nxnative-tools"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#nxnative-tools",
+          "profile": "nxnative native tools MCLv1-1027-3"
         }
       ]
     },
@@ -790,7 +841,8 @@
             "bytes": 1955635,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onscripter-en%2FvMCLv1-0126%2Farm64/onscripter-en-MCLv1-0126-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#onscripter-en"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#onscripter-en",
+          "profile": "ONScripter-EN MCLv1-0126"
         }
       ]
     },
@@ -816,7 +868,8 @@
             "bytes": 3804991,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onsyuri%2Fv0.7.7beta-MCLv1%2Farm64/onsyuri-0.7.7beta-MCLv1-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#onsyuri"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#onsyuri",
+          "profile": "ONScripterYuri 0.7.7beta-MCLv1"
         }
       ]
     },
@@ -842,7 +895,8 @@
             "bytes": 2512194,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/opengmk%2Fv0.2.0-MCLv1%2Farm64/opengmk-0.2.0-MCLv1-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#opengmk"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#opengmk",
+          "profile": "OpenGMK 0.2.0-MCLv1"
         }
       ]
     },
@@ -868,7 +922,8 @@
             "bytes": 5473189,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reminori%2Fv0.1.0-MCLv1%2Farm64/reminori-0.1.0-MCLv1-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reminori"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reminori",
+          "profile": "ReMinori 0.1.0-MCLv1"
         }
       ]
     },
@@ -879,10 +934,24 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reshade",
       "catalog": {
         "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/reshade.json",
-        "sha256": "76677225d45e090d420bfc29a10f03f706380f0b6bc1e9cc6d3f85b16e46f7b2",
-        "bytes": 1897
+        "sha256": "258c1850b274eb677ff8cd5dfa48fc400e4d10f7e486cc9eca5d370c3063fc4c",
+        "bytes": 2751
       },
       "releases": [
+        {
+          "version": "0.2.0",
+          "arch": "universal",
+          "minimumMacOS": "13.0",
+          "tag": "reshade/v0.2.0/universal",
+          "asset": {
+            "filename": "reshade-0.2.0-universal.tar.gz",
+            "sha256": "f1dac0e54cd602f8243b8f8f284f3aa771b09ecc3802c7e4f06f69cfdfefbbb7",
+            "bytes": 59444312,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reshade%2Fv0.2.0%2Funiversal/reshade-0.2.0-universal.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reshade",
+          "profile": "MacLauncher graphics 0.2.0"
+        },
         {
           "version": "0.1.0-d75a76f1-7a7f8293",
           "arch": "universal",
@@ -907,7 +976,8 @@
             "bytes": 44022969,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reshade%2Fv0.1.0%2Funiversal/reshade-0.1.0-universal.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reshade"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reshade",
+          "profile": "MacLauncher graphics 0.1.0"
         }
       ]
     },
@@ -933,7 +1003,8 @@
             "bytes": 8004,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/rlvm-adapter%2Fv1.0.0-MCLv1%2Funiversal/rlvm-adapter-1.0.0-MCLv1-universal.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#rlvm-adapter"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#rlvm-adapter",
+          "profile": "MacLauncher RLVM adapter 1.0.0-MCLv1"
         }
       ]
     },
@@ -959,7 +1030,8 @@
             "bytes": 7967715,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/rpgmaker-decrypter%2Fv3.0.0-465c88c3-MCLv2%2Farm64/rpgmaker-decrypter-3.0.0-465c88c3-MCLv2-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#rpgmaker-decrypter"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#rpgmaker-decrypter",
+          "profile": "RPGMakerDecrypter 3.0.0-465c88c3-MCLv2"
         }
       ]
     },
@@ -985,7 +1057,8 @@
             "bytes": 11411582,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/siglus%2Fv1.0.0-preview.5f358ef1360b-MCLv1-1028-1%2Farm64/siglus-1.0.0-preview.5f358ef1360b-MCLv1-1028-1-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#siglus"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#siglus",
+          "profile": "siglus_rs 1.0.0-preview.5f358ef1360b-MCLv1-1028-1"
         }
       ]
     },
@@ -1011,7 +1084,8 @@
             "bytes": 94596,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/steam-api-helper%2Fv0.5.0%2Funiversal/steam-api-helper-0.5.0-universal.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#steam-api-helper"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#steam-api-helper",
+          "profile": "Offline Steam API compatibility helper 0.5.0"
         }
       ]
     },
@@ -1037,7 +1111,8 @@
             "bytes": 3122,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/steam-ticket-loader%2Fv0.1.0%2Funiversal/steam-ticket-loader-0.1.0-universal.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#steam-ticket-loader"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#steam-ticket-loader",
+          "profile": "Steam ticket availability adapter 0.1.0"
         }
       ]
     },
@@ -1063,7 +1138,8 @@
             "bytes": 48723,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/sys3-decompiler%2Fv0.5.0-MCLv1%2Farm64/sys3-decompiler-0.5.0-MCLv1-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#sys3-decompiler"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#sys3-decompiler",
+          "profile": "System3 decompiler 0.5.0-MCLv1"
         }
       ]
     },
@@ -1089,7 +1165,8 @@
             "bytes": 3455003,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/system3%2Fv1.8.0-MCLv1%2Farm64/system3-1.8.0-MCLv1-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#system3"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#system3",
+          "profile": "System3 SDL2 1.8.0-MCLv1"
         }
       ]
     },
@@ -1115,7 +1192,8 @@
             "bytes": 34659,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vnds-love%2Fv0.0.13-838e47b-MCLv1%2Funiversal/vnds-love-0.0.13-838e47b-MCLv1-universal.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#vnds-love"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#vnds-love",
+          "profile": "VNDS-LOVE 0.0.13-838e47b-MCLv1"
         }
       ]
     },
@@ -1141,7 +1219,8 @@
             "bytes": 3244314,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vulkan-kosmickrisp-gles32%2FvMCLv1-1024%2Farm64/vulkan-kosmickrisp-gles32-MCLv1-1024-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#vulkan-kosmickrisp-gles32"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#vulkan-kosmickrisp-gles32",
+          "profile": "KosmicKrisp geometry/transform-feedback adaptation MCLv1-1024"
         }
       ]
     },
@@ -1167,7 +1246,8 @@
             "bytes": 5846,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/web-renderer-network%2Fv1.0.1%2Funiversal/web-renderer-network-1.0.1-universal.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#web-renderer-network"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#web-renderer-network",
+          "profile": "Browser network helper 1.0.1"
         }
       ]
     },
@@ -1193,7 +1273,8 @@
             "bytes": 62739,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsys35-decompiler%2Fv1.13.0-MCLv1%2Farm64/xsys35-decompiler-1.13.0-MCLv1-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsys35-decompiler"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsys35-decompiler",
+          "profile": "System3.5 decompiler 1.13.0-MCLv1"
         }
       ]
     },
@@ -1219,7 +1300,8 @@
             "bytes": 7438373,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem35%2FvMCLv1-1019%2Farm64/xsystem35-MCLv1-1019-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsystem35"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsystem35",
+          "profile": "xsystem35 SDL2 MCLv1-1019"
         }
       ]
     },
@@ -1245,7 +1327,8 @@
             "bytes": 21357638,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem4%2FvMCLv1-1021%2Farm64/xsystem4-MCLv1-1021-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsystem4"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsystem4",
+          "profile": "xsystem4 MCLv1-1021"
         }
       ]
     }

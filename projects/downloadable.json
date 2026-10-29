@@ -69,7 +69,17 @@
         }
       }
     ],
-    "compatibility": "Android 16 / API 36 framework and image contract; source updates are explicit adaptations."
+    "compatibility": "Android 16 / API 36 framework and image contract; source updates are explicit adaptations.",
+    "packageProfiles": [
+      {
+        "version": "0.2.0",
+        "label": "MacLauncher Android 0.2.0"
+      },
+      {
+        "version": "0.1.0",
+        "label": "MacLauncher Android 0.1.0"
+      }
+    ]
   },
   {
     "id": "android-art",
@@ -121,7 +131,17 @@
         }
       }
     ],
-    "compatibility": "Android 16 / API 36; uses the matching Android common framework and a separately acquired original system image."
+    "compatibility": "Android 16 / API 36; uses the matching Android common framework and a separately acquired original system image.",
+    "packageProfiles": [
+      {
+        "version": "0.2.0",
+        "label": "MacLauncher Android ART adapter 0.2.0"
+      },
+      {
+        "version": "0.1.0",
+        "label": "MacLauncher Android ART adapter 0.1.0"
+      }
+    ]
   },
   {
     "id": "android-aim",
@@ -146,6 +166,16 @@
           "pointer": "/commit",
           "repositoryPointer": "/repository"
         }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "MCLv1-1022",
+        "label": "AIM with MacLauncher integration MCLv1-1022"
+      },
+      {
+        "version": "MCLv1-1028-6",
+        "label": "AIM with MacLauncher integration MCLv1-1028-6"
       }
     ]
   },
@@ -172,6 +202,12 @@
           "file": "producers/maclauncher/src/modules/ai5/runtime/portable-build-v4.js",
           "pointer": "/REVISION"
         }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "1.5.0-MCLv1",
+        "label": "AI5 SDL2 1.5.0-MCLv1"
       }
     ]
   },
@@ -241,6 +277,12 @@
           "pointer": "/REVISION"
         }
       }
+    ],
+    "packageProfiles": [
+      {
+        "version": "MCLv1-1020",
+        "label": "GemRB MCLv1-1020"
+      }
     ]
   },
   {
@@ -265,6 +307,12 @@
           "file": "producers/maclauncher/src/modules/gamemaker/overlays/opengmk-macos/apply-emulator.js",
           "pointer": "/REVISION"
         }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "2.2.0-MCLv1",
+        "label": "GameMaker 8 decompiler 2.2.0-MCLv1"
       }
     ]
   },
@@ -343,6 +391,12 @@
           "pointer": "/REVISION"
         }
       }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.10.8.903-MCLv1",
+        "label": "impacto Windows-game profile 0.10.8.903-MCLv1"
+      }
     ]
   },
   {
@@ -367,6 +421,12 @@
           "file": "producers/maclauncher/src/modules/shared/installers/runtime/innoextract-build.js",
           "pointer": "/REVISION"
         }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "MCLv1-0206",
+        "label": "Inno Setup extraction tools MCLv1-0206"
       }
     ]
   },
@@ -414,7 +474,17 @@
         ],
         "kag3Resources": 1
       }
-    }
+    },
+    "packageProfiles": [
+      {
+        "version": "MCLv1-1028-kag3-1",
+        "label": "Kirikiri SDL2 MCLv1-1028-kag3-1"
+      },
+      {
+        "version": "MCLv1-1001",
+        "label": "Kirikiri SDL2 MCLv1-1001"
+      }
+    ]
   },
   {
     "id": "npengine",
@@ -438,6 +508,12 @@
           "file": "producers/maclauncher/src/modules/nitroplus/runtime/build.js",
           "pointer": "/REVISION"
         }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.5.3-MCLv1",
+        "label": "libnpengine Mac runner 0.5.3-MCLv1"
       }
     ]
   },
@@ -465,6 +541,12 @@
           "pointer": "/SNAPSHOT_REVISION"
         }
       }
+    ],
+    "packageProfiles": [
+      {
+        "version": "MCLv1-0126",
+        "label": "ONScripter-EN MCLv1-0126"
+      }
     ]
   },
   {
@@ -489,6 +571,12 @@
           "file": "producers/maclauncher/src/modules/shared/onsyuri/runtime/portable-build-v3.json",
           "pointer": "/engine/revision"
         }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.7.7beta-MCLv1",
+        "label": "ONScripterYuri 0.7.7beta-MCLv1"
       }
     ]
   },
@@ -515,6 +603,12 @@
           "pointer": "/REVISION"
         }
       }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.2.0-MCLv1",
+        "label": "OpenGMK 0.2.0-MCLv1"
+      }
     ]
   },
   {
@@ -539,6 +633,12 @@
           "file": "producers/maclauncher/src/modules/minori/runtime/overlay.js",
           "pointer": "/REVISION"
         }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.1.0-MCLv1",
+        "label": "ReMinori 0.1.0-MCLv1"
       }
     ]
   },
@@ -565,6 +665,12 @@
           "pointer": "/0/upstreamRevision"
         }
       }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.5.0-MCLv1",
+        "label": "System3 decompiler 0.5.0-MCLv1"
+      }
     ]
   },
   {
@@ -590,6 +696,12 @@
           "pointer": "/REVISION"
         }
       }
+    ],
+    "packageProfiles": [
+      {
+        "version": "1.8.0-MCLv1",
+        "label": "System3 SDL2 1.8.0-MCLv1"
+      }
     ]
   },
   {
@@ -614,6 +726,12 @@
           "file": "producers/maclauncher/src/modules/alicesoft/decompiler-profiles.json",
           "pointer": "/1/upstreamRevision"
         }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "1.13.0-MCLv1",
+        "label": "System3.5 decompiler 1.13.0-MCLv1"
       }
     ]
   },
@@ -646,7 +764,13 @@
       "capabilities": {
         "debugAdapter": "dap-terminal-nul-v1"
       }
-    }
+    },
+    "packageProfiles": [
+      {
+        "version": "MCLv1-1019",
+        "label": "xsystem35 SDL2 MCLv1-1019"
+      }
+    ]
   },
   {
     "id": "xsystem4",
@@ -673,6 +797,12 @@
           "pointer": "/REVISION"
         }
       }
+    ],
+    "packageProfiles": [
+      {
+        "version": "MCLv1-1021",
+        "label": "xsystem4 MCLv1-1021"
+      }
     ]
   },
   {
@@ -698,6 +828,12 @@
           "pointer": ""
         }
       }
+    ],
+    "packageProfiles": [
+      {
+        "version": "MCLv1-1024",
+        "label": "KosmicKrisp geometry/transform-feedback adaptation MCLv1-1024"
+      }
     ]
   },
   {
@@ -712,7 +848,13 @@
         "x64"
       ]
     },
-    "upstreams": []
+    "upstreams": [],
+    "packageProfiles": [
+      {
+        "version": "35.0.0.60-MCLv1",
+        "label": "Universal Flash Player projector 35.0.0.60-MCLv1"
+      }
+    ]
   },
   {
     "id": "mkxpz",
@@ -788,7 +930,13 @@
         ],
         "sourceKind": "commit"
       }
-    }
+    },
+    "packageProfiles": [
+      {
+        "version": "MCLv1-1007",
+        "label": "Butterscotch MCLv1-1007"
+      }
+    ]
   },
   {
     "id": "anyps5",
@@ -818,7 +966,13 @@
         }
       }
     ],
-    "compatibility": "ARM64 converter; x86-64 Mach-O game code and PRX libraries run with Rosetta on Apple Silicon."
+    "compatibility": "ARM64 converter; x86-64 Mach-O game code and PRX libraries run with Rosetta on Apple Silicon.",
+    "packageProfiles": [
+      {
+        "version": "MCLv1-1027-2",
+        "label": "AnyPS5 MCLv1-1027-2"
+      }
+    ]
   },
   {
     "id": "nxnative-tools",
@@ -853,7 +1007,13 @@
         }
       }
     ],
-    "compatibility": "Apple Silicon with macOS 26 or later and the launcher-provided CPython 3.12 ABI. Upstream source and profiles are selected separately; native tools require a compatible shader format and source adapter."
+    "compatibility": "Apple Silicon with macOS 26 or later and the launcher-provided CPython 3.12 ABI. Upstream source and profiles are selected separately; native tools require a compatible shader format and source adapter.",
+    "packageProfiles": [
+      {
+        "version": "MCLv1-1027-3",
+        "label": "nxnative native tools MCLv1-1027-3"
+      }
+    ]
   },
   {
     "id": "mpv",
@@ -1077,6 +1237,12 @@
           "pointer": "/source/source/revision"
         }
       }
+    ],
+    "packageProfiles": [
+      {
+        "version": "3.0.0-465c88c3-MCLv2",
+        "label": "RPGMakerDecrypter 3.0.0-465c88c3-MCLv2"
+      }
     ]
   },
   {
@@ -1095,7 +1261,13 @@
         "producers/included-helpers/gamemaker-opengl-helper/sources.json"
       ]
     },
-    "upstreams": []
+    "upstreams": [],
+    "packageProfiles": [
+      {
+        "version": "software-gl-v3-MCLv2",
+        "label": "GameMaker OpenGL helper software-gl-v3-MCLv2"
+      }
+    ]
   },
   {
     "id": "vnds-love",
@@ -1121,6 +1293,12 @@
           "pointer": ""
         }
       }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.0.13-838e47b-MCLv1",
+        "label": "VNDS-LOVE 0.0.13-838e47b-MCLv1"
+      }
     ]
   },
   {
@@ -1138,7 +1316,13 @@
         "producers/vn-adaptations/rlvm/source.json"
       ]
     },
-    "upstreams": []
+    "upstreams": [],
+    "packageProfiles": [
+      {
+        "version": "1.0.0-MCLv1",
+        "label": "MacLauncher RLVM adapter 1.0.0-MCLv1"
+      }
+    ]
   },
   {
     "id": "siglus",
@@ -1168,6 +1352,12 @@
       "capabilities": {
         "nativeApi": "game_run_entry-v1"
       }
-    }
+    },
+    "packageProfiles": [
+      {
+        "version": "1.0.0-preview.5f358ef1360b-MCLv1-1028-1",
+        "label": "siglus_rs 1.0.0-preview.5f358ef1360b-MCLv1-1028-1"
+      }
+    ]
   }
 ]
