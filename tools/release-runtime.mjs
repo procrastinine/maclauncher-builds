@@ -112,9 +112,9 @@ export function catalogIndex(directory=root){
  return {schemaVersion:1,repository:registry.repository,updatePolicy:'manual',projects:projects.sort((a,b)=>a.projectId.localeCompare(b.projectId))};
 }
 
-/** Apply a verified project's catalog update locally; older versions cannot be removed or replaced. */
-export async function applyRelease({bundle,directory=root}){
- const checked=await verifyRelease({bundle,directory}),{release,record}=checked;
+/** Apply only a public, digest-verified release; older versions cannot be removed or replaced. */
+export async function applyRelease({bundle,directory=root,runGh=runGitHub}){
+ const {release,record}=await verifyRemoteRelease({bundle,directory,runGh,requirePublic:true});
  const previous=loadPrevious(release.id,directory),next=catalog([record],{project:release.id,repository:release.repository,previous});
  const file=path.join(directory,'catalogs',release.id+'.json');fs.mkdirSync(path.dirname(file),{recursive:true});
  const temporary=file+'.tmp-'+process.pid;try{fs.writeFileSync(temporary,json(next),{flag:'wx'});fs.renameSync(temporary,file);}finally{fs.rmSync(temporary,{force:true});}
@@ -171,6 +171,15 @@ async function existingRelease({release,record,runGh}){
  if(!sha256){const bytes=await runGh(['api','repos/'+repository+'/releases/assets/'+asset.id,'-H','Accept: application/octet-stream'],{encoding:null});if(bytes.length!==record.asset.bytes)throw Error('Existing release asset size differs from the selected record.');sha256='sha256:'+digest(bytes);}
  if(sha256!=='sha256:'+record.asset.sha256)throw Error('Existing release asset checksum differs from the selected record.');
  return {repository,tag,draft:remote.draft,existing:true,sourceCommit:commit,sha256:record.asset.sha256};
+}
+
+/** Verify the immutable remote asset, including staged drafts, without changing GitHub. */
+export async function verifyRemoteRelease({bundle,directory=root,runGh=runGitHub,requirePublic=false}){
+ const checked=await verifyRelease({bundle,directory});
+ const publication=await existingRelease({...checked,runGh});
+ if(!publication)throw Error('The selected release has not been staged.');
+ if(requirePublic&&publication.draft!==false)throw Error('Catalog updates require a public, non-draft release.');
+ return {...checked,publication};
 }
 
 /** Explicit network action: upload only a release with no existing public identity. */
