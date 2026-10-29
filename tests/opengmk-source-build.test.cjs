@@ -7,6 +7,7 @@ const test = require("node:test");
 const { prepareSourceBuild, DECOMPILER_SOURCE_HASHES } = require("../producers/maclauncher/src/modules/gamemaker/overlays/opengmk-macos/source-build");
 
 function fixture(t) {
+  if (!fs.existsSync(path.join(__dirname, "../producers/maclauncher/src/external/OpenGMK/Cargo.toml"))) { t.skip("OpenGMK source submodule is not initialized."); return; }
   const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "opengmk-offline-recipe-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const packageRoot = path.join(root, "package"), outputRoot = path.join(root, "build");
@@ -21,7 +22,7 @@ function fixture(t) {
 }
 
 test("the decompiler recipe isolates its workspace and preserves upstream Rust while reporting its actual source revision", t => {
-  const f = fixture(t), originalBuild = fs.readFileSync(path.join(f.packageRoot, "OpenGMK/gm8decompiler/build.rs"));
+  const f = fixture(t); if (!f) return; const originalBuild = fs.readFileSync(path.join(f.packageRoot, "OpenGMK/gm8decompiler/build.rs"));
   // Real development builds often live below the launcher's Git worktree.
   // git apply must not silently skip paths relative to that parent repository.
   const parentGit = spawnSync("git", ["init", "-q", f.root], { encoding: "utf8" });
@@ -44,7 +45,7 @@ test("the decompiler recipe isolates its workspace and preserves upstream Rust w
 });
 
 test("unlisted targets, changed pinned source and source-relative outputs fail before preparing a build", t => {
-  const f = fixture(t);
+  const f = fixture(t); if (!f) return;
   assert.throws(() => prepareSourceBuild({ ...f, target: "unknown" }), /gm8emulator or gm8decompiler/);
   assert.equal(fs.existsSync(f.outputRoot), false);
   assert.throws(() => prepareSourceBuild({ ...f, outputRoot: path.join(f.packageRoot, "owned"), target: "gm8decompiler" }), /outside/);

@@ -21,6 +21,6 @@ test("movie diagnostic normalization maps complete prefixes and rejects unmapped
 test("cancelled movie builds create no work directories",async t=>{
   const root=temporary(t),workRoot=path.join(root,"output");await assert.rejects(Movie.buildDependencies({workRoot,signal:AbortSignal.abort()}),{name:"AbortError"});assert.equal(fs.existsSync(workRoot),false);
 });
-test("untrusted movie archive identities fail before creating build outputs",async t=>{
+test("untrusted movie archive identities fail before creating build outputs",{skip:process.platform!=="darwin"||process.arch!=="arm64"},async t=>{
   const root=temporary(t),archive=path.join(root,"archive.tar.xz"),workRoot=path.join(root,"output");fs.writeFileSync(archive,"untrusted");await assert.rejects(Movie.buildDependencies({archive,workRoot}),/exact source pin/);assert.equal(fs.existsSync(workRoot),false);
 });

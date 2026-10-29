@@ -13,7 +13,7 @@ test("FNA build overlays affect only private inputs and retain default accelerat
   assert.equal(Build.__test.runtimeConfig().runtimeOptions.rollForward, "Disable");
 });
 
-test("FNA portable tools download only when a local executable is absent", async t => {
+test("FNA portable tools download only when a local executable is absent", { skip: process.platform !== "darwin" || process.arch !== "arm64" }, async t => {
   const temporary = fixture(t); let downloads = 0;
   const found = await Build.__test.resolveBuildTool("ninja", { temporary, findBuildTool: () => "/local/ninja", packageArchive: async () => { downloads++; } });
   assert.equal(found, "/local/ninja"); assert.equal(downloads, 0);

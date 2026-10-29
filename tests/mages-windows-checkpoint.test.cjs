@@ -28,7 +28,7 @@ test("checkpoint adapters reject mismatched exports and linked outputs without m
 });
 
 test("compiled Windows checkpoint instructions consume LEu16 atomically and preserve legacy type widths",
-  { skip: process.platform !== "darwin" }, t => {
+  { skip: process.platform !== "darwin" || !fs.existsSync(path.join(__dirname, "../producers/maclauncher/src/external/impacto/src/vm/inst_system.cpp")) }, t => {
     const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "mages-checkpoint-native-"));
     t.after(() => fs.rmSync(root, { recursive: true, force: true }));
     const vm = path.join(root, "vm"), data = path.join(root, "data"), profile = path.join(root, "profile");

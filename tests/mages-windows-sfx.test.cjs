@@ -29,7 +29,7 @@ test("sound-effect adapters reject unsafe or mismatched exports before writes", 
 });
 
 test("compiled Windows sound effects preserve instruction boundaries, preload/resume and legacy widths",
-  { skip: process.platform !== "darwin" }, t => {
+  { skip: process.platform !== "darwin" || !fs.existsSync(path.join(__dirname, "../producers/maclauncher/src/external/impacto/src/vm/inst_sound.cpp")) }, t => {
     const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "mages-sfx-native-"));
     t.after(() => fs.rmSync(root, { recursive: true, force: true }));
     const vm = path.join(root, "vm"), audio = path.join(root, "audio"), profile = path.join(root, "profile");

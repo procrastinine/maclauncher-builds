@@ -12,6 +12,7 @@ const descriptor=require('../producers/maclauncher/src/modules/mages/native/curr
 const upstream=path.resolve(__dirname,'../producers/maclauncher/src/external/impacto');
 const relative='src/ui/backlogmenu.cpp';
 function sourceFixture(t){
+ if(!fs.existsSync(path.join(upstream,relative))){t.skip("Impacto source submodule is not initialized.");return;}
  const root=fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()),'mages-current-backlog-'));
  t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  const source=path.join(root,'source');fs.mkdirSync(source);
@@ -21,7 +22,7 @@ function sourceFixture(t){
 
 
 test("the current backlog patch verifies all pinned input hashes before any write",async t=>{
- const f=sourceFixture(t),first=path.join(f.source,descriptor.files.find(item=>item.originalSha256!==null).path),bytes=fs.readFileSync(first),before=fs.readFileSync(f.target);
+ const f=sourceFixture(t);if(!f)return;const first=path.join(f.source,descriptor.files.find(item=>item.originalSha256!==null).path),bytes=fs.readFileSync(first),before=fs.readFileSync(f.target);
  fs.appendFileSync(first,'\nchanged source\n');
  await assert.rejects(Current.applyCurrentOverlay(f.source,{logPath:f.logPath}),/Pinned dependency source differs/);
  assert.deepEqual(fs.readFileSync(f.target),before);
@@ -33,7 +34,7 @@ test("the current backlog patch verifies all pinned input hashes before any writ
 
 test("compiled backlog guard skips zero-capacity storage and preserves enabled append and eviction behavior",
   { skip: process.platform !== "darwin" }, async t => {
-    const {root,source,target,logPath}=sourceFixture(t);
+    const f=sourceFixture(t);if(!f)return;const {root,source,target,logPath}=f;
     const original=fs.readFileSync(target,'utf8');
     await Current.applyCurrentOverlay(source,{logPath});
     const expression = /template <typename EntryType>\nvoid BacklogMenu<EntryType>::AddMessage\([\s\S]*?\n\}/;
