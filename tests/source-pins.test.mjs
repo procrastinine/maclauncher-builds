@@ -155,7 +155,7 @@ test('source-free release preparation and verification work without pin files; s
  assert.deepEqual(catalogIndex(f.root).projects,[]);
  const bundle=path.join(f.root,'release');await prepareRelease({project:'engine',input,declaration,output:bundle,directory:f.root});
  assert.equal((await verifyRelease({bundle,directory:f.root})).record.version,'1.0');assert.throws(()=>resolveProject('engine',f.root));
- const calls=[],runGh=async args=>{calls.push(args);if(args[0]==='api'){if(!args.includes('POST'))throw Object.assign(Error('Missing'),{status:404});return JSON.stringify({object:{sha:target,type:'commit'}});}return '';};
+ const calls=[],runGh=async args=>{calls.push(args);if(args[0]==='api'){if(args.includes('--paginate'))return '[]';if(!args.includes('POST'))throw Object.assign(Error('Missing'),{status:404});return JSON.stringify({object:{sha:target,type:'commit'}});}return '';};
  await assert.rejects(stageRelease({bundle,target,directory:f.root,runGh}));assert.equal(calls.length,0);
  f.source({source:{repository:'https://github.com/owner/source.git',revision:next}});
  await stageRelease({bundle,target,directory:f.root,runGh});assert.equal(calls.length,4);

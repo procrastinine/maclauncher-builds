@@ -75,4 +75,7 @@ jobs:
         run: node tools/release-runtime.mjs verify-assets --assets "$RUNNER_TEMP/runtime-assets" --output "$RUNNER_TEMP/runtime-release" --project "$PROJECT" --version "$VERSION" --arch "$ARCH"
       - name: Publish selected draft
         if: inputs.operation == 'publish'
-        run: node tools/release-runtime.mjs publish --bundle "$RUNNER_TEMP/runtime-release"
+        run: |
+          # Package verification uses the tag; publication control uses this dispatch.
+          git restore --source="$GITHUB_SHA" -- tools/release-runtime.mjs
+          node tools/release-runtime.mjs publish --bundle "$RUNNER_TEMP/runtime-release"

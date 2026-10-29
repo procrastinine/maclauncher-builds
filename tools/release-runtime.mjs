@@ -155,7 +155,10 @@ async function existingRelease({release,record,runGh}){
  const repository=release.repository,tag=release.tag;
  const ref=await optionalGitHub(['repos/'+repository+'/git/ref/tags/'+tag],runGh);
  const commit=ref&&await releaseTagCommit(ref,{repository,runGh});
- const remote=await optionalGitHub(['repos/'+repository+'/releases/tags/'+encodeURIComponent(tag)],runGh);
+ const pages=JSON.parse(await runGh(['api','--paginate','--slurp','repos/'+repository+'/releases?per_page=100']));
+ const matches=pages.flat().filter(row=>row.tag_name===tag);
+ if(matches.length>1)throw Error('Existing release identity is ambiguous.');
+ const remote=matches[0];
  if(!ref&&!remote)return;
  if(!ref||!remote)throw Error('Existing release identity is incomplete; no tag or asset will be replaced.');
  if(remote.tag_name!==tag||remote.assets?.length!==1)throw Error('Existing release differs from the selected record.');

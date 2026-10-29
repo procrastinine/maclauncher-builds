@@ -79,7 +79,7 @@ const notFound=()=>Object.assign(Error('ref missing'),{stderr:'gh: Not Found (HT
 const remoteRelease=(record,draft=false)=>({tag_name:'engine/v1.0/arm64',draft,assets:[{id:1,name:record.asset.filename,size:record.asset.bytes,state:'uploaded',digest:'sha256:'+record.asset.sha256}]});
 test('staging creates a new exact source tag and uploads one draft binary',async t=>{
  const f=fixture(t,{external:true});await prepareRelease(f);const calls=[];
- const runGh=async(args,options)=>{calls.push(args);if(calls.length<=2)throw notFound();if(args[0]==='api'){assert.ok(args.includes('POST'));return refResult();}assert.equal(options.stdio,'inherit');return '';};
+ const runGh=async(args,options)=>{calls.push(args);if(args[1]?.includes('/git/ref/'))throw notFound();if(args.includes('--paginate'))return '[]';if(args[0]==='api'){assert.ok(args.includes('POST'));return refResult();}assert.equal(options.stdio,'inherit');return '';};
  const result=await stageRelease({bundle:f.output,target:sourceTarget,directory:f.directory,runGh});
  assert.deepEqual(result,{repository:'owner/builds',tag:'engine/v1.0/arm64',draft:true});assert.equal(calls.length,4);
  const upload=calls[3];assert.deepEqual(upload.slice(0,9),['release','create','engine/v1.0/arm64','--repo','owner/builds','--draft','--verify-tag','--latest=false','--target']);
@@ -89,7 +89,7 @@ test('matching releases and local preparation are no-ops without rewriting tags 
  for(const annotated of [false,true]){
   const f=fixture(t);await prepareRelease(f);const archive=path.join(f.output,'engine-1.0-arm64.tar.gz'),record=JSON.parse(fs.readFileSync(archive+'.json')),calls=[];
   const local=await prepareRelease({project:f.project,archive,record,output:f.output,directory:f.directory});assert.equal(local.existing,true);
-  const runGh=async args=>{calls.push(args);assert.equal(args[0],'api');assert.equal(args.includes('POST'),false);if(args[1].includes('/git/ref/'))return refResult(annotated?annotation:sourceTarget,annotated?'tag':'commit');if(args[1].includes('/git/tags/'))return refResult();return JSON.stringify(remoteRelease(record));};
+  const runGh=async args=>{calls.push(args);assert.equal(args[0],'api');assert.equal(args.includes('POST'),false);if(args[1].includes('/git/ref/'))return refResult(annotated?annotation:sourceTarget,annotated?'tag':'commit');if(args[1].includes('/git/tags/'))return refResult();return JSON.stringify([[remoteRelease(record)]]);};
   const staged=await stageRelease({bundle:f.output,target:'c'.repeat(40),directory:f.directory,runGh});assert.equal(staged.existing,true);assert.equal(staged.draft,false);
   const published=await publishRelease({bundle:f.output,directory:f.directory,runGh});assert.equal(published.existing,true);assert.equal(published.draft,false);
   assert.equal(calls.some(args=>args[0]==='release'||args.includes('POST')),false);
@@ -98,14 +98,14 @@ test('matching releases and local preparation are no-ops without rewriting tags 
 test('existing asset conflicts and orphan tags fail before any write',async t=>{
  for(const orphan of [false,true]){
   const f=fixture(t);await prepareRelease(f);const record=JSON.parse(fs.readFileSync(path.join(f.output,'engine-1.0-arm64.tar.gz.json'))),calls=[];
-  const runGh=async args=>{calls.push(args);assert.equal(args[0],'api');assert.equal(args.includes('POST'),false);if(args[1].includes('/git/ref/'))return refResult();if(orphan)throw notFound();const remote=remoteRelease(record);remote.assets[0].digest='sha256:'+'f'.repeat(64);return JSON.stringify(remote);};
+  const runGh=async args=>{calls.push(args);assert.equal(args[0],'api');assert.equal(args.includes('POST'),false);if(args[1].includes('/git/ref/'))return refResult();if(orphan)return '[]';const remote=remoteRelease(record);remote.assets[0].digest='sha256:'+'f'.repeat(64);return JSON.stringify([[remote]]);};
   await assert.rejects(stageRelease({bundle:f.output,target:sourceTarget,directory:f.directory,runGh}),orphan?/identity is incomplete/:/checksum differs/);
   assert.equal(calls.length,2);
  }
 });
 test('publishing changes only a verified draft status and never uploads assets',async t=>{
  const f=fixture(t);await prepareRelease(f);const record=JSON.parse(fs.readFileSync(path.join(f.output,'engine-1.0-arm64.tar.gz.json'))),calls=[];
- const runGh=async args=>{calls.push(args);if(args[0]==='api')return args[1].includes('/git/ref/')?refResult():JSON.stringify(remoteRelease(record,true));assert.deepEqual(args,['release','edit','engine/v1.0/arm64','--repo','owner/builds','--draft=false','--latest=false']);return '';};
+ const runGh=async args=>{calls.push(args);if(args[0]==='api')return args[1].includes('/git/ref/')?refResult():JSON.stringify([[remoteRelease(record,true)]]);assert.deepEqual(args,['release','edit','engine/v1.0/arm64','--repo','owner/builds','--draft=false','--latest=false']);return '';};
  const result=await publishRelease({bundle:f.output,directory:f.directory,runGh});assert.equal(result.published,true);assert.equal(result.draft,false);assert.equal(calls.length,3);
 });
 test('staging never interprets an authentication or API failure as an absent tag',async t=>{
@@ -139,4 +139,12 @@ test('catalog compatibility metadata survives sealed preparation and public asse
  for(const [key,value] of Object.entries(metadata))assert.deepEqual(restored.record[key],value);
  await assert.rejects(prepareRelease({project:f.project,archive,record:{...record,minimumMacOS:'14.0'},output:path.join(f.directory,'changed-payload'),directory:f.directory}),/record differs/);
  await assert.rejects(prepareRelease({project:f.project,archive,record:{...record,unknownField:true},output:path.join(f.directory,'unknown-metadata'),directory:f.directory}),/Invalid runtime release record/);
+});
+
+
+test('a draft found only in the authenticated paginated release list finalizes without restaging',async t=>{
+ const f=fixture(t);await prepareRelease(f);const record=JSON.parse(fs.readFileSync(path.join(f.output,'engine-1.0-arm64.tar.gz.json'))),calls=[];
+ const runGh=async args=>{calls.push(args);if(args[0]==='api'){if(args[1].includes('/git/ref/'))return refResult();assert.deepEqual(args,['api','--paginate','--slurp','repos/owner/builds/releases?per_page=100']);return JSON.stringify([[],[remoteRelease(record,true)]]);}assert.deepEqual(args,['release','edit','engine/v1.0/arm64','--repo','owner/builds','--draft=false','--latest=false']);return '';};
+ const staged=await stageRelease({bundle:f.output,target:sourceTarget,directory:f.directory,runGh});assert.equal(staged.existing,true);assert.equal(staged.draft,true);assert.equal(calls.length,2);
+ const published=await publishRelease({bundle:f.output,directory:f.directory,runGh});assert.equal(published.published,true);assert.equal(calls.length,5);assert.equal(calls.some(args=>args.includes('create')||args.includes('upload')||args.includes('POST')),false);
 });
