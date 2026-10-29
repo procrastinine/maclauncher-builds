@@ -125,3 +125,22 @@ test('source push CI selects main without scheduling runtime tag jobs',()=>{
  assert.match(workflow,/on:\n  push:\n    branches: \[main\]\n  pull_request:\n  workflow_dispatch:/);
  assert.doesNotMatch(workflow,/\n    tags:/);
 });
+
+
+test('catalog compatibility metadata survives sealed preparation and public asset verification',async t=>{
+ const f=fixture(t);await prepareRelease(f);
+ const archive=path.join(f.output,'engine-1.0-arm64.tar.gz');
+ const metadata={launcherContract:1,capabilities:{nativeApi:'entry-v1',nativeFeatures:['one','two'],resources:1},source:{repository:'owner/source',revision:'a'.repeat(40),path:'engine'}};
+ const record={...JSON.parse(fs.readFileSync(archive+'.json')),...metadata},output=path.join(f.directory,'metadata-release');
+ await prepareRelease({project:f.project,archive,record,output,directory:f.directory});
+ const checked=await verifyRelease({bundle:output,directory:f.directory});
+ for(const [key,value] of Object.entries(metadata))assert.deepEqual(checked.record[key],value);
+ assert.deepEqual(fs.readFileSync(path.join(output,path.basename(archive))),fs.readFileSync(archive));
+ await applyRelease({bundle:output,directory:f.directory});
+ const assets=path.join(f.directory,'metadata-assets');fs.mkdirSync(assets);fs.copyFileSync(archive,path.join(assets,path.basename(archive)));
+ await verifyPublicAssets({project:f.project,version:'1.0',arch:'arm64',assets,output:path.join(f.directory,'public-metadata'),directory:f.directory});
+ const restored=await verifyRelease({bundle:path.join(f.directory,'public-metadata'),directory:f.directory});
+ for(const [key,value] of Object.entries(metadata))assert.deepEqual(restored.record[key],value);
+ await assert.rejects(prepareRelease({project:f.project,archive,record:{...record,minimumMacOS:'14.0'},output:path.join(f.directory,'changed-payload'),directory:f.directory}),/record differs/);
+ await assert.rejects(prepareRelease({project:f.project,archive,record:{...record,unknownField:true},output:path.join(f.directory,'unknown-metadata'),directory:f.directory}),/Invalid runtime release record/);
+});

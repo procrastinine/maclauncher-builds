@@ -16,7 +16,12 @@ const read=file=>JSON.parse(fs.readFileSync(file));
 function regular(file){const s=fs.lstatSync(file);if(!s.isFile()||s.isSymbolicLink())throw Error('Release assets must be regular files.');return s;}
 function copy(input,output){regular(input);fs.copyFileSync(input,output,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);}
 function sourceRecord(d,repo){if(!d.sourceArtifact)return undefined;const source=d.sourceArtifact,filename=path.posix.basename(source.directoryRelative);return {filename,url:'https://github.com/'+repo+'/releases/download/'+encodeURIComponent(releaseTag(d))+'/'+filename,sha256:source.sha256,bytes:source.bytes};}
-function recordFromDeclaration(d,asset,sourceAsset,source){return {schemaVersion:2,id:d.id,version:d.version,arch:d.arch,launcherArchitectures:d.launcherArchitectures,minimumMacOS:d.minimumMacOS,manifestRelative:d.manifestRelative,manifestSha256:d.manifestSha256,sourceSha256:d.sourceSha256,updatePolicy:'manual',asset,...(sourceAsset?{sourceAsset}:{}),...(source?{source}:{})};}
+function recordFromDeclaration(d,asset,sourceAsset,source,catalogRecord={}){
+ // Catalog metadata is validated by releaseRecord before this reconstruction.
+ // Sealed declaration and archive facts always replace catalog payload fields.
+ const {tag,asset:catalogAsset,source:catalogSource,sourceAsset:catalogSourceAsset,...metadata}=catalogRecord;
+ return {...metadata,schemaVersion:2,id:d.id,version:d.version,arch:d.arch,launcherArchitectures:d.launcherArchitectures,minimumMacOS:d.minimumMacOS,manifestRelative:d.manifestRelative,manifestSha256:d.manifestSha256,sourceSha256:d.sourceSha256,updatePolicy:'manual',asset,...(sourceAsset?{sourceAsset}:{}),...(source?{source}:{})};
+}
 async function asset(directory,name,role){const file=path.join(directory,name);return {filename:name,role,sha256:await A.checksum(file),bytes:regular(file).size};}
 function write(file,value){fs.writeFileSync(file,json(value),{flag:'wx'});}
 function loadPrevious(project,directory){const file=path.join(directory,'catalogs',project+'.json');return fs.existsSync(file)?read(file):undefined;}
@@ -47,7 +52,7 @@ export async function prepareRelease({project,input,declaration,archive,record,s
  try{
   const name=assetName(selected),archivePath=path.join(staging,name);
   if(archive){copy(archive,archivePath);const checked=await verify({archive:archivePath,sha256:record.asset.sha256,project,version:record.version,arch:record.arch,includeDeclaration:true});declaration=checked.declaration;
-   const expected=recordFromDeclaration(declaration,{filename:name,sha256:record.asset.sha256,bytes:regular(archivePath).size});
+   const expected=recordFromDeclaration(declaration,{filename:name,sha256:record.asset.sha256,bytes:regular(archivePath).size},undefined,undefined,record);
    if(stable({...record,tag:undefined,sourceAsset:undefined,source:undefined,asset:{...record.asset,url:undefined}})!==stable(expected))throw Error('Release record differs from the sealed runtime archive.');
    record=expected;write(archivePath+'.json',record);
   }else record=await pack({project,input,declaration,output:archivePath});
@@ -73,7 +78,7 @@ export async function verifyRelease({bundle,project,version,arch,directory=root}
  const name=assetName(record);if(sidecars[0]!==name+'.json')throw Error('Release asset belongs to a different project or version.');
  const runtime=path.join(bundle,name);if(regular(runtime).size!==record.asset.bytes)throw Error('Release asset checksum or size changed.');
  const checked=await verify({archive:runtime,sha256:record.asset.sha256,project:record.id,version:record.version,arch:record.arch,includeDeclaration:true});
- const expected=recordFromDeclaration(checked.declaration,{filename:name,sha256:record.asset.sha256,bytes:record.asset.bytes},record.sourceAsset,record.source);
+ const expected=recordFromDeclaration(checked.declaration,{filename:name,sha256:record.asset.sha256,bytes:record.asset.bytes},record.sourceAsset,record.source,record);
  if(stable(record)!==stable(expected))throw Error('Release record differs from the sealed runtime archive.');
  const snapshot=validateCatalog(read(path.join(bundle,record.id+'.json')),{project:record.id,repository:repo}),next=catalog([record],{project:record.id,repository:repo});
  if(stable(snapshot.packages.find(p=>p.version===record.version&&p.arch===record.arch))!==stable(next.packages[0]))throw Error('Release catalog does not contain the selected package.');
