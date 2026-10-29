@@ -1,3 +1,4 @@
+const requirements = require('./support/requirements.cjs');
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -15,8 +16,7 @@ function temporary(t) {
   return root;
 }
 
-test("Yuri V3 applies only the pinned page reset to a disposable source tree", t => {
-  if (!fs.existsSync(ORIGINAL)) return t.skip("ONScripter-Yuri source submodule is not initialized.");
+test("Yuri V3 applies only the pinned page reset to a disposable source tree", requirements({ sourceTree: 'producers/maclauncher/src/external/onscripter-yuri' }), t => {
   const original = fs.readFileSync(ORIGINAL), root = temporary(t), staged = path.join(root, Page.FILE);
   fs.mkdirSync(path.dirname(staged), { recursive: true }); fs.writeFileSync(staged, original);
   const result = Page.apply(root, path.dirname(ORIGINAL));

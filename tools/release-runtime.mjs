@@ -41,7 +41,14 @@ export async function prepareRelease({project,input,declaration,archive,record,s
  const registration=resolveProject(project,directory,{resolvePins:false}),repo=registration.releaseRepository;
  const legacySourceAsset=record?.sourceAsset;
  const sourcePointer=record?.source||(sourceRevision?{repository:repo,revision:sourceRevision}:registration.producer.source);
- if(!output||fs.existsSync(output))throw Error('Choose a new release output directory.');
+ if(!output)throw Error('Choose a release output directory.');
+ if(fs.existsSync(output)){
+  if(!archive||!record)throw Error('Choose a new release output directory.');
+  const existing=await verifyRelease({bundle:output,directory});
+  releaseRecord(record,{project,repository:repo});
+  if(stable(catalog([record],{project,repository:repo}).packages[0])!==stable(catalog([existing.record],{project,repository:repo}).packages[0])||regular(archive).size!==record.asset.bytes||await A.checksum(archive)!==record.asset.sha256)throw Error('Existing release output differs from the selected record.');
+  return {...existing.release,existing:true};
+ }
  if(archive?(!record||input||declaration):(!input||record))throw Error('Select sealed --input and --declaration, or existing --archive and --record.');
  if(!archive){declaration??=await managerDeclaration({project,input,source});declaration=publicDeclaration(declaration);if(declaration.id!==project)throw Error('Declaration belongs to another project.');}
  else releaseRecord(record,{project,repository:repo});
@@ -133,36 +140,59 @@ export function releaseNotes(record,project){
 
 const runGitHub=(args,options={})=>execFileSync('gh',args,{encoding:'utf8',...options});
 function missingRef(error){return error.status===404||error.statusCode===404||/\bHTTP 404\b/.test(String(error.stderr||''));}
-async function ensureReleaseTag({repository,tag,target,runGh}){
- const endpoint='repos/'+repository+'/git/',api=async args=>JSON.parse(await runGh(['api',...args]));
- let ref;
- try{ref=await api([endpoint+'ref/tags/'+tag]);}
- catch(error){
-  if(!missingRef(error))throw error;
-  ref=await api(['--method','POST',endpoint+'refs','-f','ref=refs/tags/'+tag,'-f','sha='+target]);
- }
+async function releaseTagCommit(ref,{repository,runGh}){
  const seen=new Set();let object=ref.object;
  while(object?.type==='tag'){
   if(seen.has(object.sha)||seen.size>=10)throw Error('Release tag annotation chain is invalid.');
-  seen.add(object.sha);object=(await api([endpoint+'tags/'+object.sha])).object;
+  seen.add(object.sha);object=JSON.parse(await runGh(['api','repos/'+repository+'/git/tags/'+object.sha])).object;
  }
- if(object?.type!=='commit'||object.sha!==target)throw Error('Release tag differs from the exact source commit.');
+ if(object?.type!=='commit'||!/^[a-f0-9]{40}$/.test(object.sha))throw Error('Release tag does not identify a source commit.');
+ return object.sha;
+}
+async function optionalGitHub(args,runGh){try{return JSON.parse(await runGh(['api',...args]));}catch(error){if(!missingRef(error))throw error;}}
+/** Existing tags, releases and assets are immutable; matching assets are a no-op. */
+async function existingRelease({release,record,runGh}){
+ const repository=release.repository,tag=release.tag;
+ const ref=await optionalGitHub(['repos/'+repository+'/git/ref/tags/'+tag],runGh);
+ const commit=ref&&await releaseTagCommit(ref,{repository,runGh});
+ const remote=await optionalGitHub(['repos/'+repository+'/releases/tags/'+encodeURIComponent(tag)],runGh);
+ if(!ref&&!remote)return;
+ if(!ref||!remote)throw Error('Existing release identity is incomplete; no tag or asset will be replaced.');
+ if(remote.tag_name!==tag||remote.assets?.length!==1)throw Error('Existing release differs from the selected record.');
+ const asset=remote.assets[0];
+ if(asset.name!==record.asset.filename||asset.size!==record.asset.bytes||asset.state!=='uploaded')throw Error('Existing release asset differs from the selected record.');
+ let sha256=asset.digest;
+ if(!sha256){const bytes=await runGh(['api','repos/'+repository+'/releases/assets/'+asset.id,'-H','Accept: application/octet-stream'],{encoding:null});if(bytes.length!==record.asset.bytes)throw Error('Existing release asset size differs from the selected record.');sha256='sha256:'+digest(bytes);}
+ if(sha256!=='sha256:'+record.asset.sha256)throw Error('Existing release asset checksum differs from the selected record.');
+ return {repository,tag,draft:remote.draft,existing:true,sourceCommit:commit,sha256:record.asset.sha256};
 }
 
-/** Explicit network action: create or verify the source tag, then upload one draft. */
+/** Explicit network action: upload only a release with no existing public identity. */
 export async function stageRelease({bundle,target,directory=root,runGh=runGitHub}){
  if(!/^[a-f0-9]{40}$/.test(target||''))throw Error('Staging requires an exact public source commit through --target.');
  const {release,record}=await verifyRelease({bundle,directory}),project=resolveProject(release.id,directory);
- await ensureReleaseTag({repository:release.repository,tag:release.tag,target,runGh});
+ const existing=await existingRelease({release,record,runGh});if(existing)return existing;
+ const ref=JSON.parse(await runGh(['api','--method','POST','repos/'+release.repository+'/git/refs','-f','ref=refs/tags/'+release.tag,'-f','sha='+target]));
+ if(await releaseTagCommit(ref,{repository:release.repository,runGh})!==target)throw Error('Release tag differs from the exact source commit.');
  const files=publicationAssets(release).map(name=>path.join(path.resolve(bundle),name));
  await runGh(['release','create',release.tag,'--repo',release.repository,'--draft','--verify-tag','--latest=false','--target',target,'--title',project.name+' '+release.version+' ('+release.arch+')','--notes',releaseNotes({...record,source:{repository:release.repository,revision:target}},project),...files],{stdio:'inherit'});
  return {repository:release.repository,tag:release.tag,draft:true};
 }
 
+/** Publishing finalizes a verified draft; an already public release is unchanged. */
+export async function publishRelease({bundle,directory=root,runGh=runGitHub}){
+ const {release,record}=await verifyRelease({bundle,directory});
+ const existing=await existingRelease({release,record,runGh});
+ if(!existing)throw Error('The selected release has not been staged.');
+ if(!existing.draft)return existing;
+ await runGh(['release','edit',release.tag,'--repo',release.repository,'--draft=false','--latest=false']);
+ return {...existing,draft:false,published:true};
+}
+
 function options(args){const result={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!args[i]?.startsWith('--')||!args[i+1]||Object.hasOwn(result,key))throw Error('Use unique --option value pairs.');result[key]=args[i+1];}return result;}
 export async function main([command,...args],directory=root){
- const o=options(args),allowed={prepare:['project','input','declaration','archive','record','source','source-revision','output'],verify:['bundle','project','version','arch'],'verify-assets':['project','version','arch','assets','output'],apply:['bundle'],stage:['bundle','target'],index:['output']}[command];
- if(!allowed||Object.keys(o).some(k=>!allowed.includes(k)))throw Error('Use prepare, verify, apply, stage or index with explicit options.');
+ const o=options(args),allowed={prepare:['project','input','declaration','archive','record','source','source-revision','output'],verify:['bundle','project','version','arch'],'verify-assets':['project','version','arch','assets','output'],apply:['bundle'],stage:['bundle','target'],publish:['bundle'],index:['output']}[command];
+ if(!allowed||Object.keys(o).some(k=>!allowed.includes(k)))throw Error('Use prepare, verify, apply, stage, publish or index with explicit options.');
  if(command==='prepare'){
   if(!o.project||!o.output)throw Error('prepare requires --project and --output.');
   if(o.declaration){let d=read(o.declaration);if(Array.isArray(d)){d=d.filter(item=>item.id===o.project);if(d.length!==1)throw Error('Declaration must select exactly one project.');d=d[0];}o.declaration=d;}
@@ -171,6 +201,7 @@ export async function main([command,...args],directory=root){
  if(command==='verify-assets')return verifyPublicAssets({...o,directory});
  if(command==='verify')return verifyRelease({...o,directory});
  if(command==='stage')return stageRelease({...o,directory});
+ if(command==='publish')return publishRelease({...o,directory});
  if(command==='apply')return applyRelease({...o,directory});
  if(command==='index'){if(!o.output)throw Error('index requires --output.');const result=catalogIndex(directory);fs.mkdirSync(path.dirname(o.output),{recursive:true});fs.writeFileSync(o.output,json(result));return result;}
 }

@@ -1,3 +1,4 @@
+const requirements = require('./support/requirements.cjs');
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -28,7 +29,7 @@ test("checkpoint adapters reject mismatched exports and linked outputs without m
 });
 
 test("compiled Windows checkpoint instructions consume LEu16 atomically and preserve legacy type widths",
-  { skip: process.platform !== "darwin" || !fs.existsSync(path.join(__dirname, "../producers/maclauncher/src/external/impacto/src/vm/inst_system.cpp")) }, t => {
+  requirements({ sourceTree: 'producers/maclauncher/src/external/impacto', appleSiliconMacOS: true }), t => {
     const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "mages-checkpoint-native-"));
     t.after(() => fs.rmSync(root, { recursive: true, force: true }));
     const vm = path.join(root, "vm"), data = path.join(root, "data"), profile = path.join(root, "profile");

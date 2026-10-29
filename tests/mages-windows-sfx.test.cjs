@@ -1,3 +1,4 @@
+const requirements = require('./support/requirements.cjs');
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -29,7 +30,7 @@ test("sound-effect adapters reject unsafe or mismatched exports before writes", 
 });
 
 test("compiled Windows sound effects preserve instruction boundaries, preload/resume and legacy widths",
-  { skip: process.platform !== "darwin" || !fs.existsSync(path.join(__dirname, "../producers/maclauncher/src/external/impacto/src/vm/inst_sound.cpp")) }, t => {
+  requirements({ sourceTree: 'producers/maclauncher/src/external/impacto', appleSiliconMacOS: true }), t => {
     const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "mages-sfx-native-"));
     t.after(() => fs.rmSync(root, { recursive: true, force: true }));
     const vm = path.join(root, "vm"), audio = path.join(root, "audio"), profile = path.join(root, "profile");

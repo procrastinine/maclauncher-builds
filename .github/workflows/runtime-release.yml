@@ -66,14 +66,13 @@ jobs:
           git cat-file -e 'FETCH_HEAD^{commit}'
           git cat-file -e FETCH_HEAD:projects.json
           git checkout --detach FETCH_HEAD
-      - name: Download selected draft assets
+      - name: Download selected release assets
         run: |
           gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq '.isDraft' > "$RUNNER_TEMP/release-draft"
-          test "$(cat "$RUNNER_TEMP/release-draft")" = true
           mkdir -p "$RUNNER_TEMP/runtime-assets"
           gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir "$RUNNER_TEMP/runtime-assets"
       - name: Verify selected package
         run: node tools/release-runtime.mjs verify-assets --assets "$RUNNER_TEMP/runtime-assets" --output "$RUNNER_TEMP/runtime-release" --project "$PROJECT" --version "$VERSION" --arch "$ARCH"
       - name: Publish selected draft
         if: inputs.operation == 'publish'
-        run: gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest=false
+        run: node tools/release-runtime.mjs publish --bundle "$RUNNER_TEMP/runtime-release"

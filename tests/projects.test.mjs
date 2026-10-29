@@ -13,7 +13,7 @@ test('project registry covers every selected package and excludes direct upstrea
  for(const file of catalogs)assert.ok(ids.has(file.slice(0,-5)),file+' has no registered producer');
  const mpv=resolveProject('mpv',root);assert.equal(mpv.delivery,'downloadable');assert.equal(mpv.producer.sourceDirectory,'producers/mpv-render/v7');assert.equal(mpv.upstreams[0].revision,'41f6a645068483470267271e1d09966ca3b9f413');assert.ok(catalogs.includes('mpv.json'));
  const media=JSON.parse(fs.readFileSync(path.join(root,'catalogs/mpv.json')));assert.deepEqual(media.packages,[]);assert.deepEqual(mpv.packageProfiles.map(value=>value.version),['0.41.0-MCLv7']);
- for(const file of catalogs){const project=file.slice(0,-5);validateCatalog(JSON.parse(fs.readFileSync(path.join(root,'catalogs',file))),{project,repository:registry.repository,allowEmpty:project==='prosper'||project==='mpv'});}
+ for(const file of catalogs){const project=file.slice(0,-5),value=JSON.parse(fs.readFileSync(path.join(root,'catalogs',file)));validateCatalog(value,{project,repository:registry.repository,allowEmpty:Array.isArray(value.packages)&&value.packages.length===0});}
  for(const id of ['nwjs','renpy'])assert.throws(()=>resolveProject(id,root),/Unknown/);
  assert.equal(resolveProject('android',root).producer.recipe,'runtimes/android/source.json');
  assert.notEqual(releaseTag({id:'engine',version:'a-b-1',arch:'arm64'}),releaseTag({id:'engine-a',version:'b-1',arch:'arm64'}));

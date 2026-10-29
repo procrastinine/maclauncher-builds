@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
-import {prepareRelease,verifyRelease,applyRelease,catalogIndex,publicationAssets,verifyPublicAssets,stageRelease,main} from '../tools/release-runtime.mjs';
+import {prepareRelease,verifyRelease,applyRelease,catalogIndex,publicationAssets,verifyPublicAssets,stageRelease,publishRelease,main} from '../tools/release-runtime.mjs';
 const digest=b=>crypto.createHash('sha256').update(b).digest('hex');
 function fixture(t,{external=false}={}){
  const directory=fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()),'runtime-release-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
@@ -76,49 +76,45 @@ test('manual release verification checks out the selected tag instead of the dis
 const sourceTarget='a'.repeat(40),annotation='b'.repeat(40);
 const refResult=(sha=sourceTarget,type='commit')=>JSON.stringify({object:{sha,type}});
 const notFound=()=>Object.assign(Error('ref missing'),{stderr:'gh: Not Found (HTTP 404)'});
-test('staging creates the exact source tag before uploading one draft binary',async t=>{
+const remoteRelease=(record,draft=false)=>({tag_name:'engine/v1.0/arm64',draft,assets:[{id:1,name:record.asset.filename,size:record.asset.bytes,state:'uploaded',digest:'sha256:'+record.asset.sha256}]});
+test('staging creates a new exact source tag and uploads one draft binary',async t=>{
  const f=fixture(t,{external:true});await prepareRelease(f);const calls=[];
- const runGh=async(args,options)=>{
-  calls.push(args);
-  if(calls.length===1){assert.deepEqual(args,['api','repos/owner/builds/git/ref/tags/engine/v1.0/arm64']);throw notFound();}
-  if(calls.length===2){assert.deepEqual(args,['api','--method','POST','repos/owner/builds/git/refs','-f','ref=refs/tags/engine/v1.0/arm64','-f','sha='+sourceTarget]);return refResult();}
-  assert.equal(options.stdio,'inherit');return '';
- };
+ const runGh=async(args,options)=>{calls.push(args);if(calls.length<=2)throw notFound();if(args[0]==='api'){assert.ok(args.includes('POST'));return refResult();}assert.equal(options.stdio,'inherit');return '';};
  const result=await stageRelease({bundle:f.output,target:sourceTarget,directory:f.directory,runGh});
- assert.deepEqual(result,{repository:'owner/builds',tag:'engine/v1.0/arm64',draft:true});assert.equal(calls.length,3);
- const upload=calls[2];assert.deepEqual(upload.slice(0,9),['release','create','engine/v1.0/arm64','--repo','owner/builds','--draft','--verify-tag','--latest=false','--target']);
+ assert.deepEqual(result,{repository:'owner/builds',tag:'engine/v1.0/arm64',draft:true});assert.equal(calls.length,4);
+ const upload=calls[3];assert.deepEqual(upload.slice(0,9),['release','create','engine/v1.0/arm64','--repo','owner/builds','--draft','--verify-tag','--latest=false','--target']);
  assert.equal(upload[9],sourceTarget);assert.deepEqual(upload.filter(arg=>arg.startsWith(f.output)),[path.join(f.output,'engine-1.0-arm64.tar.gz')]);
 });
-test('staging reuses exact lightweight and annotated source tags without rewriting them',async t=>{
+test('matching releases and local preparation are no-ops without rewriting tags or uploading assets',async t=>{
  for(const annotated of [false,true]){
-  const f=fixture(t);await prepareRelease(f);const calls=[];
-  const runGh=async args=>{
-   calls.push(args);
-   if(args[0]==='release')return '';
-   if(calls.length===1)return refResult(annotated?annotation:sourceTarget,annotated?'tag':'commit');
-   assert.deepEqual(args,['api','repos/owner/builds/git/tags/'+annotation]);return refResult();
-  };
-  await stageRelease({bundle:f.output,target:sourceTarget,directory:f.directory,runGh});
-  assert.equal(calls.length,annotated?3:2);assert.equal(calls.some(args=>args.includes('POST')),false);
+  const f=fixture(t);await prepareRelease(f);const archive=path.join(f.output,'engine-1.0-arm64.tar.gz'),record=JSON.parse(fs.readFileSync(archive+'.json')),calls=[];
+  const local=await prepareRelease({project:f.project,archive,record,output:f.output,directory:f.directory});assert.equal(local.existing,true);
+  const runGh=async args=>{calls.push(args);assert.equal(args[0],'api');assert.equal(args.includes('POST'),false);if(args[1].includes('/git/ref/'))return refResult(annotated?annotation:sourceTarget,annotated?'tag':'commit');if(args[1].includes('/git/tags/'))return refResult();return JSON.stringify(remoteRelease(record));};
+  const staged=await stageRelease({bundle:f.output,target:'c'.repeat(40),directory:f.directory,runGh});assert.equal(staged.existing,true);assert.equal(staged.draft,false);
+  const published=await publishRelease({bundle:f.output,directory:f.directory,runGh});assert.equal(published.existing,true);assert.equal(published.draft,false);
+  assert.equal(calls.some(args=>args[0]==='release'||args.includes('POST')),false);
  }
 });
-test('staging refuses conflicting lightweight and annotated tags before any write',async t=>{
- for(const annotated of [false,true]){
-  const f=fixture(t);await prepareRelease(f);const calls=[];
-  const runGh=async args=>{calls.push(args);assert.equal(args[0],'api');assert.equal(args.includes('POST'),false);return refResult(annotation,annotated&&calls.length===1?'tag':'commit');};
-  await assert.rejects(stageRelease({bundle:f.output,target:sourceTarget,directory:f.directory,runGh}),/differs from the exact source commit/);
-  assert.equal(calls.length,annotated?2:1);
+test('existing asset conflicts and orphan tags fail before any write',async t=>{
+ for(const orphan of [false,true]){
+  const f=fixture(t);await prepareRelease(f);const record=JSON.parse(fs.readFileSync(path.join(f.output,'engine-1.0-arm64.tar.gz.json'))),calls=[];
+  const runGh=async args=>{calls.push(args);assert.equal(args[0],'api');assert.equal(args.includes('POST'),false);if(args[1].includes('/git/ref/'))return refResult();if(orphan)throw notFound();const remote=remoteRelease(record);remote.assets[0].digest='sha256:'+'f'.repeat(64);return JSON.stringify(remote);};
+  await assert.rejects(stageRelease({bundle:f.output,target:sourceTarget,directory:f.directory,runGh}),orphan?/identity is incomplete/:/checksum differs/);
+  assert.equal(calls.length,2);
  }
+});
+test('publishing changes only a verified draft status and never uploads assets',async t=>{
+ const f=fixture(t);await prepareRelease(f);const record=JSON.parse(fs.readFileSync(path.join(f.output,'engine-1.0-arm64.tar.gz.json'))),calls=[];
+ const runGh=async args=>{calls.push(args);if(args[0]==='api')return args[1].includes('/git/ref/')?refResult():JSON.stringify(remoteRelease(record,true));assert.deepEqual(args,['release','edit','engine/v1.0/arm64','--repo','owner/builds','--draft=false','--latest=false']);return '';};
+ const result=await publishRelease({bundle:f.output,directory:f.directory,runGh});assert.equal(result.published,true);assert.equal(result.draft,false);assert.equal(calls.length,3);
 });
 test('staging never interprets an authentication or API failure as an absent tag',async t=>{
  const f=fixture(t);await prepareRelease(f);let calls=0;const failure=Object.assign(Error('authentication failed'),{stderr:'gh: Bad credentials (HTTP 401)'});
- await assert.rejects(stageRelease({bundle:f.output,target:sourceTarget,directory:f.directory,runGh:async args=>{calls++;assert.equal(args[0],'api');throw failure;}}),error=>error===failure);
- assert.equal(calls,1);
+ await assert.rejects(stageRelease({bundle:f.output,target:sourceTarget,directory:f.directory,runGh:async args=>{calls++;assert.equal(args[0],'api');throw failure;}}),error=>error===failure);assert.equal(calls,1);
 });
 test('staging rejects a cyclic annotation chain without creating a release',async t=>{
  const f=fixture(t);await prepareRelease(f);let calls=0;
- await assert.rejects(stageRelease({bundle:f.output,target:sourceTarget,directory:f.directory,runGh:async args=>{calls++;assert.equal(args[0],'api');return refResult(annotation,'tag');}}),/annotation chain is invalid/);
- assert.equal(calls,2);
+ await assert.rejects(stageRelease({bundle:f.output,target:sourceTarget,directory:f.directory,runGh:async args=>{calls++;assert.equal(args[0],'api');return refResult(annotation,'tag');}}),/annotation chain is invalid/);assert.equal(calls,2);
 });
 test('source push CI selects main without scheduling runtime tag jobs',()=>{
  const workflow=fs.readFileSync(new URL('../.github/workflows/source.yml',import.meta.url),'utf8');

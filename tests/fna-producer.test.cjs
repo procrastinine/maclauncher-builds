@@ -1,3 +1,4 @@
+const requirements = require('./support/requirements.cjs');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const temporary=t=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'producer-test-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;};
 const Build=require('../producers/maclauncher/src/modules/fna/runtime/build'),Native=require('../producers/maclauncher/src/modules/shared/runtime/local-native');
@@ -13,7 +14,7 @@ test("FNA build overlays affect only private inputs and retain default accelerat
   assert.equal(Build.__test.runtimeConfig().runtimeOptions.rollForward, "Disable");
 });
 
-test("FNA portable tools download only when a local executable is absent", { skip: process.platform !== "darwin" || process.arch !== "arm64" }, async t => {
+test("FNA portable tools download only when a local executable is absent", requirements({ appleSiliconMacOS: true }), async t => {
   const temporary = fixture(t); let downloads = 0;
   const found = await Build.__test.resolveBuildTool("ninja", { temporary, findBuildTool: () => "/local/ninja", packageArchive: async () => { downloads++; } });
   assert.equal(found, "/local/ninja"); assert.equal(downloads, 0);
