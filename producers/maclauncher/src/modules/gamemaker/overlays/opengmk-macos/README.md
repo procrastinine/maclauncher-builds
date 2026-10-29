@@ -82,15 +82,15 @@ gameplay never uses the upstream dummy-effect/audio bypass or Wine helper.
 separate private working directory. Append/read-write copies only the affected
 original file. The native highscore table implements the four table/query APIs
 with private persistence.
-Bundled distribution records architecture, macOS floor, exact upstream/dependency
+The managed package records architecture, macOS floor, exact upstream/dependency
 revisions, overlay hashes, Cargo lock hash, compiler options, binary hash and
 license notices. Build flags remap private paths before compilation. The tagged
 Builds repository contains the owned overlays, build recipes and pinned upstream
 sources. Local corresponding-source archives retain checksum-validated
 dependencies and `source-build.js`; that script builds owned source copies
 offline. Pinned immutable
-packages execute directly from the app's resources; users need no compiler,
-source checkout or runtime copy.
+packages install through MacLauncher's runtime manager and execute from shared
+runtime storage. Play needs no compiler, source checkout or per-game runtime copy.
 
 ## Native decompiler workspace
 

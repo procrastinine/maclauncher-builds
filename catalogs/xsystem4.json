@@ -22,7 +22,11 @@
         "bytes": 21357638,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem4%2FvMCLv1-1021%2Farm64/xsystem4-MCLv1-1021-arm64.tar.gz"
       },
-      "tag": "xsystem4/vMCLv1-1021/arm64"
+      "tag": "xsystem4/vMCLv1-1021/arm64",
+      "source": {
+        "repository": "nunuhara/xsystem4",
+        "revision": "de65718ba72d5eb291a4d0ddb691627f1d401909"
+      }
     }
   ]
 }

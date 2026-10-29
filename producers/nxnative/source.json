@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "nxnative-tools",
+  "version": "MCLv1-1027-3",
+  "source": {
+    "path": "sources/nxnative",
+    "repository": "https://github.com/seedds/nxnative.git",
+    "revision": "712eb8167230a02023cfa57d10bb07b748b8933f",
+    "license": "MIT",
+    "committedAt": "2026-10-28T00:36:48.000Z"
+  },
+  "platform": "darwin",
+  "architecture": "arm64",
+  "minimumMacOS": "26.0",
+  "buildEntry": "producers/nxnative/build.mjs",
+  "tools": {
+    "node": ">=24",
+    "dotnetSDK": "10.0.401",
+    "macOSSDK": "27.0"
+  },
+  "output": {
+    "executableRelative": "bin/nxnative",
+    "hostRelative": "bin/nxnative-host",
+    "manifestRelative": "manifest.json",
+    "sourceRelative": "source.json"
+  },
+  "runtimePython": {
+    "delivery": "launcher",
+    "version": "3.12",
+    "abi": "cpython-312-darwin",
+    "architecture": "arm64"
+  },
+  "previousRuntimeIds": [
+    "nxnative"
+  ],
+  "runtimeSource": {
+    "delivery": "upstream",
+    "repository": "https://github.com/seedds/nxnative.git",
+    "adapter": "maclauncher-nxnative-1"
+  },
+  "runtimeMetal": {
+    "delivery": "managed",
+    "managerId": "apple-metal-toolchain",
+    "environment": "MCL_APPLE_METAL_TOOLCHAIN_ROOT",
+    "targetSDKVersion": "27.0",
+    "managedAcquisition": true
+  }
+}

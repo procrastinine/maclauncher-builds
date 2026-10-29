@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "rlvm-adapter",
+  "version": "1.0.0-MCLv1",
+  "adapterABI": 1,
+  "minimumMacOS": "13.0",
+  "repository": "https://github.com/procrastinine/maclauncher-builds",
+  "files": {
+    "adapter.m": "77ab945b9d8e62ef4b78649f093fe2dfe7ed710105ae14fe42f53586036f89ba",
+    "adapter.json": "7af757859832bed219951a16158d40ce5ca2e88f4afdb48b2dd01d25d340bcfa",
+    "prebuilt/rlvm-adapter.dylib": "a728d970519766e31529060619ba0bec755f68df94b6125d81f1d3c8c8f73b2f"
+  },
+  "licenseSha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7"
+}

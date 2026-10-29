@@ -22,7 +22,11 @@
         "bytes": 15312763,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gemrb%2FvMCLv1-1020%2Farm64/gemrb-MCLv1-1020-arm64.tar.gz"
       },
-      "tag": "gemrb/vMCLv1-1020/arm64"
+      "tag": "gemrb/vMCLv1-1020/arm64",
+      "source": {
+        "repository": "gemrb/gemrb",
+        "revision": "bcb5cfaa9f19ffbe8a51f25a3c014fa344173351"
+      }
     }
   ]
 }

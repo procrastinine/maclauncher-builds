@@ -213,6 +213,267 @@
       "version": "7684e9586f8d",
       "sourceUrl": "https://github.com/bloc97/Anime4K",
       "bundledPath": "shader-collection/anime4k"
+    },
+    {
+      "id": "image",
+      "label": "Image",
+      "license": "MIT",
+      "description": "GPU color balance, threshold debanding, ordered palette quantization and soft highlight bloom.",
+      "version": "1",
+      "bundledPath": "shader-collection/image",
+      "format": "libplacebo",
+      "includePaths": [],
+      "texturePaths": [],
+      "effects": [
+        {
+          "id": "color-balance",
+          "label": "Color balance",
+          "file": "color-balance.hook",
+          "requires": []
+        },
+        {
+          "id": "deband",
+          "label": "Threshold deband",
+          "file": "deband.hook",
+          "requires": []
+        },
+        {
+          "id": "libplacebo-deband",
+          "label": "libplacebo Deband",
+          "file": "deband.plfilter",
+          "libplaceboMethod": "deband",
+          "requires": []
+        },
+        {
+          "id": "palette",
+          "label": "Pixel palette",
+          "file": "palette.hook",
+          "requires": []
+        },
+        {
+          "id": "soft-bloom",
+          "label": "Soft bloom",
+          "file": "soft-bloom.hook",
+          "requires": []
+        }
+      ]
+    },
+    {
+      "id": "accessibility",
+      "label": "Accessibility",
+      "license": "MIT",
+      "description": "LMS daltonization with protanopia, deuteranopia and tritanopia modes, adjustable strength and preserved alpha.",
+      "version": "1",
+      "bundledPath": "shader-collection/accessibility",
+      "format": "fx",
+      "includePaths": [],
+      "texturePaths": [],
+      "effects": [
+        {
+          "id": "daltonize",
+          "label": "Daltonization",
+          "file": "daltonize.fx",
+          "requires": []
+        }
+      ]
+    },
+    {
+      "id": "ssim-superres",
+      "label": "SSIM SuperRes",
+      "license": "LGPL-3.0-or-later",
+      "description": "Original structural-similarity refinement of the selected spatial upscale, retaining its pre-kernel reference and multi-pass variance analysis.",
+      "version": "15d93440d0a2",
+      "revision": "15d93440d0a24fc4b8770070be6a9fa2af6f200b",
+      "sourceUrl": "https://gist.github.com/igv/2364ffa6e81540f29cb7ab4c9bc05b6b",
+      "bundledPath": "shader-collection/ssim-superres",
+      "format": "libplacebo",
+      "includePaths": [],
+      "texturePaths": [],
+      "effects": [
+        {
+          "id": "ssim-superres",
+          "label": "SSIM SuperRes refinement",
+          "file": "SSimSuperRes.glsl",
+          "requires": []
+        }
+      ]
+    },
+    {
+      "id": "kuwahara",
+      "label": "Artistic",
+      "license": "GPL-3.0-or-later",
+      "description": "Anisotropic Kuwahara filtering with structure-tensor orientation and eight weighted sectors.",
+      "version": "1",
+      "revision": "a66ae5f84560959e64f6a1433f5d549d1fad303b",
+      "sourceUrl": "https://github.com/jkyprian/gpuakf",
+      "bundledPath": "shader-collection/kuwahara",
+      "format": "libplacebo",
+      "includePaths": [],
+      "texturePaths": [],
+      "effects": [
+        {
+          "id": "anisotropic",
+          "label": "Anisotropic Kuwahara",
+          "file": "anisotropic-kuwahara.hook",
+          "requires": []
+        }
+      ]
+    },
+    {
+      "id": "native",
+      "label": "Image",
+      "license": "MIT and Apache-2.0",
+      "description": "Compiled GPU image filters with typed parameters.",
+      "version": "1",
+      "bundledPath": "shader-collection/native",
+      "format": "native",
+      "includePaths": [],
+      "texturePaths": [],
+      "effects": [
+        {
+          "id": "histogram-exposure",
+          "label": "Histogram exposure",
+          "file": "histogram-exposure.mclfilter",
+          "requires": [],
+          "nativeMethod": "histogram-exposure",
+          "license": "MIT",
+          "sourceUrl": "https://github.com/procrastinine/maclauncher"
+        },
+        {
+          "id": "local-laplacian",
+          "label": "Local Laplacian",
+          "file": "local-laplacian.mclfilter",
+          "requires": [],
+          "nativeMethod": "local-laplacian",
+          "sourceUrl": "https://github.com/halide/Halide",
+          "revision": "d62903bbf5166e05841e1346837c8367e2296a83",
+          "license": "MIT"
+        },
+        {
+          "id": "cmaa2",
+          "label": "CMAA2",
+          "file": "cmaa2.mclfilter",
+          "requires": [],
+          "nativeMethod": "cmaa2",
+          "license": "Apache-2.0 and MIT",
+          "sourceUrl": "https://github.com/GameTechDev/CMAA2",
+          "revision": "071c6b0857559f4e36f614362e6d2aab1b61938a"
+        },
+        {
+          "id": "xegtao",
+          "label": "XeGTAO",
+          "file": "xegtao.mclfilter",
+          "requires": [
+            "depth",
+            "projectionMatrix"
+          ],
+          "nativeMethod": "xegtao",
+          "license": "MIT",
+          "sourceUrl": "https://github.com/GameTechDev/XeGTAO",
+          "revision": "a5b1686c7ea37788eeb3576b5be47f7c03db532c"
+        },
+        {
+          "id": "cacao",
+          "label": "CACAO",
+          "file": "cacao.mclfilter",
+          "requires": [
+            "depth",
+            "projectionMatrix"
+          ],
+          "nativeMethod": "cacao",
+          "license": "MIT",
+          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
+          "revision": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55"
+        },
+        {
+          "id": "depth-fog",
+          "label": "Depth fog",
+          "file": "depth-fog.mclfilter",
+          "requires": [
+            "depth",
+            "projectionMatrix"
+          ],
+          "nativeMethod": "depth-fog",
+          "license": "MIT",
+          "sourceUrl": "https://github.com/luluco250/FXShaders",
+          "revision": "76365e35c48e30170985ca371e67d8daf8eb9a98"
+        },
+        {
+          "id": "depth-outlines",
+          "label": "Depth outlines",
+          "file": "depth-outlines.mclfilter",
+          "requires": [
+            "depth",
+            "projectionMatrix"
+          ],
+          "nativeMethod": "depth-outlines",
+          "license": "MIT",
+          "sourceUrl": "https://github.com/luluco250/FXShaders",
+          "revision": "76365e35c48e30170985ca371e67d8daf8eb9a98"
+        },
+        {
+          "id": "ffx-dof",
+          "label": "FidelityFX DoF",
+          "file": "ffx-dof.mclfilter",
+          "requires": [
+            "depth",
+            "projectionMatrix"
+          ],
+          "nativeMethod": "ffx-dof",
+          "license": "MIT",
+          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
+          "revision": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55"
+        },
+        {
+          "id": "screen-space-reflections",
+          "label": "Screen-space reflections",
+          "file": "screen-space-reflections.mclfilter",
+          "requires": [
+            "depth",
+            "projectionMatrix",
+            "normal",
+            "roughness",
+            "resolvedRadiance",
+            "resolvedSpecular",
+            "metallic"
+          ],
+          "nativeMethod": "screen-space-reflections",
+          "license": "MIT",
+          "sourceUrl": "https://github.com/godotengine/godot",
+          "revision": "4c311cbee68c0b66ff8ebb8b0defdd9979dd2a41"
+        },
+        {
+          "id": "estimated-depth-fog",
+          "label": "Estimated depth fog",
+          "file": "estimated-depth-fog.mclfilter",
+          "requires": [],
+          "nativeMethod": "estimated-depth-fog",
+          "modelOperation": "depth-anything-v2-small",
+          "license": "MIT",
+          "sourceUrl": "https://github.com/luluco250/FXShaders",
+          "revision": "76365e35c48e30170985ca371e67d8daf8eb9a98"
+        },
+        {
+          "id": "ffx-lens",
+          "label": "FidelityFX Lens",
+          "file": "ffx-lens.mclfilter",
+          "requires": [],
+          "nativeMethod": "ffx-lens",
+          "license": "MIT",
+          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
+          "revision": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55"
+        },
+        {
+          "id": "ffx-blur",
+          "label": "FidelityFX Blur",
+          "file": "ffx-blur.mclfilter",
+          "requires": [],
+          "nativeMethod": "ffx-blur",
+          "license": "MIT",
+          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
+          "revision": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55"
+        }
+      ]
     }
   ]
 }

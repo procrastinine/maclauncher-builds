@@ -6,6 +6,7 @@ import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {assetName,releaseTag,assetUrl,identity,projectId,releaseRecord,validateCatalog} from '../lib/project-identity.mjs';
 import {resolveProject} from '../lib/projects.mjs';
+import {recordMetadata} from '../lib/record-metadata.mjs';
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs');
 const {validateDeclaration}=require('../lib/declaration.cjs');
 const A=require('../lib/archive.cjs'),SHA=/^[a-f0-9]{64}$/;
@@ -19,12 +20,14 @@ export function publicDeclaration(value){
  return value;
 }
 
-export async function pack({project,input,declaration,output}){
+export async function pack({project,input,declaration,output,metadata={}}){
  projectId(project);declaration=publicDeclaration(declaration);identity(declaration);
  if(declaration.id!==project)throw Error(`Package belongs to ${declaration.id}; expected project ${project}.`);
  if(path.basename(output)!==assetName(declaration))throw Error('Output filename must be '+assetName(declaration));
  input=fs.realpathSync(input);
  B.verifyPayload(input,declaration);
+ const manifest=JSON.parse(B.readRegular(path.join(input,declaration.manifestRelative),B.LIMITS.manifestBytes).bytes);
+ const publication=recordMetadata({project,manifest,metadata});
  const bytes=Buffer.from(JSON.stringify(declaration,null,2)+'\n');
  const entries=[{name:'runtime-package.json',bytes,size:bytes.length,sha256:B.digest(bytes),mode:0o644},
   ...declaration.files.map(file=>({...file,name:'files/'+file.path,file:path.join(input,file.path)}))];
@@ -33,7 +36,7 @@ export async function pack({project,input,declaration,output}){
  const record={schemaVersion:2,id:declaration.id,version:declaration.version,arch:declaration.arch,
   launcherArchitectures:declaration.launcherArchitectures,minimumMacOS:declaration.minimumMacOS,
   manifestRelative:declaration.manifestRelative,manifestSha256:declaration.manifestSha256,
-  sourceSha256:declaration.sourceSha256,updatePolicy:'manual',
+  sourceSha256:declaration.sourceSha256,updatePolicy:'manual',...publication,
   asset:{filename:path.basename(output),sha256:archive.sha256,bytes:archive.bytes}};
  fs.writeFileSync(output+'.json',JSON.stringify(record,null,2)+'\n',{flag:'wx'});
  return record;
@@ -83,11 +86,23 @@ export function catalog(records,{project,repository,previous}={}){
   releaseRecord(record,{project,repository});const key=record.version+'/'+record.arch;
   if(seen.has(key))throw Error('Duplicate project/version/architecture.');seen.add(key);
   const result={...record,tag:releaseTag(record),asset:{...record.asset,url:assetUrl(record,repository)}};
-  if(old.has(key)&&stable(old.get(key))!==stable(result))throw Error('Published project versions are immutable; choose a new version.');
+  if(old.has(key)&&!additiveRecordMetadata(old.get(key),result))throw Error('Published project versions are immutable; choose a new version.');
   return result;
  });
  for(const record of previous?.packages||[])if(!seen.has(record.version+'/'+record.arch))packages.push(record);
  return validateCatalog({schemaVersion:2,projectId:project,updatePolicy:'manual',packages},{project,repository});
+}
+
+// Published payload identities stay fixed; factual metadata can be backfilled.
+function additiveRecordMetadata(previous,next){
+ const {source:oldSource,capabilities:oldCapabilities,launcherContract:oldContract,...oldPayload}=previous;
+ const {source:nextSource,capabilities:nextCapabilities,launcherContract:nextContract,...nextPayload}=next;
+ if(stable(oldPayload)!==stable(nextPayload))return false;
+ if(oldSource!==undefined&&stable(oldSource)!==stable(nextSource))return false;
+ if(oldContract===undefined?nextContract!==undefined&&nextContract!==1:oldContract!==nextContract)return false;
+ if(oldCapabilities!==undefined&&(nextCapabilities===undefined||Object.entries(oldCapabilities).some(([key,value])=>
+  !Object.hasOwn(nextCapabilities,key)||stable(value)!==stable(nextCapabilities[key]))))return false;
+ return true;
 }
 
 function stable(value){return JSON.stringify(value,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))):v);}

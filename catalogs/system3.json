@@ -22,7 +22,11 @@
         "bytes": 3455003,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/system3%2Fv1.8.0-MCLv1%2Farm64/system3-1.8.0-MCLv1-arm64.tar.gz"
       },
-      "tag": "system3/v1.8.0-MCLv1/arm64"
+      "tag": "system3/v1.8.0-MCLv1/arm64",
+      "source": {
+        "repository": "kichikuou/system3-sdl2",
+        "revision": "461673bec729e7e0ec905921fc3e03aecf977a70"
+      }
     }
   ]
 }

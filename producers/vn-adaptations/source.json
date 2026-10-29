@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/procrastinine/maclauncher-builds",
+  "projects": {
+    "siglus": {
+      "version": "1.0.0-preview.5f358ef1360b-MCLv1-1028-1",
+      "upstream": {
+        "url": "https://github.com/xmoezzz/siglus_rs",
+        "revision": "5f358ef1360b0439e92aed2b749e8f25d8721954"
+      },
+      "inputFiles": {
+        "bin/siglus-host": "c956c19fdfd2ebaa0d536fe4f7aa0c0e5de7ad24b9e508d4964a213de122d72e",
+        "lib/libsiglus.dylib": "fae301af784184a2a766966569338be3bbf262fbc6e45cb1104bde34a8048414",
+        "LICENSE-siglus_rs.txt": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85"
+      },
+      "inputProfileSha256": "39c6c04d1efe426772c1ac65e14bcede9fb7114fee4b92be1176ed89a2e463a3"
+    },
+    "krkrsdl2": {
+      "version": "MCLv1-1028-kag3-1",
+      "upstream": {
+        "url": "https://github.com/krkrsdl2/krkrsdl2",
+        "revision": "124bdf841f09e7ce02aa99b7b55791a0f7a900ff"
+      },
+      "inputManifestSha256": "c42b4581fc50c801452f9a068d30d440481f3272f27fa4c29817a79c4c1e5539",
+      "polyfill": {
+        "url": "https://github.com/krkrsdl2/kag3",
+        "revision": "fe6d40e9a1667293ebb053af7f06374b7dac9292"
+      }
+    }
+  },
+  "ownedFiles": {
+    "siglus/host.m": "c762ad8e34167b10d3efd0389b91a353cd404d694fb8d09e2d717cdda69e9137",
+    "siglus/host.json": "a31f44d554668e7aa05746a99f1e1e6cd0cb9b710d32ccbe56ecb2109497e110",
+    "siglus/prebuilt/siglus-host": "c956c19fdfd2ebaa0d536fe4f7aa0c0e5de7ad24b9e508d4964a213de122d72e",
+    "rlvm/adapter.m": "77ab945b9d8e62ef4b78649f093fe2dfe7ed710105ae14fe42f53586036f89ba",
+    "rlvm/adapter.json": "7af757859832bed219951a16158d40ce5ca2e88f4afdb48b2dd01d25d340bcfa",
+    "rlvm/prebuilt/rlvm-adapter.dylib": "a728d970519766e31529060619ba0bec755f68df94b6125d81f1d3c8c8f73b2f",
+    "siglus/LICENSE-siglus_rs.txt": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
+    "LICENSE": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+    "kag3-polyfill/FONT_LICENSE.txt": "54146d78134b7508daa0722a91f344b931ece27cdd5c72d8791d7826d6b51a42",
+    "kag3-polyfill/KAGParser.tjs": "6b9c55ae37c6453715fdff72b97751e87803fa807781e34c1a028afb708b393b",
+    "kag3-polyfill/MenuItem_stub.tjs": "5d2561cb6f8d1cd30dd2623de993798fa89b407d149ddc9074d72e14fed61d8a",
+    "kag3-polyfill/PolyfillInitialize.tjs": "817daa9af46cb8faf9041da5ee9dec86c5fb0d972d61e89e3c38c0608e5844fa",
+    "kag3-polyfill/UPSTREAM_README.md": "c402285ad50b1846fd57b8e061dec5049696c2ca5a86b4f2cff74eb5ff20616c",
+    "kag3-polyfill/font.ttf": "0bf901a96e9481c80e562d738d98ad66ee07eb4ac81007fca3e227ed8ad98a61",
+    "kag3-polyfill/manifest.json": "dcb0cf8821ed459d268501f024b9feec48882c56f3eac2cb14fea7d5b0235178"
+  }
+}

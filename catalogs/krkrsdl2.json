@@ -6,6 +6,40 @@
     {
       "schemaVersion": 2,
       "id": "krkrsdl2",
+      "version": "MCLv1-1028-kag3-1",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "e93ed046c83f864f66bb1d133813ddce7a82426a48eb71709ec88d57e17fb569",
+      "sourceSha256": "0af34b45848273c569489805a8c8b359ba9c155ff8c61093d880cf7d50976f7e",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "krkrsdl2-MCLv1-1028-kag3-1-arm64.tar.gz",
+        "sha256": "d5b7315188062bd4dbfd0cb196ec19e6197517a66520fe11d451bad20a4d71fe",
+        "bytes": 4937863,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/krkrsdl2%2FvMCLv1-1028-kag3-1%2Farm64/krkrsdl2-MCLv1-1028-kag3-1-arm64.tar.gz"
+      },
+      "tag": "krkrsdl2/vMCLv1-1028-kag3-1/arm64",
+      "source": {
+        "repository": "krkrsdl2/krkrsdl2",
+        "revision": "124bdf841f09e7ce02aa99b7b55791a0f7a900ff"
+      },
+      "capabilities": {
+        "buildProfile": "macos-storage-font-monitor-v3-kag3",
+        "nativeFeatures": [
+          "storage.dirlist",
+          "system.addFont",
+          "monitor.adjust"
+        ],
+        "kag3Resources": 1
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "krkrsdl2",
       "version": "MCLv1-1001",
       "arch": "arm64",
       "launcherArchitectures": [
@@ -22,7 +56,19 @@
         "bytes": 2783881,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/krkrsdl2%2FvMCLv1-1001%2Farm64/krkrsdl2-MCLv1-1001-arm64.tar.gz"
       },
-      "tag": "krkrsdl2/vMCLv1-1001/arm64"
+      "tag": "krkrsdl2/vMCLv1-1001/arm64",
+      "capabilities": {
+        "buildProfile": "macos-storage-font-monitor-v3",
+        "nativeFeatures": [
+          "storage.dirlist",
+          "system.addFont",
+          "monitor.adjust"
+        ]
+      },
+      "source": {
+        "repository": "krkrsdl2/krkrsdl2",
+        "revision": "124bdf841f09e7ce02aa99b7b55791a0f7a900ff"
+      }
     }
   ]
 }

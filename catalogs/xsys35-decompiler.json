@@ -22,7 +22,11 @@
         "bytes": 62739,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsys35-decompiler%2Fv1.13.0-MCLv1%2Farm64/xsys35-decompiler-1.13.0-MCLv1-arm64.tar.gz"
       },
-      "tag": "xsys35-decompiler/v1.13.0-MCLv1/arm64"
+      "tag": "xsys35-decompiler/v1.13.0-MCLv1/arm64",
+      "source": {
+        "repository": "kichikuou/xsys35c",
+        "revision": "5444fd18e94db3a36feb3885b158ea45d606bc93"
+      }
     }
   ]
 }

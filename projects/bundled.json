@@ -59,7 +59,10 @@
         "provider": "github",
         "url": "https://github.com/uspgamedev/luasteam",
         "repository": "uspgamedev/luasteam",
-        "revision": "fbb72bd22c0c526f4276800024967323acd9d10d"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/love/runtime/luasteam-source-overlay.js",
+          "pointer": "/SOURCE_REVISION"
+        }
       }
     ],
     "packageProfiles": [
@@ -104,7 +107,22 @@
         "producers/maclauncher/src/modules/shared/reshade/temporal/fsr/build.mjs",
         "producers/maclauncher/src/modules/shared/reshade/temporal/fsr4/build.mjs",
         "producers/maclauncher/src/modules/crossover/temporal/dxmt/build.mjs",
-        "producers/maclauncher/src/modules/crossover/temporal/streamline/build.mjs"
+        "producers/maclauncher/src/modules/crossover/temporal/streamline/build.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/native/retroarch-external-overlay.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/native/scene-role-header.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/libplacebo/scene-source.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/libplacebo/scene-overlay.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/ssr/build.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/lens/build.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/blur/build.mjs",
+        "producers/maclauncher/scripts/stage-libplacebo-scene.mjs",
+        "producers/maclauncher/scripts/build-graphics-runtime.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/temporal/asr/build.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/temporal/sgsr2/build.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/generation/fsr3/build.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/isf/build.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/xess/native/build.mjs",
+        "producers/maclauncher/src/modules/crossover/temporal/xess/build.mjs"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -114,76 +132,368 @@
         "provider": "github",
         "url": "https://github.com/crosire/reshade",
         "repository": "crosire/reshade",
-        "revision": "7bf9de8b33bcc76c3177007e65d73c72dd0f34c0"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/native/processor-sources.json",
+          "pointer": "/sources",
+          "match": {
+            "id": "macfx-reshade"
+          }
+        }
       },
       {
         "id": "spirv-headers",
         "provider": "github",
         "url": "https://github.com/KhronosGroup/SPIRV-Headers",
         "repository": "KhronosGroup/SPIRV-Headers",
-        "revision": "7845730cab6ebbdeb621e7349b7dc1a59c3377be"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/native/processor-sources.json",
+          "pointer": "/sources",
+          "match": {
+            "id": "macfx-spirv-headers"
+          }
+        }
       },
       {
         "id": "spirv-cross",
         "provider": "github",
         "url": "https://github.com/KhronosGroup/SPIRV-Cross",
         "repository": "KhronosGroup/SPIRV-Cross",
-        "revision": "300681bbcb8365a8d1eacdacdbdd0249bbf1d6b1"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/native/processor-sources.json",
+          "pointer": "/sources",
+          "match": {
+            "id": "macfx-spirv-cross"
+          }
+        }
       },
       {
         "id": "reshade-shaders",
         "provider": "github",
         "url": "https://github.com/crosire/reshade-shaders",
         "repository": "crosire/reshade-shaders",
-        "revision": "fd0022170615ce0d8162d219bff07232fa6dd84f"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/native/processor-sources.json",
+          "pointer": "/sources",
+          "match": {
+            "id": "macfx-reshade-shaders"
+          }
+        }
       },
       {
         "id": "mako",
         "provider": "github",
         "url": "https://github.com/eugeniosegala/MAKO",
         "repository": "eugeniosegala/MAKO",
-        "revision": "522cccbee6caafc643d2ccfa4ee5c06e4c5ba533"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/native/processor-sources.json",
+          "pointer": "/sources",
+          "match": {
+            "id": "macfx-mako"
+          }
+        }
       },
       {
         "id": "vkd3d",
         "provider": "git",
         "url": "https://codeberg.org/vkd3d/vkd3d",
-        "revision": "fb7f9ff3c1f8d972ee6f1b8c6a92caf6c8ba1e10"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/native/processor-sources.json",
+          "pointer": "/sources",
+          "match": {
+            "id": "macfx-vkd3d"
+          }
+        }
       },
       {
         "id": "fsr1",
         "provider": "github",
         "url": "https://github.com/GPUOpen-Effects/FidelityFX-FSR",
         "repository": "GPUOpen-Effects/FidelityFX-FSR",
-        "revision": "a21ffb8f6c13233ba336352bdff293894c706575"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/native/processor-sources.json",
+          "pointer": "/sources",
+          "match": {
+            "id": "macfx-fsr1"
+          }
+        }
       },
       {
         "id": "librashader",
         "provider": "github",
         "url": "https://github.com/SnowflakePowered/librashader",
         "repository": "SnowflakePowered/librashader",
-        "revision": "07ac790cdb9826f37cf8e1daf5011f03e3c4daa7"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/native/retroarch-source.json",
+          "pointer": ""
+        }
       },
       {
         "id": "godot-camera",
         "provider": "github",
         "url": "https://github.com/godotengine/godot",
         "repository": "godotengine/godot",
-        "revision": "4c311cbee68c0b66ff8ebb8b0defdd9979dd2a41"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/godot/graphics/source.json",
+          "pointer": ""
+        }
       },
       {
         "id": "dxmt-camera",
         "provider": "github",
         "url": "https://github.com/3Shain/dxmt",
         "repository": "3Shain/dxmt",
-        "revision": "7c8dee1c2d73415301ceb7d1fa810861cef4cd67"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/crossover/temporal/dxmt/source.json",
+          "pointer": ""
+        }
       },
       {
         "id": "streamline-camera",
         "provider": "github",
         "url": "https://github.com/NVIDIA-RTX/Streamline",
         "repository": "NVIDIA-RTX/Streamline",
-        "revision": "b998246a3d499c08765c5681b229c9e6b4513348"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/crossover/temporal/streamline/source.json",
+          "pointer": ""
+        }
+      },
+      {
+        "id": "libplacebo-scene",
+        "repository": "haasn/libplacebo",
+        "provider": "github",
+        "url": "https://github.com/haasn/libplacebo",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/scene-profile.json",
+          "pointer": "/SOURCE",
+          "repositoryPointer": "/SOURCE/origin"
+        }
+      },
+      {
+        "id": "libplacebo-vulkan-headers",
+        "repository": "KhronosGroup/Vulkan-Headers",
+        "provider": "github",
+        "url": "https://github.com/KhronosGroup/Vulkan-Headers",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/scene-profile.json",
+          "pointer": "/VULKAN_HEADERS",
+          "repositoryPointer": "/VULKAN_HEADERS/origin"
+        }
+      },
+      {
+        "id": "libplacebo-fast-float",
+        "repository": "fastfloat/fast_float",
+        "provider": "github",
+        "url": "https://github.com/fastfloat/fast_float",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/scene-profile.json",
+          "pointer": "/FAST_FLOAT",
+          "repositoryPointer": "/FAST_FLOAT/origin"
+        }
+      },
+      {
+        "id": "fidelityfx-image-filters",
+        "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
+        "provider": "github",
+        "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/lens/source.json",
+          "pointer": "/commit",
+          "repositoryPointer": "/repository"
+        }
+      },
+      {
+        "id": "fsr2",
+        "provider": "github",
+        "url": "https://github.com/GPUOpen-Effects/FidelityFX-FSR2",
+        "repository": "GPUOpen-Effects/FidelityFX-FSR2",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/fsr/source.json",
+          "pointer": "/fsr2"
+        }
+      },
+      {
+        "id": "fsr3-upscaler",
+        "provider": "github",
+        "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
+        "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/fsr/source.json",
+          "pointer": "/fsr3"
+        }
+      },
+      {
+        "id": "fsr3-generation",
+        "provider": "github",
+        "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
+        "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/generation/fsr3/source.json",
+          "pointer": ""
+        }
+      },
+      {
+        "id": "fsr4",
+        "provider": "github",
+        "url": "https://github.com/UzenUPoZiTiV4ik/fsr4-native-macos",
+        "repository": "UzenUPoZiTiV4ik/fsr4-native-macos",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/fsr4/source.json",
+          "pointer": "/commit",
+          "repositoryPointer": "/repository"
+        }
+      },
+      {
+        "id": "fsr4-sdk-headers",
+        "provider": "github",
+        "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
+        "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/fsr4/source.json",
+          "pointer": "/sources",
+          "match": {
+            "use": "MIT shader helper headers"
+          }
+        }
+      },
+      {
+        "id": "fsr4-sdk-model",
+        "provider": "github",
+        "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
+        "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/fsr4/source.json",
+          "pointer": "/sources",
+          "match": {
+            "use": "FSR 4.1.1 model weights from MIT-excepted provider"
+          }
+        }
+      },
+      {
+        "id": "fsr4-int8",
+        "provider": "github",
+        "url": "https://github.com/int3rrobang/fsr4-int8-reverse-engineering",
+        "repository": "int3rrobang/fsr4-int8-reverse-engineering",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/fsr4/source.json",
+          "pointer": "/sources",
+          "match": {
+            "use": "MIT FSR 4.1.1 shader reimplementation"
+          }
+        }
+      },
+      {
+        "id": "fsr4-lite2",
+        "provider": "github",
+        "url": "https://github.com/zgauthier2000/fsr4-shader-performance-overrides",
+        "repository": "zgauthier2000/fsr4-shader-performance-overrides",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/fsr4/source.json",
+          "pointer": "/lite2/commit",
+          "repositoryPointer": "/lite2/repository"
+        }
+      },
+      {
+        "id": "asr",
+        "provider": "github",
+        "url": "https://github.com/arm/accuracy-super-resolution-generic-library",
+        "repository": "arm/accuracy-super-resolution-generic-library",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/asr/source.json",
+          "pointer": ""
+        }
+      },
+      {
+        "id": "sgsr2",
+        "provider": "github",
+        "url": "https://github.com/SnapdragonGameStudios/snapdragon-gsr",
+        "repository": "SnapdragonGameStudios/snapdragon-gsr",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/sgsr2/source.json",
+          "pointer": ""
+        }
+      },
+      {
+        "id": "xess",
+        "provider": "github",
+        "url": "https://github.com/intel/xess",
+        "repository": "intel/xess",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/xess/source.json",
+          "pointer": "/commit",
+          "repositoryPointer": "/repository"
+        }
+      },
+      {
+        "id": "xess-vulkan-headers",
+        "provider": "github",
+        "url": "https://github.com/libsdl-org/SDL",
+        "repository": "libsdl-org/SDL",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/xess/native/vulkan-source.json",
+          "pointer": ""
+        }
+      },
+      {
+        "id": "mlx-dlss",
+        "provider": "github",
+        "url": "https://github.com/iamwavecut/MLX-DLSS",
+        "repository": "iamwavecut/MLX-DLSS",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/neural/source.json",
+          "pointer": ""
+        }
+      },
+      {
+        "id": "isfmslkit",
+        "provider": "github",
+        "url": "https://github.com/mrRay/ISFMSLKit",
+        "repository": "mrRay/ISFMSLKit",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
+          "pointer": "/sources",
+          "match": {
+            "repository": "https://github.com/mrRay/ISFMSLKit"
+          }
+        }
+      },
+      {
+        "id": "isfglslgenerator",
+        "provider": "github",
+        "url": "https://github.com/mrRay/ISFGLSLGenerator",
+        "repository": "mrRay/ISFGLSLGenerator",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
+          "pointer": "/sources",
+          "match": {
+            "repository": "https://github.com/mrRay/ISFGLSLGenerator"
+          }
+        }
+      },
+      {
+        "id": "vvmetalkit",
+        "provider": "github",
+        "url": "https://github.com/mrRay/VVMetalKit",
+        "repository": "mrRay/VVMetalKit",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
+          "pointer": "/sources",
+          "match": {
+            "repository": "https://github.com/mrRay/VVMetalKit"
+          }
+        }
+      },
+      {
+        "id": "pincache",
+        "provider": "github",
+        "url": "https://github.com/mrRay/PINCache",
+        "repository": "mrRay/PINCache",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
+          "pointer": "/sources",
+          "match": {
+            "repository": "https://github.com/mrRay/PINCache"
+          }
+        }
       }
     ]
   },
@@ -235,7 +545,10 @@
         "provider": "github",
         "url": "https://github.com/code-disaster/steamworks4j",
         "repository": "code-disaster/steamworks4j",
-        "revision": "33ae54e87657afe8464eb01845e62b79403f5bfa"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/java/runtime/steamworks/versions.json",
+          "pointer": "/0/sourceRevision"
+        }
       }
     ],
     "packageProfiles": [
@@ -264,5 +577,47 @@
       "sourceDirectory": "sources/maclauncher-android"
     },
     "upstreams": []
+  },
+  {
+    "id": "web-renderer-network",
+    "name": "Browser network helper",
+    "purpose": "Owned Node-API network policy for browser game renderers.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "producers/maclauncher/scripts/stage-web-renderer-network.cjs"
+      ],
+      "sourceDirectory": "producers/maclauncher"
+    },
+    "upstreams": []
+  },
+  {
+    "id": "android-launcher",
+    "name": "Android launcher integrations",
+    "purpose": "Owned Android JVM agents, package signing support and launcher-facing Android runtime interfaces.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers",
+      "entries": [
+        "producers/included-helpers/prepare.mjs",
+        "producers/included-helpers/profiles/android-launcher.json",
+        "producers/android-launcher/build.mjs",
+        "producers/android-launcher/source.json"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "maclauncher-android",
+        "provider": "github",
+        "url": "https://github.com/procrastinine/maclauncher-android",
+        "repository": "procrastinine/maclauncher-android",
+        "pin": {
+          "file": "producers/android-launcher/source.json",
+          "pointer": "/android"
+        }
+      }
+    ]
   }
 ]

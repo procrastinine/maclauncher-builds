@@ -22,7 +22,11 @@
         "bytes": 11244214,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/ai5%2Fv1.5.0-MCLv1%2Farm64/ai5-1.5.0-MCLv1-arm64.tar.gz"
       },
-      "tag": "ai5/v1.5.0-MCLv1/arm64"
+      "tag": "ai5/v1.5.0-MCLv1/arm64",
+      "source": {
+        "repository": "nunuhara/ai5-sdl2",
+        "revision": "ad7a703f1c9f56e127d23c10d54fec0dcd4eaef3"
+      }
     }
   ]
 }

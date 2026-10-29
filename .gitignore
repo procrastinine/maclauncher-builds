@@ -6,3 +6,13 @@ node_modules/
 src/modules/android/native/tools/*.jar
 AGENTS.md
 dist/
+/producers/maclauncher/build/managed-runtimes/
+/producers/maclauncher/src/modules/shared/reshade/native/*-test.*
+!/producers/maclauncher/src/modules/shared/reshade/native/depth-opengl-test.fx
+!/producers/maclauncher/src/modules/shared/reshade/native/depth-opengl-test.mm
+!/producers/maclauncher/src/modules/shared/reshade/native/metal-presentation-test.mm
+!/producers/maclauncher/src/modules/shared/reshade/native/native-layer-test.mm
+!/producers/maclauncher/src/modules/shared/reshade/native/opengl-test.mm
+!/producers/maclauncher/src/modules/shared/reshade/native/remote-presentation-test.mm
+!/producers/maclauncher/src/modules/shared/reshade/native/smaa-opengl-test.mm
+!/producers/maclauncher/src/modules/shared/reshade/native/smaa-test.mm

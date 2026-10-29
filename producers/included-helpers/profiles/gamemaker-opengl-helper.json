@@ -1,0 +1,68 @@
+{
+  "id": "gamemaker-opengl-helper",
+  "version": "software-gl-v3-MCLv2",
+  "arch": "universal",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "source": {
+    "repository": "https://github.com/procrastinine/maclauncher-builds",
+    "sourceSha256": "7b9e4779af97a2bd7d5f2dd5c1a643ebc9eabc864e649940b294b05d0724c994",
+    "sourceFile": "producers/included-helpers/gamemaker-opengl-helper/software-opengl-v3.m"
+  },
+  "inputs": [
+    {
+      "path": "helper.json",
+      "output": "helper.json",
+      "kind": "file",
+      "size": 1480,
+      "sha256": "e7bee537ce01d5baf84f6abebc0fa2740003b79653f12587a38a03a59fd5f574",
+      "mode": 420
+    },
+    {
+      "path": "license.txt",
+      "output": "license.txt",
+      "kind": "file",
+      "size": 1642,
+      "sha256": "a42344fc11f4afc0514c300cc1454583c47a5f0b2d787ac954dac3fb61a7178f",
+      "mode": 420
+    },
+    {
+      "path": "software-opengl.dylib",
+      "output": "software-opengl.dylib",
+      "kind": "file",
+      "size": 101232,
+      "sha256": "0249adee6d15ef62abc0518c3530a7959a883de322a3143fa8c587e769562616",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    }
+  ],
+  "notices": [
+    {
+      "name": "MacLauncher software OpenGL integration",
+      "license": "MIT",
+      "path": "license.txt",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-builds"
+    }
+  ],
+  "executableRelative": "software-opengl.dylib",
+  "managedManifest": {
+    "managerId": "gamemaker-opengl-helper",
+    "helperABI": 1,
+    "runnerChecksums": {
+      "2026.0.0.23": "d63b5d5152d427b333b64883c26edc6701214d0a5ad027fa6f09e579fa31c1b0",
+      "2024.13.1.242": "4871c81c7425b18cb8aa0650c82019f75dde504ca2d1d7e61d14aa5f1e874ffe",
+      "2.3.7.476": "50916940fb11afe911f1bb11b24be075c8b616d5afae10b933c407bf618e1fbb",
+      "1.4.9999": "dd8395d9dcdb5eb6e58641a730b22640d1909e72a55a48c3450cf6d0231040fa",
+      "2.2.5.378": "054debab706e5fd42ce73df6c4739ce86c31804e00e039b9e78c16dfaffc265a"
+    },
+    "legacyLogicalRunnerVersions": [
+      "1.4.9999"
+    ]
+  }
+}

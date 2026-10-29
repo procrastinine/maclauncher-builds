@@ -22,7 +22,11 @@
         "bytes": 2512194,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/opengmk%2Fv0.2.0-MCLv1%2Farm64/opengmk-0.2.0-MCLv1-arm64.tar.gz"
       },
-      "tag": "opengmk/v0.2.0-MCLv1/arm64"
+      "tag": "opengmk/v0.2.0-MCLv1/arm64",
+      "source": {
+        "repository": "OpenGMK/OpenGMK",
+        "revision": "9ccc47a9cab4681a889866f7233a6b016d36a15e"
+      }
     }
   ]
 }

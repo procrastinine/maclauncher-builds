@@ -1,0 +1,251 @@
+{
+  "schemaVersion": 1,
+  "id": "mpv",
+  "version": "0.41.0-MCLv7",
+  "source": {
+    "path": "producers/maclauncher/src/external/mpv-player",
+    "repository": "https://github.com/mpv-player/mpv.git",
+    "revision": "41f6a645068483470267271e1d09966ca3b9f413",
+    "license": "GPL-2.0-or-later, LGPL-2.1-or-later"
+  },
+  "architecture": "arm64",
+  "minimumMacOS": "27.0",
+  "libraryInputSha256": "b355a957a8fc4435099ad5ca43a8405d042fc268315dea29ae19fa69cea95254",
+  "artifact": {
+    "kind": "owned-source-build",
+    "sha256": "b355a957a8fc4435099ad5ca43a8405d042fc268315dea29ae19fa69cea95254",
+    "bytes": 4239488
+  },
+  "backports": [
+    "75b2ccfeb1ce4ed5a40ac9860fa74f3d1265e13f",
+    "c5d391adba7bd024954d0df1e0405f5749f4d4ca"
+  ],
+  "ownedInputs": [
+    {
+      "path": "producers/mpv-render/v7/maclauncher/LICENSE",
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/package.json",
+      "sha256": "965af71b1c6daad229456928c9b178c04e3241f76c4a260b7f65afd130c81f6e"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/scripts/build-mpv-library.cjs",
+      "sha256": "1b7a1a36eff50974cbd9c5dcc4be4574cdeff3c456cc9f582150cd80119684e3"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/scripts/native-binary-tools.cjs",
+      "sha256": "40c99e682e785a42de48ae958fe23deac10c9a527d777c9a8852bfa0246a2074"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/scripts/stage-mpv-render.cjs",
+      "sha256": "791c25a616b6a104cc0354e1ef24caf174d2ecd58c566499dbf236e804391a74"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/frame.h",
+      "sha256": "4fb8fcc8df79f75a784afce8c4a15d122be8ab811f139cbc9ca93b99daf4b51a"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/image-color.h",
+      "sha256": "1608d90688bcb8e8560a4a06e7b810134a3c2d8287812b3cb09de5933a4bceea"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/presentation-content.h",
+      "sha256": "0f8993eb3345bcbb3978180229fd2f54cf6486a4ad1b7f1ff44a2ff1bc7b997f"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/presentation-observed.h",
+      "sha256": "b74f3740304e395cfc24ae55aa7cd00ffd75085d07e51ef137f5c3df4aeaf2e0"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/presentation-source.h",
+      "sha256": "107a70534fd1e96c3f9e3b1ac37f2078a6d5ad5cbe6bdfab55d93af70a52a814"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/presentation.h",
+      "sha256": "e06dcd4664169c4fd4e707789c4315b4f3a081e624bc98c686f85841b996e01c"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/target-time.h",
+      "sha256": "d8e8f6b487e03fa85dacccf4e60c464b8e647abbd5259559396f7da46449a271"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/app-bundle.js",
+      "sha256": "a0e4cdef49e0892bf60ab9777cb53af77c88dc97cd607efcd31b70ec10622ca2"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/bundled-native.js",
+      "sha256": "f63718b8af1d3ef869fe75f9e87fd71ab0b2168b8ace7b433e84f9a356a7186b"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/local-native.js",
+      "sha256": "7bcbc75f773bea4bd7456ec36b9f38dc53df639f2b7be1b78cf699a79d4d90ef"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/native-focus.js",
+      "sha256": "73175acb9fa527e32fd17a3864122a5755274b02f4a5f9f2c8f8ffb6ba339d78"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/gpu-surface.hpp",
+      "sha256": "e122bbf3cc8685287a8bbcdf22a6349e0ea048a79a40434932e95aef37fd7194"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/gpu-surface.mm",
+      "sha256": "08518dcbadb2847b9b0594a2810ff9bdaae442320ea54d29f20709a3899d4140"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/mpv-frame-metadata.h",
+      "sha256": "5ddbe4cd4e130b4ef53965c5429f8f9822ce8464b6d7537dba73aca16c644c89"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/mpv-frame-metadata.patch",
+      "sha256": "0ad025b167501139f55cfce513431c1b76df22546b775413b3021f0871696f48"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/mpv-render-layers.patch",
+      "sha256": "33ab29d1c56c13fb186f0534455b856a4e28a15d8df06bf21ffdbf9580b4664b"
+    },
+    {
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/mpv-render.mm",
+      "sha256": "173ff3b68dc8d675f0603947fa71683303c810a0a56bc588e877d2374c06250b"
+    }
+  ],
+  "buildEntry": "producers/mpv-render/v7/build.mjs",
+  "packageEntry": "producers/mpv-render/v7/package.mjs",
+  "decodedColorAPI": 1,
+  "intermediateColor": {
+    "primaries": "bt2020",
+    "transfer": "pq",
+    "referenceWhite": 203,
+    "encodingPeak": 10000,
+    "format": "rgba16float"
+  },
+  "outputColor": {
+    "primaries": "display-p3",
+    "transfer": "linear",
+    "format": "rgba16float",
+    "headroom": "display"
+  },
+  "preparationNotificationAPI": 1,
+  "playerScriptsAPI": 1,
+  "playerInputAPI": 1,
+  "osdLayerAPI": 1,
+  "libraryBuild": {
+    "entry": "producers/mpv-render/v7/maclauncher/scripts/build-mpv-library.cjs",
+    "schema": 1,
+    "repository": "https://github.com/mpv-player/mpv.git",
+    "revision": "41f6a645068483470267271e1d09966ca3b9f413",
+    "backports": [
+      "75b2ccfeb1ce4ed5a40ac9860fa74f3d1265e13f",
+      "c5d391adba7bd024954d0df1e0405f5749f4d4ca"
+    ],
+    "patches": [
+      {
+        "path": "src/modules/video/native/mpv-frame-metadata.patch",
+        "sha256": "0ad025b167501139f55cfce513431c1b76df22546b775413b3021f0871696f48"
+      },
+      {
+        "path": "src/modules/video/native/mpv-render-layers.patch",
+        "sha256": "33ab29d1c56c13fb186f0534455b856a4e28a15d8df06bf21ffdbf9580b4664b"
+      }
+    ],
+    "options": [
+      "--buildtype=release",
+      "--wrap-mode=nofallback",
+      "-Dlibmpv=true",
+      "-Dcplayer=false",
+      "-Dbuild-date=false",
+      "-Dtests=false",
+      "-Dmanpage-build=disabled",
+      "-Dhtml-build=disabled",
+      "-Dpdf-build=disabled",
+      "-Dgl=enabled",
+      "-Dplain-gl=enabled",
+      "-Dvideotoolbox-gl=enabled",
+      "-Dlua=luajit",
+      "-Djavascript=enabled",
+      "-Dswift-build=enabled",
+      "-Dcocoa=enabled",
+      "-Dgl-cocoa=enabled",
+      "-Dmacos-cocoa-cb=disabled",
+      "-Dvulkan=disabled"
+    ],
+    "minimumMacOS": "27.0",
+    "architecture": "arm64",
+    "meson": "1.10.2",
+    "ninja": "1.13.0.git.kitware.jobserver-pipe-1",
+    "dependencies": [
+      {
+        "name": "libass",
+        "version": "0.17.4"
+      },
+      {
+        "name": "libplacebo",
+        "version": "7.360.1"
+      },
+      {
+        "name": "libavcodec",
+        "version": "63.1.102"
+      },
+      {
+        "name": "libavformat",
+        "version": "63.1.102"
+      },
+      {
+        "name": "libavfilter",
+        "version": "12.1.102"
+      },
+      {
+        "name": "libavutil",
+        "version": "61.1.102"
+      },
+      {
+        "name": "libswscale",
+        "version": "10.1.102"
+      },
+      {
+        "name": "libswresample",
+        "version": "7.1.102"
+      },
+      {
+        "name": "luajit",
+        "version": "2.1.1788856981"
+      },
+      {
+        "name": "mujs",
+        "version": "1.3.11"
+      }
+    ],
+    "dependencyInputs": [
+      {
+        "name": "libass",
+        "version": "0.17.4",
+        "url": "https://github.com/libass/libass/releases/download/0.17.4/libass-0.17.4.tar.gz",
+        "archive": "libass-0.17.4.tar.gz",
+        "sha256": "a886b3b80867f437bc55cff3280a652bfa0d37b43d2aff39ddf3c4f288b8c5a8",
+        "publicHeaders": [
+          "libass/ass.h",
+          "libass/ass_types.h"
+        ]
+      },
+      {
+        "name": "libplacebo",
+        "version": "7.360.1",
+        "url": "https://codeload.github.com/haasn/libplacebo/tar.gz/refs/tags/v7.360.1",
+        "archive": "libplacebo-v7.360.1.tar.gz",
+        "sha256": "d05fdf90bea2f629eaa2d115e909fd356388ac639e54f77b87a018a6d76224bd",
+        "generatedHeader": "include/libplacebo/config.h",
+        "clientFeatureProfile": "OpenGL only; source template substitution major=7 API=360. Other binary backends are intentionally not declared to this compilation."
+      },
+      {
+        "name": "mujs",
+        "headerRelease": "1.3.11",
+        "headerApiVersion": "1.3.8",
+        "url": "https://ghcr.io/v2/homebrew/core/mujs/blobs/sha256:462a216d223d3cf43356216410830a2618ed18dbe8f0149e2dac38a78a5ea75e",
+        "archive": "mujs.tar.gz",
+        "sha256": "462a216d223d3cf43356216410830a2618ed18dbe8f0149e2dac38a78a5ea75e",
+        "note": "Stable public header reused; dynamic linking targets the original mpv libmujs.dylib, never the downloaded bottle library."
+      }
+    ]
+  }
+}

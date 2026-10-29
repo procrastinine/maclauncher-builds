@@ -12,7 +12,15 @@ under `producers/maclauncher/`. Each release attaches only its binary package;
 the release tag identifies the matching source, patches and pinned upstream
 repositories. Compiled packages are excluded from Git history.
 
+## Conversion tools
+
+[AnyPS5](ANYPS5.md) has a pinned source checkout and an ARM64 macOS relinker
+recipe under `producers/anyps5/`. The converter produces x86-64 game code;
+host system-library implementations are separate execution inputs.
+
 ## Projects and packages
+
+[Source pin references](SOURCE_PINS.md) connect upstream descriptions to the selected producer metadata.
 
 [projects.json](../projects.json) selects two project registries:
 [downloadable runtimes and tools](../projects/downloadable.json) and
@@ -29,7 +37,12 @@ these groups separately; its JSON records expose each project's classification.
 
 The Android producer uses a pinned source submodule. Other producer sources and
 patches live under `producers/maclauncher/`. The package tools accept their sealed
-outputs. [Per-project catalogs](../catalogs) record published versions, CPU
+outputs. Native build entries share `scripts/native-binary-tools.cjs` for
+Mach-O inspection, dependency copying and notices without loading the launcher
+module registry. `producers/maclauncher/native-tools-source.json` records the exact
+canonical file hashes and the standalone Kosmic build import adaptation.
+`node producers/maclauncher/refresh-native-tools.mjs --source /path/to/maclauncher`
+refreshes those declared inputs. [Per-project catalogs](../catalogs) record published versions, CPU
 architectures and archive identities, including separate HashLink profiles.
 
 ### Downloadable runtimes
@@ -47,6 +60,7 @@ architectures and archive identities, including separate HashLink profiles.
 | [impacto](https://github.com/CommitteeOfZero/impacto) | `impacto` | Windows scripts, input, audio, saves and backlog adaptations |
 | [Kirikiri SDL2](https://github.com/krkrsdl2/krkrsdl2) | `krkrsdl2` | Storage access, fonts and full-frame presentation |
 | [MKXP-Z](https://github.com/mkxp-z/mkxp-z) | `mkxpz` | macOS filename normalization for Apple Silicon |
+| [mpv decoded-frame host](MPV.md) | `mpv` | GPU video frames, audio timing and shared presentation |
 | [libnpengine](https://github.com/FGRE/libnpengine) | `npengine` | Script compiler, choice handling and native media runner |
 | [ONScripter-EN](https://github.com/Galladite27/ONScripter-EN) | `onscripter-en` | Native Cocoa shell and portable SDL/media libraries |
 | [ONScripterYuri](https://github.com/YuriSizuku/OnscripterYuri) | `onsyuri` | Empty-page state reset and portable native libraries |
@@ -106,6 +120,7 @@ build inputs.
 | Android APK metadata reader | `android-apk-metadata` | Local APK package and manifest inspection |
 | Android privacy helper | `android-privacy` | Process-scoped clipboard broker |
 | CatSystem2 KIF cryptography helper | `catsystem2-kif-crypto` | CommonCrypto KIF block adapter |
+| Browser network helper | `web-renderer-network` | Node-API network policy for browser game renderers |
 | PlayTools storage adapter | `ios-playtools-paths` | Private paths and device identity |
 | [LuaSteam](https://github.com/uspgamedev/luasteam) LÖVE bridge | `love-luasteam` | Version 4 binding against the selected host Lua VM |
 | MKXP-Z configuration helper | `mkxpz-config-helper` | Per-game configuration-path adapter |
@@ -115,6 +130,21 @@ build inputs.
 
 The MKXP-Z helper contains MacLauncher integration code. The MKXP-Z runtime is a
 separate downloadable package.
+
+The graphics [build recipe](../producers/maclauncher/scripts/graphics-runtime.json)
+declares the shared processor's CMake targets, pinned sources, binary inputs and
+provider builds. Its pinned sources are the registered submodules under
+`producers/maclauncher/src/external`. This command reports unavailable sources,
+inputs and tools without building:
+
+```sh
+node producers/maclauncher/scripts/build-graphics-runtime.mjs --check --work /absolute/work
+```
+
+`--fetch` downloads inputs that have recorded URLs and checksums, and
+`--input id=path` supplies another declared input; recorded checksums are
+verified. Without `--check`, the command builds the processor and its providers
+in the work directory. `--stage` then stages the component in the producer tree.
 
 ## Project and version identities
 
@@ -135,17 +165,15 @@ Records include the archive size/checksum, manifest/source checksums, launcher
 architectures and minimum macOS version. Download URLs must match the registered
 release repository, project, tag and archive filename. Catalog generation rejects
 mixed projects and duplicate version/architecture pairs. Existing published
-versions are immutable: changed bytes or metadata require a new package version.
+payload identities are immutable: changed archive bytes, sealed manifests or assets require a new package version. Verified source identity and capability facts can be added to a catalog record without changing its payload. Existing facts cannot be removed or replaced.
 Tagged upstream packages use `1.2.3-MCLv1`, with the revision restarting at 1 for
 a new upstream version. Commit snapshots use `MCLv1-MMDD` and increase their
 revision across upstream and adaptation changes. The [release reference](RELEASES.md)
 defines these version rules and metadata-only package rewriting.
 
-Catalog generation can merge records through `--previous`. Published catalogs
-retain the current package per runtime or incompatible game ABI; retired
-generations are removed deliberately along with their release assets.
-Neither the package tools nor MacLauncher's catalog reader infer an update from
-version text or select a different installed version automatically.
+Downloadable records use `source: {repository, revision, path?}` for their upstream Git identity and a bounded `capabilities` object for game/runtime requirements. The source revision matches the sealed manifest. `launcherContract` is a positive integer; omission means contract 1. Bundled records retain their exact launcher-selected identity.
+
+Catalog generation can merge records through `--previous`, preserving published versions. Each project includes at most one new unpublished version per publication. Superseded unpublished candidates are omitted. MacLauncher honors a per-game choice, then a user default, then the newest usable installed version; catalog discovery and installation remain explicit actions.
 
 ## Android producer
 

@@ -22,7 +22,27 @@
         "bytes": 1174311,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/butterscotch%2FvMCLv1-1007%2Farm64/butterscotch-MCLv1-1007-arm64.tar.gz"
       },
-      "tag": "butterscotch/vMCLv1-1007/arm64"
+      "tag": "butterscotch/vMCLv1-1007/arm64",
+      "capabilities": {
+        "gameArguments": "repeat-game-arg-v1",
+        "wadVersions": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17
+        ],
+        "sourceKind": "commit"
+      },
+      "source": {
+        "repository": "ButterscotchRunner/Butterscotch",
+        "revision": "d66464857303a2840a5cc5141c0035440847f441"
+      }
     }
   ]
 }

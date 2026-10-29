@@ -8,8 +8,22 @@ import { validateEffectSources } from "./reshade-effect-sources.mjs";
 
 const repository = path.resolve(import.meta.dirname, "..");
 const digest = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
+export function requirePreservedNativeFeatures(requested,sealed,key=""){
+  if(isDeepStrictEqual(requested,sealed))return;
+  if(key==="graphics.simpleGenerationPlacementQualified"&&typeof requested==="boolean"&&typeof sealed==="boolean")return;
+  if(typeof requested==="boolean"&&typeof sealed==="boolean"&&!requested)return;
+  if(typeof requested==="number"&&typeof sealed==="number"&&requested>=0&&requested<=sealed)return;
+  if(Array.isArray(requested)&&Array.isArray(sealed)&&requested.every(value=>sealed.some(existing=>isDeepStrictEqual(value,existing))))return;
+  if(requested&&sealed&&typeof requested==="object"&&typeof sealed==="object"&&!Array.isArray(requested)&&!Array.isArray(sealed)){
+    for(const [name,value]of Object.entries(requested)){
+      if(!Object.hasOwn(sealed,name))throw Error("Effects-only staging cannot add native graphics capabilities; use the matching source and native payload.");
+      requirePreservedNativeFeatures(value,sealed[name],key?key+"."+name:name);
+    }return;
+  }
+  throw Error("Effects-only staging cannot add native graphics capabilities; use the matching source and native payload.");
+}
 
-// Effect and capability changes reuse the sealed native payload. No native checkout, build
+// Effect changes retain the sealed native capabilities. No native checkout, build
 // directory, signing operation or source archive generation is involved.
 export function stageReShadeEffects({
   resourceRoot = path.join(repository, "src/resources/native-runtimes"),
@@ -39,6 +53,7 @@ export function stageReShadeEffects({
   if (features !== undefined) {
     if (!features || typeof features !== "object" || Array.isArray(features)) throw new Error("Graphics features must be an object.");
     Supplementals.validatePublicMetadata(features);
+    requirePreservedNativeFeatures(features,manifest.features);
     manifest.features = structuredClone(features);
   }
   const inputs = new Map();

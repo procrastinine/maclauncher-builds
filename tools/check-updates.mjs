@@ -58,7 +58,7 @@ export async function main(args){
   if(!args[i]?.startsWith('--')||!['project','output'].includes(key)||!args[i+1]||Object.hasOwn(options,key))throw Error('Use --project <id> or --all, with optional --output <file>.');options[key]=args[++i];
  }
  if(Boolean(options.all)===Boolean(options.project))throw Error('Select one project or --all.');
- const registry=readProjects(root),projects=options.all?registry.projects:[resolveProject(options.project,root)];
+ const projects=options.all?readProjects(root).projects:[resolveProject(options.project,root)];
  const report=await checkProjects(projects);
  if(options.output){const output=path.resolve(options.output);if(output===path.join(root,'projects.json')||output.startsWith(path.join(root,'projects')+path.sep)||output.startsWith(path.join(root,'catalogs')+path.sep)||output.startsWith(path.join(root,'recipes')+path.sep))throw Error('Update reports cannot replace project pins or release catalogs.');fs.mkdirSync(path.dirname(output),{recursive:true});fs.writeFileSync(output,JSON.stringify(report,null,2)+'\n',{flag:'wx'});}
  if(report.projects.some(value=>value.status==='incomplete'))process.exitCode=1;return report;

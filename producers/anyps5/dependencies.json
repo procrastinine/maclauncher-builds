@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "dependencies": [
+    {
+      "path": "3rdparty/jxrlib",
+      "repository": "https://github.com/4creators/jxrlib.git",
+      "revision": "f7521879862b9085318e814c6157490dd9dbbdb4"
+    },
+    {
+      "path": "3rdparty/SDL2",
+      "repository": "https://github.com/libsdl-org/SDL.git",
+      "revision": "4b69833bc54abf3dd3288d4aa7afbba527775e5b"
+    },
+    {
+      "path": "3rdparty/Vulkan-Headers",
+      "repository": "https://github.com/KhronosGroup/Vulkan-Headers.git",
+      "revision": "2fa203425eb4af9dfc6b03f97ef72b0b5bcb8350"
+    },
+    {
+      "path": "3rdparty/SPIRV-Headers",
+      "repository": "https://github.com/KhronosGroup/SPIRV-Headers.git",
+      "revision": "b824a462d4256d720bebb40e78b9eb8f78bbb305"
+    },
+    {
+      "path": "3rdparty/SPIRV-Tools",
+      "repository": "https://github.com/KhronosGroup/SPIRV-Tools.git",
+      "revision": "262bdab48146c937467f826699a40da0fdfc0f1a"
+    },
+    {
+      "path": "3rdparty/glslang",
+      "repository": "https://github.com/KhronosGroup/glslang.git",
+      "revision": "ba1640446f3826a518721d1f083f3a8cca1120c3"
+    },
+    {
+      "path": "3rdparty/VulkanMemoryAllocator",
+      "repository": "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git",
+      "revision": "a1d434708c217b2a6c7b365f1fe41fa03a562e59"
+    },
+    {
+      "path": "3rdparty/LibAtrac9",
+      "repository": "https://github.com/shadps4-emu/ext-LibAtrac9.git",
+      "revision": "946e05a9212976626a9f5e52f29c0a7202871f29"
+    },
+    {
+      "path": "3rdparty/ffmpeg-core",
+      "repository": "https://github.com/KytyPS5/ext-ffmpeg-core.git",
+      "revision": "9ac4cfd195f192ed8b08566f49c28dbb48d08341"
+    },
+    {
+      "path": "3rdparty/opus",
+      "repository": "https://github.com/xiph/opus.git",
+      "revision": "22244de5a79bd1d6d623c32e72bf1954b56235be"
+    },
+    {
+      "path": "3rdparty/freetype",
+      "repository": "https://github.com/freetype/freetype.git",
+      "revision": "42608f77f20749dd6ddc9e0536788eaad70ea4b5"
+    },
+    {
+      "path": "3rdparty/freetype/subprojects/dlg",
+      "repository": "https://github.com/nyorain/dlg.git",
+      "revision": "72dfcc858c040c54a6a0b88fcb7e70ee186d3167"
+    },
+    {
+      "path": "3rdparty/stb",
+      "repository": "https://github.com/nothings/stb.git",
+      "revision": "2c980bb59875b0d32144a71867fbdebb2f77cd20"
+    },
+    {
+      "path": "3rdparty/tracy",
+      "repository": "https://github.com/wolfpld/tracy.git",
+      "revision": "30997d5ca6bb632cc10807a1da8a6d3de0aeeb3c"
+    },
+    {
+      "path": "3rdparty/mimalloc",
+      "repository": "https://github.com/microsoft/mimalloc.git",
+      "revision": "f8401befa675adb13b98decababd7fdc59572477"
+    },
+    {
+      "path": "3rdparty/libjpeg-turbo",
+      "repository": "https://github.com/libjpeg-turbo/libjpeg-turbo.git",
+      "revision": "c85e6b905bf237038faa936dab160ebfc5da0344"
+    },
+    {
+      "path": "3rdparty/libusb-cmake",
+      "repository": "https://github.com/libusb/libusb-cmake.git",
+      "revision": "bea6567b63796ab27c1c33257d230284fb2d8316"
+    },
+    {
+      "path": "3rdparty/mbedtls",
+      "repository": "https://github.com/Mbed-TLS/mbedtls.git",
+      "revision": "068ff080b369adfac81509f9b57b2afabaf82dc5"
+    },
+    {
+      "path": "3rdparty/mbedtls/framework",
+      "repository": "https://github.com/Mbed-TLS/mbedtls-framework",
+      "revision": "dde0c4a0e448a0552f18817dcea633bb851fd288"
+    },
+    {
+      "path": "3rdparty/zstd",
+      "repository": "https://github.com/facebook/zstd.git",
+      "revision": "f8745da6ff1ad1e7bab384bd1f9d742439278e99"
+    },
+    {
+      "path": "3rdparty/ZArchive",
+      "repository": "https://github.com/Exzap/ZArchive.git",
+      "revision": "965b66c8d67b6b7e30fd63b3b75aa91a99ff303b"
+    },
+    {
+      "path": "3rdparty/vgmstream",
+      "repository": "https://github.com/vgmstream/vgmstream.git",
+      "revision": "7c520e8f9b078dfde2f84f1b5bcbad0c6c415806"
+    },
+    {
+      "path": "3rdparty/ogg",
+      "repository": "https://github.com/xiph/ogg.git",
+      "revision": "be05b13e98b048f0b5a0f5fa8ce514d56db5f822"
+    },
+    {
+      "path": "3rdparty/vorbis",
+      "repository": "https://github.com/xiph/vorbis.git",
+      "revision": "c2aa86b05e981c96bf381fc6aa11cdd03eccc2fb"
+    },
+    {
+      "path": "3rdparty/nghttp2",
+      "repository": "https://github.com/nghttp2/nghttp2.git",
+      "revision": "85e300c79fb6dbcfa9c1013215c8710c1c2cd3d2"
+    },
+    {
+      "path": "3rdparty/nghttp2/third-party/mruby",
+      "repository": "https://github.com/mruby/mruby",
+      "revision": "831da26b9021de0369d17b71b5667e2941a1a32d"
+    },
+    {
+      "path": "3rdparty/nghttp2/third-party/neverbleed",
+      "repository": "https://github.com/tatsuhiro-t/neverbleed.git",
+      "revision": "68f65c7b05f68e6fd93631668d4f469875946656"
+    },
+    {
+      "path": "3rdparty/nghttp2/tests/munit",
+      "repository": "https://github.com/ngtcp2/munit",
+      "revision": "114805e1bab0222574b5eb3a92461ad5216647ed"
+    },
+    {
+      "path": "3rdparty/nghttp2/third-party/urlparse",
+      "repository": "https://github.com/ngtcp2/urlparse",
+      "revision": "59b068a7618a256c6823b0b9801b61d1d04677a3"
+    },
+    {
+      "path": "3rdparty/nghttp2/third-party/urlparse/munit",
+      "repository": "https://github.com/ngtcp2/munit",
+      "revision": "3cf9c79f3a76f313d560dedd5b47c0416a0fbb6e"
+    },
+    {
+      "path": "3rdparty/nghttp2/third-party/urlparse/http-parser",
+      "repository": "https://github.com/nodejs/http-parser",
+      "revision": "ec8b5ee63f0e51191ea43bb0c6eac7bfbff3141d"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ffmpeg-macos-x64",
+      "repository": "https://github.com/KytyPS5/ext-ffmpeg-core.git",
+      "revision": "9ac4cfd195f192ed8b08566f49c28dbb48d08341",
+      "url": "https://github.com/KytyPS5/ext-ffmpeg-core/releases/download/9ac4cfd195f1/ffmpeg-macos-x64.zip",
+      "bytes": 14864759,
+      "sha256": "b92c60ac99f9b2277f62d42e7424c24bc991d5723f4fa388a5d2e452be18f40b"
+    }
+  ]
+}

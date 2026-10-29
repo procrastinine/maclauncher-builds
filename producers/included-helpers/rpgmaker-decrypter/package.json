@@ -1,0 +1,9 @@
+{
+  "name": "maclauncher-rpgmaker-decrypter-producer",
+  "private": true,
+  "type": "commonjs",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  }
+}

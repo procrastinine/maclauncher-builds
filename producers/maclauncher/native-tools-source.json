@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/procrastinine/maclauncher",
+  "files": [
+    {
+      "path": "scripts/native-binary-tools.cjs",
+      "sourceSha256": "40c99e682e785a42de48ae958fe23deac10c9a527d777c9a8852bfa0246a2074",
+      "sha256": "40c99e682e785a42de48ae958fe23deac10c9a527d777c9a8852bfa0246a2074"
+    },
+    {
+      "path": "scripts/stage-mkxpz-config-helper.cjs",
+      "sourceSha256": "8874d55402cc327df59a7a0bf5f7d2b94d48baf70be4de6ed57dd7790c363388",
+      "sha256": "8874d55402cc327df59a7a0bf5f7d2b94d48baf70be4de6ed57dd7790c363388"
+    },
+    {
+      "path": "scripts/build-mkxpz-nfc.cjs",
+      "sourceSha256": "942c130d29f93191948828505b57e79c07030c5d414882d96214a0d36068ff2a",
+      "sha256": "942c130d29f93191948828505b57e79c07030c5d414882d96214a0d36068ff2a"
+    },
+    {
+      "path": "src/modules/shared/vulkan/native/kosmickrisp-build.mjs",
+      "sourceSha256": "86cdec94cbd6fc624cfe129803179554bde4494ad571203e742804336b5acc3f",
+      "sha256": "5a51d048ab873c43817b53c09dadc0485d1c54da4da22dce01309ee19136879d",
+      "replacements": [
+        {
+          "from": "import Stage from '../../../../../scripts/stage-native-runtimes.cjs';",
+          "to": "import Stage from '../../../../../scripts/native-binary-tools.cjs';"
+        }
+      ]
+    },
+    {
+      "path": "src/modules/shared/runtime/package-contract.cjs",
+      "destination": "lib/package-contract.cjs",
+      "sourceSha256": "878451c47195564a0a10b336ac9350d726dd77df1969621057109b84054698b5",
+      "sha256": "306bb2a70fda5fb0f62eec1d6bd96376eed46164b2b051977412ef3d872c41c9",
+      "replacements": [
+        {
+          "from": "const B = require(\"./bundled-native\");",
+          "to": "const B = require(\"./bundled-native.cjs\");"
+        }
+      ]
+    },
+    {
+      "path": "src/modules/shared/runtime/bundled-native.js",
+      "destination": "lib/bundled-native.cjs",
+      "sourceSha256": "e8d7b2c4d418c798877817b5e8d13241b40e6cace2ccd1a6b8d93c5644b94c40",
+      "sha256": "5788d41a348fdfaad3e70d0a4230eca6e420d30c64589e2c11821bc1fe728ca2",
+      "replacements": [
+        {
+          "from": "const Native = require(\"./local-native\");",
+          "to": "const Native = require(\"./local-native.cjs\");"
+        },
+        {
+          "from": "const PE = require(\"./pe-exports\");",
+          "to": "const PE = require(\"./pe-exports.cjs\");"
+        }
+      ]
+    }
+  ],
+  "retired": {
+    "scripts/distribution-model.cjs": "80ad97314b147faf1e90fe59ebd65081ef8f3fa6c68601da573ca6e9c9343346",
+    "scripts/stage-native-runtimes.cjs": "b18a8fe479b5d251416dc21ef4e0794d2a6bf49b7a68f7d36a30d0b5c98418c7"
+  }
+}

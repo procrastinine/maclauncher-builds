@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "dependencies": [
+    {"id": "sdl3", "repository": "https://github.com/libsdl-org/SDL.git", "revision": "f5e5f6588921eed3d7d048ce43d9eb1ff0da0ffc", "version": "3.2.30", "license": "Zlib"},
+    {"id": "vulkan-headers", "repository": "https://github.com/KhronosGroup/Vulkan-Headers.git", "revision": "2fa203425eb4af9dfc6b03f97ef72b0b5bcb8350", "reusePath": "sources/anyps5/3rdparty/Vulkan-Headers", "license": "Apache-2.0 OR MIT"}
+  ],
+  "artifacts": [{"id": "ffmpeg-macos-x64", "repository": "https://github.com/KytyPS5/ext-ffmpeg-core.git", "revision": "9ac4cfd195f192ed8b08566f49c28dbb48d08341", "url": "https://github.com/KytyPS5/ext-ffmpeg-core/releases/download/9ac4cfd195f1/ffmpeg-macos-x64.zip", "bytes": 14864759, "sha256": "b92c60ac99f9b2277f62d42e7424c24bc991d5723f4fa388a5d2e452be18f40b"}]
+}

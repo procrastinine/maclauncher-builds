@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 2,
+  "projectId": "rpgmaker-decrypter",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "rpgmaker-decrypter",
+      "version": "3.0.0-465c88c3-MCLv2",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "11.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "8e1568af2e0e9ba4371e8533e7ad3474b6a4c22ef57144b262097a343eb8a5af",
+      "sourceSha256": "b09a0dcea6092bccf1a14ca6a283e0993d7c924705ef2c7bc3f21d12028d14bb",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "rpgmaker-decrypter-3.0.0-465c88c3-MCLv2-arm64.tar.gz",
+        "sha256": "ae44b8b2cd4222d55b5c65131609908c056ea1c3ce6fb5f14b4b0f569a7243e2",
+        "bytes": 7967715,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/rpgmaker-decrypter%2Fv3.0.0-465c88c3-MCLv2%2Farm64/rpgmaker-decrypter-3.0.0-465c88c3-MCLv2-arm64.tar.gz"
+      },
+      "tag": "rpgmaker-decrypter/v3.0.0-465c88c3-MCLv2/arm64",
+      "source": {
+        "repository": "uuksu/RPGMakerDecrypter",
+        "revision": "465c88c304cac0b1516a3fbfb0b2a87fb0517736"
+      }
+    }
+  ]
+}

@@ -52,7 +52,7 @@ jobs:
           import fs from 'node:fs';
           import {resolveProject} from './lib/projects.mjs';
           import {releaseTag,validateCatalog} from './lib/project-identity.mjs';
-          const p = resolveProject(process.env.PROJECT);
+          const p = resolveProject(process.env.PROJECT, undefined, {resolvePins:false});
           if (p.releaseRepository !== process.env.GITHUB_REPOSITORY) throw Error('Release repository differs from its registry.');
           const tag = releaseTag({id: p.id, version: process.env.VERSION, arch: process.env.ARCH});
           const catalog = validateCatalog(JSON.parse(fs.readFileSync('catalogs/' + p.id + '.json')), {project: p.id, repository: p.releaseRepository});

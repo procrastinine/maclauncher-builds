@@ -6,8 +6,9 @@ const Native = require("./local-native");
 const { downloadToFile, throwIfAborted } = require("./download-utils");
 const { runDownloadTask } = require("./download-manager");
 const { buildRuntimeDownloadMeta } = require("./runtime-downloads");
-const { readRuntimeCatalog, writeRuntimeCatalog } = require("./runtime-catalog");
+const { catalogPath, readRuntimeCatalog, writeRuntimeCatalog } = require("./runtime-catalog");
 const { systemVersionSync, versionAtLeast } = require("./bundled-native");
+const Custom = require("./custom-runtime");
 
 // Source hashes identify builds but do not order them. Equal release stems
 // retain the publisher/catalog order (including the primary included build).
@@ -76,11 +77,12 @@ function installationEvidence(value) {
 
 // Pinned identities stay available offline for exact selections. Discoverable
 // release lists are displayed only after an explicit query or from a local cache.
-function createPinnedNativeManager({ id, label, catalog, recommendedVersion, discoverCatalog, projectBuilds, resolveExecutable, verifyArtifact, validateRecordedArtifact, prepareInstall, buildRuntime, buildSourcePath, sourceUrl, buildHelpUrl, buildRequirements, bundledRuntime, bundledExecution = "copy", distributionRequired = false, importLocal = false, nativeLibrary = false, supportsDefault = nativeLibrary, maxEntries = 500, dependencies = {} }) {
+function createPinnedNativeManager({ id, label, catalog, recommendedVersion, discoverCatalog, projectBuilds, buildsRepository, upstreamUrl, upstreamLabel, resolveExecutable, inspectRuntime = Native.resolveLocalRuntime, verifyArtifact, validateRecordedArtifact, prepareInstall, buildRuntime, buildSourcePath, sourceUrl, buildHelpUrl, buildRequirements, bundledRuntime, legacyInstalledRuntime, bundledExecution = "copy", distributionRequired = false, importLocal = false, nativeLibrary = false, supportsDefault = nativeLibrary, maxEntries = 500, dependencies = {} }) {
   if (typeof distributionRequired !== "boolean") throw new Error("Runtime distribution requirements must be explicit booleans.");
   if (typeof importLocal !== "boolean") throw new Error("Local runtime imports must be explicitly enabled.");
   if (typeof nativeLibrary !== "boolean") throw new Error("Native library runtimes must be explicitly enabled.");
   if (typeof supportsDefault !== "boolean") throw new Error("Runtime default selection must be an explicit boolean.");
+  if (typeof inspectRuntime !== "function") throw new Error("Runtime executable inspection requires a callback.");
   if (!/^[a-z0-9-]+$/.test(id || "") || !Array.isArray(catalog) || !catalog.length && typeof discoverCatalog !== "function") {
     throw new Error("Pinned native manager needs an id and a version catalog.");
   }
@@ -99,11 +101,18 @@ function createPinnedNativeManager({ id, label, catalog, recommendedVersion, dis
   }
   if (!["copy", "direct"].includes(bundledExecution) || bundledExecution === "direct" && typeof bundledRuntime?.resolveRuntime !== "function")
     throw new Error("The included runtime cannot be resolved.");
+  if (legacyInstalledRuntime !== undefined && typeof legacyInstalledRuntime?.verifyInstalled !== "function")
+    throw new Error("Existing runtime installations require an integrity verifier.");
   const projectPackages = projectBuilds && require("./project-native-package").createProjectNativePackage(projectBuilds,
     { id, catalog, dependencies: dependencies.projectBuilds || {} });
   if (projectPackages) {
-    const upstreamDiscovery = discoverCatalog;
+    const upstreamDiscovery = projectBuilds.upstreamMacDownloads === true ? discoverCatalog : null;
     discoverCatalog = async options => {
+      if (options.sourceId === "builds") return projectPackages.discover(options);
+      if (options.sourceId === "upstream") {
+        if (!upstreamDiscovery) throw new Error("This runtime has no upstream Mac download source.");
+        return upstreamDiscovery(options);
+      }
       const [hosted, upstream] = await Promise.allSettled([
         projectPackages.discover(options), upstreamDiscovery ? upstreamDiscovery(options) : []
       ]);
@@ -113,6 +122,9 @@ function createPinnedNativeManager({ id, label, catalog, recommendedVersion, dis
     };
   }
   let manager;
+  const sourceIds = projectPackages ? projectBuilds.upstreamMacDownloads === true ? ["builds", "upstream"] : ["builds"]
+    : buildsRepository ? ["builds"] : ["upstream"];
+  const catalogLimit = Math.min(2000, maxEntries * sourceIds.length);
   const entries = new Map();
   const validEntry = entry => Boolean(entry && /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(entry.version || "") &&
     typeof entry.upstreamRevision === "string" && entry.upstreamRevision && entry.upstreamRevision.length <= 200 &&
@@ -152,23 +164,32 @@ function createPinnedNativeManager({ id, label, catalog, recommendedVersion, dis
   }
   const assetReason = pin => pin?.asset?.expiresAt && Date.parse(pin.asset.expiresAt) <= (dependencies.now || Date.now)()
     ? "This build's download expired. Refresh versions to find a current build." : null;
-  let discoveryState = { status: discoverCatalog ? "idle" : "success", fetchedAt: null, error: null, source: sourceUrl || null, mode: null };
-  let discoveryPromise = null;
+  let discoveryState = { status: "idle", fetchedAt: null, error: null, source: sourceUrl || null, mode: null };
+  const sourceStates = Object.fromEntries(sourceIds.map(sourceId => [sourceId, { status: "idle", fetchedAt: null, error: null, mode: null }]));
+  const discoveryPromises = new Map();
   // UI broadcasts only revisit registration/executable metadata. Actual
   // selection, install and explicit Reload retain full integrity checks.
   const displayCache = new Map();
   const includedFailures = new Map();
   const DISPLAY_CACHE_LIMIT = 128;
-  const loadedCaches = new Set();
-  const loadedInstalledPins = new Set();
+  const loadedCaches = new Map();
+  const loadedInstalledPins = new Map();
+  function metadataIdentity(file) {
+    try {const stat=fs.statSync(file,{bigint:true});return [stat.dev,stat.ino,stat.size,stat.mtimeNs,stat.ctimeNs].join(":");}
+    catch {return null;}
+  }
   const root = userDataDir => {
     if (typeof userDataDir !== "string" || !path.isAbsolute(userDataDir)) throw new Error("An absolute launcher data directory is required.");
     return path.join(userDataDir, "runtimes", id);
   };
-  function mergeEntries(incoming) {
-    if (!Array.isArray(incoming) || incoming.length > maxEntries || !incoming.every(validEntry)) throw new Error("Discovered runtime catalog contains invalid version or artifact identities.");
+  const entrySource = entry => entry.catalogSourceId || (entry.projectPackage ? "builds" : "upstream");
+  function mergeEntries(incoming, sourceId) {
+    if (!Array.isArray(incoming) || incoming.length > (sourceId ? maxEntries : catalogLimit) || !incoming.every(validEntry)) throw new Error("Discovered runtime catalog contains invalid version or artifact identities.");
+    const selected = incoming.map(entry => sourceId ? { ...entry, catalogSourceId: sourceId } : entry);
+    const combined = sourceId ? [...remoteEntries.filter(entry => entrySource(entry) !== sourceId), ...selected]
+      .sort((a, b) => sourceIds.indexOf(entrySource(a)) - sourceIds.indexOf(entrySource(b))) : selected;
     const deduplicated = new Map();
-    for (const original of incoming) {
+    for (const original of combined) {
       const version = canonicalVersion(original.version);
       if (deduplicated.has(version)) continue;
       const entry = { ...original, version,
@@ -184,27 +205,32 @@ function createPinnedNativeManager({ id, label, catalog, recommendedVersion, dis
     remoteEntries = [...deduplicated.values()];
     // Successful refresh replaces the remote list. Removed releases remain
     // resolvable through installed records, never as stale download options.
-    versions = [...new Set([...deduplicated.keys(), ...baseVersions, ...resolvedVersions])];
+    versions = [...new Set([...deduplicated.keys(), ...baseVersions.filter(version => !baseEntries.get(version).asset), ...resolvedVersions])];
   }
   function loadCatalog(userDataDir) {
-    if (userDataDir && !loadedInstalledPins.has(userDataDir)) {
-      const directory = root(userDataDir);
-      if (fs.existsSync(directory)) {
-        for (const item of fs.readdirSync(directory, { withFileTypes: true }).slice(0, 500)) {
-          if (!item.isDirectory() || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(item.name)) continue;
-          try {
-            const file = path.join(directory, item.name, "runtime.json");
-            if (fs.statSync(file).size > 1024 * 1024) continue;
-            const record = JSON.parse(fs.readFileSync(file, "utf8")), pin = record.catalogEntry;
-            if (validEntry(pin) && pin.version === item.name && record.version === item.name &&
-              record.upstreamRevision === pin.upstreamRevision && !entries.has(item.name)) entries.set(item.name, Object.freeze(pin));
-          } catch {}
-        }
+    if (userDataDir) {
+      const directory=root(userDataDir),stamp=metadataIdentity(directory),previous=loadedInstalledPins.get(userDataDir),pending=previous?.pending||new Map();
+      let names;
+      if (!previous || previous.stamp!==stamp) {
+        names=stamp?fs.readdirSync(directory,{withFileTypes:true}).slice(0,500).filter(item=>item.isDirectory()&&/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(item.name)).map(item=>item.name):[];
+        for(const name of pending.keys())if(!names.includes(name))pending.delete(name);
+      } else names=[...pending.keys()].filter(name=>metadataIdentity(path.join(directory,name,"runtime.json"))!==pending.get(name));
+      for(const name of names){
+        if(entries.has(name)){pending.delete(name);continue;}
+        const file=path.join(directory,name,"runtime.json"),identity=metadataIdentity(file);
+        try {
+          if(fs.statSync(file).size>1024*1024)throw Error("Runtime metadata exceeds its limit.");
+          const record=JSON.parse(fs.readFileSync(file,"utf8")),pin=record.catalogEntry;
+          if(!validEntry(pin)||pin.version!==name||record.version!==name||record.upstreamRevision!==pin.upstreamRevision)throw Error("Runtime metadata does not match its version.");
+          entries.set(name,Object.freeze(pin));pending.delete(name);
+        }catch{pending.set(name,identity);}
       }
-      loadedInstalledPins.add(userDataDir);
+      loadedInstalledPins.set(userDataDir,{stamp,pending});
     }
-    if (!discoverCatalog || !userDataDir || loadedCaches.has(userDataDir)) return;
-    const cached = readRuntimeCatalog({ userDataDir, managerId: id, validateEntry: validEntry, maxEntries });
+    if (!userDataDir) return;
+    const stamp=metadataIdentity(catalogPath(userDataDir,id));
+    if(loadedCaches.has(userDataDir)&&loadedCaches.get(userDataDir)===stamp)return;
+    const cached = readRuntimeCatalog({ userDataDir, managerId: id, validateEntry: validEntry, maxEntries: catalogLimit });
     if (cached && (!sourceUrl || cached.source === sourceUrl)) {
       for (const entry of cached.retainedEntries || []) {
         if (validEntry(entry) && !entries.has(entry.version)) entries.set(entry.version, Object.freeze(entry));
@@ -212,46 +238,73 @@ function createPinnedNativeManager({ id, label, catalog, recommendedVersion, dis
       }
       mergeEntries(cached.entries);
       discoveryState = { status: "success", fetchedAt: cached.fetchedAt, source: cached.source || sourceUrl || null, error: null, mode: null };
+      for (const sourceId of sourceIds) {
+        const state = cached.sourceStates?.[sourceId];
+        sourceStates[sourceId] = state
+          ? { status: ["idle", "success", "error"].includes(state.status) ? state.status : "idle", fetchedAt: Number.isFinite(state.fetchedAt) ? state.fetchedAt : null,
+            error: typeof state.error === "string" ? state.error.slice(0, 8192) : null, mode: ["all", "latest"].includes(state.mode) ? state.mode : null }
+          : { status: "success", fetchedAt: cached.fetchedAt, error: null, mode: null };
+      }
+      if (sourceIds.length === 1) discoveryState = { ...discoveryState, ...sourceStates[sourceIds[0]] };
     }
-    loadedCaches.add(userDataDir);
+    loadedCaches.set(userDataDir,stamp);
   }
-  async function refreshCatalog({ userDataDir, logger, signal, force = false, latestOnly = false } = {}) {
-    const mode = latestOnly === true ? "latest" : "all";
-    if (userDataDir) {
-      clearDisplayCache(userDataDir);
-      // Reload is an explicit action: surface changed auxiliary payloads once,
-      // then retain that outcome for subsequent inexpensive broadcasts.
-      listInstalled(userDataDir);
-    }
-    bundledRuntime?.clearCache?.();
-    if (!discoverCatalog) return getState({ userDataDir }).catalog;
+  function saveCatalog(userDataDir) {
+    if (!userDataDir) return;
+    writeRuntimeCatalog({ userDataDir, managerId: id, maxEntries: catalogLimit, entries: remoteEntries,
+      retainedEntries: [...entries.values()].filter(entry => !versions.includes(entry.version) ||
+        (entry.resolvedForGame === true && !remoteEntries.some(remote => remote.version === entry.version))),
+      source: sourceUrl || null, fetchedAt: discoveryState.fetchedAt, sourceStates });
+    loadedCaches.set(userDataDir,metadataIdentity(catalogPath(userDataDir,id)));
+  }
+  async function refreshCatalog({ userDataDir, logger, signal, force = false, latestOnly = false, sourceId } = {}) {
+    if (sourceId === "default") sourceId = sourceIds[0];
+    if (sourceId != null && !sourceIds.includes(sourceId)) throw new Error("This runtime download source is unavailable.");
     loadCatalog(userDataDir);
-    if (!force && discoveryState.mode === mode && discoveryState.status === "success" && discoveryState.fetchedAt && Date.now() - discoveryState.fetchedAt < 6 * 3600000) return getState({ userDataDir }).catalog;
-    if (discoveryPromise) {
-      if (discoveryState.mode === mode) return discoveryPromise;
-      try { await discoveryPromise; } catch {}
-      throwIfAborted(signal);
-      return refreshCatalog({ userDataDir, logger, signal, force, latestOnly });
+    if (sourceId == null && sourceIds.length > 1) {
+      const results = await Promise.allSettled(sourceIds.map(sourceId => refreshCatalog({ userDataDir, logger, signal, force, latestOnly, sourceId })));
+      if (results.every(result => result.status === "rejected")) throw results[0].reason;
+      return getState({ userDataDir }).catalog;
     }
-    const previous = discoveryState;
+    sourceId ||= sourceIds[0];
+    const mode = latestOnly === true ? "latest" : "all", previous = sourceStates[sourceId];
+    if (!discoverCatalog) {
+      if (userDataDir) { clearDisplayCache(userDataDir); listInstalled(userDataDir); }
+      bundledRuntime?.clearCache?.();
+      return getState({ userDataDir }).catalog;
+    }
+    if (!force && previous.mode === mode && previous.status === "success" && previous.fetchedAt && Date.now() - previous.fetchedAt < 6 * 3600000)
+      return getState({ userDataDir }).catalog;
+    const pending = discoveryPromises.get(sourceId);
+    if (pending) {
+      if (pending.mode === mode) return pending.promise;
+      try { await pending.promise; } catch {}
+      throwIfAborted(signal);
+      return refreshCatalog({ userDataDir, logger, signal, force, latestOnly, sourceId });
+    }
+    if (userDataDir) { clearDisplayCache(userDataDir); listInstalled(userDataDir); }
+    bundledRuntime?.clearCache?.();
+    sourceStates[sourceId] = { ...previous, status: "loading", error: null, mode };
     discoveryState = { ...discoveryState, status: "loading", error: null, mode };
-    discoveryPromise = (async () => {
+    const promise = (async () => {
       try {
-        const discovered = await discoverCatalog({ logger, signal, latestOnly });
+        const discovered = await discoverCatalog({ logger, signal, latestOnly, sourceId });
         throwIfAborted(signal);
-        mergeEntries(discovered);
-        discoveryState = { status: "success", fetchedAt: Date.now(), source: sourceUrl || null, error: null, mode };
-        if (userDataDir) writeRuntimeCatalog({ userDataDir, managerId: id, maxEntries,
-          entries: remoteEntries, retainedEntries: [...entries.values()].filter(entry => !versions.includes(entry.version) ||
-            (entry.resolvedForGame === true && !remoteEntries.some(remote => remote.version === entry.version))),
-          source: discoveryState.source, fetchedAt: discoveryState.fetchedAt });
+        mergeEntries(discovered, sourceId);
+        const fetchedAt = Date.now();
+        sourceStates[sourceId] = { status: "success", fetchedAt, error: null, mode };
+        discoveryState = { status: "success", fetchedAt, source: sourceUrl || null, error: null, mode };
+        saveCatalog(userDataDir);
         return getState({ userDataDir }).catalog;
       } catch (error) {
-        discoveryState = { ...previous, status: "error", error: error.message || String(error) };
+        sourceStates[sourceId] = { ...previous, status: "error", error: error.message || String(error) };
+        discoveryState = { ...discoveryState, status: "error", error: error.message || String(error),
+          ...(sourceIds.length === 1 ? { mode: previous.mode, fetchedAt: previous.fetchedAt } : {}) };
         throw error;
-      } finally { discoveryPromise = null; }
+      } finally { discoveryPromises.delete(sourceId); }
     })();
-    return discoveryPromise;
+    discoveryPromises.set(sourceId, { mode, promise });
+    return promise;
   }
   function normalizeVersion(version) {
     const value = canonicalVersion(version);
@@ -306,18 +359,17 @@ function createPinnedNativeManager({ id, label, catalog, recommendedVersion, dis
             (pin.asset.assetId ? record.assetId !== pin.asset.assetId : record.artifactId !== pin.asset.artifactId || record.archiveBytes !== pin.asset.bytes) ||
             !/^[a-f0-9]{64}$/.test(record.archiveSha256 || "")))) return null;
       if (record.source === "bundled" && (!runtimePath.startsWith(directory + path.sep) ||
-        !bundledRuntime?.verifyInstalled({ installDir: directory, record, pin, verification }))) {
+        !(legacyInstalledRuntime || bundledRuntime)?.verifyInstalled({ installDir: directory, record, pin, verification }))) {
         rememberDisplay(directory, cacheKey, null);
         return null;
       }
       let project;
-      if (projectPackages && pin.projectPackage) {
-        if (record.source !== "download") return null;
+      if (projectPackages && pin.projectPackage && record.source === "download") {
         project = projectPackages.inspectInstalled(directory, pin, { verification });
         if (runtimePath !== project.executablePath) return null;
       }
       if (verification === "status" && cached?.key === cacheKey) return cached.install;
-      const native = Native.resolveLocalRuntime({ runtimePath, runtimeVersion: normalized,
+      const native = inspectRuntime({ runtimePath, runtimeVersion: normalized,
         upstreamRevision: pin.upstreamRevision, expectedSha256: record.binarySha256, allowLibrary: nativeLibrary });
       // resolveLocalRuntime already hashes the executable against this record.
       const installed = { ...record, ...native, version: normalized, runtimePath, installDir: directory,
@@ -415,7 +467,7 @@ function createPinnedNativeManager({ id, label, catalog, recommendedVersion, dis
     if (pin.hostArchitectures && !pin.hostArchitectures.includes(process.arch)) {
       throw new Error(`${label} ${normalized} supports ${pin.hostArchitectures.join(", ")}; this Mac uses ${process.arch}.`);
     }
-    const native = Native.resolveLocalRuntime({ runtimePath, runtimeVersion: normalized, upstreamRevision: pin.upstreamRevision, allowLibrary: nativeLibrary });
+    const native = inspectRuntime({ runtimePath, runtimeVersion: normalized, upstreamRevision: pin.upstreamRevision, allowLibrary: nativeLibrary });
     if (["arm64", "x86_64"].includes(pin.architecture) && !native.architectures.includes(pin.architecture)) {
       throw new Error(`${label} ${normalized} requires a ${pin.architecture} executable.`);
     }
@@ -473,7 +525,9 @@ function createPinnedNativeManager({ id, label, catalog, recommendedVersion, dis
     if (assetReason(pin)) throw new Error(assetReason(pin));
     if (!versions.includes(normalized)) throw new Error("This runtime release is no longer in the current upstream catalog. Existing installed copies can be used or removed.");
     const destination = installDir(userDataDir, normalized);
-    if (fs.existsSync(destination)) throw new Error(`Remove the incomplete ${label} ${normalized} installation before reinstalling.`);
+    const replacing = fs.existsSync(destination);
+    if (replacing && (!pin.asset || !fs.lstatSync(destination).isDirectory() || fs.lstatSync(destination).isSymbolicLink()))
+      throw new Error(`Remove the incomplete ${label} ${normalized} registration before replacing it.`);
     throwIfAborted(signal);
     if (bundledExecution === "direct" && bundledRuntime.resolve({ version: normalized, upstreamRevision: pin.upstreamRevision, verification: "full" })) {
       throw new Error(includedFailures.get(normalized)?.error || "The included runtime could not start. Reinstall MacLauncher or choose a compatible imported runtime.");
@@ -498,6 +552,7 @@ function createPinnedNativeManager({ id, label, catalog, recommendedVersion, dis
     if (!pin.asset) throw new Error(pin.installReason || `${label} ${normalized} requires a local Mac build. A compatible runtime can be imported in Runtimes.`);
     fs.mkdirSync(root(userDataDir), { recursive: true });
     const staging = fs.mkdtempSync(path.join(root(userDataDir), ".install-"));
+    let preserveStaging = false;
     try {
       const archivePath = path.join(staging, pin.asset.filename);
       await (dependencies.downloadToFile || downloadToFile)(pin.asset.url, archivePath, { signal, onProgress });
@@ -525,7 +580,7 @@ function createPinnedNativeManager({ id, label, catalog, recommendedVersion, dis
       throwIfAborted(signal);
       const runtimePath = projectPackages && pin.projectPackage ? projectPackages.inspectInstalled(unpacked, pin).executablePath
         : (pin.resolveExecutable || resolveExecutable)(unpacked, pin);
-      const native = Native.resolveLocalRuntime({ runtimePath, runtimeVersion: normalized, upstreamRevision: pin.upstreamRevision, allowLibrary: nativeLibrary });
+      const native = inspectRuntime({ runtimePath, runtimeVersion: normalized, upstreamRevision: pin.upstreamRevision, allowLibrary: nativeLibrary });
       const executableRelative = path.relative(unpacked, native.executablePath);
       if (!executableRelative || executableRelative.startsWith("..") || path.isAbsolute(executableRelative)) throw new Error("Pinned runtime executable escaped the installation.");
       publishRecord(unpacked, { version: normalized, upstreamRevision: pin.upstreamRevision,
@@ -538,12 +593,23 @@ function createPinnedNativeManager({ id, label, catalog, recommendedVersion, dis
         source: "download", provenanceVerified: Boolean(pin.asset.sha256 || artifactVerification?.verified),
         integritySource: pin.asset.integritySource || (pin.asset.sha256 ? "publisher-sha256" : archiveMd5 ? "publisher-md5-and-signature" : "recorded-local"), installedAt: new Date().toISOString() });
       throwIfAborted(signal);
-      fs.renameSync(unpacked, destination);
-      const installed = resolveInstalled({ userDataDir, version: normalized });
-      if (!installed) throw new Error("Installed runtime failed its version and executable integrity check.");
-      return installed;
+      const previous = path.join(staging, "previous");
+      if (replacing) fs.renameSync(destination, previous);
+      try {
+        fs.renameSync(unpacked, destination);
+        clearDisplayCache(userDataDir);
+        const installed = resolveInstalled({ userDataDir, version: normalized });
+        if (!installed) throw new Error("Installed runtime failed its version and executable integrity check.");
+        return installed;
+      } catch (error) {
+        if (replacing) {
+          try { fs.rmSync(destination, { recursive: true, force: true }); fs.renameSync(previous, destination); }
+          catch { preserveStaging = true; throw new Error(`Runtime replacement failed. The previous installation remains at ${previous}.`); }
+        } else fs.rmSync(destination, { recursive: true, force: true });
+        throw error;
+      }
     } finally {
-      fs.rmSync(staging, { recursive: true, force: true });
+      if (!preserveStaging) fs.rmSync(staging, { recursive: true, force: true });
     }
   }
   function uninstallRuntime({ userDataDir, version } = {}) {
@@ -567,9 +633,10 @@ function createPinnedNativeManager({ id, label, catalog, recommendedVersion, dis
     if (!baseEntries.has(version)) entries.set(version, Object.freeze({ ...entry, version, resolvedForGame: true }));
     resolvedVersions.add(version);
     if (!versions.includes(version)) versions.push(version);
-    if (userDataDir) writeRuntimeCatalog({ userDataDir, managerId: id, maxEntries, entries: remoteEntries,
+    if (userDataDir) {writeRuntimeCatalog({ userDataDir, managerId: id, maxEntries: catalogLimit, entries: remoteEntries,
       retainedEntries: [...entries.values()].filter(item => !remoteEntries.some(remote => remote.version === item.version) && !baseEntries.has(item.version)),
-      source: discoveryState.source, fetchedAt: discoveryState.fetchedAt || Date.now() });
+      source: discoveryState.source, fetchedAt: discoveryState.fetchedAt || Date.now(), sourceStates });
+      loadedCaches.set(userDataDir,metadataIdentity(catalogPath(userDataDir,id)));}
     return entries.get(version);
   }
   function getState({ settings, userDataDir } = {}) {
@@ -586,29 +653,23 @@ function createPinnedNativeManager({ id, label, catalog, recommendedVersion, dis
     // a source Build action when its default input cannot exist in that app.
     const sourceAvailable = Boolean(buildRuntime) && (!buildSourcePath || fs.existsSync(path.join(buildSourcePath, ".git")));
     const includedVersions = installed.filter(item => item.bundledExecution === "direct").map(item => item.version);
-    // Factory pins describe identities, not a fetched upstream history. Actual
-    // included/installed payloads and explicitly resolved game versions remain
-    // selectable when a publisher removes them from its current release list.
-    const displayVersions = discoverCatalog ? [...new Set([
-      ...remoteEntries.map(pin => pin.version), ...resolvedVersions,
-      ...installed.map(row => row.version),
-      ...(importLocal ? baseVersions : []),
-      ...baseVersions.filter(version => bundleAvailability.get(version))
-    ])] : versions;
+    // Download rows come from explicit discovery or its persisted snapshot.
+    // Installed registrations and automatic Play pins remain separate.
+    const displayVersions = remoteEntries.map(pin => pin.version);
     const visibleVersions = displayVersions.filter(version => !entries.get(version).deprecated || installed.some(row => row.version === version));
     const installable = visibleVersions.filter(version => versions.includes(version)).map(version => entries.get(version)).filter(pin => !pin.deprecated && !includedVersions.includes(pin.version) && !bundleErrors.has(pin.version) &&
       !hostReason(pin) && !assetReason(pin) &&
       (!pin.hostArchitectures || pin.hostArchitectures.includes(process.arch)) &&
       (pin.asset || bundleAvailability.get(pin.version) || (sourceAvailable && pin.localBuild !== false)));
     const sourceOnly = installable.length > 0 && installable.every(pin => !pin.asset && !bundleAvailability.get(pin.version));
-    const sources = sourceUrl || [...entries.values()].map(pin => pin.sourceUrl || pin.asset?.url).filter(Boolean).join(" · ") || "Local versions";
+    const sources = sourceUrl || [...entries.values()].map(pin => pin.sourceUrl || pin.asset?.url).find(Boolean) || null;
     const versionLabels = Object.fromEntries(visibleVersions.map(version => {
       const pin = entries.get(version);
-      return [version, pin.versionLabel || (pin.publishedRelease && pin.publishedRelease.upstreamRevision !== pin.upstreamRevision
+      return [version, /^(?:MCLv[1-9]\d*-\d{4}|.+-MCLv[1-9]\d*)$/.test(version) ? version : pin.versionLabel || (pin.publishedRelease && pin.publishedRelease.upstreamRevision !== pin.upstreamRevision
         ? `${version} · Mac build ${pin.upstreamRevision.slice(0, 8)}` : version)];
     }));
     const state = { supportsDefault, defaultVersion: cfg.defaultVersion, installed, installing: null, variants: [], versionLabels,
-      catalog: { ...discoveryState, versions: visibleVersions, source: sources, sourceUrl: sourceUrl || null,
+      catalog: { ...discoveryState, sourceStates: structuredClone(sourceStates), versions: visibleVersions, source: sources, sourceUrl: sourceUrl || null,
         recommendedVersion: visibleVersions.includes(defaultVersion()) ? defaultVersion() : visibleVersions[0] || null,
         installable: installable.length > 0,
         ...(importLocal ? { importable: true, importVersionRequired: true, importLabel: "Import local build…",
@@ -632,6 +693,10 @@ function createPinnedNativeManager({ id, label, catalog, recommendedVersion, dis
           : buildRuntime && !sourceAvailable && !installable.length ? "No runtime is included for this Mac. A compatible local runtime or source checkout can be imported in Runtimes."
           : installable.length || includedVersions.length ? null : "A compatible local runtime can be imported in Runtimes.",
         supportsLatestOnly: false, latestAvailableVersion: visibleVersions[0], latestInstalledVersion: usable[0]?.version || null, updateAvailable: false } };
+    state.catalog.versionLabels = versionLabels;
+    if (projectPackages || buildsRepository) state.catalog = require("./runtime-sources").projectSources(state.catalog, [...entries.values()],
+      { projectId: id, repository: projectBuilds?.repository || buildsRepository, upstreamUrl: upstreamUrl || (projectBuilds ? sourceUrl : undefined), upstreamLabel,
+        upstreamDownloads: projectBuilds?.upstreamMacDownloads === true });
     return { ...state, sections: [{ id: "default", label: `${label} versions`, ...state }] };
   }
   manager = {
@@ -678,6 +743,29 @@ function createPinnedNativeManager({ id, label, catalog, recommendedVersion, dis
       getInstallDir: ({ userDataDir, version }) => { loadCatalog(userDataDir); return installDir(userDataDir, version); },
       get catalog() { return [...entries.values()]; } }
   };
+  Custom.configure(manager, { defaultsPath: () => ["defaultVersion"], providers: [{ core: manager.core,
+    lists: { listInstalled: "default" }, resolves: { resolveInstalled: "default", resolveRegistered: "default" },
+    versions: ["normalizeVersion"], directories: ["getInstallDir"] }], inspect(runtimePath, { verification } = {}) {
+    const packaged = inspectRuntime === Native.resolveLocalRuntime && Custom.inspectManifest(runtimePath, { managerId: id, allowLibrary: nativeLibrary, verification });
+    if (packaged) {
+      const pin = [...entries.values()].find(row => row.version === packaged.runtimeVersion && row.upstreamRevision === packaged.upstreamRevision);
+      return { ...packaged, ...(pin ? { catalogEntry: pin } : {}) };
+    }
+    let executablePath = runtimePath, root = path.dirname(runtimePath);
+    if (fs.statSync(runtimePath).isDirectory()) {
+      root = runtimePath;
+      executablePath = runtimePath.toLowerCase().endsWith(".app")
+        ? require("./app-bundle").resolveAppBundleExecutablePath(runtimePath)
+        : resolveExecutable(runtimePath, entries.get(defaultVersion()));
+    }
+    if (!executablePath) throw new Error("The selected runtime has no executable.");
+    const inspected = inspectRuntime === Native.resolveLocalRuntime
+      ? Custom.inspectExecutable(executablePath, { allowLibrary: nativeLibrary })
+      : inspectRuntime({ runtimePath: executablePath, runtimeVersion: "custom", upstreamRevision: "custom" });
+    return { ...inspected, appPath: runtimePath, installDir: root, root, payloadRoot: root,
+      requiresRosetta: inspected.needsRosetta, binarySha256: inspected.sha256 };
+  } });
+  Custom.instrumentManagers([manager]);
   return manager;
 }
 

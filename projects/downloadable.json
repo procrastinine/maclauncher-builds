@@ -13,40 +13,60 @@
         "provider": "github",
         "url": "https://github.com/shinyquagsire23/Klepton",
         "repository": "shinyquagsire23/Klepton",
-        "revision": "ce74582cb1e434db210014dbcd0ca0aad0e46ba2"
+        "pin": {
+          "file": "sources/maclauncher-android/src/modules/android/native/source-pins.json",
+          "pointer": "/klepton"
+        }
       },
       {
         "id": "dex2jvm",
         "provider": "github",
         "url": "https://github.com/kksimp/dex2jvm",
         "repository": "kksimp/dex2jvm",
-        "revision": "4c666fdc49fee8f61166fa943980e92a1368a15f"
+        "pin": {
+          "file": "sources/maclauncher-android/src/modules/android/native/source-pins.json",
+          "pointer": "/dex2jvm"
+        }
       },
       {
         "id": "aosp-framework",
         "provider": "gitiles",
         "url": "https://android.googlesource.com/platform/frameworks/base",
-        "revision": "4e43ad12e1b211f15152e9c5b16b0fe88e6b93f3"
+        "pin": {
+          "file": "sources/maclauncher-android/src/modules/android/native/source-pins.json",
+          "pointer": "/aospFramework"
+        }
       },
       {
         "id": "aim",
         "provider": "github",
         "url": "https://github.com/hahnlee/aim",
         "repository": "hahnlee/aim",
-        "revision": "9b5068fa8185d3f51f1862fe7c54d88d51f09ec8"
+        "pin": {
+          "file": "sources/maclauncher-android/src/modules/android/native/source-pins.json",
+          "pointer": "/aim"
+        }
       },
       {
         "id": "android-angle",
         "provider": "gitiles",
         "url": "https://chromium.googlesource.com/angle/angle",
-        "revision": "cbc4153da8d5796b0fbb3cf288e97bee19436191"
+        "pin": {
+          "file": "sources/maclauncher-android/src/modules/android/native/angle-source.json",
+          "pointer": "/revision",
+          "repositoryPointer": "/repository"
+        }
       },
       {
         "id": "libvpx",
         "provider": "github",
         "url": "https://github.com/webmproject/libvpx",
         "repository": "webmproject/libvpx",
-        "revision": "6df3ec34557879fff673706f4a1d9fbd0f3a6f0e"
+        "pin": {
+          "file": "sources/maclauncher-android/src/modules/android/native/media-foundation/vpx-source.json",
+          "pointer": "/revision",
+          "repositoryPointer": "/repository"
+        }
       }
     ],
     "compatibility": "Android 16 / API 36 framework and image contract; source updates are explicit adaptations."
@@ -76,19 +96,29 @@
         "provider": "github",
         "url": "https://github.com/hahnlee/aim",
         "repository": "hahnlee/aim",
-        "revision": "9b5068fa8185d3f51f1862fe7c54d88d51f09ec8"
+        "pin": {
+          "file": "sources/maclauncher-android/src/modules/android/art/supplier.json",
+          "pointer": "/sources/aim/commit",
+          "repositoryPointer": "/sources/aim/url"
+        }
       },
       {
         "id": "aosp-art",
         "provider": "gitiles",
         "url": "https://android.googlesource.com/platform/art",
-        "revision": "ed6c006bd06ae060bd9698fd2cb25c4865512ec3"
+        "pin": {
+          "file": "sources/maclauncher-android/src/modules/android/native/source-pins.json",
+          "pointer": "/aospArt"
+        }
       },
       {
         "id": "aosp-bionic",
         "provider": "gitiles",
         "url": "https://android.googlesource.com/platform/bionic",
-        "revision": "09a271af557444c9a6b3f3146d6d474156fd6cdb"
+        "pin": {
+          "file": "sources/maclauncher-android/src/modules/android/native/source-pins.json",
+          "pointer": "/aospBionic"
+        }
       }
     ],
     "compatibility": "Android 16 / API 36; uses the matching Android common framework and a separately acquired original system image."
@@ -111,8 +141,11 @@
         "provider": "github",
         "url": "https://github.com/hahnlee/aim",
         "repository": "hahnlee/aim",
-        "revision": "3136fe473714ec5cf8ad34323313174761d95139",
-        "committedAt": "2026-10-22T13:00:18.000Z"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/android/providers/aim/source.json",
+          "pointer": "/commit",
+          "repositoryPointer": "/repository"
+        }
       }
     ]
   },
@@ -135,7 +168,10 @@
         "provider": "github",
         "url": "https://github.com/nunuhara/ai5-sdl2",
         "repository": "nunuhara/ai5-sdl2",
-        "revision": "ad7a703f1c9f56e127d23c10d54fec0dcd4eaef3"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/ai5/runtime/portable-build-v4.js",
+          "pointer": "/REVISION"
+        }
       }
     ]
   },
@@ -157,14 +193,20 @@
         "provider": "github",
         "url": "https://github.com/FNA-XNA/FNA",
         "repository": "FNA-XNA/FNA",
-        "revision": "00498b0b81425b14bf8da23e68655215b9b5daa7"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/fna/runtime/build.js",
+          "pointer": "/FNA_REVISION"
+        }
       },
       {
         "id": "fna3d",
         "provider": "github",
         "url": "https://github.com/FNA-XNA/FNA3D",
         "repository": "FNA-XNA/FNA3D",
-        "revision": "fd1b24671fb0f5d1b544cd7843d3ad9e80d92219"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/fna/runtime/build.js",
+          "pointer": "/FNA3D_REVISION"
+        }
       }
     ],
     "packageProfiles": [
@@ -194,8 +236,10 @@
         "provider": "github",
         "url": "https://github.com/gemrb/gemrb",
         "repository": "gemrb/gemrb",
-        "revision": "bcb5cfaa9f19ffbe8a51f25a3c014fa344173351",
-        "committedAt": "2026-10-20T13:13:54.000Z"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/gemrb/runtime/portable-build-v5.js",
+          "pointer": "/REVISION"
+        }
       }
     ]
   },
@@ -217,7 +261,10 @@
         "provider": "github",
         "url": "https://github.com/OpenGMK/OpenGMK",
         "repository": "OpenGMK/OpenGMK",
-        "revision": "9ccc47a9cab4681a889866f7233a6b016d36a15e"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/gamemaker/overlays/opengmk-macos/apply-emulator.js",
+          "pointer": "/REVISION"
+        }
       }
     ]
   },
@@ -240,14 +287,24 @@
         "provider": "github",
         "url": "https://github.com/HaxeFoundation/hashlink",
         "repository": "HaxeFoundation/hashlink",
-        "revision": "c3f2a1563cf7aa9f4076b0808a7eaf40e18e8f14"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/hashlink/runtime/manager.js",
+          "pointer": "/core/catalog",
+          "match": {
+            "version": "1.16"
+          },
+          "field": "/upstreamRevision"
+        }
       },
       {
         "id": "hashlink-1-9",
         "provider": "github",
         "url": "https://github.com/HaxeFoundation/hashlink",
         "repository": "HaxeFoundation/hashlink",
-        "revision": "4a4cfe91f3388a0b05bf2e45e7c4e38bae686dc6"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/hashlink/runtime/legacy-build.js",
+          "pointer": "/REVISION"
+        }
       }
     ],
     "packageProfiles": [
@@ -271,8 +328,7 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/mages/native/current-build.js",
-        "producers/maclauncher/src/modules/mages/native/portable-sfx-build.js"
+        "producers/maclauncher/src/modules/mages/native/current-build.js"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -282,7 +338,10 @@
         "provider": "github",
         "url": "https://github.com/CommitteeOfZero/impacto",
         "repository": "CommitteeOfZero/impacto",
-        "revision": "914fae7cbb9583f8aa231569a03aab27d8c042f8"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/mages/native/current-build.js",
+          "pointer": "/REVISION"
+        }
       }
     ]
   },
@@ -304,22 +363,24 @@
         "provider": "github",
         "url": "https://github.com/dscharrer/innoextract",
         "repository": "dscharrer/innoextract",
-        "revision": "6e9e34ed0876014fdb46e684103ef8c3605e382e",
-        "committedAt": "2025-02-06T21:27:33.000Z"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/installers/runtime/innoextract-build.js",
+          "pointer": "/REVISION"
+        }
       }
     ]
   },
   {
     "id": "krkrsdl2",
     "name": "Kirikiri SDL2",
-    "purpose": "Archive/storage access, fonts and full-frame presentation.",
+    "purpose": "Managed visual-novel interpreter and owned compatibility resources.",
     "producer": {
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/vn-adaptations",
       "entries": [
-        "producers/maclauncher/src/modules/kirikiri/build.js"
-      ],
-      "sourceDirectory": "producers/maclauncher"
+        "producers/vn-adaptations/package.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -327,10 +388,33 @@
         "provider": "github",
         "url": "https://github.com/krkrsdl2/krkrsdl2",
         "repository": "krkrsdl2/krkrsdl2",
-        "revision": "124bdf841f09e7ce02aa99b7b55791a0f7a900ff",
-        "committedAt": "2026-10-01T03:11:23.000Z"
+        "pin": {
+          "file": "producers/vn-adaptations/source.json",
+          "pointer": "/projects/krkrsdl2/upstream/revision"
+        }
+      },
+      {
+        "id": "kag3",
+        "provider": "github",
+        "url": "https://github.com/krkrsdl2/kag3",
+        "repository": "krkrsdl2/kag3",
+        "pin": {
+          "file": "producers/vn-adaptations/source.json",
+          "pointer": "/projects/krkrsdl2/polyfill/revision"
+        }
       }
-    ]
+    ],
+    "recordMetadata": {
+      "capabilities": {
+        "buildProfile": "macos-storage-font-monitor-v3-kag3",
+        "nativeFeatures": [
+          "storage.dirlist",
+          "system.addFont",
+          "monitor.adjust"
+        ],
+        "kag3Resources": 1
+      }
+    }
   },
   {
     "id": "npengine",
@@ -350,7 +434,10 @@
         "provider": "github",
         "url": "https://github.com/FGRE/libnpengine",
         "repository": "FGRE/libnpengine",
-        "revision": "da1a175e6b497c37f9714b77510cb47c0930cd42"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/nitroplus/runtime/build.js",
+          "pointer": "/REVISION"
+        }
       }
     ]
   },
@@ -373,8 +460,10 @@
         "provider": "github",
         "url": "https://github.com/Galladite27/ONScripter-EN",
         "repository": "Galladite27/ONScripter-EN",
-        "revision": "3854ae86c19337991722059d2bed07cbcc847f6f",
-        "committedAt": "2026-01-26T10:05:38.000Z"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/nscripter/runtime/onscripter-en-manager.js",
+          "pointer": "/SNAPSHOT_REVISION"
+        }
       }
     ]
   },
@@ -396,7 +485,10 @@
         "provider": "github",
         "url": "https://github.com/YuriSizuku/OnscripterYuri",
         "repository": "YuriSizuku/OnscripterYuri",
-        "revision": "08f744b31cc1907b66a15f0402e62321a131ed81"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/onsyuri/runtime/portable-build-v3.json",
+          "pointer": "/engine/revision"
+        }
       }
     ]
   },
@@ -418,7 +510,10 @@
         "provider": "github",
         "url": "https://github.com/OpenGMK/OpenGMK",
         "repository": "OpenGMK/OpenGMK",
-        "revision": "9ccc47a9cab4681a889866f7233a6b016d36a15e"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/gamemaker/overlays/opengmk-macos/apply-emulator.js",
+          "pointer": "/REVISION"
+        }
       }
     ]
   },
@@ -440,7 +535,10 @@
         "provider": "github",
         "url": "https://github.com/luoyily/ReMinori",
         "repository": "luoyily/ReMinori",
-        "revision": "79b00990324404bfbd496e7fa76c690cf040f744"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/minori/runtime/overlay.js",
+          "pointer": "/REVISION"
+        }
       }
     ]
   },
@@ -462,7 +560,10 @@
         "provider": "github",
         "url": "https://github.com/kichikuou/sys3c",
         "repository": "kichikuou/sys3c",
-        "revision": "7fb3814510255b964c855d1231543b442d051bb5"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/alicesoft/decompiler-profiles.json",
+          "pointer": "/0/upstreamRevision"
+        }
       }
     ]
   },
@@ -484,7 +585,10 @@
         "provider": "github",
         "url": "https://github.com/kichikuou/system3-sdl2",
         "repository": "kichikuou/system3-sdl2",
-        "revision": "461673bec729e7e0ec905921fc3e03aecf977a70"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/alicesoft/system3-portable.js",
+          "pointer": "/REVISION"
+        }
       }
     ]
   },
@@ -506,7 +610,10 @@
         "provider": "github",
         "url": "https://github.com/kichikuou/xsys35c",
         "repository": "kichikuou/xsys35c",
-        "revision": "5444fd18e94db3a36feb3885b158ea45d606bc93"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/alicesoft/decompiler-profiles.json",
+          "pointer": "/1/upstreamRevision"
+        }
       }
     ]
   },
@@ -529,10 +636,17 @@
         "provider": "github",
         "url": "https://github.com/kichikuou/xsystem35-sdl2",
         "repository": "kichikuou/xsystem35-sdl2",
-        "revision": "fbb12f67950601d547f65ef37c4fba4a10cc3822",
-        "committedAt": "2026-10-19T23:55:39.000Z"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/alicesoft/system35-portable-v3.js",
+          "pointer": "/REVISION"
+        }
       }
-    ]
+    ],
+    "recordMetadata": {
+      "capabilities": {
+        "debugAdapter": "dap-terminal-nul-v1"
+      }
+    }
   },
   {
     "id": "xsystem4",
@@ -554,8 +668,10 @@
         "provider": "github",
         "url": "https://github.com/nunuhara/xsystem4",
         "repository": "nunuhara/xsystem4",
-        "revision": "de65718ba72d5eb291a4d0ddb691627f1d401909",
-        "committedAt": "2026-10-21T00:53:25.000Z"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/alicesoft/system4-portable-v3.js",
+          "pointer": "/REVISION"
+        }
       }
     ]
   },
@@ -577,8 +693,10 @@
         "id": "mesa-kosmickrisp",
         "provider": "git",
         "url": "https://gitlab.freedesktop.org/mesa/mesa",
-        "revision": "19a135296672f24ec1699ada244d5b80ced371da",
-        "committedAt": "2026-10-24T04:28:03.000Z"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/vulkan/native/kosmickrisp-source.json",
+          "pointer": ""
+        }
       }
     ]
   },
@@ -615,8 +733,10 @@
         "provider": "github",
         "url": "https://github.com/mkxp-z/mkxp-z",
         "repository": "mkxp-z/mkxp-z",
-        "revision": "37a04d14413454551a7b6aadbb4e93e67168accb",
-        "committedAt": "2026-10-03T08:32:53.000Z"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json",
+          "pointer": "/upstream"
+        }
       }
     ],
     "packageProfiles": [
@@ -645,9 +765,409 @@
         "provider": "github",
         "url": "https://github.com/ButterscotchRunner/Butterscotch",
         "repository": "ButterscotchRunner/Butterscotch",
-        "revision": "d66464857303a2840a5cc5141c0035440847f441",
-        "committedAt": "2026-10-07T09:21:00.000Z"
+        "pin": {
+          "file": "producers/maclauncher/src/modules/gamemaker/runtime/catalog.js",
+          "pointer": "/BUTTERSCOTCH_REVISION"
+        }
+      }
+    ],
+    "recordMetadata": {
+      "capabilities": {
+        "gameArguments": "repeat-game-arg-v1",
+        "wadVersions": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17
+        ],
+        "sourceKind": "commit"
+      }
+    }
+  },
+  {
+    "id": "anyps5",
+    "name": "AnyPS5",
+    "purpose": "PS5 ELF conversion and x86-64 macOS system libraries.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/anyps5",
+      "entries": [
+        "producers/anyps5/build-relinker.mjs",
+        "producers/anyps5/build-runtime.mjs",
+        "producers/anyps5/package-runtime.mjs",
+        "producers/anyps5/tools/unwrap-self.cjs"
+      ],
+      "buildEntry": "producers/anyps5/package-runtime.mjs"
+    },
+    "upstreams": [
+      {
+        "id": "anyps5",
+        "provider": "github",
+        "url": "https://github.com/boykopovar/AnyPS5",
+        "repository": "boykopovar/AnyPS5",
+        "pin": {
+          "file": "producers/anyps5/source.json",
+          "pointer": "/source"
+        }
+      }
+    ],
+    "compatibility": "ARM64 converter; x86-64 Mach-O game code and PRX libraries run with Rosetta on Apple Silicon."
+  },
+  {
+    "id": "nxnative-tools",
+    "name": "nxnative native tools",
+    "purpose": "Native ARM64 host, package extraction, shader tools and launcher adapters for independently selected upstream nxnative source.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/nxnative",
+      "entries": [
+        "producers/nxnative/build.mjs",
+        "producers/nxnative/source.json",
+        "producers/nxnative/dependencies.mjs",
+        "producers/nxnative/dependencies.json",
+        "producers/nxnative/nx-extract.lock.json",
+        "producers/nxnative/overlays/apply.mjs",
+        "producers/nxnative/runtime/nxnative.py",
+        "producers/nxnative/package.mjs",
+        "producers/nxnative/runtime/metal-toolchain.m"
+      ],
+      "buildEntry": "producers/nxnative/build.mjs"
+    },
+    "upstreams": [
+      {
+        "id": "nxnative",
+        "provider": "github",
+        "url": "https://github.com/seedds/nxnative",
+        "repository": "seedds/nxnative",
+        "pin": {
+          "file": "producers/nxnative/source.json",
+          "pointer": "/source"
+        }
+      }
+    ],
+    "compatibility": "Apple Silicon with macOS 26 or later and the launcher-provided CPython 3.12 ABI. Upstream source and profiles are selected separately; native tools require a compatible shader format and source adapter."
+  },
+  {
+    "id": "mpv",
+    "name": "mpv decoded-frame host",
+    "purpose": "Native decoded video frames, audio timing and shared GPU presentation.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/mpv-render/v7",
+      "entries": [
+        "producers/mpv-render/v7/build.mjs",
+        "producers/mpv-render/v7/package.mjs",
+        "producers/mpv-render/v7/source.json"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "mpv",
+        "provider": "github",
+        "url": "https://github.com/mpv-player/mpv",
+        "repository": "mpv-player/mpv",
+        "pin": {
+          "file": "producers/mpv-render/v7/source.json",
+          "pointer": "/source"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.41.0-MCLv7",
+        "label": "Decoded video with separate controls and subtitles, Apple Silicon, macOS 27"
+      }
+    ],
+    "compatibility": "Apple Silicon with macOS 27 or later; the original command-line profile remains separate.",
+    "recordMetadata": {
+      "capabilities": {
+        "decodedFrameAPI": 1,
+        "decodedColorAPI": 1,
+        "preparationNotificationAPI": 1,
+        "playerScriptsAPI": 1,
+        "playerInputAPI": 1,
+        "osdLayerAPI": 1
+      }
+    }
+  },
+  {
+    "id": "prosper",
+    "name": "Prosper",
+    "purpose": "Local x86-64 macOS PS5 compatibility runtime.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/prosper",
+      "entries": [
+        "producers/prosper/build.mjs",
+        "producers/prosper/package.mjs",
+        "producers/prosper/source.json",
+        "producers/prosper/dependencies.json"
+      ],
+      "buildEntry": "producers/prosper/build.mjs"
+    },
+    "upstreams": [
+      {
+        "id": "prosper",
+        "provider": "github",
+        "url": "https://github.com/mattias800/prosper",
+        "repository": "mattias800/prosper",
+        "pin": {
+          "file": "producers/prosper/source.json",
+          "pointer": "/source"
+        }
+      }
+    ],
+    "compatibility": "Local-only x86-64 macOS runtime; Rosetta on Apple Silicon and a managed Vulkan1.4 provider."
+  },
+  {
+    "id": "winevulkan-scene",
+    "name": "WineVulkan scene adapter",
+    "purpose": "Wine Vulkan recording with original native and WOW64 forwarding.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "producers/maclauncher/src/modules/crossover/temporal/vulkan/build.mjs"
+      ],
+      "sourceDirectory": "producers/maclauncher"
+    },
+    "upstreams": [],
+    "packageProfiles": [
+      {
+        "version": "26.3.0-MCLv1",
+        "label": "CrossOver26.3 WineVulkan ABI47"
       }
     ]
+  },
+  {
+    "id": "fidelityfx-api",
+    "name": "FidelityFX API adapter",
+    "purpose": "Original-preserving FidelityFX API proxy and native Vulkan scene producer.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "producers/maclauncher/src/modules/crossover/temporal/fidelityfx/build.mjs",
+        "producers/maclauncher/src/modules/crossover/temporal/fidelityfx/README.md"
+      ],
+      "sourceDirectory": "producers/maclauncher"
+    },
+    "upstreams": [
+      {
+        "id": "fidelityfx-sdk",
+        "provider": "github",
+        "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
+        "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/crossover/temporal/fidelityfx/source.json",
+          "pointer": "/sdk/revision",
+          "repositoryPointer": "/sdk/repository"
+        }
+      },
+      {
+        "id": "vulkan-headers",
+        "provider": "github",
+        "url": "https://github.com/libsdl-org/SDL",
+        "repository": "libsdl-org/SDL",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/crossover/temporal/fidelityfx/source.json",
+          "pointer": "/vulkan/revision",
+          "repositoryPointer": "/vulkan/repository"
+        }
+      }
+    ]
+  },
+  {
+    "id": "vulkan-moltenvk-scene",
+    "name": "MoltenVK scene recording adaptation",
+    "purpose": "Vulkan scene operations recorded on the original native command buffer with prepared tracked boundary resources.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "producers/maclauncher/src/modules/shared/vulkan/native/moltenvk-scene-build.mjs"
+      ],
+      "sourceDirectory": "producers/maclauncher"
+    },
+    "upstreams": [
+      {
+        "id": "moltenvk",
+        "provider": "github",
+        "url": "https://github.com/KhronosGroup/MoltenVK",
+        "repository": "KhronosGroup/MoltenVK",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/vulkan/native/moltenvk-scene-source.json",
+          "pointer": ""
+        }
+      },
+      {
+        "id": "spirv-cross",
+        "provider": "github",
+        "url": "https://github.com/KhronosGroup/SPIRV-Cross",
+        "repository": "KhronosGroup/SPIRV-Cross",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/vulkan/native/moltenvk-scene-source.json",
+          "pointer": "/dependencies",
+          "match": {
+            "id": "SPIRV-Cross"
+          }
+        }
+      },
+      {
+        "id": "vulkan-headers",
+        "provider": "github",
+        "url": "https://github.com/KhronosGroup/Vulkan-Headers",
+        "repository": "KhronosGroup/Vulkan-Headers",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/vulkan/native/moltenvk-scene-source.json",
+          "pointer": "/dependencies",
+          "match": {
+            "id": "Vulkan-Headers"
+          }
+        }
+      },
+      {
+        "id": "cereal",
+        "provider": "github",
+        "url": "https://github.com/USCiLab/cereal",
+        "repository": "USCiLab/cereal",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/vulkan/native/moltenvk-scene-source.json",
+          "pointer": "/dependencies",
+          "match": {
+            "id": "cereal"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "rpgmaker-decrypter",
+    "name": "RPGMakerDecrypter",
+    "purpose": "Local RPG Maker archive and asset extraction.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/included-helpers",
+      "entries": [
+        "producers/included-helpers/prepare.mjs",
+        "producers/included-helpers/profiles/rpgmaker-decrypter.json",
+        "producers/included-helpers/rpgmaker-decrypter/decrypter-build.js",
+        "producers/included-helpers/rpgmaker-decrypter/package.json"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "rpgmaker-decrypter",
+        "provider": "github",
+        "url": "https://github.com/uuksu/RPGMakerDecrypter",
+        "repository": "uuksu/RPGMakerDecrypter",
+        "pin": {
+          "file": "producers/included-helpers/profiles/rpgmaker-decrypter.json",
+          "pointer": "/source/source/revision"
+        }
+      }
+    ]
+  },
+  {
+    "id": "gamemaker-opengl-helper",
+    "name": "GameMaker OpenGL helper",
+    "purpose": "Software OpenGL integration for selected official GameMaker runners.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/included-helpers",
+      "entries": [
+        "producers/included-helpers/prepare.mjs",
+        "producers/included-helpers/profiles/gamemaker-opengl-helper.json",
+        "producers/included-helpers/gamemaker-opengl-helper/software-opengl-v3.m",
+        "producers/included-helpers/gamemaker-opengl-helper/build.mjs",
+        "producers/included-helpers/gamemaker-opengl-helper/sources.json"
+      ]
+    },
+    "upstreams": []
+  },
+  {
+    "id": "vnds-love",
+    "name": "VNDS-LOVE",
+    "purpose": "Adapted VNDS interpreter for the managed LÖVE host.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/engine-adaptations",
+      "entries": [
+        "producers/engine-adaptations/stage.mjs",
+        "producers/engine-adaptations/vnds-love/source.json"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "vnds-love",
+        "provider": "github",
+        "url": "https://github.com/ajusa/VNDS-LOVE",
+        "repository": "ajusa/VNDS-LOVE",
+        "pin": {
+          "file": "producers/engine-adaptations/vnds-love/source.json",
+          "pointer": ""
+        }
+      }
+    ]
+  },
+  {
+    "id": "rlvm-adapter",
+    "name": "MacLauncher RLVM adapter",
+    "purpose": "Managed Cocoa application integration library for the upstream RLVM app.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/vn-adaptations",
+      "entries": [
+        "producers/vn-adaptations/rlvm/package.mjs",
+        "producers/vn-adaptations/rlvm/adapter.m",
+        "producers/vn-adaptations/rlvm/adapter.json",
+        "producers/vn-adaptations/rlvm/source.json"
+      ]
+    },
+    "upstreams": []
+  },
+  {
+    "id": "siglus",
+    "name": "siglus_rs",
+    "purpose": "Managed visual-novel interpreter and owned compatibility resources.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/vn-adaptations",
+      "entries": [
+        "producers/vn-adaptations/package.mjs"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "siglus",
+        "provider": "github",
+        "url": "https://github.com/xmoezzz/siglus_rs",
+        "repository": "xmoezzz/siglus_rs",
+        "pin": {
+          "file": "producers/vn-adaptations/source.json",
+          "pointer": "/projects/siglus/upstream/revision"
+        }
+      }
+    ],
+    "recordMetadata": {
+      "capabilities": {
+        "nativeApi": "game_run_entry-v1"
+      }
+    }
   }
 ]

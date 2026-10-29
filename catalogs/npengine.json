@@ -22,7 +22,11 @@
         "bytes": 17942804,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/npengine%2Fv0.5.3-MCLv1%2Farm64/npengine-0.5.3-MCLv1-arm64.tar.gz"
       },
-      "tag": "npengine/v0.5.3-MCLv1/arm64"
+      "tag": "npengine/v0.5.3-MCLv1/arm64",
+      "source": {
+        "repository": "FGRE/libnpengine",
+        "revision": "da1a175e6b497c37f9714b77510cb47c0930cd42"
+      }
     }
   ]
 }

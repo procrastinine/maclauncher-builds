@@ -10,6 +10,10 @@
 	path = producers/maclauncher/src/external/aim
 	url = https://github.com/hahnlee/aim
 
+[submodule "producers/maclauncher/src/external/asr"]
+	path = producers/maclauncher/src/external/asr
+	url = https://github.com/arm/accuracy-super-resolution-generic-library
+
 [submodule "producers/maclauncher/src/external/atrac9"]
 	path = producers/maclauncher/src/external/atrac9
 	url = https://github.com/Thealexbarney/LibAtrac9.git
@@ -82,6 +86,10 @@
 	path = producers/maclauncher/src/external/innoextract
 	url = https://github.com/dscharrer/innoextract
 
+[submodule "producers/maclauncher/src/external/ISFMSLKit"]
+	path = producers/maclauncher/src/external/ISFMSLKit
+	url = https://github.com/mrRay/ISFMSLKit
+
 [submodule "producers/maclauncher/src/external/krkrsdl2"]
 	path = producers/maclauncher/src/external/krkrsdl2
 	url = https://github.com/krkrsdl2/krkrsdl2
@@ -93,6 +101,10 @@
 [submodule "producers/maclauncher/src/external/libnpengine"]
 	path = producers/maclauncher/src/external/libnpengine
 	url = https://github.com/FGRE/libnpengine
+
+[submodule "producers/maclauncher/src/external/libplacebo"]
+	path = producers/maclauncher/src/external/libplacebo
+	url = https://github.com/haasn/libplacebo
 
 [submodule "producers/maclauncher/src/external/librashader"]
 	path = producers/maclauncher/src/external/librashader
@@ -190,6 +202,10 @@
 	path = producers/maclauncher/src/external/RPGMakerDecrypter
 	url = https://github.com/uuksu/RPGMakerDecrypter.git
 
+[submodule "producers/maclauncher/src/external/sgsr2"]
+	path = producers/maclauncher/src/external/sgsr2
+	url = https://github.com/SnapdragonGameStudios/snapdragon-gsr
+
 [submodule "producers/maclauncher/src/external/source-revisions/fna3d"]
 	path = producers/maclauncher/src/external/source-revisions/fna3d
 	url = https://github.com/FNA-XNA/FNA3D
@@ -222,6 +238,10 @@
 	path = producers/maclauncher/src/external/UndertaleModTool
 	url = https://github.com/UnderminersTeam/UndertaleModTool.git
 
+[submodule "producers/maclauncher/src/external/xess"]
+	path = producers/maclauncher/src/external/xess
+	url = https://github.com/intel/xess
+
 [submodule "producers/maclauncher/src/external/xsys35c"]
 	path = producers/maclauncher/src/external/xsys35c
 	url = https://github.com/kichikuou/xsys35c
@@ -245,3 +265,28 @@
 [submodule "producers/maclauncher/src/external/streamline-camera"]
 	path = producers/maclauncher/src/external/streamline-camera
 	url = https://github.com/NVIDIA-RTX/Streamline
+[submodule "sources/anyps5"]
+	path = sources/anyps5
+	url = https://github.com/boykopovar/AnyPS5.git
+[submodule "sources/vulkan-loader"]
+	path = sources/vulkan-loader
+	url = https://chromium.googlesource.com/external/github.com/KhronosGroup/Vulkan-Loader
+[submodule "sources/nxnative"]
+	path = sources/nxnative
+	url = https://github.com/seedds/nxnative.git
+
+[submodule "producers/maclauncher/src/external/mpv-player"]
+	path = producers/maclauncher/src/external/mpv-player
+	url = https://github.com/mpv-player/mpv.git
+
+[submodule "sources/prosper"]
+	path = sources/prosper
+	url = https://github.com/mattias800/prosper.git
+
+[submodule "producers/engine-adaptations/sources/VNDS-LOVE"]
+	path = producers/engine-adaptations/sources/VNDS-LOVE
+	url = https://github.com/ajusa/VNDS-LOVE.git
+
+[submodule "producers/vn-adaptations/upstreams/kag3"]
+	path = producers/vn-adaptations/upstreams/kag3
+	url = https://github.com/krkrsdl2/kag3.git

@@ -22,7 +22,11 @@
         "bytes": 33711997,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/fna%2Fv26.10-MCLv1%2Farm64/fna-26.10-MCLv1-arm64.tar.gz"
       },
-      "tag": "fna/v26.10-MCLv1/arm64"
+      "tag": "fna/v26.10-MCLv1/arm64",
+      "source": {
+        "repository": "FNA-XNA/FNA",
+        "revision": "00498b0b81425b14bf8da23e68655215b9b5daa7"
+      }
     }
   ]
 }

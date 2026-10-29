@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "anyps5-relinker",
+  "source": {
+    "path": "sources/anyps5",
+    "repository": "https://github.com/boykopovar/AnyPS5.git",
+    "revision": "de004fed720ab6dadff66a044008b47524cb0b3f",
+    "license": "GPL-2.0-only",
+    "committedAt": "2026-10-28T00:32:37.000Z"
+  },
+  "buildEntry": "producers/anyps5/build-relinker.mjs",
+  "configure": {
+    "ANYPS5_RELINKER_ONLY": "ON",
+    "BUILD_TESTING": "OFF",
+    "CMAKE_BUILD_TYPE": "Release",
+    "CMAKE_OSX_ARCHITECTURES": "arm64",
+    "CMAKE_OSX_DEPLOYMENT_TARGET": "13.0"
+  },
+  "output": {
+    "kind": "conversion-tool",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "executableRelative": "core/relinker/relinker",
+    "gameCodeArchitecture": "x86_64"
+  }
+}

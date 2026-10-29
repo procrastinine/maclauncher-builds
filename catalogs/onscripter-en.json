@@ -22,7 +22,11 @@
         "bytes": 1955635,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onscripter-en%2FvMCLv1-0126%2Farm64/onscripter-en-MCLv1-0126-arm64.tar.gz"
       },
-      "tag": "onscripter-en/vMCLv1-0126/arm64"
+      "tag": "onscripter-en/vMCLv1-0126/arm64",
+      "source": {
+        "repository": "Galladite27/ONScripter-EN",
+        "revision": "3854ae86c19337991722059d2bed07cbcc847f6f"
+      }
     }
   ]
 }

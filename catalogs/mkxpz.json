@@ -22,7 +22,11 @@
         "bytes": 14431489,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mkxpz%2FvMCLv1-1003%2Farm64/mkxpz-MCLv1-1003-arm64.tar.gz"
       },
-      "tag": "mkxpz/vMCLv1-1003/arm64"
+      "tag": "mkxpz/vMCLv1-1003/arm64",
+      "source": {
+        "repository": "mkxp-z/mkxp-z",
+        "revision": "37a04d14413454551a7b6aadbb4e93e67168accb"
+      }
     }
   ]
 }

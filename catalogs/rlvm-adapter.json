@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 2,
+  "projectId": "rlvm-adapter",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "rlvm-adapter",
+      "version": "1.0.0-MCLv1",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "079d12d3158855f2766d7c60e5ebc7874cd79fe1f38492dd717037f3453b3e9d",
+      "sourceSha256": "a72fa658c9c77731e7d35d315a8c61e2af6f6162e56c9318de998f8e4dfbdcf2",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "rlvm-adapter-1.0.0-MCLv1-universal.tar.gz",
+        "sha256": "6053328d9ac096422ca59931c79d3a2d7f8a269b94180790a3c4e0faeac0be5b",
+        "bytes": 8004,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/rlvm-adapter%2Fv1.0.0-MCLv1%2Funiversal/rlvm-adapter-1.0.0-MCLv1-universal.tar.gz"
+      },
+      "tag": "rlvm-adapter/v1.0.0-MCLv1/universal"
+    }
+  ]
+}

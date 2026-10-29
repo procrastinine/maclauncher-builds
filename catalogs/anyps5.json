@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 2,
+  "projectId": "anyps5",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "anyps5",
+      "version": "MCLv1-1027-2",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "26.0",
+      "manifestRelative": "runtime.json",
+      "manifestSha256": "3298b549d284c6c709d5254859d91243d08561b3ffd95a5a8684dd18e4fa7f71",
+      "sourceSha256": "b550a82267b02d372058a385299f9d8605f594a653841e8a1bf1fec681fed90b",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "anyps5-MCLv1-1027-2-arm64.tar.gz",
+        "sha256": "84f3ebafed2f495e99ed9b8939d2572b2092a49cd9d0fef9568ca16154c65406",
+        "bytes": 37399676,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/anyps5%2FvMCLv1-1027-2%2Farm64/anyps5-MCLv1-1027-2-arm64.tar.gz"
+      },
+      "tag": "anyps5/vMCLv1-1027-2/arm64",
+      "source": {
+        "repository": "boykopovar/AnyPS5",
+        "revision": "de004fed720ab6dadff66a044008b47524cb0b3f"
+      }
+    }
+  ]
+}

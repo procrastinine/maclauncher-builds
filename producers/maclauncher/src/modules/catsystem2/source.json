@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/procrastinine/maclauncher-builds",
+  "moduleId": "catsystem2",
+  "componentDelivery": "managed-engine",
+  "includedTools": [
+    "catsystem2-kif-crypto"
+  ],
+  "sourceFiles": [
+    {
+      "path": "runtime/stage-audio.cjs",
+      "sourceSha256": "bf9bd22e0f31e10c39ad8318ec598c57ea1e31ca28fde99162da5d31e631d6b6",
+      "sha256": "9afe90468531322e978be1c62ea8470e8403ba4eefe995f143d29653260f6757"
+    },
+    {
+      "path": "runtime/stage-coretext-raster.cjs",
+      "sourceSha256": "5b28f7e740967d76bbd0c9db856450f5a54eb3fcd9317b0829d9b6d6ab18d556",
+      "sha256": "8a890f14e6faee8c45651c3d5d49da215c2823e9d7d49d8f7ebe40f2d5c17bcd"
+    },
+    {
+      "path": "runtime/stage-pcm-output.cjs",
+      "sourceSha256": "c92388a87ae2b67d9fa800402b7590e3413bdbb04935451298af47e590029849",
+      "sha256": "63120cf3a9ee7eb9ac3ef3a3d795d1839454c488b4fe2e2081f5cef2d3c3f4bb"
+    },
+    {
+      "path": "runtime/stage-viewport.cjs",
+      "sourceSha256": "fe762f482e5da5d99d1f9f98aadbc732017a381397bf8939048dc07c3c55e9fe",
+      "sha256": "e5de0fa790bcc31d836ee6630ab9d96943a1f7ac2c6cc01d5b4bbe25ee834e2c"
+    },
+    {
+      "path": "runtime/stage-viewport-v2.cjs",
+      "sourceSha256": "ec4773f38494616a9f6dd19ba17cfac8d72c1dabb5dd0423cfae9f5fadfe4bbb",
+      "sha256": "c133e256cc6396c46109e5aed9dfef934910f09996a482703b57391236a8f58b"
+    },
+    {
+      "path": "runtime/native/cocoa-audio.m",
+      "sha256": "b4db50cfb1183c94fa0da1eeb90f7b79e7e3d6cae05eaf5884d931b722074d9a"
+    },
+    {
+      "path": "runtime/native/cocoa-viewport-v2.m",
+      "sha256": "752692228da364c8607c375b739d147f6326345118b6a38bbdcf42d73163da59"
+    },
+    {
+      "path": "runtime/native/cocoa-viewport.m",
+      "sha256": "16579ffd113422d8005ebac4cd40ce10f709ffa99157e363df40a9f3eb7af071"
+    },
+    {
+      "path": "runtime/native/coretext-raster.m",
+      "sha256": "0a7da26275c9a4fea8d5ecdd103369189736b0a4fc35661f6f8ff308f5278542"
+    },
+    {
+      "path": "runtime/native/ogg-decode.c",
+      "sha256": "5d1a766ce515226c5c06d903a9c73f530695d02f821c1bd5e84257acfb15d894"
+    }
+  ],
+  "codecArchives": [
+    {
+      "id": "libogg",
+      "version": "1.3.6",
+      "name": "libogg-1.3.6.tar.xz",
+      "url": "https://downloads.xiph.org/releases/ogg/libogg-1.3.6.tar.xz",
+      "sha256": "5c8253428e181840cd20d41f3ca16557a9cc04bad4a3d04cce84808677fa1061",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "id": "libvorbis",
+      "version": "1.3.7",
+      "name": "libvorbis-1.3.7.tar.xz",
+      "url": "https://downloads.xiph.org/releases/vorbis/libvorbis-1.3.7.tar.xz",
+      "sha256": "b33cc4934322bcbf6efcbacf49e3ca01aadbea4114ec9589d1b1e9d20f72954b",
+      "license": "BSD-3-Clause"
+    }
+  ]
+}

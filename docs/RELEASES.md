@@ -70,10 +70,7 @@ archive remains unchanged. Compilation is a separate producer operation. New
 package bytes receive a new version and checksum; published identities remain
 immutable.
 
-The catalog lists the current working package for each runtime type. Separate
-HashLink 1.9/1.12 and Steamworks4j 1.9/1.10 packages preserve incompatible game
-ABIs. Superseded package generations are removed from the catalog and Releases;
-source tags remain available. MKXP-Z publisher updates use the upstream provider;
+The catalog retains published packages and at most one new version per project per publication. Superseded unpublished candidates are omitted from records, producer outputs and source history. Separate HashLink 1.9/1.12 and Steamworks4j 1.9/1.10 packages preserve incompatible game ABIs. MKXP-Z publisher updates use the upstream provider;
 the Builds catalog contains the Apple Silicon Unicode filename normalization
 adaptation.
 

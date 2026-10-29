@@ -33,7 +33,7 @@ export async function managerDeclaration({project,input,source}){
 
 /** Prepare one release from sealed files or an already packed archive. No build or network call occurs. */
 export async function prepareRelease({project,input,declaration,archive,record,source,sourceRevision,output,directory=root}){
- const registration=resolveProject(project,directory),repo=registration.releaseRepository;
+ const registration=resolveProject(project,directory,{resolvePins:false}),repo=registration.releaseRepository;
  const legacySourceAsset=record?.sourceAsset;
  const sourcePointer=record?.source||(sourceRevision?{repository:repo,revision:sourceRevision}:registration.producer.source);
  if(!output||fs.existsSync(output))throw Error('Choose a new release output directory.');
@@ -68,7 +68,7 @@ export async function prepareRelease({project,input,declaration,archive,record,s
 /** Verify downloaded release assets without executing runtime contents. */
 export async function verifyRelease({bundle,project,version,arch,directory=root}){
  const sidecars=fs.readdirSync(bundle).filter(name=>name.endsWith('.tar.gz.json'));if(sidecars.length!==1)throw Error('Select a directory containing exactly one runtime archive and its package record.');
- const record=read(path.join(bundle,sidecars[0]));identity(record);const registration=resolveProject(record.id,directory),repo=registration.releaseRepository;releaseRecord(record,{project:record.id,repository:repo});
+ const record=read(path.join(bundle,sidecars[0]));identity(record);const registration=resolveProject(record.id,directory,{resolvePins:false}),repo=registration.releaseRepository;releaseRecord(record,{project:record.id,repository:repo});
  if(project&&record.id!==project||version&&record.version!==version||arch&&record.arch!==arch)throw Error('Release metadata differs from the selected project, version or architecture.');
  const name=assetName(record);if(sidecars[0]!==name+'.json')throw Error('Release asset belongs to a different project or version.');
  const runtime=path.join(bundle,name);if(regular(runtime).size!==record.asset.bytes)throw Error('Release asset checksum or size changed.');
@@ -87,9 +87,9 @@ export async function verifyRelease({bundle,project,version,arch,directory=root}
 
 /** A single discoverable listing, generated from the same project catalogs used by the launcher. */
 export function catalogIndex(directory=root){
- const registry=readProjects(directory),catalogs=path.join(directory,'catalogs');
+ const registry=readProjects(directory,{resolvePins:false}),catalogs=path.join(directory,'catalogs');
  const projects=[];
- for(const p of registry.projects){const file=path.join(catalogs,p.id+'.json');if(!fs.existsSync(file))continue;const bytes=fs.readFileSync(file),c=validateCatalog(JSON.parse(bytes),{project:p.id,repository:registry.repository});
+ for(const p of registry.projects){const file=path.join(catalogs,p.id+'.json');if(!fs.existsSync(file))continue;const bytes=fs.readFileSync(file),c=validateCatalog(JSON.parse(bytes),{project:p.id,repository:registry.repository,allowEmpty:true});if(!c.packages.length)continue;
   const page='https://'+registry.repository.split('/')[0]+'.github.io/'+registry.repository.split('/')[1]+'/';
   const profiles=new Map((p.packageProfiles||[]).map(profile=>[profile.version,profile]));
   projects.push({projectId:p.id,name:p.name,delivery:p.delivery,pageUrl:new URL('#'+p.id,page).href,catalog:{url:'https://raw.githubusercontent.com/'+registry.repository+'/main/catalogs/'+p.id+'.json',sha256:digest(bytes),bytes:bytes.length},releases:c.packages.map(r=>({version:r.version,arch:r.arch,minimumMacOS:r.minimumMacOS,tag:r.tag,asset:r.asset,pageUrl:new URL('#'+(profiles.get(r.version)?.anchor||p.id),page).href,...(profiles.has(r.version)?{profile:profiles.get(r.version).label,...(profiles.get(r.version).anchor?{anchor:profiles.get(r.version).anchor}:{})}:{})}))});
@@ -111,7 +111,7 @@ export function publicationAssets(release){return release.assets.filter(a=>a.rol
 
 /** Reconstruct local verification metadata from a committed catalog and downloaded public assets. */
 export async function verifyPublicAssets({project,version,arch,assets,output,directory=root}){
- const registration=resolveProject(project,directory),snapshot=validateCatalog(loadPrevious(project,directory),{project,repository:registration.releaseRepository});
+ const registration=resolveProject(project,directory,{resolvePins:false}),snapshot=validateCatalog(loadPrevious(project,directory),{project,repository:registration.releaseRepository});
  const record=snapshot.packages.find(r=>r.version===version&&r.arch===arch);if(!record)throw Error('The selected package is absent from the committed project catalog.');
  const names=[record.asset.filename];
  if(fs.readdirSync(assets).length!==names.length||fs.readdirSync(assets).some(name=>!names.includes(name)))throw Error('Public release attachments must contain only the selected runtime archive.');

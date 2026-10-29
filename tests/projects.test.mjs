@@ -10,8 +10,10 @@ const root=path.resolve(import.meta.dirname,'..');
 test('project registry covers every selected package and excludes direct upstream binaries',()=>{
  const registry=readProjects(root),ids=new Set(registry.projects.map(value=>value.id));
  const catalogs=fs.readdirSync(path.join(root,'catalogs')).filter(name=>name.endsWith('.json')&&name!=='index.json');
- assert.deepEqual(new Set(catalogs.map(name=>name.slice(0,-5))),ids);
- for(const file of catalogs){const project=file.slice(0,-5);validateCatalog(JSON.parse(fs.readFileSync(path.join(root,'catalogs',file))),{project,repository:registry.repository});}
+ for(const file of catalogs)assert.ok(ids.has(file.slice(0,-5)),file+' has no registered producer');
+ const mpv=resolveProject('mpv',root);assert.equal(mpv.delivery,'downloadable');assert.equal(mpv.producer.sourceDirectory,'producers/mpv-render/v7');assert.equal(mpv.upstreams[0].revision,'41f6a645068483470267271e1d09966ca3b9f413');assert.ok(catalogs.includes('mpv.json'));
+ const media=JSON.parse(fs.readFileSync(path.join(root,'catalogs/mpv.json')));assert.equal(media.packages[0].minimumMacOS,'27.0');assert.deepEqual(media.packages.map(value=>value.version),['0.41.0-MCLv7']);assert.deepEqual(mpv.packageProfiles.map(value=>value.version),['0.41.0-MCLv7']);
+ for(const file of catalogs){const project=file.slice(0,-5);validateCatalog(JSON.parse(fs.readFileSync(path.join(root,'catalogs',file))),{project,repository:registry.repository,allowEmpty:project==='prosper'});}
  for(const id of ['nwjs','renpy'])assert.throws(()=>resolveProject(id,root),/Unknown/);
  assert.equal(resolveProject('android',root).producer.recipe,'runtimes/android/source.json');
  assert.notEqual(releaseTag({id:'engine',version:'a-b-1',arch:'arm64'}),releaseTag({id:'engine-a',version:'b-1',arch:'arm64'}));
@@ -32,19 +34,20 @@ test('upstream checks retain prerelease candidates and report incomplete metadat
 });
 
 test('delivery registries classify each project once and preserve a flat project API',t=>{
- const registry=readProjects(root),manifest=JSON.parse(fs.readFileSync(path.join(root,'projects.json')));
+ const registry=readProjects(root),rawRegistry=readProjects(root,{resolvePins:false}),manifest=JSON.parse(fs.readFileSync(path.join(root,'projects.json')));
  assert.equal(registry.schemaVersion,1);assert.equal(manifest.schemaVersion,2);
- assert.equal(registry.projects.filter(project=>project.delivery==='downloadable').length,25);
- assert.equal(registry.projects.filter(project=>project.delivery==='bundled').length,10);
+ assert.equal(registry.projects.filter(project=>project.delivery==='downloadable').length,37);
+ assert.equal(registry.projects.filter(project=>project.delivery==='bundled').length,12);
  assert.equal(resolveProject('mkxpz',root).delivery,'downloadable');assert.equal(resolveProject('reshade',root).delivery,'bundled');
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'project-delivery-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
  fs.mkdirSync(path.join(directory,'projects'));
  for(const file of Object.values(manifest.registries))fs.copyFileSync(path.join(root,file),path.join(directory,file));
  const save=value=>fs.writeFileSync(path.join(directory,'projects.json'),JSON.stringify(value));save(manifest);
- assert.deepEqual(readProjects(directory),registry);
+ assert.deepEqual(readProjects(directory,{resolvePins:false}),rawRegistry);
+ save(registry);assert.deepEqual(readProjects(directory),registry);save(manifest);
  const bundled=JSON.parse(fs.readFileSync(path.join(directory,manifest.registries.bundled)));
  bundled.push(JSON.parse(fs.readFileSync(path.join(directory,manifest.registries.downloadable)))[0]);fs.writeFileSync(path.join(directory,manifest.registries.bundled),JSON.stringify(bundled));
- assert.throws(()=>readProjects(directory),/duplicate project/);
+ assert.throws(()=>readProjects(directory,{resolvePins:false}),/duplicate project/);
  save({...manifest,registries:{...manifest.registries,bundled:'../outside.json'}});assert.throws(()=>readProjects(directory),/registry path/);
  save({...manifest,registries:{downloadable:manifest.registries.downloadable}});assert.throws(()=>readProjects(directory),/delivery registries/);
  const flat=structuredClone(registry);delete flat.projects[0].delivery;save(flat);assert.throws(()=>readProjects(directory),/delivery classification/);

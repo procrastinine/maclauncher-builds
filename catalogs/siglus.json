@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 2,
+  "projectId": "siglus",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "siglus",
+      "version": "1.0.0-preview.5f358ef1360b-MCLv1-1028-1",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "bb80a014e79f9bd0707c2b04625d9dc0572e8d2370d8f0fae2e46fca31c5f0d6",
+      "sourceSha256": "0af34b45848273c569489805a8c8b359ba9c155ff8c61093d880cf7d50976f7e",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "siglus-1.0.0-preview.5f358ef1360b-MCLv1-1028-1-arm64.tar.gz",
+        "sha256": "390bbf2ecef6031dcd441f1ad12c59fc4a695ec83d80284665cfef6e3a3bc506",
+        "bytes": 11411582,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/siglus%2Fv1.0.0-preview.5f358ef1360b-MCLv1-1028-1%2Farm64/siglus-1.0.0-preview.5f358ef1360b-MCLv1-1028-1-arm64.tar.gz"
+      },
+      "tag": "siglus/v1.0.0-preview.5f358ef1360b-MCLv1-1028-1/arm64",
+      "source": {
+        "repository": "xmoezzz/siglus_rs",
+        "revision": "5f358ef1360b0439e92aed2b749e8f25d8721954"
+      },
+      "capabilities": {
+        "nativeApi": "game_run_entry-v1"
+      }
+    }
+  ]
+}

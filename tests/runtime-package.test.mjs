@@ -68,6 +68,30 @@ test('catalog updates retain prior versions and cannot replace an existing relea
  assert.throws(()=>catalog([record],{...options,previous:{...previous,projectId:'another-project'}}),/different project/);
 });
 
+test('published catalogs accept only additive source and capability backfills without changing payload identity',async t=>{
+ const f=fixture(t),record=await pack(f),options={project:f.project,repository:'owner/builds'},previous=catalog([record],options),archiveHash=digest(fs.readFileSync(f.output));
+ const source={repository:'owner/runtime',revision:'d'.repeat(40)};
+ const filled={...record,source,capabilities:{decodedFrameAPI:1,nativeAbi:{eventLoop:'sdl'},formats:['vm']},launcherContract:1};
+ const backfilled=catalog([filled],{...options,previous});
+ assert.deepEqual(backfilled.packages[0].source,source);assert.deepEqual(backfilled.packages[0].capabilities,filled.capabilities);
+ assert.equal(backfilled.packages[0].asset.sha256,record.asset.sha256);assert.equal(digest(fs.readFileSync(f.output)),archiveHash);
+ const added={...filled,capabilities:{...filled.capabilities,decodedColorAPI:1}};
+ const extended=catalog([added],{...options,previous:backfilled});assert.equal(extended.packages[0].capabilities.decodedColorAPI,1);
+ assert.deepEqual(catalog([added],{...options,previous:extended}),extended,'Identical metadata updates are idempotent');
+ const without=(value,key)=>{const result={...value};delete result[key];return result;};
+ for(const changed of [without(filled,'source'),without(filled,'capabilities'),without(filled,'launcherContract'),
+  {...filled,source:{...source,revision:'e'.repeat(40)}},{...filled,capabilities:{decodedFrameAPI:1}},
+  {...filled,capabilities:{...filled.capabilities,decodedFrameAPI:2}},
+  {...filled,capabilities:{...filled.capabilities,nativeAbi:{eventLoop:'sdl',callback:'extra'}}},
+  {...filled,capabilities:{...filled.capabilities,formats:['vm','native']}},{...filled,launcherContract:2},
+  {...filled,minimumMacOS:'14.0'},{...filled,launcherArchitectures:['arm64','x64']},
+  {...filled,manifestRelative:'other.json'},{...filled,manifestSha256:'f'.repeat(64)},
+  {...filled,sourceSha256:'e'.repeat(64)},{...filled,asset:{...filled.asset,sha256:'0'.repeat(64)}},
+  {...filled,asset:{...filled.asset,bytes:filled.asset.bytes+1}}])assert.throws(()=>catalog([changed],{...options,previous:backfilled}),/immutable/);
+ assert.throws(()=>catalog([{...record,launcherContract:2}],{...options,previous}),/immutable/,'An omitted contract only backfills the existing contract1 semantics');
+ assert.deepEqual(previous.packages[0],catalog([record],options).packages[0],'Merging does not mutate the previous catalog');
+});
+
 test('optional native providers retain platform requirements and exact sealed bytes',async t=>{
  const f=fixture(t);
  for(const [name,optional] of [['baseline.dylib',false],['provider.dylib',true]]){
@@ -95,4 +119,20 @@ test('zero-byte app signature members retain their exact bytes and inventory',as
  assert.equal(result.files,5);assert.throws(()=>publicDeclaration({...f.declaration,files:f.declaration.files.map(file=>file.path===name?{...file,size:-1}:file)}),/Invalid sealed/);
  fs.writeFileSync(path.join(f.input,name),'changed');
  await assert.rejects(pack({...f,output:path.join(f.root,'next',path.basename(f.output))}),/exceeds|checksum/);
+});
+
+test('downloadable metadata follows payload source pins and bundled records remain exact',async()=>{
+ const {recordMetadata}=await import('../lib/record-metadata.mjs');const {resolveProject}=await import('../lib/projects.mjs');
+ const project=resolveProject('siglus'),revision=project.upstreams[0].revision;
+ assert.deepEqual(recordMetadata({project:'siglus',manifest:{upstreamRevision:revision}}),{capabilities:{nativeApi:'game_run_entry-v1'},source:{repository:'xmoezzz/siglus_rs',revision}});
+ assert.throws(()=>recordMetadata({project:'siglus',manifest:{upstreamRevision:'f'.repeat(40)}}),/source differs/);
+ assert.deepEqual(recordMetadata({project:'siglus',manifest:{upstreamRevision:revision},metadata:{capabilities:{nativeApi:'../unsafe'}}}).capabilities,{nativeApi:'../unsafe'},'Modules validate capability semantics; scalar strings are generic metadata');
+ const tooMany=Object.fromEntries(Array.from({length:65},(_,n)=>['feature'+n,n]));
+ const tooDeep={engine:{profile:{abi:{version:1}}}};
+ for(const capabilities of [tooMany,tooDeep])assert.throws(()=>recordMetadata({project:'siglus',manifest:{upstreamRevision:revision},metadata:{capabilities}}),/capabilities/i);
+ assert.throws(()=>recordMetadata({project:'siglus',manifest:{upstreamRevision:revision},metadata:{source:{repository:'owner/repo',revision:'a'.repeat(40)}}}),/source differs/);
+ assert.deepEqual(recordMetadata({project:'reshade',manifest:{upstreamRevision:revision},metadata:{capabilities:{nativeApi:'unused'}}}),{});
+ const mesa=resolveProject('vulkan-kosmickrisp-gles32'),mesaRevision=mesa.upstreams[0].revision;
+ assert.deepEqual(recordMetadata({project:mesa.id,manifest:{upstreamRevision:mesaRevision}}),{},'A verified non-GitHub source stays packable without a fabricated GitHub identity');
+ assert.throws(()=>recordMetadata({project:mesa.id,manifest:{upstreamRevision:'f'.repeat(40)}}),/source differs/);
 });

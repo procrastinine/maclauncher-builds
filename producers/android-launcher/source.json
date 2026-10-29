@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/procrastinine/maclauncher-builds",
+  "android": {
+    "repository": "https://github.com/procrastinine/maclauncher-android",
+    "revision": "00f17cb15b1fcbe797a59027144dd8173424f06b"
+  },
+  "files": [
+    {
+      "path": "supplied/resources/launch-arguments.jar",
+      "sha256": "ec11c7a32a467d42da519066f8ce5277e92f763b428b0726f02cf0b593b04c4f"
+    },
+    {
+      "path": "supplied/resources/text-input.jar",
+      "sha256": "331582e630a4f8cfca4b2edb15bb404ba6db1f9e68783fc60c7b175cb59f5530"
+    },
+    {
+      "path": "supplied/resources/text-input.json",
+      "sha256": "c7fde03229e5cc436b9c08143a816a9c3147a7f92f889d20b8d2939bb915f8b9"
+    },
+    {
+      "path": "supplied/store/resources/account-control.jar",
+      "sha256": "72eae00c867cec39ebe043760e7cd0b81e20358fc354897641470684bac89fce"
+    },
+    {
+      "path": "supplied/store/resources/account-control.json",
+      "sha256": "c5c18d6677663f7ab189687b678a1d581e368b56edfaccd88f80fd745b331a2a"
+    },
+    {
+      "path": "supplied/providers/macapk/resources/privacy.jar",
+      "sha256": "6499744367ec6016c99192c1a11368b1abb8181eadc98b4a739b95bdfa3fcfc6"
+    },
+    {
+      "path": "supplied/runtime/package.json",
+      "sha256": "2f19de4c912908df5ab485fe38a4513d7040afdd1d2e4f4459355b2877c9d4cd"
+    },
+    {
+      "path": "supplied/runtime/src/modules/android/apk.js",
+      "sha256": "dbbddf8891bdaab3bfbbdc57c7d6f498da318c6de786b94819a8a23252eed937"
+    },
+    {
+      "path": "supplied/runtime/src/modules/android/binary-manifest.js",
+      "sha256": "9b61b3265358f5f2be6f7e6eb1ace52e569c99a8934e029f3e8a95e70b860351"
+    },
+    {
+      "path": "supplied/runtime/src/modules/android/profile.js",
+      "sha256": "f24aa405be769f94429c16b6589838619cd0d2465cf599fe4549e208c95f89b6"
+    },
+    {
+      "path": "supplied/runtime/src/modules/android/art/runtime.js",
+      "sha256": "274e59d5561954c1d86523fee3073faa88cae60ef5f58777f2fa6f6c77986a25"
+    },
+    {
+      "path": "supplied/runtime/src/modules/android/art/boot-classpath.mjs",
+      "sha256": "710bf317809a4ceb6010b2db24916c0d4d465a07540c9abf931b9498c73670ef"
+    },
+    {
+      "path": "supplied/runtime/src/modules/android/art/components.json",
+      "sha256": "c3cf6cab55c1da7604074533b13016191d9ed5046474505bb7f7aa3316240661"
+    },
+    {
+      "path": "supplied/runtime/src/modules/android/art/supplier.json",
+      "sha256": "9055610b60a384aa7f04ad78b32afd62c7de437f057223179519c9496b2b91bb"
+    },
+    {
+      "path": "supplied/runtime/src/modules/android/native/arm32/components.json",
+      "sha256": "577dda96d7e9edec7a646d7f7cbf2800eab594dea32ddc37af32d775a929f532"
+    },
+    {
+      "path": "supplied/runtime/src/modules/android/native/resources/ad-hosts.json",
+      "sha256": "0bff70d6de3b343369a1a14ce16828d8f5ea4bca48a5202b2c09d518c108e62a"
+    },
+    {
+      "path": "supplied/runtime/src/modules/android/native/resources/storage-namespace.json",
+      "sha256": "db6fcc79dfff8920d321fa7c1d7fb34d77b73454a4b657f860f200afbd6aae6a"
+    },
+    {
+      "path": "supplied/runtime/src/modules/shared/runtime/zip.js",
+      "sha256": "b3e018f075cc5e83e7daac48f6f08d0820ff2f31bb08689c3155b5ffe98aedc2"
+    },
+    {
+      "path": "supplied/LICENSE",
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7"
+    },
+    {
+      "path": "supplied/text-input.LICENSE",
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7"
+    },
+    {
+      "path": "supplied/account-control.LICENSE",
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "source/arguments/build.mjs",
+      "sha256": "b15b5848d230668134875d73de7ef55c7fe7a21579181b5ce7ff86a692a1729a"
+    },
+    {
+      "path": "source/arguments/java/com/maclauncher/android/arguments/ArgumentsAgent.java",
+      "sha256": "1b585a3a61bb3cd461a26f7650067790334a356a82ccb12abd7d3e0c96ddfa21"
+    },
+    {
+      "path": "source/arguments/java/com/maclauncher/android/arguments/ArgumentsBridge.java",
+      "sha256": "6edda07eb1fa9a02bb60a2fa9bf2082e6c2366a551e2677e4eaa85dd8d498228"
+    },
+    {
+      "path": "source/providers/macapk/build-policy.mjs",
+      "sha256": "dacee9007b14e0c92b9336655449d0c5ac39b46a2ded8f04a22650bbeea92909"
+    },
+    {
+      "path": "source/providers/macapk/java/AccountControl.java",
+      "sha256": "00cead2ecbc62fe81698c16a52f53218997052bdb2471d83d5ad78fa52440285"
+    },
+    {
+      "path": "source/providers/macapk/java/AuthBridge.java",
+      "sha256": "181f7e9d88246785c9a89ee7c807294040b964aba04d2f87626091190a0947c9"
+    },
+    {
+      "path": "source/providers/macapk/java/Capabilities.java",
+      "sha256": "bf5d7b251a0395eb67d2ec6c73fbc52a13812233c6bf3f84820739f192d07481"
+    },
+    {
+      "path": "source/providers/macapk/java/IconPreparation.java",
+      "sha256": "75b3b073e6ab42ae11530907a171c1eec658f6aabf3eefdf727290737f164703"
+    },
+    {
+      "path": "source/providers/macapk/java/JsonRpc.java",
+      "sha256": "8d6909801d832ed030c3f7c9cf848534c6fb3df3d2a352fc4a37b96dad04824e"
+    },
+    {
+      "path": "source/providers/macapk/java/PrivacyAgent.java",
+      "sha256": "0ce504f85daf8c027e3b1e0f64068070afa8e47b7fb3940ea99e3ed7759af6e0"
+    },
+    {
+      "path": "source/providers/macapk/java/PrivacyBridge.java",
+      "sha256": "de554ab526f80cbf793a151fa30771b7ee0f5ab5cd36bfdbc130f33bbcbf727f"
+    },
+    {
+      "path": "source/store/build-account-control.mjs",
+      "sha256": "8e7a1ad4cb2b739e48b3198aef72f1c88fc1dc3be1ae9f92d20e806c65447122"
+    },
+    {
+      "path": "source/store/java/maclauncher/android/AccountControl.java",
+      "sha256": "1be31d59d4721f685781fc5cac8c35e21e773d7a8995ed4f03a3ef1ef08a7b07"
+    },
+    {
+      "path": "source/store/java/maclauncher/android/framework/HostAccountAccess.java",
+      "sha256": "18f68ec13261223fcd491658ff995890215d092732652d93314d330a204b6cb9"
+    },
+    {
+      "path": "source/text-input/build.mjs",
+      "sha256": "422f227390081e51600313b806ab11d403dc54ede05ff1e05ae997ef1339dd43"
+    },
+    {
+      "path": "source/text-input/java/maclauncher/android/framework/HostTextInput.java",
+      "sha256": "2c183b0a424e68223c98729f8e479f8b7e922de53bf819313aaa2223480c0e77"
+    }
+  ]
+}

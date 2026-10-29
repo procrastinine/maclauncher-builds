@@ -22,7 +22,11 @@
         "bytes": 3804991,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onsyuri%2Fv0.7.7beta-MCLv1%2Farm64/onsyuri-0.7.7beta-MCLv1-arm64.tar.gz"
       },
-      "tag": "onsyuri/v0.7.7beta-MCLv1/arm64"
+      "tag": "onsyuri/v0.7.7beta-MCLv1/arm64",
+      "source": {
+        "repository": "YuriSizuku/OnscripterYuri",
+        "revision": "08f744b31cc1907b66a15f0402e62321a131ed81"
+      }
     }
   ]
 }

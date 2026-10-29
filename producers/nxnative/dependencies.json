@@ -1,0 +1,293 @@
+{
+  "schemaVersion": 1,
+  "architecture": "arm64",
+  "minimumMacOS": "14.0",
+  "payloadPolicy": "producers/maclauncher/src/modules/shared/runtime/runtime-content.js",
+  "python": {
+    "version": "3.12.15",
+    "publisher": "astral-sh/python-build-standalone",
+    "release": "20261013",
+    "filename": "python-3.12.15-arm64.tar.gz",
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261013/cpython-3.12.15%2B20261013-aarch64-apple-darwin-install_only_stripped.tar.gz",
+    "sha256": "9866e11cf2ae9caa1e671383786f248859a52dd8bfb702fb4c0dc2c65f1d36de",
+    "bytes": 25052618,
+    "repository": "https://github.com/astral-sh/python-build-standalone",
+    "license": "Python-2.0 AND CNRI-Python",
+    "licenseArchive": {
+      "filename": "python-3.12.15-arm64-licenses.tar.zst",
+      "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261013/cpython-3.12.15%2B20261013-aarch64-apple-darwin-pgo%2Blto-full.tar.zst",
+      "sha256": "8c7ac5f091c64111247e595c9fc8fecc38453e94a60323a3b66dbfca3c01414a",
+      "bytes": 57714586,
+      "path": "python/licenses"
+    },
+    "exclude": [
+      "include",
+      "share",
+      "lib/pkgconfig",
+      "lib/python3.12/config-3.12-darwin",
+      "lib/python3.12/ensurepip",
+      "lib/python3.12/turtledemo",
+      "lib/python3.12/site-packages/pip",
+      "lib/python3.12/site-packages/pip-26.2.1.dist-info",
+      "bin/2to3",
+      "bin/2to3-3.12",
+      "bin/idle3",
+      "bin/idle3.12",
+      "bin/pydoc3",
+      "bin/pydoc3.12",
+      "bin/pip",
+      "bin/pip3",
+      "bin/pip3.12",
+      "bin/python3-config",
+      "bin/python3.12-config",
+      "bin/python",
+      "bin/python3.12"
+    ]
+  },
+  "dotnet": {
+    "version": "10.0.13",
+    "filename": "dotnet-runtime-10.0.13-osx-arm64.tar.gz",
+    "url": "https://builds.dotnet.microsoft.com/dotnet/Runtime/10.0.13/dotnet-runtime-10.0.13-osx-arm64.tar.gz",
+    "sha512": "339c5b031b5fd7d64edd27314a1d0f8a1320b8c61f9ac305c1d4cdb61c94bc438482867ceea09d38fc7194da2a05e6a86b164992a5ec793ea3d65ccce0ea6bac",
+    "bytes": 33248881,
+    "repository": "https://github.com/dotnet/runtime",
+    "license": "MIT",
+    "licenseFiles": [
+      "LICENSE.txt",
+      "ThirdPartyNotices.txt"
+    ]
+  },
+  "wheels": [
+    {
+      "name": "backports.zstd",
+      "version": "1.8.0",
+      "filename": "backports_zstd-1.8.0-cp312-cp312-macosx_11_0_arm64.whl",
+      "url": "https://files.pythonhosted.org/packages/92/31/1e73b2835c78a9067ecba390b0eea032f827fc0b2f8bf2c8656992c30dc8/backports_zstd-1.8.0-cp312-cp312-macosx_11_0_arm64.whl",
+      "sha256": "d810d83c8a703f424ed2a49aa271078c91b530da2d8c104bd88207e68d116de8",
+      "bytes": 368337,
+      "repository": "https://github.com/rogdham/backports.zstd",
+      "license": "PSF-2.0",
+      "licenseFiles": [
+        "backports_zstd-1.8.0.dist-info/licenses/LICENSE_zstd.txt",
+        "backports_zstd-1.8.0.dist-info/licenses/LICENSE.txt"
+      ]
+    },
+    {
+      "name": "blessed",
+      "version": "1.52.0",
+      "filename": "blessed-1.52.0-py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/29/1f/88e64e3b4a8299fcc47dd0db35276ca21c18fadad4e8eb25afad546404c6/blessed-1.52.0-py3-none-any.whl",
+      "sha256": "1936f421f3feb130035a4629e6477d1432e33b2674ab2b9841292c74d479eac2",
+      "bytes": 142946,
+      "repository": "https://github.com/jquast/blessed",
+      "license": "MIT",
+      "licenseFiles": [
+        "blessed-1.52.0.dist-info/licenses/LICENSE"
+      ]
+    },
+    {
+      "name": "capstone",
+      "version": "5.0.9",
+      "filename": "capstone-5.0.9-py3-none-macosx_11_0_arm64.whl",
+      "url": "https://files.pythonhosted.org/packages/42/9a/4eecfbc94961cda70301fd13de69042be1943bee456e37bc1369840601b1/capstone-5.0.9-py3-none-macosx_11_0_arm64.whl",
+      "sha256": "fc269c5082e17d7f9f265cd6980e2fdc6ab572df913951d76db0357e06b8001d",
+      "bytes": 1202361,
+      "repository": "https://www.capstone-engine.org",
+      "license": "BSD License",
+      "licenseFiles": [
+        "capstone-5.0.9.dist-info/LICENSE.TXT"
+      ]
+    },
+    {
+      "name": "enlighten",
+      "version": "1.14.1",
+      "filename": "enlighten-1.14.1-py2.py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/73/1e/244bb2fc5713ad21ae9f9012067f6432c682593816c6a45372c24f5a7d61/enlighten-1.14.1-py2.py3-none-any.whl",
+      "sha256": "5fbd0c959ca1644034c41bb0ace5db19c9852cf9d721b6103f5f130663c57be8",
+      "bytes": 42281,
+      "repository": "https://github.com/Rockhopper-Technologies/enlighten",
+      "license": "MPLv2.0",
+      "licenseFiles": [
+        "enlighten-1.14.1.dist-info/LICENSE"
+      ]
+    },
+    {
+      "name": "fonttools",
+      "version": "4.67.0",
+      "filename": "fonttools-4.67.0-cp312-cp312-macosx_10_13_universal2.whl",
+      "url": "https://files.pythonhosted.org/packages/5b/50/f674402869f11a89868c4755ae86cd2fcfd67ca6193c6f5d1b479b1267b9/fonttools-4.67.0-cp312-cp312-macosx_10_13_universal2.whl",
+      "sha256": "fcb9743140419410161acfe7ec205fb0a8a703acfccb85b586becb5a97c047c9",
+      "bytes": 3108316,
+      "repository": "http://github.com/fonttools/fonttools",
+      "license": "MIT",
+      "licenseFiles": [
+        "fonttools-4.67.0.dist-info/licenses/LICENSE",
+        "fonttools-4.67.0.dist-info/licenses/LICENSE.external"
+      ]
+    },
+    {
+      "name": "jinxed",
+      "version": "2.1.0",
+      "filename": "jinxed-2.1.0-py2.py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/f1/1d/0a6be99b69bb448448403a45a241aff0dca751832ae54f027ed940d2eb52/jinxed-2.1.0-py2.py3-none-any.whl",
+      "sha256": "43b802d18b70e405d410fb66eb2837d1101e7e5ea922e666507bb43f34d11d09",
+      "bytes": 104999,
+      "repository": "https://github.com/Rockhopper-Technologies/jinxed",
+      "license": "MPLv2.0",
+      "licenseFiles": [
+        "jinxed-2.1.0.dist-info/licenses/LICENSE",
+        "jinxed-2.1.0.dist-info/licenses/LICENSE.ncurses"
+      ]
+    },
+    {
+      "name": "lz4",
+      "version": "4.4.5",
+      "filename": "lz4-4.4.5-cp312-cp312-macosx_11_0_arm64.whl",
+      "url": "https://files.pythonhosted.org/packages/8d/df/0fadac6e5bd31b6f34a1a8dbd4db6a7606e70715387c27368586455b7fc9/lz4-4.4.5-cp312-cp312-macosx_11_0_arm64.whl",
+      "sha256": "6d0bf51e7745484d2092b3a51ae6eb58c3bd3ce0300cf2b2c14f76c536d5697a",
+      "bytes": 207150,
+      "repository": "https://github.com/python-lz4/python-lz4",
+      "license": "BSD License",
+      "licenseFiles": [
+        "lz4-4.4.5.dist-info/licenses/LICENSE"
+      ]
+    },
+    {
+      "name": "nsz",
+      "version": "5.0.0",
+      "filename": "nsz-5.0.0-py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/85/7f/e11c738d92ffa58116184b443636b27c4cdefc0a7d73e5eacff1c9e3b6dd/nsz-5.0.0-py3-none-any.whl",
+      "sha256": "b3698cab8d7720aed056a0290017ff60a989d8343b7bb9c3c161ab137ec03965",
+      "bytes": 1113071,
+      "repository": "https://github.com/nicoboss/nsz",
+      "license": "MIT License",
+      "licenseFiles": [
+        "nsz/gui/txt/license.txt",
+        "nsz-5.0.0.dist-info/licenses/LICENSE.md"
+      ]
+    },
+    {
+      "name": "prefixed",
+      "version": "0.9.0",
+      "filename": "prefixed-0.9.0-py2.py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/c3/61/d9957a0ed189ac8a89075c59c97588fb1c77e51d8d44a26f5cdf001d260c/prefixed-0.9.0-py2.py3-none-any.whl",
+      "sha256": "3cdb74bfc4cf0aba28f3574662b13afdcac27c463dcbef320fe5d03f4c5fbca8",
+      "bytes": 13509,
+      "repository": "https://github.com/Rockhopper-Technologies/prefixed",
+      "license": "MPLv2.0",
+      "licenseFiles": [
+        "prefixed-0.9.0.dist-info/LICENSE"
+      ]
+    },
+    {
+      "name": "pycryptodome",
+      "version": "4.2.0",
+      "filename": "pycryptodome-4.2.0-cp39-abi3-macosx_10_9_universal2.whl",
+      "url": "https://files.pythonhosted.org/packages/41/4c/954a9a1451f7bcc89d66db39bf6499ef5701e8ff35b6c898c659a7ec8546/pycryptodome-4.2.0-cp39-abi3-macosx_10_9_universal2.whl",
+      "sha256": "3e430168f767ecec60c1f850df4abbd0b9f94786b9cc8041a00e976f6d5190c6",
+      "bytes": 1680663,
+      "repository": "https://github.com/Legrandin/pycryptodome/",
+      "license": "BSD-2-Clause AND Unlicense AND MIT",
+      "licenseFiles": [
+        "pycryptodome-4.2.0.dist-info/licenses/LICENSE.rst",
+        "pycryptodome-4.2.0.dist-info/licenses/src/mlkem-native/LICENSE",
+        "pycryptodome-4.2.0.dist-info/licenses/src/mldsa-native/LICENSE"
+      ]
+    },
+    {
+      "name": "wcwidth",
+      "version": "0.9.4",
+      "filename": "wcwidth-0.9.4-cp310-abi3-macosx_11_0_arm64.whl",
+      "url": "https://files.pythonhosted.org/packages/04/e9/dfdca30ca36c472de3e260406dee29fc108499ec590c63b3fe279887ee9d/wcwidth-0.9.4-cp310-abi3-macosx_11_0_arm64.whl",
+      "sha256": "f279f32c8e206a9092fa350e53ca0c2bd8072e45b1c9fd31bb6d476b59b591c4",
+      "bytes": 618904,
+      "repository": "https://github.com/jquast/wcwidth",
+      "license": "MIT License",
+      "licenseFiles": [
+        "wcwidth-0.9.4.dist-info/licenses/LICENSE"
+      ]
+    },
+    {
+      "name": "zstandard",
+      "version": "0.25.0",
+      "filename": "zstandard-0.25.0-cp312-cp312-macosx_11_0_arm64.whl",
+      "url": "https://files.pythonhosted.org/packages/aa/1c/d920d64b22f8dd028a8b90e2d756e431a5d86194caa78e3819c7bf53b4b3/zstandard-0.25.0-cp312-cp312-macosx_11_0_arm64.whl",
+      "sha256": "913cbd31a400febff93b564a23e17c3ed2d56c064006f54efec210d586171c00",
+      "bytes": 640436,
+      "repository": "https://github.com/indygreg/python-zstandard",
+      "license": "BSD-3-Clause",
+      "licenseFiles": [
+        "zstandard-0.25.0.dist-info/licenses/LICENSE"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "spirv-cross",
+      "source": {
+        "path": "producers/maclauncher/src/external/macfx-spirv-cross",
+        "repository": "https://github.com/KhronosGroup/SPIRV-Cross",
+        "revision": "300681bbcb8365a8d1eacdacdbdd0249bbf1d6b1",
+        "license": "Apache-2.0",
+        "licenseFiles": [
+          "LICENSE"
+        ]
+      },
+      "cmakeSource": ".",
+      "target": "spirv-cross",
+      "executable": "spirv-cross",
+      "configure": {
+        "SPIRV_CROSS_CLI": "ON",
+        "SPIRV_CROSS_STATIC": "ON",
+        "SPIRV_CROSS_SHARED": "OFF",
+        "SPIRV_CROSS_ENABLE_TESTS": "OFF"
+      }
+    },
+    {
+      "name": "glslangValidator",
+      "source": {
+        "path": "sources/anyps5/3rdparty/glslang",
+        "repository": "https://github.com/KhronosGroup/glslang.git",
+        "revision": "ba1640446f3826a518721d1f083f3a8cca1120c3",
+        "license": "BSD-3-Clause AND MIT AND Apache-2.0",
+        "licenseFiles": [
+          "LICENSE.txt"
+        ]
+      },
+      "cmakeSource": ".",
+      "target": "glslang-standalone",
+      "executable": "StandAlone/glslang",
+      "configure": {
+        "ENABLE_GLSLANG_BINARIES": "ON",
+        "GLSLANG_TESTS": "OFF",
+        "ENABLE_OPT": "OFF",
+        "BUILD_SHARED_LIBS": "OFF"
+      }
+    },
+    {
+      "name": "zstd",
+      "source": {
+        "path": "sources/anyps5/3rdparty/zstd",
+        "repository": "https://github.com/facebook/zstd.git",
+        "revision": "f8745da6ff1ad1e7bab384bd1f9d742439278e99",
+        "license": "BSD-3-Clause AND MIT",
+        "licenseFiles": [
+          "LICENSE"
+        ]
+      },
+      "cmakeSource": "build/cmake",
+      "target": "zstd",
+      "executable": "programs/zstd",
+      "configure": {
+        "ZSTD_BUILD_PROGRAMS": "ON",
+        "ZSTD_BUILD_STATIC": "ON",
+        "ZSTD_BUILD_SHARED": "OFF",
+        "ZSTD_BUILD_TESTS": "OFF",
+        "ZSTD_PROGRAMS_LINK_SHARED": "OFF",
+        "ZSTD_ZLIB_SUPPORT": "OFF",
+        "ZSTD_LZMA_SUPPORT": "OFF",
+        "ZSTD_LZ4_SUPPORT": "OFF"
+      }
+    }
+  ]
+}

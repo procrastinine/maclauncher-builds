@@ -22,7 +22,11 @@
         "bytes": 94878081,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/impacto%2Fv0.10.8.903-MCLv1%2Farm64/impacto-0.10.8.903-MCLv1-arm64.tar.gz"
       },
-      "tag": "impacto/v0.10.8.903-MCLv1/arm64"
+      "tag": "impacto/v0.10.8.903-MCLv1/arm64",
+      "source": {
+        "repository": "CommitteeOfZero/impacto",
+        "revision": "914fae7cbb9583f8aa231569a03aab27d8c042f8"
+      }
     }
   ]
 }

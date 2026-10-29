@@ -6,7 +6,7 @@
     "node": ">=24"
   },
   "scripts": {
-    "test": "node --test tests/*.test.mjs",
+    "test": "node --test tests/*.test.mjs tests/*.test.cjs",
     "pack": "node tools/runtime-package.mjs pack",
     "verify": "node tools/runtime-package.mjs verify",
     "catalog": "node tools/runtime-package.mjs catalog",

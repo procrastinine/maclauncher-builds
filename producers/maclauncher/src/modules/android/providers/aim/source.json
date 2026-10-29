@@ -1,8 +1,8 @@
 {
   "id": "aim",
-  "version": "MCLv1-1022",
+  "version": "MCLv1-1028-6",
   "repository": "https://github.com/hahnlee/aim.git",
-  "commit": "3136fe473714ec5cf8ad34323313174761d95139",
+  "commit": "df3fccfc399a06d1252088c7c189cd67d25da930",
   "license": "Apache-2.0",
   "androidImage": {
     "url": "https://dl.google.com/android/repository/sys-img/google_apis_playstore/arm64-v8a-playstore-ps16k-36_r07.zip",

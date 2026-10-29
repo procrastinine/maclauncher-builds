@@ -2,9 +2,10 @@ const fs = require("node:fs"), path = require("node:path");
 const { promisify } = require("node:util"), execute = promisify(require("node:child_process").execFile);
 const Catalog = require("./maclauncher-builds"), Bundled = require("./bundled-native");
 const { createPinnedNativeManager, compareRuntimeVersions } = require("./pinned-native-manager");
+const Custom = require("./custom-runtime");
 
 const SHA = /^[a-f0-9]{64}$/;
-function inspectPackage(root, record, { projectId, manifestRelative, sourceRelative, executableRelative, filesPrefix = "", validateManifest }) {
+function inspectPackage(root, record, { projectId, manifestRelative, sourceRelative, executableRelative, filesPrefix = "", dataOnly = false, validateManifest }) {
   if (record.id !== projectId || record.manifestRelative !== manifestRelative) throw new Error("The runtime package belongs to a different project or format.");
   const stored = Bundled.readRegular(path.join(root, manifestRelative), Bundled.LIMITS.manifestBytes);
   if (stored.sha256 !== record.manifestSha256 || stored.mode !== 0o644) throw new Error("The runtime package manifest changed.");
@@ -24,14 +25,21 @@ function inspectPackage(root, record, { projectId, manifestRelative, sourceRelat
     const name = Bundled.relativeFile(prefix + Bundled.relativeFile(file.path));
     if (names.has(name) || !Number.isSafeInteger(file.size) || file.size < 0 || file.size > Bundled.LIMITS.fileBytes ||
         !Number.isInteger(file.mode) || file.mode < 0 || file.mode > 0o777 || !SHA.test(file.sha256 || "") ||
+        file.format !== undefined && !["mach-o", "pe"].includes(file.format) || file.format === "pe" && !file.architectures?.length ||
         file.architectures && (!Array.isArray(file.architectures) || !file.architectures.length ||
-          file.architectures.some(arch => !["arm64", "x86_64"].includes(arch)) ||
-          !file.architectures.includes(record.arch === "x64" ? "x86_64" : "arm64")))
+        file.architectures.some(arch => !(file.format === "pe" ? ["arm64", "x86_64", "x86"] : ["arm64", "x86_64"]).includes(arch)) ||
+          file.format !== "pe" && !file.architectures.includes(file.executionArchitecture || (record.arch === "x64" ? "x86_64" : "arm64"))) ||
+        Object.hasOwn(file, "executionArchitecture") && (file.executionArchitecture !== "x86_64" || !file.architectures?.includes("x86_64")))
       throw new Error("The runtime package file inventory is invalid.");
     names.add(name); return { ...file, path: name };
   });
-  const source = sourcePath === null ? null : files.find(file => file.path === sourcePath), primary = files.find(file => file.path === prefix + executable);
-  if (sourcePath !== null && (!source || source.sha256 !== record.sourceSha256) || !primary?.architectures || names.has(manifestRelative))
+  const source = sourcePath === null ? null : sourcePath === manifestRelative
+    ? { path: manifestRelative, ...stored, mode: 0o644 } : files.find(file => file.path === sourcePath);
+  const primary = files.find(file => file.path === prefix + executable);
+  const primaryArchitectures = record.arch === "universal" ? ["arm64", "x86_64"] : [record.arch === "x64" ? "x86_64" : "arm64"];
+  if (sourcePath !== null && (!source || source.sha256 !== record.sourceSha256) ||
+      !primary || !dataOnly && (!primaryArchitectures.every(architecture => primary.architectures?.includes(architecture)) || primary.executionArchitecture && primary.executionArchitecture !== (record.arch === "x64" ? "x86_64" : "arm64")) ||
+      dataOnly && (manifest.kind !== "data" || files.some(file => file.architectures || file.format)) || names.has(manifestRelative))
     throw new Error("The runtime package source or executable identity is invalid.");
   for (const file of [source, primary].filter(Boolean)) {
     const full = path.join(root, file.path);
@@ -47,20 +55,29 @@ function inspectPackage(root, record, { projectId, manifestRelative, sourceRelat
 
 /** Project catalogs are queried only by Refresh. Included packages remain in
  * place; downloaded packages use the ordinary immutable version installation. */
-function createProjectBuildManager({ projectId, runtimeId = projectId, label, repository, included, retainedIncluded, manifestRelative, sourceRelative,
-  executableRelative, filesPrefix = "", validateManifest, verifyPayload, nativeLibrary = false, supportsDefault = nativeLibrary, dependencies = {} }) {
-  const format = { projectId, manifestRelative, sourceRelative, executableRelative, filesPrefix, validateManifest };
+function createProjectBuildManager({ projectId, runtimeId = projectId, label, repository, upstreamUrl, upstreamLabel, fallbackVersion, included, retainedIncluded, manifestRelative, sourceRelative,
+  executableRelative, filesPrefix = "", validateManifest, verifyPayload, inspectRuntime, dataOnly = false, nativeLibrary = false, supportsDefault = nativeLibrary, dependencies = {} }) {
+  if (fallbackVersion != null && !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(fallbackVersion)) throw new Error("The runtime preparation version is invalid.");
+  if (typeof dataOnly !== "boolean" || dataOnly && inspectRuntime) throw new Error("Data packages use sealed regular-file inspection.");
+  const format = { projectId, manifestRelative, sourceRelative, executableRelative, filesPrefix, dataOnly, validateManifest };
   const inspect = (root, record) => inspectPackage(root, record, format);
   const sourceUrl = `https://github.com/${repository}`;
   const compatible = pin => (process.platform === "darwin" || Boolean(dependencies.systemVersionSync)) &&
     (!pin.minimumMacOS || Bundled.versionAtLeast((dependencies.systemVersionSync || Bundled.systemVersionSync)(), pin.minimumMacOS)) &&
     (!pin.hostArchitectures || pin.hostArchitectures.includes(process.arch));
-  const core = createPinnedNativeManager({ id: projectId, label, catalog: [], sourceUrl, nativeLibrary, supportsDefault,
+  const publishedPins = catalog => Catalog.preferredPackages(catalog).map(record => ({ version: record.version, upstreamRevision: record.manifestSha256,
+    architecture: record.arch === "x64" ? "x86_64" : record.arch, hostArchitectures: record.launcherArchitectures,
+    minimumMacOS: record.minimumMacOS, localBuild: false, projectPackage: record, asset: record.asset }));
+  const core = createPinnedNativeManager({ id: projectId, label,
+    catalog: [], sourceUrl, buildsRepository: repository, upstreamUrl, upstreamLabel, nativeLibrary, supportsDefault,
+    ...(dataOnly ? { inspectRuntime({ runtimePath, runtimeVersion, upstreamRevision, expectedSha256 }) {
+      const stored = Bundled.readRegular(runtimePath, Bundled.LIMITS.fileBytes);
+      if (expectedSha256 && stored.sha256 !== expectedSha256) throw new Error("The managed script entry changed.");
+      return { executablePath: runtimePath, runtimePath, runtimeVersion, upstreamRevision, architecture: process.arch, ready: true };
+    } } : inspectRuntime ? { inspectRuntime } : {}),
     discoverCatalog: async ({ signal }) => {
       const catalog = await Catalog.fetchProjectCatalog({ projectId, repository, architecture: process.arch, signal }, dependencies);
-      return catalog.packages.map(record => ({ version: record.version, upstreamRevision: record.manifestSha256,
-        architecture: record.arch === "x64" ? "x86_64" : record.arch, hostArchitectures: record.launcherArchitectures,
-        minimumMacOS: record.minimumMacOS, localBuild: false, projectPackage: record, asset: record.asset }));
+      return publishedPins(catalog);
     },
     resolveExecutable: (root, pin) => typeof executableRelative === "function" || typeof filesPrefix === "function"
       ? inspect(path.join(root, "payload"), pin.projectPackage).executablePath
@@ -75,7 +92,8 @@ function createProjectBuildManager({ projectId, runtimeId = projectId, label, re
       if (["id", "version", "arch", "minimumMacOS", "manifestRelative", "manifestSha256", "sourceSha256"].some(key => wrapper[key] !== record[key]) ||
           (sourcePath === null ? wrapper.sourceRelative != null : wrapper.sourceRelative !== sourcePath) || JSON.stringify(wrapper.launcherArchitectures) !== JSON.stringify(record.launcherArchitectures))
         throw new Error("The runtime archive belongs to a different project or version.");
-      const inventory = files => files.map(file => [file.path, file.size, file.mode, file.sha256, file.architectures?.slice().sort() || null]).sort((a, b) => a[0].localeCompare(b[0]));
+      const inventory = files => files.map(file => [file.path, file.size, file.mode, file.sha256, file.architectures?.slice().sort() || null,
+        file.executionArchitecture || null, file.format || null]).sort((a, b) => a[0].localeCompare(b[0]));
       if (!Array.isArray(wrapper.files) || JSON.stringify(inventory(wrapper.files)) !== JSON.stringify(inventory(selected.declaration.files)))
         throw new Error("The runtime archive inventory differs from its sealed manifest.");
       await verifyPayload(selected, { signal });
@@ -116,7 +134,7 @@ function createProjectBuildManager({ projectId, runtimeId = projectId, label, re
       runtimePath: selected?.executablePath, upstreamRevision: pin.upstreamRevision, present, ready: !error && compatible(pin), ...(error ? { error } : {}) };
   }
   function includedPackages(options = {}) {
-    const primary = included(options), retained = retainedIncluded?.(options) || [];
+    const primary = included?.(options), retained = retainedIncluded?.(options) || [];
     if (!Array.isArray(retained)) throw new Error("Retained runtime metadata must be a list.");
     const versions = new Set(), all = [];
     for (const item of [primary, ...retained].filter(Boolean)) {
@@ -158,12 +176,14 @@ function createProjectBuildManager({ projectId, runtimeId = projectId, label, re
         if (selected.ready) return selected;
       }
     }
-    const selectedVersion = configured || (fallback?.ready ? fallback.version : latest?.version);
+    // This preparation identity requests consent on first Play without seeding
+    // the download list or querying a catalog during local selection.
+    const selectedVersion = configured || (fallback?.ready ? fallback.version : latest?.version) || fallbackVersion;
     return selectedVersion ? attempted.get(selectedVersion) || select(selectedVersion) : { version: null, ready: false, install: null,
       reason: `No compatible ${label} version is available. Refresh ${label} in Runtimes.` };
   }
-  return { ...core, resolveSelection,
-    delivery: Object.freeze({ included: "direct", catalog: "remote", sourceBuild: false }),
+  const manager = { ...core, resolveSelection,
+    delivery: Object.freeze({ included: included || retainedIncluded ? "direct" : "none", catalog: "remote", sourceBuild: false }),
     getState(options = {}) {
       const { fallback, all } = includedPackages(options), state = core.getState(options), present = all.filter(item => item.present),
         versions = new Set(present.map(item => item.version));
@@ -211,5 +231,29 @@ function createProjectBuildManager({ projectId, runtimeId = projectId, label, re
     },
     inspectPackage: inspect
   };
+  Custom.configure(manager, { inspect(runtimePath, { verification } = {}) {
+    const roots = [], start = fs.statSync(runtimePath).isDirectory() ? runtimePath : path.dirname(runtimePath);
+    for (let root = start, depth = 0; depth < 7; depth += 1) {
+      roots.push(root, path.join(root, "payload"), path.join(root, "files"));
+      if (path.dirname(root) === root) break;
+      root = path.dirname(root);
+    }
+    const root = roots.find(candidate => fs.existsSync(path.join(candidate, manifestRelative)));
+    if (!root) throw new Error(`Select the complete ${label} runtime directory containing ${manifestRelative}.`);
+    const stored = Bundled.readRegular(path.join(root, manifestRelative), Bundled.LIMITS.manifestBytes), manifest = JSON.parse(stored.bytes);
+    const sourcePath = typeof sourceRelative === "function" ? sourceRelative(manifest) : sourceRelative;
+    const source = sourcePath === null ? stored : Bundled.readRegular(path.join(root, sourcePath), Bundled.LIMITS.manifestBytes);
+    const executable = typeof executableRelative === "function" ? executableRelative(manifest) : executableRelative;
+    const architectures = manifest.files?.find(file => file.path === executable)?.architectures || manifest.architectures || [];
+    const arch = manifest.arch || (architectures.includes("arm64") ? "arm64" : architectures.includes("x86_64") ? "x64" : null);
+    const record = { id: projectId, version: manifest.version, arch, minimumMacOS: manifest.minimumMacOS,
+      manifestRelative, manifestSha256: stored.sha256, sourceSha256: source.sha256 };
+    if (!compatible(record)) throw new Error(`${label} requires macOS ${manifest.minimumMacOS} or later on a compatible Mac.`);
+    const selected = inspect(root, record);
+    if (verification === "full") Bundled.verifyPayload(selected.root, selected.declaration);
+    return { ...selected, runtimeVersion: manifest.version, manifestSha256: stored.sha256,
+      installDir: root, runtimePath, ready: true };
+  } });
+  return manager;
 }
 module.exports = { createProjectBuildManager, inspectPackage };

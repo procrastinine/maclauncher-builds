@@ -22,7 +22,11 @@
         "bytes": 5473189,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reminori%2Fv0.1.0-MCLv1%2Farm64/reminori-0.1.0-MCLv1-arm64.tar.gz"
       },
-      "tag": "reminori/v0.1.0-MCLv1/arm64"
+      "tag": "reminori/v0.1.0-MCLv1/arm64",
+      "source": {
+        "repository": "luoyily/ReMinori",
+        "revision": "79b00990324404bfbd496e7fa76c690cf040f744"
+      }
     }
   ]
 }

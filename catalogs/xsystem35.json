@@ -22,7 +22,14 @@
         "bytes": 7438373,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem35%2FvMCLv1-1019%2Farm64/xsystem35-MCLv1-1019-arm64.tar.gz"
       },
-      "tag": "xsystem35/vMCLv1-1019/arm64"
+      "tag": "xsystem35/vMCLv1-1019/arm64",
+      "source": {
+        "repository": "kichikuou/xsystem35-sdl2",
+        "revision": "fbb12f67950601d547f65ef37c4fba4a10cc3822"
+      },
+      "capabilities": {
+        "debugAdapter": "dap-terminal-nul-v1"
+      }
     }
   ]
 }

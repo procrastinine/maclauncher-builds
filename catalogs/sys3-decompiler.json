@@ -22,7 +22,11 @@
         "bytes": 48723,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/sys3-decompiler%2Fv0.5.0-MCLv1%2Farm64/sys3-decompiler-0.5.0-MCLv1-arm64.tar.gz"
       },
-      "tag": "sys3-decompiler/v0.5.0-MCLv1/arm64"
+      "tag": "sys3-decompiler/v0.5.0-MCLv1/arm64",
+      "source": {
+        "repository": "kichikuou/sys3c",
+        "revision": "7fb3814510255b964c855d1231543b442d051bb5"
+      }
     }
   ]
 }

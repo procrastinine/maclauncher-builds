@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import source from './source.json' with {type:'json'};
 
@@ -33,6 +34,208 @@ export function adaptResidentProcessLiveness(text) {
     '    Ok(process_info(process.host_pid)?.is_some_and(|info| info_identity(&info) == process))',
     '    Ok(process_info(process.host_pid)?.is_some_and(|info| {\n        info.pbi_status != libc::SZOMB && info_identity(&info) == process\n    }))',
     'exited worker liveness');
+}
+
+/** New mappings cannot retire an existing executable memfd view. */
+export function adaptMemfdMmapRetirement(text) {
+  return replace(text,
+    `        super::vma_names::forget(lo, lo + len);
+        super::memfd::reclaim();
+    }
+    result
+}
+fn mmap_guest`,
+    `        super::vma_names::forget(lo, lo + len);
+        // Only a fixed replacement can remove an existing memfd view.
+        // Ordinary allocations leave last-reference retirement to close,
+        // munmap and mremap, without rescanning inherited executable maps.
+        if a[3] & MAP_FIXED != 0 {
+            super::memfd::reclaim();
+        }
+    }
+    result
+}
+fn mmap_guest`, 'memfd retirement after mapping replacement');
+}
+
+/** Read each owner's thread list once while pruning one membership. */
+export function adaptCgroupMembershipSnapshot(text) {
+  text = replace(text,
+    `fn thread_live(owner: i32, start: Start, tid: i32) -> bool {
+    live(owner, start) && tids(owner).contains(&tid)
+}`,
+    `fn thread_live(
+    owner: i32,
+    start: Start,
+    tid: i32,
+    tasks: &mut std::collections::HashMap<(i32, Start), Vec<i32>>,
+) -> bool {
+    live(owner, start)
+        && tasks.entry((owner, start)).or_insert_with(|| tids(owner)).contains(&tid)
+}`, 'cgroup owner thread snapshot');
+  return replace(text,
+    `    m.threads
+        .retain(|(tid, start, _)| thread_live(super::thread::owner(*tid), *start, *tid));`,
+    `    // Keep the birth check for every entry; only reuse the thread list
+    // within this membership prune, never across transactions or owners.
+    let mut tasks = std::collections::HashMap::new();
+    m.threads.retain(|(tid, start, _)| {
+        thread_live(super::thread::owner(*tid), *start, *tid, &mut tasks)
+    });`, 'cgroup membership prune snapshot');
+}
+
+/** Keep cgroup file position below fork's descriptor ownership lease. */
+export function adaptCgroupPositionForkOrder(text) {
+  text = replace(text,
+    `fn transact<R>(
+    root: &Path,
+    f: impl FnOnce(&mut Membership) -> Result<R, Errno>,
+) -> Result<R, Errno> {
+    let _own = super::fork::spawn::own_fds();`,
+    `fn transact<R>(
+    root: &Path,
+    f: impl FnOnce(&mut Membership) -> Result<R, Errno>,
+) -> Result<R, Errno> {
+    let own = super::fork::spawn::own_fds();
+    transact_held(&own, root, f)
+}
+
+fn transact_held<R>(
+    _own: &std::sync::RwLockReadGuard<'static, ()>,
+    root: &Path,
+    f: impl FnOnce(&mut Membership) -> Result<R, Errno>,
+) -> Result<R, Errno> {`, 'cgroup transaction ownership lease');
+  text = replace(text,
+    'fn move_task(open: &Open, text: &str) -> Result<(), Errno> {',
+    `fn move_task(
+    open: &Open,
+    text: &str,
+    own: &std::sync::RwLockReadGuard<'static, ()>,
+) -> Result<(), Errno> {`,
+    'cgroup move ownership lease');
+  text = replace(text,
+    'fn write_at(open: &Open, input: &[u8], offset: u64) -> i64 {',
+    `fn write_at(
+    open: &Open,
+    input: &[u8],
+    offset: u64,
+    own: &std::sync::RwLockReadGuard<'static, ()>,
+) -> i64 {`,
+    'cgroup write ownership lease');
+  text = replace(text, '.and_then(|t| move_task(open, t)),', '.and_then(|t| move_task(open, t, own)),', 'cgroup move lease forwarding');
+  if (text.split('transact(&open.root, |m| {').length !== 3) throw new Error('AIM source adaptation no longer matches: cgroup write transactions');
+  text = text.replaceAll('transact(&open.root, |m| {', 'transact_held(own, &open.root, |m| {');
+  return replace(text,
+    `    let input = user_try!(gather(iov));
+    let mut cur = open.pos.lock().unwrap();
+    let offset = pos.unwrap_or(*cur);
+    let r = write_at(open, &input, offset);`,
+    `    let input = user_try!(gather(iov));
+    // Fork captures this position while holding descriptor ownership.
+    // Acquire that lease first and borrow it through the transaction.
+    let own = super::fork::spawn::own_fds();
+    let mut cur = open.pos.lock().unwrap();
+    let offset = pos.unwrap_or(*cur);
+    let r = write_at(open, &input, offset, &own);`, 'cgroup position and fork lock order');
+}
+
+/** Anonymous memfd census needs region identity, without vnode paths. */
+export function adaptMemfdAnonymousRegionInfo(text) {
+  const signature = 'fn has_views(k: Key, f: &Memfd) -> bool {';
+  const start = text.indexOf(signature);
+  if (start < 0 || start !== text.lastIndexOf(signature)) throw new Error('AIM source adaptation no longer matches: anonymous memfd census');
+  const end = findBrace(text, text.indexOf('{', start)) + 1;
+  const before = text.slice(start, end);
+  if (before.split('RegionWithPath').length !== 4 || before.split('PROC_PIDREGIONPATHINFO').length !== 3) {
+    throw new Error('AIM source adaptation no longer matches: anonymous memfd region queries');
+  }
+  const after = before.replaceAll('RegionWithPath', 'RegionInfo')
+    .replaceAll('PROC_PIDREGIONPATHINFO', 'PROC_PIDREGIONINFO')
+    .replaceAll('backing.info.', 'backing.').replaceAll('r.info.', 'r.');
+  text = replace(text, before, after, 'anonymous memfd region census');
+  return replace(text,
+    '/// `PROC_PIDREGIONPATHINFO`.\nconst PROC_PIDREGIONPATHINFO: i32 = 8;',
+    '/// `PROC_PIDREGIONINFO`.\nconst PROC_PIDREGIONINFO: i32 = 7;\n\n/// `PROC_PIDREGIONPATHINFO`.\nconst PROC_PIDREGIONPATHINFO: i32 = 8;',
+    'anonymous memfd region query flavor');
+}
+
+/** Release watch descriptors after locks also captured by fork. */
+export function adaptInotifyPrivateRetirement(text) {
+  text = replace(text,
+    `            if let Err(error) = fdtab::close_fork_private(fd) {
+                crate::diag!("inotify private watch close: errno {error}");
+            }`,
+    `            close_watch_private(fd, "inotify private watch close");`, 'inotify watch retirement');
+  text = replace(text,
+    `            if let Err(error) = fdtab::close_fork_private(*fd) {
+                crate::diag!("inotify private entry close: errno {error}");
+            }`,
+    `            close_watch_private(*fd, "inotify private entry close");`, 'inotify entry retirement');
+  text = replace(text,
+    '    let dev_ino = (st.st_dev as u32 as u64, st.st_ino);\n    let mut s = ino.state.lock().unwrap();',
+    '    let dev_ino = (st.st_dev as u32 as u64, st.st_ino);\n    let _retirement = defer_watch_closes();\n    let mut s = ino.state.lock().unwrap();', 'inotify add retirement scope');
+  text = replace(text,
+    '    if remove(fd, &mut ino.state.lock().unwrap(), wd) {',
+    '    let _retirement = defer_watch_closes();\n    if remove(fd, &mut ino.state.lock().unwrap(), wd) {', 'inotify remove retirement scope');
+  text = replace(text,
+    '    let mut s = ino.state.lock().unwrap();\n    loop {',
+    '    let mut retirement = defer_watch_closes();\n    let mut s = ino.state.lock().unwrap();\n    loop {', 'inotify read retirement scope');
+  text = replace(text,
+    `        drop(s);
+        let r = fdtab::wait_for(fd, libc::POLLIN);
+        s = ino.state.lock().unwrap();`,
+    `        drop(s);
+        drop(retirement);
+        let r = fdtab::wait_for(fd, libc::POLLIN);
+        retirement = defer_watch_closes();
+        s = ino.state.lock().unwrap();`, 'inotify retirement before blocking read');
+  text = replace(text,
+    '    let mut s = ino.state.lock().unwrap();\n    collect(fd, &mut s, false);',
+    '    let _retirement = defer_watch_closes();\n    let mut s = ino.state.lock().unwrap();\n    collect(fd, &mut s, false);', 'inotify readiness retirement scope');
+  return text + `
+// Fork holds descriptor lifecycle admission while capturing watch state.
+// Finish watch/epoll state changes before closing their private descriptors.
+thread_local! {
+    static WATCH_CLOSES: std::cell::RefCell<(usize, Vec<(i32, &'static str)>)> =
+        const { std::cell::RefCell::new((0, Vec::new())) };
+}
+pub(super) struct DeferredWatchCloses(std::marker::PhantomData<std::rc::Rc<()>>);
+pub(super) fn defer_watch_closes() -> DeferredWatchCloses {
+    WATCH_CLOSES.with(|pending| pending.borrow_mut().0 += 1);
+    DeferredWatchCloses(std::marker::PhantomData)
+}
+impl Drop for DeferredWatchCloses {
+    fn drop(&mut self) {
+        let retired = WATCH_CLOSES.with(|pending| {
+            let mut pending = pending.borrow_mut();
+            pending.0 -= 1;
+            if pending.0 == 0 { std::mem::take(&mut pending.1) } else { Vec::new() }
+        });
+        for (fd, context) in retired {
+            if let Err(error) = fdtab::close_fork_private(fd) {
+                crate::diag!("{context}: errno {error}");
+            }
+        }
+    }
+}
+fn close_watch_private(fd: i32, context: &'static str) {
+    let deferred = WATCH_CLOSES.with(|pending| {
+        let mut pending = pending.borrow_mut();
+        if pending.0 == 0 { return false; }
+        pending.1.push((fd, context));
+        true
+    });
+    if !deferred && let Err(error) = fdtab::close_fork_private(fd) {
+        crate::diag!("{context}: errno {error}");
+    }
+}
+`;
+}
+
+export function adaptEpollWatchRetirement(text) {
+  return replace(text,
+    '    let mut rearmed = Vec::new();\n    let mut interest = ep.interest.lock().unwrap();',
+    '    let mut rearmed = Vec::new();\n    let _retirement = super::inotify::defer_watch_closes();\n    let mut interest = ep.interest.lock().unwrap();', 'epoll watch retirement after interest capture');
 }
 
 /** Publish a fully initialized display before its first draw can compile effects. */
@@ -162,22 +365,6 @@ fn process_info`,
 }
 
 export function adaptFuseTransport(text) {
-  text = functionBody(text, 'fn transport_directory()', `    let base = std::env::temp_dir();
-    for _ in 0..16 {
-        let directory = base.join(format!("af-{:016x}", id()?));
-        match fs::create_dir(&directory) {
-            Ok(()) => {
-                if let Err(error) = fs::set_permissions(&directory, fs::Permissions::from_mode(0o700)) {
-                    let _ = fs::remove_dir(&directory);
-                    return Err(io_error(error));
-                }
-                return Ok(directory);
-            }
-            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
-            Err(error) => return Err(io_error(error)),
-        }
-    }
-    Err(36)`, 'private FUSE transport allocation');
   text = replace(text,
     '    let key = SessionKey(socket_path(fd, true)?);\n    let local = socket_path(fd, false)?;',
     '    let key = SessionKey(registered_transport_path(&socket_path(fd, true)?)?);\n    let local = registered_transport_path(&socket_path(fd, false)?)?;\n    if local.parent() != key.0.parent() { return Err(EBADF); }',
@@ -239,11 +426,6 @@ fn registered_transport_path(path: &Path) -> Result<PathBuf, Errno> {
 }
 
 export function adaptFuseBroker(text) {
-  text = replace(text, '    let listener = UnixListener::bind(path).map_err(io_error)?;',
-    `    let listener = aim_storage::socket_path::in_parent(path.parent().ok_or(EINVAL)?, |directory| {
-        let address = if path.as_os_str().as_encoded_bytes().len() < unsafe { std::mem::zeroed::<libc::sockaddr_un>() }.sun_path.len() { path.to_owned() } else { Path::new(directory).join(path.file_name().ok_or_else(|| std::io::Error::from_raw_os_error(libc::EINVAL))?) };
-        UnixListener::bind(address)
-    }).map_err(io_error)?;`, 'directory-relative FUSE broker listener');
   text = replace(text, '            let local = socket_path(stream.as_raw_fd(), true)?;',
     `            let local = socket_path(stream.as_raw_fd(), true)?;
             let directory = owner.key.0.parent().ok_or(EBADF)?;
@@ -265,6 +447,44 @@ export function adaptFuseBroker(text) {
             let error = std::io::Error::last_os_error();
             if error.kind() != std::io::ErrorKind::Interrupted { return Err(io_error(error)); }
         }`, 'readiness-driven FUSE broker admission');
+}
+
+/** Keep upstream broker leases and stale-session collection in private IPC paths. */
+export function adaptFuseTransportLifetime(text) {
+  text = replace(text, `    let capacity = unsafe { std::mem::zeroed::<libc::sockaddr_un>() }
+        .sun_path
+        .len();
+    let mut bases = vec![std::env::temp_dir()];
+    if bases[0] != Path::new("/tmp") {
+        bases.push(PathBuf::from("/tmp"));
+    }`, '    let bases = vec![std::env::temp_dir()];', 'private FUSE lifetime allocation');
+  text = replace(text, `            if path
+                .join("c.dffffffffffffffff")
+                .as_os_str()
+                .as_bytes()
+                .len()
+                >= capacity
+            {
+                break;
+            }
+`, '', 'directory-relative FUSE allocation capacity');
+  text = replace(text, '    let listener = std::os::unix::net::UnixListener::bind(path).map_err(io_error)?;',
+    `    let listener = aim_storage::socket_path::in_parent(path.parent().ok_or(EINVAL)?, |directory| {
+        let address = if path.as_os_str().as_encoded_bytes().len() < unsafe { std::mem::zeroed::<libc::sockaddr_un>() }.sun_path.len() { path.to_owned() } else { Path::new(directory).join(path.file_name().ok_or_else(|| std::io::Error::from_raw_os_error(libc::EINVAL))?) };
+        std::os::unix::net::UnixListener::bind(address)
+    }).map_err(io_error)?;`, 'directory-relative leased FUSE listener');
+  const signature='fn socket_gone(path: &Path) -> bool',start=text.indexOf(signature);
+  if(start<0)throw new Error('AIM FUSE stale transport boundary changed');
+  const open=text.indexOf('{',start),end=findBrace(text,open);
+  let body=text.slice(open+1,end);
+  body=replace(body,'    let bytes = path.as_os_str().as_bytes();',
+    `    let relative = if path.as_os_str().as_bytes().len() < unsafe { std::mem::zeroed::<libc::sockaddr_un>() }.sun_path.len() { path.to_owned() } else { Path::new(directory).join(path.file_name().ok_or_else(|| std::io::Error::from_raw_os_error(libc::EINVAL))?) };
+    let bytes = relative.as_os_str().as_bytes();`, 'directory-relative FUSE stale probe');
+  body=body.replaceAll('return false;','return Ok(false);');
+  body=replace(body,'    result < 0','    Ok(result < 0','FUSE stale probe result');
+  return functionBody(text,signature,`    let Some(parent) = path.parent() else { return false; };
+    aim_storage::socket_path::in_parent(parent, |directory| {${body.trimEnd()})
+    }).unwrap_or(false)`, 'FUSE stale probe directory lifetime');
 }
 
 export function adaptFuseMountBindings(text) {
@@ -432,7 +652,7 @@ fn maclauncher_boot_stop_report(
 `;
 }
 
-export function prepareAimSources({checkout, output}) {
+export function prepareAimSources({checkout, output, controllerSource}) {
   checkout = path.resolve(checkout);
   output = path.resolve(output);
   const commit = execFileSync('git', ['-C', checkout, 'rev-parse', 'HEAD'], {encoding:'utf8'}).trim();
@@ -442,23 +662,38 @@ export function prepareAimSources({checkout, output}) {
   execFileSync('git', ['-C', checkout, 'archive', '--format=tar', '-o', archive, source.commit]);
   execFileSync('/usr/bin/tar', ['-xf', archive, '-C', output]);
   fs.unlinkSync(archive);
-  adaptAimSources(output);
+  adaptAimSources(output, {controllerSource});
   return output;
 }
 
-export function adaptAimSources(root) {
+export function adaptAimSources(root, {controllerSource} = {}) {
+  const controllerBytes = fs.readFileSync(controllerSource ?? new URL('./keeper.rs', import.meta.url));
+  const controllerSha256 = crypto.createHash('sha256').update(controllerBytes).digest('hex');
   function edit(file, change) {
     const target = path.join(root, file);
     fs.writeFileSync(target, change(fs.readFileSync(target, 'utf8')));
   }
+  edit('crates/aim-linux-abi/src/sys/mem.rs', adaptMemfdMmapRetirement);
+  edit('crates/aim-linux-abi/src/sys/memfd.rs', adaptMemfdAnonymousRegionInfo);
+  edit('crates/aim-linux-abi/src/sys/cgroup.rs', text => adaptCgroupPositionForkOrder(adaptCgroupMembershipSnapshot(text)));
+  edit('crates/aim-linux-abi/src/sys/inotify.rs', adaptInotifyPrivateRetirement);
+  edit('crates/aim-linux-abi/src/sys/epoll.rs', adaptEpollWatchRetirement);
+  edit('crates/aim-build/src/graph.rs', text => replace(text,
+    '        key.part("recipe", &node.recipe.to_string());',
+    `        key.part("recipe", &node.recipe.to_string());
+        if matches!(&node.action, Action::Cargo(_)) {
+            for name in ["RUSTFLAGS", "CARGO_ENCODED_RUSTFLAGS", "CARGO_PROFILE_RELEASE_STRIP"] {
+                key.part(name, &std::env::var(name).unwrap_or_default());
+            }
+        }
+        if node.name == "host/maclauncher-aim" {
+            key.part("controller-source-sha256", "${controllerSha256}");
+        }`, 'Cargo compiler environment cache identity'));
   edit('crates/aim-paths/src/lib.rs', text => functionBody(text, "pub fn root() -> &'static Path", `    static ROOT: std::sync::OnceLock<PathBuf> = std::sync::OnceLock::new();
     ROOT.get_or_init(|| std::env::var_os("MACLAUNCHER_AIM_ROOT")
         .map(PathBuf::from)
         .unwrap_or_else(|| PathBuf::from("/aim")))
         .as_path()`, 'runtime resource root'));
-  edit('crates/aim-build/src/tools.rs', text => replace(text,
-    'pub fn jdk() -> Result<PathBuf, String> {',
-    'pub fn jdk() -> Result<PathBuf, String> {\n    if let Some(home) = std::env::var_os("JAVA_HOME") { return Ok(PathBuf::from(home)); }', 'JDK selection'));
   edit('tools/art-android/gen_build.py', text => replace(text,
     '        target = f"--target=aarch64-linux-android{self.args.api}"',
     '        source_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))\n        maps = " ".join(shlex.quote(f"-{flag}={source_root}=/aim") for flag in ("ffile-prefix-map", "fdebug-prefix-map"))\n        target = f"--target=aarch64-linux-android{self.args.api} {maps}"', 'portable ART source paths'));
@@ -547,6 +782,7 @@ export function adaptAimSources(root) {
   });
   edit('crates/aim-linux-abi/src/sys/fuse.rs', adaptFuseTransport);
   edit('crates/aim-linux-abi/src/sys/fuse/broker.rs', adaptFuseBroker);
+  edit('crates/aim-linux-abi/src/sys/fuse/transport.rs', adaptFuseTransportLifetime);
   edit('crates/aim-linux-abi/src/vfs.rs', adaptFuseMountBindings);
   edit('crates/aim-linux-abi/src/vfs.rs', adaptFuseMountRootTraversal);
   edit('crates/aim-storage/src/mount_namespace/records.rs', adaptFuseMountRecords);
@@ -612,7 +848,7 @@ export function adaptAimSources(root) {
   edit('crates/aim-services/Cargo.toml', text => replace(text, '[dependencies]', '[dependencies]\nserde_json = "1.0"', 'clipboard broker JSON'));
   fs.copyFileSync(new URL('./runtime_prepare.rs', import.meta.url), path.join(root, 'crates/aim-android-image/src/bin/prepare-runtime.rs'));
   fs.mkdirSync(path.join(root, 'crates/aimctl/src/bin'), {recursive:true});
-  fs.copyFileSync(new URL('./keeper.rs', import.meta.url), path.join(root, 'crates/aimctl/src/bin/maclauncher-aim.rs'));
+  fs.writeFileSync(path.join(root, 'crates/aimctl/src/bin/maclauncher-aim.rs'), controllerBytes);
   edit('crates/aimctl/Cargo.toml', text => replace(text, '[dependencies]', '[dependencies]\nserde_json = "1.0"', 'native controller JSON'));
   edit('crates/aim-android-image/Cargo.toml', text => replace(text, '[dependencies]',
     '[[bin]]\nname = "android-runtime-prepare"\npath = "src/bin/prepare-runtime.rs"\n\n[dependencies]\naim-storage = { path = "../aim-storage" }\nserde_json = "1.0"', 'automatic image preparation'));

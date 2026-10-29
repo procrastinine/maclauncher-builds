@@ -22,7 +22,11 @@
         "bytes": 599201,
         "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/innoextract%2FvMCLv1-0206%2Farm64/innoextract-MCLv1-0206-arm64.tar.gz"
       },
-      "tag": "innoextract/vMCLv1-0206/arm64"
+      "tag": "innoextract/vMCLv1-0206/arm64",
+      "source": {
+        "repository": "dscharrer/innoextract",
+        "revision": "6e9e34ed0876014fdb46e684103ef8c3605e382e"
+      }
     }
   ]
 }

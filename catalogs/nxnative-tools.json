@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 2,
+  "projectId": "nxnative-tools",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "nxnative-tools",
+      "version": "MCLv1-1027-3",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "26.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "1d15809a83bd45c15f9a1cc356196e48542eb1e284f6db27e44be1eceb82c480",
+      "sourceSha256": "de5fedf1f67525033b53c82d90a028b1075bd9001b3a2d4e2cc1de8587e29262",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "nxnative-tools-MCLv1-1027-3-arm64.tar.gz",
+        "sha256": "0d59f9c4afd6abd6c9e6674da2b125026d3abfcef7266d5e324dd0c221609c43",
+        "bytes": 47926370,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/nxnative-tools%2FvMCLv1-1027-3%2Farm64/nxnative-tools-MCLv1-1027-3-arm64.tar.gz"
+      },
+      "tag": "nxnative-tools/vMCLv1-1027-3/arm64",
+      "source": {
+        "repository": "seedds/nxnative",
+        "revision": "712eb8167230a02023cfa57d10bb07b748b8933f"
+      }
+    }
+  ]
+}
