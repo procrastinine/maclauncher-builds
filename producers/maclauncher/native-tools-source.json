@@ -5,7 +5,13 @@
     {
       "path": "scripts/native-binary-tools.cjs",
       "sourceSha256": "40c99e682e785a42de48ae958fe23deac10c9a527d777c9a8852bfa0246a2074",
-      "sha256": "40c99e682e785a42de48ae958fe23deac10c9a527d777c9a8852bfa0246a2074"
+      "sha256": "5226a2d0674db4dd94de4bc5eb33292bc61e3100919c7342a3ede9fa84a28a5e",
+      "replacements": [
+        {
+          "from": "/^(?:licen[sc]e|copying|copyright|notice)(?:[._-].*)?$/i",
+          "to": "/^(?:(?:licen[sc]e|copying|copyright|notice)(?:[._-].*)?|(?:AGPL|GPL|LGPL|MPL|Apache|MIT|BSD|ISC|Zlib)(?:[-_.].*)?)$/i"
+        }
+      ]
     },
     {
       "path": "scripts/stage-mkxpz-config-helper.cjs",
