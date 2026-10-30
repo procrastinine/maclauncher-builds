@@ -43,13 +43,13 @@ export function buildHelper({project:id,arch,output,work=path.join(fs.mkdtempSyn
  if(!Object.hasOwn(CPUS,arch)||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))
   throw Error('Select arm64, x64 or universal, and new absolute output and work directories.');
  const payload=path.join(output,'payload'),binary=path.join(payload,profile.output),sources=profile.sources.map(source=>path.join(base,source));
- const sdk=run('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path']),compiler=run('/usr/bin/xcrun',[profile.compiler,'--version']).split('\n')[0];
+ const sdk=fs.realpathSync(process.env.SDKROOT||run('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path'])),compiler=run('/usr/bin/xcrun',[profile.compiler,'--version']).split('\n')[0];
  const flags=[...KINDS[profile.kind],'-mmacosx-version-min='+profile.minimumMacOS,...profile.flags,...(profile.frameworks||[]).flatMap(name=>['-framework',name])];
  fs.mkdirSync(work,{recursive:true});fs.mkdirSync(payload,{recursive:true});
  try{
   // Each CPU compiles separately; a universal helper joins the slices.
   const slices=CPUS[arch].map(cpu=>{const file=path.join(work,cpu);
-   run('/usr/bin/xcrun',['--sdk','macosx',profile.compiler,'-arch',cpu,'-isysroot',sdk,...flags,'-ffile-prefix-map='+directory+'=maclauncher-builds',...sources,'-o',file],{env:{PATH:'/usr/bin:/bin:/usr/sbin:/sbin',SDKROOT:sdk,MACOSX_DEPLOYMENT_TARGET:profile.minimumMacOS,TMPDIR:work}});return file;});
+   run('/usr/bin/xcrun',['--sdk','macosx',profile.compiler,'-arch',cpu,'-isysroot',sdk,...flags,'-ffile-prefix-map='+directory+'=maclauncher-builds',...sources,'-o',file],{env:{PATH:'/usr/bin:/bin:/usr/sbin:/sbin',...(process.env.DEVELOPER_DIR?{DEVELOPER_DIR:process.env.DEVELOPER_DIR}:{}),SDKROOT:sdk,MACOSX_DEPLOYMENT_TARGET:profile.minimumMacOS,TMPDIR:work}});return file;});
   if(slices.length>1)run('/usr/bin/lipo',['-create',...slices,'-output',binary]);else fs.copyFileSync(slices[0],binary);
   fs.chmodSync(binary,0o755);
   run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',binary]);run('/usr/bin/codesign',['--verify','--strict',binary]);
