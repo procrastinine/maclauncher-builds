@@ -105,7 +105,7 @@ test('GitHub build records name a contained command, exclusive universal builds 
 });
 
 test('a GitHub build runs the registered command and accepts only its declared package',t=>{
- const root=githubFixture(t),work=path.join(root,'work');
+ const root=githubFixture(t,{architectures:['arm64','x64'],tools:undefined}),work=path.join(root,'work');
  const built=runBuild({project:'engine',arch:'x64',output:path.join(root,'out-x64'),work,directory:root});
  assert.equal(built.version,'1.0');assert.equal(built.arch,'x64');assert.equal(built.payload,path.join(root,'out-x64/payload'));
  assert.equal(main(['--project','engine','--arch','arm64','--output',path.join(root,'out-arm64')],root).arch,'arm64');
@@ -116,7 +116,7 @@ test('a GitHub build runs the registered command and accepts only its declared p
  process.env.ENGINE_CPUS='x64';assert.equal(runBuild({project:'engine',arch:'x64',output:path.join(root,'out-intel-only'),directory:root}).arch,'x64');
  process.env.ENGINE_CPUS='arm64';assert.throws(()=>runBuild({project:'engine',arch:'x64',output:path.join(root,'out-cpus'),directory:root}),/Mac CPUs/);delete process.env.ENGINE_CPUS;
  process.env.ENGINE_EXTRA='1';assert.throws(()=>runBuild({project:'engine',arch:'arm64',output:path.join(root,'out-extra'),directory:root}),/only declaration.json and payload/);delete process.env.ENGINE_EXTRA;
- const failing=githubFixture(t,{architectures:['arm64']},'process.exitCode=3;\n');
+ const failing=githubFixture(t,{architectures:['arm64'],tools:undefined},'process.exitCode=3;\n');
  assert.throws(()=>runBuild({project:'engine',arch:'arm64',output:path.join(failing,'out'),directory:failing}),/exited with status 3/);
 });
 

@@ -1146,7 +1146,8 @@
         "cmake",
         "llvm",
         "spirv-tools",
-        "zstd"
+        "zstd",
+        "spirv-llvm-translator"
       ]
     }
   },

@@ -35,6 +35,8 @@ The `mpv` and `vulkan-kosmickrisp-gles32` source builds use `xcode-27` with Xcod
 
 Rust builds select toolchain 1.99.0 explicitly. That selection applies to compilation and dependency-license collection, including source trees with their own older toolchain file.
 
+Build commands receive the declared Homebrew formulae and their installed dependency closure. Executable and pkg-config searches use those prefixes and the selected host toolchain, and inherited library search paths are cleared.
+
 Before compilation, `tools/init-runtime-sources.mjs` initializes the declared source paths. It follows each registered Git submodule in a nested path and applies recursive initialization only to a declared leaf that requests it. Servers without shallow-fetch support use a full fetch of the same pinned source.
 
 The job runs the build script through `tools/build-runtime.mjs`, which selects the declared version and passes `--project`, `--arch`, `--output` and `--work`; a command serving several ABI versions also receives `--version`. When the script finishes, its output directory must hold exactly two entries, the finished runtime in `payload/` and its package declaration in `declaration.json`. `build-runtime.mjs` rejects any other layout, a version other than the one in the `build` record, an architecture that the project does not build and a declaration whose Mac CPUs do not match its architecture.
