@@ -96,9 +96,13 @@ jobs:
       PROJECT: ${{ matrix.project }}
       VERSION: ${{ matrix.version }}
       ARCH: ${{ matrix.arch }}
+      DEVELOPER_DIR: ${{ matrix.developerDirectory }}
+      BUILD_XCODE_VERSION: ${{ matrix.xcodeVersion }}
+      BUILD_MACOS_SDK_VERSION: ${{ matrix.sdkVersion }}
       SUBMODULES: ${{ matrix.submodules }}
       RECURSIVE_SUBMODULES: ${{ matrix.recursiveSubmodules }}
       TOOLS: ${{ matrix.tools }}
+      RUNTIME_RUST_TOOLCHAIN: ${{ matrix.rustToolchain }}
       RUST_COMPONENTS: ${{ matrix.rustComponents }}
       RUST_TARGETS: ${{ matrix.rustTargets }}
       HOMEBREW_NO_AUTO_UPDATE: '1'
@@ -112,6 +116,12 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
+      - name: Select Xcode and verify the SDK
+        run: |
+          test -d "$DEVELOPER_DIR"
+          xcodebuild -version
+          test "$(xcodebuild -version | sed -n '1s/^Xcode //p')" = "$BUILD_XCODE_VERSION"
+          test "$(xcrun --sdk macosx --show-sdk-version)" = "$BUILD_MACOS_SDK_VERSION"
       - name: Initialize the producer's pinned sources
         if: matrix.submodules != ''
         run: node tools/init-runtime-sources.mjs --project "$PROJECT" --version "$VERSION"
@@ -120,27 +130,43 @@ jobs:
         run: |
           read -r -a formulae <<< "$TOOLS"
           brew install "${formulae[@]}"
+      - name: Select the Rust toolchain
+        if: matrix.rustToolchain != ''
+        run: |
+          rustup toolchain install "$RUNTIME_RUST_TOOLCHAIN" --profile minimal
+          echo "RUSTUP_TOOLCHAIN=$RUNTIME_RUST_TOOLCHAIN" >> "$GITHUB_ENV"
       - name: Install Rust components
         if: matrix.rustComponents != ''
         run: |
           read -r -a components <<< "$RUST_COMPONENTS"
-          rustup component add "${components[@]}"
+          rustup component add --toolchain "$RUNTIME_RUST_TOOLCHAIN" "${components[@]}"
       - name: Install Rust CPU targets
         if: matrix.rustTargets != ''
         run: |
           read -r -a targets <<< "$RUST_TARGETS"
-          rustup target add "${targets[@]}"
+          rustup target add --toolchain "$RUNTIME_RUST_TOOLCHAIN" "${targets[@]}"
       - name: Build the package
         run: node tools/build-runtime.mjs --project "$PROJECT" --arch "$ARCH" --version "$VERSION" --output "$RUNNER_TEMP/build" --work "$RUNNER_TEMP/work"
       - name: Package the release
         run: node tools/release-runtime.mjs prepare --project "$PROJECT" --input "$RUNNER_TEMP/build/payload" --declaration "$RUNNER_TEMP/build/declaration.json" --source-revision "$GITHUB_SHA" --output "$RUNNER_TEMP/release"
       - name: Verify the package identity
+        id: verify
         run: node tools/release-runtime.mjs verify --bundle "$RUNNER_TEMP/release" --project "$PROJECT" --version "$VERSION" --arch "$ARCH"
       # Signed provenance that ties the package archive to this workflow run and commit.
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        id: attest
+        continue-on-error: true
+        with:
+          subject-path: ${{ runner.temp }}/release/*.tar.gz
+      - name: Wait before retrying the attestation request
+        if: steps.attest.outcome == 'failure' && !cancelled()
+        run: sleep 5
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        if: steps.attest.outcome == 'failure' && !cancelled()
         with:
           subject-path: ${{ runner.temp }}/release/*.tar.gz
       - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
         with:
           name: runtime-${{ matrix.project }}-${{ matrix.version }}-${{ matrix.arch }}
           path: ${{ runner.temp }}/release

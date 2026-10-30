@@ -60,6 +60,11 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
    for(const rpath of new Set(commands.rpaths.filter(value=>path.isAbsolute(value)&&!system(value))))run('/usr/bin/install_name_tool',['-delete_rpath',rpath,target]);
    if(ids.length)run('/usr/bin/install_name_tool',['-id','@rpath/'+path.basename(target),target]);
   }}finally{fs.rmSync(receipts,{recursive:true,force:true});}
+  // Upstream source and bottles may use read-only modes; package files are owned copies.
+  for(const relative of B.fileInventory(files)){
+   const file=path.join(files,relative),executable=Tools.macho(file)||Boolean(fs.statSync(file).mode&0o111);
+   fs.chmodSync(file,executable?0o755:0o644);
+  }
   let minimumMacOS='0.0';
   for(const target of seen){
    if(Tools.macho(target)?.join()!==cpu)throw Error('Dependency has the wrong CPU: '+path.basename(target));

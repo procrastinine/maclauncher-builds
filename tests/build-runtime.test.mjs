@@ -52,7 +52,7 @@ if(process.env.ENGINE_EXTRA)fs.writeFileSync(path.join(o.output,'extra.txt'),'ex
  return root;
 }
 
-const row=(arch,version='1.0')=>({project:'engine',version,arch,runner:RUNNERS[arch],submodules:'producers/engine/upstream',tools:'meson ninja',rustComponents:'',recursiveSubmodules:false,rustTargets:''});
+const row=(arch,version='1.0')=>({project:'engine',version,arch,runner:RUNNERS[arch],rustToolchain:'',xcodeVersion:arch==='x64'?'26.6':'27.0',sdkVersion:arch==='x64'?'26.5':'27.0',developerDirectory:arch==='x64'?'/Applications/Xcode_26.6.app/Contents/Developer':'/Applications/Xcode_27.0.app/Contents/Developer',submodules:'producers/engine/upstream',tools:'meson ninja',rustComponents:'',recursiveSubmodules:false,rustTargets:''});
 const commit=(root,message)=>{for(const args of [['add','-A'],['-c','user.name=t','-c','user.email=t@example.com','commit','-qm',message]])execFileSync('git',['-C',root,...args]);return execFileSync('git',['-C',root,'rev-parse','HEAD'],{encoding:'utf8'}).trim();};
 
 test('a manual GitHub build plans the registered version once for each missing architecture',t=>{
@@ -146,10 +146,17 @@ test('the Runtime build workflow builds each architecture on its own runner befo
  const stage=workflow.slice(workflow.indexOf('\n  stage:'));
  assert.match(stage,/if: github\.event_name == 'workflow_dispatch' && inputs\.operation == 'stage'/);
  assert.match(workflow,/push:\n    branches: \[main\]\n    paths:\n      - projects\.json\n      - projects\/\*\*/);assert.match(workflow,/if: needs\.plan\.outputs\.empty == 'false'/);
- assert.match(workflow,/actions\/attest-build-provenance@[a-f0-9]{40} # v4\.2\.2\n        with:\n          subject-path: \$\{\{ runner\.temp \}\}\/release\/\*\.tar\.gz/);assert.match(stage,/needs: build/);assert.match(stage,/github\.ref != 'refs\/heads\/main'/);
+ const attestations=[...workflow.matchAll(/      - uses: actions\/attest-build-provenance@([a-f0-9]{40}) # v4\.2\.2\n((?:        [^\n]*\n)+)/g)];assert.equal(attestations.length,2);assert.equal(attestations[0][1],attestations[1][1]);
+ for(const [, ,block] of attestations)assert.match(block,/subject-path: \$\{\{ runner\.temp \}\}\/release\/\*\.tar\.gz/);
+ assert.match(attestations[0][2],/id: attest\n        continue-on-error: true/);assert.match(attestations[1][2],/if: steps\.attest\.outcome == 'failure' && !cancelled\(\)/);assert.ok(!attestations[1][2].includes('continue-on-error'));
+ assert.match(workflow,/run: sleep 5/);assert.match(stage,/needs: build/);assert.match(stage,/github\.ref != 'refs\/heads\/main'/);
  assert.match(stage,/stage --bundle "\$bundle" --target "\$GITHUB_SHA"/);assert.ok(!workflow.slice(0,workflow.indexOf('\n  stage:')).includes('contents: write'));
  const release=fs.readFileSync(path.join(root,'.github/workflows/runtime-release.yml'),'utf8');
- assert.match(release,/build-run:/);assert.match(release,/"Runtime build \$\(git rev-parse HEAD\) success"/);assert.match(release,/verify-remote --bundle/);
+ assert.match(release,/build-run:/);assert.match(release,/tools\/verified-build-run\.mjs --input/);
+ assert.match(release,/--json workflowName,headSha,headBranch,status,jobs/);
+ assert.match(release,/\[ "\$BUILD_SOURCE_REVISION" = "\$\(git rev-parse HEAD\)" \]/);
+ assert.match(release,/--signer-workflow "\$GITHUB_REPOSITORY\/\.github\/workflows\/runtime-build\.yml" --source-digest/);
+ assert.match(release,/verify-remote --bundle/);
 });
 
 test('registered GitHub build commands reject architectures their projects do not build',async t=>{

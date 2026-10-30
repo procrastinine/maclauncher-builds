@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import vm from 'node:vm';
 import {buildIndex,renderIndex} from '../tools/package-index.mjs';
+import {catalogIndex} from '../tools/release-runtime.mjs';
 import {readProjects} from '../lib/projects.mjs';
 import {assetName,releaseTag} from '../lib/project-identity.mjs';
 const root=path.resolve(import.meta.dirname,'..');
@@ -16,7 +17,15 @@ test('the static browser and JSON use exactly the current catalog packages and i
   const catalog=JSON.parse(fs.readFileSync(file));return catalog.packages.length?[{project,packages:catalog.packages}]:[];
  });
  const expected=new Map(published.map(row=>[row.project.id,row])),total=published.reduce((count,row)=>count+row.packages.length,0);
- assert.equal(result.projects,published.length);assert.equal(result.packages,total);assert.deepEqual(index,JSON.parse(fs.readFileSync(path.join(root,'catalogs/index.json'))));
+ assert.equal(result.projects,published.length);assert.equal(result.packages,total);
+ const committed=JSON.parse(fs.readFileSync(path.join(root,'catalogs/index.json'))),comparable=structuredClone(index);
+ // Earlier indexes omit this additive field. Source changes do not publish a
+ // replacement catalog; all existing snapshot fields still match exactly.
+ for(const project of comparable.projects)for(const release of project.releases){
+  const previous=committed.projects.find(row=>row.projectId===project.projectId)?.releases.find(row=>row.version===release.version&&row.arch===release.arch);
+  if(previous&&!Object.hasOwn(previous,'launcherArchitectures'))delete release.launcherArchitectures;
+ }
+ assert.deepEqual(comparable,committed);
  assert.deepEqual(index.projects.map(project=>project.projectId).sort(),[...expected.keys()].sort());
  for(const project of index.projects){
   const supplied=expected.get(project.projectId);assert.equal(project.delivery,supplied.project.delivery);
@@ -67,10 +76,12 @@ test('ABI profile metadata rejects duplicate versions and incomplete labels',t=>
 });
 
 test('each package states its CPU architecture and the Mac CPUs that can run it',()=>{
- const index=JSON.parse(fs.readFileSync(path.join(root,'catalogs/index.json'))),html=renderIndex(index);
+ const index=catalogIndex(root),html=renderIndex(index);
  for(const project of index.projects)for(const release of project.releases){
   assert.ok(['arm64','x64','universal'].includes(release.arch));
-  assert.deepEqual(release.launcherArchitectures,release.arch==='arm64'?['arm64']:['arm64','x64']);
+  const catalog=JSON.parse(fs.readFileSync(path.join(root,'catalogs',project.projectId+'.json'))),record=catalog.packages.find(row=>row.version===release.version&&row.arch===release.arch);
+  assert.deepEqual(release.launcherArchitectures,record.launcherArchitectures);
+  for(const own of release.arch==='universal'?['arm64','x64']:[release.arch])assert.ok(release.launcherArchitectures.includes(own));
  }
  assert.ok(html.includes('Apple Silicon<span class="secondary">arm64 · macOS 13.0+</span>'));
  assert.ok(html.includes('Universal<span class="secondary">arm64 and x64 · macOS'));

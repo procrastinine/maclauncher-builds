@@ -13,7 +13,16 @@ export function initializeSources({project:id,version,directory=root,run=(args,c
    const link=links.find(name=>remaining===name||remaining.startsWith(name+'/'));
    if(!link)throw Error('Declared source is not a registered Gitlink: '+selected);
    const recursive=build.recursiveSubmodules===true&&remaining===link,key=path.join(current,link)+'/'+recursive;
-   if(!done.has(key)){run(['submodule','update','--init','--depth','1',...(recursive?['--recursive']:[]),'--',link],current);done.add(key);initialized.push({path:path.relative(directory,path.join(current,link)).split(path.sep).join('/'),recursive});}
+   if(!done.has(key)){
+    const args=['submodule','update','--init'];
+    try{run([...args,'--depth','1',...(recursive?['--recursive']:[]),'--',link],current);}
+    catch(error){
+     if(!/dumb http transport does not support shallow capabilities/i.test(String(error.stderr||error.message)))throw error;
+     // The pinned commit is unchanged; older Git servers need a full fetch.
+     run([...args,...(recursive?['--recursive']:[]),'--',link],current);
+    }
+    done.add(key);initialized.push({path:path.relative(directory,path.join(current,link)).split(path.sep).join('/'),recursive});
+   }
    current=path.join(current,link);remaining=remaining===link?'':remaining.slice(link.length+1);
   }
  }

@@ -5,6 +5,7 @@ import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {resolveProject,buildRecord,buildRecords} from '../lib/projects.mjs';
 import {releaseVersion} from '../lib/package-version.mjs';
+import {RUST_TOOLCHAIN} from './rust-build.mjs';
 import {publicDeclaration} from './runtime-package.mjs';
 const B=createRequire(import.meta.url)('../lib/bundled-native.cjs');
 
@@ -30,6 +31,10 @@ export function verifyProducer(directory,recipe){
 // GitHub-hosted runners for each package architecture. Each architecture builds
 // on a Mac with that CPU; a universal package builds on the Apple Silicon runner.
 export const RUNNERS=Object.freeze({arm64:'xcode-27',x64:'macos-26-intel',universal:'xcode-27'});
+export const HOST_TOOLCHAINS=Object.freeze({
+ 'xcode-27':Object.freeze({xcodeVersion:'27.0',sdkVersion:'27.0',developerDirectory:'/Applications/Xcode_27.0.app/Contents/Developer'}),
+ 'macos-26-intel':Object.freeze({xcodeVersion:'26.6',sdkVersion:'26.5',developerDirectory:'/Applications/Xcode_26.6.app/Contents/Developer'})
+});
 
 function githubBuild(id,directory,version){
  const project=resolveProject(id,directory,{resolvePins:false});
@@ -39,7 +44,11 @@ function githubBuild(id,directory,version){
  return {project,build:buildRecord(project,version)};
 }
 
-const matrixRow=(project,build,arch)=>({project:project.id,version:build.version,arch,runner:build.runners?.[arch]||RUNNERS[arch],submodules:(build.submodules||[]).join(' '),tools:(build.tools||[]).join(' '),rustComponents:(build.rustComponents||[]).join(' '),recursiveSubmodules:build.recursiveSubmodules===true,rustTargets:(build.rustTargets||[]).join(' ')});
+const matrixRow=(project,build,arch)=>{
+ const runner=build.runners?.[arch]||RUNNERS[arch],toolchain=HOST_TOOLCHAINS[runner];
+ if(!toolchain)throw Error('The hosted image needs an explicit Xcode and SDK declaration: '+runner);
+ return {project:project.id,version:build.version,arch,runner,...toolchain,rustToolchain:build.rustComponents?.length||build.rustTargets?.length?RUST_TOOLCHAIN:'',submodules:(build.submodules||[]).join(' '),tools:(build.tools||[]).join(' '),rustComponents:(build.rustComponents||[]).join(' '),recursiveSubmodules:build.recursiveSubmodules===true,rustTargets:(build.rustTargets||[]).join(' ')};
+};
 const gitTags=(directory,id)=>git(directory,['tag','--list',id+'/v*']).split('\n').filter(Boolean);
 
 /** Architectures of a version that already have a catalog record or a release tag, which a draft also has. */

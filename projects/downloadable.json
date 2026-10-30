@@ -1123,8 +1123,32 @@
       {
         "version": "MCLv1-1024",
         "label": "KosmicKrisp geometry/transform-feedback adaptation MCLv1-1024"
+      },
+      {
+        "version": "MCLv2-1030",
+        "label": "KosmicKrisp geometry and transform feedback"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv2-1030",
+      "command": "tools/build-sdk27-runtime.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/mesa",
+        "sources/vulkan-loader",
+        "sources/anyps5/3rdparty/Vulkan-Headers"
+      ],
+      "tools": [
+        "uv",
+        "pkgconf",
+        "cmake",
+        "llvm",
+        "spirv-tools",
+        "zstd"
+      ]
+    }
   },
   {
     "id": "flash-projector",
@@ -1350,6 +1374,10 @@
       {
         "version": "0.41.0-MCLv7",
         "label": "Decoded video with separate controls and subtitles, Apple Silicon, macOS 27"
+      },
+      {
+        "version": "0.41.0-MCLv8",
+        "label": "Decoded video with separate controls and subtitles"
       }
     ],
     "compatibility": "Apple Silicon with macOS 27 or later; the original command-line profile remains separate.",
@@ -1362,6 +1390,25 @@
         "playerInputAPI": 1,
         "osdLayerAPI": 1
       }
+    },
+    "build": {
+      "version": "0.41.0-MCLv8",
+      "command": "tools/build-sdk27-runtime.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/mpv-player"
+      ],
+      "tools": [
+        "uv",
+        "pkgconf",
+        "ffmpeg",
+        "libass",
+        "libplacebo",
+        "luajit",
+        "mujs"
+      ]
     }
   },
   {

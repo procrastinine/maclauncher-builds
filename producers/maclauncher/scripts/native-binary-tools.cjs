@@ -154,7 +154,7 @@ function addDependencyNotices(source, payload, notices, seen, receiptRoot) {
   const formula = formulaRoot(source);
   if (!formula || seen.has(formula.root)) return;
   if (notices.some(notice => notice.dependencyName === formula.name)) { seen.add(formula.root); return; }
-  const candidates = fs.readdirSync(formula.root).filter(name => /^(?:licen[sc]e|copying|copyright|notice)(?:[._-].*)?$/i.test(name));
+  const candidates = fs.readdirSync(formula.root).filter(name => /^(?:(?:licen[sc]e|copying|copyright|notice)(?:[._-].*)?|(?:AGPL|GPL|LGPL|MPL|Apache|MIT|BSD|ISC|Zlib)(?:[-_.].*)?)$/i.test(name));
   if (!candidates.length) throw new Error(`Missing license notice for ${formula.name} ${formula.version}; add it explicitly to this package's notices.`);
   seen.add(formula.root);
   for (const name of candidates) {

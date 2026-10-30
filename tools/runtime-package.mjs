@@ -80,7 +80,7 @@ export async function verify({archive,sha256,project,version,arch,includeDeclara
 
 export function catalog(records,{project,repository,previous}={}){
  projectId(project);if(!Array.isArray(records)||!records.length)throw Error('Select at least one project release record.');
- if(previous)validateCatalog(previous,{project,repository});
+ if(previous)validateCatalog(previous,{project,repository,allowEmpty:true});
  const seen=new Set(),old=new Map((previous?.packages||[]).map(record=>[record.version+'/'+record.arch,record]));
  const packages=records.map(record=>{
   releaseRecord(record,{project,repository});const key=record.version+'/'+record.arch;

@@ -42,7 +42,7 @@ Other projects keep a different architecture for a fixed reason:
 | `universal` | No native code | VNDS-LOVE, Android launcher integrations |
 | `universal` | The publisher's binary is universal | Flash projector |
 | `arm64` | The package runs ARM64 Android, iOS or Switch code, or serves Android games, all of which need Apple Silicon | `android`, `android-art`, `android-aim`, `android-privacy`, `nxnative-tools`, `ios-playtools-paths` |
-| `arm64` | The package requires macOS 27, which Intel Macs cannot install | `mpv`, `vulkan-kosmickrisp-gles32` |
+| `arm64` | The sealed media or Apple-GPU driver closure requires macOS 27 | `mpv`, `vulkan-kosmickrisp-gles32` |
 | `x64` | HashLink 1.9 and 1.12 compile games to x86-64 code at run time, and the publisher's Steamworks4j 1.9 library is x86-64 only; on Apple Silicon these packages run through Rosetta | HashLink 1.9 and 1.12, Steamworks4j 1.9 |
 
 MKXP-Z uses `arm64` for its adapted package: its package adds Apple Silicon filename normalization to the publisher's universal build, and Intel Macs use the publisher's build directly.

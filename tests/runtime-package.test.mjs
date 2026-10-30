@@ -62,6 +62,7 @@ test('packing, catalogs and downloaded archives reject swapped project identitie
 test('catalog updates retain prior versions and cannot replace an existing release',async t=>{
  const f=fixture(t),record=await pack(f),options={project:f.project,repository:'owner/builds'},previous=catalog([record],options);
  const next={...record,version:'1.0.1',asset:{...record.asset,filename:'fixture-1.0.1-arm64.tar.gz'}};
+ assert.deepEqual(catalog([record],{...options,previous:{schemaVersion:2,projectId:f.project,updatePolicy:'manual',packages:[]}}),catalog([record],options));
  const updated=catalog([next],{...options,previous});assert.deepEqual(updated.packages.map(record=>record.version),['1.0.1','1.0.0']);
  assert.deepEqual(catalog([record],{...options,previous}),previous);
  assert.throws(()=>catalog([{...record,asset:{...record.asset,sha256:'0'.repeat(64)}}],{...options,previous}),/immutable/);
