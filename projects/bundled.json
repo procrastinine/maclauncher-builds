@@ -7,7 +7,8 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/catsystem2/runtime/stage-crypto.cjs"
+        "producers/maclauncher/src/modules/catsystem2/runtime/stage-crypto.cjs",
+        "producers/maclauncher/helper-builds/catsystem2-kif-crypto.json"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -16,8 +17,20 @@
       {
         "version": "1.0.0",
         "label": "CatSystem2 KIF cryptography helper 1.0.0"
+      },
+      {
+        "version": "1.1.0",
+        "label": "CatSystem2 KIF cryptography helper 1.1.0"
       }
-    ]
+    ],
+    "build": {
+      "version": "1.1.0",
+      "command": "tools/build-helper.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ]
+    }
   },
   {
     "id": "android-privacy",
@@ -27,7 +40,8 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/scripts/build-android-privacy.mjs"
+        "producers/maclauncher/scripts/build-android-privacy.mjs",
+        "producers/maclauncher/helper-builds/android-privacy.json"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -36,8 +50,22 @@
       {
         "version": "1.0.0",
         "label": "Android privacy helper 1.0.0"
+      },
+      {
+        "version": "1.1.0",
+        "label": "Android privacy helper 1.1.0"
       }
-    ]
+    ],
+    "build": {
+      "version": "1.1.0",
+      "command": "tools/build-helper.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "submodules": [
+        "sources/maclauncher-android"
+      ]
+    }
   },
   {
     "id": "ios-playtools-paths",
@@ -47,7 +75,8 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/ios/native/build.mjs"
+        "producers/maclauncher/src/modules/ios/native/build.mjs",
+        "producers/maclauncher/src/modules/ios/native/playtools-paths.swift"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -56,8 +85,19 @@
       {
         "version": "1.0.0",
         "label": "PlayTools storage adapter 1.0.0"
+      },
+      {
+        "version": "1.1.0",
+        "label": "PlayTools storage adapter 1.1.0"
       }
-    ]
+    ],
+    "build": {
+      "version": "1.1.0",
+      "command": "tools/build-ios-helper.mjs",
+      "architectures": [
+        "arm64"
+      ]
+    }
   },
   {
     "id": "love-luasteam",
@@ -81,14 +121,49 @@
           "file": "producers/maclauncher/src/modules/love/runtime/luasteam-source-overlay.js",
           "pointer": "/SOURCE_REVISION"
         }
+      },
+      {
+        "id": "luajit",
+        "provider": "git",
+        "url": "https://luajit.org/git/luajit.git",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/love/runtime/luasteam-source-overlay.js",
+          "pointer": "/LUA_HEADERS_REVISION"
+        }
+      },
+      {
+        "id": "steamworks-sdk",
+        "provider": "github",
+        "url": "https://github.com/rlabrecque/SteamworksSDK",
+        "repository": "rlabrecque/SteamworksSDK",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/love/runtime/luasteam-source-overlay.js",
+          "pointer": "/SDK_HEADERS_REVISION"
+        }
       }
     ],
     "packageProfiles": [
       {
         "version": "4.0.2-MCLv1",
         "label": "Lua 5.1 host ABI"
+      },
+      {
+        "version": "4.0.2-MCLv2",
+        "label": "Lua 5.1 host ABI"
       }
-    ]
+    ],
+    "build": {
+      "version": "4.0.2-MCLv2",
+      "command": "tools/build-luasteam.mjs",
+      "architectures": [
+        "universal"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/luasteam",
+        "producers/maclauncher/src/external/SteamworksSDK"
+      ],
+      "recursiveSubmodules": true
+    }
   },
   {
     "id": "mkxpz-config-helper",
@@ -98,7 +173,8 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/scripts/stage-mkxpz-config-helper.cjs"
+        "producers/maclauncher/scripts/stage-mkxpz-config-helper.cjs",
+        "producers/maclauncher/helper-builds/mkxpz-config-helper.json"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -107,8 +183,19 @@
       {
         "version": "1.0.0",
         "label": "MKXP-Z configuration helper 1.0.0"
+      },
+      {
+        "version": "1.1.0",
+        "label": "MKXP-Z configuration helper 1.1.0"
       }
-    ]
+    ],
+    "build": {
+      "version": "1.1.0",
+      "command": "tools/build-helper.mjs",
+      "architectures": [
+        "universal"
+      ]
+    }
   },
   {
     "id": "reshade",
@@ -529,8 +616,73 @@
       {
         "version": "0.1.0",
         "label": "MacLauncher graphics 0.1.0"
+      },
+      {
+        "version": "0.3.0",
+        "label": "MacLauncher graphics 0.3.0"
       }
-    ]
+    ],
+    "build": {
+      "version": "0.3.0",
+      "command": "tools/build-graphics.mjs",
+      "architectures": [
+        "universal",
+        "x64"
+      ],
+      "runners": {
+        "universal": "xcode-27",
+        "x64": "macos-26-intel"
+      },
+      "submodules": [
+        "producers/maclauncher/src/external/ISFMSLKit",
+        "producers/maclauncher/src/external/ISFMSLKit/submodules/ISFGLSLGenerator",
+        "producers/maclauncher/src/external/ISFMSLKit/submodules/PINCache",
+        "producers/maclauncher/src/external/ISFMSLKit/submodules/VVMetalKit",
+        "producers/maclauncher/src/external/MLX-DLSS",
+        "producers/maclauncher/src/external/asr",
+        "producers/maclauncher/src/external/dxmt-camera",
+        "producers/maclauncher/src/external/fsr2",
+        "producers/maclauncher/src/external/fsr3-sdk",
+        "producers/maclauncher/src/external/fsr4-metal",
+        "producers/maclauncher/src/external/godot-camera",
+        "producers/maclauncher/src/external/krkrsdl2",
+        "producers/maclauncher/src/external/krkrsdl2/external/SDL",
+        "producers/maclauncher/src/external/libplacebo",
+        "producers/maclauncher/src/external/libplacebo/3rdparty/Vulkan-Headers",
+        "producers/maclauncher/src/external/libplacebo/3rdparty/fast_float",
+        "producers/maclauncher/src/external/librashader",
+        "producers/maclauncher/src/external/macfx-fsr1",
+        "producers/maclauncher/src/external/macfx-mako",
+        "producers/maclauncher/src/external/macfx-reshade",
+        "producers/maclauncher/src/external/macfx-reshade-shaders",
+        "producers/maclauncher/src/external/macfx-spirv-cross",
+        "producers/maclauncher/src/external/macfx-spirv-headers",
+        "producers/maclauncher/src/external/macfx-vkd3d",
+        "producers/maclauncher/src/external/sgsr2",
+        "producers/maclauncher/src/external/streamline-camera",
+        "producers/maclauncher/src/external/xess"
+      ],
+      "recursiveSubmodules": false,
+      "rustComponents": [
+        "rust-docs"
+      ],
+      "rustTargets": [
+        "aarch64-apple-darwin",
+        "x86_64-apple-darwin"
+      ],
+      "tools": [
+        "cmake",
+        "ninja",
+        "meson",
+        "pkgconf",
+        "uv",
+        "autoconf",
+        "automake",
+        "libtool",
+        "bison",
+        "flex"
+      ]
+    }
   },
   {
     "id": "steam-api-helper",
@@ -540,7 +692,8 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/shared/runtime/steamworks/native/offline-0.5.0/build.cjs"
+        "producers/maclauncher/src/modules/shared/runtime/steamworks/native/offline-0.5.0/build.cjs",
+        "producers/maclauncher/helper-builds/steam-api-helper.json"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -549,8 +702,19 @@
       {
         "version": "0.5.0",
         "label": "Offline Steam API compatibility helper 0.5.0"
+      },
+      {
+        "version": "0.5.1",
+        "label": "Offline Steam API compatibility helper 0.5.1"
       }
-    ]
+    ],
+    "build": {
+      "version": "0.5.1",
+      "command": "tools/build-helper.mjs",
+      "architectures": [
+        "universal"
+      ]
+    }
   },
   {
     "id": "steam-ticket-loader",
@@ -560,7 +724,8 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/shared/runtime/steamworks/native/ticket-0.1.0/build.cjs"
+        "producers/maclauncher/src/modules/shared/runtime/steamworks/native/ticket-0.1.0/build.cjs",
+        "producers/maclauncher/helper-builds/steam-ticket-loader.json"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -569,8 +734,19 @@
       {
         "version": "0.1.0",
         "label": "Steam ticket availability adapter 0.1.0"
+      },
+      {
+        "version": "0.1.1",
+        "label": "Steam ticket availability adapter 0.1.1"
       }
-    ]
+    ],
+    "build": {
+      "version": "0.1.1",
+      "command": "tools/build-helper.mjs",
+      "architectures": [
+        "universal"
+      ]
+    }
   },
   {
     "id": "java-steamworks",
@@ -596,6 +772,16 @@
           "file": "producers/maclauncher/src/modules/java/runtime/steamworks/versions.json",
           "pointer": "/0/sourceRevision"
         }
+      },
+      {
+        "id": "steamworks4j-1-10",
+        "provider": "github",
+        "url": "https://github.com/code-disaster/steamworks4j",
+        "repository": "code-disaster/steamworks4j",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/java/runtime/steamworks/versions.json",
+          "pointer": "/1/sourceRevision"
+        }
       }
     ],
     "packageProfiles": [
@@ -608,6 +794,30 @@
         "version": "1.10.0-MCLv1",
         "label": "Steamworks4j 1.10 JNI ABI",
         "anchor": "java-steamworks-1-10"
+      },
+      {
+        "version": "1.9.0-MCLv2",
+        "label": "Steamworks4j 1.9.0 JNI ABI"
+      },
+      {
+        "version": "1.10.0-MCLv2",
+        "label": "Steamworks4j 1.10.0 JNI ABI"
+      }
+    ],
+    "build": [
+      {
+        "version": "1.9.0-MCLv2",
+        "command": "tools/build-java-steamworks.mjs",
+        "architectures": [
+          "x64"
+        ]
+      },
+      {
+        "version": "1.10.0-MCLv2",
+        "command": "tools/build-java-steamworks.mjs",
+        "architectures": [
+          "universal"
+        ]
       }
     ]
   },
@@ -619,17 +829,52 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "sources/maclauncher-android/src/modules/android/native/apk-metadata/build.mjs"
+        "producers/maclauncher/src/modules/android/native/apk-metadata/build.mjs",
+        "producers/maclauncher/src/modules/android/native/apk-metadata/adapt.mjs",
+        "producers/maclauncher/src/modules/android/native/apk-metadata/main.rs",
+        "producers/maclauncher/src/modules/android/native/apk-metadata/sources.json",
+        "producers/maclauncher/src/modules/android/native/apk-metadata/Cargo.toml",
+        "producers/maclauncher/src/modules/android/native/apk-metadata/Cargo.lock"
       ],
-      "sourceDirectory": "sources/maclauncher-android"
+      "sourceDirectory": "producers/maclauncher"
     },
-    "upstreams": [],
+    "upstreams": [
+      {
+        "id": "aim",
+        "provider": "github",
+        "url": "https://github.com/hahnlee/aim",
+        "repository": "hahnlee/aim",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/android/native/apk-metadata/sources.json",
+          "pointer": "/aim/revision"
+        }
+      }
+    ],
     "packageProfiles": [
       {
         "version": "1.0.0",
         "label": "Android package metadata helper 1.0.0"
+      },
+      {
+        "version": "1.1.0",
+        "label": "Android package metadata helper 1.1.0"
       }
-    ]
+    ],
+    "build": {
+      "version": "1.1.0",
+      "command": "tools/build-apk-metadata.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "rustComponents": [
+        "rust-docs"
+      ],
+      "rustTargets": [
+        "aarch64-apple-darwin",
+        "x86_64-apple-darwin"
+      ]
+    }
   },
   {
     "id": "web-renderer-network",
@@ -639,7 +884,8 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/scripts/stage-web-renderer-network.cjs"
+        "producers/maclauncher/scripts/stage-web-renderer-network.cjs",
+        "producers/maclauncher/helper-builds/web-renderer-network.json"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -648,8 +894,20 @@
       {
         "version": "1.0.1",
         "label": "Browser network helper 1.0.1"
+      },
+      {
+        "version": "1.1.0",
+        "label": "Browser network helper 1.1.0"
       }
-    ]
+    ],
+    "build": {
+      "version": "1.1.0",
+      "command": "tools/build-helper.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ]
+    }
   },
   {
     "id": "android-launcher",
@@ -663,7 +921,8 @@
         "producers/included-helpers/prepare.mjs",
         "producers/included-helpers/profiles/android-launcher.json",
         "producers/android-launcher/build.mjs",
-        "producers/android-launcher/source.json"
+        "producers/android-launcher/source.json",
+        "producers/android-launcher/build-inputs.json"
       ]
     },
     "upstreams": [
@@ -682,7 +941,18 @@
       {
         "version": "1.0.0-MCLv3",
         "label": "Android launcher integrations 1.0.0-MCLv3"
+      },
+      {
+        "version": "1.0.0-MCLv4",
+        "label": "Android launcher integrations 1.0.0-MCLv4"
       }
-    ]
+    ],
+    "build": {
+      "version": "1.0.0-MCLv4",
+      "command": "tools/build-android-launcher.mjs",
+      "architectures": [
+        "universal"
+      ]
+    }
   }
 ]

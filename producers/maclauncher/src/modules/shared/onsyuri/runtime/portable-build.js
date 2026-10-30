@@ -28,8 +28,8 @@ function validateEngineArchive(archives) {
       Native.hashFile(file) !== PIN.engine.archiveSha256) throw new Error("Yuri primary source archive checksum or size differs from its pinned version.");
 }
 
-function validateMixerStack(stack) {
-  if (!stack || stack.version !== Mixer.PIN.version || stack.architecture !== "arm64" || stack.minimumMacOS !== "13.0" ||
+function validateMixerStack(stack, architecture = process.arch) {
+  if (!stack || stack.version !== Mixer.PIN.version || stack.architecture !== architecture || stack.minimumMacOS !== "13.0" ||
       stack.recipeSha256 !== Mixer.recipeIdentity() || !/^[a-f0-9]{64}$/.test(stack.prefixSha256 || "") ||
       !Array.isArray(stack.sources) || stack.sources.length !== Mixer.PIN.dependencies.length ||
       !isDeepStrictEqual(stack.readRoots, [stack.fonts?.prefix, stack.audio?.prefix])) throw new Error("Yuri mixer reuse requires the exact source recipe, dependency roots and prefix checksum.");
@@ -37,8 +37,8 @@ function validateMixerStack(stack) {
     const source = stack.sources.find(row => row.id === pin.id);
     if (!source || Object.keys(pin).some(key => !isDeepStrictEqual(pin[key], source[key]))) throw new Error("Yuri mixer source identity differs from its pinned version.");
   }
-  Prefix.validateStack(stack.fonts, Fonts.PIN, dependencyRecipe("../../runtime/portable-sdl2-fonts", "../../runtime/portable-sdl2-fonts.json"));
-  Prefix.validateStack(stack.audio, Audio.PIN, dependencyRecipe("../../runtime/portable-sndfile", "../../runtime/portable-sndfile.json"));
+  Prefix.validateStack(stack.fonts, Fonts.PIN, dependencyRecipe("../../runtime/portable-sdl2-fonts", "../../runtime/portable-sdl2-fonts.json"), architecture);
+  Prefix.validateStack(stack.audio, Audio.PIN, dependencyRecipe("../../runtime/portable-sndfile", "../../runtime/portable-sndfile.json"), architecture);
   const inventory = Prefix.snapshotPrefix(stack.prefix, { readRoots: stack.readRoots });
   if (inventory.sha256 !== stack.prefixSha256) throw new Error("Yuri reused mixer prefix checksum changed.");
   return inventory;

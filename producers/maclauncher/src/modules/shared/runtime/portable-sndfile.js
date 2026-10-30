@@ -38,28 +38,28 @@ function validateArchives(archives, { catalog = PIN } = {}) {
   return catalog.dependencies;
 }
 
-function compilerFlags(sdk, pathMappings = []) {
+function compilerFlags(sdk, pathMappings = [], architecture = process.arch) {
   // Use the shared validator, so both build systems reject ambiguous paths and
   // retain identical deployment and source-path mapping rules.
-  Portable.cmakeOptions({ prefix: sdk, sdk, ninja: "/usr/bin/true", pathMappings });
+  Portable.cmakeOptions({ prefix: sdk, sdk, ninja: "/usr/bin/true", architecture, pathMappings });
   // Autoconf expands these environment variables as compiler words, so quotes
   // inside CFLAGS are literal bytes. Use an ordinary temporary build path.
   if ([sdk, ...pathMappings.map(mapping => mapping.from)].some(value => /[\s'"$`\\]/.test(value))) {
     throw new Error("Portable audio compiler paths require a temporary directory without spaces or shell metacharacters.");
   }
-  return ["-O2", "-arch", "arm64", "-mmacosx-version-min=13.0", "-isysroot", sdk,
+  return ["-O2", "-arch", architecture === "x64" ? "x86_64" : "arm64", "-mmacosx-version-min=13.0", "-isysroot", sdk,
     ...pathMappings.flatMap(mapping => ["file", "debug", "macro"].map(kind => `-f${kind}-prefix-map=${mapping.from}=${mapping.to}`)),
     "-Werror=unguarded-availability-new"].join(" ");
 }
 
-async function buildAutotools({ sourceRoot, outputRoot, prefix, sdk, pathMappings, options, signal, dependencies = {} }) {
+async function buildAutotools({ sourceRoot, outputRoot, prefix, sdk, architecture = process.arch, pathMappings, options, signal, dependencies = {} }) {
   if ([sourceRoot, outputRoot, prefix].some(value => !path.isAbsolute(value || "") || /[\s'"$`\\]/.test(value))) {
     throw new Error("Portable audio configure paths require a temporary directory without spaces or shell metacharacters.");
   }
-  const flags = compilerFlags(sdk, pathMappings), env = Portable.buildEnvironment(prefix, sdk);
+  const flags = compilerFlags(sdk, pathMappings, architecture), env = Portable.buildEnvironment(prefix, sdk);
   Object.assign(env, { CC: "/usr/bin/clang", CXX: "/usr/bin/clang++", CFLAGS: flags, CXXFLAGS: flags,
-    LDFLAGS: `-arch arm64 -mmacosx-version-min=13.0 -isysroot ${sdk} -Wl,-headerpad_max_install_names -Wl,-rpath,${prefix}/lib` });
-  const configureOptions = [`--prefix=${prefix}`, ...options], logPath = outputRoot + ".log";
+    LDFLAGS: `-arch ${architecture === "x64" ? "x86_64" : "arm64"} -mmacosx-version-min=13.0 -isysroot ${sdk} -Wl,-headerpad_max_install_names -Wl,-rpath,${prefix}/lib` });
+  const configureOptions = [`--prefix=${prefix}`, `--host=${architecture === "x64" ? "x86_64" : "aarch64"}-apple-darwin`, ...options], logPath = outputRoot + ".log";
   fs.mkdirSync(outputRoot); const startedAt = new Date().toISOString();
   const run = dependencies.runBuildCommand || Source.runBuildCommand;
   await run(path.join(sourceRoot, "configure"), configureOptions, { cwd: outputRoot, env, logPath, signal });
@@ -69,13 +69,13 @@ async function buildAutotools({ sourceRoot, outputRoot, prefix, sdk, pathMapping
     startedAt, completedAt: new Date().toISOString(), logPath };
 }
 
-async function buildDependencies({ archives, workRoot, pathMappings = [], signal, onProgress, dependencies = {} }) {
+async function buildDependencies({ archives, workRoot, architecture = process.arch, pathMappings = [], signal, onProgress, dependencies = {} }) {
   throwIfAborted(signal);
-  if (process.platform !== "darwin" || process.arch !== "arm64") throw new Error("This portable audio build requires an Apple Silicon Mac.");
+  if (process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) throw new Error("Portable audio builds require macOS and an arm64 or x64 target.");
   const pins = validateArchives(archives);
   workRoot = Portable.assertFreshBuildRoot(workRoot);
   const sdk = (dependencies.readSDK || (() => execFileSync("/usr/bin/xcrun", ["--show-sdk-path"], { encoding: "utf8" }).trim()))();
-  compilerFlags(sdk, pathMappings);
+  compilerFlags(sdk, pathMappings, architecture);
   const tools = { cmake: (dependencies.findBuildTool || Source.findBuildTool)("cmake"), ninja: (dependencies.findBuildTool || Source.findBuildTool)("ninja") };
   fs.mkdirSync(workRoot, { recursive: true });
   const prefix = path.join(workRoot, "prefix"), sourceDirectory = path.join(workRoot, "source");
@@ -88,8 +88,8 @@ async function buildDependencies({ archives, workRoot, pathMappings = [], signal
     for (const notice of pin.notices) if (!fs.lstatSync(path.join(sourceRoot, notice)).isFile()) throw new Error(`Missing source license for ${pin.name}.`);
     onProgress?.({ phase: "build", project: pin.id });
     const build = await (pin.buildSystem === "autotools" ? buildAutotools({ sourceRoot, outputRoot: path.join(workRoot, pin.id),
-      prefix, sdk, pathMappings, options: pin.options, signal, dependencies }) : Portable.buildProject({
-      sourceRoot: path.join(sourceRoot, pin.sourceSubdirectory || ""), outputRoot: path.join(workRoot, pin.id), prefix, sdk, tools,
+      prefix, sdk, architecture, pathMappings, options: pin.options, signal, dependencies }) : Portable.buildProject({
+      sourceRoot: path.join(sourceRoot, pin.sourceSubdirectory || ""), outputRoot: path.join(workRoot, pin.id), prefix, sdk, tools, architecture,
       pathMappings, options: pin.options, signal, onProgress, dependencies }));
     sourceRoots[pin.id] = sourceRoot; sources.push({ ...pin, ...build, sourceRoot });
   }
@@ -99,9 +99,9 @@ async function buildDependencies({ archives, workRoot, pathMappings = [], signal
   for (const symbol of ["HAVE_EXTERNAL_XIPH_LIBS", "HAVE_MPEG"]) if (!new RegExp(`^#define ${symbol} 1$`, "m").test(config)) {
     throw new Error(`Portable libsndfile did not enable ${symbol}.`);
   }
-  return { version: PIN.version, architecture: PIN.architecture, minimumMacOS: PIN.minimumMacOS, audioFormats: PIN.audioFormats,
+  return { version: PIN.version, architecture, minimumMacOS: PIN.minimumMacOS, audioFormats: PIN.audioFormats,
     recipeSha256: crypto.createHash("sha256").update(fs.readFileSync(__filename)).update(fs.readFileSync(require.resolve("./portable-sndfile.json"))).digest("hex"),
-    prefix, sdk, tools, sources, sourceRoots };
+    prefix, prefixSha256: require("./portable-dependency-prefix").snapshotPrefix(prefix).sha256, sdk, tools, sources, sourceRoots };
 }
 
 module.exports = { PIN, validateArchives, compilerFlags, buildAutotools, buildDependencies };

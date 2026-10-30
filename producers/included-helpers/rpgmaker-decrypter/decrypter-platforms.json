@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "architectures": {
+    "arm64": {
+      "profile": "3.0.0-465c88c3-net8.0.32-osx-arm64-v1",
+      "runtimeIdentifier": "osx-arm64",
+      "sdk": {
+        "version": "8.0.426",
+        "runtimeVersion": "8.0.32",
+        "url": "https://builds.dotnet.microsoft.com/dotnet/Sdk/8.0.426/dotnet-sdk-8.0.426-osx-arm64.tar.gz",
+        "sha512": "17cd408c92eb6ceedc06d41fa726c783b9be020c6ae5f3624ad3a0b2c26a78aa7d09f38338003163a72bb14d437731debf533c0451a5c6a05de3b1e37a3aa50a",
+        "sha256": "c4e88383ff1ffcf9e80d91367a83690f77dff32a68c742fab6fa5644173875aa"
+      },
+      "runtimePackages": [
+        {
+          "name": "microsoft.aspnetcore.app.runtime.osx-arm64",
+          "version": "8.0.32",
+          "sha256": "4f8b4c89324a540aa03eb59ea6678b93605cb0c06ed1f0a112bb8c2777afe1f4",
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.app.runtime.osx-arm64/8.0.32/microsoft.aspnetcore.app.runtime.osx-arm64.8.0.32.nupkg"
+        },
+        {
+          "name": "microsoft.netcore.app.runtime.osx-arm64",
+          "version": "8.0.32",
+          "sha256": "760049c8549dd4e2f6210815eea2e2eb7308e45a7d6516740c60356475144491",
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.netcore.app.runtime.osx-arm64/8.0.32/microsoft.netcore.app.runtime.osx-arm64.8.0.32.nupkg"
+        }
+      ]
+    },
+    "x64": {
+      "profile": "3.0.0-465c88c3-net8.0.32-osx-x64-v1",
+      "runtimeIdentifier": "osx-x64",
+      "sdk": {
+        "version": "8.0.426",
+        "runtimeVersion": "8.0.32",
+        "url": "https://builds.dotnet.microsoft.com/dotnet/Sdk/8.0.426/dotnet-sdk-8.0.426-osx-x64.tar.gz",
+        "sha512": "44f5356cd8c96a937540547df6b71995636afe35827bc380478543cc7b7b3ca089679f3bee0498db3f6399bd9ee6b5829f3b452bcfc85d3c899714712ea3c5e3",
+        "sha256": "db790f685bae9b89e53d55084ea959214a075ab575ce92fac661113c67623e08"
+      },
+      "runtimePackages": [
+        {
+          "name": "microsoft.aspnetcore.app.runtime.osx-x64",
+          "version": "8.0.32",
+          "sha256": "edc359150a315da172d8e77eefa975de595a79bb8509570d35bd4503687a1cf5",
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.app.runtime.osx-x64/8.0.32/microsoft.aspnetcore.app.runtime.osx-x64.8.0.32.nupkg"
+        },
+        {
+          "name": "microsoft.netcore.app.runtime.osx-x64",
+          "version": "8.0.32",
+          "sha256": "21654c7679c43b4be468dbbf63e629c8c71917ed66694e8c0a71dcf2b44888fd",
+          "url": "https://api.nuget.org/v3-flatcontainer/microsoft.netcore.app.runtime.osx-x64/8.0.32/microsoft.netcore.app.runtime.osx-x64.8.0.32.nupkg"
+        }
+      ]
+    }
+  }
+}

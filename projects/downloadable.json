@@ -209,7 +209,26 @@
         "version": "1.5.0-MCLv1",
         "label": "AI5 SDL2 1.5.0-MCLv1"
       }
-    ]
+    ],
+    "build": {
+      "version": "1.5.0-MCLv1",
+      "command": "tools/build-portable-runtime.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/ai5-sdl2"
+      ],
+      "recursiveSubmodules": true,
+      "tools": [
+        "cmake",
+        "ninja",
+        "meson",
+        "pkgconf",
+        "nasm"
+      ]
+    }
   },
   {
     "id": "fna",
@@ -283,7 +302,23 @@
         "version": "MCLv1-1020",
         "label": "GemRB MCLv1-1020"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv1-1020",
+      "command": "tools/build-portable-runtime.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/gemrb"
+      ],
+      "tools": [
+        "cmake",
+        "ninja",
+        "pkgconf"
+      ]
+    }
   },
   {
     "id": "gm8-decompiler",
@@ -314,7 +349,21 @@
         "version": "2.2.0-MCLv1",
         "label": "GameMaker 8 decompiler 2.2.0-MCLv1"
       }
-    ]
+    ],
+    "build": {
+      "version": "2.2.0-MCLv1",
+      "command": "tools/build-gm8-decompiler.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/OpenGMK"
+      ],
+      "rustComponents": [
+        "rust-docs"
+      ]
+    }
   },
   {
     "id": "hashlink",
@@ -421,6 +470,36 @@
           "file": "producers/maclauncher/src/modules/shared/installers/runtime/innoextract-build.js",
           "pointer": "/REVISION"
         }
+      },
+      {
+        "id": "boost-filesystem",
+        "provider": "github",
+        "url": "https://github.com/boostorg/filesystem",
+        "repository": "boostorg/filesystem",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/installers/runtime/innoextract-build.js",
+          "pointer": "/DEPENDENCIES/boost-filesystem"
+        }
+      },
+      {
+        "id": "boost-program-options",
+        "provider": "github",
+        "url": "https://github.com/boostorg/program_options",
+        "repository": "boostorg/program_options",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/installers/runtime/innoextract-build.js",
+          "pointer": "/DEPENDENCIES/boost-program-options"
+        }
+      },
+      {
+        "id": "boost-iostreams",
+        "provider": "github",
+        "url": "https://github.com/boostorg/iostreams",
+        "repository": "boostorg/iostreams",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/installers/runtime/innoextract-build.js",
+          "pointer": "/DEPENDENCIES/boost-iostreams"
+        }
       }
     ],
     "packageProfiles": [
@@ -428,7 +507,26 @@
         "version": "MCLv1-0206",
         "label": "Inno Setup extraction tools MCLv1-0206"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv1-0206",
+      "command": "tools/build-innoextract.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/innoextract",
+        "producers/maclauncher/src/external/boost-filesystem",
+        "producers/maclauncher/src/external/boost-program-options",
+        "producers/maclauncher/src/external/boost-iostreams"
+      ],
+      "tools": [
+        "cmake",
+        "ninja",
+        "xz"
+      ]
+    }
   },
   {
     "id": "krkrsdl2",
@@ -547,7 +645,22 @@
         "version": "MCLv1-0126",
         "label": "ONScripter-EN MCLv1-0126"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv1-0126",
+      "command": "tools/build-onscripter-en.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/onscripter-en"
+      ],
+      "tools": [
+        "cmake",
+        "ninja"
+      ]
+    }
   },
   {
     "id": "onsyuri",
@@ -577,8 +690,28 @@
       {
         "version": "0.7.7beta-MCLv1",
         "label": "ONScripterYuri 0.7.7beta-MCLv1"
+      },
+      {
+        "version": "0.7.7beta-MCLv2",
+        "label": "ONScripter-Yuri 0.7.7beta-MCLv2"
       }
-    ]
+    ],
+    "build": {
+      "version": "0.7.7beta-MCLv2",
+      "command": "tools/build-portable-runtime.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/onscripter-yuri"
+      ],
+      "tools": [
+        "cmake",
+        "ninja",
+        "pkgconf"
+      ]
+    }
   },
   {
     "id": "opengmk",
@@ -650,7 +783,8 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/alicesoft/decompiler-build.js"
+        "producers/maclauncher/src/modules/alicesoft/decompiler-build.js",
+        "producers/maclauncher/scripts/build-decompiler.mjs"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -671,7 +805,18 @@
         "version": "0.5.0-MCLv1",
         "label": "System3 decompiler 0.5.0-MCLv1"
       }
-    ]
+    ],
+    "build": {
+      "version": "0.5.0-MCLv1",
+      "command": "producers/maclauncher/scripts/build-decompiler.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/sys3c"
+      ]
+    }
   },
   {
     "id": "system3",
@@ -695,6 +840,83 @@
           "file": "producers/maclauncher/src/modules/alicesoft/system3-portable.js",
           "pointer": "/REVISION"
         }
+      },
+      {
+        "id": "fonts-sdl2",
+        "provider": "github",
+        "url": "https://github.com/libsdl-org/SDL",
+        "repository": "libsdl-org/SDL",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
+          "pointer": "/dependencies",
+          "match": {
+            "id": "sdl2"
+          }
+        }
+      },
+      {
+        "id": "fonts-libpng",
+        "provider": "github",
+        "url": "https://github.com/pnggroup/libpng",
+        "repository": "pnggroup/libpng",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
+          "pointer": "/dependencies",
+          "match": {
+            "id": "libpng"
+          }
+        }
+      },
+      {
+        "id": "fonts-freetype",
+        "provider": "git",
+        "url": "https://gitlab.com/freetype/freetype",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
+          "pointer": "/dependencies",
+          "match": {
+            "id": "freetype"
+          }
+        }
+      },
+      {
+        "id": "fonts-graphite2",
+        "provider": "github",
+        "url": "https://github.com/silnrsi/graphite",
+        "repository": "silnrsi/graphite",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
+          "pointer": "/dependencies",
+          "match": {
+            "id": "graphite2"
+          }
+        }
+      },
+      {
+        "id": "fonts-harfbuzz",
+        "provider": "github",
+        "url": "https://github.com/harfbuzz/harfbuzz",
+        "repository": "harfbuzz/harfbuzz",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
+          "pointer": "/dependencies",
+          "match": {
+            "id": "harfbuzz"
+          }
+        }
+      },
+      {
+        "id": "fonts-sdl2-ttf",
+        "provider": "github",
+        "url": "https://github.com/libsdl-org/SDL_ttf",
+        "repository": "libsdl-org/SDL_ttf",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
+          "pointer": "/dependencies",
+          "match": {
+            "id": "sdl2_ttf"
+          }
+        }
       }
     ],
     "packageProfiles": [
@@ -702,7 +924,24 @@
         "version": "1.8.0-MCLv1",
         "label": "System3 SDL2 1.8.0-MCLv1"
       }
-    ]
+    ],
+    "build": {
+      "version": "1.8.0-MCLv1",
+      "command": "tools/build-system3.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/system3-sdl2"
+      ],
+      "tools": [
+        "cmake",
+        "ninja",
+        "pkgconf"
+      ],
+      "recursiveSubmodules": true
+    }
   },
   {
     "id": "xsys35-decompiler",
@@ -712,7 +951,8 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/alicesoft/decompiler-build.js"
+        "producers/maclauncher/src/modules/alicesoft/decompiler-build.js",
+        "producers/maclauncher/scripts/build-decompiler.mjs"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -733,7 +973,18 @@
         "version": "1.13.0-MCLv1",
         "label": "System3.5 decompiler 1.13.0-MCLv1"
       }
-    ]
+    ],
+    "build": {
+      "version": "1.13.0-MCLv1",
+      "command": "producers/maclauncher/scripts/build-decompiler.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/xsys35c"
+      ]
+    }
   },
   {
     "id": "xsystem35",
@@ -770,7 +1021,25 @@
         "version": "MCLv1-1019",
         "label": "xsystem35 SDL2 MCLv1-1019"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv1-1019",
+      "command": "tools/build-portable-runtime.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/xsystem35-sdl2"
+      ],
+      "recursiveSubmodules": false,
+      "tools": [
+        "cmake",
+        "ninja",
+        "meson",
+        "pkgconf"
+      ]
+    }
   },
   {
     "id": "xsystem4",
@@ -803,7 +1072,28 @@
         "version": "MCLv1-1021",
         "label": "xsystem4 MCLv1-1021"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv1-1021",
+      "command": "tools/build-portable-runtime.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/xsystem4"
+      ],
+      "recursiveSubmodules": true,
+      "tools": [
+        "cmake",
+        "ninja",
+        "meson",
+        "pkgconf",
+        "nasm",
+        "bison",
+        "flex"
+      ]
+    }
   },
   {
     "id": "vulkan-kosmickrisp-gles32",
@@ -936,7 +1226,22 @@
         "version": "MCLv1-1007",
         "label": "Butterscotch MCLv1-1007"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv1-1007",
+      "command": "tools/build-butterscotch.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/Butterscotch"
+      ],
+      "tools": [
+        "cmake",
+        "ninja"
+      ]
+    }
   },
   {
     "id": "anyps5",
@@ -1223,7 +1528,8 @@
         "producers/included-helpers/prepare.mjs",
         "producers/included-helpers/profiles/rpgmaker-decrypter.json",
         "producers/included-helpers/rpgmaker-decrypter/decrypter-build.js",
-        "producers/included-helpers/rpgmaker-decrypter/package.json"
+        "producers/included-helpers/rpgmaker-decrypter/package.json",
+        "producers/included-helpers/rpgmaker-decrypter/decrypter-platforms.json"
       ]
     },
     "upstreams": [
@@ -1242,8 +1548,20 @@
       {
         "version": "3.0.0-465c88c3-MCLv2",
         "label": "RPGMakerDecrypter 3.0.0-465c88c3-MCLv2"
+      },
+      {
+        "version": "3.0.0-465c88c3-MCLv3",
+        "label": "RPGMakerDecrypter 3.0.0-465c88c3-MCLv3"
       }
-    ]
+    ],
+    "build": {
+      "version": "3.0.0-465c88c3-MCLv3",
+      "command": "tools/build-rpgmaker-decrypter.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ]
+    }
   },
   {
     "id": "gamemaker-opengl-helper",
@@ -1266,8 +1584,19 @@
       {
         "version": "software-gl-v3-MCLv2",
         "label": "GameMaker OpenGL helper software-gl-v3-MCLv2"
+      },
+      {
+        "version": "software-gl-v3-MCLv3",
+        "label": "GameMaker software OpenGL software-gl-v3-MCLv3"
       }
-    ]
+    ],
+    "build": {
+      "version": "software-gl-v3-MCLv3",
+      "command": "tools/build-gamemaker-opengl.mjs",
+      "architectures": [
+        "universal"
+      ]
+    }
   },
   {
     "id": "vnds-love",
@@ -1299,7 +1628,14 @@
         "version": "0.0.13-838e47b-MCLv1",
         "label": "VNDS-LOVE 0.0.13-838e47b-MCLv1"
       }
-    ]
+    ],
+    "build": {
+      "version": "0.0.13-838e47b-MCLv1",
+      "command": "producers/engine-adaptations/stage.mjs",
+      "architectures": [
+        "universal"
+      ]
+    }
   },
   {
     "id": "rlvm-adapter",
@@ -1322,7 +1658,14 @@
         "version": "1.0.0-MCLv1",
         "label": "MacLauncher RLVM adapter 1.0.0-MCLv1"
       }
-    ]
+    ],
+    "build": {
+      "version": "1.0.0-MCLv1",
+      "command": "producers/vn-adaptations/rlvm/package.mjs",
+      "architectures": [
+        "universal"
+      ]
+    }
   },
   {
     "id": "siglus",

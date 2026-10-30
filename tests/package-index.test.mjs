@@ -31,7 +31,7 @@ test('the static browser and JSON use exactly the current catalog packages and i
   const rows=new RegExp('data-package data-project="[^"\n]+" data-delivery="'+delivery+'"','g');
   assert.equal((html.match(rows)||[]).length,supplied.reduce((count,row)=>count+row.packages.length,0));
  }
- assert.ok(html.includes('Downloadable runtimes and tools'));assert.ok(html.includes('Included components'));assert.ok(html.includes('Bundled with MacLauncher for offline use. No separate installation or setup.'));
+ assert.ok(html.includes('Downloadable runtimes and tools'));assert.ok(html.includes('Included components'));assert.ok(html.includes('Core graphics components and internal helpers included in the app.'));
  assert.throws(()=>renderIndex({projects:[{delivery:'unknown'}]}),/delivery classification/);
  for(const project of index.projects){assert.ok(html.includes('id="'+project.projectId+'"'));assert.ok(project.pageUrl.endsWith('/#'+project.projectId));}
  for(const anchor of ['hashlink-1-9','hashlink-1-12','java-steamworks-1-9','java-steamworks-1-10'])assert.ok(html.includes('id="'+anchor+'"'));
@@ -64,4 +64,15 @@ test('ABI profile metadata rejects duplicate versions and incomplete labels',t=>
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'package-profiles-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
  const registry=readProjects(root),project=registry.projects.find(p=>p.id==='hashlink');project.packageProfiles[1].version=project.packageProfiles[0].version;fs.writeFileSync(path.join(directory,'projects.json'),JSON.stringify(registry));assert.throws(()=>readProjects(directory),/ABI profiles/);
  project.packageProfiles=[{version:'1.9-macos-v2',label:''}];fs.writeFileSync(path.join(directory,'projects.json'),JSON.stringify(registry));assert.throws(()=>readProjects(directory),/ABI profiles/);
+});
+
+test('each package states its CPU architecture and the Mac CPUs that can run it',()=>{
+ const index=JSON.parse(fs.readFileSync(path.join(root,'catalogs/index.json'))),html=renderIndex(index);
+ for(const project of index.projects)for(const release of project.releases){
+  assert.ok(['arm64','x64','universal'].includes(release.arch));
+  assert.deepEqual(release.launcherArchitectures,release.arch==='arm64'?['arm64']:['arm64','x64']);
+ }
+ assert.ok(html.includes('Apple Silicon<span class="secondary">arm64 · macOS 13.0+</span>'));
+ assert.ok(html.includes('Universal<span class="secondary">arm64 and x64 · macOS'));
+ assert.ok(html.includes('Intel<span class="secondary">x64 · macOS 13.0+</span>'));
 });

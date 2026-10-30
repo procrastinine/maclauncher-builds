@@ -34,8 +34,10 @@ test("portable dependency archives bind exact sizes and hashes and reject aliase
 });
 
 test("portable CMake plans isolate native dependencies and protect the architecture and macOS floor", () => {
-  const input = { prefix: "/build/prefix", sdk: "/SDK", ninja: "/tools/ninja", pathMappings: [{ from: "/build/folder with spaces", to: "source" }], options: ["-DFEATURE=ON"] };
+  const input = { architecture: "arm64", prefix: "/build/prefix", sdk: "/SDK", ninja: "/tools/ninja", pathMappings: [{ from: "/build/folder with spaces", to: "source" }], options: ["-DFEATURE=ON"] };
   const options = Fonts.cmakeOptions(input);
+  assert.ok(Fonts.cmakeOptions({...input,architecture:"x64"}).includes("-DCMAKE_OSX_ARCHITECTURES=x86_64"));
+  assert.throws(()=>Fonts.cmakeOptions({...input,architecture:"riscv64"}),/arm64 or x64/);
   assert.ok(options.includes("-DCMAKE_OSX_ARCHITECTURES=arm64")); assert.ok(options.includes("-DCMAKE_OSX_DEPLOYMENT_TARGET=13.0"));
   assert.ok(options.includes("-DCMAKE_IGNORE_PREFIX_PATH=/opt/homebrew;/usr/local"));
   assert.ok(options.includes("-DFETCHCONTENT_FULLY_DISCONNECTED=ON"));

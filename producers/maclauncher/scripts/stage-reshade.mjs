@@ -35,10 +35,15 @@ const build = path.resolve(source, args[0] && !args[0].startsWith("--") ? args.s
 const options = {};
 while (args.length) {
   const key = args.shift(), value = args.shift();
-  if (!["--version", "--owned-source", "--isf", "--xess-host", "--xess-host-source", "--fsr", "--fsr4", "--fsr4-source", "--asr", "--asr-source", "--sgsr2", "--sgsr2-source", "--fsr3-generation", "--godot", "--streamline", "--dxmt", "--xess", "--retroarch", "--libplacebo", "--neural"].includes(key) || !value || value.startsWith("--") || options[key])
+  if (!["--version", "--arch", "--output", "--declaration", "--source-root", "--owned-source", "--isf", "--xess-host", "--xess-host-source", "--fsr", "--fsr4", "--fsr4-source", "--asr", "--asr-source", "--sgsr2", "--sgsr2-source", "--fsr3-generation", "--godot", "--streamline", "--dxmt", "--xess", "--retroarch", "--libplacebo", "--neural"].includes(key) || !value || value.startsWith("--") || options[key])
     throw new Error("Usage: node scripts/stage-reshade.mjs <source> [build] [--owned-source <source>] [--isf <payload>] [--xess-host <payload>] [--xess-host-source <source>] [--fsr <payload>] [--fsr4 <payload>] [--fsr4-source <checkout>] [--asr <payload>] [--asr-source <checkout>] [--sgsr2 <payload>] [--sgsr2-source <checkout>] [--fsr3-generation <payload>] [--godot <payload>] [--streamline <payload>] [--dxmt <payload>] [--xess <payload>] [--retroarch <payload>] [--libplacebo <payload>] [--neural <payload>]");
-  options[key] = key === "--version" ? value : path.resolve(value);
+  options[key] = ["--version","--arch"].includes(key) ? value : path.resolve(value);
 }
+const upstreamRoot=options["--source-root"]||path.resolve(import.meta.dirname,"..");
+const packageArch=options["--arch"]||"universal";
+if(!["arm64","x64","universal"].includes(packageArch))throw Error("Choose arm64, x64 or universal graphics.");
+const packageCPUs=packageArch==="universal"?["arm64","x86_64"]:[packageArch==="x64"?"x86_64":"arm64"];
+if(options["--output"]&&!options["--declaration"])throw Error("Isolated staging requires an output declaration path.");
 if(options["--xess-host-source"]&&!options["--xess-host"])throw Error("An owned XeSS source snapshot requires its exact GPU host payload.");
 if(features.graphics.xessGenerationAPI===1&&!options["--xess-host"])throw Error("The declared XeSS frame-generation operation requires its complete original GPU host.");
 // Owned adaptations may be built outside the read-only pinned checkout. Vendor
@@ -56,7 +61,7 @@ const registeredSources = JSON.parse(fs.readFileSync(path.resolve(import.meta.di
   "../src/modules/shared/reshade/native/processor-sources.json"), "utf8"));
 const pins = registeredSources.sources.map(entry => {
   if (!consumed.has(entry.sourcePath)) throw new Error("The graphics source profile contains an undeclared dependency.");
-  const directory = path.resolve(import.meta.dirname, "..", entry.submodulePath);
+  const directory = options["--source-root"]?path.resolve(options["--source-root"],entry.submodulePath):path.resolve(import.meta.dirname, "..", entry.submodulePath);
   const actual = execFileSync("git", ["-C", directory, "rev-parse", "HEAD"], {encoding: "utf8"}).trim();
   if (actual !== entry.commit) throw new Error("Initialize the selected graphics source commit: " + entry.submodulePath);
   execFileSync("git", ["-C", directory, "diff", "--exit-code", "HEAD", "--"], {stdio: "pipe"});
@@ -107,9 +112,9 @@ if(options["--xess-host"]){
         components.files.some(row=>{const item=generation.sdk?.[row.id];return !item||item.path!=="bin/"+row.file||item.sha256!==row.sha256||item.bytes!==row.bytes;}))throw Error("The original XeSS frame-generation inputs differ from their declared identities.");
     required.add(generation.hostPath);required.add("source/components.json");extraOwned.set("maclauncher/xess/components.json",componentFile);
   }else if(features.graphics.xessGenerationAPI===1)throw Error("The declared XeSS frame-generation operation requires its complete original GPU host.");
-  const upstream=path.resolve(import.meta.dirname,"../src/external/xess"),actual=execFileSync("git",["-C",upstream,"rev-parse","HEAD"],{encoding:"utf8"}).trim();if(actual!==source.commit)throw Error("The original XeSS SDK pin differs from the GPU host.");execFileSync("git",["-C",upstream,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});pins.push(` ${actual} third_party/xess-original`);
+  const upstream=path.resolve(upstreamRoot,"src/external/xess"),actual=execFileSync("git",["-C",upstream,"rev-parse","HEAD"],{encoding:"utf8"}).trim();if(actual!==source.commit)throw Error("The original XeSS SDK pin differs from the GPU host.");execFileSync("git",["-C",upstream,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});pins.push(` ${actual} third_party/xess-original`);
   if(backends.includes("vulkan")){
-    const headers=JSON.parse(fs.readFileSync(path.join(ownedRoot,"native/vulkan-source.json"))),headerRoot=path.resolve(import.meta.dirname,"../src/external/krkrsdl2/external/SDL");
+    const headers=JSON.parse(fs.readFileSync(path.join(ownedRoot,"native/vulkan-source.json"))),headerRoot=path.resolve(upstreamRoot,"src/external/krkrsdl2/external/SDL");
     if(hostPaths.vulkan!=="x86_64-windows/maclauncher-xess-vulkan-host.exe"||JSON.stringify(metadata.source.vulkanHeaders)!==JSON.stringify(headers)||headers.repository!=="https://github.com/libsdl-org/SDL"||headers.license!=="Apache-2.0"||!Array.isArray(headers.headers)||headers.headers.length!==3||execFileSync("git",["-C",headerRoot,"rev-parse","HEAD"],{encoding:"utf8"}).trim()!==headers.commit||execFileSync("git",["-C",headerRoot,"remote","get-url","origin"],{encoding:"utf8"}).trim().replace(/\.git$/,"")!==headers.repository)throw Error("The XeSS Vulkan header source differs from its declared pin.");
     execFileSync("git",["-C",headerRoot,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});
     required.add(hostPaths.vulkan);required.add("KHRONOS-APACHE-2.0.txt");
@@ -127,7 +132,7 @@ if(options["--xess-host"]){
 }
 if(options["--isf"]){
   const directory=options["--isf"],ownedRoot=path.resolve(import.meta.dirname,"../src/modules/shared/reshade/isf"),source=JSON.parse(fs.readFileSync(path.join(ownedRoot,"source.json"))),metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json")));
-  if(metadata.schema!==source.schema||metadata.providerABI!==source.providerABI||metadata.library!==source.library||metadata.minimumMacOS!==source.minimumMacOS||JSON.stringify(metadata.architectures)!==JSON.stringify(source.architectures)||JSON.stringify(metadata.sources)!==JSON.stringify(source.sources)||JSON.stringify(metadata.compilerLibraries)!==JSON.stringify(source.compilerLibraries)||!Array.isArray(metadata.files))throw Error("A compatible complete ISF shader provider is required.");
+  if(metadata.schema!==source.schema||metadata.providerABI!==source.providerABI||metadata.library!==source.library||metadata.minimumMacOS!==source.minimumMacOS||!Array.isArray(metadata.architectures)||metadata.architectures.some(cpu=>!source.architectures.includes(cpu))||!packageCPUs.every(cpu=>metadata.architectures.includes(cpu))||JSON.stringify(metadata.sources)!==JSON.stringify(source.sources)||JSON.stringify(metadata.compilerLibraries)!==JSON.stringify(source.compilerLibraries)||!Array.isArray(metadata.files))throw Error("A compatible complete ISF shader provider is required.");
   const ownedNames=["source.json","build.mjs","isolate-compiler.mjs","../compiler-isolation.mjs","CMakeLists.txt","provider.mm","index.js",
     ...(metadata.sceneInputsAPI===1?["../../effects/operation-contracts.mjs"]:[])];
   if(!metadata.owned||Object.keys(metadata.owned).sort().join()!==ownedNames.sort().join())throw Error("The ISF owned source closure is incomplete.");
@@ -138,7 +143,7 @@ if(options["--isf"]){
     if(digest(fs.readFileSync(path.resolve(ownedRoot,"../native",relative)))!==sha256)throw Error("The ISF native header changed: "+relative);
   }
   for(const entry of source.sources){
-    const upstream=path.resolve(import.meta.dirname,"..",entry.path),actual=execFileSync("git",["-C",upstream,"rev-parse","HEAD"],{encoding:"utf8"}).trim();
+    const upstream=path.resolve(upstreamRoot,entry.path),actual=execFileSync("git",["-C",upstream,"rev-parse","HEAD"],{encoding:"utf8"}).trim();
     if(actual!==entry.commit)throw Error("The ISF source pin differs from its provider: "+entry.path);
     execFileSync("git",["-C",upstream,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});pins.push(` ${actual} third_party/isf/${path.basename(entry.path)}`);
   }
@@ -205,7 +210,7 @@ if (options["--neural"]) {
   if(descriptor.restorationAPI===1&&descriptor.operations?.includes("rife"))features.graphics.videoFrameGenerationMethods=[...new Set([...(features.graphics.videoFrameGenerationMethods||[]),"rife"])];
   optionalInputs.set("neural/provider.json", path.join(directory, "provider.json"));
   const neuralRoot = path.resolve(import.meta.dirname, "../src/modules/shared/reshade/neural");
-  const upstream = path.resolve(import.meta.dirname, "../src/external/MLX-DLSS");
+  const upstream = path.resolve(upstreamRoot, "src/external/MLX-DLSS");
   const revision = execFileSync("git", ["-C", upstream, "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
   if (revision !== source.commit) throw new Error("The neural source revision differs from its provider.");
   const { patchKernelParameters, patchVideoOperations,patchOpticalFlowGPU,opticalFlowFile,opticalFlowSourceHash,patchSceneSR,sceneSRFile,sceneSRSourceHash, kernelParametersFile, kernelParametersSourceHash } = await import("../src/modules/shared/reshade/neural/native/prepare-upstream.mjs");
@@ -291,7 +296,7 @@ if(options["--retroarch"]) {
     retroarchInputs.set(entry.path,file);
   }
   const pin=JSON.parse(fs.readFileSync(retroarchInputs.get("notices/librashader/source.json"),"utf8"));
-  const original=path.resolve(import.meta.dirname,"../src/external/librashader");
+  const original=path.resolve(upstreamRoot,"src/external/librashader");
   const actual=execFileSync("git",["-C",original,"rev-parse","HEAD"],{encoding:"utf8"}).trim();
   if(actual!==pin.commit)throw new Error("The original librashader source pin differs from its payload.");
   extraSources.push({directory:original,relative:"third_party/librashader",commit:actual});
@@ -350,7 +355,7 @@ if(options["--xess"]){
   const source=JSON.parse(fs.readFileSync(path.join(ownedRoot,"source.json"),"utf8"));
   if(metadata.schema!==1||metadata.profile!==source.profile||metadata.library!==source.library||JSON.stringify(metadata.sources)!==JSON.stringify(source)||!metadata.owned)throw Error("A compatible XeSS API translation payload is required.");
   for(const [id,submodule]of [["xess","xess"],["dxmt","dxmt-camera"]]){
-    const root=path.resolve(import.meta.dirname,"../src/external",submodule),commit=execFileSync("git",["-C",root,"rev-parse","HEAD"],{encoding:"utf8"}).trim();
+    const root=path.resolve(upstreamRoot,"src/external",submodule),commit=execFileSync("git",["-C",root,"rev-parse","HEAD"],{encoding:"utf8"}).trim();
     if(commit!==source[id].revision)throw Error("The XeSS API translation source pin differs.");
     execFileSync("git",["-C",root,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});
     pins.push(` ${commit} third_party/${submodule}`);
@@ -457,11 +462,17 @@ const nativePaths = new Map(nativeFiles.map(file => [file, path.join(build, file
 for(const [relative,file] of retroarchInputs)if(nativeFiles.includes(relative))nativePaths.set(relative,file);
 for(const [relative,load] of optionalLoad){nativeFiles.push(relative);nativePaths.set(relative,optionalInputs.get(relative));}
 if(nativeFiles.includes("maclauncher-graphics-video")) optionalLoad.set("maclauncher-graphics-video", {architectures: ["arm64", "x86_64"], minimumMacOS: "14.0"});
-for (const [relative, file] of temporalInputs) if (/\.(dylib|so)$/.test(relative)) { nativeFiles.push(relative); nativePaths.set(relative, file); }
+for (const [relative, file] of temporalInputs) if (/\.(dylib|so)$/.test(relative)) {
+ nativeFiles.push(relative);nativePaths.set(relative,file);
+ const architectures=Native.readMachOArchitectures(file,{allowLibrary:true}),floors=[...execFileSync("xcrun",["vtool","-show-build",file],{encoding:"utf8"}).matchAll(/minos\s+(\d+(?:\.\d+)+)/g)].map(match=>match[1]);
+ if(!floors.length)throw Error("Cannot determine an optional camera provider's macOS requirement.");
+ // DXMT runs in its separate Intel host; it is not loaded into the launcher.
+ if(!relative.startsWith("temporal/dxmt/"))optionalLoad.set(relative,{architectures,minimumMacOS:["13.0",...floors].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).at(-1)});
+}
 const nativeArchitectures = new Map();
 for (const file of nativeFiles) {
   const architectures = Native.readMachOArchitectures(nativePaths.get(file), { allowLibrary: /\.(dylib|so)$/.test(file) });
-  const required = optionalLoad.get(file)?.architectures || (file.startsWith("temporal/dxmt/") ? ["x86_64"] : ["arm64", "x86_64"]);
+  const required = optionalLoad.get(file)?.architectures?.filter(cpu=>packageCPUs.includes(cpu)) || (file.startsWith("temporal/dxmt/") ? ["x86_64"] : packageCPUs);
   if (!required.every(arch => architectures.includes(arch))) throw new Error(`${file} is missing a required architecture.`);
   nativeArchitectures.set(file, architectures);
 }
@@ -477,6 +488,12 @@ try {
 if (inspection?.schema !== 1 || typeof inspection.error !== "string") throw new Error("The ReShade compiler must support CPU-only model inspection.");
 verifyReShadeCompiler(path.join(build, "fx-compile"));
 const symbols = execFileSync("/usr/bin/nm", ["-gU", path.join(build, "libreshade-macos.dylib")], { encoding: "utf8" });
+const buildSDKs=[...execFileSync("xcrun",["vtool","-show-build",path.join(build,"libreshade-macos.dylib")],{encoding:"utf8"}).matchAll(/sdk\s+(\d+(?:\.\d+)+)/g)].map(match=>match[1]);
+if(!buildSDKs.length)throw Error("Cannot determine the graphics build SDK.");
+const buildSDK=buildSDKs.sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).at(-1);
+const metalFx27Inputs=buildSDK.localeCompare("27.0",undefined,{numeric:true})>=0;
+if(metalFx27Inputs)features.graphics.metalFX27InputsAPI=1;else delete features.graphics.metalFX27InputsAPI;
+features.graphics.requirements={...(features.graphics.requirements||{}),metalFX27Inputs:{minimumMacOS:"27.0"}};
 if(/\b_rsShaderLinearInputPolicyAPI\b/.test(symbols))features.shaders.linearInputPolicyAPI=1;
 if(/\b_rsShaderSceneHistoryAPI\b/.test(symbols)){
   features.shaders.sceneHistoryAPI=1;features.shaders.providers??={};
@@ -511,7 +528,7 @@ if(nativeImageFilters){
   pins.push(...nativeImageFilters.pins);
   for(const [relative,file]of nativeImageFilters.owned)extraOwned.set(relative,file);
 }
-if(nativeImageFilters?.methods.includes("estimated-depth-fog")&&features.graphics.estimatedDepthAPI!==1)throw Error("Estimated depth fog requires the complete scalar neural provider.");
+if(options["--neural"]&&nativeImageFilters?.methods.includes("estimated-depth-fog")&&features.graphics.estimatedDepthAPI!==1)throw Error("Estimated depth fog requires the complete scalar neural provider.");
 if(features.graphics.estimatedDepthAPI===1&&(!symbols.includes("NeuralDepthEstimator")||!symbols.includes("makeEstimatedDepthFogNode")))throw Error("The graphics core is missing its scalar attachment and fog consumer.");
 if(nativeFiles.includes("shaderc-offline")&&optionalInputs.has("libplacebo/libshaderc_shared.1.dylib")&&symbols.includes("makeMagpieShaderNode")){
   features.shaders.formats=[...new Set([...(features.shaders.formats||[]),"magpie"])];features.shaders.providers??={};
@@ -597,22 +614,25 @@ const payloadHash = digest(Buffer.concat([Buffer.from("adhoc-signature-v1\0" + p
   ...[...inputs].sort(([a], [b]) => a.localeCompare(b)).flatMap(([relative, input]) =>
     [Buffer.from(relative + "\0"), fs.readFileSync(input)])]));
 const version = options["--version"] ?? "dev-" + sourceHash.slice(0, 8) + "-" + payloadHash.slice(0, 8);
-const directoryRelative = `reshade/${version}/universal`;
-const destination = path.join(resourceRoot, directoryRelative);
+const directoryRelative = `reshade/${version}/${packageArch}`;
+const destination = options["--output"]||path.join(resourceRoot, directoryRelative);
+if(options["--output"]&&fs.existsSync(destination))throw Error("Use a new isolated graphics output directory.");
 fs.mkdirSync(destination, { recursive: true });
 for (const directory of ["include", "effects", "licenses"]) fs.mkdirSync(path.join(destination, directory), { recursive: true });
 const files = [];
 for (const [relative, input] of inputs) {
   const output = path.join(destination, relative);
   fs.mkdirSync(path.dirname(output), { recursive: true });
-  fs.copyFileSync(input, output, fs.constants.COPYFILE_FICLONE);
   const executable = nativeFiles.includes(relative);
+  if(executable&&packageArch!=="universal"&&nativeArchitectures.get(relative)?.length>1){
+    execFileSync("/usr/bin/lipo",[input,"-thin",packageCPUs[0],"-output",output]);nativeArchitectures.set(relative,[packageCPUs[0]]);
+  }else fs.copyFileSync(input, output, fs.constants.COPYFILE_FICLONE);
   fs.chmodSync(output, executable ? 0o755 : 0o644);
   if (executable) execFileSync("/usr/bin/codesign", ["--force", "--sign", "-", "--timestamp=none", output], { stdio: "pipe" });
   files.push({ path: relative, sha256: digest(fs.readFileSync(output)), size: fs.statSync(output).size,
     mode: executable ? 0o755 : 0o644, ...(executable ? { architectures: nativeArchitectures.get(relative),
       ...(relative.startsWith("temporal/dxmt/") ? { executionArchitecture: "x86_64" } : {}),
-      ...(optionalLoad.has(relative)?{optionalLoad:optionalLoad.get(relative)}:{}) } : {}) });
+      ...(optionalLoad.has(relative)?{optionalLoad:{...optionalLoad.get(relative),architectures:optionalLoad.get(relative).architectures.filter(cpu=>packageCPUs.includes(cpu))}}:{}) } : {}) });
 }
 // The camera provider's source is available in the tagged producer repository.
 if(options["--xess-host"]){
@@ -625,15 +645,34 @@ if (inputs.has('temporal/dxmt/camera-bridge.json')) {
   delete metadata.files['source.tar.gz'];fs.writeFileSync(file,JSON.stringify(metadata,null,2)+'\n');
   Object.assign(files.find(entry=>entry.path===relative),{sha256:digest(fs.readFileSync(file)),size:fs.statSync(file).size});
 }
+// CPU thinning changes provider inventories as well as their native bytes.
+// Refresh nested descriptor entries from the final copies, deepest paths first.
+if(packageArch!=="universal"){
+ const jsonFiles=files.filter(row=>row.path.endsWith(".json")).sort((a,b)=>b.path.split("/").length-a.path.split("/").length);
+ for(const entry of jsonFiles){
+  const file=path.join(destination,entry.path);let metadata;try{metadata=JSON.parse(fs.readFileSync(file));}catch{continue;}
+  let changed=false;
+  if(Array.isArray(metadata.architectures)&&metadata.architectures.includes(packageCPUs[0])){metadata.architectures=[packageCPUs[0]];changed=true;}
+  if(Array.isArray(metadata.files))for(const row of metadata.files){
+   if(typeof row.path!=="string"||row.path.split("/").includes("..")||path.isAbsolute(row.path))continue;
+   const base=entry.path==="libplacebo/provider.json"?destination:path.dirname(file),target=path.join(base,row.path),relative=path.relative(destination,target).split(path.sep).join("/"),actual=files.find(value=>value.path===relative);
+   if(actual){Object.assign(row,{size:fs.statSync(target).size,sha256:digest(fs.readFileSync(target)),...(actual.architectures?{architectures:actual.architectures}:{})});changed=true;}
+  }
+  if(changed)fs.writeFileSync(file,JSON.stringify(metadata,null,2)+"\n");
+ }
+ for(const row of files){const file=path.join(destination,row.path);Object.assign(row,{size:fs.statSync(file).size,sha256:digest(fs.readFileSync(file))});}
+}
 // Source and owned build recipes are delivered by the tagged producer repository.
 function record(relative) {
   const file = path.join(destination, relative); fs.chmodSync(file, 0o644);
   return { path: relative, sha256: digest(fs.readFileSync(file)), size: fs.statSync(file).size, mode: 0o644 };
 }
+if(packageArch!=="universal")for(const specification of Object.values(features.shaders?.providers||{}))
+ if(Array.isArray(specification.architectures))specification.architectures=specification.architectures.filter(cpu=>packageCPUs.includes(cpu));
 fs.writeFileSync(path.join(destination, "runtime.json"), JSON.stringify({ schema: 1, version,
-  minimumMacOS, architectures: ["arm64", "x86_64"], features, effectSources, sourceHash, sourcePins: pins.map(line => line.trim()), files }, null, 2) + "\n");
+  minimumMacOS, build:{sdkVersion:buildSDK}, architectures: packageCPUs, features, effectSources, sourceHash, sourcePins: pins.map(line => line.trim()), files }, null, 2) + "\n");
 const manifest = record("runtime.json"); files.push(manifest);
-const declaration = { id: "reshade", version, arch: "universal", launcherArchitectures: ["arm64", "x64"], minimumMacOS,
+const declaration = { id: "reshade", version, arch: packageArch, launcherArchitectures: packageArch==="universal"?["arm64","x64"]:[packageArch], minimumMacOS,
   sourceRelative: null, sourceSha256: sourceHash, directoryRelative,
   manifestRelative: manifest.path, manifestSha256: manifest.sha256, files,
   notices: [
@@ -698,15 +737,11 @@ const declaration = { id: "reshade", version, arch: "universal", launcherArchite
   ] };
 const { validateDeclaration } = await import("./native-supplementals.cjs");
 validateDeclaration(declaration);
-if(priorDeclaration?!fs.readFileSync(declarationPath).equals(priorDeclaration):fs.existsSync(declarationPath))throw Error("The graphics selection changed during staging; the newer selection was preserved.");
-const declarationTemporary=declarationPath+"."+crypto.randomBytes(8).toString("hex")+".tmp";
+if(!options["--declaration"]&&(priorDeclaration?!fs.readFileSync(declarationPath).equals(priorDeclaration):fs.existsSync(declarationPath)))throw Error("The graphics selection changed during staging; the newer selection was preserved.");
+const selectedDeclaration=options["--declaration"]||declarationPath, declarationTemporary=selectedDeclaration+"."+crypto.randomBytes(8).toString("hex")+".tmp";
 try{
-  fs.writeFileSync(declarationTemporary,JSON.stringify([declaration],null,2)+"\n",{flag:"wx",mode:0o644});
-  fs.renameSync(declarationTemporary,declarationPath);
-}finally{if(fs.existsSync(declarationTemporary))fs.unlinkSync(declarationTemporary);}
-// Earlier generations other than the previous selection are removed from the
-// repository resource directory only; installed runtimes are never touched.
+ fs.writeFileSync(declarationTemporary,JSON.stringify(options["--declaration"]?declaration:[declaration],null,2)+"\n",{flag:"wx",mode:0o644});fs.renameSync(declarationTemporary,selectedDeclaration);
+}finally{fs.rmSync(declarationTemporary,{force:true});}
 let pruned=[];
-try{pruned=pruneGraphicsRuntimes(path.join(resourceRoot,"reshade"),{selected:version,previous:priorDeclaration&&JSON.parse(priorDeclaration)[0]?.version});}
-catch(error){console.warn("Graphics runtime cleanup: "+error.message);}
+if(!options["--output"])try{pruned=pruneGraphicsRuntimes(path.join(resourceRoot,"reshade"),{selected:version,previous:priorDeclaration&&JSON.parse(priorDeclaration)[0]?.version});}catch(error){console.warn("Graphics runtime cleanup: "+error.message);}
 console.log(JSON.stringify({ destination, version, minimumMacOS, files: files.length, sourceHash, pruned }));

@@ -7,6 +7,7 @@ import crypto from "node:crypto";
 import {execFileSync, spawnSync} from "node:child_process";
 import {pathToFileURL} from "node:url";
 import {createRequire} from "node:module";
+import {buildInput} from "../../../tools/build-input.mjs";
 
 const repository = path.resolve(import.meta.dirname, "..");
 export const recipe = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, "graphics-runtime.json"), "utf8"));
@@ -143,22 +144,15 @@ export async function fetchInput(id, work) {
   const {entry, url, sha256, archives, member, directory, fetched} = inputLocation(id, work);
   if (!(archives || [{url, sha256}]).every(row => row.url && row.sha256)) throw Error("This graphics input has no pinned download: " + id);
   if (fs.existsSync(fetched)) return fetched;
-  const download = async (address, expected) => {
-    const response = await fetch(address, {headers: entry.headers || {}});
-    if (!response.ok) throw Error("Graphics input download failed (" + response.status + "): " + id);
-    const bytes = Buffer.from(await response.arrayBuffer());
-    if (digest(bytes) !== expected) throw Error("Graphics input checksum mismatch: " + id);
-    return bytes;
-  };
+  const download=(address,expected)=>buildInput({url:address,sha256:expected,headers:entry.headers||{}});
   // Archives extract into a staging directory that becomes the input only when complete.
   const staging = directory + ".partial";
   fs.rmSync(staging, {recursive: true, force: true});fs.mkdirSync(staging, {recursive: true});
-  if (entry.kind === "file") fs.writeFileSync(path.join(staging, path.basename(fetched)), await download(url, sha256));
+  if (entry.kind === "file") fs.copyFileSync(await download(url,sha256),path.join(staging,path.basename(fetched)));
   for (const row of archives || (entry.kind === "archive" ? [{url, sha256, path: ""}] : [])) {
-    const target = path.join(staging, row.path), archive = path.join(staging, ".download");
-    fs.mkdirSync(target, {recursive: true});fs.writeFileSync(archive, await download(row.url, row.sha256));
+    const target = path.join(staging, row.path), archive = await download(row.url,row.sha256);
+    fs.mkdirSync(target, {recursive: true});
     execFileSync("tar", ["-xf", archive, "-C", target, ...(entry.extract && member ? [member] : [])], {stdio: "inherit"});
-    fs.rmSync(archive);
   }
   fs.rmSync(directory, {recursive: true, force: true});fs.renameSync(staging, directory);
   if (!fs.existsSync(fetched)) throw Error("The graphics input archive lacks its declared entry: " + id);
@@ -180,11 +174,12 @@ function requirements(id) {
 }
 
 /** Resolve the complete build and staging plan without building. */
-export function plan({work, only, skip = [], reuse = {}, sources: sourceOverrides = {}, inputs: inputOverrides = {}, tools: toolOverrides = {}} = {}) {
+export function plan({work, arch="universal", sdkPath, only, skip = [], reuse = {}, sources: sourceOverrides = {}, inputs: inputOverrides = {}, tools: toolOverrides = {}} = {}) {
   if (work && !path.isAbsolute(work)) throw Error("Use an absolute graphics build directory.");
+  if(!["arm64","x64","universal"].includes(arch))throw Error("Choose arm64, x64 or universal graphics.");
   const names = ["core", ...Object.keys(recipe.providers)];
   for (const name of [...(only || []), ...skip, ...Object.keys(reuse)]) if (!names.includes(name)) throw Error("Unknown graphics component: " + name);
-  const selected = names.filter(name => (!only || only.includes(name)) && !skip.includes(name));
+  const selected = names.filter(name => (!only || only.includes(name)) && !skip.includes(name) && (name === "core" || !recipe.providers[name].architectures || recipe.providers[name].architectures.includes(arch === "universal" ? "arm64" : arch)));
   const building = new Set(selected.filter(name => !reuse[name]));
   const needs = {source: new Set(), input: new Set(), tool: new Set()};
   for (const name of selected) {
@@ -198,9 +193,9 @@ export function plan({work, only, skip = [], reuse = {}, sources: sourceOverride
   const sources = Object.fromEntries([...needs.source].sort().map(id => [id, resolveSource(id, sourceOverrides[id])]));
   const inputs = Object.fromEntries([...needs.input].sort().map(id => [id, resolveInput(id, {overrides: inputOverrides, work, coreRoot, sources, building})]));
   const tools = Object.fromEntries([...needs.tool].sort().map(id => [id, resolveTool(id, toolOverrides)]));
-  const sdk = spawnSync("xcrun", ["--sdk", "macosx", "--show-sdk-version"], {encoding: "utf8"}).stdout?.trim();
+  const sdkName=sdkPath||"macosx",sdk = (path.isAbsolute(sdkName)&&fs.existsSync(path.join(sdkName,"SDKSettings.json"))?JSON.parse(fs.readFileSync(path.join(sdkName,"SDKSettings.json"))).Version:spawnSync("xcrun", ["--sdk", sdkName, "--show-sdk-version"], {encoding: "utf8"}).stdout?.trim()),minimumSDK=recipe.core.macOSSDKByArchitecture?.[arch]||recipe.core.macOSSDK;
   const unresolved = [];
-  if (building.has("core") && (!sdk || sdk.localeCompare(recipe.core.macOSSDK, undefined, {numeric: true}) < 0)) unresolved.push("macOS SDK " + recipe.core.macOSSDK + " or later (found " + (sdk || "none") + ")");
+  if (building.has("core") && (!sdk || sdk.localeCompare(minimumSDK, undefined, {numeric: true}) < 0)) unresolved.push("macOS SDK " + minimumSDK + " or later (found " + (sdk || "none") + ")");
   if (!work && building.size) unresolved.push("--work <absolute build directory>");
   const payloads = {}, steps = [];
   for (const name of selected.filter(name => name !== "core")) {
@@ -209,7 +204,7 @@ export function plan({work, only, skip = [], reuse = {}, sources: sourceOverride
     const root = work && path.join(work, "providers", name), values = {work: root && path.join(root, "work"), output: root && path.join(root, "output")};
     payloads[name] = root && path.join(root, provider.payload);
     for (const step of provider.steps) steps.push({provider: name, marker: path.join(payloads[name] || "", provider.marker || "provider.json"),
-      argv: [path.join(repository, step.recipe), ...step.args.map(argument => argument.replace(/\{(work|output)\}|\{(source|input|tool|repo):([^}]+)\}/g, (_, local, kind, id) =>
+      argv: [path.join(repository, step.recipe), ...step.args.map(argument => argument.replaceAll("{arch}",arch).replace(/\{(work|output)\}|\{(source|input|tool|repo):([^}]+)\}/g, (_, local, kind, id) =>
         local ? values[local] ?? `<${local}>` : kind === "repo" ? path.join(repository, id) : (kind === "source" ? sources : kind === "input" ? inputs : tools)[id].path ?? `<${kind}:${id}>`))]});
   }
   for (const [kind, rows] of Object.entries({source: sources, input: inputs, tool: tools}))
@@ -219,10 +214,10 @@ export function plan({work, only, skip = [], reuse = {}, sources: sourceOverride
   // Staging reads vendor notices and includes from a complete materialized
   // tree; a reused core may supply only its applied owned source.
   const stage = selected.includes("core") && core.build ? [path.join(repository, "scripts/stage-reshade.mjs"),
-    work ? path.join(work, "core/source") : core.source, core.build, "--owned-source", core.source,
+    work ? path.join(work, "core/source") : core.source, core.build, "--owned-source", core.source, "--arch",arch,
     ...Object.entries(payloads).flatMap(([name, directory]) => [recipe.providers[name].option, directory,
       ...(recipe.providers[name].sourceOption ? [recipe.providers[name].sourceOption[0], sources[recipe.providers[name].sourceOption[1]].path] : [])])] : null;
-  return {work: work || null, selected, building: [...building], core, sdk: sdk || null, sources, inputs, tools, steps, payloads, stage, unresolved};
+  return {work: work || null, arch, sdkPath: sdkName, minimumSDK, selected, building: [...building], core, sdk: sdk || null, sources, inputs, tools, steps, payloads, stage, unresolved};
 }
 
 function syncTree(from, to) {
@@ -236,21 +231,21 @@ function syncTree(from, to) {
   }
 }
 
-async function materializeCore(work) {
+async function materializeCore(work,sources={}) {
   const {materializeSource} = await import(pathToFileURL(path.join(repository, recipe.core.materialize)).href);
   const source = path.join(work, "core/source"), fresh = path.join(work, "core/source." + crypto.randomBytes(6).toString("hex"));
   fs.mkdirSync(path.dirname(source), {recursive: true});
   // Unchanged files keep their timestamps, so a repeated build stays incremental.
-  try { materializeSource({output: fresh}); syncTree(fresh, source); } finally { fs.rmSync(fresh, {recursive: true, force: true}); }
+  try { materializeSource({output: fresh,sources}); syncTree(fresh, source); } finally { fs.rmSync(fresh, {recursive: true, force: true}); }
   return source;
 }
 
 /** Materialize the owned core source and build its CMake production targets.
  * With tests, the same build also produces the native fixtures under build/test. */
-export async function buildCore({work, jobs = 4, tests = false}) {
-  const source = await materializeCore(work), build = path.join(work, "core/build");
+export async function buildCore({work, arch="universal",sdkPath="macosx",sources={}, jobs = 4, tests = false}) {
+  const source = await materializeCore(work,sources), build = path.join(work, "core/build");
   const env = buildEnvironment(), run = args => execFileSync("cmake", args, {stdio: "inherit", env});
-  const configure = {...recipe.core.configure, ...(tests ? {BUILD_TESTING: "ON", MACLAUNCHER_FIXTURE_DIR: path.join(repository, path.dirname(recipe.core.materialize), "test")} : {})};
+  const configure = {...recipe.core.configure,CMAKE_OSX_ARCHITECTURES:arch==="universal"?"arm64;x86_64":arch==="x64"?"x86_64":"arm64",CMAKE_OSX_DEPLOYMENT_TARGET:recipe.core.minimumMacOS||"13.0",CMAKE_OSX_SYSROOT:sdkPath, ...(tests ? {BUILD_TESTING: "ON", MACLAUNCHER_FIXTURE_DIR: path.join(repository, path.dirname(recipe.core.materialize), "test")} : {})};
   run(["-S", source, "-B", build, ...Object.entries(configure).map(([name, value]) => `-D${name}=${value}`)]);
   run(["--build", build, "--target", ...recipe.core.targets, ...(tests ? ["native-fixtures"] : []), "-j", String(jobs)]);
   return {source, build};
@@ -261,11 +256,12 @@ export async function build(options) {
   const resolved = plan(options);
   if (resolved.unresolved.length) throw Error("Unresolved graphics build inputs:\n  " + resolved.unresolved.join("\n  "));
   if (options.tests && !resolved.building.includes("core")) throw Error("Native fixtures build with the core component.");
-  if (resolved.building.includes("core")) await buildCore({work: resolved.work, jobs: options.jobs, tests: options.tests});
-  else if (resolved.stage && resolved.work) await materializeCore(resolved.work);
+  if (resolved.building.includes("core")) await buildCore({work: resolved.work, arch:resolved.arch,sdkPath:resolved.sdkPath,sources:options.sources,jobs: options.jobs, tests: options.tests});
+  else if (resolved.stage && resolved.work) await materializeCore(resolved.work,options.sources);
   // A provider whose payload metadata existed before this run is complete;
   // remove its directory under the work root to rebuild it.
-  const env = buildEnvironment(), completed = new Set(resolved.steps.filter(step => fs.existsSync(step.marker)).map(step => step.provider));
+  const selectedSDK=path.isAbsolute(resolved.sdkPath)?resolved.sdkPath:execFileSync("xcrun",["--sdk",resolved.sdkPath,"--show-sdk-path"],{encoding:"utf8"}).trim();
+  const env = {...buildEnvironment(),SDKROOT:selectedSDK,...(resolved.tools.cargo?{RUSTC:process.env.RUSTC||spawnSync("/usr/bin/which",["rustc"],{encoding:"utf8"}).stdout.trim()}:{}),...(resolved.tools.python?{MACLAUNCHER_GRAPHICS_PYTHON:resolved.tools.python.path}:{}),PATH:[...new Set(Object.values(resolved.tools).map(tool=>path.dirname(tool.path))) ,process.env.PATH].join(path.delimiter)}, completed = new Set(resolved.steps.filter(step => fs.existsSync(step.marker)).map(step => step.provider));
   for (const name of completed) console.log("Reusing completed graphics provider: " + name);
   for (const step of resolved.steps.filter(step => !completed.has(step.provider))) {
     fs.mkdirSync(path.join(resolved.work, "providers", step.provider), {recursive: true});
@@ -287,6 +283,8 @@ function parse(argv) {
       if (!name || !location || value.indexOf("=") < 1) throw Error(`Use ${key} id=path`);
       options[pairs[key]][name] = path.resolve(location);
     } else if (key === "--work") options.work = path.resolve(value);
+    else if (key === "--arch") options.arch=value;
+    else if (key === "--sdk") options.sdkPath=value;
     else if (key === "--jobs") { options.jobs = Number(value); if (!Number.isSafeInteger(options.jobs) || options.jobs < 1 || options.jobs > 64) throw Error("Use between 1 and 64 build jobs."); }
     else if (key === "--only" || key === "--skip") options[key.slice(2)] = value.split(",").filter(Boolean);
     else throw Error("Usage: node scripts/build-graphics-runtime.mjs [--check] --work DIR [--jobs N] [--only a,b] [--skip a,b] [--reuse id=DIR] [--source id=DIR] [--input id=PATH] [--tool id=PATH] [--fetch] [--stage] [--tests]");

@@ -5,9 +5,14 @@ import {catalogIndex} from './release-runtime.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 const escape=value=>String(value).replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 const size=bytes=>bytes<1024*1024?(bytes/1024).toFixed(1)+' KB':(bytes/(1024*1024)).toFixed(1)+' MB';
+// Each package names the CPU architecture it was built for.
+const platform=release=>{
+ const name={arm64:'Apple Silicon',x64:'Intel',universal:'Universal'}[release.arch]||release.arch,detail=[release.arch==='universal'?'arm64 and x64':release.arch,'macOS '+release.minimumMacOS+'+'];
+ return escape(name)+'<span class="secondary">'+escape(detail.join(' · '))+'</span>';
+};
 const groups=[
  {id:'downloadable',label:'Downloadable runtimes and tools',description:'Installed through MacLauncher Runtimes or when a game needs them.'},
- {id:'bundled',label:'Included components',description:'Bundled with MacLauncher for offline use. No separate installation or setup.'}
+ {id:'bundled',label:'Included components',description:'Core graphics components and internal helpers included in the app.'}
 ];
 export function renderIndex(index){
  if(index.projects.some(project=>!groups.some(group=>group.id===project.delivery)))throw Error('Every indexed project requires a delivery classification.');
@@ -15,7 +20,7 @@ export function renderIndex(index){
  const packageCount=projects=>projects.reduce((total,project)=>total+project.releases.length,0);
  const tabs=projectGroups.map((group,position)=>`<button type="button" role="tab" id="tab-${group.id}" aria-controls="panel-${group.id}" aria-selected="${position===0}" tabindex="${position===0?0:-1}" data-group="${group.id}">${group.label} <span class="tab-count" aria-hidden="true">${packageCount(group.projects)}</span></button>`).join('\n');
  const panels=projectGroups.map((group,position)=>{
-  const rows=group.projects.flatMap(project=>project.releases.map((release,releasePosition)=>`<tr data-package data-project="${escape(project.projectId)}" data-delivery="${group.id}"${releasePosition===0?' id="'+escape(project.projectId)+'"':''}><td><strong>${escape(project.name)}</strong><span class="secondary">${escape(project.projectId)}</span>${release.profile?'<span class="profile"'+(release.anchor?' id="'+escape(release.anchor)+'"':'')+'>'+escape(release.profile)+'</span>':''}</td><td><code>${escape(release.version)}</code></td><td>${escape(release.arch)}<span class="secondary">macOS ${escape(release.minimumMacOS)}+</span></td><td><a class="download" href="${escape(release.asset.url)}">${group.id==='bundled'?'Archive':'Download'} <span>${size(release.asset.bytes)}</span></a><div class="links"><a href="https://github.com/${escape(index.repository)}/tree/${encodeURIComponent(release.tag)}">Source</a> · <a href="${escape(project.catalog.url)}">Catalog</a></div><details><summary>SHA-256</summary><code>${escape(release.asset.sha256)}</code></details></td></tr>`)).join('\n');
+  const rows=group.projects.flatMap(project=>project.releases.map((release,releasePosition)=>`<tr data-package data-project="${escape(project.projectId)}" data-delivery="${group.id}"${releasePosition===0?' id="'+escape(project.projectId)+'"':''}><td><strong>${escape(project.name)}</strong><span class="secondary">${escape(project.projectId)}</span>${release.profile?'<span class="profile"'+(release.anchor?' id="'+escape(release.anchor)+'"':'')+'>'+escape(release.profile)+'</span>':''}</td><td><code>${escape(release.version)}</code></td><td>${platform(release)}</td><td><a class="download" href="${escape(release.asset.url)}">${group.id==='bundled'?'Archive':'Download'} <span>${size(release.asset.bytes)}</span></a><div class="links"><a href="https://github.com/${escape(index.repository)}/tree/${encodeURIComponent(release.tag)}">Source</a> · <a href="${escape(project.catalog.url)}">Catalog</a></div><details><summary>SHA-256</summary><code>${escape(release.asset.sha256)}</code></details></td></tr>`)).join('\n');
   return `<section role="tabpanel" id="panel-${group.id}" aria-labelledby="tab-${group.id}" data-panel data-delivery="${group.id}"${position?' hidden':''}><p class="group-description">${group.description}</p><div class="table-scroll"><table><thead><tr><th scope="col">Package</th><th scope="col">Version</th><th scope="col">Platform</th><th scope="col">Files</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
  }).join('\n');
  const first=projectGroups[0];

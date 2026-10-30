@@ -64,7 +64,8 @@ function resolveSourceRoot() {
   return source;
 }
 
-async function buildRuntime({ userDataDir, version, sourceDir, logger, signal, runtimeManager = manager } = {}) {
+async function buildRuntime({ userDataDir, version, sourceDir, architecture = process.arch, logger, signal, runtimeManager = manager } = {}) {
+  if (!["arm64", "x64"].includes(architecture)) throw new Error("Select an arm64 or x64 Butterscotch build.");
   if (process.platform !== "darwin") throw new Error("Butterscotch AppKit builds require macOS.");
   version ||= runtimeManager.resolveSelection(null, {}, userDataDir).version;
   if (!version) throw new Error("Select a compatible source build version before compiling Butterscotch.");
@@ -97,7 +98,8 @@ async function buildRuntime({ userDataDir, version, sourceDir, logger, signal, r
     const maps = ["-ffile-prefix-map", "-fmacro-prefix-map", "-fdebug-prefix-map"].flatMap(option =>
       [`${option}=${temporary}=butterscotch-build`, `${option}=${snapshot}=butterscotch-source`]).join(" ");
     const configureOptions = ["-DBACKEND=appkit", "-DVIDEO_BACKEND=none", "-DCMAKE_BUILD_TYPE=Release",
-      "-DCMAKE_OSX_DEPLOYMENT_TARGET=13.0", `-DBUTTERSCOTCH_COMMIT_HASH=${pin.upstreamRevision}`,
+      "-DCMAKE_OSX_DEPLOYMENT_TARGET=13.0", `-DCMAKE_OSX_ARCHITECTURES=${architecture === "x64" ? "x86_64" : architecture}`,
+      `-DBUTTERSCOTCH_COMMIT_HASH=${pin.upstreamRevision}`,
       `-DCMAKE_C_FLAGS=${maps}`, `-DCMAKE_OBJC_FLAGS=${maps}`];
     await run(cmake, ["-S", snapshot, "-B", path.join(temporary, "build"), ...configureOptions], options);
     await run(cmake, ["--build", path.join(temporary, "build"), "--parallel", "2"], options);

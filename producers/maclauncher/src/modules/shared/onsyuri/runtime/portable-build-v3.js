@@ -22,18 +22,18 @@ function validateBase() {
       Base.overlayIdentity() !== PIN.base.overlaySha256) throw new Error("Yuri dependency recipe differs from its pinned base version.");
 }
 
-function validateCompleteStack(stack) {
+function validateCompleteStack(stack, architecture = process.arch) {
   validateBase();
   const receipt = stack?.receipt, closure = receipt?.dependencyClosure;
   if (!receipt || receipt.complete !== true || receipt.version !== PIN.base.version || receipt.sourceRevision !== REVISION ||
       receipt.sourceTreeSha256 !== SOURCE_SHA256 || receipt.overlaySha256 !== PIN.base.overlaySha256 ||
-      receipt.architecture !== "arm64" || receipt.minimumMacOS !== "13.0" ||
+      receipt.architecture !== architecture || receipt.minimumMacOS !== "13.0" ||
       receipt.profile?.overlaySha256 !== PIN.base.overlaySha256 || !/^[a-f0-9]{64}$/.test(stack.prefixSha256 || "") ||
       !isDeepStrictEqual(stack.readRoots, [closure?.mixer?.prefix, ...(closure?.mixer?.readRoots || [])]) ||
       !Array.isArray(closure?.sources) || closure.sources.length !== Base.PIN.dependencies.length) {
     throw new Error("Yuri dependency reuse needs its complete pinned base recipe and prefix checksum.");
   }
-  Base.validateMixerStack(closure.mixer);
+  Base.validateMixerStack(closure.mixer, architecture);
   for (const pin of Base.PIN.dependencies) {
     const source = closure.sources.find(row => row.id === pin.id);
     if (!source || Object.keys(pin).some(key => !isDeepStrictEqual(pin[key], source[key]))) throw new Error("Yuri dependency source differs from its pinned base version.");
@@ -52,9 +52,9 @@ function validateEngineFeatures(outputRoot) {
   if (commands.includes("USE_GLES") || commands.includes("renderer/gles_renderer.cpp")) throw new Error("Yuri macOS build enabled the excluded GLES sharpness path.");
 }
 
-async function buildPortableYuri({ sourceDir, archives, workRoot, dependencyStacks, pathMappings = [], signal, onProgress, dependencies = {} }) {
+async function buildPortableYuri({ sourceDir, archives, workRoot, dependencyStacks, architecture = process.arch, pathMappings = [], signal, onProgress, dependencies = {} }) {
   throwIfAborted(signal);
-  if (process.platform !== "darwin" || process.arch !== "arm64") throw new Error("This portable Yuri build requires an Apple Silicon Mac.");
+  if (process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) throw new Error("Yuri builds require macOS and an arm64 or x64 target.");
   validateBase();
   if (!path.isAbsolute(sourceDir || "")) throw new Error("Choose an absolute clean checkout of the pinned Yuri source.");
   const scope = Base.PIN.engine.sourceScope;
@@ -62,12 +62,12 @@ async function buildPortableYuri({ sourceDir, archives, workRoot, dependencyStac
   if (Source.hashPinnedFiles(sourceDir, original.files) !== SOURCE_SHA256 || !isDeepStrictEqual(original.omittedSubmodules, Base.PIN.engine.omittedSubmodules)) throw new Error("Yuri primary source checksum or omitted-submodule revisions changed.");
   Base.validateEngineArchive(archives); Fonts.validateArchives(archives); Audio.validateArchives(archives); Audio.validateArchives(archives, { catalog: Mixer.PIN }); Fonts.validateArchives(archives, { catalog: Base.PIN });
   if (dependencyStacks && (Object.keys(dependencyStacks).length !== 1 || !dependencyStacks.yuri)) throw new Error("Yuri dependency reuse accepts one exact complete base profile.");
-  const retained = dependencyStacks ? validateCompleteStack(dependencyStacks.yuri) : null;
+  const retained = dependencyStacks ? validateCompleteStack(dependencyStacks.yuri, architecture) : null;
   let closure = dependencyStacks?.yuri.receipt.dependencyClosure, mixer = closure?.mixer;
   const readRoots = retained ? [closure.prefix, ...dependencyStacks.yuri.readRoots] : [];
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, ...readRoots] });
   const overlaySha256 = overlayIdentity(); fs.mkdirSync(workRoot, { recursive: true });
-  if (!mixer) mixer = await Mixer.buildMixer({ archives, workRoot: path.join(workRoot, "mixer-dependencies"), pathMappings, signal, onProgress, dependencies });
+  if (!mixer) mixer = await Mixer.buildMixer({ archives, workRoot: path.join(workRoot, "mixer-dependencies"), architecture, pathMappings, signal, onProgress, dependencies });
   const prefix = path.join(workRoot, "prefix"); fs.mkdirSync(prefix);
   Prefix.linkPrefix(closure?.prefix || mixer.prefix, prefix, { readRoots: retained ? dependencyStacks.yuri.readRoots : mixer.readRoots });
   const run = dependencies.runBuildCommand || Source.runBuildCommand;
@@ -80,7 +80,7 @@ async function buildPortableYuri({ sourceDir, archives, workRoot, dependencyStac
         { cwd: workRoot, logPath: path.join(workRoot, "extraction.log"), env: Fonts.buildEnvironment(prefix, mixer.sdk), signal });
       for (const notice of pin.notices) if (!fs.lstatSync(path.join(sourceRoot, notice)).isFile()) throw new Error(`Missing source license for ${pin.name}.`);
       const sourceOverlay = pin.id === "lua" ? Base.adaptLua(sourceRoot) : undefined;
-      const build = await Fonts.buildProject({ sourceRoot, outputRoot: path.join(workRoot, pin.id), prefix, sdk: mixer.sdk, tools: mixer.tools,
+      const build = await Fonts.buildProject({ sourceRoot, outputRoot: path.join(workRoot, pin.id), prefix, sdk: mixer.sdk, tools: mixer.tools, architecture,
         pathMappings, options: pin.options, signal, onProgress, dependencies });
       sources.push({ ...pin, ...build, ...(sourceOverlay ? { sourceOverlay } : {}) }); sourceRoots[pin.id] = sourceRoot;
     }
@@ -89,12 +89,12 @@ async function buildPortableYuri({ sourceDir, archives, workRoot, dependencyStac
   const cmake = Base.adaptEngine(sourceRoot, sourceDir), page = Page.apply(sourceRoot, sourceDir);
   const sourceOverlay = { files: [...cmake.files, ...page.files] };
   const outputRoot = path.join(workRoot, "onsyuri");
-  const build = await Fonts.buildProject({ sourceRoot, outputRoot, prefix, sdk: mixer.sdk, tools: mixer.tools,
+  const build = await Fonts.buildProject({ sourceRoot, outputRoot, prefix, sdk: mixer.sdk, tools: mixer.tools, architecture,
     pathMappings, options: [], signal, onProgress, dependencies });
   validateEngineFeatures(outputRoot);
   const features = { ...mixer.features, ...(retained ? dependencyStacks.yuri.receipt.features : Base.validateFeatures(workRoot)), emptyPageReset: true };
   const profile = { schemaVersion: 1, version: VERSION, upstreamVersion: PIN.engine.upstreamVersion, upstreamRevision: REVISION, sourceTreeSha256,
-    sourceScope: original.sourceScope, omittedSubmodules: original.omittedSubmodules, overlaySha256, architecture: "arm64", minimumMacOS: "13.0", features };
+    sourceScope: original.sourceScope, omittedSubmodules: original.omittedSubmodules, overlaySha256, architecture, minimumMacOS: "13.0", features };
   fs.writeFileSync(path.join(prefix, "profile.json"), JSON.stringify(profile, null, 2) + "\n", { flag: "wx" });
   const current = await Source.validatePinnedSource(sourceDir, REVISION, { signal, sourceScope: scope });
   if (Source.hashPinnedFiles(sourceDir, current.files) !== sourceTreeSha256 || overlayIdentity() !== overlaySha256) throw new Error("Yuri source or build adapter changed during compilation.");
@@ -102,7 +102,7 @@ async function buildPortableYuri({ sourceDir, archives, workRoot, dependencyStac
   throwIfAborted(signal);
   const executable = path.join(prefix, "bin/onsyuri");
   return { managerId: "onsyuri", version: VERSION, sourceRevision: REVISION, sourceTreeSha256, sourceScope: original.sourceScope,
-    omittedSubmodules: original.omittedSubmodules, sourceOverlay, overlaySha256, architecture: "arm64", minimumMacOS: "13.0", executable,
+    omittedSubmodules: original.omittedSubmodules, sourceOverlay, overlaySha256, architecture, minimumMacOS: "13.0", executable,
     executableSha256: Native.hashFile(executable), profile, features, ...build,
     dependencyClosure: { version: PIN.version, prefix, sdk: mixer.sdk, tools: mixer.tools, mixer, sources, sourceRoots,
       ...(retained ? { reusedPrefixes: [{ prefix: retained.prefix, sha256: retained.sha256, readRoots: dependencyStacks.yuri.readRoots, baseVersion: PIN.base.version }] } : {}) } };

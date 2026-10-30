@@ -17,14 +17,20 @@ on:
         type: choice
         options: [arm64, x64, universal]
       operation:
-        description: Validate a draft or publish its existing assets
+        description: Stage a build artifact, validate a draft or publish its existing assets
         required: true
         default: verify
         type: choice
-        options: [verify, publish]
+        options: [stage, verify, publish]
+      build-run:
+        description: Runtime build run (required for stage; empty for a package already in its catalog)
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: write
+  actions: read
 
 concurrency:
   group: runtime-release-${{ inputs.project }}
@@ -38,6 +44,8 @@ jobs:
       PROJECT: ${{ inputs.project }}
       VERSION: ${{ inputs.version }}
       ARCH: ${{ inputs.arch }}
+      BUILD_RUN: ${{ inputs.build-run }}
+      OPERATION: ${{ inputs.operation }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -46,6 +54,11 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
+      - name: Require main for staging
+        if: inputs.operation == 'stage' && github.ref != 'refs/heads/main'
+        run: |
+          echo "Draft releases are staged only from main." >&2
+          exit 1
       - name: Select registered release
         run: |
           node --input-type=module <<'JS'
@@ -55,23 +68,54 @@ jobs:
           const p = resolveProject(process.env.PROJECT, undefined, {resolvePins:false});
           if (p.releaseRepository !== process.env.GITHUB_REPOSITORY) throw Error('Release repository differs from its registry.');
           const tag = releaseTag({id: p.id, version: process.env.VERSION, arch: process.env.ARCH});
-          const catalog = validateCatalog(JSON.parse(fs.readFileSync('catalogs/' + p.id + '.json')), {project: p.id, repository: p.releaseRepository});
-          const record = catalog.packages.find(r => r.version === process.env.VERSION && r.arch === process.env.ARCH);
-          if (!record) throw Error('The selected package is absent from its project catalog.');
+          if (process.env.OPERATION === 'stage' && !process.env.BUILD_RUN) throw Error('Staging requires a successful Runtime build run.');
+          if (!process.env.BUILD_RUN) {
+            const catalog = validateCatalog(JSON.parse(fs.readFileSync('catalogs/' + p.id + '.json')), {project: p.id, repository: p.releaseRepository});
+            const record = catalog.packages.find(r => r.version === process.env.VERSION && r.arch === process.env.ARCH);
+            if (!record) throw Error('The selected package is absent from its project catalog.');
+          } else if (!/^[1-9][0-9]{0,19}$/.test(process.env.BUILD_RUN)) throw Error('Select a Runtime build run ID.');
           fs.appendFileSync(process.env.GITHUB_ENV, 'RELEASE_TAG=' + tag + '\n');
           JS
       - name: Verify release source commit
+        if: inputs.operation != 'stage'
         run: |
           git fetch --no-tags --depth=1 origin "refs/tags/$RELEASE_TAG"
           git cat-file -e 'FETCH_HEAD^{commit}'
           git cat-file -e FETCH_HEAD:projects.json
           git checkout --detach FETCH_HEAD
+      - name: Select the source commit of the successful build
+        if: inputs.operation == 'stage'
+        run: |
+          run=$(gh run view "$BUILD_RUN" --repo "$GITHUB_REPOSITORY" --json workflowName,headSha,conclusion --jq '[.workflowName, .headSha, .conclusion] | join(" ")')
+          [[ "$run" =~ ^Runtime\ build\ ([a-f0-9]{40})\ success$ ]] || { echo "Select a successful Runtime build." >&2; exit 1; }
+          commit="${BASH_REMATCH[1]}"
+          git fetch --no-tags --depth=1 origin "$commit"
+          git checkout --detach FETCH_HEAD
       - name: Download selected release assets
+        if: inputs.build-run == ''
         run: |
           mkdir -p "$RUNNER_TEMP/runtime-assets"
           gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir "$RUNNER_TEMP/runtime-assets"
       - name: Verify selected package
+        if: inputs.build-run == ''
         run: node tools/release-runtime.mjs verify-assets --assets "$RUNNER_TEMP/runtime-assets" --output "$RUNNER_TEMP/runtime-release" --project "$PROJECT" --version "$VERSION" --arch "$ARCH"
+      - name: Download the package built from the tagged commit
+        if: inputs.build-run != ''
+        run: |
+          run=$(gh run view "$BUILD_RUN" --repo "$GITHUB_REPOSITORY" --json workflowName,headSha,conclusion --jq '[.workflowName, .headSha, .conclusion] | join(" ")')
+          [ "$run" = "Runtime build $(git rev-parse HEAD) success" ] || { echo "The build run differs from the tagged source commit." >&2; exit 1; }
+          gh run download "$BUILD_RUN" --repo "$GITHUB_REPOSITORY" --name "runtime-$PROJECT-$VERSION-$ARCH" --dir "$RUNNER_TEMP/runtime-release"
+      - name: Verify the draft against the built package
+        if: inputs.build-run != ''
+        run: |
+          node tools/release-runtime.mjs verify --bundle "$RUNNER_TEMP/runtime-release" --project "$PROJECT" --version "$VERSION" --arch "$ARCH"
+          gh attestation verify "$RUNNER_TEMP/runtime-release/$PROJECT-$VERSION-$ARCH.tar.gz" --repo "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/runtime-build.yml" --source-digest "$(git rev-parse HEAD)"
+      - name: Stage the existing build artifact
+        if: inputs.operation == 'stage'
+        run: node tools/release-runtime.mjs stage --bundle "$RUNNER_TEMP/runtime-release" --target "$(git rev-parse HEAD)"
+      - name: Verify the existing draft
+        if: inputs.build-run != ''
+        run: node tools/release-runtime.mjs verify-remote --bundle "$RUNNER_TEMP/runtime-release"
       - name: Publish selected draft
         if: inputs.operation == 'publish'
         run: |

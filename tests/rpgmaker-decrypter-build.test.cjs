@@ -45,6 +45,13 @@ test("publish pins upstream identity and omits private debug records independent
 });
 
 test("NuGet compiler/runtime archives have explicit versions and hashes beyond project locks", () => {
+  for (const architecture of ['arm64', 'x64']) {
+    const selected=Build.platformPin(architecture),rid='osx-'+architecture;
+    assert.equal(selected.runtimeIdentifier,rid);assert.equal(selected.sdk.version,'8.0.426');assert.match(selected.sdk.sha512,/^[a-f0-9]{128}$/);assert.match(selected.sdk.sha256,/^[a-f0-9]{64}$/);
+    assert.ok(selected.packages.some(pin=>pin.name==='microsoft.netcore.app.runtime.'+rid&&pin.version==='8.0.32'));
+    assert.ok(Build.publishArguments('input','output',selected).includes(rid));
+    assert.ok(!selected.packages.some(pin=>pin.name.includes('.runtime.osx-')&&!pin.name.endsWith(rid)));
+  }
   for (const item of Build.PIN.packages) {
     assert.match(item.sha256, /^[a-f0-9]{64}$/);
     assert.ok(item.url.endsWith(item.name + "." + item.version + ".nupkg"));

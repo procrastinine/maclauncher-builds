@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
-import {prepareRelease,verifyRelease,applyRelease,catalogIndex,publicationAssets,verifyPublicAssets,stageRelease,publishRelease,main} from '../tools/release-runtime.mjs';
+import {prepareRelease,verifyRelease,applyRelease,catalogIndex,publicationAssets,verifyPublicAssets,stageRelease,publishRelease,managerDeclaration,verifyRemoteRelease,main} from '../tools/release-runtime.mjs';
 import {releaseBatch,main as batchMain} from '../tools/release-batch.mjs';
 const digest=b=>crypto.createHash('sha256').update(b).digest('hex');
 function fixture(t,{external=false,version='1.0'}={}){
@@ -68,7 +68,7 @@ test('manual release verification checks out the selected tag instead of the dis
  fs.writeFileSync(path.join(upstream,'projects.json'),'different dispatch branch source');git(upstream,['add','projects.json']);git(upstream,['commit','-m','Later branch source']);
  execFileSync('git',['clone','--quiet','--no-hardlinks',upstream,checkout],{env,stdio:'pipe'});assert.notEqual(git(checkout,['rev-parse','HEAD']),tagged);
  const workflow=fs.readFileSync(new URL('../.github/workflows/runtime-release.yml',import.meta.url),'utf8');
- const block=workflow.match(/      - name: Verify release source commit\n        run: \|\n((?:          [^\n]*\n)+)/)?.[1];assert.ok(block,'Tagged-source workflow step exists');
+ const block=workflow.match(/      - name: Verify release source commit\n        if: inputs.operation != 'stage'\n        run: \|\n((?:          [^\n]*\n)+)/)?.[1];assert.ok(block,'Tagged-source workflow step exists');
  const command=block.trimEnd().split('\n').map(line=>line.slice(10)).join('\n');
  execFileSync('/bin/bash',['-eu','-c',command],{cwd:checkout,env:{...env,RELEASE_TAG:tag},stdio:'pipe'});
  assert.equal(git(checkout,['rev-parse','HEAD']),tagged);assert.equal(fs.readFileSync(path.join(checkout,'projects.json'),'utf8'),'tagged catalog source');
@@ -263,4 +263,35 @@ test('batch verifies a newly staged asset before publication and leaves later pa
 test('batch CLI rejects incomplete or ambiguous options before GitHub calls',async()=>{
  const runGh=()=>assert.fail('Invalid options must not contact GitHub.');
  for(const args of [[],['--package'],['--target',sourceTarget,'--target',sourceTarget],['--unknown','value']])await assert.rejects(batchMain(args,{runGh}),/requires|Use/);
+});
+
+// Minimal Mach-O executable headers: enough for inventory checks, never executed.
+function machO(cpus){
+ const thin=cpu=>{const b=Buffer.alloc(32);b.writeUInt32LE(0xfeedfacf,0);b.writeUInt32LE({arm64:0x0100000c,x86_64:0x01000007}[cpu],4);b.writeUInt32LE(2,12);return b;};
+ if(cpus.length===1)return thin(cpus[0]);
+ const header=Buffer.alloc(8+cpus.length*20);header.writeUInt32BE(0xcafebabe,0);header.writeUInt32BE(cpus.length,4);
+ cpus.forEach((cpu,i)=>{header.writeUInt32BE({arm64:0x0100000c,x86_64:0x01000007}[cpu],8+i*20);header.writeUInt32BE(4096*(i+1),16+i*20);header.writeUInt32BE(32,20+i*20);});
+ const bytes=Buffer.alloc(4096*(cpus.length+1));header.copy(bytes);cpus.forEach((cpu,i)=>thin(cpu).copy(bytes,4096*(i+1)));return bytes;
+}
+function managerOutput(directory,arch){
+ const input=path.join(directory,'manager-'+arch),files=path.join(input,'files');fs.mkdirSync(path.join(files,'bin'),{recursive:true});
+ const cpus=arch==='universal'?['arm64','x86_64']:[arch==='x64'?'x86_64':'arm64'],binary=machO(cpus);
+ fs.writeFileSync(path.join(files,'bin/engine'),binary,{mode:0o755});fs.writeFileSync(path.join(files,'LICENSE'),'MIT',{mode:0o644});
+ const revision='1'.repeat(40);
+ fs.writeFileSync(path.join(input,'manifest.json'),JSON.stringify({schemaVersion:1,managerId:'engine',version:'1.0',upstreamRevision:revision,platform:'darwin',arch,minimumMacOS:'13.0',executableRelative:'bin/engine',
+  files:[{path:'bin/engine',size:binary.length,mode:0o755,sha256:digest(binary),architectures:cpus},{path:'LICENSE',size:3,mode:0o644,sha256:digest('MIT')}],dependencies:[],notices:[{name:'Engine',license:'MIT',sourceUrl:'https://example.com/engine',path:'LICENSE'}],provenance:{sourceRevision:revision}}));
+ return input;
+}
+test('manager outputs declare the Mac CPUs of their architecture',async t=>{
+ const f=fixture(t),declared={};
+ for(const arch of ['arm64','x64','universal'])declared[arch]=await managerDeclaration({project:'engine',input:managerOutput(f.directory,arch)});
+ assert.deepEqual(declared.arm64.launcherArchitectures,['arm64']);assert.deepEqual(declared.universal.launcherArchitectures,['arm64','x64']);
+ // Intel code also runs on Apple Silicon through Rosetta.
+ assert.deepEqual(declared.x64.launcherArchitectures,['arm64','x64']);assert.equal(declared.x64.files.find(file=>file.path==='files/bin/engine').executionArchitecture,'x86_64');
+});
+test('remote verification compares a staged draft with its local package without changing GitHub',async t=>{
+ await assert.rejects(main(['verify-remote']),/--bundle/);await assert.rejects(main(['verify-remote','--bundle','x','--target','y']),/explicit options/);
+ const f=fixture(t);await prepareRelease(f);const record=JSON.parse(fs.readFileSync(path.join(f.output,'engine-1.0-arm64.tar.gz.json')));
+ const draft=async args=>{assert.equal(args[0],'api');assert.equal(args.includes('POST'),false);if(args[1].includes('/git/ref/'))return refResult();return JSON.stringify([[remoteRelease(record,true)]]);};
+ const {publication}=await verifyRemoteRelease({bundle:f.output,directory:f.directory,runGh:draft});assert.equal(publication.draft,true);assert.equal(publication.sourceCommit,sourceTarget);
 });

@@ -47,5 +47,15 @@ export function stageData({project,output,version=profiles[project]?.version}){
   declaration.sourceRelative='manifest.json';validateDeclaration(declaration);return declaration;
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }
-export function main(args){const options={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!['project','output','version'].includes(key)||!args[i+1])throw Error('Use --project, --output and optional --version.');options[key]=key==='output'?path.resolve(args[i+1]):args[i+1];}const declaration=stageData(options);fs.writeFileSync(options.output+'.json',JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});return {project:declaration.id,version:declaration.version,files:declaration.files.length,output:options.output};}
+/** GitHub build layout: the data package in payload/ and its declaration beside it. Engine data has no CPU, so it builds as universal. */
+export function build({project,arch,output}){
+ if(arch!=='universal'||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Engine data builds as a universal package into a new absolute output directory.');
+ fs.mkdirSync(output,{recursive:true});
+ try{const declaration=stageData({project,output:path.join(output,'payload')});fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});return declaration;}
+ catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
+}
+export function main(args){const options={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!['project','output','version','arch','work'].includes(key)||!args[i+1]||Object.hasOwn(options,key))throw Error('Use --project, --output and optional --version, or --project, --arch and --output.');options[key]=['output','work'].includes(key)?path.resolve(args[i+1]):args[i+1];}
+ if(options.arch!==undefined){if(options.version)throw Error('GitHub builds use the registered package version.');const declaration=build(options);return {project:declaration.id,version:declaration.version,arch:declaration.arch,output:options.output};}
+ if(options.work)throw Error('--work applies to GitHub builds.');
+ const declaration=stageData(options);fs.writeFileSync(options.output+'.json',JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});return {project:declaration.id,version:declaration.version,files:declaration.files.length,output:options.output};}
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){try{console.log(JSON.stringify(main(process.argv.slice(2))));}catch(error){console.error(error.message);process.exitCode=1;}}

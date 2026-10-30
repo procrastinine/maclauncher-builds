@@ -80,13 +80,13 @@ function recipeHash(moduleFile, catalogFile) {
   return crypto.createHash("sha256").update(fs.readFileSync(moduleFile)).update(fs.readFileSync(catalogFile)).digest("hex");
 }
 
-function dependencyPrefixes({ fontStack, audioStack, movieStack }) {
-  if (fontStack?.version !== Fonts.PIN.version || fontStack.architecture !== "arm64" || fontStack.minimumMacOS !== "13.0" ||
+function dependencyPrefixes({ fontStack, audioStack, movieStack }, architecture = process.arch) {
+  if (fontStack?.version !== Fonts.PIN.version || fontStack.architecture !== architecture || fontStack.minimumMacOS !== "13.0" ||
       fontStack.recipeSha256 !== recipeHash(require.resolve("../../shared/runtime/portable-sdl2-fonts"), require.resolve("../../shared/runtime/portable-sdl2-fonts.json")) ||
-      audioStack?.version !== Audio.PIN.version || audioStack.architecture !== "arm64" || audioStack.minimumMacOS !== "13.0" ||
+      audioStack?.version !== Audio.PIN.version || audioStack.architecture !== architecture || audioStack.minimumMacOS !== "13.0" ||
       audioStack.recipeSha256 !== recipeHash(require.resolve("../../shared/runtime/portable-sndfile"), require.resolve("../../shared/runtime/portable-sndfile.json")) ||
       movieStack?.version !== Movie.PIN.version || movieStack.recipeSha256 !== Movie.recipeIdentity() || movieStack.source.version !== Movie.PIN.source.version || movieStack.source.sha256 !== Movie.PIN.source.sha256 ||
-      movieStack.architecture !== "arm64" || movieStack.minimumMacOS !== "13.0" || movieStack.network !== false ||
+      movieStack.architecture !== architecture || movieStack.minimumMacOS !== "13.0" || movieStack.network !== false ||
       movieStack.externalCodecs !== false || movieStack.gpl !== false || movieStack.nonfree !== false ||
       JSON.stringify(movieStack.decoders) !== JSON.stringify(Movie.PIN.decoders) || JSON.stringify(movieStack.demuxers) !== JSON.stringify(Movie.PIN.demuxers)) {
     throw new Error("AI5 portable dependencies differ from their selected source profiles.");
@@ -99,24 +99,24 @@ function dependencyPrefixes({ fontStack, audioStack, movieStack }) {
   return prefixes;
 }
 
-function nativeFile({ pkgConfig, sdk, pathMappings = [], libraryDirectories = [] }) {
+function nativeFile({ pkgConfig, sdk, architecture = process.arch, pathMappings = [], libraryDirectories = [] }) {
   const literal = value => "'" + String(value).replaceAll("\\", "\\\\").replaceAll("'", "\\'") + "'";
-  Fonts.cmakeOptions({ prefix: sdk, sdk, ninja: "/usr/bin/true", pathMappings });
+  Fonts.cmakeOptions({ prefix: sdk, sdk, ninja: "/usr/bin/true", architecture, pathMappings });
   if (!path.isAbsolute(pkgConfig || "") || /[\r\n\0]/.test(pkgConfig)) throw new Error("AI5 requires an absolute pkg-config build tool.");
   if (!Array.isArray(libraryDirectories) || libraryDirectories.some(value => !path.isAbsolute(value || "") || /[\r\n\0,]/.test(value))) {
     throw new Error("AI5 dependency rpaths must be absolute library directories.");
   }
   const maps = pathMappings.flatMap(mapping => ["file", "debug", "macro"].map(kind => `-f${kind}-prefix-map=${mapping.from}=${mapping.to}`));
-  const flags = ["-arch", "arm64", "-mmacosx-version-min=13.0", "-isysroot", sdk];
+  const flags = ["-arch", architecture === "x64" ? "x86_64" : "arm64", "-mmacosx-version-min=13.0", "-isysroot", sdk];
   return `[binaries]\nc = '/usr/bin/clang'\nar = '/usr/bin/ar'\nstrip = '/usr/bin/strip'\npkg-config = ${literal(pkgConfig)}\n\n[built-in options]\nc_args = [${[...flags, ...maps, "-Werror=unguarded-availability-new"].map(literal).join(", ")}]\nc_link_args = [${[...flags, "-Wl,-headerpad_max_install_names", ...libraryDirectories.map(value => "-Wl,-rpath," + value)].map(literal).join(", ")}]\n`;
 }
 
 async function buildPortableAI5({ sourceDir = Previous.sourcePath, workRoot, fontStack, audioStack, movieStack,
-  pathMappings = [], signal, onProgress, dependencies = {} }) {
+  architecture = process.arch, pathMappings = [], signal, onProgress, dependencies = {} }) {
   throwIfAborted(signal);
-  if (process.platform !== "darwin" || process.arch !== "arm64") throw new Error("This AI5 source profile requires an Apple Silicon Mac.");
+  if (process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) throw new Error("AI5 builds require macOS and an arm64 or x64 target.");
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, fontStack?.prefix, audioStack?.prefix].filter(Boolean) });
-  const prefixes = dependencyPrefixes({ fontStack, audioStack, movieStack });
+  const prefixes = dependencyPrefixes({ fontStack, audioStack, movieStack }, architecture);
   const source = await Source.validatePinnedSource(sourceDir, REVISION, { signal });
   if (Source.hashPinnedFiles(sourceDir, source.files) !== SOURCE_SHA256) throw new Error("AI5 source tree checksum does not match the selected version.");
   const overlaySha256 = overlayIdentity(); fs.mkdirSync(workRoot, { recursive: true });
@@ -125,12 +125,13 @@ async function buildPortableAI5({ sourceDir = Previous.sourcePath, workRoot, fon
   const tool = dependencies.findBuildTool || Source.findBuildTool;
   const tools = { meson: tool("meson"), ninja: tool("ninja"), pkgConfig: tool("pkg-config") };
   const sdk = fontStack.sdk, file = path.join(workRoot, "native.ini");
-  fs.writeFileSync(file, nativeFile({ pkgConfig: tools.pkgConfig, sdk, pathMappings, libraryDirectories: prefixes.map(item => path.join(item, "lib")) }));
+  fs.writeFileSync(file, nativeFile({ pkgConfig: tools.pkgConfig, sdk, architecture, pathMappings, libraryDirectories: prefixes.map(item => path.join(item, "lib")) }));
   const configureOptions = ["setup", outputRoot, sourceRoot, "--wrap-mode=nodownload", "--buildtype=release", "--native-file=" + file,
     "-Dffmpeg=enabled", "-Dsdl_mixer=disabled", "--prefix=" + prefix];
   const env = Fonts.buildEnvironment(prefix, sdk);
   env.PKG_CONFIG_LIBDIR = prefixes.map(item => path.join(item, "lib/pkgconfig")).join(path.delimiter);
   env.GIT_CEILING_DIRECTORIES = workRoot;
+  env.NINJA = tools.ninja;
   for (const key of ["PKG_CONFIG_SYSROOT_DIR", "PKG_CONFIG_ALLOW_SYSTEM_CFLAGS", "PKG_CONFIG_ALLOW_SYSTEM_LIBS"]) delete env[key];
   const run = dependencies.runBuildCommand || Source.runBuildCommand, logPath = path.join(workRoot, "build.log"), startedAt = new Date().toISOString();
   fs.writeFileSync(logPath, `AI5 ${VERSION}\nSource ${REVISION}\nSource tree ${sourceTreeSha256}\nOverlay ${overlaySha256}\n`);
@@ -143,7 +144,7 @@ async function buildPortableAI5({ sourceDir = Previous.sourcePath, workRoot, fon
   if (Source.hashPinnedFiles(sourceDir, source.files) !== sourceTreeSha256 || overlayIdentity() !== overlaySha256) throw new Error("AI5 source or build adapter changed during compilation.");
   const executable = path.join(prefix, "bin/ai5");
   return { managerId: "ai5", version: VERSION, profile: PROFILE, sourceRevision: REVISION, sourceTreeSha256, overlaySha256, sourceOverlay,
-    architecture: "arm64", minimumMacOS: "13.0", executable, executableSha256: Native.hashFile(executable), resources: path.join(prefix, "share/ai5-sdl2"),
+    architecture, minimumMacOS: "13.0", executable, executableSha256: Native.hashFile(executable), resources: path.join(prefix, "share/ai5-sdl2"),
     sourceRoot, outputRoot, prefix, tools, configureOptions, nativeFileSha256: Native.hashFile(file), startedAt, completedAt: new Date().toISOString(), logPath,
     dependencyClosure: { fonts: fontStack, audio: audioStack, movie: movieStack } };
 }

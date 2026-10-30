@@ -39,7 +39,7 @@ function validateFeatures(outputRoot) {
   return {audioFormats:["WAV","AIFF","FLAC","Ogg Vorbis","Ogg Opus","MP3","MIDI"],midi:"macOS AudioToolbox",dynamicCodecLoading:false};
 }
 
-async function buildMixer({archives,workRoot,dependencyStacks,pathMappings=[],signal,onProgress,dependencies={}}) {
+async function buildMixer({archives,workRoot,dependencyStacks,architecture=process.arch,pathMappings=[],signal,onProgress,dependencies={}}) {
   throwIfAborted(signal);
   workRoot=Fonts.assertFreshBuildRoot(workRoot,{readOnlyRoots:Object.values(dependencyStacks||{}).map(stack=>stack.prefix)});
   Fonts.validateArchives(archives);Audio.validateArchives(archives);Audio.validateArchives(archives,{catalog:PIN});
@@ -47,10 +47,10 @@ async function buildMixer({archives,workRoot,dependencyStacks,pathMappings=[],si
   if(dependencyStacks){
     if(Object.keys(dependencyStacks).length!==2||!dependencyStacks.fonts||!dependencyStacks.audio)throw new Error("SDL2_mixer reuse needs exact font and audio profiles.");
     fonts=dependencyStacks.fonts;audio=dependencyStacks.audio;
-    retained.push(Prefix.validateStack(fonts,Fonts.PIN,dependencyRecipe("./portable-sdl2-fonts","./portable-sdl2-fonts.json")),Prefix.validateStack(audio,Audio.PIN,dependencyRecipe("./portable-sndfile","./portable-sndfile.json")));
+    retained.push(Prefix.validateStack(fonts,Fonts.PIN,dependencyRecipe("./portable-sdl2-fonts","./portable-sdl2-fonts.json"),architecture),Prefix.validateStack(audio,Audio.PIN,dependencyRecipe("./portable-sndfile","./portable-sndfile.json"),architecture));
   }
   const recipeSha256=recipeIdentity();fs.mkdirSync(workRoot,{recursive:true});
-  if(!fonts){fonts=await Fonts.buildDependencies({archives,workRoot:path.join(workRoot,"fonts"),pathMappings,signal,onProgress,dependencies});audio=await Audio.buildDependencies({archives,workRoot:path.join(workRoot,"audio"),pathMappings,signal,onProgress,dependencies});}
+  if(!fonts){fonts=await Fonts.buildDependencies({archives,workRoot:path.join(workRoot,"fonts"),architecture,pathMappings,signal,onProgress,dependencies});audio=await Audio.buildDependencies({archives,workRoot:path.join(workRoot,"audio"),architecture,pathMappings,signal,onProgress,dependencies});}
   if(fonts.sdk!==audio.sdk)throw new Error("SDL2_mixer dependencies must use the same macOS SDK.");
   const prefix=path.join(workRoot,"prefix");fs.mkdirSync(prefix);Prefix.linkPrefix(fonts.prefix,prefix);Prefix.linkPrefix(audio.prefix,prefix);
   const descriptor=adaptOpusDescriptor(prefix),sources=[],sourceRoots={},run=dependencies.runBuildCommand||Source.runBuildCommand;
@@ -59,7 +59,7 @@ async function buildMixer({archives,workRoot,dependencyStacks,pathMappings=[],si
     await run("/usr/bin/tar",["-xf",archives[pin.id],"--strip-components","1","-C",sourceRoot],{cwd:workRoot,logPath:path.join(workRoot,"extraction.log"),env:Fonts.buildEnvironment(prefix,fonts.sdk),signal});
     for(const notice of pin.notices)if(!fs.lstatSync(path.join(sourceRoot,notice)).isFile())throw new Error(`Missing license for ${pin.name}.`);
     const sourceOverlay=pin.id==="sdl2_mixer"?adaptMixer(sourceRoot):undefined;
-    const common={sourceRoot,outputRoot:path.join(workRoot,pin.id),prefix,sdk:fonts.sdk,pathMappings,options:pin.options,signal,dependencies};
+    const common={sourceRoot,outputRoot:path.join(workRoot,pin.id),prefix,sdk:fonts.sdk,architecture,pathMappings,options:pin.options,signal,dependencies};
     const build=await(pin.buildSystem==="autotools"?Audio.buildAutotools(common):Fonts.buildProject({...common,tools:fonts.tools,onProgress}));
     sourceRoots[pin.id]=sourceRoot;sources.push({...pin,...build,...(sourceOverlay?{sourceOverlay}:{})});
   }
@@ -67,7 +67,7 @@ async function buildMixer({archives,workRoot,dependencyStacks,pathMappings=[],si
   for(const old of retained)if(Prefix.snapshotPrefix(old.prefix).sha256!==old.sha256)throw new Error("A reused dependency prefix changed during compilation.");
   if(recipeIdentity()!==recipeSha256)throw new Error("SDL2_mixer recipe changed during compilation.");
   const readRoots=[fonts.prefix,audio.prefix];
-  return {version:PIN.version,architecture:PIN.architecture,minimumMacOS:PIN.minimumMacOS,recipeSha256,prefix,prefixSha256:Prefix.snapshotPrefix(prefix,{readRoots}).sha256,readRoots,sdk:fonts.sdk,tools:fonts.tools,sources,sourceRoots,fonts,audio,descriptor,features,reusedPrefixes:retained.map(({prefix:directory,sha256})=>({prefix:directory,sha256}))};
+  return {version:PIN.version,architecture,minimumMacOS:PIN.minimumMacOS,recipeSha256,prefix,prefixSha256:Prefix.snapshotPrefix(prefix,{readRoots}).sha256,readRoots,sdk:fonts.sdk,tools:fonts.tools,sources,sourceRoots,fonts,audio,descriptor,features,reusedPrefixes:retained.map(({prefix:directory,sha256})=>({prefix:directory,sha256}))};
 }
 
 module.exports={PIN,MIXER_CMAKE_SHA256,recipeIdentity,adaptMixer,adaptOpusDescriptor,validateFeatures,buildMixer};

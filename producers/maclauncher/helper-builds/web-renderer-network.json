@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "web-renderer-network",
+  "version": "1.1.0",
+  "compiler": "clang",
+  "kind": "bundle",
+  "output": "renderer-network.node",
+  "sources": ["src/modules/shared/web/native/renderer-network.c"],
+  "flags": ["-undefined", "dynamic_lookup", "-O2", "-Wall", "-Wextra", "-lsandbox"],
+  "minimumMacOS": "11.0",
+  "license": {"from": "LICENSE", "path": "license.txt", "name": "MacLauncher browser network helper", "license": "MIT"},
+  "record": {"nodeAPI": 1, "scope": "node-capable-game-renderer-network"}
+}

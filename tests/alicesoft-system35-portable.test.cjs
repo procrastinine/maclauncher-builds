@@ -69,11 +69,12 @@ test("dependency prefix checksums reject external links, content mutations and r
   const inventory = Prefix.snapshotPrefix(prefix), pin = { id: "fixture", version: "1", archiveSha256: "a".repeat(64), options: [] };
   const catalog = { version: "fixture-v1", architecture: "arm64", minimumMacOS: "13.0", dependencies: [pin] }, stack = { version: catalog.version, architecture: "arm64", minimumMacOS: "13.0",
     recipeSha256: "b".repeat(64), prefix, prefixSha256: inventory.sha256, sources: [pin] };
-  assert.equal(Prefix.validateStack(stack, catalog, stack.recipeSha256).sha256, inventory.sha256);
-  assert.throws(() => Prefix.validateStack({ ...stack, recipeSha256: "c".repeat(64) }, catalog, stack.recipeSha256), /exact source recipe/);
-  assert.throws(() => Prefix.validateStack({ ...stack, sources: [{ ...pin, version: "2" }] }, catalog, stack.recipeSha256), /source identity/);
+  assert.equal(Prefix.validateStack(stack, catalog, stack.recipeSha256, "arm64").sha256, inventory.sha256);
+  assert.throws(() => Prefix.validateStack({ ...stack, recipeSha256: "c".repeat(64) }, catalog, stack.recipeSha256, "arm64"), /exact source recipe/);
+  assert.throws(() => Prefix.validateStack({ ...stack, sources: [{ ...pin, version: "2" }] }, catalog, stack.recipeSha256, "arm64"), /source identity/);
+  assert.throws(()=>Prefix.validateStack(stack,catalog,stack.recipeSha256,"x64"),/exact source recipe/);
   fs.writeFileSync(path.join(prefix, "lib/library"), "changed dependency");
-  assert.throws(() => Prefix.validateStack(stack, catalog, stack.recipeSha256), /prefix checksum/);
+  assert.throws(() => Prefix.validateStack(stack, catalog, stack.recipeSha256, "arm64"), /prefix checksum/);
   const outside = path.join(root, "outside"); fs.writeFileSync(outside, "outside"); fs.symlinkSync(outside, path.join(prefix, "lib/escaped"));
   assert.throws(() => Prefix.snapshotPrefix(prefix), /inside their declared prefixes/);
 });

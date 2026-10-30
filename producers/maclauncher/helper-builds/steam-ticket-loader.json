@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "steam-ticket-loader",
+  "version": "0.1.1",
+  "compiler": "clang++",
+  "kind": "dylib",
+  "output": "libsdkencryptedappticket.dylib",
+  "sources": [
+    "src/modules/shared/runtime/steamworks/native/ticket-0.1.0/source/ticket.cpp"
+  ],
+  "flags": [
+    "-std=c++17",
+    "-Werror=unguarded-availability-new",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-fvisibility=hidden",
+    "-install_name",
+    "@rpath/libsdkencryptedappticket.dylib"
+  ],
+  "minimumMacOS": "13.0",
+  "license": {
+    "from": "src/modules/shared/runtime/steamworks/native/ticket-0.1.0/LICENSE",
+    "path": "LICENSE",
+    "name": "MacLauncher Steam ticket loader",
+    "license": "MIT"
+  },
+  "binaryField": "librarySha256",
+  "record": {
+    "sourceKind": "owned",
+    "sourceRevision": null,
+    "policy": "unavailable",
+    "license": "MIT"
+  }
+}

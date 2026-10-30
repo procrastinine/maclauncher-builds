@@ -27,8 +27,8 @@ function snapshotPrefix(prefix, { readRoots = [] } = {}) {
   visit(root); return { prefix: root, sha256: tree.digest("hex"), files, bytes };
 }
 
-function validateStack(stack, catalog, recipeSha256) {
-  if (!stack || stack.version !== catalog.version || stack.architecture !== catalog.architecture || stack.minimumMacOS !== catalog.minimumMacOS ||
+function validateStack(stack, catalog, recipeSha256, architecture = process.arch) {
+  if (!stack || stack.version !== catalog.version || !["arm64", "x64"].includes(architecture) || stack.architecture !== architecture || stack.minimumMacOS !== catalog.minimumMacOS ||
     stack.recipeSha256 !== recipeSha256 || !/^[a-f0-9]{64}$/.test(stack.prefixSha256 || "") || !Array.isArray(stack.sources) || stack.sources.length !== catalog.dependencies.length) {
     throw new Error("Dependency reuse requires the exact source recipe and prefix checksum.");
   }

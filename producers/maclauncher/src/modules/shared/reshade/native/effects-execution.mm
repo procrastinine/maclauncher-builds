@@ -302,7 +302,11 @@ public:
  }
  ~ShaderCallBindings(){if(isf)bindISFSceneInputs(node,nullptr);if(placebo)module->bindScene(node.get(),nullptr);}
 };
-bool generationCameraAvailable(const std::string&method,const RSTemporalFrame*scene){if(!scene)return false;if(scene->flags&RS_TEMPORAL_CAMERA_VALID)return true;if(method=="metalfx")if(@available(macOS 27.0,*)){const auto matrices=temporalSceneMatrices(*scene);return matrices&&(matrices->flags&(RS_SCENE_VIEW_VALID|RS_SCENE_PROJECTION_VALID))==(RS_SCENE_VIEW_VALID|RS_SCENE_PROJECTION_VALID)&&(matrices->flags&(RS_SCENE_CLIP_ZERO_TO_ONE|RS_SCENE_CLIP_MINUS_ONE_TO_ONE));}return false;}
+bool generationCameraAvailable(const std::string&method,const RSTemporalFrame*scene){if(!scene)return false;if(scene->flags&RS_TEMPORAL_CAMERA_VALID)return true;if(method=="metalfx")
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 270000
+if(@available(macOS 27.0,*)){const auto matrices=temporalSceneMatrices(*scene);return matrices&&(matrices->flags&(RS_SCENE_VIEW_VALID|RS_SCENE_PROJECTION_VALID))==(RS_SCENE_VIEW_VALID|RS_SCENE_PROJECTION_VALID)&&(matrices->flags&(RS_SCENE_CLIP_ZERO_TO_ONE|RS_SCENE_CLIP_MINUS_ONE_TO_ONE));}
+#endif
+return false;}
 ShaderResult sceneShaderCall(const std::shared_ptr<ShaderNode>&node,const std::string&format,const ShaderFrame&frame,const RSShaderSceneInputsV1*inputs,bool prepare){ShaderCallBindings bindings(node,format,inputs);if(!bindings.result.encoded)return bindings.result;return prepare?node->prepare(frame):node->encode(frame);}
 
 }

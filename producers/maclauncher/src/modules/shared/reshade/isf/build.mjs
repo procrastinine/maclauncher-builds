@@ -5,12 +5,15 @@ import {execFileSync} from "node:child_process";
 import {isolateCompiler} from "./isolate-compiler.mjs";
 import {SCENE_SHADER_INPUTS} from "../../effects/operation-contracts.mjs";
 const owned=import.meta.dirname,workspace=path.resolve(owned,"../../../../.."),source=JSON.parse(fs.readFileSync(path.join(owned,"source.json")));
-const output=path.resolve(process.argv[2]||"");
-if(!process.argv[2]||process.argv.length!==3&&!(process.argv.length===5&&process.argv[3]==="--payload"))throw Error("Choose an ISF build directory and optional --payload <new output>.");
+const output=path.resolve(process.argv[2]||""),options={};
+for(let i=3;i<process.argv.length;i+=2){const key=process.argv[i];if(!["--payload","--source","--arch"].includes(key)||!process.argv[i+1]||Object.hasOwn(options,key))throw Error("Choose an ISF build directory, --payload, --source and --arch.");options[key]=process.argv[i+1];}
+const arch=options["--arch"]||"universal",architectures=arch==="universal"?["arm64","x86_64"]:[arch==="x64"?"x86_64":arch];
+if(!process.argv[2]||!["universal","x64","arm64"].includes(arch))throw Error("Choose an ISF build directory and a package architecture.");
+const upstream=options["--source"]?path.resolve(options["--source"]):path.join(workspace,source.sources[0].path);
 const run=(cmd,args)=>execFileSync(cmd,args,{stdio:"inherit"});
 const write=(file,bytes)=>{bytes=Buffer.isBuffer(bytes)?bytes:Buffer.from(bytes);if(!fs.existsSync(file)||!fs.readFileSync(file).equals(bytes))fs.writeFileSync(file,bytes);};
-for(const entry of source.sources){const root=path.join(workspace,entry.path),actual=execFileSync("git",["-C",root,"rev-parse","HEAD"],{encoding:"utf8"}).trim();if(actual!==entry.commit)throw Error("Initialize the selected ISF source: "+entry.path);execFileSync("git",["-C",root,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});}
-const upstream=path.join(workspace,source.sources[0].path),input=path.join(output,"input"),payload=process.argv[4]?path.resolve(process.argv[4]):path.join(output,"payload");
+for(const entry of source.sources){const root=path.join(upstream,path.posix.relative(source.sources[0].path,entry.path)),actual=execFileSync("git",["-C",root,"rev-parse","HEAD"],{encoding:"utf8"}).trim();if(actual!==entry.commit)throw Error("Initialize the selected ISF source: "+entry.path);execFileSync("git",["-C",root,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});}
+const input=path.join(output,"input"),payload=options["--payload"]?path.resolve(options["--payload"]):path.join(output,"payload");
 if(fs.existsSync(path.join(payload,"provider.json")))throw Error("Choose a new ISF payload directory; the build cache can be reused.");
 fs.mkdirSync(input,{recursive:true});fs.mkdirSync(payload,{recursive:true});
 const roots={ISFMSLKit:path.join(upstream,"ISFMSLKit"),VVMetalKit:path.join(upstream,"submodules/VVMetalKit/VVMetalKit"),PINCache:path.join(upstream,"submodules/PINCache/Source"),PINOperation:path.join(upstream,"submodules/PINCache/Carthage/Checkouts/PINOperation/Source"),generator:path.join(upstream,"submodules/ISFGLSLGenerator/libISFGLSLGenerator")};
@@ -34,7 +37,7 @@ for(const file of source.compilerLibraries){
   isolateCompiler(library);
   const include=path.join(upstream,path.dirname(path.dirname(file)),"include");for(const name of fs.readdirSync(include))if(name.endsWith(".hpp"))write(path.join(input,name),fs.readFileSync(path.join(include,name)));
 }
-run("cmake",["-S",owned,"-B",path.join(output,"cmake"),"-DISF_INPUT="+input,"-DMACFX_INPUT="+path.resolve(owned,"../native"),"-DCMAKE_BUILD_TYPE=Release"]);
+run("cmake",["-S",owned,"-B",path.join(output,"cmake"),"-DISF_INPUT="+input,"-DMACFX_INPUT="+path.resolve(owned,"../native"),"-DCMAKE_BUILD_TYPE=Release","-DCMAKE_OSX_ARCHITECTURES="+architectures.join(";")]);
 run("cmake",["--build",path.join(output,"cmake"),"--parallel","2"]);
 fs.copyFileSync(path.join(output,"cmake/libmacfx-isf.dylib"),path.join(payload,source.library));
 for(const file of source.compilerLibraries){const filename=path.basename(file);fs.copyFileSync(path.join(input,filename),path.join(payload,filename));}
@@ -53,4 +56,4 @@ const dependencies=[...dependencyText.matchAll(/(?:\\.|[^\s])+/g)].map(match=>ma
 const headerInputs=Object.fromEntries([...new Set(dependencies)].sort().map(file=>[path.relative(nativeRoot,file),crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex")]));if(!Object.keys(headerInputs).length)throw Error("The ISF provider header closure is missing.");
 const exports=execFileSync("nm",["-gj",path.join(payload,source.library)],{encoding:"utf8"}).split(/\r?\n/);
 if(!["_rsISFSceneInputsAPI","_rsISFBindSceneInputs"].every(name=>exports.includes(name)))throw Error("The ISF scene input API exports are missing.");
-fs.writeFileSync(path.join(payload,"provider.json"),JSON.stringify({...source,sceneInputsAPI:1,sceneInputRoles:SCENE_SHADER_INPUTS.filter(role=>!["viewMatrix","projectionMatrix"].includes(role)),inputs,owned:ownedInputs,headerInputs,files},null,2)+"\n");console.log(JSON.stringify({payload,files:files.length}));
+fs.writeFileSync(path.join(payload,"provider.json"),JSON.stringify({...source,architectures,sceneInputsAPI:1,sceneInputRoles:SCENE_SHADER_INPUTS.filter(role=>!["viewMatrix","projectionMatrix"].includes(role)),inputs,owned:ownedInputs,headerInputs,files},null,2)+"\n");console.log(JSON.stringify({payload,files:files.length}));

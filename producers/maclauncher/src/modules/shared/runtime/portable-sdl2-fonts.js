@@ -30,14 +30,15 @@ function validateArchives(archives, { catalog = PIN } = {}) {
 }
 
 function buildEnvironment(prefix, sdk) {
-  const env = { ...process.env, PATH: "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin",
+  const env = { ...process.env, PATH: "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/usr/local/bin",
     PKG_CONFIG_PATH: "", PKG_CONFIG_LIBDIR: path.join(prefix, "lib/pkgconfig"), MACOSX_DEPLOYMENT_TARGET: "13.0", SDKROOT: sdk };
   for (const key of ["CPATH", "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "OBJC_INCLUDE_PATH", "LIBRARY_PATH", "CFLAGS", "CXXFLAGS", "LDFLAGS",
     "DYLD_LIBRARY_PATH", "DYLD_FRAMEWORK_PATH", "DYLD_INSERT_LIBRARIES"]) delete env[key];
   return env;
 }
 
-function cmakeOptions({ prefix, sdk, ninja, pathMappings = [], options = [] }) {
+function cmakeOptions({ prefix, sdk, ninja, architecture = process.arch, pathMappings = [], options = [] }) {
+  if (!["arm64","x64"].includes(architecture)) throw new Error("Choose an arm64 or x64 portable build.");
   for (const value of [prefix, sdk, ninja]) if (!path.isAbsolute(value || "") || value.includes("\0")) throw new Error("Portable build paths must be absolute.");
   if (!Array.isArray(pathMappings) || pathMappings.some(mapping => !path.isAbsolute(mapping?.from || "") ||
       !/^[A-Za-z0-9_.-]+$/.test(mapping?.to || "") || /[\r\n\0;]/.test(mapping.from))) throw new Error("Portable compiler mappings need absolute prefixes and logical names.");
@@ -49,7 +50,7 @@ function cmakeOptions({ prefix, sdk, ninja, pathMappings = [], options = [] }) {
   const maps = pathMappings.flatMap(mapping => ["file", "debug", "macro"].map(kind => quote(`-f${kind}-prefix-map=${mapping.from}=${mapping.to}`)));
   const flags = [...maps, "-Werror=unguarded-availability-new"].join(" ");
   return ["-G", "Ninja", `-DCMAKE_MAKE_PROGRAM=${ninja}`, "-DCMAKE_BUILD_TYPE=Release", "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
-    "-DCMAKE_OSX_ARCHITECTURES=arm64", "-DCMAKE_OSX_DEPLOYMENT_TARGET=13.0", `-DCMAKE_OSX_SYSROOT=${sdk}`,
+    `-DCMAKE_OSX_ARCHITECTURES=${architecture === "x64" ? "x86_64" : "arm64"}`, "-DCMAKE_OSX_DEPLOYMENT_TARGET=13.0", `-DCMAKE_OSX_SYSROOT=${sdk}`,
     `-DCMAKE_INSTALL_PREFIX=${prefix}`, `-DCMAKE_PREFIX_PATH=${prefix}`, "-DCMAKE_IGNORE_PREFIX_PATH=/opt/homebrew;/usr/local",
     "-DCMAKE_FIND_USE_PACKAGE_REGISTRY=OFF", "-DCMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY=OFF", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
     "-DFETCHCONTENT_FULLY_DISCONNECTED=ON", "-DFETCHCONTENT_UPDATES_DISCONNECTED=ON", "-DCMAKE_C_COMPILER=/usr/bin/clang", "-DCMAKE_CXX_COMPILER=/usr/bin/clang++",
@@ -70,9 +71,9 @@ function sdkCompressionMetadata(sdk, prefix) {
     bzip2: { headerSha256: Native.hashFile(bzipHeader), library: "/usr/lib/libbz2.1.0.dylib" } };
 }
 
-async function buildProject({ sourceRoot, outputRoot, prefix, sdk, tools, pathMappings, options, signal, onProgress, dependencies = {} }) {
+async function buildProject({ sourceRoot, outputRoot, prefix, sdk, tools, architecture = process.arch, pathMappings, options, signal, onProgress, dependencies = {} }) {
   throwIfAborted(signal);
-  const args = ["-S", sourceRoot, "-B", outputRoot, ...cmakeOptions({ prefix, sdk, ninja: tools.ninja, pathMappings, options })];
+  const args = ["-S", sourceRoot, "-B", outputRoot, ...cmakeOptions({ prefix, sdk, ninja: tools.ninja, architecture, pathMappings, options })];
   const logPath = outputRoot + ".log", env = buildEnvironment(prefix, sdk);
   const run = dependencies.runBuildCommand || Source.runBuildCommand;
   const startedAt = new Date().toISOString(); onProgress?.({ phase: "configure", project: path.basename(outputRoot) });
@@ -99,9 +100,9 @@ function assertFreshBuildRoot(workRoot, { readOnlyRoots = [] } = {}) {
   return resolved;
 }
 
-async function buildDependencies({ archives, workRoot, pathMappings = [], signal, onProgress, dependencies = {} }) {
+async function buildDependencies({ archives, workRoot, architecture = process.arch, pathMappings = [], signal, onProgress, dependencies = {} }) {
   throwIfAborted(signal);
-  if (process.platform !== "darwin" || process.arch !== "arm64") throw new Error("This portable dependency build requires an Apple Silicon Mac.");
+  if (process.platform !== "darwin" || !["arm64","x64"].includes(architecture)) throw new Error("This portable dependency build requires macOS and an arm64 or x64 target.");
   const pins = validateArchives(archives);
   workRoot = assertFreshBuildRoot(workRoot);
   const sdk = (dependencies.readSDK || (() => execFileSync("/usr/bin/xcrun", ["--show-sdk-path"], { encoding: "utf8" }).trim()))();
@@ -121,11 +122,11 @@ async function buildDependencies({ archives, workRoot, pathMappings = [], signal
     for (const notice of pin.notices) if (!fs.lstatSync(path.join(sourceRoot, notice)).isFile()) throw new Error(`Missing source license for ${pin.name}.`);
     const options = [...pin.options, ...(["libpng", "freetype"].includes(pin.id) ? zlib : []),
       ...(pin.id === "freetype" ? [`-DBZIP2_LIBRARY_RELEASE=${sdk}/usr/lib/libbz2.tbd`, `-DBZIP2_INCLUDE_DIR=${sdk}/usr/include`] : [])];
-    const build = await buildProject({ sourceRoot, outputRoot: path.join(workRoot, pin.id), prefix, sdk, tools, pathMappings, options, signal, onProgress, dependencies });
+    const build = await buildProject({ sourceRoot, outputRoot: path.join(workRoot, pin.id), prefix, sdk, tools, architecture, pathMappings, options, signal, onProgress, dependencies });
     sourceRoots[pin.id] = sourceRoot; sources.push({ ...pin, ...build });
   }
   const recipeSha256 = crypto.createHash("sha256").update(fs.readFileSync(__filename)).update(fs.readFileSync(path.join(__dirname, "portable-sdl2-fonts.json"))).digest("hex");
-  return { version: PIN.version, architecture: PIN.architecture, minimumMacOS: PIN.minimumMacOS, recipeSha256, prefix, sdk, tools, sdkPackages, sources, sourceRoots };
+  return { version: PIN.version, architecture, minimumMacOS: PIN.minimumMacOS, recipeSha256, prefix, prefixSha256: require("./portable-dependency-prefix").snapshotPrefix(prefix).sha256, sdk, tools, sdkPackages, sources, sourceRoots };
 }
 
 module.exports = { PIN, validateArchives, buildEnvironment, cmakeOptions, sdkCompressionMetadata, buildProject, assertFreshBuildRoot, buildDependencies };

@@ -50,14 +50,14 @@ test("native System4 resources follow a relocated executable, confine names and 
 test("movie dependency reuse rejects source/profile/configured-prefix drift and byte mutations",t=>{
   const root=temporary(t),prefix=path.join(root,"prefix");fs.mkdirSync(path.join(prefix,"lib"),{recursive:true});fs.writeFileSync(path.join(prefix,"lib/avcodec"),"codec");
   const stack={version:Movie.PIN.version,source:Movie.PIN.source,architecture:"arm64",minimumMacOS:"13.0",recipeSha256:Movie.recipeIdentity(),prefix,prefixSha256:Prefix.snapshotPrefix(prefix).sha256,decoders:Movie.PIN.decoders,demuxers:Movie.PIN.demuxers,options:["--prefix="+prefix,"--arch=arm64","--target-os=darwin","--cc=/usr/bin/clang","--cxx=/usr/bin/clang++","--host-cc=/usr/bin/clang","--sysroot=/SDK",...Movie.OPTIONS,"--extra-cflags=flags","--extra-ldflags=flags"],network:false,externalCodecs:false,gpl:false,nonfree:false};
-  assert.equal(Portable.validateMovieStack(stack).sha256,stack.prefixSha256);
-  assert.throws(()=>Portable.validateMovieStack({...stack,decoders:Movie.PIN.decoders.slice(1)}),/exact source recipe/);
-  assert.throws(()=>Portable.validateMovieStack({...stack,minimumMacOS:"27.0"}),/exact source recipe/);
-  assert.throws(()=>Portable.validateMovieStack({...stack,options:["--prefix="+root,...stack.options.slice(1)]}),/original library prefix/);
-  fs.writeFileSync(path.join(prefix,"lib/avcodec"),"changed");assert.throws(()=>Portable.validateMovieStack(stack),/prefix checksum changed/);
+  assert.equal(Portable.validateMovieStack(stack,"arm64").sha256,stack.prefixSha256);
+  assert.throws(()=>Portable.validateMovieStack({...stack,decoders:Movie.PIN.decoders.slice(1)},"arm64"),/exact source recipe/);
+  assert.throws(()=>Portable.validateMovieStack({...stack,minimumMacOS:"27.0"},"arm64"),/exact source recipe/);
+  assert.throws(()=>Portable.validateMovieStack({...stack,options:["--prefix="+root,...stack.options.slice(1)]},"arm64"),/original library prefix/);
+  fs.writeFileSync(path.join(prefix,"lib/avcodec"),"changed");assert.throws(()=>Portable.validateMovieStack(stack,"arm64"),/prefix checksum changed/);
 });
 test("Meson compiler settings pin architecture, SDK, package tools and source-path maps",()=>{
-  const settings=Portable.nativeFile({prefix:"/tmp/build/prefix",sdk:"/SDK",pathMappings:[{from:"/tmp/build",to:"source-build"}],tools:{pkgconfig:"/tools/pkg-config",bison:"/tools/bison",flex:"/tools/flex"}});
+  const settings=Portable.nativeFile({architecture:"arm64",prefix:"/tmp/build/prefix",sdk:"/SDK",pathMappings:[{from:"/tmp/build",to:"source-build"}],tools:{pkgconfig:"/tools/pkg-config",bison:"/tools/bison",flex:"/tools/flex"}});
   assert.match(settings,/c = '\/usr\/bin\/clang'/);assert.match(settings,/'-arch', 'arm64'/);assert.match(settings,/-mmacosx-version-min=13\.0/);assert.match(settings,/pkg_config_path = \[\]/);assert.match(settings,/-fmacro-prefix-map=\/tmp\/build=source-build/);
   assert.throws(()=>Portable.nativeFile({prefix:"/tmp/prefix",sdk:"/SDK",tools:{pkgconfig:"relative",bison:"/tools/bison",flex:"/tools/flex"}}),/absolute/);
 });

@@ -88,11 +88,11 @@ function stageNotices({ source, sdl12, sdl2, destination, revision }) {
   });
 }
 
-async function buildRuntime({ manager: suppliedManager, userDataDir, version, sourceDir, logger, signal, onProgress, dependencies = {} } = {}) {
+async function buildRuntime({ manager: suppliedManager, userDataDir, version, sourceDir, architecture = process.arch, retainBuildDirectory = false, logger, signal, onProgress, dependencies = {} } = {}) {
   const manager = suppliedManager || require("./onscripter-en-manager");
   const { SNAPSHOT: PROFILE, SNAPSHOT_REVISION: REVISION } = require("./onscripter-en-manager");
   const selected = version || PROFILE;
-  if (selected !== PROFILE || process.platform !== "darwin" || !["arm64", "x64"].includes(process.arch)) {
+  if (selected !== PROFILE || process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) {
     throw new Error("The reviewed ONScripter-EN source adapter supports the selected Mac source snapshot.");
   }
   const destination = manager.core.getInstallDir({ userDataDir, version: selected });
@@ -139,7 +139,7 @@ async function buildRuntime({ manager: suppliedManager, userDataDir, version, so
     await packageArchive("sdl12", path.join(work, "sdl12-package"));
     await packageArchive("sdl2", path.join(work, "sdl2-package"));
     onProgress?.({ downloaded: 1, total: 5 });
-    const prefix = path.join(work, "deps"), arch = process.arch === "x64" ? "x86_64" : "arm64";
+    const prefix = path.join(work, "deps"), arch = architecture === "x64" ? "x86_64" : "arm64";
     const overlaySource = path.resolve(__dirname, "../overlays/onscripter-en-v3"), overlay = path.join(work, "overlay");
     fs.cpSync(overlaySource, overlay, { recursive: true });
     const prefixMaps = compilerPrefixMaps({ work, source, overlay, packageRoots, profile: selected });
@@ -173,7 +173,7 @@ async function buildRuntime({ manager: suppliedManager, userDataDir, version, so
     await run("/usr/bin/codesign", ["--force", "--sign", "-", executable], { logPath, signal });
     const notices = stageNotices({ source, sdl12: packageRoots.sdl12, sdl2: packageRoots.sdl2, destination: payload, revision: REVISION });
     const verifiedBuild = { sourceRevision: REVISION, sourceTreeSha256, sourceArchiveSha256, sourceScope: SOURCE_SCOPE,
-      adapterProfile: "mac-sdl12-v3", overlaySha256, overlayFiles, architecture: process.arch, minimumMacOS: "13.0",
+      adapterProfile: "mac-sdl12-v3", overlaySha256, overlayFiles, architecture, minimumMacOS: "13.0",
       compilerPrefixMaps: prefixMaps, compilerFlags, buildDirectory: work,
       nativeVersions: { sdl12Compat: "1.2.76", sdl2: "2.32.10" }, packages: Object.fromEntries(Object.entries(PACKAGES).map(([key, pin]) => [key, pin.sha256])), notices };
     // The shipped profile contains logical source identities only. Complete
@@ -188,7 +188,7 @@ async function buildRuntime({ manager: suppliedManager, userDataDir, version, so
     logger?.info?.(`[onscripter-en] installed ${selected}; ${logPath}`);
     onProgress?.({ downloaded: 5, total: 5 });
     return { ...installed, logPath, verifiedBuild };
-  } finally { fs.rmSync(work, { recursive: true, force: true }); building.delete(destination); }
+  } finally { if (!retainBuildDirectory) fs.rmSync(work, { recursive: true, force: true }); building.delete(destination); }
 }
 
-module.exports = { PACKAGES, CODECS, buildRuntime, stageNotices, sourceFiles, compilerPrefixMaps, compilerPathFlags };
+module.exports = { SOURCE_SCOPE, PACKAGES, CODECS, buildRuntime, stageNotices, sourceFiles, compilerPrefixMaps, compilerPathFlags };

@@ -24,22 +24,24 @@ export const INPUTS=Object.freeze([
   {name:"libshaderc_shared.1.dylib",formula:"shaderc",file:"shaderc/shaderc/2026.4/lib/libshaderc_shared.1.dylib",sha256:"77d64f5c9ef95f78e3f3214c310792b63c1337cc5a381faa980e61816c1ffbf7",version:"2026.4",archiveSha256:"1313ffbae9ac1559f7160cc89657ecd5fc324895ff46e15a4bd198ec3bbebec0",license:"Apache-2.0",source:"https://github.com/google/shaderc/archive/refs/tags/v2026.4.tar.gz",notice:"shaderc/shaderc/2026.4/LICENSE"},
   {name:"liblcms2.2.dylib",formula:"little-cms2",file:"little-cms2/little-cms2/2.19.1/lib/liblcms2.2.dylib",sha256:"f4c2fe0d303e63e65e627271e0bceada3ca664486f9bb9f07077083dd0ff2540",version:"2.19.1",archiveSha256:"823125475a9f5bfd1f2ddda2910143aa47c018c4cd6c55867b7461553d1719e1",license:"MIT",source:"https://downloads.sourceforge.net/project/lcms/lcms/2.19.1/lcms2-2.19.1.tar.gz",notice:"little-cms2/little-cms2/2.19.1/LICENSE"},
 ]);
-export function build({inputs,moltenvk,headers,output,sceneLibrary}){
-  for(const item of INPUTS)if(hash(path.join(inputs,item.file))!==item.sha256)throw new Error("A libplacebo binary input changed: "+item.name);
+export function build({inputs,moltenvk,headers,output,sceneLibrary,architecture="arm64"}){
+  if(!["arm64","x86_64"].includes(architecture))throw Error("Choose a native libplacebo CPU.");
+  const selectedInputs=architecture==="x86_64"?INTEL_INPUTS.map(row=>({...row,notice:path.posix.join(path.posix.dirname(path.posix.dirname(row.file)),"LICENSE")})):INPUTS;
+  for(const item of selectedInputs)if(hash(path.join(inputs,item.file))!==item.sha256)throw new Error("A libplacebo binary input changed: "+item.name);
   const mvk=path.join(moltenvk,"MoltenVK/MoltenVK/dynamic/dylib/macOS/libMoltenVK.dylib");
   if(hash(mvk)!==MOLTENVK.sha256)throw new Error("The MoltenVK binary input changed.");
   if(fs.existsSync(output))throw new Error("The output already exists; choose a new build directory.");
   const lib=path.join(output,"libplacebo"),notices=path.join(output,"notices/libplacebo");fs.mkdirSync(lib,{recursive:true});fs.mkdirSync(notices,{recursive:true});
-  for(const item of INPUTS){fs.copyFileSync(path.join(inputs,item.file),path.join(lib,item.name));fs.copyFileSync(path.join(inputs,item.notice),path.join(notices,item.name+".LICENSE"));}
-  if(sceneLibrary){if(sceneLibrary.architecture!=="arm64"||hash(sceneLibrary.library)!==sceneLibrary.sha256)throw new Error("The source-built libplacebo library changed.");fs.chmodSync(path.join(lib,"libplacebo.360.dylib"),0o755);fs.copyFileSync(sceneLibrary.library,path.join(lib,"libplacebo.360.dylib"));sceneNotice(sceneLibrary,path.join(notices,"scene-source.json"));}
+  for(const item of selectedInputs){fs.copyFileSync(path.join(inputs,item.file),path.join(lib,item.name));fs.copyFileSync(path.join(inputs,item.notice),path.join(notices,item.name+".LICENSE"));}
+  if(sceneLibrary){if(sceneLibrary.architecture!==architecture||hash(sceneLibrary.library)!==sceneLibrary.sha256)throw new Error("The source-built libplacebo library changed.");fs.chmodSync(path.join(lib,"libplacebo.360.dylib"),0o755);fs.copyFileSync(sceneLibrary.library,path.join(lib,"libplacebo.360.dylib"));sceneNotice(sceneLibrary,path.join(notices,architecture==="arm64"?"scene-source.json":"scene-source.x86_64.json"));}
   fs.copyFileSync(mvk,path.join(lib,"libMoltenVK.dylib"));fs.copyFileSync(path.join(moltenvk,"MoltenVK/LICENSE"),path.join(notices,"MoltenVK.LICENSE"));
-  for(const name of [...INPUTS.map(item=>item.name),"libMoltenVK.dylib"]){const file=path.join(lib,name);fs.chmodSync(file,0o755);run("install_name_tool",["-id","@rpath/"+(sceneLibrary&&name==="libplacebo.360.dylib"?"libplacebo/":"")+name,file]);
+  for(const name of [...selectedInputs.map(item=>item.name),"libMoltenVK.dylib"]){const file=path.join(lib,name);fs.chmodSync(file,0o755);run("install_name_tool",["-id","@rpath/"+(sceneLibrary&&name==="libplacebo.360.dylib"?"libplacebo/":"")+name,file]);
     for(const line of run("otool",["-L",file]).split("\n").slice(2)){const dependency=line.trim().split(" (")[0];if(!dependency.startsWith("@@HOMEBREW_PREFIX@@"))continue;let next=path.basename(dependency);if(next.startsWith("libvulkan."))next="libMoltenVK.dylib";run("install_name_tool",["-change",dependency,"@loader_path/"+next,file]);}
     if(name==="libshaderc_shared.1.dylib")isolateShaderCompiler(file);
     run("codesign",["--force","-s","-",file]);
   }
   const native=path.join(directory,"native"),include=sceneLibrary?.include||path.join(inputs,"libplacebo/libplacebo/7.360.1/include"),vulkan=path.join(moltenvk,"MoltenVK/MoltenVK/include");
-  const common=["clang++","-std=c++17","-O2","-fobjc-arc","-Wno-deprecated-declarations","-DVK_USE_PLATFORM_METAL_EXT","-arch","arm64","-mmacosx-version-min=15.0","-ffile-prefix-map="+repository+"=.","-ffile-prefix-map="+headers+"=upstream", "-I"+native,"-I"+headers,"-I"+include,"-I"+vulkan];
+  const common=["clang++","-std=c++17","-O2","-fobjc-arc","-Wno-deprecated-declarations","-DVK_USE_PLATFORM_METAL_EXT","-arch",architecture,"-mmacosx-version-min=15.0","-ffile-prefix-map="+repository+"=.","-ffile-prefix-map="+headers+"=upstream", "-I"+native,"-I"+headers,"-I"+include,"-I"+vulkan];
   if(sceneLibrary)common.push("-DMACFX_LIBPLACEBO_SCENE_INPUTS=1");
   const provider=path.join(output,"libmacfx-libplacebo.dylib");
   run("xcrun",[...common,"-dynamiclib",path.join(native,"libplacebo-node.mm"),"-L"+lib,"-lplacebo.360","-lMoltenVK","-Wl,-rpath,@loader_path/libplacebo",...(sceneLibrary?["-Wl,-rpath,@loader_path"]:[]),"-Wl,-install_name,@rpath/libmacfx-libplacebo.dylib","-framework","Foundation","-framework","Metal","-o",provider]);
@@ -47,7 +49,7 @@ export function build({inputs,moltenvk,headers,output,sceneLibrary}){
   for(const file of [provider,helper]){run("strip",["-x",file]);run("codesign",["--force","-s","-",file]);}
   const catalog=JSON.parse(run(helper,["--filters"])),filters=catalog.filters;if(!Array.isArray(filters)||catalog.imageFiltersAPI!==1||catalog.imageFilters?.join()!=="deband")throw new Error("The original libplacebo filter catalog is unavailable.");
   const entries=[];function visit(relative=""){for(const entry of fs.readdirSync(path.join(output,relative),{withFileTypes:true})){const file=relative?relative+"/"+entry.name:entry.name;if(entry.isDirectory())visit(file);else entries.push({path:file,size:fs.statSync(path.join(output,file)).size,sha256:hash(path.join(output,file))});}}visit();
-  const metadata={schema:1,provider:"libplacebo",version:"7.360.1",derivedPlanes:true,imageFiltersAPI:catalog.imageFiltersAPI,imageFilters:catalog.imageFilters,sceneInputsAPI:catalog.sceneInputsAPI||0,sceneInputRoles:catalog.sceneInputRoles||[],architectures:["arm64"],minimumMacOS:"15.0",library:"libmacfx-libplacebo.dylib",helper:"libplacebo-prepare",filters,files:entries.sort((a,b)=>a.path.localeCompare(b.path)),inputs:[...INPUTS.filter(row=>!sceneLibrary||row.name!=="libplacebo.360.dylib").map(({file,notice,formula,...row})=>({...row,url:bottle(formula,row.archiveSha256)})),...(sceneLibrary?[{name:"libplacebo",...sceneLibrary.source,sha256:sceneLibrary.sha256,overlaySha256:sceneLibrary.overlaySha256,recipeSha256:sceneLibrary.recipeSha256,headerInputs:sceneLibrary.headerInputs,source:sceneLibrary.source.origin,dependencies:[sceneLibrary.vulkanHeaders,...(sceneLibrary.fastFloat?[sceneLibrary.fastFloat]:[])]}]:[]),{name:"MoltenVK",version:MOLTENVK.version,sha256:MOLTENVK.sha256,license:MOLTENVK.license,source:MOLTENVK.source}]};
+  const metadata={schema:1,provider:"libplacebo",version:"7.360.1",derivedPlanes:true,imageFiltersAPI:catalog.imageFiltersAPI,imageFilters:catalog.imageFilters,sceneInputsAPI:catalog.sceneInputsAPI||0,sceneInputRoles:catalog.sceneInputRoles||[],architectures:[architecture],minimumMacOS:"15.0",library:"libmacfx-libplacebo.dylib",helper:"libplacebo-prepare",filters,files:entries.sort((a,b)=>a.path.localeCompare(b.path)),inputs:[...selectedInputs.filter(row=>!sceneLibrary||row.name!=="libplacebo.360.dylib").map(({file,notice,formula,...row})=>({...row,architecture,url:bottle(formula,row.archiveSha256)})),...(sceneLibrary?[{name:"libplacebo",...sceneLibrary.source,architecture,sha256:sceneLibrary.sha256,overlaySha256:sceneLibrary.overlaySha256,recipeSha256:sceneLibrary.recipeSha256,headerInputs:sceneLibrary.headerInputs,source:sceneLibrary.source.origin,dependencies:[sceneLibrary.vulkanHeaders,...(sceneLibrary.fastFloat?[sceneLibrary.fastFloat]:[])]}]:[]),{name:"MoltenVK",version:MOLTENVK.version,sha256:MOLTENVK.sha256,license:MOLTENVK.license,source:MOLTENVK.source}]};
   fs.writeFileSync(path.join(output,"provider.json"),JSON.stringify(metadata,null,2)+"\n");return metadata;
 }
 export const INTEL_INPUTS=Object.freeze([
@@ -105,9 +107,17 @@ export function buildSceneUniversal(options){
   return buildUniversal({...options,inputs,intelInputs,output,armStage,sceneLibrary:intelLibrary});
 }
 
+export function buildSceneArchitecture(options){
+ const {work,inputs,intelInputs,output,arch}=options,architecture=arch==="x64"?"x86_64":"arm64";
+ if(!work||fs.existsSync(work))throw Error("Choose an unused source build workspace.");fs.mkdirSync(work,{recursive:true});
+ const selected=architecture==="x86_64"?intelInputs:inputs;
+ const library=buildSceneLibrary({...options,inputs:selected,dependencyHeaders:inputs,architecture,output:path.join(work,architecture)});
+ return build({...options,inputs:selected,output,sceneLibrary:library,architecture});
+}
+
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
-  const options={};for(let i=2;i<process.argv.length;i+=2){const name=process.argv[i].replace(/^--/,"").replace(/-([a-z])/g,(_match,c)=>c.toUpperCase());if(!["inputs","moltenvk","headers","output","armStage","intelInputs","source","vulkanSource","fastFloatSource","work","meson","ninja"].includes(name)||!process.argv[i+1])throw new Error("Expected build input paths.");options[name]=path.resolve(process.argv[i+1]);}
-  if(options.source){for(const name of["source","vulkanSource","inputs","intelInputs","moltenvk","headers","output","work","meson","ninja"])if(!options[name])throw new Error("Missing "+name);console.log(JSON.stringify(buildSceneUniversal(options),null,2));process.exit(0);}
+  const options={};for(let i=2;i<process.argv.length;i+=2){const name=process.argv[i].replace(/^--/,"").replace(/-([a-z])/g,(_match,c)=>c.toUpperCase());if(!["inputs","moltenvk","headers","output","armStage","intelInputs","source","vulkanSource","fastFloatSource","work","meson","ninja","arch"].includes(name)||!process.argv[i+1])throw new Error("Expected build input paths.");options[name]=name==="arch"?process.argv[i+1]:path.resolve(process.argv[i+1]);}
+  if(options.source){for(const name of["source","vulkanSource","inputs","intelInputs","moltenvk","headers","output","work","meson","ninja"])if(!options[name])throw new Error("Missing "+name);console.log(JSON.stringify(options.arch&&options.arch!=="universal"?buildSceneArchitecture(options):buildSceneUniversal(options),null,2));process.exit(0);}
   const universal=Boolean(options.armStage);for(const name of universal?["armStage","intelInputs","inputs","moltenvk","headers","output"]:["inputs","moltenvk","headers","output"])if(!options[name])throw new Error("Missing "+name);
   console.log(JSON.stringify(universal?buildUniversal(options):build(options),null,2));
 }

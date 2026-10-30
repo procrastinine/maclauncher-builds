@@ -136,7 +136,9 @@ class MetalGeneration final:public GenerationEncoder {
   if(!region(depth,actual.depthX,actual.depthY,actual.renderWidth,actual.renderHeight)||!region(motion,actual.motionX,actual.motionY,actual.renderWidth,actual.renderHeight)||depth.width!=motion.width||depth.height!=motion.height)return "MetalFX interpolation depth and motion must have matching allocated extents and valid declared regions";
   if(actual.outputWidth!=source.width||actual.outputHeight!=source.height||actual.outputX>=source.width||actual.outputY>=source.height)return "MetalFX interpolation requires the complete current output extent";
   if(!std::isfinite(actual.motionScaleX)||!std::isfinite(actual.motionScaleY)||!std::isfinite(actual.jitterX)||!std::isfinite(actual.jitterY)||!std::isfinite(actual.frameTimeMs)||actual.frameTimeMs<0)return "MetalFX interpolation requires finite actual motion, jitter and frame timing";
-  if(@available(macOS 27.0,*)){
+
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 270000
+if(@available(macOS 27.0,*)){
    if(sceneMatrices&&sceneMatrices->frameId==actual.frameId&&(sceneMatrices->flags&(RS_SCENE_VIEW_VALID|RS_SCENE_PROJECTION_VALID))==(RS_SCENE_VIEW_VALID|RS_SCENE_PROJECTION_VALID)&&bool(sceneMatrices->flags&(RS_SCENE_CLIP_ZERO_TO_ONE|RS_SCENE_CLIP_MINUS_ONE_TO_ONE))){
     auto value=*sceneMatrices;
     // The shared companion uses row-vector math. Normalize only its declared
@@ -149,7 +151,9 @@ class MetalGeneration final:public GenerationEncoder {
     for(auto matrix:{simd_inverse(view),simd_inverse(projection)})for(unsigned c=0;c<4;++c)for(unsigned r=0;r<4;++r)valid&=std::isfinite(matrix.columns[c][r]);
     if(valid)inputs.matrices=value;
    }
-  }else if(actual.depthX||actual.depthY||actual.motionX||actual.motionY||actual.outputX||actual.outputY||depth.width!=actual.renderWidth||depth.height!=actual.renderHeight)return "MetalFX interpolation content regions require macOS 27 or later";
+  }
+#endif
+else if(actual.depthX||actual.depthY||actual.motionX||actual.motionY||actual.outputX||actual.outputY||depth.width!=actual.renderWidth||depth.height!=actual.renderHeight)return "MetalFX interpolation content regions require macOS 27 or later";
   inputs.perspective=(actual.flags&RS_TEMPORAL_CAMERA_VALID)&&std::isfinite(actual.nearPlane)&&std::isfinite(actual.farPlane)&&std::isfinite(actual.verticalFov)&&actual.nearPlane>0&&actual.farPlane>actual.nearPlane&&actual.verticalFov>0&&actual.verticalFov<3.1415927f;
   if(!inputs.perspective&&!inputs.matrices)return "MetalFX interpolation needs an actual perspective camera or macOS 27 view/projection matrices with a declared depth interval";
   inputs.color=source;
@@ -217,7 +221,11 @@ class MetalGeneration final:public GenerationEncoder {
     if(request->uiMode!=InterpolatorUI::None)descriptor.uiTextureFormat=request->color;
     // Completion-owned external snapshots remain authoritative even on SDKs
     // that can manage mutable previous-color storage internally.
-    bool distortion=false;if(@available(macOS 27.0,*)){descriptor.requiresPrevColorTexture=YES;descriptor.distortionTextureEnabled=bool(request->distortion.texture);distortion=descriptor.distortionTextureEnabled;}
+    bool distortion=false;
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 270000
+if(@available(macOS 27.0,*)){descriptor.requiresPrevColorTexture=YES;descriptor.distortionTextureEnabled=bool(request->distortion.texture);distortion=descriptor.distortionTextureEnabled;}
+#endif
+
     const auto create=[&]()->id<MTLFXFrameInterpolator>{@try{InternalTemporalScope scope;return [descriptor newFrameInterpolatorWithDevice:gpu];}@catch(NSException*){return nil;}};
     id<MTLFXFrameInterpolator>interpolator=create();
     auto uiMode=request->uiMode;
@@ -227,7 +235,11 @@ class MetalGeneration final:public GenerationEncoder {
      interpolator=create();
      uiMode=InterpolatorUI::None;
     }
-    if(!interpolator&&distortion){if(@available(macOS 27.0,*))descriptor.distortionTextureEnabled=NO;distortion=false;interpolator=create();}
+    if(!interpolator&&distortion){
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 270000
+if(@available(macOS 27.0,*))descriptor.distortionTextureEnabled=NO;
+#endif
+distortion=false;interpolator=create();}
     if(!interpolator&&linked){descriptor.scaler=nil;linked=nil;interpolator=create();}
     if(!interpolator)throw std::runtime_error("MetalFX could not create an interpolator for these image contracts");
     next->uiMode=uiMode;next->linked=linked!=nil;next->retryLink=request->retryLink;
@@ -312,12 +324,16 @@ public:
    interpolator.jitterOffsetX=actual.jitterX;interpolator.jitterOffsetY=actual.jitterY;interpolator.deltaTime=actual.frameTimeMs/1000;
    if(inputs.perspective){interpolator.nearPlane=actual.nearPlane;interpolator.farPlane=actual.farPlane;interpolator.fieldOfView=actual.verticalFov*180/3.14159265358979323846;}
    interpolator.aspectRatio=float(source.width)/source.height;interpolator.depthReversed=bool(actual.flags&RS_TEMPORAL_DEPTH_REVERSED);interpolator.shouldResetHistory=reset;
-   if(@available(macOS 27.0,*)){
+
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 270000
+if(@available(macOS 27.0,*)){
     interpolator.distortionTexture=field;interpolator.distortionOffsetX=field?inputs.distortion.x:0;interpolator.distortionOffsetY=field?inputs.distortion.y:0;interpolator.distortionWidth=field?inputs.distortion.width:0;interpolator.distortionHeight=field?inputs.distortion.height:0;
     interpolator.contentWidth=actual.renderWidth;interpolator.contentHeight=actual.renderHeight;
     interpolator.depthContentOffsetX=actual.depthX;interpolator.depthContentOffsetY=actual.depthY;interpolator.motionContentOffsetX=actual.motionX;interpolator.motionContentOffsetY=actual.motionY;interpolator.outputOffsetX=actual.outputX;interpolator.outputOffsetY=actual.outputY;
     if(inputs.matrices){simd_float4x4 view,projection;std::memcpy(&view,inputs.matrices->view,sizeof(view));std::memcpy(&projection,inputs.matrices->projection,sizeof(projection));interpolator.worldToViewMatrix=view;interpolator.viewToClipMatrix=projection;}
    }
+#endif
+
    for(auto output:outputs){interpolator.outputTexture=output;InternalTemporalScope scope;[interpolator encodeToCommandBuffer:commands];}
    receipt->armed.store(true);
    result.completion=[receipt]()->ShaderResult{const auto status=receipt->status.load();if(status==1)return {true,{}};if(status==2)return {false,"MetalFX interpolation commands failed or were abandoned"};return {false,"MetalFX interpolation is still in flight",true};};

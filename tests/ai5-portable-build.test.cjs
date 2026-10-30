@@ -85,13 +85,14 @@ test("portable audio sources reject changed archives and unsafe build metadata",
 
 test("portable compiler configuration binds ARM64, macOS13 and compiler paths without literal shell quoting", () => {
   const sdk = "/SDK/MacOSX.sdk", mapping = [{ from: "/tmp/build", to: "maclauncher-build" }];
-  const flags = Audio.compilerFlags(sdk, mapping);
+  const flags = Audio.compilerFlags(sdk, mapping, "arm64");
   assert.match(flags, /-arch arm64 -mmacosx-version-min=13\.0/);
   assert.match(flags, /-fmacro-prefix-map=\/tmp\/build=maclauncher-build/);
   assert.doesNotMatch(flags, /['"`]/);
   assert.throws(() => Audio.compilerFlags("/SDK/with space", mapping), /without spaces/);
   assert.throws(() => Audio.compilerFlags(sdk, [{ from: "/tmp/build", to: "bad\nname" }]), /logical names/);
-  const ini = Portable.nativeFile({ pkgConfig: "/tools/pkg-config", sdk, pathMappings: mapping, libraryDirectories: ["/build/fonts/lib", "/build/audio/lib"] });
+  assert.match(Audio.compilerFlags(sdk,mapping,"x64"),/-arch x86_64 -mmacosx-version-min=13\.0/);
+  const ini = Portable.nativeFile({ architecture: "arm64", pkgConfig: "/tools/pkg-config", sdk, pathMappings: mapping, libraryDirectories: ["/build/fonts/lib", "/build/audio/lib"] });
   assert.match(ini, /c = '\/usr\/bin\/clang'/);
   assert.match(ini, /'-arch', 'arm64', '-mmacosx-version-min=13\.0'/);
   assert.match(ini, /pkg-config = '\/tools\/pkg-config'/);

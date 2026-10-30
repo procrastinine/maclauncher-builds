@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "aim": {
+    "repository": "https://github.com/hahnlee/aim",
+    "revision": "934009283f69c251f57ed95ef1dff296546bb6ad",
+    "paths": [
+      "crates/aim-apps",
+      "crates/aim-android-xml",
+      "tools/android-image-extract"
+    ],
+    "licensePaths": [
+      "LICENSE",
+      "NOTICE",
+      "THIRD_PARTY_NOTICES.md"
+    ],
+    "archive": {
+      "url": "https://codeload.github.com/hahnlee/aim/tar.gz/934009283f69c251f57ed95ef1dff296546bb6ad",
+      "sha256": "ee1943e4e41b1163136a6c7cc6492aaf74b1bbbd137570b5cb7176f691f138d9",
+      "bytes": 7147717
+    }
+  },
+  "registryDependencies": [
+    "libc",
+    "serde_json",
+    "crc32fast",
+    "flate2",
+    "sha2"
+  ],
+  "minimumMacOS": "13.0",
+  "architecture": "arm64"
+}

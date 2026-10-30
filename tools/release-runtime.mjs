@@ -30,7 +30,8 @@ function loadPrevious(project,directory){const file=path.join(directory,'catalog
 /** Adapt an existing sealed manager output without changing its files or manifest. */
 export async function managerDeclaration({project,input,source}){
  const file=path.join(input,'manifest.json'),bytes=fs.readFileSync(file),m=B.validateManifest(JSON.parse(bytes),{managerId:project});B.verifyPayload(path.join(input,'files'),m);
- const manifestSha256=digest(bytes),launcherArchitectures=m.arch==='x64'?['arm64','x64']:['arm64'];
+ // Mac CPUs follow from the binary alone: Intel code also runs on Apple Silicon through Rosetta.
+ const manifestSha256=digest(bytes),launcherArchitectures=m.arch==='arm64'?['arm64']:['arm64','x64'];
  const files=m.files.map(f=>({...f,path:'files/'+f.path,...(m.arch==='x64'&&f.architectures?{executionArchitecture:'x86_64'}:{})}));
  files.push({path:'manifest.json',size:bytes.length,mode:regular(file).mode&0o777,sha256:manifestSha256});
  let sourceArtifact;if(source){sourceArtifact={directoryRelative:project+'/'+m.version+'-source.tar.gz',sha256:await A.checksum(source),bytes:regular(source).size};}
@@ -107,7 +108,7 @@ export function catalogIndex(directory=root){
  for(const p of registry.projects){const file=path.join(catalogs,p.id+'.json');if(!fs.existsSync(file))continue;const bytes=fs.readFileSync(file),c=validateCatalog(JSON.parse(bytes),{project:p.id,repository:registry.repository,allowEmpty:true});if(!c.packages.length)continue;
   const page='https://'+registry.repository.split('/')[0]+'.github.io/'+registry.repository.split('/')[1]+'/';
   const profiles=new Map((p.packageProfiles||[]).map(profile=>[profile.version,profile]));
-  projects.push({projectId:p.id,name:p.name,delivery:p.delivery,pageUrl:new URL('#'+p.id,page).href,catalog:{url:'https://raw.githubusercontent.com/'+registry.repository+'/main/catalogs/'+p.id+'.json',sha256:digest(bytes),bytes:bytes.length},releases:c.packages.map(r=>({version:r.version,arch:r.arch,minimumMacOS:r.minimumMacOS,tag:r.tag,asset:r.asset,pageUrl:new URL('#'+(profiles.get(r.version)?.anchor||p.id),page).href,...(profiles.has(r.version)?{profile:profiles.get(r.version).label,...(profiles.get(r.version).anchor?{anchor:profiles.get(r.version).anchor}:{})}:{})}))});
+  projects.push({projectId:p.id,name:p.name,delivery:p.delivery,pageUrl:new URL('#'+p.id,page).href,catalog:{url:'https://raw.githubusercontent.com/'+registry.repository+'/main/catalogs/'+p.id+'.json',sha256:digest(bytes),bytes:bytes.length},releases:c.packages.map(r=>({version:r.version,arch:r.arch,launcherArchitectures:r.launcherArchitectures,minimumMacOS:r.minimumMacOS,tag:r.tag,asset:r.asset,pageUrl:new URL('#'+(profiles.get(r.version)?.anchor||p.id),page).href,...(profiles.has(r.version)?{profile:profiles.get(r.version).label,...(profiles.get(r.version).anchor?{anchor:profiles.get(r.version).anchor}:{})}:{})}))});
  }
  return {schemaVersion:1,repository:registry.repository,updatePolicy:'manual',projects:projects.sort((a,b)=>a.projectId.localeCompare(b.projectId))};
 }
@@ -206,8 +207,8 @@ export async function publishRelease({bundle,directory=root,runGh=runGitHub}){
 
 function options(args){const result={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!args[i]?.startsWith('--')||!args[i+1]||Object.hasOwn(result,key))throw Error('Use unique --option value pairs.');result[key]=args[i+1];}return result;}
 export async function main([command,...args],directory=root){
- const o=options(args),allowed={prepare:['project','input','declaration','archive','record','source','source-revision','output'],verify:['bundle','project','version','arch'],'verify-assets':['project','version','arch','assets','output'],apply:['bundle'],stage:['bundle','target'],publish:['bundle'],index:['output']}[command];
- if(!allowed||Object.keys(o).some(k=>!allowed.includes(k)))throw Error('Use prepare, verify, apply, stage, publish or index with explicit options.');
+ const o=options(args),allowed={prepare:['project','input','declaration','archive','record','source','source-revision','output'],verify:['bundle','project','version','arch'],'verify-assets':['project','version','arch','assets','output'],'verify-remote':['bundle'],apply:['bundle'],stage:['bundle','target'],publish:['bundle'],index:['output']}[command];
+ if(!allowed||Object.keys(o).some(k=>!allowed.includes(k)))throw Error('Use prepare, verify, verify-remote, apply, stage, publish or index with explicit options.');
  if(command==='prepare'){
   if(!o.project||!o.output)throw Error('prepare requires --project and --output.');
   if(o.declaration){let d=read(o.declaration);if(Array.isArray(d)){d=d.filter(item=>item.id===o.project);if(d.length!==1)throw Error('Declaration must select exactly one project.');d=d[0];}o.declaration=d;}
@@ -215,6 +216,7 @@ export async function main([command,...args],directory=root){
  }
  if(command==='verify-assets')return verifyPublicAssets({...o,directory});
  if(command==='verify')return verifyRelease({...o,directory});
+ if(command==='verify-remote'){if(!o.bundle)throw Error('verify-remote requires --bundle.');const {release,publication}=await verifyRemoteRelease({...o,directory});return {...release,draft:publication.draft,sourceCommit:publication.sourceCommit};}
  if(command==='stage')return stageRelease({...o,directory});
  if(command==='publish')return publishRelease({...o,directory});
  if(command==='apply')return applyRelease({...o,directory});

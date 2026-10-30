@@ -26,7 +26,14 @@ export function buildProvider({ output = path.join(cacheDirectory, "output"),
   if (revision !== source.commit) throw new Error("The neural rendering source does not match its registered revision.");
   output = path.resolve(output);
   fs.mkdirSync(output, { recursive: true });
-  execFileSync("/bin/bash", [path.join(directory, "native/build.sh"), output], {
+  // SwiftPM writes dependency edits and lock fingerprints beside Package.swift.
+  // Keep the public producer immutable by building an owned source projection.
+  const recipeRoot=path.resolve(buildRoot+"-recipe"),shared=path.resolve(directory,"../.."),stagedShared=path.join(recipeRoot,"src/modules/shared");
+  if(recipeRoot.startsWith(repository+path.sep)||repository.startsWith(recipeRoot+path.sep))throw Error("Neural work must be separate from the producer checkout.");
+  const Content=createRequire(import.meta.url)("../../runtime/runtime-content.js");
+  fs.mkdirSync(stagedShared,{recursive:true});
+  fs.cpSync(path.join(shared,"reshade"),path.join(stagedShared,"reshade"),{recursive:true,filter:file=>{const relative=path.relative(shared,file);return !relative.split(path.sep).includes("Packages")&&!Content.excludedReason(relative);}});
+  execFileSync("/bin/bash", [path.join(stagedShared,"reshade/neural/native/build.sh"), output], {
     cwd: repository, stdio: "inherit", env: { ...process.env,
       MACLAUNCHER_MLX_DLSS_SOURCE: sourceDirectory,
       MACLAUNCHER_NEURAL_BUILD_ROOT: path.resolve(buildRoot),
@@ -63,11 +70,10 @@ export function buildProvider({ output = path.join(cacheDirectory, "output"),
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const arguments_ = process.argv.slice(2);
-  let output;
-  if (arguments_.length === 1 && arguments_[0] !== "--output") output = arguments_[0];
-  else if (arguments_.length === 2 && arguments_[0] === "--output") output = arguments_[1];
-  else if (arguments_.length) throw new Error("Usage: node build.mjs [--output DIRECTORY]");
-  const result = buildProvider({ output });
+  const options={};
+  if(arguments_.length===1&&!arguments_[0].startsWith("--"))options.output=arguments_[0];
+  else for(let i=0;i<arguments_.length;i+=2){const key=arguments_[i];if(!["--output","--source","--work","--cache"].includes(key)||!arguments_[i+1]||Object.hasOwn(options,key))throw Error("Use --source, --work, --cache and --output.");options[key]=arguments_[i+1];}
+  const result=buildProvider({output:options.output||options["--output"],sourceDirectory:options["--source"],buildRoot:options["--work"],cacheRoot:options["--cache"]});
   console.log(JSON.stringify({ output: result.output, providerABI: result.descriptor.providerABI,
     commit: result.descriptor.commit, files: result.descriptor.files.length }));
 }

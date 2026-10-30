@@ -29,18 +29,19 @@ function applySourceAdapter(sourceRoot) {
   return {path:"Makefile.pre.in",sourceSha256:MAKEFILE_SOURCE_SHA256,adaptedSourceSha256:hash(adapted)};
 }
 
-function compilerEnvironment({ sdk, sourceRoot, workRoot, pathMappings = [] }) {
+function compilerEnvironment({ sdk, sourceRoot, workRoot, architecture = process.arch, pathMappings = [] }) {
   // Autoconf expands compiler variables as words; embedded shell quotes are
   // literal arguments. Build in an ordinary temporary directory instead.
   if (![sdk, sourceRoot, workRoot].every(value => path.isAbsolute(value || "") && !/[\s'"$`\\\0]/.test(value))) throw new Error("Python build paths must be absolute and contain no shell metacharacters or spaces.");
   if (!Array.isArray(pathMappings) || pathMappings.some(({ from, to } = {}) => !path.isAbsolute(from || "") || /[\s'"$`\\\0]/.test(from) || !/^[A-Za-z0-9_.-]+$/.test(to || ""))) throw new Error("Python compiler mappings need absolute paths and logical names.");
   const maps = [...pathMappings, { from: sourceRoot, to: "python-source" }, { from: workRoot, to: "python-build" }]
     .flatMap(({ from, to }) => ["file", "debug", "macro"].map(kind => `-f${kind}-prefix-map=${from}=${to}`));
-  const flags = ["-arch arm64", "-mmacosx-version-min=13.0", `-isysroot ${sdk}`, ...maps, "-Werror=unguarded-availability-new"].join(" ");
+  if (!["arm64", "x64"].includes(architecture)) throw new Error("Choose an arm64 or x64 Python target.");
+  const flags = ["-arch " + (architecture === "x64" ? "x86_64" : "arm64"), "-mmacosx-version-min=13.0", `-isysroot ${sdk}`, ...maps, "-Werror=unguarded-availability-new"].join(" ");
   const env = Portable.buildEnvironment(workRoot, sdk);
   for (const key of Object.keys(env)) if (/^(?:PYTHON|DYLD_)/.test(key)) delete env[key];
   return { ...env, PATH: "/usr/bin:/bin:/usr/sbin:/sbin", CC: "/usr/bin/clang", CXX: "/usr/bin/clang++", AR: "/usr/bin/ar", RANLIB: "/usr/bin/ranlib",
-    CFLAGS: flags, CPPFLAGS: flags, LDFLAGS: "-arch arm64 -mmacosx-version-min=13.0 -Wl,-headerpad_max_install_names " + `-isysroot ${sdk}`, CONFIG_SITE: "/dev/null" };
+    CFLAGS: flags, CPPFLAGS: flags, LDFLAGS: "-arch " + (architecture === "x64" ? "x86_64" : "arm64") + " -mmacosx-version-min=13.0 -Wl,-headerpad_max_install_names " + `-isysroot ${sdk}`, CONFIG_SITE: "/dev/null" };
 }
 
 function copyTree(source, destination, { exclude = [] } = {}) {
@@ -87,15 +88,15 @@ function stageRuntime({ sourceRoot, buildRoot, prefix, pathMappings = [] }) {
   return { prefix, library: path.join(libDir, path.basename(library)), includeDir, stdlib, extensions, notices };
 }
 
-async function buildPython({ archive, workRoot, sdk, pathMappings = [], signal, onProgress, dependencies = {} }) {
+async function buildPython({ archive, workRoot, sdk, architecture = process.arch, pathMappings = [], signal, onProgress, dependencies = {} }) {
   throwIfAborted(signal);
-  if (process.platform !== "darwin" || process.arch !== "arm64") throw new Error("This embedded Python build requires an Apple Silicon Mac.");
+  if (process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) throw new Error("Embedded Python builds require macOS and an arm64 or x64 target.");
   validateArchive(archive);
   workRoot = Portable.assertFreshBuildRoot(workRoot, { readOnlyRoots: [archive] });
   sdk ||= (dependencies.readSDK || (() => execFileSync("/usr/bin/xcrun", ["--show-sdk-path"], { encoding: "utf8" }).trim()))();
   const recipeSha256 = recipeIdentity(), sourceRoot = path.join(workRoot, "source"), buildRoot = path.join(workRoot, "build"), prefix = path.join(workRoot, "prefix");
   fs.mkdirSync(sourceRoot, { recursive: true }); fs.mkdirSync(buildRoot); fs.mkdirSync(prefix);
-  const env = compilerEnvironment({ sdk, sourceRoot, workRoot, pathMappings }), run = dependencies.runBuildCommand || Source.runBuildCommand, logPath = path.join(workRoot, "python.log");
+  const env = compilerEnvironment({ sdk, sourceRoot, workRoot, architecture, pathMappings }), run = dependencies.runBuildCommand || Source.runBuildCommand, logPath = path.join(workRoot, "python.log");
   const options = { cwd: buildRoot, logPath, env, signal, timeout: 20 * 60 * 1000 };
   await run("/usr/bin/tar", ["-xf", archive, "--strip-components", "1", "-C", sourceRoot], options);
   const sourceOverlay=applySourceAdapter(sourceRoot);
@@ -109,7 +110,7 @@ async function buildPython({ archive, workRoot, sdk, pathMappings = [], signal, 
   throwIfAborted(signal);
   const staged = stageRuntime({ sourceRoot, buildRoot, prefix, pathMappings });
   if (recipeIdentity() !== recipeSha256) throw new Error("Python build recipe changed during compilation.");
-  return { version: PIN.version, architecture: PIN.architecture, minimumMacOS: PIN.minimumMacOS, source: PIN.source,
+  return { version: PIN.version, architecture, minimumMacOS: PIN.minimumMacOS, source: PIN.source,
     recipeSha256, sourceRoot, sourceOverlay, buildRoot, sdk, configureOptions: PIN.options, disabledModules: PIN.disabledModules, setupSha256: crypto.createHash("sha256").update(setup).digest("hex"), ...staged, logPath };
 }
 

@@ -5,8 +5,9 @@ import os from 'node:os';
 import {execFileSync} from 'node:child_process';
 import {applyRetroarchExternalOverlay} from './retroarch-external-overlay.mjs';
 import {SCENE_SHADER_INPUTS} from '../../effects/operation-contracts.mjs';
-const [sourceArg,archiveArg,outputArg,option]=process.argv.slice(2);
-if(!sourceArg||!archiveArg||!outputArg||(option&&option!=='--universal')||process.argv.length>6)
+const [sourceArg,archiveArg,outputArg,...options]=process.argv.slice(2);
+const arch=options.length===1&&options[0]==='--universal'?'universal':options.length===2&&options[0]==='--arch'?options[1]:'arm64';
+if(!sourceArg||!archiveArg||!outputArg||!['arm64','x64','universal'].includes(arch)||options.length&&!((options.length===1&&options[0]==='--universal')||(options.length===2&&options[0]==='--arch')))
   throw new Error('Usage: node build-retroarch.mjs <original librashader source> <official arm64 archive or -> <new output> [--universal]');
 const originalSource=path.resolve(sourceArg),archive=archiveArg==='-'?null:path.resolve(archiveArg),output=path.resolve(outputArg);
 const declaration=JSON.parse(fs.readFileSync(new URL('./retroarch-source.json',import.meta.url)));
@@ -31,29 +32,26 @@ const project=path.join(output,'prepare-source');fs.mkdirSync(project);
 for(const file of ['main.rs','Cargo.lock'])fs.copyFileSync(new URL('./retroarch-prepare/'+file,import.meta.url),path.join(project,file));
 const manifest=fs.readFileSync(new URL('./retroarch-prepare/Cargo.toml',import.meta.url),'utf8');
 fs.writeFileSync(path.join(project,'Cargo.toml'),manifest.replaceAll('../../../../../external/librashader',source));
-const env={...process.env,MACOSX_DEPLOYMENT_TARGET:'13.0',CFLAGS:[process.env.CFLAGS||'','-ffile-prefix-map='+os.homedir()+'=BuildHome'].join(' '),CXXFLAGS:[process.env.CXXFLAGS||'','-ffile-prefix-map='+os.homedir()+'=BuildHome'].join(' '),RUSTFLAGS:[process.env.RUSTFLAGS||'', '--remap-path-prefix='+os.homedir()+'=BuildHome','--remap-path-prefix='+source+'=librashader','--remap-path-prefix='+project+'=retroarch-prepare'].join(' ')};
-const capiTarget=process.env.MACLAUNCHER_LIBRASHADER_TARGET||path.join(output,'capi-target');
-// External inputs are additive owned runtime code, so a stock upstream binary
-// cannot substitute for this source build. An archive remains checksum-checked
-// for compatibility with existing invocation records.
-{
- run(process.env.CARGO||'cargo',['build','--release','--locked','--offline','--target','aarch64-apple-darwin','--no-default-features','--features','runtime-metal','--package','librashader-capi','--manifest-path',path.join(source,'Cargo.toml'),'--target-dir',capiTarget,'--jobs','2'],{env,timeout:900000});
- fs.copyFileSync(path.join(capiTarget,'aarch64-apple-darwin/release/liblibrashader_capi.dylib'),library);
+const env={...process.env,MACOSX_DEPLOYMENT_TARGET:'13.0',CFLAGS:[process.env.CFLAGS||'','-ffile-prefix-map='+os.homedir()+'=BuildHome -ffile-prefix-map='+output+'=retroarch-build'].join(' '),CXXFLAGS:[process.env.CXXFLAGS||'','-ffile-prefix-map='+os.homedir()+'=BuildHome -ffile-prefix-map='+output+'=retroarch-build'].join(' '),RUSTFLAGS:[process.env.RUSTFLAGS||'', '--remap-path-prefix='+os.homedir()+'=BuildHome','--remap-path-prefix='+source+'=librashader','--remap-path-prefix='+project+'=retroarch-prepare','--remap-path-prefix='+output+'=retroarch-build'].join(' ')};
+const capiTarget=path.join(output,'capi-target'),helperTarget=path.join(output,'target');
+const targets=arch==='universal'?['aarch64-apple-darwin','x86_64-apple-darwin']:[arch==='x64'?'x86_64-apple-darwin':'aarch64-apple-darwin'];
+const cargo=process.env.CARGO||'cargo';
+// Public builds fetch the dependencies described by the existing exact locks;
+// compilation then uses the same offline dependency set on each CPU.
+for(const manifest of [path.join(source,'Cargo.toml'),path.join(project,'Cargo.toml')])run(cargo,['fetch','--locked','--manifest-path',manifest],{env,timeout:900000});
+const libraries=[],helpers=[];
+for(const target of targets){
+ run(cargo,['build','--release','--locked','--offline','--target',target,'--no-default-features','--features','runtime-metal','--package','librashader-capi','--manifest-path',path.join(source,'Cargo.toml'),'--target-dir',capiTarget,'--jobs','2'],{env,timeout:900000});
+ libraries.push(path.join(capiTarget,target,'release/liblibrashader_capi.dylib'));
+ run(cargo,['build','--release','--locked','--offline','--target',target,'--manifest-path',path.join(project,'Cargo.toml'),'--target-dir',helperTarget,'--jobs','2'],{env,timeout:900000});
+ helpers.push(path.join(helperTarget,target,'release/retroarch-prepare'));
 }
-if(run('/usr/bin/lipo',['-archs',library]).trim()!=='arm64')throw new Error('The library has an unexpected architecture.');
+const helper=path.join(output,'retroarch-prepare');
+for(const [inputs,target] of [[libraries,library],[helpers,helper]]){
+ if(inputs.length>1)run('/usr/bin/lipo',['-create',...inputs,'-output',target]);else fs.copyFileSync(inputs[0],target);
+ fs.chmodSync(target,0o755);
+}
 run('/usr/bin/install_name_tool',['-id','@rpath/librashader.dylib',library]);
-const helperTarget=process.env.MACLAUNCHER_RETROARCH_HELPER_TARGET||path.join(output,'target');
-run(process.env.CARGO||'cargo',['build','--release','--locked','--offline','--manifest-path',path.join(project,'Cargo.toml'),'--target-dir',helperTarget,'--jobs','2'],{env});
-const helper=path.join(output,'retroarch-prepare');fs.copyFileSync(path.join(helperTarget,'release/retroarch-prepare'),helper);fs.chmodSync(helper,0o755);
-run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',helper]);
-if(option==='--universal'){
- const cross={...env,RUSTC_BOOTSTRAP:'1'};
- run(process.env.CARGO||'cargo',['build','-Z','build-std=std,panic_abort','--release','--locked','--offline','--target','x86_64-apple-darwin','--no-default-features','--features','runtime-metal','--package','librashader-capi','--manifest-path',path.join(source,'Cargo.toml'),'--target-dir',capiTarget,'--jobs','2'],{env:cross,timeout:900000});
- const capi=path.join(capiTarget,'x86_64-apple-darwin/release/liblibrashader_capi.dylib');
- run('/usr/bin/lipo',['-create',library,capi,'-output',library+'.universal']);fs.renameSync(library+'.universal',library);run('/usr/bin/install_name_tool',['-id','@rpath/librashader.dylib',library]);
- run(process.env.CARGO||'cargo',['build','-Z','build-std=std,panic_abort','--release','--locked','--offline','--target','x86_64-apple-darwin','--manifest-path',path.join(project,'Cargo.toml'),'--target-dir',capiTarget,'--jobs','2'],{env:cross,timeout:900000});
- const intel=path.join(capiTarget,'x86_64-apple-darwin/release/retroarch-prepare');run('/usr/bin/lipo',['-create',helper,intel,'-output',helper+'.universal']);fs.renameSync(helper+'.universal',helper);
-}
 for(const file of [library,helper]){run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',file]);run('/usr/bin/codesign',['--verify','--strict',file]);}
 const notice=path.join(output,'notices/librashader');fs.mkdirSync(notice,{recursive:true});
 fs.copyFileSync(path.join(source,'LICENSE.md'),path.join(notice,'LICENSE.md'));

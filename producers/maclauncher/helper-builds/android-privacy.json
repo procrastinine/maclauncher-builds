@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "android-privacy",
+  "version": "1.1.0",
+  "compiler": "clang++",
+  "kind": "executable",
+  "output": "clipboard-helper",
+  "sourceDirectory": "sources/maclauncher-android",
+  "sources": [
+    "src/modules/android/native/clipboard-helper.mm"
+  ],
+  "flags": [
+    "-std=c++20",
+    "-O2",
+    "-fobjc-arc"
+  ],
+  "frameworks": [
+    "AppKit",
+    "Carbon",
+    "CoreGraphics"
+  ],
+  "minimumMacOS": "13.0",
+  "license": {
+    "from": "LICENSE",
+    "path": "license.txt",
+    "name": "MacLauncher clipboard integration",
+    "license": "MIT"
+  },
+  "record": {
+    "executable": "clipboard-helper",
+    "clipboard": "explicit-plain-text"
+  }
+}

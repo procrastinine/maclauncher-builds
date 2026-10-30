@@ -26,7 +26,10 @@ if(options['--native-only']){
   adaptations.push(...metadata.adaptations);buildInputs=metadata.buildInputs;
 }else{
 const compiler=path.join(out,'shaderc-offline');
-run('xcrun',['clang++','-std=c++17','-O2','-I',options['--shaderc-headers'],path.join(here,'../../shaderc-offline.cpp'),'-o',compiler]);
+const compilerArchitectures=run('lipo',['-archs',options['--shaderc-library']]).trim().split(/\s+/),hostCPU=process.arch==='x64'?'x86_64':process.arch;
+const compilerCPU=compilerArchitectures.includes(hostCPU)?hostCPU:compilerArchitectures.length===1?compilerArchitectures[0]:null;
+if(!['arm64','x86_64'].includes(compilerCPU))throw new Error('Shader compiler library has no supported build-host CPU.');
+run('xcrun',['clang++','-std=c++17','-O2','-arch',compilerCPU,'-I',options['--shaderc-headers'],path.join(here,'../../shaderc-offline.cpp'),'-o',compiler]);
 for(const [filename,expected] of Object.entries(spec.shaders)){
   const original=path.join(source,'sgsr/v2/include/glsl_2_pass_cs',filename);
   if(hash(original)!==expected)throw new Error('SGSR shader input changed: '+filename);

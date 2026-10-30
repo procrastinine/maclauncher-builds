@@ -159,7 +159,7 @@ if (options['--base-payload']) {
 const python = (script, args) => run(
     'uv',
     [
-      'run', '--offline', '--python', '3.12', '--no-project',
+      'run', '--offline', '--python', process.env.MACLAUNCHER_GRAPHICS_PYTHON || '3.12', '--no-project',
       path.join(work, script), ...args
     ],
     {

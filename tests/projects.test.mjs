@@ -53,3 +53,12 @@ test('delivery registries classify each project once and preserve a flat project
  const flat=structuredClone(registry);delete flat.projects[0].delivery;save(flat);assert.throws(()=>readProjects(directory),/delivery classification/);
  flat.projects[0].delivery='optional';save(flat);assert.throws(()=>readProjects(directory),/delivery classification/);
 });
+
+test('one version keeps a package for each architecture published for it',()=>{
+ const registry=readProjects(root,{resolvePins:false}),catalog=JSON.parse(fs.readFileSync(path.join(root,'catalogs/hashlink.json')));
+ const intel=catalog.packages[0];assert.equal(intel.arch,'x64');assert.deepEqual(intel.launcherArchitectures,['arm64','x64']);
+ const other=arch=>{const tag=releaseTag({id:'hashlink',version:intel.version,arch}),filename='hashlink-'+intel.version+'-'+arch+'.tar.gz';
+  return {...intel,arch,launcherArchitectures:arch==='arm64'?['arm64']:['arm64','x64'],tag,asset:{...intel.asset,filename,url:'https://github.com/'+registry.repository+'/releases/download/'+encodeURIComponent(tag)+'/'+filename}};};
+ validateCatalog({...catalog,packages:[intel,other('arm64'),other('universal')]},{project:'hashlink',repository:registry.repository});
+ assert.throws(()=>validateCatalog({...catalog,packages:[intel,other('arm64'),other('arm64')]},{project:'hashlink',repository:registry.repository}),/Duplicate/);
+});

@@ -1,10 +1,15 @@
-// Developer-only recipe. Game actions use the reviewed bundled executable.
+// Source recipe for the hosted RPGMakerDecrypter packages.
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 
 const PIN = Object.freeze(require("./decrypter-source.json"));
+function platformPin(architecture) {
+  const target=require("./decrypter-platforms.json").architectures[architecture];
+  if(!target)throw new Error("Choose arm64 or x64 for RPGMakerDecrypter.");
+  return {...PIN,...target,packages:[...PIN.packages.filter(row=>! /\.runtime\.osx-/.test(row.name)),...target.runtimePackages]};
+}
 const PROPS = path.join(__dirname, "decrypter-build.props");
 const TARGETS = path.join(__dirname, "decrypter-build.targets");
 const PROJECTS = ["RPGMakerDecrypter.Cli", "RPGMakerDecrypter.Common", "RPGMakerDecrypter.MVMZ", "RPGMakerDecrypter.RGSSAD"];
@@ -40,7 +45,7 @@ function verifySource(sourcePath) {
   }
   return root;
 }
-function prepareSource({ sourcePath, outputDir, includeLocks = true }) {
+function prepareSource({ sourcePath, outputDir, includeLocks = true, architecture }) {
   const original = verifySource(sourcePath);
   const owned = assertNewOutput(outputDir, [original]);
   fs.mkdirSync(owned);
@@ -52,7 +57,7 @@ function prepareSource({ sourcePath, outputDir, includeLocks = true }) {
   fs.copyFileSync(PROPS, path.join(owned, "Directory.Build.props"));
   fs.copyFileSync(TARGETS, path.join(owned, "Directory.Build.targets"));
   if (includeLocks) for (const project of PROJECTS)
-    fs.copyFileSync(path.join(LOCK_ROOT, project + ".json"), path.join(owned, project, "packages.lock.json"));
+    fs.copyFileSync(path.join(architecture?path.join(LOCK_ROOT,architecture):LOCK_ROOT, project + ".json"), path.join(owned, project, "packages.lock.json"));
   return { sourcePath: owned, upstreamRevision: PIN.source.revision,
     sourceArchiveSha256: PIN.source.sha256, propertiesSha256: sha256(PROPS) };
 }
@@ -62,41 +67,43 @@ function buildEnvironment(buildRoot, packageRoot) {
     DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE: "true", DOTNET_MULTILEVEL_LOOKUP: "0",
     NUGET_PACKAGES: packageRoot, GIT_TERMINAL_PROMPT: "0", GIT_NO_LAZY_FETCH: "1" };
 }
-function publishArguments(project, publishRoot) {
-  return ["publish", project, "--no-restore", "--configuration", "Release", "--runtime", PIN.runtimeIdentifier,
+function publishArguments(project, publishRoot, pin = PIN) {
+  return ["publish", project, "--no-restore", "--configuration", "Release", "--runtime", pin.runtimeIdentifier,
     "--self-contained", "true", "--output", publishRoot,
     "-p:MinVerSkip=true", "-p:Version=3.0.0-dev.465c88c3", "-p:InformationalVersion=" + PIN.informationalVersion,
     "-p:DebugType=none", "-p:DebugSymbols=false", "-p:Deterministic=true", "-p:ContinuousIntegrationBuild=true"];
 }
-function verifyPackageArchives(packageRoot) {
-  for (const pin of PIN.packages) {
+function verifyPackageArchives(packageRoot, selected = PIN) {
+  for (const pin of selected.packages) {
     const archive = path.join(packageRoot, pin.name, pin.version, pin.name + "." + pin.version + ".nupkg");
     assertArchive(archive, pin);
   }
-  return Object.fromEntries(PIN.packages.map(pin => [pin.name + "/" + pin.version, pin.sha256]));
+  return Object.fromEntries(selected.packages.map(pin => [pin.name + "/" + pin.version, pin.sha256]));
 }
-function buildTool({ sourceArchive, sdkArchive, outputDir, packageRoot, offline = false, logPath }) {
-  assertArchive(sourceArchive, PIN.source); assertArchive(sdkArchive, PIN.sdk);
+function buildTool({ sourceArchive, sdkArchive, outputDir, packageRoot, offline = false, logPath, architecture }) {
+  const pin=architecture?platformPin(architecture):PIN;
+  assertArchive(sourceArchive, pin.source); assertArchive(sdkArchive, pin.sdk);
   const owned = assertNewOutput(outputDir, [sourceArchive, sdkArchive]); fs.mkdirSync(owned);
   const extracted = path.join(owned, "input"); fs.mkdirSync(extracted);
   execFileSync("/usr/bin/tar", ["-xzf", sourceArchive, "-C", extracted]);
-  const input = path.join(extracted, "RPGMakerDecrypter-" + PIN.source.revision);
-  const source = prepareSource({ sourcePath: input, outputDir: path.join(owned, "source") });
+  const input = path.join(extracted, "RPGMakerDecrypter-" + pin.source.revision);
+  const source = prepareSource({ sourcePath: input, outputDir: path.join(owned, "source"),architecture });
   const sdk = path.join(owned, "sdk"); fs.mkdirSync(sdk);
   execFileSync("/usr/bin/tar", ["-xzf", sdkArchive, "-C", sdk]);
   const packages = packageRoot ? fs.realpathSync(packageRoot) : path.join(owned, "packages");
   const env = buildEnvironment(owned, packages), dotnet = path.join(sdk, "dotnet");
+  env.DOTNET_ROOT=sdk;env.DOTNET_ROLL_FORWARD="LatestPatch";env.DOTNET_BUNDLE_EXTRACT_BASE_DIR=path.join(owned,"bundle");
   const version = execFileSync(dotnet, ["--version"], { cwd: source.sourcePath, env, encoding: "utf8" }).trim();
-  if (version !== PIN.sdk.version) throw new Error("Extracted SDK version does not match its pin.");
+  if (version !== pin.sdk.version) throw new Error("Extracted SDK version does not match its pin.");
   const project = path.join(source.sourcePath, "RPGMakerDecrypter.Cli", "RPGMakerDecrypter.Cli.csproj");
   const publishRoot = path.join(owned, "publish"), log = logPath ? fs.openSync(logPath, "a", 0o600) : null;
   try {
     const stdio = log == null ? "inherit" : ["ignore", log, log];
-    execFileSync(dotnet, ["restore", project, "--locked-mode", "--runtime", PIN.runtimeIdentifier,
+    execFileSync(dotnet, ["restore", project, "--locked-mode", "--runtime", pin.runtimeIdentifier,
       "--source", offline ? packages : "https://api.nuget.org/v3/index.json", "-p:MinVerSkip=true"],
     { cwd: source.sourcePath, env, stdio, timeout: 180000 });
-    verifyPackageArchives(packages);
-    execFileSync(dotnet, publishArguments(project, publishRoot),
+    verifyPackageArchives(packages,pin);
+    execFileSync(dotnet, publishArguments(project, publishRoot,pin),
       { cwd: source.sourcePath, env, stdio, timeout: 180000 });
   } finally { if (log != null) fs.closeSync(log); }
   const executable = path.join(publishRoot, "RPGMakerDecrypter-cli");
@@ -108,14 +115,14 @@ function buildTool({ sourceArchive, sdkArchive, outputDir, packageRoot, offline 
     fs.copyFileSync(notice, path.join(publishRoot, "DOTNET-" + name));
   }
   for (const [name, file] of [["commandlineparser", "License.md"], ["newtonsoft.json", "LICENSE.md"]]) {
-    const pin = PIN.packages.find(item => item.name === name);
-    fs.copyFileSync(path.join(packages, name, pin.version, file), path.join(publishRoot, "LICENSE-" + name + ".md"));
+    const dependency = pin.packages.find(item => item.name === name);
+    fs.copyFileSync(path.join(packages, name, dependency.version, file), path.join(publishRoot, "LICENSE-" + name + ".md"));
   }
-  const lockSha256 = Object.fromEntries(PROJECTS.map(project => [project, sha256(path.join(LOCK_ROOT, project + ".json"))]));
-  const record = { schemaVersion: 1, profile: PIN.profile, version: PIN.informationalVersion,
-    source: PIN.source, sdk: PIN.sdk, runtimeIdentifier: PIN.runtimeIdentifier,
+  const lockSha256 = Object.fromEntries(PROJECTS.map(project => [project, sha256(path.join(architecture?path.join(LOCK_ROOT,architecture):LOCK_ROOT, project + ".json"))]));
+  const record = { schemaVersion: 1, profile: pin.profile, version: pin.informationalVersion,
+    source: pin.source, sdk: pin.sdk, runtimeIdentifier: pin.runtimeIdentifier,
     propertiesSha256: source.propertiesSha256, targetsSha256: sha256(TARGETS), recipeSha256: sha256(__filename), lockSha256,
-    packageArchiveSha256: Object.fromEntries(PIN.packages.map(pin => [pin.name + "/" + pin.version, pin.sha256])),
+    packageArchiveSha256: Object.fromEntries(pin.packages.map(pin => [pin.name + "/" + pin.version, pin.sha256])),
     deterministic: true, debugSymbols: false, sourcePathMap: "/_/RPGMakerDecrypter",
     parentGitVersionIgnored: true, executableSha256: sha256(executable) };
   fs.writeFileSync(path.join(publishRoot, "build.json"), JSON.stringify(record, null, 2) + "\n");
@@ -135,4 +142,4 @@ if (require.main === module) {
     throw new Error("Usage: decrypter-build.js --source-archive source.tar.gz --sdk-archive sdk.tar.gz --output new-directory [--offline --packages cache]");
   const result = buildTool(options); process.stdout.write(JSON.stringify(result.record, null, 2) + "\n");
 }
-module.exports = { PIN, PROJECTS, assertArchive, assertNewOutput, verifySource, prepareSource, buildEnvironment, publishArguments, verifyPackageArchives, buildTool };
+module.exports = { PIN, platformPin, PROJECTS, assertArchive, assertNewOutput, verifySource, prepareSource, buildEnvironment, publishArguments, verifyPackageArchives, buildTool };

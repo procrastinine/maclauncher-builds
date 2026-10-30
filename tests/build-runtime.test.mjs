@@ -4,7 +4,10 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
-import {verifyProducer,main} from '../tools/build-runtime.mjs';
+import {verifyProducer,main,buildPlan,pushPlan,runBuild,RUNNERS} from '../tools/build-runtime.mjs';
+import {prepareRelease} from '../tools/release-runtime.mjs';
+import {readProjects,buildRecord,buildRecords} from '../lib/projects.mjs';
+const root=path.resolve(import.meta.dirname,'..');
 
 test('producer routing never substitutes Android for a different project',()=>{
  const selected=main(['--project','fna','--check']);assert.equal(selected.id,'fna');assert.equal(selected.sourceDirectory,'producers/maclauncher');assert.ok(selected.entries.every(entry=>entry.startsWith('producers/maclauncher/')));
@@ -26,4 +29,176 @@ test('runtime builds require the exact clean source commit recorded by the hub',
  assert.equal(verifyProducer(root,recipe),source);
  assert.throws(()=>verifyProducer(root,{...recipe,revision:'0'.repeat(40)}),/pinned/);
  fs.appendFileSync(path.join(source,'tools/build.mjs'),'// changed\n');assert.throws(()=>verifyProducer(root,recipe),/local changes/);
+});
+
+// A registry with one GitHub-built project and a command that writes a data-only package.
+function githubFixture(t,build={architectures:['arm64','x64']},command){
+ const root=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'runtime-github-build-')));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const project={id:'engine',name:'Engine',producer:{kind:'maclauncher',repository:'https://github.com/owner/builds',entries:['producers/engine/build.mjs'],sourceDirectory:'producers/engine'},upstreams:[],packageProfiles:[{version:'1.0',label:'Engine 1.0'}],build:{version:'1.0',command:'producers/engine/build.mjs',submodules:['producers/engine/upstream'],tools:['meson','ninja'],...build}};
+ const helper={id:'helper',name:'Helper',producer:{kind:'maclauncher',repository:'https://github.com/owner/builds',entries:['producers/helper/build.mjs']},upstreams:[]};
+ fs.mkdirSync(path.join(root,'projects'));fs.mkdirSync(path.join(root,'producers/engine'),{recursive:true});
+ fs.writeFileSync(path.join(root,'projects.json'),JSON.stringify({schemaVersion:2,repository:'owner/builds',updatePolicy:'manual',registries:{downloadable:'projects/downloadable.json',bundled:'projects/bundled.json'}}));
+ fs.writeFileSync(path.join(root,'projects/downloadable.json'),JSON.stringify([project]));fs.writeFileSync(path.join(root,'projects/bundled.json'),JSON.stringify([helper]));
+ fs.writeFileSync(path.join(root,'producers/engine/build.mjs'),command??`import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';
+const o={};for(let i=2;i<process.argv.length;i+=2)o[process.argv[i].slice(2)]=process.argv[i+1];
+const payload=path.join(o.output,'payload');fs.mkdirSync(payload,{recursive:true});
+const files={'manifest.json':JSON.stringify({version:'1.0',arch:o.arch}),'LICENSE':'MIT'};
+for(const [name,bytes] of Object.entries(files))fs.writeFileSync(path.join(payload,name),bytes,{mode:0o644});
+const record=name=>({path:name,size:Buffer.byteLength(files[name]),mode:0o644,sha256:crypto.createHash('sha256').update(files[name]).digest('hex')});
+const cpus=o.arch==='arm64'?['arm64']:o.arch==='x64'?(process.env.ENGINE_CPUS||'arm64,x64').split(','):['arm64','x64'];
+fs.writeFileSync(path.join(o.output,'declaration.json'),JSON.stringify({id:o.project,version:'1.0',arch:o.arch,launcherArchitectures:cpus,minimumMacOS:'13.0',directoryRelative:o.project+'/1.0/'+o.arch,manifestRelative:'manifest.json',manifestSha256:record('manifest.json').sha256,sourceSha256:record('manifest.json').sha256,sourceRelative:'manifest.json',files:Object.keys(files).map(record),notices:[{name:'Engine',license:'MIT',path:'LICENSE'}]}));
+if(process.env.ENGINE_EXTRA)fs.writeFileSync(path.join(o.output,'extra.txt'),'extra');
+`);
+ return root;
+}
+
+const row=(arch,version='1.0')=>({project:'engine',version,arch,runner:RUNNERS[arch],submodules:'producers/engine/upstream',tools:'meson ninja',rustComponents:'',recursiveSubmodules:false,rustTargets:''});
+const commit=(root,message)=>{for(const args of [['add','-A'],['-c','user.name=t','-c','user.email=t@example.com','commit','-qm',message]])execFileSync('git',['-C',root,...args]);return execFileSync('git',['-C',root,'rev-parse','HEAD'],{encoding:'utf8'}).trim();};
+
+test('a manual GitHub build plans the registered version once for each missing architecture',t=>{
+ const root=githubFixture(t),none=()=>[];
+ assert.deepEqual(buildPlan({project:'engine',directory:root,tags:none}),{include:[row('arm64'),row('x64')]});
+ assert.equal(RUNNERS.arm64,'xcode-27');assert.equal(RUNNERS.x64,'macos-26-intel');assert.equal(RUNNERS.universal,RUNNERS.arm64);
+ assert.deepEqual(buildPlan({project:'engine',arch:'x64',version:'1.0',directory:root,tags:none}),{include:[row('x64')]});
+ assert.throws(()=>buildPlan({project:'engine',arch:'universal',directory:root,tags:none}),/builds arm64 and x64 packages/);
+ assert.throws(()=>buildPlan({project:'engine',version:'2.0',directory:root,tags:none}),/builds version 1\.0/);
+ assert.throws(()=>buildPlan({project:'helper',directory:root,tags:none}),/no GitHub build command/);
+ // A catalog record or a release tag, which a staged draft also has, means the architecture is never built again.
+ fs.mkdirSync(path.join(root,'catalogs'));fs.writeFileSync(path.join(root,'catalogs/engine.json'),JSON.stringify({packages:[{version:'1.0',arch:'arm64'}]}));
+ assert.deepEqual(buildPlan({project:'engine',directory:root,tags:none}),{include:[row('x64')]});
+ assert.throws(()=>buildPlan({project:'engine',arch:'arm64',directory:root,tags:none}),/already has a arm64 package or tag/);
+ assert.throws(()=>buildPlan({project:'engine',directory:root,tags:()=>['engine/v1.0/x64','engine/v0.9/arm64']}),/already has a package for each architecture/);
+ execFileSync('git',['init','-q',root]);commit(root,'registry');
+ assert.deepEqual(main(['--plan','--project','engine'],root),{include:[row('x64')]});
+ for(const args of [['--plan','--project','engine','--output','/tmp/out'],['--plan'],['--plan','--before','a'.repeat(40),'--project','engine'],['--before','a'.repeat(40),'--project','engine','--check']])
+  assert.throws(()=>main(args,root),/--plan|--before/);
+});
+
+test('a push builds only the GitHub builds whose version or architectures it changed',t=>{
+ const root=githubFixture(t,{architectures:['arm64']});execFileSync('git',['init','-q',root]);
+ const first=commit(root,'registry'),registry=file=>path.join(root,'projects',file);
+ const update=change=>{const projects=JSON.parse(fs.readFileSync(registry('downloadable.json')));change(projects[0]);fs.writeFileSync(registry('downloadable.json'),JSON.stringify(projects));};
+ assert.deepEqual(pushPlan({before:'0'.repeat(40),directory:root}),{include:[]});
+ assert.deepEqual(pushPlan({before:first,directory:root}),{include:[]});
+ fs.writeFileSync(path.join(root,'notes.txt'),'unrelated');const unrelated=commit(root,'notes');
+ assert.deepEqual(main(['--plan','--before',first],root),{include:[]});
+ // Adding Intel to the build record plans only the new architecture of the published version.
+ fs.mkdirSync(path.join(root,'catalogs'));fs.writeFileSync(path.join(root,'catalogs/engine.json'),JSON.stringify({packages:[{version:'1.0',arch:'arm64'}]}));
+ update(project=>{project.build.architectures=['arm64','x64'];});commit(root,'intel');
+ assert.deepEqual(pushPlan({before:unrelated,directory:root}),{include:[row('x64')]});
+ // A newly declared version plans every architecture without a record or tag.
+ const intel=execFileSync('git',['-C',root,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
+ update(project=>{project.packageProfiles.push({version:'1.1',label:'Engine 1.1'});project.build.version='1.1';});commit(root,'1.1');
+ assert.deepEqual(pushPlan({before:intel,directory:root}),{include:[row('arm64','1.1'),row('x64','1.1')]});
+ execFileSync('git',['-C',root,'tag','engine/v1.1/arm64']);
+ assert.deepEqual(main(['--plan','--before',intel],root),{include:[row('x64','1.1')]});
+});
+
+test('GitHub build records name a contained command, exclusive universal builds and plain tool names',()=>{
+ const project=build=>({id:'engine',producer:{kind:'maclauncher',sourceDirectory:'producers/engine'},packageProfiles:[{version:'1.0'}],build:{version:'1.0',command:'producers/engine/build.mjs',architectures:['arm64'],...build}});
+ assert.deepEqual(buildRecord(project({})).architectures,['arm64']);
+ assert.equal(buildRecord(project({command:'tools/build-engine.mjs'})).command,'tools/build-engine.mjs');
+ for(const [build,error] of [[{architectures:[]},/distinct arm64/],[{architectures:['arm64','arm64']},/distinct arm64/],
+  [{command:'producers/other/build.mjs'},/command/],[{command:'producers/engine/../build.mjs'},/command/],[{command:'producers/engine/build.sh'},/command/],
+  [{tools:['meson; rm']},/tools/],[{version:'2.0'},/declared/],[{version:undefined},/declared/],[{submodules:['../outside']},/submodules/],[{runner:'self-hosted'},/command/]])assert.throws(()=>buildRecord(project(build)),error);
+ assert.throws(()=>buildRecord({...project({}),producer:{kind:'prebuilt'}}),/command/);
+});
+
+test('a GitHub build runs the registered command and accepts only its declared package',t=>{
+ const root=githubFixture(t),work=path.join(root,'work');
+ const built=runBuild({project:'engine',arch:'x64',output:path.join(root,'out-x64'),work,directory:root});
+ assert.equal(built.version,'1.0');assert.equal(built.arch,'x64');assert.equal(built.payload,path.join(root,'out-x64/payload'));
+ assert.equal(main(['--project','engine','--arch','arm64','--output',path.join(root,'out-arm64')],root).arch,'arm64');
+ assert.throws(()=>runBuild({project:'engine',arch:'universal',output:path.join(root,'out-universal'),directory:root}),/builds arm64 and x64/);
+ assert.throws(()=>runBuild({project:'engine',arch:'x64',output:path.join(root,'out-x64'),directory:root}),/new absolute output/);
+ assert.throws(()=>runBuild({project:'engine',arch:'x64',output:'relative',directory:root}),/new absolute output/);
+ const previous={...process.env};t.after(()=>{for(const key of ['ENGINE_CPUS','ENGINE_EXTRA'])if(previous[key]===undefined)delete process.env[key];});
+ process.env.ENGINE_CPUS='x64';assert.equal(runBuild({project:'engine',arch:'x64',output:path.join(root,'out-intel-only'),directory:root}).arch,'x64');
+ process.env.ENGINE_CPUS='arm64';assert.throws(()=>runBuild({project:'engine',arch:'x64',output:path.join(root,'out-cpus'),directory:root}),/Mac CPUs/);delete process.env.ENGINE_CPUS;
+ process.env.ENGINE_EXTRA='1';assert.throws(()=>runBuild({project:'engine',arch:'arm64',output:path.join(root,'out-extra'),directory:root}),/only declaration.json and payload/);delete process.env.ENGINE_EXTRA;
+ const failing=githubFixture(t,{architectures:['arm64']},'process.exitCode=3;\n');
+ assert.throws(()=>runBuild({project:'engine',arch:'arm64',output:path.join(failing,'out'),directory:failing}),/exited with status 3/);
+});
+
+test('every registered GitHub build names an existing command and submodule of this repository',()=>{
+ const modules=fs.readFileSync(path.join(root,'.gitmodules'),'utf8'),registry=readProjects(root,{resolvePins:false});
+ for(const project of registry.projects.filter(project=>project.build))for(const build of buildRecords(project)){
+  assert.ok(fs.statSync(path.join(root,build.command)).isFile(),project.id);
+  const roots=[...modules.matchAll(/\tpath = ([^\n]+)\n/g)].map(match=>match[1]);
+  for(const submodule of build.submodules||[])assert.ok(roots.some(root=>submodule===root||submodule.startsWith(root+'/')),project.id+' '+submodule);
+  // Nested paths are checked at each Gitlink by init-runtime-sources before compilation.
+ }
+});
+
+test('the VNDS-LOVE GitHub build reproduces its published package',async t=>{
+ const work=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'vnds-love-build-')));t.after(()=>fs.rmSync(work,{recursive:true,force:true}));
+ const built=runBuild({project:'vnds-love',arch:'universal',output:path.join(work,'build'),directory:root});
+ const release=await prepareRelease({project:'vnds-love',input:built.payload,declaration:JSON.parse(fs.readFileSync(built.declaration)),output:path.join(work,'release')});
+ const published=JSON.parse(fs.readFileSync(path.join(root,'catalogs/vnds-love.json'))).packages.find(record=>record.version===built.version);
+ assert.equal(release.assets.find(asset=>asset.role==='runtime').sha256,published.asset.sha256);
+});
+
+test('the Runtime build workflow builds each architecture on its own runner before staging drafts',()=>{
+ const workflow=fs.readFileSync(path.join(root,'.github/workflows/runtime-build.yml'),'utf8');
+ assert.match(workflow,/node tools\/build-runtime\.mjs --plan --before "\$BEFORE"/);assert.match(workflow,/node tools\/build-runtime\.mjs --plan --project "\$PROJECT" --arch "\$ARCH"/);
+ assert.match(workflow,/matrix: \$\{\{ fromJSON\(needs\.plan\.outputs\.matrix\) \}\}/);assert.match(workflow,/runs-on: \$\{\{ matrix\.runner \}\}/);
+ assert.match(workflow,/tools\/release-runtime\.mjs prepare --project "\$PROJECT"/);assert.match(workflow,/tools\/release-runtime\.mjs verify --bundle "\$RUNNER_TEMP\/release" --project "\$PROJECT" --version "\$VERSION" --arch "\$ARCH"/);
+ const stage=workflow.slice(workflow.indexOf('\n  stage:'));
+ assert.match(stage,/if: github\.event_name == 'workflow_dispatch' && inputs\.operation == 'stage'/);
+ assert.match(workflow,/push:\n    branches: \[main\]\n    paths:\n      - projects\.json\n      - projects\/\*\*/);assert.match(workflow,/if: needs\.plan\.outputs\.empty == 'false'/);
+ assert.match(workflow,/actions\/attest-build-provenance@[a-f0-9]{40} # v4\.2\.2\n        with:\n          subject-path: \$\{\{ runner\.temp \}\}\/release\/\*\.tar\.gz/);assert.match(stage,/needs: build/);assert.match(stage,/github\.ref != 'refs\/heads\/main'/);
+ assert.match(stage,/stage --bundle "\$bundle" --target "\$GITHUB_SHA"/);assert.ok(!workflow.slice(0,workflow.indexOf('\n  stage:')).includes('contents: write'));
+ const release=fs.readFileSync(path.join(root,'.github/workflows/runtime-release.yml'),'utf8');
+ assert.match(release,/build-run:/);assert.match(release,/"Runtime build \$\(git rev-parse HEAD\) success"/);assert.match(release,/verify-remote --bundle/);
+});
+
+test('registered GitHub build commands reject architectures their projects do not build',async t=>{
+ const work=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'github-build-commands-')));t.after(()=>fs.rmSync(work,{recursive:true,force:true}));
+ const {build:stageEngine}=await import('../producers/engine-adaptations/stage.mjs');
+ assert.throws(()=>stageEngine({project:'vnds-love',arch:'arm64',output:path.join(work,'vnds')}),/universal package/);
+ const {build:buildAdapter}=await import('../producers/vn-adaptations/rlvm/package.mjs');
+ await assert.rejects(buildAdapter({project:'rlvm-adapter',arch:'x64',output:path.join(work,'rlvm'),work:path.join(work,'rlvm-work')}),/universal package/);
+ const {buildDecompiler}=await import('../producers/maclauncher/scripts/build-decompiler.mjs');
+ await assert.rejects(buildDecompiler({project:'sys3-decompiler',arch:'universal',output:path.join(work,'sys3'),work:path.join(work,'sys3-work')}),/arm64 or x64/);
+ await assert.rejects(buildDecompiler({project:'gemrb',arch:'arm64',output:path.join(work,'gemrb'),work:path.join(work,'gemrb-work')}),/registered decompiler/);
+ const registry=readProjects(root,{resolvePins:false});
+ for(const [id,architectures] of [['sys3-decompiler',['arm64','x64']],['xsys35-decompiler',['arm64','x64']],['gm8-decompiler',['arm64','x64']],['catsystem2-kif-crypto',['arm64','x64']],['web-renderer-network',['arm64','x64']]])assert.deepEqual(buildRecords(registry.projects.find(project=>project.id===id))[0].architectures,architectures);
+ assert.deepEqual(buildRecords(registry.projects.find(project=>project.id==='java-steamworks')).map(build=>[build.version,build.architectures]),[['1.9.0-MCLv2',['x64']],['1.10.0-MCLv2',['universal']]]);
+ const {buildHelper,helperProfile}=await import('../tools/build-helper.mjs');
+ assert.throws(()=>buildHelper({project:'web-renderer-network',arch:'ppc',output:path.join(work,'web'),work:path.join(work,'web-work')}),/arm64, x64 or universal/);
+ assert.throws(()=>helperProfile('gemrb'),/ENOENT|helper-builds/);
+ for(const id of ['catsystem2-kif-crypto','web-renderer-network','steam-api-helper','steam-ticket-loader','mkxpz-config-helper'])assert.equal(helperProfile(id).profile.version,registry.projects.find(project=>project.id===id).build.version);
+});
+
+test('an owned helper builds a separate package for each CPU, and only Intel executables also serve Apple Silicon',{skip:process.platform!=='darwin'&&'macOS toolchain'},async t=>{
+ const work=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'helper-builds-')));t.after(()=>fs.rmSync(work,{recursive:true,force:true}));
+ const cpus={};
+ for(const [id,arch] of [['catsystem2-kif-crypto','arm64'],['catsystem2-kif-crypto','x64'],['web-renderer-network','x64']]){
+  const built=runBuild({project:id,arch,output:path.join(work,id+'-'+arch),work:path.join(work,id+'-'+arch+'-work'),directory:root});
+  cpus[id+'/'+arch]=JSON.parse(fs.readFileSync(built.declaration)).launcherArchitectures;
+ }
+ assert.deepEqual(cpus,{'catsystem2-kif-crypto/arm64':['arm64'],'catsystem2-kif-crypto/x64':['arm64','x64'],'web-renderer-network/x64':['x64']});
+});
+
+
+test('a project with multiple ABI builds plans missing versions independently',t=>{
+ const directory=githubFixture(t),file=path.join(directory,'projects/downloadable.json'),projects=JSON.parse(fs.readFileSync(file)),project=projects[0];
+ project.packageProfiles.push({version:'1.1',label:'Engine ABI 1.1'});project.build=[{...project.build,architectures:['x64']},{...project.build,version:'1.1',architectures:['universal']}];fs.writeFileSync(file,JSON.stringify(projects));
+ assert.deepEqual(buildPlan({project:'engine',directory,tags:()=>[]}),{include:[row('x64'),row('universal','1.1')]});
+ assert.deepEqual(buildPlan({project:'engine',version:'1.1',directory,tags:()=>[]}),{include:[row('universal','1.1')]});
+ assert.deepEqual(buildPlan({project:'engine',arch:'x64',directory,tags:()=>[]}),{include:[row('x64')]});
+ assert.deepEqual(buildPlan({project:'engine',arch:'universal',directory,tags:()=>[]}),{include:[row('universal','1.1')]});
+ assert.deepEqual(buildPlan({project:'engine',directory,tags:()=>['engine/v1.0/x64']}),{include:[row('universal','1.1')]});
+ assert.throws(()=>buildPlan({project:'engine',directory,tags:()=>['engine/v1.0/x64','engine/v1.1/universal']}),/already has a package for each declared version/);
+ assert.throws(()=>buildRecords({...project,build:[project.build[0],project.build[0]]}),/distinct declared versions/);
+});
+
+
+test('graphics outputs use different build hosts while retaining one version per CPU',()=>{
+ const matrix=buildPlan({project:'reshade',directory:root,tags:()=>[]}).include;
+ assert.deepEqual(matrix.map(row=>[row.version,row.arch,row.runner]),[['0.3.0','universal','xcode-27'],['0.3.0','x64','macos-26-intel']]);
+ const project=readProjects(root,{resolvePins:false}).projects.find(project=>project.id==='reshade');
+ assert.deepEqual(buildRecord(project).architectures,['universal','x64']);
+ assert.throws(()=>buildRecord({...project,build:{...project.build,runners:{x64:'self-hosted'}}}),/hosted Mac/);
+ assert.throws(()=>buildRecord({...project,build:{...project.build,runners:{arm64:'macos-26'}}}),/hosted Mac/);
 });
