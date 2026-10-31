@@ -177,8 +177,34 @@
       {
         "version": "MCLv1-1028-6",
         "label": "AIM with MacLauncher integration MCLv1-1028-6"
+      },
+      {
+        "version": "MCLv2-1028-6",
+        "label": "AIM with MacLauncher integration MCLv2-1028-6"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv2-1028-6",
+      "command": "tools/build-android-aim.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "submodules": [
+        "sources/maclauncher-android",
+        "producers/maclauncher/src/external/aim"
+      ],
+      "tools": [
+        "ninja",
+        "uv"
+      ],
+      "rustComponents": [
+        "rustfmt"
+      ],
+      "rustTargets": [
+        "aarch64-linux-android"
+      ],
+      "cleanupRunner": true
+    }
   },
   {
     "id": "ai5",

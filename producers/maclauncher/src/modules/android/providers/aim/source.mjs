@@ -652,7 +652,7 @@ fn maclauncher_boot_stop_report(
 `;
 }
 
-export function prepareAimSources({checkout, output, controllerSource}) {
+export function prepareAimSources({checkout, output, controllerSource, buildJobs}) {
   checkout = path.resolve(checkout);
   output = path.resolve(output);
   const commit = execFileSync('git', ['-C', checkout, 'rev-parse', 'HEAD'], {encoding:'utf8'}).trim();
@@ -662,16 +662,22 @@ export function prepareAimSources({checkout, output, controllerSource}) {
   execFileSync('git', ['-C', checkout, 'archive', '--format=tar', '-o', archive, source.commit]);
   execFileSync('/usr/bin/tar', ['-xf', archive, '-C', output]);
   fs.unlinkSync(archive);
-  adaptAimSources(output, {controllerSource});
+  adaptAimSources(output, {controllerSource, buildJobs});
   return output;
 }
 
-export function adaptAimSources(root, {controllerSource} = {}) {
+export function adaptAimSources(root, {controllerSource, buildJobs} = {}) {
   const controllerBytes = fs.readFileSync(controllerSource ?? new URL('./keeper.rs', import.meta.url));
   const controllerSha256 = crypto.createHash('sha256').update(controllerBytes).digest('hex');
   function edit(file, change) {
     const target = path.join(root, file);
     fs.writeFileSync(target, change(fs.readFileSync(target, 'utf8')));
+  }
+  if(buildJobs!==undefined){
+    if(!Number.isSafeInteger(buildJobs)||buildJobs<1)throw new Error('AIM build jobs require a positive integer.');
+    edit('crates/aim-build/src/n2db.rs', text => replace(text,
+      '            .arg0(ARGV0)\n            .arg("-C")',
+      '            .arg0(ARGV0)\n            .args(["-j", "'+buildJobs+'"])\n            .arg("-C")', 'bounded source build jobs'));
   }
   edit('crates/aim-linux-abi/src/sys/mem.rs', adaptMemfdMmapRetirement);
   edit('crates/aim-linux-abi/src/sys/memfd.rs', adaptMemfdAnonymousRegionInfo);
