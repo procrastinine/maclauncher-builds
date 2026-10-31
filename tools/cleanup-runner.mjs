@@ -43,10 +43,16 @@ export function planRunnerCleanup({developerDirectory,sdkRoot=null,homeDirectory
   if(protectedPaths.some(file=>inside(file,entry.path))||sdkRoot&&inside(entry.path,sdkRoot)){kept.push({...entry,reason:'contains a selected SDK or active tool'});continue;}
   actions.push({kind:entry.kind,path:entry.path});
  }
+ const simulatorTargets=new Map();
  for(const runtime of simulatorRuntimes){
   if(!/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(runtime.identifier||'')||runtime.deletable===false)continue;
   if(sdkRoot&&[runtime.path,runtime.bundlePath,runtime.mountPath].filter(absolute).some(file=>inside(file,sdkRoot)||inside(sdkRoot,file)))continue;
-  actions.unshift({kind:'simulator-runtime',identifier:runtime.identifier,...(runtime.path?{measurementPath:runtime.path}:{}),...(Number.isSafeInteger(runtime.sizeBytes)?{reportedSizeBytes:runtime.sizeBytes}:{})});
+  let target=[runtime.path,runtime.bundlePath,runtime.mountPath].find(absolute);
+  if(target){try{target=canonicalDirectory(target);}catch(error){if(error.code!=='ENOENT')throw error;}
+   if(simulatorTargets.has(target)){kept.push({kind:'simulator-runtime',path:target,identifier:runtime.identifier,reason:'shares a canonical physical target with simulator '+simulatorTargets.get(target)});continue;}
+   simulatorTargets.set(target,runtime.identifier);
+  }
+  actions.unshift({kind:'simulator-runtime',identifier:runtime.identifier,...(target?{measurementPath:target}:{}),...(Number.isSafeInteger(runtime.sizeBytes)?{reportedSizeBytes:runtime.sizeBytes}:{})});
  }
  return {platform,developerDirectory,sdkRoot,homeDirectory,protectedPaths,actions,kept};
 }
@@ -89,6 +95,19 @@ function assertPhysicalTarget(action,plan){
  if(!entry||!allowed(entry,plan)||(plan.protectedPaths.some(file=>inside(file,entry.path))||plan.sdkRoot&&inside(entry.path,plan.sdkRoot)))throw Error('Cleanup target changed or contains an active SDK/tool: '+action.path);
 }
 
+/** A missing target is accepted only after this invocation verified its earlier removal. */
+export function applyCleanupAction(action,plan,{environment=process.env,platform=process.platform,completed=[],execute=read,exists=fs.existsSync}={}){
+ assertHostedApply(environment,platform);
+ const target=action.measurementPath||action.path,prior=target&&completed.find(row=>inside(target,row.target));
+ if(prior&&!exists(target))return {status:'already-removed',removedBy:prior.identifier||prior.target};
+ if(action.kind==='simulator-runtime'){
+  if(!/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(action.identifier||''))throw Error('Cleanup simulator identifier changed.');
+  execute('/usr/bin/xcrun',['simctl','runtime','delete',action.identifier],environment);
+ }else{assertPhysicalTarget(action,plan);execute('/usr/bin/sudo',['-n','/bin/rm','-rf','--',action.path],environment);}
+ if(target&&!exists(target))completed.push({target,identifier:action.identifier});
+ return {status:'removed'};
+}
+
 export function cleanupOptions(args,environment=process.env){
  let apply=false,modeSelected=false,tools=(environment.TOOLS||'').split(/\s+/).filter(Boolean),toolsSelected=false;
  for(let index=0;index<args.length;index++){
@@ -113,15 +132,13 @@ export function main(args){
  const inspection=process.platform==='darwin'?inspectMacRunner({developerDirectory,sdkRoot:process.env.SDKROOT||null,activePaths}):inspectLinuxRunner({sdkRoot:process.env.SDKROOT||null,activePaths});
  let runtimes=[];
  if(process.platform==='darwin')try{runtimes=simulatorInventory(JSON.parse(read('/usr/bin/xcrun',['simctl','runtime','list','--json'],toolEnv)));}catch(error){warnings.push('Simulator inventory unavailable: '+error.message.split('\n')[0]);}
- const plan=planRunnerCleanup({...inspection,tools,simulatorRuntimes:runtimes}),actions=[];
+ const plan=planRunnerCleanup({...inspection,tools,simulatorRuntimes:runtimes}),actions=[],completed=[];
  console.log(JSON.stringify({phase:'before',mode:apply?'apply':'dry-run',space:before,developerDirectory:plan.developerDirectory,sdkRoot:plan.sdkRoot}));
  for(const action of plan.actions){
   const record={...action,allocatedBytes:action.path||action.measurementPath?allocatedBytes(action.path||action.measurementPath):null,status:'planned'};
   if(apply){
    try{
-    if(action.kind==='simulator-runtime')read('/usr/bin/xcrun',['simctl','runtime','delete',action.identifier],toolEnv);
-    else{assertPhysicalTarget(action,plan);read('/usr/bin/sudo',['-n','/bin/rm','-rf','--',action.path],toolEnv);}
-    record.status='removed';
+    Object.assign(record,applyCleanupAction(action,plan,{environment:toolEnv,completed}));
    }catch(error){record.status='failed';record.error=error.message.split('\n')[0];}
   }
   actions.push(record);
