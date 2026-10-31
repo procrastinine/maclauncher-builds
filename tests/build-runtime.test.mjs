@@ -4,7 +4,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
-import {verifyProducer,main,buildPlan,pushPlan,runBuild,RUNNERS} from '../tools/build-runtime.mjs';
+import {verifyProducer,main,buildPlan,pushPlan,runBuild,RUNNERS,HOSTED_RUNNERS} from '../tools/build-runtime.mjs';
+import {prepareBuildHost} from '../tools/build-host.mjs';
 import {prepareRelease} from '../tools/release-runtime.mjs';
 import {readProjects,buildRecord,buildRecords} from '../lib/projects.mjs';
 const root=path.resolve(import.meta.dirname,'..');
@@ -52,7 +53,7 @@ if(process.env.ENGINE_EXTRA)fs.writeFileSync(path.join(o.output,'extra.txt'),'ex
  return root;
 }
 
-const row=(arch,version='1.0')=>({project:'engine',version,arch,runner:RUNNERS[arch],rustToolchain:'',xcodeVersion:arch==='x64'?'26.6':'27.0',sdkVersion:arch==='x64'?'26.5':'27.0',developerDirectory:arch==='x64'?'/Applications/Xcode_26.6.app/Contents/Developer':'/Applications/Xcode_27.0.app/Contents/Developer',submodules:'producers/engine/upstream',tools:'meson ninja',rustComponents:'',recursiveSubmodules:false,rustTargets:''});
+const row=(arch,version='1.0')=>({project:'engine',version,arch,runner:RUNNERS[arch]});
 const commit=(root,message)=>{for(const args of [['add','-A'],['-c','user.name=t','-c','user.email=t@example.com','commit','-qm',message]])execFileSync('git',['-C',root,...args]);return execFileSync('git',['-C',root,'rev-parse','HEAD'],{encoding:'utf8'}).trim();};
 
 test('a manual GitHub build plans the registered version once for each missing architecture',t=>{
@@ -85,6 +86,9 @@ test('a push builds only the GitHub builds whose version or architectures it cha
  // Adding Intel to the build record plans only the new architecture of the published version.
  fs.mkdirSync(path.join(root,'catalogs'));fs.writeFileSync(path.join(root,'catalogs/engine.json'),JSON.stringify({packages:[{version:'1.0',arch:'arm64'}]}));
  update(project=>{project.build.architectures=['arm64','x64'];});commit(root,'intel');
+ assert.deepEqual(pushPlan({before:unrelated,directory:root}),{include:[row('x64')]});
+ // A previously designated ARM output can be attested but still await catalog publication.
+ fs.rmSync(path.join(root,'catalogs/engine.json'));
  assert.deepEqual(pushPlan({before:unrelated,directory:root}),{include:[row('x64')]});
  // A newly declared version plans every architecture without a record or tag.
  const intel=execFileSync('git',['-C',root,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
@@ -159,9 +163,20 @@ test('the Runtime build workflow builds each architecture on its own runner befo
  const release=fs.readFileSync(path.join(root,'.github/workflows/runtime-release.yml'),'utf8');
  assert.match(release,/build-run:/);assert.match(release,/tools\/verified-build-run\.mjs --input/);
  assert.match(release,/--json workflowName,headSha,headBranch,status,jobs/);
- assert.match(release,/\[ "\$BUILD_SOURCE_REVISION" = "\$\(git rev-parse HEAD\)" \]/);
+ assert.match(release,/\[ "\$BUILD_SOURCE_REVISION" = "\$RELEASE_SOURCE_REVISION" \]/);
  assert.match(release,/--signer-workflow "\$GITHUB_REPOSITORY\/\.github\/workflows\/runtime-build\.yml" --source-digest/);
+ assert.equal(release.split("git rev-parse 'FETCH_HEAD^{commit}'").length,3,'Both release paths resolve annotated tags to their source commit.');
  assert.match(release,/verify-remote --bundle/);
+ const proofStep=release.match(/      - name: Verify and record the signed build\n        if: env.PUBLICATION_AUTHORITY != 'supplied-publisher'\n        run: \|\n((?:          [^\n]*\n)+)/)?.[1];
+ assert.ok(proofStep,'Compiled release paths import the signed proof before publication.');
+ assert.match(release,/const supplied = readPublisherInput\(\{project: p.id\}\)/);
+ assert.match(release,/supplied && process.env.BUILD_RUN/);
+ assert.match(release,/name: Verify supplied publisher archive\n        if: env.PUBLICATION_AUTHORITY == 'supplied-publisher'\n        run: node tools\/publisher-files\.mjs verify/);
+ assert.match(proofStep,/--format json > "\$RUNNER_TEMP\/verified-build\.json"/);
+ assert.match(proofStep,/node tools\/record-github-build\.mjs --release-bundle "\$RUNNER_TEMP\/runtime-release" --bundle "\$RUNNER_TEMP\/verified-build\.json"/);
+ assert.equal([...release.matchAll(/gh attestation verify/g)].length,1);
+ assert.ok(release.indexOf('name: Verify and record the signed build')<release.indexOf('name: Stage the existing build artifact'));
+ assert.ok(release.indexOf('name: Verify and record the signed build')<release.indexOf('name: Verify the existing draft'));
 });
 
 test('registered GitHub build commands reject architectures their projects do not build',async t=>{
@@ -211,6 +226,26 @@ test('graphics outputs use different build hosts while retaining one version per
  assert.deepEqual(matrix.map(row=>[row.version,row.arch,row.runner]),[['0.3.1','universal','xcode-27'],['0.3.1','x64','macos-26-intel']]);
  const project=readProjects(root,{resolvePins:false}).projects.find(project=>project.id==='reshade');
  assert.deepEqual(buildRecord(project).architectures,['universal','x64']);
- assert.throws(()=>buildRecord({...project,build:{...project.build,runners:{x64:'self-hosted'}}}),/hosted Mac/);
- assert.throws(()=>buildRecord({...project,build:{...project.build,runners:{arm64:'macos-26'}}}),/hosted Mac/);
+ assert.throws(()=>buildRecord({...project,build:{...project.build,runners:{x64:'self-hosted'}}}),/hosted/);
+ assert.throws(()=>buildRecord({...project,build:{...project.build,runners:{arm64:'macos-26'}}}),/hosted/);
+});
+
+
+test('every build host is prepared by one shared step on its declared hosted runner',()=>{
+ for(const label of Object.values(RUNNERS))assert.ok(HOSTED_RUNNERS[label],label);
+ for(const [label,runner] of Object.entries(HOSTED_RUNNERS)){
+  assert.ok(['macos','linux'].includes(runner.os)&&['arm64','x64'].includes(runner.cpu),label);
+  assert.equal(Boolean(runner.developerDirectory),runner.os==='macos',label);
+  assert.doesNotMatch(label,/-(?:large|xlarge)$|self-hosted/);
+ }
+ const calls=[],run=(command,args)=>calls.push([command,...args]);
+ const linux={label:'ubuntu-24.04',runner:HOSTED_RUNNERS['ubuntu-24.04'],rustToolchain:'1.99.0',platform:'linux',cpu:'x64',environment:{PATH:'/usr/bin:/bin'},run};
+ assert.throws(()=>prepareBuildHost({...linux,build:{},cpu:'arm64'}),/ubuntu-24\.04 runner \(linux x64\), not on linux arm64/);
+ assert.throws(()=>prepareBuildHost({...linux,build:{},label:'xcode-27',runner:HOSTED_RUNNERS['xcode-27']}),/xcode-27 runner \(macos arm64\)/);
+ const prepared=prepareBuildHost({...linux,build:{rustTargets:['aarch64-apple-darwin']}});
+ assert.deepEqual(prepared,{env:{RUSTUP_TOOLCHAIN:'1.99.0'},paths:[]});
+ assert.deepEqual(calls,[['rustup','toolchain','install','1.99.0','--profile','minimal'],['rustup','target','add','--toolchain','1.99.0','aarch64-apple-darwin']]);
+ const workflow=fs.readFileSync(path.join(root,'.github/workflows/runtime-build.yml'),'utf8');
+ assert.match(workflow,/run: node tools\/build-runtime\.mjs --prepare --project "\$PROJECT" --arch "\$ARCH" --version "\$VERSION"/);
+ for(const text of ['brew install','rustup ','xcodebuild','init-runtime-sources','cleanup-runner.mjs'])assert.ok(!workflow.includes(text),text);
 });

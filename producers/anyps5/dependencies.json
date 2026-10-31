@@ -54,7 +54,11 @@
     {
       "path": "3rdparty/freetype",
       "repository": "https://github.com/freetype/freetype.git",
-      "revision": "42608f77f20749dd6ddc9e0536788eaad70ea4b5"
+      "revision": "42608f77f20749dd6ddc9e0536788eaad70ea4b5",
+      "noticeFiles": [
+        "docs/FTL.TXT",
+        "docs/GPLv2.TXT"
+      ]
     },
     {
       "path": "3rdparty/freetype/subprojects/dlg",
@@ -79,7 +83,10 @@
     {
       "path": "3rdparty/libjpeg-turbo",
       "repository": "https://github.com/libjpeg-turbo/libjpeg-turbo.git",
-      "revision": "c85e6b905bf237038faa936dab160ebfc5da0344"
+      "revision": "c85e6b905bf237038faa936dab160ebfc5da0344",
+      "noticeFiles": [
+        "README.ijg"
+      ]
     },
     {
       "path": "3rdparty/libusb-cmake",
@@ -165,6 +172,16 @@
       "url": "https://github.com/KytyPS5/ext-ffmpeg-core/releases/download/9ac4cfd195f1/ffmpeg-macos-x64.zip",
       "bytes": 14864759,
       "sha256": "b92c60ac99f9b2277f62d42e7424c24bc991d5723f4fa388a5d2e452be18f40b"
+    },
+    {
+      "id": "build-python-arm64",
+      "version": "3.12.15",
+      "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261013/cpython-3.12.15%2B20261013-aarch64-apple-darwin-install_only_stripped.tar.gz",
+      "sha256": "9866e11cf2ae9caa1e671383786f248859a52dd8bfb702fb4c0dc2c65f1d36de",
+      "bytes": 25052618,
+      "repository": "https://github.com/astral-sh/python-build-standalone",
+      "license": "Python-2.0 AND CNRI-Python",
+      "buildOnly": true
     }
   ]
 }

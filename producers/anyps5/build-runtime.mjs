@@ -28,7 +28,7 @@ async function prepareFfmpeg(buildDirectory){
  }
  return directory;
 }
-export async function buildRuntime({buildDirectory=path.join(root,'out/anyps5-runtime'),jobs=4,check=false,configureOnly=false}={}){
+export async function buildRuntime({buildDirectory=path.join(root,'out/anyps5-runtime'),jobs=4,check=false,configureOnly=false,python}={}){
  const {source,repositories}=verifySources();
  if(check)return {id:'anyps5',revision:recipe.source.revision,architecture:'x86_64',dependencies:inputs.dependencies.length};
  if(process.platform!=='darwin')throw Error('The runtime recipe requires macOS.');
@@ -40,7 +40,7 @@ export async function buildRuntime({buildDirectory=path.join(root,'out/anyps5-ru
  await prepareSourceProjection({source,repositories},projection);
  const ffmpeg=await prepareFfmpeg(buildDirectory);
  run('cmake',['-S',projection,'-B',binary,'-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_ARCHITECTURES=x86_64','-DCMAKE_OSX_DEPLOYMENT_TARGET=26.0',
-  '-DBUILD_TESTING=OFF','-DANYPS5_RELINKER_ONLY=OFF','-DANYPS5_USE_SYSTEM_DEPS=OFF','-DFFMPEG_PREBUILT_DIR='+ffmpeg,
+  ...(python?['-DPython3_EXECUTABLE='+python]:[]),'-DBUILD_TESTING=OFF','-DANYPS5_RELINKER_ONLY=OFF','-DANYPS5_USE_SYSTEM_DEPS=OFF','-DFFMPEG_PREBUILT_DIR='+ffmpeg,
   '-DCMAKE_C_FLAGS=-ffile-prefix-map='+projection+'=/anyps5','-DCMAKE_CXX_FLAGS=-ffile-prefix-map='+projection+'=/anyps5']);
  if(!configureOnly)run('cmake',['--build',binary,'--target','libs','--parallel',String(jobs)]);
  return {id:'anyps5',revision:recipe.source.revision,architecture:'x86_64',projection,buildDirectory:binary,libraries:path.join(binary,'core/libs/libs')};

@@ -1,0 +1,9 @@
+# Prosper
+
+[Prosper](https://github.com/mattias800/prosper) loads and runs the original x86-64 programs in an unpacked PS5 game. Its macOS runtime is an Intel executable because the guest code executes directly. Apple Silicon runs it through Rosetta; an ARM64 host build cannot execute that guest code directly. The package requires macOS 26 or later and a managed Vulkan 1.4 implementation with Intel support.
+
+The shared Runtime build runs the source recipe in producers/prosper. The recipe follows the pinned upstream BUILDING.md: it exports the exact upstream commit to an owned work directory, builds the SDL3 frontend and FFmpeg media support, and leaves the original checkout unchanged. SDL3, Vulkan headers and the FFmpeg archive have exact source or checksum declarations. The MoltenVK scene recipe builds the Vulkan link input from source in the same job; the finished runtime uses the Vulkan implementation selected in MacLauncher.
+
+The package contains bin/prosper-app, source and runtime manifests, dependency notices, the unchanged upstream README and a notice naming mattias800 and the source repository. The upstream revision has no license file; no additional license text is assigned to Prosper. Libraries included from other projects retain their original notices, including RenderDoc API headers, Vulkan-Headers, SDL HIDAPI and yuv2rgb, and the embedded ProggyClean font. The optional NID database keeps its upstream PROSPER_NIDDB override; the unused source-tree fallback uses a stable logical path.
+
+MacLauncher accepts both managed Prosper packages and local builds. [Package verification](../VERIFYING.md) describes the shared archive checks and rebuild comparison. The [PS5 reference](https://github.com/procrastinine/maclauncher/blob/master/docs/game-types/PS5.md#prosper) describes runtime selection, preparation and saves.

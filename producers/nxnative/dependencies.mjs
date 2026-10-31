@@ -78,7 +78,7 @@ async function buildTool(tool, { work, output, jobs, licenses }) {
   const log = path.join(work, tool.name + '.log');
   await fs.mkdir(build, { recursive: true });
   const prefix = `-ffile-prefix-map=${source}=/nxnative-tools/${tool.name}`;
-  const options = { ...tool.configure, BUILD_TESTING: 'OFF', CMAKE_BUILD_TYPE: 'Release',
+  const options = { ...tool.configure, ...(tool.name === 'glslangValidator' ? { Python3_EXECUTABLE: path.join(output, 'python/bin/python3') } : {}), BUILD_TESTING: 'OFF', CMAKE_BUILD_TYPE: 'Release',
     CMAKE_OSX_ARCHITECTURES: 'arm64', CMAKE_OSX_DEPLOYMENT_TARGET: lock.minimumMacOS,
     CMAKE_C_FLAGS: prefix, CMAKE_CXX_FLAGS: prefix, CMAKE_EXE_LINKER_FLAGS: `-Wl,-oso_prefix,${build}/` };
   await run('cmake', ['-S', path.join(source, tool.cmakeSource), '-B', build,

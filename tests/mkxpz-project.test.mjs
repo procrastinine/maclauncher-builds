@@ -13,7 +13,11 @@ test('MKXP-Z uses its owned source recipe and preserves the universal publisher 
  const project=resolveProject('mkxpz',root);
  assert.equal(project.producer.kind,'maclauncher');
  assert.equal(project.producer.repository,'https://github.com/procrastinine/maclauncher-builds');
- assert.deepEqual(project.producer.entries,['producers/maclauncher/scripts/build-mkxpz-nfc.cjs','producers/maclauncher/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json']);
+ assert.deepEqual(project.producer.entries,['producers/maclauncher/scripts/build-mkxpz-nfc.cjs','producers/maclauncher/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json','producers/maclauncher/helper-builds/mkxpz.json']);
+ assert.equal(project.upstreams.find(row=>row.id==='sdl2-image').revision,'d3c6d5963dbe438bcae0e2b6f3d7cfea23d02829');
+ assert.equal(project.build.version,'MCLv2-1003');assert.equal(project.build.command,'tools/build-mkxpz.mjs');
+ assert.deepEqual(project.build.architectures,['arm64']);
+ assert.deepEqual(project.packageProfiles.map(row=>row.version),['MCLv1-1003','MCLv2-1003']);
  assert.equal(project.upstreams[0].revision,baseline.upstream.revision);
  assert.equal(baseline.upstream.revision,'37a04d14413454551a7b6aadbb4e93e67168accb');
  assert.equal(baseline.publisherArtifact.inputExecutableSha256,'3514341b5fff5b9410ff58f0e963d435a4ed1c7560008fb20e1a522e0e4a7f1c');

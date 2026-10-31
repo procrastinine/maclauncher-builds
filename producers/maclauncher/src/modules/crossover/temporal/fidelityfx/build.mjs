@@ -43,7 +43,7 @@ execFileSync(compiler,['-std=c++17','-O2','-shared','-static','-Wl,--exclude-all
  '-ffile-prefix-map='+repository+'=MacLauncher','-ffile-prefix-map='+out+'=FidelityFXBuild','-I'+inputs,'-I'+out,path.join(here,'proxy.cpp'),path.join(here,'wine-observer.cpp'),path.join(out,'exports.def'),'-lbcrypt','-o',library],{stdio:'inherit'});
 const actual=require('../streamline/pe-exports').inspect(library),ordinals=new Map(compiledExports.map(row=>[row.name,row.ordinal]));
 if(actual?.length!==compiledExports.length||actual.some(row=>ordinals.get(row.name)!==row.ordinal))throw Error('The compiled FidelityFX exports changed.');
-const clang=execFileSync('xcrun',['--find','clang++'],{encoding:'utf8'}).trim(),macSDK=execFileSync('xcrun',['--sdk','macosx','--show-sdk-path'],{encoding:'utf8'}).trim(),objects=[];
+const clang=execFileSync('xcrun',['--find','clang++'],{encoding:'utf8'}).trim(),macSDK=process.env.SDKROOT||execFileSync('xcrun',['--sdk','macosx','--show-sdk-path'],{encoding:'utf8'}).trim(),objects=[];
 for(const architecture of ['arm64','x86_64']){const object=path.join(out,'recorded-source-'+architecture+'.o');execFileSync(clang,['-std=c++17','-O2','-arch',architecture,'-isysroot',macSDK,'-mmacosx-version-min=13.0','-fdeclspec','-Wno-ignored-attributes',
  '-ffile-prefix-map='+repository+'=MacLauncher','-ffile-prefix-map='+out+'=FidelityFXBuild','-I'+inputs,'-I'+path.resolve(here,'../../../shared/vulkan/native'),'-c',path.join(here,'recorded-source.cpp'),'-o',object],{stdio:'inherit'});objects.push(object);}
 const producer=path.join(out,'libffx-vulkan-scene-source.a');execFileSync('libtool',['-static','-o',producer,...objects],{stdio:'inherit'});

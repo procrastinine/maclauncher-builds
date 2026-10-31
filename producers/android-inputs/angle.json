@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "android-angle",
+  "angle": {
+    "repository": "https://chromium.googlesource.com/angle/angle",
+    "revision": "cbc4153da8d5796b0fbb3cf288e97bee19436191"
+  },
+  "profiles": [
+    {
+      "id": "common",
+      "version": "0.1.0-MCLv1",
+      "providerVersion": "cbc4153da8d5-metal-vulkan-12",
+      "androidSource": {
+        "repository": "https://github.com/procrastinine/maclauncher-android",
+        "revision": "0d50c2f70d90549a18a69e51e33ed9308338f446"
+      },
+      "programBinaryVersion": "423e91f3f17eacdf2e1ab7def44215a1"
+    },
+    {
+      "id": "aim6",
+      "version": "0.1.0-MCLv2",
+      "providerVersion": "cbc4153da8d5-metal-vulkan-12",
+      "androidSource": {
+        "repository": "https://github.com/procrastinine/maclauncher-android",
+        "revision": "5041bb49525a4178ac9db5ab868e1f89cd225014"
+      },
+      "programBinaryVersion": "69ea190ab685f72e82c4d09ebd73e052"
+    }
+  ],
+  "angleSource": "src/modules/android/native/angle-source.json",
+  "buildEntry": "src/modules/android/native/angle-build.mjs",
+  "backend": "metal-vulkan",
+  "gn": {
+    "repository": "https://gn.googlesource.com/gn",
+    "revision": "3a4f5cea73eca32e9586e8145f97b04cbd4a1aee",
+    "commitPosition": 2265
+  },
+  "pythonVersion": "3.13.11"
+}

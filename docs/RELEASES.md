@@ -1,6 +1,6 @@
 # Runtime releases
 
-Every project has its own versions, tags and binary downloads, and releasing one project builds nothing else. A release starts from a finished runtime directory or a publisher's binary. Compiling is a separate step done by the project's [producer](PACKAGES.md), whose files are in the `sourceDirectory` named in the [project registries](PACKAGES.md#projects-and-packages). For a project with a GitHub build command, a [GitHub Actions workflow](#github-builds) compiles each new version on a GitHub-hosted Mac of each CPU type and prepares the release from the result.
+Every project has its own versions, tags and binary downloads, and releasing one project builds nothing else. A release starts from a finished runtime directory or a publisher's binary. Compiling is a separate step done by the project's [producer](PACKAGES.md), whose files are in the `sourceDirectory` named in the [project registries](PACKAGES.md#projects-and-packages). For a project with a GitHub build command, a [GitHub Actions workflow](#github-builds) builds each newly declared version on its selected GitHub-hosted image and prepares the release from the result.
 
 ## GitHub builds
 
@@ -13,29 +13,36 @@ A GitHub Actions workflow, **Runtime build**, compiles packages for every projec
 | `architectures` | Distinct package outputs: `arm64`, `x64` or `universal`; graphics declares both `universal` and `x64` |
 | `submodules` | Source submodules that each build job initializes |
 | `recursiveSubmodules` | Initialize nested submodules as well; omitted unless the producer uses them |
-| `tools` | Homebrew formulae that each build job installs |
+| `tools` | Declared host tools installed before source initialization |
 | `rustComponents` | Rust toolchain components, including `rust-docs` for standard-library license notices |
 | `rustTargets` | Rust CPU targets installed before compilation |
-| `runners` | Optional architecture-to-hosted-image map; otherwise the standard runner for that CPU |
+| `runners` | Optional package-architecture-to-hosted-image map; otherwise the standard Mac runner for that CPU |
+| `cleanupRunner` | Optional boolean, default `false`; remove unused hosted software while preserving the selected toolchain and declared tools |
 
 For a push, a planning job compares each `build` record with the same record in the previous commit and selects those whose version is new or whose architectures grew. From each selected record it leaves out every architecture that already has a catalog record or a release tag for that version. A staged draft already has its tag, so a package is never built twice, and an empty plan starts no build job. Raising `version` therefore builds the new version, and adding `x64` to the architectures of a published version builds only its Intel package.
 
 A manual run takes the project, an architecture and an operation, `build` or `stage`, and builds the declared versions that still lack a package. The optional version input selects one record when a project declares several. The architecture is `arm64`, `x64` or `universal`, or `all`, which selects every listed architecture that the version still lacks. Naming an architecture that the version already has stops the run.
 
-Each build job selects an explicit hosted image and Xcode installation through `DEVELOPER_DIR`. The workflow checks the selected Xcode and macOS SDK versions before initializing sources.
+Each build job uses the OS and CPU declared for its selected GitHub-hosted image. Without a `runners` selection, a package builds on a Mac with its own CPU, and a universal package builds on Apple Silicon.
 
-| Package outputs | Runner label | Xcode | Developer directory | macOS SDK |
-| --- | --- | --- | --- | --- |
-| Apple Silicon and Universal | `xcode-27` | 27.0 | `/Applications/Xcode_27.0.app/Contents/Developer` | 27.0 |
-| Intel | `macos-26-intel` | 26.6 | `/Applications/Xcode_26.6.app/Contents/Developer` | 26.5 |
+| Runner label | OS and CPU | Default for | Xcode | Developer directory | macOS SDK |
+| --- | --- | --- | --- | --- | --- |
+| `xcode-27` | macOS, Apple Silicon | Apple Silicon and universal packages | 27.0 | `/Applications/Xcode_27.0.app/Contents/Developer` | 27.0 |
+| `macos-26-intel` | macOS, Intel | Intel packages | 26.6 | `/Applications/Xcode_26.6.app/Contents/Developer` | 26.5 |
+| `ubuntu-24.04` | Linux, x64 | | | | |
+| `ubuntu-24.04-arm` | Linux, Arm | | | | |
 
-The [hosted-runner reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners) lists the CPU types for these labels. The [Xcode 27 image](https://github.com/actions/runner-images/blob/main/images/macos/xcode-27-arm64-Readme.md) supplies SDK 27 on Apple Silicon; the [Intel image](https://github.com/actions/runner-images/blob/main/images/macos/macos-26-Readme.md) supplies SDK 26.5. A build record can select a hosted image with a declared toolchain through `runners`. The SDK used for compilation is separate from each package's minimum macOS version.
+After checkout and Node setup, `node tools/build-runtime.mjs --prepare` checks the selected image's OS and CPU. On a Mac it selects Xcode through `DEVELOPER_DIR` and checks the Xcode and macOS SDK versions. Hosted preparation selects the declared Xcode installation. Local preparation keeps an explicit `DEVELOPER_DIR` and checks the same required version. An explicit `SDKROOT` selects the SDK checked and used for compilation. The same command installs declared tools and the Rust toolchain, initializes declared sources, and records environment and PATH settings for the later steps.
+
+The [hosted-runner reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners) lists the CPU types for these labels. The [Xcode 27 image](https://github.com/actions/runner-images/blob/main/images/macos/xcode-27-arm64-Readme.md) supplies SDK 27 on Apple Silicon; the [Intel image](https://github.com/actions/runner-images/blob/main/images/macos/macos-26-Readme.md) supplies SDK 26.5. A build record can select `xcode-27`, `macos-26-intel`, `ubuntu-24.04` or `ubuntu-24.04-arm` through `runners`. Linux labels provide x64 and arm64 hosts respectively. Recipes that produce Mac programs use Mac images; data, Java, DEX and guest compilation inputs can use Linux. Host CPU and package architecture are separate facts. Paid and self-hosted images are excluded. The SDK used for compilation is separate from each package's minimum macOS version.
 
 The `mpv` and `vulkan-kosmickrisp-gles32` source builds use `xcode-27` with Xcode 27.0. The media recipe builds the pinned libmpv source and backports, then compiles its decoded-frame host. KosmicKrisp builds the pinned Mesa driver and Vulkan loader. Both pass their fresh outputs through the shared dependency sealer; package records retain the measured requirements of the complete library closure.
 
 Rust builds select toolchain 1.99.0 explicitly. That selection applies to compilation and dependency-license collection, including source trees with their own older toolchain file.
 
-Build commands receive the declared Homebrew formulae and their installed dependency closure. Executable and pkg-config searches use those prefixes and the selected host toolchain, and inherited library search paths are cleared.
+On macOS, declared tools use Homebrew formulae and their installed dependency closure. On Linux, `tools/build-tools.mjs` maps supported tool names to Ubuntu packages; `uv` uses the version and wheel hashes in `tools/linux-build-requirements.txt`. Unsupported Linux tool names fail before installation. Additional executable searches use declared tools, and inherited library search paths are cleared. Both systems use the same build, preparation, verification and attestation steps.
+
+Every build reports initial disk space. With `cleanupRunner: true`, `tools/cleanup-runner.mjs` reports disk space before and after removing unused hosted software. It retains the selected Xcode and SDK, active language toolchains and declared build tools. Host preparation applies cleanup only in a GitHub-hosted environment; local preparation runs the cleanup report without deleting files. Direct cleanup invocation is also a dry run without `--apply`.
 
 Version-specific capability facts can be stored in the sealed manifest. Packaging validates their shape and copies them into the catalog record alongside any project-wide defaults. HashLink uses this path for its bytecode and native-module ABI facts.
 
@@ -47,7 +54,7 @@ The job then runs `prepare` with the exact source commit and `verify`, adds a si
 
 A manual **Runtime build** run also offers a `stage` operation. It adds a final job, which runs only on `main` and only after every build job has succeeded. That job stages one draft release per architecture, each tagged `<project>/v<version>/<arch>` at the commit that the packages were built from. Nothing is published until the [Runtime release](#draft-upload-and-publication) workflow publishes the drafts. A successful package job from a push build already has the same release artifacts; the `stage` operation of **Runtime release** stages those artifacts directly without compiling again.
 
-The same commands run locally. `--plan` prints the job list that the workflow uses, either for one project or for the changes since a given commit:
+The build and packaging commands also run locally. `--prepare` requires the declared host; local cross-compilation can call the exported `prepareBuild` function with `verifyHost: false`. Package records retain the actual toolchain observations. `--plan` prints the job list that the workflow uses, either for one project or for the changes since a given commit:
 
 ```sh
 node tools/build-runtime.mjs --plan --project sys3-decompiler
@@ -68,7 +75,7 @@ node tools/rebuild-runtime.mjs --project <project> --version <version> \
   --arch <arch> --install-tools true --output /absolute/path/to/new-comparison
 ```
 
-A historical package without a registered build command uses the producer entry in its tagged project record for manual reproduction. Rebuilds retain the historical packaging implementation. Recipe-only edits do not designate a build or change published packages; the push plan selects new versions or additional explicitly declared architectures.
+A historical package without a registered build command uses the producer entry in its tagged project record for manual reproduction. Rebuilds use the recorded commit's host-preparation helper and tool installer when present, and retain its packaging implementation. Earlier Mac recipes retain their original Homebrew installation commands. Recipe-only edits do not designate a build or change published packages; the push plan selects new versions or additional explicitly declared architectures.
 
 The report compares complete archive hashes, regular-file hashes and permissions, tar headers, member order and the full decompressed tar stream. JSON differences include field pointers and distinguish missing fields from null values. Toolchain observations appear separately from file differences. A binary difference whose cause is not established remains unexplained; an SDK difference does not establish executable equivalence.
 
@@ -114,6 +121,8 @@ Tags and archive names follow one rule:
 
 The package's file list and the runtime manifest that MacLauncher reads contain that exact version. The architecture appears only as the final component: `arm64`, `x64` or `universal`.
 
+A changed package with the same engine source receives a new `MCLvN` revision: `26.10-MCLv1`, for example, becomes `26.10-MCLv2`. A version without that suffix adds `-MCLv1`. Each revision has its own immutable tag, archive and catalog record. Older catalog rows and installed versions remain available; the ordinary catalog resolver chooses among the compatible versions. Recipe-only changes do not designate a new package build.
+
 Each catalog record also lists, in `launcherArchitectures`, the Mac CPUs on which MacLauncher can use the package. An `arm64` package lists `arm64`, and a universal package lists both CPUs. An `x64` package whose native files run as separate programs lists both CPUs as well, because Apple Silicon runs those programs through Rosetta; its package record marks each such file with `executionArchitecture: "x86_64"`. An `x64` add-on loaded into MacLauncher's own process lists only `x64`, since macOS cannot mix CPU architectures within a process. A library used by a separate Intel host, such as the Steamworks4j 1.9 JNI library in an Intel JVM, can list both with the same `executionArchitecture` record. One version can have a package for each architecture, the catalog keeps all of them, and MacLauncher chooses among them on the Mac where it runs.
 
 ### Versions
@@ -122,11 +131,11 @@ Packages of tagged upstream versions use `<upstream-version>-MCLvN`, where N is 
 
 Commit snapshots use `MCLvN-MMDD`, where the month and day come from the UTC timestamp of the exact upstream commit. The revision increases with each upstream or adaptation update and continues across years, so `MCLv9-1231` can advance to `MCLv10-0125`. The full timestamp and exact commit stay in the source metadata.
 
-Components maintained in this repository use their own versions. Packages of upstream publisher binaries also use the MCL suffix for the packaging revision, and the embedded vendor version stays unchanged. `lib/package-version.mjs` implements both revision calculations.
+Components maintained in this repository use their own versions. Unmodified publisher files use the publisher’s version without an MCL suffix. Their registered input inventory records the exact supplied files; package manifests and inventories identify the surrounding archive. Older package names keep their original versions. `lib/package-version.mjs` implements the revision calculations for MacLauncher builds.
 
 ### Changing a package version
 
-`tools/reversion-runtime.mjs` changes the version in the package's file list and in the runtime manifest by rewriting the archive as a stream. All other file bytes, modes, source checksums, native signatures and dependency records stay the same. The tool takes `--archive`, `--record`, `--version` and a new `--output` path, and the original archive stays unchanged. It does not compile anything. The rewritten package gets a new version and checksum; a published package is never changed.
+`tools/reversion-runtime.mjs` changes the version in the package's file list and in the runtime manifest by rewriting the archive as a stream. All other file bytes, modes, source checksums, native signatures and dependency records stay the same. The tool takes `--archive`, `--record`, `--version` and a new `--output` path, and the original archive stays unchanged. It does not compile anything. The rewritten package gets a new version and checksum; a published package is never changed. A rewritten compiled package needs a GitHub build attestation for its new digest. A package containing only unchanged publisher files instead requires the registered file-equality authority described below.
 
 ### Catalog contents
 
@@ -134,14 +143,20 @@ A project's catalog keeps every published package and gains at most one new vers
 
 ## Draft upload and publication
 
-`stage` uploads a prepared package to GitHub through an authenticated GitHub CLI. Before it creates the draft release, it validates the local package and creates the source tag at the exact `--target` commit; an existing tag, including an annotated tag, must resolve to that same commit, and a conflicting tag is never replaced. The runtime archive is the only public attachment, and the release notes contain a collapsed Source section that links to the tagged source and the upstream commits. Existing releases and assets are not replaced.
+Supplied publisher packages use a separate file-equality authority. A registered prebuilt producer names a public descriptor and its SHA-256. The descriptor pins the original input archive and every supplied file's path, size, hash and mode. `tools/publisher-files.mjs record` compares the actual input and output archives and records their equality in `publisher-records/<archive-sha256>.json`. Additional files are limited to consumed JSON metadata and declared non-executable textual notices. A prebuilt label or locally written success flag grants no publication authority.
+
+`node tools/publisher-files.mjs verify --project <project> --archive <archive> --record <package-record-or-equality-receipt>` rechecks a supplied archive without writing files. Optional `--input-archive` also rechecks the pinned original archive.
+
+Stage and apply recheck the actual supplied archive. Source tags must contain the matching descriptor and producer registration. This records the packaging inputs without claiming compilation on GitHub or authenticated publisher identity; ad-hoc signatures establish no publisher identity. A tag that lacks those inputs cannot authorize another source commit. Compiled packages continue to require signed GitHub build provenance.
+
+`stage` uploads a package through an authenticated GitHub CLI after checking its publication authority. Compiled packages require signed provenance from `runtime-build.yml` on a GitHub-hosted runner. Supplied publisher packages require the registered file-equality record and an actual archive comparison. The archive identity and packaging source must match the package and exact `--target` commit. An existing tag, including an annotated tag, must resolve to that same commit, and a conflicting tag is never replaced. The runtime archive is the only public attachment, and the release notes contain a collapsed Source section that links to the tagged source and the upstream commits. Existing releases and assets are not replaced.
 
 ```sh
 node tools/release-runtime.mjs stage --bundle out/gemrb-release \
   --target <40-character-builds-source-commit>
 ```
 
-A manual GitHub Actions workflow, **Runtime release**, takes a project, version and architecture. It checks out the source commit of the selected tag, downloads only that draft's binary archive and validates it against the catalog at that commit. Its `stage` operation creates a draft from a successful build artifact, `verify` keeps an existing draft, and `publish` publishes the same bytes; none builds native code. The repository's **Source** workflow runs on pushes to `main`, on pull requests and when started by hand; creating a runtime tag does not start it.
+A manual GitHub Actions workflow, **Runtime release**, takes a project, version and architecture. It keeps the dispatch commit's publication tools and evidence ledger, resolves the historical source tag without changing the checkout, downloads only that draft's binary archive and validates it against the committed catalog. Signed provenance must identify the archive digest and the tag's exact source commit. Its `stage` operation creates a draft from a successful build artifact, `verify` keeps an existing draft, and `publish` publishes the same bytes; none builds native code. The repository's **Source** workflow runs on pushes to `main`, on pull requests and when started by hand; creating a runtime tag does not start it.
 
 Packages built by **Runtime build** are not in the catalog yet. For them, the `build-run` input of **Runtime release** names the ID of the build run. Staging requires that input and a dispatch from `main`; the workflow selects its source commit before creating the tag. The job first confirms that the run is complete and that the selected project, version and architecture have a successful package job. Each package is checked independently. It then downloads the run's artifact for the selected architecture, checks it with `verify`, verifies its GitHub attestation against the build workflow and source commit, and compares it with the draft's asset through `verify-remote` before `publish`. A draft staged locally from the artifact of a push-triggered run, with `stage --target` set to that run's commit, is published the same way without a second build. Each architecture needs its own dispatch. `verify-remote --bundle <directory>` can also be run locally; it reads the release from GitHub and changes nothing.
 
@@ -153,7 +168,7 @@ gh run download <run-id> --repo procrastinine/maclauncher-builds \
 node tools/release-runtime.mjs apply --bundle out/sys3-decompiler-x64
 ```
 
-`apply --bundle <directory>` updates the local project catalog and regenerates `catalogs/index.json`. It makes no network request, commit or publication, and it cannot replace an existing package. Retiring a catalog entry is a separate, deliberate change, made together with the removal of the corresponding release. MacLauncher reads the per-project catalogs directly from Git, and the package index uses the same committed records.
+`apply --bundle <directory>` verifies the applicable publication authority, checks the public release and its source tag, updates the local project catalog and regenerates `catalogs/index.json`. It creates no commit or release and cannot replace an existing package. `stage`, `publish`, `verify-remote`, `apply` and the catalog publication CLI require the applicable publication authority: signed GitHub build evidence for compiled packages, or registered supplied-file equality for unmodified publisher packages. A run ID or locally written success flag is insufficient. Local `prepare` and `verify` remain available for unsigned diagnostic archives. During catalog updates, previous records without either publication authority move to `catalogs/superseded/<project>.json`; their versions and archive identities remain available there. Active catalogs contain the verified incoming package and earlier verified packages. Retiring a catalog entry is a separate, deliberate change, made together with the removal of the corresponding release. MacLauncher reads the per-project catalogs directly from Git, and the package index uses the same committed records.
 
 ### Helper packages
 

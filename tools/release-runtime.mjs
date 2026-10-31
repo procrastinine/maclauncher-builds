@@ -7,6 +7,7 @@ import {pathToFileURL} from 'node:url';
 import {pack,verify,catalog,publicDeclaration} from './runtime-package.mjs';
 import {resolveProject,readProjects} from '../lib/projects.mjs';
 import {releaseVersion} from '../lib/package-version.mjs';
+import {buildCoverage,assertBuildCoverage} from './build-coverage.mjs';
 import {sourceDateEpoch,buildToolchain} from '../lib/reproducible-build.mjs';
 import {assetName,releaseTag,releaseRecord,validateCatalog,identity} from '../lib/project-identity.mjs';
 const require=createRequire(import.meta.url),A=require('../lib/archive.cjs'),B=require('../lib/bundled-native.cjs');
@@ -27,6 +28,8 @@ function recordFromDeclaration(d,asset,sourceAsset,source,catalogRecord={}){
 async function asset(directory,name,role){const file=path.join(directory,name);return {filename:name,role,sha256:await A.checksum(file),bytes:regular(file).size};}
 function write(file,value){fs.writeFileSync(file,json(value),{flag:'wx'});}
 function loadPrevious(project,directory){const file=path.join(directory,'catalogs',project+'.json');return fs.existsSync(file)?read(file):undefined;}
+async function verifyPublicationBuild(options){const {requirePublicationAuthority}=await import('./publication-authority.mjs');return requirePublicationAuthority(options);}
+async function matchingBuildSource(authority,sourceRevision,{record,directory}){const {assertPublicationSource}=await import('./publication-authority.mjs');return assertPublicationSource({authority,record,directory,sourceRevision});}
 
 /** Adapt an existing sealed manager output without changing its files or manifest. */
 export async function managerDeclaration({project,input,source}){
@@ -107,23 +110,32 @@ export async function verifyRelease({bundle,project,version,arch,directory=root}
 }
 
 /** A single discoverable listing, generated from the same project catalogs used by the launcher. */
-export function catalogIndex(directory=root){
+export function catalogIndex(directory=root,{coverage=buildCoverage(directory)}={}){
  const registry=readProjects(directory,{resolvePins:false}),catalogs=path.join(directory,'catalogs');
+ assertBuildCoverage(coverage,directory);
  const projects=[];
- for(const p of registry.projects){const file=path.join(catalogs,p.id+'.json');if(!fs.existsSync(file))continue;const bytes=fs.readFileSync(file),c=validateCatalog(JSON.parse(bytes),{project:p.id,repository:registry.repository,allowEmpty:true});if(!c.packages.length)continue;
-  const page='https://'+registry.repository.split('/')[0]+'.github.io/'+registry.repository.split('/')[1]+'/';
+ for(const p of registry.projects){
+  if(p.supersededBy!==undefined)continue;
+  const file=path.join(catalogs,p.id+'.json');if(!fs.existsSync(file))continue;
+  const original=validateCatalog(JSON.parse(fs.readFileSync(file)),{project:p.id,repository:registry.repository,allowEmpty:true});
+  const approved=coverage.catalogPackages.filter(row=>row.projectId===p.id&&row.projectState==='active'&&row.catalogState==='active'&&['github','supplied-publisher'].includes(row.origin));
+  const packages=original.packages.filter(record=>approved.some(row=>stable(row.record)===stable(record)));
+  if(!packages.length)continue;
+  const bytes=Buffer.from(json({...original,packages})),page='https://'+registry.repository.split('/')[0]+'.github.io/'+registry.repository.split('/')[1]+'/';
   const profiles=new Map((p.packageProfiles||[]).map(profile=>[profile.version,profile]));
-  projects.push({projectId:p.id,name:p.name,delivery:p.delivery,pageUrl:new URL('#'+p.id,page).href,catalog:{url:'https://raw.githubusercontent.com/'+registry.repository+'/main/catalogs/'+p.id+'.json',sha256:digest(bytes),bytes:bytes.length},releases:c.packages.map(r=>({version:r.version,arch:r.arch,launcherArchitectures:r.launcherArchitectures,minimumMacOS:r.minimumMacOS,tag:r.tag,asset:r.asset,pageUrl:new URL('#'+(profiles.get(r.version)?.anchor||p.id),page).href,...(profiles.has(r.version)?{profile:profiles.get(r.version).label,...(profiles.get(r.version).anchor?{anchor:profiles.get(r.version).anchor}:{})}:{})}))});
+  projects.push({projectId:p.id,name:p.name,delivery:p.delivery,pageUrl:new URL('#'+p.id,page).href,
+   catalog:{url:new URL('catalogs/'+p.id+'.json',page).href,sha256:digest(bytes),bytes:bytes.length},
+   releases:packages.map(r=>({version:r.version,arch:r.arch,launcherArchitectures:r.launcherArchitectures,minimumMacOS:r.minimumMacOS,tag:r.tag,asset:r.asset,pageUrl:new URL('#'+(profiles.get(r.version)?.anchor||p.id),page).href,...(profiles.has(r.version)?{profile:profiles.get(r.version).label,...(profiles.get(r.version).anchor?{anchor:profiles.get(r.version).anchor}:{})}:{})}))});
  }
- return {schemaVersion:1,repository:registry.repository,updatePolicy:'manual',projects:projects.sort((a,b)=>a.projectId.localeCompare(b.projectId))};
+ return {schemaVersion:1,repository:registry.repository,updatePolicy:'manual',projects:projects.sort((a,b)=>a.projectId.localeCompare(b.projectId)),retiredProjects:coverage.retiredProjects};
 }
 
 /** Apply only a public, digest-verified release; older versions cannot be removed or replaced. */
-export async function applyRelease({bundle,directory=root,runGh=runGitHub}){
- const {release,record}=await verifyRemoteRelease({bundle,directory,runGh,requirePublic:true});
- const previous=loadPrevious(release.id,directory),next=catalog([record],{project:release.id,repository:release.repository,previous});
- const file=path.join(directory,'catalogs',release.id+'.json');fs.mkdirSync(path.dirname(file),{recursive:true});
- const temporary=file+'.tmp-'+process.pid;try{fs.writeFileSync(temporary,json(next),{flag:'wx'});fs.renameSync(temporary,file);}finally{fs.rmSync(temporary,{force:true});}
+export async function applyRelease({bundle,directory=root,runGh=runGitHub,verifyGithubBuild=verifyPublicationBuild}){
+ const {release,record}=await verifyRemoteRelease({bundle,directory,runGh,verifyGithubBuild,requirePublic:true});
+ const previous=loadPrevious(release.id,directory),file=path.join(directory,'catalogs',release.id+'.json');
+ const {writePublicationCatalog}=await import('./catalog-publication.mjs');
+ writePublicationCatalog({records:[record],project:release.id,repository:release.repository,directory,output:file,previous});
  const index=catalogIndex(directory);fs.writeFileSync(path.join(directory,'catalogs','index.json'),json(index));return {projectId:release.id,tag:release.tag,catalog:file};
 }
 
@@ -180,19 +192,23 @@ async function existingRelease({release,record,runGh}){
 }
 
 /** Verify the immutable remote asset, including staged drafts, without changing GitHub. */
-export async function verifyRemoteRelease({bundle,directory=root,runGh=runGitHub,requirePublic=false}){
+export async function verifyRemoteRelease({bundle,directory=root,runGh=runGitHub,requirePublic=false,verifyGithubBuild=verifyPublicationBuild}){
  const checked=await verifyRelease({bundle,directory});
+ const build=await verifyGithubBuild({record:checked.record,repository:checked.release.repository,directory,archive:path.join(path.resolve(bundle),checked.record.asset.filename)});
  const publication=await existingRelease({...checked,runGh});
  if(!publication)throw Error('The selected release has not been staged.');
+ await matchingBuildSource(build,publication.sourceCommit,{record:checked.record,directory});
  if(requirePublic&&publication.draft!==false)throw Error('Catalog updates require a public, non-draft release.');
  return {...checked,publication};
 }
 
 /** Explicit network action: upload only a release with no existing public identity. */
-export async function stageRelease({bundle,target,directory=root,runGh=runGitHub}){
+export async function stageRelease({bundle,target,directory=root,runGh=runGitHub,verifyGithubBuild=verifyPublicationBuild}){
  if(!/^[a-f0-9]{40}$/.test(target||''))throw Error('Staging requires an exact public source commit through --target.');
- const {release,record}=await verifyRelease({bundle,directory}),project=resolveProject(release.id,directory);
- const existing=await existingRelease({release,record,runGh});if(existing)return existing;
+ const {release,record}=await verifyRelease({bundle,directory}),project=resolveProject(release.id,directory,{resolvePins:false});
+ const build=await verifyGithubBuild({record,repository:release.repository,directory,archive:path.join(path.resolve(bundle),record.asset.filename),sourceRevision:target});
+ await matchingBuildSource(build,target,{record,directory});
+ const existing=await existingRelease({release,record,runGh});if(existing){await matchingBuildSource(build,existing.sourceCommit,{record,directory});return existing;}
  const ref=JSON.parse(await runGh(['api','--method','POST','repos/'+release.repository+'/git/refs','-f','ref=refs/tags/'+release.tag,'-f','sha='+target]));
  if(await releaseTagCommit(ref,{repository:release.repository,runGh})!==target)throw Error('Release tag differs from the exact source commit.');
  const files=publicationAssets(release).map(name=>path.join(path.resolve(bundle),name));
@@ -201,10 +217,8 @@ export async function stageRelease({bundle,target,directory=root,runGh=runGitHub
 }
 
 /** Publishing finalizes a verified draft; an already public release is unchanged. */
-export async function publishRelease({bundle,directory=root,runGh=runGitHub}){
- const {release,record}=await verifyRelease({bundle,directory});
- const existing=await existingRelease({release,record,runGh});
- if(!existing)throw Error('The selected release has not been staged.');
+export async function publishRelease({bundle,directory=root,runGh=runGitHub,verifyGithubBuild=verifyPublicationBuild}){
+ const {release,publication:existing}=await verifyRemoteRelease({bundle,directory,runGh,verifyGithubBuild});
  if(!existing.draft)return existing;
  await runGh(['release','edit',release.tag,'--repo',release.repository,'--draft=false','--latest=false']);
  return {...existing,draft:false,published:true};

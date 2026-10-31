@@ -1,0 +1,6 @@
+gl_generator 0.14.0
+
+Authors from the locked crate Cargo.toml:
+Brendan Zabarauskas <bjzaba@yahoo.com.au>
+Corey Richardson
+Arseny Kapoulkine

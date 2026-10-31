@@ -10,15 +10,23 @@ MacLauncher's [runtime distribution](https://github.com/procrastinine/maclaunche
 
 Some producers have their own reference page:
 
+- [FNA, OpenGMK, npengine and Impacto](NATIVE_ENGINES.md): source recipes, native dependencies and runtime profiles.
 - [AnyPS5](ANYPS5.md): the PS5 executable converter and the x86-64 macOS system libraries that converted games run with.
 - [mpv decoded-frame runtime](MPV.md): the native libmpv host that passes decoded video frames to MacLauncher's graphics presenter.
 - [nxnative native tools](NXNATIVE.md): the native host, package extractor and shader tools for nxnative.
+- [MKXP-Z](MKXPZ.md): source-built filename normalization and its engine dependencies.
+- [Prosper](PROSPER.md): the Intel PS5 runtime and its source recipe.
+- [ReMinori](REMINORI.md): engine, movie bridge and dependency notices.
+- [siglus_rs](SIGLUS.md): the source-built library and native host.
+- [Scene adapters](SCENE_ADAPTERS.md): WineVulkan, FidelityFX and MoltenVK packages.
 
 [Upstream commit references](SOURCE_PINS.md) describes how a project record points to the file in which its producer records the exact upstream commit.
 
 ## Projects and packages
 
 [projects.json](../projects.json) names two project registries: [downloadable runtimes and tools](../projects/downloadable.json) and [bundled components](../projects/bundled.json). Each project is in exactly one of them, and the registry sets the project's `delivery` value, `downloadable` or `bundled`. MacLauncher installs downloadable packages separately from the app. The bundled registry contains components selected by app packaging and pinned input packages consumed by build recipes. A registry entry does not add files to the app; its packaging manifest selects included components. A project record names the producer, the upstream repositories with a reference to the exact commit of each, and the producer's entry files; a project built on GitHub also has a `build` record with its build command and architectures, or an array of records for distinct ABI versions. `readProjects()` reads both registries into one validated list. The [package index](https://procrastinine.github.io/maclauncher-builds/) shows the two groups separately, and its JSON records include each project's `delivery` value.
+
+The optional `supersededBy` field names another registered project that replaces a retired project. Links can form a chain, but cannot name the same project or form a cycle. Historical records, package profiles, source and catalogs retain their original identities. `resolveProject(oldId)` returns the original project; the successor is a separate registry reference.
 
 Native builds share `producers/maclauncher/scripts/native-binary-tools.cjs` for Mach-O inspection, dependency copying and license notices, without loading MacLauncher's module registry. That script and a few other build scripts are copies of MacLauncher files. `producers/maclauncher/native-tools-source.json` records the hash of each original and of each copy, and the import change that the standalone KosmicKrisp build needs. This command copies the files again from a MacLauncher checkout and checks those hashes:
 
@@ -84,10 +92,10 @@ The internal `android-art-image-extractor` input package compiles AIM’s origin
 | [ONScripter-EN](https://github.com/Galladite27/ONScripter-EN) | `onscripter-en` | Native Cocoa shell and portable SDL/media libraries |
 | [ONScripterYuri](https://github.com/YuriSizuku/OnscripterYuri) | `onsyuri` | Empty-page state reset and portable native libraries |
 | [OpenGMK](https://github.com/OpenGMK/OpenGMK) | `opengmk` | Native AppKit, graphics, audio and extensions |
-| [Prosper](https://github.com/mattias800/prosper) | `prosper` | Build recipe for an x86-64 macOS PS5 runtime, for local use only |
+| [Prosper](PROSPER.md) | `prosper` | Source-built x86-64 macOS PS5 runtime |
 | [ReMinori](https://github.com/luoyily/ReMinori) | `reminori` | Fonts, movies, menus, saves and PAZ/PE profiles |
 | MacLauncher RLVM adapter | `rlvm-adapter` | Cocoa integration library for the unmodified upstream RLVM app |
-| [siglus_rs](https://github.com/xmoezzz/siglus_rs) | `siglus` | The publisher's siglus_rs library with a universal host program that calls its C API |
+| [siglus_rs](SIGLUS.md) | `siglus` | Source-built siglus_rs library and native host calling its C API |
 | [System3 SDL2](https://github.com/kichikuou/system3-sdl2) | `system3` | Executable-relative resources and native libraries |
 | [VNDS-LOVE](https://github.com/ajusa/VNDS-LOVE) | `vnds-love` | VNDS interpreter compiled from MoonScript to Lua, with wrappers for MacLauncher's LÖVE runtime |
 | [xsystem35 SDL2](https://github.com/kichikuou/xsystem35-sdl2) | `xsystem35` | Executable-relative fonts/resources and native libraries |
@@ -97,9 +105,9 @@ KiriKiri SDL2 builds from its pinned source and nested dependencies through `too
 
 HashLink uses `tools/build-hashlink.mjs` for its separate 1.9 and 1.12 ABI packages. Both contain an Intel bytecode VM, matching native modules and source-built SDL2 and OpenAL libraries, with a macOS 13 minimum. Apple Silicon runs these Intel VMs through Rosetta. Each payload records its bytecode versions and SDL event-loop ABI; the catalog carries those facts for the app to match against a game.
 
-The MKXP-Z package adds Unicode filename normalization for Apple Silicon at MKXP-Z's own file-system calls, and keeps the publisher's universal build as its baseline. Its producer is `producers/maclauncher/scripts/build-mkxpz-nfc.cjs`, the patch is recorded in `producers/maclauncher/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json`, and `runtimes/mkxpz/baseline.json` identifies the publisher's build. The publisher's own releases are not repeated in the Builds catalog.
+The [MKXP-Z recipe](MKXPZ.md) builds the engine and its dependencies from pinned source for Apple Silicon, with Unicode filename normalization at the engine's file-system calls. Its source archive and the publisher's separate universal build are recorded in `runtimes/mkxpz/baseline.json`. The publisher's releases remain available through their normal upstream route.
 
-The upstream Prosper source has no license grant, so its recipe is marked for local use only and no Prosper package is published.
+The [Prosper recipe](PROSPER.md) builds the Intel macOS runtime from its pinned source and dependency inputs through Runtime build. The package includes the upstream README, an author and source notice, and dependency notices. Game instructions execute directly as x86-64 code, so Apple Silicon uses Rosetta. Local builds remain accepted by MacLauncher.
 
 ### Game and extraction tools
 
@@ -129,9 +137,11 @@ The KosmicKrisp package contains only the adapted driver; the unmodified driver 
 
 | Project | Package ID | Artifact |
 | --- | --- | --- |
-| Adobe Flash Player projector | `flash-projector` | Supplied 35.0.0.60 app, universal ARM64 and Intel |
+| [Adobe Flash Player projector](FLASH_PROJECTOR.md) | `flash-projector` | Adobe Animate’s unchanged 35.0.0.60 app, universal ARM64 and Intel |
 
-The Flash projector package keeps the supplied universal binary, app bundle and notices unchanged.
+The Flash projector is Adobe’s universal Flash Player 35.0.0.60 app from Adobe Animate. Builds hosts its unchanged app bundle and notices because Adobe’s public projector downloads are Intel only. Its package uses the publisher’s version without an MCL suffix. The earlier 35.0.0.60-MCLv1 record remains available for existing installations.
+
+Prebuilt projects contain unmodified publisher files. They are listed separately from source builds and do not count as projects missing a GitHub build.
 
 ### Included components
 

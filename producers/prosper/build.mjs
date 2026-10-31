@@ -62,6 +62,9 @@ export async function build({buildDirectory=path.join(root,'out/prosper'),vulkan
  try{
   const archive=path.join(buildDirectory,'source.tar');run('git',['-C',source,'archive','--format=tar','--output='+archive,recipe.source.revision,'prosper']);run('/usr/bin/tar',['-xf',archive,'-C',staged]);fs.unlinkSync(archive);
   const revisionFile=path.join(staged,'prosper/cmake/GenerateBuildRevision.cmake');let revision=fs.readFileSync(revisionFile,'utf8');const anchor='set(PROSPER_GENERATED_REVISION "unknown")';if(!revision.includes(anchor))throw Error('Prosper exported revision boundary changed.');write(revisionFile,revision.replace(anchor,'set(PROSPER_GENERATED_REVISION "'+recipe.source.revision+'")'));
+  const nidFile=path.join(staged,'prosper/src/hle/dispatch/nid.cpp'),nid=fs.readFileSync(nidFile,'utf8'),sourcePath='load_names_file(PROSPER_SOURCE_DIR "/data/known_names.txt");';
+  if(nid.split(sourcePath).length!==2)throw Error('Prosper optional NID database boundary changed.');
+  write(nidFile,nid.replace(sourcePath,'load_names_file("/prosper/data/known_names.txt");'));
   sync(staged,projection);
  }finally{fs.rmSync(staged,{recursive:true,force:true});}
  if(!python){try{python=execFileSync('uv',['python','find'],{encoding:'utf8'}).trim();}catch{throw Error('A Python interpreter from uv or --python is required for upstream build metadata.');}}

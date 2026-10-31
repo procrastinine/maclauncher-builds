@@ -77,7 +77,7 @@ export async function buildModule(options){
     const mingw=fs.realpathSync(options.mingw),build=path.join(work,'build'),vulkan=await prepareVulkanLink({...options,work});
     for(const name of ['x86_64-w64-mingw32-clang','i686-w64-mingw32-clang'])fs.accessSync(path.join(mingw,name),fs.constants.X_OK);
     const bison=options.bison?fs.realpathSync(options.bison):options.bisonArchive?await buildBison({archive:options.bisonArchive,work,jobs}):'bison';
-    const cc=read('xcrun',['--find','clang']),sdk=read('xcrun',['--sdk','macosx','--show-sdk-path']);
+    const cc=read('xcrun',['--find','clang']),sdk=process.env.SDKROOT||read('xcrun',['--sdk','macosx','--show-sdk-path']);
     const wrapper=path.join(work,'clang-x86_64'),linkDirectory=path.join(work,'vulkan-link');
     writeChanged(wrapper,'#!/bin/sh\nexec '+[cc,'-arch','x86_64','-isysroot',sdk,'-mmacosx-version-min='+source.minimumMacOS].map(quote).join(' ')+' "$@"\n',0o755);
     writeChanged(path.join(linkDirectory,'libMoltenVK.dylib'),fs.readFileSync(vulkan.library));

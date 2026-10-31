@@ -39,7 +39,8 @@ function closeMovieDependencies(prefix, directory) {
   return payload.map(file => ({ path: path.relative(directory, file), sha256: Native.hashFile(file) }));
 }
 
-async function buildMovieDecoder({ prefix, directory, signal, dependencies = {} } = {}) {
+async function buildMovieDecoder({ prefix, directory, architecture = process.arch, signal, dependencies = {} } = {}) {
+  if (!["arm64", "x64"].includes(architecture)) throw new Error("Select an arm64 or x64 movie decoder.");
   if (!path.isAbsolute(prefix || "")) throw new Error("Provide a pinned FFmpeg 7.1.2 native build prefix.");
   const versionHeader = fs.readFileSync(path.join(prefix, "include/libavutil/ffversion.h"), "utf8");
   if (!/^#define FFMPEG_VERSION "7\.1\.2"$/m.test(versionHeader)) throw new Error("The Minori movie bridge requires FFmpeg 7.1.2.");
@@ -48,7 +49,7 @@ async function buildMovieDecoder({ prefix, directory, signal, dependencies = {} 
   fs.writeFileSync(logPath, "FFmpeg 7.1.2 Minori decoder bridge\n");
   const clang = (dependencies.findBuildTool || Build.findBuildTool)("clang");
   await (dependencies.runBuildCommand || Build.runBuildCommand)(clang,
-    ["-O2", "-mmacosx-version-min=13.0", `-ffile-prefix-map=${__dirname}=src/modules/minori/runtime`,
+    ["-arch", architecture === "x64" ? "x86_64" : architecture, "-O2", "-mmacosx-version-min=13.0", `-ffile-prefix-map=${__dirname}=src/modules/minori/runtime`,
       `-ffile-prefix-map=${directory}=maclauncher-build/minori/movie`,
       "-I" + path.join(prefix, "include"), path.join(__dirname, "native/movie-decoder.c"),
       "-L" + path.join(prefix, "lib"), "-lavformat", "-lavcodec", "-lavutil", "-lswscale", "-lswresample",
@@ -57,7 +58,9 @@ async function buildMovieDecoder({ prefix, directory, signal, dependencies = {} 
     sourceSha256: Native.hashFile(path.join(__dirname, "native/movie-decoder.c")), dependencyPrefix: prefix };
 }
 
-async function buildCandidate({ sourceDir = sourcePath, destination, decoderPrefix, signal, onProgress, dependencies = {} } = {}) {
+async function buildCandidate({ sourceDir = sourcePath, destination, decoderPrefix, architecture = process.arch, signal, onProgress, dependencies = {} } = {}) {
+  if (!["arm64", "x64"].includes(architecture)) throw new Error("Select an arm64 or x64 Minori build.");
+  const targetTriple = architecture === "x64" ? "x86_64-apple-darwin" : "aarch64-apple-darwin";
   if (process.platform !== "darwin") throw new Error("The Minori native build requires macOS.");
   if (!path.isAbsolute(destination || "") || fs.existsSync(destination)) throw new Error("Choose a new absolute Minori candidate directory.");
   if (destination === sourceDir || destination.startsWith(sourceDir + path.sep) || sourceDir.startsWith(destination + path.sep)) throw new Error("Source and output directories must be separate.");
@@ -74,7 +77,7 @@ async function buildCandidate({ sourceDir = sourcePath, destination, decoderPref
     const platformObject = path.join(workspace, "maclauncher-platform.o");
     const platformLibrary = path.join(workspace, "libmaclauncher-platform.a");
     const run = dependencies.runBuildCommand || Build.runBuildCommand;
-    await run((dependencies.findBuildTool || Build.findBuildTool)("clang"), ["-fobjc-arc", "-O2", "-mmacosx-version-min=13.0",
+    await run((dependencies.findBuildTool || Build.findBuildTool)("clang"), ["-arch", architecture === "x64" ? "x86_64" : architecture, "-fobjc-arc", "-O2", "-mmacosx-version-min=13.0",
       `-ffile-prefix-map=${workspace}=maclauncher-build/minori/${Overlay.VERSION}`,
       "-c", path.join(sourceRoot, "maclauncher-platform.m"), "-o", platformObject], { cwd: workspace, logPath, signal });
     await run("/usr/bin/ar", ["rcs", platformLibrary, platformObject], { cwd: workspace, logPath, signal });
@@ -83,18 +86,19 @@ async function buildCandidate({ sourceDir = sourcePath, destination, decoderPref
       "-C", "link-arg=-Wl,-dead_strip", "-C", `link-arg=${platformLibrary}`, "-C", "link-arg=-framework", "-C", "link-arg=AppKit"]).join("\x1f");
     const env = { ...process.env, CARGO_TARGET_DIR: target, CARGO_ENCODED_RUSTFLAGS: rustFlags, MACOSX_DEPLOYMENT_TARGET: "13.0" };
     onProgress?.({ downloaded: 1, total: 3 });
-    await run(cargo, ["build", "--locked", "--offline", "--release", "-p", "eden", "-p", "eden-formats", "--bins"], { cwd: sourceRoot, logPath, env, signal });
+    await dependencies.prepareCargo?.({ sourceRoot, env, target: targetTriple });
+    await run(cargo, ["build", "--locked", "--offline", "--target", targetTriple, "--release", "-p", "eden", "-p", "eden-formats", "--bins"], { cwd: sourceRoot, logPath, env, signal });
     throwIfAborted(signal); onProgress?.({ downloaded: 2, total: 3 });
     await Build.validatePinnedSource(sourceDir, Overlay.REVISION, { signal });
     const candidate = path.join(workspace, "candidate"); fs.mkdirSync(path.join(candidate, "bin"), { recursive: true });
     for (const name of ["eden", "maclauncher-minori-probe"]) {
-      const source = path.join(target, "release", name);
+      const source = path.join(target, targetTriple, "release", name);
       fs.copyFileSync(source, path.join(candidate, "bin", name)); fs.chmodSync(path.join(candidate, "bin", name), 0o755);
     }
     fs.copyFileSync(path.join(sourceRoot, "LICENSE"), path.join(candidate, "ReMinori-LICENSE.txt"));
     let movieDecoder = null;
     if (decoderPrefix) {
-      const built = await buildMovieDecoder({ prefix: decoderPrefix, directory: path.join(candidate, "bin"), signal, dependencies });
+      const built = await buildMovieDecoder({ prefix: decoderPrefix, directory: path.join(candidate, "bin"), architecture, signal, dependencies });
       const files = closeMovieDependencies(decoderPrefix, candidate);
       movieDecoder = { version: built.version, bridgeVersion: "maclauncher-minori-movie-v1",
         sha256: Native.hashFile(built.executable), sourceSha256: built.sourceSha256, files };
@@ -102,7 +106,7 @@ async function buildCandidate({ sourceDir = sourcePath, destination, decoderPref
     }
     const profile = { schemaVersion: 1, version: Overlay.VERSION, upstreamRevision: Overlay.REVISION,
       profileRevision: Overlay.PROFILE, dataProfiles: ["paz-bf-slot0-rc4-v1", "paz-pe-keytables-rc4-v1"], minimumMacOS: "13.0",
-      architecture: process.arch, sourceTreeSha256, sourceOverlay, cargoLockSha256: Native.hashFile(path.join(sourceRoot, "Cargo.lock")),
+      architecture, sourceTreeSha256, sourceOverlay, cargoLockSha256: Native.hashFile(path.join(sourceRoot, "Cargo.lock")),
       nativeFeatures: ["wgpu-metal", "coretext-fonts", "appkit-game-menu", "appkit-save-comments", "cpal-audio", "private-saves", "private-movie-cache", "original-pe-profile",
         ...(movieDecoder ? ["ffmpeg-movie-bridge"] : [])], movieDecoder,
       supportLevel: "beta", executables: Object.fromEntries(["eden", "maclauncher-minori-probe"].map(name => [name, Native.hashFile(path.join(candidate, "bin", name))])) };

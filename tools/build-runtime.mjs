@@ -5,8 +5,12 @@ import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {resolveProject,buildRecord,buildRecords} from '../lib/projects.mjs';
 import {releaseVersion} from '../lib/package-version.mjs';
+import {linuxToolSelection} from './build-tools.mjs';
+import {HOSTED_RUNNERS,hostedRunner} from '../lib/hosted-runners.mjs';
 import {RUST_TOOLCHAIN} from './rust-build.mjs';
 import {runtimeBuildEnvironment} from './runtime-build-environment.mjs';
+import {prepareBuildHost} from './build-host.mjs';
+import {initializeSources} from './init-runtime-sources.mjs';
 import {publicDeclaration} from './runtime-package.mjs';
 import {reproducibleEnvironment} from '../lib/reproducible-build.mjs';
 const B=createRequire(import.meta.url)('../lib/bundled-native.cjs');
@@ -30,13 +34,12 @@ export function verifyProducer(directory,recipe){
  return source;
 }
 
-// GitHub-hosted runners for each package architecture. Each architecture builds
-// on a Mac with that CPU; a universal package builds on the Apple Silicon runner.
+// Default hosted Mac images. A recipe may select another standard hosted image
+// for data or guest-code outputs through its architecture-to-runner map.
 export const RUNNERS=Object.freeze({arm64:'xcode-27',x64:'macos-26-intel',universal:'xcode-27'});
-export const HOST_TOOLCHAINS=Object.freeze({
- 'xcode-27':Object.freeze({xcodeVersion:'27.0',sdkVersion:'27.0',developerDirectory:'/Applications/Xcode_27.0.app/Contents/Developer'}),
- 'macos-26-intel':Object.freeze({xcodeVersion:'26.6',sdkVersion:'26.5',developerDirectory:'/Applications/Xcode_26.6.app/Contents/Developer'})
-});
+export {HOSTED_RUNNERS};
+export const HOST_TOOLCHAINS=Object.freeze(Object.fromEntries(Object.entries(HOSTED_RUNNERS).filter(([,host])=>host.developerDirectory).map(([label,{os,cpu,...toolchain}])=>[label,Object.freeze(toolchain)])));
+export const runnerFor=(build,arch)=>build.runners?.[arch]||RUNNERS[arch];
 
 function githubBuild(id,directory,version){
  const project=resolveProject(id,directory,{resolvePins:false});
@@ -47,9 +50,9 @@ function githubBuild(id,directory,version){
 }
 
 const matrixRow=(project,build,arch)=>{
- const runner=build.runners?.[arch]||RUNNERS[arch],toolchain=HOST_TOOLCHAINS[runner];
- if(!toolchain)throw Error('The hosted image needs an explicit Xcode and SDK declaration: '+runner);
- return {project:project.id,version:build.version,arch,runner,...toolchain,rustToolchain:build.rustComponents?.length||build.rustTargets?.length?RUST_TOOLCHAIN:'',submodules:(build.submodules||[]).join(' '),tools:(build.tools||[]).join(' '),rustComponents:(build.rustComponents||[]).join(' '),recursiveSubmodules:build.recursiveSubmodules===true,rustTargets:(build.rustTargets||[]).join(' ')};
+ const runner=runnerFor(build,arch),host=hostedRunner(runner);
+ if(host.os==='linux')linuxToolSelection(build.tools||[]);
+ return {project:project.id,version:build.version,arch,runner};
 };
 const gitTags=(directory,id)=>git(directory,['tag','--list',id+'/v*']).split('\n').filter(Boolean);
 
@@ -97,24 +100,40 @@ export function pushPlan({before,directory=root,tags=gitTags,show=(revision,file
   const old=previous.get(key),id=next.project;
   if(old&&old.version===next.version&&next.architectures.every(arch=>old.architectures.includes(arch)))continue;
   const {project,build}=githubBuild(id,directory,next.version),done=existing(project,build.version,directory,tags);
-  for(const arch of build.architectures)if(!done.has(arch))include.push(matrixRow(project,build,arch));
+  for(const arch of build.architectures)if(!old?.architectures.includes(arch)&&!done.has(arch))include.push(matrixRow(project,build,arch));
  }
  return {include};
 }
 
 
 /** A build output holds the finished runtime in payload/ and its package declaration. */
-export function checkBuildOutput({project,build,arch,output}){
+export function checkBuildOutput({project,build,arch,output,platform=process.platform}){
  const names=fs.readdirSync(output).sort();
  if(names.join('\n')!=='declaration.json\npayload')throw Error('A build output contains only declaration.json and payload/.');
  const declaration=publicDeclaration(JSON.parse(fs.readFileSync(path.join(output,'declaration.json'))));
  if(declaration.id!==project.id||declaration.arch!==arch||declaration.version!==build.version)throw Error('The build produced a package for a different project, version or architecture.');
  // Each package serves the CPUs its code was built for. The package contract decides whether an
  // Intel package also serves Apple Silicon, which needs Intel files that run as their own processes.
+ if(platform==='linux'&&declaration.files.some(file=>file.format==='mach-o'))throw Error('Recipes producing Mac programs require a hosted Mac runner.');
  const cpus=declaration.launcherArchitectures,own=arch==='universal'?['arm64','x64']:[arch];
  if(!own.every(cpu=>cpus.includes(cpu))||arch==='arm64'&&cpus.length!==1)throw Error('The package declares Mac CPUs that differ from its architecture.');
  B.verifyPayload(path.join(output,'payload'),declaration);
  return {id:project.id,version:declaration.version,arch,payload:path.join(output,'payload'),declaration:path.join(output,'declaration.json')};
+}
+
+/** Prepare one declared version and architecture on its selected hosted image. */
+export function prepareBuild({project:id,arch,version,directory=root,environment=process.env,initialize=initializeSources,...hostOptions}){
+ const {project,build}=githubBuild(id,directory,version);
+ if(Array.isArray(project.build)&&version===undefined)throw Error('Select one declared build version with --version.');
+ if(!build.architectures.includes(arch))throw Error(project.name+' builds '+build.architectures.join(' and ')+' packages on GitHub.');
+ const runner=runnerFor(build,arch),host=hostedRunner(runner);
+ if(host.os==='linux')linuxToolSelection(build.tools||[]);
+ const prepared=prepareBuildHost({build,label:runner,runner:host,rustToolchain:RUST_TOOLCHAIN,environment,...hostOptions});
+ const env={...environment,...prepared.env,PATH:[...prepared.paths,environment.PATH].filter(Boolean).join(path.delimiter)};
+ const {initialized}=initialize({project:project.id,version:build.version,directory,run:(args,cwd)=>execFileSync('git',args,{cwd,env,encoding:'utf8',stdio:['ignore','pipe','pipe'],maxBuffer:32<<20})});
+ if(environment.GITHUB_ENV)fs.appendFileSync(environment.GITHUB_ENV,Object.entries(prepared.env).map(([key,value])=>key+'='+value+'\n').join(''));
+ if(environment.GITHUB_PATH&&prepared.paths.length)fs.appendFileSync(environment.GITHUB_PATH,prepared.paths.join('\n')+'\n');
+ return {project:project.id,version:build.version,arch,runner,...prepared,initialized};
 }
 
 /** Run the project's registered GitHub build command for one architecture. */
@@ -136,11 +155,15 @@ export function runBuild({project:id,arch,version,output,work,directory=root,spa
 
 export function main(args,directory=root){
  const options={};for(let i=0;i<args.length;i++){
-  if(['--check','--plan'].includes(args[i])){const key=args[i].slice(2);if(options[key])throw Error('Duplicate '+args[i]+'.');options[key]=true;continue;}
+  if(['--check','--plan','--prepare'].includes(args[i])){const key=args[i].slice(2);if(options[key])throw Error('Duplicate '+args[i]+'.');options[key]=true;continue;}
   const key=args[i]?.slice(2);if(!args[i]?.startsWith('--')||!['project','runtime','inputs','arch','output','work','version','before'].includes(key)||!args[i+1]||Object.hasOwn(options,key))throw Error('Use --project android with --check or --inputs /absolute/path.json.');
   options[key]=args[++i];
  }
  if(options.project&&options.runtime)throw Error('Select one project.');options.project??=options.runtime;
+ if(options.prepare){
+  if(options.check||options.plan||options.inputs||options.output||options.work||options.before||!options.project||!options.arch)throw Error('Use --prepare with --project, --arch and an optional --version.');
+  return prepareBuild({project:options.project,arch:options.arch,version:options.version,directory});
+ }
  if(options.plan){
   if(options.check||options.inputs||options.output||options.work||!options.before===!options.project||options.before&&(options.arch||options.version))throw Error('Use --plan with --before <commit>, or with --project and optional --arch and --version.');
   return options.before?pushPlan({before:options.before,directory}):buildPlan({...options,directory});

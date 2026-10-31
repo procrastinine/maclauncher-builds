@@ -48,7 +48,7 @@ function makePortable(libraries){
   run('/usr/bin/codesign',['--force','--sign','-',file]);
  }
 }
-export async function packageRuntime({runtimeBuild,relinkerBuild,output,version}){
+export async function packageRuntime({runtimeBuild,relinkerBuild,output,version,buildOutput=false}){
  await buildRuntime({check:true});
  if(!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(version||'')||!output||fs.existsSync(output))throw Error('Choose a new output directory and explicit package version.');
  const libraryRoot=path.join(runtimeBuild,'build/core/libs/libs'),relinker=path.join(relinkerBuild,'core/relinker/relinker');
@@ -64,7 +64,7 @@ export async function packageRuntime({runtimeBuild,relinkerBuild,output,version}
  const source=path.join(root,recipe.source.path),notices=[];
  for(const entry of [{path:'',id:'anyps5',repository:recipe.source.repository,license:'GPL-2.0-only'},...dependencies.dependencies.map(entry=>({...entry,id:entry.path.replaceAll('/','-'),license:'See notice'}))]){
   const directory=path.join(source,entry.path),names=fs.readdirSync(directory).filter(name=>/^(?:LICENSE|COPYING|COPYRIGHT)(?:[._-].*)?$/i.test(name)&&fs.statSync(path.join(directory,name)).isFile());
-  for(const name of names){const relative=path.posix.join('notices',entry.id,name);copy(path.join(directory,name),path.join(payload,relative));notices.push({name:entry.id,license:entry.license,path:relative,sourceUrl:entry.repository});}
+  for(const name of [...names,...(entry.noticeFiles||[])]){const relative=path.posix.join('notices',entry.id,name);copy(path.join(directory,name),path.join(payload,relative));notices.push({name:entry.id,license:entry.license,path:relative,sourceUrl:entry.repository});}
  }
  const ffmpeg=path.join(runtimeBuild,'dependencies/ffmpeg-macos-x64/share/ffmpeg');
  for(const relative of filesIn(ffmpeg).filter(relative=>relative!=='build-log.txt'))copy(path.join(ffmpeg,relative),path.join(payload,'notices/ffmpeg',relative));
@@ -82,6 +82,7 @@ export async function packageRuntime({runtimeBuild,relinkerBuild,output,version}
  const declaration={id:'anyps5',version,arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS:manifest.minimumMacOS,directoryRelative:'anyps5/'+version+'/arm64',
   sourceRelative:'source.json',sourceSha256:sourceFile.sha256,manifestRelative:'runtime.json',manifestSha256:manifestFile.sha256,files:[...files,manifestFile],notices,redistribution:'bundle'};
  fs.writeFileSync(path.join(output,'declaration.json'),json(declaration));
+ if(buildOutput)return {output,declaration};
  const archive=path.join(output,assetName(declaration));
  const result=await pack({project:'anyps5',input:payload,declaration,output:archive});
  return {archive,record:result};

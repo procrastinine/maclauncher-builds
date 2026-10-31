@@ -31,6 +31,7 @@ on:
 permissions:
   contents: write
   actions: read
+  attestations: read
 
 concurrency:
   group: runtime-release-${{ inputs.project }}
@@ -54,6 +55,8 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
+      - name: Install publication verification dependencies
+        run: npm ci --ignore-scripts
       - name: Require main for staging
         if: inputs.operation == 'stage' && github.ref != 'refs/heads/main'
         run: |
@@ -65,9 +68,14 @@ jobs:
           import fs from 'node:fs';
           import {resolveProject} from './lib/projects.mjs';
           import {releaseTag,validateCatalog} from './lib/project-identity.mjs';
+          import {readPublisherInput} from './tools/publisher-files.mjs';
           const p = resolveProject(process.env.PROJECT, undefined, {resolvePins:false});
           if (p.releaseRepository !== process.env.GITHUB_REPOSITORY) throw Error('Release repository differs from its registry.');
           const tag = releaseTag({id: p.id, version: process.env.VERSION, arch: process.env.ARCH});
+          const supplied = readPublisherInput({project: p.id});
+          if (supplied && process.env.BUILD_RUN) throw Error('Supplied publisher packages do not use a GitHub compilation run.');
+          if (supplied && process.env.OPERATION === 'stage') throw Error('Stage supplied publisher archives through release-runtime.mjs stage with their verified local bundle and exact source target.');
+          fs.appendFileSync(process.env.GITHUB_ENV, 'PUBLICATION_AUTHORITY=' + (supplied ? 'supplied-publisher' : 'github-build') + '\n');
           if (process.env.OPERATION === 'stage' && !process.env.BUILD_RUN) throw Error('Staging requires a Runtime build run.');
           if (!process.env.BUILD_RUN) {
             const catalog = validateCatalog(JSON.parse(fs.readFileSync('catalogs/' + p.id + '.json')), {project: p.id, repository: p.releaseRepository});
@@ -88,13 +96,13 @@ jobs:
           git fetch --no-tags --depth=1 origin "refs/tags/$RELEASE_TAG"
           git cat-file -e 'FETCH_HEAD^{commit}'
           git cat-file -e FETCH_HEAD:projects.json
-          git checkout --detach FETCH_HEAD
+          echo "RELEASE_SOURCE_REVISION=$(git rev-parse 'FETCH_HEAD^{commit}')" >> "$GITHUB_ENV"
       - name: Select the source commit of the successful build
         if: inputs.operation == 'stage'
         run: |
           commit="$BUILD_SOURCE_REVISION"
           git fetch --no-tags --depth=1 origin "$commit"
-          git checkout --detach FETCH_HEAD
+          echo "RELEASE_SOURCE_REVISION=$(git rev-parse 'FETCH_HEAD^{commit}')" >> "$GITHUB_ENV"
       - name: Download selected release assets
         if: inputs.build-run == ''
         run: |
@@ -106,22 +114,25 @@ jobs:
       - name: Download the package built from the tagged commit
         if: inputs.build-run != ''
         run: |
-          [ "$BUILD_SOURCE_REVISION" = "$(git rev-parse HEAD)" ] || { echo "The build run differs from the tagged source commit." >&2; exit 1; }
+          [ "$BUILD_SOURCE_REVISION" = "$RELEASE_SOURCE_REVISION" ] || { echo "The build run differs from the tagged source commit." >&2; exit 1; }
           gh run download "$BUILD_RUN" --repo "$GITHUB_REPOSITORY" --name "runtime-$PROJECT-$VERSION-$ARCH" --dir "$RUNNER_TEMP/runtime-release"
       - name: Verify the draft against the built package
         if: inputs.build-run != ''
         run: |
           node tools/release-runtime.mjs verify --bundle "$RUNNER_TEMP/runtime-release" --project "$PROJECT" --version "$VERSION" --arch "$ARCH"
-          gh attestation verify "$RUNNER_TEMP/runtime-release/$PROJECT-$VERSION-$ARCH.tar.gz" --repo "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/runtime-build.yml" --source-digest "$(git rev-parse HEAD)"
+      - name: Verify and record the signed build
+        if: env.PUBLICATION_AUTHORITY != 'supplied-publisher'
+        run: |
+          gh attestation verify "$RUNNER_TEMP/runtime-release/$PROJECT-$VERSION-$ARCH.tar.gz" --repo "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/runtime-build.yml" --source-digest "$RELEASE_SOURCE_REVISION" --deny-self-hosted-runners --format json > "$RUNNER_TEMP/verified-build.json"
+          node tools/record-github-build.mjs --release-bundle "$RUNNER_TEMP/runtime-release" --bundle "$RUNNER_TEMP/verified-build.json"
+      - name: Verify supplied publisher archive
+        if: env.PUBLICATION_AUTHORITY == 'supplied-publisher'
+        run: node tools/publisher-files.mjs verify --project "$PROJECT" --archive "$RUNNER_TEMP/runtime-release/$PROJECT-$VERSION-$ARCH.tar.gz" --record "$RUNNER_TEMP/runtime-release/$PROJECT-$VERSION-$ARCH.tar.gz.json"
       - name: Stage the existing build artifact
         if: inputs.operation == 'stage'
-        run: node tools/release-runtime.mjs stage --bundle "$RUNNER_TEMP/runtime-release" --target "$(git rev-parse HEAD)"
+        run: node tools/release-runtime.mjs stage --bundle "$RUNNER_TEMP/runtime-release" --target "$RELEASE_SOURCE_REVISION"
       - name: Verify the existing draft
-        if: inputs.build-run != ''
         run: node tools/release-runtime.mjs verify-remote --bundle "$RUNNER_TEMP/runtime-release"
       - name: Publish selected draft
         if: inputs.operation == 'publish'
-        run: |
-          # Package verification uses the tag; publication control uses this dispatch.
-          git restore --source="$GITHUB_SHA" -- tools/release-runtime.mjs
-          node tools/release-runtime.mjs publish --bundle "$RUNNER_TEMP/runtime-release"
+        run: node tools/release-runtime.mjs publish --bundle "$RUNNER_TEMP/runtime-release"

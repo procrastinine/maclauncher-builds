@@ -20,6 +20,8 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
+      - name: Install locked build-tool dependencies
+        run: npm ci --ignore-scripts
       - name: Initialize Android pin metadata
         run: git submodule update --init --depth 1 -- sources/maclauncher-android
       - name: Check package and project contracts

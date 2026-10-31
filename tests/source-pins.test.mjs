@@ -147,7 +147,7 @@ test('held profiles keep distinct canonical pins while update metadata uses the 
  const notes=releaseNotes({id:'engine',version:'1.0',arch:'arm64'},resolved);assert.ok(notes.includes('/tree/'+next));assert.ok(notes.includes('/tree/'+held));assert.equal(notes.includes('/tree/'+current),false);
 });
 
-test('source-free release preparation and verification work without pin files; staging resolves current pins',async t=>{
+test('source-free preparation and verification remain available while publication requires signed GitHub provenance',async t=>{
  const f=fixture(t,{source:null}),input=path.join(f.root,'input');fs.mkdirSync(input);
  const content={'runtime.json':'{"version":"1.0"}','LICENSE':'MIT'};
  const files=Object.entries(content).map(([name,bytes])=>{fs.writeFileSync(path.join(input,name),bytes,{mode:0o644});return{path:name,size:Buffer.byteLength(bytes),mode:0o644,sha256:digest(bytes)};});
@@ -156,9 +156,8 @@ test('source-free release preparation and verification work without pin files; s
  const bundle=path.join(f.root,'release');await prepareRelease({project:'engine',input,declaration,output:bundle,directory:f.root});
  assert.equal((await verifyRelease({bundle,directory:f.root})).record.version,'1.0');assert.throws(()=>resolveProject('engine',f.root));
  const calls=[],runGh=async args=>{calls.push(args);if(args[0]==='api'){if(args.includes('--paginate'))return '[]';if(!args.includes('POST'))throw Object.assign(Error('Missing'),{status:404});return JSON.stringify({object:{sha:target,type:'commit'}});}return '';};
- await assert.rejects(stageRelease({bundle,target,directory:f.root,runGh}));assert.equal(calls.length,0);
+ await assert.rejects(stageRelease({bundle,target,directory:f.root,runGh}),/no GitHub build record yet/);assert.equal(calls.length,0);
  f.source({source:{repository:'https://github.com/owner/source.git',revision:next}});
- await stageRelease({bundle,target,directory:f.root,runGh});assert.equal(calls.length,4);
- const upload=calls.find(args=>args[0]==='release');assert.ok(upload);assert.ok(upload[upload.indexOf('--notes')+1].includes('https://github.com/owner/source/tree/'+next));
- assert.deepEqual(upload.filter(arg=>arg.startsWith(bundle)),[path.join(bundle,'engine-1.0-arm64.tar.gz')]);assert.equal(calls.filter(args=>args.includes('POST')).length,1);
+ assert.equal(resolveProject('engine',f.root).upstreams[0].revision,next);
+ await assert.rejects(stageRelease({bundle,target,directory:f.root,runGh}),/no GitHub build record yet/);assert.equal(calls.length,0);
 });

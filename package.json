@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=24"
+    "node": ">=24.15.0"
   },
   "scripts": {
     "test": "node --test tests/*.test.mjs tests/*.test.cjs",
@@ -18,5 +18,11 @@
     "index:build": "node tools/package-index.mjs --output dist/package-index",
     "check:versions": "node tools/check-release-versions.mjs",
     "release:batch": "node tools/release-batch.mjs"
+  },
+  "dependencies": {
+    "@sigstore/bundle": "5.0.0",
+    "@sigstore/core": "4.0.1",
+    "@sigstore/protobuf-specs": "0.5.0",
+    "@sigstore/verify": "4.1.0"
   }
 }

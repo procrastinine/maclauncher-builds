@@ -1,10 +1,60 @@
 # Verifying MacLauncher Builds
 
-This guide explains how the packages in this repository are made and how anyone can check them. MacLauncher Builds compiles game engines, players and helpers for [MacLauncher](https://github.com/procrastinine/maclauncher). Each package comes from a recipe: the instructions, patches and source references in this repository that turn a project's source code into a Mac package. The [Runtime build workflow](.github/workflows/runtime-build.yml) builds every package on a Mac that GitHub runs, and GitHub signs a build record that ties the package archive's SHA-256 to the recipe commit and the build run that produced it. Checking that record confirms that a downloaded archive came from that public recipe and was built on GitHub's own machines. Anyone with a Mac can also rebuild a package and compare the result.
+MacLauncher Builds provides public recipes for the game engines, players and helpers used by [MacLauncher](https://github.com/procrastinine/maclauncher). A recipe contains the build instructions, patches and exact source references for a package. The [Runtime build workflow](.github/workflows/runtime-build.yml) runs these instructions on GitHub-hosted Macs and signs a build record, called an attestation, that ties an archive's SHA-256 to its recipe commit and build run. Anyone with a Mac can also rebuild a package and compare the result.
 
-GitHub calls a signed build record an attestation, or more fully a build provenance attestation. Each project in this repository has a catalog, a JSON file under `catalogs/` that records its published packages. The [verification table](https://procrastinine.github.io/maclauncher-builds/verification.html) collects, from these catalogs, the evidence for every published package: its version, CPU, minimum macOS version, recipe commit and build run, a link to look up its build record, and the result of any recorded rebuild. Each CPU build has its own row. The minimum macOS version is the one the catalog records for the complete package, which can differ from the SDK it was built with. [App feature requirements](https://github.com/procrastinine/maclauncher/blob/master/docs/runtimes/SYSTEM_REQUIREMENTS.md) describe which MacLauncher features each Mac can run.
+The generated package catalog and [download index](https://procrastinine.github.io/maclauncher-builds/) use two verification routes. Compiled and adapted packages require an attestation from `runtime-build.yml` on a GitHub-hosted runner for their exact archive bytes. Registered unmodified publisher files require a complete file-equality proof against their declared supplied input. Publication tools require the applicable proof; a recipe, a prebuilt label or an unrelated build does not qualify.
 
-## Verify a package
+The [verification table](https://procrastinine.github.io/maclauncher-builds/verification.html) keeps older catalog archives without either applicable proof separate at the top under **Built locally — no GitHub build record yet**, with an archive count. Their state is superseded, built locally. Existing app installations keep working. Verified GitHub outputs awaiting catalog publication appear in their own section with their exact versions and hashes; they never change the identity of an older local archive.
+
+Each CPU build has its own row, with its minimum macOS, recipe commit, build run, attestation and recorded rebuild result. Minimum macOS is the recorded requirement of the complete native package, separately from the SDK used to compile it. [App feature requirements](https://github.com/procrastinine/maclauncher/blob/master/docs/runtimes/SYSTEM_REQUIREMENTS.md) describe which MacLauncher features each Mac can run.
+
+## Coverage
+
+Repository tools need Node 24.15 or newer and locked dependencies. After cloning this repository, the same verified build inventory that supplies the Pages table is available with:
+
+```sh
+npm ci --ignore-scripts
+node tools/package-index.mjs --local-builds
+```
+
+Its JSON reports local catalog archives and their exact hashes, active projects missing required verification, supplied-file projects and proofs, retired projects, and signed GitHub outputs awaiting publication. Archive counts and project counts are separate: one project can have several versions and CPU builds, and a signed output can establish project coverage before that output is published. A locally built package that contains a publisher binary is classified by where the package was assembled; the publisher's binary has its own verification route below.
+
+Project coverage counts active projects. A compiled project is complete when the newest packaging revision of each maintained version line has a verified GitHub build for each CPU. Older revisions remain in history. A universal archive can cover both CPUs; a newer native CPU package supersedes its older revision for that CPU. The report lists only the missing current version and CPU pairs. `projectsWithoutAuthority` includes both incomplete GitHub builds and missing supplied-file proofs. Registering a supplied-file project does not satisfy that requirement until its proof is verified. The summary keeps total, active and retired counts separate, including projects requiring GitHub builds, registered supplied-file projects and verified supplied outputs. The local archive count includes historical packages from retired projects. Retiring a project does not turn one of its local archives into a verified GitHub build.
+
+Build evidence is verified with Sigstore using the TUF-validated public trust snapshot in `attestations/trusted-root.jsonl`. Package records cannot choose trust roots. Refreshing the snapshot uses the normal Sigstore TUF update, as used by `gh attestation trusted-root`; generating catalogs or importing an archive does not replace it.
+
+An existing Runtime build artifact can add its signed evidence without publishing a catalog or release:
+
+```sh
+node tools/record-github-build.mjs --release-bundle /absolute/path/to/runtime-build-output
+```
+
+The importer verifies the actual archive, package contents and signed provenance. Optional `--bundle /absolute/path/to/signed-bundle.json` supplies a downloaded attestation instead of fetching it through GitHub CLI. The archive stays unchanged.
+
+## Unchanged supplied files
+
+A supplied-file project needs a registered input descriptor and its exact checksum. Its equality record compares the complete supplied application inventory, including every file's SHA-256, size and mode. The package can add bounded consumed metadata and license notices, but no production code. Marking a producer as prebuilt is insufficient. Generated metadata identifies this route as `authorityPolicy: "supplied-publisher"`; compiled packages use `github-build`.
+
+The verification table lists supplied packages separately with their publisher version, file count, input inventory and equality record. These are not GitHub build attestations. File equality proves that the supplied files stayed unchanged; it does not authenticate their publisher. An ad-hoc code signature is not a Developer ID signature, and does not establish publisher identity.
+
+A downloaded archive can be checked against its registered equality record without changing files:
+
+```sh
+node tools/publisher-files.mjs verify --project '<project>' \
+  --archive /absolute/path/to/package.tar.gz --record /absolute/path/to/package-record.json
+```
+
+The equality record linked by the table contains the package record in its `record` field. Optional `--input-archive /absolute/path/to/supplied-input.tar.gz` also rechecks the original input archive. Both package and supplied-input hashes stay independent of any GitHub build claim.
+
+## Retired projects
+
+A project without a `supersededBy` reference is active. A registry record with this reference is classified as retired and stays in the registry and verification history, while its packages leave active downloads and its project leaves the active build-coverage goal. Historical versions, archive hashes, source references and signed evidence keep their original project IDs. Existing installations remain usable.
+
+The optional registry field `supersededBy` names the immediate successor project. Generated project metadata records `state` as `active` or `retired`, and archive rows carry `projectState`. The generated pages show that successor as a link, and also show the terminal active project when a longer successor chain exists. Successor references must name registered projects and form no cycle. These links do not rename an archive, rewrite its provenance or redirect an installed runtime.
+
+Every project has a stable verification history anchor, `#project-<project-id>`. Retired projects remain listed with their history links in the download index and in `--local-builds` output. Their local packages still appear at the top of the verification table under **Built locally — no GitHub build record yet**; their signed builds remain visible as retired history.
+
+## Verify a compiled package
 
 1. Choose a package in the [package index](https://procrastinine.github.io/maclauncher-builds/) and download its archive from its release. The package's catalog records the archive's file name and SHA-256. The GitHub CLI, `gh`, can download one exact archive:
 
@@ -26,9 +76,10 @@ GitHub calls a signed build record an attestation, or more fully a build provena
 
    A successful check confirms that these exact bytes were built by the named workflow from that commit on a GitHub-hosted runner; `--deny-self-hosted-runners` rejects builds on machines that the repository owner supplies. Without a build record, nothing confirms that history. Some older packages have none, and their release tag and the SHA-256 in their catalog still identify them.
 
-3. Optionally, rebuild the package on a Mac and compare. A rebuild needs Node 24 or newer, Git, the GitHub CLI, Xcode and Homebrew, and recipes written in Rust also need rustup. Clone this repository, then run:
+3. Optionally, rebuild the package on a Mac and compare. A rebuild needs Node 24.15 or newer, Git, the GitHub CLI, Xcode and Homebrew, and recipes written in Rust also need rustup. Clone this repository, then run:
 
    ```sh
+   npm ci --ignore-scripts
    node tools/rebuild-runtime.mjs --project '<project>' \
      --version '<version>' --arch '<arch>' --install-tools true \
      --output /absolute/path/to/new-comparison

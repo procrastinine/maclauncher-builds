@@ -1104,5 +1104,229 @@
         "rustfmt"
       ]
     }
+  },
+  {
+    "id": "android-blueprint-parser",
+    "name": "Android Blueprint parser",
+    "purpose": "Original Blueprint build-language parser with JSON transport for Android source producers.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "tools/build-android-blueprint.mjs",
+        "producers/android-inputs/blueprint/main.go",
+        "producers/android-inputs/blueprint/source.json"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "blueprint",
+        "provider": "gitiles",
+        "url": "https://android.googlesource.com/platform/build/blueprint",
+        "pin": {
+          "file": "producers/android-inputs/blueprint/source.json",
+          "pointer": "/upstream/revision",
+          "repositoryPointer": "/upstream/repository"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.1.0-MCLv1",
+        "label": "Android Blueprint parser"
+      }
+    ],
+    "build": {
+      "version": "0.1.0-MCLv1",
+      "command": "tools/build-android-blueprint.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "tools": [
+        "go"
+      ]
+    }
+  },
+  {
+    "id": "android-aconfig",
+    "name": "Android flag generator build input",
+    "purpose": "Original Android flag source generator with finalized SDK flag data.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "tools/build-android-aconfig.mjs",
+        "producers/android-inputs/aconfig/source.json",
+        "producers/android-inputs/aconfig/Cargo.lock"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "aosp-build",
+        "provider": "gitiles",
+        "url": "https://android.googlesource.com/platform/build",
+        "pin": {
+          "file": "producers/android-inputs/aconfig/source.json",
+          "pointer": "/revision"
+        }
+      },
+      {
+        "id": "aosp-sdk",
+        "provider": "gitiles",
+        "url": "https://android.googlesource.com/platform/prebuilts/sdk",
+        "pin": {
+          "file": "producers/android-inputs/aconfig/source.json",
+          "pointer": "/sdk/revision"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.1.0-MCLv1",
+        "label": "Android flag generator 0.1.0-MCLv1"
+      }
+    ],
+    "build": {
+      "version": "0.1.0-MCLv1",
+      "command": "tools/build-android-aconfig.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "rustComponents": [
+        "rustfmt"
+      ]
+    }
+  },
+  {
+    "id": "android-codecs",
+    "name": "Android audio codecs",
+    "purpose": "Original portable libsndfile and its codec dependency closure for Android source builds.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "tools/build-android-codecs.mjs",
+        "producers/android-inputs/codecs.json",
+        "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.js",
+        "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.json"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "libsndfile",
+        "provider": "github",
+        "url": "https://github.com/libsndfile/libsndfile",
+        "repository": "libsndfile/libsndfile",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.json",
+          "pointer": "/dependencies",
+          "match": {
+            "id": "sndfile"
+          },
+          "field": "/revision"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.1.0-MCLv1",
+        "label": "Android audio codec input libraries"
+      }
+    ],
+    "build": {
+      "version": "0.1.0-MCLv1",
+      "command": "tools/build-android-codecs.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "tools": [
+        "cmake",
+        "ninja",
+        "pkgconf"
+      ]
+    }
+  },
+  {
+    "id": "android-angle",
+    "name": "Android ANGLE",
+    "purpose": "Shared adapted Metal and Vulkan GLES libraries for Android JVM, ART and AIM.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "tools/build-android-angle.mjs",
+        "producers/android-inputs/angle.json"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "angle",
+        "provider": "gitiles",
+        "url": "https://chromium.googlesource.com/angle/angle",
+        "pin": {
+          "file": "producers/android-inputs/angle.json",
+          "pointer": "/angle/revision",
+          "repositoryPointer": "/angle/repository"
+        }
+      },
+      {
+        "id": "gn",
+        "provider": "git",
+        "url": "https://gn.googlesource.com/gn",
+        "pin": {
+          "file": "producers/android-inputs/angle.json",
+          "pointer": "/gn/revision",
+          "repositoryPointer": "/gn/repository"
+        }
+      },
+      {
+        "id": "android-common",
+        "provider": "github",
+        "url": "https://github.com/procrastinine/maclauncher-android",
+        "repository": "procrastinine/maclauncher-android",
+        "pin": {
+          "file": "producers/android-inputs/angle.json",
+          "pointer": "/profiles",
+          "match": {
+            "id": "common"
+          },
+          "field": "/androidSource"
+        }
+      },
+      {
+        "id": "android-aim6",
+        "provider": "github",
+        "url": "https://github.com/procrastinine/maclauncher-android",
+        "repository": "procrastinine/maclauncher-android",
+        "pin": {
+          "file": "producers/android-inputs/angle.json",
+          "pointer": "/profiles",
+          "match": {
+            "id": "aim6"
+          },
+          "field": "/androidSource"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.1.0-MCLv1",
+        "label": "Android ANGLE for JVM and ART"
+      }
+    ],
+    "build": [
+      {
+        "version": "0.1.0-MCLv1",
+        "command": "tools/build-android-angle.mjs",
+        "architectures": [
+          "arm64"
+        ],
+        "tools": [
+          "ninja",
+          "uv"
+        ],
+        "cleanupRunner": true
+      }
+    ]
   }
 ]

@@ -44,13 +44,13 @@ export async function pack({project,input,declaration,output,metadata={},sourceD
 
 /** Validate downloads by streaming regular tar members; no extraction or guest
  * code execution is needed to reject traversal, links or extra payload files. */
-export async function verify({archive,sha256,project,version,arch,includeDeclaration=false,includeManifest=false}){
+export async function verify({archive,sha256,project,version,arch,includeDeclaration=false,includeManifest=false,includeMetadata=false}){
  identity({id:project,version,arch});
  if(!SHA.test(sha256||''))throw Error('An exact expected archive SHA-256 is required.');
  const stat=fs.lstatSync(archive);if(!stat.isFile()||stat.isSymbolicLink()||stat.size>A.LIMITS.archiveBytes)throw Error('Invalid runtime archive file.');
  if(await A.checksum(archive)!==sha256)throw Error('Runtime archive checksum differs from the selected release.');
  const input=fs.createReadStream(archive),stream=zlib.createGunzip();input.on('error',error=>stream.destroy(error));input.pipe(stream);
- const reader=new A.ArchiveReader(stream),seen=new Set();let declaration,expected,manifest,total=0;
+ const reader=new A.ArchiveReader(stream),seen=new Set();let declaration,expected,manifest,total=0,capturedBytes=0;const metadata=Object.create(null);let metadataPaths;
  try{
   while(true){
    const header=await reader.read(512);
@@ -62,19 +62,20 @@ export async function verify({archive,sha256,project,version,arch,includeDeclara
     declaration=publicDeclaration(JSON.parse((await reader.read(entry.size)).toString('utf8')));
     if(declaration.id!==project||declaration.version!==version||declaration.arch!==arch)throw Error('Runtime archive belongs to a different project, version or architecture.');
     expected=new Map(declaration.files.map(file=>['files/'+file.path,file]));
+    metadataPaths=new Set([declaration.manifestRelative,declaration.sourceRelative,...declaration.notices.map(notice=>notice.path)].filter(value=>typeof value==='string'));
    }else{
     const file=expected.get(entry.name);
     if(!file||file.size!==entry.size||file.mode!==entry.mode)throw Error('Runtime archive member differs from its inventory.');
-    const hash=crypto.createHash('sha256'),capture=includeManifest&&file.path===declaration.manifestRelative,chunks=[];let left=entry.size;
-    if(capture&&entry.size>A.LIMITS.metadataBytes)throw Error('Runtime manifest exceeds its metadata limit.');
+    const hash=crypto.createHash('sha256'),capture=includeManifest&&file.path===declaration.manifestRelative||includeMetadata&&metadataPaths.has(file.path),chunks=[];let left=entry.size;
+    if(capture&&(capturedBytes+=entry.size)>A.LIMITS.metadataBytes)throw Error('Runtime metadata exceeds its aggregate limit.');
     while(left){const chunk=await reader.read(Math.min(left,65536));left-=chunk.length;hash.update(chunk);if(capture)chunks.push(chunk);}
-    if(capture)manifest=JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    if(capture){const content=Buffer.concat(chunks);if(includeManifest&&file.path===declaration.manifestRelative)manifest=JSON.parse(content.toString('utf8'));if(includeMetadata)metadata[file.path]=content;}
     if(hash.digest('hex')!==file.sha256)throw Error('Runtime file checksum differs from its inventory.');
    }
    if(entry.size%512&&(await reader.read(512-entry.size%512)).some(byte=>byte!==0))throw Error('Invalid archive padding.');
   }
   if(!declaration||[...expected.keys()].some(file=>!seen.has(file)))throw Error('Runtime archive is missing declared files.');
-  return {id:declaration.id,version:declaration.version,arch:declaration.arch,files:expected.size,sha256,...(includeDeclaration?{declaration}:{}),...(includeManifest?{manifest}:{})};
+  return {id:declaration.id,version:declaration.version,arch:declaration.arch,files:expected.size,sha256,...(includeDeclaration?{declaration}:{}),...(includeManifest?{manifest}:{}),...(includeMetadata?{metadata}:{})};
  }finally{input.destroy();stream.destroy();}
 }
 
@@ -126,10 +127,12 @@ export async function main([command,...args]){
   if(!o.packages?.length||!o.output)throw Error('catalog requires --package records and --output.');
   if(path.basename(o.output)!==o.project+'.json')throw Error('Catalog filename must be '+o.project+'.json');
   const previous=o.previous?JSON.parse(fs.readFileSync(o.previous)):undefined;
-  const result=catalog(o.packages.map(file=>JSON.parse(fs.readFileSync(file))),{project:o.project,repository:project.releaseRepository,previous});
+  const records=o.packages.map(file=>JSON.parse(fs.readFileSync(file)));
+  const {requirePublicationAuthority}=await import('./publication-authority.mjs');
+  for(const record of records)await requirePublicationAuthority({record,repository:project.releaseRepository,directory:path.resolve(import.meta.dirname,'..')});
   if(fs.existsSync(o.output)&&(!o.previous||path.resolve(o.previous)!==path.resolve(o.output)))throw Error('Use --previous to retain existing published versions.');
-  fs.mkdirSync(path.dirname(path.resolve(o.output)),{recursive:true});
-  const temporary=o.output+'.tmp-'+process.pid;try{fs.writeFileSync(temporary,JSON.stringify(result,null,2)+'\n',{flag:'wx'});fs.renameSync(temporary,o.output);}finally{fs.rmSync(temporary,{force:true});}return result;
+  const {writePublicationCatalog}=await import('./catalog-publication.mjs');
+  return writePublicationCatalog({records,project:o.project,repository:project.releaseRepository,directory:path.resolve(import.meta.dirname,'..'),output:o.output,previous});
  }
  throw Error('Use pack, verify or catalog.');
 }

@@ -60,6 +60,8 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
+      - name: Install locked build-tool dependencies
+        run: npm ci --ignore-scripts
       - name: Select new builds and their runners
         id: plan
         run: |
@@ -81,7 +83,7 @@ jobs:
   build:
     needs: plan
     if: needs.plan.outputs.empty == 'false'
-    # Each architecture builds on a GitHub-hosted Mac with that CPU.
+    # Each recipe selects a standard GitHub-hosted build image.
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
@@ -96,18 +98,9 @@ jobs:
       PROJECT: ${{ matrix.project }}
       VERSION: ${{ matrix.version }}
       ARCH: ${{ matrix.arch }}
-      DEVELOPER_DIR: ${{ matrix.developerDirectory }}
-      BUILD_XCODE_VERSION: ${{ matrix.xcodeVersion }}
-      BUILD_MACOS_SDK_VERSION: ${{ matrix.sdkVersion }}
-      SUBMODULES: ${{ matrix.submodules }}
-      RECURSIVE_SUBMODULES: ${{ matrix.recursiveSubmodules }}
-      TOOLS: ${{ matrix.tools }}
-      RUNTIME_RUST_TOOLCHAIN: ${{ matrix.rustToolchain }}
-      RUST_COMPONENTS: ${{ matrix.rustComponents }}
-      RUST_TARGETS: ${{ matrix.rustTargets }}
-      HOMEBREW_NO_AUTO_UPDATE: '1'
-      HOMEBREW_NO_INSTALL_CLEANUP: '1'
     steps:
+      - name: Report initial disk space
+        run: df -h
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: false
@@ -116,35 +109,10 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
-      - name: Select Xcode and verify the SDK
-        run: |
-          test -d "$DEVELOPER_DIR"
-          xcodebuild -version
-          test "$(xcodebuild -version | sed -n '1s/^Xcode //p')" = "$BUILD_XCODE_VERSION"
-          test "$(xcrun --sdk macosx --show-sdk-version)" = "$BUILD_MACOS_SDK_VERSION"
-      - name: Initialize the producer's pinned sources
-        if: matrix.submodules != ''
-        run: node tools/init-runtime-sources.mjs --project "$PROJECT" --version "$VERSION"
-      - name: Install build tools
-        if: matrix.tools != ''
-        run: |
-          read -r -a formulae <<< "$TOOLS"
-          brew install "${formulae[@]}"
-      - name: Select the Rust toolchain
-        if: matrix.rustToolchain != ''
-        run: |
-          rustup toolchain install "$RUNTIME_RUST_TOOLCHAIN" --profile minimal
-          echo "RUSTUP_TOOLCHAIN=$RUNTIME_RUST_TOOLCHAIN" >> "$GITHUB_ENV"
-      - name: Install Rust components
-        if: matrix.rustComponents != ''
-        run: |
-          read -r -a components <<< "$RUST_COMPONENTS"
-          rustup component add --toolchain "$RUNTIME_RUST_TOOLCHAIN" "${components[@]}"
-      - name: Install Rust CPU targets
-        if: matrix.rustTargets != ''
-        run: |
-          read -r -a targets <<< "$RUST_TARGETS"
-          rustup target add --toolchain "$RUNTIME_RUST_TOOLCHAIN" "${targets[@]}"
+      - name: Install locked build-tool dependencies
+        run: npm ci --ignore-scripts
+      - name: Prepare the runner
+        run: node tools/build-runtime.mjs --prepare --project "$PROJECT" --arch "$ARCH" --version "$VERSION"
       - name: Build the package
         run: node tools/build-runtime.mjs --project "$PROJECT" --arch "$ARCH" --version "$VERSION" --output "$RUNNER_TEMP/build" --work "$RUNNER_TEMP/work"
       - name: Package the release
@@ -195,6 +163,8 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
+      - name: Install locked build-tool dependencies
+        run: npm ci --ignore-scripts
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: runtime-${{ inputs.project }}-*
@@ -203,6 +173,7 @@ jobs:
         # The tag of each draft points to the commit these packages were built from.
         run: |
           for bundle in "$RUNNER_TEMP"/releases/*/; do
+            node tools/record-github-build.mjs --release-bundle "$bundle"
             node tools/release-runtime.mjs stage --bundle "$bundle" --target "$GITHUB_SHA"
             node tools/release-runtime.mjs verify-remote --bundle "$bundle"
           done

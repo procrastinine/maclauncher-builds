@@ -1,0 +1,32 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {createRequire} from 'node:module';
+import {pathToFileURL} from 'node:url';
+import {buildOptions,checkoutSource,stageSource,sourceNotices,run} from './build-source.mjs';
+import {rustEnvironment,rustNotices} from './rust-build.mjs';
+import {sealRuntime} from './seal-runtime.mjs';
+import {rustLicenseInputs} from './rust-license-inputs.mjs';
+const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
+const overlays=path.join(root,'producers/maclauncher/src/modules/gamemaker/overlays/opengmk-macos');
+const Emulator=require(path.join(overlays,'apply-emulator.js')),Ramen=require(path.join(overlays,'apply-ramen.js')),Audio=require(path.join(overlays,'apply-audio.js'));
+export async function buildOpenGMK({project,arch,output,work}){
+ if(project!=='opengmk'||!['arm64','x64'].includes(arch)||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select OpenGMK, a Mac CPU and new absolute work/output directories.');
+ fs.mkdirSync(work,{recursive:true});
+ const inputs=[['OpenGMK','https://github.com/OpenGMK/OpenGMK',Emulator.REVISION],['ramen','https://github.com/viriuwu/ramen',Ramen.REVISION],['udon','https://github.com/Adamcake/udon',Audio.REVISION]];
+ const sources=inputs.map(([name,repository,revision])=>({name,repository,revision,source:checkoutSource({repository,revision,destination:path.join(work,'upstream-'+name)})}));
+ const source=path.join(work,'source'),ramen=path.join(work,'ramen'),audio=path.join(work,'audio'),udon=path.join(work,'udon');
+ const provenance=await stageSource(sources[0].source,Emulator.REVISION,source);
+ Ramen.applyRamenOverlay({sourceDir:sources[1].source,destination:ramen});Audio.applyAudioOverlay({sourceDir:path.join(sources[2].source,'libsoundio-sys'),destination:audio});
+ Emulator.applyEmulatorOverlay({sourceDir:source,ramenDir:ramen,soundioDir:audio});
+ await stageSource(sources[2].source,Audio.REVISION,udon);
+ const manifest=path.join(udon,'Cargo.toml'),text=fs.readFileSync(manifest,'utf8'),before='libsoundio-sys = { path = "./libsoundio-sys" }';
+ if(text.split(before).length!==2)throw Error('Pinned udon manifest changed.');
+ fs.writeFileSync(manifest,text.replace(before,'libsoundio-sys = { path = '+JSON.stringify(audio)+' }'));fs.appendFileSync(path.join(source,'Cargo.toml'),'udon = { path = '+JSON.stringify(udon)+' }\n');
+ fs.copyFileSync(path.join(root,'producers/maclauncher/helper-builds/opengmk.lock'),path.join(source,'Cargo.lock'));
+ const target=arch==='x64'?'x86_64-apple-darwin':'aarch64-apple-darwin',env=rustEnvironment({work,minimumMacOS:'13.0'});
+ run('cargo',['build','--release','--locked','--target',target,'--package','gm8emulator'],{cwd:source,env});
+ const executable=path.join(work,'target',target,'release/gm8emulator');run(executable,['--version']);
+ const licenses=await rustLicenseInputs({file:path.join(root,'producers/opengmk/licenses.json'),output:path.join(work,'declared-notices')});
+ return sealRuntime({project,arch,output,executable,sourceRoot:sources[0].source,upstreamRevision:Emulator.REVISION,notices:[...sources.flatMap(({source,name,repository})=>sourceNotices(source,{name,repository})),...rustNotices({source,output:path.join(work,'notices'),env,licenseInputs:licenses.licenseInputs})],provenance:{...provenance,crateLicenseDeclaration:licenses.provenance,dependencies:sources.slice(1).map(({name,repository,revision})=>({name,repository,revision})),overlay:Emulator.OVERLAY_VERSION}});
+}
+if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)buildOpenGMK(buildOptions(process.argv.slice(2))).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error);process.exitCode=1;});

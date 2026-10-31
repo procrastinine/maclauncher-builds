@@ -30,7 +30,13 @@
     {
       "path": "scripts/build-mkxpz-nfc.cjs",
       "sourceSha256": "942c130d29f93191948828505b57e79c07030c5d414882d96214a0d36068ff2a",
-      "sha256": "942c130d29f93191948828505b57e79c07030c5d414882d96214a0d36068ff2a"
+      "sha256": "800f2d33a32259f2df8c6bfb97b613cd1ac971e1c8a143cf989748068f23229f",
+      "replacements": [
+        {
+          "from": "const VERSION = 'MCLv1-1003';",
+          "to": "const VERSION = 'MCLv2-1003';"
+        }
+      ]
     },
     {
       "path": "src/modules/shared/vulkan/native/kosmickrisp-build.mjs",
@@ -50,8 +56,8 @@
     {
       "path": "src/modules/shared/runtime/package-contract.cjs",
       "destination": "lib/package-contract.cjs",
-      "sourceSha256": "878451c47195564a0a10b336ac9350d726dd77df1969621057109b84054698b5",
-      "sha256": "baeb8d91a2889f1f5e4d8a9f6485072cab1fc01db62a07e434c4ddf9916fd958",
+      "sourceSha256": "1e4868e5ad327b8f804c9d09301c47d6920d6542dd3007fb6aeb11a3499fbc25",
+      "sha256": "dfa804e42e343d6a1f67ac928e25155d7b4cc3fd46aa93cc816519512ee64542",
       "replacements": [
         {
           "from": "const B = require(\"./bundled-native\");",

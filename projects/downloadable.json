@@ -141,7 +141,8 @@
         "version": "0.1.0",
         "label": "MacLauncher Android ART adapter 0.1.0"
       }
-    ]
+    ],
+    "supersededBy": "android"
   },
   {
     "id": "android-aim",
@@ -268,8 +269,23 @@
       {
         "version": "26.10-MCLv1",
         "label": ".NET 8 host"
+      },
+      {
+        "version": "26.10-MCLv2",
+        "label": ".NET 8 host"
       }
-    ]
+    ],
+    "build": {
+      "version": "26.10-MCLv2",
+      "command": "tools/build-fna.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "tools": [
+        "cmake",
+        "ninja"
+      ]
+    }
   },
   {
     "id": "gemrb",
@@ -501,8 +517,27 @@
       {
         "version": "0.10.8.903-MCLv1",
         "label": "impacto Windows-game profile 0.10.8.903-MCLv1"
+      },
+      {
+        "version": "0.10.8.903-MCLv2",
+        "label": "impacto Windows-game profile 0.10.8.903-MCLv2"
       }
-    ]
+    ],
+    "build": {
+      "version": "0.10.8.903-MCLv2",
+      "command": "tools/build-impacto.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "tools": [
+        "cmake",
+        "ninja",
+        "meson",
+        "pkgconf",
+        "nasm",
+        "git"
+      ]
+    }
   },
   {
     "id": "innoextract",
@@ -689,8 +724,27 @@
       {
         "version": "0.5.3-MCLv1",
         "label": "libnpengine Mac runner 0.5.3-MCLv1"
+      },
+      {
+        "version": "0.5.3-MCLv2",
+        "label": "libnpengine Mac runner 0.5.3-MCLv2"
       }
-    ]
+    ],
+    "build": {
+      "version": "0.5.3-MCLv2",
+      "command": "tools/build-npengine.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "tools": [
+        "cmake",
+        "ninja",
+        "pkgconf",
+        "flex",
+        "bison",
+        "xz"
+      ]
+    }
   },
   {
     "id": "onscripter-en",
@@ -818,8 +872,26 @@
       {
         "version": "0.2.0-MCLv1",
         "label": "OpenGMK 0.2.0-MCLv1"
+      },
+      {
+        "version": "0.2.0-MCLv2",
+        "label": "OpenGMK 0.2.0-MCLv2"
       }
-    ]
+    ],
+    "build": {
+      "version": "0.2.0-MCLv2",
+      "command": "tools/build-opengmk.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "tools": [
+        "cmake",
+        "ninja"
+      ],
+      "rustTargets": [
+        "aarch64-apple-darwin"
+      ]
+    }
   },
   {
     "id": "reminori",
@@ -849,8 +921,34 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "ReMinori 0.1.0-MCLv1"
+      },
+      {
+        "version": "0.1.0-MCLv2",
+        "label": "ReMinori 0.1.0-MCLv2"
       }
-    ]
+    ],
+    "build": {
+      "version": "0.1.0-MCLv2",
+      "command": "tools/build-reminori.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/ReMinori"
+      ],
+      "tools": [
+        "pkgconf",
+        "nasm"
+      ],
+      "rustComponents": [
+        "rust-src"
+      ],
+      "rustTargets": [
+        "aarch64-apple-darwin",
+        "x86_64-apple-darwin"
+      ]
+    }
   },
   {
     "id": "sys3-decompiler",
@@ -1265,10 +1363,18 @@
       "architectures": [
         "arm64",
         "x64"
-      ]
+      ],
+      "publisherFiles": {
+        "file": "producers/flash-projector/publisher-input.json",
+        "sha256": "eabba2d01fa416954574df366294caa9f54a8d40c862faaa3f93b0fa7e363809"
+      }
     },
     "upstreams": [],
     "packageProfiles": [
+      {
+        "version": "35.0.0.60",
+        "label": "Universal Flash Player projector 35.0.0.60"
+      },
       {
         "version": "35.0.0.60-MCLv1",
         "label": "Universal Flash Player projector 35.0.0.60-MCLv1"
@@ -1284,7 +1390,8 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
         "producers/maclauncher/scripts/build-mkxpz-nfc.cjs",
-        "producers/maclauncher/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json"
+        "producers/maclauncher/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json",
+        "producers/maclauncher/helper-builds/mkxpz.json"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -1298,14 +1405,47 @@
           "file": "producers/maclauncher/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json",
           "pointer": "/upstream"
         }
+      },
+      {
+        "id": "sdl2-image",
+        "provider": "github",
+        "url": "https://github.com/libsdl-org/SDL_image",
+        "repository": "libsdl-org/SDL_image",
+        "pin": {
+          "file": "producers/maclauncher/helper-builds/mkxpz.json",
+          "pointer": "/sdlImage"
+        }
       }
     ],
     "packageProfiles": [
       {
         "version": "MCLv1-1003",
         "label": "Unicode filename normalization"
+      },
+      {
+        "version": "MCLv2-1003",
+        "label": "Unicode filename normalization"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv2-1003",
+      "command": "tools/build-mkxpz.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "tools": [
+        "uv",
+        "pkgconf",
+        "cmake",
+        "bison",
+        "flex",
+        "autoconf",
+        "automake",
+        "libtool",
+        "m4",
+        "nasm"
+      ]
+    }
   },
   {
     "id": "butterscotch",
@@ -1405,8 +1545,28 @@
       {
         "version": "MCLv1-1027-2",
         "label": "AnyPS5 MCLv1-1027-2"
+      },
+      {
+        "version": "MCLv2-1027-2",
+        "label": "AnyPS5 MCLv2-1027-2"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv2-1027-2",
+      "architectures": [
+        "arm64"
+      ],
+      "command": "tools/build-anyps5.mjs",
+      "submodules": [
+        "sources/anyps5"
+      ],
+      "recursiveSubmodules": true,
+      "tools": [
+        "cmake",
+        "ninja",
+        "pkgconf"
+      ]
+    }
   },
   {
     "id": "nxnative-tools",
@@ -1446,8 +1606,30 @@
       {
         "version": "MCLv1-1027-3",
         "label": "nxnative native tools MCLv1-1027-3"
+      },
+      {
+        "version": "MCLv2-1027-3",
+        "label": "nxnative native tools MCLv2-1027-3"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv2-1027-3",
+      "architectures": [
+        "arm64"
+      ],
+      "command": "tools/build-nxnative.mjs",
+      "submodules": [
+        "sources/nxnative",
+        "sources/anyps5/3rdparty/glslang",
+        "sources/anyps5/3rdparty/zstd",
+        "producers/maclauncher/src/external/macfx-spirv-cross"
+      ],
+      "tools": [
+        "cmake",
+        "ninja",
+        "zstd"
+      ]
+    }
   },
   {
     "id": "mpv",
@@ -1519,7 +1701,7 @@
   {
     "id": "prosper",
     "name": "Prosper",
-    "purpose": "Local x86-64 macOS PS5 compatibility runtime.",
+    "purpose": "Intel macOS PS5 compatibility runtime.",
     "producer": {
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
@@ -1544,7 +1726,29 @@
         }
       }
     ],
-    "compatibility": "Local-only x86-64 macOS runtime; Rosetta on Apple Silicon and a managed Vulkan1.4 provider."
+    "compatibility": "Intel x86-64 guest execution; Rosetta on Apple Silicon, macOS26 and a managed Vulkan1.4 provider.",
+    "packageProfiles": [
+      {
+        "version": "MCLv1-1027-1",
+        "label": "Prosper x86-64"
+      }
+    ],
+    "build": {
+      "version": "MCLv1-1027-1",
+      "command": "tools/build-prosper.mjs",
+      "architectures": [
+        "x64"
+      ],
+      "submodules": [
+        "sources/prosper"
+      ],
+      "tools": [
+        "cmake",
+        "ninja",
+        "pkgconf",
+        "uv"
+      ]
+    }
   },
   {
     "id": "winevulkan-scene",
@@ -1564,7 +1768,17 @@
         "version": "26.3.0-MCLv1",
         "label": "CrossOver26.3 WineVulkan ABI47"
       }
-    ]
+    ],
+    "build": {
+      "version": "26.3.0-MCLv1",
+      "command": "tools/build-scene-runtime.mjs",
+      "architectures": [
+        "x64"
+      ],
+      "tools": [
+        "pkgconf"
+      ]
+    }
   },
   {
     "id": "fidelityfx-api",
@@ -1602,7 +1816,20 @@
           "repositoryPointer": "/vulkan/repository"
         }
       }
-    ]
+    ],
+    "packageProfiles": [
+      {
+        "version": "1.0.1-MCLv1",
+        "label": "FidelityFX API 1.0.1 Vulkan"
+      }
+    ],
+    "build": {
+      "version": "1.0.1-MCLv1",
+      "command": "tools/build-scene-runtime.mjs",
+      "architectures": [
+        "x64"
+      ]
+    }
   },
   {
     "id": "vulkan-moltenvk-scene",
@@ -1666,7 +1893,23 @@
           }
         }
       }
-    ]
+    ],
+    "packageProfiles": [
+      {
+        "version": "1.4.2-MCLv2",
+        "label": "MoltenVK 1.4.2 scene recording"
+      }
+    ],
+    "build": {
+      "version": "1.4.2-MCLv2",
+      "command": "tools/build-scene-runtime.mjs",
+      "architectures": [
+        "universal"
+      ],
+      "tools": [
+        "cmake"
+      ]
+    }
   },
   {
     "id": "rpgmaker-decrypter",
@@ -1860,8 +2103,27 @@
       {
         "version": "1.0.0-preview.5f358ef1360b-MCLv1-1028-1",
         "label": "siglus_rs 1.0.0-preview.5f358ef1360b-MCLv1-1028-1"
+      },
+      {
+        "version": "1.0.0-preview.5f358ef1360b-MCLv2-1028-1",
+        "label": "siglus_rs 1.0.0-preview.5f358ef1360b-MCLv2-1028-1"
       }
-    ]
+    ],
+    "build": {
+      "version": "1.0.0-preview.5f358ef1360b-MCLv2-1028-1",
+      "architectures": [
+        "arm64"
+      ],
+      "command": "tools/build-siglus.mjs",
+      "tools": [
+        "cmake",
+        "ninja",
+        "pkgconf"
+      ],
+      "rustTargets": [
+        "aarch64-apple-darwin"
+      ]
+    }
   },
   {
     "id": "uosc-helper",

@@ -1,0 +1,7 @@
+khronos_api 3.1.0
+
+Authors from the locked crate Cargo.toml:
+Brendan Zabarauskas <bjzaba@yahoo.com.au>
+Corey Richardson
+Arseny Kapoulkine
+Pierre Krieger <pierre.krieger1708@gmail.com>

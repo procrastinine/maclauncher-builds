@@ -1,0 +1,275 @@
+{
+  "schemaVersion": 1,
+  "crates": [
+    {
+      "name": "block",
+      "version": "0.1.6",
+      "license": "MIT",
+      "authors": [
+        "Steven Sheldon"
+      ],
+      "files": [
+        {
+          "file": "notices/block-0.1.6-LICENSE-MIT.txt",
+          "sha256": "ffff24c520428acd1181aad66ef1728b19cc08065ac52ccbc6c4849c998be391",
+          "bytes": 1053,
+          "filename": "block-0.1.6-LICENSE-MIT.txt",
+          "standardLicense": {
+            "url": "https://raw.githubusercontent.com/spdx/license-list-data/31846481de7ea17d92f2f46fad76abe58b2e9bb0/text/MIT.txt",
+            "attribution": "Cargo.toml authors from locked crate"
+          }
+        }
+      ]
+    },
+    {
+      "name": "gl_generator",
+      "version": "0.14.0",
+      "license": "Apache-2.0",
+      "authors": [
+        "Brendan Zabarauskas <bjzaba@yahoo.com.au>",
+        "Corey Richardson",
+        "Arseny Kapoulkine"
+      ],
+      "files": [
+        {
+          "file": "notices/gl_generator-0.14.0-LICENSE-APACHE.txt",
+          "sha256": "074e6e32c86a4c0ef8b3ed25b721ca23aca83df277cd88106ef7177c354615ff",
+          "bytes": 10280,
+          "filename": "gl_generator-0.14.0-LICENSE-APACHE.txt",
+          "standardLicense": {
+            "url": "https://raw.githubusercontent.com/spdx/license-list-data/31846481de7ea17d92f2f46fad76abe58b2e9bb0/text/Apache-2.0.txt"
+          }
+        },
+        {
+          "file": "notices/gl_generator-0.14.0-AUTHORS.txt",
+          "sha256": "da041f0b725e12cad9984bfbc6cd7b81c5b918a938f053e674abd84e8531c429",
+          "bytes": 140,
+          "filename": "gl_generator-0.14.0-AUTHORS.txt",
+          "standardLicense": {
+            "url": "https://crates.io/crates/gl_generator/0.14.0"
+          }
+        }
+      ]
+    },
+    {
+      "name": "khronos_api",
+      "version": "3.1.0",
+      "license": "Apache-2.0",
+      "authors": [
+        "Brendan Zabarauskas <bjzaba@yahoo.com.au>",
+        "Corey Richardson",
+        "Arseny Kapoulkine",
+        "Pierre Krieger <pierre.krieger1708@gmail.com>"
+      ],
+      "files": [
+        {
+          "file": "notices/khronos_api-3.1.0-LICENSE-APACHE.txt",
+          "sha256": "074e6e32c86a4c0ef8b3ed25b721ca23aca83df277cd88106ef7177c354615ff",
+          "bytes": 10280,
+          "filename": "khronos_api-3.1.0-LICENSE-APACHE.txt",
+          "standardLicense": {
+            "url": "https://raw.githubusercontent.com/spdx/license-list-data/31846481de7ea17d92f2f46fad76abe58b2e9bb0/text/Apache-2.0.txt"
+          }
+        },
+        {
+          "file": "notices/khronos_api-3.1.0-AUTHORS.txt",
+          "sha256": "02f466745ebbb92ba23b63b967f7778467b6e8a1b6673e488592e7749d9eedd4",
+          "bytes": 184,
+          "filename": "khronos_api-3.1.0-AUTHORS.txt",
+          "standardLicense": {
+            "url": "https://crates.io/crates/khronos_api/3.1.0"
+          }
+        }
+      ]
+    },
+    {
+      "name": "libffi",
+      "version": "3.2.0",
+      "license": "MIT/Apache-2.0",
+      "authors": [
+        "Jesse A. Tov <jesse.tov@gmail.com>"
+      ],
+      "files": [
+        {
+          "file": "notices/libffi-3.2.0-LICENSE-APACHE.txt",
+          "sha256": "074e6e32c86a4c0ef8b3ed25b721ca23aca83df277cd88106ef7177c354615ff",
+          "bytes": 10280,
+          "filename": "libffi-3.2.0-LICENSE-APACHE.txt",
+          "standardLicense": {
+            "url": "https://raw.githubusercontent.com/spdx/license-list-data/31846481de7ea17d92f2f46fad76abe58b2e9bb0/text/Apache-2.0.txt"
+          }
+        },
+        {
+          "file": "notices/libffi-3.2.0-AUTHORS.txt",
+          "sha256": "414c38e2ffd7e080693932b34be8d30f2c35e00768155e72434df0a5c917b6f7",
+          "bytes": 91,
+          "filename": "libffi-3.2.0-AUTHORS.txt",
+          "standardLicense": {
+            "url": "https://crates.io/crates/libffi/3.2.0"
+          }
+        }
+      ]
+    },
+    {
+      "name": "libffi-sys",
+      "version": "2.3.0",
+      "license": "MIT/Apache-2.0",
+      "authors": [
+        "Jesse A. Tov <jesse.tov@gmail.com>"
+      ],
+      "files": [
+        {
+          "file": "notices/libffi-sys-2.3.0-LICENSE-APACHE.txt",
+          "sha256": "074e6e32c86a4c0ef8b3ed25b721ca23aca83df277cd88106ef7177c354615ff",
+          "bytes": 10280,
+          "filename": "libffi-sys-2.3.0-LICENSE-APACHE.txt",
+          "standardLicense": {
+            "url": "https://raw.githubusercontent.com/spdx/license-list-data/31846481de7ea17d92f2f46fad76abe58b2e9bb0/text/Apache-2.0.txt"
+          }
+        },
+        {
+          "file": "notices/libffi-sys-2.3.0-AUTHORS.txt",
+          "sha256": "1e7a19f6658e7edce8681e8727d0685e0d69aa706d57e9fc36a60ca9b56b2410",
+          "bytes": 95,
+          "filename": "libffi-sys-2.3.0-AUTHORS.txt",
+          "standardLicense": {
+            "url": "https://crates.io/crates/libffi-sys/2.3.0"
+          }
+        }
+      ]
+    },
+    {
+      "name": "malloc_buf",
+      "version": "0.0.6",
+      "license": "MIT",
+      "authors": [
+        "Steven Sheldon"
+      ],
+      "files": [
+        {
+          "file": "notices/malloc_buf-0.0.6-LICENSE-MIT.txt",
+          "sha256": "ffff24c520428acd1181aad66ef1728b19cc08065ac52ccbc6c4849c998be391",
+          "bytes": 1053,
+          "filename": "malloc_buf-0.0.6-LICENSE-MIT.txt",
+          "standardLicense": {
+            "url": "https://raw.githubusercontent.com/spdx/license-list-data/31846481de7ea17d92f2f46fad76abe58b2e9bb0/text/MIT.txt",
+            "attribution": "Cargo.toml authors from locked crate"
+          }
+        }
+      ]
+    },
+    {
+      "name": "objc-foundation",
+      "version": "0.1.1",
+      "license": "MIT",
+      "authors": [
+        "Steven Sheldon"
+      ],
+      "files": [
+        {
+          "file": "notices/objc-foundation-0.1.1-LICENSE-MIT.txt",
+          "sha256": "ffff24c520428acd1181aad66ef1728b19cc08065ac52ccbc6c4849c998be391",
+          "bytes": 1053,
+          "filename": "objc-foundation-0.1.1-LICENSE-MIT.txt",
+          "standardLicense": {
+            "url": "https://raw.githubusercontent.com/spdx/license-list-data/31846481de7ea17d92f2f46fad76abe58b2e9bb0/text/MIT.txt",
+            "attribution": "Cargo.toml authors from locked crate"
+          }
+        }
+      ]
+    },
+    {
+      "name": "objc_id",
+      "version": "0.1.1",
+      "license": "MIT",
+      "authors": [
+        "Steven Sheldon"
+      ],
+      "files": [
+        {
+          "file": "notices/objc_id-0.1.1-LICENSE-MIT.txt",
+          "sha256": "ffff24c520428acd1181aad66ef1728b19cc08065ac52ccbc6c4849c998be391",
+          "bytes": 1053,
+          "filename": "objc_id-0.1.1-LICENSE-MIT.txt",
+          "standardLicense": {
+            "url": "https://raw.githubusercontent.com/spdx/license-list-data/31846481de7ea17d92f2f46fad76abe58b2e9bb0/text/MIT.txt",
+            "attribution": "Cargo.toml authors from locked crate"
+          }
+        }
+      ]
+    },
+    {
+      "name": "r-efi",
+      "version": "6.0.0",
+      "license": "MIT OR Apache-2.0 OR LGPL-2.1-or-later",
+      "authors": [],
+      "files": [
+        {
+          "file": "notices/r-efi-6.0.0-AUTHORS.txt",
+          "sha256": "d027e91dbc9cdbb2f1190068e498bd6b61cff022b6a032b191021ba658d96111",
+          "bytes": 3733,
+          "filename": "r-efi-6.0.0-AUTHORS.txt",
+          "standardLicense": {
+            "url": "https://raw.githubusercontent.com/r-efi/r-efi/7e1b0322d31d625f81a5656096330934f9cd835d/AUTHORS"
+          }
+        }
+      ]
+    },
+    {
+      "name": "winapi-i686-pc-windows-gnu",
+      "version": "0.4.0",
+      "license": "MIT/Apache-2.0",
+      "authors": [
+        "Peter Atashian <retep998@gmail.com>"
+      ],
+      "files": [
+        {
+          "file": "notices/winapi-i686-pc-windows-gnu-0.4.0-LICENSE-APACHE.txt",
+          "sha256": "074e6e32c86a4c0ef8b3ed25b721ca23aca83df277cd88106ef7177c354615ff",
+          "bytes": 10280,
+          "filename": "winapi-i686-pc-windows-gnu-0.4.0-LICENSE-APACHE.txt",
+          "standardLicense": {
+            "url": "https://raw.githubusercontent.com/spdx/license-list-data/31846481de7ea17d92f2f46fad76abe58b2e9bb0/text/Apache-2.0.txt"
+          }
+        },
+        {
+          "file": "notices/winapi-i686-pc-windows-gnu-0.4.0-AUTHORS.txt",
+          "sha256": "09485092d7c03c94efb0fe4738c79609c935f0ddc959aa627ab076c1a9f96e7d",
+          "bytes": 112,
+          "filename": "winapi-i686-pc-windows-gnu-0.4.0-AUTHORS.txt",
+          "standardLicense": {
+            "url": "https://crates.io/crates/winapi-i686-pc-windows-gnu/0.4.0"
+          }
+        }
+      ]
+    },
+    {
+      "name": "winapi-x86_64-pc-windows-gnu",
+      "version": "0.4.0",
+      "license": "MIT/Apache-2.0",
+      "authors": [
+        "Peter Atashian <retep998@gmail.com>"
+      ],
+      "files": [
+        {
+          "file": "notices/winapi-x86_64-pc-windows-gnu-0.4.0-LICENSE-APACHE.txt",
+          "sha256": "074e6e32c86a4c0ef8b3ed25b721ca23aca83df277cd88106ef7177c354615ff",
+          "bytes": 10280,
+          "filename": "winapi-x86_64-pc-windows-gnu-0.4.0-LICENSE-APACHE.txt",
+          "standardLicense": {
+            "url": "https://raw.githubusercontent.com/spdx/license-list-data/31846481de7ea17d92f2f46fad76abe58b2e9bb0/text/Apache-2.0.txt"
+          }
+        },
+        {
+          "file": "notices/winapi-x86_64-pc-windows-gnu-0.4.0-AUTHORS.txt",
+          "sha256": "6e31186375111e02a2a8041542fbfc5d34d7210eef4f2e0ae730621cef416931",
+          "bytes": 114,
+          "filename": "winapi-x86_64-pc-windows-gnu-0.4.0-AUTHORS.txt",
+          "standardLicense": {
+            "url": "https://crates.io/crates/winapi-x86_64-pc-windows-gnu/0.4.0"
+          }
+        }
+      ]
+    }
+  ]
+}

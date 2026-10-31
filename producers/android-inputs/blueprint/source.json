@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "android-blueprint-parser",
+  "version": "0.1.0-MCLv1",
+  "upstream": {
+    "repository": "https://android.googlesource.com/platform/build/blueprint",
+    "revision": "dcb14f2e146f40cf1f212efb220e9aa1f3cfc280"
+  },
+  "driver": "main.go",
+  "driverSha256": "32a6abcca5f912fe0500098aaa94dbfc4b18769bb4b95b70a3c20ea61d1d2d15"
+}

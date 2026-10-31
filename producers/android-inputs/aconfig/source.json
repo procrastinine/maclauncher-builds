@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "android-aconfig",
+  "version": "0.1.0-MCLv1",
+  "repository": "https://android.googlesource.com/platform/build",
+  "revision": "874fa586c48ae230ebfcff0df1b9c1b004fa8f7c",
+  "crate": "tools/aconfig",
+  "members": [
+    "aconfig",
+    "aconfig_protos",
+    "aconfig_storage_file",
+    "convert_finalized_flags"
+  ],
+  "sdk": {
+    "repository": "https://android.googlesource.com/platform/prebuilts/sdk",
+    "revision": "3b7daadc4e54d51439e5ae9b4dbd96cda8b6104e",
+    "files": [
+      {
+        "path": "35/finalized-flags.txt",
+        "url": "https://android.googlesource.com/platform/prebuilts/sdk/+/3b7daadc4e54d51439e5ae9b4dbd96cda8b6104e/35/finalized-flags.txt?format=TEXT",
+        "bytes": 15612,
+        "sha256": "94c1ac5be001b52ca1fbcb0b04fae6248a8625e3dfff2d6e161494ed8a790ec9",
+        "contentSha256": "6034d605e8a146cc12b0453afbe8f74434ad0de4eb3e3db4b98b8d3f224e2f40"
+      },
+      {
+        "path": "36/finalized-flags.txt",
+        "url": "https://android.googlesource.com/platform/prebuilts/sdk/+/3b7daadc4e54d51439e5ae9b4dbd96cda8b6104e/36/finalized-flags.txt?format=TEXT",
+        "bytes": 29212,
+        "sha256": "6af45ac95d8b04044ab63cad2e4d14772b93cc1a3bc20534ed91668eaa55dd76",
+        "contentSha256": "a9f5c770bdac1700cff2b81faf3d310da957af5de3d314d983230fe8593cf2c3"
+      },
+      {
+        "path": "current/finalized-flags.txt",
+        "url": "https://android.googlesource.com/platform/prebuilts/sdk/+/3b7daadc4e54d51439e5ae9b4dbd96cda8b6104e/current/finalized-flags.txt?format=TEXT",
+        "bytes": 29212,
+        "sha256": "6af45ac95d8b04044ab63cad2e4d14772b93cc1a3bc20534ed91668eaa55dd76",
+        "contentSha256": "a9f5c770bdac1700cff2b81faf3d310da957af5de3d314d983230fe8593cf2c3"
+      }
+    ]
+  },
+  "minimumMacOS": "13.0",
+  "license": {
+    "url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+    "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "bytes": 11358
+  }
+}

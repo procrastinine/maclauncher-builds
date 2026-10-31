@@ -10,6 +10,9 @@ import {identity,releaseTag,releaseRecord,validateCatalog} from '../lib/project-
 import {resolveProject} from '../lib/projects.mjs';
 import {verify} from './runtime-package.mjs';
 import {declaredBuilds} from './build-runtime.mjs';
+import {prepareBuildHost,rustSetupCommands} from './build-host.mjs';
+export {rustSetupCommands};
+import {HOSTED_RUNNERS} from '../lib/hosted-runners.mjs';
 import {buildToolchain} from '../lib/reproducible-build.mjs';
 const require=createRequire(import.meta.url), A=require('../lib/archive.cjs');
 const root=path.resolve(import.meta.dirname,'..');
@@ -121,16 +124,22 @@ function stringMap(text){
  }
  return result;
 }
-export function historicalRunner(source,arch,buildRunner){
+/** Read runner declarations as data, including tables stored beside the recipe. */
+export function historicalRunner(source,arch,buildRunner,runnerSource){
  const declaration=/export const RUNNERS\s*=\s*Object\.freeze\(\s*\{([^{}]*)\}\s*\)\s*;/.exec(source);
  if(!declaration)throw Error('This historical recipe has no data-only hosted runner declaration.');
  const runner=buildRunner||stringMap(declaration[1])[arch];
- if(!/^(?:macos-(?:latest|[0-9]+)(?:-intel|-large|-xlarge)?|xcode-[0-9]+)$/.test(runner||''))throw Error('Select a supported GitHub-hosted Mac runner.');
- const selected=new RegExp("['\"]"+runner+"['\"]\\s*:\\s*Object\\.freeze\\(\\s*\\{([^{}]*)\\}\\s*\\)").exec(source);
- if(!selected)return {runner,toolchainDeclared:false};
- const toolchain=stringMap(selected[1]);
- if(Object.keys(toolchain).sort().join(',')!=='developerDirectory,sdkVersion,xcodeVersion'||!/^\d+(?:\.\d+)*$/.test(toolchain.xcodeVersion)||!/^\d+(?:\.\d+)*$/.test(toolchain.sdkVersion)||!/^\/Applications\/Xcode[_0-9.]+\.app\/Contents\/Developer$/.test(toolchain.developerDirectory))throw Error('The historical toolchain declaration needs manual reproduction.');
- return {runner,toolchainDeclared:true,...toolchain};
+ if(!/^(?:macos-(?:latest|[0-9]+)(?:-intel|-large|-xlarge)?|xcode-[0-9]+|ubuntu-24\.04(?:-arm)?)$/.test(runner||''))throw Error('Select a supported GitHub-hosted runner.');
+ const entry=text=>new RegExp("['\"]"+runner.replaceAll('.','\\.')+"['\"]\\s*:\\s*Object\\.freeze\\(\\s*\\{([^{}]*)\\}\\s*\\)").exec(text||'');
+ const modern=entry(runnerSource),legacy=entry(source);
+ if(!modern&&!legacy)return {runner,toolchainDeclared:false};
+ const declared={...(legacy?stringMap(legacy[1]):{}),...(modern?stringMap(modern[1]):{})},keys=['os','cpu','platform','architecture','developerDirectory','sdkVersion','xcodeVersion'];
+ const os=declared.os||(declared.platform==='darwin'?'macos':declared.platform),cpu=declared.cpu||declared.architecture;
+ const {developerDirectory,sdkVersion,xcodeVersion}=declared,toolchainDeclared=['developerDirectory','sdkVersion','xcodeVersion'].some(key=>Object.hasOwn(declared,key));
+ if(Object.keys(declared).some(key=>!keys.includes(key))||os!==undefined&&!['macos','linux'].includes(os)||cpu!==undefined&&!['arm64','x64'].includes(cpu)||(os===undefined)!==(cpu===undefined)||
+  toolchainDeclared&&(!/^\d+(?:\.\d+)*$/.test(xcodeVersion)||!/^\d+(?:\.\d+)*$/.test(sdkVersion)||!/^\/Applications\/Xcode[_0-9.]+\.app\/Contents\/Developer$/.test(developerDirectory)))throw Error('The historical runner declaration needs manual reproduction.');
+ const toolchain=toolchainDeclared?{developerDirectory,sdkVersion,xcodeVersion}:{};
+ return {runner,toolchainDeclared,...toolchain,...(os?{host:{os,cpu,...toolchain}}:{})};
 }
 
 export function rebuildPlan(options){
@@ -144,21 +153,33 @@ export function rebuildPlan(options){
  try{const rows=declaredBuilds(file=>run('git',['-C',options.directory||root,'show',sourceRevision+':'+file]));build=rows.get(record.id+'@'+record.version);}catch(error){throw Error('The recipe commit must be available locally; fetch that exact commit before planning.',{cause:error});}
  if(!build?.architectures.includes(record.arch))throw Error('This historical package has no registered build command for its recorded version and CPU. Its source tag remains available for manual reproduction.');
  const recipe=run('git',['-C',options.directory||root,'show',sourceRevision+':tools/build-runtime.mjs']);
- return {repository,record,tag,sourceRevision,build,...historicalRunner(recipe,record.arch,build.runners?.[record.arch])};
+ let runners;try{runners=run('git',['-C',options.directory||root,'show',sourceRevision+':lib/hosted-runners.mjs'],{stdio:['ignore','pipe','ignore']});}catch{/* Older recipes keep their runner declarations in the build script. */}
+ return {repository,record,tag,sourceRevision,build,...historicalRunner(recipe,record.arch,build.runners?.[record.arch],runners)};
 }
 
-/** Historical recipes without an explicit Rust toolchain use the runner default. */
-export function rustSetupCommands(build,toolchain){
- const selection=toolchain?['--toolchain',toolchain]:[];
- return [...(toolchain?[['toolchain','install',toolchain,'--profile','minimal']]:[]),
-  ...(build.rustComponents?.length?[['component','add',...selection,...build.rustComponents]]:[]),
-  ...(build.rustTargets?.length?[['target','add',...selection,...build.rustTargets]]:[])];
+/** Historical recipes retain their own host preparation and tool installer. */
+export async function prepareHistoricalHost({checkout,plan,environment=process.env,install=false,verifyHost=false}){
+ const host=plan.host||{os:plan.runner.startsWith('ubuntu-')?'linux':'macos',cpu:HOSTED_RUNNERS[plan.runner]?.cpu||(plan.record.arch==='x64'?'x64':'arm64'),...(plan.toolchainDeclared?{developerDirectory:plan.developerDirectory,sdkVersion:plan.sdkVersion,xcodeVersion:plan.xcodeVersion}:{})};
+ const hasRust=plan.build.rustComponents?.length||plan.build.rustTargets?.length;
+ const {RUST_TOOLCHAIN}=hasRust?await import(pathToFileURL(path.join(checkout,'tools/rust-build.mjs'))):{};
+ const helper=path.join(checkout,'tools/build-host.mjs'),installer=path.join(checkout,'tools/build-tools.mjs');
+ const historical=fs.existsSync(helper)?await import(pathToFileURL(helper)):undefined;
+ let installTools;
+ if(!historical){
+  if(fs.existsSync(installer))({installBuildTools:installTools}=await import(pathToFileURL(installer)));
+  else installTools=(tools,{platform,environment:env,execute})=>{
+   if(platform!=='darwin')throw Error('The historical Linux recipe has no declared build-tool installer.');
+   execute('brew',['install',...tools],{env,stdio:'inherit'});
+  };
+ }
+ return (historical?.prepareBuildHost||prepareBuildHost)({build:plan.build,label:plan.runner,runner:host,rustToolchain:RUST_TOOLCHAIN,environment,install,verifyHost:verifyHost&&(plan.toolchainDeclared||Boolean(plan.host)),...(installTools?{installTools}:{})});
 }
 
 export async function rebuild(options){
  const plan=rebuildPlan(options),output=path.resolve(options.output||'');
  if(!options.output||!path.isAbsolute(options.output)||fs.existsSync(output))throw Error('Choose a new absolute --output directory.');
- if(process.platform!=='darwin')throw Error('Runtime rebuilding requires macOS. Archive comparison is available on other systems.');
+ const platform=plan.host?.os==='linux'||plan.runner.startsWith('ubuntu-')?'linux':'darwin';
+ if(process.platform!==platform)throw Error('Runtime rebuilding requires the historical recipe host operating system: '+platform+'.');
  fs.mkdirSync(output,{recursive:true});
  const originalDir=path.join(output,'original');fs.mkdirSync(originalDir);
  const original=path.join(originalDir,plan.record.asset.filename);
@@ -172,18 +193,9 @@ export async function rebuild(options){
   run('git',['clone','--no-checkout','--filter=blob:none','--no-tags','--depth','1','--','https://github.com/'+plan.repository+'.git',checkout]);
   run('git',['-C',checkout,'fetch','--no-tags','--depth','1','origin',plan.sourceRevision]);
   run('git',['-C',checkout,'checkout','--detach',plan.sourceRevision]);
-  const env={...process.env,HOMEBREW_NO_AUTO_UPDATE:'1',HOMEBREW_NO_INSTALL_CLEANUP:'1'};
-  if(options.requireToolchain==='true'&&plan.toolchainDeclared)env.DEVELOPER_DIR=plan.developerDirectory;
-  const observed=buildToolchain(env);
-  if(options.requireToolchain==='true'&&plan.toolchainDeclared&&(observed.macosSDK!==plan.sdkVersion||!observed.xcode?.startsWith('Xcode '+plan.xcodeVersion+'\n')))throw Error('The selected Xcode/SDK differs from the recipe runner declaration.');
-  if(options.installTools==='true'){
-   if(plan.build.tools?.length)run('brew',['install',...plan.build.tools],{env,stdio:'inherit'});
-   if(plan.build.rustComponents?.length||plan.build.rustTargets?.length){
-    const {RUST_TOOLCHAIN}=await import(pathToFileURL(path.join(checkout,'tools/rust-build.mjs')));
-    if(RUST_TOOLCHAIN){env.RUNTIME_RUST_TOOLCHAIN=RUST_TOOLCHAIN;env.RUSTUP_TOOLCHAIN=RUST_TOOLCHAIN;}
-    for(const args of rustSetupCommands(plan.build,RUST_TOOLCHAIN))run('rustup',args,{env,stdio:'inherit'});
-   }
-  }
+  const prepared=await prepareHistoricalHost({checkout,plan,install:options.installTools==='true',verifyHost:options.requireToolchain==='true'});
+  const env={...process.env,...prepared.env,PATH:[...prepared.paths,process.env.PATH].filter(Boolean).join(path.delimiter)},observed=buildToolchain(env);
+  if(fs.existsSync(path.join(checkout,'package-lock.json')))run('npm',['ci','--ignore-scripts'],{cwd:checkout,env,stdio:'inherit'});
   const node=(args)=>run(process.execPath,args,{cwd:checkout,env,stdio:'inherit'});
   node(['tools/init-runtime-sources.mjs','--project',plan.record.id,'--version',plan.record.version]);
   node(['tools/build-runtime.mjs','--project',plan.record.id,'--version',plan.record.version,'--arch',plan.record.arch,'--output',path.join(output,'build'),'--work',path.join(output,'work')]);

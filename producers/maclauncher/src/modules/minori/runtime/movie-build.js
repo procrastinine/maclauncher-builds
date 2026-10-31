@@ -26,21 +26,21 @@ function normalizeDiagnostics(directory, mappings) {
   if (!found) throw new Error("The FFmpeg configuration diagnostic is missing.");
   fs.writeFileSync(file, text); return { path: "config.h", sha256: Native.hashFile(file) };
 }
-async function buildMovieDependencies({ archive, destination, signal, dependencies = {} } = {}) {
-  if (process.platform !== "darwin" || !["arm64", "x64"].includes(process.arch)) throw new Error("Minori movie dependencies require a supported Mac architecture.");
+async function buildMovieDependencies({ archive, destination, architecture = process.arch, signal, dependencies = {} } = {}) {
+  if (process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) throw new Error("Minori movie dependencies require a supported Mac architecture.");
   if (!path.isAbsolute(archive || "") || Native.hashFile(archive) !== SOURCE.sha256) throw new Error("The FFmpeg 7.1.2 archive differs from its pinned SHA-256.");
   if (!path.isAbsolute(destination || "") || fs.existsSync(destination)) throw new Error("Choose a new Minori movie dependency directory.");
   const workspace = fs.mkdtempSync(path.join(os.tmpdir(), "maclauncher-minori-movie-"));
   const output = path.join(workspace, "output"), prefix = path.join(workspace, "install"), logPath = path.join(workspace, "build.log");
   fs.mkdirSync(output); fs.writeFileSync(logPath, `FFmpeg ${SOURCE.version} ${SOURCE.sha256}\n`);
   const mappings = [...new Set([workspace, fs.realpathSync(workspace)])];
-  const flags = ["-mmacosx-version-min=13.0", ...mappings.flatMap(from => [`-ffile-prefix-map=${from}=maclauncher-build/minori/movie`, `-fmacro-prefix-map=${from}=maclauncher-build/minori/movie`])].join(" ");
+  const flags = ["-arch " + (architecture === "x64" ? "x86_64" : architecture), "-mmacosx-version-min=13.0", ...mappings.flatMap(from => [`-ffile-prefix-map=${from}=maclauncher-build/minori/movie`, `-fmacro-prefix-map=${from}=maclauncher-build/minori/movie`])].join(" ");
   const run = dependencies.runBuildCommand || Build.runBuildCommand;
   const env = { ...process.env, MACOSX_DEPLOYMENT_TARGET: "13.0" };
   await run("/usr/bin/tar", ["-xf", archive, "-C", workspace], { cwd: workspace, logPath, env, signal });
   const sourceRoot = path.join(workspace, "ffmpeg-" + SOURCE.version);
-  const options = [`--prefix=${prefix}`, `--arch=${process.arch === "arm64" ? "arm64" : "x86_64"}`, ...OPTIONS,
-    "--extra-cflags=" + flags, "--extra-ldflags=-mmacosx-version-min=13.0"];
+  const options = [`--prefix=${prefix}`, `--arch=${architecture === "arm64" ? "arm64" : "x86_64"}`, ...OPTIONS,
+    "--extra-cflags=" + flags, "--extra-ldflags=-mmacosx-version-min=13.0 -arch " + (architecture === "x64" ? "x86_64" : architecture)];
   await run(path.join(sourceRoot, "configure"), options, { cwd: output, logPath, env, signal });
   const diagnostics = normalizeDiagnostics(output, mappings);
   await run("/usr/bin/make", ["-j6"], { cwd: output, logPath, env, signal });
@@ -49,7 +49,7 @@ async function buildMovieDependencies({ archive, destination, signal, dependenci
   fs.mkdirSync(path.dirname(destination), { recursive: true });
   fs.cpSync(prefix, destination, { recursive: true, force: false, errorOnExist: true });
   const receipt = { source: SOURCE, decoders: DECODERS, demuxers: DEMUXERS, options, diagnostics, workspace, prefix: destination,
-    sourceRoot, architecture: process.arch, minimumMacOS: "13.0", network: false, externalCodecs: false, gpl: false, nonfree: false };
+    sourceRoot, architecture, minimumMacOS: "13.0", network: false, externalCodecs: false, gpl: false, nonfree: false };
   fs.writeFileSync(path.join(destination, "minori-movie-source.json"), JSON.stringify(receipt, null, 2) + "\n");
   return receipt;
 }

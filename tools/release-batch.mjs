@@ -7,7 +7,7 @@ import {prepareRelease,stageRelease,verifyRemoteRelease,publishRelease,applyRele
 const root=path.resolve(import.meta.dirname,'..');
 
 /** Release packed package directories in order, stopping before the next package on any failure. */
-export async function releaseBatch({packages,target,output,directory=root,runGh}){
+export async function releaseBatch({packages,target,output,directory=root,runGh,verifyGithubBuild}){
  if(!/^[a-f0-9]{40}$/.test(target||''))throw Error('Batch release requires an exact source commit through --target.');
  if(!output||!Array.isArray(packages)||!packages.length||packages.some(p=>typeof p!=='string'||!p))throw Error('Batch release requires --output and one or more --package directories.');
  const destination=path.resolve(output),inputs=packages.map(p=>path.resolve(p));
@@ -21,7 +21,7 @@ export async function releaseBatch({packages,target,output,directory=root,runGh}
    if(sidecars[0]!==name+'.json')throw Error('Release asset belongs to a different project or version.');
    const bundle=path.join(destination,record.id,record.version,record.arch);
    await prepareRelease({project:record.id,archive:path.join(input,name),record,output:bundle,directory});
-   const selected={bundle,directory,runGh};
+   const selected={bundle,directory,runGh,verifyGithubBuild};
    await stageRelease({...selected,target});
    await verifyRemoteRelease(selected);
    const publication=await publishRelease(selected);
@@ -34,7 +34,7 @@ export async function releaseBatch({packages,target,output,directory=root,runGh}
  return results;
 }
 
-export async function main(args,{directory=root,runGh}={}){
+export async function main(args,{directory=root,runGh,verifyGithubBuild}={}){
  const options={packages:[]};
  for(let i=0;i<args.length;i+=2){
   const key=args[i],value=args[i+1];
@@ -45,6 +45,6 @@ export async function main(args,{directory=root,runGh}={}){
    options[name]=value;
   }
  }
- return releaseBatch({...options,directory,runGh});
+ return releaseBatch({...options,directory,runGh,verifyGithubBuild});
 }
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)main(process.argv.slice(2)).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error.message);process.exitCode=1;});

@@ -41,6 +41,8 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
+      - name: Install locked build-tool dependencies
+        run: npm ci --ignore-scripts
       - name: Resolve the published source and its build runner
         id: recipe
         run: node tools/rebuild-runtime.mjs plan --project "$PROJECT" --version "$VERSION" --arch "$ARCH"
@@ -64,6 +66,8 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
+      - name: Install locked build-tool dependencies
+        run: npm ci --ignore-scripts
       - name: Verify provenance, rebuild the exact source and compare
         run: node tools/rebuild-runtime.mjs --project "$PROJECT" --version "$VERSION" --arch "$ARCH" --source-revision "$SOURCE_REVISION" --install-tools true --require-toolchain true --output "$RUNNER_TEMP/comparison"
       - name: Summarize the comparison

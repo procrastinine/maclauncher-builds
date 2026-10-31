@@ -1,0 +1,477 @@
+{
+  "schemaVersion": 1,
+  "kind": "registered-supplied-publisher-input",
+  "id": "flash-projector",
+  "publisherVersion": "35.0.0.60",
+  "origin": "Adobe Animate Flash Player application",
+  "input": {
+    "format": "runtime-package-v2",
+    "record": {
+      "id": "flash-projector",
+      "version": "35.0.0.60-MCLv1",
+      "arch": "universal"
+    },
+    "archive": {
+      "filename": "flash-projector-35.0.0.60-MCLv1-universal.tar.gz",
+      "sha256": "189725d92f493d6794ead560d7fb551923855cea603672cd7f6995960a0b7cdb",
+      "bytes": 12209410,
+      "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/flash-projector%2Fv35.0.0.60-MCLv1%2Funiversal/flash-projector-35.0.0.60-MCLv1-universal.tar.gz"
+    },
+    "archivePrefix": "files/files/Flash Player.app/"
+  },
+  "output": {
+    "payloadPrefix": "files/Flash Player.app/"
+  },
+  "files": [
+    {
+      "path": "files/Flash Player.app/Contents/_CodeSignature/CodeResources",
+      "size": 27958,
+      "sha256": "b6781030be84b8a9b752f0d58dbab4851ae1f9fd486cc5fb8ab0faf01335ba89",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Info.plist",
+      "size": 4519,
+      "sha256": "4b4035622114a533ea0e0304427367c09d949f19040fe926bd7a9ecb3ba39baa",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/MacOS/Flash Player",
+      "size": 26634688,
+      "sha256": "167ef8fdd8207c2860edd60a6426ededea38768af0b6214f75c35322ed4c628f",
+      "mode": 493
+    },
+    {
+      "path": "files/Flash Player.app/Contents/PkgInfo",
+      "size": 8,
+      "sha256": "55b4dbfbbccef893547517f137e32bcc0a8080143344850bc82125328ce4cdbf",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/cs.lproj/InfoPlist.strings",
+      "size": 202,
+      "sha256": "10ba9bb53d80a8bb71122b36f51d583a932684162b44ed6f37d291bfcad00f25",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/cs.lproj/MainMenu.nib",
+      "size": 23962,
+      "sha256": "d79c539abea07a38933b1db40dfea11b95e0142e2c01da51427386b7e718504b",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/cs.lproj/PlayerUILocalizable.strings",
+      "size": 34180,
+      "sha256": "86286a7b3cf0bf9db7d27a7379d5cba92d986725a7e6c76fa5cc679df252b2cf",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/cs.lproj/StandalonePlayerLocalizable.strings",
+      "size": 2306,
+      "sha256": "1e6a4c10f20c7010a52e11f1295940cb2d31b3f9d56c23e4a246ae5f2e9107da",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/de.lproj/InfoPlist.strings",
+      "size": 202,
+      "sha256": "10ba9bb53d80a8bb71122b36f51d583a932684162b44ed6f37d291bfcad00f25",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/de.lproj/MainMenu.nib",
+      "size": 23906,
+      "sha256": "692cc83bc8624c842d27b2505a4195f4c577a14507a2faac73ba657658bddb56",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/de.lproj/PlayerUILocalizable.strings",
+      "size": 35398,
+      "sha256": "a25cdf3afa5887f365e16994a04bd163d23e3da76e0a0f99a7b1d6d09424a6fb",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/de.lproj/StandalonePlayerLocalizable.strings",
+      "size": 2322,
+      "sha256": "351ff0914bad0dc13f0e1f46542c00e344adb119f8ac8224211ed0d2bc2f1fec",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/document_f4a.icns",
+      "size": 99737,
+      "sha256": "0b2fcdf48e9e2ffbfccf9aa12a0d38f8a3d7836326cd9ed3ba39106f8eabfbab",
+      "mode": 493
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/document_f4p.icns",
+      "size": 96528,
+      "sha256": "1a95c47ba2426720c795071bb3620c5d68c0d78bf26a05445bbeb01d0fde9682",
+      "mode": 493
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/document_f4v.icns",
+      "size": 80814,
+      "sha256": "00fd8a310ca30146e089f906bc4a81c6a107465487bd9a6ef00a0ac7c7719121",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/document_flv.icns",
+      "size": 79264,
+      "sha256": "d401bd154349eea2dfbcb13ce5a92dc09b7ede567dc727808deb97327ae962b2",
+      "mode": 493
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/document_swf.icns",
+      "size": 84298,
+      "sha256": "df30f0c808f7a1ff3b360b26619c5f18e567f663c264dd3621b37e1d0e5e35c5",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/en.lproj/InfoPlist.strings",
+      "size": 202,
+      "sha256": "10ba9bb53d80a8bb71122b36f51d583a932684162b44ed6f37d291bfcad00f25",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/en.lproj/MainMenu.nib",
+      "size": 23473,
+      "sha256": "ff78cd8178d555a239821e1b6a98d785cf069ae33f1bad43189a262fa59e76d4",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/en.lproj/PlayerUILocalizable.strings",
+      "size": 31484,
+      "sha256": "3df84566597a65fcde1d267cee8adeea4692578c4af18aa8695a30fbb4d449f8",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/en.lproj/StandalonePlayerLocalizable.strings",
+      "size": 2278,
+      "sha256": "151fb630f195761cd7ed7593d8c454ac72875c53e71c0541e621207e674e02af",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/es.lproj/InfoPlist.strings",
+      "size": 202,
+      "sha256": "10ba9bb53d80a8bb71122b36f51d583a932684162b44ed6f37d291bfcad00f25",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/es.lproj/MainMenu.nib",
+      "size": 23629,
+      "sha256": "bfa2597ffa023ece5a661c33d7b5bd18964c894532f5bbcb06b8656abcf693cf",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/es.lproj/PlayerUILocalizable.strings",
+      "size": 36130,
+      "sha256": "562cf23680efa56718b7311e4e6cabec262296914db3124815731e0a572bc778",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/es.lproj/StandalonePlayerLocalizable.strings",
+      "size": 2312,
+      "sha256": "7af32a1f65e5cabad4cc38fff44dcd5a19ea01925b193dd18bd5d7d6ffe48459",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/FlashPlayer.icns",
+      "size": 109293,
+      "sha256": "e4becab221bad7dd1f38eb4df249d259c8ce19dfa99bae232189b1305a1f684a",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/fr.lproj/InfoPlist.strings",
+      "size": 202,
+      "sha256": "10ba9bb53d80a8bb71122b36f51d583a932684162b44ed6f37d291bfcad00f25",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/fr.lproj/MainMenu.nib",
+      "size": 23840,
+      "sha256": "1e48fe22cf347b7665365ce7bde6a1915e2eedaf5dd783a05bf861802aa0c0a1",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/fr.lproj/PlayerUILocalizable.strings",
+      "size": 37240,
+      "sha256": "c2c3d6b15fbdef8c20047892fa276cc7aaea489fe5a9bf48175ef62674cdc979",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/fr.lproj/StandalonePlayerLocalizable.strings",
+      "size": 2304,
+      "sha256": "760800013994554911275e5a38ff38e45a05921e9f831e3521abc967402f1957",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/it.lproj/InfoPlist.strings",
+      "size": 202,
+      "sha256": "10ba9bb53d80a8bb71122b36f51d583a932684162b44ed6f37d291bfcad00f25",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/it.lproj/MainMenu.nib",
+      "size": 23607,
+      "sha256": "23e348668513ea68e374f955b112436fca7d7cac478c9fc443131981c0f66197",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/it.lproj/PlayerUILocalizable.strings",
+      "size": 36124,
+      "sha256": "3566549a2ad80d16178216c1519b3b5031c25561a98ae5226e670a96a6ca1d0d",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/it.lproj/StandalonePlayerLocalizable.strings",
+      "size": 2292,
+      "sha256": "6e4547eade570751d2510a8c2c9f8528c6fa860ad6232bbbdacbac2c56d5a41f",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/ja.lproj/InfoPlist.strings",
+      "size": 202,
+      "sha256": "10ba9bb53d80a8bb71122b36f51d583a932684162b44ed6f37d291bfcad00f25",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/ja.lproj/MainMenu.nib",
+      "size": 23627,
+      "sha256": "453f45bf33fcaa537746c40a403382493f633b4cdb187c5e6a338ed7375209e7",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/ja.lproj/PlayerUILocalizable.strings",
+      "size": 26510,
+      "sha256": "6827c71b14416bf892e722530f65ea66cefae1534b4656918d75af53e0e11e3b",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/ja.lproj/StandalonePlayerLocalizable.strings",
+      "size": 2244,
+      "sha256": "04333c3eb22d0c4a18d46df36e52fc9d8aebaddc71435660be2c519a40927397",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/ko.lproj/InfoPlist.strings",
+      "size": 202,
+      "sha256": "10ba9bb53d80a8bb71122b36f51d583a932684162b44ed6f37d291bfcad00f25",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/ko.lproj/MainMenu.nib",
+      "size": 23576,
+      "sha256": "72954136239f4e9652a02759775ffc1dbc3bc9c8955f7aad5603dda52053f7fd",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/ko.lproj/PlayerUILocalizable.strings",
+      "size": 26288,
+      "sha256": "9ca72592c73e28491cfce9b0989dafc7261dc47849942b09784e560f94b123cf",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/ko.lproj/StandalonePlayerLocalizable.strings",
+      "size": 2250,
+      "sha256": "343a2f1b557d4c0acd5f7c175122495e10b0b9b4a95c9b6c0f8c5ee82b2124cb",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/nl.lproj/InfoPlist.strings",
+      "size": 202,
+      "sha256": "10ba9bb53d80a8bb71122b36f51d583a932684162b44ed6f37d291bfcad00f25",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/nl.lproj/MainMenu.nib",
+      "size": 23677,
+      "sha256": "2c990d88878bbe2cd052b5dfd5037a64e5e1ffcb62f8d8a5a25fd686c8b271ce",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/nl.lproj/PlayerUILocalizable.strings",
+      "size": 34820,
+      "sha256": "3d520c4436598c3ec6b53ec1a0a0b9a0c3b621014f619ba7d5a96bb8ad432084",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/nl.lproj/StandalonePlayerLocalizable.strings",
+      "size": 2332,
+      "sha256": "e1fdcd9657d8a67d13c908311ccdfa31eb592b7eff5820f1ee5e571dc8cf9535",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/pl.lproj/InfoPlist.strings",
+      "size": 202,
+      "sha256": "10ba9bb53d80a8bb71122b36f51d583a932684162b44ed6f37d291bfcad00f25",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/pl.lproj/MainMenu.nib",
+      "size": 23892,
+      "sha256": "e62eab04bf818548aaf52a4e5f2044f61d501ed14123ced477ea6c254716a660",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/pl.lproj/PlayerUILocalizable.strings",
+      "size": 35694,
+      "sha256": "8a48bcdcaa7180b6a7c4b08e2119a5397a2f504b6f3a0ec6dfe88092d73fcbcd",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/pl.lproj/StandalonePlayerLocalizable.strings",
+      "size": 2300,
+      "sha256": "c1fa213acdb7ec78a81d1c835b83ec3c0824496c6dc3552656654a09cd366a0b",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/pt.lproj/InfoPlist.strings",
+      "size": 202,
+      "sha256": "10ba9bb53d80a8bb71122b36f51d583a932684162b44ed6f37d291bfcad00f25",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/pt.lproj/MainMenu.nib",
+      "size": 23606,
+      "sha256": "82c08f13944583be87936923662df5bbd9d901e5f60c590dac398933963cd8e4",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/pt.lproj/PlayerUILocalizable.strings",
+      "size": 33930,
+      "sha256": "6d2728165097a400a63bc1a39f2995ebb5a412cb21ebb0dea70107528a3a3f24",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/pt.lproj/StandalonePlayerLocalizable.strings",
+      "size": 2312,
+      "sha256": "2df2dae22920b39842cc49816173e3412cc1657fe934f40e86a7c0265db5944c",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/ru.lproj/InfoPlist.strings",
+      "size": 202,
+      "sha256": "10ba9bb53d80a8bb71122b36f51d583a932684162b44ed6f37d291bfcad00f25",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/ru.lproj/MainMenu.nib",
+      "size": 24213,
+      "sha256": "e5949627d2b77ea8618ba1a20fd98d0e2d0966656ae80e2cf9a38abcd73f241d",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/ru.lproj/PlayerUILocalizable.strings",
+      "size": 35692,
+      "sha256": "e7d2e8081edbbd73c3285cfb886627f0d08e0687a8382e467cc6e167291a44d2",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/ru.lproj/StandalonePlayerLocalizable.strings",
+      "size": 2314,
+      "sha256": "2aed3cc1a1c03271643634c4b4b3c886f7d58f6e7a23bcb89316ac3e488c7729",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/sv.lproj/InfoPlist.strings",
+      "size": 202,
+      "sha256": "10ba9bb53d80a8bb71122b36f51d583a932684162b44ed6f37d291bfcad00f25",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/sv.lproj/MainMenu.nib",
+      "size": 23699,
+      "sha256": "2b9f9af20450c6ba317b657b8afd8ced911d04c97d987805b342e677a8cdb475",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/sv.lproj/PlayerUILocalizable.strings",
+      "size": 33236,
+      "sha256": "767f78ceff4d17b2b06dcbfe9db478721fcb5215ca5bfe6bcb06f0e78f0c7fcd",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/sv.lproj/StandalonePlayerLocalizable.strings",
+      "size": 2298,
+      "sha256": "117afb048237d12855a6245128a90bef51f8c4da01238ebc33d2b5725bb47216",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/tr.lproj/InfoPlist.strings",
+      "size": 202,
+      "sha256": "10ba9bb53d80a8bb71122b36f51d583a932684162b44ed6f37d291bfcad00f25",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/tr.lproj/MainMenu.nib",
+      "size": 23871,
+      "sha256": "020e785bdf5631b07e7c9c338727e623758900126a9296e9828bf1d4174b5111",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/tr.lproj/PlayerUILocalizable.strings",
+      "size": 34036,
+      "sha256": "1cac1ce44d7262f02b46298a9b0ef6889efd4b244b71550b0deb4270f0eaf136",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/tr.lproj/StandalonePlayerLocalizable.strings",
+      "size": 2334,
+      "sha256": "19378c7f6f8a35616f3a27809c79346158d9f0852d5c2c5d9329a7e420a1f4bd",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/zh_Hans.lproj/InfoPlist.strings",
+      "size": 202,
+      "sha256": "10ba9bb53d80a8bb71122b36f51d583a932684162b44ed6f37d291bfcad00f25",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/zh_Hans.lproj/MainMenu.nib",
+      "size": 23490,
+      "sha256": "53533335b7d3ca54c0794f6cd3d8a33be88d4ae228d72a1028a57e9b43d54f78",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/zh_Hans.lproj/PlayerUILocalizable.strings",
+      "size": 23500,
+      "sha256": "36573189527b6f35c8b5894e39850b82c86fbe34d34fa314fda86e5bd2a43bf3",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/zh_Hans.lproj/StandalonePlayerLocalizable.strings",
+      "size": 2232,
+      "sha256": "56657771f39554ffc8902230b0b7d085b183c2707e4f6e6f3e29aa120af34a5f",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/zh_Hant.lproj/InfoPlist.strings",
+      "size": 202,
+      "sha256": "10ba9bb53d80a8bb71122b36f51d583a932684162b44ed6f37d291bfcad00f25",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/zh_Hant.lproj/MainMenu.nib",
+      "size": 23508,
+      "sha256": "9d763de72de81caedbe94a243112e9fd291bed63ed9eebcdf78dc4a0de52a485",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/zh_Hant.lproj/PlayerUILocalizable.strings",
+      "size": 23780,
+      "sha256": "dc54f49295ba1cd5b0a4e9340838db3687aa48e695f2235a943ac002bba5d5e1",
+      "mode": 420
+    },
+    {
+      "path": "files/Flash Player.app/Contents/Resources/zh_Hant.lproj/StandalonePlayerLocalizable.strings",
+      "size": 2234,
+      "sha256": "d4e57a978a242ee05146dfeeeabf99c0ca570d904bcbd4a8e368429be926864b",
+      "mode": 420
+    }
+  ],
+  "signature": {
+    "kind": "ad-hoc",
+    "developerId": null,
+    "teamIdentifier": null,
+    "publisherAuthenticated": false
+  }
+}

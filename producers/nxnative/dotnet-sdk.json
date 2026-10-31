@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "version": "10.0.401",
+  "platform": "osx-arm64",
+  "url": "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.401/dotnet-sdk-10.0.401-osx-arm64.tar.gz",
+  "bytes": 230753980,
+  "sha256": "d143ccec4474dce17d7b778854598137a2599b81828bce51e809897fe8bdf035",
+  "sha512": "69f64eb00dc045398755c440b152225d544301a345a146a16e86a56a0c52b7c94b2c331520e976dbb821f18d31930aafbd25bb85961e3517e0665414ce0cbcff",
+  "metadata": "https://builds.dotnet.microsoft.com/dotnet/release-metadata/10.0/releases.json"
+}

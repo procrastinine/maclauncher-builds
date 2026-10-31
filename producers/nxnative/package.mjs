@@ -68,7 +68,7 @@ function selectPayload(input, temporary) {
  return temporary;
 }
 
-export async function packageNxNative({input,outputDirectory,catalogFile}){
+export async function packageNxNative({input,outputDirectory,catalogFile,buildOutput}){
  fs.mkdirSync(outputDirectory,{recursive:true});
  const temporary=fs.mkdtempSync(path.join(outputDirectory,'.nxnative-payload-'));
  try {
@@ -86,6 +86,11 @@ export async function packageNxNative({input,outputDirectory,catalogFile}){
   files:[...manifest.files,{path:'manifest.json',size:manifestBytes.length,mode:0o644,sha256:digest(manifestBytes)}],notices:manifest.notices,redistribution:'bundle'};
  Bundled.verifyPayload(input,declaration);
  fs.mkdirSync(outputDirectory,{recursive:true});
+ if(buildOutput){
+  if(!path.isAbsolute(buildOutput)||fs.existsSync(buildOutput))throw Error('Choose a new absolute build output.');
+  fs.mkdirSync(buildOutput,{recursive:true});fs.cpSync(input,path.join(buildOutput,'payload'),{recursive:true});
+  fs.writeFileSync(path.join(buildOutput,'declaration.json'),JSON.stringify(declaration,null,2)+'\n');return {output:buildOutput,declaration};
+ }
  const output=path.join(outputDirectory,manifest.managerId+'-'+manifest.version+'-'+manifest.arch+'.tar.gz');
  if(fs.existsSync(output)||fs.existsSync(output+'.json'))throw Error('The immutable package output already exists.');
  const record=await pack({project:manifest.managerId,input,declaration,output});
