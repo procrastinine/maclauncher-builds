@@ -5,23 +5,28 @@ on:
     inputs:
       project:
         description: Registered runtime project ID
-        required: true
+        required: false
         type: string
       version:
         description: Exact package version
-        required: true
+        required: false
         type: string
       arch:
         description: Package architecture
-        required: true
+        required: false
         type: choice
         options: [arm64, x64, universal]
       operation:
-        description: Stage a build artifact, validate a draft or publish its existing assets
+        description: Stage, verify, publish one package, or publish every imported signed output
         required: true
         default: verify
         type: choice
-        options: [stage, verify, publish]
+        options: [stage, verify, publish, publish-verified]
+      dry-run:
+        description: Download and verify the publish-verified batch without changing releases or catalogs
+        required: false
+        default: false
+        type: boolean
       build-run:
         description: Runtime build run (required for stage; empty for a package already in its catalog)
         required: false
@@ -34,11 +39,12 @@ permissions:
   attestations: read
 
 concurrency:
-  group: runtime-release-${{ inputs.project }}
+  group: runtime-release
   cancel-in-progress: false
 
 jobs:
   release:
+    if: inputs.operation != 'publish-verified'
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
@@ -136,3 +142,80 @@ jobs:
       - name: Publish selected draft
         if: inputs.operation == 'publish'
         run: node tools/release-runtime.mjs publish --bundle "$RUNNER_TEMP/runtime-release"
+  publish-verified:
+    if: inputs.operation == 'publish-verified'
+    runs-on: ubuntu-latest
+    outputs:
+      catalog-commit: ${{ steps.catalog.outputs.commit }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      DRY_RUN: ${{ inputs.dry-run }}
+    steps:
+      - name: Require main
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "Verified batches publish only from main." >&2
+          exit 1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install locked publication dependencies
+        run: npm ci --ignore-scripts
+      - name: Publish imported signed outputs
+        run: |
+          args=(--output "$RUNNER_TEMP/verified-publication")
+          if [ "$DRY_RUN" = true ]; then args+=(--dry-run); fi
+          node tools/publish-verified.mjs "${args[@]}"
+      - name: Commit catalog changes
+        id: catalog
+        if: inputs.dry-run == false
+        run: |
+          git add -- catalogs
+          if git diff --cached --quiet; then
+            echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name procrastinine
+          git config user.email 24549552+procrastinine@users.noreply.github.com
+          git commit -m 'Publish verified runtime catalogs'
+          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+      - name: Check the exact catalog commit
+        if: steps.catalog.outputs.changed == 'true'
+        run: |
+          git clone --no-hardlinks "$GITHUB_WORKSPACE" "$RUNNER_TEMP/publication-source-check"
+          cd "$RUNNER_TEMP/publication-source-check"
+          npm ci --ignore-scripts
+          git submodule update --init --depth 1 -- sources/maclauncher-android
+          npm test
+          npm run check:versions
+          npm run index:build
+      - name: Push checked catalogs
+        if: steps.catalog.outputs.changed == 'true'
+        run: |
+          gh auth setup-git
+          git push origin HEAD:main
+      - name: Keep the publication plan
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: verified-publication-plan
+          path: |
+            ${{ runner.temp }}/verified-publication/publication-plan.json
+            ${{ runner.temp }}/verified-publication/publication-result.json
+          if-no-files-found: ignore
+  update-index:
+    needs: publish-verified
+    if: needs.publish-verified.outputs.catalog-commit != ''
+    uses: ./.github/workflows/pages.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    with:
+      source-revision: ${{ needs.publish-verified.outputs.catalog-commit }}
