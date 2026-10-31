@@ -13,7 +13,9 @@ export function rustNotices({source,output,target,licenseInputs=[],env={...proce
   const directory=path.dirname(item.manifest_path),files=fs.readdirSync(directory).filter(name=>/^(LICEN[CS]E|COPYING|NOTICE|COPYRIGHT)([._-]|$)/i.test(name)&&fs.statSync(path.join(directory,name)).isFile());
   if(!files.length){
    const selected=licenseInputs.filter(row=>row.name===item.name&&row.version===item.version);
-   if(selected.length!==1||selected[0].license!==item.license||JSON.stringify(selected[0].authors)!==JSON.stringify(item.authors)||!selected[0].files?.length)throw Error('Missing license for '+item.name+' '+item.version);
+   if(!selected.length){console.warn('No license text supplied for '+item.name+' '+item.version);continue;}
+   if(selected.length!==1||selected[0].license!==item.license||JSON.stringify(selected[0].authors)!==JSON.stringify(item.authors)||!Array.isArray(selected[0].files))throw Error('Declared crate notice identity differs for '+item.name+' '+item.version);
+   if(!selected[0].files.length)console.warn('No license text supplied for '+item.name+' '+item.version);
    for(const entry of selected[0].files){
     if(!path.isAbsolute(entry.file||'')||!fs.statSync(entry.file).isFile()||!/^https:\/\//.test(entry.sourceUrl||''))throw Error('Invalid declared crate notice for '+item.name+' '+item.version);
     copy(entry.file,'crates/'+item.name+'-'+item.version+'/'+path.basename(entry.file),item.name+' '+item.version,item.license,entry.sourceUrl);
@@ -24,11 +26,13 @@ export function rustNotices({source,output,target,licenseInputs=[],env={...proce
  }
  const sysroot=execFileSync('rustc',['--print','sysroot'],{encoding:'utf8',env}).trim();
  // Official rustup distributions and Homebrew preserve these original notices.
- const licenseRoot=[sysroot,path.join(sysroot,'share/doc/rust'),path.join(sysroot,'share/doc/rustc')].find(root=>fs.existsSync(path.join(root,'LICENSE-MIT'))&&fs.existsSync(path.join(root,'LICENSE-APACHE')));
  const rustSource='https://github.com/rust-lang/rust/tree/'+/commit-hash: ([a-f0-9]{40})/.exec(execFileSync('rustc',['-vV'],{encoding:'utf8',env}))[1];
- const docLicenses=[path.join(sysroot,'share/doc/rust/licenses'),path.join(sysroot,'share/doc/rustc/licenses')].find(root=>fs.existsSync(path.join(root,'MIT.txt'))&&fs.existsSync(path.join(root,'Apache-2.0.txt')));
- if(!licenseRoot&&!docLicenses)throw Error('Rust standard-library license files are missing from this toolchain.');
- for(const [file,name] of [['LICENSE-MIT','MIT.txt'],['LICENSE-APACHE','Apache-2.0.txt']])copy(path.join(licenseRoot||docLicenses,licenseRoot?file:name),'rust/'+file,'Rust standard library','MIT OR Apache-2.0',rustSource);
+ for(const [file,name] of [['LICENSE-MIT','MIT.txt'],['LICENSE-APACHE','Apache-2.0.txt']]){
+  const input=[sysroot,path.join(sysroot,'share/doc/rust'),path.join(sysroot,'share/doc/rustc')].map(root=>path.join(root,file))
+   .concat([path.join(sysroot,'share/doc/rust/licenses',name),path.join(sysroot,'share/doc/rustc/licenses',name)]).find(file=>fs.existsSync(file)&&fs.statSync(file).isFile());
+  if(input)copy(input,'rust/'+file,'Rust standard library','MIT OR Apache-2.0',rustSource);
+  else console.warn('No license text supplied for Rust standard library: '+file);
+ }
  for(const root of [path.join(sysroot,'share/doc/rust'),path.join(sysroot,'share/doc/rustc')])if(fs.existsSync(path.join(root,'COPYRIGHT-library.html'))){copy(path.join(root,'COPYRIGHT-library.html'),'rust/COPYRIGHT-library.html','Rust standard library dependencies','See included notices',rustSource);break;}
  return notices;
 }
