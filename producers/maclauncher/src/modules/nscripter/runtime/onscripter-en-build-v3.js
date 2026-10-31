@@ -88,14 +88,14 @@ function stageNotices({ source, sdl12, sdl2, destination, revision }) {
   });
 }
 
-async function buildRuntime({ manager: suppliedManager, userDataDir, version, sourceDir, architecture = process.arch, retainBuildDirectory = false, logger, signal, onProgress, dependencies = {} } = {}) {
+async function buildRuntime({ manager: suppliedManager, userDataDir, version, packageVersion, sourceDir, architecture = process.arch, retainBuildDirectory = false, logger, signal, onProgress, dependencies = {} } = {}) {
   const manager = suppliedManager || require("./onscripter-en-manager");
   const { SNAPSHOT: PROFILE, SNAPSHOT_REVISION: REVISION } = require("./onscripter-en-manager");
-  const selected = version || PROFILE;
-  if (selected !== PROFILE || process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) {
+  const selected = version || PROFILE, outputVersion = packageVersion === undefined ? selected : packageVersion;
+  if (selected !== PROFILE || typeof outputVersion !== "string" || !outputVersion.trim() || process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) {
     throw new Error("The reviewed ONScripter-EN source adapter supports the selected Mac source snapshot.");
   }
-  const destination = manager.core.getInstallDir({ userDataDir, version: selected });
+  const destination = manager.core.getInstallDir({ userDataDir, version: outputVersion });
   if (building.has(destination)) throw new Error("This ONScripter-EN version is already building.");
   if (fs.existsSync(path.join(destination, "runtime.json"))) throw new Error("This runtime version is already installed.");
   const work = fs.mkdtempSync(path.join(os.tmpdir(), "maclauncher-onscripter-en-build-"));
@@ -104,7 +104,7 @@ async function buildRuntime({ manager: suppliedManager, userDataDir, version, so
   fs.mkdirSync(destination, { recursive: true });
   const logPath = path.join(destination, "build.log");
   const payload = path.join(destination, "files");
-  fs.writeFileSync(logPath, `ONScripter-EN ${selected}\nSource ${REVISION}\n`);
+  fs.writeFileSync(logPath, `ONScripter-EN ${outputVersion}\nSource ${REVISION}\n`);
   building.add(destination);
   try {
     const packageRoots = {};
@@ -184,10 +184,10 @@ async function buildRuntime({ manager: suppliedManager, userDataDir, version, so
     if (sourceDir && fs.existsSync(path.join(sourceDir, ".git"))) await Source.validatePinnedSource(sourceDir, REVISION, { signal, sourceScope: SOURCE_SCOPE });
     throwIfAborted(signal);
     onProgress?.({ downloaded: 4, total: 5 });
-    const installed = manager.core.registerLocal({ userDataDir, version: selected, runtimePath: executable, verifiedBuild });
-    logger?.info?.(`[onscripter-en] installed ${selected}; ${logPath}`);
+    const installed = manager.core.registerLocal({ userDataDir, version: outputVersion, runtimePath: executable, verifiedBuild });
+    logger?.info?.(`[onscripter-en] installed ${outputVersion}; ${logPath}`);
     onProgress?.({ downloaded: 5, total: 5 });
-    return { ...installed, logPath, verifiedBuild };
+    return { ...installed, logPath, verifiedBuild, sdl2Source: packageRoots.sdl2 };
   } finally { if (!retainBuildDirectory) fs.rmSync(work, { recursive: true, force: true }); building.delete(destination); }
 }
 

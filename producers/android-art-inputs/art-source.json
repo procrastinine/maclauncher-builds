@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "android-art-elf",
+  "version": "0.1.0-MCLv1",
+  "androidSource": {
+    "repository": "https://github.com/procrastinine/maclauncher-android",
+    "revision": "0d50c2f70d90549a18a69e51e33ed9308338f446"
+  },
+  "supplier": "src/modules/android/art/supplier.json",
+  "compilerSource": "src/modules/android/art/compiler-paths-source.mjs",
+  "buildEntry": "src/modules/android/art/build-elf.mjs",
+  "sourceLock": "src/modules/android/art/adapters/art-android-sources.lock",
+  "outputs": [
+    "bin/dex2oat64",
+    "lib64/libartbase.so",
+    "lib64/libdexfile.so",
+    "lib64/libprofile.so",
+    "lib64/libart.so",
+    "lib64/libopenjdkjvm.so",
+    "lib64/libadbconnection.so",
+    "lib64/libopenjdkjvmti.so"
+  ]
+}

@@ -209,27 +209,50 @@
       {
         "version": "1.5.0-MCLv1",
         "label": "AI5 SDL2 1.5.0-MCLv1"
+      },
+      {
+        "version": "1.5.0-MCLv2",
+        "label": "AI5 SDL2 1.5.0-MCLv2"
       }
     ],
-    "build": {
-      "version": "1.5.0-MCLv1",
-      "command": "tools/build-portable-runtime.mjs",
-      "architectures": [
-        "arm64",
-        "x64"
-      ],
-      "submodules": [
-        "producers/maclauncher/src/external/ai5-sdl2"
-      ],
-      "recursiveSubmodules": true,
-      "tools": [
-        "cmake",
-        "ninja",
-        "meson",
-        "pkgconf",
-        "nasm"
-      ]
-    }
+    "build": [
+      {
+        "version": "1.5.0-MCLv1",
+        "command": "tools/build-portable-runtime.mjs",
+        "architectures": [
+          "x64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/ai5-sdl2"
+        ],
+        "recursiveSubmodules": true,
+        "tools": [
+          "cmake",
+          "ninja",
+          "meson",
+          "pkgconf",
+          "nasm"
+        ]
+      },
+      {
+        "version": "1.5.0-MCLv2",
+        "command": "tools/build-portable-runtime.mjs",
+        "architectures": [
+          "arm64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/ai5-sdl2"
+        ],
+        "recursiveSubmodules": true,
+        "tools": [
+          "cmake",
+          "ninja",
+          "meson",
+          "pkgconf",
+          "nasm"
+        ]
+      }
+    ]
   },
   {
     "id": "fna",
@@ -317,24 +340,44 @@
       {
         "version": "MCLv1-1020",
         "label": "GemRB MCLv1-1020"
+      },
+      {
+        "version": "MCLv2-1020",
+        "label": "GemRB MCLv2-1020"
       }
     ],
-    "build": {
-      "version": "MCLv1-1020",
-      "command": "tools/build-portable-runtime.mjs",
-      "architectures": [
-        "arm64",
-        "x64"
-      ],
-      "submodules": [
-        "producers/maclauncher/src/external/gemrb"
-      ],
-      "tools": [
-        "cmake",
-        "ninja",
-        "pkgconf"
-      ]
-    }
+    "build": [
+      {
+        "version": "MCLv1-1020",
+        "command": "tools/build-portable-runtime.mjs",
+        "architectures": [
+          "x64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/gemrb"
+        ],
+        "tools": [
+          "cmake",
+          "ninja",
+          "pkgconf"
+        ]
+      },
+      {
+        "version": "MCLv2-1020",
+        "command": "tools/build-portable-runtime.mjs",
+        "architectures": [
+          "arm64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/gemrb"
+        ],
+        "tools": [
+          "cmake",
+          "ninja",
+          "pkgconf"
+        ]
+      }
+    ]
   },
   {
     "id": "gm8-decompiler",
@@ -775,23 +818,42 @@
       {
         "version": "MCLv1-0126",
         "label": "ONScripter-EN MCLv1-0126"
+      },
+      {
+        "version": "MCLv2-0126",
+        "label": "ONScripter-EN MCLv2-0126"
       }
     ],
-    "build": {
-      "version": "MCLv1-0126",
-      "command": "tools/build-onscripter-en.mjs",
-      "architectures": [
-        "arm64",
-        "x64"
-      ],
-      "submodules": [
-        "producers/maclauncher/src/external/onscripter-en"
-      ],
-      "tools": [
-        "cmake",
-        "ninja"
-      ]
-    }
+    "build": [
+      {
+        "version": "MCLv1-0126",
+        "command": "tools/build-onscripter-en.mjs",
+        "architectures": [
+          "x64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/onscripter-en"
+        ],
+        "tools": [
+          "cmake",
+          "ninja"
+        ]
+      },
+      {
+        "version": "MCLv2-0126",
+        "command": "tools/build-onscripter-en.mjs",
+        "architectures": [
+          "arm64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/onscripter-en"
+        ],
+        "tools": [
+          "cmake",
+          "ninja"
+        ]
+      }
+    ]
   },
   {
     "id": "onsyuri",
@@ -1246,29 +1308,54 @@
       {
         "version": "MCLv1-1021",
         "label": "xsystem4 MCLv1-1021"
+      },
+      {
+        "version": "MCLv2-1021",
+        "label": "xsystem4 MCLv2-1021"
       }
     ],
-    "build": {
-      "version": "MCLv1-1021",
-      "command": "tools/build-portable-runtime.mjs",
-      "architectures": [
-        "arm64",
-        "x64"
-      ],
-      "submodules": [
-        "producers/maclauncher/src/external/xsystem4"
-      ],
-      "recursiveSubmodules": true,
-      "tools": [
-        "cmake",
-        "ninja",
-        "meson",
-        "pkgconf",
-        "nasm",
-        "bison",
-        "flex"
-      ]
-    }
+    "build": [
+      {
+        "version": "MCLv1-1021",
+        "command": "tools/build-portable-runtime.mjs",
+        "architectures": [
+          "x64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/xsystem4"
+        ],
+        "recursiveSubmodules": true,
+        "tools": [
+          "cmake",
+          "ninja",
+          "meson",
+          "pkgconf",
+          "nasm",
+          "bison",
+          "flex"
+        ]
+      },
+      {
+        "version": "MCLv2-1021",
+        "command": "tools/build-portable-runtime.mjs",
+        "architectures": [
+          "arm64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/xsystem4"
+        ],
+        "recursiveSubmodules": true,
+        "tools": [
+          "cmake",
+          "ninja",
+          "meson",
+          "pkgconf",
+          "nasm",
+          "bison",
+          "flex"
+        ]
+      }
+    ]
   },
   {
     "id": "vulkan-kosmickrisp-gles32",

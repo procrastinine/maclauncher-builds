@@ -1328,5 +1328,56 @@
         "cleanupRunner": true
       }
     ]
+  },
+  {
+    "id": "android-art-elf",
+    "name": "Android ART ELF build input",
+    "purpose": "Original ART executables and shared libraries for the managed ART adapter.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "tools/build-android-art-elf.mjs",
+        "producers/android-art-inputs/art-source.json",
+        "tools/android-art-producer.mjs",
+        "tools/android-build-inputs.mjs",
+        "producers/android-inputs/aim.json"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "aim",
+        "provider": "github",
+        "url": "https://github.com/hahnlee/aim",
+        "repository": "hahnlee/aim",
+        "pin": {
+          "file": "sources/maclauncher-android/src/modules/android/art/supplier.json",
+          "pointer": "/sources/aim/commit"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.1.0-MCLv1",
+        "label": "ART ELF input 0.1.0-MCLv1"
+      }
+    ],
+    "build": {
+      "version": "0.1.0-MCLv1",
+      "command": "tools/build-android-art-elf.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "submodules": [
+        "sources/maclauncher-android"
+      ],
+      "tools": [
+        "uv"
+      ],
+      "rustComponents": [
+        "rustfmt"
+      ],
+      "cleanupRunner": true
+    }
   }
 ]
