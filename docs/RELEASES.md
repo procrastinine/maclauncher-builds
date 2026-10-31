@@ -59,7 +59,7 @@ node tools/build-runtime.mjs --project sys3-decompiler --arch arm64 \
 
 ## Verification and rebuild comparison
 
-[Verifying packages](../VERIFYING.md) describes the signed archive provenance and the generated [package verification table](https://procrastinine.github.io/maclauncher-builds/verification.html). The table uses the same catalogs as the package index, with one row per version and CPU build, its minimum macOS, recipe commit, build run and recorded comparison result. [App feature requirements](https://github.com/procrastinine/maclauncher/blob/main/docs/runtimes/SYSTEM_REQUIREMENTS.md) describe which features can use those packages.
+[Verifying packages](../VERIFYING.md) explains how to check the build record that GitHub signs for each package and how to rebuild a package for comparison. The [package verification table](https://procrastinine.github.io/maclauncher-builds/verification.html) is generated from the same catalogs as the package index, with one row for each version and CPU build that shows its minimum macOS, recipe commit, build run and recorded rebuild result. [App feature requirements](https://github.com/procrastinine/maclauncher/blob/master/docs/runtimes/SYSTEM_REQUIREMENTS.md) describe which features can use those packages.
 
 The manual **Rebuild and compare** workflow verifies a published archive's provenance, selects its exact source commit, and runs that commit's source initialization, build, preparation and verification commands. It writes a Markdown summary and JSON report; it does not stage releases, update catalogs or publish packages. The local equivalent is:
 

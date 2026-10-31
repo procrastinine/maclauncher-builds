@@ -2,7 +2,7 @@
 
 MacLauncher Builds provides binary builds, version control and patch sets for the runtimes and tools that [MacLauncher](https://github.com/procrastinine/maclauncher) installs. Most of them are game engines, emulators and decompilers that need changes to run on macOS, and the core graphics components and internal helpers ship inside the app. Runtimes whose publishers already offer a working macOS build are downloaded from the publisher and are not kept here.
 
-[Verify a package](VERIFYING.md): check its signed GitHub build provenance, inspect its public recipe and optionally rebuild it for comparison. The [verification table](https://procrastinine.github.io/maclauncher-builds/verification.html) lists the evidence recorded for each published package.
+[Verifying MacLauncher Builds](VERIFYING.md) explains how to check the build record that GitHub signs for each package, read the package's public recipe and rebuild it for comparison. The [verification table](https://procrastinine.github.io/maclauncher-builds/verification.html) lists the evidence recorded for each published package.
 
 Each runtime and tool has its own version history. A version is released on GitHub once per CPU architecture, under a tag of the form `<project>/v<version>/<arch>`, and although the release contains only the compiled package, the tagged commit holds everything it was built from: the exact upstream commit, the patches MacLauncher applies to it and the build script. MacLauncher reads the published versions of each project from [`catalogs/`](catalogs). Refresh discovers later versions and CPU builds of managed runtimes without a launcher update.
 
