@@ -145,6 +145,7 @@ test('Linux outputs reject Mach-O files with explicit and legacy format metadata
 test('every registered GitHub build names an existing command and submodule of this repository',()=>{
  const modules=fs.readFileSync(path.join(root,'.gitmodules'),'utf8'),registry=readProjects(root,{resolvePins:false});
  for(const project of registry.projects.filter(project=>project.build))for(const build of buildRecords(project)){
+  for(const entry of project.producer.entries||[])assert.ok(fs.statSync(path.join(root,entry)).isFile(),project.id+' '+entry);
   assert.ok(fs.statSync(path.join(root,build.command)).isFile(),project.id);
   const roots=[...modules.matchAll(/\tpath = ([^\n]+)\n/g)].map(match=>match[1]);
   for(const submodule of build.submodules||[])assert.ok(roots.some(root=>submodule===root||submodule.startsWith(root+'/')),project.id+' '+submodule);
