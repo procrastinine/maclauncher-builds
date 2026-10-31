@@ -158,7 +158,7 @@ gh workflow run runtime-release.yml --repo procrastinine/maclauncher-builds \
 
 The dry run downloads and verifies the selected artifacts and saves a publication plan without changing releases, tags or catalogs. Omitting `dry-run=true` performs publication. The workflow then commits only catalog changes, runs the Source tests, release-version checks and package-index generation from a clean clone of that exact commit, and pushes it to `main`. The existing Package index workflow updates the site at the checked commit. No package compiler runs and no archive passes through a local Mac.
 
-A retry skips cataloged outputs and preserves matching tags, drafts and public releases. If a previous attempt created only a tag, batch staging creates the missing draft only when that tag identifies the exact certified source commit. Conflicting source commits or archive bytes stop publication; releases and assets are never replaced or deleted. If a build artifact has expired after its release was created, the same signed digest can verify the existing release archive. A retry also refreshes the package index when the catalogs already match.
+A retry skips cataloged outputs and preserves matching tags, drafts and public releases. If a previous attempt created only a tag or an empty draft, batch staging completes it only when that tag identifies the exact certified source commit. Conflicting source commits or archive bytes stop publication; releases and assets are never replaced or deleted. If a build artifact has expired after its release was created, the same signed digest can verify the existing release archive. A retry also refreshes the package index when the catalogs already match.
 
 The same batch script supports local preparation:
 

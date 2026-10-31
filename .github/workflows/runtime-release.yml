@@ -54,6 +54,11 @@ jobs:
       BUILD_RUN: ${{ inputs.build-run }}
       OPERATION: ${{ inputs.operation }}
     steps:
+      - name: Require batch mode for dry run
+        if: inputs.dry-run
+        run: |
+          echo "Dry run is available only with publish-verified." >&2
+          exit 1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -158,6 +163,7 @@ jobs:
           exit 1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: main
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -187,9 +193,12 @@ jobs:
           echo "changed=true" >> "$GITHUB_OUTPUT"
       - name: Check the exact catalog commit
         if: steps.catalog.outputs.changed == 'true'
+        env:
+          CATALOG_COMMIT: ${{ steps.catalog.outputs.commit }}
         run: |
           git clone --no-hardlinks "$GITHUB_WORKSPACE" "$RUNNER_TEMP/publication-source-check"
           cd "$RUNNER_TEMP/publication-source-check"
+          git checkout --detach "$CATALOG_COMMIT"
           npm ci --ignore-scripts
           git submodule update --init --depth 1 -- sources/maclauncher-android
           npm test
