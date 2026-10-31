@@ -28,7 +28,7 @@ export async function cppAidlSources({directory,android,parser,targets}){
  });
  const selected=targets.map(name=>{
   const matches=modules.filter(row=>row.properties.name===name);
-  if(matches.length!==1||matches[0].type!=='aidl_interface'||matches[0].properties.backend?.cpp?.enabled===false)throw Error('Missing original C++ AIDL target: '+name);
+  if(matches.length!==1||!['aidl_interface','filegroup'].includes(matches[0].type)||matches[0].properties.backend?.cpp?.enabled===false)throw Error('Missing original C++ AIDL target: '+name);
   return matches[0];
  });
  return [...new Set(selected.flatMap(row=>patterns(row.properties.srcs).flatMap(pattern=>fs.globSync(pattern,{cwd:directory}))))].filter(file=>file.endsWith('.aidl'));

@@ -387,12 +387,14 @@
   "cppAidlRoots": [
     "frameworks/native/libs/binder/aidl",
     "frameworks/native/libs/gui/aidl",
+    "frameworks/native/libs/gui",
     "frameworks/native/libs/permission/aidl",
     "frameworks/native/libs/input",
     "frameworks/av/media/libaudioclient/aidl",
     "frameworks/av/media/aidl"
   ],
   "cppAidlModules": {
+    "frameworks/native/libs/gui": ["guiconstants_aidl", "android_gui_aidl"],
     "frameworks/native/libs/input": ["inputconstants"],
     "frameworks/av/media/aidl": ["av-types-aidl", "audio-permission-aidl"]
   },
