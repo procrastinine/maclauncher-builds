@@ -31,7 +31,7 @@ export async function prepareArtGuestInputs({common,hwui,image,ndk,work}){
  }
  const generated=path.join(sourceRoot,'generated'),headers=path.join(generated,'include'),cpp=path.join(generated,'src');fs.mkdirSync(headers,{recursive:true});fs.mkdirSync(cpp);
  const roots=profile.cppAidlRoots.map(relative=>path.join(sourceRoot,relative)),frozen=profile.frozenCpp.map(record=>({...record,root:path.join(sourceRoot,record.directory)}));
- const imports=[...roots,path.join(sourceRoot,'frameworks/base/core/java'),...frozen.map(record=>record.root)].map(directory=>'-I'+directory);
+ const imports=[...roots,...profile.cppAidlImportRoots.map(relative=>path.join(sourceRoot,relative)),path.join(sourceRoot,'frameworks/base/core/java'),...frozen.map(record=>record.root)].map(directory=>'-I'+directory);
  for(const directory of roots){
   if(!fs.existsSync(directory))throw Error('Original ART AIDL source group is missing: '+path.relative(sourceRoot,directory));
   for(const relative of fs.globSync('**/*.aidl',{cwd:directory}))run(common.tools.aidl,['--lang=cpp',...imports,'-h',headers,'-o',cpp,path.join(directory,relative)]);
