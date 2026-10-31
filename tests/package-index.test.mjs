@@ -36,7 +36,10 @@ test('download pages include only exact verified archive authorities and verific
  const activeRows=coverage.catalogPackages.filter(row=>row.projectState==='active'&&row.catalogState==='active'&&row.origin!=='local');
  for(const row of activeRows){assert.ok(['github','supplied-publisher'].includes(row.origin));if(row.origin==='github')assert.equal(row.githubBuild.record.asset.sha256,row.record.asset.sha256);else{assert.equal(row.publisherProof.publisherAuthenticated,false);assert.ok(row.publisherProof.publisherFiles>0);}}
  const published=registry.projects.flatMap(project=>{
-  const packages=activeRows.filter(row=>row.projectId===project.id).map(row=>row.record);
+  const approved=new Set(activeRows.filter(row=>row.projectId===project.id).map(row=>row.record.asset.sha256));
+  // The index preserves the source catalog's newest-first order, not coverage's inventory order.
+  const file=path.join(root,'catalogs',project.id+'.json');
+  const packages=fs.existsSync(file)?JSON.parse(fs.readFileSync(file)).packages.filter(record=>approved.has(record.asset.sha256)):[];
   return packages.length?[{project,packages}]:[];
  });
  const expected=new Map(published.map(row=>[row.project.id,row])),total=published.reduce((count,row)=>count+row.packages.length,0);
