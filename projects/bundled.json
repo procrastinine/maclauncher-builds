@@ -788,7 +788,8 @@
         "automake",
         "libtool",
         "bison",
-        "flex"
+        "flex",
+        "git-lfs"
       ]
     }
   },
