@@ -1,0 +1,18 @@
+--- a/src/modules/android/art/build.mjs
++++ b/src/modules/android/art/build.mjs
+@@ -95,7 +95,7 @@
+ 
+ /** The producer may reuse original AIM build outputs. Optional complete HWUI
+  * compilation is requested explicitly and preserves the original image ABI. */
+-export async function buildArt({output,host,runner,java,guest,sensors,composer,graphics,nativeBridge,hwui,inputs,bootClasspath,baseSupplier}){
++export async function buildArt({output,host,runner,java,guest,sensors,composer,graphics,nativeBridge,hwui,inputs,bootClasspath,baseSupplier,includeImage=true,originalImage}){
+  if(nativeBridge)host={...host,arm32:nativeBridge.arm32.cpu};
+  const runnerProducts=runner?buildArtRunner({...runner,output:path.join(output,'build/runner')}):{};
+  const guestProducts=guest?buildArtGuest({...guest,output:path.join(output,'build/guest')}):{};
+@@ -115,5 +115,5 @@
+  identity.update(boot.identity);
+  for(const input of [...originalTreeFiles(import.meta.dirname),native.hostLibrary,bootstrap.bootstrapDex,...Object.values(runnerProducts).filter(value=>typeof value==='string'),...Object.values(guestProducts),...Object.values(sensorProducts),...Object.values(composerProducts),...Object.values(graphicsProducts),...Object.values(bridgeProducts),...Object.values(hwuiProducts)])
+   for(const file of fs.statSync(input).isDirectory()?originalTreeFiles(input):[input])identity.update(fs.readFileSync(file));
+- return assembleArtSupplier({output:path.join(output,'runtime'),inputs:{...products,bootImage:boot.root},bootClasspath,baseSupplier,sourceVersion:'0.1.0-'+identity.digest('hex').slice(0,16)});
++ return assembleArtSupplier({output:path.join(output,'runtime'),inputs:{...products,bootImage:boot.root},bootClasspath,baseSupplier,includeImage,originalImage,sourceVersion:'0.1.0-'+identity.digest('hex').slice(0,16)});
+ }

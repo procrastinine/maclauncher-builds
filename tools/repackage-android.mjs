@@ -6,6 +6,21 @@ import {pathToFileURL} from 'node:url';
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs');
 const {validateDeclaration}=require('../lib/declaration.cjs');
 
+const frameworkBuildDirectories=['native/SDL3.framework/Versions/A/Headers','native/SDL3.framework/Versions/A/Resources/CMake'];
+export const androidFrameworkBuildInput=name=>frameworkBuildDirectories.some(directory=>name.startsWith(directory+'/'));
+
+/** Omit SDK declarations from an owned runtime staging copy and update its framework signature. */
+export function stripAndroidFrameworkBuildInputs(root,{resign=false}={}){
+ let removed=false;
+ for(const relative of frameworkBuildDirectories){const directory=path.join(root,relative);if(fs.existsSync(directory)){fs.rmSync(directory,{recursive:true});removed=true;}}
+ if(removed||resign){
+  const framework=path.join(root,'native/SDL3.framework/Versions/A');
+  execFileSync('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',framework],{stdio:['ignore','pipe','pipe']});
+  execFileSync('/usr/bin/codesign',['--verify','--strict',framework],{stdio:['ignore','pipe','pipe']});
+ }
+ return removed;
+}
+
 /** Publish a separate runtime copy without build-only source inputs. */
 export function repackageAndroid({input,declaration,output}){
  validateDeclaration(declaration);
@@ -14,17 +29,12 @@ export function repackageAndroid({input,declaration,output}){
  B.verifyPayload(input,declaration);
  const prefix=declaration.id==='android-aim'?'files/':'',source=prefix+'source.tar.gz';
  if(declaration.sourceRelative!==source&&declaration.sourceRelative!==null)throw Error('The Android input source layout differs from its declaration.');
- const frameworkBuildInput=name=>/^native\/SDL3\.framework\/Versions\/A\/(?:Headers|Resources\/CMake)\//.test(name);
- const omitted=name=>name===source||frameworkBuildInput(name);
+ const omitted=name=>name===source||androidFrameworkBuildInput(name);
  const retained=declaration.files.filter(file=>!omitted(file.path));
  fs.mkdirSync(output,{recursive:true});
  try{
   for(const file of retained){const destination=path.join(output,file.path);fs.mkdirSync(path.dirname(destination),{recursive:true});fs.copyFileSync(path.join(input,file.path),destination,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);}
-  if(declaration.files.some(file=>frameworkBuildInput(file.path))){
-   const framework=path.join(output,'native/SDL3.framework/Versions/A');
-   execFileSync('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',framework],{stdio:['ignore','pipe','pipe']});
-   execFileSync('/usr/bin/codesign',['--verify','--strict',framework],{stdio:['ignore','pipe','pipe']});
-  }
+  stripAndroidFrameworkBuildInputs(output,{resign:declaration.files.some(file=>androidFrameworkBuildInput(file.path))});
   const metadata=path.join(output,declaration.manifestRelative),manifest=JSON.parse(fs.readFileSync(metadata));
   manifest.files=manifest.files.filter(file=>!omitted(prefix+file.path)).map(file=>{
    const {bytes,...content}=B.readRegular(path.join(output,prefix+file.path),B.LIMITS.fileBytes);return {...file,...content};

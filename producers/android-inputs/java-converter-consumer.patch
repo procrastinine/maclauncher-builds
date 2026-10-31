@@ -1,0 +1,65 @@
+diff --git a/src/modules/android/native/build-options.mjs b/src/modules/android/native/build-options.mjs
+index c055890..fe0e7f1 100644
+--- a/src/modules/android/native/build-options.mjs
++++ b/src/modules/android/native/build-options.mjs
+@@ -3,7 +3,7 @@ import path from 'node:path';
+ 
+ export const requiredInputs=['klepton','converter','jdk','sdl','vulkan-headers','sndfile-headers','codecs','codec-notices','angle','gles-headers','framework','output'];
+ export const platformTools=['aidl','aconfig','rust-toolchain','python'];
+-export const optionalInputs=['ndk-headers','blueprint-parser','blueprint-parser-sources','ninja','build-work','tool-inputs','ndk','bionic-inputs','bionic-target'];
++export const optionalInputs=['ndk-headers','blueprint-parser','blueprint-parser-sources','ninja','build-work','tool-inputs','java-inputs','ndk','bionic-inputs','bionic-target'];
+ 
+ /** The snapshot builder and compiler consume the same pinned supplier catalog. */
+ export function sourceOptions(root){
+diff --git a/src/modules/android/native/compile.mjs b/src/modules/android/native/compile.mjs
+index 0682b0e..d6fb9dc 100644
+--- a/src/modules/android/native/compile.mjs
++++ b/src/modules/android/native/compile.mjs
+@@ -373,7 +373,8 @@ function auditNative(directory){for(const entry of fs.readdirSync(directory,{wit
+ auditNative(native);
+ fs.copyFileSync(path.join(root,'resources/java-security.properties'),path.join(output,'java-security.properties'));
+ buildHostArchive({root,output,build,hostClasses,frameworkTool,frameworkInput:framework.input.file,asmClasspath,java,jar});
+-const {apiHeaders}=await buildConverter({root,build,output,jdk:options.jdk,checkout:options.converter,apksig:apksig.file,asmClasspath});
++const {apiHeaders}=await buildConverter({root,build,output,jdk:options.jdk,checkout:options.converter,apksig:apksig.file,asmClasspath,prebuilt:options['java-inputs']});
++if(options['java-inputs'])inputs.javaConverter=Object.fromEntries(['dex2jvm.jar','converter-overlay.jar','android-api-headers.jar'].map(name=>[name,inputFile(path.join(options['java-inputs'],name))]));
+ run(java,['-cp',[frameworkTool,asmClasspath].join(path.delimiter),'ConversionHeaders',path.join(output,'android-api-metadata.jar'),path.join(output,'android-host.jar'),path.join(output,'android-framework.jar'),apiHeaders]);
+ const inputHash=crypto.createHash('sha256').update(JSON.stringify(inputs)).digest('hex');
+ fs.writeFileSync(path.join(output,'build-receipt.json'),JSON.stringify({schemaVersion:2,pins,framework:framework.definition,glesHeaders,angle:angle.files,nativeDependencies,...sourceIdentity,inputs,inputHash,pathMappings:buildPathMappings({source:root,build,output,options}),products:productInventory(output)},null,2)+'\n');
+diff --git a/src/modules/android/native/converter-build.mjs b/src/modules/android/native/converter-build.mjs
+index f28b037..6261fc9 100644
+--- a/src/modules/android/native/converter-build.mjs
++++ b/src/modules/android/native/converter-build.mjs
+@@ -1,4 +1,5 @@
+ import fs from 'node:fs';
++import crypto from 'node:crypto';
+ import path from 'node:path';
+ import {execFileSync} from 'node:child_process';
+ import {fileURLToPath} from 'node:url';
+@@ -6,7 +7,7 @@ import {cachedBuildStep} from './upstream/build-step.mjs';
+ import {javaSources,javaToolInputs,javaToolEnvironment} from './framework-build.mjs';
+ import {adaptTranslator,adaptConverter,adaptInitRepointPlan} from './converter-source.mjs';
+ 
+-export async function buildConverter({root,build,output,jdk,checkout,apksig,asmClasspath}){
++export async function buildConverter({root,build,output,jdk,checkout,apksig,asmClasspath,prebuilt}){
+   const converter=path.join(checkout,'build/dex2jvm.jar'),java=path.join(jdk,'bin/java'),javac=path.join(jdk,'bin/javac'),jar=path.join(jdk,'bin/jar');
+   const upstream=path.join(checkout,'src/main/java/io/github/kksimp/dex2jvm');
+   const classes=path.join(build,'converter'),generated=path.join(build,'converter-sources');
+@@ -14,6 +15,18 @@ export async function buildConverter({root,build,output,jdk,checkout,apksig,asmC
+   const sources=javaSources(path.join(root,'converter')),portability=javaSources(path.join(root,'portability'));
+   const names=['GuestRepoint','Translator','DexConverter','InitRepointPlan'];
+   const run=(command,args,extra={})=>execFileSync(command,args,{stdio:'inherit',...extra});
++  if(prebuilt){
++    const manifest=JSON.parse(fs.readFileSync(path.join(prebuilt,'input.json')));
++    for(const name of ['dex2jvm.jar','converter-overlay.jar','android-api-headers.jar']){
++      const record=manifest.files.find(file=>file.path===name),bytes=fs.readFileSync(path.join(prebuilt,name));
++      if(!record||record.size!==bytes.length||crypto.createHash('sha256').update(bytes).digest('hex')!==record.sha256)throw Error('Java converter product differs from its verified input: '+name);
++    }
++    if(fs.readFileSync(converter).compare(fs.readFileSync(path.join(prebuilt,'dex2jvm.jar'))))throw Error('Converter bootstrap differs from its verified Java input.');
++    fs.copyFileSync(converter,path.join(output,'dex2jvm.jar'),fs.constants.COPYFILE_FICLONE);
++    fs.copyFileSync(path.join(prebuilt,'converter-overlay.jar'),path.join(output,'converter-overlay.jar'),fs.constants.COPYFILE_FICLONE);
++    fs.mkdirSync(path.dirname(apiHeaders),{recursive:true});fs.copyFileSync(path.join(prebuilt,'android-api-headers.jar'),apiHeaders,fs.constants.COPYFILE_FICLONE);
++    return {apiHeaders};
++  }
+   await cachedBuildStep({cache:path.join(build,'converter.reuse.json'),
+     inputs:[fileURLToPath(import.meta.url),fileURLToPath(new URL('./converter-source.mjs',import.meta.url)),
+       fileURLToPath(new URL('./converter-array-source.mjs',import.meta.url)),

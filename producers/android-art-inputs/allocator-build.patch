@@ -1,0 +1,36 @@
+--- a/hal/graphics/allocator/Cargo.toml
++++ b/hal/graphics/allocator/Cargo.toml
+@@ -21,3 +21,8 @@
+ binder.workspace = true
+ aim-gralloc = { path = "../gralloc" }
+ libc.workspace = true
++
++[lib]
++name = "aim_allocator"
++crate-type = ["cdylib"]
++path = "src/lib.rs"
+--- a/hal/graphics/allocator/src/main.rs
++++ b/hal/graphics/allocator/src/main.rs
+@@ -160,3 +160,8 @@
+     }
+     binder::ProcessState::join_thread_pool();
+ }
++
++// In-process use retains this complete original allocator and its Binder lifetime.
++pub fn local_binder() -> binder::SpIBinder {
++    BnAllocator::new_binder(Allocator { next_id: AtomicU32::new(1) }, BinderFeatures::default()).as_binder()
++}
+--- /dev/null
++++ b/hal/graphics/allocator/src/lib.rs
+@@ -0,0 +1,11 @@
++// Original HAL implementation, with one standard strong-reference handoff.
++#[allow(dead_code)]
++#[path = "main.rs"]
++mod implementation;
++#[unsafe(no_mangle)]
++pub extern "C" fn maclauncher_art_allocator() -> *mut std::ffi::c_void {
++ let binder=implementation::local_binder();
++ let pointer=unsafe { binder.as_raw() };
++ std::mem::forget(binder);
++ pointer.cast()
++}

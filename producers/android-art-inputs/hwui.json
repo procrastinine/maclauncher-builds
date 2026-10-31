@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "androidSource": {
+    "repository": "https://github.com/procrastinine/maclauncher-android",
+    "revision": "0d50c2f70d90549a18a69e51e33ed9308338f446"
+  },
+  "sourceManifest": "src/modules/android/native/hwui/sources.json",
+  "buildOverlay": "producers/android-art-inputs/hwui-build.patch",
+  "protoc": {
+    "url": "https://github.com/protocolbuffers/protobuf/releases/download/v21.12/protoc-21.12-osx-aarch_64.zip",
+    "sha256": "96839af0caed64352442fc8236f4bdf7c1cd6efcfaa98fa5db37307a73fc7c70",
+    "bytes": 1364715
+  },
+  "hidlGen": {
+    "repository": "https://android.googlesource.com/platform/prebuilts/build-tools",
+    "revision": "8c01d80d728e5bf542e7d754064994d3f1107a7d",
+    "path": "darwin-x86/bin/hidl-gen",
+    "gitBlob": "295d67d0a440aeabc1a1eb14a37747793c64e32d",
+    "sha256": "99fcea69da4dfde9087fdd744854f64e47de30c74d16b9ed1ca030e4a1b03be2",
+    "bytes": 7840392,
+    "transport": {
+      "url": "https://android.googlesource.com/platform/prebuilts/build-tools/+/8c01d80d728e5bf542e7d754064994d3f1107a7d/darwin-x86/bin/hidl-gen?format=TEXT",
+      "sha256": "8992411def26422875d40e28d8ef43ddf2da5db972dc890d24ee3b4c4de620e3",
+      "bytes": 10453856
+    }
+  }
+}

@@ -31,11 +31,15 @@ export async function prepareAndroidBuildInputs({source,work,image,cache=path.jo
  extractZip(buildTools,path.join(work,'build-tools'));
  const buildToolsTarget=path.join(sdk,'build-tools',lockValue(javaLock,'BUILD_TOOLS_VERSION'));fs.mkdirSync(path.dirname(buildToolsTarget),{recursive:true});
  fs.renameSync(path.join(work,'build-tools',lockValue(javaLock,'BUILD_TOOLS_DIR')),buildToolsTarget);retireArchive(buildTools);
- const archive=await buildInput({...image,bytes:image.size??image.bytes},cache),imageLock=path.join(source,'image/original.lock');
+ let archive=null;
+ if(image){
+  archive=await buildInput({...image,bytes:image.size??image.bytes},cache);
+  const imageLock=path.join(source,'image/original.lock');
  if(lockValue(imageLock,'SHA256')!==image.sha256)throw Error('The AIM image and selected image profile differ.');
  const destination=path.join(source,lockValue(imageLock,'ARCHIVE'));fs.mkdirSync(path.dirname(destination),{recursive:true});
  // The supplier only reads this verified archive. Share immutable bytes on one volume.
  try{fs.linkSync(archive,destination);}catch(error){if(error.code!=='EXDEV')throw error;fs.copyFileSync(archive,destination,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);}
+ }
  const pythonRoot=path.join(work,'python');
  const pythonEnv={...process.env,UV_CACHE_DIR:path.join(work,'uv-cache'),UV_PYTHON_INSTALL_DIR:pythonRoot,UV_PYTHON_BIN_DIR:path.join(work,'python-bin')};run('uv',['python','install',inputs.pythonVersion],{env:pythonEnv});
  const python=read('uv',['python','find','--managed-python','--system',inputs.pythonVersion],{env:pythonEnv});

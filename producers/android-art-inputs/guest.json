@@ -1,0 +1,402 @@
+{
+  "schemaVersion": 1,
+  "androidSource": {
+    "revision": "c71de272618e22a531d9259929a2478d838f9b1f",
+    "directory": "sources/maclauncher-android",
+    "repository": "https://github.com/procrastinine/maclauncher-android"
+  },
+  "binderFlags": [
+    "-nostdlibinc",
+    "-Werror=implicit-function-declaration",
+    "-D__BIONIC_NO_PAGE_SIZE_MACRO",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Winit-self",
+    "-Wpointer-arith",
+    "-Wunguarded-availability",
+    "-Werror=date-time",
+    "-Werror=int-conversion",
+    "-Werror=pragma-pack",
+    "-Werror=pragma-pack-suspicious-include",
+    "-Werror=sizeof-array-div",
+    "-Werror=string-plus-int",
+    "-Werror=unreachable-code-loop-increment",
+    "-Wno-error=deprecated-declarations",
+    "-Wno-c23-extensions",
+    "-Wno-c99-designator",
+    "-Wno-gnu-folding-constant",
+    "-Wno-inconsistent-missing-override",
+    "-Wno-error=reorder-init-list",
+    "-Wno-reorder-init-list",
+    "-Wno-sign-compare",
+    "-Wno-unused",
+    "-DANDROID",
+    "-DNDEBUG",
+    "-UDEBUG",
+    "-D__compiler_offsetof=__builtin_offsetof",
+    "-D__ANDROID_UNAVAILABLE_SYMBOLS_ARE_WEAK__",
+    "-faddrsig",
+    "-fdebug-default-version=5",
+    "-fcolor-diagnostics",
+    "-ffp-contract=off",
+    "-fno-exceptions",
+    "-fno-strict-aliasing",
+    "-fmessage-length=0",
+    "-gsimple-template-names",
+    "-no-canonical-prefixes",
+    "-ftrivial-auto-var-init=zero",
+    "-ffunction-sections",
+    "-fdata-sections",
+    "-fno-short-enums",
+    "-funwind-tables",
+    "-fstack-protector-strong",
+    "-Wa,--noexecstack",
+    "-D_FORTIFY_SOURCE=2",
+    "-Wstrict-aliasing=2",
+    "-Werror=return-type",
+    "-Werror=non-virtual-dtor",
+    "-Werror=address",
+    "-Werror=sequence-point",
+    "-Werror=format-security",
+    "-march=armv8-a",
+    "-target",
+    "aarch64-linux-android10000",
+    "-DANDROID_STRICT",
+    "-fPIC",
+    "-Wimplicit-fallthrough",
+    "-D_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS",
+    "-Wno-gnu-include-next",
+    "-fvisibility-inlines-hidden",
+    "-Ibionic/libc/kernel/android/uapi",
+    "-Ibionic/libc/kernel/uapi",
+    "-Iframeworks/native/libs/binder",
+    "-Igenerated/include",
+    "-D__LIBC_API__=10000",
+    "-D__LIBM_API__=10000",
+    "-D__LIBDL_API__=10000",
+    "-Ilibnativehelper/include_jni",
+    "-Isystem/libbase/include",
+    "-Iexternal/fmtlib/include",
+    "-Iframeworks/native/libs/binder/include",
+    "-Iframeworks/native/libs/binder/ndk/include_cpp",
+    "-Isystem/core/libcutils/include",
+    "-Isystem/core/libprocessgroup/include",
+    "-Isystem/core/libutils/include",
+    "-Isystem/logging/liblog/include",
+    "-Isystem/core/libsystem/include",
+    "-Isystem/core/libutils/binder/include",
+    "-Isystem/apex/libs/libapexsupport/include",
+    "-Isystem/core/libvndksupport/include",
+    "-Iprebuilts/clang/host/linux-x86/clang-r547379/android_libc++/platform/aarch64/include/c++/v1",
+    "-Iprebuilts/clang/host/linux-x86/clang-r547379/include/c++/v1",
+    "-Ibionic/libc/async_safe/include",
+    "-Ibionic/libc/system_properties/include",
+    "-Isystem/core/property_service/libpropertyinfoparser/include",
+    "-Ibionic/libdl/include_private",
+    "-isystem",
+    "bionic/libc/include",
+    "-isystem",
+    "bionic/libc/kernel/uapi/asm-arm64",
+    "-isystem",
+    "bionic/libc/kernel/uapi",
+    "-isystem",
+    "bionic/libc/kernel/android/scsi",
+    "-isystem",
+    "bionic/libc/kernel/android/uapi",
+    "-mllvm",
+    "--salvage-unused-profile=true",
+    "-mllvm",
+    "--salvage-stale-profile-max-callsites=2000",
+    "-mllvm",
+    "--salvage-stale-profile=true",
+    "-fprofile-sample-use=toolchain/pgo-profiles/sampling/libbinder.afdo",
+    "-fprofile-sample-accurate",
+    "-mllvm",
+    "-improved-fs-discriminator=true",
+    "-mllvm",
+    "-enable-fs-discriminator=true",
+    "-funique-internal-linkage-names",
+    "-fdebug-info-for-profiling",
+    "-DLIBBINDER_REMOVE_CACHE_STATIC_LIST",
+    "-DLIBBINDER_ADDSERVICE_CACHE",
+    "-DLIBBINDER_CLIENT_CACHE",
+    "-DBINDER_WITH_KERNEL_IPC",
+    "-Wextra",
+    "-Wextra-semi",
+    "-Werror",
+    "-Wzero-as-null-pointer-constant",
+    "-Wreorder-init-list",
+    "-Wunused-const-variable",
+    "-Wunused-result",
+    "-DANDROID_BASE_UNIQUE_FD_DISABLE_IMPLICIT_CONVERSION",
+    "-DANDROID_UTILS_REF_BASE_DISABLE_IMPLICIT_CONSTRUCTION",
+    "-fvisibility=hidden",
+    "-DBUILDING_LIBBINDER",
+    "-DBINDER_RPC_DEV_SERVERS",
+    "-DBINDER_ENABLE_RECORDING",
+    "-std=gnu++20",
+    "-fno-rtti",
+    "-Isystem/core/include",
+    "-Isystem/logging/liblog/include",
+    "-Isystem/media/audio/include",
+    "-Ihardware/libhardware/include",
+    "-Ihardware/libhardware_legacy/include",
+    "-Ihardware/ril/include",
+    "-Iframeworks/native/include",
+    "-Iframeworks/native/opengl/include",
+    "-Iframeworks/av/include",
+    "-Werror=bool-operation",
+    "-Werror=dangling",
+    "-Werror=format-insufficient-args",
+    "-Werror=implicit-int-float-conversion",
+    "-Werror=int-in-bool-context",
+    "-Werror=int-to-pointer-cast",
+    "-Werror=pointer-to-int-cast",
+    "-Werror=xor-used-as-pow",
+    "-Wimplicit-int-float-conversion",
+    "-Wno-void-pointer-to-enum-cast",
+    "-Wno-void-pointer-to-int-cast",
+    "-Wno-pointer-to-int-cast",
+    "-Werror=fortify-source",
+    "-Wno-unused-variable",
+    "-Wno-missing-field-initializers",
+    "-Wno-packed-non-pod",
+    "-Werror=address-of-temporary",
+    "-Werror=incompatible-function-pointer-types",
+    "-Werror=null-dereference",
+    "-Werror=return-type",
+    "-Wno-tautological-constant-compare",
+    "-Wno-tautological-type-limit-compare",
+    "-Wno-implicit-int-float-conversion",
+    "-Wno-tautological-overlap-compare",
+    "-Wno-deprecated-copy",
+    "-Wno-range-loop-construct",
+    "-Wno-zero-as-null-pointer-constant",
+    "-Wno-deprecated-anon-enum-enum-conversion",
+    "-Wno-deprecated-enum-enum-conversion",
+    "-Wno-error=pessimizing-move",
+    "-Wno-non-c-typedef-for-linkage",
+    "-Wno-align-mismatch",
+    "-Wno-error=unused-but-set-variable",
+    "-Wno-error=unused-but-set-parameter",
+    "-Wno-error=deprecated-builtins",
+    "-Wno-error=deprecated",
+    "-Wno-error=invalid-offsetof",
+    "-Wno-vla-cxx-extension",
+    "-Wno-cast-function-type-mismatch",
+    "-fno-lto",
+    "-fno-sanitize=all"
+  ],
+  "includeDirectories": [
+    "frameworks/base/core/jni",
+    "frameworks/base/core/jni/include",
+    "libnativehelper/include",
+    "libnativehelper/include_jni",
+    "libnativehelper/include_platform",
+    "libnativehelper/include_platform_header_only",
+    "libnativehelper/header_only_include",
+    "frameworks/native/libs/binder/ndk/include_ndk",
+    "frameworks/native/libs/binder/ndk/include_platform",
+    "frameworks/native/libs/binder/include_rpc_unstable",
+    "frameworks/native/libs/nativewindow/include",
+    "frameworks/native/libs/arect/include",
+    "frameworks/native/include",
+    "frameworks/native/libs/nativewindow/include-private",
+    "system/core/libcutils/include",
+    "system/libhidl/transport/token/1.0/utils/include",
+    "system/libhwbinder/include",
+    "system/libfmq/base",
+    "system/libfmq/include",
+    "system/libhidl/base/include",
+    "system/libhidl/transport/include",
+    "frameworks/native/libs/gui/include",
+    "frameworks/native/libs/ui/include",
+    "frameworks/native/libs/math/include",
+    "frameworks/native/libs/ftl/include",
+    "frameworks/native/libs/nativebase/include",
+    "frameworks/native/libs/fence/include",
+    "frameworks/av/media/libaudioclient/include",
+    "frameworks/av/media/libaudiofoundation/include",
+    "frameworks/av/media/audioaidlconversion/include",
+    "frameworks/av/media/liberror/include",
+    "frameworks/av/media/libmediahelper/include",
+    "system/media/audio/include",
+    "system/media/audio_utils/include",
+    "generated/include"
+  ],
+  "generatedSources": {
+    "aidl/android/os/ConnectionInfo.aidl": [
+      "generated/src/android/os/ConnectionInfo.cpp"
+    ],
+    "aidl/android/os/IClientCallback.aidl": [
+      "generated/src/android/os/IClientCallback.cpp"
+    ],
+    "aidl/android/os/IServiceCallback.aidl": [
+      "generated/src/android/os/IServiceCallback.cpp"
+    ],
+    "aidl/android/os/IServiceManager.aidl": [
+      "generated/src/android/os/IServiceManager.cpp"
+    ],
+    "aidl/android/os/Service.aidl": [
+      "generated/src/android/os/Service.cpp"
+    ],
+    "aidl/android/os/ServiceWithMetadata.aidl": [
+      "generated/src/android/os/ServiceWithMetadata.cpp"
+    ],
+    "aidl/android/os/ServiceDebugInfo.aidl": [
+      "generated/src/android/os/ServiceDebugInfo.cpp"
+    ],
+    "aidl/android/os/IAccessor.aidl": [
+      "generated/src/android/os/IAccessor.cpp"
+    ]
+  },
+  "sourceLinks": {
+    "bionic": "bionic-source",
+    "frameworks/base": "framework-source",
+    "frameworks/native": "native-source",
+    "frameworks/av": "av-source",
+    "libnativehelper": "nativehelper-source",
+    "system/core": "system-core-source",
+    "system/libbase": "libbase-source",
+    "external/fmtlib": "fmt-source",
+    "system/logging": "logging-source",
+    "system/apex": "apex-source",
+    "hardware/libhardware": "libhardware-source",
+    "hardware/interfaces": "hardware-interfaces-source",
+    "system/hardware/interfaces": "system-hardware-source"
+  },
+  "hwuiLinks": {
+    "system/libhidl": "hidl",
+    "system/libfmq": "fmq"
+  },
+  "extraSources": [
+    {
+      "directory": "system/libhwbinder",
+      "repository": "https://android.googlesource.com/platform/system/libhwbinder",
+      "revision": "4b32efe408236d977e2fdb8dbf7dee02e57ce42b"
+    },
+    {
+      "directory": "system/media",
+      "repository": "https://android.googlesource.com/platform/system/media",
+      "revision": "f01e84b958fb6a887dc0e74e4b5ebd159f03860a"
+    }
+  ],
+  "stockSources": [
+    {
+      "directory": "prebuilts/clang/host/darwin-x86",
+      "repository": "https://android.googlesource.com/platform/prebuilts/clang/host/darwin-x86",
+      "revision": "be7cd8f090d124f885d89bd14a5c93c596eb3900",
+      "selection": [
+        "clang-r547379/bin/clang++",
+        "clang-r547379/bin/clang",
+        "clang-r547379/bin/clang-20",
+        "clang-r547379/lib/libc++.dylib",
+        "clang-r547379/lib/clang/20/include",
+        "clang-r547379/NOTICE",
+        "clang-r547379/AndroidVersion.txt"
+      ],
+      "objects": {
+        "clang-r547379/bin/clang++": {
+          "id": "060d289be84034fca2960b888d3232e7c95b46e2",
+          "type": "blob",
+          "mode": "120000"
+        },
+        "clang-r547379/bin/clang": {
+          "id": "76ceae1316598442463c59a91d002226982deac2",
+          "type": "blob",
+          "mode": "120000"
+        },
+        "clang-r547379/bin/clang-20": {
+          "id": "229f80952afd68b12cf84127aa3f3274a6dca624",
+          "type": "blob",
+          "mode": "100755"
+        },
+        "clang-r547379/lib/libc++.dylib": {
+          "id": "425128bf38a4d4df7cd18cee4e9fcb51e59bfa2c",
+          "type": "blob",
+          "mode": "100755"
+        },
+        "clang-r547379/lib/clang/20/include": {
+          "id": "99cf925a240c6ba9f8675558bfd5df81423c7c01",
+          "type": "tree",
+          "mode": "40000"
+        },
+        "clang-r547379/NOTICE": {
+          "id": "b051002f8a69f553700ee907ccd3c56d9a2c6c8e",
+          "type": "blob",
+          "mode": "100644"
+        },
+        "clang-r547379/AndroidVersion.txt": {
+          "id": "71e11d81366f35a6eeef3db370537fcd8ef6bed4",
+          "type": "blob",
+          "mode": "100644"
+        }
+      }
+    },
+    {
+      "directory": "prebuilts/clang/host/linux-x86",
+      "repository": "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86",
+      "revision": "2d4dcbff7cb42f360f368bacf51cfe711fd1cb0f",
+      "selection": [
+        "clang-r547379/android_libc++/platform/aarch64/include/c++/v1",
+        "clang-r547379/include/c++/v1",
+        "clang-r547379/NOTICE"
+      ],
+      "objects": {
+        "clang-r547379/android_libc++/platform/aarch64/include/c++/v1": {
+          "id": "c1cb802ad4d42abae0ad607b61a9c135e4b815aa",
+          "type": "tree"
+        },
+        "clang-r547379/include/c++/v1": {
+          "id": "6ac56266fada7daaebd5f0b676cb65040c58cc2e",
+          "type": "tree"
+        },
+        "clang-r547379/NOTICE": {
+          "id": "b051002f8a69f553700ee907ccd3c56d9a2c6c8e",
+          "type": "blob"
+        }
+      }
+    },
+    {
+      "directory": "toolchain/pgo-profiles",
+      "repository": "https://android.googlesource.com/toolchain/pgo-profiles",
+      "revision": "17fc8d37e16aaf065334058cc02a82f0df195340",
+      "selection": [
+        "sampling/libbinder.afdo"
+      ],
+      "objects": {
+        "sampling/libbinder.afdo": {
+          "id": "fe051ab1c6a892ab1e1ff59b61fd967dbe366f9f",
+          "type": "blob"
+        }
+      }
+    }
+  ],
+  "compiler": "prebuilts/clang/host/darwin-x86/clang-r547379/bin/clang++",
+  "cppAidlRoots": [
+    "frameworks/native/libs/binder/aidl",
+    "frameworks/native/libs/gui/aidl",
+    "frameworks/native/libs/permission/aidl",
+    "frameworks/av/media/libaudioclient/aidl",
+    "frameworks/av/aidl"
+  ],
+  "frozenCpp": [
+    {
+      "directory": "system/hardware/interfaces/media/aidl/aidl_api/android.media.audio.common.types/4",
+      "version": 4
+    }
+  ],
+  "hidlPackages": [
+    "android.hardware.media@1.0",
+    "android.hardware.graphics.bufferqueue@1.0",
+    "android.hardware.graphics.bufferqueue@2.0",
+    "android.hardware.graphics.common@1.0",
+    "android.hardware.graphics.common@1.1",
+    "android.hardware.graphics.common@1.2",
+    "android.hidl.base@1.0",
+    "android.hidl.token@1.0",
+    "android.hidl.manager@1.0",
+    "android.hidl.memory@1.0"
+  ]
+}

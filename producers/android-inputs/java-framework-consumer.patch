@@ -1,0 +1,73 @@
+diff --git a/src/modules/android/native/build-options.mjs b/src/modules/android/native/build-options.mjs
+index fe0e7f1..64e643b 100644
+--- a/src/modules/android/native/build-options.mjs
++++ b/src/modules/android/native/build-options.mjs
+@@ -3,7 +3,7 @@ import path from 'node:path';
+ 
+ export const requiredInputs=['klepton','converter','jdk','sdl','vulkan-headers','sndfile-headers','codecs','codec-notices','angle','gles-headers','framework','output'];
+ export const platformTools=['aidl','aconfig','rust-toolchain','python'];
+-export const optionalInputs=['ndk-headers','blueprint-parser','blueprint-parser-sources','ninja','build-work','tool-inputs','java-inputs','ndk','bionic-inputs','bionic-target'];
++export const optionalInputs=['ndk-headers','blueprint-parser','blueprint-parser-sources','ninja','build-work','tool-inputs','java-inputs','java-framework-input','ndk','bionic-inputs','bionic-target'];
+ 
+ /** The snapshot builder and compiler consume the same pinned supplier catalog. */
+ export function sourceOptions(root){
+diff --git a/src/modules/android/native/compile.mjs b/src/modules/android/native/compile.mjs
+index d6fb9dc..06e367a 100644
+--- a/src/modules/android/native/compile.mjs
++++ b/src/modules/android/native/compile.mjs
+@@ -137,12 +137,13 @@ generateEglSurfaceForward(options['gles-headers'],path.join(build,'egl-surface-f
+ // Compile host callbacks against the original API before selecting native bridge bindings.
+ const java=path.join(options.jdk,'bin/java'),jar=path.join(options.jdk,'bin/jar');
+ const frameworkModules=await buildFrameworkModules({root,build,jdk:options.jdk,framework,
+-  apacheHttpSource:options['apache-http-source'],statsdSource:options['statsd-source']});
++  apacheHttpSource:options['apache-http-source'],statsdSource:options['statsd-source'],prebuilt:options['java-framework-input']});
++if(options['java-framework-input'])inputs.javaFramework=inputFile(path.join(options['java-framework-input'],'input.json'));
+ inputs.frameworkModules=frameworkModules.archives.map(file=>({name:path.basename(file),sha256:inputFile(file)}));
+ for(const notice of frameworkModules.notices)fs.cpSync(notice.path,path.join(output,'notices',notice.name),{recursive:true});
+ const frameworkGles=prepareFrameworkGles(options['framework-source'],pins.aospFramework,build,root,options['native-source'],pins.aospNative);
+ const {frameworkTool,hostClasses}=await buildFramework({root,build,output,jdk:options.jdk,framework,
+-  frameworkArchives:frameworkModules.archives,asmClasspath,graphicsRegistrations:path.join(build,'framework-gles/registrations.txt')});
++  frameworkArchives:frameworkModules.archives,asmClasspath,graphicsRegistrations:path.join(build,'framework-gles/registrations.txt'),prebuilt:options['java-framework-input']});
+ const includes=['','jni','libc','gfx','xr','media','guest','diag'].map(name=>'-I'+path.join(options.klepton,'runtime',name));
+ const jni=['-I'+path.join(options.jdk,'include'),'-I'+path.join(options.jdk,'include/darwin')];
+ const flags=['-I'+root,'-I'+path.join(options['gles-headers'],'include'),'-I'+build,'-I'+path.join(build,'jni'),'-arch','arm64','-mmacosx-version-min=13.0','-O1','-Wall','-Wextra','-Wno-unused-parameter',...includes,...jni,'-I'+options['vulkan-headers']];
+diff --git a/src/modules/android/native/framework-build.mjs b/src/modules/android/native/framework-build.mjs
+index 933c384..676d2cc 100644
+--- a/src/modules/android/native/framework-build.mjs
++++ b/src/modules/android/native/framework-build.mjs
+@@ -1,4 +1,5 @@
+ import fs from 'node:fs';
++import {stageJavaFramework} from './java-framework-input.mjs';
+ import path from 'node:path';
+ import {execFileSync} from 'node:child_process';
+ import {fileURLToPath} from 'node:url';
+@@ -35,7 +36,8 @@ export function stageFrameworkHyphenation(archive,output){
+   return names.map(name=>path.join(destination,name.slice(prefix.length)));
+ }
+ 
+-export async function buildFramework({root,build,output,jdk,framework,frameworkArchives,asmClasspath,graphicsRegistrations}){
++export async function buildFramework({root,build,output,jdk,framework,frameworkArchives,asmClasspath,graphicsRegistrations,prebuilt}){
++  if(prebuilt)return stageJavaFramework({input:prebuilt,build,output,graphicsRegistrations});
+   const frameworkTool=path.join(build,'framework-tool'),hostClasses=path.join(build,'classes'),jni=path.join(build,'jni');
+   const archive=path.join(build,'framework-payload/android-framework.jar'),callbacks=path.join(build,'host-callbacks.h');
+   const declarations=path.join(build,'framework-declarations'),generatedJni=path.join(declarations,'jni'),generatedCallbacks=path.join(declarations,'host-callbacks.h');
+diff --git a/src/modules/android/native/framework-modules.mjs b/src/modules/android/native/framework-modules.mjs
+index b60f29e..758953a 100644
+--- a/src/modules/android/native/framework-modules.mjs
++++ b/src/modules/android/native/framework-modules.mjs
+@@ -1,4 +1,5 @@
+ import fs from 'node:fs';
++import {stageJavaFrameworkModules} from './java-framework-input.mjs';
+ import path from 'node:path';
+ import {execFileSync} from 'node:child_process';
+ import {fileURLToPath} from 'node:url';
+@@ -10,7 +11,8 @@ import {javaToolInputs,javaToolEnvironment} from './framework-build.mjs';
+ /** Compile the original supplemental implementations against the supplied full
+  * framework. Source groups remain owned by their original Blueprint files;
+  * neither SDK API stubs nor copies of framework-owned dependencies are added. */
+-export async function buildFrameworkModules({root,build,jdk,framework,apacheHttpSource,statsdSource}){
++export async function buildFrameworkModules({root,build,jdk,framework,apacheHttpSource,statsdSource,prebuilt}){
++  if(prebuilt)return stageJavaFrameworkModules({input:prebuilt,build});
+   const pinsFile=path.join(root,'source-pins.json'),pins=JSON.parse(fs.readFileSync(pinsFile));
+   const suppliers=[
+     {name:'org.apache.http.legacy',source:apacheHttpSource,pin:pins.aospApacheHttp,

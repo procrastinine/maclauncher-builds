@@ -1,0 +1,61 @@
+diff --git a/src/modules/android/native/hwui/build.mjs b/src/modules/android/native/hwui/build.mjs
+index 8427ef1..221952b 100644
+--- a/src/modules/android/native/hwui/build.mjs
++++ b/src/modules/android/native/hwui/build.mjs
+@@ -23,6 +23,7 @@ export async function buildHwui(options) {
+  const ni=options.noticeInputs;
+  if(!prepared&&(!ni?.rust?.root||!ni.rust.version||!ni?.ndk?.root||!ni.ndk.version||!ni.ndk.files?.length))throw Error('Explicit original Rust and Android NDK notice inputs are required before HWUI compilation');
+  const ctx=await prepareHwuiInputs(options);
++ ctx.buildEnvironment=options.buildEnvironment;
+  for(const name of ['clangxx','ninja','blueprintParser','aidl','aconfig','protoc','python','syspropCpp','statsLogApiGen','hidlGen','rustc','cargo','cargoHome','libclang'])if(!ctx.tools[name])throw Error('An explicit HWUI build tool is required: '+name);
+  const sysroot=ctx.tools.sysroot||path.join(path.dirname(path.dirname(ctx.tools.clangxx)),'sysroot');
+  const configFile=path.join(sysroot,'usr/include/c++/v1/__config_site');let config=fs.readFileSync(configFile,'utf8');
+@@ -35,7 +36,7 @@ export async function buildHwui(options) {
+  await buildCore({...ctx,build:false});
+  // Each target owns a separate output/depfile directory; all use the same
+  // original class definition and explicit source/tool inputs.
+- await Promise.all([buildCore(ctx),buildStatics(ctx),buildAvif(ctx),buildGenerated(ctx),buildPerfetto(ctx)]);
++ for (const build of [buildCore,buildStatics,buildAvif,buildGenerated,buildPerfetto]) await build(ctx);
+  await prepareLinkInputs(ctx);
+  const product=validateHwui(ctx,await linkHwui(ctx));
+  const notices=prepared?{root:prepared}:await (await import('./notices.mjs')).collectHwuiNotices(ctx,options.noticeInputs||{});
+diff --git a/src/modules/android/native/hwui/buildAvif.mjs b/src/modules/android/native/hwui/buildAvif.mjs
+index c2fe0f3..a2615c8 100644
+--- a/src/modules/android/native/hwui/buildAvif.mjs
++++ b/src/modules/android/native/hwui/buildAvif.mjs
+@@ -35,11 +35,20 @@ crate('rustutils',path.join(rustutils,'lib.rs'),`anyhow="=1.0.97"\nlibc={version
+ crate('logger',path.join(source,'logging/rust/logger.rs'),'log="=0.4.26"\nenv_filter="=0.1.4"\nenv_logger="=0.10.2"\nandroid_logger="=0.15.0"');
+ crate('crabbyavif',path.join(crabby,'src/lib.rs'),'ndk_sys={path="../ndk_sys"}\nlibyuv_sys={path="../libyuv_sys"}\nlog="=0.4.26"\nlogger={path="../logger"}\nrustutils={path="../rustutils"}',`crate-type=["staticlib","rlib"]\n[features]\ndefault=[]\nandroid_mediacodec=[]\ncapi=[]\nheic=[]\nlibyuv=[]`,bindgen(path.join(crabby,'sys/ndk-sys/mediaimage2_wrapper.hpp'),'mediaimage2_bindgen.rs','.allowlist_item("android::MediaImage2?").allowlist_recursively(false)',['-x','c++','-std=c++17']));
+ write(path.join(workspace,'Cargo.toml'),'[workspace]\nmembers=["crabbyavif","ndk_sys","libyuv_sys","logger","rustutils","cutils_bindgen","system_properties_bindgen"]\nresolver="2"\n[profile.release]\nopt-level=3\ndebug=1\npanic="abort"\n');
+-const env={...process.env,CARGO_HOME:ctx.tools.cargoHome,RUSTC:ctx.tools.rustc,CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER:path.join(bin,'aarch64-linux-android35-clang'),LIBCLANG_PATH:ctx.tools.libclang,RUSTFLAGS:'--cfg android_soong -C panic=abort -C relocation-model=pic --remap-path-prefix='+repo+'=/src/maclauncher --remap-path-prefix='+source+'=/src/aosp --remap-path-prefix='+output+'=/src/android-hwui/avif',CARGO_TARGET_DIR:path.join(output,'cargo-target')};
++const env=avifBuildEnvironment({tools:ctx.tools,repo,source,output,bin,env:ctx.buildEnvironment||process.env});
+ fs.copyFileSync(new URL('./Cargo.lock',import.meta.url),path.join(workspace,'Cargo.lock'));
++if(ctx.prepareOnly)return {workspace,env};
+ const startedAt=new Date().toISOString();
+-execFileSync(options.ninja,['-f',path.join(output,'build.ninja'),'-j','4'],{cwd:output,stdio:'inherit'});
+-execFileSync(ctx.tools.cargo,['build','--offline','--locked','--release','--target','aarch64-linux-android','--manifest-path',path.join(workspace,'Cargo.toml'),'-p','crabbyavif','--features','android_mediacodec,capi,heic,libyuv','-j','3'],{cwd:output,env,stdio:'inherit'});
++execFileSync(options.ninja,['-f',path.join(output,'build.ninja'),'-j','2'],{cwd:output,stdio:'inherit'});
++execFileSync(ctx.tools.cargo,['build','--offline','--locked','--release','--target','aarch64-linux-android','--manifest-path',path.join(workspace,'Cargo.toml'),'-p','crabbyavif','--features','android_mediacodec,capi,heic,libyuv','-j','2'],{cwd:output,env,stdio:'inherit'});
+ fs.writeFileSync(path.join(output,'build-result.json'),json({startedAt,finishedAt:new Date().toISOString(),target:'aarch64-linux-android',features:['android_mediacodec','capi','heic','libyuv'],cfg:['android_soong'],archive:path.join(output,'cargo-target/aarch64-linux-android/release/libcrabbyavif.a'),libyuv:path.join(output,'libyuv.a'),sources:{crabby,yuv,rustutils,logging:path.join(source,'logging')},originalLibyuvUnits:objects.length},null,2)+'\n');
+ 
+ }
++
++/** Retain both the selected toolchain flags and the original Android AVIF flags. */
++export function avifBuildEnvironment({tools,repo,source,output,bin,env=process.env}) {
++ const inherited=env.CARGO_ENCODED_RUSTFLAGS?env.CARGO_ENCODED_RUSTFLAGS.split(String.fromCharCode(31)):(env.RUSTFLAGS||'').split(/\s+/).filter(Boolean);
++ const flags=[...inherited,'--cfg','android_soong','-C','panic=abort','-C','relocation-model=pic','--remap-path-prefix='+repo+'=/src/maclauncher','--remap-path-prefix='+source+'=/src/aosp','--remap-path-prefix='+output+'=/src/android-hwui/avif'];
++ const result={...env,CARGO_HOME:tools.cargoHome,RUSTC:tools.rustc,CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER:path.join(bin,'aarch64-linux-android35-clang'),LIBCLANG_PATH:tools.libclang,CARGO_ENCODED_RUSTFLAGS:flags.join(String.fromCharCode(31)),CARGO_TARGET_DIR:path.join(output,'cargo-target')};
++ delete result.RUSTFLAGS;return result;
++}
+diff --git a/src/modules/android/native/hwui/buildStatics.mjs b/src/modules/android/native/hwui/buildStatics.mjs
+index 5714c0e..5097f7f 100644
+--- a/src/modules/android/native/hwui/buildStatics.mjs
++++ b/src/modules/android/native/hwui/buildStatics.mjs
+@@ -46,6 +46,6 @@ const resolved=[];for(const record of records){
+ }
+ ninja.push('default '+resolved.map(record=>record.archive).join(' '));fs.writeFileSync(path.join(output,'build.ninja'),ninja.join('\n')+'\n');
+ fs.writeFileSync(path.join(output,'resolved-inputs.json'),JSON.stringify({requested,externalDefaults:[...externalDefaults],commonFlags:inputs.flags,extraIncludes,records:resolved},null,2)+'\n');
+-const result=spawnSync(options.ninja,['-C',output,'-j','3','-k','12'],{stdio:'inherit'});if(result.status!==0)throw Error('Original HWUI static dependency compile failed: '+result.status);
++const result=spawnSync(options.ninja,['-C',output,'-j','2','-k','12'],{stdio:'inherit'});if(result.status!==0)throw Error('Original HWUI static dependency compile failed: '+result.status);
+ 
+ }
