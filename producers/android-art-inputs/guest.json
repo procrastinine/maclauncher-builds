@@ -272,6 +272,16 @@
   },
   "extraSources": [
     {
+      "directory": "packages/modules/Connectivity",
+      "repository": "https://android.googlesource.com/platform/packages/modules/Connectivity",
+      "revision": "627eb3c63e7c7cb3cb9f8ea319e4bb1676079c3a"
+    },
+    {
+      "directory": "packages/modules/DnsResolver",
+      "repository": "https://android.googlesource.com/platform/packages/modules/DnsResolver",
+      "revision": "8822f51b0b0b01b51324acba16f4676e88ffdfdc"
+    },
+    {
       "directory": "system/libhwbinder",
       "repository": "https://android.googlesource.com/platform/system/libhwbinder",
       "revision": "4b32efe408236d977e2fdb8dbf7dee02e57ce42b"
