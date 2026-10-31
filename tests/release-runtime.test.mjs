@@ -183,6 +183,19 @@ test('batch staging cannot adopt a tag at a different source commit',async t=>{
  await assert.rejects(stageRelease({bundle:f.output,target:sourceTarget,resume:true,directory:f.directory,runGh}),/source commit differs/);
  assert.equal(calls.some(args=>args.includes('POST')||args[0]==='release'),false);
 });
+
+test('batch staging fills an empty matching draft without recreating its tag or release',async t=>{
+ const f=fixture(t);await prepareRelease(f);const record=JSON.parse(fs.readFileSync(path.join(f.output,'engine-1.0-arm64.tar.gz.json'))),calls=[];
+ const runGh=async args=>{calls.push(args);if(args[1]?.includes('/git/ref/'))return refResult();if(args.includes('--paginate'))return JSON.stringify([[{...remoteRelease(record,true),assets:[]}]]);assert.deepEqual(args.slice(0,2),['release','upload']);return '';};
+ const result=await stageRelease({bundle:f.output,target:sourceTarget,resume:true,directory:f.directory,runGh});assert.equal(result.uploaded,true);
+ assert.deepEqual(calls.at(-1),['release','upload','engine/v1.0/arm64','--repo','owner/builds',path.join(f.output,'engine-1.0-arm64.tar.gz')]);assert.equal(calls.some(args=>args.includes('POST')||args[1]==='create'),false);
+});
+
+test('batch staging never fills an empty public release',async t=>{
+ const f=fixture(t);await prepareRelease(f);const record=JSON.parse(fs.readFileSync(path.join(f.output,'engine-1.0-arm64.tar.gz.json')));
+ const runGh=async args=>{assert.equal(args[0],'api');if(args[1]?.includes('/git/ref/'))return refResult();return JSON.stringify([[{...remoteRelease(record,false),assets:[]}]]);};
+ await assert.rejects(stageRelease({bundle:f.output,target:sourceTarget,resume:true,directory:f.directory,runGh}),/differs/);
+});
 test('publishing changes only a verified draft status and never uploads assets',async t=>{
  const f=fixture(t);await prepareRelease(f);const record=JSON.parse(fs.readFileSync(path.join(f.output,'engine-1.0-arm64.tar.gz.json'))),calls=[];
  const runGh=async args=>{calls.push(args);if(args[0]==='api')return args[1].includes('/git/ref/')?refResult():JSON.stringify([[remoteRelease(record,true)]]);assert.deepEqual(args,['release','edit','engine/v1.0/arm64','--repo','owner/builds','--draft=false','--latest=false']);return '';};
