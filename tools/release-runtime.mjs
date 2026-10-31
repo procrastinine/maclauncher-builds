@@ -10,7 +10,6 @@ import {releaseVersion} from '../lib/package-version.mjs';
 import {buildCoverage,assertBuildCoverage} from './build-coverage.mjs';
 import {sourceDateEpoch,buildToolchain} from '../lib/reproducible-build.mjs';
 import {assetName,releaseTag,releaseRecord,validateCatalog,identity} from '../lib/project-identity.mjs';
-import {readPublisherInput} from './publisher-files.mjs';
 const require=createRequire(import.meta.url),A=require('../lib/archive.cjs'),B=require('../lib/bundled-native.cjs');
 const root=path.resolve(import.meta.dirname,'..');
 const json=value=>JSON.stringify(value,null,2)+'\n';
@@ -20,7 +19,7 @@ const read=file=>JSON.parse(fs.readFileSync(file));
 function regular(file){const s=fs.lstatSync(file);if(!s.isFile()||s.isSymbolicLink())throw Error('Release assets must be regular files.');return s;}
 function copy(input,output){regular(input);fs.copyFileSync(input,output,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);}
 function sourceRecord(d,repo){if(!d.sourceArtifact)return undefined;const source=d.sourceArtifact,filename=path.posix.basename(source.directoryRelative);return {filename,url:'https://github.com/'+repo+'/releases/download/'+encodeURIComponent(releaseTag(d))+'/'+filename,sha256:source.sha256,bytes:source.bytes};}
-function recordFromDeclaration(d,asset,sourceAsset,source,catalogRecord={}){
+export function recordFromDeclaration(d,asset,sourceAsset,source,catalogRecord={}){
  // Catalog metadata is validated by releaseRecord before this reconstruction.
  // Sealed declaration and archive facts always replace catalog payload fields.
  const {tag,asset:catalogAsset,source:catalogSource,sourceAsset:catalogSourceAsset,...metadata}=catalogRecord;
@@ -235,16 +234,10 @@ export async function publishRelease({bundle,directory=root,runGh=runGitHub,veri
  return {...existing,draft:false,published:true};
 }
 
-// Compiled packages move from a GitHub build run to their release and catalog only
-// inside GitHub Actions, so GitHub's files never travel through a local copy.
-// Unmodified publisher packages come from their publisher and may be released locally.
-export function requireHostedPublication(bundles,{directory=root,env=process.env}={}){
- if(env.GITHUB_ACTIONS==='true')return;
- for(const bundle of bundles){
-  const sidecars=fs.existsSync(bundle||'')?fs.readdirSync(bundle).filter(name=>name.endsWith('.tar.gz.json')):[];
-  if(sidecars.length!==1)continue;
-  if(!readPublisherInput({project:read(path.join(bundle,sidecars[0])).id,directory}))throw Error('Compiled packages are released only by the Runtime release workflow on GitHub.');
- }
+// Packages move from their GitHub run to their release and catalog only inside
+// GitHub Actions, so release files never travel through a local copy.
+export function requireHostedPublication({env=process.env}={}){
+ if(env.GITHUB_ACTIONS!=='true')throw Error('Packages are released only by the Runtime release workflow on GitHub.');
 }
 
 function options(args){const result={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!args[i]?.startsWith('--')||!args[i+1]||Object.hasOwn(result,key))throw Error('Use unique --option value pairs.');result[key]=args[i+1];}return result;}
@@ -259,7 +252,7 @@ export async function main([command,...args],directory=root,env=process.env){
  if(command==='verify-assets')return verifyPublicAssets({...o,directory});
  if(command==='verify')return verifyRelease({...o,directory});
  if(command==='verify-remote'){if(!o.bundle)throw Error('verify-remote requires --bundle.');const {release,publication}=await verifyRemoteRelease({...o,directory});return {...release,draft:publication.draft,sourceCommit:publication.sourceCommit};}
- if(['stage','publish','apply'].includes(command))requireHostedPublication([o.bundle],{directory,env});
+ if(['stage','publish','apply'].includes(command))requireHostedPublication({env});
  if(command==='stage')return stageRelease({...o,directory});
  if(command==='publish')return publishRelease({...o,directory});
  if(command==='apply')return applyRelease({...o,directory});

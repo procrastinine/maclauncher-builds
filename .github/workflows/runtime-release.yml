@@ -46,6 +46,8 @@ jobs:
   release:
     if: inputs.operation != 'publish-verified'
     runs-on: ubuntu-latest
+    outputs:
+      catalog-commit: ${{ steps.push.outputs.commit }}
     env:
       GH_TOKEN: ${{ github.token }}
       PROJECT: ${{ inputs.project }}
@@ -84,8 +86,6 @@ jobs:
           if (p.releaseRepository !== process.env.GITHUB_REPOSITORY) throw Error('Release repository differs from its registry.');
           const tag = releaseTag({id: p.id, version: process.env.VERSION, arch: process.env.ARCH});
           const supplied = readPublisherInput({project: p.id});
-          if (supplied && process.env.BUILD_RUN) throw Error('Supplied publisher packages do not use a GitHub compilation run.');
-          if (supplied && process.env.OPERATION === 'stage') throw Error('Stage supplied publisher archives through release-runtime.mjs stage with their verified local bundle and exact source target.');
           fs.appendFileSync(process.env.GITHUB_ENV, 'PUBLICATION_AUTHORITY=' + (supplied ? 'supplied-publisher' : 'github-build') + '\n');
           if (process.env.OPERATION === 'stage' && !process.env.BUILD_RUN) throw Error('Staging requires a Runtime build run.');
           if (!process.env.BUILD_RUN) {
@@ -136,9 +136,16 @@ jobs:
         run: |
           gh attestation verify "$RUNNER_TEMP/runtime-release/$PROJECT-$VERSION-$ARCH.tar.gz" --repo "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/runtime-build.yml" --source-digest "$RELEASE_SOURCE_REVISION" --deny-self-hosted-runners --format json > "$RUNNER_TEMP/verified-build.json"
           node tools/record-github-build.mjs --release-bundle "$RUNNER_TEMP/runtime-release" --bundle "$RUNNER_TEMP/verified-build.json"
+      - name: Download the pinned publisher input
+        if: env.PUBLICATION_AUTHORITY == 'supplied-publisher'
+        run: node tools/publisher-files.mjs fetch --project "$PROJECT" --output "$RUNNER_TEMP/publisher-input.tar.gz"
+      # A package from a build run gains its equality record here, compared again from the actual archives.
+      - name: Record supplied-file equality
+        if: env.PUBLICATION_AUTHORITY == 'supplied-publisher' && inputs.build-run != ''
+        run: node tools/publisher-files.mjs record --project "$PROJECT" --input-archive "$RUNNER_TEMP/publisher-input.tar.gz" --release-bundle "$RUNNER_TEMP/runtime-release"
       - name: Verify supplied publisher archive
         if: env.PUBLICATION_AUTHORITY == 'supplied-publisher'
-        run: node tools/publisher-files.mjs verify --project "$PROJECT" --archive "$RUNNER_TEMP/runtime-release/$PROJECT-$VERSION-$ARCH.tar.gz" --record "$RUNNER_TEMP/runtime-release/$PROJECT-$VERSION-$ARCH.tar.gz.json"
+        run: node tools/publisher-files.mjs verify --project "$PROJECT" --input-archive "$RUNNER_TEMP/publisher-input.tar.gz" --release-bundle "$RUNNER_TEMP/runtime-release"
       - name: Stage the existing build artifact
         if: inputs.operation == 'stage'
         run: node tools/release-runtime.mjs stage --bundle "$RUNNER_TEMP/runtime-release" --target "$RELEASE_SOURCE_REVISION"
@@ -147,6 +154,49 @@ jobs:
       - name: Publish selected draft
         if: inputs.operation == 'publish'
         run: node tools/release-runtime.mjs publish --bundle "$RUNNER_TEMP/runtime-release"
+      # Compiled packages reach their catalogs through publish-verified. A supplied package from a
+      # build run is applied here, together with the equality record that authorizes it.
+      - name: Apply the supplied package and its equality record
+        id: catalog
+        if: inputs.operation == 'publish' && inputs.build-run != '' && env.PUBLICATION_AUTHORITY == 'supplied-publisher'
+        run: |
+          [ "$GITHUB_REF" = refs/heads/main ] || { echo "Catalogs are updated only from main." >&2; exit 1; }
+          node tools/release-runtime.mjs apply --bundle "$RUNNER_TEMP/runtime-release"
+          git add -- catalogs publisher-records
+          if git diff --cached --quiet; then
+            echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name procrastinine
+          git config user.email 24549552+procrastinine@users.noreply.github.com
+          git commit -m "Publish $PROJECT $VERSION ($ARCH)"
+          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+      - name: Check the exact catalog commit
+        if: steps.catalog.outputs.changed == 'true'
+        env:
+          CATALOG_COMMIT: ${{ steps.catalog.outputs.commit }}
+        run: |
+          git clone --no-hardlinks "$GITHUB_WORKSPACE" "$RUNNER_TEMP/publication-source-check"
+          cd "$RUNNER_TEMP/publication-source-check"
+          git checkout --detach "$CATALOG_COMMIT"
+          npm ci --ignore-scripts
+          git submodule update --init --depth 1 -- sources/maclauncher-android
+          npm test
+          npm run check:versions
+          npm run index:build
+      - name: Push checked catalogs
+        id: push
+        if: steps.catalog.outputs.commit != ''
+        env:
+          CATALOG_COMMIT: ${{ steps.catalog.outputs.commit }}
+          CHANGED: ${{ steps.catalog.outputs.changed }}
+        run: |
+          if [ "$CHANGED" = true ]; then
+            gh auth setup-git
+            git push origin HEAD:main
+          fi
+          echo "commit=$CATALOG_COMMIT" >> "$GITHUB_OUTPUT"
   publish-verified:
     if: inputs.operation == 'publish-verified'
     runs-on: ubuntu-latest
@@ -219,12 +269,13 @@ jobs:
             ${{ runner.temp }}/verified-publication/publication-result.json
           if-no-files-found: ignore
   update-index:
-    needs: publish-verified
-    if: needs.publish-verified.outputs.catalog-commit != ''
+    needs: [release, publish-verified]
+    # Exactly one publication job runs for each dispatch.
+    if: ${{ !cancelled() && (needs.publish-verified.result == 'success' && needs.publish-verified.outputs.catalog-commit != '' || needs.release.result == 'success' && needs.release.outputs.catalog-commit != '') }}
     uses: ./.github/workflows/pages.yml
     permissions:
       contents: read
       pages: write
       id-token: write
     with:
-      source-revision: ${{ needs.publish-verified.outputs.catalog-commit }}
+      source-revision: ${{ needs.publish-verified.outputs.catalog-commit || needs.release.outputs.catalog-commit }}

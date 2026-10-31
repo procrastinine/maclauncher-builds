@@ -83,7 +83,8 @@ jobs:
   build:
     needs: plan
     if: needs.plan.outputs.empty == 'false'
-    # Each recipe selects a standard GitHub-hosted build image.
+    # Each recipe selects a standard GitHub-hosted build image. A registered publisher input
+    # instead assembles its supplied package from the pinned publisher archive.
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
@@ -114,17 +115,32 @@ jobs:
       - name: Install locked build-tool dependencies
         run: npm ci --ignore-scripts
       - name: Prepare the runner
+        if: ${{ !matrix.supplied }}
         run: node tools/build-runtime.mjs --prepare --project "$BUILD_PROJECT" --arch "$BUILD_ARCH" --version "$BUILD_VERSION"
       - name: Build the package
+        if: ${{ !matrix.supplied }}
         run: node tools/build-runtime.mjs --project "$BUILD_PROJECT" --arch "$BUILD_ARCH" --version "$BUILD_VERSION" --output "$RUNNER_TEMP/build" --work "$RUNNER_TEMP/work"
       - name: Package the release
+        if: ${{ !matrix.supplied }}
         run: node tools/release-runtime.mjs prepare --project "$BUILD_PROJECT" --input "$RUNNER_TEMP/build/payload" --declaration "$RUNNER_TEMP/build/declaration.json" --source-revision "$GITHUB_SHA" --output "$RUNNER_TEMP/release"
+      - name: Download the pinned publisher input
+        if: ${{ matrix.supplied }}
+        run: node tools/publisher-files.mjs fetch --project "$BUILD_PROJECT" --output "$RUNNER_TEMP/publisher-input.tar.gz"
+      - name: Assemble the supplied package
+        if: ${{ matrix.supplied }}
+        run: node tools/publisher-files.mjs assemble --project "$BUILD_PROJECT" --input-archive "$RUNNER_TEMP/publisher-input.tar.gz" --output "$RUNNER_TEMP/release" --work "$RUNNER_TEMP/work"
+      # The comparison covers every supplied file; the release workflow repeats it before publication.
+      - name: Record supplied-file equality
+        if: ${{ matrix.supplied }}
+        run: node tools/publisher-files.mjs record --project "$BUILD_PROJECT" --input-archive "$RUNNER_TEMP/publisher-input.tar.gz" --release-bundle "$RUNNER_TEMP/release" --output-dir "$RUNNER_TEMP/publisher-records"
       - name: Verify the package identity
         id: verify
         run: node tools/release-runtime.mjs verify --bundle "$RUNNER_TEMP/release" --project "$BUILD_PROJECT" --version "$BUILD_VERSION" --arch "$BUILD_ARCH"
-      # Signed provenance that ties the package archive to this workflow run and commit.
+      # Signed provenance that ties the compiled package archive to this workflow run and commit.
+      # Supplied packages rely on their file-equality record instead.
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         id: attest
+        if: ${{ !matrix.supplied }}
         continue-on-error: true
         with:
           subject-path: ${{ runner.temp }}/release/*.tar.gz
@@ -143,6 +159,13 @@ jobs:
           if-no-files-found: error
           retention-days: 90
           compression-level: 0
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        if: ${{ !cancelled() && matrix.supplied && steps.verify.outcome == 'success' }}
+        with:
+          name: publisher-record-${{ matrix.project }}-${{ matrix.version }}-${{ matrix.arch }}
+          path: ${{ runner.temp }}/publisher-records
+          if-no-files-found: error
+          retention-days: 90
 
   stage:
     if: github.event_name == 'workflow_dispatch' && inputs.operation == 'stage'
@@ -152,6 +175,7 @@ jobs:
       contents: write
     env:
       GH_TOKEN: ${{ github.token }}
+      PROJECT: ${{ inputs.project }}
     steps:
       - name: Require the main branch
         if: github.ref != 'refs/heads/main'
@@ -171,11 +195,27 @@ jobs:
         with:
           pattern: runtime-${{ inputs.project }}-*
           path: ${{ runner.temp }}/releases
+      - name: Select the publication authority
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import {readPublisherInput} from './tools/publisher-files.mjs';
+          const supplied = readPublisherInput({project: process.env.PROJECT});
+          fs.appendFileSync(process.env.GITHUB_ENV, 'PUBLICATION_AUTHORITY=' + (supplied ? 'supplied-publisher' : 'github-build') + '\n');
+          JS
+      - name: Download the pinned publisher input
+        if: env.PUBLICATION_AUTHORITY == 'supplied-publisher'
+        run: node tools/publisher-files.mjs fetch --project "$PROJECT" --output "$RUNNER_TEMP/publisher-input.tar.gz"
       - name: Stage one draft release for each architecture
         # The tag of each draft points to the commit these packages were built from.
+        # Compiled packages import their signed provenance; supplied packages repeat their file comparison.
         run: |
           for bundle in "$RUNNER_TEMP"/releases/*/; do
-            node tools/record-github-build.mjs --release-bundle "$bundle"
+            if [ "$PUBLICATION_AUTHORITY" = supplied-publisher ]; then
+              node tools/publisher-files.mjs record --project "$PROJECT" --input-archive "$RUNNER_TEMP/publisher-input.tar.gz" --release-bundle "$bundle"
+            else
+              node tools/record-github-build.mjs --release-bundle "$bundle"
+            fi
             node tools/release-runtime.mjs stage --bundle "$bundle" --target "$GITHUB_SHA"
             node tools/release-runtime.mjs verify-remote --bundle "$bundle"
           done

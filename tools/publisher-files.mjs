@@ -2,10 +2,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
+import {Readable,Transform} from 'node:stream';
+import {pipeline} from 'node:stream/promises';
 import {pathToFileURL} from 'node:url';
 import {createRequire} from 'node:module';
 import {resolveProject} from '../lib/projects.mjs';
-import {releaseRecord} from '../lib/project-identity.mjs';
+import {assetName,releaseRecord} from '../lib/project-identity.mjs';
 import {publicDeclaration,verify} from './runtime-package.mjs';
 const require=createRequire(import.meta.url),A=require('../lib/archive.cjs');
 const root=path.resolve(import.meta.dirname,'..'),SHA=/^[a-f0-9]{64}$/,COMMIT=/^[a-f0-9]{40}$/;
@@ -101,6 +103,7 @@ async function verifyInputArchive(archive,input){
  const selected=checked.declaration.files.filter(file=>('files/'+file.path).startsWith(pin.archivePrefix)).map(file=>({...tuple(file),path:descriptor.output.payloadPrefix+('files/'+file.path).slice(pin.archivePrefix.length)}));
  const expected=new Map(descriptor.files.map(file=>[file.path,file]));
  if(selected.length!==expected.size||selected.some(file=>stable(file)!==stable(expected.get(file.path))))fail('the supplied input archive differs from its complete registered subtree.');
+ return checked;
 }
 
 /** Recheck actual archive bytes against the public baseline and equality declaration. */
@@ -134,10 +137,52 @@ export async function recordPublisherFiles({project,inputArchive,archive,record,
  if(fs.existsSync(destination)){if(stable(read(destination))!==stable(entry))fail('an existing equality record cannot be replaced.');return {file:destination,...recordResult(record,input)};}
  fs.mkdirSync(outputDir,{recursive:true});fs.writeFileSync(destination,bytes,{flag:'wx'});return {file:destination,...recordResult(record,input)};
 }
+
+/** Download the pinned input archive to a new file, checking its size, checksum and registered subtree. */
+export async function fetchPublisherInput({project,output,directory=root,download=fetch}){
+ const input=readPublisherInput({project,directory});if(!input)fail('the project has no registered publisher input.');
+ if(!path.isAbsolute(output||'')||fs.existsSync(output))fail('choose a new absolute input archive path.');
+ const pin=input.descriptor.input.archive,response=await download(pin.url,{redirect:'follow'});
+ if(!response.ok||!response.body)fail('the pinned input download returned HTTP '+response.status+'.');
+ const digest=crypto.createHash('sha256');let bytes=0;
+ const count=new Transform({transform(chunk,_,done){bytes+=chunk.length;digest.update(chunk);done(bytes>pin.bytes?Error('Supplied publisher files: the downloaded input exceeds its pinned size.'):null,chunk);}});
+ fs.mkdirSync(path.dirname(output),{recursive:true});
+ try{
+  await pipeline(Readable.fromWeb(response.body),count,fs.createWriteStream(output,{flags:'wx',mode:0o644}));
+  if(bytes!==pin.bytes||digest.digest('hex')!==pin.sha256)fail('the downloaded input differs from its pinned size or checksum.');
+  await verifyInputArchive(output,input);
+ }catch(error){fs.rmSync(output,{force:true});throw error;}
+ return {project:input.project.id,archive:output,sha256:pin.sha256,bytes:pin.bytes};
+}
+
+/** Assemble the registered publisher version from the pinned input package. Only the package inventory and runtime manifest outside the supplied files take the new version. */
+export async function assemblePublisherPackage({project,inputArchive,output,work,directory=root}){
+ const input=readPublisherInput({project,directory});if(!input)fail('the project has no registered publisher input.');
+ if(!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work)||work===output||work.startsWith(output+path.sep)||output.startsWith(work+path.sep))fail('choose new separate absolute output and work directories.');
+ const checked=await verifyInputArchive(inputArchive,input),pin=input.descriptor.input.archive,version=input.descriptor.publisherVersion;
+ const {recordFromDeclaration,prepareRelease}=await import('./release-runtime.mjs');
+ let archive=inputArchive,record=recordFromDeclaration(checked.declaration,{filename:pin.filename,sha256:pin.sha256,bytes:pin.bytes});
+ if(record.version!==version){
+  const {reversionPackage}=await import('./reversion-runtime.mjs');
+  fs.mkdirSync(work,{recursive:true});archive=path.join(work,assetName({...record,version}));
+  ({record}=await reversionPackage({archive:inputArchive,record,version,output:archive,directory}));
+ }
+ return prepareRelease({project:input.project.id,archive,record,output,directory});
+}
+
+const usage={record:['project','input-archive','archive','record','release-bundle','output-dir'],verify:['project','input-archive','archive','record','release-bundle'],fetch:['project','output'],assemble:['project','input-archive','output','work']};
 export async function main([command,...args],directory=root){
- if(!['record','verify'].includes(command))fail('use record or verify with explicit archives and package record.');
- const options={};for(let index=0;index<args.length;index+=2){const key=args[index]?.slice(2);if(!args[index]?.startsWith('--')||!['project','input-archive','archive','record','output-dir'].includes(key)||!args[index+1]||Object.hasOwn(options,key))fail('use unique --project, --input-archive, --archive, --record and optional --output-dir values.');options[key]=args[index+1];}
- if(!options.project||!options.archive||!options.record||command==='record'&&!options['input-archive']||command==='verify'&&options['output-dir'])fail('record needs both actual archives; verify needs its archive and record without an output directory.');
+ if(!usage[command])fail('use record, verify, fetch or assemble with explicit options.');
+ const options={};for(let index=0;index<args.length;index+=2){const key=args[index]?.slice(2);if(!args[index]?.startsWith('--')||!usage[command].includes(key)||!args[index+1]||Object.hasOwn(options,key))fail('use unique --'+usage[command].join(', --')+' values with '+command+'.');options[key]=args[index+1];}
+ if(!options.project)fail('select the registered --project.');
+ if(command==='fetch')return fetchPublisherInput({project:options.project,output:options.output,directory});
+ if(command==='assemble'){if(!options['input-archive'])fail('assemble needs the pinned --input-archive.');return assemblePublisherPackage({project:options.project,inputArchive:options['input-archive'],output:options.output,work:options.work,directory});}
+ if(options['release-bundle']){
+  if(options.archive||options.record)fail('select one release bundle, or one archive and its record.');
+  const {verifyRelease}=await import('./release-runtime.mjs'),{record}=await verifyRelease({bundle:options['release-bundle'],directory});
+  options.archive=path.join(options['release-bundle'],record.asset.filename);options.record=options.archive+'.json';
+ }
+ if(!options.archive||!options.record||command==='record'&&!options['input-archive'])fail('record needs both actual archives and the package record; verify needs the archive and its record.');
  const selected=read(options.record),wrapped=command==='verify'&&selected.kind==='supplied-publisher-files',record=wrapped?selected.record:selected;
  if(record?.id!==options.project)fail('the package record belongs to another registered project.');
  if(wrapped){const input=readPublisherInput({project:options.project,directory});if(!input)fail('the project has no registered publisher input.');validateEquality(selected,{record,repository:input.project.releaseRepository,input});}

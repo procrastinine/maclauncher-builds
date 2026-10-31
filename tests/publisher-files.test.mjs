@@ -7,9 +7,9 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import Archive from '../lib/archive.cjs';
 import {catalog} from '../tools/runtime-package.mjs';
-import {readPublisherInput,recordPublisherFiles,verifyPublisherRecord,verifyPublisherArchive,assertPublisherSource,main as publisherMain} from '../tools/publisher-files.mjs';
+import {readPublisherInput,recordPublisherFiles,verifyPublisherRecord,verifyPublisherArchive,assertPublisherSource,fetchPublisherInput,assemblePublisherPackage,main as publisherMain} from '../tools/publisher-files.mjs';
 import {requirePublicationAuthority} from '../tools/publication-authority.mjs';
-import {stageRelease,publishRelease,applyRelease} from '../tools/release-runtime.mjs';
+import {stageRelease,publishRelease,applyRelease,verifyRelease,main as releaseMain} from '../tools/release-runtime.mjs';
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const json=value=>JSON.stringify(value,null,2)+'\n';
 const id='sample-publisher',repository='owner/builds';
@@ -116,6 +116,46 @@ test('read-only publisher verification accepts package records or validated equa
  const f=await fixture(t),result=await f.record(),receiptBytes=fs.readFileSync(result.file),names=fs.readdirSync(f.directory).sort();
  for(const recordFile of [f.output.archive+'.json',result.file]){const verified=await publisherMain(['verify','--project',id,'--archive',f.output.archive,'--record',recordFile,'--input-archive',f.input.archive],f.directory);assert.equal(verified.files,3);assert.equal(verified.publisherAuthenticated,false);}
  assert.deepEqual(fs.readdirSync(f.directory).sort(),names);assert.deepEqual(fs.readFileSync(result.file),receiptBytes);
- await assert.rejects(publisherMain(['verify','--project',id,'--archive',f.output.archive,'--record',result.file,'--output-dir',path.join(f.directory,'forbidden')],f.directory),/without an output directory/);assert.equal(fs.existsSync(path.join(f.directory,'forbidden')),false);
+ await assert.rejects(publisherMain(['verify','--project',id,'--archive',f.output.archive,'--record',result.file,'--output-dir',path.join(f.directory,'forbidden')],f.directory),/values with verify/);assert.equal(fs.existsSync(path.join(f.directory,'forbidden')),false);
  const tampered=JSON.parse(receiptBytes);tampered.metadata[0].base64=Buffer.from('{}').toString('base64');const bad=path.join(f.directory,'bad-receipt.json');fs.writeFileSync(bad,json(tampered));await assert.rejects(publisherMain(['verify','--project',id,'--archive',f.output.archive,'--record',bad],f.directory),/metadata differs/);
+});
+
+test('the pinned publisher input downloads only with its exact size, checksum and supplied subtree',async t=>{
+ const f=await fixture(t),bytes=fs.readFileSync(f.input.archive),urls=[];
+ const download=body=>async url=>{urls.push(url);return new Response(body);};
+ const output=path.join(f.directory,'downloads','input.tar.gz');
+ const fetched=await fetchPublisherInput({project:id,output,directory:f.directory,download:download(bytes)});
+ assert.deepEqual(urls,[f.descriptor.input.archive.url]);assert.equal(fetched.sha256,f.descriptor.input.archive.sha256);assert.deepEqual(fs.readFileSync(output),bytes);
+ await assert.rejects(fetchPublisherInput({project:id,output,directory:f.directory,download:download(bytes)}),/new absolute/);
+ const altered=Buffer.from(bytes);altered[altered.length-1]^=1;
+ for(const [body,pattern] of [[altered,/size or checksum/],[Buffer.concat([bytes,Buffer.from([0])]),/exceeds its pinned size/]]){
+  const refused=path.join(f.directory,'downloads','refused.tar.gz');
+  await assert.rejects(fetchPublisherInput({project:id,output:refused,directory:f.directory,download:download(body)}),pattern);assert.equal(fs.existsSync(refused),false);
+ }
+ await assert.rejects(fetchPublisherInput({project:id,output:path.join(f.directory,'missing.tar.gz'),directory:f.directory,download:async()=>new Response('',{status:404})}),/HTTP 404/);
+});
+
+test('assembly gives the pinned package the registered publisher version without changing supplied files',async t=>{
+ const f=await fixture(t),output=path.join(f.directory,'assembled'),work=path.join(f.directory,'assembly-work');
+ const release=await assemblePublisherPackage({project:id,inputArchive:f.input.archive,output,work,directory:f.directory});
+ assert.equal(release.version,'1.0');assert.equal(release.tag,id+'/v1.0/universal');
+ const {record,catalog:snapshot}=await verifyRelease({bundle:output,directory:f.directory});
+ assert.equal(record.build,undefined);assert.equal(record.source,undefined);assert.deepEqual(snapshot.packages.map(row=>row.version),['1.0']);
+ const archive=path.join(output,record.asset.filename),recorded=await recordPublisherFiles({project:id,inputArchive:f.input.archive,archive,record,directory:f.directory});
+ assert.equal(recorded.files,3);assert.equal((await verifyPublisherArchive({record,archive,inputArchive:f.input.archive,directory:f.directory})).version,'1.0');
+ const again=path.join(f.directory,'assembled-again');
+ await publisherMain(['assemble','--project',id,'--input-archive',f.input.archive,'--output',again,'--work',path.join(f.directory,'assembly-work-again')],f.directory);
+ assert.deepEqual(fs.readFileSync(path.join(again,record.asset.filename)),fs.readFileSync(archive),'Assembly is reproducible.');
+ assert.equal((await publisherMain(['record','--project',id,'--input-archive',f.input.archive,'--release-bundle',again],f.directory)).file,recorded.file);
+ assert.equal((await publisherMain(['verify','--project',id,'--input-archive',f.input.archive,'--release-bundle',again],f.directory)).files,3);
+ await assert.rejects(assemblePublisherPackage({project:id,inputArchive:f.input.archive,output,work:path.join(f.directory,'other-work'),directory:f.directory}),/new separate absolute/);
+ const altered=path.join(f.directory,'altered-input.tar.gz'),bytes=fs.readFileSync(f.input.archive);bytes[bytes.length-1]^=1;fs.writeFileSync(altered,bytes);
+ await assert.rejects(assemblePublisherPackage({project:id,inputArchive:altered,output:path.join(f.directory,'refused'),work:path.join(f.directory,'refused-work'),directory:f.directory}),/checksum/);
+ assert.equal(fs.existsSync(path.join(f.directory,'refused')),false);
+});
+
+test('supplied publisher packages are staged, published and applied only inside GitHub Actions',async t=>{
+ const f=await fixture(t);await f.record();const revision=commitInputs(f);
+ for(const command of ['stage','publish','apply'])
+  await assert.rejects(releaseMain([command,'--bundle',f.output.bundle,...(command==='stage'?['--target',revision]:[])],f.directory,{}),/only by the Runtime release workflow on GitHub/);
 });

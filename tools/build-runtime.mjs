@@ -13,6 +13,7 @@ import {runtimeBuildEnvironment} from './runtime-build-environment.mjs';
 import {prepareBuildHost,assertBuildHost} from './build-host.mjs';
 import {initializeSources} from './init-runtime-sources.mjs';
 import {publicDeclaration} from './runtime-package.mjs';
+import {readPublisherInput} from './publisher-files.mjs';
 import {reproducibleEnvironment} from '../lib/reproducible-build.mjs';
 const B=createRequire(import.meta.url)('../lib/bundled-native.cjs');
 
@@ -64,9 +65,24 @@ function existing(project,version,directory,tags){
  return new Set([...published,...tags(directory,project.id).filter(tag=>tag.startsWith(prefix)).map(tag=>tag.slice(prefix.length))]);
 }
 
+// Supplied publisher packages contain no compiled code; any standard Linux image assembles them.
+export const SUPPLIED_RUNNER='ubuntu-24.04';
+
+/** A registered publisher input yields one package: the publisher version, in the pinned input's architecture. */
+function suppliedPlan(input,{arch,version,directory,tags}){
+ const project=input.project,target={version:input.descriptor.publisherVersion,arch:input.descriptor.input.record.arch};
+ if(version!==undefined&&version!==target.version)throw Error(project.name+' assembles version '+target.version+' on GitHub.');
+ if(arch!=='all'&&arch!==target.arch)throw Error(project.name+' assembles '+target.arch+' packages on GitHub.');
+ releaseVersion(project.id,target.version,directory);
+ if(existing(project,target.version,directory,tags).has(target.arch))throw Error(project.name+' '+target.version+' already has a '+target.arch+' package or tag.');
+ return {include:[{project:project.id,version:target.version,arch:target.arch,runner:SUPPLIED_RUNNER,supplied:true}]};
+}
+
 /** Manual Runtime build: the registered version of one project. `all` selects every
  * architecture that has no catalog record or tag yet; nothing is built twice. */
 export function buildPlan({project:id,arch='all',version,directory=root,tags=gitTags}){
+ const input=readPublisherInput({project:id,directory});
+ if(input)return suppliedPlan(input,{arch,version,directory,tags});
  const {project,build}=githubBuild(id,directory,version);
  if(version===undefined&&Array.isArray(project.build)){
   const records=buildRecords(project).filter(build=>arch==='all'||build.architectures.includes(arch));

@@ -5,12 +5,22 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync,spawnSync} from 'node:child_process';
-import {verifyProducer,main,buildPlan,pushPlan,runBuild,checkBuildRequest,checkBuildOutput,RUNNERS,HOSTED_RUNNERS} from '../tools/build-runtime.mjs';
+import {verifyProducer,main,buildPlan,pushPlan,runBuild,checkBuildRequest,checkBuildOutput,RUNNERS,HOSTED_RUNNERS,SUPPLIED_RUNNER} from '../tools/build-runtime.mjs';
 import {findBuildTool} from '../tools/build-source.mjs';
 import {prepareBuildHost} from '../tools/build-host.mjs';
 import {prepareRelease} from '../tools/release-runtime.mjs';
 import {readProjects,buildRecord,buildRecords} from '../lib/projects.mjs';
 const root=path.resolve(import.meta.dirname,'..');
+
+test('a registered publisher input plans one supplied assembly at the publisher version',()=>{
+ const none=()=>[];
+ assert.deepEqual(buildPlan({project:'flash-projector',tags:none}),{include:[{project:'flash-projector',version:'35.0.0.60',arch:'universal',runner:SUPPLIED_RUNNER,supplied:true}]});
+ assert.deepEqual(buildPlan({project:'flash-projector',arch:'universal',version:'35.0.0.60',tags:none}).include.length,1);
+ assert.throws(()=>buildPlan({project:'flash-projector',arch:'arm64',tags:none}),/assembles universal packages/);
+ assert.throws(()=>buildPlan({project:'flash-projector',version:'35.0.0.60-MCLv1',tags:none}),/assembles version 35\.0\.0\.60/);
+ assert.throws(()=>buildPlan({project:'flash-projector',tags:()=>['flash-projector/v35.0.0.60/universal']}),/already has a universal package or tag/);
+ assert.equal(HOSTED_RUNNERS[SUPPLIED_RUNNER].os,'linux');
+});
 
 test('producer routing never substitutes Android for a different project',()=>{
  const selected=main(['--project','fna','--check']);assert.equal(selected.id,'fna');assert.equal(selected.sourceDirectory,'producers/maclauncher');assert.ok(selected.entries.every(entry=>entry.startsWith('producers/maclauncher/')));
@@ -179,7 +189,7 @@ test('the Runtime build workflow builds each architecture on its own runner befo
  assert.match(workflow,/push:\n    branches: \[main\]\n    paths:\n      - projects\.json\n      - projects\/\*\*/);assert.match(workflow,/if: needs\.plan\.outputs\.empty == 'false'/);
  const attestations=[...workflow.matchAll(/      - uses: actions\/attest-build-provenance@([a-f0-9]{40}) # v4\.2\.2\n((?:        [^\n]*\n)+)/g)];assert.equal(attestations.length,2);assert.equal(attestations[0][1],attestations[1][1]);
  for(const [, ,block] of attestations)assert.match(block,/subject-path: \$\{\{ runner\.temp \}\}\/release\/\*\.tar\.gz/);
- assert.match(attestations[0][2],/id: attest\n        continue-on-error: true/);assert.match(attestations[1][2],/if: steps\.attest\.outcome == 'failure' && !cancelled\(\)/);assert.ok(!attestations[1][2].includes('continue-on-error'));
+ assert.match(attestations[0][2],/id: attest\n        if: \$\{\{ !matrix\.supplied \}\}\n        continue-on-error: true/);assert.match(attestations[1][2],/if: steps\.attest\.outcome == 'failure' && !cancelled\(\)/);assert.ok(!attestations[1][2].includes('continue-on-error'));
  assert.match(workflow,/run: sleep 5/);assert.match(stage,/needs: build/);assert.match(stage,/github\.ref != 'refs\/heads\/main'/);
  assert.match(stage,/stage --bundle "\$bundle" --target "\$GITHUB_SHA"/);assert.ok(!workflow.slice(0,workflow.indexOf('\n  stage:')).includes('contents: write'));
  const release=fs.readFileSync(path.join(root,'.github/workflows/runtime-release.yml'),'utf8');
@@ -192,8 +202,21 @@ test('the Runtime build workflow builds each architecture on its own runner befo
  const proofStep=release.match(/      - name: Verify and record the signed build\n        if: env.PUBLICATION_AUTHORITY != 'supplied-publisher'\n        run: \|\n((?:          [^\n]*\n)+)/)?.[1];
  assert.ok(proofStep,'Compiled release paths import the signed proof before publication.');
  assert.match(release,/const supplied = readPublisherInput\(\{project: p.id\}\)/);
- assert.match(release,/supplied && process.env.BUILD_RUN/);
- assert.match(release,/name: Verify supplied publisher archive\n        if: env.PUBLICATION_AUTHORITY == 'supplied-publisher'\n        run: node tools\/publisher-files\.mjs verify/);
+ assert.ok(!release.includes('supplied && process.env.BUILD_RUN')&&!release.includes('supplied && process.env.OPERATION'),'Supplied packages use build runs and staging like compiled packages.');
+ assert.match(release,/name: Verify supplied publisher archive\n        if: env.PUBLICATION_AUTHORITY == 'supplied-publisher'\n        run: node tools\/publisher-files\.mjs verify --project "\$PROJECT" --input-archive "\$RUNNER_TEMP\/publisher-input\.tar\.gz" --release-bundle "\$RUNNER_TEMP\/runtime-release"/);
+ assert.match(release,/name: Record supplied-file equality\n        if: env.PUBLICATION_AUTHORITY == 'supplied-publisher' && inputs.build-run != ''\n        run: node tools\/publisher-files\.mjs record --project "\$PROJECT" --input-archive "\$RUNNER_TEMP\/publisher-input\.tar\.gz" --release-bundle "\$RUNNER_TEMP\/runtime-release"\n/);
+ assert.ok(release.indexOf('name: Record supplied-file equality')<release.indexOf('name: Stage the existing build artifact'));
+ const apply=release.slice(release.indexOf('name: Apply the supplied package and its equality record'),release.indexOf('\n  publish-verified:'));
+ assert.match(apply,/if: inputs.operation == 'publish' && inputs.build-run != '' && env.PUBLICATION_AUTHORITY == 'supplied-publisher'/);
+ assert.match(apply,/node tools\/release-runtime\.mjs apply --bundle "\$RUNNER_TEMP\/runtime-release"\n          git add -- catalogs publisher-records/);
+ assert.ok(apply.indexOf('npm test')<apply.indexOf('git push origin HEAD:main'),'Catalog commits pass the Source checks before they are pushed.');
+ assert.match(release,/catalog-commit: \$\{\{ steps\.push\.outputs\.commit \}\}/);assert.match(release,/needs: \[release, publish-verified\]/);
+ const supplied=workflow.slice(workflow.indexOf('name: Download the pinned publisher input'),workflow.indexOf('name: Verify the package identity'));
+ assert.match(supplied,/if: \$\{\{ matrix\.supplied \}\}\n        run: node tools\/publisher-files\.mjs fetch --project "\$BUILD_PROJECT" --output "\$RUNNER_TEMP\/publisher-input\.tar\.gz"/);
+ assert.match(supplied,/node tools\/publisher-files\.mjs assemble --project "\$BUILD_PROJECT" --input-archive "\$RUNNER_TEMP\/publisher-input\.tar\.gz" --output "\$RUNNER_TEMP\/release"/);
+ assert.match(supplied,/node tools\/publisher-files\.mjs record --project "\$BUILD_PROJECT" --input-archive "\$RUNNER_TEMP\/publisher-input\.tar\.gz" --release-bundle "\$RUNNER_TEMP\/release"/);
+ for(const step of ['Prepare the runner','Build the package','Package the release'])assert.match(workflow,new RegExp('name: '+step+'\\n        if: \\$\\{\\{ !matrix\\.supplied \\}\\}\\n'));
+ assert.match(stage,/publisher-files\.mjs record --project "\$PROJECT" --input-archive "\$RUNNER_TEMP\/publisher-input\.tar\.gz" --release-bundle "\$bundle"/);
  assert.match(proofStep,/--format json > "\$RUNNER_TEMP\/verified-build\.json"/);
  assert.match(proofStep,/node tools\/record-github-build\.mjs --release-bundle "\$RUNNER_TEMP\/runtime-release" --bundle "\$RUNNER_TEMP\/verified-build\.json"/);
  assert.equal([...release.matchAll(/gh attestation verify/g)].length,1);

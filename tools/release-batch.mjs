@@ -45,7 +45,7 @@ export async function main(args,{directory=root,runGh,verifyGithubBuild,env=proc
    options[name]=value;
   }
  }
- requireHostedPublication(options.packages,{directory,env});
+ requireHostedPublication({env});
  return releaseBatch({...options,directory,runGh,verifyGithubBuild});
 }
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)main(process.argv.slice(2)).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error.message);process.exitCode=1;});
