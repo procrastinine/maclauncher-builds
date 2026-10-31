@@ -402,6 +402,16 @@
           "file": "producers/maclauncher/src/modules/hashlink/runtime/legacy-build.js",
           "pointer": "/REVISION"
         }
+      },
+      {
+        "id": "hashlink-1-12",
+        "provider": "github",
+        "url": "https://github.com/HaxeFoundation/hashlink",
+        "repository": "HaxeFoundation/hashlink",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/hashlink/runtime/dynamic-legacy-build.js",
+          "pointer": "/REVISION"
+        }
       }
     ],
     "packageProfiles": [
@@ -414,6 +424,52 @@
         "version": "1.12-MCLv1",
         "label": "HashLink 1.12 ABI",
         "anchor": "hashlink-1-12"
+      },
+      {
+        "version": "1.9-MCLv2",
+        "label": "HashLink 1.9 ABI",
+        "anchor": "hashlink-1-9"
+      },
+      {
+        "version": "1.12-MCLv2",
+        "label": "HashLink 1.12 ABI",
+        "anchor": "hashlink-1-12"
+      }
+    ],
+    "build": [
+      {
+        "version": "1.9-MCLv2",
+        "command": "tools/build-hashlink.mjs",
+        "architectures": [
+          "x64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/source-revisions/hashlink-1-9",
+          "producers/maclauncher/src/external/krkrsdl2/external/SDL",
+          "producers/maclauncher/src/external/openal-soft"
+        ],
+        "tools": [
+          "cmake",
+          "ninja",
+          "pkgconf"
+        ]
+      },
+      {
+        "version": "1.12-MCLv2",
+        "command": "tools/build-hashlink.mjs",
+        "architectures": [
+          "x64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/source-revisions/hashlink-1-9",
+          "producers/maclauncher/src/external/krkrsdl2/external/SDL",
+          "producers/maclauncher/src/external/openal-soft"
+        ],
+        "tools": [
+          "cmake",
+          "ninja",
+          "pkgconf"
+        ]
       }
     ]
   },
@@ -575,6 +631,10 @@
     },
     "packageProfiles": [
       {
+        "version": "MCLv2-1030-kag3",
+        "label": "KiriKiri SDL2 macOS"
+      },
+      {
         "version": "MCLv1-1028-kag3-1",
         "label": "Kirikiri SDL2 MCLv1-1028-kag3-1"
       },
@@ -582,7 +642,24 @@
         "version": "MCLv1-1001",
         "label": "Kirikiri SDL2 MCLv1-1001"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv2-1030-kag3",
+      "command": "tools/build-krkrsdl2.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/krkrsdl2"
+      ],
+      "recursiveSubmodules": true,
+      "tools": [
+        "cmake",
+        "ninja",
+        "pkgconf"
+      ]
+    }
   },
   {
     "id": "npengine",

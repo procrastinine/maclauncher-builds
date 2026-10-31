@@ -13,7 +13,7 @@ const Tools=require('../producers/maclauncher/scripts/native-binary-tools.cjs');
 const system=value=>value.startsWith('/usr/lib/')||value.startsWith('/System/Library/');
 const run=(command,args)=>execFileSync(command,args,{encoding:'utf8',timeout:120000,maxBuffer:16<<20});
 
-export async function sealRuntime({project:id,version:selectedVersion,arch,executable,sourceRoot,sourceScope,upstreamRevision,output,executableRelative,appRoot,payloads=[],notices=[],extraLibraries=[],runtimeFiles={},environmentRelative={},jsonMetadata={},maximumMacOS='13.0',provenance={},directory=path.resolve(import.meta.dirname,'..')}) {
+export async function sealRuntime({project:id,version:selectedVersion,arch,executable,sourceRoot,sourceScope,upstreamRevision,output,executableRelative,appRoot,payloads=[],notices=[],extraLibraries=[],runtimeFiles={},environmentRelative={},jsonMetadata={},capabilities,maximumMacOS='13.0',provenance={},directory=path.resolve(import.meta.dirname,'..')}) {
  const project=resolveProject(id,directory),build=buildRecord(project,selectedVersion),version=build.version,cpu=arch==='x64'?'x86_64':arch;
  if(!version||!['arm64','x64'].includes(arch)||!build.architectures.includes(arch)||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(executable||'')||!path.isAbsolute(sourceRoot||'')||!project.upstreams.some(pin=>pin.revision===upstreamRevision)||!notices.length)
   throw Error('Sealing needs a registered build, target CPU, pinned public source, license notices and a new absolute output directory.');
@@ -97,7 +97,7 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
   const inventory=B.fileInventory(files).map(relative=>{const target=path.join(files,relative),stat=fs.statSync(target),architectures=Tools.macho(target);return {path:relative,size:stat.size,sha256:Native.hashFile(target),mode:stat.mode&0o777,...(architectures?{architectures}:{})};});
   const manifest={schemaVersion:1,managerId:id,version,upstreamRevision,platform:'darwin',arch,minimumMacOS,executableRelative,files:inventory,
    dependencies:[...seen].map(file=>({file:path.relative(files,file).split(path.sep).join('/'),links:Tools.links(file,cpu).filter(link=>!Tools.libraryIds(file,cpu).includes(link))})),
-   notices:licenseRows,runtimeFiles,environmentRelative,signature:{identity:'-',verified:true},
+   notices:licenseRows,runtimeFiles,environmentRelative,...(capabilities?{capabilities}:{}),signature:{identity:'-',verified:true},
    provenance:Tools.publicProvenance({...provenance,sourceRevision:upstreamRevision,inputExecutableSha256:originals.get(executable)||Native.hashFile(executable),verifiedBuild:true})};
   B.validateManifest(manifest);B.verifyPayload(files,manifest);
   await Source.validatePinnedSource(sourceRoot,upstreamRevision,{sourceScope});

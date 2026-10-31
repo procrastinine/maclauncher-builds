@@ -84,6 +84,10 @@ The graphics `runtime.json` stores the build SDK in `build.sdkVersion`. A build 
 | [xsystem35 SDL2](https://github.com/kichikuou/xsystem35-sdl2) | `xsystem35` | Executable-relative fonts/resources and native libraries |
 | [xsystem4](https://github.com/nunuhara/xsystem4) | `xsystem4` | macOS OpenGL/shader support and resource paths |
 
+KiriKiri SDL2 builds from its pinned source and nested dependencies through `tools/build-krkrsdl2.mjs`. Separate Apple Silicon and Intel packages include the storage, font and monitor integration, full-frame presentation and KAG3 resources. Both target macOS 13.
+
+HashLink uses `tools/build-hashlink.mjs` for its separate 1.9 and 1.12 ABI packages. Both contain an Intel bytecode VM, matching native modules and source-built SDL2 and OpenAL libraries, with a macOS 13 minimum. Apple Silicon runs these Intel VMs through Rosetta. Each payload records its bytecode versions and SDL event-loop ABI; the catalog carries those facts for the app to match against a game.
+
 The MKXP-Z package adds Unicode filename normalization for Apple Silicon at MKXP-Z's own file-system calls, and keeps the publisher's universal build as its baseline. Its producer is `producers/maclauncher/scripts/build-mkxpz-nfc.cjs`, the patch is recorded in `producers/maclauncher/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json`, and `runtimes/mkxpz/baseline.json` identifies the publisher's build. The publisher's own releases are not repeated in the Builds catalog.
 
 The upstream Prosper source has no license grant, so its recipe is marked for local use only and no Prosper package is published.

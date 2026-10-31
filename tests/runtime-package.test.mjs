@@ -137,3 +137,15 @@ test('downloadable metadata follows payload source pins and bundled records rema
  assert.deepEqual(recordMetadata({project:mesa.id,manifest:{upstreamRevision:mesaRevision}}),{},'A verified non-GitHub source stays packable without a fabricated GitHub identity');
  assert.throws(()=>recordMetadata({project:mesa.id,manifest:{upstreamRevision:'f'.repeat(40)}}),/source differs/);
 });
+
+// Facts from each verified version accompany its catalog row.
+test('verified manifest capabilities survive package verification and reject malformed facts',async t=>{
+ const f=fixture(t),capabilities={supportedBytecodeVersions:[2,3,4,5],nativeAbi:{sdlEventLoop:'typed-event'}};
+ const bytes=JSON.stringify({schemaVersion:1,capabilities})+'\n';fs.writeFileSync(path.join(f.input,'runtime.json'),bytes);Object.assign(f.declaration.files[0],{size:Buffer.byteLength(bytes),sha256:digest(bytes)});f.declaration.manifestSha256=digest(bytes);
+ const record=await pack(f);assert.deepEqual(record.capabilities,capabilities);
+ const checked=await verify({...selected(f),archive:f.output,sha256:record.asset.sha256,includeManifest:true});assert.deepEqual(checked.manifest.capabilities,capabilities);
+ const {recordMetadata}=await import('../lib/record-metadata.mjs');
+ assert.throws(()=>recordMetadata({project:'fixture',manifest:{capabilities:'invalid'}}),/capabilities/);
+ assert.throws(()=>recordMetadata({project:'fixture',manifest:{capabilities:{logPath:'not-a-log'}}}),/private/);
+});
+
