@@ -149,9 +149,9 @@ test('a VNDS-LOVE package revision preserves engine files and historical packagi
 
 test('the Runtime build workflow builds each architecture on its own runner before staging drafts',()=>{
  const workflow=fs.readFileSync(path.join(root,'.github/workflows/runtime-build.yml'),'utf8');
- assert.match(workflow,/node tools\/build-runtime\.mjs --plan --before "\$BEFORE"/);assert.match(workflow,/node tools\/build-runtime\.mjs --plan --project "\$PROJECT" --arch "\$ARCH"/);
+ assert.match(workflow,/node tools\/build-runtime\.mjs --plan --before "\$BEFORE"/);assert.match(workflow,/node tools\/build-runtime\.mjs --plan --project "\$BUILD_PROJECT" --arch "\$BUILD_ARCH"/);
  assert.match(workflow,/matrix: \$\{\{ fromJSON\(needs\.plan\.outputs\.matrix\) \}\}/);assert.match(workflow,/runs-on: \$\{\{ matrix\.runner \}\}/);
- assert.match(workflow,/tools\/release-runtime\.mjs prepare --project "\$PROJECT"/);assert.match(workflow,/tools\/release-runtime\.mjs verify --bundle "\$RUNNER_TEMP\/release" --project "\$PROJECT" --version "\$VERSION" --arch "\$ARCH"/);
+ assert.match(workflow,/tools\/release-runtime\.mjs prepare --project "\$BUILD_PROJECT"/);assert.match(workflow,/tools\/release-runtime\.mjs verify --bundle "\$RUNNER_TEMP\/release" --project "\$BUILD_PROJECT" --version "\$BUILD_VERSION" --arch "\$BUILD_ARCH"/);
  const stage=workflow.slice(workflow.indexOf('\n  stage:'));
  assert.match(stage,/if: github\.event_name == 'workflow_dispatch' && inputs\.operation == 'stage'/);
  assert.match(workflow,/push:\n    branches: \[main\]\n    paths:\n      - projects\.json\n      - projects\/\*\*/);assert.match(workflow,/if: needs\.plan\.outputs\.empty == 'false'/);
@@ -246,6 +246,6 @@ test('every build host is prepared by one shared step on its declared hosted run
  assert.deepEqual(prepared,{env:{RUSTUP_TOOLCHAIN:'1.99.0'},paths:[]});
  assert.deepEqual(calls,[['rustup','toolchain','install','1.99.0','--profile','minimal'],['rustup','target','add','--toolchain','1.99.0','aarch64-apple-darwin']]);
  const workflow=fs.readFileSync(path.join(root,'.github/workflows/runtime-build.yml'),'utf8');
- assert.match(workflow,/run: node tools\/build-runtime\.mjs --prepare --project "\$PROJECT" --arch "\$ARCH" --version "\$VERSION"/);
+ assert.match(workflow,/run: node tools\/build-runtime\.mjs --prepare --project "\$BUILD_PROJECT" --arch "\$BUILD_ARCH" --version "\$BUILD_VERSION"/);
  for(const text of ['brew install','rustup ','xcodebuild','init-runtime-sources','cleanup-runner.mjs'])assert.ok(!workflow.includes(text),text);
 });
