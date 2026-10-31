@@ -48,6 +48,34 @@ export function artHwuiBuildEnvironment({work,env=process.env}){
  return {...rustEnvironment({work,minimumMacOS:'13.0',env:{...env,CARGO_HOME:path.join(work,'cargo')}}),CARGO_BUILD_JOBS:'2'};
 }
 
+/** Stage the original host tool's declared templates and give it their owned working directory. */
+export async function prepareStatsGenerator({producer,compile,executable,blueprintParser}){
+ const source=path.join(compile,'module/source/proto_logging/stats/stats_log_api_gen');
+ const {parseBlueprint}=await import(pathToFileURL(path.join(producer,'src/modules/android/native/upstream/blueprint.mjs')));
+ const file=path.join(source,'Android.bp'),modules=parseBlueprint(fs.readFileSync(file,'utf8'),{file,parser:blueprintParser}).modules;
+ const choose=name=>{const found=modules.filter(row=>row.properties.name===name);if(found.length!==1)throw Error('Missing original stats generator module: '+name);return found[0].properties;};
+ const patterns=(values,seen=new Set())=>values.flatMap(value=>{
+  if(typeof value!=='string')throw Error('Invalid original stats generator source.');
+  if(!value.startsWith(':'))return [value];
+  const name=value.slice(1);if(seen.has(name))throw Error('Circular stats generator source group.');return patterns(choose(name).srcs,new Set([...seen,name]));
+ });
+ const files=[];
+ for(const name of choose('stats-log-api-gen').required||[]){
+  const module=choose(name),relative=module.sub_dir;
+  if(typeof relative!=='string'||path.isAbsolute(relative)||relative.split('/').includes('..'))throw Error('Invalid original stats generator data directory.');
+  const destination=path.join(compile,'tools/out/etc',relative);fs.mkdirSync(destination,{recursive:true});
+  for(const pattern of patterns(module.srcs)){
+   if(path.isAbsolute(pattern)||pattern.split('/').includes('..'))throw Error('Invalid original stats generator data source.');
+   const matched=fs.globSync(pattern,{cwd:source});if(!matched.length)throw Error('Missing original stats generator data: '+pattern);
+   for(const relativeFile of matched){const input=path.join(source,relativeFile);if(!fs.lstatSync(input).isFile())throw Error('Stats generator data must be an original regular file.');const output=path.join(destination,path.basename(relativeFile));fs.copyFileSync(input,output);files.push({input,output});}
+  }
+ }
+ if(!files.length)throw Error('The original stats generator declares no runtime data.');
+ const launcher=path.join(compile,'tools/stats-log-api-gen.mjs');
+ fs.writeFileSync(launcher,'#!/usr/bin/env node\nimport {spawnSync} from "node:child_process";\nconst result=spawnSync('+JSON.stringify(executable)+',process.argv.slice(2),{cwd:'+JSON.stringify(compile)+',stdio:"inherit"});\nif(result.error)throw result.error;process.exitCode=result.status??1;\n',{mode:0o755});
+ return {executable:launcher,files};
+}
+
 /** Prepare original host generators and a locked Cargo workspace before native HWUI compilation. */
 export async function prepareArtHwui({common,image,ndk,work}){
  if(!common?.buildWork||!common?.tools||!path.isAbsolute(image?.root||'')||!path.isAbsolute(ndk||'')||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('HWUI requires completed common source products, the original image, NDK and a new absolute work directory.');
@@ -82,7 +110,8 @@ export async function prepareArtHwui({common,image,ndk,work}){
   run('cmake',['-S',path.join(compile,'tools',group),'-B',output,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_DEPLOYMENT_TARGET=13.0','-DCMAKE_CXX_FLAGS='+maps]);
   run('cmake',['--build',output,'--parallel','2']);
  }
- Object.assign(tools,{syspropCpp:path.join(compile,'tools/generators-build/sysprop_cpp'),statsLogApiGen:path.join(compile,'tools/generators-build/stats-log-api-gen'),
+ const stats=await prepareStatsGenerator({producer,compile,executable:path.join(compile,'tools/generators-build/stats-log-api-gen'),blueprintParser:tools.blueprintParser});
+ Object.assign(tools,{syspropCpp:path.join(compile,'tools/generators-build/sysprop_cpp'),statsLogApiGen:stats.executable,
   perfettoPlugins:Object.fromEntries(['perfetto_src_protozero_protoc_plugin_cppgen_plugin','protozero_plugin','ipc_plugin'].map(name=>[name,path.join(compile,'tools/perfetto-generators-build',name)]))});
  Object.assign(ctx.tools,tools);
  const {buildAvif}=await import(pathToFileURL(path.join(producer,native,'buildAvif.mjs')));
