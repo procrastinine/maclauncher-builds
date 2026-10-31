@@ -160,11 +160,7 @@ The dry run downloads and verifies the selected artifacts and saves a publicatio
 
 A retry skips cataloged outputs and preserves matching tags, drafts and public releases. If a previous attempt created only a tag or an empty draft, batch staging completes it only when that tag identifies the exact certified source commit. Conflicting source commits or archive bytes stop publication; releases and assets are never replaced or deleted. If a build artifact has expired after its release was created, the same signed digest can verify the existing release archive. A retry also refreshes the package index when the catalogs already match.
 
-The same batch script supports local preparation:
-
-```sh
-node tools/publish-verified.mjs --output /absolute/path/to/publication --dry-run
-```
+`tools/publish-verified.mjs` runs only inside this workflow, so GitHub's build outputs go straight from the build run to their releases and catalogs.
 
 The workflow uses `GITHUB_TOKEN` with Actions read and repository contents write access. Its index deployment uses Pages and identity-token permissions. Unchanged publisher files retain their separate file-equality publication path.
 
@@ -176,23 +172,21 @@ Supplied publisher packages use a separate file-equality authority. A registered
 
 Stage and apply recheck the actual supplied archive. Source tags must contain the matching descriptor and producer registration. This records the packaging inputs without claiming compilation on GitHub or authenticated publisher identity; ad-hoc signatures establish no publisher identity. A tag that lacks those inputs cannot authorize another source commit. Compiled packages continue to require signed GitHub build provenance.
 
-`stage` uploads a package through an authenticated GitHub CLI after checking its publication authority. Compiled packages require signed provenance from `runtime-build.yml` on a GitHub-hosted runner. Supplied publisher packages require the registered file-equality record and an actual archive comparison. The archive identity and packaging source must match the package and exact `--target` commit. An existing tag, including an annotated tag, must resolve to that same commit, and a conflicting tag is never replaced. The runtime archive is the only public attachment, and the release notes contain a collapsed Source section that links to the tagged source and the upstream commits. Existing releases and assets are not replaced.
+`stage` uploads a package through an authenticated GitHub CLI after checking its publication authority. Compiled packages require signed provenance from `runtime-build.yml` on a GitHub-hosted runner. Supplied publisher packages require the registered file-equality record and an actual archive comparison. The archive identity and packaging source must match the package and exact `--target` commit. An existing tag, including an annotated tag, must resolve to that same commit, and a conflicting tag is never replaced. The runtime archive is the only public attachment, and the release notes contain a collapsed Source section that links to the tagged source and the upstream commits. Existing releases and assets are not replaced. Outside GitHub Actions, `stage`, `publish`, `apply` and `tools/release-batch.mjs` accept only supplied publisher packages, whose files come from their publisher rather than from a GitHub build. Compiled packages are released by the **Runtime release** workflow.
 
 ```sh
-node tools/release-runtime.mjs stage --bundle out/gemrb-release \
+node tools/release-runtime.mjs stage --bundle out/flash-projector-release \
   --target <40-character-builds-source-commit>
 ```
 
 A manual GitHub Actions workflow, **Runtime release**, takes a project, version and architecture. It keeps the dispatch commit's publication tools and evidence ledger, resolves the historical source tag without changing the checkout, downloads only that draft's binary archive and validates it against the committed catalog. Signed provenance must identify the archive digest and the tag's exact source commit. Its `stage` operation creates a draft from a successful build artifact, `verify` keeps an existing draft, and `publish` publishes the same bytes; none builds native code. The repository's **Source** workflow runs on pushes to `main`, on pull requests and when started by hand; creating a runtime tag does not start it.
 
-Packages built by **Runtime build** are not in the catalog yet. For them, the `build-run` input of **Runtime release** names the ID of the build run. Staging requires that input and a dispatch from `main`; the workflow selects its source commit before creating the tag. The job first confirms that the run is complete and that the selected project, version and architecture have a successful package job. Each package is checked independently. It then downloads the run's artifact for the selected architecture, checks it with `verify`, verifies its GitHub attestation against the build workflow and source commit, and compares it with the draft's asset through `verify-remote` before `publish`. A draft staged locally from the artifact of a push-triggered run, with `stage --target` set to that run's commit, is published the same way without a second build. Each architecture needs its own dispatch. `verify-remote --bundle <directory>` can also be run locally; it reads the release from GitHub and changes nothing.
+Packages built by **Runtime build** are not in the catalog yet. For them, the `build-run` input of **Runtime release** names the ID of the build run. Staging requires that input and a dispatch from `main`; the workflow selects its source commit before creating the tag. The job first confirms that the run is complete and that the selected project, version and architecture have a successful package job. Each package is checked independently. It then downloads the run's artifact for the selected architecture, checks it with `verify`, verifies its GitHub attestation against the build workflow and source commit, and compares it with the draft's asset through `verify-remote` before `publish`. Each architecture needs its own dispatch. `verify-remote --bundle <directory>` can also be run locally; it reads the release from GitHub and changes nothing.
 
-After publication, the same artifact updates the catalog:
+For compiled packages, the `publish-verified` operation applies each catalog record on GitHub after publication. A supplied publisher package's record is applied from its verified bundle:
 
 ```sh
-gh run download <run-id> --repo procrastinine/maclauncher-builds \
-  --name runtime-sys3-decompiler-0.5.0-MCLv1-x64 --dir out/sys3-decompiler-x64
-node tools/release-runtime.mjs apply --bundle out/sys3-decompiler-x64
+node tools/release-runtime.mjs apply --bundle out/flash-projector-release
 ```
 
 `apply --bundle <directory>` verifies the applicable publication authority, checks the public release and its source tag, updates the local project catalog and regenerates `catalogs/index.json`. It creates no commit or release and cannot replace an existing package. `stage`, `publish`, `verify-remote`, `apply` and the catalog publication CLI require the applicable publication authority: signed GitHub build evidence for compiled packages, or registered supplied-file equality for unmodified publisher packages. A run ID or locally written success flag is insufficient. Local `prepare` and `verify` remain available for unsigned diagnostic archives. During catalog updates, previous records without either publication authority move to `catalogs/superseded/<project>.json`; their versions and archive identities remain available there. Active catalogs contain the verified incoming package and earlier verified packages. Retiring a catalog entry is a separate, deliberate change, made together with the removal of the corresponding release. MacLauncher reads the per-project catalogs directly from Git, and the package index uses the same committed records.

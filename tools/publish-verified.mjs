@@ -54,7 +54,8 @@ export async function publishVerified({output,dryRun=false,directory=root,runGh=
  return result;
 }
 
-export function main(args,options={}){
+export function main(args,{env=process.env,...options}={}){
+ if(env.GITHUB_ACTIONS!=='true')throw Error('Verified batches are published only by the Runtime release workflow on GitHub.');
  const selected={};for(let i=0;i<args.length;i++){
   const key=args[i];
   if(key==='--dry-run'){if(Object.hasOwn(selected,'dryRun'))throw Error('Use --dry-run only once.');selected.dryRun=true;}

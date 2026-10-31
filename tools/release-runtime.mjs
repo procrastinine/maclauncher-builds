@@ -10,6 +10,7 @@ import {releaseVersion} from '../lib/package-version.mjs';
 import {buildCoverage,assertBuildCoverage} from './build-coverage.mjs';
 import {sourceDateEpoch,buildToolchain} from '../lib/reproducible-build.mjs';
 import {assetName,releaseTag,releaseRecord,validateCatalog,identity} from '../lib/project-identity.mjs';
+import {readPublisherInput} from './publisher-files.mjs';
 const require=createRequire(import.meta.url),A=require('../lib/archive.cjs'),B=require('../lib/bundled-native.cjs');
 const root=path.resolve(import.meta.dirname,'..');
 const json=value=>JSON.stringify(value,null,2)+'\n';
@@ -234,8 +235,20 @@ export async function publishRelease({bundle,directory=root,runGh=runGitHub,veri
  return {...existing,draft:false,published:true};
 }
 
+// Compiled packages move from a GitHub build run to their release and catalog only
+// inside GitHub Actions, so GitHub's files never travel through a local copy.
+// Unmodified publisher packages come from their publisher and may be released locally.
+export function requireHostedPublication(bundles,{directory=root,env=process.env}={}){
+ if(env.GITHUB_ACTIONS==='true')return;
+ for(const bundle of bundles){
+  const sidecars=fs.existsSync(bundle||'')?fs.readdirSync(bundle).filter(name=>name.endsWith('.tar.gz.json')):[];
+  if(sidecars.length!==1)continue;
+  if(!readPublisherInput({project:read(path.join(bundle,sidecars[0])).id,directory}))throw Error('Compiled packages are released only by the Runtime release workflow on GitHub.');
+ }
+}
+
 function options(args){const result={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!args[i]?.startsWith('--')||!args[i+1]||Object.hasOwn(result,key))throw Error('Use unique --option value pairs.');result[key]=args[i+1];}return result;}
-export async function main([command,...args],directory=root){
+export async function main([command,...args],directory=root,env=process.env){
  const o=options(args),allowed={prepare:['project','input','declaration','archive','record','source','source-revision','output'],verify:['bundle','project','version','arch'],'verify-assets':['project','version','arch','assets','output'],'verify-remote':['bundle'],apply:['bundle'],stage:['bundle','target'],publish:['bundle'],index:['output']}[command];
  if(!allowed||Object.keys(o).some(k=>!allowed.includes(k)))throw Error('Use prepare, verify, verify-remote, apply, stage, publish or index with explicit options.');
  if(command==='prepare'){
@@ -246,6 +259,7 @@ export async function main([command,...args],directory=root){
  if(command==='verify-assets')return verifyPublicAssets({...o,directory});
  if(command==='verify')return verifyRelease({...o,directory});
  if(command==='verify-remote'){if(!o.bundle)throw Error('verify-remote requires --bundle.');const {release,publication}=await verifyRemoteRelease({...o,directory});return {...release,draft:publication.draft,sourceCommit:publication.sourceCommit};}
+ if(['stage','publish','apply'].includes(command))requireHostedPublication([o.bundle],{directory,env});
  if(command==='stage')return stageRelease({...o,directory});
  if(command==='publish')return publishRelease({...o,directory});
  if(command==='apply')return applyRelease({...o,directory});

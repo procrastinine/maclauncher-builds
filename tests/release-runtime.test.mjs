@@ -19,7 +19,8 @@ const publishRelease=o=>actualPublishRelease({...o,verifyGithubBuild:fixtureBuil
 const verifyRemoteRelease=o=>actualVerifyRemoteRelease({...o,verifyGithubBuild:fixtureBuild});
 const applyRelease=o=>actualApplyRelease({...o,verifyGithubBuild:fixtureBuild});
 const releaseBatch=o=>actualReleaseBatch({...o,verifyGithubBuild:fixtureBuild});
-const batchMain=(args,o)=>actualBatchMain(args,{...o,verifyGithubBuild:fixtureBuild});
+const hosted={GITHUB_ACTIONS:'true'};
+const batchMain=(args,o)=>actualBatchMain(args,{env:hosted,...o,verifyGithubBuild:fixtureBuild});
 const rawCatalog=directory=>JSON.parse(fs.readFileSync(path.join(directory,'catalogs/engine.json')));
 const supersededCatalog=directory=>{const file=path.join(directory,'catalogs/superseded/engine.json');return fs.existsSync(file)?JSON.parse(fs.readFileSync(file)):{packages:[]};};
 const catalogHistory=directory=>[...rawCatalog(directory).packages,...supersededCatalog(directory).packages];
@@ -135,6 +136,14 @@ function publicReleaseGh(record){return async args=>{
  assert.deepEqual(args,['api','--paginate','--slurp','repos/owner/builds/releases?per_page=100']);
  return JSON.stringify([[remoteRelease(record)]]);
 };}
+test('compiled packages are released only inside GitHub Actions',async t=>{
+ const f=fixture(t,{external:true});await prepareRelease(f);
+ for(const command of ['stage','publish','apply'])
+  await assert.rejects(main([command,'--bundle',f.output,...(command==='stage'?['--target',sourceTarget]:[])],f.directory,{}),/only by the Runtime release workflow on GitHub/);
+ const b=await batchFixture(t),args=['--target',sourceTarget,'--output',b.output,...b.packages.flatMap(p=>['--package',p])];
+ await assert.rejects(batchMain(args,{directory:b.directory,runGh:async()=>assert.fail('No GitHub request outside Actions'),env:{}}),/only by the Runtime release workflow on GitHub/);
+});
+
 test('staging creates a new exact source tag and uploads one draft binary',async t=>{
  const f=fixture(t,{external:true});await prepareRelease(f);const calls=[];
  const runGh=async(args,options)=>{calls.push(args);if(args[1]?.includes('/git/ref/'))throw notFound();if(args.includes('--paginate'))return '[]';if(args[0]==='api'){assert.ok(args.includes('POST'));return refResult();}assert.equal(options.stdio,'inherit');return '';};

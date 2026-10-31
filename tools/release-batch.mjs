@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {assetName} from '../lib/project-identity.mjs';
-import {prepareRelease,stageRelease,verifyRemoteRelease,publishRelease,applyRelease} from './release-runtime.mjs';
+import {prepareRelease,stageRelease,verifyRemoteRelease,publishRelease,applyRelease,requireHostedPublication} from './release-runtime.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
 
@@ -34,7 +34,7 @@ export async function releaseBatch({packages,target,output,directory=root,runGh,
  return results;
 }
 
-export async function main(args,{directory=root,runGh,verifyGithubBuild}={}){
+export async function main(args,{directory=root,runGh,verifyGithubBuild,env=process.env}={}){
  const options={packages:[]};
  for(let i=0;i<args.length;i+=2){
   const key=args[i],value=args[i+1];
@@ -45,6 +45,7 @@ export async function main(args,{directory=root,runGh,verifyGithubBuild}={}){
    options[name]=value;
   }
  }
+ requireHostedPublication(options.packages,{directory,env});
  return releaseBatch({...options,directory,runGh,verifyGithubBuild});
 }
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)main(process.argv.slice(2)).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error.message);process.exitCode=1;});
