@@ -172,7 +172,7 @@ async function releaseTagCommit(ref,{repository,runGh}){
 }
 async function optionalGitHub(args,runGh){try{return JSON.parse(await runGh(['api',...args]));}catch(error){if(!missingRef(error))throw error;}}
 /** Existing tags, releases and assets are immutable; matching assets are a no-op. */
-async function existingRelease({release,record,runGh}){
+async function existingRelease({release,record,runGh,allowUnreleasedTag=false}){
  const repository=release.repository,tag=release.tag;
  const ref=await optionalGitHub(['repos/'+repository+'/git/ref/tags/'+tag],runGh);
  const commit=ref&&await releaseTagCommit(ref,{repository,runGh});
@@ -181,6 +181,7 @@ async function existingRelease({release,record,runGh}){
  if(matches.length>1)throw Error('Existing release identity is ambiguous.');
  const remote=matches[0];
  if(!ref&&!remote)return;
+ if(ref&&!remote&&allowUnreleasedTag)return {repository,tag,sourceCommit:commit,tagOnly:true};
  if(!ref||!remote)throw Error('Existing release identity is incomplete; no tag or asset will be replaced.');
  if(remote.tag_name!==tag||remote.assets?.length!==1)throw Error('Existing release differs from the selected record.');
  const asset=remote.assets[0];
@@ -203,14 +204,18 @@ export async function verifyRemoteRelease({bundle,directory=root,runGh=runGitHub
 }
 
 /** Explicit network action: upload only a release with no existing public identity. */
-export async function stageRelease({bundle,target,directory=root,runGh=runGitHub,verifyGithubBuild=verifyPublicationBuild}){
+export async function stageRelease({bundle,target,resume=false,directory=root,runGh=runGitHub,verifyGithubBuild=verifyPublicationBuild}){
  if(!/^[a-f0-9]{40}$/.test(target||''))throw Error('Staging requires an exact public source commit through --target.');
+ if(typeof resume!=='boolean')throw Error('Staging resume must be a boolean.');
  const {release,record}=await verifyRelease({bundle,directory}),project=resolveProject(release.id,directory,{resolvePins:false});
  const build=await verifyGithubBuild({record,repository:release.repository,directory,archive:path.join(path.resolve(bundle),record.asset.filename),sourceRevision:target});
  await matchingBuildSource(build,target,{record,directory});
- const existing=await existingRelease({release,record,runGh});if(existing){await matchingBuildSource(build,existing.sourceCommit,{record,directory});return existing;}
- const ref=JSON.parse(await runGh(['api','--method','POST','repos/'+release.repository+'/git/refs','-f','ref=refs/tags/'+release.tag,'-f','sha='+target]));
- if(await releaseTagCommit(ref,{repository:release.repository,runGh})!==target)throw Error('Release tag differs from the exact source commit.');
+ const existing=await existingRelease({release,record,runGh,allowUnreleasedTag:resume});
+ if(existing){await matchingBuildSource(build,existing.sourceCommit,{record,directory});if(!existing.tagOnly)return existing;}
+ else{
+  const ref=JSON.parse(await runGh(['api','--method','POST','repos/'+release.repository+'/git/refs','-f','ref=refs/tags/'+release.tag,'-f','sha='+target]));
+  if(await releaseTagCommit(ref,{repository:release.repository,runGh})!==target)throw Error('Release tag differs from the exact source commit.');
+ }
  const files=publicationAssets(release).map(name=>path.join(path.resolve(bundle),name));
  await runGh(['release','create',release.tag,'--repo',release.repository,'--draft','--verify-tag','--latest=false','--target',target,'--title',project.name+' '+release.version+' ('+release.arch+')','--notes',releaseNotes({...record,source:{repository:release.repository,revision:target}},project),...files],{stdio:'inherit'});
  return {repository:release.repository,tag:release.tag,draft:true};

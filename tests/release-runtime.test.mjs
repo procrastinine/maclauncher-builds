@@ -161,6 +161,28 @@ test('existing asset conflicts and orphan tags fail before any write',async t=>{
   assert.equal(calls.length,2);
  }
 });
+
+test('batch staging resumes an interrupted release creation at the certified tag',async t=>{
+ const f=fixture(t);await prepareRelease(f);let hasTag=false,creates=0,tags=0;
+ const runGh=async args=>{
+  if(args[0]==='api'&&args[1]?.includes('/git/ref/')){if(!hasTag)throw notFound();return refResult();}
+  if(args.includes('--paginate'))return '[]';
+  if(args.includes('POST')){hasTag=true;tags++;return refResult();}
+  assert.deepEqual(args.slice(0,2),['release','create']);creates++;
+  if(creates===1)throw Error('Connection interrupted after tag creation.');
+  return '';
+ };
+ await assert.rejects(stageRelease({bundle:f.output,target:sourceTarget,resume:true,directory:f.directory,runGh}),/Connection interrupted/);
+ await stageRelease({bundle:f.output,target:sourceTarget,resume:true,directory:f.directory,runGh});
+ assert.equal(tags,1);assert.equal(creates,2);
+});
+
+test('batch staging cannot adopt a tag at a different source commit',async t=>{
+ const f=fixture(t);await prepareRelease(f);const calls=[];
+ const runGh=async args=>{calls.push(args);if(args[1]?.includes('/git/ref/'))return refResult('b'.repeat(40));if(args.includes('--paginate'))return '[]';throw Error('No remote writes permitted.');};
+ await assert.rejects(stageRelease({bundle:f.output,target:sourceTarget,resume:true,directory:f.directory,runGh}),/source commit differs/);
+ assert.equal(calls.some(args=>args.includes('POST')||args[0]==='release'),false);
+});
 test('publishing changes only a verified draft status and never uploads assets',async t=>{
  const f=fixture(t);await prepareRelease(f);const record=JSON.parse(fs.readFileSync(path.join(f.output,'engine-1.0-arm64.tar.gz.json'))),calls=[];
  const runGh=async args=>{calls.push(args);if(args[0]==='api')return args[1].includes('/git/ref/')?refResult():JSON.stringify([[remoteRelease(record,true)]]);assert.deepEqual(args,['release','edit','engine/v1.0/arm64','--repo','owner/builds','--draft=false','--latest=false']);return '';};

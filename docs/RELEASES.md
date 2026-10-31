@@ -147,6 +147,29 @@ A project's catalog keeps every published package and gains at most one new vers
 
 ## Draft upload and publication
 
+### Publish verified builds on GitHub
+
+The **Runtime release** workflow's `publish-verified` operation publishes every active, imported signed output that is absent from its catalog. Project, version, architecture and build-run inputs are unused in this mode. It runs on a GitHub-hosted Ubuntu runner, downloads each package from the build run recorded in its attestation, and checks its digest and sealed contents through the existing release tools. It stages the release at the certified source commit, verifies the draft, publishes it, verifies the public archive and applies its catalog record. Packages are processed serially, stopping at the first failure. All Runtime release operations share one publication queue.
+
+```sh
+gh workflow run runtime-release.yml --repo procrastinine/maclauncher-builds \
+  --ref main -f operation=publish-verified -F dry-run=true
+```
+
+The dry run downloads and verifies the selected artifacts and saves a publication plan without changing releases, tags or catalogs. Omitting `dry-run=true` performs publication. The workflow then commits only catalog changes, runs the Source tests, release-version checks and package-index generation from a clean clone of that exact commit, and pushes it to `main`. The existing Package index workflow updates the site at the checked commit. No package compiler runs and no archive passes through a local Mac.
+
+A retry skips cataloged outputs and preserves matching tags, drafts and public releases. If a previous attempt created only a tag, batch staging creates the missing draft only when that tag identifies the exact certified source commit. Conflicting source commits or archive bytes stop publication; releases and assets are never replaced or deleted. If a build artifact has expired after its release was created, the same signed digest can verify the existing release archive. A retry also refreshes the package index when the catalogs already match.
+
+The same batch script supports local preparation:
+
+```sh
+node tools/publish-verified.mjs --output /absolute/path/to/publication --dry-run
+```
+
+The workflow uses `GITHUB_TOKEN` with Actions read and repository contents write access. Its index deployment uses Pages and identity-token permissions. Unchanged publisher files retain their separate file-equality publication path.
+
+### Publish one package
+
 Supplied publisher packages use a separate file-equality authority. A registered prebuilt producer names a public descriptor and its SHA-256. The descriptor pins the original input archive and every supplied file's path, size, hash and mode. `tools/publisher-files.mjs record` compares the actual input and output archives and records their equality in `publisher-records/<archive-sha256>.json`. Additional files are limited to consumed JSON metadata and declared non-executable textual notices. A prebuilt label or locally written success flag grants no publication authority.
 
 `node tools/publisher-files.mjs verify --project <project> --archive <archive> --record <package-record-or-equality-receipt>` rechecks a supplied archive without writing files. Optional `--input-archive` also rechecks the pinned original archive.

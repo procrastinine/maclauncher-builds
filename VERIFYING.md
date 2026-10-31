@@ -15,6 +15,8 @@ The [verification table](https://procrastinine.github.io/maclauncher-builds/veri
 
 Some older archives in the catalog were built on a local machine and have neither kind of check. The table lists them separately at the top, under **Built locally — no GitHub build record yet**, with a count of those archives, and their status reads superseded, built locally. Installed copies of them keep working. GitHub builds that have passed their checks but are not yet in the catalog appear in a section of their own, with their exact versions and hashes; they never change how an older local archive is identified.
 
+The **Runtime release** workflow can publish these imported signed outputs directly from their GitHub build artifacts with `operation=publish-verified`. Its dry run downloads the archives and applies the same signature, digest and package checks without changing releases or catalogs. Publication pins each release to its certified build source and commits checked catalogs to `main`; the package index is refreshed in the same run. Matching releases stay unchanged on a retry. [Runtime releases](docs/RELEASES.md#publish-verified-builds-on-github) describes the commands and retry behavior. No local archive collection is required.
+
 ## Verify a compiled package
 
 1. Choose a package in the [package index](https://procrastinine.github.io/maclauncher-builds/) and download its archive from its release. The package's catalog records the archive's file name and SHA-256. The GitHub CLI, `gh`, can download one exact archive:
