@@ -1,10 +1,9 @@
-import {recipeMain} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {createRequire} from 'node:module';
-import {checkoutSource,run,buildOptions,sourceNotices} from './build-source.mjs';
+import {checkoutSource,run,recipeMain,sourceNotices} from './build-source.mjs';
 import {buildInput} from './build-input.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 const root=path.resolve(import.meta.dirname,'..'),descriptor=path.join(root,'producers/android-inputs/java-converter.json');
@@ -59,7 +58,7 @@ export function verifyAndroidJavaConverterInput(input){
 }
 export async function buildAndroidJavaConverter({project,version,arch,output,work}){
  const definition=profile();version??=definition.version;
- if(project!==definition.id||version!==definition.version||!['arm64','x64'].includes(arch))throw Error('Select the declared Java converter package version and target CPU.');
+ if(project!==definition.id||version!==definition.version)throw Error('Select the declared Java converter package version and target CPU.');
  const built=await buildAndroidJavaConverterInput({output:path.join(output,'payload'),work});
  return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:built.record,notices:built.notices});
 }

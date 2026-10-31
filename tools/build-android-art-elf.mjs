@@ -1,9 +1,8 @@
-import {recipeMain} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
-import {checkoutSource,stageSource,sourceNotices,run,buildOptions} from './build-source.mjs';
+import {checkoutSource,stageSource,sourceNotices,run,recipeMain} from './build-source.mjs';
 import {buildInput} from './build-input.mjs';
 import {acquireArtProducer} from './android-art-producer.mjs';
 import {prepareAndroidBuildInputs,releaseAndroidImageArchive} from './android-build-inputs.mjs';
@@ -26,7 +25,7 @@ export function artElfBuildEnvironment({work,target,sdk,jdk,python,env=process.e
 }
 /** Build ART's original ELF group independently of host, HWUI and Java adapters. */
 export async function buildArtElfsInput({output,work}){
-
+ if(!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('ART ELF builds require Apple Silicon macOS and new absolute output/work paths.');
  const profile=JSON.parse(fs.readFileSync(descriptor));fs.mkdirSync(work,{recursive:true});
  const android=acquireArtProducer({source:profile.androidSource,work});
  const supplier=JSON.parse(fs.readFileSync(path.join(android,profile.supplier)));
@@ -67,7 +66,7 @@ export async function buildArtElfsInput({output,work}){
 /** Seal the ELF group through the ordinary Runtime build output contract. */
 export async function buildAndroidArtElf({project,version,arch,output,work}){
  const profile=JSON.parse(fs.readFileSync(descriptor));version??=profile.version;
- if(project!==profile.id||version!==profile.version||arch!=='arm64'||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('Select the declared ART ELF input version and arm64 with new absolute output/work paths.');
+ if(project!==profile.id||version!==profile.version||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('Select the declared ART ELF input version and arm64 with new absolute output/work paths.');
  const built=await buildArtElfsInput({output:path.join(output,'payload'),work});
  return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:built.record,notices:built.notices});
 }

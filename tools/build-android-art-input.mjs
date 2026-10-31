@@ -1,8 +1,6 @@
-import {recipeMain} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
-import {pathToFileURL} from 'node:url';
-import {checkoutSource,stageSource,sourceNotices,run,buildOptions} from './build-source.mjs';
+import {checkoutSource,stageSource,sourceNotices,run,recipeMain} from './build-source.mjs';
 import {rustEnvironment,rustNotices} from './rust-build.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 
@@ -11,7 +9,6 @@ const descriptor=JSON.parse(fs.readFileSync(new URL('../producers/android-art-in
 
 /** Build the original image reader independently of the Android system image. */
 export async function buildArtInput({project,arch,version,output,work}){
- if(project!==descriptor.id||arch!=='arm64'||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('Select the ART image reader, arm64 and new absolute output/work paths.');
  fs.mkdirSync(work,{recursive:true});
  const checkout=checkoutSource({repository:descriptor.repository,revision:descriptor.revision,destination:path.join(work,'upstream')});
  const source=path.join(work,'source'),staged=await stageSource(checkout,descriptor.revision,source);
@@ -32,7 +29,7 @@ export async function buildArtInput({project,arch,version,output,work}){
   if(!upstream.some(row=>['name','version','source','checksum'].every(key=>row[key]===pkg[key])))throw Error('The image reader resolved a dependency outside the original lock: '+pkg.name);
  }
  run('cargo',['build','--offline','--locked','--release','--manifest-path',path.join(crate,'Cargo.toml'),'--jobs','2'],{env});
- const notices=[...sourceNotices(checkout,{name:'AIM',repository:descriptor.repository}),...rustNotices({source:crate,output:path.join(work,'notices'),env})];
+ const notices=[...sourceNotices(checkout,{name:'AIM',repository:descriptor.repository}),...rustNotices({source:crate,target:'aarch64-apple-darwin',output:path.join(work,'notices'),env})];
  return sealRuntime({project,version,arch,output,sourceRoot:checkout,upstreamRevision:descriptor.revision,executable:path.join(env.CARGO_TARGET_DIR,'release/android-image-extract'),maximumMacOS:descriptor.minimumMacOS,notices,
   provenance:{sourceTreeSha256:staged.treeSha256,gitDependencies:staged.dependencies,component:'android-image-extract',rustLockSha256:(await import('node:crypto')).createHash('sha256').update(fs.readFileSync(path.join(crate,'Cargo.lock'))).digest('hex')}});
 }

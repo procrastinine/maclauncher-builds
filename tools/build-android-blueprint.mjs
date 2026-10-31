@@ -1,10 +1,8 @@
-import {recipeMain} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
-import {pathToFileURL} from 'node:url';
 import {createRequire} from 'node:module';
-import {checkoutSource,run,buildOptions} from './build-source.mjs';
+import {checkoutSource,run,recipeMain} from './build-source.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 
 const root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/android-inputs/blueprint');

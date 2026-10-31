@@ -1,9 +1,8 @@
-import {recipeMain} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
-import {buildOptions,run} from './build-source.mjs';
+import {recipeMain,run} from './build-source.mjs';
 import {prepareAndroidBuildInputs,releaseAndroidImageArchive} from './android-build-inputs.mjs';
 import {buildAngleInput} from './build-android-angle.mjs';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
@@ -48,7 +47,6 @@ function detachAimImage(work,upstream){
 }
 /** Build the existing AIM adaptation and seal it without changing app declarations. */
 export async function buildAndroidAim({project,version,arch,output,work}){
-
  const ownedWork=path.resolve(work),ownedOutput=path.resolve(output);
  if(ownedWork===ownedOutput||ownedOutput.startsWith(ownedWork+path.sep)||ownedWork.startsWith(ownedOutput+path.sep))throw Error('AIM output and build directories must be separate.');
  const selected=resolveProject(project,root),record=buildRecord(selected,version);

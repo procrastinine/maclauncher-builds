@@ -1,9 +1,7 @@
-import {recipeMain} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import {pathToFileURL} from 'node:url';
-import {checkoutSource,run,buildOptions} from './build-source.mjs';
+import {checkoutSource,run,recipeMain} from './build-source.mjs';
 import {buildInput} from './build-input.mjs';
 import {rustEnvironment,rustNotices} from './rust-build.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
@@ -13,7 +11,7 @@ const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 /** Compile the original Android flag generator and its finalized SDK flag data. */
 export async function buildAndroidAconfig({project,version,arch,output,work}){
  const profile=JSON.parse(fs.readFileSync(descriptor));version??=profile.version;
- if(project!==profile.id||version!==profile.version||arch!=='arm64'||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('Select the Android flag generator, its declared version, arm64 and new absolute output/work paths.');
+ if(project!==profile.id||version!==profile.version||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('Select the Android flag generator, its declared version, arm64 and new absolute output/work paths.');
  fs.mkdirSync(work,{recursive:true});
  const source=checkoutSource({repository:profile.repository,revision:profile.revision,destination:path.join(work,'upstream')});
  const crate=path.join(work,'build/make/tools/aconfig');fs.mkdirSync(crate,{recursive:true});
@@ -36,7 +34,7 @@ export async function buildAndroidAconfig({project,version,arch,output,work}){
 /** Package a completed original flag-generator build with its license closure. */
 export async function packageAndroidAconfig({project='android-aconfig',version,arch='arm64',output,work}){
  const profile=JSON.parse(fs.readFileSync(descriptor));version??=profile.version;
- if(project!==profile.id||version!==profile.version||arch!=='arm64'||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||''))throw Error('Select the declared flag-generator build and a new absolute output path.');
+ if(project!==profile.id||version!==profile.version||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||''))throw Error('Select the declared flag-generator build and a new absolute output path.');
  const source=path.join(work,'upstream'),crate=path.join(work,'build/make/tools/aconfig');
  if(sha(fs.readFileSync(path.join(crate,'Cargo.lock')))!==sha(fs.readFileSync(new URL('../producers/android-inputs/aconfig/Cargo.lock',import.meta.url))))throw Error('The completed flag generator has a different dependency lock.');
  const license=await buildInput(profile.license),copyrights=new Set();

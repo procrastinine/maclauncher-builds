@@ -1,9 +1,7 @@
-import {recipeMain} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
-import {pathToFileURL} from 'node:url';
-import {checkoutSource,run,buildOptions} from './build-source.mjs';
+import {checkoutSource,run,recipeMain} from './build-source.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
@@ -21,7 +19,7 @@ function verifyProducerSource(source,profile){
 
 /** Build the selected common or AIM ANGLE supplier from its exact owned sources. */
 export async function buildAngleInput({output,work,profile:profileId='common'}){
-
+ if(!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('ANGLE input builds require Apple Silicon macOS and new absolute output/work directories.');
  const {definition,profile}=selectedProfile(profileId);
  fs.mkdirSync(work,{recursive:true});
  const android=profile.androidSource.directory?path.join(root,profile.androidSource.directory):checkoutSource({...profile.androidSource,destination:path.join(work,'android-producer')});
@@ -74,7 +72,7 @@ export function packageAngleInput({project='android-angle',version,arch='arm64',
 /** Use the one Runtime build path for each declared source profile. */
 export async function buildAndroidAngle({project,version,arch,output,work}){
  const {definition,profile}=selectedProfile(version??JSON.parse(fs.readFileSync(descriptor)).profiles[0].version,'version');
- if(project!==definition.id||arch!=='arm64'||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select an Android ANGLE version, arm64 and new absolute output/work directories.');
+ if(project!==definition.id||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select an Android ANGLE version, arm64 and new absolute output/work directories.');
  const input=await buildAngleInput({output:path.join(work,'provider'),work:path.join(work,'compile'),profile:profile.id});
  return packageAngleInput({project,version:profile.version,arch,output,input});
 }

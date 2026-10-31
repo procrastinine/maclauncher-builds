@@ -1,11 +1,9 @@
-import {recipeMain} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
 import {execFileSync} from 'node:child_process';
-import {pathToFileURL} from 'node:url';
 import {buildInput} from './build-input.mjs';
-import {buildOptions,run} from './build-source.mjs';
+import {recipeMain,run} from './build-source.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
@@ -17,7 +15,7 @@ const read=(command,args)=>execFileSync(command,args,{encoding:'utf8'}).trim();
 
 /** Build the original shared codec profile and stage its complete dynamic closure. */
 export async function buildAndroidCodecsInput({output,work,arch='arm64'}){
- if(process.platform!=='darwin'||!['arm64','x64'].includes(arch)||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('Android codec input builds need macOS, a CPU and new absolute output/work directories.');
+ if(!['arm64','x64'].includes(arch)||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('Android codec input builds need macOS, a CPU and new absolute output/work directories.');
  const profile=JSON.parse(fs.readFileSync(descriptor));
  if(Audio.PIN.version!==profile.sourceProfile)throw Error('The shared codec source catalog differs from this input profile.');
  fs.mkdirSync(work,{recursive:true});const archives={};
