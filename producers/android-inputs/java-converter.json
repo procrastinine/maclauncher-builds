@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "android-java-converter",
+  "version": "0.1.0-MCLv1",
+  "androidSource": {
+    "repository": "https://github.com/procrastinine/maclauncher-android",
+    "revision": "c71de272618e22a531d9259929a2478d838f9b1f"
+  },
+  "converter": {
+    "repository": "https://github.com/kksimp/dex2jvm",
+    "revision": "b563cf8ee837348efa13c71797387345c9f3de5c"
+  },
+  "jdk": {
+    "linux-x64": {
+      "url": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jdk_x64_linux_hotspot_21.0.12.1_1.tar.gz",
+      "sha256": "ce79869e1307ed8ee1e2baa86a412b1eb5b75d10a01006d788a6f968bcfaee94",
+      "bytes": 207473347
+    },
+    "darwin-arm64": {
+      "url": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.12.1_1.tar.gz",
+      "sha256": "3623232f33a9c3baadf304480b2535f9a3cba8a58d42ecbb438ba267315d9998"
+    }
+  }
+}

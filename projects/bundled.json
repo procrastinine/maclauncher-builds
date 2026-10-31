@@ -1379,5 +1379,56 @@
       ],
       "cleanupRunner": true
     }
+  },
+  {
+    "id": "android-java-converter",
+    "name": "Android Java converter input",
+    "purpose": "Complete Android Java converter and API hierarchy declarations.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "tools/build-android-java-converter.mjs",
+        "producers/android-inputs/java-converter.json"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "android",
+        "provider": "github",
+        "url": "https://github.com/procrastinine/maclauncher-android",
+        "repository": "procrastinine/maclauncher-android",
+        "pin": {
+          "file": "producers/android-inputs/java-converter.json",
+          "pointer": "/androidSource"
+        }
+      },
+      {
+        "id": "dex2jvm",
+        "provider": "github",
+        "url": "https://github.com/kksimp/dex2jvm",
+        "repository": "kksimp/dex2jvm",
+        "pin": {
+          "file": "producers/android-inputs/java-converter.json",
+          "pointer": "/converter"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.1.0-MCLv1",
+        "label": "Android Java converter 0.1.0-MCLv1"
+      }
+    ],
+    "build": {
+      "version": "0.1.0-MCLv1",
+      "command": "tools/build-android-java-converter.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "runners": {
+        "arm64": "ubuntu-24.04"
+      }
+    }
   }
 ]
