@@ -6,7 +6,7 @@ MacLauncher Builds provides binary builds, version control and patch sets for th
 
 Each runtime and tool has its own version history. A version is released on GitHub once per CPU architecture, under a tag of the form `<project>/v<version>/<arch>`, and although the release contains only the compiled package, the tagged commit holds everything it was built from: the exact upstream commit, the patches MacLauncher applies to it and the build script. MacLauncher reads the published versions of each project from [`catalogs/`](catalogs). Refresh discovers later versions and CPU builds of managed runtimes without a launcher update.
 
-For projects with a build record, GitHub Actions compiles packages on GitHub-hosted Macs, with separate builds for Apple Silicon and Intel. Libraries that load into a game's process are built as Universal binaries instead, because the game can run as either CPU type. [Runtime releases](docs/RELEASES.md#github-builds) describes the build workflow, its signed attestations and publication.
+For projects with a build record, GitHub Actions builds packages on machines that GitHub runs: on Macs, with separate builds for Apple Silicon and Intel, or on Linux for packages that contain no Mac programs, such as data, scripts or Java bytecode. Libraries that load into a game's process are built as Universal binaries instead, because the game can run as either CPU type. [Runtime releases](docs/RELEASES.md#github-builds) describes the build workflow, its signed attestations and publication.
 
 - [Package index](https://procrastinine.github.io/maclauncher-builds/): every package and its published versions.
 - [Runtime packages](docs/PACKAGES.md): the projects in this repository and the tools that build and package them.

@@ -182,6 +182,16 @@
       "repository": "https://github.com/astral-sh/python-build-standalone",
       "license": "Python-2.0 AND CNRI-Python",
       "buildOnly": true
+    },
+    {
+      "id": "build-python-x64",
+      "version": "3.12.15",
+      "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261013/cpython-3.12.15%2B20261013-x86_64-apple-darwin-install_only_stripped.tar.gz",
+      "sha256": "d09998f85752b646873a8a6bc7eea442a0d251b1c8d2413aa8ea06ef131c3335",
+      "bytes": 24774808,
+      "repository": "https://github.com/astral-sh/python-build-standalone",
+      "license": "Python-2.0 AND CNRI-Python",
+      "buildOnly": true
     }
   ]
 }

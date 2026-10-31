@@ -48,12 +48,13 @@ function makePortable(libraries){
   run('/usr/bin/codesign',['--force','--sign','-',file]);
  }
 }
-export async function packageRuntime({runtimeBuild,relinkerBuild,output,version,buildOutput=false}){
+export async function packageRuntime({runtimeBuild,relinkerBuild,output,version,arch=recipe.output.architecture,buildOutput=false}){
  await buildRuntime({check:true});
+ if(!['arm64','x64'].includes(arch))throw Error('Select an arm64 or x64 AnyPS5 package.');
  if(!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(version||'')||!output||fs.existsSync(output))throw Error('Choose a new output directory and explicit package version.');
  const libraryRoot=path.join(runtimeBuild,'build/core/libs/libs'),relinker=path.join(relinkerBuild,'core/relinker/relinker');
  const executableArchitectures=Native.readMachOArchitectures(relinker);
- if(!executableArchitectures.includes('arm64'))throw Error('The relinker must support ARM64.');
+ if(!executableArchitectures.includes(arch==='x64'?'x86_64':arch))throw Error('The relinker must support the requested package CPU.');
  fs.mkdirSync(output,{recursive:true});const payload=path.join(output,'payload');fs.mkdirSync(payload);
  copy(relinker,path.join(payload,'tools/relinker'),0o755);
  run('/usr/bin/strip',['-S',path.join(payload,'tools/relinker')]);
@@ -75,11 +76,11 @@ export async function packageRuntime({runtimeBuild,relinkerBuild,output,version,
   .map(relative=>({path:relative,sha256:sha(fs.readFileSync(path.join(import.meta.dirname,relative)))})),...overlays,...tools].sort((a,b)=>a.path.localeCompare(b.path));
  fs.writeFileSync(path.join(payload,'source.json'),json({schemaVersion:1,source:recipe.source,dependencies:dependencies.dependencies,artifacts:dependencies.artifacts,overlays,tools,producerInputs}));
  const files=filesIn(payload).map(relative=>record(payload,relative));
- const manifest={schemaVersion:1,managerId:'anyps5',version,platform:'darwin',arch:'arm64',minimumMacOS:'26.0',upstreamRevision:recipe.source.revision,
+ const manifest={schemaVersion:1,managerId:'anyps5',version,platform:'darwin',arch,minimumMacOS:'26.0',upstreamRevision:recipe.source.revision,
   gameArchitecture:'x86_64',capabilities:{mouseRouting:true,touchPadBinding:true},provenance:{sourceUrl:recipe.source.repository,sourceRevision:recipe.source.revision,producerInputs},executableRelative:'tools/relinker',runtimeFiles:{libraries:'libs',unwrap:'tools/unwrap-self.cjs'},files,notices};
  fs.writeFileSync(path.join(payload,'runtime.json'),json(manifest));
  const manifestFile=record(payload,'runtime.json'),sourceFile=files.find(file=>file.path==='source.json');
- const declaration={id:'anyps5',version,arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS:manifest.minimumMacOS,directoryRelative:'anyps5/'+version+'/arm64',
+ const declaration={id:'anyps5',version,arch,launcherArchitectures:[arch],minimumMacOS:manifest.minimumMacOS,directoryRelative:'anyps5/'+version+'/'+arch,
   sourceRelative:'source.json',sourceSha256:sourceFile.sha256,manifestRelative:'runtime.json',manifestSha256:manifestFile.sha256,files:[...files,manifestFile],notices,redistribution:'bundle'};
  fs.writeFileSync(path.join(output,'declaration.json'),json(declaration));
  if(buildOutput)return {output,declaration};
@@ -89,7 +90,7 @@ export async function packageRuntime({runtimeBuild,relinkerBuild,output,version,
 }
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){
  try{
-  const options={};for(let index=2;index<process.argv.length;index+=2){const key=process.argv[index],value=process.argv[index+1];if(!value||!['--runtime-build','--relinker-build','--output','--version'].includes(key))throw Error('Use --runtime-build, --relinker-build, --output and --version.');options[{'--runtime-build':'runtimeBuild','--relinker-build':'relinkerBuild','--output':'output','--version':'version'}[key]]=value;}
+  const options={};for(let index=2;index<process.argv.length;index+=2){const key=process.argv[index],value=process.argv[index+1];if(!value||!['--runtime-build','--relinker-build','--output','--version','--arch'].includes(key))throw Error('Use --runtime-build, --relinker-build, --output, --version and --arch.');options[{'--runtime-build':'runtimeBuild','--relinker-build':'relinkerBuild','--output':'output','--version':'version','--arch':'arch'}[key]]=value;}
   console.log(json(await packageRuntime(options)));
  }catch(error){console.error(error.message);process.exitCode=1;}
 }

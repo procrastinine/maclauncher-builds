@@ -1,6 +1,6 @@
 # AnyPS5
 
-[AnyPS5](https://github.com/boykopovar/AnyPS5) converts PS5 executables and their bundled modules into executable formats of the host system. The macOS package built in this repository has two parts: an ARM64 conversion tool called the relinker, and x86-64 Mach-O system libraries for the converted games, whose code runs through Rosetta on Apple Silicon. MacLauncher's [PlayStation 5](https://github.com/procrastinine/maclauncher/blob/master/docs/game-types/PS5.md) page describes how games use the runtime.
+[AnyPS5](https://github.com/boykopovar/AnyPS5) converts PS5 executables and their bundled modules into executable formats of the host system. The macOS package has a conversion tool called the relinker for its selected CPU, and x86-64 Mach-O system libraries for the converted games. The games run natively on Intel Macs and through Rosetta on Apple Silicon. MacLauncher's [PlayStation 5](https://github.com/procrastinine/maclauncher/blob/master/docs/game-types/PS5.md) page describes how games use the runtime.
 
 The AnyPS5 source is the submodule [`sources/anyps5`](../sources/anyps5), fixed at an exact commit, and the build recipes never modify that checkout. `producers/anyps5/dependencies.json` records the exact commit and public repository URL of every Git dependency the runtime uses.
 
@@ -16,11 +16,11 @@ node producers/anyps5/build-relinker.mjs --check
 node producers/anyps5/build-relinker.mjs --jobs 4
 ```
 
-The default build directory is `out/anyps5-relinker`. `--build-dir` selects another absolute output directory, which must be outside the upstream checkout. The projection is written to the build directory's `source` subdirectory, and the executable is built at `core/relinker/relinker`. A build directory configured against a different source root cannot be reused, so that build needs its own output directory.
+The default build directory is `out/anyps5-relinker`. `--arch arm64` or `--arch x64` selects the conversion tool's CPU; the default is the build host's CPU. `--build-dir` selects another absolute output directory, which must be outside the upstream checkout. The projection is written to the build directory's `source` subdirectory, and the executable is built at `core/relinker/relinker`. A build directory configured against a different source root cannot be reused, so that build needs its own output directory.
 
 `--check` verifies the checkout's commit and repository URL without creating build outputs. A full build ends by running the relinker with `--help`, and it does not need the third-party submodules.
 
-The ARM64 tool produces x86-64 game executables: `--macos` selects Mach-O output, and `--to-rosetta` applies the supported x86 instruction substitutions. A converted game also needs host implementations of the system libraries, which the upstream relinker-only target leaves out and the macOS runtime recipe provides.
+Both tool builds produce x86-64 game executables: `--macos` selects Mach-O output, and `--to-rosetta` applies the supported x86 instruction substitutions. A converted game also needs host implementations of the system libraries, which the upstream relinker-only target leaves out and the macOS runtime recipe provides.
 
 ## macOS runtime
 
@@ -29,7 +29,7 @@ The [runtime recipe](../producers/anyps5/build-runtime.mjs) exports the upstream
 ```sh
 git submodule update --init --recursive sources/anyps5
 node producers/anyps5/build-runtime.mjs --check
-node producers/anyps5/build-runtime.mjs --jobs 6
+node producers/anyps5/build-runtime.mjs --jobs 4
 ```
 
 The default output is `out/anyps5-runtime`. Besides every nested Git source, the [dependency file](../producers/anyps5/dependencies.json) lists a macOS FFmpeg binary, which the runtime build downloads and checks against its SHA-256. Build outputs and generated source projections stay outside the upstream checkout.
@@ -75,7 +75,7 @@ node producers/anyps5/package-runtime.mjs \
   --runtime-build /absolute/path/to/anyps5-runtime \
   --relinker-build /absolute/path/to/anyps5-relinker \
   --output /absolute/path/to/package-output \
-  --version <explicit-version>
+  --version <explicit-version> --arch x64
 ```
 
 The payload contains `tools/relinker`, `tools/unwrap-self.cjs`, `libs/*.prx`, `source.json`, `runtime.json` and license notices. The archive and inventory use the shared [Builds package format](PACKAGES.md#package-tools).
@@ -92,7 +92,7 @@ The upstream source and this repository's adapters are licensed GPL-2.0-only, wi
 
 ## GitHub build
 
-The shared [Runtime build workflow](../.github/workflows/runtime-build.yml) runs [build-anyps5.mjs](../tools/build-anyps5.mjs). Its registry entry declares CMake, Ninja, pkg-config and the recursive AnyPS5 source checkout. One ARM64 job compiles the ARM64 relinker and x86-64 runtime libraries, then produces the package declaration and payload used by the shared release command. The recipe downloads the FFmpeg dependency and a build-only CPython interpreter recorded in `dependencies.json`, checking their sizes and SHA-256 values before extraction. Python runs from an isolated environment and generates glslang headers; the interpreter is excluded from the runtime payload.
+The shared [Runtime build workflow](../.github/workflows/runtime-build.yml) runs [build-anyps5.mjs](../tools/build-anyps5.mjs). Its registry entry declares CMake, Ninja, pkg-config and the recursive AnyPS5 source checkout. Each job builds the relinker for the requested CPU and the same x86-64 runtime libraries, then produces the package declaration and payload used by the shared release command. ARM64 runs on the Apple Silicon runner; x64 runs on the Intel runner. The recipe downloads the FFmpeg dependency and a build-only CPython interpreter for the selected CPU recorded in `dependencies.json`, checking their sizes and SHA-256 values before extraction. Python runs from an isolated environment and generates glslang headers; the interpreter is excluded from the runtime payload.
 
 ```sh
 node tools/init-runtime-sources.mjs --project anyps5 --version MCLv2-1027-2
@@ -101,4 +101,4 @@ node tools/build-runtime.mjs --project anyps5 --arch arm64 \
   --output /absolute/path/to/new-output
 ```
 
-Builds require Apple Silicon, Xcode 27 and the declared Homebrew tools. [Verifying MacLauncher Builds](../VERIFYING.md) explains archive checks and rebuild comparisons.
+The ARM64 runner uses Xcode 27; the Intel runner uses Xcode 26.6 and SDK 26.5. Both use the declared Homebrew tools. Runtime packages require macOS 26 or later. [Verifying MacLauncher Builds](../VERIFYING.md) explains archive checks and rebuild comparisons.

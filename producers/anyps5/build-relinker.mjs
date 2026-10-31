@@ -12,10 +12,11 @@ function run(command,args){
  if(result.status!==0)throw Error(command+' exited with status '+result.status);
 }
 
-export async function buildRelinker({buildDirectory=path.join(root,'out/anyps5-relinker'),jobs=4,check=false}={}){
+export async function buildRelinker({buildDirectory=path.join(root,'out/anyps5-relinker'),jobs=4,architecture=process.arch,check=false}={}){
+ if(!['arm64','x64'].includes(architecture))throw Error('Select an arm64 or x64 macOS relinker.');
  const {source,repositories}=verifySources({includeDependencies:false});
- if(check)return {id:recipe.id,revision:recipe.source.revision,architecture:recipe.output.architecture};
- if(process.platform!=='darwin'||process.arch!=='arm64')throw Error('This recipe builds the ARM64 macOS relinker.');
+ if(check)return {id:recipe.id,revision:recipe.source.revision,architecture};
+ if(process.platform!=='darwin')throw Error('The relinker recipe requires macOS.');
  if(!path.isAbsolute(buildDirectory)||!Number.isSafeInteger(jobs)||jobs<1||jobs>128)throw Error('Use an absolute build directory and between 1 and 128 build jobs.');
  buildDirectory=path.resolve(buildDirectory);
  const relative=path.relative(source,buildDirectory);
@@ -26,12 +27,13 @@ export async function buildRelinker({buildDirectory=path.join(root,'out/anyps5-r
   if(configured&&path.resolve(configured)!==projection)throw Error('The CMake cache uses a different source directory. Choose a fresh --build-dir; the existing build is preserved.');
  }
  await prepareSourceProjection({source,repositories},projection,{overlays:RELINKER_OVERLAYS});
- run('cmake',['-S',projection,'-B',buildDirectory,...Object.entries(recipe.configure).map(([key,value])=>'-D'+key+'='+value),
+ const configure={...recipe.configure,CMAKE_OSX_ARCHITECTURES:architecture==='x64'?'x86_64':architecture};
+ run('cmake',['-S',projection,'-B',buildDirectory,...Object.entries(configure).map(([key,value])=>'-D'+key+'='+value),
   '-DCMAKE_CXX_FLAGS=-ffile-prefix-map='+projection+'=/anyps5']);
  run('cmake',['--build',buildDirectory,'--parallel',String(jobs)]);
  const executable=path.join(buildDirectory,recipe.output.executableRelative);
  run(executable,['--help']);
- return {id:recipe.id,revision:recipe.source.revision,architecture:recipe.output.architecture,projection,executable};
+ return {id:recipe.id,revision:recipe.source.revision,architecture,projection,executable};
 }
 
 export async function main(args){
@@ -42,11 +44,11 @@ export async function main(args){
    options.check=true;continue;
   }
   const key=args[index]?.slice(2),value=args[index+1];
-  if(!args[index]?.startsWith('--')||!['build-dir','jobs'].includes(key)||!value||Object.hasOwn(options,key))throw Error('Use --check, --build-dir /absolute/path or --jobs <count>.');
+  if(!args[index]?.startsWith('--')||!['build-dir','jobs','arch'].includes(key)||!value||Object.hasOwn(options,key))throw Error('Use --check, --build-dir /absolute/path, --arch <arm64|x64> or --jobs <count>.');
   options[key]=value;index++;
  }
  if(options.check&&(options['build-dir']||options.jobs))throw Error('--check does not accept build options.');
- return buildRelinker({check:options.check,buildDirectory:options['build-dir'],jobs:options.jobs===undefined?undefined:Number(options.jobs)});
+ return buildRelinker({check:options.check,buildDirectory:options['build-dir'],architecture:options.arch,jobs:options.jobs===undefined?undefined:Number(options.jobs)});
 }
 
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){

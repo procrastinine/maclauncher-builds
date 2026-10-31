@@ -1808,7 +1808,7 @@
         }
       }
     ],
-    "compatibility": "ARM64 converter; x86-64 Mach-O game code and PRX libraries run with Rosetta on Apple Silicon.",
+    "compatibility": "The converter matches the package CPU. Game code and PRX libraries are x86-64, native on Intel and run through Rosetta on Apple Silicon.",
     "packageProfiles": [
       {
         "version": "MCLv1-1027-2",
@@ -1817,24 +1817,46 @@
       {
         "version": "MCLv2-1027-2",
         "label": "AnyPS5 MCLv2-1027-2"
+      },
+      {
+        "version": "MCLv3-1027-2",
+        "label": "AnyPS5 MCLv3-1027-2"
       }
     ],
-    "build": {
-      "version": "MCLv2-1027-2",
-      "architectures": [
-        "arm64"
-      ],
-      "command": "tools/build-anyps5.mjs",
-      "submodules": [
-        "sources/anyps5"
-      ],
-      "recursiveSubmodules": true,
-      "tools": [
-        "cmake",
-        "ninja",
-        "pkgconf"
-      ]
-    }
+    "build": [
+      {
+        "version": "MCLv2-1027-2",
+        "architectures": [
+          "arm64"
+        ],
+        "command": "tools/build-anyps5.mjs",
+        "submodules": [
+          "sources/anyps5"
+        ],
+        "recursiveSubmodules": true,
+        "tools": [
+          "cmake",
+          "ninja",
+          "pkgconf"
+        ]
+      },
+      {
+        "version": "MCLv3-1027-2",
+        "architectures": [
+          "x64"
+        ],
+        "command": "tools/build-anyps5.mjs",
+        "submodules": [
+          "sources/anyps5"
+        ],
+        "recursiveSubmodules": true,
+        "tools": [
+          "cmake",
+          "ninja",
+          "pkgconf"
+        ]
+      }
+    ]
   },
   {
     "id": "nxnative-tools",
