@@ -115,7 +115,7 @@ export function checkBuildOutput({project,build,arch,output,platform=process.pla
  if(declaration.id!==project.id||declaration.arch!==arch||declaration.version!==build.version)throw Error('The build produced a package for a different project, version or architecture.');
  // Each package serves the CPUs its code was built for. The package contract decides whether an
  // Intel package also serves Apple Silicon, which needs Intel files that run as their own processes.
- if(platform==='linux'&&declaration.files.some(file=>file.format==='mach-o'))throw Error('Recipes producing Mac programs require a hosted Mac runner.');
+ if(platform==='linux'&&declaration.files.some(file=>file.architectures&&file.format!=='pe'))throw Error('Recipes producing Mac programs require a hosted Mac runner.');
  const cpus=declaration.launcherArchitectures,own=arch==='universal'?['arm64','x64']:[arch];
  if(!own.every(cpu=>cpus.includes(cpu))||arch==='arm64'&&cpus.length!==1)throw Error('The package declares Mac CPUs that differ from its architecture.');
  B.verifyPayload(path.join(output,'payload'),declaration);

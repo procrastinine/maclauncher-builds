@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import {execFileSync,spawnSync} from 'node:child_process';
-import {verifyProducer,main,buildPlan,pushPlan,runBuild,checkBuildRequest,RUNNERS,HOSTED_RUNNERS} from '../tools/build-runtime.mjs';
+import {verifyProducer,main,buildPlan,pushPlan,runBuild,checkBuildRequest,checkBuildOutput,RUNNERS,HOSTED_RUNNERS} from '../tools/build-runtime.mjs';
 import {prepareBuildHost} from '../tools/build-host.mjs';
 import {prepareRelease} from '../tools/release-runtime.mjs';
 import {readProjects,buildRecord,buildRecords} from '../lib/projects.mjs';
@@ -123,6 +124,21 @@ test('a GitHub build runs the registered command and accepts only its declared p
  process.env.ENGINE_EXTRA='1';assert.throws(()=>runBuild({project:'engine',arch:'arm64',output:path.join(root,'out-extra'),directory:root}),/only declaration.json and payload/);delete process.env.ENGINE_EXTRA;
  const failing=githubFixture(t,{architectures:['arm64'],tools:undefined,...(fixtureRunners?{runners:{arm64:fixtureRunners.arm64}}:{})},'process.exitCode=3;\n');
  assert.throws(()=>runBuild({project:'engine',arch:'arm64',output:path.join(failing,'out'),directory:failing}),/exited with status 3/);
+});
+
+test('Linux outputs reject Mach-O files with explicit and legacy format metadata',t=>{
+ const directory=githubFixture(t,{architectures:['arm64'],tools:undefined,runners:{arm64:'ubuntu-24.04'}}),output=path.join(directory,'built');
+ const built=runBuild({project:'engine',arch:'arm64',output,directory,platform:'linux',cpu:'x64'});
+ const declaration=JSON.parse(fs.readFileSync(built.declaration)),bytes=Buffer.alloc(32);
+ bytes.writeUInt32LE(0xfeedfacf,0);bytes.writeUInt32LE(0x0100000c,4);bytes.writeUInt32LE(6,12);
+ fs.writeFileSync(path.join(built.payload,'native.dylib'),bytes);
+ const file={path:'native.dylib',size:bytes.length,mode:0o644,sha256:crypto.createHash('sha256').update(bytes).digest('hex'),architectures:['arm64']};
+ declaration.files.push(file);
+ for(const format of [undefined,'mach-o']){
+  if(format)file.format=format;else delete file.format;
+  fs.writeFileSync(built.declaration,JSON.stringify(declaration));
+  assert.throws(()=>checkBuildOutput({project:{id:'engine'},build:{version:'1.0'},arch:'arm64',output,platform:'linux'}),/Mac programs require a hosted Mac runner/);
+ }
 });
 
 test('every registered GitHub build names an existing command and submodule of this repository',()=>{

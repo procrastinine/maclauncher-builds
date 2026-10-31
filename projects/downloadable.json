@@ -2301,7 +2301,10 @@
       "command": "producers/engine-adaptations/stage.mjs",
       "architectures": [
         "universal"
-      ]
+      ],
+      "runners": {
+        "universal": "ubuntu-24.04"
+      }
     }
   },
   {
