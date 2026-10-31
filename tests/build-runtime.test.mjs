@@ -6,6 +6,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync,spawnSync} from 'node:child_process';
 import {verifyProducer,main,buildPlan,pushPlan,runBuild,checkBuildRequest,checkBuildOutput,RUNNERS,HOSTED_RUNNERS} from '../tools/build-runtime.mjs';
+import {findBuildTool} from '../tools/build-source.mjs';
 import {prepareBuildHost} from '../tools/build-host.mjs';
 import {prepareRelease} from '../tools/release-runtime.mjs';
 import {readProjects,buildRecord,buildRecords} from '../lib/projects.mjs';
@@ -236,6 +237,16 @@ test('one shared request check covers every registered build command before its 
  const other=readProjects(root,{resolvePins:false}).projects.find(project=>project.id===(process.platform==='linux'?'android-java-converter':'gemrb')),otherBuild=buildRecords(other).find(build=>(build.runners?.[build.architectures[0]]||'xcode-27')===(process.platform==='linux'?'ubuntu-24.04':'xcode-27'))||buildRecords(other).at(-1);
  const started=spawnSync(process.execPath,[path.join(root,'tools/build-fna.mjs'),'--project',other.id,'--version',otherBuild.version,'--arch',otherBuild.architectures[0],'--output',request.output,'--work',request.work],{cwd:root,encoding:'utf8'});
  assert.notEqual(started.status,0);assert.match(started.stderr,/ builds with /);assert.ok(!fs.existsSync(request.output)&&!fs.existsSync(request.work));
+});
+
+test('build tools come from declared Homebrew formulae before PATH',t=>{
+ const work=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'build-tools-')));t.after(()=>fs.rmSync(work,{recursive:true,force:true}));
+ const tool=directory=>{fs.mkdirSync(directory,{recursive:true});const file=path.join(directory,'flex');fs.writeFileSync(file,'#!/bin/sh\n',{mode:0o755});return file;};
+ const declared=tool(path.join(work,'opt/flex/bin')),xcode=tool(path.join(work,'xcode/bin'));
+ assert.equal(findBuildTool('flex',{CMAKE_PREFIX_PATH:path.join(work,'opt/flex'),PATH:path.dirname(xcode)}),declared);
+ assert.equal(findBuildTool('flex',{PATH:path.dirname(xcode)}),xcode);
+ assert.throws(()=>findBuildTool('bison',{CMAKE_PREFIX_PATH:path.join(work,'opt/flex'),PATH:path.dirname(xcode)}),/Declare the Homebrew formula/);
+ assert.doesNotMatch(String(findBuildTool),/homebrew|usr\/local/);
 });
 
 test('an owned helper builds a separate package for each CPU, and only Intel executables also serve Apple Silicon',{skip:process.platform!=='darwin'&&'macOS toolchain'},async t=>{

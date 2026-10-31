@@ -1,10 +1,5 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const crypto = require("node:crypto");
-const { execFileSync } = require("node:child_process");
-const Native = require("../../shared/runtime/local-native");
-const Build = require("../../shared/runtime/pinned-native-build");
-const { throwIfAborted } = require("../../shared/runtime/download-utils");
 
 const VERSION = "0.5.3-macos-v7";
 const LEGACY_VERSION = "0.5.3-macos-v1";
@@ -20,7 +15,6 @@ const NPA_REVISION = "5bdf666155d828d9ef4003fd9dc39e154aa4b0f1";
 const sourcePath = path.resolve(__dirname, "../../../external/libnpengine");
 const npaSourcePath = path.resolve(__dirname, "../../../external/libnpa");
 const ChoiceOverlay = require("./choice-overlay");
-const building = new Set();
 const PLUGINS = ["app", "audioconvert", "audioresample", "autodetect", "avi", "coreelements", "jpeg", "libav",
   "ogg", "osxaudio", "playback", "png", "typefindfunctions", "videoconvertscale", "volume", "vorbis", "wavparse"];
 
@@ -176,70 +170,4 @@ function adaptSource(root) {
   for (const file of ["main.cpp", "private-files.cpp", "text-markup.cpp", "text-markup.hpp"]) fs.copyFileSync(path.join(__dirname, "native", file), path.join(root, file));
 }
 
-async function buildRuntime({ manager, version = VERSION, sourceDir = sourcePath, npaSourceDir = npaSourcePath, userDataDir,
-  signal, logger, onProgress, dependencies = {} } = {}) {
-  throwIfAborted(signal);
-  if (process.platform !== "darwin") throw new Error("libnpengine source builds require macOS.");
-  const normalized = manager.core.normalizeVersion(version);
-  if (normalized !== VERSION) throw new Error("Choose libnpengine 0.5.3 Mac v7 for the current reviewed source-build adapter; older registered versions remain separate.");
-  const directory = manager.core.getInstallDir({ userDataDir, version: normalized });
-  if (building.has(directory)) throw new Error("This libnpengine version is already building.");
-  if (fs.existsSync(path.join(directory, "runtime.json"))) throw new Error("Remove the current runtime registration before rebuilding.");
-  for (const source of [sourceDir, npaSourceDir]) {
-    if (!path.isAbsolute(source) || source === directory || source.startsWith(directory + path.sep) || directory.startsWith(source + path.sep)) throw new Error("Nitroplus source and runtime directories must be separate.");
-  }
-  building.add(directory); let lock;
-  try {
-    const [engineSource, npaSource] = await Promise.all([Build.validatePinnedSource(sourceDir, REVISION, { signal }), Build.validatePinnedSource(npaSourceDir, NPA_REVISION, { signal })]);
-    const tool = dependencies.findBuildTool || Build.findBuildTool, cmake = tool("cmake"), ninja = tool("ninja"), pkg = tool("pkg-config");
-    const flex = ["/opt/homebrew/opt/flex/bin/flex", "/usr/local/opt/flex/bin/flex"].find(file => fs.existsSync(file)) || tool("flex");
-    const bison = ["/opt/homebrew/opt/bison/bin/bison", "/usr/local/opt/bison/bin/bison"].find(file => fs.existsSync(file)) || tool("bison");
-    fs.mkdirSync(directory, { recursive: true }); lock = fs.openSync(path.join(directory, "build.lock"), "wx");
-    const staged = path.join(directory, "build-source"), output = path.join(directory, "build-output"), payload = path.join(directory, "payload");
-    for (const folder of [staged, output, payload]) fs.rmSync(folder, { recursive: true, force: true });
-    const engineTreeSha256 = Build.stagePinnedFiles(sourceDir, engineSource.files, path.join(staged, "libnpengine"));
-    const npaTreeSha256 = Build.stagePinnedFiles(npaSourceDir, npaSource.files, path.join(staged, "libnpa"));
-    const sourceTreeSha256 = crypto.createHash("sha256").update(engineTreeSha256).update(npaTreeSha256).digest("hex");
-    adaptSource(staged);
-    const overlaySha256 = crypto.createHash("sha256").update(fs.readFileSync(__filename))
-      .update(fs.readFileSync(path.join(__dirname, "native/CMakeLists.txt")))
-      .update(fs.readFileSync(path.join(__dirname, "native/main.cpp")))
-      .update(fs.readFileSync(path.join(__dirname, "native/private-files.cpp")))
-      .update(fs.readFileSync(path.join(__dirname, "native/text-markup.cpp")))
-      .update(fs.readFileSync(path.join(__dirname, "native/text-markup.hpp")))
-      .update(fs.readFileSync(path.join(__dirname, "native/fontconfig.conf")))
-      .update(fs.readFileSync(path.join(__dirname, "choice-overlay.js")))
-      .update(fs.readFileSync(path.join(__dirname, "native/choice-state.hpp"))).digest("hex");
-    const options = ["-DCMAKE_BUILD_TYPE=Release", "-DCMAKE_OSX_DEPLOYMENT_TARGET=13.0", `-DCMAKE_CXX_FLAGS=${sourcePathFlags(directory)}`, "-DFETCHCONTENT_FULLY_DISCONNECTED=ON", "-DFETCHCONTENT_UPDATES_DISCONNECTED=ON",
-      `-DCMAKE_INSTALL_PREFIX=${payload}`, `-DFLEX_EXECUTABLE=${flex}`, `-DBISON_EXECUTABLE=${bison}`, `-DCMAKE_MAKE_PROGRAM=${ninja}`];
-    const logPath = path.join(directory, "build.log");
-    fs.writeFileSync(logPath, `libnpengine ${VERSION}\nEngine ${REVISION}\nlibnpa ${NPA_REVISION}\nSource tree ${sourceTreeSha256}\nOverlay ${overlaySha256}\n`);
-    const env = { ...process.env, MACOSX_DEPLOYMENT_TARGET: "13.0", HOMEBREW_NO_AUTO_UPDATE: "1",
-      PATH: [...new Set([path.dirname(cmake), path.dirname(ninja), path.dirname(pkg), "/opt/homebrew/bin", "/usr/local/bin", ...String(process.env.PATH || "").split(path.delimiter)])].join(path.delimiter) };
-    const run = dependencies.runBuildCommand || Build.runBuildCommand;
-    logger?.info?.(`[runtime] build libnpengine ${normalized}; ${logPath}`); onProgress?.({ downloaded: 1, total: 4 });
-    await run(cmake, ["-S", staged, "-B", output, "-G", "Ninja", ...options], { cwd: directory, env, logPath, signal });
-    onProgress?.({ downloaded: 2, total: 4 });
-    await run(cmake, ["--build", output, "--parallel", "6"], { cwd: directory, env, logPath, signal });
-    await run(cmake, ["--install", output], { cwd: directory, env, logPath, signal });
-    const pluginRoot = execFileSync(pkg, ["--variable=pluginsdir", "gstreamer-1.0"], { encoding: "utf8", timeout: 10000, env }).trim();
-    if (!path.isAbsolute(pluginRoot)) throw new Error("GStreamer did not declare its native plugin directory.");
-    const plugins = path.join(payload, "lib/gstreamer-1.0"); fs.mkdirSync(plugins, { recursive: true });
-    for (const plugin of PLUGINS) fs.copyFileSync(fs.realpathSync(path.join(pluginRoot, `libgst${plugin}.dylib`)), path.join(plugins, `libgst${plugin}.dylib`));
-    const profile = { version: VERSION, profileRevision: PROFILE_REVISION, upstreamRevision: REVISION, npaRevision: NPA_REVISION,
-      sourceTreeSha256, overlaySha256, plugins: PLUGINS, formats: ["NPA v1 unencrypted", "NSS source"] };
-    fs.writeFileSync(path.join(payload, "profile.json"), JSON.stringify(profile, null, 2) + "\n");
-    fs.copyFileSync(path.join(__dirname, "native/fontconfig.conf"), path.join(payload, "fontconfig.conf"));
-    throwIfAborted(signal); onProgress?.({ downloaded: 3, total: 4 });
-    await Promise.all([Build.validatePinnedSource(sourceDir, REVISION, { signal }), Build.validatePinnedSource(npaSourceDir, NPA_REVISION, { signal })]);
-    const installed = manager.core.registerLocal({ userDataDir, version: normalized, runtimePath: path.join(payload, "bin/npengine-runner"), verifiedBuild: {
-      sourceRevision: REVISION, sourceTreeSha256, overlaySha256, profileRevision: PROFILE_REVISION, configureOptions: options, hostPlatform: "darwin", hostArch: process.arch,
-      deploymentTarget: "13.0", logPath, npaRevision: NPA_REVISION, engineTreeSha256, npaTreeSha256 } });
-    onProgress?.({ downloaded: 4, total: 4 }); return installed;
-  } finally {
-    if (lock !== undefined) { fs.closeSync(lock); fs.rmSync(path.join(directory, "build.lock"), { force: true }); }
-    building.delete(directory);
-  }
-}
-
-module.exports = { VERSION, LEGACY_VERSION, V2_VERSION, V3_VERSION, V4_VERSION, V5_VERSION, PREVIOUS_VERSION, SUPPORTED_VERSIONS, PROFILE_REVISION, REVISION, NPA_REVISION, sourcePath, npaSourcePath, PLUGINS, sourcePathFlags, adaptObjectSources, adaptSource, buildRuntime };
+module.exports = { VERSION, LEGACY_VERSION, V2_VERSION, V3_VERSION, V4_VERSION, V5_VERSION, PREVIOUS_VERSION, SUPPORTED_VERSIONS, PROFILE_REVISION, REVISION, NPA_REVISION, sourcePath, npaSourcePath, PLUGINS, sourcePathFlags, adaptObjectSources, adaptSource };

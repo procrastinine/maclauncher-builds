@@ -33,7 +33,7 @@ test("portable dependency archives bind exact sizes and hashes and reject aliase
   }
 });
 
-test("portable CMake plans isolate native dependencies and protect the architecture and macOS floor", () => {
+test("portable CMake plans isolate native dependencies and protect the architecture and macOS floor", t => {
   const input = { architecture: "arm64", prefix: "/build/prefix", sdk: "/SDK", ninja: "/tools/ninja", pathMappings: [{ from: "/build/folder with spaces", to: "source" }], options: ["-DFEATURE=ON"] };
   const options = Fonts.cmakeOptions(input);
   assert.ok(Fonts.cmakeOptions({...input,architecture:"x64"}).includes("-DCMAKE_OSX_ARCHITECTURES=x86_64"));
@@ -46,7 +46,11 @@ test("portable CMake plans isolate native dependencies and protect the architect
     "-DCMAKE_SHARED_LINKER_FLAGS=-L/opt/homebrew/lib", "-DFETCHCONTENT_FULLY_DISCONNECTED=OFF"]) {
     assert.throws(() => Fonts.cmakeOptions({ ...input, options: [option] }), /cannot replace/);
   }
-  const environment = Fonts.buildEnvironment("/build/prefix", "/SDK");
+  const declared = temporary(t), saved = process.env.CMAKE_PREFIX_PATH; fs.mkdirSync(path.join(declared, "bin"));
+  process.env.CMAKE_PREFIX_PATH = declared;
+  let environment; try { environment = Fonts.buildEnvironment("/build/prefix", "/SDK"); }
+  finally { if (saved === undefined) delete process.env.CMAKE_PREFIX_PATH; else process.env.CMAKE_PREFIX_PATH = saved; }
+  assert.equal(environment.PATH, ["/usr/bin", "/bin", "/usr/sbin", "/sbin", path.join(declared, "bin")].join(path.delimiter));
   assert.equal(environment.PKG_CONFIG_PATH, ""); assert.equal(environment.PKG_CONFIG_LIBDIR, "/build/prefix/lib/pkgconfig");
   assert.equal(environment.MACOSX_DEPLOYMENT_TARGET, "13.0"); assert.equal(environment.DYLD_INSERT_LIBRARIES, undefined);
 });

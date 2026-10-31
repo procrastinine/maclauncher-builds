@@ -90,8 +90,6 @@ async function buildPortableSystem4({ sourceDir=sourcePath,archives,workRoot,dep
   Prefix.linkPrefix(fonts.prefix,prefix);Prefix.linkPrefix(audio.prefix,prefix);Prefix.linkPrefix(movie.prefix,prefix);
   const find=dependencies.findBuildTool||Source.findBuildTool;
   const tools={...fonts.tools,meson:find("meson"),pkgconfig:find("pkg-config"),bison:find("bison"),flex:find("flex")};
-  // Tool-only keg paths are explicit; runtime dependencies are prefix-confined.
-  for(const name of ["bison","flex"]){for(const root of ["/opt/homebrew/opt","/usr/local/opt"]){const file=path.join(root,name,"bin",name);try{fs.accessSync(file,fs.constants.X_OK);tools[name]=file;break;}catch{}}}
   const run=dependencies.runBuildCommand||Source.runBuildCommand,env=Fonts.buildEnvironment(prefix,fonts.sdk);
   for(const pin of PIN.dependencies){
     throwIfAborted(signal);const sourceRoot=path.join(workRoot,"source",pin.id);fs.mkdirSync(sourceRoot,{recursive:true});

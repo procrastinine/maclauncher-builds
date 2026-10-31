@@ -11,7 +11,7 @@
   },
   "base": {
     "version": "0.7.7beta-macos-v2",
-    "overlaySha256": "5850b4378131aa184781a070600ecd7dce23275ceca21ba26642968885d4f2e2"
+    "overlaySha256": "8e6ebbb3d8f7c677edce647f5fdd3355cb0d4c0f9d6e8cf5c4d01160fd78a103"
   },
   "sourceGuards": {
     "src/onsyuri/ONScripter.cpp": "a51452f14def6a68d7f2ae602032810cbebfff4ee0824b8c07b45e534abc197b"

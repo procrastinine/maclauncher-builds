@@ -4,6 +4,8 @@ import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Source=require('../producers/maclauncher/src/modules/shared/runtime/pinned-native-build.js');
+/** A build tool from the declared Homebrew formulae, then from PATH. */
+export const findBuildTool=Source.findBuildTool;
 export const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
 const git=(source,args)=>execFileSync('git',['-C',source,...args],{encoding:'utf8',maxBuffer:32<<20}).trim();
 /** Fetch one exact declared HTTPS source revision into a new owned directory. */

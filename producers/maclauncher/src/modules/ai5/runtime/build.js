@@ -1,15 +1,10 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const crypto = require("node:crypto");
-const Native = require("../../shared/runtime/local-native");
-const Build = require("../../shared/runtime/pinned-native-build");
-const { throwIfAborted } = require("../../shared/runtime/download-utils");
 
 const VERSION = "1.5.0-macos-v2";
 const LEGACY_VERSION = "1.5.0-macos-v1";
 const REVISION = "1dfe835ceff2ecd62aa75ced91f11450dd75d1d2";
 const sourcePath = path.resolve(__dirname, "../../../external/ai5-sdl2");
-const building = new Set();
 
 function replace(file, before, after) {
   const text = fs.readFileSync(file, "utf8");
@@ -186,45 +181,4 @@ struct archive_data *asset_fs_load(const char *_name)
   fs.copyFileSync(path.join(__dirname, "macos-disc.h"), path.join(root, "maclauncher-disc.h"));
 }
 
-async function buildRuntime({ manager, version = VERSION, sourceDir = sourcePath, userDataDir, logger, signal, onProgress, dependencies = {} } = {}) {
-  throwIfAborted(signal);
-  if (process.platform !== "darwin") throw new Error("AI5 source builds require macOS.");
-  const normalized = manager.core.normalizeVersion(version), pin = manager.core.catalog.find(row => row.version === normalized);
-  if (normalized !== VERSION || pin.upstreamRevision !== REVISION) throw new Error("This AI5 release has no reviewed Mac/save adapter.");
-  const directory = manager.core.getInstallDir({ userDataDir, version: normalized });
-  if (building.has(directory)) throw new Error("This AI5 version is already building.");
-  if (fs.existsSync(path.join(directory, "runtime.json"))) throw new Error("Remove the current runtime registration before rebuilding.");
-  if (!path.isAbsolute(sourceDir) || sourceDir === directory || sourceDir.startsWith(directory + path.sep) || directory.startsWith(sourceDir + path.sep)) throw new Error("AI5 source and runtime directories must be separate.");
-  building.add(directory); let lock;
-  try {
-    const source = await Build.validatePinnedSource(sourceDir, REVISION, { signal });
-    const tool = dependencies.findBuildTool || Build.findBuildTool, meson = tool("meson"), ninja = tool("ninja");
-    fs.mkdirSync(directory, { recursive: true }); lock = fs.openSync(path.join(directory, "build.lock"), "wx");
-    const staged = path.join(directory, "build-source"), output = path.join(directory, "build-output"), payload = path.join(directory, "payload");
-    for (const folder of [staged, output, payload]) fs.rmSync(folder, { recursive: true, force: true });
-    const sourceTreeSha256 = Build.stagePinnedFiles(sourceDir, source.files, staged);
-    adaptSource(staged);
-    const overlaySha256 = crypto.createHash("sha256").update(fs.readFileSync(__filename)).update(fs.readFileSync(path.join(__dirname, "macos-paths.h"))).update(fs.readFileSync(path.join(__dirname, "macos-disc.h"))).digest("hex");
-    const options = ["--wrap-mode=nodownload", "--buildtype=release", "-Dffmpeg=enabled", "-Dsdl_mixer=disabled", `--prefix=${payload}`];
-    const logPath = path.join(directory, "build.log");
-    fs.writeFileSync(logPath, `AI5 ${normalized}\nSource ${REVISION}\nSource tree ${sourceTreeSha256}\nOverlay ${overlaySha256}\n`);
-    const env = { ...process.env, MACOSX_DEPLOYMENT_TARGET: "13.0", GIT_CEILING_DIRECTORIES: directory, HOMEBREW_NO_AUTO_UPDATE: "1",
-      PATH: [...new Set([path.dirname(meson), path.dirname(ninja), "/opt/homebrew/bin", "/usr/local/bin", ...String(process.env.PATH || "").split(path.delimiter)])].join(path.delimiter) };
-    const run = dependencies.runBuildCommand || Build.runBuildCommand;
-    logger?.info?.(`[runtime] build AI5 ${normalized}; ${logPath}`); onProgress?.({ downloaded: 1, total: 4 });
-    await run(meson, ["setup", output, staged, ...options], { cwd: directory, logPath, env, signal });
-    onProgress?.({ downloaded: 2, total: 4 });
-    await run(ninja, ["-C", output, "-j6"], { cwd: directory, logPath, env, signal });
-    await run(meson, ["install", "-C", output, "--no-rebuild"], { cwd: directory, logPath, env, signal });
-    throwIfAborted(signal); onProgress?.({ downloaded: 3, total: 4 });
-    await Build.validatePinnedSource(sourceDir, REVISION, { signal });
-    const installed = manager.core.registerLocal({ userDataDir, version: normalized, runtimePath: path.join(payload, "bin/ai5"), verifiedBuild: {
-      sourceRevision: REVISION, sourceTreeSha256, overlaySha256, configureOptions: options, hostPlatform: "darwin", hostArch: process.arch, deploymentTarget: "13.0", logPath } });
-    onProgress?.({ downloaded: 4, total: 4 }); return installed;
-  } finally {
-    if (lock !== undefined) { fs.closeSync(lock); fs.rmSync(path.join(directory, "build.lock"), { force: true }); }
-    building.delete(directory);
-  }
-}
-
-module.exports = { VERSION, LEGACY_VERSION, REVISION, sourcePath, buildRuntime, adaptSource };
+module.exports = { VERSION, LEGACY_VERSION, REVISION, sourcePath, adaptSource };

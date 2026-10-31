@@ -104,16 +104,20 @@ function stagePinnedFiles(sourceDir, files, destination) {
   });
 }
 
-function findBuildTool(name) {
-  const directories = [...new Set(["/opt/homebrew/bin", "/usr/local/bin", ...String(process.env.PATH || "").split(path.delimiter)].filter(Boolean))];
+// A build lists its declared Homebrew formula prefixes in CMAKE_PREFIX_PATH.
+function declaredToolDirectories(env = process.env) {
+  return String(env.CMAKE_PREFIX_PATH || "").split(path.delimiter).filter(Boolean)
+    .flatMap(prefix => [path.join(prefix, "bin"), path.join(prefix, "sbin")]).filter(directory => fs.existsSync(directory));
+}
+
+// Declared formulae come before PATH, where the Xcode compiler directory also carries older flex and bison.
+function findBuildTool(name, env = process.env) {
+  const directories = [...new Set([...declaredToolDirectories(env), ...String(env.PATH || "").split(path.delimiter)].filter(Boolean))];
   for (const directory of directories) {
     const file = path.join(directory, name);
     try { if (fs.statSync(file).isFile()) { fs.accessSync(file, fs.constants.X_OK); return file; } } catch {}
   }
-  const install = ["cmake", "ninja"].includes(name)
-    ? `Install with 'brew install ${name}' (https://brew.sh/); executables belong in /opt/homebrew/bin on Apple Silicon or /usr/local/bin on Intel.`
-    : "Install the upstream build prerequisites explicitly.";
-  throw new Error(`${name} is required for a native source build. ${install} See docs/runtimes/NATIVE_TOOL_SETUP.md, then retry.`);
+  throw new Error(`${name} is required for this build. Declare the Homebrew formula that provides it among the project's build tools.`);
 }
 
 async function runBuildCommand(command, args, { cwd, logPath, env, signal, timeout = 15 * 60 * 1000 } = {}) {
@@ -215,13 +219,13 @@ async function buildPinnedRuntime({ manager, version, sourceDir, userDataDir, cm
     }
     const logPath = path.join(installDir, "build.log");
     fs.writeFileSync(logPath, `Pinned source ${source.head}\nSource tree SHA-256 ${sourceTreeSha256}\n`);
-    const env = { ...process.env, PATH: [...new Set([path.dirname(cmake), path.dirname(ninja), "/opt/homebrew/bin", "/usr/local/bin", ...String(process.env.PATH || "").split(path.delimiter)])].join(path.delimiter), HOMEBREW_NO_AUTO_UPDATE: "1" };
+    const env = { ...process.env, PATH: [...new Set([path.dirname(cmake), path.dirname(ninja), ...String(process.env.PATH || "").split(path.delimiter)])].join(path.delimiter), HOMEBREW_NO_AUTO_UPDATE: "1" };
     const run = dependencies.runBuildCommand || runBuildCommand;
     context?.logger?.info?.(`[runtime] build ${manager.id} ${normalized}; ${logPath}`);
     await run(cmake, ["-S", sourceRoot, "-B", outputRoot, "-G", "Ninja", `-DCMAKE_MAKE_PROGRAM=${ninja}`, ...options], { cwd: installDir, logPath, env, signal });
     throwIfAborted(signal);
     onProgress?.({ downloaded: 2, total: 4 });
-    await run(cmake, ["--build", outputRoot, "--parallel", "6"], { cwd: installDir, logPath, env, signal });
+    await run(cmake, ["--build", outputRoot, "--parallel", "2"], { cwd: installDir, logPath, env, signal });
     throwIfAborted(signal);
     onProgress?.({ downloaded: 3, total: 4 });
     // Source checkouts are never mutated, including by dependency source generation.
@@ -241,4 +245,4 @@ async function buildPinnedRuntime({ manager, version, sourceDir, userDataDir, cm
   }
 }
 
-module.exports = { buildPinnedRuntime, validateSourceScope, validatePinnedSource, hashPinnedFiles, stagePinnedFiles, runBuildCommand, findBuildTool };
+module.exports = { buildPinnedRuntime, validateSourceScope, validatePinnedSource, hashPinnedFiles, stagePinnedFiles, runBuildCommand, findBuildTool, declaredToolDirectories };

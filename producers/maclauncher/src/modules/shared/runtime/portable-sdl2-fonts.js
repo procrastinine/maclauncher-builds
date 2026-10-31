@@ -30,7 +30,8 @@ function validateArchives(archives, { catalog = PIN } = {}) {
 }
 
 function buildEnvironment(prefix, sdk) {
-  const env = { ...process.env, PATH: "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/usr/local/bin",
+  // System tools, then only the build's declared Homebrew formulae.
+  const env = { ...process.env, PATH: ["/usr/bin", "/bin", "/usr/sbin", "/sbin", ...Source.declaredToolDirectories()].join(path.delimiter),
     PKG_CONFIG_PATH: "", PKG_CONFIG_LIBDIR: path.join(prefix, "lib/pkgconfig"), MACOSX_DEPLOYMENT_TARGET: "13.0", SDKROOT: sdk };
   for (const key of ["CPATH", "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "OBJC_INCLUDE_PATH", "LIBRARY_PATH", "CFLAGS", "CXXFLAGS", "LDFLAGS",
     "DYLD_LIBRARY_PATH", "DYLD_FRAMEWORK_PATH", "DYLD_INSERT_LIBRARIES"]) delete env[key];
@@ -51,7 +52,7 @@ function cmakeOptions({ prefix, sdk, ninja, architecture = process.arch, pathMap
   const flags = [...maps, "-Werror=unguarded-availability-new"].join(" ");
   return ["-G", "Ninja", `-DCMAKE_MAKE_PROGRAM=${ninja}`, "-DCMAKE_BUILD_TYPE=Release", "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
     `-DCMAKE_OSX_ARCHITECTURES=${architecture === "x64" ? "x86_64" : "arm64"}`, "-DCMAKE_OSX_DEPLOYMENT_TARGET=13.0", `-DCMAKE_OSX_SYSROOT=${sdk}`,
-    `-DCMAKE_INSTALL_PREFIX=${prefix}`, `-DCMAKE_PREFIX_PATH=${prefix}`, "-DCMAKE_IGNORE_PREFIX_PATH=/opt/homebrew;/usr/local",
+    `-DCMAKE_INSTALL_PREFIX=${prefix}`, `-DCMAKE_PREFIX_PATH=${prefix}`, `-DPYTHON_EXECUTABLE=${Source.findBuildTool("python3")}`, "-DCMAKE_IGNORE_PREFIX_PATH=/opt/homebrew;/usr/local",
     "-DCMAKE_FIND_USE_PACKAGE_REGISTRY=OFF", "-DCMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY=OFF", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
     "-DFETCHCONTENT_FULLY_DISCONNECTED=ON", "-DFETCHCONTENT_UPDATES_DISCONNECTED=ON", "-DCMAKE_C_COMPILER=/usr/bin/clang", "-DCMAKE_CXX_COMPILER=/usr/bin/clang++",
     `-DCMAKE_C_FLAGS=${flags}`, `-DCMAKE_CXX_FLAGS=${flags}`, "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-headerpad_max_install_names", "-DCMAKE_EXE_LINKER_FLAGS=-Wl,-headerpad_max_install_names",

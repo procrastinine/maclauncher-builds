@@ -93,9 +93,7 @@ async function buildPortableNPengine({ sourceDir = Previous.sourcePath, npaSourc
   Source.stagePinnedFiles(sourceDir, engine.files, path.join(sourceRoot, "libnpengine"));
   Source.stagePinnedFiles(npaSourceDir, npa.files, path.join(sourceRoot, "libnpa"));
   const sourceOverlay = adaptSource(sourceRoot), sdk = utilityStack.sdk;
-  const tool = dependencies.findBuildTool || Source.findBuildTool, tools = { cmake: tool("cmake"), ninja: tool("ninja"), pkg: tool("pkg-config"),
-    flex: ["/opt/homebrew/opt/flex/bin/flex", "/usr/local/opt/flex/bin/flex"].find(file => fs.existsSync(file)) || tool("flex"),
-    bison: ["/opt/homebrew/opt/bison/bin/bison", "/usr/local/opt/bison/bin/bison"].find(file => fs.existsSync(file)) || tool("bison") };
+  const tool = dependencies.findBuildTool || Source.findBuildTool, tools = { cmake: tool("cmake"), ninja: tool("ninja"), pkg: tool("pkg-config"), flex: tool("flex"), bison: tool("bison") };
   const env = Media.buildEnvironment(prefix, sdk);
   env.PKG_CONFIG_LIBDIR = [media.prefix, utilityPrefix, sdlPrefix].map(value => path.join(value, "lib/pkgconfig")).join(path.delimiter);
   const packageVersion = (name) => execFileSync(tools.pkg, ["--modversion", name], { env, encoding: "utf8", timeout: 10000 }).trim();

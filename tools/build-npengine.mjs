@@ -8,7 +8,6 @@ import {sealRuntime} from './seal-runtime.mjs';
 import {collectSdlNotices} from './sdl-notices.mjs';
 const require=createRequire(import.meta.url);
 const Builder=require('../producers/maclauncher/src/modules/nitroplus/runtime/portable-build.js'),Media=require('../producers/maclauncher/src/modules/nitroplus/runtime/portable-media.js'),Fonts=require('../producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.js');
-const dependencies={findBuildTool:name=>execFileSync('/usr/bin/which',[name],{encoding:'utf8'}).trim()};
 const MEDIA_NOTICE_INPUTS=Object.freeze({fontconfig:{version:'2.16.1',filename:'COPYING',url:'https://raw.githubusercontent.com/fontconfig/fontconfig/fdfc3445d1cc9c1c7e587fb2a1287871de16faf9/COPYING',sha256:'51a51aa9823704fd90bccc616cdd17ebabb5b2b3e9cbde886ca02c7002288067',bytes:8616},libpng:{version:'1.6.56',filename:'LICENSE',url:'https://raw.githubusercontent.com/pnggroup/libpng/d5515b5b8be3901aac04e5bd8bd5c89f287bcd33/LICENSE',sha256:'bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526',bytes:5345}});
 const capture=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',maxBuffer:64<<20,...options});
 /** Decode the declared PBZX package payload into its cpio archive. */
@@ -46,8 +45,8 @@ export async function buildNPengine({project,arch,output,work}){
 }
 export async function finishNPengine({project,arch,output,work,source,npa,repository,npaRepository,media,notices}){
  const archives={};for(const pin of [...Fonts.PIN.dependencies,...Media.PIN.utilitySources])archives[pin.id]??=await buildInput({url:pin.archiveUrl,sha256:pin.archiveSha256,bytes:pin.archiveBytes});
- const sdl=await Fonts.buildDependencies({archives,workRoot:path.join(work,'sdl'),architecture:arch,pathMappings:[...new Set([work,fs.realpathSync(work)])].map(from=>({from,to:'NPENGINE_BUILD'})),dependencies}),utilities=await Media.buildUtilities({archives,workRoot:path.join(work,'utilities'),dependencies});
- const built=await Builder.buildPortableNPengine({sourceDir:source,npaSourceDir:npa,workRoot:path.join(work,'engine'),mediaStack:media,utilityStack:utilities,sdlStack:sdl,dependencies});
+ const sdl=await Fonts.buildDependencies({archives,workRoot:path.join(work,'sdl'),architecture:arch,pathMappings:[...new Set([work,fs.realpathSync(work)])].map(from=>({from,to:'NPENGINE_BUILD'}))}),utilities=await Media.buildUtilities({archives,workRoot:path.join(work,'utilities')});
+ const built=await Builder.buildPortableNPengine({sourceDir:source,npaSourceDir:npa,workRoot:path.join(work,'engine'),mediaStack:media,utilityStack:utilities,sdlStack:sdl});
  for(const stack of [sdl,utilities])for(const pin of stack.sources)for(const name of pin.notices||[pin.notice])notices.push({file:path.join(stack===utilities?path.join(work,'utilities','source-'+pin.id):pin.sourceRoot||stack.sourceRoots[pin.id],name),name:pin.name||pin.id,license:pin.license,sourceUrl:pin.archiveUrl});
  const pin=Fonts.PIN.dependencies.find(row=>row.id==='sdl2'),sdlNotices=collectSdlNotices({source:sdl.sourceRoots.sdl2,output:path.join(work,'sdl-notices'),name:'SDL2 '+pin.version,sourceUrl:pin.archiveUrl,includeLibm:false});notices.push(...sdlNotices.notices);
  return sealNPengine({project,arch,output,work,source,npa,repository,npaRepository,media,notices,built,sdlNoticeProvenance:sdlNotices.provenance});

@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
-import {execFileSync} from 'node:child_process';
 import {buildInput} from './build-input.mjs';
 import {checkoutSource,sourceNotices,run,recipeMain} from './build-source.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
@@ -10,7 +9,7 @@ const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirna
 const Builder=require(path.join(native,'current-build.js')),Dependency=require(path.join(native,'portable-dependencies.js')),Portable=require(path.join(native,'portable-build.js')),Adapter=require(path.join(native,'adapter.js')),Patches=require(path.join(native,'source-patches.js')),DependencyOverlays=require(path.join(native,'dependency-overlays.json'));
 const Fonts=require(path.join(modules,'shared/runtime/portable-sdl2-fonts.js')),Audio=require(path.join(modules,'shared/runtime/portable-sndfile.js'));
 const Source=require(path.join(modules,'shared/runtime/pinned-native-build.js')),AVCPP_SOURCE_SCOPE=Object.freeze({kind:'primary-tree',omittedSubmodules:['catch2']});
-const dependencies={findBuildTool:name=>execFileSync('/usr/bin/which',[name],{encoding:'utf8'}).trim(),runBuildCommand:(command,args,options)=>Source.runBuildCommand(command,args.map((value,index)=>index>0&&args[index-1]==='--parallel'?'2':value),options)};
+const dependencies={runBuildCommand:(command,args,options)=>Source.runBuildCommand(command,args.map((value,index)=>index>0&&args[index-1]==='--parallel'?'2':value),options)};
 export async function buildImpacto({project,arch,output,work}){
  fs.mkdirSync(work,{recursive:true});const sources={};for(const id of ['impacto','avcpp','atrac9','magicEnum']){const pin=id==='impacto'?{...Adapter.SOURCES.impacto,revision:Builder.REVISION}:Adapter.SOURCES[id];sources[id]=checkoutSource({...pin,destination:path.join(work,'upstream-'+id)});}
  const archives={};for(const pin of [...Fonts.PIN.dependencies,...Audio.PIN.dependencies,...Dependency.PIN.dependencies])archives[pin.id]??=await buildInput({url:pin.archiveUrl,sha256:pin.archiveSha256,bytes:pin.archiveBytes});
