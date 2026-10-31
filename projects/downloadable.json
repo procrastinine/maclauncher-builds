@@ -1779,10 +1779,14 @@
       {
         "version": "0.0.13-838e47b-MCLv1",
         "label": "VNDS-LOVE 0.0.13-838e47b-MCLv1"
+      },
+      {
+        "version": "0.0.13-838e47b-MCLv2",
+        "label": "VNDS-LOVE 0.0.13-838e47b-MCLv2"
       }
     ],
     "build": {
-      "version": "0.0.13-838e47b-MCLv1",
+      "version": "0.0.13-838e47b-MCLv2",
       "command": "producers/engine-adaptations/stage.mjs",
       "architectures": [
         "universal"
@@ -1809,10 +1813,14 @@
       {
         "version": "1.0.0-MCLv1",
         "label": "MacLauncher RLVM adapter 1.0.0-MCLv1"
+      },
+      {
+        "version": "1.0.0-MCLv2",
+        "label": "MacLauncher RLVM adapter 1.0.0-MCLv2"
       }
     ],
     "build": {
-      "version": "1.0.0-MCLv1",
+      "version": "1.0.0-MCLv2",
       "command": "producers/vn-adaptations/rlvm/package.mjs",
       "architectures": [
         "universal"

@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
+import {resolveProject,buildRecord} from '../../lib/projects.mjs';
 const require=createRequire(import.meta.url),B=require('../../lib/bundled-native.cjs');
 const {validateDeclaration}=require('../../lib/declaration.cjs');
 const root=import.meta.dirname;
@@ -51,7 +52,7 @@ export function stageData({project,output,version=profiles[project]?.version}){
 export function build({project,arch,output}){
  if(arch!=='universal'||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Engine data builds as a universal package into a new absolute output directory.');
  fs.mkdirSync(output,{recursive:true});
- try{const declaration=stageData({project,output:path.join(output,'payload')});fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});return declaration;}
+ try{const version=buildRecord(resolveProject(project,path.resolve(root,'../..'),{resolvePins:false})).version;const declaration=stageData({project,version,output:path.join(output,'payload')});fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});return declaration;}
  catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }
 export function main(args){const options={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!['project','output','version','arch','work'].includes(key)||!args[i+1]||Object.hasOwn(options,key))throw Error('Use --project, --output and optional --version, or --project, --arch and --output.');options[key]=['output','work'].includes(key)?path.resolve(args[i+1]):args[i+1];}

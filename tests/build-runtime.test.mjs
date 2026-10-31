@@ -130,12 +130,17 @@ test('every registered GitHub build names an existing command and submodule of t
  }
 });
 
-test('the VNDS-LOVE GitHub build reproduces its published package',async t=>{
+test('a VNDS-LOVE package revision preserves engine files and historical packaging',async t=>{
  const work=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'vnds-love-build-')));t.after(()=>fs.rmSync(work,{recursive:true,force:true}));
  const built=runBuild({project:'vnds-love',arch:'universal',output:path.join(work,'build'),directory:root});
- const release=await prepareRelease({project:'vnds-love',input:built.payload,declaration:JSON.parse(fs.readFileSync(built.declaration)),output:path.join(work,'release')});
- const published=JSON.parse(fs.readFileSync(path.join(root,'catalogs/vnds-love.json'))).packages.find(record=>record.version===built.version);
+ assert.equal(built.version,buildRecord(readProjects(root,{resolvePins:false}).projects.find(row=>row.id==='vnds-love')).version);
+ const published=JSON.parse(fs.readFileSync(path.join(root,'catalogs/vnds-love.json'))).packages[0];
+ const {stageData}=await import('../producers/engine-adaptations/stage.mjs'),input=path.join(work,'historical');
+ const declaration=stageData({project:'vnds-love',version:published.version,output:input});
+ const release=await prepareRelease({project:'vnds-love',input,declaration,output:path.join(work,'release')});
  assert.equal(release.assets.find(asset=>asset.role==='runtime').sha256,published.asset.sha256);
+ const actual=JSON.parse(fs.readFileSync(built.declaration));
+ assert.deepEqual(actual.files.filter(row=>row.path!=='manifest.json'),declaration.files.filter(row=>row.path!=='manifest.json'));
 });
 
 test('the Runtime build workflow builds each architecture on its own runner before staging drafts',()=>{

@@ -48,6 +48,8 @@ Other projects keep a different architecture for a fixed reason:
 
 MKXP-Z uses `arm64` for its adapted package: its package adds Apple Silicon filename normalization to the publisher's universal build, and Intel Macs use the publisher's build directly.
 
+VNDS-LOVE’s Runtime recipe takes its package version from the project record. Engine-data staging accepts an explicit version for historical archive comparison, and packaging revisions retain the same Lua engine files. The RLVM adapter recipe compiles `adapter.m` as a Universal Cocoa library and records the generated binary’s checksum in its packaged descriptor. Its source declaration identifies the owned source and build profile; the package version comes from the registered build.
+
 ### Build SDK and runtime compatibility
 
 The macOS SDK on a build host does not set a package's minimum macOS version. Graphics, for example, is compiled with SDK 27 for its Universal build and an earlier SDK for Intel, and its shared core targets macOS 13. The package manifest records the build SDK separately from `minimumMacOS`, and optional native files and providers keep their own macOS and hardware requirements. MacLauncher checks those requirements before it enables each component, so one package can contain code for newer features and still run on older systems.
