@@ -14,9 +14,10 @@ function alias(destination,source){
 }
 
 /** Preserve original AIDL backend choices when generating C++ declarations. */
-export async function cppAidlSources({directory,android,parser}){
+export async function cppAidlSources({directory,android,parser,targets}){
  const files=fs.globSync('**/*.aidl',{cwd:directory}),blueprint=path.join(directory,'Android.bp');
- if(!fs.existsSync(blueprint))return files;
+ if(!targets)return files;
+ if(!fs.existsSync(blueprint))throw Error('Missing original AIDL module declarations.');
  const {parseBlueprint}=await import(pathToFileURL(path.join(android,'src/modules/android/native/upstream/blueprint.mjs')));
  const modules=parseBlueprint(fs.readFileSync(blueprint,'utf8'),{file:blueprint,parser}).modules;
  const patterns=(values,seen=new Set())=>(values||[]).flatMap(value=>{
@@ -25,8 +26,12 @@ export async function cppAidlSources({directory,android,parser}){
   if(seen.has(name)||matches.length!==1)throw Error('Invalid original AIDL source group: '+name);
   return patterns(matches[0].properties.srcs,new Set([...seen,name]));
  });
- const disabled=new Set(modules.filter(row=>row.type==='aidl_interface'&&row.properties.backend?.cpp?.enabled===false).flatMap(row=>patterns(row.properties.srcs).flatMap(pattern=>fs.globSync(pattern,{cwd:directory}))));
- return files.filter(file=>!disabled.has(file));
+ const selected=targets.map(name=>{
+  const matches=modules.filter(row=>row.properties.name===name);
+  if(matches.length!==1||matches[0].type!=='aidl_interface'||matches[0].properties.backend?.cpp?.enabled===false)throw Error('Missing original C++ AIDL target: '+name);
+  return matches[0];
+ });
+ return [...new Set(selected.flatMap(row=>patterns(row.properties.srcs).flatMap(pattern=>fs.globSync(pattern,{cwd:directory}))))].filter(file=>file.endsWith('.aidl'));
 }
 
 /** Reconstruct the original ART guest's coherent AIDL/HIDL input groups. */
@@ -51,7 +56,7 @@ export async function prepareArtGuestInputs({common,hwui,image,ndk,work}){
  const imports=[...roots,...profile.cppAidlImportRoots.map(relative=>path.join(sourceRoot,relative)),path.join(sourceRoot,'frameworks/base/core/java'),...frozen.map(record=>record.root)].map(directory=>'-I'+directory);
  for(const directory of roots){
   if(!fs.existsSync(directory))throw Error('Original ART AIDL source group is missing: '+path.relative(sourceRoot,directory));
-  for(const relative of await cppAidlSources({directory,android,parser:common.tools.blueprintParser}))run(common.tools.aidl,['--lang=cpp',...imports,'-h',headers,'-o',cpp,path.join(directory,relative)]);
+  for(const relative of await cppAidlSources({directory,android,parser:common.tools.blueprintParser,targets:profile.cppAidlModules[path.relative(sourceRoot,directory)]}))run(common.tools.aidl,['--lang=cpp',...imports,'-h',headers,'-o',cpp,path.join(directory,relative)]);
  }
  for(const record of frozen){
   const hash=fs.readFileSync(path.join(record.root,'.hash'),'utf8').trim().split('\n').at(-1);

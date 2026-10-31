@@ -381,6 +381,9 @@
     "frameworks/av/media/libaudioclient/aidl",
     "frameworks/av/media/aidl"
   ],
+  "cppAidlModules": {
+    "frameworks/av/media/aidl": ["av-types-aidl", "audio-permission-aidl"]
+  },
   "cppAidlImportRoots": [
     "frameworks/native/libs/gui",
     "frameworks/av/media/libshmem/aidl"
