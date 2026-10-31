@@ -379,10 +379,11 @@
     "frameworks/native/libs/gui/aidl",
     "frameworks/native/libs/permission/aidl",
     "frameworks/av/media/libaudioclient/aidl",
-    "frameworks/av/aidl"
+    "frameworks/av/media/aidl"
   ],
   "cppAidlImportRoots": [
-    "frameworks/native/libs/gui"
+    "frameworks/native/libs/gui",
+    "frameworks/av/media/libshmem/aidl"
   ],
   "frozenCpp": [
     {
