@@ -148,4 +148,3 @@ test('verified manifest capabilities survive package verification and reject mal
  assert.throws(()=>recordMetadata({project:'fixture',manifest:{capabilities:'invalid'}}),/capabilities/);
  assert.throws(()=>recordMetadata({project:'fixture',manifest:{capabilities:{logPath:'not-a-log'}}}),/private/);
 });
-
