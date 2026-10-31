@@ -87,3 +87,9 @@ test('each package states its CPU architecture and the Mac CPUs that can run it'
  assert.ok(html.includes('Universal<span class="secondary">arm64 and x64 · macOS'));
  assert.ok(html.includes('Intel<span class="secondary">x64 · macOS 13.0+</span>'));
 });
+
+test('ABI links have one anchor when a family gains versions and CPU rows',()=>{
+ const index=JSON.parse(fs.readFileSync(path.join(root,'catalogs/index.json'))),project=index.projects.find(p=>p.projectId==='hashlink'),release=project.releases.find(r=>r.anchor==='hashlink-1-9');
+ assert.ok(release);project.releases.unshift({...release,version:'1.9-MCLv2'},{...release,version:'1.9-MCLv2',arch:'arm64'});
+ const html=renderIndex(index);assert.equal((html.match(/id="hashlink-1-9"/g)||[]).length,1);assert.ok(html.includes('1.9-MCLv2'));assert.ok(html.includes('Apple Silicon'));
+});

@@ -20,7 +20,7 @@ export function publicDeclaration(value){
  return value;
 }
 
-export async function pack({project,input,declaration,output,metadata={}}){
+export async function pack({project,input,declaration,output,metadata={},sourceDateEpoch=0}){
  projectId(project);declaration=publicDeclaration(declaration);identity(declaration);
  if(declaration.id!==project)throw Error(`Package belongs to ${declaration.id}; expected project ${project}.`);
  if(path.basename(output)!==assetName(declaration))throw Error('Output filename must be '+assetName(declaration));
@@ -31,7 +31,7 @@ export async function pack({project,input,declaration,output,metadata={}}){
  const bytes=Buffer.from(JSON.stringify(declaration,null,2)+'\n');
  const entries=[{name:'runtime-package.json',bytes,size:bytes.length,sha256:B.digest(bytes),mode:0o644},
   ...declaration.files.map(file=>({...file,name:'files/'+file.path,file:path.join(input,file.path)}))];
- const archive=await A.writeArchive(entries,output);
+ const archive=await A.writeArchive(entries,output,{sourceDateEpoch});
  await verify({archive:output,sha256:archive.sha256,project,version:declaration.version,arch:declaration.arch});
  const record={schemaVersion:2,id:declaration.id,version:declaration.version,arch:declaration.arch,
   launcherArchitectures:declaration.launcherArchitectures,minimumMacOS:declaration.minimumMacOS,
@@ -95,8 +95,9 @@ export function catalog(records,{project,repository,previous}={}){
 
 // Published payload identities stay fixed; factual metadata can be backfilled.
 function additiveRecordMetadata(previous,next){
- const {source:oldSource,capabilities:oldCapabilities,launcherContract:oldContract,...oldPayload}=previous;
- const {source:nextSource,capabilities:nextCapabilities,launcherContract:nextContract,...nextPayload}=next;
+ const {source:oldSource,capabilities:oldCapabilities,launcherContract:oldContract,build:oldBuild,rebuild:oldRebuild,...oldPayload}=previous;
+ const {source:nextSource,capabilities:nextCapabilities,launcherContract:nextContract,build:nextBuild,rebuild:nextRebuild,...nextPayload}=next;
+ if(oldBuild!==undefined&&stable(oldBuild)!==stable(nextBuild)||oldRebuild!==undefined&&stable(oldRebuild)!==stable(nextRebuild))return false;
  if(stable(oldPayload)!==stable(nextPayload))return false;
  if(oldSource!==undefined&&stable(oldSource)!==stable(nextSource))return false;
  if(oldContract===undefined?nextContract!==undefined&&nextContract!==1:oldContract!==nextContract)return false;

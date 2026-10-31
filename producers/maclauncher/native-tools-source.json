@@ -5,13 +5,22 @@
     {
       "path": "scripts/native-binary-tools.cjs",
       "sourceSha256": "40c99e682e785a42de48ae958fe23deac10c9a527d777c9a8852bfa0246a2074",
-      "sha256": "5226a2d0674db4dd94de4bc5eb33292bc61e3100919c7342a3ede9fa84a28a5e",
+      "sha256": "999ec21684fa85e3914444a3161f0aecb82b28567ca48b8a06fc2217d3915f54",
       "replacements": [
         {
           "from": "/^(?:licen[sc]e|copying|copyright|notice)(?:[._-].*)?$/i",
           "to": "/^(?:(?:licen[sc]e|copying|copyright|notice)(?:[._-].*)?|(?:AGPL|GPL|LGPL|MPL|Apache|MIT|BSD|ISC|Zlib)(?:[-_.].*)?)$/i"
+        },
+        {
+          "from": "    if (value && typeof value === \"object\") {\n      const entries = [], keys = new Set();\n      for (const [key, item] of Object.entries(value)) {\n        if ([\"logPath\", \"evidenceSource\"].includes(key)) continue;\n        const projectedKey = project(key);\n        if (keys.has(projectedKey)) throw new Error(\"Public provenance projection produces a duplicate metadata key.\");\n        keys.add(projectedKey); entries.push([projectedKey, project(item)]);\n",
+          "to": "    if (value && typeof value === \"object\") {\n      const entries = [], keys = new Set();\n      for (const [key, item] of Object.entries(value)) {\n        if ([\"logPath\", \"evidenceSource\", \"startedAt\", \"completedAt\", \"builtAt\", \"createdAt\"].includes(key)) continue;\n        const projectedKey = project(key);\n        if (keys.has(projectedKey)) throw new Error(\"Public provenance projection produces a duplicate metadata key.\");\n        keys.add(projectedKey); entries.push([projectedKey, project(item)]);\n"
+        },
+        {
+          "from": "  const sanitized = JSON.parse(JSON.stringify(receipt));\n  if (!sanitized.source || typeof sanitized.source !== \"object\" || Array.isArray(sanitized.source)) throw new Error(\"Homebrew receipt source identity is missing.\");\n  delete sanitized.source.path;\n  const tap = sanitized.source.tap || \"homebrew/core\";\n  if (!/^[A-Za-z0-9_.-]+\\/[A-Za-z0-9_.-]+$/.test(tap)) throw new Error(\"Homebrew receipt tap identity is invalid.\");\n  sanitized.source.formula = `${tap}/${formula.name}`;\n",
+          "to": "  const sanitized = JSON.parse(JSON.stringify(receipt));\n  if (!sanitized.source || typeof sanitized.source !== \"object\" || Array.isArray(sanitized.source)) throw new Error(\"Homebrew receipt source identity is missing.\");\n  delete sanitized.source.path;\n  // Installation bookkeeping varies with the host; dependency and build identities stay.\n  for (const key of ['time', 'source_modified_time', 'installed_on_request', 'installed_as_dependency', 'poured_from_bottle', 'loaded_from_api', 'loaded_from_internal_api', 'changed_files', 'homebrew_version']) delete sanitized[key];\n  const tap = sanitized.source.tap || \"homebrew/core\";\n  if (!/^[A-Za-z0-9_.-]+\\/[A-Za-z0-9_.-]+$/.test(tap)) throw new Error(\"Homebrew receipt tap identity is invalid.\");\n  sanitized.source.formula = `${tap}/${formula.name}`;\n"
         }
-      ]
+      ],
+      "previousSha256": "5226a2d0674db4dd94de4bc5eb33292bc61e3100919c7342a3ede9fa84a28a5e"
     },
     {
       "path": "scripts/stage-mkxpz-config-helper.cjs",
@@ -38,13 +47,26 @@
       "path": "src/modules/shared/runtime/package-contract.cjs",
       "destination": "lib/package-contract.cjs",
       "sourceSha256": "878451c47195564a0a10b336ac9350d726dd77df1969621057109b84054698b5",
-      "sha256": "306bb2a70fda5fb0f62eec1d6bd96376eed46164b2b051977412ef3d872c41c9",
+      "sha256": "baeb8d91a2889f1f5e4d8a9f6485072cab1fc01db62a07e434c4ddf9916fd958",
       "replacements": [
         {
           "from": "const B = require(\"./bundled-native\");",
           "to": "const B = require(\"./bundled-native.cjs\");"
+        },
+        {
+          "from": "const ARCHITECTURES = new Set([\"arm64\", \"x64\", \"universal\"]);\nconst LAUNCHER_ARCHITECTURES = new Set([\"arm64\", \"x64\"]);\nconst MAX_ARCHIVE_BYTES = 4 * 1024 * 1024 * 1024;\nconst RECORD_KEYS = [\"schemaVersion\",\"id\",\"version\",\"arch\",\"launcherArchitectures\",\"minimumMacOS\",\"manifestRelative\",\"manifestSha256\",\"sourceSha256\",\"updatePolicy\",\"tag\",\"asset\",\"sourceAsset\",\"source\",\"launcherContract\",\"capabilities\"];\nconst ARCHITECTURE_NAME = /^[a-z][a-z0-9_]{0,31}$/, CAPABILITY_NAME = /^[A-Za-z][A-Za-z0-9_]{0,63}$/;\n\nfunction object(value) {\n",
+          "to": "const ARCHITECTURES = new Set([\"arm64\", \"x64\", \"universal\"]);\nconst LAUNCHER_ARCHITECTURES = new Set([\"arm64\", \"x64\"]);\nconst MAX_ARCHIVE_BYTES = 4 * 1024 * 1024 * 1024;\nconst RECORD_KEYS = [\"schemaVersion\",\"id\",\"version\",\"arch\",\"launcherArchitectures\",\"minimumMacOS\",\"manifestRelative\",\"manifestSha256\",\"sourceSha256\",\"updatePolicy\",\"tag\",\"asset\",\"sourceAsset\",\"source\",\"launcherContract\",\"capabilities\",\"build\",\"rebuild\"];\nconst ARCHITECTURE_NAME = /^[a-z][a-z0-9_]{0,31}$/, CAPABILITY_NAME = /^[A-Za-z][A-Za-z0-9_]{0,63}$/;\n\nfunction object(value) {\n"
+        },
+        {
+          "from": "        record.sourceAsset && Object.keys(record.sourceAsset).some(key => ![\"filename\", \"sha256\", \"bytes\", \"url\"].includes(key)))\n      throw new Error(\"Invalid runtime release record.\");\n    validatePublicMetadata(record);\n  }\n  if (record.schemaVersion !== 2 || record.id !== projectId || record.updatePolicy !== \"manual\" ||\n      !version(record.version) || !ARCHITECTURES.has(record.arch) ||\n",
+          "to": "        record.sourceAsset && Object.keys(record.sourceAsset).some(key => ![\"filename\", \"sha256\", \"bytes\", \"url\"].includes(key)))\n      throw new Error(\"Invalid runtime release record.\");\n    validatePublicMetadata(record);\n    const evidence = require(\"./build-verification.cjs\");\n    evidence.buildMetadata(record.build, repository); evidence.rebuildMetadata(record.rebuild, record);\n  }\n  if (record.schemaVersion !== 2 || record.id !== projectId || record.updatePolicy !== \"manual\" ||\n      !version(record.version) || !ARCHITECTURES.has(record.arch) ||\n"
+        },
+        {
+          "from": "    sourceSha256: record.sourceSha256, updatePolicy: \"manual\", tag,\n    asset: Object.freeze({ filename, sha256: record.asset.sha256, bytes: record.asset.bytes, url }),\n    ...(sourceAsset ? { sourceAsset } : {}), ...(source ? { source } : {}),\n    ...(record.launcherContract === undefined ? {} : { launcherContract: record.launcherContract }), ...compatibility });\n}\n\nfunction validateDeclaration(item) {\n",
+          "to": "    sourceSha256: record.sourceSha256, updatePolicy: \"manual\", tag,\n    asset: Object.freeze({ filename, sha256: record.asset.sha256, bytes: record.asset.bytes, url }),\n    ...(sourceAsset ? { sourceAsset } : {}), ...(source ? { source } : {}),\n    ...(record.launcherContract === undefined ? {} : { launcherContract: record.launcherContract }), ...compatibility,\n    ...(publication && record.build !== undefined ? { build: require(\"./build-verification.cjs\").buildMetadata(record.build, repository) } : {}),\n    ...(publication && record.rebuild !== undefined ? { rebuild: require(\"./build-verification.cjs\").rebuildMetadata(record.rebuild, record) } : {}) });\n}\n\nfunction validateDeclaration(item) {\n"
         }
-      ]
+      ],
+      "previousSha256": "306bb2a70fda5fb0f62eec1d6bd96376eed46164b2b051977412ef3d872c41c9"
     },
     {
       "path": "src/modules/shared/runtime/bundled-native.js",

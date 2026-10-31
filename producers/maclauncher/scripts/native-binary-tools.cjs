@@ -125,7 +125,7 @@ function publicProvenance(provenance, pathMappings = []) {
     if (value && typeof value === "object") {
       const entries = [], keys = new Set();
       for (const [key, item] of Object.entries(value)) {
-        if (["logPath", "evidenceSource"].includes(key)) continue;
+        if (["logPath", "evidenceSource", "startedAt", "completedAt", "builtAt", "createdAt"].includes(key)) continue;
         const projectedKey = project(key);
         if (keys.has(projectedKey)) throw new Error("Public provenance projection produces a duplicate metadata key.");
         keys.add(projectedKey); entries.push([projectedKey, project(item)]);
@@ -143,6 +143,8 @@ function sanitizeHomebrewReceipt(receipt, formula) {
   const sanitized = JSON.parse(JSON.stringify(receipt));
   if (!sanitized.source || typeof sanitized.source !== "object" || Array.isArray(sanitized.source)) throw new Error("Homebrew receipt source identity is missing.");
   delete sanitized.source.path;
+  // Installation bookkeeping varies with the host; dependency and build identities stay.
+  for (const key of ['time', 'source_modified_time', 'installed_on_request', 'installed_as_dependency', 'poured_from_bottle', 'loaded_from_api', 'loaded_from_internal_api', 'changed_files', 'homebrew_version']) delete sanitized[key];
   const tap = sanitized.source.tap || "homebrew/core";
   if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(tap)) throw new Error("Homebrew receipt tap identity is invalid.");
   sanitized.source.formula = `${tap}/${formula.name}`;

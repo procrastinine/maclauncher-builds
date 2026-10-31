@@ -7,6 +7,7 @@ import {pathToFileURL} from 'node:url';
 import {pack,verify,catalog,publicDeclaration} from './runtime-package.mjs';
 import {resolveProject,readProjects} from '../lib/projects.mjs';
 import {releaseVersion} from '../lib/package-version.mjs';
+import {sourceDateEpoch,buildToolchain} from '../lib/reproducible-build.mjs';
 import {assetName,releaseTag,releaseRecord,validateCatalog,identity} from '../lib/project-identity.mjs';
 const require=createRequire(import.meta.url),A=require('../lib/archive.cjs'),B=require('../lib/bundled-native.cjs');
 const root=path.resolve(import.meta.dirname,'..');
@@ -65,7 +66,11 @@ export async function prepareRelease({project,input,declaration,archive,record,s
    const expected=recordFromDeclaration(declaration,{filename:name,sha256:record.asset.sha256,bytes:regular(archivePath).size},undefined,undefined,record);
    if(stable({...record,tag:undefined,sourceAsset:undefined,source:undefined,asset:{...record.asset,url:undefined}})!==stable(expected))throw Error('Release record differs from the sealed runtime archive.');
    record=expected;write(archivePath+'.json',record);
-  }else record=await pack({project,input,declaration,output:archivePath});
+  }else record=await pack({project,input,declaration,output:archivePath,sourceDateEpoch:sourceRevision?sourceDateEpoch(directory,sourceRevision):0});
+  if(!archive&&sourceRevision){
+   record.build={sourceRevision,workflow:repo+'/.github/workflows/runtime-build.yml',toolchain:buildToolchain(),
+    ...(process.env.GITHUB_ACTIONS==='true'&&process.env.GITHUB_REPOSITORY===repo?{runId:process.env.GITHUB_RUN_ID,runAttempt:process.env.GITHUB_RUN_ATTEMPT}:{})};
+  }
   if(sourcePointer)record.source=sourcePointer;
   if(legacySourceAsset)record.sourceAsset=legacySourceAsset;
   fs.writeFileSync(archivePath+'.json',json(record));

@@ -1,0 +1,87 @@
+name: Rebuild and compare
+
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: Published package project ID
+        required: true
+        type: string
+      version:
+        description: Exact published package version
+        required: true
+        type: string
+      arch:
+        description: Published package CPU
+        required: true
+        type: choice
+        options: [arm64, x64, universal]
+
+permissions:
+  contents: read
+  attestations: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      runner: ${{ steps.recipe.outputs.runner }}
+      source_revision: ${{ steps.recipe.outputs.source_revision }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PROJECT: ${{ inputs.project }}
+      VERSION: ${{ inputs.version }}
+      ARCH: ${{ inputs.arch }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Resolve the published source and its build runner
+        id: recipe
+        run: node tools/rebuild-runtime.mjs plan --project "$PROJECT" --version "$VERSION" --arch "$ARCH"
+
+  compare:
+    needs: plan
+    runs-on: ${{ needs.plan.outputs.runner }}
+    timeout-minutes: 240
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PROJECT: ${{ inputs.project }}
+      VERSION: ${{ inputs.version }}
+      ARCH: ${{ inputs.arch }}
+      SOURCE_REVISION: ${{ needs.plan.outputs.source_revision }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Verify provenance, rebuild the exact source and compare
+        run: node tools/rebuild-runtime.mjs --project "$PROJECT" --version "$VERSION" --arch "$ARCH" --source-revision "$SOURCE_REVISION" --install-tools true --require-toolchain true --output "$RUNNER_TEMP/comparison"
+      - name: Summarize the comparison
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f "$RUNNER_TEMP/comparison/comparison.md" ]; then
+            cat "$RUNNER_TEMP/comparison/comparison.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'Rebuild did not complete. The job log and failure.json identify the failed step.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        if: ${{ !cancelled() }}
+        with:
+          name: comparison-${{ inputs.project }}-${{ inputs.version }}-${{ inputs.arch }}
+          path: |
+            ${{ runner.temp }}/comparison/comparison.json
+            ${{ runner.temp }}/comparison/comparison.md
+            ${{ runner.temp }}/comparison/attestation.json
+            ${{ runner.temp }}/comparison/failure.json
+          if-no-files-found: warn
+          retention-days: 90

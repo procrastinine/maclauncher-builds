@@ -57,6 +57,27 @@ node tools/build-runtime.mjs --project sys3-decompiler --arch arm64 \
   --output /absolute/path/to/new-build --work /absolute/path/to/new-work
 ```
 
+## Verification and rebuild comparison
+
+[Verifying packages](../VERIFYING.md) describes the signed archive provenance and the generated [package verification table](https://procrastinine.github.io/maclauncher-builds/verification.html). The table uses the same catalogs as the package index, with one row per version and CPU build, its minimum macOS, recipe commit, build run and recorded comparison result. [App feature requirements](https://github.com/procrastinine/maclauncher/blob/main/docs/runtimes/SYSTEM_REQUIREMENTS.md) describe which features can use those packages.
+
+The manual **Rebuild and compare** workflow verifies a published archive's provenance, selects its exact source commit, and runs that commit's source initialization, build, preparation and verification commands. It writes a Markdown summary and JSON report; it does not stage releases, update catalogs or publish packages. The local equivalent is:
+
+```sh
+node tools/rebuild-runtime.mjs --project <project> --version <version> \
+  --arch <arch> --install-tools true --output /absolute/path/to/new-comparison
+```
+
+A historical package without a registered build command uses the producer entry in its tagged project record for manual reproduction. Rebuilds retain the historical packaging implementation. Recipe-only edits do not designate a build or change published packages; the push plan selects new versions or additional explicitly declared architectures.
+
+The report compares complete archive hashes, regular-file hashes and permissions, tar headers, member order and the full decompressed tar stream. JSON differences include field pointers and distinguish missing fields from null values. Toolchain observations appear separately from file differences. A binary difference whose cause is not established remains unexplained; an SDK difference does not establish executable equivalence.
+
+New preparation with `--source-revision` uses the commit timestamp for `SOURCE_DATE_EPOCH` and tar timestamps. Archive entries have fixed owner IDs and retain the sealed declaration's permissions; the inventory is first and the remaining members are sorted by UTF-8 bytes. Gzip settings and header fields are explicit. Legacy preparation and existing-archive reuse retain their established bytes. Runtime archives use gzip; a bundled zstd library is a binary dependency, not an archive-compression setting.
+
+New package sidecars record `build.sourceRevision`, the build workflow, GitHub run/attempt when present, and observed Node, zlib, selected clang, Xcode and macOS SDK versions. Component receipts retain their actual dependency/compiler information. Run timestamps and host installation paths are omitted from newly generated portable receipts. These records remain outside the runtime archive, so a run ID does not change its bytes.
+
+Catalog `build` metadata identifies the Builds recipe separately from an upstream `source` pointer. Optional `rebuild` metadata records `status` (`match` or `different`), the recipe commit, both archive hashes and a GitHub Actions report URL. Publication validates the original hash against the immutable asset and rejects a claimed match with different hashes. Missing historical evidence stays absent; a table link to an attestation lookup does not assert that a signed statement exists.
+
 ## Local preparation
 
 `tools/release-runtime.mjs prepare` runs offline. Its input is either a finished runtime directory with a declaration file, or the output of a MacLauncher runtime manager, which contains `manifest.json` and `files/`. Preparation keeps the runtime's files, the CPU architectures of its native binaries and its file modes unchanged.
@@ -144,4 +165,4 @@ The [package index](https://procrastinine.github.io/maclauncher-builds/), a GitH
 
 The `index.json` next to the page contains the same records, explicit page URLs and each project's `delivery` value (`downloadable` or `bundled`). Every release entry there has its `arch` and its `launcherArchitectures`. Project links use `#<project-id>`. Incompatible ABI profiles also have stable anchors, including `#hashlink-1-9`, `#hashlink-1-12`, `#java-steamworks-1-9` and `#java-steamworks-1-10`.
 
-`npm run index:build` generates both files without compiling or downloading runtimes. A second workflow, **Package index**, regenerates and deploys the site when the catalogs, either project registry or the index inputs change on `main`. Preparing and publishing an individual runtime stay separate from that workflow.
+`npm run index:build` generates `index.html`, `index.json`, `verification.html` and `verification.json` without compiling or downloading runtimes. A second workflow, **Package index**, regenerates and deploys the site when the catalogs, either project registry or the index inputs change on `main`. Preparing and publishing an individual runtime stay separate from that workflow.

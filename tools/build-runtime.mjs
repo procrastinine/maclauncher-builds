@@ -8,6 +8,7 @@ import {releaseVersion} from '../lib/package-version.mjs';
 import {RUST_TOOLCHAIN} from './rust-build.mjs';
 import {runtimeBuildEnvironment} from './runtime-build-environment.mjs';
 import {publicDeclaration} from './runtime-package.mjs';
+import {reproducibleEnvironment} from '../lib/reproducible-build.mjs';
 const B=createRequire(import.meta.url)('../lib/bundled-native.cjs');
 
 const root=path.resolve(import.meta.dirname,'..');
@@ -126,7 +127,7 @@ export function runBuild({project:id,arch,version,output,work,directory=root,spa
  if(actual!==command||!fs.statSync(actual).isFile())throw Error('The GitHub build command must be a regular file in this repository.');
  const context=runtimeBuildEnvironment(build);
  try{
-  const result=spawn(process.execPath,[command,'--project',project.id,'--arch',arch,...(Array.isArray(project.build)?['--version',build.version]:[]),'--output',output,...(work?['--work',work]:[])],{cwd:directory,stdio:'inherit',env:context.env});
+  const result=spawn(process.execPath,[command,'--project',project.id,'--arch',arch,...(Array.isArray(project.build)?['--version',build.version]:[]),'--output',output,...(work?['--work',work]:[])],{cwd:directory,stdio:'inherit',env:reproducibleEnvironment(directory,context.env)});
   if(result.error)throw result.error;
   if(result.status!==0)throw Error(project.name+' build exited with status '+result.status);
   return checkBuildOutput({project,build,arch,output});

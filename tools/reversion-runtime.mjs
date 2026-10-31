@@ -45,7 +45,8 @@ export async function reversionPackage({archive,record,version,output,directory=
   fs.mkdirSync(path.dirname(output),{recursive:true});const target=fs.createWriteStream(output,{flags:'wx',mode:0o600});target.once('open',()=>{started=true;});
   await pipeline(Readable.from(entries()),zlib.createGzip({level:6}),target);
   const sha256=await A.checksum(output);await verify({archive:output,sha256,project:record.id,version,arch:record.arch});
-  const {tag,sourceAsset,...previous}=record,result={...previous,version,manifestSha256:declaration.manifestSha256,asset:{filename:path.basename(output),sha256,bytes:fs.statSync(output).size}};
+  // A new archive has no attestation or comparison inherited from its input.
+  const {tag,sourceAsset,build,rebuild,...previous}=record,result={...previous,version,manifestSha256:declaration.manifestSha256,asset:{filename:path.basename(output),sha256,bytes:fs.statSync(output).size}};
   fs.writeFileSync(output+'.json',bytes(result),{flag:'wx'});
   return{record:result,declaration,manifest:JSON.parse(manifest),unchangedFiles:original.files.filter(file=>file.path!==original.manifestRelative).length};
  }catch(error){if(started)fs.rmSync(output,{force:true});throw error;}
