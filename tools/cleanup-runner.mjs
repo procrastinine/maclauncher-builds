@@ -98,10 +98,10 @@ function assertPhysicalTarget(action,plan){
 /** A missing target is accepted only after this invocation verified its earlier removal. */
 export function applyCleanupAction(action,plan,{environment=process.env,platform=process.platform,completed=[],execute=read,exists=fs.existsSync}={}){
  assertHostedApply(environment,platform);
+ if(action.kind==='simulator-runtime'&&!/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(action.identifier||''))throw Error('Cleanup simulator identifier changed.');
  const target=action.measurementPath||action.path,prior=target&&completed.find(row=>inside(target,row.target));
- if(prior&&!exists(target))return {status:'already-removed',removedBy:prior.identifier||prior.target};
+ if(action.kind==='simulator-runtime'&&prior&&!exists(target))return {status:'already-removed',removedBy:prior.identifier||prior.target};
  if(action.kind==='simulator-runtime'){
-  if(!/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(action.identifier||''))throw Error('Cleanup simulator identifier changed.');
   execute('/usr/bin/xcrun',['simctl','runtime','delete',action.identifier],environment);
  }else{assertPhysicalTarget(action,plan);execute('/usr/bin/sudo',['-n','/bin/rm','-rf','--',action.path],environment);}
  if(target&&!exists(target))completed.push({target,identifier:action.identifier});
