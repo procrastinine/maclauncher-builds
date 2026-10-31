@@ -386,7 +386,7 @@
   ],
   "frozenCpp": [
     {
-      "directory": "system/hardware/interfaces/media/aidl/aidl_api/android.media.audio.common.types/4",
+      "directory": "system/hardware/interfaces/media/aidl_api/android.media.audio.common.types/4",
       "version": 4
     }
   ],
