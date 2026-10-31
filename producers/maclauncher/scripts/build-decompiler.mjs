@@ -17,8 +17,8 @@ const external=path.resolve(import.meta.dirname,'../src/external');
 const run=(command,args)=>execFileSync(command,args,{encoding:'utf8',timeout:60000});
 const systemLink=value=>value.startsWith('/usr/lib/')||value.startsWith('/System/Library/');
 
-export async function buildDecompiler({project,arch,output,work=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'decompiler-')),'work'),dependencies}){
- const profile=profiles.find(row=>row.managerId===project),release=profile?.releases.find(row=>row.version===profile.version);
+export async function buildDecompiler({project,arch,version,output,work=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'decompiler-')),'work'),dependencies}){
+ const profile=profiles.find(row=>row.managerId===project),release=profile?.releases.find(row=>row.version===(version??profile.version)&&row.upstreamRevision===profile.upstreamRevision);
  if(!release||!['arm64','x64'].includes(arch)||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))
   throw Error('Select a registered decompiler, arm64 or x64, and new absolute output and work directories.');
  const cpu=arch==='x64'?'x86_64':'arm64',sourceDir=path.join(external,profile.repo),userDataDir=path.join(work,'user-data');
@@ -56,7 +56,7 @@ export async function buildDecompiler({project,arch,output,work=path.join(fs.mkd
 }
 
 export async function main(args){
- const options={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!args[i]?.startsWith('--')||!['project','arch','output','work'].includes(key)||!args[i+1]||Object.hasOwn(options,key))throw Error('Use --project, --arch, --output and --work.');options[key]=args[i+1];}
+ const options={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!args[i]?.startsWith('--')||!['project','arch','version','output','work'].includes(key)||!args[i+1]||Object.hasOwn(options,key))throw Error('Use --project, --arch, --output and --work, with an optional --version.');options[key]=args[i+1];}
  return buildDecompiler(options);
 }
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)main(process.argv.slice(2)).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error.message);process.exitCode=1;});

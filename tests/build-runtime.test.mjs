@@ -188,8 +188,9 @@ test('registered GitHub build commands reject architectures their projects do no
  const {buildDecompiler}=await import('../producers/maclauncher/scripts/build-decompiler.mjs');
  await assert.rejects(buildDecompiler({project:'sys3-decompiler',arch:'universal',output:path.join(work,'sys3'),work:path.join(work,'sys3-work')}),/arm64 or x64/);
  await assert.rejects(buildDecompiler({project:'gemrb',arch:'arm64',output:path.join(work,'gemrb'),work:path.join(work,'gemrb-work')}),/registered decompiler/);
+ await assert.rejects(buildDecompiler({project:'sys3-decompiler',arch:'arm64',version:'0.5.0',output:path.join(work,'sys3-tag'),work:path.join(work,'sys3-tag-work')}),/registered decompiler/);
  const registry=readProjects(root,{resolvePins:false});
- for(const [id,architectures] of [['sys3-decompiler',['arm64','x64']],['xsys35-decompiler',['arm64','x64']],['gm8-decompiler',['arm64','x64']],['catsystem2-kif-crypto',['arm64','x64']],['web-renderer-network',['arm64','x64']]])assert.deepEqual(buildRecords(registry.projects.find(project=>project.id===id))[0].architectures,architectures);
+ for(const [id,architectures] of [['sys3-decompiler',['arm64','x64']],['xsys35-decompiler',['arm64','x64']],['gm8-decompiler',['arm64','x64']],['catsystem2-kif-crypto',['arm64','x64']],['web-renderer-network',['arm64','x64']]])assert.deepEqual(buildRecords(registry.projects.find(project=>project.id===id)).flatMap(build=>build.architectures).sort(),architectures);
  assert.deepEqual(buildRecords(registry.projects.find(project=>project.id==='java-steamworks')).map(build=>[build.version,build.architectures]),[['1.9.0-MCLv2',['x64']],['1.10.0-MCLv2',['universal']]]);
  const {buildHelper,helperProfile}=await import('../tools/build-helper.mjs');
  assert.throws(()=>buildHelper({project:'web-renderer-network',arch:'ppc',output:path.join(work,'web'),work:path.join(work,'web-work')}),/arm64, x64 or universal/);

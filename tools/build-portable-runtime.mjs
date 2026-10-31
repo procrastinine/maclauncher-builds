@@ -47,6 +47,9 @@ export async function buildPortableRuntime({project,arch,version,output,work}){
  }
  collect(built.dependencyClosure);if(project==='ai5')for(const key of ['fontStack','audioStack','movieStack'])collect(options[key]);
  for(const name of fs.readdirSync(sourceDir).filter(name=>/^(?:COPYING|LICENSE)(?:[._-].*)?$/i.test(name)))if(fs.statSync(path.join(sourceDir,name)).isFile())notices.push({file:path.join(sourceDir,name),name:project,license:'GPL-2.0-or-later',sourceUrl:'https://github.com/'+(project==='onsyuri'?'YuriSizuku/OnscripterYuri':(project==='gemrb'?'gemrb/':project==='xsystem35'?'kichikuou/':'nunuhara/')+recipe.source)});
+ // Upstream notices for bundled fonts and embedded code.
+ const licenses=path.join(sourceDir,'licenses'),sourceUrl=notices.find(row=>row.name===project)?.sourceUrl;
+ if(sourceUrl&&fs.existsSync(licenses))for(const name of fs.readdirSync(licenses).sort())if(fs.statSync(path.join(licenses,name)).isFile())notices.push({file:path.join(licenses,name),name:path.parse(name).name,license:'See included license',sourceUrl});
  if(!notices.some(row=>row.name===project))throw Error('Runtime source license is missing.');
  const payloads=!built.appRoot&&built.resources&&fs.existsSync(built.resources)?[{source:built.resources,relative:'share/'+(project==='ai5'?'ai5-sdl2':project)}]:[];
  const environmentRelative={};

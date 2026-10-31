@@ -433,22 +433,46 @@
       {
         "version": "2.2.0-MCLv1",
         "label": "GameMaker 8 decompiler 2.2.0-MCLv1"
+      },
+      {
+        "version": "2.2.0-MCLv2",
+        "label": "GameMaker 8 decompiler 2.2.0-MCLv2"
       }
     ],
-    "build": {
-      "version": "2.2.0-MCLv1",
-      "command": "tools/build-gm8-decompiler.mjs",
-      "architectures": [
-        "arm64",
-        "x64"
-      ],
-      "submodules": [
-        "producers/maclauncher/src/external/OpenGMK"
-      ],
-      "rustComponents": [
-        "rust-docs"
-      ]
-    }
+    "build": [
+      {
+        "version": "2.2.0-MCLv1",
+        "command": "tools/build-gm8-decompiler.mjs",
+        "architectures": [
+          "x64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/OpenGMK"
+        ],
+        "tools": [
+          "cmake"
+        ],
+        "rustComponents": [
+          "rust-docs"
+        ]
+      },
+      {
+        "version": "2.2.0-MCLv2",
+        "command": "tools/build-gm8-decompiler.mjs",
+        "architectures": [
+          "arm64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/OpenGMK"
+        ],
+        "tools": [
+          "cmake"
+        ],
+        "rustComponents": [
+          "rust-docs"
+        ]
+      }
+    ]
   },
   {
     "id": "hashlink",
@@ -1090,19 +1114,42 @@
       {
         "version": "0.5.0-MCLv1",
         "label": "System3 decompiler 0.5.0-MCLv1"
+      },
+      {
+        "version": "0.5.0-MCLv2",
+        "label": "System3 decompiler 0.5.0-MCLv2"
       }
     ],
-    "build": {
-      "version": "0.5.0-MCLv1",
-      "command": "producers/maclauncher/scripts/build-decompiler.mjs",
-      "architectures": [
-        "arm64",
-        "x64"
-      ],
-      "submodules": [
-        "producers/maclauncher/src/external/sys3c"
-      ]
-    }
+    "build": [
+      {
+        "version": "0.5.0-MCLv1",
+        "command": "producers/maclauncher/scripts/build-decompiler.mjs",
+        "architectures": [
+          "x64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/sys3c"
+        ],
+        "tools": [
+          "cmake",
+          "ninja"
+        ]
+      },
+      {
+        "version": "0.5.0-MCLv2",
+        "command": "producers/maclauncher/scripts/build-decompiler.mjs",
+        "architectures": [
+          "arm64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/sys3c"
+        ],
+        "tools": [
+          "cmake",
+          "ninja"
+        ]
+      }
+    ]
   },
   {
     "id": "system3",
@@ -1209,25 +1256,46 @@
       {
         "version": "1.8.0-MCLv1",
         "label": "System3 SDL2 1.8.0-MCLv1"
+      },
+      {
+        "version": "1.8.0-MCLv2",
+        "label": "System3 SDL2 1.8.0-MCLv2"
       }
     ],
-    "build": {
-      "version": "1.8.0-MCLv1",
-      "command": "tools/build-system3.mjs",
-      "architectures": [
-        "arm64",
-        "x64"
-      ],
-      "submodules": [
-        "producers/maclauncher/src/external/system3-sdl2"
-      ],
-      "tools": [
-        "cmake",
-        "ninja",
-        "pkgconf"
-      ],
-      "recursiveSubmodules": true
-    }
+    "build": [
+      {
+        "version": "1.8.0-MCLv1",
+        "command": "tools/build-system3.mjs",
+        "architectures": [
+          "x64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/system3-sdl2"
+        ],
+        "tools": [
+          "cmake",
+          "ninja",
+          "pkgconf"
+        ],
+        "recursiveSubmodules": true
+      },
+      {
+        "version": "1.8.0-MCLv2",
+        "command": "tools/build-system3.mjs",
+        "architectures": [
+          "arm64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/system3-sdl2"
+        ],
+        "tools": [
+          "cmake",
+          "ninja",
+          "pkgconf"
+        ],
+        "recursiveSubmodules": true
+      }
+    ]
   },
   {
     "id": "xsys35-decompiler",
@@ -1258,19 +1326,42 @@
       {
         "version": "1.13.0-MCLv1",
         "label": "System3.5 decompiler 1.13.0-MCLv1"
+      },
+      {
+        "version": "1.13.0-MCLv2",
+        "label": "System3.5 decompiler 1.13.0-MCLv2"
       }
     ],
-    "build": {
-      "version": "1.13.0-MCLv1",
-      "command": "producers/maclauncher/scripts/build-decompiler.mjs",
-      "architectures": [
-        "arm64",
-        "x64"
-      ],
-      "submodules": [
-        "producers/maclauncher/src/external/xsys35c"
-      ]
-    }
+    "build": [
+      {
+        "version": "1.13.0-MCLv1",
+        "command": "producers/maclauncher/scripts/build-decompiler.mjs",
+        "architectures": [
+          "x64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/xsys35c"
+        ],
+        "tools": [
+          "cmake",
+          "ninja"
+        ]
+      },
+      {
+        "version": "1.13.0-MCLv2",
+        "command": "producers/maclauncher/scripts/build-decompiler.mjs",
+        "architectures": [
+          "arm64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/xsys35c"
+        ],
+        "tools": [
+          "cmake",
+          "ninja"
+        ]
+      }
+    ]
   },
   {
     "id": "xsystem35",
@@ -1306,26 +1397,48 @@
       {
         "version": "MCLv1-1019",
         "label": "xsystem35 SDL2 MCLv1-1019"
+      },
+      {
+        "version": "MCLv2-1019",
+        "label": "xsystem35 SDL2 MCLv2-1019"
       }
     ],
-    "build": {
-      "version": "MCLv1-1019",
-      "command": "tools/build-portable-runtime.mjs",
-      "architectures": [
-        "arm64",
-        "x64"
-      ],
-      "submodules": [
-        "producers/maclauncher/src/external/xsystem35-sdl2"
-      ],
-      "recursiveSubmodules": false,
-      "tools": [
-        "cmake",
-        "ninja",
-        "meson",
-        "pkgconf"
-      ]
-    }
+    "build": [
+      {
+        "version": "MCLv1-1019",
+        "command": "tools/build-portable-runtime.mjs",
+        "architectures": [
+          "x64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/xsystem35-sdl2"
+        ],
+        "recursiveSubmodules": false,
+        "tools": [
+          "cmake",
+          "ninja",
+          "meson",
+          "pkgconf"
+        ]
+      },
+      {
+        "version": "MCLv2-1019",
+        "command": "tools/build-portable-runtime.mjs",
+        "architectures": [
+          "arm64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/xsystem35-sdl2"
+        ],
+        "recursiveSubmodules": false,
+        "tools": [
+          "cmake",
+          "ninja",
+          "meson",
+          "pkgconf"
+        ]
+      }
+    ]
   },
   {
     "id": "xsystem4",

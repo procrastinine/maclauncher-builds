@@ -4,7 +4,7 @@ Every project has its own versions, tags and binary downloads, and releasing one
 
 ## GitHub builds
 
-A GitHub Actions workflow, **Runtime build**, compiles packages for every project whose registry entry has a `build` record. The workflow runs when a push to `main` changes `projects.json` or a project registry, and it can also be started by hand for one project; other commits build nothing. A project with several incompatible ABI versions, such as Java Steamworks, can have an array of build records, each with its own command and architectures.
+A GitHub Actions workflow, **Runtime build**, compiles packages for every project whose registry entry has a `build` record. The workflow runs when a push to `main` changes `projects.json` or a project registry, and it can also be started by hand for one project; other commits build nothing. A project with several incompatible ABI versions, such as Java Steamworks, can have an array of build records, each with its own command and architectures. An array also serves a project whose architectures have different package revisions: the System3 decompiler builds `0.5.0-MCLv1` for Intel and `0.5.0-MCLv2` for Apple Silicon.
 
 | `build` field | Contents |
 | --- | --- |
@@ -48,7 +48,7 @@ Version-specific capability facts can be stored in the sealed manifest. Packagin
 
 Before compilation, `tools/init-runtime-sources.mjs` initializes the declared source paths. It follows each registered Git submodule in a nested path and applies recursive initialization only to a declared leaf that requests it. Servers without shallow-fetch support use a full fetch of the same pinned source.
 
-The job runs the build script through `tools/build-runtime.mjs`, which selects the declared version and passes `--project`, `--arch`, `--output` and `--work`; a command serving several ABI versions also receives `--version`. When the script finishes, its output directory must hold exactly two entries, the finished runtime in `payload/` and its package declaration in `declaration.json`. `build-runtime.mjs` rejects any other layout, a version other than the one in the `build` record, an architecture that the project does not build and a declaration whose Mac CPUs do not match its architecture.
+The job runs the build script through `tools/build-runtime.mjs`, which selects the declared version and passes `--project`, `--arch`, `--output` and `--work`; a command with several build records also receives `--version`. When the script finishes, its output directory must hold exactly two entries, the finished runtime in `payload/` and its package declaration in `declaration.json`. `build-runtime.mjs` rejects any other layout, a version other than the one in the `build` record, an architecture that the project does not build and a declaration whose Mac CPUs do not match its architecture.
 
 The job then runs `prepare` with the exact source commit and `verify`, adds a signed GitHub build attestation for the package archive and uploads the release directory as the workflow artifact `runtime-<project>-<version>-<arch>`. A failed attestation request is retried once after five seconds without rebuilding. If both attempts fail, the job fails. Verified release directories are retained as Actions artifacts even when attestation fails; publication still requires a successful package job and a valid attestation. The attestation names this workflow, its run and the commit the package was built from, and `gh attestation verify <archive> --repo procrastinine/maclauncher-builds` checks it.
 
@@ -59,8 +59,8 @@ The build and packaging commands also run locally. `--prepare` requires the decl
 ```sh
 node tools/build-runtime.mjs --plan --project sys3-decompiler
 node tools/build-runtime.mjs --plan --before <40-character-previous-commit>
-node tools/init-runtime-sources.mjs --project sys3-decompiler
-node tools/build-runtime.mjs --project sys3-decompiler --arch arm64 \
+node tools/init-runtime-sources.mjs --project sys3-decompiler --version 0.5.0-MCLv2
+node tools/build-runtime.mjs --project sys3-decompiler --arch arm64 --version 0.5.0-MCLv2 \
   --output /absolute/path/to/new-build --work /absolute/path/to/new-work
 ```
 
