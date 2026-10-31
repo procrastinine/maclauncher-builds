@@ -153,7 +153,7 @@ fs.copyFileSync(path.join(build, "libvkd3d-shader.dylib"), path.join(output, "li
 const library = path.join(output, "libreshade-macos.dylib");
 run("/usr/bin/codesign", ["--force", "--sign", "-", "--timestamp=none", library]);
 // Same arm64 selector-stub form as the CMake targets (see CMakeLists.txt).
-run("/usr/bin/c++", ["-O3", "-std=c++17", "-arch", "arm64", "-arch", "x86_64", "-mmacosx-version-min=14.0", "-fobjc-arc", "-Wno-deprecated-declarations",
+run("/usr/bin/c++", ["-O3", "-std=c++17", "-arch", "arm64", "-arch", "x86_64", "-mmacosx-version-min=13.0", "-fobjc-arc", "-Wno-deprecated-declarations", "-Werror=unguarded-availability-new",
   "-Wl,-objc_stubs_small", path.join(applied,"src/graphics-video.mm"), "-o", path.join(output,"maclauncher-graphics-video"),
   ...["Foundation","AVFoundation","CoreVideo","CoreMedia","CoreGraphics","VideoToolbox","Metal"].flatMap(name=>["-framework",name])]);
 run("/usr/bin/codesign", ["--force", "--sign", "-", "--timestamp=none", path.join(output,"maclauncher-graphics-video")]);

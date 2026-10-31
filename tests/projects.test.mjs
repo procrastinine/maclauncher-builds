@@ -36,8 +36,8 @@ test('upstream checks retain prerelease candidates and report incomplete metadat
 test('delivery registries classify each project once and preserve a flat project API',t=>{
  const registry=readProjects(root),rawRegistry=readProjects(root,{resolvePins:false}),manifest=JSON.parse(fs.readFileSync(path.join(root,'projects.json')));
  assert.equal(registry.schemaVersion,1);assert.equal(manifest.schemaVersion,2);
- assert.equal(registry.projects.filter(project=>project.delivery==='downloadable').length,37);
- assert.equal(registry.projects.filter(project=>project.delivery==='bundled').length,12);
+ assert.equal(registry.projects.filter(project=>project.delivery==='downloadable').length,39);
+ assert.equal(registry.projects.filter(project=>project.delivery==='bundled').length,13);
  assert.equal(resolveProject('mkxpz',root).delivery,'downloadable');assert.equal(resolveProject('reshade',root).delivery,'bundled');
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'project-delivery-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
  fs.mkdirSync(path.join(directory,'projects'));

@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "projects": {
+    "uosc-helper": {
+      "repository": "https://github.com/tomasklaen/uosc",
+      "revision": "d124c2c930d69446448022851373e00ae592390d",
+      "version": "5.13.0",
+      "license": "LGPL-2.1",
+      "modules": [
+        {
+          "module": "github.com/atotto/clipboard",
+          "version": "v0.1.4",
+          "revision": "e4aee1922c628e6966acd4207c408df132dc6fb5",
+          "sum": "h1:EH0zSVneZPSuFR11BlR9YppQTVDbh5+16AmcJi4g1z4=",
+          "license": "BSD-3-Clause"
+        },
+        {
+          "module": "github.com/pkg/browser",
+          "version": "v0.0.0-20240102092130-5ac0b6a4141c",
+          "revision": "5ac0b6a4141c771a0d3a081c36b87c977cf9c7db",
+          "sum": "h1:+mdjkGKdHQG3305AYmdv1U2eRNDiU2ErMBj1gwrq8eQ=",
+          "license": "BSD-2-Clause"
+        }
+      ]
+    },
+    "scummvm-tools": {
+      "repository": "https://github.com/scummvm/scummvm-tools",
+      "revision": "516246735618120eb9439cb9673a32430c18d604",
+      "version": "2.9.0",
+      "license": "GPL-3.0-or-later",
+      "dependencies": [
+        {
+          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.json",
+          "ids": [
+            "ogg",
+            "flac",
+            "vorbis"
+          ]
+        },
+        {
+          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
+          "ids": [
+            "libpng"
+          ]
+        }
+      ]
+    }
+  }
+}

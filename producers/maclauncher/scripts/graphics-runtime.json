@@ -234,42 +234,6 @@
         "x86_64-windows/d3d11.dll": null
       }
     },
-    "libplacebo-arm64": {
-      "kind": "archives",
-      "description": "Apple Silicon package prefix holding the libplacebo 7.360.1, shaderc 2026.4 and Little CMS 2.19.1 Homebrew bottles listed in libplacebo-build.mjs",
-      "pin": {
-        "file": "src/modules/shared/reshade/libplacebo-build.mjs",
-        "pointer": "/INPUTS"
-      },
-      "headers": {
-        "Authorization": "Bearer QQ=="
-      },
-      "each": {
-        "path": "{formula}",
-        "url": "https://ghcr.io/v2/homebrew/core/{formula}/blobs/sha256:{archiveSha256}",
-        "sha256": "{archiveSha256}",
-        "file": "{file}",
-        "fileSha256": "{sha256}"
-      }
-    },
-    "libplacebo-x86_64": {
-      "kind": "archives",
-      "description": "Intel package prefix with the same libplacebo, shaderc and Little CMS layout",
-      "pin": {
-        "file": "src/modules/shared/reshade/libplacebo-build.mjs",
-        "pointer": "/INTEL_INPUTS"
-      },
-      "headers": {
-        "Authorization": "Bearer QQ=="
-      },
-      "each": {
-        "path": "{formula}",
-        "url": "https://ghcr.io/v2/homebrew/core/{formula}/blobs/sha256:{archiveSha256}",
-        "sha256": "{archiveSha256}",
-        "file": "{file}",
-        "fileSha256": "{sha256}"
-      }
-    },
     "moltenvk": {
       "kind": "archive",
       "description": "MoltenVK release directory whose dynamic macOS library matches libplacebo-build.mjs",
@@ -308,6 +272,50 @@
         "provider": "core",
         "path": "build/shaderc-offline"
       }
+    },
+    "isf-glslang": {
+      "kind": "archive",
+      "description": "Original glslang compiler source for ISF",
+      "pin": {
+        "file": "src/modules/shared/reshade/isf/source.json",
+        "pointer": "/compilerSources/0"
+      },
+      "url": "{url}",
+      "sha256": "{sha256}",
+      "entry": "{entry}"
+    },
+    "isf-spirv-cross": {
+      "kind": "archive",
+      "description": "Original spirv-cross compiler source for ISF",
+      "pin": {
+        "file": "src/modules/shared/reshade/isf/source.json",
+        "pointer": "/compilerSources/1"
+      },
+      "url": "{url}",
+      "sha256": "{sha256}",
+      "entry": "{entry}"
+    },
+    "isf-spirv-tools": {
+      "kind": "archive",
+      "description": "Original spirv-tools compiler source for ISF",
+      "pin": {
+        "file": "src/modules/shared/reshade/isf/source.json",
+        "pointer": "/compilerSources/2"
+      },
+      "url": "{url}",
+      "sha256": "{sha256}",
+      "entry": "{entry}"
+    },
+    "isf-spirv-headers": {
+      "kind": "archive",
+      "description": "Original spirv-headers compiler source for ISF",
+      "pin": {
+        "file": "src/modules/shared/reshade/isf/source.json",
+        "pointer": "/compilerSources/3"
+      },
+      "url": "{url}",
+      "sha256": "{sha256}",
+      "entry": "{entry}"
     }
   },
   "tools": {
@@ -351,10 +359,6 @@
             "{source:libplacebo-vulkan-headers}",
             "--fast-float-source",
             "{source:libplacebo-fast-float}",
-            "--inputs",
-            "{input:libplacebo-arm64}",
-            "--intel-inputs",
-            "{input:libplacebo-x86_64}",
             "--moltenvk",
             "{input:moltenvk}",
             "--headers",
@@ -368,7 +372,9 @@
             "--output",
             "{output}",
             "--arch",
-            "{arch}"
+            "{arch}",
+            "--python",
+            "{tool:python}"
           ]
         }
       ]
@@ -621,7 +627,15 @@
             "--source",
             "{source:isfmslkit}",
             "--arch",
-            "{arch}"
+            "{arch}",
+            "--glslang",
+            "{input:isf-glslang}",
+            "--spirv-cross",
+            "{input:isf-spirv-cross}",
+            "--spirv-tools",
+            "{input:isf-spirv-tools}",
+            "--spirv-headers",
+            "{input:isf-spirv-headers}"
           ]
         }
       ]

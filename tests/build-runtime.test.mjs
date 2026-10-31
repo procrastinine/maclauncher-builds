@@ -203,7 +203,7 @@ test('a project with multiple ABI builds plans missing versions independently',t
 
 test('graphics outputs use different build hosts while retaining one version per CPU',()=>{
  const matrix=buildPlan({project:'reshade',directory:root,tags:()=>[]}).include;
- assert.deepEqual(matrix.map(row=>[row.version,row.arch,row.runner]),[['0.3.0','universal','xcode-27'],['0.3.0','x64','macos-26-intel']]);
+ assert.deepEqual(matrix.map(row=>[row.version,row.arch,row.runner]),[['0.3.1','universal','xcode-27'],['0.3.1','x64','macos-26-intel']]);
  const project=readProjects(root,{resolvePins:false}).projects.find(project=>project.id==='reshade');
  assert.deepEqual(buildRecord(project).architectures,['universal','x64']);
  assert.throws(()=>buildRecord({...project,build:{...project.build,runners:{x64:'self-hosted'}}}),/hosted Mac/);

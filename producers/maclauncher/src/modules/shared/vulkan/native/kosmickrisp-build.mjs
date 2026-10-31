@@ -31,6 +31,7 @@ export function buildKosmic(options){
  });
  const environment={...process.env,CC:'/usr/bin/clang',CXX:'/usr/bin/clang++',
   LLVM_CONFIG:path.join(llvm,'bin/llvm-config'),MACOSX_DEPLOYMENT_TARGET:pin.minimumMacOS,
+  ...(options.pkgConfigPath?{PKG_CONFIG_PATH:options.pkgConfigPath}:{}),
   MESA_GIT_SHA1_OVERRIDE:pin.revision,CCACHE_DIR:path.join(work,'ccache'),CCACHE_MAXSIZE:'128M',
   PATH:[path.dirname(meson),path.join(llvm,'bin'),process.env.PATH].join(path.delimiter)};
  const args=['--buildtype=release','--wrap-mode=nofallback','-Dvulkan-drivers=kosmickrisp',

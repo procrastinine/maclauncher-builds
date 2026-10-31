@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "minimumMacOS": "13.0",
+  "shadercVersion": "2026.4",
+  "lcmsVersion": "2.19.1",
+  "sources": [
+    {
+      "id": "shaderc",
+      "repository": "https://github.com/google/shaderc",
+      "commit": "b64fd42c4a2a9d501c47aca5d3571f7673a5e9cc",
+      "license": "Apache-2.0",
+      "url": "https://codeload.github.com/google/shaderc/tar.gz/b64fd42c4a2a9d501c47aca5d3571f7673a5e9cc",
+      "sha256": "b0f73c2f50df5f24e78fae6d04f1e95131c65ea3ea13fd8998a317a5d632a51f"
+    },
+    {
+      "id": "glslang",
+      "repository": "https://github.com/KhronosGroup/glslang",
+      "commit": "e1b562a8bed273a02f30b59b66a5d499793cede5",
+      "license": "BSD-3-Clause AND MIT AND Apache-2.0",
+      "url": "https://codeload.github.com/KhronosGroup/glslang/tar.gz/e1b562a8bed273a02f30b59b66a5d499793cede5",
+      "sha256": "907174a24713c6202c146f164bf81783f1fbc79c8cb821a30f18f159eb980312"
+    },
+    {
+      "id": "spirv-tools",
+      "repository": "https://github.com/KhronosGroup/SPIRV-Tools",
+      "commit": "ef96ed763b43b59b33b31b362f09a02b729fa1c9",
+      "license": "Apache-2.0",
+      "url": "https://codeload.github.com/KhronosGroup/SPIRV-Tools/tar.gz/ef96ed763b43b59b33b31b362f09a02b729fa1c9",
+      "sha256": "82c62146083fd558735a3171cf97cfc47903ca7d368482e87f94bd44883c0f00"
+    },
+    {
+      "id": "spirv-headers",
+      "repository": "https://github.com/KhronosGroup/SPIRV-Headers",
+      "commit": "04fd3caa1e8267e4d95c806cad901181728e1006",
+      "license": "MIT",
+      "url": "https://codeload.github.com/KhronosGroup/SPIRV-Headers/tar.gz/04fd3caa1e8267e4d95c806cad901181728e1006",
+      "sha256": "392f4801409aad9c4f1b77745f179952fd6264e4c8bd0fc1bc45dfa6807bf6d0"
+    },
+    {
+      "id": "lcms2",
+      "repository": "https://github.com/mm2/Little-CMS",
+      "commit": "21c582a594fe5279f90c0b93437c398f93bf62b0",
+      "license": "MIT",
+      "url": "https://codeload.github.com/mm2/Little-CMS/tar.gz/21c582a594fe5279f90c0b93437c398f93bf62b0",
+      "sha256": "0d953b598c25cc202a8f77e584fd4c7d285f759100fd391f77eca32574717509"
+    }
+  ]
+}

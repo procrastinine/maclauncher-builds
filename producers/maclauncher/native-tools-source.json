@@ -35,11 +35,15 @@
     {
       "path": "src/modules/shared/vulkan/native/kosmickrisp-build.mjs",
       "sourceSha256": "86cdec94cbd6fc624cfe129803179554bde4494ad571203e742804336b5acc3f",
-      "sha256": "5a51d048ab873c43817b53c09dadc0485d1c54da4da22dce01309ee19136879d",
+      "sha256": "49682dc6528a034218300385666c570d0c2e6acdff0a5b89295b0353a812f57d",
       "replacements": [
         {
           "from": "import Stage from '../../../../../scripts/stage-native-runtimes.cjs';",
           "to": "import Stage from '../../../../../scripts/native-binary-tools.cjs';"
+        },
+        {
+          "from": "  LLVM_CONFIG:path.join(llvm,'bin/llvm-config'),MACOSX_DEPLOYMENT_TARGET:pin.minimumMacOS,\n",
+          "to": "  LLVM_CONFIG:path.join(llvm,'bin/llvm-config'),MACOSX_DEPLOYMENT_TARGET:pin.minimumMacOS,\n  ...(options.pkgConfigPath?{PKG_CONFIG_PATH:options.pkgConfigPath}:{}),\n"
         }
       ]
     },

@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "id": "android-art-image-extractor",
+  "repository": "https://github.com/hahnlee/aim",
+  "revision": "9b5068fa8185d3f51f1862fe7c54d88d51f09ec8",
+  "crate": "tools/android-image-extract",
+  "minimumMacOS": "13.0"
+}

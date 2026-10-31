@@ -132,8 +132,8 @@ if(options["--xess-host"]){
 }
 if(options["--isf"]){
   const directory=options["--isf"],ownedRoot=path.resolve(import.meta.dirname,"../src/modules/shared/reshade/isf"),source=JSON.parse(fs.readFileSync(path.join(ownedRoot,"source.json"))),metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json")));
-  if(metadata.schema!==source.schema||metadata.providerABI!==source.providerABI||metadata.library!==source.library||metadata.minimumMacOS!==source.minimumMacOS||!Array.isArray(metadata.architectures)||metadata.architectures.some(cpu=>!source.architectures.includes(cpu))||!packageCPUs.every(cpu=>metadata.architectures.includes(cpu))||JSON.stringify(metadata.sources)!==JSON.stringify(source.sources)||JSON.stringify(metadata.compilerLibraries)!==JSON.stringify(source.compilerLibraries)||!Array.isArray(metadata.files))throw Error("A compatible complete ISF shader provider is required.");
-  const ownedNames=["source.json","build.mjs","isolate-compiler.mjs","../compiler-isolation.mjs","CMakeLists.txt","provider.mm","index.js",
+  if(metadata.schema!==source.schema||metadata.providerABI!==source.providerABI||metadata.library!==source.library||metadata.minimumMacOS!==source.minimumMacOS||!Array.isArray(metadata.architectures)||metadata.architectures.some(cpu=>!source.architectures.includes(cpu))||!packageCPUs.every(cpu=>metadata.architectures.includes(cpu))||JSON.stringify(metadata.sources)!==JSON.stringify(source.sources)||JSON.stringify(metadata.compilerLibraries)!==JSON.stringify(source.compilerLibraries)||JSON.stringify(metadata.compilerSources)!==JSON.stringify(source.compilerSources)||!Array.isArray(metadata.files))throw Error("A compatible complete ISF shader provider is required.");
+  const ownedNames=["source.json","build.mjs","build-compilers.mjs","compiler-CMakeLists.txt","isolate-compiler.mjs","../compiler-isolation.mjs","CMakeLists.txt","provider.mm","index.js",
     ...(metadata.sceneInputsAPI===1?["../../effects/operation-contracts.mjs"]:[])];
   if(!metadata.owned||Object.keys(metadata.owned).sort().join()!==ownedNames.sort().join())throw Error("The ISF owned source closure is incomplete.");
   for(const name of ownedNames)if(digest(fs.readFileSync(path.join(ownedRoot,name)))!==metadata.owned[name])throw Error("The ISF owned source changed: "+name);
@@ -147,7 +147,7 @@ if(options["--isf"]){
     if(actual!==entry.commit)throw Error("The ISF source pin differs from its provider: "+entry.path);
     execFileSync("git",["-C",upstream,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});pins.push(` ${actual} third_party/isf/${path.basename(entry.path)}`);
   }
-  const required=new Set([source.library,...source.compilerLibraries.map(file=>path.basename(file)),"default.metallib","ISF-LICENSE.txt","VVMetalKit-LICENSE.txt","ISFGLSLGenerator-LICENSE.txt","PINCache-LICENSE.txt","PINOperation-LICENSE.txt"]);
+  const required=new Set([source.library,...source.compilerLibraries.map(file=>path.basename(file)),...source.compilerSources.map(row=>row.id+"-LICENSE.txt"),"default.metallib","ISF-LICENSE.txt","VVMetalKit-LICENSE.txt","ISFGLSLGenerator-LICENSE.txt","PINCache-LICENSE.txt","PINOperation-LICENSE.txt"]);
   for(const row of metadata.files){
     if(typeof row.path!=="string"||!required.delete(row.path))throw Error("The ISF provider contains an undeclared or duplicate resource.");
     const file=path.join(directory,row.path),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==row.size||digest(fs.readFileSync(file))!==row.sha256)throw Error("The ISF provider resource changed: "+row.path);
@@ -156,7 +156,7 @@ if(options["--isf"]){
   if(required.size||fs.readdirSync(directory).length!==metadata.files.length+1)throw Error("The ISF provider dependency and license closure is incomplete.");
   optionalInputs.set("isf/provider.json",path.join(directory,"provider.json"));
   for(const name of ownedNames)extraOwned.set(path.posix.normalize("maclauncher/isf/"+name),path.join(ownedRoot,name));
-  features.shaders.formats=[...new Set([...(features.shaders.formats||[]),"isf"])];features.shaders.providers??={};features.shaders.providers.isf={nodeABI:1,architectures:source.architectures,minimumMacOS:source.minimumMacOS};
+  features.shaders.formats=[...new Set([...(features.shaders.formats||[]),"isf"])];features.shaders.providers??={};features.shaders.providers.isf={nodeABI:1,architectures:packageCPUs.filter(cpu=>metadata.architectures.includes(cpu)),minimumMacOS:metadata.minimumMacOS};
   if(metadata.sceneInputsAPI!==undefined){
     const roles=SCENE_SHADER_INPUTS.filter(name=>!["viewMatrix","projectionMatrix"].includes(name));
     if(metadata.sceneInputsAPI!==1||JSON.stringify(metadata.sceneInputRoles)!==JSON.stringify(roles))throw Error("The ISF scene input contract differs from its supported image roles.");
@@ -253,7 +253,8 @@ if(options["--libplacebo"]) {
   const directory=options["--libplacebo"];
   const metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json"),"utf8"));
   if(metadata.schema!==1||metadata.provider!=="libplacebo"||metadata.library!=="libmacfx-libplacebo.dylib"||metadata.helper!=="libplacebo-prepare"||
-      !Array.isArray(metadata.architectures)||!metadata.architectures.length||new Set(metadata.architectures).size!==metadata.architectures.length||metadata.architectures.some(arch=>!["arm64","x86_64"].includes(arch))||metadata.minimumMacOS!=="15.0"||!Array.isArray(metadata.files))throw new Error("A complete optional shader provider is required.");
+      !Array.isArray(metadata.architectures)||!metadata.architectures.length||new Set(metadata.architectures).size!==metadata.architectures.length||metadata.architectures.some(arch=>!["arm64","x86_64"].includes(arch))||metadata.minimumMacOS!=="13.0"||!Array.isArray(metadata.files))throw new Error("A complete optional shader provider is required.");
+  features.shaders??={};features.shaders.providers??={};features.shaders.providers.libplacebo={...features.shaders.providers.libplacebo,architectures:packageCPUs.filter(cpu=>metadata.architectures.includes(cpu)),minimumMacOS:metadata.minimumMacOS};
   const required=new Set([metadata.library,metadata.helper,"libplacebo/liblcms2.2.dylib","libplacebo/libMoltenVK.dylib","libplacebo/libplacebo.360.dylib","libplacebo/libshaderc_shared.1.dylib"]);
   for(const entry of metadata.files) {
     if(typeof entry.path!=="string"||path.isAbsolute(entry.path)||entry.path.split(/[\\/]/).some(part=>!part||part==="."||part==="..")||optionalInputs.has(entry.path))throw new Error("Invalid optional provider path.");
@@ -461,7 +462,7 @@ if(snapshotProviders.size){
 const nativePaths = new Map(nativeFiles.map(file => [file, path.join(build, file)]));
 for(const [relative,file] of retroarchInputs)if(nativeFiles.includes(relative))nativePaths.set(relative,file);
 for(const [relative,load] of optionalLoad){nativeFiles.push(relative);nativePaths.set(relative,optionalInputs.get(relative));}
-if(nativeFiles.includes("maclauncher-graphics-video")) optionalLoad.set("maclauncher-graphics-video", {architectures: ["arm64", "x86_64"], minimumMacOS: "14.0"});
+if(nativeFiles.includes("maclauncher-graphics-video")) optionalLoad.set("maclauncher-graphics-video", {architectures: ["arm64", "x86_64"], minimumMacOS: "13.0"});
 for (const [relative, file] of temporalInputs) if (/\.(dylib|so)$/.test(relative)) {
  nativeFiles.push(relative);nativePaths.set(relative,file);
  const architectures=Native.readMachOArchitectures(file,{allowLibrary:true}),floors=[...execFileSync("xcrun",["vtool","-show-build",file],{encoding:"utf8"}).matchAll(/minos\s+(\d+(?:\.\d+)+)/g)].map(match=>match[1]);
@@ -532,7 +533,7 @@ if(options["--neural"]&&nativeImageFilters?.methods.includes("estimated-depth-fo
 if(features.graphics.estimatedDepthAPI===1&&(!symbols.includes("NeuralDepthEstimator")||!symbols.includes("makeEstimatedDepthFogNode")))throw Error("The graphics core is missing its scalar attachment and fog consumer.");
 if(nativeFiles.includes("shaderc-offline")&&optionalInputs.has("libplacebo/libshaderc_shared.1.dylib")&&symbols.includes("makeMagpieShaderNode")){
   features.shaders.formats=[...new Set([...(features.shaders.formats||[]),"magpie"])];features.shaders.providers??={};
-  features.shaders.providers.magpie={...features.shaders.providers.magpie,architectures:["arm64","x86_64"],minimumMacOS:"13.0",compilerMinimumMacOSByArchitecture:{arm64:"15.0",x86_64:"14.0"}};
+  features.shaders.providers.magpie={...features.shaders.providers.magpie,architectures:["arm64","x86_64"],minimumMacOS:"13.0",compilerMinimumMacOSByArchitecture:Object.fromEntries(packageCPUs.map(cpu=>[cpu,libplacebo.minimumMacOS]))};
   if(features.graphics.shaderSceneInputsAPI===1)Object.assign(features.shaders.providers.magpie,{sceneInputsAPI:1,sceneInputRoles:[...SCENE_SHADER_INPUTS]});
 }
 if(options["--fsr3-generation"]&&!symbols.includes("makeFSR3GenerationEncoder"))throw Error("The core graphics library must include the AMD generation adapter.");
@@ -692,6 +693,7 @@ const declaration = { id: "reshade", version, arch: packageArch, launcherArchite
     ...(inputs.has("licenses/Khronos-ToneMapping.txt")?[{name:"Khronos PBR Neutral tone mapping",license:"Apache-2.0",path:"licenses/Khronos-ToneMapping.txt",sourceUrl:"https://github.com/KhronosGroup/ToneMapping"}]:[]),
     ...(options["--isf"]?[
       {name:"ISFMSLKit and shader compiler dependencies",license:"MIT AND BSD-3-Clause AND Apache-2.0",path:"isf/ISF-LICENSE.txt",sourceUrl:"https://github.com/mrRay/ISFMSLKit"},
+      ...JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname,"../src/modules/shared/reshade/isf/source.json"))).compilerSources.map(row=>({name:row.id,license:row.license,path:"isf/"+row.id+"-LICENSE.txt",sourceUrl:row.repository})),
       {name:"VVMetalKit",license:"MIT AND LicenseRef-Apple-Sample-Code",path:"isf/VVMetalKit-LICENSE.txt",sourceUrl:"https://github.com/mrRay/VVMetalKit"},
       {name:"ISFGLSLGenerator",license:"BSD-3-Clause",path:"isf/ISFGLSLGenerator-LICENSE.txt",sourceUrl:"https://github.com/mrRay/ISFGLSLGenerator"},
       {name:"PINCache",license:"Apache-2.0",path:"isf/PINCache-LICENSE.txt",sourceUrl:"https://github.com/mrRay/PINCache"},
@@ -706,9 +708,10 @@ const declaration = { id: "reshade", version, arch: packageArch, launcherArchite
       { name: "Swift Numerics", license: "Apache-2.0", path: "neural/notices/Swift-Numerics-LICENSE", sourceUrl: "https://github.com/apple/swift-numerics" }
     ] : []),
     ...(libplacebo?[
-      {name:"libplacebo",license:"LGPL-2.1-or-later",path:"notices/libplacebo/libplacebo.360.dylib.LICENSE",sourceUrl:libplacebo.inputs.find(item=>["libplacebo.360.dylib","libplacebo"].includes(item.name)).source},
-      {name:"shaderc",license:"Apache-2.0",path:"notices/libplacebo/libshaderc_shared.1.dylib.LICENSE",sourceUrl:libplacebo.inputs.find(item=>item.name==="libshaderc_shared.1.dylib").source},
-      {name:"Little CMS",license:"MIT",path:"notices/libplacebo/liblcms2.2.dylib.LICENSE",sourceUrl:libplacebo.inputs.find(item=>item.name==="liblcms2.2.dylib").source},
+      ...libplacebo.inputs.filter(row=>row.id&&!["shaderc","lcms2"].includes(row.id)).map(row=>({name:row.id,license:row.license,path:"notices/libplacebo/"+row.id+".LICENSE",sourceUrl:row.repository})),
+      {name:"libplacebo",license:"LGPL-2.1-or-later",path:"notices/libplacebo/libplacebo-source.LICENSE",sourceUrl:libplacebo.inputs.find(item=>["libplacebo.360.dylib","libplacebo"].includes(item.name)).source},
+      {name:"shaderc",license:"Apache-2.0",path:"notices/libplacebo/shaderc.LICENSE",sourceUrl:libplacebo.inputs.find(item=>item.id==="shaderc").repository},
+      {name:"Little CMS",license:"MIT",path:"notices/libplacebo/lcms2.LICENSE",sourceUrl:libplacebo.inputs.find(item=>item.id==="lcms2").repository},
       {name:"MoltenVK",license:"Apache-2.0",path:"notices/libplacebo/MoltenVK.LICENSE",sourceUrl:"https://github.com/KhronosGroup/MoltenVK"}
     ]:[]),
     ...(options["--fsr"] ? [

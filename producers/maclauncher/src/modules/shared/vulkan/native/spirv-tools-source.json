@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "version": "1.4.363.0",
+  "minimumMacOS": "26.0",
+  "sources": [
+    {
+      "id": "spirv-tools",
+      "repository": "https://github.com/KhronosGroup/SPIRV-Tools",
+      "license": "Apache-2.0",
+      "archive": {
+        "url": "https://codeload.github.com/KhronosGroup/SPIRV-Tools/tar.gz/ef96ed763b43b59b33b31b362f09a02b729fa1c9",
+        "sha256": "82c62146083fd558735a3171cf97cfc47903ca7d368482e87f94bd44883c0f00"
+      },
+      "commit": "ef96ed763b43b59b33b31b362f09a02b729fa1c9"
+    },
+    {
+      "id": "spirv-headers",
+      "repository": "https://github.com/KhronosGroup/SPIRV-Headers",
+      "license": "MIT",
+      "archive": {
+        "url": "https://codeload.github.com/KhronosGroup/SPIRV-Headers/tar.gz/496543121ce6419f23d6fa5d7194ba66c36212d2",
+        "sha256": "a9bb9c48713245eacf97cc539b6f1d45405a92d8813f8b82e635f0a085ee9898"
+      },
+      "commit": "496543121ce6419f23d6fa5d7194ba66c36212d2"
+    }
+  ]
+}

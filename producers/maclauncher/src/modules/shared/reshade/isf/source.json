@@ -2,13 +2,84 @@
   "schema": 1,
   "providerABI": 1,
   "library": "libmacfx-isf.dylib",
-  "minimumMacOS": "15.0",
-  "architectures": ["arm64", "x86_64"],
-  "sources": [
-    {"path": "src/external/ISFMSLKit", "repository": "https://github.com/mrRay/ISFMSLKit", "commit": "3aa93550c3acee0caed3e71c6e54743f1bc9da4f", "license": "MIT"},
-    {"path": "src/external/ISFMSLKit/submodules/ISFGLSLGenerator", "repository": "https://github.com/mrRay/ISFGLSLGenerator", "commit": "2b5507bde4648e3ee5152121e8aeb61ea9a549cb", "license": "BSD-3-Clause"},
-    {"path": "src/external/ISFMSLKit/submodules/VVMetalKit", "repository": "https://github.com/mrRay/VVMetalKit", "commit": "7e77f228ce9b5ef03726bdabeae39763b23f52b6", "license": "MIT AND LicenseRef-Apple-Sample-Code"},
-    {"path": "src/external/ISFMSLKit/submodules/PINCache", "repository": "https://github.com/mrRay/PINCache", "commit": "41330ff0e4f16e43103aae61e87db16eec03dd20", "license": "Apache-2.0", "includes": ["Carthage/Checkouts/PINOperation"]}
+  "minimumMacOS": "13.0",
+  "architectures": [
+    "arm64",
+    "x86_64"
   ],
-  "compilerLibraries": ["extern/GLSLangValidatorLib/bin/libGLSLangValidatorLib.dylib", "extern/SPIRVCrossLib/bin/libSPIRVCrossLib.dylib"]
+  "sources": [
+    {
+      "path": "src/external/ISFMSLKit",
+      "repository": "https://github.com/mrRay/ISFMSLKit",
+      "commit": "3aa93550c3acee0caed3e71c6e54743f1bc9da4f",
+      "license": "MIT"
+    },
+    {
+      "path": "src/external/ISFMSLKit/submodules/ISFGLSLGenerator",
+      "repository": "https://github.com/mrRay/ISFGLSLGenerator",
+      "commit": "2b5507bde4648e3ee5152121e8aeb61ea9a549cb",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "path": "src/external/ISFMSLKit/submodules/VVMetalKit",
+      "repository": "https://github.com/mrRay/VVMetalKit",
+      "commit": "7e77f228ce9b5ef03726bdabeae39763b23f52b6",
+      "license": "MIT AND LicenseRef-Apple-Sample-Code"
+    },
+    {
+      "path": "src/external/ISFMSLKit/submodules/PINCache",
+      "repository": "https://github.com/mrRay/PINCache",
+      "commit": "41330ff0e4f16e43103aae61e87db16eec03dd20",
+      "license": "Apache-2.0",
+      "includes": [
+        "Carthage/Checkouts/PINOperation"
+      ]
+    }
+  ],
+  "compilerLibraries": [
+    "extern/GLSLangValidatorLib/bin/libGLSLangValidatorLib.dylib",
+    "extern/SPIRVCrossLib/bin/libSPIRVCrossLib.dylib"
+  ],
+  "compilerSources": [
+    {
+      "id": "glslang",
+      "repository": "https://github.com/mrRay/glslang",
+      "commit": "278eba154ac4006f662fa7eefed5d5797fd33d75",
+      "license": "BSD-3-Clause AND MIT AND Apache-2.0",
+      "notice": "LICENSE.txt",
+      "url": "https://codeload.github.com/mrRay/glslang/tar.gz/278eba154ac4006f662fa7eefed5d5797fd33d75",
+      "sha256": "c4fe4931e9f8d04179ecdccd01df3ef20e4a4e8b9dfb34f75a65e7d00ecdc758",
+      "entry": "glslang-278eba154ac4006f662fa7eefed5d5797fd33d75"
+    },
+    {
+      "id": "spirv-cross",
+      "repository": "https://github.com/mrRay/SPIRV-Cross",
+      "commit": "774b272260baef494a79fa90c655d248bf02b00b",
+      "license": "Apache-2.0 OR MIT",
+      "notice": "LICENSE",
+      "url": "https://codeload.github.com/mrRay/SPIRV-Cross/tar.gz/774b272260baef494a79fa90c655d248bf02b00b",
+      "sha256": "ce7f77bb5074d21170cba11a6bfd88a44f131c2b69f2f51fbec303fa29f6fdca",
+      "entry": "SPIRV-Cross-774b272260baef494a79fa90c655d248bf02b00b"
+    },
+    {
+      "id": "spirv-tools",
+      "repository": "https://github.com/KhronosGroup/SPIRV-Tools",
+      "commit": "0cfe9e7219148716dfd30b37f4d21753f098707a",
+      "license": "Apache-2.0",
+      "notice": "LICENSE",
+      "url": "https://codeload.github.com/KhronosGroup/SPIRV-Tools/tar.gz/0cfe9e7219148716dfd30b37f4d21753f098707a",
+      "sha256": "a5277538fec0868452b1f616553c2fca80939a6a3ee0b7322e21ff063750a482",
+      "entry": "SPIRV-Tools-0cfe9e7219148716dfd30b37f4d21753f098707a"
+    },
+    {
+      "id": "spirv-headers",
+      "repository": "https://github.com/KhronosGroup/SPIRV-Headers",
+      "commit": "2acb319af38d43be3ea76bfabf3998e5281d8d12",
+      "license": "MIT",
+      "notice": "LICENSE",
+      "url": "https://codeload.github.com/KhronosGroup/SPIRV-Headers/tar.gz/2acb319af38d43be3ea76bfabf3998e5281d8d12",
+      "sha256": "425da1e3e4ba8de41dc8c8273d281ae82f1e18a397ec476649df3c832e242329",
+      "entry": "SPIRV-Headers-2acb319af38d43be3ea76bfabf3998e5281d8d12"
+    }
+  ]
 }

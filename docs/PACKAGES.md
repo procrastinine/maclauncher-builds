@@ -18,7 +18,7 @@ Some producers have their own reference page:
 
 ## Projects and packages
 
-[projects.json](../projects.json) names two project registries: [downloadable runtimes and tools](../projects/downloadable.json) and [bundled components](../projects/bundled.json). Each project is in exactly one of them, and the registry sets the project's `delivery` value, `downloadable` or `bundled`. MacLauncher installs downloadable packages separately from the app, while bundled packages are built into the app. A project record names the producer, the upstream repositories with a reference to the exact commit of each, and the producer's entry files; a project built on GitHub also has a `build` record with its build command and architectures, or an array of records for distinct ABI versions. `readProjects()` reads both registries into one validated list. The [package index](https://procrastinine.github.io/maclauncher-builds/) shows the two groups separately, and its JSON records include each project's `delivery` value.
+[projects.json](../projects.json) names two project registries: [downloadable runtimes and tools](../projects/downloadable.json) and [bundled components](../projects/bundled.json). Each project is in exactly one of them, and the registry sets the project's `delivery` value, `downloadable` or `bundled`. MacLauncher installs downloadable packages separately from the app. The bundled registry contains components selected by app packaging and pinned input packages consumed by build recipes. A registry entry does not add files to the app; its packaging manifest selects included components. A project record names the producer, the upstream repositories with a reference to the exact commit of each, and the producer's entry files; a project built on GitHub also has a `build` record with its build command and architectures, or an array of records for distinct ABI versions. `readProjects()` reads both registries into one validated list. The [package index](https://procrastinine.github.io/maclauncher-builds/) shows the two groups separately, and its JSON records include each project's `delivery` value.
 
 Native builds share `producers/maclauncher/scripts/native-binary-tools.cjs` for Mach-O inspection, dependency copying and license notices, without loading MacLauncher's module registry. That script and a few other build scripts are copies of MacLauncher files. `producers/maclauncher/native-tools-source.json` records the hash of each original and of each copy, and the import change that the standalone KosmicKrisp build needs. This command copies the files again from a MacLauncher checkout and checks those hashes:
 
@@ -42,7 +42,8 @@ Other projects keep a different architecture for a fixed reason:
 | `universal` | No native code | VNDS-LOVE, Android launcher integrations |
 | `universal` | The publisher's binary is universal | Flash projector |
 | `arm64` | The package runs ARM64 Android, iOS or Switch code, or serves Android games, all of which need Apple Silicon | `android`, `android-art`, `android-aim`, `android-privacy`, `nxnative-tools`, `ios-playtools-paths` |
-| `arm64` | The sealed media or Apple-GPU driver closure requires macOS 27 | `mpv`, `vulkan-kosmickrisp-gles32` |
+| `arm64` | The sealed media closure requires macOS 27 | `mpv` |
+| `arm64` | KosmicKrisp uses Apple GPU features available from macOS 26 | `vulkan-kosmickrisp-gles32` |
 | `x64` | HashLink 1.9 and 1.12 compile games to x86-64 code at run time, and the publisher's Steamworks4j 1.9 library is x86-64 only; on Apple Silicon these packages run through Rosetta | HashLink 1.9 and 1.12, Steamworks4j 1.9 |
 
 MKXP-Z uses `arm64` for its adapted package: its package adds Apple Silicon filename normalization to the publisher's universal build, and Intel Macs use the publisher's build directly.
@@ -52,6 +53,12 @@ MKXP-Z uses `arm64` for its adapted package: its package adds Apple Silicon file
 The macOS SDK on a build host does not set a package's minimum macOS version. Graphics, for example, is compiled with SDK 27 for its Universal build and an earlier SDK for Intel, and its shared core targets macOS 13. The package manifest records the build SDK separately from `minimumMacOS`, and optional native files and providers keep their own macOS and hardware requirements. MacLauncher checks those requirements before it enables each component, so one package can contain code for newer features and still run on older systems.
 
 The graphics `runtime.json` stores the build SDK in `build.sdkVersion`. A build that includes the macOS 27 MetalFX motion-vector and subregion inputs declares `features.graphics.metalFX27InputsAPI: 1`, with `features.graphics.requirements.metalFX27Inputs.minimumMacOS: "27.0"`. Native file inventories record the actual CPU slices, `optionalLoad` gives the architectures and macOS requirement of a library that only a selected feature loads, and provider descriptors keep their own requirements.
+
+Graphics 0.3.1 builds the ISF compiler libraries, libplacebo, shaderc and Little CMS from pinned public sources with a macOS 13 deployment target. Its video helper and Magpie preparation also require macOS 13. Newer MetalFX and neural operations retain their individual requirements. KosmicKrisp MCLv3-1030 builds SPIRV-Tools from its pinned source at macOS 26, matching the driver and loader requirements.
+
+The `uosc-helper` and `scummvm-tools` packages compile native Apple Silicon and Intel tools at macOS 13. The former provides the Ziggy helper for uosc; the latter includes ScummVM archive extraction and codec support. Both use the shared Runtime build workflow and dependency sealer.
+
+The internal `android-art-image-extractor` input package compiles AIM’s original Android image reader independently of an Android system image. Its exact upstream lock controls Rust dependencies. Android runtime recipes consume this input; it is not an app-included component.
 
 ### Downloadable runtimes
 

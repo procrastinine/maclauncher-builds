@@ -234,7 +234,12 @@
         "producers/maclauncher/src/modules/shared/reshade/isf/build.mjs",
         "producers/maclauncher/src/modules/shared/reshade/xess/native/build.mjs",
         "producers/maclauncher/src/modules/crossover/temporal/xess/build.mjs",
-        "producers/maclauncher/scripts/stage-reshade-effects.mjs"
+        "producers/maclauncher/scripts/stage-reshade-effects.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies-build.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies.json",
+        "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies-CMakeLists.txt",
+        "producers/maclauncher/src/modules/shared/reshade/isf/build-compilers.mjs",
+        "producers/maclauncher/src/modules/shared/reshade/isf/compiler-CMakeLists.txt"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -606,6 +611,105 @@
             "repository": "https://github.com/mrRay/PINCache"
           }
         }
+      },
+      {
+        "id": "libplacebo-shaderc",
+        "provider": "github",
+        "url": "https://github.com/google/shaderc",
+        "repository": "google/shaderc",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies.json",
+          "pointer": "/sources/0/commit",
+          "repositoryPointer": "/sources/0/repository"
+        }
+      },
+      {
+        "id": "libplacebo-glslang",
+        "provider": "github",
+        "url": "https://github.com/KhronosGroup/glslang",
+        "repository": "KhronosGroup/glslang",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies.json",
+          "pointer": "/sources/1/commit",
+          "repositoryPointer": "/sources/1/repository"
+        }
+      },
+      {
+        "id": "libplacebo-spirv-tools",
+        "provider": "github",
+        "url": "https://github.com/KhronosGroup/SPIRV-Tools",
+        "repository": "KhronosGroup/SPIRV-Tools",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies.json",
+          "pointer": "/sources/2/commit",
+          "repositoryPointer": "/sources/2/repository"
+        }
+      },
+      {
+        "id": "libplacebo-spirv-headers",
+        "provider": "github",
+        "url": "https://github.com/KhronosGroup/SPIRV-Headers",
+        "repository": "KhronosGroup/SPIRV-Headers",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies.json",
+          "pointer": "/sources/3/commit",
+          "repositoryPointer": "/sources/3/repository"
+        }
+      },
+      {
+        "id": "libplacebo-lcms2",
+        "provider": "github",
+        "url": "https://github.com/mm2/Little-CMS",
+        "repository": "mm2/Little-CMS",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies.json",
+          "pointer": "/sources/4/commit",
+          "repositoryPointer": "/sources/4/repository"
+        }
+      },
+      {
+        "id": "isf-glslang",
+        "provider": "github",
+        "url": "https://github.com/mrRay/glslang",
+        "repository": "mrRay/glslang",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
+          "pointer": "/compilerSources/0/commit",
+          "repositoryPointer": "/compilerSources/0/repository"
+        }
+      },
+      {
+        "id": "isf-spirv-cross",
+        "provider": "github",
+        "url": "https://github.com/mrRay/SPIRV-Cross",
+        "repository": "mrRay/SPIRV-Cross",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
+          "pointer": "/compilerSources/1/commit",
+          "repositoryPointer": "/compilerSources/1/repository"
+        }
+      },
+      {
+        "id": "isf-spirv-tools",
+        "provider": "github",
+        "url": "https://github.com/KhronosGroup/SPIRV-Tools",
+        "repository": "KhronosGroup/SPIRV-Tools",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
+          "pointer": "/compilerSources/2/commit",
+          "repositoryPointer": "/compilerSources/2/repository"
+        }
+      },
+      {
+        "id": "isf-spirv-headers",
+        "provider": "github",
+        "url": "https://github.com/KhronosGroup/SPIRV-Headers",
+        "repository": "KhronosGroup/SPIRV-Headers",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
+          "pointer": "/compilerSources/3/commit",
+          "repositoryPointer": "/compilerSources/3/repository"
+        }
       }
     ],
     "packageProfiles": [
@@ -620,10 +724,14 @@
       {
         "version": "0.3.0",
         "label": "MacLauncher graphics 0.3.0"
+      },
+      {
+        "version": "0.3.1",
+        "label": "MacLauncher graphics 0.3.1"
       }
     ],
     "build": {
-      "version": "0.3.0",
+      "version": "0.3.1",
       "command": "tools/build-graphics.mjs",
       "architectures": [
         "universal",
@@ -952,6 +1060,47 @@
       "command": "tools/build-android-launcher.mjs",
       "architectures": [
         "universal"
+      ]
+    }
+  },
+  {
+    "id": "android-art-image-extractor",
+    "name": "Android ART image reader build input",
+    "purpose": "Original Android image reader for the managed ART adapter.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "producers/android-art-inputs/source.json",
+        "tools/build-android-art-input.mjs"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "aim",
+        "provider": "github",
+        "url": "https://github.com/hahnlee/aim",
+        "repository": "hahnlee/aim",
+        "pin": {
+          "file": "producers/android-art-inputs/source.json",
+          "pointer": "/revision"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.1.0-MCLv1",
+        "label": "ART image reader 0.1.0-MCLv1"
+      }
+    ],
+    "build": {
+      "version": "0.1.0-MCLv1",
+      "command": "tools/build-android-art-input.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "rustComponents": [
+        "rustfmt"
       ]
     }
   }

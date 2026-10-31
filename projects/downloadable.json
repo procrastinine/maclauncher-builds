@@ -1181,7 +1181,8 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
         "producers/maclauncher/src/modules/shared/vulkan/native/kosmickrisp-build.mjs",
-        "producers/maclauncher/scripts/repackage-graphics-runtime.mjs"
+        "producers/maclauncher/scripts/repackage-graphics-runtime.mjs",
+        "producers/maclauncher/src/modules/shared/vulkan/native/spirv-tools-source.json"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -1194,6 +1195,28 @@
           "file": "producers/maclauncher/src/modules/shared/vulkan/native/kosmickrisp-source.json",
           "pointer": ""
         }
+      },
+      {
+        "id": "spirv-tools",
+        "provider": "github",
+        "url": "https://github.com/KhronosGroup/SPIRV-Tools",
+        "repository": "KhronosGroup/SPIRV-Tools",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/vulkan/native/spirv-tools-source.json",
+          "pointer": "/sources/0/commit",
+          "repositoryPointer": "/sources/0/repository"
+        }
+      },
+      {
+        "id": "spirv-headers",
+        "provider": "github",
+        "url": "https://github.com/KhronosGroup/SPIRV-Headers",
+        "repository": "KhronosGroup/SPIRV-Headers",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/vulkan/native/spirv-tools-source.json",
+          "pointer": "/sources/1/commit",
+          "repositoryPointer": "/sources/1/repository"
+        }
       }
     ],
     "packageProfiles": [
@@ -1204,10 +1227,14 @@
       {
         "version": "MCLv2-1030",
         "label": "KosmicKrisp geometry and transform feedback"
+      },
+      {
+        "version": "MCLv3-1030",
+        "label": "KosmicKrisp geometry and transform feedback"
       }
     ],
     "build": {
-      "version": "MCLv2-1030",
+      "version": "MCLv3-1030",
       "command": "tools/build-sdk27-runtime.mjs",
       "architectures": [
         "arm64"
@@ -1827,5 +1854,169 @@
         "label": "siglus_rs 1.0.0-preview.5f358ef1360b-MCLv1-1028-1"
       }
     ]
+  },
+  {
+    "id": "uosc-helper",
+    "name": "uosc Ziggy helper",
+    "purpose": "Native clipboard, HTTP and subtitle helper for uosc playback controls.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/native-tools",
+      "entries": [
+        "producers/native-tools/build.mjs",
+        "producers/native-tools/source.json"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "uosc",
+        "provider": "github",
+        "url": "https://github.com/tomasklaen/uosc",
+        "repository": "tomasklaen/uosc",
+        "pin": {
+          "file": "producers/native-tools/source.json",
+          "pointer": "/projects/uosc-helper"
+        }
+      },
+      {
+        "id": "clipboard",
+        "provider": "github",
+        "url": "https://github.com/atotto/clipboard",
+        "repository": "atotto/clipboard",
+        "pin": {
+          "file": "producers/native-tools/source.json",
+          "pointer": "/projects/uosc-helper/modules/0"
+        }
+      },
+      {
+        "id": "browser",
+        "provider": "github",
+        "url": "https://github.com/pkg/browser",
+        "repository": "pkg/browser",
+        "pin": {
+          "file": "producers/native-tools/source.json",
+          "pointer": "/projects/uosc-helper/modules/1"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "5.13.0-MCLv1",
+        "label": "uosc helper 5.13.0-MCLv1"
+      }
+    ],
+    "build": {
+      "version": "5.13.0-MCLv1",
+      "command": "producers/native-tools/build.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "tools": [
+        "go"
+      ]
+    }
+  },
+  {
+    "id": "scummvm-tools",
+    "name": "ScummVM Tools",
+    "purpose": "Native command-line game archive extraction and conversion tools.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/native-tools",
+      "entries": [
+        "producers/native-tools/build.mjs",
+        "producers/native-tools/source.json"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "scummvm-tools",
+        "provider": "github",
+        "url": "https://github.com/scummvm/scummvm-tools",
+        "repository": "scummvm/scummvm-tools",
+        "pin": {
+          "file": "producers/native-tools/source.json",
+          "pointer": "/projects/scummvm-tools"
+        }
+      },
+      {
+        "id": "ogg",
+        "provider": "github",
+        "url": "https://github.com/xiph/ogg",
+        "repository": "xiph/ogg",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.json",
+          "pointer": "/dependencies",
+          "match": {
+            "id": "ogg"
+          },
+          "field": ""
+        }
+      },
+      {
+        "id": "flac",
+        "provider": "github",
+        "url": "https://github.com/xiph/flac",
+        "repository": "xiph/flac",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.json",
+          "pointer": "/dependencies",
+          "match": {
+            "id": "flac"
+          },
+          "field": ""
+        }
+      },
+      {
+        "id": "vorbis",
+        "provider": "github",
+        "url": "https://github.com/xiph/vorbis",
+        "repository": "xiph/vorbis",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.json",
+          "pointer": "/dependencies",
+          "match": {
+            "id": "vorbis"
+          },
+          "field": ""
+        }
+      },
+      {
+        "id": "libpng",
+        "provider": "github",
+        "url": "https://github.com/pnggroup/libpng",
+        "repository": "pnggroup/libpng",
+        "pin": {
+          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
+          "pointer": "/dependencies",
+          "match": {
+            "id": "libpng"
+          },
+          "field": ""
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "2.9.0-MCLv1",
+        "label": "ScummVM Tools 2.9.0-MCLv1"
+      }
+    ],
+    "build": {
+      "version": "2.9.0-MCLv1",
+      "command": "producers/native-tools/build.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "tools": [
+        "cmake",
+        "ninja",
+        "pkgconf"
+      ]
+    }
   }
 ]

@@ -3,10 +3,11 @@ import path from "node:path";
 import crypto from "node:crypto";
 import {execFileSync} from "node:child_process";
 import {isolateCompiler} from "./isolate-compiler.mjs";
+import {buildCompilers} from "./build-compilers.mjs";
 import {SCENE_SHADER_INPUTS} from "../../effects/operation-contracts.mjs";
 const owned=import.meta.dirname,workspace=path.resolve(owned,"../../../../.."),source=JSON.parse(fs.readFileSync(path.join(owned,"source.json")));
 const output=path.resolve(process.argv[2]||""),options={};
-for(let i=3;i<process.argv.length;i+=2){const key=process.argv[i];if(!["--payload","--source","--arch"].includes(key)||!process.argv[i+1]||Object.hasOwn(options,key))throw Error("Choose an ISF build directory, --payload, --source and --arch.");options[key]=process.argv[i+1];}
+for(let i=3;i<process.argv.length;i+=2){const key=process.argv[i];if(!["--payload","--source","--arch","--glslang","--spirv-cross","--spirv-tools","--spirv-headers"].includes(key)||!process.argv[i+1]||Object.hasOwn(options,key))throw Error("Choose an ISF build directory, --payload, --source and --arch.");options[key]=process.argv[i+1];}
 const arch=options["--arch"]||"universal",architectures=arch==="universal"?["arm64","x86_64"]:[arch==="x64"?"x86_64":arch];
 if(!process.argv[2]||!["universal","x64","arm64"].includes(arch))throw Error("Choose an ISF build directory and a package architecture.");
 const upstream=options["--source"]?path.resolve(options["--source"]):path.join(workspace,source.sources[0].path);
@@ -32,17 +33,20 @@ for(const [name,root]of Object.entries(roots)){
   }
 }
 const prefix=["#include <stdint.h>","#ifdef __OBJC__","#import <Metal/Metal.h>","#ifdef __cplusplus","extern \"C\" {","#endif","id<MTLLibrary> MCLISFDefaultLibrary(id<MTLDevice>);","id<MTLTexture> MCLISFNewTexture(id<MTLDevice>,MTLTextureDescriptor*);","#ifdef __cplusplus","}","#endif","#endif",...[...names].sort().map(name=>`#define ${name} MCLGraphics_${name}`)].join("\n")+"\n";write(path.join(input,"prefix.h"),prefix);
-for(const file of source.compilerLibraries){
-  const library=path.join(input,path.basename(file));write(library,fs.readFileSync(path.join(upstream,file)));
+const compilerSources=Object.fromEntries(source.compilerSources.map(entry=>[entry.id,options["--"+entry.id]&&path.resolve(options["--"+entry.id])]));
+const compilers=buildCompilers({work:output,architectures,sources:compilerSources});
+for(const entry of compilers){
+  const library=path.join(input,path.basename(entry.library));write(library,fs.readFileSync(entry.library));
   isolateCompiler(library);
-  const include=path.join(upstream,path.dirname(path.dirname(file)),"include");for(const name of fs.readdirSync(include))if(name.endsWith(".hpp"))write(path.join(input,name),fs.readFileSync(path.join(include,name)));
+  write(path.join(input,path.basename(entry.header)),fs.readFileSync(entry.header));
 }
+for(const entry of source.compilerSources)fs.copyFileSync(path.join(compilerSources[entry.id],entry.notice),path.join(payload,entry.id+"-LICENSE.txt"));
 run("cmake",["-S",owned,"-B",path.join(output,"cmake"),"-DISF_INPUT="+input,"-DMACFX_INPUT="+path.resolve(owned,"../native"),"-DCMAKE_BUILD_TYPE=Release","-DCMAKE_OSX_ARCHITECTURES="+architectures.join(";")]);
 run("cmake",["--build",path.join(output,"cmake"),"--parallel","2"]);
 fs.copyFileSync(path.join(output,"cmake/libmacfx-isf.dylib"),path.join(payload,source.library));
 for(const file of source.compilerLibraries){const filename=path.basename(file);fs.copyFileSync(path.join(input,filename),path.join(payload,filename));}
 const shaderRoot=roots.VVMetalKit,air=[];
-for(const name of ["CopierMTLScene","SwizzleMTLScene"]){const file=path.join(output,name+".air");run("xcrun",["-sdk","macosx","metal","-std=metal3.0","-mmacosx-version-min=15.0","-I",shaderRoot,"-I",input,"-c",path.join(shaderRoot,name+".metal"),"-o",file]);air.push(file);}
+for(const name of ["CopierMTLScene","SwizzleMTLScene"]){const file=path.join(output,name+".air");run("xcrun",["-sdk","macosx","metal","-std=metal3.0","-mmacosx-version-min=13.0","-I",shaderRoot,"-I",input,"-c",path.join(shaderRoot,name+".metal"),"-o",file]);air.push(file);}
 run("xcrun",["-sdk","macosx","metallib",...air,"-o",path.join(payload,"default.metallib")]);
 fs.copyFileSync(path.join(upstream,"LICENSE.txt"),path.join(payload,"ISF-LICENSE.txt"));
 for(const [name,root]of [["VVMetalKit",path.join(upstream,"submodules/VVMetalKit")],["ISFGLSLGenerator",path.join(upstream,"submodules/ISFGLSLGenerator")],["PINCache",path.join(upstream,"submodules/PINCache")],["PINOperation",path.join(upstream,"submodules/PINCache/Carthage/Checkouts/PINOperation")]]){
@@ -50,7 +54,7 @@ for(const [name,root]of [["VVMetalKit",path.join(upstream,"submodules/VVMetalKit
 }
 for(const name of [source.library,...source.compilerLibraries.map(file=>path.basename(file))])run("codesign",["--force","--sign","-",path.join(payload,name)]);
 const files=fs.readdirSync(payload).filter(name=>name!=="provider.json").sort().map(name=>{const bytes=fs.readFileSync(path.join(payload,name));return {path:name,size:bytes.length,sha256:crypto.createHash("sha256").update(bytes).digest("hex")};});
-const ownedInputs=Object.fromEntries(["source.json","build.mjs","isolate-compiler.mjs","../compiler-isolation.mjs","../../effects/operation-contracts.mjs","CMakeLists.txt","provider.mm","index.js"].map(name=>[name,crypto.createHash("sha256").update(fs.readFileSync(path.join(owned,name))).digest("hex")]));
+const ownedInputs=Object.fromEntries(["source.json","build.mjs","build-compilers.mjs","compiler-CMakeLists.txt","isolate-compiler.mjs","../compiler-isolation.mjs","../../effects/operation-contracts.mjs","CMakeLists.txt","provider.mm","index.js"].map(name=>[name,crypto.createHash("sha256").update(fs.readFileSync(path.join(owned,name))).digest("hex")]));
 const nativeRoot=path.resolve(owned,"../native"),dependencyText=fs.readFileSync(path.join(output,"cmake/CMakeFiles/macfx-isf.dir/provider.mm.o.d"),"utf8").replace(/\\\r?\n/g," ");
 const dependencies=[...dependencyText.matchAll(/(?:\\.|[^\s])+/g)].map(match=>match[0].replace(/\\(.)/g,"$1")).filter(file=>file.startsWith(nativeRoot+path.sep)&&/\.(?:h|hpp)$/.test(file));
 const headerInputs=Object.fromEntries([...new Set(dependencies)].sort().map(file=>[path.relative(nativeRoot,file),crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex")]));if(!Object.keys(headerInputs).length)throw Error("The ISF provider header closure is missing.");

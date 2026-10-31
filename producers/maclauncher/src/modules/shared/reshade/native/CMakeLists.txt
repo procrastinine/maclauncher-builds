@@ -142,8 +142,7 @@ target_link_libraries(reshade-macos PRIVATE "-weak_framework ScreenCaptureKit" "
 target_sources(reshade-macos PRIVATE src/video-frame.mm)
 set_source_files_properties(src/video-frame.mm PROPERTIES COMPILE_OPTIONS -fobjc-arc)
 add_executable(maclauncher-graphics-video src/graphics-video.mm)
-target_compile_options(maclauncher-graphics-video PRIVATE -fobjc-arc -Wno-deprecated-declarations -mmacosx-version-min=14.0)
-target_link_options(maclauncher-graphics-video PRIVATE -mmacosx-version-min=14.0)
+target_compile_options(maclauncher-graphics-video PRIVATE -fobjc-arc -Wno-deprecated-declarations -Werror=unguarded-availability-new)
 target_link_libraries(maclauncher-graphics-video PRIVATE "-framework Foundation" "-framework AVFoundation" "-framework CoreVideo" "-framework CoreMedia" "-framework CoreGraphics" "-framework VideoToolbox" "-framework Metal")
 
 target_include_directories(reshade-macos PRIVATE ${LIBRASHADER_INCLUDE_DIR})

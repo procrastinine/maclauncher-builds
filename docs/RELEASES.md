@@ -99,6 +99,8 @@ node tools/release-runtime.mjs prepare --project android \
 
 ## Source and release identity
 
+A new build with changed bytes uses a new package revision. Versions with an `MCLvN` component advance that number; versions without one append `-MCLv1`. The upstream engine version, source commit and runtime profile remain unchanged when only packaging or the build producer changes. Previous catalog records, release tags and assets retain their original identity. The existing release and catalog commands append the new revision without replacing an earlier package.
+
 A tag has the form `<project>/v<version>/<arch>` and points to the commit of this repository that the package was built from. That commit contains the matching source, patches, build recipes and the exact upstream commits of every dependency. Submodule source is available through a recursive Git checkout; GitHub's automatic source ZIP files leave it out.
 
 The archive checksum and size are stored in `catalogs/<project>.json`, together with checksums of the source. Because the tagged commit holds the source, releases do not carry a separate source archive.
