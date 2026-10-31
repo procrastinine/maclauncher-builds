@@ -67,7 +67,7 @@ async function buildCandidate({directory,sourceDir,dependencyDirs,boostHeaders,a
   for(const key of ['CFLAGS','CXXFLAGS','CPPFLAGS','LDFLAGS','CPATH','LIBRARY_PATH','C_INCLUDE_PATH','CPLUS_INCLUDE_PATH'])delete env[key];
   logger.info?.('Building the pinned static installer helper');
   await Pinned.runBuildCommand(cmake,['-S',upstream,'-B',output,'-G','Ninja',...options],{cwd:directory,env,logPath,signal});
-  await Pinned.runBuildCommand(cmake,['--build',output,'--parallel','6'],{cwd:directory,env,logPath,signal});
+  await Pinned.runBuildCommand(cmake,['--build',output,'--parallel','2'],{cwd:directory,env,logPath,signal});
   await Pinned.runBuildCommand(cmake,['--install',output],{cwd:directory,env,logPath,signal});
   await Promise.all(Object.entries(pins).map(([name,revision])=>Pinned.validatePinnedSource(dirs[name],revision,{signal})));
   return {version:VERSION,architecture,sourceRevision:REVISION,dependencyPins:DEPENDENCIES,sourceTrees,overlaySha256,configureOptions:options,logPath,payload,

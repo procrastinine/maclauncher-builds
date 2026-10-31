@@ -640,27 +640,50 @@
       {
         "version": "MCLv1-0206",
         "label": "Inno Setup extraction tools MCLv1-0206"
+      },
+      {
+        "version": "MCLv2-0206",
+        "label": "Inno Setup extraction tools MCLv2-0206"
       }
     ],
-    "build": {
-      "version": "MCLv1-0206",
-      "command": "tools/build-innoextract.mjs",
-      "architectures": [
-        "arm64",
-        "x64"
-      ],
-      "submodules": [
-        "producers/maclauncher/src/external/innoextract",
-        "producers/maclauncher/src/external/boost-filesystem",
-        "producers/maclauncher/src/external/boost-program-options",
-        "producers/maclauncher/src/external/boost-iostreams"
-      ],
-      "tools": [
-        "cmake",
-        "ninja",
-        "xz"
-      ]
-    }
+    "build": [
+      {
+        "version": "MCLv1-0206",
+        "command": "tools/build-innoextract.mjs",
+        "architectures": [
+          "x64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/innoextract",
+          "producers/maclauncher/src/external/boost-filesystem",
+          "producers/maclauncher/src/external/boost-program-options",
+          "producers/maclauncher/src/external/boost-iostreams"
+        ],
+        "tools": [
+          "cmake",
+          "ninja",
+          "xz"
+        ]
+      },
+      {
+        "version": "MCLv2-0206",
+        "command": "tools/build-innoextract.mjs",
+        "architectures": [
+          "arm64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/innoextract",
+          "producers/maclauncher/src/external/boost-filesystem",
+          "producers/maclauncher/src/external/boost-program-options",
+          "producers/maclauncher/src/external/boost-iostreams"
+        ],
+        "tools": [
+          "cmake",
+          "ninja",
+          "xz"
+        ]
+      }
+    ]
   },
   {
     "id": "krkrsdl2",
@@ -1581,23 +1604,42 @@
       {
         "version": "MCLv1-1007",
         "label": "Butterscotch MCLv1-1007"
+      },
+      {
+        "version": "MCLv2-1007",
+        "label": "Butterscotch MCLv2-1007"
       }
     ],
-    "build": {
-      "version": "MCLv1-1007",
-      "command": "tools/build-butterscotch.mjs",
-      "architectures": [
-        "arm64",
-        "x64"
-      ],
-      "submodules": [
-        "producers/maclauncher/src/external/Butterscotch"
-      ],
-      "tools": [
-        "cmake",
-        "ninja"
-      ]
-    }
+    "build": [
+      {
+        "version": "MCLv1-1007",
+        "command": "tools/build-butterscotch.mjs",
+        "architectures": [
+          "x64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/Butterscotch"
+        ],
+        "tools": [
+          "cmake",
+          "ninja"
+        ]
+      },
+      {
+        "version": "MCLv2-1007",
+        "command": "tools/build-butterscotch.mjs",
+        "architectures": [
+          "arm64"
+        ],
+        "submodules": [
+          "producers/maclauncher/src/external/Butterscotch"
+        ],
+        "tools": [
+          "cmake",
+          "ninja"
+        ]
+      }
+    ]
   },
   {
     "id": "anyps5",
