@@ -65,7 +65,7 @@ async function prepareVulkanLink({moltenvkArchive,vulkanLibrary,work}){
     vulkanLibrary=fs.realpathSync(vulkanLibrary);
     const sha256=digest(fs.readFileSync(vulkanLibrary));
     if(sha256!==input.sha256)throw Error('The Vulkan link input differs from the declared MoltenVK release.');
-    run('/usr/bin/lipo',['-verify_arch',input.architecture,vulkanLibrary]);
+    run('/usr/bin/lipo',[vulkanLibrary,'-verify_arch',input.architecture]);
     return {library:vulkanLibrary,sha256};
 }
 export async function buildModule(options){
