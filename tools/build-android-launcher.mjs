@@ -9,16 +9,23 @@ import {recipeMain} from './build-source.mjs';
 const root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/android-launcher');
 export async function buildAndroidLauncher({project:id,arch,output,work}){
  const project=resolveProject(id,root,{resolvePins:false}),profile=JSON.parse(fs.readFileSync(path.join(root,'producers/included-helpers/profiles/android-launcher.json'))),input=JSON.parse(fs.readFileSync(path.join(base,'build-inputs.json')));
- fs.mkdirSync(work,{recursive:true});
+ fs.mkdirSync(work,{recursive:true});const cache=path.join(work,'archives');
  try {
-  const archive=await buildInput(input.androidAPI),names=execFileSync('/usr/bin/tar',['-tzf',archive],{encoding:'utf8',maxBuffer:8<<20}).trim().split('\n'),selected=[];
+  const archive=await buildInput(input.androidAPI,cache),names=execFileSync('/usr/bin/tar',['-tzf',archive],{encoding:'utf8',maxBuffer:8<<20}).trim().split('\n'),selected=[];
   for(const name of ['android-host.jar','android-framework.jar']){
    const matches=names.filter(entry=>entry.endsWith('/'+name)||entry===name);if(matches.length!==1||matches[0].split('/').includes('..')||path.isAbsolute(matches[0]))throw Error('Android API archive has an ambiguous or unsafe '+name);selected.push(matches[0]);
   }
   const extracted=path.join(work,'api');fs.mkdirSync(extracted);
-  execFileSync('/usr/bin/tar',['-xzf',archive,'-C',extracted,...selected]);
+  execFileSync('/usr/bin/tar',['-xzf',archive,'-C',extracted,...selected]);fs.unlinkSync(archive);
   const api=path.join(work,'classpath');fs.mkdirSync(api);for(const name of selected)fs.copyFileSync(path.join(extracted,name),path.join(api,path.basename(name)));
-  const jdk=process.env.JAVA_HOME||execFileSync('/usr/libexec/java_home',['-v','21'],{encoding:'utf8'}).trim();
+  let jdk;
+  if(process.platform==='linux'){
+   const pin=input.jdk?.['linux-'+process.arch];if(!pin)throw Error('No JDK input is declared for this Linux host.');
+   const archive=await buildInput(pin,cache),directory=path.join(work,'jdk');fs.mkdirSync(directory);
+   execFileSync('/usr/bin/tar',['-xzf',archive,'-C',directory]);fs.unlinkSync(archive);
+   const homes=fs.readdirSync(directory).map(name=>path.join(directory,name)).filter(home=>fs.existsSync(path.join(home,'bin/javac')));
+   if(homes.length!==1)throw Error('The pinned JDK must contain one Java compiler.');jdk=homes[0];
+  }else jdk=process.env.JAVA_HOME||execFileSync('/usr/libexec/java_home',['-v','21'],{encoding:'utf8'}).trim();
   const built=path.join(work,'compiled');build({jdk,runtime:api,output:built});
   const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});
   for(const entry of profile.inputs){

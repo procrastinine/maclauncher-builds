@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "android-java-framework",
+  "version": "0.1.0-MCLv1",
+  "androidSource": {
+    "repository": "https://github.com/procrastinine/maclauncher-android",
+    "revision": "c71de272618e22a531d9259929a2478d838f9b1f"
+  },
+  "sources": [
+    {
+      "id": "apacheHttp",
+      "repository": "https://android.googlesource.com/platform/external/apache-http",
+      "pin": "aospApacheHttp",
+      "revision": "818f4b36e61315f2ae27fa05cf6b5b293f349c8c",
+      "prefetch": [
+        "Android.bp",
+        "src",
+        "android/src",
+        "NOTICE"
+      ]
+    },
+    {
+      "id": "statsd",
+      "repository": "https://android.googlesource.com/platform/packages/modules/StatsD",
+      "pin": "aospStatsd",
+      "revision": "8022cc37e35d424fb0eab65f79cd272759b5dc54",
+      "prefetch": [
+        "service"
+      ]
+    },
+    {
+      "id": "framework",
+      "repository": "https://android.googlesource.com/platform/frameworks/base",
+      "pin": "aospFramework",
+      "revision": "4e43ad12e1b211f15152e9c5b16b0fe88e6b93f3",
+      "prefetch": [
+        "core/jni"
+      ]
+    },
+    {
+      "id": "native",
+      "repository": "https://android.googlesource.com/platform/frameworks/native",
+      "pin": "aospNative",
+      "revision": "2827a4a16b0340ecd07c2d5a6c89991799b362bb",
+      "prefetch": [
+        "opengl/libs/ETC1",
+        "opengl/include/ETC1",
+        "include/android/bitmap.h"
+      ]
+    }
+  ],
+  "notices": [
+    "aosp-framework",
+    "aosp-apache-http",
+    "aosp-framework-base",
+    "robolectric-portability",
+    "asm"
+  ]
+}

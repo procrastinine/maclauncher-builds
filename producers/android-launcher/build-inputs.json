@@ -3,5 +3,12 @@
     "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android%2Fv0.2.0%2Farm64/android-0.2.0-arm64.tar.gz",
     "sha256": "01faee89379b50329f4bee917bf5c3d4ef186058f02380c2eb89ff10661dc2c7",
     "bytes": 296899524
+  },
+  "jdk": {
+    "linux-x64": {
+      "url": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jdk_x64_linux_hotspot_21.0.12.1_1.tar.gz",
+      "sha256": "ce79869e1307ed8ee1e2baa86a412b1eb5b75d10a01006d788a6f968bcfaee94",
+      "bytes": 207473347
+    }
   }
 }

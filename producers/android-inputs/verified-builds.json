@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "javaConverter": {
+    "evidence": {
+      "path": "attestations/74b2951a816191a1de3f55e1c1a25d3d99617f1d992b18fc6e17729427209ef1.json",
+      "sha256": "5c68938a4ad0ee6a69d39a0ee5acaf3df31b56a979313d097f8cbe69d59c78ab"
+    },
+    "artifact": {
+      "id": 13030375361,
+      "sha256": "93bd052f3b45aaf959e7f50beff65cadede042d5abb54ad90ee954a191a370e3"
+    }
+  }
+}

@@ -1061,7 +1061,10 @@
       "command": "tools/build-android-launcher.mjs",
       "architectures": [
         "universal"
-      ]
+      ],
+      "runners": {
+        "universal": "ubuntu-24.04"
+      }
     }
   },
   {
@@ -1488,6 +1491,98 @@
         "make",
         "gcc",
         "unzip"
+      ]
+    }
+  },
+  {
+    "id": "android-java-framework",
+    "name": "Android Java framework input",
+    "purpose": "Complete Android framework Java implementations and declarations.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "tools/build-android-java-framework.mjs",
+        "producers/android-inputs/java-framework.json",
+        "producers/android-inputs/java-converter.json",
+        "producers/android-inputs/blueprint/source.json",
+        "producers/android-inputs/blueprint/main.go"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "android",
+        "provider": "github",
+        "url": "https://github.com/procrastinine/maclauncher-android",
+        "repository": "procrastinine/maclauncher-android",
+        "pin": {
+          "file": "producers/android-inputs/java-framework.json",
+          "pointer": "/androidSource"
+        }
+      },
+      {
+        "id": "apache-http",
+        "provider": "gitiles",
+        "url": "https://android.googlesource.com/platform/external/apache-http",
+        "pin": {
+          "file": "producers/android-inputs/java-framework.json",
+          "pointer": "/sources/0"
+        }
+      },
+      {
+        "id": "statsd",
+        "provider": "gitiles",
+        "url": "https://android.googlesource.com/platform/packages/modules/StatsD",
+        "pin": {
+          "file": "producers/android-inputs/java-framework.json",
+          "pointer": "/sources/1"
+        }
+      },
+      {
+        "id": "aosp-framework",
+        "provider": "gitiles",
+        "url": "https://android.googlesource.com/platform/frameworks/base",
+        "pin": {
+          "file": "producers/android-inputs/java-framework.json",
+          "pointer": "/sources/2"
+        }
+      },
+      {
+        "id": "aosp-native",
+        "provider": "gitiles",
+        "url": "https://android.googlesource.com/platform/frameworks/native",
+        "pin": {
+          "file": "producers/android-inputs/java-framework.json",
+          "pointer": "/sources/3"
+        }
+      },
+      {
+        "id": "blueprint",
+        "provider": "gitiles",
+        "url": "https://android.googlesource.com/platform/build/blueprint",
+        "pin": {
+          "file": "producers/android-inputs/blueprint/source.json",
+          "pointer": "/upstream"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.1.0-MCLv1",
+        "label": "Android Java framework 0.1.0-MCLv1"
+      }
+    ],
+    "build": {
+      "version": "0.1.0-MCLv1",
+      "command": "tools/build-android-java-framework.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "runners": {
+        "arm64": "ubuntu-24.04"
+      },
+      "tools": [
+        "go"
       ]
     }
   }
