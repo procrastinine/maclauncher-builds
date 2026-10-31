@@ -64,7 +64,7 @@ export async function prepareArtHwui({common,image,ndk,work}){
  if(!fs.statSync(foundationHost).isFile())throw Error('The common original host foundation archive is required.');
  const hostProtobufRoot=path.join(work,'host-protobuf');
  const maps=['-ffile-prefix-map='+work+'=/android-hwui-build','-fdebug-prefix-map='+work+'=/android-hwui-build'].join(' ');
- run('cmake',['-S',sources.protobuf,'-B',hostProtobufRoot,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_DEPLOYMENT_TARGET=13.0','-DCMAKE_POLICY_VERSION_MINIMUM=3.12','-DCMAKE_CXX_FLAGS='+maps,'-Dprotobuf_BUILD_TESTS=OFF','-Dprotobuf_BUILD_CONFORMANCE=OFF','-Dprotobuf_BUILD_EXAMPLES=OFF','-Dprotobuf_BUILD_PROTOC_BINARIES=OFF','-Dprotobuf_BUILD_LIBPROTOC=ON','-Dprotobuf_BUILD_SHARED_LIBS=OFF']);
+ run('cmake',['-S',sources.protobuf,'-B',hostProtobufRoot,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_DEPLOYMENT_TARGET=13.0','-DCMAKE_POLICY_VERSION_MINIMUM=3.12','-DCMAKE_CXX_FLAGS='+maps+' -I'+path.join(sources.protobuf,'android'),'-Dprotobuf_BUILD_TESTS=OFF','-Dprotobuf_BUILD_CONFORMANCE=OFF','-Dprotobuf_BUILD_EXAMPLES=OFF','-Dprotobuf_BUILD_PROTOC_BINARIES=OFF','-Dprotobuf_BUILD_LIBPROTOC=ON','-Dprotobuf_BUILD_SHARED_LIBS=OFF']);
  run('cmake',['--build',hostProtobufRoot,'--parallel','2','--target','libprotobuf','libprotoc']);
  const bin=path.join(ndk,'toolchains/llvm/prebuilt/darwin-x86_64/bin'),compile=path.join(work,'compile'),cargoHome=path.join(work,'cargo');fs.mkdirSync(cargoHome);
  const buildEnvironment=artHwuiBuildEnvironment({work});
