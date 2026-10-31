@@ -1,0 +1,30 @@
+diff --git a/src/modules/android/art/build-java.mjs b/src/modules/android/art/build-java.mjs
+index 7cd2802..afdc07c 100644
+--- a/src/modules/android/art/build-java.mjs
++++ b/src/modules/android/art/build-java.mjs
+@@ -1,4 +1,5 @@
+ import fs from 'node:fs';
++import crypto from 'node:crypto';
+ import path from 'node:path';
+ import {execFileSync} from 'node:child_process';
+ import {cachedBuildStep} from '../native/upstream/build-step.mjs';
+@@ -30,7 +31,18 @@ export function compileArtSources({jdk,core,api,sharedClasses,classes,sources}){
+  * matching libcore/framework DEX from its image without HotSpot transforms.
+  * sharedClasses is the complete host-archive tree (or extracted android-host.jar),
+  * including generated publisher resources, rather than bare javac output. */
+-export async function buildArtJava({output,jdk,api,coreSystemModules,sharedClasses,r8,imageServicesJar,imageFrameworkJar=path.join(path.dirname(imageServicesJar),'framework.jar'),dexBodies}){
++export async function buildArtJava({output,jdk,api,coreSystemModules,sharedClasses,r8,imageServicesJar,imageFrameworkJar=imageServicesJar?path.join(path.dirname(imageServicesJar),'framework.jar'):undefined,dexBodies,prebuilt}){
++ if(prebuilt){
++  const manifest=JSON.parse(fs.readFileSync(path.join(prebuilt,'input.json'))),destination=path.join(output,'bootstrap'),products={};
++  fs.mkdirSync(destination,{recursive:true});
++  for(const [key,name]of Object.entries({bootstrapDex:'hooks-dex.jar',servicesJar:'services.jar',frameworkJar:'framework.jar'})){
++   const record=manifest.files.find(file=>file.path===name),bytes=fs.readFileSync(path.join(prebuilt,name));
++   if(!record||bytes.length!==record.size||crypto.createHash('sha256').update(bytes).digest('hex')!==record.sha256)throw Error('ART Java product differs from its verified input: '+name);
++   const file=path.join(destination,name);fs.writeFileSync(file,bytes,{mode:record.mode});products[key]=file;
++  }
++  if(manifest.frameworkResourcePreinitVersion!==1)throw Error('The ART Java resource profile changed.');
++  return {...products,frameworkResourcePreinitVersion:manifest.frameworkResourcePreinitVersion};
++ }
+  const root=import.meta.dirname,java=path.join(jdk,'bin/java'),javac=path.join(jdk,'bin/javac'),jar=path.join(jdk,'bin/jar');
+  const core=await prepareCoreApi({output:path.join(output,'core-api'),jdk,coreSystemModules});
+  const sources=originalTreeFiles(path.join(root,'java')).filter(file=>file.endsWith('.java'));

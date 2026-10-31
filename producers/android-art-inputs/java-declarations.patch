@@ -1,0 +1,13 @@
+diff --git a/src/modules/android/art/build-java.mjs b/src/modules/android/art/build-java.mjs
+index 7cd2802..5bde52c 100644
+--- a/src/modules/android/art/build-java.mjs
++++ b/src/modules/android/art/build-java.mjs
+@@ -20,7 +20,7 @@ export function compileArtSources({jdk,core,api,sharedClasses,classes,sources}){
+  // complete original class declarations for compilation, outside program output.
+  const declarations=classes+'.platform-declarations';fs.mkdirSync(declarations,{recursive:true});
+  const hidden=['android/system/Os.class','android/system/OsConstants.class','android/system/StructCapUserHeader.class','android/system/StructCapUserData.class'];
+- const runtime=execFileSync(path.join(jdk,'bin/jar'),['--list','--file',path.resolve(api),'dalvik/system/VMRuntime'],{encoding:'utf8'}).split(/\r?\n/).filter(name=>/^dalvik\/system\/VMRuntime(?:\$[^/]+)?\.class$/.test(name));
++ const runtime=execFileSync(path.join(jdk,'bin/jar'),['--list','--file',path.resolve(api),'dalvik/system/'],{encoding:'utf8'}).split(/\r?\n/).filter(name=>name.startsWith('dalvik/system/')&&name.endsWith('.class'));
+  if(!runtime.includes('dalvik/system/VMRuntime.class'))throw Error('The original VMRuntime compile declaration is unavailable');
+  execFileSync(path.join(jdk,'bin/jar'),['--extract','--file',path.resolve(api),...hidden,...runtime],{cwd:declarations,stdio:'inherit'});
+  execFileSync(path.join(jdk,'bin/javac'),['--system',core,'--patch-module','java.base='+declarations,'-source','21','-target','21','-cp',[api,sharedClasses].join(path.delimiter),'-d',classes,...sources],{stdio:'inherit'});

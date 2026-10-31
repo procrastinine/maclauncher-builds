@@ -1825,5 +1825,72 @@
       ],
       "cleanupRunner": true
     }
+  },
+  {
+    "id": "android-art-java",
+    "name": "Android ART Java input",
+    "purpose": "Original Android ART hooks DEX and delegated platform bodies.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "tools/build-android-art-java.mjs",
+        "tools/android-art-java-stage.mjs",
+        "producers/android-art-inputs/java-stage.json",
+        "producers/android-art-inputs/java-declarations.patch",
+        "producers/android-art-inputs/java-consumer.patch",
+        "producers/android-art-inputs/java.json",
+        "producers/android-inputs/java-converter.json",
+        "producers/android-image-data/source.json",
+        "producers/android-image-data/Cargo.toml",
+        "producers/android-image-data/main.rs",
+        "producers/android-image-data/tree.rs",
+        "tools/build-android-image-data.mjs",
+        "attestations/4f1464fe0894c18e6b8a083abff4a540b98b58524e9c77d726208b7c568a4def.json"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "android",
+        "provider": "github",
+        "url": "https://github.com/procrastinine/maclauncher-android",
+        "repository": "procrastinine/maclauncher-android",
+        "pin": {
+          "file": "producers/android-art-inputs/java-stage.json",
+          "pointer": "/androidSource"
+        }
+      },
+      {
+        "id": "aim",
+        "provider": "github",
+        "url": "https://github.com/hahnlee/aim",
+        "repository": "hahnlee/aim",
+        "pin": {
+          "file": "producers/android-image-data/source.json",
+          "pointer": "/revision",
+          "repositoryPointer": "/repository"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.1.0-MCLv1",
+        "label": "Android ART Java 0.1.0-MCLv1"
+      }
+    ],
+    "build": {
+      "version": "0.1.0-MCLv1",
+      "command": "tools/build-android-art-java.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "runners": {
+        "arm64": "ubuntu-24.04"
+      },
+      "rustComponents": [
+        "rustfmt"
+      ],
+      "cleanupRunner": true
+    }
   }
 ]

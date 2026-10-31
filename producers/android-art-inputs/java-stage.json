@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "android-art-java",
+  "version": "0.1.0-MCLv1",
+  "androidSource": {
+    "repository": "https://github.com/procrastinine/maclauncher-android",
+    "revision": "c71de272618e22a531d9259929a2478d838f9b1f"
+  },
+  "frameworkInput": "producers/android-inputs/java-framework.json",
+  "imageInput": "producers/android-image-data/source.json",
+  "publisherInputs": "producers/android-art-inputs/java.json",
+  "jdkInput": "producers/android-inputs/java-converter.json",
+  "consumerSourceSha256": "cf90c065a2cd12df85155e8b4c91adc3a35053c4b05a2b356f5556494344ba7c",
+  "frameworkArtifact": {
+    "evidence": {
+      "path": "attestations/4f1464fe0894c18e6b8a083abff4a540b98b58524e9c77d726208b7c568a4def.json",
+      "sha256": "6baf77f00f0fa4a5201bc485fa77572986afbab7deaadf943764a544438ef6e7"
+    },
+    "artifact": {
+      "id": 13030872999,
+      "sha256": "80fc54056db0b3bcfd850dd54c8b96c23e21b00ec0d27de43f2be1d2a45d27c6"
+    }
+  },
+  "imageProfiles": [
+    "android-image-data-1",
+    "android-image-data-3"
+  ],
+  "compileOverlay": {
+    "file": "producers/android-art-inputs/java-declarations.patch",
+    "sha256": "3bd0fa5784c53d22b1c40c269678ee0c4367b3c0d541434a3e7b97896b0c44cc"
+  },
+  "compileProducerSha256": "f6ae4eb67925c7fe80d9c1408a54cb4d193826820d1a1b7c6f0e35ecde8ef0ee"
+}
