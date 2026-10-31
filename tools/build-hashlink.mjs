@@ -2,8 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
-import {pathToFileURL} from 'node:url';
-import {checkoutSource,stageSource,sourceNotices,run,buildOptions} from './build-source.mjs';
+import {checkoutSource,stageSource,sourceNotices,run,recipeMain} from './build-source.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),moduleRoot=path.join(root,'producers/maclauncher/src/modules/hashlink/runtime');
 const Paths=require(path.join(moduleRoot,'compiler-paths.js'));
@@ -15,7 +14,6 @@ function bytecodeFacts(source){
  return {supportedBytecodeVersions:Array.from({length:maximum-minimum},(_,i)=>minimum+i+1),nativeAbi:{sdlEventLoop:loop==='_DYN'?'dynamic':'typed-event'}};
 }
 export async function buildHashLink({project,arch,version,output,work}){
- if(project!=='hashlink'||arch!=='x64'||!/^1\.(9|12)-MCLv2$/.test(version||'')||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select HashLink 1.9 or 1.12, Intel and new absolute work/output paths.');
  fs.mkdirSync(work,{recursive:true});const legacy=version.startsWith('1.9'),Builder=require(path.join(moduleRoot,legacy?'legacy-build.js':'dynamic-legacy-build.js'));
  let sourceRoot=path.join(root,'producers/maclauncher/src/external/source-revisions/hashlink-1-9');
  if(!legacy)sourceRoot=checkoutSource({repository:'https://github.com/HaxeFoundation/hashlink',revision:Builder.REVISION,destination:path.join(work,'upstream')});
@@ -51,4 +49,4 @@ export function sealHashLink({project='hashlink',version,arch='x64',output,work,
   notices:[...sourceNotices(source,{name:'HashLink',repository:'https://github.com/HaxeFoundation/hashlink'}),...sourceNotices(sdl,{name:'SDL2',repository:'https://github.com/libsdl-org/SDL'}),...sourceNotices(openal,{name:'OpenAL-soft',repository:'https://github.com/kcat/openal-soft'})],
   provenance:{upstreamVersion:legacy?'1.9':'1.12',nativeProfile:legacy?'1.9-sdl2.0.22-openal-soft1.24.3-macos-v2':'1.12-sdl2.0.22-openal-soft1.24.3-macos-v1',sourceTreeSha256:staged.treeSha256,overlaySha256,dependencies:[{name:'SDL2',revision:Builder.SDL_REVISION,sourceTreeSha256:sdlStage.treeSha256},{name:'OpenAL-soft',revision:Builder.OPENAL_REVISION,sourceTreeSha256:openalStage.treeSha256}]}});
 }
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)buildHashLink(buildOptions(process.argv.slice(2))).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error);process.exitCode=1;});
+recipeMain(import.meta,buildHashLink);

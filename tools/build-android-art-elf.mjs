@@ -1,3 +1,4 @@
+import {recipeMain} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -25,7 +26,7 @@ export function artElfBuildEnvironment({work,target,sdk,jdk,python,env=process.e
 }
 /** Build ART's original ELF group independently of host, HWUI and Java adapters. */
 export async function buildArtElfsInput({output,work}){
- if(process.platform!=='darwin'||process.arch!=='arm64'||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('ART ELF builds require Apple Silicon macOS and new absolute output/work paths.');
+
  const profile=JSON.parse(fs.readFileSync(descriptor));fs.mkdirSync(work,{recursive:true});
  const android=acquireArtProducer({source:profile.androidSource,work});
  const supplier=JSON.parse(fs.readFileSync(path.join(android,profile.supplier)));
@@ -70,4 +71,4 @@ export async function buildAndroidArtElf({project,version,arch,output,work}){
  const built=await buildArtElfsInput({output:path.join(output,'payload'),work});
  return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:built.record,notices:built.notices});
 }
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)buildAndroidArtElf(buildOptions(process.argv.slice(2))).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error);process.exitCode=1;});
+recipeMain(import.meta,buildAndroidArtElf);

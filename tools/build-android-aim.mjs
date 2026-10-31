@@ -1,3 +1,4 @@
+import {recipeMain} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -47,7 +48,7 @@ function detachAimImage(work,upstream){
 }
 /** Build the existing AIM adaptation and seal it without changing app declarations. */
 export async function buildAndroidAim({project,version,arch,output,work}){
- if(project!=='android-aim'||arch!=='arm64'||process.platform!=='darwin'||process.arch!=='arm64'||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('Select Android AIM, Apple Silicon macOS and new absolute output/work directories.');
+
  const ownedWork=path.resolve(work),ownedOutput=path.resolve(output);
  if(ownedWork===ownedOutput||ownedOutput.startsWith(ownedWork+path.sep)||ownedWork.startsWith(ownedOutput+path.sep))throw Error('AIM output and build directories must be separate.');
  const selected=resolveProject(project,root),record=buildRecord(selected,version);
@@ -78,4 +79,4 @@ export async function buildAndroidAim({project,version,arch,output,work}){
   return {project,version,arch,output};
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)buildAndroidAim(buildOptions(process.argv.slice(2))).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error);process.exitCode=1;});
+recipeMain(import.meta,buildAndroidAim);

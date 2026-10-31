@@ -2,9 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
-import {pathToFileURL} from 'node:url';
 import {buildInput} from './build-input.mjs';
-import {buildOptions,checkoutSource,sourceNotices,run} from './build-source.mjs';
+import {checkoutSource,sourceNotices,run,recipeMain} from './build-source.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 import {collectSdlNotices} from './sdl-notices.mjs';
 const require=createRequire(import.meta.url);
@@ -42,7 +41,6 @@ export async function mediaNotices(work){
  return notices;
 }
 export async function buildNPengine({project,arch,output,work}){
- if(project!=='npengine'||arch!=='arm64'||process.arch!=='arm64'||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select the npengine ARM profile and new absolute work/output directories.');
  fs.mkdirSync(work,{recursive:true});const repository='https://github.com/FGRE/libnpengine',source=checkoutSource({repository,revision:Builder.REVISION,destination:path.join(work,'upstream-engine')}),npaRepository='https://github.com/FGRE/libnpa',npa=checkoutSource({repository:npaRepository,revision:Builder.NPA_REVISION,destination:path.join(work,'upstream-npa')});
  const {media,notices}=await projectMedia(work);return finishNPengine({project,arch,output,work,source,npa,repository,npaRepository,media,notices});
 }
@@ -58,4 +56,4 @@ export async function sealNPengine({project,arch,output,work,source,npa,reposito
  const payloads=fs.readdirSync(built.prefix).filter(name=>name!=='bin').map(name=>({source:path.join(built.prefix,name),relative:'npengine/'+name}));
  return sealRuntime({project,arch,output,executable:built.executable,executableRelative:'npengine/bin/npengine-runner',sourceRoot:source,upstreamRevision:Builder.REVISION,payloads,notices:[...sourceNotices(source,{name:'libnpengine',repository}),...sourceNotices(npa,{name:'libnpa',repository:npaRepository}),...notices],runtimeFiles:{profile:'npengine/profile.json'},provenance:{sdlNoticeSources:sdlNoticeProvenance,mediaNoticeInputs:MEDIA_NOTICE_INPUTS,mediaInputs:Media.PIN.officialPayloads.map(({url,member,sha256})=>({url,member,sha256})),dependencySources:Media.PIN.correspondingSources.map(({id,version,archiveUrl,archiveSha256})=>({id,version,archiveUrl,archiveSha256}))}});
 }
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)buildNPengine(buildOptions(process.argv.slice(2))).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error);process.exitCode=1;});
+recipeMain(import.meta,buildNPengine);

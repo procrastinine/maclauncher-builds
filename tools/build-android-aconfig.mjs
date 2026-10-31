@@ -1,3 +1,4 @@
+import {recipeMain} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -48,4 +49,4 @@ export async function packageAndroidAconfig({project='android-aconfig',version,a
   notices:[{file:license,name:'Android flag generator license',license:'Apache-2.0',sourceUrl:profile.repository},{file:copyright,name:'Android source copyright notices',license:'Apache-2.0',sourceUrl:profile.repository},...rustNotices({source:crate,target:'aarch64-apple-darwin',output:path.join(work,'notices'),env})],
   provenance:{sdk:{repository:profile.sdk.repository,revision:profile.sdk.revision,files:profile.sdk.files.map(({path,contentSha256})=>({path,sha256:contentSha256}))},rustLockSha256:sha(fs.readFileSync(path.join(crate,'Cargo.lock')))}});
 }
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)buildAndroidAconfig(buildOptions(process.argv.slice(2))).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error);process.exitCode=1;});
+recipeMain(import.meta,buildAndroidAconfig);

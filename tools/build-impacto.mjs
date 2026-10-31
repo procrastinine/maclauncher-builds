@@ -2,9 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
 import {execFileSync} from 'node:child_process';
-import {pathToFileURL} from 'node:url';
 import {buildInput} from './build-input.mjs';
-import {buildOptions,checkoutSource,sourceNotices,run} from './build-source.mjs';
+import {checkoutSource,sourceNotices,run,recipeMain} from './build-source.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 import {collectSdlNotices} from './sdl-notices.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),modules=path.join(root,'producers/maclauncher/src/modules'),native=path.join(modules,'mages/native');
@@ -13,7 +12,6 @@ const Fonts=require(path.join(modules,'shared/runtime/portable-sdl2-fonts.js')),
 const Source=require(path.join(modules,'shared/runtime/pinned-native-build.js')),AVCPP_SOURCE_SCOPE=Object.freeze({kind:'primary-tree',omittedSubmodules:['catch2']});
 const dependencies={findBuildTool:name=>execFileSync('/usr/bin/which',[name],{encoding:'utf8'}).trim(),runBuildCommand:(command,args,options)=>Source.runBuildCommand(command,args.map((value,index)=>index>0&&args[index-1]==='--parallel'?'2':value),options)};
 export async function buildImpacto({project,arch,output,work}){
- if(project!=='impacto'||arch!=='arm64'||process.arch!=='arm64'||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select the Impacto ARM profile and new absolute work/output directories.');
  fs.mkdirSync(work,{recursive:true});const sources={};for(const id of ['impacto','avcpp','atrac9','magicEnum']){const pin=id==='impacto'?{...Adapter.SOURCES.impacto,revision:Builder.REVISION}:Adapter.SOURCES[id];sources[id]=checkoutSource({...pin,destination:path.join(work,'upstream-'+id)});}
  const archives={};for(const pin of [...Fonts.PIN.dependencies,...Audio.PIN.dependencies,...Dependency.PIN.dependencies])archives[pin.id]??=await buildInput({url:pin.archiveUrl,sha256:pin.archiveSha256,bytes:pin.archiveBytes});
  const maps=[...new Set([work,fs.realpathSync(work)])].map(from=>({from,to:'IMPACTO_BUILD'}));
@@ -45,4 +43,4 @@ export async function finishImpactoEngine({project,arch,output,work,sources,font
 export function sealImpacto({project,arch,output,built,sources,notices,sdlNoticeProvenance}){
  return sealRuntime({project,arch,output,executable:built.executable,appRoot:path.dirname(path.dirname(path.dirname(built.executable))),payloads:fs.readdirSync(built.runtimeRoot).filter(name=>name!=='Impacto.app').map(name=>({source:path.join(built.runtimeRoot,name),relative:name})),sourceRoot:sources.impacto,upstreamRevision:Builder.REVISION,notices,provenance:{sdlNoticeSources:sdlNoticeProvenance,profile:Builder.PROFILE,upstreamRevision:Builder.REVISION,avcppSourceScope:AVCPP_SOURCE_SCOPE,codecSource:{version:Adapter.SOURCES.ffmpeg.version,archiveSha256:Adapter.SOURCES.ffmpeg.sha256,bink2:Adapter.SOURCES.bink2},additionalSources:Object.fromEntries(Object.entries(Adapter.SOURCES).filter(([id])=>['avcpp','atrac9','magicEnum'].includes(id)))}});
 }
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)buildImpacto(buildOptions(process.argv.slice(2))).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error);process.exitCode=1;});
+recipeMain(import.meta,buildImpacto);

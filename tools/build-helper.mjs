@@ -8,8 +8,8 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
-import {pathToFileURL} from 'node:url';
 import {resolveProject} from '../lib/projects.mjs';
+import {recipeMain} from './build-source.mjs';
 const require=createRequire(import.meta.url);
 const B=require('../lib/bundled-native.cjs'),Native=require('../lib/local-native.cjs'),{validateDeclaration}=require('../lib/declaration.cjs');
 const root=path.resolve(import.meta.dirname,'..');
@@ -40,8 +40,6 @@ export function helperProfile(id,directory=root){
 
 export function buildHelper({project:id,arch,output,work=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'helper-build-')),'work'),directory=root}){
  const {profile,base}=helperProfile(id,directory);
- if(!Object.hasOwn(CPUS,arch)||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))
-  throw Error('Select arm64, x64 or universal, and new absolute output and work directories.');
  const payload=path.join(output,'payload'),binary=path.join(payload,profile.output),sources=profile.sources.map(source=>path.join(base,source));
  const sdk=fs.realpathSync(process.env.SDKROOT||run('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path'])),compiler=run('/usr/bin/xcrun',[profile.compiler,'--version']).split('\n')[0];
  const flags=[...KINDS[profile.kind],'-mmacosx-version-min='+profile.minimumMacOS,...profile.flags,...(profile.frameworks||[]).flatMap(name=>['-framework',name])];
@@ -77,8 +75,4 @@ export function buildHelper({project:id,arch,output,work=path.join(fs.mkdtempSyn
  finally{fs.rmSync(work,{recursive:true,force:true});}
 }
 
-export function main(args){
- const options={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!args[i]?.startsWith('--')||!['project','arch','output','work'].includes(key)||!args[i+1]||Object.hasOwn(options,key))throw Error('Use --project, --arch, --output and --work.');options[key]=args[i+1];}
- return buildHelper(options);
-}
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){try{console.log(JSON.stringify(main(process.argv.slice(2))));}catch(error){console.error(error.message);process.exitCode=1;}}
+recipeMain(import.meta,buildHelper);

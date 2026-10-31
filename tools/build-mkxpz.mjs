@@ -2,14 +2,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
 import {execFileSync} from 'node:child_process';
-import {pathToFileURL} from 'node:url';
 import {buildInput} from './build-input.mjs';
-import {buildOptions} from './build-source.mjs';
+import {recipeMain} from './build-source.mjs';
 import {managerDeclaration} from './release-runtime.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
 const run=(command,args)=>execFileSync(command,args,{stdio:'inherit',env:{...process.env,SDKROOT:process.env.SDKROOT||execFileSync('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path'],{encoding:'utf8'}).trim()}});
 export async function buildMKXPZ({project,arch,output,work}){
- if(project!=='mkxpz'||arch!=='arm64'||process.arch!=='arm64'||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select MKXP-Z arm64 and new absolute work/output paths.');
  fs.mkdirSync(work,{recursive:true});
  const pin=JSON.parse(fs.readFileSync(path.join(root,'runtimes/mkxpz/baseline.json'))).upstream;
  const archive=await buildInput({url:pin.sourceUrl,sha256:pin.sourceSha256,bytes:pin.sourceBytes},path.join(work,'downloads'));
@@ -43,4 +41,4 @@ export async function buildMKXPZ({project,arch,output,work}){
  fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});
  return {project,version:producer.VERSION,arch,output};
 }
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)buildMKXPZ(buildOptions(process.argv.slice(2))).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error);process.exitCode=1;});
+recipeMain(import.meta,buildMKXPZ);

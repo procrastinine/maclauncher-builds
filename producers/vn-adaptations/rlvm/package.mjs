@@ -4,6 +4,7 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
+import {checkBuildRequest} from '../../../tools/build-runtime.mjs';
 import {pack} from '../../../tools/runtime-package.mjs';
 import {resolveProject,buildRecord} from '../../../lib/projects.mjs';
 const require=createRequire(import.meta.url),B=require('../../../lib/bundled-native.cjs');
@@ -39,9 +40,8 @@ export async function packageAdapter({output,binary,archive:packed=true,version}
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }
 /** GitHub build: compile the owned source with its recorded universal arguments, then package it. */
-export async function build({project,arch,output,work}){
+export async function build({output,work}){
  const profile=JSON.parse(fs.readFileSync(path.join(here,'adapter.json')));
- if(project!=='rlvm-adapter'||arch!=='universal'||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('The RLVM adapter builds as a universal package with a new absolute work directory.');
  fs.mkdirSync(work,{recursive:true});fs.copyFileSync(path.join(here,'adapter.m'),path.join(work,'adapter.m'));
  execFileSync(profile.build.command,profile.build.args,{cwd:work,stdio:'inherit',timeout:120000});
  if(profile.signature!=='ad-hoc')throw Error('The adapter profile selects an unsupported signature.');
@@ -50,5 +50,5 @@ export async function build({project,arch,output,work}){
 }
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){
  const args=process.argv.slice(2),options={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!['output','project','arch','work'].includes(key)||!args[i+1]||Object.hasOwn(options,key))throw Error('Use --output with a new absolute directory, or --project, --arch, --output and --work.');options[key]=args[i+1];}
- (options.arch?build(options):Object.keys(options).join()==='output'?packageAdapter(options):Promise.reject(Error('Use --output with a new absolute directory.'))).then(result=>console.log(JSON.stringify(result.archive?result:{id:result.declaration.id,version:result.declaration.version,arch:result.declaration.arch}))).catch(error=>{console.error(error.message);process.exitCode=1;});
+ (options.arch?Promise.resolve(options).then(checkBuildRequest).then(()=>build(options)):Object.keys(options).join()==='output'?packageAdapter(options):Promise.reject(Error('Use --output with a new absolute directory.'))).then(result=>console.log(JSON.stringify(result.archive?result:{id:result.declaration.id,version:result.declaration.version,arch:result.declaration.arch}))).catch(error=>{console.error(error.message);process.exitCode=1;});
 }

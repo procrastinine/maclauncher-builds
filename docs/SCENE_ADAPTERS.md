@@ -1,6 +1,6 @@
 # Scene adapters
 
-The scene adapters record work alongside the original game graphics calls. Each has a recipe in `tools/build-scene-runtime.mjs` and uses the shared Runtime build workflow. The registered version selects its source profile, compiler inputs and required notices.
+The scene adapters record work alongside the original game graphics calls. Each has its own recipe, `tools/build-winevulkan-scene.mjs`, `tools/build-fidelityfx-api.mjs` or `tools/build-vulkan-moltenvk-scene.mjs`, and they share the llvm-mingw toolchain and packaging steps in `tools/scene-runtime.mjs`. All three use the shared Runtime build workflow. The registered version selects its source profile, compiler inputs and required notices.
 
 | Package | Version | CPU | Minimum macOS | Inputs |
 | --- | --- | --- | --- | --- |

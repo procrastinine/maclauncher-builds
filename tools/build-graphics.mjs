@@ -1,14 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
-import {pathToFileURL} from 'node:url';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {plan,build,fetchInput} from '../producers/maclauncher/scripts/build-graphics-runtime.mjs';
+import {recipeMain} from './build-source.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 /** Build one graphics package; SDK and deployment requirements stay separate. */
 export async function buildGraphics({project:id,arch,output,work,sdkPath,sources={},sourceRoot,reuse={},tools={}}){
  const project=resolveProject(id,root,{resolvePins:false}),registered=buildRecord(project);
- if(id!=='reshade'||!registered.architectures.includes(arch)||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||''))throw Error('Select reshade, a declared architecture and new absolute output and work directories.');
  if(tools.meson&&!tools.python){const candidate=path.join(path.dirname(tools.meson),"python");if(fs.existsSync(candidate))tools.python=candidate;}
  const options={work,arch,sdkPath,sources,reuse,tools},initial=plan(options);
  const blocked=initial.unresolved.filter(value=>(!value.startsWith('input ')||!value.endsWith(': fetchable'))&&!['tool meson: missing','tool ninja: missing'].includes(value));
@@ -31,5 +30,4 @@ export async function buildGraphics({project:id,arch,output,work,sdkPath,sources
   return {project:id,version:registered.version,arch,output};
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }
-export async function main(args){const o={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!['project','arch','output','work'].includes(key)||!args[i+1]||Object.hasOwn(o,key))throw Error('Use --project, --arch, --output and --work.');o[key]=args[i+1];}return buildGraphics(o);}
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)main(process.argv.slice(2)).then(result=>console.log(JSON.stringify(result))).catch(error=>{console.error(error.message);process.exitCode=1;});
+recipeMain(import.meta,buildGraphics);

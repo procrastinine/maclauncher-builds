@@ -1,3 +1,4 @@
+import {recipeMain} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
@@ -65,4 +66,4 @@ export async function buildAndroidCodecs({project,version,arch,output,work}){
  const input=await buildAndroidCodecsInput({output:path.join(output,'payload'),work,arch});
  return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{sourceProfile:profile.sourceProfile,audioFormats:input.audioFormats,recipeSha256:input.recipeSha256},notices:input.notices});
 }
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)buildAndroidCodecs(buildOptions(process.argv.slice(2))).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error);process.exitCode=1;});
+recipeMain(import.meta,buildAndroidCodecs);

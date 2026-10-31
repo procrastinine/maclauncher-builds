@@ -6,8 +6,9 @@ import {installBuildTools,installedToolsDirectory} from './build-tools.mjs';
 const HOST_OS=Object.freeze({darwin:'macos',linux:'linux'});
 
 /** A build runs on the OS and CPU of the GitHub-hosted runner its record selects. */
-export function assertBuildHost(label,runner,{platform=process.platform,cpu=process.arch}={}){
- if(!runner||HOST_OS[platform]!==runner.os||cpu!==runner.cpu)throw Error('This build runs on the '+label+' runner ('+(runner?runner.os+' '+runner.cpu:'undeclared')+'), not on '+platform+' '+cpu+'.');
+export function assertBuildHost(label,runner,{platform=process.platform,cpu=process.arch,exact=false}={}){
+ const runs=runner&&HOST_OS[platform]===runner.os&&(cpu===runner.cpu||!exact&&platform==='darwin'&&cpu==='arm64'&&runner.cpu==='x64');
+ if(!runs)throw Error('This build runs on the '+label+' runner ('+(runner?runner.os+' '+runner.cpu:'undeclared')+'), which '+platform+' '+cpu+' cannot run.');
 }
 
 /** Rustup commands for the declared toolchain, components and CPU targets. */
@@ -24,7 +25,7 @@ export function prepareBuildHost({build,label,runner,rustToolchain,install=true,
  run=(command,args,options)=>execFileSync(command,args,{stdio:'inherit',...options}),
  read=(command,args,options)=>execFileSync(command,args,{encoding:'utf8',stdio:['ignore','pipe','pipe'],...options}).trim(),
  installTools=installBuildTools}){
- if(verifyHost)assertBuildHost(label,runner,{platform,cpu});
+ if(verifyHost)assertBuildHost(label,runner,{platform,cpu,exact:true});
  const env={},paths=[],current=()=>({...environment,...env,PATH:[...paths,environment.PATH].filter(Boolean).join(path.delimiter)});
  if(verifyHost&&runner?.developerDirectory){
   const hosted=environment.GITHUB_ACTIONS==='true'&&environment.RUNNER_ENVIRONMENT==='github-hosted';

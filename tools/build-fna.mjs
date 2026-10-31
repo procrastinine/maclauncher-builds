@@ -3,9 +3,8 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {createRequire} from 'node:module';
 import {execFileSync} from 'node:child_process';
-import {pathToFileURL} from 'node:url';
 import {buildInput} from './build-input.mjs';
-import {buildOptions,checkoutSource,sourceNotices,run} from './build-source.mjs';
+import {checkoutSource,sourceNotices,run,recipeMain} from './build-source.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 import {collectSdlNotices} from './sdl-notices.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Builder=require('../producers/maclauncher/src/modules/fna/runtime/build.js');
@@ -36,7 +35,6 @@ export async function fnaSdlNotices(work){
  return collectSdlNotices({source,output:path.join(work,'sdl-notices'),name:'SDL3 3.4.18',sourceUrl:Builder.PACKAGES.sdl.url,includeLibm:true});
 }
 export async function buildFNA({project,arch,output,work}){
- if(project!=='fna'||arch!=='arm64'||process.arch!=='arm64'||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select the FNA ARM profile and new absolute work/output directories.');
  fs.mkdirSync(work,{recursive:true});const repository='https://github.com/FNA-XNA/FNA',source=checkoutSource({repository,revision:Builder.FNA_REVISION,destination:path.join(work,'upstream-fna')});
  run('git',['-C',source,'submodule','update','--init','--recursive','--depth','1']);
  const fna3d=checkoutSource({repository:'https://github.com/FNA-XNA/FNA3D',revision:Builder.FNA3D_REVISION,destination:path.join(work,'upstream-fna3d')});run('git',['-C',fna3d,'submodule','update','--init','--recursive','--depth','1']);
@@ -48,4 +46,4 @@ export async function buildFNA({project,arch,output,work}){
  const payloads=fs.readdirSync(runtime).filter(name=>name!=='dotnet').map(name=>({source:path.join(runtime,name),relative:'fna/'+name}));
  return sealRuntime({project,arch,output,executable:path.join(runtime,'dotnet'),executableRelative:'fna/dotnet',sourceRoot:source,upstreamRevision:Builder.FNA_REVISION,payloads,maximumMacOS:'13.0',provenance:{dependencies,dotnetRuntime:RUNTIMES[arch],licenseSelections:selectedLicenses.map(({file,...row})=>row),sdlNoticeSources:sdl.provenance},runtimeFiles:{profile:'fna/fna-runtime.json'},notices:[...sdl.notices,...selectedLicenses.map(row=>({file:row.file,name:row.project+' '+row.sourceRelative,license:'MIT OR Unlicense',sourceUrl:'https://github.com/FNA-XNA/'+row.project+'/blob/'+(row.project==='FNA3D'?Builder.FNA3D_REVISION:dependencies.find(item=>item.path==='FNA/lib/FAudio').revision)+'/'+row.sourceRelative})),...sourceNotices(source,{name:'FNA',repository}),...sourceNotices(fna3d,{name:'FNA3D',repository:'https://github.com/FNA-XNA/FNA3D'}),...sourceNotices(path.join(runtime,'licenses'),{name:'FNA native dependencies',repository}),{file:path.join(runtime,'LICENSE.txt'),name:'.NET runtime',license:'MIT',sourceUrl:'https://github.com/dotnet/runtime'},{file:path.join(runtime,'ThirdPartyNotices.txt'),name:'.NET runtime third-party notices',license:'See original notices',sourceUrl:'https://github.com/dotnet/runtime'}]});
 }
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)buildFNA(buildOptions(process.argv.slice(2))).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error);process.exitCode=1;});
+recipeMain(import.meta,buildFNA);

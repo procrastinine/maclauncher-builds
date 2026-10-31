@@ -1,16 +1,15 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
-import {pathToFileURL} from 'node:url';
 import {rustNotices,rustEnvironment} from './rust-build.mjs';
 import {buildInput} from './build-input.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 import {resolveProject} from '../lib/projects.mjs';
 import {adapt} from '../producers/maclauncher/src/modules/android/native/apk-metadata/adapt.mjs';
+import {recipeMain} from './build-source.mjs';
 const root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/maclauncher/src/modules/android/native/apk-metadata');
 export async function buildAPK({project:id,arch,output,work}){
  const project=resolveProject(id,root),spec=JSON.parse(fs.readFileSync(path.join(base,'sources.json')));
- if(id!=='android-apk-metadata'||!['arm64','x64'].includes(arch)||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('Select android-apk-metadata, arm64 or x64 and new absolute output and work directories.');
  fs.mkdirSync(work,{recursive:true});
  try {
   const archive=await buildInput(spec.aim.archive),source=path.join(work,'source');fs.mkdirSync(source);
@@ -32,5 +31,4 @@ export async function buildAPK({project:id,arch,output,work}){
    record:{executable:'android-apk-metadata',upstreamRevision:spec.aim.revision,binarySha256:sha(binary),cargoLockSha256:sha(path.join(base,'Cargo.lock'))},notices});
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}finally{fs.rmSync(work,{recursive:true,force:true});}
 }
-export async function main(args){const o={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!['project','arch','output','work'].includes(key)||!args[i+1]||Object.hasOwn(o,key))throw Error('Use --project, --arch, --output and --work.');o[key]=args[i+1];}return buildAPK(o);}
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)main(process.argv.slice(2)).then(result=>console.log(JSON.stringify(result))).catch(error=>{console.error(error.message);process.exitCode=1;});
+recipeMain(import.meta,buildAPK);

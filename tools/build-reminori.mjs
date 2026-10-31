@@ -2,18 +2,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
-import {pathToFileURL} from 'node:url';
 import {buildInput} from './build-input.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 import {rustEnvironment,rustNotices} from './rust-build.mjs';
 import {rustLicenseInputs} from './rust-license-inputs.mjs';
-import {buildOptions} from './build-source.mjs';
+import {recipeMain} from './build-source.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
 const Builder=require('../producers/maclauncher/src/modules/minori/runtime/build.js');
 const Movies=require('../producers/maclauncher/src/modules/minori/runtime/movie-build.js');
 const Native=require('../producers/maclauncher/src/modules/shared/runtime/local-native.js');
 export async function buildMinori({project,arch,output,work}) {
- if(project!=='reminori'||!['arm64','x64'].includes(arch)||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select ReMinori, a CPU and new work/output paths.');
  fs.mkdirSync(work,{recursive:true});
  const sourceDir=path.join(root,'producers/maclauncher/src/external/ReMinori'),prefix=path.join(work,'movies');
  const archive=await buildInput(Movies.SOURCE);
@@ -33,5 +31,4 @@ export async function buildMinori({project,arch,output,work}) {
   runtimeFiles:{profile:'profile.json',probe:'bin/maclauncher-minori-probe',movieDecoder:'bin/maclauncher-minori-movie'},
   jsonMetadata:{'profile.json':(profile,{files})=>({...profile,executables:Object.fromEntries(Object.keys(profile.executables).map(name=>[name,Native.hashFile(path.join(files,'bin',name))])),movieDecoder:{...profile.movieDecoder,sha256:Native.hashFile(path.join(files,'bin/maclauncher-minori-movie')),files:profile.movieDecoder.files.map(row=>({...row,sha256:Native.hashFile(path.join(files,row.path))}))}})}});
 }
-export async function main(args){return buildMinori(buildOptions(args));}
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)main(process.argv.slice(2)).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error);process.exitCode=1;});
+recipeMain(import.meta,buildMinori);

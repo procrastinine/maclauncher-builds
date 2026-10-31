@@ -1,3 +1,4 @@
+import {recipeMain} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -20,7 +21,7 @@ function verifyProducerSource(source,profile){
 
 /** Build the selected common or AIM ANGLE supplier from its exact owned sources. */
 export async function buildAngleInput({output,work,profile:profileId='common'}){
- if(process.platform!=='darwin'||process.arch!=='arm64'||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('ANGLE input builds require Apple Silicon macOS and new absolute output/work directories.');
+
  const {definition,profile}=selectedProfile(profileId);
  fs.mkdirSync(work,{recursive:true});
  const android=profile.androidSource.directory?path.join(root,profile.androidSource.directory):checkoutSource({...profile.androidSource,destination:path.join(work,'android-producer')});
@@ -77,4 +78,4 @@ export async function buildAndroidAngle({project,version,arch,output,work}){
  const input=await buildAngleInput({output:path.join(work,'provider'),work:path.join(work,'compile'),profile:profile.id});
  return packageAngleInput({project,version:profile.version,arch,output,input});
 }
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)buildAndroidAngle(buildOptions(process.argv.slice(2))).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error);process.exitCode=1;});
+recipeMain(import.meta,buildAndroidAngle);

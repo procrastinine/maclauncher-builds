@@ -1,15 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import {pathToFileURL} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {buildInput} from './build-input.mjs';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
-import {buildOptions} from './build-source.mjs';
+import {recipeMain} from './build-source.mjs';
 import {buildNxNative} from '../producers/nxnative/build.mjs';
 import {packageNxNative} from '../producers/nxnative/package.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 export async function buildNxnative({project,arch,output,work}){
- if(project!=='nxnative-tools'||arch!=='arm64'||process.arch!=='arm64'||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select nxnative tools ARM64 and new absolute work/output paths.');
  const record=buildRecord(resolveProject(project,root)),native=path.join(work,'native');
  const pin=JSON.parse(fs.readFileSync(path.join(root,'producers/nxnative/source.json'))),sdkPin=JSON.parse(fs.readFileSync(path.join(root,'producers/nxnative/dotnet-sdk.json')));
  if(execFileSync('/usr/bin/xcrun',['--show-sdk-version'],{encoding:'utf8'}).trim()!==pin.tools.macOSSDK||sdkPin.version!==pin.tools.dotnetSDK)throw Error('The selected macOS or .NET SDK differs from the recipe.');
@@ -22,4 +20,4 @@ export async function buildNxnative({project,arch,output,work}){
  finally{for(const key of Object.keys(process.env))if(!(key in previous))delete process.env[key];Object.assign(process.env,previous);}
  return packageNxNative({input:native,outputDirectory:path.join(work,'package'),buildOutput:output});
 }
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)buildNxnative(buildOptions(process.argv.slice(2))).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error);process.exitCode=1;});
+recipeMain(import.meta,buildNxnative);

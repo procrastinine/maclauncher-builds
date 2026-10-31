@@ -1,15 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import {pathToFileURL} from 'node:url';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
-import {checkoutSource,stageSource,sourceNotices,run,buildOptions} from './build-source.mjs';
+import {checkoutSource,stageSource,sourceNotices,run,recipeMain} from './build-source.mjs';
 import {rustEnvironment,rustNotices} from './rust-build.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 import {rustLicenseInputs} from './rust-license-inputs.mjs';
 const root=path.resolve(import.meta.dirname,'..'),hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 export async function buildSiglus({project,arch,output,work}){
- if(project!=='siglus'||!['arm64','x64'].includes(arch)||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select Siglus, a CPU and new absolute work/output paths.');
  const record=buildRecord(resolveProject(project,root)),owned=path.join(root,'producers/vn-adaptations/siglus'),pin=JSON.parse(fs.readFileSync(path.join(root,'producers/vn-adaptations/source.json'))).projects.siglus;
  fs.mkdirSync(work,{recursive:true});
  const sourceRoot=checkoutSource({repository:pin.upstream.url,revision:pin.upstream.revision,destination:path.join(work,'upstream')}),source=path.join(work,'source');
@@ -38,4 +36,4 @@ export async function packageSiglus({project,arch,output,work,sourceRoot,source,
   jsonMetadata:{'siglus-profile.json':(value,{files})=>({...value,files:Object.fromEntries(['bin/siglus-host','lib/libsiglus.dylib','LICENSE-siglus_rs.txt'].map(name=>[name,hash(path.join(files,name))]))})},
   provenance:{licenseInputs:licenses.provenance,sourceTreeSha256:staged.treeSha256,gitDependencies:staged.dependencies,hostSourceSha256:hash(path.join(owned,'host.m')),resourceLookup:'executable-relative',nativeApi:'game_run_entry-v1'}});
 }
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)buildSiglus(buildOptions(process.argv.slice(2))).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error);process.exitCode=1;});
+recipeMain(import.meta,buildSiglus);

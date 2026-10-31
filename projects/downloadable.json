@@ -1582,7 +1582,7 @@
     ],
     "build": {
       "version": "MCLv3-1030",
-      "command": "tools/build-sdk27-runtime.mjs",
+      "command": "tools/build-vulkan-kosmickrisp.mjs",
       "architectures": [
         "arm64"
       ],
@@ -1948,7 +1948,7 @@
     },
     "build": {
       "version": "0.41.0-MCLv8",
-      "command": "tools/build-sdk27-runtime.mjs",
+      "command": "tools/build-mpv.mjs",
       "architectures": [
         "arm64"
       ],
@@ -2039,7 +2039,7 @@
     ],
     "build": {
       "version": "26.3.0-MCLv1",
-      "command": "tools/build-scene-runtime.mjs",
+      "command": "tools/build-winevulkan-scene.mjs",
       "architectures": [
         "x64"
       ],
@@ -2093,7 +2093,7 @@
     ],
     "build": {
       "version": "1.0.1-MCLv1",
-      "command": "tools/build-scene-runtime.mjs",
+      "command": "tools/build-fidelityfx-api.mjs",
       "architectures": [
         "x64"
       ]
@@ -2170,7 +2170,7 @@
     ],
     "build": {
       "version": "1.4.2-MCLv2",
-      "command": "tools/build-scene-runtime.mjs",
+      "command": "tools/build-vulkan-moltenvk-scene.mjs",
       "architectures": [
         "universal"
       ],

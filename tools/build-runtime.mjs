@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import {spawnSync,execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
@@ -9,7 +10,7 @@ import {linuxToolSelection} from './build-tools.mjs';
 import {HOSTED_RUNNERS,hostedRunner} from '../lib/hosted-runners.mjs';
 import {RUST_TOOLCHAIN} from './rust-build.mjs';
 import {runtimeBuildEnvironment} from './runtime-build-environment.mjs';
-import {prepareBuildHost} from './build-host.mjs';
+import {prepareBuildHost,assertBuildHost} from './build-host.mjs';
 import {initializeSources} from './init-runtime-sources.mjs';
 import {publicDeclaration} from './runtime-package.mjs';
 import {reproducibleEnvironment} from '../lib/reproducible-build.mjs';
@@ -136,17 +137,23 @@ export function prepareBuild({project:id,arch,version,directory=root,environment
  return {project:project.id,version:build.version,arch,runner,...prepared,initialized};
 }
 
-/** Run the project's registered GitHub build command for one architecture. */
-export function runBuild({project:id,arch,version,output,work,directory=root,spawn=spawnSync}){
+/** Validate the declared version and CPU, output/work paths and execution host. */
+export function checkBuildRequest({project:id,arch,version,output,work,directory=root,platform=process.platform,cpu=process.arch}){
  const {project,build}=githubBuild(id,directory,version);
  if(Array.isArray(project.build)&&version===undefined)throw Error('Select one declared build version with --version.');
  if(!build.architectures.includes(arch))throw Error(project.name+' builds '+build.architectures.join(' and ')+' packages on GitHub.');
- if(!path.isAbsolute(output||'')||fs.existsSync(output)||work!==undefined&&(!path.isAbsolute(work)||work===output||work.startsWith(output+path.sep)||output.startsWith(work+path.sep)))throw Error('Choose a new absolute output directory and a separate absolute work directory.');
+ if(!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||work===output||work.startsWith(output+path.sep)||output.startsWith(work+path.sep))throw Error('Choose a new absolute output directory and a separate absolute work directory.');
+ const runner=runnerFor(build,arch),host=hostedRunner(runner);assertBuildHost(runner,host,{platform,cpu});return {project,build,runner,host};
+}
+
+/** Run the project's registered GitHub build command for one architecture. */
+export function runBuild({project:id,arch,version,output,work=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'runtime-build-')),'work'),directory=root,spawn=spawnSync,platform,cpu}){
+ const {project,build}=checkBuildRequest({project:id,arch,version,output,work,directory,platform,cpu});
  const command=path.join(directory,build.command),actual=fs.realpathSync(command);
  if(actual!==command||!fs.statSync(actual).isFile())throw Error('The GitHub build command must be a regular file in this repository.');
  const context=runtimeBuildEnvironment(build);
  try{
-  const result=spawn(process.execPath,[command,'--project',project.id,'--arch',arch,...(Array.isArray(project.build)?['--version',build.version]:[]),'--output',output,...(work?['--work',work]:[])],{cwd:directory,stdio:'inherit',env:reproducibleEnvironment(directory,context.env)});
+  const result=spawn(process.execPath,[command,'--project',project.id,'--arch',arch,...(Array.isArray(project.build)?['--version',build.version]:[]),'--output',output,'--work',work],{cwd:directory,stdio:'inherit',env:reproducibleEnvironment(directory,context.env)});
   if(result.error)throw result.error;
   if(result.status!==0)throw Error(project.name+' build exited with status '+result.status);
   return checkBuildOutput({project,build,arch,output});

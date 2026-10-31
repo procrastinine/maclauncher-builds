@@ -1,3 +1,4 @@
+import {recipeMain} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -62,4 +63,4 @@ export async function buildAndroidJavaConverter({project,version,arch,output,wor
  const built=await buildAndroidJavaConverterInput({output:path.join(output,'payload'),work});
  return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:built.record,notices:built.notices});
 }
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)buildAndroidJavaConverter(buildOptions(process.argv.slice(2))).then(result=>console.log(JSON.stringify(result))).catch(error=>{console.error(error);process.exitCode=1;});
+recipeMain(import.meta,buildAndroidJavaConverter);

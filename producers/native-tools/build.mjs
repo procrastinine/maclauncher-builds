@@ -1,3 +1,4 @@
+import {recipeMain} from '../../tools/build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -68,9 +69,9 @@ async function scummvmBuild({pin,arch,source,work}){
  return {executable:path.join(build,'scummvm-tools-cli'),notices,provenance:{sdkVersion:run('/usr/bin/xcrun',['--show-sdk-version']).trim()},capabilities:{tools:['extract_kyra','extract_gob_stk'],codecs:['vorbis','flac','png','zlib']}};
 }
 
-export async function buildNativeTool({project,arch,output,work,sources={}}){
+export async function buildNativeTool({project,version,arch,output,work,sources={}}){
  const pin=profiles[project];
- if(!pin||!['arm64','x64'].includes(arch)||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select a native tool, CPU and new absolute work and output directories.');
+
  fs.mkdirSync(work,{recursive:true});
  const source=sources[project]||path.join(work,'source');
  if(!sources[project]){
@@ -80,7 +81,6 @@ export async function buildNativeTool({project,arch,output,work,sources={}}){
  await Source.validatePinnedSource(source,pin.revision);
  const result=await (project==='uosc-helper'?goBuild:scummvmBuild)({pin,arch,source,work});
  await Source.validatePinnedSource(source,pin.revision);
- return sealRuntime({project,arch,output,sourceRoot:source,upstreamRevision:pin.revision,...result});
+ return sealRuntime({project,version,arch,output,sourceRoot:source,upstreamRevision:pin.revision,...result});
 }
-export async function main(args){const options={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!['project','arch','output','work'].includes(key)||!args[i+1]||Object.hasOwn(options,key))throw Error('Use --project, --arch, --output and --work.');options[key]=args[i+1];}return buildNativeTool(options);}
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)main(process.argv.slice(2)).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error);process.exitCode=1;});
+recipeMain(import.meta,buildNativeTool);

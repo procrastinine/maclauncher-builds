@@ -1,8 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
-import {pathToFileURL} from 'node:url';
-import {buildOptions,checkoutSource,stageSource,sourceNotices,run} from './build-source.mjs';
+import {checkoutSource,stageSource,sourceNotices,run,recipeMain} from './build-source.mjs';
 import {rustEnvironment,rustNotices} from './rust-build.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 import {rustLicenseInputs} from './rust-license-inputs.mjs';
@@ -10,7 +9,6 @@ const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirna
 const overlays=path.join(root,'producers/maclauncher/src/modules/gamemaker/overlays/opengmk-macos');
 const Emulator=require(path.join(overlays,'apply-emulator.js')),Ramen=require(path.join(overlays,'apply-ramen.js')),Audio=require(path.join(overlays,'apply-audio.js'));
 export async function buildOpenGMK({project,arch,output,work}){
- if(project!=='opengmk'||!['arm64','x64'].includes(arch)||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select OpenGMK, a Mac CPU and new absolute work/output directories.');
  fs.mkdirSync(work,{recursive:true});
  const inputs=[['OpenGMK','https://github.com/OpenGMK/OpenGMK',Emulator.REVISION],['ramen','https://github.com/viriuwu/ramen',Ramen.REVISION],['udon','https://github.com/Adamcake/udon',Audio.REVISION]];
  const sources=inputs.map(([name,repository,revision])=>({name,repository,revision,source:checkoutSource({repository,revision,destination:path.join(work,'upstream-'+name)})}));
@@ -29,4 +27,4 @@ export async function buildOpenGMK({project,arch,output,work}){
  const licenses=await rustLicenseInputs({file:path.join(root,'producers/opengmk/licenses.json'),output:path.join(work,'declared-notices')});
  return sealRuntime({project,arch,output,executable,sourceRoot:sources[0].source,upstreamRevision:Emulator.REVISION,notices:[...sources.flatMap(({source,name,repository})=>sourceNotices(source,{name,repository})),...rustNotices({source,output:path.join(work,'notices'),env,licenseInputs:licenses.licenseInputs})],provenance:{...provenance,crateLicenseDeclaration:licenses.provenance,dependencies:sources.slice(1).map(({name,repository,revision})=>({name,repository,revision})),overlay:Emulator.OVERLAY_VERSION}});
 }
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)buildOpenGMK(buildOptions(process.argv.slice(2))).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error);process.exitCode=1;});
+recipeMain(import.meta,buildOpenGMK);

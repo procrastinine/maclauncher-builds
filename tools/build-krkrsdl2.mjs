@@ -1,12 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
-import {pathToFileURL} from 'node:url';
-import {stageSource,sourceNotices,run,buildOptions} from './build-source.mjs';
+import {stageSource,sourceNotices,run,recipeMain} from './build-source.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Compat=require('../producers/maclauncher/src/modules/kirikiri/native-compat.js');
 export async function buildKirikiri({project,arch,output,work}){
- if(project!=='krkrsdl2'||!['arm64','x64'].includes(arch)||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select KiriKiri, a CPU and new absolute work/output paths.');
  fs.mkdirSync(work,{recursive:true});const sourceRoot=path.join(root,'producers/maclauncher/src/external/krkrsdl2'),source=path.join(work,'source'),build=path.join(work,'build');
  const staged=await stageSource(sourceRoot,Compat.REVISION,source),overlay=Compat.prepareSource({sourceRoot:source,revision:Compat.REVISION});
  const header=path.join(root,'producers/maclauncher/src/modules/kirikiri/overlays/macos-compat.h'),cpu=arch==='x64'?'x86_64':'arm64';
@@ -19,4 +17,4 @@ export async function buildKirikiri({project,arch,output,work}){
   notices:[...sourceNotices(source,{name:'KiriKiri SDL2',repository:'https://github.com/krkrsdl2/krkrsdl2'}),{file:path.join(resources,'FONT_LICENSE.txt'),name:'KAG3 polyfill font',license:'See original notice',sourceUrl:'https://github.com/krkrsdl2/kag3'}],
   provenance:{sourceTreeSha256:staged.treeSha256,gitDependencies:staged.dependencies,sourceOverlay:overlay,features:{storageDirlist:true,systemAddFont:true,monitorAdjust:true,fullFramePresentation:true,kag3Resources:1}}});
 }
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)buildKirikiri(buildOptions(process.argv.slice(2))).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error);process.exitCode=1;});
+recipeMain(import.meta,buildKirikiri);

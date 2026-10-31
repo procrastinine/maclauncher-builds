@@ -1,3 +1,4 @@
+import {recipeMain} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -66,4 +67,4 @@ export async function buildAndroidBlueprint({project,version,arch,output,work}){
  const input=await buildBlueprintInput({output:path.join(work,'compiled'),work:path.join(work,'compile'),arch});
  return packageBlueprintInput({project,version,arch,output,input});
 }
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)buildAndroidBlueprint(buildOptions(process.argv.slice(2))).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error);process.exitCode=1;});
+recipeMain(import.meta,buildAndroidBlueprint);

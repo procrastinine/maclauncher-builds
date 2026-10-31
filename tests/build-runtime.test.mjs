@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {execFileSync} from 'node:child_process';
-import {verifyProducer,main,buildPlan,pushPlan,runBuild,RUNNERS,HOSTED_RUNNERS} from '../tools/build-runtime.mjs';
+import {execFileSync,spawnSync} from 'node:child_process';
+import {verifyProducer,main,buildPlan,pushPlan,runBuild,checkBuildRequest,RUNNERS,HOSTED_RUNNERS} from '../tools/build-runtime.mjs';
 import {prepareBuildHost} from '../tools/build-host.mjs';
 import {prepareRelease} from '../tools/release-runtime.mjs';
 import {readProjects,buildRecord,buildRecords} from '../lib/projects.mjs';
@@ -109,7 +109,8 @@ test('GitHub build records name a contained command, exclusive universal builds 
 });
 
 test('a GitHub build runs the registered command and accepts only its declared package',t=>{
- const root=githubFixture(t,{architectures:['arm64','x64'],tools:undefined}),work=path.join(root,'work');
+ const fixtureRunners=process.platform==='linux'?{arm64:'ubuntu-24.04',x64:'ubuntu-24.04'}:undefined;
+ const root=githubFixture(t,{architectures:['arm64','x64'],tools:undefined,...(fixtureRunners?{runners:fixtureRunners}:{})}),work=path.join(root,'work');
  const built=runBuild({project:'engine',arch:'x64',output:path.join(root,'out-x64'),work,directory:root});
  assert.equal(built.version,'1.0');assert.equal(built.arch,'x64');assert.equal(built.payload,path.join(root,'out-x64/payload'));
  assert.equal(main(['--project','engine','--arch','arm64','--output',path.join(root,'out-arm64')],root).arch,'arm64');
@@ -120,7 +121,7 @@ test('a GitHub build runs the registered command and accepts only its declared p
  process.env.ENGINE_CPUS='x64';assert.equal(runBuild({project:'engine',arch:'x64',output:path.join(root,'out-intel-only'),directory:root}).arch,'x64');
  process.env.ENGINE_CPUS='arm64';assert.throws(()=>runBuild({project:'engine',arch:'x64',output:path.join(root,'out-cpus'),directory:root}),/Mac CPUs/);delete process.env.ENGINE_CPUS;
  process.env.ENGINE_EXTRA='1';assert.throws(()=>runBuild({project:'engine',arch:'arm64',output:path.join(root,'out-extra'),directory:root}),/only declaration.json and payload/);delete process.env.ENGINE_EXTRA;
- const failing=githubFixture(t,{architectures:['arm64'],tools:undefined},'process.exitCode=3;\n');
+ const failing=githubFixture(t,{architectures:['arm64'],tools:undefined,...(fixtureRunners?{runners:{arm64:fixtureRunners.arm64}}:{})},'process.exitCode=3;\n');
  assert.throws(()=>runBuild({project:'engine',arch:'arm64',output:path.join(failing,'out'),directory:failing}),/exited with status 3/);
 });
 
@@ -136,7 +137,9 @@ test('every registered GitHub build names an existing command and submodule of t
 
 test('a VNDS-LOVE package revision preserves engine files and historical packaging',async t=>{
  const work=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'vnds-love-build-')));t.after(()=>fs.rmSync(work,{recursive:true,force:true}));
- const built=runBuild({project:'vnds-love',arch:'universal',output:path.join(work,'build'),directory:root});
+ const {build}=await import('../producers/engine-adaptations/stage.mjs'),output=path.join(work,'build');
+ const staged=build({project:'vnds-love',arch:'universal',output});
+ const built={version:staged.version,declaration:path.join(output,'declaration.json'),payload:path.join(output,'payload')};
  assert.equal(built.version,buildRecord(readProjects(root,{resolvePins:false}).projects.find(row=>row.id==='vnds-love')).version);
  const published=JSON.parse(fs.readFileSync(path.join(root,'catalogs/vnds-love.json'))).packages[0];
  const {stageData}=await import('../producers/engine-adaptations/stage.mjs'),input=path.join(work,'historical');
@@ -181,21 +184,42 @@ test('the Runtime build workflow builds each architecture on its own runner befo
 
 test('registered GitHub build commands reject architectures their projects do not build',async t=>{
  const work=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'github-build-commands-')));t.after(()=>fs.rmSync(work,{recursive:true,force:true}));
- const {build:stageEngine}=await import('../producers/engine-adaptations/stage.mjs');
- assert.throws(()=>stageEngine({project:'vnds-love',arch:'arm64',output:path.join(work,'vnds')}),/universal package/);
- const {build:buildAdapter}=await import('../producers/vn-adaptations/rlvm/package.mjs');
- await assert.rejects(buildAdapter({project:'rlvm-adapter',arch:'x64',output:path.join(work,'rlvm'),work:path.join(work,'rlvm-work')}),/universal package/);
+ const request=(project,arch)=>({project,arch,output:path.join(work,project+'-'+arch),work:path.join(work,project+'-'+arch+'-work')});
+ assert.throws(()=>checkBuildRequest(request('vnds-love','arm64')),/builds universal packages/);
+ assert.throws(()=>checkBuildRequest(request('rlvm-adapter','x64')),/builds universal packages/);
+ assert.throws(()=>checkBuildRequest({...request('sys3-decompiler','universal'),version:'0.5.0-MCLv2'}),/builds arm64 packages/);
+ assert.throws(()=>checkBuildRequest(request('web-renderer-network','ppc')),/builds arm64 and x64 packages/);
  const {buildDecompiler}=await import('../producers/maclauncher/scripts/build-decompiler.mjs');
- await assert.rejects(buildDecompiler({project:'sys3-decompiler',arch:'universal',output:path.join(work,'sys3'),work:path.join(work,'sys3-work')}),/arm64 or x64/);
- await assert.rejects(buildDecompiler({project:'gemrb',arch:'arm64',output:path.join(work,'gemrb'),work:path.join(work,'gemrb-work')}),/registered decompiler/);
- await assert.rejects(buildDecompiler({project:'sys3-decompiler',arch:'arm64',version:'0.5.0',output:path.join(work,'sys3-tag'),work:path.join(work,'sys3-tag-work')}),/registered decompiler/);
+ await assert.rejects(buildDecompiler({project:'gemrb',arch:'arm64',output:path.join(work,'gemrb'),work:path.join(work,'gemrb-work')}),/decompiler profiles have no release/);
+ assert.throws(()=>checkBuildRequest({...request('sys3-decompiler','arm64'),version:'0.5.0'}),/builds version|declared|version/);
  const registry=readProjects(root,{resolvePins:false});
  for(const [id,architectures] of [['sys3-decompiler',['arm64','x64']],['xsys35-decompiler',['arm64','x64']],['gm8-decompiler',['arm64','x64']],['catsystem2-kif-crypto',['arm64','x64']],['web-renderer-network',['arm64','x64']]])assert.deepEqual(buildRecords(registry.projects.find(project=>project.id===id)).flatMap(build=>build.architectures).sort(),architectures);
  assert.deepEqual(buildRecords(registry.projects.find(project=>project.id==='java-steamworks')).map(build=>[build.version,build.architectures]),[['1.9.0-MCLv2',['x64']],['1.10.0-MCLv2',['universal']]]);
- const {buildHelper,helperProfile}=await import('../tools/build-helper.mjs');
- assert.throws(()=>buildHelper({project:'web-renderer-network',arch:'ppc',output:path.join(work,'web'),work:path.join(work,'web-work')}),/arm64, x64 or universal/);
+ const {helperProfile}=await import('../tools/build-helper.mjs');
  assert.throws(()=>helperProfile('gemrb'),/ENOENT|helper-builds/);
  for(const id of ['catsystem2-kif-crypto','web-renderer-network','steam-api-helper','steam-ticket-loader','mkxpz-config-helper'])assert.equal(helperProfile(id).profile.version,registry.projects.find(project=>project.id===id).build.version);
+});
+
+test('one shared request check covers every registered build command before its recipe starts',t=>{
+ const work=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'build-requests-')));t.after(()=>fs.rmSync(work,{recursive:true,force:true}));
+ const commands=new Set(readProjects(root,{resolvePins:false}).projects.filter(project=>project.build).flatMap(project=>buildRecords(project).map(build=>build.command)));
+ for(const command of commands){
+  const source=fs.readFileSync(path.join(root,command),'utf8');
+  assert.match(source,/recipeMain\(import\.meta,|checkBuildRequest/,command);
+  // Host input selection (for example a JDK archive) may observe the CPU.
+  assert.doesNotMatch(source,/process\.arch\s*[!=]=|(?:if|throw)[^\n]*process\.arch/,command);
+ }
+ const request={project:'gemrb',version:'MCLv2-1020',arch:'arm64',platform:'darwin',cpu:'arm64',output:path.join(work,'out'),work:path.join(work,'work')};
+ assert.equal(checkBuildRequest(request).build.command,'tools/build-portable-runtime.mjs');
+ for(const [change,pattern] of [[{output:'relative'},/new absolute output/],[{output:work},/new absolute output/],[{work:path.join(work,'out','work')},/separate absolute work/],
+  [{version:'0.0'},/builds version/],[{platform:'linux',cpu:'arm64'},/cannot run/],[{platform:'darwin',cpu:'x64',arch:'arm64'},/cannot run/]])
+  assert.throws(()=>checkBuildRequest({...request,...change}),pattern);
+ // An Apple Silicon Mac also builds for an Intel runner; GitHub prepares only the exact runner.
+ assert.equal(checkBuildRequest({...request,version:'MCLv1-1020',arch:'x64',platform:'darwin',cpu:'arm64'}).runner,'macos-26-intel');
+ // A recipe started for another project stops before it builds anything.
+ const other=readProjects(root,{resolvePins:false}).projects.find(project=>project.id===(process.platform==='linux'?'android-java-converter':'gemrb')),otherBuild=buildRecords(other).find(build=>(build.runners?.[build.architectures[0]]||'xcode-27')===(process.platform==='linux'?'ubuntu-24.04':'xcode-27'))||buildRecords(other).at(-1);
+ const started=spawnSync(process.execPath,[path.join(root,'tools/build-fna.mjs'),'--project',other.id,'--version',otherBuild.version,'--arch',otherBuild.architectures[0],'--output',request.output,'--work',request.work],{cwd:root,encoding:'utf8'});
+ assert.notEqual(started.status,0);assert.match(started.stderr,/ builds with /);assert.ok(!fs.existsSync(request.output)&&!fs.existsSync(request.work));
 });
 
 test('an owned helper builds a separate package for each CPU, and only Intel executables also serve Apple Silicon',{skip:process.platform!=='darwin'&&'macOS toolchain'},async t=>{
@@ -241,7 +265,7 @@ test('every build host is prepared by one shared step on its declared hosted run
  }
  const calls=[],run=(command,args)=>calls.push([command,...args]);
  const linux={label:'ubuntu-24.04',runner:HOSTED_RUNNERS['ubuntu-24.04'],rustToolchain:'1.99.0',platform:'linux',cpu:'x64',environment:{PATH:'/usr/bin:/bin'},run};
- assert.throws(()=>prepareBuildHost({...linux,build:{},cpu:'arm64'}),/ubuntu-24\.04 runner \(linux x64\), not on linux arm64/);
+ assert.throws(()=>prepareBuildHost({...linux,build:{},cpu:'arm64'}),/ubuntu-24\.04 runner \(linux x64\), which linux arm64 cannot run/);
  assert.throws(()=>prepareBuildHost({...linux,build:{},label:'xcode-27',runner:HOSTED_RUNNERS['xcode-27']}),/xcode-27 runner \(macos arm64\)/);
  const prepared=prepareBuildHost({...linux,build:{rustTargets:['aarch64-apple-darwin']}});
  assert.deepEqual(prepared,{env:{RUSTUP_TOOLCHAIN:'1.99.0'},paths:[]});

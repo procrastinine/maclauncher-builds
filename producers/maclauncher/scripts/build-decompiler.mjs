@@ -5,8 +5,9 @@ import os from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
-import {pathToFileURL} from 'node:url';
+import {resolveProject,buildRecord} from '../../../lib/projects.mjs';
 import {managerDeclaration} from '../../../tools/release-runtime.mjs';
+import {recipeMain} from '../../../tools/build-source.mjs';
 const require=createRequire(import.meta.url);
 const Native=require('../src/modules/shared/runtime/local-native.js');
 const B=require('../src/modules/shared/runtime/bundled-native.js');
@@ -17,10 +18,10 @@ const external=path.resolve(import.meta.dirname,'../src/external');
 const run=(command,args)=>execFileSync(command,args,{encoding:'utf8',timeout:60000});
 const systemLink=value=>value.startsWith('/usr/lib/')||value.startsWith('/System/Library/');
 
-export async function buildDecompiler({project,arch,version,output,work=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'decompiler-')),'work'),dependencies}){
- const profile=profiles.find(row=>row.managerId===project),release=profile?.releases.find(row=>row.version===(version??profile.version)&&row.upstreamRevision===profile.upstreamRevision);
- if(!release||!['arm64','x64'].includes(arch)||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))
-  throw Error('Select a registered decompiler, arm64 or x64, and new absolute output and work directories.');
+export async function buildDecompiler({project,version:selectedVersion,arch,output,work=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'decompiler-')),'work'),dependencies}){
+ const version=buildRecord(resolveProject(project,path.resolve(import.meta.dirname,'../../..'),{resolvePins:false}),selectedVersion).version;
+ const profile=profiles.find(row=>row.managerId===project),release=profile?.releases.find(row=>row.version===version&&row.upstreamRevision===profile.upstreamRevision);
+ if(!release)throw Error('The decompiler profiles have no release for '+project+'.');
  const cpu=arch==='x64'?'x86_64':'arm64',sourceDir=path.join(external,profile.repo),userDataDir=path.join(work,'user-data');
  // CMake reads its target CPU from this variable; a runner of the same CPU builds natively.
  const previous=process.env.CMAKE_OSX_ARCHITECTURES;process.env.CMAKE_OSX_ARCHITECTURES=cpu;
@@ -44,7 +45,7 @@ export async function buildDecompiler({project,arch,version,output,work=path.joi
  const inventory=B.fileInventory(files).map(relative=>{const file=path.join(files,relative),stat=fs.statSync(file),architectures=macho(file);
   return {path:relative,size:stat.size,sha256:Native.hashFile(file),mode:stat.mode&0o777,...(architectures?{architectures}:{})};});
  const {logPath,...verifiedBuild}=built.verifiedBuild;
- const manifest={schemaVersion:1,managerId:project,version:release.version,upstreamRevision:release.upstreamRevision,platform:'darwin',arch,minimumMacOS,executableRelative,
+ const manifest={schemaVersion:1,managerId:project,version,upstreamRevision:release.upstreamRevision,platform:'darwin',arch,minimumMacOS,executableRelative,
   files:inventory,dependencies:[{file:executableRelative,links:linked}],notices:[{name:profile.repo,license:'GPL-2.0-or-later',sourceUrl:'https://github.com/kichikuou/'+profile.repo,path:license}],
   environmentRelative:{},runtimeFiles:{},signature:{identity:'-',verified:true},
   provenance:{...verifiedBuild,configureOptions:verifiedBuild.configureOptions.map(option=>option.split(work).join('maclauncher-build')),inputExecutableSha256:Native.hashFile(built.runtimePath),verifiedBuild:true}};
@@ -52,11 +53,7 @@ export async function buildDecompiler({project,arch,version,output,work=path.joi
  fs.writeFileSync(path.join(payload,'manifest.json'),JSON.stringify(manifest,null,2)+'\n',{mode:0o644,flag:'wx'});
  const declaration=await managerDeclaration({project,input:payload});
  fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});
- return {project,version:release.version,arch,output};
+ return {project,version,arch,output};
 }
 
-export async function main(args){
- const options={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!args[i]?.startsWith('--')||!['project','arch','version','output','work'].includes(key)||!args[i+1]||Object.hasOwn(options,key))throw Error('Use --project, --arch, --output and --work, with an optional --version.');options[key]=args[i+1];}
- return buildDecompiler(options);
-}
-if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)main(process.argv.slice(2)).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error.message);process.exitCode=1;});
+recipeMain(import.meta,buildDecompiler);
