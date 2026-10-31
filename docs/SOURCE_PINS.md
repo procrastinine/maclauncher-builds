@@ -1,7 +1,6 @@
-# Source pins
+# Upstream commit references
 
-Project upstream descriptions reference the pin consumed by the selected
-producer. A reference contains a relative file and a JSON pointer:
+A project record lists the upstream repositories that the project is built from, but it does not store their exact commits. Each upstream instead has a `pin`, a reference to the place where the project's producer records the commit it builds: a file in this repository and a [JSON pointer](https://www.rfc-editor.org/rfc/rfc6901) into that file. The producer's file is therefore the only place where the commit is recorded, and builds, update checks and release notes all read it from there. Every upstream in the project registries needs such a reference.
 
 ```json
 {
@@ -16,20 +15,15 @@ producer. A reference contains a relative file and a JSON pointer:
 }
 ```
 
-The selected value can be a 40-character commit string or a source object with
-`revision` or `commit`, an optional repository, version and commit timestamp.
-`repositoryPointer` selects an origin from the same file when the commit is a
-scalar. An origin supplied by the producer must match the registered origin;
-terminal `.git` suffixes are equivalent. A referenced upstream cannot also
-supply `revision`, `version` or `committedAt` overrides.
+The value at the pointer is either a 40-character commit string or a source object with `revision` or `commit` and, optionally, a repository, version and commit timestamp. When the value is a plain commit string, `repositoryPointer` selects the repository URL from the same file. A repository URL supplied by the producer must match the registered one, and a trailing `.git` makes no difference. An upstream that uses a reference cannot also set `revision`, `version` or `committedAt` directly.
 
-Owned CommonJS producers can expose their existing build constant directly:
-`{"file":"producers/maclauncher/src/modules/ai5/runtime/portable-build-v4.js","pointer":"/REVISION"}`.
-Resolution loads the same trusted owned module as the producer and reads its
-export without calling build functions. JSON metadata is preferred for new
-producers. Export references preserve existing recipe and package identities.
+## Build constants in CommonJS producers
 
-Named entries preserve held releases when an array is reordered:
+A reference can also point at a constant that a CommonJS producer in this repository already exports: `{"file":"producers/maclauncher/src/modules/ai5/runtime/portable-build-v4.js","pointer":"/REVISION"}`. Resolving it loads the same module that the producer uses and reads the export without calling any build function. New producers record their commits in JSON files instead; references to exports let existing recipes and packages stay unchanged.
+
+## Entries in arrays
+
+When the commit is inside an array, `match` selects the entry by its fields rather than its position, so reordering the array does not change which commit is used:
 
 ```json
 {
@@ -40,26 +34,12 @@ Named entries preserve held releases when an array is reordered:
 }
 ```
 
-`match` requires exactly one entry. Missing or ambiguous selections fail.
-Different ABI or supplier profiles retain separate references, including ART's
-held AIM supplier and the common Android native-memory implementation. Updating
-one profile does not advance another profile's pin.
+`match` must select exactly one entry; a missing or ambiguous match fails. Builds for different ABIs or suppliers have separate references even when they use the same upstream. For example, the ART adapter's AIM source and the common Android native-memory implementation each have their own reference, and updating one does not change the other's commit.
 
-`lib/projects.mjs` resolves upstreams for update comparisons, source builds and
-release notes. Resolved upstreams retain the flat revision API without retaining
-the reference, so resolved registry snapshots remain self-contained.
-References have no copied-revision, Git-HEAD, network or cache fallback. Each
-registry resolution reads one consistent set of metadata; subsequent reads pick
-up changes to the authoritative files.
+## Resolution
 
-Catalog indexing and sealed release preparation/verification use
-`resolvePins:false`. These operations validate reference syntax without loading
-producer modules or requiring source submodules. Update checks and source builds
-resolve their selected pins. Android metadata resolution needs only the
-`sources/maclauncher-android` submodule; initializing its nested AOSP checkouts
-is unnecessary for metadata. The source workflow initializes that top-level
-checkout. Package-index publication watches declared pin inputs.
+`lib/projects.mjs` resolves the references for update comparisons, source builds and release notes. A resolved upstream has a plain `revision` field in place of its reference, so a resolved copy of the registry is self-contained. A reference that cannot be read fails; it never falls back to a copied commit, Git HEAD, the network or a cache. Each resolution of the registry reads one consistent set of files, and later resolutions pick up changes to them.
 
-Split project registries require references for every upstream. Inline revisions
-are accepted only in self-contained resolved flat registry snapshots. Reference
-selection and producer pins remain independent of update discovery.
+Catalog indexing and the preparation and verification of finished releases use `resolvePins:false`. These operations check the syntax of each reference without loading producer modules or needing the source submodules. Update checks and source builds resolve the references they need. Resolving the Android references needs only the `sources/maclauncher-android` submodule, without its nested AOSP checkouts, and the source workflow initializes that submodule. The package-index workflow also runs when a file that a reference points to changes.
+
+Commits written directly into an upstream entry are accepted only in resolved, self-contained copies of the registry. The update checker never changes a reference or the commit a producer records.
