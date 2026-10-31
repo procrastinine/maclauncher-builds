@@ -92,9 +92,11 @@ jobs:
     timeout-minutes: 240
     permissions:
       contents: read
+      actions: read
       id-token: write
       attestations: write
     env:
+      GH_TOKEN: ${{ github.token }}
       BUILD_PROJECT: ${{ matrix.project }}
       BUILD_VERSION: ${{ matrix.version }}
       BUILD_ARCH: ${{ matrix.arch }}
