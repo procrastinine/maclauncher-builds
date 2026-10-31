@@ -6,27 +6,66 @@
     {
       "schemaVersion": 2,
       "id": "gemrb",
-      "version": "MCLv1-1020",
+      "version": "MCLv2-1020",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "5cc4421e956d20767fdf7d8777e5259bff76c01f1881239a9b7ca58121df1b94",
-      "sourceSha256": "bfde8c88a2240443cb0ccd58e276b8d0d19897485b3ead646b34671c0aed20ce",
+      "manifestSha256": "7bf3d324f877127a758690c3854247feb8aa172584bac9d852ef71ea5d7d81a9",
+      "sourceSha256": "7bf3d324f877127a758690c3854247feb8aa172584bac9d852ef71ea5d7d81a9",
+      "updatePolicy": "manual",
+      "build": {
+        "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41167281231",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "gemrb-MCLv2-1020-arm64.tar.gz",
+        "sha256": "71a1c0e5192c26993d75115313eb7f51c0d81b4b0f22448fc766e2b46ce70401",
+        "bytes": 15292862,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gemrb%2FvMCLv2-1020%2Farm64/gemrb-MCLv2-1020-arm64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "830c33f46db62a6e71380c246359df7a6e5d4729"
+      },
+      "tag": "gemrb/vMCLv2-1020/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "gemrb",
+      "version": "MCLv1-1020",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "800ed0dee632923eb3d05cf1c1fc0c9ba4a0e69fb9c5177aaf72f80c02f494fb",
+      "sourceSha256": "800ed0dee632923eb3d05cf1c1fc0c9ba4a0e69fb9c5177aaf72f80c02f494fb",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "gemrb-MCLv1-1020-arm64.tar.gz",
-        "sha256": "fc80bf3526d11e968120df674b706f40656473eb2a89c0225764fa2db90e5aa4",
-        "bytes": 15312763,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gemrb%2FvMCLv1-1020%2Farm64/gemrb-MCLv1-1020-arm64.tar.gz"
+        "filename": "gemrb-MCLv1-1020-x64.tar.gz",
+        "sha256": "d11e81caab7c15e41a6cda5398598f9b760376ab97a6cac6d5ad802adc38472c",
+        "bytes": 16222313,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gemrb%2FvMCLv1-1020%2Fx64/gemrb-MCLv1-1020-x64.tar.gz"
       },
-      "tag": "gemrb/vMCLv1-1020/arm64",
       "source": {
-        "repository": "gemrb/gemrb",
-        "revision": "bcb5cfaa9f19ffbe8a51f25a3c014fa344173351"
-      }
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "a554fd85e38c5db2b377049b15163eb6cee9c6a6"
+      },
+      "tag": "gemrb/vMCLv1-1020/x64"
     }
   ]
 }

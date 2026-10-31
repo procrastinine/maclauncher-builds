@@ -6,27 +6,66 @@
     {
       "schemaVersion": 2,
       "id": "ai5",
-      "version": "1.5.0-MCLv1",
+      "version": "1.5.0-MCLv2",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "d956d2ff98119c15cf4d7845adbfdc175518b06a8cbf419ad24ef8160e2958ef",
-      "sourceSha256": "f58f52697a0442bc64f15c23f0fa835a758f821aae690f1a0b9a9d3ab36649da",
+      "manifestSha256": "aecd37826aeeeb428a8f865788191ca72a2dbdaf310595b52dc1fca1ff9cecbe",
+      "sourceSha256": "aecd37826aeeeb428a8f865788191ca72a2dbdaf310595b52dc1fca1ff9cecbe",
+      "updatePolicy": "manual",
+      "build": {
+        "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41167281231",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "ai5-1.5.0-MCLv2-arm64.tar.gz",
+        "sha256": "a8a12f8eda183f674dc03d6683c71ddfd65db587371e1aab6de2e12e03ad8bc9",
+        "bytes": 11245139,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/ai5%2Fv1.5.0-MCLv2%2Farm64/ai5-1.5.0-MCLv2-arm64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "830c33f46db62a6e71380c246359df7a6e5d4729"
+      },
+      "tag": "ai5/v1.5.0-MCLv2/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "ai5",
+      "version": "1.5.0-MCLv1",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "6bf4460819ce292cc0dc4524cd13db9eebd98674031faaa48bd859e53ccc6af0",
+      "sourceSha256": "6bf4460819ce292cc0dc4524cd13db9eebd98674031faaa48bd859e53ccc6af0",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "ai5-1.5.0-MCLv1-arm64.tar.gz",
-        "sha256": "4974882522f60e81a295c067c38d954cee086379ac07644188985f9d94a82ed0",
-        "bytes": 11244214,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/ai5%2Fv1.5.0-MCLv1%2Farm64/ai5-1.5.0-MCLv1-arm64.tar.gz"
+        "filename": "ai5-1.5.0-MCLv1-x64.tar.gz",
+        "sha256": "1543babf924cffccb5aeb3af1706c706cbf9e038023e71e5201e9c161ab9e842",
+        "bytes": 11684743,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/ai5%2Fv1.5.0-MCLv1%2Fx64/ai5-1.5.0-MCLv1-x64.tar.gz"
       },
-      "tag": "ai5/v1.5.0-MCLv1/arm64",
       "source": {
-        "repository": "nunuhara/ai5-sdl2",
-        "revision": "ad7a703f1c9f56e127d23c10d54fec0dcd4eaef3"
-      }
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0e9c60db0dcf018cd3a7c9da39bfbef3070597ac"
+      },
+      "tag": "ai5/v1.5.0-MCLv1/x64"
     }
   ]
 }

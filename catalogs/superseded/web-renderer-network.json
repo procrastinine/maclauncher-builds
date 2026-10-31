@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 2,
+  "projectId": "web-renderer-network",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "web-renderer-network",
+      "version": "1.0.1",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "11.0",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "c40db636ae0a4dc37ad8419320e9a634f654e6a9d25dbeaefbff0a75d7cb2154",
+      "sourceSha256": "9d1a5fb91b8ea207ec117aaabb62a1b7925637cec958bd0b443b03f9eaa0631c",
+      "updatePolicy": "manual",
+      "tag": "web-renderer-network/v1.0.1/universal",
+      "asset": {
+        "filename": "web-renderer-network-1.0.1-universal.tar.gz",
+        "sha256": "3dd057dbe86ddd4666c8f92863fcbf705772d3c4c76b9268b4b7e12149f5e7ce",
+        "bytes": 5846,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/web-renderer-network%2Fv1.0.1%2Funiversal/web-renderer-network-1.0.1-universal.tar.gz"
+      }
+    }
+  ]
+}

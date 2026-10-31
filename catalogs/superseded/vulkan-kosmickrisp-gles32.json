@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "projectId": "vulkan-kosmickrisp-gles32",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "vulkan-kosmickrisp-gles32",
+      "version": "MCLv1-1024",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "27.0.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "ab785f70a5552114f617849e90772598adcdd1758900724e50643be3391e2d17",
+      "sourceSha256": "e338e7b26ed208e8efb4dd3683a4c0e1a3d77059e8c8b95c2af0e1394438013d",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "vulkan-kosmickrisp-gles32-MCLv1-1024-arm64.tar.gz",
+        "sha256": "544576660e6f52048ab06261df4a4afc3d52a8683e6b8c96d345ae3cfda9a0ae",
+        "bytes": 3244314,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vulkan-kosmickrisp-gles32%2FvMCLv1-1024%2Farm64/vulkan-kosmickrisp-gles32-MCLv1-1024-arm64.tar.gz"
+      },
+      "tag": "vulkan-kosmickrisp-gles32/vMCLv1-1024/arm64"
+    }
+  ]
+}

@@ -6,27 +6,66 @@
     {
       "schemaVersion": 2,
       "id": "xsystem4",
-      "version": "MCLv1-1021",
+      "version": "MCLv2-1021",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "312b8bd4f7d472b559b54c95016b631855d9ef3d716c3c972b19b6ae2d1326b5",
-      "sourceSha256": "46d90ce63680684d4a18ddb75db308d9ce45f1ba8b4324f309acedc36a9858a8",
+      "manifestSha256": "d75be3da09a1510a9239700f8852cc996784cd3ab975caa9ebbc140a13d6d9ef",
+      "sourceSha256": "d75be3da09a1510a9239700f8852cc996784cd3ab975caa9ebbc140a13d6d9ef",
+      "updatePolicy": "manual",
+      "build": {
+        "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41167281231",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "xsystem4-MCLv2-1021-arm64.tar.gz",
+        "sha256": "2cfe19100b983b7159734f9cc678e82064db1373aa456399a24f14229d1b8e55",
+        "bytes": 21360637,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem4%2FvMCLv2-1021%2Farm64/xsystem4-MCLv2-1021-arm64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "830c33f46db62a6e71380c246359df7a6e5d4729"
+      },
+      "tag": "xsystem4/vMCLv2-1021/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "xsystem4",
+      "version": "MCLv1-1021",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "f7c6a63067c4db40594b0d2e0082a39886d88d50fcd70e51343ba4d75bdcec3f",
+      "sourceSha256": "f7c6a63067c4db40594b0d2e0082a39886d88d50fcd70e51343ba4d75bdcec3f",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "xsystem4-MCLv1-1021-arm64.tar.gz",
-        "sha256": "a805feb0438c5cc05e1f87e5c164b16111e27ac1893946ed24237f151d9fd0a4",
-        "bytes": 21357638,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem4%2FvMCLv1-1021%2Farm64/xsystem4-MCLv1-1021-arm64.tar.gz"
+        "filename": "xsystem4-MCLv1-1021-x64.tar.gz",
+        "sha256": "ccafb0d641625f2e393f5bb0f770b1778f6ecb3ba0746a1e485fb6d1c9d2b60a",
+        "bytes": 21897097,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem4%2FvMCLv1-1021%2Fx64/xsystem4-MCLv1-1021-x64.tar.gz"
       },
-      "tag": "xsystem4/vMCLv1-1021/arm64",
       "source": {
-        "repository": "nunuhara/xsystem4",
-        "revision": "de65718ba72d5eb291a4d0ddb691627f1d401909"
-      }
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "a554fd85e38c5db2b377049b15163eb6cee9c6a6"
+      },
+      "tag": "xsystem4/vMCLv1-1021/x64"
     }
   ]
 }

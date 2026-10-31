@@ -6,29 +6,45 @@
     {
       "schemaVersion": 2,
       "id": "reshade",
-      "version": "0.2.0",
-      "arch": "universal",
+      "version": "0.3.1",
+      "arch": "x64",
       "launcherArchitectures": [
-        "arm64",
         "x64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "runtime.json",
-      "manifestSha256": "e80e9464a70958b8e78847697db419fe14ae15e898b5a7c0571dccbc63036ff0",
-      "sourceSha256": "d75a76f18dcc4c2c616b144a0e7436536aa080695cf7543968bd72a6b8da9d6c",
+      "manifestSha256": "5cb15a464b4c139d3c052d1a9f535d45ad648fcef3915bf64f2e8c5c2f225fe8",
+      "sourceSha256": "c12d8d32bd378eceaa883b86d0cfcd720b7019eb14349d285e1b27b6bd9faffd",
       "updatePolicy": "manual",
-      "asset": {
-        "filename": "reshade-0.2.0-universal.tar.gz",
-        "sha256": "f1dac0e54cd602f8243b8f8f284f3aa771b09ecc3802c7e4f06f69cfdfefbbb7",
-        "bytes": 59444312,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reshade%2Fv0.2.0%2Funiversal/reshade-0.2.0-universal.tar.gz"
+      "build": {
+        "sourceRevision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "41164339724",
+        "runAttempt": "1"
       },
-      "tag": "reshade/v0.2.0/universal"
+      "asset": {
+        "filename": "reshade-0.3.1-x64.tar.gz",
+        "sha256": "70af28d14d407453e6e5631bfc8365bc3eadd49c47539beb9f8d9ccc0cae212a",
+        "bytes": 32301949,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reshade%2Fv0.3.1%2Fx64/reshade-0.3.1-x64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4"
+      },
+      "tag": "reshade/v0.3.1/x64"
     },
     {
       "schemaVersion": 2,
       "id": "reshade",
-      "version": "0.1.0",
+      "version": "0.3.1",
       "arch": "universal",
       "launcherArchitectures": [
         "arm64",
@@ -36,16 +52,84 @@
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "runtime.json",
-      "manifestSha256": "3fc284802563fe3ed2f75e703015d121ce73a379486c3f487e38c6a1981708b1",
-      "sourceSha256": "d7e9ac9e5292667b2d6d1b8ea1ab8eca4eed732270a01e0e8bb48c3b3fbbb0d9",
+      "manifestSha256": "b28693fdc4933ddbde1e1f92545c4129ea8c940fcfd977e897d66e00ac6ba5ab",
+      "sourceSha256": "48fb621425bf6937554f2709885f8a3828e6ce0888d441b07a443a03f9334589",
+      "updatePolicy": "manual",
+      "build": {
+        "sourceRevision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41164339724",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "reshade-0.3.1-universal.tar.gz",
+        "sha256": "fce0dd80dfafd29450c43d8a97a30e81e0f357de394b1b2c31d598666188a707",
+        "bytes": 63605673,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reshade%2Fv0.3.1%2Funiversal/reshade-0.3.1-universal.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4"
+      },
+      "tag": "reshade/v0.3.1/universal"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "reshade",
+      "version": "0.3.0",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "runtime.json",
+      "manifestSha256": "f7cbf283096fd3a3d454bc762af1de2b28dfeea79e7b5b0b40c401859321b11f",
+      "sourceSha256": "04bb574c4705c124253bd39b9676a7df529dc5ce9a28a9bea856c190f9d114d9",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "reshade-0.1.0-universal.tar.gz",
-        "sha256": "8da8a4825a715c8bc829775d0f0a3cf32da0c8c53b3beebee26faa141acb30aa",
-        "bytes": 44022969,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reshade%2Fv0.1.0%2Funiversal/reshade-0.1.0-universal.tar.gz"
+        "filename": "reshade-0.3.0-x64.tar.gz",
+        "sha256": "f2aede9e005576a8746f2087e8093636d4e695074e22777fe45753a6ae09680e",
+        "bytes": 29983517,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reshade%2Fv0.3.0%2Fx64/reshade-0.3.0-x64.tar.gz"
       },
-      "tag": "reshade/v0.1.0/universal"
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0e9c60db0dcf018cd3a7c9da39bfbef3070597ac"
+      },
+      "tag": "reshade/v0.3.0/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "reshade",
+      "version": "0.3.0",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "runtime.json",
+      "manifestSha256": "48e9dcf23cadbe945802ae79f764684ed1276e7a55e40c79d99485c0617f09ae",
+      "sourceSha256": "ebda56f4d0fa2a70877bcbcd4a3c3a5595efa64f353ff1ebd3dc235d19972320",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "reshade-0.3.0-universal.tar.gz",
+        "sha256": "1d65c460febea59d012e33225f1f1e9306c9d59b3e3f14ee7c694d0f31deef5d",
+        "bytes": 59391974,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reshade%2Fv0.3.0%2Funiversal/reshade-0.3.0-universal.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0e9c60db0dcf018cd3a7c9da39bfbef3070597ac"
+      },
+      "tag": "reshade/v0.3.0/universal"
     }
   ]
 }

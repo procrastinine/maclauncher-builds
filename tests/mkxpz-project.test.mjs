@@ -8,7 +8,6 @@ import {catalog} from '../tools/runtime-package.mjs';
 import {validateCatalog} from '../lib/project-identity.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 const baseline=JSON.parse(fs.readFileSync(path.join(root,'runtimes/mkxpz/baseline.json')));
-const adaptedVersion='MCLv1-1003';
 test('MKXP-Z uses its owned source recipe and preserves the universal publisher identity',()=>{
  const project=resolveProject('mkxpz',root);
  assert.equal(project.producer.kind,'maclauncher');
@@ -29,7 +28,7 @@ test('MKXP-Z uses its owned source recipe and preserves the universal publisher 
 test('MKXP-Z catalog contains only the current patched Apple Silicon package',()=>{
  const project=resolveProject('mkxpz',root),value=JSON.parse(fs.readFileSync(path.join(root,'catalogs/mkxpz.json')));
  validateCatalog(value,{project:'mkxpz',repository:project.releaseRepository});
- assert.equal(value.packages.length,1);const adapted=value.packages[0];assert.equal(adapted.version,adaptedVersion);
+ assert.equal(value.packages.length,1);const adapted=value.packages[0];assert.ok(project.packageProfiles.some(profile=>profile.version===adapted.version));
  assert.equal(adapted.arch,'arm64');assert.deepEqual(adapted.launcherArchitectures,['arm64']);
  assert.equal(adapted.minimumMacOS,'11.0');assert.equal(adapted.manifestRelative,'manifest.json');
  assert.throws(()=>catalog([{...adapted,asset:{...adapted.asset,sha256:'0'.repeat(64)}}],
@@ -37,7 +36,8 @@ test('MKXP-Z catalog contains only the current patched Apple Silicon package',()
 });
 test('MKXP-Z configuration helper has a separate source-free binary package',()=>{
  const value=JSON.parse(fs.readFileSync(path.join(root,'catalogs/mkxpz-config-helper.json')));
- validateCatalog(value,{project:'mkxpz-config-helper',repository:resolveProject('mkxpz-config-helper',root).releaseRepository});
- const helper=value.packages.find(row=>row.version==='1.0.0');
+ const project=resolveProject('mkxpz-config-helper',root);
+ validateCatalog(value,{project:'mkxpz-config-helper',repository:project.releaseRepository});
+ const helper=value.packages.find(row=>project.packageProfiles.some(profile=>profile.version===row.version));
  assert.ok(helper);assert.equal(helper.arch,'universal');assert.equal(helper.minimumMacOS,'11.0');
 });

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 2,
+  "projectId": "fna",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "fna",
+      "version": "26.10-MCLv1",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "724ec823ada108089490d65910c0aeec76061d16e4eb45e14e3382c44b388123",
+      "sourceSha256": "887f8e67a1b644f0541fe9b4b4c2ce9c496166497e11b73815a9b5f940e3c925",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "fna-26.10-MCLv1-arm64.tar.gz",
+        "sha256": "2a157d59af82aab7dc1ea6c634e75bc052923953b60e487e40b26ca72145c521",
+        "bytes": 33711997,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/fna%2Fv26.10-MCLv1%2Farm64/fna-26.10-MCLv1-arm64.tar.gz"
+      },
+      "tag": "fna/v26.10-MCLv1/arm64",
+      "source": {
+        "repository": "FNA-XNA/FNA",
+        "revision": "00498b0b81425b14bf8da23e68655215b9b5daa7"
+      }
+    }
+  ]
+}

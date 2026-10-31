@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 2,
+  "projectId": "mkxpz",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "mkxpz",
+      "version": "MCLv1-1003",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "11.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "fc37838f899a434690a3b8f3050317cbacaf4593558a5a74ab4be9e63707e5c3",
+      "sourceSha256": "22b3838dff7968456d1d648587118e1506831788ce367fd98337462b4c76198f",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "mkxpz-MCLv1-1003-arm64.tar.gz",
+        "sha256": "837761f93ff172343caaf7cc94d67c7d67470b925b62febc0011377a7ac2cc25",
+        "bytes": 14431489,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mkxpz%2FvMCLv1-1003%2Farm64/mkxpz-MCLv1-1003-arm64.tar.gz"
+      },
+      "tag": "mkxpz/vMCLv1-1003/arm64",
+      "source": {
+        "repository": "mkxp-z/mkxp-z",
+        "revision": "37a04d14413454551a7b6aadbb4e93e67168accb"
+      }
+    }
+  ]
+}

@@ -6,23 +6,16 @@
     {
       "schemaVersion": 2,
       "id": "butterscotch",
-      "version": "MCLv1-1007",
+      "version": "MCLv2-1007",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "10964e6bf8f851ac85637d9516990945b1c0b14f7a6aabcaf81715e308743288",
-      "sourceSha256": "c77014ab4120e8be3425b4f879333a7217931d84ce5c3c81d19af90d42049112",
+      "manifestSha256": "025542e08fc2cd1baedd34d2e69ca8dedb61753ef86d7bc2944451fc085b48a6",
+      "sourceSha256": "025542e08fc2cd1baedd34d2e69ca8dedb61753ef86d7bc2944451fc085b48a6",
       "updatePolicy": "manual",
-      "asset": {
-        "filename": "butterscotch-MCLv1-1007-arm64.tar.gz",
-        "sha256": "17e63845e505dd3a98e9cff4138be72f919799e97036535a72f7cd61e3b26048",
-        "bytes": 1174311,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/butterscotch%2FvMCLv1-1007%2Farm64/butterscotch-MCLv1-1007-arm64.tar.gz"
-      },
-      "tag": "butterscotch/vMCLv1-1007/arm64",
       "capabilities": {
         "gameArguments": "repeat-game-arg-v1",
         "wadVersions": [
@@ -39,10 +32,72 @@
         ],
         "sourceKind": "commit"
       },
+      "build": {
+        "sourceRevision": "f9e460f130291ab38279f2a638a6d59c9b522934",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41167386066",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "butterscotch-MCLv2-1007-arm64.tar.gz",
+        "sha256": "815f97ca2beadb890516362923b590615c8d0cd8c0a8c0b90241a4602c7fdbc1",
+        "bytes": 1184518,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/butterscotch%2FvMCLv2-1007%2Farm64/butterscotch-MCLv2-1007-arm64.tar.gz"
+      },
       "source": {
-        "repository": "ButterscotchRunner/Butterscotch",
-        "revision": "d66464857303a2840a5cc5141c0035440847f441"
-      }
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "f9e460f130291ab38279f2a638a6d59c9b522934"
+      },
+      "tag": "butterscotch/vMCLv2-1007/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "butterscotch",
+      "version": "MCLv1-1007",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "19353742e7c00db753e5e63d41280945d63a5c42da1924b0d438bf858f5c97d3",
+      "sourceSha256": "19353742e7c00db753e5e63d41280945d63a5c42da1924b0d438bf858f5c97d3",
+      "updatePolicy": "manual",
+      "capabilities": {
+        "gameArguments": "repeat-game-arg-v1",
+        "wadVersions": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17
+        ],
+        "sourceKind": "commit"
+      },
+      "asset": {
+        "filename": "butterscotch-MCLv1-1007-x64.tar.gz",
+        "sha256": "144f8276d2c55af812a749f739d73bafb2f69a09ee20a50718a2d0b01ed83ae8",
+        "bytes": 1257032,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/butterscotch%2FvMCLv1-1007%2Fx64/butterscotch-MCLv1-1007-x64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0e9c60db0dcf018cd3a7c9da39bfbef3070597ac"
+      },
+      "tag": "butterscotch/vMCLv1-1007/x64"
     }
   ]
 }

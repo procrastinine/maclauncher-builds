@@ -6,27 +6,66 @@
     {
       "schemaVersion": 2,
       "id": "xsys35-decompiler",
-      "version": "1.13.0-MCLv1",
+      "version": "1.13.0-MCLv2",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "cc8efa20be36081d1b7738f69d0253ec027095dbaa988a98ddb1e21a727b8e8d",
-      "sourceSha256": "627fc077d1e4a2c31441574865e80802f6a89e97c46df353a5edb6f55512fe5a",
+      "manifestSha256": "00475ec6ae36842f3102dfa45e18b04fc68965d31fea8a149acb8fbaf07240bf",
+      "sourceSha256": "00475ec6ae36842f3102dfa45e18b04fc68965d31fea8a149acb8fbaf07240bf",
+      "updatePolicy": "manual",
+      "build": {
+        "sourceRevision": "7f9bdc4beb59086b4c11360159dd8e80ccad3f6b",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41168716940",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "xsys35-decompiler-1.13.0-MCLv2-arm64.tar.gz",
+        "sha256": "0b47d03fc013806d919488537f0dab607fb5b4d2606460e9ff094dafe1632509",
+        "bytes": 62651,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsys35-decompiler%2Fv1.13.0-MCLv2%2Farm64/xsys35-decompiler-1.13.0-MCLv2-arm64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "7f9bdc4beb59086b4c11360159dd8e80ccad3f6b"
+      },
+      "tag": "xsys35-decompiler/v1.13.0-MCLv2/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "xsys35-decompiler",
+      "version": "1.13.0-MCLv1",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "9b55293351366287b775d6fd6c49061838ffe11f6b78b04cb94ff0ac17e012b2",
+      "sourceSha256": "9b55293351366287b775d6fd6c49061838ffe11f6b78b04cb94ff0ac17e012b2",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "xsys35-decompiler-1.13.0-MCLv1-arm64.tar.gz",
-        "sha256": "355fb8ac882c5c932462e27dc7760907956b210f4ec71e45d7f4b255a1a1b579",
-        "bytes": 62739,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsys35-decompiler%2Fv1.13.0-MCLv1%2Farm64/xsys35-decompiler-1.13.0-MCLv1-arm64.tar.gz"
+        "filename": "xsys35-decompiler-1.13.0-MCLv1-x64.tar.gz",
+        "sha256": "4c3a2ff540cd02a01b1400f609211534a09d2e1a47ec89aec918c6b2f3456d46",
+        "bytes": 64942,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsys35-decompiler%2Fv1.13.0-MCLv1%2Fx64/xsys35-decompiler-1.13.0-MCLv1-x64.tar.gz"
       },
-      "tag": "xsys35-decompiler/v1.13.0-MCLv1/arm64",
       "source": {
-        "repository": "kichikuou/xsys35c",
-        "revision": "5444fd18e94db3a36feb3885b158ea45d606bc93"
-      }
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0e9c60db0dcf018cd3a7c9da39bfbef3070597ac"
+      },
+      "tag": "xsys35-decompiler/v1.13.0-MCLv1/x64"
     }
   ]
 }

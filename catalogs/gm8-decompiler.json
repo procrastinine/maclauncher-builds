@@ -6,27 +6,66 @@
     {
       "schemaVersion": 2,
       "id": "gm8-decompiler",
-      "version": "2.2.0-MCLv1",
+      "version": "2.2.0-MCLv2",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "11.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "4307e8bb4debb6a73241c60f501b674527a88cef1e0575e6d88eaef404650199",
-      "sourceSha256": "91be3a309db481f6f069a9ac0021c113d8485ab54d7ac72cbc0330aa7e338270",
+      "manifestSha256": "5d7c701e0ae190c696d1b8890111f91cab4ca798c42e30f31b5fd50aedaebbf8",
+      "sourceSha256": "5d7c701e0ae190c696d1b8890111f91cab4ca798c42e30f31b5fd50aedaebbf8",
+      "updatePolicy": "manual",
+      "build": {
+        "sourceRevision": "7f9bdc4beb59086b4c11360159dd8e80ccad3f6b",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41168716940",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "gm8-decompiler-2.2.0-MCLv2-arm64.tar.gz",
+        "sha256": "036ea91863e662894aaf17d9495941c63680a0efff1be505a7b8b3790d6de257",
+        "bytes": 491152,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gm8-decompiler%2Fv2.2.0-MCLv2%2Farm64/gm8-decompiler-2.2.0-MCLv2-arm64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "7f9bdc4beb59086b4c11360159dd8e80ccad3f6b"
+      },
+      "tag": "gm8-decompiler/v2.2.0-MCLv2/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "gm8-decompiler",
+      "version": "2.2.0-MCLv1",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "11.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "3c3a7d6ea14b3aa23cc540b048fabe39f9ac21f133fac72e355de03f708f5f53",
+      "sourceSha256": "3c3a7d6ea14b3aa23cc540b048fabe39f9ac21f133fac72e355de03f708f5f53",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "gm8-decompiler-2.2.0-MCLv1-arm64.tar.gz",
-        "sha256": "d81215deac83f50637fa1b6a5a290d4ede8b7d9bc4ab0930a15290329e40d0e6",
-        "bytes": 457371,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gm8-decompiler%2Fv2.2.0-MCLv1%2Farm64/gm8-decompiler-2.2.0-MCLv1-arm64.tar.gz"
+        "filename": "gm8-decompiler-2.2.0-MCLv1-x64.tar.gz",
+        "sha256": "6dab64abdd2b491962101ba21ffef5fe167d644c52e166500e316b20c3866465",
+        "bytes": 547030,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gm8-decompiler%2Fv2.2.0-MCLv1%2Fx64/gm8-decompiler-2.2.0-MCLv1-x64.tar.gz"
       },
-      "tag": "gm8-decompiler/v2.2.0-MCLv1/arm64",
       "source": {
-        "repository": "OpenGMK/OpenGMK",
-        "revision": "9ccc47a9cab4681a889866f7233a6b016d36a15e"
-      }
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "a554fd85e38c5db2b377049b15163eb6cee9c6a6"
+      },
+      "tag": "gm8-decompiler/v2.2.0-MCLv1/x64"
     }
   ]
 }

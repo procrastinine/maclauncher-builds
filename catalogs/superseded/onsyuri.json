@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 2,
+  "projectId": "onsyuri",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "onsyuri",
+      "version": "0.7.7beta-MCLv1",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "3b5847735e657977c260a15c87e858f83f03c0b71dcb7d2be78abc56a9086519",
+      "sourceSha256": "b4a15fe88d2492b33979d9093591b8436cd907c25232d302de9e5e269f6b96db",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "onsyuri-0.7.7beta-MCLv1-arm64.tar.gz",
+        "sha256": "e9d23a15f310a5f7fb00a19e8ea70c7fc8e98a4eb7e891d02a38958005d6470d",
+        "bytes": 3804991,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onsyuri%2Fv0.7.7beta-MCLv1%2Farm64/onsyuri-0.7.7beta-MCLv1-arm64.tar.gz"
+      },
+      "tag": "onsyuri/v0.7.7beta-MCLv1/arm64",
+      "source": {
+        "repository": "YuriSizuku/OnscripterYuri",
+        "revision": "08f744b31cc1907b66a15f0402e62321a131ed81"
+      }
+    }
+  ]
+}

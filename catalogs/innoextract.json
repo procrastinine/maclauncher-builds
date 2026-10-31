@@ -6,27 +6,66 @@
     {
       "schemaVersion": 2,
       "id": "innoextract",
-      "version": "MCLv1-0206",
+      "version": "MCLv2-0206",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "879aa960b47c1fa77db1312f6563c26fa071142a935617d34568314356a1c44c",
-      "sourceSha256": "5dfe39c91087cc184a764dca8b0a2e35c6df4c585d767108a945781c2cf2cc7f",
+      "manifestSha256": "d65a2687dd62b8ca4fdc8d10c7f845cece7c495b56e55ac7c964dc6e4bd5d740",
+      "sourceSha256": "d65a2687dd62b8ca4fdc8d10c7f845cece7c495b56e55ac7c964dc6e4bd5d740",
+      "updatePolicy": "manual",
+      "build": {
+        "sourceRevision": "f9e460f130291ab38279f2a638a6d59c9b522934",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41167386066",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "innoextract-MCLv2-0206-arm64.tar.gz",
+        "sha256": "e5b4b1c4d175d5f9681677355b5a87a1f117cd5e6129a8b16f39ec8facb0893e",
+        "bytes": 597537,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/innoextract%2FvMCLv2-0206%2Farm64/innoextract-MCLv2-0206-arm64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "f9e460f130291ab38279f2a638a6d59c9b522934"
+      },
+      "tag": "innoextract/vMCLv2-0206/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "innoextract",
+      "version": "MCLv1-0206",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "a0c4323fb0917502c3882221959de1ca0d42eceac095a837f11ac2cb64ad4d79",
+      "sourceSha256": "a0c4323fb0917502c3882221959de1ca0d42eceac095a837f11ac2cb64ad4d79",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "innoextract-MCLv1-0206-arm64.tar.gz",
-        "sha256": "09b38243d4ba554083898d65a437804fae75579ec5bfe358b99e5f7e1e3b54eb",
-        "bytes": 599201,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/innoextract%2FvMCLv1-0206%2Farm64/innoextract-MCLv1-0206-arm64.tar.gz"
+        "filename": "innoextract-MCLv1-0206-x64.tar.gz",
+        "sha256": "393f4cddb7c14f69934a865003462445c4c1efd73da08b56fdf1e45849762f3e",
+        "bytes": 647533,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/innoextract%2FvMCLv1-0206%2Fx64/innoextract-MCLv1-0206-x64.tar.gz"
       },
-      "tag": "innoextract/vMCLv1-0206/arm64",
       "source": {
-        "repository": "dscharrer/innoextract",
-        "revision": "6e9e34ed0876014fdb46e684103ef8c3605e382e"
-      }
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0e9c60db0dcf018cd3a7c9da39bfbef3070597ac"
+      },
+      "tag": "innoextract/vMCLv1-0206/x64"
     }
   ]
 }

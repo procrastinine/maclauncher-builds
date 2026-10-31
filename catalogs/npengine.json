@@ -6,27 +6,40 @@
     {
       "schemaVersion": 2,
       "id": "npengine",
-      "version": "0.5.3-MCLv1",
+      "version": "0.5.3-MCLv2",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "8f7eb1c72224e625aec9deb8486089e29a3dff7e6c2182633f442a6d0c703c08",
-      "sourceSha256": "6a3856bfa4aaa957529944c34c168cf110dd7b60a2752f159b90e2f2589e3e36",
+      "manifestSha256": "6ea57e5ee3efb75ea88eafa8cb7a35a9cda6eb13997e1cce3f82113274ae707e",
+      "sourceSha256": "6ea57e5ee3efb75ea88eafa8cb7a35a9cda6eb13997e1cce3f82113274ae707e",
       "updatePolicy": "manual",
-      "asset": {
-        "filename": "npengine-0.5.3-MCLv1-arm64.tar.gz",
-        "sha256": "7dff7833970fa401766df56e7eee6ffca40367d1c1eb8eece549b3803ce735aa",
-        "bytes": 17942804,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/npengine%2Fv0.5.3-MCLv1%2Farm64/npengine-0.5.3-MCLv1-arm64.tar.gz"
+      "build": {
+        "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41167281231",
+        "runAttempt": "1"
       },
-      "tag": "npengine/v0.5.3-MCLv1/arm64",
+      "asset": {
+        "filename": "npengine-0.5.3-MCLv2-arm64.tar.gz",
+        "sha256": "a0743d5b07bac727d522f05c80e949854b9d1f693fec0237ebb32c6263057524",
+        "bytes": 18017818,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/npengine%2Fv0.5.3-MCLv2%2Farm64/npengine-0.5.3-MCLv2-arm64.tar.gz"
+      },
       "source": {
-        "repository": "FGRE/libnpengine",
-        "revision": "da1a175e6b497c37f9714b77510cb47c0930cd42"
-      }
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "830c33f46db62a6e71380c246359df7a6e5d4729"
+      },
+      "tag": "npengine/v0.5.3-MCLv2/arm64"
     }
   ]
 }

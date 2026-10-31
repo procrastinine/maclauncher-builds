@@ -6,7 +6,7 @@
     {
       "schemaVersion": 2,
       "id": "rlvm-adapter",
-      "version": "1.0.0-MCLv1",
+      "version": "1.0.0-MCLv2",
       "arch": "universal",
       "launcherArchitectures": [
         "arm64",
@@ -14,16 +14,33 @@
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "079d12d3158855f2766d7c60e5ebc7874cd79fe1f38492dd717037f3453b3e9d",
-      "sourceSha256": "a72fa658c9c77731e7d35d315a8c61e2af6f6162e56c9318de998f8e4dfbdcf2",
+      "manifestSha256": "81c275b61c5a95668c2e0b8e7007eab46c1c1b4e9c16fe6a4a9eba5036fafac4",
+      "sourceSha256": "5845f043cbf5c6b10875955504efe4153f54db8f4ba159f0a8544a4d0d778a5b",
       "updatePolicy": "manual",
-      "asset": {
-        "filename": "rlvm-adapter-1.0.0-MCLv1-universal.tar.gz",
-        "sha256": "6053328d9ac096422ca59931c79d3a2d7f8a269b94180790a3c4e0faeac0be5b",
-        "bytes": 8004,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/rlvm-adapter%2Fv1.0.0-MCLv1%2Funiversal/rlvm-adapter-1.0.0-MCLv1-universal.tar.gz"
+      "build": {
+        "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41167281231",
+        "runAttempt": "1"
       },
-      "tag": "rlvm-adapter/v1.0.0-MCLv1/universal"
+      "asset": {
+        "filename": "rlvm-adapter-1.0.0-MCLv2-universal.tar.gz",
+        "sha256": "9c4151f1c73528cbd0eb69ccbd92f7eda7ef95aeceb9fbc307ad7731293d1a27",
+        "bytes": 8022,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/rlvm-adapter%2Fv1.0.0-MCLv2%2Funiversal/rlvm-adapter-1.0.0-MCLv2-universal.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "830c33f46db62a6e71380c246359df7a6e5d4729"
+      },
+      "tag": "rlvm-adapter/v1.0.0-MCLv2/universal"
     }
   ]
 }

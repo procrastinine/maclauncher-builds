@@ -6,27 +6,53 @@
     {
       "schemaVersion": 2,
       "id": "onsyuri",
-      "version": "0.7.7beta-MCLv1",
+      "version": "0.7.7beta-MCLv2",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "e4e7c6fc2252c02bc7fe680de92604a49835dd7c7dcc9483e44dfac9e96f28f5",
+      "sourceSha256": "e4e7c6fc2252c02bc7fe680de92604a49835dd7c7dcc9483e44dfac9e96f28f5",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "onsyuri-0.7.7beta-MCLv2-x64.tar.gz",
+        "sha256": "b48fd5e7f8f579e98961dcd1d4f5da34b166001b889e8f8082ba4614ca26e1e4",
+        "bytes": 4061562,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onsyuri%2Fv0.7.7beta-MCLv2%2Fx64/onsyuri-0.7.7beta-MCLv2-x64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0e9c60db0dcf018cd3a7c9da39bfbef3070597ac"
+      },
+      "tag": "onsyuri/v0.7.7beta-MCLv2/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "onsyuri",
+      "version": "0.7.7beta-MCLv2",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "3b5847735e657977c260a15c87e858f83f03c0b71dcb7d2be78abc56a9086519",
-      "sourceSha256": "b4a15fe88d2492b33979d9093591b8436cd907c25232d302de9e5e269f6b96db",
+      "manifestSha256": "abd114e71cc87c8981089047aad8e46940340a27b08bd12ae4a2a04ae84b44b0",
+      "sourceSha256": "abd114e71cc87c8981089047aad8e46940340a27b08bd12ae4a2a04ae84b44b0",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "onsyuri-0.7.7beta-MCLv1-arm64.tar.gz",
-        "sha256": "e9d23a15f310a5f7fb00a19e8ea70c7fc8e98a4eb7e891d02a38958005d6470d",
-        "bytes": 3804991,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onsyuri%2Fv0.7.7beta-MCLv1%2Farm64/onsyuri-0.7.7beta-MCLv1-arm64.tar.gz"
+        "filename": "onsyuri-0.7.7beta-MCLv2-arm64.tar.gz",
+        "sha256": "e03970dd56b99e7f490f3529d1165a9fd3c0a4b49fef9b027d54159ea4b34781",
+        "bytes": 3795142,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onsyuri%2Fv0.7.7beta-MCLv2%2Farm64/onsyuri-0.7.7beta-MCLv2-arm64.tar.gz"
       },
-      "tag": "onsyuri/v0.7.7beta-MCLv1/arm64",
       "source": {
-        "repository": "YuriSizuku/OnscripterYuri",
-        "revision": "08f744b31cc1907b66a15f0402e62321a131ed81"
-      }
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "a554fd85e38c5db2b377049b15163eb6cee9c6a6"
+      },
+      "tag": "onsyuri/v0.7.7beta-MCLv2/arm64"
     }
   ]
 }

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 2,
+  "projectId": "android-aim",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "android-aim",
+      "version": "MCLv1-1022",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "26.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "7cc110be6348cbbf3f5bed8a4452705fb44bac061ca03a5b0cf3700cca342c65",
+      "sourceSha256": "3571320ece89f1c6fe3241ce19dc9c4351afd1da78544c943cd46b803d0bb0a5",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "android-aim-MCLv1-1022-arm64.tar.gz",
+        "sha256": "7b305b4800aecf1473d793321e5d4b09356ac5835edaa5662deee496fe722278",
+        "bytes": 88939079,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-aim%2FvMCLv1-1022%2Farm64/android-aim-MCLv1-1022-arm64.tar.gz"
+      },
+      "tag": "android-aim/vMCLv1-1022/arm64",
+      "source": {
+        "repository": "hahnlee/aim",
+        "revision": "3136fe473714ec5cf8ad34323313174761d95139"
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "id": "android-aim",
+      "version": "MCLv1-1028-6",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "26.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "1872614a3fcfa43b260e71ef1932f78b29e924a9e0de26a6388cef2d7656a0bd",
+      "sourceSha256": "1872614a3fcfa43b260e71ef1932f78b29e924a9e0de26a6388cef2d7656a0bd",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "android-aim-MCLv1-1028-6-arm64.tar.gz",
+        "sha256": "41cf37f592cc9f166c2bebf0e8f65ad24a3a166d27976c1f6da60d5bcd4026c4",
+        "bytes": 90111764,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-aim%2FvMCLv1-1028-6%2Farm64/android-aim-MCLv1-1028-6-arm64.tar.gz"
+      },
+      "tag": "android-aim/vMCLv1-1028-6/arm64",
+      "source": {
+        "repository": "hahnlee/aim",
+        "revision": "df3fccfc399a06d1252088c7c189cd67d25da930"
+      }
+    }
+  ]
+}

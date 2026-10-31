@@ -6,27 +6,66 @@
     {
       "schemaVersion": 2,
       "id": "system3",
-      "version": "1.8.0-MCLv1",
+      "version": "1.8.0-MCLv2",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "769f00104e4ebfce029e1b8a8518ddec1111d916d0c5e3c9fa13d1b48d58eaa6",
-      "sourceSha256": "4730f6ce3a71fb406350ab338c9d1eb7a187d2b27feeda0c8f218f722b34b376",
+      "manifestSha256": "160e7606f8531db2e2792f387bcf2b492d47b79e8f6fbca5e40eccc58eaf0d24",
+      "sourceSha256": "160e7606f8531db2e2792f387bcf2b492d47b79e8f6fbca5e40eccc58eaf0d24",
+      "updatePolicy": "manual",
+      "build": {
+        "sourceRevision": "7f9bdc4beb59086b4c11360159dd8e80ccad3f6b",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41168716940",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "system3-1.8.0-MCLv2-arm64.tar.gz",
+        "sha256": "7db97523d0ff776633e0589496f244d6faaafec211aad4f953e7b4dc5527796b",
+        "bytes": 3471334,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/system3%2Fv1.8.0-MCLv2%2Farm64/system3-1.8.0-MCLv2-arm64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "7f9bdc4beb59086b4c11360159dd8e80ccad3f6b"
+      },
+      "tag": "system3/v1.8.0-MCLv2/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "system3",
+      "version": "1.8.0-MCLv1",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "9474d176cc4d675230a81f844921fddc19c05c3c668be22b701cb6907051fc4c",
+      "sourceSha256": "9474d176cc4d675230a81f844921fddc19c05c3c668be22b701cb6907051fc4c",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "system3-1.8.0-MCLv1-arm64.tar.gz",
-        "sha256": "bad58c9a68011d81010ca09ee0be488eba30fb00283eeff50252ec5e1172c7d3",
-        "bytes": 3455003,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/system3%2Fv1.8.0-MCLv1%2Farm64/system3-1.8.0-MCLv1-arm64.tar.gz"
+        "filename": "system3-1.8.0-MCLv1-x64.tar.gz",
+        "sha256": "293919e3da8f10e477e54664131e2560962ce39f2570d056ce9475f7a3c4070f",
+        "bytes": 3610621,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/system3%2Fv1.8.0-MCLv1%2Fx64/system3-1.8.0-MCLv1-x64.tar.gz"
       },
-      "tag": "system3/v1.8.0-MCLv1/arm64",
       "source": {
-        "repository": "kichikuou/system3-sdl2",
-        "revision": "461673bec729e7e0ec905921fc3e03aecf977a70"
-      }
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0e9c60db0dcf018cd3a7c9da39bfbef3070597ac"
+      },
+      "tag": "system3/v1.8.0-MCLv1/x64"
     }
   ]
 }

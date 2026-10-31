@@ -6,23 +6,53 @@
     {
       "schemaVersion": 2,
       "id": "android-apk-metadata",
-      "version": "1.0.0",
+      "version": "1.1.0",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "bc36fdd1ea303bfa4ae91b62c757c59e425e2f9a2f5802125c9953ef09bd4794",
+      "sourceSha256": "34430ef0f71a136d9bf5a208964ef8b7ccdec1559dc721eca1868ed9b975ea96",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "android-apk-metadata-1.1.0-x64.tar.gz",
+        "sha256": "e07aeb078144527b0669cd6b6922c029c9265579b5ae023a6653c45168c4a8ff",
+        "bytes": 449991,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-apk-metadata%2Fv1.1.0%2Fx64/android-apk-metadata-1.1.0-x64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0e9c60db0dcf018cd3a7c9da39bfbef3070597ac"
+      },
+      "tag": "android-apk-metadata/v1.1.0/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "android-apk-metadata",
+      "version": "1.1.0",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "helper.json",
-      "manifestSha256": "40f0cc2d165c93e2fd307fd7a328b27eb9b6a24b4fdac7fb0d6d5bffe9d168f8",
+      "manifestSha256": "1d963928ce3781bc819d019a79393a8d95e9a8eed2b0083145f3b21c7a58caf3",
       "sourceSha256": "34430ef0f71a136d9bf5a208964ef8b7ccdec1559dc721eca1868ed9b975ea96",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "android-apk-metadata-1.0.0-arm64.tar.gz",
-        "sha256": "e3aa8d26bde0f4f1324cdb9e2df1215a3f5eecf01df9c8c2d526b114548ef2f6",
-        "bytes": 448967,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-apk-metadata%2Fv1.0.0%2Farm64/android-apk-metadata-1.0.0-arm64.tar.gz"
+        "filename": "android-apk-metadata-1.1.0-arm64.tar.gz",
+        "sha256": "5d1b1bcf90179d7970153deae0f657430799c2413510f604c47b9d8ddebd25c7",
+        "bytes": 428277,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-apk-metadata%2Fv1.1.0%2Farm64/android-apk-metadata-1.1.0-arm64.tar.gz"
       },
-      "tag": "android-apk-metadata/v1.0.0/arm64"
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0e9c60db0dcf018cd3a7c9da39bfbef3070597ac"
+      },
+      "tag": "android-apk-metadata/v1.1.0/arm64"
     }
   ]
 }

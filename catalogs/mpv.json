@@ -2,5 +2,39 @@
   "schemaVersion": 2,
   "projectId": "mpv",
   "updatePolicy": "manual",
-  "packages": []
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "mpv",
+      "version": "0.41.0-MCLv8",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "27.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "fbd3e75c0ba9106aba6bfedda225e16546e82f8972818808a6796376c73b0aa1",
+      "sourceSha256": "fbd3e75c0ba9106aba6bfedda225e16546e82f8972818808a6796376c73b0aa1",
+      "updatePolicy": "manual",
+      "capabilities": {
+        "decodedFrameAPI": 1,
+        "decodedColorAPI": 1,
+        "preparationNotificationAPI": 1,
+        "playerScriptsAPI": 1,
+        "playerInputAPI": 1,
+        "osdLayerAPI": 1
+      },
+      "asset": {
+        "filename": "mpv-0.41.0-MCLv8-arm64.tar.gz",
+        "sha256": "4e1b69d26bc7087722d2055cb3e30b521dbfab539d821172b59d1d9a16b8fb56",
+        "bytes": 25199077,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mpv%2Fv0.41.0-MCLv8%2Farm64/mpv-0.41.0-MCLv8-arm64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "a554fd85e38c5db2b377049b15163eb6cee9c6a6"
+      },
+      "tag": "mpv/v0.41.0-MCLv8/arm64"
+    }
+  ]
 }

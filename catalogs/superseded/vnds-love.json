@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 2,
+  "projectId": "vnds-love",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "vnds-love",
+      "version": "0.0.13-838e47b-MCLv1",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "11.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "64ad711e7fface94ad61f22eaec7b66eab96b00bee91eca0736b6d7410e15b81",
+      "sourceSha256": "64ad711e7fface94ad61f22eaec7b66eab96b00bee91eca0736b6d7410e15b81",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "vnds-love-0.0.13-838e47b-MCLv1-universal.tar.gz",
+        "sha256": "0aaf5094cf9cb52fa09d8425dad97fbe7052fdaee84b59c2aa8f3567ef5befc8",
+        "bytes": 34659,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vnds-love%2Fv0.0.13-838e47b-MCLv1%2Funiversal/vnds-love-0.0.13-838e47b-MCLv1-universal.tar.gz"
+      },
+      "tag": "vnds-love/v0.0.13-838e47b-MCLv1/universal",
+      "source": {
+        "repository": "ajusa/VNDS-LOVE",
+        "revision": "838e47b7b47ed8d019cdaaa191f4953324e75540"
+      }
+    }
+  ]
+}

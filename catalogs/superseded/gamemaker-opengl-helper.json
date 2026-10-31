@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 2,
+  "projectId": "gamemaker-opengl-helper",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "gamemaker-opengl-helper",
+      "version": "software-gl-v3-MCLv2",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "11528034486f7b3ada42cf87522eeabc4365b37a377ab6c1002d5464d913ce26",
+      "sourceSha256": "f7e3e52f0570858b01c1f6b58a2ec5d45b773ff57608a2ee3845fab5ec1da4e0",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "gamemaker-opengl-helper-software-gl-v3-MCLv2-universal.tar.gz",
+        "sha256": "ef4795e38660bb186a5f3e61fcd601795b1c5bf1d8b259e8a62384a240df30ec",
+        "bytes": 11144,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gamemaker-opengl-helper%2Fvsoftware-gl-v3-MCLv2%2Funiversal/gamemaker-opengl-helper-software-gl-v3-MCLv2-universal.tar.gz"
+      },
+      "tag": "gamemaker-opengl-helper/vsoftware-gl-v3-MCLv2/universal"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 2,
+  "projectId": "catsystem2-kif-crypto",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "catsystem2-kif-crypto",
+      "version": "1.0.0",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "11.0",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "80d33b5de288acede5667f512baabcb6cfe0765acf671dab994da01a6946ef30",
+      "sourceSha256": "325c23b2d1dab9c3c0818da1d9c64b20f21fc959181b25dbe6b7a32a8a792f0c",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "catsystem2-kif-crypto-1.0.0-universal.tar.gz",
+        "sha256": "b96701f8075592b1fd907c69f1317cf3c930f2b10f9c510c25c95d6b288a256d",
+        "bytes": 6454,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/catsystem2-kif-crypto%2Fv1.0.0%2Funiversal/catsystem2-kif-crypto-1.0.0-universal.tar.gz"
+      },
+      "tag": "catsystem2-kif-crypto/v1.0.0/universal"
+    }
+  ]
+}

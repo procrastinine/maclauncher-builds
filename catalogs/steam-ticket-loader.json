@@ -6,7 +6,7 @@
     {
       "schemaVersion": 2,
       "id": "steam-ticket-loader",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "arch": "universal",
       "launcherArchitectures": [
         "arm64",
@@ -14,16 +14,20 @@
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "helper.json",
-      "manifestSha256": "e7993470ff2c3be3ec3e310720eb921ea90602a051850d8b9a471b4c6551fb56",
+      "manifestSha256": "f45f13523cd1a3abac93d76f0d1037f5f722db5fe30a7230eac46b315e4099c2",
       "sourceSha256": "5b5604323f8d6a016efb50056403fe504271ddbd70ba738b268eb3b4dc223f00",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "steam-ticket-loader-0.1.0-universal.tar.gz",
-        "sha256": "f13e0c43aa1ca1c7f8be2b6967fa0282654bdfd5b42f9747bdedec88935972c9",
-        "bytes": 3122,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/steam-ticket-loader%2Fv0.1.0%2Funiversal/steam-ticket-loader-0.1.0-universal.tar.gz"
+        "filename": "steam-ticket-loader-0.1.1-universal.tar.gz",
+        "sha256": "b072bfbcde1c05f4cc09d94228b1c246550019c8f740ea109ff79dda4e990cdb",
+        "bytes": 3394,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/steam-ticket-loader%2Fv0.1.1%2Funiversal/steam-ticket-loader-0.1.1-universal.tar.gz"
       },
-      "tag": "steam-ticket-loader/v0.1.0/universal"
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0e9c60db0dcf018cd3a7c9da39bfbef3070597ac"
+      },
+      "tag": "steam-ticket-loader/v0.1.1/universal"
     }
   ]
 }

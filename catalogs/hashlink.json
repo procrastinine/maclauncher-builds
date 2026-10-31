@@ -6,7 +6,7 @@
     {
       "schemaVersion": 2,
       "id": "hashlink",
-      "version": "1.12-MCLv1",
+      "version": "1.9-MCLv2",
       "arch": "x64",
       "launcherArchitectures": [
         "arm64",
@@ -14,57 +14,9 @@
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "ed319039938029f2d80e70ad9c5e638065c8ef3dbe7a54574f5aa6ff49802fda",
-      "sourceSha256": "4298cc441fc3ff096602792b289afdea2af153d43b48a19f1482551ee3cd42ff",
+      "manifestSha256": "6c068965bd62effdbb550ce4f1600551290e561b403e068b51b4dd66d676a1fe",
+      "sourceSha256": "6c068965bd62effdbb550ce4f1600551290e561b403e068b51b4dd66d676a1fe",
       "updatePolicy": "manual",
-      "asset": {
-        "filename": "hashlink-1.12-MCLv1-x64.tar.gz",
-        "sha256": "9db8790ed7133f8f4ed93a4d307b2e7241f4cc9349e6a592df6cf82e7e69a278",
-        "bytes": 2173029,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/hashlink%2Fv1.12-MCLv1%2Fx64/hashlink-1.12-MCLv1-x64.tar.gz"
-      },
-      "tag": "hashlink/v1.12-MCLv1/x64",
-      "capabilities": {
-        "supportedBytecodeVersions": [
-          2,
-          3,
-          4,
-          5
-        ],
-        "nativeAbi": {
-          "sdlEventLoop": "dynamic"
-        },
-        "primitiveProfileId": "legacy-dynamic-1.12-macos-v1",
-        "primitiveProfileSha256": "8ffb3f20d0356494fb853c36a7d35339fa19cd5e50c7cd2df6fbe7324f3f7301",
-        "macPackageVersion": "1.12-MCLv1",
-        "sourceKind": "commit"
-      },
-      "source": {
-        "repository": "HaxeFoundation/hashlink",
-        "revision": "68daa125ad115a1f1d1db65d38e6045858d55013"
-      }
-    },
-    {
-      "schemaVersion": 2,
-      "id": "hashlink",
-      "version": "1.9-MCLv1",
-      "arch": "x64",
-      "launcherArchitectures": [
-        "arm64",
-        "x64"
-      ],
-      "minimumMacOS": "13.0",
-      "manifestRelative": "manifest.json",
-      "manifestSha256": "bdca03e7f52523a9218ea9ee9aa96fac28e8d6cb4f7c98ec70d9e828e6d8b51c",
-      "sourceSha256": "7a1b7b40995534903611887022b681f75d83edec0bef38844e287b0484cebbd5",
-      "updatePolicy": "manual",
-      "asset": {
-        "filename": "hashlink-1.9-MCLv1-x64.tar.gz",
-        "sha256": "b9a14baa5f5a348f2463ae50a8e48162390628dec04c49a77869a40129c085ba",
-        "bytes": 2109616,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/hashlink%2Fv1.9-MCLv1%2Fx64/hashlink-1.9-MCLv1-x64.tar.gz"
-      },
-      "tag": "hashlink/v1.9-MCLv1/x64",
       "capabilities": {
         "supportedBytecodeVersions": [
           2,
@@ -77,13 +29,87 @@
         },
         "primitiveProfileId": "typed-1.9-macos-v2",
         "primitiveProfileSha256": "a22d96b6fea6dd8b9031489a1c0d89c091ff8c6ee9a090d2f95795ac30790296",
-        "macPackageVersion": "1.9-MCLv1",
+        "macPackageVersion": "1.9-MCLv2",
         "sourceKind": "commit"
       },
+      "build": {
+        "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "41167290863",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "hashlink-1.9-MCLv2-x64.tar.gz",
+        "sha256": "ccce8faa1a15eb4ed3e96cc6b177bc2b7a3a7f272550ff368275d1b9552824f7",
+        "bytes": 2052259,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/hashlink%2Fv1.9-MCLv2%2Fx64/hashlink-1.9-MCLv2-x64.tar.gz"
+      },
       "source": {
-        "repository": "HaxeFoundation/hashlink",
-        "revision": "4a4cfe91f3388a0b05bf2e45e7c4e38bae686dc6"
-      }
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "830c33f46db62a6e71380c246359df7a6e5d4729"
+      },
+      "tag": "hashlink/v1.9-MCLv2/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "hashlink",
+      "version": "1.12-MCLv2",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "28ef78a71fbd482fe37dcba9e5f8a2f9c0d12703b3d6bcbf2c4366df92a3594d",
+      "sourceSha256": "28ef78a71fbd482fe37dcba9e5f8a2f9c0d12703b3d6bcbf2c4366df92a3594d",
+      "updatePolicy": "manual",
+      "capabilities": {
+        "supportedBytecodeVersions": [
+          2,
+          3,
+          4,
+          5
+        ],
+        "nativeAbi": {
+          "sdlEventLoop": "dynamic"
+        },
+        "primitiveProfileId": "legacy-dynamic-1.12-macos-v1",
+        "primitiveProfileSha256": "8ffb3f20d0356494fb853c36a7d35339fa19cd5e50c7cd2df6fbe7324f3f7301",
+        "macPackageVersion": "1.12-MCLv2",
+        "sourceKind": "commit"
+      },
+      "build": {
+        "sourceRevision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "41164339724",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "hashlink-1.12-MCLv2-x64.tar.gz",
+        "sha256": "fc880f2c2c07bdc96eab35cbf184855a47455f3f259fbbf5b5f310d38262c1cc",
+        "bytes": 2084095,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/hashlink%2Fv1.12-MCLv2%2Fx64/hashlink-1.12-MCLv2-x64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4"
+      },
+      "tag": "hashlink/v1.12-MCLv2/x64"
     }
   ]
 }

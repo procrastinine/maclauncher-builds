@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 2,
+  "projectId": "winevulkan-scene",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "winevulkan-scene",
+      "version": "26.3.0-MCLv1",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "10.15",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "740e83a4e0cbff2e72d5e1ab854f60fbceb5cba1d4a85463d92cd1ecc9f880e8",
+      "sourceSha256": "d56fb3113c03f291131933bee97302d4fd6aab15f2ca6e2e9a28976643a17894",
+      "updatePolicy": "manual",
+      "build": {
+        "sourceRevision": "c517689817b08838294f983d8e177fa1e6ad1995",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "41168574432",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "winevulkan-scene-26.3.0-MCLv1-x64.tar.gz",
+        "sha256": "6fb06f3f3615a514dcb002c831edaa08f033a5667cd6a5ec721eaeab666a3d9b",
+        "bytes": 430745,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/winevulkan-scene%2Fv26.3.0-MCLv1%2Fx64/winevulkan-scene-26.3.0-MCLv1-x64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "c517689817b08838294f983d8e177fa1e6ad1995"
+      },
+      "tag": "winevulkan-scene/v26.3.0-MCLv1/x64"
+    }
+  ]
+}

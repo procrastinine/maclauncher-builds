@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 2,
+  "projectId": "uosc-helper",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "uosc-helper",
+      "version": "5.13.0-MCLv1",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "5dc218efd4e8eb6fda77ab1a8e0dc9d624f9623be7d514641bc3911fb6dcd778",
+      "sourceSha256": "5dc218efd4e8eb6fda77ab1a8e0dc9d624f9623be7d514641bc3911fb6dcd778",
+      "updatePolicy": "manual",
+      "capabilities": {
+        "uoscVersion": "5.13.0",
+        "helper": "ziggy",
+        "commands": [
+          "get-clipboard",
+          "set-clipboard",
+          "download",
+          "http-get",
+          "http-post",
+          "http-put",
+          "http-patch",
+          "http-delete",
+          "open",
+          "search-subtitles",
+          "download-subtitles"
+        ]
+      },
+      "build": {
+        "sourceRevision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "41164339724",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "uosc-helper-5.13.0-MCLv1-x64.tar.gz",
+        "sha256": "2c890499bf5eed9b80c976bb23a02bc1a20e22da639d94e437e5a1782e2f8301",
+        "bytes": 3154111,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/uosc-helper%2Fv5.13.0-MCLv1%2Fx64/uosc-helper-5.13.0-MCLv1-x64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4"
+      },
+      "tag": "uosc-helper/v5.13.0-MCLv1/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "uosc-helper",
+      "version": "5.13.0-MCLv1",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "f0fdb4db73410f5c9a006bb194951ff3e5da946534f94cec6ef66d90bf845a04",
+      "sourceSha256": "f0fdb4db73410f5c9a006bb194951ff3e5da946534f94cec6ef66d90bf845a04",
+      "updatePolicy": "manual",
+      "capabilities": {
+        "uoscVersion": "5.13.0",
+        "helper": "ziggy",
+        "commands": [
+          "get-clipboard",
+          "set-clipboard",
+          "download",
+          "http-get",
+          "http-post",
+          "http-put",
+          "http-patch",
+          "http-delete",
+          "open",
+          "search-subtitles",
+          "download-subtitles"
+        ]
+      },
+      "build": {
+        "sourceRevision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41164339724",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "uosc-helper-5.13.0-MCLv1-arm64.tar.gz",
+        "sha256": "f7a5004141f73743fc4bfc74c92267855e10423ae99b689e698ef6067f322f6c",
+        "bytes": 2825629,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/uosc-helper%2Fv5.13.0-MCLv1%2Farm64/uosc-helper-5.13.0-MCLv1-arm64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4"
+      },
+      "tag": "uosc-helper/v5.13.0-MCLv1/arm64"
+    }
+  ]
+}

@@ -6,52 +6,44 @@
     {
       "schemaVersion": 2,
       "id": "android-aim",
-      "version": "MCLv1-1022",
+      "version": "MCLv2-1028-6",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "26.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "7cc110be6348cbbf3f5bed8a4452705fb44bac061ca03a5b0cf3700cca342c65",
-      "sourceSha256": "3571320ece89f1c6fe3241ce19dc9c4351afd1da78544c943cd46b803d0bb0a5",
+      "manifestSha256": "5c54fc7d61e040d36359bf9265060198d6c1d9501373a98d111dc7568e4ca23f",
+      "sourceSha256": "5c54fc7d61e040d36359bf9265060198d6c1d9501373a98d111dc7568e4ca23f",
       "updatePolicy": "manual",
-      "asset": {
-        "filename": "android-aim-MCLv1-1022-arm64.tar.gz",
-        "sha256": "7b305b4800aecf1473d793321e5d4b09356ac5835edaa5662deee496fe722278",
-        "bytes": 88939079,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-aim%2FvMCLv1-1022%2Farm64/android-aim-MCLv1-1022-arm64.tar.gz"
+      "capabilities": {
+        "appHost": true,
+        "appHostUserUnlockTransaction": 78
       },
-      "tag": "android-aim/vMCLv1-1022/arm64",
-      "source": {
-        "repository": "hahnlee/aim",
-        "revision": "3136fe473714ec5cf8ad34323313174761d95139"
-      }
-    },
-    {
-      "schemaVersion": 2,
-      "id": "android-aim",
-      "version": "MCLv1-1028-6",
-      "arch": "arm64",
-      "launcherArchitectures": [
-        "arm64"
-      ],
-      "minimumMacOS": "26.0",
-      "manifestRelative": "manifest.json",
-      "manifestSha256": "1872614a3fcfa43b260e71ef1932f78b29e924a9e0de26a6388cef2d7656a0bd",
-      "sourceSha256": "1872614a3fcfa43b260e71ef1932f78b29e924a9e0de26a6388cef2d7656a0bd",
-      "updatePolicy": "manual",
-      "asset": {
-        "filename": "android-aim-MCLv1-1028-6-arm64.tar.gz",
-        "sha256": "41cf37f592cc9f166c2bebf0e8f65ad24a3a166d27976c1f6da60d5bcd4026c4",
-        "bytes": 90111764,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-aim%2FvMCLv1-1028-6%2Farm64/android-aim-MCLv1-1028-6-arm64.tar.gz"
+      "build": {
+        "sourceRevision": "09e7e038f391891840247d4e468bbe3dfb8ebc57",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41169901659",
+        "runAttempt": "1"
       },
-      "tag": "android-aim/vMCLv1-1028-6/arm64",
+      "asset": {
+        "filename": "android-aim-MCLv2-1028-6-arm64.tar.gz",
+        "sha256": "a0efc9e3d920a1a251992eb324040bf624e45690d10ce3b1833733c911824260",
+        "bytes": 90705918,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-aim%2FvMCLv2-1028-6%2Farm64/android-aim-MCLv2-1028-6-arm64.tar.gz"
+      },
       "source": {
-        "repository": "hahnlee/aim",
-        "revision": "df3fccfc399a06d1252088c7c189cd67d25da930"
-      }
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "09e7e038f391891840247d4e468bbe3dfb8ebc57"
+      },
+      "tag": "android-aim/vMCLv2-1028-6/arm64"
     }
   ]
 }

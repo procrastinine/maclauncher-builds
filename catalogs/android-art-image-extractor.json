@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 2,
+  "projectId": "android-art-image-extractor",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "android-art-image-extractor",
+      "version": "0.1.0-MCLv1",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "59b5cfebe1cff5da01a16cb8f0916963f0e104aeca2e0189654ba1d41ba6b1d0",
+      "sourceSha256": "59b5cfebe1cff5da01a16cb8f0916963f0e104aeca2e0189654ba1d41ba6b1d0",
+      "updatePolicy": "manual",
+      "build": {
+        "sourceRevision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41164339724",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "android-art-image-extractor-0.1.0-MCLv1-arm64.tar.gz",
+        "sha256": "7e6e27a96f2941ac49ae285aa5ded00a0dbcfcd84ef2818881741713c6032bdd",
+        "bytes": 460936,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art-image-extractor%2Fv0.1.0-MCLv1%2Farm64/android-art-image-extractor-0.1.0-MCLv1-arm64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4"
+      },
+      "tag": "android-art-image-extractor/v0.1.0-MCLv1/arm64"
+    }
+  ]
+}

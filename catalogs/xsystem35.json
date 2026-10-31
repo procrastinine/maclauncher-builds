@@ -6,30 +6,72 @@
     {
       "schemaVersion": 2,
       "id": "xsystem35",
-      "version": "MCLv1-1019",
+      "version": "MCLv2-1019",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "0a361e7f7fd0de42f4b6f78aee9109d4fae95e9e4caf4f7ef6714d8be804d226",
-      "sourceSha256": "366f7db8c0cc20ed0b983686c6074ec7032b3f3e4423980cc0d9a9fd5c1889fa",
+      "manifestSha256": "b94953491117d749b12e1ab548405ece627aef178b81dd01d6ceac4ac8c0d690",
+      "sourceSha256": "b94953491117d749b12e1ab548405ece627aef178b81dd01d6ceac4ac8c0d690",
       "updatePolicy": "manual",
-      "asset": {
-        "filename": "xsystem35-MCLv1-1019-arm64.tar.gz",
-        "sha256": "2453693f677017e521ce06152d5b1c2faab2f5d2b4d4238d2a51d3510f715e49",
-        "bytes": 7438373,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem35%2FvMCLv1-1019%2Farm64/xsystem35-MCLv1-1019-arm64.tar.gz"
-      },
-      "tag": "xsystem35/vMCLv1-1019/arm64",
-      "source": {
-        "repository": "kichikuou/xsystem35-sdl2",
-        "revision": "fbb12f67950601d547f65ef37c4fba4a10cc3822"
-      },
       "capabilities": {
         "debugAdapter": "dap-terminal-nul-v1"
-      }
+      },
+      "build": {
+        "sourceRevision": "7f9bdc4beb59086b4c11360159dd8e80ccad3f6b",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41168716940",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "xsystem35-MCLv2-1019-arm64.tar.gz",
+        "sha256": "fc65a61ae3a5d1dc1aa7e3be4d0a54eb2905349cb43e57c673607f494970ec8f",
+        "bytes": 7447873,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem35%2FvMCLv2-1019%2Farm64/xsystem35-MCLv2-1019-arm64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "7f9bdc4beb59086b4c11360159dd8e80ccad3f6b"
+      },
+      "tag": "xsystem35/vMCLv2-1019/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "xsystem35",
+      "version": "MCLv1-1019",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "8c3dfeac4e2ef83319bcaa374596995b74734239119b6fbd40e682933ccc3f48",
+      "sourceSha256": "8c3dfeac4e2ef83319bcaa374596995b74734239119b6fbd40e682933ccc3f48",
+      "updatePolicy": "manual",
+      "capabilities": {
+        "debugAdapter": "dap-terminal-nul-v1"
+      },
+      "asset": {
+        "filename": "xsystem35-MCLv1-1019-x64.tar.gz",
+        "sha256": "069bff6059b89815dbe4184eba1b38c4ddc0a7f416f4c51239e626efe4cb8b66",
+        "bytes": 7659205,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem35%2FvMCLv1-1019%2Fx64/xsystem35-MCLv1-1019-x64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0e9c60db0dcf018cd3a7c9da39bfbef3070597ac"
+      },
+      "tag": "xsystem35/vMCLv1-1019/x64"
     }
   ]
 }

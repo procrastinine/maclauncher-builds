@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 2,
+  "projectId": "innoextract",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "innoextract",
+      "version": "MCLv1-0206",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "879aa960b47c1fa77db1312f6563c26fa071142a935617d34568314356a1c44c",
+      "sourceSha256": "5dfe39c91087cc184a764dca8b0a2e35c6df4c585d767108a945781c2cf2cc7f",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "innoextract-MCLv1-0206-arm64.tar.gz",
+        "sha256": "09b38243d4ba554083898d65a437804fae75579ec5bfe358b99e5f7e1e3b54eb",
+        "bytes": 599201,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/innoextract%2FvMCLv1-0206%2Farm64/innoextract-MCLv1-0206-arm64.tar.gz"
+      },
+      "tag": "innoextract/vMCLv1-0206/arm64",
+      "source": {
+        "repository": "dscharrer/innoextract",
+        "revision": "6e9e34ed0876014fdb46e684103ef8c3605e382e"
+      }
+    }
+  ]
+}

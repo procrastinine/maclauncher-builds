@@ -6,27 +6,40 @@
     {
       "schemaVersion": 2,
       "id": "fna",
-      "version": "26.10-MCLv1",
+      "version": "26.10-MCLv2",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "724ec823ada108089490d65910c0aeec76061d16e4eb45e14e3382c44b388123",
-      "sourceSha256": "887f8e67a1b644f0541fe9b4b4c2ce9c496166497e11b73815a9b5f940e3c925",
+      "manifestSha256": "3978f496ecdbd2dcbc3dfe2a91be96a19830881d67c1cd30c7f9e3656808eece",
+      "sourceSha256": "3978f496ecdbd2dcbc3dfe2a91be96a19830881d67c1cd30c7f9e3656808eece",
       "updatePolicy": "manual",
-      "asset": {
-        "filename": "fna-26.10-MCLv1-arm64.tar.gz",
-        "sha256": "2a157d59af82aab7dc1ea6c634e75bc052923953b60e487e40b26ca72145c521",
-        "bytes": 33711997,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/fna%2Fv26.10-MCLv1%2Farm64/fna-26.10-MCLv1-arm64.tar.gz"
+      "build": {
+        "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41167281231",
+        "runAttempt": "1"
       },
-      "tag": "fna/v26.10-MCLv1/arm64",
+      "asset": {
+        "filename": "fna-26.10-MCLv2-arm64.tar.gz",
+        "sha256": "6c3585a7b8d0c7f67e9ee6f582e9f99ebcd0a4b4a46e7be80257cb929fad866a",
+        "bytes": 33434351,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/fna%2Fv26.10-MCLv2%2Farm64/fna-26.10-MCLv2-arm64.tar.gz"
+      },
       "source": {
-        "repository": "FNA-XNA/FNA",
-        "revision": "00498b0b81425b14bf8da23e68655215b9b5daa7"
-      }
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "830c33f46db62a6e71380c246359df7a6e5d4729"
+      },
+      "tag": "fna/v26.10-MCLv2/arm64"
     }
   ]
 }

@@ -6,29 +6,7 @@
     {
       "schemaVersion": 2,
       "id": "java-steamworks",
-      "version": "1.10.0-MCLv1",
-      "arch": "universal",
-      "launcherArchitectures": [
-        "arm64",
-        "x64"
-      ],
-      "minimumMacOS": "11.0",
-      "manifestRelative": "helper.json",
-      "manifestSha256": "56b94d64684928bc6d518ec0b464e0503c9f333f8e2948fafac5f6a41b59fd08",
-      "sourceSha256": "b92ea7eac757c843c358fd2de0103a0851d94f4f5a748dd0f56e7979f9daf141",
-      "updatePolicy": "manual",
-      "asset": {
-        "filename": "java-steamworks-1.10.0-MCLv1-universal.tar.gz",
-        "sha256": "2a013935aa6b2faaf4318f3137fccf06520a24d6af77603c57a35e0b145f0752",
-        "bytes": 148653,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/java-steamworks%2Fv1.10.0-MCLv1%2Funiversal/java-steamworks-1.10.0-MCLv1-universal.tar.gz"
-      },
-      "tag": "java-steamworks/v1.10.0-MCLv1/universal"
-    },
-    {
-      "schemaVersion": 2,
-      "id": "java-steamworks",
-      "version": "1.9.0-MCLv1",
+      "version": "1.9.0-MCLv2",
       "arch": "x64",
       "launcherArchitectures": [
         "arm64",
@@ -36,16 +14,46 @@
       ],
       "minimumMacOS": "10.9",
       "manifestRelative": "helper.json",
-      "manifestSha256": "7dfff6a0da5c6f43a594311015ccd5d3b13c218c3314fd9cb9daf277d0e512b9",
+      "manifestSha256": "7b26b13b02ffd92bb28fdab6881c620f1b4445af4d7e42d9f199ef6183df81d0",
       "sourceSha256": "b92ea7eac757c843c358fd2de0103a0851d94f4f5a748dd0f56e7979f9daf141",
       "updatePolicy": "manual",
       "asset": {
-        "filename": "java-steamworks-1.9.0-MCLv1-x64.tar.gz",
-        "sha256": "b0ca08410b79fb0636b6f8eddb61f825f60e95cbf5c3745a0cb9900c84c433c4",
-        "bytes": 87374,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/java-steamworks%2Fv1.9.0-MCLv1%2Fx64/java-steamworks-1.9.0-MCLv1-x64.tar.gz"
+        "filename": "java-steamworks-1.9.0-MCLv2-x64.tar.gz",
+        "sha256": "fc6c99a9e0a146abdf221a3232dfabb7ec5eb2534788d37849e9f4d7f6fc42c3",
+        "bytes": 86658,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/java-steamworks%2Fv1.9.0-MCLv2%2Fx64/java-steamworks-1.9.0-MCLv2-x64.tar.gz"
       },
-      "tag": "java-steamworks/v1.9.0-MCLv1/x64"
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0e9c60db0dcf018cd3a7c9da39bfbef3070597ac"
+      },
+      "tag": "java-steamworks/v1.9.0-MCLv2/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "java-steamworks",
+      "version": "1.10.0-MCLv2",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "11.0",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "0e2f440239f7b003b06dfdb93ee28330e55fd12b39d59e7ac627c414d043b5db",
+      "sourceSha256": "b92ea7eac757c843c358fd2de0103a0851d94f4f5a748dd0f56e7979f9daf141",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "java-steamworks-1.10.0-MCLv2-universal.tar.gz",
+        "sha256": "58b8c5137117156ce5d56047ceb45dd14dc4870f9ca4438466e6108e7780631e",
+        "bytes": 147887,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/java-steamworks%2Fv1.10.0-MCLv2%2Funiversal/java-steamworks-1.10.0-MCLv2-universal.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0e9c60db0dcf018cd3a7c9da39bfbef3070597ac"
+      },
+      "tag": "java-steamworks/v1.10.0-MCLv2/universal"
     }
   ]
 }

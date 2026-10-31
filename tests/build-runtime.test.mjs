@@ -159,9 +159,10 @@ test('a VNDS-LOVE package revision preserves engine files and historical packagi
  const staged=build({project:'vnds-love',arch:'universal',output});
  const built={version:staged.version,declaration:path.join(output,'declaration.json'),payload:path.join(output,'payload')};
  assert.equal(built.version,buildRecord(readProjects(root,{resolvePins:false}).projects.find(row=>row.id==='vnds-love')).version);
- const published=JSON.parse(fs.readFileSync(path.join(root,'catalogs/vnds-love.json'))).packages[0];
  const {stageData}=await import('../producers/engine-adaptations/stage.mjs'),input=path.join(work,'historical');
- const declaration=stageData({project:'vnds-love',version:published.version,output:input});
+ const declaration=stageData({project:'vnds-love',output:input});
+ const history=['catalogs/vnds-love.json','catalogs/superseded/vnds-love.json'].filter(file=>fs.existsSync(path.join(root,file))).flatMap(file=>JSON.parse(fs.readFileSync(path.join(root,file))).packages);
+ const published=history.find(row=>row.version===declaration.version&&row.arch===declaration.arch);assert.ok(published,'The original archive remains in catalog history.');
  const release=await prepareRelease({project:'vnds-love',input,declaration,output:path.join(work,'release')});
  assert.equal(release.assets.find(asset=>asset.role==='runtime').sha256,published.asset.sha256);
  const actual=JSON.parse(fs.readFileSync(built.declaration));
@@ -274,10 +275,12 @@ test('a project with multiple ABI builds plans missing versions independently',t
 });
 
 
-test('graphics outputs use different build hosts while retaining one version per CPU',()=>{
- const matrix=buildPlan({project:'reshade',directory:root,tags:()=>[]}).include;
- assert.deepEqual(matrix.map(row=>[row.version,row.arch,row.runner]),[['0.3.1','universal','xcode-27'],['0.3.1','x64','macos-26-intel']]);
+test('graphics outputs use different build hosts while retaining one version per CPU',t=>{
  const project=readProjects(root,{resolvePins:false}).projects.find(project=>project.id==='reshade');
+ const directory=githubFixture(t),manifest=JSON.parse(fs.readFileSync(path.join(root,'projects.json')));
+ for(const file of ['projects.json',...Object.values(manifest.registries)])fs.copyFileSync(path.join(root,file),path.join(directory,file));
+ const matrix=buildPlan({project:'reshade',directory,tags:()=>[]}).include;
+ assert.deepEqual(matrix.map(row=>[row.version,row.arch,row.runner]),[['0.3.1','universal','xcode-27'],['0.3.1','x64','macos-26-intel']]);
  assert.deepEqual(buildRecord(project).architectures,['universal','x64']);
  assert.throws(()=>buildRecord({...project,build:{...project.build,runners:{x64:'self-hosted'}}}),/hosted/);
  assert.throws(()=>buildRecord({...project,build:{...project.build,runners:{arm64:'macos-26'}}}),/hosted/);

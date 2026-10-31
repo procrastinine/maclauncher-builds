@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 2,
+  "projectId": "onscripter-en",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "onscripter-en",
+      "version": "MCLv1-0126",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "ed067c6048f2f24c96a8fbf9024926753038f38c89c66bb8033947b604150eae",
+      "sourceSha256": "a81f16d504fbb7213d043ec36f5194947a11833697e3e2f76a7f21a523d2164d",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "onscripter-en-MCLv1-0126-arm64.tar.gz",
+        "sha256": "a27a6460e22acc683d53faade6722a703a777553d9d4deed35113f3a9c9cea37",
+        "bytes": 1955635,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onscripter-en%2FvMCLv1-0126%2Farm64/onscripter-en-MCLv1-0126-arm64.tar.gz"
+      },
+      "tag": "onscripter-en/vMCLv1-0126/arm64",
+      "source": {
+        "repository": "Galladite27/ONScripter-EN",
+        "revision": "3854ae86c19337991722059d2bed07cbcc847f6f"
+      }
+    }
+  ]
+}

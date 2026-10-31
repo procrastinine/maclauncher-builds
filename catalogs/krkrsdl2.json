@@ -6,27 +6,17 @@
     {
       "schemaVersion": 2,
       "id": "krkrsdl2",
-      "version": "MCLv1-1028-kag3-1",
-      "arch": "arm64",
+      "version": "MCLv2-1030-kag3",
+      "arch": "x64",
       "launcherArchitectures": [
-        "arm64"
+        "arm64",
+        "x64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "e93ed046c83f864f66bb1d133813ddce7a82426a48eb71709ec88d57e17fb569",
-      "sourceSha256": "0af34b45848273c569489805a8c8b359ba9c155ff8c61093d880cf7d50976f7e",
+      "manifestSha256": "282b805deb343264a922610f8b14a7905ed245d75f816ea952cc54c2eb1f6db6",
+      "sourceSha256": "282b805deb343264a922610f8b14a7905ed245d75f816ea952cc54c2eb1f6db6",
       "updatePolicy": "manual",
-      "asset": {
-        "filename": "krkrsdl2-MCLv1-1028-kag3-1-arm64.tar.gz",
-        "sha256": "d5b7315188062bd4dbfd0cb196ec19e6197517a66520fe11d451bad20a4d71fe",
-        "bytes": 4937863,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/krkrsdl2%2FvMCLv1-1028-kag3-1%2Farm64/krkrsdl2-MCLv1-1028-kag3-1-arm64.tar.gz"
-      },
-      "tag": "krkrsdl2/vMCLv1-1028-kag3-1/arm64",
-      "source": {
-        "repository": "krkrsdl2/krkrsdl2",
-        "revision": "124bdf841f09e7ce02aa99b7b55791a0f7a900ff"
-      },
       "capabilities": {
         "buildProfile": "macos-storage-font-monitor-v3-kag3",
         "nativeFeatures": [
@@ -35,40 +25,78 @@
           "monitor.adjust"
         ],
         "kag3Resources": 1
-      }
+      },
+      "build": {
+        "sourceRevision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "41164339724",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "krkrsdl2-MCLv2-1030-kag3-x64.tar.gz",
+        "sha256": "fd3728ee6de6c79342fe9d011b4fc8dae9b1a798ebe1ba8d559f096c4236928a",
+        "bytes": 5210690,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/krkrsdl2%2FvMCLv2-1030-kag3%2Fx64/krkrsdl2-MCLv2-1030-kag3-x64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4"
+      },
+      "tag": "krkrsdl2/vMCLv2-1030-kag3/x64"
     },
     {
       "schemaVersion": 2,
       "id": "krkrsdl2",
-      "version": "MCLv1-1001",
+      "version": "MCLv2-1030-kag3",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "c42b4581fc50c801452f9a068d30d440481f3272f27fa4c29817a79c4c1e5539",
-      "sourceSha256": "cff10bee4d38e70e8cb6ae80ecec1d1110834612e0f7879bebdd9fcc1d442316",
+      "manifestSha256": "295e943fdcf718007702d69ef7ea161c31e22ed8b12490b9f7f55d580e3d0584",
+      "sourceSha256": "295e943fdcf718007702d69ef7ea161c31e22ed8b12490b9f7f55d580e3d0584",
       "updatePolicy": "manual",
-      "asset": {
-        "filename": "krkrsdl2-MCLv1-1001-arm64.tar.gz",
-        "sha256": "f9eadc89e6a377895c401d37782609b8577fc091ad5c7d2e3bed5f11e6cc0492",
-        "bytes": 2783881,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/krkrsdl2%2FvMCLv1-1001%2Farm64/krkrsdl2-MCLv1-1001-arm64.tar.gz"
-      },
-      "tag": "krkrsdl2/vMCLv1-1001/arm64",
       "capabilities": {
-        "buildProfile": "macos-storage-font-monitor-v3",
+        "buildProfile": "macos-storage-font-monitor-v3-kag3",
         "nativeFeatures": [
           "storage.dirlist",
           "system.addFont",
           "monitor.adjust"
-        ]
+        ],
+        "kag3Resources": 1
+      },
+      "build": {
+        "sourceRevision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41164339724",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "krkrsdl2-MCLv2-1030-kag3-arm64.tar.gz",
+        "sha256": "5e872e3baff7ab525706de077a641e27b9b42b5c0121f9103e4a5880a4c029bf",
+        "bytes": 4925054,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/krkrsdl2%2FvMCLv2-1030-kag3%2Farm64/krkrsdl2-MCLv2-1030-kag3-arm64.tar.gz"
       },
       "source": {
-        "repository": "krkrsdl2/krkrsdl2",
-        "revision": "124bdf841f09e7ce02aa99b7b55791a0f7a900ff"
-      }
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4"
+      },
+      "tag": "krkrsdl2/vMCLv2-1030-kag3/arm64"
     }
   ]
 }

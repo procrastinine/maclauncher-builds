@@ -6,27 +6,40 @@
     {
       "schemaVersion": 2,
       "id": "impacto",
-      "version": "0.10.8.903-MCLv1",
+      "version": "0.10.8.903-MCLv2",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "cd77d502bbd95629568bb69e980f4e17f5041dfe3085e4988640b038c0f6becf",
-      "sourceSha256": "c5777ea8d2bd256af287337a34d698f0112887e06dbe5fb0056d99a239d690fc",
+      "manifestSha256": "e0d8583ef346e8f8975bfa815f4ad6e680fb29b7e3de146da376fcda7deb88fb",
+      "sourceSha256": "e0d8583ef346e8f8975bfa815f4ad6e680fb29b7e3de146da376fcda7deb88fb",
       "updatePolicy": "manual",
-      "asset": {
-        "filename": "impacto-0.10.8.903-MCLv1-arm64.tar.gz",
-        "sha256": "2e509d3fec56c49a56234b614360fd9d616f99b18d522f83f7ec5c8a47661cb9",
-        "bytes": 94878081,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/impacto%2Fv0.10.8.903-MCLv1%2Farm64/impacto-0.10.8.903-MCLv1-arm64.tar.gz"
+      "build": {
+        "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41167281231",
+        "runAttempt": "1"
       },
-      "tag": "impacto/v0.10.8.903-MCLv1/arm64",
+      "asset": {
+        "filename": "impacto-0.10.8.903-MCLv2-arm64.tar.gz",
+        "sha256": "085d73ba95576bda387e6c399c0b1ae3f3567aa73ab144cf7613bfae9a9f1e2e",
+        "bytes": 94945745,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/impacto%2Fv0.10.8.903-MCLv2%2Farm64/impacto-0.10.8.903-MCLv2-arm64.tar.gz"
+      },
       "source": {
-        "repository": "CommitteeOfZero/impacto",
-        "revision": "914fae7cbb9583f8aa231569a03aab27d8c042f8"
-      }
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "830c33f46db62a6e71380c246359df7a6e5d4729"
+      },
+      "tag": "impacto/v0.10.8.903-MCLv2/arm64"
     }
   ]
 }

@@ -6,27 +6,40 @@
     {
       "schemaVersion": 2,
       "id": "opengmk",
-      "version": "0.2.0-MCLv1",
+      "version": "0.2.0-MCLv2",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
       ],
       "minimumMacOS": "13.0",
       "manifestRelative": "manifest.json",
-      "manifestSha256": "4dd5c9ce6c029fe071e8d3a642038f7bdef0722e8b90b06fe2797fb2a8289559",
-      "sourceSha256": "756c22fd212a6a6043eb7f1aecb785836d4cc180afeb4770a2f1befa801703a9",
+      "manifestSha256": "1ac8cbc9ea65903ebf8385bc1cb1b23f2ccaefc629ddd07c3f4e1192f0ec0033",
+      "sourceSha256": "1ac8cbc9ea65903ebf8385bc1cb1b23f2ccaefc629ddd07c3f4e1192f0ec0033",
       "updatePolicy": "manual",
-      "asset": {
-        "filename": "opengmk-0.2.0-MCLv1-arm64.tar.gz",
-        "sha256": "a5f7f520d88113d854797e5fc0a7bcf9eeed83bf62c978c602f69ec3b2ffd0c1",
-        "bytes": 2512194,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/opengmk%2Fv0.2.0-MCLv1%2Farm64/opengmk-0.2.0-MCLv1-arm64.tar.gz"
+      "build": {
+        "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41167281231",
+        "runAttempt": "1"
       },
-      "tag": "opengmk/v0.2.0-MCLv1/arm64",
+      "asset": {
+        "filename": "opengmk-0.2.0-MCLv2-arm64.tar.gz",
+        "sha256": "44ce0c286927abb75600ecf52763d327e2af510de63e5ea479ef3613ef939338",
+        "bytes": 2623552,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/opengmk%2Fv0.2.0-MCLv2%2Farm64/opengmk-0.2.0-MCLv2-arm64.tar.gz"
+      },
       "source": {
-        "repository": "OpenGMK/OpenGMK",
-        "revision": "9ccc47a9cab4681a889866f7233a6b016d36a15e"
-      }
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "830c33f46db62a6e71380c246359df7a6e5d4729"
+      },
+      "tag": "opengmk/v0.2.0-MCLv2/arm64"
     }
   ]
 }

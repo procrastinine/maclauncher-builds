@@ -9,21 +9,42 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#ai5",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/ai5.json",
-        "sha256": "7634ac372220c30ba65a9296ce30a0ccc415f2a2850bcdfa92e5e9795f782a40",
-        "bytes": 1058
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/ai5.json",
+        "sha256": "05928e8f3fce0eae5fc5958579a57243749a08502f590e3c3b42381c8ec00d24",
+        "bytes": 2563
       },
       "releases": [
         {
-          "version": "1.5.0-MCLv1",
+          "version": "1.5.0-MCLv2",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "ai5/v1.5.0-MCLv1/arm64",
+          "tag": "ai5/v1.5.0-MCLv2/arm64",
           "asset": {
-            "filename": "ai5-1.5.0-MCLv1-arm64.tar.gz",
-            "sha256": "4974882522f60e81a295c067c38d954cee086379ac07644188985f9d94a82ed0",
-            "bytes": 11244214,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/ai5%2Fv1.5.0-MCLv1%2Farm64/ai5-1.5.0-MCLv1-arm64.tar.gz"
+            "filename": "ai5-1.5.0-MCLv2-arm64.tar.gz",
+            "sha256": "a8a12f8eda183f674dc03d6683c71ddfd65db587371e1aab6de2e12e03ad8bc9",
+            "bytes": 11245139,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/ai5%2Fv1.5.0-MCLv2%2Farm64/ai5-1.5.0-MCLv2-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#ai5",
+          "profile": "AI5 SDL2 1.5.0-MCLv2"
+        },
+        {
+          "version": "1.5.0-MCLv1",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "ai5/v1.5.0-MCLv1/x64",
+          "asset": {
+            "filename": "ai5-1.5.0-MCLv1-x64.tar.gz",
+            "sha256": "1543babf924cffccb5aeb3af1706c706cbf9e038023e71e5201e9c161ab9e842",
+            "bytes": 11684743,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/ai5%2Fv1.5.0-MCLv1%2Fx64/ai5-1.5.0-MCLv1-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#ai5",
           "profile": "AI5 SDL2 1.5.0-MCLv1"
@@ -36,38 +57,57 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/android.json",
-        "sha256": "0b3c6445ee54e8827bac6c1d77e5d68c89cde3e7119d23c303dda4fe60faa9b3",
-        "bytes": 1917
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android.json",
+        "sha256": "e7ce7d91d0be86e0bed2c1d02adb331904b80d5eb38bebb26dbc7a675e957bac",
+        "bytes": 1670
       },
       "releases": [
         {
-          "version": "0.2.0",
+          "version": "0.2.0-MCLv1",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "android/v0.2.0/arm64",
+          "tag": "android/v0.2.0-MCLv1/arm64",
           "asset": {
-            "filename": "android-0.2.0-arm64.tar.gz",
-            "sha256": "01faee89379b50329f4bee917bf5c3d4ef186058f02380c2eb89ff10661dc2c7",
-            "bytes": 296899524,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android%2Fv0.2.0%2Farm64/android-0.2.0-arm64.tar.gz"
+            "filename": "android-0.2.0-MCLv1-arm64.tar.gz",
+            "sha256": "09407bf178517291b1b085b3afa8dce9e6de403261f0abb846098fd147e66cf8",
+            "bytes": 415417829,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android%2Fv0.2.0-MCLv1%2Farm64/android-0.2.0-MCLv1-arm64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android",
-          "profile": "MacLauncher Android 0.2.0"
-        },
+          "profile": "MacLauncher Android 0.2.0-MCLv1"
+        }
+      ]
+    },
+    {
+      "projectId": "android-aconfig",
+      "name": "Android flag generator build input",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-aconfig",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-aconfig.json",
+        "sha256": "db2d81a230386f8f53c4baa537b28de16682dbb7080bcbce7247e16be7cf8e2f",
+        "bytes": 1651
+      },
+      "releases": [
         {
-          "version": "0.1.0",
+          "version": "0.1.0-MCLv1",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "android/v0.1.0/arm64",
+          "tag": "android-aconfig/v0.1.0-MCLv1/arm64",
           "asset": {
-            "filename": "android-0.1.0-arm64.tar.gz",
-            "sha256": "dd2ee55dc0ac956ea1815f90176f3929fe77b9ddd51c49881e741c9ab22e4ce3",
-            "bytes": 295718423,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android%2Fv0.1.0%2Farm64/android-0.1.0-arm64.tar.gz"
+            "filename": "android-aconfig-0.1.0-MCLv1-arm64.tar.gz",
+            "sha256": "4f864546f30620471930d2f7be0675b4c2e8fc6532a4dcf33acb6ad21e974863",
+            "bytes": 1073454,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-aconfig%2Fv0.1.0-MCLv1%2Farm64/android-aconfig-0.1.0-MCLv1-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android",
-          "profile": "MacLauncher Android 0.1.0"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-aconfig",
+          "profile": "Android flag generator 0.1.0-MCLv1"
         }
       ]
     },
@@ -77,38 +117,57 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-aim",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/android-aim.json",
-        "sha256": "e81acb5cc0b01a2bfb6b43c971fbb92e3a8d9b58874e076121e50528f3d73d41",
-        "bytes": 2097
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-aim.json",
+        "sha256": "e56f50d3e862e2b329ae0021ab39d575167ca3404ac2ef02196c36124317aefe",
+        "bytes": 1734
       },
       "releases": [
         {
-          "version": "MCLv1-1022",
+          "version": "MCLv2-1028-6",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "26.0",
-          "tag": "android-aim/vMCLv1-1022/arm64",
+          "tag": "android-aim/vMCLv2-1028-6/arm64",
           "asset": {
-            "filename": "android-aim-MCLv1-1022-arm64.tar.gz",
-            "sha256": "7b305b4800aecf1473d793321e5d4b09356ac5835edaa5662deee496fe722278",
-            "bytes": 88939079,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-aim%2FvMCLv1-1022%2Farm64/android-aim-MCLv1-1022-arm64.tar.gz"
+            "filename": "android-aim-MCLv2-1028-6-arm64.tar.gz",
+            "sha256": "a0efc9e3d920a1a251992eb324040bf624e45690d10ce3b1833733c911824260",
+            "bytes": 90705918,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-aim%2FvMCLv2-1028-6%2Farm64/android-aim-MCLv2-1028-6-arm64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-aim",
-          "profile": "AIM with MacLauncher integration MCLv1-1022"
-        },
+          "profile": "AIM with MacLauncher integration MCLv2-1028-6"
+        }
+      ]
+    },
+    {
+      "projectId": "android-angle",
+      "name": "Android ANGLE",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-angle",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-angle.json",
+        "sha256": "36f4a463b0f5ec866d1d5b5fc8b806b361fc2dd08a9b39d6013518c72d18014e",
+        "bytes": 1636
+      },
+      "releases": [
         {
-          "version": "MCLv1-1028-6",
+          "version": "0.1.0-MCLv1",
           "arch": "arm64",
-          "minimumMacOS": "26.0",
-          "tag": "android-aim/vMCLv1-1028-6/arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "android-angle/v0.1.0-MCLv1/arm64",
           "asset": {
-            "filename": "android-aim-MCLv1-1028-6-arm64.tar.gz",
-            "sha256": "41cf37f592cc9f166c2bebf0e8f65ad24a3a166d27976c1f6da60d5bcd4026c4",
-            "bytes": 90111764,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-aim%2FvMCLv1-1028-6%2Farm64/android-aim-MCLv1-1028-6-arm64.tar.gz"
+            "filename": "android-angle-0.1.0-MCLv1-arm64.tar.gz",
+            "sha256": "b4aee6d82def28b64167064c96dc3023ff818e8b689c8b116019a644e731242c",
+            "bytes": 2866408,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-angle%2Fv0.1.0-MCLv1%2Farm64/android-angle-0.1.0-MCLv1-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-aim",
-          "profile": "AIM with MacLauncher integration MCLv1-1028-6"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-angle",
+          "profile": "Android ANGLE for JVM and ART"
         }
       ]
     },
@@ -118,65 +177,435 @@
       "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-apk-metadata",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/android-apk-metadata.json",
-        "sha256": "4f61cb84c634539370a9d8fab79c95c809f731b02aa225501cee6125f66edaa4",
-        "bytes": 993
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-apk-metadata.json",
+        "sha256": "f60205d210543088d57d3aef69a04ffe54b5fbec195aa4971790efcf1822b2f4",
+        "bytes": 2175
       },
       "releases": [
         {
-          "version": "1.0.0",
-          "arch": "arm64",
+          "version": "1.1.0",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "android-apk-metadata/v1.0.0/arm64",
+          "tag": "android-apk-metadata/v1.1.0/x64",
           "asset": {
-            "filename": "android-apk-metadata-1.0.0-arm64.tar.gz",
-            "sha256": "e3aa8d26bde0f4f1324cdb9e2df1215a3f5eecf01df9c8c2d526b114548ef2f6",
-            "bytes": 448967,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-apk-metadata%2Fv1.0.0%2Farm64/android-apk-metadata-1.0.0-arm64.tar.gz"
+            "filename": "android-apk-metadata-1.1.0-x64.tar.gz",
+            "sha256": "e07aeb078144527b0669cd6b6922c029c9265579b5ae023a6653c45168c4a8ff",
+            "bytes": 449991,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-apk-metadata%2Fv1.1.0%2Fx64/android-apk-metadata-1.1.0-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-apk-metadata",
-          "profile": "Android package metadata helper 1.0.0"
+          "profile": "Android package metadata helper 1.1.0"
+        },
+        {
+          "version": "1.1.0",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "android-apk-metadata/v1.1.0/arm64",
+          "asset": {
+            "filename": "android-apk-metadata-1.1.0-arm64.tar.gz",
+            "sha256": "5d1b1bcf90179d7970153deae0f657430799c2413510f604c47b9d8ddebd25c7",
+            "bytes": 428277,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-apk-metadata%2Fv1.1.0%2Farm64/android-apk-metadata-1.1.0-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-apk-metadata",
+          "profile": "Android package metadata helper 1.1.0"
         }
       ]
     },
     {
-      "projectId": "android-art",
-      "name": "MacLauncher Android ART adapter",
-      "delivery": "downloadable",
-      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art",
+      "projectId": "android-art-elf",
+      "name": "Android ART ELF build input",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art-elf",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/android-art.json",
-        "sha256": "d8742517aee4b77d33636d66fa674092344704a699cac0090ba094a2c2f0db26",
-        "bytes": 1965
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-art-elf.json",
+        "sha256": "b0dd406b3a83c1a5436f8ac2130fa30f8e6b05914ba320a338c1921d83a100b1",
+        "bytes": 1648
       },
       "releases": [
         {
-          "version": "0.2.0",
+          "version": "0.1.0-MCLv1",
           "arch": "arm64",
-          "minimumMacOS": "13.0.0",
-          "tag": "android-art/v0.2.0/arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "android-art-elf/v0.1.0-MCLv1/arm64",
           "asset": {
-            "filename": "android-art-0.2.0-arm64.tar.gz",
-            "sha256": "ffb3306b5ce720eedbc88d310aab874ee3fb011b4385c36e49e51b96682a7f15",
-            "bytes": 124678081,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art%2Fv0.2.0%2Farm64/android-art-0.2.0-arm64.tar.gz"
+            "filename": "android-art-elf-0.1.0-MCLv1-arm64.tar.gz",
+            "sha256": "067f520df70bbbb961deb484072bdd93b091f74eb7621e375b0d0b19483161e5",
+            "bytes": 7497119,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art-elf%2Fv0.1.0-MCLv1%2Farm64/android-art-elf-0.1.0-MCLv1-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art",
-          "profile": "MacLauncher Android ART adapter 0.2.0"
-        },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art-elf",
+          "profile": "ART ELF input 0.1.0-MCLv1"
+        }
+      ]
+    },
+    {
+      "projectId": "android-art-ffi",
+      "name": "Android ART libffi input",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art-ffi",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-art-ffi.json",
+        "sha256": "fe4819924de93d0f80d467f3705e30adca0f9b6229ffffb89140c50719534973",
+        "bytes": 1491
+      },
+      "releases": [
         {
-          "version": "0.1.0",
+          "version": "0.1.0-MCLv1",
           "arch": "arm64",
-          "minimumMacOS": "13.0.0",
-          "tag": "android-art/v0.1.0/arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "android-art-ffi/v0.1.0-MCLv1/arm64",
           "asset": {
-            "filename": "android-art-0.1.0-arm64.tar.gz",
-            "sha256": "a656444041659e8a9318bb274dfe74530d543bf18a00af55f11531aec9a1cf6c",
-            "bytes": 124569769,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art%2Fv0.1.0%2Farm64/android-art-0.1.0-arm64.tar.gz"
+            "filename": "android-art-ffi-0.1.0-MCLv1-arm64.tar.gz",
+            "sha256": "52ccfe2ff42275f2c1f980fbdb367c6e6a04f3d0bb617d4d69b581ac074dfd66",
+            "bytes": 35197,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art-ffi%2Fv0.1.0-MCLv1%2Farm64/android-art-ffi-0.1.0-MCLv1-arm64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art",
-          "profile": "MacLauncher Android ART adapter 0.1.0"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art-ffi",
+          "profile": "Android ART libffi 0.1.0-MCLv1"
+        }
+      ]
+    },
+    {
+      "projectId": "android-art-image-extractor",
+      "name": "Android ART image reader build input",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art-image-extractor",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-art-image-extractor.json",
+        "sha256": "adeb2709cda32f18aabcba4569156903f51eb08b5769efb3380b80205b7f92e8",
+        "bytes": 1722
+      },
+      "releases": [
+        {
+          "version": "0.1.0-MCLv1",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "android-art-image-extractor/v0.1.0-MCLv1/arm64",
+          "asset": {
+            "filename": "android-art-image-extractor-0.1.0-MCLv1-arm64.tar.gz",
+            "sha256": "7e6e27a96f2941ac49ae285aa5ded00a0dbcfcd84ef2818881741713c6032bdd",
+            "bytes": 460936,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art-image-extractor%2Fv0.1.0-MCLv1%2Farm64/android-art-image-extractor-0.1.0-MCLv1-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art-image-extractor",
+          "profile": "ART image reader 0.1.0-MCLv1"
+        }
+      ]
+    },
+    {
+      "projectId": "android-art-java",
+      "name": "Android ART Java input",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art-java",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-art-java.json",
+        "sha256": "9407896aad1c05f4756db45fa3a27536e6de2f84676bd64b37251e2afa432a00",
+        "bytes": 1500
+      },
+      "releases": [
+        {
+          "version": "0.1.0-MCLv1",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "android-art-java/v0.1.0-MCLv1/arm64",
+          "asset": {
+            "filename": "android-art-java-0.1.0-MCLv1-arm64.tar.gz",
+            "sha256": "500131599a382a82cdfe156c059fc529c89c4895d890e562dca2a783d79f6938",
+            "bytes": 29150703,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art-java%2Fv0.1.0-MCLv1%2Farm64/android-art-java-0.1.0-MCLv1-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art-java",
+          "profile": "Android ART Java 0.1.0-MCLv1"
+        }
+      ]
+    },
+    {
+      "projectId": "android-blueprint-parser",
+      "name": "Android Blueprint parser",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-blueprint-parser",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-blueprint-parser.json",
+        "sha256": "4873d835fff93c1c208b82b7174a53b8250880ebcc60043c90a6bab53bb17374",
+        "bytes": 1702
+      },
+      "releases": [
+        {
+          "version": "0.1.0-MCLv1",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "android-blueprint-parser/v0.1.0-MCLv1/arm64",
+          "asset": {
+            "filename": "android-blueprint-parser-0.1.0-MCLv1-arm64.tar.gz",
+            "sha256": "a9457107fea67578a0e5b13f0e488e5e84249706d3efcebd1566d593f56a2257",
+            "bytes": 1139982,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-blueprint-parser%2Fv0.1.0-MCLv1%2Farm64/android-blueprint-parser-0.1.0-MCLv1-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-blueprint-parser",
+          "profile": "Android Blueprint parser"
+        }
+      ]
+    },
+    {
+      "projectId": "android-codecs",
+      "name": "Android audio codecs",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-codecs",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-codecs.json",
+        "sha256": "8dce8e55899947ab84d6533b918082528606b92c613ec45e5055afc48d10deae",
+        "bytes": 1642
+      },
+      "releases": [
+        {
+          "version": "0.1.0-MCLv1",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "android-codecs/v0.1.0-MCLv1/arm64",
+          "asset": {
+            "filename": "android-codecs-0.1.0-MCLv1-arm64.tar.gz",
+            "sha256": "36c6565247fcbf0eb2c06a728b59ca865201b74534f89be2a34a3199f90eb278",
+            "bytes": 1464477,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-codecs%2Fv0.1.0-MCLv1%2Farm64/android-codecs-0.1.0-MCLv1-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-codecs",
+          "profile": "Android audio codec input libraries"
+        }
+      ]
+    },
+    {
+      "projectId": "android-image-data-1",
+      "name": "Android original image data 1",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-image-data-1",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-image-data-1.json",
+        "sha256": "5f777fe9a73c584dfe20cf373343d2fd15a54865decfc5c9775d50ebf6d48c77",
+        "bytes": 1525
+      },
+      "releases": [
+        {
+          "version": "0.1.0-MCLv1",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "android-image-data-1/v0.1.0-MCLv1/arm64",
+          "asset": {
+            "filename": "android-image-data-1-0.1.0-MCLv1-arm64.tar.gz",
+            "sha256": "11aef62b3cd6609720552da74a8e473f2f6acf31c569966047b3a2c7127ccbe9",
+            "bytes": 411049620,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-image-data-1%2Fv0.1.0-MCLv1%2Farm64/android-image-data-1-0.1.0-MCLv1-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-image-data-1",
+          "profile": "Android original image data 1 0.1.0-MCLv1"
+        }
+      ]
+    },
+    {
+      "projectId": "android-image-data-2",
+      "name": "Android original image data 2",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-image-data-2",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-image-data-2.json",
+        "sha256": "79032c2989017fe31780361e736c5d2b4341aa4eec246340d129cc04b84f4b86",
+        "bytes": 1525
+      },
+      "releases": [
+        {
+          "version": "0.1.0-MCLv1",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "android-image-data-2/v0.1.0-MCLv1/arm64",
+          "asset": {
+            "filename": "android-image-data-2-0.1.0-MCLv1-arm64.tar.gz",
+            "sha256": "8dac32a8ac878d2a511a70671002841ac6e1351bedb61e1b810bc4444f68422e",
+            "bytes": 412471685,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-image-data-2%2Fv0.1.0-MCLv1%2Farm64/android-image-data-2-0.1.0-MCLv1-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-image-data-2",
+          "profile": "Android original image data 2 0.1.0-MCLv1"
+        }
+      ]
+    },
+    {
+      "projectId": "android-image-data-3",
+      "name": "Android original image data 3",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-image-data-3",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-image-data-3.json",
+        "sha256": "55472bbe6af789a9876f2a9a4323d86412f3dd09247a22fc1a37f2fe9f9fef30",
+        "bytes": 1525
+      },
+      "releases": [
+        {
+          "version": "0.1.0-MCLv1",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "android-image-data-3/v0.1.0-MCLv1/arm64",
+          "asset": {
+            "filename": "android-image-data-3-0.1.0-MCLv1-arm64.tar.gz",
+            "sha256": "958e4cd41e3ef7d0ca257a2f143334ed9f25c84d713f47640326f008a98576b4",
+            "bytes": 397703915,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-image-data-3%2Fv0.1.0-MCLv1%2Farm64/android-image-data-3-0.1.0-MCLv1-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-image-data-3",
+          "profile": "Android original image data 3 0.1.0-MCLv1"
+        }
+      ]
+    },
+    {
+      "projectId": "android-image-data-4",
+      "name": "Android original image data 4",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-image-data-4",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-image-data-4.json",
+        "sha256": "5dd43a21f2c83ff18577bd4424f4e95a416071562ba51608ef5ac28845c107b1",
+        "bytes": 1525
+      },
+      "releases": [
+        {
+          "version": "0.1.0-MCLv1",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "android-image-data-4/v0.1.0-MCLv1/arm64",
+          "asset": {
+            "filename": "android-image-data-4-0.1.0-MCLv1-arm64.tar.gz",
+            "sha256": "f567c762d76d4cf7261f5adeb6f26383f58cb6f63b4cc12fbece2df3329d4c6f",
+            "bytes": 358829700,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-image-data-4%2Fv0.1.0-MCLv1%2Farm64/android-image-data-4-0.1.0-MCLv1-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-image-data-4",
+          "profile": "Android original image data 4 0.1.0-MCLv1"
+        }
+      ]
+    },
+    {
+      "projectId": "android-image-data-5",
+      "name": "Android original image data 5",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-image-data-5",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-image-data-5.json",
+        "sha256": "1b38789776ba1feaa624d79ff644f5f8921fa55b621c6421bf4edac9735facd2",
+        "bytes": 1525
+      },
+      "releases": [
+        {
+          "version": "0.1.0-MCLv1",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "android-image-data-5/v0.1.0-MCLv1/arm64",
+          "asset": {
+            "filename": "android-image-data-5-0.1.0-MCLv1-arm64.tar.gz",
+            "sha256": "a661cb32c8e2bc05f92196d4782b7984f1f20f817e6d9b229876402a08572ea0",
+            "bytes": 394884419,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-image-data-5%2Fv0.1.0-MCLv1%2Farm64/android-image-data-5-0.1.0-MCLv1-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-image-data-5",
+          "profile": "Android original image data 5 0.1.0-MCLv1"
+        }
+      ]
+    },
+    {
+      "projectId": "android-java-converter",
+      "name": "Android Java converter input",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-java-converter",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-java-converter.json",
+        "sha256": "8ef5795b7daca3bbc8455244d6f6cd8f0918aed7549e0694eb9f41c2909049d8",
+        "bytes": 1535
+      },
+      "releases": [
+        {
+          "version": "0.1.0-MCLv1",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "android-java-converter/v0.1.0-MCLv1/arm64",
+          "asset": {
+            "filename": "android-java-converter-0.1.0-MCLv1-arm64.tar.gz",
+            "sha256": "74b2951a816191a1de3f55e1c1a25d3d99617f1d992b18fc6e17729427209ef1",
+            "bytes": 1111547,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-java-converter%2Fv0.1.0-MCLv1%2Farm64/android-java-converter-0.1.0-MCLv1-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-java-converter",
+          "profile": "Android Java converter 0.1.0-MCLv1"
+        }
+      ]
+    },
+    {
+      "projectId": "android-java-framework",
+      "name": "Android Java framework input",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-java-framework",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-java-framework.json",
+        "sha256": "8dd55374e4c6a44396327268660508250938e7a895a2b2076e999de695bdf2b7",
+        "bytes": 1537
+      },
+      "releases": [
+        {
+          "version": "0.1.0-MCLv1",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "android-java-framework/v0.1.0-MCLv1/arm64",
+          "asset": {
+            "filename": "android-java-framework-0.1.0-MCLv1-arm64.tar.gz",
+            "sha256": "4f1464fe0894c18e6b8a083abff4a540b98b58524e9c77d726208b7c568a4def",
+            "bytes": 148979377,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-java-framework%2Fv0.1.0-MCLv1%2Farm64/android-java-framework-0.1.0-MCLv1-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-java-framework",
+          "profile": "Android Java framework 0.1.0-MCLv1"
         }
       ]
     },
@@ -186,24 +615,28 @@
       "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-launcher",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/android-launcher.json",
-        "sha256": "e1292473de6d36cfd61685e58e03891ee3c1b8715f0585a874a603f322568e33",
-        "bytes": 1035
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-launcher.json",
+        "sha256": "6d262a02e81c84cca43e9554d1dcbe837f9dfff4a8ffcde0d13edc9950f97dd8",
+        "bytes": 1183
       },
       "releases": [
         {
-          "version": "1.0.0-MCLv3",
+          "version": "1.0.0-MCLv4",
           "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "android-launcher/v1.0.0-MCLv3/universal",
+          "tag": "android-launcher/v1.0.0-MCLv4/universal",
           "asset": {
-            "filename": "android-launcher-1.0.0-MCLv3-universal.tar.gz",
-            "sha256": "1d6634a1ac29879e53d15fb7cbf7855d351aef420db9c8f2d54be7b61696d3c1",
-            "bytes": 91092,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-launcher%2Fv1.0.0-MCLv3%2Funiversal/android-launcher-1.0.0-MCLv3-universal.tar.gz"
+            "filename": "android-launcher-1.0.0-MCLv4-universal.tar.gz",
+            "sha256": "504eb048c06b613a641c56360c953df8326f7a1285c3a73b551e5e4a08d529af",
+            "bytes": 92501,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-launcher%2Fv1.0.0-MCLv4%2Funiversal/android-launcher-1.0.0-MCLv4-universal.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-launcher",
-          "profile": "Android launcher integrations 1.0.0-MCLv3"
+          "profile": "Android launcher integrations 1.0.0-MCLv4"
         }
       ]
     },
@@ -213,24 +646,27 @@
       "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-privacy",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/android-privacy.json",
-        "sha256": "c43c28b22a6247fa4b77c43b52dc97345c301d7a0ea18532ba1f74e9ce1a533f",
-        "bytes": 962
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-privacy.json",
+        "sha256": "ad01d4f690ad4faee0043b4035cb9b6470fc938c37e38315464bd5edc109aa54",
+        "bytes": 1110
       },
       "releases": [
         {
-          "version": "1.0.0",
+          "version": "1.1.0",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "android-privacy/v1.0.0/arm64",
+          "tag": "android-privacy/v1.1.0/arm64",
           "asset": {
-            "filename": "android-privacy-1.0.0-arm64.tar.gz",
-            "sha256": "4dbc2f45ee292cc0593669bb070602f76788a9b79356cace9d73766c9e58e93e",
-            "bytes": 19515,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-privacy%2Fv1.0.0%2Farm64/android-privacy-1.0.0-arm64.tar.gz"
+            "filename": "android-privacy-1.1.0-arm64.tar.gz",
+            "sha256": "4d4705257892c03cdfb1828547d1016cc608e5dd57da06238c78dab5ebd3091e",
+            "bytes": 19866,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-privacy%2Fv1.1.0%2Farm64/android-privacy-1.1.0-arm64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-privacy",
-          "profile": "Android privacy helper 1.0.0"
+          "profile": "Android privacy helper 1.1.0"
         }
       ]
     },
@@ -240,24 +676,44 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#anyps5",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/anyps5.json",
-        "sha256": "b2ef9cb2a2927d827f082ad083feee1bb230d366b67ebbff3eb2b928d1de7042",
-        "bytes": 1080
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/anyps5.json",
+        "sha256": "1f0c90127d4c5cf4a67feaed270657654c7a643941fb296281d65cbe6f157ae5",
+        "bytes": 3284
       },
       "releases": [
         {
-          "version": "MCLv1-1027-2",
-          "arch": "arm64",
+          "version": "MCLv3-1027-2",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "x64"
+          ],
           "minimumMacOS": "26.0",
-          "tag": "anyps5/vMCLv1-1027-2/arm64",
+          "tag": "anyps5/vMCLv3-1027-2/x64",
           "asset": {
-            "filename": "anyps5-MCLv1-1027-2-arm64.tar.gz",
-            "sha256": "84f3ebafed2f495e99ed9b8939d2572b2092a49cd9d0fef9568ca16154c65406",
-            "bytes": 37399676,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/anyps5%2FvMCLv1-1027-2%2Farm64/anyps5-MCLv1-1027-2-arm64.tar.gz"
+            "filename": "anyps5-MCLv3-1027-2-x64.tar.gz",
+            "sha256": "839bf4e8ac638689de3907b570a4a5bad88784c6d887149e882b1f2c3cb7b314",
+            "bytes": 37246678,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/anyps5%2FvMCLv3-1027-2%2Fx64/anyps5-MCLv3-1027-2-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#anyps5",
-          "profile": "AnyPS5 MCLv1-1027-2"
+          "profile": "AnyPS5 MCLv3-1027-2"
+        },
+        {
+          "version": "MCLv2-1027-2",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "26.0",
+          "tag": "anyps5/vMCLv2-1027-2/arm64",
+          "asset": {
+            "filename": "anyps5-MCLv2-1027-2-arm64.tar.gz",
+            "sha256": "cfed5e9e3d99b9108b2d03d3fae0d1bb8027428b2bfddfb14e1a3f9d8c5501c7",
+            "bytes": 37404448,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/anyps5%2FvMCLv2-1027-2%2Farm64/anyps5-MCLv2-1027-2-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#anyps5",
+          "profile": "AnyPS5 MCLv2-1027-2"
         }
       ]
     },
@@ -267,21 +723,42 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#butterscotch",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/butterscotch.json",
-        "sha256": "4a5461f7710995f175397619fa46de75ae97923b34831724c5861d79ee51b03a",
-        "bytes": 1404
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/butterscotch.json",
+        "sha256": "c50b100ed70441de77e4259995719c182f4ad37abae7dd2146bfeb6e3bb83a83",
+        "bytes": 3218
       },
       "releases": [
         {
-          "version": "MCLv1-1007",
+          "version": "MCLv2-1007",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "butterscotch/vMCLv1-1007/arm64",
+          "tag": "butterscotch/vMCLv2-1007/arm64",
           "asset": {
-            "filename": "butterscotch-MCLv1-1007-arm64.tar.gz",
-            "sha256": "17e63845e505dd3a98e9cff4138be72f919799e97036535a72f7cd61e3b26048",
-            "bytes": 1174311,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/butterscotch%2FvMCLv1-1007%2Farm64/butterscotch-MCLv1-1007-arm64.tar.gz"
+            "filename": "butterscotch-MCLv2-1007-arm64.tar.gz",
+            "sha256": "815f97ca2beadb890516362923b590615c8d0cd8c0a8c0b90241a4602c7fdbc1",
+            "bytes": 1184518,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/butterscotch%2FvMCLv2-1007%2Farm64/butterscotch-MCLv2-1007-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#butterscotch",
+          "profile": "Butterscotch MCLv2-1007"
+        },
+        {
+          "version": "MCLv1-1007",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "butterscotch/vMCLv1-1007/x64",
+          "asset": {
+            "filename": "butterscotch-MCLv1-1007-x64.tar.gz",
+            "sha256": "144f8276d2c55af812a749f739d73bafb2f69a09ee20a50718a2d0b01ed83ae8",
+            "bytes": 1257032,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/butterscotch%2FvMCLv1-1007%2Fx64/butterscotch-MCLv1-1007-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#butterscotch",
           "profile": "Butterscotch MCLv1-1007"
@@ -294,24 +771,76 @@
       "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#catsystem2-kif-crypto",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/catsystem2-kif-crypto.json",
-        "sha256": "7c6627dd5a1f2902dbd75ad276f5a7abfec5babc43bd2bf1924d57a5956b414b",
-        "bytes": 1032
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/catsystem2-kif-crypto.json",
+        "sha256": "d4f1e67af5071874b8378834eff6d4b4e40d99fcacaa191d37f8befdd9d6f6ed",
+        "bytes": 2182
       },
       "releases": [
         {
-          "version": "1.0.0",
-          "arch": "universal",
+          "version": "1.1.0",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
           "minimumMacOS": "11.0",
-          "tag": "catsystem2-kif-crypto/v1.0.0/universal",
+          "tag": "catsystem2-kif-crypto/v1.1.0/x64",
           "asset": {
-            "filename": "catsystem2-kif-crypto-1.0.0-universal.tar.gz",
-            "sha256": "b96701f8075592b1fd907c69f1317cf3c930f2b10f9c510c25c95d6b288a256d",
-            "bytes": 6454,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/catsystem2-kif-crypto%2Fv1.0.0%2Funiversal/catsystem2-kif-crypto-1.0.0-universal.tar.gz"
+            "filename": "catsystem2-kif-crypto-1.1.0-x64.tar.gz",
+            "sha256": "e141d270e033807bcdfbe71efb09c3e3f5eefa79308c1317a59918268f8fb782",
+            "bytes": 3997,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/catsystem2-kif-crypto%2Fv1.1.0%2Fx64/catsystem2-kif-crypto-1.1.0-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#catsystem2-kif-crypto",
-          "profile": "CatSystem2 KIF cryptography helper 1.0.0"
+          "profile": "CatSystem2 KIF cryptography helper 1.1.0"
+        },
+        {
+          "version": "1.1.0",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "11.0",
+          "tag": "catsystem2-kif-crypto/v1.1.0/arm64",
+          "asset": {
+            "filename": "catsystem2-kif-crypto-1.1.0-arm64.tar.gz",
+            "sha256": "b85d0310ff03aed53f979498ffdf2eba2c363e1b93adbdd3d593f7ada447b615",
+            "bytes": 4076,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/catsystem2-kif-crypto%2Fv1.1.0%2Farm64/catsystem2-kif-crypto-1.1.0-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#catsystem2-kif-crypto",
+          "profile": "CatSystem2 KIF cryptography helper 1.1.0"
+        }
+      ]
+    },
+    {
+      "projectId": "fidelityfx-api",
+      "name": "FidelityFX API adapter",
+      "delivery": "downloadable",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#fidelityfx-api",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/fidelityfx-api.json",
+        "sha256": "6260e91b2f659ca358b21f447896cdfb8600604282c4c2ab408a6164d06c96ee",
+        "bytes": 1651
+      },
+      "releases": [
+        {
+          "version": "1.0.1-MCLv1",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "10.15",
+          "tag": "fidelityfx-api/v1.0.1-MCLv1/x64",
+          "asset": {
+            "filename": "fidelityfx-api-1.0.1-MCLv1-x64.tar.gz",
+            "sha256": "bf738ac5ac13e9756891ce9d1d4f2fba1b87b1dbe7317872561e4dd868bfe652",
+            "bytes": 2877734,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/fidelityfx-api%2Fv1.0.1-MCLv1%2Fx64/fidelityfx-api-1.0.1-MCLv1-x64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#fidelityfx-api",
+          "profile": "FidelityFX API 1.0.1 Vulkan"
         }
       ]
     },
@@ -321,7 +850,7 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#flash-projector",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/flash-projector.json",
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/flash-projector.json",
         "sha256": "f46e66a98c5220c9e4edd96e881ce24161f36d432221726c3f7627f3dfc52af5",
         "bytes": 1052
       },
@@ -329,6 +858,10 @@
         {
           "version": "35.0.0.60-MCLv1",
           "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
           "minimumMacOS": "11.0",
           "tag": "flash-projector/v35.0.0.60-MCLv1/universal",
           "asset": {
@@ -348,21 +881,24 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#fna",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/fna.json",
-        "sha256": "c037d2f9652cfe21a6abf7c789815d420467b5654d35dc4e2bb3d92c2a6cb7dc",
-        "bytes": 1052
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/fna.json",
+        "sha256": "bf1c96d98054b4f76273f4ce8e2b1d904acd0cf76196fdccf20ea8541f7e2dea",
+        "bytes": 1580
       },
       "releases": [
         {
-          "version": "26.10-MCLv1",
+          "version": "26.10-MCLv2",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "fna/v26.10-MCLv1/arm64",
+          "tag": "fna/v26.10-MCLv2/arm64",
           "asset": {
-            "filename": "fna-26.10-MCLv1-arm64.tar.gz",
-            "sha256": "2a157d59af82aab7dc1ea6c634e75bc052923953b60e487e40b26ca72145c521",
-            "bytes": 33711997,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/fna%2Fv26.10-MCLv1%2Farm64/fna-26.10-MCLv1-arm64.tar.gz"
+            "filename": "fna-26.10-MCLv2-arm64.tar.gz",
+            "sha256": "6c3585a7b8d0c7f67e9ee6f582e9f99ebcd0a4b4a46e7be80257cb929fad866a",
+            "bytes": 33434351,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/fna%2Fv26.10-MCLv2%2Farm64/fna-26.10-MCLv2-arm64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#fna",
           "profile": ".NET 8 host"
@@ -375,24 +911,28 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gamemaker-opengl-helper",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/gamemaker-opengl-helper.json",
-        "sha256": "54f40391fb39d418325a19e8f966009731b1c728664d9ebb634c748575fb0974",
-        "bytes": 1122
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/gamemaker-opengl-helper.json",
+        "sha256": "20d03cbdce22d31e16bdfd2afa41618d6540fc4b85d9da84b0f2208117cab379",
+        "bytes": 1270
       },
       "releases": [
         {
-          "version": "software-gl-v3-MCLv2",
+          "version": "software-gl-v3-MCLv3",
           "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "gamemaker-opengl-helper/vsoftware-gl-v3-MCLv2/universal",
+          "tag": "gamemaker-opengl-helper/vsoftware-gl-v3-MCLv3/universal",
           "asset": {
-            "filename": "gamemaker-opengl-helper-software-gl-v3-MCLv2-universal.tar.gz",
-            "sha256": "ef4795e38660bb186a5f3e61fcd601795b1c5bf1d8b259e8a62384a240df30ec",
-            "bytes": 11144,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gamemaker-opengl-helper%2Fvsoftware-gl-v3-MCLv2%2Funiversal/gamemaker-opengl-helper-software-gl-v3-MCLv2-universal.tar.gz"
+            "filename": "gamemaker-opengl-helper-software-gl-v3-MCLv3-universal.tar.gz",
+            "sha256": "6a7e36d2b342703c2eadc5353822f2c45d760ec2f3d343d4ef3d6daee85cf09b",
+            "bytes": 10887,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gamemaker-opengl-helper%2Fvsoftware-gl-v3-MCLv3%2Funiversal/gamemaker-opengl-helper-software-gl-v3-MCLv3-universal.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gamemaker-opengl-helper",
-          "profile": "GameMaker OpenGL helper software-gl-v3-MCLv2"
+          "profile": "GameMaker software OpenGL software-gl-v3-MCLv3"
         }
       ]
     },
@@ -402,21 +942,42 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gemrb",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/gemrb.json",
-        "sha256": "58b0d46ee77d70be57e03a1f50e237f952707ce7b1e29336612918785cee6d4b",
-        "bytes": 1059
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/gemrb.json",
+        "sha256": "e18033d109042039396561f976457d0a5ba041f85f2dea7d7fc3a4ddea9b6c1d",
+        "bytes": 2575
       },
       "releases": [
         {
-          "version": "MCLv1-1020",
+          "version": "MCLv2-1020",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "gemrb/vMCLv1-1020/arm64",
+          "tag": "gemrb/vMCLv2-1020/arm64",
           "asset": {
-            "filename": "gemrb-MCLv1-1020-arm64.tar.gz",
-            "sha256": "fc80bf3526d11e968120df674b706f40656473eb2a89c0225764fa2db90e5aa4",
-            "bytes": 15312763,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gemrb%2FvMCLv1-1020%2Farm64/gemrb-MCLv1-1020-arm64.tar.gz"
+            "filename": "gemrb-MCLv2-1020-arm64.tar.gz",
+            "sha256": "71a1c0e5192c26993d75115313eb7f51c0d81b4b0f22448fc766e2b46ce70401",
+            "bytes": 15292862,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gemrb%2FvMCLv2-1020%2Farm64/gemrb-MCLv2-1020-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gemrb",
+          "profile": "GemRB MCLv2-1020"
+        },
+        {
+          "version": "MCLv1-1020",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "gemrb/vMCLv1-1020/x64",
+          "asset": {
+            "filename": "gemrb-MCLv1-1020-x64.tar.gz",
+            "sha256": "d11e81caab7c15e41a6cda5398598f9b760376ab97a6cac6d5ad802adc38472c",
+            "bytes": 16222313,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gemrb%2FvMCLv1-1020%2Fx64/gemrb-MCLv1-1020-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gemrb",
           "profile": "GemRB MCLv1-1020"
@@ -429,21 +990,42 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gm8-decompiler",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/gm8-decompiler.json",
-        "sha256": "64cb27db8580f5cf7e16dea5af050f5b2c6b26d5bafdf70c3db9bdb98382bd79",
-        "bytes": 1120
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/gm8-decompiler.json",
+        "sha256": "5faf15e65de4305d63dc4819c48bc0524608aa808ed18fcc9ec3704398b35039",
+        "bytes": 2680
       },
       "releases": [
         {
-          "version": "2.2.0-MCLv1",
+          "version": "2.2.0-MCLv2",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "11.0",
-          "tag": "gm8-decompiler/v2.2.0-MCLv1/arm64",
+          "tag": "gm8-decompiler/v2.2.0-MCLv2/arm64",
           "asset": {
-            "filename": "gm8-decompiler-2.2.0-MCLv1-arm64.tar.gz",
-            "sha256": "d81215deac83f50637fa1b6a5a290d4ede8b7d9bc4ab0930a15290329e40d0e6",
-            "bytes": 457371,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gm8-decompiler%2Fv2.2.0-MCLv1%2Farm64/gm8-decompiler-2.2.0-MCLv1-arm64.tar.gz"
+            "filename": "gm8-decompiler-2.2.0-MCLv2-arm64.tar.gz",
+            "sha256": "036ea91863e662894aaf17d9495941c63680a0efff1be505a7b8b3790d6de257",
+            "bytes": 491152,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gm8-decompiler%2Fv2.2.0-MCLv2%2Farm64/gm8-decompiler-2.2.0-MCLv2-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gm8-decompiler",
+          "profile": "GameMaker 8 decompiler 2.2.0-MCLv2"
+        },
+        {
+          "version": "2.2.0-MCLv1",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "11.0",
+          "tag": "gm8-decompiler/v2.2.0-MCLv1/x64",
+          "asset": {
+            "filename": "gm8-decompiler-2.2.0-MCLv1-x64.tar.gz",
+            "sha256": "6dab64abdd2b491962101ba21ffef5fe167d644c52e166500e316b20c3866465",
+            "bytes": 547030,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gm8-decompiler%2Fv2.2.0-MCLv1%2Fx64/gm8-decompiler-2.2.0-MCLv1-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gm8-decompiler",
           "profile": "GameMaker 8 decompiler 2.2.0-MCLv1"
@@ -456,40 +1038,48 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#hashlink",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/hashlink.json",
-        "sha256": "b6645cc649c25c2898b4dd38c6bb1cea95b717f635725351ee2d754671ca762e",
-        "bytes": 2958
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/hashlink.json",
+        "sha256": "ae5f4bf036f6941721d727f1637067384c7b898aa16ae2a8dfa94e2f6460412f",
+        "bytes": 3990
       },
       "releases": [
         {
-          "version": "1.12-MCLv1",
+          "version": "1.9-MCLv2",
           "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "hashlink/v1.12-MCLv1/x64",
+          "tag": "hashlink/v1.9-MCLv2/x64",
           "asset": {
-            "filename": "hashlink-1.12-MCLv1-x64.tar.gz",
-            "sha256": "9db8790ed7133f8f4ed93a4d307b2e7241f4cc9349e6a592df6cf82e7e69a278",
-            "bytes": 2173029,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/hashlink%2Fv1.12-MCLv1%2Fx64/hashlink-1.12-MCLv1-x64.tar.gz"
-          },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#hashlink-1-12",
-          "profile": "HashLink 1.12 ABI",
-          "anchor": "hashlink-1-12"
-        },
-        {
-          "version": "1.9-MCLv1",
-          "arch": "x64",
-          "minimumMacOS": "13.0",
-          "tag": "hashlink/v1.9-MCLv1/x64",
-          "asset": {
-            "filename": "hashlink-1.9-MCLv1-x64.tar.gz",
-            "sha256": "b9a14baa5f5a348f2463ae50a8e48162390628dec04c49a77869a40129c085ba",
-            "bytes": 2109616,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/hashlink%2Fv1.9-MCLv1%2Fx64/hashlink-1.9-MCLv1-x64.tar.gz"
+            "filename": "hashlink-1.9-MCLv2-x64.tar.gz",
+            "sha256": "ccce8faa1a15eb4ed3e96cc6b177bc2b7a3a7f272550ff368275d1b9552824f7",
+            "bytes": 2052259,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/hashlink%2Fv1.9-MCLv2%2Fx64/hashlink-1.9-MCLv2-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#hashlink-1-9",
           "profile": "HashLink 1.9 ABI",
           "anchor": "hashlink-1-9"
+        },
+        {
+          "version": "1.12-MCLv2",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "hashlink/v1.12-MCLv2/x64",
+          "asset": {
+            "filename": "hashlink-1.12-MCLv2-x64.tar.gz",
+            "sha256": "fc880f2c2c07bdc96eab35cbf184855a47455f3f259fbbf5b5f310d38262c1cc",
+            "bytes": 2084095,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/hashlink%2Fv1.12-MCLv2%2Fx64/hashlink-1.12-MCLv2-x64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#hashlink-1-12",
+          "profile": "HashLink 1.12 ABI",
+          "anchor": "hashlink-1-12"
         }
       ]
     },
@@ -499,24 +1089,27 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#impacto",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/impacto.json",
-        "sha256": "32e7bf6116e81f32bdc30f3494da7a64b1e0b10713932db0d294181ad0d5c421",
-        "bytes": 1113
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/impacto.json",
+        "sha256": "9ff5270839091485d1ac0d4973bb87228b33ee6727c410110166a59e96e30f10",
+        "bytes": 1629
       },
       "releases": [
         {
-          "version": "0.10.8.903-MCLv1",
+          "version": "0.10.8.903-MCLv2",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "impacto/v0.10.8.903-MCLv1/arm64",
+          "tag": "impacto/v0.10.8.903-MCLv2/arm64",
           "asset": {
-            "filename": "impacto-0.10.8.903-MCLv1-arm64.tar.gz",
-            "sha256": "2e509d3fec56c49a56234b614360fd9d616f99b18d522f83f7ec5c8a47661cb9",
-            "bytes": 94878081,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/impacto%2Fv0.10.8.903-MCLv1%2Farm64/impacto-0.10.8.903-MCLv1-arm64.tar.gz"
+            "filename": "impacto-0.10.8.903-MCLv2-arm64.tar.gz",
+            "sha256": "085d73ba95576bda387e6c399c0b1ae3f3567aa73ab144cf7613bfae9a9f1e2e",
+            "bytes": 94945745,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/impacto%2Fv0.10.8.903-MCLv2%2Farm64/impacto-0.10.8.903-MCLv2-arm64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#impacto",
-          "profile": "impacto Windows-game profile 0.10.8.903-MCLv1"
+          "profile": "impacto Windows-game profile 0.10.8.903-MCLv2"
         }
       ]
     },
@@ -526,21 +1119,42 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#innoextract",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/innoextract.json",
-        "sha256": "5e9e73caeffa2f8036a2ad65f500d03ba9d8e6fc488991402b51d225a7ecd7f0",
-        "bytes": 1103
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/innoextract.json",
+        "sha256": "81f1745e06fc12748fff0d2f2f8e0499346fad841f931198ef5585728eb6dca2",
+        "bytes": 2637
       },
       "releases": [
         {
-          "version": "MCLv1-0206",
+          "version": "MCLv2-0206",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "innoextract/vMCLv1-0206/arm64",
+          "tag": "innoextract/vMCLv2-0206/arm64",
           "asset": {
-            "filename": "innoextract-MCLv1-0206-arm64.tar.gz",
-            "sha256": "09b38243d4ba554083898d65a437804fae75579ec5bfe358b99e5f7e1e3b54eb",
-            "bytes": 599201,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/innoextract%2FvMCLv1-0206%2Farm64/innoextract-MCLv1-0206-arm64.tar.gz"
+            "filename": "innoextract-MCLv2-0206-arm64.tar.gz",
+            "sha256": "e5b4b1c4d175d5f9681677355b5a87a1f117cd5e6129a8b16f39ec8facb0893e",
+            "bytes": 597537,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/innoextract%2FvMCLv2-0206%2Farm64/innoextract-MCLv2-0206-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#innoextract",
+          "profile": "Inno Setup extraction tools MCLv2-0206"
+        },
+        {
+          "version": "MCLv1-0206",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "innoextract/vMCLv1-0206/x64",
+          "asset": {
+            "filename": "innoextract-MCLv1-0206-x64.tar.gz",
+            "sha256": "393f4cddb7c14f69934a865003462445c4c1efd73da08b56fdf1e45849762f3e",
+            "bytes": 647533,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/innoextract%2FvMCLv1-0206%2Fx64/innoextract-MCLv1-0206-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#innoextract",
           "profile": "Inno Setup extraction tools MCLv1-0206"
@@ -553,24 +1167,27 @@
       "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#ios-playtools-paths",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/ios-playtools-paths.json",
-        "sha256": "90f0250044ce2ff25f7d5a4594fd2c5f010cade1931b33c012bf1a4f67f03cdb",
-        "bytes": 986
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/ios-playtools-paths.json",
+        "sha256": "4b2394baa0920d3512372c56f3e882b12ad39b9b8b1ced1305135b7ef87f8dd6",
+        "bytes": 1134
       },
       "releases": [
         {
-          "version": "1.0.0",
+          "version": "1.1.0",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "12.0",
-          "tag": "ios-playtools-paths/v1.0.0/arm64",
+          "tag": "ios-playtools-paths/v1.1.0/arm64",
           "asset": {
-            "filename": "ios-playtools-paths-1.0.0-arm64.tar.gz",
-            "sha256": "e5141c0b16ef785da831af39149b0dc9eb65bcbbe2a127f8603feb7fd7964a9f",
-            "bytes": 17213,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/ios-playtools-paths%2Fv1.0.0%2Farm64/ios-playtools-paths-1.0.0-arm64.tar.gz"
+            "filename": "ios-playtools-paths-1.1.0-arm64.tar.gz",
+            "sha256": "ccf47a1796c9ddd0184e8898a7be304c850ebbe90cfb26acfa38237ae2e88533",
+            "bytes": 17599,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/ios-playtools-paths%2Fv1.1.0%2Farm64/ios-playtools-paths-1.1.0-arm64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#ios-playtools-paths",
-          "profile": "PlayTools storage adapter 1.0.0"
+          "profile": "PlayTools storage adapter 1.1.0"
         }
       ]
     },
@@ -580,40 +1197,46 @@
       "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#java-steamworks",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/java-steamworks.json",
-        "sha256": "b7ed680651768b7defac46df1bdc202727d23d4e74b825b814905ea89c1b6747",
-        "bytes": 1923
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/java-steamworks.json",
+        "sha256": "5de22442d4c5d174f252cb2d0867ea214787b22d51370969ef59a588584ff925",
+        "bytes": 2219
       },
       "releases": [
         {
-          "version": "1.10.0-MCLv1",
-          "arch": "universal",
-          "minimumMacOS": "11.0",
-          "tag": "java-steamworks/v1.10.0-MCLv1/universal",
+          "version": "1.9.0-MCLv2",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "10.9",
+          "tag": "java-steamworks/v1.9.0-MCLv2/x64",
           "asset": {
-            "filename": "java-steamworks-1.10.0-MCLv1-universal.tar.gz",
-            "sha256": "2a013935aa6b2faaf4318f3137fccf06520a24d6af77603c57a35e0b145f0752",
-            "bytes": 148653,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/java-steamworks%2Fv1.10.0-MCLv1%2Funiversal/java-steamworks-1.10.0-MCLv1-universal.tar.gz"
+            "filename": "java-steamworks-1.9.0-MCLv2-x64.tar.gz",
+            "sha256": "fc6c99a9e0a146abdf221a3232dfabb7ec5eb2534788d37849e9f4d7f6fc42c3",
+            "bytes": 86658,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/java-steamworks%2Fv1.9.0-MCLv2%2Fx64/java-steamworks-1.9.0-MCLv2-x64.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#java-steamworks-1-10",
-          "profile": "Steamworks4j 1.10 JNI ABI",
-          "anchor": "java-steamworks-1-10"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#java-steamworks",
+          "profile": "Steamworks4j 1.9.0 JNI ABI"
         },
         {
-          "version": "1.9.0-MCLv1",
-          "arch": "x64",
-          "minimumMacOS": "10.9",
-          "tag": "java-steamworks/v1.9.0-MCLv1/x64",
+          "version": "1.10.0-MCLv2",
+          "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "11.0",
+          "tag": "java-steamworks/v1.10.0-MCLv2/universal",
           "asset": {
-            "filename": "java-steamworks-1.9.0-MCLv1-x64.tar.gz",
-            "sha256": "b0ca08410b79fb0636b6f8eddb61f825f60e95cbf5c3745a0cb9900c84c433c4",
-            "bytes": 87374,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/java-steamworks%2Fv1.9.0-MCLv1%2Fx64/java-steamworks-1.9.0-MCLv1-x64.tar.gz"
+            "filename": "java-steamworks-1.10.0-MCLv2-universal.tar.gz",
+            "sha256": "58b8c5137117156ce5d56047ceb45dd14dc4870f9ca4438466e6108e7780631e",
+            "bytes": 147887,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/java-steamworks%2Fv1.10.0-MCLv2%2Funiversal/java-steamworks-1.10.0-MCLv2-universal.tar.gz"
           },
-          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#java-steamworks-1-9",
-          "profile": "Steamworks4j 1.9 JNI ABI",
-          "anchor": "java-steamworks-1-9"
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#java-steamworks",
+          "profile": "Steamworks4j 1.10.0 JNI ABI"
         }
       ]
     },
@@ -623,38 +1246,45 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#krkrsdl2",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/krkrsdl2.json",
-        "sha256": "075486043b23d670aebfb33e91f67992c2454fe25e1ef01392fba9517ed73455",
-        "bytes": 2556
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/krkrsdl2.json",
+        "sha256": "04335da1dc299cc3adc23d859f748e1bb1a2e562e04f6181caab423361259ad7",
+        "bytes": 3653
       },
       "releases": [
         {
-          "version": "MCLv1-1028-kag3-1",
-          "arch": "arm64",
+          "version": "MCLv2-1030-kag3",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "krkrsdl2/vMCLv1-1028-kag3-1/arm64",
+          "tag": "krkrsdl2/vMCLv2-1030-kag3/x64",
           "asset": {
-            "filename": "krkrsdl2-MCLv1-1028-kag3-1-arm64.tar.gz",
-            "sha256": "d5b7315188062bd4dbfd0cb196ec19e6197517a66520fe11d451bad20a4d71fe",
-            "bytes": 4937863,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/krkrsdl2%2FvMCLv1-1028-kag3-1%2Farm64/krkrsdl2-MCLv1-1028-kag3-1-arm64.tar.gz"
+            "filename": "krkrsdl2-MCLv2-1030-kag3-x64.tar.gz",
+            "sha256": "fd3728ee6de6c79342fe9d011b4fc8dae9b1a798ebe1ba8d559f096c4236928a",
+            "bytes": 5210690,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/krkrsdl2%2FvMCLv2-1030-kag3%2Fx64/krkrsdl2-MCLv2-1030-kag3-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#krkrsdl2",
-          "profile": "Kirikiri SDL2 MCLv1-1028-kag3-1"
+          "profile": "KiriKiri SDL2 macOS"
         },
         {
-          "version": "MCLv1-1001",
+          "version": "MCLv2-1030-kag3",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "krkrsdl2/vMCLv1-1001/arm64",
+          "tag": "krkrsdl2/vMCLv2-1030-kag3/arm64",
           "asset": {
-            "filename": "krkrsdl2-MCLv1-1001-arm64.tar.gz",
-            "sha256": "f9eadc89e6a377895c401d37782609b8577fc091ad5c7d2e3bed5f11e6cc0492",
-            "bytes": 2783881,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/krkrsdl2%2FvMCLv1-1001%2Farm64/krkrsdl2-MCLv1-1001-arm64.tar.gz"
+            "filename": "krkrsdl2-MCLv2-1030-kag3-arm64.tar.gz",
+            "sha256": "5e872e3baff7ab525706de077a641e27b9b42b5c0121f9103e4a5880a4c029bf",
+            "bytes": 4925054,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/krkrsdl2%2FvMCLv2-1030-kag3%2Farm64/krkrsdl2-MCLv2-1030-kag3-arm64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#krkrsdl2",
-          "profile": "Kirikiri SDL2 MCLv1-1001"
+          "profile": "KiriKiri SDL2 macOS"
         }
       ]
     },
@@ -664,21 +1294,25 @@
       "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#love-luasteam",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/love-luasteam.json",
-        "sha256": "26b0564c1cd037a71cbfae16fecee5135457d866436bd842c7a81a3ce6e2a2e7",
-        "bytes": 1015
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/love-luasteam.json",
+        "sha256": "fbbe4afefa0819c4b8fb63c800c4d2818a4b92b65206bf2cb0e7ae452cd48f44",
+        "bytes": 1163
       },
       "releases": [
         {
-          "version": "4.0.2-MCLv1",
+          "version": "4.0.2-MCLv2",
           "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "love-luasteam/v4.0.2-MCLv1/universal",
+          "tag": "love-luasteam/v4.0.2-MCLv2/universal",
           "asset": {
-            "filename": "love-luasteam-4.0.2-MCLv1-universal.tar.gz",
-            "sha256": "5a12ced0b38b0ec3ffc5e5f0a0c39389b9ad55b2b15e18b5f68ff28654de29a6",
-            "bytes": 78561,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/love-luasteam%2Fv4.0.2-MCLv1%2Funiversal/love-luasteam-4.0.2-MCLv1-universal.tar.gz"
+            "filename": "love-luasteam-4.0.2-MCLv2-universal.tar.gz",
+            "sha256": "e67993df82374871ec75f01deca8900e86021efa7e5fe34817cbcada8fd197ed",
+            "bytes": 77772,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/love-luasteam%2Fv4.0.2-MCLv2%2Funiversal/love-luasteam-4.0.2-MCLv2-universal.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#love-luasteam",
           "profile": "Lua 5.1 host ABI"
@@ -691,21 +1325,24 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#mkxpz",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/mkxpz.json",
-        "sha256": "31590975e39a879f299025771d0a8d7ba7b6985c23f5ccc05000091c1744e645",
-        "bytes": 1061
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/mkxpz.json",
+        "sha256": "284731ea039ad054e56b76812cd90932a8f9331868e5c9d18b767e2f6331b387",
+        "bytes": 1587
       },
       "releases": [
         {
-          "version": "MCLv1-1003",
+          "version": "MCLv2-1003",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "11.0",
-          "tag": "mkxpz/vMCLv1-1003/arm64",
+          "tag": "mkxpz/vMCLv2-1003/arm64",
           "asset": {
-            "filename": "mkxpz-MCLv1-1003-arm64.tar.gz",
-            "sha256": "837761f93ff172343caaf7cc94d67c7d67470b925b62febc0011377a7ac2cc25",
-            "bytes": 14431489,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mkxpz%2FvMCLv1-1003%2Farm64/mkxpz-MCLv1-1003-arm64.tar.gz"
+            "filename": "mkxpz-MCLv2-1003-arm64.tar.gz",
+            "sha256": "f223eb4bb2609cbd8c7baadadafbbf9cbc2081d89ad1e6952e4f9e8d2a5b1ae5",
+            "bytes": 14431782,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mkxpz%2FvMCLv2-1003%2Farm64/mkxpz-MCLv2-1003-arm64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#mkxpz",
           "profile": "Unicode filename normalization"
@@ -718,24 +1355,58 @@
       "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#mkxpz-config-helper",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/mkxpz-config-helper.json",
-        "sha256": "6b495d5af7e08649b38152958b68c9366c065e75cf2628cdf574e659e2b7f98b",
-        "bytes": 1021
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/mkxpz-config-helper.json",
+        "sha256": "7373f4e9fe66907b023e2c26e27f7d6a9840796a1a78c3e2140e844118bef75b",
+        "bytes": 1169
       },
       "releases": [
         {
-          "version": "1.0.0",
+          "version": "1.1.0",
           "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
           "minimumMacOS": "11.0",
-          "tag": "mkxpz-config-helper/v1.0.0/universal",
+          "tag": "mkxpz-config-helper/v1.1.0/universal",
           "asset": {
-            "filename": "mkxpz-config-helper-1.0.0-universal.tar.gz",
-            "sha256": "f57314d2fc07fe33f5b55cbb224af2322a1c7075535e4dafd08bbaa0769d2212",
-            "bytes": 14773,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mkxpz-config-helper%2Fv1.0.0%2Funiversal/mkxpz-config-helper-1.0.0-universal.tar.gz"
+            "filename": "mkxpz-config-helper-1.1.0-universal.tar.gz",
+            "sha256": "8ca2273b7a5e24590014386550e7e2f17ec4be70ae1eda47c79132bb1c58de26",
+            "bytes": 14795,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mkxpz-config-helper%2Fv1.1.0%2Funiversal/mkxpz-config-helper-1.1.0-universal.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#mkxpz-config-helper",
-          "profile": "MKXP-Z configuration helper 1.0.0"
+          "profile": "MKXP-Z configuration helper 1.1.0"
+        }
+      ]
+    },
+    {
+      "projectId": "mpv",
+      "name": "mpv decoded-frame host",
+      "delivery": "downloadable",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#mpv",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/mpv.json",
+        "sha256": "5d17e690cfe4856219669bc91fabec6187cb72d48ac118fd729051b813402972",
+        "bytes": 1297
+      },
+      "releases": [
+        {
+          "version": "0.41.0-MCLv8",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "27.0",
+          "tag": "mpv/v0.41.0-MCLv8/arm64",
+          "asset": {
+            "filename": "mpv-0.41.0-MCLv8-arm64.tar.gz",
+            "sha256": "4e1b69d26bc7087722d2055cb3e30b521dbfab539d821172b59d1d9a16b8fb56",
+            "bytes": 25199077,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mpv%2Fv0.41.0-MCLv8%2Farm64/mpv-0.41.0-MCLv8-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#mpv",
+          "profile": "Decoded video with separate controls and subtitles"
         }
       ]
     },
@@ -745,24 +1416,27 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#npengine",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/npengine.json",
-        "sha256": "bb2fb86e566bbb9f238373bd926166dabb17b3faba5ec3996404e957e4efe1f2",
-        "bytes": 1087
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/npengine.json",
+        "sha256": "c164f2e9591608ecfacbe99c0f842f2f136ecad9eb77a5e07fe4665aaf7518c0",
+        "bytes": 1610
       },
       "releases": [
         {
-          "version": "0.5.3-MCLv1",
+          "version": "0.5.3-MCLv2",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "npengine/v0.5.3-MCLv1/arm64",
+          "tag": "npengine/v0.5.3-MCLv2/arm64",
           "asset": {
-            "filename": "npengine-0.5.3-MCLv1-arm64.tar.gz",
-            "sha256": "7dff7833970fa401766df56e7eee6ffca40367d1c1eb8eece549b3803ce735aa",
-            "bytes": 17942804,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/npengine%2Fv0.5.3-MCLv1%2Farm64/npengine-0.5.3-MCLv1-arm64.tar.gz"
+            "filename": "npengine-0.5.3-MCLv2-arm64.tar.gz",
+            "sha256": "a0743d5b07bac727d522f05c80e949854b9d1f693fec0237ebb32c6263057524",
+            "bytes": 18017818,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/npengine%2Fv0.5.3-MCLv2%2Farm64/npengine-0.5.3-MCLv2-arm64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#npengine",
-          "profile": "libnpengine Mac runner 0.5.3-MCLv1"
+          "profile": "libnpengine Mac runner 0.5.3-MCLv2"
         }
       ]
     },
@@ -772,24 +1446,27 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#nxnative-tools",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/nxnative-tools.json",
-        "sha256": "2f7f865190cfb2ed0dd765d5b99187d46f9958e140f156c982503d48ef97c566",
-        "bytes": 1127
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/nxnative-tools.json",
+        "sha256": "cfdb4541df6f33d34972a6ec7494a6d17734c07c5e70fffbffd5b10822112ae7",
+        "bytes": 1651
       },
       "releases": [
         {
-          "version": "MCLv1-1027-3",
+          "version": "MCLv2-1027-3",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "26.0",
-          "tag": "nxnative-tools/vMCLv1-1027-3/arm64",
+          "tag": "nxnative-tools/vMCLv2-1027-3/arm64",
           "asset": {
-            "filename": "nxnative-tools-MCLv1-1027-3-arm64.tar.gz",
-            "sha256": "0d59f9c4afd6abd6c9e6674da2b125026d3abfcef7266d5e324dd0c221609c43",
-            "bytes": 47926370,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/nxnative-tools%2FvMCLv1-1027-3%2Farm64/nxnative-tools-MCLv1-1027-3-arm64.tar.gz"
+            "filename": "nxnative-tools-MCLv2-1027-3-arm64.tar.gz",
+            "sha256": "1667b37f6c8746d879e0a8caae9d67c5ea701fa9b167952728a2d748e275f107",
+            "bytes": 47933549,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/nxnative-tools%2FvMCLv2-1027-3%2Farm64/nxnative-tools-MCLv2-1027-3-arm64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#nxnative-tools",
-          "profile": "nxnative native tools MCLv1-1027-3"
+          "profile": "nxnative native tools MCLv2-1027-3"
         }
       ]
     },
@@ -799,21 +1476,42 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#onscripter-en",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/onscripter-en.json",
-        "sha256": "b2c93963f8542b8aebd267f91eb82b8c98c1250e0938e5fad32387ef63de2d4b",
-        "bytes": 1120
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/onscripter-en.json",
+        "sha256": "982b0f94b516d2cb48f9eefc7c3e0895eafd803153c08c9d3914c5df00c1089c",
+        "bytes": 2661
       },
       "releases": [
         {
-          "version": "MCLv1-0126",
+          "version": "MCLv2-0126",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "onscripter-en/vMCLv1-0126/arm64",
+          "tag": "onscripter-en/vMCLv2-0126/arm64",
           "asset": {
-            "filename": "onscripter-en-MCLv1-0126-arm64.tar.gz",
-            "sha256": "a27a6460e22acc683d53faade6722a703a777553d9d4deed35113f3a9c9cea37",
-            "bytes": 1955635,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onscripter-en%2FvMCLv1-0126%2Farm64/onscripter-en-MCLv1-0126-arm64.tar.gz"
+            "filename": "onscripter-en-MCLv2-0126-arm64.tar.gz",
+            "sha256": "e2e4d1702071429cd4ccc798d720ff33fd19165cf738cf42cb8a542ecdf2380e",
+            "bytes": 1347546,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onscripter-en%2FvMCLv2-0126%2Farm64/onscripter-en-MCLv2-0126-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#onscripter-en",
+          "profile": "ONScripter-EN MCLv2-0126"
+        },
+        {
+          "version": "MCLv1-0126",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "onscripter-en/vMCLv1-0126/x64",
+          "asset": {
+            "filename": "onscripter-en-MCLv1-0126-x64.tar.gz",
+            "sha256": "357665b5c147acdb1c54f6769524e98bc8d054c3d1b1ebeca519d673bcff91bd",
+            "bytes": 1414116,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onscripter-en%2FvMCLv1-0126%2Fx64/onscripter-en-MCLv1-0126-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#onscripter-en",
           "profile": "ONScripter-EN MCLv1-0126"
@@ -826,24 +1524,45 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#onsyuri",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/onsyuri.json",
-        "sha256": "ca5299054523b782047eee2bcb62c30df72c7ba582352b030de8ca46c19d5695",
-        "bytes": 1109
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/onsyuri.json",
+        "sha256": "f5f11fcfd73e08844e748b6ee9299f69db4a2f644d40ec1b1b77fbcd60717dbf",
+        "bytes": 2138
       },
       "releases": [
         {
-          "version": "0.7.7beta-MCLv1",
-          "arch": "arm64",
+          "version": "0.7.7beta-MCLv2",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "onsyuri/v0.7.7beta-MCLv1/arm64",
+          "tag": "onsyuri/v0.7.7beta-MCLv2/x64",
           "asset": {
-            "filename": "onsyuri-0.7.7beta-MCLv1-arm64.tar.gz",
-            "sha256": "e9d23a15f310a5f7fb00a19e8ea70c7fc8e98a4eb7e891d02a38958005d6470d",
-            "bytes": 3804991,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onsyuri%2Fv0.7.7beta-MCLv1%2Farm64/onsyuri-0.7.7beta-MCLv1-arm64.tar.gz"
+            "filename": "onsyuri-0.7.7beta-MCLv2-x64.tar.gz",
+            "sha256": "b48fd5e7f8f579e98961dcd1d4f5da34b166001b889e8f8082ba4614ca26e1e4",
+            "bytes": 4061562,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onsyuri%2Fv0.7.7beta-MCLv2%2Fx64/onsyuri-0.7.7beta-MCLv2-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#onsyuri",
-          "profile": "ONScripterYuri 0.7.7beta-MCLv1"
+          "profile": "ONScripter-Yuri 0.7.7beta-MCLv2"
+        },
+        {
+          "version": "0.7.7beta-MCLv2",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "onsyuri/v0.7.7beta-MCLv2/arm64",
+          "asset": {
+            "filename": "onsyuri-0.7.7beta-MCLv2-arm64.tar.gz",
+            "sha256": "e03970dd56b99e7f490f3529d1165a9fd3c0a4b49fef9b027d54159ea4b34781",
+            "bytes": 3795142,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onsyuri%2Fv0.7.7beta-MCLv2%2Farm64/onsyuri-0.7.7beta-MCLv2-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#onsyuri",
+          "profile": "ONScripter-Yuri 0.7.7beta-MCLv2"
         }
       ]
     },
@@ -853,24 +1572,58 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#opengmk",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/opengmk.json",
-        "sha256": "fcea077aa120fa3f424565829a171863be2e6a0a551dde3cb2da24d257ce133e",
-        "bytes": 1079
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/opengmk.json",
+        "sha256": "2ceb456281b6e65641df54c6b767d3bf9433a0a67a210270903d945459d3b878",
+        "bytes": 1603
       },
       "releases": [
         {
-          "version": "0.2.0-MCLv1",
+          "version": "0.2.0-MCLv2",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "opengmk/v0.2.0-MCLv1/arm64",
+          "tag": "opengmk/v0.2.0-MCLv2/arm64",
           "asset": {
-            "filename": "opengmk-0.2.0-MCLv1-arm64.tar.gz",
-            "sha256": "a5f7f520d88113d854797e5fc0a7bcf9eeed83bf62c978c602f69ec3b2ffd0c1",
-            "bytes": 2512194,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/opengmk%2Fv0.2.0-MCLv1%2Farm64/opengmk-0.2.0-MCLv1-arm64.tar.gz"
+            "filename": "opengmk-0.2.0-MCLv2-arm64.tar.gz",
+            "sha256": "44ce0c286927abb75600ecf52763d327e2af510de63e5ea479ef3613ef939338",
+            "bytes": 2623552,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/opengmk%2Fv0.2.0-MCLv2%2Farm64/opengmk-0.2.0-MCLv2-arm64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#opengmk",
-          "profile": "OpenGMK 0.2.0-MCLv1"
+          "profile": "OpenGMK 0.2.0-MCLv2"
+        }
+      ]
+    },
+    {
+      "projectId": "prosper",
+      "name": "Prosper",
+      "delivery": "downloadable",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#prosper",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/prosper.json",
+        "sha256": "6a7ad2f6be784dbcaefa3e0db27b4a5bb59cb77ceb444eaa578637437ed78b16",
+        "bytes": 1612
+      },
+      "releases": [
+        {
+          "version": "MCLv1-1027-1",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "26.0",
+          "tag": "prosper/vMCLv1-1027-1/x64",
+          "asset": {
+            "filename": "prosper-MCLv1-1027-1-x64.tar.gz",
+            "sha256": "a6db1226d61a7ee0765c281467a040a5a4d23c56e6e851c3c608106b00b056de",
+            "bytes": 9614284,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/prosper%2FvMCLv1-1027-1%2Fx64/prosper-MCLv1-1027-1-x64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#prosper",
+          "profile": "Prosper x86-64"
         }
       ]
     },
@@ -880,24 +1633,45 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reminori",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/reminori.json",
-        "sha256": "028eb4ed80c074817271a9f9342f3dac8ce122bb7b0c026e366965d1efb320fa",
-        "bytes": 1086
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/reminori.json",
+        "sha256": "f0f27c612b16b23711411e4664641500aae4ce4854eae1d5dc2efc68cf260b2b",
+        "bytes": 3123
       },
       "releases": [
         {
-          "version": "0.1.0-MCLv1",
-          "arch": "arm64",
+          "version": "0.1.0-MCLv2",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "reminori/v0.1.0-MCLv1/arm64",
+          "tag": "reminori/v0.1.0-MCLv2/x64",
           "asset": {
-            "filename": "reminori-0.1.0-MCLv1-arm64.tar.gz",
-            "sha256": "0bc5639c5173bc2aa7a95203c24d12dc0fce233a66fd9acbfa18791d83e16d3e",
-            "bytes": 5473189,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reminori%2Fv0.1.0-MCLv1%2Farm64/reminori-0.1.0-MCLv1-arm64.tar.gz"
+            "filename": "reminori-0.1.0-MCLv2-x64.tar.gz",
+            "sha256": "a11997ff0d10317a646d43130054dad15a8a7c3e2974f8e589f1e800bb38af8f",
+            "bytes": 6122041,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reminori%2Fv0.1.0-MCLv2%2Fx64/reminori-0.1.0-MCLv2-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reminori",
-          "profile": "ReMinori 0.1.0-MCLv1"
+          "profile": "ReMinori 0.1.0-MCLv2"
+        },
+        {
+          "version": "0.1.0-MCLv2",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "reminori/v0.1.0-MCLv2/arm64",
+          "asset": {
+            "filename": "reminori-0.1.0-MCLv2-arm64.tar.gz",
+            "sha256": "d344147761fd1ff375cf544064c75c38d82fecf91634a9aa0d1adaa5f8540a43",
+            "bytes": 5574433,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reminori%2Fv0.1.0-MCLv2%2Farm64/reminori-0.1.0-MCLv2-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reminori",
+          "profile": "ReMinori 0.1.0-MCLv2"
         }
       ]
     },
@@ -907,38 +1681,80 @@
       "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reshade",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/reshade.json",
-        "sha256": "e2ffe56470aa90fdb867a7c0b50188bf6d814c2308adf707bfae83e504a0436b",
-        "bytes": 1807
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/reshade.json",
+        "sha256": "cdc3081b06f0d5f1a6c63bf8b1b17f7e45eab094218270f8c419681b8ae33209",
+        "bytes": 5027
       },
       "releases": [
         {
-          "version": "0.2.0",
-          "arch": "universal",
+          "version": "0.3.1",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "x64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "reshade/v0.2.0/universal",
+          "tag": "reshade/v0.3.1/x64",
           "asset": {
-            "filename": "reshade-0.2.0-universal.tar.gz",
-            "sha256": "f1dac0e54cd602f8243b8f8f284f3aa771b09ecc3802c7e4f06f69cfdfefbbb7",
-            "bytes": 59444312,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reshade%2Fv0.2.0%2Funiversal/reshade-0.2.0-universal.tar.gz"
+            "filename": "reshade-0.3.1-x64.tar.gz",
+            "sha256": "70af28d14d407453e6e5631bfc8365bc3eadd49c47539beb9f8d9ccc0cae212a",
+            "bytes": 32301949,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reshade%2Fv0.3.1%2Fx64/reshade-0.3.1-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reshade",
-          "profile": "MacLauncher graphics 0.2.0"
+          "profile": "MacLauncher graphics 0.3.1"
         },
         {
-          "version": "0.1.0",
+          "version": "0.3.1",
           "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "reshade/v0.1.0/universal",
+          "tag": "reshade/v0.3.1/universal",
           "asset": {
-            "filename": "reshade-0.1.0-universal.tar.gz",
-            "sha256": "8da8a4825a715c8bc829775d0f0a3cf32da0c8c53b3beebee26faa141acb30aa",
-            "bytes": 44022969,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reshade%2Fv0.1.0%2Funiversal/reshade-0.1.0-universal.tar.gz"
+            "filename": "reshade-0.3.1-universal.tar.gz",
+            "sha256": "fce0dd80dfafd29450c43d8a97a30e81e0f357de394b1b2c31d598666188a707",
+            "bytes": 63605673,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reshade%2Fv0.3.1%2Funiversal/reshade-0.3.1-universal.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reshade",
-          "profile": "MacLauncher graphics 0.1.0"
+          "profile": "MacLauncher graphics 0.3.1"
+        },
+        {
+          "version": "0.3.0",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "reshade/v0.3.0/x64",
+          "asset": {
+            "filename": "reshade-0.3.0-x64.tar.gz",
+            "sha256": "f2aede9e005576a8746f2087e8093636d4e695074e22777fe45753a6ae09680e",
+            "bytes": 29983517,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reshade%2Fv0.3.0%2Fx64/reshade-0.3.0-x64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reshade",
+          "profile": "MacLauncher graphics 0.3.0"
+        },
+        {
+          "version": "0.3.0",
+          "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "reshade/v0.3.0/universal",
+          "asset": {
+            "filename": "reshade-0.3.0-universal.tar.gz",
+            "sha256": "1d65c460febea59d012e33225f1f1e9306c9d59b3e3f14ee7c694d0f31deef5d",
+            "bytes": 59391974,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reshade%2Fv0.3.0%2Funiversal/reshade-0.3.0-universal.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reshade",
+          "profile": "MacLauncher graphics 0.3.0"
         }
       ]
     },
@@ -948,24 +1764,28 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#rlvm-adapter",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/rlvm-adapter.json",
-        "sha256": "f6e1ef64f527aedfdb70797af68658dd6834b2b92074de4ee012a3806d92c20b",
-        "bytes": 1010
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/rlvm-adapter.json",
+        "sha256": "9065e982be7c0fb91d39ff65b2ba01ea4baa625e928e59a1dd4a949e03ba1ccd",
+        "bytes": 1665
       },
       "releases": [
         {
-          "version": "1.0.0-MCLv1",
+          "version": "1.0.0-MCLv2",
           "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "rlvm-adapter/v1.0.0-MCLv1/universal",
+          "tag": "rlvm-adapter/v1.0.0-MCLv2/universal",
           "asset": {
-            "filename": "rlvm-adapter-1.0.0-MCLv1-universal.tar.gz",
-            "sha256": "6053328d9ac096422ca59931c79d3a2d7f8a269b94180790a3c4e0faeac0be5b",
-            "bytes": 8004,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/rlvm-adapter%2Fv1.0.0-MCLv1%2Funiversal/rlvm-adapter-1.0.0-MCLv1-universal.tar.gz"
+            "filename": "rlvm-adapter-1.0.0-MCLv2-universal.tar.gz",
+            "sha256": "9c4151f1c73528cbd0eb69ccbd92f7eda7ef95aeceb9fbc307ad7731293d1a27",
+            "bytes": 8022,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/rlvm-adapter%2Fv1.0.0-MCLv2%2Funiversal/rlvm-adapter-1.0.0-MCLv2-universal.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#rlvm-adapter",
-          "profile": "MacLauncher RLVM adapter 1.0.0-MCLv1"
+          "profile": "MacLauncher RLVM adapter 1.0.0-MCLv2"
         }
       ]
     },
@@ -975,24 +1795,93 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#rpgmaker-decrypter",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/rpgmaker-decrypter.json",
-        "sha256": "f6b82c5f4e2cdddd9a5a240b31dd85f7a6de6fc92372d4b36030159559896003",
-        "bytes": 1198
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/rpgmaker-decrypter.json",
+        "sha256": "c8dc2f1c84fa7e097cd91b4fda0bdda13e742b46751cd224a4c07f57ccb21218",
+        "bytes": 2310
       },
       "releases": [
         {
-          "version": "3.0.0-465c88c3-MCLv2",
-          "arch": "arm64",
-          "minimumMacOS": "11.0",
-          "tag": "rpgmaker-decrypter/v3.0.0-465c88c3-MCLv2/arm64",
+          "version": "3.0.0-465c88c3-MCLv3",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "10.15",
+          "tag": "rpgmaker-decrypter/v3.0.0-465c88c3-MCLv3/x64",
           "asset": {
-            "filename": "rpgmaker-decrypter-3.0.0-465c88c3-MCLv2-arm64.tar.gz",
-            "sha256": "ae44b8b2cd4222d55b5c65131609908c056ea1c3ce6fb5f14b4b0f569a7243e2",
-            "bytes": 7967715,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/rpgmaker-decrypter%2Fv3.0.0-465c88c3-MCLv2%2Farm64/rpgmaker-decrypter-3.0.0-465c88c3-MCLv2-arm64.tar.gz"
+            "filename": "rpgmaker-decrypter-3.0.0-465c88c3-MCLv3-x64.tar.gz",
+            "sha256": "5e54d2645d0c9d56cfab90618d5086dac5432d4f7eed7a2f136be3ae638119e3",
+            "bytes": 8471232,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/rpgmaker-decrypter%2Fv3.0.0-465c88c3-MCLv3%2Fx64/rpgmaker-decrypter-3.0.0-465c88c3-MCLv3-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#rpgmaker-decrypter",
-          "profile": "RPGMakerDecrypter 3.0.0-465c88c3-MCLv2"
+          "profile": "RPGMakerDecrypter 3.0.0-465c88c3-MCLv3"
+        },
+        {
+          "version": "3.0.0-465c88c3-MCLv3",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "11.0",
+          "tag": "rpgmaker-decrypter/v3.0.0-465c88c3-MCLv3/arm64",
+          "asset": {
+            "filename": "rpgmaker-decrypter-3.0.0-465c88c3-MCLv3-arm64.tar.gz",
+            "sha256": "2b1ad1c0fde5cde9276bdb2eca3918beb3492f7d6a255c52db7e0eb521fc5512",
+            "bytes": 7969088,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/rpgmaker-decrypter%2Fv3.0.0-465c88c3-MCLv3%2Farm64/rpgmaker-decrypter-3.0.0-465c88c3-MCLv3-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#rpgmaker-decrypter",
+          "profile": "RPGMakerDecrypter 3.0.0-465c88c3-MCLv3"
+        }
+      ]
+    },
+    {
+      "projectId": "scummvm-tools",
+      "name": "ScummVM Tools",
+      "delivery": "downloadable",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#scummvm-tools",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/scummvm-tools.json",
+        "sha256": "f1805aa07f07880e4fc99d49051bfee2126169c44eda4bd5aec302361b023eea",
+        "bytes": 3614
+      },
+      "releases": [
+        {
+          "version": "2.9.0-MCLv1",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "scummvm-tools/v2.9.0-MCLv1/x64",
+          "asset": {
+            "filename": "scummvm-tools-2.9.0-MCLv1-x64.tar.gz",
+            "sha256": "13e5e65f4489d2c5afc9c75a8ea1080e2454e49da3a939325c041849fde539d9",
+            "bytes": 899870,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/scummvm-tools%2Fv2.9.0-MCLv1%2Fx64/scummvm-tools-2.9.0-MCLv1-x64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#scummvm-tools",
+          "profile": "ScummVM Tools 2.9.0-MCLv1"
+        },
+        {
+          "version": "2.9.0-MCLv1",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "scummvm-tools/v2.9.0-MCLv1/arm64",
+          "asset": {
+            "filename": "scummvm-tools-2.9.0-MCLv1-arm64.tar.gz",
+            "sha256": "1b93df3cc3c15b9273caeba51124279bbb2fb02a4f546739ab615ef6a043bc4f",
+            "bytes": 829570,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/scummvm-tools%2Fv2.9.0-MCLv1%2Farm64/scummvm-tools-2.9.0-MCLv1-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#scummvm-tools",
+          "profile": "ScummVM Tools 2.9.0-MCLv1"
         }
       ]
     },
@@ -1002,24 +1891,27 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#siglus",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/siglus.json",
-        "sha256": "4ab4281b85524b19f1b2ae329efbfa087c76aaa6ee5621b0d920871c397d27ff",
-        "bytes": 1290
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/siglus.json",
+        "sha256": "fe5345454691c7b5c901e5cf51f2963b2bf5840d6817b7383758bc0b88a6103d",
+        "bytes": 1812
       },
       "releases": [
         {
-          "version": "1.0.0-preview.5f358ef1360b-MCLv1-1028-1",
+          "version": "1.0.0-preview.5f358ef1360b-MCLv2-1028-1",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "siglus/v1.0.0-preview.5f358ef1360b-MCLv1-1028-1/arm64",
+          "tag": "siglus/v1.0.0-preview.5f358ef1360b-MCLv2-1028-1/arm64",
           "asset": {
-            "filename": "siglus-1.0.0-preview.5f358ef1360b-MCLv1-1028-1-arm64.tar.gz",
-            "sha256": "390bbf2ecef6031dcd441f1ad12c59fc4a695ec83d80284665cfef6e3a3bc506",
-            "bytes": 11411582,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/siglus%2Fv1.0.0-preview.5f358ef1360b-MCLv1-1028-1%2Farm64/siglus-1.0.0-preview.5f358ef1360b-MCLv1-1028-1-arm64.tar.gz"
+            "filename": "siglus-1.0.0-preview.5f358ef1360b-MCLv2-1028-1-arm64.tar.gz",
+            "sha256": "dee24a056ed614c3ab5efcf4e9386503ddb448d66f4b6744fdaa0c239680c5d6",
+            "bytes": 11498368,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/siglus%2Fv1.0.0-preview.5f358ef1360b-MCLv2-1028-1%2Farm64/siglus-1.0.0-preview.5f358ef1360b-MCLv2-1028-1-arm64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#siglus",
-          "profile": "siglus_rs 1.0.0-preview.5f358ef1360b-MCLv1-1028-1"
+          "profile": "siglus_rs 1.0.0-preview.5f358ef1360b-MCLv2-1028-1"
         }
       ]
     },
@@ -1029,24 +1921,28 @@
       "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#steam-api-helper",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/steam-api-helper.json",
-        "sha256": "abec90fb519efb662ebbc68bc9b7e47976d8610c637f0631de26eebb4dcc3577",
-        "bytes": 1003
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/steam-api-helper.json",
+        "sha256": "779fc7c97b7744f9f2f8341c049b7d4eacd82618bfb222cbb588a8c581969ac2",
+        "bytes": 1151
       },
       "releases": [
         {
-          "version": "0.5.0",
+          "version": "0.5.1",
           "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "steam-api-helper/v0.5.0/universal",
+          "tag": "steam-api-helper/v0.5.1/universal",
           "asset": {
-            "filename": "steam-api-helper-0.5.0-universal.tar.gz",
-            "sha256": "42731d9319406fce3814509c63c251fb6e5f40872577966b16dc7c960d728858",
-            "bytes": 94596,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/steam-api-helper%2Fv0.5.0%2Funiversal/steam-api-helper-0.5.0-universal.tar.gz"
+            "filename": "steam-api-helper-0.5.1-universal.tar.gz",
+            "sha256": "24c55abf34802ff549cc5ea81840f1688b4793226a47735ad5751cc1c0cb272c",
+            "bytes": 94922,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/steam-api-helper%2Fv0.5.1%2Funiversal/steam-api-helper-0.5.1-universal.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#steam-api-helper",
-          "profile": "Offline Steam API compatibility helper 0.5.0"
+          "profile": "Offline Steam API compatibility helper 0.5.1"
         }
       ]
     },
@@ -1056,24 +1952,28 @@
       "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#steam-ticket-loader",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/steam-ticket-loader.json",
-        "sha256": "7500ef4138a3926dfee4f9390da728089051973d05586a0ceccaf8fc76e4933e",
-        "bytes": 1020
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/steam-ticket-loader.json",
+        "sha256": "84a06b5ceaedb79d899b418e5b91373d6ecdd590edd98964c7a720b4dce734af",
+        "bytes": 1168
       },
       "releases": [
         {
-          "version": "0.1.0",
+          "version": "0.1.1",
           "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "steam-ticket-loader/v0.1.0/universal",
+          "tag": "steam-ticket-loader/v0.1.1/universal",
           "asset": {
-            "filename": "steam-ticket-loader-0.1.0-universal.tar.gz",
-            "sha256": "f13e0c43aa1ca1c7f8be2b6967fa0282654bdfd5b42f9747bdedec88935972c9",
-            "bytes": 3122,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/steam-ticket-loader%2Fv0.1.0%2Funiversal/steam-ticket-loader-0.1.0-universal.tar.gz"
+            "filename": "steam-ticket-loader-0.1.1-universal.tar.gz",
+            "sha256": "b072bfbcde1c05f4cc09d94228b1c246550019c8f740ea109ff79dda4e990cdb",
+            "bytes": 3394,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/steam-ticket-loader%2Fv0.1.1%2Funiversal/steam-ticket-loader-0.1.1-universal.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#steam-ticket-loader",
-          "profile": "Steam ticket availability adapter 0.1.0"
+          "profile": "Steam ticket availability adapter 0.1.1"
         }
       ]
     },
@@ -1083,21 +1983,42 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#sys3-decompiler",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/sys3-decompiler.json",
-        "sha256": "0e4fda4e76646f8e3d55e49c5a8f062a19c4c38286c1b288ec049e3cb1db2579",
-        "bytes": 1125
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/sys3-decompiler.json",
+        "sha256": "97be4dccd399e3a09984f7575f991be29bc0d4da42790ae088a790b03ebde767",
+        "bytes": 2689
       },
       "releases": [
         {
-          "version": "0.5.0-MCLv1",
+          "version": "0.5.0-MCLv2",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "sys3-decompiler/v0.5.0-MCLv1/arm64",
+          "tag": "sys3-decompiler/v0.5.0-MCLv2/arm64",
           "asset": {
-            "filename": "sys3-decompiler-0.5.0-MCLv1-arm64.tar.gz",
-            "sha256": "4f22773f227fe77bd982cb37116f7dd074f44c7cc5b2490146a0634c41a00570",
-            "bytes": 48723,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/sys3-decompiler%2Fv0.5.0-MCLv1%2Farm64/sys3-decompiler-0.5.0-MCLv1-arm64.tar.gz"
+            "filename": "sys3-decompiler-0.5.0-MCLv2-arm64.tar.gz",
+            "sha256": "9301281a9f356c1367da2d3153061ccff5402ecf4a2dbbf8b03d02f4a42d8944",
+            "bytes": 48646,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/sys3-decompiler%2Fv0.5.0-MCLv2%2Farm64/sys3-decompiler-0.5.0-MCLv2-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#sys3-decompiler",
+          "profile": "System3 decompiler 0.5.0-MCLv2"
+        },
+        {
+          "version": "0.5.0-MCLv1",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "sys3-decompiler/v0.5.0-MCLv1/x64",
+          "asset": {
+            "filename": "sys3-decompiler-0.5.0-MCLv1-x64.tar.gz",
+            "sha256": "aa32aafacae9699f285024bb811ad554461983dfe1342fc5a9e48f8f54ade7c9",
+            "bytes": 50551,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/sys3-decompiler%2Fv0.5.0-MCLv1%2Fx64/sys3-decompiler-0.5.0-MCLv1-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#sys3-decompiler",
           "profile": "System3 decompiler 0.5.0-MCLv1"
@@ -1110,24 +2031,93 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#system3",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/system3.json",
-        "sha256": "4c309bc963a98ebc0cc8bc020a6d66e754a9ce611df82a117793a183d1ed1ae1",
-        "bytes": 1086
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/system3.json",
+        "sha256": "5e753aa8f578b7e2eb11afe73d9cdc5eb55563785c19cd2e427f6ce99159840d",
+        "bytes": 2605
       },
       "releases": [
         {
-          "version": "1.8.0-MCLv1",
+          "version": "1.8.0-MCLv2",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "system3/v1.8.0-MCLv1/arm64",
+          "tag": "system3/v1.8.0-MCLv2/arm64",
           "asset": {
-            "filename": "system3-1.8.0-MCLv1-arm64.tar.gz",
-            "sha256": "bad58c9a68011d81010ca09ee0be488eba30fb00283eeff50252ec5e1172c7d3",
-            "bytes": 3455003,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/system3%2Fv1.8.0-MCLv1%2Farm64/system3-1.8.0-MCLv1-arm64.tar.gz"
+            "filename": "system3-1.8.0-MCLv2-arm64.tar.gz",
+            "sha256": "7db97523d0ff776633e0589496f244d6faaafec211aad4f953e7b4dc5527796b",
+            "bytes": 3471334,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/system3%2Fv1.8.0-MCLv2%2Farm64/system3-1.8.0-MCLv2-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#system3",
+          "profile": "System3 SDL2 1.8.0-MCLv2"
+        },
+        {
+          "version": "1.8.0-MCLv1",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "system3/v1.8.0-MCLv1/x64",
+          "asset": {
+            "filename": "system3-1.8.0-MCLv1-x64.tar.gz",
+            "sha256": "293919e3da8f10e477e54664131e2560962ce39f2570d056ce9475f7a3c4070f",
+            "bytes": 3610621,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/system3%2Fv1.8.0-MCLv1%2Fx64/system3-1.8.0-MCLv1-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#system3",
           "profile": "System3 SDL2 1.8.0-MCLv1"
+        }
+      ]
+    },
+    {
+      "projectId": "uosc-helper",
+      "name": "uosc Ziggy helper",
+      "delivery": "downloadable",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#uosc-helper",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/uosc-helper.json",
+        "sha256": "c5422bee9d22d20bc1e7fb35962d11e8e07b5406a69f792dec66379901a16e55",
+        "bytes": 3958
+      },
+      "releases": [
+        {
+          "version": "5.13.0-MCLv1",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "uosc-helper/v5.13.0-MCLv1/x64",
+          "asset": {
+            "filename": "uosc-helper-5.13.0-MCLv1-x64.tar.gz",
+            "sha256": "2c890499bf5eed9b80c976bb23a02bc1a20e22da639d94e437e5a1782e2f8301",
+            "bytes": 3154111,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/uosc-helper%2Fv5.13.0-MCLv1%2Fx64/uosc-helper-5.13.0-MCLv1-x64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#uosc-helper",
+          "profile": "uosc helper 5.13.0-MCLv1"
+        },
+        {
+          "version": "5.13.0-MCLv1",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "uosc-helper/v5.13.0-MCLv1/arm64",
+          "asset": {
+            "filename": "uosc-helper-5.13.0-MCLv1-arm64.tar.gz",
+            "sha256": "f7a5004141f73743fc4bfc74c92267855e10423ae99b689e698ef6067f322f6c",
+            "bytes": 2825629,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/uosc-helper%2Fv5.13.0-MCLv1%2Farm64/uosc-helper-5.13.0-MCLv1-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#uosc-helper",
+          "profile": "uosc helper 5.13.0-MCLv1"
         }
       ]
     },
@@ -1137,24 +2127,28 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#vnds-love",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/vnds-love.json",
-        "sha256": "97cc66a2742e7bbc3d59d46ce4892211fe933fd7e7077348efcc0f7b77e0baff",
-        "bytes": 1169
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/vnds-love.json",
+        "sha256": "fd6262f0ba98fa2785e1488564e135719cfdb9dcd42a28146081cc0b13ddcd73",
+        "bytes": 1693
       },
       "releases": [
         {
-          "version": "0.0.13-838e47b-MCLv1",
+          "version": "0.0.13-838e47b-MCLv2",
           "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
           "minimumMacOS": "11.0",
-          "tag": "vnds-love/v0.0.13-838e47b-MCLv1/universal",
+          "tag": "vnds-love/v0.0.13-838e47b-MCLv2/universal",
           "asset": {
-            "filename": "vnds-love-0.0.13-838e47b-MCLv1-universal.tar.gz",
-            "sha256": "0aaf5094cf9cb52fa09d8425dad97fbe7052fdaee84b59c2aa8f3567ef5befc8",
-            "bytes": 34659,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vnds-love%2Fv0.0.13-838e47b-MCLv1%2Funiversal/vnds-love-0.0.13-838e47b-MCLv1-universal.tar.gz"
+            "filename": "vnds-love-0.0.13-838e47b-MCLv2-universal.tar.gz",
+            "sha256": "1234d36ec451b52ffdc43b5165f23430cdeefe3776a4fa31f362974286822bab",
+            "bytes": 34656,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vnds-love%2Fv0.0.13-838e47b-MCLv2%2Funiversal/vnds-love-0.0.13-838e47b-MCLv2-universal.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#vnds-love",
-          "profile": "VNDS-LOVE 0.0.13-838e47b-MCLv1"
+          "profile": "VNDS-LOVE 0.0.13-838e47b-MCLv2"
         }
       ]
     },
@@ -1164,24 +2158,75 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#vulkan-kosmickrisp-gles32",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/vulkan-kosmickrisp-gles32.json",
-        "sha256": "3706b088c7f107ebbebafed84779ea4b80e39574a069564f7e72591a768bdf0a",
-        "bytes": 1053
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/vulkan-kosmickrisp-gles32.json",
+        "sha256": "5abe3abb59a29ba662be3f72345e0f288ab4d9800ec800ad2303116bea292d69",
+        "bytes": 2788
       },
       "releases": [
         {
-          "version": "MCLv1-1024",
+          "version": "MCLv3-1030",
           "arch": "arm64",
-          "minimumMacOS": "27.0.0",
-          "tag": "vulkan-kosmickrisp-gles32/vMCLv1-1024/arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "26.0",
+          "tag": "vulkan-kosmickrisp-gles32/vMCLv3-1030/arm64",
           "asset": {
-            "filename": "vulkan-kosmickrisp-gles32-MCLv1-1024-arm64.tar.gz",
-            "sha256": "544576660e6f52048ab06261df4a4afc3d52a8683e6b8c96d345ae3cfda9a0ae",
-            "bytes": 3244314,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vulkan-kosmickrisp-gles32%2FvMCLv1-1024%2Farm64/vulkan-kosmickrisp-gles32-MCLv1-1024-arm64.tar.gz"
+            "filename": "vulkan-kosmickrisp-gles32-MCLv3-1030-arm64.tar.gz",
+            "sha256": "ddcecb1fc2ab4bf1247fa51f0667d13c22dcaf73b9017c8e11cbe4f34b5f25b3",
+            "bytes": 3390323,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vulkan-kosmickrisp-gles32%2FvMCLv3-1030%2Farm64/vulkan-kosmickrisp-gles32-MCLv3-1030-arm64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#vulkan-kosmickrisp-gles32",
-          "profile": "KosmicKrisp geometry/transform-feedback adaptation MCLv1-1024"
+          "profile": "KosmicKrisp geometry and transform feedback"
+        },
+        {
+          "version": "MCLv2-1030",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "27.0",
+          "tag": "vulkan-kosmickrisp-gles32/vMCLv2-1030/arm64",
+          "asset": {
+            "filename": "vulkan-kosmickrisp-gles32-MCLv2-1030-arm64.tar.gz",
+            "sha256": "3959111f1678658d1435bbc24023a3e8058704b9f8c2da4187a67fc57f84622b",
+            "bytes": 3226939,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vulkan-kosmickrisp-gles32%2FvMCLv2-1030%2Farm64/vulkan-kosmickrisp-gles32-MCLv2-1030-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#vulkan-kosmickrisp-gles32",
+          "profile": "KosmicKrisp geometry and transform feedback"
+        }
+      ]
+    },
+    {
+      "projectId": "vulkan-moltenvk-scene",
+      "name": "MoltenVK scene recording adaptation",
+      "delivery": "downloadable",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#vulkan-moltenvk-scene",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/vulkan-moltenvk-scene.json",
+        "sha256": "3604592f2d995e51a0b1e42325360d2084719d039afb5ed94438bebea8682239",
+        "bytes": 1722
+      },
+      "releases": [
+        {
+          "version": "1.4.2-MCLv2",
+          "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "vulkan-moltenvk-scene/v1.4.2-MCLv2/universal",
+          "asset": {
+            "filename": "vulkan-moltenvk-scene-1.4.2-MCLv2-universal.tar.gz",
+            "sha256": "ec9f7b557387ace28a4372fab005472f87a384a4248ed184d666a35921b18ef4",
+            "bytes": 3388206,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vulkan-moltenvk-scene%2Fv1.4.2-MCLv2%2Funiversal/vulkan-moltenvk-scene-1.4.2-MCLv2-universal.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#vulkan-moltenvk-scene",
+          "profile": "MoltenVK 1.4.2 scene recording"
         }
       ]
     },
@@ -1191,24 +2236,75 @@
       "delivery": "bundled",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#web-renderer-network",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/web-renderer-network.json",
-        "sha256": "007e59bad67116727cb2a77de6b84dd053b86f795b5226ccd04c4573f056929e",
-        "bytes": 1026
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/web-renderer-network.json",
+        "sha256": "67fdcc41117ffa9c9d2fc130dcc13670689bbb85ee39a7c4959ca174f17db4c2",
+        "bytes": 2154
       },
       "releases": [
         {
-          "version": "1.0.1",
-          "arch": "universal",
+          "version": "1.1.0",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "x64"
+          ],
           "minimumMacOS": "11.0",
-          "tag": "web-renderer-network/v1.0.1/universal",
+          "tag": "web-renderer-network/v1.1.0/x64",
           "asset": {
-            "filename": "web-renderer-network-1.0.1-universal.tar.gz",
-            "sha256": "3dd057dbe86ddd4666c8f92863fcbf705772d3c4c76b9268b4b7e12149f5e7ce",
-            "bytes": 5846,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/web-renderer-network%2Fv1.0.1%2Funiversal/web-renderer-network-1.0.1-universal.tar.gz"
+            "filename": "web-renderer-network-1.1.0-x64.tar.gz",
+            "sha256": "6c59573be5c63fcfcbb1de0d636c7478b9f1749ff4eb6079b692ee407b592cf0",
+            "bytes": 3881,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/web-renderer-network%2Fv1.1.0%2Fx64/web-renderer-network-1.1.0-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#web-renderer-network",
-          "profile": "Browser network helper 1.0.1"
+          "profile": "Browser network helper 1.1.0"
+        },
+        {
+          "version": "1.1.0",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "11.0",
+          "tag": "web-renderer-network/v1.1.0/arm64",
+          "asset": {
+            "filename": "web-renderer-network-1.1.0-arm64.tar.gz",
+            "sha256": "d7da830dd9c53129fa811b03cb4f5aa9bb106d03738ff6b1d8dbc88f7654ca44",
+            "bytes": 3994,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/web-renderer-network%2Fv1.1.0%2Farm64/web-renderer-network-1.1.0-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#web-renderer-network",
+          "profile": "Browser network helper 1.1.0"
+        }
+      ]
+    },
+    {
+      "projectId": "winevulkan-scene",
+      "name": "WineVulkan scene adapter",
+      "delivery": "downloadable",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#winevulkan-scene",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/winevulkan-scene.json",
+        "sha256": "ca433fc356f74e36d9ac6f8ad1ecba72752d2fb9939e287698718d41701aaf3f",
+        "bytes": 1667
+      },
+      "releases": [
+        {
+          "version": "26.3.0-MCLv1",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "10.15",
+          "tag": "winevulkan-scene/v26.3.0-MCLv1/x64",
+          "asset": {
+            "filename": "winevulkan-scene-26.3.0-MCLv1-x64.tar.gz",
+            "sha256": "6fb06f3f3615a514dcb002c831edaa08f033a5667cd6a5ec721eaeab666a3d9b",
+            "bytes": 430745,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/winevulkan-scene%2Fv26.3.0-MCLv1%2Fx64/winevulkan-scene-26.3.0-MCLv1-x64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#winevulkan-scene",
+          "profile": "CrossOver26.3 WineVulkan ABI47"
         }
       ]
     },
@@ -1218,21 +2314,42 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsys35-decompiler",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/xsys35-decompiler.json",
-        "sha256": "b90ec77e7a65520994d22744650147a5ec2736b447b1ffc704c0540666a06385",
-        "bytes": 1144
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/xsys35-decompiler.json",
+        "sha256": "c143eaf3a7912076f27168726a237b28223967ad07015c0505f319b6a370a400",
+        "bytes": 2721
       },
       "releases": [
         {
-          "version": "1.13.0-MCLv1",
+          "version": "1.13.0-MCLv2",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "xsys35-decompiler/v1.13.0-MCLv1/arm64",
+          "tag": "xsys35-decompiler/v1.13.0-MCLv2/arm64",
           "asset": {
-            "filename": "xsys35-decompiler-1.13.0-MCLv1-arm64.tar.gz",
-            "sha256": "355fb8ac882c5c932462e27dc7760907956b210f4ec71e45d7f4b255a1a1b579",
-            "bytes": 62739,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsys35-decompiler%2Fv1.13.0-MCLv1%2Farm64/xsys35-decompiler-1.13.0-MCLv1-arm64.tar.gz"
+            "filename": "xsys35-decompiler-1.13.0-MCLv2-arm64.tar.gz",
+            "sha256": "0b47d03fc013806d919488537f0dab607fb5b4d2606460e9ff094dafe1632509",
+            "bytes": 62651,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsys35-decompiler%2Fv1.13.0-MCLv2%2Farm64/xsys35-decompiler-1.13.0-MCLv2-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsys35-decompiler",
+          "profile": "System3.5 decompiler 1.13.0-MCLv2"
+        },
+        {
+          "version": "1.13.0-MCLv1",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "xsys35-decompiler/v1.13.0-MCLv1/x64",
+          "asset": {
+            "filename": "xsys35-decompiler-1.13.0-MCLv1-x64.tar.gz",
+            "sha256": "4c3a2ff540cd02a01b1400f609211534a09d2e1a47ec89aec918c6b2f3456d46",
+            "bytes": 64942,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsys35-decompiler%2Fv1.13.0-MCLv1%2Fx64/xsys35-decompiler-1.13.0-MCLv1-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsys35-decompiler",
           "profile": "System3.5 decompiler 1.13.0-MCLv1"
@@ -1245,21 +2362,42 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsystem35",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/xsystem35.json",
-        "sha256": "1cdf4678c5ef1bd9273f09ea60137cc428b00936ee27bfcc3f446c314cfd9416",
-        "bytes": 1174
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/xsystem35.json",
+        "sha256": "ddcc7eb8759019258334675dc6a2c79558053a1ac2b255db14bd647a4e4cc051",
+        "bytes": 2775
       },
       "releases": [
         {
-          "version": "MCLv1-1019",
+          "version": "MCLv2-1019",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "xsystem35/vMCLv1-1019/arm64",
+          "tag": "xsystem35/vMCLv2-1019/arm64",
           "asset": {
-            "filename": "xsystem35-MCLv1-1019-arm64.tar.gz",
-            "sha256": "2453693f677017e521ce06152d5b1c2faab2f5d2b4d4238d2a51d3510f715e49",
-            "bytes": 7438373,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem35%2FvMCLv1-1019%2Farm64/xsystem35-MCLv1-1019-arm64.tar.gz"
+            "filename": "xsystem35-MCLv2-1019-arm64.tar.gz",
+            "sha256": "fc65a61ae3a5d1dc1aa7e3be4d0a54eb2905349cb43e57c673607f494970ec8f",
+            "bytes": 7447873,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem35%2FvMCLv2-1019%2Farm64/xsystem35-MCLv2-1019-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsystem35",
+          "profile": "xsystem35 SDL2 MCLv2-1019"
+        },
+        {
+          "version": "MCLv1-1019",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "xsystem35/vMCLv1-1019/x64",
+          "asset": {
+            "filename": "xsystem35-MCLv1-1019-x64.tar.gz",
+            "sha256": "069bff6059b89815dbe4184eba1b38c4ddc0a7f416f4c51239e626efe4cb8b66",
+            "bytes": 7659205,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem35%2FvMCLv1-1019%2Fx64/xsystem35-MCLv1-1019-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsystem35",
           "profile": "xsystem35 SDL2 MCLv1-1019"
@@ -1272,25 +2410,76 @@
       "delivery": "downloadable",
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsystem4",
       "catalog": {
-        "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-builds/main/catalogs/xsystem4.json",
-        "sha256": "c76d4ce37dbea090bc8829a91d606430057ae0926605a8a244313997a08506ef",
-        "bytes": 1083
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/xsystem4.json",
+        "sha256": "d9098863bd6b64fc0cd6e644b774e775b0b7d7bcd9225727f8997233a07073a1",
+        "bytes": 2608
       },
       "releases": [
         {
-          "version": "MCLv1-1021",
+          "version": "MCLv2-1021",
           "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
           "minimumMacOS": "13.0",
-          "tag": "xsystem4/vMCLv1-1021/arm64",
+          "tag": "xsystem4/vMCLv2-1021/arm64",
           "asset": {
-            "filename": "xsystem4-MCLv1-1021-arm64.tar.gz",
-            "sha256": "a805feb0438c5cc05e1f87e5c164b16111e27ac1893946ed24237f151d9fd0a4",
-            "bytes": 21357638,
-            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem4%2FvMCLv1-1021%2Farm64/xsystem4-MCLv1-1021-arm64.tar.gz"
+            "filename": "xsystem4-MCLv2-1021-arm64.tar.gz",
+            "sha256": "2cfe19100b983b7159734f9cc678e82064db1373aa456399a24f14229d1b8e55",
+            "bytes": 21360637,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem4%2FvMCLv2-1021%2Farm64/xsystem4-MCLv2-1021-arm64.tar.gz"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsystem4",
+          "profile": "xsystem4 MCLv2-1021"
+        },
+        {
+          "version": "MCLv1-1021",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "xsystem4/vMCLv1-1021/x64",
+          "asset": {
+            "filename": "xsystem4-MCLv1-1021-x64.tar.gz",
+            "sha256": "ccafb0d641625f2e393f5bb0f770b1778f6ecb3ba0746a1e485fb6d1c9d2b60a",
+            "bytes": 21897097,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem4%2FvMCLv1-1021%2Fx64/xsystem4-MCLv1-1021-x64.tar.gz"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsystem4",
           "profile": "xsystem4 MCLv1-1021"
         }
+      ]
+    }
+  ],
+  "retiredProjects": [
+    {
+      "projectId": "android-art",
+      "name": "MacLauncher Android ART adapter",
+      "delivery": "downloadable",
+      "authorityPolicy": "github-build",
+      "state": "retired",
+      "historyUrl": "https://procrastinine.github.io/maclauncher-builds/verification.html#project-android-art",
+      "supersededBy": "android",
+      "successor": {
+        "projectId": "android",
+        "name": "MacLauncher Android",
+        "url": "https://procrastinine.github.io/maclauncher-builds/verification.html#project-android"
+      },
+      "activeSuccessor": {
+        "projectId": "android",
+        "name": "MacLauncher Android",
+        "url": "https://procrastinine.github.io/maclauncher-builds/verification.html#project-android"
+      },
+      "hasBuildCommand": false,
+      "hasGithubBuild": false,
+      "githubBuildComplete": false,
+      "missingGithubOutputs": [],
+      "hasPublisherProof": false,
+      "versions": [
+        "0.2.0",
+        "0.1.0"
       ]
     }
   ]

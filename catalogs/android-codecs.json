@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 2,
+  "projectId": "android-codecs",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "android-codecs",
+      "version": "0.1.0-MCLv1",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "input.json",
+      "manifestSha256": "da605adb1e047744f4ac929d64a3d64b5ed4b1e9424b34137cf20fc2f5c51708",
+      "sourceSha256": "ae0db1ee868dace90ed5d3a3989deb7d5e53613b84e932336536aae9589e4042",
+      "updatePolicy": "manual",
+      "build": {
+        "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41167281231",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "android-codecs-0.1.0-MCLv1-arm64.tar.gz",
+        "sha256": "36c6565247fcbf0eb2c06a728b59ca865201b74534f89be2a34a3199f90eb278",
+        "bytes": 1464477,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-codecs%2Fv0.1.0-MCLv1%2Farm64/android-codecs-0.1.0-MCLv1-arm64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "830c33f46db62a6e71380c246359df7a6e5d4729"
+      },
+      "tag": "android-codecs/v0.1.0-MCLv1/arm64"
+    }
+  ]
+}

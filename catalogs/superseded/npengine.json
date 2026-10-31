@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 2,
+  "projectId": "npengine",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "npengine",
+      "version": "0.5.3-MCLv1",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "8f7eb1c72224e625aec9deb8486089e29a3dff7e6c2182633f442a6d0c703c08",
+      "sourceSha256": "6a3856bfa4aaa957529944c34c168cf110dd7b60a2752f159b90e2f2589e3e36",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "npengine-0.5.3-MCLv1-arm64.tar.gz",
+        "sha256": "7dff7833970fa401766df56e7eee6ffca40367d1c1eb8eece549b3803ce735aa",
+        "bytes": 17942804,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/npengine%2Fv0.5.3-MCLv1%2Farm64/npengine-0.5.3-MCLv1-arm64.tar.gz"
+      },
+      "tag": "npengine/v0.5.3-MCLv1/arm64",
+      "source": {
+        "repository": "FGRE/libnpengine",
+        "revision": "da1a175e6b497c37f9714b77510cb47c0930cd42"
+      }
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 2,
+  "projectId": "android-image-data-5",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "android-image-data-5",
+      "version": "0.1.0-MCLv1",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "input.json",
+      "manifestSha256": "013eca2ae8001a43b0eaf538c9dca4978326fe52b1afa8e9610c60f2104c8232",
+      "sourceSha256": "de8a9b19fdecb38d5057d747e6769b34de02be10049c99b05745cf2ccb3bc19d",
+      "updatePolicy": "manual",
+      "build": {
+        "sourceRevision": "d8b8cb458e8b55dc0567b498fc2df829406555da",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b"
+        },
+        "runId": "41171583284",
+        "runAttempt": "1"
+      },
+      "asset": {
+        "filename": "android-image-data-5-0.1.0-MCLv1-arm64.tar.gz",
+        "sha256": "a661cb32c8e2bc05f92196d4782b7984f1f20f817e6d9b229876402a08572ea0",
+        "bytes": 394884419,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-image-data-5%2Fv0.1.0-MCLv1%2Farm64/android-image-data-5-0.1.0-MCLv1-arm64.tar.gz"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "d8b8cb458e8b55dc0567b498fc2df829406555da"
+      },
+      "tag": "android-image-data-5/v0.1.0-MCLv1/arm64"
+    }
+  ]
+}
