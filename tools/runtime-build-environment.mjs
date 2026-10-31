@@ -21,7 +21,12 @@ export function runtimeBuildEnvironment(build,{environment=process.env}={}){
   }
   const binaries=prefixes.flatMap(prefix=>['bin','sbin'].map(name=>path.join(prefix,name))).filter(file=>fs.existsSync(file));
   let compilerDirectory;
-  if(process.platform==='darwin')compilerDirectory=path.dirname(execFileSync('/usr/bin/xcrun',['--find','clang'],{encoding:'utf8',env:environment,stdio:['ignore','pipe','pipe']}).trim());
+  if(process.platform==='darwin'){
+   compilerDirectory=path.dirname(execFileSync('/usr/bin/xcrun',['--find','clang'],{encoding:'utf8',env:environment,stdio:['ignore','pipe','pipe']}).trim());
+   // PATH invokes Xcode's compiler directly. Its C++ standard-library headers
+   // need the same selected SDK that the xcrun compiler wrapper supplies.
+   env.SDKROOT=environment.SDKROOT||execFileSync('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path'],{encoding:'utf8',env:environment,stdio:['ignore','pipe','pipe']}).trim();
+  }
   fs.symlinkSync(process.execPath,path.join(aliases,'node'));
   const hostTools=['brew','npm','npx','corepack','java','javac','jar',...(build.rustComponents?.length||build.rustTargets?.length?['rustup','cargo','rustc','rustdoc','rustfmt','cargo-fmt','cargo-clippy','clippy-driver']:[])];
   for(const name of hostTools){
