@@ -1,0 +1,10 @@
+--- a/src/modules/android/art/build-ffi.mjs
++++ b/src/modules/android/art/build-ffi.mjs
+@@ -16,6 +16,6 @@
+  const members=run('git',['-C',source,'ls-files','-z'],{encoding:'utf8',stdio:'pipe'}).split('\0').filter(Boolean);
+  const tool=name=>fs.realpathSync(path.isAbsolute(name)?name:run('/usr/bin/which',[name],{encoding:'utf8',stdio:'pipe'}).trim());
+- const tools={autoreconf:tool(autoreconf),make:tool(make)},bin=path.join(ndk,'toolchains/llvm/prebuilt/darwin-x86_64/bin');
++ const tools={autoreconf:tool(autoreconf),make:tool(make)},bin=path.join(ndk,'toolchains/llvm/prebuilt/linux-x86_64/bin');
+  const cc=path.join(bin,'aarch64-linux-android35-clang'),cxx=path.join(bin,'aarch64-linux-android35-clang++'),ar=path.join(bin,'llvm-ar'),ranlib=path.join(bin,'llvm-ranlib');
+  const projected=path.join(output,'source'),build=path.join(output,'build'),install=path.join(output,'install');
+  const flags=nativeFlagsString(['-O2','-fPIC',...nativePathFlags({source:projected,build:output,roots:[[source,'/src/libffi']]})]);

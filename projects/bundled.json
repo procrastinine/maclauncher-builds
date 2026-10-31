@@ -1430,5 +1430,65 @@
         "arm64": "ubuntu-24.04"
       }
     }
+  },
+  {
+    "id": "android-art-ffi",
+    "name": "Android ART libffi input",
+    "purpose": "Original Android ARM64 libffi static library and public headers.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "tools/build-android-art-ffi.mjs",
+        "producers/android-art-inputs/ffi.json",
+        "producers/android-art-inputs/ffi-build.patch"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "android",
+        "provider": "github",
+        "url": "https://github.com/procrastinine/maclauncher-android",
+        "repository": "procrastinine/maclauncher-android",
+        "pin": {
+          "file": "producers/android-art-inputs/ffi.json",
+          "pointer": "/androidSource"
+        }
+      },
+      {
+        "id": "libffi",
+        "provider": "github",
+        "url": "https://github.com/libffi/libffi",
+        "repository": "libffi/libffi",
+        "pin": {
+          "file": "producers/android-art-inputs/ffi.json",
+          "pointer": "/libffi"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.1.0-MCLv1",
+        "label": "Android ART libffi 0.1.0-MCLv1"
+      }
+    ],
+    "build": {
+      "version": "0.1.0-MCLv1",
+      "command": "tools/build-android-art-ffi.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "runners": {
+        "arm64": "ubuntu-24.04"
+      },
+      "tools": [
+        "autoconf",
+        "automake",
+        "libtool",
+        "make",
+        "gcc",
+        "unzip"
+      ]
+    }
   }
 ]

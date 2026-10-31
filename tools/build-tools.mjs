@@ -13,7 +13,7 @@ const linuxTools=Object.freeze({
  'git-lfs':{packages:['git-lfs'],commands:['git-lfs']},
  autoconf:{packages:['autoconf'],commands:['autoconf','autoheader','autoreconf','autom4te','autoscan','autoupdate','ifnames']},
  automake:{packages:['automake'],commands:['automake','aclocal']},
- libtool:{packages:['libtool','libtool-bin'],commands:['libtool','libtoolize']},
+ libtool:{packages:['libtool','libtool-bin','libltdl-dev'],commands:['libtool','libtoolize']},
  bison:{packages:['bison'],commands:['bison']},
  flex:{packages:['flex'],commands:['flex']},
  make:{packages:['make'],commands:['make']},

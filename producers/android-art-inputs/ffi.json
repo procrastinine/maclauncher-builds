@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "android-art-ffi",
+  "version": "0.1.0-MCLv1",
+  "androidSource": {
+    "repository": "https://github.com/procrastinine/maclauncher-android",
+    "revision": "c71de272618e22a531d9259929a2478d838f9b1f"
+  },
+  "libffi": {
+    "repository": "https://github.com/libffi/libffi.git",
+    "revision": "bc553867367246d140cd156f060bd0409f57f157"
+  },
+  "ndk": {
+    "url": "https://dl.google.com/android/repository/android-ndk-r28c-linux.zip",
+    "sha256": "dfb20d396df28ca02a8c708314b814a4d961dc9074f9a161932746f815aa552f",
+    "bytes": 722261334,
+    "version": "28.2.13676358",
+    "directory": "android-ndk-r28c"
+  },
+  "buildOverlay": "producers/android-art-inputs/ffi-build.patch"
+}
