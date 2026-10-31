@@ -1,0 +1,13 @@
+[package]
+name = "maclauncher-android-image-data"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+
+[dependencies]
+android-image-extract = { path = "upstream/tools/android-image-extract" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+flate2 = { version = "1.0", default-features = false, features = ["rust_backend"] }

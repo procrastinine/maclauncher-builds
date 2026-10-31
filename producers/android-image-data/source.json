@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/hahnlee/aim",
+  "revision": "9b5068fa8185d3f51f1862fe7c54d88d51f09ec8",
+  "crate": "tools/android-image-extract",
+  "archive": {
+    "url": "https://dl.google.com/android/repository/sys-img/google_apis_playstore/arm64-v8a-playstore-ps16k-36_r07.zip",
+    "sha256": "182f51ad2b04bbb9cd9464d3e0396a81201db6d9659e1fde5951b6efc1e0a00e",
+    "bytes": 1953548168
+  },
+  "content": {
+    "sha256": "cc3e94ea29cb3c7ee6c9bd2805610efbf16a20a27335c18cc80a503ee61cb8ab",
+    "records": 5920,
+    "bytes": 4110736819
+  },
+  "license": {
+    "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-android/c71de272618e22a531d9259929a2478d838f9b1f/src/modules/android/art/licenses/android-sdk-arm-dbt-license.txt",
+    "sha256": "0682da42e0ca119ce29503c265587f8ae17277094f9262b54c1d2bb99557c6f5"
+  },
+  "targetSymlinkMode": 493,
+  "chunkBytes": 134217728,
+  "profiles": [
+    {
+      "id": "android-image-data-1",
+      "version": "0.1.0-MCLv1",
+      "shard": 1
+    },
+    {
+      "id": "android-image-data-2",
+      "version": "0.1.0-MCLv1",
+      "shard": 2
+    },
+    {
+      "id": "android-image-data-3",
+      "version": "0.1.0-MCLv1",
+      "shard": 3
+    },
+    {
+      "id": "android-image-data-4",
+      "version": "0.1.0-MCLv1",
+      "shard": 4
+    },
+    {
+      "id": "android-image-data-5",
+      "version": "0.1.0-MCLv1",
+      "shard": 5
+    }
+  ]
+}

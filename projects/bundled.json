@@ -1585,5 +1585,245 @@
         "go"
       ]
     }
+  },
+  {
+    "id": "android-image-data-1",
+    "name": "Android original image data 1",
+    "purpose": "Original system-image data with complete inode and SELinux metadata.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/android-image-data",
+      "entries": [
+        "producers/android-image-data/main.rs",
+        "producers/android-image-data/tree.rs",
+        "producers/android-image-data/source.json"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "aim-image-parser",
+        "provider": "github",
+        "repository": "hahnlee/aim",
+        "url": "https://github.com/hahnlee/aim",
+        "pin": {
+          "file": "producers/android-image-data/source.json",
+          "pointer": "/revision",
+          "repositoryPointer": "/repository"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.1.0-MCLv1",
+        "label": "Android original image data 1 0.1.0-MCLv1"
+      }
+    ],
+    "build": {
+      "version": "0.1.0-MCLv1",
+      "command": "tools/build-android-image-data.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "runners": {
+        "arm64": "ubuntu-24.04"
+      },
+      "rustComponents": [
+        "rustfmt"
+      ],
+      "cleanupRunner": true
+    }
+  },
+  {
+    "id": "android-image-data-2",
+    "name": "Android original image data 2",
+    "purpose": "Original system-image data with complete inode and SELinux metadata.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/android-image-data",
+      "entries": [
+        "producers/android-image-data/main.rs",
+        "producers/android-image-data/tree.rs",
+        "producers/android-image-data/source.json"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "aim-image-parser",
+        "provider": "github",
+        "repository": "hahnlee/aim",
+        "url": "https://github.com/hahnlee/aim",
+        "pin": {
+          "file": "producers/android-image-data/source.json",
+          "pointer": "/revision",
+          "repositoryPointer": "/repository"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.1.0-MCLv1",
+        "label": "Android original image data 2 0.1.0-MCLv1"
+      }
+    ],
+    "build": {
+      "version": "0.1.0-MCLv1",
+      "command": "tools/build-android-image-data.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "runners": {
+        "arm64": "ubuntu-24.04"
+      },
+      "rustComponents": [
+        "rustfmt"
+      ],
+      "cleanupRunner": true
+    }
+  },
+  {
+    "id": "android-image-data-3",
+    "name": "Android original image data 3",
+    "purpose": "Original system-image data with complete inode and SELinux metadata.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/android-image-data",
+      "entries": [
+        "producers/android-image-data/main.rs",
+        "producers/android-image-data/tree.rs",
+        "producers/android-image-data/source.json"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "aim-image-parser",
+        "provider": "github",
+        "repository": "hahnlee/aim",
+        "url": "https://github.com/hahnlee/aim",
+        "pin": {
+          "file": "producers/android-image-data/source.json",
+          "pointer": "/revision",
+          "repositoryPointer": "/repository"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.1.0-MCLv1",
+        "label": "Android original image data 3 0.1.0-MCLv1"
+      }
+    ],
+    "build": {
+      "version": "0.1.0-MCLv1",
+      "command": "tools/build-android-image-data.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "runners": {
+        "arm64": "ubuntu-24.04"
+      },
+      "rustComponents": [
+        "rustfmt"
+      ],
+      "cleanupRunner": true
+    }
+  },
+  {
+    "id": "android-image-data-4",
+    "name": "Android original image data 4",
+    "purpose": "Original system-image data with complete inode and SELinux metadata.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/android-image-data",
+      "entries": [
+        "producers/android-image-data/main.rs",
+        "producers/android-image-data/tree.rs",
+        "producers/android-image-data/source.json"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "aim-image-parser",
+        "provider": "github",
+        "repository": "hahnlee/aim",
+        "url": "https://github.com/hahnlee/aim",
+        "pin": {
+          "file": "producers/android-image-data/source.json",
+          "pointer": "/revision",
+          "repositoryPointer": "/repository"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.1.0-MCLv1",
+        "label": "Android original image data 4 0.1.0-MCLv1"
+      }
+    ],
+    "build": {
+      "version": "0.1.0-MCLv1",
+      "command": "tools/build-android-image-data.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "runners": {
+        "arm64": "ubuntu-24.04"
+      },
+      "rustComponents": [
+        "rustfmt"
+      ],
+      "cleanupRunner": true
+    }
+  },
+  {
+    "id": "android-image-data-5",
+    "name": "Android original image data 5",
+    "purpose": "Original system-image data with complete inode and SELinux metadata.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/android-image-data",
+      "entries": [
+        "producers/android-image-data/main.rs",
+        "producers/android-image-data/tree.rs",
+        "producers/android-image-data/source.json"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "aim-image-parser",
+        "provider": "github",
+        "repository": "hahnlee/aim",
+        "url": "https://github.com/hahnlee/aim",
+        "pin": {
+          "file": "producers/android-image-data/source.json",
+          "pointer": "/revision",
+          "repositoryPointer": "/repository"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.1.0-MCLv1",
+        "label": "Android original image data 5 0.1.0-MCLv1"
+      }
+    ],
+    "build": {
+      "version": "0.1.0-MCLv1",
+      "command": "tools/build-android-image-data.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "runners": {
+        "arm64": "ubuntu-24.04"
+      },
+      "rustComponents": [
+        "rustfmt"
+      ],
+      "cleanupRunner": true
+    }
   }
 ]
