@@ -16,3 +16,17 @@
 - return assembleArtSupplier({output:path.join(output,'runtime'),inputs:{...products,bootImage:boot.root},bootClasspath,baseSupplier,sourceVersion:'0.1.0-'+identity.digest('hex').slice(0,16)});
 + return assembleArtSupplier({output:path.join(output,'runtime'),inputs:{...products,bootImage:boot.root},bootClasspath,baseSupplier,includeImage,originalImage,sourceVersion:'0.1.0-'+identity.digest('hex').slice(0,16)});
  }
+--- a/src/modules/android/art/hal-aidl.mjs
++++ b/src/modules/android/art/hal-aidl.mjs
+@@ -1,3 +1,4 @@
++import fs from 'node:fs';
+ import path from 'node:path';
+ import {execFileSync} from 'node:child_process';
+ 
+@@ -14,5 +15,5 @@
+ for name in interfaces.versions:
+  if m.crate(name) in dependencies:wanted.update([name,*interfaces.transitive(name)])
+ for name in sorted(wanted):m.generate(sys.argv[2],interfaces,name,str(root/'target/aim/gen/hal-aidl'),str(root/'hal/aidl'))
+-`,path.resolve(aim),path.resolve(aidl),hal,path.resolve(apiRoot)],{stdio:'inherit'});
++`,path.resolve(aim),path.resolve(aidl),hal,fs.realpathSync(apiRoot)],{stdio:'inherit'});
+ }
