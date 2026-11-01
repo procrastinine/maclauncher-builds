@@ -8,7 +8,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
-import {resolveProject} from '../lib/projects.mjs';
+import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {recipeMain} from './build-source.mjs';
 const require=createRequire(import.meta.url);
 const B=require('../lib/bundled-native.cjs'),Native=require('../lib/local-native.cjs'),{validateDeclaration}=require('../lib/declaration.cjs');
@@ -38,8 +38,13 @@ export function helperProfile(id,directory=root){
  return {project,profile,base};
 }
 
-export function buildHelper({project:id,arch,output,work=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'helper-build-')),'work'),directory=root}){
- const {profile,base}=helperProfile(id,directory);
+export function selectedHelperProfile({project:id,version,directory=root}){
+ const selected=helperProfile(id,directory),build=buildRecord(selected.project,version);
+ return {...selected,profile:{...selected.profile,version:build.version}};
+}
+
+export function buildHelper({project:id,version,arch,output,work=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'helper-build-')),'work'),directory=root}){
+ const {profile,base}=selectedHelperProfile({project:id,version,directory});
  const payload=path.join(output,'payload'),binary=path.join(payload,profile.output),sources=profile.sources.map(source=>path.join(base,source));
  const sdk=fs.realpathSync(process.env.SDKROOT||run('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path'])),compiler=run('/usr/bin/xcrun',[profile.compiler,'--version']).split('\n')[0];
  const flags=[...KINDS[profile.kind],'-mmacosx-version-min='+profile.minimumMacOS,...profile.flags,...(profile.frameworks||[]).flatMap(name=>['-framework',name])];

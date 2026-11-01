@@ -6,7 +6,6 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {prepareRelease,verifyRelease,applyRelease as actualApplyRelease,publicationAssets,verifyPublicAssets,stageRelease as actualStageRelease,publishRelease as actualPublishRelease,managerDeclaration,verifyRemoteRelease as actualVerifyRemoteRelease,main} from '../tools/release-runtime.mjs';
-import {releaseBatch as actualReleaseBatch,main as actualBatchMain} from '../tools/release-batch.mjs';
 import {verifiedBuildSource} from '../tools/verified-build-run.mjs';
 // Synthetic remote-release lifecycle tests inject only the cryptographic boundary.
 const fixtureBuild=({record,repository,directory,archive,sourceRevision})=>{
@@ -19,9 +18,6 @@ const stageRelease=o=>actualStageRelease({...o,verifyGithubBuild:fixtureBuild});
 const publishRelease=o=>actualPublishRelease({...o,verifyGithubBuild:fixtureBuild});
 const verifyRemoteRelease=o=>actualVerifyRemoteRelease({...o,verifyGithubBuild:fixtureBuild});
 const applyRelease=o=>actualApplyRelease({...o,verifyGithubBuild:fixtureBuild});
-const releaseBatch=o=>actualReleaseBatch({...o,verifyGithubBuild:fixtureBuild});
-const hosted={GITHUB_ACTIONS:'true'};
-const batchMain=(args,o)=>actualBatchMain(args,{env:hosted,...o,verifyGithubBuild:fixtureBuild});
 const rawCatalog=directory=>JSON.parse(fs.readFileSync(path.join(directory,'catalogs/engine.json')));
 const supersededCatalog=directory=>{const file=path.join(directory,'catalogs/superseded/engine.json');return fs.existsSync(file)?JSON.parse(fs.readFileSync(file)):{packages:[]};};
 const catalogHistory=directory=>[...rawCatalog(directory).packages,...supersededCatalog(directory).packages];
@@ -118,14 +114,14 @@ test('release source verification retains the current publication controller and
  const tagged=git(upstream,['rev-parse','HEAD']),tag='engine/v1.0/arm64';git(upstream,['tag',tag]);
  fs.writeFileSync(path.join(upstream,'projects.json'),'different dispatch branch source');git(upstream,['add','projects.json']);git(upstream,['commit','-m','Later branch source']);
  execFileSync('git',['clone','--quiet','--no-hardlinks',upstream,checkout],{env,stdio:'pipe'});assert.notEqual(git(checkout,['rev-parse','HEAD']),tagged);
- const workflow=fs.readFileSync(new URL('../.github/workflows/runtime-release.yml',import.meta.url),'utf8');
- assert.match(workflow,/workflow_run:/);assert.match(workflow,/ref: main/);assert.match(workflow,/tools\/publish-verified\.mjs.*--build-run/);
+ const workflow=fs.readFileSync(new URL('../.github/workflows/runtime-build.yml',import.meta.url),'utf8');
+ assert.match(workflow,/name: Build and release/);assert.match(workflow,/ref: main/);assert.match(workflow,/tools\/publish-verified\.mjs --output/);
  assert.doesNotMatch(workflow,/git checkout.*RELEASE_TAG/,'Publication retains the current controller instead of checking out the historical tag.');
  const controller=git(checkout,['rev-parse','HEAD']);
- const selected=verifiedBuildSource({workflowName:'Runtime build',status:'completed',headBranch:'main',headSha:tagged,jobs:[{name:'build (engine 1.0 arm64)',status:'completed',conclusion:'success'}]},{project:'engine',version:'1.0',arch:'arm64'});
+ const selected=verifiedBuildSource({workflowName:'Build and release',status:'completed',headBranch:'main',headSha:tagged,jobs:[{name:'build (engine 1.0 arm64)',status:'completed',conclusion:'success'}]},{project:'engine',version:'1.0',arch:'arm64'});
  assert.equal(selected,git(checkout,['rev-parse',tag+'^{commit}']));
  assert.equal(git(checkout,['rev-parse','HEAD']),controller);assert.equal(fs.readFileSync(path.join(checkout,'projects.json'),'utf8'),'different dispatch branch source');
- const publisher=fs.readFileSync(new URL('../tools/publish-verified.mjs',import.meta.url),'utf8');assert.match(publisher,/stageRelease\(\{\.\.\.options,target:row\.sourceRevision,resume:true\}\)/);
+ const publisher=fs.readFileSync(new URL('../tools/publish-verified.mjs',import.meta.url),'utf8');assert.match(publisher,/stageBundle\(\{\.\.\.options,target:env\.GITHUB_SHA,resume:true\}\)/);
 });
 
 const sourceTarget='a'.repeat(40),annotation='b'.repeat(40);
@@ -138,14 +134,6 @@ function publicReleaseGh(record){return async args=>{
  assert.deepEqual(args,['api','--paginate','--slurp','repos/owner/builds/releases?per_page=100']);
  return JSON.stringify([[remoteRelease(record)]]);
 };}
-test('compiled packages are released only inside GitHub Actions',async t=>{
- const f=fixture(t,{external:true});await prepareRelease(f);
- for(const command of ['stage','publish','apply'])
-  await assert.rejects(main([command,'--bundle',f.output,...(command==='stage'?['--target',sourceTarget]:[])],f.directory,{}),/only by the Runtime release workflow on GitHub/);
- const b=await batchFixture(t),args=['--target',sourceTarget,'--output',b.output,...b.packages.flatMap(p=>['--package',p])];
- await assert.rejects(batchMain(args,{directory:b.directory,runGh:async()=>assert.fail('No GitHub request outside Actions'),env:{}}),/only by the Runtime release workflow on GitHub/);
-});
-
 test('staging creates a new exact source tag and uploads one draft binary',async t=>{
  const f=fixture(t,{external:true});await prepareRelease(f);const calls=[];
  const runGh=async(args,options)=>{calls.push(args);if(args[1]?.includes('/git/ref/'))throw notFound();if(args.includes('--paginate'))return '[]';if(args[0]==='api'){assert.ok(args.includes('POST'));return refResult();}assert.equal(options.stdio,'inherit');return '';};
@@ -284,86 +272,6 @@ test('catalog application hashes a public asset when GitHub omits its digest',as
  assert.equal(rawCatalog(f.directory).packages[0].version,'1.0');
 });
 
-async function batchFixture(t){
- const fixtures=[];
- for(const version of ['1.0','2.0','3.0']){
-  const f=fixture(t,{version});await prepareRelease(f);
-  fixtures.push({...f,...await verifyRelease({bundle:f.output,directory:f.directory})});
- }
- const directory=fixtures[0].directory,file=path.join(directory,'projects.json'),registry=JSON.parse(fs.readFileSync(file));
- registry.projects[0].packageProfiles=fixtures.map(f=>({version:f.record.version,label:'Engine '+f.record.version}));
- fs.writeFileSync(file,JSON.stringify(registry));
- return {directory,output:path.join(directory,'batch-output'),packages:fixtures.map(f=>f.output),records:fixtures.map(f=>f.record)};
-}
-function batchGitHub(f,{existing=[],badUpload=false}={}){
- const records=new Map(f.records.map(r=>[remoteRelease(r).tag_name,r])),releases=new Map(existing.map(r=>[r.tag_name,structuredClone(r)])),refs=new Set(releases.keys()),calls=[];
- const runGh=async args=>{
-  calls.push(args);
-  if(args[0]==='api'){
-   if(args.includes('--paginate'))return JSON.stringify([[...releases.values()]]);
-   if(args[1].includes('/git/ref/')){
-    const tag=args[1].split('/git/ref/tags/')[1];if(!refs.has(tag))throw notFound();return refResult();
-   }
-   assert.deepEqual(args.slice(0,4),['api','--method','POST','repos/owner/builds/git/refs']);
-   const tag=args.find(a=>a.startsWith('ref=refs/tags/')).slice('ref=refs/tags/'.length);
-   assert.ok(records.has(tag));assert.equal(refs.has(tag),false);assert.ok(args.includes('sha='+sourceTarget));refs.add(tag);return refResult();
-  }
-  assert.equal(args[0],'release');
-  const tag=args[2],record=records.get(tag);assert.ok(record);
-  const catalog=path.join(f.directory,'catalogs','engine.json');
-  if(fs.existsSync(catalog))assert.equal(JSON.parse(fs.readFileSync(catalog)).packages.some(r=>r.version===record.version),false,'Catalog row must wait for publication.');
-  if(args[1]==='create'){
-   assert.equal(releases.has(tag),false);assert.ok(args.includes('--draft'));
-   const archive=fs.readFileSync(args.at(-1));assert.equal(digest(archive),record.asset.sha256);assert.equal(archive.length,record.asset.bytes);
-   const remote=remoteRelease(record,true);if(badUpload)remote.assets[0].digest='sha256:'+'f'.repeat(64);releases.set(tag,remote);return '';
-  }
-  assert.deepEqual(args,['release','edit',tag,'--repo','owner/builds','--draft=false','--latest=false']);
-  assert.equal(releases.get(tag).draft,true);releases.get(tag).draft=false;return '';
- };
- return {runGh,calls,releases};
-}
-const writes=calls=>calls.filter(args=>args[0]==='release'||args.includes('POST'));
-test('batch CLI releases in order, applies public catalogs and never reuploads on rerun',async t=>{
- const f=await batchFixture(t),remote=batchGitHub(f,{existing:[remoteRelease(f.records[1])]}),args=['--target',sourceTarget,'--output',f.output,...f.packages.flatMap(p=>['--package',p])];
- const results=await batchMain(args,{directory:f.directory,runGh:remote.runGh});
- assert.deepEqual(results.map(r=>r.published),[true,false,true]);
- const tags=f.records.map(r=>remoteRelease(r).tag_name);
- assert.deepEqual(writes(remote.calls).map(args=>args[0]==='api'?args.find(a=>a.startsWith('ref=refs/tags/')).slice('ref=refs/tags/'.length):args[2]),[tags[0],tags[0],tags[0],tags[2],tags[2],tags[2]]);
- assert.deepEqual(new Set(catalogHistory(f.directory).map(r=>r.version)),new Set(['1.0','2.0','3.0']));
- assert.deepEqual(rawCatalog(f.directory).packages.map(r=>r.version),['3.0']);
- assert.deepEqual(new Set(supersededCatalog(f.directory).packages.map(r=>r.version)),new Set(['1.0','2.0']));
- for(const [i,result] of results.entries())assert.equal(digest(fs.readFileSync(path.join(result.bundle,f.records[i].asset.filename))),f.records[i].asset.sha256);
- const count=remote.calls.length,again=await batchMain(args,{directory:f.directory,runGh:remote.runGh});
- assert.deepEqual(again.map(r=>r.published),[false,false,false]);assert.deepEqual(writes(remote.calls.slice(count)),[]);
-});
-test('a batch asset mismatch stops before preparing or contacting later packages',async t=>{
- const f=await batchFixture(t),conflict=remoteRelease(f.records[1]);conflict.assets[0].digest='sha256:'+'f'.repeat(64);
- const remote=batchGitHub(f,{existing:[conflict]});
- await assert.rejects(releaseBatch({...f,target:sourceTarget,runGh:remote.runGh}),/checksum differs/);
- assert.deepEqual(rawCatalog(f.directory).packages.map(r=>r.version),['1.0']);
- assert.equal(fs.existsSync(path.join(f.output,'engine','3.0')),false);
- assert.equal(remote.calls.some(args=>args.some(a=>a.includes('engine/v3.0/arm64'))),false);
- assert.deepEqual(writes(remote.calls).filter(args=>args[0]==='release').map(args=>args[2]),['engine/v1.0/arm64','engine/v1.0/arm64']);
-});
-test('batch resumes an identical draft without a tag write or archive upload',async t=>{
- const f=await batchFixture(t),remote=batchGitHub(f,{existing:[remoteRelease(f.records[0],true)]});
- const results=await releaseBatch({...f,packages:f.packages.slice(0,1),target:sourceTarget,runGh:remote.runGh});
- assert.equal(results[0].published,true);
- assert.deepEqual(writes(remote.calls),[['release','edit','engine/v1.0/arm64','--repo','owner/builds','--draft=false','--latest=false']]);
-});
-test('batch verifies a newly staged asset before publication and leaves later packages untouched',async t=>{
- const f=await batchFixture(t),remote=batchGitHub(f,{badUpload:true});
- await assert.rejects(releaseBatch({...f,target:sourceTarget,runGh:remote.runGh}),/checksum differs/);
- assert.equal(remote.releases.get('engine/v1.0/arm64').draft,true);
- assert.equal(writes(remote.calls).some(args=>args[1]==='edit'),false);
- assert.equal(fs.existsSync(path.join(f.directory,'catalogs')),false);
- assert.equal(fs.existsSync(path.join(f.output,'engine','2.0')),false);
-});
-test('batch CLI rejects incomplete or ambiguous options before GitHub calls',async()=>{
- const runGh=()=>assert.fail('Invalid options must not contact GitHub.');
- for(const args of [[],['--package'],['--target',sourceTarget,'--target',sourceTarget],['--unknown','value']])await assert.rejects(batchMain(args,{runGh}),/requires|Use/);
-});
-
 // Minimal Mach-O executable headers: enough for inventory checks, never executed.
 function machO(cpus){
  const thin=cpu=>{const b=Buffer.alloc(32);b.writeUInt32LE(0xfeedfacf,0);b.writeUInt32LE({arm64:0x0100000c,x86_64:0x01000007}[cpu],4);b.writeUInt32LE(2,12);return b;};
@@ -389,7 +297,6 @@ test('manager outputs declare the Mac CPUs of their architecture',async t=>{
  assert.deepEqual(declared.x64.launcherArchitectures,['arm64','x64']);assert.equal(declared.x64.files.find(file=>file.path==='files/bin/engine').executionArchitecture,'x86_64');
 });
 test('remote verification compares a staged draft with its local package without changing GitHub',async t=>{
- await assert.rejects(main(['verify-remote']),/--bundle/);await assert.rejects(main(['verify-remote','--bundle','x','--target','y']),/explicit options/);
  const f=fixture(t);await prepareRelease(f);const record=JSON.parse(fs.readFileSync(path.join(f.output,'engine-1.0-arm64.tar.gz.json')));
  const draft=async args=>{assert.equal(args[0],'api');assert.equal(args.includes('POST'),false);if(args[1].includes('/git/ref/'))return refResult();return JSON.stringify([[remoteRelease(record,true)]]);};
  const {publication}=await verifyRemoteRelease({bundle:f.output,directory:f.directory,runGh:draft});assert.equal(publication.draft,true);assert.equal(publication.sourceCommit,sourceTarget);

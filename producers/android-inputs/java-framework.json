@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "android-java-framework",
-  "version": "0.1.0-MCLv2",
+  "version": "0.1.0-MCLv1",
   "androidSource": {
     "repository": "https://github.com/procrastinine/maclauncher-android",
     "revision": "c71de272618e22a531d9259929a2478d838f9b1f"

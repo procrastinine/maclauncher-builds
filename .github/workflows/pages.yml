@@ -1,15 +1,6 @@
 name: Package index
 
 on:
-  # The index reads the registry, catalogs, signed build and supplied-file records, and
-  # source pins anywhere in the producers, so any change other than prose or tests rebuilds it.
-  push:
-    branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - 'tests/**'
-      - '**/*.md'
-  workflow_dispatch:
   workflow_call:
     inputs:
       source-revision:

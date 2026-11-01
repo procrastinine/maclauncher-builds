@@ -13,11 +13,8 @@
     "check:updates": "node tools/check-updates.mjs",
     "release:prepare": "node tools/release-runtime.mjs prepare",
     "release:verify": "node tools/release-runtime.mjs verify",
-    "release:catalog": "node tools/release-runtime.mjs apply",
-    "release:stage": "node tools/release-runtime.mjs stage",
     "index:build": "node tools/package-index.mjs --output dist/package-index",
-    "check:versions": "node tools/check-release-versions.mjs",
-    "release:batch": "node tools/release-batch.mjs"
+    "check:versions": "node tools/check-release-versions.mjs"
   },
   "dependencies": {
     "@sigstore/bundle": "5.0.0",

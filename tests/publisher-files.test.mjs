@@ -9,7 +9,7 @@ import Archive from '../lib/archive.cjs';
 import {catalog} from '../tools/runtime-package.mjs';
 import {readPublisherInput,recordPublisherFiles,verifyPublisherRecord,verifyPublisherArchive,assertPublisherSource,fetchPublisherInput,assemblePublisherPackage,main as publisherMain} from '../tools/publisher-files.mjs';
 import {requirePublicationAuthority} from '../tools/publication-authority.mjs';
-import {stageRelease,publishRelease,applyRelease,verifyRelease,main as releaseMain} from '../tools/release-runtime.mjs';
+import {stageRelease,publishRelease,applyRelease,verifyRelease} from '../tools/release-runtime.mjs';
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const json=value=>JSON.stringify(value,null,2)+'\n';
 const id='sample-publisher',repository='owner/builds';
@@ -152,10 +152,4 @@ test('assembly gives the pinned package the registered publisher version without
  const altered=path.join(f.directory,'altered-input.tar.gz'),bytes=fs.readFileSync(f.input.archive);bytes[bytes.length-1]^=1;fs.writeFileSync(altered,bytes);
  await assert.rejects(assemblePublisherPackage({project:id,inputArchive:altered,output:path.join(f.directory,'refused'),work:path.join(f.directory,'refused-work'),directory:f.directory}),/checksum/);
  assert.equal(fs.existsSync(path.join(f.directory,'refused')),false);
-});
-
-test('supplied publisher packages are staged, published and applied only inside GitHub Actions',async t=>{
- const f=await fixture(t);await f.record();const revision=commitInputs(f);
- for(const command of ['stage','publish','apply'])
-  await assert.rejects(releaseMain([command,'--bundle',f.output.bundle,...(command==='stage'?['--target',revision]:[])],f.directory,{}),/only by the Runtime release workflow on GitHub/);
 });

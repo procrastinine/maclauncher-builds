@@ -1,57 +1,28 @@
-name: Runtime build
+name: Build and release
+run-name: Build and release — ${{ inputs.releases }}
 
 on:
-  # A push builds only the build records whose version or architectures it changes.
-  push:
-    branches: [main]
-    paths:
-      - projects.json
-      - projects/**
   workflow_dispatch:
     inputs:
-      project:
-        description: Registered runtime project ID
+      releases:
+        description: 'Project=release-name pairs, separated by commas or newlines'
         required: true
         type: string
-      version:
-        description: Version in the project's build record (optional check)
-        required: false
-        type: string
-      arch:
-        description: Package architectures to build
-        required: true
-        default: all
-        type: choice
-        options: [all, arm64, x64, universal]
-      operation:
-        description: Build packages, or build them and stage draft releases
-        required: true
-        default: build
-        type: choice
-        options: [build, stage]
 
 permissions:
   contents: read
-
-concurrency:
-  group: runtime-build-${{ inputs.project || github.sha }}
-  cancel-in-progress: false
 
 jobs:
   plan:
     runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.plan.outputs.matrix }}
+      selection: ${{ steps.plan.outputs.selection }}
       empty: ${{ steps.plan.outputs.empty }}
     env:
-      EVENT: ${{ github.event_name }}
-      BEFORE: ${{ github.event.before }}
-      BUILD_PROJECT: ${{ inputs.project }}
-      BUILD_VERSION: ${{ inputs.version }}
-      BUILD_ARCH: ${{ inputs.arch }}
+      GH_TOKEN: ${{ github.token }}
+      RELEASES: ${{ inputs.releases }}
     steps:
-      # Full history and tags: the plan compares the registry with the previous commit
-      # and skips architectures that already have a release tag.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
@@ -60,31 +31,24 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
-      - name: Install locked build-tool dependencies
-        run: npm ci --ignore-scripts
-      - name: Select new builds and their runners
+      - run: npm ci --ignore-scripts
+      - name: Select the requested projects and names
         id: plan
         run: |
-          if [ "$EVENT" = push ]; then
-            matrix=$(node tools/build-runtime.mjs --plan --before "$BEFORE")
-          elif [ -n "$BUILD_VERSION" ]; then
-            matrix=$(node tools/build-runtime.mjs --plan --project "$BUILD_PROJECT" --arch "$BUILD_ARCH" --version "$BUILD_VERSION")
-          else
-            matrix=$(node tools/build-runtime.mjs --plan --project "$BUILD_PROJECT" --arch "$BUILD_ARCH")
-          fi
-          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
-          if [ "$matrix" = '{"include":[]}' ]; then
-            echo "empty=true" >> "$GITHUB_OUTPUT"
-            echo "No build record declares a new version or architecture." >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "empty=false" >> "$GITHUB_OUTPUT"
-          fi
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import {execFileSync} from 'node:child_process';
+          import {registerSelection} from './tools/release-selection.mjs';
+          import {buildPlan} from './tools/build-runtime.mjs';
+          const releases = JSON.parse(execFileSync('gh', ['api', '--paginate', '--slurp', `repos/${process.env.GITHUB_REPOSITORY}/releases?per_page=100`], {encoding: 'utf8'})).flat().filter(release => !release.draft);
+          const result = registerSelection({selection: process.env.RELEASES, directory: process.cwd(), releases});
+          const include = result.selection.flatMap(({id, version}) => buildPlan({project: id, version, arch: 'all', tags: () => []}).include);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify({include})}\nselection=${JSON.stringify(result.selection)}\nempty=${include.length === 0}\n`);
+          JS
 
   build:
     needs: plan
     if: needs.plan.outputs.empty == 'false'
-    # Each recipe selects a standard GitHub-hosted build image. A registered publisher input
-    # instead assembles its supplied package from the pinned publisher archive.
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
@@ -101,6 +65,7 @@ jobs:
       BUILD_PROJECT: ${{ matrix.project }}
       BUILD_VERSION: ${{ matrix.version }}
       BUILD_ARCH: ${{ matrix.arch }}
+      RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
     steps:
       - name: Report initial disk space
         run: df -h
@@ -114,30 +79,22 @@ jobs:
           package-manager-cache: false
       - name: Install locked build-tool dependencies
         run: npm ci --ignore-scripts
+      - name: Register the selected names for this build
+        run: |
+          node --input-type=module <<'JS'
+          import {registerSelection} from './tools/release-selection.mjs';
+          registerSelection({selection: process.env.RELEASE_SELECTION, directory: process.cwd()});
+          JS
       - name: Prepare the runner
-        if: ${{ !matrix.supplied }}
         run: node tools/build-runtime.mjs --prepare --project "$BUILD_PROJECT" --arch "$BUILD_ARCH" --version "$BUILD_VERSION"
       - name: Build the package
-        if: ${{ !matrix.supplied }}
         run: node tools/build-runtime.mjs --project "$BUILD_PROJECT" --arch "$BUILD_ARCH" --version "$BUILD_VERSION" --output "$RUNNER_TEMP/build" --work "$RUNNER_TEMP/work"
       - name: Package the release
-        if: ${{ !matrix.supplied }}
         run: node tools/release-runtime.mjs prepare --project "$BUILD_PROJECT" --input "$RUNNER_TEMP/build/payload" --declaration "$RUNNER_TEMP/build/declaration.json" --source-revision "$GITHUB_SHA" --output "$RUNNER_TEMP/release"
-      - name: Download the pinned publisher input
-        if: ${{ matrix.supplied }}
-        run: node tools/publisher-files.mjs fetch --project "$BUILD_PROJECT" --output "$RUNNER_TEMP/publisher-input.tar.gz"
-      - name: Assemble the supplied package
-        if: ${{ matrix.supplied }}
-        run: node tools/publisher-files.mjs assemble --project "$BUILD_PROJECT" --input-archive "$RUNNER_TEMP/publisher-input.tar.gz" --output "$RUNNER_TEMP/release" --work "$RUNNER_TEMP/work"
-      # The comparison covers every supplied file; the release workflow repeats it before publication.
-      - name: Record supplied-file equality
-        if: ${{ matrix.supplied }}
-        run: node tools/publisher-files.mjs record --project "$BUILD_PROJECT" --input-archive "$RUNNER_TEMP/publisher-input.tar.gz" --release-bundle "$RUNNER_TEMP/release" --output-dir "$RUNNER_TEMP/publisher-records"
       - name: Verify the package identity
         id: verify
         run: node tools/release-runtime.mjs verify --bundle "$RUNNER_TEMP/release" --project "$BUILD_PROJECT" --version "$BUILD_VERSION" --arch "$BUILD_ARCH"
       # Signed provenance that ties the compiled package archive to this workflow run and commit.
-      # Supplied packages rely on their file-equality record instead.
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         id: attest
         if: ${{ !matrix.supplied }}
@@ -159,63 +116,75 @@ jobs:
           if-no-files-found: error
           retention-days: 90
           compression-level: 0
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-        if: ${{ !cancelled() && matrix.supplied && steps.verify.outcome == 'success' }}
-        with:
-          name: publisher-record-${{ matrix.project }}-${{ matrix.version }}-${{ matrix.arch }}
-          path: ${{ runner.temp }}/publisher-records
-          if-no-files-found: error
-          retention-days: 90
 
-  stage:
-    if: github.event_name == 'workflow_dispatch' && inputs.operation == 'stage'
-    needs: build
+  publish:
+    needs: [plan, build]
+    if: ${{ !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty == 'false' }}
     runs-on: ubuntu-24.04
+    concurrency:
+      group: build-and-release-publication
+      queue: max
     permissions:
       contents: write
+      actions: read
+      attestations: read
+    outputs:
+      commit: ${{ steps.catalog.outputs.commit }}
     env:
       GH_TOKEN: ${{ github.token }}
-      PROJECT: ${{ inputs.project }}
+      RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
     steps:
-      - name: Require the main branch
-        if: github.ref != 'refs/heads/main'
-        run: |
-          echo "Draft releases are staged only from main." >&2
-          exit 1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: main
+          fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
           package-manager-cache: false
-      - name: Install locked build-tool dependencies
-        run: npm ci --ignore-scripts
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          pattern: runtime-${{ inputs.project }}-*
-          path: ${{ runner.temp }}/releases
-      - name: Select the publication authority
+      - run: npm ci --ignore-scripts
+      - name: Register the selected release names
         run: |
           node --input-type=module <<'JS'
-          import fs from 'node:fs';
-          import {readPublisherInput} from './tools/publisher-files.mjs';
-          const supplied = readPublisherInput({project: process.env.PROJECT});
-          fs.appendFileSync(process.env.GITHUB_ENV, 'PUBLICATION_AUTHORITY=' + (supplied ? 'supplied-publisher' : 'github-build') + '\n');
+          import {registerSelection} from './tools/release-selection.mjs';
+          registerSelection({selection: process.env.RELEASE_SELECTION, directory: process.cwd()});
           JS
-      - name: Download the pinned publisher input
-        if: env.PUBLICATION_AUTHORITY == 'supplied-publisher'
-        run: node tools/publisher-files.mjs fetch --project "$PROJECT" --output "$RUNNER_TEMP/publisher-input.tar.gz"
-      - name: Stage one draft release for each architecture
-        # The tag of each draft points to the commit these packages were built from.
-        # Compiled packages import their signed provenance; supplied packages repeat their file comparison.
+      - name: Publish this run's verified packages
+        id: publish
+        continue-on-error: true
+        run: node tools/publish-verified.mjs --output "$RUNNER_TEMP/publication"
+      - name: Commit registrations and catalogs
+        id: catalog
         run: |
-          for bundle in "$RUNNER_TEMP"/releases/*/; do
-            if [ "$PUBLICATION_AUTHORITY" = supplied-publisher ]; then
-              node tools/publisher-files.mjs record --project "$PROJECT" --input-archive "$RUNNER_TEMP/publisher-input.tar.gz" --release-bundle "$bundle"
-            else
-              node tools/record-github-build.mjs --release-bundle "$bundle"
-            fi
-            node tools/release-runtime.mjs stage --bundle "$bundle" --target "$GITHUB_SHA"
-            node tools/release-runtime.mjs verify-remote --bundle "$bundle"
-          done
+          git add --update
+          git add -- catalogs attestations
+          if ! git diff --cached --quiet; then
+            git config user.name procrastinine
+            git config user.email 24549552+procrastinine@users.noreply.github.com
+            git commit -m 'Publish selected runtime releases'
+            gh auth setup-git
+            git push origin HEAD:main
+          fi
+          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Retain the publication result
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: publication-result
+          path: ${{ runner.temp }}/publication/publication-result.json
+          if-no-files-found: ignore
+      - name: Report incomplete packages
+        if: steps.publish.outcome == 'failure'
+        run: exit 1
+
+  index:
+    needs: publish
+    if: ${{ always() && !cancelled() && needs.publish.outputs.commit != '' }}
+    uses: ./.github/workflows/pages.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    with:
+      source-revision: ${{ needs.publish.outputs.commit }}

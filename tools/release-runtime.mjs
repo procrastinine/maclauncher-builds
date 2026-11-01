@@ -125,7 +125,7 @@ export function catalogIndex(directory=root,{coverage=buildCoverage(directory)}=
   const profiles=new Map((p.packageProfiles||[]).map(profile=>[profile.version,profile]));
   projects.push({projectId:p.id,name:p.name,delivery:p.delivery,pageUrl:new URL('#'+p.id,page).href,
    catalog:{url:new URL('catalogs/'+p.id+'.json',page).href,sha256:digest(bytes),bytes:bytes.length},
-   releases:packages.map(r=>({version:r.version,arch:r.arch,launcherArchitectures:r.launcherArchitectures,minimumMacOS:r.minimumMacOS,tag:r.tag,asset:r.asset,pageUrl:new URL('#'+(profiles.get(r.version)?.anchor||p.id),page).href,...(profiles.has(r.version)?{profile:profiles.get(r.version).label,...(profiles.get(r.version).anchor?{anchor:profiles.get(r.version).anchor}:{})}:{})}))});
+   releases:packages.map(r=>({version:r.version,arch:r.arch,launcherArchitectures:r.launcherArchitectures,minimumMacOS:r.minimumMacOS,tag:r.tag,asset:r.asset,...(r.build?{build:r.build}:{}),pageUrl:new URL('#'+(profiles.get(r.version)?.anchor||p.id),page).href,...(profiles.has(r.version)?{profile:profiles.get(r.version).label,...(profiles.get(r.version).anchor?{anchor:profiles.get(r.version).anchor}:{})}:{})}))});
  }
  return {schemaVersion:1,repository:registry.repository,updatePolicy:'manual',projects:projects.sort((a,b)=>a.projectId.localeCompare(b.projectId)),retiredProjects:coverage.retiredProjects};
 }
@@ -156,6 +156,8 @@ export async function verifyPublicAssets({project,version,arch,assets,output,dir
 }
 
 export function releaseNotes(record,project){
+ const source=record.build?.sourceRevision,run=record.build?.runId,repo=project.releaseRepository;
+ if(source&&run)return 'Built from ['+source+'](https://github.com/'+repo+'/tree/'+source+') by [build '+run+'](https://github.com/'+repo+'/actions/runs/'+run+').\n\n`gh attestation verify '+record.asset.filename+' --repo '+repo+' --signer-workflow '+repo+'/.github/workflows/runtime-build.yml --deny-self-hosted-runners`\n';
  const lines=['Versioned macOS runtime package for '+record.arch+'.','', '<details>','<summary>Source</summary>',''];
  if(record.source){const s=record.source,base='https://github.com/'+s.repository+'/tree/'+s.revision;lines.push('[Complete source and patches]('+base+(s.path?'/'+s.path:'')+')','', 'The release tag identifies the source commit. Pinned upstream repositories and build recipes are included in that source. GitHub source ZIPs omit submodule contents; recursive Git checkout retains their exact pins.');}
  else lines.push('[Source and patches](https://github.com/'+project.releaseRepository+'/tree/'+encodeURIComponent(releaseTag(record))+')');
@@ -241,13 +243,13 @@ export async function publishRelease({bundle,directory=root,runGh=runGitHub,veri
 // Packages move from their GitHub run to their release and catalog only inside
 // GitHub Actions, so release files never travel through a local copy.
 export function requireHostedPublication({env=process.env}={}){
- if(env.GITHUB_ACTIONS!=='true')throw Error('Packages are released only by the Runtime release workflow on GitHub.');
+ if(env.GITHUB_ACTIONS!=='true')throw Error('Packages are released only inside Build and release on GitHub.');
 }
 
 function options(args){const result={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!args[i]?.startsWith('--')||!args[i+1]||Object.hasOwn(result,key))throw Error('Use unique --option value pairs.');result[key]=args[i+1];}return result;}
 export async function main([command,...args],directory=root,env=process.env){
- const o=options(args),allowed={prepare:['project','input','declaration','archive','record','source','source-revision','output'],verify:['bundle','project','version','arch'],'verify-assets':['project','version','arch','assets','output'],'verify-remote':['bundle'],apply:['bundle'],stage:['bundle','target'],publish:['bundle'],index:['output']}[command];
- if(!allowed||Object.keys(o).some(k=>!allowed.includes(k)))throw Error('Use prepare, verify, verify-remote, apply, stage, publish or index with explicit options.');
+ const o=options(args),allowed={prepare:['project','input','declaration','archive','record','source','source-revision','output'],verify:['bundle','project','version','arch'],'verify-assets':['project','version','arch','assets','output'],index:['output']}[command];
+ if(!allowed||Object.keys(o).some(k=>!allowed.includes(k)))throw Error('Use prepare, verify, verify-assets or index with explicit options.');
  if(command==='prepare'){
   if(!o.project||!o.output)throw Error('prepare requires --project and --output.');
   if(o.declaration){let d=read(o.declaration);if(Array.isArray(d)){d=d.filter(item=>item.id===o.project);if(d.length!==1)throw Error('Declaration must select exactly one project.');d=d[0];}o.declaration=d;}
@@ -255,11 +257,6 @@ export async function main([command,...args],directory=root,env=process.env){
  }
  if(command==='verify-assets')return verifyPublicAssets({...o,directory});
  if(command==='verify')return verifyRelease({...o,directory});
- if(command==='verify-remote'){if(!o.bundle)throw Error('verify-remote requires --bundle.');const {release,publication}=await verifyRemoteRelease({...o,directory});return {...release,draft:publication.draft,sourceCommit:publication.sourceCommit};}
- if(['stage','publish','apply'].includes(command))requireHostedPublication({env});
- if(command==='stage')return stageRelease({...o,directory});
- if(command==='publish')return publishRelease({...o,directory});
- if(command==='apply')return applyRelease({...o,directory});
  if(command==='index'){if(!o.output)throw Error('index requires --output.');const result=catalogIndex(directory);fs.mkdirSync(path.dirname(o.output),{recursive:true});fs.writeFileSync(o.output,json(result));return result;}
 }
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)main(process.argv.slice(2)).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error.message);process.exitCode=1;});

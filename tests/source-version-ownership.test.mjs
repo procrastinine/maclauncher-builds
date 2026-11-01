@@ -26,7 +26,7 @@ test('package versions follow product source ownership, not ownership of a wrapp
  assert.throws(()=>nextSnapshotVersion('2026-11-01T00:00:00Z',[],{sourceRepository:'owner/product',releaseRepository:'owner/builds'}),/plain semantic version/);
 });
 
-test('new owned builds require semantic versions while published MCL identities still resolve',t=>{
+test('owned version suggestions use semantic versions while explicit registered names remain unchanged',t=>{
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'owned-build-version-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
  fs.mkdirSync(path.join(directory,'runtimes/owned-game'),{recursive:true});fs.mkdirSync(path.join(directory,'catalogs'));
  fs.writeFileSync(path.join(directory,'runtimes/owned-game/source.json'),JSON.stringify({repository:'https://github.com/owner/product'}));
@@ -37,9 +37,9 @@ test('new owned builds require semantic versions while published MCL identities 
  assert.equal(buildReleaseVersion('owned-game','0.2.1',directory),'0.2.1');
  assert.equal(buildReleaseVersion('owned-game','0.2.0-MCLv1',directory),'0.2.0-MCLv1');
  assert.equal(releaseVersion('owned-game','0.2.0-MCLv2',directory),'0.2.0-MCLv2');
- assert.throws(()=>buildReleaseVersion('owned-game','0.2.0-MCLv2',directory),/plain semantic version/);
- assert.throws(()=>outputVersion('owned-game','0.2.0-MCLv2',directory),/plain semantic version/);
- assert.throws(()=>catalog([{version:'0.2.0-MCLv2'}],{project:'owned-game',repository:'owner/builds',directory}),/plain semantic version/);
+ assert.equal(buildReleaseVersion('owned-game','0.2.0-MCLv2',directory),'0.2.0-MCLv2');
+ assert.equal(outputVersion('owned-game','0.2.0-MCLv2',directory),'0.2.0-MCLv2');
+
 });
 
 test('all existing Android signed input leaves retain their upstream-derived version scheme',()=>{

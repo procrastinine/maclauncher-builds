@@ -149,12 +149,26 @@ export function rebuildPlan(options){
  const sourceRevision=options.bundle?options.sourceRevision||record.build?.sourceRevision:tagRevision(repository,tag);
  if(!sourceRevision)throw Error('An unpublished build bundle requires --source-revision from its successful build run.');
  if(options.sourceRevision&&sourceRevision!==options.sourceRevision||record.build?.sourceRevision&&sourceRevision!==record.build.sourceRevision)throw Error('The release tag differs from the recorded recipe commit.');
- let build;
- try{const rows=declaredBuilds(file=>run('git',['-C',options.directory||root,'show',sourceRevision+':'+file]));build=rows.get(record.id+'@'+record.version);}catch(error){throw Error('The recipe commit must be available locally; fetch that exact commit before planning.',{cause:error});}
+ let build,registrationRequired=false;
+ try{
+  const read=file=>run('git',['-C',options.directory||root,'show',sourceRevision+':'+file]);
+  const rows=declaredBuilds(read);build=rows.get(record.id+'@'+record.version);
+  if(!build){
+   // Dispatch-time registration is source-owned and only available in recipes
+   // that include the generic selection command. Older sources stay unchanged.
+   try{run('git',['-C',options.directory||root,'cat-file','-e',sourceRevision+':tools/release-selection.mjs'],{stdio:['ignore','pipe','ignore']});}
+   catch{throw Error('This recipe has no dispatch-time package registration.');}
+   const family=value=>value.replace(/-MCLv[1-9]\d*$/,'').replace(/^MCLv[1-9]\d*-/,'snapshot-');
+   const candidates=[...rows.values()].filter(row=>row.project===record.id&&row.architectures.includes(record.arch));
+   const matching=candidates.filter(row=>family(row.version)===family(record.version));
+   const template=matching[0]||(new Set(candidates.map(row=>family(row.version))).size===1?candidates[0]:undefined);
+   if(template){build={...template,version:record.version};registrationRequired=true;}
+  }
+ }catch(error){throw Error('The recipe commit must be available locally; fetch that exact commit before planning.',{cause:error});}
  if(!build?.architectures.includes(record.arch))throw Error('This historical package has no registered build command for its recorded version and CPU. Its source tag remains available for manual reproduction.');
  const recipe=run('git',['-C',options.directory||root,'show',sourceRevision+':tools/build-runtime.mjs']);
  let runners;try{runners=run('git',['-C',options.directory||root,'show',sourceRevision+':lib/hosted-runners.mjs'],{stdio:['ignore','pipe','ignore']});}catch{/* Older recipes keep their runner declarations in the build script. */}
- return {repository,record,tag,sourceRevision,build,...historicalRunner(recipe,record.arch,build.runners?.[record.arch],runners)};
+ return {repository,record,tag,sourceRevision,build,registrationRequired,...historicalRunner(recipe,record.arch,build.runners?.[record.arch],runners)};
 }
 
 /** Historical recipes retain their own host preparation and tool installer. */
@@ -175,6 +189,15 @@ export async function prepareHistoricalHost({checkout,plan,environment=process.e
  return (historical?.prepareBuildHost||prepareBuildHost)({build:plan.build,label:plan.runner,runner:host,rustToolchain:RUST_TOOLCHAIN,environment,install,verifyHost:verifyHost&&(plan.toolchainDeclared||Boolean(plan.host)),...(installTools?{installTools}:{})});
 }
 
+/** Register only the exact package identity in the isolated historical checkout. */
+export async function registerRebuildSelection({checkout,plan}){
+ if(!plan.registrationRequired)return false;
+ const {registerSelection}=await import(pathToFileURL(path.join(checkout,'tools/release-selection.mjs')));
+ if(typeof registerSelection!=='function')throw Error('The historical recipe has no package registration entry.');
+ await registerSelection({selection:[{id:plan.record.id,version:plan.record.version}],directory:checkout,tags:[],releases:[]});
+ return true;
+}
+
 export async function rebuild(options){
  const plan=rebuildPlan(options),output=path.resolve(options.output||'');
  if(!options.output||!path.isAbsolute(options.output)||fs.existsSync(output))throw Error('Choose a new absolute --output directory.');
@@ -193,6 +216,7 @@ export async function rebuild(options){
   run('git',['clone','--no-checkout','--filter=blob:none','--no-tags','--depth','1','--','https://github.com/'+plan.repository+'.git',checkout]);
   run('git',['-C',checkout,'fetch','--no-tags','--depth','1','origin',plan.sourceRevision]);
   run('git',['-C',checkout,'checkout','--detach',plan.sourceRevision]);
+  await registerRebuildSelection({checkout,plan});
   const prepared=await prepareHistoricalHost({checkout,plan,install:options.installTools==='true',verifyHost:options.requireToolchain==='true'});
   const env={...process.env,...prepared.env,PATH:[...prepared.paths,process.env.PATH].filter(Boolean).join(path.delimiter)},observed=buildToolchain(env);
   if(fs.existsSync(path.join(checkout,'package-lock.json')))run('npm',['ci','--ignore-scripts'],{cwd:checkout,env,stdio:'inherit'});

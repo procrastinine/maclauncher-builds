@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync,spawnSync} from 'node:child_process';
-import {verifyProducer,main,buildPlan,pushPlan,runBuild,checkBuildRequest,checkBuildOutput,RUNNERS,HOSTED_RUNNERS,SUPPLIED_RUNNER} from '../tools/build-runtime.mjs';
+import {verifyProducer,main,buildPlan,runBuild,checkBuildRequest,checkBuildOutput,RUNNERS,HOSTED_RUNNERS,SUPPLIED_RUNNER} from '../tools/build-runtime.mjs';
 import {findBuildTool} from '../tools/build-source.mjs';
 import {prepareBuildHost} from '../tools/build-host.mjs';
 import {prepareRelease} from '../tools/release-runtime.mjs';
@@ -84,30 +84,7 @@ test('a manual GitHub build plans the registered version once for each missing a
  execFileSync('git',['init','-q',root]);commit(root,'registry');
  assert.deepEqual(main(['--plan','--project','engine'],root),{include:[row('x64')]});
  for(const args of [['--plan','--project','engine','--output','/tmp/out'],['--plan'],['--plan','--before','a'.repeat(40),'--project','engine'],['--before','a'.repeat(40),'--project','engine','--check']])
-  assert.throws(()=>main(args,root),/--plan|--before/);
-});
-
-test('a push builds only the GitHub builds whose version or architectures it changed',t=>{
- const root=githubFixture(t,{architectures:['arm64']});execFileSync('git',['init','-q',root]);
- const first=commit(root,'registry'),registry=file=>path.join(root,'projects',file);
- const update=change=>{const projects=JSON.parse(fs.readFileSync(registry('downloadable.json')));change(projects[0]);fs.writeFileSync(registry('downloadable.json'),JSON.stringify(projects));};
- assert.deepEqual(pushPlan({before:'0'.repeat(40),directory:root}),{include:[]});
- assert.deepEqual(pushPlan({before:first,directory:root}),{include:[]});
- fs.writeFileSync(path.join(root,'notes.txt'),'unrelated');const unrelated=commit(root,'notes');
- assert.deepEqual(main(['--plan','--before',first],root),{include:[]});
- // Adding Intel to the build record plans only the new architecture of the published version.
- fs.mkdirSync(path.join(root,'catalogs'));fs.writeFileSync(path.join(root,'catalogs/engine.json'),JSON.stringify({packages:[{version:'1.0.0',arch:'arm64'}]}));
- update(project=>{project.build.architectures=['arm64','x64'];});commit(root,'intel');
- assert.deepEqual(pushPlan({before:unrelated,directory:root}),{include:[row('x64')]});
- // A previously designated ARM output can be attested but still await catalog publication.
- fs.rmSync(path.join(root,'catalogs/engine.json'));
- assert.deepEqual(pushPlan({before:unrelated,directory:root}),{include:[row('x64')]});
- // A newly declared version plans every architecture without a record or tag.
- const intel=execFileSync('git',['-C',root,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
- update(project=>{project.packageProfiles.push({version:'1.1.0',label:'Engine 1.1'});project.build.version='1.1.0';});commit(root,'1.1.0');
- assert.deepEqual(pushPlan({before:intel,directory:root}),{include:[row('arm64','1.1.0'),row('x64','1.1.0')]});
- execFileSync('git',['-C',root,'tag','engine/v1.1.0/arm64']);
- assert.deepEqual(main(['--plan','--before',intel],root),{include:[row('x64','1.1.0')]});
+  assert.throws(()=>main(args,root),/--plan|Use --project/);
 });
 
 test('GitHub build records name a contained command, exclusive universal builds and plain tool names',()=>{
@@ -179,38 +156,15 @@ test('a VNDS-LOVE package revision preserves engine files and historical packagi
  assert.deepEqual(actual.files.filter(row=>row.path!=='manifest.json'),declaration.files.filter(row=>row.path!=='manifest.json'));
 });
 
-test('the Runtime build workflow builds each architecture on its own runner before staging drafts',()=>{
+test('Build and release retains the shared architecture and attestation steps',()=>{
  const workflow=fs.readFileSync(path.join(root,'.github/workflows/runtime-build.yml'),'utf8');
- assert.match(workflow,/node tools\/build-runtime\.mjs --plan --before "\$BEFORE"/);assert.match(workflow,/node tools\/build-runtime\.mjs --plan --project "\$BUILD_PROJECT" --arch "\$BUILD_ARCH"/);
- assert.match(workflow,/matrix: \$\{\{ fromJSON\(needs\.plan\.outputs\.matrix\) \}\}/);assert.match(workflow,/runs-on: \$\{\{ matrix\.runner \}\}/);
- assert.match(workflow,/tools\/release-runtime\.mjs prepare --project "\$BUILD_PROJECT"/);assert.match(workflow,/tools\/release-runtime\.mjs verify --bundle "\$RUNNER_TEMP\/release" --project "\$BUILD_PROJECT" --version "\$BUILD_VERSION" --arch "\$BUILD_ARCH"/);
- const stage=workflow.slice(workflow.indexOf('\n  stage:'));
- assert.match(stage,/if: github\.event_name == 'workflow_dispatch' && inputs\.operation == 'stage'/);
- assert.match(workflow,/push:\n    branches: \[main\]\n    paths:\n      - projects\.json\n      - projects\/\*\*/);assert.match(workflow,/if: needs\.plan\.outputs\.empty == 'false'/);
- const attestations=[...workflow.matchAll(/      - uses: actions\/attest-build-provenance@([a-f0-9]{40}) # v4\.2\.2\n((?:        [^\n]*\n)+)/g)];assert.equal(attestations.length,2);assert.equal(attestations[0][1],attestations[1][1]);
- for(const [, ,block] of attestations)assert.match(block,/subject-path: \$\{\{ runner\.temp \}\}\/release\/\*\.tar\.gz/);
- assert.match(attestations[0][2],/id: attest\n        if: \$\{\{ !matrix\.supplied \}\}\n        continue-on-error: true/);assert.match(attestations[1][2],/if: steps\.attest\.outcome == 'failure' && !cancelled\(\)/);assert.ok(!attestations[1][2].includes('continue-on-error'));
- assert.match(workflow,/run: sleep 5/);assert.match(stage,/needs: build/);assert.match(stage,/github\.ref != 'refs\/heads\/main'/);
- assert.match(stage,/stage --bundle "\$bundle" --target "\$GITHUB_SHA"/);assert.ok(!workflow.slice(0,workflow.indexOf('\n  stage:')).includes('contents: write'));
- const release=fs.readFileSync(path.join(root,'.github/workflows/runtime-release.yml'),'utf8');
- assert.match(release,/workflow_run:/);assert.match(release,/workflows: \['Runtime build'\]/);assert.match(release,/types: \[completed\]/);
- assert.match(release,/head_branch == 'main'/);assert.match(release,/head_repository\.full_name == github\.repository/);assert.match(release,/conclusion == 'success'.*\|\|.*conclusion == 'failure'/);
- assert.match(release,/ref: main/);assert.match(release,/tools\/publish-verified\.mjs --output.*--build-run.*--catch-up/);
- assert.match(release,/continue-on-error: true/);assert.match(release,/if: steps\.publish\.outcome == 'failure'/);
- assert.equal([...release.matchAll(/git commit -m/g)].length,1);assert.equal([...release.matchAll(/git push origin HEAD:main/g)].length,1);
- assert.match(release,/git clone --no-hardlinks --dissociate/);assert.match(release,/git checkout --detach "\$CATALOG_COMMIT"/);
- assert.ok(release.indexOf('npm test')<release.indexOf('git push origin HEAD:main'),'The exact catalog commit passes Source before its one push.');
- assert.match(release,/needs: publish-verified/);assert.match(release,/source-revision: \$\{\{ needs\.publish-verified\.outputs\.catalog-commit \}\}/);
- const publisher=fs.readFileSync(path.join(root,'tools/publish-verified.mjs'),'utf8');
- assert.match(publisher,/verifiedBuildSource/);assert.match(publisher,/recordBuild\(\{archive:/);assert.match(publisher,/requireGithubBuild\(\{record,/);
- assert.ok(publisher.indexOf('await recordBuild(')<publisher.indexOf('await stageRelease('),'Signed imports precede release mutations.');
- const supplied=workflow.slice(workflow.indexOf('name: Download the pinned publisher input'),workflow.indexOf('name: Verify the package identity'));
- assert.match(supplied,/if: \$\{\{ matrix\.supplied \}\}\n        run: node tools\/publisher-files\.mjs fetch --project "\$BUILD_PROJECT" --output "\$RUNNER_TEMP\/publisher-input\.tar\.gz"/);
- assert.match(supplied,/node tools\/publisher-files\.mjs assemble --project "\$BUILD_PROJECT" --input-archive "\$RUNNER_TEMP\/publisher-input\.tar\.gz" --output "\$RUNNER_TEMP\/release"/);
- assert.match(supplied,/node tools\/publisher-files\.mjs record --project "\$BUILD_PROJECT" --input-archive "\$RUNNER_TEMP\/publisher-input\.tar\.gz" --release-bundle "\$RUNNER_TEMP\/release"/);
- for(const step of ['Prepare the runner','Build the package','Package the release'])assert.match(workflow,new RegExp('name: '+step+'\\n        if: \\$\\{\\{ !matrix\\.supplied \\}\\}\\n'));
- assert.match(stage,/publisher-files\.mjs record --project "\$PROJECT" --input-archive "\$RUNNER_TEMP\/publisher-input\.tar\.gz" --release-bundle "\$bundle"/);
-
+ assert.match(workflow,/name: Build and release/);assert.match(workflow,/workflow_dispatch:/);
+ assert.match(workflow,/matrix: \$\{\{ fromJSON\(needs\.plan\.outputs\.matrix\) \}\}/);
+ assert.match(workflow,/runs-on: \$\{\{ matrix\.runner \}\}/);assert.match(workflow,/fail-fast: false/);
+ assert.match(workflow,/tools\/release-runtime\.mjs prepare --project/);assert.match(workflow,/tools\/release-runtime\.mjs verify --bundle/);
+ const actions=[...workflow.matchAll(/uses: actions\/attest-build-provenance@([a-f0-9]{40})/g)];assert.equal(actions.length,2);assert.equal(actions[0][1],actions[1][1]);
+ assert.match(workflow,/subject-path: \$\{\{ runner\.temp \}\}\/release\/\*\.tar\.gz/);
+ assert.match(workflow,/needs: \[plan, build\]/);assert.match(workflow,/tools\/publish-verified\.mjs --output/);
 });
 
 test('registered GitHub build commands reject architectures their projects do not build',async t=>{
@@ -228,7 +182,7 @@ test('registered GitHub build commands reject architectures their projects do no
  const java=buildRecords(registry.projects.find(project=>project.id==='java-steamworks'));assert.deepEqual(java.map(build=>build.architectures),[['x64'],['universal']]);for(const [index,base] of ['1.9.0','1.10.0'].entries())assert.ok(java[index].version.startsWith(base+'-MCLv'));
  const {helperProfile}=await import('../tools/build-helper.mjs');
  assert.throws(()=>helperProfile('gemrb'),/ENOENT|helper-builds/);
- for(const id of ['catsystem2-kif-crypto','web-renderer-network','steam-api-helper','steam-ticket-loader','mkxpz-config-helper'])assert.equal(helperProfile(id).profile.version,registry.projects.find(project=>project.id===id).build.version);
+ for(const id of ['catsystem2-kif-crypto','web-renderer-network','steam-api-helper','steam-ticket-loader','mkxpz-config-helper'])assert.ok(registry.projects.find(project=>project.id===id).packageProfiles.some(profile=>profile.version===helperProfile(id).profile.version));
 });
 
 test('one shared request check covers every registered build command before its recipe starts',t=>{

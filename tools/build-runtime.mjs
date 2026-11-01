@@ -108,21 +108,6 @@ export function declaredBuilds(read){
  return builds;
 }
 
-/** Push-triggered Runtime build: only builds whose version or architectures changed
- * since `before`, minus architectures that already have a catalog record or tag. */
-export function pushPlan({before,directory=root,tags=gitTags,show=(revision,file)=>git(directory,['show',revision+':'+file])}){
- if(!/^[a-f0-9]{40}$/.test(before||'')||/^0+$/.test(before))return {include:[]};
- const previous=declaredBuilds(file=>show(before,file)),include=[];
- for(const [key,next] of declaredBuilds(file=>fs.readFileSync(path.join(directory,file),'utf8'))){
-  const old=previous.get(key),id=next.project;
-  if(old&&old.version===next.version&&next.architectures.every(arch=>old.architectures.includes(arch)))continue;
-  const {project,build}=githubBuild(id,directory,next.version),done=existing(project,build.version,directory,tags);
-  for(const arch of build.architectures)if(!old?.architectures.includes(arch)&&!done.has(arch))include.push(matrixRow(project,build,arch));
- }
- return {include};
-}
-
-
 /** A build output holds the finished runtime in payload/ and its package declaration. */
 export function checkBuildOutput({project,build,arch,output,platform=process.platform}){
  const names=fs.readdirSync(output).sort();
@@ -169,7 +154,7 @@ export function runBuild({project:id,arch,version,output,work=path.join(fs.mkdte
  if(actual!==command||!fs.statSync(actual).isFile())throw Error('The GitHub build command must be a regular file in this repository.');
  const context=runtimeBuildEnvironment(build);
  try{
-  const result=spawn(process.execPath,[command,'--project',project.id,'--arch',arch,...(Array.isArray(project.build)?['--version',build.version]:[]),'--output',output,'--work',work],{cwd:directory,stdio:'inherit',env:reproducibleEnvironment(directory,context.env)});
+  const result=spawn(process.execPath,[command,'--project',project.id,'--arch',arch,'--version',build.version,'--output',output,'--work',work],{cwd:directory,stdio:'inherit',env:reproducibleEnvironment(directory,context.env)});
   if(result.error)throw result.error;
   if(result.status!==0)throw Error(project.name+' build exited with status '+result.status);
   return checkBuildOutput({project,build,arch,output});
@@ -179,19 +164,18 @@ export function runBuild({project:id,arch,version,output,work=path.join(fs.mkdte
 export function main(args,directory=root){
  const options={};for(let i=0;i<args.length;i++){
   if(['--check','--plan','--prepare'].includes(args[i])){const key=args[i].slice(2);if(options[key])throw Error('Duplicate '+args[i]+'.');options[key]=true;continue;}
-  const key=args[i]?.slice(2);if(!args[i]?.startsWith('--')||!['project','runtime','inputs','arch','output','work','version','before'].includes(key)||!args[i+1]||Object.hasOwn(options,key))throw Error('Use --project android with --check or --inputs /absolute/path.json.');
+  const key=args[i]?.slice(2);if(!args[i]?.startsWith('--')||!['project','runtime','inputs','arch','output','work','version'].includes(key)||!args[i+1]||Object.hasOwn(options,key))throw Error('Use --project android with --check or --inputs /absolute/path.json.');
   options[key]=args[++i];
  }
  if(options.project&&options.runtime)throw Error('Select one project.');options.project??=options.runtime;
  if(options.prepare){
-  if(options.check||options.plan||options.inputs||options.output||options.work||options.before||!options.project||!options.arch)throw Error('Use --prepare with --project, --arch and an optional --version.');
+  if(options.check||options.plan||options.inputs||options.output||options.work||!options.project||!options.arch)throw Error('Use --prepare with --project, --arch and an optional --version.');
   return prepareBuild({project:options.project,arch:options.arch,version:options.version,directory});
  }
  if(options.plan){
-  if(options.check||options.inputs||options.output||options.work||!options.before===!options.project||options.before&&(options.arch||options.version))throw Error('Use --plan with --before <commit>, or with --project and optional --arch and --version.');
-  return options.before?pushPlan({before:options.before,directory}):buildPlan({...options,directory});
+  if(options.check||options.inputs||options.output||options.work||!options.project)throw Error('Use --plan with --project and optional --arch and --version.');
+  return buildPlan({...options,directory});
  }
- if(options.before)throw Error('--before applies to --plan.');
  if(options.arch||options.output){
   if(options.check||options.inputs||!options.arch||!options.output)throw Error('Use --project, --arch and --output, with an optional --work directory.');
   return runBuild({...options,directory});
