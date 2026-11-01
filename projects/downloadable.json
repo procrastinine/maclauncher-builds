@@ -82,10 +82,14 @@
       {
         "version": "0.2.0-MCLv1",
         "label": "MacLauncher Android 0.2.0-MCLv1"
+      },
+      {
+        "version": "0.2.1",
+        "label": "MacLauncher Android 0.2.1"
       }
     ],
     "build": {
-      "version": "0.2.0-MCLv1",
+      "version": "0.2.1",
       "command": "tools/build-android.mjs",
       "architectures": [
         "arm64"
@@ -2089,10 +2093,14 @@
       {
         "version": "26.3.0-MCLv1",
         "label": "CrossOver26.3 WineVulkan ABI47"
+      },
+      {
+        "version": "26.3.1",
+        "label": "WineVulkan scene adapter 26.3.1"
       }
     ],
     "build": {
-      "version": "26.3.0-MCLv1",
+      "version": "26.3.1",
       "command": "tools/build-winevulkan-scene.mjs",
       "architectures": [
         "x64"
@@ -2300,15 +2308,21 @@
     "packageProfiles": [
       {
         "version": "software-gl-v3-MCLv2",
-        "label": "GameMaker OpenGL helper software-gl-v3-MCLv2"
+        "label": "GameMaker OpenGL helper software-gl-v3-MCLv2",
+        "semanticVersion": "3.0.0"
       },
       {
         "version": "software-gl-v3-MCLv3",
-        "label": "GameMaker software OpenGL software-gl-v3-MCLv3"
+        "label": "GameMaker software OpenGL software-gl-v3-MCLv3",
+        "semanticVersion": "3.0.0"
+      },
+      {
+        "version": "3.0.1",
+        "label": "GameMaker OpenGL helper 3.0.1"
       }
     ],
     "build": {
-      "version": "software-gl-v3-MCLv3",
+      "version": "3.0.1",
       "command": "tools/build-gamemaker-opengl.mjs",
       "architectures": [
         "universal"
@@ -2318,7 +2332,7 @@
   {
     "id": "vnds-love",
     "name": "VNDS-LOVE",
-    "purpose": "Adapted VNDS interpreter for the managed LÖVE host.",
+    "purpose": "Adapted VNDS interpreter for the managed L\u00d6VE host.",
     "producer": {
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
@@ -2385,10 +2399,14 @@
       {
         "version": "1.0.0-MCLv2",
         "label": "MacLauncher RLVM adapter 1.0.0-MCLv2"
+      },
+      {
+        "version": "1.0.1",
+        "label": "MacLauncher RLVM adapter 1.0.1"
       }
     ],
     "build": {
-      "version": "1.0.0-MCLv2",
+      "version": "1.0.1",
       "command": "producers/vn-adaptations/rlvm/package.mjs",
       "architectures": [
         "universal"

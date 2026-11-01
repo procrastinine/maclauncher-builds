@@ -5,7 +5,7 @@ import {spawnSync,execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {resolveProject,buildRecord,buildRecords} from '../lib/projects.mjs';
-import {releaseVersion} from '../lib/package-version.mjs';
+import {buildReleaseVersion as releaseVersion} from '../lib/package-version.mjs';
 import {linuxToolSelection} from './build-tools.mjs';
 import {HOSTED_RUNNERS,hostedRunner} from '../lib/hosted-runners.mjs';
 import {RUST_TOOLCHAIN} from './rust-build.mjs';

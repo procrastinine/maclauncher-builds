@@ -7,7 +7,7 @@ import {pipeline} from 'node:stream/promises';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {assetName,identity} from '../lib/project-identity.mjs';
-import {releaseVersion} from '../lib/package-version.mjs';
+import {buildReleaseVersion} from '../lib/package-version.mjs';
 import {publicDeclaration,verify} from './runtime-package.mjs';
 const require=createRequire(import.meta.url),A=require('../lib/archive.cjs');
 const bytes=value=>Buffer.from(JSON.stringify(value,null,2)+'\n');
@@ -15,7 +15,7 @@ const digest=value=>crypto.createHash('sha256').update(value).digest('hex');
 
 /** Rewrite the package and its consumed manifest without extracting or changing runtime files. */
 export async function reversionPackage({archive,record,version,output,directory=path.resolve(import.meta.dirname,'..')}){
- releaseVersion(record.id,version,directory);
+ buildReleaseVersion(record.id,version,directory);
  if(version===record.version)throw Error('Repacking requires a new immutable release version.');
  identity({...record,version});
  if(path.basename(output)!==assetName({...record,version})||path.resolve(archive)===path.resolve(output)||fs.existsSync(output))throw Error('Choose a new archive path matching the package version.');

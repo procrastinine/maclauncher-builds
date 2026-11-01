@@ -1,3 +1,4 @@
+import VersionOrder from '../lib/version-order.cjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -5,11 +6,13 @@ import zlib from 'node:zlib';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {assetName,releaseTag,assetUrl,identity,projectId,releaseRecord,validateCatalog} from '../lib/project-identity.mjs';
-import {resolveProject} from '../lib/projects.mjs';
+import {resolveProject,readProjects} from '../lib/projects.mjs';
+import {outputVersion} from '../lib/package-version.mjs';
 import {recordMetadata} from '../lib/record-metadata.mjs';
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs');
 const {validateDeclaration}=require('../lib/declaration.cjs');
 const A=require('../lib/archive.cjs'),SHA=/^[a-f0-9]{64}$/;
+const root=path.resolve(import.meta.dirname,'..');
 
 export function publicDeclaration(value){
  validateDeclaration(value);
@@ -20,7 +23,8 @@ export function publicDeclaration(value){
  return value;
 }
 
-export async function pack({project,input,declaration,output,metadata={},sourceDateEpoch=0}){
+export async function pack({project,input,declaration,output,metadata={},sourceDateEpoch=0,directory=root}){
+ outputVersion(project,declaration?.version,directory);
  projectId(project);declaration=publicDeclaration(declaration);identity(declaration);
  if(declaration.id!==project)throw Error(`Package belongs to ${declaration.id}; expected project ${project}.`);
  if(path.basename(output)!==assetName(declaration))throw Error('Output filename must be '+assetName(declaration));
@@ -79,11 +83,12 @@ export async function verify({archive,sha256,project,version,arch,includeDeclara
  }finally{input.destroy();stream.destroy();}
 }
 
-export function catalog(records,{project,repository,previous}={}){
+export function catalog(records,{project,repository,previous,directory=root}={}){
  projectId(project);if(!Array.isArray(records)||!records.length)throw Error('Select at least one project release record.');
  if(previous)validateCatalog(previous,{project,repository,allowEmpty:true});
  const seen=new Set(),old=new Map((previous?.packages||[]).map(record=>[record.version+'/'+record.arch,record]));
  const packages=records.map(record=>{
+  outputVersion(project,record.version,directory);
   releaseRecord(record,{project,repository});const key=record.version+'/'+record.arch;
   if(seen.has(key))throw Error('Duplicate project/version/architecture.');seen.add(key);
   const result={...record,tag:releaseTag(record),asset:{...record.asset,url:assetUrl(record,repository)}};
@@ -91,7 +96,13 @@ export function catalog(records,{project,repository,previous}={}){
   return result;
  });
  for(const record of previous?.packages||[])if(!seen.has(record.version+'/'+record.arch))packages.push(record);
- return validateCatalog({schemaVersion:2,projectId:project,updatePolicy:'manual',packages},{project,repository});
+ const registered=readProjects(directory,{resolvePins:false}).projects.find(row=>row.id===project),semantics={...previous?.versionSemantics};
+ for(const profile of registered?.packageProfiles||[])if(profile.semanticVersion&&packages.some(record=>record.version===profile.version)){
+  if(semantics[profile.version]&&semantics[profile.version]!==profile.semanticVersion)throw Error('A declared semantic version is immutable.');
+  semantics[profile.version]=profile.semanticVersion;
+ }
+ if(Object.keys(semantics).length)packages.sort((a,b)=>VersionOrder.compareRuntimeVersions(a,b,semantics));
+ return validateCatalog({schemaVersion:2,projectId:project,updatePolicy:'manual',packages,...(Object.keys(semantics).length?{versionSemantics:semantics}:{})},{project,repository});
 }
 
 // Published payload identities stay fixed; factual metadata can be backfilled.

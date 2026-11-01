@@ -47,7 +47,7 @@ test('runtime builds require the exact clean source commit recorded by the hub',
 // A registry with one GitHub-built project and a command that writes a data-only package.
 function githubFixture(t,build={architectures:['arm64','x64']},command){
  const root=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'runtime-github-build-')));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
- const project={id:'engine',name:'Engine',producer:{kind:'maclauncher',repository:'https://github.com/owner/builds',entries:['producers/engine/build.mjs'],sourceDirectory:'producers/engine'},upstreams:[],packageProfiles:[{version:'1.0',label:'Engine 1.0'}],build:{version:'1.0',command:'producers/engine/build.mjs',submodules:['producers/engine/upstream'],tools:['meson','ninja'],...build}};
+ const project={id:'engine',name:'Engine',producer:{kind:'maclauncher',repository:'https://github.com/owner/builds',entries:['producers/engine/build.mjs'],sourceDirectory:'producers/engine'},upstreams:[],packageProfiles:[{version:'1.0.0',label:'Engine 1.0'}],build:{version:'1.0.0',command:'producers/engine/build.mjs',submodules:['producers/engine/upstream'],tools:['meson','ninja'],...build}};
  const helper={id:'helper',name:'Helper',producer:{kind:'maclauncher',repository:'https://github.com/owner/builds',entries:['producers/helper/build.mjs']},upstreams:[]};
  fs.mkdirSync(path.join(root,'projects'));fs.mkdirSync(path.join(root,'producers/engine'),{recursive:true});
  fs.writeFileSync(path.join(root,'projects.json'),JSON.stringify({schemaVersion:2,repository:'owner/builds',updatePolicy:'manual',registries:{downloadable:'projects/downloadable.json',bundled:'projects/bundled.json'}}));
@@ -55,32 +55,32 @@ function githubFixture(t,build={architectures:['arm64','x64']},command){
  fs.writeFileSync(path.join(root,'producers/engine/build.mjs'),command??`import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';
 const o={};for(let i=2;i<process.argv.length;i+=2)o[process.argv[i].slice(2)]=process.argv[i+1];
 const payload=path.join(o.output,'payload');fs.mkdirSync(payload,{recursive:true});
-const files={'manifest.json':JSON.stringify({version:'1.0',arch:o.arch}),'LICENSE':'MIT'};
+const files={'manifest.json':JSON.stringify({version:'1.0.0',arch:o.arch}),'LICENSE':'MIT'};
 for(const [name,bytes] of Object.entries(files))fs.writeFileSync(path.join(payload,name),bytes,{mode:0o644});
 const record=name=>({path:name,size:Buffer.byteLength(files[name]),mode:0o644,sha256:crypto.createHash('sha256').update(files[name]).digest('hex')});
 const cpus=o.arch==='arm64'?['arm64']:o.arch==='x64'?(process.env.ENGINE_CPUS||'arm64,x64').split(','):['arm64','x64'];
-fs.writeFileSync(path.join(o.output,'declaration.json'),JSON.stringify({id:o.project,version:'1.0',arch:o.arch,launcherArchitectures:cpus,minimumMacOS:'13.0',directoryRelative:o.project+'/1.0/'+o.arch,manifestRelative:'manifest.json',manifestSha256:record('manifest.json').sha256,sourceSha256:record('manifest.json').sha256,sourceRelative:'manifest.json',files:Object.keys(files).map(record),notices:[{name:'Engine',license:'MIT',path:'LICENSE'}]}));
+fs.writeFileSync(path.join(o.output,'declaration.json'),JSON.stringify({id:o.project,version:'1.0.0',arch:o.arch,launcherArchitectures:cpus,minimumMacOS:'13.0',directoryRelative:o.project+'/1.0.0/'+o.arch,manifestRelative:'manifest.json',manifestSha256:record('manifest.json').sha256,sourceSha256:record('manifest.json').sha256,sourceRelative:'manifest.json',files:Object.keys(files).map(record),notices:[{name:'Engine',license:'MIT',path:'LICENSE'}]}));
 if(process.env.ENGINE_EXTRA)fs.writeFileSync(path.join(o.output,'extra.txt'),'extra');
 `);
  return root;
 }
 
-const row=(arch,version='1.0')=>({project:'engine',version,arch,runner:RUNNERS[arch]});
+const row=(arch,version='1.0.0')=>({project:'engine',version,arch,runner:RUNNERS[arch]});
 const commit=(root,message)=>{for(const args of [['add','-A'],['-c','user.name=t','-c','user.email=t@example.com','commit','-qm',message]])execFileSync('git',['-C',root,...args]);return execFileSync('git',['-C',root,'rev-parse','HEAD'],{encoding:'utf8'}).trim();};
 
 test('a manual GitHub build plans the registered version once for each missing architecture',t=>{
  const root=githubFixture(t),none=()=>[];
  assert.deepEqual(buildPlan({project:'engine',directory:root,tags:none}),{include:[row('arm64'),row('x64')]});
  assert.equal(RUNNERS.arm64,'xcode-27');assert.equal(RUNNERS.x64,'macos-26-intel');assert.equal(RUNNERS.universal,RUNNERS.arm64);
- assert.deepEqual(buildPlan({project:'engine',arch:'x64',version:'1.0',directory:root,tags:none}),{include:[row('x64')]});
+ assert.deepEqual(buildPlan({project:'engine',arch:'x64',version:'1.0.0',directory:root,tags:none}),{include:[row('x64')]});
  assert.throws(()=>buildPlan({project:'engine',arch:'universal',directory:root,tags:none}),/builds arm64 and x64 packages/);
  assert.throws(()=>buildPlan({project:'engine',version:'2.0',directory:root,tags:none}),/builds version 1\.0/);
  assert.throws(()=>buildPlan({project:'helper',directory:root,tags:none}),/no GitHub build command/);
  // A catalog record or a release tag, which a staged draft also has, means the architecture is never built again.
- fs.mkdirSync(path.join(root,'catalogs'));fs.writeFileSync(path.join(root,'catalogs/engine.json'),JSON.stringify({packages:[{version:'1.0',arch:'arm64'}]}));
+ fs.mkdirSync(path.join(root,'catalogs'));fs.writeFileSync(path.join(root,'catalogs/engine.json'),JSON.stringify({packages:[{version:'1.0.0',arch:'arm64'}]}));
  assert.deepEqual(buildPlan({project:'engine',directory:root,tags:none}),{include:[row('x64')]});
  assert.throws(()=>buildPlan({project:'engine',arch:'arm64',directory:root,tags:none}),/already has a arm64 package or tag/);
- assert.throws(()=>buildPlan({project:'engine',directory:root,tags:()=>['engine/v1.0/x64','engine/v0.9/arm64']}),/already has a package for each architecture/);
+ assert.throws(()=>buildPlan({project:'engine',directory:root,tags:()=>['engine/v1.0.0/x64','engine/v0.9/arm64']}),/already has a package for each architecture/);
  execFileSync('git',['init','-q',root]);commit(root,'registry');
  assert.deepEqual(main(['--plan','--project','engine'],root),{include:[row('x64')]});
  for(const args of [['--plan','--project','engine','--output','/tmp/out'],['--plan'],['--plan','--before','a'.repeat(40),'--project','engine'],['--before','a'.repeat(40),'--project','engine','--check']])
@@ -96,7 +96,7 @@ test('a push builds only the GitHub builds whose version or architectures it cha
  fs.writeFileSync(path.join(root,'notes.txt'),'unrelated');const unrelated=commit(root,'notes');
  assert.deepEqual(main(['--plan','--before',first],root),{include:[]});
  // Adding Intel to the build record plans only the new architecture of the published version.
- fs.mkdirSync(path.join(root,'catalogs'));fs.writeFileSync(path.join(root,'catalogs/engine.json'),JSON.stringify({packages:[{version:'1.0',arch:'arm64'}]}));
+ fs.mkdirSync(path.join(root,'catalogs'));fs.writeFileSync(path.join(root,'catalogs/engine.json'),JSON.stringify({packages:[{version:'1.0.0',arch:'arm64'}]}));
  update(project=>{project.build.architectures=['arm64','x64'];});commit(root,'intel');
  assert.deepEqual(pushPlan({before:unrelated,directory:root}),{include:[row('x64')]});
  // A previously designated ARM output can be attested but still await catalog publication.
@@ -104,14 +104,14 @@ test('a push builds only the GitHub builds whose version or architectures it cha
  assert.deepEqual(pushPlan({before:unrelated,directory:root}),{include:[row('x64')]});
  // A newly declared version plans every architecture without a record or tag.
  const intel=execFileSync('git',['-C',root,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
- update(project=>{project.packageProfiles.push({version:'1.1',label:'Engine 1.1'});project.build.version='1.1';});commit(root,'1.1');
- assert.deepEqual(pushPlan({before:intel,directory:root}),{include:[row('arm64','1.1'),row('x64','1.1')]});
- execFileSync('git',['-C',root,'tag','engine/v1.1/arm64']);
- assert.deepEqual(main(['--plan','--before',intel],root),{include:[row('x64','1.1')]});
+ update(project=>{project.packageProfiles.push({version:'1.1.0',label:'Engine 1.1'});project.build.version='1.1.0';});commit(root,'1.1.0');
+ assert.deepEqual(pushPlan({before:intel,directory:root}),{include:[row('arm64','1.1.0'),row('x64','1.1.0')]});
+ execFileSync('git',['-C',root,'tag','engine/v1.1.0/arm64']);
+ assert.deepEqual(main(['--plan','--before',intel],root),{include:[row('x64','1.1.0')]});
 });
 
 test('GitHub build records name a contained command, exclusive universal builds and plain tool names',()=>{
- const project=build=>({id:'engine',producer:{kind:'maclauncher',sourceDirectory:'producers/engine'},packageProfiles:[{version:'1.0'}],build:{version:'1.0',command:'producers/engine/build.mjs',architectures:['arm64'],...build}});
+ const project=build=>({id:'engine',producer:{kind:'maclauncher',sourceDirectory:'producers/engine'},packageProfiles:[{version:'1.0.0'}],build:{version:'1.0.0',command:'producers/engine/build.mjs',architectures:['arm64'],...build}});
  assert.deepEqual(buildRecord(project({})).architectures,['arm64']);
  assert.equal(buildRecord(project({command:'tools/build-engine.mjs'})).command,'tools/build-engine.mjs');
  for(const [build,error] of [[{architectures:[]},/distinct arm64/],[{architectures:['arm64','arm64']},/distinct arm64/],
@@ -124,7 +124,7 @@ test('a GitHub build runs the registered command and accepts only its declared p
  const fixtureRunners=process.platform==='linux'?{arm64:'ubuntu-24.04',x64:'ubuntu-24.04'}:undefined;
  const root=githubFixture(t,{architectures:['arm64','x64'],tools:undefined,...(fixtureRunners?{runners:fixtureRunners}:{})}),work=path.join(root,'work');
  const built=runBuild({project:'engine',arch:'x64',output:path.join(root,'out-x64'),work,directory:root});
- assert.equal(built.version,'1.0');assert.equal(built.arch,'x64');assert.equal(built.payload,path.join(root,'out-x64/payload'));
+ assert.equal(built.version,'1.0.0');assert.equal(built.arch,'x64');assert.equal(built.payload,path.join(root,'out-x64/payload'));
  assert.equal(main(['--project','engine','--arch','arm64','--output',path.join(root,'out-arm64')],root).arch,'arm64');
  assert.throws(()=>runBuild({project:'engine',arch:'universal',output:path.join(root,'out-universal'),directory:root}),/builds arm64 and x64/);
  assert.throws(()=>runBuild({project:'engine',arch:'x64',output:path.join(root,'out-x64'),directory:root}),/new absolute output/);
@@ -148,7 +148,7 @@ test('Linux outputs reject Mach-O files with explicit and legacy format metadata
  for(const format of [undefined,'mach-o']){
   if(format)file.format=format;else delete file.format;
   fs.writeFileSync(built.declaration,JSON.stringify(declaration));
-  assert.throws(()=>checkBuildOutput({project:{id:'engine'},build:{version:'1.0'},arch:'arm64',output,platform:'linux'}),/Mac programs require a hosted Mac runner/);
+  assert.throws(()=>checkBuildOutput({project:{id:'engine'},build:{version:'1.0.0'},arch:'arm64',output,platform:'linux'}),/Mac programs require a hosted Mac runner/);
  }
 });
 
@@ -287,13 +287,13 @@ test('an owned helper builds a separate package for each CPU, and only Intel exe
 
 test('a project with multiple ABI builds plans missing versions independently',t=>{
  const directory=githubFixture(t),file=path.join(directory,'projects/downloadable.json'),projects=JSON.parse(fs.readFileSync(file)),project=projects[0];
- project.packageProfiles.push({version:'1.1',label:'Engine ABI 1.1'});project.build=[{...project.build,architectures:['x64']},{...project.build,version:'1.1',architectures:['universal']}];fs.writeFileSync(file,JSON.stringify(projects));
- assert.deepEqual(buildPlan({project:'engine',directory,tags:()=>[]}),{include:[row('x64'),row('universal','1.1')]});
- assert.deepEqual(buildPlan({project:'engine',version:'1.1',directory,tags:()=>[]}),{include:[row('universal','1.1')]});
+ project.packageProfiles.push({version:'1.1.0',label:'Engine ABI 1.1'});project.build=[{...project.build,architectures:['x64']},{...project.build,version:'1.1.0',architectures:['universal']}];fs.writeFileSync(file,JSON.stringify(projects));
+ assert.deepEqual(buildPlan({project:'engine',directory,tags:()=>[]}),{include:[row('x64'),row('universal','1.1.0')]});
+ assert.deepEqual(buildPlan({project:'engine',version:'1.1.0',directory,tags:()=>[]}),{include:[row('universal','1.1.0')]});
  assert.deepEqual(buildPlan({project:'engine',arch:'x64',directory,tags:()=>[]}),{include:[row('x64')]});
- assert.deepEqual(buildPlan({project:'engine',arch:'universal',directory,tags:()=>[]}),{include:[row('universal','1.1')]});
- assert.deepEqual(buildPlan({project:'engine',directory,tags:()=>['engine/v1.0/x64']}),{include:[row('universal','1.1')]});
- assert.throws(()=>buildPlan({project:'engine',directory,tags:()=>['engine/v1.0/x64','engine/v1.1/universal']}),/already has a package for each declared version/);
+ assert.deepEqual(buildPlan({project:'engine',arch:'universal',directory,tags:()=>[]}),{include:[row('universal','1.1.0')]});
+ assert.deepEqual(buildPlan({project:'engine',directory,tags:()=>['engine/v1.0.0/x64']}),{include:[row('universal','1.1.0')]});
+ assert.throws(()=>buildPlan({project:'engine',directory,tags:()=>['engine/v1.0.0/x64','engine/v1.1.0/universal']}),/already has a package for each declared version/);
  assert.throws(()=>buildRecords({...project,build:[project.build[0],project.build[0]]}),/distinct declared versions/);
 });
 

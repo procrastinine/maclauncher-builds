@@ -6,7 +6,7 @@ import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {pack,verify,catalog,publicDeclaration} from './runtime-package.mjs';
 import {resolveProject,readProjects} from '../lib/projects.mjs';
-import {releaseVersion} from '../lib/package-version.mjs';
+import {releaseVersion,buildReleaseVersion} from '../lib/package-version.mjs';
 import {buildCoverage,assertBuildCoverage} from './build-coverage.mjs';
 import {sourceDateEpoch,buildToolchain} from '../lib/reproducible-build.mjs';
 import {assetName,releaseTag,releaseRecord,validateCatalog,identity} from '../lib/project-identity.mjs';
@@ -52,14 +52,14 @@ export async function prepareRelease({project,input,declaration,archive,record,s
   if(!archive||!record)throw Error('Choose a new release output directory.');
   const existing=await verifyRelease({bundle:output,directory});
   releaseRecord(record,{project,repository:repo});
-  if(stable(catalog([record],{project,repository:repo}).packages[0])!==stable(catalog([existing.record],{project,repository:repo}).packages[0])||regular(archive).size!==record.asset.bytes||await A.checksum(archive)!==record.asset.sha256)throw Error('Existing release output differs from the selected record.');
+  if(stable(catalog([record],{project,repository:repo,directory}).packages[0])!==stable(catalog([existing.record],{project,repository:repo,directory}).packages[0])||regular(archive).size!==record.asset.bytes||await A.checksum(archive)!==record.asset.sha256)throw Error('Existing release output differs from the selected record.');
   return {...existing.release,existing:true};
  }
  if(archive?(!record||input||declaration):(!input||record))throw Error('Select sealed --input and --declaration, or existing --archive and --record.');
  if(!archive){declaration??=await managerDeclaration({project,input,source});declaration=publicDeclaration(declaration);if(declaration.id!==project)throw Error('Declaration belongs to another project.');}
  else releaseRecord(record,{project,repository:repo});
  const selected=archive?record:declaration;
- releaseVersion(project,selected.version,directory);
+ buildReleaseVersion(project,selected.version,directory);
  const previous=loadPrevious(project,directory);
  const parent=path.dirname(path.resolve(output));fs.mkdirSync(parent,{recursive:true});
  const staging=fs.mkdtempSync(path.join(parent,'.release-'));
@@ -69,7 +69,7 @@ export async function prepareRelease({project,input,declaration,archive,record,s
    const expected=recordFromDeclaration(declaration,{filename:name,sha256:record.asset.sha256,bytes:regular(archivePath).size},undefined,undefined,record);
    if(stable({...record,tag:undefined,sourceAsset:undefined,source:undefined,asset:{...record.asset,url:undefined}})!==stable(expected))throw Error('Release record differs from the sealed runtime archive.');
    record=expected;write(archivePath+'.json',record);
-  }else record=await pack({project,input,declaration,output:archivePath,sourceDateEpoch:sourceRevision?sourceDateEpoch(directory,sourceRevision):0});
+  }else record=await pack({project,input,declaration,output:archivePath,sourceDateEpoch:sourceRevision?sourceDateEpoch(directory,sourceRevision):0,directory});
   if(!archive&&sourceRevision){
    record.build={sourceRevision,workflow:repo+'/.github/workflows/runtime-build.yml',toolchain:buildToolchain(),
     ...(process.env.GITHUB_ACTIONS==='true'&&process.env.GITHUB_REPOSITORY===repo?{runId:process.env.GITHUB_RUN_ID,runAttempt:process.env.GITHUB_RUN_ATTEMPT}:{})};
@@ -77,7 +77,7 @@ export async function prepareRelease({project,input,declaration,archive,record,s
   if(sourcePointer)record.source=sourcePointer;
   if(legacySourceAsset)record.sourceAsset=legacySourceAsset;
   fs.writeFileSync(archivePath+'.json',json(record));
-  const next=catalog([record],{project,repository:repo,previous});
+  const next=catalog([record],{project,repository:repo,previous,directory});
   write(path.join(staging,project+'.json'),next);
   if(declaration.sourceArtifact&&source){
    const expected=declaration.sourceArtifact;
@@ -99,7 +99,7 @@ export async function verifyRelease({bundle,project,version,arch,directory=root}
  const checked=await verify({archive:runtime,sha256:record.asset.sha256,project:record.id,version:record.version,arch:record.arch,includeDeclaration:true});
  const expected=recordFromDeclaration(checked.declaration,{filename:name,sha256:record.asset.sha256,bytes:record.asset.bytes},record.sourceAsset,record.source,record);
  if(stable(record)!==stable(expected))throw Error('Release record differs from the sealed runtime archive.');
- const snapshot=validateCatalog(read(path.join(bundle,record.id+'.json')),{project:record.id,repository:repo}),next=catalog([record],{project:record.id,repository:repo});
+ const snapshot=validateCatalog(read(path.join(bundle,record.id+'.json')),{project:record.id,repository:repo}),next=catalog([record],{project:record.id,repository:repo,directory});
  if(stable(snapshot.packages.find(p=>p.version===record.version&&p.arch===record.arch))!==stable(next.packages[0]))throw Error('Release catalog does not contain the selected package.');
  const required=checked.declaration.sourceArtifact,sourceName=required&&path.posix.basename(required.directoryRelative),source=sourceName&&path.join(bundle,sourceName),hasSource=Boolean(source&&fs.existsSync(source));
  if(record.sourceAsset&&stable(record.sourceAsset)!==stable(sourceRecord(checked.declaration,repo)))throw Error('Release source asset differs from the sealed source identity.');
