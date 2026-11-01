@@ -158,14 +158,22 @@ A project's catalog keeps every published package and gains at most one new vers
 
 ### Publish verified builds on GitHub
 
-The **Runtime release** workflow's `publish-verified` operation publishes every active, imported signed output that is absent from its catalog. Project, version, architecture and build-run inputs are unused in this mode. It runs on a GitHub-hosted Ubuntu runner, downloads each package from the build run recorded in its attestation, and checks its digest and sealed contents through the existing release tools. It stages the release at the certified source commit, verifies the draft, publishes it, verifies the public archive and applies its catalog record. Packages are processed serially, stopping at the first failure. All Runtime release operations share one publication queue.
+The **Runtime release** workflow's `publish-verified` operation publishes every active, imported signed output that is absent from its catalog. An optional build-run input imports the successful packages of an exact project and version before publication. An omitted architecture selects every architecture in that build record. The workflow verifies each successful build job, the sealed package and its signed provenance through the existing release tools. Its staging step keeps the strict verified ledgers in the hosted checkout and the publication-plan artifact; the publisher reads those records there. Archives use the same download directory for import and publication. It runs on a GitHub-hosted Ubuntu runner, downloads each package from the build run recorded in its attestation, and checks its digest and sealed contents through the existing release tools. It stages the release at the certified source commit, verifies the draft, publishes it, verifies the public archive and applies its catalog record. Packages are processed serially, stopping at the first failure. All Runtime release operations share one publication queue.
 
 ```sh
 gh workflow run runtime-release.yml --repo procrastinine/maclauncher-builds \
   --ref main -f operation=publish-verified -F dry-run=true
 ```
 
-The dry run downloads and verifies the selected artifacts and saves a publication plan without changing releases, tags or catalogs. Omitting `dry-run=true` performs publication. The workflow then commits only catalog changes, runs the Source tests, release-version checks and package-index generation from a clean clone of that exact commit, and pushes it to `main`. The existing Package index workflow updates the site at the checked commit. No package compiler runs and no archive passes through a local Mac.
+A new Runtime build can be imported and published in one dispatch:
+
+```sh
+gh workflow run runtime-release.yml --repo procrastinine/maclauncher-builds \
+  --ref main -f operation=publish-verified -f project=reshade \
+  -f version=0.3.2 -f build-run="$BUILD_RUN"
+```
+
+The dry run downloads and verifies the selected artifacts and saves a publication plan without changing releases, tags or catalogs. Omitting `dry-run=true` performs publication. The workflow then commits catalog changes and any newly imported signed build records, runs the Source tests, release-version checks and package-index generation from a clean clone of that exact commit, and pushes it to `main`. The existing Package index workflow updates the site at the checked commit. No package compiler runs and no archive passes through a local Mac.
 
 A retry skips cataloged outputs and preserves matching tags, drafts and public releases. If a previous attempt created only a tag or an empty draft, batch staging completes it only when that tag identifies the exact certified source commit. Conflicting source commits or archive bytes stop publication; releases and assets are never replaced or deleted. If a build artifact has expired after its release was created, the same signed digest can verify the existing release archive. A retry also refreshes the package index when the catalogs already match.
 

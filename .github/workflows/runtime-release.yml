@@ -28,7 +28,7 @@ on:
         default: false
         type: boolean
       build-run:
-        description: Runtime build run (required for stage; empty for a package already in its catalog)
+        description: Runtime build run (required for stage; optionally imported before publish-verified)
         required: false
         default: ''
         type: string
@@ -205,6 +205,10 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       DRY_RUN: ${{ inputs.dry-run }}
+      BUILD_RUN: ${{ inputs.build-run }}
+      PROJECT: ${{ inputs.project }}
+      VERSION: ${{ inputs.version }}
+      ARCH: ${{ inputs.arch }}
     steps:
       - name: Require main
         if: github.ref != 'refs/heads/main'
@@ -225,13 +229,17 @@ jobs:
       - name: Publish imported signed outputs
         run: |
           args=(--output "$RUNNER_TEMP/verified-publication")
+          if [ -n "$BUILD_RUN" ]; then
+            args+=(--build-run "$BUILD_RUN" --project "$PROJECT" --version "$VERSION")
+            if [ -n "$ARCH" ]; then args+=(--arch "$ARCH"); fi
+          fi
           if [ "$DRY_RUN" = true ]; then args+=(--dry-run); fi
           node tools/publish-verified.mjs "${args[@]}"
       - name: Commit catalog changes
         id: catalog
         if: inputs.dry-run == false
         run: |
-          git add -- catalogs
+          git add -- catalogs attestations
           if git diff --cached --quiet; then
             echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
             exit 0
@@ -267,6 +275,8 @@ jobs:
           path: |
             ${{ runner.temp }}/verified-publication/publication-plan.json
             ${{ runner.temp }}/verified-publication/publication-result.json
+            ${{ runner.temp }}/verified-publication/imported-builds.json
+            ${{ runner.temp }}/verified-publication/staged-ledgers
           if-no-files-found: ignore
   update-index:
     needs: [release, publish-verified]
