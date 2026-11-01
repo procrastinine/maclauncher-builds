@@ -217,10 +217,14 @@
       {
         "version": "MCLv2-1028-6",
         "label": "AIM with MacLauncher integration MCLv2-1028-6"
+      },
+      {
+        "version": "MCLv3-1028-6",
+        "label": "AIM with MacLauncher integration MCLv3-1028-6"
       }
     ],
     "build": {
-      "version": "MCLv2-1028-6",
+      "version": "MCLv3-1028-6",
       "command": "tools/build-android-aim.mjs",
       "architectures": [
         "arm64"
@@ -275,46 +279,31 @@
       {
         "version": "1.5.0-MCLv2",
         "label": "AI5 SDL2 1.5.0-MCLv2"
-      }
-    ],
-    "build": [
-      {
-        "version": "1.5.0-MCLv1",
-        "command": "tools/build-portable-runtime.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/ai5-sdl2"
-        ],
-        "recursiveSubmodules": true,
-        "tools": [
-          "cmake",
-          "ninja",
-          "meson",
-          "pkgconf",
-          "nasm"
-        ]
       },
       {
-        "version": "1.5.0-MCLv2",
-        "command": "tools/build-portable-runtime.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/ai5-sdl2"
-        ],
-        "recursiveSubmodules": true,
-        "tools": [
-          "cmake",
-          "ninja",
-          "meson",
-          "pkgconf",
-          "nasm"
-        ]
+        "version": "1.5.0-MCLv3",
+        "label": "AI5 SDL2 1.5.0-MCLv3"
       }
-    ]
+    ],
+    "build": {
+      "version": "1.5.0-MCLv3",
+      "command": "tools/build-portable-runtime.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/ai5-sdl2"
+      ],
+      "recursiveSubmodules": true,
+      "tools": [
+        "cmake",
+        "ninja",
+        "meson",
+        "pkgconf",
+        "nasm"
+      ]
+    }
   },
   {
     "id": "fna",
@@ -358,10 +347,14 @@
       {
         "version": "26.10-MCLv2",
         "label": ".NET 8 host"
+      },
+      {
+        "version": "26.10-MCLv3",
+        "label": ".NET 8 host"
       }
     ],
     "build": {
-      "version": "26.10-MCLv2",
+      "version": "26.10-MCLv3",
       "command": "tools/build-fna.mjs",
       "architectures": [
         "arm64"
@@ -406,40 +399,28 @@
       {
         "version": "MCLv2-1020",
         "label": "GemRB MCLv2-1020"
-      }
-    ],
-    "build": [
-      {
-        "version": "MCLv1-1020",
-        "command": "tools/build-portable-runtime.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/gemrb"
-        ],
-        "tools": [
-          "cmake",
-          "ninja",
-          "pkgconf"
-        ]
       },
       {
-        "version": "MCLv2-1020",
-        "command": "tools/build-portable-runtime.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/gemrb"
-        ],
-        "tools": [
-          "cmake",
-          "ninja",
-          "pkgconf"
-        ]
+        "version": "MCLv3-1020",
+        "label": "GemRB MCLv3-1020"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv3-1020",
+      "command": "tools/build-portable-runtime.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/gemrb"
+      ],
+      "tools": [
+        "cmake",
+        "ninja",
+        "pkgconf"
+      ]
+    }
   },
   {
     "id": "gm8-decompiler",
@@ -473,42 +454,29 @@
       {
         "version": "2.2.0-MCLv2",
         "label": "GameMaker 8 decompiler 2.2.0-MCLv2"
-      }
-    ],
-    "build": [
-      {
-        "version": "2.2.0-MCLv1",
-        "command": "tools/build-gm8-decompiler.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/OpenGMK"
-        ],
-        "tools": [
-          "cmake"
-        ],
-        "rustComponents": [
-          "rust-docs"
-        ]
       },
       {
-        "version": "2.2.0-MCLv2",
-        "command": "tools/build-gm8-decompiler.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/OpenGMK"
-        ],
-        "tools": [
-          "cmake"
-        ],
-        "rustComponents": [
-          "rust-docs"
-        ]
+        "version": "2.2.0-MCLv3",
+        "label": "GameMaker 8 decompiler 2.2.0-MCLv3"
       }
-    ]
+    ],
+    "build": {
+      "version": "2.2.0-MCLv3",
+      "command": "tools/build-gm8-decompiler.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/OpenGMK"
+      ],
+      "tools": [
+        "cmake"
+      ],
+      "rustComponents": [
+        "rust-docs"
+      ]
+    }
   },
   {
     "id": "hashlink",
@@ -579,11 +547,21 @@
         "version": "1.12-MCLv2",
         "label": "HashLink 1.12 ABI",
         "anchor": "hashlink-1-12"
+      },
+      {
+        "version": "1.9-MCLv3",
+        "label": "HashLink 1.9 ABI",
+        "anchor": "hashlink-1-9"
+      },
+      {
+        "version": "1.12-MCLv3",
+        "label": "HashLink 1.12 ABI",
+        "anchor": "hashlink-1-12"
       }
     ],
     "build": [
       {
-        "version": "1.9-MCLv2",
+        "version": "1.9-MCLv3",
         "command": "tools/build-hashlink.mjs",
         "architectures": [
           "x64"
@@ -600,7 +578,7 @@
         ]
       },
       {
-        "version": "1.12-MCLv2",
+        "version": "1.12-MCLv3",
         "command": "tools/build-hashlink.mjs",
         "architectures": [
           "x64"
@@ -650,10 +628,14 @@
       {
         "version": "0.10.8.903-MCLv2",
         "label": "impacto Windows-game profile 0.10.8.903-MCLv2"
+      },
+      {
+        "version": "0.10.8.903-MCLv3",
+        "label": "impacto Windows-game profile 0.10.8.903-MCLv3"
       }
     ],
     "build": {
-      "version": "0.10.8.903-MCLv2",
+      "version": "0.10.8.903-MCLv3",
       "command": "tools/build-impacto.mjs",
       "architectures": [
         "arm64"
@@ -730,46 +712,31 @@
       {
         "version": "MCLv2-0206",
         "label": "Inno Setup extraction tools MCLv2-0206"
-      }
-    ],
-    "build": [
-      {
-        "version": "MCLv1-0206",
-        "command": "tools/build-innoextract.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/innoextract",
-          "producers/maclauncher/src/external/boost-filesystem",
-          "producers/maclauncher/src/external/boost-program-options",
-          "producers/maclauncher/src/external/boost-iostreams"
-        ],
-        "tools": [
-          "cmake",
-          "ninja",
-          "xz"
-        ]
       },
       {
-        "version": "MCLv2-0206",
-        "command": "tools/build-innoextract.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/innoextract",
-          "producers/maclauncher/src/external/boost-filesystem",
-          "producers/maclauncher/src/external/boost-program-options",
-          "producers/maclauncher/src/external/boost-iostreams"
-        ],
-        "tools": [
-          "cmake",
-          "ninja",
-          "xz"
-        ]
+        "version": "1.10-dev-MCLv3",
+        "label": "Inno Setup extraction tools 1.10-dev-MCLv3"
       }
-    ]
+    ],
+    "build": {
+      "version": "1.10-dev-MCLv3",
+      "command": "tools/build-innoextract.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/innoextract",
+        "producers/maclauncher/src/external/boost-filesystem",
+        "producers/maclauncher/src/external/boost-program-options",
+        "producers/maclauncher/src/external/boost-iostreams"
+      ],
+      "tools": [
+        "cmake",
+        "ninja",
+        "xz"
+      ]
+    }
   },
   {
     "id": "krkrsdl2",
@@ -828,10 +795,14 @@
       {
         "version": "MCLv1-1001",
         "label": "Kirikiri SDL2 MCLv1-1001"
+      },
+      {
+        "version": "MCLv3-1030-kag3",
+        "label": "KiriKiri SDL2 macOS"
       }
     ],
     "build": {
-      "version": "MCLv2-1030-kag3",
+      "version": "MCLv3-1030-kag3",
       "command": "tools/build-krkrsdl2.mjs",
       "architectures": [
         "arm64",
@@ -880,10 +851,14 @@
       {
         "version": "0.5.3-MCLv2",
         "label": "libnpengine Mac runner 0.5.3-MCLv2"
+      },
+      {
+        "version": "0.5.3-MCLv3",
+        "label": "libnpengine Mac runner 0.5.3-MCLv3"
       }
     ],
     "build": {
-      "version": "0.5.3-MCLv2",
+      "version": "0.5.3-MCLv3",
       "command": "tools/build-npengine.mjs",
       "architectures": [
         "arm64"
@@ -931,38 +906,27 @@
       {
         "version": "MCLv2-0126",
         "label": "ONScripter-EN MCLv2-0126"
-      }
-    ],
-    "build": [
-      {
-        "version": "MCLv1-0126",
-        "command": "tools/build-onscripter-en.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/onscripter-en"
-        ],
-        "tools": [
-          "cmake",
-          "ninja"
-        ]
       },
       {
-        "version": "MCLv2-0126",
-        "command": "tools/build-onscripter-en.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/onscripter-en"
-        ],
-        "tools": [
-          "cmake",
-          "ninja"
-        ]
+        "version": "MCLv3-0126",
+        "label": "ONScripter-EN MCLv3-0126"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv3-0126",
+      "command": "tools/build-onscripter-en.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/onscripter-en"
+      ],
+      "tools": [
+        "cmake",
+        "ninja"
+      ]
+    }
   },
   {
     "id": "onsyuri",
@@ -996,10 +960,14 @@
       {
         "version": "0.7.7beta-MCLv2",
         "label": "ONScripter-Yuri 0.7.7beta-MCLv2"
+      },
+      {
+        "version": "0.7.7beta-MCLv3",
+        "label": "ONScripter-Yuri 0.7.7beta-MCLv3"
       }
     ],
     "build": {
-      "version": "0.7.7beta-MCLv2",
+      "version": "0.7.7beta-MCLv3",
       "command": "tools/build-portable-runtime.mjs",
       "architectures": [
         "arm64",
@@ -1047,10 +1015,14 @@
       {
         "version": "0.2.0-MCLv2",
         "label": "OpenGMK 0.2.0-MCLv2"
+      },
+      {
+        "version": "0.2.0-MCLv3",
+        "label": "OpenGMK 0.2.0-MCLv3"
       }
     ],
     "build": {
-      "version": "0.2.0-MCLv2",
+      "version": "0.2.0-MCLv3",
       "command": "tools/build-opengmk.mjs",
       "architectures": [
         "arm64"
@@ -1096,10 +1068,14 @@
       {
         "version": "0.1.0-MCLv2",
         "label": "ReMinori 0.1.0-MCLv2"
+      },
+      {
+        "version": "0.1.0-MCLv3",
+        "label": "ReMinori 0.1.0-MCLv3"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv2",
+      "version": "0.1.0-MCLv3",
       "command": "tools/build-reminori.mjs",
       "architectures": [
         "arm64",
@@ -1154,38 +1130,27 @@
       {
         "version": "0.5.0-MCLv2",
         "label": "System3 decompiler 0.5.0-MCLv2"
-      }
-    ],
-    "build": [
-      {
-        "version": "0.5.0-MCLv1",
-        "command": "producers/maclauncher/scripts/build-decompiler.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/sys3c"
-        ],
-        "tools": [
-          "cmake",
-          "ninja"
-        ]
       },
       {
-        "version": "0.5.0-MCLv2",
-        "command": "producers/maclauncher/scripts/build-decompiler.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/sys3c"
-        ],
-        "tools": [
-          "cmake",
-          "ninja"
-        ]
+        "version": "0.5.0-MCLv3",
+        "label": "System3 decompiler 0.5.0-MCLv3"
       }
-    ]
+    ],
+    "build": {
+      "version": "0.5.0-MCLv3",
+      "command": "producers/maclauncher/scripts/build-decompiler.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/sys3c"
+      ],
+      "tools": [
+        "cmake",
+        "ninja"
+      ]
+    }
   },
   {
     "id": "system3",
@@ -1296,42 +1261,29 @@
       {
         "version": "1.8.0-MCLv2",
         "label": "System3 SDL2 1.8.0-MCLv2"
-      }
-    ],
-    "build": [
-      {
-        "version": "1.8.0-MCLv1",
-        "command": "tools/build-system3.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/system3-sdl2"
-        ],
-        "tools": [
-          "cmake",
-          "ninja",
-          "pkgconf"
-        ],
-        "recursiveSubmodules": true
       },
       {
-        "version": "1.8.0-MCLv2",
-        "command": "tools/build-system3.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/system3-sdl2"
-        ],
-        "tools": [
-          "cmake",
-          "ninja",
-          "pkgconf"
-        ],
-        "recursiveSubmodules": true
+        "version": "1.8.0-MCLv3",
+        "label": "System3 SDL2 1.8.0-MCLv3"
       }
-    ]
+    ],
+    "build": {
+      "version": "1.8.0-MCLv3",
+      "command": "tools/build-system3.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/system3-sdl2"
+      ],
+      "tools": [
+        "cmake",
+        "ninja",
+        "pkgconf"
+      ],
+      "recursiveSubmodules": true
+    }
   },
   {
     "id": "xsys35-decompiler",
@@ -1366,38 +1318,27 @@
       {
         "version": "1.13.0-MCLv2",
         "label": "System3.5 decompiler 1.13.0-MCLv2"
-      }
-    ],
-    "build": [
-      {
-        "version": "1.13.0-MCLv1",
-        "command": "producers/maclauncher/scripts/build-decompiler.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/xsys35c"
-        ],
-        "tools": [
-          "cmake",
-          "ninja"
-        ]
       },
       {
-        "version": "1.13.0-MCLv2",
-        "command": "producers/maclauncher/scripts/build-decompiler.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/xsys35c"
-        ],
-        "tools": [
-          "cmake",
-          "ninja"
-        ]
+        "version": "1.13.0-MCLv3",
+        "label": "System3.5 decompiler 1.13.0-MCLv3"
       }
-    ]
+    ],
+    "build": {
+      "version": "1.13.0-MCLv3",
+      "command": "producers/maclauncher/scripts/build-decompiler.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/xsys35c"
+      ],
+      "tools": [
+        "cmake",
+        "ninja"
+      ]
+    }
   },
   {
     "id": "xsystem35",
@@ -1437,44 +1378,30 @@
       {
         "version": "MCLv2-1019",
         "label": "xsystem35 SDL2 MCLv2-1019"
-      }
-    ],
-    "build": [
-      {
-        "version": "MCLv1-1019",
-        "command": "tools/build-portable-runtime.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/xsystem35-sdl2"
-        ],
-        "recursiveSubmodules": false,
-        "tools": [
-          "cmake",
-          "ninja",
-          "meson",
-          "pkgconf"
-        ]
       },
       {
-        "version": "MCLv2-1019",
-        "command": "tools/build-portable-runtime.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/xsystem35-sdl2"
-        ],
-        "recursiveSubmodules": false,
-        "tools": [
-          "cmake",
-          "ninja",
-          "meson",
-          "pkgconf"
-        ]
+        "version": "MCLv3-1019",
+        "label": "xsystem35 SDL2 MCLv3-1019"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv3-1019",
+      "command": "tools/build-portable-runtime.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/xsystem35-sdl2"
+      ],
+      "recursiveSubmodules": false,
+      "tools": [
+        "cmake",
+        "ninja",
+        "meson",
+        "pkgconf"
+      ]
+    }
   },
   {
     "id": "xsystem4",
@@ -1510,50 +1437,33 @@
       {
         "version": "MCLv2-1021",
         "label": "xsystem4 MCLv2-1021"
-      }
-    ],
-    "build": [
-      {
-        "version": "MCLv1-1021",
-        "command": "tools/build-portable-runtime.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/xsystem4"
-        ],
-        "recursiveSubmodules": true,
-        "tools": [
-          "cmake",
-          "ninja",
-          "meson",
-          "pkgconf",
-          "nasm",
-          "bison",
-          "flex"
-        ]
       },
       {
-        "version": "MCLv2-1021",
-        "command": "tools/build-portable-runtime.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/xsystem4"
-        ],
-        "recursiveSubmodules": true,
-        "tools": [
-          "cmake",
-          "ninja",
-          "meson",
-          "pkgconf",
-          "nasm",
-          "bison",
-          "flex"
-        ]
+        "version": "MCLv3-1021",
+        "label": "xsystem4 MCLv3-1021"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv3-1021",
+      "command": "tools/build-portable-runtime.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/xsystem4"
+      ],
+      "recursiveSubmodules": true,
+      "tools": [
+        "cmake",
+        "ninja",
+        "meson",
+        "pkgconf",
+        "nasm",
+        "bison",
+        "flex"
+      ]
+    }
   },
   {
     "id": "vulkan-kosmickrisp-gles32",
@@ -1614,10 +1524,14 @@
       {
         "version": "MCLv3-1030",
         "label": "KosmicKrisp geometry and transform feedback"
+      },
+      {
+        "version": "MCLv4-1030",
+        "label": "KosmicKrisp geometry and transform feedback"
       }
     ],
     "build": {
-      "version": "MCLv3-1030",
+      "version": "MCLv4-1030",
       "command": "tools/build-vulkan-kosmickrisp.mjs",
       "architectures": [
         "arm64"
@@ -1710,10 +1624,14 @@
       {
         "version": "MCLv2-1003",
         "label": "Unicode filename normalization"
+      },
+      {
+        "version": "2.4.2-MCLv3",
+        "label": "Unicode filename normalization"
       }
     ],
     "build": {
-      "version": "MCLv2-1003",
+      "version": "2.4.2-MCLv3",
       "command": "tools/build-mkxpz.mjs",
       "architectures": [
         "arm64"
@@ -1783,38 +1701,27 @@
       {
         "version": "MCLv2-1007",
         "label": "Butterscotch MCLv2-1007"
-      }
-    ],
-    "build": [
-      {
-        "version": "MCLv1-1007",
-        "command": "tools/build-butterscotch.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/Butterscotch"
-        ],
-        "tools": [
-          "cmake",
-          "ninja"
-        ]
       },
       {
-        "version": "MCLv2-1007",
-        "command": "tools/build-butterscotch.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/Butterscotch"
-        ],
-        "tools": [
-          "cmake",
-          "ninja"
-        ]
+        "version": "MCLv3-1007",
+        "label": "Butterscotch MCLv3-1007"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv3-1007",
+      "command": "tools/build-butterscotch.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/Butterscotch"
+      ],
+      "tools": [
+        "cmake",
+        "ninja"
+      ]
+    }
   },
   {
     "id": "anyps5",
@@ -1857,42 +1764,29 @@
       {
         "version": "MCLv3-1027-2",
         "label": "AnyPS5 MCLv3-1027-2"
-      }
-    ],
-    "build": [
-      {
-        "version": "MCLv2-1027-2",
-        "architectures": [
-          "arm64"
-        ],
-        "command": "tools/build-anyps5.mjs",
-        "submodules": [
-          "sources/anyps5"
-        ],
-        "recursiveSubmodules": true,
-        "tools": [
-          "cmake",
-          "ninja",
-          "pkgconf"
-        ]
       },
       {
-        "version": "MCLv3-1027-2",
-        "architectures": [
-          "x64"
-        ],
-        "command": "tools/build-anyps5.mjs",
-        "submodules": [
-          "sources/anyps5"
-        ],
-        "recursiveSubmodules": true,
-        "tools": [
-          "cmake",
-          "ninja",
-          "pkgconf"
-        ]
+        "version": "MCLv4-1027-2",
+        "label": "AnyPS5 MCLv4-1027-2"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv4-1027-2",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "command": "tools/build-anyps5.mjs",
+      "submodules": [
+        "sources/anyps5"
+      ],
+      "recursiveSubmodules": true,
+      "tools": [
+        "cmake",
+        "ninja",
+        "pkgconf"
+      ]
+    }
   },
   {
     "id": "nxnative-tools",
@@ -1936,10 +1830,14 @@
       {
         "version": "MCLv2-1027-3",
         "label": "nxnative native tools MCLv2-1027-3"
+      },
+      {
+        "version": "MCLv3-1027-3",
+        "label": "nxnative native tools MCLv3-1027-3"
       }
     ],
     "build": {
-      "version": "MCLv2-1027-3",
+      "version": "MCLv3-1027-3",
       "architectures": [
         "arm64"
       ],
@@ -1991,6 +1889,10 @@
       {
         "version": "0.41.0-MCLv8",
         "label": "Decoded video with separate controls and subtitles"
+      },
+      {
+        "version": "0.41.0-MCLv9",
+        "label": "Decoded video with separate controls and subtitles"
       }
     ],
     "compatibility": "Apple Silicon with macOS 27 or later; the original command-line profile remains separate.",
@@ -2005,7 +1907,7 @@
       }
     },
     "build": {
-      "version": "0.41.0-MCLv8",
+      "version": "0.41.0-MCLv9",
       "command": "tools/build-mpv.mjs",
       "architectures": [
         "arm64"
@@ -2057,10 +1959,14 @@
       {
         "version": "MCLv1-1027-1",
         "label": "Prosper x86-64"
+      },
+      {
+        "version": "MCLv2-1027-1",
+        "label": "Prosper x86-64"
       }
     ],
     "build": {
-      "version": "MCLv1-1027-1",
+      "version": "MCLv2-1027-1",
       "command": "tools/build-prosper.mjs",
       "architectures": [
         "x64"
@@ -2151,10 +2057,14 @@
       {
         "version": "1.0.1-MCLv1",
         "label": "FidelityFX API 1.0.1 Vulkan"
+      },
+      {
+        "version": "1.0.1-MCLv2",
+        "label": "FidelityFX API 1.0.1 Vulkan"
       }
     ],
     "build": {
-      "version": "1.0.1-MCLv1",
+      "version": "1.0.1-MCLv2",
       "command": "tools/build-fidelityfx-api.mjs",
       "architectures": [
         "x64"
@@ -2228,10 +2138,14 @@
       {
         "version": "1.4.2-MCLv2",
         "label": "MoltenVK 1.4.2 scene recording"
+      },
+      {
+        "version": "1.4.2-MCLv3",
+        "label": "MoltenVK 1.4.2 scene recording"
       }
     ],
     "build": {
-      "version": "1.4.2-MCLv2",
+      "version": "1.4.2-MCLv3",
       "command": "tools/build-vulkan-moltenvk-scene.mjs",
       "architectures": [
         "universal"
@@ -2277,10 +2191,14 @@
       {
         "version": "3.0.0-465c88c3-MCLv3",
         "label": "RPGMakerDecrypter 3.0.0-465c88c3-MCLv3"
+      },
+      {
+        "version": "3.0.0-MCLv4",
+        "label": "RPGMakerDecrypter 3.0.0-MCLv4"
       }
     ],
     "build": {
-      "version": "3.0.0-465c88c3-MCLv3",
+      "version": "3.0.0-MCLv4",
       "command": "tools/build-rpgmaker-decrypter.mjs",
       "architectures": [
         "arm64",
@@ -2332,7 +2250,7 @@
   {
     "id": "vnds-love",
     "name": "VNDS-LOVE",
-    "purpose": "Adapted VNDS interpreter for the managed L\u00d6VE host.",
+    "purpose": "Adapted VNDS interpreter for the managed LÖVE host.",
     "producer": {
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
@@ -2362,10 +2280,14 @@
       {
         "version": "0.0.13-838e47b-MCLv2",
         "label": "VNDS-LOVE 0.0.13-838e47b-MCLv2"
+      },
+      {
+        "version": "0.0.13-MCLv3",
+        "label": "VNDS-LOVE 0.0.13-MCLv3"
       }
     ],
     "build": {
-      "version": "0.0.13-838e47b-MCLv2",
+      "version": "0.0.13-MCLv3",
       "command": "producers/engine-adaptations/stage.mjs",
       "architectures": [
         "universal"
@@ -2450,10 +2372,14 @@
       {
         "version": "1.0.0-preview.5f358ef1360b-MCLv2-1028-1",
         "label": "siglus_rs 1.0.0-preview.5f358ef1360b-MCLv2-1028-1"
+      },
+      {
+        "version": "1.0.0-preview.5f358ef1360b-MCLv3-1028-1",
+        "label": "siglus_rs 1.0.0-preview.5f358ef1360b-MCLv3-1028-1"
       }
     ],
     "build": {
-      "version": "1.0.0-preview.5f358ef1360b-MCLv2-1028-1",
+      "version": "1.0.0-preview.5f358ef1360b-MCLv3-1028-1",
       "architectures": [
         "arm64"
       ],
@@ -2517,10 +2443,14 @@
       {
         "version": "5.13.0-MCLv1",
         "label": "uosc helper 5.13.0-MCLv1"
+      },
+      {
+        "version": "5.13.0-MCLv2",
+        "label": "uosc helper 5.13.0-MCLv2"
       }
     ],
     "build": {
-      "version": "5.13.0-MCLv1",
+      "version": "5.13.0-MCLv2",
       "command": "producers/native-tools/build.mjs",
       "architectures": [
         "arm64",
@@ -2616,10 +2546,14 @@
       {
         "version": "2.9.0-MCLv1",
         "label": "ScummVM Tools 2.9.0-MCLv1"
+      },
+      {
+        "version": "2.9.0-MCLv2",
+        "label": "ScummVM Tools 2.9.0-MCLv2"
       }
     ],
     "build": {
-      "version": "2.9.0-MCLv1",
+      "version": "2.9.0-MCLv2",
       "command": "producers/native-tools/build.mjs",
       "architectures": [
         "arm64",

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "android-art-elf",
-  "version": "0.1.0-MCLv1",
+  "version": "0.1.0-MCLv2",
   "androidSource": {
     "repository": "https://github.com/procrastinine/maclauncher-android",
     "revision": "0d50c2f70d90549a18a69e51e33ed9308338f446"

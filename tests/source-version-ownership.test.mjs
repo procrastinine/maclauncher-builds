@@ -46,7 +46,9 @@ test('all existing Android signed input leaves retain their upstream-derived ver
  for(const input of androidBuildInputRequirements()){
   const project=resolveProject(input.id,root,{resolvePins:false});
   assert.equal(ownedPackageSource(project,project.releaseRepository,root),false,input.id);
-  assert.equal(input.version,'0.1.0-MCLv1');
+  assert.match(input.version,/^0\.1\.0-MCLv[1-9]\d*$/,input.id);
+  const history=JSON.parse(fs.readFileSync(path.join(root,'catalogs',input.id+'.json')));
+  assert.ok(history.packages.some(record=>record.version==='0.1.0-MCLv1'),input.id+' retains its original signed version');
  }
 });
 

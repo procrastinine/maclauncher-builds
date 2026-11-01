@@ -1,10 +1,10 @@
 # Runtime releases
 
-Every project has its own versions, tags and binary downloads, and releasing one project builds nothing else. A release starts from a finished runtime directory or a publisher's binary. Compiling is a separate step done by the project's [producer](PACKAGES.md), whose files are in the `sourceDirectory` named in the [project registries](PACKAGES.md#projects-and-packages). For a project with a GitHub build command, a [GitHub Actions workflow](#github-builds) builds each newly declared version on its selected GitHub-hosted image and prepares the release from the result.
+Every project has its own versions, tags and binary downloads. A source push declares the packages that GitHub builds and publishes. The project's [producer](PACKAGES.md) supplies the source recipe, exact upstream inputs and package layout. GitHub-hosted workflows build the designated outputs, verify their provenance, publish their immutable archives and commit the catalogs that the package index reads.
 
 ## GitHub builds
 
-A GitHub Actions workflow, **Runtime build**, compiles packages for every project whose registry entry has a `build` record. The workflow runs when a push to `main` changes `projects.json` or a project registry, and it can also be started by hand for one project; other commits build nothing. A project with several incompatible ABI versions, such as Java Steamworks, can have an array of build records, each with its own command and architectures. An array also serves a project whose architectures have different package revisions: the System3 decompiler builds `0.5.0-MCLv1` for Intel and `0.5.0-MCLv2` for Apple Silicon.
+A GitHub Actions workflow, **Runtime build**, compiles packages for every project whose registry entry has a `build` record. The workflow runs when a push to `main` changes `projects.json` or a project registry; recipe-only commits do not designate additional builds. A project with several incompatible ABI versions, such as Java Steamworks, can have an array of build records, each with its own command and architectures. An array also serves a project whose architectures have different package revisions: the System3 decompiler builds `0.5.0-MCLv1` for Intel and `0.5.0-MCLv2` for Apple Silicon.
 
 | `build` field | Contents |
 | --- | --- |
@@ -21,7 +21,7 @@ A GitHub Actions workflow, **Runtime build**, compiles packages for every projec
 
 For a push, a planning job compares each `build` record with the same record in the previous commit and selects those whose version is new or whose architectures grew. From each selected record it leaves out every architecture that already has a catalog record or a release tag for that version. A staged draft already has its tag, so a package is never built twice, and an empty plan starts no build job. Raising `version` therefore builds the new version, and adding `x64` to the architectures of a published version builds only its Intel package.
 
-A manual run takes the project, an architecture and an operation, `build` or `stage`, and builds the declared versions that still lack a package. The optional version input selects one record when a project declares several. The architecture is `arm64`, `x64` or `universal`, or `all`, which selects every listed architecture that the version still lacks. Naming an architecture that the version already has stops the run.
+Each selected record names its project, version and package architectures. A project with several build records retains its incompatible ABI lines separately. The planner leaves out package identities already present in a catalog or release tag.
 
 Each build job uses the OS and CPU declared for its selected GitHub-hosted image. Without a `runners` selection, a package builds on a Mac with its own CPU, and a universal package builds on Apple Silicon.
 
@@ -56,7 +56,7 @@ Every build script makes the same checks before it compiles anything, whether `b
 
 The job then runs `prepare` with the exact source commit and `verify`, adds a signed GitHub build attestation for the package archive and uploads the release directory as the workflow artifact `runtime-<project>-<version>-<arch>`. A failed attestation request is retried once after five seconds without rebuilding. If both attempts fail, the job fails. Verified release directories are retained as Actions artifacts even when attestation fails; publication still requires a successful package job and a valid attestation. The attestation names this workflow, its run and the commit the package was built from, and `gh attestation verify <archive> --repo procrastinine/maclauncher-builds` checks it.
 
-A manual **Runtime build** run also offers a `stage` operation. It adds a final job, which runs only on `main` and only after every build job has succeeded. That job stages one draft release per architecture, each tagged `<project>/v<version>/<arch>` at the commit that the packages were built from. Nothing is published until the [Runtime release](#draft-upload-and-publication) workflow publishes the drafts. A successful package job from a push build already has the same release artifacts; the `stage` operation of **Runtime release** stages those artifacts directly without compiling again.
+Completion of **Runtime build** triggers **Runtime release** through GitHub's `workflow_run` event. Publication uses the successful package artifacts from that run; it does not compile them again. No local dispatch, artifact transfer or publication command is part of the release path.
 
 The build and packaging commands also run locally. `--prepare` requires the declared host; local cross-compilation can call the exported `prepareBuild` function with `verifyHost: false`. Package records retain the actual toolchain observations. `--plan` prints the job list that the workflow uses, either for one project or for the changes since a given commit:
 
@@ -70,23 +70,15 @@ node tools/build-runtime.mjs --project sys3-decompiler --arch arm64 --version 0.
 
 ### Supplied publisher packages
 
-A project whose prebuilt producer registers a [publisher input](#publish-one-package) has no `build` record. A manual **Runtime build** run for that project assembles one package: the registered publisher version, in the architecture of the pinned input archive, on `ubuntu-24.04`. Pushes assemble nothing. The build job downloads the pinned input with `tools/publisher-files.mjs fetch`, which checks its size, SHA-256 and complete supplied-file inventory. `tools/publisher-files.mjs assemble` then gives that package the publisher version. Only the package inventory and the runtime manifest outside the supplied files change; the archive is rewritten as a stream, as by `tools/reversion-runtime.mjs`, and the result is reproducible. An input that already carries the publisher version is used unchanged. The job records file equality with `tools/publisher-files.mjs record`, verifies the package identity and uploads the release directory as the run artifact `runtime-<project>-<version>-<arch>`. The equality record is uploaded separately as `publisher-record-<project>-<version>-<arch>`. Supplied packages receive no build provenance attestation; their publication authority is the equality record.
+A project whose prebuilt producer registers a [publisher input](#supplied-publisher-verification) assembles the registered publisher version from that exact input on a GitHub-hosted runner. The hosted job checks the input archive's size, SHA-256 and complete supplied-file inventory. It writes only the surrounding package metadata and declared notices; the publisher's files retain their bytes and modes.
 
-```sh
-gh workflow run runtime-build.yml --repo procrastinine/maclauncher-builds \
-  --ref main -f project=flash-projector -f arch=all -f operation=build
-```
+The workflow records supplied-file equality and verifies the sealed package. Unmodified publisher files do not require a build attestation; their authority is the exact file-equality record. This comparison does not establish publisher authentication or turn an ad-hoc signature into a Developer ID signature. Compiled and supplied packages use the same hosted publication boundary, with their distinct verification requirements.
 
 ## Verification and rebuild comparison
 
 [Verifying packages](../VERIFYING.md) explains how to check the build record that GitHub signs for each package and how to rebuild a package for comparison. The [package verification table](https://procrastinine.github.io/maclauncher-builds/verification.html) is generated from the same catalogs as the package index, with one row for each version and CPU build that shows its minimum macOS, recipe commit, build run and recorded rebuild result. [App feature requirements](https://github.com/procrastinine/maclauncher/blob/master/docs/runtimes/SYSTEM_REQUIREMENTS.md) describe which features can use those packages.
 
-The manual **Rebuild and compare** workflow verifies a published archive's provenance, selects its exact source commit, and runs that commit's source initialization, build, preparation and verification commands. It writes a Markdown summary and JSON report; it does not stage releases, update catalogs or publish packages. The local equivalent is:
-
-```sh
-node tools/rebuild-runtime.mjs --project <project> --version <version> \
-  --arch <arch> --install-tools true --output /absolute/path/to/new-comparison
-```
+The **Rebuild and compare** workflow verifies a published archive's provenance, selects its exact source commit, and runs that commit's source initialization, build, preparation and verification commands on GitHub. It writes a Markdown summary and JSON report; it does not publish packages or change catalogs. Local verification can compare already available archives without downloading or publishing them.
 
 A historical package without a registered build command uses the producer entry in its tagged project record for manual reproduction. Rebuilds use the recorded commit's host-preparation helper and tool installer when present, and retain its packaging implementation. Earlier Mac recipes retain their original Homebrew installation commands. Recipe-only edits do not designate a build or change published packages; the push plan selects new versions or additional explicitly declared architectures.
 
@@ -119,7 +111,7 @@ node tools/release-runtime.mjs prepare --project android \
 
 ## Source and release identity
 
-A new build with changed bytes uses a new package revision. Versions with an `MCLvN` component advance that number; versions without one append `-MCLv1`. The upstream engine version, source commit and runtime profile remain unchanged when only packaging or the build producer changes. Previous catalog records, release tags and assets retain their original identity. The existing release and catalog commands append the new revision without replacing an earlier package.
+A new build with changed bytes uses a new package revision. Owned products advance their plain semantic version. Upstream-derived packages advance their `MCLvN` revision while retaining the original upstream release or snapshot identity. Unmodified publisher packages retain the publisher version. The upstream engine version, source commit and runtime profile remain unchanged when only packaging or the build producer changes. Previous catalog records, release tags and assets retain their original identity. The existing release and catalog commands append the new revision without replacing an earlier package.
 
 A tag has the form `<project>/v<version>/<arch>` and points to the commit of this repository that the package was built from. That commit contains the matching source, patches, build recipes and the exact upstream commits of every dependency. Submodule source is available through a recursive Git checkout; GitHub's automatic source ZIP files leave it out.
 
@@ -134,7 +126,7 @@ Tags and archive names follow one rule:
 
 The package's file list and the runtime manifest that MacLauncher reads contain that exact version. The architecture appears only as the final component: `arm64`, `x64` or `universal`.
 
-A changed package with the same engine source receives a new `MCLvN` revision: `26.10-MCLv1`, for example, becomes `26.10-MCLv2`. A version without that suffix adds `-MCLv1`. Each revision has its own immutable tag, archive and catalog record. Older catalog rows and installed versions remain available; the ordinary catalog resolver chooses among the compatible versions. Recipe-only changes do not designate a new package build.
+A changed package with the same engine source receives a new `MCLvN` revision: `26.10-MCLv1`, for example, becomes `26.10-MCLv2`. An upstream-derived version without that suffix adds `-MCLv1`; an owned product instead advances its plain semantic version. Each revision has its own immutable tag, archive and catalog record. Older catalog rows and installed versions remain available; the ordinary catalog resolver chooses among the compatible versions. Recipe-only changes do not designate a new package build.
 
 Each catalog record also lists, in `launcherArchitectures`, the Mac CPUs on which MacLauncher can use the package. An `arm64` package lists `arm64`, and a universal package lists both CPUs. An `x64` package whose native files run as separate programs lists both CPUs as well, because Apple Silicon runs those programs through Rosetta; its package record marks each such file with `executionArchitecture: "x86_64"`. An `x64` add-on loaded into MacLauncher's own process lists only `x64`, since macOS cannot mix CPU architectures within a process. A library used by a separate Intel host, such as the Steamworks4j 1.9 JNI library in an Intel JVM, can list both with the same `executionArchitecture` record. One version can have a package for each architecture, the catalog keeps all of them, and MacLauncher chooses among them on the Mac where it runs.
 
@@ -148,65 +140,52 @@ Components maintained in this repository use their own versions. Unmodified publ
 
 ### Changing a package version
 
-`tools/reversion-runtime.mjs` changes the version in the package's file list and in the runtime manifest by rewriting the archive as a stream. All other file bytes, modes, source checksums, native signatures and dependency records stay the same. The tool takes `--archive`, `--record`, `--version` and a new `--output` path, and the original archive stays unchanged. It does not compile anything. The rewritten package gets a new version and checksum; a published package is never changed. A rewritten compiled package needs a GitHub build attestation for its new digest. A package containing only unchanged publisher files instead requires the registered file-equality authority described below.
+`tools/reversion-runtime.mjs` changes the version in the package's file list and in the runtime manifest by rewriting the archive as a stream. All other file bytes, modes, source checksums, native signatures and dependency records stay the same. The tool takes `--archive`, `--record`, `--version` and a new `--output` path, and the original archive stays unchanged. It does not compile anything. The rewritten package gets a new version and checksum; a published package is never changed. A rewritten compiled package needs hosted provenance for its new archive digest. Unmodified publisher files instead require the registered file-equality authority described below. Local rewriting produces diagnostic files only; it does not authorize publication.
 
 ### Catalog contents
 
 A project's catalog keeps every published package and gains at most one new version in each publication. Unpublished candidates that a newer one replaced are left out of the records, the producer outputs and the source history. HashLink 1.9 and 1.12, and Steamworks4j 1.9 and 1.10, have separate packages because their game ABIs are incompatible.
 
-## Draft upload and publication
+<a id="draft-upload-and-publication"></a>
 
-### Publish verified builds on GitHub
+## Automatic publication on GitHub
 
-The **Runtime release** workflow's `publish-verified` operation publishes every active, imported signed output that is absent from its catalog. An optional build-run input imports the successful packages of an exact project and version before publication. An omitted architecture selects every architecture in that build record. The workflow verifies each successful build job, the sealed package and its signed provenance through the existing release tools. Its staging step keeps the strict verified ledgers in the hosted checkout and the publication-plan artifact; the publisher reads those records there. Archives use the same download directory for import and publication. It runs on a GitHub-hosted Ubuntu runner, downloads each package from the build run recorded in its attestation, and checks its digest and sealed contents through the existing release tools. It stages the release at the certified source commit, verifies the draft, publishes it, verifies the public archive and applies its catalog record. Packages are processed serially, stopping at the first failure. All Runtime release operations share one publication queue.
+The **Runtime release** workflow starts automatically when **Runtime build** completes. It obtains the triggering run ID and exact source commit from GitHub's `workflow_run` event. The source push is the release input; a local dispatcher, downloaded Actions artifact or locally staged upload is not part of this path.
 
-```sh
-gh workflow run runtime-release.yml --repo procrastinine/maclauncher-builds \
-  --ref main -f operation=publish-verified -F dry-run=true
-```
+<a id="publish-verified-builds-on-github"></a>
 
-A new Runtime build can be imported and published in one dispatch:
+### Verification and publication
 
-```sh
-gh workflow run runtime-release.yml --repo procrastinine/maclauncher-builds \
-  --ref main -f operation=publish-verified -f project=reshade \
-  -f version=0.3.2 -f build-run="$BUILD_RUN"
-```
+The hosted controller selects successful package jobs from the completed run and checks the project, version, architecture and source commit. It downloads their artifacts inside the GitHub-hosted checkout, verifies each archive's digest and sealed declaration, and imports compiled-package provenance or supplied-file equality as applicable. A run ID or a locally written success flag is not publication authority. The publication plan records the exact packages selected for publication.
 
-The dry run downloads and verifies the selected artifacts and saves a publication plan without changing releases, tags or catalogs. Omitting `dry-run=true` performs publication. The workflow then commits catalog changes and any newly imported signed build records, runs the Source tests, release-version checks and package-index generation from a clean clone of that exact commit, and pushes it to `main`. The existing Package index workflow updates the site at the checked commit. No package compiler runs and no archive passes through a local Mac.
+For each selected package, the controller creates or resumes a draft whose tag identifies the certified source commit. It verifies the draft, publishes the same archive bytes, verifies the public release and applies its catalog record. Packages are processed serially and stop at the first failure. A matching existing tag, draft, public archive or catalog entry is reused; a conflicting source commit or archive digest remains an error. Releases, assets and previous installed identities are not replaced.
 
-A retry skips cataloged outputs and preserves matching tags, drafts and public releases. If a previous attempt created only a tag or an empty draft, batch staging completes it only when that tag identifies the exact certified source commit. Conflicting source commits or archive bytes stop publication; releases and assets are never replaced or deleted. If a build artifact has expired after its release was created, the same signed digest can verify the existing release archive. A retry also refreshes the package index when the catalogs already match.
+The archive is the only public release attachment. The package record, signed evidence, supplied-file equality when applicable, sealed declaration and catalog are committed as source records. Release notes link to the tagged source and its exact upstream pins. No compiled archive passes through a local Mac for publication.
 
-`tools/publish-verified.mjs` runs only inside this workflow, so GitHub's build outputs go straight from the build run to their releases and catalogs.
+After applying the verified records, the workflow commits the catalogs and evidence with the public repository identity. It checks an ordinary clone of that exact catalog commit with the Source checks, version checks and package-index generation before pushing the commit. Its index job calls the existing **Package index** workflow with that catalog commit's SHA, so the deployed index and per-project catalogs describe the same publication.
 
-The workflow uses `GITHUB_TOKEN` with Actions read and repository contents write access. Its index deployment uses Pages and identity-token permissions. Supplied publisher packages, which have no signed build evidence, are published one at a time by the operations below.
+All publication operations share one hosted queue. A retry preserves matching completed work and checks the same identities again. If an Actions artifact has expired after its release was created, the existing public archive remains acceptable only when its signed digest and package identity match. Recipe changes alone never cause an old version to be rebuilt or reissued.
 
-### Publish one package
+<a id="publish-one-package"></a>
 
-Supplied publisher packages use a separate file-equality authority. A registered prebuilt producer names a public descriptor and its SHA-256. The descriptor pins the original input archive and every supplied file's path, size, hash and mode. `tools/publisher-files.mjs record` compares the actual input and output archives and records their equality in `publisher-records/<archive-sha256>.json`. Additional files are limited to consumed JSON metadata and declared non-executable textual notices. A prebuilt label or locally written success flag grants no publication authority.
+### Supplied publisher verification
 
-`node tools/publisher-files.mjs verify --project <project> --archive <archive> --record <package-record-or-equality-receipt>` rechecks a supplied archive without writing files. Optional `--input-archive` also rechecks the pinned original archive. `--release-bundle <directory>` selects the archive and package record of a verified release directory for both `record` and `verify`. `fetch --project <project> --output <new-file>` downloads the pinned input archive.
+A registered prebuilt producer names a public descriptor and its SHA-256. The descriptor pins the original input archive and every supplied file's path, size, hash and mode. `tools/publisher-files.mjs record` compares the actual input and assembled archives. Added files are limited to consumed package metadata and declared non-executable textual notices. A prebuilt label alone grants no exception.
 
-Stage and apply recheck the actual supplied archive. Source tags must contain the matching descriptor and producer registration. This records the packaging inputs without claiming compilation on GitHub or authenticated publisher identity; ad-hoc signatures establish no publisher identity. A tag that lacks those inputs cannot authorize another source commit. Compiled packages continue to require signed GitHub build provenance.
+Publication verifies the exact supplied-file equality record and rechecks the actual supplied bytes. Source tags must contain the matching producer registration and descriptor. No build attestation is required for unchanged publisher files. The comparison identifies the unchanged files, not the publisher's private compilation or identity. Existing ad-hoc signatures remain ad-hoc signatures.
 
-`stage` uploads a package through an authenticated GitHub CLI after checking its publication authority. Compiled packages require signed provenance from `runtime-build.yml` on a GitHub-hosted runner. Supplied publisher packages require the registered file-equality record and an actual archive comparison. The archive identity and packaging source must match the package and exact `--target` commit. An existing tag, including an annotated tag, must resolve to that same commit, and a conflicting tag is never replaced. The runtime archive is the only public attachment, and the release notes contain a collapsed Source section that links to the tagged source and the upstream commits. Existing releases and assets are not replaced. `stage`, `publish`, `apply` and `tools/release-batch.mjs` run only inside GitHub Actions, for compiled and supplied packages alike; the **Runtime build** and **Runtime release** workflows perform every publication.
-
-A manual GitHub Actions workflow, **Runtime release**, takes a project, version and architecture. It keeps the dispatch commit's publication tools and evidence ledger, resolves the historical source tag without changing the checkout, downloads only that draft's binary archive and validates it against the committed catalog. For a compiled package, signed provenance must identify the archive digest and the tag's exact source commit; a supplied package must match its equality record. Its `stage` operation creates a draft from a successful build artifact, `verify` keeps an existing draft, and `publish` publishes the same bytes; none builds native code. The repository's **Source** workflow runs on pushes to `main`, on pull requests and when started by hand; creating a runtime tag does not start it.
-
-Packages built by **Runtime build** are not in the catalog yet. For them, the `build-run` input of **Runtime release** names the ID of the build run. Staging requires that input and a dispatch from `main`; the workflow selects its source commit before creating the tag. The job first confirms that the run is complete and that the selected project, version and architecture have a successful package job. Each package is checked independently. It then downloads the run's artifact for the selected architecture, checks it with `verify`, verifies its GitHub attestation against the build workflow and source commit, and compares it with the draft's asset through `verify-remote` before `publish`. Each architecture needs its own dispatch. `verify-remote --bundle <directory>` can also be run locally; it reads the release from GitHub and changes nothing.
-
-A supplied package from a **Runtime build** run follows the same `stage` and `publish` operations with the same `build-run` input. In place of the attestation check, the job downloads the pinned input archive, records file equality from the actual input and output archives into its checkout and verifies the package against that record. The `stage` operation of **Runtime build** makes the same comparison before staging. For compiled packages, the `publish-verified` operation applies each catalog record on GitHub after publication. For a supplied package, `publish` with a build run, dispatched from `main`, applies its catalog record after publication. It commits the catalog together with the equality record that authorizes it, runs the Source tests, release-version checks and package-index generation from a clean clone of that exact commit, and pushes it to `main`. The Package index workflow then updates the site at that commit. A retry with an already applied record pushes nothing and refreshes the index.
+Local checks of already available files remain read-only:
 
 ```sh
-gh workflow run runtime-release.yml --repo procrastinine/maclauncher-builds --ref main \
-  -f project=flash-projector -f version=35.0.0.60 -f arch=universal \
-  -f operation=stage -f build-run=<runtime-build-run-id>
-gh workflow run runtime-release.yml --repo procrastinine/maclauncher-builds --ref main \
-  -f project=flash-projector -f version=35.0.0.60 -f arch=universal \
-  -f operation=publish -f build-run=<runtime-build-run-id>
+node tools/release-runtime.mjs verify --bundle /absolute/path/to/existing-release
+node tools/publisher-files.mjs verify --project <project> \
+  --archive /absolute/path/to/existing-package.tar.gz \
+  --record /absolute/path/to/existing-equality-record.json
 ```
 
-`apply --bundle <directory>` verifies the applicable publication authority, checks the public release and its source tag, updates the local project catalog and regenerates `catalogs/index.json`. It creates no commit or release and cannot replace an existing package. `stage`, `publish`, `verify-remote`, `apply` and the catalog publication CLI require the applicable publication authority: signed GitHub build evidence for compiled packages, or registered supplied-file equality for unmodified publisher packages. A run ID or locally written success flag is insufficient. Local `prepare` and `verify` remain available for unsigned diagnostic archives. During catalog updates, previous records without either publication authority move to `catalogs/superseded/<project>.json`; their versions and archive identities remain available there. Active catalogs contain the verified incoming package and earlier verified packages. Retiring a catalog entry is a separate, deliberate change, made together with the removal of the corresponding release. MacLauncher reads the per-project catalogs directly from Git, and the package index uses the same committed records.
+The local `release:stage`, `release:catalog` and `release:batch` publication routes are unavailable. Their CLI entry points require the shared GitHub-hosted publication context before any remote mutation. The batch tool remains a hosted maintenance interface; the automatic workflow uses the shared verified publication controller. Local `prepare` and `verify` can inspect unsigned diagnostic archives without changing a release or catalog.
+
+Applying a package also records its complete sealed declaration in `catalogs/declarations/<project>/<version>/<arch>.json`. File inventories, notices and manifest/source digests come from the verified `runtime-package.json` inside the archive. Conflicting declarations stop publication. These records are readable from Git and are not additional release attachments. Older identities remain in active catalogs or deliberate superseded history; no local catalog rewrite is part of ordinary publication.
 
 ### Helper packages
 
@@ -220,4 +199,4 @@ The [package index](https://procrastinine.github.io/maclauncher-builds/), a GitH
 
 The `index.json` next to the page contains the same records, explicit page URLs and each project's `delivery` value (`downloadable` or `bundled`). Every release entry there has its `arch` and its `launcherArchitectures`. Project links use `#<project-id>`. Incompatible ABI profiles also have stable anchors, including `#hashlink-1-9`, `#hashlink-1-12`, `#java-steamworks-1-9` and `#java-steamworks-1-10`.
 
-`npm run index:build` generates `index.html`, `index.json`, `verification.html` and `verification.json` without compiling or downloading runtimes. A second workflow, **Package index**, regenerates and deploys the site when the catalogs, either project registry or the index inputs change on `main`. Preparing and publishing an individual runtime stay separate from that workflow.
+`npm run index:build` generates `index.html`, `index.json`, `verification.html` and `verification.json` without compiling or downloading runtimes. The **Package index** workflow regenerates and deploys the site when its source inputs change on `main`. Automatic publication also calls it with the exact checked catalog commit. It generates the site without compiling or downloading runtime archives.

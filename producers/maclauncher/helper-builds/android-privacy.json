@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "android-privacy",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "compiler": "clang++",
   "kind": "executable",
   "output": "clipboard-helper",

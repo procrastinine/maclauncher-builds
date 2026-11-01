@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "steam-ticket-loader",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "compiler": "clang++",
   "kind": "dylib",
   "output": "libsdkencryptedappticket.dylib",

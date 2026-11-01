@@ -7,7 +7,11 @@ const Overlay = require('../src/modules/rgss/overlays/mkxpz-filename-nfc/source.
 const {loadCommands, links} = require('./native-binary-tools.cjs');
 const Content = require('./runtime-content.cjs');
 const SOURCE_SHA256 = '364394e8cb3089b1f5adb12a4ab524770e743bf3973ec53e8f411ba5e11886d6';
-const VERSION = 'MCLv2-1003';
+function packageVersion(value) {
+  if (typeof value !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._+-]{0,159}$/.test(value))
+    throw new Error('Choose an explicit MKXP-Z package version.');
+  return value;
+}
 const overlayDirectory = path.resolve(__dirname, '../src/modules/rgss/overlays/mkxpz-filename-nfc');
 const environment = () => Object.fromEntries(Object.entries(process.env).filter(([key]) =>
   !/^(?:DYLD_|RESHADE_|MACFX_|MACLAUNCHER_GRAPHICS)/.test(key) &&
@@ -89,11 +93,12 @@ function sourceArchive(source, output, work) {
     '-czf', output, '-C', source, '--no-recursion', '-T', file]);
 }
 
-function stage({work, source, output}) {
+function stage({work, source, output, version}) {
+  version = packageVersion(version);
   verifySource(source);
   const installed = path.join(work, 'install/usr/local'), apps = fs.readdirSync(installed).filter(name => name.endsWith('.app'));
   if (apps.length !== 1) throw new Error('The MKXP-Z build must install exactly one app.');
-  const directory = path.join(output, 'mkxpz', VERSION, 'arm64'), payload = path.join(directory, 'files');
+  const directory = path.join(output, 'mkxpz', version, 'arm64'), payload = path.join(directory, 'files');
   if (fs.existsSync(directory)) throw new Error('Choose a new MKXP-Z publication; existing artifacts are never overwritten.');
   fs.mkdirSync(payload, {recursive: true});
   const inventory = [], notices = [];
@@ -140,30 +145,36 @@ function stage({work, source, output}) {
     }
     inventory.push({path:relative,size:stat.size,mode:stat.mode&0o777,sha256:Native.hashFile(file),...(architectures?{architectures}:{})});
   }
-  const sourceRelative = 'mkxpz/' + VERSION + '-source.tar.gz', archive = path.join(output,sourceRelative);
+  const sourceRelative = 'mkxpz/' + version + '-source.tar.gz', archive = path.join(output,sourceRelative);
   sourceArchive(source,archive,work); fs.chmodSync(archive,0o644);
   const sourceArtifact = {directoryRelative:sourceRelative,sha256:Native.hashFile(archive),bytes:fs.statSync(archive).size};
-  const manifest = {schemaVersion:1,managerId:'mkxpz',version:VERSION,upstreamRevision:Overlay.upstream.revision,platform:'darwin',arch:'arm64',minimumMacOS:'11.0',
+  const manifest = {schemaVersion:1,managerId:'mkxpz',version:version,upstreamRevision:Overlay.upstream.revision,platform:'darwin',arch:'arm64',minimumMacOS:'11.0',
     executableRelative,files:inventory,notices,dependencies:[],provenance:{sourceKind:'owned-source-adaptation',verifiedBuild:true,sourceRevision:Overlay.upstream.revision,
       adaptationId:Overlay.id,patchSha256:Overlay.patch.sha256,headerSha256:Overlay.addedFiles[0].sha256,implementationSha256:Overlay.addedFiles[1].sha256,sourceArchiveSha256:SOURCE_SHA256,
       compiler:execFileSync('/usr/bin/xcrun',['clang','--version'],{encoding:'utf8'}).split('\n')[0]}};
   B.validateManifest(manifest); B.verifyPayload(payload,manifest);
   const bytes=Buffer.from(JSON.stringify(manifest,null,2)+'\n');fs.writeFileSync(path.join(directory,'manifest.json'),bytes,{flag:'wx',mode:0o644});
-  const declaration={id:'mkxpz',version:VERSION,arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS:'11.0',directoryRelative:'mkxpz/'+VERSION+'/arm64',
+  const declaration={id:'mkxpz',version:version,arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS:'11.0',directoryRelative:'mkxpz/'+version+'/arm64',
     manifestRelative:'manifest.json',manifestSha256:B.digest(bytes),sourceSha256:sourceArtifact.sha256,sourceArtifact,
     files:[...inventory.map(file=>({...file,path:'files/'+file.path})),{path:'manifest.json',size:bytes.length,mode:0o644,sha256:B.digest(bytes)}],
     notices:notices.map(notice=>({...notice,path:'files/'+notice.path}))};
-  const pin={version:VERSION,arch:'arm64',minimumMacOS:'11.0',appName:apps[0],executableRelative,upstreamRevision:Overlay.upstream.revision,
+  const pin={version:version,arch:'arm64',minimumMacOS:'11.0',appName:apps[0],executableRelative,upstreamRevision:Overlay.upstream.revision,
     sourceUrl:Overlay.upstream.repository+'/tree/'+Overlay.upstream.revision,sourceKind:'owned-source-adaptation',adaptationId:Overlay.id,
     patchSha256:Overlay.patch.sha256,headerSha256:Overlay.addedFiles[0].sha256,implementationSha256:Overlay.addedFiles[1].sha256,
     label:'20261003 · NFC 1 · Apple Silicon',executableSha256:inventory.find(file=>file.path===executableRelative).sha256,sourceArtifact};
   return {pin,declaration,directory,sourceArtifact};
 }
 
-function main(args) {
+function parseInputs(args) {
   const inputs={}; for(let index=0;index<args.length;index+=2){const key=args[index]?.slice(2),value=args[index+1];
-    if(!args[index]?.startsWith('--')||!['work','archive','meson','ninja','output'].includes(key)||!path.isAbsolute(value||'')||inputs[key])throw new Error('Choose absolute --work, --archive, --meson, --ninja and --output paths.');inputs[key]=value;}
-  if(Object.keys(inputs).length!==5)throw new Error('Missing MKXP-Z source build inputs.');
+    if(!args[index]?.startsWith('--')||!['work','archive','meson','ninja','output','version'].includes(key)||inputs[key]||
+      (key==='version' ? !value : !path.isAbsolute(value||'')))throw new Error('Choose an explicit --version and absolute --work, --archive, --meson, --ninja and --output paths.');
+    inputs[key]=key==='version'?packageVersion(value):value;}
+  if(Object.keys(inputs).length!==6)throw new Error('Missing MKXP-Z source build inputs or package version.');
+  return inputs;
+}
+function main(args) {
+  const inputs=parseInputs(args);
   const source=prepareSource(inputs.archive,inputs.work),build=configure({...inputs,source});
   const rubyBuild=path.join(build,'subprojects/ruby-3_1_3/build'),rubyStamp=path.join(inputs.work,'ruby-adaptation.json');
   const rubyIdentity=Overlay.files.find(file=>file.path==='subprojects/packagefiles/ruby-3.1/meson.build').adaptedSha256;
@@ -179,4 +190,4 @@ function main(args) {
   const result=stage({...inputs,source});fs.writeFileSync(path.join(inputs.work,'STAGED.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result));
 }
 if(require.main===module)main(process.argv.slice(2));
-module.exports={VERSION,SOURCE_SHA256,prepareSource,verifySource,configure,sourceArchive,stage};
+module.exports={SOURCE_SHA256,packageVersion,parseInputs,prepareSource,verifySource,configure,sourceArchive,stage};

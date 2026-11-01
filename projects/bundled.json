@@ -21,10 +21,14 @@
       {
         "version": "1.1.0",
         "label": "CatSystem2 KIF cryptography helper 1.1.0"
+      },
+      {
+        "version": "1.1.1",
+        "label": "CatSystem2 KIF cryptography helper 1.1.1"
       }
     ],
     "build": {
-      "version": "1.1.0",
+      "version": "1.1.1",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "arm64",
@@ -54,10 +58,14 @@
       {
         "version": "1.1.0",
         "label": "Android privacy helper 1.1.0"
+      },
+      {
+        "version": "1.1.1",
+        "label": "Android privacy helper 1.1.1"
       }
     ],
     "build": {
-      "version": "1.1.0",
+      "version": "1.1.1",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "arm64"
@@ -89,10 +97,14 @@
       {
         "version": "1.1.0",
         "label": "PlayTools storage adapter 1.1.0"
+      },
+      {
+        "version": "1.1.1",
+        "label": "PlayTools storage adapter 1.1.1"
       }
     ],
     "build": {
-      "version": "1.1.0",
+      "version": "1.1.1",
       "command": "tools/build-ios-helper.mjs",
       "architectures": [
         "arm64"
@@ -150,10 +162,14 @@
       {
         "version": "4.0.2-MCLv2",
         "label": "Lua 5.1 host ABI"
+      },
+      {
+        "version": "4.0.2-MCLv3",
+        "label": "Lua 5.1 host ABI"
       }
     ],
     "build": {
-      "version": "4.0.2-MCLv2",
+      "version": "4.0.2-MCLv3",
       "command": "tools/build-luasteam.mjs",
       "architectures": [
         "universal"
@@ -187,10 +203,14 @@
       {
         "version": "1.1.0",
         "label": "MKXP-Z configuration helper 1.1.0"
+      },
+      {
+        "version": "1.1.1",
+        "label": "MKXP-Z configuration helper 1.1.1"
       }
     ],
     "build": {
-      "version": "1.1.0",
+      "version": "1.1.1",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "universal"
@@ -816,10 +836,14 @@
       {
         "version": "0.5.1",
         "label": "Offline Steam API compatibility helper 0.5.1"
+      },
+      {
+        "version": "0.5.2",
+        "label": "Offline Steam API compatibility helper 0.5.2"
       }
     ],
     "build": {
-      "version": "0.5.1",
+      "version": "0.5.2",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "universal"
@@ -848,10 +872,14 @@
       {
         "version": "0.1.1",
         "label": "Steam ticket availability adapter 0.1.1"
+      },
+      {
+        "version": "0.1.2",
+        "label": "Steam ticket availability adapter 0.1.2"
       }
     ],
     "build": {
-      "version": "0.1.1",
+      "version": "0.1.2",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "universal"
@@ -912,18 +940,26 @@
       {
         "version": "1.10.0-MCLv2",
         "label": "Steamworks4j 1.10.0 JNI ABI"
+      },
+      {
+        "version": "1.9.0-MCLv3",
+        "label": "Steamworks4j 1.9.0 JNI ABI"
+      },
+      {
+        "version": "1.10.0-MCLv3",
+        "label": "Steamworks4j 1.10.0 JNI ABI"
       }
     ],
     "build": [
       {
-        "version": "1.9.0-MCLv2",
+        "version": "1.9.0-MCLv3",
         "command": "tools/build-java-steamworks.mjs",
         "architectures": [
           "x64"
         ]
       },
       {
-        "version": "1.10.0-MCLv2",
+        "version": "1.10.0-MCLv3",
         "command": "tools/build-java-steamworks.mjs",
         "architectures": [
           "universal"
@@ -968,10 +1004,14 @@
       {
         "version": "1.1.0",
         "label": "Android package metadata helper 1.1.0"
+      },
+      {
+        "version": "1.1.1",
+        "label": "Android package metadata helper 1.1.1"
       }
     ],
     "build": {
-      "version": "1.1.0",
+      "version": "1.1.1",
       "command": "tools/build-apk-metadata.mjs",
       "architectures": [
         "arm64",
@@ -1008,10 +1048,14 @@
       {
         "version": "1.1.0",
         "label": "Browser network helper 1.1.0"
+      },
+      {
+        "version": "1.1.1",
+        "label": "Browser network helper 1.1.1"
       }
     ],
     "build": {
-      "version": "1.1.0",
+      "version": "1.1.1",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "arm64",
@@ -1100,10 +1144,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "ART image reader 0.1.0-MCLv1"
+      },
+      {
+        "version": "0.1.0-MCLv2",
+        "label": "ART image reader 0.1.0-MCLv2"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "0.1.0-MCLv2",
       "command": "tools/build-android-art-input.mjs",
       "architectures": [
         "arm64"
@@ -1142,10 +1190,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "Android Blueprint parser"
+      },
+      {
+        "version": "0.1.0-MCLv2",
+        "label": "Android Blueprint parser"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "0.1.0-MCLv2",
       "command": "tools/build-android-blueprint.mjs",
       "architectures": [
         "arm64"
@@ -1192,10 +1244,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "Android flag generator 0.1.0-MCLv1"
+      },
+      {
+        "version": "0.1.0-MCLv2",
+        "label": "Android flag generator 0.1.0-MCLv2"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "0.1.0-MCLv2",
       "command": "tools/build-android-aconfig.mjs",
       "architectures": [
         "arm64"
@@ -1239,10 +1295,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "Android audio codec input libraries"
+      },
+      {
+        "version": "0.1.0-MCLv2",
+        "label": "Android audio codec input libraries"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "0.1.0-MCLv2",
       "command": "tools/build-android-codecs.mjs",
       "architectures": [
         "arm64"
@@ -1320,22 +1380,24 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "Android ANGLE for JVM and ART"
+      },
+      {
+        "version": "0.1.0-MCLv3",
+        "label": "Android ANGLE for JVM and ART"
       }
     ],
-    "build": [
-      {
-        "version": "0.1.0-MCLv1",
-        "command": "tools/build-android-angle.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "tools": [
-          "ninja",
-          "uv"
-        ],
-        "cleanupRunner": true
-      }
-    ]
+    "build": {
+      "version": "0.1.0-MCLv3",
+      "command": "tools/build-android-angle.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "tools": [
+        "ninja",
+        "uv"
+      ],
+      "cleanupRunner": true
+    }
   },
   {
     "id": "android-art-elf",
@@ -1368,10 +1430,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "ART ELF input 0.1.0-MCLv1"
+      },
+      {
+        "version": "0.1.0-MCLv2",
+        "label": "ART ELF input 0.1.0-MCLv2"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "0.1.0-MCLv2",
       "command": "tools/build-android-art-elf.mjs",
       "architectures": [
         "arm64"
@@ -1426,10 +1492,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "Android Java converter 0.1.0-MCLv1"
+      },
+      {
+        "version": "0.1.0-MCLv2",
+        "label": "Android Java converter 0.1.0-MCLv2"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "0.1.0-MCLv2",
       "command": "tools/build-android-java-converter.mjs",
       "architectures": [
         "arm64"
@@ -1478,10 +1548,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "Android ART libffi 0.1.0-MCLv1"
+      },
+      {
+        "version": "0.1.0-MCLv2",
+        "label": "Android ART libffi 0.1.0-MCLv2"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "0.1.0-MCLv2",
       "command": "tools/build-android-art-ffi.mjs",
       "architectures": [
         "arm64"
@@ -1575,10 +1649,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "Android Java framework 0.1.0-MCLv1"
+      },
+      {
+        "version": "0.1.0-MCLv2",
+        "label": "Android Java framework 0.1.0-MCLv2"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "0.1.0-MCLv2",
       "command": "tools/build-android-java-framework.mjs",
       "architectures": [
         "arm64"
@@ -1622,10 +1700,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "Android original image data 1 0.1.0-MCLv1"
+      },
+      {
+        "version": "0.1.0-MCLv2",
+        "label": "Android original image data 1 0.1.0-MCLv2"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "0.1.0-MCLv2",
       "command": "tools/build-android-image-data.mjs",
       "architectures": [
         "arm64"
@@ -1670,10 +1752,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "Android original image data 2 0.1.0-MCLv1"
+      },
+      {
+        "version": "0.1.0-MCLv2",
+        "label": "Android original image data 2 0.1.0-MCLv2"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "0.1.0-MCLv2",
       "command": "tools/build-android-image-data.mjs",
       "architectures": [
         "arm64"
@@ -1718,10 +1804,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "Android original image data 3 0.1.0-MCLv1"
+      },
+      {
+        "version": "0.1.0-MCLv2",
+        "label": "Android original image data 3 0.1.0-MCLv2"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "0.1.0-MCLv2",
       "command": "tools/build-android-image-data.mjs",
       "architectures": [
         "arm64"
@@ -1766,10 +1856,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "Android original image data 4 0.1.0-MCLv1"
+      },
+      {
+        "version": "0.1.0-MCLv2",
+        "label": "Android original image data 4 0.1.0-MCLv2"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "0.1.0-MCLv2",
       "command": "tools/build-android-image-data.mjs",
       "architectures": [
         "arm64"
@@ -1814,10 +1908,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "Android original image data 5 0.1.0-MCLv1"
+      },
+      {
+        "version": "0.1.0-MCLv2",
+        "label": "Android original image data 5 0.1.0-MCLv2"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "0.1.0-MCLv2",
       "command": "tools/build-android-image-data.mjs",
       "architectures": [
         "arm64"
@@ -1881,10 +1979,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "Android ART Java 0.1.0-MCLv1"
+      },
+      {
+        "version": "0.1.0-MCLv2",
+        "label": "Android ART Java 0.1.0-MCLv2"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "0.1.0-MCLv2",
       "command": "tools/build-android-art-java.mjs",
       "architectures": [
         "arm64"

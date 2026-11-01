@@ -5,9 +5,11 @@ import {execFileSync} from 'node:child_process';
 import {buildInput} from './build-input.mjs';
 import {recipeMain} from './build-source.mjs';
 import {managerDeclaration} from './release-runtime.mjs';
+import {resolveProject,buildRecord} from '../lib/projects.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
 const run=(command,args)=>execFileSync(command,args,{stdio:'inherit',env:{...process.env,SDKROOT:process.env.SDKROOT||execFileSync('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path'],{encoding:'utf8'}).trim()}});
-export async function buildMKXPZ({project,arch,output,work}){
+export async function buildMKXPZ({project,version,arch,output,work}){
+ version=buildRecord(resolveProject(project,root,{resolvePins:false}),version).version;
  fs.mkdirSync(work,{recursive:true});
  const pin=JSON.parse(fs.readFileSync(path.join(root,'runtimes/mkxpz/baseline.json'))).upstream;
  const archive=await buildInput({url:pin.sourceUrl,sha256:pin.sourceSha256,bytes:pin.sourceBytes},path.join(work,'downloads'));
@@ -19,7 +21,7 @@ export async function buildMKXPZ({project,arch,output,work}){
  const expected='revision = '+inputs.sdlImage.upstreamWrapRevision;
  if(!original.includes(expected)||!original.includes('url = '+inputs.sdlImage.repository+'\n'))throw Error('The declared SDL_image source wrap changed.');
  fs.writeFileSync(wrap,original.replace(expected,'revision = '+inputs.sdlImage.revision));
- run(process.execPath,[path.join(root,'producers/maclauncher/scripts/build-mkxpz-nfc.cjs'),'--archive',archive,'--work',buildWork,'--meson',path.join(environment,'bin/meson'),'--ninja',path.join(environment,'bin/ninja'),'--output',staged]);
+ run(process.execPath,[path.join(root,'producers/maclauncher/scripts/build-mkxpz-nfc.cjs'),'--version',version,'--archive',archive,'--work',buildWork,'--meson',path.join(environment,'bin/meson'),'--ninja',path.join(environment,'bin/ninja'),'--output',staged]);
  const result=JSON.parse(fs.readFileSync(path.join(buildWork,'STAGED.json'))),sdlImage=path.join(source,'subprojects/sdl2_image');
  const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',env:{...process.env,GIT_NO_LAZY_FETCH:'1'}}).trim();
  if(git(sdlImage,['rev-parse','HEAD'])!==inputs.sdlImage.revision)throw Error('SDL_image differs from its declared commit.');
@@ -39,6 +41,6 @@ export async function buildMKXPZ({project,arch,output,work}){
  // The producer's additional source archive remains outside the runtime payload.
  fs.mkdirSync(output);fs.cpSync(result.directory,path.join(output,'payload'),{recursive:true});
  fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});
- return {project,version:producer.VERSION,arch,output};
+ return {project,version:declaration.version,arch,output};
 }
 recipeMain(import.meta,buildMKXPZ);

@@ -1,37 +1,9 @@
 name: Runtime release
 
 on:
-  workflow_dispatch:
-    inputs:
-      project:
-        description: Registered runtime project ID
-        required: false
-        type: string
-      version:
-        description: Exact package version
-        required: false
-        type: string
-      arch:
-        description: Package architecture
-        required: false
-        type: choice
-        options: [arm64, x64, universal]
-      operation:
-        description: Stage, verify, publish one package, or publish every imported signed output
-        required: true
-        default: verify
-        type: choice
-        options: [stage, verify, publish, publish-verified]
-      dry-run:
-        description: Download and verify the publish-verified batch without changing releases or catalogs
-        required: false
-        default: false
-        type: boolean
-      build-run:
-        description: Runtime build run (required for stage; optionally imported before publish-verified)
-        required: false
-        default: ''
-        type: string
+  workflow_run:
+    workflows: ['Runtime build']
+    types: [completed]
 
 permissions:
   contents: write
@@ -43,178 +15,21 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  release:
-    if: inputs.operation != 'publish-verified'
-    runs-on: ubuntu-latest
-    outputs:
-      catalog-commit: ${{ steps.push.outputs.commit }}
-    env:
-      GH_TOKEN: ${{ github.token }}
-      PROJECT: ${{ inputs.project }}
-      VERSION: ${{ inputs.version }}
-      ARCH: ${{ inputs.arch }}
-      BUILD_RUN: ${{ inputs.build-run }}
-      OPERATION: ${{ inputs.operation }}
-    steps:
-      - name: Require batch mode for dry run
-        if: inputs.dry-run
-        run: |
-          echo "Dry run is available only with publish-verified." >&2
-          exit 1
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: '24'
-          package-manager-cache: false
-      - name: Install publication verification dependencies
-        run: npm ci --ignore-scripts
-      - name: Require main for staging
-        if: inputs.operation == 'stage' && github.ref != 'refs/heads/main'
-        run: |
-          echo "Draft releases are staged only from main." >&2
-          exit 1
-      - name: Select registered release
-        run: |
-          node --input-type=module <<'JS'
-          import fs from 'node:fs';
-          import {resolveProject} from './lib/projects.mjs';
-          import {releaseTag,validateCatalog} from './lib/project-identity.mjs';
-          import {readPublisherInput} from './tools/publisher-files.mjs';
-          const p = resolveProject(process.env.PROJECT, undefined, {resolvePins:false});
-          if (p.releaseRepository !== process.env.GITHUB_REPOSITORY) throw Error('Release repository differs from its registry.');
-          const tag = releaseTag({id: p.id, version: process.env.VERSION, arch: process.env.ARCH});
-          const supplied = readPublisherInput({project: p.id});
-          fs.appendFileSync(process.env.GITHUB_ENV, 'PUBLICATION_AUTHORITY=' + (supplied ? 'supplied-publisher' : 'github-build') + '\n');
-          if (process.env.OPERATION === 'stage' && !process.env.BUILD_RUN) throw Error('Staging requires a Runtime build run.');
-          if (!process.env.BUILD_RUN) {
-            const catalog = validateCatalog(JSON.parse(fs.readFileSync('catalogs/' + p.id + '.json')), {project: p.id, repository: p.releaseRepository});
-            const record = catalog.packages.find(r => r.version === process.env.VERSION && r.arch === process.env.ARCH);
-            if (!record) throw Error('The selected package is absent from its project catalog.');
-          } else if (!/^[1-9][0-9]{0,19}$/.test(process.env.BUILD_RUN)) throw Error('Select a Runtime build run ID.');
-          fs.appendFileSync(process.env.GITHUB_ENV, 'RELEASE_TAG=' + tag + '\n');
-          JS
-      - name: Verify the selected build job
-        if: inputs.build-run != ''
-        run: |
-          gh run view "$BUILD_RUN" --repo "$GITHUB_REPOSITORY" --json workflowName,headSha,headBranch,status,jobs > "$RUNNER_TEMP/runtime-build-run.json"
-          commit=$(node tools/verified-build-run.mjs --input "$RUNNER_TEMP/runtime-build-run.json" --project "$PROJECT" --version "$VERSION" --arch "$ARCH")
-          echo "BUILD_SOURCE_REVISION=$commit" >> "$GITHUB_ENV"
-      - name: Verify release source commit
-        if: inputs.operation != 'stage'
-        run: |
-          git fetch --no-tags --depth=1 origin "refs/tags/$RELEASE_TAG"
-          git cat-file -e 'FETCH_HEAD^{commit}'
-          git cat-file -e FETCH_HEAD:projects.json
-          echo "RELEASE_SOURCE_REVISION=$(git rev-parse 'FETCH_HEAD^{commit}')" >> "$GITHUB_ENV"
-      - name: Select the source commit of the successful build
-        if: inputs.operation == 'stage'
-        run: |
-          commit="$BUILD_SOURCE_REVISION"
-          git fetch --no-tags --depth=1 origin "$commit"
-          echo "RELEASE_SOURCE_REVISION=$(git rev-parse 'FETCH_HEAD^{commit}')" >> "$GITHUB_ENV"
-      - name: Download selected release assets
-        if: inputs.build-run == ''
-        run: |
-          mkdir -p "$RUNNER_TEMP/runtime-assets"
-          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir "$RUNNER_TEMP/runtime-assets"
-      - name: Verify selected package
-        if: inputs.build-run == ''
-        run: node tools/release-runtime.mjs verify-assets --assets "$RUNNER_TEMP/runtime-assets" --output "$RUNNER_TEMP/runtime-release" --project "$PROJECT" --version "$VERSION" --arch "$ARCH"
-      - name: Download the package built from the tagged commit
-        if: inputs.build-run != ''
-        run: |
-          [ "$BUILD_SOURCE_REVISION" = "$RELEASE_SOURCE_REVISION" ] || { echo "The build run differs from the tagged source commit." >&2; exit 1; }
-          gh run download "$BUILD_RUN" --repo "$GITHUB_REPOSITORY" --name "runtime-$PROJECT-$VERSION-$ARCH" --dir "$RUNNER_TEMP/runtime-release"
-      - name: Verify the draft against the built package
-        if: inputs.build-run != ''
-        run: |
-          node tools/release-runtime.mjs verify --bundle "$RUNNER_TEMP/runtime-release" --project "$PROJECT" --version "$VERSION" --arch "$ARCH"
-      - name: Verify and record the signed build
-        if: env.PUBLICATION_AUTHORITY != 'supplied-publisher'
-        run: |
-          gh attestation verify "$RUNNER_TEMP/runtime-release/$PROJECT-$VERSION-$ARCH.tar.gz" --repo "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/runtime-build.yml" --source-digest "$RELEASE_SOURCE_REVISION" --deny-self-hosted-runners --format json > "$RUNNER_TEMP/verified-build.json"
-          node tools/record-github-build.mjs --release-bundle "$RUNNER_TEMP/runtime-release" --bundle "$RUNNER_TEMP/verified-build.json"
-      - name: Download the pinned publisher input
-        if: env.PUBLICATION_AUTHORITY == 'supplied-publisher'
-        run: node tools/publisher-files.mjs fetch --project "$PROJECT" --output "$RUNNER_TEMP/publisher-input.tar.gz"
-      # A package from a build run gains its equality record here, compared again from the actual archives.
-      - name: Record supplied-file equality
-        if: env.PUBLICATION_AUTHORITY == 'supplied-publisher' && inputs.build-run != ''
-        run: node tools/publisher-files.mjs record --project "$PROJECT" --input-archive "$RUNNER_TEMP/publisher-input.tar.gz" --release-bundle "$RUNNER_TEMP/runtime-release"
-      - name: Verify supplied publisher archive
-        if: env.PUBLICATION_AUTHORITY == 'supplied-publisher'
-        run: node tools/publisher-files.mjs verify --project "$PROJECT" --input-archive "$RUNNER_TEMP/publisher-input.tar.gz" --release-bundle "$RUNNER_TEMP/runtime-release"
-      - name: Stage the existing build artifact
-        if: inputs.operation == 'stage'
-        run: node tools/release-runtime.mjs stage --bundle "$RUNNER_TEMP/runtime-release" --target "$RELEASE_SOURCE_REVISION"
-      - name: Verify the existing draft
-        run: node tools/release-runtime.mjs verify-remote --bundle "$RUNNER_TEMP/runtime-release"
-      - name: Publish selected draft
-        if: inputs.operation == 'publish'
-        run: node tools/release-runtime.mjs publish --bundle "$RUNNER_TEMP/runtime-release"
-      # Compiled packages reach their catalogs through publish-verified. A supplied package from a
-      # build run is applied here, together with the equality record that authorizes it.
-      - name: Apply the supplied package and its equality record
-        id: catalog
-        if: inputs.operation == 'publish' && inputs.build-run != '' && env.PUBLICATION_AUTHORITY == 'supplied-publisher'
-        run: |
-          [ "$GITHUB_REF" = refs/heads/main ] || { echo "Catalogs are updated only from main." >&2; exit 1; }
-          node tools/release-runtime.mjs apply --bundle "$RUNNER_TEMP/runtime-release"
-          git add -- catalogs publisher-records
-          if git diff --cached --quiet; then
-            echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          git config user.name procrastinine
-          git config user.email 24549552+procrastinine@users.noreply.github.com
-          git commit -m "Publish $PROJECT $VERSION ($ARCH)"
-          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-          echo "changed=true" >> "$GITHUB_OUTPUT"
-      - name: Check the exact catalog commit
-        if: steps.catalog.outputs.changed == 'true'
-        env:
-          CATALOG_COMMIT: ${{ steps.catalog.outputs.commit }}
-        run: |
-          git clone --no-hardlinks "$GITHUB_WORKSPACE" "$RUNNER_TEMP/publication-source-check"
-          cd "$RUNNER_TEMP/publication-source-check"
-          git checkout --detach "$CATALOG_COMMIT"
-          npm ci --ignore-scripts
-          git submodule update --init --depth 1 -- sources/maclauncher-android
-          npm test
-          npm run check:versions
-          npm run index:build
-      - name: Push checked catalogs
-        id: push
-        if: steps.catalog.outputs.commit != ''
-        env:
-          CATALOG_COMMIT: ${{ steps.catalog.outputs.commit }}
-          CHANGED: ${{ steps.catalog.outputs.changed }}
-        run: |
-          if [ "$CHANGED" = true ]; then
-            gh auth setup-git
-            git push origin HEAD:main
-          fi
-          echo "commit=$CATALOG_COMMIT" >> "$GITHUB_OUTPUT"
   publish-verified:
-    if: inputs.operation == 'publish-verified'
+    # A failed matrix can still have successful, signed packages. Catch-up keeps
+    # those successes without rerunning them or relying on a local dispatcher.
+    if: >-
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      (github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure')
     runs-on: ubuntu-latest
     outputs:
       catalog-commit: ${{ steps.catalog.outputs.commit }}
     env:
       GH_TOKEN: ${{ github.token }}
-      DRY_RUN: ${{ inputs.dry-run }}
-      BUILD_RUN: ${{ inputs.build-run }}
-      PROJECT: ${{ inputs.project }}
-      VERSION: ${{ inputs.version }}
-      ARCH: ${{ inputs.arch }}
+      BUILD_RUN: ${{ github.event.workflow_run.id }}
     steps:
-      - name: Require main
-        if: github.ref != 'refs/heads/main'
-        run: |
-          echo "Verified batches publish only from main." >&2
-          exit 1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
@@ -226,18 +41,12 @@ jobs:
           package-manager-cache: false
       - name: Install locked publication dependencies
         run: npm ci --ignore-scripts
-      - name: Publish imported signed outputs
-        run: |
-          args=(--output "$RUNNER_TEMP/verified-publication")
-          if [ -n "$BUILD_RUN" ]; then
-            args+=(--build-run "$BUILD_RUN" --project "$PROJECT" --version "$VERSION")
-            if [ -n "$ARCH" ]; then args+=(--arch "$ARCH"); fi
-          fi
-          if [ "$DRY_RUN" = true ]; then args+=(--dry-run); fi
-          node tools/publish-verified.mjs "${args[@]}"
-      - name: Commit catalog changes
+      - name: Publish verified successful outputs and catch up completed runs
+        id: publish
+        continue-on-error: true
+        run: node tools/publish-verified.mjs --output "$RUNNER_TEMP/verified-publication" --build-run "$BUILD_RUN" --catch-up
+      - name: Commit all successful catalog and declaration changes
         id: catalog
-        if: inputs.dry-run == false
         run: |
           git add -- catalogs attestations
           if git diff --cached --quiet; then
@@ -254,7 +63,7 @@ jobs:
         env:
           CATALOG_COMMIT: ${{ steps.catalog.outputs.commit }}
         run: |
-          git clone --no-hardlinks "$GITHUB_WORKSPACE" "$RUNNER_TEMP/publication-source-check"
+          git clone --no-hardlinks --dissociate "$GITHUB_WORKSPACE" "$RUNNER_TEMP/publication-source-check"
           cd "$RUNNER_TEMP/publication-source-check"
           git checkout --detach "$CATALOG_COMMIT"
           npm ci --ignore-scripts
@@ -262,12 +71,12 @@ jobs:
           npm test
           npm run check:versions
           npm run index:build
-      - name: Push checked catalogs
+      - name: Push the one checked catalog commit
         if: steps.catalog.outputs.changed == 'true'
         run: |
           gh auth setup-git
           git push origin HEAD:main
-      - name: Keep the publication plan
+      - name: Keep the publication evidence
         if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
@@ -278,14 +87,18 @@ jobs:
             ${{ runner.temp }}/verified-publication/imported-builds.json
             ${{ runner.temp }}/verified-publication/staged-ledgers
           if-no-files-found: ignore
+      - name: Report individual failures after retaining successful publications
+        if: steps.publish.outcome == 'failure'
+        run: |
+          echo 'Some outputs failed verification or publication; successful outputs were retained. See publication-result.json.' >&2
+          exit 1
   update-index:
-    needs: [release, publish-verified]
-    # Exactly one publication job runs for each dispatch.
-    if: ${{ !cancelled() && (needs.publish-verified.result == 'success' && needs.publish-verified.outputs.catalog-commit != '' || needs.release.result == 'success' && needs.release.outputs.catalog-commit != '') }}
+    needs: publish-verified
+    if: ${{ always() && !cancelled() && needs.publish-verified.outputs.catalog-commit != '' }}
     uses: ./.github/workflows/pages.yml
     permissions:
       contents: read
       pages: write
       id-token: write
     with:
-      source-revision: ${{ needs.publish-verified.outputs.catalog-commit || needs.release.outputs.catalog-commit }}
+      source-revision: ${{ needs.publish-verified.outputs.catalog-commit }}

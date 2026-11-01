@@ -7,9 +7,14 @@ import {resolveProject} from '../lib/projects.mjs';
 import {recipeMain} from './build-source.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/maclauncher/src/modules/java/runtime/steamworks');
 const {build}=require(path.join(base,'build-agent.cjs')),Zip=require('../producers/maclauncher/src/modules/shared/runtime/zip.js'),catalog=require(path.join(base,'versions.json'));
+/** Select the original ABI source independently of the Builds package revision. */
+export function javaSteamworksProfile(version){
+ const upstream=/^(.+)-MCLv[1-9]\d*$/.exec(version||'')?.[1],matches=catalog.filter(row=>row.version===upstream);
+ if(matches.length!==1)throw Error('The Steamworks4j catalog has no ABI release for '+version+'.');
+ return matches[0];
+}
 export async function buildJavaSteamworks({project:id,arch,version,output,work}){
- const project=resolveProject(id,root,{resolvePins:false}),original=catalog.find(row=>version===row.version+'-MCLv2');
- if(!original)throw Error('The Steamworks4j catalog has no ABI release for '+version+'.');
+ const project=resolveProject(id,root,{resolvePins:false}),original=javaSteamworksProfile(version);
  const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});fs.mkdirSync(work,{recursive:true});
  try {
   const publisher=path.join(work,'publisher.jar'),response=await fetch(original.publisherUrl);if(!response.ok)throw Error('Publisher archive returned HTTP '+response.status);fs.writeFileSync(publisher,Buffer.from(await response.arrayBuffer()));

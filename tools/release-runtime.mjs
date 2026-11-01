@@ -89,7 +89,7 @@ export async function prepareRelease({project,input,declaration,archive,record,s
 }
 
 /** Verify downloaded release assets without executing runtime contents. */
-export async function verifyRelease({bundle,project,version,arch,directory=root}){
+export async function verifyRelease({bundle,project,version,arch,includeDeclaration=false,directory=root}){
  const sidecars=fs.readdirSync(bundle).filter(name=>name.endsWith('.tar.gz.json'));if(sidecars.length!==1)throw Error('Select a directory containing exactly one runtime archive and its package record.');
  const record=read(path.join(bundle,sidecars[0]));identity(record);const registration=resolveProject(record.id,directory,{resolvePins:false}),repo=registration.releaseRepository;releaseRecord(record,{project:record.id,repository:repo});
  if(project&&record.id!==project||version&&record.version!==version||arch&&record.arch!==arch)throw Error('Release metadata differs from the selected project, version or architecture.');
@@ -106,7 +106,7 @@ export async function verifyRelease({bundle,project,version,arch,directory=root}
  if(hasSource&&(regular(source).size!==required.bytes||await A.checksum(source)!==required.sha256))throw Error('Release asset checksum or size changed.');
  const names=[name,name+'.json',record.id+'.json',...(hasSource?[sourceName]:[])];if(fs.readdirSync(bundle).some(name=>!names.includes(name)))throw Error('Release directory contains undeclared files.');
  const assets=[await asset(bundle,name,'runtime'),await asset(bundle,name+'.json','record'),await asset(bundle,record.id+'.json','catalog'),...(hasSource?[await asset(bundle,sourceName,'source')]:[])];
- return {release:{schemaVersion:1,repository:repo,id:record.id,version:record.version,arch:record.arch,tag:releaseTag(record),assets},record,catalog:snapshot};
+ return {release:{schemaVersion:1,repository:repo,id:record.id,version:record.version,arch:record.arch,tag:releaseTag(record),assets},record,catalog:snapshot,...(includeDeclaration?{declaration:checked.declaration}:{})};
 }
 
 /** A single discoverable listing, generated from the same project catalogs used by the launcher. */
@@ -132,11 +132,15 @@ export function catalogIndex(directory=root,{coverage=buildCoverage(directory)}=
 
 /** Apply only a public, digest-verified release; older versions cannot be removed or replaced. */
 export async function applyRelease({bundle,directory=root,runGh=runGitHub,verifyGithubBuild=verifyPublicationBuild}){
- const {release,record}=await verifyRemoteRelease({bundle,directory,runGh,verifyGithubBuild,requirePublic:true});
+ const {release,record,declaration}=await verifyRemoteRelease({bundle,directory,runGh,verifyGithubBuild,requirePublic:true,includeDeclaration:true});
+ const declarationFile=path.join(directory,'catalogs','declarations',release.id,release.version,release.arch+'.json');
+ if(fs.existsSync(declarationFile)){
+  regular(declarationFile);if(stable(read(declarationFile))!==stable(declaration))throw Error('An existing sealed declaration differs from this immutable package.');
+ }else{fs.mkdirSync(path.dirname(declarationFile),{recursive:true});write(declarationFile,declaration);}
  const previous=loadPrevious(release.id,directory),file=path.join(directory,'catalogs',release.id+'.json');
  const {writePublicationCatalog}=await import('./catalog-publication.mjs');
  writePublicationCatalog({records:[record],project:release.id,repository:release.repository,directory,output:file,previous});
- const index=catalogIndex(directory);fs.writeFileSync(path.join(directory,'catalogs','index.json'),json(index));return {projectId:release.id,tag:release.tag,catalog:file};
+ const index=catalogIndex(directory);fs.writeFileSync(path.join(directory,'catalogs','index.json'),json(index));return {projectId:release.id,tag:release.tag,catalog:file,declaration:declarationFile};
 }
 
 /** Public releases expose only the runtime binary archive. */
@@ -159,7 +163,7 @@ export function releaseNotes(record,project){
  lines.push('','</details>');return lines.join('\n');
 }
 
-const runGitHub=(args,options={})=>execFileSync('gh',args,{encoding:'utf8',...options});
+const runGitHub=(args,options={})=>{requireHostedPublication();return execFileSync('gh',args,{encoding:'utf8',...options});};
 function missingRef(error){return error.status===404||error.statusCode===404||/\bHTTP 404\b/.test(String(error.stderr||''));}
 async function releaseTagCommit(ref,{repository,runGh}){
  const seen=new Set();let object=ref.object;
@@ -194,8 +198,8 @@ async function existingRelease({release,record,runGh,allowUnreleasedTag=false}){
 }
 
 /** Verify the immutable remote asset, including staged drafts, without changing GitHub. */
-export async function verifyRemoteRelease({bundle,directory=root,runGh=runGitHub,requirePublic=false,verifyGithubBuild=verifyPublicationBuild}){
- const checked=await verifyRelease({bundle,directory});
+export async function verifyRemoteRelease({bundle,directory=root,runGh=runGitHub,requirePublic=false,includeDeclaration=false,verifyGithubBuild=verifyPublicationBuild}){
+ const checked=await verifyRelease({bundle,directory,includeDeclaration});
  const build=await verifyGithubBuild({record:checked.record,repository:checked.release.repository,directory,archive:path.join(path.resolve(bundle),checked.record.asset.filename)});
  const publication=await existingRelease({...checked,runGh});
  if(!publication)throw Error('The selected release has not been staged.');

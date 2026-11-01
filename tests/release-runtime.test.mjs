@@ -7,6 +7,7 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {prepareRelease,verifyRelease,applyRelease as actualApplyRelease,publicationAssets,verifyPublicAssets,stageRelease as actualStageRelease,publishRelease as actualPublishRelease,managerDeclaration,verifyRemoteRelease as actualVerifyRemoteRelease,main} from '../tools/release-runtime.mjs';
 import {releaseBatch as actualReleaseBatch,main as actualBatchMain} from '../tools/release-batch.mjs';
+import {verifiedBuildSource} from '../tools/verified-build-run.mjs';
 // Synthetic remote-release lifecycle tests inject only the cryptographic boundary.
 const fixtureBuild=({record,repository,directory,archive,sourceRevision})=>{
  assert.equal(repository,'owner/builds');assert.ok(fs.statSync(directory).isDirectory());
@@ -118,12 +119,13 @@ test('release source verification retains the current publication controller and
  fs.writeFileSync(path.join(upstream,'projects.json'),'different dispatch branch source');git(upstream,['add','projects.json']);git(upstream,['commit','-m','Later branch source']);
  execFileSync('git',['clone','--quiet','--no-hardlinks',upstream,checkout],{env,stdio:'pipe'});assert.notEqual(git(checkout,['rev-parse','HEAD']),tagged);
  const workflow=fs.readFileSync(new URL('../.github/workflows/runtime-release.yml',import.meta.url),'utf8');
- const block=workflow.match(/      - name: Verify release source commit\n        if: inputs.operation != 'stage'\n        run: \|\n((?:          [^\n]*\n)+)/)?.[1];assert.ok(block,'Tagged-source workflow step exists');
- const command=block.trimEnd().split('\n').map(line=>line.slice(10)).join('\n');
- const controller=git(checkout,['rev-parse','HEAD']),githubEnv=path.join(directory,'github-env');
- execFileSync('/bin/bash',['-eu','-c',command],{cwd:checkout,env:{...env,RELEASE_TAG:tag,GITHUB_ENV:githubEnv},stdio:'pipe'});
+ assert.match(workflow,/workflow_run:/);assert.match(workflow,/ref: main/);assert.match(workflow,/tools\/publish-verified\.mjs.*--build-run/);
+ assert.doesNotMatch(workflow,/git checkout.*RELEASE_TAG/,'Publication retains the current controller instead of checking out the historical tag.');
+ const controller=git(checkout,['rev-parse','HEAD']);
+ const selected=verifiedBuildSource({workflowName:'Runtime build',status:'completed',headBranch:'main',headSha:tagged,jobs:[{name:'build (engine 1.0 arm64)',status:'completed',conclusion:'success'}]},{project:'engine',version:'1.0',arch:'arm64'});
+ assert.equal(selected,git(checkout,['rev-parse',tag+'^{commit}']));
  assert.equal(git(checkout,['rev-parse','HEAD']),controller);assert.equal(fs.readFileSync(path.join(checkout,'projects.json'),'utf8'),'different dispatch branch source');
- assert.equal(fs.readFileSync(githubEnv,'utf8'),'RELEASE_SOURCE_REVISION='+tagged+'\n');
+ const publisher=fs.readFileSync(new URL('../tools/publish-verified.mjs',import.meta.url),'utf8');assert.match(publisher,/stageRelease\(\{\.\.\.options,target:row\.sourceRevision,resume:true\}\)/);
 });
 
 const sourceTarget='a'.repeat(40),annotation='b'.repeat(40);
