@@ -31,10 +31,8 @@
   "ownedFiles": {
     "siglus/host.m": "c762ad8e34167b10d3efd0389b91a353cd404d694fb8d09e2d717cdda69e9137",
     "siglus/host.json": "a31f44d554668e7aa05746a99f1e1e6cd0cb9b710d32ccbe56ecb2109497e110",
-    "siglus/prebuilt/siglus-host": "c956c19fdfd2ebaa0d536fe4f7aa0c0e5de7ad24b9e508d4964a213de122d72e",
     "rlvm/adapter.m": "77ab945b9d8e62ef4b78649f093fe2dfe7ed710105ae14fe42f53586036f89ba",
     "rlvm/adapter.json": "7af757859832bed219951a16158d40ce5ca2e88f4afdb48b2dd01d25d340bcfa",
-    "rlvm/prebuilt/rlvm-adapter.dylib": "a728d970519766e31529060619ba0bec755f68df94b6125d81f1d3c8c8f73b2f",
     "siglus/LICENSE-siglus_rs.txt": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
     "LICENSE": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
     "kag3-polyfill/FONT_LICENSE.txt": "54146d78134b7508daa0722a91f344b931ece27cdd5c72d8791d7826d6b51a42",

@@ -18,9 +18,9 @@ export async function packageAdapter({output,binary,archive:packed=true,version}
  const profile=JSON.parse(fs.readFileSync(path.join(here,'adapter.json')));
  if(!path.isAbsolute(output||'')||fs.existsSync(output)||source.id!=='rlvm-adapter'||source.adapterABI!==1)throw Error('Choose a new absolute adapter output directory.');
  for(const [relative,expected] of Object.entries(source.files)){B.relativeFile(relative);const file=path.resolve(here,relative);if(!file.startsWith(here+path.sep)||!fs.lstatSync(file).isFile()||fs.lstatSync(file).isSymbolicLink()||sha(file)!==expected)throw Error('The adapter producer input changed: '+relative);}
- // Legacy packaging checks its binary profile; Runtime builds compile the owned source.
- if(sha(path.join(here,'adapter.m'))!==profile.sourceSha256||binary===undefined&&sha(path.join(here,'prebuilt',profile.path))!==profile.sha256)throw Error('The adapter binary and owned source identities differ from their profile.');
- binary??=path.join(here,'prebuilt',profile.path);const image=M.assertSystemLibraryClosure(M.readMachOLoadCommands(binary),{fileType:6,installName:'@rpath/rlvm-adapter.dylib',maximumMacOS:source.minimumMacOS});
+ if(!path.isAbsolute(binary||''))throw Error('Packaging requires an explicit compiled adapter from the source build.');
+ if(sha(path.join(here,'adapter.m'))!==profile.sourceSha256)throw Error('The adapter binary and owned source identities differ from their profile.');
+ const image=M.assertSystemLibraryClosure(M.readMachOLoadCommands(binary),{fileType:6,installName:'@rpath/rlvm-adapter.dylib',maximumMacOS:source.minimumMacOS});
  if(JSON.stringify([...image.architectures].sort())!==JSON.stringify(['arm64','x86_64']))throw Error('The adapter requires both Mac CPU architectures.');
  execFileSync('/usr/bin/codesign',['--verify','--strict',binary],{stdio:'pipe',timeout:30000});
  const payload=path.join(output,'payload'),files=path.join(payload,'files');fs.mkdirSync(files,{recursive:true});
@@ -50,5 +50,5 @@ export async function build({output,work}){
 }
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){
  const args=process.argv.slice(2),options={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!['output','project','arch','work'].includes(key)||!args[i+1]||Object.hasOwn(options,key))throw Error('Use --output with a new absolute directory, or --project, --arch, --output and --work.');options[key]=args[i+1];}
- (options.arch?Promise.resolve(options).then(checkBuildRequest).then(()=>build(options)):Object.keys(options).join()==='output'?packageAdapter(options):Promise.reject(Error('Use --output with a new absolute directory.'))).then(result=>console.log(JSON.stringify(result.archive?result:{id:result.declaration.id,version:result.declaration.version,arch:result.declaration.arch}))).catch(error=>{console.error(error.message);process.exitCode=1;});
+ (options.arch?Promise.resolve(options).then(checkBuildRequest).then(()=>build(options)):Promise.reject(Error('Use --project, --arch, --output and --work.'))).then(result=>console.log(JSON.stringify(result.archive?result:{id:result.declaration.id,version:result.declaration.version,arch:result.declaration.arch}))).catch(error=>{console.error(error.message);process.exitCode=1;});
 }

@@ -7,28 +7,12 @@
   },
   "files": [
     {
-      "path": "supplied/resources/launch-arguments.jar",
-      "sha256": "ec11c7a32a467d42da519066f8ce5277e92f763b428b0726f02cf0b593b04c4f"
-    },
-    {
-      "path": "supplied/resources/text-input.jar",
-      "sha256": "331582e630a4f8cfca4b2edb15bb404ba6db1f9e68783fc60c7b175cb59f5530"
-    },
-    {
       "path": "supplied/resources/text-input.json",
       "sha256": "c7fde03229e5cc436b9c08143a816a9c3147a7f92f889d20b8d2939bb915f8b9"
     },
     {
-      "path": "supplied/store/resources/account-control.jar",
-      "sha256": "72eae00c867cec39ebe043760e7cd0b81e20358fc354897641470684bac89fce"
-    },
-    {
       "path": "supplied/store/resources/account-control.json",
       "sha256": "c5c18d6677663f7ab189687b678a1d581e368b56edfaccd88f80fd745b331a2a"
-    },
-    {
-      "path": "supplied/providers/macapk/resources/privacy.jar",
-      "sha256": "6499744367ec6016c99192c1a11368b1abb8181eadc98b4a739b95bdfa3fcfc6"
     },
     {
       "path": "supplied/runtime/package.json",

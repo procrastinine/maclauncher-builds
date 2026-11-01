@@ -29,7 +29,9 @@ export async function buildAndroidLauncher({project:id,arch,output,work}){
   const built=path.join(work,'compiled');build({jdk,runtime:api,output:built});
   const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});
   for(const entry of profile.inputs){
-   const generated=path.join(built,entry.path),file=fs.existsSync(generated)?generated:path.join(base,'supplied',entry.path);
+   const generated=path.join(built,entry.path);
+   if(entry.path.endsWith('.jar')&&!fs.existsSync(generated))throw Error('The source build did not produce '+entry.path);
+   const file=fs.existsSync(generated)?generated:path.join(base,'supplied',entry.path);
    if(!fs.existsSync(generated)&&sha(file)!==entry.sha256)throw Error('Supplied integration file differs: '+entry.path);
    const target=path.join(payload,entry.output);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(file,target);fs.chmodSync(target,entry.mode);
   }
