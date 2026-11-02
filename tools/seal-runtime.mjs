@@ -88,7 +88,6 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
   const main=path.join(files,executableRelative);
   const signingOrder=[...seen].filter(target=>!appRoot||target!==main).sort((a,b)=>b.split(path.sep).length-a.split(path.sep).length||a.localeCompare(b));
   for(const target of signingOrder)if(!shared.has(target))run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);
-  if(appRoot)run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',path.join(files,path.basename(appRoot))]);
   // Preserved shared imports retain their logical loader names. Copy only
   // finalized bytes; package layout later replaces these copies by exact aliases.
   for(const [alias,canonical]of aliases){
@@ -96,6 +95,7 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
    else{fs.mkdirSync(path.dirname(alias),{recursive:true});fs.copyFileSync(canonical,alias,fs.constants.COPYFILE_EXCL);}
    seen.add(alias);
   }
+  if(appRoot)run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',path.join(files,path.basename(appRoot))]);
   for(const target of seen){
    run('/usr/bin/codesign',['--verify','--strict',target]);
    const ids=Tools.libraryIds(target,cpu),commands=Tools.loadCommands(target,cpu);
