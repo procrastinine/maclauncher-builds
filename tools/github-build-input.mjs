@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {buildInput} from './build-input.mjs';
+import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {sha} from './helper-package.mjs';
 import {verify} from './runtime-package.mjs';
 import {verifyBuildEvidence} from '../lib/github-builds.mjs';
@@ -19,6 +20,8 @@ export async function githubBuildInput({pin,output,work,environment=process.env,
  releaseRecord(record,{project:record?.id,repository});
  if(pin.evidence.path!=='attestations/'+record.asset.sha256+'.json')throw Error('Input evidence filename differs from its signed archive.');
  const evidence=verifyBuildEvidence({record,repository,bundle});
+ const prepared=preparedBuildInput(record.id,environment);if(prepared)return prepared;
+ if(environment.BUILD_REPORTS)throw Error('The recipe did not resolve this Builds input before compilation: '+record.id);
  fs.mkdirSync(work,{recursive:true});
  const cache=path.join(work,'archives');fs.mkdirSync(cache,{recursive:true});
  let archive=path.join(cache,record.asset.sha256);

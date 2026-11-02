@@ -1,0 +1,66 @@
+name: Build runtime package
+description: Build, verify and attest one declared runtime package.
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: '24'
+        package-manager-cache: false
+    - name: Install locked build-tool dependencies
+      shell: bash
+      run: npm ci --ignore-scripts
+    - name: Register the selected names for this build
+      shell: bash
+      run: |
+        node --input-type=module <<'JS'
+        import {registerSelection} from './tools/release-selection.mjs';
+        registerSelection({selection: process.env.RELEASE_SELECTION, directory: process.cwd()});
+        JS
+    - name: Read the generated package definitions
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      with:
+        name: release-plan
+        path: ${{ runner.temp }}/release-plan
+    - name: Use the package definition file
+      shell: bash
+      run: echo "BUILD_REPORTS=$RUNNER_TEMP/release-plan/reports.json" >> "$GITHUB_ENV"
+    - name: Prepare the resolved package inputs
+      shell: bash
+      run: node tools/build-run-inputs.mjs prepare --project "$BUILD_PROJECT" --output "$RUNNER_TEMP/prepared-inputs"
+    - name: Prepare the runner
+      shell: bash
+      run: node tools/build-runtime.mjs --prepare --project "$BUILD_PROJECT" --arch "$BUILD_ARCH" --version "$BUILD_VERSION"
+    - name: Build the package
+      shell: bash
+      run: node tools/build-runtime.mjs --project "$BUILD_PROJECT" --arch "$BUILD_ARCH" --version "$BUILD_VERSION" --output "$RUNNER_TEMP/build" --work "$RUNNER_TEMP/work"
+    - name: Package the release
+      shell: bash
+      run: node tools/release-runtime.mjs prepare --project "$BUILD_PROJECT" --input "$RUNNER_TEMP/build/payload" --declaration "$RUNNER_TEMP/build/declaration.json" --source-revision "$GITHUB_SHA" --output "$RUNNER_TEMP/release"
+    - name: Verify the package identity
+      id: verify
+      shell: bash
+      run: node tools/release-runtime.mjs verify --bundle "$RUNNER_TEMP/release" --project "$BUILD_PROJECT" --version "$BUILD_VERSION" --arch "$BUILD_ARCH"
+    # Signed provenance that ties the compiled package archive to this workflow run and commit.
+    - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+      id: attest
+      continue-on-error: true
+      with:
+        subject-path: ${{ runner.temp }}/release/*.tar.gz
+    - name: Wait before retrying the attestation request
+      if: steps.attest.outcome == 'failure' && !cancelled()
+      shell: bash
+      run: sleep 5
+    - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+      if: steps.attest.outcome == 'failure' && !cancelled()
+      with:
+        subject-path: ${{ runner.temp }}/release/*.tar.gz
+    - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
+      with:
+        name: runtime-${{ env.BUILD_PROJECT }}-${{ env.BUILD_VERSION }}-${{ env.BUILD_ARCH }}
+        path: ${{ runner.temp }}/release
+        if-no-files-found: error
+        retention-days: 90
+        compression-level: 0
+

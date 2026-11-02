@@ -157,14 +157,14 @@ test('a VNDS-LOVE package revision preserves engine files and historical packagi
 });
 
 test('Build and release retains the shared architecture and attestation steps',()=>{
- const workflow=fs.readFileSync(path.join(root,'.github/workflows/runtime-build.yml'),'utf8');
+ const pipeline=fs.readFileSync(path.join(root,'.github/workflows/runtime-build.yml'),'utf8'),workflow=pipeline+'\n'+fs.readFileSync(path.join(root,'.github/actions/build-runtime/action.yml'),'utf8');
  assert.match(workflow,/name: Build and release/);assert.match(workflow,/workflow_dispatch:/);
- assert.match(workflow,/matrix: \$\{\{ fromJSON\(needs\.plan\.outputs\.matrix\) \}\}/);
+ assert.match(workflow,/matrix: \$\{\{ fromJSON\(needs\.plan\.outputs\.matrix0\) \}\}/);
  assert.match(workflow,/runs-on: \$\{\{ matrix\.runner \}\}/);assert.match(workflow,/fail-fast: false/);
  assert.match(workflow,/tools\/release-runtime\.mjs prepare --project/);assert.match(workflow,/tools\/release-runtime\.mjs verify --bundle/);
  const actions=[...workflow.matchAll(/uses: actions\/attest-build-provenance@([a-f0-9]{40})/g)];assert.equal(actions.length,2);assert.equal(actions[0][1],actions[1][1]);
  assert.match(workflow,/subject-path: \$\{\{ runner\.temp \}\}\/release\/\*\.tar\.gz/);
- assert.match(workflow,/needs: \[plan, build\]/);assert.match(workflow,/tools\/publish-verified\.mjs --output/);
+ assert.match(workflow,/needs: \[plan, independent, build0, build1, build2, build3\]/);assert.match(workflow,/tools\/publish-verified\.mjs --output/);
 });
 
 test('registered GitHub build commands reject architectures their projects do not build',async t=>{
@@ -268,7 +268,7 @@ test('every build host is prepared by one shared step on its declared hosted run
  const prepared=prepareBuildHost({...linux,build:{rustTargets:['aarch64-apple-darwin']}});
  assert.deepEqual(prepared,{env:{RUSTUP_TOOLCHAIN:'1.99.0'},paths:[]});
  assert.deepEqual(calls,[['rustup','toolchain','install','1.99.0','--profile','minimal'],['rustup','target','add','--toolchain','1.99.0','aarch64-apple-darwin']]);
- const workflow=fs.readFileSync(path.join(root,'.github/workflows/runtime-build.yml'),'utf8');
+ const workflow=fs.readFileSync(path.join(root,'.github/actions/build-runtime/action.yml'),'utf8');
  assert.match(workflow,/run: node tools\/build-runtime\.mjs --prepare --project "\$BUILD_PROJECT" --arch "\$BUILD_ARCH" --version "\$BUILD_VERSION"/);
  for(const text of ['brew install','rustup ','xcodebuild','init-runtime-sources','cleanup-runner.mjs'])assert.ok(!workflow.includes(text),text);
 });

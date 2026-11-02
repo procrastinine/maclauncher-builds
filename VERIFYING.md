@@ -17,3 +17,5 @@ The [verification table](https://procrastinine.github.io/maclauncher-builds/veri
 Existing unchanged publisher files retain their separate file-equality records. That equality does not claim a GitHub compilation or publisher authentication. Earlier local archives remain historical records and do not acquire build attestations from a different package.
 
 **Rebuild and compare** checks a published package's recorded recipe and compares its output. It reports differences without publishing or changing the package.
+
+The archive also contains `files/build-definition.json` and `files/build-inputs.json`. Its sealed inventory records their hashes. The input record lists the exact release, archive digest and source build of each dependency. Each referenced archive can be checked with the same attestation command. Inputs built earlier in the run receive their own attestations and releases before consumer releases are published.

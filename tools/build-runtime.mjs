@@ -14,6 +14,7 @@ import {prepareBuildHost,assertBuildHost} from './build-host.mjs';
 import {initializeSources} from './init-runtime-sources.mjs';
 import {publicDeclaration} from './runtime-package.mjs';
 import {readPublisherInput} from './publisher-files.mjs';
+import {sealBuildInputReport} from './seal-build-input-report.mjs';
 import {reproducibleEnvironment} from '../lib/reproducible-build.mjs';
 const B=createRequire(import.meta.url)('../lib/bundled-native.cjs');
 
@@ -157,6 +158,7 @@ export function runBuild({project:id,arch,version,output,work=path.join(fs.mkdte
   const result=spawn(process.execPath,[command,'--project',project.id,'--arch',arch,'--version',build.version,'--output',output,'--work',work],{cwd:directory,stdio:'inherit',env:reproducibleEnvironment(directory,context.env)});
   if(result.error)throw result.error;
   if(result.status!==0)throw Error(project.name+' build exited with status '+result.status);
+  sealBuildInputReport({project:project.id,output});
   return checkBuildOutput({project,build,arch,output});
  }finally{context.dispose();}
 }

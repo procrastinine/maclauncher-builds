@@ -18,7 +18,7 @@ function fixture(t){
  const oldVersions=['MCLv2-1028-6','0.0.13-838e47b-MCLv1','1.0.0-preview.5f358ef1360b-MCLv1-1028-1','1.0.0'];
  const projects=[...requests,{id:'unrelated'}].map(({id},index)=>({id,name:id,delivery:'downloadable',producer:{kind:'maclauncher',repository:'https://github.com/owner/builds',sourceRepository:'https://github.com/upstream/'+id,entries:['tools/build.mjs']},upstreams:[],packageProfiles:[{version:oldVersions[index],label:id+' '+oldVersions[index]}],build:{version:oldVersions[index],command:'tools/build.mjs',architectures:['arm64','x64'],tools:['cmake']}}));
  const registry=path.join(directory,'projects.json');fs.writeFileSync(registry,JSON.stringify({schemaVersion:1,repository:'owner/builds',updatePolicy:'manual',projects},null,2)+'\n');
- const env={GITHUB_ACTIONS:'true',GITHUB_REPOSITORY:'owner/builds',GITHUB_RUN_ID:'123',GITHUB_RUN_ATTEMPT:'1',GITHUB_SHA:'a'.repeat(40),GITHUB_WORKFLOW:'Build and release',GITHUB_WORKFLOW_REF:'owner/builds/.github/workflows/runtime-build.yml@refs/heads/main'},downloads=[],records=new Map(),calls=[];
+ const env={GITHUB_ACTIONS:'true',GITHUB_REPOSITORY:'owner/builds',GITHUB_RUN_ID:'123',GITHUB_RUN_ATTEMPT:'1',GITHUB_SHA:'a'.repeat(40),GITHUB_WORKFLOW:'Build and release',GITHUB_WORKFLOW_REF:'owner/builds/.github/workflows/runtime-build.yml@refs/heads/main',RELEASE_GRAPH:JSON.stringify({'siglus':['android-aim']})},downloads=[],records=new Map(),calls=[];
  let run,active=0,max=0;
  const register=({tags=[],releases=[]}={})=>{
   const registered=registerSelection({selection:JSON.stringify(requests),directory,tags,releases});env.RELEASE_SELECTION=JSON.stringify(registered.selection);
@@ -48,6 +48,7 @@ test('one request registers exact custom versions and releases every selected CP
  for(const request of requests){const current=after.projects.find(row=>row.id===request.id),previous=f.projects.find(row=>row.id===request.id);assert.equal(current.build.version,request.version);assert.deepEqual(current.build.architectures,['arm64','x64']);assert.deepEqual(current.build.tools,['cmake']);assert.deepEqual(current.producer,previous.producer);assert.ok(current.packageProfiles.some(profile=>profile.version===previous.build.version));assert.ok(current.packageProfiles.some(profile=>profile.version===request.version));}
  const result=await publishCurrentRun(f);assert.equal(result.selected,6);assert.equal(result.published,6);assert.equal(result.failed,0);assert.deepEqual(f.downloads,expected);assert.ok(f.max()>1&&f.max()<=8);assert.equal(f.calls.filter(call=>call.startsWith('apply:')).length,6);
  for(const row of result.results){assert.equal(row.runId,f.env.GITHUB_RUN_ID);assert.ok(f.calls.indexOf('signature:'+row.project+row.arch)<f.calls.indexOf('stage:'+row.project+row.arch));}
+ for(const arch of ['arm64','x64'])assert.ok(f.calls.indexOf('apply:android-aim'+arch)<f.calls.indexOf('stage:siglusarm64'),'Selected input releases complete before their consumer.');
  assert.ok(!f.calls.some(call=>call.includes('unrelated')));assert.deepEqual(JSON.parse(fs.readFileSync(path.join(f.output,'publication-result.json'))),result);
 });
 

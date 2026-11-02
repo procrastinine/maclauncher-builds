@@ -13,6 +13,10 @@ Names are used as supplied. A name already published for the project cannot be r
 
 One matrix builds the selected packages on their declared GitHub-hosted Mac or Linux runners. Each package is sealed, packed and attested with the shared build and packaging commands. Independent jobs run in parallel. A failed package does not discard another package's successful output.
 
+Recipes report their source pins, recipe files and consumed packages. Matching published input definitions reuse the exact attested release. Changed inputs build first in the same run; their verified artifacts pass directly to consumers on GitHub. Independent projects build in parallel with that chain.
+
+Each archive seals `build-definition.json` and `build-inputs.json` in its regular file inventory. The latter lists the digest, release and source build of every resolved input. The ordinary archive attestation covers those records.
+
 The publication job reads this run's artifacts on GitHub, checks their signed provenance and sealed declarations, creates the releases and commits the registrations and catalogs. Each archive has one immutable project/version/CPU identity. The index and Pages update from that catalog commit. No archive passes through a local computer for publication.
 
 Each release and package-index row links the exact Builds source commit and build run. The downloaded archive can be checked with:
