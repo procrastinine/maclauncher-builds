@@ -2018,10 +2018,41 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#love-luasteam",
       "catalog": {
         "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/love-luasteam.json",
-        "sha256": "fbbe4afefa0819c4b8fb63c800c4d2818a4b92b65206bf2cb0e7ae452cd48f44",
-        "bytes": 1163
+        "sha256": "c8ebbe1ac7900448c8b6669f3de2bc7e965d3d773b59d75869b7a0bc44b18c0e",
+        "bytes": 2728
       },
       "releases": [
+        {
+          "version": "4.0.2-MCLv3",
+          "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "love-luasteam/v4.0.2-MCLv3/universal",
+          "asset": {
+            "filename": "love-luasteam-4.0.2-MCLv3-universal.tar.gz",
+            "sha256": "abc82a716a568364d0e4d66a356118727d7b815fded8d3aeac35eb9d9fecbf0a",
+            "bytes": 84554,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/love-luasteam%2Fv4.0.2-MCLv3%2Funiversal/love-luasteam-4.0.2-MCLv3-universal.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "66bddd70fb09b14ea7bcc1f4c7fc7fabacf05c05",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41545832967",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#love-luasteam",
+          "profile": "Lua 5.1 host ABI 4.0.2-MCLv3"
+        },
         {
           "version": "4.0.2-MCLv2",
           "arch": "universal",
