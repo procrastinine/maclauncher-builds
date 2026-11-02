@@ -6,11 +6,12 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createRecipeBuildReporter} from '../tools/recipe-build-report.mjs';
 
-function fixture(t,files){
+const project=(id,command)=>({id,name:id,delivery:'downloadable',producer:{kind:'maclauncher',repository:'https://github.com/owner/builds',entries:[command]},upstreams:[],packageProfiles:[{version:'1.0.0',label:id}],build:{version:'1.0.0',architectures:['arm64'],command}});
+
+function fixture(t,files,projects=[project('recipe','tools/recipe.cjs')]){
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'recipe-modules-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
  const write=(file,value)=>{fs.mkdirSync(path.dirname(path.join(directory,file)),{recursive:true});fs.writeFileSync(path.join(directory,file),typeof value==='string'?value:JSON.stringify(value));};
- const project={id:'recipe',name:'recipe',delivery:'downloadable',producer:{kind:'maclauncher',repository:'https://github.com/owner/builds',entries:['tools/recipe.cjs']},upstreams:[],packageProfiles:[{version:'1.0.0',label:'recipe'}],build:{version:'1.0.0',architectures:['arm64'],command:'tools/recipe.cjs'}};
- write('projects.json',{schemaVersion:1,repository:'owner/builds',updatePolicy:'manual',projects:[project]});
+ write('projects.json',{schemaVersion:1,repository:'owner/builds',updatePolicy:'manual',projects});
  for(const [file,value] of Object.entries(files))write(file,value);
  // Tracked files let the report name computed paths that match repository files.
  execFileSync('git',['init','-q'],{cwd:directory});execFileSync('git',['add','-A'],{cwd:directory});
@@ -33,4 +34,14 @@ test('recipe definitions follow local modules and files the way Node resolves th
   {file:'tools/recipe.cjs',expression:'path.join(variable, "named.cjs")',reason:'computed',matches:['lib/named.cjs']}]);
  f.write('tools/nested.cjs','module.exports = 5;\n');
  assert.notEqual(createRecipeBuildReporter({directory:f.directory})('recipe').definitionDigest,report.definitionDigest);
+});
+
+test('a build command shared by several projects reports each project its own inputs',t=>{
+ const files={'tools/input.mjs':'export const input = true;\n','tools/shared.mjs':"function audio(){return preparedBuildInput('input');}\n"};
+ const projects=[project('first','tools/shared.mjs'),project('second','tools/shared.mjs'),project('input','tools/input.mjs')];
+ const f=fixture(t,files,projects);
+ assert.throws(()=>createRecipeBuildReporter({directory:f.directory})('second'),/shared build command tools\/shared\.mjs must report the inputs of second/);
+ f.write('tools/shared.mjs',files['tools/shared.mjs']+"export function recipeInputs({project}){return project==='first'?['input']:[];}\n");
+ const describe=createRecipeBuildReporter({directory:f.directory});
+ assert.deepEqual(describe('first').inputs,[{id:'input'}]);assert.deepEqual(describe('second').inputs,[]);
 });

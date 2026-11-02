@@ -29,7 +29,8 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
  const manifest=JSON.parse(fs.readFileSync(path.join(root,'projects.json'))),registryFiles=new Set(['projects.json',...Object.values(manifest.registries||{})]);
  const bindings=new Map();for(const project of projects.values())for(const binding of project.versionBindings||[]){if(!bindings.has(binding.file))bindings.set(binding.file,[]);bindings.get(binding.file).push(binding);}
  let gitlinks=[];const tracked=new Map();try{gitlinks=execFileSync('git',['ls-files','--stage'],{cwd:root,encoding:'utf8',maxBuffer:16<<20,stdio:['ignore','pipe','ignore']}).split('\n').flatMap(line=>{const match=/^(\d+) ([a-f0-9]{40}) 0\t(.+)$/.exec(line);if(!match)return [];if(match[1]!=='160000'){const name=path.posix.basename(match[3]);tracked.set(name,[...(tracked.get(name)||[]),match[3]]);return [];}return [{path:match[3],revision:match[2]}];});}catch{/* Non-Git recipe fixtures have no Gitlink inputs. */}
- const unresolvedReferences=new Map();
+ const unresolvedReferences=new Map(),commandProjects=new Map();
+ for(const project of projects.values())for(const build of project.build?buildRecords(project):[]){if(!commandProjects.has(build.command))commandProjects.set(build.command,new Set());commandProjects.get(build.command).add(project.id);}
  function normalizedJson(file,value){
   value=structuredClone(value);
   for(const binding of bindings.get(file)||[]){const target=slot(value,binding.pointer);if(!target)continue;
@@ -105,7 +106,12 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
     }
    }
   }
-  for(const build of builds){const command=path.join(root,build.command);if(/export\s+function\s+recipeInputs\b/.test(fs.readFileSync(command,'utf8'))){const report=require(command).recipeInputs({project:id,version:build.version});inputs.clear();for(const input of report){if(!projects.has(input)||input===id)throw Error('The recipe reports an invalid package input: '+input);inputs.add(input);}break;}}
+  let declared=false;
+  for(const build of builds){const command=path.join(root,build.command);if(/export\s+function\s+recipeInputs\b/.test(fs.readFileSync(command,'utf8'))){const report=require(command).recipeInputs({project:id,version:build.version});inputs.clear();for(const input of report){if(!projects.has(input)||input===id)throw Error('The recipe reports an invalid package input: '+input);inputs.add(input);}declared=true;break;}}
+  // Discovery reads every reference in a shared command, so a command that builds
+  // several projects reports each project's own inputs through recipeInputs.
+  const shared=builds.find(build=>commandProjects.get(build.command).size>1);
+  if(shared&&!declared&&inputs.size)throw Error('The shared build command '+shared.command+' must report the inputs of '+id+' through recipeInputs.');
   const sources=project.upstreams.map(upstream=>{
    if(upstream.pin&&rememberLink(upstream.pin.file))return {...upstream,gitlink:rememberLink(upstream.pin.file).revision};
    const resolved=resolveUpstream(upstream,root);
