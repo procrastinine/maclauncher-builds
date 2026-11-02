@@ -6,6 +6,45 @@
     {
       "schemaVersion": 2,
       "id": "mkxpz-config-helper",
+      "version": "1.1.1",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "11.0",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "cfae4a04b81d1a339b01f79884547e370c06355080b255b6b5d648778f3b42cd",
+      "sourceSha256": "2d266fa0916eafa57826a153ae72519ea9c3b4df348cfe219b731b5ae8ac8515",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "mkxpz-config-helper-1.1.1-universal.tar.gz",
+        "sha256": "56043e980076a88dba0f98ecb0f894944e2a5f0321d8b59f87d0b2da6ca47338",
+        "bytes": 21746,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mkxpz-config-helper%2Fv1.1.1%2Funiversal/mkxpz-config-helper-1.1.1-universal.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "66bddd70fb09b14ea7bcc1f4c7fc7fabacf05c05",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41545835995",
+        "runAttempt": "1"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "66bddd70fb09b14ea7bcc1f4c7fc7fabacf05c05"
+      },
+      "tag": "mkxpz-config-helper/v1.1.1/universal"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "mkxpz-config-helper",
       "version": "1.1.0",
       "arch": "universal",
       "launcherArchitectures": [

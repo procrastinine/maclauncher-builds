@@ -199,10 +199,14 @@
       {
         "version": "1.1.0",
         "label": "MKXP-Z configuration helper 1.1.0"
+      },
+      {
+        "version": "1.1.1",
+        "label": "MKXP-Z configuration helper 1.1.1"
       }
     ],
     "build": {
-      "version": "1.1.0",
+      "version": "1.1.1",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "universal"
