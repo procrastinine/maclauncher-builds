@@ -28,7 +28,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
  const root=fs.realpathSync(directory),registry=readProjects(root,{resolvePins:false}),projects=new Map(registry.projects.map(project=>[project.id,project])),cache=new Map();
  const manifest=JSON.parse(fs.readFileSync(path.join(root,'projects.json'))),registryFiles=new Set(['projects.json',...Object.values(manifest.registries||{})]);
  const bindings=new Map();for(const project of projects.values())for(const binding of project.versionBindings||[]){if(!bindings.has(binding.file))bindings.set(binding.file,[]);bindings.get(binding.file).push(binding);}
- let gitlinks=[];const tracked=new Map();try{gitlinks=execFileSync('git',['ls-files','--stage'],{cwd:root,encoding:'utf8',maxBuffer:16<<20,stdio:['ignore','pipe','ignore']}).split('\n').flatMap(line=>{const match=/^(\d+) ([a-f0-9]{40}) 0\t(.+)$/.exec(line);if(!match)return [];if(match[1]!=='160000'){const name=path.posix.basename(match[3]);tracked.set(name,[...(tracked.get(name)||[]),match[3]]);return [];}return [{path:match[3],revision:match[2]}];});}catch{/* Non-Git recipe fixtures have no Gitlink inputs. */}
+ let gitlinks=[];const tracked=new Map(),trackedFiles=[];try{gitlinks=execFileSync('git',['ls-files','--stage'],{cwd:root,encoding:'utf8',maxBuffer:16<<20,stdio:['ignore','pipe','ignore']}).split('\n').flatMap(line=>{const match=/^(\d+) ([a-f0-9]{40}) 0\t(.+)$/.exec(line);if(!match)return [];if(match[1]!=='160000'){const name=path.posix.basename(match[3]);tracked.set(name,[...(tracked.get(name)||[]),match[3]]);trackedFiles.push(match[3]);return [];}return [{path:match[3],revision:match[2]}];});}catch{/* Non-Git recipe fixtures have no Gitlink inputs. */}
  const unresolvedReferences=new Map(),commandProjects=new Map();
  for(const project of projects.values())for(const build of project.build?buildRecords(project):[]){if(!commandProjects.has(build.command))commandProjects.set(build.command,new Set());commandProjects.get(build.command).add(project.id);}
  function normalizedJson(file,value){
@@ -63,7 +63,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   function reference(literal,from,directories=[]){
    if(typeof literal!=='string'||!/^[-A-Za-z0-9_./@+]+$/.test(literal))return;
    const candidates=[path.resolve(root,path.dirname(from),literal),path.resolve(root,literal),...directories.map(directory=>path.resolve(directory,literal))];
-   for(const absolute of candidates){if(!inside(root,absolute))continue;const relative=path.relative(root,absolute).split(path.sep).join('/');rememberLink(relative);if(!fs.statSync(absolute,{throwIfNoEntry:false})?.isFile())continue;if(/\.(?:json|[mc]?js|[ch](?:pp|xx)?|cc|mm|m|rs|toml|lock|patch|metal|glsl|swift|cmake|txt)$/.test(relative)||path.basename(relative)==='CMakeLists.txt'){enqueue(relative);return;}}
+   for(const absolute of candidates){if(!inside(root,absolute))continue;const relative=path.relative(root,absolute).split(path.sep).join('/');rememberLink(relative);if(!fs.statSync(absolute,{throwIfNoEntry:false})?.isFile())continue;if(/\.(?:json|[mc]?js|[ch](?:pp|xx)?|cc|mm|m|rs|go|toml|lock|patch|metal|glsl|swift|cmake|txt)$/.test(relative)||path.basename(relative)==='CMakeLists.txt'){enqueue(relative);return;}}
   }
   // Local modules and files are followed the way Node resolves them. Paths
   // computed from other variables are reported, never evaluated.
@@ -85,7 +85,9 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    }
   }
   for(const build of builds){enqueue(build.command);for(const source of build.submodules||[])rememberLink(source);}
-  for(const entry of project.producer.entries||[])enqueue(entry);
+  // A directory entry declares every tracked file below it.
+  const directoryFiles=directory=>trackedFiles.length?trackedFiles.filter(file=>file.startsWith(directory+'/')):fs.readdirSync(path.join(root,directory),{recursive:true}).map(name=>path.posix.join(directory,name.split(path.sep).join('/'))).filter(file=>fs.statSync(path.join(root,file)).isFile());
+  for(const entry of project.producer.entries||[]){if(fs.statSync(path.join(root,entry),{throwIfNoEntry:false})?.isDirectory())for(const file of directoryFiles(entry))enqueue(file);else enqueue(entry);}
   if(project.producer.recipe)enqueue(project.producer.recipe);
   for(const upstream of project.upstreams)if(upstream.pin){enqueue(upstream.pin.file);rememberLink(upstream.pin.file);}
   while(queue.length){const file=queue.shift(),absolute=path.join(root,file);if(rememberLink(file))continue;

@@ -45,3 +45,9 @@ test('a build command shared by several projects reports each project its own in
  const describe=createRecipeBuildReporter({directory:f.directory});
  assert.deepEqual(describe('first').inputs,[{id:'input'}]);assert.deepEqual(describe('second').inputs,[]);
 });
+
+test('a directory entry declares every tracked file below it',t=>{
+ const recipe=project('recipe','tools/recipe.cjs');recipe.producer.entries.push('native/base');
+ const f=fixture(t,{'tools/recipe.cjs':'module.exports = {};\n','native/base/src/compile.cpp':'int main() {}\n','native/base/THIRD_PARTY.md':'notices\n','native/other.cpp':'int other;\n'},[recipe]);
+ assert.deepEqual(createRecipeBuildReporter({directory:f.directory})('recipe').definition.files.map(file=>file.path).sort(),['native/base/THIRD_PARTY.md','native/base/src/compile.cpp','tools/recipe.cjs']);
+});
