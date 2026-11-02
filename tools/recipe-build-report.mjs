@@ -28,7 +28,9 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
  const root=fs.realpathSync(directory),registry=readProjects(root,{resolvePins:false}),projects=new Map(registry.projects.map(project=>[project.id,project])),cache=new Map();
  const manifest=JSON.parse(fs.readFileSync(path.join(root,'projects.json'))),registryFiles=new Set(['projects.json',...Object.values(manifest.registries||{})]);
  const bindings=new Map();for(const project of projects.values())for(const binding of project.versionBindings||[]){if(!bindings.has(binding.file))bindings.set(binding.file,[]);bindings.get(binding.file).push(binding);}
- let gitlinks=[];try{gitlinks=execFileSync('git',['ls-files','--stage'],{cwd:root,encoding:'utf8',maxBuffer:16<<20,stdio:['ignore','pipe','ignore']}).split('\n').flatMap(line=>{const match=/^160000 ([a-f0-9]{40}) 0\t(.+)$/.exec(line);return match?[{path:match[2],revision:match[1]}]:[];});}catch{/* Non-Git recipe fixtures have no Gitlink inputs. */}
+ let gitlinks=[];const tracked=new Map();try{gitlinks=execFileSync('git',['ls-files','--stage'],{cwd:root,encoding:'utf8',maxBuffer:16<<20,stdio:['ignore','pipe','ignore']}).split('\n').flatMap(line=>{const match=/^(\d+) ([a-f0-9]{40}) 0\t(.+)$/.exec(line);if(!match)return [];if(match[1]!=='160000'){const name=path.posix.basename(match[3]);tracked.set(name,[...(tracked.get(name)||[]),match[3]]);return [];}return [{path:match[3],revision:match[2]}];});}catch{/* Non-Git recipe fixtures have no Gitlink inputs. */}
+ const unresolvedReferences=new Map(),commandProjects=new Map();
+ for(const project of projects.values())for(const build of project.build?buildRecords(project):[]){if(!commandProjects.has(build.command))commandProjects.set(build.command,new Set());commandProjects.get(build.command).add(project.id);}
  function normalizedJson(file,value){
   value=structuredClone(value);
   for(const binding of bindings.get(file)||[]){const target=slot(value,binding.pointer);if(!target)continue;
@@ -40,7 +42,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
  function describe(id){
   if(cache.has(id))return cache.get(id);
   const project=projects.get(id);if(!project)throw Error('Unknown recipe project: '+id);
-  const builds=project.build?buildRecords(project):[],files=new Map(),inputs=new Set(),usedLinks=new Map(),queue=[],queued=new Set();
+  const builds=project.build?buildRecords(project):[],files=new Map(),inputs=new Set(),usedLinks=new Map(),queue=[],queued=new Set(),unresolved=[],computed=[];
   const enqueue=file=>{file=path.normalize(file).split(path.sep).join('/');if(registryFiles.has(file)||file.startsWith('catalogs/')||queued.has(file)||path.isAbsolute(file)||file.startsWith('../'))return;queued.add(file);queue.push(file);};
   const rememberLink=file=>{const link=gitlinks.find(link=>file===link.path||file.startsWith(link.path+'/'));if(link)usedLinks.set(link.path,link);return link;};
   const artifactId=value=>{
@@ -63,6 +65,25 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    const candidates=[path.resolve(root,path.dirname(from),literal),path.resolve(root,literal),...directories.map(directory=>path.resolve(directory,literal))];
    for(const absolute of candidates){if(!inside(root,absolute))continue;const relative=path.relative(root,absolute).split(path.sep).join('/');rememberLink(relative);if(!fs.statSync(absolute,{throwIfNoEntry:false})?.isFile())continue;if(/\.(?:json|[mc]?js|[ch](?:pp|xx)?|cc|mm|m|rs|toml|lock|patch|metal|glsl|swift|cmake|txt)$/.test(relative)||path.basename(relative)==='CMakeLists.txt'){enqueue(relative);return;}}
   }
+  // Local modules and files are followed the way Node resolves them. Paths
+  // computed from other variables are reported, never evaluated.
+  const moduleFile=base=>[base,...['.js','.cjs','.mjs','.json'].map(extension=>base+extension),path.join(base,'index.js')].find(candidate=>fs.statSync(candidate,{throwIfNoEntry:false})?.isFile());
+  function local(absolute,from,expression){
+   if(absolute!==root&&!inside(root,absolute)){unresolved.push({file:from,expression,reason:'outside'});return;}
+   const relative=path.relative(root,absolute).split(path.sep).join('/'),stat=fs.statSync(absolute,{throwIfNoEntry:false});
+   if(rememberLink(relative))return;
+   if(stat?.isFile())enqueue(relative);else if(!stat?.isDirectory())unresolved.push({file:from,expression,reason:'missing'});
+  }
+  function modules(text,from){
+   const directory=path.dirname(path.join(root,from)),strings=list=>[...list.matchAll(/(['"])([^'"\r\n]*)\1/g)].map(match=>match[2]);
+   for(const match of text.matchAll(/\b(?:require(?:\.resolve)?\(|import\()\s*(['"])(\.{1,2}(?:\/[^'"\r\n]*)?)\1\s*[,)]|\b(?:from|import)\s*(['"])(\.{1,2}(?:\/[^'"\r\n]*)?)\3/g)){const base=path.resolve(directory,match[2]??match[4]);local(moduleFile(base)||base,from,match[0]);}
+   for(const match of text.matchAll(/\bnew URL\(\s*(['"])([^'":\r\n]+)\1\s*,\s*import\.meta\.url\s*\)/g))local(path.resolve(directory,match[2]),from,match[0]);
+   for(const match of text.matchAll(/\bpath\.(?:posix\.)?(?:join|resolve)\(\s*([A-Za-z_$][\w$.]*)\s*((?:,\s*(['"])[^'"\r\n]*\3\s*)+)\)/g)){
+    const parts=strings(match[2]);
+    if(match[1]==='__dirname'||match[1]==='import.meta.dirname')local(path.resolve(directory,...parts),from,match[0]);
+    else if(/\.[A-Za-z0-9]+$/.test(parts.at(-1)))computed.push({file:from,expression:match[0],tail:path.posix.join(...parts)});
+   }
+  }
   for(const build of builds){enqueue(build.command);for(const source of build.submodules||[])rememberLink(source);}
   for(const entry of project.producer.entries||[])enqueue(entry);
   if(project.producer.recipe)enqueue(project.producer.recipe);
@@ -81,10 +102,16 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
      const text=bytes.toString('utf8'),literals=[...text.matchAll(/(['"])([^'"\r\n]+)\1/g)].map(match=>match[2]).filter(literal=>/^[-A-Za-z0-9_./@+]+$/.test(literal)),directories=literals.map(literal=>path.resolve(root,literal)).filter(directory=>inside(root,directory)&&fs.statSync(directory,{throwIfNoEntry:false})?.isDirectory());
      for(const match of text.matchAll(/\bpreparedBuildInput\(\s*['"]([a-z0-9-]+)['"]/g))if(projects.has(match[1])&&match[1]!==id)inputs.add(match[1]);
      for(const literal of literals)reference(literal,file,directories);
+     if(/\.[mc]?js$/.test(file))modules(text,file);
     }
    }
   }
-  for(const build of builds){const command=path.join(root,build.command);if(/export\s+function\s+recipeInputs\b/.test(fs.readFileSync(command,'utf8'))){const report=require(command).recipeInputs({project:id,version:build.version});inputs.clear();for(const input of report){if(!projects.has(input)||input===id)throw Error('The recipe reports an invalid package input: '+input);inputs.add(input);}break;}}
+  let declared=false;
+  for(const build of builds){const command=path.join(root,build.command);if(/export\s+function\s+recipeInputs\b/.test(fs.readFileSync(command,'utf8'))){const report=require(command).recipeInputs({project:id,version:build.version});inputs.clear();for(const input of report){if(!projects.has(input)||input===id)throw Error('The recipe reports an invalid package input: '+input);inputs.add(input);}declared=true;break;}}
+  // Discovery reads every reference in a shared command, so a command that builds
+  // several projects reports each project's own inputs through recipeInputs.
+  const shared=builds.find(build=>commandProjects.get(build.command).size>1);
+  if(shared&&!declared&&inputs.size)throw Error('The shared build command '+shared.command+' must report the inputs of '+id+' through recipeInputs.');
   const sources=project.upstreams.map(upstream=>{
    if(upstream.pin&&rememberLink(upstream.pin.file))return {...upstream,gitlink:rememberLink(upstream.pin.file).revision};
    const resolved=resolveUpstream(upstream,root);
@@ -92,8 +119,12 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    return resolved;
   });
   const definition={schemaVersion:1,id,build:normalizedBuilds(builds),files:[...files].sort(([a],[b])=>a.localeCompare(b)).map(([path,sha256])=>({path,sha256})),sources,gitlinks:[...usedLinks.values()].sort((a,b)=>a.path.localeCompare(b.path))};
-  const result={definition,definitionDigest:reportDigest(definition),inputs:[...inputs].sort().map(id=>({id}))};cache.set(id,result);return result;
+  const result={definition,definitionDigest:reportDigest(definition),inputs:[...inputs].sort().map(id=>({id}))};cache.set(id,result);
+  // A computed path is reported when it names repository files and none of them is part of the definition.
+  unresolvedReferences.set(id,[...unresolved,...computed.flatMap(({tail,...row})=>{const matches=(tracked.get(path.posix.basename(tail))||[]).filter(file=>file===tail||file.endsWith('/'+tail));const named=matches.filter(file=>!registryFiles.has(file)&&!file.startsWith('catalogs/'));return !named.length||matches.some(file=>files.has(file))?[]:[{...row,reason:'computed',matches:named}];})]);
+  return result;
  }
+ describe.unresolved=id=>{describe(id);return unresolvedReferences.get(id);};
  return describe;
 }
 

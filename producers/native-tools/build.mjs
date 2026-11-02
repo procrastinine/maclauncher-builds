@@ -60,7 +60,15 @@ async function scummvmBuild({pin,arch,source,work}){
  return {executable:path.join(build,'scummvm-tools-cli'),notices,provenance:{sdkVersion:run('/usr/bin/xcrun',['--show-sdk-version']).trim()},capabilities:{tools:['extract_kyra','extract_gob_stk'],codecs:['vorbis','flac','png','zlib']}};
 }
 
+// Each project's build path and the published packages that path uses.
+const BUILDS={'uosc-helper':{build:goBuild,inputs:[]},'scummvm-tools':{build:scummvmBuild,inputs:['native-sdl2-fonts','native-sndfile']}};
+export function recipeInputs({project}){
+ if(!BUILDS[project])throw Error('No native tool build is declared for '+project+'.');
+ return BUILDS[project].inputs;
+}
+
 export async function buildNativeTool({project,version,arch,output,work,sources={}}){
+ if(!BUILDS[project])throw Error('No native tool build is declared for '+project+'.');
  const pin=profiles[project];
 
  fs.mkdirSync(work,{recursive:true});
@@ -70,7 +78,7 @@ export async function buildNativeTool({project,version,arch,output,work,sources=
   run('git',['-C',source,'checkout','--detach',pin.revision]);
  }
  await Source.validatePinnedSource(source,pin.revision);
- const result=await (project==='uosc-helper'?goBuild:scummvmBuild)({pin,arch,source,work});
+ const result=await BUILDS[project].build({pin,arch,source,work});
  await Source.validatePinnedSource(source,pin.revision);
  return sealRuntime({project,version,arch,output,sourceRoot:source,upstreamRevision:pin.revision,...result});
 }
