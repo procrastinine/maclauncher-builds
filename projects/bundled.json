@@ -2380,35 +2380,5 @@
         "pointer": "/profiles/1/packageVersion"
       }
     ]
-  },
-  {
-    "id": "graphics-moltenvk",
-    "name": "MoltenVK graphics dependency",
-    "purpose": "Original MoltenVK loader and its matching compilation headers.",
-    "producer": {
-      "kind": "maclauncher",
-      "repository": "https://github.com/procrastinine/maclauncher-builds",
-      "entries": [
-        "tools/build-graphics-moltenvk.mjs",
-        "producers/maclauncher/src/modules/shared/reshade/libplacebo-build.mjs"
-      ]
-    },
-    "upstreams": [],
-    "packageProfiles": [
-      {
-        "version": "1.4.2-MCLv1",
-        "label": "Original MoltenVK 1.4.2"
-      }
-    ],
-    "build": {
-      "version": "1.4.2-MCLv1",
-      "command": "tools/build-graphics-moltenvk.mjs",
-      "architectures": [
-        "universal"
-      ],
-      "runners": {
-        "universal": "xcode-27"
-      }
-    }
   }
 ]
