@@ -28,6 +28,19 @@
             "bytes": 11245139,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/ai5%2Fv1.5.0-MCLv2%2Farm64/ai5-1.5.0-MCLv2-arm64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#ai5",
           "profile": "AI5 SDL2 1.5.0-MCLv2"
         },
@@ -76,6 +89,19 @@
             "bytes": 415417829,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android%2Fv0.2.0-MCLv1%2Farm64/android-0.2.0-MCLv1-arm64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "d6f5e0f0edabff87044656a9862e8b2433a92cfb",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41185092544",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android",
           "profile": "MacLauncher Android 0.2.0-MCLv1"
         }
@@ -105,6 +131,19 @@
             "sha256": "4f864546f30620471930d2f7be0675b4c2e8fc6532a4dcf33acb6ad21e974863",
             "bytes": 1073454,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-aconfig%2Fv0.1.0-MCLv1%2Farm64/android-aconfig-0.1.0-MCLv1-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-aconfig",
           "profile": "Android flag generator 0.1.0-MCLv1"
@@ -136,6 +175,19 @@
             "bytes": 90705918,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-aim%2FvMCLv2-1028-6%2Farm64/android-aim-MCLv2-1028-6-arm64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "09e7e038f391891840247d4e468bbe3dfb8ebc57",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41169901659",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-aim",
           "profile": "AIM with MacLauncher integration MCLv2-1028-6"
         }
@@ -165,6 +217,19 @@
             "sha256": "b4aee6d82def28b64167064c96dc3023ff818e8b689c8b116019a644e731242c",
             "bytes": 2866408,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-angle%2Fv0.1.0-MCLv1%2Farm64/android-angle-0.1.0-MCLv1-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "f40cff0b905bff6d6eff522ed859ee9d310e349a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41169068890",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-angle",
           "profile": "Android ANGLE for JVM and ART"
@@ -244,6 +309,19 @@
             "bytes": 7497119,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art-elf%2Fv0.1.0-MCLv1%2Farm64/android-art-elf-0.1.0-MCLv1-arm64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "dd34b2859fa00c9af3535332e3fbd939b35379bf",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41168476544",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art-elf",
           "profile": "ART ELF input 0.1.0-MCLv1"
         }
@@ -273,6 +351,16 @@
             "sha256": "52ccfe2ff42275f2c1f980fbdb367c6e6a04f3d0bb617d4d69b581ac074dfd66",
             "bytes": 35197,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art-ffi%2Fv0.1.0-MCLv1%2Farm64/android-art-ffi-0.1.0-MCLv1-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "e0bd280221a7d2336f7bb78c5d5e3c456ec98788",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b"
+            },
+            "runId": "41170196705",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art-ffi",
           "profile": "Android ART libffi 0.1.0-MCLv1"
@@ -304,6 +392,19 @@
             "bytes": 460936,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art-image-extractor%2Fv0.1.0-MCLv1%2Farm64/android-art-image-extractor-0.1.0-MCLv1-arm64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41164339724",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art-image-extractor",
           "profile": "ART image reader 0.1.0-MCLv1"
         }
@@ -333,6 +434,16 @@
             "sha256": "500131599a382a82cdfe156c059fc529c89c4895d890e562dca2a783d79f6938",
             "bytes": 29150703,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art-java%2Fv0.1.0-MCLv1%2Farm64/android-art-java-0.1.0-MCLv1-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "d801609af582459e3610ebc2f2865b44a691a125",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b"
+            },
+            "runId": "41175541743",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art-java",
           "profile": "Android ART Java 0.1.0-MCLv1"
@@ -364,6 +475,19 @@
             "bytes": 1139982,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-blueprint-parser%2Fv0.1.0-MCLv1%2Farm64/android-blueprint-parser-0.1.0-MCLv1-arm64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-blueprint-parser",
           "profile": "Android Blueprint parser"
         }
@@ -393,6 +517,19 @@
             "sha256": "36c6565247fcbf0eb2c06a728b59ca865201b74534f89be2a34a3199f90eb278",
             "bytes": 1464477,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-codecs%2Fv0.1.0-MCLv1%2Farm64/android-codecs-0.1.0-MCLv1-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-codecs",
           "profile": "Android audio codec input libraries"
@@ -424,6 +561,16 @@
             "bytes": 411049620,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-image-data-1%2Fv0.1.0-MCLv1%2Farm64/android-image-data-1-0.1.0-MCLv1-arm64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "d8b8cb458e8b55dc0567b498fc2df829406555da",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b"
+            },
+            "runId": "41171583284",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-image-data-1",
           "profile": "Android original image data 1 0.1.0-MCLv1"
         }
@@ -453,6 +600,16 @@
             "sha256": "8dac32a8ac878d2a511a70671002841ac6e1351bedb61e1b810bc4444f68422e",
             "bytes": 412471685,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-image-data-2%2Fv0.1.0-MCLv1%2Farm64/android-image-data-2-0.1.0-MCLv1-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "d8b8cb458e8b55dc0567b498fc2df829406555da",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b"
+            },
+            "runId": "41171583284",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-image-data-2",
           "profile": "Android original image data 2 0.1.0-MCLv1"
@@ -484,6 +641,16 @@
             "bytes": 397703915,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-image-data-3%2Fv0.1.0-MCLv1%2Farm64/android-image-data-3-0.1.0-MCLv1-arm64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "d8b8cb458e8b55dc0567b498fc2df829406555da",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b"
+            },
+            "runId": "41171583284",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-image-data-3",
           "profile": "Android original image data 3 0.1.0-MCLv1"
         }
@@ -513,6 +680,16 @@
             "sha256": "f567c762d76d4cf7261f5adeb6f26383f58cb6f63b4cc12fbece2df3329d4c6f",
             "bytes": 358829700,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-image-data-4%2Fv0.1.0-MCLv1%2Farm64/android-image-data-4-0.1.0-MCLv1-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "d8b8cb458e8b55dc0567b498fc2df829406555da",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b"
+            },
+            "runId": "41171583284",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-image-data-4",
           "profile": "Android original image data 4 0.1.0-MCLv1"
@@ -544,6 +721,16 @@
             "bytes": 394884419,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-image-data-5%2Fv0.1.0-MCLv1%2Farm64/android-image-data-5-0.1.0-MCLv1-arm64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "d8b8cb458e8b55dc0567b498fc2df829406555da",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b"
+            },
+            "runId": "41171583284",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-image-data-5",
           "profile": "Android original image data 5 0.1.0-MCLv1"
         }
@@ -574,6 +761,16 @@
             "bytes": 1111547,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-java-converter%2Fv0.1.0-MCLv1%2Farm64/android-java-converter-0.1.0-MCLv1-arm64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "7d4bc9d8486c3054780eb890ee6ef88c0587807f",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b"
+            },
+            "runId": "41168115271",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-java-converter",
           "profile": "Android Java converter 0.1.0-MCLv1"
         }
@@ -603,6 +800,16 @@
             "sha256": "4f1464fe0894c18e6b8a083abff4a540b98b58524e9c77d726208b7c568a4def",
             "bytes": 148979377,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-java-framework%2Fv0.1.0-MCLv1%2Farm64/android-java-framework-0.1.0-MCLv1-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "595317e4f10f94e84609094bd81c09b709169e70",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b"
+            },
+            "runId": "41170952342",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-java-framework",
           "profile": "Android Java framework 0.1.0-MCLv1"
@@ -695,6 +902,19 @@
             "bytes": 37246678,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/anyps5%2FvMCLv3-1027-2%2Fx64/anyps5-MCLv3-1027-2-x64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "8c6d8ffccf81de92183f0bf089d9f7669eb9f8ca",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.19.0",
+              "zlib": "1.3.2.1-motley-3246f1b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+              "xcode": "Xcode 26.6\nBuild version 17F113",
+              "macosSDK": "26.5"
+            },
+            "runId": "41170580167",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#anyps5",
           "profile": "AnyPS5 MCLv3-1027-2"
         },
@@ -711,6 +931,19 @@
             "sha256": "cfed5e9e3d99b9108b2d03d3fae0d1bb8027428b2bfddfb14e1a3f9d8c5501c7",
             "bytes": 37404448,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/anyps5%2FvMCLv2-1027-2%2Farm64/anyps5-MCLv2-1027-2-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#anyps5",
           "profile": "AnyPS5 MCLv2-1027-2"
@@ -741,6 +974,19 @@
             "sha256": "815f97ca2beadb890516362923b590615c8d0cd8c0a8c0b90241a4602c7fdbc1",
             "bytes": 1184518,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/butterscotch%2FvMCLv2-1007%2Farm64/butterscotch-MCLv2-1007-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "f9e460f130291ab38279f2a638a6d59c9b522934",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167386066",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#butterscotch",
           "profile": "Butterscotch MCLv2-1007"
@@ -839,6 +1085,19 @@
             "bytes": 2877734,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/fidelityfx-api%2Fv1.0.1-MCLv1%2Fx64/fidelityfx-api-1.0.1-MCLv1-x64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.19.0",
+              "zlib": "1.3.2.1-motley-3246f1b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+              "xcode": "Xcode 26.6\nBuild version 17F113",
+              "macosSDK": "26.5"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#fidelityfx-api",
           "profile": "FidelityFX API 1.0.1 Vulkan"
         }
@@ -899,6 +1158,19 @@
             "sha256": "6c3585a7b8d0c7f67e9ee6f582e9f99ebcd0a4b4a46e7be80257cb929fad866a",
             "bytes": 33434351,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/fna%2Fv26.10-MCLv2%2Farm64/fna-26.10-MCLv2-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#fna",
           "profile": ".NET 8 host"
@@ -961,6 +1233,19 @@
             "bytes": 15292862,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gemrb%2FvMCLv2-1020%2Farm64/gemrb-MCLv2-1020-arm64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gemrb",
           "profile": "GemRB MCLv2-1020"
         },
@@ -1008,6 +1293,19 @@
             "sha256": "036ea91863e662894aaf17d9495941c63680a0efff1be505a7b8b3790d6de257",
             "bytes": 491152,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gm8-decompiler%2Fv2.2.0-MCLv2%2Farm64/gm8-decompiler-2.2.0-MCLv2-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "7f9bdc4beb59086b4c11360159dd8e80ccad3f6b",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41168716940",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gm8-decompiler",
           "profile": "GameMaker 8 decompiler 2.2.0-MCLv2"
@@ -1058,6 +1356,19 @@
             "bytes": 2052259,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/hashlink%2Fv1.9-MCLv2%2Fx64/hashlink-1.9-MCLv2-x64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.19.0",
+              "zlib": "1.3.2.1-motley-3246f1b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+              "xcode": "Xcode 26.6\nBuild version 17F113",
+              "macosSDK": "26.5"
+            },
+            "runId": "41167290863",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#hashlink-1-9",
           "profile": "HashLink 1.9 ABI",
           "anchor": "hashlink-1-9"
@@ -1076,6 +1387,19 @@
             "sha256": "fc880f2c2c07bdc96eab35cbf184855a47455f3f259fbbf5b5f310d38262c1cc",
             "bytes": 2084095,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/hashlink%2Fv1.12-MCLv2%2Fx64/hashlink-1.12-MCLv2-x64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.19.0",
+              "zlib": "1.3.2.1-motley-3246f1b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+              "xcode": "Xcode 26.6\nBuild version 17F113",
+              "macosSDK": "26.5"
+            },
+            "runId": "41164339724",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#hashlink-1-12",
           "profile": "HashLink 1.12 ABI",
@@ -1108,6 +1432,19 @@
             "bytes": 94945745,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/impacto%2Fv0.10.8.903-MCLv2%2Farm64/impacto-0.10.8.903-MCLv2-arm64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#impacto",
           "profile": "impacto Windows-game profile 0.10.8.903-MCLv2"
         }
@@ -1137,6 +1474,19 @@
             "sha256": "e5b4b1c4d175d5f9681677355b5a87a1f117cd5e6129a8b16f39ec8facb0893e",
             "bytes": 597537,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/innoextract%2FvMCLv2-0206%2Farm64/innoextract-MCLv2-0206-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "f9e460f130291ab38279f2a638a6d59c9b522934",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167386066",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#innoextract",
           "profile": "Inno Setup extraction tools MCLv2-0206"
@@ -1266,6 +1616,19 @@
             "bytes": 5210690,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/krkrsdl2%2FvMCLv2-1030-kag3%2Fx64/krkrsdl2-MCLv2-1030-kag3-x64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.19.0",
+              "zlib": "1.3.2.1-motley-3246f1b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+              "xcode": "Xcode 26.6\nBuild version 17F113",
+              "macosSDK": "26.5"
+            },
+            "runId": "41164339724",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#krkrsdl2",
           "profile": "KiriKiri SDL2 macOS"
         },
@@ -1282,6 +1645,19 @@
             "sha256": "5e872e3baff7ab525706de077a641e27b9b42b5c0121f9103e4a5880a4c029bf",
             "bytes": 4925054,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/krkrsdl2%2FvMCLv2-1030-kag3%2Farm64/krkrsdl2-MCLv2-1030-kag3-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41164339724",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#krkrsdl2",
           "profile": "KiriKiri SDL2 macOS"
@@ -1343,6 +1719,19 @@
             "sha256": "f223eb4bb2609cbd8c7baadadafbbf9cbc2081d89ad1e6952e4f9e8d2a5b1ae5",
             "bytes": 14431782,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mkxpz%2FvMCLv2-1003%2Farm64/mkxpz-MCLv2-1003-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#mkxpz",
           "profile": "Unicode filename normalization"
@@ -1435,6 +1824,19 @@
             "bytes": 18017818,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/npengine%2Fv0.5.3-MCLv2%2Farm64/npengine-0.5.3-MCLv2-arm64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#npengine",
           "profile": "libnpengine Mac runner 0.5.3-MCLv2"
         }
@@ -1465,6 +1867,19 @@
             "bytes": 47933549,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/nxnative-tools%2FvMCLv2-1027-3%2Farm64/nxnative-tools-MCLv2-1027-3-arm64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#nxnative-tools",
           "profile": "nxnative native tools MCLv2-1027-3"
         }
@@ -1494,6 +1909,19 @@
             "sha256": "e2e4d1702071429cd4ccc798d720ff33fd19165cf738cf42cb8a542ecdf2380e",
             "bytes": 1347546,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onscripter-en%2FvMCLv2-0126%2Farm64/onscripter-en-MCLv2-0126-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#onscripter-en",
           "profile": "ONScripter-EN MCLv2-0126"
@@ -1591,6 +2019,19 @@
             "bytes": 2623552,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/opengmk%2Fv0.2.0-MCLv2%2Farm64/opengmk-0.2.0-MCLv2-arm64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#opengmk",
           "profile": "OpenGMK 0.2.0-MCLv2"
         }
@@ -1621,6 +2062,19 @@
             "sha256": "a6db1226d61a7ee0765c281467a040a5a4d23c56e6e851c3c608106b00b056de",
             "bytes": 9614284,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/prosper%2FvMCLv1-1027-1%2Fx64/prosper-MCLv1-1027-1-x64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.19.0",
+              "zlib": "1.3.2.1-motley-3246f1b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+              "xcode": "Xcode 26.6\nBuild version 17F113",
+              "macosSDK": "26.5"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#prosper",
           "profile": "Prosper x86-64"
@@ -1653,6 +2107,19 @@
             "bytes": 6122041,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reminori%2Fv0.1.0-MCLv2%2Fx64/reminori-0.1.0-MCLv2-x64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.19.0",
+              "zlib": "1.3.2.1-motley-3246f1b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+              "xcode": "Xcode 26.6\nBuild version 17F113",
+              "macosSDK": "26.5"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reminori",
           "profile": "ReMinori 0.1.0-MCLv2"
         },
@@ -1669,6 +2136,19 @@
             "sha256": "d344147761fd1ff375cf544064c75c38d82fecf91634a9aa0d1adaa5f8540a43",
             "bytes": 5574433,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reminori%2Fv0.1.0-MCLv2%2Farm64/reminori-0.1.0-MCLv2-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reminori",
           "profile": "ReMinori 0.1.0-MCLv2"
@@ -1700,6 +2180,19 @@
             "bytes": 32301949,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reshade%2Fv0.3.1%2Fx64/reshade-0.3.1-x64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.19.0",
+              "zlib": "1.3.2.1-motley-3246f1b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+              "xcode": "Xcode 26.6\nBuild version 17F113",
+              "macosSDK": "26.5"
+            },
+            "runId": "41164339724",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reshade",
           "profile": "MacLauncher graphics 0.3.1"
         },
@@ -1717,6 +2210,19 @@
             "sha256": "fce0dd80dfafd29450c43d8a97a30e81e0f357de394b1b2c31d598666188a707",
             "bytes": 63605673,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reshade%2Fv0.3.1%2Funiversal/reshade-0.3.1-universal.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41164339724",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reshade",
           "profile": "MacLauncher graphics 0.3.1"
@@ -1783,6 +2289,19 @@
             "sha256": "9c4151f1c73528cbd0eb69ccbd92f7eda7ef95aeceb9fbc307ad7731293d1a27",
             "bytes": 8022,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/rlvm-adapter%2Fv1.0.0-MCLv2%2Funiversal/rlvm-adapter-1.0.0-MCLv2-universal.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#rlvm-adapter",
           "profile": "MacLauncher RLVM adapter 1.0.0-MCLv2"
@@ -1863,6 +2382,19 @@
             "bytes": 899870,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/scummvm-tools%2Fv2.9.0-MCLv1%2Fx64/scummvm-tools-2.9.0-MCLv1-x64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.19.0",
+              "zlib": "1.3.2.1-motley-3246f1b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+              "xcode": "Xcode 26.6\nBuild version 17F113",
+              "macosSDK": "26.5"
+            },
+            "runId": "41164339724",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#scummvm-tools",
           "profile": "ScummVM Tools 2.9.0-MCLv1"
         },
@@ -1879,6 +2411,19 @@
             "sha256": "1b93df3cc3c15b9273caeba51124279bbb2fb02a4f546739ab615ef6a043bc4f",
             "bytes": 829570,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/scummvm-tools%2Fv2.9.0-MCLv1%2Farm64/scummvm-tools-2.9.0-MCLv1-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41164339724",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#scummvm-tools",
           "profile": "ScummVM Tools 2.9.0-MCLv1"
@@ -1909,6 +2454,19 @@
             "sha256": "dee24a056ed614c3ab5efcf4e9386503ddb448d66f4b6744fdaa0c239680c5d6",
             "bytes": 11498368,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/siglus%2Fv1.0.0-preview.5f358ef1360b-MCLv2-1028-1%2Farm64/siglus-1.0.0-preview.5f358ef1360b-MCLv2-1028-1-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#siglus",
           "profile": "siglus_rs 1.0.0-preview.5f358ef1360b-MCLv2-1028-1"
@@ -2002,6 +2560,19 @@
             "bytes": 48646,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/sys3-decompiler%2Fv0.5.0-MCLv2%2Farm64/sys3-decompiler-0.5.0-MCLv2-arm64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "7f9bdc4beb59086b4c11360159dd8e80ccad3f6b",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41168716940",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#sys3-decompiler",
           "profile": "System3 decompiler 0.5.0-MCLv2"
         },
@@ -2049,6 +2620,19 @@
             "sha256": "7db97523d0ff776633e0589496f244d6faaafec211aad4f953e7b4dc5527796b",
             "bytes": 3471334,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/system3%2Fv1.8.0-MCLv2%2Farm64/system3-1.8.0-MCLv2-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "7f9bdc4beb59086b4c11360159dd8e80ccad3f6b",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41168716940",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#system3",
           "profile": "System3 SDL2 1.8.0-MCLv2"
@@ -2099,6 +2683,19 @@
             "bytes": 3154111,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/uosc-helper%2Fv5.13.0-MCLv1%2Fx64/uosc-helper-5.13.0-MCLv1-x64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.19.0",
+              "zlib": "1.3.2.1-motley-3246f1b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+              "xcode": "Xcode 26.6\nBuild version 17F113",
+              "macosSDK": "26.5"
+            },
+            "runId": "41164339724",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#uosc-helper",
           "profile": "uosc helper 5.13.0-MCLv1"
         },
@@ -2116,6 +2713,19 @@
             "bytes": 2825629,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/uosc-helper%2Fv5.13.0-MCLv1%2Farm64/uosc-helper-5.13.0-MCLv1-arm64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "7eece385aec0dd9fc689eec5419f5e0e0fba46b4",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41164339724",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#uosc-helper",
           "profile": "uosc helper 5.13.0-MCLv1"
         }
@@ -2128,10 +2738,38 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#vnds-love",
       "catalog": {
         "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/vnds-love.json",
-        "sha256": "fd6262f0ba98fa2785e1488564e135719cfdb9dcd42a28146081cc0b13ddcd73",
-        "bytes": 1693
+        "sha256": "6aa7953020298bef877e9c3f1b896a5fdf4d54dd440376ade9b816f1cc7ef757",
+        "bytes": 3090
       },
       "releases": [
+        {
+          "version": "0.0.13-MCLv3",
+          "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "11.0",
+          "tag": "vnds-love/v0.0.13-MCLv3/universal",
+          "asset": {
+            "filename": "vnds-love-0.0.13-MCLv3-universal.tar.gz",
+            "sha256": "65d6441eaeb1a90f36ad1ac5358d95cafeda46467eacaa2f9198b97687c8ec77",
+            "bytes": 40972,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vnds-love%2Fv0.0.13-MCLv3%2Funiversal/vnds-love-0.0.13-MCLv3-universal.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "66bddd70fb09b14ea7bcc1f4c7fc7fabacf05c05",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b"
+            },
+            "runId": "41545873556",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#vnds-love",
+          "profile": "VNDS-LOVE 0.0.13-MCLv3"
+        },
         {
           "version": "0.0.13-838e47b-MCLv2",
           "arch": "universal",
@@ -2146,6 +2784,19 @@
             "sha256": "1234d36ec451b52ffdc43b5165f23430cdeefe3776a4fa31f362974286822bab",
             "bytes": 34656,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vnds-love%2Fv0.0.13-838e47b-MCLv2%2Funiversal/vnds-love-0.0.13-838e47b-MCLv2-universal.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#vnds-love",
           "profile": "VNDS-LOVE 0.0.13-838e47b-MCLv2"
@@ -2176,6 +2827,19 @@
             "sha256": "ddcecb1fc2ab4bf1247fa51f0667d13c22dcaf73b9017c8e11cbe4f34b5f25b3",
             "bytes": 3390323,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vulkan-kosmickrisp-gles32%2FvMCLv3-1030%2Farm64/vulkan-kosmickrisp-gles32-MCLv3-1030-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "35fc7a904f2e6807a5c70a6b0f8feb29f332c62a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167550733",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#vulkan-kosmickrisp-gles32",
           "profile": "KosmicKrisp geometry and transform feedback"
@@ -2224,6 +2888,19 @@
             "sha256": "ec9f7b557387ace28a4372fab005472f87a384a4248ed184d666a35921b18ef4",
             "bytes": 3388206,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vulkan-moltenvk-scene%2Fv1.4.2-MCLv2%2Funiversal/vulkan-moltenvk-scene-1.4.2-MCLv2-universal.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#vulkan-moltenvk-scene",
           "profile": "MoltenVK 1.4.2 scene recording"
@@ -2303,6 +2980,19 @@
             "bytes": 430745,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/winevulkan-scene%2Fv26.3.0-MCLv1%2Fx64/winevulkan-scene-26.3.0-MCLv1-x64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "c517689817b08838294f983d8e177fa1e6ad1995",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.19.0",
+              "zlib": "1.3.2.1-motley-3246f1b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+              "xcode": "Xcode 26.6\nBuild version 17F113",
+              "macosSDK": "26.5"
+            },
+            "runId": "41168574432",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#winevulkan-scene",
           "profile": "CrossOver26.3 WineVulkan ABI47"
         }
@@ -2332,6 +3022,19 @@
             "sha256": "0b47d03fc013806d919488537f0dab607fb5b4d2606460e9ff094dafe1632509",
             "bytes": 62651,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsys35-decompiler%2Fv1.13.0-MCLv2%2Farm64/xsys35-decompiler-1.13.0-MCLv2-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "7f9bdc4beb59086b4c11360159dd8e80ccad3f6b",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41168716940",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsys35-decompiler",
           "profile": "System3.5 decompiler 1.13.0-MCLv2"
@@ -2381,6 +3084,19 @@
             "bytes": 7447873,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem35%2FvMCLv2-1019%2Farm64/xsystem35-MCLv2-1019-arm64.tar.gz"
           },
+          "build": {
+            "sourceRevision": "7f9bdc4beb59086b4c11360159dd8e80ccad3f6b",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41168716940",
+            "runAttempt": "1"
+          },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsystem35",
           "profile": "xsystem35 SDL2 MCLv2-1019"
         },
@@ -2428,6 +3144,19 @@
             "sha256": "2cfe19100b983b7159734f9cc678e82064db1373aa456399a24f14229d1b8e55",
             "bytes": 21360637,
             "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem4%2FvMCLv2-1021%2Farm64/xsystem4-MCLv2-1021-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "830c33f46db62a6e71380c246359df7a6e5d4729",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41167281231",
+            "runAttempt": "1"
           },
           "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsystem4",
           "profile": "xsystem4 MCLv2-1021"
