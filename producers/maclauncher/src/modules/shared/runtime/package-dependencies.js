@@ -31,7 +31,9 @@ function resolver(installed){
  return resolve;
 }
 function attach(selected,context){
- for(const key of ['dependencyLibraryPaths','dependencyReadRoots','sealedDeclaration'])if(context[key]!==undefined)selected[key]=context[key];
+ for(const key of ['dependencyLibraryPaths','dependencyReadRoots'])if(context[key]!==undefined)selected[key]=context[key];
+ // The sealed declaration stays with the in-process row and out of serialized runtime state.
+ if(context.sealedDeclaration!==undefined)Object.defineProperty(selected,'sealedDeclaration',{value:context.sealedDeclaration,enumerable:false,configurable:true,writable:true});
  if(selected.declaration)B.rememberDependencies(selected.declaration,context.resolveDependency);
  if(selected.item)B.rememberDependencies(selected.item,context.resolveDependency);
  Object.defineProperty(selected,'resolveDependency',{value:context.resolveDependency,enumerable:false,configurable:true,writable:true});
