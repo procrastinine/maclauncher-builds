@@ -1,0 +1,76 @@
+{
+  "id": "java-steamworks",
+  "version": "1.10.0-MCLv3",
+  "arch": "universal",
+  "minimumMacOS": "11.0",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "b92ea7eac757c843c358fd2de0103a0851d94f4f5a748dd0f56e7979f9daf141",
+  "directoryRelative": "java-steamworks/1.10.0-MCLv3/universal",
+  "manifestRelative": "helper.json",
+  "manifestSha256": "267a2fa472c73d140133bfefcd962bafd6a79912acb11b95bcf5d1d4e8a5bcf2",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 16586,
+      "mode": 420,
+      "sha256": "20d11337d47e797d7a7e62ab1e1055bcbff5b09a002bf45e87b36ca6be1555d2"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "a6a7c3b37e6756fd9f316e6e83a577f0e01c4633fbe5ff545fbd1e7c234b3614"
+    },
+    {
+      "path": "helper.json",
+      "size": 2945,
+      "sha256": "267a2fa472c73d140133bfefcd962bafd6a79912acb11b95bcf5d1d4e8a5bcf2",
+      "mode": 420
+    },
+    {
+      "path": "libsteamworks4j.dylib",
+      "size": 681280,
+      "sha256": "f596487a0edce464c21c551c1a29a29aedaf4965d0a21b6d58ab3a55bce5c97e",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "MacLauncher-MIT.txt",
+      "size": 1081,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+      "mode": 420
+    },
+    {
+      "path": "steam-agent.jar",
+      "size": 5599,
+      "sha256": "0cfea1aac0a08a12301f273fffc690b7a2f0b71c885f5ef61438e6d62351d32c",
+      "mode": 420
+    },
+    {
+      "path": "steamworks4j-MIT.txt",
+      "size": 1084,
+      "sha256": "f524d824bd479c049c1c7617d06938d6f4f58416ed24f88511d817405f23a4ef",
+      "mode": 420
+    }
+  ],
+  "notices": [
+    {
+      "name": "steamworks4j 1.10.0",
+      "license": "MIT",
+      "path": "steamworks4j-MIT.txt",
+      "sourceUrl": "https://github.com/code-disaster/steamworks4j/tree/1.10.0"
+    },
+    {
+      "name": "MacLauncher Java loader",
+      "license": "MIT",
+      "path": "MacLauncher-MIT.txt"
+    }
+  ]
+}

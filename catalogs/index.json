@@ -1895,10 +1895,41 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#java-steamworks",
       "catalog": {
         "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/java-steamworks.json",
-        "sha256": "c02b834763a0b7e6f342103ff74ed13e66a0fa227368d7f07c1b21a0cf9b37dc",
-        "bytes": 3764
+        "sha256": "ce377630e94bbbaf9c725860f1648405d14ce6bb44406fffe7325698dd39f155",
+        "bytes": 5345
       },
       "releases": [
+        {
+          "version": "1.10.0-MCLv3",
+          "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "11.0",
+          "tag": "java-steamworks/v1.10.0-MCLv3/universal",
+          "asset": {
+            "filename": "java-steamworks-1.10.0-MCLv3-universal.tar.gz",
+            "sha256": "95e1bd94063c052ad987bb629e231744c3646d3b7e0d3fba1e2a165b0d9dd083",
+            "bytes": 155968,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/java-steamworks%2Fv1.10.0-MCLv3%2Funiversal/java-steamworks-1.10.0-MCLv3-universal.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "66bddd70fb09b14ea7bcc1f4c7fc7fabacf05c05",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41545826912",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#java-steamworks",
+          "profile": "Steamworks4j 1.10.0 JNI ABI 1.10.0-MCLv3"
+        },
         {
           "version": "1.9.0-MCLv3",
           "arch": "x64",
