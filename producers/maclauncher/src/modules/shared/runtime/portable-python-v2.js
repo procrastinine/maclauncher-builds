@@ -4,6 +4,7 @@ const crypto = require("node:crypto");
 const Base = require("./portable-python");
 const Source = require("./pinned-native-build");
 const Portable = require("./portable-sdl2-fonts");
+const Prefix = require("./portable-dependency-prefix");
 const { throwIfAborted } = require("./download-utils");
 const PROFILE = Object.freeze(require("./portable-python-v2.json"));
 const PIN = Object.freeze({ ...Base.PIN, ...PROFILE });
@@ -36,7 +37,7 @@ async function buildPython(input) {
         LDFLAGS: [settings.env.LDFLAGS, ...options].join(" ") } });
     } } });
   if (recipeIdentity() !== recipeSha256) throw new Error("Python build recipe changed during compilation.");
-  return { ...result, version: PIN.version, recipeSha256, baseProfile: PROFILE.baseProfile,
+  return { ...result, prefixSha256: Prefix.snapshotPrefix(result.prefix).sha256, version: PIN.version, recipeSha256, baseProfile: PROFILE.baseProfile,
     linkerOptions: options, objectSymbolPaths: PROFILE.objectSymbolPaths };
 }
 

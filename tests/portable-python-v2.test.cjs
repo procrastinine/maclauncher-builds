@@ -9,6 +9,22 @@ const Base = require("../producers/maclauncher/src/modules/shared/runtime/portab
 const hash = file => require("node:crypto").createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 function temporary(t) { const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "maclauncher-python-linker-"))); t.after(() => fs.rmSync(root, { recursive: true, force: true })); return root; }
 
+test("Python v2 records the completed prefix that GemRB verifies before reuse", async t => {
+  const root = temporary(t), workRoot = path.join(root, "python");
+  t.mock.method(Base, "buildPython", async input => {
+    const prefix = path.join(input.workRoot, "prefix"), library = path.join(prefix, "lib/libpython3.14.dylib"), includeDir = path.join(prefix, "include/python3.14"), stdlib = path.join(prefix, "lib/python3.14");
+    for (const directory of [path.dirname(library), includeDir, stdlib]) fs.mkdirSync(directory, { recursive: true });
+    fs.writeFileSync(library, "fixture library"); fs.writeFileSync(path.join(includeDir, "Python.h"), "fixture header");
+    return { prefix, library, includeDir, stdlib, architecture: "arm64", minimumMacOS: "13.0", source: Base.PIN.source, configureOptions: Base.PIN.options, disabledModules: Base.PIN.disabledModules };
+  });
+  const stack = await Python.buildPython({ workRoot, archive: path.join(root, "source.tar.xz") });
+  const GemRB = require("../producers/maclauncher/src/modules/gemrb/runtime/portable-build-v5"), Prefix = require("../producers/maclauncher/src/modules/shared/runtime/portable-dependency-prefix");
+  assert.equal(stack.prefixSha256, Prefix.snapshotPrefix(stack.prefix).sha256);
+  assert.equal(GemRB.validatePythonStack(stack, "arm64").sha256, stack.prefixSha256);
+  fs.appendFileSync(path.join(stack.includeDir, "Python.h"), "changed");
+  assert.throws(() => GemRB.validatePythonStack(stack, "arm64"), /Python prefix checksum changed/);
+});
+
 test("Python v2 preserves the exact source/module/configure profile and adds only the linker object-path option", () => {
   assert.equal(Base.PIN.version, "python-embedded-macos13-v1");
   assert.equal(Python.PIN.version, "python-embedded-macos13-v2");
