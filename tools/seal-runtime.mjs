@@ -52,7 +52,7 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
    targets.set(source,target);sources.set(target,source);originals.set(source,Native.hashFile(source));return target;
   };
   for(const file of extraLibraries)addLibrary(file);
-  const queue=[...sources.keys()],seen=new Set(),noticeRoots=new Set(),inherited=Tools.loadCommands(executable,cpu).rpaths;
+  const queue=[...sources.keys()],seen=new Set(),noticeRoots=new Set(),aliases=new Map(),inherited=Tools.loadCommands(executable,cpu).rpaths;
   const receipts=path.join(output,'dependency-receipts');fs.mkdirSync(receipts);
   try {for(let i=0;i<queue.length;i++){
    const target=queue[i];if(seen.has(target))continue;seen.add(target);const source=sources.get(target);
@@ -63,7 +63,12 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
    for(const link of Tools.links(source,cpu)){
     if(system(link)||ids.includes(link))continue;
     const resolved=Tools.resolveLink(link,source,executable,[...commands.rpaths,...inherited],cpu),dependency=addLibrary(resolved);
-    if(!immutable)run('/usr/bin/install_name_tool',['-change',link,'@loader_path/'+path.relative(path.dirname(target),dependency).split(path.sep).join('/'),target]);queue.push(dependency);
+    if(!immutable)run('/usr/bin/install_name_tool',['-change',link,'@loader_path/'+path.relative(path.dirname(target),dependency).split(path.sep).join('/'),target]);
+    else if(link.startsWith('@loader_path/')){
+     const alias=path.resolve(path.dirname(target),link.slice('@loader_path/'.length));B.relativeFile(path.relative(files,alias).split(path.sep).join('/'));
+     if(alias!==dependency){if(aliases.has(alias)&&aliases.get(alias)!==dependency)throw Error('Conflicting preserved dependency alias.');aliases.set(alias,dependency);}
+    }
+    queue.push(dependency);
    }
    if(!immutable)for(const rpath of new Set(commands.rpaths.filter(value=>path.isAbsolute(value)&&!system(value))))run('/usr/bin/install_name_tool',['-delete_rpath',rpath,target]);
    if(!immutable&&ids.length)run('/usr/bin/install_name_tool',['-id','@rpath/'+path.basename(target),target]);
@@ -84,6 +89,13 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
   const signingOrder=[...seen].filter(target=>!appRoot||target!==main).sort((a,b)=>b.split(path.sep).length-a.split(path.sep).length||a.localeCompare(b));
   for(const target of signingOrder)if(!shared.has(target))run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);
   if(appRoot)run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',path.join(files,path.basename(appRoot))]);
+  // Preserved shared imports retain their logical loader names. Copy only
+  // finalized bytes; package layout later replaces these copies by exact aliases.
+  for(const [alias,canonical]of aliases){
+   if(fs.existsSync(alias)){if(Native.hashFile(alias)!==Native.hashFile(canonical))throw Error('Conflicting preserved dependency alias bytes.');}
+   else{fs.mkdirSync(path.dirname(alias),{recursive:true});fs.copyFileSync(canonical,alias,fs.constants.COPYFILE_EXCL);}
+   seen.add(alias);
+  }
   for(const target of seen){
    run('/usr/bin/codesign',['--verify','--strict',target]);
    const ids=Tools.libraryIds(target,cpu),commands=Tools.loadCommands(target,cpu);
