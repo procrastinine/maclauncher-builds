@@ -634,7 +634,9 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/mages/native/current-build.js"
+        "producers/maclauncher/src/modules/mages/native/current-build.js",
+        "producers/maclauncher/src/modules/mages/native/dependency-overlays.json",
+        "producers/maclauncher/src/modules/mages/native/bink2-license.txt"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -684,7 +686,9 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/shared/installers/runtime/innoextract-build.js"
+        "producers/maclauncher/src/modules/shared/installers/runtime/innoextract-build.js",
+        "producers/maclauncher/src/modules/shared/installers/native/inno-inspect.cpp",
+        "producers/maclauncher/src/modules/shared/installers/native/static-dependencies.cmake"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
