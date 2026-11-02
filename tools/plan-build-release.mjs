@@ -20,7 +20,8 @@ export async function planBuildRelease({selection,directory=root,releases=[]}){
   if(latest.has(id))return latest.get(id);
   const file=path.join(directory,'catalogs',id+'.json');let result=null;
   for(const record of fs.existsSync(file)?json(file).packages:[]){
-   try{requireGithubBuild({record,repository:registry.repository,directory});}catch{continue;}
+   // An unsigned newest release needs a rebuild; older signed releases cannot substitute for it.
+   try{requireGithubBuild({record,repository:registry.repository,directory});}catch{break;}
    const declarationFile=path.join(directory,'catalogs/declarations',id,record.version,record.arch+'.json');
    const declaration=fs.existsSync(declarationFile)?json(declarationFile):null;
    result={version:record.version,digest:record.asset.sha256,arch:record.arch,
