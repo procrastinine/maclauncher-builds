@@ -97,6 +97,7 @@ test('optional native providers retain platform requirements and exact sealed by
  const f=fixture(t);
  for(const [name,optional] of [['baseline.dylib',false],['provider.dylib',true]]){
   const bytes=Buffer.alloc(32);bytes.writeUInt32LE(0xfeedfacf);bytes.writeUInt32LE(0x0100000c,4);bytes.writeUInt32LE(6,12);
+  bytes.writeUInt32LE(optional?1:0,24);
   fs.writeFileSync(path.join(f.input,name),bytes,{mode:0o755});
   f.declaration.files.push({path:name,size:bytes.length,mode:0o755,sha256:digest(bytes),architectures:['arm64'],
    ...(optional?{optionalLoad:{architectures:['arm64'],minimumMacOS:'15.0'}}:{})});
@@ -104,7 +105,7 @@ test('optional native providers retain platform requirements and exact sealed by
  const record=await pack(f),result=await verify({...selected(f),archive:f.output,sha256:record.asset.sha256});
  assert.equal(result.files,6);assert.equal(record.minimumMacOS,'13.0');
  const raw=zlib.gunzipSync(fs.readFileSync(f.output)),size=parseInt(raw.subarray(124,136).toString('ascii').replace(/\0.*$/,''),8);
- const sealed=JSON.parse(raw.subarray(512,512+size));assert.deepEqual(sealed.files.at(-1).optionalLoad,{architectures:['arm64'],minimumMacOS:'15.0'});
+ const sealed=JSON.parse(raw.subarray(512,512+size));assert.deepEqual(sealed.files.find(file=>file.path==='provider.dylib').optionalLoad,{architectures:['arm64'],minimumMacOS:'15.0'});
  for(const optionalLoad of [null,{architectures:['x86_64'],minimumMacOS:'15.0'},{architectures:['arm64'],minimumMacOS:'12.0'}])
   assert.throws(()=>publicDeclaration({...f.declaration,files:f.declaration.files.map(file=>file.path==='provider.dylib'?{...file,optionalLoad}:file)}),/Optional native loading/);
  assert.throws(()=>publicDeclaration({...f.declaration,files:f.declaration.files.map(file=>file.architectures?

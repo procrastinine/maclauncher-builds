@@ -26,6 +26,7 @@ export function publicDeclaration(value){
 
 export async function pack({project,input,declaration,output,metadata={},sourceDateEpoch=0,directory=root}){
  outputVersion(project,declaration?.version,directory);
+ declaration=publicDeclaration(declaration);
  preparePackageLayout({input,declaration});
  projectId(project);declaration=publicDeclaration(declaration);identity(declaration);
  if(declaration.id!==project)throw Error(`Package belongs to ${declaration.id}; expected project ${project}.`);
