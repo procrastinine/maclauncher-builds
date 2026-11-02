@@ -6,6 +6,45 @@
     {
       "schemaVersion": 2,
       "id": "java-steamworks",
+      "version": "1.9.0-MCLv3",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "10.9",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "1961dd8cf83b7f1da4e556b0dcbde1b3b2a2889918b850a4de970bdae0c6741d",
+      "sourceSha256": "b92ea7eac757c843c358fd2de0103a0851d94f4f5a748dd0f56e7979f9daf141",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "java-steamworks-1.9.0-MCLv3-x64.tar.gz",
+        "sha256": "5ebda3726485dd1bf8904923a684290f8e5b865640b83fb9e9315fed0b6cebc2",
+        "bytes": 93519,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/java-steamworks%2Fv1.9.0-MCLv3%2Fx64/java-steamworks-1.9.0-MCLv3-x64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "66bddd70fb09b14ea7bcc1f4c7fc7fabacf05c05",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "41545826912",
+        "runAttempt": "1"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "66bddd70fb09b14ea7bcc1f4c7fc7fabacf05c05"
+      },
+      "tag": "java-steamworks/v1.9.0-MCLv3/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "java-steamworks",
       "version": "1.9.0-MCLv2",
       "arch": "x64",
       "launcherArchitectures": [
