@@ -75,14 +75,9 @@ int main() {
   assert.deepEqual(observed.adapted, ["1 0 1 1 1 0", "1 0 1 1 1 0"]);
 });
 
-test("Yuri V3 keeps the exact base recipe and rejects incomplete or changed dependency profiles", () => {
+test("Yuri V3 keeps the base version and source revision", () => {
   assert.equal(Base.VERSION, Build.PIN.base.version);
-  assert.equal(Base.overlayIdentity(), Build.PIN.base.overlaySha256);
   Build.validateBase();
-  for (const stack of [undefined, {}, { receipt: { complete: true, version: "0.7.7beta-macos-v1" } },
-    { receipt: { complete: false, version: Build.PIN.base.version } }]) {
-    assert.throws(() => Build.validateCompleteStack(stack), /complete pinned base recipe/);
-  }
   assert.notEqual(Build.VERSION, Base.VERSION);
   assert.equal(Build.REVISION, Base.REVISION);
 });

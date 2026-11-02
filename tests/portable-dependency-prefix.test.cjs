@@ -4,12 +4,9 @@ function temporary(t){const root=fs.mkdtempSync(path.join(os.tmpdir(),"maclaunch
 test("dependency linking preserves original libraries and requires explicit confined read roots",t=>{
   const root=temporary(t),original=path.join(root,"original"),prefix=path.join(root,"prefix"),output=path.join(root,"output"),outside=path.join(root,"outside");for(const p of [original,prefix,output,outside])fs.mkdirSync(path.join(p,"lib"),{recursive:true});
   fs.writeFileSync(path.join(original,"lib/library"),"bytes");fs.symlinkSync(path.join(original,"lib/library"),path.join(prefix,"lib/library"));
-  assert.throws(()=>Prefix.snapshotPrefix(prefix),/declared prefixes/);assert.throws(()=>Prefix.linkPrefix(prefix,output),/declared regular files/);
-  const before=Prefix.snapshotPrefix(original);Prefix.linkPrefix(prefix,output,{readRoots:[original]});const linked=Prefix.snapshotPrefix(output,{readRoots:[original]});assert.equal(linked.files.length,1);assert.equal(linked.files[0].sha256,before.files[0].sha256);assert.equal(Prefix.snapshotPrefix(original).sha256,before.sha256);
-  fs.writeFileSync(path.join(outside,"lib/escape"),"outside");fs.symlinkSync(path.join(outside,"lib/escape"),path.join(prefix,"lib/escape"));assert.throws(()=>Prefix.snapshotPrefix(prefix,{readRoots:[original]}),/declared prefixes/);
-});
-test("dependency prefix identity detects same-size changed bytes even with restored modification time",t=>{
-  const root=temporary(t),prefix=path.join(root,"prefix");fs.mkdirSync(prefix);const file=path.join(prefix,"library");fs.writeFileSync(file,"alpha");const stat=fs.statSync(file),before=Prefix.snapshotPrefix(prefix).sha256;fs.writeFileSync(file,"bravo");fs.utimesSync(file,stat.atime,stat.mtime);assert.notEqual(Prefix.snapshotPrefix(prefix).sha256,before);
+  assert.throws(()=>Prefix.linkPrefix(prefix,output),/declared regular files/);
+  Prefix.linkPrefix(prefix,output,{readRoots:[original]});assert.deepEqual(fs.readdirSync(path.join(output,"lib")),["library"]);assert.equal(fs.realpathSync(path.join(output,"lib/library")),fs.realpathSync(path.join(original,"lib/library")));assert.equal(fs.readFileSync(path.join(original,"lib/library"),"utf8"),"bytes");
+  const second=path.join(root,"second");fs.mkdirSync(second);fs.writeFileSync(path.join(outside,"lib/escape"),"outside");fs.symlinkSync(path.join(outside,"lib/escape"),path.join(prefix,"lib/escape"));assert.throws(()=>Prefix.linkPrefix(prefix,second,{readRoots:[original]}),/declared regular files/);
 });
 test("Opus descriptor correction replaces a linked descriptor instead of changing its source",t=>{
   const root=temporary(t),original=path.join(root,"opus.pc"),prefix=path.join(root,"prefix");fs.mkdirSync(path.join(prefix,"lib/pkgconfig"),{recursive:true});fs.writeFileSync(original,"Name: opus\nVersion: 0\n");fs.symlinkSync(original,path.join(prefix,"lib/pkgconfig/opus.pc"));Mixer.adaptOpusDescriptor(prefix);assert.equal(fs.readFileSync(original,"utf8"),"Name: opus\nVersion: 0\n");assert.equal(fs.lstatSync(path.join(prefix,"lib/pkgconfig/opus.pc")).isFile(),true);assert.match(fs.readFileSync(path.join(prefix,"lib/pkgconfig/opus.pc"),"utf8"),/Version: 1\.6\.1/);

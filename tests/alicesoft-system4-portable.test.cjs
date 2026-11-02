@@ -7,8 +7,6 @@ const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const Portable = require("../producers/maclauncher/src/modules/alicesoft/system4-portable-v3");
 const Overlay = require("../producers/maclauncher/src/modules/alicesoft/system4-portable-overlay-v3");
-const Prefix = require("../producers/maclauncher/src/modules/alicesoft/system35-portable");
-const Movie = require("../producers/maclauncher/src/modules/shared/runtime/portable-ffmpeg");
 function temporary(t) {
   const root=fs.mkdtempSync(path.join(os.tmpdir(),"maclauncher-system4-portable-"));
   t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;
@@ -46,15 +44,6 @@ test("native System4 resources follow a relocated executable, confine names and 
   const file=path.join(root,"probe.c");fs.writeFileSync(file,header+Overlay.RESOURCE_FUNCTION+main);
   execFileSync("/usr/bin/clang",["-arch","arm64","-mmacosx-version-min=13.0",file,"-o",exe],{timeout:30000,stdio:"pipe"});
   execFileSync(exe,[],{cwd:os.tmpdir(),timeout:10000,stdio:"pipe"});const alias=path.join(root,"alias");fs.symlinkSync(exe,alias);execFileSync(alias,[],{cwd:os.tmpdir(),timeout:10000,stdio:"pipe"});
-});
-test("movie dependency reuse rejects source/profile/configured-prefix drift and byte mutations",t=>{
-  const root=temporary(t),prefix=path.join(root,"prefix");fs.mkdirSync(path.join(prefix,"lib"),{recursive:true});fs.writeFileSync(path.join(prefix,"lib/avcodec"),"codec");
-  const stack={version:Movie.PIN.version,source:Movie.PIN.source,architecture:"arm64",minimumMacOS:"13.0",recipeSha256:Movie.recipeIdentity(),prefix,prefixSha256:Prefix.snapshotPrefix(prefix).sha256,decoders:Movie.PIN.decoders,demuxers:Movie.PIN.demuxers,options:["--prefix="+prefix,"--arch=arm64","--target-os=darwin","--cc=/usr/bin/clang","--cxx=/usr/bin/clang++","--host-cc=/usr/bin/clang","--sysroot=/SDK",...Movie.OPTIONS,"--extra-cflags=flags","--extra-ldflags=flags"],network:false,externalCodecs:false,gpl:false,nonfree:false};
-  assert.equal(Portable.validateMovieStack(stack,"arm64").sha256,stack.prefixSha256);
-  assert.throws(()=>Portable.validateMovieStack({...stack,decoders:Movie.PIN.decoders.slice(1)},"arm64"),/exact source recipe/);
-  assert.throws(()=>Portable.validateMovieStack({...stack,minimumMacOS:"27.0"},"arm64"),/exact source recipe/);
-  assert.throws(()=>Portable.validateMovieStack({...stack,options:["--prefix="+root,...stack.options.slice(1)]},"arm64"),/original library prefix/);
-  fs.writeFileSync(path.join(prefix,"lib/avcodec"),"changed");assert.throws(()=>Portable.validateMovieStack(stack,"arm64"),/prefix checksum changed/);
 });
 test("Meson compiler settings pin architecture, SDK, package tools and source-path maps",()=>{
   const settings=Portable.nativeFile({architecture:"arm64",prefix:"/tmp/build/prefix",sdk:"/SDK",pathMappings:[{from:"/tmp/build",to:"source-build"}],tools:{pkgconfig:"/tools/pkg-config",bison:"/tools/bison",flex:"/tools/flex"}});

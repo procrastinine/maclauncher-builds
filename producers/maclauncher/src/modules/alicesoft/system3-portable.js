@@ -24,8 +24,6 @@ async function buildPortableSystem3({ sourceDir = sourcePath, archives, workRoot
   const overlaySha256 = overlayIdentity();
   let stack;
   if(fontStack){
-    const recipe=crypto.createHash("sha256").update(fs.readFileSync(require.resolve("../shared/runtime/portable-sdl2-fonts"))).update(fs.readFileSync(require.resolve("../shared/runtime/portable-sdl2-fonts.json"))).digest("hex");
-    Prefix.validateStack(fontStack,Fonts.PIN,recipe,architecture);
     const prefix=path.join(workRoot,"prefix");fs.mkdirSync(prefix,{recursive:true});Prefix.linkPrefix(fontStack.prefix,prefix);stack={...fontStack,prefix};
   }else stack = await Fonts.buildDependencies({ archives, workRoot, architecture, pathMappings, signal, onProgress, dependencies });
   const sourceRoot = path.join(workRoot, "system3-source");

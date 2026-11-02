@@ -1,7 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const { isDeepStrictEqual } = require("node:util");
 const Source = require("../shared/runtime/pinned-native-build");
 const Native = require("../shared/runtime/local-native");
 const Fonts = require("../shared/runtime/portable-sdl2-fonts");
@@ -20,22 +19,6 @@ const recipeFiles = [__filename, require.resolve("./system35-overlay-v3"), requi
     [require.resolve("../shared/runtime/" + name), require.resolve("../shared/runtime/" + name + ".json")]),
   require.resolve("../shared/runtime/portable-dependency-prefix")];
 const overlayIdentity = () => { const hash = crypto.createHash("sha256"); for (const file of recipeFiles) hash.update(fs.readFileSync(file)); return hash.digest("hex"); };
-const dependencyRecipe = name => crypto.createHash("sha256").update(fs.readFileSync(require.resolve("../shared/runtime/" + name)))
-  .update(fs.readFileSync(require.resolve("../shared/runtime/" + name + ".json"))).digest("hex");
-
-function validateMixer(stack, architecture = process.arch) {
-  if (!stack || stack.version !== Mixer.PIN.version || stack.recipeSha256 !== Mixer.recipeIdentity() ||
-      stack.architecture !== architecture || stack.minimumMacOS !== "13.0" || !Array.isArray(stack.sources) ||
-      stack.sources.length !== Mixer.PIN.dependencies.length || Mixer.PIN.dependencies.some(pin =>
-        !stack.sources.some(source => source.id === pin.id && Object.keys(pin).every(key => isDeepStrictEqual(source[key], pin[key]))))) {
-    throw new Error("xsystem35 requires the exact portable SDL2_mixer dependency profile.");
-  }
-  const fonts = Prefix.validateStack(stack.fonts, Fonts.PIN, dependencyRecipe("portable-sdl2-fonts"), architecture);
-  const audio = Prefix.validateStack(stack.audio, Audio.PIN, dependencyRecipe("portable-sndfile"), architecture);
-  const inventory = Prefix.snapshotPrefix(stack.prefix, { readRoots: [fonts.prefix, audio.prefix] });
-  if (inventory.sha256 !== stack.prefixSha256) throw new Error("xsystem35 mixer prefix checksum changed.");
-  return [{ ...inventory, readRoots: [fonts.prefix, audio.prefix] }, fonts, audio];
-}
 
 async function buildPortableSystem35({ sourceDir = sourcePath, archives, workRoot, dependencyStacks, architecture = process.arch, pathMappings = [], signal, onProgress, dependencies = {} }) {
   throwIfAborted(signal);
@@ -47,7 +30,6 @@ async function buildPortableSystem35({ sourceDir = sourcePath, archives, workRoo
   const overlaySha256 = overlayIdentity();
   if (dependencyStacks && (Object.keys(dependencyStacks).length !== 1 || !dependencyStacks.mixer)) throw new Error("xsystem35 dependency reuse needs the exact mixer profile.");
   const mixer = dependencyStacks?.mixer || await Mixer.buildMixer({ archives, workRoot: path.join(workRoot, "mixer"), architecture, pathMappings, signal, onProgress, dependencies });
-  const retained = validateMixer(mixer, architecture);
   fs.mkdirSync(workRoot, { recursive: true });
   const prefix = path.join(workRoot, "prefix"), sourceRoots = {}, sources = [];
   fs.mkdirSync(prefix); Prefix.linkPrefix(mixer.prefix, prefix, { readRoots: [mixer.fonts.prefix, mixer.audio.prefix] });
@@ -71,11 +53,10 @@ async function buildPortableSystem35({ sourceDir = sourcePath, archives, workRoo
   for (const name of ["HAVE_LIBINTL", "ENABLE_MIDI_PORTMIDI"]) if (new RegExp(`^#define ${name} `, "m").test(config)) throw new Error("xsystem35 enabled an unselected dependency.");
   throwIfAborted(signal); await Source.validatePinnedSource(sourceDir, REVISION, { signal });
   if (Source.hashPinnedFiles(sourceDir, source.files) !== sourceTreeSha256 || overlayIdentity() !== overlaySha256) throw new Error("xsystem35 source or adapter changed during compilation.");
-  for (const inventory of retained) if (Prefix.snapshotPrefix(inventory.prefix, { readRoots: inventory.readRoots }).sha256 !== inventory.sha256) throw new Error("A reused dependency prefix changed during compilation.");
   const executable = path.join(prefix, "bin/xsystem35");
   return { managerId: "xsystem35", version: VERSION, sourceRevision: REVISION, sourceTreeSha256, overlaySha256, sourceOverlay,
     architecture, minimumMacOS: "13.0", executable, executableSha256: Native.hashFile(executable), resources: path.join(prefix, "share/xsystem35"),
     features: { debugger: true, webp: true, sdl: "2.32.10", midi: "macOS AudioToolbox", ...mixer.features },
     ...build, dependencyClosure: { mixer, prefix, sources, sourceRoots } };
 }
-module.exports = { VERSION, REVISION, SOURCE_SHA256, PIN, sourcePath, overlayIdentity, validateMixer, buildPortableSystem35 };
+module.exports = { VERSION, REVISION, SOURCE_SHA256, PIN, sourcePath, overlayIdentity, buildPortableSystem35 };

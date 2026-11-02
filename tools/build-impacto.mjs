@@ -30,7 +30,6 @@ export async function finishImpacto({project,arch,output,work,sources,fonts,audi
  return finishImpactoEngine({project,arch,output,work,sources,fonts,audio,dependencyStack,maps,ffmpegPrefix});
 }
 export async function finishImpactoEngine({project,arch,output,work,sources,fonts,audio,dependencyStack,maps,ffmpegPrefix}){
- Portable.validateDependencyStack(dependencyStack);
  const sdk=dependencyStack.sdk,ffmpeg=path.join(work,'ffmpeg-source'),avcpp=path.join(work,'avcpp-source'),avcppPrefix=path.join(work,'avcpp');
  const checked=await Source.validatePinnedSource(sources.avcpp,Adapter.SOURCES.avcpp.revision,{sourceScope:AVCPP_SOURCE_SCOPE});Source.stagePinnedFiles(sources.avcpp,checked.files,avcpp);
  await Patches.applyPinnedPatch(avcpp,path.join(sources.impacto,'portfiles/avcpp/0002-av_init_packet_deprecation.patch'),DependencyOverlays.avcppPacket,{logPath:path.join(work,'patches.log')});

@@ -5,7 +5,6 @@ const { execFileSync } = require("node:child_process");
 const Source = require("../../shared/runtime/pinned-native-build");
 const Native = require("../../shared/runtime/local-native");
 const Fonts = require("../../shared/runtime/portable-sdl2-fonts");
-const Audio = require("../../shared/runtime/portable-sndfile");
 const Prefix = require("./portable-prefix");
 const { throwIfAborted } = require("../../shared/runtime/download-utils");
 const PIN = Object.freeze(require("./portable-dependencies.json"));
@@ -51,11 +50,8 @@ function validateArchives(archives, { catalog = PIN } = {}) {
 }
 
 function dependencyStacks({ fonts, audio }) {
-  const inputs = [[fonts, Fonts.PIN, [require.resolve("../../shared/runtime/portable-sdl2-fonts"), require.resolve("../../shared/runtime/portable-sdl2-fonts.json")]],
-    [audio, Audio.PIN, [require.resolve("../../shared/runtime/portable-sndfile"), require.resolve("../../shared/runtime/portable-sndfile.json")]]];
-  const inventories = inputs.map(([stack, catalog, files]) => Prefix.validateStack(stack, catalog, recipeHash(files)));
   if (fonts.sdk !== audio.sdk || !path.isAbsolute(fonts.sdk || "")) throw new Error("Impacto dependencies require the same macOS SDK.");
-  return inventories;
+  return [fonts, audio];
 }
 
 function environment(prefix, sdk, prefixes = [prefix]) {
@@ -133,7 +129,7 @@ async function buildDependencies({ archives, workRoot, reusedStacks, pathMapping
   const tools = Object.fromEntries(["cmake", "ninja", "meson"].map(name => [name, (dependencies.findBuildTool || Source.findBuildTool)(name)]));
   const overlaySha256 = recipeHash(), prefix = path.join(workRoot, "prefix"), sourceDirectory = path.join(workRoot, "source");
   fs.mkdirSync(prefix, { recursive: true }); fs.mkdirSync(sourceDirectory);
-  for (const inventory of retained) Prefix.linkPrefix(inventory.prefix, prefix);
+  for (const stack of retained) Prefix.linkPrefix(stack.prefix, prefix);
   const sources = [], sourceRoots = {}, run = dependencies.runBuildCommand || Source.runBuildCommand;
   for (const pin of pins) {
     throwIfAborted(signal); const sourceRoot = path.join(sourceDirectory, pin.id); fs.mkdirSync(sourceRoot);
@@ -148,11 +144,9 @@ async function buildDependencies({ archives, workRoot, reusedStacks, pathMapping
     sourceRoots[pin.id] = sourceRoot; sources.push({ ...pin, ...build, sourceRoot });
     fs.writeFileSync(path.join(workRoot, "dependency-progress.json"), JSON.stringify({ sources, sourceRoots }, null, 2));
   }
-  for (const inventory of retained) if (Prefix.snapshotPrefix(inventory.prefix).sha256 !== inventory.sha256) throw new Error("A dependency input changed during compilation.");
   if (recipeHash() !== overlaySha256) throw new Error("Impacto dependency recipe changed during compilation.");
-  const inventory = Prefix.snapshotPrefix(prefix, { readRoots: retained.map(row => row.prefix) });
   return { version: PIN.version, architecture: "arm64", minimumMacOS: "13.0", recipeSha256: overlaySha256,
-    prefix, prefixSha256: inventory.sha256, sdk, tools, sources, sourceRoots, reusedStacks, reusedPrefixes: retained };
+    prefix, sdk, tools, sources, sourceRoots, reusedStacks };
 }
 
 module.exports = { PIN, RECIPE_FILES, recipeHash, relative, validateArchives, dependencyStacks, environment, cmakeOptions,

@@ -1,7 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const { isDeepStrictEqual } = require("node:util");
 const Source = require("../shared/runtime/pinned-native-build");
 const Native = require("../shared/runtime/local-native");
 const Fonts = require("../shared/runtime/portable-sdl2-fonts");
@@ -22,46 +21,6 @@ function overlayIdentity() {
   const hash = crypto.createHash("sha256");
   for (const file of recipeFiles) hash.update(fs.readFileSync(file));
   return hash.digest("hex");
-}
-
-function dependencyRecipe(helper, catalog) {
-  return crypto.createHash("sha256").update(fs.readFileSync(require.resolve(helper))).update(fs.readFileSync(require.resolve(catalog))).digest("hex");
-}
-
-function snapshotPrefix(prefix) {
-  if (!path.isAbsolute(prefix || "") || !fs.lstatSync(prefix).isDirectory()) throw new Error("Portable dependency prefixes must be real absolute directories.");
-  const root = fs.realpathSync(prefix), files = [], tree = crypto.createHash("sha256");
-  let bytes = 0;
-  function visit(directory, relative = "") {
-    for (const name of fs.readdirSync(directory).sort()) {
-      const file = path.join(directory, name), item = path.posix.join(relative, name), stat = fs.lstatSync(file);
-      if (stat.isDirectory()) { visit(file, item); continue; }
-      if (!stat.isFile() && !stat.isSymbolicLink()) throw new Error("Portable dependency prefix contains an unsupported file.");
-      const resolved = fs.realpathSync(file);
-      if (!resolved.startsWith(root + path.sep) || !fs.statSync(resolved).isFile()) throw new Error("Portable dependency links must stay inside their prefix.");
-      const size = fs.statSync(resolved).size;
-      bytes += size;
-      if (files.length >= 8000 || bytes > 256 * 1024 * 1024) throw new Error("Portable dependency inventory exceeds its bounds.");
-      const row = { path: item, sha256: Native.hashFile(resolved), size, mode: stat.mode & 0o777,
-        ...(stat.isSymbolicLink() ? { link: fs.readlinkSync(file) } : {}) };
-      files.push(row); tree.update(JSON.stringify(row) + "\n");
-    }
-  }
-  visit(root);
-  return { prefix: root, sha256: tree.digest("hex"), files, bytes };
-}
-
-function validateStack(stack, catalog, recipeSha256) {
-  if (!stack || stack.version !== catalog.version || stack.architecture !== "arm64" || stack.minimumMacOS !== "13.0" ||
-      stack.recipeSha256 !== recipeSha256 || !/^[a-f0-9]{64}$/.test(stack.prefixSha256 || "") ||
-      !Array.isArray(stack.sources) || stack.sources.length !== catalog.dependencies.length) throw new Error("Portable dependency reuse requires the exact source recipe and prefix checksum.");
-  for (const pin of catalog.dependencies) {
-    const source = stack.sources.find(row => row.id === pin.id);
-    if (!source || Object.keys(pin).some(key => !isDeepStrictEqual(source[key], pin[key]))) throw new Error("Portable dependency source identity differs from the selected profile.");
-  }
-  const inventory = snapshotPrefix(stack.prefix);
-  if (inventory.sha256 !== stack.prefixSha256) throw new Error("Portable dependency prefix checksum changed.");
-  return inventory;
 }
 
 function linkPrefix(inputPrefix, outputPrefix) {
@@ -119,13 +78,11 @@ async function buildPortableSystem35({ sourceDir = sourcePath, archives, workRoo
   Fonts.validateArchives(archives); Audio.validateArchives(archives); Audio.validateArchives(archives, { catalog: PIN });
   const source = await Source.validatePinnedSource(sourceDir, REVISION, { signal });
   if (Source.hashPinnedFiles(sourceDir, source.files) !== SOURCE_SHA256) throw new Error("xsystem35 source tree checksum does not match the selected version.");
-  const overlaySha256 = overlayIdentity(), retained = [];
+  const overlaySha256 = overlayIdentity();
   let fonts, audio;
   if (dependencyStacks) {
     if (Object.keys(dependencyStacks).length !== 2 || !dependencyStacks.fonts || !dependencyStacks.audio) throw new Error("Portable dependency reuse needs both font and audio profiles.");
     fonts = dependencyStacks.fonts; audio = dependencyStacks.audio;
-    retained.push(validateStack(fonts, Fonts.PIN, dependencyRecipe("../shared/runtime/portable-sdl2-fonts", "../shared/runtime/portable-sdl2-fonts.json")),
-      validateStack(audio, Audio.PIN, dependencyRecipe("../shared/runtime/portable-sndfile", "../shared/runtime/portable-sndfile.json")));
   }
   fs.mkdirSync(workRoot, { recursive: true });
   if (!fonts) {
@@ -157,12 +114,10 @@ async function buildPortableSystem35({ sourceDir = sourcePath, archives, workRoo
   const features = validateFeatures(workRoot);
   await Source.validatePinnedSource(sourceDir, REVISION, { signal });
   if (Source.hashPinnedFiles(sourceDir, source.files) !== sourceTreeSha256 || overlayIdentity() !== overlaySha256) throw new Error("xsystem35 source or build adapter changed during compilation.");
-  for (const inventory of retained) if (snapshotPrefix(inventory.prefix).sha256 !== inventory.sha256) throw new Error("A reused dependency prefix changed during compilation.");
   const executable = path.join(prefix, "bin/xsystem35");
   return { managerId: "xsystem35", version: VERSION, sourceRevision: REVISION, sourceTreeSha256, overlaySha256, sourceOverlay,
     architecture: "arm64", minimumMacOS: "13.0", executable, executableSha256: Native.hashFile(executable), resources: path.join(prefix, "share/xsystem35"), features,
-    ...build, dependencyClosure: { version: PIN.version, prefix, fonts, audio, sources, sourceRoots, dependencyMetadata,
-      reusedPrefixes: retained.map(({ prefix: directory, sha256 }) => ({ prefix: directory, sha256 })) } };
+    ...build, dependencyClosure: { version: PIN.version, prefix, fonts, audio, sources, sourceRoots, dependencyMetadata } };
 }
 
-module.exports = { VERSION, REVISION, SOURCE_SHA256, PIN, sourcePath, overlayIdentity, snapshotPrefix, validateStack, linkPrefix, adaptDependencyMetadata, validateFeatures, buildPortableSystem35 };
+module.exports = { VERSION, REVISION, SOURCE_SHA256, PIN, sourcePath, overlayIdentity, linkPrefix, adaptDependencyMetadata, validateFeatures, buildPortableSystem35 };

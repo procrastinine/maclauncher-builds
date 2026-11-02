@@ -20,28 +20,11 @@ const OWNED_FILES = [__filename, require.resolve("./portable-build.json"),
   require.resolve("../../runtime/portable-sdl2-mixer"), require.resolve("../../runtime/portable-sdl2-mixer.json"), require.resolve("../../runtime/portable-dependency-prefix")];
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 const overlayIdentity = () => hash(Buffer.concat(OWNED_FILES.map(file => fs.readFileSync(file))));
-const dependencyRecipe = (helper, catalog) => hash(Buffer.concat([fs.readFileSync(require.resolve(helper)), fs.readFileSync(require.resolve(catalog))]));
 
 function validateEngineArchive(archives) {
   const file = archives?.onsyuri;
   if (!path.isAbsolute(file || "") || !fs.lstatSync(file).isFile() || fs.statSync(file).size !== PIN.engine.archiveBytes ||
       Native.hashFile(file) !== PIN.engine.archiveSha256) throw new Error("Yuri primary source archive checksum or size differs from its pinned version.");
-}
-
-function validateMixerStack(stack, architecture = process.arch) {
-  if (!stack || stack.version !== Mixer.PIN.version || stack.architecture !== architecture || stack.minimumMacOS !== "13.0" ||
-      stack.recipeSha256 !== Mixer.recipeIdentity() || !/^[a-f0-9]{64}$/.test(stack.prefixSha256 || "") ||
-      !Array.isArray(stack.sources) || stack.sources.length !== Mixer.PIN.dependencies.length ||
-      !isDeepStrictEqual(stack.readRoots, [stack.fonts?.prefix, stack.audio?.prefix])) throw new Error("Yuri mixer reuse requires the exact source recipe, dependency roots and prefix checksum.");
-  for (const pin of Mixer.PIN.dependencies) {
-    const source = stack.sources.find(row => row.id === pin.id);
-    if (!source || Object.keys(pin).some(key => !isDeepStrictEqual(pin[key], source[key]))) throw new Error("Yuri mixer source identity differs from its pinned version.");
-  }
-  Prefix.validateStack(stack.fonts, Fonts.PIN, dependencyRecipe("../../runtime/portable-sdl2-fonts", "../../runtime/portable-sdl2-fonts.json"), architecture);
-  Prefix.validateStack(stack.audio, Audio.PIN, dependencyRecipe("../../runtime/portable-sndfile", "../../runtime/portable-sndfile.json"), architecture);
-  const inventory = Prefix.snapshotPrefix(stack.prefix, { readRoots: stack.readRoots });
-  if (inventory.sha256 !== stack.prefixSha256) throw new Error("Yuri reused mixer prefix checksum changed.");
-  return inventory;
 }
 
 function requireOwnedSource(sourceRoot, sourceDir) {
@@ -92,8 +75,7 @@ async function buildPortableYuri({ sourceDir, archives, workRoot, dependencyStac
   if (Source.hashPinnedFiles(sourceDir, original.files) !== SOURCE_SHA256 || !isDeepStrictEqual(original.omittedSubmodules, PIN.engine.omittedSubmodules)) throw new Error("Yuri primary source checksum or omitted-submodule revisions changed.");
   validateEngineArchive(archives); Fonts.validateArchives(archives); Audio.validateArchives(archives); Audio.validateArchives(archives, { catalog: Mixer.PIN }); Fonts.validateArchives(archives, { catalog: PIN });
   if (dependencyStacks && (Object.keys(dependencyStacks).length !== 1 || !dependencyStacks.mixer)) throw new Error("Yuri dependency reuse accepts one exact complete mixer profile.");
-  let mixer = dependencyStacks?.mixer, retained;
-  if (mixer) retained = validateMixerStack(mixer);
+  let mixer = dependencyStacks?.mixer;
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, ...(mixer ? [mixer.prefix, ...mixer.readRoots] : [])] });
   const overlaySha256 = overlayIdentity(); fs.mkdirSync(workRoot, { recursive: true });
   if (!mixer) mixer = await Mixer.buildMixer({ archives, workRoot: path.join(workRoot, "mixer-dependencies"), pathMappings, signal, onProgress, dependencies });
@@ -120,15 +102,13 @@ async function buildPortableYuri({ sourceDir, archives, workRoot, dependencyStac
   fs.writeFileSync(path.join(prefix, "profile.json"), JSON.stringify(profile, null, 2) + "\n", { flag: "wx" });
   const current = await Source.validatePinnedSource(sourceDir, REVISION, { signal, sourceScope: PIN.engine.sourceScope });
   if (Source.hashPinnedFiles(sourceDir, current.files) !== sourceTreeSha256 || overlayIdentity() !== overlaySha256) throw new Error("Yuri source or build adapter changed during compilation.");
-  if (retained && Prefix.snapshotPrefix(mixer.prefix, { readRoots: mixer.readRoots }).sha256 !== retained.sha256) throw new Error("A reused Yuri dependency prefix changed during compilation.");
   throwIfAborted(signal);
   const executable = path.join(prefix, "bin/onsyuri");
   return { managerId: "onsyuri", version: VERSION, sourceRevision: REVISION, sourceTreeSha256, sourceScope: original.sourceScope,
     omittedSubmodules: original.omittedSubmodules, sourceOverlay, overlaySha256, architecture: "arm64", minimumMacOS: "13.0", executable,
     executableSha256: Native.hashFile(executable), profile, features, ...build,
-    dependencyClosure: { version: PIN.version, prefix, sdk: mixer.sdk, tools: mixer.tools, mixer, sources, sourceRoots,
-      ...(retained ? { reusedPrefixes: [{ prefix: retained.prefix, sha256: retained.sha256, readRoots: mixer.readRoots }] } : {}) } };
+    dependencyClosure: { version: PIN.version, prefix, sdk: mixer.sdk, tools: mixer.tools, mixer, sources, sourceRoots } };
 }
 
-module.exports = { PIN, VERSION, REVISION, SOURCE_SHA256, OWNED_FILES, overlayIdentity, validateEngineArchive, validateMixerStack,
+module.exports = { PIN, VERSION, REVISION, SOURCE_SHA256, OWNED_FILES, overlayIdentity, validateEngineArchive,
   requireOwnedSource, adaptEngine, adaptLua, validateFeatures, buildPortableYuri };
