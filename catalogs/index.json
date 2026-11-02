@@ -1109,10 +1109,41 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#catsystem2-kif-crypto",
       "catalog": {
         "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/catsystem2-kif-crypto.json",
-        "sha256": "d4f1e67af5071874b8378834eff6d4b4e40d99fcacaa191d37f8befdd9d6f6ed",
-        "bytes": 2182
+        "sha256": "f5a4deaa338227212768ceb5b60999366714a59b97c1443ae20de3583419f963",
+        "bytes": 3727
       },
       "releases": [
+        {
+          "version": "1.1.1",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "11.0",
+          "tag": "catsystem2-kif-crypto/v1.1.1/x64",
+          "asset": {
+            "filename": "catsystem2-kif-crypto-1.1.1-x64.tar.gz",
+            "sha256": "c5ca09584f5b66fdb6d7a18fc9316bcea847dde652ba7a6633a57da5ce5127b7",
+            "bytes": 10401,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/catsystem2-kif-crypto%2Fv1.1.1%2Fx64/catsystem2-kif-crypto-1.1.1-x64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "66bddd70fb09b14ea7bcc1f4c7fc7fabacf05c05",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.19.0",
+              "zlib": "1.3.2.1-motley-3246f1b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+              "xcode": "Xcode 26.6\nBuild version 17F113",
+              "macosSDK": "26.5"
+            },
+            "runId": "41545804291",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#catsystem2-kif-crypto",
+          "profile": "CatSystem2 KIF cryptography helper 1.1.1"
+        },
         {
           "version": "1.1.0",
           "arch": "x64",
