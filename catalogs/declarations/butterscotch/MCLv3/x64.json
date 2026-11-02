@@ -1,0 +1,384 @@
+{
+  "id": "butterscotch",
+  "version": "MCLv3",
+  "arch": "x64",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "butterscotch/MCLv3/x64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "af8cf906289459a60e8097254ca4994390f04dff5297daa756a86bae5cd320ee",
+  "sourceSha256": "af8cf906289459a60e8097254ca4994390f04dff5297daa756a86bae5cd320ee",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 16837,
+      "mode": 420,
+      "sha256": "6f18b7cbfb1304f8a7bf0ac8154757340d9f4bddaf7e26f3d23e0447758a3463"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "87d4b9fe532254ac86976a26f3cfa45399780686439fe9e6bb386afb6ae5cc75"
+    },
+    {
+      "path": "files/bin/butterscotch",
+      "size": 2800432,
+      "sha256": "36581017f41e58368e3e79a57bc90198d40b2cd25ebc089380932d5ce49491ca",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/licenses/upstream/0-LICENSE",
+      "size": 34523,
+      "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/1-LICENSE",
+      "size": 1067,
+      "sha256": "68a3e676d7e94093b102d5cba0d4e04af812040d6f230c3db67a6664574e43d2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/10-vendor_bzip2_huffman.c.txt",
+      "size": 541,
+      "sha256": "74759e2ad9747607ca8572fcea2f68b755495a5d85fc1a641fdd1d733f37a7d3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/11-vendor_bzip2_randtable.c.txt",
+      "size": 541,
+      "sha256": "74759e2ad9747607ca8572fcea2f68b755495a5d85fc1a641fdd1d733f37a7d3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/12-vendor_md5_md5.c.txt",
+      "size": 876,
+      "sha256": "01521294d43bd851cece08fc5008181338c3a4e774b2f5ea23ba2a9dd40db146",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/13-vendor_md5_md5.h.txt",
+      "size": 876,
+      "sha256": "01521294d43bd851cece08fc5008181338c3a4e774b2f5ea23ba2a9dd40db146",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/14-vendor_miniaudio_miniaudio.h.txt",
+      "size": 6101,
+      "sha256": "15288fa8d55781bd554df6087d0ff90a51826312be731fa1720811767b6b7cc0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/15-vendor_miniz_miniz.c.txt",
+      "size": 2638,
+      "sha256": "5bb8911192cf768cf987a30bce7d435db0013e65840667fabbbb4e6be15210e7",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/16-vendor_miniz_miniz.h.txt",
+      "size": 7271,
+      "sha256": "2a3b65c42acbcefd68bff14f58fdb0e8f29f9112e6d44d1d7f6826e6bc50c3cb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/17-vendor_miniz_miniz_tdef.c.txt",
+      "size": 1698,
+      "sha256": "26c3e72cc8011a0a36f9316ced4de3a0b19827ac57d7c18c9845a18ed70c3a26",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/18-vendor_miniz_miniz_tinfl.c.txt",
+      "size": 1380,
+      "sha256": "3d67361c281936632c4d657141982440baf62f79d8a74633c1db8af9edbbdefa",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/19-vendor_mojoal_mojoal.c.txt",
+      "size": 1094,
+      "sha256": "cbf1d3fb819b55c99bf2e1a22e86b807ee9cc380b15bb51d74a0fee6115a99e9",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/2-LICENSE",
+      "size": 1184,
+      "sha256": "0115478d567121238cf6cc1c0c361926cf07a49d9e4c9e66da97fac6a01646b3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/20-vendor_sha1_sha1.c.txt",
+      "size": 340,
+      "sha256": "77bc62a94fcec83aed989da4ab0970816a8dd748a5500f2fb069cd109a73f42d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/21-vendor_sha1_sha1.h.txt",
+      "size": 79,
+      "sha256": "d03f7b3acb89b459aeb77ec4b2394bf1ae14da110fb4daeb728377fd4c328fb0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/22-vendor_stb_ds_stb_ds.h.txt",
+      "size": 16429,
+      "sha256": "4361485408a6e0876b0c247ef099c1ce0dc8153c0f8bab2c8f821dd7d78846ad",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/23-vendor_stb_image_stb_image.h.txt",
+      "size": 9067,
+      "sha256": "b743a98b2d447c7497f4685be3a3d308411f2690989c62ff55bf7bda37d13d1b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/24-vendor_stb_image_stb_image_write.h.txt",
+      "size": 9576,
+      "sha256": "30dc2235b25960a5b967e1d1ec970aa2e5d27c35ec031c4293532056d081a314",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/25-vendor_stb_vorbis_stb_vorbis.c.txt",
+      "size": 2674,
+      "sha256": "7587efcca32db8f95bf5860dea6dfa4be410ee723e1964db3689c8ddf2a2e4a9",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/26-vendor_glad_include_KHR_khrplatform.h.txt",
+      "size": 1147,
+      "sha256": "438187dca092de4032c1a16524aa4c34c71a0f985a71251a675aad54e77ed561",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/27-bzip2-LICENSE.txt",
+      "size": 1896,
+      "sha256": "c6dbbf828498be844a89eaa3b84adbab3199e342eb5cb2ed2f0d4ba7ec0f38a3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/3-LICENSE.txt",
+      "size": 885,
+      "sha256": "0093a136300d04e7a861aa999fb9a985d45fb779f45620e9092d80bd83d0664b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/4-vendor_base64_base64.c.txt",
+      "size": 77,
+      "sha256": "7ba49b6230a862487c1697c234eb34ae6ca618429cb124818af3e953f40fcf0c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/5-vendor_bzip2_bzlib.c.txt",
+      "size": 541,
+      "sha256": "74759e2ad9747607ca8572fcea2f68b755495a5d85fc1a641fdd1d733f37a7d3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/6-vendor_bzip2_bzlib.h.txt",
+      "size": 541,
+      "sha256": "74759e2ad9747607ca8572fcea2f68b755495a5d85fc1a641fdd1d733f37a7d3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/7-vendor_bzip2_bzlib_private.h.txt",
+      "size": 541,
+      "sha256": "74759e2ad9747607ca8572fcea2f68b755495a5d85fc1a641fdd1d733f37a7d3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/8-vendor_bzip2_crctable.c.txt",
+      "size": 541,
+      "sha256": "74759e2ad9747607ca8572fcea2f68b755495a5d85fc1a641fdd1d733f37a7d3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/9-vendor_bzip2_decompress.c.txt",
+      "size": 541,
+      "sha256": "74759e2ad9747607ca8572fcea2f68b755495a5d85fc1a641fdd1d733f37a7d3",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 13509,
+      "mode": 420,
+      "sha256": "af8cf906289459a60e8097254ca4994390f04dff5297daa756a86bae5cd320ee"
+    }
+  ],
+  "notices": [
+    {
+      "name": "Butterscotch",
+      "license": "AGPL-3.0-only",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/0-LICENSE"
+    },
+    {
+      "name": "Box2D",
+      "license": "MIT",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/1-LICENSE"
+    },
+    {
+      "name": "miniz",
+      "license": "MIT",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/2-LICENSE"
+    },
+    {
+      "name": "MojoAL",
+      "license": "Zlib",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/3-LICENSE.txt"
+    },
+    {
+      "name": "vendor/base64/base64.c",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/4-vendor_base64_base64.c.txt"
+    },
+    {
+      "name": "vendor/bzip2/bzlib.c",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/5-vendor_bzip2_bzlib.c.txt"
+    },
+    {
+      "name": "vendor/bzip2/bzlib.h",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/6-vendor_bzip2_bzlib.h.txt"
+    },
+    {
+      "name": "vendor/bzip2/bzlib_private.h",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/7-vendor_bzip2_bzlib_private.h.txt"
+    },
+    {
+      "name": "vendor/bzip2/crctable.c",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/8-vendor_bzip2_crctable.c.txt"
+    },
+    {
+      "name": "vendor/bzip2/decompress.c",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/9-vendor_bzip2_decompress.c.txt"
+    },
+    {
+      "name": "vendor/bzip2/huffman.c",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/10-vendor_bzip2_huffman.c.txt"
+    },
+    {
+      "name": "vendor/bzip2/randtable.c",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/11-vendor_bzip2_randtable.c.txt"
+    },
+    {
+      "name": "vendor/md5/md5.c",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/12-vendor_md5_md5.c.txt"
+    },
+    {
+      "name": "vendor/md5/md5.h",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/13-vendor_md5_md5.h.txt"
+    },
+    {
+      "name": "vendor/miniaudio/miniaudio.h",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/14-vendor_miniaudio_miniaudio.h.txt"
+    },
+    {
+      "name": "vendor/miniz/miniz.c",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/15-vendor_miniz_miniz.c.txt"
+    },
+    {
+      "name": "vendor/miniz/miniz.h",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/16-vendor_miniz_miniz.h.txt"
+    },
+    {
+      "name": "vendor/miniz/miniz_tdef.c",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/17-vendor_miniz_miniz_tdef.c.txt"
+    },
+    {
+      "name": "vendor/miniz/miniz_tinfl.c",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/18-vendor_miniz_miniz_tinfl.c.txt"
+    },
+    {
+      "name": "vendor/mojoal/mojoal.c",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/19-vendor_mojoal_mojoal.c.txt"
+    },
+    {
+      "name": "vendor/sha1/sha1.c",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/20-vendor_sha1_sha1.c.txt"
+    },
+    {
+      "name": "vendor/sha1/sha1.h",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/21-vendor_sha1_sha1.h.txt"
+    },
+    {
+      "name": "vendor/stb/ds/stb_ds.h",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/22-vendor_stb_ds_stb_ds.h.txt"
+    },
+    {
+      "name": "vendor/stb/image/stb_image.h",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/23-vendor_stb_image_stb_image.h.txt"
+    },
+    {
+      "name": "vendor/stb/image/stb_image_write.h",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/24-vendor_stb_image_stb_image_write.h.txt"
+    },
+    {
+      "name": "vendor/stb/vorbis/stb_vorbis.c",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/25-vendor_stb_vorbis_stb_vorbis.c.txt"
+    },
+    {
+      "name": "vendor/glad/include/KHR/khrplatform.h",
+      "license": "LicenseRef-Upstream-Notice",
+      "sourceUrl": "https://github.com/ButterscotchRunner/Butterscotch",
+      "path": "files/licenses/upstream/26-vendor_glad_include_KHR_khrplatform.h.txt"
+    },
+    {
+      "name": "bzip2 1.0.8",
+      "license": "bzip2-1.0.6",
+      "sourceUrl": "https://sourceware.org/bzip2/",
+      "path": "files/licenses/upstream/27-bzip2-LICENSE.txt"
+    }
+  ],
+  "redistribution": "bundle"
+}
