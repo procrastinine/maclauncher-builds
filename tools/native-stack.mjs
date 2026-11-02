@@ -22,7 +22,7 @@ export function nativeStackInput(input,{arch,work,fonts,audio,sdk=process.env.SD
  const metadata=JSON.parse(fs.readFileSync(path.join(input.root,'portable-stack.json')));
  if(metadata.schemaVersion!==1||metadata.architecture!==arch)throw Error('The prepared native stack has a different target CPU.');
  const prefix=path.resolve(work);if(!path.isAbsolute(work)||fs.existsSync(prefix))throw Error('Shared native stack views require a new absolute build directory.');
- fs.cpSync(input.root,prefix,{recursive:true,dereference:true,mode:fs.constants.COPYFILE_FICLONE});
+ Tools.copyTree(input.root,prefix);
  for(const [logical,canonical] of Object.entries(input.declaration?.aliases?.files||{}))if(typeof canonical==='string'){
   const alias=path.join(prefix,logical),target=path.join(prefix,canonical);if(fs.existsSync(alias)&&fs.existsSync(target)){fs.unlinkSync(alias);fs.symlinkSync(path.relative(path.dirname(alias),target),alias);}
  }
