@@ -101,8 +101,8 @@
     {
       "path": "src/modules/shared/runtime/bundled-native.js",
       "destination": "lib/bundled-native.cjs",
-      "sourceSha256": "e621e5c8a8637918cf2e7b1f1ab09ae4d6597ad2819f0aa8fb1c210d2fa88d75",
-      "sha256": "f9000fa0e119a94a9337bb8fad47187d62c78856d7b5bae3649a08e043eaa635",
+      "sourceSha256": "1589a7bcfe5b6fe50c5a7a9d9731ec896f8d79ad545a384429547aefaa3ffeb3",
+      "sha256": "6c66bb991f78b55fdf1b3a13be3528dd864ef09720d5b7841d10703f92609e71",
       "replacements": [
         {
           "from": "const Native = require(\"./local-native\");",
@@ -119,15 +119,30 @@
         {
           "from": "require('./macho-load-commands')",
           "to": "require('./macho-load-commands.cjs')"
+        },
+        {
+          "from": "const { hasFineChangeTime } = require(\"../file-time\");",
+          "to": "const { hasFineChangeTime } = require(\"./file-time.cjs\");"
         }
       ],
-      "previousSha256": "aec9f113860bebbabd2df901ffb35a43fbfab1b53abdecc598dbf734aea96c4e"
+      "previousSha256": "f9000fa0e119a94a9337bb8fad47187d62c78856d7b5bae3649a08e043eaa635"
     },
     {
       "path": "src/modules/shared/runtime/macho-load-commands.js",
       "destination": "lib/macho-load-commands.cjs",
       "sourceSha256": "f5509007f4ecdc4bd088bbf156b60bdeed5216467faa2d8d74a31b6a53cbd5aa",
       "sha256": "f5509007f4ecdc4bd088bbf156b60bdeed5216467faa2d8d74a31b6a53cbd5aa"
+    },
+    {
+      "path": "src/modules/shared/runtime/package-dependencies.js",
+      "sourceSha256": "678b6bf32b292dfc93dbf469207c8dd9686b896636d3b5b4ddb893487c6b9fae",
+      "sha256": "678b6bf32b292dfc93dbf469207c8dd9686b896636d3b5b4ddb893487c6b9fae"
+    },
+    {
+      "path": "src/modules/shared/file-time.js",
+      "destination": "lib/file-time.cjs",
+      "sourceSha256": "3992808c6ea9a1269d0a31b34b8a9b026c4f9089eed7dd78493392a439d973e6",
+      "sha256": "3992808c6ea9a1269d0a31b34b8a9b026c4f9089eed7dd78493392a439d973e6"
     }
   ],
   "retired": {

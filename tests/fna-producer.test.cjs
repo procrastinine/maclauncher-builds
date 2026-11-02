@@ -38,3 +38,22 @@ test("FNA compiler preserves declared shader resource identities and refuses mis
   assert.throws(() => Build.__test.frameworkResources(root), /ENOENT/);
 });
 
+test("FNA host declares the original-path contract it reads and alone selects the framework", async () => {
+  // Only the host is an app-local CLR assembly, so the package's FNA.dll and
+  // facades bind through the host's resolver instead of the trusted list.
+  const dependencies = Build.__test.hostDependencies(), target = dependencies.targets[dependencies.runtimeTarget.name];
+  assert.deepEqual(Object.values(target).map(item => Object.keys(item.runtime)), [["MacLauncherFnaHost.dll"]]);
+  assert.deepEqual(Build.__test.CAPABILITIES, { originalGamePaths: true });
+  const fna = path.join(__dirname, "../producers/maclauncher/src/modules/fna");
+  const host = fs.readFileSync(path.join(fna, "overlays/ManagedHost.cs"), "utf8");
+  for (const name of ["MACLAUNCHER_FNA_GAME_ROOT", "MACLAUNCHER_FNA_ASSEMBLY_ROOT", "MACLAUNCHER_FNA_USE_RUNTIME_FRAMEWORK"])
+    assert.ok(host.includes('GetEnvironmentVariable("' + name + '")'), name);
+  // New catalog records carry the same capability as fna-runtime.json, so a
+  // launcher can choose this host before download. Launchers that stage games
+  // without these variables accept only contract 1 records and never install it.
+  const { recordMetadata } = await import("../lib/record-metadata.mjs");
+  const record = recordMetadata({ project: "fna", manifest: { upstreamRevision: Build.FNA_REVISION } });
+  assert.deepEqual(record.capabilities, Build.__test.CAPABILITIES);
+  assert.equal(record.launcherContract, 2);
+});
+

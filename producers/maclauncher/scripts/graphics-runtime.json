@@ -13,7 +13,8 @@
       "fx-compile",
       "shaderc-offline",
       "maclauncher-graphics-video",
-      "maclauncher-graphics-hardware"
+      "maclauncher-graphics-hardware",
+      "maclauncher-graphics-window"
     ],
     "macOSSDKByArchitecture": {
       "arm64": "27.0",

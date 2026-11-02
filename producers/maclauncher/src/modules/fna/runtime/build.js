@@ -16,6 +16,10 @@ const REQUIRED_FILES = ["FNA.dll", "MacLauncherFnaHost.dll", "MacLauncherFnaHost
   "native/lib/libSDL3.0.dylib", "native/lib/libFNA3D.0.dylib", "native/lib/libFAudio.0.dylib",
   `host/fxr/${DOTNET_VERSION}/libhostfxr.dylib`, `shared/Microsoft.NETCore.App/${DOTNET_VERSION}/libhostpolicy.dylib`,
   `shared/Microsoft.NETCore.App/${DOTNET_VERSION}/libcoreclr.dylib`, `shared/Microsoft.NETCore.App/${DOTNET_VERSION}/System.Private.CoreLib.dll`];
+// originalGamePaths: the host requires MACLAUNCHER_FNA_GAME_ROOT, honors
+// _ASSEMBLY_ROOT and _USE_RUNTIME_FRAMEWORK and presents the game as the entry
+// assembly. Its records carry launcher contract 2 (projects/downloadable.json).
+const CAPABILITIES = Object.freeze({ originalGamePaths: true });
 const PACKAGES = Object.freeze({
   source: { filename: "FNA-2610.zip", url: "https://fna.flibitijibibo.com/archive/FNA-2610.zip", sha256: "863504b5712b17ce8d0ec32238411a10fb6cf56e90d3978f09a8a6c5571dd052" },
   compiler: { filename: "roslyn-4.8.0.zip", url: "https://api.nuget.org/v3-flatcontainer/microsoft.net.compilers.toolset/4.8.0/microsoft.net.compilers.toolset.4.8.0.nupkg", sha256: "37333f4f1e2ce55e621355d6da651dc23d4cb5f94a8f76b9478816e87f110ad9" },
@@ -73,6 +77,13 @@ function writeCompilerResponse(file, { sources, references, resources = [], outp
 }
 function runtimeConfig() {
   return { runtimeOptions: { tfm: "net8.0", framework: { name: "Microsoft.NETCore.App", version: DOTNET_VERSION }, rollForward: "Disable" } };
+}
+function hostDependencies() {
+  // Without a deps file the CLR trusts every DLL beside the host and binds this
+  // package's FNA.dll before the host can select a game's own framework.
+  const target = ".NETCoreApp,Version=v8.0", host = "MacLauncherFnaHost/1.0.0";
+  return { runtimeTarget: { name: target }, targets: { [target]: { [host]: { runtime: { "MacLauncherFnaHost.dll": {} } } } },
+    libraries: { [host]: { type: "project", serviceable: false, sha512: "" } } };
 }
 function stageAbiSource(source, destination) {
   const original = fs.readFileSync(source, "utf8");
@@ -140,6 +151,7 @@ async function prepareRuntime({ unpacked, pin, logger, signal, sourcePath, fna3d
     fs.copyFileSync(hostSource, stagedHost);
     await compile([stagedHost], path.join(unpacked, "MacLauncherFnaHost.dll"), { target: "exe" });
     fs.writeFileSync(path.join(unpacked, "MacLauncherFnaHost.runtimeconfig.json"), JSON.stringify(runtimeConfig()));
+    fs.writeFileSync(path.join(unpacked, "MacLauncherFnaHost.deps.json"), JSON.stringify(hostDependencies()));
     const abiRoot = path.join(unpacked, "abi"); fs.mkdirSync(abiRoot);
     const supportedAbi = ["Microsoft.Xna.Framework.cs", "Microsoft.Xna.Framework.Game.cs", "Microsoft.Xna.Framework.Graphics.cs",
       "Microsoft.Xna.Framework.Video.cs", "Microsoft.Xna.Framework.Xact.cs", "Microsoft.Xna.Framework.Input.Touch.cs", "Microsoft.Xna.Framework.Storage.cs"];
@@ -173,7 +185,7 @@ async function prepareRuntime({ unpacked, pin, logger, signal, sourcePath, fna3d
       if (!Native.readMachOArchitectures(to, { allowLibrary: true }).includes("arm64")) throw new Error("FNA native dependency is missing ARM64 support.");
       await run("/usr/bin/codesign", ["--force", "--sign", "-", to], { logPath, signal });
     }
-    const files = [...REQUIRED_FILES,
+    const files = [...REQUIRED_FILES, "MacLauncherFnaHost.deps.json",
       ...fs.readdirSync(abiRoot).map(name => "abi/" + name),
       ...fs.readdirSync(nativeRoot).map(name => "native/lib/" + name)];
     const licenseRoot = path.join(unpacked, "licenses"); fs.mkdirSync(licenseRoot);
@@ -189,7 +201,8 @@ async function prepareRuntime({ unpacked, pin, logger, signal, sourcePath, fna3d
     }
     fs.writeFileSync(path.join(unpacked, "fna-runtime.json"), JSON.stringify({ profile: PROFILE, frameworkVersion: "26.10.0.0",
       dotnetVersion: DOTNET_VERSION, upstreamRevision: FNA_REVISION, architecture: "arm64", sourceTreeSha256,
-      sourceArchiveSha256: sourceTreeSha256 ? null : PACKAGES.source.sha256, hostSourceSha256: Native.hashFile(stagedHost), overlaySha256,
+      sourceArchiveSha256: sourceTreeSha256 ? null : PACKAGES.source.sha256, hostSourceSha256: Native.hashFile(stagedHost),
+      capabilities: CAPABILITIES, overlaySha256,
       nativeVersions: { sdl: "3.4.18", fna3d: "26.10", faudio: "26.10" },
       nativeSources: { fna3d: { revision: FNA3D_REVISION, sourceTreeSha256: fna3dSourceSha256 } },
       embeddedResources: embeddedResources.map(resource => ({ name: resource.name, sha256: Native.hashFile(resource.file) })),
@@ -246,4 +259,4 @@ function verifyRuntime(install) {
 }
 
 module.exports = { PROFILE, FNA_REVISION, FNA3D_REVISION, PREVIOUS_PROFILE, DOTNET_VERSION, PACKAGES, prepareRuntime, verifyRuntime,
-  __test: { REQUIRED_FILES, frameworkFiles, frameworkResources, applyOpenGLPolicy, stageAbiSource, resolveBuildTool, writeCompilerResponse, runtimeConfig } };
+  __test: { REQUIRED_FILES, frameworkFiles, frameworkResources, applyOpenGLPolicy, stageAbiSource, resolveBuildTool, writeCompilerResponse, runtimeConfig, hostDependencies, CAPABILITIES } };

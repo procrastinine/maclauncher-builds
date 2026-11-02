@@ -40,9 +40,8 @@ void classicEncode(id sdk,SEL selector,id commands){
  // not a real frame. Optional inspection never gates an application's SDK.
  reinterpret_cast<void(*)(id,SEL,id)>(original)(sdk,selector,commands);
  RSMMetalFxClassicObservation*observation=objc_getAssociatedObject(sdk,&classicObservation);if(!observation)return;
-
 #if __MAC_OS_X_VERSION_MAX_ALLOWED >= 270000
-if(@available(macOS 27.0,*)){@autoreleasepool{@try{try{
+ if(@available(macOS 27.0,*)){@autoreleasepool{@try{try{
   for(SEL property:{@selector(colorTexture),@selector(depthTexture),@selector(motionTexture),@selector(distortionTexture)})if(![sdk respondsToSelector:property])return;
   if(![commands respondsToSelector:@selector(status)]||![commands respondsToSelector:@selector(retainedReferences)])return;
   id<MTLFXFrameInterpolatorBase>source=sdk;const bool field=source.distortionTexture!=nil;if(!observation->hadField.exchange(field)&&!field)return;
@@ -54,7 +53,6 @@ if(@available(macOS 27.0,*)){@autoreleasepool{@try{try{
   captureMetalFxGenerationDistortion(frame,sdk,metadata);
  }catch(...){} }@catch(NSException*){}}}
 #endif
-
 }
 void prune(){bindings.erase(std::remove_if(bindings.begin(),bindings.end(),[](const auto&r){auto c=r.commands;return !c||c.status>=MTLCommandBufferStatusCompleted;}),bindings.end());}
 bool same(const Bound&b,const RSTemporalFrame&f){return b.owner==f.owner&&b.frame==f.frameId&&b.commands==(__bridge id<MTLCommandBuffer>)f.commandBuffer&&b.color==(__bridge id<MTLTexture>)f.color&&b.x==f.colorX&&b.y==f.colorY&&b.width==f.renderWidth&&b.height==f.renderHeight;}
@@ -121,9 +119,8 @@ bool publishMetalFxGenerationDistortion(const RSTemporalFrame&f,const MetalFxDis
 }
 bool captureMetalFxGenerationDistortion(const RSTemporalFrame&f,id object,std::shared_ptr<const void>resources){
  if(!validFrame(f))return false;const auto decline=[&](){clearDistortion(f);return false;};if(!object)return decline();
-
 #if __MAC_OS_X_VERSION_MAX_ALLOWED >= 270000
-if(@available(macOS 27.0,*)){@try{
+ if(@available(macOS 27.0,*)){@try{
   for(SEL selector:{@selector(colorTexture),@selector(distortionTexture),@selector(distortionOffsetX),@selector(distortionOffsetY),@selector(distortionWidth),@selector(distortionHeight),@selector(contentWidth),@selector(contentHeight),@selector(fence)})if(![object respondsToSelector:selector])return decline();
   id<MTLFXFrameInterpolatorBase>sdk=object;if(sdk.colorTexture!=(__bridge id<MTLTexture>)f.color||!sdk.distortionTexture)return decline();
   const NSUInteger x=sdk.distortionOffsetX,y=sdk.distortionOffsetY,w=sdk.distortionWidth?:sdk.contentWidth,h=sdk.distortionHeight?:sdk.contentHeight;
@@ -131,7 +128,6 @@ if(@available(macOS 27.0,*)){@try{
   return publishMetalFxGenerationDistortion(f,{sdk.distortionTexture,uint32_t(x),uint32_t(y),uint32_t(w),uint32_t(h),MetalFxDistortionUnits::NativeMetalFX,sdk.fence},std::move(resources));
  }@catch(NSException*){return decline();}}
 #endif
-
  return decline();
 }
 void observeMetalFxClassicInterpolator(id sdk){

@@ -18,6 +18,7 @@ import {sceneRoleHeader} from "../src/modules/shared/reshade/native/scene-role-h
 import {stageLibplaceboScene} from "./stage-libplacebo-scene.mjs";
 import {stageStreamlineSnapshots} from "./stage-streamline-snapshots.mjs";
 import {pruneGraphicsRuntimes} from "./prune-graphics-runtimes.mjs";
+import {ALIAS_INDEX,aliasIndex,deduplicate,resolvedPrefixes} from "./payload-aliases.mjs";
 const features = JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, "../src/modules/shared/reshade/features.json"), "utf8"));
 const effectSources = JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, "../src/modules/shared/reshade/effect-sources.json"), "utf8"));
 const declarationPath=path.resolve(import.meta.dirname,"../src/modules/shared/reshade/distribution-supplementals.json");
@@ -72,6 +73,10 @@ if (pins.length !== consumed.size || new Set(pins.map(line => line.trim().split(
 const nativeFiles = ["libreshade-macos.dylib", "libvkd3d-shader.dylib", "fx-compile"];
 if(fs.existsSync(path.join(build,"shaderc-offline")))nativeFiles.push("shaderc-offline");
 if(fs.existsSync(path.join(build,"maclauncher-graphics-video"))) nativeFiles.push("maclauncher-graphics-video");
+if(features.graphics.windowSourceAPI===2){
+  if(!fs.existsSync(path.join(build,"maclauncher-graphics-window")))throw Error("The declared window graphics helper is missing.");
+  nativeFiles.push("maclauncher-graphics-window");
+}
 if(features.graphics.hardwareQueryAPI===1){
   if(!fs.existsSync(path.join(build,"maclauncher-graphics-hardware")))throw Error("The declared graphics device query helper is missing.");
   nativeFiles.push("maclauncher-graphics-hardware");
@@ -462,7 +467,8 @@ if(snapshotProviders.size){
 const nativePaths = new Map(nativeFiles.map(file => [file, path.join(build, file)]));
 for(const [relative,file] of retroarchInputs)if(nativeFiles.includes(relative))nativePaths.set(relative,file);
 for(const [relative,load] of optionalLoad){nativeFiles.push(relative);nativePaths.set(relative,optionalInputs.get(relative));}
-if(nativeFiles.includes("maclauncher-graphics-video")) optionalLoad.set("maclauncher-graphics-video", {architectures: ["arm64", "x86_64"], minimumMacOS: "13.0"});
+if(nativeFiles.includes("maclauncher-graphics-video")) optionalLoad.set("maclauncher-graphics-video", {architectures: ["arm64", "x86_64"], minimumMacOS: "14.0"});
+if(nativeFiles.includes("maclauncher-graphics-window")) optionalLoad.set("maclauncher-graphics-window", {architectures: ["arm64", "x86_64"], minimumMacOS: "15.2"});
 for (const [relative, file] of temporalInputs) if (/\.(dylib|so)$/.test(relative)) {
  nativeFiles.push(relative);nativePaths.set(relative,file);
  const architectures=Native.readMachOArchitectures(file,{allowLibrary:true}),floors=[...execFileSync("xcrun",["vtool","-show-build",file],{encoding:"utf8"}).matchAll(/minos\s+(\d+(?:\.\d+)+)/g)].map(match=>match[1]);
@@ -559,6 +565,8 @@ if(features.graphics.adaptiveQualityAPI===1){
   if(!/\b_rsAdaptiveQualityAPI\b/.test(symbols)||!/\b_rsVideoGetQualityStatus\b/.test(symbols)||!["EffectQualitySession","observeGpuQuality","observeRuntimeAdaptiveQuality"].every(name=>symbols.includes(name)))throw Error("The graphics library is missing shared adaptive quality processing or status support.");
   if(fs.readFileSync(path.join(ownedSource,"src/generation-methods.hpp"),"utf8")!==generationMethodsHeader())throw Error("The native generation contracts differ from their shared registry.");
 }
+if(features.graphics.generationStaticContentAPI===1&&!symbols.includes("ImagePairAnalysis14blendAvailable"))throw Error("The graphics library is missing static-content blend-back for image-pair generation.");
+if (features.graphics.windowSourceAPI === 2 && ![/\b_rsWindowSourceAPI\b/, /\b_rsWindowSourceSubmit\b/].every(symbol => symbol.test(symbols))) throw new Error("The ReShade library must provide its picked-window frame source.");
 if(features.graphics.temporalProviderRegistryAPI===1&&!/\b_rsTemporalProviderMethodMask\b/.test(symbols))throw Error("The graphics library is missing the registered temporal provider dispatcher.");
 if(features.graphics.temporalProfileAPI===1&&!/\b_rsTemporalProfileAPI\b/.test(symbols))throw Error("The graphics library is missing temporal profile validation support.");
 if(features.graphics.sceneGuideTransformAPI===1&&!symbols.includes("SceneGuideEncoder6encode"))throw Error("The graphics library is missing shared scene-guide normalization.");
@@ -607,11 +615,20 @@ for (const name of ["ReShade.fxh", "ReShadeUI.fxh"]) inputs.set("include/" + nam
 const effects = path.resolve(import.meta.dirname, "../src/modules/shared/reshade/effects");
 for (const name of fs.readdirSync(effects)) inputs.set("effects/" + name, path.join(effects, name));
 const effectNotices = validateEffectSources(effectSources, [...inputs].map(([relative, input]) => ({ path: relative, sha256: digest(fs.readFileSync(input)) })));
+// Identical files under the paths providers open through the shared payload
+// resolver are stored once; each provider's alias index names the stored copy
+// of every removed path.
+const deduplicated = deduplicate(inputs, { prefixes: resolvedPrefixes(inputs), keep: new Set(nativeFiles) });
+const removedPayload = new Set([...inputs.keys()].filter(relative => !deduplicated.inputs.has(relative)));
+for (const relative of removedPayload) inputs.delete(relative);
+const aliasIndexes = [...deduplicated.indexes].map(([directory, aliases]) => [path.posix.join(directory, ALIAS_INDEX), Buffer.from(aliasIndex(aliases))]);
+if (aliasIndexes.some(([relative]) => inputs.has(relative))) throw new Error("A provider payload cannot supply its own alias index.");
 // Presets, includes and notices belong to the same immutable payload as the
 // native binaries. An effect-only update must not overwrite an older version
 // while a running game still refers to that version's files.
 const payloadHash = digest(Buffer.concat([Buffer.from("adhoc-signature-v1\0" + pins.join("\n") + "\0" + JSON.stringify(features) + "\0" + JSON.stringify(effectSources) + "\0"),
   ...[...extraOwned].flatMap(([relative,file])=>[Buffer.from(relative+'\0'),fs.readFileSync(file)]),
+  ...aliasIndexes.flatMap(([relative, bytes]) => [Buffer.from(relative + "\0"), bytes]),
   ...[...inputs].sort(([a], [b]) => a.localeCompare(b)).flatMap(([relative, input]) =>
     [Buffer.from(relative + "\0"), fs.readFileSync(input)])]));
 const version = options["--version"] ?? "dev-" + sourceHash.slice(0, 8) + "-" + payloadHash.slice(0, 8);
@@ -675,6 +692,7 @@ function record(relative) {
 }
 if(packageArch!=="universal")for(const specification of Object.values(features.shaders?.providers||{}))
  if(Array.isArray(specification.architectures))specification.architectures=specification.architectures.filter(cpu=>packageCPUs.includes(cpu));
+for (const [relative, bytes] of aliasIndexes) { fs.writeFileSync(path.join(destination, relative), bytes); files.push(record(relative)); }
 fs.writeFileSync(path.join(destination, "runtime.json"), JSON.stringify({ schema: 1, version,
   minimumMacOS, build:{sdkVersion:buildSDK}, architectures: packageCPUs, features, effectSources, sourceHash, sourcePins: pins.map(line => line.trim()), files }, null, 2) + "\n");
 const manifest = record("runtime.json"); files.push(manifest);
