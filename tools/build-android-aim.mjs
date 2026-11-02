@@ -5,6 +5,7 @@ import {pathToFileURL} from 'node:url';
 import {recipeMain,run} from './build-source.mjs';
 import {prepareAndroidBuildInputs,releaseAndroidImageArchive} from './android-build-inputs.mjs';
 import {buildAngleInput} from './build-android-angle.mjs';
+import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {rustEnvironment} from './rust-build.mjs';
 import {stageAim} from '../producers/maclauncher/scripts/build-android-aim.mjs';
@@ -45,6 +46,13 @@ function detachAimImage(work,upstream){
  if(!fs.realpathSync(mount).startsWith(fs.realpathSync(work)+path.sep))throw Error('The AIM image mount is outside its owned build directory.');
  if(fs.statSync(mount).dev!==fs.statSync(path.dirname(mount)).dev)run('hdiutil',['detach',mount]);
 }
+/** Keep AIM's original program-binary transport distinct from the common profile. */
+export function aimAngleInput(input){
+ const definition=JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/angle.json'))),profile=definition.profiles.find(row=>row.id==='aim6');
+ const manifest=JSON.parse(fs.readFileSync(path.join(input.root,'angle-manifest.json')));
+ if(input.record?.id!==profile.project||input.record.version!==profile.packageVersion||manifest.version!==profile.providerVersion||manifest.programBinaryVersion!==profile.programBinaryVersion||manifest.angleRevision!==definition.angle.revision)throw Error('The shared AIM ANGLE input differs from its original profile.');
+ return {angle:input.root,angleNotices:path.join(input.root,'notices'),manifest,profileId:'aim6'};
+}
 /** Build the existing AIM adaptation and seal it without changing app declarations. */
 export async function buildAndroidAim({project,version,arch,output,work}){
  const ownedWork=path.resolve(work),ownedOutput=path.resolve(output);
@@ -67,7 +75,8 @@ export async function buildAndroidAim({project,version,arch,output,work}){
  }finally{detachAimImage(work,upstream);}
  // Compilation is complete. Staging reads detached runtime products, metadata and notices.
  cleanupAimBuild({work});
- const angle=await buildAngleInput({output:path.join(work,'angle'),work:path.join(work,'angle-build'),profile:'aim6'});
+ const preparedAngle=preparedBuildInput('android-angle-aim');
+ const angle=preparedAngle?aimAngleInput(preparedAngle):await buildAngleInput({output:path.join(work,'angle'),work:path.join(work,'angle-build'),profile:'aim6'});
  fs.mkdirSync(output,{recursive:true});
  try{
   // stageAim owns this runtime's existing overlay, service-ABI and native metadata.

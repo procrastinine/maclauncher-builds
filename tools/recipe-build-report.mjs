@@ -2,6 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url);
 import {readProjects,buildRecords} from '../lib/projects.mjs';
 import {resolveUpstream} from '../lib/source-pins.mjs';
 
@@ -77,10 +79,12 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
     files.set(file,crypto.createHash('sha256').update(bytes).digest('hex'));
     if(/\.(?:[mc]?js|[cm]?[ch](?:pp|xx)?|cc|rs|cmake|txt)$/.test(file)){
      const text=bytes.toString('utf8'),literals=[...text.matchAll(/(['"])([^'"\r\n]+)\1/g)].map(match=>match[2]).filter(literal=>/^[-A-Za-z0-9_./@+]+$/.test(literal)),directories=literals.map(literal=>path.resolve(root,literal)).filter(directory=>inside(root,directory)&&fs.statSync(directory,{throwIfNoEntry:false})?.isDirectory());
+     for(const match of text.matchAll(/\bpreparedBuildInput\(\s*['"]([a-z0-9-]+)['"]/g))if(projects.has(match[1])&&match[1]!==id)inputs.add(match[1]);
      for(const literal of literals)reference(literal,file,directories);
     }
    }
   }
+  for(const build of builds){const command=path.join(root,build.command);if(/export\s+function\s+recipeInputs\b/.test(fs.readFileSync(command,'utf8'))){const report=require(command).recipeInputs({project:id,version:build.version});inputs.clear();for(const input of report){if(!projects.has(input)||input===id)throw Error('The recipe reports an invalid package input: '+input);inputs.add(input);}break;}}
   const sources=project.upstreams.map(upstream=>{
    if(upstream.pin&&rememberLink(upstream.pin.file))return {...upstream,gitlink:rememberLink(upstream.pin.file).revision};
    const resolved=resolveUpstream(upstream,root);

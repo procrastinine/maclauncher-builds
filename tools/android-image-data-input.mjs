@@ -1,3 +1,4 @@
+import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
@@ -16,7 +17,7 @@ export function readImageDataInputs(inputs){
   const declaration=JSON.parse(fs.readFileSync(path.join(input,'declaration.json'))),payload=path.join(input,'payload');validateDeclaration(declaration);
   const selected=profile.profiles.find(row=>row.id===declaration.id&&row.version===declaration.version);
   if(!selected||ids.has(selected.id)||declaration.arch!=='arm64'||declaration.sourceSha256!==sourceSha256||declaration.manifestRelative!=='input.json')throw Error('Image input differs from its declared shard profile.');ids.add(selected.id);
-  B.verifyPayload(payload,declaration);
+  verifyPreparedPayload(payload,declaration);
   const manifest=JSON.parse(fs.readFileSync(path.join(payload,'input.json'))),indexFile=path.join(payload,'image-data.json'),index=JSON.parse(fs.readFileSync(indexFile)),hash=sha(indexFile),identity=JSON.parse(fs.readFileSync(path.join(payload,'content.json')));
   if(manifest.format!=='android-image-data-v1'||manifest.id!==selected.id||manifest.version!==selected.version||manifest.sourceSha256!==sourceSha256||manifest.upstreamRevision!==profile.revision||manifest.originalArchiveSha256!==profile.archive.sha256||manifest.targetSymlinkMode!==profile.targetSymlinkMode||manifest.transportSha256!==hash||index.source_revision!==profile.revision||index.archive_sha256!==profile.archive.sha256||JSON.stringify(manifest.content)!==JSON.stringify(profile.content)||JSON.stringify(identity)!==JSON.stringify(profile.content))throw Error('Image input source or target identity differs.');
   if(transportSha256&&transportSha256!==hash)throw Error('Image shards have different complete indexes.');transportSha256=hash;transport=index;content=identity;

@@ -1,3 +1,4 @@
+import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
@@ -11,7 +12,7 @@ export function readArtFfiInput(input){
  const profile=JSON.parse(fs.readFileSync(descriptor)),declaration=JSON.parse(fs.readFileSync(path.join(input,'declaration.json'))),payload=path.join(input,'payload');
  validateDeclaration(declaration);
  if(declaration.id!==profile.id||declaration.version!==profile.version||declaration.arch!=='arm64'||declaration.manifestRelative!=='input.json'||declaration.sourceSha256!==sha(descriptor))throw Error('The sealed libffi input differs from its declared profile.');
- B.verifyPayload(payload,declaration);
+ verifyPreparedPayload(payload,declaration);
  const manifest=JSON.parse(B.readRegular(path.join(payload,'input.json'),B.LIMITS.manifestBytes).bytes);
  if(manifest.id!==declaration.id||manifest.version!==declaration.version||manifest.arch!==declaration.arch||manifest.sourceSha256!==declaration.sourceSha256||manifest.androidSource?.repository!==profile.androidSource.repository||manifest.androidSource?.revision!==profile.androidSource.revision||manifest.upstream?.repository!==profile.libffi.repository||manifest.upstream?.revision!==profile.libffi.revision||manifest.ndk?.version!==profile.ndk.version||manifest.ndk?.sha256!==profile.ndk.sha256||manifest.target!=='aarch64-linux-android35')throw Error('The sealed libffi source or target differs from the ART profile.');
  for(const relative of ['lib/libffi.a','include/ffi.h','include/ffitarget.h','notices/libffi-LICENSE'])B.readRegular(path.join(payload,relative),B.LIMITS.fileBytes);

@@ -13,6 +13,13 @@ function selectedProfile(value,kind='id'){
  if(!profile)throw Error('Select a declared Android ANGLE input profile.');
  return {definition,profile};
 }
+export function anglePackageProfile(project,version){
+ const definition=JSON.parse(fs.readFileSync(descriptor));
+ let matches=definition.profiles.filter(profile=>project===(profile.project||definition.id)&&version===(profile.packageVersion||profile.version));
+ if(!matches.length&&project===definition.id)matches=definition.profiles.filter(profile=>version===profile.version);
+ if(matches.length!==1)throw Error('Select an ANGLE package and its declared source profile.');
+ return {definition,profile:matches[0]};
+}
 function verifyProducerSource(source,profile){
  if(!path.isAbsolute(source||'')||read('git',['-C',source,'rev-parse','HEAD'])!==profile.androidSource.revision||read('git',['-C',source,'status','--porcelain','--untracked-files=no']))throw Error('Android producer differs from its declared source revision.');
 }
@@ -52,8 +59,8 @@ export async function buildAngleInput({output,work,profile:profileId='common'}){
 
 /** Package unchanged compiler products with the selected normal package version. */
 export function packageAngleInput({project='android-angle',version,arch='arm64',output,input}){
- const {definition,profile}=selectedProfile(version,'version');
- if(project!==definition.id||arch!=='arm64'||!path.isAbsolute(output||'')||fs.existsSync(output)||input?.profileId!==profile.id)throw Error('Select the declared ANGLE package version, matching source profile and a new absolute output directory.');
+ const {definition,profile}=anglePackageProfile(project,version);
+ if(arch!=='arm64'||!path.isAbsolute(output||'')||fs.existsSync(output)||input?.profileId!==profile.id)throw Error('Select the declared ANGLE package version, matching source profile and a new absolute output directory.');
  verifyProducerSource(input.source,profile);
  const manifest=JSON.parse(fs.readFileSync(path.join(input.angle,'angle-manifest.json')));
  if(manifest.version!==profile.providerVersion||manifest.programBinaryVersion!==profile.programBinaryVersion||manifest.angleRevision!==definition.angle.revision||!Array.isArray(manifest.adaptations))throw Error('ANGLE provider identity differs from the package source profile.');
@@ -71,9 +78,9 @@ export function packageAngleInput({project='android-angle',version,arch='arm64',
 
 /** Use the one Runtime build path for each declared source profile. */
 export async function buildAndroidAngle({project,version,arch,output,work}){
- const {definition,profile}=selectedProfile(version??JSON.parse(fs.readFileSync(descriptor)).profiles[0].version,'version');
- if(project!==definition.id||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select an Android ANGLE version, arm64 and new absolute output/work directories.');
+ const {definition,profile}=anglePackageProfile(project,version??JSON.parse(fs.readFileSync(descriptor)).profiles[0].version);
+ if(!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select an Android ANGLE version, arm64 and new absolute output/work directories.');
  const input=await buildAngleInput({output:path.join(work,'provider'),work:path.join(work,'compile'),profile:profile.id});
- return packageAngleInput({project,version:profile.version,arch,output,input});
+ return packageAngleInput({project,version:version??profile.packageVersion??profile.version,arch,output,input});
 }
 recipeMain(import.meta,buildAndroidAngle);

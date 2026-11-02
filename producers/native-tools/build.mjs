@@ -4,11 +4,12 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
-import {buildInput} from '../../tools/build-input.mjs';
+import {preparedBuildInput} from '../../tools/prepared-build-inputs.mjs';
+import {nativeStackInput} from '../../tools/native-stack.mjs';
 import {sealRuntime} from '../../tools/seal-runtime.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'../..');
 const Source=require('../maclauncher/src/modules/shared/runtime/pinned-native-build.js');
-const Portable=require('../maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.js');
+const Portable=require('../maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.js'),Prefix=require('../maclauncher/src/modules/shared/runtime/portable-dependency-prefix.js');
 const profiles=JSON.parse(fs.readFileSync(new URL('./source.json',import.meta.url))).projects;
 const run=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',stdio:['ignore','pipe','pipe'],timeout:600000,maxBuffer:16<<20,...options});
 
@@ -35,24 +36,14 @@ function goBuild({pin,arch,source,work}){
 }
 
 async function scummvmBuild({pin,arch,source,work}){
- const sdk=run('/usr/bin/xcrun',['--show-sdk-path']).trim(),prefix=path.join(work,'prefix');fs.mkdirSync(prefix);
+ const sdk=process.env.SDKROOT||run('/usr/bin/xcrun',['--show-sdk-path']).trim(),prefix=path.join(work,'prefix');fs.mkdirSync(prefix);
  const tools={cmake:Source.findBuildTool('cmake'),ninja:Source.findBuildTool('ninja')},notices=[];
  const mappings=[{from:source,to:'scummvm-tools'},{from:work,to:'build'}];
  fs.mkdirSync(path.join(work,'dependencies'));
  const compilerFlags=['-O2','-Werror=unguarded-availability-new','-arch',arch==='x64'?'x86_64':'arm64','-isysroot',sdk,'-mmacosx-version-min=13.0',
   '-ffile-prefix-map='+source+'=scummvm-tools','-ffile-prefix-map='+work+'=build','-I'+path.join(prefix,'include')].join(' ');
- for(const group of pin.dependencies){
-  const declared=JSON.parse(fs.readFileSync(path.join(root,group.file))).dependencies;
-  for(const id of group.ids){
-   const item=declared.find(entry=>entry.id===id);if(!item)throw Error('A ScummVM Tools dependency is not declared.');
-   const archive=await buildInput({url:item.archiveUrl,sha256:item.archiveSha256,bytes:item.archiveBytes},path.join(work,'downloads'));
-   const dependencySource=path.join(work,'sources',id);fs.mkdirSync(dependencySource,{recursive:true});
-   run('/usr/bin/tar',['-xf',archive,'--strip-components','1','-C',dependencySource]);
-   const options=[...item.options,...(id==='libpng'?['-DZLIB_LIBRARY='+sdk+'/usr/lib/libz.tbd','-DZLIB_INCLUDE_DIR='+sdk+'/usr/include']:[])];
-   await Portable.buildProject({sourceRoot:dependencySource,outputRoot:path.join(work,'dependencies',id),prefix,sdk,tools,architecture:arch,pathMappings:mappings,options});
-   for(const file of item.notices)notices.push({file:path.join(dependencySource,file),name:item.name,license:item.license,sourceUrl:item.sourceUrl});
-  }
- }
+ const fonts=nativeStackInput(preparedBuildInput('native-sdl2-fonts'),{arch,work:path.join(work,'fonts')}),audio=nativeStackInput(preparedBuildInput('native-sndfile'),{arch,work:path.join(work,'audio')});
+ Prefix.linkPrefix(fonts.prefix,prefix);Prefix.linkPrefix(audio.prefix,prefix);notices.push(...fonts.notices,...audio.notices);
  const build=path.join(work,'cli');fs.mkdirSync(build);
  const toolDirectory=path.join(work,'tools');fs.mkdirSync(toolDirectory);fs.symlinkSync(Source.findBuildTool('pkg-config'),path.join(toolDirectory,'pkg-config'));
  const env={...Portable.buildEnvironment(prefix,sdk),PATH:toolDirectory+':/usr/bin:/bin:/usr/sbin:/sbin',CPPFLAGS:'',CXX:'/usr/bin/clang++',CXXFLAGS:compilerFlags,

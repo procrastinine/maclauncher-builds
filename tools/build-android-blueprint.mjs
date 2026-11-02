@@ -1,3 +1,4 @@
+import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -44,7 +45,7 @@ export function packageBlueprintInput({project='android-blueprint-parser',versio
  if(fs.existsSync(path.join(inputRoot,'input.json'))){
   const declaration=JSON.parse(fs.readFileSync(path.join(inputRoot,'../declaration.json')));validateDeclaration(declaration);
   if(declaration.id!==project||declaration.arch!==arch)throw Error('The sealed Blueprint input belongs to a different project or CPU.');
-  B.verifyPayload(inputRoot,declaration);previous=JSON.parse(fs.readFileSync(path.join(inputRoot,declaration.manifestRelative)));
+  verifyPreparedPayload(inputRoot,declaration);previous=JSON.parse(fs.readFileSync(path.join(inputRoot,declaration.manifestRelative)));
  }else{
   if(!path.isAbsolute(input.source||'')||read('git',['-C',input.source,'rev-parse','HEAD'])!==profile.upstream.revision||read('git',['-C',input.source,'status','--porcelain','--untracked-files=no'])||sha(input.parser)!==input.parserSha256)throw Error('The Blueprint compiler output differs from its declared source build.');
  }

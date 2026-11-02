@@ -7,14 +7,21 @@ import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {managerDeclaration} from './release-runtime.mjs';
+import {preparedBuildInput} from './prepared-build-inputs.mjs';
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),Native=require('../producers/maclauncher/src/modules/shared/runtime/local-native.js');
 const Source=require('../producers/maclauncher/src/modules/shared/runtime/pinned-native-build.js');
 const Tools=require('../producers/maclauncher/scripts/native-binary-tools.cjs');
 const system=value=>value.startsWith('/usr/lib/')||value.startsWith('/System/Library/');
+function preparedNativeFiles(){
+ const value=process.env.MACLAUNCHER_BUILD_INPUTS;if(!value)return new Set();
+ const map=JSON.parse(value.trim().startsWith('{')?value:fs.readFileSync(value,'utf8')),files=new Set();
+ for(const id of Object.keys(map)){const input=preparedBuildInput(id);for(const file of input.declaration.files)if(file.architectures)files.add(file.size+'/'+file.sha256);}
+ return files;
+}
 const run=(command,args)=>execFileSync(command,args,{encoding:'utf8',timeout:120000,maxBuffer:16<<20});
 
 export async function sealRuntime({project:id,version:selectedVersion,arch,executable,sourceRoot,sourceScope,upstreamRevision,output,executableRelative,appRoot,payloads=[],notices=[],extraLibraries=[],runtimeFiles={},environmentRelative={},jsonMetadata={},capabilities,maximumMacOS='13.0',provenance={},directory=path.resolve(import.meta.dirname,'..')}) {
- const project=resolveProject(id,directory),build=buildRecord(project,selectedVersion),version=build.version,cpu=arch==='x64'?'x86_64':arch;
+ const project=resolveProject(id,directory),build=buildRecord(project,selectedVersion),version=build.version,cpu=arch==='x64'?'x86_64':arch,preparedFiles=preparedNativeFiles(),shared=new Set();
  if(!version||!['arm64','x64'].includes(arch)||!build.architectures.includes(arch)||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(executable||'')||!path.isAbsolute(sourceRoot||'')||!project.upstreams.some(pin=>pin.revision===upstreamRevision)||!notices.length)
   throw Error('Sealing needs a registered build, target CPU, pinned public source, license notices and a new absolute output directory.');
  await Source.validatePinnedSource(sourceRoot,upstreamRevision,{sourceScope});
@@ -49,16 +56,17 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
   const receipts=path.join(output,'dependency-receipts');fs.mkdirSync(receipts);
   try {for(let i=0;i<queue.length;i++){
    const target=queue[i];if(seen.has(target))continue;seen.add(target);const source=sources.get(target);
-   Tools.thinStagedMachO(target,files,cpu,run);
+   const immutable=preparedFiles.has(fs.statSync(source).size+'/'+Native.hashFile(source));if(immutable)shared.add(target);
+   if(!immutable)Tools.thinStagedMachO(target,files,cpu,run);
    Tools.addDependencyNotices(source,files,licenseRows,noticeRoots,receipts);
    const commands=Tools.loadCommands(source,cpu),ids=Tools.libraryIds(source,cpu);
    for(const link of Tools.links(source,cpu)){
     if(system(link)||ids.includes(link))continue;
     const resolved=Tools.resolveLink(link,source,executable,[...commands.rpaths,...inherited],cpu),dependency=addLibrary(resolved);
-    run('/usr/bin/install_name_tool',['-change',link,'@loader_path/'+path.relative(path.dirname(target),dependency).split(path.sep).join('/'),target]);queue.push(dependency);
+    if(!immutable)run('/usr/bin/install_name_tool',['-change',link,'@loader_path/'+path.relative(path.dirname(target),dependency).split(path.sep).join('/'),target]);queue.push(dependency);
    }
-   for(const rpath of new Set(commands.rpaths.filter(value=>path.isAbsolute(value)&&!system(value))))run('/usr/bin/install_name_tool',['-delete_rpath',rpath,target]);
-   if(ids.length)run('/usr/bin/install_name_tool',['-id','@rpath/'+path.basename(target),target]);
+   if(!immutable)for(const rpath of new Set(commands.rpaths.filter(value=>path.isAbsolute(value)&&!system(value))))run('/usr/bin/install_name_tool',['-delete_rpath',rpath,target]);
+   if(!immutable&&ids.length)run('/usr/bin/install_name_tool',['-id','@rpath/'+path.basename(target),target]);
   }}finally{fs.rmSync(receipts,{recursive:true,force:true});}
   // Upstream source and bottles may use read-only modes; package files are owned copies.
   for(const relative of B.fileInventory(files)){
@@ -67,14 +75,14 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
   }
   let minimumMacOS='0.0';
   for(const target of seen){
-   if(Tools.macho(target)?.join()!==cpu)throw Error('Dependency has the wrong CPU: '+path.basename(target));
+   if(shared.has(target)?!Tools.macho(target)?.includes(cpu):Tools.macho(target)?.join()!==cpu)throw Error('Dependency has the wrong CPU: '+path.basename(target));
    const commands=Tools.loadCommands(target,cpu);if(B.versionAtLeast(commands.minimumMacOS,minimumMacOS))minimumMacOS=commands.minimumMacOS;
   }
   if(!B.versionAtLeast(maximumMacOS,minimumMacOS))throw Error('Dependency closure requires macOS '+minimumMacOS+', above '+maximumMacOS+'.');
   // Sign nested code before the app's main executable seals its bundle.
   const main=path.join(files,executableRelative);
   const signingOrder=[...seen].filter(target=>!appRoot||target!==main).sort((a,b)=>b.split(path.sep).length-a.split(path.sep).length||a.localeCompare(b));
-  for(const target of signingOrder)run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);
+  for(const target of signingOrder)if(!shared.has(target))run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);
   if(appRoot)run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',path.join(files,path.basename(appRoot))]);
   for(const target of seen){
    run('/usr/bin/codesign',['--verify','--strict',target]);

@@ -316,6 +316,24 @@
       "url": "{url}",
       "sha256": "{sha256}",
       "entry": "{entry}"
+    },
+    "fsr-glslang": {
+      "kind": "archive",
+      "description": "Source-built host compiler for the pinned FSR shader generator",
+      "pin": {
+        "file": "src/modules/shared/reshade/libplacebo/dependencies.json",
+        "pointer": "/sources",
+        "match": {
+          "id": "glslang"
+        }
+      },
+      "url": "{url}",
+      "sha256": "{sha256}",
+      "entry": "glslang-{commit}",
+      "files": {
+        "CMakeLists.txt": null,
+        "glslang/CMakeLists.txt": null
+      }
     }
   },
   "tools": {

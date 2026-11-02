@@ -1,3 +1,4 @@
+import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
@@ -17,7 +18,7 @@ function lockValue(file,key){const matches=[...fs.readFileSync(file,'utf8').matc
 export async function prepareArtMacBuildContext({elfInput,work}){
  if(process.platform!=='darwin'||process.arch!=='arm64'||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(elfInput?.root||''))throw Error('ART host context requires sealed ART ELFs and a new work directory on Apple Silicon macOS.');
  const descriptor=path.join(root,'producers/android-art-inputs/art-source.json'),profile=json(descriptor),declaration=elfInput.declaration||json(path.join(elfInput.root,'../declaration.json'));
- validateDeclaration(declaration);B.verifyPayload(elfInput.root,declaration);
+ validateDeclaration(declaration);verifyPreparedPayload(elfInput.root,declaration);
  if(declaration.id!==profile.id||declaration.version!==profile.version||declaration.arch!=='arm64'||declaration.sourceSha256!==sha(descriptor))throw Error('ART ELF input differs from its declared leaf profile.');
  const record=json(path.join(elfInput.root,declaration.manifestRelative)),android=verifyProducer(root,json(path.join(root,'runtimes/android/source.json'))),supplier=json(path.join(android,'src/modules/android/art/supplier.json'));
  if(record.aimRevision!==supplier.sources.aim.commit||record.androidSource?.repository!==profile.androidSource.repository||record.androidSource?.revision!==profile.androidSource.revision||record.sourceLockSha256!==sha(path.join(android,profile.sourceLock)))throw Error('ART ELF and host context select different original source profiles.');

@@ -76,33 +76,33 @@
     {
       "path": "src/modules/shared/runtime/package-contract.cjs",
       "destination": "lib/package-contract.cjs",
-      "sourceSha256": "1e4868e5ad327b8f804c9d09301c47d6920d6542dd3007fb6aeb11a3499fbc25",
-      "sha256": "dfa804e42e343d6a1f67ac928e25155d7b4cc3fd46aa93cc816519512ee64542",
+      "sourceSha256": "d97dc20447ddf33c624d9620b20ae1dff049ceb7b73a30e391da62a49b7a046c",
+      "sha256": "dc97d8805ebd8d9729c86c01d7426de1f71324592a5c5520b3989716cf6c4201",
       "replacements": [
         {
           "from": "const B = require(\"./bundled-native\");",
           "to": "const B = require(\"./bundled-native.cjs\");"
         },
         {
-          "from": "const ARCHITECTURES = new Set([\"arm64\", \"x64\", \"universal\"]);\nconst LAUNCHER_ARCHITECTURES = new Set([\"arm64\", \"x64\"]);\nconst MAX_ARCHIVE_BYTES = 4 * 1024 * 1024 * 1024;\nconst RECORD_KEYS = [\"schemaVersion\",\"id\",\"version\",\"arch\",\"launcherArchitectures\",\"minimumMacOS\",\"manifestRelative\",\"manifestSha256\",\"sourceSha256\",\"updatePolicy\",\"tag\",\"asset\",\"sourceAsset\",\"source\",\"launcherContract\",\"capabilities\"];\nconst ARCHITECTURE_NAME = /^[a-z][a-z0-9_]{0,31}$/, CAPABILITY_NAME = /^[A-Za-z][A-Za-z0-9_]{0,63}$/;\n\nfunction object(value) {\n",
-          "to": "const ARCHITECTURES = new Set([\"arm64\", \"x64\", \"universal\"]);\nconst LAUNCHER_ARCHITECTURES = new Set([\"arm64\", \"x64\"]);\nconst MAX_ARCHIVE_BYTES = 4 * 1024 * 1024 * 1024;\nconst RECORD_KEYS = [\"schemaVersion\",\"id\",\"version\",\"arch\",\"launcherArchitectures\",\"minimumMacOS\",\"manifestRelative\",\"manifestSha256\",\"sourceSha256\",\"updatePolicy\",\"tag\",\"asset\",\"sourceAsset\",\"source\",\"launcherContract\",\"capabilities\",\"build\",\"rebuild\"];\nconst ARCHITECTURE_NAME = /^[a-z][a-z0-9_]{0,31}$/, CAPABILITY_NAME = /^[A-Za-z][A-Za-z0-9_]{0,63}$/;\n\nfunction object(value) {\n"
+          "from": "const RECORD_KEYS = [\"schemaVersion\",\"id\",\"version\",\"arch\",\"launcherArchitectures\",\"minimumMacOS\",\"manifestRelative\",\"manifestSha256\",\"sourceSha256\",\"updatePolicy\",\"tag\",\"asset\",\"sourceAsset\",\"source\",\"launcherContract\",\"capabilities\",\"dependencies\"];",
+          "to": "const RECORD_KEYS = [\"schemaVersion\",\"id\",\"version\",\"arch\",\"launcherArchitectures\",\"minimumMacOS\",\"manifestRelative\",\"manifestSha256\",\"sourceSha256\",\"updatePolicy\",\"tag\",\"asset\",\"sourceAsset\",\"source\",\"launcherContract\",\"capabilities\",\"dependencies\",\"build\",\"rebuild\"];"
         },
         {
           "from": "        record.sourceAsset && Object.keys(record.sourceAsset).some(key => ![\"filename\", \"sha256\", \"bytes\", \"url\"].includes(key)))\n      throw new Error(\"Invalid runtime release record.\");\n    validatePublicMetadata(record);\n  }\n  if (record.schemaVersion !== 2 || record.id !== projectId || record.updatePolicy !== \"manual\" ||\n      !version(record.version) || !ARCHITECTURES.has(record.arch) ||\n",
           "to": "        record.sourceAsset && Object.keys(record.sourceAsset).some(key => ![\"filename\", \"sha256\", \"bytes\", \"url\"].includes(key)))\n      throw new Error(\"Invalid runtime release record.\");\n    validatePublicMetadata(record);\n    const evidence = require(\"./build-verification.cjs\");\n    evidence.buildMetadata(record.build, repository); evidence.rebuildMetadata(record.rebuild, record);\n  }\n  if (record.schemaVersion !== 2 || record.id !== projectId || record.updatePolicy !== \"manual\" ||\n      !version(record.version) || !ARCHITECTURES.has(record.arch) ||\n"
         },
         {
-          "from": "    sourceSha256: record.sourceSha256, updatePolicy: \"manual\", tag,\n    asset: Object.freeze({ filename, sha256: record.asset.sha256, bytes: record.asset.bytes, url }),\n    ...(sourceAsset ? { sourceAsset } : {}), ...(source ? { source } : {}),\n    ...(record.launcherContract === undefined ? {} : { launcherContract: record.launcherContract }), ...compatibility });\n}\n\nfunction validateDeclaration(item) {\n",
-          "to": "    sourceSha256: record.sourceSha256, updatePolicy: \"manual\", tag,\n    asset: Object.freeze({ filename, sha256: record.asset.sha256, bytes: record.asset.bytes, url }),\n    ...(sourceAsset ? { sourceAsset } : {}), ...(source ? { source } : {}),\n    ...(record.launcherContract === undefined ? {} : { launcherContract: record.launcherContract }), ...compatibility,\n    ...(publication && record.build !== undefined ? { build: require(\"./build-verification.cjs\").buildMetadata(record.build, repository) } : {}),\n    ...(publication && record.rebuild !== undefined ? { rebuild: require(\"./build-verification.cjs\").rebuildMetadata(record.rebuild, record) } : {}) });\n}\n\nfunction validateDeclaration(item) {\n"
+          "from": "    ...(record.dependencies === undefined ? {} : { dependencies: Object.freeze(dependencies) }), ...compatibility });",
+          "to": "    ...(record.dependencies === undefined ? {} : { dependencies: Object.freeze(dependencies) }), ...compatibility,\n    ...(publication && record.build !== undefined ? { build: require(\"./build-verification.cjs\").buildMetadata(record.build, repository) } : {}),\n    ...(publication && record.rebuild !== undefined ? { rebuild: require(\"./build-verification.cjs\").rebuildMetadata(record.rebuild, record) } : {}) });"
         }
       ],
-      "previousSha256": "306bb2a70fda5fb0f62eec1d6bd96376eed46164b2b051977412ef3d872c41c9"
+      "previousSha256": "dfa804e42e343d6a1f67ac928e25155d7b4cc3fd46aa93cc816519512ee64542"
     },
     {
       "path": "src/modules/shared/runtime/bundled-native.js",
       "destination": "lib/bundled-native.cjs",
-      "sourceSha256": "e8d7b2c4d418c798877817b5e8d13241b40e6cace2ccd1a6b8d93c5644b94c40",
-      "sha256": "5788d41a348fdfaad3e70d0a4230eca6e420d30c64589e2c11821bc1fe728ca2",
+      "sourceSha256": "fc656123a739cb39b0624f9479f7ea57936f8a675c8d5c591c857cf3fd28f000",
+      "sha256": "aec9f113860bebbabd2df901ffb35a43fbfab1b53abdecc598dbf734aea96c4e",
       "replacements": [
         {
           "from": "const Native = require(\"./local-native\");",
@@ -111,8 +111,13 @@
         {
           "from": "const PE = require(\"./pe-exports\");",
           "to": "const PE = require(\"./pe-exports.cjs\");"
+        },
+        {
+          "from": "const { versionAtLeast } = require(\"./host-capabilities\");",
+          "to": "function versionAtLeast(actual, minimum) {\n  const parts = value => String(value ?? \"\").split(\".\").map(part => Number(/^\\d+/.exec(part)?.[0] ?? NaN));\n  const a = parts(actual), b = parts(minimum);\n  if (a.some(Number.isNaN) || b.some(Number.isNaN)) return false;\n  for (let i = 0; i < Math.max(a.length, b.length); i++) {\n    const difference = (a[i] || 0) - (b[i] || 0);\n    if (difference) return difference > 0;\n  }\n  return true;\n}"
         }
-      ]
+      ],
+      "previousSha256": "5788d41a348fdfaad3e70d0a4230eca6e420d30c64589e2c11821bc1fe728ca2"
     }
   ],
   "retired": {

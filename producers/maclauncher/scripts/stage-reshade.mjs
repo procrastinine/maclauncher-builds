@@ -621,15 +621,20 @@ if(options["--output"]&&fs.existsSync(destination))throw Error("Use a new isolat
 fs.mkdirSync(destination, { recursive: true });
 for (const directory of ["include", "effects", "licenses"]) fs.mkdirSync(path.join(destination, directory), { recursive: true });
 const files = [];
+// Prepared native dependencies keep their exact signed bytes. Shared packaging
+// later removes these copies and binds their original paths as dependency aliases.
+const preparedNativeHashes=new Set();
+if(process.env.MACLAUNCHER_BUILD_INPUTS){const source=process.env.MACLAUNCHER_BUILD_INPUTS,prepared=JSON.parse(source.trim().startsWith('{')?source:fs.readFileSync(source,'utf8'));for(const input of Object.values(prepared))for(const file of input.declaration?.files||[])if(file.architectures?.length)preparedNativeHashes.add(file.sha256);}
 for (const [relative, input] of inputs) {
   const output = path.join(destination, relative);
   fs.mkdirSync(path.dirname(output), { recursive: true });
   const executable = nativeFiles.includes(relative);
-  if(executable&&packageArch!=="universal"&&nativeArchitectures.get(relative)?.length>1){
+  const preservedDependency=executable&&preparedNativeHashes.has(digest(fs.readFileSync(input)));
+  if(executable&&!preservedDependency&&packageArch!=="universal"&&nativeArchitectures.get(relative)?.length>1){
     execFileSync("/usr/bin/lipo",[input,"-thin",packageCPUs[0],"-output",output]);nativeArchitectures.set(relative,[packageCPUs[0]]);
   }else fs.copyFileSync(input, output, fs.constants.COPYFILE_FICLONE);
   fs.chmodSync(output, executable ? 0o755 : 0o644);
-  if (executable) execFileSync("/usr/bin/codesign", ["--force", "--sign", "-", "--timestamp=none", output], { stdio: "pipe" });
+  if (executable&&!preservedDependency) execFileSync("/usr/bin/codesign", ["--force", "--sign", "-", "--timestamp=none", output], { stdio: "pipe" });
   files.push({ path: relative, sha256: digest(fs.readFileSync(output)), size: fs.statSync(output).size,
     mode: executable ? 0o755 : 0o644, ...(executable ? { architectures: nativeArchitectures.get(relative),
       ...(relative.startsWith("temporal/dxmt/") ? { executionArchitecture: "x86_64" } : {}),

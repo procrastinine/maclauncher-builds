@@ -1,3 +1,4 @@
+import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -65,7 +66,7 @@ export async function buildAndroidJavaFrameworkInput({output,work}){
 }
 
 export function verifyAndroidJavaFrameworkInput(input){
- const declaration=json(path.join(input,'../declaration.json'));validateDeclaration(declaration);B.verifyPayload(input,declaration);const profile=json(descriptor),manifest=json(path.join(input,'input.json'));
+ const declaration=json(path.join(input,'../declaration.json'));validateDeclaration(declaration);verifyPreparedPayload(input,declaration);const profile=json(descriptor),manifest=json(path.join(input,'input.json'));
  if(declaration.id!==profile.id||declaration.version!==profile.version||declaration.sourceSha256!==sha(descriptor)||JSON.stringify(manifest.androidSource)!==JSON.stringify(profile.androidSource))throw Error('Framework Java input differs from its declared producer.');
  for(const name of ['products/android-framework.jar','build/classes','build/framework-tool','build/jni','build/host-callbacks.h','build/host-callbacks.c'])if(!fs.existsSync(path.join(input,name)))throw Error('Framework Java input is incomplete: '+name);
  return {root:input,declaration,manifest};

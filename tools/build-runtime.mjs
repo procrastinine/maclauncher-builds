@@ -15,6 +15,7 @@ import {initializeSources} from './init-runtime-sources.mjs';
 import {publicDeclaration} from './runtime-package.mjs';
 import {readPublisherInput} from './publisher-files.mjs';
 import {sealBuildInputReport} from './seal-build-input-report.mjs';
+import {preparePackageLayout,checkPackageDuplicates} from './package-layout.mjs';
 import {reproducibleEnvironment} from '../lib/reproducible-build.mjs';
 const B=createRequire(import.meta.url)('../lib/bundled-native.cjs');
 
@@ -120,7 +121,7 @@ export function checkBuildOutput({project,build,arch,output,platform=process.pla
  if(platform==='linux'&&declaration.files.some(file=>file.architectures&&file.format!=='pe'))throw Error('Recipes producing Mac programs require a hosted Mac runner.');
  const cpus=declaration.launcherArchitectures,own=arch==='universal'?['arm64','x64']:[arch];
  if(!own.every(cpu=>cpus.includes(cpu))||arch==='arm64'&&cpus.length!==1)throw Error('The package declares Mac CPUs that differ from its architecture.');
- B.verifyPayload(path.join(output,'payload'),declaration);
+ B.verifyStoredPayload(path.join(output,'payload'),declaration);
  return {id:project.id,version:declaration.version,arch,payload:path.join(output,'payload'),declaration:path.join(output,'declaration.json')};
 }
 
@@ -159,6 +160,10 @@ export function runBuild({project:id,arch,version,output,work=path.join(fs.mkdte
   if(result.error)throw result.error;
   if(result.status!==0)throw Error(project.name+' build exited with status '+result.status);
   sealBuildInputReport({project:project.id,output});
+  const declarationFile=path.join(output,'declaration.json'),declaration=JSON.parse(fs.readFileSync(declarationFile));
+  preparePackageLayout({input:path.join(output,'payload'),declaration});
+  checkPackageDuplicates({declaration});
+  fs.writeFileSync(declarationFile,JSON.stringify(declaration,null,2)+'\n');
   return checkBuildOutput({project,build,arch,output});
  }finally{context.dispose();}
 }

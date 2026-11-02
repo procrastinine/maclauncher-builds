@@ -1,3 +1,4 @@
+import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -18,7 +19,7 @@ export function copyArtJavaImageMembers({input,output}){
  const inputs=Array.isArray(input)?input:[input],expected=json(path.join(root,'producers/android-image-data/source.json')),locations=new Map();let manifest,transportSha256;
  if(!inputs.length)throw Error('The original image data shards are required.');
  for(const selected of inputs){
-  const declaration=json(path.join(selected,'../declaration.json'));validateDeclaration(declaration);B.verifyPayload(selected,declaration);
+  const declaration=json(path.join(selected,'../declaration.json'));validateDeclaration(declaration);verifyPreparedPayload(selected,declaration);
   const profile=expected.profiles.find(profile=>profile.id===declaration.id&&profile.version===declaration.version),metadata=json(path.join(selected,'input.json')),transport=fs.readFileSync(path.join(selected,'image-data.json')),current=JSON.parse(transport),content=json(path.join(selected,'content.json'));
   if(!profile||declaration.sourceSha256!==sha(path.join(root,'producers/android-image-data/source.json'))||current.archive_sha256!==expected.archive.sha256||current.source_revision!==expected.revision||['sha256','records','bytes'].some(key=>content[key]!==expected.content[key])||metadata.transportSha256!==digest(transport)||transportSha256&&transportSha256!==metadata.transportSha256)throw Error('ART Java requires its original verified Android image shards.');
   const shard=metadata.dataShard,original=current.shards.find(shard=>shard.id===profile.id&&shard.version===profile.version&&shard.shard===profile.shard);
@@ -77,7 +78,7 @@ export function packageAndroidArtJavaInput({framework,image,output,work,arch='ar
 
 /** Validate the neutral Java product group before adding its transport to an owned supplier export. */
 export function verifyAndroidArtJavaInput(input){
- const definition=json(descriptor),declaration=json(path.join(input,'../declaration.json'));validateDeclaration(declaration);B.verifyPayload(input,declaration);const manifest=json(path.join(input,'input.json'));
+ const definition=json(descriptor),declaration=json(path.join(input,'../declaration.json'));validateDeclaration(declaration);verifyPreparedPayload(input,declaration);const manifest=json(path.join(input,'input.json'));
  if(declaration.id!==definition.id||declaration.version!==definition.version||declaration.sourceSha256!==sha(descriptor)||JSON.stringify(manifest.androidSource)!==JSON.stringify(definition.androidSource))throw Error('ART Java input differs from its declared source profile.');return {root:input,declaration,manifest};
 }
 export function prepareArtJavaProducer({producer,input,work}){

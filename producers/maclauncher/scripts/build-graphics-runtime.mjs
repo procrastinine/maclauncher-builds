@@ -183,7 +183,7 @@ export function plan({work, arch="universal", sdkPath, only, skip = [], reuse = 
   const building = new Set(selected.filter(name => !reuse[name]));
   const needs = {source: new Set(), input: new Set(), tool: new Set()};
   for (const name of selected) {
-    if (name === "core") { if (building.has("core")) needs.tool.add("cmake"); continue; }
+    if (name === "core") { if (building.has("core")) { needs.tool.add("cmake"); needs.input.add("fsr-glslang"); } continue; }
     const provider = recipe.providers[name], own = requirements(name);
     if (provider.sourceOption) needs.source.add(provider.sourceOption[1]);
     if (building.has(name)) for (const kind of Object.keys(needs)) for (const value of own[kind]) needs[kind].add(value);
@@ -244,8 +244,9 @@ async function materializeCore(work,sources={}) {
  * With tests, the same build also produces the native fixtures under build/test. */
 export async function buildCore({work, arch="universal",sdkPath="macosx",sources={}, jobs = 4, tests = false}) {
   const source = await materializeCore(work,sources), build = path.join(work, "core/build");
+  const fsrCompilerSource=await fetchInput("fsr-glslang",work);
   const env = buildEnvironment(), run = args => execFileSync("cmake", args, {stdio: "inherit", env});
-  const configure = {...recipe.core.configure,CMAKE_OSX_ARCHITECTURES:arch==="universal"?"arm64;x86_64":arch==="x64"?"x86_64":"arm64",CMAKE_OSX_DEPLOYMENT_TARGET:recipe.core.minimumMacOS||"13.0",CMAKE_OSX_SYSROOT:sdkPath, ...(tests ? {BUILD_TESTING: "ON", MACLAUNCHER_FIXTURE_DIR: path.join(repository, path.dirname(recipe.core.materialize), "test")} : {})};
+  const configure = {...recipe.core.configure,CMAKE_OSX_ARCHITECTURES:arch==="universal"?"arm64;x86_64":arch==="x64"?"x86_64":"arm64",CMAKE_OSX_DEPLOYMENT_TARGET:recipe.core.minimumMacOS||"13.0",CMAKE_OSX_SYSROOT:sdkPath,FETCHCONTENT_FULLY_DISCONNECTED:"ON",FETCHCONTENT_SOURCE_DIR_FSR_GLSLANG:fsrCompilerSource, ...(tests ? {BUILD_TESTING: "ON", MACLAUNCHER_FIXTURE_DIR: path.join(repository, path.dirname(recipe.core.materialize), "test")} : {})};
   run(["-S", source, "-B", build, ...Object.entries(configure).map(([name, value]) => `-D${name}=${value}`)]);
   run(["--build", build, "--target", ...recipe.core.targets, ...(tests ? ["native-fixtures"] : []), "-j", String(jobs)]);
   return {source, build};

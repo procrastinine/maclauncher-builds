@@ -24,7 +24,9 @@
         "repository": "https://github.com/procrastinine/maclauncher-android",
         "revision": "5041bb49525a4178ac9db5ab868e1f89cd225014"
       },
-      "programBinaryVersion": "69ea190ab685f72e82c4d09ebd73e052"
+      "programBinaryVersion": "69ea190ab685f72e82c4d09ebd73e052",
+      "project": "android-angle-aim",
+      "packageVersion": "MCLv1"
     }
   ],
   "angleSource": "src/modules/android/native/angle-source.json",

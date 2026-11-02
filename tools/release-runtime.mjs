@@ -22,8 +22,8 @@ function sourceRecord(d,repo){if(!d.sourceArtifact)return undefined;const source
 export function recordFromDeclaration(d,asset,sourceAsset,source,catalogRecord={}){
  // Catalog metadata is validated by releaseRecord before this reconstruction.
  // Sealed declaration and archive facts always replace catalog payload fields.
- const {tag,asset:catalogAsset,source:catalogSource,sourceAsset:catalogSourceAsset,...metadata}=catalogRecord;
- return {...metadata,schemaVersion:2,id:d.id,version:d.version,arch:d.arch,launcherArchitectures:d.launcherArchitectures,minimumMacOS:d.minimumMacOS,manifestRelative:d.manifestRelative,manifestSha256:d.manifestSha256,sourceSha256:d.sourceSha256,updatePolicy:'manual',asset,...(sourceAsset?{sourceAsset}:{}),...(source?{source}:{})};
+ const {tag,asset:catalogAsset,source:catalogSource,sourceAsset:catalogSourceAsset,dependencies:catalogDependencies,launcherContract,...metadata}=catalogRecord;
+ return {...metadata,schemaVersion:2,id:d.id,version:d.version,arch:d.arch,launcherArchitectures:d.launcherArchitectures,minimumMacOS:d.minimumMacOS,manifestRelative:d.manifestRelative,manifestSha256:d.manifestSha256,sourceSha256:d.sourceSha256,updatePolicy:'manual',asset,...(d.aliases||d.dependencies?.length?{launcherContract:2}:launcherContract===undefined?{}:{launcherContract}),...(d.dependencies?.length?{dependencies:d.dependencies}:{}),...(sourceAsset?{sourceAsset}:{}),...(source?{source}:{})};
 }
 async function asset(directory,name,role){const file=path.join(directory,name);return {filename:name,role,sha256:await A.checksum(file),bytes:regular(file).size};}
 function write(file,value){fs.writeFileSync(file,json(value),{flag:'wx'});}
@@ -125,7 +125,7 @@ export function catalogIndex(directory=root,{coverage=buildCoverage(directory)}=
   const profiles=new Map((p.packageProfiles||[]).map(profile=>[profile.version,profile]));
   projects.push({projectId:p.id,name:p.name,delivery:p.delivery,pageUrl:new URL('#'+p.id,page).href,
    catalog:{url:new URL('catalogs/'+p.id+'.json',page).href,sha256:digest(bytes),bytes:bytes.length},
-   releases:packages.map(r=>({version:r.version,arch:r.arch,launcherArchitectures:r.launcherArchitectures,minimumMacOS:r.minimumMacOS,tag:r.tag,asset:r.asset,...(r.build?{build:r.build}:{}),pageUrl:new URL('#'+(profiles.get(r.version)?.anchor||p.id),page).href,...(profiles.has(r.version)?{profile:profiles.get(r.version).label,...(profiles.get(r.version).anchor?{anchor:profiles.get(r.version).anchor}:{})}:{})}))});
+   releases:packages.map(r=>({version:r.version,arch:r.arch,launcherArchitectures:r.launcherArchitectures,minimumMacOS:r.minimumMacOS,tag:r.tag,asset:r.asset,...(r.dependencies?.length?{dependencies:r.dependencies}:{}),...(r.build?{build:r.build}:{}),pageUrl:new URL('#'+(profiles.get(r.version)?.anchor||p.id),page).href,...(profiles.has(r.version)?{profile:profiles.get(r.version).label,...(profiles.get(r.version).anchor?{anchor:profiles.get(r.version).anchor}:{})}:{})}))});
  }
  return {schemaVersion:1,repository:registry.repository,updatePolicy:'manual',projects:projects.sort((a,b)=>a.projectId.localeCompare(b.projectId)),retiredProjects:coverage.retiredProjects};
 }

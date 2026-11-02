@@ -1,4 +1,5 @@
 import VersionOrder from '../lib/version-order.cjs';
+import {preparePackageLayout} from './package-layout.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -25,11 +26,12 @@ export function publicDeclaration(value){
 
 export async function pack({project,input,declaration,output,metadata={},sourceDateEpoch=0,directory=root}){
  outputVersion(project,declaration?.version,directory);
+ preparePackageLayout({input,declaration});
  projectId(project);declaration=publicDeclaration(declaration);identity(declaration);
  if(declaration.id!==project)throw Error(`Package belongs to ${declaration.id}; expected project ${project}.`);
  if(path.basename(output)!==assetName(declaration))throw Error('Output filename must be '+assetName(declaration));
  input=fs.realpathSync(input);
- B.verifyPayload(input,declaration);
+ B.verifyStoredPayload(input,declaration);
  const manifest=JSON.parse(B.readRegular(path.join(input,declaration.manifestRelative),B.LIMITS.manifestBytes).bytes);
  const publication=recordMetadata({project,manifest,metadata});
  const bytes=Buffer.from(JSON.stringify(declaration,null,2)+'\n');
@@ -40,7 +42,7 @@ export async function pack({project,input,declaration,output,metadata={},sourceD
  const record={schemaVersion:2,id:declaration.id,version:declaration.version,arch:declaration.arch,
   launcherArchitectures:declaration.launcherArchitectures,minimumMacOS:declaration.minimumMacOS,
   manifestRelative:declaration.manifestRelative,manifestSha256:declaration.manifestSha256,
-  sourceSha256:declaration.sourceSha256,updatePolicy:'manual',...publication,
+  sourceSha256:declaration.sourceSha256,updatePolicy:'manual',...publication,...(declaration.aliases||declaration.dependencies?.length?{launcherContract:2}:{}),...(declaration.dependencies?.length?{dependencies:declaration.dependencies}:{}),
   asset:{filename:path.basename(output),sha256:archive.sha256,bytes:archive.bytes}};
  fs.writeFileSync(output+'.json',JSON.stringify(record,null,2)+'\n',{flag:'wx'});
  return record;

@@ -258,7 +258,11 @@ node tools/runtime-package.mjs catalog --project android \
 
 When the catalog already exists, the catalog command also takes `--previous catalogs/android.json` and keeps the versions already published there; it accepts repeated `--package` arguments for releases of the same project. When a declaration file holds an array, the `--project` value selects the entry. `verify` requires the expected project, version and architecture as well as the archive checksum, and the archive's internal record must match all three.
 
-An archive contains `runtime-package.json` and the runtime's files, unchanged, under `files/`. The format supports native executables, shared libraries, Java runtime data and included helpers, and the tools reject paths outside the package, aliases, extra files, mismatched permissions or checksums, and declarations marked for local use only.
+An archive contains `runtime-package.json` and its stored files under `files/`. The format supports native executables, shared libraries, Java runtime data and included helpers. The tools reject paths outside the package, undeclared files, mismatched permissions or checksums, and declarations marked for local use only.
+
+Identical payload bytes are stored once. The declaration's `aliases.files` maps each additional logical path to a stored path, or to `{project, path}` in a dependency. `dependencies` records each dependency's exact `project`, `release` and archive `sha256`; the catalog carries the same records. Canonical targets are regular files in the verified sealed inventory, with no alias chains. Installation verifies the stored files before creating local clones or relative links to dependencies, then verifies every logical path against the canonical file's digest, size and mode. Archives remain regular-file-only. Packages using this layout declare `launcherContract: 2` in their catalog record; older launchers retain access to earlier compatible versions.
+
+Shared SDL2/fonts, SDL2_mixer, sndfile, FFmpeg, OpenAL, SDL3, MoltenVK and graphics data use the same package and input-resolution path as their consumers. Recipes compile against a prepared prefix; sealed shared library bytes remain unchanged when the consumer is packaged. Build and release checks the stored payload for duplicate binary and data files after aliases are assigned. Original notices, source texts, artwork and fonts remain complete.
 
 `npm test` checks package round trips, producer selection, the history of published catalog records and the rejection of altered, unsafe or incorrectly identified packages.
 

@@ -1,3 +1,4 @@
+import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
@@ -25,7 +26,7 @@ export function verifyAndroidBuildInput(requirement,input){
  if(!path.isAbsolute(input?.root||''))throw Error('Missing sealed Android input: '+requirement.id);
  const declaration=input.declaration||JSON.parse(fs.readFileSync(path.join(input.root,'../declaration.json')));validateDeclaration(declaration);
  if(['id','version','arch'].some(key=>declaration[key]!==requirement[key]))throw Error('Android input identity differs: '+requirement.id);
- B.verifyPayload(input.root,declaration);return {...input,declaration};
+ verifyPreparedPayload(input.root,declaration);return {...input,declaration};
 }
 
 /** Resolve every input from its exact public signed ledger entry before compilation. */
