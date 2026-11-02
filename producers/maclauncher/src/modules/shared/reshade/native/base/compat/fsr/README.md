@@ -1,23 +1,11 @@
 # FSR1 shader generation
 
-The spatial encoder uses AMD FidelityFX FSR1 EASU and RCAS from the pinned
-`third_party/fsr` submodule. The owned GLSL wrapper defines resource bindings,
-clamped edge reads, exact alpha interpolation and output bounds. It leaves the
-upstream headers unchanged.
+CMake generates FSR1 EASU and RCAS arrays in the build directory from the owned
+GLSL wrapper and pinned AMD FSR1 headers. glslang 16.6.0 is built from commit
+`e1b562a8bed273a02f30b59b66a5d499793cede5` at its public KhronosGroup origin.
+An existing host compiler can be selected with `FSR_GLSLANG_EXECUTABLE`.
 
-Ordinary builds use `fsr1-shaders.hpp`; no shader compiler is downloaded or run.
-To regenerate after a shader change, use glslang 16.6.0:
-
-```sh
-node compat/fsr/generate.mjs --glslang /path/to/glslang
-node compat/fsr/generate.mjs --glslang /path/to/glslang --check
-```
-
-The script runs offline, removes its temporary files and records source and
-SPIR-V hashes in `fsr1-shaders.json`. The generated arrays retain AMD's MIT
-notice. The Metal adapter translates these arrays through SPIRV-Cross at setup.
-
-The native pixel tests compare reconstruction and sharpening against an
-independent scalar reference, including clamped borders, alpha, odd dimensions
-and both CPU architectures. The reference uses explicit fused coordinate
-arithmetic to select the same integer tap grid as the GPU across architectures.
+Generation requires the header SHA-256 to match the original value recorded in
+`fsr1-shaders.json`. A mismatch fails the build before the native core compiles.
+Generated arrays retain AMD's MIT notice. The Metal adapter translates them
+through SPIRV-Cross at setup.

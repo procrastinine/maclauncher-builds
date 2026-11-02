@@ -152,7 +152,8 @@ target_link_libraries(reshade-macos PRIVATE mako-adaptive mako-ls1 mako-metal-gr
 set_source_files_properties(src/effects-plan.mm src/effects-execution.mm src/neural-node.mm src/temporal-plan.mm src/temporal.mm src/fsr1.mm src/layer-presentation.mm src/mako-spatial.mm src/ls1.mm src/presentation-api.mm src/view-presentation.mm src/graphics.mm src/presentation.mm src/opengl-interop.mm src/metal.mm src/window.mm src/spatial.mm PROPERTIES COMPILE_OPTIONS -fobjc-arc)
 target_compile_options(reshade-macos PRIVATE -Wno-deprecated-declarations -Werror=unguarded-availability)
 set_source_files_properties(src/lsfg.mm PROPERTIES COMPILE_OPTIONS "-fobjc-arc;-std=c++20")
-target_include_directories(reshade-macos PRIVATE third_party/fsr/ffx-fsr compat/fsr)
+target_include_directories(reshade-macos PRIVATE third_party/fsr/ffx-fsr)
+include(compat/fsr/build.cmake)
 target_compile_options(reshade-macos PRIVATE "$<$<COMPILE_LANGUAGE:OBJCXX>:-fobjc-arc>")
 
 target_sources(reshade-macos PRIVATE src/comparison.mm)
