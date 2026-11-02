@@ -5,9 +5,11 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
+import {createRequire} from 'node:module';
 import {preparePackageLayout,materializePackageAliases,checkPackageDuplicates} from '../tools/package-layout.mjs';
 import {recordFromDeclaration} from '../tools/release-runtime.mjs';
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
+const B=createRequire(import.meta.url)('../lib/bundled-native.cjs');
 function fixture(t){
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'package-layout-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  const payload=path.join(root,'payload');fs.mkdirSync(payload);
@@ -35,18 +37,26 @@ test('the single duplicate check rejects uncollapsed bytes and alias resolution 
  const f=fixture(t);f.write('first.bin','duplicate');f.write('second.bin','duplicate');assert.throws(()=>checkPackageDuplicates({declaration:f.declaration,environment:{}}),/Duplicate stored payload/);
  f.declaration.aliases={schema:1,files:{missing:{project:'undeclared',path:'../outside'}}};assert.throws(()=>materializePackageAliases({root:f.payload,declaration:f.declaration,inputs:{}}),/undeclared/);
 });
+test('native local aliases share the canonical inode and reject a changed symlink',t=>{
+ const f=fixture(t),bytes=Buffer.alloc(32);bytes.writeUInt32LE(0xfeedfacf);bytes.writeUInt32LE(0x0100000c,4);bytes.writeUInt32LE(6,12);
+ for(const name of ['lib/a.dylib','lib/b.dylib'])Object.assign(f.write(name,bytes),{architectures:['arm64']});
+ preparePackageLayout({input:f.payload,declaration:f.declaration,environment:{}});materializePackageAliases({root:f.payload,declaration:f.declaration,inputs:{}});
+ const alias=path.join(f.payload,'lib/b.dylib'),canonical=path.join(f.payload,'lib/a.dylib');
+ assert.equal(fs.readlinkSync(alias),'a.dylib');assert.equal(fs.statSync(alias).ino,fs.statSync(canonical).ino);
+ fs.unlinkSync(alias);fs.symlinkSync('../LICENSE',alias);assert.throws(()=>B.verifyPayload(f.payload,f.declaration),/local Mach-O alias differs/);
+});
 test('cross-directory native aliases keep both loader-path and rpath bindings identical',{skip:process.platform!=='darwin'},t=>{
  const cpu=process.arch==='x64'?'x86_64':process.arch;
- for(const kind of ['loader','rpath']){
+ for(const kind of ['loader','rpath','stable-rpath']){
   const native=fs.mkdtempSync(path.join(os.tmpdir(),'alias-load-'));t.after(()=>fs.rmSync(native,{recursive:true,force:true}));
   const dep=path.join(native,'libdep.dylib'),other=path.join(native,'different.dylib'),main=path.join(native,'libmain.dylib');
   for(const [file,value]of [[dep,1],[other,2]])execFileSync('/usr/bin/clang',['-dynamiclib','-x','c','-','-Wl,-install_name,@rpath/libdep.dylib','-o',file],{input:'int dependency(void){return '+value+';}\n'});
-  execFileSync('/usr/bin/clang',['-dynamiclib','-x','c','-','-x','none',dep,'-Wl,-install_name,@rpath/libmain.dylib',...(kind==='rpath'?['-Wl,-rpath,@loader_path']:[]),'-o',main],{input:'extern int dependency(void);int consumer(void){return dependency();}\n'});
+  execFileSync('/usr/bin/clang',['-dynamiclib','-x','c','-','-x','none',dep,'-Wl,-install_name,@rpath/libmain.dylib',...(kind==='rpath'?['-Wl,-rpath,@loader_path']:kind==='stable-rpath'?['-Wl,-rpath,@executable_path/shared']:[]),'-o',main],{input:'extern int dependency(void);int consumer(void){return dependency();}\n'});
   if(kind==='loader')execFileSync('/usr/bin/install_name_tool',['-change','@rpath/libdep.dylib','@loader_path/libdep.dylib',main]);
   for(const identical of [false,true]){
    const f=fixture(t),write=(name,file)=>Object.assign(f.write(name,fs.readFileSync(file)),{architectures:[cpu]});
    write('a/libdep.dylib',dep);write('b/libdep.dylib',identical?dep:other);write('a/libmain.dylib',main);write('b/libmain.dylib',main);
-   if(!identical)assert.throws(()=>preparePackageLayout({input:f.payload,declaration:f.declaration,environment:{}}),/Cross-directory Mach-O alias changes its load-command target/);
+   if(kind==='rpath'||!identical&&kind!=='stable-rpath')assert.throws(()=>preparePackageLayout({input:f.payload,declaration:f.declaration,environment:{}}),/Cross-directory Mach-O alias changes load-command resolution/);
    else{preparePackageLayout({input:f.payload,declaration:f.declaration,environment:{}});assert.equal(f.declaration.aliases.files['b/libmain.dylib'],'a/libmain.dylib');assert.equal(fs.existsSync(path.join(f.payload,'b/libmain.dylib')),false);}
   }
  }

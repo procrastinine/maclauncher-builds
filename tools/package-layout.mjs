@@ -7,7 +7,7 @@ const json=file=>JSON.parse(fs.readFileSync(file,'utf8'));
 const readMap=env=>env.MACLAUNCHER_BUILD_INPUTS?JSON.parse(env.MACLAUNCHER_BUILD_INPUTS.trim().startsWith('{')?env.MACLAUNCHER_BUILD_INPUTS:fs.readFileSync(env.MACLAUNCHER_BUILD_INPUTS,'utf8')):{};
 const relative=value=>{B.relativeFile(value);return value;};
 const same=(a,b)=>a.size===b.size&&a.sha256===b.sha256;
-const macho=file=>Array.isArray(file.architectures)&&file.format!=='pe';
+const macho=file=>B.localMachO(file);
 /** Notices, artwork and source texts are outside the binary duplication rule. */
 export function duplicateCandidate(file,declaration){
  return file.size>0&&file.path!==declaration.manifestRelative&&file.path!==declaration.sourceRelative&&
@@ -24,8 +24,11 @@ function canonicalAlias(target,files,inputs){
 /** A native alias must retain the same loader bindings at its logical location. */
 function checkNativeAliasPaths({root,declaration,inputs}){
  const files=new Map(declaration.files.map(file=>[file.path,file])),aliases=Object.entries(declaration.aliases?.files||{});
- const native=aliases.flatMap(([name,target])=>{const resolved=canonicalAlias(target,files,inputs);if(!macho(resolved.file))return [];return [{name,facts:resolved.file,canonical:typeof target==='string'?path.join(root,target):path.join(resolved.input.root,target.path)}];});
- const cross=native.filter(({name,canonical})=>path.dirname(path.join(root,name))!==path.dirname(canonical));
+ // Use the installer's exact bounded-reader rule for local aliases. Foreign
+ // imports also retain their existing complete dependency-closure check below.
+ for(const [name,target]of aliases)if(typeof target==='string')B.validateLocalAlias(root,name,target,declaration,dependencyResolver(inputs));
+ const native=aliases.flatMap(([name,target])=>{const resolved=canonicalAlias(target,files,inputs);if(!macho(resolved.file))return [];return [{name,target,facts:resolved.file,canonical:typeof target==='string'?path.join(root,target):path.join(resolved.input.root,target.path)}];});
+ const cross=native.filter(({name,target,canonical})=>typeof target!=='string'&&path.dirname(path.join(root,name))!==path.dirname(canonical));
  if(!cross.length)return;
  const created=[];
  try{
