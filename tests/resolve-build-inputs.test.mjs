@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {resolveBuildInputs} from '../tools/resolve-build-inputs.mjs';
+import {automaticInputName} from '../tools/plan-build-release.mjs';
 import {createRecipeBuildReporter,reportDigest} from '../tools/recipe-build-report.mjs';
 import {registerSelection} from '../tools/release-selection.mjs';
 import {helperPackage} from '../tools/helper-package.mjs';
@@ -75,4 +76,12 @@ test('a matching latest input definition reuses exact output across enclosing co
  f.write('producers/input.json',{version:'9.9.9-custom',source:{revision:'changed-real-source'},flags:['complete']});
  const changed=await resolveBuildInputs({selection:[{id:'consumer',version:'custom-consumer'}],describe:createRecipeBuildReporter({directory:f.directory}),published,nextName:()=> 'automatic-new-input'});
  assert.deepEqual(changed.orderedSelection,[{id:'input',version:'automatic-new-input'},{id:'consumer',version:'custom-consumer'}]);assert.notEqual(changed.reports.consumer.definitionDigest,reused.reports.consumer.definitionDigest);
+});
+
+// Only suggestions change; named releases are covered by the dispatch fixtures above.
+test('automatic input names use plain owned patch versions or the next published MCL revision',()=>{
+ assert.equal(automaticInputName({owned:true,current:'0.1.0-MCLv2',publishedNames:['0.1.0-MCLv1']}),'0.1.1');
+ assert.equal(automaticInputName({owned:true,current:'0.2.1',publishedNames:['0.2.0-MCLv1']}),'0.2.1');
+ assert.equal(automaticInputName({owned:false,current:'1.4.2-MCLv3',publishedNames:['1.4.2-MCLv3','1.3.0-MCLv7']}),'1.4.2-MCLv8');
+ assert.equal(automaticInputName({owned:false,current:'MCLv3-1028-6',publishedNames:['MCLv2-1028-6']}),'MCLv3');
 });

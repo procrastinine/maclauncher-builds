@@ -3,8 +3,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {readProjects,resolveProject,buildRecord} from '../lib/projects.mjs';
-import {ownedPackageSource,plainSemanticVersion} from '../lib/source-ownership.mjs';
-import {nextPackageVersion} from '../lib/package-version.mjs';
+import {ownedPackageSource} from '../lib/source-ownership.mjs';
 import {parseSelection,registerSelection} from './release-selection.mjs';
 import {buildPlan} from './build-runtime.mjs';
 import {requireGithubBuild} from './build-coverage.mjs';
@@ -12,6 +11,21 @@ import {createRecipeBuildReporter,canonicalReport} from './recipe-build-report.m
 import {resolveBuildInputs} from './resolve-build-inputs.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 const json=file=>JSON.parse(fs.readFileSync(file,'utf8'));
+
+/** Suggestions follow the product's version line; explicit names remain untouched. */
+export function automaticInputName({current,publishedNames,owned,profiles=[]}){
+ if(owned){
+  const latest=publishedNames[0]||current,profile=profiles.find(profile=>profile.version===latest);
+  const base=/^(\d+)\.(\d+)\.(\d+)/.exec(profile?.semanticVersion||latest);
+  if(!base)throw Error('The owned product needs its published semantic version.');
+  let patch=Number(base[3])+1,name;do{name=base[1]+'.'+base[2]+'.'+patch++;}while(publishedNames.includes(name));return name;
+ }
+ const highest=Math.max(0,...publishedNames.map(version=>Number(/(?:^|-)MCLv([1-9]\d*)/.exec(version)?.[1]||0)));
+ const prefix=current.split(/-?MCLv[1-9]\d*/)[0];
+ // Old snapshot labels do not invent an upstream version or retain commit hashes.
+ const upstream=/^\d+(?:\.\d+){1,3}(?:-(?:git|dev|devel|alpha\d*|beta\d*|rc\d*))?$/.test(prefix)?prefix:'';
+ return (upstream?upstream+'-':'')+'MCLv'+(highest+1);
+}
 
 export async function planBuildRelease({selection,directory=root,releases=[]}){
  const registry=readProjects(directory,{resolvePins:false}),describe=createRecipeBuildReporter({directory});
@@ -30,18 +44,11 @@ export async function planBuildRelease({selection,directory=root,releases=[]}){
   latest.set(id,result);return result;
  };
  const nextName=async id=>{
-  const project=resolveProject(id,directory,{resolvePins:false}),current=buildRecord(project).version;
-  const versions=(project.packageProfiles||[]).map(profile=>profile.version);
-  for(const folder of ['catalogs','catalogs/superseded']){const file=path.join(directory,folder,id+'.json');if(fs.existsSync(file))versions.push(...json(file).packages.map(record=>record.version));}
-  const packageVersions=[...versions];
-  for(const entry of project.producer.entries||[])if(entry.endsWith('.json')&&fs.existsSync(path.join(directory,entry)))versions.push(...fs.readFileSync(path.join(directory,entry),'utf8').matchAll(/"version"\s*:\s*"([^"]+)"/g).map(match=>match[1]));
-  if(ownedPackageSource(project,registry.repository,directory)){
-   const profile=project.packageProfiles.find(profile=>profile.version===current),candidates=[profile?.semanticVersion,current,...packageVersions].filter(value=>typeof value==='string').flatMap(value=>/^(\d+\.\d+\.\d+)(?:-|$)/.exec(value)?.[1]||[]).sort((a,b)=>b.localeCompare(a,undefined,{numeric:true})),base=candidates[0]||'0.0.0';
-   if(plainSemanticVersion(base))return nextPackageVersion(base,packageVersions,{sourceRepository:registry.repository,releaseRepository:registry.repository});
-  }
-  const match=/MCLv([1-9]\d*)/.exec(current);
-  if(match){const prefix=current.slice(0,match.index),suffix=current.slice(match.index+match[0].length),numbers=versions.flatMap(version=>version.startsWith(prefix+'MCLv')&&version.endsWith(suffix)?[Number(/^([1-9]\d*)/.exec(version.slice(prefix.length+4))?.[1]||0)]:[]);return prefix+'MCLv'+(Math.max(Number(match[1]),...numbers)+1)+suffix;}
-  return nextPackageVersion(current,versions);
+  const project=resolveProject(id,directory,{resolvePins:false}),names=[];
+  for(const folder of ['catalogs','catalogs/superseded']){const file=path.join(directory,folder,id+'.json');if(fs.existsSync(file))names.push(...json(file).packages.map(record=>record.version));}
+  for(const release of releases){const tag=typeof release==='string'?release:release.tag_name;if(!release.draft&&tag?.startsWith(id+'/v'))names.push(tag.slice(id.length+2).split('/')[0]);}
+  const current=buildRecord(project).version,owned=ownedPackageSource(project,registry.repository,directory);
+  return automaticInputName({current,publishedNames:names,owned,profiles:project.packageProfiles});
  };
  const resolved=await resolveBuildInputs({selection:parseSelection(selection),describe,published,nextName});
  const registration=registerSelection({selection:resolved.orderedSelection,directory,releases});
@@ -58,6 +65,8 @@ export async function main(args,{directory=root,env=process.env}={}){
  if(env.GITHUB_ACTIONS!=='true')throw Error('Release planning with GitHub metadata runs inside Build and release.');
  const releases=JSON.parse(execFileSync('gh',['api','--paginate','--slurp','repos/'+repository+'/releases?per_page=100'],{encoding:'utf8'})).flat().filter(release=>!release.draft);
  const plan=await planBuildRelease({selection:env.RELEASES,directory,releases});fs.mkdirSync(args[1],{recursive:true});
+ const requested=new Set(parseSelection(env.RELEASES).map(row=>row.id)),rebuilt=plan.selection.filter(row=>!requested.has(row.id));
+ if(env.GITHUB_STEP_SUMMARY&&rebuilt.length)fs.appendFileSync(env.GITHUB_STEP_SUMMARY,rebuilt.map(({id,version})=>id+' -> '+version+' (rebuilt input)').join('\n\n')+'\n');
  fs.writeFileSync(path.join(args[1],'reports.json'),canonicalReport(plan.reports));
  const output={selection:JSON.stringify(plan.selection),graph:JSON.stringify(plan.graph),reuse:JSON.stringify(plan.reuse),empty:String(!plan.independent.include.length&&plan.matrices.every(matrix=>!matrix.include.length)),matrixIndependent:JSON.stringify(plan.independent),emptyIndependent:String(!plan.independent.include.length)};
  for(let level=0;level<4;level++){output['matrix'+level]=JSON.stringify(plan.matrices[level]);output['empty'+level]=String(!plan.matrices[level].include.length);}

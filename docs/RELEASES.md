@@ -13,7 +13,7 @@ Names are used as supplied. A name already published for the project cannot be r
 
 One matrix builds the selected packages on their declared GitHub-hosted Mac or Linux runners. Each package is sealed, packed and attested with the shared build and packaging commands. Independent jobs run in parallel. A failed package does not discard another package's successful output.
 
-Recipes report their source pins, recipe files and consumed packages. Matching published input definitions reuse the exact attested release. Changed inputs build first in the same run; their verified artifacts pass directly to consumers on GitHub. Independent projects build in parallel with that chain.
+Recipes report their source pins, recipe files and consumed packages. Matching published input definitions reuse the exact attested release. Changed inputs build first in the same run; their verified artifacts pass directly to consumers on GitHub. Independent projects build in parallel with that chain. Automatically named inputs use the next published plain patch version for owned source, or the next project-wide MCL revision for an upstream build. Snapshot names omit dates and hashes. The plan summary lists those names before any build starts.
 
 Each archive seals `build-definition.json` and `build-inputs.json` in its regular file inventory. The latter lists the digest, release and source build of every resolved input. The ordinary archive attestation covers those records.
 
