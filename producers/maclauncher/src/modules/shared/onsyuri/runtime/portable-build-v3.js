@@ -52,7 +52,7 @@ function validateEngineFeatures(outputRoot) {
   if (commands.includes("USE_GLES") || commands.includes("renderer/gles_renderer.cpp")) throw new Error("Yuri macOS build enabled the excluded GLES sharpness path.");
 }
 
-async function buildPortableYuri({ sourceDir, archives, workRoot, dependencyStacks, architecture = process.arch, pathMappings = [], signal, onProgress, dependencies = {} }) {
+async function buildPortableYuri({ sourceDir, archives, workRoot, dependencyStacks, mixerStack, architecture = process.arch, pathMappings = [], signal, onProgress, dependencies = {} }) {
   throwIfAborted(signal);
   if (process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) throw new Error("Yuri builds require macOS and an arm64 or x64 target.");
   validateBase();
@@ -67,7 +67,8 @@ async function buildPortableYuri({ sourceDir, archives, workRoot, dependencyStac
   const readRoots = retained ? [closure.prefix, ...dependencyStacks.yuri.readRoots] : [];
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, ...readRoots] });
   const overlaySha256 = overlayIdentity(); fs.mkdirSync(workRoot, { recursive: true });
-  if (!mixer) mixer = await Mixer.buildMixer({ archives, workRoot: path.join(workRoot, "mixer-dependencies"), architecture, pathMappings, signal, onProgress, dependencies });
+  if(mixerStack)Base.validateMixerStack(mixerStack,architecture);
+  if (!mixer) mixer = mixerStack || await Mixer.buildMixer({ archives, workRoot: path.join(workRoot, "mixer-dependencies"), architecture, pathMappings, signal, onProgress, dependencies });
   const prefix = path.join(workRoot, "prefix"); fs.mkdirSync(prefix);
   Prefix.linkPrefix(closure?.prefix || mixer.prefix, prefix, { readRoots: retained ? dependencyStacks.yuri.readRoots : mixer.readRoots });
   const run = dependencies.runBuildCommand || Source.runBuildCommand;

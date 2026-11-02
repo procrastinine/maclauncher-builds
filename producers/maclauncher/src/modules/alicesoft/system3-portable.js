@@ -5,6 +5,7 @@ const Source = require("../shared/runtime/pinned-native-build");
 const Native = require("../shared/runtime/local-native");
 const Fonts = require("../shared/runtime/portable-sdl2-fonts");
 const Resources = require("./system3-resource-overlay");
+const Prefix = require("../shared/runtime/portable-dependency-prefix");
 
 const VERSION = "1.8.0-MCLv1";
 const REVISION = "461673bec729e7e0ec905921fc3e03aecf977a70";
@@ -16,12 +17,17 @@ function overlayIdentity() {
     .update(fs.readFileSync(require.resolve("../shared/runtime/portable-sdl2-fonts"))).update(fs.readFileSync(require.resolve("../shared/runtime/portable-sdl2-fonts.json"))).digest("hex");
 }
 
-async function buildPortableSystem3({ sourceDir = sourcePath, archives, workRoot, architecture = process.arch, pathMappings = [], signal, onProgress, dependencies = {} }) {
+async function buildPortableSystem3({ sourceDir = sourcePath, archives, workRoot, fontStack, architecture = process.arch, pathMappings = [], signal, onProgress, dependencies = {} }) {
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir] });
   const source = await Source.validatePinnedSource(sourceDir, REVISION, { signal });
   if (Source.hashPinnedFiles(sourceDir, source.files) !== SOURCE_SHA256) throw new Error("System3 source tree checksum does not match the selected version.");
   const overlaySha256 = overlayIdentity();
-  const stack = await Fonts.buildDependencies({ archives, workRoot, architecture, pathMappings, signal, onProgress, dependencies });
+  let stack;
+  if(fontStack){
+    const recipe=crypto.createHash("sha256").update(fs.readFileSync(require.resolve("../shared/runtime/portable-sdl2-fonts"))).update(fs.readFileSync(require.resolve("../shared/runtime/portable-sdl2-fonts.json"))).digest("hex");
+    Prefix.validateStack(fontStack,Fonts.PIN,recipe,architecture);
+    const prefix=path.join(workRoot,"prefix");fs.mkdirSync(prefix,{recursive:true});Prefix.linkPrefix(fontStack.prefix,prefix);stack={...fontStack,prefix};
+  }else stack = await Fonts.buildDependencies({ archives, workRoot, architecture, pathMappings, signal, onProgress, dependencies });
   const sourceRoot = path.join(workRoot, "system3-source");
   const sourceTreeSha256 = Source.stagePinnedFiles(sourceDir, source.files, sourceRoot);
   const sourceOverlay = Resources.apply(sourceRoot, { sourceDir });
