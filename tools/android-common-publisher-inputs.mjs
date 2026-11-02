@@ -14,6 +14,18 @@ const archiveNames=(archive,gzip=false)=>read('/usr/bin/tar',[gzip?'-tzf':'-tf',
  return name.replace(/\/$/,'');
 });
 function unique(values,label){const selected=[...new Set(values)];if(selected.length!==1)throw Error('The publisher archive does not identify one '+label+'.');return selected[0];}
+/** Supply the publisher framework API without adding aliases to its sealed package. */
+export function prepareSharedSdlFramework(input,work){
+ const root=fs.realpathSync(input.root),version=fs.realpathSync(path.join(root,'native/SDL3.framework/Versions/A'));
+ if(!version.startsWith(root+path.sep)||!fs.statSync(path.join(version,'SDL3')).isFile()||!fs.statSync(path.join(version,'Headers/SDL.h')).isFile())throw Error('The shared SDL3 package has no complete canonical framework API.');
+ const framework=path.join(work,'sdl-shared/SDL3.framework');
+ if(fs.existsSync(framework))throw Error('Choose a new shared SDL3 framework work directory.');
+ fs.mkdirSync(path.join(framework,'Versions'),{recursive:true});
+ fs.cpSync(version,path.join(framework,'Versions/A'),{recursive:true,verbatimSymlinks:true,mode:fs.constants.COPYFILE_FICLONE});
+ fs.symlinkSync('A',path.join(framework,'Versions/Current'),'dir');
+ for(const name of ['SDL3','Headers','Resources'])fs.symlinkSync('Versions/Current/'+name,path.join(framework,name));
+ return framework;
+}
 /** Acquire the unchanged publisher binaries and complete framework build input. */
 export async function prepareAndroidCommonPublisherInputs({work}){
  if(process.platform!=='darwin'||process.arch!=='arm64'||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('Android publisher inputs require Apple Silicon macOS and a new absolute work directory.');
@@ -32,7 +44,7 @@ export async function prepareAndroidCommonPublisherInputs({work}){
  if(!fs.statSync(path.join(jdk,'include/jni.h')).isFile())throw Error('The supplied JDK has no JNI headers.');
  retireArchive(jdkArchive);
  const sharedSdl=preparedBuildInput('native-sdl3');let sdl;
- if(sharedSdl)sdl=path.join(sharedSdl.root,'native/SDL3.framework');
+ if(sharedSdl)sdl=prepareSharedSdlFramework(sharedSdl,work);
  else{const sdlArchive=await buildInput(profile.sdl,archiveCache);sdl=await prepareSdl(sdlArchive,work,profile.sdl);retireArchive(sdlArchive);}
  if(!fs.statSync(path.join(sdl,'SDL3')).isFile()||!fs.statSync(path.join(sdl,'Headers/SDL.h')).isFile())throw Error('The shared SDL3 package has no complete framework API.');
  const mvkArchive=await buildInput(profile.vulkanHeaders,archiveCache),mvkOutput=path.join(work,'vulkan');fs.mkdirSync(mvkOutput);

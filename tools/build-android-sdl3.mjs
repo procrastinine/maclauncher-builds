@@ -7,10 +7,11 @@ import {recipeMain} from './build-source.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 /** Keep the original publisher framework API, including the headers consumers compile against. */
 export function packageSdl3Framework({project,version,output,sdl,profile}){
- const payload=path.join(output,'payload'),framework=path.join(payload,'native/SDL3.framework');fs.mkdirSync(path.dirname(framework),{recursive:true});
- // Resolve only links within this publisher framework. The sealed inventory
- // remains regular files; the shared packer aliases identical contents.
- const source=fs.realpathSync(sdl);
+ const payload=path.join(output,'payload'),framework=path.join(payload,'native/SDL3.framework/Versions/A');fs.mkdirSync(path.dirname(framework),{recursive:true});
+ // Keep the publisher's canonical image directory. Flattening its framework
+ // aliases creates cross-directory copies with different @loader_path bases.
+ const publisher=fs.realpathSync(sdl),source=fs.realpathSync(path.join(publisher,'Versions/A'));
+ if(!source.startsWith(publisher+path.sep))throw Error('SDL framework version leaves its publisher input.');
  function copy(from,to,parents=[]){
   const actual=fs.realpathSync(from),stat=fs.statSync(actual);
   if(actual!==source&&!actual.startsWith(source+path.sep))throw Error('SDL framework link leaves its publisher input.');
@@ -22,7 +23,7 @@ export function packageSdl3Framework({project,version,output,sdl,profile}){
  }
  copy(source,framework);
  return helperPackage({id:project,version,arch:'universal',output,minimumMacOS:'13.0',sourceSha256:profile.sha256,record:{publisherVersion:profile.version,publisherArchive:profile},
-  notices:[{name:'SDL3 '+profile.version,license:'Zlib',path:'native/SDL3.framework/Resources/LICENSE.txt',sourceUrl:profile.url}]});
+  notices:[{name:'SDL3 '+profile.version,license:'Zlib',path:'native/SDL3.framework/Versions/A/Resources/LICENSE.txt',sourceUrl:profile.url}]});
 }
 export async function buildAndroidSdl3({project,version,arch,output,work}){
  if(project!=='native-sdl3'||arch!=='universal')throw Error('Select the universal SDL3 framework package.');
