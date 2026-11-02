@@ -80,8 +80,10 @@ test('a matching latest input definition reuses exact output across enclosing co
 
 // Only suggestions change; named releases are covered by the dispatch fixtures above.
 test('automatic input names use plain owned patch versions or the next published MCL revision',()=>{
- assert.equal(automaticInputName({owned:true,current:'0.1.0-MCLv2',publishedNames:['0.1.0-MCLv1']}),'0.1.1');
- assert.equal(automaticInputName({owned:true,current:'0.2.1',publishedNames:['0.2.0-MCLv1']}),'0.2.1');
+ assert.equal(automaticInputName({owned:true,current:'0.1.0-MCLv2',publishedNames:['0.1.0-MCLv1']}),'0.1.0');
+ assert.equal(automaticInputName({owned:true,current:'0.2.1',publishedNames:['0.2.0','0.2.0-MCLv1']}),'0.2.1');
  assert.equal(automaticInputName({owned:false,current:'1.4.2-MCLv3',publishedNames:['1.4.2-MCLv3','1.3.0-MCLv7']}),'1.4.2-MCLv8');
+ assert.equal(automaticInputName({owned:false,current:'0.1.0-MCLv1',publishedNames:['0.1.0-MCLv1'],upstreamVersion:'3.8.0'}),'3.8.0-MCLv2');
+ assert.equal(automaticInputName({owned:false,current:'0.1.0-MCLv1',publishedNames:['0.1.0-MCLv1'],upstreamVersion:null}),'MCLv2');
  assert.equal(automaticInputName({owned:false,current:'MCLv3-1028-6',publishedNames:['MCLv2-1028-6']}),'MCLv3');
 });

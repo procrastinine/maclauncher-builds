@@ -13,17 +13,17 @@ const root=path.resolve(import.meta.dirname,'..');
 const json=file=>JSON.parse(fs.readFileSync(file,'utf8'));
 
 /** Suggestions follow the product's version line; explicit names remain untouched. */
-export function automaticInputName({current,publishedNames,owned,profiles=[]}){
+export function automaticInputName({current,publishedNames,owned,profiles=[],upstreamVersion}){
  if(owned){
-  const latest=publishedNames[0]||current,profile=profiles.find(profile=>profile.version===latest);
+  const plain=publishedNames.filter(version=>/^\d+\.\d+\.\d+(?:-|$)/.test(version)&&!version.includes('MCL')),latest=plain[0]||current,profile=profiles.find(profile=>profile.version===latest);
   const base=/^(\d+)\.(\d+)\.(\d+)/.exec(profile?.semanticVersion||latest);
   if(!base)throw Error('The owned product needs its published semantic version.');
-  let patch=Number(base[3])+1,name;do{name=base[1]+'.'+base[2]+'.'+patch++;}while(publishedNames.includes(name));return name;
+  let patch=Number(base[3])+(plain.length?1:0),name;do{name=base[1]+'.'+base[2]+'.'+patch++;}while(publishedNames.includes(name));return name;
  }
  const highest=Math.max(0,...publishedNames.map(version=>Number(/(?:^|-)MCLv([1-9]\d*)/.exec(version)?.[1]||0)));
  const prefix=current.split(/-?MCLv[1-9]\d*/)[0];
  // Old snapshot labels do not invent an upstream version or retain commit hashes.
- const upstream=/^\d+(?:\.\d+){1,3}(?:-(?:git|dev|devel|alpha\d*|beta\d*|rc\d*))?$/.test(prefix)?prefix:'';
+ const upstream=upstreamVersion!==undefined?upstreamVersion:/^\d+(?:\.\d+){1,3}(?:-(?:git|dev|devel|alpha\d*|beta\d*|rc\d*))?$/.test(prefix)?prefix:'';
  return (upstream?upstream+'-':'')+'MCLv'+(highest+1);
 }
 
@@ -48,7 +48,7 @@ export async function planBuildRelease({selection,directory=root,releases=[]}){
   for(const folder of ['catalogs','catalogs/superseded']){const file=path.join(directory,folder,id+'.json');if(fs.existsSync(file))names.push(...json(file).packages.map(record=>record.version));}
   for(const release of releases){const tag=typeof release==='string'?release:release.tag_name;if(!release.draft&&tag?.startsWith(id+'/v'))names.push(tag.slice(id.length+2).split('/')[0]);}
   const current=buildRecord(project).version,owned=ownedPackageSource(project,registry.repository,directory);
-  return automaticInputName({current,publishedNames:names,owned,profiles:project.packageProfiles});
+  return automaticInputName({current,publishedNames:names,owned,profiles:project.packageProfiles,upstreamVersion:project.producer.upstreamVersion});
  };
  const resolved=await resolveBuildInputs({selection:parseSelection(selection),describe,published,nextName});
  const registration=registerSelection({selection:resolved.orderedSelection,directory,releases});
