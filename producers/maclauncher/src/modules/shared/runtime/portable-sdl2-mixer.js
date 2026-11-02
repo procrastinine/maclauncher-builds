@@ -10,7 +10,6 @@ const { throwIfAborted } = require("./download-utils");
 const PIN = Object.freeze(require("./portable-sdl2-mixer.json"));
 const MIXER_CMAKE_SHA256 = "c14000d099bb2135ef7994dce44adad1f6dfa9b35a21f28d75476d5b001a0e08";
 const digest = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
-const dependencyRecipe = (helper, catalog) => crypto.createHash("sha256").update(fs.readFileSync(require.resolve(helper))).update(fs.readFileSync(require.resolve(catalog))).digest("hex");
 const recipeIdentity = () => digest(Buffer.concat([fs.readFileSync(__filename),fs.readFileSync(require.resolve("./portable-sdl2-mixer.json")),fs.readFileSync(require.resolve("./portable-dependency-prefix"))]));
 
 function adaptMixer(sourceRoot) {
@@ -43,11 +42,10 @@ async function buildMixer({archives,workRoot,dependencyStacks,architecture=proce
   throwIfAborted(signal);
   workRoot=Fonts.assertFreshBuildRoot(workRoot,{readOnlyRoots:Object.values(dependencyStacks||{}).map(stack=>stack.prefix)});
   Fonts.validateArchives(archives);Audio.validateArchives(archives);Audio.validateArchives(archives,{catalog:PIN});
-  const retained=[];let fonts,audio;
+  let fonts,audio;
   if(dependencyStacks){
     if(Object.keys(dependencyStacks).length!==2||!dependencyStacks.fonts||!dependencyStacks.audio)throw new Error("SDL2_mixer reuse needs exact font and audio profiles.");
     fonts=dependencyStacks.fonts;audio=dependencyStacks.audio;
-    retained.push(Prefix.validateStack(fonts,Fonts.PIN,dependencyRecipe("./portable-sdl2-fonts","./portable-sdl2-fonts.json"),architecture),Prefix.validateStack(audio,Audio.PIN,dependencyRecipe("./portable-sndfile","./portable-sndfile.json"),architecture));
   }
   const recipeSha256=recipeIdentity();fs.mkdirSync(workRoot,{recursive:true});
   if(!fonts){fonts=await Fonts.buildDependencies({archives,workRoot:path.join(workRoot,"fonts"),architecture,pathMappings,signal,onProgress,dependencies});audio=await Audio.buildDependencies({archives,workRoot:path.join(workRoot,"audio"),architecture,pathMappings,signal,onProgress,dependencies});}
@@ -64,10 +62,9 @@ async function buildMixer({archives,workRoot,dependencyStacks,architecture=proce
     sourceRoots[pin.id]=sourceRoot;sources.push({...pin,...build,...(sourceOverlay?{sourceOverlay}:{})});
   }
   const features=validateFeatures(workRoot);
-  for(const old of retained)if(Prefix.snapshotPrefix(old.prefix).sha256!==old.sha256)throw new Error("A reused dependency prefix changed during compilation.");
   if(recipeIdentity()!==recipeSha256)throw new Error("SDL2_mixer recipe changed during compilation.");
   const readRoots=[fonts.prefix,audio.prefix];
-  return {version:PIN.version,architecture,minimumMacOS:PIN.minimumMacOS,recipeSha256,prefix,prefixSha256:Prefix.snapshotPrefix(prefix,{readRoots}).sha256,readRoots,sdk:fonts.sdk,tools:fonts.tools,sources,sourceRoots,fonts,audio,descriptor,features,reusedPrefixes:retained.map(({prefix:directory,sha256})=>({prefix:directory,sha256}))};
+  return {version:PIN.version,architecture,minimumMacOS:PIN.minimumMacOS,recipeSha256,prefix,readRoots,sdk:fonts.sdk,tools:fonts.tools,sources,sourceRoots,fonts,audio,descriptor,features};
 }
 
 module.exports={PIN,MIXER_CMAKE_SHA256,recipeIdentity,adaptMixer,adaptOpusDescriptor,validateFeatures,buildMixer};

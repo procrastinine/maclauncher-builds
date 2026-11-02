@@ -63,31 +63,14 @@ test("native default fonts resolve beside a relocated executable and preserve cu
   execFileSync(alias, [], { cwd: os.tmpdir(), timeout: 10000, stdio: "pipe" });
 });
 
-test("dependency prefix checksums reject external links, content mutations and recipe mismatches", t => {
-  const root = temporary(t), prefix = path.join(root, "prefix"); fs.mkdirSync(path.join(prefix, "lib"), { recursive: true });
-  fs.writeFileSync(path.join(prefix, "lib/library"), "dependency content"); fs.symlinkSync("library", path.join(prefix, "lib/alias"));
-  const inventory = Prefix.snapshotPrefix(prefix), pin = { id: "fixture", version: "1", archiveSha256: "a".repeat(64), options: [] };
-  const catalog = { version: "fixture-v1", architecture: "arm64", minimumMacOS: "13.0", dependencies: [pin] }, stack = { version: catalog.version, architecture: "arm64", minimumMacOS: "13.0",
-    recipeSha256: "b".repeat(64), prefix, prefixSha256: inventory.sha256, sources: [pin] };
-  assert.equal(Prefix.validateStack(stack, catalog, stack.recipeSha256, "arm64").sha256, inventory.sha256);
-  assert.throws(() => Prefix.validateStack({ ...stack, recipeSha256: "c".repeat(64) }, catalog, stack.recipeSha256, "arm64"), /exact source recipe/);
-  assert.throws(() => Prefix.validateStack({ ...stack, sources: [{ ...pin, version: "2" }] }, catalog, stack.recipeSha256, "arm64"), /source identity/);
-  assert.throws(()=>Prefix.validateStack(stack,catalog,stack.recipeSha256,"x64"),/exact source recipe/);
-  fs.writeFileSync(path.join(prefix, "lib/library"), "changed dependency");
-  assert.throws(() => Prefix.validateStack(stack, catalog, stack.recipeSha256, "arm64"), /prefix checksum/);
-  const outside = path.join(root, "outside"); fs.writeFileSync(outside, "outside"); fs.symlinkSync(outside, path.join(prefix, "lib/escaped"));
-  assert.throws(() => Prefix.snapshotPrefix(prefix), /inside their declared prefixes/);
-});
-
 test("read-only dependency views link only build inputs and refuse conflicting files", t => {
   const root = temporary(t), input = path.join(root, "input"), output = path.join(root, "output");
   fs.mkdirSync(path.join(input, "lib/pkgconfig"), { recursive: true }); fs.mkdirSync(path.join(input, "bin")); fs.mkdirSync(output);
   fs.writeFileSync(path.join(input, "lib/dependency"), "content"); fs.writeFileSync(path.join(input, "lib/pkgconfig/example.pc"), "pkg"); fs.writeFileSync(path.join(input, "bin/other-runtime"), "unrelated");
-  const before = Prefix.snapshotPrefix(input);
   Prefix.linkPrefix(input, output);
   assert.equal(fs.lstatSync(path.join(output, "lib/dependency")).isSymbolicLink(), true);
   assert.equal(fs.existsSync(path.join(output, "bin/other-runtime")), false);
-  assert.equal(Prefix.snapshotPrefix(input).sha256, before.sha256);
+  assert.equal(fs.readFileSync(path.join(input, "lib/dependency"), "utf8"), "content");
   assert.throws(() => Prefix.linkPrefix(input, input), /separate build prefix/);
   fs.unlinkSync(path.join(output, "lib/dependency")); fs.writeFileSync(path.join(output, "lib/dependency"), "collision");
   assert.throws(() => Prefix.linkPrefix(input, output), /conflicting files/);

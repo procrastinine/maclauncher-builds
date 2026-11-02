@@ -101,7 +101,7 @@ async function buildDependencies({ archives, workRoot, architecture = process.ar
   }
   return { version: PIN.version, architecture, minimumMacOS: PIN.minimumMacOS, audioFormats: PIN.audioFormats,
     recipeSha256: crypto.createHash("sha256").update(fs.readFileSync(__filename)).update(fs.readFileSync(require.resolve("./portable-sndfile.json"))).digest("hex"),
-    prefix, prefixSha256: require("./portable-dependency-prefix").snapshotPrefix(prefix).sha256, sdk, tools, sources, sourceRoots };
+    prefix, sdk, tools, sources, sourceRoots };
 }
 
 module.exports = { PIN, validateArchives, compilerFlags, buildAutotools, buildDependencies };

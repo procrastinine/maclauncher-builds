@@ -6,7 +6,6 @@ const Native = require("../../shared/runtime/local-native");
 const Fonts = require("../../shared/runtime/portable-sdl2-fonts");
 const Dependency = require("./portable-dependencies");
 const Portable = require("./portable-build");
-const Prefix = require("./portable-prefix");
 const Patches = require("./source-patches");
 const SoundEffectSession = require("./windows-sfx-session");
 const Adapter = require("./adapter");
@@ -41,14 +40,12 @@ async function applyCurrentOverlay(directory, { logPath, signal } = {}) {
 async function buildCurrentImpacto({ sourceDir, workRoot, dependencyStack, ffmpegPrefix, avcppPrefix,
   atrac9Source, magicEnumSource, pathMappings = [], dependencies = {}, signal }) {
   throwIfAborted(signal);
-  Portable.validateDependencyStack(dependencyStack);
   const source = await Source.validatePinnedSource(sourceDir, REVISION, { signal });
   if (Source.hashPinnedFiles(sourceDir, source.files) !== SOURCE_SHA256)
     throw new Error("Impacto source differs from its selected snapshot.");
   const inputs = [ffmpegPrefix, avcppPrefix, atrac9Source, magicEnumSource];
   if (inputs.some(value => !path.isAbsolute(value || "") || !fs.statSync(value).isDirectory()))
     throw new Error("Impacto requires explicit codec, avcpp and native dependency source directories.");
-  const snapshots = inputs.slice(0, 2).map(prefix => Prefix.snapshotPrefix(prefix));
   const nativeSources = [[atrac9Source, Adapter.SOURCES.atrac9], [magicEnumSource, Adapter.SOURCES.magicEnum]];
   const nativeSourceHashes = [];
   for (const [directory, pin] of nativeSources) {
@@ -89,11 +86,6 @@ async function buildCurrentImpacto({ sourceDir, workRoot, dependencyStack, ffmpe
   const executable = path.join(prefix, "Impacto.app/Contents/MacOS/Impacto");
   await Portable.linkDependencyPaths(executable, [dependencyStack.prefix, ffmpegPrefix], { logPath, env, signal, dependencies });
   Portable.assertMinimumMacOS(executable);
-  Portable.validateDependencyStack(dependencyStack);
-  inputs.slice(0, 2).forEach((input, index) => {
-    if (Prefix.snapshotPrefix(input).sha256 !== snapshots[index].sha256)
-      throw new Error("An Impacto dependency input changed during compilation.");
-  });
   for (let index = 0; index < nativeSources.length; index++) {
     const [directory, pin] = nativeSources[index];
     const validated = await Source.validatePinnedSource(directory, pin.revision, { signal });

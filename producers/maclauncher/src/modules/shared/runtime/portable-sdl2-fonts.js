@@ -127,7 +127,7 @@ async function buildDependencies({ archives, workRoot, architecture = process.ar
     sourceRoots[pin.id] = sourceRoot; sources.push({ ...pin, ...build });
   }
   const recipeSha256 = crypto.createHash("sha256").update(fs.readFileSync(__filename)).update(fs.readFileSync(path.join(__dirname, "portable-sdl2-fonts.json"))).digest("hex");
-  return { version: PIN.version, architecture, minimumMacOS: PIN.minimumMacOS, recipeSha256, prefix, prefixSha256: require("./portable-dependency-prefix").snapshotPrefix(prefix).sha256, sdk, tools, sdkPackages, sources, sourceRoots };
+  return { version: PIN.version, architecture, minimumMacOS: PIN.minimumMacOS, recipeSha256, prefix, sdk, tools, sdkPackages, sources, sourceRoots };
 }
 
 module.exports = { PIN, validateArchives, buildEnvironment, cmakeOptions, sdkCompressionMetadata, buildProject, assertFreshBuildRoot, buildDependencies };

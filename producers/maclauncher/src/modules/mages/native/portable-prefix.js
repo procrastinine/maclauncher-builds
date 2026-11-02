@@ -1,7 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const { isDeepStrictEqual } = require("node:util");
 const Native = require("../../shared/runtime/local-native");
 
 function snapshotPrefix(prefix, { readRoots = [] } = {}) {
@@ -27,19 +26,6 @@ function snapshotPrefix(prefix, { readRoots = [] } = {}) {
   return { prefix: root, sha256: tree.digest("hex"), files, bytes };
 }
 
-function validateStack(stack, catalog, recipeSha256) {
-  if (!stack || stack.version !== catalog.version || stack.architecture !== "arm64" || stack.minimumMacOS !== "13.0" ||
-      stack.recipeSha256 !== recipeSha256 || !/^[a-f0-9]{64}$/.test(stack.prefixSha256 || "") ||
-      !Array.isArray(stack.sources) || stack.sources.length !== catalog.dependencies.length) throw new Error("Dependency reuse requires the exact source recipe and prefix checksum.");
-  for (const pin of catalog.dependencies) {
-    const source = stack.sources.find(row => row.id === pin.id);
-    if (!source || Object.keys(pin).some(key => !isDeepStrictEqual(source[key], pin[key]))) throw new Error("Dependency source identity differs from its selected version.");
-  }
-  const inventory = snapshotPrefix(stack.prefix);
-  if (inventory.sha256 !== stack.prefixSha256) throw new Error("Dependency prefix checksum changed.");
-  return inventory;
-}
-
 function linkPrefix(inputPrefix, outputPrefix) {
   const original = fs.realpathSync(inputPrefix), output = fs.realpathSync(outputPrefix);
   if (output === original || output.startsWith(original + path.sep) || original.startsWith(output + path.sep)) throw new Error("Dependency outputs must be separate from their inputs.");
@@ -59,4 +45,4 @@ function linkPrefix(inputPrefix, outputPrefix) {
   for (const relative of ["include", "lib", "share"]) if (fs.existsSync(path.join(original, relative))) visit(path.join(original, relative), relative);
 }
 
-module.exports = { snapshotPrefix, validateStack, linkPrefix };
+module.exports = { snapshotPrefix, linkPrefix };

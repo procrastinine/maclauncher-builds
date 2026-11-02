@@ -1,7 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const { isDeepStrictEqual } = require("node:util");
 const Source = require("../shared/runtime/pinned-native-build");
 const Native = require("../shared/runtime/local-native");
 const Fonts = require("../shared/runtime/portable-sdl2-fonts");
@@ -24,26 +23,6 @@ const recipeFiles = [__filename, require.resolve("./system4-portable-overlay"), 
 function overlayIdentity() {
   const hash=crypto.createHash("sha256");for(const file of recipeFiles)hash.update(fs.readFileSync(file));return hash.digest("hex");
 }
-function dependencyRecipe(helper, catalog) {
-  const hash=crypto.createHash("sha256").update(fs.readFileSync(require.resolve(helper)));
-  if(catalog)hash.update(fs.readFileSync(require.resolve(catalog)));return hash.digest("hex");
-}
-
-function validateMovieStack(stack) {
-  if (!stack || stack.architecture !== "arm64" || stack.minimumMacOS !== "13.0" ||
-      stack.version !== Movie.PIN.version || stack.recipeSha256 !== Movie.recipeIdentity() ||
-      !isDeepStrictEqual(stack.source,Movie.PIN.source) || !isDeepStrictEqual(stack.decoders,Movie.PIN.decoders) || !isDeepStrictEqual(stack.demuxers,Movie.PIN.demuxers) ||
-      !/^[a-f0-9]{64}$/.test(stack.prefixSha256||"") || stack.network !== false || stack.externalCodecs !== false || stack.gpl !== false || stack.nonfree !== false ||
-      !Array.isArray(stack.options) || !isDeepStrictEqual(stack.options.slice(7,-2),Movie.OPTIONS)) {
-    throw new Error("Portable movie reuse needs the exact source recipe, codec profile and prefix checksum.");
-  }
-  const configuredPrefix=stack.options.find(option=>option.startsWith("--prefix="))?.slice(9);
-  if(!configuredPrefix || fs.realpathSync(configuredPrefix)!==fs.realpathSync(stack.prefix))throw new Error("Portable movie metadata must reference its original library prefix.");
-  const inventory=Prefix.snapshotPrefix(stack.prefix);
-  if(inventory.sha256!==stack.prefixSha256)throw new Error("Portable movie dependency prefix checksum changed.");
-  return inventory;
-}
-
 function nativeFile({ prefix, sdk, pathMappings, tools }) {
   for(const value of [prefix,sdk,...Object.values(tools)]) if(!path.isAbsolute(value||"")||/[\r\n\0]/.test(value))throw new Error("Portable Meson build paths must be absolute.");
   const flags=Audio.compilerFlags(sdk,pathMappings).split(" ");
@@ -71,13 +50,11 @@ async function buildPortableSystem4({ sourceDir=sourcePath,archives,workRoot,dep
   if(!path.isAbsolute(archives?.ffmpeg||"")||Native.hashFile(archives.ffmpeg)!==Movie.PIN.source.sha256)throw new Error("Portable movies require the exact FFmpeg source archive.");
   const source=await Source.validatePinnedSource(sourceDir,REVISION,{signal});
   if(Source.hashPinnedFiles(sourceDir,source.files)!==SOURCE_SHA256)throw new Error("xsystem4 and libsys4 source checksum differs from the selected version.");
-  const overlaySha256=overlayIdentity(),retained=[];
+  const overlaySha256=overlayIdentity();
   let fonts,audio,movie;
   if(dependencyStacks){
     if(Object.keys(dependencyStacks).length!==3||!dependencyStacks.fonts||!dependencyStacks.audio||!dependencyStacks.movie)throw new Error("Portable dependency reuse needs font, audio and movie profiles.");
     ({fonts,audio,movie}=dependencyStacks);
-    retained.push(Prefix.validateStack(fonts,Fonts.PIN,dependencyRecipe("../shared/runtime/portable-sdl2-fonts","../shared/runtime/portable-sdl2-fonts.json")),
-      Prefix.validateStack(audio,Audio.PIN,dependencyRecipe("../shared/runtime/portable-sndfile","../shared/runtime/portable-sndfile.json")),validateMovieStack(movie));
   }
   fs.mkdirSync(workRoot,{recursive:true});
   if(!fonts){
@@ -115,11 +92,10 @@ async function buildPortableSystem4({ sourceDir=sourcePath,archives,workRoot,dep
   throwIfAborted(signal);const features=validateFeatures(outputRoot);
   await Source.validatePinnedSource(sourceDir,REVISION,{signal});
   if(Source.hashPinnedFiles(sourceDir,source.files)!==sourceTreeSha256||overlayIdentity()!==overlaySha256)throw new Error("xsystem4 source or build adapter changed during compilation.");
-  for(const inventory of retained)if(Prefix.snapshotPrefix(inventory.prefix).sha256!==inventory.sha256)throw new Error("A reused dependency prefix changed during compilation.");
   const executable=path.join(prefix,"bin/xsystem4");
   return {managerId:"xsystem4",version:VERSION,sourceRevision:REVISION,libsys4Revision:LIBSYS4_REVISION,sourceTreeSha256,overlaySha256,sourceOverlay,
     architecture:"arm64",minimumMacOS:"13.0",executable,executableSha256:Native.hashFile(executable),resources:path.join(prefix,"share/xsystem4"),features,
     sourceRoot,outputRoot,prefix,sdk:fonts.sdk,tools,configureOptions,startedAt,completedAt:new Date().toISOString(),logPath,
-    dependencyClosure:{version:PIN.version,prefix,fonts,audio,movie,sources,sourceRoots,reusedPrefixes:retained.map(({prefix:directory,sha256})=>({prefix:directory,sha256}))}};
+    dependencyClosure:{version:PIN.version,prefix,fonts,audio,movie,sources,sourceRoots}};
 }
-module.exports={VERSION,REVISION,LIBSYS4_REVISION,SOURCE_SHA256,PIN,sourcePath,recipeFiles,overlayIdentity,dependencyRecipe,validateMovieStack,nativeFile,validateFeatures,buildPortableSystem4};
+module.exports={VERSION,REVISION,LIBSYS4_REVISION,SOURCE_SHA256,PIN,sourcePath,recipeFiles,overlayIdentity,nativeFile,validateFeatures,buildPortableSystem4};

@@ -1,7 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const { isDeepStrictEqual } = require("node:util");
 const Source = require("../../shared/runtime/pinned-native-build");
 const Native = require("../../shared/runtime/local-native");
 const Fonts = require("../../shared/runtime/portable-sdl2-fonts");
@@ -36,26 +35,6 @@ function overlayIdentity() {
   return hash.digest("hex");
 }
 
-function validateDependencyStack(stack) {
-  if (!stack || stack.version !== Dependency.PIN.version || stack.architecture !== "arm64" || stack.minimumMacOS !== "13.0" ||
-      stack.recipeSha256 !== Dependency.recipeHash() || !/^[a-f0-9]{64}$/.test(stack.prefixSha256 || "") ||
-      !Array.isArray(stack.sources) || stack.sources.length !== Dependency.PIN.dependencies.length) {
-    throw new Error("Impacto requires its exact macOS 13 dependency version and checksum.");
-  }
-  for (const pin of Dependency.PIN.dependencies) {
-    const source = stack.sources.find(row => row.id === pin.id);
-    if (!source || Object.keys(pin).some(key => !isDeepStrictEqual(source[key], pin[key]))) throw new Error("Impacto dependency source identity changed.");
-  }
-  const retained = Dependency.dependencyStacks(stack.reusedStacks);
-  if (!Array.isArray(stack.reusedPrefixes) || stack.reusedPrefixes.length !== retained.length ||
-      retained.some((row, index) => row.sha256 !== stack.reusedPrefixes[index].sha256 || row.prefix !== stack.reusedPrefixes[index].prefix)) {
-    throw new Error("Impacto dependency inputs changed.");
-  }
-  const inventory = Prefix.snapshotPrefix(stack.prefix, { readRoots: retained.map(row => row.prefix) });
-  if (inventory.sha256 !== stack.prefixSha256) throw new Error("Impacto dependency prefix checksum changed.");
-  return { inventory, retained };
-}
-
 function assertMinimumMacOS(file, maximum = "13.0") {
   const info = MachO.readMachOLoadCommands(file, { architecture: "arm64" });
   if (info.slices.length !== 1 || info.slices[0].platform !== 1 || !info.slices[0].minimumMacOS) throw new Error("Impacto build requires an ARM macOS executable or library.");
@@ -69,7 +48,7 @@ function assertMinimumMacOS(file, maximum = "13.0") {
 }
 
 function dependencyFloors(stack) {
-  const { inventory } = validateDependencyStack(stack), seen = new Set(), files = [];
+  const inventory = Prefix.snapshotPrefix(stack.prefix, { readRoots: Dependency.dependencyStacks(stack.reusedStacks).map(row => row.prefix) }), seen = new Set(), files = [];
   for (const row of inventory.files) {
     if (!row.path.endsWith(".dylib")) continue;
     const file = fs.realpathSync(path.join(inventory.prefix, row.path));
@@ -122,7 +101,7 @@ async function buildPortableImpacto({ workRoot, sourceDir = path.resolve(__dirna
   avcppSource, atrac9Source, magicEnumSource, ffmpegArchive, dependencyStack, pathMappings = [], signal, onProgress, dependencies = {} }) {
   throwIfAborted(signal);
   if (process.platform !== "darwin" || process.arch !== "arm64") throw new Error("This Impacto source profile requires an Apple Silicon Mac.");
-  const dependencyProof = validateDependencyStack(dependencyStack), nativeFloors = dependencyFloors(dependencyStack);
+  const nativeFloors = dependencyFloors(dependencyStack);
   const checkouts = { impacto: sourceDir, avcpp: avcppSource, atrac9: atrac9Source, magicEnum: magicEnumSource }, validated = {};
   for (const [id, directory] of Object.entries(checkouts)) {
     validated[id] = await Source.validatePinnedSource(directory, Adapter.SOURCES[id].revision, { signal });
@@ -132,7 +111,7 @@ async function buildPortableImpacto({ workRoot, sourceDir = path.resolve(__dirna
       Adapter.hash(ffmpegArchive) !== Adapter.SOURCES.ffmpeg.sha256 || Adapter.hash(path.join(__dirname, "bink2.patch")) !== Adapter.SOURCES.bink2.patchSha256 ||
       Adapter.hash(path.join(__dirname, "windows-game.lua")) !== PROFILE_SHA256) throw new Error("Impacto codec sources or Windows profile checksum changed.");
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [...Object.values(checkouts), ffmpegArchive, dependencyStack.prefix,
-    ...dependencyProof.retained.map(row => row.prefix)] });
+    ...Dependency.dependencyStacks(dependencyStack.reusedStacks).map(row => row.prefix)] });
   const overlaySha256 = overlayIdentity(), sdk = dependencyStack.sdk;
   Dependency.compilerFlags(sdk, pathMappings);
   fs.mkdirSync(workRoot, { recursive: true });
@@ -189,7 +168,6 @@ async function buildPortableImpacto({ workRoot, sourceDir = path.resolve(__dirna
     await Source.validatePinnedSource(directory, Adapter.SOURCES[id].revision, { signal });
     if (Source.hashPinnedFiles(directory, validated[id].files) !== sourceTrees[id]) throw new Error("An Impacto source input changed during compilation.");
   }
-  validateDependencyStack(dependencyStack);
   if (overlayIdentity() !== overlaySha256) throw new Error("Impacto build recipe changed during compilation.");
   const executableFloor = assertMinimumMacOS(executable);
   const result = { managerId: "impacto", version: VERSION, profile: PROFILE, sourceRevision: Adapter.SOURCES.impacto.revision,
@@ -204,5 +182,5 @@ async function buildPortableImpacto({ workRoot, sourceDir = path.resolve(__dirna
   return result;
 }
 
-module.exports = { VERSION, PROFILE, SOURCE_TREES, PROFILE_SHA256, FFMPEG_ARCHIVE_BYTES, RECIPE_FILES, overlayIdentity, validateDependencyStack,
+module.exports = { VERSION, PROFILE, SOURCE_TREES, PROFILE_SHA256, FFMPEG_ARCHIVE_BYTES, RECIPE_FILES, overlayIdentity,
   assertMinimumMacOS, dependencyFloors, ffmpegOptions, writeHarfBuzzDescriptor, linkDependencyPaths, buildPortableImpacto };

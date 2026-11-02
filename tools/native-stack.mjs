@@ -6,7 +6,7 @@ import {buildInput} from './build-input.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 import {collectSdlNotices} from './sdl-notices.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/maclauncher/src/modules/shared/runtime');
-const Source=require(path.join(base,'pinned-native-build.js')),Prefix=require(path.join(base,'portable-dependency-prefix.js')),Tools=require('../producers/maclauncher/scripts/native-binary-tools.cjs');
+const Source=require(path.join(base,'pinned-native-build.js')),Tools=require('../producers/maclauncher/scripts/native-binary-tools.cjs');
 const system=value=>value.startsWith('/usr/lib/')||value.startsWith('/System/Library/');
 const command=(tool,args)=>execFileSync(tool,args,{encoding:'utf8',maxBuffer:16<<20}).trim();
 const metadataFile=file=>/\.(?:pc|cmake|la)$/.test(file)||/-config$/.test(file);
@@ -32,7 +32,7 @@ export function nativeStackInput(input,{arch,work,fonts,audio,sdk=process.env.SD
  const stack={...expand(metadata.stack),prefix,sdk,tools:tools||{cmake:Source.findBuildTool('cmake'),ninja:Source.findBuildTool('ninja')},sourceRoots:{},preparedInput:input,
   notices:metadata.notices.map(notice=>{const {path:relative,...noticeMetadata}=notice;return {...noticeMetadata,file:path.join(input.root,relative)};})};
  if(metadata.kind==='mixer'){if(!fonts||!audio)throw Error('The shared mixer requires its prepared font and audio stacks.');Object.assign(stack,{fonts,audio,readRoots:[fonts.prefix,audio.prefix]});}
- stack.prefixSha256=Prefix.snapshotPrefix(prefix).sha256;return stack;
+ return stack;
 }
 
 export async function nativeStackArchives(catalog,{work}={}){
@@ -67,7 +67,7 @@ export function stageNativeStack({built,kind,arch,output,work}){
  }
  if(built.source?.notices)for(const name of built.source.notices)copyNotice({file:path.join(built.sourceRoot,name),name:kind,license:built.source.license,sourceUrl:built.source.url});
  function copyNotice(notice){const relative='notices/'+notices.length+'-'+path.basename(notice.file);fs.mkdirSync(path.dirname(path.join(payload,relative)),{recursive:true});fs.copyFileSync(notice.file,path.join(payload,relative));const {file,...metadata}=notice;notices.push({...metadata,path:relative});}
- const {fonts,audio,preparedInput,notices:oldNotices,prefixSha256,readRoots,...metadata}=built;
+ const {fonts,audio,preparedInput,notices:oldNotices,readRoots,...metadata}=built;
  const stack=Tools.publicProvenance(metadata,[{from:built.prefix,to:PREFIX},{from:built.sdk,to:SDK},{from:work,to:'NATIVE_STACK_BUILD'}]);
  for(const key of ['prefix','sdk','tools','sourceRoots','sourceRoot','outputRoot'])delete stack[key];
  // Source identities remain complete; compiler work locations are not inputs.

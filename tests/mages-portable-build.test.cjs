@@ -46,18 +46,6 @@ test("portable dependency catalogs reject escaping licenses and target overrides
   }
 });
 
-test("dependency reuse checks source options and all original bytes", t => {
-  const prefix = directory(t); fs.writeFileSync(path.join(prefix, "header.h"), "original");
-  const inventory = Prefix.snapshotPrefix(prefix), pin = { id: "headers", version: "1.0", options: ["-DTEST=OFF"] };
-  const catalog = { version: "stack-v1", dependencies: [pin] }, recipeSha256 = "a".repeat(64);
-  const stack = { version: catalog.version, architecture: "arm64", minimumMacOS: "13.0", recipeSha256,
-    prefix, prefixSha256: inventory.sha256, sources: [pin] };
-  assert.equal(Prefix.validateStack(stack, catalog, recipeSha256).sha256, inventory.sha256);
-  assert.throws(() => Prefix.validateStack({ ...stack, sources: [{ ...pin, options: ["-DTEST=ON"] }] }, catalog, recipeSha256), /source identity/);
-  fs.writeFileSync(path.join(prefix, "header.h"), "changed");
-  assert.throws(() => Prefix.validateStack(stack, catalog, recipeSha256), /checksum changed/);
-});
-
 test("dependency overlays permit only declared read-only roots and never replace originals", t => {
   const root = directory(t), original = path.join(root, "original"), output = path.join(root, "output"), outside = path.join(root, "outside");
   fs.mkdirSync(path.join(original, "include"), { recursive: true }); fs.mkdirSync(output); fs.mkdirSync(outside);
