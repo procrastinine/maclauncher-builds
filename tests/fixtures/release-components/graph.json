@@ -1,0 +1,34 @@
+{
+  "source": {"repository": "owner/builds"},
+  "selection": [
+    {"id": "input", "version": "1.0.0"},
+    {"id": "left", "version": "2.0.0"},
+    {"id": "right", "version": "3.0.0"},
+    {"id": "chain-input", "version": "1.0.0"},
+    {"id": "chain-middle", "version": "1.0.0"},
+    {"id": "chain-top", "version": "1.0.0"},
+    {"id": "solo", "version": "4.0.0"},
+    {"id": "abi", "version": "1.9-MCLv2"},
+    {"id": "abi", "version": "1.12-MCLv2"},
+    {"id": "other-abi", "version": "1.9.0-MCLv2"},
+    {"id": "other-abi", "version": "1.10.0-MCLv2"}
+  ],
+  "graph": {
+    "input": [],
+    "left": ["input"],
+    "right": ["input"],
+    "chain-input": [],
+    "chain-middle": ["chain-input"],
+    "chain-top": ["chain-middle"],
+    "solo": [],
+    "abi": [],
+    "other-abi": []
+  },
+  "components": [
+    ["input=1.0.0", "left=2.0.0", "right=3.0.0"],
+    ["chain-input=1.0.0", "chain-middle=1.0.0", "chain-top=1.0.0"],
+    ["solo=4.0.0"],
+    ["abi=1.9-MCLv2", "abi=1.12-MCLv2"],
+    ["other-abi=1.9.0-MCLv2", "other-abi=1.10.0-MCLv2"]
+  ]
+}

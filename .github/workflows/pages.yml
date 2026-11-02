@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: package-index
-  cancel-in-progress: false
+  queue: max
 
 jobs:
   build:

@@ -164,7 +164,9 @@ test('Build and release retains the shared architecture and attestation steps',(
  assert.match(workflow,/tools\/release-runtime\.mjs prepare --project/);assert.match(workflow,/tools\/release-runtime\.mjs verify --bundle/);
  const actions=[...workflow.matchAll(/uses: actions\/attest-build-provenance@([a-f0-9]{40})/g)];assert.equal(actions.length,2);assert.equal(actions[0][1],actions[1][1]);
  assert.match(workflow,/subject-path: \$\{\{ runner\.temp \}\}\/release\/\*\.tar\.gz/);
- assert.doesNotMatch(pipeline,/^  publish:/m);assert.match(workflow,/tools\/publish-package\.mjs publish --bundle/);
+ assert.doesNotMatch(pipeline,/^  publish:/m);assert.match(workflow,/tools\/publish-level\.mjs --output/);
+ assert.doesNotMatch(fs.readFileSync(path.join(root,'.github/actions/build-runtime/action.yml'),'utf8'),/publish-package|publish-level|resume/);
+ for(const name of ['independent','build0','build1','build2','build3']){const body=pipeline.slice(pipeline.indexOf('  '+name+':')).split(/\n  [A-Za-z][A-Za-z0-9]*:/)[0];assert.match(body,/contents: read/);assert.doesNotMatch(body,/contents: write/);}
 });
 
 test('registered GitHub build commands reject architectures their projects do not build',async t=>{

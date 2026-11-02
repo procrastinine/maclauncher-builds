@@ -64,7 +64,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 240
     permissions:
-      contents: write
+      contents: read
       actions: read
       id-token: write
       attestations: write
@@ -95,7 +95,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 240
     permissions:
-      contents: write
+      contents: read
       actions: read
       id-token: write
       attestations: write
@@ -126,7 +126,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 240
     permissions:
-      contents: write
+      contents: read
       actions: read
       id-token: write
       attestations: write
@@ -157,7 +157,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 240
     permissions:
-      contents: write
+      contents: read
       actions: read
       id-token: write
       attestations: write
@@ -188,7 +188,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 240
     permissions:
-      contents: write
+      contents: read
       actions: read
       id-token: write
       attestations: write
@@ -209,8 +209,218 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/build-runtime
 
+  publishIndependent:
+    needs: [plan, independent]
+    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.emptyIndependent == 'false' }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      actions: read
+      attestations: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
+      RELEASE_GRAPH: ${{ needs.plan.outputs.graph }}
+      RELEASE_REUSE: ${{ needs.plan.outputs.reuse }}
+      PUBLICATION_TARGETS: ${{ needs.plan.outputs.matrixIndependent }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+      - name: Read the generated package definitions
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-plan
+          path: ${{ runner.temp }}/release-plan
+      - name: Use the package definition file
+        run: echo "BUILD_REPORTS=$RUNNER_TEMP/release-plan/reports.json" >> "$GITHUB_ENV"
+      - name: Publish successful packages from this build level
+        run: node tools/publish-level.mjs --output "$RUNNER_TEMP/publication"
+      - name: Retain the publication result
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: publication-Independent
+          path: ${{ runner.temp }}/publication/publication-result.json
+          if-no-files-found: ignore
+
+  publish0:
+    needs: [plan, build0]
+    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty0 == 'false' }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      actions: read
+      attestations: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
+      RELEASE_GRAPH: ${{ needs.plan.outputs.graph }}
+      RELEASE_REUSE: ${{ needs.plan.outputs.reuse }}
+      PUBLICATION_TARGETS: ${{ needs.plan.outputs.matrix0 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+      - name: Read the generated package definitions
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-plan
+          path: ${{ runner.temp }}/release-plan
+      - name: Use the package definition file
+        run: echo "BUILD_REPORTS=$RUNNER_TEMP/release-plan/reports.json" >> "$GITHUB_ENV"
+      - name: Publish successful packages from this build level
+        run: node tools/publish-level.mjs --output "$RUNNER_TEMP/publication"
+      - name: Retain the publication result
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: publication-0
+          path: ${{ runner.temp }}/publication/publication-result.json
+          if-no-files-found: ignore
+
+  publish1:
+    needs: [plan, build1, publish0]
+    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty1 == 'false' }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      actions: read
+      attestations: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
+      RELEASE_GRAPH: ${{ needs.plan.outputs.graph }}
+      RELEASE_REUSE: ${{ needs.plan.outputs.reuse }}
+      PUBLICATION_TARGETS: ${{ needs.plan.outputs.matrix1 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+      - name: Read the generated package definitions
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-plan
+          path: ${{ runner.temp }}/release-plan
+      - name: Use the package definition file
+        run: echo "BUILD_REPORTS=$RUNNER_TEMP/release-plan/reports.json" >> "$GITHUB_ENV"
+      - name: Publish successful packages from this build level
+        run: node tools/publish-level.mjs --output "$RUNNER_TEMP/publication"
+      - name: Retain the publication result
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: publication-1
+          path: ${{ runner.temp }}/publication/publication-result.json
+          if-no-files-found: ignore
+
+  publish2:
+    needs: [plan, build2, publish1]
+    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty2 == 'false' }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      actions: read
+      attestations: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
+      RELEASE_GRAPH: ${{ needs.plan.outputs.graph }}
+      RELEASE_REUSE: ${{ needs.plan.outputs.reuse }}
+      PUBLICATION_TARGETS: ${{ needs.plan.outputs.matrix2 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+      - name: Read the generated package definitions
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-plan
+          path: ${{ runner.temp }}/release-plan
+      - name: Use the package definition file
+        run: echo "BUILD_REPORTS=$RUNNER_TEMP/release-plan/reports.json" >> "$GITHUB_ENV"
+      - name: Publish successful packages from this build level
+        run: node tools/publish-level.mjs --output "$RUNNER_TEMP/publication"
+      - name: Retain the publication result
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: publication-2
+          path: ${{ runner.temp }}/publication/publication-result.json
+          if-no-files-found: ignore
+
+  publish3:
+    needs: [plan, build3, publish2]
+    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty3 == 'false' }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      actions: read
+      attestations: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
+      RELEASE_GRAPH: ${{ needs.plan.outputs.graph }}
+      RELEASE_REUSE: ${{ needs.plan.outputs.reuse }}
+      PUBLICATION_TARGETS: ${{ needs.plan.outputs.matrix3 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+      - name: Read the generated package definitions
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-plan
+          path: ${{ runner.temp }}/release-plan
+      - name: Use the package definition file
+        run: echo "BUILD_REPORTS=$RUNNER_TEMP/release-plan/reports.json" >> "$GITHUB_ENV"
+      - name: Publish successful packages from this build level
+        run: node tools/publish-level.mjs --output "$RUNNER_TEMP/publication"
+      - name: Retain the publication result
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: publication-3
+          path: ${{ runner.temp }}/publication/publication-result.json
+          if-no-files-found: ignore
+
   index:
-    needs: [plan, independent, build0, build1, build2, build3]
+    needs: [plan, publishIndependent, publish0, publish1, publish2, publish3]
     if: ${{ always() && !cancelled() && needs.plan.result == 'success' }}
     uses: ./.github/workflows/pages.yml
     permissions:
@@ -221,7 +431,7 @@ jobs:
       source-revision: main
 
   timings:
-    needs: [plan, independent, build0, build1, build2, build3]
+    needs: [plan, independent, build0, build1, build2, build3, publishIndependent, publish0, publish1, publish2, publish3]
     if: always()
     runs-on: ubuntu-24.04
     permissions:
