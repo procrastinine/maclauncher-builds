@@ -21,7 +21,7 @@ function fixture(t,files,projects=[project('recipe','tools/recipe.cjs')]){
 test('recipe definitions follow local modules and files the way Node resolves them',t=>{
  const f=fixture(t,{
   'tools/recipe.cjs':['const path = require("node:path");','const helper = require("./helper");','const index = require("./helpers");','const pin = require("./pin.json");',
-   'const resolved = require.resolve("../lib/resolved");','const overlay = path.join(__dirname, "overlays", "fix.lua");','const output = path.join(__dirname, "generated.bin");',
+   'const resolved = require.resolve('+JSON.stringify('../lib/resolved')+');','const overlay = path.join(__dirname, "overlays", "fix.lua");','const output = path.join(__dirname, "generated.bin");',
    'const named = path.join(variable, "named.cjs");',''].join('\n'),
   'tools/helper.js':'module.exports = require("./nested");\n','tools/nested.cjs':'module.exports = 1;\n','tools/helpers/index.js':'module.exports = 2;\n',
   'tools/pin.json':{version:'1.0.0'},'tools/overlays/fix.lua':'return 1\n','lib/named.cjs':'module.exports = 4;\n',
