@@ -46,16 +46,19 @@ export async function nativeStackArchives(catalog,{work}={}){
 export function stageNativeStack({built,kind,arch,output,work}){
  const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});Tools.copyTree(built.prefix,payload);
  const cpu=arch==='x64'?'x86_64':'arm64',binaries=[];
- function visit(directory){for(const entry of fs.readdirSync(directory,{withFileTypes:true})){const target=path.join(directory,entry.name);if(entry.isDirectory()){visit(target);continue;}const relative=path.relative(payload,target),source=fs.realpathSync(path.join(built.prefix,relative));if(Tools.macho(target))binaries.push({target,source});else if(metadataFile(target))fs.writeFileSync(target,fs.readFileSync(target,'utf8').replaceAll(built.prefix,PREFIX).replaceAll(built.sdk,SDK));}}
+ const prefixes=[built.prefix,built.fonts?.prefix,built.audio?.prefix].filter(Boolean).sort((a,b)=>b.length-a.length);
+ function visit(directory){for(const entry of fs.readdirSync(directory,{withFileTypes:true})){const target=path.join(directory,entry.name);if(entry.isDirectory()){visit(target);continue;}const relative=path.relative(payload,target),source=fs.realpathSync(path.join(built.prefix,relative));if(Tools.macho(target))binaries.push({target,source});else if(metadataFile(target)){let text=fs.readFileSync(target,'utf8');for(const prefix of prefixes)text=text.replaceAll(prefix,PREFIX);fs.writeFileSync(target,text.replaceAll(built.sdk,SDK));}}}
  visit(payload);
  const targets=new Map(binaries.map(({source,target})=>[source,target]));
  const shared=new Set([built.fonts?.preparedInput,built.audio?.preparedInput].filter(Boolean).flatMap(input=>(input.declaration?.files||[]).map(file=>file.sha256+':'+file.size)));
- for(const {source,target} of binaries){const ids=Tools.libraryIds(source,cpu),commands=Tools.loadCommands(source,cpu);
+ const groups=new Map();for(const binary of binaries){if(!groups.has(binary.source))groups.set(binary.source,[]);groups.get(binary.source).push(binary);}
+ for(const [source,copies] of groups){const target=(copies.find(copy=>path.basename(copy.target)===path.basename(source))||copies[0]).target,ids=Tools.libraryIds(source,cpu),commands=Tools.loadCommands(source,cpu);
   if(shared.has(sha(source)+':'+fs.statSync(source).size))continue;
   for(const link of Tools.links(source,cpu).filter(link=>!system(link)&&!ids.includes(link))){const original=Tools.resolveLink(link,source,source,commands.rpaths,cpu),destination=targets.get(original);if(!destination)throw Error('The shared native stack has an undeclared non-system library: '+link);command('/usr/bin/install_name_tool',['-change',link,'@loader_path/'+path.relative(path.dirname(target),destination).split(path.sep).join('/'),target]);}
   for(const rpath of new Set(commands.rpaths.filter(value=>path.isAbsolute(value)&&!system(value))))command('/usr/bin/install_name_tool',['-delete_rpath',rpath,target]);
   if(ids.length)command('/usr/bin/install_name_tool',['-id','@rpath/'+path.basename(source),target]);
   fs.chmodSync(target,0o755);command('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);command('/usr/bin/codesign',['--verify','--strict',target]);
+  for(const copy of copies)if(copy.target!==target){fs.copyFileSync(target,copy.target);fs.chmodSync(copy.target,0o755);}
  }
  const notices=[];
  for(const pin of built.sources||[]){const source=built.sourceRoots?.[pin.id]||pin.sourceRoot;if(!source)continue;
