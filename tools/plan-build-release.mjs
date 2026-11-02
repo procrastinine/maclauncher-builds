@@ -23,7 +23,7 @@ export function automaticInputName({current,publishedNames,owned,profiles=[],ups
  const highest=Math.max(0,...publishedNames.map(version=>Number(/(?:^|-)MCLv([1-9]\d*)/.exec(version)?.[1]||0)));
  const prefix=current.split(/-?MCLv[1-9]\d*/)[0];
  // Old snapshot labels do not invent an upstream version or retain commit hashes.
- const upstream=upstreamVersion!==undefined?upstreamVersion:/^\d+(?:\.\d+){1,3}(?:-(?:git|dev|devel|alpha\d*|beta\d*|rc\d*))?$/.test(prefix)?prefix:'';
+ const upstream=upstreamVersion!==undefined?upstreamVersion:/^\d+(?:\.\d+){1,3}(?:-?(?:git|dev|devel|alpha\d*|beta\d*|rc\d*))?$/.test(prefix)?prefix:'';
  return (upstream?upstream+'-':'')+'MCLv'+(highest+1);
 }
 
