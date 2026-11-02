@@ -3,9 +3,6 @@ description: Build, verify and attest one declared runtime package.
 runs:
   using: composite
   steps:
-    - name: Record job start
-      shell: bash
-      run: echo "BUILD_STARTED_AT=$(date +%s)" >> "$GITHUB_ENV"
     - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
       with:
         node-version: '24'
