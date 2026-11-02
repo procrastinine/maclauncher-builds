@@ -52,3 +52,5 @@ The archive is the release attachment. Catalogs retain its SHA-256, architecture
 Recipes declare their exact public inputs and tool requirements. Changing recipe code does not rebuild an existing package. **Rebuild and compare** reproduces a published package at its recorded source commit and reports differences; it does not publish packages or change catalogs.
 
 Each component run records per-job elapsed time in its summary. Source and packaging changes can be checked locally without repeating unchanged compilation. Builds used for releases run on GitHub.
+
+Runtime packages are self-contained. Prepared packages supply build inputs only; matching bytes are retained inside each consumer rather than becoming runtime downloads. Identical files within one payload still use local canonical aliases. The sealed build-input record retains the digest and release of each input for provenance.

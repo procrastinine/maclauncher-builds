@@ -56,12 +56,15 @@ function checkNativeAliasPaths({root,declaration,inputs}){
 }
 /** Store a freshly produced package once per content, preserving its logical paths. */
 export function preparePackageLayout({input,declaration,environment=process.env}){
- const inputs=readMap(environment),aliases=Object.assign(Object.create(null),declaration.aliases?.files||{}),files=new Map(declaration.files.map(file=>[file.path,{...file}])),dependencies=new Map((declaration.dependencies||[]).map(dep=>[dep.project,dep]));
+ const inputs=readMap(environment),aliases=Object.assign(Object.create(null),declaration.aliases?.files||{}),files=new Map(declaration.files.map(file=>[file.path,{...file}]));
  B.verifyStoredPayload(input,declaration);
- const shared=new Map();
- for(const [project,dep]of Object.entries(inputs))for(const file of dep.declaration.files){
-  if(!duplicateCandidate(file,dep.declaration))continue;
-  const key=file.size+'/'+file.sha256;if(!shared.has(key))shared.set(key,{project,path:file.path,input:dep,file});
+ // Build inputs are not installed runtime dependencies. Restore any incoming
+ // foreign aliases into this fresh payload before applying local-only dedupe.
+ for(const [name,target] of Object.entries(aliases))if(typeof target!=='string'){
+  relative(name);const exact=declaration.dependencies?.find(dep=>dep.project===target.project),resolved=dependencyResolver(inputs)(target,exact),actual=B.readRegular(resolved.path,resolved.size);
+  if(!same(actual,resolved)||actual.mode!==resolved.mode)throw Error('Build input alias bytes differ from their sealed declaration.');
+  const destination=path.join(input,name);fs.mkdirSync(path.dirname(destination),{recursive:true});fs.writeFileSync(destination,actual.bytes,{flag:'wx',mode:resolved.mode});
+  const {path:canonical,...facts}=resolved;files.set(name,{...facts,path:name});delete aliases[name];
  }
  // Retain the existing provider indexes; the sealed package index also describes
  // their logical paths to installers that materialize aliases before launch.
@@ -75,11 +78,8 @@ export function preparePackageLayout({input,declaration,environment=process.env}
  const stored=new Map(),remove=[];
  for(const file of [...files.values()].sort((a,b)=>a.path.localeCompare(b.path))){
   if(!duplicateCandidate(file,declaration))continue;
-  const key=file.size+'/'+file.sha256,dependency=shared.get(key),canonical=stored.get(key);
-  if(dependency){
-   aliases[file.path]={project:dependency.project,path:dependency.path};
-   const record=dependency.input.record;dependencies.set(dependency.project,{project:dependency.project,release:record.version,sha256:record.asset.sha256});remove.push(file.path);
-  }else if(canonical){
+  const key=file.size+'/'+file.sha256,canonical=stored.get(key);
+  if(canonical){
    aliases[file.path]=canonical.path;
    if((file.mode|canonical.mode)&0o111){canonical.mode=0o755;fs.chmodSync(path.join(input,canonical.path),canonical.mode);}
    remove.push(file.path);
@@ -90,19 +90,18 @@ export function preparePackageLayout({input,declaration,environment=process.env}
   let canonical=target,seen=new Set([name]);while(typeof canonical==='string'&&aliases[canonical]){if(seen.has(canonical))throw Error('Payload aliases form a cycle.');seen.add(canonical);canonical=aliases[canonical];}aliases[name]=canonical;
  }
  for(const name of remove){fs.unlinkSync(path.join(input,name));files.delete(name);}
- for(const [name,target]of Object.entries(aliases)){relative(name);if(files.has(name))throw Error('Payload alias overlaps a stored file.');const resolved=canonicalAlias(target,files,inputs);if(typeof target!=='string'){const record=resolved.input.record;dependencies.set(target.project,{project:target.project,release:record.version,sha256:record.asset.sha256});}}
+ for(const [name,target]of Object.entries(aliases)){relative(name);if(files.has(name))throw Error('Payload alias overlaps a stored file.');canonicalAlias(target,files,inputs);}
  declaration.files=[...files.values()].sort((a,b)=>a.path.localeCompare(b.path));
- if(Object.keys(aliases).length)declaration.aliases={schema:1,files:aliases};
- if(dependencies.size)declaration.dependencies=[...dependencies.values()].sort((a,b)=>a.project.localeCompare(b.project));
+ if(Object.keys(aliases).length)declaration.aliases={schema:1,files:aliases};else delete declaration.aliases;
+ delete declaration.dependencies;
  checkNativeAliasPaths({root:input,declaration,inputs});
  return declaration;
 }
 /** The single stored-content check used by Build and release. */
 export function checkPackageDuplicates({declaration,environment=process.env}){
- const files=new Map(),inputs=readMap(environment),dependencies=new Set((declaration.dependencies||[]).map(dep=>dep.project));
- for(const id of dependencies){const input=inputs[id];if(!input)throw Error('Duplicate check needs the exact verified dependency: '+id);for(const file of input.declaration.files)if(duplicateCandidate(file,input.declaration))files.set(file.size+'/'+file.sha256,id+'/'+file.path);}
+ const files=new Map();if(declaration.dependencies?.length)throw Error('Runtime packages must be self-contained.');
  for(const file of declaration.files){if(!duplicateCandidate(file,declaration))continue;const key=file.size+'/'+file.sha256;if(files.has(key))throw Error('Duplicate stored payload bytes: '+file.path+' = '+files.get(key));files.set(key,file.path);}
- return {storedFiles:declaration.files.length,aliases:Object.keys(declaration.aliases?.files||{}).length,dependencies:dependencies.size};
+ return {storedFiles:declaration.files.length,aliases:Object.keys(declaration.aliases?.files||{}).length,dependencies:0};
 }
 /** Restore logical paths only after their canonical inventories are verified. */
 export function materializePackageAliases({root,declaration,inputs}){

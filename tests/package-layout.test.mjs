@@ -24,14 +24,19 @@ test('packaging stores identical payload bytes once while preserving component n
  assert.equal(checkPackageDuplicates({declaration:f.declaration,environment:{}}).aliases,1);
  materializePackageAliases({root:f.payload,declaration:f.declaration,inputs:{}});assert.equal(fs.readFileSync(path.join(f.payload,'sub/b.bin'),'utf8'),'same binary payload');assert.ok(!fs.lstatSync(path.join(f.payload,'sub/b.bin')).isSymbolicLink());
 });
-test('a copied dependency becomes an exact release reference and a relative symlink without repacking its bytes',t=>{
+test('prepared build inputs remain copied into the self-contained consumer',t=>{
  const f=fixture(t),shared=f.write('lib/shared.bin','a shared binary'),depRoot=path.join(f.root,'dependency');fs.mkdirSync(depRoot);fs.writeFileSync(path.join(depRoot,'shared.bin'),'a shared binary');
  const dependency={root:depRoot,declaration:{id:'shared',version:'2.0.0-MCLv1',files:[{...shared,path:'shared.bin'}],notices:[],manifestRelative:'manifest.json'},record:{id:'shared',version:'2.0.0-MCLv1',asset:{sha256:'a'.repeat(64)}}},inputs={shared:dependency},environment={MACLAUNCHER_BUILD_INPUTS:JSON.stringify(inputs)};
- preparePackageLayout({input:f.payload,declaration:f.declaration,environment});assert.ok(!fs.existsSync(path.join(f.payload,'lib/shared.bin')));
- assert.deepEqual(f.declaration.dependencies,[{project:'shared',release:'2.0.0-MCLv1',sha256:'a'.repeat(64)}]);assert.deepEqual(f.declaration.aliases.files['lib/shared.bin'],{project:'shared',path:'shared.bin'});
- assert.equal(recordFromDeclaration(f.declaration,{filename:'test.tar.gz'}).launcherContract,2);
- assert.equal(checkPackageDuplicates({declaration:f.declaration,environment}).dependencies,1);
- materializePackageAliases({root:f.payload,declaration:f.declaration,inputs});assert.equal(fs.readFileSync(path.join(f.payload,'lib/shared.bin'),'utf8'),'a shared binary');assert.ok(fs.lstatSync(path.join(f.payload,'lib/shared.bin')).isSymbolicLink());assert.ok(!path.isAbsolute(fs.readlinkSync(path.join(f.payload,'lib/shared.bin'))));
+ preparePackageLayout({input:f.payload,declaration:f.declaration,environment});assert.ok(fs.existsSync(path.join(f.payload,'lib/shared.bin')));
+ assert.equal(f.declaration.dependencies,undefined);assert.equal(f.declaration.aliases,undefined);assert.equal(recordFromDeclaration(f.declaration,{filename:'test.tar.gz'}).launcherContract,undefined);
+ assert.equal(checkPackageDuplicates({declaration:f.declaration,environment}).dependencies,0);
+ materializePackageAliases({root:f.payload,declaration:f.declaration,inputs});assert.equal(fs.readFileSync(path.join(f.payload,'lib/shared.bin'),'utf8'),'a shared binary');assert.equal(fs.lstatSync(path.join(f.payload,'lib/shared.bin')).isSymbolicLink(),false);
+});
+test('build-only inputs never turn matching consumer bytes into runtime downloads',t=>{
+ const f=fixture(t),shared=f.write('lib/owned.bin','the same stage bytes'),depRoot=path.join(f.root,'stage');fs.mkdirSync(depRoot);fs.writeFileSync(path.join(depRoot,'stage.bin'),'the same stage bytes');
+ const dependency={root:depRoot,declaration:{id:'stage',version:'1.0.0',files:[{...shared,path:'stage.bin'}],notices:[],manifestRelative:'manifest.json'},record:{id:'stage',version:'1.0.0',asset:{sha256:'a'.repeat(64)}}},environment={MACLAUNCHER_BUILD_INPUTS:JSON.stringify({stage:dependency})};
+ preparePackageLayout({input:f.payload,declaration:f.declaration,environment});
+ assert.equal(fs.readFileSync(path.join(f.payload,'lib/owned.bin'),'utf8'),'the same stage bytes');assert.equal(f.declaration.aliases,undefined);assert.equal(f.declaration.dependencies,undefined);assert.equal(checkPackageDuplicates({declaration:f.declaration,environment}).dependencies,0);
 });
 test('the single duplicate check rejects uncollapsed bytes and alias resolution rejects undeclared targets',t=>{
  const f=fixture(t);f.write('first.bin','duplicate');f.write('second.bin','duplicate');assert.throws(()=>checkPackageDuplicates({declaration:f.declaration,environment:{}}),/Duplicate stored payload/);
