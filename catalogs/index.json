@@ -2080,10 +2080,40 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#native-openal",
       "catalog": {
         "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/native-openal.json",
-        "sha256": "b2daea3ebd60ddedf0a4c1d603f82add5e8967682e4153243d22c8a9fe2c9855",
-        "bytes": 1657
+        "sha256": "5d80495ae7cddcf4f69f4d85207a64aab30944340084579985a11599faf41f20",
+        "bytes": 3221
       },
       "releases": [
+        {
+          "version": "1.24.3-MCLv1",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "native-openal/v1.24.3-MCLv1/arm64",
+          "asset": {
+            "filename": "native-openal-1.24.3-MCLv1-arm64.tar.gz",
+            "sha256": "0d151e8cc6ef20a27506cd2fbce2f1ab7ed2f4dbd345112d1cdc910a7ce5e002",
+            "bytes": 830967,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/native-openal%2Fv1.24.3-MCLv1%2Farm64/native-openal-1.24.3-MCLv1-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "66bddd70fb09b14ea7bcc1f4c7fc7fabacf05c05",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41545818437",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#native-openal",
+          "profile": "OpenAL Soft 1.24.3"
+        },
         {
           "version": "1.24.3-MCLv1",
           "arch": "x64",
