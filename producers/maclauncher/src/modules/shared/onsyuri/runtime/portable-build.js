@@ -1,14 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const { isDeepStrictEqual } = require("node:util");
-const Source = require("../../runtime/pinned-native-build");
 const Native = require("../../runtime/local-native");
-const Fonts = require("../../runtime/portable-sdl2-fonts");
-const Audio = require("../../runtime/portable-sndfile");
-const Mixer = require("../../runtime/portable-sdl2-mixer");
-const Prefix = require("../../runtime/portable-dependency-prefix");
-const { throwIfAborted } = require("../../runtime/download-utils");
 const PIN = Object.freeze(require("./portable-build.json"));
 const VERSION = PIN.engine.version;
 const REVISION = PIN.engine.revision;
@@ -67,48 +60,5 @@ function validateFeatures(outputRoot) {
     moviePlayback: false, externalWindowsPlugins: false, glesSharpness: false };
 }
 
-async function buildPortableYuri({ sourceDir, archives, workRoot, dependencyStacks, pathMappings = [], signal, onProgress, dependencies = {} }) {
-  throwIfAborted(signal);
-  if (process.platform !== "darwin" || process.arch !== "arm64") throw new Error("This portable Yuri build requires an Apple Silicon Mac.");
-  if (!path.isAbsolute(sourceDir || "")) throw new Error("Choose an absolute clean checkout of the pinned Yuri source.");
-  const original = await Source.validatePinnedSource(sourceDir, REVISION, { signal, sourceScope: PIN.engine.sourceScope });
-  if (Source.hashPinnedFiles(sourceDir, original.files) !== SOURCE_SHA256 || !isDeepStrictEqual(original.omittedSubmodules, PIN.engine.omittedSubmodules)) throw new Error("Yuri primary source checksum or omitted-submodule revisions changed.");
-  validateEngineArchive(archives); Fonts.validateArchives(archives); Audio.validateArchives(archives); Audio.validateArchives(archives, { catalog: Mixer.PIN }); Fonts.validateArchives(archives, { catalog: PIN });
-  if (dependencyStacks && (Object.keys(dependencyStacks).length !== 1 || !dependencyStacks.mixer)) throw new Error("Yuri dependency reuse accepts one exact complete mixer profile.");
-  let mixer = dependencyStacks?.mixer;
-  workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, ...(mixer ? [mixer.prefix, ...mixer.readRoots] : [])] });
-  const overlaySha256 = overlayIdentity(); fs.mkdirSync(workRoot, { recursive: true });
-  if (!mixer) mixer = await Mixer.buildMixer({ archives, workRoot: path.join(workRoot, "mixer-dependencies"), pathMappings, signal, onProgress, dependencies });
-  const prefix = path.join(workRoot, "prefix"); fs.mkdirSync(prefix); Prefix.linkPrefix(mixer.prefix, prefix, { readRoots: mixer.readRoots });
-  const sources = [], sourceRoots = {}, run = dependencies.runBuildCommand || Source.runBuildCommand;
-  for (const pin of PIN.dependencies) {
-    throwIfAborted(signal);
-    const sourceRoot = path.join(workRoot, "source", pin.id); fs.mkdirSync(sourceRoot, { recursive: true });
-    await run("/usr/bin/tar", ["-xf", archives[pin.id], "--strip-components", "1", "-C", sourceRoot],
-      { cwd: workRoot, logPath: path.join(workRoot, "extraction.log"), env: Fonts.buildEnvironment(prefix, mixer.sdk), signal });
-    for (const notice of pin.notices) if (!fs.lstatSync(path.join(sourceRoot, notice)).isFile()) throw new Error(`Missing source license for ${pin.name}.`);
-    const sourceOverlay = pin.id === "lua" ? adaptLua(sourceRoot) : undefined;
-    const build = await Fonts.buildProject({ sourceRoot, outputRoot: path.join(workRoot, pin.id), prefix, sdk: mixer.sdk, tools: mixer.tools,
-      pathMappings, options: pin.options, signal, onProgress, dependencies });
-    sources.push({ ...pin, ...build, ...(sourceOverlay ? { sourceOverlay } : {}) }); sourceRoots[pin.id] = sourceRoot;
-  }
-  const sourceRoot = path.join(workRoot, "onsyuri-source"), sourceTreeSha256 = Source.stagePinnedFiles(sourceDir, original.files, sourceRoot);
-  const sourceOverlay = adaptEngine(sourceRoot, sourceDir);
-  const build = await Fonts.buildProject({ sourceRoot, outputRoot: path.join(workRoot, "onsyuri"), prefix, sdk: mixer.sdk, tools: mixer.tools,
-    pathMappings, options: [], signal, onProgress, dependencies });
-  const features = { ...mixer.features, ...validateFeatures(workRoot) };
-  const profile = { schemaVersion: 1, version: VERSION, upstreamVersion: PIN.engine.upstreamVersion, upstreamRevision: REVISION, sourceTreeSha256,
-    sourceScope: original.sourceScope, omittedSubmodules: original.omittedSubmodules, overlaySha256, architecture: "arm64", minimumMacOS: "13.0", features };
-  fs.writeFileSync(path.join(prefix, "profile.json"), JSON.stringify(profile, null, 2) + "\n", { flag: "wx" });
-  const current = await Source.validatePinnedSource(sourceDir, REVISION, { signal, sourceScope: PIN.engine.sourceScope });
-  if (Source.hashPinnedFiles(sourceDir, current.files) !== sourceTreeSha256 || overlayIdentity() !== overlaySha256) throw new Error("Yuri source or build adapter changed during compilation.");
-  throwIfAborted(signal);
-  const executable = path.join(prefix, "bin/onsyuri");
-  return { managerId: "onsyuri", version: VERSION, sourceRevision: REVISION, sourceTreeSha256, sourceScope: original.sourceScope,
-    omittedSubmodules: original.omittedSubmodules, sourceOverlay, overlaySha256, architecture: "arm64", minimumMacOS: "13.0", executable,
-    executableSha256: Native.hashFile(executable), profile, features, ...build,
-    dependencyClosure: { version: PIN.version, prefix, sdk: mixer.sdk, tools: mixer.tools, mixer, sources, sourceRoots } };
-}
-
 module.exports = { PIN, VERSION, REVISION, SOURCE_SHA256, OWNED_FILES, overlayIdentity, validateEngineArchive,
-  requireOwnedSource, adaptEngine, adaptLua, validateFeatures, buildPortableYuri };
+  requireOwnedSource, adaptEngine, adaptLua, validateFeatures };

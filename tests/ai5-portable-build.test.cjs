@@ -102,6 +102,10 @@ test("portable compiler configuration binds ARM64, macOS13 and compiler paths wi
   assert.throws(() => Portable.nativeFile({ pkgConfig: "/tools/pkg-config", sdk, libraryDirectories: ["/build/lib,evil"] }), /absolute library directories/);
 });
 
-test("AI5 portable build rejects unpinned or incompatible dependency profiles", () => {
-  assert.throws(() => Portable.dependencyPrefixes({ fontStack: { version: "current" }, audioStack: {}, movieStack: {} }), /selected source profiles/);
+test("AI5 takes the movie prefix from its configure options and requires every dependency prefix", t => {
+  const root = temporary(t), [fonts, audio, movie] = ["fonts", "audio", "movie"].map(name => path.join(root, name));
+  for (const prefix of [fonts, audio, movie]) fs.mkdirSync(path.join(prefix, "lib/pkgconfig"), { recursive: true });
+  const stacks = { fontStack: { prefix: fonts }, audioStack: { prefix: audio }, movieStack: { options: ["--prefix=" + movie, "--arch=arm64"] } };
+  assert.deepEqual(Portable.dependencyPrefixes(stacks), [fonts, audio, movie]);
+  assert.throws(() => Portable.dependencyPrefixes({ ...stacks, movieStack: { options: [] } }), /original immutable build prefixes/);
 });

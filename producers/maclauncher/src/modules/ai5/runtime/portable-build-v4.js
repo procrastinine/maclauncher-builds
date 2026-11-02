@@ -4,8 +4,6 @@ const crypto = require("node:crypto");
 const Source = require("../../shared/runtime/pinned-native-build");
 const Native = require("../../shared/runtime/local-native");
 const Fonts = require("../../shared/runtime/portable-sdl2-fonts");
-const Audio = require("../../shared/runtime/portable-sndfile");
-const Movie = require("../../shared/runtime/portable-ffmpeg");
 const Previous = require("./build");
 const { throwIfAborted } = require("../../shared/runtime/download-utils");
 
@@ -76,21 +74,7 @@ function adaptSource(root) {
     originals: ORIGINALS, files: Object.fromEntries([...Object.keys(ORIGINALS), ...OUTPUTS].sort().map(file => [file, Native.hashFile(path.join(root, file))])) };
 }
 
-function recipeHash(moduleFile, catalogFile) {
-  return crypto.createHash("sha256").update(fs.readFileSync(moduleFile)).update(fs.readFileSync(catalogFile)).digest("hex");
-}
-
-function dependencyPrefixes({ fontStack, audioStack, movieStack }, architecture = process.arch) {
-  if (fontStack?.version !== Fonts.PIN.version || fontStack.architecture !== architecture || fontStack.minimumMacOS !== "13.0" ||
-      fontStack.recipeSha256 !== recipeHash(require.resolve("../../shared/runtime/portable-sdl2-fonts"), require.resolve("../../shared/runtime/portable-sdl2-fonts.json")) ||
-      audioStack?.version !== Audio.PIN.version || audioStack.architecture !== architecture || audioStack.minimumMacOS !== "13.0" ||
-      audioStack.recipeSha256 !== recipeHash(require.resolve("../../shared/runtime/portable-sndfile"), require.resolve("../../shared/runtime/portable-sndfile.json")) ||
-      movieStack?.version !== Movie.PIN.version || movieStack.recipeSha256 !== Movie.recipeIdentity() || movieStack.source.version !== Movie.PIN.source.version || movieStack.source.sha256 !== Movie.PIN.source.sha256 ||
-      movieStack.architecture !== architecture || movieStack.minimumMacOS !== "13.0" || movieStack.network !== false ||
-      movieStack.externalCodecs !== false || movieStack.gpl !== false || movieStack.nonfree !== false ||
-      JSON.stringify(movieStack.decoders) !== JSON.stringify(Movie.PIN.decoders) || JSON.stringify(movieStack.demuxers) !== JSON.stringify(Movie.PIN.demuxers)) {
-    throw new Error("AI5 portable dependencies differ from their selected source profiles.");
-  }
+function dependencyPrefixes({ fontStack, audioStack, movieStack }) {
   const moviePrefix = movieStack.options?.find(option => option.startsWith("--prefix="))?.slice(9);
   const prefixes = [fontStack.prefix, audioStack.prefix, moviePrefix];
   for (const prefix of prefixes) if (!path.isAbsolute(prefix || "") || !fs.statSync(path.join(prefix, "lib/pkgconfig")).isDirectory()) {
@@ -116,7 +100,7 @@ async function buildPortableAI5({ sourceDir = Previous.sourcePath, workRoot, fon
   throwIfAborted(signal);
   if (process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) throw new Error("AI5 builds require macOS and an arm64 or x64 target.");
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, fontStack?.prefix, audioStack?.prefix].filter(Boolean) });
-  const prefixes = dependencyPrefixes({ fontStack, audioStack, movieStack }, architecture);
+  const prefixes = dependencyPrefixes({ fontStack, audioStack, movieStack });
   const source = await Source.validatePinnedSource(sourceDir, REVISION, { signal });
   if (Source.hashPinnedFiles(sourceDir, source.files) !== SOURCE_SHA256) throw new Error("AI5 source tree checksum does not match the selected version.");
   const overlaySha256 = overlayIdentity(); fs.mkdirSync(workRoot, { recursive: true });

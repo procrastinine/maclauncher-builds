@@ -56,10 +56,9 @@ test("Yuri rejects dynamically resolved codecs and the excluded optional GLES re
   }
 });
 
-test("cancelled Yuri builds and invalid primary archives fail before producing build output", async t => {
-  const root = temporary(t), workRoot = path.join(root, "output"), archive = path.join(root, "source.tar.gz");
+test("invalid Yuri primary archives are rejected without being changed", t => {
+  const root = temporary(t), archive = path.join(root, "source.tar.gz");
   fs.writeFileSync(archive, "wrong");
   assert.throws(() => Build.validateEngineArchive({ onsyuri: archive }), /checksum or size/);
-  await assert.rejects(Build.buildPortableYuri({ workRoot, signal: AbortSignal.abort() }), { name: "AbortError" });
-  assert.equal(fs.existsSync(workRoot), false); assert.equal(fs.readFileSync(archive, "utf8"), "wrong");
+  assert.equal(fs.readFileSync(archive, "utf8"), "wrong");
 });
