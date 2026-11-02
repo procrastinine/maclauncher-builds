@@ -2145,7 +2145,13 @@
       "tools": [
         "pkgconf"
       ]
-    }
+    },
+    "versionBindings": [
+      {
+        "file": "producers/maclauncher/src/modules/crossover/temporal/vulkan/source.json",
+        "pointer": "/version"
+      }
+    ]
   },
   {
     "id": "fidelityfx-api",
