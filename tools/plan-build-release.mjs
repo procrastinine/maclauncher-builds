@@ -27,7 +27,7 @@ export function automaticInputName({current,publishedNames,owned,profiles=[],ups
  return (upstream?upstream+'-':'')+'MCLv'+(highest+1);
 }
 
-export async function planBuildRelease({selection,directory=root,releases=[]}){
+export async function resolveReleaseSelection({selection,directory=root,releases=[]}){
  const registry=readProjects(directory,{resolvePins:false}),describe=createRecipeBuildReporter({directory});
  const latest=new Map();
  const published=async id=>{
@@ -50,7 +50,11 @@ export async function planBuildRelease({selection,directory=root,releases=[]}){
   const current=buildRecord(project).version,owned=ownedPackageSource(project,registry.repository,directory);
   return automaticInputName({current,publishedNames:names,owned,profiles:project.packageProfiles,upstreamVersion:project.producer.upstreamVersion});
  };
- const resolved=await resolveBuildInputs({selection:parseSelection(selection),describe,published,nextName});
+ return resolveBuildInputs({selection:parseSelection(selection),describe,published,nextName});
+}
+
+export async function planBuildRelease({selection,directory=root,releases=[]}){
+ const resolved=await resolveReleaseSelection({selection,directory,releases});
  const registration=registerSelection({selection:resolved.orderedSelection,directory,releases});
  const all=registration.selection.flatMap(({id,version})=>buildPlan({project:id,version,arch:'all',directory,tags:()=>[]}).include);
  const depth=new Map(resolved.levels.flatMap((ids,level)=>ids.map(id=>[id,level])));

@@ -3,6 +3,9 @@ description: Build, verify and attest one declared runtime package.
 runs:
   using: composite
   steps:
+    - name: Record job start
+      shell: bash
+      run: echo "BUILD_STARTED_AT=$(date +%s)" >> "$GITHUB_ENV"
     - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
       with:
         node-version: '24'
@@ -25,19 +28,28 @@ runs:
     - name: Use the package definition file
       shell: bash
       run: echo "BUILD_REPORTS=$RUNNER_TEMP/release-plan/reports.json" >> "$GITHUB_ENV"
+    - name: Resume a published package whose catalog append was interrupted
+      id: resume
+      shell: bash
+      run: node tools/publish-package.mjs resume --bundle "$RUNNER_TEMP/release"
     - name: Prepare the resolved package inputs
+      if: steps.resume.outputs.resumed != 'true'
       shell: bash
       run: node tools/build-run-inputs.mjs prepare --project "$BUILD_PROJECT" --output "$RUNNER_TEMP/prepared-inputs"
     - name: Prepare the runner
+      if: steps.resume.outputs.resumed != 'true'
       shell: bash
       run: node tools/build-runtime.mjs --prepare --project "$BUILD_PROJECT" --arch "$BUILD_ARCH" --version "$BUILD_VERSION"
     - name: Build the package
+      if: steps.resume.outputs.resumed != 'true'
       shell: bash
       run: node tools/build-runtime.mjs --project "$BUILD_PROJECT" --arch "$BUILD_ARCH" --version "$BUILD_VERSION" --output "$RUNNER_TEMP/build" --work "$RUNNER_TEMP/work"
     - name: Package the release
+      if: steps.resume.outputs.resumed != 'true'
       shell: bash
       run: node tools/release-runtime.mjs prepare --project "$BUILD_PROJECT" --input "$RUNNER_TEMP/build/payload" --declaration "$RUNNER_TEMP/build/declaration.json" --source-revision "$GITHUB_SHA" --output "$RUNNER_TEMP/release"
     - name: Verify the package identity
+      if: steps.resume.outputs.resumed != 'true'
       id: verify
       shell: bash
       run: node tools/release-runtime.mjs verify --bundle "$RUNNER_TEMP/release" --project "$BUILD_PROJECT" --version "$BUILD_VERSION" --arch "$BUILD_ARCH"
@@ -45,18 +57,19 @@ runs:
     - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
       id: attest
       continue-on-error: true
+      if: steps.resume.outputs.resumed != 'true'
       with:
         subject-path: ${{ runner.temp }}/release/*.tar.gz
     - name: Wait before retrying the attestation request
-      if: steps.attest.outcome == 'failure' && !cancelled()
+      if: steps.resume.outputs.resumed != 'true' && steps.attest.outcome == 'failure' && !cancelled()
       shell: bash
       run: sleep 5
     - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
-      if: steps.attest.outcome == 'failure' && !cancelled()
+      if: steps.resume.outputs.resumed != 'true' && steps.attest.outcome == 'failure' && !cancelled()
       with:
         subject-path: ${{ runner.temp }}/release/*.tar.gz
     - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-      if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
+      if: ${{ steps.resume.outputs.resumed != 'true' && !cancelled() && steps.verify.outcome == 'success' }}
       with:
         name: runtime-${{ env.BUILD_PROJECT }}-${{ env.BUILD_VERSION }}-${{ env.BUILD_ARCH }}
         path: ${{ runner.temp }}/release
@@ -64,3 +77,7 @@ runs:
         retention-days: 90
         compression-level: 0
 
+    - name: Publish this verified package and append its catalog entry
+      if: steps.resume.outputs.resumed != 'true'
+      shell: bash
+      run: node tools/publish-package.mjs publish --bundle "$RUNNER_TEMP/release"

@@ -31,12 +31,16 @@ export async function prepareBuildInputs({project,output,directory=root,environm
   if(selected){
    const build=buildRecord(registration,selected.version),target=choose(build.architectures.map(arch=>({arch})));if(!target)throw Error('No compatible dependency output: '+dep);
    if(!/^[1-9][0-9]*$/.test(environment.GITHUB_RUN_ID||'')||!/^[a-f0-9]{40}$/.test(environment.GITHUB_SHA||''))throw Error('Current-run inputs need an exact run and source.');
+   const tag=dep+'/v'+selected.version+'/'+target.arch,remote=JSON.parse(await gh(['api','repos/'+repository+'/releases/tags/'+encodeURIComponent(tag)]));
+   if(remote.draft||remote.tag_name!==tag)throw Error('Required build input is not published: '+tag);
    const bundle=path.join(work,'bundle');fs.mkdirSync(bundle);
    await gh(['run','download',environment.GITHUB_RUN_ID,'--repo',repository,'--name',`runtime-${dep}-${selected.version}-${target.arch}`,'--dir',bundle]);
    ({record,declaration}=await verifyBundle({bundle,project:dep,version:selected.version,arch:target.arch,directory,includeDeclaration:true}));
    if(record.build?.sourceRevision!==environment.GITHUB_SHA||String(record.build?.runId)!==environment.GITHUB_RUN_ID)throw Error('Dependency archive belongs to another run or source: '+dep);
    archive=path.join(bundle,record.asset.filename);await recordBuild({archive,record,directory,runGh:(command,args)=>{if(command!=='gh')throw Error('Invalid attestation transport.');return gh(args);}});
    evidence=requireBuild({record,repository,directory,archive,sourceRevision:environment.GITHUB_SHA});
+   const asset=remote.assets?.find(asset=>asset.name===record.asset.filename);
+   if(!asset||asset.size!==record.asset.bytes||asset.digest!=='sha256:'+record.asset.sha256)throw Error('Published input differs from the verified current-run archive: '+dep);
   }else{
    const binding=Array.isArray(reuse)?reuse.find(row=>row.id===dep):reuse[dep];if(!binding?.version||!binding.digest)throw Error('Missing exact planned published input: '+dep);
    const catalog=validateCatalog(json(path.join(directory,'catalogs',dep+'.json')),{project:dep,repository}),compatible=catalog.packages.filter(record=>record.version===binding.version&&record.asset.sha256===binding.digest&&(!binding.arch||record.arch===binding.arch));record=choose(compatible);if(!record)throw Error('Planned published dependency is absent: '+dep);

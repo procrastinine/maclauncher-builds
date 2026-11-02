@@ -21,11 +21,13 @@ function location(value,pointer){let parent=value;const parts=tokens(pointer),ke
 function jsonFiles(directory){if(!fs.existsSync(directory))return [];return fs.readdirSync(directory,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?jsonFiles(path.join(directory,entry.name)):entry.isFile()&&entry.name.endsWith('.json')?[path.join(directory,entry.name)]:[]);}
 
 /** Validate every selected identity and binding before changing any registry or recipe file.
+ * dryRun performs the same checks without writing registrations or bindings.
  * Binding selectors match identity objects. {version:"$version"} appends a new
  * release copied from the selected source record; other selectors update only
  * the matched object's package version. Direct pointers address a version field.
  */
-export function registerSelection({selection,directory=path.resolve(import.meta.dirname,'..'),tags=[],releases=[]}={}){
+export function registerSelection({selection,directory=path.resolve(import.meta.dirname,'..'),tags=[],releases=[],dryRun=false}={}){
+ if(typeof dryRun!=='boolean')throw Error('Selection dryRun must be a boolean.');
  const requested=parseSelection(selection);
  directory=fs.realpathSync(directory);const manifestFile=path.join(directory,'projects.json'),manifest=JSON.parse(fs.readFileSync(manifestFile)),registry=readProjects(directory,{resolvePins:false});
  const files=new Map(),originals=new Map(),load=file=>{const requested=path.resolve(directory,file),real=fs.realpathSync(requested);if(real!==requested||!real.startsWith(directory+path.sep))throw Error('Version binding must be a contained regular JSON file.');if(!files.has(file)){const text=fs.readFileSync(real,'utf8');originals.set(file,text);files.set(file,JSON.parse(text));}return files.get(file);};
@@ -61,7 +63,7 @@ export function registerSelection({selection,directory=path.resolve(import.meta.
  // Validate generated build/profile contracts without resolving source checkouts.
  for(const {project} of plans)buildRecords(project);
  const changed=[...files].map(([file,value])=>({file,text:JSON.stringify(value,null,2)+'\n'})).filter(row=>row.text!==originals.get(row.file));
- const written=[];try{for(const row of changed){fs.writeFileSync(path.join(directory,row.file),row.text);written.push(row.file);}}catch(error){for(const file of written)fs.writeFileSync(path.join(directory,file),originals.get(file));throw error;}
+ const written=[];try{if(!dryRun)for(const row of changed){fs.writeFileSync(path.join(directory,row.file),row.text);written.push(row.file);}}catch(error){for(const file of written)fs.writeFileSync(path.join(directory,file),originals.get(file));throw error;}
  return {selection:requested,include,files:changed.map(row=>row.file)};
 }
 

@@ -52,9 +52,9 @@ test('existing recipe references discover the consumed graph and plan fresh inpu
  await verifyRelease({bundle,directory:f.directory});
  const evidence={sourceRevision:environment.GITHUB_SHA,runId:environment.GITHUB_RUN_ID},transports=[];
  const actual=await prepareBuildInputs({project:'consumer',output:path.join(f.directory,'materialized'),directory:f.directory,environment,
-  runGh:async args=>{transports.push(args);assert.equal(args[2],'42');assert.equal(args[6],'runtime-input-new-input-name-arm64');fs.cpSync(bundle,args.at(-1),{recursive:true});},
+  runGh:async args=>{transports.push(args);if(args[0]==='api')return JSON.stringify({tag_name:'input/vnew-input-name/arm64',draft:false,assets:[{name:record.asset.filename,size:record.asset.bytes,digest:'sha256:'+record.asset.sha256}]});assert.equal(args[2],'42');assert.equal(args[6],'runtime-input-new-input-name-arm64');fs.cpSync(bundle,args.at(-1),{recursive:true});},
   recordBuild:async options=>{assert.equal(options.record.asset.sha256,record.asset.sha256);assert.ok(fs.existsSync(options.archive));},requireBuild:()=>evidence});
- assert.equal(transports.length,1);const map=path.join(f.directory,'materialized/inputs.json');environment.MACLAUNCHER_BUILD_INPUTS=map;
+ assert.equal(transports.length,2);const map=path.join(f.directory,'materialized/inputs.json');environment.MACLAUNCHER_BUILD_INPUTS=map;
  const fresh=preparedBuildInput('input',environment);assert.equal(fresh.record.asset.sha256,record.asset.sha256);assert.equal(fs.readFileSync(path.join(fresh.root,'data.txt'),'utf8'),'fresh data from this run');
  assert.ok(fs.existsSync(path.join(fresh.root,'../declaration.json')));assert.equal(actual.input.record.version,'new-input-name');
  const previous=process.env.MACLAUNCHER_BUILD_INPUTS;process.env.MACLAUNCHER_BUILD_INPUTS=map;

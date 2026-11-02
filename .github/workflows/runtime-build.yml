@@ -64,7 +64,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 240
     permissions:
-      contents: read
+      contents: write
       actions: read
       id-token: write
       attestations: write
@@ -95,7 +95,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 240
     permissions:
-      contents: read
+      contents: write
       actions: read
       id-token: write
       attestations: write
@@ -126,7 +126,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 240
     permissions:
-      contents: read
+      contents: write
       actions: read
       id-token: write
       attestations: write
@@ -157,7 +157,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 240
     permissions:
-      contents: read
+      contents: write
       actions: read
       id-token: write
       attestations: write
@@ -188,7 +188,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 240
     permissions:
-      contents: read
+      contents: write
       actions: read
       id-token: write
       attestations: write
@@ -209,83 +209,13 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/build-runtime
 
-  publish:
-    needs: [plan, independent, build0, build1, build2, build3]
-    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty == 'false' }}
-    runs-on: ubuntu-24.04
-    concurrency:
-      group: build-and-release-publication
-      queue: max
-    permissions:
-      contents: write
-      actions: read
-      attestations: read
-    outputs:
-      commit: ${{ steps.catalog.outputs.commit }}
-    env:
-      GH_TOKEN: ${{ github.token }}
-      RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
-      RELEASE_GRAPH: ${{ needs.plan.outputs.graph }}
-      RELEASE_REUSE: ${{ needs.plan.outputs.reuse }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: main
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: '24'
-          package-manager-cache: false
-      - run: npm ci --ignore-scripts
-      - name: Read the generated package definitions
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: release-plan
-          path: ${{ runner.temp }}/release-plan
-      - name: Use the package definition file
-        run: echo "BUILD_REPORTS=$RUNNER_TEMP/release-plan/reports.json" >> "$GITHUB_ENV"
-      - name: Register the selected release names
-        run: |
-          node --input-type=module <<'JS'
-          import {registerSelection} from './tools/release-selection.mjs';
-          registerSelection({selection: process.env.RELEASE_SELECTION, directory: process.cwd()});
-          JS
-      - name: Publish this run's verified packages
-        id: publish
-        continue-on-error: true
-        run: node tools/publish-verified.mjs --output "$RUNNER_TEMP/publication"
-      - name: Commit registrations and catalogs
-        id: catalog
-        run: |
-          git add --update
-          git add -- catalogs attestations
-          if ! git diff --cached --quiet; then
-            git config user.name procrastinine
-            git config user.email 24549552+procrastinine@users.noreply.github.com
-            git commit -m 'Publish selected runtime releases'
-            gh auth setup-git
-            git push origin HEAD:main
-          fi
-          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-      - name: Retain the publication result
-        if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-        with:
-          name: publication-result
-          path: ${{ runner.temp }}/publication/publication-result.json
-          if-no-files-found: ignore
-      - name: Report incomplete packages
-        if: steps.publish.outcome == 'failure'
-        run: exit 1
-
   index:
-    needs: publish
-    if: ${{ always() && !cancelled() && needs.publish.outputs.commit != '' }}
+    needs: [plan, independent, build0, build1, build2, build3]
+    if: ${{ always() && !cancelled() && needs.plan.result == 'success' }}
     uses: ./.github/workflows/pages.yml
     permissions:
       contents: read
       pages: write
       id-token: write
     with:
-      source-revision: ${{ needs.publish.outputs.commit }}
+      source-revision: main

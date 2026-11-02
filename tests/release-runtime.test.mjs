@@ -115,13 +115,13 @@ test('release source verification retains the current publication controller and
  fs.writeFileSync(path.join(upstream,'projects.json'),'different dispatch branch source');git(upstream,['add','projects.json']);git(upstream,['commit','-m','Later branch source']);
  execFileSync('git',['clone','--quiet','--no-hardlinks',upstream,checkout],{env,stdio:'pipe'});assert.notEqual(git(checkout,['rev-parse','HEAD']),tagged);
  const workflow=fs.readFileSync(new URL('../.github/workflows/runtime-build.yml',import.meta.url),'utf8');
- assert.match(workflow,/name: Build and release/);assert.match(workflow,/ref: main/);assert.match(workflow,/tools\/publish-verified\.mjs --output/);
+ assert.match(workflow,/name: Build and release/);assert.doesNotMatch(workflow,/^  publish:/m);assert.match(fs.readFileSync(new URL('../.github/actions/build-runtime/action.yml',import.meta.url),'utf8'),/tools\/publish-package\.mjs publish --bundle/);
  assert.doesNotMatch(workflow,/git checkout.*RELEASE_TAG/,'Publication retains the current controller instead of checking out the historical tag.');
  const controller=git(checkout,['rev-parse','HEAD']);
  const selected=verifiedBuildSource({workflowName:'Build and release',status:'completed',headBranch:'main',headSha:tagged,jobs:[{name:'build (engine 1.0 arm64)',status:'completed',conclusion:'success'}]},{project:'engine',version:'1.0',arch:'arm64'});
  assert.equal(selected,git(checkout,['rev-parse',tag+'^{commit}']));
  assert.equal(git(checkout,['rev-parse','HEAD']),controller);assert.equal(fs.readFileSync(path.join(checkout,'projects.json'),'utf8'),'different dispatch branch source');
- const publisher=fs.readFileSync(new URL('../tools/publish-verified.mjs',import.meta.url),'utf8');assert.match(publisher,/stageBundle\(\{\.\.\.options,target:env\.GITHUB_SHA,resume:true\}\)/);
+ const publisher=fs.readFileSync(new URL('../tools/publish-package.mjs',import.meta.url),'utf8');assert.match(publisher,/stageBundle\(\{\.\.\.options,target:env\.GITHUB_SHA,resume:true\}\)/);
 });
 
 const sourceTarget='a'.repeat(40),annotation='b'.repeat(40);
