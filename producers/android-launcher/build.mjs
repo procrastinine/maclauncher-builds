@@ -20,23 +20,25 @@ const definitions={
 };
 function regular(file){const stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink())throw Error('Build inputs must be regular files.');return fs.readFileSync(file);}
 function directory(value,label){if(!path.isAbsolute(value||''))throw Error(label+' requires an absolute directory.');const actual=fs.realpathSync(value);if(!fs.statSync(actual).isDirectory())throw Error(label+' requires a directory.');return actual;}
+function classpathEntries(entries){
+ if(!Array.isArray(entries)||!entries.length||entries.some(entry=>!path.isAbsolute(entry||'')))throw Error('The Android API classpath requires absolute class directories or JARs.');
+ return entries.map(entry=>{const actual=fs.realpathSync(entry),stat=fs.statSync(actual);if(!stat.isFile()&&!stat.isDirectory())throw Error('Android API classpath entries must be class directories or JARs.');return actual;});
+}
 function contains(parent,child){const relative=path.relative(parent,child);return relative===''||!relative.startsWith('..'+path.sep)&&relative!=='..'&&!path.isAbsolute(relative);}
 
-/** Compile the owned JARs against an explicitly selected JDK and Android API. */
-export function build({jdk,runtime,output,only=Object.keys(definitions)}){
+/** Compile the owned JARs against an explicitly selected JDK and Android API classpath. */
+export function build({jdk,classpath,output,only=Object.keys(definitions)}){
  if(!Array.isArray(only)||!only.length||new Set(only).size!==only.length||only.some(name=>!Object.hasOwn(definitions,name)))throw Error('Select arguments, privacy, text-input or account-control.');
- jdk=directory(jdk,'JDK');runtime=directory(runtime,'Android runtime');
+ jdk=directory(jdk,'JDK');classpath=classpathEntries(classpath);
  if(!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Choose a new absolute output directory.');
  output=path.join(fs.realpathSync(path.dirname(path.resolve(output))),path.basename(output));
- if([root,jdk,runtime].some(input=>contains(input,output)||contains(output,input)))throw Error('JAR output must be separate from its inputs.');
+ if([root,jdk,...classpath].some(input=>contains(input,output)||contains(output,input)))throw Error('JAR output must be separate from its inputs.');
  for(const tool of ['javac','jar'])regular(path.join(jdk,'bin',tool));
  const sourceIdentity=JSON.parse(regular(path.join(root,'source.json')));
  if(!Array.isArray(sourceIdentity.sourceFiles)||!sourceIdentity.sourceFiles.length)throw Error('The owned Android integration source inventory is missing.');
  for(const input of sourceIdentity.sourceFiles){
   if(!input.path.startsWith('source/')||input.path.split('/').some(part=>part==='..'||part==='.')||digest(regular(path.join(root,input.path)))!==input.sha256)throw Error('Owned Android integration source differs from its source inventory.');
  }
- const classpath=['android-host.jar','android-framework.jar'].map(name=>path.join(runtime,name));
- if(only.some(name=>definitions[name].level===21))classpath.forEach(regular);
  const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'android-launcher-build-')),result=[];
  fs.mkdirSync(output,{recursive:true});
  try{
@@ -67,7 +69,7 @@ export function build({jdk,runtime,output,only=Object.keys(definitions)}){
 }
 
 export function main(args,fixedOnly){
- const o={};for(let n=0;n<args.length;n+=2){const key=args[n]?.slice(2);if(!args[n]?.startsWith('--')||!['jdk','runtime','output','only'].includes(key)||!args[n+1]||Object.hasOwn(o,key))throw Error('Use --jdk, --runtime, --output and optional --only.');o[key]=key==='only'?args[n+1].split(','):args[n+1];}
+ const o={};for(let n=0;n<args.length;n+=2){const key=args[n]?.slice(2);if(!args[n]?.startsWith('--')||!['jdk','classpath','output','only'].includes(key)||!args[n+1]||Object.hasOwn(o,key))throw Error('Use --jdk, --classpath, --output and optional --only.');o[key]=key==='only'?args[n+1].split(','):key==='classpath'?args[n+1].split(path.delimiter):args[n+1];}
  if(fixedOnly&&o.only)throw Error('This entry builds one selected component.');
  return build({...o,...(fixedOnly?{only:[fixedOnly]}:{})});
 }

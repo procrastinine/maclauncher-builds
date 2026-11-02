@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {buildInput} from './build-input.mjs';
+import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 import {resolveProject} from '../lib/projects.mjs';
 import {build} from '../producers/android-launcher/build.mjs';
@@ -11,13 +12,9 @@ export async function buildAndroidLauncher({project:id,arch,output,work}){
  const project=resolveProject(id,root,{resolvePins:false}),profile=JSON.parse(fs.readFileSync(path.join(root,'producers/included-helpers/profiles/android-launcher.json'))),input=JSON.parse(fs.readFileSync(path.join(base,'build-inputs.json')));
  fs.mkdirSync(work,{recursive:true});const cache=path.join(work,'archives');
  try {
-  const archive=await buildInput(input.androidAPI,cache),names=execFileSync('/usr/bin/tar',['-tzf',archive],{encoding:'utf8',maxBuffer:8<<20}).trim().split('\n'),selected=[];
-  for(const name of ['android-host.jar','android-framework.jar']){
-   const matches=names.filter(entry=>entry.endsWith('/'+name)||entry===name);if(matches.length!==1||matches[0].split('/').includes('..')||path.isAbsolute(matches[0]))throw Error('Android API archive has an ambiguous or unsafe '+name);selected.push(matches[0]);
-  }
-  const extracted=path.join(work,'api');fs.mkdirSync(extracted);
-  execFileSync('/usr/bin/tar',['-xzf',archive,'-C',extracted,...selected]);fs.unlinkSync(archive);
-  const api=path.join(work,'classpath');fs.mkdirSync(api);for(const name of selected)fs.copyFileSync(path.join(extracted,name),path.join(api,path.basename(name)));
+  // Android's android-host.jar classes and android-framework.jar are this build stage's products, unchanged.
+  const framework=preparedBuildInput('android-java-framework');if(!framework)throw Error('The Android launcher build needs the android-java-framework input.');
+  const classpath=[path.join(framework.root,'build/classes'),path.join(framework.root,'products/android-framework.jar')];
   let jdk;
   if(process.platform==='linux'){
    const pin=input.jdk?.['linux-'+process.arch];if(!pin)throw Error('No JDK input is declared for this Linux host.');
@@ -26,7 +23,7 @@ export async function buildAndroidLauncher({project:id,arch,output,work}){
    const homes=fs.readdirSync(directory).map(name=>path.join(directory,name)).filter(home=>fs.existsSync(path.join(home,'bin/javac')));
    if(homes.length!==1)throw Error('The pinned JDK must contain one Java compiler.');jdk=homes[0];
   }else jdk=process.env.JAVA_HOME||execFileSync('/usr/libexec/java_home',['-v','21'],{encoding:'utf8'}).trim();
-  const built=path.join(work,'compiled');build({jdk,runtime:api,output:built});
+  const built=path.join(work,'compiled');build({jdk,classpath,output:built});
   const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});
   for(const entry of profile.inputs){
    const generated=path.join(built,entry.path);

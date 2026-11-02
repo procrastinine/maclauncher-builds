@@ -4,12 +4,12 @@ This producer builds MacLauncher's Java adapters for launch arguments, text inpu
 
 The `android-launcher` profile of the [included-helper producer](../included-helpers/README.md) lists the files that go into the package and their licenses. `source.json` records the commit of the Android source project, the supplied JavaScript and notice files and the Java source files maintained here. The JavaScript interfaces keep the directory structure and package metadata that Node's module resolver requires.
 
-The adapters are four JARs, which can be compiled without a MacLauncher checkout. An explicit JDK 21 home and the selected Android runtime directory supply `javac`, `jar`, `android-host.jar` and `android-framework.jar`:
+The adapters are four JARs, which can be compiled without a MacLauncher checkout. An explicit JDK 21 home supplies `javac` and `jar`. The Android API classpath lists absolute class directories or JARs, separated by `:`: either the `build/classes` directory and `products/android-framework.jar` of an `android-java-framework` package, or the `android-host.jar` and `android-framework.jar` of an Android runtime, which contain the same classes:
 
 ```sh
-node producers/android-launcher/build.mjs --jdk /absolute/jdk-home --runtime /absolute/android-runtime --output /absolute/new-output
+node producers/android-launcher/build.mjs --jdk /absolute/jdk-home --classpath /absolute/build/classes:/absolute/android-framework.jar --output /absolute/new-output
 ```
 
 `--only arguments,privacy,text-input,account-control` selects components. Each entry under `source/` takes the same required options and builds one component. The agent adapters target Java 17 with the internal ASM export, and the text-input and account-control adapters target Java 21. The source profiles fix the dates of the JAR members.
 
-The shared Runtime recipe compiles all four JARs from these sources and packages them with the supplied JavaScript interfaces and notices. A missing compiler product stops packaging. The adapters and Android interfaces keep their included licenses.
+The shared Runtime recipe compiles all four JARs from these sources against the `android-java-framework` build input and packages them with the supplied JavaScript interfaces and notices. A missing compiler product stops packaging. The adapters and Android interfaces keep their included licenses.
