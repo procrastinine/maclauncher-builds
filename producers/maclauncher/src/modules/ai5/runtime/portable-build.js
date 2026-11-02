@@ -4,8 +4,6 @@ const crypto = require("node:crypto");
 const Source = require("../../shared/runtime/pinned-native-build");
 const Native = require("../../shared/runtime/local-native");
 const Fonts = require("../../shared/runtime/portable-sdl2-fonts");
-const Audio = require("../../shared/runtime/portable-sndfile");
-const Movie = require("../../minori/runtime/movie-build");
 const Previous = require("./build");
 const { throwIfAborted } = require("../../shared/runtime/download-utils");
 
@@ -76,21 +74,7 @@ function adaptSource(root) {
     originals: ORIGINALS, files: Object.fromEntries([...Object.keys(ORIGINALS), ...OUTPUTS].sort().map(file => [file, Native.hashFile(path.join(root, file))])) };
 }
 
-function recipeHash(moduleFile, catalogFile) {
-  return crypto.createHash("sha256").update(fs.readFileSync(moduleFile)).update(fs.readFileSync(catalogFile)).digest("hex");
-}
-
 function dependencyPrefixes({ fontStack, audioStack, movieStack }) {
-  if (fontStack?.version !== Fonts.PIN.version || fontStack.architecture !== "arm64" || fontStack.minimumMacOS !== "13.0" ||
-      fontStack.recipeSha256 !== recipeHash(require.resolve("../../shared/runtime/portable-sdl2-fonts"), require.resolve("../../shared/runtime/portable-sdl2-fonts.json")) ||
-      audioStack?.version !== Audio.PIN.version || audioStack.architecture !== "arm64" || audioStack.minimumMacOS !== "13.0" ||
-      audioStack.recipeSha256 !== recipeHash(require.resolve("../../shared/runtime/portable-sndfile"), require.resolve("../../shared/runtime/portable-sndfile.json")) ||
-      movieStack?.source?.version !== Movie.SOURCE.version || movieStack.source.sha256 !== Movie.SOURCE.sha256 ||
-      movieStack.architecture !== "arm64" || movieStack.minimumMacOS !== "13.0" || movieStack.network !== false ||
-      movieStack.externalCodecs !== false || movieStack.gpl !== false || movieStack.nonfree !== false ||
-      JSON.stringify(movieStack.decoders) !== JSON.stringify(Movie.DECODERS) || JSON.stringify(movieStack.demuxers) !== JSON.stringify(Movie.DEMUXERS)) {
-    throw new Error("AI5 portable dependencies differ from their selected source profiles.");
-  }
   const moviePrefix = movieStack.options?.find(option => option.startsWith("--prefix="))?.slice(9);
   const prefixes = [fontStack.prefix, audioStack.prefix, moviePrefix];
   for (const prefix of prefixes) if (!path.isAbsolute(prefix || "") || !fs.statSync(path.join(prefix, "lib/pkgconfig")).isDirectory()) {

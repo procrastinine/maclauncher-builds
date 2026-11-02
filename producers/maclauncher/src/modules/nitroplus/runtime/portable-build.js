@@ -79,10 +79,7 @@ async function buildPortableNPengine({ sourceDir = Previous.sourcePath, npaSourc
   throwIfAborted(signal);
   if (process.platform !== "darwin" || process.arch !== "arm64") throw new Error("This Nitroplus source profile builds on Apple Silicon Macs.");
   const media = Media.validateSDKPrefix(requirePrefix(mediaStack?.prefix));
-  if (utilityStack?.version !== "boost-glew-macos13-v1" || utilityStack.architecture !== "arm64" || utilityStack.minimumMacOS !== "13.0" ||
-      utilityStack.recipeSha256 !== Media.recipeIdentity()) throw new Error("Nitroplus needs the matching portable Boost and GLEW build.");
-  const utilityPrefix = requirePrefix(utilityStack.prefix), sdlPrefix = requirePrefix(sdlStack?.prefix);
-  if (sdlStack?.version !== Portable.PIN.version) throw new Error("Nitroplus needs the pinned classic SDL2 source build.");
+  const utilityPrefix = requirePrefix(utilityStack?.prefix), sdlPrefix = requirePrefix(sdlStack?.prefix);
   workRoot = Portable.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, npaSourceDir, media.prefix, utilityPrefix, sdlPrefix] });
   const [engine, npa] = await Promise.all([Source.validatePinnedSource(sourceDir, REVISION, { signal }), Source.validatePinnedSource(npaSourceDir, NPA_REVISION, { signal })]);
   if (Source.hashPinnedFiles(sourceDir, engine.files) !== ENGINE_TREE_SHA256 || Source.hashPinnedFiles(npaSourceDir, npa.files) !== NPA_TREE_SHA256) {

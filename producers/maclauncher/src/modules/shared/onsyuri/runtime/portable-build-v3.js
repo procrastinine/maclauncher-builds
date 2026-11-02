@@ -27,7 +27,7 @@ function validateEngineFeatures(outputRoot) {
   if (commands.includes("USE_GLES") || commands.includes("renderer/gles_renderer.cpp")) throw new Error("Yuri macOS build enabled the excluded GLES sharpness path.");
 }
 
-async function buildPortableYuri({ sourceDir, archives, workRoot, dependencyStacks, mixerStack, architecture = process.arch, pathMappings = [], signal, onProgress, dependencies = {} }) {
+async function buildPortableYuri({ sourceDir, archives, workRoot, mixerStack, architecture = process.arch, pathMappings = [], signal, onProgress, dependencies = {} }) {
   throwIfAborted(signal);
   if (process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) throw new Error("Yuri builds require macOS and an arm64 or x64 target.");
   validateBase();
@@ -36,29 +36,23 @@ async function buildPortableYuri({ sourceDir, archives, workRoot, dependencyStac
   const original = await Source.validatePinnedSource(sourceDir, REVISION, { signal, sourceScope: scope });
   if (Source.hashPinnedFiles(sourceDir, original.files) !== SOURCE_SHA256 || !isDeepStrictEqual(original.omittedSubmodules, Base.PIN.engine.omittedSubmodules)) throw new Error("Yuri primary source checksum or omitted-submodule revisions changed.");
   Base.validateEngineArchive(archives); Fonts.validateArchives(archives); Audio.validateArchives(archives); Audio.validateArchives(archives, { catalog: Mixer.PIN }); Fonts.validateArchives(archives, { catalog: Base.PIN });
-  if (dependencyStacks && (Object.keys(dependencyStacks).length !== 1 || !dependencyStacks.yuri)) throw new Error("Yuri dependency reuse accepts one exact complete base profile.");
-  const reused = Boolean(dependencyStacks);
-  let closure = dependencyStacks?.yuri.receipt.dependencyClosure, mixer = closure?.mixer;
-  const readRoots = reused ? [closure.prefix, ...dependencyStacks.yuri.readRoots] : [];
-  workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, ...readRoots] });
+  workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir] });
   const overlaySha256 = overlayIdentity(); fs.mkdirSync(workRoot, { recursive: true });
-  if (!mixer) mixer = mixerStack || await Mixer.buildMixer({ archives, workRoot: path.join(workRoot, "mixer-dependencies"), architecture, pathMappings, signal, onProgress, dependencies });
+  const mixer = mixerStack || await Mixer.buildMixer({ archives, workRoot: path.join(workRoot, "mixer-dependencies"), architecture, pathMappings, signal, onProgress, dependencies });
   const prefix = path.join(workRoot, "prefix"); fs.mkdirSync(prefix);
-  Prefix.linkPrefix(closure?.prefix || mixer.prefix, prefix, { readRoots: reused ? dependencyStacks.yuri.readRoots : mixer.readRoots });
+  Prefix.linkPrefix(mixer.prefix, prefix, { readRoots: mixer.readRoots });
   const run = dependencies.runBuildCommand || Source.runBuildCommand;
-  const sources = reused ? closure.sources : [], sourceRoots = reused ? closure.sourceRoots : {};
-  if (!reused) {
-    for (const pin of Base.PIN.dependencies) {
-      throwIfAborted(signal);
-      const sourceRoot = path.join(workRoot, "source", pin.id); fs.mkdirSync(sourceRoot, { recursive: true });
-      await run("/usr/bin/tar", ["-xf", archives[pin.id], "--strip-components", "1", "-C", sourceRoot],
-        { cwd: workRoot, logPath: path.join(workRoot, "extraction.log"), env: Fonts.buildEnvironment(prefix, mixer.sdk), signal });
-      for (const notice of pin.notices) if (!fs.lstatSync(path.join(sourceRoot, notice)).isFile()) throw new Error(`Missing source license for ${pin.name}.`);
-      const sourceOverlay = pin.id === "lua" ? Base.adaptLua(sourceRoot) : undefined;
-      const build = await Fonts.buildProject({ sourceRoot, outputRoot: path.join(workRoot, pin.id), prefix, sdk: mixer.sdk, tools: mixer.tools, architecture,
-        pathMappings, options: pin.options, signal, onProgress, dependencies });
-      sources.push({ ...pin, ...build, ...(sourceOverlay ? { sourceOverlay } : {}) }); sourceRoots[pin.id] = sourceRoot;
-    }
+  const sources = [], sourceRoots = {};
+  for (const pin of Base.PIN.dependencies) {
+    throwIfAborted(signal);
+    const sourceRoot = path.join(workRoot, "source", pin.id); fs.mkdirSync(sourceRoot, { recursive: true });
+    await run("/usr/bin/tar", ["-xf", archives[pin.id], "--strip-components", "1", "-C", sourceRoot],
+      { cwd: workRoot, logPath: path.join(workRoot, "extraction.log"), env: Fonts.buildEnvironment(prefix, mixer.sdk), signal });
+    for (const notice of pin.notices) if (!fs.lstatSync(path.join(sourceRoot, notice)).isFile()) throw new Error(`Missing source license for ${pin.name}.`);
+    const sourceOverlay = pin.id === "lua" ? Base.adaptLua(sourceRoot) : undefined;
+    const build = await Fonts.buildProject({ sourceRoot, outputRoot: path.join(workRoot, pin.id), prefix, sdk: mixer.sdk, tools: mixer.tools, architecture,
+      pathMappings, options: pin.options, signal, onProgress, dependencies });
+    sources.push({ ...pin, ...build, ...(sourceOverlay ? { sourceOverlay } : {}) }); sourceRoots[pin.id] = sourceRoot;
   }
   const sourceRoot = path.join(workRoot, "onsyuri-source"), sourceTreeSha256 = Source.stagePinnedFiles(sourceDir, original.files, sourceRoot);
   const cmake = Base.adaptEngine(sourceRoot, sourceDir), page = Page.apply(sourceRoot, sourceDir);
@@ -67,7 +61,7 @@ async function buildPortableYuri({ sourceDir, archives, workRoot, dependencyStac
   const build = await Fonts.buildProject({ sourceRoot, outputRoot, prefix, sdk: mixer.sdk, tools: mixer.tools, architecture,
     pathMappings, options: [], signal, onProgress, dependencies });
   validateEngineFeatures(outputRoot);
-  const features = { ...mixer.features, ...(reused ? dependencyStacks.yuri.receipt.features : Base.validateFeatures(workRoot)), emptyPageReset: true };
+  const features = { ...mixer.features, ...Base.validateFeatures(workRoot), emptyPageReset: true };
   const profile = { schemaVersion: 1, version: VERSION, upstreamVersion: PIN.engine.upstreamVersion, upstreamRevision: REVISION, sourceTreeSha256,
     sourceScope: original.sourceScope, omittedSubmodules: original.omittedSubmodules, overlaySha256, architecture, minimumMacOS: "13.0", features };
   fs.writeFileSync(path.join(prefix, "profile.json"), JSON.stringify(profile, null, 2) + "\n", { flag: "wx" });

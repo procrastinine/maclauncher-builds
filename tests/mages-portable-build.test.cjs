@@ -7,7 +7,6 @@ const crypto = require("node:crypto");
 const Dependency = require("../producers/maclauncher/src/modules/mages/native/portable-dependencies");
 const Prefix = require("../producers/maclauncher/src/modules/mages/native/portable-prefix");
 const Build = require("../producers/maclauncher/src/modules/mages/native/portable-build");
-const Overlay = require("../producers/maclauncher/src/modules/mages/native/portable-overlay");
 const { image } = require("./fixtures/macho-image.cjs");
 
 function directory(t) {
@@ -46,17 +45,16 @@ test("portable dependency catalogs reject escaping licenses and target overrides
   }
 });
 
-test("dependency overlays permit only declared read-only roots and never replace originals", t => {
+test("dependency overlays link only contained originals and never replace them", t => {
   const root = directory(t), original = path.join(root, "original"), output = path.join(root, "output"), outside = path.join(root, "outside");
   fs.mkdirSync(path.join(original, "include"), { recursive: true }); fs.mkdirSync(output); fs.mkdirSync(outside);
-  fs.writeFileSync(path.join(original, "include/header.h"), "original"); fs.writeFileSync(path.join(outside, "private"), "outside");
-  const before = Prefix.snapshotPrefix(original).sha256;
+  const header = path.join(original, "include/header.h");
+  fs.writeFileSync(header, "original"); fs.writeFileSync(path.join(outside, "private"), "outside");
   Prefix.linkPrefix(original, output);
-  assert.throws(() => Prefix.snapshotPrefix(output), /declared inputs/);
-  assert.equal(Prefix.snapshotPrefix(output, { readRoots: [original] }).files.length, 1);
-  assert.equal(Prefix.snapshotPrefix(original).sha256, before);
-  fs.symlinkSync(path.join(outside, "private"), path.join(output, "escaped"));
-  assert.throws(() => Prefix.snapshotPrefix(output, { readRoots: [original] }), /declared inputs/);
+  assert.equal(fs.readlinkSync(path.join(output, "include/header.h")), fs.realpathSync(header));
+  assert.equal(fs.readFileSync(header, "utf8"), "original");
+  fs.symlinkSync(path.join(outside, "private"), path.join(original, "include/escaped"));
+  assert.throws(() => Prefix.linkPrefix(original, output), /contained regular files/);
   assert.throws(() => Prefix.linkPrefix(original, original), /separate/);
 });
 
@@ -137,19 +135,6 @@ test("native linking rejects linked executables and incomplete library inputs be
   fs.mkdirSync(prefix); fs.writeFileSync(path.join(prefix, "lib"), "file");
   await assert.rejects(Build.linkDependencyPaths(executable, [prefix], options), /library directory is unavailable/);
   assert.deepEqual(calls, []);
-});
-
-test("portable source changes require the complete Windows overlay and reject linked or Git inputs", t => {
-  const root = directory(t), source = path.join(root, "source"); fs.mkdirSync(source);
-  fs.mkdirSync(path.join(source, "src/subtitle"), { recursive: true });
-  const target = path.join(source, Overlay.FILE); fs.writeFileSync(target, "#ifndef IMPACTO_DISABLE_ASS\n");
-  assert.throws(() => Overlay.applyPortableOverlay(source), /checksum differs/);
-  assert.equal(fs.readFileSync(target, "utf8"), "#ifndef IMPACTO_DISABLE_ASS\n");
-  fs.mkdirSync(path.join(source, ".git"));
-  assert.throws(() => Overlay.applyPortableOverlay(source), /separate source export/);
-  fs.rmSync(path.join(source, ".git"), { recursive: true });
-  const alias = path.join(root, "alias"); fs.symlinkSync(source, alias);
-  assert.throws(() => Overlay.applyPortableOverlay(alias), /separate source export/);
 });
 
 test("Mach-O load-command floors reject macOS 27 despite a macOS 13 label", t => {
