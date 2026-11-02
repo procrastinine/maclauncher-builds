@@ -1,0 +1,56 @@
+{
+  "id": "android-privacy",
+  "version": "1.1.1",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "sourceRelative": null,
+  "sourceSha256": "a95dfc40811e331ffde87ccca5e52e9bc1683bd3c90b09734bf1fcd46a3969ff",
+  "directoryRelative": "android-privacy/1.1.1/arm64",
+  "manifestRelative": "helper.json",
+  "manifestSha256": "d73573dc4b769d5d1ff09c0ed466020af77a2909193466e989b3ba916065486e",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 15711,
+      "mode": 420,
+      "sha256": "42e67096a0b0f119008cf4c05ec91581ceba10a0890699d4b8e6340589550b4c"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "9b9839e02113a8981eb0e15461718809441ae28df070bb6919408cd4cad1de29"
+    },
+    {
+      "path": "clipboard-helper",
+      "size": 80384,
+      "sha256": "d6ce23fcf4f894094c1d64d506019c1ea40a59e1ec2ce1661d364532009f35bd",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "helper.json",
+      "size": 813,
+      "sha256": "d73573dc4b769d5d1ff09c0ed466020af77a2909193466e989b3ba916065486e",
+      "mode": 420
+    },
+    {
+      "path": "license.txt",
+      "size": 1081,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+      "mode": 420
+    }
+  ],
+  "notices": [
+    {
+      "name": "MacLauncher clipboard integration",
+      "license": "MIT",
+      "path": "license.txt"
+    }
+  ]
+}
