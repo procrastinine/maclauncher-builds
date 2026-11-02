@@ -709,8 +709,8 @@ const declaration = { id: "reshade", version, arch: packageArch, launcherArchite
       { name: "MLX-DLSS", license: "Apache-2.0", path: "neural/notices/MLX-DLSS-LICENSE", sourceUrl: "https://github.com/iamwavecut/MLX-DLSS" },
       { name: "MLX", license: "MIT", path: "neural/notices/MLX-LICENSE", sourceUrl: "https://github.com/ml-explore/mlx" },
       { name: "MLX Swift", license: "MIT", path: "neural/notices/MLX-Swift-LICENSE", sourceUrl: "https://github.com/ml-explore/mlx-swift" },
-      { name: "Swift Argument Parser", license: "Apache-2.0", path: "neural/notices/Swift-Argument-Parser-LICENSE", sourceUrl: "https://github.com/apple/swift-argument-parser" },
-      { name: "Swift Numerics", license: "Apache-2.0", path: "neural/notices/Swift-Numerics-LICENSE", sourceUrl: "https://github.com/apple/swift-numerics" }
+      { name: "Swift Argument Parser", license: "Apache-2.0 WITH Swift-exception", path: "neural/notices/Swift-Argument-Parser-LICENSE", sourceUrl: "https://github.com/apple/swift-argument-parser" },
+      { name: "Swift Numerics", license: "Apache-2.0 WITH Swift-exception", path: "neural/notices/Swift-Numerics-LICENSE", sourceUrl: "https://github.com/apple/swift-numerics" }
     ] : []),
     ...(libplacebo?[
       ...libplacebo.inputs.filter(row=>row.id&&!["shaderc","lcms2"].includes(row.id)).map(row=>({name:row.id,license:row.license,path:"notices/libplacebo/"+row.id+".LICENSE",sourceUrl:row.repository})),
