@@ -1,6 +1,12 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const temporary=t=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'producer-test-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;};
 const Native=require('../producers/maclauncher/src/modules/shared/runtime/local-native'),MachO=require('../producers/maclauncher/src/modules/shared/runtime/macho-load-commands');
+test('RLVM accepts the Runtime selected version before checking the requested CPU', t=>{
+ const root=temporary(t),command=path.resolve(__dirname,'../producers/vn-adaptations/rlvm/package.mjs');
+ const result=require('node:child_process').spawnSync(process.execPath,[command,'--project','rlvm-adapter','--version','1.0.1','--arch','x64','--output',path.join(root,'output'),'--work',path.join(root,'work')],{encoding:'utf8'});
+ assert.equal(result.status,1);assert.match(result.stderr,/builds universal packages on GitHub/);
+ assert.equal(fs.existsSync(path.join(root,'work')),false);
+});
 test('RLVM packaging requires an explicit compiled source-build product', async t=>{
  const root=temporary(t),output=path.join(root,'missing');
  const {packageAdapter}=await import('../producers/vn-adaptations/rlvm/package.mjs');
