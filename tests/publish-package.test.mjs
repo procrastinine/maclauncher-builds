@@ -24,7 +24,7 @@ test('a package publishes after its attestation and before its catalog entry, wi
   stageBundle:async options=>{assert.equal(options.target,f.env.GITHUB_SHA);calls.push('stage');},
   publishBundle:async()=>calls.push('release'),runGh:async args=>{if(args[0]==='api')throw Object.assign(Error('HTTP 404'),{stderr:'HTTP 404'});assert.deepEqual(args,['auth','setup-git']);calls.push('credentials');},
   append:async()=>{calls.push('catalog');return {commit:'c'.repeat(40)};}});
- assert.deepEqual(calls,['seal','attest','authority','stage','release','credentials','catalog']);assert.equal(result.project,'engine');
+ assert.deepEqual(calls,['seal','attest','authority','stage','release','catalog']);assert.equal(result.project,'engine');
 });
 test('a failed release cannot create a catalog entry and a different source cannot be published',async t=>{
  const f=fixture(t),options={...f,bundle:f.directory,verifyBundle:async()=>({record:f.record,declaration:{files:[]}}),recordBuild:async()=>{},requireBuild:()=>{},runGh:async()=>{throw Object.assign(Error('HTTP 404'),{stderr:'HTTP 404'});},stageBundle:async()=>{throw Error('release failed');},append:()=>assert.fail('No catalog before a public release')};
@@ -56,7 +56,7 @@ function catalogFixture(t){
  git(source,['add','.']);git(source,['commit','-m','Source']);git(source,['push','origin','main']);git(f.directory,['clone','--quiet',remote,other]);
  const ledger=path.join(f.directory,'ledger.json');fs.writeFileSync(ledger,'verified fixture');
  const apply=async({directory})=>{const file=path.join(directory,'catalogs','engine.json');fs.mkdirSync(path.dirname(file),{recursive:true});if(fs.existsSync(file)&&fs.readFileSync(file,'utf8')!=='exact entry\n')throw Error('Immutable entry conflict');fs.writeFileSync(file,'exact entry\n');};
- return {...f,directory:source,other,ledger,apply,bundle:f.directory};
+ return {...f,directory:source,other,ledger,apply,bundle:f.directory,runGh:async args=>assert.deepEqual(args,['auth','setup-git'])};
 }
 test('catalog races reapply the own entry onto fresh main and identical appends are no-ops',async t=>{
  const f=catalogFixture(t);let raced=false,slept=0;

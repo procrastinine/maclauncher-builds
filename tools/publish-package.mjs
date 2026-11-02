@@ -23,6 +23,7 @@ function hosted(env,directory){
 /** Reapply one verified entry to fresh main after a competing normal push.
  * No shared JSON is textually rebased and no remote ref is forced. */
 export async function appendPackageCatalog({bundle,record,ledger,directory=root,env=process.env,runGit=git,apply=applyRelease,register=registerSelection,runGh=github,sleep=delay,random=Math.random,attempts=10}={}){
+ await runGh(['auth','setup-git']);
  const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'runtime-catalog-')),checkout=path.join(temporary,'checkout');let added=false;
  try{
   for(let attempt=0;attempt<attempts;attempt++){
@@ -65,7 +66,6 @@ export async function publishPackage({bundle,directory=root,env=process.env,runG
  await recordBuild({archive,record,directory,runGh:(command,args,options)=>{if(command!=='gh')throw Error('Unexpected attestation transport.');return runGh(args,options);}});
  requireBuild({record,repository,directory,archive,sourceRevision:env.GITHUB_SHA});
  const options={bundle,directory,runGh};await stageBundle({...options,target:env.GITHUB_SHA,resume:true});await publishBundle(options);
- await runGh(['auth','setup-git']);
  const catalog=await append({bundle,record,ledger:path.join(directory,'attestations',record.asset.sha256+'.json'),directory,env,runGh});
  if(env.GITHUB_STEP_SUMMARY)fs.appendFileSync(env.GITHUB_STEP_SUMMARY,'\nPublished '+record.id+' '+record.version+' '+record.arch+'; catalog commit `'+catalog.commit+'`.\n');
  return {...catalog,project:record.id,version:record.version,arch:record.arch,sha256:record.asset.sha256};
