@@ -2303,10 +2303,14 @@
       {
         "version": "3.0.0-465c88c3-MCLv3",
         "label": "RPGMakerDecrypter 3.0.0-465c88c3-MCLv3"
+      },
+      {
+        "version": "3.0.0-MCLv4",
+        "label": "RPGMakerDecrypter 3.0.0-MCLv4"
       }
     ],
     "build": {
-      "version": "3.0.0-465c88c3-MCLv3",
+      "version": "3.0.0-MCLv4",
       "command": "tools/build-rpgmaker-decrypter.mjs",
       "architectures": [
         "arm64",
