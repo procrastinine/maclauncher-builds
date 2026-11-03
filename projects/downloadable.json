@@ -733,10 +733,14 @@
       {
         "version": "1.10-dev-MCLv3",
         "label": "Inno Setup extraction tools 1.10-dev-MCLv3"
+      },
+      {
+        "version": "1.10-dev-MCLv4",
+        "label": "Inno Setup extraction tools 1.10-dev-MCLv4"
       }
     ],
     "build": {
-      "version": "1.10-dev-MCLv3",
+      "version": "1.10-dev-MCLv4",
       "command": "tools/build-innoextract.mjs",
       "architectures": [
         "x64",
