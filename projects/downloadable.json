@@ -1288,42 +1288,29 @@
       {
         "version": "1.8.0-MCLv2",
         "label": "System3 SDL2 1.8.0-MCLv2"
-      }
-    ],
-    "build": [
-      {
-        "version": "1.8.0-MCLv1",
-        "command": "tools/build-system3.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/system3-sdl2"
-        ],
-        "tools": [
-          "cmake",
-          "ninja",
-          "pkgconf"
-        ],
-        "recursiveSubmodules": true
       },
       {
-        "version": "1.8.0-MCLv2",
-        "command": "tools/build-system3.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/system3-sdl2"
-        ],
-        "tools": [
-          "cmake",
-          "ninja",
-          "pkgconf"
-        ],
-        "recursiveSubmodules": true
+        "version": "1.8.0-MCLv3",
+        "label": "System3 SDL2 1.8.0-MCLv3"
       }
-    ]
+    ],
+    "build": {
+      "version": "1.8.0-MCLv3",
+      "command": "tools/build-system3.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/system3-sdl2"
+      ],
+      "tools": [
+        "cmake",
+        "ninja",
+        "pkgconf"
+      ],
+      "recursiveSubmodules": true
+    }
   },
   {
     "id": "xsys35-decompiler",
