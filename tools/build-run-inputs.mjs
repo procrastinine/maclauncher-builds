@@ -45,8 +45,8 @@ export async function prepareBuildInputs({project,output,directory=root,environm
    archive=path.join(bundle,record.asset.filename);
    evidence=record.build||{};
   }else{
-   const binding=Array.isArray(reuse)?reuse.find(row=>row.id===dep):reuse[dep];if(!binding?.version||!binding.digest)throw Error('Missing exact planned published input: '+dep);
-   const catalog=validateCatalog(json(path.join(directory,'catalogs',dep+'.json')),{project:dep,repository}),compatible=catalog.packages.filter(record=>record.version===binding.version&&record.asset.sha256===binding.digest&&(!binding.arch||record.arch===binding.arch));record=choose(compatible);if(!record)throw Error('Planned published dependency is absent: '+dep);
+   const binding=Array.isArray(reuse)?reuse.find(row=>row.id===dep):reuse[dep];if(!binding?.version||!binding.digests)throw Error('Missing exact planned published input: '+dep);
+   const catalog=validateCatalog(json(path.join(directory,'catalogs',dep+'.json')),{project:dep,repository}),compatible=catalog.packages.filter(record=>record.version===binding.version&&binding.digests[record.arch]===record.asset.sha256);record=choose(compatible);if(!record)throw Error('Planned published dependency is absent: '+dep);
    if(!runGh&&environment.GITHUB_ACTIONS!=='true')throw Error('Published inputs are fetched only inside GitHub Actions.');
    const release=JSON.parse(await gh(['api','repos/'+repository+'/releases/tags/'+encodeURIComponent(record.tag)]));
    if(release.draft!==false||release.assets?.length!==1||release.assets[0].digest!=='sha256:'+record.asset.sha256)throw Error('Published input release differs from its catalog digest: '+dep);

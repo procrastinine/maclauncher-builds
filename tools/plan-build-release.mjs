@@ -32,16 +32,14 @@ export async function resolveReleaseSelection({selection,directory=root,releases
  const latest=new Map();
  const published=async id=>{
   if(latest.has(id))return latest.get(id);
-  const file=path.join(directory,'catalogs',id+'.json');let result=null;
-  for(const record of fs.existsSync(file)?json(file).packages:[]){
-   // Reuse only the exact catalog archive that is public.
-   try{requireGithubBuild({record,repository:registry.repository,directory});}catch{break;}
+  const file=path.join(directory,'catalogs',id+'.json'),records=fs.existsSync(file)?json(file).packages:[];
+  // Reuse the newest version only when the exact catalog archive of each architecture is public.
+  const version=records[0]?.version,digests={};let result=version?{version,digests}:null;
+  for(const record of records.filter(record=>record.version===version)){
+   try{requireGithubBuild({record,repository:registry.repository,directory});}catch{result=null;break;}
    const release=releases.find(release=>release.tag_name===record.tag&&!release.draft);
-   if(release?.assets?.length!==1||release.assets[0].digest!=='sha256:'+record.asset.sha256)break;
-   const declarationFile=path.join(directory,'catalogs/declarations',id,record.version,record.arch+'.json');
-   const declaration=fs.existsSync(declarationFile)?json(declarationFile):null;
-   result={version:record.version,digest:record.asset.sha256,arch:record.arch,
-    definitionDigest:declaration?.files?.find(file=>file.path==='build-definition.json')?.sha256};break;
+   if(release?.assets?.length!==1||release.assets[0].digest!=='sha256:'+record.asset.sha256){result=null;break;}
+   digests[record.arch]=record.asset.sha256;
   }
   latest.set(id,result);return result;
  };

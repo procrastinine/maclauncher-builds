@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {resolveBuildInputs} from '../tools/resolve-build-inputs.mjs';
 import {automaticInputName} from '../tools/plan-build-release.mjs';
-import {createRecipeBuildReporter,reportDigest} from '../tools/recipe-build-report.mjs';
+import {createRecipeBuildReporter} from '../tools/recipe-build-report.mjs';
 import {registerSelection} from '../tools/release-selection.mjs';
 import {helperPackage} from '../tools/helper-package.mjs';
 import {sealBuildInputReport} from '../tools/seal-build-input-report.mjs';
@@ -65,12 +65,11 @@ test('existing recipe references discover the consumed graph and plan fresh inpu
 });
 
 test('a published input is reused as published until its own line is requested',async t=>{
- const f=fixture(t),original=createRecipeBuildReporter({directory:f.directory})('input');
- const definitionDigest=reportDigest({recipe:original.definition,inputs:[]});
+ const f=fixture(t);
  f.write('producers/input.json',{version:'9.9.9-custom',source:{revision:'original-source'},flags:['complete']});
- const describe=createRecipeBuildReporter({directory:f.directory}),published=()=>({version:'1.0.0',digest:'exact-verified-archive-digest',definitionDigest,sourceCommit:'a-different-enclosing-commit'});
+ const describe=createRecipeBuildReporter({directory:f.directory}),published=()=>({version:'1.0.0',digests:{arm64:'exact-verified-archive-digest'}});
  const reused=await resolveBuildInputs({selection:[{id:'consumer',version:'custom-consumer'}],describe,published,nextName:()=>{throw Error('No input rebuild expected.');}});
- assert.deepEqual(reused.orderedSelection,[{id:'consumer',version:'custom-consumer'}]);assert.deepEqual(reused.reuseBindings,[{id:'input',version:'1.0.0',digest:'exact-verified-archive-digest'}]);
+ assert.deepEqual(reused.orderedSelection,[{id:'consumer',version:'custom-consumer'}]);assert.deepEqual(reused.reuseBindings,[{id:'input',version:'1.0.0',digests:{arm64:'exact-verified-archive-digest'}}]);
  f.write('producers/input.json',{version:'9.9.9-custom',source:{revision:'changed-real-source'},flags:['complete']});
  const unchanged=await resolveBuildInputs({selection:[{id:'consumer',version:'custom-consumer'}],describe:createRecipeBuildReporter({directory:f.directory}),published,nextName:()=>{throw Error('No input rebuild expected.');}});
  assert.deepEqual(unchanged.orderedSelection,[{id:'consumer',version:'custom-consumer'}]);assert.deepEqual(unchanged.reuseBindings,reused.reuseBindings);

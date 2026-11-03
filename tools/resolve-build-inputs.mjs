@@ -22,10 +22,10 @@ export async function resolveBuildInputs({selection,describe,published,nextName}
   reports[id]={definition,definitionDigest,inputs:inputIds.map(id=>({id}))};dependencyGraph[id]=inputIds;
   const level=children.length?Math.max(...children.map(child=>child.level))+1:0;(levels[level]??=[]).push(id);
   const previous=await published(id);
-  // Only requested lines build. Any other input with a public release is used as published, pinned by its digest.
+  // Only requested lines build. Any other input with a public release is used as published, pinned by its digest for each architecture.
   const reuse=!roots.has(id)&&Boolean(previous);
   let result;
-  if(reuse){const binding={id,version:previous.version,digest:previous.digest};reuseBindings.push(binding);result={...binding,reused:true};}
+  if(reuse){const binding={id,version:previous.version,digests:previous.digests};reuseBindings.push(binding);result={...binding,reused:true};}
   else{
    const requests=roots.get(id)||[{id}],outputs=[];
    for(const request of requests){const version=request.version??await nextName(id,{definition,published:previous||null});const output={id,version};orderedSelection.push(output);outputs.push(output);}
