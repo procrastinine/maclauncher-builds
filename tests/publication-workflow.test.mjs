@@ -12,3 +12,10 @@ test('release recovery retains only the original reports for thirty days',()=>{
  assert.match(workflow,/path: \$\{\{ runner.temp \}\}\/release-plan\/reports.json[\s\S]*retention-days: 30/);
  for(const job of workflow.split(/\n  publish(?:Independent|[0-3]):/).slice(1))assert.match(job,/group: build-and-release-publication\n      cancel-in-progress: false\n      queue: max/);
 });
+
+test('built archives are attested with the required write capabilities',()=>{
+ const workflow=fs.readFileSync(new URL('../.github/workflows/runtime-build.yml',import.meta.url),'utf8'),action=fs.readFileSync(new URL('../.github/actions/build-runtime/action.yml',import.meta.url),'utf8');
+ assert.match(action,/steps\.attest\.outcome == 'success' \|\| steps\.attestRetry\.outcome == 'success'/);
+ assert.match(action,/uses: actions\/attest-build-provenance@[a-f0-9]{40}[\s\S]*subject-path: \$\{\{ runner.temp \}\}\/release\/\*\.tar\.gz/);
+ for(const name of ['independent','build0','build1','build2','build3']){const body=workflow.slice(workflow.indexOf('  '+name+':')).split(/\n  [A-Za-z][A-Za-z0-9]*:/)[0];assert.match(body,/attestations: write/);assert.match(body,/id-token: write/);}
+});

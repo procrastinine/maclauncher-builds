@@ -6,8 +6,6 @@ import {promisify} from 'node:util';
 import {readProjects,resolveProject,buildRecords} from '../lib/projects.mjs';
 import {parseSelection,registerSelection} from './release-selection.mjs';
 import {verifyRelease,stageRelease,publishRelease,applyRelease} from './release-runtime.mjs';
-import {recordGithubBuild} from './record-github-build.mjs';
-import {requireGithubBuild} from './build-coverage.mjs';
 import {releaseTag} from '../lib/project-identity.mjs';
 const root=path.resolve(import.meta.dirname,'..'),exec=promisify(execFile);
 const json=file=>JSON.parse(fs.readFileSync(file,'utf8'));
@@ -21,7 +19,7 @@ function hosted(env,directory){
 }
 /** Reapply one verified entry to fresh main after a competing normal push.
  * No shared JSON is textually rebased and no remote ref is forced. */
-export async function appendPackageCatalog({bundle,record,publication,ledger,directory=root,env=process.env,runGit=git,apply=applyRelease,register=registerSelection,runGh=github,attempts=10}={}){
+export async function appendPackageCatalog({bundle,record,publication,directory=root,env=process.env,runGit=git,apply=applyRelease,register=registerSelection,runGh=github,attempts=10}={}){
  await runGh(['auth','setup-git']);
  const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'runtime-catalog-')),checkout=path.join(temporary,'checkout');let added=false;
  try{
@@ -32,10 +30,8 @@ export async function appendPackageCatalog({bundle,record,publication,ledger,dir
    const project=resolveProject(record.id,checkout,{resolvePins:false});
    const published=['catalogs','catalogs/superseded'].some(folder=>{const file=path.join(checkout,folder,record.id+'.json');return fs.existsSync(file)&&json(file).packages.some(row=>row.version===record.version&&row.arch===record.arch);});
    if(!published&&!buildRecords(project).some(build=>build.version===record.version&&build.architectures.includes(record.arch)))register({selection:[{id:record.id,version:record.version}],directory:checkout});
-   const destination=path.join(checkout,'attestations',record.asset.sha256+'.json');fs.mkdirSync(path.dirname(destination),{recursive:true});
-   if(!fs.existsSync(destination))fs.copyFileSync(ledger,destination);
    await apply({bundle,directory:checkout,runGh,publication});
-   await runGit(['add','--update'],{cwd:checkout,env});await runGit(['add','--','catalogs','attestations'],{cwd:checkout,env});
+   await runGit(['add','--update'],{cwd:checkout,env});await runGit(['add','--','catalogs'],{cwd:checkout,env});
    if(!(await runGit(['diff','--cached','--name-only'],{cwd:checkout,env})))return {commit:head,existing:true,attempts:attempt+1};
    await runGit(['commit','-m','Publish '+record.id+' '+record.version+' '+record.arch],{cwd:checkout,env});
    try{await runGit(['push','origin','HEAD:main'],{cwd:checkout,env});return {commit:await runGit(['rev-parse','HEAD'],{cwd:checkout,env}),existing:false,attempts:attempt+1};}
@@ -51,7 +47,7 @@ export async function appendPackageCatalog({bundle,record,publication,ledger,dir
  }
 }
 /** The already sealed archive is attested, released, then made discoverable. */
-export async function publishPackage({bundle,directory=root,env=process.env,runGh=github,verifyBundle=verifyRelease,recordBuild=recordGithubBuild,requireBuild=requireGithubBuild,stageBundle=stageRelease,publishBundle=publishRelease,append=appendPackageCatalog}={}){
+export async function publishPackage({bundle,directory=root,env=process.env,runGh=github,verifyBundle=verifyRelease,stageBundle=stageRelease,publishBundle=publishRelease,append=appendPackageCatalog}={}){
  const repository=hosted(env,directory),project=resolveProject(env.BUILD_PROJECT,directory,{resolvePins:false});
  if(!project.packageProfiles.some(profile=>profile.version===env.BUILD_VERSION))registerSelection({selection:[{id:env.BUILD_PROJECT,version:env.BUILD_VERSION}],directory});
  const sourceRevision=env.GITHUB_SHA,runId=env.GITHUB_RUN_ID;
@@ -59,9 +55,6 @@ export async function publishPackage({bundle,directory=root,env=process.env,runG
  if(record.id!==env.BUILD_PROJECT||record.version!==env.BUILD_VERSION||record.arch!==env.BUILD_ARCH||record.build?.sourceRevision!==sourceRevision||String(record.build?.runId)!==runId)throw Error('The sealed package differs from this build job.');
  const reports=env.BUILD_REPORTS?json(env.BUILD_REPORTS):null;
  if(reports&&declaration.files.find(file=>file.path==='build-definition.json')?.sha256!==reports[record.id]?.definitionDigest)throw Error('The sealed build definition differs from the plan.');
- const archive=path.join(bundle,record.asset.filename);
- await recordBuild({archive,record,directory,runGh:(command,args,options)=>{if(command!=='gh')throw Error('Unexpected attestation transport.');return runGh(args,options);}});
- requireBuild({record,repository,directory,archive,sourceRevision});
  if(declaration.files.some(file=>file.path==='build-inputs.json')){
   const trace=JSON.parse(metadata?.['build-inputs.json']?.toString('utf8')||'null');
   if(trace?.schemaVersion!==1||!Array.isArray(trace.inputs))throw Error('The sealed build-input report is missing or invalid.');
@@ -80,7 +73,7 @@ export async function publishPackage({bundle,directory=root,env=process.env,runG
  }
  const options={bundle,directory,runGh},staged=await stageBundle({...options,target:sourceRevision,resume:true});
  const publication=await publishBundle({...options,publication:staged});
- const catalog=await append({bundle,record,publication,ledger:path.join(directory,'attestations',record.asset.sha256+'.json'),directory,env,runGh});
+ const catalog=await append({bundle,record,publication,directory,env,runGh});
  if(env.GITHUB_STEP_SUMMARY)fs.appendFileSync(env.GITHUB_STEP_SUMMARY,'\nPublished '+record.id+' '+record.version+' '+record.arch+'; catalog commit `'+catalog.commit+'`.\n');
  return {...catalog,project:record.id,version:record.version,arch:record.arch,sha256:record.asset.sha256};
 }

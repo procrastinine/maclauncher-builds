@@ -24,8 +24,7 @@ function fixture(t){
  write('tools/consumer.mjs',"import './shared.mjs'; const definition='producers/consumer.json';\n");
  write('tools/shared.mjs','export const shared = true;\n');write('tools/input.mjs',"const definition='producers/input.json';\n");
  write('producers/input.json',{version:'1.0.0',source:{revision:'original-source'},flags:['complete']});
- const evidence='attestations/'+('a'.repeat(64))+'.json';write(evidence,{record:{id:'input',version:'1.0.0',arch:'arm64'},sourceCommit:'old-outer-commit'});
- write('producers/consumer.json',{dependency:{evidence:{path:evidence,sha256:'old-ledger-sha'},artifact:{id:42,sha256:'old-output'}},upstream:{revision:'consumer-source'}});
+ write('producers/consumer.json',{dependency:{project:'input'},upstream:{revision:'consumer-source'}});
  return {directory,write};
 }
 
@@ -44,16 +43,15 @@ test('existing recipe references discover the consumed graph and plan fresh inpu
  }
  const inputOutput=dataHelper('input','new-input-name','fresh data from this run');sealBuildInputReport({project:'input',output:inputOutput,environment});
  const bundle=path.join(f.directory,'input-release');await prepareRelease({project:'input',input:path.join(inputOutput,'payload'),declaration:JSON.parse(fs.readFileSync(path.join(inputOutput,'declaration.json'))),output:bundle,directory:f.directory});
- // Only the signature/Actions transport is injected. Bind the real archive record
+ // Only Actions transport is injected. Bind the real archive record
  // to that fixture run, as the production prepare step does on GitHub.
  const sidecar=fs.readdirSync(bundle).find(name=>name.endsWith('.tar.gz.json')),record=JSON.parse(fs.readFileSync(path.join(bundle,sidecar)));
  record.build={sourceRevision:environment.GITHUB_SHA,runId:environment.GITHUB_RUN_ID,workflow:'owner/builds/.github/workflows/runtime-build.yml'};
  fs.writeFileSync(path.join(bundle,sidecar),JSON.stringify(record));const snapshot=JSON.parse(fs.readFileSync(path.join(bundle,'input.json')));snapshot.packages[0].build=record.build;fs.writeFileSync(path.join(bundle,'input.json'),JSON.stringify(snapshot));
  await verifyRelease({bundle,directory:f.directory});
- const evidence={sourceRevision:environment.GITHUB_SHA,runId:environment.GITHUB_RUN_ID},transports=[];
+ const transports=[];
  const actual=await prepareBuildInputs({project:'consumer',output:path.join(f.directory,'materialized'),directory:f.directory,environment,
-  runGh:async args=>{transports.push(args);assert.equal(args[2],'42');assert.equal(args[6],'runtime-input-new-input-name-arm64');fs.cpSync(bundle,args.at(-1),{recursive:true});},
-  recordBuild:async options=>{assert.equal(options.record.asset.sha256,record.asset.sha256);assert.ok(fs.existsSync(options.archive));},requireBuild:()=>evidence});
+  runGh:async args=>{transports.push(args);assert.equal(args[2],'42');assert.equal(args[6],'runtime-input-new-input-name-arm64');fs.cpSync(bundle,args.at(-1),{recursive:true});}});
  assert.equal(transports.length,1);const map=path.join(f.directory,'materialized/inputs.json');environment.MACLAUNCHER_BUILD_INPUTS=map;
  const fresh=preparedBuildInput('input',environment);assert.equal(fresh.record.asset.sha256,record.asset.sha256);assert.equal(fs.readFileSync(path.join(fresh.root,'data.txt'),'utf8'),'fresh data from this run');
  assert.ok(fs.existsSync(path.join(fresh.root,'../declaration.json')));assert.equal(actual.input.record.version,'new-input-name');

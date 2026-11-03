@@ -43,12 +43,12 @@ test('compare adds a delta column matched by job name',()=>{
  assert.match(text,/\| skipped .* \| new \|\n/);
  assert.match(text,/\| waiting .* \| new \|\n/);
 });
-test('GITHUB_STEP_SUMMARY is appended, otherwise stdout is used',async()=>{
+test('GITHUB_STEP_SUMMARY and stdout contain the same report',async()=>{
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'timings-')),input=path.join(dir,'jobs.json'),summary=path.join(dir,'summary.md');
  fs.writeFileSync(input,JSON.stringify({jobs}));fs.writeFileSync(summary,'existing\n');
  let out='';const stdout={write:text=>{out+=text;}};
  await main(['--jobs',input],{env:{GITHUB_STEP_SUMMARY:summary},stdout});
- assert.equal(out,'');assert.match(fs.readFileSync(summary,'utf8'),/^existing\n## Job timings/);
+ assert.equal(fs.readFileSync(summary,'utf8'),'existing\n'+out);assert.match(out,/^## Job timings/);
  await main(['--jobs',input],{env:{},stdout});assert.match(out,/## Job timings/);
 });
 test('fetch pages are combined and errors only warn',async()=>{

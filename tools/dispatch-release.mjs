@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
+import {setTimeout as sleep} from 'node:timers/promises';
 import {pathToFileURL} from 'node:url';
 import {readProjects} from '../lib/projects.mjs';
 import {parseSelection,registerSelection} from './release-selection.mjs';
@@ -40,10 +41,10 @@ export async function planReleaseDispatch({selection,directory=root,releases=[],
  const registration=registerSelection({selection:resolved.orderedSelection,directory,releases,dryRun:true});
  const components=orderReleaseComponents({components:releaseComponents({selection:registration.selection,graph:resolved.dependencyGraph})});
  return {repository:readProjects(directory,{resolvePins:false}).repository,workflow:'runtime-build.yml',ref:'main',selection:registration.selection,graph:resolved.dependencyGraph,
-  components:components.map(selection=>({selection,releases:pairs(selection)}))};
+  components:components.map(selection=>({selection,releases:pairs(selection),targets:registration.include.filter(row=>selection.some(pair=>pair.id===row.project&&pair.version===row.version))}))};
 }
 /** One ordinary dispatch per component; all validation precedes the first remote write. */
-export async function dispatchReleaseComponents(plan,{runGh=(args)=>execFileSync('gh',args,{stdio:'inherit'})}={}){
+export async function dispatchReleaseComponents(plan,{runGh=(args)=>execFileSync('gh',args,{encoding:'utf8',stdio:['ignore','pipe','pipe']}),wait=sleep}={}){
  if(plan.workflow!=='runtime-build.yml'||plan.ref!=='main'||!/^[-\w.]+\/[-\w.]+$/.test(plan.repository||''))throw Error('Use the ordinary main Build and release workflow.');
  const components=plan.components.map(component=>exactSelection(component.selection));
  if(!components.length)throw Error('No release components to dispatch.');
@@ -52,10 +53,17 @@ export async function dispatchReleaseComponents(plan,{runGh=(args)=>execFileSync
  if(JSON.stringify(components)!==JSON.stringify(expected))throw Error('Dispatch components differ from the resolved graph.');
  const dispatched=[];
  for(const selection of components){
-  const releases=pairs(selection);
-  try{await runGh(['workflow','run','runtime-build.yml','--repo',plan.repository,'--ref','main','--raw-field','releases='+releases]);}
+  const releases=pairs(selection);let response;
+  try{for(let attempt=0;;attempt++){
+   try{response=await runGh(['workflow','run','runtime-build.yml','--repo',plan.repository,'--ref','main','--raw-field','releases='+releases]);break;}
+   catch(error){if(attempt===4||!/TLS handshake timeout|connection refused|connection reset|no such host|temporary failure in name resolution|could not resolve host|ENOTFOUND|EAI_AGAIN|ECONNREFUSED|ECONNRESET/i.test(String(error.stderr||error.message)))throw error;await wait(1000*2**attempt);}
+  }}
   catch(error){error.message+='; components already dispatched: '+JSON.stringify(dispatched);throw error;}
   dispatched.push(releases);
+  if(process.env.GITHUB_STEP_SUMMARY){const component=plan.components[dispatched.length-1],url=String(response||'').match(/https:\/\/github\.com\/[^\s]+\/actions\/runs\/\d+/)?.[0];
+   fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,'\nComponent '+dispatched.length+': '+releases+(url?' — '+url:'')+'\n'+(component.targets||[]).map(row=>'- '+[row.project,row.version,row.arch].join(' ')).join('\n')+'\n');
+  }
+  if(response)console.log(String(response).trim());
  }
  return {dispatched};
 }
@@ -63,12 +71,17 @@ export async function main([operation,...args],{directory=root,runGh}={}){
  if(!['plan','dispatch'].includes(operation))throw Error('Use plan or dispatch --file releases.txt (or --releases project=version).');
  const options={};for(let i=0;i<args.length;i+=2){if(!['--file','--releases','--output'].includes(args[i])||!args[i+1]||Object.hasOwn(options,args[i]))throw Error('Use --file or --releases, with optional --output.');options[args[i]]=args[i+1];}
  if(Boolean(options['--file'])===Boolean(options['--releases']))throw Error('Choose exactly one of --file or --releases.');
- const selection=options['--file']?fs.readFileSync(options['--file'],'utf8'):options['--releases'];
+ let selection=options['--file']?fs.readFileSync(options['--file'],'utf8'):options['--releases'];
  let releases=[];
  if(operation==='dispatch'){
   const repository=readProjects(directory,{resolvePins:false}).repository;
   const text=await(runGh?runGh(['api','--paginate','--slurp','repos/'+repository+'/releases?per_page=100']):execFileSync('gh',['api','--paginate','--slurp','repos/'+repository+'/releases?per_page=100'],{encoding:'utf8',maxBuffer:32<<20}));
   releases=JSON.parse(text).flat();
+ }
+ if(operation==='dispatch'){
+  const skipped=[],selected=parseSelection(selection).filter(row=>{const published=releases.some(release=>!release.draft&&release.tag_name?.startsWith(row.id+'/v'+row.version+'/'));if(published)skipped.push(row);return !published;});
+  for(const row of skipped){const notice=row.id+'='+row.version+' skipped: release already exists';console.log('::notice::'+notice);if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,'- '+notice+'\n');}
+  if(!selected.length)return {dispatched:[],skipped};selection=selected;
  }
  const plan=await planReleaseDispatch({selection,directory,releases});
  if(options['--output'])fs.writeFileSync(options['--output'],JSON.stringify(plan,null,2)+'\n',{flag:'wx'});

@@ -8,6 +8,7 @@ import {pack,verify,catalog,publicDeclaration} from './runtime-package.mjs';
 import {resolveProject,readProjects} from '../lib/projects.mjs';
 import {releaseVersion,buildReleaseVersion} from '../lib/package-version.mjs';
 import {buildCoverage,assertBuildCoverage} from './build-coverage.mjs';
+import {readPublisherInput,assertPublisherSource} from './publisher-files.mjs';
 import {sourceDateEpoch,buildToolchain} from '../lib/reproducible-build.mjs';
 import {assetName,releaseTag,releaseRecord,validateCatalog,identity} from '../lib/project-identity.mjs';
 const require=createRequire(import.meta.url),A=require('../lib/archive.cjs'),B=require('../lib/bundled-native.cjs');
@@ -17,12 +18,16 @@ const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const stable=value=>JSON.stringify(value,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))):v);
 const read=file=>JSON.parse(fs.readFileSync(file));
 function regular(file){const s=fs.lstatSync(file);if(!s.isFile()||s.isSymbolicLink())throw Error('Release assets must be regular files.');return s;}
-import {recordFromDeclaration,managerDeclaration,prepareRelease,verifyRelease} from './release-package.mjs';
-export {recordFromDeclaration,managerDeclaration,prepareRelease,verifyRelease};
+import {recordFromDeclaration,prepareRelease,verifyRelease} from './release-package.mjs';
+export {recordFromDeclaration,prepareRelease,verifyRelease};
+export {managerDeclaration} from './manager-declaration.mjs';
 function write(file,value){fs.writeFileSync(file,json(value),{flag:'wx'});}
 function loadPrevious(project,directory){const file=path.join(directory,'catalogs',project+'.json');return fs.existsSync(file)?read(file):undefined;}
-async function verifyPublicationBuild(options){const {requirePublicationAuthority}=await import('./publication-authority.mjs');return requirePublicationAuthority(options);}
-async function matchingBuildSource(authority,sourceRevision,{record,directory}){const {assertPublicationSource}=await import('./publication-authority.mjs');return assertPublicationSource({authority,record,directory,sourceRevision});}
+function matchingBuildSource(sourceRevision,{record,directory=root}){
+ if(readPublisherInput({project:record.id,directory}))return assertPublisherSource({record,directory,sourceRevision});
+ const expected=record.build?.sourceRevision||record.source?.revision;
+ if(expected&&expected!==sourceRevision)throw Error('Release source commit differs from the recorded build.');
+}
 
 /** A single discoverable listing, generated from the same project catalogs used by the launcher. */
 export function catalogIndex(directory=root,{coverage=buildCoverage(directory)}={}){
@@ -46,8 +51,8 @@ export function catalogIndex(directory=root,{coverage=buildCoverage(directory)}=
 }
 
 /** Apply only a public, digest-verified release; older versions cannot be removed or replaced. */
-export async function applyRelease({bundle,directory=root,runGh=runGitHub,verifyGithubBuild=verifyPublicationBuild,publication}){
- const {release,record,declaration}=await verifyRemoteRelease({bundle,directory,runGh,verifyGithubBuild,publication,requirePublic:true,includeDeclaration:true});
+export async function applyRelease({bundle,directory=root,runGh=runGitHub,publication}){
+ const {release,record,declaration}=await verifyRemoteRelease({bundle,directory,runGh,publication,requirePublic:true,includeDeclaration:true});
  const declarationFile=path.join(directory,'catalogs','declarations',release.id,release.version,release.arch+'.json');
  if(fs.existsSync(declarationFile)){
   regular(declarationFile);if(stable(read(declarationFile))!==stable(declaration))throw Error('An existing sealed declaration differs from this immutable package.');
@@ -68,7 +73,7 @@ export async function verifyPublicAssets({project,version,arch,assets,output,dir
  const record=snapshot.packages.find(r=>r.version===version&&r.arch===arch);if(!record)throw Error('The selected package is absent from the committed project catalog.');
  const names=[record.asset.filename];
  if(fs.readdirSync(assets).length!==names.length||fs.readdirSync(assets).some(name=>!names.includes(name)))throw Error('Public release attachments must contain only the selected runtime archive.');
- return prepareRelease({project,archive:path.join(assets,record.asset.filename),record,output,directory});
+ return {record,...await verify({archive:path.join(assets,record.asset.filename),sha256:record.asset.sha256,project,version,arch,includeDeclaration:true})};
 }
 
 export function releaseNotes(record,project){
@@ -110,9 +115,8 @@ async function publicTagCommit({release,runGh}){
  return releaseTagCommit(ref,{repository:release.repository,runGh});
 }
 /** Verify an existing release or the publication returned by this process. */
-export async function verifyRemoteRelease({bundle,directory=root,runGh=runGitHub,requirePublic=false,includeDeclaration=false,verifyGithubBuild=verifyPublicationBuild,publication}){
+export async function verifyRemoteRelease({bundle,directory=root,runGh=runGitHub,requirePublic=false,includeDeclaration=false,publication}){
  const checked=await verifyRelease({bundle,directory,includeDeclaration});
- const build=await verifyGithubBuild({record:checked.record,repository:checked.release.repository,directory,archive:path.join(path.resolve(bundle),checked.record.asset.filename)});
  if(publication){if(publication.repository!==checked.release.repository||publication.tag!==checked.release.tag||!Number.isSafeInteger(publication.id)||publication.id<=0||typeof publication.draft!=='boolean'||publication.sha256!==checked.record.asset.sha256)throw Error('Publication identity differs from the verified release.');}
  else{
   const remote=await optionalGitHub(['repos/'+checked.release.repository+'/releases/tags/'+encodeURIComponent(checked.release.tag)],runGh);
@@ -122,17 +126,16 @@ export async function verifyRemoteRelease({bundle,directory=root,runGh=runGitHub
   if(remote.assets.length!==1)throw Error('Existing release differs from the selected record.');
   await releaseAsset(remote.assets[0],checked.record,{repository:checked.release.repository,runGh});
  }
- await matchingBuildSource(build,publication.sourceCommit,{record:checked.record,directory});
+ matchingBuildSource(publication.sourceCommit,{record:checked.record,directory});
  if(requirePublic&&publication.draft!==false)throw Error('Catalog updates require a public, non-draft release.');
  return {...checked,publication};
 }
 /** An unpublished attempt owns only its draft; the public tag is created by finalization. */
-export async function stageRelease({bundle,target,resume=false,directory=root,runGh=runGitHub,verifyGithubBuild=verifyPublicationBuild}){
+export async function stageRelease({bundle,target,resume=false,directory=root,runGh=runGitHub}){
  if(!/^[a-f0-9]{40}$/.test(target||''))throw Error('Staging requires an exact public source commit through --target.');
  if(typeof resume!=='boolean')throw Error('Staging resume must be a boolean.');
  const checked=await verifyRelease({bundle,directory}),{release,record}=checked,project=resolveProject(release.id,directory,{resolvePins:false});
- const build=await verifyGithubBuild({record,repository:release.repository,directory,archive:path.join(path.resolve(bundle),record.asset.filename),sourceRevision:target});
- await matchingBuildSource(build,target,{record,directory});
+ matchingBuildSource(target,{record,directory});
  let sourceCommit=target;
  let remote=await optionalGitHub(['repos/'+release.repository+'/releases/tags/'+encodeURIComponent(release.tag)],runGh);
  if(!remote||remote.draft){
@@ -146,7 +149,7 @@ export async function stageRelease({bundle,target,resume=false,directory=root,ru
  let created=false;
  if(!remote){
   remote=JSON.parse(await runGh(['api','--method','POST','repos/'+release.repository+'/releases','-f','tag_name='+release.tag,'-f','target_commitish='+target,'-F','draft=true','-f','make_latest=false','-f','name='+project.name+' '+release.version+' ('+release.arch+')','-f','body='+releaseNotes({...record,source:{repository:release.repository,revision:target}},project)]));created=true;
- }else{sourceCommit=await publicTagCommit({release,runGh});await matchingBuildSource(build,sourceCommit,{record,directory});}
+ }else{sourceCommit=await publicTagCommit({release,runGh});matchingBuildSource(sourceCommit,{record,directory});}
  const publication=releaseIdentity(remote,{release,record,sourceCommit});
  try{
  if(remote.assets.length===0&&remote.draft){
@@ -160,9 +163,9 @@ export async function stageRelease({bundle,target,resume=false,directory=root,ru
  }catch(error){if(created)await runGh(['api','--method','DELETE','repos/'+release.repository+'/releases/'+remote.id]);throw error;}
 }
 /** Finalize the exact staged REST ID; no tag or releases-list lookup follows upload. */
-export async function publishRelease({bundle,directory=root,runGh=runGitHub,verifyGithubBuild=verifyPublicationBuild,publication}){
+export async function publishRelease({bundle,directory=root,runGh=runGitHub,publication}){
  try{
-  const checked=await verifyRemoteRelease({bundle,directory,runGh,verifyGithubBuild,publication}),{release,record}=checked,existing=checked.publication;publication=existing;
+  const checked=await verifyRemoteRelease({bundle,directory,runGh,publication}),{release,record}=checked,existing=checked.publication;publication=existing;
   if(!existing.draft)return existing;
   const remote=JSON.parse(await runGh(['api','--method','PATCH','repos/'+release.repository+'/releases/'+existing.id,'-F','draft=false','-f','make_latest=false']));
   if(remote.id!==existing.id||remote.tag_name!==release.tag||remote.draft!==false)throw Error('Published release differs from its staged REST identity.');

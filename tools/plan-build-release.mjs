@@ -34,8 +34,10 @@ export async function resolveReleaseSelection({selection,directory=root,releases
   if(latest.has(id))return latest.get(id);
   const file=path.join(directory,'catalogs',id+'.json');let result=null;
   for(const record of fs.existsSync(file)?json(file).packages:[]){
-   // An unsigned newest release needs a rebuild; older signed releases cannot substitute for it.
+   // Reuse only the exact catalog archive that is public.
    try{requireGithubBuild({record,repository:registry.repository,directory});}catch{break;}
+   const release=releases.find(release=>release.tag_name===record.tag&&!release.draft);
+   if(release?.assets?.length!==1||release.assets[0].digest!=='sha256:'+record.asset.sha256)break;
    const declarationFile=path.join(directory,'catalogs/declarations',id,record.version,record.arch+'.json');
    const declaration=fs.existsSync(declarationFile)?json(declarationFile):null;
    result={version:record.version,digest:record.asset.sha256,arch:record.arch,

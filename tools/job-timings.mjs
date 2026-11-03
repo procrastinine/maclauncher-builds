@@ -43,7 +43,7 @@ export async function main(argv=process.argv.slice(2),{env=process.env,fetcher=g
   const load=async(file,run)=>file?JSON.parse(fs.readFileSync(file,'utf8')):run?fetchJobs(run,option('repo'),env.GITHUB_TOKEN,fetcher):undefined;
   const jobs=await load(option('jobs'),option('run'));if(!jobs)throw Error('Pass --jobs FILE or --run ID with --repo OWNER/NAME.');
   const text=renderTimings(jobs,await load(option('compare'),option('compare-run')));
-  if(env.GITHUB_STEP_SUMMARY)fs.appendFileSync(env.GITHUB_STEP_SUMMARY,text+'\n');else stdout.write(text+'\n');
+  if(env.GITHUB_STEP_SUMMARY)fs.appendFileSync(env.GITHUB_STEP_SUMMARY,text+'\n');stdout.write(text+'\n');
  }catch(error){stdout.write('Job timings unavailable: '+String(error?.message||error).split('\n')[0]+'\n');}
 }
 if(process.argv[1]&&fileURLToPath(import.meta.url)===fs.realpathSync(process.argv[1]))await main();

@@ -7,8 +7,7 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import Archive from '../lib/archive.cjs';
 import {catalog} from '../tools/runtime-package.mjs';
-import {readPublisherInput,recordPublisherFiles,verifyPublisherRecord,verifyPublisherArchive,assertPublisherSource,fetchPublisherInput,assemblePublisherPackage,main as publisherMain} from '../tools/publisher-files.mjs';
-import {requirePublicationAuthority} from '../tools/publication-authority.mjs';
+import {readPublisherInput,recordPublisherFiles,verifyPublisherRecord,verifyPublisherArchive,assertPublisherSource,fetchPublisherInput,main as publisherMain} from '../tools/publisher-files.mjs';
 import {stageRelease,publishRelease,applyRelease,verifyRelease} from '../tools/release-runtime.mjs';
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const json=value=>JSON.stringify(value,null,2)+'\n';
@@ -43,7 +42,6 @@ test('unmodified publisher files have explicit equality authority without a GitH
  const result=await f.record();assert.equal(result.files,3);assert.equal(result.publisherAuthenticated,false);assert.equal(result.sourceRevision,undefined);
  assert.equal((await verifyPublisherArchive({...f.output,directory:f.directory})).kind,'supplied-publisher');
  const catalogRecord=catalog([f.output.record],{project:id,repository}).packages[0];assert.equal(verifyPublisherRecord({record:catalogRecord,repository,directory:f.directory}).kind,'supplied-publisher');
- assert.equal((await requirePublicationAuthority({...f.output,repository,directory:f.directory})).kind,'supplied-publisher');
  await f.record({...f.input});assert.equal(verifyPublisherRecord({record:f.input.record,repository,directory:f.directory}).version,'1.0-MCLv1');
  assert.equal(sha(fs.readFileSync(f.input.archive)),f.descriptor.input.archive.sha256);
 });
@@ -51,7 +49,6 @@ test('unmodified publisher files have explicit equality authority without a GitH
 test('a prebuilt flag or forged equality flag cannot authorize compiled or changed content',async t=>{
  const f=await fixture(t),registry=path.join(f.directory,'projects.json'),value=JSON.parse(fs.readFileSync(registry));delete value.projects[0].producer.publisherFiles;fs.writeFileSync(registry,json(value));
  assert.equal(readPublisherInput({project:id,directory:f.directory}),undefined);
- await assert.rejects(requirePublicationAuthority({...f.output,repository,directory:f.directory}),/GitHub build record/);
  fs.writeFileSync(registry,json({schemaVersion:1,repository,updatePolicy:'manual',projects:[f.project]}));await f.record();
  const file=path.join(f.directory,'publisher-records',f.output.record.asset.sha256+'.json'),receipt=JSON.parse(fs.readFileSync(file));receipt.verified=true;fs.writeFileSync(file,json(receipt));
  assert.throws(()=>verifyPublisherRecord({record:f.output.record,repository,directory:f.directory}),/equality record/);
@@ -88,7 +85,7 @@ function commitInputs(f){
 test('publisher source tags pin the exact public descriptor and producer mapping',async t=>{
  const f=await fixture(t);await f.record();const revision=commitInputs(f);
  assert.equal(assertPublisherSource({record:f.output.record,directory:f.directory,sourceRevision:revision}),revision);
- await assert.rejects(requirePublicationAuthority({...f.output,repository,directory:f.directory,sourceRevision:'f'.repeat(40)}),/source commit/);
+ assert.throws(()=>assertPublisherSource({record:f.output.record,directory:f.directory,sourceRevision:'f'.repeat(40)}),/source commit/);
  const descriptor=path.join(f.directory,f.project.producer.publisherFiles.file);fs.appendFileSync(descriptor,'\n');
  assert.throws(()=>assertPublisherSource({record:f.output.record,directory:f.directory,sourceRevision:revision}),/checksum changed/);
 });
@@ -140,23 +137,4 @@ test('the pinned publisher input downloads only with its exact size, checksum an
   await assert.rejects(fetchPublisherInput({project:id,output:refused,directory:f.directory,download:download(body)}),pattern);assert.equal(fs.existsSync(refused),false);
  }
  await assert.rejects(fetchPublisherInput({project:id,output:path.join(f.directory,'missing.tar.gz'),directory:f.directory,download:async()=>new Response('',{status:404})}),/HTTP 404/);
-});
-
-test('assembly gives the pinned package the registered publisher version without changing supplied files',async t=>{
- const f=await fixture(t),output=path.join(f.directory,'assembled'),work=path.join(f.directory,'assembly-work');
- const release=await assemblePublisherPackage({project:id,inputArchive:f.input.archive,output,work,directory:f.directory});
- assert.equal(release.version,'1.0');assert.equal(release.tag,id+'/v1.0/universal');
- const {record,catalog:snapshot}=await verifyRelease({bundle:output,directory:f.directory});
- assert.equal(record.build,undefined);assert.equal(record.source,undefined);assert.deepEqual(snapshot.packages.map(row=>row.version),['1.0']);
- const archive=path.join(output,record.asset.filename),recorded=await recordPublisherFiles({project:id,inputArchive:f.input.archive,archive,record,directory:f.directory});
- assert.equal(recorded.files,3);assert.equal((await verifyPublisherArchive({record,archive,inputArchive:f.input.archive,directory:f.directory})).version,'1.0');
- const again=path.join(f.directory,'assembled-again');
- await publisherMain(['assemble','--project',id,'--input-archive',f.input.archive,'--output',again,'--work',path.join(f.directory,'assembly-work-again')],f.directory);
- assert.deepEqual(fs.readFileSync(path.join(again,record.asset.filename)),fs.readFileSync(archive),'Assembly is reproducible.');
- assert.equal((await publisherMain(['record','--project',id,'--input-archive',f.input.archive,'--release-bundle',again],f.directory)).file,recorded.file);
- assert.equal((await publisherMain(['verify','--project',id,'--input-archive',f.input.archive,'--release-bundle',again],f.directory)).files,3);
- await assert.rejects(assemblePublisherPackage({project:id,inputArchive:f.input.archive,output,work:path.join(f.directory,'other-work'),directory:f.directory}),/new separate absolute/);
- const altered=path.join(f.directory,'altered-input.tar.gz'),bytes=fs.readFileSync(f.input.archive);bytes[bytes.length-1]^=1;fs.writeFileSync(altered,bytes);
- await assert.rejects(assemblePublisherPackage({project:id,inputArchive:altered,output:path.join(f.directory,'refused'),work:path.join(f.directory,'refused-work'),directory:f.directory}),/checksum/);
- assert.equal(fs.existsSync(path.join(f.directory,'refused')),false);
 });

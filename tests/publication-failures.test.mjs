@@ -21,7 +21,7 @@ async function fixture(t,id='engine',version='1.0.0',arch='arm64'){
  const files=Object.entries(data).map(([name,bytes])=>{fs.writeFileSync(path.join(input,name),bytes,{mode:0o644});return {path:name,size:Buffer.byteLength(bytes),mode:0o644,sha256:sha(bytes)};});
  const declaration={id,version,arch,launcherArchitectures:arch==='arm64'?['arm64']:['arm64','x64'],minimumMacOS:'13.0',directoryRelative:id+'/'+version+'/'+arch,manifestRelative:'manifest.json',manifestSha256:files[0].sha256,sourceSha256:files[0].sha256,sourceRelative:'manifest.json',files,notices:[{name:'Engine',license:'MIT',path:'LICENSE'}],redistribution:'bundle'};
  const bundle=path.join(directory,'bundle');await prepareRelease({project:id,input,declaration,output:bundle,directory});const {record}=await verifyRelease({bundle,directory});
- return {directory,bundle,record,verifyGithubBuild:()=>({sourceRevision:source})};
+ return {directory,bundle,record};
 }
 test('regression: Invalid declared semantic versions.',async t=>{
  const f=await fixture(t,'gamemaker-opengl-helper','software-gl-v3-MCLv3','universal');
@@ -64,7 +64,7 @@ test('regression: Build job did not succeed: build (innoextract 1.10-dev-MCLv3 x
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'publication-job-copy-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
  fs.writeFileSync(path.join(directory,'projects.json'),JSON.stringify({schemaVersion:1,repository,updatePolicy:'manual',projects:[{id:'innoextract',name:'Inno',delivery:'downloadable',producer:{kind:'prebuilt',version:'1.10-dev-MCLv3',architectures:['x64']},upstreams:[]}]}));
  const env={GITHUB_ACTIONS:'true',GITHUB_REPOSITORY:repository,GITHUB_WORKFLOW:'Build and release',GITHUB_WORKFLOW_REF:repository+'/.github/workflows/runtime-build.yml@refs/heads/main',GITHUB_SHA:source,GITHUB_RUN_ID:'123',RELEASE_SELECTION:'innoextract=1.10-dev-MCLv3'};
- const result=await publishLevel({directory,env,targets:[{project:'innoextract',version:'1.10-dev-MCLv3',arch:'x64'}],output:path.join(directory,'publication'),runGh:async args=>args[1]==='view'?JSON.stringify({databaseId:123,headSha:source,headBranch:'main',workflowName:'Build and release',status:'in_progress',conclusion:null,jobs:[]}):'',publish:async()=>({commit:source})});
+ const result=await publishLevel({directory,env,targets:[{project:'innoextract',version:'1.10-dev-MCLv3',arch:'x64'}],output:path.join(directory,'publication'),runGh:async()=>JSON.stringify([{artifacts:[{id:1,name:'runtime-innoextract-1.10-dev-MCLv3-x64'}]}]),download:async()=>{},publish:async()=>({commit:source})});
  assert.equal(result.failed,0,result.errors[0]?.error);assert.equal(result.published,1);
 });
 test("regression: ! [remote rejected] HEAD -> main (cannot lock ref 'refs/heads/main': is at 15acfcd but expected 48eaae2)",async t=>{

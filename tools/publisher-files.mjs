@@ -163,28 +163,13 @@ export async function fetchPublisherInput({project,output,directory=root,downloa
  return {project:input.project.id,archive:output,sha256:pin.sha256,bytes:pin.bytes};
 }
 
-/** Assemble the registered publisher version from the pinned input package. Only the package inventory and runtime manifest outside the supplied files take the new version. */
-export async function assemblePublisherPackage({project,inputArchive,output,work,directory=root}){
- const input=readPublisherInput({project,directory});if(!input)fail('the project has no registered publisher input.');
- if(!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work)||work===output||work.startsWith(output+path.sep)||output.startsWith(work+path.sep))fail('choose new separate absolute output and work directories.');
- const checked=await verifyInputArchive(inputArchive,input),pin=input.descriptor.input.archive,version=input.descriptor.publisherVersion;
- const {recordFromDeclaration,prepareRelease}=await import('./release-package.mjs');
- let archive=inputArchive,record=recordFromDeclaration(checked.declaration,{filename:pin.filename,sha256:pin.sha256,bytes:pin.bytes});
- if(record.version!==version){
-  const {reversionPackage}=await import('./reversion-runtime.mjs');
-  fs.mkdirSync(work,{recursive:true});archive=path.join(work,assetName({...record,version}));
-  ({record}=await reversionPackage({archive:inputArchive,record,version,output:archive,directory}));
- }
- return prepareRelease({project:input.project.id,archive,record,output,directory});
-}
-
-const usage={record:['project','input-archive','archive','record','release-bundle','output-dir'],verify:['project','input-archive','archive','record','release-bundle'],fetch:['project','output'],assemble:['project','input-archive','output','work']};
+const usage={record:['project','input-archive','archive','record','release-bundle','output-dir'],verify:['project','input-archive','archive','record','release-bundle'],fetch:['project','output']};
 export async function main([command,...args],directory=root){
- if(!usage[command])fail('use record, verify, fetch or assemble with explicit options.');
+ if(!usage[command])fail('use record, verify or fetch with explicit options.');
  const options={};for(let index=0;index<args.length;index+=2){const key=args[index]?.slice(2);if(!args[index]?.startsWith('--')||!usage[command].includes(key)||!args[index+1]||Object.hasOwn(options,key))fail('use unique --'+usage[command].join(', --')+' values with '+command+'.');options[key]=args[index+1];}
  if(!options.project)fail('select the registered --project.');
  if(command==='fetch')return fetchPublisherInput({project:options.project,output:options.output,directory});
- if(command==='assemble'){if(!options['input-archive'])fail('assemble needs the pinned --input-archive.');return assemblePublisherPackage({project:options.project,inputArchive:options['input-archive'],output:options.output,work:options.work,directory});}
+
  if(options['release-bundle']){
   if(options.archive||options.record)fail('select one release bundle, or one archive and its record.');
   const {verifyRelease}=await import('./release-package.mjs'),{record}=await verifyRelease({bundle:options['release-bundle'],directory});

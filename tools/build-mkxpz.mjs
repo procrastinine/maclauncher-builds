@@ -4,7 +4,7 @@ import {createRequire} from 'node:module';
 import {execFileSync} from 'node:child_process';
 import {buildInput} from './build-input.mjs';
 import {recipeMain} from './build-source.mjs';
-import {managerDeclaration} from './release-package.mjs';
+import {managerDeclaration} from './manager-declaration.mjs';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
 const run=(command,args)=>execFileSync(command,args,{stdio:'inherit',env:{...process.env,SDKROOT:process.env.SDKROOT||execFileSync('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path'],{encoding:'utf8'}).trim()}});

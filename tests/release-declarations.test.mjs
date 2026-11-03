@@ -29,7 +29,7 @@ for(const kind of ['maclauncher','prebuilt'])test(kind+' publication exports the
  const f=fixture(t,kind);await prepareRelease(f);
  const checked=await verifyRelease({bundle:f.output,directory:f.directory});assert.equal(checked.declaration,undefined);
  const included=await verifyRelease({bundle:f.output,directory:f.directory,includeDeclaration:true});assert.deepEqual(included.declaration,publicDeclaration(f.declaration));
- const options={bundle:f.output,directory:f.directory,runGh:remote(checked.record),verifyGithubBuild:authority};
+ const options={bundle:f.output,directory:f.directory,runGh:remote(checked.record)};
  assert.deepEqual((await verifyRemoteRelease({...options,includeDeclaration:true})).declaration,included.declaration);
  const applied=await applyRelease(options),expected=path.join(f.directory,'catalogs/declarations/engine/1.0.0/arm64.json');assert.equal(applied.declaration,expected);
  const exported=JSON.parse(fs.readFileSync(expected));assert.deepEqual(exported,included.declaration);assert.deepEqual(exported.files,f.declaration.files);assert.deepEqual(exported.notices,f.declaration.notices);assert.equal(exported.manifestSha256,checked.record.manifestSha256);assert.equal(exported.sourceSha256,checked.record.sourceSha256);
@@ -40,6 +40,6 @@ for(const kind of ['maclauncher','prebuilt'])test(kind+' publication exports the
 });
 test('archive/record disagreement cannot export a declaration or mutate catalogs',async t=>{
  const f=fixture(t,'prebuilt');await prepareRelease(f);const sidecar=path.join(f.output,'engine-1.0.0-arm64.tar.gz.json'),record=JSON.parse(fs.readFileSync(sidecar));record.sourceSha256='0'.repeat(64);fs.writeFileSync(sidecar,JSON.stringify(record));
- await assert.rejects(applyRelease({bundle:f.output,directory:f.directory,runGh:()=>assert.fail('Invalid archive must stop before remote'),verifyGithubBuild:authority}),/record differs/);
+ await assert.rejects(applyRelease({bundle:f.output,directory:f.directory,runGh:()=>assert.fail('Invalid archive must stop before remote')}),/record differs/);
  assert.equal(fs.existsSync(path.join(f.directory,'catalogs')),false);
 });

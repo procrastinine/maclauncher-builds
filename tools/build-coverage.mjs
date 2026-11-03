@@ -3,7 +3,6 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {readProjects,buildRecords} from '../lib/projects.mjs';
 import {releaseRecord,validateCatalog} from '../lib/project-identity.mjs';
-import {verifyBuildEvidence} from '../lib/github-builds.mjs';
 import {readPublisherInput,verifyPublisherRecord} from './publisher-files.mjs';
 const root=path.resolve(import.meta.dirname,'..'),SHA=/^[a-f0-9]{64}$/;
 const verifiedCoverages=new WeakMap();
@@ -26,39 +25,18 @@ export function currentBuildOutputs(project){
  return [...new Map([...selected.values()].map(({version,arch})=>[version+'/'+arch,{version,arch}])).values()];
 }
 
-/** Ledger entries contain signed bundles, never a self-declared verification flag. */
-export function readGithubBuild(file,{repository}){
- const entry=read(file);
- if(!entry||entry.schemaVersion!==1||Object.keys(entry).some(key=>!['schemaVersion','record','bundle'].includes(key)))throw Error('Invalid GitHub build evidence ledger entry.');
- releaseRecord(entry.record,{project:entry.record?.id,repository});
- if(path.basename(file)!==entry.record.asset.sha256+'.json')throw Error('GitHub build evidence filename differs from its archive digest.');
- const evidence=verifyBuildEvidence({record:entry.record,repository,bundle:entry.bundle});
- return {record:entry.record,evidence};
-}
-
-export function verifiedArchiveBuild({record,repository,directory=root}){
- if(!SHA.test(record?.asset?.sha256||''))throw Error('Select an exact archive digest.');
- const file=path.join(directory,'attestations',record.asset.sha256+'.json');
- if(!fs.existsSync(file))return undefined;
- const verified=readGithubBuild(file,{repository});
- if(!recordMatches(verified.record,record))throw Error('GitHub build evidence belongs to a different package identity.');
- return verifyBuildEvidence({record,repository,bundle:read(file).bundle});
-}
-
-function archiveDigest(file){
- const stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink())throw Error('Select a regular archive for GitHub build verification.');
- const fd=fs.openSync(file,'r'),buffer=Buffer.alloc(1024*1024),hash=crypto.createHash('sha256');
- try{let length;while((length=fs.readSync(fd,buffer,0,buffer.length,null)))hash.update(buffer.subarray(0,length));}finally{fs.closeSync(fd);}
- return {sha256:hash.digest('hex'),bytes:stat.size};
-}
-
-/** Publication cannot substitute local bytes, metadata or a different recipe commit. */
-export function requireGithubBuild({record,repository,directory=root,archive,sourceRevision}){
- const evidence=verifiedArchiveBuild({record,repository,directory});
- if(!evidence)throw Error(`Built locally — no GitHub build record yet: ${record.id} ${record.version} ${record.arch} (${record.asset.sha256}). Import its signed Runtime build evidence before publication.`);
- if(sourceRevision!==undefined&&sourceRevision!==evidence.sourceRevision)throw Error('The publication source differs from the signed GitHub build commit.');
- if(archive){const actual=archiveDigest(archive);if(actual.sha256!==record.asset.sha256||actual.bytes!==record.asset.bytes)throw Error('The archive differs from its signed GitHub build identity.');}
- return evidence;
+/** Recorded workflow identity. Users verify the linked attestation with gh. */
+export function requireGithubBuild({record,repository,archive,sourceRevision}){
+ releaseRecord(record,{project:record?.id,repository});
+ const build=record.build;
+ if(!build?.sourceRevision||build.workflow!==repository+'/.github/workflows/runtime-build.yml')throw Error('The package has no recorded Build and release source.');
+ if(sourceRevision!==undefined&&sourceRevision!==build.sourceRevision)throw Error('The publication source differs from the recorded build commit.');
+ if(archive){const stat=fs.lstatSync(archive);if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==record.asset.bytes)throw Error('The archive size differs from its recorded identity.');
+  const fd=fs.openSync(archive,'r'),buffer=Buffer.alloc(1024*1024),hash=crypto.createHash('sha256');
+  try{let length;while((length=fs.readSync(fd,buffer,0,buffer.length,null)))hash.update(buffer.subarray(0,length));}finally{fs.closeSync(fd);}
+  if(hash.digest('hex')!==record.asset.sha256)throw Error('The archive digest differs from its recorded identity.');
+ }
+ return {...build,repository,runId:String(build.runId),runAttempt:String(build.runAttempt||'1'),runUrl:'https://github.com/'+repository+'/actions/runs/'+build.runId};
 }
 
 /** Preserve unsigned history separately; malformed signed evidence is never ignored. */
@@ -66,12 +44,12 @@ export function partitionCatalog({records,repository,directory=root}){
  const github=[],publisher=[],local=[];
  for(const record of records){
   releaseRecord(record,{project:record.id,repository});
-  (verifiedArchiveBuild({record,repository,directory})?github:verifyPublisherRecord({record,repository,directory})?publisher:local).push(record);
+  (record.build?github:verifyPublisherRecord({record,repository,directory})?publisher:local).push(record);
  }
  return {github,publisher,active:[...github,...publisher],local};
 }
 
-/** Offline inventory. Every claimed GitHub output is cryptographically verified. */
+/** Offline inventory of catalog records and their external attestation links. */
 export function buildCoverage(directory=root){
  directory=fs.realpathSync(directory);
  const registry=readProjects(directory,{resolvePins:false}),projects=new Map(registry.projects.map(project=>[project.id,project]));
@@ -88,17 +66,7 @@ export function buildCoverage(directory=root){
  const views=new Map(projectViews.map(project=>[project.projectId,project]));
  const projectFacts=id=>{const view=views.get(id);return {projectState:view.state,authorityPolicy:view.authorityPolicy,historyUrl:view.historyUrl,
   ...(view.state==='retired'?{supersededBy:view.supersededBy,successor:view.successor,activeSuccessor:view.activeSuccessor}:{})};};
- const ledger=path.join(directory,'attestations'),builds=new Map();
- if(fs.existsSync(ledger))for(const name of fs.readdirSync(ledger).sort()){
-  if(!/^[a-f0-9]{64}\.json$/.test(name))continue;
-  const {record,evidence}=readGithubBuild(path.join(ledger,name),{repository:registry.repository}),project=projects.get(record.id);
-  if(!project)throw Error('GitHub build evidence names an unregistered project: '+record.id);
-  const identity=key(record);if(builds.has(identity))throw Error('Duplicate signed GitHub package identity.');
-  builds.set(identity,{projectId:record.id,name:project.name,delivery:project.delivery,...projectFacts(record.id),version:record.version,arch:record.arch,
-   minimumMacOS:record.minimumMacOS,asset:record.asset,sourceRevision:evidence.sourceRevision,runId:evidence.runId,runAttempt:evidence.runAttempt,
-   workflow:evidence.workflow,catalogPublished:false,
-   attestation:{url:'https://api.github.com/repos/'+registry.repository+'/attestations/sha256:'+record.asset.sha256,bundlePath:'attestations/'+name},record});
- }
+ const builds=new Map();
  const publisherBuilds=new Map(),publisherLedger=path.join(directory,'publisher-records');
  if(fs.existsSync(publisherLedger))for(const name of fs.readdirSync(publisherLedger).sort()){
   if(!/^[a-f0-9]{64}\.json$/.test(name))continue;
@@ -118,10 +86,13 @@ export function buildCoverage(directory=root){
    const identity=[record.id,record.version,record.arch].join('/'),old=seenCatalog.get(identity);
    if(old){if(JSON.stringify(old)!==JSON.stringify(record))throw Error('Active and superseded catalogs disagree about an immutable package.');continue;}
    seenCatalog.set(identity,record);
-   const githubBuild=builds.get(key(record)),publisherBuild=publisherBuilds.get(key(record));
+   let githubBuild=builds.get(key(record));const publisherBuild=publisherBuilds.get(key(record));
+   if(record.build&&!githubBuild){const evidence=requireGithubBuild({record,repository:registry.repository});
+    githubBuild={projectId:record.id,name:project.name,delivery:project.delivery,...projectFacts(record.id),version:record.version,arch:record.arch,minimumMacOS:record.minimumMacOS,asset:record.asset,...evidence,catalogPublished:false,attestation:{url:'https://api.github.com/repos/'+registry.repository+'/attestations/sha256:'+record.asset.sha256},record};builds.set(key(record),githubBuild);
+   }
    if(publisherBuild){verifyPublisherRecord({record,repository:registry.repository,directory});if(sourceState==='active'){publisherBuild.catalogPublished=true;publisherBuild.asset=record.asset;}}
-   if(githubBuild&&!recordMatches(githubBuild.record,record))throw Error('Catalog and signed build ledger disagree about the archive identity.');
-   if(githubBuild){verifyBuildEvidence({record,repository:registry.repository,bundle:read(path.join(directory,githubBuild.attestation.bundlePath)).bundle});if(sourceState==='active')githubBuild.catalogPublished=true;}
+   if(githubBuild&&!recordMatches(githubBuild.record,record))throw Error('Catalog build records disagree about the archive identity.');
+   if(githubBuild&&sourceState==='active')githubBuild.catalogPublished=true;
    catalogPackages.push({projectId:project.id,name:project.name,delivery:project.delivery,...projectFacts(project.id),record,origin:githubBuild?'github':publisherBuild?'supplied-publisher':'local',catalogState:(githubBuild||publisherBuild)&&sourceState==='active'?'active':'superseded',...(githubBuild?{githubBuild}:{}),...(publisherBuild?{publisherProof:publisherBuild.publisherProof}:{})});
   }
  }
@@ -151,8 +122,8 @@ export function buildCoverage(directory=root){
  freeze(coverage);verifiedCoverages.set(coverage,directory);return coverage;
 }
 
-/** Only this module can supply the immutable catalog view with verified publication authority. */
+/** Only this module can supply the immutable catalog view from this source tree. */
 export function assertBuildCoverage(coverage,directory=root){
- if(verifiedCoverages.get(coverage)!==fs.realpathSync(directory))throw Error('Catalog generation requires verified GitHub build coverage from this source tree.');
+ if(verifiedCoverages.get(coverage)!==fs.realpathSync(directory))throw Error('Catalog generation requires catalog build coverage from this source tree.');
  return coverage;
 }

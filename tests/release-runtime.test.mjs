@@ -7,17 +7,7 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {prepareRelease,verifyRelease,applyRelease as actualApplyRelease,publicationAssets,verifyPublicAssets,stageRelease as actualStageRelease,publishRelease as actualPublishRelease,managerDeclaration,verifyRemoteRelease as actualVerifyRemoteRelease,main} from '../tools/release-runtime.mjs';
 import {verifiedBuildSource} from '../tools/verified-build-run.mjs';
-// Synthetic remote-release lifecycle tests inject only the cryptographic boundary.
-const fixtureBuild=({record,repository,directory,archive,sourceRevision})=>{
- assert.equal(repository,'owner/builds');assert.ok(fs.statSync(directory).isDirectory());
- assert.equal(digest(fs.readFileSync(archive)),record.asset.sha256);assert.equal(path.basename(archive),record.asset.filename);
- if(sourceRevision!==undefined)assert.equal(sourceRevision,'a'.repeat(40));
- return {sourceRevision:'a'.repeat(40)};
-};
-const stageRelease=o=>actualStageRelease({...o,verifyGithubBuild:fixtureBuild});
-const publishRelease=o=>actualPublishRelease({...o,verifyGithubBuild:fixtureBuild});
-const verifyRemoteRelease=o=>actualVerifyRemoteRelease({...o,verifyGithubBuild:fixtureBuild});
-const applyRelease=o=>actualApplyRelease({...o,verifyGithubBuild:fixtureBuild});
+const stageRelease=actualStageRelease,publishRelease=actualPublishRelease,verifyRemoteRelease=actualVerifyRemoteRelease,applyRelease=actualApplyRelease;
 const rawCatalog=directory=>JSON.parse(fs.readFileSync(path.join(directory,'catalogs/engine.json')));
 const supersededCatalog=directory=>{const file=path.join(directory,'catalogs/superseded/engine.json');return fs.existsSync(file)?JSON.parse(fs.readFileSync(file)):{packages:[]};};
 const catalogHistory=directory=>[...rawCatalog(directory).packages,...supersededCatalog(directory).packages];
@@ -33,39 +23,6 @@ function fixture(t,{external=false,version='1.0'}={}){
  let source;if(external){source=path.join(directory,'source.tar.gz');fs.writeFileSync(source,'source bytes');declaration.sourceArtifact={directoryRelative:'engine/'+version+'-source.tar.gz',sha256:digest('source bytes'),bytes:12};}else declaration.sourceRelative='source.tar.gz';
  return {project:'engine',input,declaration,source,output:path.join(directory,'release'),directory};
 }
-test('publication refuses absent and forged signed evidence before remote or catalog writes',async t=>{
- const f=fixture(t);await prepareRelease(f);
- const archive=path.join(f.output,'engine-1.0-arm64.tar.gz'),record=JSON.parse(fs.readFileSync(archive+'.json'));
- const forged={...record,build:{sourceRevision:'a'.repeat(40),workflow:'owner/builds/.github/workflows/runtime-build.yml',runId:'123',runAttempt:'1'}};
- const bundle=path.join(f.directory,'forged');await prepareRelease({project:f.project,archive,record:forged,output:bundle,directory:f.directory});
- let calls=0;const runGh=()=>{calls++;throw Error('Unsigned packages must not contact GitHub.');};
- for(const operation of [actualStageRelease,actualPublishRelease,actualApplyRelease,actualVerifyRemoteRelease]){
-  await assert.rejects(operation({bundle,target:'a'.repeat(40),directory:f.directory,runGh}),/GitHub|signed|attestation|provenance/i);
-  assert.equal(calls,0);assert.equal(fs.existsSync(path.join(f.directory,'catalogs')),false);
- }
- fs.mkdirSync(path.join(f.directory,'attestations'));
- fs.writeFileSync(path.join(f.directory,'attestations',record.asset.sha256+'.json'),JSON.stringify({schemaVersion:1,repository:'owner/builds',sourceRevision:'a'.repeat(40),runId:'123',sha256:record.asset.sha256,verified:true}));
- await assert.rejects(actualStageRelease({bundle,target:'a'.repeat(40),directory:f.directory,runGh}),/GitHub|signed|attestation|provenance|evidence|bundle/i);
- assert.equal(calls,0);
-});
-test('publication binds the signed build to the requested and existing tag commit',async t=>{
- const f=fixture(t);await prepareRelease(f);let calls=0;
- await assert.rejects(actualStageRelease({bundle:f.output,target:'a'.repeat(40),directory:f.directory,verifyGithubBuild:()=>({sourceRevision:'b'.repeat(40)}),runGh:()=>{calls++;}}),/source commit differs/);
- assert.equal(calls,0);
- const {record}=await verifyRelease({bundle:f.output,directory:f.directory});
- const runGh=async args=>{calls++;assert.equal(args[0],'api');assert.equal(args.includes('POST'),false);return args[1].includes('/git/ref/')?refResult('b'.repeat(40)):JSON.stringify(remoteRelease(record,true));};
- await assert.rejects(publishRelease({bundle:f.output,directory:f.directory,runGh}),/source commit differs/);
- assert.equal(calls,2);
-});
-test('catalog publication CLI refuses an unproven record before creating its output',async t=>{
- const {main:packageMain}=await import('../tools/runtime-package.mjs');
- const f=fixture(t);await prepareRelease(f);const {record:sealed}=await verifyRelease({bundle:f.output,directory:f.directory}),{resolveProject}=await import('../lib/projects.mjs'),version=resolveProject('vnds-love').build.version;
- const record={...sealed,id:'vnds-love',version,arch:'universal',launcherArchitectures:['arm64','x64'],asset:{...sealed.asset,filename:'vnds-love-'+version+'-universal.tar.gz',sha256:'f'.repeat(64)}};
- const input=path.join(f.directory,'record.json'),output=path.join(f.directory,'published/vnds-love.json');fs.writeFileSync(input,JSON.stringify(record));
- await assert.rejects(packageMain(['catalog','--project','vnds-love','--package',input,'--output',output]),/GitHub|signed|attestation|provenance/i);
- assert.equal(fs.existsSync(path.dirname(output)),false);
-});
-
 test('one selected release prepares offline and applies an independently discoverable catalog',async t=>{
  const f=fixture(t),r=await prepareRelease(f);assert.equal(r.tag,'engine/v1.0/arm64');assert.equal(r.assets.length,3);
  const checked=await verifyRelease({bundle:f.output,directory:f.directory,project:'engine',version:'1.0',arch:'arm64'});assert.equal(checked.record.version,'1.0');
@@ -214,8 +171,7 @@ test('catalog compatibility metadata survives sealed preparation and public asse
  assert.deepEqual(fs.readFileSync(path.join(output,path.basename(archive))),fs.readFileSync(archive));
  await applyRelease({bundle:output,directory:f.directory,runGh:publicReleaseGh(checked.record)});
  const assets=path.join(f.directory,'metadata-assets');fs.mkdirSync(assets);fs.copyFileSync(archive,path.join(assets,path.basename(archive)));
- await verifyPublicAssets({project:f.project,version:'1.0',arch:'arm64',assets,output:path.join(f.directory,'public-metadata'),directory:f.directory});
- const restored=await verifyRelease({bundle:path.join(f.directory,'public-metadata'),directory:f.directory});
+ const restored=await verifyPublicAssets({project:f.project,version:'1.0',arch:'arm64',assets,directory:f.directory});
  for(const [key,value] of Object.entries(metadata))assert.deepEqual(restored.record[key],value);
  await assert.rejects(prepareRelease({project:f.project,archive,record:{...record,minimumMacOS:'14.0'},output:path.join(f.directory,'changed-payload'),directory:f.directory}),/record differs/);
  await assert.rejects(prepareRelease({project:f.project,archive,record:{...record,unknownField:true},output:path.join(f.directory,'unknown-metadata'),directory:f.directory}),/Invalid runtime release record/);
@@ -332,4 +288,10 @@ test('publication reads build inputs only after their archived bytes pass the se
  fs.writeFileSync(path.join(f.input,'build-inputs.json'),bytes,{mode:0o644});f.declaration.files.push({path:'build-inputs.json',size:bytes.length,mode:0o644,sha256:digest(bytes)});
  await prepareRelease(f);const checked=await verifyRelease({bundle:f.output,directory:f.directory,includeMetadata:true});
  assert.deepEqual(checked.metadata['build-inputs.json'],bytes);
+});
+
+test('catalog envelope and runtime row retain the fc173327 format',async t=>{
+ const f=fixture(t);await prepareRelease(f);const {record}=await verifyRelease({bundle:f.output,directory:f.directory});const {catalog}=await import('../tools/runtime-package.mjs');
+ const expected={schemaVersion:2,projectId:'engine',updatePolicy:'manual',packages:[{...record,tag:'engine/v1.0/arm64',asset:{...record.asset,url:'https://github.com/owner/builds/releases/download/engine%2Fv1.0%2Farm64/engine-1.0-arm64.tar.gz'}}]};
+ assert.equal(JSON.stringify(catalog([record],{project:'engine',repository:'owner/builds',directory:f.directory})),JSON.stringify(expected));
 });

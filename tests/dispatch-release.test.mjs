@@ -65,3 +65,10 @@ test('dispatch prioritizes graphics, Android and mpv while preserving the other 
  const components=['small','mpv','android','reshade','other'].map(id=>[{id,version:'1.0.0'}]);
  assert.deepEqual(orderReleaseComponents({components}).map(rows=>rows[0].id),['reshade','android','mpv','small','other']);
 });
+
+test('dispatch retries only connection establishment failures with bounded backoff',async()=>{
+ const selection=[{id:'engine',version:'1.0.0'}],plan={repository:'owner/builds',workflow:'runtime-build.yml',ref:'main',selection,graph:{engine:[]},components:[{selection}]},delays=[];let attempts=0;
+ const runGh=()=>{attempts++;if(attempts<5)throw Error(['TLS handshake timeout','connection refused','connection reset','no such host'][attempts-1]);};
+ await dispatchReleaseComponents(plan,{runGh,wait:async ms=>delays.push(ms)});assert.equal(attempts,5);assert.deepEqual(delays,[1000,2000,4000,8000]);
+ attempts=0;await assert.rejects(dispatchReleaseComponents(plan,{runGh:()=>{attempts++;throw Error('HTTP 403');},wait:()=>assert.fail('No retry after an API response')}),/403/);assert.equal(attempts,1);
+});

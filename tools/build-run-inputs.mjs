@@ -6,7 +6,6 @@ import {pathToFileURL} from 'node:url';
 import {resolveProject,buildRecord,readProjects} from '../lib/projects.mjs';
 import {assetUrl,validateCatalog,projectId} from '../lib/project-identity.mjs';
 import {verifyRelease} from './release-package.mjs';
-import {recordGithubBuild} from './record-github-build.mjs';
 import {requireGithubBuild} from './build-coverage.mjs';
 import {buildInput} from './build-input.mjs';
 import {verify} from './runtime-package.mjs';
@@ -16,7 +15,7 @@ const root=path.resolve(import.meta.dirname,'..'),exec=promisify(execFile),json=
 const reportMap=value=>!value?{}:JSON.parse(value.trim().startsWith('{')?value:fs.readFileSync(value,'utf8'));
 const canonical=value=>JSON.stringify(value,(_,item)=>item&&typeof item==='object'&&!Array.isArray(item)?Object.fromEntries(Object.entries(item).sort()):item);
 /** Materialize only declared direct dependencies from this run or exact verified releases. */
-export async function prepareBuildInputs({project,output,directory=root,environment=process.env,runGh,download=buildInput,verifyBundle=verifyRelease,recordBuild=recordGithubBuild,requireBuild=requireGithubBuild,verifyArchive=verify,extract=async(archive,destination)=>{await exec('tar',['-xzf',archive,'-C',destination]);}}={}){
+export async function prepareBuildInputs({project,output,directory=root,environment=process.env,runGh,download=buildInput,verifyBundle=verifyRelease,requireBuild=requireGithubBuild,verifyArchive=verify,extract=async(archive,destination)=>{await exec('tar',['-xzf',archive,'-C',destination]);}}={}){
  projectId(project);if(!path.isAbsolute(output||'')||fs.existsSync(output)||/[\r\n]/.test(output))throw Error('Build inputs require a new absolute output directory.');
  const graph=JSON.parse(environment.RELEASE_GRAPH||'{}'),reports=reportMap(environment.BUILD_REPORTS),reuse=JSON.parse(environment.RELEASE_REUSE||'{}'),selection=parseSelection(environment.RELEASE_SELECTION||'[]'),repository=readProjects(directory,{resolvePins:false}).repository;
  const direct=graph[project]||[],deps=[],seen=new Set();if(!Array.isArray(direct))throw Error('Invalid release dependency graph.');
@@ -35,18 +34,20 @@ export async function prepareBuildInputs({project,output,directory=root,environm
    await gh(['run','download',environment.GITHUB_RUN_ID,'--repo',repository,'--name',`runtime-${dep}-${selected.version}-${target.arch}`,'--dir',bundle]);
    ({record,declaration}=await verifyBundle({bundle,project:dep,version:selected.version,arch:target.arch,directory,includeDeclaration:true}));
    if(record.build?.sourceRevision!==environment.GITHUB_SHA||String(record.build?.runId)!==environment.GITHUB_RUN_ID)throw Error('Dependency archive belongs to another run or source: '+dep);
-   archive=path.join(bundle,record.asset.filename);await recordBuild({archive,record,directory,runGh:(command,args)=>{if(command!=='gh')throw Error('Invalid attestation transport.');return gh(args);}});
+   archive=path.join(bundle,record.asset.filename);
    evidence=requireBuild({record,repository,directory,archive,sourceRevision:environment.GITHUB_SHA});
   }else{
    const binding=Array.isArray(reuse)?reuse.find(row=>row.id===dep):reuse[dep];if(!binding?.version||!binding.digest)throw Error('Missing exact planned published input: '+dep);
    const catalog=validateCatalog(json(path.join(directory,'catalogs',dep+'.json')),{project:dep,repository}),compatible=catalog.packages.filter(record=>record.version===binding.version&&record.asset.sha256===binding.digest&&(!binding.arch||record.arch===binding.arch));record=choose(compatible);if(!record)throw Error('Planned published dependency is absent: '+dep);
-   evidence=requireBuild({record,repository,directory});
    if(!runGh&&environment.GITHUB_ACTIONS!=='true')throw Error('Published inputs are fetched only inside GitHub Actions.');
+   const release=JSON.parse(await gh(['api','repos/'+repository+'/releases/tags/'+encodeURIComponent(record.tag)]));
+   if(release.draft!==false||release.assets?.length!==1||release.assets[0].digest!=='sha256:'+record.asset.sha256)throw Error('Published input release differs from its catalog digest: '+dep);
+
    archive=await download({url:assetUrl(record,repository),sha256:record.asset.sha256,bytes:record.asset.bytes},path.join(work,'archives'));
    ({declaration}=await verifyArchive({archive,sha256:record.asset.sha256,project:dep,version:record.version,arch:record.arch,includeDeclaration:true}));
    evidence=requireBuild({record,repository,directory,archive});
   }
-  for(const key of ['id','version','arch','manifestRelative','manifestSha256','sourceSha256','minimumMacOS','launcherArchitectures'])if(canonical(declaration[key])!==canonical(record[key]))throw Error('Input sealed inventory differs from signed record: '+dep+' '+key);
+  for(const key of ['id','version','arch','manifestRelative','manifestSha256','sourceSha256','minimumMacOS','launcherArchitectures'])if(canonical(declaration[key])!==canonical(record[key]))throw Error('Input sealed inventory differs from recorded package: '+dep+' '+key);
   const definition=reports[dep]?.definitionDigest;if(!/^[a-f0-9]{64}$/.test(definition||'')||declaration.files?.find(file=>file.path==='build-definition.json')?.sha256!==definition)throw Error('Verified dependency definition differs from the plan: '+dep);
   const payload=path.join(work,'payload');fs.mkdirSync(payload);await extract(archive,payload);
   const files=path.join(payload,'files');if(!fs.statSync(files).isDirectory())throw Error('Verified archive has no payload: '+dep);
