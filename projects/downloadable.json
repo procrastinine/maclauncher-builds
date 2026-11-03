@@ -1489,50 +1489,33 @@
       {
         "version": "MCLv2-1021",
         "label": "xsystem4 MCLv2-1021"
-      }
-    ],
-    "build": [
-      {
-        "version": "MCLv1-1021",
-        "command": "tools/build-portable-runtime.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/xsystem4"
-        ],
-        "recursiveSubmodules": true,
-        "tools": [
-          "cmake",
-          "ninja",
-          "meson",
-          "pkgconf",
-          "nasm",
-          "bison",
-          "flex"
-        ]
       },
       {
-        "version": "MCLv2-1021",
-        "command": "tools/build-portable-runtime.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/xsystem4"
-        ],
-        "recursiveSubmodules": true,
-        "tools": [
-          "cmake",
-          "ninja",
-          "meson",
-          "pkgconf",
-          "nasm",
-          "bison",
-          "flex"
-        ]
+        "version": "MCLv3",
+        "label": "xsystem4 MCLv3"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv3",
+      "command": "tools/build-portable-runtime.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/xsystem4"
+      ],
+      "recursiveSubmodules": true,
+      "tools": [
+        "cmake",
+        "ninja",
+        "meson",
+        "pkgconf",
+        "nasm",
+        "bison",
+        "flex"
+      ]
+    }
   },
   {
     "id": "vulkan-kosmickrisp-gles32",
