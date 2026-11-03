@@ -21,7 +21,7 @@
       "archiveSha256": "d80ef5facdb21972efe91774da03d6b9abf216aa17093d740fcc411cd8afbb41", "archiveBytes": 976062,
       "sourceUrl": "https://github.com/xiph/flac/tree/1507800de4b70e21be71f38caa0d9079d0bc6e45",
       "license": "BSD-3-Clause (libFLAC); see included notices for other source components",
-      "notices": ["COPYING.Xiph", "COPYING.LGPL", "COPYING.GPL", "COPYING.FDL"], "buildSystem": "cmake",
+      "notices": ["COPYING.Xiph", "COPYING.LGPL", "COPYING.GPL"], "buildSystem": "cmake",
       "options": ["-DBUILD_CXXLIBS=OFF", "-DBUILD_PROGRAMS=OFF", "-DBUILD_EXAMPLES=OFF", "-DBUILD_DOCS=OFF", "-DINSTALL_MANPAGES=OFF", "-DWITH_OGG=ON"]
     },
     {
