@@ -10,7 +10,6 @@ import {resolveProject,readProjects} from '../lib/projects.mjs';
 import {releaseVersion,buildReleaseVersion} from '../lib/package-version.mjs';
 import {buildCoverage,assertBuildCoverage} from './build-coverage.mjs';
 import {readPublisherInput,assertPublisherSource} from './publisher-files.mjs';
-import {sourceDateEpoch,buildToolchain} from '../lib/reproducible-build.mjs';
 import {assetName,releaseTag,releaseRecord,validateCatalog,identity} from '../lib/project-identity.mjs';
 const require=createRequire(import.meta.url),A=require('../lib/archive.cjs'),B=require('../lib/bundled-native.cjs');
 const root=path.resolve(import.meta.dirname,'..');

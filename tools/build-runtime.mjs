@@ -127,7 +127,7 @@ export function runBuild({project:id,arch,version,output,work=path.join(fs.mkdte
  if(actual!==command||!fs.statSync(actual).isFile())throw Error('The GitHub build command must be a regular file in this repository.');
  const context=runtimeBuildEnvironment(build);
  try{
-  const result=spawn(process.execPath,[command,'--project',project.id,'--arch',arch,'--version',build.version,'--output',output,'--work',work],{cwd:directory,stdio:'inherit',env:reproducibleEnvironment(directory,context.env)});
+  const result=spawn(process.execPath,[command,'--project',project.id,'--arch',arch,'--version',build.version,'--output',output,'--work',work],{cwd:directory,stdio:'inherit',env:reproducibleEnvironment(context.env)});
   if(result.error)throw result.error;
   if(result.status!==0)throw Error(project.name+' build exited with status '+result.status);
   sealBuildInputReport({project:project.id,output});

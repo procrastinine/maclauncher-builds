@@ -5,7 +5,7 @@ import {pathToFileURL} from 'node:url';
 import {pack,verify,publicDeclaration} from './runtime-package.mjs';
 import {resolveProject} from '../lib/projects.mjs';
 import {releaseVersion,buildReleaseVersion} from '../lib/package-version.mjs';
-import {sourceDateEpoch,buildToolchain} from '../lib/reproducible-build.mjs';
+import {SOURCE_DATE_EPOCH,buildToolchain} from '../lib/reproducible-build.mjs';
 import {assetName,releaseTag,releaseRecord,identity} from '../lib/project-identity.mjs';
 const require=createRequire(import.meta.url),A=require('../lib/archive.cjs');
 const root=path.resolve(import.meta.dirname,'..');
@@ -28,7 +28,7 @@ export async function prepareRelease({project,input,declaration,sourceRevision,o
  buildReleaseVersion(project,declaration.version,directory);
  const parent=path.dirname(path.resolve(output));fs.mkdirSync(parent,{recursive:true});const staging=fs.mkdtempSync(path.join(parent,'.release-'));
  try{
-  const archive=path.join(staging,assetName(declaration)),record=await pack({project,input,declaration,output:archive,sourceDateEpoch:sourceRevision?sourceDateEpoch(directory,sourceRevision):0,directory});
+  const archive=path.join(staging,assetName(declaration)),record=await pack({project,input,declaration,output:archive,sourceDateEpoch:sourceRevision?SOURCE_DATE_EPOCH:0,directory});
   if(sourceRevision)record.build={sourceRevision,workflow:repo+'/.github/workflows/runtime-build.yml',toolchain:buildToolchain(),...(process.env.GITHUB_ACTIONS==='true'&&process.env.GITHUB_REPOSITORY===repo?{runId:process.env.GITHUB_RUN_ID,runAttempt:process.env.GITHUB_RUN_ATTEMPT}:{})};
   const source=sourceRevision?{repository:repo,revision:sourceRevision}:registration.producer.source;if(source)record.source=source;
   fs.writeFileSync(archive+'.json',json(record));const checked=await verifyRelease({bundle:staging,directory});fs.renameSync(staging,path.resolve(output));return checked.release;
