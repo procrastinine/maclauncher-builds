@@ -174,10 +174,14 @@
       {
         "version": "4.0.2-MCLv3",
         "label": "Lua 5.1 host ABI 4.0.2-MCLv3"
+      },
+      {
+        "version": "4.0.2-MCLv4",
+        "label": "Lua 5.1 host ABI 4.0.2-MCLv4"
       }
     ],
     "build": {
-      "version": "4.0.2-MCLv3",
+      "version": "4.0.2-MCLv4",
       "command": "tools/build-luasteam.mjs",
       "architectures": [
         "universal"

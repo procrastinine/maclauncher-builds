@@ -1,0 +1,80 @@
+{
+  "id": "love-luasteam",
+  "version": "4.0.2-MCLv4",
+  "arch": "universal",
+  "minimumMacOS": "13.0",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "5d78a1e1d39f661727a583e25cfd3d32ab26bcc545374fb3203d51e7c1c3e181",
+  "directoryRelative": "love-luasteam/4.0.2-MCLv4/universal",
+  "manifestRelative": "helper.json",
+  "manifestSha256": "509a5b783f40a6fd9ad36cea501d14b8362994fd2ded22a8a92389a0bb428bd5",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 16824,
+      "mode": 420,
+      "sha256": "64f8dca2229eecd01eba9441807a4a6a517a6755ee3361ec5c087e273040dfaa"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "11d8a9012042169a502cec8b3e5204f9dc0747d427c23a21ebdd99ddd1b7b95a"
+    },
+    {
+      "path": "helper.json",
+      "size": 1902,
+      "sha256": "509a5b783f40a6fd9ad36cea501d14b8362994fd2ded22a8a92389a0bb428bd5",
+      "mode": 420
+    },
+    {
+      "path": "LuaJIT-MIT.txt",
+      "size": 1955,
+      "sha256": "b632c180a16c63fdc1c4c8e532f9cf9870efe4e774418d45078c3c27eff71ac5",
+      "mode": 420
+    },
+    {
+      "path": "LuaSteam-MIT.txt",
+      "size": 88,
+      "sha256": "3fa162dcd9e57bb65fcdcb16fe4a4be27ae1d20d32e728c47783a157317613d7",
+      "mode": 420
+    },
+    {
+      "path": "luasteam.so",
+      "size": 309552,
+      "sha256": "d9c0bb486e268d79dfcb2b7641159badcb016c5504f5eb3d9b6d859a7623e81a",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "MacLauncher-MIT.txt",
+      "size": 102,
+      "sha256": "5af29266515f783c70c2325be017f9d9211e48550480698c392aa268d8ef2d8f",
+      "mode": 420
+    }
+  ],
+  "notices": [
+    {
+      "name": "LuaSteam",
+      "license": "MIT",
+      "path": "LuaSteam-MIT.txt"
+    },
+    {
+      "name": "LuaJIT",
+      "license": "MIT",
+      "path": "LuaJIT-MIT.txt"
+    },
+    {
+      "name": "MacLauncher LuaSteam integration",
+      "license": "MIT",
+      "path": "MacLauncher-MIT.txt"
+    }
+  ]
+}
