@@ -2646,6 +2646,49 @@
           "profile": "MoltenVK 1.4.2 scene recording 1.4.2-MCLv3"
         }
       ]
+    },
+    {
+      "projectId": "web-renderer-network",
+      "name": "Browser network helper",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#web-renderer-network",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/web-renderer-network.json",
+        "sha256": "6e8ef905e655fca8077065cbf23839731961ff370b9303f394d51be52833a236",
+        "bytes": 1647
+      },
+      "releases": [
+        {
+          "version": "1.1.1",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "11.0",
+          "tag": "web-renderer-network/v1.1.1/arm64",
+          "asset": {
+            "filename": "web-renderer-network-1.1.1-arm64.tar.gz",
+            "sha256": "71cf1ef45682e9320f111e5330c8e20442765ed5cf60802a16d45b49cca248a5",
+            "bytes": 10387,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/web-renderer-network%2Fv1.1.1%2Farm64/web-renderer-network-1.1.1-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41578914540",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#web-renderer-network",
+          "profile": "Browser network helper 1.1.1"
+        }
+      ]
     }
   ],
   "retiredProjects": [
