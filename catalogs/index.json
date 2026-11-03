@@ -3377,10 +3377,40 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#siglus",
       "catalog": {
         "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/siglus.json",
-        "sha256": "fe5345454691c7b5c901e5cf51f2963b2bf5840d6817b7383758bc0b88a6103d",
-        "bytes": 1812
+        "sha256": "9af83639f7427a238a2001ea32aeed5baad715e5384b93e69fb9c99da9452a67",
+        "bytes": 3386
       },
       "releases": [
+        {
+          "version": "0.1.0-MCLv3",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "siglus/v0.1.0-MCLv3/arm64",
+          "asset": {
+            "filename": "siglus-0.1.0-MCLv3-arm64.tar.gz",
+            "sha256": "572bdb616c8aac5a97218cc2a3303a75412b72f330e9349c5f3212d8d2e36cc4",
+            "bytes": 11491718,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/siglus%2Fv0.1.0-MCLv3%2Farm64/siglus-0.1.0-MCLv3-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "66bddd70fb09b14ea7bcc1f4c7fc7fabacf05c05",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41545860706",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#siglus",
+          "profile": "siglus_rs 0.1.0-MCLv3"
+        },
         {
           "version": "1.0.0-preview.5f358ef1360b-MCLv2-1028-1",
           "arch": "arm64",
