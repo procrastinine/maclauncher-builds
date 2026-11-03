@@ -2189,10 +2189,14 @@
       {
         "version": "0.1.0",
         "label": "Android ART Java 0.1.0"
+      },
+      {
+        "version": "0.1.1",
+        "label": "Android ART Java 0.1.1"
       }
     ],
     "build": {
-      "version": "0.1.0",
+      "version": "0.1.1",
       "command": "tools/build-android-art-java.mjs",
       "architectures": [
         "arm64"
