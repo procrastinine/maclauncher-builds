@@ -7,6 +7,60 @@
       "schemaVersion": 2,
       "id": "butterscotch",
       "version": "MCLv4",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "fae25d15a21ac2ecdde77d78a5cc093761cb4d23e2ad49d2ac1842e3c1fbdbd8",
+      "sourceSha256": "fae25d15a21ac2ecdde77d78a5cc093761cb4d23e2ad49d2ac1842e3c1fbdbd8",
+      "updatePolicy": "manual",
+      "capabilities": {
+        "gameArguments": "repeat-game-arg-v1",
+        "wadVersions": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17
+        ],
+        "sourceKind": "commit"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2"
+      },
+      "asset": {
+        "filename": "butterscotch-MCLv4-arm64.tar.gz",
+        "sha256": "4d5124763075c6d758aa0bf800b60c816df9fd096aa2e0ae7055ba1b3b012e80",
+        "bytes": 1190788,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/butterscotch%2FvMCLv4%2Farm64/butterscotch-MCLv4-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41650042047",
+        "runAttempt": "1"
+      },
+      "tag": "butterscotch/vMCLv4/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "butterscotch",
+      "version": "MCLv4",
       "arch": "x64",
       "launcherArchitectures": [
         "arm64",
