@@ -2321,10 +2321,14 @@
       {
         "version": "1.2.2-MCLv2",
         "label": "libsndfile and codecs 1.2.2 1.2.2-MCLv2"
+      },
+      {
+        "version": "1.2.2-MCLv3",
+        "label": "libsndfile and codecs 1.2.2 1.2.2-MCLv3"
       }
     ],
     "build": {
-      "version": "1.2.2-MCLv2",
+      "version": "1.2.2-MCLv3",
       "command": "tools/build-native-sndfile.mjs",
       "architectures": [
         "arm64",
