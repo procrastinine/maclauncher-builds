@@ -1102,10 +1102,14 @@
       {
         "version": "1.1.1",
         "label": "Browser network helper 1.1.1"
+      },
+      {
+        "version": "1.1.2",
+        "label": "Browser network helper 1.1.2"
       }
     ],
     "build": {
-      "version": "1.1.1",
+      "version": "1.1.2",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "arm64",
