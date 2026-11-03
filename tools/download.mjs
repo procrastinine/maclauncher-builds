@@ -45,7 +45,8 @@ export async function downloadFile(url,output,{run=execFile,wait=sleep,...option
   }
  }
 }
-export function downloadFileSync(url,output,{run=execFileSync,wait=milliseconds=>Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,milliseconds),...options}={}){
+const pause=milliseconds=>Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,milliseconds);
+export function downloadFileSync(url,output,{run=execFileSync,wait=pause,...options}={}){
  for(let index=0;;index++){
   const {args,options:runOptions}=request(url,output,options);
   try{run('curl',args,runOptions);return output;}
@@ -54,6 +55,18 @@ export function downloadFileSync(url,output,{run=execFileSync,wait=milliseconds=
    const delay=1000*2**index;
    if(index+1>=attempts||!transientDownload(error))throw error;
    wait(delay);
+  }
+ }
+}
+/** Five attempts of one repeatable network step, such as a shallow fetch or a submodule
+ * initialization, with the download backoff. Git has no reliable transient status, so
+ * every failure is repeated and the last one is reported. */
+export function retryNetwork(step,{wait=pause}={}){
+ for(let index=0;;index++){
+  try{return step();}
+  catch(error){
+   if(index+1>=attempts)throw error;
+   wait(1000*2**index);
   }
  }
 }

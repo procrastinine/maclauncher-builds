@@ -5,22 +5,12 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync,spawnSync} from 'node:child_process';
-import {verifyProducer,main,buildPlan,runBuild,checkBuildRequest,checkBuildOutput,RUNNERS,HOSTED_RUNNERS,SUPPLIED_RUNNER} from '../tools/build-runtime.mjs';
+import {verifyProducer,main,buildPlan,runBuild,checkBuildRequest,checkBuildOutput,RUNNERS,HOSTED_RUNNERS} from '../tools/build-runtime.mjs';
 import {findBuildTool} from '../tools/build-source.mjs';
 import {prepareBuildHost} from '../tools/build-host.mjs';
 import {prepareRelease} from '../tools/release-runtime.mjs';
 import {readProjects,buildRecord,buildRecords} from '../lib/projects.mjs';
 const root=path.resolve(import.meta.dirname,'..');
-
-test('a registered publisher input plans one supplied assembly at the publisher version',()=>{
- const none=()=>[];
- assert.deepEqual(buildPlan({project:'flash-projector',tags:none}),{include:[{project:'flash-projector',version:'35.0.0.60',arch:'universal',runner:SUPPLIED_RUNNER,supplied:true}]});
- assert.deepEqual(buildPlan({project:'flash-projector',arch:'universal',version:'35.0.0.60',tags:none}).include.length,1);
- assert.throws(()=>buildPlan({project:'flash-projector',arch:'arm64',tags:none}),/assembles universal packages/);
- assert.throws(()=>buildPlan({project:'flash-projector',version:'35.0.0.60-MCLv1',tags:none}),/assembles version 35\.0\.0\.60/);
- assert.throws(()=>buildPlan({project:'flash-projector',tags:()=>['flash-projector/v35.0.0.60/universal']}),/already has a universal package or tag/);
- assert.equal(HOSTED_RUNNERS[SUPPLIED_RUNNER].os,'linux');
-});
 
 test('producer routing never substitutes Android for a different project',()=>{
  const selected=main(['--project','fna','--check']);assert.equal(selected.id,'fna');assert.equal(selected.sourceDirectory,'producers/maclauncher');assert.ok(selected.entries.every(entry=>entry.startsWith('producers/maclauncher/')));
@@ -66,23 +56,16 @@ if(process.env.ENGINE_EXTRA)fs.writeFileSync(path.join(o.output,'extra.txt'),'ex
 }
 
 const row=(arch,version='1.0.0')=>({project:'engine',version,arch,runner:RUNNERS[arch]});
-const commit=(root,message)=>{for(const args of [['add','-A'],['-c','user.name=t','-c','user.email=t@example.com','commit','-qm',message]])execFileSync('git',['-C',root,...args]);return execFileSync('git',['-C',root,'rev-parse','HEAD'],{encoding:'utf8'}).trim();};
 
-test('a manual GitHub build plans the registered version once for each missing architecture',t=>{
- const root=githubFixture(t),none=()=>[];
- assert.deepEqual(buildPlan({project:'engine',directory:root,tags:none}),{include:[row('arm64'),row('x64')]});
+test('a manual GitHub build plans the registered version once for each architecture',t=>{
+ const root=githubFixture(t);
+ assert.deepEqual(buildPlan({project:'engine',directory:root}),{include:[row('arm64'),row('x64')]});
  assert.equal(RUNNERS.arm64,'xcode-27');assert.equal(RUNNERS.x64,'macos-26-intel');assert.equal(RUNNERS.universal,RUNNERS.arm64);
- assert.deepEqual(buildPlan({project:'engine',arch:'x64',version:'1.0.0',directory:root,tags:none}),{include:[row('x64')]});
- assert.throws(()=>buildPlan({project:'engine',arch:'universal',directory:root,tags:none}),/builds arm64 and x64 packages/);
- assert.throws(()=>buildPlan({project:'engine',version:'2.0',directory:root,tags:none}),/builds version 1\.0/);
- assert.throws(()=>buildPlan({project:'helper',directory:root,tags:none}),/no GitHub build command/);
- // A catalog record or a release tag, which a staged draft also has, means the architecture is never built again.
- fs.mkdirSync(path.join(root,'catalogs'));fs.writeFileSync(path.join(root,'catalogs/engine.json'),JSON.stringify({packages:[{version:'1.0.0',arch:'arm64'}]}));
- assert.deepEqual(buildPlan({project:'engine',directory:root,tags:none}),{include:[row('x64')]});
- assert.throws(()=>buildPlan({project:'engine',arch:'arm64',directory:root,tags:none}),/already has a arm64 package or tag/);
- assert.throws(()=>buildPlan({project:'engine',directory:root,tags:()=>['engine/v1.0.0/x64','engine/v0.9/arm64']}),/already has a package for each architecture/);
- execFileSync('git',['init','-q',root]);commit(root,'registry');
- assert.deepEqual(main(['--plan','--project','engine'],root),{include:[row('x64')]});
+ assert.deepEqual(buildPlan({project:'engine',arch:'x64',version:'1.0.0',directory:root}),{include:[row('x64')]});
+ assert.throws(()=>buildPlan({project:'engine',arch:'universal',directory:root}),/builds arm64 and x64 packages/);
+ assert.throws(()=>buildPlan({project:'engine',version:'2.0',directory:root}),/builds version 1\.0/);
+ assert.throws(()=>buildPlan({project:'helper',directory:root}),/no GitHub build command/);
+ assert.deepEqual(main(['--plan','--project','engine'],root),{include:[row('arm64'),row('x64')]});
  for(const args of [['--plan','--project','engine','--output','/tmp/out'],['--plan'],['--plan','--before','a'.repeat(40),'--project','engine'],['--before','a'.repeat(40),'--project','engine','--check']])
   assert.throws(()=>main(args,root),/--plan|Use --project/);
 });
@@ -217,15 +200,13 @@ test('an owned helper builds a separate package for each CPU, and only Intel exe
 });
 
 
-test('a project with multiple ABI builds plans missing versions independently',t=>{
+test('a project with multiple ABI builds plans each declared version independently',t=>{
  const directory=githubFixture(t),file=path.join(directory,'projects/downloadable.json'),projects=JSON.parse(fs.readFileSync(file)),project=projects[0];
  project.packageProfiles.push({version:'1.1.0',label:'Engine ABI 1.1'});project.build=[{...project.build,architectures:['x64']},{...project.build,version:'1.1.0',architectures:['universal']}];fs.writeFileSync(file,JSON.stringify(projects));
- assert.deepEqual(buildPlan({project:'engine',directory,tags:()=>[]}),{include:[row('x64'),row('universal','1.1.0')]});
- assert.deepEqual(buildPlan({project:'engine',version:'1.1.0',directory,tags:()=>[]}),{include:[row('universal','1.1.0')]});
- assert.deepEqual(buildPlan({project:'engine',arch:'x64',directory,tags:()=>[]}),{include:[row('x64')]});
- assert.deepEqual(buildPlan({project:'engine',arch:'universal',directory,tags:()=>[]}),{include:[row('universal','1.1.0')]});
- assert.deepEqual(buildPlan({project:'engine',directory,tags:()=>['engine/v1.0.0/x64']}),{include:[row('universal','1.1.0')]});
- assert.throws(()=>buildPlan({project:'engine',directory,tags:()=>['engine/v1.0.0/x64','engine/v1.1.0/universal']}),/already has a package for each declared version/);
+ assert.deepEqual(buildPlan({project:'engine',directory}),{include:[row('x64'),row('universal','1.1.0')]});
+ assert.deepEqual(buildPlan({project:'engine',version:'1.1.0',directory}),{include:[row('universal','1.1.0')]});
+ assert.deepEqual(buildPlan({project:'engine',arch:'x64',directory}),{include:[row('x64')]});
+ assert.deepEqual(buildPlan({project:'engine',arch:'universal',directory}),{include:[row('universal','1.1.0')]});
  assert.throws(()=>buildRecords({...project,build:[project.build[0],project.build[0]]}),/distinct declared versions/);
 });
 
@@ -234,7 +215,7 @@ test('graphics outputs use different build hosts while retaining one version per
  const project=readProjects(root,{resolvePins:false}).projects.find(project=>project.id==='reshade');
  const directory=githubFixture(t),manifest=JSON.parse(fs.readFileSync(path.join(root,'projects.json')));
  for(const file of ['projects.json',...Object.values(manifest.registries)])fs.copyFileSync(path.join(root,file),path.join(directory,file));
- const matrix=buildPlan({project:'reshade',directory,tags:()=>[]}).include;
+ const matrix=buildPlan({project:'reshade',directory}).include;
  const version=buildRecord(project).version;
  assert.deepEqual(matrix.map(row=>[row.version,row.arch,row.runner]),[[version,'universal','xcode-27'],[version,'x64','macos-26-intel']]);
  assert.deepEqual(buildRecord(project).architectures,['universal','x64']);

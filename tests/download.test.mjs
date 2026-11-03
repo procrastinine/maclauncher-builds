@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createRequire} from 'node:module';
-import {downloadFile,downloadFileSync,transientDownload} from '../tools/download.mjs';
+import {downloadFile,downloadFileSync,transientDownload,retryNetwork} from '../tools/download.mjs';
 import {buildInput} from '../tools/build-input.mjs';
 test('download and portable producer modules remain synchronously require-able',()=>{
  const require=createRequire(import.meta.url);
@@ -49,6 +49,14 @@ test('synchronous retries are bounded and handle truncated transfers',t=>{
  const run=runner(args=>{calls++;fs.writeFileSync(output,calls===2?'complete input':'partial');return calls===1?{error:Object.assign(Error('truncated'),{code:18})}:{};});
  downloadFileSync('https://example.invalid/input',output,{run,wait:delay=>delays.push(delay)});assert.equal(calls,2);assert.deepEqual(delays,[1000]);assert.equal(fs.readFileSync(output,'utf8'),'complete input');
  calls=0;delays.length=0;assert.throws(()=>downloadFileSync('https://example.invalid/stalled',output,{run:runner(()=>{calls++;return {error:Object.assign(Error('stalled'),{code:28})};}),wait:delay=>delays.push(delay)}),/stalled/);assert.equal(calls,5);assert.deepEqual(delays,[1000,2000,4000,8000]);assert.equal(fs.existsSync(output),false);
+});
+test('network steps repeat with backoff and report the last failure',()=>{
+ const delays=[];let calls=0;
+ assert.equal(retryNetwork(()=>{calls++;if(calls<3)throw Error('early EOF '+calls);return 'fetched';},{wait:delay=>delays.push(delay)}),'fetched');
+ assert.equal(calls,3);assert.deepEqual(delays,[1000,2000]);
+ calls=0;delays.length=0;
+ assert.throws(()=>retryNetwork(()=>{calls++;throw Error('RPC failed '+calls);},{wait:delay=>delays.push(delay)}),/^Error: RPC failed 5$/);
+ assert.equal(calls,5);assert.deepEqual(delays,[1000,2000,4000,8000]);
 });
 test('a downloaded checksum mismatch is not retried and never becomes a cached input',async t=>{
  const directory=temporary(t),count=path.join(directory,'calls'),cache=path.join(directory,'cache');

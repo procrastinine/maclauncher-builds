@@ -6,6 +6,7 @@ import {pathToFileURL} from 'node:url';
 import {createRequire} from 'node:module';
 import {checkoutSource,run,recipeMain} from './build-source.mjs';
 import {buildInput} from './build-input.mjs';
+import {retryNetwork} from './download.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 const root=path.resolve(import.meta.dirname,'..'),descriptor=path.join(root,'producers/android-inputs/java-framework.json');
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),{validateDeclaration}=require('../lib/declaration.cjs');
@@ -16,7 +17,7 @@ const read=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8'
 function sourceObjects({repository,revision},destination){
  run('git',['init','--bare',destination]);run('git',['-C',destination,'remote','add','origin',repository]);
  run('git',['-C',destination,'config','remote.origin.promisor','true']);run('git',['-C',destination,'config','remote.origin.partialclonefilter','blob:none']);
- run('git',['-C',destination,'fetch','--filter=blob:none','--depth','1','--no-tags','origin',revision]);run('git',['-C',destination,'update-ref','HEAD',revision]);
+ retryNetwork(()=>run('git',['-C',destination,'fetch','--filter=blob:none','--depth','1','--no-tags','origin',revision]));run('git',['-C',destination,'update-ref','HEAD',revision]);
  if(read('git',['-C',destination,'rev-parse','HEAD'])!==revision)throw Error('Java source object store differs from its declared commit.');return destination;
 }
 
@@ -38,7 +39,7 @@ export async function buildAndroidJavaFrameworkInput({output,work}){
  const sources={};for(const record of profile.sources){if(pins[record.pin]!==record.revision)throw Error('The framework Java source pin differs from the original producer: '+record.id);sources[record.id]=sourceObjects(record,path.join(work,record.id));}
  for(const record of profile.sources){
   const objects=[...new Set(read('git',['-C',sources[record.id],'ls-tree','-r','--format=%(objecttype) %(objectname)',record.revision,'--',...record.prefetch]).split('\n').filter(line=>line.startsWith('blob ')).map(line=>line.slice(5)))];
-  if(objects.length)run('git',['-C',sources[record.id],'fetch','--no-tags','--no-write-fetch-head','origin','--stdin'],{input:objects.join('\n')+'\n',stdio:['pipe','inherit','inherit']});
+  if(objects.length)retryNetwork(()=>run('git',['-C',sources[record.id],'fetch','--no-tags','--no-write-fetch-head','origin','--stdin'],{input:objects.join('\n')+'\n',stdio:['pipe','inherit','inherit']}));
  }
 
  const build=path.join(work,'build'),products=path.join(output,'products');fs.mkdirSync(products,{recursive:true});

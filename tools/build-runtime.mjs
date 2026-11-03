@@ -13,7 +13,6 @@ import {runtimeBuildEnvironment} from './runtime-build-environment.mjs';
 import {prepareBuildHost,assertBuildHost} from './build-host.mjs';
 import {initializeSources} from './init-runtime-sources.mjs';
 import {publicDeclaration} from './runtime-package.mjs';
-import {readPublisherInput} from './publisher-files.mjs';
 import {sealBuildInputReport} from './seal-build-input-report.mjs';
 import {preparePackageLayout,checkPackageDuplicates} from './package-layout.mjs';
 import {reproducibleEnvironment} from '../lib/reproducible-build.mjs';
@@ -58,48 +57,20 @@ const matrixRow=(project,build,arch)=>{
  if(host.os==='linux')linuxToolSelection(build.tools||[]);
  return {project:project.id,version:build.version,arch,runner};
 };
-const gitTags=(directory,id)=>git(directory,['tag','--list',id+'/v*']).split('\n').filter(Boolean);
-
-/** Architectures of a version that already have a catalog record or a release tag, which a draft also has. */
-function existing(project,version,directory,tags){
- const file=path.join(directory,'catalogs',project.id+'.json'),prefix=project.id+'/v'+version+'/';
- const published=fs.existsSync(file)?JSON.parse(fs.readFileSync(file)).packages.filter(record=>record.version===version).map(record=>record.arch):[];
- return new Set([...published,...tags(directory,project.id).filter(tag=>tag.startsWith(prefix)).map(tag=>tag.slice(prefix.length))]);
-}
-
-// Supplied publisher packages contain no compiled code; any standard Linux image assembles them.
-export const SUPPLIED_RUNNER='ubuntu-24.04';
-
-/** A registered publisher input yields one package: the publisher version, in the pinned input's architecture. */
-function suppliedPlan(input,{arch,version,directory,tags}){
- const project=input.project,target={version:input.descriptor.publisherVersion,arch:input.descriptor.input.record.arch};
- if(version!==undefined&&version!==target.version)throw Error(project.name+' assembles version '+target.version+' on GitHub.');
- if(arch!=='all'&&arch!==target.arch)throw Error(project.name+' assembles '+target.arch+' packages on GitHub.');
- releaseVersion(project.id,target.version,directory);
- if(existing(project,target.version,directory,tags).has(target.arch))throw Error(project.name+' '+target.version+' already has a '+target.arch+' package or tag.');
- return {include:[{project:project.id,version:target.version,arch:target.arch,runner:SUPPLIED_RUNNER,supplied:true}]};
-}
 
 /** Manual Runtime build: the registered version of one project. `all` selects every
- * architecture that has no catalog record or tag yet; nothing is built twice. */
-export function buildPlan({project:id,arch='all',version,directory=root,tags=gitTags}){
- const input=readPublisherInput({project:id,directory});
- if(input)return suppliedPlan(input,{arch,version,directory,tags});
+ * architecture it builds; release selection refuses versions that are already published. */
+export function buildPlan({project:id,arch='all',version,directory=root}){
  const {project,build}=githubBuild(id,directory,version);
  if(version===undefined&&Array.isArray(project.build)){
   const records=buildRecords(project).filter(build=>arch==='all'||build.architectures.includes(arch));
   if(!records.length)throw Error(project.name+' has no declared '+arch+' build.');
-  const include=records.flatMap(build=>{try{return buildPlan({project:id,arch,version:build.version,directory,tags}).include;}catch(error){if(arch==='all'&&error.message.includes('already has a package for each'))return [];throw error;}});
-  if(!include.length)throw Error(project.name+' already has a package for each declared version and architecture.');
-  return {include};
+  return {include:records.flatMap(build=>buildPlan({project:id,arch,version:build.version,directory}).include)};
  }
  if(version!==undefined&&version!==build.version)throw Error(project.name+' builds version '+build.version+' on GitHub.');
  releaseVersion(project.id,build.version,directory);
- const done=existing(project,build.version,directory,tags);
- const selected=arch==='all'?build.architectures.filter(value=>!done.has(value)):[arch];
+ const selected=arch==='all'?build.architectures:[arch];
  if(selected.some(value=>!build.architectures.includes(value)))throw Error(project.name+' builds '+build.architectures.join(' and ')+' packages on GitHub.');
- if(arch!=='all'&&done.has(arch))throw Error(project.name+' '+build.version+' already has a '+arch+' package or tag.');
- if(!selected.length)throw Error(project.name+' '+build.version+' already has a package for each architecture it builds.');
  return {include:selected.map(value=>matrixRow(project,build,value))};
 }
 

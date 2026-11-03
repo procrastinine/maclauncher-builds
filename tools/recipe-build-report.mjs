@@ -6,13 +6,8 @@ import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 import {readProjects,buildRecords} from '../lib/projects.mjs';
 import {resolveUpstream} from '../lib/source-pins.mjs';
-
-export function canonicalReport(value){
- if(Array.isArray(value))return '['+value.map(canonicalReport).join(',')+']';
- if(value&&typeof value==='object')return '{'+Object.keys(value).filter(key=>value[key]!==undefined).sort().map(key=>JSON.stringify(key)+':'+canonicalReport(value[key])).join(',')+'}';
- return JSON.stringify(value);
-}
-export const reportDigest=value=>crypto.createHash('sha256').update(canonicalReport(value)).digest('hex');
+import {canonicalReport,reportDigest} from '../lib/canonical-report.mjs';
+export {canonicalReport,reportDigest};
 const inside=(root,file)=>file.startsWith(root+path.sep);
 const parsePointer=pointer=>pointer.slice(1).split('/').map(key=>key.replaceAll('~1','/').replaceAll('~0','~'));
 function slot(value,pointer){const keys=parsePointer(pointer),key=keys.pop();for(const part of keys){if(!value||!Object.hasOwn(value,part))return null;value=value[part];}return value&&Object.hasOwn(value,key)?{value,key}:null;}

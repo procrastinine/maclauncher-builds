@@ -7,6 +7,7 @@ import {pathToFileURL} from 'node:url';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 import {pythonBuildTools,recipeMain} from './build-source.mjs';
+import {retryNetwork} from './download.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Native=require('../producers/maclauncher/scripts/native-binary-tools.cjs');
 const run=(command,args,options={})=>String(execFileSync(command,args,{encoding:'utf8',maxBuffer:64<<20,...options})||'').trim();
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -30,7 +31,7 @@ export async function buildMPV({project:id,arch,output,work}){
  const producer=path.join(root,'producers/mpv-render/v7'),source=path.join(root,'producers/maclauncher/src/external/mpv-player');
  const Builder=require(path.join(producer,'maclauncher/scripts/build-mpv-library.cjs'));
  (await import(pathToFileURL(path.join(producer,'package.mjs')))).checkSources();
- run('git',['-C',source,'fetch','--depth','2','origin',Builder.REVISION,...Builder.BACKPORTS],{stdio:'inherit'});
+ retryNetwork(()=>run('git',['-C',source,'fetch','--depth','2','origin',Builder.REVISION,...Builder.BACKPORTS],{stdio:'inherit'}));
  const sdk=process.env.SDKROOT||run('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path']);
  const sdkPackages=sdkCompressionPkgConfig({sdk,directory:path.join(work,'sdk-pkgconfig')});
  const pkgConfigPath=[sdkPackages,...['ffmpeg','libass','libplacebo','luajit','mujs'].map(name=>path.join(prefix(name),'lib/pkgconfig'))].join(path.delimiter);

@@ -3,7 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {run} from './build-source.mjs';
-import {downloadFileSync} from './download.mjs';
+import {downloadFileSync,retryNetwork} from './download.mjs';
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const safe=value=>typeof value==='string'&&!path.isAbsolute(value)&&!value.split('/').some(part=>part==='.'||part==='..'||part==='');
 
@@ -27,9 +27,10 @@ function sourceTreeIdentity(directory){
 function gitSource(record,output,work){
  const checkout=path.join(work,'git');fs.mkdirSync(checkout);
  run('git',['init','-q',checkout]);run('git',['-C',checkout,'remote','add','origin','https://android.googlesource.com/'+record.project]);
- run('git',['-C',checkout,'fetch','--depth=1','--filter=blob:none','origin',record.revision]);
+ retryNetwork(()=>run('git',['-C',checkout,'fetch','--depth=1','--filter=blob:none','origin',record.revision]));
  if(record.path)run('git',['-C',checkout,'sparse-checkout','set','--no-cone','/'+record.path+(record.file?'':'/')]);
- run('git',['-C',checkout,'checkout','--detach','FETCH_HEAD']);
+ // A blob-filtered checkout fetches the selected blobs before writing files.
+ retryNetwork(()=>run('git',['-C',checkout,'checkout','--detach','FETCH_HEAD']));
  const selected=path.join(checkout,record.path);fs.rmSync(path.join(checkout,'.git'),{recursive:true});fs.cpSync(selected,output,{recursive:!record.file,verbatimSymlinks:true});
 }
 

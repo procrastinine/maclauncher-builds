@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {createRequire} from 'node:module';
-import {canonicalReport} from './recipe-build-report.mjs';
+import {canonicalReport} from '../lib/canonical-report.mjs';
 import {releaseTag} from '../lib/project-identity.mjs';
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs');
 const read=value=>JSON.parse(value.trim().startsWith('{')?value:fs.readFileSync(value,'utf8'));

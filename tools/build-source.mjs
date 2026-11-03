@@ -3,6 +3,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
+import {retryNetwork} from './download.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Source=require('../producers/maclauncher/src/modules/shared/runtime/pinned-native-build.js');
 /** A build tool from the declared Homebrew formulae, then from PATH. */
 export const findBuildTool=Source.findBuildTool;
@@ -12,7 +13,7 @@ const git=(source,args)=>execFileSync('git',['-C',source,...args],{encoding:'utf
 export function checkoutSource({repository,revision,destination}){
  const url=new URL(repository);if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash||!/^[a-f0-9]{40}$/.test(revision||'')||!path.isAbsolute(destination||'')||fs.existsSync(destination))throw Error('Source checkout needs a public HTTPS origin, exact revision and new absolute directory.');
  run('git',['init',destination]);run('git',['-C',destination,'remote','add','origin',repository]);
- run('git',['-C',destination,'fetch','--depth','1','--no-tags','origin',revision]);run('git',['-C',destination,'checkout','--detach','FETCH_HEAD']);
+ retryNetwork(()=>run('git',['-C',destination,'fetch','--depth','1','--no-tags','origin',revision]));run('git',['-C',destination,'checkout','--detach','FETCH_HEAD']);
  if(git(destination,['rev-parse','HEAD'])!==revision)throw Error('Fetched source differs from its declared revision.');return destination;
 }
 /** Export pinned source before applying owned adaptations or compiling. */

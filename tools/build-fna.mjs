@@ -4,6 +4,7 @@ import crypto from 'node:crypto';
 import {createRequire} from 'node:module';
 import {execFileSync} from 'node:child_process';
 import {buildInput} from './build-input.mjs';
+import {retryNetwork} from './download.mjs';
 import {checkoutSource,sourceNotices,run,recipeMain} from './build-source.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 import {collectSdlNotices} from './sdl-notices.mjs';
@@ -36,8 +37,8 @@ export async function fnaSdlNotices(work){
 }
 export async function buildFNA({project,arch,output,work}){
  fs.mkdirSync(work,{recursive:true});const repository='https://github.com/FNA-XNA/FNA',source=checkoutSource({repository,revision:Builder.FNA_REVISION,destination:path.join(work,'upstream-fna')});
- run('git',['-C',source,'submodule','update','--init','--recursive','--depth','1']);
- const fna3d=checkoutSource({repository:'https://github.com/FNA-XNA/FNA3D',revision:Builder.FNA3D_REVISION,destination:path.join(work,'upstream-fna3d')});run('git',['-C',fna3d,'submodule','update','--init','--recursive','--depth','1']);
+ retryNetwork(()=>run('git',['-C',source,'submodule','update','--init','--recursive','--depth','1']));
+ const fna3d=checkoutSource({repository:'https://github.com/FNA-XNA/FNA3D',revision:Builder.FNA3D_REVISION,destination:path.join(work,'upstream-fna3d')});retryNetwork(()=>run('git',['-C',fna3d,'submodule','update','--init','--recursive','--depth','1']));
  const runtime=path.join(work,'runtime');fs.mkdirSync(runtime);const archive=await buildInput(RUNTIMES[arch]);run('/usr/bin/tar',['-xzf',archive,'-C',runtime]);
  const downloads=new Map(Object.values(Builder.PACKAGES).map(pin=>[pin.url,pin]));
  await Builder.prepareRuntime({unpacked:runtime,pin:{version:Builder.PROFILE},sourcePath:source,fna3dSourcePath:fna3d,dependencies:{downloadToFile:async(url,destination)=>{const pin=downloads.get(url);if(!pin)throw Error('Undeclared FNA build download.');fs.copyFileSync(await buildInput(pin),destination);}}});
