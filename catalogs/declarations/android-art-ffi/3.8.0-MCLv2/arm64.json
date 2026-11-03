@@ -1,0 +1,66 @@
+{
+  "id": "android-art-ffi",
+  "version": "3.8.0-MCLv2",
+  "arch": "arm64",
+  "minimumMacOS": "13.0",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "13d13d1e5174bb0ac22cc1e9136f8f8bc8888358d251f23af75179cdb83f2516",
+  "directoryRelative": "android-art-ffi/3.8.0-MCLv2/arm64",
+  "manifestRelative": "input.json",
+  "manifestSha256": "6325113a7d4de625946646f65044c7c175a0f9e0f4280b3dc58f46d84824eaef",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 16014,
+      "mode": 420,
+      "sha256": "7c3a529fd7d3dd634952351163d561bafb0028f8cb781396b29631825dba5875"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "685010e0e64803b1e2e4103de8c14660b3de57d535266a3d2e707663f9fc6b71"
+    },
+    {
+      "path": "include/ffi.h",
+      "size": 16188,
+      "sha256": "3e34056b78377d1e2331a15b3758ad790dd2c9a06d1d5ca63fa98a9d33ba06b7",
+      "mode": 420
+    },
+    {
+      "path": "include/ffitarget.h",
+      "size": 2997,
+      "sha256": "ca1c2f5b66fac019373a031b4c47acd67f508ac43a0f18fe620bb5890a26d50e",
+      "mode": 420
+    },
+    {
+      "path": "input.json",
+      "size": 1891,
+      "sha256": "6325113a7d4de625946646f65044c7c175a0f9e0f4280b3dc58f46d84824eaef",
+      "mode": 420
+    },
+    {
+      "path": "lib/libffi.a",
+      "size": 120784,
+      "sha256": "6382bf68db384e8d17ea9f51877ef18252ed6bf28422f9b0e46a10acda32ca02",
+      "mode": 420
+    },
+    {
+      "path": "notices/libffi-LICENSE",
+      "size": 1132,
+      "sha256": "17b64dc60f3b6897a60f971e288b973f655c2edcdf08b25f3c3dd5549857881c",
+      "mode": 420
+    }
+  ],
+  "notices": [
+    {
+      "name": "libffi",
+      "license": "MIT",
+      "path": "notices/libffi-LICENSE",
+      "sourceUrl": "https://github.com/libffi/libffi.git"
+    }
+  ]
+}

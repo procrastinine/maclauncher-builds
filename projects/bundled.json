@@ -1577,10 +1577,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "Android ART libffi 0.1.0-MCLv1"
+      },
+      {
+        "version": "3.8.0-MCLv2",
+        "label": "Android ART libffi 3.8.0-MCLv2"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "3.8.0-MCLv2",
       "command": "tools/build-android-art-ffi.mjs",
       "architectures": [
         "arm64"
