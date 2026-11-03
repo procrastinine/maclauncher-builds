@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {createRequire} from 'node:module';
+import {tidyNotices} from '../lib/notices.mjs';
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),Native=require('../lib/local-native.cjs'),{validateDeclaration}=require('../lib/declaration.cjs');
 const Tools=require('../producers/maclauncher/scripts/native-binary-tools.cjs');
 export const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -9,7 +10,10 @@ export const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file))
 /** Finish a helper built in payload/, recording its actual files and native CPUs. */
 export function helperPackage({id,version,arch,output,minimumMacOS,sourceSha256,record,notices,manifestRelative='helper.json',rosettaFiles=[]}){
  const payload=path.join(output,'payload'),cpus=arch==='universal'?['arm64','x86_64']:[arch==='x64'?'x86_64':arch];
- const inventory=B.fileInventory(payload).map(relative=>{
+ const candidateRows=Array.isArray(notices)?notices:[];
+ notices=tidyNotices(payload,{id,version,notices:candidateRows,files:candidateRows.filter(row=>typeof row?.path==='string').map(row=>({path:row.path}))},{share:false}).notices;
+ const noticePaths=new Set(notices.map(row=>row.path));
+ const inventory=B.fileInventory(payload).filter(relative=>!noticePaths.has(relative)).map(relative=>{
   const file=path.join(payload,relative),stat=fs.statSync(file),architectures=Tools.macho(file);
   if(architectures){
    if(JSON.stringify([...architectures].sort())!==JSON.stringify(cpus))throw Error('Helper CPU slices differ from '+arch+': '+relative);

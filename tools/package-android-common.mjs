@@ -1,3 +1,4 @@
+import {copyNotice,sourceNotices,tidyNotices} from '../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -6,7 +7,6 @@ import {execFileSync} from 'node:child_process';
 import {copyAndroidProducts,publishAndroidAngle,publishAndroidNotices} from './android-common-products.mjs';
 import {stripAndroidFrameworkBuildInputs} from './repackage-android.mjs';
 import {verifyAndroidSourceSnapshot} from '../producers/maclauncher/scripts/android-stage-sources.mjs';
-import {isLicenseNoticeFile} from '../sources/maclauncher-android/src/modules/android/native/upstream/reuse.mjs';
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),Native=require('../lib/local-native.cjs'),Contract=require('../lib/package-contract.cjs'),Staging=require('../producers/maclauncher/scripts/native-binary-tools.cjs');
 const root=path.resolve(import.meta.dirname,'..'),sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 
@@ -29,9 +29,12 @@ export function packageAndroidCommon({build,version,sourceRevision,output}){
    verify(original.path,original);
    for(const data of original.data||[]){if(!/^icudt[0-9]+l\.dat$/.test(data.path))throw Error('Unexpected Android framework native data.');verify(data.path,data);}
   }
-  fs.mkdirSync(path.join(payload,'notices'),{recursive:true});fs.copyFileSync(path.join(root,'producers/maclauncher/LICENSE'),path.join(payload,'notices/MacLauncher.txt'));
+  copyNotice(path.join(root,'producers/maclauncher/LICENSE'),path.join(payload,'notices/MacLauncher.txt'));
+  const candidates=sourceNotices(path.join(payload,'notices'),{all:true,name:'Android runtime',repository:'https://github.com/procrastinine/maclauncher-android'}).map(({file,...row})=>({...row,path:path.relative(payload,file).split(path.sep).join('/')}));
+  const notices=tidyNotices(payload,{id:'android',version,notices:candidates,files:candidates.map(row=>({path:row.path}))},{share:false}).notices;
+  const noticePaths=new Set(notices.map(row=>row.path));
   const files=[],dependencies=[];let minimumMacOS='0.0';
-  for(const name of B.fileInventory(payload)){
+  for(const name of B.fileInventory(payload).filter(name=>!noticePaths.has(name))){
    const file=path.join(payload,name),bytes=fs.readFileSync(file),stat=fs.statSync(file),record={path:name,size:bytes.length,mode:stat.mode&0o777,sha256:sha(bytes)};
    let architectures=[];try{architectures=Native.readMachOArchitectures(file,{allowLibrary:true});}catch{}
    if(architectures.length){
@@ -53,7 +56,7 @@ export function packageAndroidCommon({build,version,sourceRevision,output}){
   const manifest={schemaVersion:1,version,profile,minimumMacOS,architectures:['arm64'],sourceHash:receipt.sourceHash,inputHash:receipt.inputHash,pins,dependencies,files,upstreamRevision:sourceRevision};
   Contract.validatePublicMetadata(manifest);const bytes=Buffer.from(JSON.stringify(manifest,null,2)+'\n');fs.writeFileSync(path.join(payload,'runtime.json'),bytes,{mode:0o644});
   const declaration={id:'android',version,arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS,sourceRelative:null,sourceSha256:sha(bytes),directoryRelative:'android/'+version+'/arm64',manifestRelative:'runtime.json',manifestSha256:sha(bytes),
-   files:[...files,{path:'runtime.json',size:bytes.length,mode:0o644,sha256:sha(bytes)}],notices:files.filter(file=>file.path.startsWith('notices/')&&isLicenseNoticeFile(file.path)).map(file=>({name:file.path.slice(8).replaceAll('/',' - '),license:'See included license',path:file.path}))};
+   files:[...files,{path:'runtime.json',size:bytes.length,mode:0o644,sha256:sha(bytes)}],notices};
   Contract.validateDeclaration(declaration);B.verifyPayload(payload,declaration);fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});return {root:payload,declaration};
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }

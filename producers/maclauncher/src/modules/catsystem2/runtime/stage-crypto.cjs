@@ -1,3 +1,4 @@
+const NoticeIntake = require('../../../../../../lib/notices.mjs');
 // Developer-only build recipe. CatSystem2 tools execute the sealed Included
 // helper directly; end users need neither a compiler nor a runtime install.
 const fs = require("node:fs");
@@ -40,7 +41,7 @@ function stage({ resourcesRoot } = {}) {
     if (command(executable, ["--version"]) !== "maclauncher-kif-crypto 1.0.0") throw new Error("The new KIF helper cannot execute its declared protocol.");
     if (JSON.stringify(Native.readMachOArchitectures(executable).sort()) !== JSON.stringify(["arm64", "x86_64"])) throw new Error("KIF helper CPU slices differ.");
     for (const name of ["kif-crypto.c", "stage-crypto.cjs"]) fs.copyFileSync(path.join(__dirname, name), path.join(destination, name));
-    fs.copyFileSync(path.join(REPO, "LICENSE"), path.join(destination, "MacLauncher-MIT.txt"));
+    NoticeIntake.copyNotice(path.join(REPO, "LICENSE"), path.join(destination, "MacLauncher-MIT.txt"));
     const dependencies = ["MacLauncher KIF cipher helper: owned MIT source, no third-party engine code or game assets.",
       "CommonCrypto: supplied by macOS through libSystem; not redistributed in this package.",
       "Protocol version: maclauncher-kif-crypto 1.0.0 / KBF1, four-byte minimum cyclic key, eight-byte little-endian blocks.",
@@ -48,7 +49,7 @@ function stage({ resourcesRoot } = {}) {
       "Key resources: https://github.com/trigger-segfault/TriggersTools.CatSystem2/wiki/V_CODEs",
       "No game keys, Windows executable, Valve API or proprietary runtime is included."].join("\n") + "\n";
     fs.writeFileSync(path.join(destination, "DEPENDENCIES.txt"), dependencies);
-    const files = fs.readdirSync(destination).sort().map(name => {
+    const files = fs.readdirSync(destination).sort().filter(name=>!NoticeIntake.isNoticePath(name)).map(name => {
       fs.chmodSync(path.join(destination, name), name === "kif-crypto" ? 0o755 : 0o644);
       const file = B.readRegular(path.join(destination, name), 1024 * 1024);
       return { path: name, size: file.size, sha256: file.sha256, mode: file.mode,

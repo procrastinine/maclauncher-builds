@@ -1,3 +1,4 @@
+const NoticeIntake = require('../../../../../../lib/notices.mjs');
 // CatSystem2 native component producer.
 const fs = require("node:fs"), os = require("node:os"), path = require("node:path");
 const { execFileSync } = require("node:child_process");
@@ -28,13 +29,13 @@ function stage({ resourcesRoot } = {}) {
     if(command(executable,["--version"]) !== `maclauncher-catsystem2-pcm-output ${VERSION} protocol1`) throw new Error("PCM output protocol version differs from its build declaration.");
     if(JSON.stringify(Native.readMachOArchitectures(executable).sort()) !== JSON.stringify(["arm64","x86_64"])) throw new Error("PCM output CPU slices differ.");
     fs.copyFileSync(SOURCE,path.join(destination,"cocoa-audio.m")); fs.copyFileSync(__filename,path.join(destination,"stage-pcm-output.cjs"));
-    fs.copyFileSync(path.join(REPO,"LICENSE"),path.join(destination,"MacLauncher-MIT.txt"));
+    NoticeIntake.copyNotice(path.join(REPO,"LICENSE"),path.join(destination,"MacLauncher-MIT.txt"));
     fs.writeFileSync(path.join(destination,"DEPENDENCIES.txt"),[
       "MacLauncher PCM output: independently owned MIT source.",
       "AVFAudio and Foundation: supplied by macOS, not redistributed.",
       "CSPA1 protocol: bounded sealed PCM WAVE caches, gain/loop controls and real completion over NDJSON; no script decisions.",
       "CPU slices: arm64 and x86_64. Minimum macOS:13.0. No compiler or installation needed by end users."].join("\n")+"\n");
-    const files = fs.readdirSync(destination).sort().map(name=>{ const file=path.join(destination,name); fs.chmodSync(file,name==="cocoa-audio"?0o755:0o644); const r=B.readRegular(file,1024*1024);
+    const files = fs.readdirSync(destination).sort().filter(name=>!NoticeIntake.isNoticePath(name)).map(name =>{ const file=path.join(destination,name); fs.chmodSync(file,name==="cocoa-audio"?0o755:0o644); const r=B.readRegular(file,1024*1024);
       return {path:name,size:r.size,sha256:r.sha256,mode:r.mode,...(name==="cocoa-audio"?{architectures:["arm64","x86_64"]}:{})}; });
     const notices=[{name:"MacLauncher PCM output",license:"MIT",path:"MacLauncher-MIT.txt"}];
     const record={schemaVersion:1,id:"catsystem2-pcm-output",version:VERSION,protocolVersion:"CSPA1",scope:"pcm-audio-output",sourceKind:"owned-source",verifiedBuild:true,

@@ -1,3 +1,4 @@
+const NoticeIntake = require('../../../../../../../lib/notices.mjs');
 // Developer staging of publisher JNI binaries and the small owned loader.
 // Runtime launch never downloads a SDK, compiles Java or rewrites this catalog.
 const fs = require("node:fs");
@@ -42,7 +43,7 @@ function stage({ references, jdkBin, resourcesRoot } = {}) {
       execFileSync("/usr/bin/codesign", ["--verify", "--strict", libraryPath], { timeout: 30000, stdio: "pipe" });
       fs.copyFileSync(agent, path.join(directory, "steam-agent.jar"));
       fs.copyFileSync(path.join(__dirname, "steamworks4j-" + original.version + "-MIT.txt"), path.join(directory, "steamworks4j-MIT.txt"));
-      fs.copyFileSync(path.resolve(__dirname, "../../../../../LICENSE"), path.join(directory, "MacLauncher-MIT.txt"));
+      NoticeIntake.copyNotice(path.resolve(__dirname, "../../../../../LICENSE"), path.join(directory, "MacLauncher-MIT.txt"));
       const dependencies = [
         "steamworks4j " + original.version + ": publisher JNI binary, unchanged. MIT.",
         "Source: " + original.sourceUrl,
@@ -57,7 +58,7 @@ function stage({ references, jdkBin, resourcesRoot } = {}) {
         "The game retains its original JAR, initialization, callbacks and shutdown."
       ].join("\n") + "\n";
       fs.writeFileSync(path.join(directory, "DEPENDENCIES.txt"), dependencies);
-      const files = fs.readdirSync(directory).sort().map(name => {
+      const files = fs.readdirSync(directory).sort().filter(name=>!NoticeIntake.isNoticePath(name)).map(name => {
         fs.chmodSync(path.join(directory, name), name === "libsteamworks4j.dylib" ? 0o755 : 0o644);
         const item = Bundle.readRegular(path.join(directory, name), 8 * 1024 * 1024);
         return { path: name, size: item.size, sha256: item.sha256, mode: item.mode,

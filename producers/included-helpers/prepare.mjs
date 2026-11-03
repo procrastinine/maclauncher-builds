@@ -1,3 +1,4 @@
+import * as NoticeIntake from '../../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -22,6 +23,7 @@ export function prepare({id,input,output}){
  if(output===input||output.startsWith(input+path.sep)||input.startsWith(output+path.sep))throw Error('Helper output must be separate from its input.');
  const names=new Set();
  for(const file of profile.inputs){
+  if(NoticeIntake.isNoticePath(file.output,profile.notices))continue;
   B.relativeFile(file.path);B.relativeFile(file.output);
   if(names.has(file.output)||!['file'].includes(file.kind))throw Error('Invalid helper source inventory.');
   names.add(file.output);
@@ -31,6 +33,7 @@ export function prepare({id,input,output}){
  fs.mkdirSync(output,{recursive:true});
  try{
   for(const file of profile.inputs){
+   if(NoticeIntake.isNoticePath(file.output,profile.notices)){NoticeIntake.copyNotice(path.join(input,file.path),path.join(output,file.output));continue;}
    const target=path.join(output,file.output);fs.mkdirSync(path.dirname(target),{recursive:true});
    fs.copyFileSync(path.join(input,file.path),target,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.chmodSync(target,file.mode);
    if(file.architectures){
@@ -49,7 +52,7 @@ export function prepare({id,input,output}){
     catch{run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);run('/usr/bin/codesign',['--verify','--strict',target]);}
    }
   }
-  const files=profile.inputs.map(input=>{
+  const files=profile.inputs.filter(input=>!NoticeIntake.isNoticePath(input.output,profile.notices)).map(input=>{
    const stored=B.readRegular(path.join(output,input.output),B.LIMITS.fileBytes);
    return {path:input.output,size:stored.size,mode:stored.mode,sha256:stored.sha256,...(input.architectures?{architectures:input.architectures}:{})};
   });

@@ -55,7 +55,7 @@ async function buildMixer({archives,workRoot,dependencyStacks,architecture=proce
   for(const pin of PIN.dependencies){
     throwIfAborted(signal);const sourceRoot=path.join(workRoot,"source",pin.id);fs.mkdirSync(sourceRoot,{recursive:true});
     await run("/usr/bin/tar",["-xf",archives[pin.id],"--strip-components","1","-C",sourceRoot],{cwd:workRoot,logPath:path.join(workRoot,"extraction.log"),env:Fonts.buildEnvironment(prefix,fonts.sdk),signal});
-    for(const notice of pin.notices)if(!fs.lstatSync(path.join(sourceRoot,notice)).isFile())throw new Error(`Missing license for ${pin.name}.`);
+
     const sourceOverlay=pin.id==="sdl2_mixer"?adaptMixer(sourceRoot):undefined;
     const common={sourceRoot,outputRoot:path.join(workRoot,pin.id),prefix,sdk:fonts.sdk,architecture,pathMappings,options:pin.options,signal,dependencies};
     const build=await(pin.buildSystem==="autotools"?Audio.buildAutotools(common):Fonts.buildProject({...common,tools:fonts.tools,onProgress}));

@@ -1,3 +1,4 @@
+import * as NoticeIntake from '../../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -48,9 +49,6 @@ export function build({jdk,classpath,output,only=Object.keys(definitions)}){
    const flags=definition.level===17?['-source','17','-target','17','--add-exports','java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED']:
     ['--release','21','-classpath',classpath.join(path.delimiter)];
    execFileSync(path.join(jdk,'bin/javac'),[...flags,'-proc:none','-encoding','UTF-8','-d',classes,...sources],options);
-   if(definition.license){
-    const metadata=path.join(classes,'META-INF');fs.mkdirSync(metadata);fs.writeFileSync(path.join(metadata,'LICENSE'),regular(path.join(root,'supplied',definition.license)));
-   }
    const target=path.join(output,definition.output);fs.mkdirSync(path.dirname(target),{recursive:true});
    const jar=['--create','--file',target];
    if(definition.premain){const manifest=path.join(temporary,name+'.MF');fs.writeFileSync(manifest,'Manifest-Version: 1.0\nPremain-Class: '+definition.premain+'\n\n');jar.push('--manifest',manifest);}
@@ -62,7 +60,7 @@ export function build({jdk,classpath,output,only=Object.keys(definitions)}){
    }
    result.push({component:name,path:definition.output,sha256,bytes:fs.statSync(target).size,javaMajor:definition.level});
   }
-  fs.copyFileSync(path.join(root,'supplied/LICENSE'),path.join(output,'LICENSE'));
+  NoticeIntake.copyNotice(path.join(root,'supplied/LICENSE'),path.join(output,'LICENSE'));
   return result;
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
  finally{fs.rmSync(temporary,{recursive:true,force:true});}

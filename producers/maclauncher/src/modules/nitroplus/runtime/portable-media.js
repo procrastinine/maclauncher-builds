@@ -93,7 +93,6 @@ async function buildUtilities({ archives, workRoot, signal, onProgress, dependen
     throwIfAborted(signal);
     const sourceRoot = path.join(workRoot, "source-" + pin.id); fs.mkdirSync(sourceRoot);
     await run("/usr/bin/tar", ["-xf", archives[pin.id], "--strip-components", "1", "-C", sourceRoot], { cwd: workRoot, env, logPath: path.join(workRoot, "extract.log"), signal });
-    if (!fs.lstatSync(path.join(sourceRoot, pin.notice)).isFile()) throw new Error(`Nitroplus ${pin.id} source license is missing.`);
     onProgress?.({ phase: "build", project: pin.id }); let build;
     if (pin.id === "boost") {
       const flags = `-O2 -arch arm64 -mmacosx-version-min=13.0 -isysroot ${sdk} -ffile-prefix-map=${workRoot}=NPENGINE_UTILITY_BUILD_ROOT -fdebug-prefix-map=${workRoot}=NPENGINE_UTILITY_BUILD_ROOT -fmacro-prefix-map=${workRoot}=NPENGINE_UTILITY_BUILD_ROOT -Werror=unguarded-availability-new`;

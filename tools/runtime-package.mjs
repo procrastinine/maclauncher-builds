@@ -1,3 +1,4 @@
+import {tidyNotices,isNoticePath,NOTICE_LIMIT} from '../lib/notices.mjs';
 import {preparePackageLayout} from './package-layout.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -18,7 +19,7 @@ const root=path.resolve(import.meta.dirname,'..');
 export function publicDeclaration(value){
  validateDeclaration(value);
  if(value.redistribution==='local-only')throw Error('This package is restricted to local use.');
- const text=JSON.stringify(value);
+ const {notices:noticeMetadata,...metadata}=value;const text=JSON.stringify(metadata);
  if(/(?:"(?:\/Users\/|\/home\/)|file:\/\/|(?:password|accessToken|refreshToken|logPath|evidenceSource)"\s*:)/i.test(text))throw Error('Package metadata contains private paths or fields.');
  for(const file of value.files)A.safeFile(file.path);
  return value;
@@ -26,6 +27,7 @@ export function publicDeclaration(value){
 
 export async function pack({project,input,declaration,output,metadata={},directory=root}){
  outputVersion(project,declaration?.version,directory);
+ const noticeIntake=tidyNotices(input,declaration,{share:false});
  declaration=publicDeclaration(declaration);
  preparePackageLayout({input,declaration});
  projectId(project);declaration=publicDeclaration(declaration);identity(declaration);
@@ -37,7 +39,8 @@ export async function pack({project,input,declaration,output,metadata={},directo
  const publication=recordMetadata({project,manifest,metadata});
  const bytes=Buffer.from(JSON.stringify(declaration,null,2)+'\n');
  const entries=[{name:'runtime-package.json',bytes,size:bytes.length,sha256:B.digest(bytes),mode:0o644},
-  ...declaration.files.map(file=>({...file,name:'files/'+file.path,file:path.join(input,file.path)}))];
+  ...declaration.files.map(file=>({...file,name:'files/'+file.path,file:path.join(input,file.path)})),
+  ...noticeIntake.entries.map(({path:name,bytes})=>({name:'files/'+name,bytes,size:bytes.length,mode:0o644,notice:true}))];
  const archive=await A.writeArchive(entries,output,{sourceDateEpoch:SOURCE_DATE_EPOCH});
  await verify({archive:output,sha256:archive.sha256,project,version:declaration.version,arch:declaration.arch});
  const record={schemaVersion:2,id:declaration.id,version:declaration.version,arch:declaration.arch,
@@ -68,21 +71,22 @@ export async function verify({archive,sha256,project,version,arch,includeDeclara
     if(entry.name!=='runtime-package.json'||entry.mode!==0o644||entry.size>A.LIMITS.metadataBytes)throw Error('Runtime inventory must be the first archive member.');
     declaration=publicDeclaration(JSON.parse((await reader.read(entry.size)).toString('utf8')));
     if(declaration.id!==project||declaration.version!==version||declaration.arch!==arch)throw Error('Runtime archive belongs to a different project, version or architecture.');
-    expected=new Map(declaration.files.map(file=>['files/'+file.path,file]));
-    metadataPaths=new Set(['build-inputs.json',declaration.manifestRelative,declaration.sourceRelative,...declaration.notices.map(notice=>notice.path)].filter(value=>typeof value==='string'));
+    expected=new Map(declaration.files.filter(file=>!isNoticePath(file.path,declaration.notices)).map(file=>['files/'+file.path,file]));
+    for(const notice of Array.isArray(declaration.notices)?declaration.notices:[])if(typeof notice?.path==='string'&&!expected.has('files/'+notice.path))expected.set('files/'+notice.path,{path:notice.path,notice:true});
+    metadataPaths=new Set(['build-inputs.json',declaration.manifestRelative,declaration.sourceRelative,...(Array.isArray(declaration.notices)?declaration.notices:[]).flatMap(notice=>typeof notice?.path==='string'?[notice.path]:[])].filter(value=>typeof value==='string'));
    }else{
     const file=expected.get(entry.name);
-    if(!file||file.size!==entry.size||file.mode!==entry.mode)throw Error('Runtime archive member differs from its inventory.');
-    const hash=crypto.createHash('sha256'),capture=includeManifest&&file.path===declaration.manifestRelative||includeMetadata&&metadataPaths.has(file.path),chunks=[];let left=entry.size;
+    if(!file||!file.notice&&(file.size!==entry.size||file.mode!==entry.mode))throw Error('Runtime archive member differs from its inventory.');
+    const hash=file.notice?null:crypto.createHash('sha256'),capture=(!file.notice||entry.size<=NOTICE_LIMIT)&&(includeManifest&&file.path===declaration.manifestRelative||includeMetadata&&metadataPaths.has(file.path)),chunks=[];let left=entry.size;
     if(capture&&(capturedBytes+=entry.size)>A.LIMITS.metadataBytes)throw Error('Runtime metadata exceeds its aggregate limit.');
-    while(left){const chunk=await reader.read(Math.min(left,65536));left-=chunk.length;hash.update(chunk);if(capture)chunks.push(chunk);}
+    while(left){const chunk=await reader.read(Math.min(left,65536));left-=chunk.length;hash?.update(chunk);if(capture)chunks.push(chunk);}
     if(capture){const content=Buffer.concat(chunks);if(includeManifest&&file.path===declaration.manifestRelative)manifest=JSON.parse(content.toString('utf8'));if(includeMetadata)metadata[file.path]=content;}
-    if(hash.digest('hex')!==file.sha256)throw Error('Runtime file checksum differs from its inventory.');
+    if(!file.notice&&hash.digest('hex')!==file.sha256)throw Error('Runtime file checksum differs from its inventory.');
    }
    if(entry.size%512&&(await reader.read(512-entry.size%512)).some(byte=>byte!==0))throw Error('Invalid archive padding.');
   }
-  if(!declaration||[...expected.keys()].some(file=>!seen.has(file)))throw Error('Runtime archive is missing declared files.');
-  return {id:declaration.id,version:declaration.version,arch:declaration.arch,files:expected.size,sha256,...(includeDeclaration?{declaration}:{}),...(includeManifest?{manifest}:{}),...(includeMetadata?{metadata}:{})};
+  if(!declaration||[...expected].some(([name,file])=>!file.notice&&!seen.has(name)))throw Error('Runtime archive is missing declared files.');
+  return {id:declaration.id,version:declaration.version,arch:declaration.arch,files:[...expected.values()].filter(file=>!file.notice).length,sha256,...(includeDeclaration?{declaration}:{}),...(includeManifest?{manifest}:{}),...(includeMetadata?{metadata}:{})};
  }finally{input.destroy();stream.destroy();}
 }
 

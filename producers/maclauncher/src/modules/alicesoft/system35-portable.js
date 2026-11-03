@@ -99,7 +99,7 @@ async function buildPortableSystem35({ sourceDir = sourcePath, archives, workRoo
     const sourceRoot = path.join(workRoot, "source", pin.id); fs.mkdirSync(sourceRoot, { recursive: true });
     await run("/usr/bin/tar", ["-xf", archives[pin.id], "--strip-components", "1", "-C", sourceRoot],
       { cwd: workRoot, logPath: path.join(workRoot, "extraction.log"), env: Fonts.buildEnvironment(prefix, fonts.sdk), signal });
-    for (const notice of pin.notices) if (!fs.lstatSync(path.join(sourceRoot, notice)).isFile()) throw new Error(`Missing source license for ${pin.name}.`);
+
     const sourceOverlay = pin.id === "sdl2_mixer" ? Overlay.applyMixer(sourceRoot) : undefined;
     onProgress?.({ phase: "build", project: pin.id });
     const common = { sourceRoot, outputRoot: path.join(workRoot, pin.id), prefix, sdk: fonts.sdk, pathMappings, options: pin.options, signal, dependencies };

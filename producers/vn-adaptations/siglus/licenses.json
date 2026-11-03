@@ -16,8 +16,6 @@
       "files": [
         {
           "file": "notices/block-0.1.6-LICENSE-MIT.txt",
-          "sha256": "ffff24c520428acd1181aad66ef1728b19cc08065ac52ccbc6c4849c998be391",
-          "bytes": 1053,
           "filename": "block-0.1.6-LICENSE-MIT.txt",
           "spdx": "MIT",
           "attribution": "Cargo.toml authors from the locked crate",
@@ -49,8 +47,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/madsmtm/objc2/b4167b582b2f75f9a1be75495c41b765344fd03c/LICENSE.md",
-          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54",
-          "bytes": 1339,
           "filename": "LICENSE.md",
           "source": {
             "repository": "https://github.com/madsmtm/objc2",
@@ -60,8 +56,6 @@
         },
         {
           "file": "notices/block2-0.6.2-LICENSE-MIT.txt",
-          "sha256": "426770b6a917449c40c0fde141f58646b6a9d650f428688cec68dfef793d61be",
-          "bytes": 1084,
           "filename": "block2-0.6.2-LICENSE-MIT.txt",
           "spdx": "MIT",
           "attribution": "Cargo.toml authors from the locked crate",
@@ -92,8 +86,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/brendanzab/codespan/fd389a13f5bb6d625b71e2e4694b26e127f393f9/LICENSE",
-          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
-          "bytes": 11357,
           "filename": "LICENSE",
           "source": {
             "repository": "https://github.com/brendanzab/codespan",
@@ -118,8 +110,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/rustaudio/sample/97c3bb9b2363c0b46ac1633858bf1054fd02a980/LICENSE-APACHE",
-          "sha256": "756c8d2ab2dc24f256e1455b5f03937f4933d83d7bc9f2d55009fc962377d512",
-          "bytes": 561,
           "filename": "LICENSE-APACHE",
           "source": {
             "repository": "https://github.com/rustaudio/sample",
@@ -129,8 +119,6 @@
         },
         {
           "url": "https://raw.githubusercontent.com/rustaudio/sample/97c3bb9b2363c0b46ac1633858bf1054fd02a980/LICENSE-MIT",
-          "sha256": "b1d6df41ed3aa96806e74c729444d7c121d90e6660a6aed01d298e03fde475a0",
-          "bytes": 1087,
           "filename": "LICENSE-MIT",
           "source": {
             "repository": "https://github.com/rustaudio/sample",
@@ -156,8 +144,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/madsmtm/objc2/8852b424193ca41602281b3d7540d7c8ed51e49a/LICENSE.md",
-          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54",
-          "bytes": 1339,
           "filename": "LICENSE.md",
           "source": {
             "repository": "https://github.com/madsmtm/objc2",
@@ -167,8 +153,6 @@
         },
         {
           "file": "notices/dispatch2-0.3.1-LICENSE-MIT.txt",
-          "sha256": "a83e28bd254b642e1ceba871156c9f423f41d862c97ffa018feec29b78f5280f",
-          "bytes": 1107,
           "filename": "dispatch2-0.3.1-LICENSE-MIT.txt",
           "spdx": "MIT",
           "attribution": "Cargo.toml authors from the locked crate",
@@ -201,8 +185,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/emilk/egui/abab06867cdbc8966cf1de1e5429a7b7f9126af2/LICENSE-APACHE",
-          "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90",
-          "bytes": 10850,
           "filename": "LICENSE-APACHE",
           "source": {
             "repository": "https://github.com/emilk/egui",
@@ -212,8 +194,6 @@
         },
         {
           "url": "https://raw.githubusercontent.com/emilk/egui/abab06867cdbc8966cf1de1e5429a7b7f9126af2/LICENSE-MIT",
-          "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c",
-          "bytes": 1092,
           "filename": "LICENSE-MIT",
           "source": {
             "repository": "https://github.com/emilk/egui",
@@ -245,8 +225,6 @@
         },
         {
           "url": "https://raw.githubusercontent.com/emilk/egui/abab06867cdbc8966cf1de1e5429a7b7f9126af2/crates/epaint/fonts/emoji-icon-font-mit-license.txt",
-          "sha256": "b9d2c1d909aa149996fd4c91dcb92b2362a04431640c1d200959da94caf8cde1",
-          "bytes": 1069,
           "filename": "crates-epaint-fonts-emoji-icon-font-mit-license.txt",
           "source": {
             "repository": "https://github.com/emilk/egui",
@@ -271,8 +249,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/emilk/egui/abab06867cdbc8966cf1de1e5429a7b7f9126af2/LICENSE-APACHE",
-          "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90",
-          "bytes": 10850,
           "filename": "LICENSE-APACHE",
           "source": {
             "repository": "https://github.com/emilk/egui",
@@ -282,8 +258,6 @@
         },
         {
           "url": "https://raw.githubusercontent.com/emilk/egui/abab06867cdbc8966cf1de1e5429a7b7f9126af2/LICENSE-MIT",
-          "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c",
-          "bytes": 1092,
           "filename": "LICENSE-MIT",
           "source": {
             "repository": "https://github.com/emilk/egui",
@@ -315,8 +289,6 @@
         },
         {
           "url": "https://raw.githubusercontent.com/emilk/egui/abab06867cdbc8966cf1de1e5429a7b7f9126af2/crates/epaint/fonts/emoji-icon-font-mit-license.txt",
-          "sha256": "b9d2c1d909aa149996fd4c91dcb92b2362a04431640c1d200959da94caf8cde1",
-          "bytes": 1069,
           "filename": "crates-epaint-fonts-emoji-icon-font-mit-license.txt",
           "source": {
             "repository": "https://github.com/emilk/egui",
@@ -343,8 +315,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/emilk/egui/abab06867cdbc8966cf1de1e5429a7b7f9126af2/LICENSE-APACHE",
-          "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90",
-          "bytes": 10850,
           "filename": "LICENSE-APACHE",
           "source": {
             "repository": "https://github.com/emilk/egui",
@@ -354,8 +324,6 @@
         },
         {
           "url": "https://raw.githubusercontent.com/emilk/egui/abab06867cdbc8966cf1de1e5429a7b7f9126af2/LICENSE-MIT",
-          "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c",
-          "bytes": 1092,
           "filename": "LICENSE-MIT",
           "source": {
             "repository": "https://github.com/emilk/egui",
@@ -387,8 +355,6 @@
         },
         {
           "url": "https://raw.githubusercontent.com/emilk/egui/abab06867cdbc8966cf1de1e5429a7b7f9126af2/crates/epaint/fonts/emoji-icon-font-mit-license.txt",
-          "sha256": "b9d2c1d909aa149996fd4c91dcb92b2362a04431640c1d200959da94caf8cde1",
-          "bytes": 1069,
           "filename": "crates-epaint-fonts-emoji-icon-font-mit-license.txt",
           "source": {
             "repository": "https://github.com/emilk/egui",
@@ -413,8 +379,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/emilk/egui/abab06867cdbc8966cf1de1e5429a7b7f9126af2/LICENSE-APACHE",
-          "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90",
-          "bytes": 10850,
           "filename": "LICENSE-APACHE",
           "source": {
             "repository": "https://github.com/emilk/egui",
@@ -424,8 +388,6 @@
         },
         {
           "url": "https://raw.githubusercontent.com/emilk/egui/abab06867cdbc8966cf1de1e5429a7b7f9126af2/LICENSE-MIT",
-          "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c",
-          "bytes": 1092,
           "filename": "LICENSE-MIT",
           "source": {
             "repository": "https://github.com/emilk/egui",
@@ -457,8 +419,6 @@
         },
         {
           "url": "https://raw.githubusercontent.com/emilk/egui/abab06867cdbc8966cf1de1e5429a7b7f9126af2/crates/epaint/fonts/emoji-icon-font-mit-license.txt",
-          "sha256": "b9d2c1d909aa149996fd4c91dcb92b2362a04431640c1d200959da94caf8cde1",
-          "bytes": 1069,
           "filename": "crates-epaint-fonts-emoji-icon-font-mit-license.txt",
           "source": {
             "repository": "https://github.com/emilk/egui",
@@ -483,8 +443,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/emilk/egui/abab06867cdbc8966cf1de1e5429a7b7f9126af2/LICENSE-APACHE",
-          "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90",
-          "bytes": 10850,
           "filename": "LICENSE-APACHE",
           "source": {
             "repository": "https://github.com/emilk/egui",
@@ -494,8 +452,6 @@
         },
         {
           "url": "https://raw.githubusercontent.com/emilk/egui/abab06867cdbc8966cf1de1e5429a7b7f9126af2/LICENSE-MIT",
-          "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c",
-          "bytes": 1092,
           "filename": "LICENSE-MIT",
           "source": {
             "repository": "https://github.com/emilk/egui",
@@ -527,8 +483,6 @@
         },
         {
           "url": "https://raw.githubusercontent.com/emilk/egui/abab06867cdbc8966cf1de1e5429a7b7f9126af2/crates/epaint/fonts/emoji-icon-font-mit-license.txt",
-          "sha256": "b9d2c1d909aa149996fd4c91dcb92b2362a04431640c1d200959da94caf8cde1",
-          "bytes": 1069,
           "filename": "crates-epaint-fonts-emoji-icon-font-mit-license.txt",
           "source": {
             "repository": "https://github.com/emilk/egui",
@@ -553,8 +507,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/zakarumych/gpu-alloc/84ca166ba69b95b69f36c2cb3b0160a6c4efa90a/COPYING",
-          "sha256": "12121dfa588677007848ab922a45a1e3248868f6ff063598fceb3141d7897314",
-          "bytes": 347,
           "filename": "COPYING",
           "source": {
             "repository": "https://github.com/zakarumych/gpu-alloc",
@@ -564,8 +516,6 @@
         },
         {
           "url": "https://raw.githubusercontent.com/zakarumych/gpu-alloc/84ca166ba69b95b69f36c2cb3b0160a6c4efa90a/license/APACHE",
-          "sha256": "58317934bf818c379e4215fad7e8dfb6812edff32c9557b8b039343f69711e08",
-          "bytes": 569,
           "filename": "license-APACHE",
           "source": {
             "repository": "https://github.com/zakarumych/gpu-alloc",
@@ -575,8 +525,6 @@
         },
         {
           "url": "https://raw.githubusercontent.com/zakarumych/gpu-alloc/84ca166ba69b95b69f36c2cb3b0160a6c4efa90a/license/MIT",
-          "sha256": "f774bf68151714985324d90adbd59e8f271b7ba518608d871b6ba16464692879",
-          "bytes": 1075,
           "filename": "license-MIT",
           "source": {
             "repository": "https://github.com/zakarumych/gpu-alloc",
@@ -601,8 +549,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/zakarumych/gpu-alloc/84ca166ba69b95b69f36c2cb3b0160a6c4efa90a/COPYING",
-          "sha256": "12121dfa588677007848ab922a45a1e3248868f6ff063598fceb3141d7897314",
-          "bytes": 347,
           "filename": "COPYING",
           "source": {
             "repository": "https://github.com/zakarumych/gpu-alloc",
@@ -612,8 +558,6 @@
         },
         {
           "url": "https://raw.githubusercontent.com/zakarumych/gpu-alloc/84ca166ba69b95b69f36c2cb3b0160a6c4efa90a/license/APACHE",
-          "sha256": "58317934bf818c379e4215fad7e8dfb6812edff32c9557b8b039343f69711e08",
-          "bytes": 569,
           "filename": "license-APACHE",
           "source": {
             "repository": "https://github.com/zakarumych/gpu-alloc",
@@ -623,8 +567,6 @@
         },
         {
           "url": "https://raw.githubusercontent.com/zakarumych/gpu-alloc/84ca166ba69b95b69f36c2cb3b0160a6c4efa90a/license/MIT",
-          "sha256": "f774bf68151714985324d90adbd59e8f271b7ba518608d871b6ba16464692879",
-          "bytes": 1075,
           "filename": "license-MIT",
           "source": {
             "repository": "https://github.com/zakarumych/gpu-alloc",
@@ -649,8 +591,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/zakarumych/gpu-descriptor/bb28b4e55b742e0ea3e7a0968e7ee6287ba0e06a/COPYING",
-          "sha256": "f72143f7e9d9fb8bd336b139fa22f825a299591c29f2f7338c5566347b137613",
-          "bytes": 352,
           "filename": "COPYING",
           "source": {
             "repository": "https://github.com/zakarumych/gpu-descriptor",
@@ -660,8 +600,6 @@
         },
         {
           "file": "notices/gpu-descriptor-0.3.2-LICENSE-MIT.txt",
-          "sha256": "ee57587780676cf53ae5d3dcc69887d4fc21ade9408fd0e1075b65ec61d9b9c0",
-          "bytes": 1065,
           "filename": "gpu-descriptor-0.3.2-LICENSE-MIT.txt",
           "spdx": "MIT",
           "attribution": "Cargo.toml authors from the locked crate",
@@ -693,8 +631,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/zakarumych/gpu-descriptor/9f2fb9546591322e7b77ee1e79385e01effd85e4/COPYING",
-          "sha256": "f72143f7e9d9fb8bd336b139fa22f825a299591c29f2f7338c5566347b137613",
-          "bytes": 352,
           "filename": "COPYING",
           "source": {
             "repository": "https://github.com/zakarumych/gpu-descriptor",
@@ -704,8 +640,6 @@
         },
         {
           "file": "notices/gpu-descriptor-types-0.2.0-LICENSE-MIT.txt",
-          "sha256": "ee57587780676cf53ae5d3dcc69887d4fc21ade9408fd0e1075b65ec61d9b9c0",
-          "bytes": 1065,
           "filename": "gpu-descriptor-types-0.2.0-LICENSE-MIT.txt",
           "spdx": "MIT",
           "attribution": "Cargo.toml authors from the locked crate",
@@ -737,8 +671,6 @@
       "files": [
         {
           "file": "notices/hexf-parse-0.2.1-LICENSE-CC0-1.0.txt",
-          "sha256": "ccab85641479a411f139db1f386dc4ed6429998c8982f0e3cfefb9535152e67c",
-          "bytes": 7141,
           "filename": "hexf-parse-0.2.1-LICENSE-CC0-1.0.txt",
           "spdx": "CC0-1.0",
           "attribution": "Cargo.toml authors from the locked crate",
@@ -770,8 +702,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/tesselode/kira/dfb08d08d065930e9b257203bf11c6d34742f542/LICENSE-APACHE",
-          "sha256": "85bb5389360900e5ef360073a906f7ff6c2866995743242671091f376fe2c92d",
-          "bytes": 11344,
           "filename": "LICENSE-APACHE",
           "source": {
             "repository": "https://github.com/tesselode/kira",
@@ -781,8 +711,6 @@
         },
         {
           "url": "https://raw.githubusercontent.com/tesselode/kira/dfb08d08d065930e9b257203bf11c6d34742f542/LICENSE-MIT",
-          "sha256": "1d075e895672c131d6adda4c0d03933e4162ca732d8c99b0cc497af884b8e703",
-          "bytes": 1054,
           "filename": "LICENSE-MIT",
           "source": {
             "repository": "https://github.com/tesselode/kira",
@@ -807,8 +735,6 @@
       "files": [
         {
           "file": "notices/malloc_buf-0.0.6-LICENSE-MIT.txt",
-          "sha256": "ffff24c520428acd1181aad66ef1728b19cc08065ac52ccbc6c4849c998be391",
-          "bytes": 1053,
           "filename": "malloc_buf-0.0.6-LICENSE-MIT.txt",
           "spdx": "MIT",
           "attribution": "Cargo.toml authors from the locked crate",
@@ -840,8 +766,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/gfx-rs/wgpu/4521502da69bcf4f92c8350042c268573ef216d4/LICENSE.APACHE",
-          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
-          "bytes": 10173,
           "filename": "LICENSE.APACHE",
           "source": {
             "repository": "https://github.com/gfx-rs/wgpu",
@@ -851,8 +775,6 @@
         },
         {
           "url": "https://raw.githubusercontent.com/gfx-rs/wgpu/4521502da69bcf4f92c8350042c268573ef216d4/LICENSE.MIT",
-          "sha256": "c7fea58d1cfe49634cd92e54fc10a9d871f4b275321a4cd8c09e449122caaeb4",
-          "bytes": 1078,
           "filename": "LICENSE.MIT",
           "source": {
             "repository": "https://github.com/gfx-rs/wgpu",
@@ -877,8 +799,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/madsmtm/objc2/8852b424193ca41602281b3d7540d7c8ed51e49a/LICENSE.md",
-          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54",
-          "bytes": 1339,
           "filename": "LICENSE.md",
           "source": {
             "repository": "https://github.com/madsmtm/objc2",
@@ -888,8 +808,6 @@
         },
         {
           "file": "notices/objc2-0.6.4-LICENSE-MIT.txt",
-          "sha256": "426770b6a917449c40c0fde141f58646b6a9d650f428688cec68dfef793d61be",
-          "bytes": 1084,
           "filename": "objc2-0.6.4-LICENSE-MIT.txt",
           "spdx": "MIT",
           "attribution": "Cargo.toml authors from the locked crate",
@@ -919,8 +837,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md",
-          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54",
-          "bytes": 1339,
           "filename": "LICENSE.md",
           "source": {
             "repository": "https://github.com/madsmtm/objc2",
@@ -930,8 +846,6 @@
         },
         {
           "file": "notices/objc2-app-kit-0.3.2-LICENSE-MIT.txt",
-          "sha256": "b05785f9f18e6716bab63424b11454513b9943a222595b70411009202fc592b5",
-          "bytes": 1078,
           "filename": "objc2-app-kit-0.3.2-LICENSE-MIT.txt",
           "spdx": "MIT",
           "attribution": "Unmodified SPDX text; the source package declares no authors",
@@ -961,8 +875,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md",
-          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54",
-          "bytes": 1339,
           "filename": "LICENSE.md",
           "source": {
             "repository": "https://github.com/madsmtm/objc2",
@@ -972,8 +884,6 @@
         },
         {
           "file": "notices/objc2-core-foundation-0.3.2-LICENSE-MIT.txt",
-          "sha256": "b05785f9f18e6716bab63424b11454513b9943a222595b70411009202fc592b5",
-          "bytes": 1078,
           "filename": "objc2-core-foundation-0.3.2-LICENSE-MIT.txt",
           "spdx": "MIT",
           "attribution": "Unmodified SPDX text; the source package declares no authors",
@@ -1003,8 +913,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md",
-          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54",
-          "bytes": 1339,
           "filename": "LICENSE.md",
           "source": {
             "repository": "https://github.com/madsmtm/objc2",
@@ -1014,8 +922,6 @@
         },
         {
           "file": "notices/objc2-core-graphics-0.3.2-LICENSE-MIT.txt",
-          "sha256": "b05785f9f18e6716bab63424b11454513b9943a222595b70411009202fc592b5",
-          "bytes": 1078,
           "filename": "objc2-core-graphics-0.3.2-LICENSE-MIT.txt",
           "spdx": "MIT",
           "attribution": "Unmodified SPDX text; the source package declares no authors",
@@ -1045,8 +951,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md",
-          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54",
-          "bytes": 1339,
           "filename": "LICENSE.md",
           "source": {
             "repository": "https://github.com/madsmtm/objc2",
@@ -1056,8 +960,6 @@
         },
         {
           "file": "notices/objc2-core-video-0.3.2-LICENSE-MIT.txt",
-          "sha256": "b05785f9f18e6716bab63424b11454513b9943a222595b70411009202fc592b5",
-          "bytes": 1078,
           "filename": "objc2-core-video-0.3.2-LICENSE-MIT.txt",
           "spdx": "MIT",
           "attribution": "Unmodified SPDX text; the source package declares no authors",
@@ -1089,8 +991,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/madsmtm/objc2/8d214f5477365ffcbcbb7de058c86ed9a518efb7/LICENSE.md",
-          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54",
-          "bytes": 1339,
           "filename": "LICENSE.md",
           "source": {
             "repository": "https://github.com/madsmtm/objc2",
@@ -1100,8 +1000,6 @@
         },
         {
           "file": "notices/objc2-encode-4.1.0-LICENSE-MIT.txt",
-          "sha256": "426770b6a917449c40c0fde141f58646b6a9d650f428688cec68dfef793d61be",
-          "bytes": 1084,
           "filename": "objc2-encode-4.1.0-LICENSE-MIT.txt",
           "spdx": "MIT",
           "attribution": "Cargo.toml authors from the locked crate",
@@ -1131,8 +1029,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md",
-          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54",
-          "bytes": 1339,
           "filename": "LICENSE.md",
           "source": {
             "repository": "https://github.com/madsmtm/objc2",
@@ -1142,8 +1038,6 @@
         },
         {
           "file": "notices/objc2-foundation-0.3.2-LICENSE-MIT.txt",
-          "sha256": "b05785f9f18e6716bab63424b11454513b9943a222595b70411009202fc592b5",
-          "bytes": 1078,
           "filename": "objc2-foundation-0.3.2-LICENSE-MIT.txt",
           "spdx": "MIT",
           "attribution": "Unmodified SPDX text; the source package declares no authors",
@@ -1175,8 +1069,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/aclysma/profiling/740d74c82212f1f0584cfa5c6d884c5ab5367101/LICENSE-APACHE",
-          "sha256": "10d30a673cd5e9349bdc02aeb48f14b3386d27d0da32df8f0a555d4aa16aa551",
-          "bytes": 10818,
           "filename": "LICENSE-APACHE",
           "source": {
             "repository": "https://github.com/aclysma/profiling",
@@ -1186,8 +1078,6 @@
         },
         {
           "url": "https://raw.githubusercontent.com/aclysma/profiling/740d74c82212f1f0584cfa5c6d884c5ab5367101/LICENSE-MIT",
-          "sha256": "c8167fdeeed46d3f244d3f85c5bf998ce889343691c32be2c61a8bc4b5c08333",
-          "bytes": 1093,
           "filename": "LICENSE-MIT",
           "source": {
             "repository": "https://github.com/aclysma/profiling",
@@ -1212,8 +1102,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/gfx-rs/rspirv/e91a5debc10c395b36db7721dfff6326d697a1e2/LICENSE",
-          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
-          "bytes": 11358,
           "filename": "LICENSE",
           "source": {
             "repository": "https://github.com/gfx-rs/rspirv",
@@ -1238,8 +1126,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/pdeljanov/Symphonia/6d533f26150953a882a6a111ebd13f0abf7129d5/LICENSE",
-          "sha256": "c76f740d1521b9bed9ca7a04ad526c310493c62621b1341d623b431736533b30",
-          "bytes": 16725,
           "filename": "LICENSE",
           "source": {
             "repository": "https://github.com/pdeljanov/Symphonia",
@@ -1264,8 +1150,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/pdeljanov/Symphonia/6d533f26150953a882a6a111ebd13f0abf7129d5/LICENSE",
-          "sha256": "c76f740d1521b9bed9ca7a04ad526c310493c62621b1341d623b431736533b30",
-          "bytes": 16725,
           "filename": "LICENSE",
           "source": {
             "repository": "https://github.com/pdeljanov/Symphonia",
@@ -1290,8 +1174,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/pdeljanov/Symphonia/6d533f26150953a882a6a111ebd13f0abf7129d5/LICENSE",
-          "sha256": "c76f740d1521b9bed9ca7a04ad526c310493c62621b1341d623b431736533b30",
-          "bytes": 16725,
           "filename": "LICENSE",
           "source": {
             "repository": "https://github.com/pdeljanov/Symphonia",
@@ -1316,8 +1198,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/pdeljanov/Symphonia/6d533f26150953a882a6a111ebd13f0abf7129d5/LICENSE",
-          "sha256": "c76f740d1521b9bed9ca7a04ad526c310493c62621b1341d623b431736533b30",
-          "bytes": 16725,
           "filename": "LICENSE",
           "source": {
             "repository": "https://github.com/pdeljanov/Symphonia",
@@ -1342,8 +1222,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/pdeljanov/Symphonia/6d533f26150953a882a6a111ebd13f0abf7129d5/LICENSE",
-          "sha256": "c76f740d1521b9bed9ca7a04ad526c310493c62621b1341d623b431736533b30",
-          "bytes": 16725,
           "filename": "LICENSE",
           "source": {
             "repository": "https://github.com/pdeljanov/Symphonia",
@@ -1368,8 +1246,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/pdeljanov/Symphonia/6d533f26150953a882a6a111ebd13f0abf7129d5/LICENSE",
-          "sha256": "c76f740d1521b9bed9ca7a04ad526c310493c62621b1341d623b431736533b30",
-          "bytes": 16725,
           "filename": "LICENSE",
           "source": {
             "repository": "https://github.com/pdeljanov/Symphonia",
@@ -1394,8 +1270,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/pdeljanov/Symphonia/6d533f26150953a882a6a111ebd13f0abf7129d5/LICENSE",
-          "sha256": "c76f740d1521b9bed9ca7a04ad526c310493c62621b1341d623b431736533b30",
-          "bytes": 16725,
           "filename": "LICENSE",
           "source": {
             "repository": "https://github.com/pdeljanov/Symphonia",
@@ -1421,8 +1295,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/pdeljanov/Symphonia/6d533f26150953a882a6a111ebd13f0abf7129d5/LICENSE",
-          "sha256": "c76f740d1521b9bed9ca7a04ad526c310493c62621b1341d623b431736533b30",
-          "bytes": 16725,
           "filename": "LICENSE",
           "source": {
             "repository": "https://github.com/pdeljanov/Symphonia",
@@ -1447,8 +1319,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/pdeljanov/Symphonia/6d533f26150953a882a6a111ebd13f0abf7129d5/LICENSE",
-          "sha256": "c76f740d1521b9bed9ca7a04ad526c310493c62621b1341d623b431736533b30",
-          "bytes": 16725,
           "filename": "LICENSE",
           "source": {
             "repository": "https://github.com/pdeljanov/Symphonia",
@@ -1473,8 +1343,6 @@
       "files": [
         {
           "url": "https://raw.githubusercontent.com/pdeljanov/Symphonia/6d533f26150953a882a6a111ebd13f0abf7129d5/LICENSE",
-          "sha256": "c76f740d1521b9bed9ca7a04ad526c310493c62621b1341d623b431736533b30",
-          "bytes": 16725,
           "filename": "LICENSE",
           "source": {
             "repository": "https://github.com/pdeljanov/Symphonia",

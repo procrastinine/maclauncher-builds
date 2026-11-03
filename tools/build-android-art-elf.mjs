@@ -8,6 +8,7 @@ import {acquireArtProducer} from './android-art-producer.mjs';
 import {prepareAndroidBuildInputs,releaseAndroidImageArchive} from './android-build-inputs.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 import {rustEnvironment} from './rust-build.mjs';
+import {copyNotices,printWarnings} from '../lib/notices.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 const descriptor=path.join(root,'producers/android-art-inputs/art-source.json');
 const read=(program,args,options={})=>execFileSync(program,args,{encoding:'utf8',...options}).trim();
@@ -58,7 +59,7 @@ export async function buildArtElfsInput({output,work}){
  }
  const notices=sourceNotices(checkout,{name:'AIM ART producer',repository:supplier.sources.aim.url});
  for(const notice of sourceNotices(path.join(fetched,'aosp'),{name:'Android ART',repository:'https://android.googlesource.com'}))notices.push(notice);
- const records=notices.map((notice,index)=>{const relative='notices/'+index+'-'+path.basename(notice.file),destination=path.join(output,relative);fs.mkdirSync(path.dirname(destination),{recursive:true});fs.copyFileSync(notice.file,destination);const {file,...metadata}=notice;return {...metadata,path:relative};});
+ const copied=copyNotices(notices.map((notice,index)=>({...notice,path:'notices/'+index+'-'+path.basename(notice.file)})),{output});printWarnings(copied.warnings);const records=copied.notices.map(({file,...notice})=>notice);
  return {art:output,notices:records,build:{source,checkout,fetched,sdk,jdk:homes[0],python,target,env},record:{androidSource:profile.androidSource,aimRevision:supplier.sources.aim.commit,sourceTreeSha256:staged.treeSha256,sourceLockSha256:sha(path.join(android,profile.sourceLock))}};
  }finally{const mount=path.join(fetched,'android16-image');if(fs.existsSync(path.join(mount,'root.identity')))run('hdiutil',['detach',mount]);}
 }

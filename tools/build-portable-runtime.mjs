@@ -1,3 +1,4 @@
+import {sourceNotices as collectSourceNotices} from '../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
@@ -51,9 +52,9 @@ export async function buildPortableRuntime({project,arch,version,output,work}){
  }
  collect(built.dependencyClosure);for(const name of recipe.stacks||[])collect(options[STACKS[name].option]);
  const sourceUrl=resolveProject(project,root,{resolvePins:false}).upstreams[0].url;
- for(const name of fs.readdirSync(sourceDir).filter(name=>/^(?:COPYING|LICENSE)(?:[._-].*)?$/i.test(name)))if(fs.statSync(path.join(sourceDir,name)).isFile())notices.push({file:path.join(sourceDir,name),name:project,license:'GPL-2.0-or-later',sourceUrl});
+ notices.push(...collectSourceNotices(sourceDir,{name:project,repository:sourceUrl}));
  const licenses=path.join(sourceDir,'licenses');
- if(fs.existsSync(licenses))for(const name of fs.readdirSync(licenses).sort())if(fs.statSync(path.join(licenses,name)).isFile())notices.push({file:path.join(licenses,name),name:path.parse(name).name,license:'See included license',sourceUrl});
+ notices.push(...collectSourceNotices(licenses,{all:true,name:project,repository:sourceUrl}));
  if(!notices.some(row=>row.name===project))console.warn('No license text supplied for '+project);
  const payloads=!built.appRoot&&built.resources&&fs.existsSync(built.resources)?[{source:built.resources,relative:'share/'+recipe.share}]:[];
  const environmentRelative={};

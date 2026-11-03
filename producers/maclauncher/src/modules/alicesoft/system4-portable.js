@@ -73,7 +73,7 @@ async function buildPortableSystem4({ sourceDir=sourcePath,archives,workRoot,dep
   for(const pin of PIN.dependencies){
     throwIfAborted(signal);const sourceRoot=path.join(workRoot,"source",pin.id);fs.mkdirSync(sourceRoot,{recursive:true});
     await run("/usr/bin/tar",["-xf",archives[pin.id],"--strip-components","1","-C",sourceRoot],{cwd:workRoot,logPath:path.join(workRoot,"extraction.log"),env,signal});
-    for(const notice of pin.notices)if(!fs.lstatSync(path.join(sourceRoot,notice)).isFile())throw new Error("Missing source license for "+pin.name);
+
     onProgress?.({phase:"build",project:pin.id});
     const common={sourceRoot:path.join(sourceRoot,pin.sourceSubdirectory||""),outputRoot:path.join(workRoot,pin.id),prefix,sdk:fonts.sdk,pathMappings,options:pin.options,signal,dependencies};
     const build=await(pin.buildSystem==="autotools"?Audio.buildAutotools(common):Fonts.buildProject({...common,tools,onProgress}));

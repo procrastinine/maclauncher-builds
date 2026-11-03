@@ -2,8 +2,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
-import {productInventory} from '../sources/maclauncher-android/src/modules/android/native/build-sources.mjs';
+import {sourceInventory} from '../sources/maclauncher-android/src/modules/android/native/build-sources.mjs';
 import Staging from '../producers/maclauncher/scripts/native-binary-tools.cjs';
+import {projectNoticeMetadata,sourceNotices,copyNotices,printWarnings} from '../lib/notices.mjs';
 
 /** Remove developer debug records from the copied ANGLE delivery only. Verify
  * the completed build bytes before transforming them; final staging inventories
@@ -27,30 +28,14 @@ export function publishAndroidAngle(payload,products,angle){
 
 /** Publish informational build notices through the shared provenance boundary.
  * Operational receipts and original cached products remain private and intact. */
-export function publishAndroidNotices(payload,pathMappings){
-  const root=path.join(payload,'notices');
-  if(!fs.existsSync(root))return;
-  function visit(directory){
-    for(const entry of fs.readdirSync(directory,{withFileTypes:true})){
-      const file=path.join(directory,entry.name);
-      if(entry.isDirectory())visit(file);
-      else if(entry.isFile()&&entry.name.endsWith('.json')){
-        const original=fs.readFileSync(file,'utf8');
-        const parsed=JSON.parse(original),projected=Staging.publicProvenance(parsed,pathMappings);
-        if(JSON.stringify(projected)===JSON.stringify(parsed))continue;
-        const text=JSON.stringify(projected,null,2)+'\n';
-        if(text!==original)fs.writeFileSync(file,text);
-      }
-    }
-  }
-  visit(root);
-}
+export function publishAndroidNotices(payload,pathMappings){return projectNoticeMetadata(path.join(payload,'notices'),value=>Staging.publicProvenance(value,pathMappings));}
 
 /** The compiler output is the payload. There is no second list of libraries,
  * data directories or JARs for staging to accidentally omit. */
 export function copyAndroidProducts(build,payload,products) {
   if(!Array.isArray(products)||!products.length)throw Error('Android build has no product inventory');
-  const actual=productInventory(build);
+  products=products.filter(product=>!product.path?.startsWith('notices/'));
+  const actual=sourceInventory(build,undefined,{links:true,exclude:['build','source','build-source.json','build-receipt.json','notices']});
   if(JSON.stringify(actual)!==JSON.stringify(products))throw Error('Android build products changed after compilation');
   const byPath=new Map(products.map(product=>[product.path,product]));
   // Upstream resource modules include aliases (for example older font names).
@@ -77,5 +62,6 @@ export function copyAndroidProducts(build,payload,products) {
     if(crypto.createHash('sha256').update(fs.readFileSync(output)).digest('hex')!==target.sha256)throw Error('Android product changed while staging: '+name);
     fs.chmodSync(output,stat.mode&0o111?0o755:0o644);
   }
+  const noticeRoot=path.join(build,'notices'),copied=copyNotices(sourceNotices(noticeRoot,{all:true,name:'Android runtime',repository:'https://github.com/procrastinine/maclauncher-android'}).map(notice=>({...notice,path:'notices/'+path.relative(noticeRoot,notice.file)})),{output:payload});printWarnings(copied.warnings);
   return products.length;
 }

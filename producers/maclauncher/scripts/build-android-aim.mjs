@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import * as NoticeIntake from '../../../lib/notices.mjs';
 // Developer build and publication of the fixed AIM adaptation. Play uses only
 // this sealed payload and a separately acquired original Android image.
 import fs from 'node:fs';
@@ -31,7 +32,7 @@ function files(root,relative='') {
   });
 }
 function architecture(file) { try { return Native.readMachOArchitectures(file,{allowLibrary:true}); } catch { return null; } }
-function inventory(root) { return files(root).map(file=>{
+function inventory(root) { return files(root).filter(file=>!NoticeIntake.isNoticePath(file)).map(file=>{
   const full=path.join(root,file),stat=fs.statSync(full),arch=architecture(full);
   return {path:file,size:stat.size,mode:stat.mode&0o777,sha256:sha(full),...(arch?{architectures:arch}:{})};
 }); }
@@ -48,10 +49,10 @@ function overlaySources(root,manifest,seen=new Set()) {
   return seen;
 }
 function noticeTree(from,to) {
-  for(const file of files(from)) copy(path.join(from,file),path.join(to,file));
+  try{for(const file of files(from))NoticeIntake.copyNotice(path.join(from,file),path.join(to,file));}catch(error){console.warn('::warning::Notice candidates unavailable: '+error.message);}
 }
 export function stageAim({build,angle,angleNotices,output,writeDistribution=true,environment=process.env,version=source.version}) {
-  build=path.resolve(build);angle=path.resolve(angle);angleNotices=path.resolve(angleNotices);output=path.resolve(output);
+  build=path.resolve(build);angle=path.resolve(angle);angleNotices=path.resolve(angleNotices||path.join(build,'notices/angle'));output=path.resolve(output);
   if(fs.existsSync(output))throw new Error('The AIM runtime version already exists. Staging requires a new immutable version.');
   const temporary=output+'.stage-'+process.pid;
   fs.rmSync(temporary,{recursive:true,force:true});
@@ -84,7 +85,7 @@ export function stageAim({build,angle,angleNotices,output,writeDistribution=true
       ['AIM licensing exceptions','Multiple',path.join(build,'LICENSING.md'),'notices/aim/LICENSING.md','https://github.com/hahnlee/aim'],
       ['MoltenVK','Apache-2.0',path.join(build,'target/aim/moltenvk/LICENSE'),'notices/moltenvk/LICENSE','https://github.com/KhronosGroup/MoltenVK'],
       ['BoringSSL','ISC AND OpenSSL',path.join(build,'_build/aosp/external/boringssl/src/LICENSE'),'notices/boringssl/LICENSE','https://boringssl.googlesource.com/boringssl'],
-    ]) {copy(from,path.join(payload,to));notices.push({name,license,path:to,sourceUrl:url});}
+    ]) {NoticeIntake.copyNotice(from,path.join(payload,to));notices.push({name,license,path:to,sourceUrl:url});}
     const modifications='notices/aim/MacLauncher-modifications.txt';
     fs.writeFileSync(path.join(payload,modifications),
       `AIM runtime modified by MacLauncher.\nRuntime version: ${version}\nOriginal AIM revision: ${source.commit}\n`+
@@ -94,17 +95,17 @@ export function stageAim({build,angle,angleNotices,output,writeDistribution=true
       'Build recipes and modification sources: https://github.com/procrastinine/maclauncher-builds\n');
     notices.push({name:'MacLauncher AIM modifications',license:'See source licenses',path:modifications,sourceUrl:'https://github.com/procrastinine/maclauncher-builds'});
     noticeTree(path.join(build,'licensing'),path.join(payload,'notices/aim/licensing'));
-    for(const file of files(path.join(payload,'notices/aim/licensing/third-party'))) notices.push({name:'AIM dependency '+file,license:'See notice',path:'notices/aim/licensing/third-party/'+file,sourceUrl:'https://github.com/hahnlee/aim'});
+    for(const file of NoticeIntake.sourceNotices(path.join(payload,'notices/aim/licensing/third-party')).map(row=>path.relative(path.join(payload,'notices/aim/licensing/third-party'),row.file))) notices.push({name:'AIM dependency '+file,license:'See notice',path:'notices/aim/licensing/third-party/'+file,sourceUrl:'https://github.com/hahnlee/aim'});
     noticeTree(angleNotices,path.join(payload,'notices/angle'));
     const angleManifest=path.join(angle,'angle-manifest.json');
     if(fs.existsSync(angleManifest))copy(angleManifest,path.join(payload,'notices/angle/angle-manifest.json'));
-    for(const file of files(angleNotices).filter(name=>name.endsWith('.txt'))) notices.push({name:'ANGLE '+file,license:'See notice',path:'notices/angle/'+file,sourceUrl:'https://chromium.googlesource.com/angle/angle'});
+    for(const file of NoticeIntake.sourceNotices(angleNotices).map(row=>path.relative(angleNotices,row.file))) notices.push({name:'ANGLE '+file,license:'See notice',path:'notices/angle/'+file,sourceUrl:'https://chromium.googlesource.com/angle/angle'});
     // Rust crate notices cover statically linked registry code too. Cargo's
     // locked metadata identifies the exact supplier for every included text.
     for(const pkg of metadata.packages.filter(pkg=>pkg.source?.startsWith('registry+'))) {
       const directory=path.dirname(pkg.manifest_path);
       for(const name of fs.readdirSync(directory).filter(file=>/^(LICENSE|COPYING|NOTICE|COPYRIGHT)(?:$|[-_.])/i.test(file)&&fs.statSync(path.join(directory,file)).isFile())) {
-        const relative=`notices/rust/${pkg.name}-${pkg.version}/${name}`;copy(path.join(directory,name),path.join(payload,relative));
+        const relative=`notices/rust/${pkg.name}-${pkg.version}/${name}`;NoticeIntake.copyNotice(path.join(directory,name),path.join(payload,relative));
         notices.push({name:pkg.name+' '+pkg.version,license:pkg.license||'See notice',path:relative,sourceUrl:`https://crates.io/crates/${pkg.name}/${pkg.version}`});
       }
     }
@@ -173,7 +174,7 @@ if(process.argv[1]===fileURLToPath(import.meta.url)) {
   if(args.includes('--build')) run('cargo',['aim','build','-j',String(jobs),...(args.includes('--image-only')?['image']:[...binaries.map(name=>'host/'+name),...imageProducts])],{cwd:build,env:aimCompilerEnvironment({build,jobs})});
   if(args.includes('--stage')) {
     const angle=value('--angle'),angleNotices=value('--angle-notices');
-    if(!angle||!angleNotices) throw new Error('Staging needs --angle and --angle-notices for the pinned ANGLE supplier.');
+    if(!angle) throw new Error('Staging needs the pinned ANGLE supplier.');
     const output=path.join(repo,'build/managed-runtimes/android-aim',source.version,'arm64');
     const staged=stageAim({build,angle,angleNotices,output});
     console.log(JSON.stringify({output:staged.output,files:staged.declaration.files.length,bytes:staged.declaration.files.reduce((total,file)=>total+file.size,0),minimumMacOS}));

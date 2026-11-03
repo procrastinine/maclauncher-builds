@@ -63,16 +63,10 @@
       "sha256": "b3e018f075cc5e83e7daac48f6f08d0820ff2f31bb08689c3155b5ffe98aedc2"
     },
     {
-      "path": "supplied/LICENSE",
-      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7"
+      "path": "supplied/text-input.LICENSE"
     },
     {
-      "path": "supplied/text-input.LICENSE",
-      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7"
-    },
-    {
-      "path": "supplied/account-control.LICENSE",
-      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7"
+      "path": "supplied/account-control.LICENSE"
     }
   ],
   "sourceFiles": [

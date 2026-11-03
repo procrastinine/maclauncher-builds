@@ -871,11 +871,6 @@
       "baseSha256": null
     },
     {
-      "source": "shaderc/LICENSE",
-      "path": "compat/shaderc/LICENSE",
-      "baseSha256": null
-    },
-    {
       "source": "shaderc/source.json",
       "path": "compat/shaderc/source.json",
       "baseSha256": null
@@ -927,11 +922,6 @@
     {
       "source": "local-laplacian-source.json",
       "path": "src/local-laplacian-source.json",
-      "baseSha256": null
-    },
-    {
-      "source": "local-laplacian-MIT.txt",
-      "path": "src/local-laplacian-MIT.txt",
       "baseSha256": null
     },
     {
@@ -1002,11 +992,6 @@
       "baseSha256": null
     },
     {
-      "source": "xegtao-MIT.txt",
-      "path": "src/xegtao-MIT.txt",
-      "baseSha256": null
-    },
-    {
       "source": "adaptive-quality.hpp",
       "path": "src/adaptive-quality.hpp",
       "baseSha256": null
@@ -1065,11 +1050,6 @@
       "baseSha256": null
     },
     {
-      "source": "cacao-MIT.txt",
-      "path": "src/cacao-MIT.txt",
-      "baseSha256": null
-    },
-    {
       "source": "libplacebo-node.hpp",
       "path": "src/libplacebo-node.hpp",
       "baseSha256": null
@@ -1084,11 +1064,6 @@
       "path": "src/depth-effects.mm",
       "baseSha256": null,
       "nativeLink": true
-    },
-    {
-      "source": "depth-effects-MIT.txt",
-      "path": "src/depth-effects-MIT.txt",
-      "baseSha256": null
     },
     {
       "source": "depth-fog-source.json",
@@ -1153,16 +1128,6 @@
       "baseSha256": null
     },
     {
-      "source": "../dof/generated/dof-MIT.txt",
-      "path": "src/dof-MIT.txt",
-      "baseSha256": null
-    },
-    {
-      "source": "../dof/generated/dof-HASH22-MIT.txt",
-      "path": "src/dof-HASH22-MIT.txt",
-      "baseSha256": null
-    },
-    {
       "source": "histogram-exposure.hpp",
       "path": "src/histogram-exposure.hpp",
       "baseSha256": null
@@ -1176,11 +1141,6 @@
     {
       "source": "histogram-exposure-source.json",
       "path": "src/histogram-exposure-source.json",
-      "baseSha256": null
-    },
-    {
-      "source": "histogram-exposure-MIT.txt",
-      "path": "src/histogram-exposure-MIT.txt",
       "baseSha256": null
     },
     {
@@ -1255,11 +1215,6 @@
     {
       "source": "ssr-source.json",
       "path": "src/ssr-source.json",
-      "baseSha256": null
-    },
-    {
-      "source": "ssr-MIT.txt",
-      "path": "src/ssr-MIT.txt",
       "baseSha256": null
     },
     {
@@ -1358,11 +1313,6 @@
       "baseSha256": null
     },
     {
-      "source": "ffx-lens-MIT.txt",
-      "path": "src/ffx-lens-MIT.txt",
-      "baseSha256": null
-    },
-    {
       "source": "ffx-blur.hpp",
       "path": "src/ffx-blur.hpp",
       "baseSha256": null
@@ -1386,11 +1336,6 @@
     {
       "source": "ffx-blur-source.json",
       "path": "src/ffx-blur-source.json",
-      "baseSha256": null
-    },
-    {
-      "source": "ffx-blur-MIT.txt",
-      "path": "src/ffx-blur-MIT.txt",
       "baseSha256": null
     },
     {
@@ -1529,11 +1474,6 @@
     {
       "source": "generation-automatic.hpp",
       "path": "src/generation-automatic.hpp",
-      "baseSha256": null
-    },
-    {
-      "source": "metalduck-MIT.txt",
-      "path": "src/metalduck-MIT.txt",
       "baseSha256": null
     },
     {

@@ -1,3 +1,4 @@
+import * as NoticeIntake from '../../../lib/notices.mjs';
 // GitHub build of an AliceSoft decompiler for one Mac CPU, sealed as a runtime
 // manager output with the package declaration that release preparation reads.
 import fs from 'node:fs';
@@ -35,14 +36,14 @@ export async function buildDecompiler({project,version:selectedVersion,arch,outp
  fs.mkdirSync(path.join(files,'bin'),{recursive:true});fs.mkdirSync(path.join(files,'licenses/upstream'),{recursive:true});
  const executable=path.join(files,executableRelative);
  fs.copyFileSync(built.runtimePath,executable,fs.constants.COPYFILE_EXCL);fs.chmodSync(executable,0o755);
- fs.copyFileSync(path.join(sourceDir,'COPYING'),path.join(files,license),fs.constants.COPYFILE_EXCL);fs.chmodSync(path.join(files,license),0o644);
+ NoticeIntake.copyNotice(path.join(sourceDir,'COPYING'),path.join(files,license));
  if(JSON.stringify(macho(executable))!==JSON.stringify([cpu]))throw Error('The decompiler was built for a different CPU.');
  const ids=libraryIds(executable),linked=links(executable).filter(link=>!ids.includes(link));
  if(linked.some(link=>!systemLink(link)))throw Error('The decompiler links a library outside macOS.');
  const {minimumMacOS}=loadCommands(executable);
  if(!B.versionAtLeast('13.0',minimumMacOS))throw Error('The decompiler requires a macOS release above 13.0.');
  run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',executable]);run('/usr/bin/codesign',['--verify','--strict',executable]);
- const inventory=B.fileInventory(files).map(relative=>{const file=path.join(files,relative),stat=fs.statSync(file),architectures=macho(file);
+ const inventory=B.fileInventory(files).filter(relative=>!NoticeIntake.isNoticePath(relative)).map(relative=>{const file=path.join(files,relative),stat=fs.statSync(file),architectures=macho(file);
   return {path:relative,size:stat.size,sha256:Native.hashFile(file),mode:stat.mode&0o777,...(architectures?{architectures}:{})};});
  const {logPath,...verifiedBuild}=built.verifiedBuild;
  const manifest={schemaVersion:1,managerId:project,version,upstreamRevision:release.upstreamRevision,platform:'darwin',arch,minimumMacOS,executableRelative,

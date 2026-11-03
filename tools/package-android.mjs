@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {createRequire} from 'node:module';
+import {printWarnings,copyNotices,tidyNotices} from '../lib/notices.mjs';
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),{validateDeclaration,validatePublicMetadata}=require('../lib/package-contract.cjs');
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 
@@ -17,36 +18,32 @@ export function packageAndroid({commonRoot,commonDeclaration,artRoot,artDeclarat
  }
  const common=JSON.parse(fs.readFileSync(path.join(commonRoot,'runtime.json'))),art=JSON.parse(fs.readFileSync(path.join(artRoot,'runtime.json')));
  if(common.profile?.javaMajor!==21||common.profile?.nativeLoadTarget!=='maclauncher.android.bridge.GuestNativeLoader'||art.profile?.artExecutionVersion!==1)throw Error('The Android JVM and ART producer profiles are incompatible.');
- const inventory=new Map(),notices=new Map(),dependencies=new Map(),owners=new Map(),noticeAliases=[new Map(),new Map()];
+ const inventory=new Map(),notices=new Map(),dependencies=new Map();
  const inputs=[[commonRoot,commonDeclaration,common],[artRoot,artDeclaration,art]],names=['jvm','art'];
  const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});
  try{
   for(const [index,[root,declaration,manifest]]of inputs.entries()){
+   const candidateRows=Array.isArray(declaration.notices)?declaration.notices:[],noticePaths=new Set(candidateRows.filter(row=>typeof row?.path==='string').map(row=>row.path));
    for(const file of declaration.files){
-    if(file.path===declaration.manifestRelative||file.path===declaration.sourceRelative)continue;
-    const previous=inventory.get(file.path);let delivered=file.path;
+    if(file.path===declaration.manifestRelative||file.path===declaration.sourceRelative||noticePaths.has(file.path)||file.path.startsWith('notices/')||file.path==='package-notice.txt')continue;
+    const previous=inventory.get(file.path);
     if(previous){
      if(previous.sha256===file.sha256&&previous.size===file.size&&previous.mode===file.mode&&JSON.stringify(previous.architectures||[])===JSON.stringify(file.architectures||[]))continue;
-     if(!file.path.startsWith('notices/'))throw Error('The Android engines contain different shared input bytes: '+file.path);
-     // Each engine retains its own original notice when build provenance or
-     // license text differs. Executable/shared framework conflicts stay errors.
-     const owner=owners.get(file.path),previousPath='notices/engines/'+names[owner]+'/'+file.path.slice(8);
-     delivered='notices/engines/'+names[index]+'/'+file.path.slice(8);
-     if(inventory.has(previousPath)||inventory.has(delivered))throw Error('Android notice namespace collision: '+file.path);
-     const moved=path.join(payload,previousPath);fs.mkdirSync(path.dirname(moved),{recursive:true});fs.renameSync(path.join(payload,file.path),moved);
-     inventory.delete(file.path);inventory.set(previousPath,{...previous,path:previousPath});owners.delete(file.path);owners.set(previousPath,owner);
-     noticeAliases[owner].set(file.path,previousPath);noticeAliases[index].set(file.path,delivered);
+     throw Error('The Android engines contain different shared input bytes: '+file.path);
     }
-    const destination=path.join(payload,delivered);fs.mkdirSync(path.dirname(destination),{recursive:true});fs.copyFileSync(path.join(root,file.path),destination,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.chmodSync(destination,file.mode);inventory.set(delivered,{...file,path:delivered});owners.set(delivered,index);
+    const destination=path.join(payload,file.path);fs.mkdirSync(path.dirname(destination),{recursive:true});fs.copyFileSync(path.join(root,file.path),destination,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.chmodSync(destination,file.mode);inventory.set(file.path,file);
    }
+   const copied=copyNotices(candidateRows.map(notice=>({...notice,file:typeof notice?.path==='string'?path.join(root,notice.path):undefined,path:'notices/engines/'+names[index]+'/'+(notice?.path||'notice.txt')})),{output:payload});printWarnings(copied.warnings);
+   for(const {file,...notice}of copied.notices)notices.set(JSON.stringify(notice),notice);
    for(const dependency of manifest.dependencies||[]){
     const old=dependencies.get(dependency.file);
     if(old&&JSON.stringify(old)!==JSON.stringify(dependency))throw Error('The Android engines describe different shared library dependencies: '+dependency.file);
     dependencies.set(dependency.file,dependency);
    }
   }
-  for(const [index,[,declaration]]of inputs.entries())for(const notice of declaration.notices){const delivered={...notice,path:noticeAliases[index].get(notice.path)||notice.path};notices.set(JSON.stringify(delivered),delivered);}
   if(!inventory.has('art/runtime.json')||!inventory.has('art/host/linux-run'))throw Error('The Android ART supplier component is incomplete.');
+  const judged={id:'android',version,notices:[...notices.values()],files:[...notices.values()].filter(row=>typeof row?.path==='string').map(row=>({path:row.path}))};
+  const sanitized=tidyNotices(payload,judged,{share:false});notices.clear();for(const notice of sanitized.notices)notices.set(JSON.stringify(notice),notice);
   const files=[...inventory.values()].sort((a,b)=>a.path.localeCompare(b.path));
   const minimumMacOS=B.versionAtLeast(common.minimumMacOS,art.minimumMacOS)?common.minimumMacOS:art.minimumMacOS;
   const {upstreamRevision,sourceRevision,...commonMetadata}=common;

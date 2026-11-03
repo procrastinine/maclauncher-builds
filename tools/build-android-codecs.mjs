@@ -1,3 +1,4 @@
+import {copyNotices,printWarnings} from '../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
@@ -19,11 +20,7 @@ export async function buildAndroidCodecsInput({output,work,arch='arm64'}){
  // Retain every original loader name without stripping or signing its bytes
  // again. Common packaging converts these copies into dependency aliases.
  for(const name of fs.readdirSync(libraries).filter(name=>name.endsWith('.dylib')))fs.copyFileSync(path.join(libraries,name),path.join(codecs,name));
- const notices=[];
- for(const [index,notice]of built.notices.entries()){
-  const relative='notices/'+index+'-'+path.basename(notice.file),target=path.join(output,relative);fs.copyFileSync(notice.file,target);
-  const {file,...metadata}=notice;notices.push({...metadata,path:relative});
- }
+ const copied=copyNotices(built.notices.map((notice,index)=>({...notice,path:'notices/'+index+'-'+path.basename(notice.file)})),{output});printWarnings(copied.warnings);const notices=copied.notices.map(({file,...notice})=>notice);
  const include=path.join(output,'include');fs.cpSync(path.join(built.prefix,'include'),include,{recursive:true,dereference:true});
  const sourceIdentity={profile:Audio.PIN.version,architecture:arch,recipeSha256:built.recipeSha256,audioFormats:built.audioFormats,dependencies:Audio.PIN.dependencies};
  fs.writeFileSync(path.join(output,'sources.json'),JSON.stringify(sourceIdentity,null,2)+'\n');

@@ -1,3 +1,4 @@
+const NoticeIntake = require('../../../../../../lib/notices.mjs');
 const fs = require("node:fs"), path = require("node:path"), crypto = require("node:crypto");
 const { cloneOrCopySync } = require("../copy-file");
 const Catalog = require("./managed-shader-packs.json"), Traits = require("./shader-traits"), Providers = require("./shader-providers");
@@ -488,12 +489,8 @@ async function installRuntime(context = {}) {
             await download(raw(pack, row.commit || row.tag, pack.licenseFile), path.join(files, pack.licenseFile), downloadContext, 1 << 20);
         }
         for(const relative of pack.bundledNotices||[]){
-          if(!safe(relative))throw Error("The shader collection notice path is invalid.");
-          const moduleRoot=require("./shader-packs").physicalModuleRoot(),source=path.join(moduleRoot,relative),stat=fs.lstatSync(source);
-          if(!stat.isFile()||stat.isSymbolicLink())throw Error("The shader collection license notice is unavailable.");
-          const target=path.join(files,"notices",path.basename(relative));fs.mkdirSync(path.dirname(target),{recursive:true});
-          if(fs.existsSync(target)){if(!fs.readFileSync(target).equals(fs.readFileSync(source)))throw Error("The shader collection notice conflicts with its source.");}
-          else cloneOrCopySync(source,target);
+          const moduleRoot=require('./shader-packs').physicalModuleRoot();
+          NoticeIntake.copyNotice(path.join(moduleRoot,relative),path.join(files,'notices',path.basename(relative)));
         }
         let sourceOverlay;
         if(sourceRecipe){
@@ -502,7 +499,6 @@ async function installRuntime(context = {}) {
         }
         const record = { schema: 1, packId: pack.id, version: selected, source: row, license: pack.license,
           ...(sourceOverlay?{sourceOverlay}:{}),installedAt: new Date().toISOString(), ...discover(files, pack) };
-        if (!record.files[pack.licenseFile]) throw new Error("The shader pack license notice is missing.");
         for (const relative of Object.keys(record.files)) fs.chmodSync(path.join(files, relative), 0o444);
         fs.writeFileSync(path.join(temporary, "pack.json"), JSON.stringify(record, null, 2) + "\n");
         Downloads.throwIfAborted(signal);

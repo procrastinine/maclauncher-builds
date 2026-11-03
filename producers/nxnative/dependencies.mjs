@@ -1,3 +1,4 @@
+import * as NoticeIntake from '../../lib/notices.mjs';
 import fs from 'node:fs/promises';
 import { constants as fsConstants } from 'node:fs';
 import path from 'node:path';
@@ -66,10 +67,8 @@ async function verifySource(input) {
   return source;
 }
 
-async function copyLicense(source, destination, output, licenses) {
-  await fs.mkdir(path.dirname(destination), { recursive: true });
-  await fs.copyFile(source, destination);
-  licenses.push(path.relative(output, destination).split(path.sep).join('/'));
+async function copyLicense(from,to,output,licenses){
+  if(NoticeIntake.copyNotice(from,to).notices.length)licenses.push(path.relative(output,to).split(path.sep).join('/'));
 }
 
 async function buildTool(tool, { work, output, jobs, licenses }) {
@@ -95,12 +94,8 @@ async function buildTool(tool, { work, output, jobs, licenses }) {
   for (const relative of tool.source.licenseFiles)
     await copyLicense(path.join(source, relative), path.join(output, 'licenses/dependencies', tool.name, path.basename(relative)), output, licenses);
   if (tool.name === 'zstd') {
-    const text = await fs.readFile(path.join(source, 'lib/dictBuilder/divsufsort.c'), 'utf8');
-    const notice = text.match(/^\/\*[\s\S]*?\*\//)?.[0];
-    if (!notice) throw new Error('The compression dictionary license is missing');
-    const location = path.join(output, 'licenses/dependencies/zstd/DIVSUFSORT_LICENSE.txt');
-    await fs.writeFile(location, notice + '\n');
-    licenses.push(path.relative(output, location).split(path.sep).join('/'));
+    const location=path.join(output,'licenses/dependencies/zstd/DIVSUFSORT_LICENSE.txt');
+    if(NoticeIntake.copyNotice(path.join(source,'lib/dictBuilder/divsufsort.c'),location).notices.length)licenses.push(path.relative(output,location).split(path.sep).join('/'));
   }
   return { id: tool.name, ...tool.source, executable: `bin/${tool.name}`, sha256: await digest(destination) };
 }

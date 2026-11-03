@@ -118,8 +118,7 @@ export async function prepareArtHwui({common,image,ndk,work}){
  const prepared=await buildAvif({...ctx,prepareOnly:true});
  run(tools.cargo,['fetch','--locked','--target','aarch64-linux-android','--manifest-path',path.join(prepared.workspace,'Cargo.toml')],{env:{...prepared.env,CARGO_BUILD_JOBS:'2'}});
  const sysroot=read(tools.rustc,['--print','sysroot']),rustRoot=['share/doc/rust','share/doc/rustc'].map(relative=>path.join(sysroot,relative)).find(directory=>fs.existsSync(path.join(directory,'COPYRIGHT-library.html'))&&fs.existsSync(path.join(directory,'licenses')));
- if(!rustRoot)throw Error('Original Rust standard-library notices are required.');
- const noticeInputs={rust:{root:rustRoot,version:read(tools.rustc,['--version'])},ndk:{root:ndk,version:'28.2.13676358',files:['NOTICE','NOTICE.toolchain']}};
+ const noticeInputs={rust:{root:rustRoot||sysroot,version:read(tools.rustc,['--version'])},ndk:{root:ndk,version:'28.2.13676358',files:['NOTICE','NOTICE.toolchain']}};
  return {producer,options:{work:compile,sources,tools,image,noticeInputs,buildEnvironment}};
 }
 

@@ -1,3 +1,4 @@
+import {copyNotice} from '../lib/notices.mjs';
 // GitHub build of an owned-source native helper from its build profile. One profile
 // per helper names the sources, compiler flags, output and identity fields; this
 // command compiles them for one package architecture, signs the result ad hoc and
@@ -30,7 +31,7 @@ export function helperProfile(id,directory=root){
   !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(profile.output||'')||!Array.isArray(profile.sources)||!profile.sources.length||!profile.sources.every(source=>contained(source,base))||
   !Array.isArray(profile.flags)||profile.flags.some(flag=>typeof flag!=='string'||/^-(?:arch|isysroot|mmacosx-version-min|o$)/.test(flag))||
   profile.frameworks!==undefined&&(!Array.isArray(profile.frameworks)||!profile.frameworks.every(name=>/^[A-Za-z0-9]+$/.test(name)))||
-  !/^\d+\.\d+$/.test(profile.minimumMacOS||'')||!contained(profile.license?.from,base)||!/^[A-Za-z0-9._-]+$/.test(profile.license?.path||'')||!profile.license.name||!profile.license.license||
+  !/^\d+\.\d+$/.test(profile.minimumMacOS||'')||
   profile.binaryField!==undefined&&!['binarySha256','librarySha256'].includes(profile.binaryField)||
   !profile.record||typeof profile.record!=='object'||Object.keys(profile.record).some(key=>['schemaVersion','id','version','sourceSha256','binarySha256','librarySha256','minimumMacOS','architectures','build'].includes(key)))
   throw Error('Invalid helper build profile.');
@@ -58,7 +59,7 @@ export function buildHelper({project:id,version,arch,output,work=path.join(fs.mk
   run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',binary]);run('/usr/bin/codesign',['--verify','--strict',binary]);
   const architectures=Native.readMachOArchitectures(binary,{allowLibrary:true}).sort();
   if(JSON.stringify(architectures)!==JSON.stringify(CPUS[arch]))throw Error('The helper was built for different CPUs.');
-  fs.copyFileSync(path.join(base,profile.license.from),path.join(payload,profile.license.path));fs.chmodSync(path.join(payload,profile.license.path),0o644);
+  copyNotice(path.join(base,profile.license?.from||''),path.join(payload,profile.license?.path||'package-notice.txt'));
   // The first source is the helper's primary source; the release tag holds all of them.
   const sourceSha256=sha(sources[0]);
   const record={schemaVersion:1,id,version:profile.version,...profile.record,sourceSha256,[profile.binaryField||'binarySha256']:sha(binary),minimumMacOS:profile.minimumMacOS,architectures,
@@ -72,7 +73,7 @@ export function buildHelper({project:id,version,arch,output,work=path.join(fs.mk
    return {path:name,size:stat.size,sha256:sha(file),mode:stat.mode&0o777,...(name===profile.output?{architectures,...(rosetta?{executionArchitecture:'x86_64'}:{})}:{})};});
   const declaration={id,version:profile.version,arch,launcherArchitectures:arch==='arm64'?['arm64']:arch==='x64'&&!rosetta?['x64']:['arm64','x64'],minimumMacOS:profile.minimumMacOS,
    sourceRelative:null,sourceSha256,directoryRelative:[id,profile.version,arch].join('/'),manifestRelative:'helper.json',manifestSha256:B.digest(metadata),files,
-   notices:[{name:profile.license.name,license:profile.license.license,path:profile.license.path}]};
+   notices:[{name:profile.license?.name,license:profile.license?.license,path:profile.license?.path}]};
   validateDeclaration(declaration);B.verifyPayload(payload,declaration);
   fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});
   return {project:id,version:profile.version,arch,output};

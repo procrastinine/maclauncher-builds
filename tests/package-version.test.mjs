@@ -15,6 +15,7 @@ test('package version rewrite changes only consumed metadata and preserves every
  const bundle=path.join(directory,'release'),release=await prepareRelease({project:'engine',input,declaration,output:bundle,directory}),record=JSON.parse(fs.readFileSync(path.join(bundle,release.assets.find(a=>a.role==='record').filename))),archive=path.join(bundle,record.asset.filename),before=hash(fs.readFileSync(archive)),output=path.join(directory,'engine-0.7.7-MCLv1-arm64.tar.gz');
  const result=await reversionPackage({archive,record,version:'0.7.7-MCLv1',output,directory});assert.equal(hash(fs.readFileSync(archive)),before);assert.equal(result.manifest.version,'0.7.7-MCLv1');assert.equal(result.manifest.upstreamVersion,'0.7.7');assert.equal(result.declaration.sourceRelative,null);assert.equal(result.record.sourceSha256,declaration.sourceSha256);
  const checked=await verify({archive:output,sha256:result.record.asset.sha256,project:'engine',version:'0.7.7-MCLv1',arch:'arm64',includeDeclaration:true,includeManifest:true});assert.equal(checked.manifest.version,checked.declaration.version);assert.notEqual(checked.declaration.manifestSha256,declaration.manifestSha256);
- for(const file of files.filter(f=>f.path!=='manifest.json'))assert.deepEqual(checked.declaration.files.find(f=>f.path===file.path),file);
+ assert.ok(checked.declaration.notices.some(notice=>notice.path==='LICENSE'));
+ for(const file of files.filter(f=>f.path!=='manifest.json'&&f.path!=='LICENSE'))assert.deepEqual(checked.declaration.files.find(f=>f.path===file.path),file);
  await assert.rejects(reversionPackage({archive,record,version:'0.7.7-MCLv1',output,directory}),/new archive path/);
 });

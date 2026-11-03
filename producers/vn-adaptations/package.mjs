@@ -1,3 +1,4 @@
+import * as NoticeIntake from '../../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -26,7 +27,7 @@ function copy(from,to){
   fs.chmodSync(to,(fs.statSync(from).mode&0o111)?0o755:0o644);
 }
 function inventory(root){
-  return B.fileInventory(root).map(name=>{
+  return B.fileInventory(root).filter(relative=>!NoticeIntake.isNoticePath(relative)).map(name=>{
     const file=path.join(root,name),stored=B.readRegular(file,B.LIMITS.fileBytes);
     const magic=stored.bytes.length>=4?stored.bytes.readUInt32BE(0):0;
     let architectures;

@@ -1,3 +1,4 @@
+const NoticeIntake = require('../../../../../../lib/notices.mjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -83,7 +84,7 @@ function stageNotices({ source, sdl12, sdl2, destination, revision }) {
   return notices.map(([name, version, from, license, sourceUrl], index) => {
     const relative = `licenses/${index}-${name.replace(/[^A-Za-z0-9_-]/g, "_")}-${version}.txt`;
     fs.mkdirSync(path.dirname(path.join(destination, relative)), { recursive: true });
-    fs.copyFileSync(from, path.join(destination, relative));
+    NoticeIntake.copyNotice(from, path.join(destination, relative));
     return { name: `${name} ${version}`, license, sourceUrl, path: relative };
   });
 }

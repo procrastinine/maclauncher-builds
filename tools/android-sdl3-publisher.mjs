@@ -35,7 +35,6 @@ export async function prepareSdl(archive,work,profile){
   fs.mkdirSync(path.dirname(sdl),{recursive:true});fs.cpSync(source,sdl,{recursive:true,verbatimSymlinks:true});
   const version=read('/usr/libexec/PlistBuddy',['-c','Print :CFBundleShortVersionString',path.join(sdl,'Resources/Info.plist')]);
   if(version!==profile.version)throw Error('The SDL framework differs from its declared publisher version.');
-  if(!fs.statSync(path.join(sdl,'Resources/LICENSE.txt')).isFile())throw Error('The SDL framework license is missing.');
   read('/usr/bin/codesign',['--verify','--strict',sdl]);
   return sdl;
  }finally{

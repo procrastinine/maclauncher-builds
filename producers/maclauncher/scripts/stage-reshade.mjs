@@ -1,3 +1,4 @@
+import * as NoticeIntake from '../../../lib/notices.mjs';
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -131,7 +132,8 @@ if(options["--xess-host"]){
     }
     pins.push(` ${headers.commit} third_party/xess-vulkan-headers`);
   }else if(metadata.source.vulkanHeaders)throw Error("The XeSS Vulkan source is declared without its GPU host.");
-  for(const row of metadata.files){if(typeof row.path!=="string"||!required.delete(row.path))throw Error("The XeSS GPU host contains an undeclared resource.");const file=path.join(directory,row.path),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==row.size||digest(fs.readFileSync(file))!==row.sha256)throw Error("The XeSS GPU host resource changed: "+row.path);if(!row.path.startsWith("source/"))optionalInputs.set("xess/"+row.path,file);if(row.path.endsWith(".so"))optionalLoad.set("xess/"+row.path,{architectures:["x86_64"],minimumMacOS:metadata.minimumMacOS});}
+  for(const row of metadata.files){
+    if(NoticeIntake.isNoticePath(row.path))continue;if(typeof row.path!=="string"||!required.delete(row.path))throw Error("The XeSS GPU host contains an undeclared resource.");const file=path.join(directory,row.path),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==row.size||digest(fs.readFileSync(file))!==row.sha256)throw Error("The XeSS GPU host resource changed: "+row.path);if(!row.path.startsWith("source/"))optionalInputs.set("xess/"+row.path,file);if(row.path.endsWith(".so"))optionalLoad.set("xess/"+row.path,{architectures:["x86_64"],minimumMacOS:metadata.minimumMacOS});}
   if(required.size||digest(fs.readFileSync(path.join(directory,"source/source.json")))!==digest(fs.readFileSync(path.join(ownedRoot,"source.json"))))throw Error("The XeSS GPU host source closure is incomplete.");
   optionalInputs.set("xess/provider.json",path.join(directory,"provider.json"));optionalInputs.set("xess/INTEL-HEADERS-MIT.txt",path.join(upstream,"inc/MIT.txt"));features.graphics.xessSceneAPI=1;
 }
@@ -152,13 +154,15 @@ if(options["--isf"]){
     if(actual!==entry.commit)throw Error("The ISF source pin differs from its provider: "+entry.path);
     execFileSync("git",["-C",upstream,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});pins.push(` ${actual} third_party/isf/${path.basename(entry.path)}`);
   }
-  const required=new Set([source.library,...source.compilerLibraries.map(file=>path.basename(file)),...source.compilerSources.map(row=>row.id+"-LICENSE.txt"),"default.metallib","ISF-LICENSE.txt","VVMetalKit-LICENSE.txt","ISFGLSLGenerator-LICENSE.txt","PINCache-LICENSE.txt","PINOperation-LICENSE.txt"]);
+  const required=new Set([source.library,...source.compilerLibraries.map(file=>path.basename(file)),"default.metallib"]);
   for(const row of metadata.files){
+    if(NoticeIntake.isNoticePath(row.path))continue;
+    if(/(?:license|notice|copying|copyright)/i.test(row.path||"")){optionalInputs.set("isf/"+row.path,path.join(directory,row.path));continue;}
     if(typeof row.path!=="string"||!required.delete(row.path))throw Error("The ISF provider contains an undeclared or duplicate resource.");
     const file=path.join(directory,row.path),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==row.size||digest(fs.readFileSync(file))!==row.sha256)throw Error("The ISF provider resource changed: "+row.path);
     optionalInputs.set("isf/"+row.path,file);if(row.path.endsWith(".dylib"))optionalLoad.set("isf/"+row.path,{architectures:source.architectures,minimumMacOS:source.minimumMacOS});
   }
-  if(required.size||fs.readdirSync(directory).length!==metadata.files.length+1)throw Error("The ISF provider dependency and license closure is incomplete.");
+  if(required.size)throw Error("The ISF provider dependency closure is incomplete.");
   optionalInputs.set("isf/provider.json",path.join(directory,"provider.json"));
   for(const name of ownedNames)extraOwned.set(path.posix.normalize("maclauncher/isf/"+name),path.join(ownedRoot,name));
   features.shaders.formats=[...new Set([...(features.shaders.formats||[]),"isf"])];features.shaders.providers??={};features.shaders.providers.isf={nodeABI:1,architectures:packageCPUs.filter(cpu=>metadata.architectures.includes(cpu)),minimumMacOS:metadata.minimumMacOS};
@@ -204,6 +208,7 @@ if (options["--neural"]) {
     features.graphics.neuralGpuTimingAPI=1;
   }
   for (const entry of descriptor.files) {
+    if(NoticeIntake.isNoticePath(entry.path))continue;
     if (typeof entry.path !== "string" || path.isAbsolute(entry.path) || entry.path.split(/[\\/]/).some(part => !part || part === "." || part === "..")) throw new Error("Invalid neural provider path.");
     const file = path.join(directory, entry.path), stat = fs.lstatSync(file);
     if (!stat.isFile() || stat.size !== entry.size || digest(fs.readFileSync(file)) !== entry.sha256) throw new Error("The neural provider changed.");
@@ -262,6 +267,7 @@ if(options["--libplacebo"]) {
   features.shaders??={};features.shaders.providers??={};features.shaders.providers.libplacebo={...features.shaders.providers.libplacebo,architectures:packageCPUs.filter(cpu=>metadata.architectures.includes(cpu)),minimumMacOS:metadata.minimumMacOS};
   const required=new Set([metadata.library,metadata.helper,"libplacebo/liblcms2.2.dylib","libplacebo/libMoltenVK.dylib","libplacebo/libplacebo.360.dylib","libplacebo/libshaderc_shared.1.dylib"]);
   for(const entry of metadata.files) {
+    if(NoticeIntake.isNoticePath(entry.path))continue;
     if(typeof entry.path!=="string"||path.isAbsolute(entry.path)||entry.path.split(/[\\/]/).some(part=>!part||part==="."||part==="..")||optionalInputs.has(entry.path))throw new Error("Invalid optional provider path.");
     const file=path.join(directory,entry.path),stat=fs.lstatSync(file);
     if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==entry.size||digest(fs.readFileSync(file))!==entry.sha256)throw new Error("The optional shader provider changed.");
@@ -335,12 +341,13 @@ if(options["--fsr3-generation"]){
   const directory=options["--fsr3-generation"],ownedRoot=path.resolve(import.meta.dirname,"../src/modules/shared/reshade/generation/fsr3");
   const source=JSON.parse(fs.readFileSync(path.join(ownedRoot,"source.json"),"utf8")),metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json"),"utf8"));
   if(metadata.providerABI!==source.providerABI||metadata.complete!==true||metadata.source!==source.repository||metadata.commit!==source.commit||metadata.method!=="fsr3"||metadata.interfaces?.preparation!==1||metadata.library!=="libmaclauncher-fsr3-generation.dylib"||metadata.architectures?.join()!==source.architectures.join()||metadata.minimumMacOS!==source.minimumMacOS||metadata.shaderVariants?.opticalflow!==2||metadata.shaderVariants?.frameinterpolation!==8||metadata.shaderPasses?.opticalflow!==7||metadata.shaderPasses?.frameinterpolation!==11||["dxc","spirv-cross"].some(name=>metadata.tools?.[name]!==source.tools[name]))throw Error("A complete compatible AMD optical-flow/frame-interpolation provider is required.");
-  const expected=new Set([metadata.library,"provider.json","FSR3-LICENSE.txt"]);
+  const expected=new Set([metadata.library,"provider.json"]);
   for(const [effect,variants,passes]of [["opticalflow",2,7],["frameinterpolation",8,11]])for(let variant=0;variant<variants;++variant)for(let pass=0;pass<passes;++pass)for(const extension of ["metal","json"])expected.add(`${effect}/${variant}/${pass}.${extension}`);
   for(const relative of fs.readdirSync(directory,{recursive:true}).sort()){
     const file=path.join(directory,relative),stat=fs.lstatSync(file);
     if(stat.isSymbolicLink()||!stat.isFile()&&!stat.isDirectory())throw Error("Generation payloads require regular files and directories.");
     if(stat.isDirectory())continue;
+    if(/(?:license|notice|copying|copyright)/i.test(relative)){temporalInputs.set("generation/fsr3/"+relative,file);continue;}
     if(!expected.delete(relative)||Content.excludedReason(relative))throw Error("Unexpected AMD generation payload input: "+relative);
     if(relative.endsWith(".json")&&relative!=="provider.json"){
       const shader=JSON.parse(fs.readFileSync(file,"utf8"));
@@ -348,7 +355,7 @@ if(options["--fsr3-generation"]){
     }
     temporalInputs.set("generation/fsr3/"+relative,file);
   }
-  if(expected.size)throw Error("The AMD generation shader and license closure is incomplete.");
+  if(expected.size)throw Error("The AMD generation shader closure is incomplete.");
   const symbols=execFileSync("/usr/bin/nm",["-gU",path.join(directory,metadata.library)],{encoding:"utf8"});
   if(!/\b_rsGetGenerationProvider\b/.test(symbols))throw Error("The AMD generation library does not export its provider interface.");
   for(const name of ["source.json","build.mjs","backend.mm","metal-backend.hpp","index.js"])extraOwned.set("maclauncher/generation/fsr3/"+name,path.join(ownedRoot,name));
@@ -367,6 +374,7 @@ if(options["--xess"]){
     pins.push(` ${commit} third_party/${submodule}`);
   }
   for(const [name,sha256]of Object.entries(metadata.owned)){
+    if(NoticeIntake.isNoticePath(name))continue;
     if(!/^[a-zA-Z0-9_.-]+$/.test(name)||digest(fs.readFileSync(path.join(ownedRoot,name)))!==sha256)throw Error("The XeSS translation build inputs changed.");
     extraOwned.set("maclauncher/crossover/temporal/xess/"+name,path.join(ownedRoot,name));
   }
@@ -570,7 +578,7 @@ if (features.graphics.windowSourceAPI === 2 && ![/\b_rsWindowSourceAPI\b/, /\b_r
 if(features.graphics.temporalProviderRegistryAPI===1&&!/\b_rsTemporalProviderMethodMask\b/.test(symbols))throw Error("The graphics library is missing the registered temporal provider dispatcher.");
 if(features.graphics.temporalProfileAPI===1&&!/\b_rsTemporalProfileAPI\b/.test(symbols))throw Error("The graphics library is missing temporal profile validation support.");
 if(features.graphics.sceneGuideTransformAPI===1&&!symbols.includes("SceneGuideEncoder6encode"))throw Error("The graphics library is missing shared scene-guide normalization.");
-if(extraOwned.size)sourceHash=digest(Buffer.concat([Buffer.from(sourceHash+'\0'),...[...extraOwned].flatMap(([relative,file])=>[Buffer.from(relative+'\0'),fs.readFileSync(file)])]));
+if(extraOwned.size)sourceHash=digest(Buffer.concat([Buffer.from(sourceHash+'\0'),...[...extraOwned].filter(([relative])=>!NoticeIntake.isNoticePath(relative)).flatMap(([relative,file])=>[Buffer.from(relative+'\0'),fs.readFileSync(file)])]));
 if(features.graphics.sceneWindowContinuationAPI===1)for(const name of ["rsSceneWindowContinuationABI","rsSetTemporalSceneDestinationFlagsForTextures"])if(!new RegExp("\\b_"+name+"\\b").test(symbols))throw Error("The graphics library is missing explicit scene-window continuation: "+name);
 if(features.graphics.videoFrameGenerationMethods?.includes("rife")&&!symbols.includes("makeRifeGenerationEncoder"))throw Error("The graphics library is missing the RIFE generation adapter.");
 if (!/\b_rsProcessFrame\b/.test(symbols)) throw new Error("The ReShade library must provide its shared frame encoder.");
@@ -614,7 +622,7 @@ if(fs.existsSync(path.join(ownedSource,"src/color-source.json"))){
 for (const name of ["ReShade.fxh", "ReShadeUI.fxh"]) inputs.set("include/" + name, path.join(source, "third_party/reshade-shaders/Shaders", name));
 const effects = path.resolve(import.meta.dirname, "../src/modules/shared/reshade/effects");
 for (const name of fs.readdirSync(effects)) inputs.set("effects/" + name, path.join(effects, name));
-const effectNotices = validateEffectSources(effectSources, [...inputs].map(([relative, input]) => ({ path: relative, sha256: digest(fs.readFileSync(input)) })));
+const effectNotices = validateEffectSources(effectSources, [...inputs].filter(([relative])=>!NoticeIntake.isNoticePath(relative)).map(([relative, input]) => ({ path: relative, sha256: digest(fs.readFileSync(input)) })));
 // Identical files under the paths providers open through the shared payload
 // resolver are stored once; each provider's alias index names the stored copy
 // of every removed path.
@@ -627,9 +635,9 @@ if (aliasIndexes.some(([relative]) => inputs.has(relative))) throw new Error("A 
 // native binaries. An effect-only update must not overwrite an older version
 // while a running game still refers to that version's files.
 const payloadHash = digest(Buffer.concat([Buffer.from("adhoc-signature-v1\0" + pins.join("\n") + "\0" + JSON.stringify(features) + "\0" + JSON.stringify(effectSources) + "\0"),
-  ...[...extraOwned].flatMap(([relative,file])=>[Buffer.from(relative+'\0'),fs.readFileSync(file)]),
+  ...[...extraOwned].filter(([relative])=>!NoticeIntake.isNoticePath(relative)).flatMap(([relative,file])=>[Buffer.from(relative+'\0'),fs.readFileSync(file)]),
   ...aliasIndexes.flatMap(([relative, bytes]) => [Buffer.from(relative + "\0"), bytes]),
-  ...[...inputs].sort(([a], [b]) => a.localeCompare(b)).flatMap(([relative, input]) =>
+  ...[...inputs].filter(([relative])=>!NoticeIntake.isNoticePath(relative)).sort(([a], [b]) => a.localeCompare(b)).flatMap(([relative, input]) =>
     [Buffer.from(relative + "\0"), fs.readFileSync(input)])]));
 const version = options["--version"] ?? "dev-" + sourceHash.slice(0, 8) + "-" + payloadHash.slice(0, 8);
 const directoryRelative = `reshade/${version}/${packageArch}`;
@@ -639,6 +647,7 @@ fs.mkdirSync(destination, { recursive: true });
 for (const directory of ["include", "effects", "licenses"]) fs.mkdirSync(path.join(destination, directory), { recursive: true });
 const files = [];
 for (const [relative, input] of inputs) {
+  if(NoticeIntake.isNoticePath(relative)){NoticeIntake.copyNotice(input,path.join(destination,relative));continue;}
   const output = path.join(destination, relative);
   fs.mkdirSync(path.dirname(output), { recursive: true });
   const executable = nativeFiles.includes(relative);
@@ -655,7 +664,7 @@ for (const [relative, input] of inputs) {
 // The camera provider's source is available in the tagged producer repository.
 if(options["--xess-host"]){
   const relative="xess/provider.json",file=path.join(destination,relative),metadata=JSON.parse(fs.readFileSync(file));
-  metadata.files=metadata.files.filter(row=>!row.path.startsWith("source/")).map(row=>{const actual=files.find(item=>item.path==="xess/"+row.path);return {...row,size:actual.size,sha256:actual.sha256};});
+  metadata.files=metadata.files.filter(row=>!row.path.startsWith("source/")&&!NoticeIntake.isNoticePath(row.path,metadata.notices)).map(row=>{const actual=files.find(item=>item.path==="xess/"+row.path);return {...row,size:actual.size,sha256:actual.sha256};});
   fs.writeFileSync(file,JSON.stringify(metadata,null,2)+"\n");Object.assign(files.find(row=>row.path===relative),{sha256:digest(fs.readFileSync(file)),size:fs.statSync(file).size});
 }
 if (inputs.has('temporal/dxmt/camera-bridge.json')) {
@@ -672,6 +681,7 @@ if(packageArch!=="universal"){
   let changed=false;
   if(Array.isArray(metadata.architectures)&&metadata.architectures.includes(packageCPUs[0])){metadata.architectures=[packageCPUs[0]];changed=true;}
   if(Array.isArray(metadata.files))for(const row of metadata.files){
+    if(NoticeIntake.isNoticePath(row.path))continue;
    if(typeof row.path!=="string"||row.path.split("/").includes("..")||path.isAbsolute(row.path))continue;
    const base=entry.path==="libplacebo/provider.json"?destination:path.dirname(file),target=path.join(base,row.path),relative=path.relative(destination,target).split(path.sep).join("/"),actual=files.find(value=>value.path===relative);
    if(actual){Object.assign(row,{size:fs.statSync(target).size,sha256:digest(fs.readFileSync(target)),...(actual.architectures?{architectures:actual.architectures}:{})});changed=true;}

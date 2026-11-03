@@ -1,3 +1,4 @@
+import * as NoticeIntake from '../../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -75,7 +76,7 @@ export async function packageRuntime({runtimeBuild,relinkerBuild,output,version,
  const producerInputs=[...['build-relinker.mjs','build-runtime.mjs','source-projection.mjs','package-runtime.mjs','source.json','dependencies.json']
   .map(relative=>({path:relative,sha256:sha(fs.readFileSync(path.join(import.meta.dirname,relative)))})),...overlays,...tools].sort((a,b)=>a.path.localeCompare(b.path));
  fs.writeFileSync(path.join(payload,'source.json'),json({schemaVersion:1,source:recipe.source,dependencies:dependencies.dependencies,artifacts:dependencies.artifacts,overlays,tools,producerInputs}));
- const files=filesIn(payload).map(relative=>record(payload,relative));
+ const files=filesIn(payload).filter(name=>!NoticeIntake.isNoticePath(name)).map(relative=>record(payload,relative));
  const manifest={schemaVersion:1,managerId:'anyps5',version,platform:'darwin',arch,minimumMacOS:'26.0',upstreamRevision:recipe.source.revision,
   gameArchitecture:'x86_64',capabilities:{mouseRouting:true,touchPadBinding:true},provenance:{sourceUrl:recipe.source.repository,sourceRevision:recipe.source.revision,producerInputs},executableRelative:'tools/relinker',runtimeFiles:{libraries:'libs',unwrap:'tools/unwrap-self.cjs'},files,notices};
  fs.writeFileSync(path.join(payload,'runtime.json'),json(manifest));

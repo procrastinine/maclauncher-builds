@@ -1,3 +1,4 @@
+const NoticeIntake = require('../../../../../../lib/notices.mjs');
 // CatSystem2 native component producer.
 const fs = require("node:fs"), os = require("node:os"), path = require("node:path");
 const { execFileSync } = require("node:child_process");
@@ -28,13 +29,13 @@ function stage({ resourcesRoot } = {}) {
     if(command(executable,["--version"]) !== `maclauncher-catsystem2-viewport ${VERSION} protocol1`) throw new Error("Viewport protocol version differs from its build declaration.");
     if(JSON.stringify(Native.readMachOArchitectures(executable).sort()) !== JSON.stringify(["arm64","x86_64"])) throw new Error("Viewport CPU slices differ.");
     fs.copyFileSync(SOURCE,path.join(destination,"cocoa-viewport.m")); fs.copyFileSync(__filename,path.join(destination,"stage-viewport.cjs"));
-    fs.copyFileSync(path.join(REPO,"LICENSE"),path.join(destination,"MacLauncher-MIT.txt"));
+    NoticeIntake.copyNotice(path.join(REPO,"LICENSE"),path.join(destination,"MacLauncher-MIT.txt"));
     fs.writeFileSync(path.join(destination,"DEPENDENCIES.txt"),[
       "MacLauncher software viewport: independently owned MIT source; no upstream interpreter, proprietary engine code or game assets.",
       "AppKit, Foundation, CoreGraphics and ImageIO: supplied by macOS, not redistributed.",
       "CSVP1 protocol: bounded RGBA8 layers and authored-coordinate input over NDJSON; no script or menu decisions.",
       "CPU slices: arm64 and x86_64. Minimum macOS:13.0. No compiler or installation needed by end users."].join("\n")+"\n");
-    const files = fs.readdirSync(destination).sort().map(name=>{ const file=path.join(destination,name); fs.chmodSync(file,name==="cocoa-viewport"?0o755:0o644); const r=B.readRegular(file,1024*1024);
+    const files = fs.readdirSync(destination).sort().filter(name=>!NoticeIntake.isNoticePath(name)).map(name =>{ const file=path.join(destination,name); fs.chmodSync(file,name==="cocoa-viewport"?0o755:0o644); const r=B.readRegular(file,1024*1024);
       return {path:name,size:r.size,sha256:r.sha256,mode:r.mode,...(name==="cocoa-viewport"?{architectures:["arm64","x86_64"]}:{})}; });
     const notices=[{name:"MacLauncher software viewport",license:"MIT",path:"MacLauncher-MIT.txt"}];
     const record={schemaVersion:1,id:"catsystem2-software-viewport",version:VERSION,protocolVersion:"CSVP1",scope:"rgba-software-viewport",sourceKind:"owned-source",verifiedBuild:true,

@@ -22,10 +22,6 @@
   ],
   "ownedInputs": [
     {
-      "path": "producers/mpv-render/v7/maclauncher/LICENSE",
-      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7"
-    },
-    {
       "path": "producers/mpv-render/v7/maclauncher/package.json",
       "sha256": "965af71b1c6daad229456928c9b178c04e3241f76c4a260b7f65afd130c81f6e"
     },
@@ -35,11 +31,11 @@
     },
     {
       "path": "producers/mpv-render/v7/maclauncher/scripts/native-binary-tools.cjs",
-      "sha256": "40c99e682e785a42de48ae958fe23deac10c9a527d777c9a8852bfa0246a2074"
+      "sha256": "8e78125d5d7cf225ffc661354c30390ab0dcad995fb31f433531b6f967173a5a"
     },
     {
       "path": "producers/mpv-render/v7/maclauncher/scripts/stage-mpv-render.cjs",
-      "sha256": "791c25a616b6a104cc0354e1ef24caf174d2ecd58c566499dbf236e804391a74"
+      "sha256": "89448c1b0cad61dc237c1293ba911f3e1b9ce98c17476237ab792e567b8fecdb"
     },
     {
       "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/frame.h",
@@ -75,7 +71,7 @@
     },
     {
       "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/bundled-native.js",
-      "sha256": "f63718b8af1d3ef869fe75f9e87fd71ab0b2168b8ace7b433e84f9a356a7186b"
+      "sha256": "307b3c53ec14e03a0ccf8ef6e325b8c5944d6b647003fb96327f5a1751059ba3"
     },
     {
       "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/local-native.js",

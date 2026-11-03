@@ -45,7 +45,7 @@ async function buildDependencies({archive,workRoot,architecture=process.arch,pat
   fs.mkdirSync(sourceRoot);fs.mkdirSync(outputRoot);fs.mkdirSync(prefix);
   const run=dependencies.runBuildCommand||Source.runBuildCommand,env=Portable.buildEnvironment(prefix,sdk),logPath=path.join(workRoot,"build.log");
   await run("/usr/bin/tar",["-xf",archive,"--strip-components","1","-C",sourceRoot],{cwd:workRoot,logPath,env,signal});
-  for(const name of PIN.source.notices)if(!fs.lstatSync(path.join(sourceRoot,name)).isFile())throw new Error("FFmpeg source notice is missing.");
+
   const options=[`--prefix=${prefix}`,`--arch=${architecture==="x64"?"x86_64":"aarch64"}`,"--target-os=darwin","--cc=/usr/bin/clang","--cxx=/usr/bin/clang++","--host-cc=/usr/bin/clang",`--sysroot=${sdk}`,...OPTIONS,
     "--extra-cflags="+flags,`--extra-ldflags=-arch ${architecture==="x64"?"x86_64":"arm64"} -mmacosx-version-min=13.0 -isysroot ${sdk} -Wl,-headerpad_max_install_names -Wl,-rpath,${prefix}/lib`];
   const startedAt=new Date().toISOString();onProgress?.({phase:"configure",project:"ffmpeg"});

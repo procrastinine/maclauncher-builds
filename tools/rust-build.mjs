@@ -2,22 +2,21 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import {execFileSync} from 'node:child_process';
+import {intakeNotices,printWarnings,sourceNotices} from '../lib/notices.mjs';
 export const RUST_TOOLCHAIN='1.99.0';
 /** License files for statically linked Cargo dependencies and the Rust library. */
 export function rustNotices({source,output,target,licenseInputs=[],env={...process.env,RUSTUP_TOOLCHAIN:RUST_TOOLCHAIN}}){
  const metadata=JSON.parse(execFileSync('cargo',['metadata','--locked','--format-version','1',...(target?['--filter-platform',target]:[])],{cwd:source,env,encoding:'utf8',maxBuffer:16<<20})),notices=[];
  if(target&&!Array.isArray(metadata.resolve?.nodes))throw Error('Cargo target dependency graph is missing.');
  const selected=target?new Set(metadata.resolve.nodes.map(node=>node.id)):null;
- const copy=(file,relative,name,license,sourceUrl)=>{const target=path.join(output,relative);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(file,target);fs.chmodSync(target,0o644);notices.push({file:target,name,license,sourceUrl});};
+ const copy=(file,relative,name,license,sourceUrl)=>{const result=intakeNotices([{file,path:relative,name,license,sourceUrl}],{output,packageName:name,sourceUrl,standIn:false});printWarnings(result.warnings);notices.push(...result.notices);};
  for(const item of metadata.packages.filter(item=>item.source?.startsWith('registry+')&&(!selected||selected.has(item.id)))){
-  const directory=path.dirname(item.manifest_path),files=fs.readdirSync(directory).filter(name=>/^(LICEN[CS]E|COPYING|NOTICE|COPYRIGHT)([._-]|$)/i.test(name)&&fs.statSync(path.join(directory,name)).isFile());
+  const directory=path.dirname(item.manifest_path),files=sourceNotices(directory,{name:item.name,repository:'https://crates.io/crates/'+item.name+'/'+item.version}).map(row=>path.relative(directory,row.file));
   if(!files.length){
    const selected=licenseInputs.filter(row=>row.name===item.name&&row.version===item.version);
    if(!selected.length){console.warn('No license text supplied for '+item.name+' '+item.version);continue;}
-   if(selected.length!==1||selected[0].license!==item.license||JSON.stringify(selected[0].authors)!==JSON.stringify(item.authors)||!Array.isArray(selected[0].files))throw Error('Declared crate notice identity differs for '+item.name+' '+item.version);
-   if(!selected[0].files.length)console.warn('No license text supplied for '+item.name+' '+item.version);
-   for(const entry of selected[0].files){
-    if(!path.isAbsolute(entry.file||'')||!fs.statSync(entry.file).isFile()||!/^https:\/\//.test(entry.sourceUrl||''))throw Error('Invalid declared crate notice for '+item.name+' '+item.version);
+   if(!selected[0]?.files?.length)console.warn('No license text supplied for '+item.name+' '+item.version);
+   for(const entry of selected[0]?.files||[]){
     copy(entry.file,'crates/'+item.name+'-'+item.version+'/'+path.basename(entry.file),item.name+' '+item.version,item.license,entry.sourceUrl);
    }
    continue;

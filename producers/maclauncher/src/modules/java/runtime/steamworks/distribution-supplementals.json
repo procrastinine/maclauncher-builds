@@ -21,12 +21,6 @@
         "mode": 420
       },
       {
-        "path": "MacLauncher-MIT.txt",
-        "size": 1081,
-        "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
-        "mode": 420
-      },
-      {
         "path": "libsteamworks4j.dylib",
         "size": 407344,
         "sha256": "86326f197fa7f502f9fb122ce0753e315f7fa220712cbd81c6b29b7c97e7b42f",
@@ -40,12 +34,6 @@
         "path": "steam-agent.jar",
         "size": 5599,
         "sha256": "0cfea1aac0a08a12301f273fffc690b7a2f0b71c885f5ef61438e6d62351d32c",
-        "mode": 420
-      },
-      {
-        "path": "steamworks4j-MIT.txt",
-        "size": 1084,
-        "sha256": "171679b0302bc454889dd49220da633cbbb00f050fd6d81449019fa4cc7b0b8c",
         "mode": 420
       },
       {
@@ -91,12 +79,6 @@
         "mode": 420
       },
       {
-        "path": "MacLauncher-MIT.txt",
-        "size": 1081,
-        "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
-        "mode": 420
-      },
-      {
         "path": "libsteamworks4j.dylib",
         "size": 681280,
         "sha256": "f596487a0edce464c21c551c1a29a29aedaf4965d0a21b6d58ab3a55bce5c97e",
@@ -110,12 +92,6 @@
         "path": "steam-agent.jar",
         "size": 5599,
         "sha256": "0cfea1aac0a08a12301f273fffc690b7a2f0b71c885f5ef61438e6d62351d32c",
-        "mode": 420
-      },
-      {
-        "path": "steamworks4j-MIT.txt",
-        "size": 1084,
-        "sha256": "f524d824bd479c049c1c7617d06938d6f4f58416ed24f88511d817405f23a4ef",
         "mode": 420
       },
       {

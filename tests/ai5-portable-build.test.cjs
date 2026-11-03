@@ -75,9 +75,10 @@ test("portable audio sources reject changed archives and unsafe build metadata",
     notices: ["COPYING"], buildSystem: "cmake", options: [] };
   const catalog = { schemaVersion: 1, version: "audio-v1", architecture: "arm64", minimumMacOS: "13.0", dependencies: [pin] };
   assert.equal(Audio.validateArchives({ fixture: file }, { catalog }).length, 1);
+  assert.equal(Audio.validateArchives({ fixture: file }, { catalog: { ...catalog, dependencies: [{ ...pin, notices: ["../COPYING"] }] } }).length, 1);
   fs.writeFileSync(file, Buffer.from("bad! source"));
   assert.throws(() => Audio.validateArchives({ fixture: file }, { catalog }), /checksum or size differs/);
-  for (const change of [{ notices: ["../COPYING"] }, { sourceSubdirectory: "/etc" }, { revision: "main" },
+  for (const change of [{ sourceSubdirectory: "/etc" }, { revision: "main" },
     { options: ["-DCMAKE_PREFIX_PATH=/opt/homebrew"] }, { options: ["-DFETCHCONTENT_FULLY_DISCONNECTED=OFF"] }]) {
     assert.throws(() => Audio.validateArchives({ fixture: file }, { catalog: { ...catalog, dependencies: [{ ...pin, ...change }] } }), /exact archive pins/);
   }

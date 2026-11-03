@@ -1,3 +1,4 @@
+const NoticeIntake = require('../../../../../../lib/notices.mjs');
 // Developer-only recipe. End users execute the sealed Included raster child.
 const fs = require("node:fs"), os = require("node:os"), path = require("node:path");
 const { execFileSync } = require("node:child_process");
@@ -28,13 +29,13 @@ function stage({ resourcesRoot } = {}) {
     if(command(executable,["--version"]) !== `maclauncher-catsystem2-coretext ${VERSION} CSTR1`) throw new Error("CoreText raster protocol version differs from its build declaration.");
     if(JSON.stringify(Native.readMachOArchitectures(executable).sort()) !== JSON.stringify(["arm64","x86_64"])) throw new Error("CoreText raster CPU slices differ.");
     fs.copyFileSync(SOURCE,path.join(destination,"coretext-raster.m")); fs.copyFileSync(__filename,path.join(destination,"stage-coretext-raster.cjs"));
-    fs.copyFileSync(path.join(REPO,"LICENSE"),path.join(destination,"MacLauncher-MIT.txt"));
+    NoticeIntake.copyNotice(path.join(REPO,"LICENSE"),path.join(destination,"MacLauncher-MIT.txt"));
     fs.writeFileSync(path.join(destination,"DEPENDENCIES.txt"),[
       "MacLauncher CoreText raster: independently owned MIT source.",
       "CoreText, CoreGraphics and Foundation: supplied by macOS, not redistributed.",
       "CSTR1 protocol: bounded UTF-8 and original font bytes to straight top-left RGBA8; no script decisions or font installation.",
       "CPU slices: arm64 and x86_64. Minimum macOS:13.0. No compiler or installation needed by end users."].join("\n")+"\n");
-    const files = fs.readdirSync(destination).sort().map(name=>{ const file=path.join(destination,name); fs.chmodSync(file,name==="coretext-raster"?0o755:0o644); const r=B.readRegular(file,1024*1024);
+    const files = fs.readdirSync(destination).sort().filter(name=>!NoticeIntake.isNoticePath(name)).map(name =>{ const file=path.join(destination,name); fs.chmodSync(file,name==="coretext-raster"?0o755:0o644); const r=B.readRegular(file,1024*1024);
       return {path:name,size:r.size,sha256:r.sha256,mode:r.mode,...(name==="coretext-raster"?{architectures:["arm64","x86_64"]}:{})}; });
     const notices=[{name:"MacLauncher CoreText raster",license:"MIT",path:"MacLauncher-MIT.txt"}];
     const record={schemaVersion:1,id:"catsystem2-coretext-raster",version:VERSION,protocolVersion:"CSTR1",scope:"font-text-raster",sourceKind:"owned-source",verifiedBuild:true,

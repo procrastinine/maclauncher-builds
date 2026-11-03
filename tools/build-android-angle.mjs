@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {copyNotices,printWarnings,sourceNotices} from '../lib/notices.mjs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {checkoutSource,run,recipeMain} from './build-source.mjs';
@@ -72,8 +73,8 @@ export function packageAngleInput({project='android-angle',version,arch='arm64',
  }
  const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});
  for(const name of ['libEGL.dylib','libGLESv2.dylib','angle-manifest.json'])fs.copyFileSync(path.join(input.angle,name),path.join(payload,name));
- fs.cpSync(input.angleNotices,path.join(payload,'notices'),{recursive:true});
- return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{source:profile.androidSource,sourceProfile:profile.id,providerVersion:manifest.version,angleRevision:manifest.angleRevision},notices:manifest.notices.map(notice=>({name:notice.name,license:'See original notice',path:'notices/'+notice.file,sourceUrl:notice.url}))});
+ const copied=copyNotices(sourceNotices(input.angleNotices,{all:true,name:'ANGLE',repository:definition.angle.repository}).map(notice=>({...notice,path:'notices/'+path.relative(input.angleNotices,notice.file)})),{output:payload});printWarnings(copied.warnings);
+ return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{source:profile.androidSource,sourceProfile:profile.id,providerVersion:manifest.version,angleRevision:manifest.angleRevision},notices:copied.notices.map(({file,...notice})=>notice)});
 }
 
 /** Use the one Runtime build path for each declared source profile. */

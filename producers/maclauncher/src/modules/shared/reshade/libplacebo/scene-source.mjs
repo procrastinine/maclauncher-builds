@@ -29,7 +29,7 @@ export function buildSceneLibrary({source,vulkanSource,fastFloatSource,inputs,de
   // These C headers are architecture independent. Binary-only Intel caches
   // reuse the declared common C interface, rather than acquiring new bottles.
   const headerInputs=[{name:"shaderc",version:"2026.4",root:path.join(dependencyHeaders,"shaderc/shaderc/2026.4/include"),files:["shaderc/shaderc.h","shaderc/env.h","shaderc/status.h","shaderc/visibility.h"]},{name:"lcms2",version:"2.19.1",root:path.join(dependencyHeaders,"little-cms2/little-cms2/2.19.1/include"),files:["lcms2.h","lcms2_plugin.h"]}];
-  manifest.headerInputs=headerInputs.map(({root,files,...row})=>({...row,files:files.map(name=>({path:name,sha256:hash(path.join(root,name))}))}));
+  manifest.headerInputs=headerInputs.map(({root,files,...row})=>({...row,files:files.map(name=>({path:name}))}));
   for(const [index,name,version,root,library]of [[0,"shaderc","2026.4",shaderc,"shaderc_shared.1"],[1,"lcms2","2.19.1",lcms,"lcms2.2"]]){
     fs.writeFileSync(path.join(pc,name+".pc"),`Name: ${name}\nDescription: Explicit cached ${name} build input\nVersion: ${version}\nLibs: -L${path.join(root,"lib")} -l${library}\nCflags: -I${headerInputs[index].root}\n`);
   }
@@ -48,7 +48,7 @@ export function buildSceneLibrary({source,vulkanSource,fastFloatSource,inputs,de
     ["Vulkan-Headers.Apache-2.0.LICENSE","3rdparty/Vulkan-Headers/LICENSES/Apache-2.0.txt"],
     ["Vulkan-Headers.MIT.LICENSE","3rdparty/Vulkan-Headers/LICENSES/MIT.txt"],
     ...(fastFloatSource?["APACHE","BOOST","MIT"].map(name=>["fast_float."+name+".LICENSE","3rdparty/fast_float/LICENSE-"+name]):[]),
-  ].map(([name,relative])=>({name,file:path.join(tree,relative),sha256:hash(path.join(tree,relative))}));
+  ].map(([name,relative])=>({name,file:path.join(tree,relative)}));
   const result={...manifest,architecture,library,include:path.join(prefix,"include"),sha256:hash(library),notices,overlaySha256:hash(new URL("./scene-overlay.mjs",import.meta.url)),recipeSha256:hash(new URL("./scene-source.mjs",import.meta.url)),buildTools:{meson:run(meson,["--version"]).trim(),ninja:run(ninja,["--version"]).trim()}};
   fs.writeFileSync(path.join(output,"source-build.json"),JSON.stringify(result,null,2)+"\n");return result;
 }

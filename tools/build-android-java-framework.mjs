@@ -8,6 +8,7 @@ import {checkoutSource,run,recipeMain} from './build-source.mjs';
 import {buildInput} from './build-input.mjs';
 import {retryNetwork} from './download.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
+import {copyNotices,printWarnings,sourceNotices} from '../lib/notices.mjs';
 const root=path.resolve(import.meta.dirname,'..'),descriptor=path.join(root,'producers/android-inputs/java-framework.json');
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),{validateDeclaration}=require('../lib/declaration.cjs');
 const json=file=>JSON.parse(fs.readFileSync(file));
@@ -59,10 +60,10 @@ export async function buildAndroidJavaFrameworkInput({output,work}){
   const pin=dexProfile.artifacts.find(file=>file.file===filename);if(!pin)throw Error('The original DEX tool profile is incomplete.');const archive=await buildInput({...pin,bytes:pin.size},cache),destination=path.join(tools,filename);fs.copyFileSync(archive,destination,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.unlinkSync(archive);dexDependencies[name]=destination;
  }
  const {buildDexBodies}=await import(pathToFileURL(path.join(android,'src/modules/android/art/dex-bodies.mjs'))),dexBuild=path.join(work,'dex-tool');await buildDexBodies({output:dexBuild,jdk,dependencies:dexDependencies});fs.cpSync(path.join(dexBuild,'classes'),path.join(output,'dex-tool/classes'),{recursive:true});
- const notices=[];for(const [index,archive]of modules.archives.entries()){const name=path.basename(archive);fs.mkdirSync(path.join(output,'modules'),{recursive:true});fs.copyFileSync(archive,path.join(output,'modules',name));const notice=modules.notices[index];fs.cpSync(notice.path,path.join(output,'notices',notice.name),{recursive:true});}
- for(const name of profile.notices)fs.cpSync(path.join(native,'notices',name),path.join(output,'notices',name),{recursive:true});
- fs.copyFileSync(path.join(android,'LICENSE'),path.join(output,'notices/Android-adapters-LICENSE'));
- for(const file of B.fileInventory(path.join(output,'notices')))notices.push({name:'Android framework '+file,license:'See original notice',path:'notices/'+file,sourceUrl:profile.androidSource.repository});
+ const candidates=[];for(const [index,archive]of modules.archives.entries()){const name=path.basename(archive);fs.mkdirSync(path.join(output,'modules'),{recursive:true});fs.copyFileSync(archive,path.join(output,'modules',name));const notice=modules.notices?.[index];if(notice)for(const row of sourceNotices(notice.path,{all:true,name:notice.name,repository:profile.androidSource.repository}))candidates.push({...row,path:'notices/'+notice.name+'/'+path.relative(notice.path,row.file)});}
+ for(const name of profile.notices||[])for(const row of sourceNotices(path.join(native,'notices',name),{all:true,name:'Android framework '+name,repository:profile.androidSource.repository}))candidates.push({...row,path:'notices/'+name+'/'+path.relative(path.join(native,'notices',name),row.file)});
+ candidates.push({file:path.join(android,'LICENSE'),path:'notices/Android-adapters-LICENSE',name:'Android adapters',license:'See original notice',sourceUrl:profile.androidSource.repository});
+ const copied=copyNotices(candidates,{output});printWarnings(copied.warnings);const notices=copied.notices.map(({file,...notice})=>notice);
  return {root:output,notices,record:{androidSource:profile.androidSource,framework:frameworkPin,sources:profile.sources,blueprint:{...blueprintProfile.upstream,driverSha256:blueprintProfile.driverSha256,toolchain:read('go',['version'])},jdk:{sha256:jdkPin.sha256,version:read(path.join(jdk,'bin/java'),['--version']).split('\n')[0]},graphicsRegistrationsSha256:sha(path.join(output,'graphics-registrations.txt')),modules:modules.archives.map(file=>path.basename(file)),dexTools:dexProfile}};
 }
 

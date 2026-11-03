@@ -48,7 +48,7 @@ async function buildPortableYuri({ sourceDir, archives, workRoot, mixerStack, ar
     const sourceRoot = path.join(workRoot, "source", pin.id); fs.mkdirSync(sourceRoot, { recursive: true });
     await run("/usr/bin/tar", ["-xf", archives[pin.id], "--strip-components", "1", "-C", sourceRoot],
       { cwd: workRoot, logPath: path.join(workRoot, "extraction.log"), env: Fonts.buildEnvironment(prefix, mixer.sdk), signal });
-    for (const notice of pin.notices) if (!fs.lstatSync(path.join(sourceRoot, notice)).isFile()) throw new Error(`Missing source license for ${pin.name}.`);
+
     const sourceOverlay = pin.id === "lua" ? Base.adaptLua(sourceRoot) : undefined;
     const build = await Fonts.buildProject({ sourceRoot, outputRoot: path.join(workRoot, pin.id), prefix, sdk: mixer.sdk, tools: mixer.tools, architecture,
       pathMappings, options: pin.options, signal, onProgress, dependencies });

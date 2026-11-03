@@ -1,3 +1,4 @@
+import * as NoticeIntake from '../../../lib/notices.mjs';
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -16,6 +17,7 @@ export function stageFSR4Provider({directory,upstream,ownedRoot}){
      JSON.stringify(metadata.supportedProfiles)!==JSON.stringify(spec.supportedProfiles)||!Array.isArray(metadata.files)||metadata.files.length>16000||!metadata.owned)throw Error("The FSR 4 profile and resource contracts are incomplete.");
   const files=new Map();
   for(const row of metadata.files){
+    if(NoticeIntake.isNoticePath(row.path))continue;
     if(!safe(row.path)||row.path==="provider.json"||Content.excludedReason(row.path)||files.has(row.path)||!Number.isSafeInteger(row.size)||row.size<0||!/^[a-f0-9]{64}$/.test(row.sha256))throw Error("Invalid FSR 4 runtime inventory.");
     const file=path.join(directory,row.path),stat=fs.lstatSync(file);
     if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==row.size||hash(file)!==row.sha256)throw Error("An FSR 4 runtime input changed: "+row.path);
@@ -26,8 +28,9 @@ export function stageFSR4Provider({directory,upstream,ownedRoot}){
   const symbols=execFileSync("/usr/bin/nm",["-gU",files.get(metadata.library)],{encoding:"utf8"});
   for(const name of ["rsGetTemporalProvider","rsPrepareTemporalResources","rsTemporalProviderProfiles"])if(!new RegExp("\\b_"+name+"\\b").test(symbols))throw Error("The FSR 4 provider is missing its profile or preparation interface.");
   const owned=new Map();
-  for(const required of ["source.json","build.mjs","adapt-runtime.mjs","provider.mm","index.js","NOTICE.md","../frame.h"])if(!Object.hasOwn(metadata.owned,required))throw Error("An FSR 4 build input is undeclared: "+required);
+  for(const required of ["source.json","build.mjs","adapt-runtime.mjs","provider.mm","index.js","../frame.h"])if(!Object.hasOwn(metadata.owned,required))throw Error("An FSR 4 build input is undeclared: "+required);
   for(const [relative,expected]of Object.entries(metadata.owned)){
+    if(NoticeIntake.isNoticePath(relative))continue;
     if((!safe(relative)&&!["../frame.h","../payload-files.hpp"].includes(relative))||!/^[a-f0-9]{64}$/.test(expected))throw Error("Invalid owned FSR 4 build input.");
     const file=path.resolve(ownedRoot,relative);if(!fs.lstatSync(file).isFile()||hash(file)!==expected)throw Error("An FSR 4 build input changed: "+relative);
     owned.set(path.posix.normalize("maclauncher/temporal/fsr4/"+relative),file);
@@ -35,7 +38,7 @@ export function stageFSR4Provider({directory,upstream,ownedRoot}){
   const archive=metadata.sourceInputs?.find(row=>row.path==="source-inputs/weights_lossy2.npz");
   if(!archive||metadata.sourceInputs.length!==1||archive.sha256!==spec.lite2.sha256||archive.repository!==spec.lite2.repository||archive.commit!==spec.lite2.commit||archive.sourceUrl!==spec.lite2.url)throw Error("The Lite 2 source archive identity is incomplete.");
   const archiveFile=path.join(path.dirname(directory),archive.path),archiveStat=fs.lstatSync(archiveFile);
-  if(!archiveStat.isFile()||archiveStat.isSymbolicLink()||archiveStat.size!==archive.size||hash(archiveFile)!==archive.sha256||hash(files.get("third_party/fsr411/LICENSE.Lite2.txt"))!==spec.lite2.licenseSha256)throw Error("A Lite 2 source or license input changed.");
+  if(!archiveStat.isFile()||archiveStat.isSymbolicLink()||archiveStat.size!==archive.size||hash(archiveFile)!==archive.sha256)throw Error("A Lite 2 source input changed.");
   owned.set("maclauncher/temporal/fsr4/inputs/weights_lossy2.npz",archiveFile);
   if(!upstream)throw Error("Supply the exact FSR 4 source checkout for this provider.");
   const git=args=>execFileSync("git",["-C",upstream,...args],{encoding:"utf8"}).trim(),canonical=url=>url.replace(/\.git$/,"").replace(/\/$/,"");

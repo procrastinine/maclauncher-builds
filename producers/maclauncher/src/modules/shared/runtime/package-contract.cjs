@@ -1,3 +1,4 @@
+const Notices = require('../../../../../../lib/notices.mjs');
 // Shared public contracts for the launcher and native package producer.
 const B = require("./bundled-native");
 const SHA256 = /^[a-f0-9]{64}$/;
@@ -269,10 +270,10 @@ function validateDeclaration(item) {
     !Array.isArray(item.launcherArchitectures) || !item.launcherArchitectures.length || new Set(item.launcherArchitectures).size !== item.launcherArchitectures.length ||
     item.launcherArchitectures.some(arch => !['arm64', 'x64'].includes(arch)) ||
     item.directoryRelative !== `${item.id}/${item.version}/${item.arch}` || !Array.isArray(item.files) || !item.files.length || item.files.length > B.LIMITS.files ||
-      !Array.isArray(item.notices) || !item.notices.length ||
       item.redistribution !== undefined && !['bundle', 'local-only'].includes(item.redistribution)) throw new Error('Invalid supplemental native declaration.');
   const names = new Set(); let bytes = 0;
   for (const file of item.files) {
+    if(Notices.isNoticePath(file?.path,item.notices))continue;
     if (!file || Object.keys(file).some(key => !['path', 'size', 'mode', 'sha256', 'architectures', 'format', 'executionArchitecture', 'optionalLoad'].includes(key)) ||
       B.relativeFile(file.path) !== file.path || names.has(file.path) || !Number.isSafeInteger(file.size) || file.size < 0 || file.size > B.LIMITS.fileBytes ||
       ![0o640, 0o644, 0o755].includes(file.mode) || !SHA.test(file.sha256 || '')) throw new Error('Invalid sealed supplemental native file.');
@@ -310,12 +311,8 @@ function validateDeclaration(item) {
     (!item.sourceArtifact && item.sourceRelative === undefined) ||
     item.sourceRelative != null && !item.files.some(file => file.path === item.sourceRelative && file.sha256 === item.sourceSha256) ||
     !item.files.some(file => file.path === item.manifestRelative && file.sha256 === item.manifestSha256)) throw new Error('Supplemental native source, manifest or dependency inventory is incomplete.');
-  for (const notice of item.notices) {
-    if (!notice || Object.keys(notice).some(key => !['name', 'license', 'path', 'sourceUrl'].includes(key)) ||
-      typeof notice.name !== 'string' || !notice.name.trim() || typeof notice.license !== 'string' || !notice.license.trim() || !names.has(notice.path)) throw new Error('Supplemental native license notice is missing.');
-    if (notice.sourceUrl && !/^https:\/\//.test(notice.sourceUrl)) throw new Error('Supplemental source links must use HTTPS.');
-  }
-  validatePublicMetadata(item);
+  Notices.printWarnings(Notices.noticeRows(item.notices,{packageName:item.id}).warnings);
+  const {notices:noticeMetadata,...metadata}=item;validatePublicMetadata(metadata);
   return item;
 }
 

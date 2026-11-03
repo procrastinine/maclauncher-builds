@@ -1,3 +1,4 @@
+import * as NoticeIntake from '../../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -169,18 +170,17 @@ export async function buildNxNative({work,output,dependencyWork,jobs=4,version=p
     });
     for(const [name,relative,license]of[['nxnative','LICENSE','MIT'],['libvpx','dm/third_party/libvpx/LICENSE','BSD-3-Clause'],['libvpx patent grant','dm/third_party/libvpx/PATENTS','Patent grant'],['stb_vorbis','dm/third_party/stb_vorbis/LICENSE','MIT'],['Ryujinx','dm/third_party/ryujinx/LICENSE.txt','MIT'],['Spv.Generator','dm/third_party/ryujinx/src/Spv.Generator/LICENSE','MIT'],['Vulkan-Headers','dm/third_party/vulkan-headers/LICENSE.md','Apache-2.0 or MIT'],['MacNativeGames','dm/third_party/macnativegames/LICENSE','MIT']]){
         let file=path.join(source,relative);if(!fs.existsSync(file)&&name==='MacNativeGames')file=path.join(source,'dm/gfx/nvn/macnativegames/LICENSE');
-        if(!fs.existsSync(file))throw Error('Missing runtime notice: '+relative);
-        const destination='licenses/nxnative/'+name.replace(/[^A-Za-z0-9.-]/g,'-')+'.txt';copyFile(file,path.join(output,destination));notices.push({name,license,sourceUrl:pin.source.repository,path:destination});
+
+        const destination='licenses/nxnative/'+name.replace(/[^A-Za-z0-9.-]/g,'-')+'.txt';NoticeIntake.copyNotice(file,path.join(output,destination));notices.push({name,license,sourceUrl:pin.source.repository,path:destination});
     }
-    const nvn=fs.readFileSync(path.join(source,'dm/gfx/nvn/include/nvn.h'),'utf8');
-    fs.writeFileSync(path.join(output,'licenses/nxnative/NVN.txt'),nvn.slice(0,nvn.indexOf('*/')+2)+'\n');
+    NoticeIntake.copyNotice(path.join(source,'dm/gfx/nvn/include/nvn.h'),path.join(output,'licenses/nxnative/NVN.txt'));
     notices.push({name:'NVN interface',license:'MIT',sourceUrl:pin.source.repository,path:'licenses/nxnative/NVN.txt'});
     for(const [name,file,license,url]of[['deko3d','deko3d.txt','Zlib','https://github.com/devkitPro/deko3d'],['LibHac','LibHac.txt','MIT','https://www.nuget.org/packages/LibHac/0.19.0']]){
         const destination='licenses/nxnative/'+file;copyFile(path.join(producer,'licenses',file),path.join(output,destination));notices.push({name,license,sourceUrl:url,path:destination});
     }
     const closure=nativeClosure(output);
     for(const file of files(output)){const mode=fs.statSync(file).mode&0o777;fs.chmodSync(file,mode&0o111?0o755:0o644);}
-    const inventory=B.fileInventory(output).filter(file=>!file.endsWith('.inputs')).map(relative=>{
+    const inventory=B.fileInventory(output).filter(file=>!file.endsWith('.inputs')&&!NoticeIntake.isNoticePath(file,notices)).filter(relative=>!NoticeIntake.isNoticePath(relative)).map(relative=>{
         const file=path.join(output,relative),stat=fs.statSync(file);let architectures;
         if(nativeFile(file))architectures=Native.readMachOArchitectures(file,{allowLibrary:true});
         return {path:relative,size:stat.size,mode:stat.mode&0o777,sha256:sha(fs.readFileSync(file)),...(architectures?{architectures}:{})};

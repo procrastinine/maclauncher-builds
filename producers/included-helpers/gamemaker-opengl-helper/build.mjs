@@ -1,3 +1,4 @@
+import * as NoticeIntake from '../../../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -41,7 +42,7 @@ export function build({version=pins[0].version,output}){
    minimumMacOS:'13.0',architectures:['arm64','x86_64'],supportedRunnerVersions:runners,testedVendorSha256:vendor,
    legacyLogicalRunnerVersions:pin.legacyLogicalRunnerVersions,compilerArgs:args};
   fs.writeFileSync(path.join(output,'helper.json'),JSON.stringify(record,null,2)+'\n');
-  fs.copyFileSync(path.join(root,'LICENSE'),path.join(output,'license.txt'));
+  NoticeIntake.copyNotice(path.join(root,'LICENSE'),path.join(output,'license.txt'));
   return {...record,dylibPath,output};
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }

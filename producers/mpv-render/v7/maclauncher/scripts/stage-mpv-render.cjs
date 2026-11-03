@@ -1,3 +1,4 @@
+const NoticeIntake = require('../../../../../lib/notices.mjs');
 // Build an owned GPU render host around an explicit, unchanged libmpv input.
 // The result is a managed media runtime, separate from launcher resources.
 const fs = require('node:fs'), path = require('node:path'), {execFileSync} = require('node:child_process');
@@ -11,7 +12,7 @@ const run = (command, args) => execFileSync(command, args, {encoding:'utf8',stdi
 function stage({library,referenceExecutable,dependencyRoots=[],output,version,source,notices,arch=process.arch,minimumMacOS='14.0'}) {
   if(process.platform!=='darwin'||!['arm64','x64'].includes(arch))throw Error('Choose a supported native Mac architecture.');
   if(!/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(version||'')||!/^\d+\.\d+$/.test(minimumMacOS))throw Error('An explicit runtime version and macOS floor are required.');
-  if(!source||!/^https:\/\//.test(source.url||'')||!/^[a-f0-9]{40}$/.test(source.commit||'')||!source.version||!Array.isArray(notices)||!notices.length)throw Error('The library source identity and original notices are required.');
+  if(!source||!/^https:\/\//.test(source.url||'')||!/^[a-f0-9]{40}$/.test(source.commit||'')||!source.version)throw Error('The library source identity is required.');
   library=fs.realpathSync(library);referenceExecutable=fs.realpathSync(referenceExecutable);output=path.resolve(output);
   if(fs.existsSync(output))throw Error('Choose an empty output; managed runtime inputs are never modified.');
   const cpu=arch==='x64'?'x86_64':arch,images=new Map(),targets=new Map(),originalHashes=new Map(),included=[],noticeRoots=new Set();
@@ -61,7 +62,7 @@ function stage({library,referenceExecutable,dependencyRoots=[],output,version,so
     if(info.schema!==1||info.decodedFrameAPI!==1||info.decodedColorAPI!==1||info.preparationNotificationAPI!==1||info.osdLayerAPI!==1||!String(info.libraryVersion).includes(source.version))throw Error('The prepared media library differs from its selected version or lacks separate video and OSD output.');
     const licenseDirectory=path.join(output,'licenses');fs.mkdirSync(licenseDirectory,{recursive:true});
     included.push(...notices.map((notice,index)=>{
-      const destination=path.join(licenseDirectory,index+'-'+path.basename(notice.file));fs.copyFileSync(notice.file,destination);
+      const destination=path.join(licenseDirectory,index+'-'+path.basename(notice.file));NoticeIntake.copyNotice(notice.file,destination);
       return {name:notice.name,license:notice.license,path:path.relative(output,destination),sha256:Native.hashFile(destination),...(notice.sourceUrl?{sourceUrl:notice.sourceUrl}:{})};
     }));
     const plist='<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>org.maclauncher.video</string><key>CFBundleName</key><string>Video</string><key>CFBundleExecutable</key><string>mpv</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleShortVersionString</key><string>'+source.version+'</string><key>LSMinimumSystemVersion</key><string>'+effectiveMinimum+'</string><key>NSHighResolutionCapable</key><true/></dict></plist>';

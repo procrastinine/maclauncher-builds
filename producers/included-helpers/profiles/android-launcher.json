@@ -163,24 +163,18 @@
       "path": "LICENSE",
       "output": "files/notices/LICENSE",
       "kind": "file",
-      "size": 1081,
-      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
       "mode": 420
     },
     {
       "path": "text-input.LICENSE",
       "output": "files/notices/text-input.LICENSE",
       "kind": "file",
-      "size": 1081,
-      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
       "mode": 420
     },
     {
       "path": "account-control.LICENSE",
       "output": "files/notices/account-control.LICENSE",
       "kind": "file",
-      "size": 1081,
-      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
       "mode": 420
     }
   ],

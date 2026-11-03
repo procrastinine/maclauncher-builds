@@ -1,3 +1,4 @@
+const NoticeIntake = require('../../../../../../lib/notices.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
 const { execFile } = require("node:child_process");
@@ -36,11 +37,11 @@ async function stageBundledHelper({ libraryPath, sourceRoot, destination, profil
   fs.mkdirSync(destination, { recursive: true, mode: 0o755 });
   const copy = (name, bytes, mode = 0o644) => fs.writeFileSync(path.join(destination, name), bytes, { flag: "wx", mode });
   copy("luasteam.so", library.bytes, 0o755);
-  copy("LuaSteam-MIT.txt", Bundle.readRegular(path.join(sourceRoot, "notices/LuaSteam-LICENSE"), 128 * 1024).bytes);
-  copy("LuaJIT-MIT.txt", Bundle.readRegular(path.join(sourceRoot, "notices/LuaJIT-COPYRIGHT"), 128 * 1024).bytes);
-  copy("MacLauncher-MIT.txt", Bundle.readRegular(projectLicense, 128 * 1024).bytes);
+  NoticeIntake.copyNotice(path.join(sourceRoot,"notices/LuaSteam-LICENSE"),path.join(destination,"LuaSteam-MIT.txt"));
+  NoticeIntake.copyNotice(path.join(sourceRoot,"notices/LuaJIT-COPYRIGHT"),path.join(destination,"LuaJIT-MIT.txt"));
+  NoticeIntake.copyNotice(projectLicense,path.join(destination,"MacLauncher-MIT.txt"));
   copy("DEPENDENCIES.txt", Buffer.from(DEPENDENCIES));
-  const files = fs.readdirSync(destination).sort().map(name => {
+  const files = fs.readdirSync(destination).sort().filter(name=>!NoticeIntake.isNoticePath(name)).map(name => {
     const file = Bundle.readRegular(path.join(destination, name), 4 * 1024 * 1024);
     return { path: name, size: file.size, sha256: file.sha256, mode: file.mode,
       ...(name === "luasteam.so" ? { architectures: ["arm64", "x86_64"] } : {}) };

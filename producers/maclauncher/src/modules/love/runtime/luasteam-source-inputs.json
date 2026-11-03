@@ -198,9 +198,7 @@
   {
     "origin": "luasteam",
     "path": "LICENSE",
-    "destination": "notices/LuaSteam-LICENSE",
-    "size": 1067,
-    "sha256": "115ab018030b37f892e33da0f2af96d01b3d03c845c6ad41ce4ad19c4b342f73"
+    "destination": "notices/LuaSteam-LICENSE"
   },
   {
     "origin": "luajit",

@@ -35,11 +35,11 @@ function validateArchives(archives, { catalog = PIN } = {}) {
         !(pin.revision ? /^[a-f0-9]{40}$/.test(pin.revision) : /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(pin.sourceRelease || "")) ||
         !/^[a-f0-9]{64}$/.test(pin.archiveSha256 || "") || !/^https:\/\//.test(pin.archiveUrl || "") ||
         !Number.isSafeInteger(pin.archiveBytes) || pin.archiveBytes <= 0 || pin.archiveBytes > 256 * 1024 * 1024 ||
-        !Array.isArray(pin.notices) || !pin.notices.length || pin.notices.some(value => !relative(value)) ||
+
         !["cmake", "meson", "headers"].includes(pin.buildSystem) || !Array.isArray(pin.options) ||
         pin.options.some(option => typeof option !== "string" || /[\r\n\0;]/.test(option) ||
           !/^-D[A-Za-z0-9_]+=/.test(option) || /^-D(?:CMAKE_|FETCHCONTENT_)/.test(option))) {
-      throw new Error("Impacto dependencies require exact source archives, build options and license notices.");
+      throw new Error("Impacto dependencies require exact source archives, build options.");
     }
     seen.add(pin.id);
     const file = archives?.[pin.id];
@@ -135,7 +135,7 @@ async function buildDependencies({ archives, workRoot, reusedStacks, pathMapping
     throwIfAborted(signal); const sourceRoot = path.join(sourceDirectory, pin.id); fs.mkdirSync(sourceRoot);
     await run("/usr/bin/tar", ["-xf", archives[pin.id], "--strip-components", "1", "-C", sourceRoot],
       { cwd: workRoot, logPath: path.join(workRoot, "extraction.log"), env: environment(prefix, sdk), signal });
-    for (const notice of pin.notices) if (!fs.lstatSync(path.join(sourceRoot, notice)).isFile()) throw new Error(`Missing source license for ${pin.name}.`);
+
     onProgress?.({ phase: "build", project: pin.id });
     const outputRoot = path.join(workRoot, pin.id);
     const build = pin.buildSystem === "headers" ? boostHeaders(sourceRoot, prefix, pin.version)

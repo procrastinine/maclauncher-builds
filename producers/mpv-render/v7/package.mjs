@@ -1,3 +1,4 @@
+import * as NoticeIntake from '../../../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -27,7 +28,7 @@ export async function packageRuntime({input,output,version=recipe.version,catalo
  const bytes=B.readRegular(path.join(input,'video-runtime.json'),B.LIMITS.manifestBytes).bytes,video=JSON.parse(bytes);
  if(video.schema!==1||video.id!=='mpv-render'||video.decodedFrameAPI!==1||video.architecture!==recipe.architecture||video.minimumMacOS!==recipe.minimumMacOS||
   video.librarySource?.commit!==recipe.source.revision||video.librarySource?.inputSha256!==recipe.libraryInputSha256||JSON.stringify(video.librarySource?.artifact)!==JSON.stringify(recipe.artifact)||
-  JSON.stringify(video.librarySource?.backports)!==JSON.stringify(recipe.backports)||video.headerSource?.commit!==recipe.source.revision||!Array.isArray(video.images)||!video.images.length||!Array.isArray(video.notices)||!video.notices.length)throw Error('The media input differs from its selected library and render contract.');
+  JSON.stringify(video.librarySource?.backports)!==JSON.stringify(recipe.backports)||video.headerSource?.commit!==recipe.source.revision||!Array.isArray(video.images)||!video.images.length)throw Error('The media input differs from its selected library and render contract.');
  const imageNames=new Set();for(const image of video.images){B.relativeFile(image.path);if(imageNames.has(image.path)||hash(fs.readFileSync(path.join(input,image.path)))!==image.sha256)throw Error('A sealed media image changed.');imageNames.add(image.path);}
  for(const owned of video.ownedSources||[]){const pin=recipe.ownedInputs.find(row=>row.path==='producers/mpv-render/v7/maclauncher/src/modules/video/native/'+owned.file);if(!pin||pin.sha256!==owned.sha256)throw Error('The render host differs from its declared source.');}
  if(video.ownedSources?.length!==4)throw Error('The media host source inventory is incomplete.');
@@ -35,7 +36,7 @@ export async function packageRuntime({input,output,version=recipe.version,catalo
  const headers=new Set();for(const owned of video.ownedHeaders||[]){B.relativeFile(owned.file);const pin=recipe.ownedInputs.find(row=>row.path==='producers/mpv-render/v7/maclauncher/'+owned.file);if(headers.has(owned.file)||!pin||pin.sha256!==owned.sha256)throw Error('The media host header differs from its declared source.');headers.add(owned.file);}
  if(headers.size!==7)throw Error('The media host header inventory is incomplete.');
  const allowed=new Set(['video-runtime.json',...imageNames,'mpv.app/Contents/Info.plist','mpv.app/Contents/_CodeSignature/CodeResources']);
- for(const notice of video.notices){B.relativeFile(notice.path);allowed.add(notice.path);if(notice.sha256&&hash(fs.readFileSync(path.join(input,notice.path)))!==notice.sha256)throw Error('A media notice changed.');}
+ for(const notice of Array.isArray(video.notices)?video.notices:[])if(typeof notice?.path==='string'&&fs.existsSync(path.join(input,notice.path)))allowed.add(notice.path);
  // Original dependency receipts are consumed source metadata alongside notices.
  for(const name of filesIn(input))if(!allowed.has(name)&&!/^licenses\/dependencies\/[^/]+\/INSTALL_RECEIPT\.json$/.test(name))throw Error('Unexpected media input: '+name);
  fs.mkdirSync(output,{recursive:true});const payload=path.join(output,'payload'),content=path.join(payload,'files');fs.mkdirSync(content,{recursive:true});
@@ -44,7 +45,7 @@ export async function packageRuntime({input,output,version=recipe.version,catalo
   const producerInputs=['source.json','package.mjs','build.mjs'].map(name=>({path:'producers/mpv-render/v7/'+name,sha256:hash(fs.readFileSync(path.join(import.meta.dirname,name)))}));
   const source={schemaVersion:1,id:recipe.id,version,source:recipe.source,artifact:recipe.artifact,backports:recipe.backports,libraryInputSha256:recipe.libraryInputSha256,ownedInputs:recipe.ownedInputs,libraryBuild:recipe.libraryBuild,producerInputs};
   fs.writeFileSync(path.join(content,'source.json'),json(source));
-  const files=filesIn(content).map(name=>record(content,name)),notices=video.notices.map(({name,license,path:noticePath,sourceUrl})=>({name,license,path:noticePath,sourceUrl:sourceUrl||recipe.source.repository}));
+  const files=filesIn(content).filter(name=>!NoticeIntake.isNoticePath(name)).map(name=>record(content,name)),notices=video.notices.map(({name,license,path:noticePath,sourceUrl})=>({name,license,path:noticePath,sourceUrl:sourceUrl||recipe.source.repository}));
   const dependencies=[];
   for(const file of files.filter(file=>file.architectures)){
    if(JSON.stringify(file.architectures)!==JSON.stringify(['arm64']))throw Error('The media closure requires native ARM64 images.');

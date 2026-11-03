@@ -1,3 +1,4 @@
+import * as NoticeIntake from '../../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -33,30 +34,28 @@ export async function packageLocal({buildDirectory,output,version=recipe.version
  const license='Prosper\nAuthor: mattias800\nSource: '+recipe.source.repository+'\nRevision: '+recipe.source.revision+'\nThe upstream revision contains no license file.\n';
  fs.mkdirSync(path.join(payload,'notices'),{recursive:true});fs.writeFileSync(path.join(payload,'notices/PROSPER.txt'),license);
  notices.push({name:'Prosper',license:'NOASSERTION',path:'notices/PROSPER.txt',sourceUrl:recipe.source.repository});
- copy(path.join(source,'README.md'),path.join(payload,'notices/Prosper-README.md'));
+ NoticeIntake.copyNotice(path.join(source,'README.md'),path.join(payload,'notices/Prosper-README.md'));
  notices.push({name:'Prosper README',license:'NOASSERTION',path:'notices/Prosper-README.md',sourceUrl:recipe.source.repository});
- for(const name of fs.readdirSync(path.join(source,'prosper/third_party'))){const directory=path.join(source,'prosper/third_party',name);if(!fs.statSync(directory).isDirectory()||['googletest'].includes(name))continue;for(const file of fs.readdirSync(directory).filter(file=>/^(LICENSE|COPYING|COPYRIGHT)(?:[._-].*)?$/i.test(file)&&fs.statSync(path.join(directory,file)).isFile())){const relative='notices/'+name+'/'+file;copy(path.join(directory,file),path.join(payload,relative));notices.push({name,license:'See notice',path:relative,sourceUrl:recipe.source.repository});}}
- for(const file of fs.readdirSync(path.join(buildDirectory,'dependencies/sdl3')).filter(file=>/^LICENSE/i.test(file))){const relative='notices/SDL3/'+file;copy(path.join(buildDirectory,'dependencies/sdl3',file),path.join(payload,relative));notices.push({name:'SDL3',license:'Zlib',path:relative,sourceUrl:inputs.dependencies[0].repository});}
+ for(const name of fs.readdirSync(path.join(source,'prosper/third_party'))){const directory=path.join(source,'prosper/third_party',name);if(!fs.statSync(directory).isDirectory()||['googletest'].includes(name))continue;for(const file of fs.readdirSync(directory).filter(file=>/^(LICENSE|COPYING|COPYRIGHT)(?:[._-].*)?$/i.test(file)&&fs.statSync(path.join(directory,file)).isFile())){const relative='notices/'+name+'/'+file;NoticeIntake.copyNotice(path.join(directory,file),path.join(payload,relative));notices.push({name,license:'See notice',path:relative,sourceUrl:recipe.source.repository});}}
+ for(const file of fs.readdirSync(path.join(buildDirectory,'dependencies/sdl3')).filter(file=>/^LICENSE/i.test(file))){const relative='notices/SDL3/'+file;NoticeIntake.copyNotice(path.join(buildDirectory,'dependencies/sdl3',file),path.join(payload,relative));notices.push({name:'SDL3',license:'Zlib',path:relative,sourceUrl:inputs.dependencies[0].repository});}
  const dependencyNotice=(directory,file,name,license,repository)=>{
-  const relative='notices/'+name+'/'+file;copy(path.join(directory,file),path.join(payload,relative));notices.push({name,license,path:relative,sourceUrl:repository});
+  const relative='notices/'+name+'/'+file;NoticeIntake.copyNotice(path.join(directory,file),path.join(payload,relative));notices.push({name,license,path:relative,sourceUrl:repository});
  };
  const headers=path.join(buildDirectory,'dependencies/vulkan-headers');
  for(const file of ['LICENSE.md','LICENSES/Apache-2.0.txt','LICENSES/MIT.txt'])dependencyNotice(headers,file,'Vulkan-Headers','Apache-2.0 OR MIT',inputs.dependencies.find(row=>row.id==='vulkan-headers').repository);
  const sdl=path.join(buildDirectory,'dependencies/sdl3');
  for(const file of ['LICENSE.txt','LICENSE-bsd.txt','LICENSE-orig.txt','LICENSE-gpl3.txt','AUTHORS.txt'])dependencyNotice(path.join(sdl,'src/hidapi'),file,'SDL3-HIDAPI','BSD-3-Clause OR HIDAPI original OR GPL-3.0',inputs.dependencies[0].repository);
  dependencyNotice(path.join(sdl,'src/video/yuv2rgb'),'LICENSE','SDL3-yuv2rgb','BSD-3-Clause',inputs.dependencies[0].repository);
- const fontSource=fs.readFileSync(path.join(source,'prosper/third_party/imgui/src/imgui_draw.cpp'),'utf8'),fontNotice=fontSource.match(/^\/\/ ProggyClean\.ttf\n(?:\/\/.*\n){3}/m)?.[0];
- if(!fontNotice||!fontNotice.includes('Tristan Grimmer')||!fontNotice.includes('MIT license'))throw Error('Embedded font notice differs from the pinned source.');
- const fontLicense=fontNotice.replace(/^\/\/ ?/gm,'')+'\n'+fs.readFileSync(path.join(source,'prosper/third_party/imgui/LICENSE'),'utf8');
- writeFontNotice();
- function writeFontNotice(){const relative='notices/ProggyClean/NOTICE.txt';fs.mkdirSync(path.dirname(path.join(payload,relative)),{recursive:true});fs.writeFileSync(path.join(payload,relative),fontLicense);notices.push({name:'ProggyClean',license:'MIT',path:relative,sourceUrl:recipe.source.repository});}
+ const fontSource=path.join(source,'prosper/third_party/imgui/src/imgui_draw.cpp');
+ const fontRelative='notices/ProggyClean/NOTICE.txt';NoticeIntake.copyNotice(fontSource,path.join(payload,fontRelative));
+ notices.push({name:'ProggyClean',license:'MIT',path:fontRelative,sourceUrl:recipe.source.repository});
 
  const codecs=path.join(buildDirectory,'dependencies/ffmpeg-macos-x64/share/ffmpeg');
- for(const file of filesIn(codecs).filter(file=>file!=='build-log.txt'))copy(path.join(codecs,file),path.join(payload,'notices/ffmpeg',file));
+ for(const file of filesIn(codecs).filter(file=>file!=='build-log.txt'))NoticeIntake.copyNotice(path.join(codecs,file),path.join(payload,'notices/ffmpeg',file));
  notices.push({name:'FFmpeg',license:'See notice',path:'notices/ffmpeg/copyright',sourceUrl:inputs.artifacts[0].repository});
  const producerInputs=['build.mjs','package.mjs','source.json','dependencies.json'].map(file=>({path:file,sha256:sha(fs.readFileSync(path.join(import.meta.dirname,file)))}));
  fs.writeFileSync(path.join(payload,'source.json'),json({schemaVersion:1,source:recipe.source,dependencies:inputs.dependencies,artifacts:inputs.artifacts,vulkanLinkInput:result.vulkanLinkInput,producerInputs}));
- const files=filesIn(payload).map(file=>record(payload,file));
+ const files=filesIn(payload).filter(name=>!NoticeIntake.isNoticePath(name)).map(file=>record(payload,file));
  const manifest={schemaVersion:1,managerId:'prosper',version,arch:'x64',platform:'darwin',minimumMacOS:recipe.output.minimumMacOS,upstreamRevision:recipe.source.revision,
   committedAt:recipe.source.committedAt,gameArchitecture:'x86_64',executableRelative:'bin/prosper-app',runtimeFiles:{vulkan:'managed'},files,notices};
  fs.writeFileSync(path.join(payload,'runtime.json'),json(manifest));

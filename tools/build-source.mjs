@@ -4,6 +4,7 @@ import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import {retryNetwork} from './download.mjs';
+import {sourceNotices as collectSourceNotices} from '../lib/notices.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Source=require('../producers/maclauncher/src/modules/shared/runtime/pinned-native-build.js');
 /** A build tool from the declared Homebrew formulae, then from PATH. */
 export const findBuildTool=Source.findBuildTool;
@@ -27,13 +28,7 @@ export async function stageSource(source,revision,destination){
  return {treeSha256,dependencies};
 }
 /** Preserve source-tree license notices, including statically linked libraries. */
-export function sourceNotices(source,{name,repository}){
- const rows=[];function visit(directory){for(const entry of fs.readdirSync(directory,{withFileTypes:true})){
-  if(entry.name==='.git')continue;const file=path.join(directory,entry.name);
-  if(entry.isDirectory())visit(file);
-  else if(entry.isFile()&&(/^(?:LICEN[CS]E|COPYING|NOTICE|COPYRIGHT)(?:[._-]|$)/i.test(entry.name)||entry.name==='FTL.TXT'))rows.push({file,name:name+' '+path.relative(source,file),license:'See original notice',sourceUrl:repository});
- }}visit(source);if(!rows.length)console.warn('No source license text supplied for '+name);return rows;
-}
+export const sourceNotices=collectSourceNotices;
 /** A Python 3.13 environment in the work directory holding the exact tools of a requirements file. */
 export function pythonBuildTools(work,requirements){
  const environment=path.join(work,'tools'),python=path.join(environment,'bin/python');

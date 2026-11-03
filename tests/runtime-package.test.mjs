@@ -17,7 +17,7 @@ function fixture(t){
 const selected=f=>({project:f.project,version:f.declaration.version,arch:f.declaration.arch});
 test('sealed data/runtime packages round trip and produce a manually updated catalog',async t=>{
  const f=fixture(t),record=await pack(f),result=await verify({...selected(f),archive:f.output,sha256:record.asset.sha256});
- assert.equal(result.files,4);assert.equal(result.id,'fixture');assert.equal(record.updatePolicy,'manual');
+ assert.equal(result.files,3);assert.equal(f.declaration.files.some(file=>file.path==='LICENSE'),false);assert.equal(result.id,'fixture');assert.equal(record.updatePolicy,'manual');
  const c=catalog([record],{project:f.project,repository:'owner/maclauncher-builds'});assert.equal(c.updatePolicy,'manual');
  assert.equal(c.projectId,'fixture');assert.equal(c.packages[0].tag,'fixture/v1.0.0/arm64');
  assert.equal(c.packages[0].asset.url,'https://github.com/owner/maclauncher-builds/releases/download/fixture%2Fv1.0.0%2Farm64/fixture-1.0.0-arm64.tar.gz');
@@ -79,7 +79,7 @@ test('optional native providers retain platform requirements and exact sealed by
    ...(optional?{optionalLoad:{architectures:['arm64'],minimumMacOS:'15.0'}}:{})});
  }
  const record=await pack(f),result=await verify({...selected(f),archive:f.output,sha256:record.asset.sha256});
- assert.equal(result.files,6);assert.equal(record.minimumMacOS,'13.0');
+ assert.equal(result.files,5);assert.equal(record.minimumMacOS,'13.0');
  const raw=zlib.gunzipSync(fs.readFileSync(f.output)),size=parseInt(raw.subarray(124,136).toString('ascii').replace(/\0.*$/,''),8);
  const sealed=JSON.parse(raw.subarray(512,512+size));assert.deepEqual(sealed.files.find(file=>file.path==='provider.dylib').optionalLoad,{architectures:['arm64'],minimumMacOS:'15.0'});
  for(const optionalLoad of [null,{architectures:['x86_64'],minimumMacOS:'15.0'},{architectures:['arm64'],minimumMacOS:'12.0'}])
@@ -94,7 +94,7 @@ test('zero-byte app signature members retain their exact bytes and inventory',as
  fs.mkdirSync(path.dirname(path.join(f.input,name)),{recursive:true});fs.writeFileSync(path.join(f.input,name),'',{mode:0o644});
  f.declaration.files.push({path:name,size:0,mode:0o644,sha256:digest('')});
  const record=await pack(f),result=await verify({...selected(f),archive:f.output,sha256:record.asset.sha256});
- assert.equal(result.files,5);assert.throws(()=>publicDeclaration({...f.declaration,files:f.declaration.files.map(file=>file.path===name?{...file,size:-1}:file)}),/Invalid sealed/);
+ assert.equal(result.files,4);assert.throws(()=>publicDeclaration({...f.declaration,files:f.declaration.files.map(file=>file.path===name?{...file,size:-1}:file)}),/Invalid sealed/);
  fs.writeFileSync(path.join(f.input,name),'changed');
  await assert.rejects(pack({...f,output:path.join(f.root,'next',path.basename(f.output))}),/exceeds|checksum/);
 });

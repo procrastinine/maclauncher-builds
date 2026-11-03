@@ -1,3 +1,4 @@
+import {copyNotices,fetchNotices,printWarnings} from '../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -109,13 +110,8 @@ export async function packageImageData({project,version,arch,output,work,tool,in
  fs.writeFileSync(path.join(payload,'content.json'),JSON.stringify(content)+'\n');
  const notices=sourceNotices(tool.upstream,{name:'AIM image parser',repository:profile.repository});
  const rust=rustNotices({source:tool.crate,output:path.join(work,'rust-notices'),env:tool.env});
- const records=[];
- for(const [index,notice]of [...notices,...rust].entries()){
-  const relative='notices/'+index+'-'+path.basename(notice.file);fs.mkdirSync(path.dirname(path.join(payload,relative)),{recursive:true});fs.copyFileSync(notice.file,path.join(payload,relative));
-  const {file,...metadata}=notice;records.push({...metadata,path:relative});
- }
- const license=await buildInput(profile.license,path.join(work,'archive-cache'));fs.copyFileSync(license,path.join(payload,'notices/android-sdk-arm-dbt-license.txt'));
- records.push({name:'Android SDK system image',license:'Android SDK ARM DBT license',path:'notices/android-sdk-arm-dbt-license.txt',sourceUrl:profile.license.url});
+ const copied=copyNotices([...notices,...rust].map((notice,index)=>({...notice,path:'notices/'+index+'-'+path.basename(notice.file)})),{output:payload});printWarnings(copied.warnings);const records=copied.notices.map(({file,...notice})=>notice);
+ const fetched=await fetchNotices([{url:profile.license.url,path:'notices/android-sdk-arm-dbt-license.txt',name:'Android SDK system image',license:'Android SDK ARM DBT license',sourceUrl:profile.license.url}],{output:payload});printWarnings(fetched.warnings);records.push(...fetched.notices.map(({file,...notice})=>notice));
  const result=helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{format:'android-image-data-v1',upstreamRevision:profile.revision,originalArchiveSha256:profile.archive.sha256,targetSymlinkMode:profile.targetSymlinkMode,content,transportSha256:sha(path.join(payload,'image-data.json')),dataShard:shard},notices:records});
  // Sealing computes actual data-object digests. Match those to the decoder's
  // records, so the target identity authenticates the delivered bytes as well.

@@ -1,3 +1,4 @@
+const NoticeIntake = require('../../../lib/notices.mjs');
 // Build the invisible Node-API network boundary included with the launcher.
 // The payload holds the binary, its build record and the license; the source
 // stays in the producer repository and is identified by its checksum.
@@ -25,7 +26,7 @@ function stage({ output }) {
     if (JSON.stringify(architectures) !== JSON.stringify(['arm64', 'x86_64'])) throw new Error('Both Mac architectures are required.');
     const minimumMacOS = loadCommands(binary).minimumMacOS;
     if (minimumMacOS !== '11.0') throw new Error('Unexpected browser network helper deployment target.');
-    fs.copyFileSync(path.resolve(__dirname, '../LICENSE'), path.join(directory, 'license.txt'));
+    NoticeIntake.copyNotice(path.resolve(__dirname, '../LICENSE'), path.join(directory, 'license.txt'));
     fs.chmodSync(path.join(directory, 'license.txt'), 0o644);
     const manifest = { schemaVersion: 1, id: ID, version: VERSION, sourceSha256: Native.hashFile(source),
       binarySha256: Native.hashFile(binary), minimumMacOS, architectures, nodeAPI: 1,
@@ -33,7 +34,7 @@ function stage({ output }) {
         compiler: execFileSync('/usr/bin/xcrun', ['clang', '--version'], { encoding: 'utf8' }).split('\n')[0],
         flags, sources: ['renderer-network.c'], signing: 'ad-hoc' } };
     fs.writeFileSync(path.join(directory, 'helper.json'), JSON.stringify(manifest, null, 2) + '\n', { flag: 'wx', mode: 0o644 });
-    const files = fs.readdirSync(directory).sort().map(name => {
+    const files = fs.readdirSync(directory).sort().filter(name=>!NoticeIntake.isNoticePath(name)).map(name => {
       const file = path.join(directory, name), stat = fs.statSync(file);
       return { path: name, size: stat.size, sha256: Native.hashFile(file), mode: stat.mode & 0o777,
         ...(name.endsWith('.node') ? { architectures } : {}) };

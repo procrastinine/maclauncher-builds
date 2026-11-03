@@ -1,3 +1,4 @@
+const Notices = require('../../../../../../../../lib/notices.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -103,14 +104,13 @@ function validateManifest(manifest, { managerId, version, upstreamRevision, arch
       manifest.platform !== "darwin" || !["arm64", "x64"].includes(manifest.arch) ||
       !/^\d+\.\d+(?:\.\d+)?$/.test(manifest.minimumMacOS || "") ||
       !Array.isArray(manifest.files) || !manifest.files.length || manifest.files.length > LIMITS.files ||
-      !Array.isArray(manifest.notices) || !manifest.notices.length ||
       manifest.provenance?.sourceRevision !== manifest.upstreamRevision || !Array.isArray(manifest.dependencies)) throw new Error("Invalid bundled runtime manifest.");
   if (managerId && manifest.managerId !== managerId || version && manifest.version !== version ||
       upstreamRevision && manifest.upstreamRevision !== upstreamRevision || arch && manifest.arch !== arch) throw new Error("Bundled runtime version, source pin or architecture differs from the selected catalog entry.");
   relativeFile(manifest.executableRelative);
   const names = new Set(), filesByPath = new Map(), directories = new Set();
   let total = 0;
-  for (const file of manifest.files) {
+  for (const file of manifest.files.filter(file=>!Notices.isNoticePath(file.path,manifest.notices))) {
     relativeFile(file.path);
     const key = file.path.normalize("NFC").toLowerCase();
     if (names.has(key) || !Number.isSafeInteger(file.size) || file.size < 0 || file.size > LIMITS.fileBytes ||
@@ -124,10 +124,7 @@ function validateManifest(manifest, { managerId, version, upstreamRevision, arch
   }
   const executable = filesByPath.get(manifest.executableRelative);
   if (!executable || !(executable.mode & 0o111) || !executable.architectures?.includes(manifest.arch === "x64" ? "x86_64" : "arm64")) throw new Error("Bundled runtime has no matching executable.");
-  for (const notice of manifest.notices) {
-    if (!notice || typeof notice.name !== "string" || !notice.name || typeof notice.license !== "string" || !notice.license ||
-        !/^https:\/\//.test(notice.sourceUrl || "") || !filesByPath.has(relativeFile(notice.path))) throw new Error("Bundled runtime license notice is missing.");
-  }
+  Notices.printWarnings(Notices.noticeRows(manifest.notices,{packageName:manifest.managerId}).warnings);
   for (const dependency of manifest.dependencies) {
     if (!dependency || !filesByPath.has(relativeFile(dependency.file)) ||
         !Array.isArray(dependency.links) || dependency.links.some(link => typeof link !== "string" || !(
@@ -153,6 +150,7 @@ function fileInventory(root) {
     if (depth > 32) throw new Error("Bundled runtime directory nesting exceeds its limit.");
     for (const entry of fs.readdirSync(path.join(root, relative), { withFileTypes: true })) {
       const name = relativeFile(path.posix.join(relative, entry.name));
+      if(Notices.isNoticePath(name,notices))continue;
       if (entry.isSymbolicLink()) throw new Error("Bundled runtime packages cannot contain symlinks.");
       if (entry.isDirectory()) walk(name, depth + 1);
       else if (entry.isFile()) files.push(name);
@@ -166,9 +164,9 @@ function fileInventory(root) {
 }
 
 function verifyPayload(root, manifest) {
-  const expected = manifest.files.map(file => file.path).sort();
-  if (JSON.stringify(fileInventory(root)) !== JSON.stringify(expected)) throw new Error("Bundled runtime file inventory differs from its manifest.");
-  for (const file of manifest.files) {
+  const expected = manifest.files.filter(file=>!Notices.isNoticePath(file.path,manifest.notices)).map(file => file.path).sort();
+  if (JSON.stringify(fileInventory(root,{notices:manifest.notices})) !== JSON.stringify(expected)) throw new Error("Bundled runtime file inventory differs from its manifest.");
+  for (const file of manifest.files.filter(file=>!Notices.isNoticePath(file.path,manifest.notices))) {
     const full = path.join(root, file.path);
     const actual = readRegular(full, file.size);
     if (actual.size !== file.size || actual.sha256 !== file.sha256 || actual.mode !== file.mode) throw new Error(`Bundled runtime checksum or permissions changed: ${file.path}`);

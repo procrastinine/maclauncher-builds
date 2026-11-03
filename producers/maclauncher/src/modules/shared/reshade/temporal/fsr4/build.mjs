@@ -1,3 +1,4 @@
+import * as NoticeIntake from '../../../../../../../../lib/notices.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import {spawn} from 'node:child_process';
 import {createHash} from 'node:crypto';
@@ -17,7 +18,7 @@ const source = path.resolve(sourceArg),
 const ownedNames =
           [
             'source.json', 'build.mjs', 'adapt-runtime.mjs', 'provider.mm',
-            'index.js', 'NOTICE.md', 'README.md', '../frame.h',
+            'index.js', 'README.md', '../frame.h',
             '../payload-files.hpp'
           ],
       ownedSnapshot = new Map(await Promise.all(ownedNames.map(
@@ -40,7 +41,7 @@ for (let i = 0; i < flags.length; i++) {
 }
 if (quick && repackage)
   throw Error('Repackaging requires an existing complete payload.');
-for (const name of ['--tools', '--lite2-weights', '--lite2-license'])
+for (const name of ['--tools', '--lite2-weights'])
   if (!options[name])
     throw Error('Missing ' + name);
 const hash = b => createHash('sha256').update(b).digest('hex'),
@@ -67,8 +68,7 @@ const capture = async (command, args) => {
 if (await capture('git', [ '-C', source, 'rev-parse', 'HEAD' ]) !== pin.commit)
   throw Error('FSR4 source pin changed.');
 await run('git', [ '-C', source, 'diff', '--exit-code', 'HEAD', '--' ]);
-for (const [option, digest] of [[ '--lite2-weights', pin.lite2.sha256 ],
-                                [ '--lite2-license', pin.lite2.licenseSha256 ]])
+for (const [option, digest] of [[ '--lite2-weights', pin.lite2.sha256 ]])
   if (hash(await fs.readFile(options[option])) !== digest)
     throw Error('The pinned Lite2 input changed: ' + option);
 const work = path.join(destination, 'source'),
@@ -181,6 +181,7 @@ if (repackage) {
       JSON.stringify(previous.tools) !== JSON.stringify(tools))
     throw Error('Repackaging cannot change compiled shader/model inputs.');
   for (const entry of previous.files) {
+    if(NoticeIntake.isNoticePath(entry.path))continue;
     const file = path.join(payload, entry.path);
     if ((await fs.stat(file)).size !== entry.size ||
         hash(await fs.readFile(file)) !== entry.sha256)
@@ -277,12 +278,11 @@ if (!repackage) {
   await fs.mkdir(path.join(payload, 'third_party/fsr411'), {recursive : true});
   await fs.rm(path.join(payload, 'third_party/fsr411/weights_lossy2.npz'),
               {force : true});
-  for (const file of ['initializers.bin', 'initializers-ultraperformance.bin',
-                      'LICENSE', 'LICENSE.AMD.md'])
+  for (const file of ['initializers.bin', 'initializers-ultraperformance.bin'])
     await fs.copyFile(path.join(work, 'third_party/fsr411', file),
                       path.join(payload, 'third_party/fsr411', file));
-  await fs.copyFile(options['--lite2-license'],
-                    path.join(payload, 'third_party/fsr411/LICENSE.Lite2.txt'));
+  for(const file of ['LICENSE','LICENSE.AMD.md'])NoticeIntake.copyNotice(path.join(work,'third_party/fsr411',file),path.join(payload,'third_party/fsr411',file));
+  if(options['--lite2-license'])NoticeIntake.copyNotice(options['--lite2-license'],path.join(payload,'third_party/fsr411/LICENSE.Lite2.txt'));
 }
 await fs.mkdir(path.join(destination, 'source-inputs'), {recursive : true});
 await fs.copyFile(options['--lite2-weights'],
@@ -319,8 +319,7 @@ await run('xcrun', [
 await run('codesign', [
   '--force', '--sign', '-', path.join(payload, 'libmaclauncher-fsr4.dylib')
 ]);
-await fs.copyFile(path.join(here, 'NOTICE.md'),
-                  path.join(payload, 'NOTICE.md'));
+NoticeIntake.copyNotice(path.join(here,'NOTICE.md'),path.join(payload,'NOTICE.md'));
 const owned = {};
 for (const [name, bytes] of ownedSnapshot) {
   owned[name] = hash(bytes);
@@ -330,7 +329,7 @@ for (const [name, bytes] of ownedSnapshot) {
 }
 const files = [];
 for (const relative of (await fs.readdir(payload, {recursive : true})).sort()) {
-  if (relative === 'provider.json')
+  if (relative === 'provider.json'||NoticeIntake.isNoticePath(relative))
     continue;
   const file = path.join(payload, relative), stat = await fs.stat(file);
   if (stat.isFile())

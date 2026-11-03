@@ -1,3 +1,4 @@
+import * as NoticeIntake from '../../../../../../../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -75,12 +76,11 @@ export function publishKosmic({source,work,library,loader,loaderNotice,spirvNoti
    links.push({file:name,links:dependencies});
   }
   const licenseRoot=path.join(payload,'licenses');fs.mkdirSync(licenseRoot);
-  const mesaLicense=execFileSync('git',['-C',source,'show',pin.revision+':docs/license.rst']);
-  fs.writeFileSync(path.join(licenseRoot,'Mesa-license.rst'),mesaLicense);
+  NoticeIntake.copyNotice(path.join(source,'docs/license.rst'),path.join(licenseRoot,'Mesa-license.rst'));
   const notices=[{name:'Mesa',license:'MIT and upstream notices',sourceUrl:pin.repository,path:'licenses/Mesa-license.rst'}];
   for(const name of read('git',['-C',source,'ls-tree','-r','--name-only',pin.revision,'licenses/']).split('\n')){
    const relative='licenses/Mesa-'+path.basename(name);
-   fs.writeFileSync(path.join(payload,relative),execFileSync('git',['-C',source,'show',pin.revision+':'+name]));
+   NoticeIntake.copyNotice(path.join(source,name),path.join(payload,relative));
    notices.push({name:'Mesa '+path.basename(name),license:path.basename(name),sourceUrl:pin.repository,path:relative});
   }
   for(const item of [
@@ -92,7 +92,7 @@ export function publishKosmic({source,work,library,loader,loaderNotice,spirvNoti
    if(!file)continue;
    fs.copyFileSync(file,path.join(payload,relative));notices.push({name,license,sourceUrl,path:relative});
   }
-  const files=Bundled.fileInventory(payload).map(relative=>{
+  const files=Bundled.fileInventory(payload).filter(relative=>!NoticeIntake.isNoticePath(relative)).map(relative=>{
    const file=path.join(payload,relative),stat=fs.statSync(file);
    const native=links.some(item=>item.file===relative);
    return {path:relative,size:stat.size,mode:stat.mode&0o777,sha256:sha(fs.readFileSync(file)),...(native?{architectures:MachO.readMachOLoadCommands(file).architectures}:{})};
@@ -126,7 +126,7 @@ export function stageKosmic({output,resourceRoot,declarationFile=path.join(root,
  const manifest=Bundled.validateManifest(JSON.parse(fs.readFileSync(path.join(output,'manifest.json'))));
  Bundled.verifyPayload(path.join(output,'files'),manifest);
  const directoryRelative=[manifest.managerId,manifest.version,manifest.arch].join('/');
- const files=Bundled.fileInventory(output).map(relative=>{
+ const files=Bundled.fileInventory(output).filter(relative=>!NoticeIntake.isNoticePath(relative)).map(relative=>{
   const full=path.join(output,relative),stat=fs.statSync(full),native=manifest.files.find(file=>'files/'+file.path===relative)?.architectures;
   return {path:relative,size:stat.size,mode:stat.mode&0o777,sha256:sha(fs.readFileSync(full)),...(native?{architectures:native}:{})};
  });

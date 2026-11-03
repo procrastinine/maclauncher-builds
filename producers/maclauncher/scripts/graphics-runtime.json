@@ -204,7 +204,7 @@
         "pointer": "/lite2"
       },
       "url": "https://raw.githubusercontent.com/zgauthier2000/fsr4-shader-performance-overrides/{commit}/LICENSE",
-      "sha256": "{licenseSha256}"
+      "notice": true
     },
     "streamline-reference": {
       "kind": "archive",

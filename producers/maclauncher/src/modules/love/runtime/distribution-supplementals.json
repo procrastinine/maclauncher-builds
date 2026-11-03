@@ -21,24 +21,6 @@
         "mode": 420
       },
       {
-        "path": "LuaJIT-MIT.txt",
-        "size": 2935,
-        "sha256": "5b79fb4754728487cf43d55b213bb68369912484f2dd7ab68380435e994bce39",
-        "mode": 420
-      },
-      {
-        "path": "LuaSteam-MIT.txt",
-        "size": 1067,
-        "sha256": "115ab018030b37f892e33da0f2af96d01b3d03c845c6ad41ce4ad19c4b342f73",
-        "mode": 420
-      },
-      {
-        "path": "MacLauncher-MIT.txt",
-        "size": 1081,
-        "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
-        "mode": 420
-      },
-      {
         "path": "luasteam.so",
         "size": 309552,
         "sha256": "1f388109f5fd18534a025287cb29df68499179f41b973411533fee41318567ef",

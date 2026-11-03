@@ -1,3 +1,4 @@
+import {copyNotices,printWarnings} from '../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -13,8 +14,9 @@ export async function buildAPK({project:id,arch,output,work}){
  fs.mkdirSync(work,{recursive:true});
  try {
   const archive=await buildInput(spec.aim.archive),source=path.join(work,'source');fs.mkdirSync(source);
-  const prefix='aim-'+spec.aim.revision,paths=[...spec.aim.paths,...spec.aim.licensePaths];
+  const prefix='aim-'+spec.aim.revision,paths=spec.aim.paths;
   execFileSync('/usr/bin/tar',['-xzf',archive,'-C',source,...paths.map(file=>prefix+'/'+file)]);
+  try{execFileSync('/usr/bin/tar',['-xzf',archive,'-C',source,...spec.aim.licensePaths.map(file=>prefix+'/'+file)]);}catch(error){printWarnings(['Some AIM notices were unavailable: '+error.message]);}
   fs.renameSync(path.join(source,prefix),path.join(source,'upstream'));
   for(const file of ['main.rs','Cargo.toml','Cargo.lock'])fs.copyFileSync(path.join(base,file),path.join(source,file));
   adapt(path.join(source,'upstream/crates/aim-apps/src'));
@@ -23,7 +25,7 @@ export async function buildAPK({project:id,arch,output,work}){
   const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});const binary=path.join(payload,'android-apk-metadata');fs.copyFileSync(path.join(work,'target',target,'release/android-apk-metadata'),binary);fs.chmodSync(binary,0o755);
   execFileSync('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',binary]);execFileSync('/usr/bin/codesign',['--verify','--strict',binary]);
   const notices=[];
-  const copyNotice=(file,relative,name,license)=>{const target=path.join(payload,relative);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(file,target);fs.chmodSync(target,0o644);notices.push({name,license,path:relative});};
+  const copyNotice=(file,relative,name,license)=>{const result=copyNotices([{file,path:relative,name,license}],{output:payload});printWarnings(result.warnings);notices.push(...result.notices.map(({file,...notice})=>notice));};
   for(const file of spec.aim.licensePaths)copyNotice(path.join(source,'upstream',file),'licenses/aim/'+file,'AIM','Apache-2.0');
   copyNotice(path.join(root,'producers/maclauncher/LICENSE'),'licenses/maclauncher/LICENSE','MacLauncher metadata protocol','MIT');
   for(const [index,notice] of rustNotices({source,output:path.join(work,'notices'),env}).entries())copyNotice(notice.file,'licenses/dependencies/'+index+'-'+path.basename(notice.file),notice.name,notice.license);

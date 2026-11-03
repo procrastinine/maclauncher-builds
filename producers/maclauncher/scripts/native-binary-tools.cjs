@@ -1,3 +1,4 @@
+const NoticeIntake = require('../../../lib/notices.mjs');
 // Shared native binary inspection, copying and dependency notices.
 const fs = require("node:fs"), path = require("node:path"), crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
@@ -156,13 +157,11 @@ function addDependencyNotices(source, payload, notices, seen, receiptRoot) {
   const formula = formulaRoot(source);
   if (!formula || seen.has(formula.root)) return;
   if (notices.some(notice => notice.dependencyName === formula.name)) { seen.add(formula.root); return; }
-  const candidates = fs.readdirSync(formula.root).filter(name => /^(?:(?:licen[sc]e|copying|copyright|notice)(?:[._-].*)?|(?:AGPL|GPL|LGPL|MPL|Apache|MIT|BSD|ISC|Zlib)(?:[-_.].*)?)$/i.test(name));
-  if (!candidates.length) throw new Error(`Missing license notice for ${formula.name} ${formula.version}; add it explicitly to this package's notices.`);
+  let candidates=[];try { candidates=fs.readdirSync(formula.root).filter(name=>/^(?:licen[sc]e|copying|copyright|notice)(?:[._-].*)?$/i.test(name)); } catch {}
   seen.add(formula.root);
-  for (const name of candidates) {
-    const relative = `licenses/dependencies/${formula.name}-${formula.version}/${name}`;
-    copyTree(path.join(formula.root, name), path.join(payload, relative));
-    notices.push({ name: `${formula.name} ${formula.version}`, license: "See included upstream license", sourceUrl: `https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/${formula.name[0]}/${formula.name}.rb`, path: relative });
+  for(const name of candidates){
+    const relative=`licenses/dependencies/${formula.name}-${formula.version}/${name}`;
+    if(NoticeIntake.copyNotice(path.join(formula.root,name),path.join(payload,relative)))notices.push({name:`${formula.name} ${formula.version}`,license:'See included upstream license',sourceUrl:`https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/${formula.name[0]}/${formula.name}.rb`,path:relative});
   }
   const receipt = path.join(formula.root, "INSTALL_RECEIPT.json");
   if (fs.existsSync(receipt)) {

@@ -1,3 +1,4 @@
+import * as NoticeIntake from '../../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
@@ -14,6 +15,7 @@ function inventory(directory,prefix=''){
  const files=[];
  for(const entry of fs.readdirSync(path.join(directory,prefix),{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))){
   const relative=prefix?prefix+'/'+entry.name:entry.name;
+  if(NoticeIntake.isNoticePath(relative))continue;
   if(entry.isDirectory())files.push(...inventory(directory,relative));
   else if(entry.isFile())files.push({path:relative,...metadata(path.join(directory,relative))});
   else throw Error('Engine packages require regular files.');

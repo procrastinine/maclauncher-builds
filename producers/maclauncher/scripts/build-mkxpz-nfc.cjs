@@ -1,3 +1,4 @@
+const NoticeIntake = require('../../../lib/notices.mjs');
 // Maintainer source build. Ordinary Play uses the sealed Included artifact.
 const fs = require('node:fs'), path = require('node:path'), os = require('node:os');
 const {execFileSync} = require('node:child_process');
@@ -135,6 +136,7 @@ function stage({work, source, output, version}) {
   run('/usr/bin/codesign', ['--force','--sign','-',path.join(payload,apps[0])]);
   run('/usr/bin/codesign', ['--verify','--deep','--strict',path.join(payload,apps[0])]);
   for (const relative of B.fileInventory(payload)) {
+    if(NoticeIntake.isNoticePath(relative,notices))continue;
     const file = path.join(payload,relative), stat = fs.lstatSync(file); let architectures;
     try { architectures = Native.readMachOArchitectures(file,{allowLibrary:true}); } catch {}
     if (architectures) {

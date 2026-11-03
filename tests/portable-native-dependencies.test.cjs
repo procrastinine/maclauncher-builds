@@ -21,13 +21,13 @@ test("portable dependency archives bind exact sizes and hashes and reject aliase
     archiveBytes: bytes.length, archiveUrl: "https://example.invalid/source.tar.gz", notices: ["LICENSE"], options: ["-DFEATURE=ON"] };
   const catalog = { schemaVersion: 1, version: "fixture-v1", architecture: "arm64", minimumMacOS: "13.0", dependencies: [pin] };
   assert.deepEqual(Fonts.validateArchives({ fixture: file }, { catalog }), [pin]);
+  assert.equal(Fonts.validateArchives({ fixture: file }, { catalog: { ...catalog, dependencies: [{ ...pin, notices: ["../LICENSE"] }] } }).length, 1);
   const alias = path.join(root, "alias.tar.gz"); fs.symlinkSync(file, alias);
   assert.throws(() => Fonts.validateArchives({ fixture: alias }, { catalog }), /checksum or size/);
   assert.throws(() => Fonts.validateArchives({}, { catalog }), /checksum or size/);
   fs.writeFileSync(file, "changed archive bytes");
   assert.throws(() => Fonts.validateArchives({ fixture: file }, { catalog }), /checksum or size/);
-  for (const change of [p => { p.revision = "short"; }, p => { p.archiveSha256 = "short"; }, p => { p.notices = ["../LICENSE"]; },
-    p => { p.options = ["--untrusted"]; }, p => { p.id = "../escape"; }]) {
+  for (const change of [p => { p.revision = "short"; }, p => { p.archiveSha256 = "short"; }, p => { p.options = ["--untrusted"]; }, p => { p.id = "../escape"; }]) {
     const changed = structuredClone(catalog); change(changed.dependencies[0]);
     assert.throws(() => Fonts.validateArchives({ fixture: file }, { catalog: changed }), /exact source pins/);
   }

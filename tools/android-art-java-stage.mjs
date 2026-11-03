@@ -1,3 +1,4 @@
+import {copyNotices,sourceNotices,printWarnings} from '../lib/notices.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -71,8 +72,9 @@ export function packageAndroidArtJavaInput({framework,image,output,work,arch='ar
  const built={bootstrapDex:path.join(work,'compile/bootstrap/hooks-dex.jar'),servicesJar:path.join(work,'compile/bootstrap/services.jar'),frameworkJar:path.join(work,'compile/bootstrap/framework.jar'),frameworkResourcePreinitVersion:1};
  for(const file of [built.bootstrapDex,built.servicesJar,built.frameworkJar])if(!completed.inputs.some(record=>record.file===file))throw Error('ART Java completion does not include every declared product.');
  const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});for(const [key,name]of Object.entries({bootstrapDex:'hooks-dex.jar',servicesJar:'services.jar',frameworkJar:'framework.jar'}))fs.copyFileSync(built[key],path.join(payload,name),fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);
- fs.cpSync(path.join(framework,'notices'),path.join(payload,'notices/framework'),{recursive:true});fs.copyFileSync(path.join(Array.isArray(image)?image[0]:image,'notices/android-sdk-arm-dbt-license.txt'),path.join(payload,'notices/android-sdk-arm-dbt-license.txt'));
- const notices=B.fileInventory(path.join(payload,'notices')).map(file=>({name:'Android ART Java '+file,license:'See original notice',path:'notices/'+file,sourceUrl:definition.androidSource.repository}));
+ const noticeRoot=path.join(framework,'notices'),candidates=sourceNotices(noticeRoot,{all:true,name:'Android ART Java framework',repository:definition.androidSource.repository}).map(notice=>({...notice,path:'notices/framework/'+path.relative(noticeRoot,notice.file)}));
+ candidates.push({file:path.join(Array.isArray(image)?image[0]:image,'notices/android-sdk-arm-dbt-license.txt'),path:'notices/android-sdk-arm-dbt-license.txt',name:'Android SDK system image',license:'Android SDK ARM DBT license',sourceUrl:definition.androidSource.repository});
+ const copied=copyNotices(candidates,{output:payload});printWarnings(copied.warnings);const notices=copied.notices.map(({file,...notice})=>notice);
  return helperPackage({id:stage.id,version:stage.version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{androidSource:definition.androidSource,frameworkInputSha256:checked.declaration.manifestSha256,originalImageSha256:json(path.join(root,'producers/android-image-data/source.json')).archive.sha256,buildOverlay:stage.compileOverlay,jdk:{sha256:jdkPin.sha256},compilerInputs:profile,dexTools:dex,frameworkResourcePreinitVersion:built.frameworkResourcePreinitVersion},notices});
 }
 

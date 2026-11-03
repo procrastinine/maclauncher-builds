@@ -1,3 +1,4 @@
+const NoticeIntake = require('../../../../../../lib/notices.mjs');
 const path = require("node:path");
 const fs = require("node:fs");
 const crypto = require("node:crypto");
@@ -29,7 +30,7 @@ function createStagingInput(appRoot) {
 }
 
 function publisherArtifactTree(root) {
-  const files = Bundled.fileInventory(root).filter(relative => relative !== ".maclauncher-mkxpz.json").map(relative => {
+  const files = Bundled.fileInventory(root).filter(relative => relative !== ".maclauncher-mkxpz.json").filter(relative=>!NoticeIntake.isNoticePath(relative)).map(relative=> {
     const file = path.join(root, relative), stat = fs.lstatSync(file);
     if (!stat.isFile() || stat.isSymbolicLink()) throw new Error("MKXP-Z publisher resources must be regular files.");
     return { path: relative, size: stat.size, mode: stat.mode & 0o777, sha256: Native.hashFile(file) };

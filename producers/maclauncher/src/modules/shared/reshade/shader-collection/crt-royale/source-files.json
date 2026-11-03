@@ -13,12 +13,6 @@
   ],
   "files": [
     {
-      "path": "LICENSE.TXT",
-      "sourcePath": "LICENSE.TXT",
-      "size": 15521,
-      "sha256": "186d4b813cca7c779938db8fb041d9fe9c132f403045f88c251af1656358d169"
-    },
-    {
       "path": "README.MD",
       "sourcePath": "README.MD",
       "size": 1501,

@@ -46,6 +46,8 @@ Commits written directly into an upstream entry are accepted only in resolved, s
 
 ## HTTP build inputs
 
-Build-input downloads use one HTTP transport with up to five attempts and exponential backoff. Connections have a 20-second timeout; transfers below 1 KB/s for 60 seconds are treated as stalled. Healthy transfers have no duration cap. Stalls, interrupted connections, HTTP 429 and server failures can retry. Other client errors, including HTTP 404, fail immediately. Source-object, archive-size and checksum verification follows the download and is never retried as a transport failure. HTTPS inputs remain on HTTPS across redirects.
+Build-input downloads use one HTTP transport with up to six attempts and exponential backoff (5, 10, 20, 40 and 80 seconds). Connections have a 20-second timeout; transfers below 1 KB/s for 60 seconds are treated as stalled. Healthy transfers have no duration cap. Stalls, interrupted connections, HTTP 408/429 and server failures can retry. Other client errors, including HTTP 404, fail immediately. Source-object, archive-size and checksum verification follows the download and is never retried as a transport failure. HTTPS inputs remain on HTTPS across redirects.
 
-Git source fetches and submodule initialization repeat up to five times with the same backoff.
+Git source fetches and submodule initialization use the same transient-only policy as attestation, artifact transfers and release API requests.
+
+Licence notices are copied as candidates without size or checksum pins. Sealing retains usable text and reports unusable candidates as warnings; when none remain, package-notice.txt names the package and source repository. Notice files are separate archive members without per-file size or digest facts. Source archives, executables and non-notice payload inventories retain their ordinary integrity checks; the archive digest and attestation cover all archive bytes.

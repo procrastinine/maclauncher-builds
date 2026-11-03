@@ -8,6 +8,7 @@ import {retryNetwork} from './download.mjs';
 import {checkoutSource,sourceNotices,run,recipeMain} from './build-source.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 import {collectSdlNotices} from './sdl-notices.mjs';
+import {intakeNotices,printWarnings} from '../lib/notices.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Builder=require('../producers/maclauncher/src/modules/fna/runtime/build.js');
 export const RUNTIMES=Object.freeze({
  arm64:{url:'https://builds.dotnet.microsoft.com/dotnet/Runtime/8.0.32/dotnet-runtime-8.0.32-osx-arm64.tar.gz',sha256:'0e36796c3415bd95c25184fe81386bfc5a5a0b1668ce2f7d8127e03009dec73c',bytes:29113232},
@@ -19,14 +20,10 @@ const STB_NOTICES=Object.freeze([
 ]);
 /** Select complete original license terms from the compiled headers. */
 export function selectStbNotices(runtime,{output}){
- if(!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select a new absolute notice output directory.');
- const selections=[];fs.mkdirSync(output,{recursive:true});
+ const selections=[];
  for(const [filename,project,sourceRelative]of STB_NOTICES){
-  const input=path.join(runtime,'licenses',filename),bytes=fs.readFileSync(input),text=bytes.toString('utf8');
-  const blocks=[...text.matchAll(/\/\*\r?\n-+\r?\nThis software is available under 2 licenses -- choose whichever you prefer\.[\s\S]*?\r?\n\*\//g)];
-  if(blocks.length!==1||text.slice(blocks[0].index+blocks[0][0].length).trim()||!blocks[0][0].includes('Copyright (c) 2017 Sean Barrett')||!blocks[0][0].includes('ALTERNATIVE A - MIT License')||!blocks[0][0].includes('ALTERNATIVE B - Public Domain'))throw Error('The original stb license block changed: '+filename);
-  const notice=Buffer.from(blocks[0][0]+'\n'),file=path.join(output,filename);fs.writeFileSync(file,notice,{flag:'wx',mode:0o644});fs.rmSync(input);
-  selections.push({filename,project,sourceRelative,file,sourceHeaderSha256:crypto.createHash('sha256').update(bytes).digest('hex'),noticeSha256:crypto.createHash('sha256').update(notice).digest('hex')});
+  const result=intakeNotices([{file:path.join(runtime,'licenses',filename),path:filename,name:project+' '+sourceRelative,license:'MIT OR Unlicense',sourceUrl:'https://github.com/FNA-XNA/'+project}],{output,packageName:project,sourceUrl:'https://github.com/FNA-XNA/'+project,standIn:false});
+  printWarnings(result.warnings);for(const notice of result.notices)selections.push({filename,project,sourceRelative,file:notice.file});
  }
  return selections;
 }

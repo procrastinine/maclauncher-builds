@@ -1,3 +1,4 @@
+import * as NoticeIntake from '../../../../../../../lib/notices.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -59,9 +60,10 @@ export function publishSceneProvider({library,projected,output,architecture,depe
  const links=read('/usr/bin/otool',['-L',library]).split('\n').slice(2).map(line=>line.trim().split(' (')[0]);for(const link of links)if(link&&!link.startsWith('/System/Library/')&&!link.startsWith('/usr/lib/'))throw Error('Unclosed provider dependency: '+link);
  fs.mkdirSync(output,{recursive:true});const name='libMoltenVK-scene.dylib',destination=path.join(output,name);fs.copyFileSync(library,destination);fs.chmodSync(destination,0o755);
  run('/usr/bin/install_name_tool',['-id','@rpath/'+name,destination]);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',destination]);
- fs.copyFileSync(path.join(projected,'LICENSE'),path.join(output,'MoltenVK-LICENSE'));
- const notices=['MoltenVK-LICENSE'];for(const item of source.dependencies){const input=dependencies?.[item.id];if(!input)throw Error('Dependency source is missing at publication: '+item.id);const notice=['LICENSE','LICENSE.txt','LICENSE.md'].find(file=>fs.existsSync(path.join(input,file)));const licenses=item.licenseFiles||[notice];if(licenses.some(file=>!file||!fs.existsSync(path.join(input,file))))throw Error('Dependency license is missing: '+item.id);const destination=item.id+'-LICENSE';writeChanged(path.join(output,destination),licenses.map(file=>fs.readFileSync(path.join(input,file),'utf8')).join('\n\n'));notices.push(destination);}
- const files=[name,...notices].map(file=>({path:file,sha256:digest(fs.readFileSync(path.join(output,file))),size:fs.statSync(path.join(output,file)).size}));
+ NoticeIntake.copyNotice(path.join(projected,'LICENSE'),path.join(output,'MoltenVK-LICENSE'));
+ const notices=['MoltenVK-LICENSE'];for(const item of source.dependencies){const input=dependencies?.[item.id];if(!input)throw Error('Dependency source is missing at publication: '+item.id);const candidates=item.licenseFiles||['LICENSE','LICENSE.txt','LICENSE.md'];for(const [index,file] of candidates.entries()){const destination=item.id+'-'+index+'-LICENSE';if(NoticeIntake.copyNotice(path.join(input,file),path.join(output,destination)).notices.length)notices.push(destination);}}
+
+ const files=[name,...notices].filter(file=>!NoticeIntake.isNoticePath(file)&&fs.existsSync(path.join(output,file))).map(file=>({path:file,sha256:digest(fs.readFileSync(path.join(output,file))),size:fs.statSync(path.join(output,file)).size}));
  const provider={schema:1,provider:'moltenvk',sceneOperationAPI:1,sceneStagingAPI:1,sceneOperationResources:'prepared-tracked-boundary',originalOutputRetained:true,
   library:name,architectures:[architecture],minimumMacOS:source.minimumMacOS,files,buildInputs};
  writeChanged(path.join(output,'provider.json'),JSON.stringify(provider,null,2)+'\n');return provider;
@@ -101,7 +103,7 @@ export function publishScenePackage({providerDirectory,peerDirectory,output}){
   if(inputs.length===2){const library=path.join(temporary,provider.library);run('/usr/bin/lipo',['-create',...inputs.map(input=>input.library),'-output',library]);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',library]);if(JSON.stringify(MachO.readMachOLoadCommands(library).architectures.sort())!==JSON.stringify(architectures))throw Error('The merged driver is missing a CPU slice');}
   provider.files=provider.files.map(row=>row.path===provider.library?{...row,sha256:digest(fs.readFileSync(path.join(temporary,row.path))),size:fs.statSync(path.join(temporary,row.path)).size}:row);
   writeChanged(path.join(temporary,'provider.json'),JSON.stringify(provider,null,2)+'\n');
-  const files=Bundled.fileInventory(temporary).map(file=>{const stored=Bundled.readRegular(path.join(temporary,file),Bundled.LIMITS.fileBytes);return {path:file,size:stored.size,mode:stored.mode,sha256:stored.sha256,...(file===provider.library?{architectures}:{})};});
+  const files=Bundled.fileInventory(temporary).filter(relative=>!NoticeIntake.isNoticePath(relative)).map(file=>{const stored=Bundled.readRegular(path.join(temporary,file),Bundled.LIMITS.fileBytes);return {path:file,size:stored.size,mode:stored.mode,sha256:stored.sha256,...(file===provider.library?{architectures}:{})};});
   const manifest={schemaVersion:1,managerId:source.projectId,version:source.version,upstreamRevision:source.revision,
    platform:'darwin',arch:inputs.length===2?'universal':architectures[0]==='x86_64'?'x64':'arm64',minimumMacOS:source.minimumMacOS,
    executableRelative:provider.library,files,dependencies:[{file:provider.library,links:first.links}],notices,provider,

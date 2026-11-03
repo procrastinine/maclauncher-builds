@@ -21,12 +21,6 @@
         "mode": 420
       },
       {
-        "path": "license.txt",
-        "size": 1081,
-        "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
-        "mode": 420
-      },
-      {
         "path": "mkxpz-config.dylib",
         "size": 104416,
         "sha256": "b5bbf7065e95e21320e15e916672aa4c46f604b0dc38343ce1e4957e0a8df48e",

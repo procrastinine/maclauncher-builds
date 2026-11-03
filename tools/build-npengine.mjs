@@ -8,9 +8,10 @@ import {sealRuntime} from './seal-runtime.mjs';
 import {collectSdlNotices} from './sdl-notices.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {nativeStackInput} from './native-stack.mjs';
+import {fetchNotices,printWarnings} from '../lib/notices.mjs';
 const require=createRequire(import.meta.url);
 const Builder=require('../producers/maclauncher/src/modules/nitroplus/runtime/portable-build.js'),Media=require('../producers/maclauncher/src/modules/nitroplus/runtime/portable-media.js'),Fonts=require('../producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.js');
-const MEDIA_NOTICE_INPUTS=Object.freeze({fontconfig:{version:'2.16.1',filename:'COPYING',url:'https://raw.githubusercontent.com/fontconfig/fontconfig/fdfc3445d1cc9c1c7e587fb2a1287871de16faf9/COPYING',sha256:'51a51aa9823704fd90bccc616cdd17ebabb5b2b3e9cbde886ca02c7002288067',bytes:8616},libpng:{version:'1.6.56',filename:'LICENSE',url:'https://raw.githubusercontent.com/pnggroup/libpng/d5515b5b8be3901aac04e5bd8bd5c89f287bcd33/LICENSE',sha256:'bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526',bytes:5345}});
+const MEDIA_NOTICE_INPUTS=Object.freeze({fontconfig:{version:'2.16.1',filename:'COPYING',url:'https://raw.githubusercontent.com/fontconfig/fontconfig/fdfc3445d1cc9c1c7e587fb2a1287871de16faf9/COPYING'},libpng:{version:'1.6.56',filename:'LICENSE',url:'https://raw.githubusercontent.com/pnggroup/libpng/d5515b5b8be3901aac04e5bd8bd5c89f287bcd33/LICENSE'}});
 const capture=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',maxBuffer:64<<20,...options});
 /** Decode the declared PBZX package payload into its cpio archive. */
 function decodePayload(input,output){
@@ -35,9 +36,15 @@ export async function projectMedia(work){
  const media=Media.validateSDKPrefix(prefix);return {media,notices:await mediaNotices(work)};
 }
 export async function mediaNotices(work){
- const notices=[];for(const pin of Media.PIN.correspondingSources){if(MEDIA_NOTICE_INPUTS[pin.id]){const selected=MEDIA_NOTICE_INPUTS[pin.id];if(selected.version!==pin.version)throw Error('Media source notice version differs.');const directory=path.join(work,'media-notices',pin.id),file=path.join(directory,selected.filename);fs.mkdirSync(directory,{recursive:true});fs.copyFileSync(await buildInput(selected),file);notices.push({file,name:pin.id+' '+pin.version,license:'See original notice',sourceUrl:selected.url});continue;}const archive=await buildInput({url:pin.archiveUrl,sha256:pin.archiveSha256,bytes:pin.archiveBytes}),directory=path.join(work,'media-notices',pin.id);fs.mkdirSync(directory,{recursive:true});
-  const listing=capture('/usr/bin/tar',['-tf',archive]).trim().split('\n'),selected=listing.filter(file=>/^(?:LICEN[CS]E|COPYING|NOTICE|COPYRIGHT)(?:[._-]|$)/i.test(path.basename(file))&&!file.endsWith('/'));
-  if(!selected.length)throw Error('Missing GStreamer dependency notice for '+pin.id);run('/usr/bin/tar',['-xf',archive,'-C',directory,...selected]);notices.push(...sourceNotices(directory,{name:pin.id+' '+pin.version,repository:pin.archiveUrl}));
+ const notices=[];
+ for(const pin of Media.PIN.correspondingSources){
+  const selected=MEDIA_NOTICE_INPUTS[pin.id];
+  if(selected){const result=await fetchNotices([{url:selected.url,path:selected.filename,name:pin.id+' '+pin.version,license:'See original notice',sourceUrl:selected.url}],{output:path.join(work,'media-notices',pin.id)});printWarnings(result.warnings);notices.push(...result.notices);continue;}
+  try{
+   const archive=await buildInput({url:pin.archiveUrl,sha256:pin.archiveSha256,bytes:pin.archiveBytes}),directory=path.join(work,'media-notices',pin.id);fs.mkdirSync(directory,{recursive:true});
+   const listing=capture('/usr/bin/tar',['-tf',archive]).trim().split('\n'),members=listing.filter(file=>/^(?:LICEN[CS]E|COPYING|NOTICE|COPYRIGHT)(?:[._-]|$)/i.test(path.basename(file))&&!file.endsWith('/'));
+   if(members.length)run('/usr/bin/tar',['-xf',archive,'-C',directory,...members]);notices.push(...sourceNotices(directory,{name:pin.id+' '+pin.version,repository:pin.archiveUrl}));
+  }catch(error){printWarnings(['Could not collect '+pin.id+' notices: '+error.message]);}
  }
  return notices;
 }

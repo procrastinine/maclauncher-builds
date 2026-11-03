@@ -134,7 +134,7 @@ test('a VNDS-LOVE package revision preserves engine files and historical packagi
  const release=await prepareRelease({project:'vnds-love',input,declaration,output:path.join(work,'release')});
  assert.equal(release.id,'vnds-love');
  const actual=JSON.parse(fs.readFileSync(built.declaration));
- assert.deepEqual(actual.files.filter(row=>row.path!=='manifest.json'),declaration.files.filter(row=>row.path!=='manifest.json'));
+ assert.deepEqual(actual.files.filter(row=>row.path!=='manifest.json'&&row.path!=='package-notice.txt'),declaration.files.filter(row=>row.path!=='manifest.json'&&row.path!=='package-notice.txt'));
 });
 
 test('build jobs cannot mutate repository contents',()=>{

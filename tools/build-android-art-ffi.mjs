@@ -1,3 +1,4 @@
+import {copyNotice} from '../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -30,7 +31,7 @@ export async function buildAndroidArtFfi({project,version,arch,output,work}){
  const machines=[...headers.matchAll(/^\s*Machine:\s*(.+)$/gm)].map(match=>match[1]);
  if(!members.length||machines.length!==members.length||machines.some(machine=>machine!=='AArch64'))throw Error('The libffi archive contains a different target architecture.');
  const payload=path.join(output,'payload');fs.mkdirSync(path.join(payload,'lib'),{recursive:true});fs.mkdirSync(path.join(payload,'notices'));
- fs.copyFileSync(built.archive,path.join(payload,'lib/libffi.a'));fs.cpSync(built.include,path.join(payload,'include'),{recursive:true});fs.copyFileSync(built.license,path.join(payload,'notices/libffi-LICENSE'));
+ fs.copyFileSync(built.archive,path.join(payload,'lib/libffi.a'));fs.cpSync(built.include,path.join(payload,'include'),{recursive:true});copyNotice(built.license,path.join(payload,'notices/libffi-LICENSE'));
  const result=helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{androidSource:profile.androidSource,upstream:profile.libffi,ndk:{version:profile.ndk.version,sha256:profile.ndk.sha256},target:'aarch64-linux-android35',archiveMembers:members,tools:{autoconf:read('autoconf',['--version']).split('\n')[0],automake:read('automake',['--version']).split('\n')[0],make:read('make',['--version']).split('\n')[0]}},notices:[{name:'libffi',license:'MIT',path:'notices/libffi-LICENSE',sourceUrl:profile.libffi.repository}]});
  return result;
 }

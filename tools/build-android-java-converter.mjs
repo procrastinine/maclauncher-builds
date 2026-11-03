@@ -7,6 +7,7 @@ import {createRequire} from 'node:module';
 import {checkoutSource,run,recipeMain,sourceNotices} from './build-source.mjs';
 import {buildInput} from './build-input.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
+import {copyNotices,printWarnings} from '../lib/notices.mjs';
 const root=path.resolve(import.meta.dirname,'..'),descriptor=path.join(root,'producers/android-inputs/java-converter.json');
 const profile=()=>JSON.parse(fs.readFileSync(descriptor));
 const read=(command,args)=>execFileSync(command,args,{encoding:'utf8',maxBuffer:32<<20}).trim();
@@ -38,14 +39,9 @@ export async function buildAndroidJavaConverterInput({output,work}){
  const {buildConverter}=await import(pathToFileURL(path.join(native,'converter-build.mjs'))),build=path.join(work,'build');
  const built=await buildConverter({root:native,build,output,jdk,checkout:converter,apksig:path.join(tools,catalogs.apksig.files[0].path),asmClasspath:catalogs.asm.files.map(file=>path.join(tools,file.path)).join(path.delimiter)});
  fs.copyFileSync(built.apiHeaders,path.join(output,'android-api-headers.jar'),fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);
- const notices=[];
- for(const [index,notice]of sourceNotices(converter,{name:'dex2jvm',repository:definition.converter.repository}).entries()){
-  const relative='notices/converter/'+index+'-'+path.basename(notice.file);fs.mkdirSync(path.dirname(path.join(output,relative)),{recursive:true});fs.copyFileSync(notice.file,path.join(output,relative));const {file,...metadata}=notice;notices.push({...metadata,path:relative});
- }
- for(const name of ['asm','apksig']){
-  fs.cpSync(path.join(native,'notices',name),path.join(output,'notices',name),{recursive:true});
-  for(const relative of B.fileInventory(path.join(output,'notices',name)))notices.push({name:name+' '+relative,license:catalogs[name].license,path:'notices/'+name+'/'+relative,sourceUrl:catalogs[name].url});
- }
+ const candidates=sourceNotices(converter,{name:'dex2jvm',repository:definition.converter.repository}).map((notice,index)=>({...notice,path:'notices/converter/'+index+'-'+path.basename(notice.file)}));
+ for(const name of ['asm','apksig'])for(const notice of sourceNotices(path.join(native,'notices',name),{all:true,name,repository:catalogs[name].url}))candidates.push({...notice,path:'notices/'+name+'/'+path.relative(path.join(native,'notices',name),notice.file)});
+ const copied=copyNotices(candidates,{output});printWarnings(copied.warnings);const notices=copied.notices.map(({file,...notice})=>notice);
  return {root:output,notices,record:{androidSource:definition.androidSource,converter:definition.converter,jdk:{sha256:jdkPin.sha256,version:read(path.join(jdk,'bin/java'),['--version']).split('\n')[0]},tools:catalogs}};
 }
 

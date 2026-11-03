@@ -15,78 +15,6 @@
     "manifestSha256": "e80e9464a70958b8e78847697db419fe14ae15e898b5a7c0571dccbc63036ff0",
     "files": [
       {
-        "path": "licenses/native-filters/ssr-MIT.txt",
-        "sha256": "b0435e3b3e4e55238f05f4b306f30524a1b2e20147810d436eaa554fa6855c80",
-        "size": 1149,
-        "mode": 420
-      },
-      {
-        "path": "licenses/native-filters/histogram-exposure-MIT.txt",
-        "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
-        "size": 1081,
-        "mode": 420
-      },
-      {
-        "path": "licenses/native-filters/local-laplacian-MIT.txt",
-        "sha256": "f8dfa0ece6635d3c5b8c65120e6c3aa94a80df77e023f24df35570b70f79ebfc",
-        "size": 14716,
-        "mode": 420
-      },
-      {
-        "path": "licenses/native-filters/cmaa2-APACHE-2.0.txt",
-        "sha256": "be3cb07dcb1bb6b191d4fa72910d9ccfcdd7d035d2be92c97a7e84a476406c54",
-        "size": 10429,
-        "mode": 420
-      },
-      {
-        "path": "licenses/native-filters/cmaa2-THIRD-PARTY.txt",
-        "sha256": "1366fa0339b2ecd8b0ae9c3cf52034e2f9dc3a4a922010900179416f4af22527",
-        "size": 14728,
-        "mode": 420
-      },
-      {
-        "path": "licenses/native-filters/xegtao-MIT.txt",
-        "sha256": "1f3bfd6b628535f0f0e779e70c260cfdc1bb45bc8644d7108e65f83e24a05cba",
-        "size": 1081,
-        "mode": 420
-      },
-      {
-        "path": "licenses/native-filters/cacao-MIT.txt",
-        "sha256": "82cf74fc23885107c7f69249ac3f1dac55898ff68320eb2c753984cae6b2d78a",
-        "size": 1115,
-        "mode": 420
-      },
-      {
-        "path": "licenses/native-filters/depth-effects-MIT.txt",
-        "sha256": "715dfa2cf3ea38aff207a34ec79611f80bf9189e121f564e42cff4aeed8541c1",
-        "size": 1067,
-        "mode": 420
-      },
-      {
-        "path": "licenses/native-filters/dof-MIT.txt",
-        "sha256": "82cf74fc23885107c7f69249ac3f1dac55898ff68320eb2c753984cae6b2d78a",
-        "size": 1115,
-        "mode": 420
-      },
-      {
-        "path": "licenses/native-filters/dof-HASH22-MIT.txt",
-        "sha256": "ba46903318c122b15d9baa0ff607bf383a94144686f454e1ec50718d10266121",
-        "size": 1122,
-        "mode": 420
-      },
-      {
-        "path": "licenses/native-filters/ffx-lens-MIT.txt",
-        "sha256": "82cf74fc23885107c7f69249ac3f1dac55898ff68320eb2c753984cae6b2d78a",
-        "size": 1115,
-        "mode": 420
-      },
-      {
-        "path": "licenses/native-filters/ffx-blur-MIT.txt",
-        "sha256": "82cf74fc23885107c7f69249ac3f1dac55898ff68320eb2c753984cae6b2d78a",
-        "size": 1115,
-        "mode": 420
-      },
-      {
         "path": "libreshade-macos.dylib",
         "sha256": "99d78a6ad24aa2c68a8f7396d468032dbfc7058341f2cdd6003dae793d1dc09d",
         "size": 20393072,
@@ -467,42 +395,6 @@
         "executionArchitecture": "x86_64"
       },
       {
-        "path": "notices/librashader/LICENSE.md",
-        "sha256": "69c15395f33bc9ce8e1d8b6cef42b7e49cdec4c6f5233d4b9cfc4bfa335f97f9",
-        "size": 15383,
-        "mode": 420
-      },
-      {
-        "path": "notices/librashader/source.json",
-        "sha256": "f0b1d80199dbeb3111cc9723233d7f419410d6f7049f0ce6b2ca5f6f0014e927",
-        "size": 879,
-        "mode": 420
-      },
-      {
-        "path": "xess/INTEL-LICENSE.txt",
-        "sha256": "784be42c39a4a4d03cf85d88e15e59d75828fca773ce45b8dbfffbd7eaf208df",
-        "size": 4194,
-        "mode": 420
-      },
-      {
-        "path": "xess/INTEL-THIRD-PARTY.txt",
-        "sha256": "e8d8899dbfc4de0e8ca25560be9358e03c1405d7c956d20a1838c3c709b9b51c",
-        "size": 35788,
-        "mode": 420
-      },
-      {
-        "path": "xess/KHRONOS-APACHE-2.0.txt",
-        "sha256": "7e4d3fba250d15e9e0afa380d4b611828fa2560cc8fdebe95bcf2f01a487de12",
-        "size": 10045,
-        "mode": 420
-      },
-      {
-        "path": "xess/LICENSE.txt",
-        "sha256": "ab09ca50662d81d0689a94f8b77834d287ff769dbeccb20968dd71bceb601317",
-        "size": 1063,
-        "mode": 420
-      },
-      {
         "path": "xess/x86_64-windows/maclauncher-xess-fg-host.exe",
         "sha256": "27b9ae896b7a8130009e707a758a81ae03879ed713a394fa8d71c503c6b73a9a",
         "size": 825856,
@@ -530,42 +422,6 @@
         "path": "xess/provider.json",
         "sha256": "0cc77fb8c7aa611c5640011a6fb9ae1bb98e44f495ccecdd5e99e7631b52cce3",
         "size": 5805,
-        "mode": 420
-      },
-      {
-        "path": "xess/INTEL-HEADERS-MIT.txt",
-        "sha256": "f09a35f93520e4efa65c413a5c9797e96e0c2138fe53ea416e8e90ab2bc9fed7",
-        "size": 1082,
-        "mode": 420
-      },
-      {
-        "path": "isf/ISF-LICENSE.txt",
-        "sha256": "8b869ea0f5c85a59c69390bb3394478b2ce20b89674aaf11585160b71c939116",
-        "size": 84452,
-        "mode": 420
-      },
-      {
-        "path": "isf/ISFGLSLGenerator-LICENSE.txt",
-        "sha256": "be82abb2d428f3b0d14596006449b0009fb2c655f8ce6092ed2161eb06071e67",
-        "size": 4669,
-        "mode": 420
-      },
-      {
-        "path": "isf/PINCache-LICENSE.txt",
-        "sha256": "ff7815545a466d100b5873e9d7a8a4e803788da9e6d68bf30e155c296a4d0b31",
-        "size": 10839,
-        "mode": 420
-      },
-      {
-        "path": "isf/PINOperation-LICENSE.txt",
-        "sha256": "bb28c48e3e078166e91cfc2b6db7ffebb8a0973b9e23b3df060561292d8d69ec",
-        "size": 10140,
-        "mode": 420
-      },
-      {
-        "path": "isf/VVMetalKit-LICENSE.txt",
-        "sha256": "fc532b7832d3f5cf1de40e7b579a9733aecc466cf39b0fc4656f26da9f1c7319",
-        "size": 3821,
         "mode": 420
       },
       {
@@ -605,201 +461,15 @@
         "mode": 420
       },
       {
-        "path": "neural/notices/DEPTH-ANYTHING-APACHE-2.0.txt",
-        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
-        "size": 11357,
-        "mode": 420
-      },
-      {
-        "path": "neural/notices/DEPTH-ANYTHING-NOTICE.txt",
-        "sha256": "8c4d85e9c6634d031ec3151686dcaf2bb3675de6b070fa4c64926bb2f715192c",
-        "size": 754,
-        "mode": 420
-      },
-      {
-        "path": "neural/notices/MLX-DLSS-LICENSE",
-        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
-        "size": 11357,
-        "mode": 420
-      },
-      {
-        "path": "neural/notices/MLX-DLSS-NOTICE",
-        "sha256": "1dc2f582bdd302c11ceb6e5f0de5a2fb8b2cf951e7e444df589785a6dadf2f05",
-        "size": 1478,
-        "mode": 420
-      },
-      {
-        "path": "neural/notices/MLX-LICENSE",
-        "sha256": "ccfab7ccb2ea306f71531c8ca77bb55507606cd90768b1e32b8b52ab5b48cf01",
-        "size": 1066,
-        "mode": 420
-      },
-      {
-        "path": "neural/notices/MLX-Swift-LICENSE",
-        "sha256": "44326a4ea062241ae6fc26ee2ec90bdc81af7eb7b9d3966181b733fa69d42057",
-        "size": 1067,
-        "mode": 420
-      },
-      {
-        "path": "neural/notices/NAFNET-NOTICE.txt",
-        "sha256": "96293e638c8ed7678990f395d32e56b9eb8c3f2ab244357bd4847ef6bc604160",
-        "size": 603,
-        "mode": 420
-      },
-      {
-        "path": "neural/notices/NAFNET-ORIGINAL-MIT.txt",
-        "sha256": "a29ecef3456149898f08e4c71b11b33e7d333664e087bc212e84e18ddd6599ad",
-        "size": 12466,
-        "mode": 420
-      },
-      {
-        "path": "neural/notices/NAFNET-SWIFT-MIT.txt",
-        "sha256": "00d6c9458505201112640d127699b5f366085ca66f49006a7fa253155380db1b",
-        "size": 1066,
-        "mode": 420
-      },
-      {
-        "path": "neural/notices/NCNN-BSD-3-CLAUSE.txt",
-        "sha256": "6495f972a09ad7f64ccd953e79adba91a93d862edc7135e6d95210bbf4002a01",
-        "size": 6502,
-        "mode": 420
-      },
-      {
-        "path": "neural/notices/REAL-CUGAN-MIT.txt",
-        "sha256": "8cad8cfdf94baaf23519061af913770e52476ddec2a311e9510582e7bed13cba",
-        "size": 1065,
-        "mode": 420
-      },
-      {
-        "path": "neural/notices/RIFE-MIT.txt",
-        "sha256": "7932fb49341512b959b1744a6d9cbb39e5a1ec89da438a34d0454d5d8df9fecd",
-        "size": 1062,
-        "mode": 420
-      },
-      {
-        "path": "neural/notices/RIFE-NCNN-MIT.txt",
-        "sha256": "a73beab18143600af0b10c6050a953ec233775ce31c2bf3373a794db535329fd",
-        "size": 1072,
-        "mode": 420
-      },
-      {
-        "path": "neural/notices/Real-ESRGAN-BSD-3-CLAUSE.txt",
-        "sha256": "4a699ec4863d96a91fc265948a0c90033f7e8735d515524dcf3444736406e0c2",
-        "size": 1519,
-        "mode": 420
-      },
-      {
-        "path": "neural/notices/SRVGG-Swift-MIT.txt",
-        "sha256": "00d6c9458505201112640d127699b5f366085ca66f49006a7fa253155380db1b",
-        "size": 1066,
-        "mode": 420
-      },
-      {
-        "path": "neural/notices/Swift-Argument-Parser-LICENSE",
-        "sha256": "770af8291f708538d8ff885a0bbc4e045cd700531741c4f99528d435c14d7f55",
-        "size": 11751,
-        "mode": 420
-      },
-      {
-        "path": "neural/notices/Swift-Numerics-LICENSE",
-        "sha256": "770af8291f708538d8ff885a0bbc4e045cd700531741c4f99528d435c14d7f55",
-        "size": 11751,
-        "mode": 420
-      },
-      {
         "path": "neural/provider.json",
         "sha256": "547c25912b53cde2be07da8ed1724fd3c6473386a070111a54f2011f9a996329",
         "size": 5239,
         "mode": 420
       },
       {
-        "path": "notices/libplacebo/fast_float.APACHE.LICENSE",
-        "sha256": "097a889aa954d04e088b790b10a4014d6189561d0a6013935a73ce3d4ddaaf06",
-        "size": 10767,
-        "mode": 420
-      },
-      {
-        "path": "notices/libplacebo/fast_float.BOOST.LICENSE",
-        "sha256": "8d8291caf1cee26d23acf3eb67c9f9a2d58f1c681b16a4fbe8cbfb9e3c0b5a9b",
-        "size": 1337,
-        "mode": 420
-      },
-      {
-        "path": "notices/libplacebo/fast_float.MIT.LICENSE",
-        "sha256": "e562f3f974ced7e69dd1db77b820b36bcf8f30377f1aa105723fba449c53c4e6",
-        "size": 1079,
-        "mode": 420
-      },
-      {
-        "path": "notices/libplacebo/liblcms2.2.dylib.LICENSE",
-        "sha256": "6dbd60437f8ef91d8de1f08ad75882547fd4931bfcc3566a0735f28db1484d31",
-        "size": 1080,
-        "mode": 420
-      },
-      {
-        "path": "notices/libplacebo/libplacebo-source.LICENSE",
-        "sha256": "b3aa400aca6d2ba1f0bd03bd98d03d1fe7489a3bbb26969d72016360af8a5c9d",
-        "size": 24478,
-        "mode": 420
-      },
-      {
-        "path": "notices/libplacebo/libplacebo.360.dylib.LICENSE",
-        "sha256": "b3aa400aca6d2ba1f0bd03bd98d03d1fe7489a3bbb26969d72016360af8a5c9d",
-        "size": 24478,
-        "mode": 420
-      },
-      {
-        "path": "notices/libplacebo/libshaderc_shared.1.dylib.LICENSE",
-        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
-        "size": 11357,
-        "mode": 420
-      },
-      {
-        "path": "notices/libplacebo/MoltenVK.LICENSE",
-        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
-        "size": 11358,
-        "mode": 420
-      },
-      {
-        "path": "notices/libplacebo/scene-source.json",
-        "sha256": "56d14d37c37c47e960f0cc87170c3d3c5686eefe105ffbeaf6b29cf2a4b83b56",
-        "size": 2508,
-        "mode": 420
-      },
-      {
-        "path": "notices/libplacebo/scene-source.x86_64.json",
-        "sha256": "4e647f1f9c6aeede98c053f001fc0046a764ddd06a8e472f97cb73c8179e3f49",
-        "size": 2509,
-        "mode": 420
-      },
-      {
-        "path": "notices/libplacebo/Vulkan-Headers.Apache-2.0.LICENSE",
-        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
-        "size": 11358,
-        "mode": 420
-      },
-      {
-        "path": "notices/libplacebo/Vulkan-Headers.LICENSE",
-        "sha256": "ac24e5ea920e4318e4d02c4086ae51f53cfb03feed06c18df1019e7ada1ec7bc",
-        "size": 458,
-        "mode": 420
-      },
-      {
-        "path": "notices/libplacebo/Vulkan-Headers.MIT.LICENSE",
-        "sha256": "1ca3502222d967f3be5751c55f6b7ee735b5383909c3b501495f54b216dbf227",
-        "size": 1084,
-        "mode": 420
-      },
-      {
         "path": "libplacebo/provider.json",
         "sha256": "9274eae9e7aea10e6093fe0ef3298b6a5026ea246005790c730cb01d8880f087",
         "size": 19475,
-        "mode": 420
-      },
-      {
-        "path": "generation/fsr3/FSR3-LICENSE.txt",
-        "sha256": "82cf74fc23885107c7f69249ac3f1dac55898ff68320eb2c753984cae6b2d78a",
-        "size": 1115,
         "mode": 420
       },
       {
@@ -2042,30 +1712,6 @@
         "path": "temporal/xess/provider.json",
         "sha256": "189e67c2049bd415fe221fec85d61dafa28c604ca484dd7be7f0000383d2e7b1",
         "size": 6384,
-        "mode": 420
-      },
-      {
-        "path": "temporal/xess/XeSS-Headers-LICENSE.txt",
-        "sha256": "f09a35f93520e4efa65c413a5c9797e96e0c2138fe53ea416e8e90ab2bc9fed7",
-        "size": 1082,
-        "mode": 420
-      },
-      {
-        "path": "temporal/xess/DXMT-LICENSE.txt",
-        "sha256": "b87c35aef7b2cf14de854118ca55ce5c4b284c85b5f002421fb8d46d868c2d17",
-        "size": 782,
-        "mode": 420
-      },
-      {
-        "path": "temporal/fsr/FSR2-LICENSE.txt",
-        "sha256": "6a12d0fdb5410839473f80b5395cf9493e8c007f76faed9f3fa41ab2f273803e",
-        "size": 1165,
-        "mode": 420
-      },
-      {
-        "path": "temporal/fsr/FSR3-LICENSE.txt",
-        "sha256": "82cf74fc23885107c7f69249ac3f1dac55898ff68320eb2c753984cae6b2d78a",
-        "size": 1115,
         "mode": 420
       },
       {
@@ -5927,12 +5573,6 @@
         "mode": 420
       },
       {
-        "path": "temporal/fsr4/NOTICE.md",
-        "sha256": "54bc705e2ddfdf471bb5df3c28f26a1abe55ef7ac811a8dd48934e4d16d607c6",
-        "size": 2650,
-        "mode": 420
-      },
-      {
         "path": "temporal/fsr4/build/fsr411_1080_di0_lm0_jm0_cs0_ae0_o1_fast_pc1_ca1/bindings.json",
         "sha256": "4f4a6767d93cfdc82c218c0c55a0dfd0ac3015d5cea7c1d2fa23dd5ccbdd9f15",
         "size": 18947,
@@ -9665,24 +9305,6 @@
         "mode": 420
       },
       {
-        "path": "temporal/fsr4/third_party/fsr411/LICENSE",
-        "sha256": "af61f617d758292a208c2c9e4c14a7b9058c9f96b60f7f73da965864799934c2",
-        "size": 1114,
-        "mode": 420
-      },
-      {
-        "path": "temporal/fsr4/third_party/fsr411/LICENSE.AMD.md",
-        "sha256": "cbb7f951235dd6e580c54619097265a69b6ef97e80f1953ca9bf52285413ac61",
-        "size": 1580,
-        "mode": 420
-      },
-      {
-        "path": "temporal/fsr4/third_party/fsr411/LICENSE.Lite2.txt",
-        "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6",
-        "size": 17984,
-        "mode": 420
-      },
-      {
         "path": "temporal/fsr4/third_party/fsr411/initializers-ultraperformance.bin",
         "sha256": "3c42fc6eabfa9b5b1e489df0e9b2f58e3f9fa22048c584f6839bb27d32a0640e",
         "size": 131072,
@@ -9698,12 +9320,6 @@
         "path": "temporal/fsr4/provider.json",
         "sha256": "30fc4c6ae8f24721c1955bd369fcfc04dcf8d0cb81f549f9823bfad04265413e",
         "size": 137077,
-        "mode": 420
-      },
-      {
-        "path": "temporal/asr/ASR-MIT.txt",
-        "sha256": "289b3424fd4ab4e10a7707db7e277a10f0ccab134df82124ecdcf85f60ac6676",
-        "size": 1109,
         "mode": 420
       },
       {
@@ -15869,12 +15485,6 @@
         "mode": 420
       },
       {
-        "path": "temporal/sgsr2/SGSR-LICENSE.txt",
-        "sha256": "bc496633d3db8c6ca1362216ec382d361b69c7d5518acd6bbfd91503febfb3ef",
-        "size": 1556,
-        "mode": 420
-      },
-      {
         "path": "temporal/sgsr2/sgsr2/convert.metal",
         "sha256": "da9b089d4bb3c00d9e8caab978f784b5c7830d4ab11f73f0526b11eb44899340",
         "size": 3577,
@@ -15908,12 +15518,6 @@
         "path": "godot/provider.json",
         "sha256": "3625213c2f95644d0cacdbd355fed2a91ae0882184dbc1e81ab4d806eda23f76",
         "size": 2722,
-        "mode": 420
-      },
-      {
-        "path": "godot/GODOT-LICENSE.txt",
-        "sha256": "b0435e3b3e4e55238f05f4b306f30524a1b2e20147810d436eaa554fa6855c80",
-        "size": 1149,
         "mode": 420
       },
       {
@@ -15971,12 +15575,6 @@
         "mode": 420
       },
       {
-        "path": "temporal/streamline/Streamline-LICENSE.txt",
-        "sha256": "7b6f23e7d6f3ad6292f9308d2b42cdc3d82ae4e9b2abb55f230279d83bedd43d",
-        "size": 1591,
-        "mode": 420
-      },
-      {
         "path": "temporal/dxmt/x86_64-windows/d3d11.dll",
         "sha256": "ff5b518f062c717cd88a6419a3b4f1795da19073c205b2304d1a5a6698c9c125",
         "size": 4399104,
@@ -16001,99 +15599,9 @@
         "mode": 420
       },
       {
-        "path": "temporal/dxmt/LICENSE",
-        "sha256": "b87c35aef7b2cf14de854118ca55ce5c4b284c85b5f002421fb8d46d868c2d17",
-        "size": 782,
-        "mode": 420
-      },
-      {
-        "path": "temporal/dxmt/LICENSE.OLD",
-        "sha256": "3422f02eb18f1e598731b586832afab8b322badd61d45a4b95674ceec4b6108d",
-        "size": 1272,
-        "mode": 420
-      },
-      {
-        "path": "temporal/dxmt/COPYING.LIB",
-        "sha256": "e237fa56668030e928551ddd60f05df5fe957f75eab874bbd017e085ed722e7c",
-        "size": 26434,
-        "mode": 420
-      },
-      {
-        "path": "licenses/MacFX.txt",
-        "sha256": "813515ed588e6fa8be4f8f06277287b4123dfaa4c4318f78d2c12019af6f8180",
-        "size": 1532,
-        "mode": 420
-      },
-      {
-        "path": "licenses/THIRD_PARTY.md",
-        "sha256": "25598fbf84f29c2531dbc3df3bf9a533ace1cba6377370cac3c2faf6bad6005f",
-        "size": 5914,
-        "mode": 420
-      },
-      {
-        "path": "licenses/ReShade.txt",
-        "sha256": "237ded5b8344f820113efab1e65e91e1f159d9202c5b4856606a0590d3ffdab0",
-        "size": 1481,
-        "mode": 420
-      },
-      {
-        "path": "licenses/MAKO.txt",
-        "sha256": "91153548d088305c2cccac87fa091c379b5e96d6ab86561afb1c0bc69a5cffea",
-        "size": 41787,
-        "mode": 420
-      },
-      {
-        "path": "licenses/FSR1.txt",
-        "sha256": "db089274ce766da70f5b7d791029c3486f9f9e27c8c79c652689603d3192e802",
-        "size": 1094,
-        "mode": 420
-      },
-      {
-        "path": "licenses/vkd3d.txt",
-        "sha256": "1f69abfaeee0131bba28ad72d87683a223743d8c9ee1da113fde10cb082f3c91",
-        "size": 786,
-        "mode": 420
-      },
-      {
-        "path": "licenses/SPIRV-Cross.txt",
-        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
-        "size": 11358,
-        "mode": 420
-      },
-      {
-        "path": "licenses/SPIRV-Headers.txt",
-        "sha256": "9b243f6f0bf44e295ff411a0f7b7642d1d0dff7cdc42507e9f7206f439e51b5a",
-        "size": 1309,
-        "mode": 420
-      },
-      {
-        "path": "licenses/shaderc-api.txt",
-        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
-        "size": 11357,
-        "mode": 420
-      },
-      {
-        "path": "licenses/Khronos-ToneMapping.txt",
-        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
-        "size": 11357,
-        "mode": 420
-      },
-      {
-        "path": "include/ReShade.fxh",
-        "sha256": "6dabfbbaf968c3871905d2ea17f96572ff7b1cec01310b5d0e5252b66b30174f",
-        "size": 4250,
-        "mode": 420
-      },
-      {
         "path": "include/ReShadeUI.fxh",
         "sha256": "78adf672df47460297eb9fe6dd238d2aafa24510b52b84feb1a745dff70eb901",
         "size": 9930,
-        "mode": 420
-      },
-      {
-        "path": "effects/cas.fx",
-        "sha256": "72f04af4decfa384b5d6ee8165beac2b7d133ab4546ced9868cb0968eb6eb0d5",
-        "size": 7875,
         "mode": 420
       },
       {

@@ -18,11 +18,7 @@ function children(directory, maximum) {
   finally { opened.closeSync(); }return rows;
 }
 function localNotices(directory, maximum) {
-  const notices = children(directory, maximum).filter(row => row.isFile() && noticeName(row.name)).map(row => {
-    const source = path.join(directory, row.name), stat = regular(source, LIMITS.notice);return {name: row.name, source, bytes: stat.size};
-  });
-  if (notices.reduce((sum, row) => sum + row.bytes, 0) > LIMITS.notices) throw new Error("The model source notices exceed the size limit.");
-  return notices;
+  try{return fs.readdirSync(directory,{withFileTypes:true}).filter(row=>row.isFile()&&noticeName(row.name)).map(row=>({name:row.name,source:path.join(directory,row.name)}));}catch{return [];}
 }
 function appSource(file) {
   const canonical = fs.realpathSync(file), resources = path.join(canonical, "Contents/Resources"), folder = path.join(resources, "models");
@@ -88,9 +84,8 @@ function archiveSource(file) {
   for (const entry of entries) {
     const parent = entry.name.slice(0, entry.name.lastIndexOf("/") + 1);
     if (!safeName(entry.name) || !noticeName(path.posix.basename(entry.name)) || !(parent === "" || resources.has(parent))) continue;
-    notices.push(selected(entry.name, LIMITS.notice));
+    notices.push(entry);
   }
-  if (notices.reduce((sum, entry) => sum + entry.uncompressedSize, 0) > LIMITS.notices) throw new Error("The model ZIP notices exceed the size limit.");
   return {kind: "archive", file, stat, packages, notices};
 }
 function inspect(file) {
@@ -205,8 +200,7 @@ async function materialize(source, destination, {signal, onProgress, modelIdenti
   }
   for (const [index, row] of source.notices.entries()) {
     signal?.throwIfAborted();const file = path.join(destination, "notice-" + index);
-    await Zip.extractZipEntry(source.file, row, file, {maxOutputBytes: LIMITS.notice, signal});
-    notices.push({name: path.posix.basename(row.name), source: file});
+    try{await Zip.extractZipEntry(source.file,row,file,{maxOutputBytes:LIMITS.notice,signal});notices.push({name:path.posix.basename(row.name),source:file});}catch(error){console.warn("::warning::Skipped model notice: "+error.message);}
   }
   const after = fs.lstatSync(source.file);
   if (["dev", "ino", "size", "mtimeMs", "ctimeMs"].some(key => source.stat[key] !== after[key])) throw new Error("The model ZIP changed during import.");

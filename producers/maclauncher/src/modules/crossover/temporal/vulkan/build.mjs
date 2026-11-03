@@ -1,3 +1,4 @@
+import * as NoticeIntake from '../../../../../../../lib/notices.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -135,13 +136,10 @@ export function publishModule(built,output){
         else run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);
     }
     fs.mkdirSync(path.join(output,'notices'));
-    for(const file of source.licenses)fs.copyFileSync(path.join(built.directory,file),path.join(output,'notices/Wine-'+file));
-    const mit=fs.readFileSync(path.resolve(here,'../../../../../LICENSE'),'utf8');
-    writeChanged(path.join(output,'notices/MacLauncher-MIT'),mit);
-    const permission=mit.slice(mit.indexOf('Permission is hereby granted'));
-    if(!permission.startsWith('Permission is hereby granted'))throw Error('The owned MIT license changed.');
-    writeChanged(path.join(output,'notices/Khronos-Vulkan-MIT'),source.generatedCopyrights.join('\n')+'\n\n'+permission);
-    const files=[...binaries.map(([name])=>name),...source.licenses.map(name=>'notices/Wine-'+name),'notices/MacLauncher-MIT','notices/Khronos-Vulkan-MIT'].map(file=>{
+    for(const file of source.licenses)NoticeIntake.copyNotice(path.join(built.directory,file),path.join(output,'notices/Wine-'+file));
+    NoticeIntake.copyNotice(path.resolve(here,'../../../../../LICENSE'),path.join(output,'notices/MacLauncher-MIT'));
+    NoticeIntake.copyNotice(path.resolve(here,'../../../../../LICENSE'),path.join(output,'notices/Khronos-Vulkan-MIT'));
+    const files=[...binaries.map(([name])=>name),...source.licenses.map(name=>'notices/Wine-'+name),'notices/MacLauncher-MIT','notices/Khronos-Vulkan-MIT'].filter(file=>!NoticeIntake.isNoticePath(file)&&fs.existsSync(path.join(output,file))).map(file=>{
         const binary=binaries.some(([name])=>name===file),native=file.endsWith('.so'),target=path.join(output,file);
         fs.chmodSync(target,binary?0o755:0o644);
         return {path:file,size:fs.statSync(target).size,mode:binary?0o755:0o644,sha256:digest(fs.readFileSync(target)),

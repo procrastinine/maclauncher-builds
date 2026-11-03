@@ -55,40 +55,30 @@
       "path": "DOTNET-LICENSE.txt",
       "output": "files/licenses/DOTNET-LICENSE.txt",
       "kind": "file",
-      "size": 1116,
-      "sha256": "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310",
       "mode": 420
     },
     {
       "path": "DOTNET-ThirdPartyNotices.txt",
       "output": "files/licenses/DOTNET-ThirdPartyNotices.txt",
       "kind": "file",
-      "size": 94355,
-      "sha256": "fb47c97d2919d9584f25564058f973de424da8b500d51b46e406391c6e9adca6",
       "mode": 420
     },
     {
       "path": "LICENSE-RPGMakerDecrypter.txt",
       "output": "files/licenses/LICENSE-RPGMakerDecrypter.txt",
       "kind": "file",
-      "size": 1083,
-      "sha256": "e0506d6306bb0895f7a9dd3a1b701c3b7e97377be12dc0870b60698fe5fa15a5",
       "mode": 420
     },
     {
       "path": "LICENSE-commandlineparser.md",
       "output": "files/licenses/LICENSE-commandlineparser.md",
       "kind": "file",
-      "size": 1111,
-      "sha256": "87a1efc79d6ee27ee9dcc01534e2be6f26839e4a6b8e53b6d91458aae08831fa",
       "mode": 420
     },
     {
       "path": "LICENSE-newtonsoft.json.md",
       "output": "files/licenses/LICENSE-newtonsoft.json.md",
       "kind": "file",
-      "size": 1104,
-      "sha256": "b98a397897ff55f76cddc380041507a95a896b2946e0188703bf0496793d6516",
       "mode": 420
     },
     {

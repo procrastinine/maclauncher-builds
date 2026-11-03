@@ -27,7 +27,7 @@ function goBuild({pin,arch,source,work}){
   notices.push({file:path.join(module.Dir,'LICENSE'),name:entry.module,license:entry.license,sourceUrl:'https://'+entry.module+'/tree/'+entry.revision});
  }
  const goRoot=execute(['env','GOROOT']).trim(),goLicense=[path.join(goRoot,'LICENSE'),path.join(goRoot,'../LICENSE')].find(file=>fs.statSync(file,{throwIfNoEntry:false})?.isFile());
- if(!goLicense)throw Error('The Go toolchain license is missing.');
+
  notices.push({file:goLicense,name:'Go runtime',license:'BSD-3-Clause',sourceUrl:'https://go.dev/'});
  const executable=path.join(work,'ziggy-darwin');
  execute(['build','-trimpath','-buildvcs=false','-ldflags=-s -w -buildid=','-o',executable,'./src/ziggy/ziggy.go']);
