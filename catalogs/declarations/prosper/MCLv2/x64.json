@@ -1,0 +1,275 @@
+{
+  "id": "prosper",
+  "version": "MCLv2",
+  "arch": "x64",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "26.0",
+  "directoryRelative": "prosper/MCLv2/x64",
+  "sourceRelative": "source.json",
+  "sourceSha256": "2c3e3e965d6ef89170e5b6e674137d063bd308ed08db80d9fd01c74cd6b275b8",
+  "manifestRelative": "runtime.json",
+  "manifestSha256": "9ec626427ed26a149754ace59ad21263734a2c719146f271361373bd5a0593e9",
+  "files": [
+    {
+      "path": "bin/prosper-app",
+      "size": 25553952,
+      "mode": 493,
+      "sha256": "e11a809f417bd04b23c3f581c3ded2e4f1bfd788826647226983b681a2229977",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "build-definition.json",
+      "size": 16583,
+      "mode": 420,
+      "sha256": "ae1d5f3e8c96ff382205dae58d644c1dd84776f4e918f9bdbb3f3319d8824e93"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "84955d42eee60337f752c5da299656bc3465f29a4b97dab90c9f21936fcf3fcc"
+    },
+    {
+      "path": "notices/ffmpeg/copyright",
+      "size": 26526,
+      "mode": 420,
+      "sha256": "b634ab5640e258563c536e658cad87080553df6f34f62269a21d554844e58bfe"
+    },
+    {
+      "path": "notices/ffmpeg/SOURCE.txt",
+      "size": 439,
+      "mode": 420,
+      "sha256": "97947c54dafc0a40c671bc48cb7fc13365f0927bd47b72b6ccef7730a0d219b6"
+    },
+    {
+      "path": "notices/imgui/LICENSE",
+      "size": 1083,
+      "mode": 420,
+      "sha256": "c80c5789748d955c4a650562baa0d750494e2c7128c2ca66aaebe2e3c4e198bf"
+    },
+    {
+      "path": "notices/libatrac9/LICENSE",
+      "size": 1068,
+      "mode": 420,
+      "sha256": "cdb280ff931233bdefef0dfdd1d884217d97cb24a96530a41ce7848790df86f7"
+    },
+    {
+      "path": "notices/ProggyClean/NOTICE.txt",
+      "size": 1332,
+      "mode": 420,
+      "sha256": "f095a6d2e7783eca3fb03c70f9b6db5d0f615d39ae1006c5b25995fb279ab146"
+    },
+    {
+      "path": "notices/Prosper-README.md",
+      "size": 10306,
+      "mode": 420,
+      "sha256": "b2300fc423cb73ea914c29f7322efb70a25de2afe95b09e9daa9f0f2febd5512"
+    },
+    {
+      "path": "notices/PROSPER.txt",
+      "size": 176,
+      "mode": 420,
+      "sha256": "4d05b3a58d722b055308dd782053f0a11b25ea7c2d248f7066412045412d6593"
+    },
+    {
+      "path": "notices/renderdoc/LICENSE",
+      "size": 1087,
+      "mode": 420,
+      "sha256": "fdb2bb2135379e9dbd6154c57059676c3cc16354583b4396d6327c6ea4efd6bb"
+    },
+    {
+      "path": "notices/SDL3-HIDAPI/AUTHORS.txt",
+      "size": 425,
+      "mode": 420,
+      "sha256": "38102075d829116ee23d7a1fe0cb53f0c6932a9275da0ca1a3885b44db1963b4"
+    },
+    {
+      "path": "notices/SDL3-HIDAPI/LICENSE-bsd.txt",
+      "size": 1534,
+      "mode": 420,
+      "sha256": "30eb1bef29b46f8ba7ab8b416035dbd93cb034a45481dd97815b944284582cd2"
+    },
+    {
+      "path": "notices/SDL3-HIDAPI/LICENSE-gpl3.txt",
+      "size": 35147,
+      "mode": 420,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    },
+    {
+      "path": "notices/SDL3-HIDAPI/LICENSE-orig.txt",
+      "size": 264,
+      "mode": 420,
+      "sha256": "fb5436aa63d1b71a8dfbf74ecaf1a5b4e1ec4df7f80074d11fec99284f69ca5f"
+    },
+    {
+      "path": "notices/SDL3-HIDAPI/LICENSE.txt",
+      "size": 530,
+      "mode": 420,
+      "sha256": "7d3b087c34f35d4d538e3bcddd1ff8f66e92f9ef336881999482800ddf840913"
+    },
+    {
+      "path": "notices/SDL3-yuv2rgb/LICENSE",
+      "size": 1480,
+      "mode": 420,
+      "sha256": "f7d74004cc75778cae46c5f0139f244d67c07ef64cf51937e8272352197dcb18"
+    },
+    {
+      "path": "notices/SDL3/LICENSE.txt",
+      "size": 884,
+      "mode": 420,
+      "sha256": "97f35b302b361680ec1e891e95d2d52097bb95abff361434916d99dc1305f127"
+    },
+    {
+      "path": "notices/stb/LICENSE",
+      "size": 2671,
+      "mode": 420,
+      "sha256": "47534a29e655561f65c4e1ee4b22802e3978b9f50383eab465e9aa9eced9703c"
+    },
+    {
+      "path": "notices/Vulkan-Headers/LICENSE.md",
+      "size": 458,
+      "mode": 420,
+      "sha256": "ac24e5ea920e4318e4d02c4086ae51f53cfb03feed06c18df1019e7ada1ec7bc"
+    },
+    {
+      "path": "notices/Vulkan-Headers/LICENSES/Apache-2.0.txt",
+      "size": 11358,
+      "mode": 420,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "notices/Vulkan-Headers/LICENSES/MIT.txt",
+      "size": 1084,
+      "mode": 420,
+      "sha256": "1ca3502222d967f3be5751c55f6b7ee735b5383909c3b501495f54b216dbf227"
+    },
+    {
+      "path": "runtime.json",
+      "size": 7749,
+      "mode": 420,
+      "sha256": "9ec626427ed26a149754ace59ad21263734a2c719146f271361373bd5a0593e9"
+    },
+    {
+      "path": "source.json",
+      "size": 2122,
+      "mode": 420,
+      "sha256": "2c3e3e965d6ef89170e5b6e674137d063bd308ed08db80d9fd01c74cd6b275b8"
+    }
+  ],
+  "notices": [
+    {
+      "name": "Prosper",
+      "license": "NOASSERTION",
+      "path": "notices/PROSPER.txt",
+      "sourceUrl": "https://github.com/mattias800/prosper.git"
+    },
+    {
+      "name": "Prosper README",
+      "license": "NOASSERTION",
+      "path": "notices/Prosper-README.md",
+      "sourceUrl": "https://github.com/mattias800/prosper.git"
+    },
+    {
+      "name": "imgui",
+      "license": "See notice",
+      "path": "notices/imgui/LICENSE",
+      "sourceUrl": "https://github.com/mattias800/prosper.git"
+    },
+    {
+      "name": "libatrac9",
+      "license": "See notice",
+      "path": "notices/libatrac9/LICENSE",
+      "sourceUrl": "https://github.com/mattias800/prosper.git"
+    },
+    {
+      "name": "renderdoc",
+      "license": "See notice",
+      "path": "notices/renderdoc/LICENSE",
+      "sourceUrl": "https://github.com/mattias800/prosper.git"
+    },
+    {
+      "name": "stb",
+      "license": "See notice",
+      "path": "notices/stb/LICENSE",
+      "sourceUrl": "https://github.com/mattias800/prosper.git"
+    },
+    {
+      "name": "SDL3",
+      "license": "Zlib",
+      "path": "notices/SDL3/LICENSE.txt",
+      "sourceUrl": "https://github.com/libsdl-org/SDL.git"
+    },
+    {
+      "name": "Vulkan-Headers",
+      "license": "Apache-2.0 OR MIT",
+      "path": "notices/Vulkan-Headers/LICENSE.md",
+      "sourceUrl": "https://github.com/KhronosGroup/Vulkan-Headers.git"
+    },
+    {
+      "name": "Vulkan-Headers",
+      "license": "Apache-2.0 OR MIT",
+      "path": "notices/Vulkan-Headers/LICENSES/Apache-2.0.txt",
+      "sourceUrl": "https://github.com/KhronosGroup/Vulkan-Headers.git"
+    },
+    {
+      "name": "Vulkan-Headers",
+      "license": "Apache-2.0 OR MIT",
+      "path": "notices/Vulkan-Headers/LICENSES/MIT.txt",
+      "sourceUrl": "https://github.com/KhronosGroup/Vulkan-Headers.git"
+    },
+    {
+      "name": "SDL3-HIDAPI",
+      "license": "BSD-3-Clause OR HIDAPI original OR GPL-3.0",
+      "path": "notices/SDL3-HIDAPI/LICENSE.txt",
+      "sourceUrl": "https://github.com/libsdl-org/SDL.git"
+    },
+    {
+      "name": "SDL3-HIDAPI",
+      "license": "BSD-3-Clause OR HIDAPI original OR GPL-3.0",
+      "path": "notices/SDL3-HIDAPI/LICENSE-bsd.txt",
+      "sourceUrl": "https://github.com/libsdl-org/SDL.git"
+    },
+    {
+      "name": "SDL3-HIDAPI",
+      "license": "BSD-3-Clause OR HIDAPI original OR GPL-3.0",
+      "path": "notices/SDL3-HIDAPI/LICENSE-orig.txt",
+      "sourceUrl": "https://github.com/libsdl-org/SDL.git"
+    },
+    {
+      "name": "SDL3-HIDAPI",
+      "license": "BSD-3-Clause OR HIDAPI original OR GPL-3.0",
+      "path": "notices/SDL3-HIDAPI/LICENSE-gpl3.txt",
+      "sourceUrl": "https://github.com/libsdl-org/SDL.git"
+    },
+    {
+      "name": "SDL3-HIDAPI",
+      "license": "BSD-3-Clause OR HIDAPI original OR GPL-3.0",
+      "path": "notices/SDL3-HIDAPI/AUTHORS.txt",
+      "sourceUrl": "https://github.com/libsdl-org/SDL.git"
+    },
+    {
+      "name": "SDL3-yuv2rgb",
+      "license": "BSD-3-Clause",
+      "path": "notices/SDL3-yuv2rgb/LICENSE",
+      "sourceUrl": "https://github.com/libsdl-org/SDL.git"
+    },
+    {
+      "name": "ProggyClean",
+      "license": "MIT",
+      "path": "notices/ProggyClean/NOTICE.txt",
+      "sourceUrl": "https://github.com/mattias800/prosper.git"
+    },
+    {
+      "name": "FFmpeg",
+      "license": "See notice",
+      "path": "notices/ffmpeg/copyright",
+      "sourceUrl": "https://github.com/KytyPS5/ext-ffmpeg-core.git"
+    }
+  ]
+}
