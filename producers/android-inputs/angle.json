@@ -26,7 +26,7 @@
       },
       "programBinaryVersion": "69ea190ab685f72e82c4d09ebd73e052",
       "project": "android-angle-aim",
-      "packageVersion": "MCLv2"
+      "packageVersion": "MCLv3"
     }
   ],
   "angleSource": "src/modules/android/native/angle-source.json",

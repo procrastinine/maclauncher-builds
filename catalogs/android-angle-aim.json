@@ -6,6 +6,44 @@
     {
       "schemaVersion": 2,
       "id": "android-angle-aim",
+      "version": "MCLv3",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "input.json",
+      "manifestSha256": "43be27859f2e3617d5636506d63cedcba048abc87262698362d12007f57b9e25",
+      "sourceSha256": "621442a696c3109c850e0eab775902286d7f08cc271b5f7dfa3a1d6f374f2c82",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "android-angle-aim-MCLv3-arm64.tar.gz",
+        "sha256": "fd3a2a46d290b5e2e3a1574091064470387b09678a70fad3304d5738ba3bce1c",
+        "bytes": 2870480,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-angle-aim%2FvMCLv3%2Farm64/android-angle-aim-MCLv3-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "d2b042f9b8002d2e09ece537b8e34cf7b6a60815",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41718935186",
+        "runAttempt": "1"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "d2b042f9b8002d2e09ece537b8e34cf7b6a60815"
+      },
+      "tag": "android-angle-aim/vMCLv3/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "android-angle-aim",
       "version": "MCLv2",
       "arch": "arm64",
       "launcherArchitectures": [

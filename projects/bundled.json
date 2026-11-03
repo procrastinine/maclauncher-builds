@@ -2589,10 +2589,14 @@
       {
         "version": "MCLv2",
         "label": "AIM original ANGLE profile MCLv2"
+      },
+      {
+        "version": "MCLv3",
+        "label": "AIM original ANGLE profile MCLv3"
       }
     ],
     "build": {
-      "version": "MCLv2",
+      "version": "MCLv3",
       "command": "tools/build-android-angle.mjs",
       "architectures": [
         "arm64"
