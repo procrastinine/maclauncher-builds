@@ -1,0 +1,58 @@
+{
+  "id": "sys3-decompiler",
+  "version": "0.5.0-MCLv3",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "sys3-decompiler/0.5.0-MCLv3/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "6936e7cb8155fc64a2527eaf2a5b0afbb4430bc6229b77cd48740a1e77b498f1",
+  "sourceSha256": "6936e7cb8155fc64a2527eaf2a5b0afbb4430bc6229b77cd48740a1e77b498f1",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 16173,
+      "mode": 420,
+      "sha256": "6e91ee437112e91faddca2e62d226f837310133cd3ff380873f70e49ecb92730"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "7b5ef495b7dfd794be32b2adc4bc66e9566164e286d0900a998c514fde159a27"
+    },
+    {
+      "path": "files/bin/sys3dc",
+      "size": 106752,
+      "sha256": "a46eb1517099ef96bfd1bd9471b389c8e25aaf9b1988d112598e89a6a852ebb5",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/licenses/upstream/0-COPYING",
+      "size": 18092,
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 2896,
+      "mode": 420,
+      "sha256": "6936e7cb8155fc64a2527eaf2a5b0afbb4430bc6229b77cd48740a1e77b498f1"
+    }
+  ],
+  "notices": [
+    {
+      "name": "sys3c",
+      "license": "GPL-2.0-or-later",
+      "sourceUrl": "https://github.com/kichikuou/sys3c",
+      "path": "files/licenses/upstream/0-COPYING"
+    }
+  ],
+  "redistribution": "bundle"
+}
