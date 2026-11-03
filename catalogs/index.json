@@ -1170,10 +1170,40 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#native-sdl2-fonts",
       "catalog": {
         "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/native-sdl2-fonts.json",
-        "sha256": "22773725f63d57d82dd76f2608d75ac6cc7dd73b7a59ed0b3aed1e9df4c2271d",
-        "bytes": 1699
+        "sha256": "702bca358da83f2c683f2c9302c5f56a580a71ae9190797a9d55bdb0b137b3b3",
+        "bytes": 3277
       },
       "releases": [
+        {
+          "version": "2.32.10-MCLv1",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "native-sdl2-fonts/v2.32.10-MCLv1/x64",
+          "asset": {
+            "filename": "native-sdl2-fonts-2.32.10-MCLv1-x64.tar.gz",
+            "sha256": "280faa685001a107762fb596403c2b91ee8b9b57cc1c45af4a4d92627ab983d8",
+            "bytes": 2966601,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/native-sdl2-fonts%2Fv2.32.10-MCLv1%2Fx64/native-sdl2-fonts-2.32.10-MCLv1-x64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.19.0",
+              "zlib": "1.3.2.1-motley-3246f1b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+              "xcode": "Xcode 26.6\nBuild version 17F113",
+              "macosSDK": "26.5"
+            },
+            "runId": "41578842959",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#native-sdl2-fonts",
+          "profile": "SDL2 and fonts 2.32.10"
+        },
         {
           "version": "2.32.10-MCLv1",
           "arch": "arm64",
