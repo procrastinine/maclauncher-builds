@@ -1653,10 +1653,40 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gm8-decompiler",
       "catalog": {
         "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/gm8-decompiler.json",
-        "sha256": "5faf15e65de4305d63dc4819c48bc0524608aa808ed18fcc9ec3704398b35039",
-        "bytes": 2680
+        "sha256": "8df256f6ad833018e999ae334a0870fcf3ea5ef243389bc744914e5f5a9af653",
+        "bytes": 4218
       },
       "releases": [
+        {
+          "version": "2.2.0-MCLv3",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "11.0",
+          "tag": "gm8-decompiler/v2.2.0-MCLv3/arm64",
+          "asset": {
+            "filename": "gm8-decompiler-2.2.0-MCLv3-arm64.tar.gz",
+            "sha256": "d81ff4723404430b474a435f068f519136347e69a200a87d1c6316420433027c",
+            "bytes": 495162,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gm8-decompiler%2Fv2.2.0-MCLv3%2Farm64/gm8-decompiler-2.2.0-MCLv3-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "66bddd70fb09b14ea7bcc1f4c7fc7fabacf05c05",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41545815668",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gm8-decompiler",
+          "profile": "GameMaker 8 decompiler 2.2.0-MCLv3"
+        },
         {
           "version": "2.2.0-MCLv2",
           "arch": "arm64",
