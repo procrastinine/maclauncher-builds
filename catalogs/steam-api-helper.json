@@ -2,5 +2,45 @@
   "schemaVersion": 2,
   "projectId": "steam-api-helper",
   "updatePolicy": "manual",
-  "packages": []
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "steam-api-helper",
+      "version": "0.5.3",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "f5bf1b892f4dc203dc26de333d8e603e65b9058a6fd066b9866c337a028ba728",
+      "sourceSha256": "40597e2596bf3df91e7a8d1be6939f75d2d427bbeb91d0ac2316420c1c0cb23e",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "steam-api-helper-0.5.3-universal.tar.gz",
+        "sha256": "47cc6828b8ac44fc143cfb35b8838c93cfcb196c0ef121a50dfbe360f8633be1",
+        "bytes": 102340,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/steam-api-helper%2Fv0.5.3%2Funiversal/steam-api-helper-0.5.3-universal.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41650132930",
+        "runAttempt": "1"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2"
+      },
+      "tag": "steam-api-helper/v0.5.3/universal"
+    }
+  ]
 }

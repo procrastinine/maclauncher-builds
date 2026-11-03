@@ -869,10 +869,14 @@
       {
         "version": "0.5.2",
         "label": "Offline Steam API compatibility helper 0.5.2"
+      },
+      {
+        "version": "0.5.3",
+        "label": "Offline Steam API compatibility helper 0.5.3"
       }
     ],
     "build": {
-      "version": "0.5.2",
+      "version": "0.5.3",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "universal"
