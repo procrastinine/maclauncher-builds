@@ -1105,10 +1105,14 @@
       {
         "version": "0.1.0-MCLv3",
         "label": "ReMinori 0.1.0-MCLv3"
+      },
+      {
+        "version": "0.1.0-MCLv4",
+        "label": "ReMinori 0.1.0-MCLv4"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv3",
+      "version": "0.1.0-MCLv4",
       "command": "tools/build-reminori.mjs",
       "architectures": [
         "arm64",
