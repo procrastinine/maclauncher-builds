@@ -416,10 +416,14 @@
       {
         "version": "0.9.5-git-MCLv3",
         "label": "GemRB 0.9.5-git-MCLv3"
+      },
+      {
+        "version": "0.9.5-git-MCLv4",
+        "label": "GemRB 0.9.5-git-MCLv4"
       }
     ],
     "build": {
-      "version": "0.9.5-git-MCLv3",
+      "version": "0.9.5-git-MCLv4",
       "command": "tools/build-portable-runtime.mjs",
       "architectures": [
         "x64",
