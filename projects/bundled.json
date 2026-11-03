@@ -1603,10 +1603,14 @@
       {
         "version": "MCLv2",
         "label": "Android Java converter MCLv2"
+      },
+      {
+        "version": "MCLv3",
+        "label": "Android Java converter MCLv3"
       }
     ],
     "build": {
-      "version": "MCLv2",
+      "version": "MCLv3",
       "command": "tools/build-android-java-converter.mjs",
       "architectures": [
         "arm64"
