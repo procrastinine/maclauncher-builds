@@ -2574,10 +2574,14 @@
       {
         "version": "3.4.18-MCLv2",
         "label": "SDL3 3.4.18 Universal framework 3.4.18-MCLv2"
+      },
+      {
+        "version": "3.4.18-MCLv3",
+        "label": "SDL3 3.4.18 Universal framework 3.4.18-MCLv3"
       }
     ],
     "build": {
-      "version": "3.4.18-MCLv2",
+      "version": "3.4.18-MCLv3",
       "command": "tools/build-android-sdl3.mjs",
       "architectures": [
         "universal"
