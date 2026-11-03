@@ -6,6 +6,44 @@
     {
       "schemaVersion": 2,
       "id": "rpgmaker-decrypter",
+      "version": "3.0.0-MCLv4",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "11.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "b749919dccfcb90721390744452bfbc6b1878b4b8ed3ca89f8cd2f104fcef83e",
+      "sourceSha256": "6b66821e6d77d75bb7757bc60f224436d2743103717545cc6634c40864c0a612",
+      "updatePolicy": "manual",
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "66bddd70fb09b14ea7bcc1f4c7fc7fabacf05c05"
+      },
+      "asset": {
+        "filename": "rpgmaker-decrypter-3.0.0-MCLv4-arm64.tar.gz",
+        "sha256": "8f46a93e4b93559975d12ed046c24f3e760dfd54703078657ec6c97f2160c40f",
+        "bytes": 7974964,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/rpgmaker-decrypter%2Fv3.0.0-MCLv4%2Farm64/rpgmaker-decrypter-3.0.0-MCLv4-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "66bddd70fb09b14ea7bcc1f4c7fc7fabacf05c05",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41545858089",
+        "runAttempt": "1"
+      },
+      "tag": "rpgmaker-decrypter/v3.0.0-MCLv4/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "rpgmaker-decrypter",
       "version": "3.0.0-465c88c3-MCLv3",
       "arch": "x64",
       "launcherArchitectures": [
