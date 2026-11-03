@@ -1143,10 +1143,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "ART image reader 0.1.0-MCLv1"
+      },
+      {
+        "version": "0.1.0-MCLv2",
+        "label": "ART image reader 0.1.0-MCLv2"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "0.1.0-MCLv2",
       "command": "tools/build-android-art-input.mjs",
       "architectures": [
         "arm64"
