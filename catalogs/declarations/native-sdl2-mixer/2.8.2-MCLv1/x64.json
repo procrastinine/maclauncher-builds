@@ -1,0 +1,2030 @@
+{
+  "id": "native-sdl2-mixer",
+  "version": "2.8.2-MCLv1",
+  "arch": "x64",
+  "minimumMacOS": "13.0",
+  "launcherArchitectures": [
+    "x64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "02352a459fe0d5c90f1c6ebac0af50c2bc9c765fb55defa67f3c5f6cc56c3116",
+  "directoryRelative": "native-sdl2-mixer/2.8.2-MCLv1/x64",
+  "manifestRelative": "input.json",
+  "manifestSha256": "0ce636f1a762b1614bed7f172d9f3c50f557023f101f76d8c65f3e0fea970fd0",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 17117,
+      "mode": 420,
+      "sha256": "50945d87ef94c70b81234bfb70511116a96156f1e766b403536cdea04e310e12"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 966,
+      "mode": 420,
+      "sha256": "2236576aa750029ab1f16cccb894747b12af7be3af12c62cfd0586a5a91c52a6"
+    },
+    {
+      "path": "include/FLAC/all.h",
+      "size": 22074,
+      "sha256": "ff88842fac3d3a79223df3cb2f80af926cd73cbeb32fb925e82d26c6ca65d9eb",
+      "mode": 420
+    },
+    {
+      "path": "include/FLAC/assert.h",
+      "size": 2153,
+      "sha256": "f819c5f88e7b6ea1efbcf5476faf4042db65915b519231449b7895e5d16ac539",
+      "mode": 420
+    },
+    {
+      "path": "include/FLAC/callback.h",
+      "size": 7649,
+      "sha256": "72340f12ab7197b0492eb7ce0b3d465e6ac359e976dcd222759034f82e56a992",
+      "mode": 420
+    },
+    {
+      "path": "include/FLAC/export.h",
+      "size": 4102,
+      "sha256": "0020243b53cafd9a9f7f5185c02984e450b74d9318a02e717f8071cebb240a26",
+      "mode": 420
+    },
+    {
+      "path": "include/FLAC/format.h",
+      "size": 41367,
+      "sha256": "7311a9c8e5be7aa44b3f48c0d98c96a6fde937a009ac9d4311d82f01b1b6d512",
+      "mode": 420
+    },
+    {
+      "path": "include/FLAC/metadata.h",
+      "size": 102906,
+      "sha256": "ed54ca45d24c4e3d18a8ba867ef7e66d7ed510a3b87f3cb1a14d0efb517bce8f",
+      "mode": 420
+    },
+    {
+      "path": "include/FLAC/ordinals.h",
+      "size": 2081,
+      "sha256": "206c45b8573fd50fec359028e4d69c626a5dfbeb75a53027195704d5f9a60c63",
+      "mode": 420
+    },
+    {
+      "path": "include/FLAC/stream_decoder.h",
+      "size": 80537,
+      "sha256": "375f08a6983ce0f75a00169b114d753965d0176fd95c620ecf265244e61be5f3",
+      "mode": 420
+    },
+    {
+      "path": "include/FLAC/stream_encoder.h",
+      "size": 87898,
+      "sha256": "5aedffc9654871ed89055155b92ce3e784f3d059837b6d4d972a489d85f8dbb7",
+      "mode": 420
+    },
+    {
+      "path": "include/FLAC++/all.h",
+      "size": 1976,
+      "sha256": "14f2c68f790199cac206309179fcd1ad81090122e99f558778b51141f12cd963",
+      "mode": 420
+    },
+    {
+      "path": "include/FLAC++/decoder.h",
+      "size": 13547,
+      "sha256": "502ec12f5c8da8aa83d983ba00975b6ea2e62a120942bf5d341cbb4c25f7b331",
+      "mode": 420
+    },
+    {
+      "path": "include/FLAC++/encoder.h",
+      "size": 15901,
+      "sha256": "20ae45ad4602e2e445caecad60b2110b301bb2d58adca292a0b7098358a52eea",
+      "mode": 420
+    },
+    {
+      "path": "include/FLAC++/export.h",
+      "size": 3932,
+      "sha256": "c42e467a6dd11cbf0ca64fb573f03b15cae0f16f5267ff9451b9a850acac0136",
+      "mode": 420
+    },
+    {
+      "path": "include/FLAC++/metadata.h",
+      "size": 51649,
+      "sha256": "32b08559e9106fca0c96c8a73ca0443cb15b277f43271fd288163e990f2367d6",
+      "mode": 420
+    },
+    {
+      "path": "include/fmt123.h",
+      "size": 6089,
+      "sha256": "9b7c2567f5aa80eefaeb045ed793fd013ac2d1ea9dbb11ff3434c485517d94a6",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/config/ftconfig.h",
+      "size": 1603,
+      "sha256": "2f8c64d2eaaaff98966291b17fe1ac9c4f286143989c770112d294bee8ae8bda",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/config/ftheader.h",
+      "size": 23919,
+      "sha256": "0b099b85a787ef6a20774dad096bb74e6cbb89e244f198baad8b135709123d0b",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/config/ftmodule.h",
+      "size": 1443,
+      "sha256": "61c76e01106e7b7c80f39f8d6fd479b5323b54d757c9a2cb66d07064ef616649",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/config/ftoption.h",
+      "size": 41672,
+      "sha256": "314a1013df9b468f40747aec204d952b944104a3f6df475092f4bdbd297ad1a4",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/config/ftstdlib.h",
+      "size": 4576,
+      "sha256": "de81744697b6f9f7fe3a49ca320f2a7ea8f2ae905bb96ff161b5b2d1eed25fe2",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/config/integer-types.h",
+      "size": 7450,
+      "sha256": "0aeaf74f638d1584ccae37f580076a7ac24ef89049749839c3c90dcdda148d5b",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/config/mac-support.h",
+      "size": 1645,
+      "sha256": "be37d3886a1a1ab1bcf894259d6a50d90b5fc71e3284b12e818c57710a9c945d",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/config/public-macros.h",
+      "size": 4240,
+      "sha256": "7557630cb407f98fbc003300c507ae444b0f7449cab99d80c13f5c343710d06e",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/freetype.h",
+      "size": 177129,
+      "sha256": "fd45e7ee01c8f0f2419186d3fc9dd58e25cd866ef0c49f0b347c2d141665a364",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftadvanc.h",
+      "size": 5470,
+      "sha256": "6f0c22af9c16eb0459736db8c60e27269db6b774addd196a845e417c851d3813",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftbbox.h",
+      "size": 2638,
+      "sha256": "4389ec87328ba568415fe4919b9399ff38fa766956b0940e494fbccd1427a6da",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftbdf.h",
+      "size": 5654,
+      "sha256": "d394c0d427d75efbb04ee06d55e2793bfab969d6ca94dba9f743707b109adbcd",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftbitmap.h",
+      "size": 9051,
+      "sha256": "92b63e93b151d96fd985cfaba4ec60e47204bbc922f3bee82412ae2fc426fb03",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftbzip2.h",
+      "size": 2786,
+      "sha256": "be324bc70ad4b355d7a2ae78a540019db17146a140cdcc59676079afc174ca38",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftcache.h",
+      "size": 34179,
+      "sha256": "ba20c0391cc39373474ce3d57adb65559e3954d413d98c2100d77d40bf82bf07",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftchapters.h",
+      "size": 2933,
+      "sha256": "c7d1c2ca13903fb6d0b3b37850344d805280856fb87c7597087ce2352573f752",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftcid.h",
+      "size": 4022,
+      "sha256": "e71180811abd5f87bb9c5eb058904b32c037ed29f8666e8a9b3561936b5b6ecc",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftcolor.h",
+      "size": 50791,
+      "sha256": "217af290dc25ceba7b77ed62bf7710e17d6396d6a20438072ab3a0685f4b2137",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftdriver.h",
+      "size": 50570,
+      "sha256": "459e4688340c8fc66545768e360b7fa126a4939c8de33d729181ca23572cf695",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/fterrdef.h",
+      "size": 12559,
+      "sha256": "376e05cbda2fe270031ef19722c6f9d76b9c4c444ff9e0e9c97cf9e3a016111f",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/fterrors.h",
+      "size": 9301,
+      "sha256": "a7547172143ce6309f89492b47ab0e6e69c7fb7f7caa8c81635811fd42673050",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftfntfmt.h",
+      "size": 2213,
+      "sha256": "54f23d9c103f0c485e837ea1a9db5f0736372b7d781d1adafb8cff6aa950d4d1",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftgasp.h",
+      "size": 4138,
+      "sha256": "a1453a8faeba8845c7b35bcdbbfc43afcc51bfaea89470f813e344a5c9fb06af",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftglyph.h",
+      "size": 20912,
+      "sha256": "79a94788388fee750f7cb1deac0c2dfe23d6a6232f29eb9bc056ca4d5a74f137",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftgxval.h",
+      "size": 10625,
+      "sha256": "06bb3bd9450ac2534f738849df72de6e618313a61d4b4866bc0bdf44ecefdbcf",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftgzip.h",
+      "size": 4211,
+      "sha256": "75f54dfef82233d9a9a1f9d4b4560a258b052784aff9859137cc232f468805df",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftimage.h",
+      "size": 42337,
+      "sha256": "30fb302298e418986d12107f856aca8f6e290cf88fe51b6186171ca21a65d824",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftincrem.h",
+      "size": 10696,
+      "sha256": "073a9dd3b7585989ee68540b3688a1e11bbd3498dd8210809b0869529861df05",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftlcdfil.h",
+      "size": 11257,
+      "sha256": "462073b97096be0c7e485d802fee6e6046f1aa36050c14f7771c31b99bab30fa",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftlist.h",
+      "size": 7100,
+      "sha256": "fea6f521193148308630725ae5de0ec736c135910704239967c541c8ab3e0cd1",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftlogging.h",
+      "size": 4130,
+      "sha256": "3c353c71c09de36f847cdc209f6e7d92dd92304b1d11c1d8d7300d439a24ef88",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftlzw.h",
+      "size": 2768,
+      "sha256": "fd8b72704427c0d8d4c6f2efdd30fdbfc55a7d1246a3c627dcb82661b324aae3",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftmac.h",
+      "size": 7771,
+      "sha256": "4203c770c57d3f09ea16e1dd6535da3a1bda62673cb9bedaacab90ac4b736bad",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftmm.h",
+      "size": 27783,
+      "sha256": "5d134d486b89d9a3dbaa54e581168be3868d04951c1ec3260542d852a14dddb1",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftmodapi.h",
+      "size": 22544,
+      "sha256": "1e526ff1f741cce96bf8d5e935bd9f1ba8db4afdd5c76f387ac54964b25d3fde",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftmoderr.h",
+      "size": 6675,
+      "sha256": "b9f667a0487217b12de1390cbf08622aae39966d1ef7c0578cfdd44d7328ddb9",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftotval.h",
+      "size": 5346,
+      "sha256": "da5bfb9e509556bfc16ce899a161ea26555cc3ff019cdcc67e6b3af3723f6361",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftoutln.h",
+      "size": 17403,
+      "sha256": "db0585ea338debdb9b721adc5f6d138ec7f88df30ff44cf6fb3cac79a70982f8",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftparams.h",
+      "size": 5847,
+      "sha256": "4db8f53c9b62aa5adfd2f89877a96c522198e9a780402be7aafba9fdace5f485",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftpfr.h",
+      "size": 4908,
+      "sha256": "dd40f7a041f345c8ae12664f52d2def53ec5dd2a49e65aba2b95bdef5b63a1d0",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftrender.h",
+      "size": 6625,
+      "sha256": "9579d3d9ff09e98ee09a49c8588d97a910c8fe698fe465a3f33965921fea77ec",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftsizes.h",
+      "size": 4288,
+      "sha256": "2afecd7a4dabbf89e9f76d373829b4e8e70a5c593ecccb7646e190c47a2b398e",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftsnames.h",
+      "size": 7730,
+      "sha256": "621faad855dfd4cc5e9a90b5a4554b706767653c5c2d41acd1b03d2e118b52dd",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftstroke.h",
+      "size": 21773,
+      "sha256": "ba4ed8f81ac66e9e6a2cdf772b69da02a0085fc5576cd233e4da661c6fb1967c",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftsynth.h",
+      "size": 4483,
+      "sha256": "f75aa75f8cb754c37db6ac16e1c9648997e06d280d8b28490d502838e6c649ca",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftsystem.h",
+      "size": 8502,
+      "sha256": "9a41ef1877a9f5f7e5debbf0d701bd393e53e2ae36fb6c34faebf26b8cbc43f2",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/fttrigon.h",
+      "size": 7411,
+      "sha256": "924526c9b662973f64eb5b4f5034ae897684cb08b9cca7262aba097e49471ade",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/fttypes.h",
+      "size": 14735,
+      "sha256": "27663e885fdb62982c221cbe1dba3e2f0d2730f5aa54aec333613bc60e05d1fe",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ftwinfnt.h",
+      "size": 7949,
+      "sha256": "a2d77ef372f2c874d61179687b71a2d034e1d51430266c46ec0854593d02b779",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/otsvg.h",
+      "size": 10457,
+      "sha256": "3f7b2484cf4980c5dfb568e8f57b687d3add3b7cc499054f46164ca6d2690e53",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/t1tables.h",
+      "size": 21529,
+      "sha256": "3bf63affe3fd88daa017ee7fcd894e37e961be9abdcd168b39a328ad3e6db3ba",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/ttnameid.h",
+      "size": 58844,
+      "sha256": "c7f9f5b9d7f90bb77f0b5e5fb643039f47ded753130b9c4521d6070fe7dcd7ce",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/tttables.h",
+      "size": 25422,
+      "sha256": "7fd1ce25de661e802dbff67ad5e9927bcdef1730527a5d453120586f13698280",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/freetype/tttags.h",
+      "size": 5145,
+      "sha256": "7ded67566c32f76903938b53dc849c97cc1c2f25abe14357f7258928df4c3f1f",
+      "mode": 420
+    },
+    {
+      "path": "include/freetype2/ft2build.h",
+      "size": 990,
+      "sha256": "1e8028d455a85db4dd19b2019a721d56409f802c2223e78ab5199c22f8b33397",
+      "mode": 420
+    },
+    {
+      "path": "include/graphite2/Font.h",
+      "size": 17644,
+      "sha256": "c8e67cc52dd19e5d98178e3d8d25216f13c2613ae2aa8e80756bc283e0fb276d",
+      "mode": 420
+    },
+    {
+      "path": "include/graphite2/Log.h",
+      "size": 1869,
+      "sha256": "36c88d7c6970774ed2beac493617d18a4fecbf8b0d1a9911503b06b32f70ed06",
+      "mode": 420
+    },
+    {
+      "path": "include/graphite2/Segment.h",
+      "size": 19209,
+      "sha256": "676e7357a3a84cdb8c63118d67a306113575cb30d528de906111bd00be902b18",
+      "mode": 420
+    },
+    {
+      "path": "include/graphite2/Types.h",
+      "size": 1988,
+      "sha256": "5ba78bf94b6af7ad9b6dc6a494e29604711a4d1be923e55cf15fb3433838e437",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-aat-layout.h",
+      "size": 57382,
+      "sha256": "19260855effa365dabbea60543813bdb88c67835aa347b7970e416906f3ff392",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-aat.h",
+      "size": 1243,
+      "sha256": "bce10093cad39cfbd5355d763368b22a04ae2bec9289ef0642e5f752bd6e79ff",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-blob.h",
+      "size": 4731,
+      "sha256": "710fe0a1be3b3a344154939be9bf6cc30674f6abd4ae0fcc0d3144b9d6b9a6bd",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-buffer.h",
+      "size": 31931,
+      "sha256": "c9d608ef2ab9fdcbe3b285418a3662fb075a579fb7fd3010e75cfb1ae8263566",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-common.h",
+      "size": 13574,
+      "sha256": "5238d77823c4fc37ad37aff7422b1fe5157fcd10c706862db7c37dcb975e3b37",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-coretext.h",
+      "size": 2932,
+      "sha256": "27f22c0c9fee8e164fc6672494b03bca5340f3be9682bad338936d3507cfd5f0",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-cplusplus.hh",
+      "size": 6695,
+      "sha256": "e6aa3fee07a1384316172a4ab28ba2b710cc2710c952d2bdbfead348c7887b0e",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-deprecated.h",
+      "size": 13343,
+      "sha256": "d0b32b536185fc9ee042e5371b581c330fb871d546a7c8a775f7d6d635b7dfb5",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-draw.h",
+      "size": 15245,
+      "sha256": "c121d6ffed28256074ff4ac921231d330e47f81ac51c65aff9a534a60ddf6af4",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-face.h",
+      "size": 6464,
+      "sha256": "fd53fe46728fbd055f2e7232d9c38510320a879ee508147e7c1a2b1c9b5cbaba",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-features.h",
+      "size": 3126,
+      "sha256": "beaef79681fe5c8d3824cc8a74e56b79ca085d7acf3d6586fa8999345960b0ce",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-font.h",
+      "size": 41731,
+      "sha256": "a7b0cb846e3cad88578a2435483bf64f6b164d4a63a53e4d79e6228bc0053e73",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-ft.h",
+      "size": 4839,
+      "sha256": "e5a128de581bad91eec64eb057a26dbb4539b60cafa6017d5ca2578cfe0de3e8",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-graphite2.h",
+      "size": 1723,
+      "sha256": "98180c71960325ae9a9c886859547f56899504072da6935ae977cb5e7b2586da",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-map.h",
+      "size": 3347,
+      "sha256": "b073aa19718e43e3535caeddc0015a4e45a89032a76059cc5ab8f3f0d220bece",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-ot-color.h",
+      "size": 5118,
+      "sha256": "187e95990bb37e5e124ba7fc2fa8b42975717502531759a0f298916df17d5158",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-ot-deprecated.h",
+      "size": 4130,
+      "sha256": "c3a9878ac0633d5e6d7e16821114ad4555458a6924100581f0d16fef5728b1c4",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-ot-fetch.h",
+      "size": 3736,
+      "sha256": "e574d686e1a00e3df6d31f2b92849b8330ba295012556bb190056fc7a5d00296",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-ot-font.h",
+      "size": 1410,
+      "sha256": "e62d178aa73ef9c80b08d3c076db3e99bb8cb4e8219e978e793ef7ffe965f8f1",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-ot-layout.h",
+      "size": 19223,
+      "sha256": "c7b0024750a50cef84cc81d49188e5ceab441ed0c24809fcb63ddcc449691f1c",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-ot-math.h",
+      "size": 13761,
+      "sha256": "4e737e5ed9dcb3db18a64534a1ff2faf638ef720dc30db0ee821324099432f90",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-ot-meta.h",
+      "size": 2553,
+      "sha256": "1d38c9bcbc0d417f8b7e0e818c2f5f9b83d2abddc39f2f116cc0ae84157a572d",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-ot-metrics.h",
+      "size": 6020,
+      "sha256": "c65239f100590cf1b1f647bba6ccd1a548a4e89cb80978601ca3050e9884e724",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-ot-name.h",
+      "size": 5536,
+      "sha256": "5be924687f71a0f98149b1987f3de3fd766ed9e84c4e144250e97048a36cb1ac",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-ot-shape.h",
+      "size": 2339,
+      "sha256": "fd484f67e5c0d99cd428a2debadface7e80f7163b9c1be150cf1860fabe050c6",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-ot-var.h",
+      "size": 5209,
+      "sha256": "9c438bc34f43afcc95c3f5f390b929903156af93e19473fc29daa650d98cf20e",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-ot.h",
+      "size": 1527,
+      "sha256": "b1f9eb217039400ca9031f6a84a85cb879fc16fa0ca927ed453c17d2c3e05429",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-paint.h",
+      "size": 54911,
+      "sha256": "ba9e2d78eebed719ef0b7c21229d4fe0d55466e891d15abcde7e1f94de17788d",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-script-list.h",
+      "size": 20664,
+      "sha256": "898de25adaf9253471d9f1351a6c90e3547e1470dd2f468ab19a86561868182b",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-set.h",
+      "size": 5144,
+      "sha256": "f19c6a8dea1733d749f6cebe6a7366a9ece37a0020bd1153b233f1fbb72d3440",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-shape-plan.h",
+      "size": 4121,
+      "sha256": "03555c82558fa347e96549ec99698fae790c2cfb9ee795c5ea48ff4134e06224",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-shape.h",
+      "size": 2344,
+      "sha256": "3adfcf510853bc118a120b7633c0e4d15134e4ac4bdf7911cb85511887e7e328",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-style.h",
+      "size": 3340,
+      "sha256": "6e88aec3ae6db176b37e4d6089923f78859134a26fd12b33b40b772e91673b5a",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-unicode.h",
+      "size": 22980,
+      "sha256": "6131f0eb9e411fa392101f58793f4e4347ec3bc6fe45226736b186004cea8038",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb-version.h",
+      "size": 2597,
+      "sha256": "110e75e9904f1e1a987ece9a17bf7f3c40ad43af685768a56f26a82540d12d5a",
+      "mode": 420
+    },
+    {
+      "path": "include/harfbuzz/hb.h",
+      "size": 1555,
+      "sha256": "31a1b53db3ee4395916e6d4f105b2c64772b8037bbb97d0e6d1e4a905eb6c6c9",
+      "mode": 420
+    },
+    {
+      "path": "include/lame/lame.h",
+      "size": 50618,
+      "sha256": "46eb6a9f0ec2186bfbf1c2455c9a667343b57e5ea53f87add97153568210b4dc",
+      "mode": 420
+    },
+    {
+      "path": "include/libpng16/png.h",
+      "size": 148529,
+      "sha256": "5758258cb691e429bafbf16057210e2d9bfa2c33b6c4636a6db562480f39b273",
+      "mode": 420
+    },
+    {
+      "path": "include/libpng16/pngconf.h",
+      "size": 22673,
+      "sha256": "3f1d9e8b05ec5165b65744f99af0ef3d0d10d77d6866551715b80ac884a0bf47",
+      "mode": 420
+    },
+    {
+      "path": "include/libpng16/pnglibconf.h",
+      "size": 8081,
+      "sha256": "1589f6f49f857fb68edba098f0c9c2ff19c5dd05da6deb84d661ea88c8d01307",
+      "mode": 420
+    },
+    {
+      "path": "include/mpg123.h",
+      "size": 106709,
+      "sha256": "d6c7d5094aef2f6587819b4445028c45f06af26b15a5fb643a55c4be09cf7c4a",
+      "mode": 420
+    },
+    {
+      "path": "include/ogg/config_types.h",
+      "size": 538,
+      "sha256": "bd424c5670e21bf37fcd039d4e39a9f8f19aa5af7ee720810a07092da6557e60",
+      "mode": 420
+    },
+    {
+      "path": "include/ogg/ogg.h",
+      "size": 8373,
+      "sha256": "aad86109c1fdb377738675a63e0b19859e06ada25ae5c59c290ca7263d1dc4ca",
+      "mode": 420
+    },
+    {
+      "path": "include/ogg/os_types.h",
+      "size": 4781,
+      "sha256": "3bbab6a5d31e3c25c6080252b042afb87028e3ffff100e3e0285648b250b70f4",
+      "mode": 420
+    },
+    {
+      "path": "include/opus/opus_defines.h",
+      "size": 38558,
+      "sha256": "bbd4d4e3ba99f6982b1c8d8f5541814ad77d8e8babf3cc788cf23d517b2ca9d6",
+      "mode": 420
+    },
+    {
+      "path": "include/opus/opus_multistream.h",
+      "size": 38267,
+      "sha256": "fd99c4594b4b57e406e9cab45a777895dd1b4c8de067088aa54ed7ae100b13f0",
+      "mode": 420
+    },
+    {
+      "path": "include/opus/opus_projection.h",
+      "size": 32998,
+      "sha256": "11b3427e9ca342308a93adc9a081e2479685e5b7811a3a53540609f1bbc488ad",
+      "mode": 420
+    },
+    {
+      "path": "include/opus/opus_types.h",
+      "size": 5157,
+      "sha256": "19cb301ea1eedbcbdbb5049363de061893bf11c20e505a657b69ce6ffa5b11fa",
+      "mode": 420
+    },
+    {
+      "path": "include/opus/opus.h",
+      "size": 59505,
+      "sha256": "036f6a6e83a20e943505743e113e90d6278cbe8240f7d5bb90b3f86261e783e3",
+      "mode": 420
+    },
+    {
+      "path": "include/opus/opusfile.h",
+      "size": 116107,
+      "sha256": "fec33e1edcf905af91ed9f7bb8e5860235cc11ba5551fc2e28fc22ca951520d5",
+      "mode": 420
+    },
+    {
+      "path": "include/png.h",
+      "size": 148529,
+      "sha256": "5758258cb691e429bafbf16057210e2d9bfa2c33b6c4636a6db562480f39b273",
+      "mode": 420
+    },
+    {
+      "path": "include/pngconf.h",
+      "size": 22673,
+      "sha256": "3f1d9e8b05ec5165b65744f99af0ef3d0d10d77d6866551715b80ac884a0bf47",
+      "mode": 420
+    },
+    {
+      "path": "include/pnglibconf.h",
+      "size": 8081,
+      "sha256": "1589f6f49f857fb68edba098f0c9c2ff19c5dd05da6deb84d661ea88c8d01307",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/begin_code.h",
+      "size": 5664,
+      "sha256": "9803dab29fb4522ce3500ab789260e9622df6307ce90f92ad20c1808e19c4e7b",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/close_code.h",
+      "size": 1486,
+      "sha256": "4599e9cedba7451ff07a6306f0b7531beed05b1c5a65b1a2613d1b771be43fda",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_assert.h",
+      "size": 12808,
+      "sha256": "32fc342e0a5f3a55ea1ce2a5d9195e77215edcb6f4595c0dc3674dcca1cc81d8",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_atomic.h",
+      "size": 14496,
+      "sha256": "c561ce8f94de18ccb4f708bda45880ba6d3c9f052e166beb5dadc5544f35221e",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_audio.h",
+      "size": 59559,
+      "sha256": "047afc29591ac43a90f06169f67ee7d99a6256c6bbe5efe5de79a52565bb6853",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_bits.h",
+      "size": 3405,
+      "sha256": "63d22d1c8fe0d83bba5a49aba9bb700592f14462f7f7bf87e5838064047e3fa9",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_blendmode.h",
+      "size": 9048,
+      "sha256": "1985f81b886d9bc681821af4f23d28e6e51bf51f21e5ef28ccc13bc8c7cdfbae",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_clipboard.h",
+      "size": 4307,
+      "sha256": "3e8c73fb9b3ca5a544b70b66b683b78db53e1a187e066912a068c0ed7bb3e8ce",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_config.h",
+      "size": 16437,
+      "sha256": "2c59c4e955856131f328b9fead1d9ff799044e3e8603075ffc6d1d47d5abe688",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_copying.h",
+      "size": 939,
+      "sha256": "3f90be470c18f99f4aef39444e9374edba166cfeb1b90f99f35286cc33924642",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_cpuinfo.h",
+      "size": 17785,
+      "sha256": "fee0c489ed4364c21fe0b726a47f72df167fbcbf42cf569807b2bbf77dc30c54",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_egl.h",
+      "size": 108847,
+      "sha256": "72c119f4f7ec30f13b03d3e33d2266cb012ee103f0ad1973786d84d538a0b53d",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_endian.h",
+      "size": 10896,
+      "sha256": "7907cb3ab7b8d7bc99274f5aef5294bef215b01ea49d97226cbe6e911de557d5",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_error.h",
+      "size": 5177,
+      "sha256": "0931656a5825e5f1f319f2cd3f573fc527393bb02fa7a1ed3f7fae6c790328be",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_events.h",
+      "size": 48349,
+      "sha256": "ceb7bc717342e652e2c432fd1dd08a5508575cea6bd8615fb4ddea63c071ddc4",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_filesystem.h",
+      "size": 5526,
+      "sha256": "dcfaa010c73150e7b0d56f50f5adb3fc2e35621091a55bc5436b2fb85fe71675",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_gamecontroller.h",
+      "size": 41726,
+      "sha256": "c77c1d8287ee441843b9d8be87b71252bdb1ce76b7bfc4fcff46889ad8e9cfec",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_gesture.h",
+      "size": 3420,
+      "sha256": "a5a8f8bb8efb26860faa9694189aaf76df1cdb7755ccd30a8599b46b237a5d82",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_guid.h",
+      "size": 3365,
+      "sha256": "da8fef1d047b31e55d1b167de301a806481b6948e7c2497779fd71934c45d5db",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_haptic.h",
+      "size": 42573,
+      "sha256": "4267b6f039bea7ad0f5cb37c37d63d0704af84f73a36d2680684ff302f49f153",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_hidapi.h",
+      "size": 16663,
+      "sha256": "489a83d1073e528f82e821c23c515af8b5a59357ec5ab132c854bb588648f59f",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_hints.h",
+      "size": 120275,
+      "sha256": "96c1056e0734f019b1dafed5129d4a9d36253559ed8c7577a23c188bb75a48c1",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_joystick.h",
+      "size": 39540,
+      "sha256": "a39fc5da97edc94eabff8616a413cf850efb35d1daf437a8cc16caa837766482",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_keyboard.h",
+      "size": 11377,
+      "sha256": "f68dfa4f784f0b22949a8df94f3c3653ea01a03ae02297d17579eb9e7ea94054",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_keycode.h",
+      "size": 15615,
+      "sha256": "291c769a05bc3e1ead011db3e07cb52415e1aa306f484904d203e94cbb3186cd",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_loadso.h",
+      "size": 3898,
+      "sha256": "8d3653b7b774b406a289519c74ae695eb5b52d71060712a88fce4c72d82b1bd3",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_locale.h",
+      "size": 3808,
+      "sha256": "c4a663ce8ea4ca22f961796cae644a04fc521fa2d0681333f7da8a581909560c",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_log.h",
+      "size": 11775,
+      "sha256": "3342cb31280c2dbf0e5809b03e5499f0cf5edf193efa5e3c5b17814526a92033",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_main.h",
+      "size": 8994,
+      "sha256": "622ffcd0e7fe0c755a987c5eb9dad6b3672774026b8250b66ad3c40d3a4dda9a",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_messagebox.h",
+      "size": 6878,
+      "sha256": "65df549cab0a515145ae55325c447159ae1d60171331a7508eac06034d25c972",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_metal.h",
+      "size": 3367,
+      "sha256": "1f3d0251522b735b0e37677eb1a0594440599fbbb2af86bbb508606cca001a06",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_misc.h",
+      "size": 2834,
+      "sha256": "5d5e4b42481a5ef44ec9d66159e88426be5632262731a3c3b223277771d30006",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_mixer.h",
+      "size": 111771,
+      "sha256": "d7284c74e5abe94049b5b483084edd0980faa0050144631931a7359c14f35851",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_mouse.h",
+      "size": 17031,
+      "sha256": "66b5353387d011a54b232931e86121cb5551e251b9491b9ed15afe293d5856ff",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_mutex.h",
+      "size": 16751,
+      "sha256": "c5ef9a8aeb056422ef878672770e1f60ae965933693df6d8ebd53d0e514a1794",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_name.h",
+      "size": 1155,
+      "sha256": "fdc6c648734220285056ad8b8273511c75d5be00d17fc1ea3eb4c06526b13fa3",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_opengl_glext.h",
+      "size": 864070,
+      "sha256": "1abb28891c9b0661b6ff3749de2671da5fe12beb5bcb1833b2d6bdf5c89ecdf8",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_opengl.h",
+      "size": 81038,
+      "sha256": "c4d2857e757b2b2a83d7531cbeda19c383ad6d16648ab9b7544fc0a74eb2ff13",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_opengles.h",
+      "size": 1225,
+      "sha256": "0542791816fcdd84b74d98347ac1b00a97bc6c2cdf31334cd9083789ffb6594a",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_opengles2_gl2.h",
+      "size": 42938,
+      "sha256": "d6ec44b1d73f3afce3a20ac6976db7fb3dac656c5190f0b563e4ce90d79a15aa",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_opengles2_gl2ext.h",
+      "size": 241221,
+      "sha256": "4fc5b0034dcde9c125922e3e70d01489a6b335076856ee660294e1a6305a3719",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_opengles2_gl2platform.h",
+      "size": 646,
+      "sha256": "4779be999acd1904458238f09c86983b7960ac40e612e05db2db97db615f1e0f",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_opengles2_khrplatform.h",
+      "size": 11131,
+      "sha256": "7b1e01aaa7ad8f6fc34b5c7bdf79ebf5189bb09e2c4d2e79fc5d350623d11e83",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_opengles2.h",
+      "size": 1576,
+      "sha256": "73a3b042f7b3d296904bff91268730d5180638f4ec1836d57258fe53ee60df8b",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_pixels.h",
+      "size": 26252,
+      "sha256": "fee61aee337a3823e832f5c26b3000315d6eb95da91ba20d4fb0b5bac9d4967a",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_platform.h",
+      "size": 7129,
+      "sha256": "9ce62823791d7a16b9ad17ad11f4de8dcbcde7918f67bf6d1dd4fc625b69e50c",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_power.h",
+      "size": 3238,
+      "sha256": "fbbdf3ff13b21095623edfc5659c1b76c6dbb1364a4dd14d8f9e5cf329048784",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_quit.h",
+      "size": 1982,
+      "sha256": "9c902abaea7560f98fc546bd35a04629a205d047df5433fc30b0c1d81af58b21",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_rect.h",
+      "size": 12890,
+      "sha256": "01db368d4b7736e2358cd29eec0d187d964cfd6182cffab57a938adf73b6a418",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_render.h",
+      "size": 74566,
+      "sha256": "a0cf0db1a13d0dd0d8bfdc01ffb371e2b19be36326f85058200ac9481876c7f0",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_revision.h",
+      "size": 230,
+      "sha256": "3aeb32fbed9e4b88fea9b2d1645fa8659154fbd1b34585257a35258d19dbba43",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_rwops.h",
+      "size": 28219,
+      "sha256": "10da91c08e96e5fca452e06e11029908a6f237356e4db11af1ad13ffa2e57a47",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_scancode.h",
+      "size": 16910,
+      "sha256": "eb14f3cedde58358f6456d185f473d7551e8234de260151ad0319861ff1444c2",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_sensor.h",
+      "size": 10733,
+      "sha256": "f4dabf5bae217fa6370d8af73abdcbba99aea626f35e17a381b636afe01bb81b",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_shape.h",
+      "size": 5880,
+      "sha256": "cbdcdd8ead6d61a7bfa09bc4c538cc598919d1c060d70524c0828d3af7418667",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_stdinc.h",
+      "size": 30995,
+      "sha256": "33edc0b35512b86162d1affe9df95165b4bc514a90b17238420efe85d24ca8a1",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_surface.h",
+      "size": 36909,
+      "sha256": "92299233370d645f78d9c655ce7f102c16f9d4ddde28a59bd82a962c49b51d94",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_system.h",
+      "size": 21435,
+      "sha256": "ffc5f3662a85f795c0b2e2b87b9fbf493bceeda4aacf7721a68225c5e318ca67",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_syswm.h",
+      "size": 11505,
+      "sha256": "34fec1a5f1089bd395ee11c3a25ad0fc10e7abc56d4a77cc6f17eb9e4e8a9607",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_test_assert.h",
+      "size": 3226,
+      "sha256": "fe826feb054929284764718c67ae95b920729ae1336ffeec88a23d611e6498f0",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_test_common.h",
+      "size": 6862,
+      "sha256": "b619cc3020ffdc8f8a12f5d9d4af8b83e9b7c6c3bfc05c6502933c4b3f0103de",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_test_compare.h",
+      "size": 2161,
+      "sha256": "713af284d8520e910d94090396bfd2db2b2292096edd93e4d60aa69163b9c510",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_test_crc32.h",
+      "size": 3380,
+      "sha256": "74cb4c2f7f7130d6048a2c716260d6403620f0e358fa928136ed3560bf71a378",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_test_font.h",
+      "size": 5421,
+      "sha256": "b0b7e6ac8bcf7b9e5bf28695b05d3a084cd530c90322cbc9a0b198114b174231",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_test_fuzzer.h",
+      "size": 13176,
+      "sha256": "494e0e49882a9c2745d07da7b04761d8d992dd90a7a29dd34b605051ed8dcee5",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_test_harness.h",
+      "size": 4629,
+      "sha256": "30b9ccb36e07ff0442429a27540f6a796aee073355b538bd50ef0b98cc47982e",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_test_images.h",
+      "size": 2213,
+      "sha256": "35e7ad856a201fbaafe7ec3fc48db47fb5d9452c292267f8936aec5e5c77b81d",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_test_log.h",
+      "size": 1951,
+      "sha256": "3a8736e6d757666420616f83e7929493fcbe816a0cddf10347f3446818870be8",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_test_md5.h",
+      "size": 4626,
+      "sha256": "be73865b584b5eb207cab3d8dcff6ad057286b75053b547b0238df275e282491",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_test_memory.h",
+      "size": 1784,
+      "sha256": "556f676637fbb1a85f1998545c59addca358b8b95c71812337b370184f27483f",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_test_random.h",
+      "size": 3152,
+      "sha256": "1d8c7987ae39b74d83f40fb54394fd32c61037716c77ebcaf7ce87788934c035",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_test.h",
+      "size": 1999,
+      "sha256": "55e453735fb6a14cf350f663e8c7bc9aa273db95bb31bcf3abbfb5b3a91a414e",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_thread.h",
+      "size": 17410,
+      "sha256": "0e546047dd407ca0e1d2d686cf2650ac77a987047184e3645f6ba2ec958ddc5c",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_timer.h",
+      "size": 7291,
+      "sha256": "d0497ad3d75701613a227134d63fdcbc62ed72f645153d52753e386ee4b498c7",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_touch.h",
+      "size": 4506,
+      "sha256": "4e5d7a083bbf5237daf5ccf06faed3fae81b1caa693e27841ebf4ec9bf8ff769",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_ttf.h",
+      "size": 88154,
+      "sha256": "0b83c6f2ec988e75c2fae73f020ccd4d52b8e0b40e9124b82d35e21406c0b526",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_types.h",
+      "size": 982,
+      "sha256": "ed0c92bed5eec2648f744e8451f3ac5140c1ef11510175fa1b726273dbded9ed",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_version.h",
+      "size": 6839,
+      "sha256": "ee97570d0d6507b4687076336c07fd4a7fa1f5e7986c9b61893a279950febce8",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_video.h",
+      "size": 85653,
+      "sha256": "82ab63ff37834cd4bfcee490b8e37fb892bbb0b31a1a7913ec13c329271ca5ff",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL_vulkan.h",
+      "size": 8688,
+      "sha256": "98ed6b3d354191019ae208fc861799237ba8ffb11fa6bd41b3569e6ce05555b8",
+      "mode": 420
+    },
+    {
+      "path": "include/SDL2/SDL.h",
+      "size": 8111,
+      "sha256": "952e89e1dc4e0dd1a7bea6a153df632b8cdb6e433a9b3b0702c5ffe15b9b9360",
+      "mode": 420
+    },
+    {
+      "path": "include/sndfile.h",
+      "size": 29558,
+      "sha256": "911098ea4b66f0c5ad59785b176f2b19f6e657042c15c93791edb53467efd6c0",
+      "mode": 420
+    },
+    {
+      "path": "include/sndfile.hh",
+      "size": 13436,
+      "sha256": "dea133a9521918fb48b1d5922d08ca00de372e6049dc65bb747242a1158c4d6b",
+      "mode": 420
+    },
+    {
+      "path": "include/syn123.h",
+      "size": 53292,
+      "sha256": "c13a50c857963d066ff9a9f8cef6f402b86fda98b56409df1ff84ef3ab834e9d",
+      "mode": 420
+    },
+    {
+      "path": "include/vorbis/codec.h",
+      "size": 8387,
+      "sha256": "1d031e3cbae7defe966426e33802450a56388a1323eec1ec629e6d4095c676c5",
+      "mode": 420
+    },
+    {
+      "path": "include/vorbis/vorbisenc.h",
+      "size": 16990,
+      "sha256": "d2aba0527252dc265ffc40bc9b1955d5ac0dc8d5e16d9376fa366c05fa27dc7f",
+      "mode": 420
+    },
+    {
+      "path": "include/vorbis/vorbisfile.h",
+      "size": 7990,
+      "sha256": "7d98264e57b0190ef0a2701a0bea5f982e82fc1bedd93cd9408a2fff7790f803",
+      "mode": 420
+    },
+    {
+      "path": "input.json",
+      "size": 66191,
+      "sha256": "0ce636f1a762b1614bed7f172d9f3c50f557023f101f76d8c65f3e0fea970fd0",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/FLAC/flac-config-version.cmake",
+      "size": 1861,
+      "sha256": "896f616ce435e9381ccf3b8cfa2a00b0375cf97e6d9af58403921ccb07308687",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/FLAC/flac-config.cmake",
+      "size": 1174,
+      "sha256": "56a0c1cb6df7abaa816f2e56a51c0ea842335cbd3e304c08a2a5eb68d9b26d14",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/FLAC/targets-release.cmake",
+      "size": 843,
+      "sha256": "347afd2feca2599a829b265070741191f31802cc71d08339d91f394cb44235df",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/FLAC/targets.cmake",
+      "size": 4240,
+      "sha256": "4159cafea3213ed511150d7b7697462178b0c58f87ceb53b1588fe190bd38aba",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/freetype/freetype-config-release.cmake",
+      "size": 844,
+      "sha256": "9d9f142af7f32d0555081b24a76cf20b189183e728fa5cf4b72f10e3f7b47f13",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/freetype/freetype-config-version.cmake",
+      "size": 2765,
+      "sha256": "612c0c9627c24daa28da631644700404b791f501400c3d9602133d47b55da126",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/freetype/freetype-config.cmake",
+      "size": 4311,
+      "sha256": "27c6abc4641b8fd5d5f96c680dadaaf0797f94888a8943e81e66f3015e50f527",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/harfbuzz/harfbuzzConfig-release.cmake",
+      "size": 878,
+      "sha256": "a4f64e3b9f7b9eeecc88c96e2ea419b0bac19a467079687b2cda51574c7a0c18",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/harfbuzz/harfbuzzConfig.cmake",
+      "size": 4324,
+      "sha256": "dc686fec19bfb86a7d2080829e5a5294f859511ba16dba4edf1611b1764e1e95",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/mpg123/mpg123-config-version.cmake",
+      "size": 1862,
+      "sha256": "656114b956c1623cb69c621bc50b88d626ff84b4b9451c2a7e03f4c5ae6fad3c",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/mpg123/mpg123-config.cmake",
+      "size": 932,
+      "sha256": "e6d2a4ce5d8c51082b55d70b687a2df4b9ed5060655ca4411f6c8f7e1a902f62",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/mpg123/targets-release.cmake",
+      "size": 1356,
+      "sha256": "984a1716740998eebb4f547372ad0de970c51162713dec1df64e0854deb73ff9",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/mpg123/targets.cmake",
+      "size": 4344,
+      "sha256": "d6cb9e4dc44d54c3f88c90906f49a2c7d0bd325077caa10c43f5485fde3c8fe8",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/Ogg/OggConfig.cmake",
+      "size": 1302,
+      "sha256": "9f2eca52035397cd145072cacf29f006171a7ebb275a43229b33ca5965a12b54",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/Ogg/OggConfigVersion.cmake",
+      "size": 2762,
+      "sha256": "6400e90aeff611201abbbaddc8e8a913372f73b1b046281ef0ecc98880a01428",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/Ogg/OggTargets-release.cmake",
+      "size": 827,
+      "sha256": "ef35514d87c8f6f119685011c34852333ea1a9722705913760f0ba70de5ddb84",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/Ogg/OggTargets.cmake",
+      "size": 4088,
+      "sha256": "088f859a7941af619c79eb070dc0b874627ca820be9def90a97c3b55c7344ab6",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/Opus/OpusConfig.cmake",
+      "size": 1390,
+      "sha256": "4ae9b5376f837fd0e57c7901b0e798daf530fdc9c59be41c2f93c227f827126a",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/Opus/OpusConfigVersion.cmake",
+      "size": 2750,
+      "sha256": "6bd9d9663afcaf0bad0bab5ab6dbd9af105c919bdeead6cc40a58c0f4d9bbcad",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/Opus/OpusTargets-release.cmake",
+      "size": 842,
+      "sha256": "933aaee045d1d7d584ef546ac07b3897f71df22e538dd336945e2cd228466840",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/Opus/OpusTargets.cmake",
+      "size": 4128,
+      "sha256": "a4539d84d87a7c4d1da138e32a89a8dbde25a1e4e419a41feada74a264b73d7f",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/PNG/PNGConfig.cmake",
+      "size": 833,
+      "sha256": "658ffa30d7073e31f4c4194b83496cc03835d7340e84eda324f308345751874d",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/PNG/PNGConfigVersion.cmake",
+      "size": 3678,
+      "sha256": "7770ec916a594f527f30eb3db48a38d94a3da47a5bc36f7940288b629fab2924",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/PNG/PNGTargets-release.cmake",
+      "size": 873,
+      "sha256": "1acd917c44c5a6e8b104931731e15b5e1a87971e20a2b01cafed38347817bba2",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/PNG/PNGTargets.cmake",
+      "size": 4245,
+      "sha256": "d8b1c8e69438ec784e90868ead09caaa165c155d058a21d92b1193810a52fda0",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/SDL2_mixer/SDL2_mixer-shared-targets-release.cmake",
+      "size": 1039,
+      "sha256": "b2e6186d145716e9e694165781a4ff4e1d706fb64de1af8236d2ff7197c12d21",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/SDL2_mixer/SDL2_mixer-shared-targets.cmake",
+      "size": 4235,
+      "sha256": "8fc99ac090471a45bf8f967c0c9c4785c1a120e84c633128e6194ba1e5d24a05",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/SDL2_mixer/SDL2_mixerConfig.cmake",
+      "size": 3809,
+      "sha256": "79c1fc3bc2458076c589277548b6646ba7e8b1947c0c4f3581fa11e9044cd6c4",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/SDL2_mixer/SDL2_mixerConfigVersion.cmake",
+      "size": 1861,
+      "sha256": "0ce71b52a464ce0f0e8d37604081388e808629defca7d79bab37a9c4ca8e5238",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/SDL2_ttf/SDL2_ttf-shared-targets-release.cmake",
+      "size": 967,
+      "sha256": "bf566d27c4f9a701113222180f83e29d7640fbeffa6b0a0fdb88bb1367a49967",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/SDL2_ttf/SDL2_ttf-shared-targets.cmake",
+      "size": 4217,
+      "sha256": "7040daf468674165f6eaee3a04728123206c5aa7ba74ff28757e9c30cac46f07",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/SDL2_ttf/SDL2_ttfConfig.cmake",
+      "size": 1565,
+      "sha256": "bb9e79695ae0b7c380cc2c3ca3a5f067d5d5d971a27ecb8e1eed79a77bc25f9f",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/SDL2_ttf/SDL2_ttfConfigVersion.cmake",
+      "size": 1862,
+      "sha256": "8eef6e5a9411324e22d820c9929086f09375f501c15e4433f8e41e8b95dc5478",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/SDL2/SDL2Config.cmake",
+      "size": 3306,
+      "sha256": "ad5a6e94c6ca9cffe0fc11d613fdf002a8d107b79245ea2e07e0672d9bd5a675",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/SDL2/SDL2ConfigVersion.cmake",
+      "size": 1863,
+      "sha256": "66b8e0614e2950b058331e96efd5d083c2748793798329ac49f6797a6a8ed702",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/SDL2/SDL2mainTargets-release.cmake",
+      "size": 845,
+      "sha256": "e6d5c30419b611eea4d24c31a6ec4ece4a0cfea638f8cb99ece694f229f83925",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/SDL2/SDL2mainTargets.cmake",
+      "size": 4223,
+      "sha256": "4a0eac78d07caac090352cbf64b087bfaa3f856864ddb88db5cd4d0b3cb6bb5e",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/SDL2/SDL2Targets-release.cmake",
+      "size": 844,
+      "sha256": "433ead29b4dfc6494f133a37b74813816de6f9b4f2111b9b5b42244865dc2203",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/SDL2/SDL2Targets.cmake",
+      "size": 4276,
+      "sha256": "572e45ec69df7b1d5d05fee1b6cff5a2bb72bb6ea08790cdb12744a1ba76d208",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/SDL2/sdlfind.cmake",
+      "size": 342,
+      "sha256": "80152b52da2ac50a3323beaaec0fc1e3aa3c3b5a66d382fdb47736b313df9a75",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/SndFile/SndFileConfig.cmake",
+      "size": 1908,
+      "sha256": "282d9d52b1d7aad7b7db03314d51e8e1281ed8e3dba0a1d4ddae93146337afc2",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/SndFile/SndFileConfigVersion.cmake",
+      "size": 2762,
+      "sha256": "5c44ee46e2c0e6a14e3e2c84c6f1d41bd4c3770049597206b6403351127828bc",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/SndFile/SndFileTargets-release.cmake",
+      "size": 881,
+      "sha256": "237b7d116a67cc5df72c329e34cbdba39912fa060e994eef541bd82fe0db84c4",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/SndFile/SndFileTargets.cmake",
+      "size": 4124,
+      "sha256": "49693aaa3bdae5ed0b3103a39b069196aeb399b9ec86ca8b710b0947cf0904b2",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/Vorbis/VorbisConfig.cmake",
+      "size": 1260,
+      "sha256": "15d7787d026bf77e74bd967ba4f557814d207db0e7f18a8fc8f3ff7d07e93eba",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/Vorbis/VorbisConfigVersion.cmake",
+      "size": 2762,
+      "sha256": "b5b2f4148bcea8230933514ebb15f58aa46b5266a995de0b9bcdb54405ad0d2c",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/Vorbis/VorbisTargets-release.cmake",
+      "size": 1913,
+      "sha256": "639935dcb74aa92853a5363ad1ffda490b18a6beb9a3cc17123b68fef91f8a35",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/Vorbis/VorbisTargets.cmake",
+      "size": 4695,
+      "sha256": "8e4749b510f452e751fe275a373f4a973386a2cba3cdfa2f77e4757029c1466f",
+      "mode": 420
+    },
+    {
+      "path": "lib/libFLAC.14.0.0.dylib",
+      "size": 364384,
+      "sha256": "749f17f60b95ee4d645bd04636f590e1b7a114e9c1dcaefbc5d25d36416cfcf7",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "lib/libfreetype.6.20.6.dylib",
+      "size": 815616,
+      "sha256": "71a72f2e66b9d5138a3fc4a7bcc669a4096147c95a8044bf171fdf45a7f0e689",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "lib/libgraphite2.3.3.1.dylib",
+      "size": 158672,
+      "sha256": "8afd6ec4913e574860fecb08ab55cb15f24927175c4eb92ee5b94005c975a4c6",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "lib/libgraphite2.la",
+      "size": 892,
+      "sha256": "eb0aed253c0f01fbd60b4955fdb706a55601971f76f04ab9d2a916d2be492a35",
+      "mode": 420
+    },
+    {
+      "path": "lib/libharfbuzz.dylib",
+      "size": 1490416,
+      "sha256": "920ddee4d79adc1b817d6ff8d68196b08bd43e863df009e960738be1016b229b",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "lib/libmp3lame.0.dylib",
+      "size": 282192,
+      "sha256": "6de83394114df932008549ff6b6fc28d6b8039dbca65e287d7972d357f8fe2a4",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "lib/libmp3lame.la",
+      "size": 928,
+      "sha256": "d8e2506c368e3be67e0337345b34850bee93628b88f799a0dc5fa63330f43b5d",
+      "mode": 493
+    },
+    {
+      "path": "lib/libmpg123.dylib",
+      "size": 360064,
+      "sha256": "2d45452e3eb3eab140200045c5457e25a51af7dcb546174c009c2f5520412346",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "lib/libogg.0.8.6.dylib",
+      "size": 51360,
+      "sha256": "7a0afb115366ce75556825f2cf6f2e44268cc267673a619b09ece77b56c885d1",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "lib/libopus.0.11.1.dylib",
+      "size": 561248,
+      "sha256": "a3c5dca358ba01e02f2d6e4719b7208d606e9e7f5d2eace30e4b027c2f413e25",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "lib/libopusfile.0.dylib",
+      "size": 70560,
+      "sha256": "d769d31ef33210b8e59de9089d211b2977241917bec406950715b2f62ad71a1e",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "lib/libopusfile.la",
+      "size": 984,
+      "sha256": "e27ac21541bfd678c7e7ae1887effa49a0be2145d70322c1e664286ae8f943e0",
+      "mode": 493
+    },
+    {
+      "path": "lib/libopusurl.0.dylib",
+      "size": 32048,
+      "sha256": "bd74f4559da7603adfc2768eb1cb32df85969d1fffd3cab64ea57d3c12f045dc",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "lib/libopusurl.la",
+      "size": 1018,
+      "sha256": "b3341c08f7ac353e72f3a71e8c9df596b056da4a4bcb9f134234fb24d5e58074",
+      "mode": 493
+    },
+    {
+      "path": "lib/libpng.dylib",
+      "size": 252736,
+      "sha256": "0caff9154dddd75b0fd5b903d978d85dc755c875af47222c9b31c3f6baa96abe",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "lib/libpng/libpng16-release.cmake",
+      "size": 848,
+      "sha256": "67abff11a2184fb7b6c3ef4872e65374b58cd07303f14042436e10a72fe83589",
+      "mode": 420
+    },
+    {
+      "path": "lib/libpng/libpng16.cmake",
+      "size": 4159,
+      "sha256": "7e7cefbf293dc692b9e093b1831a194a9823c12a981dd368a2e3e7a655b4f8d0",
+      "mode": 420
+    },
+    {
+      "path": "lib/libSDL2_mixer-2.0.0.800.2.dylib",
+      "size": 170464,
+      "sha256": "a83629042694f18cd1addda4459aed48db80ec086989c2f4999293154f0d9559",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "lib/libSDL2_ttf-2.0.0.2400.0.dylib",
+      "size": 119152,
+      "sha256": "7776e8f446a361b80bc5dfdf1cf90af45a9968a1b8166236f20dc64b655bac06",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "lib/libSDL2-2.0.0.dylib",
+      "size": 1803984,
+      "sha256": "2467e7837f3c2abbd49ad687f84542312f8579a82d2352c4f9094618e5ccae5d",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "lib/libSDL2main.a",
+      "size": 840,
+      "sha256": "2bb1122a3e9f66b46eff9f97acd64cc307db7ceb8165caf2cdbcf4626be57f3e",
+      "mode": 420
+    },
+    {
+      "path": "lib/libsndfile.1.0.37.dylib",
+      "size": 613200,
+      "sha256": "67fd5527eed0522929b71d4e7b6df7b1fcce38a7c7770249364fc98f6db74cac",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "lib/libsyn123.dylib",
+      "size": 214080,
+      "sha256": "1882b6b0760c8e3bee1b0f567f511dd1fb48efd43cada8d4b0055b12d37b1356",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "lib/libvorbis.0.4.9.dylib",
+      "size": 293200,
+      "sha256": "29195295359c00fa5c0bfb156d97992351a1cb16fc37b511021be96a69518e4c",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "lib/libvorbisenc.2.0.12.dylib",
+      "size": 719584,
+      "sha256": "fb6616ecc09159858b5a93fa0675e34407b8f42343d599c709b4946d12da98ca",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "lib/libvorbisfile.3.3.8.dylib",
+      "size": 61168,
+      "sha256": "d1e288119f4a255799a058791a4273a3affa04d51aabeaec55b3ae9c980aa301",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "lib/pkgconfig/flac.pc",
+      "size": 293,
+      "sha256": "fa2d3d921b5b50f883315be9f110145c0421ec3008f8ecf844b646848c6b6c8c",
+      "mode": 420
+    },
+    {
+      "path": "lib/pkgconfig/freetype2.pc",
+      "size": 346,
+      "sha256": "b1422b2349afdc07389c13f49bef6a0f0e5bcae2048304d02afb3d54dbaa0658",
+      "mode": 420
+    },
+    {
+      "path": "lib/pkgconfig/graphite2.pc",
+      "size": 170,
+      "sha256": "4a7368f5c28a89854f99b8a514b1fe213845f0e065cdf3510e26ee9d3f8c3e8d",
+      "mode": 420
+    },
+    {
+      "path": "lib/pkgconfig/harfbuzz.pc",
+      "size": 354,
+      "sha256": "2ae2e80f1a5eed159510b99d4f19cab6e417f4409ebdb31ff7484530ec4f1144",
+      "mode": 420
+    },
+    {
+      "path": "lib/pkgconfig/lame.pc",
+      "size": 255,
+      "sha256": "b77304444cf566b385d67a424c830cebdde06a23f1f43eaf1fb5255724b2bcf6",
+      "mode": 420
+    },
+    {
+      "path": "lib/pkgconfig/libmpg123.pc",
+      "size": 290,
+      "sha256": "f3be465cff7be112eae07c10bf09c29b5cda1e7e007146b2b8c9790fc3cd98a5",
+      "mode": 420
+    },
+    {
+      "path": "lib/pkgconfig/libpng.pc",
+      "size": 302,
+      "sha256": "773d8daea6971e3be5568c44cd124cca963a40cc31aa7a7fa78a55fe7c3e7c5c",
+      "mode": 420
+    },
+    {
+      "path": "lib/pkgconfig/libsyn123.pc",
+      "size": 305,
+      "sha256": "a0133a60af9429f68fb778cccf597d3ad78a5034b4118ea9ac04da60b1acfde4",
+      "mode": 420
+    },
+    {
+      "path": "lib/pkgconfig/ogg.pc",
+      "size": 313,
+      "sha256": "1861ee29c75424a4e0a213cc7defc41a3fb43ba1a1c393100a8feeb4c3bad28b",
+      "mode": 420
+    },
+    {
+      "path": "lib/pkgconfig/opus.pc",
+      "size": 405,
+      "sha256": "f298e406ce3dfeae40b7490087ac49c054e67e4d00f33b13e2cf93b9177a6fbc",
+      "mode": 420
+    },
+    {
+      "path": "lib/pkgconfig/opusfile.pc",
+      "size": 345,
+      "sha256": "fbda4ae73fe0de321fe25c2bab7129b082c631c587fffb37630e9f9b64bf4f4c",
+      "mode": 420
+    },
+    {
+      "path": "lib/pkgconfig/opusurl.pc",
+      "size": 306,
+      "sha256": "d3c01c4076d34b4db766db15e88250f3b3486c7251908290b5f2ada8cc8591ee",
+      "mode": 420
+    },
+    {
+      "path": "lib/pkgconfig/SDL2_mixer.pc",
+      "size": 345,
+      "sha256": "dd51d218d7f1893fbaa7bb99b90e1797c9802caefc439727ae292eba876fc89e",
+      "mode": 420
+    },
+    {
+      "path": "lib/pkgconfig/SDL2_ttf.pc",
+      "size": 349,
+      "sha256": "1894d3573be8db9c9102d16138ac021b4b89f486a6c3283b36485a9c6419c71f",
+      "mode": 420
+    },
+    {
+      "path": "lib/pkgconfig/sdl2.pc",
+      "size": 852,
+      "sha256": "65c2dd9cbc2111aefeded6036457668e770025765cd8d0410146678671690c75",
+      "mode": 420
+    },
+    {
+      "path": "lib/pkgconfig/sndfile.pc",
+      "size": 353,
+      "sha256": "9f9eb3bbc1c32d16411c45441c93ce0875ddf5504b66fa8f7a218789c1b70753",
+      "mode": 420
+    },
+    {
+      "path": "lib/pkgconfig/vorbis.pc",
+      "size": 352,
+      "sha256": "e8aa6cc01d6896be4f2bc8b514ef9ef5536d92bca4d1fb55d2d9062abe0277a9",
+      "mode": 420
+    },
+    {
+      "path": "lib/pkgconfig/vorbisenc.pc",
+      "size": 416,
+      "sha256": "f4f7eae52c0002b3532fd35fa73cd778ae2aac0f0610cab78b47f79a2605654c",
+      "mode": 420
+    },
+    {
+      "path": "lib/pkgconfig/vorbisfile.pc",
+      "size": 442,
+      "sha256": "403f48e1f62d3e33f798e56224c3118bcaf27ae467a1e388a6c0ddff56190855",
+      "mode": 420
+    },
+    {
+      "path": "lib/pkgconfig/zlib.pc",
+      "size": 76,
+      "sha256": "45547d6901cf83d6a88030fa116bcd780858ec15ac83416e7b0f5f7e8cc5285e",
+      "mode": 420
+    },
+    {
+      "path": "notices/0-COPYING",
+      "size": 1487,
+      "sha256": "0267ae795ab744c4e0f9c45e249440fdf2e75dac8c804f36066b28649bf74aaf",
+      "mode": 420
+    },
+    {
+      "path": "notices/1-LICENSE.txt",
+      "size": 878,
+      "sha256": "7826eca0a0f7e591f38dd844e207a200aac81a59b20d8a30c3af8c6282af13e6",
+      "mode": 420
+    },
+    {
+      "path": "portable-stack.json",
+      "size": 7350,
+      "sha256": "73df9faf12a74170af4fb9579fea230837331b6a6890f62c89254c83c1d44939",
+      "mode": 420
+    },
+    {
+      "path": "share/doc/opusfile/AUTHORS",
+      "size": 262,
+      "sha256": "7bafd4ec8a8f284cce7a8c9dab476f141ed0de91f38947c145e49929d0922071",
+      "mode": 420
+    },
+    {
+      "path": "share/doc/opusfile/COPYING",
+      "size": 1487,
+      "sha256": "0267ae795ab744c4e0f9c45e249440fdf2e75dac8c804f36066b28649bf74aaf",
+      "mode": 420
+    },
+    {
+      "path": "share/doc/opusfile/README.md",
+      "size": 908,
+      "sha256": "efe39e25a51d9399464980aa2daecd3146d1ca395ccd0278e8423181590f0388",
+      "mode": 420
+    },
+    {
+      "path": "share/licenses/SDL2_mixer/LICENSE.txt",
+      "size": 878,
+      "sha256": "7826eca0a0f7e591f38dd844e207a200aac81a59b20d8a30c3af8c6282af13e6",
+      "mode": 420
+    }
+  ],
+  "notices": [
+    {
+      "name": "opusfile",
+      "license": "BSD-3-Clause",
+      "sourceUrl": "https://github.com/xiph/opusfile/tree/a55c164e9891a9326188b7d4d216ec9a88373739",
+      "path": "notices/0-COPYING"
+    },
+    {
+      "name": "SDL2_mixer",
+      "license": "Zlib",
+      "sourceUrl": "https://github.com/libsdl-org/SDL_mixer/tree/b208916aed9250fe434360e6c6a95f0697bb7b01",
+      "path": "notices/1-LICENSE.txt"
+    }
+  ],
+  "aliases": {
+    "schema": 1,
+    "files": {
+      "lib/libFLAC.14.dylib": "lib/libFLAC.14.0.0.dylib",
+      "lib/libFLAC.dylib": "lib/libFLAC.14.0.0.dylib",
+      "lib/libfreetype.6.dylib": "lib/libfreetype.6.20.6.dylib",
+      "lib/libfreetype.dylib": "lib/libfreetype.6.20.6.dylib",
+      "lib/libgraphite2.3.dylib": "lib/libgraphite2.3.3.1.dylib",
+      "lib/libgraphite2.dylib": "lib/libgraphite2.3.3.1.dylib",
+      "lib/libmp3lame.dylib": "lib/libmp3lame.0.dylib",
+      "lib/libogg.0.dylib": "lib/libogg.0.8.6.dylib",
+      "lib/libogg.dylib": "lib/libogg.0.8.6.dylib",
+      "lib/libopus.0.dylib": "lib/libopus.0.11.1.dylib",
+      "lib/libopus.dylib": "lib/libopus.0.11.1.dylib",
+      "lib/libopusfile.dylib": "lib/libopusfile.0.dylib",
+      "lib/libopusurl.dylib": "lib/libopusurl.0.dylib",
+      "lib/libpng16.16.59.0.dylib": "lib/libpng.dylib",
+      "lib/libpng16.16.dylib": "lib/libpng.dylib",
+      "lib/libpng16.dylib": "lib/libpng.dylib",
+      "lib/libSDL2_mixer-2.0.0.dylib": "lib/libSDL2_mixer-2.0.0.800.2.dylib",
+      "lib/libSDL2_mixer-2.0.dylib": "lib/libSDL2_mixer-2.0.0.800.2.dylib",
+      "lib/libSDL2_mixer.dylib": "lib/libSDL2_mixer-2.0.0.800.2.dylib",
+      "lib/libSDL2_ttf-2.0.0.dylib": "lib/libSDL2_ttf-2.0.0.2400.0.dylib",
+      "lib/libSDL2_ttf-2.0.dylib": "lib/libSDL2_ttf-2.0.0.2400.0.dylib",
+      "lib/libSDL2_ttf.dylib": "lib/libSDL2_ttf-2.0.0.2400.0.dylib",
+      "lib/libSDL2-2.0.dylib": "lib/libSDL2-2.0.0.dylib",
+      "lib/libSDL2.dylib": "lib/libSDL2-2.0.0.dylib",
+      "lib/libsndfile.1.dylib": "lib/libsndfile.1.0.37.dylib",
+      "lib/libsndfile.dylib": "lib/libsndfile.1.0.37.dylib",
+      "lib/libvorbis.dylib": "lib/libvorbis.0.4.9.dylib",
+      "lib/libvorbisenc.dylib": "lib/libvorbisenc.2.0.12.dylib",
+      "lib/libvorbisfile.dylib": "lib/libvorbisfile.3.3.8.dylib",
+      "lib/pkgconfig/libpng16.pc": "lib/pkgconfig/libpng.pc"
+    }
+  }
+}

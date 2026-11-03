@@ -7,6 +7,45 @@
       "schemaVersion": 2,
       "id": "native-sdl2-mixer",
       "version": "2.8.2-MCLv1",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "input.json",
+      "manifestSha256": "0ce636f1a762b1614bed7f172d9f3c50f557023f101f76d8c65f3e0fea970fd0",
+      "sourceSha256": "02352a459fe0d5c90f1c6ebac0af50c2bc9c765fb55defa67f3c5f6cc56c3116",
+      "updatePolicy": "manual",
+      "launcherContract": 2,
+      "asset": {
+        "filename": "native-sdl2-mixer-2.8.2-MCLv1-x64.tar.gz",
+        "sha256": "f819510badfec8d7f738aa6ce792e2ce1a8d05b71239ca85ccbd232106d7816a",
+        "bytes": 4576630,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/native-sdl2-mixer%2Fv2.8.2-MCLv1%2Fx64/native-sdl2-mixer-2.8.2-MCLv1-x64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "41578842959",
+        "runAttempt": "1"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a"
+      },
+      "tag": "native-sdl2-mixer/v2.8.2-MCLv1/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "native-sdl2-mixer",
+      "version": "2.8.2-MCLv1",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
