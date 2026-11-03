@@ -407,40 +407,28 @@
       {
         "version": "MCLv2-1020",
         "label": "GemRB MCLv2-1020"
-      }
-    ],
-    "build": [
-      {
-        "version": "MCLv1-1020",
-        "command": "tools/build-portable-runtime.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/gemrb"
-        ],
-        "tools": [
-          "cmake",
-          "ninja",
-          "pkgconf"
-        ]
       },
       {
-        "version": "MCLv2-1020",
-        "command": "tools/build-portable-runtime.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/gemrb"
-        ],
-        "tools": [
-          "cmake",
-          "ninja",
-          "pkgconf"
-        ]
+        "version": "0.9.5-git-MCLv3",
+        "label": "GemRB 0.9.5-git-MCLv3"
       }
-    ]
+    ],
+    "build": {
+      "version": "0.9.5-git-MCLv3",
+      "command": "tools/build-portable-runtime.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/gemrb"
+      ],
+      "tools": [
+        "cmake",
+        "ninja",
+        "pkgconf"
+      ]
+    }
   },
   {
     "id": "gm8-decompiler",
