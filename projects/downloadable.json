@@ -2218,10 +2218,14 @@
       {
         "version": "1.4.2-MCLv2",
         "label": "MoltenVK 1.4.2 scene recording"
+      },
+      {
+        "version": "1.4.2-MCLv3",
+        "label": "MoltenVK 1.4.2 scene recording 1.4.2-MCLv3"
       }
     ],
     "build": {
-      "version": "1.4.2-MCLv2",
+      "version": "1.4.2-MCLv3",
       "command": "tools/build-vulkan-moltenvk-scene.mjs",
       "architectures": [
         "universal"
