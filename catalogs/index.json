@@ -727,6 +727,50 @@
       ]
     },
     {
+      "projectId": "love-luasteam",
+      "name": "LÖVE LuaSteam bridge",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#love-luasteam",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/love-luasteam.json",
+        "sha256": "cb3ad8280233d6783548de8cccd6ae49cb4518aca4d2e6c9035549089e2a5faa",
+        "bytes": 1670
+      },
+      "releases": [
+        {
+          "version": "4.0.2-MCLv3",
+          "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "love-luasteam/v4.0.2-MCLv3/universal",
+          "asset": {
+            "filename": "love-luasteam-4.0.2-MCLv3-universal.tar.gz",
+            "sha256": "6cc8d89bbb2d1faeaf3dc609b5e8ce757d3d9f62a384ecf7796fd2de1f094417",
+            "bytes": 84508,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/love-luasteam%2Fv4.0.2-MCLv3%2Funiversal/love-luasteam-4.0.2-MCLv3-universal.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41578877696",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#love-luasteam",
+          "profile": "Lua 5.1 host ABI 4.0.2-MCLv3"
+        }
+      ]
+    },
+    {
       "projectId": "mkxpz-config-helper",
       "name": "MKXP-Z configuration helper",
       "delivery": "bundled",
