@@ -286,10 +286,14 @@
       {
         "version": "1.5.0-MCLv3",
         "label": "AI5 SDL2 1.5.0-MCLv3"
+      },
+      {
+        "version": "1.5.0-MCLv5",
+        "label": "AI5 SDL2 1.5.0-MCLv5"
       }
     ],
     "build": {
-      "version": "1.5.0-MCLv3",
+      "version": "1.5.0-MCLv5",
       "command": "tools/build-portable-runtime.mjs",
       "architectures": [
         "x64",
