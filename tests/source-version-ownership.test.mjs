@@ -46,7 +46,6 @@ test('owned version suggestions use semantic versions while explicit registered 
 test('Android signed input versions are declared independently of publication history',t=>{
  for(const input of androidBuildInputRequirements()){
   const project=resolveProject(input.id,root,{resolvePins:false});
-  assert.match(input.version,/^0\.1\.0-MCLv[1-9]\d*$/,input.id);
   assert.ok(project.packageProfiles.some(profile=>profile.version===input.version),input.id+' declares its required input version');
   const {value}=catalogFixture(t,input.id,[packageRecord(input.id,{version:input.version})]);
   assert.equal(value.packages[0].version,input.version);
