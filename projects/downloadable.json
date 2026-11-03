@@ -575,11 +575,16 @@
         "version": "1.12-MCLv4",
         "label": "HashLink 1.12 ABI 1.12-MCLv4",
         "anchor": "hashlink-1-12"
+      },
+      {
+        "version": "1.9-MCLv4",
+        "label": "HashLink 1.9 ABI 1.9-MCLv4",
+        "anchor": "hashlink-1-9"
       }
     ],
     "build": [
       {
-        "version": "1.12-MCLv4",
+        "version": "1.9-MCLv4",
         "command": "tools/build-hashlink.mjs",
         "architectures": [
           "x64"
@@ -596,7 +601,7 @@
         ]
       },
       {
-        "version": "1.9-MCLv3",
+        "version": "1.12-MCLv4",
         "command": "tools/build-hashlink.mjs",
         "architectures": [
           "x64"
