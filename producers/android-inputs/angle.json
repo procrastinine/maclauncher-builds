@@ -8,7 +8,7 @@
   "profiles": [
     {
       "id": "common",
-      "version": "MCLv2",
+      "version": "MCLv3",
       "providerVersion": "cbc4153da8d5-metal-vulkan-12",
       "androidSource": {
         "repository": "https://github.com/procrastinine/maclauncher-android",
