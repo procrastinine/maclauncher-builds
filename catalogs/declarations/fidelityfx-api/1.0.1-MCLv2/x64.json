@@ -1,0 +1,99 @@
+{
+  "id": "fidelityfx-api",
+  "version": "1.0.1-MCLv2",
+  "arch": "x64",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "10.15",
+  "sourceRelative": null,
+  "sourceSha256": "d4f2eb84f621b64a8bb75f94e7fbcd5c1e775b31c6b5331e5690965d2213b013",
+  "directoryRelative": "fidelityfx-api/1.0.1-MCLv2/x64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "6d3df5ee675feb95493dbc6785a785893670255c2256792886185da39f2c06ba",
+  "files": [
+    {
+      "path": "amd_fidelityfx_vk.dll",
+      "size": 772608,
+      "mode": 493,
+      "sha256": "d5006ef8b59ee0687f952f9f232c487a0bcf09e416d53e0a1b21d0a2d1ae8b61",
+      "format": "pe",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "build-definition.json",
+      "size": 19337,
+      "mode": 420,
+      "sha256": "9dfdc54a12a5fb013ff1ae2b7f3d16b47791d0e73f8b42e559de46ddcd5211af"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "1c254836400b2a5ed01042c281dbec2a02499a4cd459e4a358700dc0c319d622"
+    },
+    {
+      "path": "FidelityFX-SDK-LICENSE.txt",
+      "size": 1115,
+      "mode": 420,
+      "sha256": "82cf74fc23885107c7f69249ac3f1dac55898ff68320eb2c753984cae6b2d78a"
+    },
+    {
+      "path": "maclauncher_fidelityfx_vk_original.dll",
+      "size": 9332432,
+      "mode": 493,
+      "sha256": "a1624cc4238fef046f30c4d80ce3f47be63fc5f5373f49e3ee9edb9960f54c78",
+      "format": "pe",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "MacLauncher-MIT.txt",
+      "size": 1081,
+      "mode": 420,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7"
+    },
+    {
+      "path": "manifest.json",
+      "size": 3573,
+      "mode": 420,
+      "sha256": "6d3df5ee675feb95493dbc6785a785893670255c2256792886185da39f2c06ba"
+    },
+    {
+      "path": "provider.json",
+      "size": 1407,
+      "mode": 420,
+      "sha256": "717d49ca42bfdd4c525bf7c9043871fbf5ce85b54c55d670efb6229086fb7196"
+    },
+    {
+      "path": "Vulkan-Headers-Apache-2.0.txt",
+      "size": 11357,
+      "mode": 420,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    }
+  ],
+  "notices": [
+    {
+      "name": "FidelityFX SDK",
+      "license": "MIT",
+      "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
+      "path": "FidelityFX-SDK-LICENSE.txt"
+    },
+    {
+      "name": "Vulkan headers",
+      "license": "Apache-2.0",
+      "sourceUrl": "https://github.com/libsdl-org/SDL",
+      "path": "Vulkan-Headers-Apache-2.0.txt"
+    },
+    {
+      "name": "MacLauncher",
+      "license": "MIT",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher",
+      "path": "MacLauncher-MIT.txt"
+    }
+  ]
+}
