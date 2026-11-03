@@ -1165,10 +1165,14 @@
       {
         "version": "1.0.2",
         "label": "Android launcher integrations 1.0.2"
+      },
+      {
+        "version": "1.0.3",
+        "label": "Android launcher integrations 1.0.3"
       }
     ],
     "build": {
-      "version": "1.0.2",
+      "version": "1.0.3",
       "command": "tools/build-android-launcher.mjs",
       "architectures": [
         "universal"
