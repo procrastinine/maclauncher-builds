@@ -2,5 +2,44 @@
   "schemaVersion": 2,
   "projectId": "ios-playtools-paths",
   "updatePolicy": "manual",
-  "packages": []
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "ios-playtools-paths",
+      "version": "1.1.1",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "12.0",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "13f736a98e47aad3ad936dc65dd0abbde14ed435a09241316025ddd035108c24",
+      "sourceSha256": "2af09a89b7f8fd6f6814f023654ac9a503c59db7c950f960721a6846cc4ddb7e",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "ios-playtools-paths-1.1.1-arm64.tar.gz",
+        "sha256": "c4cf16308e67f98ea3d226d88a8733c996937e5595e891e7b058f3850d433505",
+        "bytes": 24101,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/ios-playtools-paths%2Fv1.1.1%2Farm64/ios-playtools-paths-1.1.1-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41578871632",
+        "runAttempt": "1"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a"
+      },
+      "tag": "ios-playtools-paths/v1.1.1/arm64"
+    }
+  ]
 }
