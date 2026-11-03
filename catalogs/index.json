@@ -1561,10 +1561,41 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gamemaker-opengl-helper",
       "catalog": {
         "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/gamemaker-opengl-helper.json",
-        "sha256": "20d03cbdce22d31e16bdfd2afa41618d6540fc4b85d9da84b0f2208117cab379",
-        "bytes": 1270
+        "sha256": "64aa9c473d97c8eca6061094395f72dae447b99b19028b162851968b76c75755",
+        "bytes": 2922
       },
       "releases": [
+        {
+          "version": "3.0.1",
+          "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "gamemaker-opengl-helper/v3.0.1/universal",
+          "asset": {
+            "filename": "gamemaker-opengl-helper-3.0.1-universal.tar.gz",
+            "sha256": "7e0857e9ac241a1c47bc8986ad6d1050b634c322b77e2641e66c984ede01cb41",
+            "bytes": 17240,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gamemaker-opengl-helper%2Fv3.0.1%2Funiversal/gamemaker-opengl-helper-3.0.1-universal.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "66bddd70fb09b14ea7bcc1f4c7fc7fabacf05c05",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41545812737",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gamemaker-opengl-helper",
+          "profile": "GameMaker OpenGL helper 3.0.1"
+        },
         {
           "version": "software-gl-v3-MCLv3",
           "arch": "universal",
