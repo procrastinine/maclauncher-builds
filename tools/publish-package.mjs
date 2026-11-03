@@ -5,6 +5,7 @@ import path from 'node:path';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {setTimeout as sleep} from 'node:timers/promises';
+import {retryNetworkAsync} from './download.mjs';
 import {readProjects,resolveProject,buildRecords} from '../lib/projects.mjs';
 import {parseSelection,registerSelection} from './release-selection.mjs';
 import {recordFromDeclaration,stageRelease,publishRelease,applyRelease} from './release-runtime.mjs';
@@ -12,8 +13,8 @@ import {releaseTag} from '../lib/project-identity.mjs';
 const root=path.resolve(import.meta.dirname,'..'),exec=promisify(execFile);
 const json=file=>JSON.parse(fs.readFileSync(file,'utf8'));
 const identity={GIT_AUTHOR_NAME:'procrastinine',GIT_AUTHOR_EMAIL:'24549552+procrastinine@users.noreply.github.com',GIT_COMMITTER_NAME:'procrastinine',GIT_COMMITTER_EMAIL:'24549552+procrastinine@users.noreply.github.com'};
-const git=async(args,{cwd,env=process.env}={})=>(await exec('git',args,{cwd,env:{...env,...identity},maxBuffer:16<<20})).stdout.trim();
-const github=async(args,options={})=>(await exec('gh',args,{encoding:'utf8',maxBuffer:32<<20,...options})).stdout;
+const git=async(args,{cwd,env=process.env}={})=>{const step=async()=>(await exec('git',args,{cwd,env:{...env,...identity},maxBuffer:16<<20})).stdout.trim();return ['fetch','push'].includes(args[0])?retryNetworkAsync(step):step();};
+const github=async(args,options={})=>retryNetworkAsync(async()=>(await exec('gh',args,{encoding:'utf8',maxBuffer:32<<20,...options})).stdout);
 const archiveEntry=async(archive,name,maxBytes)=>(await exec('tar',['-xzOf',archive,name],{encoding:'buffer',maxBuffer:maxBytes})).stdout;
 const stable=value=>JSON.stringify(value,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))):v);
 async function sha256File(file){const hash=crypto.createHash('sha256');for await(const chunk of fs.createReadStream(file))hash.update(chunk);return hash.digest('hex');}
@@ -89,10 +90,7 @@ export async function publishPackage({bundle,directory=root,env=process.env,runG
    if(release?.tag_name!==tag||release.draft!==false||release.assets?.length!==1||release.assets[0].digest!=='sha256:'+input.sha256)throw Error('Required sealed input is not public with its recorded digest: '+tag);
   }
  }
- for(let attempt=0;;attempt++){
-  try{await runGh(['attestation','verify',path.join(bundle,record.asset.filename),'--repo',repository,'--signer-workflow',repository+'/.github/workflows/runtime-build.yml']);break;}
-  catch(error){if(attempt===4)throw error;await wait(1000*2**attempt);}
- }
+ await retryNetworkAsync(()=>runGh(['attestation','verify',path.join(bundle,record.asset.filename),'--repo',repository,'--signer-workflow',repository+'/.github/workflows/runtime-build.yml']),{wait});
  const options={bundle,directory,runGh,checked},staged=await stageBundle({...options,target:sourceRevision,resume:true});
  const publication=await publishBundle({...options,publication:staged});
  const catalog=await append({bundle,record,publication,checked,directory,env,runGh});

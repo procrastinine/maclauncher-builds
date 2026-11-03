@@ -4,13 +4,32 @@ import path from 'node:path';
 import {execFile,execFileSync} from 'node:child_process';
 import {setTimeout as sleep} from 'node:timers/promises';
 
-const attempts=5;
+export const networkAttempts=6;
+export const networkDelay=index=>5000*2**index;
+const exhausted=Symbol('network retry exhausted');
 const transientCodes=new Set([5,6,7,16,18,28,52,55,56,92,95]);
 export function transientDownload(error){
- const status=Number(String(error.stdout||'').trim());
- return error.code==='ETIMEDOUT'||error.killed===true||transientCodes.has(Number(error.code??error.status))||
-  (Number(error.code??error.status)===22&&(status===408||status===429||status>=500&&status<=599));
+ if(error?.[exhausted])return false;
+ const message=[error.message,error.stderr,error.stdout,error.cause?.message].map(value=>String(value||'')).join('\n');
+ const status=Number(error.statusCode||error.response?.status||(Number(error.status)>=400?error.status:null)||(/^\d{3}$/.test(String(error.stdout||'').trim())?String(error.stdout).trim():message.match(/(?:HTTP(?:\/\d(?:\.\d)?)?\s*|(?:status(?: code)?|returned error|response code)[:=]?\s*)([45]\d\d)\b/i)?.[1]));
+ if(status>=400)return status===408||status===429||status>=500&&status<=599;
+ return ['ETIMEDOUT','ENOTFOUND','EAI_AGAIN','ECONNREFUSED','ECONNRESET','EPIPE','ERR_STREAM_PREMATURE_CLOSE'].includes(error.code)||error.killed===true||transientCodes.has(Number(error.code??error.status))||
+  /TLS handshake timeout|connection (?:refused|reset|timed out|closed)|no such host|temporary failure in name resolution|could not resolve host|ENOTFOUND|EAI_AGAIN|ECONNREFUSED|ECONNRESET|ETIMEDOUT|socket hang up|network (?:error|unreachable)|read timeout|service unavailable|bad gateway|gateway timeout|too many requests|unexpected EOF|early EOF|RPC failed|fetch failed/i.test(message);
 }
+const pause=milliseconds=>Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,milliseconds);
+export function retryNetwork(step,{wait=pause}={}){
+ for(let index=0;;index++)try{return step();}catch(error){
+  if(index+1>=networkAttempts||!transientDownload(error)){if(index+1>=networkAttempts)error[exhausted]=true;throw error;}
+  wait(networkDelay(index));
+ }
+}
+export async function retryNetworkAsync(step,{wait=sleep}={}){
+ for(let index=0;;index++)try{return await step();}catch(error){
+  if(index+1>=networkAttempts||!transientDownload(error)){if(index+1>=networkAttempts)error[exhausted]=true;throw error;}
+  await wait(networkDelay(index));
+ }
+}
+
 function request(url,output,{headers={},config='',environment=process.env,bytes}={}){
  const protocol=new URL(url).protocol;
  if(protocol!=='https:')throw Error('A download needs an HTTPS URL.');
@@ -24,51 +43,26 @@ function request(url,output,{headers={},config='',environment=process.env,bytes}
  }
  return {args,options:{input:config,env:environment,encoding:'utf8',maxBuffer:4<<20}};
 }
-/** Five transient-only attempts, including response bodies, with stall detection.
+/** Six transient-only attempts, including response bodies, with stall detection.
  * Identity checks belong to callers, outside this transport retry boundary. */
 export async function downloadFile(url,output,{run=execFile,wait=sleep,...options}={}){
- for(let index=0;;index++){
+ return retryNetworkAsync(async()=>{
   const {args,options:runOptions}=request(url,output,options);
   try{
-   // execFile's asynchronous API has no input option; send curl configuration
-   // on stdin explicitly, also when the response body is streamed to disk.
    await new Promise((resolve,reject)=>{
     const child=run('curl',args,runOptions,(error,stdout,stderr)=>error?reject(Object.assign(error,{stdout,stderr})):resolve());
     child.stdin.on('error',()=>{});child.stdin.end(runOptions.input);
    });
    return output;
-  }catch(error){
-   fs.rmSync(output,{force:true});
-   const delay=1000*2**index;
-   if(index+1>=attempts||!transientDownload(error))throw error;
-   await wait(delay);
-  }
- }
+  }catch(error){fs.rmSync(output,{force:true});throw error;}
+ },{wait});
 }
-const pause=milliseconds=>Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,milliseconds);
 export function downloadFileSync(url,output,{run=execFileSync,wait=pause,...options}={}){
- for(let index=0;;index++){
+ return retryNetwork(()=>{
   const {args,options:runOptions}=request(url,output,options);
   try{run('curl',args,runOptions);return output;}
-  catch(error){
-   fs.rmSync(output,{force:true});
-   const delay=1000*2**index;
-   if(index+1>=attempts||!transientDownload(error))throw error;
-   wait(delay);
-  }
- }
-}
-/** Five attempts of one repeatable network step, such as a shallow fetch or a submodule
- * initialization, with the download backoff. Git has no reliable transient status, so
- * every failure is repeated and the last one is reported. */
-export function retryNetwork(step,{wait=pause}={}){
- for(let index=0;;index++){
-  try{return step();}
-  catch(error){
-   if(index+1>=attempts)throw error;
-   wait(1000*2**index);
-  }
- }
+  catch(error){fs.rmSync(output,{force:true});throw error;}
+ },{wait});
 }
 export async function downloadBytes(url,options){
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'build-download-'));

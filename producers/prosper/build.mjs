@@ -3,7 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
-import {downloadBytes} from '../../tools/download.mjs';
+import {downloadBytes,retryNetwork} from '../../tools/download.mjs';
 
 const root=path.resolve(import.meta.dirname,'../..');
 export const recipe=JSON.parse(fs.readFileSync(new URL('./source.json',import.meta.url)));
@@ -34,10 +34,10 @@ function vulkanInput(library){
 async function dependency(entry,buildDirectory){
  if(entry.reusePath&&fs.existsSync(path.join(root,entry.reusePath))){const selected=path.join(root,entry.reusePath);verify(entry,selected);return selected;}
  const selected=path.join(buildDirectory,'dependencies',entry.id);
- if(!fs.existsSync(path.join(selected,'.git'))){fs.mkdirSync(path.dirname(selected),{recursive:true});run('git',['clone','--filter=blob:none','--no-checkout',entry.repository,selected]);}
+ if(!fs.existsSync(path.join(selected,'.git'))){fs.mkdirSync(path.dirname(selected),{recursive:true});retryNetwork(()=>run('git',['clone','--filter=blob:none','--no-checkout',entry.repository,selected]));}
  try{verify(entry,selected);return selected;}catch{}
  if(fs.readdirSync(selected).some(name=>name!=='.git')&&git(selected,['status','--porcelain']).trim())throw Error('Dependency checkout has local changes: '+entry.id);
- run('git',['-C',selected,'fetch','--depth','1','origin',entry.revision]);run('git',['-C',selected,'checkout','--detach',entry.revision]);verify(entry,selected);return selected;
+ retryNetwork(()=>run('git',['-C',selected,'fetch','--depth','1','origin',entry.revision]));run('git',['-C',selected,'checkout','--detach',entry.revision]);verify(entry,selected);return selected;
 }
 async function ffmpeg(buildDirectory,downloads){
  const entry=inputs.artifacts[0],cache=path.join(buildDirectory,'downloads',entry.id+'.zip');

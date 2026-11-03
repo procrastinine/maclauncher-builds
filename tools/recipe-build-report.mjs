@@ -82,7 +82,12 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   while(queue.length){const file=queue.shift(),absolute=path.join(root,file);if(rememberLink(file))continue;
    if(!fs.statSync(absolute,{throwIfNoEntry:false})?.isFile())continue;
    const bytes=fs.readFileSync(absolute);
-   if(file.endsWith('.yml'))for(const match of bytes.toString('utf8').matchAll(/\bnode (tools\/[A-Za-z0-9_./-]+\.mjs)\b/g))enqueue(match[1]);
+   if(file.endsWith('.yml')){
+    const text=bytes.toString('utf8');
+    for(const match of text.matchAll(/\bnode (tools\/[A-Za-z0-9_./-]+\.mjs)\b/g))enqueue(match[1]);
+    for(const match of text.matchAll(/\buses:\s*\.\/([A-Za-z0-9_./-]+)/g))enqueue(path.posix.join(match[1],'action.yml'));
+    const main=/^\s+main:\s*([^\s'"]+\.[mc]?js)\s*$/m.exec(text)?.[1];if(main)enqueue(path.posix.join(path.posix.dirname(file),main));
+   }
    if(file.endsWith('.json')){
     const raw=JSON.parse(bytes),value=walkJson(normalizedJson(file,raw),file);files.set(file,reportDigest(value));
     if(raw.path&&raw.buildEntry){rememberLink(raw.path);reference(path.posix.join(raw.path,raw.buildEntry),file);}

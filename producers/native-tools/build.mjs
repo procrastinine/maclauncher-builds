@@ -1,3 +1,4 @@
+import {retryNetwork} from '../../tools/download.mjs';
 import {recipeMain} from '../../tools/build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -17,7 +18,7 @@ function goBuild({pin,arch,source,work}){
  const environment={...process.env,GOOS:'darwin',GOARCH:arch==='x64'?'amd64':'arm64',CGO_ENABLED:'0',GOWORK:'off',
   GOCACHE:path.join(work,'go-cache'),GOMODCACHE:path.join(work,'go-modules'),GOPATH:path.join(work,'go-path'),
   GOFLAGS:'-mod=readonly',GOTOOLCHAIN:'local'};
- const execute=args=>run('go',args,{cwd:source,env:environment});
+ const execute=args=>{const action=()=>run('go',args,{cwd:source,env:environment});return ['list','mod'].includes(args[0])?retryNetwork(action):action();};
  const used=[...new Set(execute(['list','-deps','-f','{{if .Module}}{{.Module.Path}}{{end}}','./src/ziggy/ziggy.go']).split('\n').filter(value=>value&&value!=='uosc/bins'))].sort();
  if(JSON.stringify(used)!==JSON.stringify(pin.modules.map(entry=>entry.module).sort()))throw Error('The Ziggy module closure differs from its declared inputs.');
  const notices=[{file:path.join(source,'LICENSE.LGPL'),name:'uosc',license:pin.license,sourceUrl:pin.repository}];
@@ -74,7 +75,7 @@ export async function buildNativeTool({project,version,arch,output,work,sources=
  fs.mkdirSync(work,{recursive:true});
  const source=sources[project]||path.join(work,'source');
  if(!sources[project]){
-  run('git',['clone','--filter=blob:none','--no-checkout',pin.repository,source]);
+  retryNetwork(()=>run('git',['clone','--filter=blob:none','--no-checkout',pin.repository,source]));
   run('git',['-C',source,'checkout','--detach',pin.revision]);
  }
  await Source.validatePinnedSource(source,pin.revision);

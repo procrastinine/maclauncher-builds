@@ -50,14 +50,13 @@ jobs:
       - name: Select the requested projects and names
         id: plan
         run: node tools/plan-build-release.mjs --output "$RUNNER_TEMP/release-plan"
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+        if: ${{ false }} # Download the pinned implementation; the shared wrapper executes it.
       - name: Retain the generated package definitions
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: ./.github/actions/network
         with:
-          name: release-plan
-          path: ${{ runner.temp }}/release-plan/reports.json
-          if-no-files-found: error
-          retention-days: 30
-
+          action: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+          inputs: '{"name":"release-plan","path":"${{ runner.temp }}/release-plan/reports.json","if-no-files-found":"error","overwrite":"true","retention-days":"30"}'
   independent:
     needs: [plan]
     if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.emptyIndependent == 'false' }}

@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createRequire} from 'node:module';
-import {downloadFile,downloadFileSync,transientDownload,retryNetwork} from '../tools/download.mjs';
+import {downloadFile,downloadFileSync,transientDownload,retryNetwork,retryNetworkAsync} from '../tools/download.mjs';
 import {buildInput} from '../tools/build-input.mjs';
 test('download and portable producer modules remain synchronously require-able',()=>{
  const require=createRequire(import.meta.url);
@@ -41,22 +41,22 @@ test('async retries discard partial bodies and back off only after transient fai
  const directory=temporary(t),output=path.join(directory,'input'),delays=[];let calls=0;
  const run=runner(args=>{calls++;fs.writeFileSync(output,calls===3?'original pinned bytes':'partial body');return calls<3?{error:Object.assign(Error('HTTP failure'),{code:22}),stdout:calls===1?'429':'503'}:{};});
  await downloadFile('https://example.invalid/input',output,{run,wait:async delay=>{delays.push(delay);assert.equal(fs.existsSync(output),false);}});
- assert.equal(calls,3);assert.deepEqual(delays,[1000,2000]);assert.equal(fs.readFileSync(output,'utf8'),'original pinned bytes');
+ assert.equal(calls,3);assert.deepEqual(delays,[5000,10000]);assert.equal(fs.readFileSync(output,'utf8'),'original pinned bytes');
  calls=0;await assert.rejects(downloadFile('https://example.invalid/missing',output,{run:runner(()=>{calls++;return {error:Object.assign(Error('HTTP 404'),{code:22}),stdout:'404'};}),wait:()=>assert.fail('No delay after a permanent failure')}),/404/);assert.equal(calls,1);assert.equal(fs.existsSync(output),false);
 });
 test('synchronous retries are bounded and handle truncated transfers',t=>{
  const output=path.join(temporary(t),'input'),delays=[];let calls=0;
  const run=runner(args=>{calls++;fs.writeFileSync(output,calls===2?'complete input':'partial');return calls===1?{error:Object.assign(Error('truncated'),{code:18})}:{};});
- downloadFileSync('https://example.invalid/input',output,{run,wait:delay=>delays.push(delay)});assert.equal(calls,2);assert.deepEqual(delays,[1000]);assert.equal(fs.readFileSync(output,'utf8'),'complete input');
- calls=0;delays.length=0;assert.throws(()=>downloadFileSync('https://example.invalid/stalled',output,{run:runner(()=>{calls++;return {error:Object.assign(Error('stalled'),{code:28})};}),wait:delay=>delays.push(delay)}),/stalled/);assert.equal(calls,5);assert.deepEqual(delays,[1000,2000,4000,8000]);assert.equal(fs.existsSync(output),false);
+ downloadFileSync('https://example.invalid/input',output,{run,wait:delay=>delays.push(delay)});assert.equal(calls,2);assert.deepEqual(delays,[5000]);assert.equal(fs.readFileSync(output,'utf8'),'complete input');
+ calls=0;delays.length=0;assert.throws(()=>downloadFileSync('https://example.invalid/stalled',output,{run:runner(()=>{calls++;return {error:Object.assign(Error('stalled'),{code:28})};}),wait:delay=>delays.push(delay)}),/stalled/);assert.equal(calls,6);assert.deepEqual(delays,[5000,10000,20000,40000,80000]);assert.equal(fs.existsSync(output),false);
 });
 test('network steps repeat with backoff and report the last failure',()=>{
  const delays=[];let calls=0;
  assert.equal(retryNetwork(()=>{calls++;if(calls<3)throw Error('early EOF '+calls);return 'fetched';},{wait:delay=>delays.push(delay)}),'fetched');
- assert.equal(calls,3);assert.deepEqual(delays,[1000,2000]);
+ assert.equal(calls,3);assert.deepEqual(delays,[5000,10000]);
  calls=0;delays.length=0;
- assert.throws(()=>retryNetwork(()=>{calls++;throw Error('RPC failed '+calls);},{wait:delay=>delays.push(delay)}),/^Error: RPC failed 5$/);
- assert.equal(calls,5);assert.deepEqual(delays,[1000,2000,4000,8000]);
+ assert.throws(()=>retryNetwork(()=>{calls++;throw Error('RPC failed '+calls);},{wait:delay=>delays.push(delay)}),/^Error: RPC failed 6$/);
+ assert.equal(calls,6);assert.deepEqual(delays,[5000,10000,20000,40000,80000]);
 });
 test('a downloaded checksum mismatch is not retried and never becomes a cached input',async t=>{
  const directory=temporary(t),count=path.join(directory,'calls'),cache=path.join(directory,'cache');
@@ -66,4 +66,12 @@ const fs=require('node:fs'),args=process.argv.slice(2);fs.appendFileSync(${JSON.
  process.env.PATH=directory+path.delimiter+previousPath;
  await assert.rejects(buildInput({url:'https://example.invalid/pinned',sha256:'a'.repeat(64),bytes:11},cache),/checksum or size differs/);
  assert.equal(fs.readFileSync(count,'utf8'),'attempt\n');assert.deepEqual(fs.readdirSync(cache),[]);
+});
+
+test('the shared retry classifies service and DNS failures without retrying integrity or authorization errors',async()=>{
+ for(const message of ['fulcio.sigstore.dev: ENOTFOUND','read timeout','HTTP 503 Service Unavailable','HTTP 429','connection reset'])assert.equal(transientDownload(Error(message)),true);
+ for(const message of ['HTTP 422 Validation Failed','HTTP 403 Forbidden','HTTP 404 Not Found','checksum differs','No valid attestation'])assert.equal(transientDownload(Error(message)),false);
+ let calls=0;const delays=[];await assert.rejects(retryNetworkAsync(async()=>{calls++;throw Error('HTTP 503');},{wait:async delay=>delays.push(delay)}),/503/);
+ assert.equal(calls,6);assert.deepEqual(delays,[5000,10000,20000,40000,80000]);
+ calls=0;await assert.rejects(retryNetworkAsync(async()=>{calls++;throw Error('HTTP 403');},{wait:async()=>assert.fail('Permanent errors do not wait')}),/403/);assert.equal(calls,1);
 });

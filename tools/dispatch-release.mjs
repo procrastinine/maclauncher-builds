@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {setTimeout as sleep} from 'node:timers/promises';
+import {retryNetwork,retryNetworkAsync} from './download.mjs';
 import {pathToFileURL} from 'node:url';
 import {readProjects} from '../lib/projects.mjs';
 import {parseSelection,registerSelection} from './release-selection.mjs';
@@ -54,10 +55,7 @@ export async function dispatchReleaseComponents(plan,{runGh=(args)=>execFileSync
  const dispatched=[];
  for(const selection of components){
   const releases=pairs(selection);let response;
-  try{for(let attempt=0;;attempt++){
-   try{response=await runGh(['workflow','run','runtime-build.yml','--repo',plan.repository,'--ref','main','--raw-field','releases='+releases]);break;}
-   catch(error){if(attempt===4||!/TLS handshake timeout|connection refused|connection reset|no such host|temporary failure in name resolution|could not resolve host|ENOTFOUND|EAI_AGAIN|ECONNREFUSED|ECONNRESET/i.test(String(error.stderr||error.message)))throw error;await wait(1000*2**attempt);}
-  }}
+  try{response=await retryNetworkAsync(()=>runGh(['workflow','run','runtime-build.yml','--repo',plan.repository,'--ref','main','--raw-field','releases='+releases]),{wait});}
   catch(error){error.message+='; components already dispatched: '+JSON.stringify(dispatched);throw error;}
   dispatched.push(releases);
   if(process.env.GITHUB_STEP_SUMMARY){const component=plan.components[dispatched.length-1],url=String(response||'').match(/https:\/\/github\.com\/[^\s]+\/actions\/runs\/\d+/)?.[0];
@@ -75,7 +73,7 @@ export async function main([operation,...args],{directory=root,runGh}={}){
  let releases=[];
  if(operation==='dispatch'){
   const repository=readProjects(directory,{resolvePins:false}).repository;
-  const text=await(runGh?runGh(['api','--paginate','--slurp','repos/'+repository+'/releases?per_page=100']):execFileSync('gh',['api','--paginate','--slurp','repos/'+repository+'/releases?per_page=100'],{encoding:'utf8',maxBuffer:32<<20}));
+  const text=await retryNetworkAsync(()=>(runGh?runGh(['api','--paginate','--slurp','repos/'+repository+'/releases?per_page=100']):execFileSync('gh',['api','--paginate','--slurp','repos/'+repository+'/releases?per_page=100'],{encoding:'utf8',maxBuffer:32<<20})));
   releases=JSON.parse(text).flat();
  }
  if(operation==='dispatch'){

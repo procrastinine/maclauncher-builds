@@ -1,3 +1,4 @@
+import {retryNetwork} from './download.mjs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
@@ -43,7 +44,7 @@ export function prepareBuildHost({build,label,runner,rustToolchain,install=true,
  }
  if(build.rustComponents?.length||build.rustTargets?.length){
   if(rustToolchain)env.RUSTUP_TOOLCHAIN=rustToolchain;
-  if(install)for(const args of rustSetupCommands(build,rustToolchain))run('rustup',args,{env:current()});
+  if(install)for(const args of rustSetupCommands(build,rustToolchain))retryNetwork(()=>run('rustup',args,{env:current(),stdio:['inherit','inherit','pipe']}));
  }
  return {env,paths};
 }

@@ -31,9 +31,14 @@ jobs:
       - name: Generate package index
         run: npm run index:build
       - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
+        if: ${{ false }} # Download its pinned upload implementation.
+      - name: Archive package index
+        run: tar --dereference --hard-dereference --directory dist/package-index -cvf "$RUNNER_TEMP/artifact.tar" --exclude=.git --exclude=.github --exclude=".[^/]*" .
+      - uses: ./.github/actions/network
         with:
-          name: github-pages-${{ github.run_attempt }}
-          path: dist/package-index
+          action: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+          inputs: '{"name":"github-pages-${{ github.run_attempt }}","path":"${{ runner.temp }}/artifact.tar","retention-days":"1","if-no-files-found":"error","overwrite":"true"}'
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -44,8 +49,19 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.source-revision || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+        if: ${{ false }} # Download the pinned implementation for the retry wrapper.
       - name: Deploy package index
         id: deployment
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+        uses: ./.github/actions/network
         with:
-          artifact_name: github-pages-${{ github.run_attempt }}
+          action: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e
+          inputs: '{"artifact_name":"github-pages-${{ github.run_attempt }}","token":"${{ github.token }}"}'

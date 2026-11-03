@@ -23,7 +23,7 @@ jobs:
       - name: Install locked build-tool dependencies
         run: npm ci --ignore-scripts
       - name: Initialize Android pin metadata
-        run: git submodule update --init --depth 1 -- sources/maclauncher-android
+        run: node --input-type=module -e "import {retryNetwork} from './tools/download.mjs'; import {execFileSync} from 'node:child_process'; retryNetwork(()=>execFileSync('git',['submodule','update','--init','--depth','1','--','sources/maclauncher-android'],{stdio:['inherit','inherit','pipe']}));"
       - name: Check package and project contracts
         run: npm test
       - name: Check declared release versions

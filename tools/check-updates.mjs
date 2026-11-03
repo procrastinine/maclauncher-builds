@@ -1,3 +1,4 @@
+import {retryNetworkAsync} from './download.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFile} from 'node:child_process';
@@ -9,15 +10,16 @@ const root=path.resolve(import.meta.dirname,'..'),execute=promisify(execFile);
 async function request(url,{json=true}={}){
  const parsed=new URL(url),headers={'User-Agent':'MacLauncher-Builds','Accept':json?'application/json':'application/atom+xml'};
  if(parsed.hostname==='api.github.com'&&(process.env.GH_TOKEN||process.env.GITHUB_TOKEN))headers.Authorization='Bearer '+(process.env.GH_TOKEN||process.env.GITHUB_TOKEN);
- const response=await fetch(url,{headers,redirect:'error',signal:AbortSignal.timeout(20000)});
- if(!response.ok)throw Error('Upstream HTTP '+response.status);
+ return retryNetworkAsync(async()=>{
+ const response=await fetch(url,{headers,redirect:'error',signal:AbortSignal.timeout(20000)});if(!response.ok)throw Object.assign(Error('Upstream HTTP '+response.status),{statusCode:response.status});
  let size=0;const chunks=[];
  for await(const chunk of response.body){size+=chunk.length;if(size>2*1024**2)throw Error('Upstream metadata exceeds its size limit.');chunks.push(chunk);}
  let text=Buffer.concat(chunks).toString('utf8');if(text.startsWith(")]}'"))text=text.slice(text.indexOf('\n')+1);
  return json?JSON.parse(text):text;
+ });
 }
 async function gitHead(url){
- const {stdout}=await execute('git',['ls-remote','--symref',url,'HEAD'],{encoding:'utf8',maxBuffer:1024*1024,timeout:30000,env:{...process.env,GIT_TERMINAL_PROMPT:'0'}});
+ const {stdout}=await retryNetworkAsync(()=>execute('git',['ls-remote','--symref',url,'HEAD'],{encoding:'utf8',maxBuffer:1024*1024,timeout:30000,env:{...process.env,GIT_TERMINAL_PROMPT:'0'}}));
  const revision=/^([a-f0-9]{40})\s+HEAD$/m.exec(stdout)?.[1],branch=/^ref: refs\/heads\/([^\s]+)\s+HEAD$/m.exec(stdout)?.[1];
  if(!revision)throw Error('Upstream HEAD is unavailable.');return {revision,branch};
 }

@@ -1,3 +1,4 @@
+import {retryNetworkAsync} from './download.mjs';
 import fs from 'node:fs';
 import {fileURLToPath} from 'node:url';
 const time=value=>{const ms=Date.parse(value||'');return Number.isFinite(ms)?ms:null;};
@@ -30,9 +31,9 @@ async function fetchJobs(run,repo,token,fetcher){
  if(!/^[\w.-]+\/[\w.-]+$/.test(repo||'')||!/^\d+$/.test(String(run||'')))throw Error('A run id and owner/name repository are required.');
  const jobs=[];
  for(let page=1;;page++){
-  const response=await fetcher(`https://api.github.com/repos/${repo}/actions/runs/${run}/jobs?per_page=100&page=${page}`,{headers:{accept:'application/vnd.github+json','x-github-api-version':'2022-11-28',...token?{authorization:'Bearer '+token}:{}}});
-  if(!response.ok)throw Error(`GitHub returned ${response.status} for run ${run}.`);
-  const body=await response.json(),batch=list(body);jobs.push(...batch);
+  const body=await retryNetworkAsync(async()=>{const response=await fetcher(`https://api.github.com/repos/${repo}/actions/runs/${run}/jobs?per_page=100&page=${page}`,{headers:{accept:'application/vnd.github+json','x-github-api-version':'2022-11-28',...token?{authorization:'Bearer '+token}:{}}});
+  if(!response.ok)throw Object.assign(Error(`GitHub returned ${response.status} for run ${run}.`),{statusCode:response.status});
+  return response.json();});const batch=list(body);jobs.push(...batch);
   if(!batch.length||jobs.length>=(body.total_count??jobs.length)||page>=50)return jobs;
  }
 }

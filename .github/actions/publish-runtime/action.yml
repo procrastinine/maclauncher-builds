@@ -13,21 +13,24 @@ runs:
         package-manager-cache: false
     - shell: bash
       run: npm ci --ignore-scripts
+    - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+      if: ${{ false }} # Download the pinned implementation; the shared wrapper executes it.
     - name: Read the generated package definitions
-      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      uses: ./.github/actions/network
       with:
-        name: release-plan
-        path: ${{ runner.temp }}/release-plan
+        action: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        inputs: '{"name":"release-plan","path":"${{ runner.temp }}/release-plan"}'
     - name: Use the package definition file
       shell: bash
       run: echo "BUILD_REPORTS=$RUNNER_TEMP/release-plan/reports.json" >> "$GITHUB_ENV"
     - name: Publish successful packages from this build level
       shell: bash
       run: node tools/publish-level.mjs --output "$RUNNER_TEMP/publication"
+    - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+      if: ${{ false }} # Download the pinned implementation; the shared wrapper executes it.
     - name: Retain the publication result
+      uses: ./.github/actions/network
       if: always()
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
-        name: publication-${{ inputs.level }}-${{ github.run_attempt }}
-        path: ${{ runner.temp }}/publication/publication-result.json
-        if-no-files-found: ignore
+        action: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+        inputs: '{"name":"publication-${{ inputs.level }}-${{ github.run_attempt }}","path":"${{ runner.temp }}/publication/publication-result.json","if-no-files-found":"ignore","overwrite":"true"}'

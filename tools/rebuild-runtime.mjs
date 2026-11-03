@@ -1,3 +1,4 @@
+import {retryNetwork} from './download.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -19,7 +20,7 @@ const root=path.resolve(import.meta.dirname,'..');
 const json=value=>JSON.stringify(value,null,2)+'\n';
 const stable=value=>JSON.stringify(value,(_,item)=>item&&typeof item==='object'&&!Array.isArray(item)?Object.fromEntries(Object.entries(item).sort()):item);
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
-const run=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',stdio:['ignore','pipe','inherit'],...options});
+const run=(command,args,options={})=>{const step=()=>execFileSync(command,args,{encoding:'utf8',stdio:['ignore','pipe','pipe'],...options});return command==='gh'||command==='git'&&args.some(arg=>['fetch','clone','submodule','checkout'].includes(arg))?retryNetwork(step):step();};
 
 /** Read regular members without extracting files or running package contents. */
 async function members(archive){

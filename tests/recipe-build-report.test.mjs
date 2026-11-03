@@ -61,10 +61,11 @@ test('publication changes leave every package definition unchanged',t=>{
 });
 
 test('the shared build action and the package commands it runs are sealed build inputs',t=>{
- const f=fixture(t,{'tools/recipe.cjs':'module.exports = {};','.github/actions/build-runtime/action.yml':'runs:\n  steps:\n    - run: node tools/package.mjs prepare\n','tools/package.mjs':'export const pack = 1;'});
+ const f=fixture(t,{'tools/recipe.cjs':'module.exports = {};','.github/actions/build-runtime/action.yml':'runs:\n  steps:\n    - run: node tools/package.mjs prepare\n    - uses: ./.github/actions/network\n','.github/actions/network/action.yml':'runs:\n  using: node24\n  main: ../../../tools/network-action.cjs\n','tools/network-action.cjs':'require("./download.mjs");','tools/download.mjs':'export const retryNetwork = true;','tools/package.mjs':'export const pack = 1;'});
  const report=()=>createRecipeBuildReporter({directory:f.directory})('recipe');const before=report();
  assert.ok(before.definition.files.some(file=>file.path==='.github/actions/build-runtime/action.yml'));
  assert.ok(before.definition.files.some(file=>file.path==='tools/package.mjs'));
+ for(const file of ['.github/actions/network/action.yml','tools/network-action.cjs','tools/download.mjs'])assert.ok(before.definition.files.some(row=>row.path===file),file);
  f.write('tools/package.mjs','export const pack = 2;');assert.notEqual(report().definitionDigest,before.definitionDigest);
 });
 

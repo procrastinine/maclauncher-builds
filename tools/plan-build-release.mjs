@@ -1,3 +1,4 @@
+import {retryNetwork} from './download.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -46,7 +47,7 @@ export async function main(args,{directory=root,env=process.env}={}){
  if(args.length!==2||args[0]!=='--output'||!path.isAbsolute(args[1]))throw Error('Use --output /absolute/plan-directory.');
  const repository=readProjects(directory,{resolvePins:false}).repository;
  if(env.GITHUB_ACTIONS!=='true')throw Error('Release planning with GitHub metadata runs inside Build and release.');
- const releases=JSON.parse(execFileSync('gh',['api','--paginate','--slurp','repos/'+repository+'/releases?per_page=100'],{encoding:'utf8'})).flat().filter(release=>!release.draft);
+ const releases=JSON.parse(retryNetwork(()=>execFileSync('gh',['api','--paginate','--slurp','repos/'+repository+'/releases?per_page=100'],{encoding:'utf8'}))).flat().filter(release=>!release.draft);
  const plan=await planBuildRelease({selection:env.RELEASES,directory,releases});
  fs.mkdirSync(args[1],{recursive:true});
  const requested=new Set(parseSelection(env.RELEASES).map(row=>row.id)),rebuilt=plan.selection.filter(row=>!requested.has(row.id));

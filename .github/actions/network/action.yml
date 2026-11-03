@@ -1,0 +1,12 @@
+name: Repeat transient network operations
+description: Run a pinned JavaScript action with the shared transport retry policy.
+inputs:
+  action:
+    description: Downloaded owner/name@commit
+    required: true
+  inputs:
+    description: Action inputs as JSON
+    required: true
+runs:
+  using: node24
+  main: ../../../tools/network-action.cjs

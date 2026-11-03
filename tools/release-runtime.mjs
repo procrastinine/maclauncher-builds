@@ -3,6 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {setTimeout as sleep} from 'node:timers/promises';
+import {retryNetwork,retryNetworkAsync} from './download.mjs';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {pack,verify,catalog,publicDeclaration} from './runtime-package.mjs';
@@ -82,7 +83,7 @@ export function releaseNotes(record,project){
  lines.push('','</details>');return lines.join('\n');
 }
 
-const runGitHub=(args,options={})=>{requireHostedPublication();return execFileSync('gh',args,{encoding:'utf8',...options});};
+const runGitHub=(args,options={})=>{requireHostedPublication();return retryNetwork(()=>execFileSync('gh',args,{encoding:'utf8',...options}));};
 function missingRef(error){return error.status===404||error.statusCode===404||/\bHTTP 404\b/.test(String(error.stderr||''));}
 async function releaseTagCommit(ref,{repository,runGh}){
  const seen=new Set();let object=ref.object;
@@ -163,11 +164,7 @@ export async function publishRelease({bundle,directory=root,runGh=runGitHub,publ
  try{
   checked=await verifyRemoteRelease({bundle,directory,runGh,publication,checked});const {release,record}=checked,existing=checked.publication;publication=existing;
   if(!existing.draft)return existing;
-  let remote;
-  for(let attempt=0;attempt<5;attempt++){
-   try{remote=JSON.parse(await runGh(['api','--method','PATCH','repos/'+release.repository+'/releases/'+existing.id,'-F','draft=false','-f','make_latest=false']));break;}
-   catch(error){if(attempt===4)throw error;await wait(1000*2**attempt);}
-  }
+  const remote=JSON.parse(await retryNetworkAsync(()=>runGh(['api','--method','PATCH','repos/'+release.repository+'/releases/'+existing.id,'-F','draft=false','-f','make_latest=false']),{wait}));
   if(remote.id!==existing.id||remote.tag_name!==release.tag||remote.draft!==false)throw Error('Published release differs from its staged REST identity.');
   return {...existing,draft:false};
  }catch(error){

@@ -101,7 +101,7 @@ test('artifact transport errors remain publication failures',async t=>{
 test('the user attestation command retries with bounded backoff and preserves gh failures',async t=>{
  const f=fixture(t),calls=[],delays=[];let staged=0;
  const options={...f,bundle:f.directory,verifyBundle:async()=>({record:f.record,declaration:{files:[]}}),stageBundle:async()=>{staged++;return {id:1};},publishBundle:async()=>({id:1,draft:false}),append:async()=>({commit:'c'.repeat(40)}),wait:async ms=>delays.push(ms)};
- await actualPublishPackage({...options,runGh:async args=>{calls.push(args);if(calls.length<3)throw Error('gh temporary failure');}});
- assert.deepEqual(calls[0],['attestation','verify',path.join(f.directory,f.record.asset.filename),'--repo','owner/builds','--signer-workflow','owner/builds/.github/workflows/runtime-build.yml']);assert.equal(staged,1);assert.deepEqual(delays,[1000,2000]);
- calls.length=0;delays.length=0;staged=0;await assert.rejects(actualPublishPackage({...options,runGh:async args=>{calls.push(args);throw Error('gh: signature rejected');}}),/^Error: gh: signature rejected$/);assert.equal(staged,0);assert.equal(calls.length,5);assert.deepEqual(delays,[1000,2000,4000,8000]);
+ await actualPublishPackage({...options,runGh:async args=>{calls.push(args);if(calls.length<3)throw Error('HTTP 503: gh temporary failure');}});
+ assert.deepEqual(calls[0],['attestation','verify',path.join(f.directory,f.record.asset.filename),'--repo','owner/builds','--signer-workflow','owner/builds/.github/workflows/runtime-build.yml']);assert.equal(staged,1);assert.deepEqual(delays,[5000,10000]);
+ calls.length=0;delays.length=0;staged=0;await assert.rejects(actualPublishPackage({...options,runGh:async args=>{calls.push(args);throw Error('gh: signature rejected');}}),/^Error: gh: signature rejected$/);assert.equal(staged,0);assert.equal(calls.length,1);assert.deepEqual(delays,[]);
 });

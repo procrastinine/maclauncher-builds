@@ -14,11 +14,13 @@ runs:
         import {registerSelection} from './tools/release-selection.mjs';
         registerSelection({selection: process.env.RELEASE_SELECTION, directory: process.cwd()});
         JS
+    - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+      if: ${{ false }} # Download the pinned implementation; the shared wrapper executes it.
     - name: Read the generated package definitions
-      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      uses: ./.github/actions/network
       with:
-        name: release-plan
-        path: ${{ runner.temp }}/release-plan
+        action: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        inputs: '{"name":"release-plan","path":"${{ runner.temp }}/release-plan"}'
     - name: Use the package definition file
       shell: bash
       run: echo "BUILD_REPORTS=$RUNNER_TEMP/release-plan/reports.json" >> "$GITHUB_ENV"
@@ -38,27 +40,20 @@ runs:
       id: verify
       shell: bash
       run: node tools/release-package.mjs verify --bundle "$RUNNER_TEMP/release" --project "$BUILD_PROJECT" --version "$BUILD_VERSION" --arch "$BUILD_ARCH"
-    # Signed provenance that ties the compiled package archive to this workflow run and commit.
+    # Signed provenance ties the archive to this workflow run and commit.
     - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+      if: ${{ false }} # Download the pinned implementation; the shared wrapper executes it.
+    - uses: ./.github/actions/network
       id: attest
-      continue-on-error: true
+      env:
+        NODE_OPTIONS: --max-http-header-size=32768
       with:
-        subject-path: ${{ runner.temp }}/release/*.tar.gz
-    - name: Wait before retrying the attestation request
-      if: steps.attest.outcome == 'failure' && !cancelled()
-      shell: bash
-      run: sleep 5
-    - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
-      id: attestRetry
-      if: steps.attest.outcome == 'failure' && !cancelled()
+        action: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d
+        inputs: '{"subject-path":"${{ runner.temp }}/release/*.tar.gz","github-token":"${{ github.token }}"}'
+    - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+      if: ${{ false }} # Download the pinned implementation; the shared wrapper executes it.
+    - uses: ./.github/actions/network
+      if: ${{ !cancelled() && steps.verify.outcome == 'success' && steps.attest.outcome == 'success' }}
       with:
-        subject-path: ${{ runner.temp }}/release/*.tar.gz
-    - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-      if: ${{ !cancelled() && steps.verify.outcome == 'success' && (steps.attest.outcome == 'success' || steps.attestRetry.outcome == 'success') }}
-      with:
-        name: runtime-${{ env.BUILD_PROJECT }}-${{ env.BUILD_VERSION }}-${{ env.BUILD_ARCH }}
-        path: ${{ runner.temp }}/release
-        if-no-files-found: error
-        retention-days: 90
-        compression-level: 0
-
+        action: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+        inputs: '{"name":"runtime-${{ env.BUILD_PROJECT }}-${{ env.BUILD_VERSION }}-${{ env.BUILD_ARCH }}","path":"${{ runner.temp }}/release","if-no-files-found":"error","overwrite":"true","retention-days":"90","compression-level":"0"}'
