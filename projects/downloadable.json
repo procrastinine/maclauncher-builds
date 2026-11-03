@@ -481,42 +481,29 @@
       {
         "version": "2.2.0-MCLv2",
         "label": "GameMaker 8 decompiler 2.2.0-MCLv2"
-      }
-    ],
-    "build": [
-      {
-        "version": "2.2.0-MCLv1",
-        "command": "tools/build-gm8-decompiler.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/OpenGMK"
-        ],
-        "tools": [
-          "cmake"
-        ],
-        "rustComponents": [
-          "rust-docs"
-        ]
       },
       {
-        "version": "2.2.0-MCLv2",
-        "command": "tools/build-gm8-decompiler.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/OpenGMK"
-        ],
-        "tools": [
-          "cmake"
-        ],
-        "rustComponents": [
-          "rust-docs"
-        ]
+        "version": "2.2.0-MCLv3",
+        "label": "GameMaker 8 decompiler 2.2.0-MCLv3"
       }
-    ]
+    ],
+    "build": {
+      "version": "2.2.0-MCLv3",
+      "command": "tools/build-gm8-decompiler.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/OpenGMK"
+      ],
+      "tools": [
+        "cmake"
+      ],
+      "rustComponents": [
+        "rust-docs"
+      ]
+    }
   },
   {
     "id": "hashlink",
