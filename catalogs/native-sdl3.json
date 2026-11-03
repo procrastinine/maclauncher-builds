@@ -2,5 +2,45 @@
   "schemaVersion": 2,
   "projectId": "native-sdl3",
   "updatePolicy": "manual",
-  "packages": []
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "native-sdl3",
+      "version": "3.4.18-MCLv2",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "f540ef9390a863e7ec9ab430ccc58cbb958ae5a89bcb359a0ede7277f2a6b16d",
+      "sourceSha256": "c1adf3da91108dbc3e4205da5dacebc203085d283fa89e86eb2c889abd03a853",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "native-sdl3-3.4.18-MCLv2-universal.tar.gz",
+        "sha256": "b7ee7a88da750dca6462124a43492c31d07035d8e8a96ce71e00693bae323dba",
+        "bytes": 2861602,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/native-sdl3%2Fv3.4.18-MCLv2%2Funiversal/native-sdl3-3.4.18-MCLv2-universal.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41650019480",
+        "runAttempt": "2"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2"
+      },
+      "tag": "native-sdl3/v3.4.18-MCLv2/universal"
+    }
+  ]
 }
