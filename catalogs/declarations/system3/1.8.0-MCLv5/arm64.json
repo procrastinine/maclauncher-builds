@@ -1,0 +1,745 @@
+{
+  "id": "system3",
+  "version": "1.8.0-MCLv5",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "system3/1.8.0-MCLv5/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "4db9c836ffc98f282215445b0bd21351c66f0bb75a35a54492d1085096ace688",
+  "sourceSha256": "4db9c836ffc98f282215445b0bd21351c66f0bb75a35a54492d1085096ace688",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 18069,
+      "mode": 420,
+      "sha256": "7743d7f80704b236f7d0fe1426edcec988d7e0c21b3e0dbacf0b248dafd608e6"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 559,
+      "mode": 420,
+      "sha256": "b955402eb9d91a0f8338bf5a9289eb06f6cfc5505bda64cc8393bea3477c2215"
+    },
+    {
+      "path": "files/bin/system3",
+      "size": 534736,
+      "sha256": "b0e5444ea949001f8f687cbd82eb1b2963041b2efe6edf3bacd91e46ea0352a6",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libfreetype.6.20.6.dylib",
+      "size": 763872,
+      "sha256": "5ec7073806a0f93f6f51f9cc894d996e5118ee5c7fe37a68e10b6347b3f99098",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libgraphite2.3.3.1.dylib",
+      "size": 139712,
+      "sha256": "9b29ff06af550736de60703a8926384d296ece50bebf7eb7bb854029b34de1df",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libharfbuzz.dylib",
+      "size": 1479680,
+      "sha256": "97b4acc4eeb915f0f61484bb61f5cb95d931b3111cc9ee72535c088e2f726f36",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libpng.dylib",
+      "size": 241728,
+      "sha256": "209888f1fc1081ea397bae6981db53e63666422e9678081409b6da4c12589b04",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libSDL2_ttf-2.0.0.2400.0.dylib",
+      "size": 108160,
+      "sha256": "995c2b47413db0fb2908dea0d01d8e0f6d21a751e6cca6ff36991720535c5a05",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libSDL2-2.0.0.dylib",
+      "size": 1661040,
+      "sha256": "565014d5cd1e2e73fe8b7819ee5de3a424d649b995b44c5d267d384ed8ebf2ed",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/licenses/upstream/0-COPYING.txt",
+      "size": 18007,
+      "sha256": "dcc100d4161cc0b7177545ab6e47216f84857cda3843847c792a25289852dcaa",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/1-LICENSE",
+      "size": 1519,
+      "sha256": "2d2e9213c170a9866c616fa85b6da993a6724e10befc61f468ed9bfb84c4691c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/10-6-LICENSE",
+      "size": 657,
+      "sha256": "61e20802f0739ab2085604eaba81e655895c2eeb72ad4090716634f7f6689abd",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt",
+      "size": 380,
+      "sha256": "565eff8b979411888b4fc163ba49daf7ad9beba47ee485942f032edcefd17948",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/2-MTLc3m.ttf.license",
+      "size": 10695,
+      "sha256": "38751245389e1e23f73e6f5384b5cbe7fa972cc4410c5adc9c04b082a0b9561a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/23-19-math_libm.h.LICENSE.txt",
+      "size": 939,
+      "sha256": "3f90be470c18f99f4aef39444e9374edba166cfeb1b90f99f35286cc33924642",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/3-LICENSE",
+      "size": 1081,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/33-29-LICENSE",
+      "size": 5345,
+      "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/34-30-LICENSE.TXT",
+      "size": 2149,
+      "sha256": "bd36c8b474855fa294c2ec5c184544478ef3720aad37d65a6296a4f264fd2d3b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/35-31-FTL.TXT",
+      "size": 6743,
+      "sha256": "5a5ee54c5001bbad1cdc1a57cc3dd4c42199b2da09d39c7ee41fab002d02967f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/36-32-GPLv2.TXT",
+      "size": 764,
+      "sha256": "cc2231a758f11de157c8f53fac22a8fe54286db86a4820ce2e757d104dc14698",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/37-33-COPYING",
+      "size": 1235,
+      "sha256": "2c272829ff23f182c8bf7ea12fedea69b0ae148663123ed5240c117cb129c9c1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/38-34-LICENSE",
+      "size": 28461,
+      "sha256": "a58d21b86d133f5f66291471cd37383a1488b908d0119bb4653c109a69918696",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/39-35-COPYING",
+      "size": 1971,
+      "sha256": "ba8f810f2455c2f08e2d56bb49b72f37fcf68f1f4fade38977cfd7372050ad64",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/4-0-LICENSE.txt",
+      "size": 84,
+      "sha256": "18dfc2ee26c4a518057d54d35d5c4624e49ca9757730a25987895a09a73dbf01",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/40-36-LICENSE.txt",
+      "size": 83,
+      "sha256": "523ea71c0ef0a01f680e2f47b590ad496dd8757eab788aaf964057842cf57e78",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/5-1-LICENSE.txt",
+      "size": 530,
+      "sha256": "7d3b087c34f35d4d538e3bcddd1ff8f66e92f9ef336881999482800ddf840913",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/6-2-LICENSE-bsd.txt",
+      "size": 245,
+      "sha256": "3845dd2fcbb9fe6f798d715dfe049ec14aff0d85d008cc160b40d6db7dccb545",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/7-3-LICENSE-orig.txt",
+      "size": 264,
+      "sha256": "fb5436aa63d1b71a8dfbf74ecaf1a5b4e1ec4df7f80074d11fec99284f69ca5f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/8-4-LICENSE-gpl3.txt",
+      "size": 34459,
+      "sha256": "209c03221f427c4c07db78810cace912e867ed03f667ef6a5831bd3b2c25145c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/9-5-AUTHORS.txt",
+      "size": 355,
+      "sha256": "b327a7b3a4597e5902556ec3e8407cbdd1e288abd4623b7b4b56d14d49e84ecb",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/fonts/MTLc3m.ttf",
+      "size": 1924864,
+      "sha256": "b9e87fd7e4e5112b7bcc8c3486c19a23379e4520b36b5c049ecfd40731556a51",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_AB.MDA",
+      "size": 2816,
+      "sha256": "0dab9132fa83bd7ad7c4cceed1210d7833775c307263d5d16e5f436cd8d6972e",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_AL1.MDA",
+      "size": 2560,
+      "sha256": "f12246d4a1fc55f58da159caa7832b6e78a63eb2a864710f7ba12939f0dffadb",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_AL2.MDA",
+      "size": 46592,
+      "sha256": "350b067824ef41d20976377dec2d79900063acfde7bba46e4181ed2a32fcb3a7",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_AL3.MDA",
+      "size": 49152,
+      "sha256": "f0488b8d7fd3a50859dc29bccc02ac28fae5e1b0a4e9f938c8957164d4f09d9e",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_ALL.MDA",
+      "size": 11520,
+      "sha256": "20393c1c4ea9c918f0a9f28dec3cca6b970040b6228540406cb6c007697c082c",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_AMB.MDA",
+      "size": 6144,
+      "sha256": "aa4d593df2b0849f793bc6724d67f3084607ae7bfc02b4de75c33d912c544462",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_AT.MDA",
+      "size": 3072,
+      "sha256": "2b3655a8f7b9df2e76ce6ea68831abd9aa18140b0314757c32f8cc7631bdfaed",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_AYM.MDA",
+      "size": 2816,
+      "sha256": "f97abb8bee477341f24e81dcc8ff9b439ebd5d8565a316ae058245c1dbb5d607",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_BEE.MDA",
+      "size": 5120,
+      "sha256": "43af5406be4633ed829be9b3d3a828128e4864ba454149c33ad33951bc969ec1",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_CRS.MDA",
+      "size": 5376,
+      "sha256": "2b9f5e113b952b84fbe0f15424a56ef9e468e3691c3a4e72b10961b8a6e214a0",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_DLK.MDA",
+      "size": 6144,
+      "sha256": "31521d4e5bef22fe5c77a5d6ea7032dd52203f8258456fe021811830c99e299a",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_DPS.MDA",
+      "size": 2048,
+      "sha256": "8e9019afea88b2e906d5c6d08d53354d4e0665d7e50ac6ca1fc4682686e7e325",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_DRS.MDA",
+      "size": 4864,
+      "sha256": "cbe70fa33050381a73edaa7b1739fd0fef45f0d24103114510d77e54ed358722",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_INT.MDA",
+      "size": 3328,
+      "sha256": "ad8f66eb9bd318ea188c189c9a9f6c6fb7336d2ee39f420eaa360ec17a298d07",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_KNG.MDA",
+      "size": 8192,
+      "sha256": "f24095e7e2661127416ccd6180221e66f25ea7bd0adba748a1aa72449707b7b9",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_LP2.MDA",
+      "size": 2816,
+      "sha256": "f197eb0d8460ca72fd3f381c907ab2529102577ab396e4f65f6ab4047842c5d5",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_MGN.MDA",
+      "size": 2816,
+      "sha256": "f10bfdafa3f29b787c04cad1aef3a210de06f83353d136ba231a636cbce8b578",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_OTM.MDA",
+      "size": 2816,
+      "sha256": "5567cb428f93c6ebc3d50c2d592978129fd6a85d4f151989d92659d094153bc0",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_OY.MDA",
+      "size": 9216,
+      "sha256": "9f815e118c1c6572e1791f728c50642e65978105e73ec4f922302af5a27c79ec",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_PSG.MDA",
+      "size": 6144,
+      "sha256": "e60c3c7ebc03dc2aabf96c9d2b928d53dd3ea486b00f9f02461ae874bbdf679d",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_R3H.MDA",
+      "size": 10496,
+      "sha256": "a5f58b8262a6bbfc780bed73d8b2aacc2e297876dc0ecb315d699a4b8713c681",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_R4.MDA",
+      "size": 11776,
+      "sha256": "38a69730757e9c0ba2da63013437d86c3de01551cc387868389789db8a3e4d15",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_R41.MDA",
+      "size": 5120,
+      "sha256": "f23edff30ca30b57acfd55731cebe658a01b082383959582bb501389abe96445",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_R42.MDA",
+      "size": 5632,
+      "sha256": "cfe5eecbaa8270b6601b573d52e06c5d5002cf2cc9b36eb9478821dd6c96fea6",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_RG2.MDA",
+      "size": 2560,
+      "sha256": "d15f17e80f5688b3b6cfc576caad4716cac02e9d9c4c5ea935973b049c1a1f9b",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_SDP.MDA",
+      "size": 1280,
+      "sha256": "e26d6fcc61cd56b1f4fe013600be745c10ac7b74615a239d1e268f7438d133af",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_SG.MDA",
+      "size": 1280,
+      "sha256": "e899723f7cf6cfd97f2699a7f6645cc2180756c3bb9aad13dc3a8525063a3c27",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_T1.MDA",
+      "size": 3840,
+      "sha256": "68303274ee664d416816801c950a50096c742e544689565e59a119d4d4236053",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_T2.MDA",
+      "size": 39680,
+      "sha256": "ce1d33fa4328ea3f1e45729d4743802331693568e0bf7d070f1406b25302c903",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/AMUS_VX.MDA",
+      "size": 1280,
+      "sha256": "d593f7cd8ede89bd8d53d6242e243f0da2f73be79a5688bc3d3b1343972071b8",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/BMUS_AKA.MDA",
+      "size": 1536,
+      "sha256": "c6c2f684ea1e6625e3e67a5988e2481c65486b448c3e035d4cf6949dbd167c8a",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/BMUS_ANT.MDA",
+      "size": 1792,
+      "sha256": "a5fd6cfb7eefd533393dad250f595e64471e49992cdde3f16e959c34a22efa21",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/BMUS_FAH.MDA",
+      "size": 1536,
+      "sha256": "4bdf3b79883d894e7e51fd86b97288a412d7eb8f3721337a2468f850f5973f5a",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/BMUS_KAM.MDA",
+      "size": 1536,
+      "sha256": "0a300b034fd2746b9e57e204cb18463d45dd7eb9ab232cd4b2ef13461adb8322",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/BMUS_KAT.MDA",
+      "size": 1536,
+      "sha256": "a3e5fba5282a55c59df5806badd718aa50712fb7ac5f199687cf384003ea82df",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/BMUS_MTK.MDA",
+      "size": 1536,
+      "sha256": "789413f73dfde2d1311067404cefc076bd27c0cf949f1d5da56e5d6c48def8e2",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/BMUS_NAI.MDA",
+      "size": 1792,
+      "sha256": "88d75d5bf1d4c098621febad9fae326ec50da528170aa9e3240aa4386fb77694",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/BMUS_NOB.MDA",
+      "size": 1536,
+      "sha256": "b9aa37439a25c86e5456e67825b9d2a70d3ff27786b74a022be6b9ce9f3ad758",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/BMUS_RAB.MDA",
+      "size": 2304,
+      "sha256": "ff7c8a83cb07f27a1b0cc13c8f946d17a4a13a4cadcf40d743157a364b615eae",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/BMUS_SIN.MDA",
+      "size": 2048,
+      "sha256": "18a7e66ceafdbcee89b4bf0719b77b2b3dda57a06bc4316b943a0109ba6d5b32",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/BMUS_SOT.MDA",
+      "size": 2304,
+      "sha256": "ed716b90ffe1bf0c744f95d22e30203672f3c29e820d7a2586be06be7067c29f",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/BMUS_TNM.MDA",
+      "size": 1536,
+      "sha256": "2f86c1ecd547f050b5f75505cdf884582fc44c9dc291a11030f0a4b4cd366689",
+      "mode": 420
+    },
+    {
+      "path": "files/share/system3/mda/CMUS_T1.MDA",
+      "size": 3584,
+      "sha256": "a0a30380ae8bbc8cd3045a07ec02c2be36ecbe580fab9a206589e128387d9e85",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 30530,
+      "mode": 420,
+      "sha256": "4db9c836ffc98f282215445b0bd21351c66f0bb75a35a54492d1085096ace688"
+    }
+  ],
+  "notices": [
+    {
+      "name": "System3 SDL2",
+      "license": "GPL-2.0-or-later",
+      "sourceUrl": "https://github.com/kichikuou/system3-sdl2",
+      "path": "files/licenses/upstream/0-COPYING.txt"
+    },
+    {
+      "name": "ymfm",
+      "license": "BSD-3-Clause",
+      "sourceUrl": "https://github.com/aaronsgiles/ymfm",
+      "path": "files/licenses/upstream/1-LICENSE"
+    },
+    {
+      "name": "MTLc3m font",
+      "license": "Apache-2.0",
+      "sourceUrl": "https://github.com/kichikuou/system3-sdl2",
+      "path": "files/licenses/upstream/2-MTLc3m.ttf.license"
+    },
+    {
+      "name": "MacLauncher resource adapter and build recipes",
+      "license": "MIT",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-builds",
+      "path": "files/licenses/upstream/3-LICENSE"
+    },
+    {
+      "name": "SDL2 2.32.10 LICENSE.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/4-0-LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/hidapi/LICENSE.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/5-1-LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/hidapi/LICENSE-bsd.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/6-2-LICENSE-bsd.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/hidapi/LICENSE-orig.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/7-3-LICENSE-orig.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/hidapi/LICENSE-gpl3.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/8-4-LICENSE-gpl3.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/hidapi/AUTHORS.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/9-5-AUTHORS.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/video/yuv2rgb/LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-6-LICENSE"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/e_atan2.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/e_exp.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/e_fmod.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/e_log.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/e_log10.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/e_pow.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/e_rem_pio2.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/e_sqrt.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/k_cos.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/k_rem_pio2.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/k_sin.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/k_tan.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/math_libm.h",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/23-19-math_libm.h.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/math_private.h",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/s_atan.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/s_copysign.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/s_cos.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/s_fabs.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/s_floor.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/s_scalbn.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/s_sin.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/s_tan.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/11-7-e_atan2.c.LICENSE.txt"
+    },
+    {
+      "name": "libpng",
+      "license": "libpng-2.0",
+      "sourceUrl": "https://github.com/pnggroup/libpng/tree/cd952f49f95bb27154ae77dbb103032d95f6e580",
+      "path": "files/licenses/upstream/33-29-LICENSE"
+    },
+    {
+      "name": "FreeType",
+      "license": "FTL OR GPL-2.0-or-later",
+      "sourceUrl": "https://gitlab.com/freetype/freetype/-/tree/0a0221a1347e2f1e07c395263540026e9a0aa7c7",
+      "path": "files/licenses/upstream/34-30-LICENSE.TXT"
+    },
+    {
+      "name": "FreeType",
+      "license": "FTL OR GPL-2.0-or-later",
+      "sourceUrl": "https://gitlab.com/freetype/freetype/-/tree/0a0221a1347e2f1e07c395263540026e9a0aa7c7",
+      "path": "files/licenses/upstream/35-31-FTL.TXT"
+    },
+    {
+      "name": "FreeType",
+      "license": "FTL OR GPL-2.0-or-later",
+      "sourceUrl": "https://gitlab.com/freetype/freetype/-/tree/0a0221a1347e2f1e07c395263540026e9a0aa7c7",
+      "path": "files/licenses/upstream/36-32-GPLv2.TXT"
+    },
+    {
+      "name": "Graphite2",
+      "license": "MIT OR MPL-2.0 OR LGPL-2.1-or-later OR GPL-2.0-or-later",
+      "sourceUrl": "https://github.com/silnrsi/graphite/tree/ca8d821e60a15b6c24e404c9086992c975d8e1cf",
+      "path": "files/licenses/upstream/37-33-COPYING"
+    },
+    {
+      "name": "Graphite2",
+      "license": "MIT OR MPL-2.0 OR LGPL-2.1-or-later OR GPL-2.0-or-later",
+      "sourceUrl": "https://github.com/silnrsi/graphite/tree/ca8d821e60a15b6c24e404c9086992c975d8e1cf",
+      "path": "files/licenses/upstream/38-34-LICENSE"
+    },
+    {
+      "name": "HarfBuzz",
+      "license": "MIT",
+      "sourceUrl": "https://github.com/harfbuzz/harfbuzz/tree/c7a7457b7385f33178e8cf87615ca077a810bbe7",
+      "path": "files/licenses/upstream/39-35-COPYING"
+    },
+    {
+      "name": "SDL2_ttf",
+      "license": "Zlib",
+      "sourceUrl": "https://github.com/libsdl-org/SDL_ttf/tree/2a891473eaf05ba1707a4b7913e6c4db7de7458a",
+      "path": "files/licenses/upstream/40-36-LICENSE.txt"
+    }
+  ],
+  "redistribution": "bundle",
+  "aliases": {
+    "schema": 1,
+    "files": {
+      "files/lib/libfreetype.dylib": "files/lib/libfreetype.6.20.6.dylib",
+      "files/lib/libgraphite2.dylib": "files/lib/libgraphite2.3.3.1.dylib",
+      "files/lib/libpng16.dylib": "files/lib/libpng.dylib",
+      "files/lib/libSDL2.dylib": "files/lib/libSDL2-2.0.0.dylib"
+    }
+  }
+}
