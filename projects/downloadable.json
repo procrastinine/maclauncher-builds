@@ -1171,10 +1171,14 @@
       {
         "version": "0.5.0-MCLv3",
         "label": "System3 decompiler 0.5.0-MCLv3"
+      },
+      {
+        "version": "0.5.0-MCLv4",
+        "label": "System3 decompiler 0.5.0-MCLv4"
       }
     ],
     "build": {
-      "version": "0.5.0-MCLv3",
+      "version": "0.5.0-MCLv4",
       "command": "producers/maclauncher/scripts/build-decompiler.mjs",
       "architectures": [
         "x64",
