@@ -746,46 +746,31 @@
       {
         "version": "MCLv2-0206",
         "label": "Inno Setup extraction tools MCLv2-0206"
-      }
-    ],
-    "build": [
-      {
-        "version": "MCLv1-0206",
-        "command": "tools/build-innoextract.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/innoextract",
-          "producers/maclauncher/src/external/boost-filesystem",
-          "producers/maclauncher/src/external/boost-program-options",
-          "producers/maclauncher/src/external/boost-iostreams"
-        ],
-        "tools": [
-          "cmake",
-          "ninja",
-          "xz"
-        ]
       },
       {
-        "version": "MCLv2-0206",
-        "command": "tools/build-innoextract.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/innoextract",
-          "producers/maclauncher/src/external/boost-filesystem",
-          "producers/maclauncher/src/external/boost-program-options",
-          "producers/maclauncher/src/external/boost-iostreams"
-        ],
-        "tools": [
-          "cmake",
-          "ninja",
-          "xz"
-        ]
+        "version": "1.10-dev-MCLv3",
+        "label": "Inno Setup extraction tools 1.10-dev-MCLv3"
       }
-    ]
+    ],
+    "build": {
+      "version": "1.10-dev-MCLv3",
+      "command": "tools/build-innoextract.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/innoextract",
+        "producers/maclauncher/src/external/boost-filesystem",
+        "producers/maclauncher/src/external/boost-program-options",
+        "producers/maclauncher/src/external/boost-iostreams"
+      ],
+      "tools": [
+        "cmake",
+        "ninja",
+        "xz"
+      ]
+    }
   },
   {
     "id": "krkrsdl2",
