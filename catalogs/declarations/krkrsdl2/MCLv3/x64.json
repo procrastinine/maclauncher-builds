@@ -1,0 +1,582 @@
+{
+  "id": "krkrsdl2",
+  "version": "MCLv3",
+  "arch": "x64",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "krkrsdl2/MCLv3/x64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "53d4bc8bb694b629bc3b69b9f0ac73605a81a50b84ce86a6b59fd191d23d9779",
+  "sourceSha256": "53d4bc8bb694b629bc3b69b9f0ac73605a81a50b84ce86a6b59fd191d23d9779",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 17061,
+      "mode": 420,
+      "sha256": "90c6d20465752439765ef06832b2d2344f52be5eff9e4099e90fe0a773ebb604"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "977cd2584f353ddc2f4d3e79bf4aacf9af7e352a0579ff7457637ec0703153d6"
+    },
+    {
+      "path": "files/bin/krkrsdl2",
+      "size": 7559264,
+      "sha256": "5d4dacc7f64ab743542865a142d79c234093ef40a27c598fdb8b6ce0e38751f3",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/licenses/upstream/0-LICENSE",
+      "size": 1063,
+      "sha256": "f887439b617e3342cd87af68636b75935f51cc0b8a8aba1fe400f99d08ad5ed8",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/1-LICENSE",
+      "size": 1054,
+      "sha256": "1b06fa0d9c38360b3e08d78f01f439a05d2312c571648a5df2e0672c15c0c7a1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/10-LICENSE",
+      "size": 1480,
+      "sha256": "f7d74004cc75778cae46c5f0139f244d67c07ef64cf51937e8272352197dcb18",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/11-COPYING",
+      "size": 210,
+      "sha256": "d5a549e4a7b88cb696d0db15b21830061131ed361257ab399a33ca08ce0b33d5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/12-COPYING.txt",
+      "size": 947,
+      "sha256": "dae65ccf728227eff8e10194437078a5628047b9f55d796039688e7ca8e3aa4e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/13-LICENSE",
+      "size": 56424,
+      "sha256": "4ef7c0de0feaa9b15e2e20a9175dba6da99689a010faeb86f604f40fe1e7bd45",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/14-LICENSE",
+      "size": 1643,
+      "sha256": "bf4da21bd20bcfb5b60b7ecc67fa864a79be049e21d6178076887f178dd6c71a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/15-LICENSE",
+      "size": 1176,
+      "sha256": "3f6f1b520bc53e878ccbb698ad0bacef3752a5f4e4b50a26552bd70f60b40748",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/16-LICENSE",
+      "size": 1314,
+      "sha256": "86ec6953794503942b70fcd4f35b565d44f63f703b7037ce44dad965c4aaae91",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/17-LICENSE",
+      "size": 10341,
+      "sha256": "0e64c1e9cd62f47682caeb545d2943fb4c38a9b2e5d9fd7e3b456973bb430d1b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/18-LICENSE",
+      "size": 1262,
+      "sha256": "a08ba10adec47027ef8078848729837b1c5a42f140718d7afd65c23f1eeec392",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/19-LICENSE",
+      "size": 1158,
+      "sha256": "31346421254a3e6e12687cf17f19f6357ee73a617fa7b3d3ccefdcbabe49bdd3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/2-LICENSE",
+      "size": 1007,
+      "sha256": "ddd3be52ca42ed7941b855fb8bc1464d8395b895b92ae28f93d0afc53b9204c7",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/20-LICENSE",
+      "size": 1065,
+      "sha256": "68b85067e0b4b9c901d30d39a0dd197709cf2634dcdc7039ce9181716c71706c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/21-LICENSE",
+      "size": 17987,
+      "sha256": "ab15fd526bd8dd18a9e77ebc139656bf4d33e97fc7238cd11bf60e2b9b8666c6",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/22-LICENSE",
+      "size": 35147,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/23-LICENSE",
+      "size": 1522,
+      "sha256": "bfec18debedcb337f8af53f143ccf0b1575d0b7c30deaee137f10397eca0d353",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/24-FTL.TXT",
+      "size": 6741,
+      "sha256": "f4b133e25df1f86ad3ffea453aa0e613f0474f34778dbbb3e437e7b2724937d8",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/25-LICENSE.TXT",
+      "size": 1743,
+      "sha256": "fd056de4196903a676208ef58cfddafc7d583d1f28fa2e44c309cf84a59e62fb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/26-copying.txt",
+      "size": 2928,
+      "sha256": "696f75dafdedb1189db2980a0c5614689bec1c83fc06c7edfc698c119dcb4301",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/27-LICENSE",
+      "size": 1313,
+      "sha256": "c5f651028d89cdc3b3825d6571deebb58b6081c2465a3d061d8a8e1263de8ca4",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/28-LICENSE.md",
+      "size": 2939,
+      "sha256": "fffd497be5f4ae0a10b8258e191125fb58b90250ecbf3c79398d79604dd00b7d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/29-License.rtf",
+      "size": 2178,
+      "sha256": "d26120ab237f87dea10aa4fa7fd4243cadffd26e54eb2f3903d5fb0f8ed336b2",
+      "mode": 493
+    },
+    {
+      "path": "files/licenses/upstream/3-LICENSE.txt",
+      "size": 884,
+      "sha256": "fcb07e07ac6bc8b2fcf047b50431ef4ebe5b619d7ca7c82212018309a9067426",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/30-COPYING",
+      "size": 1466,
+      "sha256": "d2ab5758336489da61c12cc5bb757da5339c4ae9001f9bb0562b4370249af814",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/31-LICENSE",
+      "size": 4204,
+      "sha256": "a73f0ed13b0f13d4764f82c85f9725113b41ce0555f5ca52e14dc7aabbfae1b2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/32-COPYING",
+      "size": 1415,
+      "sha256": "b7255f7a573bb9319aa04071de41a0f5daf33c3d545b9301c484841587730aec",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/33-COPYING",
+      "size": 1928,
+      "sha256": "8338ce8d922bb4416ce3dd1e5680173332435e3f0755007ac7801ccd674fe682",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/34-COPYING",
+      "size": 1487,
+      "sha256": "0267ae795ab744c4e0f9c45e249440fdf2e75dac8c804f36066b28649bf74aaf",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/35-license.txt",
+      "size": 56672,
+      "sha256": "4187498c716ffa7697b749746fb956c093e6ac4cffd5699f00e217dcca46e306",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/36-LICENSE",
+      "size": 1053,
+      "sha256": "35055191efd2c134c49f80357872e819454fbe396c2a950cb2d3321155efdd1c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/37-COPYING",
+      "size": 1077,
+      "sha256": "75ce0a8c5a7bff42fbd6f8f3b469b518132132c4f4948fb8d02b1ccb5d0df9d8",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/38-COPYING",
+      "size": 1106,
+      "sha256": "551a04ab9278e48e3d4ef8b0381ad54e54e84fac1a225c50247fa3669dfdef75",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/39-LICENSE_1_0.txt",
+      "size": 1359,
+      "sha256": "36266a8fd073568394cb81cdb2b124f7fdae2c64c1a7ed09db34b4d22efa2951",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/4-License.txt",
+      "size": 909,
+      "sha256": "218e120812f1fd02025335087d3c3f3011a86a1e13cecb7231ea137f0592b833",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/40-FONT_LICENSE.txt",
+      "size": 307,
+      "sha256": "54146d78134b7508daa0722a91f344b931ece27cdd5c72d8791d7826d6b51a42",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/5-license.txt",
+      "size": 13091,
+      "sha256": "5059bc9c2f37b7e7a557685ae9330ecfd798537bdfde94de63a9c721c92a8856",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/6-LICENSE-bsd.txt",
+      "size": 1534,
+      "sha256": "30eb1bef29b46f8ba7ab8b416035dbd93cb034a45481dd97815b944284582cd2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/7-LICENSE-gpl3.txt",
+      "size": 35147,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/8-LICENSE-orig.txt",
+      "size": 264,
+      "sha256": "fb5436aa63d1b71a8dfbf74ecaf1a5b4e1ec4df7f80074d11fec99284f69ca5f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/9-LICENSE.txt",
+      "size": 530,
+      "sha256": "7d3b087c34f35d4d538e3bcddd1ff8f66e92f9ef336881999482800ddf840913",
+      "mode": 420
+    },
+    {
+      "path": "files/share/kag3-polyfill/FONT_LICENSE.txt",
+      "size": 307,
+      "sha256": "54146d78134b7508daa0722a91f344b931ece27cdd5c72d8791d7826d6b51a42",
+      "mode": 420
+    },
+    {
+      "path": "files/share/kag3-polyfill/font.ttf",
+      "size": 4242092,
+      "sha256": "0bf901a96e9481c80e562d738d98ad66ee07eb4ac81007fca3e227ed8ad98a61",
+      "mode": 420
+    },
+    {
+      "path": "files/share/kag3-polyfill/KAGParser.tjs",
+      "size": 66807,
+      "sha256": "6b9c55ae37c6453715fdff72b97751e87803fa807781e34c1a028afb708b393b",
+      "mode": 420
+    },
+    {
+      "path": "files/share/kag3-polyfill/manifest.json",
+      "size": 1043,
+      "sha256": "dcb0cf8821ed459d268501f024b9feec48882c56f3eac2cb14fea7d5b0235178",
+      "mode": 420
+    },
+    {
+      "path": "files/share/kag3-polyfill/MenuItem_stub.tjs",
+      "size": 421,
+      "sha256": "5d2561cb6f8d1cd30dd2623de993798fa89b407d149ddc9074d72e14fed61d8a",
+      "mode": 420
+    },
+    {
+      "path": "files/share/kag3-polyfill/PolyfillInitialize.tjs",
+      "size": 2119,
+      "sha256": "817daa9af46cb8faf9041da5ee9dec86c5fb0d972d61e89e3c38c0608e5844fa",
+      "mode": 420
+    },
+    {
+      "path": "files/share/kag3-polyfill/UPSTREAM_README.md",
+      "size": 609,
+      "sha256": "c402285ad50b1846fd57b8e061dec5049696c2ca5a86b4f2cff74eb5ff20616c",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 26048,
+      "mode": 420,
+      "sha256": "53d4bc8bb694b629bc3b69b9f0ac73605a81a50b84ce86a6b59fd191d23d9779"
+    }
+  ],
+  "notices": [
+    {
+      "name": "KiriKiri SDL2 LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/0-LICENSE"
+    },
+    {
+      "name": "KiriKiri SDL2 external/FAudio/LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/1-LICENSE"
+    },
+    {
+      "name": "KiriKiri SDL2 external/FAudio/csharp/LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/2-LICENSE"
+    },
+    {
+      "name": "KiriKiri SDL2 external/SDL/LICENSE.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/3-LICENSE.txt"
+    },
+    {
+      "name": "KiriKiri SDL2 external/SDL/Xcode/SDL/pkg-support/resources/License.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/4-License.txt"
+    },
+    {
+      "name": "KiriKiri SDL2 external/SDL/Xcode-iOS/Demos/data/bitmapfont/license.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/5-license.txt"
+    },
+    {
+      "name": "KiriKiri SDL2 external/SDL/src/hidapi/LICENSE-bsd.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/6-LICENSE-bsd.txt"
+    },
+    {
+      "name": "KiriKiri SDL2 external/SDL/src/hidapi/LICENSE-gpl3.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/7-LICENSE-gpl3.txt"
+    },
+    {
+      "name": "KiriKiri SDL2 external/SDL/src/hidapi/LICENSE-orig.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/8-LICENSE-orig.txt"
+    },
+    {
+      "name": "KiriKiri SDL2 external/SDL/src/hidapi/LICENSE.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/9-LICENSE.txt"
+    },
+    {
+      "name": "KiriKiri SDL2 external/SDL/src/video/yuv2rgb/LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/10-LICENSE"
+    },
+    {
+      "name": "KiriKiri SDL2 external/SDL/test/COPYING",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/11-COPYING"
+    },
+    {
+      "name": "KiriKiri SDL2 external/SDL/visualtest/COPYING.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/12-COPYING.txt"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/13-LICENSE"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/angle/LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/14-LICENSE"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/angle/src/common/third_party/smhasher/LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/15-LICENSE"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/angle/src/common/third_party/xxhash/LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/16-LICENSE"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/angle/src/tests/test_utils/third_party/LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/17-LICENSE"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/angle/src/third_party/compiler/LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/18-LICENSE"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/angle/src/third_party/libXNVCtrl/LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/19-LICENSE"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/angle/src/third_party/volk/LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/20-LICENSE"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/angle/tools/flex-bison/third_party/m4sugar/LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/21-LICENSE"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/angle/tools/flex-bison/third_party/skeletons/LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/22-LICENSE"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/angle/util/windows/third_party/StackWalker/LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/23-LICENSE"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/freetype/docs/FTL.TXT",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/24-FTL.TXT"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/freetype/docs/LICENSE.TXT",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/25-LICENSE.TXT"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/glm/copying.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/26-copying.txt"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/jxrlib/LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/27-LICENSE"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/libjpeg-turbo/LICENSE.md",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/28-LICENSE.md"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/libjpeg-turbo/release/License.rtf",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/29-License.rtf"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/libogg/COPYING",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/30-COPYING"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/lpng/LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/31-LICENSE"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/onig/COPYING",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/32-COPYING"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/opus/COPYING",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/33-COPYING"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/external/opusfile/COPYING",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/34-COPYING"
+    },
+    {
+      "name": "KiriKiri SDL2 external/krkrz/vcproj/license.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/35-license.txt"
+    },
+    {
+      "name": "KiriKiri SDL2 external/meson_toolchains/LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/36-LICENSE"
+    },
+    {
+      "name": "KiriKiri SDL2 external/simde/COPYING",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/37-COPYING"
+    },
+    {
+      "name": "KiriKiri SDL2 external/simde/test/munit/COPYING",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/38-COPYING"
+    },
+    {
+      "name": "KiriKiri SDL2 external/zlib/contrib/dotzlib/LICENSE_1_0.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/krkrsdl2",
+      "path": "files/licenses/upstream/39-LICENSE_1_0.txt"
+    },
+    {
+      "name": "KAG3 polyfill font",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/krkrsdl2/kag3",
+      "path": "files/licenses/upstream/40-FONT_LICENSE.txt"
+    }
+  ],
+  "redistribution": "bundle"
+}
