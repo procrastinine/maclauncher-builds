@@ -467,10 +467,14 @@
       {
         "version": "2.2.0-MCLv3",
         "label": "GameMaker 8 decompiler 2.2.0-MCLv3"
+      },
+      {
+        "version": "2.2.0-MCLv4",
+        "label": "GameMaker 8 decompiler 2.2.0-MCLv4"
       }
     ],
     "build": {
-      "version": "2.2.0-MCLv3",
+      "version": "2.2.0-MCLv4",
       "command": "tools/build-gm8-decompiler.mjs",
       "architectures": [
         "x64",
