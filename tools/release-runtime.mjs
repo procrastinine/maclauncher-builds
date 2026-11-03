@@ -51,8 +51,8 @@ export function catalogIndex(directory=root,{coverage=buildCoverage(directory)}=
 }
 
 /** Apply only a public, digest-verified release; older versions cannot be removed or replaced. */
-export async function applyRelease({bundle,directory=root,runGh=runGitHub,publication}){
- const {release,record,declaration}=await verifyRemoteRelease({bundle,directory,runGh,publication,requirePublic:true,includeDeclaration:true});
+export async function applyRelease({bundle,directory=root,runGh=runGitHub,publication,checked}){
+ const {release,record,declaration}=await verifyRemoteRelease({bundle,directory,runGh,publication,requirePublic:true,includeDeclaration:true,checked});
  const declarationFile=path.join(directory,'catalogs','declarations',release.id,release.version,release.arch+'.json');
  if(fs.existsSync(declarationFile)){
   regular(declarationFile);if(stable(read(declarationFile))!==stable(declaration))throw Error('An existing sealed declaration differs from this immutable package.');
@@ -115,8 +115,8 @@ async function publicTagCommit({release,runGh}){
  return releaseTagCommit(ref,{repository:release.repository,runGh});
 }
 /** Verify an existing release or the publication returned by this process. */
-export async function verifyRemoteRelease({bundle,directory=root,runGh=runGitHub,requirePublic=false,includeDeclaration=false,publication}){
- const checked=await verifyRelease({bundle,directory,includeDeclaration});
+export async function verifyRemoteRelease({bundle,directory=root,runGh=runGitHub,requirePublic=false,includeDeclaration=false,publication,checked}){
+ checked??=await verifyRelease({bundle,directory,includeDeclaration});
  if(publication){if(publication.repository!==checked.release.repository||publication.tag!==checked.release.tag||!Number.isSafeInteger(publication.id)||publication.id<=0||typeof publication.draft!=='boolean'||publication.sha256!==checked.record.asset.sha256)throw Error('Publication identity differs from the verified release.');}
  else{
   const remote=await optionalGitHub(['repos/'+checked.release.repository+'/releases/tags/'+encodeURIComponent(checked.release.tag)],runGh);
@@ -131,10 +131,10 @@ export async function verifyRemoteRelease({bundle,directory=root,runGh=runGitHub
  return {...checked,publication};
 }
 /** An unpublished attempt owns only its draft; the public tag is created by finalization. */
-export async function stageRelease({bundle,target,resume=false,directory=root,runGh=runGitHub}){
+export async function stageRelease({bundle,target,resume=false,directory=root,runGh=runGitHub,checked}){
  if(!/^[a-f0-9]{40}$/.test(target||''))throw Error('Staging requires an exact public source commit through --target.');
  if(typeof resume!=='boolean')throw Error('Staging resume must be a boolean.');
- const checked=await verifyRelease({bundle,directory}),{release,record}=checked,project=resolveProject(release.id,directory,{resolvePins:false});
+ checked??=await verifyRelease({bundle,directory});const {release,record}=checked,project=resolveProject(release.id,directory,{resolvePins:false});
  matchingBuildSource(target,{record,directory});
  let sourceCommit=target;
  let remote=await optionalGitHub(['repos/'+release.repository+'/releases/tags/'+encodeURIComponent(release.tag)],runGh);
@@ -163,9 +163,9 @@ export async function stageRelease({bundle,target,resume=false,directory=root,ru
  }catch(error){if(created)await runGh(['api','--method','DELETE','repos/'+release.repository+'/releases/'+remote.id]);throw error;}
 }
 /** Finalize the exact staged REST ID; no tag or releases-list lookup follows upload. */
-export async function publishRelease({bundle,directory=root,runGh=runGitHub,publication,wait=sleep}){
+export async function publishRelease({bundle,directory=root,runGh=runGitHub,publication,wait=sleep,checked}){
  try{
-  const checked=await verifyRemoteRelease({bundle,directory,runGh,publication}),{release,record}=checked,existing=checked.publication;publication=existing;
+  checked=await verifyRemoteRelease({bundle,directory,runGh,publication,checked});const {release,record}=checked,existing=checked.publication;publication=existing;
   if(!existing.draft)return existing;
   let remote;
   for(let attempt=0;attempt<5;attempt++){

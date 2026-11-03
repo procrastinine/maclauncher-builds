@@ -43,3 +43,14 @@ test('archive/record disagreement cannot export a declaration or mutate catalogs
  await assert.rejects(applyRelease({bundle:f.output,directory:f.directory,runGh:()=>assert.fail('Invalid archive must stop before remote')}),/record differs/);
  assert.equal(fs.existsSync(path.join(f.directory,'catalogs')),false);
 });
+test('publication reads the sealed inventory once and rejects a changed archive or record',async t=>{
+ const f=fixture(t,'maclauncher');await prepareRelease(f);
+ const {sealedBundle}=await import('../tools/publish-package.mjs');
+ const full=await verifyRelease({bundle:f.output,directory:f.directory,includeDeclaration:true}),sealed=await sealedBundle({bundle:f.output,directory:f.directory});
+ assert.deepEqual(sealed.record,full.record);assert.deepEqual(sealed.declaration,full.declaration);
+ for(const key of ['repository','id','version','arch','tag'])assert.equal(sealed.release[key],full.release[key]);
+ const sidecar=path.join(f.output,full.record.asset.filename+'.json'),original=fs.readFileSync(sidecar);
+ fs.writeFileSync(sidecar,JSON.stringify({...full.record,minimumMacOS:'14.0'}));await assert.rejects(sealedBundle({bundle:f.output,directory:f.directory}),/record differs/);
+ fs.writeFileSync(sidecar,original);fs.appendFileSync(path.join(f.output,full.record.asset.filename),'x');
+ await assert.rejects(sealedBundle({bundle:f.output,directory:f.directory}),/checksum or size changed/);
+});
