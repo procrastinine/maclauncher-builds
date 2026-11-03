@@ -1,0 +1,58 @@
+{
+  "id": "steam-api-helper",
+  "version": "0.5.2",
+  "arch": "universal",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "sourceRelative": null,
+  "sourceSha256": "40597e2596bf3df91e7a8d1be6939f75d2d427bbeb91d0ac2316420c1c0cb23e",
+  "directoryRelative": "steam-api-helper/0.5.2/universal",
+  "manifestRelative": "helper.json",
+  "manifestSha256": "98dfa9f48c6ccf0efa14deb3080abb47e255b83bb109326faa19f3bec2d46ade",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 15802,
+      "mode": 420,
+      "sha256": "41d93fb9750938e36b26779e3c3ad293cd8651cf2c8d9be0168b14dd01d62700"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "febb4b86add1c4f24c5388cb725fcf25d5209a85eb870161d530766e39390937"
+    },
+    {
+      "path": "helper.json",
+      "size": 3435,
+      "sha256": "98dfa9f48c6ccf0efa14deb3080abb47e255b83bb109326faa19f3bec2d46ade",
+      "mode": 420
+    },
+    {
+      "path": "libsteam_api.dylib",
+      "size": 465552,
+      "sha256": "6a9ce700bf002fb817518221ebe093213ad84e093cb5d63d7a3315f004e74cae",
+      "mode": 493,
+      "architectures": [
+        "arm64",
+        "x86_64"
+      ]
+    },
+    {
+      "path": "LICENSE",
+      "size": 1081,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+      "mode": 420
+    }
+  ],
+  "notices": [
+    {
+      "name": "MacLauncher offline Steam API",
+      "license": "MIT",
+      "path": "LICENSE"
+    }
+  ]
+}
