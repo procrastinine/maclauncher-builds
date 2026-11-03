@@ -1,0 +1,228 @@
+{
+  "id": "android-angle-aim",
+  "version": "MCLv2",
+  "arch": "arm64",
+  "minimumMacOS": "13.0",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "3a4842b63b18f2633f5d8be40fbfd599da9e1b94c31209742b2f770969f6434a",
+  "directoryRelative": "android-angle-aim/MCLv2/arm64",
+  "manifestRelative": "input.json",
+  "manifestSha256": "5e58bb5477c60b8fff26eda2437b746d56c7a4fabd164bf476113bbe3977073a",
+  "files": [
+    {
+      "path": "angle-manifest.json",
+      "size": 12221,
+      "sha256": "5cb7ee398a5feffd04225ad0ceeacb6de76fefaae5b5edeb60e7d9679f77e07f",
+      "mode": 420
+    },
+    {
+      "path": "build-definition.json",
+      "size": 15925,
+      "mode": 420,
+      "sha256": "90559c2e2df900c7fef2fd12b101d910ff327a974909c843f7d4d0083686f123"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "02fef1baf156fa2f45909a3291cb3e5f78a4fa51188bad95dd634407dffe39b7"
+    },
+    {
+      "path": "input.json",
+      "size": 7107,
+      "sha256": "5e58bb5477c60b8fff26eda2437b746d56c7a4fabd164bf476113bbe3977073a",
+      "mode": 420
+    },
+    {
+      "path": "libEGL.dylib",
+      "size": 81808,
+      "sha256": "fea590e693199e9281928e64ff607c282bac2c287850843899664d20a8d11987",
+      "mode": 420,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "libGLESv2.dylib",
+      "size": 8044736,
+      "sha256": "8f3aafd09d83c8490c210f51d30b2ee52ed5f268babe8751136046409b8f4f33",
+      "mode": 420,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "notices/ANGLE.txt",
+      "size": 1643,
+      "sha256": "bf4da21bd20bcfb5b60b7ecc67fa864a79be049e21d6178076887f178dd6c71a",
+      "mode": 420
+    },
+    {
+      "path": "notices/ASTC-Encoder.txt",
+      "size": 10139,
+      "sha256": "494accc32e50eb523a0e384d0ae6d4b702db867a89d6971216760e92b240ee12",
+      "mode": 420
+    },
+    {
+      "path": "notices/Chromium-Abseil.txt",
+      "size": 1433,
+      "sha256": "5eba3387cba010d0fdaa98913fd41c178552aed36edec6e8abec1ecc8a115bc4",
+      "mode": 420
+    },
+    {
+      "path": "notices/Chromium-Zlib.txt",
+      "size": 910,
+      "sha256": "e1cfcc55c325b3f78cf55df9664abaa066e2271dffe8213347d9fccdfbac8f2c",
+      "mode": 420
+    },
+    {
+      "path": "notices/glslang.txt",
+      "size": 40933,
+      "sha256": "0f5789bcd4724b69408faa3a197210ab17e458bc8346ab1d293fdbbc996e2251",
+      "mode": 420
+    },
+    {
+      "path": "notices/JsonCpp.txt",
+      "size": 2714,
+      "sha256": "cec0db5f6d7ed6b3a72647bd50aed02e13c3377fd44382b96dc2915534c042ad",
+      "mode": 420
+    },
+    {
+      "path": "notices/Khronos-Headers.txt",
+      "size": 1147,
+      "sha256": "438187dca092de4032c1a16524aa4c34c71a0f985a71251a675aad54e77ed561",
+      "mode": 420
+    },
+    {
+      "path": "notices/libcxx.txt",
+      "size": 4575,
+      "sha256": "89682f0e3a67d9d7fd0140657883e9678977c6ee03118da3b1c04ddf5a141fdf",
+      "mode": 420
+    },
+    {
+      "path": "notices/RapidJSON.txt",
+      "size": 2805,
+      "sha256": "b8ae4e9dbc0493594f74105310cd088f143d89597cc43f57937c65f1b2491eb9",
+      "mode": 420
+    },
+    {
+      "path": "notices/SPIRV-Cross.txt",
+      "size": 224,
+      "sha256": "385c08b7dcae16b9d4620bded6ae8b937d01205a8defa8dfc6bffe9eac18f4c9",
+      "mode": 420
+    },
+    {
+      "path": "notices/SPIRV-Headers.txt",
+      "size": 20037,
+      "sha256": "d182274274bc6e5fc1b79d4986bd4e03be72def4dea1cf705607bcf5d0763cc6",
+      "mode": 420
+    },
+    {
+      "path": "notices/Vulkan-Headers-MIT.txt",
+      "size": 111,
+      "sha256": "ba367e37479a20ac87a9a1e94035560674f30c22cb8695b1052fbdc63fa47dc6",
+      "mode": 420
+    },
+    {
+      "path": "notices/VulkanMemoryAllocator.txt",
+      "size": 125,
+      "sha256": "941b787d0d27a4d1a1cd82cc586c0ab80ba675a795f699583f06bcc26393d262",
+      "mode": 420
+    }
+  ],
+  "notices": [
+    {
+      "name": "ANGLE",
+      "license": "See original notice",
+      "path": "notices/ANGLE.txt",
+      "sourceUrl": "https://chromium.googlesource.com/angle/angle/+/cbc4153da8d5796b0fbb3cf288e97bee19436191/LICENSE"
+    },
+    {
+      "name": "ASTC-Encoder",
+      "license": "See original notice",
+      "path": "notices/ASTC-Encoder.txt",
+      "sourceUrl": "https://chromium.googlesource.com/external/github.com/ARM-software/astc-encoder/+/2319d9c4d4af53a7fc7c52985e264ce6e8a02a9b/LICENSE.txt"
+    },
+    {
+      "name": "glslang",
+      "license": "See original notice",
+      "path": "notices/glslang.txt",
+      "sourceUrl": "https://chromium.googlesource.com/external/github.com/KhronosGroup/glslang/+/38f6708b6b6f213010c51ffa8f577a7751e12ce7/LICENSE.txt"
+    },
+    {
+      "name": "SPIRV-Cross",
+      "license": "See original notice",
+      "path": "notices/SPIRV-Cross.txt",
+      "sourceUrl": "https://chromium.googlesource.com/external/github.com/KhronosGroup/SPIRV-Cross/+/b8fcf307f1f347089e3c46eb4451d27f32ebc8d3/LICENSE"
+    },
+    {
+      "name": "SPIRV-Headers",
+      "license": "See original notice",
+      "path": "notices/SPIRV-Headers.txt",
+      "sourceUrl": "https://chromium.googlesource.com/external/github.com/KhronosGroup/SPIRV-Headers/+/97e96f9e9defeb4bba3cfbd034dec516671dd7a3/LICENSE"
+    },
+    {
+      "name": "SPIRV-Tools",
+      "license": "See original notice",
+      "path": "notices/SPIRV-Cross.txt",
+      "sourceUrl": "https://chromium.googlesource.com/external/github.com/KhronosGroup/SPIRV-Tools/+/3aeaaa088d37b86cff036eee1a9bf452abad7d9d/LICENSE"
+    },
+    {
+      "name": "Chromium-Abseil",
+      "license": "See original notice",
+      "path": "notices/Chromium-Abseil.txt",
+      "sourceUrl": "https://chromium.googlesource.com/chromium/src/+/140.0.7339.81/third_party/abseil-cpp/LICENSE"
+    },
+    {
+      "name": "Chromium-Zlib",
+      "license": "See original notice",
+      "path": "notices/Chromium-Zlib.txt",
+      "sourceUrl": "https://chromium.googlesource.com/chromium/src/+/140.0.7339.81/third_party/zlib/LICENSE"
+    },
+    {
+      "name": "Khronos-Headers",
+      "license": "See original notice",
+      "path": "notices/Khronos-Headers.txt",
+      "sourceUrl": "https://chromium.googlesource.com/angle/angle/+/cbc4153da8d5796b0fbb3cf288e97bee19436191/include/KHR/khrplatform.h"
+    },
+    {
+      "name": "libcxx",
+      "license": "See original notice",
+      "path": "notices/libcxx.txt",
+      "sourceUrl": "https://chromium.googlesource.com/external/github.com/llvm/llvm-project/libcxx.git/+/adbb4a5210ae2a8a4e27fa6199221156c02a9b1a/LICENSE.TXT"
+    },
+    {
+      "name": "JsonCpp",
+      "license": "See original notice",
+      "path": "notices/JsonCpp.txt",
+      "sourceUrl": "https://github.com/open-source-parsers/jsoncpp"
+    },
+    {
+      "name": "RapidJSON",
+      "license": "See original notice",
+      "path": "notices/RapidJSON.txt",
+      "sourceUrl": "https://github.com/Tencent/rapidjson"
+    },
+    {
+      "name": "VulkanMemoryAllocator",
+      "license": "See original notice",
+      "path": "notices/VulkanMemoryAllocator.txt",
+      "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator"
+    },
+    {
+      "name": "Vulkan-Headers-Apache-2.0",
+      "license": "See original notice",
+      "path": "notices/SPIRV-Cross.txt",
+      "sourceUrl": "https://github.com/KhronosGroup/Vulkan-Headers"
+    },
+    {
+      "name": "Vulkan-Headers-MIT",
+      "license": "See original notice",
+      "path": "notices/Vulkan-Headers-MIT.txt",
+      "sourceUrl": "https://github.com/KhronosGroup/Vulkan-Headers"
+    }
+  ]
+}
