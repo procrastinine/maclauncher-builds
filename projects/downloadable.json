@@ -2299,10 +2299,14 @@
       {
         "version": "3.0.1",
         "label": "GameMaker OpenGL helper 3.0.1"
+      },
+      {
+        "version": "3.0.2",
+        "label": "GameMaker OpenGL helper 3.0.2"
       }
     ],
     "build": {
-      "version": "3.0.1",
+      "version": "3.0.2",
       "command": "tools/build-gamemaker-opengl.mjs",
       "architectures": [
         "universal"
