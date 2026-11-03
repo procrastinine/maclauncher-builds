@@ -224,10 +224,14 @@
       {
         "version": "0.1.0-MCLv4",
         "label": "AIM with MacLauncher integration 0.1.0-MCLv4"
+      },
+      {
+        "version": "0.1.0-MCLv5",
+        "label": "AIM with MacLauncher integration 0.1.0-MCLv5"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv4",
+      "version": "0.1.0-MCLv5",
       "command": "tools/build-android-aim.mjs",
       "architectures": [
         "arm64"
