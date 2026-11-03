@@ -343,6 +343,50 @@
       ]
     },
     {
+      "projectId": "gamemaker-opengl-helper",
+      "name": "GameMaker OpenGL helper",
+      "delivery": "downloadable",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gamemaker-opengl-helper",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/gamemaker-opengl-helper.json",
+        "sha256": "0b66b7f5c7b62b1fc8829c89561cf5c031ba0a0600fcc2247c86ac41bffbb656",
+        "bytes": 1702
+      },
+      "releases": [
+        {
+          "version": "3.0.1",
+          "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "gamemaker-opengl-helper/v3.0.1/universal",
+          "asset": {
+            "filename": "gamemaker-opengl-helper-3.0.1-universal.tar.gz",
+            "sha256": "0ed6d32dc245b0e716dea4aeb1b6fa0cbefb50062b6c49902e74c6047b31c568",
+            "bytes": 17194,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gamemaker-opengl-helper%2Fv3.0.1%2Funiversal/gamemaker-opengl-helper-3.0.1-universal.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41578863273",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#gamemaker-opengl-helper",
+          "profile": "GameMaker OpenGL helper 3.0.1"
+        }
+      ]
+    },
+    {
       "projectId": "mpv",
       "name": "mpv decoded-frame host",
       "delivery": "downloadable",
