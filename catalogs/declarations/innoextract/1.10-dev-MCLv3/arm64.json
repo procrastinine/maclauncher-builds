@@ -1,0 +1,79 @@
+{
+  "id": "innoextract",
+  "version": "1.10-dev-MCLv3",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "innoextract/1.10-dev-MCLv3/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "b9648dff3ac87616180307328a8d7bb384cc0cb3c1a0a468f36792df05d3b7aa",
+  "sourceSha256": "b9648dff3ac87616180307328a8d7bb384cc0cb3c1a0a468f36792df05d3b7aa",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 17628,
+      "mode": 420,
+      "sha256": "07d91e35ec7da6c6ed703e9825296a9d542e9b1be9acd116821df381c678d1d3"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "3baafc587fc2ef0654ff44a1e2db7f4be6c97909a7377f73e409fbbb832f1704"
+    },
+    {
+      "path": "files/bin/innoextract",
+      "size": 1033648,
+      "sha256": "5b36f596bc6b8cf63627b40124950cf8a057fdcb72241d9d93da5a9fd23a9770",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/bin/maclauncher-inno-inspect",
+      "size": 769520,
+      "sha256": "3e9dedbb65ca567e9a6ba6de0cac445725c6063387887a0a679dd9b486c263ff",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/licenses/upstream/0-LICENSE",
+      "size": 886,
+      "sha256": "7cd6f3bf0c83f2c3ce8438aab20a4827a5de934fb87dd7966f6f3f2651685127",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/1-LICENSE_1_0.txt",
+      "size": 1338,
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 2454,
+      "mode": 420,
+      "sha256": "b9648dff3ac87616180307328a8d7bb384cc0cb3c1a0a468f36792df05d3b7aa"
+    }
+  ],
+  "notices": [
+    {
+      "name": "Innoextract",
+      "license": "Zlib",
+      "sourceUrl": "https://github.com/dscharrer/innoextract",
+      "path": "files/licenses/upstream/0-LICENSE"
+    },
+    {
+      "name": "Boost",
+      "license": "BSL-1.0",
+      "sourceUrl": "https://github.com/boostorg/boost",
+      "path": "files/licenses/upstream/1-LICENSE_1_0.txt"
+    }
+  ],
+  "redistribution": "bundle"
+}
