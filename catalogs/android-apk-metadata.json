@@ -7,6 +7,45 @@
       "schemaVersion": 2,
       "id": "android-apk-metadata",
       "version": "1.1.3",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "9649b1bad1f7aa91c59a941c631d2255d145c521b55a83553cad909204b45bff",
+      "sourceSha256": "34430ef0f71a136d9bf5a208964ef8b7ccdec1559dc721eca1868ed9b975ea96",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "android-apk-metadata-1.1.3-x64.tar.gz",
+        "sha256": "5d061d1b772d3fbf579a3271c5e1253ec83855ce08d225c13d0007669de086c1",
+        "bytes": 405851,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-apk-metadata%2Fv1.1.3%2Fx64/android-apk-metadata-1.1.3-x64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "b6ca1f913cac56e8d26e58a5f6035906e863ed0a",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "41732165522",
+        "runAttempt": "1"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "b6ca1f913cac56e8d26e58a5f6035906e863ed0a"
+      },
+      "tag": "android-apk-metadata/v1.1.3/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "android-apk-metadata",
+      "version": "1.1.3",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
