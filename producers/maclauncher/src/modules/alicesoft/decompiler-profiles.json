@@ -78,6 +78,11 @@
     "upstreamRevision": "5444fd18e94db3a36feb3885b158ea45d606bc93",
     "releases": [
       {
+        "version": "1.13.0-MCLv4",
+        "upstreamRevision": "5444fd18e94db3a36feb3885b158ea45d606bc93",
+        "toolVersion": "1.13.0"
+      },
+      {
         "version": "1.13.0-MCLv3",
         "upstreamRevision": "5444fd18e94db3a36feb3885b158ea45d606bc93",
         "toolVersion": "1.13.0"
