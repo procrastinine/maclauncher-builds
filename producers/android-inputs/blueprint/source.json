@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "android-blueprint-parser",
-  "version": "MCLv2",
+  "version": "MCLv3",
   "upstream": {
     "repository": "https://android.googlesource.com/platform/build/blueprint",
     "revision": "dcb14f2e146f40cf1f212efb220e9aa1f3cfc280"

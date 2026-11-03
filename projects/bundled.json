@@ -1252,10 +1252,14 @@
       {
         "version": "MCLv2",
         "label": "Android Blueprint parser MCLv2"
+      },
+      {
+        "version": "MCLv3",
+        "label": "Android Blueprint parser MCLv3"
       }
     ],
     "build": {
-      "version": "MCLv2",
+      "version": "MCLv3",
       "command": "tools/build-android-blueprint.mjs",
       "architectures": [
         "arm64"
