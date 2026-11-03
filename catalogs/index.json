@@ -3779,10 +3779,40 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsystem35",
       "catalog": {
         "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/xsystem35.json",
-        "sha256": "27cbf28755e762642971b4ba7aca6dbce5237f7e3857198fb941cc044aaa7180",
-        "bytes": 1733
+        "sha256": "242446af35e41b8ca6e0bd984fabbdbbb4d32c3fb9803ee7cd2c90d0e328e509",
+        "bytes": 3360
       },
       "releases": [
+        {
+          "version": "2.20.0-MCLv3",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "xsystem35/v2.20.0-MCLv3/arm64",
+          "asset": {
+            "filename": "xsystem35-2.20.0-MCLv3-arm64.tar.gz",
+            "sha256": "31a660f519e3b8e17dd4b4d84d1afe6593503937ed66810c25c48e00cb1ba26c",
+            "bytes": 7382947,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem35%2Fv2.20.0-MCLv3%2Farm64/xsystem35-2.20.0-MCLv3-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41578842959",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#xsystem35",
+          "profile": "xsystem35 SDL2 2.20.0-MCLv3"
+        },
         {
           "version": "2.20.0-MCLv3",
           "arch": "x64",
