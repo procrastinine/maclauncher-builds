@@ -2,5 +2,45 @@
   "schemaVersion": 2,
   "projectId": "native-sndfile",
   "updatePolicy": "manual",
-  "packages": []
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "native-sndfile",
+      "version": "1.2.2-MCLv2",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "input.json",
+      "manifestSha256": "50ec4e9fff443a76f1957b8300e04015ca992ec6263f9442f42696fa72f4831d",
+      "sourceSha256": "a934ddf9c500f3c5794a1939456d89e204e0175181582294d7e5d8aea36d8384",
+      "updatePolicy": "manual",
+      "launcherContract": 2,
+      "asset": {
+        "filename": "native-sndfile-1.2.2-MCLv2-arm64.tar.gz",
+        "sha256": "1744a21192aacac2de551b31ee323efc4ad8726eb3ca4b553621a63dd96864b0",
+        "bytes": 1715501,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/native-sndfile%2Fv1.2.2-MCLv2%2Farm64/native-sndfile-1.2.2-MCLv2-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41650019480",
+        "runAttempt": "2"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2"
+      },
+      "tag": "native-sndfile/v1.2.2-MCLv2/arm64"
+    }
+  ]
 }
