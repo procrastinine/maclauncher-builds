@@ -1239,6 +1239,50 @@
       ]
     },
     {
+      "projectId": "rlvm-adapter",
+      "name": "MacLauncher RLVM adapter",
+      "delivery": "downloadable",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#rlvm-adapter",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/rlvm-adapter.json",
+        "sha256": "c139ddd9e8aa0c871d743581d0b0c3f0b636376187262e93b96ae8cce19472c7",
+        "bytes": 1636
+      },
+      "releases": [
+        {
+          "version": "1.0.1",
+          "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "rlvm-adapter/v1.0.1/universal",
+          "asset": {
+            "filename": "rlvm-adapter-1.0.1-universal.tar.gz",
+            "sha256": "9807f786d76747a7edaf7cc541bab4017b4219b8bc0c759b93f1e98fdcd3f074",
+            "bytes": 14564,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/rlvm-adapter%2Fv1.0.1%2Funiversal/rlvm-adapter-1.0.1-universal.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41578893356",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#rlvm-adapter",
+          "profile": "MacLauncher RLVM adapter 1.0.1"
+        }
+      ]
+    },
+    {
       "projectId": "vnds-love",
       "name": "VNDS-LOVE",
       "delivery": "downloadable",
