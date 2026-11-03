@@ -1359,10 +1359,14 @@
       {
         "version": "1.8.0-MCLv3",
         "label": "System3 SDL2 1.8.0-MCLv3"
+      },
+      {
+        "version": "1.8.0-MCLv5",
+        "label": "System3 SDL2 1.8.0-MCLv5"
       }
     ],
     "build": {
-      "version": "1.8.0-MCLv3",
+      "version": "1.8.0-MCLv5",
       "command": "tools/build-system3.mjs",
       "architectures": [
         "x64",
