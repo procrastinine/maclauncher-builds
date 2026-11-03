@@ -1,0 +1,96 @@
+{
+  "id": "uosc-helper",
+  "version": "5.13.0-MCLv3",
+  "arch": "x64",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "uosc-helper/5.13.0-MCLv3/x64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "bf0e21ff4bec088b4725dc0026a0e83c72d0f7e9b73326967cc79f8fe722d6ab",
+  "sourceSha256": "bf0e21ff4bec088b4725dc0026a0e83c72d0f7e9b73326967cc79f8fe722d6ab",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 16993,
+      "mode": 420,
+      "sha256": "de09574034494e405ed2d699d84135f0d32320a90381a657c352dcff749262c4"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "a6473e1a5d6dc763843e282ba050f5b22e80ad4a6fdad858722fa7763eb7ff2a"
+    },
+    {
+      "path": "files/bin/ziggy-darwin",
+      "size": 7303312,
+      "sha256": "5662ae947fe34c184c83196640429b2a590cfd86f67d2274e24e6e364af540de",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/licenses/upstream/0-LICENSE.LGPL",
+      "size": 26530,
+      "sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/1-LICENSE",
+      "size": 1471,
+      "sha256": "2c4bac8e2a97180d6e7758c37de85d1cda1859aaf85b56da15d935d2d9a5564f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/2-LICENSE",
+      "size": 892,
+      "sha256": "b5438b85318d6b6be614d84089ecaddcd33fae872d72d28ccfc181f36c558c6d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/3-LICENSE",
+      "size": 216,
+      "sha256": "3d1718ab07467293f9d9311f693490787459124791d2f3248dbeecb8ca572df3",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 3577,
+      "mode": 420,
+      "sha256": "bf0e21ff4bec088b4725dc0026a0e83c72d0f7e9b73326967cc79f8fe722d6ab"
+    }
+  ],
+  "notices": [
+    {
+      "name": "uosc",
+      "license": "LGPL-2.1",
+      "sourceUrl": "https://github.com/tomasklaen/uosc",
+      "path": "files/licenses/upstream/0-LICENSE.LGPL"
+    },
+    {
+      "name": "github.com/atotto/clipboard",
+      "license": "BSD-3-Clause",
+      "sourceUrl": "https://github.com/atotto/clipboard/tree/e4aee1922c628e6966acd4207c408df132dc6fb5",
+      "path": "files/licenses/upstream/1-LICENSE"
+    },
+    {
+      "name": "github.com/pkg/browser",
+      "license": "BSD-2-Clause",
+      "sourceUrl": "https://github.com/pkg/browser/tree/5ac0b6a4141c771a0d3a081c36b87c977cf9c7db",
+      "path": "files/licenses/upstream/2-LICENSE"
+    },
+    {
+      "name": "Go runtime",
+      "license": "BSD-3-Clause",
+      "sourceUrl": "https://go.dev/",
+      "path": "files/licenses/upstream/3-LICENSE"
+    }
+  ],
+  "redistribution": "bundle"
+}

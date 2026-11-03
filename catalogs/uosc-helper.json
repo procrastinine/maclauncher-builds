@@ -7,6 +7,62 @@
       "schemaVersion": 2,
       "id": "uosc-helper",
       "version": "5.13.0-MCLv3",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "bf0e21ff4bec088b4725dc0026a0e83c72d0f7e9b73326967cc79f8fe722d6ab",
+      "sourceSha256": "bf0e21ff4bec088b4725dc0026a0e83c72d0f7e9b73326967cc79f8fe722d6ab",
+      "updatePolicy": "manual",
+      "capabilities": {
+        "uoscVersion": "5.13.0",
+        "helper": "ziggy",
+        "commands": [
+          "get-clipboard",
+          "set-clipboard",
+          "download",
+          "http-get",
+          "http-post",
+          "http-put",
+          "http-patch",
+          "http-delete",
+          "open",
+          "search-subtitles",
+          "download-subtitles"
+        ]
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2"
+      },
+      "asset": {
+        "filename": "uosc-helper-5.13.0-MCLv3-x64.tar.gz",
+        "sha256": "6579a2a901615881d4bf1aaee631e8c3464044493b3060f5fc29f9c39d4739f2",
+        "bytes": 3161928,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/uosc-helper%2Fv5.13.0-MCLv3%2Fx64/uosc-helper-5.13.0-MCLv3-x64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "41650145707",
+        "runAttempt": "1"
+      },
+      "tag": "uosc-helper/v5.13.0-MCLv3/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "uosc-helper",
+      "version": "5.13.0-MCLv3",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
