@@ -1870,42 +1870,29 @@
       {
         "version": "MCLv3-1027-2",
         "label": "AnyPS5 MCLv3-1027-2"
-      }
-    ],
-    "build": [
-      {
-        "version": "MCLv2-1027-2",
-        "architectures": [
-          "arm64"
-        ],
-        "command": "tools/build-anyps5.mjs",
-        "submodules": [
-          "sources/anyps5"
-        ],
-        "recursiveSubmodules": true,
-        "tools": [
-          "cmake",
-          "ninja",
-          "pkgconf"
-        ]
       },
       {
-        "version": "MCLv3-1027-2",
-        "architectures": [
-          "x64"
-        ],
-        "command": "tools/build-anyps5.mjs",
-        "submodules": [
-          "sources/anyps5"
-        ],
-        "recursiveSubmodules": true,
-        "tools": [
-          "cmake",
-          "ninja",
-          "pkgconf"
-        ]
+        "version": "MCLv4",
+        "label": "AnyPS5 MCLv4"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv4",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "command": "tools/build-anyps5.mjs",
+      "submodules": [
+        "sources/anyps5"
+      ],
+      "recursiveSubmodules": true,
+      "tools": [
+        "cmake",
+        "ninja",
+        "pkgconf"
+      ]
+    }
   },
   {
     "id": "nxnative-tools",
