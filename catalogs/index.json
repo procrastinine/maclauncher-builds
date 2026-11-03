@@ -2096,10 +2096,40 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#krkrsdl2",
       "catalog": {
         "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/krkrsdl2.json",
-        "sha256": "04335da1dc299cc3adc23d859f748e1bb1a2e562e04f6181caab423361259ad7",
-        "bytes": 3653
+        "sha256": "5d65a8f122fb271f92d772734cfeac215150a718477be93210b869befee25525",
+        "bytes": 5377
       },
       "releases": [
+        {
+          "version": "MCLv3",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "krkrsdl2/vMCLv3/arm64",
+          "asset": {
+            "filename": "krkrsdl2-MCLv3-arm64.tar.gz",
+            "sha256": "9a3948541665b9685f513b08802fc81d3d1622541908e45105b3fc8b8ec87706",
+            "bytes": 4928357,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/krkrsdl2%2FvMCLv3%2Farm64/krkrsdl2-MCLv3-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "66bddd70fb09b14ea7bcc1f4c7fc7fabacf05c05",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41545829875",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#krkrsdl2",
+          "profile": "KiriKiri SDL2 macOS MCLv3"
+        },
         {
           "version": "MCLv2-1030-kag3",
           "arch": "x64",
