@@ -76,3 +76,25 @@ test('catalog push retries are bounded and non-race failures propagate',async t=
  await assert.rejects(appendPackageCatalog({...f,runGit,attempts:2,sleep:async()=>{}}),/exhausted 2/);assert.equal(pushes,2);
  await assert.rejects(appendPackageCatalog({...f,runGit:async(args,options)=>{if(args[0]==='push')throw Error('permission denied');return git(options.cwd,args);},sleep:()=>assert.fail()}),/permission denied/);
 });
+
+test('level publication waits for rerun job copies, but completed failures never wait',async t=>{
+ for(const state of ['delayed','failed','missing']){
+  const f=fixture(t),waits=[],downloads=[],published=[];let reads=0;
+  const job={name:'build (engine 1.0.0 arm64)',status:'completed',conclusion:'success'};
+  const env={...f.env,RELEASE_SELECTION:JSON.stringify([{id:'engine',version:'1.0.0'}])};
+  const result=await publishLevel({...f,env,output:path.join(f.directory,'publication'),targets:[{project:'engine',version:'1.0.0',arch:'arm64'}],sleep:async ms=>waits.push(ms),runGh:async args=>{
+   if(args[1]==='view'){
+    reads++;
+    const jobs=state==='failed'?[{...job,conclusion:'failure'}]:state==='missing'||reads===1?[]:reads===2?[{...job,status:'queued',conclusion:null}]:reads===3?[{...job,status:'in_progress',conclusion:null}]:[job];
+    return JSON.stringify({databaseId:123,workflowName:'Build and release',headSha:env.GITHUB_SHA,headBranch:'main',status:'in_progress',conclusion:null,jobs});
+   }
+   downloads.push(args);return '';
+  },publish:async options=>{published.push(options.env.BUILD_PROJECT);return {commit:'c'.repeat(40)};}});
+  if(state==='delayed'){
+   assert.equal(result.published,1);assert.equal(result.failed,0);assert.equal(reads,4);assert.deepEqual(waits,[2000,4000,8000]);assert.deepEqual(published,['engine']);assert.equal(downloads.length,1);
+  }else{
+   assert.equal(result.published,0);assert.equal(result.failed,1);assert.match(result.errors[0].error,/Build job did not succeed/);assert.equal(downloads.length,0);assert.equal(published.length,0);
+   assert.equal(reads,state==='failed'?1:6);assert.deepEqual(waits,state==='failed'?[]:[2000,4000,8000,16000,30000]);
+  }
+ }
+});

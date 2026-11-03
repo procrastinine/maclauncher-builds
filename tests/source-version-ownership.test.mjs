@@ -61,7 +61,9 @@ test('the ordinary Builds catalog places 0.2.1 before 0.2.0-MCLv1 and preserves 
 
 
 test('catalog ordering uses declared semantic versions for every legacy label',()=>{
- const previous=JSON.parse(fs.readFileSync(path.join(root,'catalogs/gamemaker-opengl-helper.json'))),old=previous.packages[0];
+ const history=['catalogs/gamemaker-opengl-helper.json','catalogs/superseded/gamemaker-opengl-helper.json'].flatMap(file=>fs.existsSync(path.join(root,file))?JSON.parse(fs.readFileSync(path.join(root,file))).packages:[]);
+ const old=history.find(record=>record.version==='software-gl-v3-MCLv3');assert.ok(old);
+ const previous={schemaVersion:2,projectId:old.id,updatePolicy:'manual',packages:[old]};
  const next={...old,version:'3.0.1',asset:{...old.asset,filename:'gamemaker-opengl-helper-3.0.1-universal.tar.gz'}};delete next.tag;
  next.asset.url=assetUrl(next,'procrastinine/maclauncher-builds');
  const result=catalog([next],{project:old.id,repository:'procrastinine/maclauncher-builds',previous});

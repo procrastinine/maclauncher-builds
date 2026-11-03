@@ -11,7 +11,7 @@ const github=async(args)=>(await exec('gh',args,{encoding:'utf8',maxBuffer:32<<2
 const absent=error=>/HTTP 404|Not Found|release not found/i.test(String(error.stderr||error.message));
 /** A clean publisher handles only its completed build level. Other levels and
  * components neither grant upstream code write access nor gate these releases. */
-export async function publishLevel({targets,output,directory=root,env=process.env,runGh=github,publish=publishPackage,append=appendPackageCatalog}={}){
+export async function publishLevel({targets,output,directory=root,env=process.env,runGh=github,publish=publishPackage,append=appendPackageCatalog,sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms))}={}){
  const repository=readProjects(directory,{resolvePins:false}).repository;
  if(env.GITHUB_ACTIONS!=='true'||env.GITHUB_REPOSITORY!==repository||env.GITHUB_WORKFLOW!=='Build and release'||env.GITHUB_WORKFLOW_REF!==repository+'/.github/workflows/runtime-build.yml@refs/heads/main'||!/^[a-f0-9]{40}$/.test(env.GITHUB_SHA||'')||!/^[1-9][0-9]*$/.test(env.GITHUB_RUN_ID||''))throw Error('Publication requires the current hosted Build and release run.');
  if(!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Publication needs a new absolute work directory.');
@@ -20,8 +20,24 @@ export async function publishLevel({targets,output,directory=root,env=process.en
  const selection=parseSelection(env.RELEASE_SELECTION),graph=JSON.parse(env.RELEASE_GRAPH||'{}'),reused=JSON.parse(env.RELEASE_REUSE||'[]'),seen=new Set();
  for(const target of targets){const key=[target.project,target.version,target.arch].join('/');if(seen.has(key)||!selection.some(row=>row.id===target.project&&row.version===target.version))throw Error('Publication target differs from the selection.');seen.add(key);}
  const sourceRevision=env.PUBLICATION_SOURCE_SHA||env.GITHUB_SHA,runId=env.PUBLICATION_RUN_ID||env.GITHUB_RUN_ID;
- const run=JSON.parse(await runGh(['run','view',runId,'--repo',repository,'--json','databaseId,workflowName,headSha,headBranch,status,conclusion,jobs']));
- if(String(run.databaseId)!==runId||run.headSha!==sourceRevision||run.headBranch!=='main'||run.workflowName!=='Build and release'||run.conclusion==='cancelled'||(runId!==env.GITHUB_RUN_ID&&run.status!=='completed'))throw Error('Publication metadata differs from this run.');
+ const readRun=async()=>{
+  const run=JSON.parse(await runGh(['run','view',runId,'--repo',repository,'--json','databaseId,workflowName,headSha,headBranch,status,conclusion,jobs']));
+  if(String(run.databaseId)!==runId||run.headSha!==sourceRevision||run.headBranch!=='main'||run.workflowName!=='Build and release'||run.conclusion==='cancelled'||(runId!==env.GITHUB_RUN_ID&&run.status!=='completed'))throw Error('Publication metadata differs from this run.');
+  return run;
+ };
+ let run=await readRun();
+ const waitForBuild=async name=>{
+  const waits=[2000,4000,8000,16000,30000];
+  for(let attempt=0;;attempt++){
+   const jobs=run.jobs.filter(job=>job.name===name);
+   if(jobs.length===1&&jobs[0].status==='completed'){
+    if(jobs[0].conclusion==='success')return;
+    throw Error('Build job did not succeed: '+name);
+   }
+   if(jobs.length>1||attempt===waits.length)throw Error('Build job did not succeed: '+name);
+   await sleep(waits[attempt]);run=await readRun();
+  }
+ };
  fs.mkdirSync(output,{recursive:true});const releases=new Map(),results=[],errors=[];let next=0,catalogTail=Promise.resolve();
  const serialAppend=options=>{const task=catalogTail.then(()=>append(options));catalogTail=task.catch(()=>{});return task;};
  const inputPublished=async(id,arch)=>{
@@ -34,8 +50,8 @@ export async function publishLevel({targets,output,directory=root,env=process.en
   return releases.get(tag);
  };
  await Promise.all(Array.from({length:Math.min(8,targets.length)},async()=>{for(;;){const index=next++;if(index>=targets.length)return;const target=targets[index];try{
-  const name='build ('+[target.project,target.version,target.arch].join(' ')+')',jobs=run.jobs.filter(job=>job.name===name);
-  if(jobs.length!==1||jobs[0].status!=='completed'||jobs[0].conclusion!=='success')throw Error('Build job did not succeed: '+name);
+  const name='build ('+[target.project,target.version,target.arch].join(' ')+')';
+  await waitForBuild(name);
   for(const input of graph[target.project]||[])if(!await inputPublished(input,target.arch))throw Error('Required input is not published: '+input);
   const bundle=path.join(output,target.project,target.version,target.arch);fs.mkdirSync(bundle,{recursive:true});
   await runGh(['run','download',runId,'--repo',repository,'--name','runtime-'+[target.project,target.version,target.arch].join('-'),'--dir',bundle]);
