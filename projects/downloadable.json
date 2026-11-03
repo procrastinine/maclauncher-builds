@@ -1923,10 +1923,14 @@
       {
         "version": "MCLv2-1027-3",
         "label": "nxnative native tools MCLv2-1027-3"
+      },
+      {
+        "version": "MCLv3",
+        "label": "nxnative native tools MCLv3"
       }
     ],
     "build": {
-      "version": "MCLv2-1027-3",
+      "version": "MCLv3",
       "architectures": [
         "arm64"
       ],
