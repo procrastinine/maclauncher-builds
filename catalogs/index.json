@@ -2604,6 +2604,49 @@
       ]
     },
     {
+      "projectId": "vulkan-kosmickrisp-gles32",
+      "name": "KosmicKrisp geometry/transform-feedback adaptation",
+      "delivery": "downloadable",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#vulkan-kosmickrisp-gles32",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/vulkan-kosmickrisp-gles32.json",
+        "sha256": "f5c67ae387047120953fd219e525313e49663720fa9cf32547930083b898b218",
+        "bytes": 1746
+      },
+      "releases": [
+        {
+          "version": "27.0.0-devel-MCLv4",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "26.0",
+          "tag": "vulkan-kosmickrisp-gles32/v27.0.0-devel-MCLv4/arm64",
+          "asset": {
+            "filename": "vulkan-kosmickrisp-gles32-27.0.0-devel-MCLv4-arm64.tar.gz",
+            "sha256": "add1e56d27071a6af2cb6acf55fc9a62c2afc4d0305d0486b9d6923127640d58",
+            "bytes": 3397130,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vulkan-kosmickrisp-gles32%2Fv27.0.0-devel-MCLv4%2Farm64/vulkan-kosmickrisp-gles32-27.0.0-devel-MCLv4-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41578910265",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#vulkan-kosmickrisp-gles32",
+          "profile": "KosmicKrisp geometry and transform feedback 27.0.0-devel-MCLv4"
+        }
+      ]
+    },
+    {
       "projectId": "vulkan-moltenvk-scene",
       "name": "MoltenVK scene recording adaptation",
       "delivery": "downloadable",
