@@ -877,10 +877,14 @@
       {
         "version": "0.1.1",
         "label": "Steam ticket availability adapter 0.1.1"
+      },
+      {
+        "version": "0.1.2",
+        "label": "Steam ticket availability adapter 0.1.2"
       }
     ],
     "build": {
-      "version": "0.1.1",
+      "version": "0.1.2",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "universal"
