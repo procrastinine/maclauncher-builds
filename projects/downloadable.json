@@ -276,46 +276,31 @@
       {
         "version": "1.5.0-MCLv2",
         "label": "AI5 SDL2 1.5.0-MCLv2"
-      }
-    ],
-    "build": [
-      {
-        "version": "1.5.0-MCLv1",
-        "command": "tools/build-portable-runtime.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/ai5-sdl2"
-        ],
-        "recursiveSubmodules": true,
-        "tools": [
-          "cmake",
-          "ninja",
-          "meson",
-          "pkgconf",
-          "nasm"
-        ]
       },
       {
-        "version": "1.5.0-MCLv2",
-        "command": "tools/build-portable-runtime.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/ai5-sdl2"
-        ],
-        "recursiveSubmodules": true,
-        "tools": [
-          "cmake",
-          "ninja",
-          "meson",
-          "pkgconf",
-          "nasm"
-        ]
+        "version": "1.5.0-MCLv3",
+        "label": "AI5 SDL2 1.5.0-MCLv3"
       }
-    ]
+    ],
+    "build": {
+      "version": "1.5.0-MCLv3",
+      "command": "tools/build-portable-runtime.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/ai5-sdl2"
+      ],
+      "recursiveSubmodules": true,
+      "tools": [
+        "cmake",
+        "ninja",
+        "meson",
+        "pkgconf",
+        "nasm"
+      ]
+    }
   },
   {
     "id": "fna",
