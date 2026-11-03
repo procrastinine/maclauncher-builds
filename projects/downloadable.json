@@ -2338,10 +2338,14 @@
       {
         "version": "0.0.13-MCLv3",
         "label": "VNDS-LOVE 0.0.13-MCLv3"
+      },
+      {
+        "version": "0.0.13-MCLv4",
+        "label": "VNDS-LOVE 0.0.13-MCLv4"
       }
     ],
     "build": {
-      "version": "0.0.13-MCLv3",
+      "version": "0.0.13-MCLv4",
       "command": "producers/engine-adaptations/stage.mjs",
       "architectures": [
         "universal"
