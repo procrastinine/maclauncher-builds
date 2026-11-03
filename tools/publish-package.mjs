@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -13,6 +14,7 @@ const json=file=>JSON.parse(fs.readFileSync(file,'utf8'));
 const identity={GIT_AUTHOR_NAME:'procrastinine',GIT_AUTHOR_EMAIL:'24549552+procrastinine@users.noreply.github.com',GIT_COMMITTER_NAME:'procrastinine',GIT_COMMITTER_EMAIL:'24549552+procrastinine@users.noreply.github.com'};
 const git=async(args,{cwd,env=process.env}={})=>(await exec('git',args,{cwd,env:{...env,...identity},maxBuffer:16<<20})).stdout.trim();
 const github=async(args,options={})=>(await exec('gh',args,{encoding:'utf8',maxBuffer:32<<20,...options})).stdout;
+const archiveMember=async(archive,file)=>(await exec('tar',['-xzOf',archive,'files/'+file.path],{encoding:'buffer',maxBuffer:file.size+1})).stdout;
 function hosted(env,directory){
  const repository=readProjects(directory,{resolvePins:false}).repository;
  if(env.GITHUB_ACTIONS!=='true'||env.GITHUB_REPOSITORY!==repository||env.GITHUB_WORKFLOW!=='Build and release'||env.GITHUB_WORKFLOW_REF!==repository+'/.github/workflows/runtime-build.yml@refs/heads/main'||!/^[a-f0-9]{40}$/.test(env.GITHUB_SHA||'')||!/^[1-9][0-9]*$/.test(env.GITHUB_RUN_ID||''))throw Error('Publication requires the current hosted Build and release job on main.');
@@ -48,16 +50,19 @@ export async function appendPackageCatalog({bundle,record,publication,directory=
  }
 }
 /** The already sealed archive is attested, released, then made discoverable. */
-export async function publishPackage({bundle,directory=root,env=process.env,runGh=github,verifyBundle=verifyRelease,stageBundle=stageRelease,publishBundle=publishRelease,append=appendPackageCatalog,wait=sleep}={}){
+export async function publishPackage({bundle,directory=root,env=process.env,runGh=github,verifyBundle=verifyRelease,stageBundle=stageRelease,publishBundle=publishRelease,append=appendPackageCatalog,wait=sleep,readMember=archiveMember}={}){
  const repository=hosted(env,directory),project=resolveProject(env.BUILD_PROJECT,directory,{resolvePins:false});
  if(!project.packageProfiles.some(profile=>profile.version===env.BUILD_VERSION))registerSelection({selection:[{id:env.BUILD_PROJECT,version:env.BUILD_VERSION}],directory});
  const sourceRevision=env.GITHUB_SHA,runId=env.GITHUB_RUN_ID;
- const {record,declaration,metadata}=await verifyBundle({bundle,directory,includeDeclaration:true,includeMetadata:true});
+ const {record,declaration}=await verifyBundle({bundle,directory,includeDeclaration:true});
  if(record.id!==env.BUILD_PROJECT||record.version!==env.BUILD_VERSION||record.arch!==env.BUILD_ARCH||record.build?.sourceRevision!==sourceRevision||String(record.build?.runId)!==runId)throw Error('The sealed package differs from this build job.');
  const reports=env.BUILD_REPORTS?json(env.BUILD_REPORTS):null;
  if(reports&&declaration.files.find(file=>file.path==='build-definition.json')?.sha256!==reports[record.id]?.definitionDigest)throw Error('The sealed build definition differs from the plan.');
- if(declaration.files.some(file=>file.path==='build-inputs.json')){
-  const trace=JSON.parse(metadata?.['build-inputs.json']?.toString('utf8')||'null');
+ const traceFile=declaration.files.find(file=>file.path==='build-inputs.json');
+ if(traceFile){
+  // Only the input trace is read back from the verified archive; licence notices can exceed the metadata limit.
+  const bytes=await readMember(path.join(bundle,record.asset.filename),traceFile);
+  const trace=crypto.createHash('sha256').update(bytes).digest('hex')===traceFile.sha256?JSON.parse(bytes.toString('utf8')):null;
   if(trace?.schemaVersion!==1||!Array.isArray(trace.inputs))throw Error('The sealed build-input report is missing or invalid.');
   for(const input of trace.inputs){
    const tag=releaseTag(input);
