@@ -9,7 +9,7 @@ const read=value=>JSON.parse(value.trim().startsWith('{')?value:fs.readFileSync(
 const warn=message=>console.log('::warning::'+message);
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const SIGNED_BUNDLE=/\.(?:app|framework|bundle|appex|xpc|plugin)\//i,CODE=/\.(?:c|cc|cpp|cxx|h|hh|hpp|hxx|m|mm|java|kt|rs|go|js|ts|swift)(?:\.txt)?$/i;
-const RUN=3,SHORTEST=256;
+const WORDS=8,SHORTEST=256;
 
 /** Licence notices never fail a build. Unusable entries are dropped, a package keeps at least one notice for the
  * app's contract, and the text of its notices is stored once. */
@@ -30,8 +30,8 @@ export function tidyNotices(payload,declaration){
  try{shareNoticeText(payload,declaration);}catch(error){warn('Kept licence notices of '+label+' as built: '+error.message);}
 }
 
-/** Identical notice files merge into one, a code file keeps only its licence comments, and a run of lines already
- * present in an earlier notice becomes one line naming where it is. The manifest lists its files from the payload root or
+/** Identical notice files merge into one, a code file keeps only its licence comments, and lines whose text is
+ * already present in an earlier notice become one line naming where it is. The manifest lists its files from the payload root or
  * from files/. Files that the manifest or source record name for another purpose, or that sit in a signed bundle, stay as built. */
 function shareNoticeText(payload,declaration){
  const files=new Map(declaration.files.map(file=>[file.path,file])),manifestFile=path.join(payload,declaration.manifestRelative),aliases=declaration.aliases?.files||{};
@@ -76,25 +76,37 @@ function licenceComments(text){
  return comments.length?comments.join('\n\n')+'\n':text;
 }
 
-/** Lines compare as text: HTML character references read as their characters and spacing does not matter. */
-const comparable=line=>line.replace(/&(#34|quot|#39|apos|lt|gt|amp);/g,(_,name)=>({'#34':'"',quot:'"','#39':"'",apos:"'",lt:'<',gt:'>',amp:'&'})[name]).replace(/\s+/g,' ').trim();
+/** Text compares as words: HTML character references read as their characters, and spacing, line wrapping and comment
+ * markers do not matter. */
+const wordsOf=line=>line.replace(/&(#34|quot|#39|apos|lt|gt|amp);/g,(_,name)=>({'#34':'"',quot:'"','#39':"'",apos:"'",lt:'<',gt:'>',amp:'&'})[name]).split(/\s+/).filter(word=>word&&!/^[/*#]+$/.test(word));
 
-/** Store each text once: a run of at least SHORTEST characters that repeats lines kept earlier becomes a pointer to them.
- * Runs start and end on text, so blank lines around them stay. */
+/** Store each text once: whole lines that repeat at least SHORTEST characters of whole lines kept earlier become a pointer
+ * to those lines. Runs start and end on text, so blank lines around them stay. */
 function shareRepeatedLines(documents){
- const first=new Map(),key=(lines,at)=>lines.slice(at,at+RUN).join('\n');
+ const starts=new Map(),boundary=(document,at)=>at===document.kept.length||document.line[at]!==document.line[at-1];
  for(const document of documents){
-  const lines=document.text.split('\n'),same=lines.map(comparable),out=[],kept=document.kept=[];
-  for(let at=0;at<lines.length;){
-   const source=same[at]&&at+RUN<=lines.length&&first.get(key(same,at));let length=0;
-   if(source)while(at+length<lines.length&&source.document.kept[source.line+length]===same[at+length])length++;
-   while(length&&!same[at+length-1])length--;
-   if(length&&same.slice(at,at+length).join('').length>=SHORTEST){
-    out.push('[Same text as lines '+(source.line+1)+'-'+(source.line+length)+' of '+source.document.path+']');kept.push(null);at+=length;continue;
+  const lines=document.text.split('\n'),words=[],begin=[],out=[],kept=document.kept=[],line=document.line=[],opens=new Set();
+  for(const text of lines){begin.push(words.length);words.push(...wordsOf(text));}
+  begin.push(words.length);
+  const ends=new Set(begin),keep=(word,row)=>{
+   kept.push(word);line.push(row);
+   const at=kept.length-WORDS;
+   if(opens.has(at)&&kept.slice(at).every(Boolean)){const key=kept.slice(at).join(' ');(starts.get(key)||starts.set(key,[]).get(key)).push({document,at});}
+  };
+  for(let i=0;i<lines.length;){
+   const from=begin[i];let best,length=0;
+   if(from<begin[i+1])for(const source of starts.get(words.slice(from,from+WORDS).join(' '))||[]){
+    let n=0;while(from+n<words.length&&source.document.kept[source.at+n]===words[from+n])n++;
+    while(n&&!(ends.has(from+n)&&boundary(source.document,source.at+n)))n--;
+    if(n>length){best=source;length=n;}
    }
-   out.push(lines[at]);kept.push(same[at]);at++;
-   const start=kept.length-RUN;
-   if(start>=0&&kept.slice(start).every(line=>line!==null)&&!first.has(key(kept,start)))first.set(key(kept,start),{document,line:start});
+   if(length&&words.slice(from,from+length).join(' ').length>=SHORTEST){
+    let next=i+1;while(begin[next]<from+length)next++;
+    out.push('[Same text as lines '+(best.document.line[best.at]+1)+'-'+(best.document.line[best.at+length-1]+1)+' of '+best.document.path+']');keep(null,out.length-1);i=next;continue;
+   }
+   out.push(lines[i]);opens.add(kept.length);
+   for(const word of words.slice(from,begin[i+1]))keep(word,out.length-1);
+   i++;
   }
   document.text=out.join('\n');
  }
