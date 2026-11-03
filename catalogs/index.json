@@ -157,10 +157,40 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-aim",
       "catalog": {
         "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-aim.json",
-        "sha256": "e56f50d3e862e2b329ae0021ab39d575167ca3404ac2ef02196c36124317aefe",
-        "bytes": 1734
+        "sha256": "00c7b7c9f7b4bef0289c4e8840551cbfb326fe0acf9c72877579947dfde65aca",
+        "bytes": 3389
       },
       "releases": [
+        {
+          "version": "0.1.0-MCLv3",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "26.0",
+          "tag": "android-aim/v0.1.0-MCLv3/arm64",
+          "asset": {
+            "filename": "android-aim-0.1.0-MCLv3-arm64.tar.gz",
+            "sha256": "327611e0d5f078f14bcd68ea277410f9f81aa859ce7557d84ea800b563e17895",
+            "bytes": 90696044,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-aim%2Fv0.1.0-MCLv3%2Farm64/android-aim-0.1.0-MCLv3-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "66bddd70fb09b14ea7bcc1f4c7fc7fabacf05c05",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41545789306",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-aim",
+          "profile": "AIM with MacLauncher integration 0.1.0-MCLv3"
+        },
         {
           "version": "MCLv2-1028-6",
           "arch": "arm64",
