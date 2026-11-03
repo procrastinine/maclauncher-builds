@@ -1526,10 +1526,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "Android Java converter 0.1.0-MCLv1"
+      },
+      {
+        "version": "MCLv2",
+        "label": "Android Java converter MCLv2"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "MCLv2",
       "command": "tools/build-android-java-converter.mjs",
       "architectures": [
         "arm64"
