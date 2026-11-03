@@ -817,10 +817,14 @@
       {
         "version": "MCLv1-1001",
         "label": "Kirikiri SDL2 MCLv1-1001"
+      },
+      {
+        "version": "MCLv3",
+        "label": "KiriKiri SDL2 macOS MCLv3"
       }
     ],
     "build": {
-      "version": "MCLv2-1030-kag3",
+      "version": "MCLv3",
       "command": "tools/build-krkrsdl2.mjs",
       "architectures": [
         "arm64",
