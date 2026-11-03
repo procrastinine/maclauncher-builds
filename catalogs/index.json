@@ -578,6 +578,50 @@
       ]
     },
     {
+      "projectId": "java-steamworks",
+      "name": "Java Steamworks compatibility",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#java-steamworks",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/java-steamworks.json",
+        "sha256": "347a9c75f327926dc66cbaebe01b716884c1881be33398c97bc734fb2a6566bf",
+        "bytes": 1688
+      },
+      "releases": [
+        {
+          "version": "1.10.0-MCLv3",
+          "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "11.0",
+          "tag": "java-steamworks/v1.10.0-MCLv3/universal",
+          "asset": {
+            "filename": "java-steamworks-1.10.0-MCLv3-universal.tar.gz",
+            "sha256": "876e6b6d859c77d99b7e5eb7774b235ae6a5b4a5f379453ccdd433b4689c0233",
+            "bytes": 155931,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/java-steamworks%2Fv1.10.0-MCLv3%2Funiversal/java-steamworks-1.10.0-MCLv3-universal.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41578873594",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#java-steamworks",
+          "profile": "Steamworks4j 1.10.0 JNI ABI 1.10.0-MCLv3"
+        }
+      ]
+    },
+    {
       "projectId": "mpv",
       "name": "mpv decoded-frame host",
       "delivery": "downloadable",
