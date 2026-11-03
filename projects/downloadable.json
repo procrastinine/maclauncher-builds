@@ -1819,38 +1819,27 @@
       {
         "version": "MCLv2-1007",
         "label": "Butterscotch MCLv2-1007"
-      }
-    ],
-    "build": [
-      {
-        "version": "MCLv1-1007",
-        "command": "tools/build-butterscotch.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/Butterscotch"
-        ],
-        "tools": [
-          "cmake",
-          "ninja"
-        ]
       },
       {
-        "version": "MCLv2-1007",
-        "command": "tools/build-butterscotch.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/Butterscotch"
-        ],
-        "tools": [
-          "cmake",
-          "ninja"
-        ]
+        "version": "MCLv3",
+        "label": "Butterscotch MCLv3"
       }
-    ]
+    ],
+    "build": {
+      "version": "MCLv3",
+      "command": "tools/build-butterscotch.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/Butterscotch"
+      ],
+      "tools": [
+        "cmake",
+        "ninja"
+      ]
+    }
   },
   {
     "id": "anyps5",
