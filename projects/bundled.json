@@ -2262,10 +2262,14 @@
       {
         "version": "2.32.10-MCLv2",
         "label": "SDL2 and fonts 2.32.10 2.32.10-MCLv2"
+      },
+      {
+        "version": "2.32.10-MCLv3",
+        "label": "SDL2 and fonts 2.32.10 2.32.10-MCLv3"
       }
     ],
     "build": {
-      "version": "2.32.10-MCLv2",
+      "version": "2.32.10-MCLv3",
       "command": "tools/build-native-sdl2-fonts.mjs",
       "architectures": [
         "arm64",
