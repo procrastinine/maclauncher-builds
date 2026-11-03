@@ -43,7 +43,7 @@ export async function appendPackageCatalog({bundle,record,publication,checked,di
    if(!added){await runGit(['worktree','add','--detach',checkout,head],{cwd:directory,env});added=true;}
    else await runGit(['reset','--hard',head],{cwd:checkout,env});
    const project=resolveProject(record.id,checkout,{resolvePins:false});
-   const published=['catalogs','catalogs/superseded'].some(folder=>{const file=path.join(checkout,folder,record.id+'.json');return fs.existsSync(file)&&json(file).packages.some(row=>row.version===record.version&&row.arch===record.arch);});
+   const file=path.join(checkout,'catalogs',record.id+'.json'),published=fs.existsSync(file)&&json(file).packages.some(row=>row.version===record.version&&row.arch===record.arch);
    if(!published&&!buildRecords(project).some(build=>build.version===record.version&&build.architectures.includes(record.arch)))register({selection:[{id:record.id,version:record.version}],directory:checkout});
    await apply({bundle,directory:checkout,runGh,publication,checked});
    await runGit(['add','--update'],{cwd:checkout,env});await runGit(['add','--','catalogs'],{cwd:checkout,env});

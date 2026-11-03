@@ -5,10 +5,10 @@ import {reportDigest} from './recipe-build-report.mjs';
  * filesystem, network, registration or build operations.
  *
  * describe(id): {definition, inputs: [id | {id}]}
- * published(id): {definition, version, digest} | null
- * nextName(id, {definition, published}): version
+ * published(id): {version, digests} | null
+ * listed: Map of project id to the versions its releases.txt lines name
  */
-export async function resolveBuildInputs({selection,describe,published,nextName}){
+export async function resolveBuildInputs({selection,describe,published,listed=new Map()}){
  const roots=new Map();for(const entry of selection){const row=typeof entry==='string'?{id:entry}:entry,id=row.id||row.project;if(!roots.has(id))roots.set(id,[]);roots.get(id).push(row);}
  const orderedSelection=[],reuseBindings=[],resolved=new Map(),visiting=new Set(),reports={},dependencyGraph={},levels=[];
  async function visit(id){
@@ -22,13 +22,15 @@ export async function resolveBuildInputs({selection,describe,published,nextName}
   reports[id]={definition,definitionDigest,inputs:inputIds.map(id=>({id}))};dependencyGraph[id]=inputIds;
   const level=children.length?Math.max(...children.map(child=>child.level))+1:0;(levels[level]??=[]).push(id);
   const previous=await published(id);
-  // Only requested lines build. Any other input with a public release is used as published, pinned by its digest for each architecture.
+  // Only requested lines build. Any other input with a public release is used as published, pinned by its digest for each architecture;
+  // an input without one builds at the versions its releases.txt lines name.
   const reuse=!roots.has(id)&&Boolean(previous);
   let result;
   if(reuse){const binding={id,version:previous.version,digests:previous.digests};reuseBindings.push(binding);result={...binding,reused:true};}
   else{
-   const requests=roots.get(id)||[{id}],outputs=[];
-   for(const request of requests){const version=request.version??await nextName(id,{definition,published:previous||null});const output={id,version};orderedSelection.push(output);outputs.push(output);}
+   const requests=roots.get(id)||(listed.get(id)||[]).map(version=>({id,version})),outputs=[];
+   if(!requests.length)throw Error(id+' has no public release and no line in releases.txt.');
+   for(const {version} of requests){const output={id,version};orderedSelection.push(output);outputs.push(output);}
    result={...outputs[0],reused:false};
   }
   result.level=level;visiting.delete(id);resolved.set(id,result);return result;

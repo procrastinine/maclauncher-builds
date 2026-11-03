@@ -26,8 +26,6 @@ Some producers have their own reference page:
 
 [projects.json](../projects.json) names two project registries: [downloadable runtimes and tools](../projects/downloadable.json) and [bundled components](../projects/bundled.json). Each project is in exactly one of them, and the registry sets the project's `delivery` value, `downloadable` or `bundled`. MacLauncher installs downloadable packages separately from the app. The bundled registry contains components selected by app packaging and pinned input packages consumed by build recipes. A registry entry does not add files to the app; its packaging manifest selects included components. A project record names the producer, the upstream repositories with a reference to the exact commit of each, and the producer's entry files; a project built on GitHub also has a `build` record with its build command and architectures, or an array of records for distinct ABI versions. `readProjects()` reads both registries into one validated list. The [package index](https://procrastinine.github.io/maclauncher-builds/) shows the two groups separately, and its JSON records include each project's `delivery` value.
 
-The optional `supersededBy` field names another registered project that replaces a retired project. Links can form a chain, but cannot name the same project or form a cycle. Historical records, package profiles, source and catalogs retain their original identities. `resolveProject(oldId)` returns the original project; the successor is a separate registry reference.
-
 Native builds share `producers/maclauncher/scripts/native-binary-tools.cjs` for Mach-O inspection, dependency copying and license notices, without loading MacLauncher's module registry. That script and a few other build scripts are copies of MacLauncher files. `producers/maclauncher/native-tools-source.json` records the hash of each original and of each copy, and the import change that the standalone KosmicKrisp build needs. This command copies the files again from a MacLauncher checkout and checks those hashes:
 
 ```sh
@@ -250,13 +248,9 @@ node tools/runtime-package.mjs verify --project android \
   --version 0.1.0 --arch arm64 \
   --archive out/android-0.1.0-arm64.tar.gz \
   --sha256 <archive-sha256>
-
-node tools/runtime-package.mjs catalog --project android \
-  --package out/android-0.1.0-arm64.tar.gz.json \
-  --output catalogs/android.json
 ```
 
-When the catalog already exists, the catalog command also takes `--previous catalogs/android.json` and keeps the versions already published there; it accepts repeated `--package` arguments for releases of the same project. When a declaration file holds an array, the `--project` value selects the entry. `verify` requires the expected project, version and architecture as well as the archive checksum, and the archive's internal record must match all three.
+When a declaration file holds an array, the `--project` value selects the entry. `verify` requires the expected project, version and architecture as well as the archive checksum, and the archive's internal record must match all three.
 
 An archive contains `runtime-package.json` and its stored files under `files/`. The format supports native executables, shared libraries, Java runtime data and included helpers. The tools reject paths outside the package, undeclared files, mismatched permissions or checksums, and declarations marked for local use only.
 

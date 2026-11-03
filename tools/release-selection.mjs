@@ -3,15 +3,13 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {readProjects,buildRecords,validateVersionBindings} from '../lib/projects.mjs';
 import {projectId} from '../lib/project-identity.mjs';
-import {ownedPackageSource} from '../lib/source-ownership.mjs';
-import {nextPackageVersion} from '../lib/package-version.mjs';
 
 /** One designated package version per ABI line. Commas and whitespace separate pairs. */
 export function parseSelection(input){
  if(typeof input==='string'&&input.trim().startsWith('['))input=JSON.parse(input);
- if(typeof input==='string')input=input.trim().split(/[\s,]+/).filter(Boolean).map(pair=>{const split=pair.indexOf('=');return split<0?{id:pair}:{id:pair.slice(0,split),version:pair.slice(split+1)};});
+ if(typeof input==='string')input=input.trim().split(/[\s,]+/).filter(Boolean).map(pair=>{const split=pair.indexOf('=');if(split<1||split===pair.length-1)throw Error('Each release is a project=version pair: '+pair);return {id:pair.slice(0,split),version:pair.slice(split+1)};});
  if(!Array.isArray(input)||!input.length)throw Error('Select at least one project=version pair.');
- const seen=new Set();return input.map(row=>{const id=projectId(row.id||row.project),version=row.version,key=id+'='+version;if(seen.has(key))throw Error('Duplicate release selection: '+key);seen.add(key);return {id,...(version===undefined?{}:{version})};});
+ const seen=new Set();return input.map(row=>{const id=projectId(row.id||row.project),version=row.version,key=id+'='+version;if(typeof version!=='string'||!version)throw Error('Each release is a project=version pair: '+id);if(seen.has(key))throw Error('Duplicate release selection: '+key);seen.add(key);return {id,version};});
 }
 
 const base=value=>value.replace(/-MCLv[1-9]\d*$/,'').replace(/^MCLv[1-9]\d*-/,'snapshot-');
@@ -39,8 +37,7 @@ export function registerSelection({selection,directory=path.resolve(import.meta.
  const plans=[],families=new Set(),include=[];
  for(const request of requested){
   const project=registry.projects.find(row=>row.id===request.id);if(!project)throw Error('Unknown build project: '+request.id);
-  if(project.supersededBy||!project.build||project.producer.kind==='prebuilt')throw Error('Retired or non-build projects cannot be selected: '+request.id);
-  if(request.version===undefined){const current=buildRecords(project)[0].version,used=[...(published.get(request.id)||[]),...project.packageProfiles.map(profile=>profile.version)],owned=ownedPackageSource(project,registry.repository,directory);request.version=owned?nextPackageVersion(current.replace(/-MCLv[1-9]\d*$/,''),used,{sourceRepository:registry.repository,releaseRepository:registry.repository}):/^MCLv[1-9]\d*-\d{4}$/.test(current)?'MCLv'+(Math.max(...used.map(value=>Number(/^MCLv([1-9]\d*)-/.exec(value)?.[1]||0)))+1)+'-'+current.slice(-4):nextPackageVersion(base(current),used);}
+  if(!project.build||project.producer.kind==='prebuilt')throw Error('Only registered builds can be selected: '+request.id);
   if(published.get(request.id)?.has(request.version))throw Error('Release version is already published: '+request.id+'='+request.version);
   const records=buildRecords(project),matched=records.filter(record=>base(record.version)===base(request.version));
   const sources=matched.length?matched:records.filter(record=>base(record.version)===base(records[0].version));
@@ -53,7 +50,7 @@ export function registerSelection({selection,directory=path.resolve(import.meta.
  for(const {request,project,sources,family,output} of plans){
   const previous=sources[0].version,records=Array.isArray(project.build)?project.build:[project.build],remaining=records.filter(record=>base(record.version)!==family);
   const next=[output,...remaining];project.build=next.length===1?next[0]:next;
-  if(!project.packageProfiles.some(profile=>profile.version===request.version)){const template=project.packageProfiles.find(profile=>profile.version===previous),{semanticVersion,...identity}=clone(template);project.packageProfiles.push({...identity,version:request.version,label:template.label.includes(previous)?template.label.replace(previous,request.version):template.label+' '+request.version});}
+  if(!project.packageProfiles.some(profile=>profile.version===request.version)){const template=project.packageProfiles.find(profile=>profile.version===previous),identity=clone(template);project.packageProfiles.push({...identity,version:request.version,label:template.label.includes(previous)?template.label.replace(previous,request.version):template.label+' '+request.version});}
   validateVersionBindings(project.versionBindings);
   for(const binding of project.versionBindings||[]){const value=load(binding.file),{parent,key}=location(value,binding.pointer);
    if(binding.select){const rows=parent[key];if(!Array.isArray(rows))throw Error('Selected version binding must address an array.');const matches=rows.filter(row=>Object.entries(binding.select).every(([field,expected])=>row?.[field]===(expected==='$version'?previous:expected)));if(matches.length!==1)throw Error('Version binding must select exactly one identity object.');const selected=matches[0];if(binding.select.version==='$version'){if(!rows.some(row=>row.version===request.version))rows.unshift({...clone(selected),version:request.version});}else{if(!sources.some(source=>source.version===selected.version))throw Error('Version binding differs from the selected package identity.');selected.version=request.version;}}

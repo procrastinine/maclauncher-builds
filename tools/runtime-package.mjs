@@ -1,4 +1,3 @@
-import VersionOrder from '../lib/version-order.cjs';
 import {preparePackageLayout} from './package-layout.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -7,9 +6,10 @@ import zlib from 'node:zlib';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {assetName,releaseTag,assetUrl,identity,projectId,releaseRecord,validateCatalog} from '../lib/project-identity.mjs';
-import {resolveProject,readProjects} from '../lib/projects.mjs';
+import {resolveProject} from '../lib/projects.mjs';
 import {outputVersion} from '../lib/package-version.mjs';
 import {recordMetadata} from '../lib/record-metadata.mjs';
+import {SOURCE_DATE_EPOCH} from '../lib/reproducible-build.mjs';
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs');
 const {validateDeclaration}=require('../lib/declaration.cjs');
 const A=require('../lib/archive.cjs'),SHA=/^[a-f0-9]{64}$/;
@@ -24,7 +24,7 @@ export function publicDeclaration(value){
  return value;
 }
 
-export async function pack({project,input,declaration,output,metadata={},sourceDateEpoch=0,directory=root}){
+export async function pack({project,input,declaration,output,metadata={},directory=root}){
  outputVersion(project,declaration?.version,directory);
  declaration=publicDeclaration(declaration);
  preparePackageLayout({input,declaration});
@@ -38,7 +38,7 @@ export async function pack({project,input,declaration,output,metadata={},sourceD
  const bytes=Buffer.from(JSON.stringify(declaration,null,2)+'\n');
  const entries=[{name:'runtime-package.json',bytes,size:bytes.length,sha256:B.digest(bytes),mode:0o644},
   ...declaration.files.map(file=>({...file,name:'files/'+file.path,file:path.join(input,file.path)}))];
- const archive=await A.writeArchive(entries,output,{sourceDateEpoch});
+ const archive=await A.writeArchive(entries,output,{sourceDateEpoch:SOURCE_DATE_EPOCH});
  await verify({archive:output,sha256:archive.sha256,project,version:declaration.version,arch:declaration.arch});
  const record={schemaVersion:2,id:declaration.id,version:declaration.version,arch:declaration.arch,
   launcherArchitectures:declaration.launcherArchitectures,minimumMacOS:declaration.minimumMacOS,
@@ -95,30 +95,11 @@ export function catalog(records,{project,repository,previous,directory=root}={})
   releaseRecord(record,{project,repository});const key=record.version+'/'+record.arch;
   if(seen.has(key))throw Error('Duplicate project/version/architecture.');seen.add(key);
   const result={...record,tag:releaseTag(record),asset:{...record.asset,url:assetUrl(record,repository)}};
-  if(old.has(key)&&!additiveRecordMetadata(old.get(key),result))throw Error('Published project versions are immutable; choose a new version.');
+  if(old.has(key)&&stable(old.get(key))!==stable(result))throw Error('Published project versions are immutable; choose a new version.');
   return result;
  });
  for(const record of previous?.packages||[])if(!seen.has(record.version+'/'+record.arch))packages.push(record);
- const registered=readProjects(directory,{resolvePins:false}).projects.find(row=>row.id===project),semantics={...previous?.versionSemantics};
- for(const profile of registered?.packageProfiles||[])if(profile.semanticVersion&&packages.some(record=>record.version===profile.version)){
-  if(semantics[profile.version]&&semantics[profile.version]!==profile.semanticVersion)throw Error('A declared semantic version is immutable.');
-  semantics[profile.version]=profile.semanticVersion;
- }
- if(Object.keys(semantics).length)packages.sort((a,b)=>VersionOrder.compareRuntimeVersions(a,b,semantics));
- return validateCatalog({schemaVersion:2,projectId:project,updatePolicy:'manual',packages,...(Object.keys(semantics).length?{versionSemantics:semantics}:{})},{project,repository});
-}
-
-// Published payload identities stay fixed; factual metadata can be backfilled.
-function additiveRecordMetadata(previous,next){
- const {source:oldSource,capabilities:oldCapabilities,launcherContract:oldContract,build:oldBuild,rebuild:oldRebuild,...oldPayload}=previous;
- const {source:nextSource,capabilities:nextCapabilities,launcherContract:nextContract,build:nextBuild,rebuild:nextRebuild,...nextPayload}=next;
- if(oldBuild!==undefined&&stable(oldBuild)!==stable(nextBuild)||oldRebuild!==undefined&&stable(oldRebuild)!==stable(nextRebuild))return false;
- if(stable(oldPayload)!==stable(nextPayload))return false;
- if(oldSource!==undefined&&stable(oldSource)!==stable(nextSource))return false;
- if(oldContract===undefined?nextContract!==undefined&&nextContract!==1:oldContract!==nextContract)return false;
- if(oldCapabilities!==undefined&&(nextCapabilities===undefined||Object.entries(oldCapabilities).some(([key,value])=>
-  !Object.hasOwn(nextCapabilities,key)||stable(value)!==stable(nextCapabilities[key]))))return false;
- return true;
+ return validateCatalog({schemaVersion:2,projectId:project,updatePolicy:'manual',packages,},{project,repository});
 }
 
 function stable(value){return JSON.stringify(value,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))):v);}
@@ -126,8 +107,8 @@ function stable(value){return JSON.stringify(value,(_,v)=>v&&typeof v==='object'
 function argumentsFor(args){const options={};for(let n=0;n<args.length;n+=2){if(!args[n].startsWith('--')||!args[n+1])throw Error('Expected --option value pairs.');const name=args[n].slice(2);if(name==='package')(options.packages||=[]).push(args[n+1]);else if(Object.hasOwn(options,name))throw Error('Duplicate option: '+name);else options[name]=args[n+1];}return options;}
 export async function main([command,...args]){
  const o=argumentsFor(args);
- const allowed={pack:['project','input','declaration','output'],verify:['project','version','arch','archive','sha256'],catalog:['project','packages','output','previous']}[command];
- if(!allowed)throw Error('Use pack, verify or catalog.');
+ const allowed={pack:['project','input','declaration','output'],verify:['project','version','arch','archive','sha256'],}[command];
+ if(!allowed)throw Error('Use pack or verify.');
  for(const key of Object.keys(o))if(!allowed.includes(key))throw Error('Unknown option: '+key);
  const project=resolveProject(o.project);
  if(command==='pack'){
@@ -137,7 +118,6 @@ export async function main([command,...args]){
   return pack({project:o.project,input:o.input,declaration,output:o.output});
  }
  if(command==='verify')return verify({archive:o.archive,sha256:o.sha256,project:o.project,version:o.version,arch:o.arch});
- if(command==='catalog'){const {writeCatalog}=await import('./publication/catalog.mjs');return writeCatalog(o,project,path.resolve(import.meta.dirname,'..'));}
- throw Error('Use pack, verify or catalog.');
+ throw Error('Use pack or verify.');
 }
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)main(process.argv.slice(2)).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error.message);process.exitCode=1;});

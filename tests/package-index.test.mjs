@@ -27,26 +27,24 @@ test('coverage selects the newest packaging revision per version line and CPU',(
  project.build=[{version:'1.0-MCLv1',command:'tools/build.mjs',architectures:['arm64','x64']},{version:'1.0-MCLv2',command:'tools/build.mjs',architectures:['arm64']}];
  assert.deepEqual(currentBuildOutputs(project),[{version:'1.0-MCLv2',arch:'arm64'},{version:'1.0-MCLv1',arch:'x64'}]);
 });
-test('a project builds on GitHub when its current version and CPU outputs have verified builds',async()=>{
+test('a project with a build record is covered when its current version and CPU outputs have verified builds',async()=>{
  const coverage=await buildCoverage(root),registry=readProjects(root,{resolvePins:false}),outputs=new Set(coverage.githubBuilds.map(row=>[row.projectId,row.version,row.arch].join('/')));
  const missing=new Set(coverage.projectsWithoutGithubBuild.map(row=>row.projectId));
- for(const project of registry.projects.filter(project=>project.supersededBy===undefined&&!coverage.publisherProjects.some(row=>row.projectId===project.id))){
+ for(const project of registry.projects.filter(project=>!coverage.publisherProjects.some(row=>row.projectId===project.id))){
   const expected=currentBuildOutputs(project).filter(({version,arch})=>!outputs.has([project.id,version,arch].join('/'))).map(({version,arch})=>version+'/'+arch);
-  assert.equal(missing.has(project.id),project.build===undefined||expected.length>0,project.id);
+  assert.equal(missing.has(project.id),project.build!==undefined&&expected.length>0,project.id);
   if(missing.has(project.id))assert.deepEqual(coverage.projectsWithoutGithubBuild.find(row=>row.projectId===project.id).missingGithubOutputs.map(row=>row.version+'/'+row.arch),expected);
  }
  assert.equal(coverage.summary.declaredOutputsWithoutGithubBuild,coverage.projectsWithoutGithubBuild.reduce((total,row)=>total+row.missingGithubOutputs.length,0));
- assert.equal(coverage.summary.activeProjectsWithGithubBuild,coverage.summary.projectsWithGithubBuild);
 });
-test('download pages include only exact verified archive authorities and verification keeps local history separate',async t=>{
+test('download and verification pages include only exact verified archive authorities',async t=>{
  const output=fs.mkdtempSync(path.join(os.tmpdir(),'package-index-'));t.after(()=>fs.rmSync(output,{recursive:true,force:true}));
- const catalogSnapshot=fs.existsSync(path.join(root,'catalogs/index.json'))?fs.readFileSync(path.join(root,'catalogs/index.json')):null;
  const coverage=await buildCoverage(root),result=await buildIndex({directory:root,output}),index=JSON.parse(fs.readFileSync(path.join(output,'index.json'))),html=fs.readFileSync(path.join(output,'index.html'),'utf8');
  const registry=readProjects(root,{resolvePins:false});
- const activeRows=coverage.catalogPackages.filter(row=>row.projectState==='active'&&row.catalogState==='active'&&row.origin!=='local');
- for(const row of activeRows){assert.ok(['github','supplied-publisher'].includes(row.origin));if(row.origin==='github')assert.equal(row.githubBuild.record.asset.sha256,row.record.asset.sha256);else{assert.equal(row.publisherProof.publisherAuthenticated,false);assert.ok(row.publisherProof.publisherFiles>0);}}
+ const catalogRows=coverage.catalogPackages;
+ for(const row of catalogRows){assert.ok(['github','supplied-publisher'].includes(row.origin));if(row.origin==='github')assert.equal(row.githubBuild.record.asset.sha256,row.record.asset.sha256);else{assert.equal(row.publisherProof.publisherAuthenticated,false);assert.ok(row.publisherProof.publisherFiles>0);}}
  const published=registry.projects.flatMap(project=>{
-  const approved=new Set(activeRows.filter(row=>row.projectId===project.id).map(row=>row.record.asset.sha256));
+  const approved=new Set(catalogRows.filter(row=>row.projectId===project.id).map(row=>row.record.asset.sha256));
   // The index preserves the source catalog's newest-first order, not coverage's inventory order.
   const file=path.join(root,'catalogs',project.id+'.json');
   const packages=fs.existsSync(file)?JSON.parse(fs.readFileSync(file)).packages.filter(record=>approved.has(record.asset.sha256)):[];
@@ -54,8 +52,7 @@ test('download pages include only exact verified archive authorities and verific
  });
  const expected=new Map(published.map(row=>[row.project.id,row])),total=published.reduce((count,row)=>count+row.packages.length,0);
  assert.equal(result.projects,published.length);assert.equal(result.packages,total);
- for(const project of registry.projects){const catalog=JSON.parse(fs.readFileSync(path.join(output,'catalogs',project.id+'.json')));const expected=activeRows.filter(row=>row.projectId===project.id);assert.equal(catalog.packages.length,expected.length);for(const record of catalog.packages)assert.ok(expected.some(row=>row.record.asset.sha256===record.asset.sha256));}
- assert.deepEqual(fs.existsSync(path.join(root,'catalogs/index.json'))?fs.readFileSync(path.join(root,'catalogs/index.json')):null,catalogSnapshot);
+ for(const project of registry.projects){const catalog=JSON.parse(fs.readFileSync(path.join(output,'catalogs',project.id+'.json')));const expected=catalogRows.filter(row=>row.projectId===project.id);assert.equal(catalog.packages.length,expected.length);for(const record of catalog.packages)assert.ok(expected.some(row=>row.record.asset.sha256===record.asset.sha256));}
  assert.deepEqual(index.projects.map(project=>project.projectId).sort(),[...expected.keys()].sort());
  for(const project of index.projects){
   const supplied=expected.get(project.projectId);assert.equal(project.delivery,supplied.project.delivery);
@@ -72,16 +69,12 @@ test('download pages include only exact verified archive authorities and verific
   assert.equal((html.match(rows)||[]).length,supplied.reduce((count,row)=>count+row.packages.length,0));
  }
  const verification=JSON.parse(fs.readFileSync(path.join(output,'verification.json'))),verifiedHtml=fs.readFileSync(path.join(output,'verification.html'),'utf8');
- const local=coverage.catalogPackages.filter(row=>row.origin==='local');
- assert.equal(verification.packages.filter(row=>row.origin==='local').length,local.length);
- assert.equal(verification.packages.filter(row=>row.state==='awaiting-publication').length,coverage.githubBuilds.filter(row=>row.projectState!=='retired'&&!row.catalogPublished).length);
- for(const {record} of local)assert.equal(index.projects.flatMap(project=>project.releases).some(row=>row.asset.sha256===record.asset.sha256),false);
- assert.ok(verifiedHtml.includes('Built locally — no GitHub build record yet'));assert.ok(verifiedHtml.includes('('+local.length+' archives)'));
+ const githubRows=verification.packages.filter(row=>row.origin==='github');assert.equal(githubRows.length,coverage.githubBuilds.length);
+ for(const row of githubRows){assert.equal(row.state,'published');assert.ok(verifiedHtml.includes(row.asset.sha256));}
  assert.deepEqual(verification.summary,coverage.summary);
  const publisherRows=verification.packages.filter(row=>row.origin==='supplied-publisher');assert.equal(publisherRows.length,coverage.publisherPackages.length);
  for(const row of publisherRows){assert.equal(row.build,undefined);assert.equal(row.attestation,undefined);assert.equal(row.publisherProof.publisherAuthenticated,false);assert.ok(coverage.publisherPackages.some(original=>original.asset.sha256===row.asset.sha256));if(row.state!=='publisher-published')assert.equal(row.asset.url,undefined);}
  assert.deepEqual(verification.projectsWithoutAuthority,coverage.projectsWithoutAuthority);
- if(coverage.summary.localCatalogPackages||coverage.summary.unpublishedGithubBuildOutputs){assert.ok(html.includes(coverage.summary.localCatalogPackages+' locally built archives are superseded; '+coverage.summary.unpublishedGithubBuildOutputs+' verified GitHub outputs await publication.'));assert.ok(html.includes('Review build coverage'));}
  assert.ok(html.includes('Downloadable runtimes and tools'));assert.ok(html.includes('Included components'));assert.ok(html.includes('Core graphics components and internal helpers included in the app.'));
  assert.throws(()=>renderIndex({projects:[{delivery:'unknown'}]}),/delivery classification/);
  for(const project of index.projects){assert.ok(html.includes('id="'+project.projectId+'"'));assert.ok(project.pageUrl.endsWith('/#'+project.projectId));}

@@ -12,6 +12,7 @@ function fixture(t){
  const write=(name,value)=>{fs.mkdirSync(path.dirname(path.join(directory,name)),{recursive:true});fs.writeFileSync(path.join(directory,name),typeof value==='string'?value:JSON.stringify(value));};
  const project=id=>({id,name:id,delivery:'downloadable',producer:{kind:'maclauncher',repository:'https://github.com/owner/builds',entries:['tools/'+id+'.mjs']},upstreams:[],packageProfiles:[{version:'1.0.0',label:id}],build:{version:'1.0.0',architectures:['arm64','x64'],command:'tools/'+id+'.mjs'}});
  write('projects.json',{schemaVersion:1,repository:'owner/builds',updatePolicy:'manual',projects:['input','left','right','solo'].map(project)});
+ write('releases.txt','input=1.0.0\nleft=1.0.0\nright=1.0.0\nsolo=1.0.0\n');
  for(const id of ['input','solo'])write('tools/'+id+'.mjs','export const source=true;');
  for(const id of ['left','right'])write('tools/'+id+'.mjs',"export function build(){return preparedBuildInput('input');}");
  return directory;
@@ -33,7 +34,7 @@ test('component order follows selection order and is stable across graph key and
  assert.ok(releaseComponents(hosted).some(rows=>rows.filter(row=>row.id==='abi').length===2));
  assert.ok(releaseComponents(hosted).some(rows=>rows.filter(row=>row.id==='other-abi').length===2));
 });
-test('shared automatically rebuilt inputs connect roots before dispatch and preview never writes registrations',async t=>{
+test('shared unpublished inputs build at their releases.txt versions, connect roots before dispatch and preview never writes registrations',async t=>{
  const directory=fixture(t),file=path.join(directory,'projects.json'),before=fs.readFileSync(file,'utf8');
  const plan=await planReleaseDispatch({selection:'left=2.0.0,right=3.0.0,solo=4.0.0',directory});
  assert.deepEqual(plan.components.map(row=>row.releases),['input=1.0.0,left=2.0.0,right=3.0.0','solo=4.0.0']);
@@ -51,7 +52,7 @@ test('duplicate pairs, overlapping component plans and conflicting ABI revisions
  await assert.rejects(planReleaseDispatch({selection:'left=2.0.0,left=2.0.0',directory}),/Duplicate/);
  await assert.rejects(planReleaseDispatch({selection:'left=2.0.0',directory,releases:[{tag_name:'left/v2.0.0/arm64',draft:false}]}),/already published/);
  await assert.rejects(planReleaseDispatch({selection:'left=1.0.0-MCLv1,left=1.0.0-MCLv2',directory}),/one new version for an ABI line/);
- assert.throws(()=>releaseComponents({selection:[{id:'left',version:2}],graph:{left:[]}}),/exact project=version/);
+ assert.throws(()=>releaseComponents({selection:[{id:'left',version:2}],graph:{left:[]}}),/project=version/);
  const bad={...plan,components:[plan.components[0],plan.components[0]]};
  await assert.rejects(dispatchReleaseComponents(bad,{runGh:args=>calls.push(args)}),/Duplicate/);
  assert.equal(calls.length,0);

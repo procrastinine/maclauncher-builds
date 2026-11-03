@@ -35,33 +35,29 @@ export function catalogIndex(directory=root,{coverage=buildCoverage(directory)}=
  assertBuildCoverage(coverage,directory);
  const projects=[];
  for(const p of registry.projects){
-  if(p.supersededBy!==undefined)continue;
   const file=path.join(catalogs,p.id+'.json');if(!fs.existsSync(file))continue;
-  const original=validateCatalog(JSON.parse(fs.readFileSync(file)),{project:p.id,repository:registry.repository,allowEmpty:true});
-  const approved=coverage.catalogPackages.filter(row=>row.projectId===p.id&&row.projectState==='active'&&row.catalogState==='active'&&['github','supplied-publisher'].includes(row.origin));
-  const packages=original.packages.filter(record=>approved.some(row=>stable(row.record)===stable(record)));
+  const original=validateCatalog(JSON.parse(fs.readFileSync(file)),{project:p.id,repository:registry.repository,allowEmpty:true}),packages=original.packages;
   if(!packages.length)continue;
-  const bytes=Buffer.from(json({...original,packages})),page='https://'+registry.repository.split('/')[0]+'.github.io/'+registry.repository.split('/')[1]+'/';
+  const bytes=Buffer.from(json(original)),page='https://'+registry.repository.split('/')[0]+'.github.io/'+registry.repository.split('/')[1]+'/';
   const profiles=new Map((p.packageProfiles||[]).map(profile=>[profile.version,profile]));
   projects.push({projectId:p.id,name:p.name,delivery:p.delivery,pageUrl:new URL('#'+p.id,page).href,
    catalog:{url:new URL('catalogs/'+p.id+'.json',page).href,sha256:digest(bytes),bytes:bytes.length},
    releases:packages.map(r=>({version:r.version,arch:r.arch,launcherArchitectures:r.launcherArchitectures,minimumMacOS:r.minimumMacOS,tag:r.tag,asset:r.asset,...(r.dependencies?.length?{dependencies:r.dependencies}:{}),...(r.build?{build:r.build}:{}),pageUrl:new URL('#'+(profiles.get(r.version)?.anchor||p.id),page).href,...(profiles.has(r.version)?{profile:profiles.get(r.version).label,...(profiles.get(r.version).anchor?{anchor:profiles.get(r.version).anchor}:{})}:{})}))});
  }
- return {schemaVersion:1,repository:registry.repository,updatePolicy:'manual',projects:projects.sort((a,b)=>a.projectId.localeCompare(b.projectId)),retiredProjects:coverage.retiredProjects};
+ return {schemaVersion:1,repository:registry.repository,updatePolicy:'manual',projects:projects.sort((a,b)=>a.projectId.localeCompare(b.projectId))};
 }
 
-/** Apply only a public, digest-verified release; older versions cannot be removed or replaced. */
+/** Apply only a public, digest-verified release. A published version is never removed or replaced. */
 export async function applyRelease({bundle,directory=root,runGh=runGitHub,publication,checked}){
  const {release,record,declaration}=await verifyRemoteRelease({bundle,directory,runGh,publication,requirePublic:true,includeDeclaration:true,checked});
  const declarationFile=path.join(directory,'catalogs','declarations',release.id,release.version,release.arch+'.json');
  if(fs.existsSync(declarationFile)){
   regular(declarationFile);if(stable(read(declarationFile))!==stable(declaration))throw Error('An existing sealed declaration differs from this immutable package.');
  }else{fs.mkdirSync(path.dirname(declarationFile),{recursive:true});write(declarationFile,declaration);}
- const previous=loadPrevious(release.id,directory),file=path.join(directory,'catalogs',release.id+'.json');
- const {writePublicationCatalog}=await import('./catalog-publication.mjs');
- const expected=catalog([record],{project:release.id,repository:release.repository,directory}).packages[0];
- if(!previous?.packages.some(value=>stable(value)===stable(expected)))writePublicationCatalog({records:[record],project:release.id,repository:release.repository,directory,output:file,previous});
- const index=catalogIndex(directory);fs.writeFileSync(path.join(directory,'catalogs','index.json'),json(index));return {projectId:release.id,tag:release.tag,catalog:file,declaration:declarationFile};
+ const file=path.join(directory,'catalogs',release.id+'.json'),previous=loadPrevious(release.id,directory),options={project:release.id,repository:release.repository,directory};
+ const entry=catalog([record],options).packages[0];
+ if(!previous?.packages.some(row=>stable(row)===stable(entry)))fs.writeFileSync(file,json(catalog([record],{...options,previous})));
+ return {projectId:release.id,tag:release.tag,catalog:file,declaration:declarationFile};
 }
 
 /** Public releases expose only the runtime binary archive. */

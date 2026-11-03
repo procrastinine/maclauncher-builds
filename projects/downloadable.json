@@ -177,8 +177,7 @@
         "version": "0.1.0",
         "label": "MacLauncher Android ART adapter 0.1.0"
       }
-    ],
-    "supersededBy": "android"
+    ]
   },
   {
     "id": "android-aim",
@@ -190,8 +189,7 @@
       "entries": [
         "producers/maclauncher/scripts/build-android-aim.mjs"
       ],
-      "sourceDirectory": "producers/maclauncher",
-      "upstreamVersion": "0.1.0"
+      "sourceDirectory": "producers/maclauncher"
     },
     "upstreams": [
       {
@@ -384,8 +382,7 @@
         "producers/maclauncher/src/modules/gemrb/runtime/portable-build-v5.js",
         "producers/maclauncher/src/modules/gemrb/runtime/portable-overlay-v5.js"
       ],
-      "sourceDirectory": "producers/maclauncher",
-      "upstreamVersion": "0.9.5-git"
+      "sourceDirectory": "producers/maclauncher"
     },
     "upstreams": [
       {
@@ -760,8 +757,7 @@
       "sourceDirectory": "producers/vn-adaptations",
       "entries": [
         "producers/vn-adaptations/package.mjs"
-      ],
-      "upstreamVersion": null
+      ]
     },
     "upstreams": [
       {
@@ -897,8 +893,7 @@
         "producers/maclauncher/src/modules/nscripter/runtime/onscripter-en-build.js",
         "producers/maclauncher/src/modules/nscripter/runtime/onscripter-en-build-v3.js"
       ],
-      "sourceDirectory": "producers/maclauncher",
-      "upstreamVersion": "20250608-en"
+      "sourceDirectory": "producers/maclauncher"
     },
     "upstreams": [
       {
@@ -1383,8 +1378,7 @@
         "producers/maclauncher/src/modules/alicesoft/system35-portable.js",
         "producers/maclauncher/src/modules/alicesoft/system35-portable-v3.js"
       ],
-      "sourceDirectory": "producers/maclauncher",
-      "upstreamVersion": "2.20.0"
+      "sourceDirectory": "producers/maclauncher"
     },
     "upstreams": [
       {
@@ -1448,8 +1442,7 @@
         "producers/maclauncher/src/modules/alicesoft/system4-portable-v3.js",
         "producers/maclauncher/src/modules/alicesoft/system4-portable-overlay-v3.js"
       ],
-      "sourceDirectory": "producers/maclauncher",
-      "upstreamVersion": null
+      "sourceDirectory": "producers/maclauncher"
     },
     "upstreams": [
       {
@@ -1511,8 +1504,7 @@
         "producers/maclauncher/scripts/repackage-graphics-runtime.mjs",
         "producers/maclauncher/src/modules/shared/vulkan/native/spirv-tools-source.json"
       ],
-      "sourceDirectory": "producers/maclauncher",
-      "upstreamVersion": "27.0.0-devel"
+      "sourceDirectory": "producers/maclauncher"
     },
     "upstreams": [
       {
@@ -1696,8 +1688,7 @@
         "producers/maclauncher/src/modules/gamemaker/runtime/butterscotch.js",
         "producers/maclauncher/src/modules/gamemaker/overlays/butterscotch-game-arguments.js"
       ],
-      "sourceDirectory": "producers/maclauncher",
-      "upstreamVersion": null
+      "sourceDirectory": "producers/maclauncher"
     },
     "upstreams": [
       {
@@ -1773,8 +1764,7 @@
         "producers/anyps5/package-runtime.mjs",
         "producers/anyps5/tools/unwrap-self.cjs"
       ],
-      "buildEntry": "producers/anyps5/package-runtime.mjs",
-      "upstreamVersion": null
+      "buildEntry": "producers/anyps5/package-runtime.mjs"
     },
     "upstreams": [
       {
@@ -1844,8 +1834,7 @@
         "producers/nxnative/package.mjs",
         "producers/nxnative/runtime/metal-toolchain.m"
       ],
-      "buildEntry": "producers/nxnative/build.mjs",
-      "upstreamVersion": null
+      "buildEntry": "producers/nxnative/build.mjs"
     },
     "upstreams": [
       {
@@ -1978,8 +1967,7 @@
         "producers/prosper/source.json",
         "producers/prosper/dependencies.json"
       ],
-      "buildEntry": "producers/prosper/build.mjs",
-      "upstreamVersion": null
+      "buildEntry": "producers/prosper/build.mjs"
     },
     "upstreams": [
       {
@@ -2038,7 +2026,6 @@
         "producers/maclauncher/src/modules/crossover/temporal/vulkan/build.mjs"
       ],
       "sourceDirectory": "producers/maclauncher",
-      "upstreamVersion": "26.3.0",
       "sourceRepository": "https://github.com/wine-mirror/wine"
     },
     "upstreams": [],
@@ -2295,13 +2282,11 @@
     "packageProfiles": [
       {
         "version": "software-gl-v3-MCLv2",
-        "label": "GameMaker OpenGL helper software-gl-v3-MCLv2",
-        "semanticVersion": "3.0.0"
+        "label": "GameMaker OpenGL helper software-gl-v3-MCLv2"
       },
       {
         "version": "software-gl-v3-MCLv3",
-        "label": "GameMaker software OpenGL software-gl-v3-MCLv3",
-        "semanticVersion": "3.0.0"
+        "label": "GameMaker software OpenGL software-gl-v3-MCLv3"
       },
       {
         "version": "3.0.1",
@@ -2414,8 +2399,7 @@
       "sourceDirectory": "producers/vn-adaptations",
       "entries": [
         "producers/vn-adaptations/package.mjs"
-      ],
-      "upstreamVersion": "0.1.0"
+      ]
     },
     "upstreams": [
       {

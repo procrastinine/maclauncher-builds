@@ -9,8 +9,6 @@ import {prepareRelease,verifyRelease,applyRelease as actualApplyRelease,publicat
 import {verifiedBuildSource} from '../tools/verified-build-run.mjs';
 const stageRelease=actualStageRelease,publishRelease=actualPublishRelease,verifyRemoteRelease=actualVerifyRemoteRelease,applyRelease=actualApplyRelease;
 const rawCatalog=directory=>JSON.parse(fs.readFileSync(path.join(directory,'catalogs/engine.json')));
-const supersededCatalog=directory=>{const file=path.join(directory,'catalogs/superseded/engine.json');return fs.existsSync(file)?JSON.parse(fs.readFileSync(file)):{packages:[]};};
-const catalogHistory=directory=>[...rawCatalog(directory).packages,...supersededCatalog(directory).packages];
 const digest=b=>crypto.createHash('sha256').update(b).digest('hex');
 function fixture(t,{external=false,version='1.0'}={}){
  const directory=fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()),'runtime-release-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
@@ -223,26 +221,6 @@ test('remote verification compares a staged draft with its local package without
  const {publication}=await verifyRemoteRelease({bundle:f.output,directory:f.directory,runGh:draft});assert.equal(publication.draft,true);assert.equal(publication.sourceCommit,sourceTarget);
 });
 
-test('publication partitions keep semantic labels only for versions in each partition',async t=>{
- const {writePublicationCatalog}=await import('../tools/catalog-publication.mjs');
- const f=fixture(t,{version:'software-gl-v3-MCLv3'}),registry=JSON.parse(fs.readFileSync(path.join(f.directory,'projects.json')));
- registry.projects[0].packageProfiles=[{version:'software-gl-v3-MCLv3',label:'Legacy',semanticVersion:'3.0.0'},{version:'3.0.1',label:'Current'}];
- fs.writeFileSync(path.join(f.directory,'projects.json'),JSON.stringify(registry));await prepareRelease(f);
- const {catalog}=await import('../tools/runtime-package.mjs');
- const {record}=await verifyRelease({bundle:f.output,directory:f.directory});
- const options={project:'engine',repository:'owner/builds',directory:f.directory};
- const old=catalog([record],options).packages[0];
- const current=catalog([{...record,version:'3.0.1',asset:{...record.asset,filename:'engine-3.0.1-arm64.tar.gz'}}],options).packages[0];
- const output=path.join(f.directory,'catalogs/engine.json');
- const active=writePublicationCatalog({records:[current],previous:{schemaVersion:2,projectId:'engine',updatePolicy:'manual',packages:[old]},project:'engine',repository:'owner/builds',directory:f.directory,output});
- assert.equal(active.versionSemantics,undefined);assert.deepEqual(active.packages.map(row=>row.version),['3.0.1']);
- assert.deepEqual(supersededCatalog(f.directory).versionSemantics,{'software-gl-v3-MCLv3':'3.0.0'});
- // Reverse the incoming identity: the active partition owns the label, local does not.
- fs.rmSync(path.dirname(output),{recursive:true});
- const reverse=writePublicationCatalog({records:[old],previous:{schemaVersion:2,projectId:'engine',updatePolicy:'manual',packages:[current]},project:'engine',repository:'owner/builds',directory:f.directory,output});
- assert.deepEqual(reverse.versionSemantics,{'software-gl-v3-MCLv3':'3.0.0'});assert.equal(supersededCatalog(f.directory).versionSemantics,undefined);
-});
-
 test('a failed publication removes its unpublished draft without deleting any public release',async t=>{
  for(const becamePublic of [false,true]){
   const f=fixture(t);await prepareRelease(f);const {record}=await verifyRelease({bundle:f.output,directory:f.directory});const calls=[];
@@ -262,15 +240,15 @@ test('a failed publication removes its unpublished draft without deleting any pu
  }
 });
 
-test('cataloging an identical public entry preserves existing row order and index bytes',async t=>{
+test('cataloging an identical public entry preserves existing row order',async t=>{
  const f=fixture(t);await prepareRelease(f);const {record}=await verifyRelease({bundle:f.output,directory:f.directory});
  const options={bundle:f.output,directory:f.directory,runGh:publicReleaseGh(record)};await applyRelease(options);
  const file=path.join(f.directory,'catalogs/engine.json'),before=JSON.parse(fs.readFileSync(file));
  const {catalog}=await import('../tools/runtime-package.mjs');
  const other={...record,arch:'x64',launcherArchitectures:['arm64','x64'],asset:{...record.asset,filename:'engine-1.0-x64.tar.gz'}};
  before.packages.unshift(catalog([other],{project:'engine',repository:'owner/builds',directory:f.directory}).packages[0]);fs.writeFileSync(file,JSON.stringify(before,null,2)+'\n');
- const bytes=fs.readFileSync(file),index=fs.readFileSync(path.join(f.directory,'catalogs/index.json'));
- await applyRelease(options);assert.deepEqual(fs.readFileSync(file),bytes);assert.deepEqual(fs.readFileSync(path.join(f.directory,'catalogs/index.json')),index);
+ const bytes=fs.readFileSync(file);
+ await applyRelease(options);assert.deepEqual(fs.readFileSync(file),bytes);
 });
 
 test('publication reads build inputs only after their archived bytes pass the sealed inventory',async t=>{

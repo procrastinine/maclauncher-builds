@@ -40,15 +40,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   const builds=project.build?buildRecords(project):[],files=new Map(),inputs=new Set(),usedLinks=new Map(),queue=[],queued=new Set(),unresolved=[],computed=[];
   const enqueue=file=>{file=path.normalize(file).split(path.sep).join('/');if(file.startsWith('tools/publication/')||registryFiles.has(file)||file.startsWith('catalogs/')||queued.has(file)||path.isAbsolute(file)||file.startsWith('../'))return;queued.add(file);queue.push(file);};
   const rememberLink=file=>{const link=gitlinks.find(link=>file===link.path||file.startsWith(link.path+'/'));if(link)usedLinks.set(link.path,link);return link;};
-  const artifactId=value=>{
-   if(value?.project&&Object.keys(value).length===1&&projects.has(value.project))return value.project;
-   if(value?.evidence?.path&&/^attestations\/[a-f0-9]{64}\.json$/.test(value.evidence.path)){const ledger=JSON.parse(fs.readFileSync(path.join(root,value.evidence.path)));return ledger.record?.id;}
-   if(typeof value?.url==='string'){
-    let url;try{url=new URL(value.url);}catch{return null;}
-    const prefix='/'+registry.repository+'/releases/download/';if(url.hostname==='github.com'&&url.pathname.startsWith(prefix)){const tag=decodeURIComponent(url.pathname.slice(prefix.length).split('/')[0]),match=/^([^/]+)\/v([^/]+)\/(arm64|x64|universal)$/.exec(tag);if(match){for(const folder of ['catalogs','catalogs/superseded']){const catalogFile=path.join(root,folder,match[1]+'.json');if(fs.existsSync(catalogFile)){const catalog=JSON.parse(fs.readFileSync(catalogFile));if(catalog.packages.some(record=>record.id===match[1]&&record.version===match[2]&&record.arch===match[3]&&record.asset?.url===value.url&&(!value.sha256||record.asset.sha256===value.sha256)&&(!value.bytes||record.asset.bytes===value.bytes)))return match[1];}}}}
-   }
-   return null;
-  };
+  const artifactId=value=>value?.project&&Object.keys(value).length===1&&projects.has(value.project)?value.project:null;
   const walkJson=(value,from)=>{
    if(typeof value==='string'){reference(value,from);return value;}
    if(Array.isArray(value))return value.map(child=>walkJson(child,from));
@@ -88,7 +80,6 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   if(project.producer.recipe)enqueue(project.producer.recipe);
   for(const upstream of project.upstreams)if(upstream.pin){enqueue(upstream.pin.file);rememberLink(upstream.pin.file);}
   while(queue.length){const file=queue.shift(),absolute=path.join(root,file);if(rememberLink(file))continue;
-   if(file.startsWith('attestations/')){const record=JSON.parse(fs.readFileSync(absolute)).record;if(record?.id&&record.id!==id&&projects.has(record.id))inputs.add(record.id);continue;}
    if(!fs.statSync(absolute,{throwIfNoEntry:false})?.isFile())continue;
    const bytes=fs.readFileSync(absolute);
    if(file.endsWith('.yml'))for(const match of bytes.toString('utf8').matchAll(/\bnode (tools\/[A-Za-z0-9_./-]+\.mjs)\b/g))enqueue(match[1]);

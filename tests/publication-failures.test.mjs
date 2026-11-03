@@ -6,8 +6,6 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {prepareRelease,verifyRelease,stageRelease,publishRelease} from '../tools/release-runtime.mjs';
-import {catalog} from '../tools/runtime-package.mjs';
-import {writePublicationCatalog} from '../tools/catalog-publication.mjs';
 import {publishLevel} from '../tools/publish-level.mjs';
 import {appendPackageCatalog} from '../tools/publish-package.mjs';
 const sha=value=>crypto.createHash('sha256').update(value).digest('hex'),source='a'.repeat(40),repository='procrastinine/maclauncher-builds';
@@ -15,7 +13,7 @@ const identity={GIT_AUTHOR_NAME:'procrastinine',GIT_AUTHOR_EMAIL:'24549552+procr
 const git=(cwd,args)=>execFileSync('git',args,{cwd,env:{...process.env,...identity},encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
 async function fixture(t,id='engine',version='1.0.0',arch='arm64'){
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'publication-failure-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
- const project={id,name:'Engine',delivery:'downloadable',producer:{kind:'prebuilt',version,architectures:[arch==='universal'?'arm64':arch]},upstreams:[],packageProfiles:[{version,label:'Engine',...(version.startsWith('software-gl')?{semanticVersion:'3.0.0'}:{})},{version:'3.0.1',label:'Next'}]};
+ const project={id,name:'Engine',delivery:'downloadable',producer:{kind:'prebuilt',version,architectures:[arch==='universal'?'arm64':arch]},upstreams:[],packageProfiles:[{version,label:'Engine'},{version:'3.0.1',label:'Next'}]};
  fs.writeFileSync(path.join(directory,'projects.json'),JSON.stringify({schemaVersion:1,repository,updatePolicy:'manual',projects:[project]}));
  const input=path.join(directory,'input');fs.mkdirSync(input);const data={'manifest.json':JSON.stringify({version}),'LICENSE':'MIT'};
  const files=Object.entries(data).map(([name,bytes])=>{fs.writeFileSync(path.join(input,name),bytes,{mode:0o644});return {path:name,size:Buffer.byteLength(bytes),mode:0o644,sha256:sha(bytes)};});
@@ -23,15 +21,6 @@ async function fixture(t,id='engine',version='1.0.0',arch='arm64'){
  const bundle=path.join(directory,'bundle');await prepareRelease({project:id,input,declaration,output:bundle,directory});const {record}=await verifyRelease({bundle,directory});
  return {directory,bundle,record};
 }
-test('regression: Invalid declared semantic versions.',async t=>{
- const f=await fixture(t,'gamemaker-opengl-helper','software-gl-v3-MCLv3','universal');
- const old=catalog([f.record],{project:f.record.id,repository,directory:f.directory}).packages[0];
- const current={...f.record,version:'3.0.1',asset:{...f.record.asset,filename:f.record.id+'-3.0.1-universal.tar.gz'}};
- const output=path.join(f.directory,'catalogs',f.record.id+'.json');
- const active=writePublicationCatalog({records:[current],previous:{schemaVersion:2,projectId:f.record.id,updatePolicy:'manual',packages:[old]},project:f.record.id,repository,directory:f.directory,output});
- assert.equal(active.versionSemantics,undefined);assert.equal(active.packages[0].version,'3.0.1');
- const historical=JSON.parse(fs.readFileSync(path.join(f.directory,'catalogs/superseded',f.record.id+'.json')));assert.deepEqual(historical.versionSemantics,{'software-gl-v3-MCLv3':'3.0.0'});
-});
 function releaseTransport(f,{refExists=true}={}){
  const calls=[],remote={id:17,tag_name:f.record.id+'/v'+f.record.version+'/'+f.record.arch,draft:true,assets:[]};
  const asset={id:18,name:f.record.asset.filename,size:f.record.asset.bytes,digest:'sha256:'+f.record.asset.sha256,state:'uploaded'};

@@ -34,9 +34,9 @@ for(const kind of ['maclauncher','prebuilt'])test(kind+' publication exports the
  const applied=await applyRelease(options),expected=path.join(f.directory,'catalogs/declarations/engine/1.0.0/arm64.json');assert.equal(applied.declaration,expected);
  const exported=JSON.parse(fs.readFileSync(expected));assert.deepEqual(exported,included.declaration);assert.deepEqual(exported.files,f.declaration.files);assert.deepEqual(exported.notices,f.declaration.notices);assert.equal(exported.manifestSha256,checked.record.manifestSha256);assert.equal(exported.sourceSha256,checked.record.sourceSha256);
  const original=fs.readFileSync(expected);await applyRelease(options);assert.deepEqual(fs.readFileSync(expected),original);
- const catalogFile=path.join(f.directory,'catalogs/engine.json'),indexFile=path.join(f.directory,'catalogs/index.json'),before=[fs.readFileSync(catalogFile),fs.readFileSync(indexFile)];
+ const catalogFile=path.join(f.directory,'catalogs/engine.json'),before=fs.readFileSync(catalogFile);
  exported.files[0].sha256='0'.repeat(64);fs.writeFileSync(expected,JSON.stringify(exported));
- await assert.rejects(applyRelease(options),/existing sealed declaration differs/);assert.deepEqual(fs.readFileSync(catalogFile),before[0]);assert.deepEqual(fs.readFileSync(indexFile),before[1]);
+ await assert.rejects(applyRelease(options),/existing sealed declaration differs/);assert.deepEqual(fs.readFileSync(catalogFile),before);
 });
 test('archive/record disagreement cannot export a declaration or mutate catalogs',async t=>{
  const f=fixture(t,'prebuilt');await prepareRelease(f);const sidecar=path.join(f.output,'engine-1.0.0-arm64.tar.gz.json'),record=JSON.parse(fs.readFileSync(sidecar));record.sourceSha256='0'.repeat(64);fs.writeFileSync(sidecar,JSON.stringify(record));

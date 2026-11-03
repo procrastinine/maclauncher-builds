@@ -4,6 +4,5 @@ Packages built from product source owned by the publisher use plain semantic ver
 
 Source ownership follows the product repository, separately from the repository containing its build recipe. A pinned-source recipe identifies that repository. A composite producer can declare sourceRepository for its product; dependencies can remain in other repositories. A MacLauncher producer with no foreign upstream sources is owned by its publishing repository. Upstream-derived input groups retain their own version scheme.
 
-The registry declares each release version. New builds of owned source require a plain semantic version. Published legacy versions remain valid for lookup, verification and reproduction, including older MCL names. Published versions, tags and package contents are immutable. A new semantic version such as 0.2.1 follows the legacy 0.2.0-MCLv1; publishing it preserves the earlier record and existing installations.
+The registry declares each release version. Builds of owned source use a plain semantic version. Published versions, tags and package contents are immutable; publishing a new version keeps the earlier record and existing installations.
 
-A package profile can declare semanticVersion for a historical nonnumeric label. Catalogs publish these declarations in versionSemantics, separately from immutable package records. The application and catalog writer compare the declared semantic versions; package labels, download identities and saved selections stay unchanged.

@@ -29,7 +29,7 @@ Names are used as supplied. A name already published for the project cannot be r
 
 One matrix builds the selected packages on their declared GitHub-hosted Mac or Linux runners. Each package is sealed, packed and attested with the shared build and packaging commands. Independent components run in parallel. Within a component, GitHub matrix dependency levels wait for earlier levels of that component; unrelated components never share this wait. A failed package does not discard another package's published output.
 
-Recipes report their source pins, recipe files and consumed packages. Matching published input definitions reuse the catalog release and its exact asset digest. Changed inputs build first in the same run; their verified artifacts pass directly to consumers on GitHub. Independent projects build in parallel with that chain. Automatically named inputs use the next published plain patch version for owned source, or the next project-wide MCL revision for an upstream build. An upstream recipe records its product version in `producer.upstreamVersion`; `null` identifies an unversioned product. Owned products first replace an old MCL label with a plain version; later releases increment its patch number. Snapshot names omit dates and hashes. The plan summary lists those names before any build starts.
+Recipes report their source pins, recipe files and consumed packages. Only the requested lines build. Every other input with a public release is used as published, pinned by the archive digest of each architecture. An input without a public release builds first in the same run at the version its `releases.txt` line names, and its verified artifacts pass directly to consumers on GitHub. Independent projects build in parallel with that chain. The plan summary lists every input it builds, with its version, before any build starts.
 
 Each archive seals `build-definition.json` and `build-inputs.json` in its regular file inventory. The latter lists the digest, release and source build of every resolved input. The ordinary archive attestation covers those records.
 
@@ -53,9 +53,9 @@ Each release and package-index row links the exact Builds source commit and buil
 gh attestation verify <asset> --repo procrastinine/maclauncher-builds --signer-workflow procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml --deny-self-hosted-runners
 ```
 
-The result identifies the source commit. It can be compared with the linked commit on GitHub. The signer workflow path is unchanged for historical and new packages.
+The result identifies the source commit. It can be compared with the linked commit on GitHub. The signer workflow path is `runtime-build.yml`.
 
-The archive is the release attachment. Catalogs retain its SHA-256, architecture, supported launcher architectures and minimum macOS. Complete verified declarations are recorded at `catalogs/declarations/<project>/<version>/<arch>.json`; attestations remain available from GitHub. Older published identities remain readable in catalog history and existing installations.
+The archive is the release attachment. Catalogs retain its SHA-256, architecture, supported launcher architectures and minimum macOS. Complete verified declarations are recorded at `catalogs/declarations/<project>/<version>/<arch>.json`; attestations remain available from GitHub. A catalog keeps the record of every version published for its project.
 
 Recipes declare their exact public inputs and tool requirements. Changing recipe code does not rebuild an existing package. **Rebuild and compare** reproduces a published package at its recorded source commit and reports differences; it does not publish packages or change catalogs.
 

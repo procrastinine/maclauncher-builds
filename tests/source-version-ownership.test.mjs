@@ -1,11 +1,10 @@
-import VersionOrder from '../lib/version-order.cjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {ownedPackageSource,plainSemanticVersion} from '../lib/source-ownership.mjs';
-import {nextPackageVersion,nextSnapshotVersion,releaseVersion,buildReleaseVersion,outputVersion} from '../lib/package-version.mjs';
+import {releaseVersion,buildReleaseVersion,outputVersion} from '../lib/package-version.mjs';
 import {resolveProject} from '../lib/projects.mjs';
 import {androidBuildInputRequirements} from '../tools/android-signed-inputs.mjs';
 import {catalog} from '../tools/runtime-package.mjs';
@@ -20,11 +19,7 @@ test('package versions follow product source ownership, not ownership of a wrapp
  const derived={producer:{kind:'maclauncher',repository:'https://github.com/owner/builds'},upstreams:[{repository:'upstream/library'}]};
  assert.equal(ownedPackageSource(derived,'owner/builds',directory),false);
  assert.equal(ownedPackageSource({...derived,producer:{...derived.producer,sourceRepository:'https://github.com/owner/product'}},'owner/builds',directory),true);
- assert.equal(nextPackageVersion('0.2.0',[{version:'0.2.0-MCLv1'}],{sourceRepository:'https://github.com/owner/product',releaseRepository:'owner/builds'}),'0.2.1');
- assert.equal(nextPackageVersion('3.0.0',{packages:[{version:'legacy-label'}],versionSemantics:{'legacy-label':'3.0.0'}},{sourceRepository:'owner/product',releaseRepository:'owner/builds'}),'3.0.1');
- assert.equal(nextPackageVersion('0.2.0',[],{sourceRepository:'upstream/product',releaseRepository:'owner/builds'}),'0.2.0-MCLv1');
  for(const value of ['0.2.1-MCL','0.2.1-MCLv1','MCLv2-1101'])assert.equal(plainSemanticVersion(value),false,value);
- assert.throws(()=>nextSnapshotVersion('2026-11-01T00:00:00Z',[],{sourceRepository:'owner/product',releaseRepository:'owner/builds'}),/plain semantic version/);
 });
 
 test('owned version suggestions use semantic versions while explicit registered names remain unchanged',t=>{
@@ -52,23 +47,10 @@ test('Android signed input versions are declared independently of publication hi
  }
 });
 
-test('the ordinary Builds catalog places 0.2.1 before 0.2.0-MCLv1 and preserves the old record',t=>{
+test('a new catalog record comes first and earlier records are kept unchanged',t=>{
  const {value:previous}=catalogFixture(t,'android',[packageRecord('android',{version:'0.2.0-MCLv1'})]),old=previous.packages[0];
  const record={...old,version:'0.2.1',asset:{...old.asset,filename:'android-0.2.1-arm64.tar.gz'}};delete record.tag;
  record.asset.url=assetUrl(record,repository);
  const result=catalog([record],{project:'android',repository:repository,previous});
  assert.equal(result.packages[0].version,'0.2.1');assert.deepEqual(result.packages.find(p=>p.version===old.version),old);
-});
-
-
-test('catalog ordering uses declared semantic versions for every legacy label',t=>{
- const {value:previous}=catalogFixture(t,'gamemaker-opengl-helper',[packageRecord('gamemaker-opengl-helper',{version:'software-gl-v3-MCLv3',arch:'universal'})]),old=previous.packages[0];
- const next={...old,version:'3.0.1',asset:{...old.asset,filename:'gamemaker-opengl-helper-3.0.1-universal.tar.gz'}};delete next.tag;
- next.asset.url=assetUrl(next,repository);
- const result=catalog([next],{project:old.id,repository:repository,previous});
- assert.equal(result.versionSemantics[old.version],'3.0.0');
- assert.equal(result.packages[0].version,'3.0.1');assert.deepEqual(result.packages.find(p=>p.version===old.version),old);
- for(let a=0;a<result.packages.length;a++)for(let b=a+1;b<result.packages.length;b++)
-  assert.ok(VersionOrder.compareRuntimeVersions(result.packages[a],result.packages[b],result.versionSemantics)<=0);
- assert.throws(()=>VersionOrder.versionSemantics({'legacy-label':'not-semver'}),/semantic versions/);
 });

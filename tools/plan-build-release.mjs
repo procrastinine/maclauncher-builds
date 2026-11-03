@@ -2,8 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
-import {readProjects,resolveProject,buildRecord} from '../lib/projects.mjs';
-import {ownedPackageSource} from '../lib/source-ownership.mjs';
+import {readProjects} from '../lib/projects.mjs';
 import {parseSelection,registerSelection} from './release-selection.mjs';
 import {buildPlan} from './build-runtime.mjs';
 import {requireGithubBuild} from './build-coverage.mjs';
@@ -11,21 +10,6 @@ import {createRecipeBuildReporter,canonicalReport} from './recipe-build-report.m
 import {resolveBuildInputs} from './resolve-build-inputs.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 const json=file=>JSON.parse(fs.readFileSync(file,'utf8'));
-
-/** Suggestions follow the product's version line; explicit names remain untouched. */
-export function automaticInputName({current,publishedNames,owned,profiles=[],upstreamVersion}){
- if(owned){
-  const plain=publishedNames.filter(version=>/^\d+\.\d+\.\d+(?:-|$)/.test(version)&&!version.includes('MCL')),latest=plain[0]||current,profile=profiles.find(profile=>profile.version===latest);
-  const base=/^(\d+)\.(\d+)\.(\d+)/.exec(profile?.semanticVersion||latest);
-  if(!base)throw Error('The owned product needs its published semantic version.');
-  let patch=Number(base[3])+(plain.length?1:0),name;do{name=base[1]+'.'+base[2]+'.'+patch++;}while(publishedNames.includes(name));return name;
- }
- const highest=Math.max(0,...publishedNames.map(version=>Number(/(?:^|-)MCLv([1-9]\d*)/.exec(version)?.[1]||0)));
- const prefix=current.split(/-?MCLv[1-9]\d*/)[0];
- // Old snapshot labels do not invent an upstream version or retain commit hashes.
- const upstream=upstreamVersion!==undefined?upstreamVersion:/^\d+(?:\.\d+){1,3}(?:-?(?:git|dev|devel|alpha\d*|beta\d*|rc\d*))?$/.test(prefix)?prefix:'';
- return (upstream?upstream+'-':'')+'MCLv'+(highest+1);
-}
 
 export async function resolveReleaseSelection({selection,directory=root,releases=[]}){
  const registry=readProjects(directory,{resolvePins:false}),describe=createRecipeBuildReporter({directory});
@@ -43,14 +27,9 @@ export async function resolveReleaseSelection({selection,directory=root,releases
   }
   latest.set(id,result);return result;
  };
- const nextName=async id=>{
-  const project=resolveProject(id,directory,{resolvePins:false}),names=[];
-  for(const folder of ['catalogs','catalogs/superseded']){const file=path.join(directory,folder,id+'.json');if(fs.existsSync(file))names.push(...json(file).packages.map(record=>record.version));}
-  for(const release of releases){const tag=typeof release==='string'?release:release.tag_name;if(!release.draft&&tag?.startsWith(id+'/v'))names.push(tag.slice(id.length+2).split('/')[0]);}
-  const current=buildRecord(project).version,owned=ownedPackageSource(project,registry.repository,directory);
-  return automaticInputName({current,publishedNames:names,owned,profiles:project.packageProfiles,upstreamVersion:project.producer.upstreamVersion});
- };
- return resolveBuildInputs({selection:parseSelection(selection),describe,published,nextName});
+ const listed=new Map(),file=path.join(directory,'releases.txt');
+ if(fs.existsSync(file))for(const {id,version} of parseSelection(fs.readFileSync(file,'utf8')))listed.set(id,[...(listed.get(id)||[]),version]);
+ return resolveBuildInputs({selection:parseSelection(selection),describe,published,listed});
 }
 
 export async function planBuildRelease({selection,directory=root,releases=[]}){
@@ -71,7 +50,7 @@ export async function main(args,{directory=root,env=process.env}={}){
  const plan=await planBuildRelease({selection:env.RELEASES,directory,releases});
  fs.mkdirSync(args[1],{recursive:true});
  const requested=new Set(parseSelection(env.RELEASES).map(row=>row.id)),rebuilt=plan.selection.filter(row=>!requested.has(row.id));
- if(env.GITHUB_STEP_SUMMARY&&rebuilt.length)fs.appendFileSync(env.GITHUB_STEP_SUMMARY,rebuilt.map(({id,version})=>id+' -> '+version+' (rebuilt input)').join('\n\n')+'\n');
+ if(env.GITHUB_STEP_SUMMARY&&rebuilt.length)fs.appendFileSync(env.GITHUB_STEP_SUMMARY,rebuilt.map(({id,version})=>id+' -> '+version+' (unpublished input)').join('\n\n')+'\n');
  fs.writeFileSync(path.join(args[1],'reports.json'),canonicalReport(plan.reports));
  const output={selection:JSON.stringify(plan.selection),graph:JSON.stringify(plan.graph),reuse:JSON.stringify(plan.reuse),empty:String(!plan.independent.include.length&&plan.matrices.every(matrix=>!matrix.include.length)),matrixIndependent:JSON.stringify(plan.independent),emptyIndependent:String(!plan.independent.include.length)};
  for(let level=0;level<4;level++){output['matrix'+level]=JSON.stringify(plan.matrices[level]);output['empty'+level]=String(!plan.matrices[level].include.length);}

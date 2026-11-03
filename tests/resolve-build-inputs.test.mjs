@@ -4,7 +4,6 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {resolveBuildInputs} from '../tools/resolve-build-inputs.mjs';
-import {automaticInputName} from '../tools/plan-build-release.mjs';
 import {createRecipeBuildReporter} from '../tools/recipe-build-report.mjs';
 import {registerSelection} from '../tools/release-selection.mjs';
 import {helperPackage} from '../tools/helper-package.mjs';
@@ -28,10 +27,11 @@ function fixture(t){
  return {directory,write};
 }
 
-test('existing recipe references discover the consumed graph and plan fresh inputs before explicit consumers',async t=>{
- const f=fixture(t),describe=createRecipeBuildReporter({directory:f.directory}),calls=[];
- const result=await resolveBuildInputs({selection:[{id:'consumer',version:'keep-this-name'}],describe,published:()=>null,nextName:id=>{calls.push(id);return 'new-input-name';}});
- assert.deepEqual(result.orderedSelection,[{id:'input',version:'new-input-name'},{id:'consumer',version:'keep-this-name'}]);assert.deepEqual(calls,['input']);assert.deepEqual(result.dependencyGraph,{input:[],consumer:['input']});assert.deepEqual(result.levels,[['input'],['consumer']]);assert.equal(result.reports.consumer.definition.inputs[0].definitionDigest,result.reports.input.definitionDigest);
+test('existing recipe references discover the consumed graph and build unpublished inputs at their releases.txt versions first',async t=>{
+ const f=fixture(t),describe=createRecipeBuildReporter({directory:f.directory});
+ await assert.rejects(resolveBuildInputs({selection:[{id:'consumer',version:'keep-this-name'}],describe,published:()=>null}),/input has no public release and no line in releases.txt/);
+ const result=await resolveBuildInputs({selection:[{id:'consumer',version:'keep-this-name'}],describe,published:()=>null,listed:new Map([['input',['new-input-name']]])});
+ assert.deepEqual(result.orderedSelection,[{id:'input',version:'new-input-name'},{id:'consumer',version:'keep-this-name'}]);assert.deepEqual(result.dependencyGraph,{input:[],consumer:['input']});assert.deepEqual(result.levels,[['input'],['consumer']]);assert.equal(result.reports.consumer.definition.inputs[0].definitionDigest,result.reports.input.definitionDigest);
  assert.ok(describe('consumer').definition.files.some(file=>file.path==='tools/shared.mjs'));
  // Build and seal the input selected by that graph; archive verification stays real.
  registerSelection({selection:result.orderedSelection,directory:f.directory});
@@ -68,22 +68,12 @@ test('a published input is reused as published until its own line is requested',
  const f=fixture(t);
  f.write('producers/input.json',{version:'9.9.9-custom',source:{revision:'original-source'},flags:['complete']});
  const describe=createRecipeBuildReporter({directory:f.directory}),published=()=>({version:'1.0.0',digests:{arm64:'exact-verified-archive-digest'}});
- const reused=await resolveBuildInputs({selection:[{id:'consumer',version:'custom-consumer'}],describe,published,nextName:()=>{throw Error('No input rebuild expected.');}});
+ const reused=await resolveBuildInputs({selection:[{id:'consumer',version:'custom-consumer'}],describe,published});
  assert.deepEqual(reused.orderedSelection,[{id:'consumer',version:'custom-consumer'}]);assert.deepEqual(reused.reuseBindings,[{id:'input',version:'1.0.0',digests:{arm64:'exact-verified-archive-digest'}}]);
  f.write('producers/input.json',{version:'9.9.9-custom',source:{revision:'changed-real-source'},flags:['complete']});
- const unchanged=await resolveBuildInputs({selection:[{id:'consumer',version:'custom-consumer'}],describe:createRecipeBuildReporter({directory:f.directory}),published,nextName:()=>{throw Error('No input rebuild expected.');}});
+ const unchanged=await resolveBuildInputs({selection:[{id:'consumer',version:'custom-consumer'}],describe:createRecipeBuildReporter({directory:f.directory}),published});
  assert.deepEqual(unchanged.orderedSelection,[{id:'consumer',version:'custom-consumer'}]);assert.deepEqual(unchanged.reuseBindings,reused.reuseBindings);
- const requested=await resolveBuildInputs({selection:[{id:'input',version:'1.0.1'},{id:'consumer',version:'custom-consumer'}],describe:createRecipeBuildReporter({directory:f.directory}),published,nextName:()=>{throw Error('Requested versions are used as given.');}});
+ const requested=await resolveBuildInputs({selection:[{id:'input',version:'1.0.1'},{id:'consumer',version:'custom-consumer'}],describe:createRecipeBuildReporter({directory:f.directory}),published});
  assert.deepEqual(requested.orderedSelection,[{id:'input',version:'1.0.1'},{id:'consumer',version:'custom-consumer'}]);assert.deepEqual(requested.reuseBindings,[]);
 });
 
-// Only suggestions change; named releases are covered by the dispatch fixtures above.
-test('automatic input names use plain owned patch versions or the next published MCL revision',()=>{
- assert.equal(automaticInputName({owned:true,current:'0.1.0-MCLv2',publishedNames:['0.1.0-MCLv1']}),'0.1.0');
- assert.equal(automaticInputName({owned:true,current:'0.2.1',publishedNames:['0.2.0','0.2.0-MCLv1']}),'0.2.1');
- assert.equal(automaticInputName({owned:false,current:'1.4.2-MCLv3',publishedNames:['1.4.2-MCLv3','1.3.0-MCLv7']}),'1.4.2-MCLv8');
- assert.equal(automaticInputName({owned:false,current:'0.1.0-MCLv1',publishedNames:['0.1.0-MCLv1'],upstreamVersion:'3.8.0'}),'3.8.0-MCLv2');
- assert.equal(automaticInputName({owned:false,current:'0.1.0-MCLv1',publishedNames:['0.1.0-MCLv1'],upstreamVersion:null}),'MCLv2');
- assert.equal(automaticInputName({owned:false,current:'0.7.7beta-MCLv2',publishedNames:['0.7.7beta-MCLv2']}),'0.7.7beta-MCLv3');
- assert.equal(automaticInputName({owned:false,current:'MCLv3-1028-6',publishedNames:['MCLv2-1028-6']}),'MCLv3');
-});

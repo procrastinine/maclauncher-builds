@@ -19,8 +19,7 @@
           "from": "  const sanitized = JSON.parse(JSON.stringify(receipt));\n  if (!sanitized.source || typeof sanitized.source !== \"object\" || Array.isArray(sanitized.source)) throw new Error(\"Homebrew receipt source identity is missing.\");\n  delete sanitized.source.path;\n  const tap = sanitized.source.tap || \"homebrew/core\";\n  if (!/^[A-Za-z0-9_.-]+\\/[A-Za-z0-9_.-]+$/.test(tap)) throw new Error(\"Homebrew receipt tap identity is invalid.\");\n  sanitized.source.formula = `${tap}/${formula.name}`;\n",
           "to": "  const sanitized = JSON.parse(JSON.stringify(receipt));\n  if (!sanitized.source || typeof sanitized.source !== \"object\" || Array.isArray(sanitized.source)) throw new Error(\"Homebrew receipt source identity is missing.\");\n  delete sanitized.source.path;\n  // Installation bookkeeping varies with the host; dependency and build identities stay.\n  for (const key of ['time', 'source_modified_time', 'installed_on_request', 'installed_as_dependency', 'poured_from_bottle', 'loaded_from_api', 'loaded_from_internal_api', 'changed_files', 'homebrew_version']) delete sanitized[key];\n  const tap = sanitized.source.tap || \"homebrew/core\";\n  if (!/^[A-Za-z0-9_.-]+\\/[A-Za-z0-9_.-]+$/.test(tap)) throw new Error(\"Homebrew receipt tap identity is invalid.\");\n  sanitized.source.formula = `${tap}/${formula.name}`;\n"
         }
-      ],
-      "previousSha256": "5226a2d0674db4dd94de4bc5eb33292bc61e3100919c7342a3ede9fa84a28a5e"
+      ]
     },
     {
       "path": "scripts/stage-mkxpz-config-helper.cjs",
@@ -103,8 +102,7 @@
           "from": "  for (const notice of item.notices) {\n    if (!notice || Object.keys(notice).some(key => !['name', 'license', 'path', 'sourceUrl'].includes(key)) ||\n      typeof notice.name !== 'string' || !notice.name.trim() || typeof notice.license !== 'string' || !notice.license.trim() || !names.has(notice.path)) throw new Error('Supplemental native license notice is missing.');\n    if (notice.sourceUrl && !/^https:\\/\\//.test(notice.sourceUrl)) throw new Error('Supplemental source links must use HTTPS.');\n  }",
           "to": "  // Sealing repairs licence notices before release, so a notice entry is reported and never fails a package.\n  for (const notice of Array.isArray(item.notices) ? item.notices : []) {\n    if (!notice || Object.keys(notice).some(key => !['name', 'license', 'path', 'sourceUrl'].includes(key)) ||\n      typeof notice.name !== 'string' || !notice.name.trim() || typeof notice.license !== 'string' || !notice.license.trim() || !names.has(notice.path) ||\n      notice.sourceUrl && !/^https:\\/\\//.test(notice.sourceUrl)) console.log(`::warning::${item.id} has an unusable licence notice entry: ${JSON.stringify(notice)}`);\n  }"
         }
-      ],
-      "previousSha256": "dfa804e42e343d6a1f67ac928e25155d7b4cc3fd46aa93cc816519512ee64542"
+      ]
     },
     {
       "path": "src/modules/shared/runtime/bundled-native.js",
@@ -152,8 +150,7 @@
           "from": "require(\"./architecture\").imageRequiresRosetta",
           "to": "require(\"./architecture.cjs\").imageRequiresRosetta"
         }
-      ],
-      "previousSha256": "6c66bb991f78b55fdf1b3a13be3528dd864ef09720d5b7841d10703f92609e71"
+      ]
     },
     {
       "path": "src/modules/shared/runtime/macho-load-commands.js",
@@ -221,8 +218,7 @@
           "from": "require(\"./rosetta\")",
           "to": "require(\"../producers/maclauncher/src/modules/shared/runtime/rosetta.js\")"
         }
-      ],
-      "previousSha256": "66054e912c641b46a1e93a1d8cb9220bec49fd90694e233dcd43b00145862aae"
+      ]
     },
     {
       "path": "src/modules/shared/runtime/architecture.js",
@@ -264,9 +260,5 @@
         }
       ]
     }
-  ],
-  "retired": {
-    "scripts/distribution-model.cjs": "80ad97314b147faf1e90fe59ebd65081ef8f3fa6c68601da573ca6e9c9343346",
-    "scripts/stage-native-runtimes.cjs": "b18a8fe479b5d251416dc21ef4e0794d2a6bf49b7a68f7d36a30d0b5c98418c7"
-  }
+  ]
 }
