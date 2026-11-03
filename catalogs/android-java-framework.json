@@ -38,42 +38,6 @@
         "revision": "d2b042f9b8002d2e09ece537b8e34cf7b6a60815"
       },
       "tag": "android-java-framework/v16.0.0-MCLv4/arm64"
-    },
-    {
-      "schemaVersion": 2,
-      "id": "android-java-framework",
-      "version": "16.0.0-MCLv3",
-      "arch": "arm64",
-      "launcherArchitectures": [
-        "arm64"
-      ],
-      "minimumMacOS": "13.0",
-      "manifestRelative": "input.json",
-      "manifestSha256": "70a9200dcd9c97decb5626704ea9eb4729f965496dd2d402ab91b6682a546180",
-      "sourceSha256": "55600282e897fb4689edcdf79a95fe0b48088ce3f93547ab90634cbda12e3fda",
-      "updatePolicy": "manual",
-      "launcherContract": 2,
-      "asset": {
-        "filename": "android-java-framework-16.0.0-MCLv3-arm64.tar.gz",
-        "sha256": "0685926fd0a3fa108ee2d6b927520e23b141972f8d2df34d07bb4846a921293c",
-        "bytes": 148973895,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-java-framework%2Fv16.0.0-MCLv3%2Farm64/android-java-framework-16.0.0-MCLv3-arm64.tar.gz"
-      },
-      "build": {
-        "sourceRevision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2",
-        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
-        "toolchain": {
-          "node": "24.22.1",
-          "zlib": "1.3.2.1-motley-285e94b"
-        },
-        "runId": "41650019480",
-        "runAttempt": "2"
-      },
-      "source": {
-        "repository": "procrastinine/maclauncher-builds",
-        "revision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2"
-      },
-      "tag": "android-java-framework/v16.0.0-MCLv3/arm64"
     }
   ]
 }

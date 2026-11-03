@@ -38,42 +38,6 @@
         "revision": "d2b042f9b8002d2e09ece537b8e34cf7b6a60815"
       },
       "tag": "android-image-data-4/v16.0.0-MCLv4/arm64"
-    },
-    {
-      "schemaVersion": 2,
-      "id": "android-image-data-4",
-      "version": "16.0.0-MCLv3",
-      "arch": "arm64",
-      "launcherArchitectures": [
-        "arm64"
-      ],
-      "minimumMacOS": "13.0",
-      "manifestRelative": "input.json",
-      "manifestSha256": "2a97f7808de8d3e139b1cb992c50feb75544a23684ac1ab43f9212e901a21a4f",
-      "sourceSha256": "15e1603ab718662bb3241f9159c6ba946ad3c174f1db4cb5f28f4762270678ab",
-      "updatePolicy": "manual",
-      "launcherContract": 2,
-      "asset": {
-        "filename": "android-image-data-4-16.0.0-MCLv3-arm64.tar.gz",
-        "sha256": "3152cb1c8c09ad887a4cde7c96f94029dcff9b3d9baeac7a68bbc0a27be35544",
-        "bytes": 357097046,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-image-data-4%2Fv16.0.0-MCLv3%2Farm64/android-image-data-4-16.0.0-MCLv3-arm64.tar.gz"
-      },
-      "build": {
-        "sourceRevision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2",
-        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
-        "toolchain": {
-          "node": "24.22.1",
-          "zlib": "1.3.2.1-motley-285e94b"
-        },
-        "runId": "41650019480",
-        "runAttempt": "2"
-      },
-      "source": {
-        "repository": "procrastinine/maclauncher-builds",
-        "revision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2"
-      },
-      "tag": "android-image-data-4/v16.0.0-MCLv3/arm64"
     }
   ]
 }

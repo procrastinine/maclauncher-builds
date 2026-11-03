@@ -40,44 +40,6 @@
         "revision": "d2b042f9b8002d2e09ece537b8e34cf7b6a60815"
       },
       "tag": "android-aconfig/v0.1.0-MCLv4/arm64"
-    },
-    {
-      "schemaVersion": 2,
-      "id": "android-aconfig",
-      "version": "0.1.0-MCLv3",
-      "arch": "arm64",
-      "launcherArchitectures": [
-        "arm64"
-      ],
-      "minimumMacOS": "13.0",
-      "manifestRelative": "manifest.json",
-      "manifestSha256": "ec3a24d1fee77b8654842d20e94ae90bb87d44ba5fb5a04e10c899e09afcd34c",
-      "sourceSha256": "ec3a24d1fee77b8654842d20e94ae90bb87d44ba5fb5a04e10c899e09afcd34c",
-      "updatePolicy": "manual",
-      "asset": {
-        "filename": "android-aconfig-0.1.0-MCLv3-arm64.tar.gz",
-        "sha256": "eb39b6a53d3f9d07c53f0b94bb17d340d82724f8046ff8ae1a0461e1b8c4afe8",
-        "bytes": 1031348,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-aconfig%2Fv0.1.0-MCLv3%2Farm64/android-aconfig-0.1.0-MCLv3-arm64.tar.gz"
-      },
-      "build": {
-        "sourceRevision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2",
-        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
-        "toolchain": {
-          "node": "24.22.1",
-          "zlib": "1.3.2.1-motley-285e94b",
-          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
-          "xcode": "Xcode 27.0\nBuild version 27A266a",
-          "macosSDK": "27.0"
-        },
-        "runId": "41650019480",
-        "runAttempt": "2"
-      },
-      "source": {
-        "repository": "procrastinine/maclauncher-builds",
-        "revision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2"
-      },
-      "tag": "android-aconfig/v0.1.0-MCLv3/arm64"
     }
   ]
 }

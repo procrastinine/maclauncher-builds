@@ -38,42 +38,6 @@
         "revision": "d2b042f9b8002d2e09ece537b8e34cf7b6a60815"
       },
       "tag": "android-launcher/v1.0.3/universal"
-    },
-    {
-      "schemaVersion": 2,
-      "id": "android-launcher",
-      "version": "1.0.2",
-      "arch": "universal",
-      "launcherArchitectures": [
-        "arm64",
-        "x64"
-      ],
-      "minimumMacOS": "13.0",
-      "manifestRelative": "manifest.json",
-      "manifestSha256": "957d217eee6c7ba3f0316b406c97bae61353784d3d035e87845ee003aac7cd20",
-      "sourceSha256": "d1e55810f81f8fdb0bdede929ece4d24a3323e4f49364ee7ab198c18d9e74259",
-      "updatePolicy": "manual",
-      "asset": {
-        "filename": "android-launcher-1.0.2-universal.tar.gz",
-        "sha256": "573c1ae16ec8390db1c6a0f1bd3e18e91800fe63a295b36735bee0157aeaf74b",
-        "bytes": 101189,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-launcher%2Fv1.0.2%2Funiversal/android-launcher-1.0.2-universal.tar.gz"
-      },
-      "build": {
-        "sourceRevision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2",
-        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
-        "toolchain": {
-          "node": "24.22.1",
-          "zlib": "1.3.2.1-motley-285e94b"
-        },
-        "runId": "41650019480",
-        "runAttempt": "2"
-      },
-      "source": {
-        "repository": "procrastinine/maclauncher-builds",
-        "revision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2"
-      },
-      "tag": "android-launcher/v1.0.2/universal"
     }
   ]
 }
