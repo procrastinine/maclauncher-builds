@@ -2291,10 +2291,40 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#sys3-decompiler",
       "catalog": {
         "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/sys3-decompiler.json",
-        "sha256": "41d132e78638745fa86b77c4f3783df5d477094f40e054818d5dd82968368629",
-        "bytes": 1654
+        "sha256": "621387a06b9f7834eeca8dc2692cf9e827fdaeb8074d31368c3d9979a901f61f",
+        "bytes": 3196
       },
       "releases": [
+        {
+          "version": "0.5.0-MCLv3",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "sys3-decompiler/v0.5.0-MCLv3/arm64",
+          "asset": {
+            "filename": "sys3-decompiler-0.5.0-MCLv3-arm64.tar.gz",
+            "sha256": "3095caf048b7002973554340e1377a917b334e2ece6247f1da862c206d9979eb",
+            "bytes": 56746,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/sys3-decompiler%2Fv0.5.0-MCLv3%2Farm64/sys3-decompiler-0.5.0-MCLv3-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41578904217",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#sys3-decompiler",
+          "profile": "System3 decompiler 0.5.0-MCLv3"
+        },
         {
           "version": "0.5.0-MCLv3",
           "arch": "x64",
