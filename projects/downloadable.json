@@ -1411,44 +1411,30 @@
       {
         "version": "MCLv2-1019",
         "label": "xsystem35 SDL2 MCLv2-1019"
-      }
-    ],
-    "build": [
-      {
-        "version": "MCLv1-1019",
-        "command": "tools/build-portable-runtime.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/xsystem35-sdl2"
-        ],
-        "recursiveSubmodules": false,
-        "tools": [
-          "cmake",
-          "ninja",
-          "meson",
-          "pkgconf"
-        ]
       },
       {
-        "version": "MCLv2-1019",
-        "command": "tools/build-portable-runtime.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/xsystem35-sdl2"
-        ],
-        "recursiveSubmodules": false,
-        "tools": [
-          "cmake",
-          "ninja",
-          "meson",
-          "pkgconf"
-        ]
+        "version": "2.20.0-MCLv3",
+        "label": "xsystem35 SDL2 2.20.0-MCLv3"
       }
-    ]
+    ],
+    "build": {
+      "version": "2.20.0-MCLv3",
+      "command": "tools/build-portable-runtime.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/xsystem35-sdl2"
+      ],
+      "recursiveSubmodules": false,
+      "tools": [
+        "cmake",
+        "ninja",
+        "meson",
+        "pkgconf"
+      ]
+    }
   },
   {
     "id": "xsystem4",
