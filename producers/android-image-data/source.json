@@ -22,7 +22,7 @@
   "profiles": [
     {
       "id": "android-image-data-1",
-      "version": "16.0.0-MCLv2",
+      "version": "16.0.0-MCLv3",
       "shard": 1
     },
     {
