@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "androidSource": {
-    "revision": "f4ae6717620c32b5e22102be87ab63f43c22d096",
+    "revision": "fef32f6df6b5ea4851c21523928f8c3afcc4f96d",
     "directory": "sources/maclauncher-android",
     "repository": "https://github.com/procrastinine/maclauncher-android"
   },
