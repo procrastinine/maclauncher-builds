@@ -2489,6 +2489,49 @@
       ]
     },
     {
+      "projectId": "uosc-helper",
+      "name": "uosc Ziggy helper",
+      "delivery": "downloadable",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#uosc-helper",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/uosc-helper.json",
+        "sha256": "f12fdb06820967f884e4411dfbac3565fe6677b05b4c11046957667b855163c3",
+        "bytes": 2028
+      },
+      "releases": [
+        {
+          "version": "5.13.0-MCLv2",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "uosc-helper/v5.13.0-MCLv2/arm64",
+          "asset": {
+            "filename": "uosc-helper-5.13.0-MCLv2-arm64.tar.gz",
+            "sha256": "9ba63490b56acd96858df4e30345865a04956301122b2a999328d3385cd436a6",
+            "bytes": 2835741,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/uosc-helper%2Fv5.13.0-MCLv2%2Farm64/uosc-helper-5.13.0-MCLv2-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41578906195",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#uosc-helper",
+          "profile": "uosc helper 5.13.0-MCLv2"
+        }
+      ]
+    },
+    {
       "projectId": "vnds-love",
       "name": "VNDS-LOVE",
       "delivery": "downloadable",
