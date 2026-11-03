@@ -207,6 +207,49 @@
       ]
     },
     {
+      "projectId": "android-art-elf",
+      "name": "Android ART ELF build input",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art-elf",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-art-elf.json",
+        "sha256": "34f26994d61d7d37efa3903440f86a7fcdda32572e8339cb5a6dff3018652eb7",
+        "bytes": 1653
+      },
+      "releases": [
+        {
+          "version": "16.0.0-MCLv2",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "android-art-elf/v16.0.0-MCLv2/arm64",
+          "asset": {
+            "filename": "android-art-elf-16.0.0-MCLv2-arm64.tar.gz",
+            "sha256": "36f8df434c2b471243b27bb35ce72c7b87429b65eb6398a3ae7a11b95820fc96",
+            "bytes": 7502980,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art-elf%2Fv16.0.0-MCLv2%2Farm64/android-art-elf-16.0.0-MCLv2-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41578842959",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art-elf",
+          "profile": "ART ELF input 16.0.0-MCLv2"
+        }
+      ]
+    },
+    {
       "projectId": "android-privacy",
       "name": "Android privacy helper",
       "delivery": "bundled",
