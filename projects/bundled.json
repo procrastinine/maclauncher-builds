@@ -2278,10 +2278,14 @@
       {
         "version": "7.1.2-MCLv1",
         "label": "FFmpeg native video codecs 7.1.2"
+      },
+      {
+        "version": "7.1.2-MCLv2",
+        "label": "FFmpeg native video codecs 7.1.2 7.1.2-MCLv2"
       }
     ],
     "build": {
-      "version": "7.1.2-MCLv1",
+      "version": "7.1.2-MCLv2",
       "command": "tools/build-native-ffmpeg.mjs",
       "architectures": [
         "arm64",
