@@ -1467,10 +1467,14 @@
       {
         "version": "2.20.0-MCLv3",
         "label": "xsystem35 SDL2 2.20.0-MCLv3"
+      },
+      {
+        "version": "2.20.0-MCLv4",
+        "label": "xsystem35 SDL2 2.20.0-MCLv4"
       }
     ],
     "build": {
-      "version": "2.20.0-MCLv3",
+      "version": "2.20.0-MCLv4",
       "command": "tools/build-portable-runtime.mjs",
       "architectures": [
         "x64",
