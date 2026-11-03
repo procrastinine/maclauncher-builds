@@ -1,0 +1,65 @@
+{
+  "id": "rlvm-adapter",
+  "version": "1.0.2",
+  "arch": "universal",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "sourceRelative": null,
+  "sourceSha256": "5845f043cbf5c6b10875955504efe4153f54db8f4ba159f0a8544a4d0d778a5b",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "7d3d5d3ae14fc3a0ea92c4d1959532217577480e727455b2a5c0f4f8fab642fa",
+  "directoryRelative": "rlvm-adapter/1.0.2/universal",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 15535,
+      "mode": 420,
+      "sha256": "4a1215142f8147cb4eba03430b2a7974069cf228e833507e901692101ef3b0fb"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "1dc547ebb31d5b8d014a04104846e827ab35b934d70966c85a71105cf9c7b8f7"
+    },
+    {
+      "path": "files/adapter.json",
+      "size": 709,
+      "sha256": "7af757859832bed219951a16158d40ce5ca2e88f4afdb48b2dd01d25d340bcfa",
+      "mode": 420
+    },
+    {
+      "path": "files/LICENSE",
+      "size": 1081,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+      "mode": 420
+    },
+    {
+      "path": "files/rlvm-adapter.dylib",
+      "size": 85040,
+      "sha256": "a728d970519766e31529060619ba0bec755f68df94b6125d81f1d3c8c8f73b2f",
+      "mode": 493,
+      "architectures": [
+        "arm64",
+        "x86_64"
+      ]
+    },
+    {
+      "path": "manifest.json",
+      "size": 1540,
+      "sha256": "7d3d5d3ae14fc3a0ea92c4d1959532217577480e727455b2a5c0f4f8fab642fa",
+      "mode": 420
+    }
+  ],
+  "notices": [
+    {
+      "name": "MacLauncher RLVM adapter",
+      "license": "MIT",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-builds",
+      "path": "files/LICENSE"
+    }
+  ]
+}
