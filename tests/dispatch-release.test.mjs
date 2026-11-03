@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import {releaseComponents,orderReleaseComponents,planReleaseDispatch,dispatchReleaseComponents} from '../tools/dispatch-release.mjs';
+import {releaseComponents,orderReleaseComponents,planReleaseDispatch,dispatchReleaseComponents,main} from '../tools/dispatch-release.mjs';
 import {planBuildRelease} from '../tools/plan-build-release.mjs';
 const hosted=JSON.parse(fs.readFileSync(new URL('./fixtures/release-components/graph.json',import.meta.url)));
 const strings=components=>components.map(rows=>rows.map(({id,version})=>id+'='+version));
@@ -71,4 +71,10 @@ test('dispatch retries only connection establishment failures with bounded backo
  const runGh=()=>{attempts++;if(attempts<5)throw Error(['TLS handshake timeout','connection refused','connection reset','no such host'][attempts-1]);};
  await dispatchReleaseComponents(plan,{runGh,wait:async ms=>delays.push(ms)});assert.equal(attempts,5);assert.deepEqual(delays,[1000,2000,4000,8000]);
  attempts=0;await assert.rejects(dispatchReleaseComponents(plan,{runGh:()=>{attempts++;throw Error('HTTP 403');},wait:()=>assert.fail('No retry after an API response')}),/403/);assert.equal(attempts,1);
+});
+
+test('a changed release line already public is skipped without a dispatch',async t=>{
+ const directory=fixture(t),calls=[];
+ const result=await main(['dispatch','--releases','left=2.0.0'],{directory,runGh:async args=>{calls.push(args);return JSON.stringify([[{tag_name:'left/v2.0.0/arm64',draft:false}]]);}});
+ assert.deepEqual(result.dispatched,[]);assert.deepEqual(result.skipped,[{id:'left',version:'2.0.0'}]);assert.equal(calls.length,1);assert.equal(calls[0][0],'api');
 });

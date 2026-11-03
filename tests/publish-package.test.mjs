@@ -4,8 +4,10 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
-import {publishPackage,appendPackageCatalog} from '../tools/publish-package.mjs';
+import {publishPackage as actualPublishPackage,appendPackageCatalog} from '../tools/publish-package.mjs';
 import {publishLevel} from '../tools/publish-level.mjs';
+// Other tests isolate GitHub transport; the focused test below exercises the exact verification call.
+const publishPackage=options=>actualPublishPackage({...options,runGh:async(...args)=>args[0][0]==='attestation'?'':options.runGh?.(...args)});
 const identity={GIT_AUTHOR_NAME:'procrastinine',GIT_AUTHOR_EMAIL:'24549552+procrastinine@users.noreply.github.com',GIT_COMMITTER_NAME:'procrastinine',GIT_COMMITTER_EMAIL:'24549552+procrastinine@users.noreply.github.com'};
 const git=(cwd,args)=>execFileSync('git',args,{cwd,env:{...process.env,...identity},encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
 function fixture(t){
@@ -94,4 +96,12 @@ test('artifact transport errors remain publication failures',async t=>{
  const f=fixture(t),target={project:'engine',version:'1.0.0',arch:'arm64'};
  const result=await publishLevel({...f,env:{...f.env,RELEASE_SELECTION:'engine=1.0.0'},targets:[target],output:path.join(f.directory,'publication'),runGh:async()=>JSON.stringify([{artifacts:[{id:1,name:'runtime-engine-1.0.0-arm64'}]}]),download:async()=>{throw Error('HTTP 403: Resource not accessible by integration');},publish:()=>assert.fail('No publication after a transport failure')});
  assert.equal(result.failed,1);assert.equal(result.skipped,0);assert.match(result.errors[0].error,/HTTP 403/);
+});
+
+test('the user attestation command retries with bounded backoff and preserves gh failures',async t=>{
+ const f=fixture(t),calls=[],delays=[];let staged=0;
+ const options={...f,bundle:f.directory,verifyBundle:async()=>({record:f.record,declaration:{files:[]}}),stageBundle:async()=>{staged++;return {id:1};},publishBundle:async()=>({id:1,draft:false}),append:async()=>({commit:'c'.repeat(40)}),wait:async ms=>delays.push(ms)};
+ await actualPublishPackage({...options,runGh:async args=>{calls.push(args);if(calls.length<3)throw Error('gh temporary failure');}});
+ assert.deepEqual(calls[0],['attestation','verify',path.join(f.directory,f.record.asset.filename),'--repo','owner/builds','--signer-workflow','owner/builds/.github/workflows/runtime-build.yml']);assert.equal(staged,1);assert.deepEqual(delays,[1000,2000]);
+ calls.length=0;delays.length=0;staged=0;await assert.rejects(actualPublishPackage({...options,runGh:async args=>{calls.push(args);throw Error('gh: signature rejected');}}),/^Error: gh: signature rejected$/);assert.equal(staged,0);assert.equal(calls.length,5);assert.deepEqual(delays,[1000,2000,4000,8000]);
 });

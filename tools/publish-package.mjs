@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
+import {setTimeout as sleep} from 'node:timers/promises';
 import {readProjects,resolveProject,buildRecords} from '../lib/projects.mjs';
 import {parseSelection,registerSelection} from './release-selection.mjs';
 import {verifyRelease,stageRelease,publishRelease,applyRelease} from './release-runtime.mjs';
@@ -47,7 +48,7 @@ export async function appendPackageCatalog({bundle,record,publication,directory=
  }
 }
 /** The already sealed archive is attested, released, then made discoverable. */
-export async function publishPackage({bundle,directory=root,env=process.env,runGh=github,verifyBundle=verifyRelease,stageBundle=stageRelease,publishBundle=publishRelease,append=appendPackageCatalog}={}){
+export async function publishPackage({bundle,directory=root,env=process.env,runGh=github,verifyBundle=verifyRelease,stageBundle=stageRelease,publishBundle=publishRelease,append=appendPackageCatalog,wait=sleep}={}){
  const repository=hosted(env,directory),project=resolveProject(env.BUILD_PROJECT,directory,{resolvePins:false});
  if(!project.packageProfiles.some(profile=>profile.version===env.BUILD_VERSION))registerSelection({selection:[{id:env.BUILD_PROJECT,version:env.BUILD_VERSION}],directory});
  const sourceRevision=env.GITHUB_SHA,runId=env.GITHUB_RUN_ID;
@@ -70,6 +71,10 @@ export async function publishPackage({bundle,directory=root,env=process.env,runG
    }
    if(release?.tag_name!==tag||release.draft!==false||release.assets?.length!==1||release.assets[0].digest!=='sha256:'+input.sha256)throw Error('Required sealed input is not public with its recorded digest: '+tag);
   }
+ }
+ for(let attempt=0;;attempt++){
+  try{await runGh(['attestation','verify',path.join(bundle,record.asset.filename),'--repo',repository,'--signer-workflow',repository+'/.github/workflows/runtime-build.yml']);break;}
+  catch(error){if(attempt===4)throw error;await wait(1000*2**attempt);}
  }
  const options={bundle,directory,runGh},staged=await stageBundle({...options,target:sourceRevision,resume:true});
  const publication=await publishBundle({...options,publication:staged});
