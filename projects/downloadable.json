@@ -1556,10 +1556,14 @@
       {
         "version": "MCLv3",
         "label": "xsystem4 MCLv3"
+      },
+      {
+        "version": "MCLv5",
+        "label": "xsystem4 MCLv5"
       }
     ],
     "build": {
-      "version": "MCLv3",
+      "version": "MCLv5",
       "command": "tools/build-portable-runtime.mjs",
       "architectures": [
         "x64",
