@@ -9,7 +9,17 @@ import {buildIndex,renderIndex} from '../tools/package-index.mjs';
 import {buildCoverage,currentBuildOutputs} from '../tools/build-coverage.mjs';
 import {readProjects} from '../lib/projects.mjs';
 import {assetName,releaseTag} from '../lib/project-identity.mjs';
+import {catalogFixture,packageRecord,repository} from './helpers/catalog-fixture.mjs';
 const root=path.resolve(import.meta.dirname,'..');
+function indexFixture(t){
+ const {directory,value}=catalogFixture(t,'hashlink',[
+  packageRecord('hashlink',{version:'1.9',arch:'x64'}),
+  packageRecord('hashlink',{version:'1.9',arch:'arm64'}),
+  packageRecord('hashlink',{version:'1.12',arch:'universal'})]);
+ return {directory,index:{repository,projects:[{projectId:'hashlink',name:'HashLink',delivery:'downloadable',
+  catalog:{url:'https://example.invalid/hashlink.json'},releases:value.packages.map(row=>({...row,profile:'HashLink '+row.version+' ABI',anchor:'hashlink-'+row.version.replaceAll('.','-')}))}]}};
+}
+
 test('coverage selects the newest packaging revision per version line and CPU',()=>{
  const versions=['1.0-MCLv1','1.0-MCLv2','1.0-MCLv10','2.0-MCLv1'];
  const project={producer:{kind:'maclauncher'},packageProfiles:versions.map(version=>({version})),build:versions.map(version=>({version,command:'tools/build.mjs',architectures:version==='1.0-MCLv10'?['arm64']:['universal']}))};
@@ -30,7 +40,7 @@ test('a project builds on GitHub when its current version and CPU outputs have v
 });
 test('download pages include only exact verified archive authorities and verification keeps local history separate',async t=>{
  const output=fs.mkdtempSync(path.join(os.tmpdir(),'package-index-'));t.after(()=>fs.rmSync(output,{recursive:true,force:true}));
- const catalogSnapshot=fs.readFileSync(path.join(root,'catalogs/index.json'));
+ const catalogSnapshot=fs.existsSync(path.join(root,'catalogs/index.json'))?fs.readFileSync(path.join(root,'catalogs/index.json')):null;
  const coverage=await buildCoverage(root),result=await buildIndex({directory:root,output}),index=JSON.parse(fs.readFileSync(path.join(output,'index.json'))),html=fs.readFileSync(path.join(output,'index.html'),'utf8');
  const registry=readProjects(root,{resolvePins:false});
  const activeRows=coverage.catalogPackages.filter(row=>row.projectState==='active'&&row.catalogState==='active'&&row.origin!=='local');
@@ -45,7 +55,7 @@ test('download pages include only exact verified archive authorities and verific
  const expected=new Map(published.map(row=>[row.project.id,row])),total=published.reduce((count,row)=>count+row.packages.length,0);
  assert.equal(result.projects,published.length);assert.equal(result.packages,total);
  for(const project of registry.projects){const catalog=JSON.parse(fs.readFileSync(path.join(output,'catalogs',project.id+'.json')));const expected=activeRows.filter(row=>row.projectId===project.id);assert.equal(catalog.packages.length,expected.length);for(const record of catalog.packages)assert.ok(expected.some(row=>row.record.asset.sha256===record.asset.sha256));}
- assert.deepEqual(fs.readFileSync(path.join(root,'catalogs/index.json')),catalogSnapshot);
+ assert.deepEqual(fs.existsSync(path.join(root,'catalogs/index.json'))?fs.readFileSync(path.join(root,'catalogs/index.json')):null,catalogSnapshot);
  assert.deepEqual(index.projects.map(project=>project.projectId).sort(),[...expected.keys()].sort());
  for(const project of index.projects){
   const supplied=expected.get(project.projectId);assert.equal(project.delivery,supplied.project.delivery);
@@ -93,8 +103,8 @@ test('package groups, search, keyboard tabs and deep links operate entirely offl
  location.hash='#hashlink-1-12';events.hashchange();assert.deepEqual(panels.map(panel=>panel.hidden),[false,true]);assert.equal(rows[1].scrolled,true);
  location.hash='#%invalid';assert.doesNotThrow(()=>events.hashchange());
 });
-test('package names and ABI labels are escaped before rendering public HTML',()=>{
- const index=JSON.parse(fs.readFileSync(path.join(root,'catalogs/index.json')));index.projects[0].name='<script>bad()</script>';index.projects[0].releases[0].profile='ABI <unsafe>';
+test('package names and ABI labels are escaped before rendering public HTML',t=>{
+ const {index}=indexFixture(t);index.projects[0].name='<script>bad()</script>';index.projects[0].releases[0].profile='ABI <unsafe>';
  const html=renderIndex(index);assert.ok(html.includes('&lt;script&gt;bad()&lt;/script&gt;'));assert.ok(html.includes('ABI &lt;unsafe&gt;'));assert.equal(html.includes('<script>bad()'),false);
 });
 test('ABI profile metadata rejects duplicate versions and incomplete labels',t=>{
@@ -103,16 +113,11 @@ test('ABI profile metadata rejects duplicate versions and incomplete labels',t=>
  project.packageProfiles=[{version:'1.9-macos-v2',label:''}];fs.writeFileSync(path.join(directory,'projects.json'),JSON.stringify(registry));assert.throws(()=>readProjects(directory),/ABI profiles/);
 });
 
-test('each package states its CPU architecture and the Mac CPUs that can run it',()=>{
- const registry=readProjects(root,{resolvePins:false});
- const index={repository:registry.repository,projects:registry.projects.flatMap(project=>{
-  const file=path.join(root,'catalogs',project.id+'.json');if(!fs.existsSync(file))return[];
-  const releases=JSON.parse(fs.readFileSync(file)).packages;
-  return releases.length?[{projectId:project.id,name:project.name,delivery:project.delivery,catalog:{url:'https://raw.githubusercontent.com/'+registry.repository+'/main/catalogs/'+project.id+'.json'},releases}]:[];
- })},html=renderIndex(index);
+test('each package states its CPU architecture and the Mac CPUs that can run it',t=>{
+ const {index,directory}=indexFixture(t),html=renderIndex(index);
  for(const project of index.projects)for(const release of project.releases){
   assert.ok(['arm64','x64','universal'].includes(release.arch));
-  const catalog=JSON.parse(fs.readFileSync(path.join(root,'catalogs',project.projectId+'.json'))),record=catalog.packages.find(row=>row.version===release.version&&row.arch===release.arch);
+  const catalog=JSON.parse(fs.readFileSync(path.join(directory,'catalogs',project.projectId+'.json'))),record=catalog.packages.find(row=>row.version===release.version&&row.arch===release.arch);
   assert.deepEqual(release.launcherArchitectures,record.launcherArchitectures);
   for(const own of release.arch==='universal'?['arm64','x64']:[release.arch])assert.ok(release.launcherArchitectures.includes(own));
  }
@@ -121,8 +126,8 @@ test('each package states its CPU architecture and the Mac CPUs that can run it'
  assert.ok(html.includes('Intel<span class="secondary">x64 · macOS 13.0+</span>'));
 });
 
-test('ABI links have one anchor when a family gains versions and CPU rows',()=>{
- const index=JSON.parse(fs.readFileSync(path.join(root,'catalogs/index.json'))),project=index.projects.find(p=>p.projectId==='hashlink'),release=project.releases.find(r=>r.anchor==='hashlink-1-9');
+test('ABI links have one anchor when a family gains versions and CPU rows',t=>{
+ const {index}=indexFixture(t),project=index.projects[0],release=project.releases.find(r=>r.anchor==='hashlink-1-9');
  assert.ok(release);project.releases.unshift({...release,version:'1.9-MCLv2'},{...release,version:'1.9-MCLv2',arch:'arm64'});
  const html=renderIndex(index);assert.equal((html.match(/id="hashlink-1-9"/g)||[]).length,1);assert.ok(html.includes('1.9-MCLv2'));assert.ok(html.includes('Apple Silicon'));
 });

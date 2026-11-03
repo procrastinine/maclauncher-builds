@@ -3,6 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
+import {downloadBytes} from '../../tools/download.mjs';
 
 const root=path.resolve(import.meta.dirname,'../..');
 export const recipe=JSON.parse(fs.readFileSync(new URL('./source.json',import.meta.url)));
@@ -43,7 +44,7 @@ async function ffmpeg(buildDirectory,downloads){
  if(!fs.existsSync(cache)||sha(fs.readFileSync(cache))!==entry.sha256){
   const previous=downloads&&path.join(downloads,entry.id+'.zip');let bytes;
   if(previous&&fs.existsSync(previous))bytes=fs.readFileSync(previous);
-  else{const response=await fetch(entry.url);if(!response.ok)throw Error('FFmpeg download failed: '+response.status);bytes=Buffer.from(await response.arrayBuffer());}
+  else bytes=await downloadBytes(entry.url);
   if(bytes.length!==entry.bytes||sha(bytes)!==entry.sha256)throw Error('FFmpeg archive identity differs.');write(cache,bytes);
  }
  const directory=path.join(buildDirectory,'dependencies',entry.id),marker=path.join(directory,'.package-sha256');

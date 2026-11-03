@@ -9,6 +9,7 @@ import {createRequire} from 'node:module';
 import {resolveProject} from '../lib/projects.mjs';
 import {assetName,releaseRecord} from '../lib/project-identity.mjs';
 import {publicDeclaration,verify} from './runtime-package.mjs';
+import {downloadFile} from './download.mjs';
 const require=createRequire(import.meta.url),A=require('../lib/archive.cjs');
 const root=path.resolve(import.meta.dirname,'..'),SHA=/^[a-f0-9]{64}$/,COMMIT=/^[a-f0-9]{40}$/;
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
@@ -139,10 +140,17 @@ export async function recordPublisherFiles({project,inputArchive,archive,record,
 }
 
 /** Download the pinned input archive to a new file, checking its size, checksum and registered subtree. */
-export async function fetchPublisherInput({project,output,directory=root,download=fetch}){
+export async function fetchPublisherInput({project,output,directory=root,download}){
  const input=readPublisherInput({project,directory});if(!input)fail('the project has no registered publisher input.');
  if(!path.isAbsolute(output||'')||fs.existsSync(output))fail('choose a new absolute input archive path.');
- const pin=input.descriptor.input.archive,response=await download(pin.url,{redirect:'follow'});
+ const pin=input.descriptor.input.archive;
+ if(!download){
+  fs.mkdirSync(path.dirname(output),{recursive:true});
+  try{await downloadFile(pin.url,output,{bytes:pin.bytes});await verifyInputArchive(output,input);}
+  catch(error){fs.rmSync(output,{force:true});throw error;}
+  return {project:input.project.id,archive:output,sha256:pin.sha256,bytes:pin.bytes};
+ }
+ const response=await download(pin.url,{redirect:'follow'});
  if(!response.ok||!response.body)fail('the pinned input download returned HTTP '+response.status+'.');
  const digest=crypto.createHash('sha256');let bytes=0;
  const count=new Transform({transform(chunk,_,done){bytes+=chunk.length;digest.update(chunk);done(bytes>pin.bytes?Error('Supplied publisher files: the downloaded input exceeds its pinned size.'):null,chunk);}});

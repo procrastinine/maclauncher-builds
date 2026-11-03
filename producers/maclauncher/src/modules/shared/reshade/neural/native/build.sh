@@ -92,8 +92,8 @@ if [[ ! -f "$destination/mlx.metallib" || "$(shasum -a 256 "$destination/mlx.met
   archive="$cache_root/Cmlx-0.31.6.xcframework.zip"
   archive_hash="a202bf1dcfe1e64404adabfeb5eb363332e3a6221d18e4289ca0663fa3ab86c9"
   if [[ ! -f "$archive" ]]; then
-    curl --fail --location --retry 2 --output "$archive.download" \
-      https://github.com/ml-explore/mlx-swift/releases/download/0.31.6/Cmlx.xcframework.zip
+    node "${MACLAUNCHER_BUILD_DOWNLOAD:-$repo_root/../../tools/download.mjs}" \
+      https://github.com/ml-explore/mlx-swift/releases/download/0.31.6/Cmlx.xcframework.zip "$archive.download"
     mv "$archive.download" "$archive"
   fi
   [[ "$(shasum -a 256 "$archive" | cut -d ' ' -f 1)" == "$archive_hash" ]] || { echo 'MLX artifact checksum mismatch' >&2; exit 1; }

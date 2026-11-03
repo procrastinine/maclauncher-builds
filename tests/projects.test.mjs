@@ -6,13 +6,14 @@ import path from 'node:path';
 import {readProjects,resolveProject} from '../lib/projects.mjs';
 import {validateCatalog,releaseTag} from '../lib/project-identity.mjs';
 import {checkProjects,main} from '../tools/check-updates.mjs';
+import {catalogFixture,packageRecord} from './helpers/catalog-fixture.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 test('project registry covers every selected package and excludes direct upstream binaries',()=>{
  const registry=readProjects(root),ids=new Set(registry.projects.map(value=>value.id));
  const catalogs=fs.readdirSync(path.join(root,'catalogs')).filter(name=>name.endsWith('.json')&&name!=='index.json');
  for(const file of catalogs)assert.ok(ids.has(file.slice(0,-5)),file+' has no registered producer');
- const mpv=resolveProject('mpv',root);assert.equal(mpv.delivery,'downloadable');assert.equal(mpv.producer.sourceDirectory,'producers/mpv-render/v7');assert.equal(mpv.upstreams[0].revision,'41f6a645068483470267271e1d09966ca3b9f413');assert.ok(catalogs.includes('mpv.json'));
- const media=JSON.parse(fs.readFileSync(path.join(root,'catalogs/mpv.json')));assert.equal(media.projectId,'mpv');assert.ok(mpv.packageProfiles.some(value=>value.version==='0.41.0-MCLv7'));assert.ok(mpv.packageProfiles.some(value=>value.version===mpv.build.version));
+ const mpv=resolveProject('mpv',root);assert.equal(mpv.delivery,'downloadable');assert.equal(mpv.producer.sourceDirectory,'producers/mpv-render/v7');assert.equal(mpv.upstreams[0].revision,'41f6a645068483470267271e1d09966ca3b9f413');
+ assert.ok(mpv.packageProfiles.some(value=>value.version==='0.41.0-MCLv7'));assert.ok(mpv.packageProfiles.some(value=>value.version===mpv.build.version));
  for(const file of catalogs){const project=file.slice(0,-5),value=JSON.parse(fs.readFileSync(path.join(root,'catalogs',file)));validateCatalog(value,{project,repository:registry.repository,allowEmpty:Array.isArray(value.packages)&&value.packages.length===0});}
  for(const id of ['nwjs','renpy'])assert.throws(()=>resolveProject(id,root),/Unknown/);
  assert.equal(resolveProject('android',root).producer.recipe,'runtimes/android/source.json');
@@ -54,11 +55,11 @@ test('delivery registries classify each project once and preserve a flat project
  flat.projects[0].delivery='optional';save(flat);assert.throws(()=>readProjects(directory),/delivery classification/);
 });
 
-test('one version keeps a package for each architecture published for it',()=>{
- const registry=readProjects(root,{resolvePins:false}),catalog=JSON.parse(fs.readFileSync(path.join(root,'catalogs/hashlink.json')));
+test('one version keeps a package for each architecture published for it',t=>{
+ const {repository,value:catalog}=catalogFixture(t,'hashlink',[packageRecord('hashlink',{arch:'x64'})]);
  const intel=catalog.packages[0];assert.equal(intel.arch,'x64');assert.deepEqual(intel.launcherArchitectures,['arm64','x64']);
  const other=arch=>{const tag=releaseTag({id:'hashlink',version:intel.version,arch}),filename='hashlink-'+intel.version+'-'+arch+'.tar.gz';
-  return {...intel,arch,launcherArchitectures:arch==='arm64'?['arm64']:['arm64','x64'],tag,asset:{...intel.asset,filename,url:'https://github.com/'+registry.repository+'/releases/download/'+encodeURIComponent(tag)+'/'+filename}};};
- validateCatalog({...catalog,packages:[intel,other('arm64'),other('universal')]},{project:'hashlink',repository:registry.repository});
- assert.throws(()=>validateCatalog({...catalog,packages:[intel,other('arm64'),other('arm64')]},{project:'hashlink',repository:registry.repository}),/Duplicate/);
+  return {...intel,arch,launcherArchitectures:arch==='arm64'?['arm64']:['arm64','x64'],tag,asset:{...intel.asset,filename,url:'https://github.com/'+repository+'/releases/download/'+encodeURIComponent(tag)+'/'+filename}};};
+ validateCatalog({...catalog,packages:[intel,other('arm64'),other('universal')]},{project:'hashlink',repository});
+ assert.throws(()=>validateCatalog({...catalog,packages:[intel,other('arm64'),other('arm64')]},{project:'hashlink',repository}),/Duplicate/);
 });

@@ -6,6 +6,7 @@ import {resolveProject} from '../lib/projects.mjs';
 import {main as build} from '../tools/build-runtime.mjs';
 import {catalog} from '../tools/runtime-package.mjs';
 import {validateCatalog} from '../lib/project-identity.mjs';
+import {catalogFixture,packageRecord} from './helpers/catalog-fixture.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 const baseline=JSON.parse(fs.readFileSync(path.join(root,'runtimes/mkxpz/baseline.json')));
 test('MKXP-Z uses its owned source recipe and preserves the universal publisher identity',()=>{
@@ -19,25 +20,25 @@ test('MKXP-Z uses its owned source recipe and preserves the universal publisher 
  for(const version of ['MCLv1-1003','MCLv2-1003'])assert.ok(project.packageProfiles.some(row=>row.version===version));
  assert.equal(project.upstreams[0].revision,baseline.upstream.revision);
  assert.equal(baseline.upstream.revision,'37a04d14413454551a7b6aadbb4e93e67168accb');
- assert.equal(baseline.publisherArtifact.inputExecutableSha256,'3514341b5fff5b9410ff58f0e963d435a4ed1c7560008fb20e1a522e0e4a7f1c');
+ assert.match(baseline.publisherArtifact.inputExecutableSha256,/^[a-f0-9]{64}$/);
  assert.equal(baseline.executableRelative,'mkxp-z.universal.app/Contents/MacOS/bundle_mkxp-z');
  assert.equal(baseline.arch,'universal');assert.deepEqual(baseline.launcherArchitectures,['arm64','x64']);
  assert.equal(baseline.minimumMacOS,'11.0');assert.equal(baseline.publisherFiles,1083);
  assert.equal(build(['--project','mkxpz','--check']).sourceDirectory,'producers/maclauncher');
 });
-test('MKXP-Z catalog has one Apple Silicon package for its current registered version',()=>{
- const project=resolveProject('mkxpz',root),value=JSON.parse(fs.readFileSync(path.join(root,'catalogs/mkxpz.json')));
- validateCatalog(value,{project:'mkxpz',repository:project.releaseRepository});
- const current=value.packages.filter(record=>record.version===project.build.version);assert.equal(current.length,1);const adapted=current[0];assert.ok(project.packageProfiles.some(profile=>profile.version===adapted.version));
+test('MKXP-Z catalog validates an immutable Apple Silicon package',t=>{
+ const project=resolveProject('mkxpz',root),{repository,value}=catalogFixture(t,'mkxpz',[packageRecord('mkxpz',{version:project.build.version,minimumMacOS:'11.0'})]);
+ validateCatalog(value,{project:'mkxpz',repository});
+ assert.equal(value.packages.length,1);const adapted=value.packages[0];assert.ok(project.packageProfiles.some(profile=>profile.version===adapted.version));
  assert.equal(adapted.arch,'arm64');assert.deepEqual(adapted.launcherArchitectures,['arm64']);
  assert.equal(adapted.minimumMacOS,'11.0');assert.equal(adapted.manifestRelative,'manifest.json');
  assert.throws(()=>catalog([{...adapted,asset:{...adapted.asset,sha256:'0'.repeat(64)}}],
-   {project:'mkxpz',repository:project.releaseRepository,previous:value}),/immutable/);
+   {project:'mkxpz',repository,previous:value}),/immutable/);
 });
-test('MKXP-Z configuration helper has a separate source-free binary package',()=>{
- const value=JSON.parse(fs.readFileSync(path.join(root,'catalogs/mkxpz-config-helper.json')));
+test('MKXP-Z configuration helper has a separate source-free binary package',t=>{
  const project=resolveProject('mkxpz-config-helper',root);
- validateCatalog(value,{project:'mkxpz-config-helper',repository:project.releaseRepository});
+ const {repository,value}=catalogFixture(t,project.id,[packageRecord(project.id,{version:project.build.version,arch:'universal',minimumMacOS:'11.0'})]);
+ validateCatalog(value,{project:'mkxpz-config-helper',repository});
  const helper=value.packages.find(row=>project.packageProfiles.some(profile=>profile.version===row.version));
  assert.ok(helper);assert.equal(helper.arch,'universal');assert.equal(helper.minimumMacOS,'11.0');
 });

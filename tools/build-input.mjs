@@ -2,8 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import crypto from 'node:crypto';
 import path from 'node:path';
-import {execFile} from 'node:child_process';
-import {promisify} from 'node:util';
+import {downloadFile} from './download.mjs';
 import {sha} from './helper-package.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 /** Fetch a declared public build input once; cached bytes always need its checksum. */
@@ -17,7 +16,7 @@ export async function buildInput({url,sha256,bytes,headers={}},cache=path.join(o
  try {
   // Stream with the system HTTP client. Node 24's bundled Undici can abort the
   // process when a peer closes a response while its body parser is paused.
-  await promisify(execFile)('curl',['--fail','--silent','--show-error','--location','--retry','2','--retry-all-errors','--retry-delay','1','--retry-max-time','600','--proto','=https','--proto-redir','=https','--connect-timeout','30','--max-time','600',...Object.entries(headers).flatMap(([name,value])=>['--header',name+': '+value]),'--output',temporary,url],{timeout:610000});
+  await downloadFile(url,temporary,{headers});
   if(!valid(temporary))throw Error('Build input checksum or size differs: '+url);
   fs.renameSync(temporary,target);return target;
  }finally{fs.rmSync(temporary,{force:true});}

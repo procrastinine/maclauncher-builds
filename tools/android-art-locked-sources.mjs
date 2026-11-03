@@ -3,6 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {run} from './build-source.mjs';
+import {downloadFileSync} from './download.mjs';
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const safe=value=>typeof value==='string'&&!path.isAbsolute(value)&&!value.split('/').some(part=>part==='.'||part==='..'||part==='');
 
@@ -41,7 +42,7 @@ export function acquireLockedArtSources({source,output,work}){
   const archive=path.join(temporary,'input'),url='https://android.googlesource.com/'+record.project+(record.file?'/+/':'/+archive/')+record.revision+(record.path?'/'+record.path:'')+(record.file?'?format=TEXT':'.tar.gz');
   try{
    try{
-    run('curl',['--fail','--silent','--show-error','--location','--retry','2','--retry-all-errors','--proto','=https','--proto-redir','=https','--max-time','600','--output',archive,url],{timeout:610000});
+    downloadFileSync(url,archive);
     if(record.file)fs.writeFileSync(destination,Buffer.from(fs.readFileSync(archive,'utf8'),'base64'),{flag:'wx'});
     else{
      const names=execFileSync('/usr/bin/tar',['-tzf',archive],{encoding:'utf8',maxBuffer:16<<20}).split('\n').filter(Boolean);

@@ -43,3 +43,7 @@ When the commit is inside an array, `match` selects the entry by its fields rath
 Catalog indexing and the preparation and verification of finished releases use `resolvePins:false`. These operations check the syntax of each reference without loading producer modules or needing the source submodules. Update checks and source builds resolve the references they need. Resolving the Android references needs only the `sources/maclauncher-android` submodule, without its nested AOSP checkouts, and the source workflow initializes that submodule. The package-index workflow also runs when a file that a reference points to changes.
 
 Commits written directly into an upstream entry are accepted only in resolved, self-contained copies of the registry. The update checker never changes a reference or the commit a producer records.
+
+## HTTP build inputs
+
+Build-input downloads use one HTTP transport with up to five attempts and exponential backoff. Connections have a 20-second timeout; transfers below 1 KB/s for 60 seconds are treated as stalled. Healthy transfers have no duration cap. Stalls, interrupted connections, HTTP 429 and server failures can retry. Other client errors, including HTTP 404, fail immediately. Source-object, archive-size and checksum verification follows the download and is never retried as a transport failure. HTTPS inputs remain on HTTPS across redirects.

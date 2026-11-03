@@ -10,6 +10,7 @@ import {resolveProject} from '../lib/projects.mjs';
 import {androidBuildInputRequirements} from '../tools/android-signed-inputs.mjs';
 import {catalog} from '../tools/runtime-package.mjs';
 import {assetUrl} from '../lib/project-identity.mjs';
+import {catalogFixture,packageRecord,repository} from './helpers/catalog-fixture.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 
 test('package versions follow product source ownership, not ownership of a wrapper recipe',t=>{
@@ -42,31 +43,30 @@ test('owned version suggestions use semantic versions while explicit registered 
 
 });
 
-test('existing Android signed input leaves retain their historical identities',()=>{
+test('Android signed input versions are declared independently of publication history',t=>{
  for(const input of androidBuildInputRequirements()){
   const project=resolveProject(input.id,root,{resolvePins:false});
   assert.match(input.version,/^0\.1\.0-MCLv[1-9]\d*$/,input.id);
-  const history=JSON.parse(fs.readFileSync(path.join(root,'catalogs',input.id+'.json')));
-  assert.ok(history.packages.some(record=>record.version==='0.1.0-MCLv1'),input.id+' retains its original signed version');
+  assert.ok(project.packageProfiles.some(profile=>profile.version===input.version),input.id+' declares its required input version');
+  const {value}=catalogFixture(t,input.id,[packageRecord(input.id,{version:input.version})]);
+  assert.equal(value.packages[0].version,input.version);
  }
 });
 
-test('the ordinary Builds catalog places 0.2.1 before 0.2.0-MCLv1 and preserves the old record',()=>{
- const previous=JSON.parse(fs.readFileSync(path.join(root,'catalogs/android.json'))),old=previous.packages.find(p=>p.version==='0.2.0-MCLv1');
+test('the ordinary Builds catalog places 0.2.1 before 0.2.0-MCLv1 and preserves the old record',t=>{
+ const {value:previous}=catalogFixture(t,'android',[packageRecord('android',{version:'0.2.0-MCLv1'})]),old=previous.packages[0];
  const record={...old,version:'0.2.1',asset:{...old.asset,filename:'android-0.2.1-arm64.tar.gz'}};delete record.tag;
- record.asset.url=assetUrl(record,'procrastinine/maclauncher-builds');
- const result=catalog([record],{project:'android',repository:'procrastinine/maclauncher-builds',previous});
+ record.asset.url=assetUrl(record,repository);
+ const result=catalog([record],{project:'android',repository:repository,previous});
  assert.equal(result.packages[0].version,'0.2.1');assert.deepEqual(result.packages.find(p=>p.version===old.version),old);
 });
 
 
-test('catalog ordering uses declared semantic versions for every legacy label',()=>{
- const history=['catalogs/gamemaker-opengl-helper.json','catalogs/superseded/gamemaker-opengl-helper.json'].flatMap(file=>fs.existsSync(path.join(root,file))?JSON.parse(fs.readFileSync(path.join(root,file))).packages:[]);
- const old=history.find(record=>record.version==='software-gl-v3-MCLv3');assert.ok(old);
- const previous={schemaVersion:2,projectId:old.id,updatePolicy:'manual',packages:[old]};
+test('catalog ordering uses declared semantic versions for every legacy label',t=>{
+ const {value:previous}=catalogFixture(t,'gamemaker-opengl-helper',[packageRecord('gamemaker-opengl-helper',{version:'software-gl-v3-MCLv3',arch:'universal'})]),old=previous.packages[0];
  const next={...old,version:'3.0.1',asset:{...old.asset,filename:'gamemaker-opengl-helper-3.0.1-universal.tar.gz'}};delete next.tag;
- next.asset.url=assetUrl(next,'procrastinine/maclauncher-builds');
- const result=catalog([next],{project:old.id,repository:'procrastinine/maclauncher-builds',previous});
+ next.asset.url=assetUrl(next,repository);
+ const result=catalog([next],{project:old.id,repository:repository,previous});
  assert.equal(result.versionSemantics[old.version],'3.0.0');
  assert.equal(result.packages[0].version,'3.0.1');assert.deepEqual(result.packages.find(p=>p.version===old.version),old);
  for(let a=0;a<result.packages.length;a++)for(let b=a+1;b<result.packages.length;b++)

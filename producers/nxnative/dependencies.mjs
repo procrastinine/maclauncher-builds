@@ -7,6 +7,8 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 
+import { downloadBytes } from '../../tools/download.mjs';
+
 const execute = promisify(execFile);
 const directory = path.dirname(fileURLToPath(import.meta.url));
 const repository = path.resolve(directory, '../..');
@@ -36,9 +38,7 @@ async function acquire(input, cache) {
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
   }
-  const response = await fetch(input.url, { signal: AbortSignal.timeout(120000) });
-  if (!response.ok) throw new Error(`Dependency download failed (${response.status}): ${input.filename}`);
-  const bytes = Buffer.from(await response.arrayBuffer());
+  const bytes = await downloadBytes(input.url);
   if (bytes.length !== input.bytes || crypto.createHash(algorithm).update(bytes).digest('hex') !== expected)
     throw new Error(`Dependency checksum differs: ${input.filename}`);
   const temporary = target + '.partial';

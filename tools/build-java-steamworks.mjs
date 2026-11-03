@@ -5,6 +5,7 @@ import {createRequire} from 'node:module';
 import {helperPackage,sha} from './helper-package.mjs';
 import {resolveProject} from '../lib/projects.mjs';
 import {recipeMain} from './build-source.mjs';
+import {downloadBytes} from './download.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/maclauncher/src/modules/java/runtime/steamworks');
 const {build}=require(path.join(base,'build-agent.cjs')),Zip=require('../producers/maclauncher/src/modules/shared/runtime/zip.js'),catalog=require(path.join(base,'versions.json'));
 /** Select the original ABI source independently of the Builds package revision. */
@@ -17,7 +18,7 @@ export async function buildJavaSteamworks({project:id,arch,version,output,work})
  const project=resolveProject(id,root,{resolvePins:false}),original=javaSteamworksProfile(version);
  const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});fs.mkdirSync(work,{recursive:true});
  try {
-  const publisher=path.join(work,'publisher.jar'),response=await fetch(original.publisherUrl);if(!response.ok)throw Error('Publisher archive returned HTTP '+response.status);fs.writeFileSync(publisher,Buffer.from(await response.arrayBuffer()));
+  const publisher=path.join(work,'publisher.jar');fs.writeFileSync(publisher,await downloadBytes(original.publisherUrl));
   if(sha(publisher)!==original.publisherJarSha256)throw Error('Publisher Steamworks4j archive checksum differs.');
   const bytes=Zip.readZipEntryBuffer(publisher,'libsteamworks4j.dylib'),library=path.join(payload,'libsteamworks4j.dylib');fs.writeFileSync(library,bytes,{mode:0o755});
   if(sha(library)!==original.jniSha256||bytes.length!==original.jniSize)throw Error('Publisher JNI library differs.');

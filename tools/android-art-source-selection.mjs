@@ -3,6 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
+import {downloadFile} from './download.mjs';
 const execute=promisify(execFile);
 const object=(type,bytes)=>crypto.createHash('sha1').update(type+' '+bytes.length+'\0').update(bytes).digest();
 export function gitSourceObject(file){
@@ -25,7 +26,7 @@ export async function acquireArtSourceSelection(record,destination){
   const output=path.join(destination,selected),archive=path.join(destination,'.input-'+crypto.randomUUID());fs.mkdirSync(path.dirname(output),{recursive:true});
   const url=record.repository+(expected.type==='tree'?'/+archive/':'/+/')+record.revision+'/'+selected+(expected.type==='tree'?'.tar.gz':'?format=TEXT');
   try{
-   await execute('curl',['--fail','--silent','--show-error','--location','--retry','2','--retry-all-errors','--proto','=https','--proto-redir','=https','--max-time','600','--output',archive,url],{timeout:610000,maxBuffer:4<<20});
+   await downloadFile(url,archive);
    const size=fs.statSync(archive).size,transportSha256=crypto.createHash('sha256');for await(const bytes of fs.createReadStream(archive))transportSha256.update(bytes);
    if(expected.type==='tree'){
     const {stdout}=await execute('/usr/bin/tar',['-tzf',archive],{maxBuffer:8<<20});

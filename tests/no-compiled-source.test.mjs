@@ -18,8 +18,8 @@ test('tracked source contains no compiled code or archives',()=>{
   ['RPA',['5250412d322e30','5250412d332e30']],['SPIR-V',['03022307','07230203']],
  ].flatMap(([kind,hexes])=>hexes.map(hex=>({kind,magic:Buffer.from(hex,'hex')})));
  for(const file of execFileSync('git',['ls-files','-z'],{cwd:root}).toString().split('\0').filter(Boolean)){
-  const absolute=path.join(root,file),stat=fs.lstatSync(absolute);
-  if(!stat.isFile())continue; // Gitlinks and source symlinks contain no local payload.
+  const absolute=path.join(root,file),stat=fs.lstatSync(absolute,{throwIfNoEntry:false});
+  if(!stat?.isFile())continue; // Deleted files, Gitlinks and symlinks contain no local payload.
   const bytes=fs.readFileSync(absolute),head=bytes.subarray(0,16);
   // Original artwork and font formats are source assets.
   if(['89504e470d0a1a0a','ffd8ff','474946383761','474946383961','00000100','49492a00','4d4d002a','00010000','4f54544f','74746366','774f4646','774f4632'].some(hex=>head.subarray(0,hex.length/2).equals(Buffer.from(hex,'hex')))||head.subarray(0,2).toString()==='BM'||head.subarray(0,4).toString()==='RIFF'&&head.subarray(8,12).toString()==='WEBP')continue;
