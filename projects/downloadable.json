@@ -2121,10 +2121,14 @@
       {
         "version": "1.0.1-MCLv2",
         "label": "FidelityFX API 1.0.1 Vulkan 1.0.1-MCLv2"
+      },
+      {
+        "version": "1.0.1-MCLv3",
+        "label": "FidelityFX API 1.0.1 Vulkan 1.0.1-MCLv3"
       }
     ],
     "build": {
-      "version": "1.0.1-MCLv2",
+      "version": "1.0.1-MCLv3",
       "command": "tools/build-fidelityfx-api.mjs",
       "architectures": [
         "x64"
