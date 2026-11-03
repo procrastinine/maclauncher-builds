@@ -1328,10 +1328,14 @@
       {
         "version": "0.1.0-MCLv3",
         "label": "Android flag generator 0.1.0-MCLv3"
+      },
+      {
+        "version": "0.1.0-MCLv4",
+        "label": "Android flag generator 0.1.0-MCLv4"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv3",
+      "version": "0.1.0-MCLv4",
       "command": "tools/build-android-aconfig.mjs",
       "architectures": [
         "arm64"
