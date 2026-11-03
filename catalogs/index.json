@@ -2997,10 +2997,41 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reminori",
       "catalog": {
         "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/reminori.json",
-        "sha256": "f0f27c612b16b23711411e4664641500aae4ce4854eae1d5dc2efc68cf260b2b",
-        "bytes": 3123
+        "sha256": "7affe22a3102c816fa1b4621e9d51b2ed2fec2174954260c8f6db6439bc23df5",
+        "bytes": 4637
       },
       "releases": [
+        {
+          "version": "0.1.0-MCLv3",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "reminori/v0.1.0-MCLv3/x64",
+          "asset": {
+            "filename": "reminori-0.1.0-MCLv3-x64.tar.gz",
+            "sha256": "196110727d6bada7a70f944b35ddf80ada9705c701418af76684fe6af2421668",
+            "bytes": 6133201,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reminori%2Fv0.1.0-MCLv3%2Fx64/reminori-0.1.0-MCLv3-x64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "66bddd70fb09b14ea7bcc1f4c7fc7fabacf05c05",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.19.0",
+              "zlib": "1.3.2.1-motley-3246f1b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+              "xcode": "Xcode 26.6\nBuild version 17F113",
+              "macosSDK": "26.5"
+            },
+            "runId": "41545852748",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reminori",
+          "profile": "ReMinori 0.1.0-MCLv3"
+        },
         {
           "version": "0.1.0-MCLv2",
           "arch": "x64",
