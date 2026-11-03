@@ -11,6 +11,18 @@ const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirna
 const run=(command,args,options={})=>String(execFileSync(command,args,{encoding:'utf8',maxBuffer:64<<20,...options})||'').trim();
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const prefix=name=>run('brew',['--prefix',name]);
+/** pkgconf follows private cflags requirements even for dynamic linking. The
+ * selected Apple SDK supplies these libraries without Homebrew formulae. */
+export function sdkCompressionPkgConfig({sdk,directory}){
+ const version=(file,pattern)=>{const match=pattern.exec(fs.readFileSync(path.join(sdk,'usr/include',file),'utf8'));if(!match)throw Error('The selected SDK has no compression library version: '+file);return match[1];};
+ const packages=[['zlib',version('zlib.h',/#define ZLIB_VERSION "([0-9.]+)"/),'z'],['bzip2',version('bzlib.h',/bzip2\/libbzip2 version ([0-9.]+)/),'bz2']];
+ fs.mkdirSync(directory,{recursive:true});
+ for(const [name,release,library] of packages){
+  fs.accessSync(path.join(sdk,'usr/lib','lib'+library+'.tbd'));
+  fs.writeFileSync(path.join(directory,name+'.pc'),'prefix='+path.join(sdk,'usr')+'\nName: '+name+'\nDescription: Apple SDK '+name+'\nVersion: '+release+'\nLibs: -l'+library+'\nCflags:\n');
+ }
+ return directory;
+}
 export async function buildMPV({project:id,arch,output,work}){
  const record=buildRecord(resolveProject(id,root));
  fs.mkdirSync(work,{recursive:true});
@@ -19,7 +31,9 @@ export async function buildMPV({project:id,arch,output,work}){
  const Builder=require(path.join(producer,'maclauncher/scripts/build-mpv-library.cjs'));
  (await import(pathToFileURL(path.join(producer,'package.mjs')))).checkSources();
  run('git',['-C',source,'fetch','--depth','2','origin',Builder.REVISION,...Builder.BACKPORTS],{stdio:'inherit'});
- const pkgConfigPath=['ffmpeg','libass','libplacebo','luajit','mujs'].map(name=>path.join(prefix(name),'lib/pkgconfig')).join(path.delimiter);
+ const sdk=process.env.SDKROOT||run('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path']);
+ const sdkPackages=sdkCompressionPkgConfig({sdk,directory:path.join(work,'sdk-pkgconfig')});
+ const pkgConfigPath=[sdkPackages,...['ffmpeg','libass','libplacebo','luajit','mujs'].map(name=>path.join(prefix(name),'lib/pkgconfig'))].join(path.delimiter);
  const built=Builder.build({sourceCheckout:source,workDirectory:path.join(work,'library'),toolsDirectory:tools.bin,pkgConfigPath,minimumMacOS:'14.0',jobs:4});
  const recipe=JSON.parse(fs.readFileSync(path.join(producer,'source.json'))),owned=path.join(producer,'maclauncher'),staged=path.join(work,'staged'),app=path.join(staged,'mpv.app'),executable=path.join(app,'Contents/MacOS/mpv');
  fs.mkdirSync(path.dirname(executable),{recursive:true});fs.mkdirSync(path.join(app,'Contents/Frameworks/video'),{recursive:true});
