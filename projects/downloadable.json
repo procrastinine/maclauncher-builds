@@ -1048,10 +1048,14 @@
       {
         "version": "0.2.0-MCLv3",
         "label": "OpenGMK 0.2.0-MCLv3"
+      },
+      {
+        "version": "0.2.0-MCLv4",
+        "label": "OpenGMK 0.2.0-MCLv4"
       }
     ],
     "build": {
-      "version": "0.2.0-MCLv3",
+      "version": "0.2.0-MCLv4",
       "command": "tools/build-opengmk.mjs",
       "architectures": [
         "arm64"
