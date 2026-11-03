@@ -1488,10 +1488,14 @@
       {
         "version": "MCLv3",
         "label": "Android ANGLE for JVM and ART MCLv3"
+      },
+      {
+        "version": "MCLv4",
+        "label": "Android ANGLE for JVM and ART MCLv4"
       }
     ],
     "build": {
-      "version": "MCLv3",
+      "version": "MCLv4",
       "command": "tools/build-android-angle.mjs",
       "architectures": [
         "arm64"
