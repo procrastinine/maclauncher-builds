@@ -916,10 +916,14 @@
       {
         "version": "0.5.3-MCLv3",
         "label": "libnpengine Mac runner 0.5.3-MCLv3"
+      },
+      {
+        "version": "0.5.3-MCLv5",
+        "label": "libnpengine Mac runner 0.5.3-MCLv5"
       }
     ],
     "build": {
-      "version": "0.5.3-MCLv3",
+      "version": "0.5.3-MCLv5",
       "command": "tools/build-npengine.mjs",
       "architectures": [
         "arm64"
