@@ -696,6 +696,50 @@
       ]
     },
     {
+      "projectId": "reshade",
+      "name": "MacLauncher graphics",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reshade",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/reshade.json",
+        "sha256": "4e8e1e7841b943a00cc34ec9f415010a88bfc94e7498e81f2358bd310e65dfd6",
+        "bytes": 1637
+      },
+      "releases": [
+        {
+          "version": "0.3.2",
+          "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "reshade/v0.3.2/universal",
+          "asset": {
+            "filename": "reshade-0.3.2-universal.tar.gz",
+            "sha256": "85bb656d80d040b2fd8447c43ac05eb9c098492be2093a14c16d08eeaf98ed49",
+            "bytes": 59657597,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/reshade%2Fv0.3.2%2Funiversal/reshade-0.3.2-universal.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41578840793",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#reshade",
+          "profile": "MacLauncher graphics 0.3.2"
+        }
+      ]
+    },
+    {
       "projectId": "vnds-love",
       "name": "VNDS-LOVE",
       "delivery": "downloadable",
