@@ -8,7 +8,6 @@ import {setTimeout as sleep} from 'node:timers/promises';
 import {readProjects,resolveProject,buildRecords} from '../lib/projects.mjs';
 import {parseSelection,registerSelection} from './release-selection.mjs';
 import {recordFromDeclaration,stageRelease,publishRelease,applyRelease} from './release-runtime.mjs';
-import {publicDeclaration} from './runtime-package.mjs';
 import {releaseTag} from '../lib/project-identity.mjs';
 const root=path.resolve(import.meta.dirname,'..'),exec=promisify(execFile);
 const json=file=>JSON.parse(fs.readFileSync(file,'utf8'));
@@ -18,13 +17,13 @@ const github=async(args,options={})=>(await exec('gh',args,{encoding:'utf8',maxB
 const archiveEntry=async(archive,name,maxBytes)=>(await exec('tar',['-xzOf',archive,name],{encoding:'buffer',maxBuffer:maxBytes})).stdout;
 const stable=value=>JSON.stringify(value,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))):v);
 async function sha256File(file){const hash=crypto.createHash('sha256');for await(const chunk of fs.createReadStream(file))hash.update(chunk);return hash.digest('hex');}
-/** The build job verified every archived file. Publication checks the archive digest and reads only its inventory. */
+/** The build job verified every archived file and its declaration. Publication checks only that this archive and its record are that sealed package. */
 export async function sealedBundle({bundle,directory=root}){
  const names=fs.readdirSync(bundle),sidecar=names.find(name=>name.endsWith('.tar.gz.json'));
  if(names.length!==2||!sidecar)throw Error('Select a directory containing exactly one runtime archive and its package record.');
  const record=json(path.join(bundle,sidecar)),{filename,sha256,bytes}=record.asset,archive=path.join(bundle,filename);
  if(sidecar!==filename+'.json'||fs.statSync(archive).size!==bytes||await sha256File(archive)!==sha256)throw Error('Release asset checksum or size changed.');
- const declaration=publicDeclaration(JSON.parse(await archiveEntry(archive,'runtime-package.json',8<<20)));
+ const declaration=JSON.parse(await archiveEntry(archive,'runtime-package.json',Infinity));
  if(stable(recordFromDeclaration(declaration,{filename,sha256,bytes},record.sourceAsset,record.source,record))!==stable(record))throw Error('Release record differs from the sealed runtime archive.');
  return {record,declaration,release:{repository:resolveProject(record.id,directory,{resolvePins:false}).releaseRepository,id:record.id,version:record.version,arch:record.arch,tag:releaseTag(record)}};
 }
@@ -73,7 +72,7 @@ export async function publishPackage({bundle,directory=root,env=process.env,runG
  if(reports&&declaration.files.find(file=>file.path==='build-definition.json')?.sha256!==reports[record.id]?.definitionDigest)throw Error('The sealed build definition differs from the plan.');
  const traceFile=declaration.files.find(file=>file.path==='build-inputs.json');
  if(traceFile){
-  // Only the input trace is read back from the verified archive; licence notices can exceed the metadata limit.
+  // Only the input trace is read back from the verified archive.
   const bytes=await readMember(path.join(bundle,record.asset.filename),'files/build-inputs.json',traceFile.size+1);
   const trace=crypto.createHash('sha256').update(bytes).digest('hex')===traceFile.sha256?JSON.parse(bytes.toString('utf8')):null;
   if(trace?.schemaVersion!==1||!Array.isArray(trace.inputs))throw Error('The sealed build-input report is missing or invalid.');
