@@ -1,0 +1,60 @@
+{
+  "id": "xsys35-decompiler",
+  "version": "1.13.0-MCLv3",
+  "arch": "x64",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "xsys35-decompiler/1.13.0-MCLv3/x64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "f4b52ac6eff03f055dd6dcc9c5a4ba1a18e864b3c21e365197237d7b555ca301",
+  "sourceSha256": "f4b52ac6eff03f055dd6dcc9c5a4ba1a18e864b3c21e365197237d7b555ca301",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 16185,
+      "mode": 420,
+      "sha256": "5dc06e3be905485436b56f880b05b28ae161966d70e213facdb01ad042361053"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "b2e607d05ac8b6b96408325c1314b1f8481139bbbce03064665aa8cbb6ed4fcc"
+    },
+    {
+      "path": "files/bin/xsys35dc",
+      "size": 130480,
+      "sha256": "e0f41bb2752847041d2e41716b89fb621b889e991cd22eaf3816570fa68d0ad6",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/licenses/upstream/0-COPYING",
+      "size": 18092,
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 2944,
+      "mode": 420,
+      "sha256": "f4b52ac6eff03f055dd6dcc9c5a4ba1a18e864b3c21e365197237d7b555ca301"
+    }
+  ],
+  "notices": [
+    {
+      "name": "xsys35c",
+      "license": "GPL-2.0-or-later",
+      "sourceUrl": "https://github.com/kichikuou/xsys35c",
+      "path": "files/licenses/upstream/0-COPYING"
+    }
+  ],
+  "redistribution": "bundle"
+}
