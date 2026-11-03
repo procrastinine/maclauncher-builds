@@ -1,0 +1,101 @@
+{
+  "id": "vulkan-moltenvk-scene",
+  "version": "1.4.2-MCLv4",
+  "arch": "universal",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "sourceRelative": null,
+  "sourceSha256": "43d8851d7a251d82f038f751a9e0af3ed1b263baabca2aaf3f8641326d972580",
+  "directoryRelative": "vulkan-moltenvk-scene/1.4.2-MCLv4/universal",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "3d85f612ed1b4c7cad5eba06de830b3108a303af14a1b215d16f3c5e031a567a",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 18348,
+      "mode": 420,
+      "sha256": "f017f0671b1a6386fbcb77e326f31a0f505c1b8707c74bea47649eb92ee6eca6"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "c6319d58f79943632eb518d413fc363588bfaf362cb553635940c2f909dcc5ac"
+    },
+    {
+      "path": "cereal-LICENSE",
+      "size": 1542,
+      "mode": 420,
+      "sha256": "58604a126af6a671ea390ee3d5b3e42228aa59b2858fb7af1d5b20b31739ccbb"
+    },
+    {
+      "path": "libMoltenVK-scene.dylib",
+      "size": 10788704,
+      "mode": 493,
+      "sha256": "c9522bfe28cc0da46305fb17753de2e3d99c8ac4eb318186591f09fefe1900fc",
+      "architectures": [
+        "arm64",
+        "x86_64"
+      ]
+    },
+    {
+      "path": "manifest.json",
+      "size": 15636,
+      "mode": 420,
+      "sha256": "3d85f612ed1b4c7cad5eba06de830b3108a303af14a1b215d16f3c5e031a567a"
+    },
+    {
+      "path": "MoltenVK-LICENSE",
+      "size": 11358,
+      "mode": 420,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "provider.json",
+      "size": 6371,
+      "mode": 420,
+      "sha256": "074577769b2204d7b5aafbe63fd70cc8e48b98a6ea3ae39ccb94042a900ade78"
+    },
+    {
+      "path": "SPIRV-Cross-LICENSE",
+      "size": 11358,
+      "mode": 420,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "Vulkan-Headers-LICENSE",
+      "size": 12941,
+      "mode": 420,
+      "sha256": "e884291ccffa2238bbd12375614b75f3cb4809ea606923b198afc68306a553b9"
+    }
+  ],
+  "notices": [
+    {
+      "name": "MoltenVK",
+      "license": "Apache-2.0",
+      "sourceUrl": "https://github.com/KhronosGroup/MoltenVK.git",
+      "path": "MoltenVK-LICENSE"
+    },
+    {
+      "name": "SPIRV-Cross",
+      "license": "Apache-2.0",
+      "sourceUrl": "https://github.com/KhronosGroup/SPIRV-Cross.git",
+      "path": "SPIRV-Cross-LICENSE"
+    },
+    {
+      "name": "Vulkan-Headers",
+      "license": "Apache-2.0 OR MIT",
+      "sourceUrl": "https://github.com/KhronosGroup/Vulkan-Headers.git",
+      "path": "Vulkan-Headers-LICENSE"
+    },
+    {
+      "name": "cereal",
+      "license": "BSD-3-Clause",
+      "sourceUrl": "https://github.com/USCiLab/cereal.git",
+      "path": "cereal-LICENSE"
+    }
+  ]
+}
