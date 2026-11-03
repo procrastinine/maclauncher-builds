@@ -1806,10 +1806,42 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#hashlink",
       "catalog": {
         "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/hashlink.json",
-        "sha256": "ae5f4bf036f6941721d727f1637067384c7b898aa16ae2a8dfa94e2f6460412f",
-        "bytes": 3990
+        "sha256": "b64cf9915f119eeea56d4cb36b39dec314c203608cf6b4399579abdfd0ffc2bd",
+        "bytes": 5941
       },
       "releases": [
+        {
+          "version": "1.12-MCLv3",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "hashlink/v1.12-MCLv3/x64",
+          "asset": {
+            "filename": "hashlink-1.12-MCLv3-x64.tar.gz",
+            "sha256": "bd7fecc662d75de9f74829bc3e1ca4cf2d4a3c1ab8a891318776bff70ca7d8d4",
+            "bytes": 2093310,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/hashlink%2Fv1.12-MCLv3%2Fx64/hashlink-1.12-MCLv3-x64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "66bddd70fb09b14ea7bcc1f4c7fc7fabacf05c05",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.19.0",
+              "zlib": "1.3.2.1-motley-3246f1b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+              "xcode": "Xcode 26.6\nBuild version 17F113",
+              "macosSDK": "26.5"
+            },
+            "runId": "41545818437",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#hashlink-1-12",
+          "profile": "HashLink 1.12 ABI 1.12-MCLv3",
+          "anchor": "hashlink-1-12"
+        },
         {
           "version": "1.9-MCLv2",
           "arch": "x64",
