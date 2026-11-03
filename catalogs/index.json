@@ -496,6 +496,46 @@
       ]
     },
     {
+      "projectId": "android-image-data-4",
+      "name": "Android original image data 4",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-image-data-4",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-image-data-4.json",
+        "sha256": "28a3148bf1b18d4d1897fc5aae5e08e3d410b270511ee2c8176ef88df927de51",
+        "bytes": 1559
+      },
+      "releases": [
+        {
+          "version": "16.0.0-MCLv2",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "android-image-data-4/v16.0.0-MCLv2/arm64",
+          "asset": {
+            "filename": "android-image-data-4-16.0.0-MCLv2-arm64.tar.gz",
+            "sha256": "40a7657621d5730546bf7515327db2712f49fb3d0eb3b5f25ff7a404edf219d6",
+            "bytes": 357131651,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-image-data-4%2Fv16.0.0-MCLv2%2Farm64/android-image-data-4-16.0.0-MCLv2-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b"
+            },
+            "runId": "41578842959",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-image-data-4",
+          "profile": "Android original image data 4 16.0.0-MCLv2"
+        }
+      ]
+    },
+    {
       "projectId": "android-java-framework",
       "name": "Android Java framework input",
       "delivery": "bundled",
