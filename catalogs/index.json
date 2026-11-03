@@ -813,6 +813,47 @@
       ]
     },
     {
+      "projectId": "android-launcher",
+      "name": "Android launcher integrations",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-launcher",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-launcher.json",
+        "sha256": "62b5a3cfc10b39f78c32a7201f51c3533ef1a9ed2d9e15f1e98a481b3356aae8",
+        "bytes": 1506
+      },
+      "releases": [
+        {
+          "version": "1.0.1",
+          "arch": "universal",
+          "launcherArchitectures": [
+            "arm64",
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "android-launcher/v1.0.1/universal",
+          "asset": {
+            "filename": "android-launcher-1.0.1-universal.tar.gz",
+            "sha256": "d3c5e42e400ee3183cae1155871c0904a40f0a1af2a9ff2d4865f948e02947c6",
+            "bytes": 101392,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-launcher%2Fv1.0.1%2Funiversal/android-launcher-1.0.1-universal.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b"
+            },
+            "runId": "41578842959",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-launcher",
+          "profile": "Android launcher integrations 1.0.1"
+        }
+      ]
+    },
+    {
       "projectId": "android-privacy",
       "name": "Android privacy helper",
       "delivery": "bundled",
