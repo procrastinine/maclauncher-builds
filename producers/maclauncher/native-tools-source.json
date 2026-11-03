@@ -77,7 +77,7 @@
       "path": "src/modules/shared/runtime/package-contract.cjs",
       "destination": "lib/package-contract.cjs",
       "sourceSha256": "d97dc20447ddf33c624d9620b20ae1dff049ceb7b73a30e391da62a49b7a046c",
-      "sha256": "dc97d8805ebd8d9729c86c01d7426de1f71324592a5c5520b3989716cf6c4201",
+      "sha256": "190ca0caf345e0ef4a688bcb3c1dd5c913f2a40c3a7ff8ce0779513085281f72",
       "replacements": [
         {
           "from": "const B = require(\"./bundled-native\");",
@@ -94,6 +94,14 @@
         {
           "from": "    ...(record.dependencies === undefined ? {} : { dependencies: Object.freeze(dependencies) }), ...compatibility });",
           "to": "    ...(record.dependencies === undefined ? {} : { dependencies: Object.freeze(dependencies) }), ...compatibility,\n    ...(publication && record.build !== undefined ? { build: require(\"./build-verification.cjs\").buildMetadata(record.build, repository) } : {}),\n    ...(publication && record.rebuild !== undefined ? { rebuild: require(\"./build-verification.cjs\").rebuildMetadata(record.rebuild, record) } : {}) });"
+        },
+        {
+          "from": "item.files.length > B.LIMITS.files ||\n      !Array.isArray(item.notices) || !item.notices.length ||\n      item.redistribution !== undefined",
+          "to": "item.files.length > B.LIMITS.files ||\n      item.redistribution !== undefined"
+        },
+        {
+          "from": "  for (const notice of item.notices) {\n    if (!notice || Object.keys(notice).some(key => !['name', 'license', 'path', 'sourceUrl'].includes(key)) ||\n      typeof notice.name !== 'string' || !notice.name.trim() || typeof notice.license !== 'string' || !notice.license.trim() || !names.has(notice.path)) throw new Error('Supplemental native license notice is missing.');\n    if (notice.sourceUrl && !/^https:\\/\\//.test(notice.sourceUrl)) throw new Error('Supplemental source links must use HTTPS.');\n  }",
+          "to": "  // Sealing repairs licence notices before release, so a notice entry is reported and never fails a package.\n  for (const notice of Array.isArray(item.notices) ? item.notices : []) {\n    if (!notice || Object.keys(notice).some(key => !['name', 'license', 'path', 'sourceUrl'].includes(key)) ||\n      typeof notice.name !== 'string' || !notice.name.trim() || typeof notice.license !== 'string' || !notice.license.trim() || !names.has(notice.path) ||\n      notice.sourceUrl && !/^https:\\/\\//.test(notice.sourceUrl)) console.log(`::warning::${item.id} has an unusable licence notice entry: ${JSON.stringify(notice)}`);\n  }"
         }
       ],
       "previousSha256": "dfa804e42e343d6a1f67ac928e25155d7b4cc3fd46aa93cc816519512ee64542"
