@@ -1011,10 +1011,14 @@
       {
         "version": "0.7.7beta-MCLv3",
         "label": "ONScripter-Yuri 0.7.7beta-MCLv3"
+      },
+      {
+        "version": "0.7.7beta-MCLv4",
+        "label": "ONScripter-Yuri 0.7.7beta-MCLv4"
       }
     ],
     "build": {
-      "version": "0.7.7beta-MCLv3",
+      "version": "0.7.7beta-MCLv4",
       "command": "tools/build-portable-runtime.mjs",
       "architectures": [
         "arm64",

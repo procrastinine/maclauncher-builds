@@ -1,0 +1,355 @@
+{
+  "id": "onsyuri",
+  "version": "0.7.7beta-MCLv4",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "onsyuri/0.7.7beta-MCLv4/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "17c68386450652af4db8786a8feeefa12d1bddcedac3594c680c40ebc7831b70",
+  "sourceSha256": "17c68386450652af4db8786a8feeefa12d1bddcedac3594c680c40ebc7831b70",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 22354,
+      "mode": 420,
+      "sha256": "1dc97ac58e015ba5a4203f0e7cbbe1bc05701b28d84b61e756f3ab77e9f5e021"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 1417,
+      "mode": 420,
+      "sha256": "688dc2c05c96b13ab3d90fde03d88003077a917b33ba885c14a6dcc8364ba049"
+    },
+    {
+      "path": "files/bin/onsyuri",
+      "size": 580624,
+      "sha256": "c87e30414e74dd531a3dd20aaa8ffd8e5ed40a996a503f6e7ca211bad7b0a3f2",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libFLAC.14.0.0.dylib",
+      "size": 322384,
+      "sha256": "a26ec8f1f81a373ae17dc18f9d6ff468a481d79146d609af2f8eb6986c0cab0d",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libfreetype.6.20.6.dylib",
+      "size": 763872,
+      "sha256": "5ec7073806a0f93f6f51f9cc894d996e5118ee5c7fe37a68e10b6347b3f99098",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libgraphite2.3.3.1.dylib",
+      "size": 139712,
+      "sha256": "9b29ff06af550736de60703a8926384d296ece50bebf7eb7bb854029b34de1df",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libharfbuzz.dylib",
+      "size": 1479680,
+      "sha256": "97b4acc4eeb915f0f61484bb61f5cb95d931b3111cc9ee72535c088e2f726f36",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libjpeg.62.4.0.dylib",
+      "size": 666672,
+      "sha256": "36fde1d4e81d2006ca27951184f7ca5d9216b9b8519e850e80007f22ab8a7bb5",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/liblua.5.4.9.dylib",
+      "size": 296288,
+      "sha256": "b08bd02d85efc5f0a04e33aba5c99bba7438452cda0128c1fee3dcf9aa240e3f",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libmpg123.dylib",
+      "size": 338784,
+      "sha256": "ff49fd295bef3e5018e48c65536c6b7450ef64ca72b31b1975ddf7327379f659",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libogg.0.8.6.dylib",
+      "size": 53664,
+      "sha256": "84ebfcc7780d5592740e8a40475b777bf334518ea193ec6e8558fc02ef6b16ec",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libopus.0.11.1.dylib",
+      "size": 518992,
+      "sha256": "9618f4908d6b2c9202044aa61471093b31ac2bbcddaaad661f2211b49792dcdc",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libopusfile.0.dylib",
+      "size": 73712,
+      "sha256": "14444e98f2e94d4bbad40e3320d366030da753b3b046e133924daca3fc20a60f",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libpng.dylib",
+      "size": 241728,
+      "sha256": "209888f1fc1081ea397bae6981db53e63666422e9678081409b6da4c12589b04",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libSDL2_image-2.0.0.800.8.dylib",
+      "size": 145312,
+      "sha256": "cb685177df868354630d4d77c8b5b5ab50528959fc611a1765ede99d51a7ec05",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libSDL2_mixer-2.0.0.800.2.dylib",
+      "size": 171264,
+      "sha256": "42288ea6673309303bd5cb9ea679de41c910d2389c3bb3a66e8ed41fb4596934",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libSDL2_ttf-2.0.0.2400.0.dylib",
+      "size": 108160,
+      "sha256": "995c2b47413db0fb2908dea0d01d8e0f6d21a751e6cca6ff36991720535c5a05",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libSDL2-2.0.0.dylib",
+      "size": 1661040,
+      "sha256": "565014d5cd1e2e73fe8b7819ee5de3a424d649b995b44c5d267d384ed8ebf2ed",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libsharpyuv.0.1.2.dylib",
+      "size": 67856,
+      "sha256": "822f36dc4db292a2318ad78e232bee08cb173fff35a3ca3432ba36ed3ed401da",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libvorbis.0.4.9.dylib",
+      "size": 240752,
+      "sha256": "6b301fcd7992ae4a608f1f9fee78ae55f1ab216475e22ee60323965432d2448e",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libvorbisfile.3.3.8.dylib",
+      "size": 55248,
+      "sha256": "8651fe0eb488b218c36f60f2c5da13d2fcf1481d250d322a227f22581240c0eb",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libwebp.7.2.0.dylib",
+      "size": 511024,
+      "sha256": "750090391aa697e38ce147fdfbd5d2898134cccffa5bdd204b3c323f88e67a7e",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libwebpdemux.2.0.17.dylib",
+      "size": 35168,
+      "sha256": "284cab25d705ab4d6b73f31d5d60b09339c564f273ed24fc913c1142d6685605",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/licenses/upstream/0-LICENSE.md",
+      "size": 6077,
+      "sha256": "ba6bceebcba0fdd35488477c2cca8c4632ce82c74dbfbc87d886ce6fc4433579",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/1-README.ijg",
+      "size": 12799,
+      "sha256": "75815e3bf6484201a3c3d17a1bbf10f2e8e3237f84df10a2357ea896db2a81d6",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/2-LICENSE",
+      "size": 1341,
+      "sha256": "0622b0794d0fecde47d743f1bb70a03e6fdf082be8e71f39de672ed995d96ff9",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/3-COPYING",
+      "size": 370,
+      "sha256": "6e2dce4f34b98177868c69d787a314262b9bc87d45ccc6e48dba1f342942d4a5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/4-PATENTS",
+      "size": 1436,
+      "sha256": "cc3273e0694ea5896145e0677699b53471b03ea43021ddc50e7923fbb9f5023c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/5-LICENSE.txt",
+      "size": 878,
+      "sha256": "7826eca0a0f7e591f38dd844e207a200aac81a59b20d8a30c3af8c6282af13e6",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/6-readme.html",
+      "size": 11046,
+      "sha256": "760d00c8b494ec2f170bcdd969e36b038027b0288232c60e15ffa6b0d784e9c7",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/7-0-COPYING",
+      "size": 1079,
+      "sha256": "9faa99befb61de81e8ef79fd01d1e94ea2f5fb10b5342bc8adc0f019e8b7798e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/9-LICENSE",
+      "size": 18092,
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 21655,
+      "mode": 420,
+      "sha256": "17c68386450652af4db8786a8feeefa12d1bddcedac3594c680c40ebc7831b70"
+    }
+  ],
+  "notices": [
+    {
+      "name": "libjpeg-turbo",
+      "license": "BSD-3-Clause, IJG and zlib; see included notices",
+      "sourceUrl": "https://github.com/libjpeg-turbo/libjpeg-turbo/tree/c85e6b905bf237038faa936dab160ebfc5da0344",
+      "path": "files/licenses/upstream/0-LICENSE.md"
+    },
+    {
+      "name": "libjpeg-turbo",
+      "license": "BSD-3-Clause, IJG and zlib; see included notices",
+      "sourceUrl": "https://github.com/libjpeg-turbo/libjpeg-turbo/tree/c85e6b905bf237038faa936dab160ebfc5da0344",
+      "path": "files/licenses/upstream/1-README.ijg"
+    },
+    {
+      "name": "libjpeg-turbo",
+      "license": "BSD-3-Clause, IJG and zlib; see included notices",
+      "sourceUrl": "https://github.com/libjpeg-turbo/libjpeg-turbo/tree/c85e6b905bf237038faa936dab160ebfc5da0344",
+      "path": "files/licenses/upstream/2-LICENSE"
+    },
+    {
+      "name": "libwebp",
+      "license": "BSD-3-Clause",
+      "sourceUrl": "https://github.com/webmproject/libwebp/tree/4fa21912338357f89e4fd51cf2368325b59e9bd9",
+      "path": "files/licenses/upstream/3-COPYING"
+    },
+    {
+      "name": "libwebp",
+      "license": "BSD-3-Clause",
+      "sourceUrl": "https://github.com/webmproject/libwebp/tree/4fa21912338357f89e4fd51cf2368325b59e9bd9",
+      "path": "files/licenses/upstream/4-PATENTS"
+    },
+    {
+      "name": "SDL2_image",
+      "license": "Zlib",
+      "sourceUrl": "https://github.com/libsdl-org/SDL_image/tree/c1bf2245b0ba63a25afe2f8574d305feca25af77",
+      "path": "files/licenses/upstream/5-LICENSE.txt"
+    },
+    {
+      "name": "Lua",
+      "license": "MIT",
+      "sourceUrl": "https://www.lua.org/ftp/",
+      "path": "files/licenses/upstream/6-readme.html"
+    },
+    {
+      "name": "opusfile",
+      "license": "BSD-3-Clause",
+      "sourceUrl": "https://github.com/xiph/opusfile/tree/a55c164e9891a9326188b7d4d216ec9a88373739",
+      "path": "files/licenses/upstream/7-0-COPYING"
+    },
+    {
+      "name": "SDL2_mixer",
+      "license": "Zlib",
+      "sourceUrl": "https://github.com/libsdl-org/SDL_mixer/tree/b208916aed9250fe434360e6c6a95f0697bb7b01",
+      "path": "files/licenses/upstream/5-LICENSE.txt"
+    },
+    {
+      "name": "onsyuri",
+      "license": "GPL-2.0-or-later",
+      "sourceUrl": "https://github.com/YuriSizuku/OnscripterYuri",
+      "path": "files/licenses/upstream/9-LICENSE"
+    }
+  ],
+  "redistribution": "bundle",
+  "aliases": {
+    "schema": 1,
+    "files": {
+      "files/lib/libFLAC.dylib": "files/lib/libFLAC.14.0.0.dylib",
+      "files/lib/libfreetype.dylib": "files/lib/libfreetype.6.20.6.dylib",
+      "files/lib/libgraphite2.dylib": "files/lib/libgraphite2.3.3.1.dylib",
+      "files/lib/libogg.dylib": "files/lib/libogg.0.8.6.dylib",
+      "files/lib/libopus.dylib": "files/lib/libopus.0.11.1.dylib",
+      "files/lib/libopusfile.dylib": "files/lib/libopusfile.0.dylib",
+      "files/lib/libpng16.dylib": "files/lib/libpng.dylib",
+      "files/lib/libSDL2.dylib": "files/lib/libSDL2-2.0.0.dylib",
+      "files/lib/libvorbis.dylib": "files/lib/libvorbis.0.4.9.dylib",
+      "files/lib/libvorbisfile.dylib": "files/lib/libvorbisfile.3.3.8.dylib"
+    }
+  }
+}
