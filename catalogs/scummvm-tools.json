@@ -7,6 +7,58 @@
       "schemaVersion": 2,
       "id": "scummvm-tools",
       "version": "2.9.0-MCLv4",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "a5a650b05fd6407749ef8320ef54b4e7a2e47dac90e46025522747bde416ea4b",
+      "sourceSha256": "a5a650b05fd6407749ef8320ef54b4e7a2e47dac90e46025522747bde416ea4b",
+      "updatePolicy": "manual",
+      "capabilities": {
+        "tools": [
+          "extract_kyra",
+          "extract_gob_stk"
+        ],
+        "codecs": [
+          "vorbis",
+          "flac",
+          "png",
+          "zlib"
+        ]
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "d2b042f9b8002d2e09ece537b8e34cf7b6a60815"
+      },
+      "launcherContract": 2,
+      "asset": {
+        "filename": "scummvm-tools-2.9.0-MCLv4-x64.tar.gz",
+        "sha256": "09fe5618144215bf1c7b030a0c2f5b0de62a049c08ce9ae990a87b07aaea45ef",
+        "bytes": 917033,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/scummvm-tools%2Fv2.9.0-MCLv4%2Fx64/scummvm-tools-2.9.0-MCLv4-x64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "d2b042f9b8002d2e09ece537b8e34cf7b6a60815",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "41718930806",
+        "runAttempt": "1"
+      },
+      "tag": "scummvm-tools/v2.9.0-MCLv4/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "scummvm-tools",
+      "version": "2.9.0-MCLv4",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
