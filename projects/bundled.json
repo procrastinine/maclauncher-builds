@@ -109,10 +109,14 @@
       {
         "version": "1.1.1",
         "label": "PlayTools storage adapter 1.1.1"
+      },
+      {
+        "version": "1.1.2",
+        "label": "PlayTools storage adapter 1.1.2"
       }
     ],
     "build": {
-      "version": "1.1.1",
+      "version": "1.1.2",
       "command": "tools/build-ios-helper.mjs",
       "architectures": [
         "arm64"
