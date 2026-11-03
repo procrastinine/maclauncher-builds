@@ -1321,10 +1321,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "Android audio codec input libraries"
+      },
+      {
+        "version": "1.2.2-MCLv2",
+        "label": "Android audio codec input libraries 1.2.2-MCLv2"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "1.2.2-MCLv2",
       "command": "tools/build-android-codecs.mjs",
       "architectures": [
         "arm64"
