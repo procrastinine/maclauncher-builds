@@ -1954,10 +1954,14 @@
       {
         "version": "16.0.0-MCLv3",
         "label": "Android original image data 2 16.0.0-MCLv3"
+      },
+      {
+        "version": "16.0.0-MCLv4",
+        "label": "Android original image data 2 16.0.0-MCLv4"
       }
     ],
     "build": {
-      "version": "16.0.0-MCLv3",
+      "version": "16.0.0-MCLv4",
       "command": "tools/build-android-image-data.mjs",
       "architectures": [
         "arm64"
