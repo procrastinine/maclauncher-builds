@@ -2569,10 +2569,14 @@
       {
         "version": "5.13.0-MCLv2",
         "label": "uosc helper 5.13.0-MCLv2"
+      },
+      {
+        "version": "5.13.0-MCLv3",
+        "label": "uosc helper 5.13.0-MCLv3"
       }
     ],
     "build": {
-      "version": "5.13.0-MCLv2",
+      "version": "5.13.0-MCLv3",
       "command": "producers/native-tools/build.mjs",
       "architectures": [
         "arm64",
