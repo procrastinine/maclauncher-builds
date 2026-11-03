@@ -407,6 +407,46 @@
       ]
     },
     {
+      "projectId": "android-art-java",
+      "name": "Android ART Java input",
+      "delivery": "bundled",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art-java",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/android-art-java.json",
+        "sha256": "5dc887e88daed4ee538647215107a30701480ba7fda75f1c20fb5c6cf1a8366d",
+        "bytes": 1470
+      },
+      "releases": [
+        {
+          "version": "0.1.0",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "android-art-java/v0.1.0/arm64",
+          "asset": {
+            "filename": "android-art-java-0.1.0-arm64.tar.gz",
+            "sha256": "2c52b8a81e9ed3b7d002aaac69a5ef11382f90e2f1b75dfd7016d24877b41e42",
+            "bytes": 29163750,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art-java%2Fv0.1.0%2Farm64/android-art-java-0.1.0-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b"
+            },
+            "runId": "41578842959",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#android-art-java",
+          "profile": "Android ART Java 0.1.0"
+        }
+      ]
+    },
+    {
       "projectId": "android-blueprint-parser",
       "name": "Android Blueprint parser",
       "delivery": "bundled",

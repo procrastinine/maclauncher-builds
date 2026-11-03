@@ -2095,10 +2095,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "Android ART Java 0.1.0-MCLv1"
+      },
+      {
+        "version": "0.1.0",
+        "label": "Android ART Java 0.1.0"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "0.1.0",
       "command": "tools/build-android-art-java.mjs",
       "architectures": [
         "arm64"
