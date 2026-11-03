@@ -2752,10 +2752,14 @@
       {
         "version": "2.9.0-MCLv2",
         "label": "ScummVM Tools 2.9.0-MCLv2"
+      },
+      {
+        "version": "2.9.0-MCLv4",
+        "label": "ScummVM Tools 2.9.0-MCLv4"
       }
     ],
     "build": {
-      "version": "2.9.0-MCLv2",
+      "version": "2.9.0-MCLv4",
       "command": "producers/native-tools/build.mjs",
       "architectures": [
         "arm64",

@@ -1,0 +1,599 @@
+{
+  "id": "scummvm-tools",
+  "version": "2.9.0-MCLv4",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "scummvm-tools/2.9.0-MCLv4/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "1937cae699aa1504319c6e902bf5da71363fce063ddc5e7d92941e325e84e8cc",
+  "sourceSha256": "1937cae699aa1504319c6e902bf5da71363fce063ddc5e7d92941e325e84e8cc",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 17556,
+      "mode": 420,
+      "sha256": "844a4f34577c4be27729313e9a49b9b0e5cea884c6fd100c5531a55b1cb9b6e0"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 982,
+      "mode": 420,
+      "sha256": "ced7ea977cce489ada4adcc39e8cedfc12bacf0e18f3727576d1ef7db40f7cae"
+    },
+    {
+      "path": "files/bin/scummvm-tools-cli",
+      "size": 681552,
+      "sha256": "e16fbe4c81fc2f1f242e65628bac78c207c8bade499a348117d8ee2df148e9c1",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libFLAC.14.0.0.dylib",
+      "size": 322384,
+      "sha256": "a26ec8f1f81a373ae17dc18f9d6ff468a481d79146d609af2f8eb6986c0cab0d",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libogg.0.8.6.dylib",
+      "size": 53664,
+      "sha256": "84ebfcc7780d5592740e8a40475b777bf334518ea193ec6e8558fc02ef6b16ec",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libpng.dylib",
+      "size": 241728,
+      "sha256": "209888f1fc1081ea397bae6981db53e63666422e9678081409b6da4c12589b04",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libvorbis.0.4.9.dylib",
+      "size": 240752,
+      "sha256": "6b301fcd7992ae4a608f1f9fee78ae55f1ab216475e22ee60323965432d2448e",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libvorbisenc.2.0.12.dylib",
+      "size": 705696,
+      "sha256": "c5b1c352af13d7bec8368384e4064e6f257ceb148e40363379bc3a0adee5f04f",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libvorbisfile.3.3.8.dylib",
+      "size": 55248,
+      "sha256": "8651fe0eb488b218c36f60f2c5da13d2fcf1481d250d322a227f22581240c0eb",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/licenses/upstream/0-0-LICENSE.txt",
+      "size": 884,
+      "sha256": "97f35b302b361680ec1e891e95d2d52097bb95abff361434916d99dc1305f127",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/1-1-LICENSE.txt",
+      "size": 530,
+      "sha256": "7d3b087c34f35d4d538e3bcddd1ff8f66e92f9ef336881999482800ddf840913",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt",
+      "size": 380,
+      "sha256": "565eff8b979411888b4fc163ba49daf7ad9beba47ee485942f032edcefd17948",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/19-19-math_libm.h.LICENSE.txt",
+      "size": 102,
+      "sha256": "8318141798b7fa9883ccd5f94d5d47328b02d4b08f517f764d443510fd54d435",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/2-2-LICENSE-bsd.txt",
+      "size": 1534,
+      "sha256": "30eb1bef29b46f8ba7ab8b416035dbd93cb034a45481dd97815b944284582cd2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/29-29-LICENSE",
+      "size": 5345,
+      "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/3-3-LICENSE-orig.txt",
+      "size": 264,
+      "sha256": "fb5436aa63d1b71a8dfbf74ecaf1a5b4e1ec4df7f80074d11fec99284f69ca5f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/30-30-LICENSE.TXT",
+      "size": 2149,
+      "sha256": "bd36c8b474855fa294c2ec5c184544478ef3720aad37d65a6296a4f264fd2d3b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/31-31-FTL.TXT",
+      "size": 6743,
+      "sha256": "5a5ee54c5001bbad1cdc1a57cc3dd4c42199b2da09d39c7ee41fab002d02967f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/32-32-GPLv2.TXT",
+      "size": 17994,
+      "sha256": "c4120c6752c910c299e3bd9cb3a46ff262c268303ca2069b61f92f10a5656c18",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/33-33-COPYING",
+      "size": 1235,
+      "sha256": "2c272829ff23f182c8bf7ea12fedea69b0ae148663123ed5240c117cb129c9c1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/34-34-LICENSE",
+      "size": 29228,
+      "sha256": "cab46cd45adbfea4b1d0f14b033c70062c73074fa0b56532c2f351576ddf455e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/35-35-COPYING",
+      "size": 1971,
+      "sha256": "ba8f810f2455c2f08e2d56bb49b72f37fcf68f1f4fade38977cfd7372050ad64",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/36-36-LICENSE.txt",
+      "size": 69,
+      "sha256": "2b5ab66349de271e9fd2a199ea73b8809e48f0f5b64fb5c5d120634aed6c4328",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/37-0-COPYING",
+      "size": 1466,
+      "sha256": "d2ab5758336489da61c12cc5bb757da5339c4ae9001f9bb0562b4370249af814",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/38-1-COPYING.Xiph",
+      "size": 285,
+      "sha256": "36d18c43a6259cc17deb99fa55dfa5b80e3fb47a3c4738c888d4494fff0400ac",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/39-2-COPYING.LGPL",
+      "size": 468,
+      "sha256": "7d3af4346e40ecaa2cbca7f12fc65c32220528f16156fc69b8269baff7505d35",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/4-4-LICENSE-gpl3.txt",
+      "size": 34463,
+      "sha256": "06f525eb6430f59162fc8568b5ac2b838d9bda9bb5fce83b81fe39181ad614ce",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/40-3-COPYING.GPL",
+      "size": 818,
+      "sha256": "b06b6b93e0ea10887954c5ffc11a60b417084b612bf07fe2c90b74878f623c4e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/41-4-COPYING",
+      "size": 111,
+      "sha256": "b8bf0b5d8a4a7c3296991dc5a16c4901d82fb3bfa41031794f2993950a1fbf72",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/42-5-COPYING",
+      "size": 1125,
+      "sha256": "f64c8c2186041555fc23c243037a1d8e44ac9afac9c5c001728f32409a4da1b9",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/43-6-LICENSE_PLEASE_READ.txt",
+      "size": 703,
+      "sha256": "7efb4989e0cd1b256229bdf2f09300c5d14e35db0e7476bfb87fac243498273d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/44-7-COPYING",
+      "size": 1804,
+      "sha256": "317fa6974cbfe89625ca2a3f995c4aa99d676dd058d31d229b780591e3e6ef9a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/45-8-COPYING",
+      "size": 11388,
+      "sha256": "a37b5b183686858938e0a633d76884370b36b4c1e4739684fa8c856639bafc31",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/46-9-LICENSE",
+      "size": 503,
+      "sha256": "5c1f8d44f1eacbea3e1c31ff6ee11a4e1690ccbed4ee4af16de3b6eb61dc69a8",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/47-10-COPYING",
+      "size": 993,
+      "sha256": "fcb2f311b388edf8d626a3e069f7fb335e915c9f3acd1ee40df6ed6a6aa55f32",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/48-COPYING",
+      "size": 776,
+      "sha256": "697b029520f7817e1f60d270dabda38e3179318f18afb34c15518b94ead089bd",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/49-COPYING.BSD2",
+      "size": 1270,
+      "sha256": "b94b949c2d01ac9dabe1cfecf916b58bf5c63b8decc62fed3953778e08302d49",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/5-5-AUTHORS.txt",
+      "size": 355,
+      "sha256": "b327a7b3a4597e5902556ec3e8407cbdd1e288abd4623b7b4b56d14d49e84ecb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/50-COPYING.LUA",
+      "size": 2035,
+      "sha256": "8e0272ae02203977f9d0312bd82fe2498f37741b51c52731b9af0d66dbde7b6a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/6-6-LICENSE",
+      "size": 235,
+      "sha256": "f77612ec1b5740c40c7380bcbb8eb64a1593d518ec5fc91e96c600aa642df211",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 23407,
+      "mode": 420,
+      "sha256": "1937cae699aa1504319c6e902bf5da71363fce063ddc5e7d92941e325e84e8cc"
+    }
+  ],
+  "notices": [
+    {
+      "name": "SDL2 2.32.10 LICENSE.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/0-0-LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/hidapi/LICENSE.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/1-1-LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/hidapi/LICENSE-bsd.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/2-2-LICENSE-bsd.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/hidapi/LICENSE-orig.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/3-3-LICENSE-orig.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/hidapi/LICENSE-gpl3.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/4-4-LICENSE-gpl3.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/hidapi/AUTHORS.txt",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/5-5-AUTHORS.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/video/yuv2rgb/LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/6-6-LICENSE"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/e_atan2.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/e_exp.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/e_fmod.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/e_log.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/e_log10.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/e_pow.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/e_rem_pio2.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/e_sqrt.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/k_cos.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/k_rem_pio2.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/k_sin.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/k_tan.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/math_libm.h",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/19-19-math_libm.h.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/math_private.h",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/s_atan.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/s_copysign.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/s_cos.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/s_fabs.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/s_floor.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/s_scalbn.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/s_sin.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "SDL2 2.32.10 src/libm/s_tan.c",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
+      "path": "files/licenses/upstream/10-10-e_log.c.LICENSE.txt"
+    },
+    {
+      "name": "libpng",
+      "license": "libpng-2.0",
+      "sourceUrl": "https://github.com/pnggroup/libpng/tree/cd952f49f95bb27154ae77dbb103032d95f6e580",
+      "path": "files/licenses/upstream/29-29-LICENSE"
+    },
+    {
+      "name": "FreeType",
+      "license": "FTL OR GPL-2.0-or-later",
+      "sourceUrl": "https://gitlab.com/freetype/freetype/-/tree/0a0221a1347e2f1e07c395263540026e9a0aa7c7",
+      "path": "files/licenses/upstream/30-30-LICENSE.TXT"
+    },
+    {
+      "name": "FreeType",
+      "license": "FTL OR GPL-2.0-or-later",
+      "sourceUrl": "https://gitlab.com/freetype/freetype/-/tree/0a0221a1347e2f1e07c395263540026e9a0aa7c7",
+      "path": "files/licenses/upstream/31-31-FTL.TXT"
+    },
+    {
+      "name": "FreeType",
+      "license": "FTL OR GPL-2.0-or-later",
+      "sourceUrl": "https://gitlab.com/freetype/freetype/-/tree/0a0221a1347e2f1e07c395263540026e9a0aa7c7",
+      "path": "files/licenses/upstream/32-32-GPLv2.TXT"
+    },
+    {
+      "name": "Graphite2",
+      "license": "MIT OR MPL-2.0 OR LGPL-2.1-or-later OR GPL-2.0-or-later",
+      "sourceUrl": "https://github.com/silnrsi/graphite/tree/ca8d821e60a15b6c24e404c9086992c975d8e1cf",
+      "path": "files/licenses/upstream/33-33-COPYING"
+    },
+    {
+      "name": "Graphite2",
+      "license": "MIT OR MPL-2.0 OR LGPL-2.1-or-later OR GPL-2.0-or-later",
+      "sourceUrl": "https://github.com/silnrsi/graphite/tree/ca8d821e60a15b6c24e404c9086992c975d8e1cf",
+      "path": "files/licenses/upstream/34-34-LICENSE"
+    },
+    {
+      "name": "HarfBuzz",
+      "license": "MIT",
+      "sourceUrl": "https://github.com/harfbuzz/harfbuzz/tree/c7a7457b7385f33178e8cf87615ca077a810bbe7",
+      "path": "files/licenses/upstream/35-35-COPYING"
+    },
+    {
+      "name": "SDL2_ttf",
+      "license": "Zlib",
+      "sourceUrl": "https://github.com/libsdl-org/SDL_ttf/tree/2a891473eaf05ba1707a4b7913e6c4db7de7458a",
+      "path": "files/licenses/upstream/36-36-LICENSE.txt"
+    },
+    {
+      "name": "libogg",
+      "license": "BSD-3-Clause",
+      "sourceUrl": "https://github.com/xiph/ogg/tree/be05b13e98b048f0b5a0f5fa8ce514d56db5f822",
+      "path": "files/licenses/upstream/37-0-COPYING"
+    },
+    {
+      "name": "FLAC",
+      "license": "BSD-3-Clause (libFLAC); see included notices for other source components",
+      "sourceUrl": "https://github.com/xiph/flac/tree/1507800de4b70e21be71f38caa0d9079d0bc6e45",
+      "path": "files/licenses/upstream/38-1-COPYING.Xiph"
+    },
+    {
+      "name": "FLAC",
+      "license": "BSD-3-Clause (libFLAC); see included notices for other source components",
+      "sourceUrl": "https://github.com/xiph/flac/tree/1507800de4b70e21be71f38caa0d9079d0bc6e45",
+      "path": "files/licenses/upstream/39-2-COPYING.LGPL"
+    },
+    {
+      "name": "FLAC",
+      "license": "BSD-3-Clause (libFLAC); see included notices for other source components",
+      "sourceUrl": "https://github.com/xiph/flac/tree/1507800de4b70e21be71f38caa0d9079d0bc6e45",
+      "path": "files/licenses/upstream/40-3-COPYING.GPL"
+    },
+    {
+      "name": "libvorbis",
+      "license": "BSD-3-Clause",
+      "sourceUrl": "https://github.com/xiph/vorbis/tree/0657aee69dec8508a0011f47f3b69d7538e9d262",
+      "path": "files/licenses/upstream/41-4-COPYING"
+    },
+    {
+      "name": "Opus",
+      "license": "BSD-3-Clause; see included patent and contribution notices",
+      "sourceUrl": "https://github.com/xiph/opus/tree/22244de5a79bd1d6d623c32e72bf1954b56235be",
+      "path": "files/licenses/upstream/42-5-COPYING"
+    },
+    {
+      "name": "Opus",
+      "license": "BSD-3-Clause; see included patent and contribution notices",
+      "sourceUrl": "https://github.com/xiph/opus/tree/22244de5a79bd1d6d623c32e72bf1954b56235be",
+      "path": "files/licenses/upstream/43-6-LICENSE_PLEASE_READ.txt"
+    },
+    {
+      "name": "mpg123",
+      "license": "LGPL-2.1",
+      "sourceUrl": "https://www.mpg123.de/download/",
+      "path": "files/licenses/upstream/44-7-COPYING"
+    },
+    {
+      "name": "LAME",
+      "license": "LGPL-2.0-or-later",
+      "sourceUrl": "https://sourceforge.net/projects/lame/files/lame/4.0/",
+      "path": "files/licenses/upstream/45-8-COPYING"
+    },
+    {
+      "name": "LAME",
+      "license": "LGPL-2.0-or-later",
+      "sourceUrl": "https://sourceforge.net/projects/lame/files/lame/4.0/",
+      "path": "files/licenses/upstream/46-9-LICENSE"
+    },
+    {
+      "name": "libsndfile",
+      "license": "LGPL-2.1-or-later",
+      "sourceUrl": "https://github.com/libsndfile/libsndfile/tree/72f6af15e8f85157bd622ed45b979025828b7001",
+      "path": "files/licenses/upstream/47-10-COPYING"
+    },
+    {
+      "name": "ScummVM Tools",
+      "license": "GPL-3.0-or-later",
+      "sourceUrl": "https://github.com/scummvm/scummvm-tools",
+      "path": "files/licenses/upstream/48-COPYING"
+    },
+    {
+      "name": "ScummVM Tools",
+      "license": "GPL-3.0-or-later",
+      "sourceUrl": "https://github.com/scummvm/scummvm-tools",
+      "path": "files/licenses/upstream/49-COPYING.BSD2"
+    },
+    {
+      "name": "ScummVM Tools",
+      "license": "GPL-3.0-or-later",
+      "sourceUrl": "https://github.com/scummvm/scummvm-tools",
+      "path": "files/licenses/upstream/50-COPYING.LUA"
+    }
+  ],
+  "redistribution": "bundle",
+  "aliases": {
+    "schema": 1,
+    "files": {
+      "files/lib/libogg.dylib": "files/lib/libogg.0.8.6.dylib",
+      "files/lib/libvorbis.dylib": "files/lib/libvorbis.0.4.9.dylib"
+    }
+  }
+}
