@@ -2,5 +2,44 @@
   "schemaVersion": 2,
   "projectId": "android-angle",
   "updatePolicy": "manual",
-  "packages": []
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "android-angle",
+      "version": "MCLv2",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "input.json",
+      "manifestSha256": "f99febcb6d0c8c3ccf05ad51857f69651c1621eefa2f10c1351f3237e4f126ff",
+      "sourceSha256": "5a4365b3900cc9741d116f70d42ee1f494eeb693c85ca3920a1e2edbd25258b0",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "android-angle-MCLv2-arm64.tar.gz",
+        "sha256": "e57f44156762c0950bbbff9e29f4ef3bb41271d99082283414ef7ea182d6c997",
+        "bytes": 2871359,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-angle%2FvMCLv2%2Farm64/android-angle-MCLv2-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41578842959",
+        "runAttempt": "1"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a"
+      },
+      "tag": "android-angle/vMCLv2/arm64"
+    }
+  ]
 }

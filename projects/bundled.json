@@ -1389,22 +1389,24 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "Android ANGLE for JVM and ART"
-      }
-    ],
-    "build": [
+      },
       {
-        "version": "0.1.0-MCLv1",
-        "command": "tools/build-android-angle.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "tools": [
-          "ninja",
-          "uv"
-        ],
-        "cleanupRunner": true
+        "version": "MCLv2",
+        "label": "Android ANGLE for JVM and ART MCLv2"
       }
     ],
+    "build": {
+      "version": "MCLv2",
+      "command": "tools/build-android-angle.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "tools": [
+        "ninja",
+        "uv"
+      ],
+      "cleanupRunner": true
+    },
     "versionBindings": [
       {
         "file": "producers/android-inputs/angle.json",
