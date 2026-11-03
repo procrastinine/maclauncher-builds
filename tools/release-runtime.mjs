@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
+import {setTimeout as sleep} from 'node:timers/promises';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {pack,verify,catalog,publicDeclaration} from './runtime-package.mjs';
@@ -163,11 +164,15 @@ export async function stageRelease({bundle,target,resume=false,directory=root,ru
  }catch(error){if(created)await runGh(['api','--method','DELETE','repos/'+release.repository+'/releases/'+remote.id]);throw error;}
 }
 /** Finalize the exact staged REST ID; no tag or releases-list lookup follows upload. */
-export async function publishRelease({bundle,directory=root,runGh=runGitHub,publication}){
+export async function publishRelease({bundle,directory=root,runGh=runGitHub,publication,wait=sleep}){
  try{
   const checked=await verifyRemoteRelease({bundle,directory,runGh,publication}),{release,record}=checked,existing=checked.publication;publication=existing;
   if(!existing.draft)return existing;
-  const remote=JSON.parse(await runGh(['api','--method','PATCH','repos/'+release.repository+'/releases/'+existing.id,'-F','draft=false','-f','make_latest=false']));
+  let remote;
+  for(let attempt=0;attempt<5;attempt++){
+   try{remote=JSON.parse(await runGh(['api','--method','PATCH','repos/'+release.repository+'/releases/'+existing.id,'-F','draft=false','-f','make_latest=false']));break;}
+   catch(error){if(attempt===4)throw error;await wait(1000*2**attempt);}
+  }
   if(remote.id!==existing.id||remote.tag_name!==release.tag||remote.draft!==false)throw Error('Published release differs from its staged REST identity.');
   return {...existing,draft:false};
  }catch(error){

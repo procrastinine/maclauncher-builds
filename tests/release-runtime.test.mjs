@@ -257,7 +257,7 @@ test('a failed publication removes its unpublished draft without deleting any pu
    assert.equal(endpoint,'repos/owner/builds/releases/17');return JSON.stringify({...remote,draft:!becamePublic});
   };
   const staged=await stageRelease({bundle:f.output,target:sourceTarget,directory:f.directory,runGh});
-  await assert.rejects(publishRelease({bundle:f.output,directory:f.directory,runGh,publication:staged}),/HTTP 403/);
+  await assert.rejects(publishRelease({bundle:f.output,directory:f.directory,runGh,publication:staged,wait:async()=>{}}),/HTTP 403/);
   assert.equal(calls.filter(args=>args.includes('DELETE')).length,becamePublic?0:1);
  }
 });
@@ -284,4 +284,24 @@ test('catalog envelope and runtime row retain the fc173327 format',async t=>{
  const f=fixture(t);await prepareRelease(f);const {record}=await verifyRelease({bundle:f.output,directory:f.directory});const {catalog}=await import('../tools/runtime-package.mjs');
  const expected={schemaVersion:2,projectId:'engine',updatePolicy:'manual',packages:[{...record,tag:'engine/v1.0/arm64',asset:{...record.asset,url:'https://github.com/owner/builds/releases/download/engine%2Fv1.0%2Farm64/engine-1.0-arm64.tar.gz'}}]};
  assert.equal(JSON.stringify(catalog([record],{project:'engine',repository:'owner/builds',directory:f.directory})),JSON.stringify(expected));
+});
+
+ test('release finalization retries transient 422 responses and cleans up after exhaustion',async t=>{
+ for(const failures of [2,5]){
+  const f=fixture(t);await prepareRelease(f);const {record}=await verifyRelease({bundle:f.output,directory:f.directory});
+  let attempts=0,deletes=0;const delays=[],errors=[];const remote={...remoteRelease(record,true),assets:[]};
+  const runGh=async args=>{
+   const endpoint=args.find(arg=>arg.startsWith('repos/')||arg.startsWith('https://uploads.'));
+   if(endpoint.includes('/releases/tags/'))throw notFound();
+   if(endpoint==='repos/owner/builds/releases')return JSON.stringify(remote);
+   if(endpoint.startsWith('https://uploads.'))return JSON.stringify(remoteRelease(record).assets[0]);
+   if(args.includes('PATCH')){attempts++;if(attempts<=failures){const error=Error('Validation Failed (HTTP 422), attempt '+attempts);errors.push(error);throw error;}return JSON.stringify(remoteRelease(record));}
+   if(args.includes('DELETE')){deletes++;return '';}
+   assert.equal(endpoint,'repos/owner/builds/releases/17');return JSON.stringify(remote);
+  };
+  const publication=await stageRelease({bundle:f.output,target:sourceTarget,directory:f.directory,runGh});
+  const operation=publishRelease({bundle:f.output,directory:f.directory,runGh,publication,wait:async ms=>delays.push(ms)});
+  if(failures===2){assert.equal((await operation).draft,false);assert.equal(attempts,3);assert.equal(deletes,0);assert.deepEqual(delays,[1000,2000]);}
+  else{await assert.rejects(operation,error=>error===errors[4]);assert.equal(attempts,5);assert.equal(deletes,1);assert.deepEqual(delays,[1000,2000,4000,8000]);}
+ }
 });
