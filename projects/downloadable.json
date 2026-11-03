@@ -1351,38 +1351,27 @@
       {
         "version": "1.13.0-MCLv2",
         "label": "System3.5 decompiler 1.13.0-MCLv2"
-      }
-    ],
-    "build": [
-      {
-        "version": "1.13.0-MCLv1",
-        "command": "producers/maclauncher/scripts/build-decompiler.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/xsys35c"
-        ],
-        "tools": [
-          "cmake",
-          "ninja"
-        ]
       },
       {
-        "version": "1.13.0-MCLv2",
-        "command": "producers/maclauncher/scripts/build-decompiler.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/xsys35c"
-        ],
-        "tools": [
-          "cmake",
-          "ninja"
-        ]
+        "version": "1.13.0-MCLv3",
+        "label": "System3.5 decompiler 1.13.0-MCLv3"
       }
     ],
+    "build": {
+      "version": "1.13.0-MCLv3",
+      "command": "producers/maclauncher/scripts/build-decompiler.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/xsys35c"
+      ],
+      "tools": [
+        "cmake",
+        "ninja"
+      ]
+    },
     "versionBindings": [
       {
         "file": "producers/maclauncher/src/modules/alicesoft/decompiler-profiles.json",
