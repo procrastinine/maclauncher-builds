@@ -1813,10 +1813,14 @@
       {
         "version": "0.1.0-MCLv1",
         "label": "Android original image data 2 0.1.0-MCLv1"
+      },
+      {
+        "version": "16.0.0-MCLv2",
+        "label": "Android original image data 2 16.0.0-MCLv2"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv1",
+      "version": "16.0.0-MCLv2",
       "command": "tools/build-android-image-data.mjs",
       "architectures": [
         "arm64"
