@@ -1707,10 +1707,14 @@
       {
         "version": "MCLv2-1003",
         "label": "Unicode filename normalization"
+      },
+      {
+        "version": "2.4.2-MCLv3",
+        "label": "Unicode filename normalization 2.4.2-MCLv3"
       }
     ],
     "build": {
-      "version": "MCLv2-1003",
+      "version": "2.4.2-MCLv3",
       "command": "tools/build-mkxpz.mjs",
       "architectures": [
         "arm64"

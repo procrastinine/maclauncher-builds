@@ -1466,6 +1466,49 @@
       ]
     },
     {
+      "projectId": "mkxpz",
+      "name": "MKXP-Z",
+      "delivery": "downloadable",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#mkxpz",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/mkxpz.json",
+        "sha256": "54f3ad9cf4a63db212b84e4bab8c9b01cdb381e092df28554e5a02e2b0564db7",
+        "bytes": 1621
+      },
+      "releases": [
+        {
+          "version": "2.4.2-MCLv3",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "11.0",
+          "tag": "mkxpz/v2.4.2-MCLv3/arm64",
+          "asset": {
+            "filename": "mkxpz-2.4.2-MCLv3-arm64.tar.gz",
+            "sha256": "6c3e2299abc99d710c585b72ee3c677ccd88055fcf402f26ba4b1884a7d4b547",
+            "bytes": 14439576,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mkxpz%2Fv2.4.2-MCLv3%2Farm64/mkxpz-2.4.2-MCLv3-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41578881476",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#mkxpz",
+          "profile": "Unicode filename normalization 2.4.2-MCLv3"
+        }
+      ]
+    },
+    {
       "projectId": "mkxpz-config-helper",
       "name": "MKXP-Z configuration helper",
       "delivery": "bundled",
