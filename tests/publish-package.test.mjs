@@ -31,23 +31,15 @@ test('a failed release cannot create a catalog entry and a different source cann
  await assert.rejects(publishPackage(options),/release failed/);
  await assert.rejects(publishPackage({...options,env:{...f.env,GITHUB_SHA:'c'.repeat(40)}}),/differs from this build job/);
 });
-test('only the same run can resume an existing release',async t=>{
- const f=fixture(t),options={...f,bundle:f.directory,verifyBundle:async()=>({record:f.record,declaration:{files:[]}}),recordBuild:async()=>{},requireBuild:()=>{},stageBundle:async()=>{},publishBundle:async()=>{},append:async()=>({commit:'c'.repeat(40)})};
- const same=await publishPackage({...options,runGh:async args=>args[0]==='api'?JSON.stringify({body:'Built by https://github.com/owner/builds/actions/runs/123'}):''});assert.equal(same.project,'engine');
- await assert.rejects(publishPackage({...options,runGh:async()=>JSON.stringify({body:'Built by https://github.com/owner/builds/actions/runs/99'})}),/already published by run 99/);
+test('package publication carries the staged REST identity through release and catalog',async t=>{
+ const f=fixture(t),staged={id:17},publicRelease={id:17,draft:false};
+ await publishPackage({...f,bundle:f.directory,verifyBundle:async()=>({record:f.record,declaration:{files:[]}}),recordBuild:async()=>{},requireBuild:()=>{},stageBundle:async()=>staged,publishBundle:async options=>{assert.equal(options.publication,staged);return publicRelease;},append:async options=>{assert.equal(options.publication,publicRelease);return {commit:'c'.repeat(40)};}});
 });
 test('a clean level publisher releases passed jobs without waiting for another build level',async t=>{
  const f=fixture(t),published=[],downloads=[],selection=[{id:'engine',version:'1.0.0'},{id:'failed',version:'1.0.0'}];
  const metadata={databaseId:123,workflowName:'Build and release',headSha:f.env.GITHUB_SHA,headBranch:'main',status:'in_progress',conclusion:null,jobs:[{name:'build (engine 1.0.0 arm64)',status:'completed',conclusion:'success'},{name:'build (failed 1.0.0 arm64)',status:'completed',conclusion:'failure'},{name:'build (later 1.0.0 arm64)',status:'in_progress',conclusion:null}]};
- const result=await publishLevel({...f,output:path.join(f.directory,'publication'),targets:selection.map(row=>({project:row.id,version:row.version,arch:'arm64'})),env:{...f.env,RELEASE_SELECTION:JSON.stringify(selection)},runGh:async args=>{if(args[1]==='view')return JSON.stringify(metadata);downloads.push(args);return '';},publish:async options=>{published.push(options.env.BUILD_PROJECT);return {commit:'c'.repeat(40)};}});
- assert.deepEqual(published,['engine']);assert.equal(downloads.length,1);assert.equal(result.failed,1);assert.match(result.errors[0].error,/Build job did not succeed/);
-});
-test('unpublished selected inputs block only their consumers before downloading artifacts',async t=>{
- const f=fixture(t),registry=JSON.parse(fs.readFileSync(path.join(f.directory,'projects.json')));registry.projects.push({...structuredClone(registry.projects[0]),id:'input',name:'Input'});fs.writeFileSync(path.join(f.directory,'projects.json'),JSON.stringify(registry));
- const env={...f.env,RELEASE_SELECTION:JSON.stringify([{id:'engine',version:'1.0.0'},{id:'input',version:'1.0.0'}]),RELEASE_GRAPH:JSON.stringify({engine:['input']})};
- const metadata={databaseId:123,workflowName:'Build and release',headSha:env.GITHUB_SHA,headBranch:'main',conclusion:null,jobs:[{name:'build (engine 1.0.0 arm64)',status:'completed',conclusion:'success'}]};
- const result=await publishLevel({...f,env,output:path.join(f.directory,'publication'),targets:[{project:'engine',version:'1.0.0',arch:'arm64'}],runGh:async args=>{if(args[1]==='view')return JSON.stringify(metadata);if(args[0]==='api')throw Object.assign(Error('HTTP 404'),{stderr:'HTTP 404'});assert.fail('Unpublished input must stop before download');},publish:()=>assert.fail('Unpublished input must stop publication')});
- assert.equal(result.published,0);assert.match(result.errors[0].error,/Required input is not published: input/);
+ const result=await publishLevel({...f,output:path.join(f.directory,'publication'),targets:selection.map(row=>({project:row.id,version:row.version,arch:'arm64'})),env:{...f.env,RELEASE_SELECTION:JSON.stringify(selection)},runGh:async args=>{if(args[1]==='view'){assert.ok(!args.at(-1).includes('jobs'));return JSON.stringify(metadata);}downloads.push(args);if(args.at(-1).endsWith('/failed/1.0.0/arm64'))throw Error('no artifacts match any of the names or patterns specified');return '';},publish:async options=>{published.push(options.env.BUILD_PROJECT);return {commit:'c'.repeat(40)};}});
+ assert.deepEqual(published,['engine']);assert.equal(downloads.length,2);assert.equal(result.failed,0);assert.equal(result.skipped,1);assert.equal(result.notices[0].notice,'build of failed 1.0.0 arm64 in this run produced no package; see its build job');
 });
 function catalogFixture(t){
  const f=fixture(t),remote=path.join(f.directory,'remote.git'),source=path.join(f.directory,'source'),other=path.join(f.directory,'other');
@@ -55,46 +47,52 @@ function catalogFixture(t){
  fs.copyFileSync(path.join(f.directory,'projects.json'),path.join(source,'projects.json'));fs.mkdirSync(path.join(source,'tools'));fs.writeFileSync(path.join(source,'tools/build.mjs'),'export const build=true;');
  git(source,['add','.']);git(source,['commit','-m','Source']);git(source,['push','origin','main']);git(f.directory,['clone','--quiet',remote,other]);
  const ledger=path.join(f.directory,'ledger.json');fs.writeFileSync(ledger,'verified fixture');
- const apply=async({directory})=>{const file=path.join(directory,'catalogs','engine.json');fs.mkdirSync(path.dirname(file),{recursive:true});if(fs.existsSync(file)&&fs.readFileSync(file,'utf8')!=='exact entry\n')throw Error('Immutable entry conflict');fs.writeFileSync(file,'exact entry\n');};
- return {...f,directory:source,other,ledger,apply,bundle:f.directory,runGh:async args=>assert.deepEqual(args,['auth','setup-git'])};
+ const entry=JSON.stringify({packages:[f.record]})+'\n';
+ const apply=async({directory})=>{const file=path.join(directory,'catalogs','engine.json');fs.mkdirSync(path.dirname(file),{recursive:true});if(fs.existsSync(file)&&fs.readFileSync(file,'utf8')!==entry)throw Error('Immutable entry conflict');fs.writeFileSync(file,entry);};
+ return {...f,directory:source,other,ledger,apply,entry,bundle:f.directory,runGh:async args=>assert.deepEqual(args,['auth','setup-git'])};
 }
 test('catalog races reapply the own entry onto fresh main and identical appends are no-ops',async t=>{
- const f=catalogFixture(t);let raced=false,slept=0;
+ const f=catalogFixture(t);let raced=false;
  const runGit=async(args,{cwd})=>{
   if(args[0]==='push'&&!raced){raced=true;fs.writeFileSync(path.join(f.other,'other.txt'),'another package');git(f.other,['add','.']);git(f.other,['commit','-m','Other package']);git(f.other,['push','origin','HEAD:main']);}
   assert.ok(!args.includes('--force'));return git(cwd,args);
  };
- const first=await appendPackageCatalog({...f,runGit,sleep:async()=>slept++,random:()=>0});
- assert.equal(first.attempts,2);assert.equal(slept,1);
- git(f.other,['pull','--ff-only']);assert.equal(fs.readFileSync(path.join(f.other,'other.txt'),'utf8'),'another package');assert.equal(fs.readFileSync(path.join(f.other,'catalogs/engine.json'),'utf8'),'exact entry\n');
- const second=await appendPackageCatalog({...f,runGit,sleep:()=>assert.fail('Identical entry needs no retry')});
+ const first=await appendPackageCatalog({...f,runGit});
+ assert.equal(first.attempts,2);
+ git(f.other,['pull','--ff-only']);assert.equal(fs.readFileSync(path.join(f.other,'other.txt'),'utf8'),'another package');assert.equal(fs.readFileSync(path.join(f.other,'catalogs/engine.json'),'utf8'),f.entry);
+ const second=await appendPackageCatalog({...f,runGit});
  assert.equal(second.existing,true);assert.equal(second.commit,first.commit);
 });
 test('catalog push retries are bounded and non-race failures propagate',async t=>{
  const f=catalogFixture(t);let pushes=0;
  const runGit=async(args,{cwd})=>{if(args[0]==='push'){pushes++;throw Object.assign(Error('rejected'),{stderr:'[rejected] non-fast-forward'});}return git(cwd,args);};
- await assert.rejects(appendPackageCatalog({...f,runGit,attempts:2,sleep:async()=>{}}),/exhausted 2/);assert.equal(pushes,2);
- await assert.rejects(appendPackageCatalog({...f,runGit:async(args,options)=>{if(args[0]==='push')throw Error('permission denied');return git(options.cwd,args);},sleep:()=>assert.fail()}),/permission denied/);
+ await assert.rejects(appendPackageCatalog({...f,runGit,attempts:2}),/exhausted 2/);assert.equal(pushes,2);
+ await assert.rejects(appendPackageCatalog({...f,runGit:async(args,options)=>{if(args[0]==='push')throw Error('permission denied');return git(options.cwd,args);}}),/permission denied/);
 });
 
-test('level publication waits for rerun job copies, but completed failures never wait',async t=>{
- for(const state of ['delayed','failed','missing']){
-  const f=fixture(t),waits=[],downloads=[],published=[];let reads=0;
-  const job={name:'build (engine 1.0.0 arm64)',status:'completed',conclusion:'success'};
-  const env={...f.env,RELEASE_SELECTION:JSON.stringify([{id:'engine',version:'1.0.0'}])};
-  const result=await publishLevel({...f,env,output:path.join(f.directory,'publication'),targets:[{project:'engine',version:'1.0.0',arch:'arm64'}],sleep:async ms=>waits.push(ms),runGh:async args=>{
-   if(args[1]==='view'){
-    reads++;
-    const jobs=state==='failed'?[{...job,conclusion:'failure'}]:state==='missing'||reads===1?[]:reads===2?[{...job,status:'queued',conclusion:null}]:reads===3?[{...job,status:'in_progress',conclusion:null}]:[job];
-    return JSON.stringify({databaseId:123,workflowName:'Build and release',headSha:env.GITHUB_SHA,headBranch:'main',status:'in_progress',conclusion:null,jobs});
-   }
-   downloads.push(args);return '';
-  },publish:async options=>{published.push(options.env.BUILD_PROJECT);return {commit:'c'.repeat(40)};}});
-  if(state==='delayed'){
-   assert.equal(result.published,1);assert.equal(result.failed,0);assert.equal(reads,4);assert.deepEqual(waits,[2000,4000,8000]);assert.deepEqual(published,['engine']);assert.equal(downloads.length,1);
-  }else{
-   assert.equal(result.published,0);assert.equal(result.failed,1);assert.match(result.errors[0].error,/Build job did not succeed/);assert.equal(downloads.length,0);assert.equal(published.length,0);
-   assert.equal(reads,state==='failed'?1:6);assert.deepEqual(waits,state==='failed'?[]:[2000,4000,8000,16000,30000]);
-  }
- }
+test('level publication verifies retained artifacts without consulting rerun job records',async t=>{
+ const f=fixture(t),downloads=[],order=[];let active=0;
+ const metadata={databaseId:123,workflowName:'Build and release',headSha:f.env.GITHUB_SHA,headBranch:'main',status:'in_progress',conclusion:null};
+ const env={...f.env,RELEASE_SELECTION:JSON.stringify([{id:'engine',version:'1.0.0'}])};
+ const targets=['arm64','x64'].map(arch=>({project:'engine',version:'1.0.0',arch}));
+ const result=await publishLevel({...f,env,output:path.join(f.directory,'publication'),targets,runGh:async args=>{if(args[1]==='view'){assert.ok(!args.at(-1).includes('jobs'));return JSON.stringify(metadata);}downloads.push(args);return '';},publish:async options=>{assert.equal(active++,0);order.push(options.env.BUILD_ARCH);await Promise.resolve();active--;return {commit:'c'.repeat(40)};}});
+ assert.equal(result.published,2);assert.equal(result.failed,0);assert.equal(downloads.length,2);assert.deepEqual(order,['arm64','x64']);
+});
+
+test('the current publisher uses exactly the environment supplied by the original workflow',async t=>{
+ const f=fixture(t),reports=path.join(f.directory,'reports.json'),definition='d'.repeat(64),downloaded=[];
+ fs.writeFileSync(reports,JSON.stringify({engine:{definitionDigest:definition}}));
+ const env={GITHUB_ACTIONS:'true',GITHUB_REPOSITORY:'owner/builds',GITHUB_WORKFLOW:'Build and release',GITHUB_WORKFLOW_REF:'owner/builds/.github/workflows/runtime-build.yml@refs/heads/main',GITHUB_SHA:f.record.build.sourceRevision,GITHUB_RUN_ID:f.record.build.runId,
+  RELEASE_SELECTION:JSON.stringify([{id:'engine',version:'1.0.0'}]),RELEASE_GRAPH:JSON.stringify({engine:[]}),RELEASE_REUSE:'[]',PUBLICATION_TARGETS:JSON.stringify({include:[{project:'engine',version:'1.0.0',arch:'arm64'}]}),BUILD_REPORTS:reports};
+ const result=await publishLevel({directory:f.directory,env,output:path.join(f.directory,'publication'),runGh:async args=>{downloaded.push(args);},publish:options=>publishPackage({...options,
+  verifyBundle:async()=>({record:f.record,declaration:{files:[{path:'build-definition.json',sha256:definition}]}}),
+  recordBuild:async options=>assert.equal(options.record.build.runId,'123'),requireBuild:options=>assert.equal(options.sourceRevision,env.GITHUB_SHA),
+  stageBundle:async options=>{assert.equal(options.target,env.GITHUB_SHA);return {id:17};},publishBundle:async()=>({id:17,draft:false}),append:async()=>({commit:'c'.repeat(40)})})});
+ assert.equal(result.failed,0,result.errors[0]?.error);assert.equal(result.published,1);assert.equal(downloaded[0][2],'123');assert.equal(downloaded[0][6],'runtime-engine-1.0.0-arm64');
+});
+
+test('artifact transport errors remain publication failures',async t=>{
+ const f=fixture(t),target={project:'engine',version:'1.0.0',arch:'arm64'};
+ const result=await publishLevel({...f,env:{...f.env,RELEASE_SELECTION:'engine=1.0.0'},targets:[target],output:path.join(f.directory,'publication'),runGh:async()=>{throw Error('HTTP 403: Resource not accessible by integration');},publish:()=>assert.fail('No publication after a transport failure')});
+ assert.equal(result.failed,1);assert.equal(result.skipped,0);assert.match(result.errors[0].error,/HTTP 403/);
 });

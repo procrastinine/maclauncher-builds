@@ -6,7 +6,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {resolveProject,buildRecord} from '../../../lib/projects.mjs';
-import {managerDeclaration} from '../../../tools/release-runtime.mjs';
+import {managerDeclaration} from '../../../tools/release-package.mjs';
 import {recipeMain} from '../../../tools/build-source.mjs';
 const require=createRequire(import.meta.url);
 const Native=require('../src/modules/shared/runtime/local-native.js');

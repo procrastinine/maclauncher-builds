@@ -19,8 +19,8 @@ function fixture(t,kind){
 function remote(record){return async args=>{
  assert.equal(args[0],'api');assert.equal(args.includes('POST'),false);
  if(args[1].includes('/git/ref/'))return JSON.stringify({object:{sha:target,type:'commit'}});
- assert.deepEqual(args,['api','--paginate','--slurp','repos/owner/builds/releases?per_page=100']);
- return JSON.stringify([[{tag_name:'engine/v1.0.0/arm64',draft:false,assets:[{id:1,name:record.asset.filename,size:record.asset.bytes,state:'uploaded',digest:'sha256:'+record.asset.sha256}]}]]);
+ assert.deepEqual(args,['api','repos/owner/builds/releases/tags/engine%2Fv1.0.0%2Farm64']);
+ return JSON.stringify({id:17,tag_name:'engine/v1.0.0/arm64',draft:false,assets:[{id:1,name:record.asset.filename,size:record.asset.bytes,state:'uploaded',digest:'sha256:'+record.asset.sha256}]});
 };}
 // The real archive and remote identity are checked; only cryptographic authority is injected,
 // as in the existing release lifecycle fixtures. This grants no real publication authority.

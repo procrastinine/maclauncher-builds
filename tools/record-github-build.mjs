@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
-import {verifyRelease} from './release-runtime.mjs';
+import {verifyRelease} from './release-package.mjs';
 import {verify} from './runtime-package.mjs';
 import {readProjects} from '../lib/projects.mjs';
 import {releaseRecord} from '../lib/project-identity.mjs';

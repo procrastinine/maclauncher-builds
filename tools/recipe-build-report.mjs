@@ -43,9 +43,10 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   if(cache.has(id))return cache.get(id);
   const project=projects.get(id);if(!project)throw Error('Unknown recipe project: '+id);
   const builds=project.build?buildRecords(project):[],files=new Map(),inputs=new Set(),usedLinks=new Map(),queue=[],queued=new Set(),unresolved=[],computed=[];
-  const enqueue=file=>{file=path.normalize(file).split(path.sep).join('/');if(registryFiles.has(file)||file.startsWith('catalogs/')||queued.has(file)||path.isAbsolute(file)||file.startsWith('../'))return;queued.add(file);queue.push(file);};
+  const enqueue=file=>{file=path.normalize(file).split(path.sep).join('/');if(file.startsWith('tools/publication/')||registryFiles.has(file)||file.startsWith('catalogs/')||queued.has(file)||path.isAbsolute(file)||file.startsWith('../'))return;queued.add(file);queue.push(file);};
   const rememberLink=file=>{const link=gitlinks.find(link=>file===link.path||file.startsWith(link.path+'/'));if(link)usedLinks.set(link.path,link);return link;};
   const artifactId=value=>{
+   if(value?.project&&Object.keys(value).length===1&&projects.has(value.project))return value.project;
    if(value?.evidence?.path&&/^attestations\/[a-f0-9]{64}\.json$/.test(value.evidence.path)){const ledger=JSON.parse(fs.readFileSync(path.join(root,value.evidence.path)));return ledger.record?.id;}
    if(typeof value?.url==='string'){
     let url;try{url=new URL(value.url);}catch{return null;}
@@ -87,6 +88,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   for(const build of builds){enqueue(build.command);for(const source of build.submodules||[])rememberLink(source);}
   // A directory entry declares every tracked file below it.
   const directoryFiles=directory=>trackedFiles.length?trackedFiles.filter(file=>file.startsWith(directory+'/')):fs.readdirSync(path.join(root,directory),{recursive:true}).map(name=>path.posix.join(directory,name.split(path.sep).join('/'))).filter(file=>fs.statSync(path.join(root,file)).isFile());
+  if(fs.existsSync(path.join(root,'.github/actions/build-runtime/action.yml')))enqueue('.github/actions/build-runtime/action.yml');
   for(const entry of project.producer.entries||[]){if(fs.statSync(path.join(root,entry),{throwIfNoEntry:false})?.isDirectory())for(const file of directoryFiles(entry))enqueue(file);else enqueue(entry);}
   if(project.producer.recipe)enqueue(project.producer.recipe);
   for(const upstream of project.upstreams)if(upstream.pin){enqueue(upstream.pin.file);rememberLink(upstream.pin.file);}
@@ -94,6 +96,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    if(file.startsWith('attestations/')){const record=JSON.parse(fs.readFileSync(absolute)).record;if(record?.id&&record.id!==id&&projects.has(record.id))inputs.add(record.id);continue;}
    if(!fs.statSync(absolute,{throwIfNoEntry:false})?.isFile())continue;
    const bytes=fs.readFileSync(absolute);
+   if(file.endsWith('.yml'))for(const match of bytes.toString('utf8').matchAll(/\bnode (tools\/[A-Za-z0-9_./-]+\.mjs)\b/g))enqueue(match[1]);
    if(file.endsWith('.json')){
     const raw=JSON.parse(bytes),value=walkJson(normalizedJson(file,raw),file);files.set(file,reportDigest(value));
     if(raw.path&&raw.buildEntry){rememberLink(raw.path);reference(path.posix.join(raw.path,raw.buildEntry),file);}

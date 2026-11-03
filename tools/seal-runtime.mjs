@@ -6,7 +6,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
-import {managerDeclaration} from './release-runtime.mjs';
+import {managerDeclaration} from './release-package.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),Native=require('../producers/maclauncher/src/modules/shared/runtime/local-native.js');
 const Source=require('../producers/maclauncher/src/modules/shared/runtime/pinned-native-build.js');

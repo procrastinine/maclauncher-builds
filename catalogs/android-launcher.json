@@ -2,32 +2,5 @@
   "schemaVersion": 2,
   "projectId": "android-launcher",
   "updatePolicy": "manual",
-  "packages": [
-    {
-      "schemaVersion": 2,
-      "id": "android-launcher",
-      "version": "1.0.0-MCLv4",
-      "arch": "universal",
-      "launcherArchitectures": [
-        "arm64",
-        "x64"
-      ],
-      "minimumMacOS": "13.0",
-      "manifestRelative": "manifest.json",
-      "manifestSha256": "4a2edd468a8537fbcbb1e334c4e7cbfde389c8828f4fc0da53f53afde51d3e93",
-      "sourceSha256": "e7351b24b649407f022029c277f4cf8ff1e3f641ba0a0db7ffa015cc9e9a3c3a",
-      "updatePolicy": "manual",
-      "asset": {
-        "filename": "android-launcher-1.0.0-MCLv4-universal.tar.gz",
-        "sha256": "504eb048c06b613a641c56360c953df8326f7a1285c3a73b551e5e4a08d529af",
-        "bytes": 92501,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-launcher%2Fv1.0.0-MCLv4%2Funiversal/android-launcher-1.0.0-MCLv4-universal.tar.gz"
-      },
-      "source": {
-        "repository": "procrastinine/maclauncher-builds",
-        "revision": "0e9c60db0dcf018cd3a7c9da39bfbef3070597ac"
-      },
-      "tag": "android-launcher/v1.0.0-MCLv4/universal"
-    }
-  ]
+  "packages": []
 }

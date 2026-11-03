@@ -27,13 +27,18 @@ export function releaseComponents({selection,graph}){
  const groups=new Map();for(const [index,row]of selection.entries()){const key=find(index);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(row);}
  return [...groups.values()];
 }
+/** Start long-running core components before the remaining selection. */
+export function orderReleaseComponents({components}){
+ const priority=rows=>rows.some(row=>row.id==='reshade')?0:rows.some(row=>row.id==='android')?1:rows.some(row=>row.id==='mpv')?2:3;
+ return [...components].sort((a,b)=>priority(a)-priority(b));
+}
 /** Same resolver and immutable registration checks as the build workflow, with no source writes. */
 export async function planReleaseDispatch({selection,directory=root,releases=[],resolve=resolveReleaseSelection}={}){
  // Reject overlapping user pairs before recipe discovery or any dispatch.
  const requested=parseSelection(selection);
  const resolved=await resolve({selection:requested,directory,releases});
  const registration=registerSelection({selection:resolved.orderedSelection,directory,releases,dryRun:true});
- const components=releaseComponents({selection:registration.selection,graph:resolved.dependencyGraph});
+ const components=orderReleaseComponents({components:releaseComponents({selection:registration.selection,graph:resolved.dependencyGraph})});
  return {repository:readProjects(directory,{resolvePins:false}).repository,workflow:'runtime-build.yml',ref:'main',selection:registration.selection,graph:resolved.dependencyGraph,
   components:components.map(selection=>({selection,releases:pairs(selection)}))};
 }
@@ -43,7 +48,7 @@ export async function dispatchReleaseComponents(plan,{runGh=(args)=>execFileSync
  const components=plan.components.map(component=>exactSelection(component.selection));
  if(!components.length)throw Error('No release components to dispatch.');
  exactSelection(components.flat());
- const expected=releaseComponents({selection:plan.selection,graph:plan.graph});
+ const expected=orderReleaseComponents({components:releaseComponents({selection:plan.selection,graph:plan.graph})});
  if(JSON.stringify(components)!==JSON.stringify(expected))throw Error('Dispatch components differ from the resolved graph.');
  const dispatched=[];
  for(const selection of components){

@@ -69,7 +69,7 @@ export async function verify({archive,sha256,project,version,arch,includeDeclara
     declaration=publicDeclaration(JSON.parse((await reader.read(entry.size)).toString('utf8')));
     if(declaration.id!==project||declaration.version!==version||declaration.arch!==arch)throw Error('Runtime archive belongs to a different project, version or architecture.');
     expected=new Map(declaration.files.map(file=>['files/'+file.path,file]));
-    metadataPaths=new Set([declaration.manifestRelative,declaration.sourceRelative,...declaration.notices.map(notice=>notice.path)].filter(value=>typeof value==='string'));
+    metadataPaths=new Set(['build-inputs.json',declaration.manifestRelative,declaration.sourceRelative,...declaration.notices.map(notice=>notice.path)].filter(value=>typeof value==='string'));
    }else{
     const file=expected.get(entry.name);
     if(!file||file.size!==entry.size||file.mode!==entry.mode)throw Error('Runtime archive member differs from its inventory.');
@@ -137,17 +137,7 @@ export async function main([command,...args]){
   return pack({project:o.project,input:o.input,declaration,output:o.output});
  }
  if(command==='verify')return verify({archive:o.archive,sha256:o.sha256,project:o.project,version:o.version,arch:o.arch});
- if(command==='catalog'){
-  if(!o.packages?.length||!o.output)throw Error('catalog requires --package records and --output.');
-  if(path.basename(o.output)!==o.project+'.json')throw Error('Catalog filename must be '+o.project+'.json');
-  const previous=o.previous?JSON.parse(fs.readFileSync(o.previous)):undefined;
-  const records=o.packages.map(file=>JSON.parse(fs.readFileSync(file)));
-  const {requirePublicationAuthority}=await import('./publication-authority.mjs');
-  for(const record of records)await requirePublicationAuthority({record,repository:project.releaseRepository,directory:path.resolve(import.meta.dirname,'..')});
-  if(fs.existsSync(o.output)&&(!o.previous||path.resolve(o.previous)!==path.resolve(o.output)))throw Error('Use --previous to retain existing published versions.');
-  const {writePublicationCatalog}=await import('./catalog-publication.mjs');
-  return writePublicationCatalog({records,project:o.project,repository:project.releaseRepository,directory:path.resolve(import.meta.dirname,'..'),output:o.output,previous});
- }
+ if(command==='catalog'){const {writeCatalog}=await import('./publication/catalog.mjs');return writeCatalog(o,project,path.resolve(import.meta.dirname,'..'));}
  throw Error('Use pack, verify or catalog.');
 }
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)main(process.argv.slice(2)).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error.message);process.exitCode=1;});

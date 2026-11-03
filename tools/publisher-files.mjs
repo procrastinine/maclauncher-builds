@@ -160,7 +160,7 @@ export async function assemblePublisherPackage({project,inputArchive,output,work
  const input=readPublisherInput({project,directory});if(!input)fail('the project has no registered publisher input.');
  if(!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work)||work===output||work.startsWith(output+path.sep)||output.startsWith(work+path.sep))fail('choose new separate absolute output and work directories.');
  const checked=await verifyInputArchive(inputArchive,input),pin=input.descriptor.input.archive,version=input.descriptor.publisherVersion;
- const {recordFromDeclaration,prepareRelease}=await import('./release-runtime.mjs');
+ const {recordFromDeclaration,prepareRelease}=await import('./release-package.mjs');
  let archive=inputArchive,record=recordFromDeclaration(checked.declaration,{filename:pin.filename,sha256:pin.sha256,bytes:pin.bytes});
  if(record.version!==version){
   const {reversionPackage}=await import('./reversion-runtime.mjs');
@@ -179,7 +179,7 @@ export async function main([command,...args],directory=root){
  if(command==='assemble'){if(!options['input-archive'])fail('assemble needs the pinned --input-archive.');return assemblePublisherPackage({project:options.project,inputArchive:options['input-archive'],output:options.output,work:options.work,directory});}
  if(options['release-bundle']){
   if(options.archive||options.record)fail('select one release bundle, or one archive and its record.');
-  const {verifyRelease}=await import('./release-runtime.mjs'),{record}=await verifyRelease({bundle:options['release-bundle'],directory});
+  const {verifyRelease}=await import('./release-package.mjs'),{record}=await verifyRelease({bundle:options['release-bundle'],directory});
   options.archive=path.join(options['release-bundle'],record.asset.filename);options.record=options.archive+'.json';
  }
  if(!options.archive||!options.record||command==='record'&&!options['input-archive'])fail('record needs both actual archives and the package record; verify needs the archive and its record.');

@@ -161,10 +161,10 @@ test('Build and release retains the shared architecture and attestation steps',(
  assert.match(workflow,/name: Build and release/);assert.match(workflow,/workflow_dispatch:/);
  assert.match(workflow,/matrix: \$\{\{ fromJSON\(needs\.plan\.outputs\.matrix0\) \}\}/);
  assert.match(workflow,/runs-on: \$\{\{ matrix\.runner \}\}/);assert.match(workflow,/fail-fast: false/);
- assert.match(workflow,/tools\/release-runtime\.mjs prepare --project/);assert.match(workflow,/tools\/release-runtime\.mjs verify --bundle/);
+ assert.match(workflow,/tools\/release-package\.mjs prepare --project/);assert.match(workflow,/tools\/release-package\.mjs verify --bundle/);
  const actions=[...workflow.matchAll(/uses: actions\/attest-build-provenance@([a-f0-9]{40})/g)];assert.equal(actions.length,2);assert.equal(actions[0][1],actions[1][1]);
  assert.match(workflow,/subject-path: \$\{\{ runner\.temp \}\}\/release\/\*\.tar\.gz/);
- assert.doesNotMatch(pipeline,/^  publish:/m);assert.match(workflow,/tools\/publish-level\.mjs --output/);
+ assert.doesNotMatch(pipeline,/^  publish:/m);assert.match(fs.existsSync(path.join(root,'.github/actions/publish-runtime/action.yml'))?fs.readFileSync(path.join(root,'.github/actions/publish-runtime/action.yml'),'utf8'):workflow,/tools\/publish-level\.mjs --output/);
  assert.doesNotMatch(fs.readFileSync(path.join(root,'.github/actions/build-runtime/action.yml'),'utf8'),/publish-package|publish-level|resume/);
  for(const name of ['independent','build0','build1','build2','build3']){const body=pipeline.slice(pipeline.indexOf('  '+name+':')).split(/\n  [A-Za-z][A-Za-z0-9]*:/)[0];assert.match(body,/contents: read/);assert.doesNotMatch(body,/contents: write/);}
 });
@@ -250,7 +250,7 @@ test('graphics outputs use different build hosts while retaining one version per
  const directory=githubFixture(t),manifest=JSON.parse(fs.readFileSync(path.join(root,'projects.json')));
  for(const file of ['projects.json',...Object.values(manifest.registries)])fs.copyFileSync(path.join(root,file),path.join(directory,file));
  const matrix=buildPlan({project:'reshade',directory,tags:()=>[]}).include;
- assert.deepEqual(matrix.map(row=>[row.version,row.arch,row.runner]),[['0.3.1','universal','xcode-27'],['0.3.1','x64','macos-26-intel']]);
+ assert.deepEqual(matrix.map(row=>[row.version,row.arch,row.runner]),[[buildRecord(project).version,'universal','xcode-27'],[buildRecord(project).version,'x64','macos-26-intel']]);
  assert.deepEqual(buildRecord(project).architectures,['universal','x64']);
  assert.throws(()=>buildRecord({...project,build:{...project.build,runners:{x64:'self-hosted'}}}),/hosted/);
  assert.throws(()=>buildRecord({...project,build:{...project.build,runners:{arm64:'macos-26'}}}),/hosted/);

@@ -95,10 +95,17 @@ test('publisher source tags pin the exact public descriptor and producer mapping
 
 test('publisher stage, publish and apply check real archives and normal source tags without a signer claim',async t=>{
  const f=await fixture(t);await f.record();const revision=commitInputs(f),calls=[];let staged=false,draft=true;
- const ref=()=>JSON.stringify({object:{type:'commit',sha:revision}}),remote=()=>({tag_name:id+'/v1.0/universal',draft,assets:[{id:1,name:f.output.record.asset.filename,size:f.output.record.asset.bytes,state:'uploaded',digest:'sha256:'+f.output.record.asset.sha256}]});
- const runGh=async args=>{calls.push(args);if(args[0]==='api'){if(args[1]?.includes('/git/ref/')){if(!staged)throw Object.assign(Error('missing'),{status:404});return ref();}if(args.includes('--paginate'))return JSON.stringify([staged?[remote()]:[]]);assert.ok(args.includes('POST'));staged=true;return ref();}if(args[1]==='create')return '';assert.equal(args[1],'edit');draft=false;return '';};
+ const remote=()=>({id:17,tag_name:id+'/v1.0/universal',draft,assets:staged?[{id:1,name:f.output.record.asset.filename,size:f.output.record.asset.bytes,state:'uploaded',digest:'sha256:'+f.output.record.asset.sha256}]:[]});
+ const runGh=async args=>{calls.push(args);const endpoint=args.find(arg=>arg.startsWith('repos/')||arg.startsWith('https://uploads.'));
+  if(endpoint.includes('/releases/tags/')){if(draft)throw Object.assign(Error('missing'),{status:404});return JSON.stringify(remote());}
+  if(endpoint==='repos/'+repository+'/releases')return JSON.stringify(remote());
+  if(endpoint.startsWith('https://uploads.')){staged=true;return JSON.stringify(remote().assets[0]);}
+  assert.ok(args.includes('PATCH'));assert.ok(endpoint.endsWith('/17'));draft=false;return JSON.stringify(remote());
+ };
  await assert.rejects(stageRelease({bundle:f.output.bundle,target:'f'.repeat(40),directory:f.directory,runGh}),/source commit/);assert.equal(calls.length,0);
- await stageRelease({bundle:f.output.bundle,target:revision,directory:f.directory,runGh});await publishRelease({bundle:f.output.bundle,directory:f.directory,runGh});await applyRelease({bundle:f.output.bundle,directory:f.directory,runGh});
+ const publication=await stageRelease({bundle:f.output.bundle,target:revision,directory:f.directory,runGh});
+ const published=await publishRelease({bundle:f.output.bundle,directory:f.directory,runGh,publication});
+ await applyRelease({bundle:f.output.bundle,directory:f.directory,runGh,publication:published});
  const active=JSON.parse(fs.readFileSync(path.join(f.directory,'catalogs',id+'.json')));assert.equal(active.packages[0].asset.sha256,f.output.record.asset.sha256);assert.equal(active.packages[0].build,undefined);assert.equal(draft,false);
 });
 

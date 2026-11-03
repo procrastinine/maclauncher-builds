@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import {releaseComponents,planReleaseDispatch,dispatchReleaseComponents} from '../tools/dispatch-release.mjs';
+import {releaseComponents,orderReleaseComponents,planReleaseDispatch,dispatchReleaseComponents} from '../tools/dispatch-release.mjs';
 import {planBuildRelease} from '../tools/plan-build-release.mjs';
 const hosted=JSON.parse(fs.readFileSync(new URL('./fixtures/release-components/graph.json',import.meta.url)));
 const strings=components=>components.map(rows=>rows.map(({id,version})=>id+'='+version));
@@ -59,4 +59,9 @@ test('duplicate pairs, overlapping component plans and conflicting ABI revisions
 test('published read-only inputs do not connect consumers in separate components',()=>{
  const selection=[{id:'left',version:'1.0.0'},{id:'right',version:'1.0.0'}];
  assert.deepEqual(releaseComponents({selection,graph:{left:['published-input'],right:['published-input'],'published-input':[]}}),selection.map(row=>[row]));
+});
+
+test('dispatch prioritizes graphics, Android and mpv while preserving the other components',()=>{
+ const components=['small','mpv','android','reshade','other'].map(id=>[{id,version:'1.0.0'}]);
+ assert.deepEqual(orderReleaseComponents({components}).map(rows=>rows[0].id),['reshade','android','mpv','small','other']);
 });

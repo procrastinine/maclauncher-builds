@@ -2,9 +2,7 @@ import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
-import {githubBuildInput} from './github-build-input.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
-import {sha} from './helper-package.mjs';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 const root=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),{validateDeclaration}=require('../lib/declaration.cjs');
 const json=file=>JSON.parse(fs.readFileSync(path.join(root,file)));
@@ -32,25 +30,12 @@ export function verifyAndroidBuildInput(requirement,input){
 /** Resolve every input from its exact public signed ledger entry before compilation. */
 export async function resolveAndroidSignedInputs({work}){
  if(!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('Signed Android inputs require a new absolute work directory.');
- const ledger=json('producers/android-inputs/verified-builds.json'),pins=new Map();
- function visit(value){
-  if(!value||typeof value!=='object')return;
-  if(value.evidence){
-   if(!/^attestations\/[a-f0-9]{64}\.json$/.test(value.evidence.path||'')||!/^[a-f0-9]{64}$/.test(value.evidence.sha256||''))throw Error('Invalid signed Android input evidence.');
-   const file=path.join(root,value.evidence.path);if(sha(file)!==value.evidence.sha256)throw Error('Signed Android input evidence changed.');
-   const record=JSON.parse(fs.readFileSync(file)).record,key=[record.id,record.version,record.arch].join('/'),previous=pins.get(key);
-   if(previous&&JSON.stringify(previous)!==JSON.stringify(value))throw Error('Ambiguous signed Android input: '+key);pins.set(key,value);return;
-  }
-  for(const child of Object.values(value))visit(child);
- }
- visit(ledger);
- const requirements=androidBuildInputRequirements(),missing=requirements.filter(requirement=>!preparedBuildInput(requirement.id)&&!pins.has([requirement.id,requirement.version,requirement.arch].join('/')));
- if(missing.length)throw Error('Missing signed Android inputs: '+missing.map(requirement=>[requirement.id,requirement.version,requirement.arch].join('/')).join(', '));
- fs.mkdirSync(work,{recursive:true});const result={};
+ const declared=json('producers/android-inputs/verified-builds.json'),prepared=new Map(Object.values(declared).filter(row=>row?.project).map(row=>[row.project,preparedBuildInput(row.project)]));
+ const requirements=androidBuildInputRequirements();fs.mkdirSync(work,{recursive:true});const result={};
  for(const requirement of requirements){
-  const key=[requirement.id,requirement.version,requirement.arch].join('/'),input=preparedBuildInput(requirement.id)||await githubBuildInput({pin:pins.get(key),output:path.join(work,requirement.key),work:path.join(work,requirement.key+'-download')});
+  const input=prepared.get(requirement.id);
+  if(!input)throw Error('The dependency graph did not prepare the Android input: '+requirement.id);
   result[requirement.key]=verifyAndroidBuildInput(requirement,input);
-  fs.rmSync(path.join(work,requirement.key+'-download'),{recursive:true,force:true});
  }
  return result;
 }

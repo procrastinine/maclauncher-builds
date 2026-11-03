@@ -4,7 +4,7 @@ import path from 'node:path';
 import {createRequire} from 'node:module';
 import {sha} from './helper-package.mjs';
 import {imageDataContentIdentity} from './build-android-image-data.mjs';
-const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),{validateDeclaration}=require('../lib/declaration.cjs');
+const require=createRequire(import.meta.url),{validateDeclaration,logicalFiles}=require('../lib/package-contract.cjs');
 const descriptor=new URL('../producers/android-image-data/source.json',import.meta.url);
 
 /** Read the complete ordinary sealed input group before restoring its Mac image. */
@@ -23,8 +23,8 @@ export function readImageDataInputs(inputs){
   if(transportSha256&&transportSha256!==hash)throw Error('Image shards have different complete indexes.');transportSha256=hash;transport=index;content=identity;
   const shard=index.shards?.find(row=>row.id===selected.id&&row.version===selected.version);
   if(!shard||shard.shard!==selected.shard||JSON.stringify(manifest.dataShard)!==JSON.stringify(shard))throw Error('Image input shard assignment differs.');
-  const inventory=new Map(declaration.files.map(file=>[file.path,file]));
-  if(declaration.files.filter(file=>file.path.startsWith('data/')).length!==shard.objects.length)throw Error('Image input has unassigned data objects.');
+  const files=logicalFiles(declaration),inventory=new Map(files.map(file=>[file.path,file]));
+  if(files.filter(file=>file.path.startsWith('data/')).length!==shard.objects.length)throw Error('Image input has unassigned data objects.');
   for(const object of shard.objects){
    const file=inventory.get('data/'+object.data);
    if(!/^\d{8}(?:-\d{4})?$/.test(object.data||'')||objects.has(object.data)||!file||file.size!==object.size||file.sha256!==object.sha256)throw Error('Image data object differs from the complete index.');

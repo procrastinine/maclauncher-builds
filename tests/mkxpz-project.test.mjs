@@ -25,10 +25,10 @@ test('MKXP-Z uses its owned source recipe and preserves the universal publisher 
  assert.equal(baseline.minimumMacOS,'11.0');assert.equal(baseline.publisherFiles,1083);
  assert.equal(build(['--project','mkxpz','--check']).sourceDirectory,'producers/maclauncher');
 });
-test('MKXP-Z catalog contains only the current patched Apple Silicon package',()=>{
+test('MKXP-Z catalog has one Apple Silicon package for its current registered version',()=>{
  const project=resolveProject('mkxpz',root),value=JSON.parse(fs.readFileSync(path.join(root,'catalogs/mkxpz.json')));
  validateCatalog(value,{project:'mkxpz',repository:project.releaseRepository});
- assert.equal(value.packages.length,1);const adapted=value.packages[0];assert.ok(project.packageProfiles.some(profile=>profile.version===adapted.version));
+ const current=value.packages.filter(record=>record.version===project.build.version);assert.equal(current.length,1);const adapted=current[0];assert.ok(project.packageProfiles.some(profile=>profile.version===adapted.version));
  assert.equal(adapted.arch,'arm64');assert.deepEqual(adapted.launcherArchitectures,['arm64']);
  assert.equal(adapted.minimumMacOS,'11.0');assert.equal(adapted.manifestRelative,'manifest.json');
  assert.throws(()=>catalog([{...adapted,asset:{...adapted.asset,sha256:'0'.repeat(64)}}],

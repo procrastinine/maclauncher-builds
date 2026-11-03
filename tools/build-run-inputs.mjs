@@ -5,7 +5,7 @@ import {promisify} from 'node:util';
 import {pathToFileURL} from 'node:url';
 import {resolveProject,buildRecord,readProjects} from '../lib/projects.mjs';
 import {assetUrl,validateCatalog,projectId} from '../lib/project-identity.mjs';
-import {verifyRelease} from './release-runtime.mjs';
+import {verifyRelease} from './release-package.mjs';
 import {recordGithubBuild} from './record-github-build.mjs';
 import {requireGithubBuild} from './build-coverage.mjs';
 import {buildInput} from './build-input.mjs';

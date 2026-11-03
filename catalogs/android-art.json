@@ -2,53 +2,5 @@
   "schemaVersion": 2,
   "projectId": "android-art",
   "updatePolicy": "manual",
-  "packages": [
-    {
-      "schemaVersion": 2,
-      "id": "android-art",
-      "version": "0.2.0",
-      "arch": "arm64",
-      "launcherArchitectures": [
-        "arm64"
-      ],
-      "minimumMacOS": "13.0.0",
-      "manifestRelative": "runtime.json",
-      "manifestSha256": "70204debf76f9472532b759e748d9c7c94911d4d18fd35c46a2c1c0ab418fdc7",
-      "sourceSha256": "92d448cfc7befa85bb5f6b97664bbdb1efedf1c1017300d0c17ec3d1d5ac5696",
-      "updatePolicy": "manual",
-      "launcherContract": 1,
-      "source": {
-        "repository": "procrastinine/maclauncher-android",
-        "revision": "af08a3508d3785b75d6707dadc20f99a2d2593f9"
-      },
-      "asset": {
-        "filename": "android-art-0.2.0-arm64.tar.gz",
-        "sha256": "ffb3306b5ce720eedbc88d310aab874ee3fb011b4385c36e49e51b96682a7f15",
-        "bytes": 124678081,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art%2Fv0.2.0%2Farm64/android-art-0.2.0-arm64.tar.gz"
-      },
-      "tag": "android-art/v0.2.0/arm64"
-    },
-    {
-      "schemaVersion": 2,
-      "id": "android-art",
-      "version": "0.1.0",
-      "arch": "arm64",
-      "launcherArchitectures": [
-        "arm64"
-      ],
-      "minimumMacOS": "13.0.0",
-      "manifestRelative": "runtime.json",
-      "manifestSha256": "6a5a6ea8962123f4d5d17feb7a731fcde895d9b89ac7dab6adf6550589b85386",
-      "sourceSha256": "e5aa93c2acd428669e41f2e510ddb40a70ebbf8512b0f25202254428954b5c0d",
-      "updatePolicy": "manual",
-      "asset": {
-        "filename": "android-art-0.1.0-arm64.tar.gz",
-        "sha256": "a656444041659e8a9318bb274dfe74530d543bf18a00af55f11531aec9a1cf6c",
-        "bytes": 124569769,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art%2Fv0.1.0%2Farm64/android-art-0.1.0-arm64.tar.gz"
-      },
-      "tag": "android-art/v0.1.0/arm64"
-    }
-  ]
+  "packages": []
 }

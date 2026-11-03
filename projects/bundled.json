@@ -21,14 +21,10 @@
       {
         "version": "1.1.0",
         "label": "CatSystem2 KIF cryptography helper 1.1.0"
-      },
-      {
-        "version": "1.1.1",
-        "label": "CatSystem2 KIF cryptography helper 1.1.1"
       }
     ],
     "build": {
-      "version": "1.1.1",
+      "version": "1.1.0",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "arm64",
@@ -58,14 +54,10 @@
       {
         "version": "1.1.0",
         "label": "Android privacy helper 1.1.0"
-      },
-      {
-        "version": "1.1.1",
-        "label": "Android privacy helper 1.1.1"
       }
     ],
     "build": {
-      "version": "1.1.1",
+      "version": "1.1.0",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "arm64"
@@ -97,14 +89,10 @@
       {
         "version": "1.1.0",
         "label": "PlayTools storage adapter 1.1.0"
-      },
-      {
-        "version": "1.1.1",
-        "label": "PlayTools storage adapter 1.1.1"
       }
     ],
     "build": {
-      "version": "1.1.1",
+      "version": "1.1.0",
       "command": "tools/build-ios-helper.mjs",
       "architectures": [
         "arm64"
@@ -162,14 +150,10 @@
       {
         "version": "4.0.2-MCLv2",
         "label": "Lua 5.1 host ABI"
-      },
-      {
-        "version": "4.0.2-MCLv3",
-        "label": "Lua 5.1 host ABI 4.0.2-MCLv3"
       }
     ],
     "build": {
-      "version": "4.0.2-MCLv3",
+      "version": "4.0.2-MCLv2",
       "command": "tools/build-luasteam.mjs",
       "architectures": [
         "universal"
@@ -203,14 +187,10 @@
       {
         "version": "1.1.0",
         "label": "MKXP-Z configuration helper 1.1.0"
-      },
-      {
-        "version": "1.1.1",
-        "label": "MKXP-Z configuration helper 1.1.1"
       }
     ],
     "build": {
-      "version": "1.1.1",
+      "version": "1.1.0",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "universal"
@@ -754,14 +734,10 @@
       {
         "version": "0.3.1",
         "label": "MacLauncher graphics 0.3.1"
-      },
-      {
-        "version": "0.3.2",
-        "label": "MacLauncher graphics 0.3.2"
       }
     ],
     "build": {
-      "version": "0.3.2",
+      "version": "0.3.1",
       "command": "tools/build-graphics.mjs",
       "architectures": [
         "universal",
@@ -845,14 +821,10 @@
       {
         "version": "0.5.1",
         "label": "Offline Steam API compatibility helper 0.5.1"
-      },
-      {
-        "version": "0.5.2",
-        "label": "Offline Steam API compatibility helper 0.5.2"
       }
     ],
     "build": {
-      "version": "0.5.2",
+      "version": "0.5.1",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "universal"
@@ -945,29 +917,21 @@
       {
         "version": "1.10.0-MCLv2",
         "label": "Steamworks4j 1.10.0 JNI ABI"
-      },
-      {
-        "version": "1.9.0-MCLv3",
-        "label": "Steamworks4j 1.9.0 JNI ABI 1.9.0-MCLv3"
-      },
-      {
-        "version": "1.10.0-MCLv3",
-        "label": "Steamworks4j 1.10.0 JNI ABI 1.10.0-MCLv3"
       }
     ],
     "build": [
       {
-        "version": "1.10.0-MCLv3",
-        "command": "tools/build-java-steamworks.mjs",
-        "architectures": [
-          "universal"
-        ]
-      },
-      {
-        "version": "1.9.0-MCLv3",
+        "version": "1.9.0-MCLv2",
         "command": "tools/build-java-steamworks.mjs",
         "architectures": [
           "x64"
+        ]
+      },
+      {
+        "version": "1.10.0-MCLv2",
+        "command": "tools/build-java-steamworks.mjs",
+        "architectures": [
+          "universal"
         ]
       }
     ]
@@ -1010,14 +974,10 @@
       {
         "version": "1.1.0",
         "label": "Android package metadata helper 1.1.0"
-      },
-      {
-        "version": "1.1.1",
-        "label": "Android package metadata helper 1.1.1"
       }
     ],
     "build": {
-      "version": "1.1.1",
+      "version": "1.1.0",
       "command": "tools/build-apk-metadata.mjs",
       "architectures": [
         "arm64",
@@ -1054,14 +1014,10 @@
       {
         "version": "1.1.0",
         "label": "Browser network helper 1.1.0"
-      },
-      {
-        "version": "1.1.1",
-        "label": "Browser network helper 1.1.1"
       }
     ],
     "build": {
-      "version": "1.1.1",
+      "version": "1.1.0",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "arm64",
@@ -2010,8 +1966,7 @@
         "producers/android-image-data/Cargo.toml",
         "producers/android-image-data/main.rs",
         "producers/android-image-data/tree.rs",
-        "tools/build-android-image-data.mjs",
-        "attestations/4f1464fe0894c18e6b8a083abff4a540b98b58524e9c77d726208b7c568a4def.json"
+        "tools/build-android-image-data.mjs"
       ],
       "sourceRepository": "https://github.com/procrastinine/maclauncher-android"
     },
