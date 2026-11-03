@@ -935,10 +935,14 @@
       {
         "version": "20250608-en-MCLv3",
         "label": "ONScripter-EN 20250608-en-MCLv3"
+      },
+      {
+        "version": "20250608-en-MCLv4",
+        "label": "ONScripter-EN 20250608-en-MCLv4"
       }
     ],
     "build": {
-      "version": "20250608-en-MCLv3",
+      "version": "20250608-en-MCLv4",
       "command": "tools/build-onscripter-en.mjs",
       "architectures": [
         "x64",
