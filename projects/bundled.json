@@ -1018,10 +1018,14 @@
       {
         "version": "1.1.1",
         "label": "Android package metadata helper 1.1.1"
+      },
+      {
+        "version": "1.1.2",
+        "label": "Android package metadata helper 1.1.2"
       }
     ],
     "build": {
-      "version": "1.1.1",
+      "version": "1.1.2",
       "command": "tools/build-apk-metadata.mjs",
       "architectures": [
         "arm64",

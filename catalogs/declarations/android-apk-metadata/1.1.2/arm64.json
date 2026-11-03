@@ -1,0 +1,566 @@
+{
+  "id": "android-apk-metadata",
+  "version": "1.1.2",
+  "arch": "arm64",
+  "minimumMacOS": "13.0",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "34430ef0f71a136d9bf5a208964ef8b7ccdec1559dc721eca1868ed9b975ea96",
+  "directoryRelative": "android-apk-metadata/1.1.2/arm64",
+  "manifestRelative": "helper.json",
+  "manifestSha256": "c5e57f2dd73b2fd3842eeca1583a5626392695128a6abf224447952af4f2efe9",
+  "files": [
+    {
+      "path": "android-apk-metadata",
+      "size": 812176,
+      "sha256": "b35b2644f9a336bce0d76a239b78ed6f44563b61f15d3decdd46d010d6b00696",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "build-definition.json",
+      "size": 16396,
+      "mode": 420,
+      "sha256": "e2322d9f623bc5a7ffc9431be02b0bc1ff7e1c7d5a830fa2cafb426c69560423"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "df51f861a86b47965faa787ae70cb49763f5a497b338d3a681d3ed42fbd0baa2"
+    },
+    {
+      "path": "helper.json",
+      "size": 15981,
+      "sha256": "c5e57f2dd73b2fd3842eeca1583a5626392695128a6abf224447952af4f2efe9",
+      "mode": 420
+    },
+    {
+      "path": "licenses/aim/LICENSE",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "licenses/aim/NOTICE",
+      "size": 802,
+      "sha256": "8937b0397fdaea5ecb52945c9d2da894d338ed49397ef7824be365e60049d264",
+      "mode": 420
+    },
+    {
+      "path": "licenses/aim/THIRD_PARTY_NOTICES.md",
+      "size": 11369,
+      "sha256": "a41c63d0b40a94fc5dae93d63c788b12385b98517e149b912be7d5913ad28e0f",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/0-LICENSE-0BSD",
+      "size": 665,
+      "sha256": "861399f8c21c042b110517e76dc6b63a2b334276c8cf17412fc3c8908ca8dc17",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/1-LICENSE-APACHE",
+      "size": 312,
+      "sha256": "d63873d639e09fe240d54a3a64cebcc7c660404a4692a62bdbecc4a67b7f9cba",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/10-LICENSE-MIT",
+      "size": 1097,
+      "sha256": "61d383b05b87d78f94d2937e2580cce47226d17823c0430fbcad09596537efcf",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/11-LICENSE-APACHE",
+      "size": 51,
+      "sha256": "f0a4a8b83c56b49b4747cd1e4e913d1480f132e8b3eb37de2a1a7a5e462ffc61",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/12-LICENSE-MIT",
+      "size": 108,
+      "sha256": "c604b196a8dc0ce93e177eb0b7ec165df04bc6f721559147c3cc725654a1cd35",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/14-LICENSE-MIT",
+      "size": 100,
+      "sha256": "d7878d9a7d190097990145e7a24adc717134aa5db34fc1c75c8ccdb0f31e33c6",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/15-LICENSE-APACHE",
+      "size": 51,
+      "sha256": "f0a4a8b83c56b49b4747cd1e4e913d1480f132e8b3eb37de2a1a7a5e462ffc61",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/16-LICENSE-MIT",
+      "size": 105,
+      "sha256": "3d5a330aed9e333d4b10d100223cadabb24814486c0e4081a179e13bb054b8c8",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/17-LICENSE",
+      "size": 134,
+      "sha256": "dbbca7b2a7d56234762150b5fdd0b5be94cef1cbbca6716509e25f87799a0529",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/18-LICENSE-APACHE",
+      "size": 51,
+      "sha256": "b7ecd57183ad8129ff99804f9fd16ccf2ffbb60b711d01fc5e7764e70aed1f77",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/19-LICENSE-MIT",
+      "size": 66,
+      "sha256": "cbcf9c996c869dcf612e56da16fa9a614501e00350bbb8eaaad0aabd1f22fd04",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/21-LICENSE-MIT",
+      "size": 109,
+      "sha256": "d2af1f280d17d5816e9681da9b8957275185c90afe5ffb96d736b3de388259a9",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/22-COPYING",
+      "size": 126,
+      "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/23-LICENSE-MIT",
+      "size": 124,
+      "sha256": "362db16bc9fac3a9459df354c79e9f4820300c5317a3211c276c85bfd1097043",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/24-LICENSE",
+      "size": 256,
+      "sha256": "007ca592eafd7f1f24b77335a8e2ac065a3eccc3a4d37d55bb66abc031f9743c",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/25-LICENSE-APACHE.md",
+      "size": 52,
+      "sha256": "9aa97a1c582d731a371edd66550b9704594a3afa5ad579d832fe5b511b264c14",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/26-LICENSE-MIT.md",
+      "size": 255,
+      "sha256": "2b132577ab152ed5fc1ca84c6ef47a3b6c4b61fba8989eb96e183d37fe8bac5e",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/27-LICENSE-ZLIB.md",
+      "size": 984,
+      "sha256": "0a54e647fe54104658b5e563c04c6f9edf251710e47bce692e0bd990a4ddaa39",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/4-LICENSE-MIT",
+      "size": 125,
+      "sha256": "add199f65eb299b5af6b1e990cfee7641660795c15cc80798be7bd417a466d08",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/41-LICENSE-MIT",
+      "size": 181,
+      "sha256": "c24a6ba0fec2de9e37ad16f6d621cc2c6da8de08a40cfbcd87ddd9adecdc5698",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/42-LICENSE.md",
+      "size": 121,
+      "sha256": "0c7bb6410258d18ead5321440521270d322f069a391f82487e239c939893bd72",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/45-LICENSE",
+      "size": 17,
+      "sha256": "db11fec9946737df39ca3898d9cd8c10ec6f6c3a884a6802b0ad0b81b4e8f23a",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/46-LICENSE-APACHE",
+      "size": 137,
+      "sha256": "7f574f544e13d4fc0f20af34c20a265e73bb1b95a27abb08cd92ff3e5073ab4b",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/47-LICENSE-MIT",
+      "size": 126,
+      "sha256": "76f89bf83fe9cee4c2ebdf742994f66bd435b01fb9f4bbb243b2e6722de5a4b3",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/50-LICENSE-UNICODE",
+      "size": 1995,
+      "sha256": "f7db81051789b729fea528a63ec4c938fdcb93d9d61d97dc8cc2e9df6d47f2a1",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/52-LICENSE-MIT",
+      "size": 128,
+      "sha256": "c2ce4f4c6ba2e8b371cc8717139aa67ed0b3a5b95aace9e0cbb5aecb06f8c219",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/54-LICENSE-MIT",
+      "size": 121,
+      "sha256": "d06f26505a5373bf9fe385f4aaeb0c2f19439b1f644474afb84f36398317d2b9",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/55-LICENSE-APACHE",
+      "size": 51,
+      "sha256": "f0a4a8b83c56b49b4747cd1e4e913d1480f132e8b3eb37de2a1a7a5e462ffc61",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/56-COPYRIGHT-library.html",
+      "size": 125728,
+      "sha256": "284d2ef1504d00b24d80ac513050b90a63e82406e2f85b8d2b02e3da917172d3",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/6-LICENSE-MIT",
+      "size": 100,
+      "sha256": "271b8754cdc5f97276f4e8849fa6c203763cbd7f0ec4216500c3c4f621c1b479",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/8-LICENSE-MIT",
+      "size": 125,
+      "sha256": "38487ec6db05d5ffcbeb1c667fdd719d61bc863fd314849ebaa5cf787859f083",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dependencies/9-LICENSE-APACHE",
+      "size": 274,
+      "sha256": "5b72ed2441eadf434f51af7f44b66b8145422c1b45b64f76a206d711b8aad7fe",
+      "mode": 420
+    },
+    {
+      "path": "licenses/maclauncher/LICENSE",
+      "size": 124,
+      "sha256": "361bf2822c8b0032176946fdb81168aa255ac00d0dbd970cf0b533a2d5e9e789",
+      "mode": 420
+    }
+  ],
+  "notices": [
+    {
+      "name": "AIM",
+      "license": "Apache-2.0",
+      "path": "licenses/aim/LICENSE"
+    },
+    {
+      "name": "AIM",
+      "license": "Apache-2.0",
+      "path": "licenses/aim/NOTICE"
+    },
+    {
+      "name": "AIM",
+      "license": "Apache-2.0",
+      "path": "licenses/aim/THIRD_PARTY_NOTICES.md"
+    },
+    {
+      "name": "MacLauncher metadata protocol",
+      "license": "MIT",
+      "path": "licenses/maclauncher/LICENSE"
+    },
+    {
+      "name": "adler2 2.0.1",
+      "license": "0BSD OR MIT OR Apache-2.0",
+      "path": "licenses/dependencies/0-LICENSE-0BSD"
+    },
+    {
+      "name": "adler2 2.0.1",
+      "license": "0BSD OR MIT OR Apache-2.0",
+      "path": "licenses/dependencies/1-LICENSE-APACHE"
+    },
+    {
+      "name": "adler2 2.0.1",
+      "license": "0BSD OR MIT OR Apache-2.0",
+      "path": "licenses/dependencies/19-LICENSE-MIT"
+    },
+    {
+      "name": "block-buffer 0.10.4",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/11-LICENSE-APACHE"
+    },
+    {
+      "name": "block-buffer 0.10.4",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/4-LICENSE-MIT"
+    },
+    {
+      "name": "cfg-if 1.0.5",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/15-LICENSE-APACHE"
+    },
+    {
+      "name": "cfg-if 1.0.5",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/6-LICENSE-MIT"
+    },
+    {
+      "name": "cpufeatures 0.2.17",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/11-LICENSE-APACHE"
+    },
+    {
+      "name": "cpufeatures 0.2.17",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/8-LICENSE-MIT"
+    },
+    {
+      "name": "crc32fast 1.5.3",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/9-LICENSE-APACHE"
+    },
+    {
+      "name": "crc32fast 1.5.3",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/10-LICENSE-MIT"
+    },
+    {
+      "name": "crypto-common 0.1.7",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/11-LICENSE-APACHE"
+    },
+    {
+      "name": "crypto-common 0.1.7",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/12-LICENSE-MIT"
+    },
+    {
+      "name": "digest 0.10.7",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/11-LICENSE-APACHE"
+    },
+    {
+      "name": "digest 0.10.7",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/14-LICENSE-MIT"
+    },
+    {
+      "name": "flate2 1.1.10",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/15-LICENSE-APACHE"
+    },
+    {
+      "name": "flate2 1.1.10",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/16-LICENSE-MIT"
+    },
+    {
+      "name": "generic-array 0.14.7",
+      "license": "MIT",
+      "path": "licenses/dependencies/17-LICENSE"
+    },
+    {
+      "name": "itoa 1.0.18",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/18-LICENSE-APACHE"
+    },
+    {
+      "name": "itoa 1.0.18",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/19-LICENSE-MIT"
+    },
+    {
+      "name": "libc 0.2.189",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/18-LICENSE-APACHE"
+    },
+    {
+      "name": "libc 0.2.189",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/21-LICENSE-MIT"
+    },
+    {
+      "name": "memchr 2.8.3",
+      "license": "Unlicense OR MIT",
+      "path": "licenses/dependencies/22-COPYING"
+    },
+    {
+      "name": "memchr 2.8.3",
+      "license": "Unlicense OR MIT",
+      "path": "licenses/dependencies/23-LICENSE-MIT"
+    },
+    {
+      "name": "miniz_oxide 0.9.1",
+      "license": "MIT OR Zlib OR Apache-2.0",
+      "path": "licenses/dependencies/24-LICENSE"
+    },
+    {
+      "name": "miniz_oxide 0.9.1",
+      "license": "MIT OR Zlib OR Apache-2.0",
+      "path": "licenses/dependencies/25-LICENSE-APACHE.md"
+    },
+    {
+      "name": "miniz_oxide 0.9.1",
+      "license": "MIT OR Zlib OR Apache-2.0",
+      "path": "licenses/dependencies/26-LICENSE-MIT.md"
+    },
+    {
+      "name": "miniz_oxide 0.9.1",
+      "license": "MIT OR Zlib OR Apache-2.0",
+      "path": "licenses/dependencies/27-LICENSE-ZLIB.md"
+    },
+    {
+      "name": "proc-macro2 1.0.107",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/18-LICENSE-APACHE"
+    },
+    {
+      "name": "proc-macro2 1.0.107",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/19-LICENSE-MIT"
+    },
+    {
+      "name": "quote 1.0.47",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/18-LICENSE-APACHE"
+    },
+    {
+      "name": "quote 1.0.47",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/19-LICENSE-MIT"
+    },
+    {
+      "name": "serde 1.0.229",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/18-LICENSE-APACHE"
+    },
+    {
+      "name": "serde 1.0.229",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/19-LICENSE-MIT"
+    },
+    {
+      "name": "serde_core 1.0.229",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/18-LICENSE-APACHE"
+    },
+    {
+      "name": "serde_core 1.0.229",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/19-LICENSE-MIT"
+    },
+    {
+      "name": "serde_derive 1.0.229",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/18-LICENSE-APACHE"
+    },
+    {
+      "name": "serde_derive 1.0.229",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/19-LICENSE-MIT"
+    },
+    {
+      "name": "serde_json 1.0.151",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/18-LICENSE-APACHE"
+    },
+    {
+      "name": "serde_json 1.0.151",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/19-LICENSE-MIT"
+    },
+    {
+      "name": "sha2 0.10.9",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/11-LICENSE-APACHE"
+    },
+    {
+      "name": "sha2 0.10.9",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/41-LICENSE-MIT"
+    },
+    {
+      "name": "simd-adler32 0.3.10",
+      "license": "MIT",
+      "path": "licenses/dependencies/42-LICENSE.md"
+    },
+    {
+      "name": "syn 3.0.9",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/18-LICENSE-APACHE"
+    },
+    {
+      "name": "syn 3.0.9",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/19-LICENSE-MIT"
+    },
+    {
+      "name": "typenum 1.20.1",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/45-LICENSE"
+    },
+    {
+      "name": "typenum 1.20.1",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/46-LICENSE-APACHE"
+    },
+    {
+      "name": "typenum 1.20.1",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/47-LICENSE-MIT"
+    },
+    {
+      "name": "unicode-ident 1.0.27",
+      "license": "(MIT OR Apache-2.0) AND Unicode-3.0",
+      "path": "licenses/dependencies/18-LICENSE-APACHE"
+    },
+    {
+      "name": "unicode-ident 1.0.27",
+      "license": "(MIT OR Apache-2.0) AND Unicode-3.0",
+      "path": "licenses/dependencies/19-LICENSE-MIT"
+    },
+    {
+      "name": "unicode-ident 1.0.27",
+      "license": "(MIT OR Apache-2.0) AND Unicode-3.0",
+      "path": "licenses/dependencies/50-LICENSE-UNICODE"
+    },
+    {
+      "name": "version_check 0.9.5",
+      "license": "MIT/Apache-2.0",
+      "path": "licenses/dependencies/15-LICENSE-APACHE"
+    },
+    {
+      "name": "version_check 0.9.5",
+      "license": "MIT/Apache-2.0",
+      "path": "licenses/dependencies/52-LICENSE-MIT"
+    },
+    {
+      "name": "zmij 1.0.23",
+      "license": "MIT",
+      "path": "licenses/dependencies/19-LICENSE-MIT"
+    },
+    {
+      "name": "Rust standard library",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/54-LICENSE-MIT"
+    },
+    {
+      "name": "Rust standard library",
+      "license": "MIT OR Apache-2.0",
+      "path": "licenses/dependencies/55-LICENSE-APACHE"
+    },
+    {
+      "name": "Rust standard library dependencies",
+      "license": "See included notices",
+      "path": "licenses/dependencies/56-COPYRIGHT-library.html"
+    }
+  ]
+}
