@@ -7,6 +7,44 @@
       "schemaVersion": 2,
       "id": "innoextract",
       "version": "1.10-dev-MCLv4",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "90c31d1df9d60d57c67e33823ad0fa617e79af325001a20f5ce9853b7fb9879c",
+      "sourceSha256": "90c31d1df9d60d57c67e33823ad0fa617e79af325001a20f5ce9853b7fb9879c",
+      "updatePolicy": "manual",
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2"
+      },
+      "asset": {
+        "filename": "innoextract-1.10-dev-MCLv4-arm64.tar.gz",
+        "sha256": "c897ebee8f6a63164f90e7cf815dfd53ae287bf46b5dec8821f3785a4bcd452f",
+        "bytes": 603360,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/innoextract%2Fv1.10-dev-MCLv4%2Farm64/innoextract-1.10-dev-MCLv4-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41650069382",
+        "runAttempt": "2"
+      },
+      "tag": "innoextract/v1.10-dev-MCLv4/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "innoextract",
+      "version": "1.10-dev-MCLv4",
       "arch": "x64",
       "launcherArchitectures": [
         "arm64",
