@@ -7,6 +7,45 @@
       "schemaVersion": 2,
       "id": "gemrb",
       "version": "0.9.5-git-MCLv3",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "37473513e54485dd0f03c54f553b10a4d246cd1eb4f51ac2275e4b4bdc7b9e86",
+      "sourceSha256": "37473513e54485dd0f03c54f553b10a4d246cd1eb4f51ac2275e4b4bdc7b9e86",
+      "updatePolicy": "manual",
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a"
+      },
+      "launcherContract": 2,
+      "asset": {
+        "filename": "gemrb-0.9.5-git-MCLv3-arm64.tar.gz",
+        "sha256": "b2c1a29e0424de13d9b4d5142a02a31dc3beaa39ad298bc489ad9bf7ace20b2f",
+        "bytes": 15113451,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/gemrb%2Fv0.9.5-git-MCLv3%2Farm64/gemrb-0.9.5-git-MCLv3-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41578842959",
+        "runAttempt": "1"
+      },
+      "tag": "gemrb/v0.9.5-git-MCLv3/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "gemrb",
+      "version": "0.9.5-git-MCLv3",
       "arch": "x64",
       "launcherArchitectures": [
         "arm64",
