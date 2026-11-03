@@ -22,8 +22,8 @@ export async function resolveBuildInputs({selection,describe,published,nextName}
   reports[id]={definition,definitionDigest,inputs:inputIds.map(id=>({id}))};dependencyGraph[id]=inputIds;
   const level=children.length?Math.max(...children.map(child=>child.level))+1:0;(levels[level]??=[]).push(id);
   const previous=await published(id);
-  const previousDigest=previous?.definitionDigest||(previous?.definition?reportDigest(previous.definition):null);
-  const reuse=!roots.has(id)&&children.every(child=>child.reused)&&previousDigest===definitionDigest;
+  // Only requested lines build. Any other input with a public release is used as published, pinned by its digest.
+  const reuse=!roots.has(id)&&Boolean(previous);
   let result;
   if(reuse){const binding={id,version:previous.version,digest:previous.digest};reuseBindings.push(binding);result={...binding,reused:true};}
   else{

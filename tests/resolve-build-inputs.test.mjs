@@ -64,7 +64,7 @@ test('existing recipe references discover the consumed graph and plan fresh inpu
  const consumerRelease=path.join(f.directory,'consumer-release');await prepareRelease({project:'consumer',input:path.join(consumerOutput,'payload'),declaration:JSON.parse(fs.readFileSync(path.join(consumerOutput,'declaration.json'))),output:consumerRelease,directory:f.directory});await verifyRelease({bundle:consumerRelease,directory:f.directory});
 });
 
-test('a matching latest input definition reuses exact output across enclosing commits and registration versions',async t=>{
+test('a published input is reused as published until its own line is requested',async t=>{
  const f=fixture(t),original=createRecipeBuildReporter({directory:f.directory})('input');
  const definitionDigest=reportDigest({recipe:original.definition,inputs:[]});
  f.write('producers/input.json',{version:'9.9.9-custom',source:{revision:'original-source'},flags:['complete']});
@@ -72,8 +72,10 @@ test('a matching latest input definition reuses exact output across enclosing co
  const reused=await resolveBuildInputs({selection:[{id:'consumer',version:'custom-consumer'}],describe,published,nextName:()=>{throw Error('No input rebuild expected.');}});
  assert.deepEqual(reused.orderedSelection,[{id:'consumer',version:'custom-consumer'}]);assert.deepEqual(reused.reuseBindings,[{id:'input',version:'1.0.0',digest:'exact-verified-archive-digest'}]);
  f.write('producers/input.json',{version:'9.9.9-custom',source:{revision:'changed-real-source'},flags:['complete']});
- const changed=await resolveBuildInputs({selection:[{id:'consumer',version:'custom-consumer'}],describe:createRecipeBuildReporter({directory:f.directory}),published,nextName:()=> 'automatic-new-input'});
- assert.deepEqual(changed.orderedSelection,[{id:'input',version:'automatic-new-input'},{id:'consumer',version:'custom-consumer'}]);assert.notEqual(changed.reports.consumer.definitionDigest,reused.reports.consumer.definitionDigest);
+ const unchanged=await resolveBuildInputs({selection:[{id:'consumer',version:'custom-consumer'}],describe:createRecipeBuildReporter({directory:f.directory}),published,nextName:()=>{throw Error('No input rebuild expected.');}});
+ assert.deepEqual(unchanged.orderedSelection,[{id:'consumer',version:'custom-consumer'}]);assert.deepEqual(unchanged.reuseBindings,reused.reuseBindings);
+ const requested=await resolveBuildInputs({selection:[{id:'input',version:'1.0.1'},{id:'consumer',version:'custom-consumer'}],describe:createRecipeBuildReporter({directory:f.directory}),published,nextName:()=>{throw Error('Requested versions are used as given.');}});
+ assert.deepEqual(requested.orderedSelection,[{id:'input',version:'1.0.1'},{id:'consumer',version:'custom-consumer'}]);assert.deepEqual(requested.reuseBindings,[]);
 });
 
 // Only suggestions change; named releases are covered by the dispatch fixtures above.
