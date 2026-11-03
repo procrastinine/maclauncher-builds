@@ -6,6 +6,48 @@
     {
       "schemaVersion": 2,
       "id": "fna",
+      "version": "26.10-MCLv4",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "f8c7351c31668cde0082c1bc4e6a8402da844dd93c3719b463d682a9047ef102",
+      "sourceSha256": "f8c7351c31668cde0082c1bc4e6a8402da844dd93c3719b463d682a9047ef102",
+      "updatePolicy": "manual",
+      "launcherContract": 2,
+      "capabilities": {
+        "originalGamePaths": true
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2"
+      },
+      "asset": {
+        "filename": "fna-26.10-MCLv4-arm64.tar.gz",
+        "sha256": "9d17b191b603bd24e6c17d682f1c35b21b875436d330da61f274094145f8caae",
+        "bytes": 33439017,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/fna%2Fv26.10-MCLv4%2Farm64/fna-26.10-MCLv4-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "f245d0abaa8f852118cfa3280aa01c4106b6e0d2",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41650053920",
+        "runAttempt": "1"
+      },
+      "tag": "fna/v26.10-MCLv4/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "fna",
       "version": "26.10-MCLv3",
       "arch": "arm64",
       "launcherArchitectures": [
