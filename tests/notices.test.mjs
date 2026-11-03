@@ -32,3 +32,13 @@ test('notice text is stored once and an unusable notice entry never fails sealin
  assert.deepEqual(sealed.files.map(file=>[file.path,file.sha256]),declaration.files.filter(file=>file.path.startsWith('files/')).map(file=>[file.path.slice(6),file.sha256]));
  assert.equal(sealed.notices[2].path,'licenses/a.txt');
 });
+
+test('a package that other recipes consume keeps its notice files as built',t=>{
+ const payload=fs.mkdtempSync(path.join(os.tmpdir(),'notices-input-'));t.after(()=>fs.rmSync(payload,{recursive:true,force:true}));
+ const text='Shared licence text\n'.repeat(40),names=['a.txt','b.txt'];for(const name of names)fs.writeFileSync(path.join(payload,name),text);
+ const manifest=Buffer.from('{}');fs.writeFileSync(path.join(payload,'manifest.json'),manifest);
+ const declaration={id:'input',version:'1',arch:'arm64',manifestRelative:'manifest.json',files:[...names.map(name=>({path:name,size:text.length,mode:0o644,sha256:digest(text)})),{path:'manifest.json',size:2,mode:0o644,sha256:digest(manifest)}],
+  notices:names.map(name=>({name,license:'MIT',path:name}))};
+ tidyNotices(payload,declaration,{share:false});
+ assert.deepEqual(declaration.notices.map(notice=>notice.path),names);for(const name of names)assert.equal(fs.readFileSync(path.join(payload,name),'utf8'),text);
+});

@@ -12,8 +12,9 @@ const SIGNED_BUNDLE=/\.(?:app|framework|bundle|appex|xpc|plugin)\//i,CODE=/\.(?:
 const WORDS=8,SHORTEST=256;
 
 /** Licence notices never fail a build. Unusable entries are dropped, a package keeps at least one notice for the
- * app's contract, and the text of its notices is stored once. */
-export function tidyNotices(payload,declaration){
+ * app's contract, and the text of its notices is stored once unless other recipes use the package as an input:
+ * their builds read its files exactly as built. */
+export function tidyNotices(payload,declaration,{share=true}={}){
  const files=new Map(declaration.files.map(file=>[file.path,file])),label=[declaration.id,declaration.version,declaration.arch].join(' ');
  let notices=(Array.isArray(declaration.notices)?declaration.notices:[]).filter(notice=>{
   const usable=notice&&typeof notice.name==='string'&&notice.name.trim()&&typeof notice.license==='string'&&notice.license.trim()&&files.has(notice.path)&&
@@ -27,7 +28,7 @@ export function tidyNotices(payload,declaration){
   notices=[{name:declaration.id,license:'See source',path:name}];warn(label+' recorded no licence notice; '+name+' stands in for it.');
  }
  declaration.notices=notices;
- try{shareNoticeText(payload,declaration);}catch(error){warn('Kept licence notices of '+label+' as built: '+error.message);}
+ if(share)try{shareNoticeText(payload,declaration);}catch(error){warn('Kept licence notices of '+label+' as built: '+error.message);}
 }
 
 /** Identical notice files merge into one, a code file keeps only its licence comments, and lines whose text is
@@ -114,9 +115,9 @@ function shareRepeatedLines(documents){
 /** Add generated input facts to a new build, before its archive is attested. */
 export function sealBuildInputReport({project,output,environment=process.env}){
  if(!environment.BUILD_REPORTS)return;
- const report=read(environment.BUILD_REPORTS)[project];if(!report?.definition)throw Error('The build has no resolved input report: '+project);
+ const reports=read(environment.BUILD_REPORTS),report=reports[project];if(!report?.definition)throw Error('The build has no resolved input report: '+project);
  const payload=path.join(output,'payload'),file=path.join(output,'declaration.json'),declaration=JSON.parse(fs.readFileSync(file));B.verifyPayload(payload,declaration);
- tidyNotices(payload,declaration);
+ tidyNotices(payload,declaration,{share:!Object.values(reports).some(other=>other.inputs?.some(input=>input.id===project))});
  const definition=canonicalReport(report.definition),digest=crypto.createHash('sha256').update(definition).digest('hex');
  if(digest!==report.definitionDigest)throw Error('The build definition differs from its plan.');
  const prepared=environment.MACLAUNCHER_BUILD_INPUTS?read(environment.MACLAUNCHER_BUILD_INPUTS):{};
