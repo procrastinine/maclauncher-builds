@@ -1243,10 +1243,40 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#native-sndfile",
       "catalog": {
         "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/native-sndfile.json",
-        "sha256": "86060ffd5da2700f0e0c51932b0b16b8641a251ae7ed8921294a36f50b64e1e0",
-        "bytes": 1671
+        "sha256": "0dd554d002c00a4a714b753590462332c7f9a6ecc9d6a778be75b6c3956c3c7f",
+        "bytes": 3224
       },
       "releases": [
+        {
+          "version": "1.2.2-MCLv1",
+          "arch": "x64",
+          "launcherArchitectures": [
+            "x64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "native-sndfile/v1.2.2-MCLv1/x64",
+          "asset": {
+            "filename": "native-sndfile-1.2.2-MCLv1-x64.tar.gz",
+            "sha256": "2ff1e5ac747e68a0ee42cf8bdc4097f8a9a1c9d0d719844207586ac8ba8e1015",
+            "bytes": 1807540,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/native-sndfile%2Fv1.2.2-MCLv1%2Fx64/native-sndfile-1.2.2-MCLv1-x64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.19.0",
+              "zlib": "1.3.2.1-motley-3246f1b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+              "xcode": "Xcode 26.6\nBuild version 17F113",
+              "macosSDK": "26.5"
+            },
+            "runId": "41578842959",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#native-sndfile",
+          "profile": "libsndfile and codecs 1.2.2"
+        },
         {
           "version": "1.2.2-MCLv1",
           "arch": "arm64",
