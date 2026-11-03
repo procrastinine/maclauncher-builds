@@ -6,6 +6,45 @@
     {
       "schemaVersion": 2,
       "id": "android-codecs",
+      "version": "1.2.2-MCLv4",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "input.json",
+      "manifestSha256": "2b093526d244a2a7caa5ab376e2cd98640da14f7caee1caa2a5afeac9deaeaa9",
+      "sourceSha256": "ea25c10fe1eef7eaaf75db8f1c8f289a95ca39a462776de87beb15d77933ff42",
+      "updatePolicy": "manual",
+      "launcherContract": 2,
+      "asset": {
+        "filename": "android-codecs-1.2.2-MCLv4-arm64.tar.gz",
+        "sha256": "b6a363007d65b9cb62faa1359219969bee0780795528d53c22bae87d747a567f",
+        "bytes": 1560120,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-codecs%2Fv1.2.2-MCLv4%2Farm64/android-codecs-1.2.2-MCLv4-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "d2b042f9b8002d2e09ece537b8e34cf7b6a60815",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41718930806",
+        "runAttempt": "1"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "d2b042f9b8002d2e09ece537b8e34cf7b6a60815"
+      },
+      "tag": "android-codecs/v1.2.2-MCLv4/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "android-codecs",
       "version": "1.2.2-MCLv3",
       "arch": "arm64",
       "launcherArchitectures": [
