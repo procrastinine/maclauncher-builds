@@ -2410,10 +2410,14 @@
       {
         "version": "2.8.2-MCLv1",
         "label": "SDL2_mixer 2.8.2"
+      },
+      {
+        "version": "2.8.2-MCLv2",
+        "label": "SDL2_mixer 2.8.2 2.8.2-MCLv2"
       }
     ],
     "build": {
-      "version": "2.8.2-MCLv1",
+      "version": "2.8.2-MCLv2",
       "command": "tools/build-native-sdl2-mixer.mjs",
       "architectures": [
         "arm64",
