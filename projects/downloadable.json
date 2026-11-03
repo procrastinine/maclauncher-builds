@@ -2502,10 +2502,14 @@
       {
         "version": "0.1.0-MCLv3",
         "label": "siglus_rs 0.1.0-MCLv3"
+      },
+      {
+        "version": "0.1.0-MCLv4",
+        "label": "siglus_rs 0.1.0-MCLv4"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv3",
+      "version": "0.1.0-MCLv4",
       "architectures": [
         "arm64"
       ],
