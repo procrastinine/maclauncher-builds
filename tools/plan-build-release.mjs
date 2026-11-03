@@ -58,7 +58,7 @@ export async function resolveReleaseSelection({selection,directory=root,releases
 export async function planBuildRelease({selection,directory=root,releases=[]}){
  const resolved=await resolveReleaseSelection({selection,directory,releases});
  const registration=registerSelection({selection:resolved.orderedSelection,directory,releases});
- const all=registration.selection.flatMap(({id,version})=>buildPlan({project:id,version,arch:'all',directory,tags:()=>[]}).include);
+ const all=registration.selection.flatMap(({id,version})=>buildPlan({project:id,version,arch:'all',directory}).include);
  const depth=new Map(resolved.levels.flatMap((ids,level)=>ids.map(id=>[id,level])));
  if(all.some(row=>depth.get(row.project)>3))throw Error('The build dependency chain exceeds the four configured build phases.');
  const required=new Set(Object.values(resolved.dependencyGraph).flat()),independent=all.filter(row=>depth.get(row.project)===0&&!required.has(row.project));

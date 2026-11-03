@@ -7,9 +7,6 @@ runs:
       with:
         node-version: '24'
         package-manager-cache: false
-    - name: Install locked build-tool dependencies
-      shell: bash
-      run: npm ci --ignore-scripts
     - name: Register the selected names for this build
       shell: bash
       run: |

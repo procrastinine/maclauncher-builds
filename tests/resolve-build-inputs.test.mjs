@@ -47,7 +47,7 @@ test('existing recipe references discover the consumed graph and plan fresh inpu
  // to that fixture run, as the production prepare step does on GitHub.
  const sidecar=fs.readdirSync(bundle).find(name=>name.endsWith('.tar.gz.json')),record=JSON.parse(fs.readFileSync(path.join(bundle,sidecar)));
  record.build={sourceRevision:environment.GITHUB_SHA,runId:environment.GITHUB_RUN_ID,workflow:'owner/builds/.github/workflows/runtime-build.yml'};
- fs.writeFileSync(path.join(bundle,sidecar),JSON.stringify(record));const snapshot=JSON.parse(fs.readFileSync(path.join(bundle,'input.json')));snapshot.packages[0].build=record.build;fs.writeFileSync(path.join(bundle,'input.json'),JSON.stringify(snapshot));
+ fs.writeFileSync(path.join(bundle,sidecar),JSON.stringify(record));
  await verifyRelease({bundle,directory:f.directory});
  const transports=[];
  const actual=await prepareBuildInputs({project:'consumer',output:path.join(f.directory,'materialized'),directory:f.directory,environment,

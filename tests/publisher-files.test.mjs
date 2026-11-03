@@ -23,7 +23,7 @@ async function bundle(directory,version,change=()=>{}){
  const output=fs.mkdtempSync(path.join(directory,'bundle-')),archive=path.join(output,id+'-'+version+'-universal.tar.gz'),bytes=Buffer.from(json(declaration));
  const packed=await Archive.writeArchive([{name:'runtime-package.json',bytes,size:bytes.length,mode:0o644,sha256:sha(bytes)},...inventory.map(file=>({...file,name:'files/'+file.path,bytes:files[file.path].bytes}))],archive);
  const record={schemaVersion:2,id,version,arch:'universal',launcherArchitectures:declaration.launcherArchitectures,minimumMacOS:'11.0',manifestRelative:'manifest.json',manifestSha256:manifest.sha256,sourceSha256:declaration.sourceSha256,updatePolicy:'manual',asset:{filename:path.basename(archive),sha256:packed.sha256,bytes:packed.bytes}};
- fs.writeFileSync(archive+'.json',json(record));fs.writeFileSync(path.join(output,id+'.json'),json(catalog([record],{project:id,repository})));
+ fs.writeFileSync(archive+'.json',json(record));
  return {archive,record,declaration,bundle:output};
 }
 async function fixture(t){

@@ -24,22 +24,21 @@ function fixture(t,{external=false,version='1.0'}={}){
  return {project:'engine',input,declaration,source,output:path.join(directory,'release'),directory};
 }
 test('one selected release prepares offline and applies an independently discoverable catalog',async t=>{
- const f=fixture(t),r=await prepareRelease(f);assert.equal(r.tag,'engine/v1.0/arm64');assert.equal(r.assets.length,3);
+ const f=fixture(t),r=await prepareRelease(f);assert.equal(r.tag,'engine/v1.0/arm64');assert.equal(r.assets.length,2);
  const checked=await verifyRelease({bundle:f.output,directory:f.directory,project:'engine',version:'1.0',arch:'arm64'});assert.equal(checked.record.version,'1.0');
  await assert.rejects(verifyRelease({bundle:f.output,directory:f.directory,project:'other'}),/differs/);
  await applyRelease({bundle:f.output,directory:f.directory,runGh:publicReleaseGh(checked.record)});assert.equal(rawCatalog(f.directory).packages[0].version,'1.0');
- await assert.rejects(prepareRelease(f),/new release output/);
+ await assert.rejects(prepareRelease(f),/new output/);
  fs.writeFileSync(path.join(f.output,'unexpected.txt'),'extra');await assert.rejects(verifyRelease({bundle:f.output,directory:f.directory}),/undeclared/);
 });
-test('optional local source validation never adds a public source attachment',async t=>{
+test('build packaging emits no separate source attachment',async t=>{
  const f=fixture(t,{external:true});await prepareRelease(f);const checked=await verifyRelease({bundle:f.output,directory:f.directory});
  assert.equal(checked.record.sourceAsset,undefined);assert.deepEqual(publicationAssets(checked.release),['engine-1.0-arm64.tar.gz']);
- fs.writeFileSync(path.join(f.output,'1.0-source.tar.gz'),'changed');await assert.rejects(verifyRelease({bundle:f.output,directory:f.directory}),/checksum or size/);
+ fs.writeFileSync(path.join(f.output,'1.0-source.tar.gz'),'changed');await assert.rejects(verifyRelease({bundle:f.output,directory:f.directory}),/undeclared files/);
 });
-test('existing archives are reused and altered sidecar metadata is rejected',async t=>{
- const f=fixture(t);await prepareRelease(f);const archive=path.join(f.output,'engine-1.0-arm64.tar.gz'),record=JSON.parse(fs.readFileSync(archive+'.json'));
- const next=path.join(f.directory,'reuse');await prepareRelease({project:f.project,archive,record,output:next,directory:f.directory});assert.deepEqual(fs.readFileSync(path.join(next,path.basename(archive))),fs.readFileSync(archive));
- await assert.rejects(prepareRelease({project:f.project,archive,record:{...record,minimumMacOS:'14.0'},output:path.join(f.directory,'altered'),directory:f.directory}),/record differs/);
+test('packaging never reuses an existing output directory',async t=>{
+ const f=fixture(t);await prepareRelease(f);const bytes=fs.readFileSync(path.join(f.output,'engine-1.0-arm64.tar.gz'));
+ await assert.rejects(prepareRelease(f),/new output/);assert.deepEqual(fs.readFileSync(path.join(f.output,'engine-1.0-arm64.tar.gz')),bytes);
 });
 
 test('public attachments contain only the binary without source or metadata attachments',async t=>{
@@ -107,10 +106,9 @@ test('staging supplies the source commit and carries the returned release ID wit
  assert.equal(calls.filter(args=>args.includes('POST')).length,2);assert.equal(calls.filter(args=>args.some(arg=>arg.includes('/releases/tags/'))).length,1);
 });
 
-test('matching releases and local preparation are no-ops without rewriting tags or uploading assets',async t=>{
+test('matching public releases are no-ops without rewriting tags or uploading assets',async t=>{
  for(const annotated of [false,true]){
   const f=fixture(t);await prepareRelease(f);const archive=path.join(f.output,'engine-1.0-arm64.tar.gz'),record=JSON.parse(fs.readFileSync(archive+'.json')),calls=[];
-  const local=await prepareRelease({project:f.project,archive,record,output:f.output,directory:f.directory});assert.equal(local.existing,true);
   const runGh=async args=>{calls.push(args);assert.equal(args[0],'api');assert.equal(args.includes('POST'),false);if(args[1].includes('/git/ref/'))return refResult(annotated?annotation:sourceTarget,annotated?'tag':'commit');if(args[1].includes('/git/tags/'))return refResult();return JSON.stringify(remoteRelease(record));};
   const staged=await stageRelease({bundle:f.output,target:sourceTarget,directory:f.directory,runGh});assert.equal(staged.draft,false);assert.equal(staged.draft,false);
   const published=await publishRelease({bundle:f.output,directory:f.directory,runGh});assert.equal(published.draft,false);assert.equal(published.draft,false);
@@ -160,21 +158,13 @@ test('remote verification rejects a cyclic source tag without any write',async t
 
 
 
-test('catalog compatibility metadata survives sealed preparation and public asset verification',async t=>{
- const f=fixture(t);await prepareRelease(f);
- const archive=path.join(f.output,'engine-1.0-arm64.tar.gz');
- const metadata={launcherContract:1,capabilities:{nativeApi:'entry-v1',nativeFeatures:['one','two'],resources:1},source:{repository:'owner/source',revision:'a'.repeat(40),path:'engine'}};
- const record={...JSON.parse(fs.readFileSync(archive+'.json')),...metadata},output=path.join(f.directory,'metadata-release');
- await prepareRelease({project:f.project,archive,record,output,directory:f.directory});
- const checked=await verifyRelease({bundle:output,directory:f.directory});
- for(const [key,value] of Object.entries(metadata))assert.deepEqual(checked.record[key],value);
- assert.deepEqual(fs.readFileSync(path.join(output,path.basename(archive))),fs.readFileSync(archive));
- await applyRelease({bundle:output,directory:f.directory,runGh:publicReleaseGh(checked.record)});
- const assets=path.join(f.directory,'metadata-assets');fs.mkdirSync(assets);fs.copyFileSync(archive,path.join(assets,path.basename(archive)));
- const restored=await verifyPublicAssets({project:f.project,version:'1.0',arch:'arm64',assets,directory:f.directory});
- for(const [key,value] of Object.entries(metadata))assert.deepEqual(restored.record[key],value);
- await assert.rejects(prepareRelease({project:f.project,archive,record:{...record,minimumMacOS:'14.0'},output:path.join(f.directory,'changed-payload'),directory:f.directory}),/record differs/);
- await assert.rejects(prepareRelease({project:f.project,archive,record:{...record,unknownField:true},output:path.join(f.directory,'unknown-metadata'),directory:f.directory}),/Invalid runtime release record/);
+test('catalog compatibility metadata survives archive verification and publication',async t=>{
+ const f=fixture(t);await prepareRelease(f);const archive=path.join(f.output,'engine-1.0-arm64.tar.gz'),metadata={launcherContract:1,capabilities:{nativeApi:'entry-v1',nativeFeatures:['one','two'],resources:1},source:{repository:'owner/source',revision:'a'.repeat(40),path:'engine'}};
+ const record={...JSON.parse(fs.readFileSync(archive+'.json')),...metadata};fs.writeFileSync(archive+'.json',JSON.stringify(record));
+ const checked=await verifyRelease({bundle:f.output,directory:f.directory});for(const [key,value]of Object.entries(metadata))assert.deepEqual(checked.record[key],value);
+ await applyRelease({bundle:f.output,directory:f.directory,runGh:publicReleaseGh(record)});
+ const assets=path.join(f.directory,'metadata-assets');fs.mkdirSync(assets);fs.copyFileSync(archive,path.join(assets,path.basename(archive)));const restored=await verifyPublicAssets({project:f.project,version:'1.0',arch:'arm64',assets,directory:f.directory});for(const [key,value]of Object.entries(metadata))assert.deepEqual(restored.record[key],value);
+ fs.writeFileSync(archive+'.json',JSON.stringify({...record,minimumMacOS:'14.0'}));await assert.rejects(verifyRelease({bundle:f.output,directory:f.directory}),/record differs/);
 });
 
 

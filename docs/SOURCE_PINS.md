@@ -47,3 +47,5 @@ Commits written directly into an upstream entry are accepted only in resolved, s
 ## HTTP build inputs
 
 Build-input downloads use one HTTP transport with up to five attempts and exponential backoff. Connections have a 20-second timeout; transfers below 1 KB/s for 60 seconds are treated as stalled. Healthy transfers have no duration cap. Stalls, interrupted connections, HTTP 429 and server failures can retry. Other client errors, including HTTP 404, fail immediately. Source-object, archive-size and checksum verification follows the download and is never retried as a transport failure. HTTPS inputs remain on HTTPS across redirects.
+
+Git source fetches and submodule initialization repeat up to five times with the same backoff.
