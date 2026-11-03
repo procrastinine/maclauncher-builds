@@ -54,18 +54,19 @@ export async function appendPackageCatalog({bundle,record,ledger,directory=root,
 export async function publishPackage({bundle,directory=root,env=process.env,runGh=github,verifyBundle=verifyRelease,recordBuild=recordGithubBuild,requireBuild=requireGithubBuild,stageBundle=stageRelease,publishBundle=publishRelease,append=appendPackageCatalog}={}){
  const repository=hosted(env,directory),project=resolveProject(env.BUILD_PROJECT,directory,{resolvePins:false});
  if(!buildRecords(project).some(build=>build.version===env.BUILD_VERSION&&build.architectures.includes(env.BUILD_ARCH)))registerSelection({selection:[{id:env.BUILD_PROJECT,version:env.BUILD_VERSION}],directory});
+ const sourceRevision=env.PUBLICATION_SOURCE_SHA||env.GITHUB_SHA,runId=env.PUBLICATION_RUN_ID||env.GITHUB_RUN_ID;
  const {record,declaration}=await verifyBundle({bundle,directory,includeDeclaration:true});
- if(record.id!==env.BUILD_PROJECT||record.version!==env.BUILD_VERSION||record.arch!==env.BUILD_ARCH||record.build?.sourceRevision!==env.GITHUB_SHA||String(record.build?.runId)!==env.GITHUB_RUN_ID)throw Error('The sealed package differs from this build job.');
+ if(record.id!==env.BUILD_PROJECT||record.version!==env.BUILD_VERSION||record.arch!==env.BUILD_ARCH||record.build?.sourceRevision!==sourceRevision||String(record.build?.runId)!==runId)throw Error('The sealed package differs from this build job.');
  const reports=env.BUILD_REPORTS?json(env.BUILD_REPORTS):null;
  if(reports&&declaration.files.find(file=>file.path==='build-definition.json')?.sha256!==reports[record.id]?.definitionDigest)throw Error('The sealed build definition differs from the plan.');
  let existing;
  try{existing=JSON.parse(await runGh(['api','repos/'+repository+'/releases/tags/'+encodeURIComponent(record.id+'/v'+record.version+'/'+record.arch)]));}
  catch(error){if(!/HTTP 404|Not Found|release not found/i.test(String(error.stderr||error.message)))throw error;}
- if(existing){const previous=/\/actions\/runs\/([0-9]+)/.exec(existing.body||'')?.[1];if(previous!==env.GITHUB_RUN_ID)throw Error(record.id+' '+record.version+' '+record.arch+' already published by run '+(previous||'unknown')+'.');}
+ if(existing){const previous=/\/actions\/runs\/([0-9]+)/.exec(existing.body||'')?.[1];if(previous!==runId)throw Error(record.id+' '+record.version+' '+record.arch+' already published by run '+(previous||'unknown')+'.');}
  const archive=path.join(bundle,record.asset.filename);
  await recordBuild({archive,record,directory,runGh:(command,args,options)=>{if(command!=='gh')throw Error('Unexpected attestation transport.');return runGh(args,options);}});
- requireBuild({record,repository,directory,archive,sourceRevision:env.GITHUB_SHA});
- const options={bundle,directory,runGh};await stageBundle({...options,target:env.GITHUB_SHA,resume:true});await publishBundle(options);
+ requireBuild({record,repository,directory,archive,sourceRevision});
+ const options={bundle,directory,runGh};await stageBundle({...options,target:sourceRevision,resume:true});await publishBundle(options);
  const catalog=await append({bundle,record,ledger:path.join(directory,'attestations',record.asset.sha256+'.json'),directory,env,runGh});
  if(env.GITHUB_STEP_SUMMARY)fs.appendFileSync(env.GITHUB_STEP_SUMMARY,'\nPublished '+record.id+' '+record.version+' '+record.arch+'; catalog commit `'+catalog.commit+'`.\n');
  return {...catalog,project:record.id,version:record.version,arch:record.arch,sha256:record.asset.sha256};

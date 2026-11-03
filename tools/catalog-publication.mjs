@@ -22,11 +22,16 @@ export function writePublicationCatalog({records,project,repository,directory,ou
   history.set(key,record);
  }
  const prior=history.size?{schemaVersion:2,projectId:project,updatePolicy:'manual',packages:[...history.values()]}:undefined;
- const combined=catalog(records,{project,repository,previous:prior}),incoming=new Set(records.map(identity));
+ const combined=catalog(records,{project,repository,previous:prior,directory}),incoming=new Set(records.map(identity));
  const retained=partitionCatalog({records:combined.packages.filter(record=>!incoming.has(identity(record))),repository,directory});
  const activeKeys=new Set(retained.active.map(identity));
- const active={...combined,packages:combined.packages.filter(record=>incoming.has(identity(record))||activeKeys.has(identity(record)))};
- const local={...combined,packages:retained.local};
+ const partition=packages=>{
+  const {versionSemantics,...base}=combined,versions=new Set(packages.map(record=>record.version));
+  const semantics=Object.fromEntries(Object.entries(versionSemantics||{}).filter(([version])=>versions.has(version)));
+  return {...base,packages,...(Object.keys(semantics).length?{versionSemantics:semantics}:{})};
+ };
+ const active=partition(combined.packages.filter(record=>incoming.has(identity(record))||activeKeys.has(identity(record))));
+ const local=partition(retained.local);
  validateCatalog(active,{project,repository});validateCatalog(local,{project,repository,allowEmpty:true});
  // Preserve historical records before replacing the active catalog.
  if(local.packages.length||oldSuperseded)write(superseded,local);

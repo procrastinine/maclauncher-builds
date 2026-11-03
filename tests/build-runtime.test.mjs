@@ -181,7 +181,8 @@ test('registered GitHub build commands reject architectures their projects do no
  await assert.rejects(buildDecompiler({project:'gemrb',arch:'arm64',output:path.join(work,'gemrb'),work:path.join(work,'gemrb-work')}),/decompiler profiles have no release/);
  assert.throws(()=>checkBuildRequest({...request('sys3-decompiler','arm64'),version:'0.5.0'}),/builds version|declared|version/);
  for(const [id,architectures] of [['sys3-decompiler',['arm64','x64']],['xsys35-decompiler',['arm64','x64']],['gm8-decompiler',['arm64','x64']],['catsystem2-kif-crypto',['arm64','x64']],['web-renderer-network',['arm64','x64']]])assert.deepEqual(buildRecords(registry.projects.find(project=>project.id===id)).flatMap(build=>build.architectures).sort(),architectures);
- const java=buildRecords(registry.projects.find(project=>project.id==='java-steamworks'));assert.deepEqual(java.map(build=>build.architectures),[['x64'],['universal']]);for(const [index,base] of ['1.9.0','1.10.0'].entries())assert.ok(java[index].version.startsWith(base+'-MCLv'));
+ const java=buildRecords(registry.projects.find(project=>project.id==='java-steamworks'));
+ for(const [base,architectures] of [['1.9.0',['x64']],['1.10.0',['universal']]])assert.deepEqual(java.find(build=>build.version.startsWith(base+'-MCLv'))?.architectures,architectures);
  const {helperProfile}=await import('../tools/build-helper.mjs');
  assert.throws(()=>helperProfile('gemrb'),/ENOENT|helper-builds/);
  for(const id of ['catsystem2-kif-crypto','web-renderer-network','steam-api-helper','steam-ticket-loader','mkxpz-config-helper'])assert.ok(registry.projects.find(project=>project.id===id).packageProfiles.some(profile=>profile.version===helperProfile(id).profile.version));

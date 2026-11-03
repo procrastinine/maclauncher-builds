@@ -1,12 +1,17 @@
 name: Build and release
-run-name: Build and release — ${{ inputs.releases }}
+run-name: Build and release — ${{ inputs.releases || format('publish run {0}', inputs.publish_run) }}
 
 on:
   workflow_dispatch:
     inputs:
       releases:
         description: 'Project=release-name pairs, separated by commas or newlines'
-        required: true
+        required: false
+        type: string
+
+      publish_run:
+        description: 'Publish retained artifacts from a completed Build and release run, without compiling'
+        required: false
         type: string
 
 permissions:
@@ -15,7 +20,13 @@ permissions:
 jobs:
   plan:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
     outputs:
+      publishOnly: ${{ steps.plan.outputs.publishOnly }}
+      publicationRun: ${{ steps.plan.outputs.publicationRun }}
+      publicationSource: ${{ steps.plan.outputs.publicationSource }}
       selection: ${{ steps.plan.outputs.selection }}
       empty: ${{ steps.plan.outputs.empty }}
       graph: ${{ steps.plan.outputs.graph }}
@@ -33,6 +44,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       RELEASES: ${{ inputs.releases }}
+      PUBLISH_RUN: ${{ inputs.publish_run }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -50,13 +62,13 @@ jobs:
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: release-plan
-          path: ${{ runner.temp }}/release-plan/reports.json
+          path: ${{ runner.temp }}/release-plan/
           if-no-files-found: error
           retention-days: 7
 
   independent:
     needs: [plan]
-    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.emptyIndependent == 'false' }}
+    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.publishOnly != 'true' && needs.plan.outputs.emptyIndependent == 'false' }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.plan.outputs.matrixIndependent) }}
@@ -87,7 +99,7 @@ jobs:
 
   build0:
     needs: [plan]
-    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty0 == 'false' }}
+    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.publishOnly != 'true' && needs.plan.outputs.empty0 == 'false' }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.plan.outputs.matrix0) }}
@@ -118,7 +130,7 @@ jobs:
 
   build1:
     needs: [plan, build0]
-    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty1 == 'false' }}
+    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.publishOnly != 'true' && needs.plan.outputs.empty1 == 'false' }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.plan.outputs.matrix1) }}
@@ -149,7 +161,7 @@ jobs:
 
   build2:
     needs: [plan, build0, build1]
-    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty2 == 'false' }}
+    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.publishOnly != 'true' && needs.plan.outputs.empty2 == 'false' }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.plan.outputs.matrix2) }}
@@ -180,7 +192,7 @@ jobs:
 
   build3:
     needs: [plan, build0, build1, build2]
-    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty3 == 'false' }}
+    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.publishOnly != 'true' && needs.plan.outputs.empty3 == 'false' }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.plan.outputs.matrix3) }}
@@ -219,6 +231,8 @@ jobs:
       attestations: read
     env:
       GH_TOKEN: ${{ github.token }}
+      PUBLICATION_RUN_ID: ${{ needs.plan.outputs.publicationRun }}
+      PUBLICATION_SOURCE_SHA: ${{ needs.plan.outputs.publicationSource }}
       RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
       RELEASE_GRAPH: ${{ needs.plan.outputs.graph }}
       RELEASE_REUSE: ${{ needs.plan.outputs.reuse }}
@@ -261,6 +275,8 @@ jobs:
       attestations: read
     env:
       GH_TOKEN: ${{ github.token }}
+      PUBLICATION_RUN_ID: ${{ needs.plan.outputs.publicationRun }}
+      PUBLICATION_SOURCE_SHA: ${{ needs.plan.outputs.publicationSource }}
       RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
       RELEASE_GRAPH: ${{ needs.plan.outputs.graph }}
       RELEASE_REUSE: ${{ needs.plan.outputs.reuse }}
@@ -303,6 +319,8 @@ jobs:
       attestations: read
     env:
       GH_TOKEN: ${{ github.token }}
+      PUBLICATION_RUN_ID: ${{ needs.plan.outputs.publicationRun }}
+      PUBLICATION_SOURCE_SHA: ${{ needs.plan.outputs.publicationSource }}
       RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
       RELEASE_GRAPH: ${{ needs.plan.outputs.graph }}
       RELEASE_REUSE: ${{ needs.plan.outputs.reuse }}
@@ -345,6 +363,8 @@ jobs:
       attestations: read
     env:
       GH_TOKEN: ${{ github.token }}
+      PUBLICATION_RUN_ID: ${{ needs.plan.outputs.publicationRun }}
+      PUBLICATION_SOURCE_SHA: ${{ needs.plan.outputs.publicationSource }}
       RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
       RELEASE_GRAPH: ${{ needs.plan.outputs.graph }}
       RELEASE_REUSE: ${{ needs.plan.outputs.reuse }}
@@ -387,6 +407,8 @@ jobs:
       attestations: read
     env:
       GH_TOKEN: ${{ github.token }}
+      PUBLICATION_RUN_ID: ${{ needs.plan.outputs.publicationRun }}
+      PUBLICATION_SOURCE_SHA: ${{ needs.plan.outputs.publicationSource }}
       RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
       RELEASE_GRAPH: ${{ needs.plan.outputs.graph }}
       RELEASE_REUSE: ${{ needs.plan.outputs.reuse }}

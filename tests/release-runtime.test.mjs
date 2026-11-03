@@ -14,10 +14,10 @@ const fixtureBuild=({record,repository,directory,archive,sourceRevision})=>{
  if(sourceRevision!==undefined)assert.equal(sourceRevision,'a'.repeat(40));
  return {sourceRevision:'a'.repeat(40)};
 };
-const stageRelease=o=>actualStageRelease({...o,verifyGithubBuild:fixtureBuild});
-const publishRelease=o=>actualPublishRelease({...o,verifyGithubBuild:fixtureBuild});
-const verifyRemoteRelease=o=>actualVerifyRemoteRelease({...o,verifyGithubBuild:fixtureBuild});
-const applyRelease=o=>actualApplyRelease({...o,verifyGithubBuild:fixtureBuild});
+const stageRelease=o=>actualStageRelease({...o,sleep:o.sleep||(async()=>{}),verifyGithubBuild:fixtureBuild});
+const publishRelease=o=>actualPublishRelease({...o,sleep:o.sleep||(async()=>{}),verifyGithubBuild:fixtureBuild});
+const verifyRemoteRelease=o=>actualVerifyRemoteRelease({...o,sleep:o.sleep||(async()=>{}),verifyGithubBuild:fixtureBuild});
+const applyRelease=o=>actualApplyRelease({...o,sleep:o.sleep||(async()=>{}),verifyGithubBuild:fixtureBuild});
 const rawCatalog=directory=>JSON.parse(fs.readFileSync(path.join(directory,'catalogs/engine.json')));
 const supersededCatalog=directory=>{const file=path.join(directory,'catalogs/superseded/engine.json');return fs.existsSync(file)?JSON.parse(fs.readFileSync(file)):{packages:[]};};
 const catalogHistory=directory=>[...rawCatalog(directory).packages,...supersededCatalog(directory).packages];
@@ -121,7 +121,7 @@ test('release source verification retains the current publication controller and
  const selected=verifiedBuildSource({workflowName:'Build and release',status:'completed',headBranch:'main',headSha:tagged,jobs:[{name:'build (engine 1.0 arm64)',status:'completed',conclusion:'success'}]},{project:'engine',version:'1.0',arch:'arm64'});
  assert.equal(selected,git(checkout,['rev-parse',tag+'^{commit}']));
  assert.equal(git(checkout,['rev-parse','HEAD']),controller);assert.equal(fs.readFileSync(path.join(checkout,'projects.json'),'utf8'),'different dispatch branch source');
- const publisher=fs.readFileSync(new URL('../tools/publish-package.mjs',import.meta.url),'utf8');assert.match(publisher,/stageBundle\(\{\.\.\.options,target:env\.GITHUB_SHA,resume:true\}\)/);
+ const publisher=fs.readFileSync(new URL('../tools/publish-package.mjs',import.meta.url),'utf8');assert.match(publisher,/stageBundle\(\{\.\.\.options,target:sourceRevision,resume:true\}\)/);
 });
 
 const sourceTarget='a'.repeat(40),annotation='b'.repeat(40);
@@ -157,7 +157,7 @@ test('existing asset conflicts and orphan tags fail before any write',async t=>{
   const f=fixture(t);await prepareRelease(f);const record=JSON.parse(fs.readFileSync(path.join(f.output,'engine-1.0-arm64.tar.gz.json'))),calls=[];
   const runGh=async args=>{calls.push(args);assert.equal(args[0],'api');assert.equal(args.includes('POST'),false);if(args[1].includes('/git/ref/'))return refResult();if(orphan)return '[]';const remote=remoteRelease(record);remote.assets[0].digest='sha256:'+'f'.repeat(64);return JSON.stringify([[remote]]);};
   await assert.rejects(stageRelease({bundle:f.output,target:sourceTarget,directory:f.directory,runGh}),orphan?/identity is incomplete/:/checksum differs/);
-  assert.equal(calls.length,2);
+  assert.equal(calls.length,orphan?12:2);
  }
 });
 
@@ -300,4 +300,40 @@ test('remote verification compares a staged draft with its local package without
  const f=fixture(t);await prepareRelease(f);const record=JSON.parse(fs.readFileSync(path.join(f.output,'engine-1.0-arm64.tar.gz.json')));
  const draft=async args=>{assert.equal(args[0],'api');assert.equal(args.includes('POST'),false);if(args[1].includes('/git/ref/'))return refResult();return JSON.stringify([[remoteRelease(record,true)]]);};
  const {publication}=await verifyRemoteRelease({bundle:f.output,directory:f.directory,runGh:draft});assert.equal(publication.draft,true);assert.equal(publication.sourceCommit,sourceTarget);
+});
+
+for(const delayed of ['tag','release'])test('publication retries a temporarily invisible '+delayed+' without replacing remote bytes',async t=>{
+ const f=fixture(t);await prepareRelease(f);const {record}=await verifyRelease({bundle:f.output,directory:f.directory});let reads=0,sleeps=0;
+ const runGh=async args=>{
+  assert.equal(args[0],'api');
+  if(args[1].includes('/git/ref/')){reads++;if(delayed==='tag'&&reads===1)throw notFound();return refResult();}
+  return JSON.stringify([[...(delayed==='release'&&reads===1?[]:[remoteRelease(record,false)])]]);
+ };
+ const result=await verifyRemoteRelease({bundle:f.output,directory:f.directory,runGh,sleep:async()=>sleeps++});
+ assert.equal(result.publication.draft,false);assert.equal(reads,2);assert.equal(sleeps,1);
+});
+test('release identity visibility retries stop without creating or replacing an incomplete release',async t=>{
+ const f=fixture(t);await prepareRelease(f);let reads=0;const waits=[];
+ await assert.rejects(verifyRemoteRelease({bundle:f.output,directory:f.directory,sleep:async ms=>waits.push(ms),runGh:async args=>{assert.equal(args[0],'api');if(args[1].includes('/git/ref/')){reads++;return refResult();}return '[]';}}),/identity is incomplete/);
+ assert.equal(reads,6);assert.deepEqual(waits,[2000,4000,8000,16000,30000]);
+});
+
+test('publication partitions keep semantic labels only for versions in each partition',async t=>{
+ const {writePublicationCatalog}=await import('../tools/catalog-publication.mjs');
+ const f=fixture(t,{version:'software-gl-v3-MCLv3'}),registry=JSON.parse(fs.readFileSync(path.join(f.directory,'projects.json')));
+ registry.projects[0].packageProfiles=[{version:'software-gl-v3-MCLv3',label:'Legacy',semanticVersion:'3.0.0'},{version:'3.0.1',label:'Current'}];
+ fs.writeFileSync(path.join(f.directory,'projects.json'),JSON.stringify(registry));await prepareRelease(f);
+ const {catalog}=await import('../tools/runtime-package.mjs');
+ const {record}=await verifyRelease({bundle:f.output,directory:f.directory});
+ const options={project:'engine',repository:'owner/builds',directory:f.directory};
+ const old=catalog([record],options).packages[0];
+ const current=catalog([{...record,version:'3.0.1',asset:{...record.asset,filename:'engine-3.0.1-arm64.tar.gz'}}],options).packages[0];
+ const output=path.join(f.directory,'catalogs/engine.json');
+ const active=writePublicationCatalog({records:[current],previous:{schemaVersion:2,projectId:'engine',updatePolicy:'manual',packages:[old]},project:'engine',repository:'owner/builds',directory:f.directory,output});
+ assert.equal(active.versionSemantics,undefined);assert.deepEqual(active.packages.map(row=>row.version),['3.0.1']);
+ assert.deepEqual(supersededCatalog(f.directory).versionSemantics,{'software-gl-v3-MCLv3':'3.0.0'});
+ // Reverse the incoming identity: the active partition owns the label, local does not.
+ fs.rmSync(path.dirname(output),{recursive:true});
+ const reverse=writePublicationCatalog({records:[old],previous:{schemaVersion:2,projectId:'engine',updatePolicy:'manual',packages:[current]},project:'engine',repository:'owner/builds',directory:f.directory,output});
+ assert.deepEqual(reverse.versionSemantics,{'software-gl-v3-MCLv3':'3.0.0'});assert.equal(supersededCatalog(f.directory).versionSemantics,undefined);
 });

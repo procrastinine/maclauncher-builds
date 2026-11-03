@@ -178,14 +178,20 @@ async function releaseTagCommit(ref,{repository,runGh}){
 }
 async function optionalGitHub(args,runGh){try{return JSON.parse(await runGh(['api',...args]));}catch(error){if(!missingRef(error))throw error;}}
 /** Existing tags, releases and assets are immutable; matching assets are a no-op. */
-async function existingRelease({release,record,runGh,allowUnreleasedTag=false}){
+async function existingRelease({release,record,runGh,allowUnreleasedTag=false,sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms))}){
  const repository=release.repository,tag=release.tag;
- const ref=await optionalGitHub(['repos/'+repository+'/git/ref/tags/'+tag],runGh);
- const commit=ref&&await releaseTagCommit(ref,{repository,runGh});
+ let ref,commit,remote;
+ const waits=[2000,4000,8000,16000,30000];
+ for(let attempt=0;attempt<=waits.length;attempt++){
+ ref=await optionalGitHub(['repos/'+repository+'/git/ref/tags/'+tag],runGh);
+ commit=ref&&await releaseTagCommit(ref,{repository,runGh});
  const pages=JSON.parse(await runGh(['api','--paginate','--slurp','repos/'+repository+'/releases?per_page=100']));
  const matches=pages.flat().filter(row=>row.tag_name===tag);
  if(matches.length>1)throw Error('Existing release identity is ambiguous.');
- const remote=matches[0];
+ remote=matches[0];
+ if(Boolean(ref)===Boolean(remote))break;
+ if(attempt<waits.length)await sleep(waits[attempt]);
+ }
  if(!ref&&!remote)return;
  if(ref&&!remote&&allowUnreleasedTag)return {repository,tag,sourceCommit:commit,tagOnly:true};
  if(!ref||!remote)throw Error('Existing release identity is incomplete; no tag or asset will be replaced.');
@@ -200,10 +206,10 @@ async function existingRelease({release,record,runGh,allowUnreleasedTag=false}){
 }
 
 /** Verify the immutable remote asset, including staged drafts, without changing GitHub. */
-export async function verifyRemoteRelease({bundle,directory=root,runGh=runGitHub,requirePublic=false,includeDeclaration=false,verifyGithubBuild=verifyPublicationBuild}){
+export async function verifyRemoteRelease({bundle,directory=root,runGh=runGitHub,requirePublic=false,includeDeclaration=false,verifyGithubBuild=verifyPublicationBuild,sleep}){
  const checked=await verifyRelease({bundle,directory,includeDeclaration});
  const build=await verifyGithubBuild({record:checked.record,repository:checked.release.repository,directory,archive:path.join(path.resolve(bundle),checked.record.asset.filename)});
- const publication=await existingRelease({...checked,runGh});
+ const publication=await existingRelease({...checked,runGh,sleep});
  if(!publication)throw Error('The selected release has not been staged.');
  await matchingBuildSource(build,publication.sourceCommit,{record:checked.record,directory});
  if(requirePublic&&publication.draft!==false)throw Error('Catalog updates require a public, non-draft release.');
@@ -211,14 +217,14 @@ export async function verifyRemoteRelease({bundle,directory=root,runGh=runGitHub
 }
 
 /** Explicit network action: upload only a release with no existing public identity. */
-export async function stageRelease({bundle,target,resume=false,directory=root,runGh=runGitHub,verifyGithubBuild=verifyPublicationBuild}){
+export async function stageRelease({bundle,target,resume=false,directory=root,runGh=runGitHub,verifyGithubBuild=verifyPublicationBuild,sleep}){
  if(!/^[a-f0-9]{40}$/.test(target||''))throw Error('Staging requires an exact public source commit through --target.');
  if(typeof resume!=='boolean')throw Error('Staging resume must be a boolean.');
  const {release,record}=await verifyRelease({bundle,directory}),project=resolveProject(release.id,directory,{resolvePins:false});
  const build=await verifyGithubBuild({record,repository:release.repository,directory,archive:path.join(path.resolve(bundle),record.asset.filename),sourceRevision:target});
  await matchingBuildSource(build,target,{record,directory});
  const files=publicationAssets(release).map(name=>path.join(path.resolve(bundle),name));
- const existing=await existingRelease({release,record,runGh,allowUnreleasedTag:resume});
+ const existing=await existingRelease({release,record,runGh,allowUnreleasedTag:resume,sleep});
  if(existing){
   await matchingBuildSource(build,existing.sourceCommit,{record,directory});
   if(existing.emptyDraft){await runGh(['release','upload',release.tag,'--repo',release.repository,...files],{stdio:'inherit'});return {...existing,uploaded:true};}
@@ -233,8 +239,8 @@ export async function stageRelease({bundle,target,resume=false,directory=root,ru
 }
 
 /** Publishing finalizes a verified draft; an already public release is unchanged. */
-export async function publishRelease({bundle,directory=root,runGh=runGitHub,verifyGithubBuild=verifyPublicationBuild}){
- const {release,publication:existing}=await verifyRemoteRelease({bundle,directory,runGh,verifyGithubBuild});
+export async function publishRelease({bundle,directory=root,runGh=runGitHub,verifyGithubBuild=verifyPublicationBuild,sleep}){
+ const {release,publication:existing}=await verifyRemoteRelease({bundle,directory,runGh,verifyGithubBuild,sleep});
  if(!existing.draft)return existing;
  await runGh(['release','edit',release.tag,'--repo',release.repository,'--draft=false','--latest=false']);
  return {...existing,draft:false,published:true};

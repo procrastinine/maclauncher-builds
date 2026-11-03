@@ -9,6 +9,7 @@ import {buildPlan} from './build-runtime.mjs';
 import {requireGithubBuild} from './build-coverage.mjs';
 import {createRecipeBuildReporter,canonicalReport} from './recipe-build-report.mjs';
 import {resolveBuildInputs} from './resolve-build-inputs.mjs';
+import {preparePublishOnly} from './publish-only.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 const json=file=>JSON.parse(fs.readFileSync(file,'utf8'));
 
@@ -67,12 +68,19 @@ export async function main(args,{directory=root,env=process.env}={}){
  if(args.length!==2||args[0]!=='--output'||!path.isAbsolute(args[1]))throw Error('Use --output /absolute/plan-directory.');
  const repository=readProjects(directory,{resolvePins:false}).repository;
  if(env.GITHUB_ACTIONS!=='true')throw Error('Release planning with GitHub metadata runs inside Build and release.');
+ if(env.PUBLISH_RUN&&env.RELEASES?.trim())throw Error('Choose releases or publish_run, not both.');
+ let plan;
+ if(env.PUBLISH_RUN)plan=await preparePublishOnly({runId:env.PUBLISH_RUN,output:args[1],directory,env});
+ else{
  const releases=JSON.parse(execFileSync('gh',['api','--paginate','--slurp','repos/'+repository+'/releases?per_page=100'],{encoding:'utf8'})).flat().filter(release=>!release.draft);
- const plan=await planBuildRelease({selection:env.RELEASES,directory,releases});fs.mkdirSync(args[1],{recursive:true});
- const requested=new Set(parseSelection(env.RELEASES).map(row=>row.id)),rebuilt=plan.selection.filter(row=>!requested.has(row.id));
+ plan=await planBuildRelease({selection:env.RELEASES,directory,releases});
+ }
+ fs.mkdirSync(args[1],{recursive:true});
+ const requested=new Set((env.PUBLISH_RUN?plan.selection:parseSelection(env.RELEASES)).map(row=>row.id)),rebuilt=plan.selection.filter(row=>!requested.has(row.id));
  if(env.GITHUB_STEP_SUMMARY&&rebuilt.length)fs.appendFileSync(env.GITHUB_STEP_SUMMARY,rebuilt.map(({id,version})=>id+' -> '+version+' (rebuilt input)').join('\n\n')+'\n');
  fs.writeFileSync(path.join(args[1],'reports.json'),canonicalReport(plan.reports));
- const output={selection:JSON.stringify(plan.selection),graph:JSON.stringify(plan.graph),reuse:JSON.stringify(plan.reuse),empty:String(!plan.independent.include.length&&plan.matrices.every(matrix=>!matrix.include.length)),matrixIndependent:JSON.stringify(plan.independent),emptyIndependent:String(!plan.independent.include.length)};
+ fs.writeFileSync(path.join(args[1],'plan.json'),JSON.stringify(plan));
+ const output={publishOnly:String(!!plan.publishOnly),publicationRun:plan.publicationRun||env.GITHUB_RUN_ID,publicationSource:plan.publicationSource||env.GITHUB_SHA,selection:JSON.stringify(plan.selection),graph:JSON.stringify(plan.graph),reuse:JSON.stringify(plan.reuse),empty:String(!plan.independent.include.length&&plan.matrices.every(matrix=>!matrix.include.length)),matrixIndependent:JSON.stringify(plan.independent),emptyIndependent:String(!plan.independent.include.length)};
  for(let level=0;level<4;level++){output['matrix'+level]=JSON.stringify(plan.matrices[level]);output['empty'+level]=String(!plan.matrices[level].include.length);}
  if(env.GITHUB_OUTPUT)fs.appendFileSync(env.GITHUB_OUTPUT,Object.entries(output).map(([key,value])=>key+'='+value+'\n').join(''));
  return output;

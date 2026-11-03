@@ -37,7 +37,17 @@ Recipes report their source pins, recipe files and consumed packages. Matching p
 
 Each archive seals `build-definition.json` and `build-inputs.json` in its regular file inventory. The latter lists the digest, release and source build of every resolved input. The ordinary archive attestation covers those records.
 
-After a build level finishes, its clean publisher verifies each successful archive's signed provenance, publishes that package's release and appends its catalog entry. Other component levels can still be building. Packages whose required inputs have not published are skipped without discarding the other releases. A catalog entry is written only after the exact release asset is public. Competing catalog commits restart from fresh main and reapply that package's entry, with up to ten attempts and randomized backoff. An identical entry is a no-op. No force push or textual merge of shared JSON is used. If the catalog append fails, re-running that publish job reuses its retained attested bundle and existing release without compiling again. An existing release can resume only under its original run id; another run cannot replace it. Each archive has one immutable project/version/CPU identity. The index and Pages update from main after the component publishers finish. Their queued index updates do not cancel other component runs. No archive passes through a local computer for publication.
+After a build level finishes, its clean publisher verifies each successful archive's signed provenance, publishes that package's release and appends its catalog entry. Other component levels can still be building. Packages whose required inputs have not published are skipped without discarding the other releases. A catalog entry is written only after the exact release asset is public. Competing catalog commits restart from fresh main and reapply that package's entry, with up to ten attempts and randomized backoff. An identical entry is a no-op. No force push or textual merge of shared JSON is used. If the catalog append fails, re-running that publish job reuses its retained attested bundle and existing release without compiling again. Only the original run's outputs can resume, either by re-running its failed jobs or by a publish-only run naming it. Another build run cannot replace them. Each archive has one immutable project/version/CPU identity. The index and Pages update from main after the component publishers finish. Their queued index updates do not cancel other component runs. No archive passes through a local computer for publication.
+
+## Resume publication without rebuilding
+
+The workflow's `publish_run` input names one completed **Build and release** run. Its retained plan, definition reports and package artifacts supply the original selection and targets. No build job runs. For older runs that retained only definition reports, the original matrix job identities recover the targets and the reports supply their input graph. Every archive is checked against that original run ID, source commit and attestation before publication. Existing releases from that run are verified and retained; missing catalog entries are appended normally.
+
+```sh
+gh workflow run runtime-build.yml --repo procrastinine/maclauncher-builds --ref main -f publish_run=41545812737
+```
+
+`publish_run` and `releases` are alternatives. Publication recovery requires the original run's retained artifacts. Pages artifacts include the workflow attempt number so an earlier attempt's upload cannot conflict with the next deployment.
 
 Each release and package-index row links the exact Builds source commit and build run. The downloaded archive can be checked with:
 
