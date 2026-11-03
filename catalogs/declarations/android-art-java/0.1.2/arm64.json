@@ -1,0 +1,318 @@
+{
+  "id": "android-art-java",
+  "version": "0.1.2",
+  "arch": "arm64",
+  "minimumMacOS": "13.0",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "b72209a4747aa0e388a7062ffd82d15e301cac8b8254593725801e8b6f91a344",
+  "directoryRelative": "android-art-java/0.1.2/arm64",
+  "manifestRelative": "input.json",
+  "manifestSha256": "5eee8a18f8804e3a30a23b62d97a22c778d4c5663d91b8a5d66d8f1198e54b64",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 17797,
+      "mode": 420,
+      "sha256": "5cdc422bb90939385861e7dda15929ef8e0455f0b348c9313e8d9ea41cb64982"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 575,
+      "mode": 420,
+      "sha256": "fd46f23f8fd0685c4a8411dcbaf8ce2ecd424ac43a4ded400d138b1f9af62f82"
+    },
+    {
+      "path": "framework.jar",
+      "size": 46631957,
+      "sha256": "78c51c9c03fe87ede949b7b1985b009da28636f50d8aa80bb59ec9e6a19cfe4b",
+      "mode": 420
+    },
+    {
+      "path": "hooks-dex.jar",
+      "size": 5514870,
+      "sha256": "90685ac3c63dc19b267446b2349cf61a388700efb366ab1dea7735b491ae5383",
+      "mode": 420
+    },
+    {
+      "path": "input.json",
+      "size": 13423,
+      "sha256": "5eee8a18f8804e3a30a23b62d97a22c778d4c5663d91b8a5d66d8f1198e54b64",
+      "mode": 420
+    },
+    {
+      "path": "notices/android-sdk-arm-dbt-license.txt",
+      "size": 17327,
+      "sha256": "0682da42e0ca119ce29503c265587f8ae17277094f9262b54c1d2bb99557c6f5",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/Android-adapters-LICENSE",
+      "size": 1081,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/aosp-apache-http/NOTICE",
+      "size": 10850,
+      "sha256": "35de8127791c66480f3bfac591dd3ade6845a09ed5b48f8c7233f68714a80110",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/aosp-apache-http/source.json",
+      "size": 376,
+      "sha256": "0fb29409f5442c3ae54d6f1d739a3a7ad0ce126c1f42d34601a2ab40013046a6",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/aosp-framework-base/artifact.pom",
+      "size": 1492,
+      "sha256": "ff1599e6c25bcd367200a4b1d2aa5f8df81a969c5e43177733ca7359b358ea6c",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/aosp-framework-base/LICENSE",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/aosp-framework-base/NOTICE",
+      "size": 1168,
+      "sha256": "c43a51f8b32832e2d7cc69ab66a5773cf091459f42daa95802a0e646565ce2f1",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/aosp-framework/LICENSE",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/aosp-framework/NOTICE",
+      "size": 392,
+      "sha256": "0508aff987bc8fa7e1cac97e5fd959bf41b9f9b5c8bc9015474484c6b356b767",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/aosp-framework/source.json",
+      "size": 1873,
+      "sha256": "c230df531acbe163778425156ba1a4f87fecfeb0667260659c88d7f23080af88",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/asm/LICENSE",
+      "size": 1651,
+      "sha256": "34b8dd2e1b4b5f822ba633602676297fa82328d9438ba4d7336ec7393d212e06",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/asm/provenance.json",
+      "size": 1384,
+      "sha256": "c1ed5c3795e376307fc7ed1cace9d7ec470fb67e86df90f255a916bcfc951b2d",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/org.apache.http.legacy/Android.bp",
+      "size": 4123,
+      "sha256": "7047c20d2e05f093839d347ccdd73be0a293dc790d92411fa04eaea2ff7edfe7",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/org.apache.http.legacy/LICENSE",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/org.apache.http.legacy/NOTICE",
+      "size": 10850,
+      "sha256": "35de8127791c66480f3bfac591dd3ade6845a09ed5b48f8c7233f68714a80110",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/org.apache.http.legacy/source.json",
+      "size": 24668,
+      "sha256": "31e4fb1b5f53b1a3869db20338f71d33d58a4f2cab323667a9d545891e680aef",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/robolectric-portability/LICENSE",
+      "size": 12865,
+      "sha256": "b9f28151a15110f04a7e40734edeaf7d650815fad5902f0736f4dd2ac4695694",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/robolectric-portability/source.json",
+      "size": 5074,
+      "sha256": "96eed9a5ddd51a210a8c073d7dd90687157e6589f45636a52d9942c046ffa025",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/service-statsd/Android.bp",
+      "size": 1454,
+      "sha256": "b56320b68bf88e430cbff57938edf293c0429cae17eb1ccf5464f6565587accf",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/service-statsd/LICENSE",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/service-statsd/NOTICE",
+      "size": 2048,
+      "sha256": "89488d777eae329252a154b4b19116bff7d2294e5833e29f0c8040efa68919d1",
+      "mode": 420
+    },
+    {
+      "path": "notices/framework/service-statsd/source.json",
+      "size": 469,
+      "sha256": "21a900a86191a52e02483418f9185fb37491cf9701374b75f0bd16f62ddbe53b",
+      "mode": 420
+    },
+    {
+      "path": "services.jar",
+      "size": 22166370,
+      "sha256": "c74c9a7c6f0a2ac07fe92e7c80582286c21263ab603e62e11f6022fc5b4897c8",
+      "mode": 420
+    }
+  ],
+  "notices": [
+    {
+      "name": "Android ART Java android-sdk-arm-dbt-license.txt",
+      "license": "See original notice",
+      "path": "notices/android-sdk-arm-dbt-license.txt",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/Android-adapters-LICENSE",
+      "license": "See original notice",
+      "path": "notices/framework/Android-adapters-LICENSE",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/aosp-apache-http/NOTICE",
+      "license": "See original notice",
+      "path": "notices/framework/aosp-apache-http/NOTICE",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/aosp-apache-http/source.json",
+      "license": "See original notice",
+      "path": "notices/framework/aosp-apache-http/source.json",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/aosp-framework-base/LICENSE",
+      "license": "See original notice",
+      "path": "notices/framework/aosp-framework-base/LICENSE",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/aosp-framework-base/NOTICE",
+      "license": "See original notice",
+      "path": "notices/framework/aosp-framework-base/NOTICE",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/aosp-framework-base/artifact.pom",
+      "license": "See original notice",
+      "path": "notices/framework/aosp-framework-base/artifact.pom",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/aosp-framework/LICENSE",
+      "license": "See original notice",
+      "path": "notices/framework/aosp-framework/LICENSE",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/aosp-framework/NOTICE",
+      "license": "See original notice",
+      "path": "notices/framework/aosp-framework/NOTICE",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/aosp-framework/source.json",
+      "license": "See original notice",
+      "path": "notices/framework/aosp-framework/source.json",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/asm/LICENSE",
+      "license": "See original notice",
+      "path": "notices/framework/asm/LICENSE",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/asm/provenance.json",
+      "license": "See original notice",
+      "path": "notices/framework/asm/provenance.json",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/org.apache.http.legacy/Android.bp",
+      "license": "See original notice",
+      "path": "notices/framework/org.apache.http.legacy/Android.bp",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/org.apache.http.legacy/LICENSE",
+      "license": "See original notice",
+      "path": "notices/framework/org.apache.http.legacy/LICENSE",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/org.apache.http.legacy/NOTICE",
+      "license": "See original notice",
+      "path": "notices/framework/org.apache.http.legacy/NOTICE",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/org.apache.http.legacy/source.json",
+      "license": "See original notice",
+      "path": "notices/framework/org.apache.http.legacy/source.json",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/robolectric-portability/LICENSE",
+      "license": "See original notice",
+      "path": "notices/framework/robolectric-portability/LICENSE",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/robolectric-portability/source.json",
+      "license": "See original notice",
+      "path": "notices/framework/robolectric-portability/source.json",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/service-statsd/Android.bp",
+      "license": "See original notice",
+      "path": "notices/framework/service-statsd/Android.bp",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/service-statsd/LICENSE",
+      "license": "See original notice",
+      "path": "notices/framework/service-statsd/LICENSE",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/service-statsd/NOTICE",
+      "license": "See original notice",
+      "path": "notices/framework/service-statsd/NOTICE",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    },
+    {
+      "name": "Android ART Java framework/service-statsd/source.json",
+      "license": "See original notice",
+      "path": "notices/framework/service-statsd/source.json",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher-android"
+    }
+  ]
+}
