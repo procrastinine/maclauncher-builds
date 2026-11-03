@@ -2,5 +2,44 @@
   "schemaVersion": 2,
   "projectId": "android-privacy",
   "updatePolicy": "manual",
-  "packages": []
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "android-privacy",
+      "version": "1.1.1",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "d73573dc4b769d5d1ff09c0ed466020af77a2909193466e989b3ba916065486e",
+      "sourceSha256": "a95dfc40811e331ffde87ccca5e52e9bc1683bd3c90b09734bf1fcd46a3969ff",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "android-privacy-1.1.1-arm64.tar.gz",
+        "sha256": "3446de6fc163dfc102a5c1b0fcea0e5ea589f056db0d162aa3dbad2827cc88d3",
+        "bytes": 26863,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-privacy%2Fv1.1.1%2Farm64/android-privacy-1.1.1-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41578851272",
+        "runAttempt": "1"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a"
+      },
+      "tag": "android-privacy/v1.1.1/arm64"
+    }
+  ]
 }
