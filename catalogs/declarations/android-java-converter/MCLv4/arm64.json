@@ -1,0 +1,126 @@
+{
+  "id": "android-java-converter",
+  "version": "MCLv4",
+  "arch": "arm64",
+  "minimumMacOS": "13.0",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "194750c6d4967b78bac63ad38073c72780a3f553941665305b9136e78b824d59",
+  "directoryRelative": "android-java-converter/MCLv4/arm64",
+  "manifestRelative": "input.json",
+  "manifestSha256": "5409f847742812cb6c7c4ae92806fce993e2dfb4a29ab63d1de989422ed3a526",
+  "files": [
+    {
+      "path": "android-api-headers.jar",
+      "size": 1504476,
+      "sha256": "f3e8f6a56341b7ae5806175f2b232ea159c2cc29355017a8457e511d8a924e0c",
+      "mode": 420
+    },
+    {
+      "path": "build-definition.json",
+      "size": 15741,
+      "mode": 420,
+      "sha256": "eb20f45d3c7836a9aebecd678c5867134d6e42a4f35148cc68d86e817d5af2ef"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "b5c677982c3ce503e3a799484d7422cdf2d7c7955df1980b0e1ec92d6acfbcca"
+    },
+    {
+      "path": "converter-overlay.jar",
+      "size": 408193,
+      "sha256": "ab14566679642f023b36c0a8252ef6dddd9403c8663cccf713146e208086fe7d",
+      "mode": 420
+    },
+    {
+      "path": "dex2jvm.jar",
+      "size": 361315,
+      "sha256": "985016b2eef4000067ad3834767f21bd20b566c0f5c074dd3deab2bb0bbc4aed",
+      "mode": 420
+    },
+    {
+      "path": "input.json",
+      "size": 5538,
+      "sha256": "5409f847742812cb6c7c4ae92806fce993e2dfb4a29ab63d1de989422ed3a526",
+      "mode": 420
+    },
+    {
+      "path": "notices/apksig/artifact.pom",
+      "size": 933,
+      "sha256": "223ded8268e7f0ee9df0109d8049ced61474b5ebd848c2d3a088932a2c5cc823",
+      "mode": 420
+    },
+    {
+      "path": "notices/apksig/LICENSE",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "notices/asm/LICENSE",
+      "size": 1651,
+      "sha256": "34b8dd2e1b4b5f822ba633602676297fa82328d9438ba4d7336ec7393d212e06",
+      "mode": 420
+    },
+    {
+      "path": "notices/asm/provenance.json",
+      "size": 1384,
+      "sha256": "c1ed5c3795e376307fc7ed1cace9d7ec470fb67e86df90f255a916bcfc951b2d",
+      "mode": 420
+    },
+    {
+      "path": "notices/converter/0-LICENSE",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "notices/converter/1-NOTICE",
+      "size": 968,
+      "sha256": "55c94a158002be1acec8e0743afaee31901fc03a80ff3ee0dca10b50230fac53",
+      "mode": 420
+    }
+  ],
+  "notices": [
+    {
+      "name": "dex2jvm LICENSE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/kksimp/dex2jvm",
+      "path": "notices/converter/0-LICENSE"
+    },
+    {
+      "name": "dex2jvm NOTICE",
+      "license": "See original notice",
+      "sourceUrl": "https://github.com/kksimp/dex2jvm",
+      "path": "notices/converter/1-NOTICE"
+    },
+    {
+      "name": "asm LICENSE",
+      "license": "BSD-3-Clause",
+      "path": "notices/asm/LICENSE",
+      "sourceUrl": "https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.10.1/asm-9.10.1.jar"
+    },
+    {
+      "name": "asm provenance.json",
+      "license": "BSD-3-Clause",
+      "path": "notices/asm/provenance.json",
+      "sourceUrl": "https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.10.1/asm-9.10.1.jar"
+    },
+    {
+      "name": "apksig LICENSE",
+      "license": "Apache-2.0",
+      "path": "notices/apksig/LICENSE",
+      "sourceUrl": "https://dl.google.com/dl/android/maven2/com/android/tools/build/apksig/8.13.2/apksig-8.13.2.jar"
+    },
+    {
+      "name": "apksig artifact.pom",
+      "license": "Apache-2.0",
+      "path": "notices/apksig/artifact.pom",
+      "sourceUrl": "https://dl.google.com/dl/android/maven2/com/android/tools/build/apksig/8.13.2/apksig-8.13.2.jar"
+    }
+  ]
+}
