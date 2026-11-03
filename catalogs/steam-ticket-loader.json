@@ -2,45 +2,5 @@
   "schemaVersion": 2,
   "projectId": "steam-ticket-loader",
   "updatePolicy": "manual",
-  "packages": [
-    {
-      "schemaVersion": 2,
-      "id": "steam-ticket-loader",
-      "version": "0.1.2",
-      "arch": "universal",
-      "launcherArchitectures": [
-        "arm64",
-        "x64"
-      ],
-      "minimumMacOS": "13.0",
-      "manifestRelative": "helper.json",
-      "manifestSha256": "7b0acef06b820d19d188471b99a52f28e4d76e4cdbf6d4b9b062cfeef1b2a3bc",
-      "sourceSha256": "5b5604323f8d6a016efb50056403fe504271ddbd70ba738b268eb3b4dc223f00",
-      "updatePolicy": "manual",
-      "asset": {
-        "filename": "steam-ticket-loader-0.1.2-universal.tar.gz",
-        "sha256": "8342ec804f6663c6cf9c2ae3a0726a235f4206a710239d5880f2489f05ee3bde",
-        "bytes": 9655,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/steam-ticket-loader%2Fv0.1.2%2Funiversal/steam-ticket-loader-0.1.2-universal.tar.gz"
-      },
-      "build": {
-        "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
-        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
-        "toolchain": {
-          "node": "24.22.1",
-          "zlib": "1.3.2.1-motley-285e94b",
-          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
-          "xcode": "Xcode 27.0\nBuild version 27A266a",
-          "macosSDK": "27.0"
-        },
-        "runId": "41578902058",
-        "runAttempt": "1"
-      },
-      "source": {
-        "repository": "procrastinine/maclauncher-builds",
-        "revision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a"
-      },
-      "tag": "steam-ticket-loader/v0.1.2/universal"
-    }
-  ]
+  "packages": []
 }

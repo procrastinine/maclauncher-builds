@@ -2,44 +2,5 @@
   "schemaVersion": 2,
   "projectId": "android-blueprint-parser",
   "updatePolicy": "manual",
-  "packages": [
-    {
-      "schemaVersion": 2,
-      "id": "android-blueprint-parser",
-      "version": "MCLv2",
-      "arch": "arm64",
-      "launcherArchitectures": [
-        "arm64"
-      ],
-      "minimumMacOS": "13.0",
-      "manifestRelative": "input.json",
-      "manifestSha256": "3f73cfa69478de5e460e84e7db78fba00918be56fbbf65d3c3d83490fe0c3baa",
-      "sourceSha256": "5305addd87aba60f9d8b4e9fb817d43992ccd15bce14f3af738e627d8dbe0f5b",
-      "updatePolicy": "manual",
-      "asset": {
-        "filename": "android-blueprint-parser-MCLv2-arm64.tar.gz",
-        "sha256": "c48bcdf99c216fb7ca6629be22e1d8dba0d3b1fcbcf6610fe9ed317285b16435",
-        "bytes": 1146367,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-blueprint-parser%2FvMCLv2%2Farm64/android-blueprint-parser-MCLv2-arm64.tar.gz"
-      },
-      "build": {
-        "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
-        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
-        "toolchain": {
-          "node": "24.22.1",
-          "zlib": "1.3.2.1-motley-285e94b",
-          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
-          "xcode": "Xcode 27.0\nBuild version 27A266a",
-          "macosSDK": "27.0"
-        },
-        "runId": "41578842959",
-        "runAttempt": "1"
-      },
-      "source": {
-        "repository": "procrastinine/maclauncher-builds",
-        "revision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a"
-      },
-      "tag": "android-blueprint-parser/vMCLv2/arm64"
-    }
-  ]
+  "packages": []
 }

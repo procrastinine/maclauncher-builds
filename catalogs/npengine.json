@@ -2,44 +2,5 @@
   "schemaVersion": 2,
   "projectId": "npengine",
   "updatePolicy": "manual",
-  "packages": [
-    {
-      "schemaVersion": 2,
-      "id": "npengine",
-      "version": "0.5.3-MCLv3",
-      "arch": "arm64",
-      "launcherArchitectures": [
-        "arm64"
-      ],
-      "minimumMacOS": "13.0",
-      "manifestRelative": "manifest.json",
-      "manifestSha256": "e47b1ada270e4ae622d75bbb5efb8e5f47850070d6b9db62912974316536a5fc",
-      "sourceSha256": "e47b1ada270e4ae622d75bbb5efb8e5f47850070d6b9db62912974316536a5fc",
-      "updatePolicy": "manual",
-      "source": {
-        "repository": "procrastinine/maclauncher-builds",
-        "revision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a"
-      },
-      "asset": {
-        "filename": "npengine-0.5.3-MCLv3-arm64.tar.gz",
-        "sha256": "2fae7d6f691b65fc72d1fb941785241050f642f3ae84d2c990383577cbe061eb",
-        "bytes": 18009801,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/npengine%2Fv0.5.3-MCLv3%2Farm64/npengine-0.5.3-MCLv3-arm64.tar.gz"
-      },
-      "build": {
-        "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
-        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
-        "toolchain": {
-          "node": "24.22.1",
-          "zlib": "1.3.2.1-motley-285e94b",
-          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
-          "xcode": "Xcode 27.0\nBuild version 27A266a",
-          "macosSDK": "27.0"
-        },
-        "runId": "41578842959",
-        "runAttempt": "1"
-      },
-      "tag": "npengine/v0.5.3-MCLv3/arm64"
-    }
-  ]
+  "packages": []
 }

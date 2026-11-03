@@ -2,41 +2,5 @@
   "schemaVersion": 2,
   "projectId": "android-art-ffi",
   "updatePolicy": "manual",
-  "packages": [
-    {
-      "schemaVersion": 2,
-      "id": "android-art-ffi",
-      "version": "3.8.0-MCLv2",
-      "arch": "arm64",
-      "launcherArchitectures": [
-        "arm64"
-      ],
-      "minimumMacOS": "13.0",
-      "manifestRelative": "input.json",
-      "manifestSha256": "6325113a7d4de625946646f65044c7c175a0f9e0f4280b3dc58f46d84824eaef",
-      "sourceSha256": "13d13d1e5174bb0ac22cc1e9136f8f8bc8888358d251f23af75179cdb83f2516",
-      "updatePolicy": "manual",
-      "asset": {
-        "filename": "android-art-ffi-3.8.0-MCLv2-arm64.tar.gz",
-        "sha256": "a0a6249183e9016ee3f600636c4705b5f0bb681f114fe7823a9a2a643a0e7f8e",
-        "bytes": 41841,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art-ffi%2Fv3.8.0-MCLv2%2Farm64/android-art-ffi-3.8.0-MCLv2-arm64.tar.gz"
-      },
-      "build": {
-        "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
-        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
-        "toolchain": {
-          "node": "24.22.1",
-          "zlib": "1.3.2.1-motley-285e94b"
-        },
-        "runId": "41578842959",
-        "runAttempt": "1"
-      },
-      "source": {
-        "repository": "procrastinine/maclauncher-builds",
-        "revision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a"
-      },
-      "tag": "android-art-ffi/v3.8.0-MCLv2/arm64"
-    }
-  ]
+  "packages": []
 }

@@ -2,41 +2,5 @@
   "schemaVersion": 2,
   "projectId": "android-java-converter",
   "updatePolicy": "manual",
-  "packages": [
-    {
-      "schemaVersion": 2,
-      "id": "android-java-converter",
-      "version": "MCLv2",
-      "arch": "arm64",
-      "launcherArchitectures": [
-        "arm64"
-      ],
-      "minimumMacOS": "13.0",
-      "manifestRelative": "input.json",
-      "manifestSha256": "24629c58b3ce9bd7d905fd5a56848ed001c196a3ab6e7a6a19060b0a09668e2f",
-      "sourceSha256": "deafb072dc75d99354082a7ad9108266b0e81109f328e4e615d5e13bf8e3eec2",
-      "updatePolicy": "manual",
-      "asset": {
-        "filename": "android-java-converter-MCLv2-arm64.tar.gz",
-        "sha256": "e608e4f740b8545449872fda3dd03821ae475d11b06e4ff90225e55c4b53cdc3",
-        "bytes": 1119756,
-        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-java-converter%2FvMCLv2%2Farm64/android-java-converter-MCLv2-arm64.tar.gz"
-      },
-      "build": {
-        "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
-        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
-        "toolchain": {
-          "node": "24.22.1",
-          "zlib": "1.3.2.1-motley-285e94b"
-        },
-        "runId": "41578842959",
-        "runAttempt": "1"
-      },
-      "source": {
-        "repository": "procrastinine/maclauncher-builds",
-        "revision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a"
-      },
-      "tag": "android-java-converter/vMCLv2/arm64"
-    }
-  ]
+  "packages": []
 }
