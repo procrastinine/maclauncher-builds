@@ -1431,6 +1431,49 @@
       ]
     },
     {
+      "projectId": "impacto",
+      "name": "impacto Windows-game profile",
+      "delivery": "downloadable",
+      "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#impacto",
+      "catalog": {
+        "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/impacto.json",
+        "sha256": "2ef36a271e794579fa147e126685e91c28cd6c792d7840d44ac02a706d8fc1db",
+        "bytes": 1658
+      },
+      "releases": [
+        {
+          "version": "0.10.8.903-MCLv3",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "impacto/v0.10.8.903-MCLv3/arm64",
+          "asset": {
+            "filename": "impacto-0.10.8.903-MCLv3-arm64.tar.gz",
+            "sha256": "2ee4de169f51ca119d5877037c8e4067b27c19fa6dbfb680a33bd2817076b328",
+            "bytes": 94951656,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/impacto%2Fv0.10.8.903-MCLv3%2Farm64/impacto-0.10.8.903-MCLv3-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41578842959",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#impacto",
+          "profile": "impacto Windows-game profile 0.10.8.903-MCLv3"
+        }
+      ]
+    },
+    {
       "projectId": "innoextract",
       "name": "Inno Setup extraction tools",
       "delivery": "downloadable",
