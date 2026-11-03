@@ -1,0 +1,128 @@
+{
+  "id": "winevulkan-scene",
+  "version": "26.3.0-MCLv3",
+  "arch": "x64",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "10.15",
+  "sourceRelative": null,
+  "sourceSha256": "7e8ed045ff525fefb669e723171d9e1c249186f52b96bcb3053c7ae045a2018f",
+  "directoryRelative": "winevulkan-scene/26.3.0-MCLv3/x64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "b2514d7fb3e846c95b0584d878f0792b7d13f9ea4f019793e9a540a7a684a164",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 16594,
+      "mode": 420,
+      "sha256": "72ab492fa52693040d2faf0652e955d595805e33f31f1bfa8a80ff67e9c3af73"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "c477b16b3045005dc2c1fb38ff02968510a6630bdb15161e8c47df87b5f9a2a3"
+    },
+    {
+      "path": "i386-windows/winevulkan.dll",
+      "size": 368640,
+      "mode": 493,
+      "sha256": "11397ad67a476ce282af14e3f0d7aa8ea3df6acafdf835e6b650595173cbf2cf",
+      "format": "pe",
+      "architectures": [
+        "x86"
+      ]
+    },
+    {
+      "path": "manifest.json",
+      "size": 6944,
+      "mode": 420,
+      "sha256": "b2514d7fb3e846c95b0584d878f0792b7d13f9ea4f019793e9a540a7a684a164"
+    },
+    {
+      "path": "notices/Khronos-Vulkan-MIT",
+      "size": 1110,
+      "mode": 420,
+      "sha256": "e11918eaa383ec63075f3b21a6955c7ba6c366043eb9c34690cb8372ca333986"
+    },
+    {
+      "path": "notices/MacLauncher-MIT",
+      "size": 1081,
+      "mode": 420,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7"
+    },
+    {
+      "path": "notices/Wine-AUTHORS",
+      "size": 29845,
+      "mode": 420,
+      "sha256": "4e2f062fd9c658b60ba7c0000f88f08d2b8f1333fa7b1c37ec27859ecb2de59d"
+    },
+    {
+      "path": "notices/Wine-COPYING.LIB",
+      "size": 26434,
+      "mode": 420,
+      "sha256": "e237fa56668030e928551ddd60f05df5fe957f75eab874bbd017e085ed722e7c"
+    },
+    {
+      "path": "notices/Wine-LICENSE",
+      "size": 824,
+      "mode": 420,
+      "sha256": "ae025f125a5d639f0f7abe5146efa1e3d7453cc10b744b2910806fa3f46626ef"
+    },
+    {
+      "path": "x86_64-unix/winevulkan.so",
+      "size": 668800,
+      "mode": 493,
+      "sha256": "e2f73997372d005534409b21f37129006216cc6f128550f5258f429a8d377cb9",
+      "format": "mach-o",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "x86_64-windows/winevulkan.dll",
+      "size": 385024,
+      "mode": 493,
+      "sha256": "ab3782261adac235a4cd618f87885c28a819992eeea76ec65c169f481af12456",
+      "format": "pe",
+      "architectures": [
+        "x86_64"
+      ]
+    }
+  ],
+  "notices": [
+    {
+      "name": "Wine COPYING.LIB",
+      "license": "LGPL-2.1-or-later",
+      "sourceUrl": "https://www.codeweavers.com/crossover/source",
+      "path": "notices/Wine-COPYING.LIB"
+    },
+    {
+      "name": "Wine LICENSE",
+      "license": "See included notice",
+      "sourceUrl": "https://www.codeweavers.com/crossover/source",
+      "path": "notices/Wine-LICENSE"
+    },
+    {
+      "name": "Wine AUTHORS",
+      "license": "See included notice",
+      "sourceUrl": "https://www.codeweavers.com/crossover/source",
+      "path": "notices/Wine-AUTHORS"
+    },
+    {
+      "name": "MacLauncher",
+      "license": "MIT",
+      "sourceUrl": "https://github.com/procrastinine/maclauncher",
+      "path": "notices/MacLauncher-MIT"
+    },
+    {
+      "name": "Khronos Vulkan",
+      "license": "MIT",
+      "sourceUrl": "https://github.com/KhronosGroup/Vulkan-Headers",
+      "path": "notices/Khronos-Vulkan-MIT"
+    }
+  ]
+}

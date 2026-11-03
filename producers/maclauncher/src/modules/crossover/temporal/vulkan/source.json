@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "winevulkan-scene",
-  "version": "26.3.0-MCLv2",
+  "version": "26.3.0-MCLv3",
   "profile": "crossover-26.3.0-winevulkan-scene-v1",
   "sourcePage": "https://www.codeweavers.com/crossover/source",
   "archive": {

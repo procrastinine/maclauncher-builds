@@ -2097,10 +2097,14 @@
       {
         "version": "26.3.0-MCLv2",
         "label": "WineVulkan scene adapter 26.3.0-MCLv2"
+      },
+      {
+        "version": "26.3.0-MCLv3",
+        "label": "WineVulkan scene adapter 26.3.0-MCLv3"
       }
     ],
     "build": {
-      "version": "26.3.0-MCLv2",
+      "version": "26.3.0-MCLv3",
       "command": "tools/build-winevulkan-scene.mjs",
       "architectures": [
         "x64"
