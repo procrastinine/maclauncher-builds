@@ -1772,10 +1772,14 @@
       {
         "version": "16.0.0-MCLv2",
         "label": "Android Java framework 16.0.0-MCLv2"
+      },
+      {
+        "version": "16.0.0-MCLv3",
+        "label": "Android Java framework 16.0.0-MCLv3"
       }
     ],
     "build": {
-      "version": "16.0.0-MCLv2",
+      "version": "16.0.0-MCLv3",
       "command": "tools/build-android-java-framework.mjs",
       "architectures": [
         "arm64"
