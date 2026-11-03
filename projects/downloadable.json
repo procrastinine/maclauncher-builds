@@ -938,38 +938,27 @@
       {
         "version": "MCLv2-0126",
         "label": "ONScripter-EN MCLv2-0126"
-      }
-    ],
-    "build": [
-      {
-        "version": "MCLv1-0126",
-        "command": "tools/build-onscripter-en.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/onscripter-en"
-        ],
-        "tools": [
-          "cmake",
-          "ninja"
-        ]
       },
       {
-        "version": "MCLv2-0126",
-        "command": "tools/build-onscripter-en.mjs",
-        "architectures": [
-          "arm64"
-        ],
-        "submodules": [
-          "producers/maclauncher/src/external/onscripter-en"
-        ],
-        "tools": [
-          "cmake",
-          "ninja"
-        ]
+        "version": "20250608-en-MCLv3",
+        "label": "ONScripter-EN 20250608-en-MCLv3"
       }
-    ]
+    ],
+    "build": {
+      "version": "20250608-en-MCLv3",
+      "command": "tools/build-onscripter-en.mjs",
+      "architectures": [
+        "x64",
+        "arm64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/onscripter-en"
+      ],
+      "tools": [
+        "cmake",
+        "ninja"
+      ]
+    }
   },
   {
     "id": "onsyuri",

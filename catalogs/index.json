@@ -2587,10 +2587,40 @@
       "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#onscripter-en",
       "catalog": {
         "url": "https://procrastinine.github.io/maclauncher-builds/catalogs/onscripter-en.json",
-        "sha256": "982b0f94b516d2cb48f9eefc7c3e0895eafd803153c08c9d3914c5df00c1089c",
-        "bytes": 2661
+        "sha256": "850e23a8f3cee4a64dc9f1f55332948066e1c2483c736097c103d426a4f527fa",
+        "bytes": 4225
       },
       "releases": [
+        {
+          "version": "20250608-en-MCLv3",
+          "arch": "arm64",
+          "launcherArchitectures": [
+            "arm64"
+          ],
+          "minimumMacOS": "13.0",
+          "tag": "onscripter-en/v20250608-en-MCLv3/arm64",
+          "asset": {
+            "filename": "onscripter-en-20250608-en-MCLv3-arm64.tar.gz",
+            "sha256": "ae9652aebe90b225e8834cfa90bd8b36fa793e62c1a84a08a36463774862d4de",
+            "bytes": 1354007,
+            "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onscripter-en%2Fv20250608-en-MCLv3%2Farm64/onscripter-en-20250608-en-MCLv3-arm64.tar.gz"
+          },
+          "build": {
+            "sourceRevision": "66bddd70fb09b14ea7bcc1f4c7fc7fabacf05c05",
+            "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+            "toolchain": {
+              "node": "24.22.1",
+              "zlib": "1.3.2.1-motley-285e94b",
+              "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+              "xcode": "Xcode 27.0\nBuild version 27A266a",
+              "macosSDK": "27.0"
+            },
+            "runId": "41545844401",
+            "runAttempt": "1"
+          },
+          "pageUrl": "https://procrastinine.github.io/maclauncher-builds/#onscripter-en",
+          "profile": "ONScripter-EN 20250608-en-MCLv3"
+        },
         {
           "version": "MCLv2-0126",
           "arch": "arm64",
