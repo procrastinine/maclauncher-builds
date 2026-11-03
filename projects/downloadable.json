@@ -1732,10 +1732,14 @@
       {
         "version": "MCLv3",
         "label": "Butterscotch MCLv3"
+      },
+      {
+        "version": "MCLv4",
+        "label": "Butterscotch MCLv4"
       }
     ],
     "build": {
-      "version": "MCLv3",
+      "version": "MCLv4",
       "command": "tools/build-butterscotch.mjs",
       "architectures": [
         "x64",
