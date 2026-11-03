@@ -2478,10 +2478,14 @@
       {
         "version": "1.0.0-preview.5f358ef1360b-MCLv2-1028-1",
         "label": "siglus_rs 1.0.0-preview.5f358ef1360b-MCLv2-1028-1"
+      },
+      {
+        "version": "0.1.0-MCLv3",
+        "label": "siglus_rs 0.1.0-MCLv3"
       }
     ],
     "build": {
-      "version": "1.0.0-preview.5f358ef1360b-MCLv2-1028-1",
+      "version": "0.1.0-MCLv3",
       "architectures": [
         "arm64"
       ],
