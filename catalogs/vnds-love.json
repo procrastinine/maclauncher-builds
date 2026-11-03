@@ -2,5 +2,42 @@
   "schemaVersion": 2,
   "projectId": "vnds-love",
   "updatePolicy": "manual",
-  "packages": []
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "vnds-love",
+      "version": "0.0.13-MCLv3",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "11.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "7e1e586789cc39082b532bfd0d4335402a7a62b3d4df53da8858aa3bc74f2987",
+      "sourceSha256": "7e1e586789cc39082b532bfd0d4335402a7a62b3d4df53da8858aa3bc74f2987",
+      "updatePolicy": "manual",
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a"
+      },
+      "asset": {
+        "filename": "vnds-love-0.0.13-MCLv3-universal.tar.gz",
+        "sha256": "e8c1a583fbd36256c3e50c6899a7a14b5a8463344190d768f3babe8a440e89f3",
+        "bytes": 40989,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vnds-love%2Fv0.0.13-MCLv3%2Funiversal/vnds-love-0.0.13-MCLv3-universal.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "8b70fa47c367c7ef68c6a2709b0636548ac0e46a",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b"
+        },
+        "runId": "41578908263",
+        "runAttempt": "1"
+      },
+      "tag": "vnds-love/v0.0.13-MCLv3/universal"
+    }
+  ]
 }
