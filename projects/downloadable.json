@@ -2046,10 +2046,14 @@
       {
         "version": "MCLv2",
         "label": "Prosper x86-64 MCLv2"
+      },
+      {
+        "version": "MCLv3",
+        "label": "Prosper x86-64 MCLv3"
       }
     ],
     "build": {
-      "version": "MCLv2",
+      "version": "MCLv3",
       "command": "tools/build-prosper.mjs",
       "architectures": [
         "x64"
