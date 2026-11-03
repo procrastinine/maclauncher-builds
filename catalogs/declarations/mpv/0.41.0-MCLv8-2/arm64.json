@@ -1,0 +1,1135 @@
+{
+  "id": "mpv",
+  "version": "0.41.0-MCLv8-2",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "27.0",
+  "directoryRelative": "mpv/0.41.0-MCLv8-2/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "e670a7b41967ba8916fb3aca1beb183ec2a75d643eb8b1fbf0108cf8575a5eef",
+  "sourceSha256": "e670a7b41967ba8916fb3aca1beb183ec2a75d643eb8b1fbf0108cf8575a5eef",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 19534,
+      "mode": 420,
+      "sha256": "fa0c6169e07f16ae6b6487d46cdef4d80f32ed9e696f7eeb131d6ee5c7444bb8"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "05a10b0a8c090ef84ade2f5a2be41d18adda33aff00c23ff84178894c30e58df"
+    },
+    {
+      "path": "files/lib/libass.9.dylib",
+      "size": 228640,
+      "sha256": "ce12ed76f8fa568be8796db8f301048ae03319a4eee35154cd40f57b0d9e9dd1",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libavcodec.63.1.102.dylib",
+      "size": 9692176,
+      "sha256": "bbdd715f0cfc227b2904df0ba77400d24c3f41e6dff4961f5df5bcb7f467162d",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libavdevice.63.1.102.dylib",
+      "size": 130864,
+      "sha256": "1ba62e67b3f0208161ce23f6c4223ce92a14bc5046a707b1d2e75f7ee9592ee1",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libavfilter.12.1.102.dylib",
+      "size": 2930576,
+      "sha256": "bfe87123bd31a3d0b8d52c50e4efce58f1f59fec77a67ad16b94e7d22bf26f91",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libavformat.63.1.102.dylib",
+      "size": 2359584,
+      "sha256": "700f05d8a8e1977f4943519f0c2f41b1631571ed111ced1f08ac4fabc12fbe4d",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libavutil.61.1.102.dylib",
+      "size": 639840,
+      "sha256": "35e17c80902780914af3d0619ec3a6f8ef31b0e7192bce59a9c38803469376f2",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libbrotlicommon.1.2.1.dylib",
+      "size": 149264,
+      "sha256": "5d3729e2cbd3865952769c5d0dc0aa18672fcbf8a5ae00609d3ec45a734ac56d",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libbrotlidec.1.2.1.dylib",
+      "size": 69744,
+      "sha256": "59f34c16054d161bb9e77b7140ad2357c5fe926297fc6e5a25a9ca016f1e60fd",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libcrypto.4.dylib",
+      "size": 4910688,
+      "sha256": "bedc5adce1a3d1e355e5e25b44e5e54ab2b616760b58b21170d046934d5cc71b",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libdav1d.7.dylib",
+      "size": 841776,
+      "sha256": "d72b86a2a6103118bf421752d172a291a703de409e0ca355c627989a8dc7aef2",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libfreetype.6.dylib",
+      "size": 657424,
+      "sha256": "5680def44decf0d203f3ede675852569d61835dd94e4a3582b76fe8d2521f123",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libfribidi.0.dylib",
+      "size": 153216,
+      "sha256": "c5726046801ee6604ae9b2fad9bc5d8e3784a0ae01e57c95151954b9cae5e48b",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libglib-2.0.0.dylib",
+      "size": 1354928,
+      "sha256": "4a7dc824bda196faa62e41f6f863223c8b5504eac53c5509b0a9e82d57d82c80",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libgraphite2.3.3.1.dylib",
+      "size": 124560,
+      "sha256": "f6de709d870a59538d0821512e3c4b336b8a5c2ffd12d78ddaec176a4b192c6a",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libharfbuzz.0.dylib",
+      "size": 1419376,
+      "sha256": "0b4d9db2d40768aa918b57703d47f24f6a5cb2e025dda0199043754d05bc7d14",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libintl.8.dylib",
+      "size": 210848,
+      "sha256": "1e9741be68ca173dffc9d719ad638cb73e7b2d950d06091eb7d69e4c8e4ae887",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libjpeg.8.3.2.dylib",
+      "size": 454256,
+      "sha256": "ae5509afe8092627f43934b2c60c14a5f43cff93160db1aa4029f034316da730",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/liblcms2.2.dylib",
+      "size": 338320,
+      "sha256": "cf965389d69867869912903a4dc3835a07967fb88cfe1272bc41d8ebbecdaecc",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libluajit-5.1.2.1.1792588164.dylib",
+      "size": 540240,
+      "sha256": "b787cd64036594add4694998b43b443f84855db5b9bafa917717dfa3386637b9",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/liblzma.5.dylib",
+      "size": 166576,
+      "sha256": "60ff6730f47bd78dc6386eabd93645ec95b966fadb7b6946789f1f628da500ff",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libmp3lame.0.dylib",
+      "size": 214640,
+      "sha256": "ff6da81838fa084b32b8b5b2c44217939d101492f72ce866a4acd7b97107b638",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libmpg123.0.dylib",
+      "size": 270336,
+      "sha256": "6928d5576e66049b351ee4ed4d0f3bdc581edefedef1a124be29ef7b78b5cdf9",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libmujs.dylib",
+      "size": 289056,
+      "sha256": "f88f0d9a95b69d4777e51117faf617dab2792d32dcda34087ee655037f6e4a4f",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libopus.0.dylib",
+      "size": 339392,
+      "sha256": "f4081507d09bf7290f5eb8ca2658cc13058e5e6e03ab8242d78f2a4710e4d003",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libpcre2-8.0.dylib",
+      "size": 570784,
+      "sha256": "4c494053ae7324f5dda00472f12c9b3d6303dcf8ac2ca3baf7dcdd7d80f95021",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libplacebo.387.dylib",
+      "size": 1031728,
+      "sha256": "151095bc915d4a87ea39c590c227e3d4a0afdf0bdc7c767a9cc5f2d94ff200f9",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libpng16.16.dylib",
+      "size": 190272,
+      "sha256": "c662c15e52f71da5914295393a71718043afaa1f50cbfc85cfc863f4f7a9cb83",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libshaderc_shared.1.dylib",
+      "size": 7563456,
+      "sha256": "722027a6c9b5f62313f64aa1822b281d1eded8d8624f1a6eae6883305ca3dc7d",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libssl.4.dylib",
+      "size": 990384,
+      "sha256": "4fc9d19981abd97cac0469cb8adcf7931b29ef1af1f1617a5281b3dadc29cfb0",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libSvtAv1Enc.4.2.0.dylib",
+      "size": 3039520,
+      "sha256": "ddb141576d4545ccb926892e68bc7c57946aeebc5b510d68f483a177c114d662",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libswresample.7.1.102.dylib",
+      "size": 103008,
+      "sha256": "bb7d6408f0902eb9e8d64ae7a1a3205b45108d7c7d0b0f70e2c08bf059bece0d",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libswscale.10.1.102.dylib",
+      "size": 684752,
+      "sha256": "7713122efb098d59ebd0ff141ffa24645f6bcba0c93a82ef0136ce9827148b47",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libunibreak.8.dylib",
+      "size": 167744,
+      "sha256": "61ff8eedc2b923b77f3018c2df177871e7de069d2e1a4d6222b1f7f6016e4883",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libvmaf.3.dylib",
+      "size": 896560,
+      "sha256": "eefd05bdec7f4acc5f9d6127ce499ca6b536470ad1edcb4966c8f7e05e6a3409",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libvpx.12.dylib",
+      "size": 1737744,
+      "sha256": "f8880e0bb2cb2902ded2097785db8b363c5be3760c0198e695bb9b85c81f2615",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libvulkan.1.4.363.dylib",
+      "size": 679104,
+      "sha256": "a9d596b4ec466ca503dec176ff54892fb7dba3fd822a95c73f32399b03409f29",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libx264.165.dylib",
+      "size": 1256288,
+      "sha256": "f4e20cefce8fae6ceb5c36288e57e319462bbce2d101f8e1dd4af0750a4a02da",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libx265.217.dylib",
+      "size": 7593568,
+      "sha256": "eaccf2fa6d6df5a813e517b1ce99a1f923022d110118c12a1a63159520c2fc81",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/licenses/dependencies/brotli-1.2.1/INSTALL_RECEIPT.json",
+      "size": 853,
+      "sha256": "2a868292ffbc680062accd7ea813de11fd43024f0a51f7528c31fd9cb75dd470",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/brotli-1.2.1/LICENSE",
+      "size": 1084,
+      "sha256": "3d180008e36922a4e8daec11c34c7af264fed5962d07924aea928c38e8663c94",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/dav1d-1.5.4/COPYING",
+      "size": 1317,
+      "sha256": "dd92c3c2247c5651606fc23a5e2d6a1ebc5ace9a3e49cbde0e12f05ad1cb1ee5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/dav1d-1.5.4/INSTALL_RECEIPT.json",
+      "size": 784,
+      "sha256": "b006ec3f45bacc49fff787207f5046cce71d223bd931d3100176b64841a6470a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/ffmpeg-9.0.2_1/COPYING.GPLv2",
+      "size": 18092,
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/ffmpeg-9.0.2_1/COPYING.GPLv3",
+      "size": 34568,
+      "sha256": "ba97231b2704845687d1f52107ef95ac139f8ee70b9429d39af9905ed98c4004",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/ffmpeg-9.0.2_1/COPYING.LGPLv2.1",
+      "size": 25370,
+      "sha256": "d2cdd2d8feab938fb7c079b88ea11a64fe96fd23a6667a5f27f7ccb8978e2bd4",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/ffmpeg-9.0.2_1/COPYING.LGPLv3",
+      "size": 7651,
+      "sha256": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/ffmpeg-9.0.2_1/INSTALL_RECEIPT.json",
+      "size": 4444,
+      "sha256": "15d3d13b9058749fbc5ff9a71d8b1b0b3a83388e3742b240b27b721923725b4f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/ffmpeg-9.0.2_1/LICENSE.md",
+      "size": 4346,
+      "sha256": "2e1d16c72fd74e12063776371da757322f8b77589386532f4fd8634bde7de1af",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/freetype-2.15.0/INSTALL_RECEIPT.json",
+      "size": 1224,
+      "sha256": "0f40fc5ce2549903840b7b410a5463e43d6fcc564579524f1ec9b2a851ff34af",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/freetype-2.15.0/LICENSE.TXT",
+      "size": 2149,
+      "sha256": "bd36c8b474855fa294c2ec5c184544478ef3720aad37d65a6296a4f264fd2d3b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/fribidi-1.0.17/COPYING",
+      "size": 1249,
+      "sha256": "ff407ebf4472f8e14b5661ec1307612deaba96d1aad4ed5ded1377dd8619cb3a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/fribidi-1.0.17/INSTALL_RECEIPT.json",
+      "size": 792,
+      "sha256": "352889e0ad354423075c49035af8405c0228d7b4769f4e3ce14de40031715567",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/gettext-1.0/COPYING",
+      "size": 931,
+      "sha256": "4a572e7e656e1684e142eca20df0543f670e47c80c8ebd29c064c578c793460c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/gettext-1.0/INSTALL_RECEIPT.json",
+      "size": 2097,
+      "sha256": "3a3222fdae783a7f2df27b0e3e544a57f8c2a07e2ea7e4f704516f6ffe7c05d0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/glib-2.90.1/INSTALL_RECEIPT.json",
+      "size": 2457,
+      "sha256": "5c5a2295eba4c8b348ebd42861745916329b6717a0653914c1c8d4550a433cbd",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/glib-2.90.1/LGPL-2.1-or-later.txt",
+      "size": 3281,
+      "sha256": "298efc8a9bfe86dbb9a38b9405a785a4ad52f3d41f6a2c15d9b8feffe0be59a8",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/graphite2-1.3.15/COPYING",
+      "size": 1235,
+      "sha256": "2c272829ff23f182c8bf7ea12fedea69b0ae148663123ed5240c117cb129c9c1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/graphite2-1.3.15/INSTALL_RECEIPT.json",
+      "size": 781,
+      "sha256": "e0fc4afabcbcfeab2a733b7938b7a150185dd12ed33fc940975e63208dbd4c8f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/graphite2-1.3.15/LICENSE",
+      "size": 5289,
+      "sha256": "7d0d5954be40b60ed57717dfd8ac1ceb3b415dc4d6beb3ce5c3ea32c2c7aa5fe",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/harfbuzz-15.0.0_1/COPYING",
+      "size": 1971,
+      "sha256": "ba8f810f2455c2f08e2d56bb49b72f37fcf68f1f4fade38977cfd7372050ad64",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/harfbuzz-15.0.0_1/INSTALL_RECEIPT.json",
+      "size": 5524,
+      "sha256": "f168b7c6a5207c5b23aa238906d8e5f9b41ac4f2b0c16710bbc674aa00085fc7",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/jpeg-turbo-3.2.0/INSTALL_RECEIPT.json",
+      "size": 834,
+      "sha256": "40cd91f21dc51bb8f90b11cc9e3b418ef5663682735cea0f7b46c6ed71734636",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/jpeg-turbo-3.2.0/LICENSE.md",
+      "size": 6077,
+      "sha256": "ba6bceebcba0fdd35488477c2cca8c4632ce82c74dbfbc87d886ce6fc4433579",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/lame-4.0/COPYING",
+      "size": 7822,
+      "sha256": "e1d677f2f8f0896da1d15ba58de313e8e2eb791761625b0b8b4a1083c71000ac",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/lame-4.0/INSTALL_RECEIPT.json",
+      "size": 996,
+      "sha256": "0906b74fb6a6edc66ba6c851bc5bad7d098c375d8c2206f8706bf08ebd4f0c39",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/lame-4.0/LICENSE",
+      "size": 503,
+      "sha256": "5c1f8d44f1eacbea3e1c31ff6ee11a4e1690ccbed4ee4af16de3b6eb61dc69a8",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/libass-0.17.5_1/COPYING",
+      "size": 755,
+      "sha256": "f7e30699d02798351e7f839e3d3bfeb29ce65e44efa7735c225464c4fd7dfe9c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/libass-0.17.5_1/INSTALL_RECEIPT.json",
+      "size": 5751,
+      "sha256": "fa677082ab9337709643a6d40840786fb18f80042c530014e9b9adf335798083",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/libplacebo-7.387.0/INSTALL_RECEIPT.json",
+      "size": 3309,
+      "sha256": "fa329761951036debdea0813ccb7fc6315b0506805aba5ceaacd4b7bb692daad",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/libplacebo-7.387.0/LICENSE",
+      "size": 793,
+      "sha256": "f9e2ec2ab9839b43baaa8d5826878ecc7fb023c7274b81fb73cc634a62cfda67",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/libpng-1.6.59/INSTALL_RECEIPT.json",
+      "size": 791,
+      "sha256": "fa1bbf042412776424c39042a83b54250f1db37777af3fcfc8e622d2ae990f0a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/libpng-1.6.59/LICENSE",
+      "size": 5345,
+      "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/libunibreak-8.0/INSTALL_RECEIPT.json",
+      "size": 772,
+      "sha256": "3b8bbbd43dcb0df060ece82909d378e407a4a549ba425e01730f5871ea72c076",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/libunibreak-8.0/LICENCE",
+      "size": 1045,
+      "sha256": "0c57e2ec42ece17791a75d2f9b2f8e0663181be008667a507f765b3ef22522db",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/libvmaf-3.2.1/INSTALL_RECEIPT.json",
+      "size": 768,
+      "sha256": "83c5fb0702e1b40db2f92b3a668e275820af055c7622076d95f80e14b5bae120",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/libvmaf-3.2.1/LICENSE",
+      "size": 2431,
+      "sha256": "bb48a7b309e08c0fe068e74c9d2d6fdac191799b2a933fd999d5cb4c06b797ff",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/libvpx-1.17.0/INSTALL_RECEIPT.json",
+      "size": 769,
+      "sha256": "6272c627b98feee7db170d0ac223e2b68dd5b85e6e5f77fda902de88b77bebf5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/libvpx-1.17.0/LICENSE",
+      "size": 1205,
+      "sha256": "26648f9ae33a5653a82893d8d31f3c7137ed2ebe7467709f81df0340fcd8b10f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/little-cms2-2.19.1/INSTALL_RECEIPT.json",
+      "size": 2552,
+      "sha256": "59e0fae36f5455f799198ed4211be6afb2a48b01ce9b414c596682e51dd3588f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/little-cms2-2.19.1/LICENSE",
+      "size": 130,
+      "sha256": "bddc0f31ab5ee253b0183322885a6f7602d23424979df6052ae88755e99b8e68",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/luajit-2.1.1792588164/COPYRIGHT",
+      "size": 1043,
+      "sha256": "8f5562120105475fac523cfce63a23f51e876f1562bac7bc5b1c03b17bc25932",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/luajit-2.1.1792588164/INSTALL_RECEIPT.json",
+      "size": 806,
+      "sha256": "8e565e51c6e2bab8630c09931f8e30e2347c81c2659dbc5f07cd989712010e23",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/mpg123-1.33.7/COPYING",
+      "size": 2123,
+      "sha256": "5ce768b0d31abf6ded5dc7cf4f16ac80fec5bbf506700dbc90355c7124e5df33",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/mpg123-1.33.7/INSTALL_RECEIPT.json",
+      "size": 1004,
+      "sha256": "5aa9fc39bf183bc4ab0506654b8ea9a7168c2206f31b6ebdfffa42e26c142f95",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/mujs-1.3.11/COPYING",
+      "size": 143,
+      "sha256": "6d091567b6b264a472f828ff2d05e0044efdef3bc27c77415e9c3d735d6e68c2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/mujs-1.3.11/INSTALL_RECEIPT.json",
+      "size": 767,
+      "sha256": "838ec14d71a49787a6223e78c739c93ed0b6bb8faa9034285713a4a2b7967831",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/openssl@4-4.1.0/INSTALL_RECEIPT.json",
+      "size": 1195,
+      "sha256": "fa1e84894d7d449db07105f272fba2b0d71d9b44ae9cfa265dee4fd62b4abd27",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/openssl@4-4.1.0/LICENSE.txt",
+      "size": 10175,
+      "sha256": "7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/opus-1.6.1/COPYING",
+      "size": 1556,
+      "sha256": "ece9fc7efbb3695d903f60042ef6d6ba0c9f9cd2d483dda4af2e65e7c0bdee26",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/opus-1.6.1/INSTALL_RECEIPT.json",
+      "size": 765,
+      "sha256": "766ad1dfb73151c26ec85fff51a0e8d3daa3487bd3aba561f2ca13c3b20edd74",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/pcre2-10.49/COPYING",
+      "size": 97,
+      "sha256": "99272c55f3dcfa07a8a7e15a5c1a33096e4727de74241d65fa049fccfdd59507",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/pcre2-10.49/INSTALL_RECEIPT.json",
+      "size": 907,
+      "sha256": "e77ef68e79689eb320e60ccbce4a733e61c758ac345a6423495f888a284cf81e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/pcre2-10.49/LICENCE.md",
+      "size": 3334,
+      "sha256": "07a1d420233dc126ab69853c354241a7ec4e7d4927224d7bfaa0f451a8708c1f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/shaderc-2026.4/INSTALL_RECEIPT.json",
+      "size": 780,
+      "sha256": "27d53df86a1b4927b507764012070e638c8f937ffb4a8e99779adf6fc08265ed",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/shaderc-2026.4/LICENSE",
+      "size": 1428,
+      "sha256": "3213ca0f46ada79bb74718daa257bac1184805fbeae029a69d862734e72ef503",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/shaderc-2026.4/license-checker.cfg",
+      "size": 872,
+      "sha256": "ff39f110e4b17c6a2e24eacc14a32674c2c1f2385828bdc23a0399d3475fffc8",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/svt-av1-4.2.0/INSTALL_RECEIPT.json",
+      "size": 777,
+      "sha256": "91a6d56d55eeda9ec9a6717a86bac71cd910e4e24aea26d576d7cb5c372b3897",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/svt-av1-4.2.0/LICENSE-BSD2.md",
+      "size": 690,
+      "sha256": "2db21109a3564213b5efa03b237f450fce472ca491ce76cd02cd972c13e490f5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/svt-av1-4.2.0/LICENSE.md",
+      "size": 846,
+      "sha256": "af94e089f2b9ecde434c655f32e9ba8eb04f64fe39f558018f22d8ee722b199e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/vulkan-loader-1.4.363.0/INSTALL_RECEIPT.json",
+      "size": 1192,
+      "sha256": "61f6251108a2b50a4a4f7b684ec8a098a11c8985def5e7f33a0e156c7604e753",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/vulkan-loader-1.4.363.0/LICENSE.txt",
+      "size": 629,
+      "sha256": "ca2c82ee6f5af9322515283afb45b70728ad500f5e1a56738156bb3b4dd5f817",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/x264-r3222/COPYING",
+      "size": 840,
+      "sha256": "099164152d82adf33ff180c3fec1141318da06552ca218cd63cce7e6d8692562",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/x264-r3222/INSTALL_RECEIPT.json",
+      "size": 831,
+      "sha256": "748702b308f0167b8e782b8850fc98c51ecdc26196e0313b42f8eaa97fbbd186",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/x265-4.3/COPYING",
+      "size": 968,
+      "sha256": "4165c8afaa85bbabc30614876d57f9682c2d7d7151e8df241728a53837075ce9",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/x265-4.3/INSTALL_RECEIPT.json",
+      "size": 763,
+      "sha256": "389bf732c998b14510461c2d4ad626608efe9c25d97578dc4150d1d23f9e43d7",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/xz-5.8.4/COPYING",
+      "size": 3119,
+      "sha256": "616a3ad264ce29b8f1cb97e53037b139d406899ca8d1f799651e17bfa09830b8",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/xz-5.8.4/COPYING.0BSD",
+      "size": 202,
+      "sha256": "182fb9cd1b0ae61169541742b97cc8bdf227f657e2a04250e682e29d5a1c4023",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/xz-5.8.4/COPYING.GPLv2",
+      "size": 578,
+      "sha256": "79015f19c95b92497121560300c21b44b01d65e0ac7975afad7e371b7d6f7eda",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/xz-5.8.4/COPYING.GPLv3",
+      "size": 929,
+      "sha256": "7231b6aacac5441dc2ec80b4b25f87ef3b9c7518841d37ebd44f0d6fa586f7c6",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dependencies/xz-5.8.4/INSTALL_RECEIPT.json",
+      "size": 833,
+      "sha256": "96a4c09fd3fdbe9912390fcd993a5789583167ed7d86ed37f16c68965ca7edf9",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/0-Copyright",
+      "size": 4096,
+      "sha256": "bfe9ee4cceabcb8ecbfadf208d04156f73d801e6a57369a5606bb8341e204a23",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/upstream/2-LICENSE.LGPL",
+      "size": 1249,
+      "sha256": "ff407ebf4472f8e14b5661ec1307612deaba96d1aad4ed5ded1377dd8619cb3a",
+      "mode": 420
+    },
+    {
+      "path": "files/mpv.app/Contents/_CodeSignature/CodeResources",
+      "size": 2443,
+      "sha256": "f9689e3443bfa288fad22d423cef0accf9d8cfc80d0c1275cea1c994edcc8e05",
+      "mode": 420
+    },
+    {
+      "path": "files/mpv.app/Contents/Frameworks/video/libmpv.2.dylib",
+      "size": 4215168,
+      "sha256": "d7b1508e3a8833658eb42ac40b9dbc3027f9d89f4482fac7e2e8128f603db415",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/mpv.app/Contents/Info.plist",
+      "size": 402,
+      "sha256": "10e9365a6d8b541a119dd2ae5d410ff14821024684e1626c08609908a15a80e3",
+      "mode": 420
+    },
+    {
+      "path": "files/mpv.app/Contents/MacOS/mpv",
+      "size": 153824,
+      "sha256": "fb2d4a14a599554f3157a2a223c76e6af1a4ef4cfdfb71962364845b210ee698",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/video-runtime.json",
+      "size": 14033,
+      "sha256": "9af85190df1e1c1fba4b1972c1d91caef91cef12c69fe852cd84d447544d6338",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 57857,
+      "mode": 420,
+      "sha256": "e670a7b41967ba8916fb3aca1beb183ec2a75d643eb8b1fbf0108cf8575a5eef"
+    }
+  ],
+  "notices": [
+    {
+      "name": "mpv Copyright",
+      "license": "GPL-2.0-or-later AND LGPL-2.1-or-later",
+      "sourceUrl": "https://github.com/mpv-player/mpv.git",
+      "path": "files/licenses/upstream/0-Copyright"
+    },
+    {
+      "name": "mpv LICENSE.GPL",
+      "license": "GPL-2.0-or-later AND LGPL-2.1-or-later",
+      "sourceUrl": "https://github.com/mpv-player/mpv.git",
+      "path": "files/licenses/dependencies/xz-5.8.4/COPYING.GPLv2"
+    },
+    {
+      "name": "mpv LICENSE.LGPL",
+      "license": "GPL-2.0-or-later AND LGPL-2.1-or-later",
+      "sourceUrl": "https://github.com/mpv-player/mpv.git",
+      "path": "files/licenses/upstream/2-LICENSE.LGPL"
+    },
+    {
+      "name": "libass 0.17.5_1",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/l/libass.rb",
+      "path": "files/licenses/dependencies/libass-0.17.5_1/COPYING"
+    },
+    {
+      "name": "ffmpeg 9.0.2_1",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/f/ffmpeg.rb",
+      "path": "files/licenses/dependencies/ffmpeg-9.0.2_1/COPYING.GPLv2"
+    },
+    {
+      "name": "ffmpeg 9.0.2_1",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/f/ffmpeg.rb",
+      "path": "files/licenses/dependencies/ffmpeg-9.0.2_1/COPYING.GPLv3"
+    },
+    {
+      "name": "ffmpeg 9.0.2_1",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/f/ffmpeg.rb",
+      "path": "files/licenses/dependencies/ffmpeg-9.0.2_1/COPYING.LGPLv2.1"
+    },
+    {
+      "name": "ffmpeg 9.0.2_1",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/f/ffmpeg.rb",
+      "path": "files/licenses/dependencies/ffmpeg-9.0.2_1/COPYING.LGPLv3"
+    },
+    {
+      "name": "ffmpeg 9.0.2_1",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/f/ffmpeg.rb",
+      "path": "files/licenses/dependencies/ffmpeg-9.0.2_1/LICENSE.md"
+    },
+    {
+      "name": "libplacebo 7.387.0",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/l/libplacebo.rb",
+      "path": "files/licenses/dependencies/libplacebo-7.387.0/LICENSE"
+    },
+    {
+      "name": "mujs 1.3.11",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/m/mujs.rb",
+      "path": "files/licenses/dependencies/mujs-1.3.11/COPYING"
+    },
+    {
+      "name": "little-cms2 2.19.1",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/l/little-cms2.rb",
+      "path": "files/licenses/dependencies/little-cms2-2.19.1/LICENSE"
+    },
+    {
+      "name": "luajit 2.1.1792588164",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/l/luajit.rb",
+      "path": "files/licenses/dependencies/luajit-2.1.1792588164/COPYRIGHT"
+    },
+    {
+      "name": "jpeg-turbo 3.2.0",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/j/jpeg-turbo.rb",
+      "path": "files/licenses/dependencies/jpeg-turbo-3.2.0/LICENSE.md"
+    },
+    {
+      "name": "freetype 2.15.0",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/f/freetype.rb",
+      "path": "files/licenses/dependencies/freetype-2.15.0/LICENSE.TXT"
+    },
+    {
+      "name": "fribidi 1.0.17",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/f/fribidi.rb",
+      "path": "files/licenses/dependencies/fribidi-1.0.17/COPYING"
+    },
+    {
+      "name": "harfbuzz 15.0.0_1",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/h/harfbuzz.rb",
+      "path": "files/licenses/dependencies/harfbuzz-15.0.0_1/COPYING"
+    },
+    {
+      "name": "libunibreak 8.0",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/l/libunibreak.rb",
+      "path": "files/licenses/dependencies/libunibreak-8.0/LICENCE"
+    },
+    {
+      "name": "libvpx 1.17.0",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/l/libvpx.rb",
+      "path": "files/licenses/dependencies/libvpx-1.17.0/LICENSE"
+    },
+    {
+      "name": "xz 5.8.4",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/x/xz.rb",
+      "path": "files/licenses/dependencies/xz-5.8.4/COPYING"
+    },
+    {
+      "name": "xz 5.8.4",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/x/xz.rb",
+      "path": "files/licenses/dependencies/xz-5.8.4/COPYING.0BSD"
+    },
+    {
+      "name": "xz 5.8.4",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/x/xz.rb",
+      "path": "files/licenses/dependencies/xz-5.8.4/COPYING.GPLv2"
+    },
+    {
+      "name": "xz 5.8.4",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/x/xz.rb",
+      "path": "files/licenses/dependencies/xz-5.8.4/COPYING.GPLv3"
+    },
+    {
+      "name": "xz 5.8.4",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/x/xz.rb",
+      "path": "files/licenses/dependencies/fribidi-1.0.17/COPYING"
+    },
+    {
+      "name": "dav1d 1.5.4",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/d/dav1d.rb",
+      "path": "files/licenses/dependencies/dav1d-1.5.4/COPYING"
+    },
+    {
+      "name": "lame 4.0",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/l/lame.rb",
+      "path": "files/licenses/dependencies/lame-4.0/COPYING"
+    },
+    {
+      "name": "lame 4.0",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/l/lame.rb",
+      "path": "files/licenses/dependencies/lame-4.0/LICENSE"
+    },
+    {
+      "name": "opus 1.6.1",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/o/opus.rb",
+      "path": "files/licenses/dependencies/opus-1.6.1/COPYING"
+    },
+    {
+      "name": "svt-av1 4.2.0",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/s/svt-av1.rb",
+      "path": "files/licenses/dependencies/svt-av1-4.2.0/LICENSE-BSD2.md"
+    },
+    {
+      "name": "svt-av1 4.2.0",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/s/svt-av1.rb",
+      "path": "files/licenses/dependencies/svt-av1-4.2.0/LICENSE.md"
+    },
+    {
+      "name": "x264 r3222",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/x/x264.rb",
+      "path": "files/licenses/dependencies/x264-r3222/COPYING"
+    },
+    {
+      "name": "x265 4.3",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/x/x265.rb",
+      "path": "files/licenses/dependencies/x265-4.3/COPYING"
+    },
+    {
+      "name": "openssl@4 4.1.0",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/o/openssl@4.rb",
+      "path": "files/licenses/dependencies/openssl@4-4.1.0/LICENSE.txt"
+    },
+    {
+      "name": "libvmaf 3.2.1",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/l/libvmaf.rb",
+      "path": "files/licenses/dependencies/libvmaf-3.2.1/LICENSE"
+    },
+    {
+      "name": "shaderc 2026.4",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/s/shaderc.rb",
+      "path": "files/licenses/dependencies/shaderc-2026.4/LICENSE"
+    },
+    {
+      "name": "shaderc 2026.4",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/s/shaderc.rb",
+      "path": "files/licenses/dependencies/shaderc-2026.4/license-checker.cfg"
+    },
+    {
+      "name": "vulkan-loader 1.4.363.0",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/v/vulkan-loader.rb",
+      "path": "files/licenses/dependencies/vulkan-loader-1.4.363.0/LICENSE.txt"
+    },
+    {
+      "name": "libpng 1.6.59",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/l/libpng.rb",
+      "path": "files/licenses/dependencies/libpng-1.6.59/LICENSE"
+    },
+    {
+      "name": "brotli 1.2.1",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/b/brotli.rb",
+      "path": "files/licenses/dependencies/brotli-1.2.1/LICENSE"
+    },
+    {
+      "name": "glib 2.90.1",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/g/glib.rb",
+      "path": "files/licenses/dependencies/glib-2.90.1/LGPL-2.1-or-later.txt"
+    },
+    {
+      "name": "graphite2 1.3.15",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/g/graphite2.rb",
+      "path": "files/licenses/dependencies/graphite2-1.3.15/COPYING"
+    },
+    {
+      "name": "graphite2 1.3.15",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/g/graphite2.rb",
+      "path": "files/licenses/dependencies/graphite2-1.3.15/LICENSE"
+    },
+    {
+      "name": "mpg123 1.33.7",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/m/mpg123.rb",
+      "path": "files/licenses/dependencies/mpg123-1.33.7/COPYING"
+    },
+    {
+      "name": "gettext 1.0",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/g/gettext.rb",
+      "path": "files/licenses/dependencies/gettext-1.0/COPYING"
+    },
+    {
+      "name": "pcre2 10.49",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/p/pcre2.rb",
+      "path": "files/licenses/dependencies/pcre2-10.49/COPYING"
+    },
+    {
+      "name": "pcre2 10.49",
+      "license": "See included upstream license",
+      "sourceUrl": "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/p/pcre2.rb",
+      "path": "files/licenses/dependencies/pcre2-10.49/LICENCE.md"
+    }
+  ],
+  "redistribution": "bundle"
+}
