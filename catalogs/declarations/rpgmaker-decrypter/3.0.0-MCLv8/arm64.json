@@ -1,0 +1,103 @@
+{
+  "id": "rpgmaker-decrypter",
+  "version": "3.0.0-MCLv8",
+  "arch": "arm64",
+  "minimumMacOS": "11.0",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "6b66821e6d77d75bb7757bc60f224436d2743103717545cc6634c40864c0a612",
+  "directoryRelative": "rpgmaker-decrypter/3.0.0-MCLv8/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "d7e50c5a688dc971b0a0229d305bc593c4f2034fced0f4c38a0d7e5a44fb01e5",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 17560,
+      "mode": 420,
+      "sha256": "2e2f83e413e7b173a26cacdcdb6bb7388ea9768cc261ce0a6bd6721f79c20078"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "81dc7c2976c26cb6d537ef7b57c1e13cb6539597597784f6cdfaf1418edf96b1"
+    },
+    {
+      "path": "files/bin/RPGMakerDecrypter-cli",
+      "size": 13914832,
+      "sha256": "7319e37e375132d0f3a1c6cd059a39b1b74d864232691698b944cb3c709c0a30",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "licenses/commandlineparser.txt",
+      "size": 1111,
+      "sha256": "87a1efc79d6ee27ee9dcc01534e2be6f26839e4a6b8e53b6d91458aae08831fa",
+      "mode": 420
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 697,
+      "sha256": "870b29c366c524ba3a3929f4eb1389c5e3ab8b9fbebb6ad6848967303e4724f4",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dotnet-2.txt",
+      "size": 94355,
+      "sha256": "fb47c97d2919d9584f25564058f973de424da8b500d51b46e406391c6e9adca6",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dotnet.txt",
+      "size": 1116,
+      "sha256": "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310",
+      "mode": 420
+    },
+    {
+      "path": "licenses/microsoft.aspnetcore.app.runtime.osx-arm64.txt",
+      "size": 55638,
+      "sha256": "52af3d603b6d069e635f8afd08ec44ec01559255b5f3afd161ae9e6fe7e7aa54",
+      "mode": 420
+    },
+    {
+      "path": "licenses/microsoft.net.illink.tasks.txt",
+      "size": 68910,
+      "sha256": "b60b2912da28eaa6518593c9e2efb5334ee062d3c42e80d8fdfa806b3dc52977",
+      "mode": 420
+    },
+    {
+      "path": "licenses/microsoft.netcore.platforms.txt",
+      "size": 1617,
+      "sha256": "0684b2349427ee28e392ae8914645832e59731dba8a38a984f72b3fb8769c76b",
+      "mode": 420
+    },
+    {
+      "path": "licenses/netstandard.library.txt",
+      "size": 1115,
+      "sha256": "fc95de1436a321aadbfafd21f8a8506a2f4678bfc003bd806d6b59d3088efadc",
+      "mode": 420
+    },
+    {
+      "path": "licenses/newtonsoft.json.txt",
+      "size": 1104,
+      "sha256": "b98a397897ff55f76cddc380041507a95a896b2946e0188703bf0496793d6516",
+      "mode": 420
+    },
+    {
+      "path": "licenses/RPGMakerDecrypter.txt",
+      "size": 1083,
+      "sha256": "e0506d6306bb0895f7a9dd3a1b701c3b7e97377be12dc0870b60698fe5fa15a5",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 7830,
+      "sha256": "d7e50c5a688dc971b0a0229d305bc593c4f2034fced0f4c38a0d7e5a44fb01e5",
+      "mode": 420
+    }
+  ]
+}
