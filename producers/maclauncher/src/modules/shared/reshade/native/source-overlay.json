@@ -1177,6 +1177,10 @@
       "path": "src/image-pair-kernels.hpp"
     },
     {
+      "source": "image-pair-motion.hpp",
+      "path": "src/image-pair-motion.hpp"
+    },
+    {
       "source": "generation-automatic.hpp",
       "path": "src/generation-automatic.hpp"
     },

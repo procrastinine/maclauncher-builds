@@ -7,6 +7,7 @@
 #include "generation-automatic.hpp"
 #include "image-admission.hpp"
 #include "image-pair-kernels.hpp"
+#include "image-pair-motion.hpp"
 #include "metal-library-cache.hpp"
 #include "temporal-provider.hpp"
 #import <CoreVideo/CoreVideo.h>
@@ -49,7 +50,7 @@ dispatch_queue_t externalQueue(){static dispatch_queue_t queue=dispatch_queue_cr
 bool srgbView(MTLPixelFormat format){return format==MTLPixelFormatBGRA8Unorm_sRGB||format==MTLPixelFormatRGBA8Unorm_sRGB;}
 bool readableColor(id<MTLTexture>image){return image&&image.textureType==MTLTextureType2D&&image.sampleCount==1&&!image.framebufferOnly&&(image.usage&MTLTextureUsageShaderRead);}
 struct Convert {uint32_t fullRange=1,flags=0;float coverage[2]={1,1},vectorScale[2]={1,1};};
-struct FlowParams {float t,gain,consistency,colorTolerance;};
+struct FlowParams {float t,gain,consistency,colorTolerance;uint32_t borrowedAvailable=0;};
 // Completion callbacks may run in a different order from their registration.
 // Read the command's terminal state directly before consulting GPU output;
 // keep a cached result after its weak command reference has disappeared.
@@ -179,6 +180,22 @@ bool copyVectors(CVPixelBufferRef buffer,id<MTLTexture>target){
  const size_t width=std::min<size_t>(CVPixelBufferGetWidth(buffer),target.width),height=std::min<size_t>(CVPixelBufferGetHeight(buffer),target.height);
  if(base&&width&&height)[target replaceRegion:MTLRegionMake2D(0,0,width,height) mipmapLevel:0 withBytes:base bytesPerRow:CVPixelBufferGetBytesPerRow(buffer)];
  CVPixelBufferUnlockBaseAddress(buffer,kCVPixelBufferLock_ReadOnly);return base&&width&&height;
+}
+bool copyFilteredBlockVectors(CVPixelBufferRef buffer,id<MTLTexture>target,unsigned activeWidth=UINT32_MAX,unsigned activeHeight=UINT32_MAX){
+ if(!buffer||!target||CVPixelBufferGetPixelFormatType(buffer)!=kCVPixelFormatType_TwoComponent16Half)return false;
+ const unsigned width=unsigned(std::min<size_t>({CVPixelBufferGetWidth(buffer),target.width,activeWidth})),height=unsigned(std::min<size_t>({CVPixelBufferGetHeight(buffer),target.height,activeHeight}));
+ if(!width||!height)return false;
+ std::vector<BlockMotion>field(size_t(width)*height);
+ if(CVPixelBufferLockBaseAddress(buffer,kCVPixelBufferLock_ReadOnly)!=kCVReturnSuccess)return false;
+ const auto *base=static_cast<const uint8_t*>(CVPixelBufferGetBaseAddress(buffer));const size_t stride=CVPixelBufferGetBytesPerRow(buffer);
+ if(base)for(unsigned y=0;y<height;++y)for(unsigned x=0;x<width;++x){__fp16 pair[2];std::memcpy(pair,base+y*stride+x*sizeof(pair),sizeof(pair));field[size_t(y)*width+x]={float(pair[0]),float(pair[1])};}
+ CVPixelBufferUnlockBaseAddress(buffer,kCVPixelBufferLock_ReadOnly);if(!base)return false;
+ filterBlockMotion(field,width,height);
+ // Replicate the valid border into estimator padding, so expansion never
+ // interpolates against unwritten texels when the framework pads differently.
+ std::vector<std::array<__fp16,2>>filtered(size_t(target.width)*target.height);
+ for(unsigned y=0;y<target.height;++y)for(unsigned x=0;x<target.width;++x){const auto v=field[size_t(std::min(y,height-1))*width+std::min(x,width-1)];auto &out=filtered[size_t(y)*target.width+x];out[0]=v.x;out[1]=v.y;}
+ [target replaceRegion:MTLRegionMake2D(0,0,target.width,target.height) mipmapLevel:0 withBytes:filtered.data() bytesPerRow:target.width*sizeof(filtered[0])];return true;
 }
 void requireSDR(const ImageColorDescription&color,const char*name){
  if(!color.valid()||color.transfer==ColorTransfer::Linear||color.transfer==ColorTransfer::PQ||color.transfer==ColorTransfer::HLG)
@@ -445,7 +462,7 @@ public:
     const auto started=std::chrono::steady_clock::now();
     if(@available(macOS 26.0,*)){
      const OSStatus status=videoToolbox().estimate((VTMotionEstimationSessionRef)current->estimator,(__bridge CVPixelBufferRef)reference,(__bridge CVPixelBufferRef)luma,kVTMotionEstimationFrameFlags_CurrentBufferWillBeNextReferenceBuffer,nullptr,
-      ^(OSStatus result,VTMotionEstimationInfoFlags,CFDictionaryRef,CVPixelBufferRef vectors){current->timing->record(std::chrono::duration<double>(std::chrono::steady_clock::now()-started).count());step->complete(result==noErr&&copyVectors(vectors,blocks));});
+      ^(OSStatus result,VTMotionEstimationInfoFlags,CFDictionaryRef,CVPixelBufferRef vectors){current->timing->record(std::chrono::duration<double>(std::chrono::steady_clock::now()-started).count());step->complete(result==noErr&&copyFilteredBlockVectors(vectors,blocks,(current->lumaW+blockSize-1)/blockSize,(current->lumaH+blockSize-1)/blockSize));});
      if(status!=noErr)step->complete(false);
     }else step->complete(false);
    });
@@ -473,11 +490,13 @@ public:
 };
 
 // Vision optical-flow generation, ported from MetalDuck's VisionFlowProvider
-// and flowInterpolate (MIT; see metalduck-MIT.txt). Forward and backward flow
+// and flowInterpolate (MIT; see licenses/metalduck-MIT.txt). Forward and backward flow
 // come from VNGenerateOpticalFlowRequest at up to 800 pixels; the warp checks
 // each vector against the opposite field, keeps the side that sees an
 // occluded pixel and blends where neither side is reliable or flow is late.
 class VisionFlowGeneration final:public GenerationEncoder {
+ struct FlowPair {id<MTLTexture>forward=nil,backward=nil;uint64_t sequence=0;std::atomic<bool>ready{false};};
+ ImagePairFlowPool<FlowPair>flowPool;
  static constexpr double maximumDimension=800;
  static constexpr float consistency=1;
  id<MTLDevice>device;std::shared_ptr<Kernels>gpu;std::mutex mutex;CVMetalTextureCacheRef cache=nullptr;CVPixelBufferPoolRef pool=nullptr;
@@ -510,37 +529,49 @@ public:
   std::unique_lock lock(mutex,std::try_to_lock);if(!lock.owns_lock())return rejected(sequence,"Vision optical flow is occupied",true);
   @autoreleasepool{
   unsigned width,height;fitSize(unsigned(source.width),unsigned(source.height),maximumDimension,maximumDimension*maximumDimension,width,height);
-  if(!pool||poolW!=width||poolH!=height){if(pool)CVPixelBufferPoolRelease(pool);pool=createPool(nil,kCVPixelFormatType_32BGRA,width,height);poolW=width;poolH=height;previousFlow=nil;if(!pool)return rejected(sequence,"Vision optical flow could not allocate its frame buffers");}
+  if(!pool||poolW!=width||poolH!=height){if(pool)CVPixelBufferPoolRelease(pool);pool=createPool(nil,kCVPixelFormatType_32BGRA,width,height);poolW=width;poolH=height;previousFlow=nil;flowPool.clear();if(!pool)return rejected(sequence,"Vision optical flow could not allocate its frame buffers");}
   if(historyW!=source.width||historyH!=source.height||historyFormat!=source.pixelFormat){
    for(auto&slot:history)if(!(slot=historyTexture(device,source,"Vision optical flow history")))return rejected(sequence,"Vision optical flow could not allocate its history");
-   historyW=unsigned(source.width);historyH=unsigned(source.height);historyFormat=source.pixelFormat;previousSlot=-1;
+   historyW=unsigned(source.width);historyH=unsigned(source.height);historyFormat=source.pixelFormat;previousSlot=-1;flowPool.clear();
   }
   std::vector<id>holders;id frame=pooledBuffer(pool);if(!frame)return rejected(sequence,"Vision optical flow frame buffers are in use",true);
   auto view=planeView(cache,(__bridge CVPixelBufferRef)frame,0,MTLPixelFormatBGRA8Unorm);if(!view.texture)return rejected(sequence,"Cannot prepare the Vision input image");holders.push_back(view.holder);
   Convert values;values.flags=srgbView(source.pixelFormat)?1:0;
   if(!gpu->encode(commands,gpu->resample,{source,view.texture},values,width,height))return rejected(sequence,"Cannot prepare the Vision input image");
+  [commands addCompletedHandler:^(id<MTLCommandBuffer>){(void)holders;(void)frame;}];
   const bool reset=previousSlot<0||!previousFlow||sequence!=previousSequence+1;const int slot=previousSlot<0?0:1-previousSlot;
   auto snapshot=history[slot],previousColor=reset?snapshot:history[previousSlot];id reference=previousFlow;
   auto copy=[commands blitCommandEncoder];if(!copy)return rejected(sequence,"Cannot retain the real interpolation frame");[copy copyFromTexture:source toTexture:snapshot];[copy endEncoding];
   previousFlow=frame;previousSequence=sequence;previousSlot=slot;
+  if(reset)flowPool.clear();
   if(reset||outputs.empty()){auto result=warming(commands,source,outputs,sequence);[commands addCompletedHandler:^(id<MTLCommandBuffer>){(void)holders;(void)frame;}];return result;}
-  auto forward=sharedTexture(device,MTLPixelFormatRG16Float,width,height,MTLTextureUsageShaderRead,"Vision forward flow"),backward=sharedTexture(device,MTLPixelFormatRG16Float,width,height,MTLTextureUsageShaderRead,"Vision backward flow");
-  if(!forward||!backward)return rejected(sequence,"Cannot allocate Vision optical flow");
+  // Borrowed flow is a read-only lease. The exact pair still runs, and may
+  // become useful to a later capture even if it misses this pair's deadline.
+  auto borrowed=flowPool.nearest(sequence);
+  auto pair=flowPool.acquire(sequence,[&]{auto value=std::make_shared<FlowPair>();
+   value->forward=sharedTexture(device,MTLPixelFormatRG16Float,width,height,MTLTextureUsageShaderRead,"Vision forward flow");
+   value->backward=sharedTexture(device,MTLPixelFormatRG16Float,width,height,MTLTextureUsageShaderRead,"Vision backward flow");
+   return value->forward&&value->backward?value:std::shared_ptr<FlowPair>{};});
+  if(!pair&&!borrowed){auto result=warming(commands,source,outputs,sequence);[commands addCompletedHandler:^(id<MTLCommandBuffer>){(void)holders;(void)reference;(void)frame;(void)previousColor;(void)snapshot;}];return result;}
+  auto forward=pair?pair->forward:borrowed->forward,backward=pair?pair->backward:borrowed->backward;
   auto step=std::make_shared<ExternalStep>(device);const NSUInteger chosen=revision;
-  // Flow that is not ready within 100 ms gives way to the blend fallback.
-  ExternalStep::schedule(step,commands,100,[reference,frame,forward,backward,chosen](std::shared_ptr<ExternalStep>step){
+  if(pair)ExternalStep::schedule(step,commands,100,[reference,frame,pair,chosen](std::shared_ptr<ExternalStep>step){
+   if(step->state.load(std::memory_order_acquire))return; // abandoned inputs never become a reusable result
    __block bool forwardReady=false,backwardReady=false;auto previous=(__bridge CVPixelBufferRef)reference,next=(__bridge CVPixelBufferRef)frame;
-   // Forward and backward requests run in parallel.
-   dispatch_apply(2,externalQueue(),^(size_t index){@autoreleasepool{@try{const bool ready=vectors(index?next:previous,index?previous:next,chosen,index?backward:forward);if(index)backwardReady=ready;else forwardReady=ready;}@catch(NSException*){}}});
-   step->complete(forwardReady&&backwardReady);
+   dispatch_apply(2,externalQueue(),^(size_t index){@autoreleasepool{@try{const bool ready=vectors(index?next:previous,index?previous:next,chosen,index?pair->backward:pair->forward);if(index)backwardReady=ready;else forwardReady=ready;}@catch(NSException*){}}});
+   pair->ready.store(forwardReady&&backwardReady,std::memory_order_release);step->complete(forwardReady&&backwardReady);
   });
+  // Retain leases before the first encoder: partial encode failure must not
+  // allow the pool to overwrite a texture already read by these commands.
+  [commands addCompletedHandler:^(id<MTLCommandBuffer>){(void)pair;(void)borrowed;}];
   for(size_t i=0;i<outputs.size();++i){
-   FlowParams params{phases.timestamps[i],gain,consistency,0};auto encoder=[commands computeCommandEncoder];if(!encoder)return rejected(sequence,"Cannot encode Vision optical-flow generation");
+   FlowParams params{phases.timestamps[i],gain,consistency,borrowedFlowColorTolerance,borrowed?1u:0u};auto encoder=[commands computeCommandEncoder];if(!encoder)return rejected(sequence,"Cannot encode Vision optical-flow generation");
    [encoder setTexture:previousColor atIndex:0];[encoder setTexture:snapshot atIndex:1];[encoder setTexture:forward atIndex:2];[encoder setTexture:backward atIndex:3];[encoder setTexture:outputs[i] atIndex:4];
+   [encoder setTexture:borrowed?borrowed->forward:forward atIndex:5];[encoder setTexture:borrowed?borrowed->backward:backward atIndex:6];
    [encoder setBytes:&params length:sizeof(params) atIndex:0];[encoder setBuffer:step->valid offset:0 atIndex:1];Kernels::dispatch(encoder,gpu->flow,unsigned(source.width),unsigned(source.height));[encoder endEncoding];
   }
   auto completed=std::make_shared<ImagePairReceipt>();completed->commands=commands;
-  [commands addCompletedHandler:^(id<MTLCommandBuffer>finished){(void)holders;(void)reference;(void)frame;(void)forward;(void)backward;(void)previousColor;(void)snapshot;completed->result.store(finished.status==MTLCommandBufferStatusCompleted?1:2);}];
+  [commands addCompletedHandler:^(id<MTLCommandBuffer>finished){(void)holders;(void)reference;(void)frame;(void)forward;(void)backward;(void)pair;(void)borrowed;(void)previousColor;(void)snapshot;completed->result.store(finished.status==MTLCommandBufferStatusCompleted?1:2);}];
   // These are encoded candidates. The completion receipt alone attests GPU-valid output.
   GenerationResult result;result.frameId=sequence;result.encoded=result.ready=true;result.generated=unsigned(outputs.size());result.historyFrames=2;
   result.completion=[completed]()->ShaderResult{const auto status=completed->status();if(status==1)return {true,{}};if(status==2)return {false,"Vision optical-flow commands failed or were abandoned"};return {false,"Vision optical flow is still in flight",true};};
