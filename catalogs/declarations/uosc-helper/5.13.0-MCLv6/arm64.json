@@ -1,0 +1,74 @@
+{
+  "id": "uosc-helper",
+  "version": "5.13.0-MCLv6",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "uosc-helper/5.13.0-MCLv6/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "65d15b03d018a05c205b8e2de3b26b3db2b27cef1c90b98ca510a14c6b3d41d5",
+  "sourceSha256": "65d15b03d018a05c205b8e2de3b26b3db2b27cef1c90b98ca510a14c6b3d41d5",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 17965,
+      "mode": 420,
+      "sha256": "a864c28c9bcb4214893ee7dc318a744785b95a13dd28d4cef054402bb83bd27e"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "3784168fd9857ceb73ae6d9aab7cd67c0444de89d9a10cc245a0dc9001f93e6b"
+    },
+    {
+      "path": "files/bin/ziggy-darwin",
+      "size": 6672496,
+      "sha256": "ad9ada4aecc7f4a4d6cf511abdedc715b2a7a02089cc9385337eff76ec2be1f3",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 168,
+      "sha256": "458498c9166cb556a9fc960ebac0f888c22060a9bd0bea274d623d31d3ebb0f1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/github.com-atotto-clipboard.txt",
+      "size": 1471,
+      "sha256": "2c4bac8e2a97180d6e7758c37de85d1cda1859aaf85b56da15d935d2d9a5564f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/github.com-pkg-browser.txt",
+      "size": 1312,
+      "sha256": "4801bb0c5d70b980b3e1f63d1d2df8d84fec22548e3d73f03a68df1fb808791f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/Go-runtime.txt",
+      "size": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/uosc-helper.txt",
+      "size": 26530,
+      "sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 2457,
+      "mode": 420,
+      "sha256": "65d15b03d018a05c205b8e2de3b26b3db2b27cef1c90b98ca510a14c6b3d41d5"
+    }
+  ],
+  "redistribution": "bundle"
+}

@@ -6,6 +6,61 @@
     {
       "schemaVersion": 2,
       "id": "uosc-helper",
+      "version": "5.13.0-MCLv6",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "65d15b03d018a05c205b8e2de3b26b3db2b27cef1c90b98ca510a14c6b3d41d5",
+      "sourceSha256": "65d15b03d018a05c205b8e2de3b26b3db2b27cef1c90b98ca510a14c6b3d41d5",
+      "updatePolicy": "manual",
+      "capabilities": {
+        "uoscVersion": "5.13.0",
+        "helper": "ziggy",
+        "commands": [
+          "get-clipboard",
+          "set-clipboard",
+          "download",
+          "http-get",
+          "http-post",
+          "http-put",
+          "http-patch",
+          "http-delete",
+          "open",
+          "search-subtitles",
+          "download-subtitles"
+        ]
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "f445a97387537e90d6f56d5e6b30d8ba395aa2aa"
+      },
+      "asset": {
+        "filename": "uosc-helper-5.13.0-MCLv6-arm64.tar.gz",
+        "sha256": "415d4d002c4ad906783013e43a75fd5f82a0393b13539c05afabd7416fda80fa",
+        "bytes": 2835905,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/uosc-helper%2Fv5.13.0-MCLv6%2Farm64/uosc-helper-5.13.0-MCLv6-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "f445a97387537e90d6f56d5e6b30d8ba395aa2aa",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41840898871",
+        "runAttempt": "1"
+      },
+      "tag": "uosc-helper/v5.13.0-MCLv6/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "uosc-helper",
       "version": "5.13.0-MCLv3",
       "arch": "x64",
       "launcherArchitectures": [
