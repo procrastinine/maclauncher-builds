@@ -136,7 +136,7 @@ export function publishModule(built,output){
         else run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);
     }
     addLicenses(output,'Wine',built.directory);
-    const files=[...binaries.map(([name])=>name),...(fs.existsSync(path.join(output,'licenses'))?fs.readdirSync(path.join(output,'licenses')).map(name=>'licenses/'+name):[])].map(file=>{
+    const files=fs.readdirSync(output,{recursive:true}).filter(name=>name!=='provider.json'&&fs.statSync(path.join(output,name)).isFile()).map(file=>{
         const binary=binaries.some(([name])=>name===file),native=file.endsWith('.so'),target=path.join(output,file);
         fs.chmodSync(target,binary?0o755:0o644);
         return {path:file,size:fs.statSync(target).size,mode:binary?0o755:0o644,sha256:digest(fs.readFileSync(target)),

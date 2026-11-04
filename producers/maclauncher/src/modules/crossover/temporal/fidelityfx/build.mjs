@@ -48,9 +48,8 @@ const clang=execFileSync('xcrun',['--find','clang++'],{encoding:'utf8'}).trim(),
 for(const architecture of ['arm64','x86_64']){const object=path.join(out,'recorded-source-'+architecture+'.o');execFileSync(clang,['-std=c++17','-O2','-arch',architecture,'-isysroot',macSDK,'-mmacosx-version-min=13.0','-fdeclspec','-Wno-ignored-attributes',
  '-ffile-prefix-map='+repository+'=MacLauncher','-ffile-prefix-map='+out+'=FidelityFXBuild','-I'+inputs,'-I'+path.resolve(here,'../../../shared/vulkan/native'),'-c',path.join(here,'recorded-source.cpp'),'-o',object],{stdio:'inherit'});objects.push(object);}
 const producer=path.join(out,'libffx-vulkan-scene-source.a');execFileSync('libtool',['-static','-o',producer,...objects],{stdio:'inherit'});
-addLicenses(out,'FidelityFX-SDK',sdk);
 // The Vulkan headers also retain their original copyright notices in inputs/.
-const owned=['source.json','Apache-2.0.txt','capture.hpp','observation.h','proxy.cpp','wine-observer.hpp','wine-observer.cpp','scalar-mapping.hpp','native-source.h','recorded-source.hpp','recorded-source.cpp','index.js','build.mjs'];
+const owned=['source.json','capture.hpp','observation.h','proxy.cpp','wine-observer.hpp','wine-observer.cpp','scalar-mapping.hpp','native-source.h','recorded-source.hpp','recorded-source.cpp','index.js','build.mjs'];
 const metadata={schema:1,version:source.version,profile:source.profile,backend,library:source.libraries[backend],sha256:hash(library),exports:actual,
  sources:source,originalInputs,sourceExports:exports,observationAPI:1,owned:Object.fromEntries(owned.map(file=>[file,hash(path.join(here,file))])),
  dependencies:{...Object.fromEntries(['vulkan/native/scene-interop.h','reshade/native/vulkan-scene.h','reshade/temporal/frame.h','reshade/temporal/scene-aovs.h','reshade/temporal/scene-matrices.h','reshade/native/image-color.h'].map(file=>[file,hash(path.resolve(here,'../../../shared',file))])),
@@ -62,18 +61,19 @@ const metadata={schema:1,version:source.version,profile:source.profile,backend,l
 fs.writeFileSync(path.join(out,'provider.json'),JSON.stringify(metadata,null,2)+'\n');
 // Runtime packages select binary and notice files only. Compiler inputs and
 // the native source archive remain producer outputs outside that selection.
-const runtimeFiles=[source.libraries[backend],source.original[backend],...(fs.existsSync(path.join(out,'licenses'))?fs.readdirSync(path.join(out,'licenses')):[]).map(file=>'licenses/'+file)];
+const runtimeFiles=[source.libraries[backend],source.original[backend]];
 const files=runtimeFiles.map(file=>{const target=path.join(out,file),binary=file.endsWith('.dll');fs.chmodSync(target,binary?0o755:0o644);return{
  path:file,size:fs.statSync(target).size,mode:binary?0o755:0o644,sha256:hash(target),...(binary?{format:'pe',architectures:['x86_64']}:{})};});
 const provider=Object.fromEntries(['schema','version','profile','backend','library','sha256','exports','sourceExports','observationAPI','referenceSha256','referenceFileVersion','originalLibrary','execution'].map(key=>[key,metadata[key]]));
 const manifest={schemaVersion:1,managerId:source.id,version:source.version,platform:'darwin',arch:'x64',minimumMacOS:source.minimumMacOS,
  executableRelative:source.libraries[backend],provider,files,dependencies:[]};
 const payload=path.join(out,'payload');fs.mkdirSync(payload,{recursive:true});
+addLicenses(payload,'FidelityFX-SDK',sdk);
 for(const file of files){const target=path.join(payload,file.path);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(out,file.path),target);fs.chmodSync(target,file.mode);}
 // The game-library adapter reads this descriptor from its installed payload.
 // Source/build correspondence stays in the separate producer descriptor.
 const providerFile=path.join(payload,'provider.json');fs.writeFileSync(providerFile,JSON.stringify(provider,null,2)+'\n');fs.chmodSync(providerFile,0o644);
-files.push({path:'provider.json',size:fs.statSync(providerFile).size,mode:0o644,sha256:hash(providerFile)});
+for(const relative of fs.readdirSync(payload,{recursive:true}).filter(name=>fs.statSync(path.join(payload,name)).isFile()))if(!files.some(file=>file.path===relative)){const file=path.join(payload,relative);files.push({path:relative,size:fs.statSync(file).size,mode:fs.statSync(file).mode&0o777,sha256:hash(file)});}
 const manifestFile=path.join(payload,'manifest.json');fs.writeFileSync(manifestFile,JSON.stringify(manifest,null,2)+'\n');fs.chmodSync(manifestFile,0o644);
 const declaration={id:source.id,version:source.version,arch:'x64',launcherArchitectures:['arm64','x64'],minimumMacOS:source.minimumMacOS,
  sourceRelative:null,sourceSha256:hash(path.join(here,'source.json')),directoryRelative:[source.id,source.version,'x64'].join('/'),
