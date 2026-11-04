@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {gitlink} from '../../../../../../../../lib/pins.mjs';
 import {addLicense} from '../../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
@@ -24,7 +25,7 @@ const vulkanSource=JSON.parse(fs.readFileSync(path.join(here,'vulkan-source.json
 let vulkanHeaders=null;
 if(args['vulkan-source']){
   const root=fs.realpathSync(args['vulkan-source']);
-  if(execFileSync('git',['-C',root,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==execFileSync('git',['-C',path.resolve(here,'../../../../../external/krkrsdl2'),'rev-parse','HEAD:external/SDL'],{encoding:'utf8'}).trim()||
+  if(execFileSync('git',['-C',root,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==execFileSync('git',['-C',path.resolve(here,'../../../../../external/krkrsdl2'),'rev-parse',gitlink('producers/maclauncher/src/external/krkrsdl2')+':external/SDL'],{encoding:'utf8'}).trim()||
       execFileSync('git',['-C',root,'remote','get-url','origin'],{encoding:'utf8'}).trim().replace(/\.git$/,'')!==vulkanSource.repository)
     throw Error('Initialize the exact declared Vulkan header source commit.');
   vulkanHeaders=path.join(root,vulkanSource.headerDirectory);

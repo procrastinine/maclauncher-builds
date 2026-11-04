@@ -1,3 +1,4 @@
+import {gitlink} from '../../../../../../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -17,7 +18,7 @@ const toolFiles = {
 };
 
 function verifySource(source, input) {
-    if (read('git', ['-C', source, 'rev-parse', 'HEAD']) !== (input.revision || read('git', ['-C', path.resolve(import.meta.dirname,'../../../../../../../sources/anyps5'), 'rev-parse', 'HEAD:3rdparty/Vulkan-Headers']))) throw Error('Vulkan source revision differs from its pin');
+    if (read('git', ['-C', source, 'rev-parse', 'HEAD']) !== (input.revision || read('git', ['-C', path.resolve(import.meta.dirname,'../../../../../../../sources/anyps5'), 'rev-parse', gitlink('sources/anyps5')+':3rdparty/Vulkan-Headers']))) throw Error('Vulkan source revision differs from its pin');
 }
 
 export function describeNativeTools({source, build}) {

@@ -1,3 +1,4 @@
+const {gitlink}=require('../../../../../lib/pins.mjs');
 // The portable libffi release includes configure; the newer Android Git input does not.
 const sharedDependencies=require('../../../../dependencies.json');
 const fs = require("node:fs");
@@ -11,7 +12,7 @@ const Movie = require("../shared/runtime/portable-ffmpeg");
 const Prefix = require("./system35-portable");
 const Overlay = require("./system4-portable-overlay");
 const { throwIfAborted } = require("../shared/runtime/download-utils");
-const PIN = Object.freeze({...require("./system4-portable.json"),dependencies:require("./system4-portable.json").dependencies.map(row=>{if(row.id==='turbojpeg'){const pin=row,revision=require('node:child_process').execFileSync('git',['-C',require('node:path').resolve(__dirname,'../../../../../sources/anyps5'),'rev-parse','HEAD:3rdparty/'+'libjpeg-turbo'],{encoding:'utf8'}).trim();return {...row,revision,sourceUrl:pin.sourceUrl,archiveUrl:pin.sourceUrl+'/archive/'+revision+'.tar.gz',archiveSha256:pin.archiveSha256,archiveBytes:pin.archiveBytes};}const pin=sharedDependencies[row.id==='libffi'?'libffiPortable':row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:row.archiveUrl||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:row;})});
+const PIN = Object.freeze({...require("./system4-portable.json"),dependencies:require("./system4-portable.json").dependencies.map(row=>{if(row.id==='turbojpeg'){const pin=row,revision=require('node:child_process').execFileSync('git',['-C',require('node:path').resolve(__dirname,'../../../../../sources/anyps5'),'rev-parse',gitlink('sources/anyps5')+':3rdparty/'+'libjpeg-turbo'],{encoding:'utf8'}).trim();return {...row,revision,sourceUrl:pin.sourceUrl,archiveUrl:pin.sourceUrl+'/archive/'+revision+'.tar.gz',archiveSha256:pin.archiveSha256,archiveBytes:pin.archiveBytes};}const pin=sharedDependencies[row.id==='libffi'?'libffiPortable':row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:row.archiveUrl||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:row;})});
 const VERSION = "snapshot-04333ad-macos-v2";
 const REVISION = "04333ad689d7e517a93d58141bb214c19ba16129";
 const LIBSYS4_REVISION = "20560d4d6d41a7196bd6b8409bcbb974f9de4af0";

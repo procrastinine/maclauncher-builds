@@ -1,9 +1,10 @@
+const {gitlink}=require('../../../../../../../lib/pins.mjs');
 const sharedDependencies=require('../../../../../../dependencies.json');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const Native = require("../../runtime/local-native");
-const PIN = Object.freeze({...require("./portable-build.json"),dependencies:require("./portable-build.json").dependencies.map(row=>{if(row.id==='turbojpeg'){const pin=require('../../../alicesoft/system4-portable.json').dependencies.find(pin=>pin.id==='turbojpeg'),revision=require('node:child_process').execFileSync('git',['-C',require('node:path').resolve(__dirname,'../../../../../../../sources/anyps5'),'rev-parse','HEAD:3rdparty/'+'libjpeg-turbo'],{encoding:'utf8'}).trim();return {...row,revision,sourceUrl:pin.sourceUrl,archiveUrl:pin.sourceUrl+'/archive/'+revision+'.tar.gz',archiveSha256:pin.archiveSha256,archiveBytes:pin.archiveBytes};}const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:row;})});
+const PIN = Object.freeze({...require("./portable-build.json"),dependencies:require("./portable-build.json").dependencies.map(row=>{if(row.id==='turbojpeg'){const pin=require('../../../alicesoft/system4-portable.json').dependencies.find(pin=>pin.id==='turbojpeg'),revision=require('node:child_process').execFileSync('git',['-C',require('node:path').resolve(__dirname,'../../../../../../../sources/anyps5'),'rev-parse',gitlink('sources/anyps5')+':3rdparty/'+'libjpeg-turbo'],{encoding:'utf8'}).trim();return {...row,revision,sourceUrl:pin.sourceUrl,archiveUrl:pin.sourceUrl+'/archive/'+revision+'.tar.gz',archiveSha256:pin.archiveSha256,archiveBytes:pin.archiveBytes};}const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:row;})});
 const VERSION = PIN.engine.version;
 const REVISION = PIN.engine.revision;
 const SOURCE_SHA256 = PIN.engine.sourceTreeSha256;

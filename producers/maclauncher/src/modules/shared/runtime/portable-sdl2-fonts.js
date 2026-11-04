@@ -1,3 +1,4 @@
+const {gitlink}=require('../../../../../../lib/pins.mjs');
 const sharedDependencies=require('../../../../../dependencies.json');
 const fs = require("node:fs");
 const path = require("node:path");
@@ -6,7 +7,7 @@ const { execFileSync } = require("node:child_process");
 const Source = require("./pinned-native-build");
 const Native = require("./local-native");
 const { throwIfAborted } = require("./download-utils");
-const sdl2Revision=execFileSync('git',['-C',path.resolve(__dirname,'../../../../../../sources/anyps5'),'rev-parse','HEAD:3rdparty/SDL2'],{encoding:'utf8'}).trim();
+const sdl2Revision=execFileSync('git',['-C',path.resolve(__dirname,'../../../../../../sources/anyps5'),'rev-parse',gitlink('sources/anyps5')+':3rdparty/SDL2'],{encoding:'utf8'}).trim();
 const PIN = Object.freeze({...require("./portable-sdl2-fonts.json"),dependencies:require("./portable-sdl2-fonts.json").dependencies.map(row=>{if(row.id==='sdl2')return {...row,revision:sdl2Revision,sourceUrl:'https://github.com/libsdl-org/SDL',archiveUrl:'https://github.com/libsdl-org/SDL/archive/'+sdl2Revision+'.tar.gz'};const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:row;})});
 
 function validateArchives(archives, { catalog = PIN } = {}) {
