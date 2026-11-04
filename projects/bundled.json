@@ -1158,7 +1158,8 @@
       "entries": [
         "tools/build-android-aconfig.mjs",
         "producers/android-inputs/aconfig/source.json",
-        "producers/android-inputs/aconfig/Cargo.lock"
+        "producers/android-inputs/aconfig/Cargo.lock",
+        "producers/android-inputs/aconfig/licenses"
       ]
     },
     "upstreams": [
