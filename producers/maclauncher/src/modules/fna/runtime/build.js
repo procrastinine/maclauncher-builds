@@ -1,5 +1,5 @@
 const { gitlink } = require("../../../../../../lib/pins.mjs");
-const {addLicenses} = require('../../../../../../lib/licenses.mjs');
+const {addLicense,addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -194,6 +194,24 @@ async function prepareRuntime({ unpacked, pin, logger, signal, sourcePath, fna3d
     addLicenses(unpacked, "FNA3D", fna3dRoot);
     addLicenses(unpacked, "FAudio", faudioRoot);
     addLicenses(unpacked, "SDL3", sdlRoot);
+    addLicense(unpacked, ".NET runtime", path.join(unpacked, "LICENSE.txt"));
+    addLicense(unpacked, ".NET runtime third-party notices", path.join(unpacked, "ThirdPartyNotices.txt"));
+    addLicenses(unpacked, "FAudio C#", path.join(framework, "lib/FAudio/csharp"));
+    addLicenses(unpacked, "MojoShader", path.join(fna3dRoot, "MojoShader"));
+    addLicenses(unpacked, "SDL2-CS", path.join(framework, "lib/SDL2-CS"));
+    addLicenses(unpacked, "SDL3-CS", path.join(framework, "lib/SDL3-CS"));
+    addLicenses(unpacked, "Theorafile C#", path.join(framework, "lib/Theorafile/csharp"));
+    addLicenses(unpacked, "dav1dfile", path.join(framework, "lib/dav1dfile"));
+    addLicenses(unpacked, "FNA stock effects", path.join(framework, "src/Graphics/Effect/StockEffects"));
+    addLicenses(unpacked, "SDL3 HIDAPI", path.join(sdlRoot, "src/hidapi"));
+    addLicense(unpacked, "SDL3 HIDAPI authors", path.join(sdlRoot, "src/hidapi/AUTHORS.txt"));
+    addLicenses(unpacked, "SDL3 yuv2rgb", path.join(sdlRoot, "src/video/yuv2rgb"));
+    addLicense(unpacked, "SDL3 libm e_log", path.join(sdlRoot, "src/libm/e_log.c"));
+    addLicense(unpacked, "SDL3 libm", path.join(sdlRoot, "src/libm/math_libm.h"));
+    addLicense(unpacked, "FNA3D stb_image", path.join(__dirname, "licenses/LICENSE-FNA3D-stb-image.txt"));
+    addLicense(unpacked, "FNA3D stb_image_write", path.join(__dirname, "licenses/LICENSE-FNA3D-stb-image-write.txt"));
+    addLicense(unpacked, "FAudio stb", path.join(__dirname, "licenses/LICENSE-FAudio-stb.txt"));
+    addLicense(unpacked, "FAudio stb_vorbis", path.join(__dirname, "licenses/LICENSE-FAudio-stb-vorbis.txt"));
     fs.writeFileSync(path.join(unpacked, "fna-runtime.json"), JSON.stringify({ profile: PROFILE, frameworkVersion: "26.10.0.0",
       dotnetVersion: DOTNET_VERSION, upstreamRevision: FNA_REVISION, architecture: "arm64", sourceTreeSha256,
       hostSourceSha256: Native.hashFile(stagedHost),
