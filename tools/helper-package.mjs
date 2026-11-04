@@ -7,7 +7,7 @@ const Tools=require('../producers/maclauncher/scripts/native-binary-tools.cjs');
 export const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 
 /** Finish a helper built in payload/, recording its actual files and native CPUs. */
-export function helperPackage({id,version,arch,output,minimumMacOS,sourceSha256,record,notices,manifestRelative='helper.json',rosettaFiles=[]}){
+export function helperPackage({id,version,arch,output,minimumMacOS,sourceSha256,record,manifestRelative='helper.json',rosettaFiles=[]}){
  const payload=path.join(output,'payload'),cpus=arch==='universal'?['arm64','x86_64']:[arch==='x64'?'x86_64':arch];
  const inventory=B.fileInventory(payload).map(relative=>{
   const file=path.join(payload,relative),stat=fs.statSync(file),architectures=Tools.macho(file);

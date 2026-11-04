@@ -1,12 +1,12 @@
-import {addLicense} from '../lib/licenses.mjs';
+import {addLicenses,addCargoLicenses} from '../lib/licenses.mjs';
 import {downloadFile} from './download.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
-import {checkoutSource,sourceNotices,run,recipeMain} from './build-source.mjs';
+import {checkoutSource,run,recipeMain} from "./build-source.mjs";
 import {buildInput} from './build-input.mjs';
-import {rustEnvironment,rustNotices} from './rust-build.mjs';
+import {rustEnvironment} from "./rust-build.mjs";
 import {helperPackage,sha} from './helper-package.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 const producer=path.join(root,'producers/android-image-data');
@@ -52,7 +52,7 @@ export function imageDataContentIdentity(transport,{targetSymlinkMode=0o755}={})
   if(row.kind!=='hardlink'||!linked)throw Error('Invalid image hardlink.');return regular(linked,seen);
  }
  function visit(name){
-  const row=byName.get(name);let value;
+  const row=byName.get(name);;
   if(row.kind==='directory')value=[name,'directory',row.mode&0o777];
   else if(row.kind==='symlink')value=[name,'link',targetSymlinkMode,Buffer.from(row.link).toString('utf8')];
   else{const source=regular(row);if(!Number.isSafeInteger(source.size)||source.size<0||!(/^[a-f0-9]{64}$/).test(source.sha256||''))throw Error('Invalid image data identity.');value=[name,'file',row.mode&0o777,source.size,source.sha256];bytes+=source.size;}
@@ -109,11 +109,10 @@ export async function packageImageData({project,version,arch,output,work,tool,in
  for(const object of shard.objects)fs.copyFileSync(path.join(input,'data',object.data),path.join(payload,'data',object.data),fs.constants.COPYFILE_FICLONE);
  fs.copyFileSync(path.join(input,'image-data.json'),path.join(payload,'image-data.json'));
  fs.writeFileSync(path.join(payload,'content.json'),JSON.stringify(content)+'\n');
- const notices=sourceNotices(tool.upstream,{name:'AIM image parser',repository:profile.repository});
- const rust=rustNotices({source:tool.crate,output:path.join(work,'rust-notices'),env:tool.env});
- const records=[];for(const notice of [...notices,...rust])addLicense(payload,notice.name,notice.file,notice.license);
- const license=path.join(work,'android-sdk-arm-dbt-license.txt');try{await downloadFile(profile.license.url,license);addLicense(payload,'Android SDK system image',license,'Android SDK ARM DBT license');}catch(error){console.warn('::warning::Could not collect Android SDK notice: '+error.message);}
- const result=helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{format:'android-image-data-v1',upstreamRevision:profile.revision,originalArchiveSha256:profile.archive.sha256,targetSymlinkMode:profile.targetSymlinkMode,content,transportSha256:sha(path.join(payload,'image-data.json')),dataShard:shard},notices:records});
+
+ const records=[];;
+ addLicenses(payload,project,tool.upstream);addCargoLicenses(payload,project,tool.crate,tool.env);
+ const result=helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{format:'android-image-data-v1',upstreamRevision:profile.revision,originalArchiveSha256:profile.archive.sha256,targetSymlinkMode:profile.targetSymlinkMode,content,transportSha256:sha(path.join(payload,'image-data.json')),dataShard:shard}});
  // Sealing computes actual data-object digests. Match those to the decoder's
  // records, so the target identity authenticates the delivered bytes as well.
  const inventory=new Map(JSON.parse(fs.readFileSync(path.join(output,'declaration.json'))).files.map(file=>[file.path,file]));
@@ -128,7 +127,7 @@ export async function buildAndroidImageData(options){
  const input=path.join(work,'decoded');
  run(tool.executable,['export',archive,path.join(work,'root'),input],{env:tool.env});
  const result=await packageImageData({...options,tool,input});
- for(const relative of ['archive-cache','target','cargo','rust-notices','decoded'])fs.rmSync(path.join(work,relative),{recursive:true,force:true});
+
  return result;
 }
 recipeMain(import.meta,buildAndroidImageData);

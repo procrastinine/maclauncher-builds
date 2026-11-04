@@ -49,8 +49,8 @@ export async function prepareAndroidCommonPublisherInputs({work}){
  if(!fs.statSync(path.join(sdl,'SDL3')).isFile()||!fs.statSync(path.join(sdl,'Headers/SDL.h')).isFile())throw Error('The shared SDL3 package has no complete framework API.');
  const mvkArchive=await buildInput(profile.vulkanHeaders,archiveCache),mvkOutput=path.join(work,'vulkan');fs.mkdirSync(mvkOutput);
  const mvkNames=archiveNames(mvkArchive),include=unique(mvkNames.filter(name=>name.endsWith(profile.vulkanHeaders.includeSuffix)),'Vulkan header directory');
- const notices=mvkNames.filter(name=>/\/(?:LICEN[CS]E|NOTICE)(?:[._-][^/]*)?$/.test(name));
- read('/usr/bin/tar',['-xf',mvkArchive,'-C',mvkOutput,include,...notices]);
+
+ read('/usr/bin/tar',['-xf',mvkArchive,'-C',mvkOutput,include]);
  const vulkanHeaders=path.join(mvkOutput,include);
  if(!fs.statSync(path.join(vulkanHeaders,'vulkan/vulkan.h')).isFile())throw Error('The publisher SDK has no Vulkan headers.');
  retireArchive(mvkArchive);

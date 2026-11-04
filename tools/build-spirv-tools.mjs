@@ -25,9 +25,9 @@ export async function buildSpirvTools({work,ninja,python,architecture='arm64',jo
  for(const name of ['libSPIRV-Tools.dylib','libSPIRV-Tools-opt.dylib','libSPIRV-Tools-link.dylib'])fs.copyFileSync(path.join(build,'source',name==='libSPIRV-Tools.dylib'?'':name==='libSPIRV-Tools-opt.dylib'?'opt':'link',name),path.join(lib,name));
  fs.cpSync(path.join(sources['spirv-tools'],'include'),path.join(prefix,'include'),{recursive:true});
  fs.copyFileSync(path.join(build,'SPIRV-Tools.pc'),path.join(pc,'SPIRV-Tools.pc'));
- const notices=spirvToolsProfile.sources.map(row=>({file:path.join(sources[row.id],'LICENSE'),name:row.id,license:row.license,sourceUrl:row.repository}));
+
  const provenance={...spirvToolsProfile,architecture,librarySha256:hash(path.join(lib,'libSPIRV-Tools.dylib'))};
  fs.writeFileSync(path.join(work,'source-build.json'),JSON.stringify(provenance,null,2)+'\n');
- return {prefix,pkgConfigPath:pc,library:path.join(lib,'libSPIRV-Tools.dylib'),notices,provenance};
+ return {prefix,pkgConfigPath:pc,library:path.join(lib,'libSPIRV-Tools.dylib'),provenance};
 }
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){const options={};for(let i=2;i<process.argv.length;i+=2){const key=process.argv[i].slice(2);if(!['work','ninja','python'].includes(key)||!process.argv[i+1])throw Error('Use --work, --ninja and --python.');options[key]=path.resolve(process.argv[i+1]);}buildSpirvTools(options).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error);process.exitCode=1;});}

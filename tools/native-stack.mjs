@@ -1,11 +1,11 @@
+import {addLicenses,includeLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {buildInput} from './build-input.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
-import {collectSdlNotices} from './sdl-notices.mjs';
-import {addLicense} from '../lib/licenses.mjs';
+
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/maclauncher/src/modules/shared/runtime');
 const Source=require(path.join(base,'pinned-native-build.js')),Tools=require('../producers/maclauncher/scripts/native-binary-tools.cjs');
 const system=value=>value.startsWith('/usr/lib/')||value.startsWith('/System/Library/');
@@ -30,8 +30,7 @@ export function nativeStackInput(input,{arch,work,fonts,audio,sdk=process.env.SD
  function expand(value){if(typeof value==='string')return value.replaceAll(PREFIX,prefix).replaceAll(SDK,sdk);if(Array.isArray(value))return value.map(expand);if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).map(([key,value])=>[key,expand(value)]));return value;}
  function visit(directory){for(const entry of fs.readdirSync(directory,{withFileTypes:true})){const file=path.join(directory,entry.name);if(entry.isDirectory())visit(file);else if(metadataFile(file))fs.writeFileSync(file,expand(fs.readFileSync(file,'utf8')));}}
  visit(prefix);
- const stack={...expand(metadata.stack),prefix,sdk,tools:tools||{cmake:Source.findBuildTool('cmake'),ninja:Source.findBuildTool('ninja')},sourceRoots:{},preparedInput:input,
-  notices:[]};
+ const stack={...expand(metadata.stack),prefix,sdk,tools:tools||{cmake:Source.findBuildTool('cmake'),ninja:Source.findBuildTool('ninja')},sourceRoots:{},preparedInput:input};
  if(metadata.kind==='mixer'){if(!fonts||!audio)throw Error('The shared mixer requires its prepared font and audio stacks.');Object.assign(stack,{fonts,audio,readRoots:[fonts.prefix,audio.prefix]});}
  return stack;
 }
@@ -61,19 +60,16 @@ export function stageNativeStack({built,kind,arch,output,work}){
   fs.chmodSync(target,0o755);command('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);command('/usr/bin/codesign',['--verify','--strict',target]);
   for(const copy of copies)if(copy.target!==target){fs.copyFileSync(target,copy.target);fs.chmodSync(copy.target,0o755);}
  }
- const notices=[];
- for(const pin of built.sources||[]){const source=built.sourceRoots?.[pin.id]||pin.sourceRoot;if(!source)continue;
-  if(pin.id==='sdl2'){const collected=collectSdlNotices({source,output:path.join(work,'sdl-notices'),name:pin.name+' '+pin.version,sourceUrl:pin.sourceUrl||pin.archiveUrl,includeLibm:true});for(const notice of collected.notices)addLicense(payload,notice.name,notice.file,notice.license);}
-  else for(const name of pin.notices||[])addLicense(payload,pin.name,path.join(source,name),pin.license);
- }
- if(built.source?.notices)for(const name of built.source.notices)addLicense(payload,kind,path.join(built.sourceRoot,name),built.source.license);
- const {fonts,audio,preparedInput,notices:oldNotices,readRoots,...metadata}=built;
+
+ for(const source of Object.values(built.sourceRoots||{}))addLicenses(payload,kind,source);
+ addLicenses(payload,kind,built.sourceRoot);includeLicenses(payload,built.prefix);
+ const {fonts,audio,preparedInput,readRoots,...metadata}=built;
  const stack=Tools.publicProvenance(metadata,[{from:built.prefix,to:PREFIX},{from:built.sdk,to:SDK},{from:work,to:'NATIVE_STACK_BUILD'}]);
  for(const key of ['prefix','sdk','tools','sourceRoots','sourceRoot','outputRoot'])delete stack[key];
  // Source identities remain complete; compiler work locations are not inputs.
  for(const source of stack.sources||[])for(const key of ['sourceRoot','outputRoot'])delete source[key];
  fs.writeFileSync(path.join(payload,'portable-stack.json'),JSON.stringify({schemaVersion:1,kind,architecture:arch,stack},null,2)+'\n');
- return {payload,notices};
+ return {payload};
 }
 
 export async function buildNativeStack({project,version,arch,output,work,kind,dependencyStacks,archives:providedArchives}){
@@ -81,5 +77,5 @@ export async function buildNativeStack({project,version,arch,output,work,kind,de
  const built=kind==='movie'?await Builder.buildDependencies({...options,archive:await buildInput(Builder.PIN.source,path.join(work,'archives'))}):kind==='mixer'?await Builder.buildMixer({...options,dependencyStacks}):await Builder.buildDependencies(options);
  const staged=stageNativeStack({built,kind,arch,output,work});
  const primary={fonts:'sdl2',audio:'sndfile',mixer:'sdl2_mixer'}[kind],upstreamVersion=kind==='movie'?Builder.PIN.source.version:Builder.PIN.dependencies.find(pin=>pin.id===primary).version;
- return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(path.join(base,modules[kind]+'.json')),manifestRelative:'input.json',record:{sourceProfile:Builder.PIN.version,upstreamVersion,recipeSha256:built.recipeSha256},notices:staged.notices});
+ return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(path.join(base,modules[kind]+'.json')),manifestRelative:'input.json',record:{sourceProfile:Builder.PIN.version,upstreamVersion,recipeSha256:built.recipeSha256}});
 }

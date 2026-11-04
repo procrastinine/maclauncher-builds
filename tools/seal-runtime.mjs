@@ -8,7 +8,7 @@ import {createRequire} from 'node:module';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {managerDeclaration} from './manager-declaration.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
-import {addLicense} from '../lib/licenses.mjs';
+import {addLicenses,addCargoLicenses} from '../lib/licenses.mjs';
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),Native=require('../producers/maclauncher/src/modules/shared/runtime/local-native.js');
 const Source=require('../producers/maclauncher/src/modules/shared/runtime/pinned-native-build.js');
 const Tools=require('../producers/maclauncher/scripts/native-binary-tools.cjs');
@@ -21,7 +21,7 @@ function preparedNativeFiles(){
 }
 const run=(command,args)=>execFileSync(command,args,{encoding:'utf8',timeout:120000,maxBuffer:Infinity});
 
-export async function sealRuntime({project:id,version:selectedVersion,arch,executable,sourceRoot,sourceScope,upstreamRevision,output,executableRelative,appRoot,payloads=[],notices=[],extraLibraries=[],runtimeFiles={},environmentRelative={},jsonMetadata={},capabilities,maximumMacOS='13.0',provenance={},directory=path.resolve(import.meta.dirname,'..')}) {
+export async function sealRuntime({project:id,version:selectedVersion,arch,executable,sourceRoot,sourceScope,upstreamRevision,output,executableRelative,appRoot,payloads=[],extraLibraries=[],runtimeFiles={},environmentRelative={},jsonMetadata={},capabilities,maximumMacOS='13.0',provenance={},directory=path.resolve(import.meta.dirname,'..')}) {
  const project=resolveProject(id,directory),build=buildRecord(project,selectedVersion),version=build.version,cpu=arch==='x64'?'x86_64':arch,preparedFiles=preparedNativeFiles(),shared=new Set();
  if(!version||!['arm64','x64'].includes(arch)||!build.architectures.includes(arch)||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(executable||'')||!path.isAbsolute(sourceRoot||'')||!project.upstreams.some(pin=>pin.revision===upstreamRevision))
   throw Error('Sealing needs a registered build, target CPU, pinned public source and a new absolute output directory.');
@@ -33,7 +33,7 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
  try {
   copy(appRoot||executable,appRoot?path.basename(appRoot):executableRelative);
   for(const entry of payloads)copy(entry.source,entry.relative);
-  for(const notice of notices)addLicense(files,notice.name,notice.file,notice.license);
+  addLicenses(files,id,sourceRoot);addCargoLicenses(files,id,sourceRoot);
   const roots=[{source:appRoot||executable,relative:appRoot?path.basename(appRoot):executableRelative},...payloads];
   for(const relative of B.fileInventory(files)){
    const target=path.join(files,relative);if(!Tools.macho(target))continue;
@@ -50,12 +50,12 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
    targets.set(source,target);sources.set(target,source);originals.set(source,Native.hashFile(source));return target;
   };
   for(const file of extraLibraries)addLibrary(file);
-  const queue=[...sources.keys()],seen=new Set(),noticeRoots=new Set(),aliases=new Map(),inherited=Tools.loadCommands(executable,cpu).rpaths;
+  const queue=[...sources.keys()],seen=new Set(),aliases=new Map(),inherited=Tools.loadCommands(executable,cpu).rpaths;
   for(let i=0;i<queue.length;i++){
    const target=queue[i];if(seen.has(target))continue;seen.add(target);const source=sources.get(target);
    const immutable=preparedFiles.has(fs.statSync(source).size+'/'+Native.hashFile(source));if(immutable)shared.add(target);
    if(!immutable)Tools.thinStagedMachO(target,files,cpu,run);
-   Tools.addDependencyNotices(source,files,noticeRoots);
+
    const commands=Tools.loadCommands(source,cpu),ids=Tools.libraryIds(source,cpu);
    for(const link of Tools.links(source,cpu)){
     if(system(link)||ids.includes(link))continue;

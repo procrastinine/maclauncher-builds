@@ -1,3 +1,4 @@
+import {addLicenses,includeLicenses} from '../lib/licenses.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -5,7 +6,6 @@ import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {checkoutSource,run,recipeMain} from './build-source.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
-import {addLicense} from '../lib/licenses.mjs';
 
 const root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/android-inputs/blueprint');
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),{validateDeclaration}=require('../lib/declaration.cjs');
@@ -27,12 +27,7 @@ export async function buildBlueprintInput({output,work,arch='arm64'}){
  const rows=read('git',['-C',upstream,'ls-tree','-r','--format=%(objectname) %(path)','HEAD','--','parser']).split('\n').filter(Boolean).map(line=>{const split=line.indexOf(' ');return {path:line.slice(split+1),gitObject:line.slice(0,split)};}).filter(file=>file.path.endsWith('.go'));
  const identity={project:'platform/build/blueprint',repository:profile.upstream.repository,revision:profile.upstream.revision,files:rows.map(file=>({...file,sha256:sha(path.join(upstream,file.path))})),driverSha256:profile.driverSha256};
  const sources=path.join(output,'parser-sources.json');fs.writeFileSync(sources,JSON.stringify(identity,null,2)+'\n');
- const collect=(file,relative,name,license)=>addLicense(output,name||relative,file,license||name||relative);
- collect(path.join(upstream,'LICENSE'),'licenses/blueprint-LICENSE','Android Blueprint parser','Apache-2.0',profile.upstream.repository);
- const goRoot=read('go',['env','GOROOT']),goPrefix=read('brew',['--prefix','go']);
- const license=[path.join(goRoot,'LICENSE'),path.join(goPrefix,'LICENSE')].find(file=>fs.existsSync(file));
- collect(license,'licenses/go-LICENSE','Go runtime','BSD-3-Clause','https://go.googlesource.com/go');
- collect(path.join(goRoot,'PATENTS'),'licenses/go-PATENTS','Go runtime patent grant','Go patent grant','https://go.googlesource.com/go');
+ addLicenses(output,'Blueprint',upstream);
  return {parser,sources,source:upstream,parserSha256:sha(parser),profile,toolchain:read('go',['version'])};
 }
 
@@ -56,9 +51,10 @@ export function packageBlueprintInput({project='android-blueprint-parser',versio
  for(const relative of ['bin/android-blueprint-parser','parser-sources.json']){
   const target=path.join(payload,relative);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(inputRoot,relative),target);
  }
- try{fs.cpSync(path.join(inputRoot,'licenses'),path.join(payload,'licenses'),{recursive:true});}catch{}
+ 
  run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',path.join(payload,'bin/android-blueprint-parser')]);
- return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(path.join(base,'source.json')),manifestRelative:'input.json',record:{upstreamRevision:profile.upstream.revision,toolchain},notices:[]});
+ includeLicenses(payload,inputRoot);
+ return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(path.join(base,'source.json')),manifestRelative:'input.json',record:{upstreamRevision:profile.upstream.revision,toolchain}});
 }
 
 /** Produce a normal Runtime package for downstream Android build jobs. */

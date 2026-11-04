@@ -1,3 +1,4 @@
+import {includeLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
@@ -14,16 +15,17 @@ export async function buildAndroidCodecsInput({output,work,arch='arm64'}){
  if(!['arm64','x64'].includes(arch)||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('Android codec input builds need a CPU and new absolute output/work directories.');
  const profile=JSON.parse(fs.readFileSync(descriptor));
  if(Audio.PIN.version!==profile.sourceProfile)throw Error('The shared codec source catalog differs from this input profile.');
- const built=nativeStackInput(preparedBuildInput('native-sndfile'),{arch,work}),libraries=path.join(built.prefix,'lib'),codecs=path.join(output,'codecs'),codecLicenses=path.join(output,'licenses');
- fs.mkdirSync(codecs,{recursive:true});fs.mkdirSync(codecLicenses);
+ const built=nativeStackInput(preparedBuildInput('native-sndfile'),{arch,work}),libraries=path.join(built.prefix,'lib'),codecs=path.join(output,'codecs');
+ fs.mkdirSync(codecs,{recursive:true});
  // Retain every original loader name without stripping or signing its bytes
  // again. Common packaging converts these copies into dependency aliases.
  for(const name of fs.readdirSync(libraries).filter(name=>name.endsWith('.dylib')))fs.copyFileSync(path.join(libraries,name),path.join(codecs,name));
- const notices=[];try{fs.cpSync(path.join(built.prefix,'licenses'),codecLicenses,{recursive:true});}catch{}
+
+ includeLicenses(output,built.prefix);
  const include=path.join(output,'include');fs.cpSync(path.join(built.prefix,'include'),include,{recursive:true,dereference:true});
  const sourceIdentity={profile:Audio.PIN.version,architecture:arch,recipeSha256:built.recipeSha256,audioFormats:built.audioFormats,dependencies:Audio.PIN.dependencies};
  fs.writeFileSync(path.join(output,'sources.json'),JSON.stringify(sourceIdentity,null,2)+'\n');
- return {codecs,codecLicenses,include,sourceArchives:{},sources:built.sourceRoots,profile,notices,audioFormats:built.audioFormats,recipeSha256:built.recipeSha256};
+ return {codecs,include,sourceArchives:{},sources:built.sourceRoots,profile,audioFormats:built.audioFormats,recipeSha256:built.recipeSha256};
 }
 
 /** Seal the same codec input closure for the shared Runtime build path. */
@@ -31,6 +33,6 @@ export async function buildAndroidCodecs({project,version,arch,output,work}){
  const profile=JSON.parse(fs.readFileSync(descriptor));version??=profile.version;
  if(project!==profile.id||version!==profile.version||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select the declared Android codec version and a new absolute output directory.');
  const input=await buildAndroidCodecsInput({output:path.join(output,'payload'),work,arch});
- return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{sourceProfile:profile.sourceProfile,audioFormats:input.audioFormats,recipeSha256:input.recipeSha256},notices:input.notices});
+ return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{sourceProfile:profile.sourceProfile,audioFormats:input.audioFormats,recipeSha256:input.recipeSha256}});
 }
 recipeMain(import.meta,buildAndroidCodecs);

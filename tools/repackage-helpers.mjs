@@ -12,7 +12,7 @@ export function repackageHelper({input,declaration,output,version=declaration?.v
  if(!helpers.has(declaration.id)||!path.isAbsolute(input||'')||!path.isAbsolute(output||'')||!version||/[\\/]/.test(version))throw Error('Select a helper declaration, version and absolute input/output directories.');
  if(output===input||output.startsWith(input+path.sep)||fs.existsSync(output))throw Error('Choose a new helper output directory outside its input.');
  B.verifyPayload(input,declaration);
- const retained=declaration.files.filter(file=>file.architectures||file.path===declaration.manifestRelative||/^licenses\//.test(file.path)||/^NOTICE(?:\.|$)/i.test(file.path));
+ const retained=declaration.files.filter(file=>file.architectures||file.path===declaration.manifestRelative||!/\.(?:mm|m|c|cc|cpp|h|hpp|js|mjs|cjs)$/i.test(file.path));
  fs.mkdirSync(output,{recursive:true});
  try{
   for(const file of retained){const dest=path.join(output,file.path);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(input,file.path),dest,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.chmodSync(dest,file.mode);}
@@ -20,11 +20,11 @@ export function repackageHelper({input,declaration,output,version=declaration?.v
   manifest.version=version;
   if(Object.hasOwn(manifest,'sourceRelative'))manifest.sourceRelative=null;
   if(Array.isArray(manifest.files))manifest.files=manifest.files.filter(file=>retained.some(item=>item.path===file.path));
-  delete manifest.sources;delete manifest.notices;
+  delete manifest.sources;
   fs.writeFileSync(metadata,JSON.stringify(manifest,null,2)+'\n');fs.chmodSync(metadata,0o644);
   const files=retained.map(file=>{const {bytes,...content}=B.readRegular(path.join(output,file.path),Infinity);return {...file,...content};});
   const result={...declaration,version,directoryRelative:[declaration.id,version,declaration.arch].join('/'),sourceRelative:null,manifestSha256:B.digest(fs.readFileSync(metadata)),files};
-  delete result.sourceArtifact;delete result.notices;
+  delete result.sourceArtifact;
   validateDeclaration(result);B.verifyPayload(output,result);
   return result;
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}

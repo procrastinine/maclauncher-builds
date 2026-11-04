@@ -99,12 +99,11 @@ export async function buildAndroidArtSupplier({common,elf,ffiInput,artJava,outpu
  const manifest=await buildArt({output,host:{aim,klepton:common.sources.klepton,sdl:common.sdl,jni:common.tools.jdk,ninja:common.tools.ninja,python:common.tools.python,env},
   runner:{aim,unicorn,jobs:2,env},guest:{...guest,libraryDirectories},sensors:rustGuest,composer:rustGuest,graphics:rustGuest,
   nativeBridge:{ndk,ffi,imports,ninja:common.tools.ninja,python:common.tools.python,bionicSource:common.sources['bionic-source'],artSource:common.sources['art-source'],image:image.root,arm32},java,
-  inputs:{image:image.root,art:elf.art,linuxTranslate:file(path.join(elf.build.target,'release/linux-translate'),'original source-built image translator'),halRoot,halManifests,
-   vendorManifest:file(path.join(aim,'image/vendor/etc/vintf/manifest.xml'),'original derived vendor manifest'),hwuiLibrary:hwui.path,hwuiLicenses:hwui.licenses},
+  inputs:{image:image.root,art:elf.art,linuxTranslate:file(path.join(elf.build.target,'release/linux-translate'),'original source-built image translator'),halRoot,halManifests,vendorManifest:file(path.join(aim,'image/vendor/etc/vintf/manifest.xml'),'original derived vendor manifest'),hwuiLibrary:hwui.path},
   bootClasspath:profile.bootClasspath,includeImage:false,originalImage:profile.originalImage});
  const sourceArchiveInputs={sources:{source:elf.build.checkout,klepton:common.sources.klepton,glesHeaders,aosp:path.join(elf.build.fetched,'aosp'),xsdc:path.join(elf.build.fetched,'xsdc')},unicorn,
   sourceCheckouts:{'aosp-native':common.sources['native-source'],'aosp-bionic':common.sources['bionic-source'],'aosp-art':common.sources['art-source'],libffi,dynarmic:common.sources['dynarmic-source']},
-  nativeBridgeSources:{ndkHeaders:arm32Inputs.ndkHeaders,arm32Licenses:arm32.licenses},hwuiSources:{sources:hwui.sources,registry:path.join(hwui.sourceRecords,'SOURCES.json'),registryCache:path.join(hwui.tools.cargoHome,'registry/cache')}};
+  nativeBridgeSources:{ndkHeaders:arm32Inputs.ndkHeaders},hwuiSources:{sources:hwui.sources,registry:path.join(hwui.sourceRecords,'SOURCES.json'),registryCache:path.join(hwui.tools.cargoHome,'registry/cache')}};
  return {root:path.join(output,'runtime'),manifest,originalImage:profile.originalImage,sourceArchiveInputs,build:{producer,aim,hwui,guest,libffi,unicorn,java,halRoot,halManifests},record:{androidSource:profile.androidSource,aimRevision:sourceProfile.sources.aim.commit,unicornRevision:unicornProfile.revision,libffiRevision:sourceProfile.sources.libffi.commit}};
  }finally{if(!wasMounted&&fs.existsSync(path.join(mount,'root.identity')))run('hdiutil',['detach',mount]);}
 }

@@ -55,7 +55,7 @@ export async function buildAndroidCommonInput({version,output,work,angle,codecs,
  const {acquireNdkHeaders}=await import(new URL('../sources/maclauncher-android/src/modules/android/native/arm32/acquire-headers.mjs',import.meta.url));
  const ndk=acquireNdkHeaders(path.join(work,'ndk-headers'));
  const options={...sources,converter,jdk:publisher.jdk,sdl:publisher.sdl,'vulkan-headers':publisher.vulkanHeaders,'sndfile-headers':codecs.include,
-  codecs:codecs.codecs,'codec-licenses':codecs.codecLicenses,angle:angle.angle,'angle-manifest':path.join(angle.angle,'angle-manifest.json'),framework:publisher.framework,
+  codecs:codecs.codecs,angle:angle.angle,'angle-manifest':path.join(angle.angle,'angle-manifest.json'),framework:publisher.framework,
   output:build,'build-work':buildWork,'ndk-headers':ndk.include||path.join(work,'ndk-headers/include'),aidl:publisher.aidl,aconfig,'rust-toolchain':tools.rustToolchain,python,ninja:tools.ninja,
   'blueprint-parser':blueprint.parser,'blueprint-parser-sources':blueprint.sources};
  if(javaInput)options['java-inputs']=java;
