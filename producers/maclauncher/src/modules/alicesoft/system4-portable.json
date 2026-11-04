@@ -74,9 +74,6 @@
     },
     {
       "id": "webp",
-      "name": "libwebp",
-      "version": "1.6.0",
-      "buildSystem": "cmake",
       "options": [
         "-DWEBP_BUILD_ANIM_UTILS=OFF",
         "-DWEBP_BUILD_CWEBP=OFF",
@@ -88,8 +85,7 @@
         "-DWEBP_BUILD_WEBPMUX=OFF",
         "-DWEBP_BUILD_EXTRAS=OFF",
         "-DWEBP_BUILD_FUZZTEST=OFF"
-      ],
-      "repository": "https://github.com/webmproject/libwebp"
+      ]
     }
   ]
 }

@@ -41,51 +41,6 @@
         "-DWEBP_BUILD_FUZZTEST=OFF"
       ],
       "repository": "https://github.com/webmproject/libwebp"
-    },
-    {
-      "id": "opusfile",
-      "name": "opusfile",
-      "version": "0.12",
-      "sourceRelease": "opusfile-0.12",
-      "buildSystem": "autotools",
-      "options": [
-        "--enable-shared",
-        "--disable-static",
-        "--disable-http",
-        "--disable-examples",
-        "--disable-doc",
-        "--disable-dependency-tracking"
-      ]
-    },
-    {
-      "id": "sdl2_mixer",
-      "name": "SDL2_mixer",
-      "version": "2.8.2",
-      "buildSystem": "cmake",
-      "options": [
-        "-DSDL2MIXER_INSTALL=ON",
-        "-DSDL2MIXER_VENDORED=OFF",
-        "-DSDL2MIXER_DEPS_SHARED=OFF",
-        "-DSDL2MIXER_SAMPLES=OFF",
-        "-DSDL2MIXER_CMD=OFF",
-        "-DSDL2MIXER_FLAC=ON",
-        "-DSDL2MIXER_FLAC_LIBFLAC=ON",
-        "-DSDL2MIXER_FLAC_DRFLAC=OFF",
-        "-DSDL2MIXER_GME=OFF",
-        "-DSDL2MIXER_MOD=OFF",
-        "-DSDL2MIXER_MP3=ON",
-        "-DSDL2MIXER_MP3_MINIMP3=OFF",
-        "-DSDL2MIXER_MP3_MPG123=ON",
-        "-DSDL2MIXER_MIDI=ON",
-        "-DSDL2MIXER_MIDI_FLUIDSYNTH=OFF",
-        "-DSDL2MIXER_MIDI_NATIVE=ON",
-        "-DSDL2MIXER_MIDI_TIMIDITY=OFF",
-        "-DSDL2MIXER_OPUS=ON",
-        "-DSDL2MIXER_VORBIS=VORBISFILE",
-        "-DSDL2MIXER_WAVE=ON",
-        "-DSDL2MIXER_WAVPACK=OFF"
-      ],
-      "repository": "https://github.com/libsdl-org/SDL_mixer"
     }
   ]
 }

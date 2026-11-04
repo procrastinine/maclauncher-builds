@@ -17,7 +17,9 @@
         "--disable-examples",
         "--disable-doc",
         "--disable-dependency-tracking"
-      ]
+      ],
+      "repository": "https://github.com/xiph/opusfile",
+      "revision": "a55c164e9891a9326188b7d4d216ec9a88373739"
     },
     {
       "id": "sdl2_mixer",
@@ -46,7 +48,8 @@
         "-DSDL2MIXER_VORBIS=VORBISFILE",
         "-DSDL2MIXER_WAVE=ON",
         "-DSDL2MIXER_WAVPACK=OFF"
-      ]
+      ],
+      "repository": "https://github.com/libsdl-org/SDL_mixer"
     }
   ]
 }

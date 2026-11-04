@@ -1,5 +1,4 @@
-const {addLicenses} = require('../../../lib/licenses.mjs');
-// Shared native binary inspection, copying and dependency notices.
+// Shared native binary inspection and copying.
 const fs = require("node:fs"), path = require("node:path"), crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const { isDeepStrictEqual } = require("node:util");
@@ -138,10 +137,4 @@ function publicProvenance(provenance, pathMappings = []) {
   return assertPublicMetadata(project(provenance));
 }
 
-function addDependencyNotices(source, payload, seen) {
-  const formula = formulaRoot(source);
-  if (!formula || seen.has(formula.root)) return;
-  seen.add(formula.root);
-  addLicenses(payload,`${formula.name} ${formula.version}`,formula.root);
-}
-module.exports = { macho, loadCommands, parseLinkedLibraries, links, libraryIds, thinStagedMachO, resolveLink, copyTree, formulaRoot, assertPublicMetadata, publicProvenance, addDependencyNotices };
+module.exports = { macho, loadCommands, parseLinkedLibraries, links, libraryIds, thinStagedMachO, resolveLink, copyTree, formulaRoot, assertPublicMetadata, publicProvenance };

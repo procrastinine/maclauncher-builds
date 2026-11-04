@@ -6,13 +6,14 @@ const crypto = require("node:crypto");
 const Native = require("../../runtime/local-native");
 const metadata = require("./portable-build.json");
 const revision = gitlink("producers/maclauncher/src/external/onscripter-yuri");
-const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map(row=>{if(row.id==='turbojpeg'){const pin=require('../../../alicesoft/system4-portable.json').dependencies.find(pin=>pin.id==='turbojpeg'),revision=require('node:child_process').execFileSync('git',['-C',require('node:path').resolve(__dirname,'../../../../../../../sources/anyps5'),'rev-parse',gitlink('sources/anyps5')+':3rdparty/'+'libjpeg-turbo'],{encoding:'utf8'}).trim();return {...row,revision,sourceUrl:pin.sourceUrl,archiveUrl:pin.sourceUrl+'/archive/'+revision+'.tar.gz',archiveSha256:pin.archiveSha256,archiveBytes:pin.archiveBytes};}const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:row;}), engine: { ...metadata.engine, revision,
+const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map(row=>{if(row.id==='turbojpeg'){const pin=require('../../../alicesoft/system4-portable.json').dependencies.find(pin=>pin.id==='turbojpeg'),revision=require('node:child_process').execFileSync('git',['-C',require('node:path').resolve(__dirname,'../../../../../../../sources/anyps5'),'rev-parse',gitlink('sources/anyps5')+':3rdparty/'+'libjpeg-turbo'],{encoding:'utf8'}).trim();return {...row,revision,sourceUrl:pin.repository||pin.sourceUrl,archiveUrl:(pin.repository||pin.sourceUrl)+'/archive/'+revision+'.tar.gz',archiveSha256:pin.archiveSha256,archiveBytes:pin.archiveBytes};}const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};}), engine: { ...metadata.engine, revision,
   sourceUrl: `https://github.com/YuriSizuku/OnscripterYuri/tree/${revision}`,
   archiveUrl: `https://codeload.github.com/YuriSizuku/OnscripterYuri/tar.gz/${revision}` } });
 const VERSION = PIN.engine.version;
 const REVISION = PIN.engine.revision;
 const SOURCE_SHA256 = PIN.engine.sourceTreeSha256;
 const OWNED_FILES = [__filename, require.resolve("./portable-build.json"),
+  require.resolve("../../../alicesoft/system35-portable.json"), require.resolve("../../../alicesoft/system4-portable.json"),
   path.join(__dirname, "portable-native/CMakeLists.txt"), path.join(__dirname, "portable-native/lua.CMakeLists.txt"),
   require.resolve("../../runtime/pinned-native-build"), require.resolve("../../runtime/portable-sdl2-fonts"), require.resolve("../../runtime/portable-sdl2-fonts.json"),
   require.resolve("../../runtime/portable-sndfile"), require.resolve("../../runtime/portable-sndfile.json"),

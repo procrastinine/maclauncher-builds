@@ -149,9 +149,6 @@
     },
     {
       "id": "webp",
-      "name": "libwebp",
-      "version": "1.6.0",
-      "buildSystem": "cmake",
       "options": [
         "-DWEBP_BUILD_ANIM_UTILS=OFF",
         "-DWEBP_BUILD_CWEBP=OFF",
