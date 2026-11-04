@@ -68,7 +68,7 @@ These renderer changes are general and independent of the Darwin host adapters:
 
 ## Package
 
-The [package producer](../producers/anyps5/package-runtime.mjs) combines the two builds into a runtime archive. It records the actual CPU slices, marks the x86-64 libraries for Intel execution, adds the required license notices, makes library dependencies relative and signs the resulting Mach-O files.
+The [package producer](../producers/anyps5/package-runtime.mjs) combines the two builds into a runtime archive. It records the actual CPU slices, marks the x86-64 libraries for Intel execution, includes available licence texts, makes library dependencies relative and signs the resulting Mach-O files.
 
 ```sh
 node producers/anyps5/package-runtime.mjs \

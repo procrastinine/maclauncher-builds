@@ -31,6 +31,6 @@ export async function buildArtInput({project,arch,version,output,work}){
  }
  run('cargo',['build','--offline','--locked','--release','--manifest-path',path.join(crate,'Cargo.toml'),'--jobs','2'],{env});
 
- return sealRuntime({project,version,arch,output,sourceRoot:checkout,upstreamRevision:descriptor.revision,executable:path.join(env.CARGO_TARGET_DIR,'release/android-image-extract'),maximumMacOS:descriptor.minimumMacOS,provenance:{sourceTreeSha256:staged.treeSha256,gitDependencies:staged.dependencies,component:'android-image-extract',rustLockSha256:(await import('node:crypto')).createHash('sha256').update(fs.readFileSync(path.join(crate,'Cargo.lock'))).digest('hex')}});
+ return sealRuntime({env,project,version,arch,output,sourceRoot:checkout,upstreamRevision:descriptor.revision,executable:path.join(env.CARGO_TARGET_DIR,'release/android-image-extract'),maximumMacOS:descriptor.minimumMacOS,provenance:{sourceTreeSha256:staged.treeSha256,gitDependencies:staged.dependencies,component:'android-image-extract',rustLockSha256:(await import('node:crypto')).createHash('sha256').update(fs.readFileSync(path.join(crate,'Cargo.lock'))).digest('hex')}});
 }
 recipeMain(import.meta,buildArtInput);

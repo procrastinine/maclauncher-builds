@@ -1,3 +1,4 @@
+import {addLicenses} from '../lib/licenses.mjs';
 import {prepareSources} from '../producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies-build.mjs';
 // Build the original SPIR-V compiler library at the driver's macOS floor.
 import fs from 'node:fs';
@@ -28,6 +29,7 @@ export async function buildSpirvTools({work,ninja,python,architecture='arm64',jo
  fs.cpSync(path.join(sources['spirv-tools'],'include'),path.join(prefix,'include'),{recursive:true});
  fs.copyFileSync(path.join(build,'SPIRV-Tools.pc'),path.join(pc,'SPIRV-Tools.pc'));
 
+ addLicenses(prefix,'SPIRV-Tools',sources['spirv-tools']);addLicenses(prefix,'SPIRV-Headers',sources['spirv-headers']);
  const provenance={...spirvToolsProfile,sourceRevisions:{tools:compiler.inputs.find(row=>row.id==='spirv-tools').commit,headers:headersRevision},architecture,librarySha256:hash(path.join(lib,'libSPIRV-Tools.dylib'))};
  fs.writeFileSync(path.join(work,'source-build.json'),JSON.stringify(provenance,null,2)+'\n');
  return {prefix,pkgConfigPath:pc,library:path.join(lib,'libSPIRV-Tools.dylib'),provenance};

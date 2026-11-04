@@ -1,3 +1,4 @@
+import {addLicenses} from '../lib/licenses.mjs';
 import {gitlink} from '../lib/pins.mjs';
 // Build the original Zstandard runtime at the declared macOS floor.
 import fs from 'node:fs';
@@ -19,6 +20,7 @@ export async function buildZstd({work,architecture='arm64',jobs=2,ninja='ninja'}
  const env={...process.env,MACOSX_DEPLOYMENT_TARGET:floor,CFLAGS:'',CXXFLAGS:'',CPPFLAGS:'',LDFLAGS:'',CPATH:'',C_INCLUDE_PATH:'',CPLUS_INCLUDE_PATH:''};
  run('cmake',['-S',path.join(source,'build/cmake'),'-B',build,'-G','Ninja','-DCMAKE_MAKE_PROGRAM='+ninja,'-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_ARCHITECTURES='+ (architecture==='x64'?'x86_64':architecture),'-DCMAKE_OSX_DEPLOYMENT_TARGET='+floor,'-DCMAKE_OSX_SYSROOT='+sdk,'-DCMAKE_C_FLAGS='+flags.join(' '),'-DCMAKE_INSTALL_PREFIX='+prefix,'-DCMAKE_INSTALL_LIBDIR=lib','-DCMAKE_INSTALL_INCLUDEDIR=include','-DCMAKE_INSTALL_NAME_DIR='+path.join(prefix,'lib'),'-DZSTD_BUILD_SHARED=ON','-DZSTD_BUILD_STATIC=OFF','-DZSTD_BUILD_PROGRAMS=OFF','-DZSTD_BUILD_TESTS=OFF'],{env});
  run('cmake',['--build',build,'--target','install','--parallel',String(jobs)],{env});
+ addLicenses(prefix,'Zstandard',source);
  const library=path.join(prefix,'lib/libzstd.'+zstdProfile.version+'.dylib');
  const provenance={...zstdProfile,commit:revision,architecture,librarySha256:hash(library)};fs.writeFileSync(path.join(work,'source-build.json'),JSON.stringify(provenance,null,2)+'\n');
  return {prefix,pkgConfigPath:path.join(prefix,'lib/pkgconfig'),library,provenance};
