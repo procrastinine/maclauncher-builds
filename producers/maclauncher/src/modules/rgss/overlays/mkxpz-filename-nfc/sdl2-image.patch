@@ -1,0 +1,94 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -190,7 +190,6 @@
+     set(sdl2_target_name SDL2::SDL2-static)
+ endif()
+ 
+-sdl_find_sdl2(${sdl2_target_name} ${SDL_REQUIRED_VERSION})
+ 
+ # Set PROJECT_VERSION of subprojects to "" if it's project call does not set VERSION
+ cmake_policy(SET CMP0048 NEW)
+@@ -239,7 +238,6 @@
+     SDL_BUILD_MINOR_VERSION=${MINOR_VERSION}
+     SDL_BUILD_MICRO_VERSION=${MICRO_VERSION}
+ )
+-target_link_libraries(SDL2_image PRIVATE $<BUILD_INTERFACE:${sdl2_target_name}>)
+ if(WIN32 AND SDL2IMAGE_BUILD_SHARED_LIBS)
+     target_sources(SDL2_image PRIVATE
+         src/version.rc
+@@ -998,7 +996,6 @@
+         if(TARGET SDL2::SDL2main)
+             target_link_libraries(${prog} PRIVATE SDL2::SDL2main)
+         endif()
+-        target_link_libraries(${prog} PRIVATE ${sdl2_target_name})
+ 
+         if(SDL2IMAGE_SAMPLES_INSTALL)
+             install(TARGETS ${prog}
+--- a/external/libjxl/CMakeLists.txt
++++ b/external/libjxl/CMakeLists.txt
+@@ -464,7 +464,6 @@
+ 
+ # Example usage code.
+ if (JPEGXL_ENABLE_EXAMPLES)
+-include(examples/examples.cmake)
+ endif ()
+ 
+ # Plugins for third-party software
+@@ -473,4 +472,3 @@
+ endif ()
+ 
+ # Binary tools
+-add_subdirectory(tools)
+--- a/external/zlib/CMakeLists.txt
++++ b/external/zlib/CMakeLists.txt
+@@ -122,33 +122,13 @@
+     zutil.c
+ )
+ 
+-if(NOT MINGW)
+-    set(ZLIB_DLL_SRCS
+-        win32/zlib1.rc # If present will override custom build rule below.
+-    )
+-endif()
+ 
+ # parse the full version number from zlib.h and include in ZLIB_FULL_VERSION
+ file(READ ${CMAKE_CURRENT_SOURCE_DIR}/zlib.h _zlib_h_contents)
+ string(REGEX REPLACE ".*#define[ \t]+ZLIB_VERSION[ \t]+\"([-0-9A-Za-z.]+)\".*"
+     "\\1" ZLIB_FULL_VERSION ${_zlib_h_contents})
+ 
+-if(MINGW)
+-    # This gets us DLL resource information when compiling on MinGW.
+-    if(NOT CMAKE_RC_COMPILER)
+-        set(CMAKE_RC_COMPILER windres.exe)
+-    endif()
+ 
+-    add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/zlib1rc.obj
+-                       COMMAND ${CMAKE_RC_COMPILER}
+-                            -D GCC_WINDRES
+-                            -I ${CMAKE_CURRENT_SOURCE_DIR}
+-                            -I ${CMAKE_CURRENT_BINARY_DIR}
+-                            -o ${CMAKE_CURRENT_BINARY_DIR}/zlib1rc.obj
+-                            -i ${CMAKE_CURRENT_SOURCE_DIR}/win32/zlib1.rc)
+-    set(ZLIB_DLL_SRCS ${CMAKE_CURRENT_BINARY_DIR}/zlib1rc.obj)
+-endif(MINGW)
+-
+ add_library(zlib SHARED ${ZLIB_SRCS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+ target_include_directories(zlib PUBLIC
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+# Disables building libjxl's encoder library because it fails to build on macOS.
+
+--- a/external/libjxl/lib/jxl.cmake
++++ b/external/libjxl/lib/jxl.cmake
+@@ -370,7 +370,7 @@ target_link_libraries(jxl_dec-obj PUBLIC jxl_profiler)
+ endif()
+ 
+ # Object library. This is used to hold the set of objects and properties.
+-add_library(jxl_enc-obj OBJECT ${JPEGXL_INTERNAL_SOURCES_ENC})
++add_library(jxl_enc-obj OBJECT jxl/enc_dummy.cc)
+ target_compile_options(jxl_enc-obj PRIVATE ${JPEGXL_INTERNAL_FLAGS})
+ target_compile_options(jxl_enc-obj PUBLIC ${JPEGXL_COVERAGE_FLAGS})
+ set_property(TARGET jxl_enc-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
+--- /dev/null
++++ b/external/libjxl/lib/jxl/enc_dummy.cc
+@@ -0,0 +1 @@
++ 

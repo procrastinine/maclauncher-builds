@@ -21,7 +21,10 @@ export async function buildMKXPZ({project,version,arch,output,work}){
  const source=producer.prepareSource(archive,buildWork),wrap=path.join(source,inputs.sdlImage.wrap),original=fs.readFileSync(wrap,'utf8');
  const expected='revision = '+inputs.sdlImage.upstreamWrapRevision;
  if(!original.includes(expected)||!original.includes('url = '+sdlImagePin.repository+'\n'))throw Error('The declared SDL_image source wrap changed.');
- fs.writeFileSync(wrap,original.replace(expected,'revision = '+sdlImagePin.revision));
+ fs.writeFileSync(wrap,original.replace(expected,'revision = '+sdlImagePin.revision).replace(/diff_files =[^]*$/,'diff_files = maclauncher-sdl2-image.patch\n'));
+ fs.copyFileSync(new URL('../producers/maclauncher/src/modules/rgss/overlays/mkxpz-filename-nfc/sdl2-image.patch',import.meta.url),path.join(source,'subprojects/packagefiles/maclauncher-sdl2-image.patch'));
+ const imageBuild=path.join(source,'src/meson.build');
+ fs.writeFileSync(imageBuild,fs.readFileSync(imageBuild,'utf8').replaceAll(".dependency('brotlicommon-static')",".dependency('brotlicommon')").replaceAll(".dependency('brotlidec-static')",".dependency('brotlidec')"));
  run(process.execPath,[path.join(root,'producers/maclauncher/scripts/build-mkxpz-nfc.cjs'),'--version',version,'--archive',archive,'--work',buildWork,'--meson',path.join(environment,'bin/meson'),'--ninja',path.join(environment,'bin/ninja'),'--output',staged]);
  const result=JSON.parse(fs.readFileSync(path.join(buildWork,'STAGED.json'))),sdlImage=path.join(source,'subprojects/sdl2_image');
  const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{maxBuffer:Infinity,encoding:'utf8',env:{...process.env,GIT_NO_LAZY_FETCH:'1'}}).trim();

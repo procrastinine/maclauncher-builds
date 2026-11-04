@@ -9,7 +9,7 @@ const B = require('../src/modules/shared/runtime/bundled-native');
 const Overlay = require('../src/modules/rgss/overlays/mkxpz-filename-nfc/source.json');
 const {loadCommands, links} = require('./native-binary-tools.cjs');
 const Content = require('./runtime-content.cjs');
-const SOURCE_SHA256 = '364394e8cb3089b1f5adb12a4ab524770e743bf3973ec53e8f411ba5e11886d6';
+const SOURCE_SHA256 = require('../../../runtimes/mkxpz/baseline.json').upstream.sourceSha256;
 function packageVersion(value) {
   if (typeof value !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._+-]{0,159}$/.test(value))
     throw new Error('Choose an explicit MKXP-Z package version.');
