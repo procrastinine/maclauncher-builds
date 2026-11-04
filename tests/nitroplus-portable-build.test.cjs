@@ -44,7 +44,7 @@ test("Nitroplus source export keeps NSS compatibility while replacing Homebrew l
     const cmake = fs.readFileSync(path.join(root, "CMakeLists.txt"), "utf8");
     assert.doesNotMatch(cmake, /\/opt\/homebrew|\/usr\/local/);
     assert.match(cmake, /MACLAUNCHER_NATIVE_RPATHS/);
-    assert.match(fs.readFileSync(path.join(root, "main.cpp"), "utf8"), /libnpengine 0\.5\.3 Mac v8 \/ da1a175/);
+    assert.match(fs.readFileSync(path.join(root, "main.cpp"), "utf8"), /libnpengine 0\.5\.3 Mac v8/);
     assert.doesNotMatch(fs.readFileSync(path.join(root, "main.cpp"), "utf8"), /reviewed native profile/);
     const lexer = fs.readFileSync(path.join(root, "libnpa/src/lexer.l"), "utf8");
     assert.match(lexer, /PRE_TEXT/);

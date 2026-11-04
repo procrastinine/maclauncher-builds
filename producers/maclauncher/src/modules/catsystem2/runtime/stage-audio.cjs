@@ -58,7 +58,7 @@ function stage({ resourcesRoot, sourceArchives } = {}) {
       return { path: name, size: file.size, sha256: file.sha256, mode: file.mode, ...(name === "ogg-decode" ? { architectures: ["arm64", "x86_64"] } : {}) };
     });
     const metadata = Buffer.from(JSON.stringify({ schemaVersion: 1, id: "catsystem2-ogg-decode", version: VERSION, protocolVersion: 1, minimumMacOS: MINIMUM_MACOS,
-      sourceKind: "owned-source-with-codecs", sourceSha256: source.sha256, binarySha256: files.find(file => file.path === "ogg-decode").sha256,
+      sourceKind: "owned-source-with-bsd-codecs", sourceSha256: source.sha256, binarySha256: files.find(file => file.path === "ogg-decode").sha256,
       dependencySources: SOURCES, architectures: ["arm64", "x86_64"], files,
       build: { compiler, sdk, signing: "ad-hoc", minimumMacOS: MINIMUM_MACOS, recipe: "src/modules/catsystem2/runtime/stage-audio.cjs", recipeSha256: files.find(file => file.path === "stage-audio.cjs").sha256,
         oggConfigTypesSha256: B.digest(Buffer.from(generatedTypes)), oggFiles: ["src/bitwise.c", "src/framing.c"], vorbisFiles: VORBIS_FILES.map(name => `lib/${name}.c`) } }, null, 2) + "\n");
