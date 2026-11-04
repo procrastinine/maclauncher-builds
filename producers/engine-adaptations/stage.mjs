@@ -1,4 +1,5 @@
 import {gitlink} from '../../lib/pins.mjs';
+import {addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
@@ -42,7 +43,9 @@ export function stageData({project,output,version=profiles[project]?.version}){
  const profile=profiles[project];if(!profile||!path.isAbsolute(output||'')||fs.existsSync(output)||!version||/[\\/]/.test(version))throw Error('Select an engine-data project and a new absolute output directory.');
  fs.mkdirSync(output,{recursive:true});
  try{
-  const source=copySources(profile,output);const files=inventory(output);
+  const source=copySources(profile,output);
+  addLicenses(output,project,path.join(root,profile.source,'engine'));
+  const files=inventory(output);
   const manifest={schemaVersion:1,kind:'data',managerId:project,version,arch:'universal',minimumMacOS:profile.minimumMacOS,
    sourceRevision:gitlink('producers/engine-adaptations/sources/VNDS-LOVE'),sourceUrl:source.repository,entryRelative:profile.entry,files,loveVersion:'11.5'};
   const declaration=seal(project,version,'universal',profile.minimumMacOS,output,manifest);

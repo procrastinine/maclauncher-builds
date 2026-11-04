@@ -8,6 +8,7 @@ import {pathToFileURL} from 'node:url';
 import {preparedBuildInput} from '../../tools/prepared-build-inputs.mjs';
 import {nativeStackInput} from '../../tools/native-stack.mjs';
 import {sealRuntime} from '../../tools/seal-runtime.mjs';
+import {addLicense} from '../../lib/licenses.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'../..');
 const Source=require('../maclauncher/src/modules/shared/runtime/pinned-native-build.js');
 const Portable=require('../maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.js'),Prefix=require('../maclauncher/src/modules/shared/runtime/portable-dependency-prefix.js');
@@ -21,6 +22,9 @@ function goBuild({pin,arch,source,work}){
  const execute=args=>{const action=()=>run('go',args,{cwd:source,env:environment});return ['list','mod'].includes(args[0])?retryNetwork(action):action();};
  const executable=path.join(work,'ziggy-darwin');
  execute(['build','-trimpath','-buildvcs=false','-ldflags=-s -w -buildid=','-o',executable,'./src/ziggy/ziggy.go']);
+ addLicense(path.dirname(work),'github.com/atotto/clipboard',path.join(import.meta.dirname,'licenses/clipboard.txt'));
+ addLicense(path.dirname(work),'github.com/pkg/browser',path.join(import.meta.dirname,'licenses/browser.txt'));
+ addLicense(path.dirname(work),'Go runtime',path.join(import.meta.dirname,'licenses/Go.txt'));
  return {executable,provenance:{goVersion:execute(['version']).trim()},
   capabilities:{uoscVersion:pin.version,helper:'ziggy',commands:['get-clipboard','set-clipboard','download','http-get','http-post','http-put','http-patch','http-delete','open','search-subtitles','download-subtitles']}};
 }

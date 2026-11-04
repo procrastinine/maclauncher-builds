@@ -1,6 +1,6 @@
 import {checkoutSource} from '../../tools/build-source.mjs';
 import sharedDependencies from '../dependencies.json' with {type:'json'};
-import {addLicenses} from '../../lib/licenses.mjs';
+import {addLicense,addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs/promises';
 import { constants as fsConstants } from 'node:fs';
 import path from 'node:path';
@@ -188,10 +188,19 @@ export async function prepareDependencies({ work, output, jobs = 4 }) {
   await run(python, ['-B', '-I', '-c', installWheels, path.join(pythonRoot, 'lib/python3.12/site-packages'), path.join(work, 'wheels'), JSON.stringify(lock.wheels)]);
   await prunePython(pythonRoot, excludedReason);
   addLicenses(output,'Python',pythonRoot);
+  for(const wheel of lock.wheels){
+    addLicenses(output,wheel.name,path.join(pythonRoot,'lib/python3.12/site-packages',wheel.filename.split('-').slice(0,2).join('-')+'.dist-info'));
+    if(wheel.name==='pycryptodome'){
+      addLicense(output,wheel.name,path.join(pythonRoot,'lib/python3.12/site-packages',wheel.filename.split('-').slice(0,2).join('-')+'.dist-info/licenses/src/mlkem-native/LICENSE'));
+      addLicense(output,wheel.name,path.join(pythonRoot,'lib/python3.12/site-packages',wheel.filename.split('-').slice(0,2).join('-')+'.dist-info/licenses/src/mldsa-native/LICENSE'));
+    }
+  }
+  addLicense(output,'nsz',path.join(pythonRoot,'lib/python3.12/site-packages/nsz/gui/txt/license.txt'));
   const dotnetRoot = path.join(output, 'dotnet');
   await fs.rm(dotnetRoot, { recursive: true, force: true });
   await extractTar(dotnetArchive, dotnetRoot);
   addLicenses(output,'dotnet',dotnetRoot);
+  addLicense(output,'dotnet',path.join(dotnetRoot,'ThirdPartyNotices.txt'));
   await run(python, ['-B', '-I', '-c', 'import sys,lz4.block,capstone,fontTools,backports.zstd,nsz,zstandard; from Crypto.Cipher import AES; assert sys.version_info[:3] == (3,12,15)']);
   const dotnet = await run(path.join(dotnetRoot, 'dotnet'), ['--list-runtimes'], {
     env: { ...process.env, DOTNET_ROOT: dotnetRoot, DOTNET_ROOT_ARM64: dotnetRoot, DOTNET_MULTILEVEL_LOOKUP: '0', DOTNET_CLI_TELEMETRY_OPTOUT: '1', DOTNET_SKIP_FIRST_TIME_EXPERIENCE: '1' }

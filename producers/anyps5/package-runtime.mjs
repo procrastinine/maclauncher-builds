@@ -1,5 +1,5 @@
 import {gitlink} from '../../lib/pins.mjs';
-import {addLicenses} from '../../lib/licenses.mjs';
+import {addLicense,addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -67,6 +67,10 @@ export async function packageRuntime({runtimeBuild,relinkerBuild,output,version,
  makePortable(path.join(payload,'libs'));
  const source=path.join(root,recipe.source.path);
  addLicenses(payload,'anyps5',source);
+ for(const entry of dependencies.dependencies)addLicenses(payload,entry.path,path.join(source,entry.path));
+ addLicense(payload,'FreeType',path.join(source,'3rdparty/freetype/docs/FTL.TXT'));
+ addLicense(payload,'FreeType',path.join(source,'3rdparty/freetype/docs/GPLv2.TXT'));
+ addLicense(payload,'libjpeg-turbo',path.join(source,'3rdparty/libjpeg-turbo/README.ijg'));
  const overlays=filesIn(path.join(import.meta.dirname,'overlays')).map(relative=>({path:'overlays/'+relative,sha256:sha(fs.readFileSync(path.join(import.meta.dirname,'overlays',relative)))}));
  const tools=[{path:'tools/unwrap-self.cjs',sha256:sha(fs.readFileSync(path.join(import.meta.dirname,'tools/unwrap-self.cjs')))}];
  const producerInputs=[...['build-relinker.mjs','build-runtime.mjs','source-projection.mjs','package-runtime.mjs','source.json','dependencies.json']

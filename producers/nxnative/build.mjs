@@ -1,5 +1,5 @@
 import {gitlink} from '../../lib/pins.mjs';
-import {addLicenses} from '../../lib/licenses.mjs';
+import {addLicense,addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -165,6 +165,16 @@ export async function buildNxNative({work,output,dependencyWork,jobs=4,version=p
     json(path.join(output,'runtime.json'),runtime);
     const origins={schemaVersion:1,id:pin.id,version,source:pin.source,producerInputs:owned,dependencies,nuget:JSON.parse(fs.readFileSync(lock))};json(path.join(output,'source.json'),origins);
     addLicenses(output,pin.id,source);
+    addLicenses(output,'libvpx',path.join(source,'dm/third_party/libvpx'));
+    addLicense(output,'libvpx patent grant',path.join(source,'dm/third_party/libvpx/PATENTS'));
+    addLicenses(output,'stb_vorbis',path.join(source,'dm/third_party/stb_vorbis'));
+    addLicenses(output,'Ryujinx',path.join(source,'dm/third_party/ryujinx'));
+    addLicenses(output,'Spv.Generator',path.join(source,'dm/third_party/ryujinx/src/Spv.Generator'));
+    addLicenses(output,'Vulkan-Headers',path.join(source,'dm/third_party/vulkan-headers'));
+    addLicenses(output,'MacNativeGames',path.join(source,'dm/third_party/macnativegames'));
+    addLicense(output,'NVN',path.join(producer,'licenses/NVN.txt'));
+    addLicense(output,'deko3d',path.join(producer,'licenses/deko3d.txt'));
+    addLicense(output,'LibHac',path.join(producer,'licenses/LibHac.txt'));
     const closure=nativeClosure(output);
     for(const file of files(output)){const mode=fs.statSync(file).mode&0o777;fs.chmodSync(file,mode&0o111?0o755:0o644);}
     const inventory=B.fileInventory(output).filter(file=>!file.endsWith('.inputs')).map(relative=>{
