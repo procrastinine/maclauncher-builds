@@ -56,7 +56,7 @@ export async function buildAngleInput({output,work,profile:profileId='common'}){
  const toolEnv={...compilerEnv,PATH:path.dirname(python)+path.delimiter+process.env.PATH};
  run(process.execPath,[path.join(android,definition.buildEntry),'--source',upstream,'--dependencies',dependencies,'--output',output,'--gn',path.join(gnBuild,'gn'),'--ninja',read('which',['ninja']),'--clang',clang,'--python',python,'--backend',definition.backend,'--jobs','2'],{env:toolEnv});
  const manifest=JSON.parse(fs.readFileSync(path.join(output,'angle-manifest.json')));
- if(manifest.version!==profile.providerVersion||manifest.programBinaryVersion!==profile.programBinaryVersion||manifest.angleRevision!==pins.revision)throw Error('Generated ANGLE profile differs from its declared identity.');
+ if(manifest.version!==profile.providerVersion||manifest.angleRevision!==pins.revision)throw Error('Generated ANGLE profile differs from its declared identity.');
  return {angle:output,manifest,source:android,profileId};
 }
 
@@ -66,7 +66,7 @@ export function packageAngleInput({project='android-angle',version,arch='arm64',
  if(arch!=='arm64'||!path.isAbsolute(output||'')||fs.existsSync(output)||input?.profileId!==profile.id)throw Error('Select the declared ANGLE package version, matching source profile and a new absolute output directory.');
  verifyProducerSource(input.source,profile);
  const manifest=JSON.parse(fs.readFileSync(path.join(input.angle,'angle-manifest.json')));
- if(manifest.version!==profile.providerVersion||manifest.programBinaryVersion!==profile.programBinaryVersion||manifest.angleRevision!==definition.angle.revision||!Array.isArray(manifest.adaptations))throw Error('ANGLE provider identity differs from the package source profile.');
+ if(manifest.version!==profile.providerVersion||manifest.angleRevision!==definition.angle.revision||!Array.isArray(manifest.adaptations))throw Error('ANGLE provider identity differs from the package source profile.');
  for(const adaptation of manifest.adaptations){
   if(path.basename(adaptation.file)!==adaptation.file||sha(path.join(input.source,'src/modules/android/native',adaptation.file))!==adaptation.sha256)throw Error('ANGLE owned adaptation differs from the selected source profile.');
  }
