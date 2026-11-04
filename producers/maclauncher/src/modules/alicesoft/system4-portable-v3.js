@@ -11,6 +11,7 @@ const Movie = require("../shared/runtime/portable-ffmpeg");
 const Prefix = require("../shared/runtime/portable-dependency-prefix");
 const Overlay = require("./system4-portable-overlay-v3");
 const { throwIfAborted } = require("../shared/runtime/download-utils");
+// Portable libffi uses its configured release archive; the Git snapshot does not contain configure.
 const PIN = Object.freeze({...require("./system4-portable.json"),dependencies:require("./system4-portable.json").dependencies.map(row=>{if(row.id==='webp')row={...require('./system35-portable.json').dependencies.find(pin=>pin.id==='webp'),...row};const pin=sharedDependencies[row.id==='libffi'?'libffiPortable':row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};})});
 const VERSION = "MCLv1-1021";
 const REVISION = gitlink("producers/maclauncher/src/external/xsystem4");
