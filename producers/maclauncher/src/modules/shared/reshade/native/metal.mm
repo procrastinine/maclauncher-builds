@@ -1,3 +1,4 @@
+#include "depth-resample.hpp"
 #include "live-controls.hpp"
 #include "log.hpp"
 #include "native-config.hpp"
@@ -159,12 +160,19 @@ void bypassNativeHistory(id<MTLDrawable> drawable){
 
 // One current-frame association per game command buffer. No global texture
 // history and no dependency on guessed offscreen render targets.
+@interface RSMDepthSampling : NSObject { @public std::shared_ptr<macfx::DepthResampler> sampler; }
+@end
+@implementation RSMDepthSampling
+@end
+
 @interface RSMFrameDepth : NSObject {
 @public
     id<MTLTexture> color;
     id<MTLTexture> depth;
     MTLStoreAction colorStore,depthStore;
     bool valid;
+    bool promoted;
+    bool sampled;
 }
 @end
 @implementation RSMFrameDepth
@@ -1003,12 +1011,14 @@ std::map<void*,SurfacePool> &surfacePools(){static auto *m=new std::map<void*,Su
 
 macfx::HookOriginals &hooks() { static auto *value=new macfx::HookOriginals; return *value; }
 IMP original(id object,SEL selector) { return hooks().original(object,selector); }
+char depthSamplingKey;
 char frameDepthKey;
 std::atomic<bool> captureDepth{false};
 void replace(Class,SEL,IMP);
 void depthStoreAction(id object,SEL selector,MTLStoreAction action) {
-    reinterpret_cast<void(*)(id,SEL,MTLStoreAction)>(original(object,selector))(object,selector,action);
     RSMFrameDepth *frame=objc_getAssociatedObject(object,&frameDepthKey);
+    if(frame&&frame->promoted&&action==MTLStoreActionDontCare)action=MTLStoreActionStore;
+    reinterpret_cast<void(*)(id,SEL,MTLStoreAction)>(original(object,selector))(object,selector,action);
     if(frame&&action!=frame->depthStore)frame->valid=false;
 }
 void colorStoreAction(id object,SEL selector,MTLStoreAction action,NSUInteger index) {
@@ -1017,27 +1027,26 @@ void colorStoreAction(id object,SEL selector,MTLStoreAction action,NSUInteger in
     if(frame&&!index&&action!=frame->colorStore)frame->valid=false;
 }
 id<MTLRenderCommandEncoder> captureRenderPass(id object,SEL selector,MTLRenderPassDescriptor *descriptor) {
-    auto encoder=reinterpret_cast<id<MTLRenderCommandEncoder>(*)(id,SEL,MTLRenderPassDescriptor*)>(original(object,selector))(object,selector,descriptor);
-    if(!encoder||!captureDepth.load(std::memory_order_relaxed))return encoder;
-    const auto attachment=descriptor.depthAttachment;
-    const auto colorAttachment=descriptor.colorAttachments[0];
     const auto stored=[](MTLRenderPassAttachmentDescriptor *a)->id<MTLTexture>{
         if(a.storeAction==MTLStoreActionStore)return a.texture;
         if(a.storeAction==MTLStoreActionMultisampleResolve||a.storeAction==MTLStoreActionStoreAndMultisampleResolve)return a.resolveTexture;
         return nil;
     };
-    const auto color=stored(colorAttachment);
-    // Match the actual acquired presentation color. A previous depth shader
-    // cannot keep retaining attachments for a later color-only selection, and
-    // one layer's color-only frame cannot clear another layer's requirement.
-    // Other passes return before the environment-backed request check.
-    if(!color||!macfx::colorRequiresDepth(color)||!macfx::effectRequested())return encoder;
+    const auto color=stored(descriptor.colorAttachments[0]);
+    const auto originalDepth=descriptor.depthAttachment.texture;
+    const bool demanded=captureDepth.load(std::memory_order_relaxed)&&color&&macfx::colorRequiresDepth(color)&&macfx::effectRequested();
+    const auto eligible=[&](id<MTLTexture> depth){return depth&&depth.storageMode!=MTLStorageModeMemoryless&&!depth.framebufferOnly&&
+        (depth.pixelFormat==MTLPixelFormatDepth16Unorm||depth.pixelFormat==MTLPixelFormatDepth32Float||depth.pixelFormat==MTLPixelFormatDepth32Float_Stencil8||depth.pixelFormat==MTLPixelFormatDepth24Unorm_Stencil8)&&
+        (depth.textureType==MTLTextureType2D||depth.textureType==MTLTextureType2DMultisample)&&depth.width==color.width&&depth.height==color.height;};
+    bool promote=demanded&&eligible(originalDepth)&&descriptor.depthAttachment.storeAction==MTLStoreActionDontCare;
+    if(promote){descriptor=[descriptor copy];descriptor.depthAttachment.storeAction=MTLStoreActionStore;}
+    auto encoder=reinterpret_cast<id<MTLRenderCommandEncoder>(*)(id,SEL,MTLRenderPassDescriptor*)>(original(object,selector))(object,selector,descriptor);
+    if(!encoder||!demanded||!originalDepth||originalDepth.storageMode==MTLStorageModeMemoryless)return encoder;
+    const auto attachment=descriptor.depthAttachment;
     const auto depth=stored(attachment);
-    if(!depth||!color||depth.pixelFormat!=MTLPixelFormatDepth32Float||depth.sampleCount!=1||depth.textureType!=MTLTextureType2D||
-       depth.width!=color.width||depth.height!=color.height||depth.framebufferOnly||
-       (depth.usage!=MTLTextureUsageUnknown&&!(depth.usage&MTLTextureUsageShaderRead)))return encoder;
-    auto frame=[RSMFrameDepth new];frame->color=color;frame->depth=depth;frame->valid=true;
-    frame->colorStore=colorAttachment.storeAction;frame->depthStore=attachment.storeAction;
+    if(!eligible(depth))return encoder;
+    auto frame=[RSMFrameDepth new];frame->color=color;frame->depth=depth;frame->valid=true;frame->promoted=promote;
+    frame->colorStore=descriptor.colorAttachments[0].storeAction;frame->depthStore=attachment.storeAction;
     objc_setAssociatedObject(object,&frameDepthKey,frame,OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     objc_setAssociatedObject(encoder,&frameDepthKey,frame,OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     replace(object_getClass(encoder),@selector(setDepthStoreAction:),reinterpret_cast<IMP>(depthStoreAction));
@@ -1046,7 +1055,26 @@ id<MTLRenderCommandEncoder> captureRenderPass(id object,SEL selector,MTLRenderPa
 }
 RSMFrameDepth *capturedDepth(id<MTLCommandBuffer> commands,id<MTLTexture> color) {
     RSMFrameDepth *frame=objc_getAssociatedObject(commands,&frameDepthKey);
-    return frame&&frame->valid&&frame->color==color?frame:nil;
+    if(!frame||!frame->valid||frame->color!=color)return nil;
+    if(frame->sampled)return frame;
+    @try{try{
+        id<MTLTexture> input=frame->depth;
+        if(input.usage!=MTLTextureUsageUnknown&&!(input.usage&MTLTextureUsageShaderRead)){
+            auto d=[MTLTextureDescriptor texture2DDescriptorWithPixelFormat:input.pixelFormat width:input.width height:input.height mipmapped:NO];
+            d.textureType=input.textureType;d.sampleCount=input.sampleCount;d.storageMode=MTLStorageModePrivate;d.usage=MTLTextureUsageShaderRead;
+            auto readable=macfx::newAdmittedTexture(commands.device,d);auto blit=[commands blitCommandEncoder];
+            if(!blit)return nil;
+            [blit copyFromTexture:input sourceSlice:0 sourceLevel:0 sourceOrigin:MTLOriginMake(0,0,0) sourceSize:MTLSizeMake(input.width,input.height,1) toTexture:readable destinationSlice:0 destinationLevel:0 destinationOrigin:MTLOriginMake(0,0,0)];[blit endEncoding];input=readable;
+        }
+        RSMDepthSampling *sampling;
+        @synchronized(commands.commandQueue){sampling=objc_getAssociatedObject(commands.commandQueue,&depthSamplingKey);if(!sampling){sampling=[RSMDepthSampling new];sampling->sampler=std::make_shared<macfx::DepthResampler>(commands.device);objc_setAssociatedObject(commands.commandQueue,&depthSamplingKey,sampling,OBJC_ASSOCIATION_RETAIN_NONATOMIC);}}
+        auto d=[MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatR32Float width:input.width height:input.height mipmapped:NO];d.storageMode=MTLStorageModePrivate;d.usage=MTLTextureUsageShaderRead|MTLTextureUsageShaderWrite;
+        auto output=macfx::newAdmittedTexture(commands.device,d);std::string reason;
+        if(!sampling->sampler->encode(commands,{input,0,macfx::FrameOrigin::TopLeft},output,macfx::FrameOrigin::TopLeft,reason))return nil;
+        frame->depth=output;frame->sampled=true;return frame;
+    }catch(const std::exception&e){frame->valid=false;log(std::string("Depth capture unavailable: ")+e.what());}}
+    @catch(NSException*e){frame->valid=false;log(std::string("Depth capture unavailable: ")+(e.reason.UTF8String?:"Depth copy failed"));}
+    return nil;
 }
 void process(id<MTLCommandBuffer> buffer,id<MTLDrawable> drawable,const char *timingScope="game-and-effects",uint64_t captureFrame=UINT64_MAX,double sourceTime=0) {
     if(![drawable conformsToProtocol:@protocol(CAMetalDrawable)]) return;

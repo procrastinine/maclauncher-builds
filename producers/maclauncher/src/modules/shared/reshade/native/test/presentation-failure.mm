@@ -31,13 +31,17 @@ namespace {std::atomic<unsigned>queues{0},images{0},copies{0};id device;bool rej
 @end
 @interface FailureCommands:NSObject
 @property MTLCommandBufferStatus status;
+@property(strong)id queue;
 @property(strong)NSMutableArray *handlers;
 @end
 @implementation FailureCommands
 - (instancetype)init{if((self=[super init])){_handlers=[NSMutableArray new];_status=MTLCommandBufferStatusNotEnqueued;}return self;}
+// Controlled commands have no measured GPU time.
+- (CFTimeInterval)GPUStartTime{return 0;}
+- (CFTimeInterval)GPUEndTime{return 0;}
 - (BOOL)retainedReferences{return YES;}
 - (id)device{return device;}
-- (id)commandQueue{return nil;}
+- (id)commandQueue{return self.queue;}
 - (id)blitCommandEncoder{return [FailureBlit new];}
 - (void)addCompletedHandler:(MTLCommandBufferHandler)handler{[self.handlers addObject:[handler copy]];}
 - (void)addScheduledHandler:(MTLCommandBufferHandler)handler{(void)handler;}
@@ -48,7 +52,7 @@ namespace {std::atomic<unsigned>queues{0},images{0},copies{0};id device;bool rej
 @interface FailureQueue:NSObject
 @end
 @implementation FailureQueue
-- (id)commandBuffer{return [FailureCommands new];}
+- (id)commandBuffer{auto commands=[FailureCommands new];commands.queue=self;return commands;}
 @end
 @interface FailureDevice:NSObject
 @end
@@ -78,7 +82,7 @@ namespace {std::atomic<unsigned>queues{0},images{0},copies{0};id device;bool rej
 namespace generation_failure {
 enum class Fault {None,Queue,Create,CreateNil,Callback,Start,Display};
 struct Counts {unsigned creates=0,callbacks=0,starts=0,stops=0,releases=0,queries=0,displays=0,encodes=0,live=0;};
-Fault fault=Fault::None;Counts counts;
+Fault fault=Fault::None;Counts counts;dispatch_semaphore_t generated;
 struct Link {bool running=false;};
 Link* checked(CVDisplayLinkRef value){assert(value);return reinterpret_cast<Link*>(value);}
 CVReturn create(CVDisplayLinkRef*out){++counts.creates;*out=nullptr;if(fault==Fault::Create)return kCVReturnError;if(fault==Fault::CreateNil)return kCVReturnSuccess;*out=reinterpret_cast<CVDisplayLinkRef>(new Link);++counts.live;return kCVReturnSuccess;}
@@ -112,7 +116,7 @@ CVReturn display(CVDisplayLinkRef value,CGDirectDisplayID){checked(value);++coun
 namespace macfx {
 namespace {struct ControlledGeneration final:GenerationEncoder {
  const char*method()const noexcept override{return "lsfg";}
- GenerationResult encode(id<MTLCommandBuffer>,id<MTLTexture>,const std::vector<id<MTLTexture>>&,uint64_t,const InterpolationPlan&)override{++generation_failure::counts.encodes;GenerationResult result;result.encoded=true;return result;}
+ GenerationResult encode(id<MTLCommandBuffer>commands,id<MTLTexture>,const std::vector<id<MTLTexture>>&,uint64_t,const InterpolationPlan&)override{assert(commands.commandQueue);++generation_failure::counts.encodes;dispatch_semaphore_signal(generation_failure::generated);GenerationResult result;result.encoded=true;return result;}
  uint64_t imageBytes(unsigned,unsigned,const GenerationMeasure&)const override{return 0;}
 };}
 std::shared_ptr<GenerationEncoder>makeGenerationEncoder(id<MTLDevice>,const std::string&,const LsfgConfig&){return std::make_shared<ControlledGeneration>();}
@@ -123,7 +127,7 @@ void publishGeneration(const std::string&file,bool enabled){
     const auto temporary=file+".next";{std::ofstream stream(temporary,std::ios::binary);stream.write(reinterpret_cast<const char*>(&packet),sizeof(packet));assert(stream.good());}assert(!rename(temporary.c_str(),file.c_str()));macfx::refreshLiveState();
 }
 void generationCase(generation_failure::Fault failure,const std::string&file){
-    using namespace generation_failure;assert(!counts.live);counts={};fault=failure;rejectPrivateQueue=failure==Fault::Queue;publishGeneration(file,true);
+    using namespace generation_failure;assert(!counts.live);counts={};generated=dispatch_semaphore_create(0);fault=failure;rejectPrivateQueue=failure==Fault::Queue;publishGeneration(file,true);
     auto layer=[FailureLayer layer];layer.pixelFormat=MTLPixelFormatBGRA8Unorm;layer.drawableSize=CGSizeMake(32,24);
     auto descriptor=[MTLTextureDescriptor texture2DDescriptorWithPixelFormat:layer.pixelFormat width:32 height:24 mipmapped:NO];auto source=(id<MTLTexture>)[device newTextureWithDescriptor:descriptor];
     macfx::PresenterConfig config;config.generation=macfx::LsfgConfig{"controlled-no-provider",true,false,1,2};int owner=0;
@@ -136,8 +140,15 @@ void generationCase(generation_failure::Fault failure,const std::string&file){
     // A real accepted Off packet is inert, then a new accepted On packet may
     // retry the same owner after the controlled allocation/timing fault clears.
     fault=Fault::None;rejectPrivateQueue=false;publishGeneration(file,false);auto off=[FailureCommands new];assert(presenter.submit((id<MTLCommandBuffer>)off,source,5,CACurrentMediaTime()).encoded);[off fire:MTLCommandBufferStatusCompleted];assert(queues==queueAttempts&&counts.creates==createAttempts&&counts.starts==startAttempts);
-    publishGeneration(file,true);auto on=[FailureCommands new];auto resumed=presenter.submit((id<MTLCommandBuffer>)on,source,6,CACurrentMediaTime());if(!resumed.encoded)fprintf(stderr,"FG recovery rejected: %s\n",resumed.reason.c_str());assert(resumed.encoded&&counts.live==1&&counts.encodes==1&&counts.creates==createAttempts+1&&counts.starts==startAttempts+1);
-    presenter.stop();[on fire:MTLCommandBufferStatusCompleted];assert(!counts.live);const auto afterStop=counts.starts;
+    publishGeneration(file,true);auto on=[FailureCommands new];auto resumed=presenter.submit((id<MTLCommandBuffer>)on,source,6,CACurrentMediaTime());if(!resumed.encoded)fprintf(stderr,"FG recovery rejected: %s\n",resumed.reason.c_str());assert(resumed.encoded&&counts.live==1&&counts.encodes==0&&counts.creates==createAttempts+1&&counts.starts==startAttempts+1);
+    // Only the producer copy is encoded at submit. Completion admits the
+    // image-pair generator on a presenter-owned queue, never that producer.
+    [on fire:MTLCommandBufferStatusError];assert(counts.encodes==0);
+    auto completed=[FailureCommands new];assert(presenter.submit((id<MTLCommandBuffer>)completed,source,7,CACurrentMediaTime()).encoded);
+    [completed fire:MTLCommandBufferStatusCompleted];assert(!dispatch_semaphore_wait(generated,dispatch_time(DISPATCH_TIME_NOW,2*NSEC_PER_SEC)));assert(counts.encodes==1);
+    auto stopped=[FailureCommands new];macfx::FrameResult stopping;const auto deadline=CACurrentMediaTime()+2;do{stopping=presenter.submit((id<MTLCommandBuffer>)stopped,source,8,CACurrentMediaTime());if(stopping.busy)usleep(1000);}while(stopping.busy&&CACurrentMediaTime()<deadline);assert(stopping.encoded);
+    presenter.stop();[stopped fire:MTLCommandBufferStatusCompleted];assert(dispatch_semaphore_wait(generated,dispatch_time(DISPATCH_TIME_NOW,20*NSEC_PER_MSEC)));assert(counts.encodes==1);
+    assert(!counts.live);const auto afterStop=counts.starts;
     presenter.stop();assert(counts.starts==afterStop);
 }
 }
@@ -152,7 +163,7 @@ int main(int argc,char**argv){@autoreleasepool{
     }
     assert(phase.argc==2);const std::string file=phase.argv[1];device=[FailureDevice new];
     for(const auto fault:{generation_failure::Fault::Queue,generation_failure::Fault::Create,generation_failure::Fault::CreateNil,generation_failure::Fault::Callback,generation_failure::Fault::Start,generation_failure::Fault::Display})generationCase(fault,file);
-    puts("Actual presenter source: FG queue/create/nil/callback/start/display failures bypass generation without null CoreVideo calls; four unchanged submissions keep caller-buffer rendering and make no resource retry; actual Off/On packets recover the same owner. CoreVideo/LSFG/Metal NSObject stand-ins only, no GPU or display.");
+    puts("Actual presenter source: FG queue/create/nil/callback/start/display failures bypass generation without null CoreVideo calls; four unchanged submissions keep caller-buffer rendering and make no resource retry; actual Off/On packets recover the same owner; image-pair encoding starts only after producer completion and uses a private queue. CoreVideo/LSFG/Metal NSObject stand-ins only, no GPU or display.");
 }}
 #else
 int main(){@autoreleasepool{

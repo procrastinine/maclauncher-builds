@@ -1219,6 +1219,10 @@
     {
       "source": "graphics-window-pointer.mm",
       "path": "src/graphics-window-pointer.mm"
+    },
+    {
+      "path": "src/opengl-flip.hpp",
+      "source": "opengl-flip.hpp"
     }
   ]
 }

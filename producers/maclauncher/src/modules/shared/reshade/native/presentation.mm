@@ -92,6 +92,7 @@ struct macfx::FramePresenter::Impl:std::enable_shared_from_this<Impl>{
  std::atomic<PresenterPreparation>preparation{PresenterPreparation::Ready};
  std::atomic<RuntimeFrameSource>frameSource{RuntimeFrameSource::Unknown};
  std::atomic<bool>outputVisible{true},outputIdleCut{false};
+ std::atomic<bool>imagePairPending{false};
  mutable std::mutex mutex;std::mutex submission,privateQueueMutex;std::atomic<bool>privateQueueUnavailable{false};PresenterStatus status;RSPresentationTiming timing{};std::vector<std::shared_ptr<Batch>>pool;std::vector<std::weak_ptr<Retirement>>retirements;std::optional<Display>immediate,motionFrame;OutputPolicy outputPolicy;unsigned nextSubframe=0,lastQueuedSubframe=0;double nextSubframeTime=0,lastQueuedTime=0;bool motionRepeated=false;
  std::atomic<bool>gpuFailed{false};std::shared_ptr<const FramePublication>publication,failedPublication;uint64_t publicationGeneration=~uint64_t(0);std::unique_ptr<EffectPlanState>failureReader;std::mutex failureReaderMutex;
  std::atomic<unsigned> displayHz{0};unsigned appliedRefresh=0;uint32_t currentDisplay=0;
@@ -465,7 +466,10 @@ worker=dispatch_queue_create("macfx.presentation",DISPATCH_QUEUE_SERIAL);layer.f
   if(scene.execution){receiptDepth=scene.depth;effectFrameId=scene.frameId;receiptMapped=scene.displayMapped;receiptInputs=scene.inputs;}
   EffectExecutionSelection selected;std::shared_ptr<TemporalSceneContinuation>continuation;std::string rendererPendingReason;
   if(sceneWindow){holdPlans.poll();const auto desired=holdPlans.snapshot();if(desired&&desired->mode=="advanced")if(auto candidate=temporalSceneContinuation(sceneWindow)){if(candidate->execution()->revision()==desired->revision)continuation=std::move(candidate);else if(std::any_of(desired->nodes.begin(),desired->nodes.end(),[](const auto&node){return node.enabled&&(node.kind=="temporal"||node.requirements.depth||node.requirements.motion||node.kind=="frame-generation"&&generationRequiresScene(node.method));})){rendererPendingReason="Waiting for the latest renderer scene graph; the accepted scene remains active";continuation=std::move(candidate);}}}
-  if(scene.execution&&scene.deferred){
+  // A renderer receipt owns its scene prefix. Reprepare its image-pair
+  // suffix for this presenter's queue instead of reusing producer resources.
+  const bool sceneImagePair=scene.execution&&std::any_of(scene.execution->generationStages().begin(),scene.execution->generationStages().end(),[](const auto&stage){return !stage.encoder->requiresScene();});
+  if(scene.execution&&(scene.deferred||sceneImagePair)){
    const auto prefix=scene.execution;std::optional<RSTemporalFrame>inputs;
    if(sceneInputs){std::shared_ptr<const EffectSceneLease>derived;const auto bound=prefix->bindSceneImage(commands,source,planTarget,sceneInputs,derived,config.origin);if(!bound.encoded){result.busy=bound.busy;result.reason=bound.reason;return false;}sceneInputs=std::move(derived);inputs=retainedSceneFrame(sceneInputs);if(!inputs){result.reason="The Metal 4 final image lost its exact scene lease";return false;}receiptDepth={(__bridge id<MTLTexture>)inputs->depth,inputs->frameId,config.origin};frame.depth=receiptDepth.texture?&receiptDepth:nullptr;}
    selected=plans->prepareSceneContinuation(frame,inputs?&*inputs:nullptr,colorSpace,sourceColor,prefix->sceneSuffixSnapshot(),prefix->sceneOutputIdentity(),sceneInputs);
@@ -999,6 +1003,18 @@ fragment float4 motion_fragment(float4 p[[position]],texture2d<float,access::rea
   if(traceEnabled&&sourceTime-lastTrace>2){lastTrace=sourceTime;std::lock_guard<std::mutex>lock(mutex);traceStatus("frame");}
   const auto size=layer.drawableSize;if(!std::isfinite(size.width)||!std::isfinite(size.height)||size.width<1||size.height<1||size.width>16384||size.height>16384){result.reason="Invalid presentation dimensions";return result;}
   if(!content&&planMode&&execution&&execution->canDetachNeural()&&!target&&!observer&&!effectDepth&&execution->commandQueue()==privateCommandsQueue())return submitDetached(commands,source,frameId,sourceTime,sourcePeriod,opaque);
+  const bool imagePair=generator&&generationEnabled&&(!generator->requiresScene()||(execution&&std::any_of(execution->generationStages().begin(),execution->generationStages().end(),[](const auto&stage){return !stage.encoder->requiresScene();})));
+  const bool detached=imagePair&&commands.commandQueue!=privateCommandsQueue();
+  const auto retainedContent=content?std::optional<RSPresentationContent>(*content):std::nullopt;
+  const auto retainedTarget=target?std::optional<RSPresentationTarget>(*target):std::nullopt;
+  const auto retainedObserver=observer?std::optional<RSPresentationObserver>(*observer):std::nullopt;
+  const auto retainedRetirement=detached&&observer?std::make_shared<Retirement>(*observer,frameId):nullptr;
+  // Preserve this source's metadata and scene leases across producer completion.
+  auto encodeImage=[=,sceneInputs=std::move(sceneInputs),receiptCompletion=std::move(receiptCompletion),sceneContinuation=std::move(sceneContinuation),sceneCapture=std::move(sceneCapture)](id<MTLCommandBuffer>commands,id<MTLTexture>source,DepthFrame copiedDepth) mutable -> FrameResult {
+  const auto content=retainedContent?&*retainedContent:nullptr;
+  const auto target=retainedTarget?&*retainedTarget:nullptr;
+  const auto observer=retainedObserver?&*retainedObserver:nullptr;
+  FrameResult result;const DepthFrame*depth=copiedDepth.texture?&copiedDepth:nullptr;const DepthFrame*effectDepth=depth;
   const bool windowCapture=frameSource.load(std::memory_order_relaxed)==RuntimeFrameSource::ExternalWindow;
   const auto deliveryMode=generationDelivery(generator&&generationEnabled,outputPolicy.active(),windowCapture?displayHz.load():0,sourcePeriod,unsigned(layer.maximumDrawableCount));
   // Retire an older paced interval only when its delivery route changes.
@@ -1050,7 +1066,7 @@ fragment float4 motion_fragment(float4 p[[position]],texture2d<float,access::rea
     if(heldInputs){if(!failHeldAttempt(heldEpoch,{heldInputs->plan->revision,heldInputs->controlsDigest},result.reason)){result.busy=true;result.reason="A newer graphics update replaced this frame";}}
     else fail(result.reason);
    }return result;}
-  auto retirement=observer?std::make_shared<Retirement>(*observer,frameId):nullptr;
+  auto retirement=retainedRetirement?retainedRetirement:observer?std::make_shared<Retirement>(*observer,frameId):nullptr;
   if(content&&lastContentId)pendingProducerReset|=content->imageRevision!=lastImageRevision||sourceMapped!=lastContentMapped;
   bool generatedReady=false;if(!redraw&&generator&&generationEnabled){
    if(pendingProducerReset){historyReady=false;++generationSequence;if(batch->execution)for(const auto&stage:batch->execution->generationStages())++stage.state->sequence;pendingProducerReset=false;}
@@ -1097,6 +1113,47 @@ fragment float4 motion_fragment(float4 p[[position]],texture2d<float,access::rea
   // Rejected/busy frames retain their identity so callers can retry unchanged.
   // An accepted encoding reserves identity even if its host later abandons it.
   producer->encoded.store(true);if(!contentTimed)observe(RuntimeStatusPhase::Encoded,batch);requestRuntimeStatusPoll(true);frameRetry.reset();lastSubmission=frameId;{std::lock_guard<std::mutex>lock(mutex);if(!redraw){if(content){interval=sourcePeriod;lastContentId=content->contentId;lastContentEpoch=content->epoch;lastContentPTS=content->pts;lastContentTimeMs=contentTimeMs;lastContentPTSUnknown=ptsUnknown;lastImageRevision=content->imageRevision;lastContentMapped=sourceMapped;lastContentDuration=sourcePeriod;lastContentMediaDuration=contentPeriod;lastContentTarget=target?target->hostTime:0;}else if(!config.sourceFrameRate&&lastSourceTime)interval=updateSourceInterval(interval,sourceTime-lastSourceTime);}lastSourceTime=sourceTime;if(!contentTimed)++status.encoded;if(target){++timing.accepted;if(target->hostTime<=targetSubmittedAt)++timing.lateAtSubmit;}if(retirement){retirements.erase(std::remove_if(retirements.begin(),retirements.end(),[](const auto&entry){auto value=entry.lock();return !value||value->done.load();}),retirements.end());retirements.push_back(retirement);retirement->arm();}}return result;
+  };
+  if(detached){
+   if(imagePairPending.exchange(true)){result.busy=true;result.reason="Image-pair presentation is occupied";return result;}
+   std::weak_ptr<Impl>weak=shared_from_this();
+   auto pending=std::make_shared<CompletionLease>([weak](bool){if(auto self=weak.lock())self->imagePairPending.store(false);});
+   auto snapshot=makeTexture(layer.device,source.width,source.height,source.pixelFormat);
+   auto copy=[commands blitCommandEncoder];if(!copy)throw std::runtime_error("Cannot retain image-pair source pixels");
+   [copy copyFromTexture:source sourceSlice:0 sourceLevel:0 sourceOrigin:MTLOriginMake(0,0,0) sourceSize:MTLSizeMake(source.width,source.height,1) toTexture:snapshot destinationSlice:0 destinationLevel:0 destinationOrigin:MTLOriginMake(0,0,0)];[copy endEncoding];
+   DepthFrame retainedDepth{nil,0,FrameOrigin::TopLeft};
+   if(effectDepth&&effectDepth->texture){
+    const auto input=effectDepth->texture;auto d=[MTLTextureDescriptor texture2DDescriptorWithPixelFormat:input.pixelFormat width:input.width height:input.height mipmapped:NO];
+    d.textureType=input.textureType;d.sampleCount=input.sampleCount;d.storageMode=MTLStorageModePrivate;d.usage=MTLTextureUsageShaderRead;
+    retainedDepth={newAdmittedTexture(layer.device,d),effectDepth->frameId,effectDepth->origin};
+    auto depthCopy=[commands blitCommandEncoder];if(!depthCopy)throw std::runtime_error("Cannot retain image-pair depth pixels");
+    [depthCopy copyFromTexture:input sourceSlice:0 sourceLevel:0 sourceOrigin:MTLOriginMake(0,0,0) sourceSize:MTLSizeMake(input.width,input.height,1) toTexture:retainedDepth.texture destinationSlice:0 destinationLevel:0 destinationOrigin:MTLOriginMake(0,0,0)];[depthCopy endEncoding];
+   }
+   const auto acceptedExecution=execution;uint64_t acceptedEpoch;{std::lock_guard lock(mutex);acceptedEpoch=presentationEpoch;}
+   const auto acceptedControls=presentationControlsDigest();
+   auto encode=std::make_shared<decltype(encodeImage)>(std::move(encodeImage));
+   [commands addCompletedHandler:^(id<MTLCommandBuffer>completed){
+    if(completed.status!=MTLCommandBufferStatusCompleted){if(retainedRetirement)retainedRetirement->completed(completed.status);pending->finish(false);return;}
+    if(auto self=weak.lock())dispatch_async(self->worker,^{@autoreleasepool{
+     std::lock_guard serial(self->submission);
+     bool obsolete;{std::lock_guard lock(self->mutex);obsolete=self->presentationEpoch!=acceptedEpoch;}
+     LiveStatePin pin;
+     if(self->stopping.load()||self->execution!=acceptedExecution||obsolete||presentationControlsDigest()!=acceptedControls){pending->finish(false);return;}
+     id<MTLCommandBuffer>owned=nil;
+     @try{try{
+      owned=[self->privateCommandsQueue() commandBuffer];if(!owned)throw std::runtime_error("Image-pair presentation commands are unavailable");ownPresentationBuffer(owned);
+      const auto result=(*encode)(owned,snapshot,retainedDepth);
+      if(!result.encoded&&!result.busy)self->fail(result.reason);
+      // Retire any external work admitted even when a later stage was busy.
+      [owned commit];pending->finish(result.encoded);
+     }catch(const std::exception&e){self->fail(e.what());if(owned&&owned.status<MTLCommandBufferStatusCommitted)[owned commit];pending->finish(false);}}
+     @catch(NSException*e){self->fail(e.reason.UTF8String?:"Image-pair presentation failed");if(owned&&owned.status<MTLCommandBufferStatusCommitted)[owned commit];pending->finish(false);}
+    }});else pending->finish(false);
+   }];
+   if(retainedRetirement)retainedRetirement->arm();
+   result.encoded=true;result.effects=true;return result;
+  }
+  return encodeImage(commands,source,effectDepth?*effectDepth:DepthFrame{nil,0,FrameOrigin::TopLeft});
   }();}catch(const ImageBudgetExceeded&error){result={};frameRetry.denied(error,CACurrentMediaTime());result.busy=!frameRetry.impossible;result.reason=frameRetry.reason;}
   catch(const std::exception&error){result={};result.reason=error.what();}}
   @catch(NSException*error){result={};result.reason=error.reason.UTF8String?:"Frame presentation failed";}
