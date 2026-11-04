@@ -1,0 +1,55 @@
+{
+  "id": "ios-playtools-paths",
+  "version": "1.1.5",
+  "arch": "arm64",
+  "minimumMacOS": "12.0",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "2af09a89b7f8fd6f6814f023654ac9a503c59db7c950f960721a6846cc4ddb7e",
+  "directoryRelative": "ios-playtools-paths/1.1.5/arm64",
+  "manifestRelative": "helper.json",
+  "manifestSha256": "8e33085b7d0317af8557c2a9068fe263fd72cbb454833bd7c6480fa4637a14af",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 16643,
+      "mode": 420,
+      "sha256": "a37c0d8f6020e940e59868e2f638b8fe9a8c60509b545ace53c0f8e638d72b4c"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "d3656ae647b15ff2b14b812b0dadb22860992256096423574b9ed0385e275bdf"
+    },
+    {
+      "path": "helper.json",
+      "size": 1088,
+      "sha256": "8e33085b7d0317af8557c2a9068fe263fd72cbb454833bd7c6480fa4637a14af",
+      "mode": 420
+    },
+    {
+      "path": "libplaytools-paths.dylib",
+      "size": 85584,
+      "sha256": "7d00c8071d36ce23225e8ee66958a8fef0b672cc5b8b4cfb352bba4b85df8a3a",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 29,
+      "sha256": "5fae4a022fb97d8e3d41dc31e83fd092c1a87e5a48656a7f4b95b25659699d66",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MacLauncher.txt",
+      "size": 1081,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+      "mode": 420
+    }
+  ]
+}
