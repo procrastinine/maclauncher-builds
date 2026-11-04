@@ -38,6 +38,7 @@ export function buildProvider({ output = path.join(cacheDirectory, "output"),
   execFileSync("/bin/bash", [path.join(stagedShared,"reshade/neural/native/build.sh"), output], {
     cwd: repository, stdio: "inherit", env: { ...process.env,
       MACLAUNCHER_BUILD_DOWNLOAD: path.resolve(repository, "../../tools/download.mjs"),
+      MACLAUNCHER_NEURAL_PREPARE_UPSTREAM: path.join(directory, "native/prepare-upstream.mjs"),
       MACLAUNCHER_MLX_DLSS_SOURCE: sourceDirectory,
       MACLAUNCHER_NEURAL_BUILD_ROOT: path.resolve(buildRoot),
       MACLAUNCHER_NEURAL_CACHE_ROOT: path.resolve(cacheRoot) },

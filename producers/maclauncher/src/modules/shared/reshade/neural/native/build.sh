@@ -16,7 +16,8 @@ if [[ -z "${MACLAUNCHER_MLX_DLSS_SOURCE:-}" ]]; then
   echo 'The neural provider build requires its registered source checkout' >&2
   exit 1
 fi
-export MACLAUNCHER_MLX_DLSS_SOURCE="$(node "$native_root/prepare-upstream.mjs" "$MACLAUNCHER_MLX_DLSS_SOURCE" "$build_root")"
+MACLAUNCHER_MLX_DLSS_SOURCE="$(node "${MACLAUNCHER_NEURAL_PREPARE_UPSTREAM:-$native_root/prepare-upstream.mjs}" "$MACLAUNCHER_MLX_DLSS_SOURCE" "$build_root")"
+export MACLAUNCHER_MLX_DLSS_SOURCE
 package_options=(--disable-sandbox --package-path "$native_root" --scratch-path "$build_root"
   --cache-path "$cache_root" --config-path "$cache_root/config" --security-path "$cache_root/security" --skip-update)
 owned_mlx_source="$build_root/owned-source/mlx-swift"
