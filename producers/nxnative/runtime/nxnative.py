@@ -47,7 +47,7 @@ def source_snapshot():
 
 
 def materialize_source(snapshot, repo, env):
-    if repo.exists(): return
+    if repo.exists() and (not env.get('NXNATIVE_UPSTREAM_HOST_CACHE') or (repo / 'dm/third_party').is_dir()): return
     config = json.loads((ROOT / 'runtime.json').read_text())
     if snapshot['kind'] == 'bundled':
         shutil.copytree(snapshot['root'], repo, copy_function=copy_file)
@@ -55,9 +55,12 @@ def materialize_source(snapshot, repo, env):
     repo.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='source-', dir=repo.parent) as temporary:
         temporary = Path(temporary)
-        for relative in SOURCE_DIRECTORIES:
-            shutil.copytree(snapshot['root'] / relative, temporary / relative, copy_function=copy_file,
-                            ignore=shutil.ignore_patterns('__pycache__', 'tests', 'fixtures', 'dmsh_xlate_bin'))
+        if env.get('NXNATIVE_UPSTREAM_HOST_CACHE'):
+            shutil.copytree(snapshot['root'], temporary, dirs_exist_ok=True, copy_function=copy_file)
+        else:
+            for relative in SOURCE_DIRECTORIES:
+                shutil.copytree(snapshot['root'] / relative, temporary / relative, copy_function=copy_file,
+                                ignore=shutil.ignore_patterns('__pycache__', 'tests', 'fixtures', 'dmsh_xlate_bin'))
         chain = runpy.run_path(str(temporary / 'dm/gfx/tools/dmsh_chain.py'))
         for relative in chain['FILES']:
             target = (temporary / 'dm/gfx' / relative).resolve()
@@ -78,6 +81,7 @@ def materialize_source(snapshot, repo, env):
         header = (temporary / 'dm/gfx/nvn/dmsh_chain.h').read_text()
         if not re.search(r'#define DMSH_CHAIN "' + re.escape(toolchain['shaderChain']) + r'"', header):
             raise ValueError('The selected upstream source has a different shader format. Matching native tools are required.')
+        if repo.exists(): shutil.rmtree(repo)
         os.rename(temporary, repo)
 
 
@@ -239,11 +243,25 @@ def prepare(args):
     pipeline.build_nx_extract = lambda *_args, **_kwargs: ROOT / 'tools/nx_extract/nx_extract'
     pipeline.toolchain = lambda *_args, **_kwargs: (('cmd',['xcrun','-sdk','macosx','metal','--version']),('cmd',['spirv-cross','--revision']))
     host = ROOT / 'bin/nxnative-host'
+    upstream_host = pipeline.build_mac_host
 
     def prepare_host(_repo, destination, host_env, _logs, game):
+        nonlocal host
+        host = ROOT / 'bin/nxnative-host'
         import game as gamemod
         host_env['NXNATIVE_PROFILE'] = str(game.table('game.tsv'))
         host_env['NXNATIVE_UPSCALER_KEYS'] = ','.join(gamemod.upscaler_keys(game))
+        cache = os.environ.get('NXNATIVE_UPSTREAM_HOST_CACHE')
+        if cache and (not host.is_file() or tools.get('nativeSourceRevision', tools.get('sourceRevision')) != snapshot['revision']):
+            try:
+                subprocess.run(['/usr/bin/xcode-select', '-p'], capture_output=True, check=True)
+                for tool in ('clang', 'metal'): subprocess.run(['/usr/bin/xcrun', '--find', tool], capture_output=True, check=True)
+                cached = Path(cache) / snapshot['revision'] / game.id / 'dmhost'
+                cached.parent.mkdir(parents=True, exist_ok=True)
+                host = upstream_host(_repo, cached, host_env, _logs, game)
+                return host
+            except Exception as error:
+                event(ev='say', msg='Upstream host build warning; using the packaged host: ' + str(error))
         destination.parent.mkdir(parents=True, exist_ok=True)
         if not destination.is_file() or destination.stat().st_size != host.stat().st_size: shutil.copy2(host, destination)
         return destination
