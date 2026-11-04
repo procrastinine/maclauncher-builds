@@ -14,7 +14,8 @@ import {readProjects,buildRecord,buildRecords} from '../lib/projects.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 
 test('Android recipes initialize the producer whose metadata they read from a cold checkout',()=>{
- for(const project of ['android-java-framework','android-java-converter','android-angle','android-angle-aim','android-art-image-extractor','android-launcher']){
+ assert.equal(readProjects(root,{resolvePins:false}).projects.find(project=>project.id==='android-angle-aim').build,undefined,'The historical AIM ANGLE project has no independent producer');
+ for(const project of ['android-java-framework','android-java-converter','android-angle','android-art-image-extractor','android-launcher']){
   const commands=[],result=initializeSources({project,directory:root,run:(args,cwd)=>{
    commands.push({args,cwd});
    if(args[0]==='ls-files')return '160000 '+ 'a'.repeat(40)+' 0\tsources/maclauncher-android\n';
