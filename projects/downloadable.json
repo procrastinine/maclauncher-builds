@@ -1612,10 +1612,14 @@
       {
         "version": "27.0.0-devel-MCLv8",
         "label": "KosmicKrisp geometry and transform feedback 27.0.0-devel-MCLv8"
+      },
+      {
+        "version": "27.0.0-devel-MCLv9",
+        "label": "KosmicKrisp geometry and transform feedback 27.0.0-devel-MCLv9"
       }
     ],
     "build": {
-      "version": "27.0.0-devel-MCLv8",
+      "version": "27.0.0-devel-MCLv9",
       "command": "tools/build-vulkan-kosmickrisp.mjs",
       "architectures": [
         "arm64"
