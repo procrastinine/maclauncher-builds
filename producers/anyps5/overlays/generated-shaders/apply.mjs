@@ -46,6 +46,24 @@ BarycentricTessellationShaders BuildBarycentricTessellationShaders(const Recompi
 ` + source.slice(end);
   });
   edit('core/libs/prx/libSceAgcDriver/Execution/src/Driver/Shaders/ShaderRegistry.cpp', (source, file) => {
+    source = replace(source, 'bool AsyncRegistrationPrepare() {', `bool RegistrationPrepareEnabled() {
+#ifdef __APPLE__
+    static const bool enabled = [] {
+        if (const char* text = std::getenv("APS5_REGISTRATION_PREPARE")) return std::strcmp(text, "0") != 0;
+        const auto memory = ReadPhysicalMemoryBytes();
+        return !memory || *memory >= (std::uint64_t{32} << 30u);
+    }();
+    return enabled;
+#else
+    return true;
+#endif
+}
+
+bool AsyncRegistrationPrepare() {`, file);
+    source = replace(source, '    if (LazyShaderPreparation()) {\n        static_cast<void>(PlanRegistered(snapshot, *localDevice, registered, true, &snapshot.prepared->deferred));', `    if (!RegistrationPrepareEnabled()) {
+        snapshot.prepared->deferred = true;
+    } else if (LazyShaderPreparation()) {
+        static_cast<void>(PlanRegistered(snapshot, *localDevice, registered, true, &snapshot.prepared->deferred));`, file);
     source = '#include "prx/libSceAgcDriver/Execution/include/Driver/Shaders/RectanglePreparation.hpp"\n' + source;
     source = replace(source,
       '    ResolvePreparedGraphics(front, fragment, 17, target);\n    return PreparedRectangle(front, vertexId, fragmentId);',
