@@ -6,27 +6,36 @@ const path = require("node:path");
 const os = require("node:os");
 const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
-const Overlay = require("../producers/maclauncher/src/modules/mages/native/windows-checkpoint-overlay");
+const Current = require("../producers/maclauncher/src/modules/mages/native/current-build");
+const descriptor = require("../producers/maclauncher/src/modules/mages/native/current-windows-overlay.json");
 const Session = require("../producers/maclauncher/src/modules/mages/native/windows-checkpoint-session");
 
 const nativeRoot = path.resolve(__dirname, "../producers/maclauncher/src/modules/mages/native");
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 
-test("checkpoint adapters reject mismatched exports and linked outputs without modifying inputs", t => {
-  const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "mages-checkpoint-overlay-"));
-  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  const source = path.join(root, "source"); fs.mkdirSync(source);
-  fs.mkdirSync(path.join(source, ".git"));
-  assert.throws(() => Overlay.applyWindowsCheckpointOverlay(source), /separate source export/);
-  fs.rmdirSync(path.join(source, ".git"));
-  const original = Buffer.from("source from a different version\n");
-  fs.writeFileSync(path.join(source, "CMakeLists.txt"), original);
-  assert.throws(() => Overlay.applyWindowsCheckpointOverlay(source), /checksum/);
-  assert.deepEqual(fs.readFileSync(path.join(source, "CMakeLists.txt")), original);
-  const linked = path.join(root, "linked"); fs.symlinkSync(source, linked);
-  assert.throws(() => Overlay.applyWindowsCheckpointOverlay(linked), /separate source export/);
-  assert.throws(() => Overlay.applyWindowsCheckpointOverlay(path.resolve(__dirname, "../producers/maclauncher/src/external")), /external checkouts/);
-});
+test("the current Windows checkpoint patch validates inputs before writes and supplies the compiled implementation",
+  requirements({ sourceTree: 'producers/maclauncher/src/external/impacto' }), async t => {
+    const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "mages-current-checkpoint-"));
+    t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+    const source = path.join(root, "source"), upstream = path.resolve(__dirname, "../producers/maclauncher/src/external/impacto");
+    fs.mkdirSync(source);
+    for (const item of descriptor.files) {
+      if (item.originalSha256 === null) continue;
+      const original = path.join(upstream, item.path), target = path.join(source, item.path);
+      assert.equal(hash(fs.readFileSync(original)), item.originalSha256);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.copyFileSync(original, target);
+    }
+    const first = path.join(source, "CMakeLists.txt"), original = fs.readFileSync(first);
+    fs.appendFileSync(first, "\nchanged source\n");
+    await assert.rejects(Current.applyCurrentOverlay(source, { logPath: path.join(root, "overlay.log") }), /Pinned dependency source differs/);
+    assert.equal(fs.existsSync(path.join(source, "src/vm/windows-checkpoint.cpp")), false);
+    fs.writeFileSync(first, original);
+    await Current.applyCurrentOverlay(source, { logPath: path.join(root, "overlay.log") });
+    for (const extension of ["cpp", "h"])
+      assert.deepEqual(fs.readFileSync(path.join(source, "src/vm/windows-checkpoint." + extension)),
+        fs.readFileSync(path.join(nativeRoot, "windows-checkpoint." + extension)));
+  });
 
 test("compiled Windows checkpoint instructions consume LEu16 atomically and preserve legacy type widths",
   requirements({ sourceTree: 'producers/maclauncher/src/external/impacto', appleSiliconMacOS: true }), t => {
