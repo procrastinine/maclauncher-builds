@@ -6,6 +6,45 @@
     {
       "schemaVersion": 2,
       "id": "winevulkan-scene",
+      "version": "26.3.0-MCLv6",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "10.15",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "1cded199b256b3989cdacf4db36f13dde9011a35848ea86e360642dd00326e61",
+      "sourceSha256": "bc38018c16dac88736be53b90312eaa43e711e097e3a02f70bff62afd3d03d4f",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "winevulkan-scene-26.3.0-MCLv6-x64.tar.gz",
+        "sha256": "2a80dbc033838c5f3f88955bbc3b6ab296fe479f4b3fc2de2ba302d06c8a1412",
+        "bytes": 439571,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/winevulkan-scene%2Fv26.3.0-MCLv6%2Fx64/winevulkan-scene-26.3.0-MCLv6-x64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "f445a97387537e90d6f56d5e6b30d8ba395aa2aa",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "41840918669",
+        "runAttempt": "1"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "f445a97387537e90d6f56d5e6b30d8ba395aa2aa"
+      },
+      "tag": "winevulkan-scene/v26.3.0-MCLv6/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "winevulkan-scene",
       "version": "26.3.0-MCLv3",
       "arch": "x64",
       "launcherArchitectures": [
