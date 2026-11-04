@@ -1,7 +1,6 @@
 {
   "schemaVersion": 1,
   "repository": "https://github.com/akgunter/crt-royale-reshade",
-  "revision": "7ca7f7cbb7e7d016ca1756d0855879c3b7d0cc05",
   "files": [
     {
       "path": "README.MD",
@@ -165,5 +164,6 @@
       "size": 2191,
       "sha256": "67092eca5adef657f04d8213dea9b33977b2e71b1c4b5b7bd03aee3b28b4fb77"
     }
-  ]
+  ],
+  "gitlink": "producers/maclauncher/src/external/reshade-crt-royale"
 }

@@ -11,22 +11,19 @@
     {
       "path": "src/external/ISFMSLKit",
       "repository": "https://github.com/mrRay/ISFMSLKit",
-      "commit": "3aa93550c3acee0caed3e71c6e54743f1bc9da4f"
+      "gitlink": "producers/maclauncher/src/external/ISFMSLKit"
     },
     {
       "path": "src/external/ISFMSLKit/submodules/ISFGLSLGenerator",
-      "repository": "https://github.com/mrRay/ISFGLSLGenerator",
-      "commit": "2b5507bde4648e3ee5152121e8aeb61ea9a549cb"
+      "repository": "https://github.com/mrRay/ISFGLSLGenerator"
     },
     {
       "path": "src/external/ISFMSLKit/submodules/VVMetalKit",
-      "repository": "https://github.com/mrRay/VVMetalKit",
-      "commit": "7e77f228ce9b5ef03726bdabeae39763b23f52b6"
+      "repository": "https://github.com/mrRay/VVMetalKit"
     },
     {
       "path": "src/external/ISFMSLKit/submodules/PINCache",
       "repository": "https://github.com/mrRay/PINCache",
-      "commit": "41330ff0e4f16e43103aae61e87db16eec03dd20",
       "includes": [
         "Carthage/Checkouts/PINOperation"
       ]

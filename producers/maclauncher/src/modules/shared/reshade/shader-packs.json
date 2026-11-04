@@ -43,10 +43,10 @@
           "requires": []
         }
       ],
-      "revision": "93ddf39b357f5da534ed6d34ba4ec8cc7dcfa361",
       "version": "93ddf39b357f",
       "sourceUrl": "https://github.com/CeeJayDK/SweetFX",
-      "bundledPath": "shader-collection/sweetfx"
+      "bundledPath": "shader-collection/sweetfx",
+      "gitlink": "producers/maclauncher/src/external/reshade-sweetfx"
     },
     {
       "id": "retroarch",
@@ -82,10 +82,10 @@
           "requires": []
         }
       ],
-      "revision": "73dc21fcc9f1e1d6e4bf0f1c5c95b882078d474d",
       "version": "73dc21fcc9f1",
       "sourceUrl": "https://github.com/Matsilagi/RSRetroArch",
-      "bundledPath": "shader-collection/retroarch"
+      "bundledPath": "shader-collection/retroarch",
+      "gitlink": "producers/maclauncher/src/external/reshade-retroarch"
     },
     {
       "id": "quint",
@@ -161,10 +161,10 @@
           "requires": []
         }
       ],
-      "revision": "7ca7f7cbb7e7d016ca1756d0855879c3b7d0cc05",
       "version": "7ca7f7cbb7e7",
       "sourceUrl": "https://github.com/akgunter/crt-royale-reshade",
-      "bundledPath": "shader-collection/crt-royale"
+      "bundledPath": "shader-collection/crt-royale",
+      "gitlink": "producers/maclauncher/src/external/reshade-crt-royale"
     },
     {
       "id": "anime4k",
@@ -199,10 +199,10 @@
           "requires": []
         }
       ],
-      "revision": "7684e9586f8dcc738af08a1cdceb024cc184f426",
       "version": "7684e9586f8d",
       "sourceUrl": "https://github.com/bloc97/Anime4K",
-      "bundledPath": "shader-collection/anime4k"
+      "bundledPath": "shader-collection/anime4k",
+      "gitlink": "producers/maclauncher/src/external/mpv-anime4k"
     },
     {
       "id": "image",

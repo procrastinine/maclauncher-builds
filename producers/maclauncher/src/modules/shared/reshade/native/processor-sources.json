@@ -7,7 +7,7 @@
       "sourcePath": "third_party/reshade",
       "submodulePath": "src/external/macfx-reshade",
       "repository": "https://github.com/crosire/reshade.git",
-      "commit": "7bf9de8b33bcc76c3177007e65d73c72dd0f34c0"
+      "gitlink": "producers/maclauncher/src/external/macfx-reshade"
     },
     {
       "id": "macfx-spirv-headers",
@@ -28,21 +28,21 @@
       "sourcePath": "third_party/reshade-shaders",
       "submodulePath": "src/external/macfx-reshade-shaders",
       "repository": "https://github.com/crosire/reshade-shaders.git",
-      "commit": "fd0022170615ce0d8162d219bff07232fa6dd84f"
+      "gitlink": "producers/maclauncher/src/external/macfx-reshade-shaders"
     },
     {
       "id": "macfx-mako",
       "sourcePath": "third_party/mako",
       "submodulePath": "src/external/macfx-mako",
       "repository": "https://github.com/eugeniosegala/MAKO.git",
-      "commit": "522cccbee6caafc643d2ccfa4ee5c06e4c5ba533"
+      "gitlink": "producers/maclauncher/src/external/macfx-mako"
     },
     {
       "id": "macfx-vkd3d",
       "sourcePath": "third_party/vkd3d",
       "submodulePath": "src/external/macfx-vkd3d",
       "repository": "https://codeberg.org/vkd3d/vkd3d.git",
-      "commit": "fb7f9ff3c1f8d972ee6f1b8c6a92caf6c8ba1e10"
+      "gitlink": "producers/maclauncher/src/external/macfx-vkd3d"
     },
     {
       "id": "macfx-fsr1",
