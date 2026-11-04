@@ -1,3 +1,4 @@
+import {gitlink} from '../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
@@ -11,6 +12,8 @@ if(!['sdk-source','vulkan-source','compiler','out'].every(key=>args[key]))throw 
 const sdk=fs.realpathSync(args['sdk-source']),vulkan=fs.realpathSync(args['vulkan-source']),out=path.resolve(args.out),compiler=path.resolve(args.compiler),backend=args.backend||'vk';
 fs.accessSync(compiler,fs.constants.X_OK);
 if(!source.libraries[backend])throw Error('Choose vk or dx12.');
+source.sdk.revision=gitlink('producers/maclauncher/src/external/fsr3-sdk');
+source.vulkan.revision=execFileSync('git',['-C',path.resolve(here,'../../../../external/krkrsdl2'),'rev-parse',gitlink('producers/maclauncher/src/external/krkrsdl2')+':external/SDL'],{encoding:'utf8'}).trim();
 const git=(directory,...parameters)=>execFileSync('git',['-C',directory,...parameters],{env:{...process.env,GIT_NO_LAZY_FETCH:'1'},maxBuffer: Infinity});
 for(const [directory,pin]of[[sdk,source.sdk],[vulkan,source.vulkan]])if(git(directory,'rev-parse','HEAD').toString().trim()!==pin.revision)throw Error('The source commit does not match '+pin.repository);
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
