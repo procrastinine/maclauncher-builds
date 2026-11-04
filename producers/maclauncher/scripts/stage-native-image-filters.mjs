@@ -39,8 +39,6 @@ export function stageNativeImageFilters({ownedSource,symbols,recipeRoot}){
         owned.set("maclauncher/lens/translate.mjs",recipe);
       }
       const resources=Object.entries(source.ownedFiles||{});
-      if(provider.method==="xegtao"&&!resources.some(([name])=>name==="wrapper.hlsl"))throw Error("The native image shader translation resources are undeclared.");
-      if(["cacao","ffx-dof"].includes(provider.method)&&!["boundary.hlsl","../native/scene-projection.hlsl"].every(required=>resources.some(([name])=>name===required)))throw Error("The native scene projection shader inputs are undeclared.");
       for(const [name]of resources){
         if((!filename(name)&&!sharedInputs.has(name)))throw Error("A native image shader translation resource is invalid.");
         const file=path.join(recipeRoot,recipeName,name);
