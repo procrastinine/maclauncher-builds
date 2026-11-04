@@ -1,0 +1,148 @@
+{
+  "id": "butterscotch",
+  "version": "MCLv8",
+  "arch": "x64",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "butterscotch/MCLv8/x64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "981e740041e59705e33cb738fdb07bf574e343bba6066adedb0d7a51153d7923",
+  "sourceSha256": "981e740041e59705e33cb738fdb07bf574e343bba6066adedb0d7a51153d7923",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "files/bin/butterscotch",
+      "size": 3258016,
+      "sha256": "c4ab7d04bac71e93a2095b9573f602bee4fb665b91610d7da062ac97e8f2a19e",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/licenses/base64.txt",
+      "size": 77,
+      "sha256": "7ba49b6230a862487c1697c234eb34ae6ca618429cb124818af3e953f40fcf0c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/box2d.txt",
+      "size": 1067,
+      "sha256": "68a3e676d7e94093b102d5cba0d4e04af812040d6f230c3db67a6664574e43d2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/butterscotch.txt",
+      "size": 34523,
+      "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bzip2-1.0.8.txt",
+      "size": 1896,
+      "sha256": "c6dbbf828498be844a89eaa3b84adbab3199e342eb5cb2ed2f0d4ba7ec0f38a3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bzip2-headers.txt",
+      "size": 541,
+      "sha256": "74759e2ad9747607ca8572fcea2f68b755495a5d85fc1a641fdd1d733f37a7d3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 572,
+      "sha256": "988c183976a65b79f23712a6f1107060afda73540cc21330703954a263ddb5f3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/FMOD-Vorbis-setup.txt",
+      "size": 1213,
+      "sha256": "03114e7087e00ee433c3b6b4dd0095c2fc6def6c8a62a3aba065c4fd2db90c7b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/JetBrains-Mono.txt",
+      "size": 4399,
+      "sha256": "a76abf002c49097d146e86740a3105a5d00450b1592e820a1109a8c5680cd697",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/Khronos-platform.txt",
+      "size": 1147,
+      "sha256": "438187dca092de4032c1a16524aa4c34c71a0f985a71251a675aad54e77ed561",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/MD5.txt",
+      "size": 946,
+      "sha256": "2beb4b69097fdf649ffc58aba7f00c32089b9492dd2c8a3389d4811fe6ac9985",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/miniaudio.txt",
+      "size": 3294,
+      "sha256": "04bf37b2039eb3640f285e36b981af12052b847ad62da896167ead4d5390f4a3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/miniz-2.txt",
+      "size": 2637,
+      "sha256": "44a8400c146b0c4f159d0a73bc530e5751d01e79f89ec12ebb1995b12245ae09",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/miniz-deflate.txt",
+      "size": 1380,
+      "sha256": "3d67361c281936632c4d657141982440baf62f79d8a74633c1db8af9edbbdefa",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/miniz.txt",
+      "size": 1184,
+      "sha256": "0115478d567121238cf6cc1c0c361926cf07a49d9e4c9e66da97fac6a01646b3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/MojoAL-pitch-conversion.txt",
+      "size": 920,
+      "sha256": "920bcd5d5dd38dd52533592b33151876bba695a63cae82d8f7fffb26a2242a8d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/mojoal.txt",
+      "size": 885,
+      "sha256": "0093a136300d04e7a861aa999fb9a985d45fb779f45620e9092d80bd83d0664b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SHA1.txt",
+      "size": 340,
+      "sha256": "77bc62a94fcec83aed989da4ab0970816a8dd748a5500f2fb069cd109a73f42d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/stb_ds.txt",
+      "size": 2674,
+      "sha256": "c93e551ced34eba731958a404ede9ac46b83a1dca935713fbff0068ed9ba2e4c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/stb_image.txt",
+      "size": 2674,
+      "sha256": "7587efcca32db8f95bf5860dea6dfa4be410ee723e1964db3689c8ddf2a2e4a9",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 4859,
+      "mode": 420,
+      "sha256": "981e740041e59705e33cb738fdb07bf574e343bba6066adedb0d7a51153d7923"
+    }
+  ],
+  "redistribution": "bundle"
+}
