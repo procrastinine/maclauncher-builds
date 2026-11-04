@@ -1,5 +1,5 @@
 import {androidSource,aimSource} from '../lib/android-source.mjs';
-import {includeLicenses,addLicenses} from '../lib/licenses.mjs';
+import {includeLicenses,addLicenses,addLicense} from '../lib/licenses.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -73,6 +73,7 @@ export function packageAndroidArtJavaInput({framework,image,output,work,arch='ar
  const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});for(const [key,name]of Object.entries({bootstrapDex:'hooks-dex.jar',servicesJar:'services.jar',frameworkJar:'framework.jar'}))fs.copyFileSync(built[key],path.join(payload,name),fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);
  includeLicenses(payload,path.join(framework,'licenses'));
  addLicenses(payload,stage.id,android);
+ addLicense(payload,'Android SDK system image',path.join(root,'producers/android-image-data/android-sdk-arm-dbt-license.txt'));
 
  return helperPackage({id:stage.id,version:stage.version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{androidSource:androidSource(),frameworkInputSha256:checked.declaration.manifestSha256,originalImageSha256:json(path.join(root,'producers/android-image-data/source.json')).archive.sha256,jdk:{sha256:jdkPin.sha256},compilerInputs:profile,dexTools:dex,frameworkResourcePreinitVersion:built.frameworkResourcePreinitVersion}});
 }

@@ -1,4 +1,4 @@
-import {addLicense} from '../lib/licenses.mjs';
+import {addLicenses,addLicense} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -29,7 +29,18 @@ export function packageAndroidCommon({build,version,sourceRevision,output}){
    verify(original.path,original);
    for(const data of original.data||[]){if(!/^icudt[0-9]+l\.dat$/.test(data.path))throw Error('Unexpected Android framework native data.');verify(data.path,data);}
   }
-  addLicense(payload,'MacLauncher',path.join(root,'producers/maclauncher/LICENSE'),'MIT');
+  addLicenses(payload,'MacLauncher',root);
+  addLicenses(payload,'SDL3',path.join(payload,'native/SDL3.framework/Versions/A/Resources'));
+  addLicenses(payload,'ASM',path.join(root,'producers/android-inputs/licenses/asm'));
+  addLicenses(payload,'AOSP framework',path.join(root,'producers/android-inputs/licenses/aosp-framework'));
+  addLicenses(payload,'Apache HTTP',path.join(root,'producers/android-inputs/licenses/aosp-apache-http'));
+  addLicenses(payload,'Robolectric portability',path.join(root,'producers/android-inputs/licenses/robolectric-portability'));
+  addLicenses(payload,'fmt',path.join(root,'producers/android-inputs/licenses/aosp-fmt'));
+  addLicenses(payload,'libbase',path.join(root,'producers/android-inputs/licenses/aosp-libbase'));
+  addLicenses(payload,'AOSP native',path.join(root,'producers/android-inputs/licenses/aosp-native'));
+  addLicenses(payload,'Android platform packages',path.join(root,'producers/android-inputs/licenses/platform-packages'));
+  addLicenses(payload,'XmlPull',path.join(root,'producers/android-inputs/licenses/xmlpull'));
+  addLicense(payload,'GLES SGI-B 2.0',path.join(root,'producers/android-inputs/licenses/GLES-SGI-B-2.0.txt'));
 
   const files=[],dependencies=[];let minimumMacOS='0.0';
   for(const name of B.fileInventory(payload)){

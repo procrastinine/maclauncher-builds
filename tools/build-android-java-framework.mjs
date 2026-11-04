@@ -65,6 +65,9 @@ export async function buildAndroidJavaFrameworkInput({output,work}){
  for(const archive of modules.archives){const name=path.basename(archive);fs.mkdirSync(path.join(output,'modules'),{recursive:true});fs.copyFileSync(archive,path.join(output,'modules',name));}
 
  addLicenses(output,profile.id,android);
+ addLicenses(output,'AOSP framework',path.join(root,'producers/android-inputs/licenses/aosp-framework'));
+ addLicenses(output,'Apache HTTP',path.join(root,'producers/android-inputs/licenses/aosp-apache-http'));
+ addLicenses(output,'Robolectric portability',path.join(root,'producers/android-inputs/licenses/robolectric-portability'));
  return {root:output,record:{androidSource:androidSource(),framework:frameworkPin,sources:profile.sources,blueprint:{...blueprintProfile.upstream,driverSha256:blueprintProfile.driverSha256,toolchain:read('go',['version'])},jdk:{sha256:jdkPin.sha256,version:read(path.join(jdk,'bin/java'),['--version']).split('\n')[0]},graphicsRegistrationsSha256:sha(path.join(output,'graphics-registrations.txt')),modules:modules.archives.map(file=>path.basename(file)),dexTools:dexProfile}};
 }
 
