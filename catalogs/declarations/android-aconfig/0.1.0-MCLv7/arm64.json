@@ -1,0 +1,380 @@
+{
+  "id": "android-aconfig",
+  "version": "0.1.0-MCLv7",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "android-aconfig/0.1.0-MCLv7/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "ec921745802f1a110beb9e1e1d2bb45b67e93b16bd7ced58d10951190077ac29",
+  "sourceSha256": "ec921745802f1a110beb9e1e1d2bb45b67e93b16bd7ced58d10951190077ac29",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 17740,
+      "mode": 420,
+      "sha256": "c61460c8130b47660a793f87ffbf6edb6975a9987d3d4dfab9b014cb9b3f5884"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "75eefb1c083dad6e98c519ea90811915e80f0b2592de67eb1d7bc9e240b5a88a"
+    },
+    {
+      "path": "files/bin/aconfig",
+      "size": 2927808,
+      "sha256": "9e9883791a405d6fca276521ed96bd24e4128895ca4bab091b9030231b55f403",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/licenses/aho-corasick-1.1.5-2.txt",
+      "size": 1081,
+      "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/aho-corasick-1.1.5-3.txt",
+      "size": 1211,
+      "sha256": "7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/aho-corasick-1.1.5.txt",
+      "size": 126,
+      "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-aconfig-10.txt",
+      "size": 1078,
+      "sha256": "b85dcd3e453d05982552c52b5fc9e0bdd6d23c6f8e844b984a88af32570b0cc0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-aconfig-11.txt",
+      "size": 1676,
+      "sha256": "39cb0234065c92b9e6cee3830cbb52b1aa289aa8fe9ba2e66730fec5cf05c630",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-aconfig-12.txt",
+      "size": 4016,
+      "sha256": "8eea8287e5876b539670cadb82e99f9a7afddec6f6730811be1daf25d2e9bcfd",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-aconfig-13.txt",
+      "size": 1995,
+      "sha256": "f5062c9a188d81dfe66b56db4182dcf9e4b17c0d9b0d311a8e20b3a1b075c443",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-aconfig-2-2.txt",
+      "size": 620,
+      "sha256": "06dfb2267c545ee17e6456278ecfed89c1383f40487b21f4d69d862cbe6962b8",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-aconfig-2.txt",
+      "size": 14423589,
+      "sha256": "d518ae2d76bc7a1f0cbf0069b8deafb56efc39c2614cab74a859ef0b467f8373",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-aconfig-3-2.txt",
+      "size": 620,
+      "sha256": "7756379fe7bd5562712ba69f5ac27c1d543293775aaeedc9dc48e972484e662d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-aconfig-3.txt",
+      "size": 1267,
+      "sha256": "f32fb3b417a194167cfad068223fc975ba96c5960513a10f66a3c28720aec1df",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-aconfig-4-2.txt",
+      "size": 606,
+      "sha256": "4cb044e752ddd2a0be677828d20e251685ab10ce29634a5dcf2a14c73b3653d7",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-aconfig-4.txt",
+      "size": 20137,
+      "sha256": "23ee78c8bae49cf08ea2f0c84945c66b987ebe4520881fb51b3dad4fb43d07c2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-aconfig-5.txt",
+      "size": 3320,
+      "sha256": "a3966c9410ef94a1efbfa9ec04e9c1994026a70623fbf0885ce36737bfba3b54",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-aconfig-6.txt",
+      "size": 17642,
+      "sha256": "54b212ba1f97f6948fa5486239ab505dd820b02e50cbfd296b4062c8609a70af",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-aconfig-7.txt",
+      "size": 34795,
+      "sha256": "05315fce6c35f79b8a35454828995fa26336f235895ac64557abc028f4ffcea2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-aconfig-8.txt",
+      "size": 730,
+      "sha256": "0ff61769b238634e042ab759dddfd104a8e69d091e3600ae3410e401a6164381",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-aconfig-9.txt",
+      "size": 919,
+      "sha256": "e34c58338bd89d43e709e226610d8f32b3e3c47f4ad9a99a8dc1d4ac7842488e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-aconfig.txt",
+      "size": 1499465,
+      "sha256": "5647be074c8edf7339fd863055923a8fc80bc5610a8d4661ec3b767b9d392c27",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/anstream-1.0.0-2.txt",
+      "size": 1062,
+      "sha256": "6efb0476a1cc085077ed49357026d8c173bf33017278ef440f222fb9cbcb66e6",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/anstream-1.0.0.txt",
+      "size": 11358,
+      "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/anyhow-1.0.104-2.txt",
+      "size": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/anyhow-1.0.104.txt",
+      "size": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bitflags-2.13.2-2.txt",
+      "size": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bitflags-2.13.2.txt",
+      "size": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/cc-1.8.0.txt",
+      "size": 1057,
+      "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/clap-4.6.7.txt",
+      "size": 11349,
+      "sha256": "249fdb6694467dd615b259f7ddde07be3f8ae5a72cecebb0e24f6629af4215fe",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 7887,
+      "sha256": "67ef35d6281c29dea479f6e15dade97b382e5a03773eda990b18f0b22e9c14be",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/either-1.19.0.txt",
+      "size": 1043,
+      "sha256": "7576269ea71f767b99297934c0b2367532690f8c4badc695edf8e04ab6a1e545",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/equivalent-1.0.3.txt",
+      "size": 1049,
+      "sha256": "7365cc8878a1d7ce155a58c4ca09c3d7a6be413efa5334a80ea842912b669349",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/errno-0.3.14.txt",
+      "size": 1054,
+      "sha256": "8764a597675778ddfd4e25f81b08a05dbcf089ac05662df7613fe67f150e3aa2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/foldhash-0.2.0.txt",
+      "size": 856,
+      "sha256": "b1181a40b2a7b25cf66fd01481713bc1005df082c53ef73e851e55071b102744",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/getrandom-0.4.3-2.txt",
+      "size": 1130,
+      "sha256": "523a42c25d245dde9c015f882cec7f4555aad883382a6cf19b4b7d9b2cd5419b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/getrandom-0.4.3.txt",
+      "size": 10849,
+      "sha256": "aaff376532ea30a0cd5330b9502ad4a4c8bf769c539c87ffe78819d188a18ebf",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/hashbrown-0.17.1.txt",
+      "size": 1060,
+      "sha256": "ff8f68cb076caf8cefe7a6430d4ac086ce6af2ca8ce2c4e5a2004d4552ef52a2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/heck-0.5.0.txt",
+      "size": 1071,
+      "sha256": "7b63ecd5f1902af1b63729947373683c32745c16a10e8e6292e2e2dcd7e90ae0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/home-0.5.12.txt",
+      "size": 10860,
+      "sha256": "8ada45cd9f843acf64e4722ae262c622a2b3b3007c7310ef36ac1061a30f6adb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/indexmap-2.14.2.txt",
+      "size": 1049,
+      "sha256": "ecc269ef87fd38a1d98e30bfac9ba964a9dbd9315c3770fed98d4d7cb5882055",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/libc-0.2.191.txt",
+      "size": 1066,
+      "sha256": "123a331b5dbf04c30097fa43b8f858bc85df671fe776de498d01f3d6b7c1f69e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/linux-raw-sys-0.4.15-2.txt",
+      "size": 12243,
+      "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/linux-raw-sys-0.4.15.txt",
+      "size": 881,
+      "sha256": "3290ae0fbc9ddb77d2239121d710f0bb9d31b3b4744e6d97fe01e652b4c1870b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/protobuf-3.7.2.txt",
+      "size": 1058,
+      "sha256": "7f2fa80a60e84f8dc0747abb0e42342f83bded04a20461a636b47c0331b92ddf",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/protobuf-parse-3.7.2.txt",
+      "size": 2842,
+      "sha256": "ea240b0b1a772a073d2f8941f2145dd8f0b5b2d83c700107a84a1f7eb8ac7af1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/rustix-0.38.44.txt",
+      "size": 853,
+      "sha256": "377c2e7c53250cc5905c0b0532d35973392af16ffb9596a41d99d202cf3617c9",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/shlex-2.0.1-2.txt",
+      "size": 1092,
+      "sha256": "4455bf75a91154108304cb283e0fea9948c14f13e20d60887cf2552449dea3b1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/shlex-2.0.1.txt",
+      "size": 566,
+      "sha256": "553fffcd9b1cb158bc3e9edc35da85ca5c3b3d7d2e61c883ebcfa8a65814b583",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/strsim-0.11.1.txt",
+      "size": 1166,
+      "sha256": "1e697ce8d21401fbf1bddd9b5c3fd4c4c79ae1e3bdf51f81761c85e11d5a89cd",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/tempfile-3.27.0.txt",
+      "size": 1056,
+      "sha256": "8b427f5bc501764575e52ba4f9d95673cf8f6d80a86d0d06599852e1a9a20a36",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/tinytemplate-1.2.1.txt",
+      "size": 1057,
+      "sha256": "b6d10b8851a36aa6ec9612a186e56c2fcea0ad7db7b90c3dda1d16ae27c0077e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/unicode-ident-1.0.27.txt",
+      "size": 1995,
+      "sha256": "f7db81051789b729fea528a63ec4c938fdcb93d9d61d97dc8cc2e9df6d47f2a1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/unicode-width-0.2.2.txt",
+      "size": 321,
+      "sha256": "23860c2a7b5d96b21569afedf033469bab9fe14a1b24a35068b8641c578ce24d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/utf8parse-0.2.2.txt",
+      "size": 1052,
+      "sha256": "e4c9b06fa850cb9b540a5e400e9f6394cf15efcf4098144de477d1d3dae10150",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/which-4.4.2.txt",
+      "size": 1056,
+      "sha256": "0041560f5d419c30e1594567f3b7ac2bc078ff6a68f437e0348ba85d9cf99112",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/winapi-util-0.1.11.txt",
+      "size": 1081,
+      "sha256": "cb3c929a05e6cbc9de9ab06a4c57eeb60ca8c724bef6c138c87d3a577e27aa14",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/windows-link-0.2.1-2.txt",
+      "size": 1141,
+      "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/windows-link-0.2.1.txt",
+      "size": 11351,
+      "sha256": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 11950,
+      "mode": 420,
+      "sha256": "ec921745802f1a110beb9e1e1d2bb45b67e93b16bd7ced58d10951190077ac29"
+    }
+  ],
+  "redistribution": "bundle"
+}
