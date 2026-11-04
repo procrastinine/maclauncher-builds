@@ -21,7 +21,7 @@ function lockValue(file,key){
 
 /** Keep the ART output layout and profile on the shared Rust toolchain environment. */
 export function artElfBuildEnvironment({work,target,sdk,jdk,python,env=process.env}){
- const result=rustEnvironment({work,minimumMacOS:'13.0',env:{...env,CARGO_HOME:path.join(work,'cargo')}});
+ const result=rustEnvironment({work,minimumMacOS:'13.0',env});
  result.CARGO_ENCODED_RUSTFLAGS=[result.CARGO_ENCODED_RUSTFLAGS,'--remap-path-prefix='+work+'=/android-art-build','--remap-path-prefix='+root+'=/maclauncher-builds'].join(String.fromCharCode(31));
  return {...result,PATH:path.dirname(python)+path.delimiter+(env.PATH||''),CARGO_BUILD_JOBS:'2',CARGO_TARGET_DIR:target,ANDROID_SDK_ROOT:sdk,JAVA_HOME:jdk};
 }

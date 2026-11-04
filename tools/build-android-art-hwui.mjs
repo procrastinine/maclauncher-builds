@@ -46,7 +46,7 @@ export function acquireHwuiSources({android,common,work}){
 
 /** Use the shared toolchain flags and an owned Cargo cache for original HWUI. */
 export function artHwuiBuildEnvironment({work,env=process.env}){
- return {...rustEnvironment({work,minimumMacOS:'13.0',env:{...env,CARGO_HOME:path.join(work,'cargo')}}),CARGO_BUILD_JOBS:'2'};
+ return {...rustEnvironment({work,minimumMacOS:'13.0',env}),CARGO_BUILD_JOBS:'2'};
 }
 
 /** Stage the original host tool's declared templates and give it their owned working directory. */
@@ -95,8 +95,7 @@ export async function prepareArtHwui({common,image,ndk,work}){
  const maps=['-ffile-prefix-map='+work+'=/android-hwui-build','-fdebug-prefix-map='+work+'=/android-hwui-build'].join(' ');
  run('cmake',['-S',sources.protobuf,'-B',hostProtobufRoot,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_DEPLOYMENT_TARGET=13.0','-DCMAKE_POLICY_VERSION_MINIMUM=3.12','-DCMAKE_CXX_FLAGS='+maps+' -I'+path.join(sources.protobuf,'android'),'-Dprotobuf_BUILD_TESTS=OFF','-Dprotobuf_BUILD_CONFORMANCE=OFF','-Dprotobuf_BUILD_EXAMPLES=OFF','-Dprotobuf_BUILD_PROTOC_BINARIES=OFF','-Dprotobuf_BUILD_LIBPROTOC=ON','-Dprotobuf_BUILD_SHARED_LIBS=OFF']);
  run('cmake',['--build',hostProtobufRoot,'--parallel','2','--target','libprotobuf','libprotoc']);
- const bin=path.join(ndk,'toolchains/llvm/prebuilt/darwin-x86_64/bin'),compile=path.join(work,'compile'),cargoHome=path.join(work,'cargo');fs.mkdirSync(cargoHome);
- const buildEnvironment=artHwuiBuildEnvironment({work});
+ const buildEnvironment=artHwuiBuildEnvironment({work}),bin=path.join(ndk,'toolchains/llvm/prebuilt/darwin-x86_64/bin'),compile=path.join(work,'compile'),cargoHome=buildEnvironment.CARGO_HOME;fs.mkdirSync(cargoHome);
  const tools={...original,clangxx:path.join(bin,'clang++'),ninja:common.tools.ninja,blueprintParser:common.tools.blueprintParser,
   aidl:common.tools.aidl,aconfig:common.tools.aconfig,python:common.tools.python,rustc:read('which',['rustc']),cargo:read('which',['cargo']),cargoHome,
   libclang:path.resolve(bin,'../lib'),foundationHost,hostProtobufRoot};

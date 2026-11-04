@@ -26,7 +26,7 @@ export async function buildAndroidAconfig({project,version,arch,output,work}){
   if(sha(content)!==input.contentSha256)throw Error('Finalized SDK flags differ from their original input: '+input.path);
   const destination=path.join(work,'prebuilts/sdk',input.path);fs.mkdirSync(path.dirname(destination),{recursive:true});fs.writeFileSync(destination,content);
  }
- const env=rustEnvironment({work,minimumMacOS:profile.minimumMacOS,env:{...process.env,CARGO_HOME:path.join(work,'cargo')}});
+ const env=rustEnvironment({work,minimumMacOS:profile.minimumMacOS,env:process.env});
  run('cargo',['fetch','--locked','--manifest-path',path.join(crate,'Cargo.toml')],{env});
  run('cargo',['build','--offline','--locked','--release','--package','aconfig','--manifest-path',path.join(crate,'Cargo.toml'),'--jobs','2'],{env});
  return packageAndroidAconfig({project,version,arch,output,work});
@@ -40,7 +40,7 @@ export async function packageAndroidAconfig({project='android-aconfig',version,a
  if(sha(fs.readFileSync(path.join(crate,'Cargo.lock')))!==sha(fs.readFileSync(new URL('../producers/android-inputs/aconfig/Cargo.lock',import.meta.url))))throw Error('The completed flag generator has a different dependency lock.');
 
 
- const env=rustEnvironment({work,minimumMacOS:profile.minimumMacOS,env:{...process.env,CARGO_HOME:path.join(work,'cargo')}});
+ const env=rustEnvironment({work,minimumMacOS:profile.minimumMacOS,env:process.env});
  return sealRuntime({project,version,arch,output,sourceRoot:source,upstreamRevision:profile.revision,executable:path.join(env.CARGO_TARGET_DIR,'release/aconfig'),maximumMacOS:profile.minimumMacOS,provenance:{sdk:{repository:profile.sdk.repository,revision:profile.sdk.revision,files:profile.sdk.files.map(({path,contentSha256})=>({path,sha256:contentSha256}))},rustLockSha256:sha(fs.readFileSync(path.join(crate,'Cargo.lock')))}});
 }
 recipeMain(import.meta,buildAndroidAconfig);

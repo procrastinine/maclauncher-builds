@@ -41,7 +41,7 @@ index c2fe0f3..a2615c8 100644
 +export function avifBuildEnvironment({tools,repo,source,output,bin,env=process.env}) {
 + const inherited=env.CARGO_ENCODED_RUSTFLAGS?env.CARGO_ENCODED_RUSTFLAGS.split(String.fromCharCode(31)):(env.RUSTFLAGS||'').split(/\s+/).filter(Boolean);
 + const flags=[...inherited,'--cfg','android_soong','-C','panic=abort','-C','relocation-model=pic','--remap-path-prefix='+repo+'=/src/maclauncher','--remap-path-prefix='+source+'=/src/aosp','--remap-path-prefix='+output+'=/src/android-hwui/avif'];
-+ const result={...env,CARGO_HOME:tools.cargoHome,RUSTC:tools.rustc,CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER:path.join(bin,'aarch64-linux-android35-clang'),LIBCLANG_PATH:tools.libclang,CARGO_ENCODED_RUSTFLAGS:flags.join(String.fromCharCode(31)),CARGO_TARGET_DIR:path.join(output,'cargo-target')};
++ const result={...env,RUSTC:tools.rustc,CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER:path.join(bin,'aarch64-linux-android35-clang'),LIBCLANG_PATH:tools.libclang,CARGO_ENCODED_RUSTFLAGS:flags.join(String.fromCharCode(31)),CARGO_TARGET_DIR:path.join(output,'cargo-target')};
 + delete result.RUSTFLAGS;return result;
 +}
 diff --git a/src/modules/android/native/hwui/buildStatics.mjs b/src/modules/android/native/hwui/buildStatics.mjs

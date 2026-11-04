@@ -22,7 +22,7 @@ export async function buildArtInput({project,arch,version,output,work}){
  fs.copyFileSync(path.join(source,'Cargo.lock'),path.join(crate,'Cargo.lock'));
  // Resolve the isolated original crate from the upstream lock, then ensure that
  // every fetched package retains the exact version and checksum in that lock.
- const env=rustEnvironment({work,minimumMacOS:descriptor.minimumMacOS,env:{...process.env,CARGO_HOME:path.join(work,'cargo')}});
+ const env=rustEnvironment({work,minimumMacOS:descriptor.minimumMacOS,env:process.env});
  run('cargo',['fetch','--manifest-path',path.join(crate,'Cargo.toml')],{env});
  const packages=text=>text.split(/^\[\[package\]\]\s*$/m).slice(1).map(block=>Object.fromEntries([...block.matchAll(/^(name|version|source|checksum) = "([^"]+)"$/gm)].map(match=>[match[1],match[2]])));
  const upstream=packages(fs.readFileSync(path.join(source,'Cargo.lock'),'utf8'));

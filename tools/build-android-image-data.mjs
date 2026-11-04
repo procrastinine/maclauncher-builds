@@ -25,7 +25,7 @@ export function buildImageDataTool({work}){
  fs.mkdirSync(path.join(crate,'src'));fs.renameSync(path.join(crate,'main.rs'),path.join(crate,'src/main.rs'));fs.renameSync(path.join(crate,'tree.rs'),path.join(crate,'src/tree.rs'));
  fs.symlinkSync(upstream,path.join(crate,'src/upstream'),'dir');
  fs.copyFileSync(path.join(upstream,'Cargo.lock'),path.join(crate,'Cargo.lock'));
- const env={...rustEnvironment({work,minimumMacOS:'13.0',env:{...process.env,CARGO_HOME:path.join(work,'cargo')}}),CARGO_BUILD_JOBS:'2',AIM_REVISION:profile.revision};
+ const env={...rustEnvironment({work,minimumMacOS:'13.0',env:process.env}),CARGO_BUILD_JOBS:'2',AIM_REVISION:profile.revision};
  run('cargo',['fetch','--manifest-path',path.join(crate,'Cargo.toml')],{env});
  const packages=text=>text.split(/^\[\[package\]\]\s*$/m).slice(1).map(block=>Object.fromEntries([...block.matchAll(/^(name|version|source|checksum) = "([^"]+)"$/gm)].map(match=>[match[1],match[2]])));
  const original=packages(fs.readFileSync(path.join(upstream,'Cargo.lock'),'utf8'));

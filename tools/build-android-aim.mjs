@@ -15,7 +15,7 @@ const producer=path.join(root,'producers/maclauncher');
 const read=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8',...options}).trim();
 /** Use the shared Rust toolchain maps while retaining this producer's paths and profile. */
 export function aimBuildEnvironment({work,upstream,sdk,python,minimumMacOS='26.0',env=process.env}){
- const cargo=path.join(work,'cargo'),result=rustEnvironment({work,minimumMacOS,env:{...env,CARGO_HOME:cargo}});
+ const result=rustEnvironment({work,minimumMacOS,env});
  const maps=['--remap-path-prefix='+work+'=/aim-build','--remap-path-prefix='+root+'=/maclauncher-builds'];
  result.CARGO_ENCODED_RUSTFLAGS=[result.CARGO_ENCODED_RUSTFLAGS,...maps].join(String.fromCharCode(31));
  return {...result,CARGO_BUILD_JOBS:'2',SDKROOT:env.SDKROOT||read('xcrun',['--sdk','macosx','--show-sdk-path'],{env}),PATH:path.dirname(python)+path.delimiter+(env.PATH||''),CARGO_TARGET_DIR:path.join(upstream,'target'),ANDROID_SDK_ROOT:sdk,MACLAUNCHER_AIM_ROOT:upstream};
