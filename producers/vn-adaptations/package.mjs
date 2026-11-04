@@ -1,3 +1,4 @@
+import {gitlink} from '../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -43,6 +44,7 @@ function inventory(root){
 export async function packageRuntime({project,input,output,arch='arm64'}){
   verifyInputs();
   const pin=source.projects[project];
+  if(project==='krkrsdl2'){pin.upstream.revision=gitlink('producers/maclauncher/src/external/krkrsdl2');pin.polyfill.revision=gitlink('producers/vn-adaptations/upstreams/kag3');}
   if(!pin||!['arm64','x64'].includes(arch)||!path.isAbsolute(input||'')||!path.isAbsolute(output||''))throw Error('Select a supported project, CPU and absolute input/output paths.');
   input=fs.realpathSync(input);
   if(fs.existsSync(output)||output===input||output.startsWith(input+path.sep))throw Error('Choose a new immutable output outside the input tree.');

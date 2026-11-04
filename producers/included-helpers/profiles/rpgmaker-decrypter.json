@@ -10,19 +10,6 @@
   "source": {
     "schemaVersion": 1,
     "profile": "3.0.0-465c88c3-net8.0.32-osx-arm64-v1",
-    "version": "3.0.0-dev.465c88c3+465c88c304cac0b1516a3fbfb0b2a87fb0517736",
-    "source": {
-      "url": "https://codeload.github.com/uuksu/RPGMakerDecrypter/tar.gz/465c88c304cac0b1516a3fbfb0b2a87fb0517736",
-      "revision": "465c88c304cac0b1516a3fbfb0b2a87fb0517736",
-      "sha256": "6b66821e6d77d75bb7757bc60f224436d2743103717545cc6634c40864c0a612"
-    },
-    "sdk": {
-      "version": "8.0.426",
-      "runtimeVersion": "8.0.32",
-      "url": "https://builds.dotnet.microsoft.com/dotnet/Sdk/8.0.426/dotnet-sdk-8.0.426-osx-arm64.tar.gz",
-      "sha512": "17cd408c92eb6ceedc06d41fa726c783b9be020c6ae5f3624ad3a0b2c26a78aa7d09f38338003163a72bb14d437731debf533c0451a5c6a05de3b1e37a3aa50a",
-      "sha256": "c4e88383ff1ffcf9e80d91367a83690f77dff32a68c742fab6fa5644173875aa"
-    },
     "runtimeIdentifier": "osx-arm64",
     "propertiesSha256": "69b8ec03a833efcda1bf3297554dbe99da0714ddcbce4ff20602eb425d6bd7dc",
     "targetsSha256": "ca287b97ba69668ac1788aa81c76d7a677da6005587b2d1dcf232900e2dfdc27",

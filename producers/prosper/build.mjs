@@ -1,3 +1,4 @@
+import {gitlink} from '../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -7,7 +8,10 @@ import {downloadBytes,retryNetwork} from '../../tools/download.mjs';
 
 const root=path.resolve(import.meta.dirname,'../..');
 export const recipe=JSON.parse(fs.readFileSync(new URL('./source.json',import.meta.url)));
+recipe.source.revision=gitlink(recipe.source.path);
 export const inputs=JSON.parse(fs.readFileSync(new URL('./dependencies.json',import.meta.url)));
+inputs.artifacts=JSON.parse(fs.readFileSync(new URL('../anyps5/dependencies.json',import.meta.url))).artifacts.filter(entry=>entry.id==='ffmpeg-macos-x64');
+for(const entry of inputs.dependencies)if(entry.reusePath)Object.defineProperty(entry,'revision',{enumerable:true,get:()=>git(path.join(root,'sources/anyps5'),['rev-parse','HEAD:'+entry.reusePath.replace('sources/anyps5/','')]).trim()});
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
 const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',maxBuffer: Infinity});

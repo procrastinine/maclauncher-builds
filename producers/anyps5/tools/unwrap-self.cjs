@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: GPL-2.0-only
 // Adapted from AnyPS5 tools/unwrap_self.py at
-// https://github.com/boykopovar/AnyPS5/tree/e7e3e9c1984c293f06bff08428b8c89b7b932ac2
+// https://github.com/boykopovar/AnyPS5
 // Copyright and license notices are retained in the accompanying AnyPS5 license.
 "use strict";
 const fs = require("node:fs");

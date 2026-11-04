@@ -1,3 +1,4 @@
+import {gitlink} from '../../lib/pins.mjs';
 import {addLicense} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -44,7 +45,7 @@ export function stageData({project,output,version=profiles[project]?.version}){
  try{
   const source=copySources(profile,output);addLicense(output,project,path.join(root,profile.source,profile.license),profile.licenseName);const files=inventory(output),notices=[{name:project,license:profile.licenseName,path:profile.license,sourceUrl:source.repository}];
   const manifest={schemaVersion:1,kind:'data',managerId:project,version,arch:'universal',minimumMacOS:profile.minimumMacOS,
-   sourceRevision:source.revision,sourceUrl:source.repository,entryRelative:profile.entry,files,loveVersion:'11.5'};
+   sourceRevision:gitlink('producers/engine-adaptations/sources/VNDS-LOVE'),sourceUrl:source.repository,entryRelative:profile.entry,files,loveVersion:'11.5'};
   const declaration=seal(project,version,'universal',profile.minimumMacOS,output,manifest);
   declaration.sourceRelative='manifest.json';validateDeclaration(declaration);return declaration;
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}

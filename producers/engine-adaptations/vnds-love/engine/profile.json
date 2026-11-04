@@ -2,8 +2,7 @@
   "schemaVersion": 1,
   "profile": "0.0.13-838e47b-mac-v1",
   "engineVersion": "0.0.13",
-  "sourceRevision": "838e47b7b47ed8d019cdaaa191f4953324e75540",
-  "sourceUrl": "https://github.com/ajusa/VNDS-LOVE/tree/838e47b7b47ed8d019cdaaa191f4953324e75540",
+  "sourceUrl": "https://github.com/ajusa/VNDS-LOVE",
   "sourceFiles": {
     "src/audio.moon": "fa62b87a88b1bcd2bd3388a87243c22a962402f3d2a4ebdd7f9a8ad0ba0a2562",
     "src/choose.moon": "e9f3a4ae5b58d4f5ddd90b3fdc4bfa8f5898baf0707e7d5cb2be6ba31c400646",
@@ -58,7 +57,6 @@
   },
   "compiler": {
     "version": "MoonScript 0.7.0",
-    "sourceRevision": "b0fc077344b3bd3dc6fd503eee0ea05cd604f0c6",
     "sourceFiles": 164,
     "luaJit": "LuaJIT 2.1.1788856981",
     "lpeg": "1.1.0"

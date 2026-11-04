@@ -1,3 +1,4 @@
+import {gitlink} from '../../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -6,6 +7,7 @@ import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {checkSources} from './package.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'../../..'),recipe=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'source.json')));
+recipe.source.revision=gitlink(recipe.source.path);
 export function build({config,check=false}){
  const result=checkSources();
  if(check)return result;

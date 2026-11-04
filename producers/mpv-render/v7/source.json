@@ -5,7 +5,6 @@
   "source": {
     "path": "producers/maclauncher/src/external/mpv-player",
     "repository": "https://github.com/mpv-player/mpv.git",
-    "revision": "41f6a645068483470267271e1d09966ca3b9f413",
     "license": "GPL-2.0-or-later, LGPL-2.1-or-later"
   },
   "architecture": "arm64",
@@ -130,11 +129,6 @@
     "entry": "producers/mpv-render/v7/maclauncher/scripts/build-mpv-library.cjs",
     "schema": 1,
     "repository": "https://github.com/mpv-player/mpv.git",
-    "revision": "41f6a645068483470267271e1d09966ca3b9f413",
-    "backports": [
-      "75b2ccfeb1ce4ed5a40ac9860fa74f3d1265e13f",
-      "c5d391adba7bd024954d0df1e0405f5749f4d4ca"
-    ],
     "patches": [
       {
         "path": "src/modules/video/native/mpv-frame-metadata.patch",

@@ -1,7 +1,6 @@
 {
   "schemaVersion": 1,
   "profile": "0.0.13-838e47b-mac-v1",
-  "sourceRevision": "838e47b7b47ed8d019cdaaa191f4953324e75540",
   "loveVersion": "11.5",
   "files": {
     "audio.lua": "ead0eddc0e20ccc18ff222b13bc8885f6fec0922ef85ac11619a70735ceb9f1d",

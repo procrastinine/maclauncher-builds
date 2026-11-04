@@ -2,7 +2,6 @@
   "schemaVersion": 1,
   "id": "vnds-love",
   "repository": "https://github.com/ajusa/VNDS-LOVE",
-  "revision": "838e47b7b47ed8d019cdaaa191f4953324e75540",
   "files": {
     "engine/audio.lua": "ead0eddc0e20ccc18ff222b13bc8885f6fec0922ef85ac11619a70735ceb9f1d",
     "engine/bundle-profile.json": "928f344ddd2fe548393a030e0e1d37b613d194169a9a363b7d08b0d034a89a95",

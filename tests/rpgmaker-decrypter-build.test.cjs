@@ -37,7 +37,7 @@ test("publish pins upstream identity and omits private debug records independent
     "-p:Deterministic=true", "-p:InformationalVersion=" + Build.PIN.informationalVersion]) assert.ok(args.includes(value));
   const props = fs.readFileSync(require.resolve("../producers/included-helpers/rpgmaker-decrypter/decrypter-build.props"), "utf8");
   assert.match(props, /<PathMap>\$\(MSBuildThisFileDirectory\)=\/_\/RPGMakerDecrypter<\/PathMap>/);
-  assert.match(props, /<SourceRevisionId>465c88c304cac0b1516a3fbfb0b2a87fb0517736<\/SourceRevisionId>/);
+  assert.match(props, /<SourceRevisionId>@REVISION@<\/SourceRevisionId>/);
   assert.equal(args.some(arg => /--(?:self-contained|no-restore)/.test(arg)), true);
   assert.equal(Build.PIN.sdk.runtimeVersion, "8.0.32");
   const targets = fs.readFileSync(require.resolve("../producers/included-helpers/rpgmaker-decrypter/decrypter-build.targets"), "utf8");

@@ -1,3 +1,4 @@
+import {gitlink} from '../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -13,6 +14,7 @@ const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 // Only the matching producer declaration selects a new payload format.
 function selectPayload(input, temporary) {
  const pinBytes=fs.readFileSync(path.join(producer,'source.json')),pin=JSON.parse(pinBytes);
+pin.source.revision=gitlink(pin.source.path);
  const source=JSON.parse(fs.readFileSync(path.join(input,'source.json'))),runtime=JSON.parse(fs.readFileSync(path.join(input,'runtime.json')));
  const matched=source.producerInputs?.some(file=>file.path==='source.json'&&file.sha256===digest(pinBytes));
  const python=matched?pin.runtimePython:null,external=matched?pin.runtimeSource:null,metal=matched?pin.runtimeMetal:null;
@@ -74,6 +76,7 @@ export async function packageNxNative({input,outputDirectory,catalogFile,buildOu
  try {
   const original=Bundled.validateManifest(JSON.parse(fs.readFileSync(path.join(input,'manifest.json'))));
   const pin=JSON.parse(fs.readFileSync(path.join(producer,'source.json')));
+pin.source.revision=gitlink(pin.source.path);
   if(![pin.id,...(pin.previousRuntimeIds||[])].includes(original.managerId))throw Error('The package belongs to another project.');
   const bytes=fs.readFileSync(path.join(input,'manifest.json'));
   Bundled.verifyPayload(input,{files:[...original.files,{path:'manifest.json',size:bytes.length,mode:0o644,sha256:digest(bytes)}]});

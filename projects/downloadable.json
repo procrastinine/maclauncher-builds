@@ -198,9 +198,7 @@
         "url": "https://github.com/hahnlee/aim",
         "repository": "hahnlee/aim",
         "pin": {
-          "file": "producers/maclauncher/src/modules/android/providers/aim/source.json",
-          "pointer": "/commit",
-          "repositoryPointer": "/repository"
+          "gitlink": "producers/maclauncher/src/external/aim"
         }
       }
     ],
@@ -818,8 +816,7 @@
         "url": "https://github.com/krkrsdl2/krkrsdl2",
         "repository": "krkrsdl2/krkrsdl2",
         "pin": {
-          "file": "producers/vn-adaptations/source.json",
-          "pointer": "/projects/krkrsdl2/upstream/revision"
+          "gitlink": "producers/maclauncher/src/external/krkrsdl2"
         }
       },
       {
@@ -828,8 +825,7 @@
         "url": "https://github.com/krkrsdl2/kag3",
         "repository": "krkrsdl2/kag3",
         "pin": {
-          "file": "producers/vn-adaptations/source.json",
-          "pointer": "/projects/krkrsdl2/polyfill/revision"
+          "gitlink": "producers/vn-adaptations/upstreams/kag3"
         }
       }
     ],
@@ -1020,8 +1016,7 @@
         "url": "https://github.com/YuriSizuku/OnscripterYuri",
         "repository": "YuriSizuku/OnscripterYuri",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/onsyuri/runtime/portable-build-v3.json",
-          "pointer": "/engine/revision"
+          "gitlink": "producers/maclauncher/src/external/onscripter-yuri"
         }
       }
     ],
@@ -1202,8 +1197,7 @@
         "url": "https://github.com/kichikuou/sys3c",
         "repository": "kichikuou/sys3c",
         "pin": {
-          "file": "producers/maclauncher/src/modules/alicesoft/decompiler-profiles.json",
-          "pointer": "/0/upstreamRevision"
+          "gitlink": "producers/maclauncher/src/external/sys3c"
         }
       }
     ],
@@ -1407,8 +1401,7 @@
         "url": "https://github.com/kichikuou/xsys35c",
         "repository": "kichikuou/xsys35c",
         "pin": {
-          "file": "producers/maclauncher/src/modules/alicesoft/decompiler-profiles.json",
-          "pointer": "/1/upstreamRevision"
+          "gitlink": "producers/maclauncher/src/external/xsys35c"
         }
       }
     ],
@@ -2212,9 +2205,7 @@
         "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "pin": {
-          "file": "producers/maclauncher/src/modules/crossover/temporal/fidelityfx/source.json",
-          "pointer": "/sdk/revision",
-          "repositoryPointer": "/sdk/repository"
+          "gitlink": "producers/maclauncher/src/external/fsr3-sdk"
         }
       },
       {
@@ -2374,8 +2365,8 @@
         "url": "https://github.com/uuksu/RPGMakerDecrypter",
         "repository": "uuksu/RPGMakerDecrypter",
         "pin": {
-          "file": "producers/included-helpers/profiles/rpgmaker-decrypter.json",
-          "pointer": "/source/source/revision"
+          "file": "producers/included-helpers/rpgmaker-decrypter/decrypter-source.json",
+          "pointer": "/source/revision"
         }
       }
     ],

@@ -1,11 +1,10 @@
 {
   "schemaVersion": 1,
   "profile": "3.0.0-465c88c3-net8.0.32-osx-arm64-v1",
-  "informationalVersion": "3.0.0-dev.465c88c3+465c88c304cac0b1516a3fbfb0b2a87fb0517736",
   "source": {
-    "url": "https://codeload.github.com/uuksu/RPGMakerDecrypter/tar.gz/465c88c304cac0b1516a3fbfb0b2a87fb0517736",
     "revision": "465c88c304cac0b1516a3fbfb0b2a87fb0517736",
-    "sha256": "6b66821e6d77d75bb7757bc60f224436d2743103717545cc6634c40864c0a612"
+    "sha256": "6b66821e6d77d75bb7757bc60f224436d2743103717545cc6634c40864c0a612",
+    "repository": "https://github.com/uuksu/RPGMakerDecrypter"
   },
   "sdk": {
     "version": "8.0.426",

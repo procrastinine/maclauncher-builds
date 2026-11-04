@@ -198,9 +198,6 @@
 	path = producers/maclauncher/src/external/reshade-sweetfx
 	url = https://github.com/CeeJayDK/SweetFX
 
-[submodule "producers/maclauncher/src/external/RPGMakerDecrypter"]
-	path = producers/maclauncher/src/external/RPGMakerDecrypter
-	url = https://github.com/uuksu/RPGMakerDecrypter.git
 
 [submodule "producers/maclauncher/src/external/sgsr2"]
 	path = producers/maclauncher/src/external/sgsr2

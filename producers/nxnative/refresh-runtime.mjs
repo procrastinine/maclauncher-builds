@@ -1,3 +1,4 @@
+import {gitlink} from '../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -8,6 +9,7 @@ import {pathToFileURL} from 'node:url';
 const require=createRequire(import.meta.url),B=require('../../lib/bundled-native.cjs');
 const Native=require('../../lib/local-native.cjs');
 const producer=import.meta.dirname,pin=JSON.parse(fs.readFileSync(path.join(producer,'source.json')));
+pin.source.revision=gitlink(pin.source.path);
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const json=(file,value)=>fs.writeFileSync(file,JSON.stringify(value,null,2)+'\n');
 const run=(tool,args)=>execFileSync(tool,args,{stdio:'inherit'});

@@ -1,3 +1,4 @@
+import {gitlink} from '../../lib/pins.mjs';
 import {addLicense} from '../../lib/licenses.mjs';
 import fs from 'node:fs/promises';
 import { constants as fsConstants } from 'node:fs';
@@ -58,6 +59,7 @@ async function extractTar(archive, destination, selected) {
 
 async function verifySource(input) {
   const source = path.join(repository, input.path);
+  input.revision=input.path.startsWith('sources/anyps5/')?await run('git',['-C',path.join(repository,'sources/anyps5'),'rev-parse','HEAD:'+input.path.slice('sources/anyps5/'.length)]):gitlink(input.path);
   const revision = await run('git', ['-C', source, 'rev-parse', 'HEAD']);
   const origin = await run('git', ['-C', source, 'remote', 'get-url', 'origin']);
   const status = await run('git', ['-C', source, 'status', '--porcelain', '--untracked-files=all']);

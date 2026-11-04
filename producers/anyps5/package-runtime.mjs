@@ -1,3 +1,4 @@
+import {gitlink} from '../../lib/pins.mjs';
 import {addLicense} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -12,7 +13,8 @@ import {buildRuntime} from './build-runtime.mjs';
 const require=createRequire(import.meta.url),Native=require('../../lib/local-native.cjs');
 const root=path.resolve(import.meta.dirname,'../..');
 const recipe=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'source.json')));
-const dependencies=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'dependencies.json')));
+recipe.source.revision=gitlink(recipe.source.path);
+const {inputs:dependencies}=await import('./source-projection.mjs');
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const json=value=>JSON.stringify(value,null,2)+'\n';
 const run=(command,args)=>execFileSync(command,args,{encoding:'utf8',stdio:['ignore','pipe','pipe']});

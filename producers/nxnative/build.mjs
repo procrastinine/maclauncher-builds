@@ -1,3 +1,4 @@
+import {gitlink} from '../../lib/pins.mjs';
 import {addLicense} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -14,6 +15,7 @@ const Native = require('../../lib/local-native.cjs');
 const MachO = require('../maclauncher/src/modules/shared/runtime/macho-load-commands.js');
 const producer = import.meta.dirname, repository = path.resolve(producer, '../..');
 const pin = JSON.parse(fs.readFileSync(path.join(producer, 'source.json')));
+pin.source.revision=gitlink(pin.source.path);
 const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const json = (file, value) => fs.writeFileSync(file, JSON.stringify(value, null, 2) + '\n');
 const read = (tool, args, options = {}) => execFileSync(tool, args, {encoding:'utf8', ...options}).trim();

@@ -4,7 +4,6 @@
   "source": {
     "path": "sources/anyps5",
     "repository": "https://github.com/boykopovar/AnyPS5.git",
-    "revision": "de004fed720ab6dadff66a044008b47524cb0b3f",
     "license": "GPL-2.0-only",
     "committedAt": "2026-10-28T00:32:37.000Z"
   },

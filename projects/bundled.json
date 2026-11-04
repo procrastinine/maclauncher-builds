@@ -459,9 +459,7 @@
         "provider": "github",
         "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/lens/source.json",
-          "pointer": "/commit",
-          "repositoryPointer": "/repository"
+          "gitlink": "producers/maclauncher/src/external/fsr3-sdk"
         }
       },
       {
@@ -500,9 +498,7 @@
         "url": "https://github.com/UzenUPoZiTiV4ik/fsr4-native-macos",
         "repository": "UzenUPoZiTiV4ik/fsr4-native-macos",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/fsr4/source.json",
-          "pointer": "/commit",
-          "repositoryPointer": "/repository"
+          "gitlink": "producers/maclauncher/src/external/fsr4-metal"
         }
       },
       {
@@ -581,9 +577,7 @@
         "url": "https://github.com/intel/xess",
         "repository": "intel/xess",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/xess/source.json",
-          "pointer": "/commit",
-          "repositoryPointer": "/repository"
+          "gitlink": "producers/maclauncher/src/external/xess"
         }
       },
       {
@@ -948,8 +942,7 @@
         "url": "https://github.com/code-disaster/steamworks4j",
         "repository": "code-disaster/steamworks4j",
         "pin": {
-          "file": "producers/maclauncher/src/modules/java/runtime/steamworks/versions.json",
-          "pointer": "/0/sourceRevision"
+          "gitlink": "producers/maclauncher/src/external/source-revisions/steamworks4j"
         }
       },
       {

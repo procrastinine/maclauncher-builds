@@ -3,7 +3,7 @@ const {addLicense} = require('../../../../../lib/licenses.mjs');
 // The result is a managed media runtime, separate from launcher resources.
 const fs = require('node:fs'), path = require('node:path'), {execFileSync} = require('node:child_process');
 const Native = require('../src/modules/shared/runtime/local-native');
-const Stage = require('./native-binary-tools.cjs');
+const Stage = require('../../../../maclauncher/scripts/native-binary-tools.cjs');
 const {versionAtLeast} = require('../src/modules/shared/runtime/bundled-native');
 const root = path.resolve(__dirname, '..');
 const sourceFiles = ['mpv-render.mm', 'gpu-surface.mm', 'gpu-surface.hpp', 'mpv-frame-metadata.h'];
@@ -69,7 +69,7 @@ function stage({library,referenceExecutable,dependencyRoots=[],output,version,so
       intermediateColor:{primaries:'bt2020',transfer:'pq',referenceWhite:203,encodingPeak:10000,format:'rgba16float'},
       outputColor:{primaries:'display-p3',transfer:'linear',format:'rgba16float',headroom:'display'},
       scaleFilters:info.scaleFilters,librarySource:{...source,inputSha256:originalHashes.get(library),verifiedBuild:source.build?.librarySha256===originalHashes.get(library)},
-      headerSource:{repository:'https://github.com/mpv-player/mpv.git',commit:'41f6a645068483470267271e1d09966ca3b9f413'},
+      headerSource:{repository:'https://github.com/mpv-player/mpv.git',commit:require('./build-mpv-library.cjs').REVISION},
       ownedSources:sourceFiles.map(file=>({file,sha256:Native.hashFile(path.join(root,'src/modules/video/native',file))})),
       ownedHeaders:headerFiles.map(file=>({file,sha256:Native.hashFile(path.join(root,file))})),
       images:[{path:path.relative(output,executable),sha256:Native.hashFile(executable)},...[...processed].map(target=>({path:path.relative(output,target),sha256:Native.hashFile(target),inputSha256:originalHashes.get(images.get(target))}))]};

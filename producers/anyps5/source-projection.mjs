@@ -1,3 +1,4 @@
+import {gitlink} from '../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -6,7 +7,9 @@ import {createHash} from 'node:crypto';
 
 const root=path.resolve(import.meta.dirname,'../..');
 export const recipe=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'source.json'),'utf8'));
+recipe.source.revision=gitlink(recipe.source.path);
 export const inputs=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'dependencies.json'),'utf8'));
+for(const entry of inputs.dependencies)Object.defineProperty(entry,'revision',{enumerable:true,get:()=>git(path.join(root,recipe.source.path),['rev-parse','HEAD:'+entry.path]).trim()});
 const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',maxBuffer: Infinity,stdio:['ignore','pipe','pipe']});
 
 export function writeChanged(file,bytes,mode=0o644){

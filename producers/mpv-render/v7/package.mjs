@@ -1,3 +1,4 @@
+import {gitlink} from '../../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -7,6 +8,7 @@ import {pathToFileURL} from 'node:url';
 import {pack,catalog} from '../../../tools/runtime-package.mjs';
 const require=createRequire(import.meta.url),B=require('../../../lib/bundled-native.cjs'),Native=require('../../../lib/local-native.cjs');
 const recipe=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'source.json'))),root=path.resolve(import.meta.dirname,'../../..');
+recipe.source.revision=gitlink(recipe.source.path);
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const json=value=>JSON.stringify(value,null,2)+'\n';
 function filesIn(root,prefix=''){

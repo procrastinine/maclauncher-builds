@@ -17,13 +17,11 @@
     "krkrsdl2": {
       "version": "MCLv1-1028-kag3-1",
       "upstream": {
-        "url": "https://github.com/krkrsdl2/krkrsdl2",
-        "revision": "124bdf841f09e7ce02aa99b7b55791a0f7a900ff"
+        "url": "https://github.com/krkrsdl2/krkrsdl2"
       },
       "inputManifestSha256": "c42b4581fc50c801452f9a068d30d440481f3272f27fa4c29817a79c4c1e5539",
       "polyfill": {
-        "url": "https://github.com/krkrsdl2/kag3",
-        "revision": "fe6d40e9a1667293ebb053af7f06374b7dac9292"
+        "url": "https://github.com/krkrsdl2/kag3"
       }
     }
   },

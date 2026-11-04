@@ -1,8 +1,9 @@
 // Build the managed libmpv adapter from an exact upstream export and owned overlays.
 const fs = require("node:fs"), path = require("node:path"), crypto = require("node:crypto");
 const { execFileSync, spawnSync } = require("node:child_process");
-const REVISION = "41f6a645068483470267271e1d09966ca3b9f413";
-const BACKPORTS = ["75b2ccfeb1ce4ed5a40ac9860fa74f3d1265e13f", "c5d391adba7bd024954d0df1e0405f5749f4d4ca"];
+const {gitlink}=require('../../../../../lib/pins.mjs');
+const REVISION = gitlink('producers/maclauncher/src/external/mpv-player');
+const BACKPORTS = require('../../source.json').backports;
 const PATCHES = ["mpv-frame-metadata.patch", "mpv-render-layers.patch"];
 const OPTIONS = ["--buildtype=release", "--wrap-mode=nofallback", "-Dlibmpv=true", "-Dcplayer=false",
   "-Dbuild-date=false", "-Dtests=false", "-Dmanpage-build=disabled", "-Dhtml-build=disabled", "-Dpdf-build=disabled",

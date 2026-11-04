@@ -8,8 +8,8 @@
     <Version>3.0.0-dev.465c88c3</Version>
     <AssemblyVersion>3.0.0.0</AssemblyVersion>
     <FileVersion>3.0.0.0</FileVersion>
-    <SourceRevisionId>465c88c304cac0b1516a3fbfb0b2a87fb0517736</SourceRevisionId>
-    <InformationalVersion>3.0.0-dev.465c88c3+465c88c304cac0b1516a3fbfb0b2a87fb0517736</InformationalVersion>
+    <SourceRevisionId>@REVISION@</SourceRevisionId>
+    <InformationalVersion>3.0.0-dev.465c88c3+@REVISION@</InformationalVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <PathMap>$(MSBuildThisFileDirectory)=/_/RPGMakerDecrypter</PathMap>
     <PublishSingleFile>true</PublishSingleFile>

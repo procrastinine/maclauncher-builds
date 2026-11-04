@@ -5,7 +5,10 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 
-const PIN = Object.freeze(require("./decrypter-source.json"));
+const inputPin=require('./decrypter-source.json');
+inputPin.source.url='https://codeload.github.com/uuksu/RPGMakerDecrypter/tar.gz/'+inputPin.source.revision;
+inputPin.informationalVersion='3.0.0-dev.'+inputPin.source.revision.slice(0,8)+'+'+inputPin.source.revision;
+const PIN=Object.freeze(inputPin);
 function platformPin(architecture) {
   const target=require("./decrypter-platforms.json").architectures[architecture];
   if(!target)throw new Error("Choose arm64 or x64 for RPGMakerDecrypter.");
@@ -55,7 +58,7 @@ function prepareSource({ sourcePath, outputDir, includeLocks = true, architectur
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.copyFileSync(path.join(original, file.path), target);
   }
-  fs.copyFileSync(PROPS, path.join(owned, "Directory.Build.props"));
+  fs.writeFileSync(path.join(owned, "Directory.Build.props"),fs.readFileSync(PROPS,"utf8").replaceAll("@REVISION@",PIN.source.revision));
   fs.copyFileSync(TARGETS, path.join(owned, "Directory.Build.targets"));
   if (includeLocks) for (const project of PROJECTS)
     fs.copyFileSync(path.join(architecture?path.join(LOCK_ROOT,architecture):LOCK_ROOT, project + ".json"), path.join(owned, project, "packages.lock.json"));
