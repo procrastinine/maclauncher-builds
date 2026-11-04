@@ -23,6 +23,20 @@ export async function applyHostGraphicsOverlay(root) {
     const file = path.join(base, relative);
     await fs.writeFile(file, transform(await fs.readFile(file, 'utf8')));
   };
+  await edit('Execution/src/Driver/Draw/DrawPipeline.cpp', source => {
+    source = replace(source, '#include "prx/libSceAgcDriver/Execution/include/GuestMemory.hpp"', `#include "prx/libSceAgcDriver/Execution/include/GuestMemory.hpp"
+#ifdef __APPLE__
+#include "prx/libSceAgcDriver/Execution/include/ThreadPriority.hpp"
+#endif`);
+    return replace(source, '    StartCommitterSampler();', `    StartCommitterSampler();
+#ifdef __APPLE__
+    try {
+        RaiseWorkerThreadPriority("draw committer");
+    } catch (...) {
+        Driver::Get().ReportFailure(std::current_exception());
+    }
+#endif`);
+  });
   await edit('Graphics/src/ResidentMirror.cpp', source => {
     source = include + source;
     source = replace(source, 'struct Mapping {\n    std::uint64_t begin = 0;\n    std::uint64_t end = 0;\n    bool readable = false;\n    bool privateAnonymous = false;\n};', '#ifdef __APPLE__\nusing Mapping = DarwinAgcMemory::Mapping;\n#else\nstruct Mapping {\n    std::uint64_t begin = 0;\n    std::uint64_t end = 0;\n    bool readable = false;\n    bool privateAnonymous = false;\n};\n#endif');
