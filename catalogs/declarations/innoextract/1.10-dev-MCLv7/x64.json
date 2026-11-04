@@ -1,0 +1,74 @@
+{
+  "id": "innoextract",
+  "version": "1.10-dev-MCLv7",
+  "arch": "x64",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "innoextract/1.10-dev-MCLv7/x64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "9e3a99ada1302f35973b51bdd0011bde03f8de9406e3b84b028d240a18e2e910",
+  "sourceSha256": "9e3a99ada1302f35973b51bdd0011bde03f8de9406e3b84b028d240a18e2e910",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 18771,
+      "mode": 420,
+      "sha256": "6e4d72562c8d52136fa066a21d384c97452c0f5aebe91954c7947d3870c04a1b"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "ddaaac2c0eba5c8dd4019fb3906d1a81d33dd6ab9812e45d9c21b1337471302e"
+    },
+    {
+      "path": "files/bin/innoextract",
+      "size": 1071232,
+      "sha256": "d19f668fdb3ff64fcd35949211c751e28cef000db2c4fa44a48c3efd0e7fb495",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/bin/maclauncher-inno-inspect",
+      "size": 802240,
+      "sha256": "7861bda5b5ccee4108a30c694384c4bab6a4623d07da284d9df6750a08f96a65",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/licenses/Boost.txt",
+      "size": 1338,
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 46,
+      "sha256": "44e8eebbb3a31002c6355572b2623629e17186181147e36df0f0a2887a5ed5bb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/innoextract.txt",
+      "size": 886,
+      "sha256": "7cd6f3bf0c83f2c3ce8438aab20a4827a5de934fb87dd7966f6f3f2651685127",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 2243,
+      "mode": 420,
+      "sha256": "9e3a99ada1302f35973b51bdd0011bde03f8de9406e3b84b028d240a18e2e910"
+    }
+  ],
+  "redistribution": "bundle"
+}
