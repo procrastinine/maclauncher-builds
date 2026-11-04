@@ -1,3 +1,4 @@
+import shared from '../../../../../../../producers/dependencies.json' with {type:'json'};
 import {addLicense} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
@@ -14,7 +15,7 @@ export async function buildDependencies({work,architecture,meson,ninja,python}) 
  const source=path.join(work,'source'),build=path.join(work,'build'),prefix=path.join(work,'install');
  fs.mkdirSync(source,{recursive:true});fs.mkdirSync(build,{recursive:true});fs.mkdirSync(prefix,{recursive:true});
  for(const row of profile.sources){const target=path.join(source,row.id);if(fs.existsSync(target))continue;
-  const archive=await buildInput(row);fs.mkdirSync(target);run('tar',['-xf',archive,'--strip-components=1','-C',target]);}
+  const archive=await buildInput(row.id==='shaderc'?{url:shared.shaderc.repository+'/archive/'+shared.shaderc.revision+'.tar.gz',sha256:shared.shaderc.sha256}:row);fs.mkdirSync(target);run('tar',['-xf',archive,'--strip-components=1','-C',target]);}
  const sdk=execFileSync('xcrun',['--sdk','macosx','--show-sdk-path'],{encoding:'utf8'}).trim();
  const flags=['-arch',architecture,'-mmacosx-version-min='+profile.minimumMacOS,'-Werror=unguarded-availability-new','-ffile-prefix-map='+work+'=dependencies'];
  const env={...process.env,MACOSX_DEPLOYMENT_TARGET:profile.minimumMacOS,SDKROOT:sdk,

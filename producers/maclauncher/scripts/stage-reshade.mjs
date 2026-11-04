@@ -1,3 +1,5 @@
+import dependencies from '../../../producers/dependencies.json' with {type:'json'};
+const {shaderc}=dependencies;
 import {addLicense} from '../../../lib/licenses.mjs';
 import fs from "node:fs";
 import path from "node:path";
@@ -602,9 +604,9 @@ const inputs = new Map([
 ]);
 if(nativeFiles.includes("shaderc-offline")){
   const metadata=JSON.parse(fs.readFileSync(path.join(ownedSource,"compat/shaderc/source.json"),"utf8"));
-  if(metadata.repository!=="https://github.com/google/shaderc"||metadata.commit!=="d393a813c9b67c709d37b329203d72beb69d719e"||metadata.version!=="2026.4"||metadata.license!=="Apache-2.0"||metadata.files?.length!==4)throw Error("The shader compiler API source pin is invalid.");
+  if(metadata.version!=="2026.4"||metadata.license!=="Apache-2.0"||metadata.files?.length!==4)throw Error("The shader compiler API source pin is invalid.");
   for(const row of metadata.files)if(!["shaderc.h","env.h","status.h","visibility.h"].includes(row.path)||digest(fs.readFileSync(path.join(ownedSource,"compat/shaderc",row.path)))!==row.sha256)throw Error("A shader compiler API declaration changed.");
-  inputs.set("licenses/shaderc-api.txt",path.join(ownedSource,"compat/shaderc/LICENSE"));pins.push(` ${metadata.commit} third_party/shaderc-headers`);
+  inputs.set("licenses/shaderc-api.txt",path.join(ownedSource,"compat/shaderc/LICENSE"));pins.push(` ${shaderc.revision} third_party/shaderc-headers`);
 }
 if(fs.existsSync(path.join(ownedSource,"src/color-source.json"))){
   const colorSource=JSON.parse(fs.readFileSync(path.join(ownedSource,"src/color-source.json"),"utf8"));
