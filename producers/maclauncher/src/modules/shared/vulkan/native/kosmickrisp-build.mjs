@@ -1,3 +1,4 @@
+import {gitlink} from '../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -24,7 +25,7 @@ const system=value=>value.startsWith('/System/Library/')||value.startsWith('/usr
 export function buildKosmic(options){
  if(options.architecture&&options.architecture!=='arm64')return buildKosmicTargets(options,buildKosmic);
  const {source,work,meson,ninja,llvm}=options;
- if(read('git',['-C',source,'rev-parse','HEAD'])!==pin.revision)throw Error('Kosmic source revision differs from its pin');
+ if(read('git',['-C',source,'rev-parse','HEAD'])!==gitlink(pin.gitlink))throw Error('Kosmic source revision differs from its pin');
  const projected=path.join(work,'source'),build=path.join(work,'build');
  prepareSourceTree(projected,temporary=>{
   fs.cpSync(source,temporary,{recursive:true,filter:file=>path.basename(file)!=='.git'});
@@ -33,7 +34,7 @@ export function buildKosmic(options){
  const environment={...process.env,CC:'/usr/bin/clang',CXX:'/usr/bin/clang++',
   LLVM_CONFIG:path.join(llvm,'bin/llvm-config'),MACOSX_DEPLOYMENT_TARGET:pin.minimumMacOS,
   ...(options.pkgConfigPath?{PKG_CONFIG_PATH:options.pkgConfigPath}:{}),
-  MESA_GIT_SHA1_OVERRIDE:pin.revision,CCACHE_DIR:path.join(work,'ccache'),CCACHE_MAXSIZE:'128M',
+  MESA_GIT_SHA1_OVERRIDE:gitlink(pin.gitlink),CCACHE_DIR:path.join(work,'ccache'),CCACHE_MAXSIZE:'128M',
   PATH:[path.dirname(meson),path.join(llvm,'bin'),process.env.PATH].join(path.delimiter)};
  const args=['--buildtype=release','--wrap-mode=nofallback','-Dvulkan-drivers=kosmickrisp',
   '-Dgallium-drivers=[]','-Dplatforms=macos','-Dopengl=false','-Dgles1=disabled','-Dgles2=disabled',
@@ -89,9 +90,9 @@ export function publishKosmic({source,work,library,loader,output,architecture='a
   const adaptations=['kosmickrisp-build.mjs','kosmickrisp-source.mjs','kosmickrisp-source.json','source-files.mjs',
    ...(architecture==='arm64'?[]:['kosmickrisp-targets.mjs','kosmickrisp-targets.json'])].map(file=>({file,sha256:sha(fs.readFileSync(path.join(root,file)))}));
   const sourceHash=sha(JSON.stringify({pin,adaptations})),version=requestedVersion||'0.1.0-'+sourceHash.slice(0,8)+'-'+sha(JSON.stringify(files)).slice(0,8);
-  const manifest={schemaVersion:1,managerId:'vulkan-kosmickrisp-gles32',version,upstreamRevision:pin.revision,
+  const manifest={schemaVersion:1,managerId:'vulkan-kosmickrisp-gles32',version,upstreamRevision:gitlink(pin.gitlink),
    platform:'darwin',arch:architecture==='x64'?'x64':'arm64',minimumMacOS,executableRelative:pin.library,files,dependencies:links,
-   runtimeFiles:{loader:'libvulkan.1.dylib'},provenance:{sourceRevision:pin.revision,verifiedBuild:true,
+   runtimeFiles:{loader:'libvulkan.1.dylib'},provenance:{sourceRevision:gitlink(pin.gitlink),verifiedBuild:true,
     sourceUrl:pin.repository,adaptations,...(nativeBuild&&architecture!=='arm64'?{
      nativeCompilers:JSON.parse(fs.readFileSync(path.join(nativeBuild,'native-tools.json'))),
      targetInputs:JSON.parse(fs.readFileSync(path.join(root,'kosmickrisp-targets.json')))}:{}),

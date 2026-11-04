@@ -1,3 +1,4 @@
+import {gitlink} from '../../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import {spawn} from 'node:child_process';
@@ -65,7 +66,7 @@ const capture = async (command, args) => {
                                : reject(Error(command + ' exited ' + code))));
   return text.trim();
 };
-if (await capture('git', [ '-C', source, 'rev-parse', 'HEAD' ]) !== pin.commit)
+if (await capture('git', [ '-C', source, 'rev-parse', 'HEAD' ]) !== gitlink(pin.gitlink))
   throw Error('FSR4 source pin changed.');
 await run('git', [ '-C', source, 'diff', '--exit-code', 'HEAD', '--' ]);
 for (const [option, digest] of [[ '--lite2-weights', pin.lite2.sha256 ]])
@@ -139,7 +140,7 @@ const python = (script, args) => run(
     });
 if (repackage) {
   if (previous.providerABI !== 1 || previous.complete !== true ||
-      previous.commit !== pin.commit || previous.model !== pin.model ||
+      previous.commit !== gitlink(pin.gitlink) || previous.model !== pin.model ||
       JSON.stringify(previous.profiles) !== JSON.stringify(pin.profiles) ||
       previous.owned?.['adapt-runtime.mjs'] !==
           hash(ownedSnapshot.get('adapt-runtime.mjs')) ||
@@ -247,8 +248,6 @@ if (!repackage) {
   for (const file of ['initializers.bin', 'initializers-ultraperformance.bin'])
     await fs.copyFile(path.join(work, 'third_party/fsr411', file),
                       path.join(payload, 'third_party/fsr411', file));
-  for(const file of ['LICENSE','LICENSE.AMD.md'])addLicense(payload,'FSR4',path.join(work,'third_party/fsr411',file));
-  if(options['--lite2-license'])addLicense(payload,'FSR4',options['--lite2-license']);
 }
 await fs.mkdir(path.join(destination, 'source-inputs'), {recursive : true});
 await fs.copyFile(options['--lite2-weights'],
