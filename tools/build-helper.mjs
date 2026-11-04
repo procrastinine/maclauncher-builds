@@ -11,6 +11,7 @@ import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {recipeMain} from './build-source.mjs';
+import {macosSDKVersion} from '../lib/reproducible-build.mjs';
 const require=createRequire(import.meta.url);
 const B=require('../lib/bundled-native.cjs'),Native=require('../lib/local-native.cjs'),{validateDeclaration}=require('../lib/declaration.cjs');
 const root=path.resolve(import.meta.dirname,'..');
@@ -63,7 +64,7 @@ export function buildHelper({project:id,version,arch,output,work=path.join(fs.mk
   // The first source is the helper's primary source; the release tag holds all of them.
   const sourceSha256=sha(sources[0]);
   const record={schemaVersion:1,id,version:profile.version,...profile.record,sourceSha256,[profile.binaryField||'binarySha256']:sha(binary),minimumMacOS:profile.minimumMacOS,architectures,
-   build:{compiler,sdk:run('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-version']),flags,sources:profile.sources,
+   build:{compiler,sdk:macosSDKVersion({...process.env,SDKROOT:sdk}),flags,sources:profile.sources,
     ...(flags.includes('-install_name')?{installName:flags[flags.indexOf('-install_name')+1]}:{}),signing:'ad-hoc'}};
   const metadata=Buffer.from(JSON.stringify(record,null,2)+'\n');fs.writeFileSync(path.join(payload,'helper.json'),metadata,{flag:'wx',mode:0o644});
   // An Intel executable also runs as its own process on Apple Silicon through Rosetta;
