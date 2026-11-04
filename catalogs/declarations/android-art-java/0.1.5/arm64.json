@@ -1,0 +1,88 @@
+{
+  "id": "android-art-java",
+  "version": "0.1.5",
+  "arch": "arm64",
+  "minimumMacOS": "13.0",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "b09e40bd8bb9988815493b321241b96362069d286d50f702515d1952aeeb3f09",
+  "directoryRelative": "android-art-java/0.1.5/arm64",
+  "manifestRelative": "input.json",
+  "manifestSha256": "97c8c99bcfda0b2c60b6446be63cc5761367ee1f6071fab5cfc90f92603aef34",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 19864,
+      "mode": 420,
+      "sha256": "e51b9f07eb67adbf4dbc4f0042a92ea36eb7b2bb4a289b196d2ebb20d127ece9"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 575,
+      "mode": 420,
+      "sha256": "52b12e2ba19db3d43bd3cecfea43f6f258659e95701efdb27edeed3f19cba9b3"
+    },
+    {
+      "path": "framework.jar",
+      "size": 46631957,
+      "sha256": "78c51c9c03fe87ede949b7b1985b009da28636f50d8aa80bb59ec9e6a19cfe4b",
+      "mode": 420
+    },
+    {
+      "path": "hooks-dex.jar",
+      "size": 5514870,
+      "sha256": "43f9bdea9ea71f291097aca5835386dee937b81c16d48de66366f55cf783ec72",
+      "mode": 420
+    },
+    {
+      "path": "input.json",
+      "size": 4238,
+      "sha256": "97c8c99bcfda0b2c60b6446be63cc5761367ee1f6071fab5cfc90f92603aef34",
+      "mode": 420
+    },
+    {
+      "path": "licenses/android-java-framework.txt",
+      "size": 1081,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+      "mode": 420
+    },
+    {
+      "path": "licenses/Android-SDK-system-image.txt",
+      "size": 17327,
+      "sha256": "0682da42e0ca119ce29503c265587f8ae17277094f9262b54c1d2bb99557c6f5",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AOSP-framework.txt",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "licenses/Apache-HTTP.txt",
+      "size": 10850,
+      "sha256": "35de8127791c66480f3bfac591dd3ade6845a09ed5b48f8c7233f68714a80110",
+      "mode": 420
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 268,
+      "sha256": "5625fafca4afb4866b090b95001f35d175ef0c1135bc1bbef9f2b512f5401126",
+      "mode": 420
+    },
+    {
+      "path": "licenses/Robolectric-portability.txt",
+      "size": 12865,
+      "sha256": "b9f28151a15110f04a7e40734edeaf7d650815fad5902f0736f4dd2ac4695694",
+      "mode": 420
+    },
+    {
+      "path": "services.jar",
+      "size": 22166370,
+      "sha256": "c74c9a7c6f0a2ac07fe92e7c80582286c21263ab603e62e11f6022fc5b4897c8",
+      "mode": 420
+    }
+  ]
+}
