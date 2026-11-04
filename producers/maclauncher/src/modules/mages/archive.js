@@ -3,7 +3,7 @@ const path = require("node:path");
 const zlib = require("node:zlib");
 const { TextDecoder } = require("node:util");
 
-// MPK v2: CommitteeOfZero/impacto ba51381fb65da70697be29e6a817dc4af5c98d19,
+// MPK v2: CommitteeOfZero/impacto source gitlink,
 // src/io/mpkarchive.cpp. SC3 offsets: src/vm/vm.cpp ScriptGetLabelAddress /
 // ScriptGetStrAddress / ScriptGetRetAddress. These structures do not identify
 // the VM instruction set; the third header offset may precede return ids.
