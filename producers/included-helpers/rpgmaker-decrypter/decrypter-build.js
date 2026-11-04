@@ -114,6 +114,7 @@ function buildTool({ sourceArchive, sdkArchive, outputDir, packageRoot, offline 
   if (!fs.statSync(executable).isFile()) throw new Error("The build did not produce the reviewed CLI.");
   addLicenses(publishRoot,'RPGMakerDecrypter',input);
   addLicenses(publishRoot,'dotnet',sdk);
+  const lockSha256 = Object.fromEntries(PROJECTS.map(project => [project, sha256(path.join(architecture?path.join(LOCK_ROOT,architecture):LOCK_ROOT, project + ".json"))]));
   const record = { schemaVersion: 1, profile: pin.profile, version: pin.informationalVersion,
     source: pin.source, sdk: pin.sdk, runtimeIdentifier: pin.runtimeIdentifier,
     propertiesSha256: source.propertiesSha256, targetsSha256: sha256(TARGETS), recipeSha256: sha256(__filename), lockSha256,

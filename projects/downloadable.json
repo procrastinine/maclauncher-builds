@@ -2360,8 +2360,7 @@
         "url": "https://github.com/ajusa/VNDS-LOVE",
         "repository": "ajusa/VNDS-LOVE",
         "pin": {
-          "file": "producers/engine-adaptations/vnds-love/source.json",
-          "pointer": ""
+          "gitlink": "producers/engine-adaptations/sources/VNDS-LOVE"
         }
       }
     ],

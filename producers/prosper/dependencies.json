@@ -5,7 +5,8 @@
       "id": "sdl3",
       "repository": "https://github.com/libsdl-org/SDL.git",
       "revision": "f5e5f6588921eed3d7d048ce43d9eb1ff0da0ffc",
-      "version": "3.2.30"
+      "version": "3.2.30",
+      "comment": "Keeps a verified exact source instead of a configure-time tag fetch."
     },
     {
       "id": "vulkan-headers",
