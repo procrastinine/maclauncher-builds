@@ -29,7 +29,6 @@
   },
   "vulkan": {
     "repository": "https://github.com/libsdl-org/SDL",
-    "revision": "53dea9830964eee8b5c2a7ee0a65d6e268dc78a1",
     "directory": "src/video/khronos/vulkan",
     "headers": [
       "vulkan.h",

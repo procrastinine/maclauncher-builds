@@ -432,17 +432,6 @@
         }
       },
       {
-        "id": "libplacebo-vulkan-headers",
-        "repository": "KhronosGroup/Vulkan-Headers",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/Vulkan-Headers",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/scene-profile.json",
-          "pointer": "/VULKAN_HEADERS",
-          "repositoryPointer": "/VULKAN_HEADERS/origin"
-        }
-      },
-      {
         "id": "libplacebo-fast-float",
         "repository": "fastfloat/fast_float",
         "provider": "github",
@@ -572,16 +561,6 @@
           "file": "producers/maclauncher/src/modules/shared/reshade/xess/source.json",
           "pointer": "/commit",
           "repositoryPointer": "/repository"
-        }
-      },
-      {
-        "id": "xess-vulkan-headers",
-        "provider": "github",
-        "url": "https://github.com/libsdl-org/SDL",
-        "repository": "libsdl-org/SDL",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/xess/native/vulkan-source.json",
-          "pointer": ""
         }
       },
       {

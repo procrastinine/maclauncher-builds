@@ -1,7 +1,6 @@
 {
   "schema": 1,
   "repository": "https://github.com/libsdl-org/SDL",
-  "commit": "53dea9830964eee8b5c2a7ee0a65d6e268dc78a1",
   "headerDirectory": "src/video/khronos/vulkan",
   "license": "Apache-2.0",
   "headers": [

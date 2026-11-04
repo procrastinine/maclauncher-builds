@@ -13,12 +13,13 @@ const sdk=fs.realpathSync(args['sdk-source']),vulkan=fs.realpathSync(args['vulka
 fs.accessSync(compiler,fs.constants.X_OK);
 if(!source.libraries[backend])throw Error('Choose vk or dx12.');
 const git=(directory,...parameters)=>execFileSync('git',['-C',directory,...parameters],{env:{...process.env,GIT_NO_LAZY_FETCH:'1'},maxBuffer: Infinity});
-for(const [directory,pin]of[[sdk,source.sdk],[vulkan,source.vulkan]])if(git(directory,'rev-parse','HEAD').toString().trim()!==pin.revision)throw Error('The source commit does not match '+pin.repository);
+const vulkanRevision=git(path.resolve(here,'../../../../external/krkrsdl2'),'rev-parse','HEAD:external/SDL').toString().trim();
+for(const [directory,pin]of[[sdk,source.sdk],[vulkan,source.vulkan]])if(git(directory,'rev-parse','HEAD').toString().trim()!==(directory===sdk?gitlink('producers/maclauncher/src/external/fsr3-sdk'):vulkanRevision))throw Error('The source commit does not match '+pin.repository);
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 fs.mkdirSync(out,{recursive:true});const inputs=path.join(out,'inputs');fs.mkdirSync(inputs,{recursive:true});
 const originalInputs={};
 for(const relative of source.sdk.headers){const target=path.join(inputs,relative.slice('ffx-api/include/'.length));fs.mkdirSync(path.dirname(target),{recursive:true});const bytes=git(sdk,'show',gitlink('producers/maclauncher/src/external/fsr3-sdk')+':'+relative);fs.writeFileSync(target,bytes);originalInputs[relative]=hash(target);}
-for(const relative of source.vulkan.headers){const target=path.join(inputs,'vulkan',relative);fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,git(vulkan,'show',source.vulkan.revision+':'+source.vulkan.directory+'/'+relative));originalInputs['vulkan/'+relative]=hash(target);}
+for(const relative of source.vulkan.headers){const target=path.join(inputs,'vulkan',relative);fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,git(vulkan,'show',vulkanRevision+':'+source.vulkan.directory+'/'+relative));originalInputs['vulkan/'+relative]=hash(target);}
 const originalLibrary=path.join(out,source.original[backend]);
 const declaredReference=source.sdk.referenceLibraries[backend],sdkReference=git(sdk,'show',gitlink('producers/maclauncher/src/external/fsr3-sdk')+':'+declaredReference.path);
 if(crypto.createHash('sha256').update(sdkReference).digest('hex')!==declaredReference.sha256)throw Error('The pinned SDK original library differs from its declared digest.');

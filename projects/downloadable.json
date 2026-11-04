@@ -2273,45 +2273,6 @@
           "file": "producers/maclauncher/src/modules/shared/vulkan/native/moltenvk-scene-source.json",
           "pointer": ""
         }
-      },
-      {
-        "id": "spirv-cross",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Cross",
-        "repository": "KhronosGroup/SPIRV-Cross",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/vulkan/native/moltenvk-scene-source.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "SPIRV-Cross"
-          }
-        }
-      },
-      {
-        "id": "vulkan-headers",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/Vulkan-Headers",
-        "repository": "KhronosGroup/Vulkan-Headers",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/vulkan/native/moltenvk-scene-source.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "Vulkan-Headers"
-          }
-        }
-      },
-      {
-        "id": "cereal",
-        "provider": "github",
-        "url": "https://github.com/USCiLab/cereal",
-        "repository": "USCiLab/cereal",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/vulkan/native/moltenvk-scene-source.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "cereal"
-          }
-        }
       }
     ],
     "packageProfiles": [
