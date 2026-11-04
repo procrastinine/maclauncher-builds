@@ -10,7 +10,7 @@ export async function buildONS({project:id,version,arch,work,output}){
   result=await Builder.buildRuntime({manager,userDataDir:work,packageVersion:registered.version,sourceDir,architecture:arch,retainBuildDirectory:true,dependencies:{downloadToFile:async(url,destination)=>{const pin=Object.values(Builder.PACKAGES).find(row=>row.url===url);if(!pin)throw Error('Undeclared source archive.');fs.copyFileSync(await buildInput(pin),destination);}}});
   const input=path.join(raw,'files');
 
-  return await sealRuntime({project:id,version:registered.version,arch,output,executable:result.runtimePath,sourceRoot:sourceDir,sourceScope:Builder.SOURCE_SCOPE,upstreamRevision:project.upstreams[0].revision,payloads:[{source:path.join(input,'onscripter-en-runtime.json'),relative:'onscripter-en-runtime.json'}]});
+  return await sealRuntime({project:id,version:registered.version,arch,output,executable:result.runtimePath,sourceRoot:sourceDir,sourceScope:Builder.SOURCE_SCOPE,upstreamRevision:project.upstreams[0].revision,extraLibraries:[path.join(input,'lib','libSDL2-2.0.0.dylib')],payloads:[{source:path.join(input,'onscripter-en-runtime.json'),relative:'onscripter-en-runtime.json'}]});
  }finally{if(result?.verifiedBuild?.buildDirectory)fs.rmSync(result.verifiedBuild.buildDirectory,{recursive:true,force:true});}
 }
 recipeMain(import.meta,buildONS);
