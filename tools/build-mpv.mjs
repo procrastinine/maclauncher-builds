@@ -11,7 +11,6 @@ import {retryNetwork} from './download.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Native=require('../producers/maclauncher/scripts/native-binary-tools.cjs');
 const run=(command,args,options={})=>String(execFileSync(command,args,{encoding:'utf8',maxBuffer:Infinity,...options})||'').trim();
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-const prefix=name=>run('brew',['--prefix',name]);
 /** pkgconf follows private cflags requirements even for dynamic linking. The
  * selected Apple SDK supplies these libraries without Homebrew formulae. */
 export function sdkCompressionPkgConfig({sdk,directory}){
@@ -34,7 +33,7 @@ export async function buildMPV({project:id,arch,output,work}){
  retryNetwork(()=>run('git',['-C',source,'fetch','--depth','2','origin',Builder.REVISION,...Builder.BACKPORTS],{stdio:'inherit'}));
  const sdk=process.env.SDKROOT||run('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path']);
  const sdkPackages=sdkCompressionPkgConfig({sdk,directory:path.join(work,'sdk-pkgconfig')});
- const pkgConfigPath=[sdkPackages,...['ffmpeg','libass','libplacebo','luajit','mujs'].map(name=>path.join(prefix(name),'lib/pkgconfig'))].join(path.delimiter);
+ const pkgConfigPath=[sdkPackages,process.env.PKG_CONFIG_PATH,run('pkgconf',['--variable','pc_path','pkg-config'])].filter(Boolean).join(path.delimiter);
  const built=Builder.build({sourceCheckout:source,workDirectory:path.join(work,'library'),toolsDirectory:tools.bin,pkgConfigPath,minimumMacOS:'14.0',jobs:4});
  const recipe=JSON.parse(fs.readFileSync(path.join(producer,'source.json'))),owned=path.join(producer,'maclauncher'),staged=path.join(work,'staged'),app=path.join(staged,'mpv.app'),executable=path.join(app,'Contents/MacOS/mpv');
  fs.mkdirSync(path.dirname(executable),{recursive:true});fs.mkdirSync(path.join(app,'Contents/Frameworks/video'),{recursive:true});
