@@ -17,7 +17,7 @@ export async function buildDecrypter({project:id,arch,output,work}){
  for(const member of members.filter(name=>name.includes('/native/')&&!name.endsWith('/'))){const file=path.join(native,path.basename(member));fs.writeFileSync(file,execFileSync('/usr/bin/unzip',['-p',archive,member],{maxBuffer:Infinity}));const architectures=Tools.macho(file);if(!architectures)continue;if(architectures.length!==1||architectures[0]!==cpu)throw Error('Runtime pack has an unexpected native CPU: '+member);requirements.push({path:member,architectures,minimumMacOS:Tools.loadCommands(file,cpu).minimumMacOS});}
  const minimumMacOS=requirements.map(row=>row.minimumMacOS).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).at(-1);
 
- includeLicenses(payload,built.publishRoot);
+ includeLicenses(payload,path.join(built.publishRoot,'licenses'));
  return helperPackage({id,version:registered.version,arch,output,minimumMacOS,sourceSha256:pin.source.sha256,rosettaFiles:arch==='x64'?['files/bin/RPGMakerDecrypter-cli']:[],manifestRelative:'manifest.json',record:{managerId:id,toolABI:1,executableRelative:'files/bin/RPGMakerDecrypter-cli',source:built.record,runtimeNativeRequirements:requirements}});
 }
 recipeMain(import.meta,buildDecrypter);

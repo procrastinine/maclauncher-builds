@@ -11,7 +11,7 @@ function fixture(t){
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'runtime-builds-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  const input=path.join(root,'sealed');fs.mkdirSync(input);
  const files=Object.entries({'runtime.json':'{"schemaVersion":1}\n','library.dat':'runtime data','LICENSE':'MIT license','source.tar.gz':'corresponding source fixture'}).map(([name,bytes])=>{const file=path.join(input,name);fs.writeFileSync(file,bytes,{mode:0o644});return {path:name,size:Buffer.byteLength(bytes),mode:0o644,sha256:digest(bytes)};});
- const declaration={id:'fixture',version:'1.0.0',arch:'arm64',minimumMacOS:'13.0',launcherArchitectures:['arm64'],directoryRelative:'fixture/1.0.0/arm64',manifestRelative:'runtime.json',manifestSha256:files[0].sha256,sourceRelative:'source.tar.gz',sourceSha256:files[3].sha256,files,notices:[{name:'Fixture',license:'MIT',path:'LICENSE',sourceUrl:'https://example.com/source'}],redistribution:'bundle'};
+ const declaration={id:'fixture',version:'1.0.0',arch:'arm64',minimumMacOS:'13.0',launcherArchitectures:['arm64'],directoryRelative:'fixture/1.0.0/arm64',manifestRelative:'runtime.json',manifestSha256:files[0].sha256,sourceRelative:'source.tar.gz',sourceSha256:files[3].sha256,files,redistribution:'bundle'};
  return {root,input,declaration,project:'fixture',output:path.join(root,'fixture-1.0.0-arm64.tar.gz')};
 }
 const selected=f=>({project:f.project,version:f.declaration.version,arch:f.declaration.arch});

@@ -17,11 +17,7 @@ function directory(t) {
 
 function fixtureCatalog(file) {
   const bytes = fs.readFileSync(file);
-  return { schemaVersion: 1, version: "dependency-v1", architecture: "arm64", minimumMacOS: "13.0", dependencies: [{
-    id: "decoder", name: "Decoder", version: "1.0", sourceRelease: "1.0", archiveUrl: "https://example.org/source.tar.gz",
-    archiveSha256: crypto.createHash("sha256").update(bytes).digest("hex"), archiveBytes: bytes.length,
-    license: "MIT", notices: ["LICENSE"], buildSystem: "cmake", options: ["-DENABLE_TESTS=OFF"]
-  }] };
+  return { schemaVersion: 1, version: "dependency-v1", architecture: "arm64", minimumMacOS: "13.0", dependencies: [{id: "decoder",name: "Decoder",version: "1.0",sourceRelease: "1.0",archiveUrl: "https://example.org/source.tar.gz",archiveSha256: crypto.createHash("sha256").update(bytes).digest("hex"),archiveBytes: bytes.length,buildSystem: "cmake",options: ["-DENABLE_TESTS=OFF"]}] };
 }
 
 test("portable Impacto archives require exact release identities, checksums and CPU", t => {
@@ -39,7 +35,7 @@ test("portable Impacto archives require exact release identities, checksums and 
 test("portable dependency catalogs leave notices to sealing and reject target overrides", t => {
   const root = directory(t), file = path.join(root, "archive"); fs.writeFileSync(file, "source");
   const catalog = fixtureCatalog(file);
-  assert.equal(Dependency.validateArchives({ decoder: file }, { catalog: { ...catalog, dependencies: [{ ...catalog.dependencies[0], notices: ["../LICENSE"] }] } }).length, 1);
+  assert.equal(Dependency.validateArchives({ decoder: file }, { catalog: { ...catalog, dependencies: [{...catalog.dependencies[0]}] } }).length, 1);
   for (const mutation of [{ options: ["-DCMAKE_OSX_DEPLOYMENT_TARGET=27.0"] },
     { options: ["-DFETCHCONTENT_SOURCE_DIR_TEST=/tmp/source"] }, { options: ["-DOPTION=ON;OTHER=ON"] }, { archiveSha256: "a".repeat(40) }]) {
     assert.throws(() => Dependency.validateArchives({ decoder: file }, { catalog: { ...catalog, dependencies: [{ ...catalog.dependencies[0], ...mutation }] } }), /exact source archives/);

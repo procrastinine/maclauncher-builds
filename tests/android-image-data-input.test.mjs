@@ -42,8 +42,7 @@ function fixture(t){
   fs.writeFileSync(path.join(payload,'image-data.json'),JSON.stringify(transport));
   fs.writeFileSync(path.join(payload,'content.json'),JSON.stringify(profile.content));
   fs.mkdirSync(path.join(payload,'notices'));fs.writeFileSync(path.join(payload,'notices/LICENSE'),'test image notice');
-  helperPackage({id:shard.id,version:shard.version,arch:'arm64',output,minimumMacOS:'13.0',sourceSha256,manifestRelative:'input.json',
-   notices:[{path:'notices/LICENSE',name:'Fixture source',license:'Fixture notice'}],record:{format:'android-image-data-v1',upstreamRevision:profile.revision,
+  helperPackage({id:shard.id,version:shard.version,arch:'arm64',output,minimumMacOS:'13.0',sourceSha256,manifestRelative:'input.json',record:{format:'android-image-data-v1',upstreamRevision:profile.revision,
     originalArchiveSha256:profile.archive.sha256,targetSymlinkMode:profile.targetSymlinkMode,content:profile.content,
     transportSha256:hash(JSON.stringify(transport)),dataShard:shard}});
   const declaration=JSON.parse(fs.readFileSync(path.join(output,'declaration.json')));

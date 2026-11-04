@@ -70,12 +70,10 @@ test("portable audio catalog retains external codecs with explicit archive ident
 
 test("portable audio sources reject changed archives and unsafe build metadata", t => {
   const root = temporary(t), file = path.join(root, "source.tar.gz"), bytes = Buffer.from("test source"); fs.writeFileSync(file, bytes);
-  const pin = { id: "fixture", name: "Fixture", version: "1.0", sourceRelease: "fixture-1.0", archiveBytes: bytes.length,
-    archiveSha256: crypto.createHash("sha256").update(bytes).digest("hex"), archiveUrl: "https://example.invalid/source.tar.gz",
-    notices: ["COPYING"], buildSystem: "cmake", options: [] };
+  const pin = {id: "fixture",name: "Fixture",version: "1.0",sourceRelease: "fixture-1.0",archiveBytes: bytes.length,archiveSha256: crypto.createHash("sha256").update(bytes).digest("hex"),archiveUrl: "https://example.invalid/source.tar.gz",buildSystem: "cmake",options: []};
   const catalog = { schemaVersion: 1, version: "audio-v1", architecture: "arm64", minimumMacOS: "13.0", dependencies: [pin] };
   assert.equal(Audio.validateArchives({ fixture: file }, { catalog }).length, 1);
-  assert.equal(Audio.validateArchives({ fixture: file }, { catalog: { ...catalog, dependencies: [{ ...pin, notices: ["../COPYING"] }] } }).length, 1);
+  assert.equal(Audio.validateArchives({ fixture: file }, { catalog: { ...catalog, dependencies: [{...pin}] } }).length, 1);
   fs.writeFileSync(file, Buffer.from("bad! source"));
   assert.throws(() => Audio.validateArchives({ fixture: file }, { catalog }), /checksum or size differs/);
   for (const change of [{ sourceSubdirectory: "/etc" }, { revision: "main" },

@@ -7,7 +7,7 @@ export function buildOpenGL({project:id,arch,work,output}){
  fs.mkdirSync(work,{recursive:true});const result=build({version:'software-gl-v3-universal',output:path.join(work,'compiled')}),profile=JSON.parse(fs.readFileSync(path.join(root,'producers/included-helpers/profiles/gamemaker-opengl-helper.json'))),payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});
  for(const name of ['software-opengl.dylib','helper.json']){fs.copyFileSync(path.join(result.output,name),path.join(payload,name));fs.chmodSync(path.join(payload,name),name.endsWith('.dylib')?0o755:0o644);}
 
- includeLicenses(payload,result.output);
+ includeLicenses(payload,path.join(result.output,'licenses'));
  return helperPackage({id,version:registered.version,arch,output,minimumMacOS:result.minimumMacOS,sourceSha256:result.sourceSha256,manifestRelative:'manifest.json',record:{...profile.managedManifest,executableRelative:profile.executableRelative,source:profile.source}});
 }
 recipeMain(import.meta,buildOpenGL);

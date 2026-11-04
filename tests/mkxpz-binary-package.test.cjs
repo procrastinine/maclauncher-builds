@@ -10,9 +10,9 @@ test("the MKXP-Z binary recipe retains the reviewed artifact, source reference a
   assert.equal(input.sourceRoot, undefined); assert.equal(input.provenance.verifiedBuild, false);
   assert.equal(input.provenance.sourceKind, "reviewed-binary");
   assert.equal(input.provenance.publisherSourceRevision, pin.upstreamRevision);
-  assert.equal(input.notices[0].file, path.join(path.dirname(app), "LICENSE.txt"));
+  ;
   assert.equal(input.executableMode, 0o755);
-  assert.deepEqual(input.payloads.map(item => item.relative), ["LICENSE.txt", "mkxp.json", "scripts", "stdlib"]);
+  assert.deepEqual(input.payloads.map(item => item.relative), ["mkxp.json", "scripts", "stdlib"]);
   assert.equal(input.provenance.inputPublisherArtifactTreeSha256, pin.artifactTreeSha256);
   assert.throws(() => createStagingInput(path.join(os.tmpdir(), "other.app")), /Expected/);
   assert.throws(() => createStagingInput(""), /explicit/);

@@ -15,7 +15,7 @@ export async function javaFixture(directory,kind){
  const files=kind==='converter'?['dex2jvm.jar','converter-overlay.jar','android-api-headers.jar']:['products/android-framework.jar','build/classes/Fixture.class','build/framework-tool/Fixture.class','build/jni/fixture.h','build/host-callbacks.h','build/host-callbacks.c'];
  for(const name of files){fs.mkdirSync(path.dirname(path.join(payload,name)),{recursive:true});fs.writeFileSync(path.join(payload,name),'sealed fixture');}
  fs.writeFileSync(path.join(payload,'NOTICE'),'Fixture notice');
- await helperPackage({id:profile.id,version:profile.version,arch:'arm64',output,minimumMacOS:'13.0',sourceSha256,manifestRelative:'input.json',record:{androidSource:profile.androidSource,...(profile.converter?{converter:profile.converter}:{})},notices:[{name:'Fixture',license:'Fixture',path:'NOTICE'}]});
+ await helperPackage({id:profile.id,version:profile.version,arch:'arm64',output,minimumMacOS:'13.0',sourceSha256,manifestRelative:'input.json',record:{androidSource:profile.androidSource,...(profile.converter?{converter:profile.converter}:{})}});
  return {profile,payload};
 }
 

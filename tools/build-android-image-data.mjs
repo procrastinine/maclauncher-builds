@@ -52,7 +52,7 @@ export function imageDataContentIdentity(transport,{targetSymlinkMode=0o755}={})
   if(row.kind!=='hardlink'||!linked)throw Error('Invalid image hardlink.');return regular(linked,seen);
  }
  function visit(name){
-  const row=byName.get(name);;
+  const row=byName.get(name);let value;
   if(row.kind==='directory')value=[name,'directory',row.mode&0o777];
   else if(row.kind==='symlink')value=[name,'link',targetSymlinkMode,Buffer.from(row.link).toString('utf8')];
   else{const source=regular(row);if(!Number.isSafeInteger(source.size)||source.size<0||!(/^[a-f0-9]{64}$/).test(source.sha256||''))throw Error('Invalid image data identity.');value=[name,'file',row.mode&0o777,source.size,source.sha256];bytes+=source.size;}
@@ -110,7 +110,7 @@ export async function packageImageData({project,version,arch,output,work,tool,in
  fs.copyFileSync(path.join(input,'image-data.json'),path.join(payload,'image-data.json'));
  fs.writeFileSync(path.join(payload,'content.json'),JSON.stringify(content)+'\n');
 
- const records=[];;
+
  addLicenses(payload,project,tool.upstream);addCargoLicenses(payload,project,tool.crate,tool.env);
  const result=helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{format:'android-image-data-v1',upstreamRevision:profile.revision,originalArchiveSha256:profile.archive.sha256,targetSymlinkMode:profile.targetSymlinkMode,content,transportSha256:sha(path.join(payload,'image-data.json')),dataShard:shard}});
  // Sealing computes actual data-object digests. Match those to the decoder's
@@ -128,6 +128,7 @@ export async function buildAndroidImageData(options){
  run(tool.executable,['export',archive,path.join(work,'root'),input],{env:tool.env});
  const result=await packageImageData({...options,tool,input});
 
+ for(const relative of ['archive-cache','target','cargo','decoded'])fs.rmSync(path.join(work,relative),{recursive:true,force:true});
  return result;
 }
 recipeMain(import.meta,buildAndroidImageData);

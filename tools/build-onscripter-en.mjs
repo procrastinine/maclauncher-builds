@@ -4,7 +4,7 @@ import{resolveProject,buildRecord}from'../lib/projects.mjs';import{buildInput}fr
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Builder=require('../producers/maclauncher/src/modules/nscripter/runtime/onscripter-en-build-v3.js');
 export async function buildONS({project:id,version,arch,work,output}){
  const project=resolveProject(id,root),registered=buildRecord(project,version);
- fs.mkdirSync(work,{recursive:true});const sourceDir=path.join(root,'producers/maclauncher/src/external/onscripter-en'),raw=path.join(work,'compiled');;
+ fs.mkdirSync(work,{recursive:true});const sourceDir=path.join(root,'producers/maclauncher/src/external/onscripter-en'),raw=path.join(work,'compiled');let result;
  const manager={core:{getInstallDir:()=>raw,registerLocal:options=>options}};
  try{
   result=await Builder.buildRuntime({manager,userDataDir:work,packageVersion:registered.version,sourceDir,architecture:arch,retainBuildDirectory:true,dependencies:{downloadToFile:async(url,destination)=>{const pin=Object.values(Builder.PACKAGES).find(row=>row.url===url);if(!pin)throw Error('Undeclared source archive.');fs.copyFileSync(await buildInput(pin),destination);}}});

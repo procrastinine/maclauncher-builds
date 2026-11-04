@@ -39,7 +39,7 @@ test('existing recipe references discover the consumed graph and build unpublish
  function dataHelper(id,version,contents){
   const output=path.join(f.directory,id+'-output');fs.mkdirSync(path.join(output,'payload'),{recursive:true});
   fs.writeFileSync(path.join(output,'payload','data.txt'),contents,{mode:0o644});fs.writeFileSync(path.join(output,'payload','LICENSE'),'Permission to use this fixture.',{mode:0o644});
-  helperPackage({id,version,arch:'arm64',output,minimumMacOS:'13.0',sourceSha256:'c'.repeat(64),record:{},notices:[{name:id,license:'MIT',path:'LICENSE'}]});return output;
+  helperPackage({id,version,arch:'arm64',output,minimumMacOS:'13.0',sourceSha256:'c'.repeat(64),record:{}});return output;
  }
  const inputOutput=dataHelper('input','new-input-name','fresh data from this run');sealBuildInputReport({project:'input',output:inputOutput,environment});
  const bundle=path.join(f.directory,'input-release');await prepareRelease({project:'input',input:path.join(inputOutput,'payload'),declaration:JSON.parse(fs.readFileSync(path.join(inputOutput,'declaration.json'))),output:bundle,directory:f.directory});

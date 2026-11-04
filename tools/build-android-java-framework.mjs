@@ -46,7 +46,7 @@ export async function buildAndroidJavaFrameworkInput({output,work}){
 
  const build=path.join(work,'build'),products=path.join(output,'products');fs.mkdirSync(products,{recursive:true});
  const {frameworkInputs}=await import(pathToFileURL(path.join(native,'framework-base.mjs'))),framework=frameworkInputs(native,frameworkDirectory);
- const previousParser=process.env.ANDROID_BLUEPRINT_PARSER;process.env.ANDROID_BLUEPRINT_PARSER=parser;
+ let modules,built;const previousParser=process.env.ANDROID_BLUEPRINT_PARSER;process.env.ANDROID_BLUEPRINT_PARSER=parser;
 
  try{
   const {buildFrameworkModules}=await import(pathToFileURL(path.join(native,'framework-modules.mjs')));modules=await buildFrameworkModules({root:native,build,jdk,framework,apacheHttpSource:sources.apacheHttp,statsdSource:sources.statsd});

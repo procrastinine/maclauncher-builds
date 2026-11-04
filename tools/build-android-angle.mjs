@@ -74,7 +74,7 @@ export function packageAngleInput({project='android-angle',version,arch='arm64',
  const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});
  for(const name of ['libEGL.dylib','libGLESv2.dylib','angle-manifest.json'])fs.copyFileSync(path.join(input.angle,name),path.join(payload,name));
 
- includeLicenses(payload,input.angle);
+ includeLicenses(payload,path.join(input.angle,'licenses'));
  return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{source:profile.androidSource,sourceProfile:profile.id,providerVersion:manifest.version,angleRevision:manifest.angleRevision}});
 }
 

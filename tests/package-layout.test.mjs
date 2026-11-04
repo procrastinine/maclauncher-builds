@@ -14,19 +14,19 @@ function fixture(t){
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'package-layout-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  const payload=path.join(root,'payload');fs.mkdirSync(payload);
  const files=[],write=(name,text)=>{const bytes=Buffer.from(text);fs.mkdirSync(path.dirname(path.join(payload,name)),{recursive:true});fs.writeFileSync(path.join(payload,name),bytes,{mode:0o644});const record={path:name,size:bytes.length,sha256:hash(bytes),mode:0o644};files.push(record);return record;};
- write('manifest.json','{"id":"consumer"}');write('LICENSE','original component notice');
- return {root,payload,files,write,declaration:{id:'consumer',version:'1.0.0',arch:'arm64',manifestRelative:'manifest.json',sourceRelative:null,files,notices:[{path:'LICENSE'}]}};
+ write('manifest.json','{"id":"consumer"}');write('a-data.txt','original component data');
+ return {root,payload,files,write,declaration:{id:'consumer',version:'1.0.0',arch:'arm64',manifestRelative:'manifest.json',sourceRelative:null,files}};
 }
-test('packaging stores identical payload bytes once while preserving component notices and logical paths',t=>{
- const f=fixture(t);f.write('a.bin','same binary payload');f.write('sub/b.bin','same binary payload');f.write('licenses/vendor.txt','original component notice');
+test('packaging stores identical payload bytes once while preserving component data and logical paths',t=>{
+ const f=fixture(t);f.write('a.bin','same binary payload');f.write('sub/b.bin','same binary payload');f.write('assets/vendor.txt','original component data');
  preparePackageLayout({input:f.payload,declaration:f.declaration,environment:{}});
- assert.deepEqual(JSON.parse(JSON.stringify(f.declaration.aliases)),{schema:1,files:{'licenses/vendor.txt':'LICENSE','sub/b.bin':'a.bin'}});assert.equal(fs.existsSync(path.join(f.payload,'licenses/vendor.txt')),false);
+ assert.deepEqual(JSON.parse(JSON.stringify(f.declaration.aliases)),{schema:1,files:{'assets/vendor.txt':'a-data.txt','sub/b.bin':'a.bin'}});assert.equal(fs.existsSync(path.join(f.payload,'assets/vendor.txt')),false);
  assert.equal(checkPackageDuplicates({declaration:f.declaration,environment:{}}).aliases,2);
- materializePackageAliases({root:f.payload,declaration:f.declaration,inputs:{}});assert.equal(fs.readFileSync(path.join(f.payload,'sub/b.bin'),'utf8'),'same binary payload');assert.ok(!fs.lstatSync(path.join(f.payload,'sub/b.bin')).isSymbolicLink());assert.equal(fs.readFileSync(path.join(f.payload,'licenses/vendor.txt'),'utf8'),'original component notice');
+ materializePackageAliases({root:f.payload,declaration:f.declaration,inputs:{}});assert.equal(fs.readFileSync(path.join(f.payload,'sub/b.bin'),'utf8'),'same binary payload');assert.ok(!fs.lstatSync(path.join(f.payload,'sub/b.bin')).isSymbolicLink());assert.equal(fs.readFileSync(path.join(f.payload,'assets/vendor.txt'),'utf8'),'original component data');
 });
 test('prepared build inputs remain copied into the self-contained consumer',t=>{
  const f=fixture(t),shared=f.write('lib/shared.bin','a shared binary'),depRoot=path.join(f.root,'dependency');fs.mkdirSync(depRoot);fs.writeFileSync(path.join(depRoot,'shared.bin'),'a shared binary');
- const dependency={root:depRoot,declaration:{id:'shared',version:'2.0.0-MCLv1',files:[{...shared,path:'shared.bin'}],notices:[],manifestRelative:'manifest.json'},record:{id:'shared',version:'2.0.0-MCLv1',asset:{sha256:'a'.repeat(64)}}},inputs={shared:dependency},environment={MACLAUNCHER_BUILD_INPUTS:JSON.stringify(inputs)};
+ const dependency={root:depRoot,declaration:{id:'shared',version:'2.0.0-MCLv1',files:[{...shared,path:'shared.bin'}],manifestRelative:'manifest.json'},record:{id:'shared',version:'2.0.0-MCLv1',asset:{sha256:'a'.repeat(64)}}},inputs={shared:dependency},environment={MACLAUNCHER_BUILD_INPUTS:JSON.stringify(inputs)};
  preparePackageLayout({input:f.payload,declaration:f.declaration,environment});assert.ok(fs.existsSync(path.join(f.payload,'lib/shared.bin')));
  assert.equal(f.declaration.dependencies,undefined);assert.equal(f.declaration.aliases,undefined);assert.equal(recordFromDeclaration(f.declaration,{filename:'test.tar.gz'}).launcherContract,undefined);
  assert.equal(checkPackageDuplicates({declaration:f.declaration,environment}).dependencies,0);
@@ -34,7 +34,7 @@ test('prepared build inputs remain copied into the self-contained consumer',t=>{
 });
 test('build-only inputs never turn matching consumer bytes into runtime downloads',t=>{
  const f=fixture(t),shared=f.write('lib/owned.bin','the same stage bytes'),depRoot=path.join(f.root,'stage');fs.mkdirSync(depRoot);fs.writeFileSync(path.join(depRoot,'stage.bin'),'the same stage bytes');
- const dependency={root:depRoot,declaration:{id:'stage',version:'1.0.0',files:[{...shared,path:'stage.bin'}],notices:[],manifestRelative:'manifest.json'},record:{id:'stage',version:'1.0.0',asset:{sha256:'a'.repeat(64)}}},environment={MACLAUNCHER_BUILD_INPUTS:JSON.stringify({stage:dependency})};
+ const dependency={root:depRoot,declaration:{id:'stage',version:'1.0.0',files:[{...shared,path:'stage.bin'}],manifestRelative:'manifest.json'},record:{id:'stage',version:'1.0.0',asset:{sha256:'a'.repeat(64)}}},environment={MACLAUNCHER_BUILD_INPUTS:JSON.stringify({stage:dependency})};
  preparePackageLayout({input:f.payload,declaration:f.declaration,environment});
  assert.equal(fs.readFileSync(path.join(f.payload,'lib/owned.bin'),'utf8'),'the same stage bytes');assert.equal(f.declaration.aliases,undefined);assert.equal(f.declaration.dependencies,undefined);assert.equal(checkPackageDuplicates({declaration:f.declaration,environment}).dependencies,0);
 });
@@ -48,7 +48,7 @@ test('native local aliases share the canonical inode and reject a changed symlin
  preparePackageLayout({input:f.payload,declaration:f.declaration,environment:{}});materializePackageAliases({root:f.payload,declaration:f.declaration,inputs:{}});
  const alias=path.join(f.payload,'lib/b.dylib'),canonical=path.join(f.payload,'lib/a.dylib');
  assert.equal(fs.readlinkSync(alias),'a.dylib');assert.equal(fs.statSync(alias).ino,fs.statSync(canonical).ino);
- fs.unlinkSync(alias);fs.symlinkSync('../LICENSE',alias);assert.throws(()=>B.verifyPayload(f.payload,f.declaration),/local Mach-O alias differs/);
+ fs.unlinkSync(alias);fs.symlinkSync('../a-data.txt',alias);assert.throws(()=>B.verifyPayload(f.payload,f.declaration),/local Mach-O alias differs/);
 });
 test('cross-directory native aliases keep both loader-path and rpath bindings identical',{skip:process.platform!=='darwin'},t=>{
  const cpu=process.arch==='x64'?'x86_64':process.arch;

@@ -21,7 +21,7 @@ export async function buildAndroidCodecsInput({output,work,arch='arm64'}){
  // again. Common packaging converts these copies into dependency aliases.
  for(const name of fs.readdirSync(libraries).filter(name=>name.endsWith('.dylib')))fs.copyFileSync(path.join(libraries,name),path.join(codecs,name));
 
- includeLicenses(output,built.prefix);
+ includeLicenses(output,path.join(built.prefix,'licenses'));
  const include=path.join(output,'include');fs.cpSync(path.join(built.prefix,'include'),include,{recursive:true,dereference:true});
  const sourceIdentity={profile:Audio.PIN.version,architecture:arch,recipeSha256:built.recipeSha256,audioFormats:built.audioFormats,dependencies:Audio.PIN.dependencies};
  fs.writeFileSync(path.join(output,'sources.json'),JSON.stringify(sourceIdentity,null,2)+'\n');

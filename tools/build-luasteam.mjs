@@ -23,7 +23,7 @@ export async function buildLuaSteam({project:id,arch,output,work,sourceDir=path.
   }
   const binary=path.join(payload,'luasteam.so');run('/usr/bin/lipo',['-create',...slices,'-output',binary]);fs.chmodSync(binary,0o755);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',binary]);run('/usr/bin/codesign',['--verify','--strict',binary]);
 
-  ;includeLicenses(payload,staged);addLicenses(payload,'MacLauncher',root);
+  ;includeLicenses(payload,path.join(staged,'licenses'));addLicenses(payload,'MacLauncher',root);
   await Source.validatePinnedSource(sourceDir,Overlay.SOURCE_REVISION);await Source.validatePinnedSource(sdkDir,Overlay.SDK_HEADERS_REVISION);await Source.validatePinnedSource(luaDir,Overlay.LUA_HEADERS_REVISION);
   return helperPackage({id,version:project.build.version,arch,output,minimumMacOS:'13.0',sourceSha256:source.sourceTreeSha256,record:{upstreamVersion:'4.0.2',sourceRevision:Overlay.SOURCE_REVISION,luaHeadersRevision:Overlay.LUA_HEADERS_REVISION,sdkHeadersRevision:Overlay.SDK_HEADERS_REVISION,sdkVersion:Overlay.SDK_VERSION,hostLuaAbi:Overlay.HOST_LUA_ABI,abiProfile:'luasteam-4.0.2-sdk1.63-ml1',librarySha256:sha(binary),steamHelperVersion:steam.version,steamHelperLibrarySha256:sha(library)}});
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}finally{fs.rmSync(work,{recursive:true,force:true});}

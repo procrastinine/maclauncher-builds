@@ -72,8 +72,8 @@ export function packageAndroidArtJavaInput({framework,image,output,work,arch='ar
  const built={bootstrapDex:path.join(work,'compile/bootstrap/hooks-dex.jar'),servicesJar:path.join(work,'compile/bootstrap/services.jar'),frameworkJar:path.join(work,'compile/bootstrap/framework.jar'),frameworkResourcePreinitVersion:1};
  for(const file of [built.bootstrapDex,built.servicesJar,built.frameworkJar])if(!completed.inputs.some(record=>record.file===file))throw Error('ART Java completion does not include every declared product.');
  const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});for(const [key,name]of Object.entries({bootstrapDex:'hooks-dex.jar',servicesJar:'services.jar',frameworkJar:'framework.jar'}))fs.copyFileSync(built[key],path.join(payload,name),fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);
- includeLicenses(payload,framework);
- includeLicenses(payload,Array.isArray(image)?image[0]:image);
+ includeLicenses(payload,path.join(framework,'licenses'));
+ includeLicenses(payload,path.join(Array.isArray(image)?image[0]:image,'licenses'));
 
  return helperPackage({id:stage.id,version:stage.version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{androidSource:definition.androidSource,frameworkInputSha256:checked.declaration.manifestSha256,originalImageSha256:json(path.join(root,'producers/android-image-data/source.json')).archive.sha256,buildOverlay:stage.compileOverlay,jdk:{sha256:jdkPin.sha256},compilerInputs:profile,dexTools:dex,frameworkResourcePreinitVersion:built.frameworkResourcePreinitVersion}});
 }

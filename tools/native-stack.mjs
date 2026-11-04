@@ -62,7 +62,7 @@ export function stageNativeStack({built,kind,arch,output,work}){
  }
 
  for(const source of Object.values(built.sourceRoots||{}))addLicenses(payload,kind,source);
- addLicenses(payload,kind,built.sourceRoot);includeLicenses(payload,built.prefix);
+ addLicenses(payload,kind,built.sourceRoot);includeLicenses(payload,path.join(built.prefix,'licenses'));
  const {fonts,audio,preparedInput,readRoots,...metadata}=built;
  const stack=Tools.publicProvenance(metadata,[{from:built.prefix,to:PREFIX},{from:built.sdk,to:SDK},{from:work,to:'NATIVE_STACK_BUILD'}]);
  for(const key of ['prefix','sdk','tools','sourceRoots','sourceRoot','outputRoot'])delete stack[key];

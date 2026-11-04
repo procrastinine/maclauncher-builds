@@ -53,7 +53,7 @@ export function packageBlueprintInput({project='android-blueprint-parser',versio
  }
  
  run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',path.join(payload,'bin/android-blueprint-parser')]);
- includeLicenses(payload,inputRoot);
+ includeLicenses(payload,path.join(inputRoot,'licenses'));
  return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(path.join(base,'source.json')),manifestRelative:'input.json',record:{upstreamRevision:profile.upstream.revision,toolchain}});
 }
 
