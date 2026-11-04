@@ -57,12 +57,6 @@ function sourceFiles(root, depth = 0, prefix = "", output = []) {
   return output;
 }
 
-function stageNotices({ source, sdl12, sdl2, destination }) {
-  addLicenses(destination, "ONScripter-EN", source);
-  addLicenses(destination, "sdl12-compat", sdl12);
-  addLicenses(destination, "SDL2", sdl2);
-}
-
 async function buildRuntime({ manager: suppliedManager, userDataDir, version, packageVersion, sourceDir, architecture = process.arch, retainBuildDirectory = false, logger, signal, onProgress, dependencies = {} } = {}) {
   const manager = suppliedManager || require("./onscripter-en-manager");
   const { SNAPSHOT: PROFILE, SNAPSHOT_REVISION: REVISION } = require("./onscripter-en-manager");
@@ -146,7 +140,9 @@ async function buildRuntime({ manager: suppliedManager, userDataDir, version, pa
     }
     const executable = path.join(payload, "bin", "onscripter-en");
     await run("/usr/bin/codesign", ["--force", "--sign", "-", executable], { logPath, signal });
-    stageNotices({ source, sdl12: packageRoots.sdl12, sdl2: packageRoots.sdl2, destination: payload, revision: REVISION });
+    addLicenses(payload, "ONScripter-EN", source);
+    addLicenses(payload, "sdl12-compat", packageRoots.sdl12);
+    addLicenses(payload, "SDL2", packageRoots.sdl2);
     const verifiedBuild = { sourceRevision: REVISION, sourceTreeSha256, sourceArchiveSha256, sourceScope: SOURCE_SCOPE,
       adapterProfile: "mac-sdl12-v3", overlaySha256, overlayFiles, architecture, minimumMacOS: "13.0",
       compilerPrefixMaps: prefixMaps, compilerFlags, buildDirectory: work,
@@ -166,4 +162,4 @@ async function buildRuntime({ manager: suppliedManager, userDataDir, version, pa
   } finally { if (!retainBuildDirectory) fs.rmSync(work, { recursive: true, force: true }); building.delete(destination); }
 }
 
-module.exports = { SOURCE_SCOPE, PACKAGES, buildRuntime, stageNotices, sourceFiles, compilerPrefixMaps, compilerPathFlags };
+module.exports = { SOURCE_SCOPE, PACKAGES, buildRuntime, sourceFiles, compilerPrefixMaps, compilerPathFlags };
