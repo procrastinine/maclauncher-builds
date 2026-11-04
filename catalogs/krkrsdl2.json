@@ -6,6 +6,54 @@
     {
       "schemaVersion": 2,
       "id": "krkrsdl2",
+      "version": "MCLv7",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "4ae1489f0435ab21896b46b1fa1ccecd7146048f637749c0bc60736c1dfef263",
+      "sourceSha256": "4ae1489f0435ab21896b46b1fa1ccecd7146048f637749c0bc60736c1dfef263",
+      "updatePolicy": "manual",
+      "capabilities": {
+        "buildProfile": "macos-storage-font-monitor-v3-kag3",
+        "nativeFeatures": [
+          "storage.dirlist",
+          "system.addFont",
+          "monitor.adjust"
+        ],
+        "kag3Resources": 1
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "f445a97387537e90d6f56d5e6b30d8ba395aa2aa"
+      },
+      "launcherContract": 2,
+      "asset": {
+        "filename": "krkrsdl2-MCLv7-arm64.tar.gz",
+        "sha256": "1e8939bd43faed4d7d78cadd3c58a7394dad473fe66234d4d387db70c0a0a0e0",
+        "bytes": 4894470,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/krkrsdl2%2FvMCLv7%2Farm64/krkrsdl2-MCLv7-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "f445a97387537e90d6f56d5e6b30d8ba395aa2aa",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41840840308",
+        "runAttempt": "1"
+      },
+      "tag": "krkrsdl2/vMCLv7/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "krkrsdl2",
       "version": "MCLv4",
       "arch": "x64",
       "launcherArchitectures": [
