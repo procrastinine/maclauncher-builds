@@ -1,0 +1,143 @@
+{
+  "id": "android-launcher",
+  "version": "1.0.6",
+  "arch": "universal",
+  "minimumMacOS": "13.0",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "d903fd42c6f11850b87e4acd9e499494d42ab1c8021399a6efe7fb9a313c8130",
+  "directoryRelative": "android-launcher/1.0.6/universal",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "cd0a716e1518574ed6891dc5f06d46c70fa2b760cba0817cb9562fa15958fbfa",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 18618,
+      "mode": 420,
+      "sha256": "1050243bbecfedd8806915334d07cabac09f13670a452e3644b2e518e186a66a"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 575,
+      "mode": 420,
+      "sha256": "334061fec03c080709e4e326ae8afecd63cad056ef758a464192ddaf7add5b43"
+    },
+    {
+      "path": "files/providers/macapk/resources/privacy.jar",
+      "size": 34075,
+      "sha256": "6499744367ec6016c99192c1a11368b1abb8181eadc98b4a739b95bdfa3fcfc6",
+      "mode": 420
+    },
+    {
+      "path": "files/resources/launch-arguments.jar",
+      "size": 7741,
+      "sha256": "e1f46d536a42c50294c52d2bb364993fd73999db2295b43ee80a819cae169f3b",
+      "mode": 420
+    },
+    {
+      "path": "files/resources/text-input.jar",
+      "size": 9100,
+      "sha256": "45fcfda709dbfef7c58bc0ae6fad584bd08a175ed78bf0e5e621e653d63413f5",
+      "mode": 420
+    },
+    {
+      "path": "files/resources/text-input.json",
+      "size": 184,
+      "sha256": "fdeea6ec92c6187ea007f10172139471f6b475572a8944bd72a4b4d261122b98",
+      "mode": 420
+    },
+    {
+      "path": "files/runtime/package.json",
+      "size": 277,
+      "sha256": "2f19de4c912908df5ab485fe38a4513d7040afdd1d2e4f4459355b2877c9d4cd",
+      "mode": 420
+    },
+    {
+      "path": "files/runtime/src/modules/android/apk.js",
+      "size": 9831,
+      "sha256": "dbbddf8891bdaab3bfbbdc57c7d6f498da318c6de786b94819a8a23252eed937",
+      "mode": 420
+    },
+    {
+      "path": "files/runtime/src/modules/android/art/boot-classpath.mjs",
+      "size": 188,
+      "sha256": "710bf317809a4ceb6010b2db24916c0d4d465a07540c9abf931b9498c73670ef",
+      "mode": 420
+    },
+    {
+      "path": "files/runtime/src/modules/android/art/components.json",
+      "size": 1055,
+      "sha256": "c3cf6cab55c1da7604074533b13016191d9ed5046474505bb7f7aa3316240661",
+      "mode": 420
+    },
+    {
+      "path": "files/runtime/src/modules/android/art/runtime.js",
+      "size": 4665,
+      "sha256": "274e59d5561954c1d86523fee3073faa88cae60ef5f58777f2fa6f6c77986a25",
+      "mode": 420
+    },
+    {
+      "path": "files/runtime/src/modules/android/art/supplier.json",
+      "size": 1319,
+      "sha256": "bee3f344829d2bc060a6a902b173e0184cd3ca8c277e5acfcae73870da623761",
+      "mode": 420
+    },
+    {
+      "path": "files/runtime/src/modules/android/binary-manifest.js",
+      "size": 23635,
+      "sha256": "9b61b3265358f5f2be6f7e6eb1ace52e569c99a8934e029f3e8a95e70b860351",
+      "mode": 420
+    },
+    {
+      "path": "files/runtime/src/modules/android/native/arm32/components.json",
+      "size": 422,
+      "sha256": "6e935ab1fc4204a106fbc271cca0a40e5ce5fe3a7b20a6623f1cb4602a2f0a68",
+      "mode": 420
+    },
+    {
+      "path": "files/runtime/src/modules/android/native/resources/ad-hosts.json",
+      "size": 943,
+      "sha256": "0bff70d6de3b343369a1a14ce16828d8f5ea4bca48a5202b2c09d518c108e62a",
+      "mode": 420
+    },
+    {
+      "path": "files/runtime/src/modules/android/native/resources/storage-namespace.json",
+      "size": 1397,
+      "sha256": "db6fcc79dfff8920d321fa7c1d7fb34d77b73454a4b657f860f200afbd6aae6a",
+      "mode": 420
+    },
+    {
+      "path": "files/runtime/src/modules/android/profile.js",
+      "size": 4211,
+      "sha256": "f24aa405be769f94429c16b6589838619cd0d2465cf599fe4549e208c95f89b6",
+      "mode": 420
+    },
+    {
+      "path": "files/runtime/src/modules/shared/runtime/zip.js",
+      "size": 11538,
+      "sha256": "b3e018f075cc5e83e7daac48f6f08d0820ff2f31bb08689c3155b5ffe98aedc2",
+      "mode": 420
+    },
+    {
+      "path": "files/store/resources/account-control.jar",
+      "size": 23017,
+      "sha256": "30cb62450fcdeed42c5e6b2ff07f9d1b0b62d729e86d3a875f47de603ef797a8",
+      "mode": 420
+    },
+    {
+      "path": "files/store/resources/account-control.json",
+      "size": 276,
+      "sha256": "9db999ef08c1b162c0d1e3cd903e403f7fcf67cebfe900fc7e90fe619b5fbb7c",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 3962,
+      "sha256": "cd0a716e1518574ed6891dc5f06d46c70fa2b760cba0817cb9562fa15958fbfa",
+      "mode": 420
+    }
+  ]
+}
