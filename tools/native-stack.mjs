@@ -1,4 +1,4 @@
-import {addLicenses,includeLicenses} from '../lib/licenses.mjs';
+import {addLicense,addLicenses,includeLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -62,6 +62,14 @@ export function stageNativeStack({built,kind,arch,output,work}){
  }
 
  for(const source of Object.values(built.sourceRoots||{}))addLicenses(payload,kind,source);
+ const sdl2=built.sourceRoots?.sdl2,freetype=built.sourceRoots?.freetype;
+ if(sdl2){
+  addLicenses(payload,kind,path.join(sdl2,'src/hidapi'));
+  addLicense(payload,kind,path.join(sdl2,'src/hidapi/AUTHORS.txt'));
+  addLicenses(payload,kind,path.join(sdl2,'src/video/yuv2rgb'));
+  for(const name of ['e_log.c','math_libm.h'])addLicense(payload,kind,path.join(sdl2,'src/libm',name));
+ }
+ if(freetype)for(const name of ['FTL.TXT','GPLv2.TXT'])addLicense(payload,kind,path.join(freetype,'docs',name));
  addLicenses(payload,kind,built.sourceRoot);includeLicenses(payload,path.join(built.prefix,'licenses'));
  const {fonts,audio,preparedInput,readRoots,...metadata}=built;
  const stack=Tools.publicProvenance(metadata,[{from:built.prefix,to:PREFIX},{from:built.sdk,to:SDK},{from:work,to:'NATIVE_STACK_BUILD'}]);
