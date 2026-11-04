@@ -397,17 +397,6 @@
         }
       },
       {
-        "id": "libplacebo-fast-float",
-        "repository": "fastfloat/fast_float",
-        "provider": "github",
-        "url": "https://github.com/fastfloat/fast_float",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/scene-profile.json",
-          "pointer": "/FAST_FLOAT",
-          "repositoryPointer": "/FAST_FLOAT/origin"
-        }
-      },
-      {
         "id": "fidelityfx-image-filters",
         "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "provider": "github",
@@ -458,7 +447,7 @@
         "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/fsr3-sdk"
+          "gitlink": "producers/maclauncher/src/external/fsr4-sdk-headers"
         }
       },
       {
@@ -467,7 +456,7 @@
         "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/fsr3-sdk"
+          "gitlink": "producers/maclauncher/src/external/fsr4-sdk-model"
         }
       },
       {
