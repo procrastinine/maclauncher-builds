@@ -288,15 +288,6 @@
         }
       },
       {
-        "id": "spirv-headers",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Headers",
-        "repository": "KhronosGroup/SPIRV-Headers",
-        "pin": {
-          "gitlink": "producers/maclauncher/src/external/macfx-spirv-headers"
-        }
-      },
-      {
         "id": "spirv-cross",
         "provider": "github",
         "url": "https://github.com/KhronosGroup/SPIRV-Cross",
@@ -629,7 +620,7 @@
         "producers/maclauncher/src/external/macfx-reshade",
         "producers/maclauncher/src/external/macfx-reshade-shaders",
         "producers/maclauncher/src/external/macfx-spirv-cross",
-        "producers/maclauncher/src/external/macfx-spirv-headers",
+        "producers/maclauncher/src/external/macfx-reshade/deps/spirv",
         "producers/maclauncher/src/external/macfx-vkd3d",
         "producers/maclauncher/src/external/sgsr2",
         "producers/maclauncher/src/external/streamline-camera",

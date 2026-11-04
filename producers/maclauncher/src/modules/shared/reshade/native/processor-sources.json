@@ -12,7 +12,7 @@
     {
       "id": "macfx-spirv-headers",
       "sourcePath": "third_party/reshade/deps/spirv",
-      "submodulePath": "src/external/macfx-spirv-headers",
+      "submodulePath": "src/external/macfx-reshade/deps/spirv",
       "repository": "https://github.com/KhronosGroup/SPIRV-Headers.git"
     },
     {

@@ -68,7 +68,7 @@ const pins = registeredSources.sources.map(entry => {
   if (!consumed.has(entry.sourcePath)) throw new Error("The graphics source profile contains an undeclared dependency.");
   const directory = options["--source-root"]?path.resolve(options["--source-root"],entry.submodulePath):path.resolve(import.meta.dirname, "..", entry.submodulePath);
   const actual = execFileSync("git", ["-C", directory, "rev-parse", "HEAD"], {encoding: "utf8"}).trim();
-  if (actual !== gitlink("producers/maclauncher/"+entry.submodulePath)) throw new Error("Initialize the selected graphics source commit: " + entry.submodulePath);
+  if (actual !== (entry.commit||(entry.id==='macfx-spirv-headers'?execFileSync('git',['-C',path.resolve(directory,'../..'),'rev-parse',gitlink('producers/maclauncher/src/external/macfx-reshade')+':deps/spirv'],{encoding:'utf8'}).trim():gitlink('producers/maclauncher/'+entry.submodulePath)))) throw new Error("Initialize the selected graphics source commit: " + entry.submodulePath);
   execFileSync("git", ["-C", directory, "diff", "--exit-code", "HEAD", "--"], {stdio: "pipe"});
   return ` ${actual} ${entry.sourcePath}`;
 });
