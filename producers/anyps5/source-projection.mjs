@@ -9,7 +9,10 @@ const root=path.resolve(import.meta.dirname,'../..');
 export const recipe=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'source.json'),'utf8'));
 recipe.source.revision=gitlink(recipe.source.path);
 export const inputs=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'dependencies.json'),'utf8'));
-for(const entry of inputs.dependencies)Object.defineProperty(entry,'revision',{enumerable:true,get:()=>git(path.join(root,recipe.source.path),['rev-parse','HEAD:'+entry.path]).trim()});
+for(const entry of inputs.dependencies)Object.defineProperty(entry,'revision',{enumerable:true,get:()=>{
+ const parent=inputs.dependencies.findLast(candidate=>entry.path.startsWith(candidate.path+'/'))?.path||'';
+ return git(path.join(root,recipe.source.path,parent),['rev-parse','HEAD:'+entry.path.slice(parent?parent.length+1:0)]).trim();
+}});
 const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',maxBuffer: Infinity,stdio:['ignore','pipe','pipe']});
 
 export function writeChanged(file,bytes,mode=0o644){
