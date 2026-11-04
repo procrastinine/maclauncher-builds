@@ -1,6 +1,5 @@
 import {checkoutSource} from '../../tools/build-source.mjs';
 import sharedDependencies from '../dependencies.json' with {type:'json'};
-import {gitlink} from '../../lib/pins.mjs';
 import {addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs/promises';
 import { constants as fsConstants } from 'node:fs';

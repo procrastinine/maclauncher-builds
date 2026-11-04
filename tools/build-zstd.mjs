@@ -1,6 +1,5 @@
 import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
 import {addLicenses} from '../lib/licenses.mjs';
-import {gitlink} from '../lib/pins.mjs';
 // Build the original Zstandard runtime at the declared macOS floor.
 import fs from 'node:fs';
 import path from 'node:path';

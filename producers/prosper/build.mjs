@@ -37,7 +37,6 @@ function vulkanInput(library){
  throw Error('Choose a library from an existing managed Vulkan runtime with its source manifest.');
 }
 async function dependency(entry,buildDirectory){
- if(entry.reusePath&&fs.existsSync(path.join(root,entry.reusePath))){const selected=path.join(root,entry.reusePath);verify(entry,selected);return selected;}
  const selected=path.join(buildDirectory,'dependencies',entry.id);
  if(!fs.existsSync(path.join(selected,'.git'))){fs.mkdirSync(path.dirname(selected),{recursive:true});retryNetwork(()=>run('git',['clone','--filter=blob:none','--no-checkout',entry.repository,selected]));}
  try{verify(entry,selected);return selected;}catch{}
