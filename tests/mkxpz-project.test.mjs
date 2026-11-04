@@ -15,7 +15,7 @@ test('MKXP-Z uses its owned source recipe and one Gitlink source identity',()=>{
  assert.equal(project.producer.kind,'maclauncher');
  assert.equal(project.producer.repository,'https://github.com/procrastinine/maclauncher-builds');
  assert.deepEqual(project.producer.entries,['producers/maclauncher/scripts/build-mkxpz-nfc.cjs','producers/maclauncher/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json','producers/maclauncher/helper-builds/mkxpz.json']);
- assert.equal(project.upstreams.find(row=>row.id==='sdl2-image').revision,'d3c6d5963dbe438bcae0e2b6f3d7cfea23d02829');
+ assert.equal(project.upstreams.find(row=>row.id==='sdl2-image').revision,JSON.parse(fs.readFileSync(path.join(root,'producers/dependencies.json'))).sdl2_image.revision);
  assert.ok(project.packageProfiles.some(row=>row.version===project.build.version));assert.equal(project.build.command,'tools/build-mkxpz.mjs');
  assert.deepEqual(project.build.architectures,['arm64']);
  for(const version of ['MCLv1-1003','MCLv2-1003'])assert.ok(project.packageProfiles.some(row=>row.version===version));
