@@ -1,0 +1,226 @@
+{
+  "id": "android-angle-aim",
+  "version": "MCLv6",
+  "arch": "arm64",
+  "minimumMacOS": "13.0",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "1e960a863b7fc1212e34bf605b9c51eaf45abb3e3306cb8e64c11dad8182e39b",
+  "directoryRelative": "android-angle-aim/MCLv6/arm64",
+  "manifestRelative": "input.json",
+  "manifestSha256": "919999f35b9fbda700d726d7e076ded4a4b6b277630867a5cc15e3c86e32b33f",
+  "files": [
+    {
+      "path": "angle-manifest.json",
+      "size": 7806,
+      "sha256": "1817b66bf0a2f6a945dcbf2cdaacd8b37ee4e1ed0fe0fcc3fcfdd58f7960b8f6",
+      "mode": 420
+    },
+    {
+      "path": "build-definition.json",
+      "size": 17704,
+      "mode": 420,
+      "sha256": "d8be222ce64c65b8654e4c133c2a0756b546f3eb8d67aae22d137bf5eebd42ff"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "fa95179250afa939235cb97a461c7b7e7ad4931b24081f27465eb11e9154ab0c"
+    },
+    {
+      "path": "input.json",
+      "size": 6452,
+      "sha256": "919999f35b9fbda700d726d7e076ded4a4b6b277630867a5cc15e3c86e32b33f",
+      "mode": 420
+    },
+    {
+      "path": "libEGL.dylib",
+      "size": 81808,
+      "sha256": "fea590e693199e9281928e64ff607c282bac2c287850843899664d20a8d11987",
+      "mode": 420,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "libGLESv2.dylib",
+      "size": 8044736,
+      "sha256": "8f3aafd09d83c8490c210f51d30b2ee52ed5f268babe8751136046409b8f4f33",
+      "mode": 420,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "licenses/ANGLE.txt",
+      "size": 1643,
+      "sha256": "bf4da21bd20bcfb5b60b7ecc67fa864a79be049e21d6178076887f178dd6c71a",
+      "mode": 420
+    },
+    {
+      "path": "licenses/buildtools.txt",
+      "size": 1537,
+      "sha256": "ff11d445fb41a1087c7630e120ab15f1a2cb67c1b707173cb494141805fca35e",
+      "mode": 420
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 1614,
+      "sha256": "c3637666445a27e04ddeffb35bdcb1aa30a1d23b99eca4e22091818cf8124582",
+      "mode": 420
+    },
+    {
+      "path": "licenses/Khronos-headers.txt",
+      "size": 1147,
+      "sha256": "438187dca092de4032c1a16524aa4c34c71a0f985a71251a675aad54e77ed561",
+      "mode": 420
+    },
+    {
+      "path": "licenses/libc++.txt",
+      "size": 16703,
+      "sha256": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-abseil-cpp.txt",
+      "size": 11361,
+      "sha256": "c79a7fea0e3cac04cd43f20e7b648e5a0ff8fa5344e644b0ee09ca1162b62747",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-astc-encoder-src.txt",
+      "size": 10139,
+      "sha256": "494accc32e50eb523a0e384d0ae6d4b702db867a89d6971216760e92b240ee12",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-glslang-src-2.txt",
+      "size": 1733,
+      "sha256": "10986bda93996d06b781a5f44d2fb5b37c527a7893e2478683ac89793a4a3caf",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-glslang-src.txt",
+      "size": 54705,
+      "sha256": "adb783e734e906d1f46db5df29991dbde84bdb0ceab502ac2febb44fe3c2b5f4",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-jsoncpp-source.txt",
+      "size": 2714,
+      "sha256": "cec0db5f6d7ed6b3a72647bd50aed02e13c3377fd44382b96dc2915534c042ad",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-jsoncpp.txt",
+      "size": 2665,
+      "sha256": "76c45ece83a26117f86f4e349e7df118708e061e87225328fb478ce1e8b3eb86",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-rapidjson-src.txt",
+      "size": 5152,
+      "sha256": "a140e5d46fe734a1c78f1a3c3ef207871dd75648be71fdda8e309b23ab8b1f32",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-spirv-cross-src-2.txt",
+      "size": 1305,
+      "sha256": "fbeaca472f4f70e276dd1106ca5097435967a22ad6c1d8200aef7ad9f70aaf3f",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-spirv-cross-src-3.txt",
+      "size": 1108,
+      "sha256": "8f25018489d6fe0dec34a352314c38dc146247b7de65735790f4398a92afa84b",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-spirv-cross-src.txt",
+      "size": 16814,
+      "sha256": "b89aeb7c2a164a0576786dd2a8b57f2fb628b23981f0a06bd77e2f99a9befa0f",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-spirv-headers-src-2.txt",
+      "size": 17023,
+      "sha256": "d557539df68e771cc1eedcc91d13f70fca930e508d11eedcafa4b15db49e3744",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-spirv-headers-src-3.txt",
+      "size": 1087,
+      "sha256": "6d7c9e9d7d12c8d3753bdb24417b84819ba4d6c2f025c37948113d86dc81eef9",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-spirv-headers-src.txt",
+      "size": 23503,
+      "sha256": "ea43b1de38a6f90c488800d66dec1ed671e68cda530266bc96951fb5b6307613",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-spirv-tools-src.txt",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-vulkan_memory_allocator.txt",
+      "size": 1099,
+      "sha256": "cdb520614db3ec62e667ece01e64e6afa21948fa51e85e748b1494597a7be907",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-vulkan-headers-src-2.txt",
+      "size": 1084,
+      "sha256": "1ca3502222d967f3be5751c55f6b7ee735b5383909c3b501495f54b216dbf227",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-vulkan-headers-src.txt",
+      "size": 458,
+      "sha256": "ac24e5ea920e4318e4d02c4086ae51f53cfb03feed06c18df1019e7ada1ec7bc",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-vulkan-loader-src.txt",
+      "size": 11661,
+      "sha256": "43c0a37e6a0fa7ff3c843b3ec5a4fac84b712558ddac103fbd4c1649662a9ece",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-zlib-2.txt",
+      "size": 4476,
+      "sha256": "5aadb3f129c4c7e29f28bb6c5954dea061df3046d0fe3e134aff2ef4a217b1d6",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-zlib-3.txt",
+      "size": 97454,
+      "sha256": "71e0dcf4cacb6b1674550a3d9407344746d27cdce739e6e25189d0b620b005ed",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-zlib-4.txt",
+      "size": 1453,
+      "sha256": "e83d883a3f7bb93b3dcfab28f5300a569bc7586ded2e067c0639d0697d13fe1e",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-zlib-5.txt",
+      "size": 294,
+      "sha256": "2f1d0b18ce37c2af415a469857f02aee2c41a58877aff21d29e9c6db32b55cb7",
+      "mode": 420
+    },
+    {
+      "path": "licenses/third_party-zlib.txt",
+      "size": 910,
+      "sha256": "e1cfcc55c325b3f78cf55df9664abaa066e2271dffe8213347d9fccdfbac8f2c",
+      "mode": 420
+    }
+  ]
+}
