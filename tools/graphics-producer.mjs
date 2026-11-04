@@ -9,8 +9,9 @@ const root=path.resolve(import.meta.dirname,'..');
 export async function buildGraphicsSource({version,arch,output,work,sdkPath,sources={},sourceRoot,reuse={},tools={},inputs={}}){
  if(!version)throw Error('An exact registered graphics source-stage version is required.');
  if(tools.meson&&!tools.python){const candidate=path.join(path.dirname(tools.meson),"python");if(fs.existsSync(candidate))tools.python=candidate;}
- const cross=path.join(root,'producers/maclauncher/src/external/macfx-spirv-cross');
+ const cross=path.join(work,'spirv-cross-source');
  if(!fs.existsSync(path.join(cross,'.git')))checkoutSource({...sharedDependencies.spirvCross,destination:cross});
+ sources['macfx-spirv-cross']=cross;
  if(!sources['sdl-vulkan']){fs.mkdirSync(work,{recursive:true});sources['sdl-vulkan']=checkoutSource({...sharedDependencies.sdlHeaders,destination:path.join(work,'sdl-headers-source')});}
  const options={work,arch,sdkPath,sources,reuse,tools,inputs},initial=plan(options);
  const blocked=initial.unresolved.filter(value=>(!value.startsWith('input ')||!value.endsWith(': fetchable'))&&!['tool meson: missing','tool ninja: missing'].includes(value));
