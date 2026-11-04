@@ -13,9 +13,9 @@ const Overlay = require("./system4-portable-overlay-v3");
 const { throwIfAborted } = require("../shared/runtime/download-utils");
 // Portable libffi uses its configured release archive; the Git snapshot does not contain configure.
 const PIN = Object.freeze({...require("./system4-portable.json"),dependencies:require("./system4-portable.json").dependencies.map(row=>{if(row.id==='webp')row={...require('./system35-portable.json').dependencies.find(pin=>pin.id==='webp'),...row};const pin=sharedDependencies[row.id==='libffi'?'libffiPortable':row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};})});
-const VERSION = "MCLv1-1021";
+const VERSION = "MCLv9";
 const REVISION = gitlink("producers/maclauncher/src/external/xsystem4");
-const SOURCE_SHA256 = "3beeaf86056c10f4464c50cec45ed56a140a99443bec56e9930cbdbe09151acb";
+const SOURCE_SHA256 = "4573e25bd5958bb6b7d8b28b6e1c0036af5c752e304d30c8afa270c7818ba0c0";
 const sourcePath = path.resolve(__dirname, "../../external/xsystem4");
 const recipeFiles = [__filename, require.resolve("./system4-portable-overlay-v3"), require.resolve("./system4-portable.json"),
   require.resolve("./system35-portable"), require.resolve("./system35-portable.json"),

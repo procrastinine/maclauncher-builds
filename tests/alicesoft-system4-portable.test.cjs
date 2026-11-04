@@ -20,7 +20,7 @@ function inputs(t) {
 test("System4 portable overlay preserves upstream and declares exact dependency choices",t=>{
   const fixture=inputs(t);if(!fixture)return;
   const originals=Overlay.SOURCE_FILES.map(r=>fs.readFileSync(path.join(Portable.sourcePath,r)));
-  const result=Overlay.apply(fixture.source);assert.equal(result.files.length,8);
+  const result=Overlay.apply(fixture.source,{version:Portable.VERSION});assert.equal(result.files.length,8);
   const meson=fs.readFileSync(path.join(fixture.source,"meson.build"),"utf8");
   assert.match(meson,/appleframeworks.*OpenGL/);assert.match(meson,/required : get_option\('scheme'\)/);assert.match(meson,/required: get_option\('ffmpeg'\)/);assert.doesNotMatch(meson,/fallback : \['cglm'/);
   const video=fs.readFileSync(path.join(fixture.source,"src/video.c"),"utf8");assert.match(video,/#version 150/);assert.match(video,/xsys4_resource_path/);
