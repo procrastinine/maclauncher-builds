@@ -5,16 +5,11 @@ if(FSR_GLSLANG_EXECUTABLE)
   set(FSR_COMPILER "${FSR_GLSLANG_EXECUTABLE}")
   set(FSR_COMPILER_DEP "${FSR_GLSLANG_EXECUTABLE}")
 else()
-  include(FetchContent)
   set(ENABLE_OPT OFF CACHE BOOL "" FORCE)
   set(ENABLE_GLSLANG_BINARIES ON CACHE BOOL "" FORCE)
   set(GLSLANG_TESTS OFF CACHE BOOL "" FORCE)
   set(BUILD_EXTERNAL OFF CACHE BOOL "" FORCE)
-  FetchContent_Declare(fsr_glslang
-    GIT_REPOSITORY https://github.com/KhronosGroup/glslang.git
-    GIT_TAG e1b562a8bed273a02f30b59b66a5d499793cede5
-    GIT_SUBMODULES "")
-  FetchContent_MakeAvailable(fsr_glslang)
+  add_subdirectory("${FETCHCONTENT_SOURCE_DIR_FSR_GLSLANG}" fsr_glslang)
   set(FSR_COMPILER "$<TARGET_FILE:glslang-standalone>")
   set(FSR_COMPILER_DEP glslang-standalone)
 endif()

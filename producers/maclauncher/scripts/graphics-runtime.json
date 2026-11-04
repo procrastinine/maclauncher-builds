@@ -299,38 +299,17 @@
     "isf-spirv-tools": {
       "kind": "archive",
       "description": "Original spirv-tools compiler source for ISF",
-      "pin": {
-        "file": "src/modules/shared/reshade/isf/source.json",
-        "pointer": "/compilerSources/2"
-      },
-      "url": "{url}",
-      "sha256": "{sha256}",
-      "entry": "{entry}"
+      "entry": "source/spirv-tools"
     },
     "isf-spirv-headers": {
       "kind": "archive",
       "description": "Original spirv-headers compiler source for ISF",
-      "pin": {
-        "file": "src/modules/shared/reshade/isf/source.json",
-        "pointer": "/compilerSources/3"
-      },
-      "url": "{url}",
-      "sha256": "{sha256}",
-      "entry": "{entry}"
+      "entry": "source/spirv-headers"
     },
     "fsr-glslang": {
       "kind": "archive",
       "description": "Source-built host compiler for the pinned FSR shader generator",
-      "pin": {
-        "file": "src/modules/shared/reshade/libplacebo/dependencies.json",
-        "pointer": "/sources",
-        "match": {
-          "id": "glslang"
-        }
-      },
-      "url": "{url}",
-      "sha256": "{sha256}",
-      "entry": "glslang-{commit}",
+      "entry": "source/glslang",
       "files": {
         "CMakeLists.txt": null,
         "glslang/CMakeLists.txt": null

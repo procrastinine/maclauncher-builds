@@ -9,13 +9,22 @@ import {buildInput} from '../../../../../../../tools/build-input.mjs';
 export const profile=JSON.parse(fs.readFileSync(new URL('./dependencies.json',import.meta.url)));
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
+export async function prepareSources({work}) {
+ const source=path.join(work,'source'),inputs=[];fs.mkdirSync(source,{recursive:true});
+ for(const row of profile.sources){
+  const revision=row.id==='shaderc'?shared.shaderc.revision:['glslang','spirv-tools','spirv-headers'].includes(row.id)?new RegExp("'"+row.id.replaceAll('-','_')+"_revision':\\s*'([^']+)'").exec(fs.readFileSync(path.join(source,'shaderc/DEPS'),'utf8'))[1]:row.commit;
+  const repository=row.id==='shaderc'?shared.shaderc.repository:row.repository,sha256=row.id==='shaderc'?shared.shaderc.sha256:row.sha256;
+  const target=path.join(source,row.id);inputs.push({...row,commit:revision,repository});if(fs.existsSync(target))continue;
+  const archive=await buildInput({url:repository+'/archive/'+revision+'.tar.gz',sha256});fs.mkdirSync(target);run('tar',['-xf',archive,'--strip-components=1','-C',target]);
+ }
+ return {source,inputs};
+}
 /** Original compiler and color-management libraries, with explicit sources and OS target. */
 export async function buildDependencies({work,architecture,meson,ninja,python}) {
  if(!['arm64','x86_64'].includes(architecture)||!path.isAbsolute(work))throw Error('Choose a native CPU and absolute dependency work directory.');
  const source=path.join(work,'source'),build=path.join(work,'build'),prefix=path.join(work,'install');
  fs.mkdirSync(source,{recursive:true});fs.mkdirSync(build,{recursive:true});fs.mkdirSync(prefix,{recursive:true});
- for(const row of profile.sources){const target=path.join(source,row.id);if(fs.existsSync(target))continue;
-  const archive=await buildInput(row.id==='shaderc'?{url:shared.shaderc.repository+'/archive/'+shared.shaderc.revision+'.tar.gz',sha256:shared.shaderc.sha256}:row);fs.mkdirSync(target);run('tar',['-xf',archive,'--strip-components=1','-C',target]);}
+ const resolved=await prepareSources({work});
  const sdk=execFileSync('xcrun',['--sdk','macosx','--show-sdk-path'],{encoding:'utf8'}).trim();
  const flags=['-arch',architecture,'-mmacosx-version-min='+profile.minimumMacOS,'-Werror=unguarded-availability-new','-ffile-prefix-map='+work+'=dependencies'];
  const env={...process.env,MACOSX_DEPLOYMENT_TARGET:profile.minimumMacOS,SDKROOT:sdk,
@@ -38,5 +47,5 @@ export async function buildDependencies({work,architecture,meson,ninja,python}) 
  if(!actual)throw Error('Little CMS did not produce a shared library.');if(actual!=='liblcms2.2.dylib')fs.copyFileSync(path.join(lcmsLib,actual),path.join(lcmsLib,'liblcms2.2.dylib'));
  addLicense(lcmsRoot,'Little-CMS',path.join(source,'lcms2/LICENSE'));
  const notices=profile.sources.map(row=>{const root=path.join(source,row.id),name=fs.existsSync(path.join(root,'LICENSE'))?'LICENSE':fs.existsSync(path.join(root,'COPYING'))?'COPYING':'LICENSE.txt';return {name:row.id+'.LICENSE',file:path.join(root,name)};});
- return {inputs:prefix,source:profile.sources,notices,shadercVersion:profile.shadercVersion,lcmsVersion:profile.lcmsVersion};
+ return {inputs:prefix,source:resolved.inputs,notices,shadercVersion:profile.shadercVersion,lcmsVersion:profile.lcmsVersion};
 }

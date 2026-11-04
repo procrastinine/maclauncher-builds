@@ -63,7 +63,7 @@ async function verifySource(input) {
   const origin = await run('git', ['-C', source, 'remote', 'get-url', 'origin']);
   const status = await run('git', ['-C', source, 'status', '--porcelain', '--untracked-files=all']);
   const normalize = value => value.replace(/\.git$/, '').replace(/\/$/, '');
-  if (revision !== (input.revision || (input.path.includes('macfx-spirv-cross') ? gitlink(input.path) : await run('git', ['-C', path.dirname(source), 'rev-parse', 'HEAD:' + path.basename(source)]))) || normalize(origin) !== normalize(input.repository) || status)
+  if (revision !== (input.revision || (input.path.includes('macfx-spirv-cross') ? gitlink(input.path) : await run('git', ['-C', path.join(repository,'sources/anyps5'), 'rev-parse', 'HEAD:3rdparty/glslang']))) || normalize(origin) !== normalize(input.repository) || status)
     throw new Error(`Dependency source differs from its pin: ${input.path}`);
   return source;
 }

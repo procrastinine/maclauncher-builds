@@ -12,7 +12,7 @@ import {nativeStackInput} from './native-stack.mjs';
 import {downloadFile} from './download.mjs';
 const require=createRequire(import.meta.url);
 const Builder=require('../producers/maclauncher/src/modules/nitroplus/runtime/portable-build.js'),Media=require('../producers/maclauncher/src/modules/nitroplus/runtime/portable-media.js'),Fonts=require('../producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.js');
-const MEDIA_NOTICE_INPUTS=Object.freeze({fontconfig:{version:'2.16.1',filename:'COPYING',url:'https://raw.githubusercontent.com/fontconfig/fontconfig/fdfc3445d1cc9c1c7e587fb2a1287871de16faf9/COPYING'},libpng:{version:'1.6.56',filename:'LICENSE',url:sharedDependencies.libpng.repository.replace('github.com','raw.githubusercontent.com')+'/'+sharedDependencies.libpng.revision+'/LICENSE'}});
+const MEDIA_NOTICE_INPUTS=Object.freeze({fontconfig:{version:'2.16.1',filename:'COPYING',url:'https://raw.githubusercontent.com/fontconfig/fontconfig/fdfc3445d1cc9c1c7e587fb2a1287871de16faf9/COPYING'},libpng:{version:Fonts.PIN.dependencies.find(row=>row.id==='libpng').version,filename:'LICENSE',url:sharedDependencies.libpng.repository.replace('github.com','raw.githubusercontent.com')+'/'+sharedDependencies.libpng.revision+'/LICENSE'}});
 const capture=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',maxBuffer:Infinity,...options});
 /** Decode the declared PBZX package payload into its cpio archive. */
 function decodePayload(input,output){

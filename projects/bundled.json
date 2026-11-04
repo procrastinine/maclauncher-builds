@@ -658,39 +658,6 @@
         }
       },
       {
-        "id": "libplacebo-glslang",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/glslang",
-        "repository": "KhronosGroup/glslang",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies.json",
-          "pointer": "/sources/1/commit",
-          "repositoryPointer": "/sources/1/repository"
-        }
-      },
-      {
-        "id": "libplacebo-spirv-tools",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Tools",
-        "repository": "KhronosGroup/SPIRV-Tools",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies.json",
-          "pointer": "/sources/2/commit",
-          "repositoryPointer": "/sources/2/repository"
-        }
-      },
-      {
-        "id": "libplacebo-spirv-headers",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Headers",
-        "repository": "KhronosGroup/SPIRV-Headers",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies.json",
-          "pointer": "/sources/3/commit",
-          "repositoryPointer": "/sources/3/repository"
-        }
-      },
-      {
         "id": "libplacebo-lcms2",
         "provider": "github",
         "url": "https://github.com/mm2/Little-CMS",
@@ -721,28 +688,6 @@
           "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
           "pointer": "/compilerSources/1/commit",
           "repositoryPointer": "/compilerSources/1/repository"
-        }
-      },
-      {
-        "id": "isf-spirv-tools",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Tools",
-        "repository": "KhronosGroup/SPIRV-Tools",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
-          "pointer": "/compilerSources/2/commit",
-          "repositoryPointer": "/compilerSources/2/repository"
-        }
-      },
-      {
-        "id": "isf-spirv-headers",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Headers",
-        "repository": "KhronosGroup/SPIRV-Headers",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
-          "pointer": "/compilerSources/3/commit",
-          "repositoryPointer": "/compilerSources/3/repository"
         }
       }
     ],
