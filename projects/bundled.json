@@ -2441,12 +2441,7 @@
         "url": "https://github.com/procrastinine/maclauncher-android",
         "repository": "procrastinine/maclauncher-android",
         "pin": {
-          "file": "producers/android-inputs/angle.json",
-          "pointer": "/profiles",
-          "match": {
-            "id": "aim6"
-          },
-          "field": "/androidSource"
+          "gitlink": "sources/maclauncher-android"
         }
       }
     ],

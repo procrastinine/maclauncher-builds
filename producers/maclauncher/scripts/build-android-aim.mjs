@@ -1,5 +1,5 @@
-import {checkoutSource} from '../../../tools/build-source.mjs';
 #!/usr/bin/env node
+import {checkoutSource} from '../../../tools/build-source.mjs';
 import {addLicenses,addLicense,includeLicenses,addCargoLicenses} from '../../../lib/licenses.mjs';
 // Developer build and publication of the fixed AIM adaptation. Play uses only
 // this sealed payload and a separately acquired original Android image.
