@@ -1,0 +1,980 @@
+{
+  "id": "npengine",
+  "version": "0.5.3-MCLv8",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "npengine/0.5.3-MCLv8/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "386bb8a80cb6d3f3332511ec8e1596752c4ffe4f04c6470d44ea4deec0f15be8",
+  "sourceSha256": "386bb8a80cb6d3f3332511ec8e1596752c4ffe4f04c6470d44ea4deec0f15be8",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 25241,
+      "mode": 420,
+      "sha256": "700ed372976226df7badf77a68bb752ac15b5471d7f609e2776453ec1d419267"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 559,
+      "mode": 420,
+      "sha256": "34522437196e6fa181493d0f823a939c7df8bbe721bcda0dd2b8ebc18d2b4092"
+    },
+    {
+      "path": "files/lib/libavcodec.61.dylib",
+      "size": 12784144,
+      "sha256": "dc9d652c357b88620dd57c609d4172fd59bf3f0f87f0063ba7c42636fafc275a",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libavfilter.10.dylib",
+      "size": 253312,
+      "sha256": "4bf16ab7dea61cd79f05e2a9c2ecfe2cbcbd687edf3db4df698133c8bbad102c",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libavformat.61.dylib",
+      "size": 2384144,
+      "sha256": "378e127a63ffaa15d7436a1ffe9e399f1dee19459d3c988327d2df06fcb80cac",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libavutil.59.dylib",
+      "size": 782080,
+      "sha256": "bb5a167e5af1199ab6741c9134f8726f185d1c286ac2f42c970302602d70d779",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libboost_atomic.dylib",
+      "size": 70336,
+      "sha256": "65c9cdfea784d4775537924dc0da3f359256042c88b54acf8dfaed68770aded1",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libboost_charconv.dylib",
+      "size": 159904,
+      "sha256": "8fd6f825998e258c72102ae82b91ca9340185ce16a036f2893a8848ceeeca67c",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libboost_chrono.dylib",
+      "size": 79360,
+      "sha256": "bf8e63ca3da9d639e088b293214f8a7d03e910c4afaee76a73d2dd69d6471c2e",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libboost_container.dylib",
+      "size": 106048,
+      "sha256": "ae2f05457693b046400cff6f6be42986ff04c1f1136011ca4b1a3384824fe682",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libboost_date_time.dylib",
+      "size": 16944,
+      "sha256": "bd1da1617f1a470ec9986daab56892ff0bfd8d75c90cf85a1d84d950f26991da",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libboost_locale.dylib",
+      "size": 525136,
+      "sha256": "f81f77604602d21a6f9480980d5f6095fb19c01f02b677929841329398fa0f3a",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libboost_thread.dylib",
+      "size": 118400,
+      "sha256": "61f7fb076130b9d0cadd1780af6ea4c12433be0633f10cef47a85c638522dff5",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libbz2.1.dylib",
+      "size": 106896,
+      "sha256": "5d0c456f7766fade710c633073cb26bea1cb79a64285baf1f5f2dfb0dfe087e3",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libcairo.2.dylib",
+      "size": 1410912,
+      "sha256": "9c9c5b9dad10e75c9dc11266e59a4084ab4a953a899e7121f61de4f9d77b684b",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libexpat.1.10.2.dylib",
+      "size": 201200,
+      "sha256": "18f93a73d31208b50b114db2baec67c6cfc5b9abf28fde1433320522b72779af",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libffi.7.dylib",
+      "size": 123568,
+      "sha256": "fb68fd118a05470829eb41a7078ee08ad2e97e4809e0ad84adf2f7ec8e76a011",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libfontconfig.1.dylib",
+      "size": 368032,
+      "sha256": "df1885253a296824ebf73074dfb0ae9316660ad978705c4764dc7408322102c6",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libfreetype.6.dylib",
+      "size": 815648,
+      "sha256": "47b84b8319c5414d448d6a6795e0ac976f0f769445d6c3a9a7390a53f69c29f3",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libfribidi.0.dylib",
+      "size": 182000,
+      "sha256": "17aed5dc42639ba3aab75fc990072ab995df3e531b81df2d2419e7d891e33dbd",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libgio-2.0.0.dylib",
+      "size": 2796096,
+      "sha256": "d3345599725359179b25d63004ccd8f7d0d0e919e4c3f6830da3a331e5aa1715",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libGLEW.2.3.1.dylib",
+      "size": 917488,
+      "sha256": "f02a3646616eb98df7174c2a44128141c2c6bd93880197de84ea0caf49e9e43c",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libglib-2.0.0.dylib",
+      "size": 1763488,
+      "sha256": "e79148890faedb50a36f1b7ab5d82fce063ac55aaca33e5089acc2a0aeb48b42",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libgmodule-2.0.0.dylib",
+      "size": 55664,
+      "sha256": "a9e337f280906342d62b6456878df23d0b4033a26b66a68ddb2c3ddbc79ceab5",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libgobject-2.0.0.dylib",
+      "size": 569328,
+      "sha256": "88410e45205c58cb7020031f4e65f8d14165914d68d551382316c194696603a1",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libgstapp-1.0.0.dylib",
+      "size": 172288,
+      "sha256": "45d3fb5927a9a0bec5fba836a69aabd8f0d9605bf86e3765462ea71aa1190299",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libgstaudio-1.0.0.dylib",
+      "size": 775264,
+      "sha256": "46f249cd33b1dd55b68e3a5dea53f206503049d4eba684a01cd6accdfc4ad697",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libgstbase-1.0.0.dylib",
+      "size": 792672,
+      "sha256": "8ec4610ce6168d6e8686292f253fc7cb0528af26318d923a27c9b5cd25c5d9a4",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libgstpbutils-1.0.0.dylib",
+      "size": 415792,
+      "sha256": "4c526c084d0bdac78f7db48a12de38d80fe82105df2f6d924b7cb337e6224e04",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libgstreamer-1.0.0.dylib",
+      "size": 2187968,
+      "sha256": "076c69b570f944293cd24d51bf5988ab5d8e207fa30bb85b1b0d7ce08ffed06f",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libgstriff-1.0.0.dylib",
+      "size": 120400,
+      "sha256": "65175557be0ec4c946d96c3bf087571977a1457a9cc10b62e42b93c7b9dd47c2",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libgsttag-1.0.0.dylib",
+      "size": 372784,
+      "sha256": "67117cf91d400c1f881a5ed417d15d3c2132b2f3f461400ee125a74f19abca78",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libgstvideo-1.0.0.dylib",
+      "size": 1261568,
+      "sha256": "e1daffef6f457af97b7bc4e51e7e9b8e690ed7041e39712fadcbb5e17f3c0ac5",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libharfbuzz.0.dylib",
+      "size": 1640464,
+      "sha256": "1a447569ce243c40593d45e2fac433531993b89340fa9588e2f932351a567360",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libintl.8.dylib",
+      "size": 51456,
+      "sha256": "ce50dd4ff4edb21c8d329bf459bc1d4815fe2c38557a2a83bcf269e43d390f04",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libjpeg.8.3.2.dylib",
+      "size": 734976,
+      "sha256": "2e9b3974de66a9d1564de28ca6fe15603c71cc1ca210a03a0c5bf216579d36e4",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libogg.0.dylib",
+      "size": 75680,
+      "sha256": "0d7ed5b6e0c52c7a61b4a36d78aa3bf62a8b2811a54cf7a37bb6fb36de8f619b",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/liborc-0.4.0.dylib",
+      "size": 1657088,
+      "sha256": "7af0661bc5c57e0615c03410d7d64354bd7d932f485667ec11a2928dee7fda56",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libpango-1.0.0.dylib",
+      "size": 587328,
+      "sha256": "33a7fa2d823f939fa233a39c8e9a8c0ae1f9ade7611abfd4d4ca9d1e165e538e",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libpangocairo-1.0.0.dylib",
+      "size": 160960,
+      "sha256": "001cb4758bc83e77c86666400fceddaee8b89086e1ab0e4d8d1a9235e0a0b808",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libpangoft2-1.0.0.dylib",
+      "size": 164352,
+      "sha256": "84b7cdd5703b559ad99fa6ddaaaffaf855b2233391ed983f94ccc13cfc30c915",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libpcre2-8.0.dylib",
+      "size": 389888,
+      "sha256": "ab12cc6e5333f1923551b9c8760e317a62d5cac8db8b66cfec8b9243ed00dd58",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libpixman-1.0.dylib",
+      "size": 804000,
+      "sha256": "58ea3cf6e59e5516caabd0aa96fc2930b1e1c502dd705ceb08c7045445e8d071",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libpng16.16.56.0.dylib",
+      "size": 277280,
+      "sha256": "dd041eb1579a7837f54118dcb7f57917a2fa8c07aac995d84d05b7565e193c7d",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libSDL2-2.0.0.dylib",
+      "size": 1661040,
+      "sha256": "565014d5cd1e2e73fe8b7819ee5de3a424d649b995b44c5d267d384ed8ebf2ed",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libswresample.5.dylib",
+      "size": 146320,
+      "sha256": "f80f0ced6311e869a202810c35b53a6e81516e0b3c8dd363220c1b40c9bfeb74",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libswscale.8.dylib",
+      "size": 845456,
+      "sha256": "dceb379455c0f93fb167ca277230636380a97b5b77155d016a2b69a73e61bc66",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libvorbis.0.dylib",
+      "size": 256864,
+      "sha256": "d71845fed83926823b0035a831818be91a62e0e4a05fbcb6aad6118270e00068",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libvorbisenc.2.dylib",
+      "size": 749632,
+      "sha256": "893ec9706deeed24e15b3db7d4a929cd5b19964b15db319a09d8e4bd71818350",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libz.1.dylib",
+      "size": 135040,
+      "sha256": "9c7f8a6f25e038681426810f61c712d0bfdffbdd0b0c6279e1724816959a7ac2",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/licenses/boost.txt",
+      "size": 1338,
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 1852,
+      "sha256": "8cc661975e73ff7d06d03b91522901da6262bbac8aa86f39eb48441bc46a0bbc",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-11.txt",
+      "size": 264,
+      "sha256": "fb5436aa63d1b71a8dfbf74ecaf1a5b4e1ec4df7f80074d11fec99284f69ca5f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-12.txt",
+      "size": 530,
+      "sha256": "7d3b087c34f35d4d538e3bcddd1ff8f66e92f9ef336881999482800ddf840913",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-13.txt",
+      "size": 355,
+      "sha256": "b327a7b3a4597e5902556ec3e8407cbdd1e288abd4623b7b4b56d14d49e84ecb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-14.txt",
+      "size": 1480,
+      "sha256": "f7d74004cc75778cae46c5f0139f244d67c07ef64cf51937e8272352197dcb18",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-15.txt",
+      "size": 4791,
+      "sha256": "8f6e13bd28818e5aec0a054eb82e7618b0613fdc7a9015e6e92f22c4c5f9ad34",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-16.txt",
+      "size": 1724,
+      "sha256": "7e547b692449e35f57a4d8cd963294eed698c1505631d303d97c59189e8f6f70",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-17.txt",
+      "size": 6743,
+      "sha256": "5a5ee54c5001bbad1cdc1a57cc3dd4c42199b2da09d39c7ee41fab002d02967f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-3.txt",
+      "size": 878,
+      "sha256": "8876cdca96eb380d16d5ea32bf4529d85e87dedc7765ae2861a9bec7f34acbed",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-4.txt",
+      "size": 1036,
+      "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-5.txt",
+      "size": 2149,
+      "sha256": "bd36c8b474855fa294c2ec5c184544478ef3720aad37d65a6296a4f264fd2d3b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-6.txt",
+      "size": 1235,
+      "sha256": "2c272829ff23f182c8bf7ea12fedea69b0ae148663123ed5240c117cb129c9c1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-7.txt",
+      "size": 29228,
+      "sha256": "cab46cd45adbfea4b1d0f14b033c70062c73074fa0b56532c2f351576ddf455e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-9.txt",
+      "size": 1534,
+      "sha256": "30eb1bef29b46f8ba7ab8b416035dbd93cb034a45481dd97815b944284582cd2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts.txt",
+      "size": 884,
+      "sha256": "97f35b302b361680ec1e891e95d2d52097bb95abff361434916d99dc1305f127",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/glew.txt",
+      "size": 3797,
+      "sha256": "8991cd11befec7c6a63662700f03c0cc42e864b6e77c7e70b80297c951a7f0ff",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-10.txt",
+      "size": 4376,
+      "sha256": "cb48bf09a11f5fb576cddb0431c8f5ed0a60157a9ec942adffc13907cbe083f2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-11.txt",
+      "size": 8616,
+      "sha256": "51a51aa9823704fd90bccc616cdd17ebabb5b2b3e9cbde886ca02c7002288067",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-12.txt",
+      "size": 6743,
+      "sha256": "08c135755dd589039470f1fdbb400daaabaaa50d0b366d19cebff4d22986baa1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-13.txt",
+      "size": 17994,
+      "sha256": "c4120c6752c910c299e3bd9cb3a46ff262c268303ca2069b61f92f10a5656c18",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-14.txt",
+      "size": 2074,
+      "sha256": "2e3bbb7d7c5c396368dd0853a790ec29ce5b8647163dde42a0493fb0d6556b2b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-15.txt",
+      "size": 25967,
+      "sha256": "fa6f36630bb1e0c571d34b2bbdf188d08495c9dbf58f28cac112f303fc1f58fb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-16.txt",
+      "size": 26431,
+      "sha256": "ad2eec519ebd4b5df86ea84dff24ae3bfa2edea846a703b58902dd221ae375db",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-17.txt",
+      "size": 1971,
+      "sha256": "ba8f810f2455c2f08e2d56bb49b72f37fcf68f1f4fade38977cfd7372050ad64",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-18.txt",
+      "size": 1132,
+      "sha256": "0f4d7a0bfb83c37465d42dc305f124189196cc0cc2cc8d6f8461103682aebbc5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-19.txt",
+      "size": 5620,
+      "sha256": "96f5b328adbb78eeaaec6980d73fd558cb1e4d62560ed615646bc3cf5e532430",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-2.txt",
+      "size": 26533,
+      "sha256": "9e9e8608c4cdda51a78cc3a385f4ec9a2e4c96d5ecad74ac8bca5fca3e563b7d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-20.txt",
+      "size": 12799,
+      "sha256": "75815e3bf6484201a3c3d17a1bbf10f2e8e3237f84df10a2357ea896db2a81d6",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-21.txt",
+      "size": 1466,
+      "sha256": "d2ab5758336489da61c12cc5bb757da5339c4ae9001f9bb0562b4370249af814",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-22.txt",
+      "size": 5345,
+      "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-23.txt",
+      "size": 1470,
+      "sha256": "ec1815db59fcd302846df949d7424876cb2e2dc5ed1606c5fb0b36787b1cf43a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-24.txt",
+      "size": 3124,
+      "sha256": "4f5dabb1b44bb6fc5cd53820b1f103147ad61b395a57903991325bd1b85d97bf",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-25.txt",
+      "size": 25292,
+      "sha256": "d245807f90032872d1438d741ed21e2490e1175dc8aa3afa5ddb6c8e529b58e5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-26.txt",
+      "size": 97,
+      "sha256": "99272c55f3dcfa07a8a7e15a5c1a33096e4727de74241d65fa049fccfdd59507",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-27.txt",
+      "size": 3477,
+      "sha256": "87d884eceb7fc54611470ce9f74280d28612b0c877adfc767e9676892a638987",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-28.txt",
+      "size": 2087,
+      "sha256": "fac9270f0987b96ff4533fca3548c633e02083cbba4a0172a3b149b2e4019793",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-29.txt",
+      "size": 1002,
+      "sha256": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-3.txt",
+      "size": 25755,
+      "sha256": "53692a2ed6c6a2c6ec9b32dd0b820dfae91e0a1fcdf625ca9ed0bdf8705fcc4f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-4.txt",
+      "size": 1576,
+      "sha256": "67228a9f7c5f9b67c58f556f1be178f62da4d9e2e6285318d8c74d567255abdf",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-5.txt",
+      "size": 1144,
+      "sha256": "31b15de82aa19a845156169a17a5488bf597e561b2c318d159ed583139b25e87",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-6.txt",
+      "size": 18092,
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-7.txt",
+      "size": 35147,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media-8.txt",
+      "size": 26526,
+      "sha256": "b634ab5640e258563c536e658cad87080553df6f34f62269a21d554844e58bfe",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GStreamer-media.txt",
+      "size": 1896,
+      "sha256": "c6dbbf828498be844a89eaa3b84adbab3199e342eb5cb2ed2f0d4ba7ec0f38a3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/libnpa.txt",
+      "size": 1094,
+      "sha256": "25174ce92dea0ca50cb198145cfb38252c284e0074e61913bcb6a014b99de619",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/npengine.txt",
+      "size": 7632,
+      "sha256": "f97bc4bb9b7ae8a653941073678b5c7775e8de44a01c3bcc21e7cdc148b90e61",
+      "mode": 420
+    },
+    {
+      "path": "files/npengine/bin/npengine-runner",
+      "size": 104464,
+      "sha256": "1753f7bd313b7e9c561fc78e82c3f5e92329466ffcc099ad93431acb9152af70",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/npengine/fontconfig.conf",
+      "size": 467,
+      "sha256": "31e20bf1701db6e6932a4bee1e0ee0ebd8b7f4caa324b645e67e231cb17f542b",
+      "mode": 420
+    },
+    {
+      "path": "files/npengine/lib/gstreamer-1.0/libgstapp.dylib",
+      "size": 51632,
+      "sha256": "744856d9e937dab7cb0dfb162258f8d48cbb4b404e7217c9294889175474689c",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/npengine/lib/gstreamer-1.0/libgstaudioconvert.dylib",
+      "size": 84832,
+      "sha256": "43994c9b6466ce0f52766a19f6a6a9173816ae7c9f3b00197ccfb68f2a5a58a4",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/npengine/lib/gstreamer-1.0/libgstaudioresample.dylib",
+      "size": 79616,
+      "sha256": "c8318ad5d7e9e17cd2cafcb574d76b85488a53669c76a45fc733bea04c99115a",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/npengine/lib/gstreamer-1.0/libgstautodetect.dylib",
+      "size": 84352,
+      "sha256": "fffa1b515dbe7744dc6956d1c10a0c21d46166019f32fc8cf178623c22b9548a",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/npengine/lib/gstreamer-1.0/libgstavi.dylib",
+      "size": 274080,
+      "sha256": "3e218cf1370a11885432756cb8137ae02720394fed4c376c7a28e40795eec457",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/npengine/lib/gstreamer-1.0/libgstcoreelements.dylib",
+      "size": 616496,
+      "sha256": "214692e656539acd9041fca534daea42e5d3af43f2d4998086bd17a0b05cfc45",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/npengine/lib/gstreamer-1.0/libgstjpeg.dylib",
+      "size": 108512,
+      "sha256": "8f14f39b20d44905a7f5fbffbe0ea508f66041c86a1a6830c753bed05ef95478",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/npengine/lib/gstreamer-1.0/libgstlibav.dylib",
+      "size": 365200,
+      "sha256": "97b2f5901ebe736d1f0c73d003bae6257a0cb9c1e9693113dbb94b7abd7e1aa4",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/npengine/lib/gstreamer-1.0/libgstogg.dylib",
+      "size": 342544,
+      "sha256": "974bb2044ab1cfa154dac45e46297c2681b1ba876e141bad5d5a3418b41f94c8",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/npengine/lib/gstreamer-1.0/libgstosxaudio.dylib",
+      "size": 203408,
+      "sha256": "c2d708ded98d865b80bba38f83ff2c724e473ecfa12ec251589d46ef4ce53a96",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/npengine/lib/gstreamer-1.0/libgstplayback.dylib",
+      "size": 926800,
+      "sha256": "987508fafa2fd5a46db0fdae0a485102986825107fa35b33da0e2150928eb97b",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/npengine/lib/gstreamer-1.0/libgstpng.dylib",
+      "size": 86944,
+      "sha256": "4fe32766e1dab57e28555dcb71ab97c722bb11b7629e288bd1e1cc4fac3852f1",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/npengine/lib/gstreamer-1.0/libgsttypefindfunctions.dylib",
+      "size": 205344,
+      "sha256": "356451efe64dfa46144a2cae17eacfdf8bef3521d826300875d263e78244b3eb",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/npengine/lib/gstreamer-1.0/libgstvideoconvertscale.dylib",
+      "size": 108256,
+      "sha256": "22c5238659912218423ac4a566291d711f9d44d342dafe2880ca2c18e21a2fa5",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/npengine/lib/gstreamer-1.0/libgstvolume.dylib",
+      "size": 101408,
+      "sha256": "2da713e03fb5fe50d466040b7051b9a195a9e964e5691e1ed6de98180e9e6d99",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/npengine/lib/gstreamer-1.0/libgstvorbis.dylib",
+      "size": 114784,
+      "sha256": "02ced12f1b9f479db5c70a8a86bb7966b68d8b87a9bd3753140d1f5c61e4a5fe",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/npengine/lib/gstreamer-1.0/libgstwavparse.dylib",
+      "size": 134624,
+      "sha256": "b7906b84f23573a26f82f9f3fc6e6c3cc478ea6d66a827dc8787201d6c2a6511",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/npengine/lib/libnpengine.dylib",
+      "size": 878896,
+      "sha256": "f309dba79753b48169c8ca64311efb1cf1a5f8747cb58d0810d7bbb32fa6918e",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/npengine/licenses/components.txt",
+      "size": 1399,
+      "sha256": "35e1cad7d9eca7d6b57b5fc2c6d966704845a3b3e10a102df5d62fa253ccd034",
+      "mode": 420
+    },
+    {
+      "path": "files/npengine/licenses/GStreamer-media-9.txt",
+      "size": 7651,
+      "sha256": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768",
+      "mode": 420
+    },
+    {
+      "path": "files/npengine/profile.json",
+      "size": 1385,
+      "sha256": "317d20b9d9ea73e053f4c3b02feb98d5a41498bc954feed03eae327c2b4ba762",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 64773,
+      "mode": 420,
+      "sha256": "386bb8a80cb6d3f3332511ec8e1596752c4ffe4f04c6470d44ea4deec0f15be8"
+    }
+  ],
+  "redistribution": "bundle",
+  "aliases": {
+    "schema": 1,
+    "files": {
+      "files/npengine/licenses/boost.txt": "files/licenses/boost.txt",
+      "files/npengine/licenses/glew.txt": "files/licenses/glew.txt",
+      "files/npengine/licenses/GStreamer-media-10.txt": "files/licenses/GStreamer-media-10.txt",
+      "files/npengine/licenses/GStreamer-media-11.txt": "files/licenses/GStreamer-media-11.txt",
+      "files/npengine/licenses/GStreamer-media-12.txt": "files/licenses/GStreamer-media-12.txt",
+      "files/npengine/licenses/GStreamer-media-13.txt": "files/licenses/GStreamer-media-13.txt",
+      "files/npengine/licenses/GStreamer-media-14.txt": "files/licenses/GStreamer-media-14.txt",
+      "files/npengine/licenses/GStreamer-media-15.txt": "files/licenses/GStreamer-media-15.txt",
+      "files/npengine/licenses/GStreamer-media-16.txt": "files/licenses/GStreamer-media-16.txt",
+      "files/npengine/licenses/GStreamer-media-17.txt": "files/licenses/GStreamer-media-17.txt",
+      "files/npengine/licenses/GStreamer-media-18.txt": "files/licenses/GStreamer-media-18.txt",
+      "files/npengine/licenses/GStreamer-media-19.txt": "files/licenses/GStreamer-media-19.txt",
+      "files/npengine/licenses/GStreamer-media-2.txt": "files/licenses/GStreamer-media-2.txt",
+      "files/npengine/licenses/GStreamer-media-20.txt": "files/licenses/GStreamer-media-20.txt",
+      "files/npengine/licenses/GStreamer-media-21.txt": "files/licenses/GStreamer-media-21.txt",
+      "files/npengine/licenses/GStreamer-media-22.txt": "files/licenses/GStreamer-media-22.txt",
+      "files/npengine/licenses/GStreamer-media-23.txt": "files/licenses/GStreamer-media-23.txt",
+      "files/npengine/licenses/GStreamer-media-24.txt": "files/licenses/GStreamer-media-24.txt",
+      "files/npengine/licenses/GStreamer-media-25.txt": "files/licenses/GStreamer-media-25.txt",
+      "files/npengine/licenses/GStreamer-media-26.txt": "files/licenses/GStreamer-media-26.txt",
+      "files/npengine/licenses/GStreamer-media-27.txt": "files/licenses/GStreamer-media-27.txt",
+      "files/npengine/licenses/GStreamer-media-28.txt": "files/licenses/GStreamer-media-28.txt",
+      "files/npengine/licenses/GStreamer-media-29.txt": "files/licenses/GStreamer-media-29.txt",
+      "files/npengine/licenses/GStreamer-media-3.txt": "files/licenses/GStreamer-media-3.txt",
+      "files/npengine/licenses/GStreamer-media-4.txt": "files/licenses/GStreamer-media-4.txt",
+      "files/npengine/licenses/GStreamer-media-5.txt": "files/licenses/GStreamer-media-5.txt",
+      "files/npengine/licenses/GStreamer-media-6.txt": "files/licenses/GStreamer-media-6.txt",
+      "files/npengine/licenses/GStreamer-media-7.txt": "files/licenses/GStreamer-media-7.txt",
+      "files/npengine/licenses/GStreamer-media-8.txt": "files/licenses/GStreamer-media-8.txt",
+      "files/npengine/licenses/GStreamer-media.txt": "files/licenses/GStreamer-media.txt",
+      "files/npengine/licenses/libnpa.txt": "files/licenses/libnpa.txt"
+    }
+  }
+}
