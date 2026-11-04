@@ -62,7 +62,7 @@ export async function buildAndroidJavaFrameworkInput({output,work}){
   const pin=dexProfile.artifacts.find(file=>file.file===filename);if(!pin)throw Error('The original DEX tool profile is incomplete.');const archive=await buildInput({...pin,bytes:pin.size},cache),destination=path.join(tools,filename);fs.copyFileSync(archive,destination,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.unlinkSync(archive);dexDependencies[name]=destination;
  }
  const {buildDexBodies}=await import(pathToFileURL(path.join(android,'src/modules/android/art/dex-bodies.mjs'))),dexBuild=path.join(work,'dex-tool');await buildDexBodies({output:dexBuild,jdk,dependencies:dexDependencies});fs.cpSync(path.join(dexBuild,'classes'),path.join(output,'dex-tool/classes'),{recursive:true});
- const candidates=[];for(const [index,archive]of modules.archives.entries()){const name=path.basename(archive);fs.mkdirSync(path.join(output,'modules'),{recursive:true});fs.copyFileSync(archive,path.join(output,'modules',name));;;}
+ for(const archive of modules.archives){const name=path.basename(archive);fs.mkdirSync(path.join(output,'modules'),{recursive:true});fs.copyFileSync(archive,path.join(output,'modules',name));}
 
  addLicenses(output,profile.id,android);
  return {root:output,record:{androidSource:androidSource(),framework:frameworkPin,sources:profile.sources,blueprint:{...blueprintProfile.upstream,driverSha256:blueprintProfile.driverSha256,toolchain:read('go',['version'])},jdk:{sha256:jdkPin.sha256,version:read(path.join(jdk,'bin/java'),['--version']).split('\n')[0]},graphicsRegistrationsSha256:sha(path.join(output,'graphics-registrations.txt')),modules:modules.archives.map(file=>path.basename(file)),dexTools:dexProfile}};
