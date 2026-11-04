@@ -41,5 +41,5 @@ export function stageFSR4Provider({directory,upstream,ownedRoot}){
   files.set("provider.json",path.join(directory,"provider.json"));
   return {files:new Map([...files].map(([name,file])=>["temporal/fsr4/"+name,file])),owned,profiles:[...metadata.supportedProfiles],
     source:{directory:upstream,relative:"third_party/fsr4-native-macos",commit:gitlink(spec.gitlink)},
-    pins:[` ${gitlink(spec.gitlink)} third_party/fsr4-native-macos`,` ${spec.lite2.commit} third_party/fsr4-lite2-weights`,...(spec.sources||[]).map((row,index)=>{const revision=index<2?gitlink('producers/maclauncher/src/external/'+(index===0?'fsr4-sdk-headers':'fsr4-sdk-model')):row.commit;if(!/^https:\/\//.test(row.repository||" ")||!/^[a-f0-9]{40}$/.test(revision||" "))throw Error("An FSR 4 consumed source pin is incomplete.");return ` ${revision} third_party/fsr4-input-${index+1}`;})]};
+    pins:[` ${gitlink(spec.gitlink)} third_party/fsr4-native-macos`,` ${spec.lite2.commit} third_party/fsr4-lite2-weights`,...(spec.sources||[]).map((row,index)=>{const revision=index<2?gitlink('producers/maclauncher/src/external/'+(index===0?'fsr4-sdk-headers':'fsr4-sdk-model')):gitlink(row.gitlink);if(!/^https:\/\//.test(row.repository||" ")||!/^[a-f0-9]{40}$/.test(revision||" "))throw Error("An FSR 4 consumed source pin is incomplete.");return ` ${revision} third_party/fsr4-input-${index+1}`;})]};
 }

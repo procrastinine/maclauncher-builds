@@ -1,9 +1,7 @@
-
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
 import {buildInput} from './build-input.mjs';
-
 import {recipeMain} from './build-source.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 import {resolveProject} from '../lib/projects.mjs';
@@ -13,14 +11,13 @@ const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirna
 const Fonts=require(path.join(modules,'shared/runtime/portable-sdl2-fonts.js')),Audio=require(path.join(modules,'shared/runtime/portable-sndfile.js')),Movie=require(path.join(modules,'shared/runtime/portable-ffmpeg.js')),Mixer=require(path.join(modules,'shared/runtime/portable-sdl2-mixer.js'));
 /** Each portable runtime names its producer recipe and entry, its upstream source, its
  * shared resource directory, the source catalogs it reads besides fonts and audio, its
- * single source archives, the dependency stacks built before it and the name that its
- * notices give a bundled CPython or FFmpeg source. */
+ * single source archives and the dependency stacks built before it. */
 const RECIPES=Object.freeze({
  onsyuri:{reuse:'mixer-stack',recipe:'shared/onsyuri/runtime/portable-build-v3.js',entry:'buildPortableYuri',source:'onscripter-yuri',share:'onsyuri',catalogs:['mixer','producer'],archives:{onsyuri:'engine'}},
- gemrb:{reuse:'mixer-python',recipe:'gemrb/runtime/portable-build-v5.js',entry:'buildPortableGemRB',source:'gemrb',share:'gemrb',catalogs:['mixer'],archives:{python:'python'},bundledSource:'CPython',python:{library:'python/lib/python3.14',home:'python'}},
- ai5:{recipe:'ai5/runtime/portable-build-v4.js',entry:'buildPortableAI5',source:'ai5-sdl2',share:'ai5-sdl2',archives:{ffmpeg:'movie'},bundledSource:'FFmpeg',stacks:['fonts','audio','movie']},
+ gemrb:{reuse:'mixer-python',recipe:'gemrb/runtime/portable-build-v5.js',entry:'buildPortableGemRB',source:'gemrb',share:'gemrb',catalogs:['mixer'],archives:{python:'python'},python:{library:'python/lib/python3.14',home:'python'}},
+ ai5:{recipe:'ai5/runtime/portable-build-v4.js',entry:'buildPortableAI5',source:'ai5-sdl2',share:'ai5-sdl2',archives:{ffmpeg:'movie'},stacks:['fonts','audio','movie']},
  xsystem35:{reuse:'mixer-dependencies',recipe:'alicesoft/system35-portable-v3.js',entry:'buildPortableSystem35',source:'xsystem35-sdl2',share:'xsystem35',catalogs:['mixer','producer']},
- xsystem4:{reuse:'av-dependencies',recipe:'alicesoft/system4-portable-v3.js',entry:'buildPortableSystem4',source:'xsystem4',share:'xsystem4',catalogs:['producer'],archives:{ffmpeg:'movie'},bundledSource:'FFmpeg'}
+ xsystem4:{reuse:'av-dependencies',recipe:'alicesoft/system4-portable-v3.js',entry:'buildPortableSystem4',source:'xsystem4',share:'xsystem4',catalogs:['producer'],archives:{ffmpeg:'movie'}}
 });
 const CATALOGS={mixer:()=>Mixer.PIN,producer:Builder=>Builder.PIN};
 const ARCHIVES={movie:()=>Movie.PIN.source,python:()=>require(path.join(modules,'shared/runtime/portable-python-v2.js')).PIN.source,engine:Builder=>Builder.PIN.engine};

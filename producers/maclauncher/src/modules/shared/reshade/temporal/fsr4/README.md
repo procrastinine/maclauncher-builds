@@ -16,9 +16,7 @@ Three profiles select distinct upstream models and execution policies:
 
 Profile selection uses `RSTemporalFrame.reserved`: zero or one selects Exact Fast,
 two selects Lite and three selects Lite2. The optional
-`rsTemporalProviderProfiles(method)` returns the supported-index bitmask. Earlier
-immutable Exact Fast payloads retain their original source identity and expose
-only that profile. A missing profile never silently selects another model.
+`rsTemporalProviderProfiles(method)` returns the supported-index bitmask. A missing profile never silently selects another model.
 
 Apple GPU family 10 uses native integer matrix operations on macOS26 or later; earlier Apple Silicon
 GPUs use SIMD half matrices with float accumulation. A GPU scalar implementation
@@ -48,17 +46,15 @@ provider contains arm64 and x86_64 slices. Library loading supports macOS13;
 encoding requires macOS15 and an Apple Silicon GPU, independently of process ISA.
 
 A source build uses `node build.mjs SOURCE OUTPUT --tools TOOLS --lite2-weights
-WEIGHTS --lite2-license LICENSE`. The recipe copies the pinned read-only source,
+WEIGHTS`. The recipe copies the pinned read-only source,
 applies owned adaptations, translates portable MSL and builds both architectures.
 An existing local `uv` Python3.12 runtime and Xcode command-line compiler are build
 dependencies. `--quick` builds one shader-input variant per profile and marks the
-output incomplete. `--base-payload` can reuse the declared earlier Exact Fast
-shader identity; native model blobs are regenerated from the pinned source.
+output incomplete.
 
-Lite2's original GPL-2.0-or-later archive remains in `OUTPUT/source-inputs` for
-source delivery. Only consumed generated model binaries and the original license
-enter the runtime. AMD, shader-reimplementation and Lite2 notices retain their
-separate identities. Their exact sources are declared in `source.json`.
+Lite2's source weights remain in `OUTPUT/source-inputs` for source delivery.
+The runtime contains the consumed generated model binaries. Exact input
+identities are declared in `source.json`.
 
 `--repackage` rebuilds the provider from owned source while retaining an existing
 complete shader/model closure. It checks the prior file hashes, source pin,

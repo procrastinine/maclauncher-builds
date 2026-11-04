@@ -310,7 +310,8 @@ async function refreshCatalog(context = {}) {
   return true;
 }
 function keep(relative) {
-  return Boolean(formats[path.extname(relative).toLowerCase()]) || /\.(?:vs|fxh|h|hlsl|hlsli|inc|glslinc|png|jpg|jpeg|bmp|tga|dds|webp|cube|lut|txt|md|json|ini)$/i.test(relative);
+  return Boolean(formats[path.extname(relative).toLowerCase()]) || /\.(?:vs|fxh|h|hlsl|hlsli|inc|glslinc|png|jpg|jpeg|bmp|tga|dds|webp|cube|lut|txt|md|json|ini)$/i.test(relative) ||
+    /^(licen[cs]e|copying|notice|copyright)/i.test(path.posix.basename(relative));
 }
 function extract(archive, destination) {
   const info = Zip.readZipEntries(archive)?.info;
@@ -348,7 +349,7 @@ async function download(listed, file, context, maxBytes = LIMITS.archive) {
   } catch (error) { if (limit.signal.aborted && !context.signal?.aborted) throw new Error("The shader download is too large."); throw error; }
 }
 // Zip archives are read entry by entry; other formats are unpacked by the
-// shared extractor first. Both keep only shader, resource and notice files
+// shared extractor first. Both retain shader sources, resources and publisher text files
 // below a single top folder.
 async function unpack(archive, destination, signal) {
   if (Release.archiveFormat(archive) === ".zip") return extract(archive, destination);
