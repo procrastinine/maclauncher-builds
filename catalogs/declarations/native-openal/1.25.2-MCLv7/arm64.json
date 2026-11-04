@@ -1,0 +1,182 @@
+{
+  "id": "native-openal",
+  "version": "1.25.2-MCLv7",
+  "arch": "arm64",
+  "minimumMacOS": "13.0",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "e244c72e4a43f5217055ad2a57a9961944df19d570df2ec052d681d8365e5ae1",
+  "directoryRelative": "native-openal/1.25.2-MCLv7/arm64",
+  "manifestRelative": "input.json",
+  "manifestSha256": "f46b5787b59742ed2689ce95d7de856496cb3286ffbb70cce79d9057eddffeef",
+  "files": [
+    {
+      "path": "include/AL/al.h",
+      "size": 30849,
+      "sha256": "c239b51b32ec10214c3e0a3678876795133150909001ee6cc338d89993ea3c14",
+      "mode": 420
+    },
+    {
+      "path": "include/AL/alc.h",
+      "size": 12640,
+      "sha256": "41c0ab1cbab67aa95e791d875ff3c744210ce441b6d7658dbcd1090c69c8bf10",
+      "mode": 420
+    },
+    {
+      "path": "include/AL/alext.h",
+      "size": 76780,
+      "sha256": "aaefb57565e53e550d3f827b54bbe0960649daf79805cbb9de86a65081dfa4b5",
+      "mode": 420
+    },
+    {
+      "path": "include/AL/efx-presets.h",
+      "size": 35514,
+      "sha256": "13e03f2d05c3b86715f9c5003cc83f80e852f0ec5ea29d45372483366ef6b617",
+      "mode": 420
+    },
+    {
+      "path": "include/AL/efx.h",
+      "size": 36387,
+      "sha256": "0bf640937082c652db7bdcbb8c4f47dcd106cfcb17a4e814d898ac505f642101",
+      "mode": 420
+    },
+    {
+      "path": "input.json",
+      "size": 5397,
+      "sha256": "f46b5787b59742ed2689ce95d7de856496cb3286ffbb70cce79d9057eddffeef",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/OpenAL/OpenALConfig.cmake",
+      "size": 491,
+      "sha256": "618de0151cc5bfbfbeb01833b062021dbdfb588103a2c6370e58866217b21884",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/OpenAL/OpenALTargets-release.cmake",
+      "size": 868,
+      "sha256": "c527cc38505b606c109fa63415b0686f7f6448c3fbfe915a57520523ce4647fd",
+      "mode": 420
+    },
+    {
+      "path": "lib/cmake/OpenAL/OpenALTargets.cmake",
+      "size": 4738,
+      "sha256": "dc3e7edfd98547f5c008b7a89695cbc01a533cb76bc89afebbcad1c027451a95",
+      "mode": 420
+    },
+    {
+      "path": "lib/libopenal.1.25.2.dylib",
+      "size": 1654592,
+      "sha256": "776655cc0ed8a0c3c5202f03c9a57b7245477d483fae381efb95d3e2e06d462a",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "lib/pkgconfig/openal.pc",
+      "size": 299,
+      "sha256": "485ae6ad59c5fa86f243193d836e25e352b0ce6d03005af956f5b20c0796d6c1",
+      "mode": 420
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 61,
+      "sha256": "d5fd8d12382e9d95d5773e54c998f08b94f5a241914eedb0c8a8487c56c18216",
+      "mode": 420
+    },
+    {
+      "path": "licenses/openal-2.txt",
+      "size": 23330,
+      "sha256": "d808ce217e5b611854da622b57ec29fe545584c48bc5352fae72a4b6e5074a15",
+      "mode": 420
+    },
+    {
+      "path": "licenses/openal-3.txt",
+      "size": 1669,
+      "sha256": "64056328b3e7bc104e24ef96accc1a7abead156f0c02d1b87c97e3f3a28030de",
+      "mode": 420
+    },
+    {
+      "path": "licenses/openal.txt",
+      "size": 1652,
+      "sha256": "b5a08cf98996dd83aa906a72c163600f6cb17a65ce546a553815a1267abd43ff",
+      "mode": 420
+    },
+    {
+      "path": "portable-stack.json",
+      "size": 464,
+      "sha256": "aac9361f02323e916e393e21dda40622a37e54c508a6dd3f6f5bd5aca069193b",
+      "mode": 420
+    },
+    {
+      "path": "share/openal/alsoftrc.sample",
+      "size": 29180,
+      "sha256": "8dd1e14564a70d77bff69e13c0151fb0cc469289e0312154713505c3a53809e2",
+      "mode": 420
+    },
+    {
+      "path": "share/openal/hrtf/Default HRTF.mhr",
+      "size": 159841,
+      "sha256": "0b2f09f4d9167dec4e977e7e1a8c78df17e87da06fb0871b9896fadaa473a440",
+      "mode": 420
+    },
+    {
+      "path": "share/openal/presets/3D7.1.ambdec",
+      "size": 2757,
+      "sha256": "1eab2c391c532de29169954e270e6114be636bfe413ef822260bae4a8d8cbfe7",
+      "mode": 420
+    },
+    {
+      "path": "share/openal/presets/hex-quad.ambdec",
+      "size": 1950,
+      "sha256": "1df9c4ba1377c371d77ba2b482399898eaca99b4c7f3a149fb98fca0d4f72eae",
+      "mode": 420
+    },
+    {
+      "path": "share/openal/presets/hexagon.ambdec",
+      "size": 1641,
+      "sha256": "edd9c426789879f7a9ff861638cb5c1999697593693576849bca85a4ea6d24fc",
+      "mode": 420
+    },
+    {
+      "path": "share/openal/presets/itu5.1-nocenter.ambdec",
+      "size": 1714,
+      "sha256": "42475444be88b3cfee15d37e34cb73749a17bbf0bb5e5ead5b70c70a0c159791",
+      "mode": 420
+    },
+    {
+      "path": "share/openal/presets/itu5.1.ambdec",
+      "size": 1611,
+      "sha256": "b1ffc1bd144bff58e4c8a5be9838db78b462c23a52a4bbd92da3224f3dafd58f",
+      "mode": 420
+    },
+    {
+      "path": "share/openal/presets/presets.txt",
+      "size": 3031,
+      "sha256": "2777bd97f563bd8474107c61e21680a28d16c5764b332f37ef25a025b4ce7ff2",
+      "mode": 420
+    },
+    {
+      "path": "share/openal/presets/rectangle.ambdec",
+      "size": 1157,
+      "sha256": "15cf6d48319fd75fce1d78785ee0c2e3fe856dc66838422db8ea58c4a6f27521",
+      "mode": 420
+    },
+    {
+      "path": "share/openal/presets/square.ambdec",
+      "size": 1154,
+      "sha256": "84a3957e550af86177ccddecec41c32f5bb4a3dfa6b407ee86e67c719b3b5d68",
+      "mode": 420
+    }
+  ],
+  "aliases": {
+    "schema": 1,
+    "files": {
+      "lib/libopenal.1.dylib": "lib/libopenal.1.25.2.dylib",
+      "lib/libopenal.dylib": "lib/libopenal.1.25.2.dylib"
+    }
+  }
+}
