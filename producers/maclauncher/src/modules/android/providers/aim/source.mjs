@@ -39,54 +39,6 @@ export function adaptResidentProcessLiveness(text) {
     'exited worker liveness');
 }
 
-/** New mappings cannot retire an existing executable memfd view. */
-export function adaptMemfdMmapRetirement(text) {
-  return replace(text,
-    `        super::vma_names::forget(lo, lo + len);
-        super::memfd::reclaim();
-    }
-    result
-}
-fn mmap_guest`,
-    `        super::vma_names::forget(lo, lo + len);
-        // Only a fixed replacement can remove an existing memfd view.
-        // Ordinary allocations leave last-reference retirement to close,
-        // munmap and mremap, without rescanning inherited executable maps.
-        if a[3] & MAP_FIXED != 0 {
-            super::memfd::reclaim();
-        }
-    }
-    result
-}
-fn mmap_guest`, 'memfd retirement after mapping replacement');
-}
-
-/** Read each owner's thread list once while pruning one membership. */
-export function adaptCgroupMembershipSnapshot(text) {
-  text = replace(text,
-    `fn thread_live(owner: i32, start: Start, tid: i32) -> bool {
-    live(owner, start) && tids(owner).contains(&tid)
-}`,
-    `fn thread_live(
-    owner: i32,
-    start: Start,
-    tid: i32,
-    tasks: &mut std::collections::HashMap<(i32, Start), Vec<i32>>,
-) -> bool {
-    live(owner, start)
-        && tasks.entry((owner, start)).or_insert_with(|| tids(owner)).contains(&tid)
-}`, 'cgroup owner thread snapshot');
-  return replace(text,
-    `    m.threads
-        .retain(|(tid, start, _)| thread_live(super::thread::owner(*tid), *start, *tid));`,
-    `    // Keep the birth check for every entry; only reuse the thread list
-    // within this membership prune, never across transactions or owners.
-    let mut tasks = std::collections::HashMap::new();
-    m.threads.retain(|(tid, start, _)| {
-        thread_live(super::thread::owner(*tid), *start, *tid, &mut tasks)
-    });`, 'cgroup membership prune snapshot');
-}
-
 /** Keep cgroup file position below fork's descriptor ownership lease. */
 export function adaptCgroupPositionForkOrder(text) {
   text = replace(text,
@@ -140,26 +92,6 @@ fn transact_held<R>(
     let mut cur = open.pos.lock().unwrap();
     let offset = pos.unwrap_or(*cur);
     let r = write_at(open, &input, offset, &own);`, 'cgroup position and fork lock order');
-}
-
-/** Anonymous memfd census needs region identity, without vnode paths. */
-export function adaptMemfdAnonymousRegionInfo(text) {
-  const signature = 'fn has_views(k: Key, f: &Memfd) -> bool {';
-  const start = text.indexOf(signature);
-  if (start < 0 || start !== text.lastIndexOf(signature)) throw new Error('AIM source adaptation no longer matches: anonymous memfd census');
-  const end = findBrace(text, text.indexOf('{', start)) + 1;
-  const before = text.slice(start, end);
-  if (before.split('RegionWithPath').length !== 4 || before.split('PROC_PIDREGIONPATHINFO').length !== 3) {
-    throw new Error('AIM source adaptation no longer matches: anonymous memfd region queries');
-  }
-  const after = before.replaceAll('RegionWithPath', 'RegionInfo')
-    .replaceAll('PROC_PIDREGIONPATHINFO', 'PROC_PIDREGIONINFO')
-    .replaceAll('backing.info.', 'backing.').replaceAll('r.info.', 'r.');
-  text = replace(text, before, after, 'anonymous memfd region census');
-  return replace(text,
-    '/// `PROC_PIDREGIONPATHINFO`.\nconst PROC_PIDREGIONPATHINFO: i32 = 8;',
-    '/// `PROC_PIDREGIONINFO`.\nconst PROC_PIDREGIONINFO: i32 = 7;\n\n/// `PROC_PIDREGIONPATHINFO`.\nconst PROC_PIDREGIONPATHINFO: i32 = 8;',
-    'anonymous memfd region query flavor');
 }
 
 /** Release watch descriptors after locks also captured by fork. */
@@ -442,14 +374,7 @@ export function adaptFuseBroker(text) {
                 directory.join(leaf)
             };`,
     'registered FUSE peer socket cleanup');
-  return replace(text, '        std::thread::sleep(Duration::from_millis(2));',
-    `        // Keep the original idle/retirement interval, but accept a ready
-        // request immediately instead of delaying every broker round trip.
-        let mut event = libc::pollfd { fd: listener.as_raw_fd(), events: libc::POLLIN, revents: 0 };
-        if unsafe { libc::poll(&mut event, 1, 2) } < 0 {
-            let error = std::io::Error::last_os_error();
-            if error.kind() != std::io::ErrorKind::Interrupted { return Err(io_error(error)); }
-        }`, 'readiness-driven FUSE broker admission');
+  return text;
 }
 
 /** Keep upstream broker leases and stale-session collection in private IPC paths. */
@@ -528,13 +453,13 @@ export function adaptFuseMountRecords(text) {
 
 export function adaptFuseMountRootTraversal(text) {
   return replace(text, `        if let Some(route) = fuse_route(&current) {
-            let node = match crate::sys::fuse_client::lookup(&route) {`,
+            let next = match crate::sys::fuse_client::Walk::advance(&route, fuse_walk.as_ref()) {`,
     `        if let Some(route) = fuse_route(&current) {
             // A FUSE mount root is already a directory (fuse_mount::parse).
             // Preserve ancestor checks and explicit stat, but do not ask the
             // daemon for root attributes merely to discover a symlink.
             if route.relative.is_empty() { continue; }
-            let node = match crate::sys::fuse_client::lookup(&route) {`, 'FUSE root directory traversal');
+            let next = match crate::sys::fuse_client::Walk::advance(&route, fuse_walk.as_ref()) {`, 'FUSE root directory traversal');
 }
 
 export function adaptAimFsTrace(text) {
@@ -601,8 +526,8 @@ pub(super) fn aim_fs_trace(message: impl FnOnce() -> String) {
 export function adaptAimFuseTrace(text) {
   text = replace(text, 'fn request(route: &FuseRoute, opcode: u32, node: u64, data: &[u8]) -> Result<Vec<u8>, Errno> {',
     'fn request(route: &FuseRoute, opcode: u32, node: u64, data: &[u8]) -> Result<Vec<u8>, Errno> {\n    super::fsops::aim_fs_trace_enabled();', 'FUSE diagnostic activation');
-  text = replace(text, '        if next == 0 {\n            return Err(crate::errno::ENOENT);',
-    '        if next == 0 {\n            super::fsops::aim_fs_trace(|| format!("op=fuse-lookup-negative session={:?} relative={:?} parent={} component={:?} result=-2", route.session, route.relative, node, component));\n            return Err(crate::errno::ENOENT);', 'negative FUSE entry diagnostic');
+  text = replace(text, '        if next == 0 {\n            forget(route, node, 1)?;\n            return Err(crate::errno::ENOENT);',
+    '        if next == 0 {\n            super::fsops::aim_fs_trace(|| format!("op=fuse-lookup-negative session={:?} relative={:?} parent={} component={:?} result=-2", route.session, route.relative, node, component));\n            forget(route, node, 1)?;\n            return Err(crate::errno::ENOENT);', 'negative FUSE entry diagnostic');
   text = replace(text, '    let reply = request(route, 3, node, &data)?;',
     '    let reply = request(route, 3, node, &data).map_err(|error| {\n        super::fsops::aim_fs_trace(|| format!("op=fuse-getattr session={:?} relative={:?} node={} result={}", route.session, route.relative, node, -(error as i64)));\n        error\n    })?;', 'FUSE getattr error diagnostic');
   return replace(text, '    if reply.len() < 104 {\n        return Err(EIO);',
@@ -682,9 +607,7 @@ export function adaptAimSources(root, {controllerSource, buildJobs} = {}) {
       '            .arg0(ARGV0)\n            .arg("-C")',
       '            .arg0(ARGV0)\n            .args(["-j", "'+buildJobs+'"])\n            .arg("-C")', 'bounded source build jobs'));
   }
-  edit('crates/aim-linux-abi/src/sys/mem.rs', adaptMemfdMmapRetirement);
-  edit('crates/aim-linux-abi/src/sys/memfd.rs', adaptMemfdAnonymousRegionInfo);
-  edit('crates/aim-linux-abi/src/sys/cgroup.rs', text => adaptCgroupPositionForkOrder(adaptCgroupMembershipSnapshot(text)));
+  edit('crates/aim-linux-abi/src/sys/cgroup.rs', adaptCgroupPositionForkOrder);
   edit('crates/aim-linux-abi/src/sys/inotify.rs', adaptInotifyPrivateRetirement);
   edit('crates/aim-linux-abi/src/sys/epoll.rs', adaptEpollWatchRetirement);
   edit('crates/aim-build/src/graph.rs', text => replace(text,
@@ -797,14 +720,11 @@ export function adaptAimSources(root, {controllerSource, buildJobs} = {}) {
   edit('crates/aim-storage/src/mount_namespace/records.rs', adaptFuseMountRecords);
   edit('crates/aim-linux-abi/src/sys/fsops.rs', adaptAimFsTrace);
   edit('crates/aim-linux-abi/src/sys/fuse_client.rs', adaptAimFuseTrace);
-  edit('crates/aim-storage/src/system.rs', text => replace(text,
-    '        let file = fs::OpenOptions::new()\n            .create(true)\n            .read(true)\n            .write(true)\n            .truncate(false)\n            .open(&path)\n            .map_err(|e| format!("{}: {e}", path.display()))?;',
-    '        let file = if !write && path.exists() {\n            File::open(&path)\n        } else {\n            fs::OpenOptions::new().create(true).read(true).write(true).truncate(false).open(&path)\n        }.map_err(|e| format!("{}: {e}", path.display()))?;', 'read-only shared image lease'));
   edit('crates/aim-storage/src/data.rs', text => {
     text = replace(text, '    pub fn handoff_detach(&mut self) -> Result<(), String> {',
       '    pub fn handoff_detach(&mut self) -> Result<(), String> {\n        if std::env::var_os("MACLAUNCHER_AIM_MOUNTED_DATA").is_some() { return Ok(()); }', 'externally owned image reboot');
     return replace(text,
-    '        for stale in disk::attachments_of(&image)? {',
+    '        detach_image(&dir)?;\n        fs::create_dir_all(&dir).map_err(|e| format!("{}: {e}", dir.display()))?;',
     `        if std::env::var_os("MACLAUNCHER_AIM_MOUNTED_DATA").is_some() {
             let attached = disk::attachments_of(&image)?;
             if attached.len() != 1 || attached[0].shadow.is_some() || !attached[0].writable
@@ -813,7 +733,8 @@ export function adaptAimSources(root, {controllerSource, buildJobs} = {}) {
             }
             return Ok(Self { dir, image, device: None, _lock: lock });
         }
-        for stale in disk::attachments_of(&image)? {`, 'launcher-owned private image attachment');
+        detach_image(&dir)?;
+        fs::create_dir_all(&dir).map_err(|e| format!("{}: {e}", dir.display()))?;`, 'launcher-owned private image attachment');
   });
   edit('crates/aim-host-display/src/bin/aim-display/main.rs', adaptDisplayTitle);
   edit('crates/aim-host-display/src/bin/aim-display/main.rs', adaptDisplayReadiness);
@@ -854,7 +775,6 @@ export function adaptAimSources(root, {controllerSource, buildJobs} = {}) {
   });
   fs.copyFileSync(new URL('./clipboard_bridge.rs', import.meta.url), path.join(root, 'crates/aim-services/src/clipboard_bridge.rs'));
   edit('crates/aim-services/src/lib.rs', text => text + '\nmod clipboard_bridge;\n');
-  edit('crates/aim-services/Cargo.toml', text => replace(text, '[dependencies]', '[dependencies]\nserde_json = "1.0"', 'clipboard broker JSON'));
   fs.copyFileSync(new URL('./runtime_prepare.rs', import.meta.url), path.join(root, 'crates/aim-android-image/src/bin/prepare-runtime.rs'));
   fs.mkdirSync(path.join(root, 'crates/aimctl/src/bin'), {recursive:true});
   fs.writeFileSync(path.join(root, 'crates/aimctl/src/bin/maclauncher-aim.rs'), controllerBytes);
@@ -940,8 +860,6 @@ export function adaptAimSources(root, {controllerSource, buildJobs} = {}) {
         if let Ok(value) = std::env::var(key) { host_environment.push((key.into(), value)); }
     }
     let c_env: Vec<CString> = host_environment`, 'service process policy'));
-  edit('crates/aim-services/src/package/installer/native.rs', text => replace(text,
-    '            Ok(Arc::new(move |uid, id| {', '            Ok(Arc::new(move |uid: u32, id: i32| {', 'installer closure argument types'));
   for (const file of ['crates/aimctl/src/guest.rs', 'crates/aim-guest-init/src/launch.rs'])
     edit(file, text => text.replaceAll('"MACLAUNCHER_AIM_NETWORK", "MACLAUNCHER_CLIPBOARD_SOCKET"', '"MACLAUNCHER_AIM_NETWORK", "MACLAUNCHER_AIM_IPC_PREFIX", "MACLAUNCHER_CLIPBOARD_SOCKET", "TMPDIR", "HOME", "CFFIXED_USER_HOME"'));
   edit('crates/aim-guest-init/src/launch.rs', adaptAimFsTraceLaunch);
@@ -953,7 +871,7 @@ export function adaptAimSources(root, {controllerSource, buildJobs} = {}) {
     return text + '\nfn scoped_name(name: &str) -> String {\n    let Some(suffix) = name.strip_prefix("dev.aim.") else { return name.into(); };\n    let Ok(prefix) = std::env::var("MACLAUNCHER_AIM_IPC_PREFIX") else { return name.into(); };\n    if !prefix.starts_with("org.maclauncher.android.aim.") || !prefix.ends_with(\'.\') || !prefix.bytes().all(|c| c.is_ascii_alphanumeric() || c == b\'.\' || c == b\'-\') { return name.into(); }\n    format!("{prefix}{suffix}")\n}\n';
   });
   edit('Cargo.lock', text => {
-    for (const [name, dependency] of [['aim-services', 'serde_json'], ['aim-android-image', 'aim-storage'], ['aim-android-image', 'serde_json'], ['aimctl', 'serde_json']]) {
+    for (const [name, dependency] of [['aim-android-image', 'aim-storage'], ['aim-android-image', 'serde_json'], ['aimctl', 'serde_json']]) {
       const expression = new RegExp('(\\[\\[package\\]\\]\\nname = "' + name + '"[\\s\\S]*?dependencies = \\[\\n)([\\s\\S]*?)(\\n\\])');
       if (!expression.test(text)) throw new Error('AIM dependency lock no longer matches: ' + name);
       text = text.replace(expression, (_all, head, rows, tail) => head + [...rows.split('\n'), ' "' + dependency + '",'].sort().join('\n') + tail);
