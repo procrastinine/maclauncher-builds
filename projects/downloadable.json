@@ -1785,9 +1785,8 @@
         "url": "https://github.com/libsdl-org/SDL_image",
         "repository": "libsdl-org/SDL_image",
         "pin": {
-          "file": "producers/dependencies.json",
-          "pointer": "/sdl2_image/revision",
-          "repositoryPointer": "/sdl2_image/repository"
+          "file": "producers/maclauncher/helper-builds/mkxpz.json",
+          "pointer": "/sdlImage"
         }
       }
     ],
