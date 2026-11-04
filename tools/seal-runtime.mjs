@@ -71,6 +71,8 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
    if(!immutable&&ids.length)run('/usr/bin/install_name_tool',['-id','@rpath/'+path.basename(target),target]);
   }
   for(const prefix of new Set([...sources.values()].map(source=>path.dirname(path.dirname(source)))))includeLicenses(files,path.join(prefix,'licenses'));
+  const formulae=new Map([...sources.values()].map(source=>Tools.formulaRoot(source)).filter(Boolean).map(formula=>[formula.root,formula]));
+  for(const formula of formulae.values())addLicenses(files,formula.name+' '+formula.version,formula.root);
   // Upstream source and bottles may use read-only modes; package files are owned copies.
   for(const relative of B.fileInventory(files)){
    const file=path.join(files,relative),executable=Tools.macho(file)||Boolean(fs.statSync(file).mode&0o111);
