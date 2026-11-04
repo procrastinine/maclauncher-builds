@@ -41,5 +41,6 @@
     "sdk/src/backends/dx12/shaders/blur/ffx_blur_pass.hlsl": "ea3aa2cc7899e8eb1fb8b2fd0837b0a3adf10c8ecaffc22eef499d72b4bcf9c0",
     "sdk/src/components/blur/ffx_blur.cpp": "87b47ecb32406214b160c97cc0867494d5ff9dc77793d24942e130adc1c28033",
     "sdk/src/components/blur/ffx_blur_private.h": "46c638f23e33ed44dc5bb879299d9bf10900f70a496620efc1607aa89b26bac4"
-  }
+  },
+  "gitlink": "producers/maclauncher/src/external/fsr3-sdk"
 }

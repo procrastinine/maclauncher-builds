@@ -98,5 +98,6 @@
     "sdk/include/FidelityFX/gpu/ffx_core_glsl.h": "01afe5b65549b2c0951b494ca4bf570ee2aa89a64344e4c7d98ef86e6613ab42",
     "sdk/include/FidelityFX/gpu/ffx_core_gpu_common.h": "0e3c50cb0b4592c051d87e028a1dfa54fbd097942ebb3146964db801dec095d0",
     "sdk/include/FidelityFX/gpu/ffx_core_gpu_common_half.h": "d10466cbf027c8c23858a25f8e8cbbbf521d29f373db663c9354221651e9a498"
-  }
+  },
+  "gitlink": "producers/maclauncher/src/external/fsr3-sdk"
 }
