@@ -1,0 +1,51 @@
+{
+  "id": "gamemaker-opengl-helper",
+  "version": "3.0.5",
+  "arch": "universal",
+  "minimumMacOS": "13.0",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "7b9e4779af97a2bd7d5f2dd5c1a643ebc9eabc864e649940b294b05d0724c994",
+  "directoryRelative": "gamemaker-opengl-helper/3.0.5/universal",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "2b0d9eeeb7e509e056046a3bb78bd270a8c8230ce28c85232051cfcaee4a924e",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 17432,
+      "mode": 420,
+      "sha256": "1d00e5a61a918e6560865c8570cdcc523c7f63279b160b78c349efc4c8c11ca0"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "cc91a1dbeddec8b2734f3e8f4fdff71a20c3aba83180ba9196c3046d23499197"
+    },
+    {
+      "path": "helper.json",
+      "size": 851,
+      "sha256": "543de087f2d6ed557bc44da64ce6bdf36b40c04c9c8a6de186a782f3aad571dc",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 1586,
+      "sha256": "2b0d9eeeb7e509e056046a3bb78bd270a8c8230ce28c85232051cfcaee4a924e",
+      "mode": 420
+    },
+    {
+      "path": "software-opengl.dylib",
+      "size": 101232,
+      "sha256": "0249adee6d15ef62abc0518c3530a7959a883de322a3143fa8c587e769562616",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    }
+  ]
+}
