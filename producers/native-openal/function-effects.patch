@@ -1,0 +1,14 @@
+# Backport https://github.com/kcat/openal-soft/commit/681d049c06c65a346f8c77c9f4deecee64cda352
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -407,9 +407,6 @@ else()
+         list(APPEND C_FLAGS -Werror=undef -Werror=format-security
+             $<$<COMPILE_LANGUAGE:C>:-Werror=implicit -Werror=incompatible-pointer-types
+                 -Werror=int-conversion>)
+-        if(HAVE_WFUNCTION_EFFECTS)
+-            list(APPEND C_FLAGS $<$<COMPILE_LANGUAGE:CXX>:-Werror=function-effects>)
+-        endif()
+     endif()
+ 
+     # NOTE: This essentially provides the equivalent of the C++26 feature to
