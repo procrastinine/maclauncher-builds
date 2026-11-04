@@ -1,4 +1,3 @@
-import {gitlink} from '../../../../../../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -25,5 +24,5 @@ run(['--crate-name','android_apk_metadata','--extern','aim_apps='+library,'--ext
 fs.chmodSync(binary,0o755);execFileSync('/usr/bin/strip',['-S',binary],{stdio:'pipe'});execFileSync('/usr/bin/codesign',['--force','--sign','-',binary],{stdio:'pipe'});execFileSync('/usr/bin/codesign',['--verify','--strict',binary],{stdio:'pipe'});
 const commands=execFileSync('/usr/bin/otool',['-L',binary],{encoding:'utf8'}),versions=execFileSync('/usr/bin/vtool',['-show-build',binary],{encoding:'utf8'});
 if(!versions.includes('minos 13.0'))throw Error('APK metadata helper must target macOS 13');
-const result={schemaVersion:1,id:'android-apk-metadata',upstreamRevision:gitlink('producers/maclauncher/src/external/aim'),source,originals,owned:['main.rs','adapt.mjs','build.mjs'].map(file=>({path:file,sha256:sha(path.join(native,file))})),dependencies,compiler:execFileSync(rustc,['-vV'],{encoding:'utf8'}),minimumMacOS:'13.0',architectures:['arm64'],binary:{path:binary,bytes:fs.statSync(binary).size,sha256:sha(binary)},dynamicDependencies:commands,buildVersions:versions};
+const result={schemaVersion:1,id:'android-apk-metadata',upstreamRevision:JSON.parse(fs.readFileSync(path.join(native,'sources.json'))).aim.revision,source,originals,owned:['main.rs','adapt.mjs','build.mjs'].map(file=>({path:file,sha256:sha(path.join(native,file))})),dependencies,compiler:execFileSync(rustc,['-vV'],{encoding:'utf8'}),minimumMacOS:'13.0',architectures:['arm64'],binary:{path:binary,bytes:fs.statSync(binary).size,sha256:sha(binary)},dynamicDependencies:commands,buildVersions:versions};
 fs.writeFileSync(path.join(output,'BUILD.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify({binary:result.binary,originalFiles:originals.length,minimumMacOS:result.minimumMacOS}));

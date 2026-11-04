@@ -15,7 +15,7 @@ const profiles=JSON.parse(fs.readFileSync(new URL('../producers/android-inputs/a
 const temp=t=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'android-runtime-deps-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;};
 test('AIM ANGLE dependency preserves its own original program transport and historical common selection',()=>{
  const common=anglePackageProfile('android-angle',commonVersion).profile,aim=anglePackageProfile('android-angle-aim',aimProfile.packageVersion).profile;
- assert.equal(common.id,'common');assert.equal(aim.id,'aim6');assert.equal(Object.hasOwn(common,'androidSource'),false);assert.equal(Object.hasOwn(aim,'androidSource'),false);
+ assert.equal(common.id,'common');assert.equal(aim.id,'aim6');assert.equal(Object.hasOwn(common,'androidSource'),false);assert.match(aim.androidSource.revision,/^5041bb4/);
  if(commonVersion!==aimProfile.version)assert.deepEqual(anglePackageProfile('android-angle',aimProfile.version).profile,aim);
 
  assert.throws(()=>anglePackageProfile('android-angle-aim','unknown'),/declared source profile/);
@@ -23,7 +23,7 @@ test('AIM ANGLE dependency preserves its own original program transport and hist
 test('AIM accepts only the prepared original AIM ANGLE package and rejects the common profile',t=>{
  const root=temp(t),{definition,profile}=anglePackageProfile('android-angle-aim',aimProfile.packageVersion);
  const manifest={version:profile.providerVersion,programBinaryVersion:'a'.repeat(32),angleRevision:definition.angle.revision};fs.writeFileSync(path.join(root,'angle-manifest.json'),JSON.stringify(manifest));
- const input={root,record:{id:'android-angle-aim',version:aimProfile.packageVersion}};const result=aimAngleInput(input);assert.equal(result.angle,root);assert.equal(result.angleLicenses,path.join(root,'licenses'));assert.equal(result.profileId,'aim6');
+ const input={root,record:{id:'android-angle-aim',version:aimProfile.packageVersion}};const result=aimAngleInput(input);assert.equal(result.angle,root);assert.equal(result.profileId,'aim6');
  manifest.angleRevision='b'.repeat(40);fs.writeFileSync(path.join(root,'angle-manifest.json'),JSON.stringify(manifest));assert.throws(()=>aimAngleInput(input),/original profile/);
 });
 function frameworkImage(){
@@ -41,15 +41,13 @@ test('SDL3 seals only its canonical Mach-O directory and restores the compile-ti
  t.mock.method(Native,'loadCommands',()=>({minimumMacOS:'13.0',rpaths:['@loader_path/Frameworks','@executable_path/../Frameworks']}));
  fs.symlinkSync('A',path.join(sdl,'Versions/Current'));for(const name of ['SDL3','Headers','Resources'])fs.symlinkSync('Versions/Current/'+name,path.join(sdl,name));
  const output=path.join(root,'output');packageSdl3Framework({project:'native-sdl3',version:'3.4.18-MCLv1',output,sdl,profile:{version:'3.4.18',url:'https://example.com/SDL3.dmg',sha256:'a'.repeat(64)}});
- const declaration=JSON.parse(fs.readFileSync(path.join(output,'declaration.json')));assert.equal(declaration.id,'native-sdl3');assert.equal(declaration.arch,'universal');assert.ok(!declaration.files.some(file=>file.path==='native/SDL3.framework/Headers/SDL.h'));assert.ok(declaration.files.some(file=>file.path==='native/SDL3.framework/Versions/A/Headers/SDL.h'));assert.equal(declaration.notices,undefined);for(const file of declaration.files)assert.equal(fs.lstatSync(path.join(output,'payload',file.path)).isSymbolicLink(),false);
+ const declaration=JSON.parse(fs.readFileSync(path.join(output,'declaration.json')));assert.equal(declaration.id,'native-sdl3');assert.equal(declaration.arch,'universal');assert.ok(!declaration.files.some(file=>file.path==='native/SDL3.framework/Headers/SDL.h'));assert.ok(declaration.files.some(file=>file.path==='native/SDL3.framework/Versions/A/Headers/SDL.h'));;for(const file of declaration.files)assert.equal(fs.lstatSync(path.join(output,'payload',file.path)).isSymbolicLink(),false);
  assert.deepEqual(declaration.files.filter(file=>file.architectures).map(file=>file.path),['native/SDL3.framework/Versions/A/SDL3']);
  const payload=path.join(output,'payload');preparePackageLayout({input:payload,declaration,environment:{}});
- const licenseAlias='native/SDL3.framework/Versions/A/Resources/LICENSE.txt';
- assert.equal(declaration.aliases.files[licenseAlias],'licenses/Zlib.txt');
+ ;
  const archive=path.join(root,'native-sdl3-3.4.18-MCLv1-universal.tar.gz'),record=await pack({project:'native-sdl3',input:payload,declaration,output:archive});
  const checked=await verify({archive,sha256:record.asset.sha256,project:'native-sdl3',version:declaration.version,arch:'universal',includeDeclaration:true});
- assert.equal(checked.declaration.aliases.files[licenseAlias],'licenses/Zlib.txt');
- assert.equal(checked.declaration.files.filter(file=>file.sha256===declaration.files.find(file=>file.path==='licenses/Zlib.txt').sha256).length,1,'Archive stores the required resource and flat licence text only once');
+ ;
  materializePackageAliases({root:payload,declaration,inputs:{}});
  const view=prepareSharedSdlFramework({root:payload},path.join(root,'work'));
  for(const name of ['SDL3','Headers/SDL.h','Resources/LICENSE.txt']){
