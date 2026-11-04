@@ -1,10 +1,10 @@
 diff --git a/src/modules/android/native/build-options.mjs b/src/modules/android/native/build-options.mjs
-index c055890..fe0e7f1 100644
+index 9032d45..931682e 100644
 --- a/src/modules/android/native/build-options.mjs
 +++ b/src/modules/android/native/build-options.mjs
-@@ -3,7 +3,7 @@ import path from 'node:path';
- 
- export const requiredInputs=['klepton','converter','jdk','sdl','vulkan-headers','sndfile-headers','codecs','angle','gles-headers','framework','output'];
+@@ -15,7 +15,7 @@ export const requiredInputs=[
+   'output'
+ ];
  export const platformTools=['aidl','aconfig','rust-toolchain','python'];
 -export const optionalInputs=['ndk-headers','blueprint-parser','blueprint-parser-sources','ninja','build-work','tool-inputs','ndk','bionic-inputs','bionic-target'];
 +export const optionalInputs=['ndk-headers','blueprint-parser','blueprint-parser-sources','ninja','build-work','tool-inputs','java-inputs','ndk','bionic-inputs','bionic-target'];
@@ -12,10 +12,10 @@ index c055890..fe0e7f1 100644
  /** The snapshot builder and compiler consume the same pinned supplier catalog. */
  export function sourceOptions(root){
 diff --git a/src/modules/android/native/compile.mjs b/src/modules/android/native/compile.mjs
-index 0682b0e..d6fb9dc 100644
+index 5eee0f7..0f11315 100644
 --- a/src/modules/android/native/compile.mjs
 +++ b/src/modules/android/native/compile.mjs
-@@ -373,7 +373,8 @@ function auditNative(directory){for(const entry of fs.readdirSync(directory,{wit
+@@ -326,7 +326,8 @@ function auditNative(directory){for(const entry of fs.readdirSync(directory,{wit
  auditNative(native);
  fs.copyFileSync(path.join(root,'resources/java-security.properties'),path.join(output,'java-security.properties'));
  buildHostArchive({root,output,build,hostClasses,frameworkTool,frameworkInput:framework.input.file,asmClasspath,java,jar});
