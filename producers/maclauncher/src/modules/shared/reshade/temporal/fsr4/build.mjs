@@ -306,6 +306,7 @@ for (const relative of (await fs.readdir(payload, {recursive : true})).sort()) {
 }
 await fs.writeFile(path.join(payload, 'provider.json'), JSON.stringify({
   ...pin,
+  commit : gitlink(pin.gitlink),
   providerABI : 1,
   complete : !quick,
   resourcePreparation : 1,
