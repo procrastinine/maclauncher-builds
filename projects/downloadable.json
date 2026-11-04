@@ -1933,10 +1933,14 @@
       {
         "version": "MCLv7",
         "label": "nxnative native tools MCLv7"
+      },
+      {
+        "version": "MCLv8",
+        "label": "nxnative native tools MCLv8"
       }
     ],
     "build": {
-      "version": "MCLv7",
+      "version": "MCLv8",
       "architectures": [
         "arm64"
       ],

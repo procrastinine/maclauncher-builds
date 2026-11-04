@@ -43,16 +43,7 @@ function cached(command, args, inputs, output, options = {}) {
     if (fs.existsSync(output) && fs.existsSync(record) && fs.readFileSync(record,'utf8') === identity) return;
     fs.mkdirSync(path.dirname(output), {recursive:true}); run(command,args,options); fs.writeFileSync(record,identity);
 }
-async function pool(items, count, callback) {
-    let index = 0;
-    await Promise.all(Array.from({length:count},async()=>{while(index<items.length)await callback(items[index++]);}));
-}
-async function compile(tool,args,options) {
-    await new Promise((resolve,reject)=>{
-        const child=spawn(tool,args,{stdio:'inherit',...options}); child.once('error',reject);
-        child.once('close',code=>code===0?resolve():reject(Error(tool+' exited '+code)));
-    });
-}
+
 function nativeFile(file) {
     const fd=fs.openSync(file,'r'),magic=Buffer.alloc(4);fs.readSync(fd,magic,0,4,0);fs.closeSync(fd);
     return ['cffaedfe','feedfacf','cafebabe','bebafeca','cafebabf','bfbafeca'].includes(magic.toString('hex'));
@@ -98,27 +89,10 @@ function metalTool(output) {
 }
 
 async function nativeHost(source,work,output,jobs) {
-    const owned=path.join(source,'nxnative'),host=path.join(source,'dm/host'),gfx=path.join(source,'dm/gfx'),third=path.join(source,'dm/third_party');
-    const flags=['-arch','arm64','-mmacosx-version-min='+pin.minimumMacOS,'-O1','-Wno-unused-function','-fobjc-arc','-ffile-prefix-map='+source+'=/nxnative','-fdebug-prefix-map='+work+'=/build'];
-    const include=[owned,path.join(gfx,'nvn/include'),path.join(third,'vulkan-headers/include'),path.join(third,'libvpx'),path.join(third,'stb_vorbis')].map(file=>'-I'+file);
-    const vpx=path.join(third,'libvpx'),vpxSources=files(vpx).filter(file=>file.endsWith('.c')),vpxHeaders=files(vpx).filter(file=>file.endsWith('.h'));
-    const vpxObjects=vpxSources.map(file=>path.join(work,'native/vpx',path.relative(vpx,file)+'.o'));
-    await pool(vpxSources,jobs,async(file)=>{
-        const object=vpxObjects[vpxSources.indexOf(file)],args=['-arch','arm64','-mmacosx-version-min='+pin.minimumMacOS,'-O2','-ffile-prefix-map='+source+'=/nxnative','-I'+vpx,'-I'+path.join(vpx,'config'),'-c',file,'-o',object];
-        const identity=sha(JSON.stringify([args,sha(fs.readFileSync(file)),...vpxHeaders.map(header=>sha(fs.readFileSync(header)))]));
-        if(fs.existsSync(object)&&fs.existsSync(object+'.inputs')&&fs.readFileSync(object+'.inputs','utf8')===identity)return;
-        fs.mkdirSync(path.dirname(object),{recursive:true});await compile('/usr/bin/clang',args);fs.writeFileSync(object+'.inputs',identity);
-    });
-    const library=path.join(work,'native/libvpx.a');run('/usr/bin/ar',['rcs',library,...vpxObjects]);
-    const names=['main.c','loader.c','hle.c','crash.c','probe.c','thread.c','memstat.m','haptics_apple.m','front_mac.m','entry.S',...fs.readdirSync(host).filter(name=>/^hle_.*\.c$/.test(name))];
-    const sources=[...new Set(names)].map(name=>path.join(host,name));
-    for(const directory of [gfx,path.join(gfx,'nvn'),path.join(gfx,'tex'),path.join(gfx,'vk'),path.join(gfx,'gl')])for(const name of fs.readdirSync(directory))if(/\.(c|m|S)$/.test(name))sources.push(path.join(directory,name));
-    sources.push(path.join(owned,'profile.c'),path.join(owned,'metal_library.m'));
-    const headers=files(source).filter(file=>/\.(h|inc)$/.test(file));
-    const executable=path.join(output,'bin/nxnative-host');
-    const args=[...flags,...include,'-o',executable,...sources,library];
-    for(const framework of ['Cocoa','QuartzCore','Metal','MetalFX','IOKit','GameController','CoreHaptics','AudioToolbox','VideoToolbox','CoreMedia','CoreVideo','ImageIO','UniformTypeIdentifiers'])args.push('-framework',framework);
-    cached('/usr/bin/clang',args,[...sources,...headers,library],executable);
+    const owned=path.join(source,'nxnative'),host=path.join(source,'dm/host');
+    const flags=['-arch','arm64','-mmacosx-version-min='+pin.minimumMacOS,'-O1','-Wno-unused-function','-fobjc-arc','-ffile-prefix-map='+source+'=/nxnative','-fdebug-prefix-map='+work+'=/build','-I'+owned];
+    run('make',['-C',host,'-j'+jobs,'dmhost','CFLAGS='+flags.join(' '),'MACOS_MIN='+pin.minimumMacOS],{env:{...process.env,PATH:path.join(output,'python/bin')+path.delimiter+process.env.PATH}});
+    const executable=path.join(output,'bin/nxnative-host');copyFile(path.join(host,'dmhost'),executable);
     const bootstrap=path.join(output,'bin/nxnative');
     cached('/usr/bin/clang',['-arch','arm64','-mmacosx-version-min='+pin.minimumMacOS,'-O2','-ffile-prefix-map='+producer+'=/nxnative-producer',path.join(producer,'runtime/bootstrap.c'),'-o',bootstrap],[path.join(producer,'runtime/bootstrap.c')],bootstrap);
     const metal=metalTool(output);
@@ -143,7 +117,7 @@ export async function buildNxNative({work,output,dependencyWork,jobs=4,version=p
     run(sdk,['publish',nxProject,'--no-restore','--runtime','osx-arm64','--self-contained','false','-c','Release','-o',path.join(output,'tools/nx_extract'),'-p:DebugType=None','-p:DebugSymbols=false','-p:PathMap='+projected+'=/nxnative'],{env:sdkEnvironment});
     metalTool(output);
     const python=path.join(output,'python/bin/python3');
-    run(python,[path.join(projected,'dm/gfx/tools/dmsh_chain.py'),'--update-lock'],{env});
+    run(python,[path.join(projected,'dm/gfx/tools/tool_lock.py'),'--update-lock'],{env});
     run(python,[path.join(projected,'dm/gfx/tools/dmsh_chain.py'),'--header'],{env});
     await nativeHost(projected,work,output,jobs);
     const share=path.join(output,'share/nxnative');
@@ -166,6 +140,7 @@ export async function buildNxNative({work,output,dependencyWork,jobs=4,version=p
     addLicenses(output,pin.id,source);
     addLicenses(output,'libvpx',path.join(source,'dm/third_party/libvpx'));
     addLicense(output,'libvpx patent grant',path.join(source,'dm/third_party/libvpx/PATENTS'));
+    addLicenses(output,'dav1d',path.join(source,'dm/third_party/dav1d'));
     addLicenses(output,'stb_vorbis',path.join(source,'dm/third_party/stb_vorbis'));
     addLicenses(output,'Ryujinx',path.join(source,'dm/third_party/ryujinx'));
     addLicenses(output,'Spv.Generator',path.join(source,'dm/third_party/ryujinx/src/Spv.Generator'));

@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "id": "nxnative-tools",
-  "version": "MCLv1-1027-3",
+  "version": "MCLv8",
   "source": {
     "path": "sources/nxnative",
     "repository": "https://github.com/seedds/nxnative.git",
-    "committedAt": "2026-10-28T00:36:48.000Z"
+    "committedAt": "2026-11-05T01:29:01+08:00"
   },
   "platform": "darwin",
   "architecture": "arm64",
-  "minimumMacOS": "26.0",
+  "minimumMacOS": "26.6",
   "buildEntry": "producers/nxnative/build.mjs",
   "tools": {
     "node": ">=24",

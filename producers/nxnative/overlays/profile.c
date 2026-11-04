@@ -62,7 +62,11 @@ static void load(void) {
     profile.id = strdup(id);
     profile.name = get("name", NULL); profile.romfs_marker = get("romfs_marker", NULL);
     profile.args = get("game_args", ""); profile.env = get("game_env", "");
-    profile.feedback_snap = get("feedback_snap", ""); profile.alpha_from_red = get("alpha_from_red", "");
+    profile.launch_param = get("launch_param", "");
+    profile.ue_fps_cvar = get("ue_fps_cvar", "t.MaxFPS");
+    profile.upscaler_keys = getenv("NXNATIVE_UPSCALER_KEYS");
+    if (!profile.upscaler_keys) profile.upscaler_keys = "";
+    for (const char *p = profile.upscaler_keys; *p; ++p) if (p == profile.upscaler_keys || p[-1] == ',') ++profile.upscaler_n;
     profile.program_id = number("program_id", NULL, 16);
     profile.mem_reserve = number("mem_reserve", NULL, 0); profile.mem_alias = number("mem_alias", NULL, 0);
     profile.mem_stack = number("mem_stack", NULL, 0); profile.app_pool = number("app_pool", NULL, 0);
@@ -79,9 +83,14 @@ static void load(void) {
         char *copy = strdup(rows[i].value), *context = NULL;
         strtok_r(copy, "\t", &context); char *version = strtok_r(NULL, "\t", &context);
         if (!version) invalid("build");
+        nxnative_version *entry = &profile.versions[profile.version_count];
+        char *module_names = calloc(strlen(rows[i].value) + 1, 1);
         for (char *module = strtok_r(NULL, "\t", &context); module; module = strtok_r(NULL, "\t", &context)) {
-            if (!strncmp(module, "main=", 5)) profile.versions[profile.version_count++] = (nxnative_version){module + 5, version};
+            char *equal = strchr(module, '='); if (!equal) continue; *equal = 0;
+            if (*module_names) strcat(module_names, " "); strcat(module_names, module);
+            if (!strcmp(module, "main")) *entry = (nxnative_version){equal + 1, version, module_names};
         }
+        if (entry->build) ++profile.version_count; else free(module_names);
     }
     profile.stdalloc_cap = number("stdalloc_cap", "0", 0);
     profile.present_display = choice("present_interval", "game", "game", "display");
@@ -89,7 +98,13 @@ static void load(void) {
     profile.core_preempt = choice("core_preempt", "off", "off", "on");
     profile.alloc_big_align = choice("alloc_big_align", "off", "off", "on");
     profile.fps_target = (int)number("fps_target", "0", 0);
-    if (profile.fps_target != 0 && profile.fps_target != 30 && profile.fps_target != 60) invalid("fps_target");
+    profile.fps_max = (int)number("fps_max", "60", 0);
+    profile.ue_texture_pool = (int)number("ue_texture_pool", "0", 0);
+    profile.enc_thread = choice("enc_thread", "off", "off", "on");
+    profile.screen_aspect = choice("screen_aspect", "off", "off", "on");
+    const char *skip = get("shader_key_skip", "");
+    const char *length = strchr(skip, '+');
+    if (length) { profile.shader_key_skip_off = (int)strtoul(skip, NULL, 0); profile.shader_key_skip_len = (int)strtoul(length + 1, NULL, 0); }
     profile.fps_hold = choice("fps_hold", "on", "off", "on");
     profile.present_snap = choice("present_snap", "off", "off", "on");
     profile.pso_mtl4 = choice("pso_mtl4", "off", "off", "on");

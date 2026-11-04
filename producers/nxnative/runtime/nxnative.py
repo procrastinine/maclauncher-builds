@@ -241,7 +241,9 @@ def prepare(args):
     host = ROOT / 'bin/nxnative-host'
 
     def prepare_host(_repo, destination, host_env, _logs, game):
+        import game as gamemod
         host_env['NXNATIVE_PROFILE'] = str(game.table('game.tsv'))
+        host_env['NXNATIVE_UPSCALER_KEYS'] = ','.join(gamemod.upscaler_keys(game))
         destination.parent.mkdir(parents=True, exist_ok=True)
         if not destination.is_file() or destination.stat().st_size != host.stat().st_size: shutil.copy2(host, destination)
         return destination
@@ -257,7 +259,8 @@ def prepare(args):
         while index < len(words) and re.match(r'^[A-Za-z_][A-Za-z_0-9]*=', words[index]):
             key, value = words[index].split('=',1); values[key] = value; index += 1
         run = output / 'run'; (run / 'save').mkdir(parents=True, exist_ok=True); (run / 'temp').mkdir(exist_ok=True)
-        values.update(NXNATIVE_PROFILE=str(profile.table('game.tsv')), DM_SAVE=str(run / 'save'), DM_TEMP=str(run / 'temp'))
+        import game as gamemod
+        values.update(NXNATIVE_PROFILE=str(profile.table('game.tsv')), NXNATIVE_UPSCALER_KEYS=','.join(gamemod.upscaler_keys(profile)), DM_SAVE=str(run / 'save'), DM_TEMP=str(run / 'temp'))
         launched.update(schemaVersion=1,titleId=profile.id,sourceRevision=snapshot['revision'],sourceKind=snapshot['kind'],sourceCommittedAt=snapshot.get('committedAt'),nativeToolsVersion=identity,nativeSourceRevision=tools.get('nativeSourceRevision'),nativeSourceCommittedAt=tools.get('nativeSourceCommittedAt'),command=str(host),args=words[index + 1:],cwd=str(run),env=values)
         (output / 'launch.json').write_text(json.dumps(launched,ensure_ascii=False,indent=2)+'\n')
         return command

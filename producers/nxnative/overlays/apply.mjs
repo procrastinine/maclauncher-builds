@@ -13,14 +13,18 @@ export function applyOverlays(root) {
         fs.writeFileSync(file, adapt(before, relative));
     };
     const include = '#include "metal_library.h"\n';
-    update('dm/host/main.c', (text, file) => once(text,
-        'static const char *def[] = DM_GAME_MODULES;',
-        'const char **def = nxnative_profile_current()->modules;', file));
-    update('dm/host/front_mac.m', (text, file) => once(once(text,
-        '@DM_GAME_NAME', '@(DM_GAME_NAME)', file),
-        '@"Quit " DM_GAME_NAME', '[NSString stringWithFormat:@"Quit %s", DM_GAME_NAME]', file));
+    update('dm/host/Makefile', text => {
+        text = 'GAME_H := ../../nxnative/game_profile.h\n' + text.slice(text.indexOf('include ../mac/min_os.mk'));
+        const start = text.indexOf('.PHONY: game_profile'), end = text.indexOf('dmhost: $(SRC)', start);
+        return text.slice(0, start) + 'SRC += ../../nxnative/profile.c ../../nxnative/metal_library.m\n.PHONY: FORCE\nFORCE:\n' + text.slice(end);
+    });
+    update('dm/host/main.c', (text, file) => {
+        text = once(text, 'const char *all[] = DM_GAME_MODULES;', 'const char **all = nxnative_profile_current()->modules;', file);
+        text = once(text, 'const struct { const char *build, *mods; } rows[] = {DM_GAME_BUILD_MODULES};', 'const nxnative_version *rows = nxnative_profile_current()->versions;', file);
+        return once(text, 'sizeof rows / sizeof *rows', 'nxnative_profile_current()->version_count', file);
+    });
     update('dm/host/hle_sdk16.c', (text, file) => {
-        text = once(text, 'static const struct { const char *build, *ver; } k[] = {DM_GAME_DISPLAY_VERSIONS};',
+        text = once(text, 'const struct { const char *build, *ver; } k[] = {DM_GAME_DISPLAY_VERSIONS};',
             'const nxnative_version *k = nxnative_profile_current()->versions;', file);
         text = once(text, 'sizeof k / sizeof *k', 'nxnative_profile_current()->version_count', file);
         text = once(text, '#ifdef DM_GAME_SHARED_FONT_TTF', 'if (nxnative_profile_current()->shared_font_present) {', file);
@@ -28,20 +32,22 @@ export function applyOverlays(root) {
         return text.replace('#else\n        int m = dm_sdk_major(), dec =', '} else {\n        int m = dm_sdk_major(), dec =')
             .replace('#endif\n    }\n    return (size_t)skip;', '}\n    }\n    return (size_t)skip;');
     });
+    update('dm/host/hle_cheats.c', (text, file) => {
+        text = once(text, '#ifdef DM_GAME_DISPLAY_VERSIONS\n    const struct { const char *build, *ver; } k[] = {DM_GAME_DISPLAY_VERSIONS};', '    const nxnative_version *k = nxnative_profile_current()->versions;', file);
+        text = once(text, 'sizeof k / sizeof *k', 'nxnative_profile_current()->version_count', file);
+        return once(text, '#endif\n}\n\n// The anchored sources', '}\n\n// The anchored sources', file);
+    });
     update('dm/gfx/nvn/hle_nvn.c', (text, file) => {
         text = once(text, '#ifdef DM_GAME_NVN_API_MAJOR', 'if (nxnative_profile_current()->nvn_api_present) {', file);
         text = once(text, 'api[0] = DM_GAME_NVN_API_MAJOR; api[1] = DM_GAME_NVN_API_MINOR;',
             'api[0] = nxnative_profile_current()->nvn_api_major; api[1] = nxnative_profile_current()->nvn_api_minor;', file);
-        return text.replace('#else\n    int m = dm_sdk_major(); api[0]', '} else {\n    int m = dm_sdk_major(); api[0]')
+        return text.replace('#else\n    // The Switch 2', '} else {\n    // The Switch 2')
             .replace('#endif\n}\nNVN(nvnDeviceGetInteger', '}\n}\nNVN(nvnDeviceGetInteger');
     });
     update('dm/gfx/nvn/nvn_mtl.m', (text, file) => {
         text = include + text;
-        text = once(text, 'exe_rel("../games/" DM_GAME_ID "/shader_map.tsv")',
+        text = once(text, 'exe_rel([NSString stringWithFormat:@"../games/%s/shader_map.tsv", DM_GAME_ID].UTF8String)',
             '[NSString stringWithFormat:@"%s/shader_map.tsv", nxnative_profile_current()->directory]', file);
-        text = once(text, '@DM_GAME_ID', '@(DM_GAME_ID)', file);
-        text = once(text, 'MLOG("[RED] shader library %s was built for game %s, not " DM_GAME_ID, g_msl_dir.UTF8String, st_game.UTF8String);',
-            'MLOG("[RED] shader library %s was built for game %s, not %s", g_msl_dir.UTF8String, st_game.UTF8String, DM_GAME_ID);', file);
         return once(text, 'dispatch_data_t d = dispatch_data_create(m, len, dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{ munmap(m, len); });\n    return [g_dev newLibraryWithData:d error:err];',
             'NSData *data = [NSData dataWithBytes:m length:len]; munmap(m, len);\n    return nxnative_metal_library_data(g_dev, data, err);', file);
     });
