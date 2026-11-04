@@ -5,7 +5,8 @@ const crypto = require("node:crypto");
 const Native = require("../../runtime/local-native");
 const metadata = require("./portable-build.json");
 const revision = gitlink("producers/maclauncher/src/external/onscripter-yuri");
-const PIN = Object.freeze({ ...metadata, engine: { ...metadata.engine, revision,
+const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map(pin => ({ ...pin,
+  archiveUrl: pin.archiveUrl.replace("{revision}", pin.revision) })), engine: { ...metadata.engine, revision,
   sourceUrl: `https://github.com/YuriSizuku/OnscripterYuri/tree/${revision}`,
   archiveUrl: `https://codeload.github.com/YuriSizuku/OnscripterYuri/tar.gz/${revision}` } });
 const VERSION = PIN.engine.version;

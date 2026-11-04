@@ -10,7 +10,9 @@ const Movie = require("../shared/runtime/portable-ffmpeg");
 const Prefix = require("../shared/runtime/portable-dependency-prefix");
 const Overlay = require("./system4-portable-overlay-v3");
 const { throwIfAborted } = require("../shared/runtime/download-utils");
-const PIN = Object.freeze(require("./system4-portable.json"));
+const metadata = require("./system4-portable.json");
+const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map(pin => ({ ...pin,
+  archiveUrl: pin.archiveUrl.replace("{revision}", pin.revision) })) });
 const VERSION = "MCLv1-1021";
 const REVISION = gitlink("producers/maclauncher/src/external/xsystem4");
 const SOURCE_SHA256 = "3beeaf86056c10f4464c50cec45ed56a140a99443bec56e9930cbdbe09151acb";

@@ -12,14 +12,14 @@
       "archiveUrl": "https://github.com/libffi/libffi/releases/download/v3.8.0/libffi-3.8.0.tar.gz",
       "archiveSha256": "7da3e2d9a171eb0a038f592ecad3ff2bb2550f3496d87b3b29ad0cf4430c0db4",
       "archiveBytes": 1581626,
-      "sourceUrl": "https://github.com/libffi/libffi/tree/12ffd1f9dc56fcea79d2f742f424301ae668d663",
       "buildSystem": "autotools",
       "options": [
         "--enable-shared",
         "--disable-static",
         "--disable-docs",
         "--disable-dependency-tracking"
-      ]
+      ],
+      "repository": "https://github.com/libffi/libffi"
     },
     {
       "id": "turbojpeg",
@@ -29,7 +29,6 @@
       "archiveUrl": "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.2.0/libjpeg-turbo-3.2.0.tar.gz",
       "archiveSha256": "6f30092cef9fb839779646608f4ee14ae3cbac989c47fa05e841b0841f09878e",
       "archiveBytes": 2537858,
-      "sourceUrl": "https://github.com/libjpeg-turbo/libjpeg-turbo/tree/c85e6b905bf237038faa936dab160ebfc5da0344",
       "buildSystem": "cmake",
       "options": [
         "-DENABLE_SHARED=ON",
@@ -39,23 +38,24 @@
         "-DWITH_TURBOJPEG=ON",
         "-DWITH_SIMD=ON",
         "-DBUILD=maclauncher-portable-v2"
-      ]
+      ],
+      "repository": "https://github.com/libjpeg-turbo/libjpeg-turbo"
     },
     {
       "id": "cglm",
       "name": "cglm",
       "version": "0.9.6",
       "revision": "144d1e7c29b3b0c6dede7917a0476cc95248559c",
-      "archiveUrl": "https://codeload.github.com/recp/cglm/tar.gz/144d1e7c29b3b0c6dede7917a0476cc95248559c",
+      "archiveUrl": "https://codeload.github.com/recp/cglm/tar.gz/{revision}",
       "archiveSha256": "601a0e687ff4b67a285d10e74c6aeff12be9accb9a38e1aecd2dc999c3536021",
       "archiveBytes": 707260,
-      "sourceUrl": "https://github.com/recp/cglm/tree/144d1e7c29b3b0c6dede7917a0476cc95248559c",
       "buildSystem": "cmake",
       "options": [
         "-DCGLM_SHARED=ON",
         "-DCGLM_STATIC=OFF",
         "-DCGLM_USE_TEST=OFF"
-      ]
+      ],
+      "repository": "https://github.com/recp/cglm"
     },
     {
       "id": "glew",
@@ -65,7 +65,6 @@
       "archiveUrl": "https://github.com/nigels-com/glew/releases/download/glew-2.3.1/glew-2.3.1.tgz",
       "archiveSha256": "b64790f94b926acd7e8f84c5d6000a86cb43967bd1e688b03089079799c9e889",
       "archiveBytes": 866060,
-      "sourceUrl": "https://github.com/nigels-com/glew/tree/285c35d395979771f9409710b2d401db8026e15a",
       "buildSystem": "cmake",
       "sourceSubdirectory": "build/cmake",
       "options": [
@@ -75,17 +74,17 @@
         "-DGLEW_EGL=OFF",
         "-DGLEW_OSMESA=OFF",
         "-DGLEW_REGAL=OFF"
-      ]
+      ],
+      "repository": "https://github.com/nigels-com/glew"
     },
     {
       "id": "webp",
       "name": "libwebp",
       "version": "1.6.0",
       "revision": "4fa21912338357f89e4fd51cf2368325b59e9bd9",
-      "archiveUrl": "https://codeload.github.com/webmproject/libwebp/tar.gz/4fa21912338357f89e4fd51cf2368325b59e9bd9",
+      "archiveUrl": "https://codeload.github.com/webmproject/libwebp/tar.gz/{revision}",
       "archiveSha256": "923f3382a47a2af185c3240c954cf004428b237bd7317413a95146d01eb4b94b",
       "archiveBytes": 3834766,
-      "sourceUrl": "https://github.com/webmproject/libwebp/tree/4fa21912338357f89e4fd51cf2368325b59e9bd9",
       "buildSystem": "cmake",
       "options": [
         "-DWEBP_BUILD_ANIM_UTILS=OFF",
@@ -98,7 +97,8 @@
         "-DWEBP_BUILD_WEBPMUX=OFF",
         "-DWEBP_BUILD_EXTRAS=OFF",
         "-DWEBP_BUILD_FUZZTEST=OFF"
-      ]
+      ],
+      "repository": "https://github.com/webmproject/libwebp"
     }
   ]
 }
