@@ -1,7 +1,6 @@
 {
   "upstreamVersion": "0.10.8.810",
   "upstreamRevision": "ba51381fb65da70697be29e6a817dc4af5c98d19",
-  "license": "ISC",
   "overlaySha256": "381b6a03b19295a36d6147cc74f5e9a5929692ab3e11a07a22d6b5c194543e0e",
   "files": [
     {

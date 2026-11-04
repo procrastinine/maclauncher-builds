@@ -193,7 +193,7 @@
         "file": "src/modules/shared/reshade/temporal/fsr4/source.json",
         "pointer": "/lite2"
       },
-      "url": "{url}",
+      "url": "{repository}/raw/{commit}/{path}",
       "sha256": "{sha256}"
     },
     "streamline-reference": {

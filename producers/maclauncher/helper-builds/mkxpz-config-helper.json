@@ -23,12 +23,6 @@
     "ImageIO"
   ],
   "minimumMacOS": "11.0",
-  "license": {
-    "from": "LICENSE",
-    "path": "license.txt",
-    "name": "MacLauncher MKXP-Z config isolation helper",
-    "license": "MIT"
-  },
   "record": {
     "scope": "selected-executable-config-and-display-identity"
   }

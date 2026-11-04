@@ -31,7 +31,6 @@ function validateArchives(archives, { catalog = PIN } = {}) {
   for (const pin of catalog.dependencies) {
     if (!/^[a-z0-9_]+$/.test(pin.id || "") || seen.has(pin.id) ||
         !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(pin.version || "") || typeof pin.name !== "string" || !pin.name ||
-        typeof pin.license !== "string" || !pin.license ||
         !(pin.revision ? /^[a-f0-9]{40}$/.test(pin.revision) : /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(pin.sourceRelease || "")) ||
         !/^[a-f0-9]{64}$/.test(pin.archiveSha256 || "") || !/^https:\/\//.test(pin.archiveUrl || "") ||
         !Number.isSafeInteger(pin.archiveBytes) || pin.archiveBytes <= 0 || pin.archiveBytes > 256 * 1024 * 1024 ||
