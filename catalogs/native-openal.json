@@ -7,6 +7,45 @@
       "schemaVersion": 2,
       "id": "native-openal",
       "version": "1.25.2-MCLv7",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "input.json",
+      "manifestSha256": "c264492aeb08cd41b5befa94191cd9adc0a78cb084c99c740143bdc58f4bccc0",
+      "sourceSha256": "e244c72e4a43f5217055ad2a57a9961944df19d570df2ec052d681d8365e5ae1",
+      "updatePolicy": "manual",
+      "launcherContract": 2,
+      "asset": {
+        "filename": "native-openal-1.25.2-MCLv7-x64.tar.gz",
+        "sha256": "01a9b83609b7e1fc91aa69f091d9dec181369afbed25f9c919766223f3c6a68d",
+        "bytes": 953534,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/native-openal%2Fv1.25.2-MCLv7%2Fx64/native-openal-1.25.2-MCLv7-x64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "3db99e4ec6a76c32aad073851ea1ea54c2f6251b",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "41931709420",
+        "runAttempt": "1"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "3db99e4ec6a76c32aad073851ea1ea54c2f6251b"
+      },
+      "tag": "native-openal/v1.25.2-MCLv7/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "native-openal",
+      "version": "1.25.2-MCLv7",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
