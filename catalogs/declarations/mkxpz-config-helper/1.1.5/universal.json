@@ -1,0 +1,57 @@
+{
+  "id": "mkxpz-config-helper",
+  "version": "1.1.5",
+  "arch": "universal",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "11.0",
+  "sourceRelative": null,
+  "sourceSha256": "2d266fa0916eafa57826a153ae72519ea9c3b4df348cfe219b731b5ae8ac8515",
+  "directoryRelative": "mkxpz-config-helper/1.1.5/universal",
+  "manifestRelative": "helper.json",
+  "manifestSha256": "6630677278b3dbe3f7d0e058550518862033f70218a7746080294cf864b91a96",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 16524,
+      "mode": 420,
+      "sha256": "ae09bac014ca05da232419070db74f3b1c3e754090ecbfdce9e4e278c878b712"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "bdcbe893fe40f1bd82191c62fa559d44526a0fe075286665068b156ea740f846"
+    },
+    {
+      "path": "helper.json",
+      "size": 1003,
+      "sha256": "6630677278b3dbe3f7d0e058550518862033f70218a7746080294cf864b91a96",
+      "mode": 420
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 29,
+      "sha256": "5fae4a022fb97d8e3d41dc31e83fd092c1a87e5a48656a7f4b95b25659699d66",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MacLauncher.txt",
+      "size": 1081,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+      "mode": 420
+    },
+    {
+      "path": "mkxpz-config.dylib",
+      "size": 104416,
+      "sha256": "b5bbf7065e95e21320e15e916672aa4c46f604b0dc38343ce1e4957e0a8df48e",
+      "mode": 493,
+      "architectures": [
+        "arm64",
+        "x86_64"
+      ]
+    }
+  ]
+}
