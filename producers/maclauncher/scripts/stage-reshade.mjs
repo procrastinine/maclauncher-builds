@@ -41,8 +41,8 @@ const build = path.resolve(source, args[0] && !args[0].startsWith("--") ? args.s
 const options = {};
 while (args.length) {
   const key = args.shift(), value = args.shift();
-  if (!["--version", "--arch", "--output", "--declaration", "--source-root", "--owned-source", "--isf", "--xess-host", "--xess-host-source", "--fsr", "--fsr4", "--fsr4-source", "--asr", "--asr-source", "--sgsr2", "--sgsr2-source", "--fsr3-generation", "--godot", "--streamline", "--dxmt", "--xess", "--retroarch", "--libplacebo", "--neural"].includes(key) || !value || value.startsWith("--") || options[key])
-    throw new Error("Usage: node scripts/stage-reshade.mjs <source> [build] [--owned-source <source>] [--isf <payload>] [--xess-host <payload>] [--xess-host-source <source>] [--fsr <payload>] [--fsr4 <payload>] [--fsr4-source <checkout>] [--asr <payload>] [--asr-source <checkout>] [--sgsr2 <payload>] [--sgsr2-source <checkout>] [--fsr3-generation <payload>] [--godot <payload>] [--streamline <payload>] [--dxmt <payload>] [--xess <payload>] [--retroarch <payload>] [--libplacebo <payload>] [--neural <payload>]");
+  if (!["--version", "--arch", "--output", "--declaration", "--source-root", "--owned-source", "--spirv-cross-source", "--isf", "--xess-host", "--xess-host-source", "--fsr", "--fsr4", "--fsr4-source", "--asr", "--asr-source", "--sgsr2", "--sgsr2-source", "--fsr3-generation", "--godot", "--streamline", "--dxmt", "--xess", "--retroarch", "--libplacebo", "--neural"].includes(key) || !value || value.startsWith("--") || options[key])
+    throw new Error("Usage: node scripts/stage-reshade.mjs <source> [build] [--owned-source <source>] [--spirv-cross-source <checkout>] [--isf <payload>] [--xess-host <payload>] [--xess-host-source <source>] [--fsr <payload>] [--fsr4 <payload>] [--fsr4-source <checkout>] [--asr <payload>] [--asr-source <checkout>] [--sgsr2 <payload>] [--sgsr2-source <checkout>] [--fsr3-generation <payload>] [--godot <payload>] [--streamline <payload>] [--dxmt <payload>] [--xess <payload>] [--retroarch <payload>] [--libplacebo <payload>] [--neural <payload>]");
   options[key] = ["--version","--arch"].includes(key) ? value : path.resolve(value);
 }
 const upstreamRoot=options["--source-root"]||path.resolve(import.meta.dirname,"..");
@@ -68,7 +68,7 @@ const registeredSources = JSON.parse(fs.readFileSync(path.resolve(import.meta.di
   "../src/modules/shared/reshade/native/processor-sources.json"), "utf8"));
 const pins = registeredSources.sources.map(entry => {
   if (!consumed.has(entry.sourcePath)) throw new Error("The graphics source profile contains an undeclared dependency.");
-  const directory = options["--source-root"]?path.resolve(options["--source-root"],entry.submodulePath):path.resolve(import.meta.dirname, "..", entry.submodulePath);
+  const directory = entry.id === "macfx-spirv-cross" && options["--spirv-cross-source"] || path.resolve(upstreamRoot, entry.submodulePath);
   const actual = execFileSync("git", ["-C", directory, "rev-parse", "HEAD"], {encoding: "utf8"}).trim();
   if (actual !== (entry.commit||(entry.id==='macfx-spirv-cross'?sharedDependencies.spirvCross.revision:entry.id==='macfx-spirv-headers'?execFileSync('git',['-C',path.resolve(directory,'../..'),'rev-parse',gitlink('producers/maclauncher/src/external/macfx-reshade')+':deps/spirv'],{encoding:'utf8'}).trim():gitlink('producers/maclauncher/'+entry.submodulePath)))) throw new Error("Initialize the selected graphics source commit: " + entry.submodulePath);
   execFileSync("git", ["-C", directory, "diff", "--exit-code", "HEAD", "--"], {stdio: "pipe"});

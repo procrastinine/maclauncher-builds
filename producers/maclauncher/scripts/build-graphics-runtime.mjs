@@ -229,6 +229,7 @@ export function plan({work, arch="universal", sdkPath, only, skip = [], reuse = 
   // tree; a reused core may supply only its applied owned source.
   const stage = selected.includes("core") && core.build ? [path.join(repository, "scripts/stage-reshade.mjs"),
     work ? path.join(work, "core/source") : core.source, core.build, "--owned-source", core.source, "--arch",arch,
+    ...(sourceOverrides["macfx-spirv-cross"] ? ["--spirv-cross-source", path.resolve(sourceOverrides["macfx-spirv-cross"])] : []),
     ...Object.entries(payloads).flatMap(([name, directory]) => [recipe.providers[name].option, directory,
       ...(recipe.providers[name].sourceOption ? [recipe.providers[name].sourceOption[0], sources[recipe.providers[name].sourceOption[1]].path] : [])])] : null;
   return {work: work || null, arch, sdkPath: sdkName, minimumSDK, selected, building: [...building], core, sdk: sdk || null, sources, inputs, tools, steps, payloads, stage, unresolved};
