@@ -30,8 +30,6 @@ export async function stageSource(source,revision,destination){
  });
  return {treeSha256,dependencies};
 }
-/** Preserve source-tree license notices, including statically linked libraries. */
-
 /** A Python 3.13 environment in the work directory holding the exact tools of a requirements file. */
 export function pythonBuildTools(work,requirements){
  const environment=path.join(work,'tools'),python=path.join(environment,'bin/python');

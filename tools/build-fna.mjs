@@ -13,8 +13,6 @@ export const RUNTIMES=Object.freeze({
  x64:{url:'https://builds.dotnet.microsoft.com/dotnet/Runtime/8.0.32/dotnet-runtime-8.0.32-osx-x64.tar.gz',sha256:'bb31ec5f4e6f6b85225672f061fd5ffbc463691a03c1338319e4c57403d30aab',bytes:30745959}
 });
 
-/** Select complete original license terms from the compiled headers. */
-
 export async function buildFNA({project,arch,output,work}){
  fs.mkdirSync(work,{recursive:true});const repository='https://github.com/FNA-XNA/FNA',source=checkoutSource({repository,revision:Builder.FNA_REVISION,destination:path.join(work,'upstream-fna')});
  retryNetwork(()=>run('git',['-C',source,'submodule','update','--init','--recursive','--depth','1']));

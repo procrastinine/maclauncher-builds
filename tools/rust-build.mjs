@@ -4,8 +4,6 @@ import os from 'node:os';
 import {execFileSync} from 'node:child_process';
 
 export const RUST_TOOLCHAIN='1.99.0';
-/** License files for statically linked Cargo dependencies and the Rust library. */
-
 /** Keep compiler source locations stable across runner and development caches. */
 export function rustEnvironment({work,minimumMacOS,env=process.env}){
  const cargo=env.CARGO_HOME||path.join(os.homedir(),'.cargo');
