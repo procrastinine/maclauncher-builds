@@ -25,7 +25,7 @@ export function nativeStackInput(input,{arch,work,fonts,audio,sdk=process.env.SD
  const prefix=path.resolve(work);if(!path.isAbsolute(work)||fs.existsSync(prefix))throw Error('Shared native stack views require a new absolute build directory.');
  Tools.copyTree(input.root,prefix);
  for(const [logical,canonical] of Object.entries(input.declaration?.aliases?.files||{}))if(typeof canonical==='string'){
-  const alias=path.join(prefix,logical),target=path.join(prefix,canonical);if(fs.existsSync(alias)&&fs.existsSync(target)){fs.unlinkSync(alias);fs.symlinkSync(path.relative(path.dirname(alias),target),alias);}
+  const alias=path.join(prefix,logical),target=path.join(prefix,canonical);if(fs.existsSync(target)){fs.mkdirSync(path.dirname(alias),{recursive:true});fs.rmSync(alias,{force:true});fs.symlinkSync(path.relative(path.dirname(alias),target),alias);}
  }
  function expand(value){if(typeof value==='string')return value.replaceAll(PREFIX,prefix).replaceAll(SDK,sdk);if(Array.isArray(value))return value.map(expand);if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).map(([key,value])=>[key,expand(value)]));return value;}
  function visit(directory){for(const entry of fs.readdirSync(directory,{withFileTypes:true})){const file=path.join(directory,entry.name);if(entry.isDirectory())visit(file);else if(metadataFile(file))fs.writeFileSync(file,expand(fs.readFileSync(file,'utf8')));}}
