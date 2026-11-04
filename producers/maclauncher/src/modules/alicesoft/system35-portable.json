@@ -16,11 +16,23 @@
       "options": ["-DWEBP_BUILD_ANIM_UTILS=OFF", "-DWEBP_BUILD_CWEBP=OFF", "-DWEBP_BUILD_DWEBP=OFF", "-DWEBP_BUILD_GIF2WEBP=OFF", "-DWEBP_BUILD_IMG2WEBP=OFF", "-DWEBP_BUILD_VWEBP=OFF", "-DWEBP_BUILD_WEBPINFO=OFF", "-DWEBP_BUILD_LIBWEBPMUX=OFF", "-DWEBP_BUILD_WEBPMUX=OFF", "-DWEBP_BUILD_EXTRAS=OFF", "-DWEBP_BUILD_WEBP_JS=OFF", "-DWEBP_BUILD_FUZZTEST=OFF"]
     },
     {
-      "id": "opusfile", "name": "opusfile", "version": "0.12", "sourceRelease": "opusfile-0.12",
-      "archiveUrl": "https://downloads.xiph.org/releases/opus/opusfile-0.12.tar.gz",
-      "archiveSha256": "118d8601c12dd6a44f52423e68ca9083cc9f2bfe72da7a8c1acb22a80ae3550b", "archiveBytes": 471354,
-      "sourceUrl": "https://github.com/xiph/opusfile/tree/a55c164e9891a9326188b7d4d216ec9a88373739", "license": "BSD-3-Clause", "notices": ["COPYING"], "buildSystem": "autotools",
-      "options": ["--enable-shared", "--disable-static", "--disable-http", "--disable-examples", "--disable-doc", "--disable-dependency-tracking"]
+      "id": "opusfile",
+      "name": "opusfile",
+      "version": "0.12",
+      "sourceRelease": "opusfile-0.12",
+      "license": "BSD-3-Clause",
+      "notices": [
+        "COPYING"
+      ],
+      "buildSystem": "autotools",
+      "options": [
+        "--enable-shared",
+        "--disable-static",
+        "--disable-http",
+        "--disable-examples",
+        "--disable-doc",
+        "--disable-dependency-tracking"
+      ]
     },
     {
       "id": "sdl2_mixer", "name": "SDL2_mixer", "version": "2.8.2", "license": "Zlib", "notices": ["LICENSE.txt"], "buildSystem": "cmake",

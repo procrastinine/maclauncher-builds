@@ -265,7 +265,6 @@
       "source": {
         "path": "sources/anyps5/3rdparty/zstd",
         "repository": "https://github.com/facebook/zstd.git",
-        "revision": "f8745da6ff1ad1e7bab384bd1f9d742439278e99",
         "license": "BSD-3-Clause AND MIT",
         "licenseFiles": [
           "LICENSE"

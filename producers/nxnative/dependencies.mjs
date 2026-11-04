@@ -63,7 +63,7 @@ async function verifySource(input) {
   const origin = await run('git', ['-C', source, 'remote', 'get-url', 'origin']);
   const status = await run('git', ['-C', source, 'status', '--porcelain', '--untracked-files=all']);
   const normalize = value => value.replace(/\.git$/, '').replace(/\/$/, '');
-  if (revision !== (input.revision || (input.path.includes('macfx-spirv-cross') ? gitlink(input.path) : await run('git', ['-C', path.join(repository,'sources/anyps5'), 'rev-parse', 'HEAD:3rdparty/glslang']))) || normalize(origin) !== normalize(input.repository) || status)
+  if (revision !== (input.revision || (input.path.includes('macfx-spirv-cross') ? gitlink(input.path) : await run('git', ['-C', path.join(repository,'sources/anyps5'), 'rev-parse', 'HEAD:3rdparty/'+path.basename(source)]))) || normalize(origin) !== normalize(input.repository) || status)
     throw new Error(`Dependency source differs from its pin: ${input.path}`);
   return source;
 }
@@ -94,7 +94,7 @@ async function buildTool(tool, { work, output, jobs }) {
   if (tool.name === 'zstd') {
     addLicense(output,'zstd',path.join(source,'lib/dictBuilder/divsufsort.c'));
   }
-  return { id: tool.name, ...tool.source, executable: `bin/${tool.name}`, sha256: await digest(destination) };
+  return { id: tool.name, ...tool.source, revision:await run('git',['-C',source,'rev-parse','HEAD']), executable: `bin/${tool.name}`, sha256: await digest(destination) };
 }
 
 const installWheels = String.raw`

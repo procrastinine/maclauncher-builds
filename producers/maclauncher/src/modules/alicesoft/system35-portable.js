@@ -8,7 +8,7 @@ const Fonts = require("../shared/runtime/portable-sdl2-fonts");
 const Audio = require("../shared/runtime/portable-sndfile");
 const Overlay = require("./system35-overlay");
 const { throwIfAborted } = require("../shared/runtime/download-utils");
-const PIN = Object.freeze({...require("./system35-portable.json"),dependencies:require("./system35-portable.json").dependencies.map(row=>{const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:row;})});
+const PIN = Object.freeze({...require("./system35-portable.json"),dependencies:require("./system35-portable.json").dependencies.map(row=>{const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:row;})});
 
 const VERSION = "2.20.0-macos-v2";
 const REVISION = "82c8b76a58a19ff1f87b4bdadbaef169c4b37f46";

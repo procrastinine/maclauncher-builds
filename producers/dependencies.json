@@ -61,5 +61,12 @@
     "revision": "12ffd1f9dc56fcea79d2f742f424301ae668d663",
     "sha256": "7da3e2d9a171eb0a038f592ecad3ff2bb2550f3496d87b3b29ad0cf4430c0db4",
     "bytes": 1581626
+  },
+  "opusfile": {
+    "repository": "https://github.com/xiph/opusfile",
+    "revision": "a55c164e9891a9326188b7d4d216ec9a88373739",
+    "sha256": "118d8601c12dd6a44f52423e68ca9083cc9f2bfe72da7a8c1acb22a80ae3550b",
+    "bytes": 471354,
+    "url": "https://downloads.xiph.org/releases/opus/opusfile-0.12.tar.gz"
   }
 }
