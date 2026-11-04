@@ -6,6 +6,52 @@
     {
       "schemaVersion": 2,
       "id": "mpv",
+      "version": "0.41.0-MCLv11",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "27.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "012c7ce6b6ce976492943a0eae9bb2e16ce1a99f0c7bfd57de664311de8e1013",
+      "sourceSha256": "012c7ce6b6ce976492943a0eae9bb2e16ce1a99f0c7bfd57de664311de8e1013",
+      "updatePolicy": "manual",
+      "capabilities": {
+        "decodedFrameAPI": 1,
+        "decodedColorAPI": 1,
+        "preparationNotificationAPI": 1,
+        "playerScriptsAPI": 1,
+        "playerInputAPI": 1,
+        "osdLayerAPI": 1
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "f445a97387537e90d6f56d5e6b30d8ba395aa2aa"
+      },
+      "asset": {
+        "filename": "mpv-0.41.0-MCLv11-arm64.tar.gz",
+        "sha256": "9d61a2877ca4bb5836ceee4934bb7cc9f3f2526acba14558c28cbbda2af2ec42",
+        "bytes": 25169499,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/mpv%2Fv0.41.0-MCLv11%2Farm64/mpv-0.41.0-MCLv11-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "f445a97387537e90d6f56d5e6b30d8ba395aa2aa",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41840784434",
+        "runAttempt": "1"
+      },
+      "tag": "mpv/v0.41.0-MCLv11/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "mpv",
       "version": "0.41.0-MCLv10",
       "arch": "arm64",
       "launcherArchitectures": [
