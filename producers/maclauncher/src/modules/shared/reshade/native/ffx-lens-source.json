@@ -9,7 +9,6 @@
     "commit": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55",
     "version": "FidelityFX Lens 1.1.0",
     "sourceScope": [
-      "LICENSE.txt",
       "sdk/include/FidelityFX/gpu/lens/CMakeCompileLENSShaders.txt",
       "sdk/include/FidelityFX/gpu/lens/ffx_lens.h",
       "sdk/include/FidelityFX/gpu/lens/ffx_lens_callbacks_glsl.h",

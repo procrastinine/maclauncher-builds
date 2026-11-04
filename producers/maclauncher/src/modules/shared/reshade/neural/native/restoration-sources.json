@@ -47,11 +47,6 @@
           "repository": "https://github.com/xocialize/mlx-nafnet-swift",
           "commit": "07d37f8a7a1ce61bacb36710c3139d4f99e6dfa9",
           "path": "Sources/NAFNetMLXCore/NAFNet.swift"
-        },
-        {
-          "repository": "https://github.com/megvii-research/NAFNet",
-          "commit": "2b4af71ebe098a92a75910c233a3965a3e93ede4",
-          "path": "LICENSE"
         }
       ]
     },

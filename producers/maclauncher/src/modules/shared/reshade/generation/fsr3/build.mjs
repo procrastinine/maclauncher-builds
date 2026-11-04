@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {addLicense} from '../../../../../../../../lib/licenses.mjs';
+import {addLicenses} from '../../../../../../../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -43,7 +43,7 @@ if(!options.includes('--native-only'))for(const [effect,passes]of Object.entries
   fs.writeFileSync(path.join(directory,pass+'.metal'),metal);fs.writeFileSync(path.join(directory,pass+'.json'),JSON.stringify(signature(metal,reflection)));fs.rmSync(spv);
  }
 }
-addLicense(payload,'FSR3',path.join(exported,'LICENSE.txt'));
+addLicenses(payload,'FSR3',exported);
 if(options.includes('--shaders-only')){console.log('Translated FidelityFX optical flow and frame interpolation shaders: '+payload);process.exit(0);}
 const overlay=path.join(output,'host-overlay/FidelityFX/host');fs.mkdirSync(overlay,{recursive:true});
 for(const effect of ['opticalflow','frameinterpolation']){

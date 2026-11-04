@@ -5,8 +5,7 @@
   "repository": "https://github.com/SnapdragonGameStudios/snapdragon-gsr.git",
   "minimumMacOS": "13.0",
   "sourceScope": [
-    "sgsr/v2/include/glsl_2_pass_cs",
-    "LICENSE"
+    "sgsr/v2/include/glsl_2_pass_cs"
   ],
   "shaders": {
     "sgsr2_convert.comp": "b8694884617bfe7bdbdd3ce24f639c03f0fb22869b9e0d293cbf67c5ce503de4",

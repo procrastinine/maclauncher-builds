@@ -10,7 +10,7 @@ function sourceFor(version = Catalog.defaultVersion) {
   return source;
 }
 function sourcesFor(method){return Catalog.sources.filter(row=>!method||(row.method||'mlx-dlss')===method);}
-function downloadPlan(source){return {managerId:Models.ID,version:source.version,label:source.files?source.label:'Neural rendering model',kind:'tool',requiresDownload:true,confirmLabel:'Download and Continue',downloadBytes:source.bytes,sourceUrl:source.releaseUrl,detail:source.description+' '+source.weightTerms};}
+function downloadPlan(source){return {managerId:Models.ID,version:source.version,label:source.files?source.label:'Neural rendering model',kind:'tool',requiresDownload:true,confirmLabel:'Download and Continue',downloadBytes:source.bytes,sourceUrl:source.releaseUrl,detail:source.description};}
 function sourceIdentity(source){return crypto.createHash('sha256').update(JSON.stringify(source.files||[])).digest('hex');}
 async function checksum(file, signal) {
   const hash = crypto.createHash("sha256");
@@ -62,7 +62,7 @@ async function downloadModel(context={},dependencies={}){
         const imported=await Models.importModel({...operation,runtimePath:source.kind==='ncnn-rife'?temporary:path.join(temporary,source.entry),modelIdentifier:source.label,onProgress:progress=>task.onProgress?.({...progress,downloaded:completed,total:source.bytes,detail:progress.label})});
         if(imported.operation!==source.method)throw new Error('The downloaded checkpoint does not match the selected model operation.');
         const receipt=path.join(imported.installDir,'download-source.json');
-        if(!fs.existsSync(receipt))fs.writeFileSync(receipt,JSON.stringify({schema:1,version:source.version,inputIdentity:sourceIdentity(source),repository:source.repository,commit:source.commit,sourceLicense:source.sourceLicense,weightTerms:source.weightTerms,files:source.files},null,2)+'\n',{flag:'wx',mode:0o444});
+        if(!fs.existsSync(receipt))fs.writeFileSync(receipt,JSON.stringify({schema:1,version:source.version,inputIdentity:sourceIdentity(source),repository:source.repository,commit:source.commit,files:source.files},null,2)+'\n',{flag:'wx',mode:0o444});
         return imported;
       }finally{fs.rmSync(temporary,{recursive:true,force:true});}
     })();
@@ -115,7 +115,7 @@ async function downloadDlssMac(context = {}, dependencies = {}) {
         const receipt = path.join(imported.installDir, "download-source.json");
         if (!fs.existsSync(receipt)) fs.writeFileSync(receipt, JSON.stringify({ schema: 1, version: source.version,
           url: source.url, bytes: published.bytes, sha256: published.sha256, commit: source.commit,
-          sourceLicense: source.sourceLicense, weightTerms: source.weightTerms }, null, 2) + "\n", { flag: "wx", mode: 0o444 });
+           }, null, 2) + "\n", { flag: "wx", mode: 0o444 });
         return imported;
       } catch (error) {
         if (oversized && !callerSignal?.aborted) throw new Error("The neural model download exceeds its release size.");

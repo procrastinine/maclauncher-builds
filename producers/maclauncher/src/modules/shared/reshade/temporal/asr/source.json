@@ -5,8 +5,7 @@
   "minimumMacOS": "13.0",
   "sourceScope": [
     "include",
-    "src",
-    "LICENSES"
+    "src"
   ],
   "shaders": {
     "ffxm_fsr2_accumulate_pass_fs.hlsl": "707443fe8b9e394bf36bdbd9e214be1518980d20d84b55fb711fcc8b86d6965b",

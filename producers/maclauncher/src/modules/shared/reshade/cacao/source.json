@@ -184,7 +184,6 @@
     "sdk/include/FidelityFX/gpu",
     "sdk/include/FidelityFX/host/ffx_cacao.h",
     "sdk/src/components/cacao/ffx_cacao.cpp",
-    "sdk/src/backends/dx12/shaders/cacao",
-    "LICENSE.txt"
+    "sdk/src/backends/dx12/shaders/cacao"
   ]
 }

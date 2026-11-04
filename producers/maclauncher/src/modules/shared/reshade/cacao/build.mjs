@@ -284,7 +284,6 @@ fs.writeFileSync(path.join(out, 'translation.json'), JSON.stringify({
   schema : 1,
   repository : spec.repository,
   commit : spec.commit,
-  license : spec.license,
   source : spec,
   owned : hash(fs.readFileSync(import.meta.filename)),
   ownedFiles : Object.fromEntries([
