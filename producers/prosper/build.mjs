@@ -70,6 +70,9 @@ export async function build({buildDirectory=path.join(root,'out/prosper'),vulkan
   const nidFile=path.join(staged,'prosper/src/hle/dispatch/nid.cpp'),nid=fs.readFileSync(nidFile,'utf8'),sourcePath='load_names_file(PROSPER_SOURCE_DIR "/data/known_names.txt");';
   if(nid.split(sourcePath).length!==2)throw Error('Prosper optional NID database boundary changed.');
   write(nidFile,nid.replace(sourcePath,'load_names_file("/prosper/data/known_names.txt");'));
+  // Keep framework name/flag pairs together when CMake deduplicates imported link options.
+  const cmakeFile=path.join(staged,'prosper/CMakeLists.txt'),cmake=fs.readFileSync(cmakeFile,'utf8');
+  write(cmakeFile,cmake.replace('  if(PROSPER_AJM_FFMPEG_FOUND)\n    add_library(prosper_ajm_ffmpeg STATIC',"  if(PROSPER_AJM_FFMPEG_FOUND)\n    string(REGEX REPLACE \"-framework;([^;]+)\" \"SHELL:-framework \\\\1\" PROSPER_AJM_FFMPEG_LDFLAGS_OTHER \"${PROSPER_AJM_FFMPEG_LDFLAGS_OTHER}\")\n    set_property(TARGET PkgConfig::PROSPER_AJM_FFMPEG PROPERTY INTERFACE_LINK_OPTIONS \"${PROSPER_AJM_FFMPEG_LDFLAGS_OTHER}\")\n    add_library(prosper_ajm_ffmpeg STATIC"));
   sync(staged,projection);
  }finally{fs.rmSync(staged,{recursive:true,force:true});}
  if(!python){try{python=execFileSync('uv',['python','find'],{encoding:'utf8'}).trim();}catch{throw Error('A Python interpreter from uv or --python is required for upstream build metadata.');}}
