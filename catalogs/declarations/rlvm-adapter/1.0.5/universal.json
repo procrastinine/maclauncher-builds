@@ -1,0 +1,63 @@
+{
+  "id": "rlvm-adapter",
+  "version": "1.0.5",
+  "arch": "universal",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "sourceRelative": null,
+  "sourceSha256": "a267c57fc6bf8712cf18fb8784fde461cba86a061240cc8c24c52b5ca71d1d0d",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "64fa1c200368ef830c60f319090fe7d887f83a567d674d3ceb9e37872e091b82",
+  "directoryRelative": "rlvm-adapter/1.0.5/universal",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 16503,
+      "mode": 420,
+      "sha256": "8a5f1248de837918beb0a3cc7b2842680fbd046af779c640b5d37b1b39bd96a7"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "576c0f4c4147247ff3572a4cdaa66f8edb7e1711fbc9fbfd9521e6a6f276accd"
+    },
+    {
+      "path": "files/adapter.json",
+      "size": 709,
+      "sha256": "7af757859832bed219951a16158d40ce5ca2e88f4afdb48b2dd01d25d340bcfa",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 29,
+      "sha256": "5fae4a022fb97d8e3d41dc31e83fd092c1a87e5a48656a7f4b95b25659699d66",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/MacLauncher.txt",
+      "size": 1081,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+      "mode": 420
+    },
+    {
+      "path": "files/rlvm-adapter.dylib",
+      "size": 85040,
+      "sha256": "a728d970519766e31529060619ba0bec755f68df94b6125d81f1d3c8c8f73b2f",
+      "mode": 493,
+      "architectures": [
+        "arm64",
+        "x86_64"
+      ]
+    },
+    {
+      "path": "manifest.json",
+      "size": 1535,
+      "sha256": "64fa1c200368ef830c60f319090fe7d887f83a567d674d3ceb9e37872e091b82",
+      "mode": 420
+    }
+  ]
+}
