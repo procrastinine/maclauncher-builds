@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "android-java-converter",
-  "version": "MCLv7",
+  "version": "MCLv8",
   "converter": {
     "repository": "https://github.com/kksimp/dex2jvm"
   },

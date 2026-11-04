@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "android-art-java",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "frameworkInput": "producers/android-inputs/java-framework.json",
   "imageInput": "producers/android-image-data/source.json",
   "publisherInputs": "producers/android-art-inputs/java.json",

@@ -17,7 +17,7 @@ function run(command,args,options={}) {
 }
 
 test('AIM holder isolation changes only its spawn group and required import',t=>{
-  const root=process.env.ANDROID_AIM_POSIX_SOURCE||fileURLToPath(new URL('../producers/maclauncher/src/external/aim',import.meta.url));
+  const root=process.env.ANDROID_AIM_POSIX_SOURCE||fileURLToPath(new URL('../sources/maclauncher-android/src/external/aim-custom',import.meta.url));
   if(!fs.existsSync(path.join(root,relative)))return t.skip('Requires the pinned AIM source');
   const original=fs.readFileSync(path.join(root,relative),'utf8'),fixed=adaptPosixHolderProcessGroup(original);
   assert.equal(fixed,original.replace('    os::fd::{AsRawFd, FromRawFd},','    os::fd::{AsRawFd, FromRawFd},\n    os::unix::process::CommandExt,').replace('        let mut child = Command::new(&config.holder)\n','        let mut child = Command::new(&config.holder)\n            .process_group(0)\n'));

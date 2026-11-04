@@ -125,7 +125,7 @@
   },
   {
     "id": "love-luasteam",
-    "name": "L\u00d6VE LuaSteam bridge",
+    "name": "LÖVE LuaSteam bridge",
     "purpose": "LuaSteam 4 binding against the selected host Lua VM.",
     "producer": {
       "kind": "maclauncher",
@@ -852,10 +852,14 @@
       {
         "version": "1.1.5",
         "label": "Android package metadata helper 1.1.5"
+      },
+      {
+        "version": "1.1.6",
+        "label": "Android package metadata helper 1.1.6"
       }
     ],
     "build": {
-      "version": "1.1.5",
+      "version": "1.1.6",
       "command": "tools/build-apk-metadata.mjs",
       "architectures": [
         "arm64",
@@ -957,10 +961,14 @@
       {
         "version": "1.0.6",
         "label": "Android launcher integrations 1.0.6"
+      },
+      {
+        "version": "1.0.7",
+        "label": "Android launcher integrations 1.0.7"
       }
     ],
     "build": {
-      "version": "1.0.6",
+      "version": "1.0.7",
       "command": "tools/build-android-launcher.mjs",
       "architectures": [
         "universal"
@@ -1014,10 +1022,14 @@
       {
         "version": "0.1.0-MCLv7",
         "label": "ART image reader 0.1.0-MCLv7"
+      },
+      {
+        "version": "0.1.0-MCLv8",
+        "label": "ART image reader 0.1.0-MCLv8"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv7",
+      "version": "0.1.0-MCLv8",
       "command": "tools/build-android-art-input.mjs",
       "architectures": [
         "arm64"
@@ -1280,10 +1292,14 @@
       {
         "version": "MCLv7",
         "label": "Android ANGLE for JVM and ART MCLv7"
+      },
+      {
+        "version": "MCLv8",
+        "label": "Android ANGLE for JVM and ART MCLv8"
       }
     ],
     "build": {
-      "version": "MCLv7",
+      "version": "MCLv8",
       "command": "tools/build-android-angle.mjs",
       "architectures": [
         "arm64"
@@ -1351,10 +1367,14 @@
       {
         "version": "16.0.0-MCLv7",
         "label": "ART ELF input 16.0.0-MCLv7"
+      },
+      {
+        "version": "16.0.0-MCLv8",
+        "label": "ART ELF input 16.0.0-MCLv8"
       }
     ],
     "build": {
-      "version": "16.0.0-MCLv7",
+      "version": "16.0.0-MCLv8",
       "command": "tools/build-android-art-elf.mjs",
       "architectures": [
         "arm64"
@@ -1430,10 +1450,14 @@
       {
         "version": "MCLv7",
         "label": "Android Java converter MCLv7"
+      },
+      {
+        "version": "MCLv8",
+        "label": "Android Java converter MCLv8"
       }
     ],
     "build": {
-      "version": "MCLv7",
+      "version": "MCLv8",
       "command": "tools/build-android-java-converter.mjs",
       "architectures": [
         "arm64"
@@ -1503,10 +1527,14 @@
       {
         "version": "3.8.0-MCLv7",
         "label": "Android ART libffi 3.8.0-MCLv7"
+      },
+      {
+        "version": "3.8.0-MCLv8",
+        "label": "Android ART libffi 3.8.0-MCLv8"
       }
     ],
     "build": {
-      "version": "3.8.0-MCLv7",
+      "version": "3.8.0-MCLv8",
       "command": "tools/build-android-art-ffi.mjs",
       "architectures": [
         "arm64"
@@ -1633,10 +1661,14 @@
       {
         "version": "16.0.0-MCLv7",
         "label": "Android Java framework 16.0.0-MCLv7"
+      },
+      {
+        "version": "16.0.0-MCLv8",
+        "label": "Android Java framework 16.0.0-MCLv8"
       }
     ],
     "build": {
-      "version": "16.0.0-MCLv7",
+      "version": "16.0.0-MCLv8",
       "command": "tools/build-android-java-framework.mjs",
       "architectures": [
         "arm64"
@@ -1701,10 +1733,14 @@
       {
         "version": "16.0.0-MCLv7",
         "label": "Android original image data 1 16.0.0-MCLv7"
+      },
+      {
+        "version": "16.0.0-MCLv8",
+        "label": "Android original image data 1 16.0.0-MCLv8"
       }
     ],
     "build": {
-      "version": "16.0.0-MCLv7",
+      "version": "16.0.0-MCLv8",
       "command": "tools/build-android-image-data.mjs",
       "architectures": [
         "arm64"
@@ -1770,10 +1806,14 @@
       {
         "version": "16.0.0-MCLv7",
         "label": "Android original image data 2 16.0.0-MCLv7"
+      },
+      {
+        "version": "16.0.0-MCLv8",
+        "label": "Android original image data 2 16.0.0-MCLv8"
       }
     ],
     "build": {
-      "version": "16.0.0-MCLv7",
+      "version": "16.0.0-MCLv8",
       "command": "tools/build-android-image-data.mjs",
       "architectures": [
         "arm64"
@@ -1839,10 +1879,14 @@
       {
         "version": "16.0.0-MCLv7",
         "label": "Android original image data 3 16.0.0-MCLv7"
+      },
+      {
+        "version": "16.0.0-MCLv8",
+        "label": "Android original image data 3 16.0.0-MCLv8"
       }
     ],
     "build": {
-      "version": "16.0.0-MCLv7",
+      "version": "16.0.0-MCLv8",
       "command": "tools/build-android-image-data.mjs",
       "architectures": [
         "arm64"
@@ -1908,10 +1952,14 @@
       {
         "version": "16.0.0-MCLv7",
         "label": "Android original image data 4 16.0.0-MCLv7"
+      },
+      {
+        "version": "16.0.0-MCLv8",
+        "label": "Android original image data 4 16.0.0-MCLv8"
       }
     ],
     "build": {
-      "version": "16.0.0-MCLv7",
+      "version": "16.0.0-MCLv8",
       "command": "tools/build-android-image-data.mjs",
       "architectures": [
         "arm64"
@@ -1977,10 +2025,14 @@
       {
         "version": "16.0.0-MCLv7",
         "label": "Android original image data 5 16.0.0-MCLv7"
+      },
+      {
+        "version": "16.0.0-MCLv8",
+        "label": "Android original image data 5 16.0.0-MCLv8"
       }
     ],
     "build": {
-      "version": "16.0.0-MCLv7",
+      "version": "16.0.0-MCLv8",
       "command": "tools/build-android-image-data.mjs",
       "architectures": [
         "arm64"
@@ -2063,10 +2115,14 @@
       {
         "version": "0.1.5",
         "label": "Android ART Java 0.1.5"
+      },
+      {
+        "version": "0.1.6",
+        "label": "Android ART Java 0.1.6"
       }
     ],
     "build": {
-      "version": "0.1.5",
+      "version": "0.1.6",
       "command": "tools/build-android-art-java.mjs",
       "architectures": [
         "arm64"
@@ -2457,10 +2513,14 @@
       {
         "version": "MCLv6",
         "label": "AIM original ANGLE profile MCLv6"
+      },
+      {
+        "version": "MCLv7",
+        "label": "AIM original ANGLE profile MCLv7"
       }
     ],
     "build": {
-      "version": "MCLv6",
+      "version": "MCLv7",
       "command": "tools/build-android-angle.mjs",
       "architectures": [
         "arm64"

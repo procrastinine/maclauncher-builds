@@ -91,10 +91,14 @@
       {
         "version": "0.2.6",
         "label": "MacLauncher Android 0.2.6"
+      },
+      {
+        "version": "0.2.7",
+        "label": "MacLauncher Android 0.2.7"
       }
     ],
     "build": {
-      "version": "0.2.6",
+      "version": "0.2.7",
       "command": "tools/build-android.mjs",
       "architectures": [
         "arm64"
@@ -233,10 +237,14 @@
       {
         "version": "0.1.0-MCLv8",
         "label": "AIM with MacLauncher integration 0.1.0-MCLv8"
+      },
+      {
+        "version": "0.1.0-MCLv9",
+        "label": "AIM with MacLauncher integration 0.1.0-MCLv9"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv8",
+      "version": "0.1.0-MCLv9",
       "command": "tools/build-android-aim.mjs",
       "architectures": [
         "arm64"
@@ -2370,7 +2378,7 @@
   {
     "id": "vnds-love",
     "name": "VNDS-LOVE",
-    "purpose": "Adapted VNDS interpreter for the managed L\u00d6VE host.",
+    "purpose": "Adapted VNDS interpreter for the managed LÖVE host.",
     "producer": {
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",

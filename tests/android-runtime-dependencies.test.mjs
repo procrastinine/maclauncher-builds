@@ -13,9 +13,9 @@ import {pack,verify} from '../tools/runtime-package.mjs';
 const Native=createRequire(import.meta.url)('../producers/maclauncher/scripts/native-binary-tools.cjs');
 const profiles=JSON.parse(fs.readFileSync(new URL('../producers/android-inputs/angle.json',import.meta.url))).profiles,commonVersion=profiles.find(row=>row.id==='common').version,aimProfile=profiles.find(row=>row.id==='aim6');
 const temp=t=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'android-runtime-deps-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;};
-test('AIM ANGLE dependency preserves its own original program transport and historical common selection',()=>{
+test('Android and AIM ANGLE profiles share the selected Android producer',()=>{
  const common=anglePackageProfile('android-angle',commonVersion).profile,aim=anglePackageProfile('android-angle-aim',aimProfile.packageVersion).profile;
- assert.equal(common.id,'common');assert.equal(aim.id,'aim6');assert.equal(Object.hasOwn(common,'androidSource'),false);assert.match(aim.androidSource.revision,/^5041bb4/);
+ assert.equal(common.id,'common');assert.equal(aim.id,'aim6');assert.equal(Object.hasOwn(common,'androidSource'),false);assert.equal(Object.hasOwn(aim,'androidSource'),false);assert.equal(aim.providerVersion,common.providerVersion);
  if(commonVersion!==aimProfile.version)assert.deepEqual(anglePackageProfile('android-angle',aimProfile.version).profile,aim);
 
  assert.throws(()=>anglePackageProfile('android-angle-aim','unknown'),/declared source profile/);
@@ -65,7 +65,7 @@ test('SDL3 seals only its canonical Mach-O directory and restores the compile-ti
 });
 
 
-test('AIM source follows its sole gitlink and shared original image declaration',async()=>{
+test("AIM source follows Android's upstream selection and shared original image declaration",async()=>{
  const {source}=await import('../producers/maclauncher/src/modules/android/providers/aim/source.mjs');
  const {aimSource}=await import('../lib/android-source.mjs');
  const image=JSON.parse(fs.readFileSync(new URL('../producers/android-image-data/source.json',import.meta.url))).archive;

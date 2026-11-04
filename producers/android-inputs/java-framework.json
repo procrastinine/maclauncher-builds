@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "android-java-framework",
-  "version": "16.0.0-MCLv7",
+  "version": "16.0.0-MCLv8",
   "sources": [
     {
       "id": "apacheHttp",

@@ -8,7 +8,7 @@ import {spawnSync} from 'node:child_process';
 import {adaptDisplayReadiness,adaptDisplayTitle} from '../producers/maclauncher/src/modules/android/providers/aim/source.mjs';
 
 const relative='crates/aim-host-display/src/bin/aim-display/main.rs';
-const upstream=path.resolve(process.env.ANDROID_AIM_DISPLAY_SOURCE||fileURLToPath(new URL('../producers/maclauncher/src/external/aim',import.meta.url)));
+const upstream=path.resolve(process.env.ANDROID_AIM_DISPLAY_SOURCE||fileURLToPath(new URL('../sources/maclauncher-android/src/external/aim-custom',import.meta.url)));
 function original(t) {
   if(!fs.existsSync(path.join(upstream,relative))) {t.skip('Requires the pinned AIM source');return null;}
   return fs.readFileSync(path.join(upstream,relative),'utf8');
