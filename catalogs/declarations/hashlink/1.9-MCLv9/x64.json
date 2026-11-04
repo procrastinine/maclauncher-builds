@@ -1,0 +1,178 @@
+{
+  "id": "hashlink",
+  "version": "1.9-MCLv9",
+  "arch": "x64",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "hashlink/1.9-MCLv9/x64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "2c116fd80f4e17cc73f064a6dad44d8e31d3a4d4c717891ddc4f705edab67c17",
+  "sourceSha256": "2c116fd80f4e17cc73f064a6dad44d8e31d3a4d4c717891ddc4f705edab67c17",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "files/bin/fmt.hdll",
+      "size": 1073024,
+      "sha256": "8e7ddb56d8f9d39b5366652aa0d2dba816b2874b31e4b60b9b4c51e1e823fb78",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/bin/hl",
+      "size": 159216,
+      "sha256": "179cda8d83d49867544d3f55d97735b2b44e1644dccd82320752789b72969bc9",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/bin/include/hl.h",
+      "size": 23031,
+      "sha256": "5a7565964f3d3593302daf9080b57f38a41d8c1eca2c9ed533cab1945b7c2343",
+      "mode": 420
+    },
+    {
+      "path": "files/bin/libhl.dylib",
+      "size": 445408,
+      "sha256": "cbe31e253e9dd7cc92a60bebc6b53d1e7755df51473c91c7789af729a4cc78c2",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/bin/libopenal.1.dylib",
+      "size": 1788336,
+      "sha256": "f20ae170753dad51f773189b1b3a49627f30f3a52d78cc2248518d279b2d4c91",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/bin/openal.hdll",
+      "size": 70432,
+      "sha256": "e7aeb6b3913c31451c16365cccb77fcdb35a590e7082de1d10f91cae8d92bcde",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/bin/sdl.hdll",
+      "size": 1643024,
+      "sha256": "cfe46c4389d8872857b82c915d6a7d927132e42861be1f4b9fe770d618556e02",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/bin/ui.hdll",
+      "size": 28480,
+      "sha256": "8e6b102f38aa0b03f05702399751ae3fbc77b54a942768702ee02dba8ac4f443",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 292,
+      "sha256": "2aeeb4251844613df27e489cef65260111205e15ac3981f0e1fb44a643603580",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/hashlink.txt",
+      "size": 1063,
+      "sha256": "901bf27bd6f066a8ad7a185f69a3fcdafdfc36e21c60ca8c9beacb145f99b2cb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/libpng.txt",
+      "size": 4935,
+      "sha256": "df789590a80552b11392afeb00a1b3c28c5e70e468d7304dea9515194f9db1d7",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/minimp3.txt",
+      "size": 6556,
+      "sha256": "6a1ee543e5282cd9061881edf462e6fdab181f328da71fc2c9a6950a80e94d01",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/openal-2.txt",
+      "size": 23330,
+      "sha256": "d808ce217e5b611854da622b57ec29fe545584c48bc5352fae72a4b6e5074a15",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/openal-3.txt",
+      "size": 1669,
+      "sha256": "64056328b3e7bc104e24ef96accc1a7abead156f0c02d1b87c97e3f3a28030de",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/openal.txt",
+      "size": 1652,
+      "sha256": "b5a08cf98996dd83aa906a72c163600f6cb17a65ce546a553815a1267abd43ff",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL2-HIDAPI-2.txt",
+      "size": 35147,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL2-HIDAPI-3.txt",
+      "size": 264,
+      "sha256": "fb5436aa63d1b71a8dfbf74ecaf1a5b4e1ec4df7f80074d11fec99284f69ca5f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL2-HIDAPI-4.txt",
+      "size": 530,
+      "sha256": "7d3b087c34f35d4d538e3bcddd1ff8f66e92f9ef336881999482800ddf840913",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL2-HIDAPI.txt",
+      "size": 1534,
+      "sha256": "30eb1bef29b46f8ba7ab8b416035dbd93cb034a45481dd97815b944284582cd2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL2-yuv2rgb.txt",
+      "size": 1480,
+      "sha256": "f7d74004cc75778cae46c5f0139f244d67c07ef64cf51937e8272352197dcb18",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL2.txt",
+      "size": 884,
+      "sha256": "fcb07e07ac6bc8b2fcf047b50431ef4ebe5b619d7ca7c82212018309a9067426",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 8656,
+      "mode": 420,
+      "sha256": "2c116fd80f4e17cc73f064a6dad44d8e31d3a4d4c717891ddc4f705edab67c17"
+    }
+  ],
+  "redistribution": "bundle"
+}
