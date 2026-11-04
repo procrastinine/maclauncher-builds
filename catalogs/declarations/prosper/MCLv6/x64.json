@@ -1,0 +1,153 @@
+{
+  "id": "prosper",
+  "version": "MCLv6",
+  "arch": "x64",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "26.0",
+  "directoryRelative": "prosper/MCLv6/x64",
+  "sourceRelative": "source.json",
+  "sourceSha256": "9139704d54bb8bb67eef04108dbc1ebb68c58806e40668a3207b6d72233aaee8",
+  "manifestRelative": "runtime.json",
+  "manifestSha256": "e360d56d6fe637f4f1164a6ee83167dc61e2f4af716656e0c90bf1e9ebdbe000",
+  "files": [
+    {
+      "path": "bin/prosper-app",
+      "size": 25553952,
+      "mode": 493,
+      "sha256": "e11a809f417bd04b23c3f581c3ded2e4f1bfd788826647226983b681a2229977",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "build-definition.json",
+      "size": 17941,
+      "mode": 420,
+      "sha256": "389132594760d3ed4fe4cd3f33e0a32dd2fd5d5d6c5e84695d754d29e72572d7"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "a8239d6ee4d308717c29e7a1a4637348d44143d557b32fa541f073cb0b9d5dce"
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 436,
+      "mode": 420,
+      "sha256": "0bc5e4d2450e4f2fb0d8a11f126022a2afd3ad492b40b8e7dc6631ae322bd3c5"
+    },
+    {
+      "path": "licenses/FFmpeg.txt",
+      "size": 26526,
+      "mode": 420,
+      "sha256": "b634ab5640e258563c536e658cad87080553df6f34f62269a21d554844e58bfe"
+    },
+    {
+      "path": "licenses/imgui.txt",
+      "size": 1083,
+      "mode": 420,
+      "sha256": "c80c5789748d955c4a650562baa0d750494e2c7128c2ca66aaebe2e3c4e198bf"
+    },
+    {
+      "path": "licenses/libatrac9.txt",
+      "size": 1068,
+      "mode": 420,
+      "sha256": "cdb280ff931233bdefef0dfdd1d884217d97cb24a96530a41ce7848790df86f7"
+    },
+    {
+      "path": "licenses/ProggyClean.txt",
+      "size": 260,
+      "mode": 420,
+      "sha256": "8935d17150860a1da7bcc746670eb395296c077692b9f1ac27bf4fabc04b1516"
+    },
+    {
+      "path": "licenses/renderdoc.txt",
+      "size": 1087,
+      "mode": 420,
+      "sha256": "fdb2bb2135379e9dbd6154c57059676c3cc16354583b4396d6327c6ea4efd6bb"
+    },
+    {
+      "path": "licenses/SDL3-HIDAPI-2.txt",
+      "size": 35147,
+      "mode": 420,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    },
+    {
+      "path": "licenses/SDL3-HIDAPI-3.txt",
+      "size": 264,
+      "mode": 420,
+      "sha256": "fb5436aa63d1b71a8dfbf74ecaf1a5b4e1ec4df7f80074d11fec99284f69ca5f"
+    },
+    {
+      "path": "licenses/SDL3-HIDAPI-4.txt",
+      "size": 530,
+      "mode": 420,
+      "sha256": "7d3b087c34f35d4d538e3bcddd1ff8f66e92f9ef336881999482800ddf840913"
+    },
+    {
+      "path": "licenses/SDL3-HIDAPI-5.txt",
+      "size": 425,
+      "mode": 420,
+      "sha256": "38102075d829116ee23d7a1fe0cb53f0c6932a9275da0ca1a3885b44db1963b4"
+    },
+    {
+      "path": "licenses/SDL3-HIDAPI.txt",
+      "size": 1534,
+      "mode": 420,
+      "sha256": "30eb1bef29b46f8ba7ab8b416035dbd93cb034a45481dd97815b944284582cd2"
+    },
+    {
+      "path": "licenses/SDL3-yuv2rgb.txt",
+      "size": 1480,
+      "mode": 420,
+      "sha256": "f7d74004cc75778cae46c5f0139f244d67c07ef64cf51937e8272352197dcb18"
+    },
+    {
+      "path": "licenses/SDL3.txt",
+      "size": 884,
+      "mode": 420,
+      "sha256": "97f35b302b361680ec1e891e95d2d52097bb95abff361434916d99dc1305f127"
+    },
+    {
+      "path": "licenses/stb.txt",
+      "size": 2671,
+      "mode": 420,
+      "sha256": "47534a29e655561f65c4e1ee4b22802e3978b9f50383eab465e9aa9eced9703c"
+    },
+    {
+      "path": "licenses/Vulkan-Headers-2.txt",
+      "size": 11358,
+      "mode": 420,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "licenses/Vulkan-Headers-3.txt",
+      "size": 1084,
+      "mode": 420,
+      "sha256": "1ca3502222d967f3be5751c55f6b7ee735b5383909c3b501495f54b216dbf227"
+    },
+    {
+      "path": "licenses/Vulkan-Headers.txt",
+      "size": 458,
+      "mode": 420,
+      "sha256": "ac24e5ea920e4318e4d02c4086ae51f53cfb03feed06c18df1019e7ada1ec7bc"
+    },
+    {
+      "path": "runtime.json",
+      "size": 3816,
+      "mode": 420,
+      "sha256": "e360d56d6fe637f4f1164a6ee83167dc61e2f4af716656e0c90bf1e9ebdbe000"
+    },
+    {
+      "path": "source.json",
+      "size": 1987,
+      "mode": 420,
+      "sha256": "9139704d54bb8bb67eef04108dbc1ebb68c58806e40668a3207b6d72233aaee8"
+    }
+  ]
+}

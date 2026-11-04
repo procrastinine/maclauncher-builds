@@ -6,6 +6,45 @@
     {
       "schemaVersion": 2,
       "id": "prosper",
+      "version": "MCLv6",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "26.0",
+      "manifestRelative": "runtime.json",
+      "manifestSha256": "e360d56d6fe637f4f1164a6ee83167dc61e2f4af716656e0c90bf1e9ebdbe000",
+      "sourceSha256": "9139704d54bb8bb67eef04108dbc1ebb68c58806e40668a3207b6d72233aaee8",
+      "updatePolicy": "manual",
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "f445a97387537e90d6f56d5e6b30d8ba395aa2aa"
+      },
+      "asset": {
+        "filename": "prosper-MCLv6-x64.tar.gz",
+        "sha256": "1e7e45fc297a7c227b3bf70df3abe1dd36fe61df4537640ed34576d91605f428",
+        "bytes": 9614347,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/prosper%2FvMCLv6%2Fx64/prosper-MCLv6-x64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "f445a97387537e90d6f56d5e6b30d8ba395aa2aa",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "41840870171",
+        "runAttempt": "1"
+      },
+      "tag": "prosper/vMCLv6/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "prosper",
       "version": "MCLv3",
       "arch": "x64",
       "launcherArchitectures": [
