@@ -1,4 +1,5 @@
 import {rustEnvironment} from './rust-build.mjs';
+import {androidSource} from '../lib/android-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -63,7 +64,7 @@ export async function buildAndroidCommonInput({version,output,work,angle,codecs,
  if(frameworkInput)options['java-framework-input']=javaFramework;
  const inputFile=path.join(work,'common-inputs.json');fs.writeFileSync(inputFile,JSON.stringify(options,null,2)+'\n');
  run(process.execPath,[path.join(producer,recipe.buildEntry),'--inputs',inputFile],{env:{...buildEnvironment,PATH:path.dirname(python)+path.delimiter+process.env.PATH,CARGO_BUILD_JOBS:'2'}});
- const packaged=packageAndroidCommon({build,version,sourceRevision:recipe.revision,output});
+ const packaged=packageAndroidCommon({build,version,sourceRevision:androidSource().revision,output});
  return {...packaged,build,buildWork,inputs:options,sources,tools,sdl:publisher.sdl,codecs,buildTools:publisher.buildTools,
   arm32Work:path.join(buildWork,'build/arm32'),arm32Inputs:{importsDirectory:path.join(buildWork,'build/arm32/imports'),syscalls:path.join(buildWork,'build/arm32/syscalls'),format:path.join(buildWork,'build/arm32/format'),ndkHeaders:options['ndk-headers']},foundationHost:path.join(buildWork,'build/keystore/foundation/libkeymint-soft-host.a')};
 }
