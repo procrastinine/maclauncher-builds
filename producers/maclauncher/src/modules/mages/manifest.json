@@ -176,15 +176,15 @@
   },
   "acknowledgments": [
     {
-      "label": "Impacto (ISC; Windows HD)",
+      "label": "Impacto (Windows HD)",
       "url": "https://github.com/CommitteeOfZero/impacto"
     },
     {
-      "label": "FFmpeg (LGPL native build)",
+      "label": "FFmpeg native build",
       "url": "https://ffmpeg.org/"
     },
     {
-      "label": "sharpemu/ffmpeg-core Bink2 patch (LGPL-2.1-or-later)",
+      "label": "sharpemu/ffmpeg-core Bink2 patch",
       "url": "https://github.com/sharpemu/ffmpeg-core"
     },
     {

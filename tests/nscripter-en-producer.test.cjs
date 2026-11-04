@@ -1,9 +1,15 @@
-const requirements = require('./support/requirements.cjs');
-const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
-const temporary=t=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'producer-test-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;};
+const test=require('node:test'),assert=require('node:assert/strict');
 const Build=require('../producers/maclauncher/src/modules/nscripter/runtime/onscripter-en-build-v3');
-test("ONScripter-EN source pins and every included codec notice exist without network", requirements({ sourceTree: 'producers/maclauncher/src/external/onscripter-en/extlib/src/SDL_image-1.2.12' }), () => {
-  for (const pin of Object.values(Build.PACKAGES)) assert.match(pin.sha256, /^[a-f0-9]{64}$/);
-  const source = path.resolve(__dirname, "../producers/maclauncher/src/external/onscripter-en");
-  for (const [, , relative] of Build.CODECS) assert.equal(fs.existsSync(path.join(source, "extlib", "src", relative)), true, relative);
+const {gitlink}=require('../lib/pins.mjs');
+test("ONScripter-EN source and portable SDL archive inputs resolve offline", () => {
+  const revision=gitlink('producers/maclauncher/src/external/onscripter-en');
+  assert.equal(Build.PACKAGES.source.url, `https://github.com/Galladite27/ONScripter-EN/archive/${revision}.tar.gz`);
+  assert.equal(Build.PACKAGES.source.folder, `ONScripter-EN-${revision}`);
+  for (const name of ['source','sdl12','sdl2']) {
+    const pin=Build.PACKAGES[name];
+    assert.match(pin.sha256, /^[a-f0-9]{64}$/);
+    assert.match(pin.url, /^https:\/\//);
+    assert.ok(pin.folder && !pin.folder.includes('..') && !pin.folder.includes('/'));
+  }
+  assert.deepEqual(Build.SOURCE_SCOPE, {kind:'primary-tree',omittedSubmodules:['test/googletest']});
 });

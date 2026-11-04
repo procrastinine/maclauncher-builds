@@ -1,4 +1,4 @@
-const {addLicenses} = require('../../../../../../lib/licenses.mjs');
+const {addLicenses,includeLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -103,7 +103,7 @@ async function buildCandidate({ sourceDir = sourcePath, destination, decoderPref
       const files = closeMovieDependencies(decoderPrefix, candidate);
       movieDecoder = { version: built.version, bridgeVersion: "maclauncher-minori-movie-v1",
         sha256: Native.hashFile(built.executable), sourceSha256: built.sourceSha256, files };
-      addLicenses(candidate,'FFmpeg',decoderPrefix);
+      includeLicenses(candidate,path.join(decoderPrefix,'licenses'));
     }
     const profile = { schemaVersion: 1, version: Overlay.VERSION, upstreamRevision: Overlay.REVISION,
       profileRevision: Overlay.PROFILE, dataProfiles: ["paz-bf-slot0-rc4-v1", "paz-pe-keytables-rc4-v1"], minimumMacOS: "13.0",

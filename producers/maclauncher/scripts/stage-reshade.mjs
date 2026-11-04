@@ -43,6 +43,7 @@ while (args.length) {
   options[key] = ["--version","--arch"].includes(key) ? value : path.resolve(value);
 }
 const upstreamRoot=options["--source-root"]||path.resolve(import.meta.dirname,"..");
+const xessSource=path.resolve(upstreamRoot,"src/external/xess");
 const packageArch=options["--arch"]||"universal";
 if(!["arm64","x64","universal"].includes(packageArch))throw Error("Choose arm64, x64 or universal graphics.");
 const packageCPUs=packageArch==="universal"?["arm64","x86_64"]:[packageArch==="x64"?"x86_64":"arm64"];
@@ -103,7 +104,7 @@ if(options["--xess-host"]){
         components.files.some(row=>{const item=generation.sdk?.[row.id];return !item||item.path!=="bin/"+row.file||item.sha256!==row.sha256||item.bytes!==row.bytes;}))throw Error("The original XeSS frame-generation inputs differ from their declared identities.");
     required.add(generation.hostPath);required.add("source/components.json");extraOwned.set("maclauncher/xess/components.json",componentFile);
   }else if(features.graphics.xessGenerationAPI===1)throw Error("The declared XeSS frame-generation operation requires its complete original GPU host.");
-  const upstream=path.resolve(upstreamRoot,"src/external/xess"),actual=execFileSync("git",["-C",upstream,"rev-parse","HEAD"],{encoding:"utf8"}).trim();if(actual!==gitlink(source.gitlink))throw Error("The original XeSS SDK pin differs from the GPU host.");execFileSync("git",["-C",upstream,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});pins.push(` ${actual} third_party/xess-original`);
+  const upstream=xessSource,actual=execFileSync("git",["-C",upstream,"rev-parse","HEAD"],{encoding:"utf8"}).trim();if(actual!==gitlink(source.gitlink))throw Error("The original XeSS SDK pin differs from the GPU host.");execFileSync("git",["-C",upstream,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});pins.push(` ${actual} third_party/xess-original`);
   if(backends.includes("vulkan")){
     const headers=JSON.parse(fs.readFileSync(path.join(ownedRoot,"native/vulkan-source.json"))),headerRoot=path.resolve(upstreamRoot,"src/external/krkrsdl2/external/SDL");
     if(hostPaths.vulkan!=="x86_64-windows/maclauncher-xess-vulkan-host.exe"||JSON.stringify(metadata.source.vulkanHeaders)!==JSON.stringify(headers)||headers.repository!=="https://github.com/libsdl-org/SDL"||!Array.isArray(headers.headers)||headers.headers.length!==3||execFileSync("git",["-C",headerRoot,"rev-parse","HEAD"],{encoding:"utf8"}).trim()!==headers.commit||execFileSync("git",["-C",headerRoot,"remote","get-url","origin"],{encoding:"utf8"}).trim().replace(/\.git$/,"")!==headers.repository)throw Error("The XeSS Vulkan header source differs from its declared pin.");
@@ -119,7 +120,7 @@ if(options["--xess-host"]){
   }else if(metadata.source.vulkanHeaders)throw Error("The XeSS Vulkan source is declared without its GPU host.");
   for(const row of metadata.files){if(typeof row.path!=="string")throw Error("The XeSS GPU host contains an undeclared resource.");required.delete(row.path);const file=path.join(directory,row.path),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==row.size||digest(fs.readFileSync(file))!==row.sha256)throw Error("The XeSS GPU host resource changed: "+row.path);if(!row.path.startsWith("source/"))optionalInputs.set("xess/"+row.path,file);if(row.path.endsWith(".so"))optionalLoad.set("xess/"+row.path,{architectures:["x86_64"],minimumMacOS:metadata.minimumMacOS});}
   if(required.size||digest(fs.readFileSync(path.join(directory,"source/source.json")))!==digest(fs.readFileSync(path.join(ownedRoot,"source.json"))))throw Error("The XeSS GPU host source closure is incomplete.");
-  optionalInputs.set("xess/provider.json",path.join(directory,"provider.json"));optionalInputs.set("xess/INTEL-HEADERS-MIT.txt",path.join(upstream,"inc/MIT.txt"));features.graphics.xessSceneAPI=1;
+  optionalInputs.set("xess/provider.json",path.join(directory,"provider.json"));features.graphics.xessSceneAPI=1;
 }
 if(options["--isf"]){
   const directory=options["--isf"],ownedRoot=path.resolve(import.meta.dirname,"../src/modules/shared/reshade/isf"),source=JSON.parse(fs.readFileSync(path.join(ownedRoot,"source.json"))),metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json")));
@@ -611,6 +612,7 @@ if(options["--output"]&&fs.existsSync(destination))throw Error("Use a new isolat
 fs.mkdirSync(destination, { recursive: true });
 for (const directory of ["include", "effects"]) fs.mkdirSync(path.join(destination, directory), { recursive: true });
 addLicenses(destination,"ReShade",source);
+if(options["--xess-host"])addLicenses(destination,"Intel-XeSS",xessSource);
 const files = [];
 for (const [relative, input] of inputs) {
   const output = path.join(destination, relative);

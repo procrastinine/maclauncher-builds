@@ -104,14 +104,6 @@ if [[ ! -f "$destination/mlx.metallib" || "$(shasum -a 256 "$destination/mlx.met
 fi
 
 upstream_root="${MACLAUNCHER_MLX_DLSS_SOURCE:-$build_root/checkouts/MLX-DLSS}"
-node --input-type=module - "$destination" "$native_root" "$upstream_root" "$mlx_source" "$build_root" <<'LICENSES'
-import path from 'node:path';
-import {pathToFileURL} from 'node:url';
-const [output,native,upstream,mlx,build]=process.argv.slice(2);
-const {addLicenses}=await import(pathToFileURL(path.resolve(native,'../../../../../../../../lib/licenses.mjs')));
-addLicenses(output,'MLX-DLSS',upstream);
-addLicenses(output,'MLX-Swift',mlx);
-LICENSES
 cp "$native_root/upstream.json" "$destination/upstream.json"
 cp "$upstream_root/maclauncher-adaptation.json" "$destination/adaptation.json"
 cp "$mlx_source/maclauncher-gpu-timing.json" "$destination/timing-adaptation.json"

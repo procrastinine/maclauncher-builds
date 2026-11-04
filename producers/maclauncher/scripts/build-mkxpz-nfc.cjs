@@ -73,7 +73,7 @@ function configure({work, source, meson}) {
 
 function sourceArchive(source, output, work) {
   // The upstream Mesa overlay only declares headers; none of its renderer
-  // sources are built. Preserve every declared include root and its notices.
+  // sources are built. Preserve every declared include root.
   const mesa = 'subprojects/mesa-26.0.3/';
   const list = [], skip = name => name.split('/').some(part => ['.git', '__pycache__', 'packagecache', 'AGENTS.md'].includes(part)) ||
     /^subprojects\/ruby-3_1_3\/test(?:\/|$)/.test(name) ||
@@ -118,12 +118,7 @@ function stage({work, source, output, version}) {
       fs.writeFileSync(target,fs.readFileSync(target,'utf8').split(work).join('/usr/local/src/mkxpz'),{mode:0o644});
   }
   for (const name of fs.readdirSync(installed).sort()) copy(path.join(installed, name), name);
-  const sourceNotice = path.join(payload, 'SOURCE.txt'); fs.mkdirSync(path.dirname(sourceNotice), {recursive: true});
-  fs.writeFileSync(sourceNotice, 'MKXP-Z '+REVISION+' with MacLauncher '+Overlay.id+'\n'+Overlay.upstream.repository+'\n', {mode: 0o644});
   addLicenses(payload, 'MKXP-Z', source);
-  const subprojects = path.join(source, 'subprojects');
-  for (const entry of fs.readdirSync(subprojects, {withFileTypes:true}))
-    if (entry.isDirectory()) addLicenses(payload, entry.name, path.join(subprojects,entry.name));
   const executableRelative = apps[0] + '/Contents/MacOS/bundle_mkxp-z';
   run('/usr/bin/codesign', ['--force','--sign','-',path.join(payload,apps[0])]);
   run('/usr/bin/codesign', ['--verify','--deep','--strict',path.join(payload,apps[0])]);

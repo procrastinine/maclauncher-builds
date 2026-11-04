@@ -1,9 +1,7 @@
-import {sourceNotices as collectSourceNotices} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
 import {buildInput} from './build-input.mjs';
-import {collectSdlNotices} from './sdl-notices.mjs';
 import {recipeMain} from './build-source.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 import {resolveProject} from '../lib/projects.mjs';
@@ -13,14 +11,13 @@ const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirna
 const Fonts=require(path.join(modules,'shared/runtime/portable-sdl2-fonts.js')),Audio=require(path.join(modules,'shared/runtime/portable-sndfile.js')),Movie=require(path.join(modules,'shared/runtime/portable-ffmpeg.js')),Mixer=require(path.join(modules,'shared/runtime/portable-sdl2-mixer.js'));
 /** Each portable runtime names its producer recipe and entry, its upstream source, its
  * shared resource directory, the source catalogs it reads besides fonts and audio, its
- * single source archives, the dependency stacks built before it and the name that its
- * notices give a bundled CPython or FFmpeg source. */
+ * single source archives and the dependency stacks built before it. */
 const RECIPES=Object.freeze({
  onsyuri:{reuse:'mixer-stack',recipe:'shared/onsyuri/runtime/portable-build-v3.js',entry:'buildPortableYuri',source:'onscripter-yuri',share:'onsyuri',catalogs:['mixer','producer'],archives:{onsyuri:'engine'}},
- gemrb:{reuse:'mixer-python',recipe:'gemrb/runtime/portable-build-v5.js',entry:'buildPortableGemRB',source:'gemrb',share:'gemrb',catalogs:['mixer'],archives:{python:'python'},bundledSource:'CPython',python:{library:'python/lib/python3.14',home:'python'}},
- ai5:{recipe:'ai5/runtime/portable-build-v4.js',entry:'buildPortableAI5',source:'ai5-sdl2',share:'ai5-sdl2',archives:{ffmpeg:'movie'},bundledSource:'FFmpeg',stacks:['fonts','audio','movie']},
+ gemrb:{reuse:'mixer-python',recipe:'gemrb/runtime/portable-build-v5.js',entry:'buildPortableGemRB',source:'gemrb',share:'gemrb',catalogs:['mixer'],archives:{python:'python'},python:{library:'python/lib/python3.14',home:'python'}},
+ ai5:{recipe:'ai5/runtime/portable-build-v4.js',entry:'buildPortableAI5',source:'ai5-sdl2',share:'ai5-sdl2',archives:{ffmpeg:'movie'},stacks:['fonts','audio','movie']},
  xsystem35:{reuse:'mixer-dependencies',recipe:'alicesoft/system35-portable-v3.js',entry:'buildPortableSystem35',source:'xsystem35-sdl2',share:'xsystem35',catalogs:['mixer','producer']},
- xsystem4:{reuse:'av-dependencies',recipe:'alicesoft/system4-portable-v3.js',entry:'buildPortableSystem4',source:'xsystem4',share:'xsystem4',catalogs:['producer'],archives:{ffmpeg:'movie'},bundledSource:'FFmpeg'}
+ xsystem4:{reuse:'av-dependencies',recipe:'alicesoft/system4-portable-v3.js',entry:'buildPortableSystem4',source:'xsystem4',share:'xsystem4',catalogs:['producer'],archives:{ffmpeg:'movie'}}
 });
 const CATALOGS={mixer:()=>Mixer.PIN,producer:Builder=>Builder.PIN};
 const ARCHIVES={movie:()=>Movie.PIN.source,python:()=>require(path.join(modules,'shared/runtime/portable-python-v2.js')).PIN.source,engine:Builder=>Builder.PIN.engine};
@@ -45,20 +42,10 @@ export async function buildPortableRuntime({project,arch,version,output,work}){
  if(recipe.reuse==='mixer-dependencies')options.dependencyStacks={mixer};
  if(recipe.reuse==='mixer-stack')options.mixerStack=mixer;
  if(recipe.reuse==='mixer-python'){const Python=require(path.join(modules,'shared/runtime/portable-python-v2.js'));options.dependencyStacks={mixer,python:await Python.buildPython({archive:archives.python,workRoot:work+'-python',sdk:mixer.sdk,architecture:arch,pathMappings})};}
- const built=await Builder[recipe.entry](options),notices=[],sdlNoticeSources=[],seen=new Set();
- function collect(stack){if(!stack||seen.has(stack))return;seen.add(stack);if(stack.preparedInput){notices.push(...stack.notices);return;}for(const pin of stack.sources||[]){const source=stack.sourceRoots?.[pin.id]||pin.sourceRoot;if(pin.id==='sdl2'){const sdl=collectSdlNotices({source,output:path.join(work,'sdl-notices-'+sdlNoticeSources.length),name:pin.name+' '+pin.version,sourceUrl:pin.sourceUrl||pin.archiveUrl,includeLibm:true});notices.push(...sdl.notices);sdlNoticeSources.push(sdl.provenance);}else for(const name of pin.notices||[])notices.push({file:path.join(source,name),name:pin.name,license:pin.license,sourceUrl:pin.sourceUrl});}
-  if(stack.source?.notices)for(const name of stack.source.notices)notices.push({file:path.join(stack.sourceRoot,name),name:recipe.bundledSource+' '+stack.source.version,license:stack.source.license,sourceUrl:stack.source.url||stack.source.archiveUrl});
-  for(const key of ['fonts','audio','movie','mixer','python','dependencyClosure'])collect(stack[key]);
- }
- collect(built.dependencyClosure);for(const name of recipe.stacks||[])collect(options[STACKS[name].option]);
- const sourceUrl=resolveProject(project,root,{resolvePins:false}).upstreams[0].url;
- notices.push(...collectSourceNotices(sourceDir,{name:project,repository:sourceUrl}));
- const licenses=path.join(sourceDir,'licenses');
- notices.push(...collectSourceNotices(licenses,{all:true,name:project,repository:sourceUrl}));
- if(!notices.some(row=>row.name===project))console.warn('No license text supplied for '+project);
+ const built=await Builder[recipe.entry](options);
  const payloads=!built.appRoot&&built.resources&&fs.existsSync(built.resources)?[{source:built.resources,relative:'share/'+recipe.share}]:[];
  const environmentRelative={};
  if(recipe.python){payloads.push({source:built.dependencyClosure.python.stdlib,relative:recipe.python.library});environmentRelative.PYTHONHOME=recipe.python.home;}
- return sealRuntime({project,arch,version,output,executable:built.executable,appRoot:built.appRoot,sourceRoot:sourceDir,sourceScope:built.sourceScope,upstreamRevision:Builder.REVISION,payloads,environmentRelative,notices,provenance:{sdlNoticeSources,features:built.features||{},sourceTreeSha256:built.sourceTreeSha256,overlaySha256:built.overlaySha256}});
+ return sealRuntime({project,arch,version,output,executable:built.executable,appRoot:built.appRoot,sourceRoot:sourceDir,sourceScope:built.sourceScope,upstreamRevision:Builder.REVISION,payloads,environmentRelative,provenance:{features:built.features||{},sourceTreeSha256:built.sourceTreeSha256,overlaySha256:built.overlaySha256}});
 }
 recipeMain(import.meta,buildPortableRuntime);

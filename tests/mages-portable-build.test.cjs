@@ -36,7 +36,7 @@ test("portable Impacto archives require exact release identities, checksums and 
   assert.throws(() => Dependency.validateArchives(archives, { catalog: { ...catalog, dependencies: [{ ...catalog.dependencies[0], sourceRelease: null }] } }), /exact source archives/);
 });
 
-test("portable dependency catalogs leave notices to sealing and reject target overrides", t => {
+test("portable dependency catalogs reject target overrides", t => {
   const root = directory(t), file = path.join(root, "archive"); fs.writeFileSync(file, "source");
   const catalog = fixtureCatalog(file);
   assert.equal(Dependency.validateArchives({ decoder: file }, { catalog: { ...catalog, dependencies: [{ ...catalog.dependencies[0], notices: ["../LICENSE"] }] } }).length, 1);

@@ -1,3 +1,4 @@
+import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import {gitlink} from '../../../../../../../lib/pins.mjs';
 import fs from "node:fs";
 import os from "node:os";
@@ -41,6 +42,8 @@ export function buildProvider({ output = path.join(cacheDirectory, "output"),
       MACLAUNCHER_NEURAL_BUILD_ROOT: path.resolve(buildRoot),
       MACLAUNCHER_NEURAL_CACHE_ROOT: path.resolve(cacheRoot) },
   });
+  addLicenses(output,'MLX-DLSS',sourceDirectory);
+  addLicenses(output,'MLX-Swift',path.join(buildRoot,'owned-source/mlx-swift'));
   verifyTimingReceipt(JSON.parse(fs.readFileSync(path.join(output,'timing-adaptation.json'))));
   const symbols=execFileSync('nm',['-gU',path.join(output,source.library)],{encoding:'utf8'});
   if(['ml_neural_timing_api','ml_neural_timing_supported_v1','ml_neural_submit_timed_v1','ml_neural_submit_batch_timed_v1'].some(name=>!symbols.includes('_'+name+'\n')))

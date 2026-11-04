@@ -1,6 +1,6 @@
 // Build the invisible Node-API network boundary included with the launcher.
-// The payload holds the binary, its build record and the license; the source
-// stays in the producer repository and is identified by its checksum.
+// The payload holds the binary and its build record. The source stays in the
+// producer repository and is identified by its checksum.
 const fs = require('node:fs');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
