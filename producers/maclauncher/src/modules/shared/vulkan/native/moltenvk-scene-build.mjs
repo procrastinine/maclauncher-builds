@@ -63,7 +63,7 @@ export function publishSceneProvider({library,projected,output,architecture,depe
  addLicenses(output,'MoltenVK',projected);
  for(const item of source.dependencies){const input=dependencies[item.id];addLicenses(output,item.id,input);}
 
- const files=[name,...(fs.existsSync(path.join(output,'licenses'))?fs.readdirSync(path.join(output,'licenses')):[]).map(file=>'licenses/'+file)].map(file=>({path:file,sha256:digest(fs.readFileSync(path.join(output,file))),size:fs.statSync(path.join(output,file)).size}));
+ const files=Bundled.fileInventory(output).filter(file=>file!=='provider.json').map(file=>({path:file,sha256:digest(fs.readFileSync(path.join(output,file))),size:fs.statSync(path.join(output,file)).size}));
  const provider={schema:1,provider:'moltenvk',sceneOperationAPI:1,sceneStagingAPI:1,sceneOperationResources:'prepared-tracked-boundary',originalOutputRetained:true,
   library:name,architectures:[architecture],minimumMacOS:source.minimumMacOS,files,buildInputs};
  writeChanged(path.join(output,'provider.json'),JSON.stringify(provider,null,2)+'\n');return provider;
@@ -84,7 +84,7 @@ export function publishScenePackage({providerDirectory,peerDirectory,output}){
  const native=MachO.readMachOLoadCommands(library);
  if(native.architectures.length!==1||native.architectures[0]!==architecture||
     native.slices.some(slice=>!Bundled.versionAtLeast(source.minimumMacOS,slice.minimumMacOS)))throw Error('The driver target differs from its profile');
- const expected=[provider.library,'MoltenVK-LICENSE',...source.dependencies.map(item=>item.id+'-LICENSE')];
+ const expected=Bundled.fileInventory(directory).filter(file=>file!=='provider.json');
  if(provider.files.length!==expected.length||expected.some(file=>!provider.files.some(row=>row.path===file)))throw Error('The raw driver inventory is incomplete');
  for(const row of provider.files){Bundled.relativeFile(row.path);const stored=Bundled.readRegular(path.join(directory,row.path),Bundled.LIMITS.fileBytes);if(stored.sha256!==row.sha256||stored.size!==row.size)throw Error('The raw driver inventory changed');}
  const links=read('/usr/bin/otool',['-L',library]).split('\n').slice(2).map(line=>line.trim().split(' (')[0]).filter(Boolean);
@@ -97,7 +97,7 @@ export function publishScenePackage({providerDirectory,peerDirectory,output}){
  const provider={...first.provider,architectures};
  fs.mkdirSync(path.dirname(output),{recursive:true});const temporary=fs.mkdtempSync(path.join(path.dirname(output),'.moltenvk-package-'));
  try{
-  for(const file of first.expected){fs.copyFileSync(path.join(first.directory,file),path.join(temporary,file));fs.chmodSync(path.join(temporary,file),file===provider.library?0o755:0o644);}
+  for(const file of first.expected){fs.mkdirSync(path.dirname(path.join(temporary,file)),{recursive:true});fs.copyFileSync(path.join(first.directory,file),path.join(temporary,file));fs.chmodSync(path.join(temporary,file),file===provider.library?0o755:0o644);}
   if(inputs.length===2){const library=path.join(temporary,provider.library);run('/usr/bin/lipo',['-create',...inputs.map(input=>input.library),'-output',library]);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',library]);if(JSON.stringify(MachO.readMachOLoadCommands(library).architectures.sort())!==JSON.stringify(architectures))throw Error('The merged driver is missing a CPU slice');}
   provider.files=provider.files.map(row=>row.path===provider.library?{...row,sha256:digest(fs.readFileSync(path.join(temporary,row.path))),size:fs.statSync(path.join(temporary,row.path)).size}:row);
   writeChanged(path.join(temporary,'provider.json'),JSON.stringify(provider,null,2)+'\n');
