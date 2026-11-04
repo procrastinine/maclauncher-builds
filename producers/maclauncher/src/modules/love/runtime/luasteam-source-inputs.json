@@ -196,11 +196,6 @@
     "sha256": "8672a33bdfaa7e7c20a852829499577e7a5db35cb252105880ac2780773909b1"
   },
   {
-    "origin": "luasteam",
-    "path": "LICENSE",
-    "destination": "notices/LuaSteam-LICENSE"
-  },
-  {
     "origin": "luajit",
     "path": "src/lua.h",
     "destination": "lua-headers/lua.h",
@@ -220,13 +215,6 @@
     "destination": "lua-headers/luaconf.h",
     "size": 4791,
     "sha256": "b21f0c0e579af54cb95a65cb3376363ff4e024fe42fe1267319370b09cd760ad"
-  },
-  {
-    "origin": "luajit",
-    "path": "COPYRIGHT",
-    "destination": "notices/LuaJIT-COPYRIGHT",
-    "size": 2935,
-    "sha256": "5b79fb4754728487cf43d55b213bb68369912484f2dd7ab68380435e994bce39"
   },
   {
     "origin": "steamSdk",
@@ -535,12 +523,5 @@
     "destination": "sdk/public/steam/steamuniverse.h",
     "size": 572,
     "sha256": "2b9c0834ae5a71eac07e6d415ded853c0d0ce3bd91f3e6991597973ed3dee394"
-  },
-  {
-    "origin": "steamSdk",
-    "path": "Readme.txt",
-    "destination": "notices/Steamworks-SDK-Readme.txt",
-    "size": 82561,
-    "sha256": "c01ef8c39e3e6864ed01137dd543d4dcdf202c46d42ce8f7405e1955138a8099"
   }
 ]

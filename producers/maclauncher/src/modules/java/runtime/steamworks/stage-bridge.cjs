@@ -1,4 +1,4 @@
-const {addLicense} = require('../../../../../../../lib/licenses.mjs');
+const {addLicenses} = require('../../../../../../../lib/licenses.mjs');
 // Developer staging of publisher JNI binaries and the small owned loader.
 // Runtime launch never downloads a SDK, compiles Java or rewrites this catalog.
 const fs = require("node:fs");
@@ -42,16 +42,15 @@ function stage({ references, jdkBin, resourcesRoot } = {}) {
         throw new Error("The publisher JNI CPU inventory changed.");
       execFileSync("/usr/bin/codesign", ["--verify", "--strict", libraryPath], { timeout: 30000, stdio: "pipe" });
       fs.copyFileSync(agent, path.join(directory, "steam-agent.jar"));
-      addLicense(directory,"steamworks4j",path.join(__dirname,"steamworks4j-"+original.version+"-MIT.txt"),"MIT");
-      addLicense(directory,'MacLauncher',path.resolve(__dirname, "../../../../../LICENSE"),'MIT');
+      addLicenses(directory,"MacLauncher Java loader",__dirname);
       const dependencies = [
-        "steamworks4j " + original.version + ": publisher JNI binary, unchanged. MIT.",
+        "steamworks4j " + original.version + ": publisher JNI binary, unchanged.",
         "Source: " + original.sourceUrl,
         "Source revision: " + original.sourceRevision,
         "Publisher archive: " + original.publisherUrl,
         "Archive SHA-256: " + original.publisherJarSha256,
         "JNI SHA-256: " + original.jniSha256,
-        "MacLauncher Java loader: owned MIT source; compiled for Java 8 (class major 52).",
+        "MacLauncher Java loader: owned source; compiled for Java 8 (class major 52).",
         "Compiler: Eclipse Temurin " + COMPILER_RUNTIME + "; two matching deterministic builds.",
         "Steam API: separate versioned Goldberg-mac helper or the game's compatible native library.",
         "No official Valve Steam API/ticket library or SDK is included in this package.",
@@ -65,8 +64,6 @@ function stage({ references, jdkBin, resourcesRoot } = {}) {
           ...(name === "libsteamworks4j.dylib" ? { architectures: original.architectures,
             ...(arch === "x64" ? { executionArchitecture: "x86_64" } : {}) } : {}) };
       });
-      const notices = [{ name: "steamworks4j " + original.version, license: "MIT", path: "steamworks4j-MIT.txt", sourceUrl: original.sourceUrl },
-        { name: "MacLauncher Java loader", license: "MIT", path: "MacLauncher-MIT.txt" }];
       const record = { schemaVersion: 1, id: "java-steamworks", version: original.bridgeVersion, wrapperVersion: original.version,
         sourceRevision: original.sourceRevision, sourceUrl: original.sourceUrl, sourceKind: "reviewed-binary", verifiedBuild: false,
         publisherUrl: original.publisherUrl, publisherJarSha256: original.publisherJarSha256,
@@ -82,7 +79,7 @@ function stage({ references, jdkBin, resourcesRoot } = {}) {
       declarations.push({ id: "java-steamworks", version: original.bridgeVersion, arch,
         launcherArchitectures: ["arm64", "x64"], minimumMacOS: record.minimumMacOS,
         sourceRelative: null, sourceSha256: built.sourceSha256,
-        directoryRelative, manifestRelative: "helper.json", manifestSha256: manifest.sha256, files: allFiles, notices });
+        directoryRelative, manifestRelative: "helper.json", manifestSha256: manifest.sha256, files: allFiles });
       pins.push({ ...original, agentSha256: built.sha256, agentSourceSha256: built.sourceSha256, agentCompilerRuntime: COMPILER_RUNTIME,
         minimumMacOS: record.minimumMacOS });
     }
