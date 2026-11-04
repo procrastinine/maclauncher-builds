@@ -1,4 +1,4 @@
-import {addLicenses} from '../../../../../../lib/licenses.mjs';
+import {addLicenses,includeLicenses} from '../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -24,7 +24,7 @@ export function build({moltenvk,headers,output,sceneLibrary,dependencies,archite
   if(name==='libshaderc_shared.1.dylib')isolateCompiler(file,[['pirv_cross','pplc_cross'],['spvtools','spvplctl'],['glslang','mclplcg'],['3spv','3plv']]);run('codesign',['--force','-s','-',file]);}
  const {library:_library,include:_include,...provenance}=sceneLibrary;fs.writeFileSync(path.join(output,architecture==='arm64'?'scene-source.json':'scene-source.x86_64.json'),JSON.stringify(provenance,null,2)+'\n');
  addLicenses(output,'MoltenVK',moltenvk);
- addLicenses(output,'libplacebo',path.dirname(sceneLibrary.include));
+ includeLicenses(output,`${sceneLibrary.include}/../licenses`);
  addLicenses(output,'compiler-dependencies',dependencies.inputs);
  const native=path.join(directory,'native'),common=['clang++','-std=c++17','-O2','-fobjc-arc','-Wno-deprecated-declarations','-Werror=unguarded-availability-new','-DVK_USE_PLATFORM_METAL_EXT','-DMACFX_LIBPLACEBO_SCENE_INPUTS=1','-arch',architecture,'-mmacosx-version-min='+profile.minimumMacOS,'-ffile-prefix-map='+repository+'=.','-ffile-prefix-map='+headers+'=upstream','-I'+native,'-I'+headers,'-I'+sceneLibrary.include,'-I'+path.join(moltenvk,'MoltenVK/MoltenVK/include')];
  const provider=path.join(output,'libmacfx-libplacebo.dylib');run('xcrun',[...common,'-dynamiclib',path.join(native,'libplacebo-node.mm'),'-L'+lib,'-lplacebo.360','-lMoltenVK','-Wl,-rpath,@loader_path/libplacebo','-Wl,-rpath,@loader_path','-Wl,-install_name,@rpath/libmacfx-libplacebo.dylib','-framework','Foundation','-framework','Metal','-o',provider]);
