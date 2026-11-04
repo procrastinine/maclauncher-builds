@@ -77,10 +77,6 @@
 	path = producers/maclauncher/src/external/gemrb
 	url = https://github.com/gemrb/gemrb
 
-[submodule "producers/maclauncher/src/external/hashlink"]
-	path = producers/maclauncher/src/external/hashlink
-	url = https://github.com/HaxeFoundation/hashlink
-
 [submodule "producers/maclauncher/src/external/impacto"]
 	path = producers/maclauncher/src/external/impacto
 	url = https://github.com/CommitteeOfZero/impacto
