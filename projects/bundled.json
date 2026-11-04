@@ -870,7 +870,9 @@
         "url": "https://github.com/hahnlee/aim",
         "repository": "hahnlee/aim",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/aim"
+          "file": "producers/maclauncher/src/modules/android/native/apk-metadata/sources.json",
+          "pointer": "/aim/revision",
+          "repositoryPointer": "/aim/repository"
         }
       }
     ],
@@ -1043,7 +1045,9 @@
         "url": "https://github.com/hahnlee/aim",
         "repository": "hahnlee/aim",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/aim"
+          "file": "sources/maclauncher-android/src/modules/android/art/supplier.json",
+          "pointer": "/sources/aim/commit",
+          "repositoryPointer": "/sources/aim/url"
         }
       }
     ],
@@ -1325,15 +1329,6 @@
         "pin": {
           "gitlink": "sources/maclauncher-android"
         }
-      },
-      {
-        "id": "android-aim6",
-        "provider": "github",
-        "url": "https://github.com/procrastinine/maclauncher-android",
-        "repository": "procrastinine/maclauncher-android",
-        "pin": {
-          "gitlink": "sources/maclauncher-android"
-        }
       }
     ],
     "packageProfiles": [
@@ -1402,7 +1397,9 @@
         "url": "https://github.com/hahnlee/aim",
         "repository": "hahnlee/aim",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/aim"
+          "file": "sources/maclauncher-android/src/modules/android/art/supplier.json",
+          "pointer": "/sources/aim/commit",
+          "repositoryPointer": "/sources/aim/url"
         }
       }
     ],
@@ -2550,21 +2547,17 @@
         }
       },
       {
-        "id": "android-common",
-        "provider": "github",
-        "url": "https://github.com/procrastinine/maclauncher-android",
-        "repository": "procrastinine/maclauncher-android",
-        "pin": {
-          "gitlink": "sources/maclauncher-android"
-        }
-      },
-      {
         "id": "android-aim6",
         "provider": "github",
         "url": "https://github.com/procrastinine/maclauncher-android",
         "repository": "procrastinine/maclauncher-android",
         "pin": {
-          "gitlink": "sources/maclauncher-android"
+          "file": "producers/android-inputs/angle.json",
+          "pointer": "/profiles",
+          "match": {
+            "id": "aim6"
+          },
+          "field": "/androidSource"
         }
       }
     ],

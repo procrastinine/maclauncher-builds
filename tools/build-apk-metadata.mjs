@@ -1,4 +1,3 @@
-import {aimSource} from '../lib/android-source.mjs';
 import {addLicenses,addCargoLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,10 +10,10 @@ import {adapt} from '../producers/maclauncher/src/modules/android/native/apk-met
 import {recipeMain,checkoutSource} from './build-source.mjs';
 const root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/maclauncher/src/modules/android/native/apk-metadata');
 export async function buildAPK({project:id,arch,output,work}){
- const project=resolveProject(id,root),definition=JSON.parse(fs.readFileSync(path.join(base,'sources.json'))),spec={...definition,aim:{...definition.aim,...aimSource()}};
+ const project=resolveProject(id,root),definition=JSON.parse(fs.readFileSync(path.join(base,'sources.json'))),spec=definition;
  fs.mkdirSync(work,{recursive:true});
  try {
-  const upstream=checkoutSource({...aimSource(),destination:path.join(work,'aim')}),archive=path.join(work,'aim.tar.gz'),source=path.join(work,'source');fs.mkdirSync(source);
+  const upstream=checkoutSource({...spec.aim,destination:path.join(work,'aim')}),archive=path.join(work,'aim.tar.gz'),source=path.join(work,'source');fs.mkdirSync(source);
   execFileSync('git',['-C',upstream,'archive','--format=tar.gz','--prefix=aim-'+spec.aim.revision+'/', '--output='+archive,spec.aim.revision],{maxBuffer:Infinity});
   const prefix='aim-'+spec.aim.revision,paths=spec.aim.paths;
   execFileSync('/usr/bin/tar',['-xzf',archive,'-C',source,...paths.map(file=>prefix+'/'+file)],{maxBuffer:Infinity});

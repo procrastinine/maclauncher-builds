@@ -15,7 +15,7 @@ const profiles=JSON.parse(fs.readFileSync(new URL('../producers/android-inputs/a
 const temp=t=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'android-runtime-deps-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;};
 test('AIM ANGLE dependency preserves its own original program transport and historical common selection',()=>{
  const common=anglePackageProfile('android-angle',commonVersion).profile,aim=anglePackageProfile('android-angle-aim',aimProfile.packageVersion).profile;
- assert.equal(common.id,'common');assert.equal(aim.id,'aim6');assert.equal(Object.hasOwn(common,'androidSource'),false);assert.equal(Object.hasOwn(aim,'androidSource'),false);
+ assert.equal(common.id,'common');assert.equal(aim.id,'aim6');assert.equal(Object.hasOwn(common,'androidSource'),false);assert.match(aim.androidSource.revision,/^5041bb4/);
  if(commonVersion!==aimProfile.version)assert.deepEqual(anglePackageProfile('android-angle',aimProfile.version).profile,aim);
 
  assert.throws(()=>anglePackageProfile('android-angle-aim','unknown'),/declared source profile/);

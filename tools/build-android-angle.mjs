@@ -24,7 +24,19 @@ export function anglePackageProfile(project,version){
  return {definition,profile:matches[0]};
 }
 function verifyProducerSource(source,profile){
- if(!path.isAbsolute(source||'')||read('git',['-C',source,'rev-parse','HEAD'])!==androidSource().revision||read('git',['-C',source,'status','--porcelain','--untracked-files=no']))throw Error('Android producer differs from its declared source revision.');
+ if(!path.isAbsolute(source||'')||read('git',['-C',source,'rev-parse','HEAD'])!==(profile.androidSource||androidSource()).revision||read('git',['-C',source,'status','--porcelain','--untracked-files=no']))throw Error('Android producer differs from its declared source revision.');
+}
+
+/** Keep a shipped adapter profile while using the current common build driver. */
+export function prepareAngleProfileProducer({source,work}){
+ const current=path.join(root,androidSource().directory,'src/modules/android/native'),native=path.join(source,'src/modules/android/native');
+ if(fs.realpathSync(current)===fs.realpathSync(native))return path.join(native,'angle-build.mjs');
+ const producer=path.join(work,'profile-producer'),archive=path.join(work,'profile-producer.tar');fs.mkdirSync(producer);
+ try{run('git',['-C',source,'archive','--format=tar','--output='+archive,'HEAD','--','src/modules/android/native']);run('/usr/bin/tar',['-xf',archive,'-C',producer]);}finally{fs.rmSync(archive,{force:true});}
+ const output=path.join(producer,'src/modules/android/native'),declaration=fs.readFileSync(path.join(native,'angle-build.mjs'),'utf8').split('\n').find(line=>line.startsWith('const adaptations='));
+ fs.cpSync(path.join(current,'upstream'),path.join(output,'upstream'),{recursive:true});
+ fs.writeFileSync(path.join(output,'angle-build.mjs'),fs.readFileSync(path.join(current,'angle-build.mjs'),'utf8').replace(/^\s*const adaptations=.*$/m,declaration));
+ return path.join(output,'angle-build.mjs');
 }
 
 /** Build the selected common or AIM ANGLE supplier from its exact owned sources. */
@@ -32,9 +44,9 @@ export async function buildAngleInput({output,work,profile:profileId='common'}){
  if(!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('ANGLE input builds require Apple Silicon macOS and new absolute output/work directories.');
  const {definition,profile}=selectedProfile(profileId);
  fs.mkdirSync(work,{recursive:true});
- const android=androidSource().directory?path.join(root,androidSource().directory):checkoutSource({...androidSource(),destination:path.join(work,'android-producer')});
+ const android=profile.androidSource?checkoutSource({...profile.androidSource,destination:path.join(work,'android-producer')}):path.join(root,androidSource().directory);
  verifyProducerSource(android,profile);
- const pins=JSON.parse(fs.readFileSync(path.join(android,definition.angleSource)));
+ const pins=definition.angle,entry=prepareAngleProfileProducer({source:android,work});
 
  const upstream=checkoutSource({repository:pins.repository,revision:pins.revision,destination:path.join(work,'angle')});
  const dependencies=path.join(work,'dependencies');fs.mkdirSync(dependencies);
@@ -54,7 +66,7 @@ export async function buildAngleInput({output,work,profile:profileId='common'}){
  run('ninja',['-C',gnBuild,'-j2','gn'],{env:compilerEnv});
  const clang=path.dirname(path.dirname(read('xcrun',['--find','clang'])));
  const toolEnv={...compilerEnv,PATH:path.dirname(python)+path.delimiter+process.env.PATH};
- run(process.execPath,[path.join(android,definition.buildEntry),'--source',upstream,'--dependencies',dependencies,'--output',output,'--gn',path.join(gnBuild,'gn'),'--ninja',read('which',['ninja']),'--clang',clang,'--python',python,'--backend',definition.backend,'--jobs','2'],{env:toolEnv});
+ run(process.execPath,[entry,'--source',upstream,'--dependencies',dependencies,'--output',output,'--gn',path.join(gnBuild,'gn'),'--ninja',read('which',['ninja']),'--clang',clang,'--python',python,'--backend',definition.backend,'--jobs','2'],{env:toolEnv});
  const manifest=JSON.parse(fs.readFileSync(path.join(output,'angle-manifest.json')));
  if(manifest.version!==profile.providerVersion||manifest.angleRevision!==pins.revision)throw Error('Generated ANGLE profile differs from its declared identity.');
  return {angle:output,manifest,source:android,profileId};
@@ -77,7 +89,7 @@ export function packageAngleInput({project='android-angle',version,arch='arm64',
  for(const name of ['libEGL.dylib','libGLESv2.dylib','angle-manifest.json'])fs.copyFileSync(path.join(input.angle,name),path.join(payload,name));
 
  includeLicenses(payload,path.join(input.angle,'licenses'));
- return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{source:androidSource(),sourceProfile:profile.id,providerVersion:manifest.version,angleRevision:manifest.angleRevision}});
+ return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{source:profile.androidSource||androidSource(),sourceProfile:profile.id,providerVersion:manifest.version,angleRevision:manifest.angleRevision}});
 }
 
 /** Use the one Runtime build path for each declared source profile. */

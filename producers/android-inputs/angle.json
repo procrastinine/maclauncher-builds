@@ -12,7 +12,11 @@
       "version": "0.1.0-MCLv2",
       "providerVersion": "cbc4153da8d5-metal-vulkan-12",
       "project": "android-angle-aim",
-      "packageVersion": "MCLv6"
+      "packageVersion": "MCLv6",
+      "androidSource": {
+        "repository": "https://github.com/procrastinine/maclauncher-android",
+        "revision": "5041bb49525a4178ac9db5ab868e1f89cd225014"
+      }
     }
   ],
   "angleSource": "src/modules/android/native/angle-source.json",
