@@ -102,11 +102,6 @@
       "baseSha256": null
     },
     {
-      "path": "src/color-tone-mapping-LICENSE.txt",
-      "source": "color-tone-mapping-LICENSE.txt",
-      "baseSha256": null
-    },
-    {
       "path": "src/color-source.json",
       "source": "color-source.json",
       "baseSha256": null
@@ -943,16 +938,6 @@
     {
       "source": "cmaa2-source.json",
       "path": "src/cmaa2-source.json",
-      "baseSha256": null
-    },
-    {
-      "source": "cmaa2-APACHE-2.0.txt",
-      "path": "src/cmaa2-APACHE-2.0.txt",
-      "baseSha256": null
-    },
-    {
-      "source": "cmaa2-THIRD-PARTY.txt",
-      "path": "src/cmaa2-THIRD-PARTY.txt",
       "baseSha256": null
     },
     {

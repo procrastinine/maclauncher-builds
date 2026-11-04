@@ -12,7 +12,7 @@ if (!outputArg) throw new Error('Usage: build.mjs <FidelityFX-FSR2> <tools conta
 const source = path.resolve(sourceArg), tools = path.resolve(toolsArg), out = path.resolve(outputArg);
 const fsr3=process.argv.includes('--fsr3');
 const group=fsr3?'fsr3':'fsr2', shaderPrefix=fsr3?'fsr3upscaler':'fsr2';
-const pin = fsr3?gitlink('producers/maclauncher/src/external/fsr3-sdk'):'1680d1edd5c034f88ebbbb793d8b88f8842cf804';
+const pin = gitlink('producers/maclauncher/src/external/'+(fsr3?'fsr3-sdk':'fsr2'));
 const run = (exe, args) => execFileSync(exe, args, { encoding: 'utf8', maxBuffer: Infinity});
 if (run('git', ['-C', source, 'rev-parse', 'HEAD']).trim() !== pin) throw new Error('FSR2 source revision differs from the build pin.');
 const api = path.join(source, fsr3?'sdk/src/components/fsr3upscaler':'src/ffx-fsr2-api');

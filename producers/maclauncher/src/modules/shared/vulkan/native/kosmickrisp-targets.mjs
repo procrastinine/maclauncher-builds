@@ -8,6 +8,8 @@ import {prepareSourceTree, writeChanged} from './source-files.mjs';
 
 const pin = JSON.parse(fs.readFileSync(new URL('./kosmickrisp-source.json', import.meta.url)));
 const targets = JSON.parse(fs.readFileSync(new URL('./kosmickrisp-targets.json', import.meta.url)));
+targets.vulkanLoader.revision=gitlink(targets.vulkanLoader.gitlink);
+pin.revision=gitlink(pin.gitlink);
 const sha = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const read = (tool, args, options = {}) => execFileSync(tool, args, {encoding: 'utf8', ...options}).trim();
 const run = (tool, args, options = {}) => execFileSync(tool, args, {stdio: 'inherit', ...options});
@@ -26,7 +28,7 @@ export function describeNativeTools({source, build}) {
     const files = Object.fromEntries(Object.entries(toolFiles).map(([name, relative]) => [name, {
         path: relative, sha256: sha(path.join(build, relative)),
     }]));
-    const record = {schemaVersion: 1, repository: pin.repository, revision: pin.revision, files};
+    const record = {schemaVersion: 1, repository: pin.repository, revision: gitlink(pin.gitlink), files};
     writeChanged(path.join(build, 'native-tools.json'), JSON.stringify(record, null, 2) + '\n');
     return build;
 }
@@ -42,7 +44,7 @@ export function buildKosmicTargets(options, buildNative) {
         nativeBuild = native.nativeBuild;
     }
     const native = JSON.parse(fs.readFileSync(path.join(nativeBuild, 'native-tools.json')));
-    if (native.revision !== pin.revision || native.repository !== pin.repository) throw Error('Kosmic native compilers differ from their source pin');
+    if (native.revision !== gitlink(pin.gitlink) || native.repository !== pin.repository) throw Error('Kosmic native compilers differ from their source pin');
     if (JSON.stringify(Object.keys(native.files).sort()) !== JSON.stringify(Object.keys(toolFiles).sort())) throw Error('Kosmic native compilers are incomplete');
     for (const [name, file] of Object.entries(native.files)) {
         if (file.path !== toolFiles[name] || file.sha256 !== sha(path.join(nativeBuild, file.path))) throw Error('Kosmic native compiler differs from its metadata');
@@ -53,7 +55,7 @@ export function buildKosmicTargets(options, buildNative) {
         for (const [file, content] of Object.entries(adaptedKosmicSources(source))) writeChanged(path.join(temporary, file), content);
     });
     const environment = {...process.env, MACOSX_DEPLOYMENT_TARGET: pin.minimumMacOS,
-        MESA_GIT_SHA1_OVERRIDE: pin.revision,
+        MESA_GIT_SHA1_OVERRIDE: gitlink(pin.gitlink),
         PATH: [path.dirname(meson), ...Object.values(toolFiles).map(file => path.dirname(path.join(nativeBuild, file))), process.env.PATH].join(path.delimiter)};
     const outputs = [];
     const jobs = Number(options.jobs || 2);

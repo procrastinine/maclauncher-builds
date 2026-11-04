@@ -1,9 +1,10 @@
+import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import {execFileSync} from "node:child_process";
-import {SOURCE,VULKAN_HEADERS,FAST_FLOAT,applySceneOverlay} from "./scene-overlay.mjs";
+import {SOURCE,VULKAN_HEADERS,applySceneOverlay} from "./scene-overlay.mjs";
 const hash=file=>crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 const run=(program,args,options={})=>execFileSync(program,args,{encoding:"utf8",stdio:"pipe",maxBuffer: Infinity,...options});
 function archive(repository,dependency,output){
@@ -14,16 +15,15 @@ function archive(repository,dependency,output){
 }
 // Each architecture has an isolated source/build directory. No network or
 // package installation occurs here; dependencies and tools are explicit inputs.
-export function buildSceneLibrary({source,vulkanSource,fastFloatSource,inputs,dependencyHeaders=inputs,architecture,output,meson,ninja,python}){
+export function buildSceneLibrary({source,vulkanSource,inputs,dependencyHeaders=inputs,architecture,output,meson,ninja,python}){
   if(!["arm64","x86_64"].includes(architecture))throw new Error("Unsupported library architecture.");
   if(fs.existsSync(output))throw new Error("Choose an unused libplacebo source-build directory.");
   const tree=path.join(output,"source"),build=path.join(output,"build"),prefix=path.join(output,"install"),pc=path.join(output,"pkgconfig");
   archive(source,SOURCE,tree);archive(vulkanSource,{...VULKAN_HEADERS,commit:run('git',['-C',source,'rev-parse',SOURCE.commit+':3rdparty/Vulkan-Headers']).trim()},path.join(tree,"3rdparty/Vulkan-Headers"));
   const manifest=applySceneOverlay(tree);
-  if(fastFloatSource){
-    const dependency=FAST_FLOAT;
-    archive(fastFloatSource,dependency,path.join(tree,"3rdparty/fast_float"));manifest.fastFloat=dependency;
-  }
+  const fastFloatSource=path.join(source,"3rdparty/fast_float");
+  const dependency={origin:run("git",["-C",source,"config","--blob",SOURCE.commit+":.gitmodules","--get","submodule.3rdparty/fast_float.url"]).trim(),commit:run("git",["-C",source,"rev-parse",SOURCE.commit+":3rdparty/fast_float"]).trim()};
+  archive(fastFloatSource,dependency,path.join(tree,"3rdparty/fast_float"));manifest.fastFloat=dependency;
   fs.mkdirSync(pc,{recursive:true});
   const shaderc=path.join(inputs,"shaderc/shaderc/2026.4"),lcms=path.join(inputs,"little-cms2/little-cms2/2.19.1");
   // These C headers are architecture independent. Binary-only Intel caches
@@ -42,13 +42,7 @@ export function buildSceneLibrary({source,vulkanSource,fastFloatSource,inputs,de
   logged("configure",meson,args);logged("compile",ninja,["-C",build,"-j2"]);logged("install",ninja,["-C",build,"install"]);
   const library=path.join(prefix,"lib/libplacebo.360.dylib");if(!fs.existsSync(library))throw new Error("The original libplacebo library was not produced.");
   const exports=run("nm",["-gU",library]);for(const name of["pl_mpv_user_shader_external_textures_api","pl_mpv_user_shader_set_external_textures"])if(!exports.includes("_"+name))throw new Error("The named texture resolver was not exported.");
-  const notices=[
-    ["libplacebo-source.LICENSE","LICENSE"],
-    ["Vulkan-Headers.LICENSE","3rdparty/Vulkan-Headers/LICENSE.md"],
-    ["Vulkan-Headers.Apache-2.0.LICENSE","3rdparty/Vulkan-Headers/LICENSES/Apache-2.0.txt"],
-    ["Vulkan-Headers.MIT.LICENSE","3rdparty/Vulkan-Headers/LICENSES/MIT.txt"],
-    ...(fastFloatSource?["APACHE","BOOST","MIT"].map(name=>["fast_float."+name+".LICENSE","3rdparty/fast_float/LICENSE-"+name]):[]),
-  ].map(([name,relative])=>({name,file:path.join(tree,relative)}));
-  const result={...manifest,architecture,library,include:path.join(prefix,"include"),sha256:hash(library),notices,overlaySha256:hash(new URL("./scene-overlay.mjs",import.meta.url)),recipeSha256:hash(new URL("./scene-source.mjs",import.meta.url)),buildTools:{meson:run(meson,["--version"]).trim(),ninja:run(ninja,["--version"]).trim()}};
+  addLicenses(prefix,'libplacebo',tree);
+  const result={...manifest,architecture,library,include:path.join(prefix,"include"),sha256:hash(library),overlaySha256:hash(new URL("./scene-overlay.mjs",import.meta.url)),recipeSha256:hash(new URL("./scene-source.mjs",import.meta.url)),buildTools:{meson:run(meson,["--version"]).trim(),ninja:run(ninja,["--version"]).trim()}};
   fs.writeFileSync(path.join(output,"source-build.json"),JSON.stringify(result,null,2)+"\n");return result;
 }

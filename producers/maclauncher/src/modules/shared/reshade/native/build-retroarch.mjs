@@ -22,7 +22,6 @@ if(run('git',['-C',originalSource,'rev-parse','HEAD']).trim()!==gitlink(declarat
 run('git',['-C',originalSource,'diff','--exit-code','HEAD','--']);
 if(hash(path.join(originalSource,'include/librashader.h'))!==declaration.headerSha256)throw new Error('The original librashader C API header differs.');
 if(archive&&hash(archive)!==declaration.artifacts.arm64?.sha256)throw new Error('The official librashader archive checksum differs.');
-if(!archive&&declaration.sourceBuilds?.arm64?.commit!==gitlink(declaration.gitlink))throw new Error('The selected librashader version needs a pinned ARM64 source build.');
 if(fs.existsSync(output))throw new Error('Use a new RetroArch shader output directory.');
 fs.mkdirSync(output,{recursive:true});
 const source=path.join(output,'upstream-source'),sourceArchive=path.join(output,'upstream.tar');

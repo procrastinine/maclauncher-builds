@@ -1,3 +1,4 @@
+import {gitlink} from '../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from "node:fs";
 import path from "node:path";
@@ -14,7 +15,7 @@ if(!process.argv[2]||!["universal","x64","arm64"].includes(arch))throw Error("Ch
 const upstream=options["--source"]?path.resolve(options["--source"]):path.join(workspace,source.sources[0].path);
 const run=(cmd,args)=>execFileSync(cmd,args,{stdio:"inherit"});
 const write=(file,bytes)=>{bytes=Buffer.isBuffer(bytes)?bytes:Buffer.from(bytes);if(!fs.existsSync(file)||!fs.readFileSync(file).equals(bytes))fs.writeFileSync(file,bytes);};
-for(const entry of source.sources){const root=path.join(upstream,path.posix.relative(source.sources[0].path,entry.path)),actual=execFileSync("git",["-C",root,"rev-parse","HEAD"],{encoding:"utf8"}).trim();if(actual!==entry.commit)throw Error("Initialize the selected ISF source: "+entry.path);execFileSync("git",["-C",root,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});}
+for(const entry of source.sources){const root=path.join(upstream,path.posix.relative(source.sources[0].path,entry.path)),actual=execFileSync("git",["-C",root,"rev-parse","HEAD"],{encoding:"utf8"}).trim();if(actual!==(entry===source.sources[0]?gitlink(entry.gitlink):execFileSync("git",["-C",upstream,"rev-parse","HEAD:"+path.posix.relative(source.sources[0].path,entry.path)],{encoding:"utf8"}).trim()))throw Error("Initialize the selected ISF source: "+entry.path);execFileSync("git",["-C",root,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});}
 const input=path.join(output,"input"),payload=options["--payload"]?path.resolve(options["--payload"]):path.join(output,"payload");
 if(fs.existsSync(path.join(payload,"provider.json")))throw Error("Choose a new ISF payload directory; the build cache can be reused.");
 fs.mkdirSync(input,{recursive:true});fs.mkdirSync(payload,{recursive:true});
@@ -50,9 +51,7 @@ const shaderRoot=roots.VVMetalKit,air=[];
 for(const name of ["CopierMTLScene","SwizzleMTLScene"]){const file=path.join(output,name+".air");run("xcrun",["-sdk","macosx","metal","-std=metal3.0","-mmacosx-version-min=13.0","-I",shaderRoot,"-I",input,"-c",path.join(shaderRoot,name+".metal"),"-o",file]);air.push(file);}
 run("xcrun",["-sdk","macosx","metallib",...air,"-o",path.join(payload,"default.metallib")]);
 addLicenses(payload,'ISF',upstream);
-for(const [name,root]of [["VVMetalKit",path.join(upstream,"submodules/VVMetalKit")],["ISFGLSLGenerator",path.join(upstream,"submodules/ISFGLSLGenerator")],["PINCache",path.join(upstream,"submodules/PINCache")],["PINOperation",path.join(upstream,"submodules/PINCache/Carthage/Checkouts/PINOperation")]]){
-  addLicenses(payload,name,root);
-}
+for(const [name,root]of Object.entries(roots))addLicenses(payload,name,root);
 for(const name of [source.library,...source.compilerLibraries.map(file=>path.basename(file))])run("codesign",["--force","--sign","-",path.join(payload,name)]);
 const files=fs.readdirSync(payload,{recursive:true}).filter(name=>name!=="provider.json"&&fs.statSync(path.join(payload,name)).isFile()).sort().map(name=>{const bytes=fs.readFileSync(path.join(payload,name));return {path:name,size:bytes.length,sha256:crypto.createHash("sha256").update(bytes).digest("hex")};});
 const ownedInputs=Object.fromEntries(["source.json","build.mjs","build-compilers.mjs","compiler-CMakeLists.txt","isolate-compiler.mjs","../compiler-isolation.mjs","../../effects/operation-contracts.mjs","CMakeLists.txt","provider.mm","index.js"].map(name=>[name,crypto.createHash("sha256").update(fs.readFileSync(path.join(owned,name))).digest("hex")]));

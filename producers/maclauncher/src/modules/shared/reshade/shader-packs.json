@@ -414,7 +414,7 @@
           ],
           "nativeMethod": "screen-space-reflections",
           "sourceUrl": "https://github.com/godotengine/godot",
-          "revision": "4c311cbee68c0b66ff8ebb8b0defdd9979dd2a41"
+          "gitlink": "producers/maclauncher/src/external/godot-camera"
         },
         {
           "id": "estimated-depth-fog",

@@ -28,8 +28,8 @@
       "path": "src/external/fsr2",
       "pin": {
         "file": "src/modules/shared/reshade/temporal/fsr/source.json",
-        "commit": "/fsr2/commit",
-        "repository": "/fsr2/repository"
+        "repository": "/fsr2/repository",
+        "gitlink": "/fsr2/gitlink"
       }
     },
     "fsr3-sdk": {
@@ -133,8 +133,8 @@
       "match": "object",
       "pin": {
         "file": "src/modules/shared/reshade/libplacebo/scene-profile.json",
-        "commit": "/SOURCE/commit",
-        "repository": "/SOURCE/origin"
+        "repository": "/SOURCE/origin",
+        "gitlink": "/SOURCE/gitlink"
       }
     },
     "libplacebo-vulkan-headers": {
@@ -144,15 +144,6 @@
         "file": "src/modules/shared/reshade/libplacebo/scene-profile.json",
         "commit": "/VULKAN_HEADERS/commit",
         "repository": "/VULKAN_HEADERS/origin"
-      }
-    },
-    "libplacebo-fast-float": {
-      "path": "src/external/libplacebo/3rdparty/fast_float",
-      "match": "object",
-      "pin": {
-        "file": "src/modules/shared/reshade/libplacebo/scene-profile.json",
-        "commit": "/FAST_FLOAT/commit",
-        "repository": "/FAST_FLOAT/origin"
       }
     }
   },
@@ -344,8 +335,6 @@
             "{source:libplacebo}",
             "--vulkan-source",
             "{source:libplacebo-vulkan-headers}",
-            "--fast-float-source",
-            "{source:libplacebo-fast-float}",
             "--moltenvk",
             "{input:moltenvk}",
             "--headers",

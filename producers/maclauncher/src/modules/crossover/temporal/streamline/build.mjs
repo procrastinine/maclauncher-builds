@@ -1,3 +1,4 @@
+import {gitlink} from '../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from "node:fs";
 import path from "node:path";
@@ -9,7 +10,7 @@ const require = createRequire(import.meta.url), here = path.dirname(fileURLToPat
 const args = Object.fromEntries(process.argv.slice(2).reduce((items, value, index, all) => index % 2 ? items : [...items, [value.replace(/^--/, ""), all[index + 1]]], []));
 if (!["source", "out", "compiler", "reference"].every(key => args[key])) throw Error("Use --source Streamline --out directory --compiler clang++ --reference sl.interposer.dll");
 const source = path.resolve(args.source), output = path.resolve(args.out), reference = path.resolve(args.reference);
-const revision = JSON.parse(fs.readFileSync(path.join(here, "source.json"), "utf8")).revision;
+const revision = gitlink(JSON.parse(fs.readFileSync(path.join(here, "source.json"), "utf8")).gitlink);
 if (execFileSync("git", ["-C", source, "rev-parse", "HEAD"], { encoding: "utf8" }).trim() !== revision) throw Error("Streamline headers must match the pinned source revision");
 execFileSync("git",["-C",source,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});
 const exports = require("./pe-exports").inspect(reference);
@@ -62,7 +63,7 @@ execFileSync(path.resolve(args.compiler), ["-std=c++17", "-O2", "-shared", "-sta
   "-I"+path.resolve(here,"../../../shared/reshade/temporal"),"-I"+path.resolve(here,"../../../shared/reshade/native"),
   path.join(here, "proxy.cpp"), path.join(output, "thunks.S"), path.join(output, "exports.def"), "-o", path.join(output, "sl.interposer.dll")], { stdio: "inherit" });
 const hash = file => crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
-const metadata = { schema: 1, version: "3", resourceSnapshotAPI:1,resourceSnapshotProfiles:["d3d11-v2"],resourceTagProfiles: ["slSetD3DDevice","slSetTag","slSetTagForFrame"].every(name=>exports.some(row=>row.name===name))?["d3d11-v1"]:[], source: { url: "https://github.com/NVIDIA-RTX/Streamline", revision, version: "2.9.0", license: "MIT" },
+const metadata = { schema: 1, version: "3", resourceSnapshotAPI:1,resourceSnapshotProfiles:["d3d11-v2"],resourceTagProfiles: ["slSetD3DDevice","slSetTag","slSetTagForFrame"].every(name=>exports.some(row=>row.name===name))?["d3d11-v1"]:[], source: { url: "https://github.com/NVIDIA-RTX/Streamline", revision, version: "2.9.0" },
   library: "sl.interposer.dll", sha256: hash(path.join(output, "sl.interposer.dll")), referenceSha256: hash(reference), exports,
   compiler: execFileSync(path.resolve(args.compiler), ["--version"], { encoding: "utf8" }).split("\n")[0],
   sources: Object.fromEntries(["build.mjs", "source.json", "proxy.cpp", "camera.hpp", "resources.hpp", "snapshots.hpp", "snapshot-budget.hpp", "../dxmt/camera-transport.hpp", "../dxmt/streamline-transport.hpp", "../dxmt/streamline-snapshot.hpp", "pe-exports.js", "../../../shared/reshade/temporal/camera.h", "../../../shared/reshade/temporal/frame.h", "../../../shared/reshade/native/image-color.h", "../../../shared/reshade/native/image-budget.hpp"].map(file => [file, hash(path.resolve(here, file))])) };

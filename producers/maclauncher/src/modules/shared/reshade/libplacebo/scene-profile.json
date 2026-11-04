@@ -1,8 +1,8 @@
 {
   "SOURCE": {
     "origin": "https://github.com/haasn/libplacebo.git",
-    "commit": "cee9b076f2c63104ccfd497fa79c39a867293ec4",
-    "version": "7.360.1"
+    "version": "7.360.1",
+    "gitlink": "producers/maclauncher/src/external/libplacebo"
   },
   "VULKAN_HEADERS": {
     "origin": "https://github.com/KhronosGroup/Vulkan-Headers.git"

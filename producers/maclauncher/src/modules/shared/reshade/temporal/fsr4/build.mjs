@@ -322,7 +322,7 @@ await fs.writeFile(path.join(payload, 'provider.json'), JSON.stringify({
     sha256 : pin.lite2.sha256,
     repository : pin.lite2.repository,
     commit : pin.lite2.commit,
-    sourceUrl : pin.lite2.url
+    sourceUrl : pin.lite2.repository + '/tree/' + pin.lite2.commit
   } ],
   owned,
   tools,

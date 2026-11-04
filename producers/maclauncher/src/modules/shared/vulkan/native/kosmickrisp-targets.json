@@ -14,7 +14,7 @@
   "vulkanLoader": {
     "path": "sources/vulkan-loader",
     "repository": "https://chromium.googlesource.com/external/github.com/KhronosGroup/Vulkan-Loader",
-    "revision": "f2389e27734347c1d9f40e03be53f69f969976b1"
+    "gitlink": "sources/vulkan-loader"
   },
   "vulkanHeaders": {
     "path": "sources/anyps5/3rdparty/Vulkan-Headers",

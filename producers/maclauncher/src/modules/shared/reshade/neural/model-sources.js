@@ -94,7 +94,7 @@ function inspect(file) {
   }
   if(/\.(?:dll|so(?:\.\d+)*)$/i.test(file))return {kind:'nvidia-weights',file:fs.realpathSync(file),weights:require('./nvidia-weight-extractor').inspect(file)};
   if(/\.pth$/i.test(file))return {kind:'torch-weights',file:fs.realpathSync(file),weights:require('./torch-checkpoint').inspect(file)};
-  if (Models.packagePattern.test(file)) return {kind: "package", file, packages: [Models.inspectPackage(file)], notices: localNotices(file};
+  if (Models.packagePattern.test(file)) return {kind: "package", file, packages: [Models.inspectPackage(file)]};
   if(/\.safetensors$/i.test(file)) {
     const weights=require('./weight-adapters').inspect(file),canonical=fs.realpathSync(file);
     let denoiseWeights;

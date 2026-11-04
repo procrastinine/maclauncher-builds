@@ -47,7 +47,7 @@
       "sourcePath": "third_party/fsr",
       "submodulePath": "src/external/macfx-fsr1",
       "repository": "https://github.com/GPUOpen-Effects/FidelityFX-FSR.git",
-      "commit": "a21ffb8f6c13233ba336352bdff293894c706575"
+      "gitlink": "producers/maclauncher/src/external/macfx-fsr1"
     }
   ]
 }

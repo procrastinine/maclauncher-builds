@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import {addLicenses} from '../../../../../../../lib/licenses.mjs';
+import {gitlink} from '../../../../../../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -13,7 +15,7 @@ const [upstreamArg, vendorArg, compilerArg, outputArg] = process.argv.slice(2);
 const nativeOnly = process.argv.includes('--native-only');
 if (!outputArg) throw new Error('Usage: build.mjs DXMT_SOURCE DXMT_WINE_DIRECTORY LLVM_MINGW_BIN OUTPUT [--native-only]');
 const [upstream, vendor, toolchain, output] = [upstreamArg, vendorArg, compilerArg, outputArg].map(p => path.resolve(p));
-const revision = JSON.parse(fs.readFileSync(path.join(here, 'source.json'), 'utf8')).revision;
+const revision = gitlink(JSON.parse(fs.readFileSync(path.join(here, 'source.json'), 'utf8')).gitlink);
 let sourceRevision;
 try { sourceRevision = JSON.parse(fs.readFileSync(path.join(upstream, '.maclauncher-upstream.json'), 'utf8')).revision; }
 catch { sourceRevision = execFileSync('git', ['-C', upstream, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(); }
@@ -129,7 +131,7 @@ await run('xcrun', ['clang', '-x','objective-c','-fblocks','-arch', 'x86_64', '-
   '-DML_UNIX_CALL_COUNT=' + count, ...include, '-Wl,-install_name,@rpath/winemetal.so',
   path.join(here, 'unix-forwarder.c'),'-framework','Foundation','-framework','Metal','-framework','MetalFX', '-o', unixOut]);
 execFileSync('codesign', ['--force', '--sign', '-', unixOut], { stdio: 'pipe' });
-for (const name of ['LICENSE', 'COPYING.LIB', 'LICENSE.OLD']) fs.copyFileSync(path.join(upstream, name), path.join(payload, name));
+addLicenses(payload,'DXMT',upstream);
 const files = {};
 for (const name of ['d3d11', 'dxgi', 'nvngx']) files['x86_64-windows/' + name + '.dll'] = sha(path.join(payload, 'x86_64-windows', name + '.dll'));
 files['x86_64-unix/winemetal.so'] = sha(unixOut);

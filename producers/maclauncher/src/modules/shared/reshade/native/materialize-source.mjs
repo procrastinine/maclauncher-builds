@@ -1,3 +1,4 @@
+import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import {gitlink} from '../../../../../../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -24,7 +25,8 @@ export function materializeSource({output,sources={},baseOnly=false}){
  }
  fs.mkdirSync(output,{recursive:true});
  try{
-  for(const name of [...inputs,'LICENSE','.gitmodules']){const file=path.join(output,name);fs.mkdirSync(path.dirname(file),{recursive:true});fs.copyFileSync(path.join(base,name),file);}
+  addLicenses(output,"ReShade",base);
+  for(const name of [...inputs,'.gitmodules']){const file=path.join(output,name);fs.mkdirSync(path.dirname(file),{recursive:true});fs.copyFileSync(path.join(base,name),file);}
   if(!baseOnly)for(const entry of overlay.files){
    const previous=path.join(base,entry.path);
    if(entry.baseSha256?digest(fs.readFileSync(previous))!==entry.baseSha256:fs.existsSync(previous))throw Error('Graphics overlay base differs: '+entry.path);
@@ -35,7 +37,8 @@ export function materializeSource({output,sources={},baseOnly=false}){
   const libraRoot=path.resolve(sources.librashader||path.join(repository,'src/external/librashader'));
   if(execFileSync('git',['-C',libraRoot,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==gitlink(libra.gitlink)||
     digest(fs.readFileSync(path.join(libraRoot,'include/librashader.h')))!==libra.headerSha256)throw Error('Initialize the selected librashader source commit.');
-  for(const name of ['include/librashader.h','LICENSE.md']){const file=path.join(output,'third_party/librashader',name);fs.mkdirSync(path.dirname(file),{recursive:true});fs.copyFileSync(path.join(libraRoot,name),file);}
+  for(const name of ['include/librashader.h']){const file=path.join(output,'third_party/librashader',name);fs.mkdirSync(path.dirname(file),{recursive:true});fs.copyFileSync(path.join(libraRoot,name),file);}
+  addLicenses(output,'librashader',libraRoot);
   return {output,sourceSha256:overlay.baseSourceHash,upstreams:processor.sources.map(entry=>({id:entry.id,commit:gitlink('producers/maclauncher/'+entry.submodulePath)}))};
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }

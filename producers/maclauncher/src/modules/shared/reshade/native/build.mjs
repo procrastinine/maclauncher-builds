@@ -1,3 +1,4 @@
+import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -33,7 +34,8 @@ for (const entry of overlay.files) {
 if (fs.existsSync(output)) throw new Error("Use a new output directory.");
 const applied = path.join(output, "source");
 fs.mkdirSync(applied, { recursive: true });
-for (const name of [...owned, "LICENSE", ".gitmodules"]) {
+addLicenses(applied,"ReShade",source);
+for (const name of [...owned, ".gitmodules"]) {
   const target = path.join(applied, name);
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.copyFileSync(path.join(source, name), target);
