@@ -1,4 +1,3 @@
-import {addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -60,7 +59,6 @@ export function build({jdk,classpath,output,only=Object.keys(definitions)}){
    }
    result.push({component:name,path:definition.output,sha256,bytes:fs.statSync(target).size,javaMajor:definition.level});
   }
-  addLicenses(output,'android-launcher',root);
   return result;
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
  finally{fs.rmSync(temporary,{recursive:true,force:true});}

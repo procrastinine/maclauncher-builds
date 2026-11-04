@@ -1,5 +1,5 @@
 import {androidSource,aimSource} from '../lib/android-source.mjs';
-import {includeLicenses} from '../sources/maclauncher-android/src/modules/android/native/upstream/licenses.mjs';
+import {includeLicenses,addLicenses} from '../lib/licenses.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -72,9 +72,9 @@ export function packageAndroidArtJavaInput({framework,image,output,work,arch='ar
  for(const file of [built.bootstrapDex,built.servicesJar,built.frameworkJar])if(!completed.inputs.some(record=>record.file===file))throw Error('ART Java completion does not include every declared product.');
  const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});for(const [key,name]of Object.entries({bootstrapDex:'hooks-dex.jar',servicesJar:'services.jar',frameworkJar:'framework.jar'}))fs.copyFileSync(built[key],path.join(payload,name),fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);
  includeLicenses(payload,path.join(framework,'licenses'));
- includeLicenses(payload,path.join(Array.isArray(image)?image[0]:image,'licenses'));
- const notices=[];
- return helperPackage({id:stage.id,version:stage.version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{androidSource:androidSource(),frameworkInputSha256:checked.declaration.manifestSha256,originalImageSha256:json(path.join(root,'producers/android-image-data/source.json')).archive.sha256,jdk:{sha256:jdkPin.sha256},compilerInputs:profile,dexTools:dex,frameworkResourcePreinitVersion:built.frameworkResourcePreinitVersion},notices});
+ addLicenses(payload,stage.id,android);
+
+ return helperPackage({id:stage.id,version:stage.version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{androidSource:androidSource(),frameworkInputSha256:checked.declaration.manifestSha256,originalImageSha256:json(path.join(root,'producers/android-image-data/source.json')).archive.sha256,jdk:{sha256:jdkPin.sha256},compilerInputs:profile,dexTools:dex,frameworkResourcePreinitVersion:built.frameworkResourcePreinitVersion}});
 }
 
 /** Validate the neutral Java product group before adding its transport to an owned supplier export. */
