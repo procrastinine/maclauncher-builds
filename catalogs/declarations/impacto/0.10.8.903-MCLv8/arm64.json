@@ -1,0 +1,2735 @@
+{
+  "id": "impacto",
+  "version": "0.10.8.903-MCLv8",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "impacto/0.10.8.903-MCLv8/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "c6d3c7766ea04ae84d0073688d13f7c98466235dc527c098679ffd20a49c3626",
+  "sourceSha256": "c6d3c7766ea04ae84d0073688d13f7c98466235dc527c098679ffd20a49c3626",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 24091,
+      "mode": 420,
+      "sha256": "69cf028d2df7acf422c0cecbd987a21aab77d84452c4ddd1f3aef6c669cafec2"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 982,
+      "mode": 420,
+      "sha256": "c86eac1c6ba715c0b5c7dc6428d26d82b019d7819238efcc5bc3519b0f081a3f"
+    },
+    {
+      "path": "files/basepaths.lua",
+      "size": 174,
+      "sha256": "d45606189f9fefe0b20d00fc76b4815f0c8d9f3735dcf5de64bcc104711c58a6",
+      "mode": 420
+    },
+    {
+      "path": "files/gamedefinitions.lua",
+      "size": 2166,
+      "sha256": "3d385d517f6d3ed359394e327aa115d28d698bd75556d2962cb76f2a6ac1b9ae",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/_CodeSignature/CodeResources",
+      "size": 49834,
+      "sha256": "7f22682454ac52aee5caf48f728da4dab3c0851438cb93866ba7647c6df14837",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Frameworks/libatrac9.dylib",
+      "size": 125040,
+      "sha256": "39feba482b2824fd1908507ad688adbdcbd4766ba902769a280233debb10045c",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/Impacto.app/Contents/Info.plist",
+      "size": 999,
+      "sha256": "98621f8015d0ff7d0f3b1334d96d55df6258efaab3582f3d390f2324237de563",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/MacOS/Impacto",
+      "size": 11205328,
+      "sha256": "678e4068f4ce737bbe5eebd9f25f0df2b1b135b6a8a4f28ffcd42fc74373f345",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/icon.icns",
+      "size": 157616,
+      "sha256": "029d027edad229f9dfcea720c47f995f7823a13b1448bccbd66e644306a0c97d",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/cc/.gitkeep",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/cc/font-lb/foreground.png",
+      "size": 2534315,
+      "sha256": "25c0b0c118c9c99c97346ec917dc77928c40238ee24a49220d73ec1285c415e2",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/cc/font-lb/outline.png",
+      "size": 8929774,
+      "sha256": "54f7c098d368b5dccf8f690f265926f72d0d87f32512269f3110765f9f20f352",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/cc/font-lb/widths.bin",
+      "size": 8000,
+      "sha256": "c5ead75ebe95ecd17ca3661185c982eb081109726196f00dad517512e108b54d",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/cclcc-switch/icondata/icon.icns",
+      "size": 1882000,
+      "sha256": "1bc1a2c00c8a48599c9174110b602fe341e66c08acc511e49ae7663c6e9484c1",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/cclcc-switch/icondata/icon.ico",
+      "size": 130087,
+      "sha256": "d2e6ec559fac318068efe8bc7392ab7a88a7df2bd2314024c32f58153cdb7b21",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/cclcc-switch/icondata/icon.png",
+      "size": 152632,
+      "sha256": "f87943e64c5ebcfa5e7fc0d1d10bcef09d069de61f79cc8e09e39b436b03dc55",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/cclcc/font-lb-italic/foreground.png",
+      "size": 5868973,
+      "sha256": "13343d4fd370f61320f1adcaeb8fe89293448b76f6e77c25490159b0379cfa3c",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/cclcc/font-lb-italic/outline.png",
+      "size": 11060212,
+      "sha256": "bc60b22d4575a9dacba9871fc7a9de2bd2a4586b0770c1fcc60adeede20a60c6",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/cclcc/font-lb-italic/widths.bin",
+      "size": 8000,
+      "sha256": "96461d5019674da2ccfc1a452ff6765b221ac485d85356f9d86e0b4e67780a65",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/cclcc/icondata/cursor_arrow.png",
+      "size": 4227,
+      "sha256": "032e1a32d537e597c4ccc3492904699243a98657c5412e5f28a610ff3006ae9b",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/cclcc/icondata/cursor_pointer.png",
+      "size": 4218,
+      "sha256": "4b188f289033fd73ff35adb813d3aa49bd5b019364f978b7cd7356ad56300f88",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/cclcc/icondata/icon.icns",
+      "size": 1882000,
+      "sha256": "1bc1a2c00c8a48599c9174110b602fe341e66c08acc511e49ae7663c6e9484c1",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/cclcc/icondata/icon.ico",
+      "size": 130087,
+      "sha256": "d2e6ec559fac318068efe8bc7392ab7a88a7df2bd2314024c32f58153cdb7b21",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/cclcc/icondata/icon.png",
+      "size": 152632,
+      "sha256": "f87943e64c5ebcfa5e7fc0d1d10bcef09d069de61f79cc8e09e39b436b03dc55",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/chlcc/.gitkeep",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/chlcc/font-lb/foreground.png",
+      "size": 1926359,
+      "sha256": "34aec21e5ddd629f345b858518e95e8fdba961cf0034b300075426c42271ee62",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/chlcc/font-lb/outline.png",
+      "size": 3943869,
+      "sha256": "69b0835a6f56f8ccede482df67fb3405d4a0f6e3500a34d1a6e0a97ee26976fc",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/chlcc/font-lb/widths.bin",
+      "size": 2496,
+      "sha256": "e7827a83e80fe19f67dc970179374c0d72311be5b58bda1cf04549722e7f2774",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/chlcc/icondata/cursor_arrow.png",
+      "size": 4278,
+      "sha256": "f7121590e46b0a43b2853dba9e2836c02eb4f74d204cda27ce74f8cb36790460",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/chlcc/icondata/cursor_pointer.png",
+      "size": 1542,
+      "sha256": "ecb38cef8273acced05cf29d60e9e39a992389ed07e638a4934c4a4b7d26eb03",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/chlcc/icondata/icon.icns",
+      "size": 2067793,
+      "sha256": "c7389a3d3ed231e4144fe530df6344c6d276f8302bbf5490f31e406e24fcddf0",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/chlcc/icondata/icon.ico",
+      "size": 139572,
+      "sha256": "cb7821c2829177cc9d4c49a04445a0dd6107c7f34f46f618bb3aaec1b2cbe00a",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/chlcc/icondata/icon.png",
+      "size": 150742,
+      "sha256": "6e90b55cf10ac6cc520f2fb78e9b624ccf5a86543eee1b3bb5399bdc140176c6",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/common/achievementnotification.png",
+      "size": 5522,
+      "sha256": "d3d21f9fd95a6a635e24cb6ef5c0103830167e17778980edf94ecb31918f2138",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/common/font/NotoSansCJKjp-Bold.otf",
+      "size": 17032620,
+      "sha256": "e53dcb0dcb2922e45d01aae1ebd2f382bb81d4229b18b6b883bd170678af1f76",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/common/font/NotoSansCJKjp-Regular.otf",
+      "size": 16467736,
+      "sha256": "68a3fc98800b2a27b371f2fb79991daf3633bd89309d4ffaa6946fd587f375b5",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/common/icons/icon.icns",
+      "size": 157616,
+      "sha256": "029d027edad229f9dfcea720c47f995f7823a13b1448bccbd66e644306a0c97d",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/common/icons/icon.ico",
+      "size": 410598,
+      "sha256": "847b142ab81f98cc9ae66064db9766539e7eea1b1d18e818e90b9de05ea0990a",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/common/icons/icon.jpg",
+      "size": 11625,
+      "sha256": "abff0e93a5a70ee9518780e569e7305c6b59760134cd5576a7183027dfb0c5f1",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/common/icons/icon.png",
+      "size": 10247,
+      "sha256": "daf89b4e0bdd51e02c47aaa12a320416fa2daad8a63a1ed21b1a630915d43306",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/common/icons/icon.svg",
+      "size": 751,
+      "sha256": "4e53840decc6e34a90af0c99c11fcaf5c43e25c947ba7a7ca703686fb4f500cf",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/rne/.gitkeep",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/rne/font-lb/foreground.png",
+      "size": 1618933,
+      "sha256": "ff460c0ff61beb315a586dfb7248fffec0ad6280e6f662eb691d1049f8b391f3",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/rne/font-lb/outline.png",
+      "size": 4549721,
+      "sha256": "a1b76bed3332684a4f42a905b65261fb1c9357643d42b98b6727476d8b854e7c",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/rne/font-lb/widths.bin",
+      "size": 3200,
+      "sha256": "e368b7e49339a5382e173da735a1dadf10df7cc44281c088d518a424709cbf81",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/sg0/.gitkeep",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/sg0/font-lb/foreground.png",
+      "size": 2533181,
+      "sha256": "bac12a05133d53b2f2cf507ef55f607fe506e5b9da1640f9b650b34204d4d48c",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/sg0/font-lb/outline.png",
+      "size": 8925972,
+      "sha256": "289ad28b637841accda3b434e1f8749ee0343e6de46220285ef2664890aaef7b",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/resources/sg0/font-lb/widths.bin",
+      "size": 8000,
+      "sha256": "1adf14880aa7a019d5755ed2abdad32df0a185e3857fddaea96cd9faad55dacb",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/dx9/CCMessageBoxSprite_frag.hlsl",
+      "size": 728,
+      "sha256": "6fd1d134758deb05e9aa7974db19be8efd4526fd3c3951acc2bd6facd6cb6465",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/dx9/CCMessageBoxSprite_vert.hlsl",
+      "size": 471,
+      "sha256": "0b18385323258366000780f89320795d428bcd6247fc05c6f5e5c62735c75093",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/dx9/CHLCCMenuBackground_frag.hlsl",
+      "size": 724,
+      "sha256": "7caae5cb9e797c1e7abb7737dbe8a51dbd8af87b54067e96d035d2692b30d54c",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/dx9/MaskedSprite_frag.hlsl",
+      "size": 681,
+      "sha256": "9df2995e028a98699fea5bb09ae746953328db5d8f69fa8bda1d195cfa24d3f1",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/dx9/MaskedSpriteNoAlpha_frag.hlsl",
+      "size": 795,
+      "sha256": "2ba4751a74953fdec1029c981ed3b8c1257443ba8a3585954974f8d9a0a8de05",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/dx9/NV12Frame_frag.hlsl",
+      "size": 917,
+      "sha256": "b889b7c5d6ffeaf77fb7e289cc19d82a9c7761d39468248fce0b813d40f964b1",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/dx9/Renderable3D_Background_frag.hlsl",
+      "size": 157,
+      "sha256": "15d35fc3c6a84473a2542c5ea2c8109fd2ee05ecfc336f8e0c5ff4006ef49ff6",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/dx9/Renderable3D_Background_vert.hlsl",
+      "size": 342,
+      "sha256": "31789306cad39a39b6634834b17bd4b2e1f2da1d90830ed164587938dab3aba0",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/dx9/Renderable3D_Character_frag.hlsl",
+      "size": 3360,
+      "sha256": "3c05ad099a3af7ae7ee92a392d9240a666383fa161f5362fef729f0e046b66f9",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/dx9/Renderable3D_Character_vert.hlsl",
+      "size": 1519,
+      "sha256": "7395608a7502f6490722448d4e59c1d9deb46aabac6c63ff48a92664beb3382f",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/dx9/Renderable3D_Eye_frag.hlsl",
+      "size": 1584,
+      "sha256": "5b24e8195d10b554c6aca7349ad3133b35d347d4bf03cc7df3f664d4df75c8b8",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/dx9/Renderable3D_Eye_vert.hlsl",
+      "size": 1294,
+      "sha256": "3aac58bc3133905a61beb163e18633657166f6c7a06d14172a9eb7f117113c84",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/dx9/Renderable3D_Outline_frag.hlsl",
+      "size": 1299,
+      "sha256": "d3649c8de3b9e013c200ded526db8c10a82e7595ecf67ee390826e84722ec8a3",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/dx9/Renderable3D_Outline_vert.hlsl",
+      "size": 1872,
+      "sha256": "af883c4b6ed78a52bf231639ee41e31f630539aaec2781ef2cc6fc41aea1cd37",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/dx9/Sprite_frag.hlsl",
+      "size": 252,
+      "sha256": "bff18b117cb10f8a5302d6d01332b9039f9253165b9fc0799a01074fdb66d3b7",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/dx9/Sprite_inverted_frag.hlsl",
+      "size": 357,
+      "sha256": "22074295f49b38ad897e5323f3d142bfb1d53d5bef82bc4f2f811197b21897ae",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/dx9/YUVFrame_frag.hlsl",
+      "size": 973,
+      "sha256": "3713ec07f256d17364bf7568353dfd5698e51e1c4c9063aa99be14bc68e36376",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/AdditiveMaskedSprite_frag.glsl",
+      "size": 387,
+      "sha256": "82191aa843334569cbd7e6fea7fefea527230147411846d0a99d67518856a566",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/AdditiveMaskedSprite_vert.glsl",
+      "size": 498,
+      "sha256": "215a3dba2396762347b0f09a903dbf361d5d34681b3a82beff21880ad7d0b47d",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/CCMessageBoxSprite_frag.glsl",
+      "size": 557,
+      "sha256": "f0aed6ef20bb1bb7008db4ee275d36140764b40bf0b069bc5eed88964dc38920",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/CCMessageBoxSprite_vert.glsl",
+      "size": 333,
+      "sha256": "f207ad650b5f27368baac193d444a060bc9953d44b4ab9b142997d787db9c401",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/CHLCCMenuBackground_frag.glsl",
+      "size": 607,
+      "sha256": "6e2c3997f3ee6e514c6f953aef5bdc52c783efe479bb6980ac0658eb83ba59c6",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/CHLCCMenuBackground_vert.glsl",
+      "size": 277,
+      "sha256": "9738b7b418656c26b03f1ed94c2d1c2e3f95578becc5863f92f286f9124d6e66",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/ColorBurnMaskedSprite_frag.glsl",
+      "size": 642,
+      "sha256": "ccbab21e9a2ad262416a1f4cc16ccbc0753249a586ce0a1a72956e6c3f149d4a",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/ColorDodgeMaskedSprite_frag.glsl",
+      "size": 513,
+      "sha256": "f3ea9ba77345b12135f07de921807fdec2540c3da36c30abd3352e3c825b3865",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/ColorMaskedSprite_frag.glsl",
+      "size": 370,
+      "sha256": "37498c00a5639fda1bb52d7c577dde8d43010f65b1170faed7f8f391015db3de",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/EdgeDetectedSingleSheetFont_frag.glsl",
+      "size": 1112,
+      "sha256": "36336340edab82b0535757b0995fb5f992b6bbbc728a2c567686fd02cb439293",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/EdgeDetectedSingleSheetFont_vert.glsl",
+      "size": 468,
+      "sha256": "8eb0610563b0879593eb9317ff7e3878cfc57aad1ac105512d532eea76d1bbec",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/GaussianBlur_frag.glsl",
+      "size": 1772,
+      "sha256": "db7507f7eac2e6e98e621978e2a900a89596b1987c44417863b6ce671ce8de2a",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/GaussianBlur_vert.glsl",
+      "size": 306,
+      "sha256": "4e1be4999ad4bbb1923a5a8845fc46180f303015b86645c80bd163872d3788f0",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/HardLightMaskedSprite_frag.glsl",
+      "size": 711,
+      "sha256": "a58384832caaea3ad88f34d37e1ed66a029fdc80704ffec2db48995fb7eb78a6",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/LinearBurnMaskedSprite_frag.glsl",
+      "size": 399,
+      "sha256": "5823494b90065d2cc25976d266a76ddaee260b966549fb0747cf45cd8bd16bb5",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/MaskedSprite_frag.glsl",
+      "size": 489,
+      "sha256": "3ee9a9c00f7c7b34534c2a3c8e7c88aa159f101cb02c61c550ca0f8c2eda5074",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/MaskedSprite_vert.glsl",
+      "size": 467,
+      "sha256": "57109eb95cffa2b44f1818ee782fbd38c912f8ccf5e260ad1c8c78ad3998f622",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/MaskedSpriteBinary_frag.glsl",
+      "size": 435,
+      "sha256": "73a8c248cae09ec4b1e994a14a129a64c9e11f41f140583845c1efe40dfd3a54",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/MaskedSpriteBinary_vert.glsl",
+      "size": 592,
+      "sha256": "3b0c3b9cdd91283c291790791ce29138e27a0aebe7b83eebf0c2109ee29ddc0f",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/MaskedSpriteNoAlpha_frag.glsl",
+      "size": 637,
+      "sha256": "52f0b28c7e51c059febce8d15cc6e4cab0b5b5b079af2b624cfb9404b523573a",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/Mosaic_frag.glsl",
+      "size": 462,
+      "sha256": "ac5d4874d85b7244e124684014f9bdf9569a6caae061342b367c1cd09fa2f447",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/Mosaic_vert.glsl",
+      "size": 313,
+      "sha256": "410b6358f3c783f5db2447429b68faabfea753c001292d98477a86c2113133e9",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/NV12Frame_frag.glsl",
+      "size": 742,
+      "sha256": "eff1285deb32b8d4b604451de38e7d342a7f9912c6f05909377783538f8c0894",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/NV12Frame_vert.glsl",
+      "size": 259,
+      "sha256": "458316705062c4178aa2c562b332cbef9cdfb40bb3cf0704315292230d47c718",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/OverlayMaskedSprite_frag.glsl",
+      "size": 755,
+      "sha256": "ab78e630a3af5089d5aca37e6fdf0ea46139dc0cf2cb15dd2ee01ba32a63b190",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/Renderable3D_Background_frag.glsl",
+      "size": 105,
+      "sha256": "ff4a8577f4e7a43c4254d02f679fe3e33a37711778927ff183fd076145f5acb2",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/Renderable3D_Background_vert.glsl",
+      "size": 175,
+      "sha256": "ac376441c080ebcb4b4a1bc2a83ebb39f1f36a6a92b8605d6deaac6da6e93090",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/Renderable3D_Character_frag.glsl",
+      "size": 3189,
+      "sha256": "36457ef356ad64e1e9c815f97eb218eeee42d122a6a74d342425696cf6353d67",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/Renderable3D_Character_vert.glsl",
+      "size": 1441,
+      "sha256": "1e6c667173442d2bccb531950a304e40e524e8b6920895013ec8ffa210f54f04",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/Renderable3D_Eye_frag.glsl",
+      "size": 1557,
+      "sha256": "0b25a1e777c6d829b9e694e858d975e58bed1a1b94be7424487aeb8c20ad332c",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/Renderable3D_Eye_vert.glsl",
+      "size": 1252,
+      "sha256": "c10da0d657c3eaa00afc882228dca15eda12ca24ff8b803f521315d7fc94aa8f",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/Renderable3D_Outline_frag.glsl",
+      "size": 1306,
+      "sha256": "97931887a6033aa48ab07809a657ea26aa4ff85a2975988c5a59a767e6b590cf",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/Renderable3D_Outline_vert.glsl",
+      "size": 1729,
+      "sha256": "52e8fe8de738dfaa25a0096fd87d1cdfd1b1fd5e602056174a3cc54472191e2a",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/SceneToRT_frag.glsl",
+      "size": 759,
+      "sha256": "5420c0cb073c1d31c50b41667bd6b75b5898a605f4e51d2d0e0d1ca7fb00a69e",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/SceneToRT_vert.glsl",
+      "size": 169,
+      "sha256": "695d4cf072eb60388b38a88e4458acf29fcded06eb6339e2122545ac02c79cc6",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/ScreenMaskedSprite_frag.glsl",
+      "size": 410,
+      "sha256": "aa6f60dbcfa6bce936a834837f1e16e23d85e49e1cc96b43019fced04d5d3bf8",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/SoftLightMaskedSprite_frag.glsl",
+      "size": 937,
+      "sha256": "b337a06d21803be33d70ab607828c5bb26f667a8decda57d2edb9f0f4a7f011f",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/Sprite_frag.glsl",
+      "size": 212,
+      "sha256": "b85e1500959f94863b8953b822a15b5d50858e21ea780dca51b39626bf87a393",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/Sprite_vert.glsl",
+      "size": 306,
+      "sha256": "4e3d9cf7e1f91071d012728e860d1a4e8c733e49e2bbfce3ef7987d55b9b1051",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/SpriteInverted_frag.glsl",
+      "size": 175,
+      "sha256": "685e0f33bdaf29f4d56cfe155b5d49b5cae7776327c489eb20b314c3dd85cde5",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/SubtitleGlyph_frag.glsl",
+      "size": 212,
+      "sha256": "04d49ef654c24236bd5b734773aa246f9449a152b14bee7ab8ac90321a437805",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/opengl/YUVFrame_frag.glsl",
+      "size": 1187,
+      "sha256": "581cb0705b505ce4f9f05fdf278592aa557c62753a166b61c8b3a335b6d8f544",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/CCMessageBoxSprite_frag.glsl",
+      "size": 806,
+      "sha256": "245af3d382469ee5de60bfc1a176aabe1b2ec14794dc18aeb0b0bb5d612e08f4",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/CCMessageBoxSprite_frag.spv",
+      "size": 2708,
+      "sha256": "9fdeb45bdc5c1da644c6f55a3c69cc8fb2376356332cc98549df996e760cdec2",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/CCMessageBoxSprite_vert.glsl",
+      "size": 414,
+      "sha256": "556a814c8196c011d232d167bc3a00393ba3efd641ce264c402e67380d5a75c0",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/CCMessageBoxSprite_vert.spv",
+      "size": 1364,
+      "sha256": "381152e44daadf507a29d9079a39779d004ba2edc42741b0db1aa80ef0dff803",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/CHLCCMenuBackground_frag.glsl",
+      "size": 766,
+      "sha256": "bdaa4e28bed5eb359f17f3b5e03e490bae1f15a727b77a25533996d431ec657d",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/CHLCCMenuBackground_frag.spv",
+      "size": 2392,
+      "sha256": "3b1afd69a1aa050f0a60b47de6ab1992b2a4386f3b1bbfc7c5d664d98063aca9",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/CHLCCMenuBackground_vert.glsl",
+      "size": 333,
+      "sha256": "e64caaaeac2d1268561869f5bb778550b1698c1c9026ffc51e264e1a1787720d",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/CHLCCMenuBackground_vert.spv",
+      "size": 1216,
+      "sha256": "b28f806791d2b6413a96d2cbad5975e5534ae337d6d4c30e2d31325a07178d48",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/MaskedSprite_frag.glsl",
+      "size": 722,
+      "sha256": "7fccc13afc12c0fd7e249112647ca483f7f7f56427a63e2a4a63f134a5d5d337",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/MaskedSprite_frag.spv",
+      "size": 2484,
+      "sha256": "f42a1c441144a160240a5825e382319fa74fd7bd3b5f13e414fbb455657d5e87",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/MaskedSpriteNoAlpha_frag.glsl",
+      "size": 859,
+      "sha256": "6277874319dba44006a209f80505934c14fc9b484d5355d5c128acf4d386f83c",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/MaskedSpriteNoAlpha_frag.spv",
+      "size": 2708,
+      "sha256": "d3ec924536b9cde9fc1e4f914068df8f50a53f7cfc90246a4617ab62a4c8c474",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/NV12Frame_frag.glsl",
+      "size": 890,
+      "sha256": "88da98acdb08197d32858eae23c4b665c8d6f7a5037ccaa91c19ee6380acfba2",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/NV12Frame_frag.spv",
+      "size": 2572,
+      "sha256": "7170ae20b6cd46cf0ba68af444640261dd19c90035211d2ee76866b8e0331dbd",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/NV12Frame_vert.glsl",
+      "size": 343,
+      "sha256": "ede8eb4e3be1e80aa4d26f809bbf7af5d56a70ecd558d7f6e2a3841fd0fff346",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/NV12Frame_vert.spv",
+      "size": 1164,
+      "sha256": "44c6fde0a6c6fe95b115daf16689d2121c20a25f896de10d5b4dff8d299ef6de",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Renderable3D_Background_frag.glsl",
+      "size": 287,
+      "sha256": "8fd2df13c38d802bcfd9f3b298323f0a079d1f011e7173d6f66014bf172370d9",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Renderable3D_Background_frag.spv",
+      "size": 780,
+      "sha256": "5ab33a9ce9501db5ca57b210ddb36dc928b8f7aa3117789e0005ed44a71fb2a4",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Renderable3D_Background_vert.glsl",
+      "size": 370,
+      "sha256": "736a98975b0909ca1b5e88dc495b2abb861b49e42e16fbf3db279897aac1ac29",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Renderable3D_Background_vert.spv",
+      "size": 1500,
+      "sha256": "abf080796199e509d9e814e4975a31a5a40ffbb00754bd8c0e34d788e3b58e0f",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Renderable3D_Character_frag.glsl",
+      "size": 3264,
+      "sha256": "7fc31c448a53a039d2faf3daf3040564698d90cbd09bda18d662143c8472da9a",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Renderable3D_Character_frag.spv",
+      "size": 7148,
+      "sha256": "954b09779dde137eca6919df35f353b08a6ac2f6911b58ff8f369d1458f9f0a3",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Renderable3D_Character_vert.glsl",
+      "size": 1478,
+      "sha256": "9e5d440c4cfa722ec3f737f94f86d32700c05464e4989673a1aee2de8fce9e70",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Renderable3D_Character_vert.spv",
+      "size": 4812,
+      "sha256": "12a51d8823b3983e91f7752ccb8095c46fc405265b7e710d8adf268a7c3a72ea",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Renderable3D_Eye_frag.glsl",
+      "size": 1619,
+      "sha256": "c867ff71dda3ca14a079ab17bc6925d6e2fec985a088f915b35e55123a9ca2e4",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Renderable3D_Eye_frag.spv",
+      "size": 4188,
+      "sha256": "2cd74f520815ffa408319ac1c7cc5d9e67facdbe5054b110ab357d448c10cb05",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Renderable3D_Eye_vert.glsl",
+      "size": 1268,
+      "sha256": "09aec3dbc1653100c9dfd8bb93fc57d60c565af348ba6fe143b6a8b99bdb82f7",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Renderable3D_Eye_vert.spv",
+      "size": 4272,
+      "sha256": "4dc1a4a0304939d7cdae632a06edfd8a310f0c9f292ce0324aed4e69c78bcb80",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Renderable3D_Outline_frag.glsl",
+      "size": 1350,
+      "sha256": "1f1ce0cdd8e889e044772257b923a351200d2dedba51bbf4792c5c2b02e562a0",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Renderable3D_Outline_frag.spv",
+      "size": 3872,
+      "sha256": "ee7134c44a4ed9566cf3c065b5d1953e4134c741fd02a99b01333608607c5539",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Renderable3D_Outline_vert.glsl",
+      "size": 1837,
+      "sha256": "adb0251e01ec87e21ef91b81fa55b66460504b49e9d3c76817620cadf485a8f7",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Renderable3D_Outline_vert.spv",
+      "size": 5588,
+      "sha256": "b80062069b9903ecb0939f5bd9a34a0406cb7ee25c1e1666be8d953d74149d7c",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Sprite_frag.glsl",
+      "size": 254,
+      "sha256": "37117e7c69b7cd4085be748947c548828021536fa86447e70c3abb50e7f01495",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Sprite_frag.spv",
+      "size": 728,
+      "sha256": "b4d61882770ecfd66ade58603b3d4f548e2546bb769196a0c47d6f08c043c0a4",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Sprite_inverted_frag.glsl",
+      "size": 303,
+      "sha256": "63c7d5d80715ea4f27df58983da16496ea9f87160a6f98de85df68b805a5a47c",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Sprite_inverted_frag.spv",
+      "size": 1116,
+      "sha256": "6bfac94e3e7530ba8a247a699200cfa5a0a951e02177f2409f9d594a1b5db5b8",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/Sprite_inverted_vert.spv",
+      "size": 1236,
+      "sha256": "a453d638636726c4f470173c51dce3f26bd6fa3cfca9fd3df47d04dbcf42e38d",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/YUVFrame_frag.glsl",
+      "size": 933,
+      "sha256": "7ee0e788f1a346da22231bddcc06b00c62d4f8545fb2d0763fab9b449e959b50",
+      "mode": 420
+    },
+    {
+      "path": "files/Impacto.app/Contents/Resources/shaders/vulkan/YUVFrame_frag.spv",
+      "size": 2704,
+      "sha256": "fd9d0722234c5cfd8b237683abfeab0de88283b23d6411ba5d9cd4a58caa523e",
+      "mode": 420
+    },
+    {
+      "path": "files/lib/libavcodec.61.19.101.dylib",
+      "size": 553600,
+      "sha256": "d0e639b59dfdfdd87ff11d874f30ee43443c602f71202669f9f957560175c741",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libavformat.61.7.100.dylib",
+      "size": 311968,
+      "sha256": "18c379a9bb5f010e5488e013e1f5b9457c1f6ce0d75d10fba7611b2a7d47f933",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libavutil.59.39.100.dylib",
+      "size": 697008,
+      "sha256": "69b01da93a936d10c0ee8a72e633e601e8de16851b37759b51e3c1c77eaf2b8c",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libdav1d.7.dylib",
+      "size": 923344,
+      "sha256": "af29342d4796f405706601f7e4f16898bf10a991308e28c45cef94238c5cba94",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libfmt.12.2.0.dylib",
+      "size": 181840,
+      "sha256": "83843ab3e6334aa4e9839ba863a180471151d1753b05557acc1d06412cff98bf",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libfreetype.6.20.6.dylib",
+      "size": 763872,
+      "sha256": "5ec7073806a0f93f6f51f9cc894d996e5118ee5c7fe37a68e10b6347b3f99098",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libglm.dylib",
+      "size": 426656,
+      "sha256": "64ea22b41a7033ead2fa89b714844c8d1cb69b94de89273c073587988082421a",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libgraphite2.3.3.1.dylib",
+      "size": 139712,
+      "sha256": "9b29ff06af550736de60703a8926384d296ece50bebf7eb7bb854029b34de1df",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libharfbuzz.dylib",
+      "size": 1479680,
+      "sha256": "97b4acc4eeb915f0f61484bb61f5cb95d931b3111cc9ee72535c088e2f726f36",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libogg.0.8.6.dylib",
+      "size": 53664,
+      "sha256": "84ebfcc7780d5592740e8a40475b777bf334518ea193ec6e8558fc02ef6b16ec",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libopenal.1.25.2.dylib",
+      "size": 1635280,
+      "sha256": "e7c6eeb384ac99a79ff1ea13063da3be96af0a11d13e07144fd0103347c4e33e",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libopus.0.11.1.dylib",
+      "size": 518992,
+      "sha256": "9618f4908d6b2c9202044aa61471093b31ac2bbcddaaad661f2211b49792dcdc",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libpng.dylib",
+      "size": 241728,
+      "sha256": "209888f1fc1081ea397bae6981db53e63666422e9678081409b6da4c12589b04",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libpugixml.1.16.dylib",
+      "size": 256544,
+      "sha256": "94498a12ff6bcb29eaca4c954d6185dc7281d8c1f5d203ea396176675178ec3a",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libSDL3.0.dylib",
+      "size": 2836288,
+      "sha256": "928e87730dbcbf305c732e4639a95e50ee36b6bb9688e01dab6b9fffac3dcdbb",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libsharpyuv.0.1.2.dylib",
+      "size": 67856,
+      "sha256": "822f36dc4db292a2318ad78e232bee08cb173fff35a3ca3432ba36ed3ed401da",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libswresample.5.3.100.dylib",
+      "size": 119440,
+      "sha256": "ca663c2ccefef3d80c2d8b8a23e9d041a54abc9883844c70086520eedd4be462",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libswscale.8.3.100.dylib",
+      "size": 794368,
+      "sha256": "25000d0545b481259eac60bd18485a6ddf2c4312a3205191e76f78706f1d8c55",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libvorbis.0.4.9.dylib",
+      "size": 240752,
+      "sha256": "6b301fcd7992ae4a608f1f9fee78ae55f1ab216475e22ee60323965432d2448e",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libvorbisfile.3.3.8.dylib",
+      "size": 55248,
+      "sha256": "8651fe0eb488b218c36f60f2c5da13d2fcf1481d250d322a227f22581240c0eb",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libwebp.7.2.0.dylib",
+      "size": 511024,
+      "sha256": "7fbff94c331700845cf2861c9206b03de66d8c3701aee6bedb74d0180d7e92e0",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libwebpdecoder.3.2.0.dylib",
+      "size": 282688,
+      "sha256": "167ccd30cd476761f556a623d4cec345c288524b6ad3f93a782e1fd8661c583f",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libwebpdemux.2.0.17.dylib",
+      "size": 35168,
+      "sha256": "378eda7db489fe812b772877db4d09c3fa5fa88e2343c2c5645d3800dde92e43",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/licenses/atrac9.txt",
+      "size": 1068,
+      "sha256": "cdb280ff931233bdefef0dfdd1d884217d97cb24a96530a41ce7848790df86f7",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-10.txt",
+      "size": 25281,
+      "sha256": "e64f9c5a18f56828c10a575df13ade641aa3af4512a7afe6c411256943b57aaf",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-11.txt",
+      "size": 503,
+      "sha256": "5c1f8d44f1eacbea3e1c31ff6ee11a4e1690ccbed4ee4af16de3b6eb61dc69a8",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-12.txt",
+      "size": 26518,
+      "sha256": "ad01ea5cd2755f6048383c8d54c88459cd6fcb17757c5c8892f8c5ea060f6140",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-2.txt",
+      "size": 22954,
+      "sha256": "c5d2b95c2538d2e41d8eedd9ecc750cd5fee085c7bb2bc3e2f95f4e59cc0b10d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-3.txt",
+      "size": 18092,
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-4.txt",
+      "size": 26436,
+      "sha256": "5df07007198989c622f5d41de8d703e7bef3d0e79d62e24332ee739a452af62a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-5.txt",
+      "size": 1509,
+      "sha256": "7866ee98760fc1f0156b4fe6bf530257e02be487ab3fd94e2b63799dd32d6b2c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-6.txt",
+      "size": 1470,
+      "sha256": "ec1815db59fcd302846df949d7424876cb2e2dc5ed1606c5fb0b36787b1cf43a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-7.txt",
+      "size": 1945,
+      "sha256": "01e1167d54a096d123cf6dfbbeb19587278845c6481d2d66d545669846079551",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-8.txt",
+      "size": 703,
+      "sha256": "7efb4989e0cd1b256229bdf2f09300c5d14e35db0e7476bfb87fac243498273d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-9.txt",
+      "size": 40718,
+      "sha256": "c22482728a634a8dfdb4ff72a96d4c1ed64cd8f3e79335c401751ac591609366",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio.txt",
+      "size": 1466,
+      "sha256": "d2ab5758336489da61c12cc5bb757da5339c4ae9001f9bb0562b4370249af814",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/avcpp-2.txt",
+      "size": 26438,
+      "sha256": "5f541e8877fb2d39ee04c8d071f7df9d7c0d0cf5f8c9f24adcf3e8a4a0f14e61",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/avcpp-3.txt",
+      "size": 511,
+      "sha256": "d2ffcf755c489ca53b1ae02b9e7624b1ca64dd63b94337bd2b3644258d79b669",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/avcpp.txt",
+      "size": 1549,
+      "sha256": "1eb761a33249a67ecf60f84865a5e6c204b4695c6e3965a3c9444635b27bf5fc",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 1432,
+      "sha256": "be37f186c348f6a33e6c31a245ff9e2a559ea965ef9bb8ef6342d9137fa50bea",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/concurrentqueue.txt",
+      "size": 3266,
+      "sha256": "22331571e5e3dbe4c79ad715e23127bdf3beabd75052c953ddabf191ef799e14",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dav1d.txt",
+      "size": 1317,
+      "sha256": "dd92c3c2247c5651606fc23a5e2d6a1ebc5ace9a3e49cbde0e12f05ad1cb1ee5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/FFmpeg-7.1.2-4.txt",
+      "size": 7651,
+      "sha256": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/FFmpeg-7.1.2-5.txt",
+      "size": 4376,
+      "sha256": "cb48bf09a11f5fb576cddb0431c8f5ed0a60157a9ec942adffc13907cbe083f2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fmt.txt",
+      "size": 1094,
+      "sha256": "a65fcc5a1095fc33cc37e4fff69366e49d7e92f613558a2b95ed1b70e33758b4",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-13.txt",
+      "size": 355,
+      "sha256": "b327a7b3a4597e5902556ec3e8407cbdd1e288abd4623b7b4b56d14d49e84ecb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-15.txt",
+      "size": 4791,
+      "sha256": "8f6e13bd28818e5aec0a054eb82e7618b0613fdc7a9015e6e92f22c4c5f9ad34",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-16.txt",
+      "size": 1724,
+      "sha256": "7e547b692449e35f57a4d8cd963294eed698c1505631d303d97c59189e8f6f70",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-17.txt",
+      "size": 6743,
+      "sha256": "5a5ee54c5001bbad1cdc1a57cc3dd4c42199b2da09d39c7ee41fab002d02967f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-18.txt",
+      "size": 17994,
+      "sha256": "c4120c6752c910c299e3bd9cb3a46ff262c268303ca2069b61f92f10a5656c18",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-2.txt",
+      "size": 5345,
+      "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-3.txt",
+      "size": 878,
+      "sha256": "8876cdca96eb380d16d5ea32bf4529d85e87dedc7765ae2861a9bec7f34acbed",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-4.txt",
+      "size": 1036,
+      "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-5.txt",
+      "size": 2149,
+      "sha256": "bd36c8b474855fa294c2ec5c184544478ef3720aad37d65a6296a4f264fd2d3b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-6.txt",
+      "size": 1235,
+      "sha256": "2c272829ff23f182c8bf7ea12fedea69b0ae148663123ed5240c117cb129c9c1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-7.txt",
+      "size": 29228,
+      "sha256": "cab46cd45adbfea4b1d0f14b033c70062c73074fa0b56532c2f351576ddf455e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-8.txt",
+      "size": 1971,
+      "sha256": "ba8f810f2455c2f08e2d56bb49b72f37fcf68f1f4fade38977cfd7372050ad64",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts.txt",
+      "size": 884,
+      "sha256": "97f35b302b361680ec1e891e95d2d52097bb95abff361434916d99dc1305f127",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/glm.txt",
+      "size": 2865,
+      "sha256": "62d2d642c7d054d4fb4c9b42faad617d6c88fcd91e317f8035aa9f277cc159c3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/impacto.txt",
+      "size": 752,
+      "sha256": "29bada6a2f0e4eb72278e29497646ee2f05b628c60c5fa88e6fcc5f52cab1688",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/magicEnum.txt",
+      "size": 1080,
+      "sha256": "7240d196079161cabea66b2b4e52d83d0946ab74900ea4dacd5e50d6bcac4510",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/openal-2.txt",
+      "size": 23330,
+      "sha256": "d808ce217e5b611854da622b57ec29fe545584c48bc5352fae72a4b6e5074a15",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/openal-3.txt",
+      "size": 1669,
+      "sha256": "64056328b3e7bc104e24ef96accc1a7abead156f0c02d1b87c97e3f3a28030de",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/openal.txt",
+      "size": 1652,
+      "sha256": "b5a08cf98996dd83aa906a72c163600f6cb17a65ce546a553815a1267abd43ff",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/pugixml.txt",
+      "size": 1079,
+      "sha256": "90974fbb120e966b452654eaae3ba6ee55f3647db3b28918a7649733ee99da97",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/readerwriterqueue.txt",
+      "size": 1615,
+      "sha256": "018fb474bdf10bc068f5e3f2c61e18df8326d60b46db3eb017b4411eda189afc",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL3-HIDAPI-2.txt",
+      "size": 35147,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL3-HIDAPI-3.txt",
+      "size": 264,
+      "sha256": "fb5436aa63d1b71a8dfbf74ecaf1a5b4e1ec4df7f80074d11fec99284f69ca5f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL3-HIDAPI-4.txt",
+      "size": 530,
+      "sha256": "7d3b087c34f35d4d538e3bcddd1ff8f66e92f9ef336881999482800ddf840913",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL3-HIDAPI-authors.txt",
+      "size": 425,
+      "sha256": "38102075d829116ee23d7a1fe0cb53f0c6932a9275da0ca1a3885b44db1963b4",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL3-HIDAPI.txt",
+      "size": 1534,
+      "sha256": "30eb1bef29b46f8ba7ab8b416035dbd93cb034a45481dd97815b944284582cd2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL3-yuv2rgb.txt",
+      "size": 1480,
+      "sha256": "f7d74004cc75778cae46c5f0139f244d67c07ef64cf51937e8272352197dcb18",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/sdl3.txt",
+      "size": 884,
+      "sha256": "1c040b8271b37e5076359f8fd54240e371114112924d2df81ef87c7d6a1dfdfd",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/toml11.txt",
+      "size": 1077,
+      "sha256": "b547d41695cdfbc1d054b5044578e476a0e9d756849f1e0cb3864cfc83e50a9e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/unordered_dense.txt",
+      "size": 1078,
+      "sha256": "4f5a62734899ec0ba85d3e8264a7ed1fcb4bcb8f0b4359c0afd627b6314ae599",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/utf8cpp.txt",
+      "size": 1338,
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/webp-2.txt",
+      "size": 1436,
+      "sha256": "cc3273e0694ea5896145e0677699b53471b03ea43021ddc50e7923fbb9f5023c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/webp.txt",
+      "size": 1496,
+      "sha256": "5aec868f669e384a22372a4e8a1a6cd7d44c64cd451f960ca69cc170d1e13acf",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/charset.lua",
+      "size": 1352,
+      "sha256": "a24fe0b8de00dadeb604f63361e5d9cb0adeec1eea8868490cd9ca131b40523b",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/dialogue.lua",
+      "size": 5378,
+      "sha256": "c098a7d0f8805faceccdd34622a79ffba285249456619ce236cc188b865adfd0",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/font.lua",
+      "size": 3634,
+      "sha256": "bf2bb17b1ca94da0c190df8bf525695f915c8535fa0e82d8845257ab00d74b6c",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/game.lua",
+      "size": 2724,
+      "sha256": "d3ad7e04441bfd2655ae7808ec02de13cc33228ac82555736afac9db494df349",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/hud/backlogmenu.lua",
+      "size": 2113,
+      "sha256": "cfa81c32aab9c1afca1eb8184f172061592810a68802aacbb6e3083dd32265d6",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/hud/datedisplay.lua",
+      "size": 4186,
+      "sha256": "c13bc2a0895fcf4d5b969b3908bc2a307b5a1b4f6d2e4d407fcf488f09a290a8",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/hud/loadingdisplay.lua",
+      "size": 1795,
+      "sha256": "7a4b11c95c02058925b959e6bbb27e1e47f05823df4e55ba3bc8f152ea7194de",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/hud/saveicon.lua",
+      "size": 688,
+      "sha256": "fb36ac2dcd82c5ebad39b1b9d3320ad77fdb351f14a85518c7198acdcc83a822",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/hud/selectiondisplay.lua",
+      "size": 2434,
+      "sha256": "e4650ac43a92d6bb383659bd300562de3c643579b785b2adc77c723db63f0931",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/hud/sysmesboxdisplay.lua",
+      "size": 3259,
+      "sha256": "60c49ae36808d729bccd44237796716a628dc333ec474c8c0c1ed30db1719911",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/hud/systemmenu.lua",
+      "size": 3353,
+      "sha256": "1e49d00b5a3d9e118b2e5d86ea56812d0d3dccb039ed431955f5ce512f07dbf6",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/hud/tipsmenu.lua",
+      "size": 50,
+      "sha256": "a1904c9c3c11e5d2ca3d1d059feeb887bb9132821e0933e2d6aa7ce841b13c1a",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/hud/tipsnotification.lua",
+      "size": 67,
+      "sha256": "33a78081680c3a2ba80efd7b3cc41c677166aa6f4ad54b6b8cf94b9356e366e2",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/hud/titlemenu.lua",
+      "size": 5631,
+      "sha256": "3ba9854911d171e41e8c9527cc8a55a4a9ce93662b8035e53fba780c7edb2f15",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/savedata.lua",
+      "size": 122,
+      "sha256": "8fbaa2864ba220adce1d1811592b98e4e96c532a3c03eb04229db32f1f613bca",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/scriptvars.lua",
+      "size": 543,
+      "sha256": "3188e438ab6aa959e7fa09acc5a23f186c3f5bd8f64fc98d3987f518be6c47cb",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/sprites.lua",
+      "size": 1454,
+      "sha256": "c2d45c147fe771e6f09f27f756c91c3c355d242ade5a5f93ef42e4d97fbdfcca",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/tipssystem.lua",
+      "size": 54,
+      "sha256": "aceb5023a3d46a0da944da44a1b834a9fad15cb6e3ea8180ef62a5ab3daa5709",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/vfs.lua",
+      "size": 751,
+      "sha256": "f4987a6fa3559560dfe192bc1392992f061e371397b06b3ab84ee4614f3e6573",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cc/waveeffects.lua",
+      "size": 88,
+      "sha256": "bf6a19170ff5905ca3ed83149ed95946cb73e3b0e7e8b3e8073b1dc2f4557e1d",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc-switch/bgeff.lua",
+      "size": 115,
+      "sha256": "e9e07fc020890ae42ae3773979571797e9bf33ec1f1a83b3df2c32a2eb127f57",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc-switch/dialogue.lua",
+      "size": 114,
+      "sha256": "f5443a89b4a350fdcdae973e202a75ae33fb8f4f8a00a9d0bcf94c16be4dd72d",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc-switch/font.lua",
+      "size": 639,
+      "sha256": "8c4ed85b1d39fae2e845d9a3c719f903cf829070878263dea2490b394e730009",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc-switch/game.lua",
+      "size": 4488,
+      "sha256": "cc38aa45eeb61ab412e38cb2806b01d37ff96b740bf7067f970b93d275b5698e",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc-switch/hud/extramenus.lua",
+      "size": 168,
+      "sha256": "3834cbe9e4e75c3b8b660c09d5a096f6fa5cf81438056a420f6d65077e4c0457",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc-switch/hud/helpmenu.lua",
+      "size": 433,
+      "sha256": "3da6a1beceb67b85c48bbdb9365c434710d4abd6bee3e0e651205d4f5fa8da9c",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc-switch/hud/saveicon.lua",
+      "size": 751,
+      "sha256": "51cec8cb70fd7069745fae4d039041353403f14ffc73c43016f461dc8bf04777",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc-switch/hud/tipsmenu.lua",
+      "size": 275,
+      "sha256": "5bfff8539a560ee5243a8346b79f4c6e74d93b12dfdc033d165772f7b8bb8c4d",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc-switch/hud/tipsnotification.lua",
+      "size": 117,
+      "sha256": "3993b1b39de2688f1684b3994e96775efa0506aab5b42e041e8e5f113c2ebbb8",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc-switch/hud/titlemenu.lua",
+      "size": 318,
+      "sha256": "105b5daed1c7001bde36cb607397b66fe3aae524c2d54ea60503bbac0844db4c",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc-switch/savedata.lua",
+      "size": 1925,
+      "sha256": "4f92e739029b9657ec345abba10c0c2d7d8e39a06a71349d853a395eef711b3a",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc-switch/scriptvars.lua",
+      "size": 7324,
+      "sha256": "7d30f1e403adcdbeff4178b9aef246ef72fc7f8ae3e4bf36d56089999dc84e14",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc-switch/sprites.lua",
+      "size": 4115,
+      "sha256": "d75f37700aa1c2584ed7efe6b1ee438e0c1b46ac23bcbead191603f0a219841c",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc-switch/vfs.lua",
+      "size": 1473,
+      "sha256": "5735dcf8165d016a991f3d5298631c5a02b6322059b7933d71d056bd2f1a043f",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/bgeff.lua",
+      "size": 60333,
+      "sha256": "0846572196bd3f60e04f761776ed1844206559e2405b9a10fbc1ea672c82e9f7",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/charset.lua",
+      "size": 23785,
+      "sha256": "7967cd302b894308906499c24cb3f97cde57a75c79a83853797c328ea37a9d72",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/configsystem.lua",
+      "size": 598,
+      "sha256": "52d9c38f9f142805dd90c1b29ed5e4daf56ad60cce4cff9d72db436e21ddcbe0",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/dialogue.lua",
+      "size": 6343,
+      "sha256": "76ac083e4cc9262e48a93ddacf09a7d8efad9a7983d9d5292798a869d598dc6e",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/equivalentlines.lua",
+      "size": 418,
+      "sha256": "925f02556a170066f6b1ae675d1040b9337845aab0096fd01b3fa14797fd287d",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/font.lua",
+      "size": 1720,
+      "sha256": "18547eabf75578e579547ddded085b985e2aa35fffccf4b903f13c37d106025c",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/game.lua",
+      "size": 3590,
+      "sha256": "f1e623c87cb743378b21f8e6884c3090cb1fec9c02105fce830472798cb9c968",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/gamespecific.lua",
+      "size": 643,
+      "sha256": "b13ce0b86c8772010024d822bbdb4f240bc4b18ce4d9136b8b779879b9984746",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/hud/backlogmenu.lua",
+      "size": 2115,
+      "sha256": "4cff101c09295a78f0cb6f65e403de16cbfd70c25d7b883026adbf3690e20dec",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/hud/delusiontrigger.lua",
+      "size": 49,
+      "sha256": "e150f44e91908cc0fda07b0bea9f1a5f8dd3944d1b176a2f387e9aa72c5caf23",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/hud/extramenus.lua",
+      "size": 17454,
+      "sha256": "529eb8294160eaae8a4211338f72055291fc811419550fe54db25f3c40112da9",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/hud/helpmenu.lua",
+      "size": 524,
+      "sha256": "b8877855f154174ff532590a707a8ba324a8fe6c7a9f367f0501fa3dc95c6ff7",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/hud/optionsmenu.lua",
+      "size": 7039,
+      "sha256": "816670cadfd52a0a351a4284606d1c0ecb6222b1a285b839df678e34e673aaf4",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/hud/saveicon.lua",
+      "size": 749,
+      "sha256": "3262615d4f0fd0ef23ce0fd34e83b05f0dc47871150e0cb80808b8781c387d1c",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/hud/savemenu.lua",
+      "size": 4114,
+      "sha256": "2e89ef236839d13d5220709e4e2e3464963373f38d3d8a979f8ef5dd6ddd2a28",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/hud/sysmesboxdisplay.lua",
+      "size": 3259,
+      "sha256": "bc000b1fe4a2757bc5fb651697982532bc8a66256193f843b53a88f3467d1fdc",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/hud/systemmenu.lua",
+      "size": 5678,
+      "sha256": "a8987f18302fc87bb42681e18aa01f0b9ebe2d6be7eb787e395499ef37cb9ae5",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/hud/tipsmenu.lua",
+      "size": 2463,
+      "sha256": "7fa0954f2c60daedefa7ac5714812a21ec905d4637c89547f52e4f0253ab95b7",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/hud/tipsnotification.lua",
+      "size": 721,
+      "sha256": "898baa6398a1dc221ec973f5b8acce9e4d7383d347649e95334233646d183576",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/hud/titlemenu.lua",
+      "size": 5308,
+      "sha256": "303872b81c65fa6c59918b964c5b89edaefdfde625d2f22480094e5d3639280a",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/mapsystem.lua",
+      "size": 2458,
+      "sha256": "da0d24624f2f37a77b20e818fa9693019e0bed2ae2a990baaa7042a0c6acb26f",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/savedata.lua",
+      "size": 5084,
+      "sha256": "a83cc9bb952e90157c350adbef198a925134762e15730e662c169c9aa93a9ae4",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/scriptinput.lua",
+      "size": 22,
+      "sha256": "3ebe9073629314a3dbe9cf230e0bd7e59d1a9eebc5d5392e5f78e7e726cc8766",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/scriptvars.lua",
+      "size": 1779,
+      "sha256": "e0a51226e047a68c15e7d054ba3710273e44f7d2985e0961b706f7ad9538a8af",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/sprites.lua",
+      "size": 4518,
+      "sha256": "5ecd7eeb99ae14f9fcbb6e03c138ad37813b4ae3612a4c1484a80aca3e20091c",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/tipssystem.lua",
+      "size": 135,
+      "sha256": "d9f60229b7522a0ca4f19f15d88e8335862214b73d795346667770a0e0fea8b4",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/vfs.lua",
+      "size": 1155,
+      "sha256": "8aaf121f030c654ed3dda6f2832a2930265c6f82fd773b6e2cf8d537837384e3",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/cclcc/yesnotrigger.lua",
+      "size": 6641,
+      "sha256": "c1067e886c74055dfd0c3a468c778ee16804092d8c48c86626399550c76cea28",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/characterviewer/game.lua",
+      "size": 215,
+      "sha256": "7054402905b9e8ead17a5477dabdcef76fb9da90cc06a6ffd17099ebc70d0f5f",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/charset.lua",
+      "size": 7025,
+      "sha256": "5630683bb426085dc9529e5750f6eb674a13da3e7c71d66dd72f55b26b1aa920",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/dialogue.lua",
+      "size": 4761,
+      "sha256": "315306b1862937b717be6db3372f42517b53df40a4a4224388eaeb00da187036",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/equivalentlines.lua",
+      "size": 25931,
+      "sha256": "d4d25051fd5947c86726a3a2d1d406a41eaf417e05a6a6c3974bfdb53422c121",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/font.lua",
+      "size": 3055,
+      "sha256": "d961f585da3d6dcb01e4c74ba1ecf4f49684f62a7859a182a77cb1f3e1e1466a",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/game.lua",
+      "size": 3468,
+      "sha256": "acfc765db7f22dbe37a78e48eca7b4e7bd9bd34aaceca3f1b176e04d37fbe059",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/gamespecific.lua",
+      "size": 1270,
+      "sha256": "ec804e3c05f5c674dfbae5f32fd1f3ae6871d5e83797a7ce62133cbf8aac1ed6",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/hud/backlogmenu.lua",
+      "size": 2289,
+      "sha256": "6eff86a71fe5ebac165ff1044f40d19247f0077171763e81f536122e06bcd95b",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/hud/commonmenu.lua",
+      "size": 1466,
+      "sha256": "bab1c2bde6fc8d3875cf4cf1515a52668dceb8cbf5a642ba0a997ca4be72328e",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/hud/datedisplay.lua",
+      "size": 4140,
+      "sha256": "dc95848530d327eb89b84110b8bf5c373ccaa6db63edbcbf296598a2ecc526de",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/hud/delusiontrigger.lua",
+      "size": 1292,
+      "sha256": "44caf8ddf9bdfe6839895bf481c76dd695a582d6dbe70c43782a5353b4962164",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/hud/extramenus.lua",
+      "size": 20455,
+      "sha256": "e5cc8a5fda0b6fb9b240cc5ef5d3213081b0271ae7f4e2d0b851f7d5689da0d5",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/hud/optionsmenu.lua",
+      "size": 8200,
+      "sha256": "72a2ea0971e7dbdea7289de94c8744855c78483d9507b93c53f82bb2a2cf6ddb",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/hud/saveicon.lua",
+      "size": 550,
+      "sha256": "e7ea5eacc34e0c79dacc1c10ea9aa2204e3f066326fed4f0f2acf142cdb0f528",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/hud/savemenu.lua",
+      "size": 5783,
+      "sha256": "d40b19974dbd5b6bab1ce36f76520fbf2384003198650bb735418c3559096bac",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/hud/sysmesboxdisplay.lua",
+      "size": 2101,
+      "sha256": "b86e3b42351fa60d7f43e2220555aeeea8d615f0d227bb2bb1712621cde066f5",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/hud/systemmenu.lua",
+      "size": 6543,
+      "sha256": "be6fd411892defee3616b28344c519c1ef3a3ac13e16c9427b2ebff38b91b8e3",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/hud/tipsmenu.lua",
+      "size": 6539,
+      "sha256": "d132534b4a3fe43854975817e61ac4fe1da820e71608e68fe71f019069dad15a",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/hud/tipsnotification.lua",
+      "size": 679,
+      "sha256": "b96f0f3a168faaf5d06d4b4a994390dfc4c2f90e30cfd5f9e82a367db1160cc5",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/hud/titlemenu.lua",
+      "size": 14226,
+      "sha256": "86faa82d1ac1e9ad39100fab2243cf8262582be781c505ee7e038f92a63785af",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/hud/trophymenu.lua",
+      "size": 3926,
+      "sha256": "2374f15f87088dce2545149cf0bb0bdc41727fa11e12caf881b8d32499af18f1",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/savedata.lua",
+      "size": 4869,
+      "sha256": "73cb485ea8f30fc3c17544c2a45618862fc59b1893d95aad6dab95f89a651319",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/scriptinput.lua",
+      "size": 1460,
+      "sha256": "530da3701bb4a85aff49500e56154818a3d9ffbc5eb022269611ec55a13598ef",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/scriptvars.lua",
+      "size": 4918,
+      "sha256": "0ec44a58bbe96dbb01e244e6aa0fd6a63a58ab9976f579b961a3a2da7763b237",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/sprites.lua",
+      "size": 3027,
+      "sha256": "9149461ca7bfcde998e52b23f09dc6dd1fdbb1dd1f6404fc93c5903365576e15",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/tipssystem.lua",
+      "size": 1159,
+      "sha256": "2d9f5ab9b5cba428d61b1186562a058068b70196d3545b117589c996b1b234a0",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/vfs.lua",
+      "size": 705,
+      "sha256": "a5d6058c53ea278180c51f6118a6fab720b0f69fefe11782a899d8e3f32f45bc",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chlcc/waveeffects.lua",
+      "size": 88,
+      "sha256": "4d032c971db786eff8cbb2769060475754413208672ea1ae888bb1ac15d50b79",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chn/dialogue.lua",
+      "size": 3171,
+      "sha256": "1998bdaa349538b753d1075b95e7a7e446efd0474b1bcb17dd65e0852e092202",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chn/font.lua",
+      "size": 3636,
+      "sha256": "6d7dd5db156939b0a85a7f840fa1bbc04a4460d63657dbd9d1e854394a951e85",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chn/game.lua",
+      "size": 2564,
+      "sha256": "ecfe1fb259d55a1c2d1f65b67c8371b7a4c52c6578e2ebf804338a34dd13f83e",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chn/hud/backlogmenu.lua",
+      "size": 1186,
+      "sha256": "d51393cffec3b9102849200a8056509f9efcf78ca7a31dc477c8cbb6819c5e49",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chn/hud/saveicon.lua",
+      "size": 705,
+      "sha256": "26cf8970d25fd5dbd2fc81c58a637b5fecd16646fecf4fccc0c9947cd4423f83",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chn/hud/sysmesboxdisplay.lua",
+      "size": 2930,
+      "sha256": "d33f06587cd7d9adf15e29c63510bfa0c0ae00a27aedd3b1813c280a98d822b4",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chn/hud/tipsnotification.lua",
+      "size": 64,
+      "sha256": "7f15561bc764323a9bdfe704ae7d2ece7fc7fc9585e91920befbe4fe82e6ccdd",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chn/scriptvars.lua",
+      "size": 449,
+      "sha256": "d7b841bc4e0269279e34b40ec67479ee3b0465911d72f4748c78157c2dc06f98",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chn/sprites.lua",
+      "size": 1192,
+      "sha256": "4802b997e99e73bd745e8173ffa3893d36bcd82f3526c457ae0723d955c8908b",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/chn/vfs.lua",
+      "size": 833,
+      "sha256": "18475ead5467b2f0410d651e06779ba0af55bec04bc1ba43ecc2e9be10ea0bba",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/common/achievementnotification.lua",
+      "size": 487,
+      "sha256": "fedd365c2407a3ef2c95bbfe07e45cccc6c4e501c16abd9b67e46138d1d6d234",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/common/animation.lua",
+      "size": 3157,
+      "sha256": "6a2e224c798937990852e40464b9ac41dd27ad44ec14c45d4a29c8de856d650a",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/common/charset.lua",
+      "size": 2132,
+      "sha256": "5f7d82d6cc557ba39aec0314ce99922252aa69e97eeb6dc713e03b8bafa1a4a9",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/common/scriptinput.lua",
+      "size": 9005,
+      "sha256": "f62ec2591ac569ec1f505d64dc1b0679b99ca4e4f74099ab183e2b5379ea68cc",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/common/scriptvars.lua",
+      "size": 11942,
+      "sha256": "ad2b1bdb7d25dbf417967d209e7ded870ee241f9e97b6e8bb60d94f797a1b7d5",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/darling/charset.lua",
+      "size": 1388,
+      "sha256": "13e85a9e5c70e9d6329e714288357a22bcd0afd059c0dca930ede5b91ece0674",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/darling/dialogue.lua",
+      "size": 3312,
+      "sha256": "31810983240131492614df2d87b607da865014e10781f3bdf262a0c911bd3291",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/darling/font.lua",
+      "size": 2940,
+      "sha256": "ac95bd3545c6abe5e29ba3ae4d41b1aacebc91c5b6f63976d7fad341c138f947",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/darling/game.lua",
+      "size": 2588,
+      "sha256": "0dcfa3ea315157f4488d6c5183c0ef5e9eb527a09d6a43582eeb7f9093b42e39",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/darling/hud/backlogmenu.lua",
+      "size": 1187,
+      "sha256": "b0b1ec3ae91a79509b9493a32def3f9e8e705824a8e98fe5118287d3e123f258",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/darling/hud/saveicon.lua",
+      "size": 684,
+      "sha256": "8f757d116e9c00752566ef5512efeb71ec17149044917823992dcb9deba364ec",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/darling/hud/sysmesboxdisplay.lua",
+      "size": 1681,
+      "sha256": "f48636a70662cc60d17e4fad16c60447ed4e5d1a6c358c9dfc9a72aa2522a650",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/darling/hud/systemmenu.lua",
+      "size": 2016,
+      "sha256": "52e3fef982852d9b1a4d86a93f2766ceef43a87414351272d445a6753901877f",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/darling/hud/titlemenu.lua",
+      "size": 9758,
+      "sha256": "0450d8b668be98e254a02bd1684d7a7a93fed165f8da674a4495cf4ab3b4efaa",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/darling/savedata.lua",
+      "size": 127,
+      "sha256": "07af167897cc0eb379e84e3a4ac7581d03b5a1cb5273fc3fc8f60273bd74c688",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/darling/scriptvars.lua",
+      "size": 482,
+      "sha256": "a22b00278def35905011cd261a84515325ad309a1ab15eda3bdaae2b81380f08",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/darling/sprites.lua",
+      "size": 931,
+      "sha256": "b705d69a3407fa8a2df8e6ce3c2e0fafc05a0288e38df886a02ee522d3b5500e",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/darling/vfs.lua",
+      "size": 723,
+      "sha256": "dc98fbcb9c9047c8dc63e5f4817a552849f6df43be5831cbc6eaccfd061d1727",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/dash/charset.lua",
+      "size": 1351,
+      "sha256": "78de4aa07a2ad0f4fe03675f2f0f9a877d6e529a83f5e219f13b955c7360f13c",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/dash/dialogue.lua",
+      "size": 3914,
+      "sha256": "40d007adef638fced0cd4ff989d2a57a86267eb5d30906d6c35f4080e7283553",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/dash/font.lua",
+      "size": 3635,
+      "sha256": "0fdd8cc9cd49e09210104190b773c7c60a3432a717ef4101524ca4f982537c3b",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/dash/game.lua",
+      "size": 2665,
+      "sha256": "2ac55d372af7358f85742eca89626ea06e9560628dd0d847d6d540f84a108e56",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/dash/gamespecific.lua",
+      "size": 54,
+      "sha256": "5cc674dd45bf50e6d0011e37d51c1ce21abf73feded122dfe3844fe2e09fec84",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/dash/hud/sysmesboxdisplay.lua",
+      "size": 4180,
+      "sha256": "4621b5e6fa3426ba06c91ec9b5489137c0abd9068ea04142b06787c7a562c088",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/dash/hud/systemmenu.lua",
+      "size": 3402,
+      "sha256": "8380d52c4f22ee7811a208e7be9919189d1e78cf8bfdb9d6138bd115aee2ffbf",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/dash/hud/titlemenu.lua",
+      "size": 592,
+      "sha256": "e8a1b420f325937af4f88c981ffb007f2a75eb55e24885bb87b06df14225d553",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/dash/savedata.lua",
+      "size": 124,
+      "sha256": "75a0d64c08baf422bd1b31786f76d0b9027ebc6cb8e4302a7d6e1e2c48cccd72",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/dash/scene3d/characters.lua",
+      "size": 14909,
+      "sha256": "c7993116984c02ad44c87763af04e2f96315484cce1a67660d06a77634716640",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/dash/scene3d/scene3d.lua",
+      "size": 469,
+      "sha256": "8fa423954e637d846b0ada14629aebff7102295cbc142999c9b4e047c887ec50",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/dash/scriptvars.lua",
+      "size": 136,
+      "sha256": "caa26bd17abf246dc0443f98cf5ddabd01a915b6a4d8e5a1265b51d3661707a5",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/dash/sprites.lua",
+      "size": 801,
+      "sha256": "e0b450169819b52c576ee5f5f1dbe82198c8a93e95037a8f05a5e46535781cda",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/dash/vfs.lua",
+      "size": 848,
+      "sha256": "a35adadfd450ae1d2b40abe5d4814810f99b8c3d501be312e583924baa696b3f",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/charset.lua",
+      "size": 2783,
+      "sha256": "72340242983e4891aed34091bc93e8b346de8320ca816707e681a3e03a90765d",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/dialogue.lua",
+      "size": 4255,
+      "sha256": "3a8fc38b6829f4a315e3b05826c6e2c5d25addc6cdece819fc879cd3681a42b2",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/font.lua",
+      "size": 2940,
+      "sha256": "b3154e60df061670d34012e763a84d87903989ad6c8e22848027f29b52c09a63",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/game.lua",
+      "size": 2741,
+      "sha256": "806e354fcd6b81471c602be5fcf29e49dd5864893d13c76752a863d57fb112e2",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/hud/backlogmenu.lua",
+      "size": 1505,
+      "sha256": "f0eb955257d4e472e5788a48a6db5174a6ad35996d6e65b9fee8117214050570",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/hud/extramenus.lua",
+      "size": 24315,
+      "sha256": "4ed7f9c7be1be41ce64efae0a44801ec9c3467139b17d1d88d30bd0ef0cf6a68",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/hud/optionsmenu.lua",
+      "size": 4638,
+      "sha256": "dc49ae80b4947bc0d2ff8188c2e2f41020aec1a4323512e1d38d64973604b640",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/hud/saveicon.lua",
+      "size": 686,
+      "sha256": "a36aaa16b8c745fa59ddc5d86e00729c42216171e36c94b844ba956a63603b06",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/hud/savemenu.lua",
+      "size": 2110,
+      "sha256": "fa701eeca1e5f77081a751f6f6a424f1e69bd0b07a4d2fbcaad0647e6d91f35f",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/hud/sysmesboxdisplay.lua",
+      "size": 1712,
+      "sha256": "836a211d91b474ab2b44afff1dc95e33f538af7c24bca8d52b0fb0cbfc33570c",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/hud/systemmenu.lua",
+      "size": 1144,
+      "sha256": "0a419a84c0d7082ea53bb81d15418bbe67bf7c0177b1bd3af1c8c66d744ad496",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/hud/tipsmenu.lua",
+      "size": 2429,
+      "sha256": "7327290d2f9553aa4fc4166b87ae415564297ca3755e00ebf3b792086c4a6e8e",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/hud/tipsnotification.lua",
+      "size": 620,
+      "sha256": "9ae8f85c9c963004071d0d8a69c361b3b522e894d87a3c1151fa12b0b39833a8",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/hud/titlemenu.lua",
+      "size": 2711,
+      "sha256": "118b9295a9b33dd228dcb833884d4248dfd7a770d3951e1c4572d47c7fb474e1",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/savedata.lua",
+      "size": 9460,
+      "sha256": "15725214f3cc82498c2a42900845bd1dad88b35b48a4bcb58f850ccbf34b319c",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/scriptinput.lua",
+      "size": 3208,
+      "sha256": "e934f1f51706a92ce582ce1169f8bef0ae32dc0ab30a841dea830db14aa83bc3",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/scriptvars.lua",
+      "size": 3681,
+      "sha256": "555217345e446c7a2f1dfd3fe01dcf1b74d4b3b4bccfffb320524bee6ca6ad3a",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/sprites.lua",
+      "size": 2775,
+      "sha256": "d74dea234b21bb29c2724e713a5bf548977de9a843a8b2e8f6edb2ca6a0ef413",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/tipssystem.lua",
+      "size": 75,
+      "sha256": "fc3b2855aa0edef24bc1f4a17a10a21a50e087689571915c6d39b1aea47c44c9",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo6tw/vfs.lua",
+      "size": 685,
+      "sha256": "43c6f8aefb648ffa39764ba3054194f7436ba0ab44e7535a4278343b1df8ba1e",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo7/dialogue.lua",
+      "size": 3320,
+      "sha256": "4a3b038bac7ae5f4c6b7f40bb2b6dc89541fda0de28f302605c8a4c88b16bb74",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo7/font.lua",
+      "size": 2940,
+      "sha256": "19841398baf59b412fd26914c71a6bf1e711a6a54278db2dbcf3c3b8e3db227e",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo7/game.lua",
+      "size": 2547,
+      "sha256": "0902fca2fc2fc8998ca9988dd98454110b54a325c524232b588119f725fb4e9a",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo7/hud/sysmesboxdisplay.lua",
+      "size": 1803,
+      "sha256": "6acca14ed8b2b97c8cce8fc2ab354e357dd74d887fbd86ae7aa165db774ee1c1",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo7/savedata.lua",
+      "size": 123,
+      "sha256": "3befe51091383963a42e96d1a3c150c083dfa34a90bfabe164dfe43059e1840b",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo7/sprites.lua",
+      "size": 931,
+      "sha256": "8123e6cd7f9bf8dec40a8e4f901e78aa554ff0cb638a3b7e6ae446c7bf05f1d8",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo7/vfs.lua",
+      "size": 687,
+      "sha256": "cd750ed0a2dc29f08c978cc3e15854f273b475cb7443c947e5c21c0aaa4cbe86",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo8/charset.lua",
+      "size": 1352,
+      "sha256": "7a6dfce741aab604de8e5f02b885600fc1f3ec6876fc8aa1fd630196781261b5",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo8/dialogue.lua",
+      "size": 5048,
+      "sha256": "1ce543d0c9a6f4ad29b84afbe125e80980919ef993d7ac81249aaa8b93053e44",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo8/font.lua",
+      "size": 3614,
+      "sha256": "0f9ff1a4b983301589ad2e110c61f2292de0e75fde9f83121f326b2ace09b0e1",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo8/game.lua",
+      "size": 2662,
+      "sha256": "fcd3fabacf7ec493c624e030fcc8bf4f2e2c5b628793e00994aaa49889cc1448",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo8/hud/backlogmenu.lua",
+      "size": 1189,
+      "sha256": "7a0cbe5c599aacbcda9a1fa72e2fc249c5d7276695eddc416d2c730fbc591375",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo8/hud/optionsmenu.lua",
+      "size": 15409,
+      "sha256": "9c5b00bc66ae262885dccc0920f9f31b77b6eb98d9452c085a83ae5466524d7b",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo8/hud/saveicon.lua",
+      "size": 692,
+      "sha256": "a43755fdca6521061df090624a45d9d595210fbe34e4726798efef5cd09040c9",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo8/hud/savemenu.lua",
+      "size": 1949,
+      "sha256": "f1c1d24f37d48ced4bdf54239044b89bf51dd8ec5652a8982f9865eddb9dd3ff",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo8/hud/selectiondisplay.lua",
+      "size": 2488,
+      "sha256": "b83e5ed03c9a735a17b4be1dc3600544963969bf7729b04bd72b3d27d92490d9",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo8/hud/sysmesboxdisplay.lua",
+      "size": 1804,
+      "sha256": "044baf2ba4bd552eaa2dbc58a17304466368feb1a665aaf1515231a4e0e6b5a3",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo8/hud/systemmenu.lua",
+      "size": 7702,
+      "sha256": "42fea25b5bf61d8cbec00a1f8906666501bb01fbc63480fae0c5ff4ae3a26908",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo8/hud/titlemenu.lua",
+      "size": 2171,
+      "sha256": "abef231a5a3fc8f285e821fe9925f4fa2439932625d895fa3c3c745969acc4a4",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo8/savedata.lua",
+      "size": 123,
+      "sha256": "eb1eef5e37ef7e77aaeb3dad5f91a827ada03849b6df5404b3e42ff8a2678869",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo8/scriptvars.lua",
+      "size": 474,
+      "sha256": "177695565c0eaa56eda4660ad3fef447bf637473de31fd9d70d127d186e1d83e",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo8/sprites.lua",
+      "size": 1312,
+      "sha256": "82a2c4701bf84a71b739ec2b684b184853ba6b6a1c433089c11fe917436b94d4",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/mo8/vfs.lua",
+      "size": 833,
+      "sha256": "5cf90f1fbb8102a9e06e4a95a8384e838267308915e0122df68accec33edbfc8",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/modelviewer-dash/game.lua",
+      "size": 208,
+      "sha256": "fb3f5dd90d2a6401b14bddcdfee06e0d9efae23fc076d357942ae6d664db5e28",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/modelviewer/game.lua",
+      "size": 208,
+      "sha256": "da75b24db946d734475daf1043186f6e069ecc009c2e10e4e5d051b738026685",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/rne/dialogue.lua",
+      "size": 3799,
+      "sha256": "ed5f0b60eb0f5b73db591a54bb89ad78d85c32bd4eb3518c7628f123bf305546",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/rne/game.lua",
+      "size": 2502,
+      "sha256": "15fab0939a391dab3c018ade353faa25f471582e1dfc5b1d5dec8d25d2e9afb6",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/rne/gamespecific.lua",
+      "size": 53,
+      "sha256": "8823d47f3ece6aacf3aee31caf9af9c579e0841c271c5c1aae64ea00028666e2",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/rne/hud/sysmesboxdisplay.lua",
+      "size": 3972,
+      "sha256": "a2d9935b1de2c79219c09f2de17162eb685877570956916ecc5d571518647ca5",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/rne/hud/systemmenu.lua",
+      "size": 3403,
+      "sha256": "f8fa1a6fbd12d419cc8bf81518f1775e7ac065281c02722de4d7a264b325224c",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/rne/hud/titlemenu.lua",
+      "size": 2156,
+      "sha256": "590622f787eae6840cd6b657ab2522502ca6bb7bd3f9c476c6b56a0692d2d6e3",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/rne/savedata.lua",
+      "size": 123,
+      "sha256": "606de44a9ac4ac39742e772d2c595c4bbd81e1f11f19699d4a3cd5ed44bd90f4",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/rne/scene3d/characters.lua",
+      "size": 14885,
+      "sha256": "1479a1817ba14e155143c4d58fff3b532928a4edfe49e1997b4dd4757da99060",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/rne/scene3d/scene3d.lua",
+      "size": 596,
+      "sha256": "37e6288e0518a7cc161f56310bd06d652dccd4c7244e798d60244d7e5d8e6a3c",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/rne/sprites.lua",
+      "size": 804,
+      "sha256": "b381ccb30118aee0478a8a67feacf69625499df55405b632a948becb1666128b",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/rne/vfs.lua",
+      "size": 687,
+      "sha256": "763db10e417f37175dce1cab431dbbed179f3abadb8ddabc9cb71f41c9ba6081",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/sgps3/charset.lua",
+      "size": 1388,
+      "sha256": "49a9579ecdbf8d327c8fbd6951fa70a44b00123211a2d2608be71884af0b4e97",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/sgps3/dialogue.lua",
+      "size": 3311,
+      "sha256": "28317e999100b5ad3fc2064821a4d5a4b9d3d0dc945082168e2cb0811eaf09bb",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/sgps3/font.lua",
+      "size": 2940,
+      "sha256": "87f66d49e6caaeb07fb6437c803fa04bbce35faf341043f519951ebbf22df6aa",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/sgps3/game.lua",
+      "size": 2394,
+      "sha256": "7572a5647f5d4d851bab9d6d5141e927e9ae3521d28176702b2cc89223b2fe95",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/sgps3/hud/sysmesboxdisplay.lua",
+      "size": 1803,
+      "sha256": "fee52c888e18e0ad459b131a34840ec49df0ce758727d9a4cdf62236367757cc",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/sgps3/savedata.lua",
+      "size": 125,
+      "sha256": "f9b76e75b6392d90543a37a6d56f1860bf678f3be70be8ca8e703edd28d79e05",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/sgps3/scriptvars.lua",
+      "size": 2272,
+      "sha256": "377e92c75f3ba2366d983b6c09f91ce348ac479c644bdcbff0fa3c2725144c3a",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/sgps3/sprites.lua",
+      "size": 929,
+      "sha256": "5f1689f4f8967d084dd3ccf40ea79ff375a450b498b7ba3208aaa039e6039ff1",
+      "mode": 420
+    },
+    {
+      "path": "files/profiles/sgps3/vfs.lua",
+      "size": 708,
+      "sha256": "9f927ee9f7394615e12d44f0df9e1e291120c5ece25982165ebaca83a226bfc2",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 114282,
+      "mode": 420,
+      "sha256": "c6d3c7766ea04ae84d0073688d13f7c98466235dc527c098679ffd20a49c3626"
+    }
+  ],
+  "redistribution": "bundle",
+  "aliases": {
+    "schema": 1,
+    "files": {
+      "files/Impacto.app/Contents/Resources/shaders/dx9/CHLCCMenuBackground_vert.hlsl": "files/Impacto.app/Contents/Resources/shaders/dx9/CCMessageBoxSprite_vert.hlsl",
+      "files/Impacto.app/Contents/Resources/shaders/dx9/MaskedSprite_vert.hlsl": "files/Impacto.app/Contents/Resources/shaders/dx9/CCMessageBoxSprite_vert.hlsl",
+      "files/Impacto.app/Contents/Resources/shaders/dx9/MaskedSpriteNoAlpha_vert.hlsl": "files/Impacto.app/Contents/Resources/shaders/dx9/CCMessageBoxSprite_vert.hlsl",
+      "files/Impacto.app/Contents/Resources/shaders/dx9/NV12Frame_vert.hlsl": "files/Impacto.app/Contents/Resources/shaders/dx9/CCMessageBoxSprite_vert.hlsl",
+      "files/Impacto.app/Contents/Resources/shaders/dx9/Sprite_inverted_vert.hlsl": "files/Impacto.app/Contents/Resources/shaders/dx9/CCMessageBoxSprite_vert.hlsl",
+      "files/Impacto.app/Contents/Resources/shaders/dx9/Sprite_vert.hlsl": "files/Impacto.app/Contents/Resources/shaders/dx9/CCMessageBoxSprite_vert.hlsl",
+      "files/Impacto.app/Contents/Resources/shaders/dx9/YUVFrame_vert.hlsl": "files/Impacto.app/Contents/Resources/shaders/dx9/CCMessageBoxSprite_vert.hlsl",
+      "files/Impacto.app/Contents/Resources/shaders/opengl/ColorBurnMaskedSprite_vert.glsl": "files/Impacto.app/Contents/Resources/shaders/opengl/AdditiveMaskedSprite_vert.glsl",
+      "files/Impacto.app/Contents/Resources/shaders/opengl/ColorDodgeMaskedSprite_vert.glsl": "files/Impacto.app/Contents/Resources/shaders/opengl/AdditiveMaskedSprite_vert.glsl",
+      "files/Impacto.app/Contents/Resources/shaders/opengl/ColorMaskedSprite_vert.glsl": "files/Impacto.app/Contents/Resources/shaders/opengl/AdditiveMaskedSprite_vert.glsl",
+      "files/Impacto.app/Contents/Resources/shaders/opengl/HardLightMaskedSprite_vert.glsl": "files/Impacto.app/Contents/Resources/shaders/opengl/AdditiveMaskedSprite_vert.glsl",
+      "files/Impacto.app/Contents/Resources/shaders/opengl/LinearBurnMaskedSprite_vert.glsl": "files/Impacto.app/Contents/Resources/shaders/opengl/AdditiveMaskedSprite_vert.glsl",
+      "files/Impacto.app/Contents/Resources/shaders/opengl/MaskedSpriteNoAlpha_vert.glsl": "files/Impacto.app/Contents/Resources/shaders/opengl/MaskedSprite_vert.glsl",
+      "files/Impacto.app/Contents/Resources/shaders/opengl/OverlayMaskedSprite_vert.glsl": "files/Impacto.app/Contents/Resources/shaders/opengl/AdditiveMaskedSprite_vert.glsl",
+      "files/Impacto.app/Contents/Resources/shaders/opengl/ScreenMaskedSprite_vert.glsl": "files/Impacto.app/Contents/Resources/shaders/opengl/AdditiveMaskedSprite_vert.glsl",
+      "files/Impacto.app/Contents/Resources/shaders/opengl/SoftLightMaskedSprite_vert.glsl": "files/Impacto.app/Contents/Resources/shaders/opengl/AdditiveMaskedSprite_vert.glsl",
+      "files/Impacto.app/Contents/Resources/shaders/opengl/SpriteInverted_vert.glsl": "files/Impacto.app/Contents/Resources/shaders/opengl/Sprite_vert.glsl",
+      "files/Impacto.app/Contents/Resources/shaders/opengl/SubtitleGlyph_vert.glsl": "files/Impacto.app/Contents/Resources/shaders/opengl/Sprite_vert.glsl",
+      "files/Impacto.app/Contents/Resources/shaders/opengl/YUVFrame_vert.glsl": "files/Impacto.app/Contents/Resources/shaders/opengl/NV12Frame_vert.glsl",
+      "files/Impacto.app/Contents/Resources/shaders/vulkan/MaskedSprite_vert.glsl": "files/Impacto.app/Contents/Resources/shaders/vulkan/CCMessageBoxSprite_vert.glsl",
+      "files/Impacto.app/Contents/Resources/shaders/vulkan/MaskedSprite_vert.spv": "files/Impacto.app/Contents/Resources/shaders/vulkan/CCMessageBoxSprite_vert.spv",
+      "files/Impacto.app/Contents/Resources/shaders/vulkan/MaskedSpriteNoAlpha_vert.glsl": "files/Impacto.app/Contents/Resources/shaders/vulkan/CCMessageBoxSprite_vert.glsl",
+      "files/Impacto.app/Contents/Resources/shaders/vulkan/MaskedSpriteNoAlpha_vert.spv": "files/Impacto.app/Contents/Resources/shaders/vulkan/CCMessageBoxSprite_vert.spv",
+      "files/Impacto.app/Contents/Resources/shaders/vulkan/Sprite_inverted_vert.glsl": "files/Impacto.app/Contents/Resources/shaders/vulkan/NV12Frame_vert.glsl",
+      "files/Impacto.app/Contents/Resources/shaders/vulkan/Sprite_vert.glsl": "files/Impacto.app/Contents/Resources/shaders/vulkan/NV12Frame_vert.glsl",
+      "files/Impacto.app/Contents/Resources/shaders/vulkan/Sprite_vert.spv": "files/Impacto.app/Contents/Resources/shaders/vulkan/Sprite_inverted_vert.spv",
+      "files/Impacto.app/Contents/Resources/shaders/vulkan/YUVFrame_vert.glsl": "files/Impacto.app/Contents/Resources/shaders/vulkan/NV12Frame_vert.glsl",
+      "files/Impacto.app/Contents/Resources/shaders/vulkan/YUVFrame_vert.spv": "files/Impacto.app/Contents/Resources/shaders/vulkan/Sprite_inverted_vert.spv",
+      "files/lib/libfreetype.dylib": "files/lib/libfreetype.6.20.6.dylib",
+      "files/lib/libgraphite2.dylib": "files/lib/libgraphite2.3.3.1.dylib",
+      "files/lib/libogg.dylib": "files/lib/libogg.0.8.6.dylib",
+      "files/lib/libpng16.dylib": "files/lib/libpng.dylib",
+      "files/lib/libvorbis.dylib": "files/lib/libvorbis.0.4.9.dylib",
+      "files/profiles/cclcc/hud/datedisplay.lua": "files/profiles/cc/hud/datedisplay.lua",
+      "files/profiles/cclcc/hud/loadingdisplay.lua": "files/profiles/cc/hud/loadingdisplay.lua",
+      "files/profiles/cclcc/hud/selectiondisplay.lua": "files/profiles/cc/hud/selectiondisplay.lua",
+      "files/profiles/cclcc/waveeffects.lua": "files/profiles/cc/waveeffects.lua",
+      "files/profiles/chlcc/hud/loadingdisplay.lua": "files/profiles/cc/hud/loadingdisplay.lua",
+      "files/profiles/chlcc/hud/selectiondisplay.lua": "files/profiles/cc/hud/selectiondisplay.lua",
+      "files/profiles/chn/charset.lua": "files/profiles/cc/charset.lua",
+      "files/profiles/chn/hud/datedisplay.lua": "files/profiles/cc/hud/datedisplay.lua",
+      "files/profiles/chn/hud/loadingdisplay.lua": "files/profiles/cc/hud/loadingdisplay.lua",
+      "files/profiles/chn/hud/selectiondisplay.lua": "files/profiles/cc/hud/selectiondisplay.lua",
+      "files/profiles/chn/hud/systemmenu.lua": "files/profiles/cc/hud/systemmenu.lua",
+      "files/profiles/chn/hud/tipsmenu.lua": "files/profiles/cc/hud/tipsmenu.lua",
+      "files/profiles/chn/hud/titlemenu.lua": "files/profiles/cc/hud/titlemenu.lua",
+      "files/profiles/chn/savedata.lua": "files/profiles/cc/savedata.lua",
+      "files/profiles/chn/tipssystem.lua": "files/profiles/cc/tipssystem.lua",
+      "files/profiles/darling/hud/datedisplay.lua": "files/profiles/chlcc/hud/datedisplay.lua",
+      "files/profiles/darling/hud/loadingdisplay.lua": "files/profiles/cc/hud/loadingdisplay.lua",
+      "files/profiles/darling/hud/selectiondisplay.lua": "files/profiles/cc/hud/selectiondisplay.lua",
+      "files/profiles/darling/hud/tipsmenu.lua": "files/profiles/cc/hud/tipsmenu.lua",
+      "files/profiles/darling/hud/tipsnotification.lua": "files/profiles/cc/hud/tipsnotification.lua",
+      "files/profiles/darling/tipssystem.lua": "files/profiles/cc/tipssystem.lua",
+      "files/profiles/dash/hud/backlogmenu.lua": "files/profiles/darling/hud/backlogmenu.lua",
+      "files/profiles/dash/hud/datedisplay.lua": "files/profiles/cc/hud/datedisplay.lua",
+      "files/profiles/dash/hud/loadingdisplay.lua": "files/profiles/cc/hud/loadingdisplay.lua",
+      "files/profiles/dash/hud/saveicon.lua": "files/profiles/chn/hud/saveicon.lua",
+      "files/profiles/dash/hud/selectiondisplay.lua": "files/profiles/cc/hud/selectiondisplay.lua",
+      "files/profiles/dash/hud/tipsmenu.lua": "files/profiles/cc/hud/tipsmenu.lua",
+      "files/profiles/dash/hud/tipsnotification.lua": "files/profiles/cc/hud/tipsnotification.lua",
+      "files/profiles/dash/tipssystem.lua": "files/profiles/cc/tipssystem.lua",
+      "files/profiles/mo6tw/hud/datedisplay.lua": "files/profiles/chlcc/hud/datedisplay.lua",
+      "files/profiles/mo6tw/hud/loadingdisplay.lua": "files/profiles/cc/hud/loadingdisplay.lua",
+      "files/profiles/mo6tw/hud/selectiondisplay.lua": "files/profiles/cc/hud/selectiondisplay.lua",
+      "files/profiles/mo7/charset.lua": "files/profiles/darling/charset.lua",
+      "files/profiles/mo7/hud/backlogmenu.lua": "files/profiles/darling/hud/backlogmenu.lua",
+      "files/profiles/mo7/hud/datedisplay.lua": "files/profiles/chlcc/hud/datedisplay.lua",
+      "files/profiles/mo7/hud/loadingdisplay.lua": "files/profiles/cc/hud/loadingdisplay.lua",
+      "files/profiles/mo7/hud/saveicon.lua": "files/profiles/mo6tw/hud/saveicon.lua",
+      "files/profiles/mo7/hud/selectiondisplay.lua": "files/profiles/cc/hud/selectiondisplay.lua",
+      "files/profiles/mo7/hud/tipsmenu.lua": "files/profiles/cc/hud/tipsmenu.lua",
+      "files/profiles/mo7/hud/tipsnotification.lua": "files/profiles/cc/hud/tipsnotification.lua",
+      "files/profiles/mo7/scriptvars.lua": "files/profiles/darling/scriptvars.lua",
+      "files/profiles/mo7/tipssystem.lua": "files/profiles/cc/tipssystem.lua",
+      "files/profiles/mo8/hud/datedisplay.lua": "files/profiles/cc/hud/datedisplay.lua",
+      "files/profiles/mo8/hud/loadingdisplay.lua": "files/profiles/cc/hud/loadingdisplay.lua",
+      "files/profiles/mo8/hud/tipsmenu.lua": "files/profiles/cc/hud/tipsmenu.lua",
+      "files/profiles/mo8/hud/tipsnotification.lua": "files/profiles/cc/hud/tipsnotification.lua",
+      "files/profiles/mo8/tipssystem.lua": "files/profiles/cc/tipssystem.lua",
+      "files/profiles/rne/charset.lua": "files/profiles/dash/charset.lua",
+      "files/profiles/rne/font.lua": "files/profiles/dash/font.lua",
+      "files/profiles/rne/hud/backlogmenu.lua": "files/profiles/darling/hud/backlogmenu.lua",
+      "files/profiles/rne/hud/datedisplay.lua": "files/profiles/chlcc/hud/datedisplay.lua",
+      "files/profiles/rne/hud/loadingdisplay.lua": "files/profiles/cc/hud/loadingdisplay.lua",
+      "files/profiles/rne/hud/saveicon.lua": "files/profiles/darling/hud/saveicon.lua",
+      "files/profiles/rne/hud/selectiondisplay.lua": "files/profiles/cc/hud/selectiondisplay.lua",
+      "files/profiles/rne/hud/tipsmenu.lua": "files/profiles/cc/hud/tipsmenu.lua",
+      "files/profiles/rne/hud/tipsnotification.lua": "files/profiles/cc/hud/tipsnotification.lua",
+      "files/profiles/rne/tipssystem.lua": "files/profiles/cc/tipssystem.lua",
+      "files/profiles/sgps3/hud/backlogmenu.lua": "files/profiles/darling/hud/backlogmenu.lua",
+      "files/profiles/sgps3/hud/datedisplay.lua": "files/profiles/chlcc/hud/datedisplay.lua",
+      "files/profiles/sgps3/hud/loadingdisplay.lua": "files/profiles/cc/hud/loadingdisplay.lua",
+      "files/profiles/sgps3/hud/saveicon.lua": "files/profiles/darling/hud/saveicon.lua",
+      "files/profiles/sgps3/hud/selectiondisplay.lua": "files/profiles/cc/hud/selectiondisplay.lua",
+      "files/profiles/sgps3/hud/systemmenu.lua": "files/profiles/rne/hud/systemmenu.lua",
+      "files/profiles/sgps3/hud/tipsmenu.lua": "files/profiles/cc/hud/tipsmenu.lua",
+      "files/profiles/sgps3/hud/tipsnotification.lua": "files/profiles/cc/hud/tipsnotification.lua",
+      "files/profiles/sgps3/hud/titlemenu.lua": "files/profiles/darling/hud/titlemenu.lua",
+      "files/profiles/sgps3/tipssystem.lua": "files/profiles/cc/tipssystem.lua"
+    }
+  }
+}
