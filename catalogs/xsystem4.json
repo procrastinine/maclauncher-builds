@@ -7,6 +7,45 @@
       "schemaVersion": 2,
       "id": "xsystem4",
       "version": "MCLv9",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "26d618784e213eb85e48fceabecccaeb715a94a5b6fb4e10e57e340b329de677",
+      "sourceSha256": "26d618784e213eb85e48fceabecccaeb715a94a5b6fb4e10e57e340b329de677",
+      "updatePolicy": "manual",
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "3db99e4ec6a76c32aad073851ea1ea54c2f6251b"
+      },
+      "launcherContract": 2,
+      "asset": {
+        "filename": "xsystem4-MCLv9-arm64.tar.gz",
+        "sha256": "0b5a11103f3e6b2da82cba856bbacda378585ab7a45c577058190fc5e99597b3",
+        "bytes": 21374195,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/xsystem4%2FvMCLv9%2Farm64/xsystem4-MCLv9-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "3db99e4ec6a76c32aad073851ea1ea54c2f6251b",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41931695710",
+        "runAttempt": "1"
+      },
+      "tag": "xsystem4/vMCLv9/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "xsystem4",
+      "version": "MCLv9",
       "arch": "x64",
       "launcherArchitectures": [
         "arm64",
