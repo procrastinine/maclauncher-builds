@@ -2328,10 +2328,14 @@
       {
         "version": "1.24.3-MCLv6",
         "label": "OpenAL Soft 1.24.3 1.24.3-MCLv6"
+      },
+      {
+        "version": "1.25.2-MCLv7",
+        "label": "OpenAL Soft 1.25.2 1.25.2-MCLv7"
       }
     ],
     "build": {
-      "version": "1.24.3-MCLv6",
+      "version": "1.25.2-MCLv7",
       "command": "tools/build-native-openal.mjs",
       "architectures": [
         "arm64",
