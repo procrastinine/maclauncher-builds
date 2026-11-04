@@ -151,7 +151,7 @@ test('source-free preparation retains its declared digest and later source resol
  const f=fixture(t,{source:null}),input=path.join(f.root,'input');fs.mkdirSync(input);
  const content={'runtime.json':'{"version":"1.0"}','LICENSE':'MIT'};
  const files=Object.entries(content).map(([name,bytes])=>{fs.writeFileSync(path.join(input,name),bytes,{mode:0o644});return{path:name,size:Buffer.byteLength(bytes),mode:0o644,sha256:digest(bytes)};});
- const declaration={id:'engine',version:'1.0',arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS:'13.0',directoryRelative:'engine/1.0/arm64',manifestRelative:'runtime.json',manifestSha256:files[0].sha256,sourceRelative:null,sourceSha256:digest('tag supplied source'),files,notices:[{name:'Engine',license:'MIT',path:'LICENSE'}],redistribution:'bundle'};
+ const declaration={id:'engine',version:'1.0',arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS:'13.0',directoryRelative:'engine/1.0/arm64',manifestRelative:'runtime.json',manifestSha256:files[0].sha256,sourceRelative:null,sourceSha256:digest('tag supplied source'),files,redistribution:'bundle'};
  assert.deepEqual(catalogIndex(f.root).projects,[]);
  const bundle=path.join(f.root,'release');await prepareRelease({project:'engine',input,declaration,output:bundle,directory:f.root});
  assert.equal((await verifyRelease({bundle,directory:f.root})).record.version,'1.0');assert.throws(()=>resolveProject('engine',f.root));

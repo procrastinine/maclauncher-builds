@@ -1,9 +1,9 @@
-import {sourceNotices as collectSourceNotices} from './build-source.mjs';
+
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
 import {buildInput} from './build-input.mjs';
-import {collectSdlNotices} from './sdl-notices.mjs';
+
 import {recipeMain} from './build-source.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 import {resolveProject} from '../lib/projects.mjs';
@@ -45,20 +45,10 @@ export async function buildPortableRuntime({project,arch,version,output,work}){
  if(recipe.reuse==='mixer-dependencies')options.dependencyStacks={mixer};
  if(recipe.reuse==='mixer-stack')options.mixerStack=mixer;
  if(recipe.reuse==='mixer-python'){const Python=require(path.join(modules,'shared/runtime/portable-python-v2.js'));options.dependencyStacks={mixer,python:await Python.buildPython({archive:archives.python,workRoot:work+'-python',sdk:mixer.sdk,architecture:arch,pathMappings})};}
- const built=await Builder[recipe.entry](options),notices=[],sdlNoticeSources=[],seen=new Set();
- function collect(stack){if(!stack||seen.has(stack))return;seen.add(stack);if(stack.preparedInput){notices.push(...stack.notices);return;}for(const pin of stack.sources||[]){const source=stack.sourceRoots?.[pin.id]||pin.sourceRoot;if(pin.id==='sdl2'){const sdl=collectSdlNotices({source,output:path.join(work,'sdl-notices-'+sdlNoticeSources.length),name:pin.name+' '+pin.version,sourceUrl:pin.sourceUrl||pin.archiveUrl,includeLibm:true});notices.push(...sdl.notices);sdlNoticeSources.push(sdl.provenance);}else for(const name of pin.notices||[])notices.push({file:path.join(source,name),name:pin.name,license:pin.license,sourceUrl:pin.sourceUrl});}
-  if(stack.source?.notices)for(const name of stack.source.notices)notices.push({file:path.join(stack.sourceRoot,name),name:recipe.bundledSource+' '+stack.source.version,license:stack.source.license,sourceUrl:stack.source.url||stack.source.archiveUrl});
-  for(const key of ['fonts','audio','movie','mixer','python','dependencyClosure'])collect(stack[key]);
- }
- collect(built.dependencyClosure);for(const name of recipe.stacks||[])collect(options[STACKS[name].option]);
- const sourceUrl=resolveProject(project,root,{resolvePins:false}).upstreams[0].url;
- notices.push(...collectSourceNotices(sourceDir,{name:project,repository:sourceUrl}));
- const licenses=path.join(sourceDir,'licenses');
- notices.push(...collectSourceNotices(licenses,{all:true,name:project,repository:sourceUrl}));
- if(!notices.some(row=>row.name===project))console.warn('No license text supplied for '+project);
+ const built=await Builder[recipe.entry](options);
  const payloads=!built.appRoot&&built.resources&&fs.existsSync(built.resources)?[{source:built.resources,relative:'share/'+recipe.share}]:[];
  const environmentRelative={};
  if(recipe.python){payloads.push({source:built.dependencyClosure.python.stdlib,relative:recipe.python.library});environmentRelative.PYTHONHOME=recipe.python.home;}
- return sealRuntime({project,arch,version,output,executable:built.executable,appRoot:built.appRoot,sourceRoot:sourceDir,sourceScope:built.sourceScope,upstreamRevision:Builder.REVISION,payloads,environmentRelative,notices,provenance:{sdlNoticeSources,features:built.features||{},sourceTreeSha256:built.sourceTreeSha256,overlaySha256:built.overlaySha256}});
+ return sealRuntime({project,arch,version,output,executable:built.executable,appRoot:built.appRoot,sourceRoot:sourceDir,sourceScope:built.sourceScope,upstreamRevision:Builder.REVISION,payloads,environmentRelative,provenance:{features:built.features||{},sourceTreeSha256:built.sourceTreeSha256,overlaySha256:built.overlaySha256}});
 }
 recipeMain(import.meta,buildPortableRuntime);

@@ -18,7 +18,7 @@ const root=path.resolve(import.meta.dirname,'..');
 export function publicDeclaration(value){
  validateDeclaration(value);
  if(value.redistribution==='local-only')throw Error('This package is restricted to local use.');
- const {notices:noticeMetadata,...metadata}=value;const text=JSON.stringify(metadata);
+ const {...metadata}=value;const text=JSON.stringify(metadata);
  if(/(?:"(?:\/Users\/|\/home\/)|file:\/\/|(?:password|accessToken|refreshToken|logPath|evidenceSource)"\s*:)/i.test(text))throw Error('Package metadata contains private paths or fields.');
  for(const file of value.files)A.safeFile(file.path);
  return value;
@@ -68,7 +68,7 @@ export async function verify({archive,sha256,project,version,arch,includeDeclara
     declaration=publicDeclaration(JSON.parse((await reader.read(entry.size)).toString('utf8')));
     if(declaration.id!==project||declaration.version!==version||declaration.arch!==arch)throw Error('Runtime archive belongs to a different project, version or architecture.');
     expected=new Map(declaration.files.map(file=>['files/'+file.path,file]));
-    metadataPaths=new Set(['build-inputs.json',declaration.manifestRelative,declaration.sourceRelative,...(declaration.notices||[]).map(notice=>notice.path)].filter(value=>typeof value==='string'));
+    metadataPaths=new Set(['build-inputs.json',declaration.manifestRelative,declaration.sourceRelative].filter(value=>typeof value==='string'));
    }else{
     const file=expected.get(entry.name);
     if(!file||file.size!==entry.size||file.mode!==entry.mode)throw Error('Runtime archive member differs from its inventory.');

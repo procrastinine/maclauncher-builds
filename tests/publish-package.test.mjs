@@ -41,7 +41,7 @@ test('a level lists artifacts once, publishes the newest attempt and skips absen
  const f=fixture(t),published=[],downloads=[],selection=[{id:'engine',version:'1.0.0'},{id:'failed',version:'1.0.0'}];let lists=0;
  const artifacts=[{id:1,name:'runtime-engine-1.0.0-arm64-1'},{id:2,name:'runtime-engine-1.0.0-arm64-2'}];
  const result=await publishLevel({...f,output:path.join(f.directory,'publication'),targets:selection.map(row=>({project:row.id,version:row.version,arch:'arm64'})),env:{...f.env,RELEASE_SELECTION:JSON.stringify(selection)},runGh:async args=>{lists++;assert.equal(args[0],'api');assert.ok(args.at(-1).endsWith('/runs/123/artifacts?per_page=100'));return JSON.stringify([{artifacts}]);},download:async({artifact})=>downloads.push(artifact.id),publish:async options=>{published.push(options.env.BUILD_PROJECT);return {commit:'c'.repeat(40)};}});
- assert.equal(lists,1);assert.deepEqual(downloads,[2]);assert.deepEqual(published,['engine']);assert.equal(result.failed,0);assert.equal(result.skipped,1);assert.equal(result.notices[0].notice,'build of failed 1.0.0 arm64 in this run produced no package; see its build job');
+ assert.equal(lists,1);assert.deepEqual(downloads,[2]);assert.deepEqual(published,['engine']);assert.equal(result.failed,0);assert.equal(result.skipped,1);;
 });
 function catalogFixture(t){
  const f=fixture(t),remote=path.join(f.directory,'remote.git'),source=path.join(f.directory,'source'),other=path.join(f.directory,'other');

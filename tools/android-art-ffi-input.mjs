@@ -16,6 +16,6 @@ export function readArtFfiInput(input){
  verifyPreparedPayload(payload,declaration);
  const manifest=JSON.parse(B.readRegular(path.join(payload,'input.json'),Infinity).bytes);
  if(manifest.id!==declaration.id||manifest.version!==declaration.version||manifest.arch!==declaration.arch||manifest.sourceSha256!==declaration.sourceSha256||manifest.androidSource?.repository!==androidSource().repository||manifest.androidSource?.revision!==androidSource().revision||manifest.upstream?.repository!==profile.libffi.repository||manifest.upstream?.revision!==profile.libffi.revision||manifest.ndk?.version!==ndkSource().version||manifest.ndk?.sha256!==profile.ndk.sha256||manifest.target!=='aarch64-linux-android35')throw Error('The sealed libffi source or target differs from the ART profile.');
- for(const relative of ['lib/libffi.a','include/ffi.h','include/ffitarget.h','licenses/libffi-LICENSE'])B.readRegular(path.join(payload,relative),Infinity);
- return {archive:path.join(payload,'lib/libffi.a'),include:path.join(payload,'include'),license:path.join(payload,'licenses/libffi-LICENSE'),revision:profile.libffi.revision};
+
+ return {archive:path.join(payload,'lib/libffi.a'),include:path.join(payload,'include'),revision:profile.libffi.revision};
 }

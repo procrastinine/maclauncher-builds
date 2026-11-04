@@ -1,14 +1,14 @@
 import {androidSource} from '../lib/android-source.mjs';
+import {addLicenses} from '../lib/licenses.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {createRequire} from 'node:module';
-import {checkoutSource,run,recipeMain,sourceNotices} from './build-source.mjs';
+import {checkoutSource,run,recipeMain} from "./build-source.mjs";
 import {buildInput} from './build-input.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
-import {addLicense} from '../lib/licenses.mjs';
 const root=path.resolve(import.meta.dirname,'..'),descriptor=path.join(root,'producers/android-inputs/java-converter.json');
 const profile=()=>JSON.parse(fs.readFileSync(descriptor));
 const read=(command,args)=>execFileSync(command,args,{encoding:'utf8',maxBuffer:Infinity}).trim();
@@ -40,10 +40,11 @@ export async function buildAndroidJavaConverterInput({output,work}){
  const {buildConverter}=await import(pathToFileURL(path.join(native,'converter-build.mjs'))),build=path.join(work,'build');
  const built=await buildConverter({root:native,build,output,jdk,checkout:converter,apksig:path.join(tools,catalogs.apksig.files[0].path),asmClasspath:catalogs.asm.files.map(file=>path.join(tools,file.path)).join(path.delimiter)});
  fs.copyFileSync(built.apiHeaders,path.join(output,'android-api-headers.jar'),fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);
- const candidates=sourceNotices(converter,{name:'dex2jvm',repository:definition.converter.repository}).map((notice,index)=>({...notice,path:'licenses/converter-'+index+'-'+path.basename(notice.file)}));
- for(const name of ['asm','apksig'])for(const notice of sourceNotices(path.join(native,'license-inputs',name),{all:true,name,repository:catalogs[name].url}))candidates.push({...notice,path:'licenses/'+name+'-'+path.relative(path.join(native,'license-inputs',name),notice.file).split(path.sep).join('-')});
- const notices=[];for(const notice of candidates)addLicense(output,notice.name,notice.file,notice.license);
- return {root:output,notices,record:{androidSource:androidSource(),converter:definition.converter,jdk:{sha256:jdkPin.sha256,version:read(path.join(jdk,'bin/java'),['--version']).split('\n')[0]},tools:catalogs}};
+
+ for(const name of ['asm','apksig']);
+
+ addLicenses(output,definition.id,android);addLicenses(output,'dex2jvm',converter);
+ return {root:output,record:{androidSource:androidSource(),converter:definition.converter,jdk:{sha256:jdkPin.sha256,version:read(path.join(jdk,'bin/java'),['--version']).split('\n')[0]},tools:catalogs}};
 }
 
 /** Verify the sealed Java products before native composition consumes them. */
@@ -58,6 +59,6 @@ export async function buildAndroidJavaConverter({project,version,arch,output,wor
  const definition=profile();version??=definition.version;
  if(project!==definition.id||version!==definition.version)throw Error('Select the declared Java converter package version and target CPU.');
  const built=await buildAndroidJavaConverterInput({output:path.join(output,'payload'),work});
- return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:built.record,notices:built.notices});
+ return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:built.record});
 }
 recipeMain(import.meta,buildAndroidJavaConverter);

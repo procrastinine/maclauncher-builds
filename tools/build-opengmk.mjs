@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
-import {checkoutSource,stageSource,sourceNotices,run,recipeMain} from './build-source.mjs';
-import {rustEnvironment,rustNotices} from './rust-build.mjs';
+import {checkoutSource,stageSource,run,recipeMain} from "./build-source.mjs";
+import {rustEnvironment} from "./rust-build.mjs";
 import {sealRuntime} from './seal-runtime.mjs';
-import {rustLicenseInputs} from './rust-license-inputs.mjs';
+
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
 const overlays=path.join(root,'producers/maclauncher/src/modules/gamemaker/overlays/opengmk-macos');
 const Emulator=require(path.join(overlays,'apply-emulator.js')),Ramen=require(path.join(overlays,'apply-ramen.js')),Audio=require(path.join(overlays,'apply-audio.js'));
@@ -24,7 +24,7 @@ export async function buildOpenGMK({project,arch,output,work}){
  const target=arch==='x64'?'x86_64-apple-darwin':'aarch64-apple-darwin',env=rustEnvironment({work,minimumMacOS:'13.0'});
  run('cargo',['build','--release','--locked','--target',target,'--package','gm8emulator'],{cwd:source,env});
  const executable=path.join(work,'target',target,'release/gm8emulator');run(executable,['--version']);
- const licenses=await rustLicenseInputs({file:path.join(root,'producers/opengmk/licenses.json'),output:path.join(work,'declared-notices')});
- return sealRuntime({project,arch,output,executable,sourceRoot:sources[0].source,upstreamRevision:Emulator.REVISION,notices:[...sources.flatMap(({source,name,repository})=>sourceNotices(source,{name,repository})),...rustNotices({source,output:path.join(work,'notices'),env,licenseInputs:licenses.licenseInputs})],provenance:{...provenance,crateLicenseDeclaration:licenses.provenance,dependencies:sources.slice(1).map(({name,repository,revision})=>({name,repository,revision})),overlay:Emulator.OVERLAY_VERSION}});
+
+ return sealRuntime({project,arch,output,executable,sourceRoot:sources[0].source,upstreamRevision:Emulator.REVISION,provenance:{...provenance,dependencies:sources.slice(1).map(({name,repository,revision})=>({name,repository,revision})),overlay:Emulator.OVERLAY_VERSION}});
 }
 recipeMain(import.meta,buildOpenGMK);

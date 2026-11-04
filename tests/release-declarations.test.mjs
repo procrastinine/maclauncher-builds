@@ -13,7 +13,7 @@ function fixture(t,kind){
  fs.writeFileSync(path.join(directory,'projects.json'),JSON.stringify({schemaVersion:1,repository:'owner/builds',updatePolicy:'manual',projects:[{id:'engine',name:'Engine',delivery:'downloadable',packageProfiles:[{version:'1.0.0',label:'Engine 1.0.0'}],producer,upstreams:[]}]}));
  const input=path.join(directory,'input');fs.mkdirSync(input);const data={'runtime.json':'{"version":"1.0.0"}','LICENSE':'Complete original MIT notice','NOTICE':'Original component notice','source.tar.gz':'original source'};
  const files=Object.entries(data).map(([name,content])=>{fs.writeFileSync(path.join(input,name),content,{mode:0o644});return {path:name,size:Buffer.byteLength(content),mode:0o644,sha256:sha(content)};});
- const declaration={id:'engine',version:'1.0.0',arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS:'13.0',directoryRelative:'engine/1.0.0/arm64',manifestRelative:'runtime.json',manifestSha256:files[0].sha256,sourceRelative:'source.tar.gz',sourceSha256:sha(data['source.tar.gz']),files,notices:[{name:'Engine',license:'MIT',path:'LICENSE'},{name:'Component',license:'See original notice',path:'NOTICE'}]};
+ const declaration={id:'engine',version:'1.0.0',arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS:'13.0',directoryRelative:'engine/1.0.0/arm64',manifestRelative:'runtime.json',manifestSha256:files[0].sha256,sourceRelative:'source.tar.gz',sourceSha256:sha(data['source.tar.gz']),files};
  return {project:'engine',directory,input,declaration,output:path.join(directory,'release')};
 }
 function remote(record){return async args=>{
@@ -32,7 +32,7 @@ for(const kind of ['maclauncher','prebuilt'])test(kind+' publication exports the
  const options={bundle:f.output,directory:f.directory,runGh:remote(checked.record)};
  assert.deepEqual((await verifyRemoteRelease({...options,includeDeclaration:true})).declaration,included.declaration);
  const applied=await applyRelease(options),expected=path.join(f.directory,'catalogs/declarations/engine/1.0.0/arm64.json');assert.equal(applied.declaration,expected);
- const exported=JSON.parse(fs.readFileSync(expected));assert.deepEqual(exported,included.declaration);assert.deepEqual(exported.files,f.declaration.files);assert.deepEqual(exported.notices,f.declaration.notices);assert.equal(exported.manifestSha256,checked.record.manifestSha256);assert.equal(exported.sourceSha256,checked.record.sourceSha256);
+ const exported=JSON.parse(fs.readFileSync(expected));assert.deepEqual(exported,included.declaration);assert.deepEqual(exported.files,f.declaration.files);;assert.equal(exported.manifestSha256,checked.record.manifestSha256);assert.equal(exported.sourceSha256,checked.record.sourceSha256);
  const original=fs.readFileSync(expected);await applyRelease(options);assert.deepEqual(fs.readFileSync(expected),original);
  const catalogFile=path.join(f.directory,'catalogs/engine.json'),before=fs.readFileSync(catalogFile);
  exported.files[0].sha256='0'.repeat(64);fs.writeFileSync(expected,JSON.stringify(exported));

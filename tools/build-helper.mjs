@@ -1,4 +1,4 @@
-import {addLicense} from '../lib/licenses.mjs';
+import {addLicenses} from '../lib/licenses.mjs';
 // GitHub build of an owned-source native helper from its build profile. One profile
 // per helper names the sources, compiler flags, output and identity fields; this
 // command compiles them for one package architecture, signs the result ad hoc and
@@ -26,7 +26,7 @@ export function helperProfile(id,directory=root){
  const file=path.join(producer,'helper-builds',id+'.json'),profile=JSON.parse(fs.readFileSync(file));
  if(profile.sourceDirectory!==undefined&&!contained(profile.sourceDirectory,directory))throw Error('Invalid helper source directory.');
  const base=profile.sourceDirectory?path.join(directory,profile.sourceDirectory):producer;
- const keys=['schemaVersion','id','version','compiler','kind','output','sources','flags','frameworks','minimumMacOS','license','record','binaryField','sourceDirectory'];
+ const keys=['schemaVersion','id','version','compiler','kind','output','sources','flags','frameworks','minimumMacOS','record','binaryField','sourceDirectory'];
  if(!profile||profile.schemaVersion!==1||profile.id!==id||Object.keys(profile).some(key=>!keys.includes(key))||!['clang','clang++'].includes(profile.compiler)||!Object.hasOwn(KINDS,profile.kind)||
   !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(profile.output||'')||!Array.isArray(profile.sources)||!profile.sources.length||!profile.sources.every(source=>contained(source,base))||
   !Array.isArray(profile.flags)||profile.flags.some(flag=>typeof flag!=='string'||/^-(?:arch|isysroot|mmacosx-version-min|o$)/.test(flag))||
@@ -59,7 +59,7 @@ export function buildHelper({project:id,version,arch,output,work=path.join(fs.mk
   run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',binary]);run('/usr/bin/codesign',['--verify','--strict',binary]);
   const architectures=Native.readMachOArchitectures(binary,{allowLibrary:true}).sort();
   if(JSON.stringify(architectures)!==JSON.stringify(CPUS[arch]))throw Error('The helper was built for different CPUs.');
-  addLicense(payload,id,path.join(base,profile.license?.from||''),profile.license?.license||id);
+  addLicenses(payload,id,base);addLicenses(payload,'MacLauncher',root);
   // The first source is the helper's primary source; the release tag holds all of them.
   const sourceSha256=sha(sources[0]);
   const record={schemaVersion:1,id,version:profile.version,...profile.record,sourceSha256,[profile.binaryField||'binarySha256']:sha(binary),minimumMacOS:profile.minimumMacOS,architectures,

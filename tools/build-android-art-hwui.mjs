@@ -118,9 +118,8 @@ export async function prepareArtHwui({common,image,ndk,work}){
  const {buildAvif}=await import(pathToFileURL(path.join(producer,native,'buildAvif.mjs')));
  const prepared=await buildAvif({...ctx,prepareOnly:true});
  run(tools.cargo,['fetch','--locked','--target','aarch64-linux-android','--manifest-path',path.join(prepared.workspace,'Cargo.toml')],{env:{...prepared.env,CARGO_BUILD_JOBS:'2'}});
- const sysroot=read(tools.rustc,['--print','sysroot']),rustRoot=['share/doc/rust','share/doc/rustc'].map(relative=>path.join(sysroot,relative)).find(directory=>fs.existsSync(path.join(directory,'COPYRIGHT-library.html'))&&fs.existsSync(path.join(directory,'licenses')));
- const licenseInputs={rust:{root:rustRoot||sysroot,version:read(tools.rustc,['--version'])},ndk:{root:ndk,version:JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/aim.json'))).ndk.version,files:['NOTICE','NOTICE.toolchain']}};
- return {producer,options:{work:compile,sources,tools,image,licenseInputs,buildEnvironment}};
+
+ return {producer,options:{work:compile,sources,tools,image,buildEnvironment}};
 }
 
 /** Build the unchanged complete HWUI target with sequential source groups and original notices. */

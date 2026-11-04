@@ -1,5 +1,5 @@
 import {androidSource,ndkSource} from '../lib/android-source.mjs';
-import {addLicense} from '../lib/licenses.mjs';
+import {addLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -31,9 +31,9 @@ export async function buildAndroidArtFfi({project,version,arch,output,work}){
  const bin=path.join(ndk,'toolchains/llvm/prebuilt/linux-x86_64/bin'),members=read(path.join(bin,'llvm-ar'),['t',built.archive]).split('\n'),headers=read(path.join(bin,'llvm-readelf'),['--file-header',built.archive]);
  const machines=[...headers.matchAll(/^\s*Machine:\s*(.+)$/gm)].map(match=>match[1]);
  if(!members.length||machines.length!==members.length||machines.some(machine=>machine!=='AArch64'))throw Error('The libffi archive contains a different target architecture.');
- const payload=path.join(output,'payload');fs.mkdirSync(path.join(payload,'lib'),{recursive:true});fs.mkdirSync(path.join(payload,'licenses'));
- fs.copyFileSync(built.archive,path.join(payload,'lib/libffi.a'));fs.cpSync(built.include,path.join(payload,'include'),{recursive:true});addLicense(payload,'libffi',built.license,'MIT');
- const result=helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{androidSource:androidSource(),upstream:profile.libffi,ndk:{version:ndkSource().version,sha256:profile.ndk.sha256},target:'aarch64-linux-android35',archiveMembers:members,tools:{autoconf:read('autoconf',['--version']).split('\n')[0],automake:read('automake',['--version']).split('\n')[0],make:read('make',['--version']).split('\n')[0]}},notices:[]});
+ const payload=path.join(output,'payload');fs.mkdirSync(path.join(payload,'lib'),{recursive:true});;
+ fs.copyFileSync(built.archive,path.join(payload,'lib/libffi.a'));fs.cpSync(built.include,path.join(payload,'include'),{recursive:true});addLicenses(payload,'libffi',source);
+ const result=helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{androidSource:androidSource(),upstream:profile.libffi,ndk:{version:profile.ndk.version,sha256:profile.ndk.sha256},target:'aarch64-linux-android35',archiveMembers:members,tools:{autoconf:read('autoconf',['--version']).split('\n')[0],automake:read('automake',['--version']).split('\n')[0],make:read('make',['--version']).split('\n')[0]}}});
  return result;
 }
 recipeMain(import.meta,buildAndroidArtFfi);

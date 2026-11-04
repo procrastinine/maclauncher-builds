@@ -31,15 +31,7 @@ export async function stageSource(source,revision,destination){
  return {treeSha256,dependencies};
 }
 /** Preserve source-tree license notices, including statically linked libraries. */
-export function sourceNotices(source,{name='Package',repository,all=false}={}){
- const rows=[];
- function visit(directory){try{for(const entry of fs.readdirSync(directory,{withFileTypes:true})){
-  if(entry.name==='.git')continue;const file=path.join(directory,entry.name);
-  if(entry.isDirectory())visit(file);
-  else if(all||/^(?:LICEN[CS]E|COPYING|NOTICE|COPYRIGHT)(?:[._-]|$)/i.test(entry.name)||entry.name==='FTL.TXT')rows.push({file,name:name+' '+path.relative(source,file),license:'See original notice',sourceUrl:repository});
- }}catch{}}
- visit(source);return rows;
-}
+
 /** A Python 3.13 environment in the work directory holding the exact tools of a requirements file. */
 export function pythonBuildTools(work,requirements){
  const environment=path.join(work,'tools'),python=path.join(environment,'bin/python');

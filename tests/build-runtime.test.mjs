@@ -49,7 +49,7 @@ const files={'manifest.json':JSON.stringify({version:'1.0.0',arch:o.arch}),'LICE
 for(const [name,bytes] of Object.entries(files))fs.writeFileSync(path.join(payload,name),bytes,{mode:0o644});
 const record=name=>({path:name,size:Buffer.byteLength(files[name]),mode:0o644,sha256:crypto.createHash('sha256').update(files[name]).digest('hex')});
 const cpus=o.arch==='arm64'?['arm64']:o.arch==='x64'?(process.env.ENGINE_CPUS||'arm64,x64').split(','):['arm64','x64'];
-fs.writeFileSync(path.join(o.output,'declaration.json'),JSON.stringify({id:o.project,version:'1.0.0',arch:o.arch,launcherArchitectures:cpus,minimumMacOS:'13.0',directoryRelative:o.project+'/1.0.0/'+o.arch,manifestRelative:'manifest.json',manifestSha256:record('manifest.json').sha256,sourceSha256:record('manifest.json').sha256,sourceRelative:'manifest.json',files:Object.keys(files).map(record),notices:[{name:'Engine',license:'MIT',path:'LICENSE'}]}));
+fs.writeFileSync(path.join(o.output,'declaration.json'),JSON.stringify({id:o.project,version:'1.0.0',arch:o.arch,launcherArchitectures:cpus,minimumMacOS:'13.0',directoryRelative:o.project+'/1.0.0/'+o.arch,manifestRelative:'manifest.json',manifestSha256:record('manifest.json').sha256,sourceSha256:record('manifest.json').sha256,sourceRelative:'manifest.json',files:Object.keys(files).map(record)}));
 if(process.env.ENGINE_EXTRA)fs.writeFileSync(path.join(o.output,'extra.txt'),'extra');
 `);
  return root;
