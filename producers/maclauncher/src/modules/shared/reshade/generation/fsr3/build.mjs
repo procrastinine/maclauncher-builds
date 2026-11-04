@@ -15,7 +15,7 @@ if(run('git',['-C',source,'rev-parse','HEAD']).trim()!==gitlink('producers/macla
 for(const name of ['dxc','spirv-cross'])if(hash(fs.readFileSync(path.join(tools,name)))!==pin.tools[name])throw Error('The shader compiler differs from the declared build input: '+name);
 fs.mkdirSync(output,{recursive:true});
 const exported=path.join(output,'source'),archive=path.join(output,'source.tar');fs.mkdirSync(exported,{recursive:true});
-run('git',['-C',source,'archive','--format=tar','--output='+archive,gitlink('producers/maclauncher/src/external/fsr3-sdk'),'LICENSE.txt','sdk/include','sdk/src/components/opticalflow','sdk/src/components/frameinterpolation','sdk/src/shared','sdk/src/backends/shared','sdk/src/backends/dx12/shaders/opticalflow','sdk/src/backends/dx12/shaders/frameinterpolation']);
+run('git',['-C',source,'archive','--format=tar','--output='+archive,gitlink('producers/maclauncher/src/external/fsr3-sdk'),'sdk/include','sdk/src/components/opticalflow','sdk/src/components/frameinterpolation','sdk/src/shared','sdk/src/backends/shared','sdk/src/backends/dx12/shaders/opticalflow','sdk/src/backends/dx12/shaders/frameinterpolation']);
 run('tar',['-xf',archive,'-C',exported]);fs.rmSync(archive);
 // The SDK's alpha channel is an internal inpainting mask. The final pass has
 // consumed that mask; an opaque presentation image requires alpha one even
