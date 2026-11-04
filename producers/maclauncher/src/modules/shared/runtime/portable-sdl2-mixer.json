@@ -9,10 +9,6 @@
       "name": "opusfile",
       "version": "0.12",
       "sourceRelease": "opusfile-0.12",
-      "license": "BSD-3-Clause",
-      "notices": [
-        "COPYING"
-      ],
       "buildSystem": "autotools",
       "options": [
         "--enable-shared",
@@ -27,10 +23,6 @@
       "id": "sdl2_mixer",
       "name": "SDL2_mixer",
       "version": "2.8.2",
-      "license": "Zlib",
-      "notices": [
-        "LICENSE.txt"
-      ],
       "buildSystem": "cmake",
       "options": [
         "-DSDL2MIXER_INSTALL=ON",
