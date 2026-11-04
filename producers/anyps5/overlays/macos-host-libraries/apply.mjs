@@ -71,9 +71,51 @@ export function applyHostLibrariesOverlay(projectionRoot) {
     return replaceOnce(text, '    int ignoredX = 0;',
       '    SDL_ShowCursor(wanted ? SDL_DISABLE : SDL_ENABLE);\n    int ignoredX = 0;', file);
   });
-  edit('core/libs/prx/libSceVideoOut/src/VideoOutDriver.cpp', (text, file) => replaceOnce(text,
-    '            OnMainThread([&] { mouseInput->UpdateCapture(!padInput->MouseModeEnabled()); });',
-    '            OnMainThread([&] { mouseInput->UpdateCapture(padInput->GuestMouseCaptureAllowed(), padInput->MouseModeEnabled()); });', file));
+  edit('core/libs/prx/libSceVideoOut/src/VideoOutDriver.cpp', (text, file) => {
+    text = replaceOnce(text, '#include "SDL_vulkan.h"', `#include "SDL_vulkan.h"
+#ifdef __APPLE__
+#include "SDL_syswm.h"
+#include <objc/message.h>
+#include <objc/runtime.h>
+#endif`, file);
+    text = replaceOnce(text, 'void windowDrawableSize(void* context, std::uint32_t* width, std::uint32_t* height) {', `#ifdef __APPLE__
+bool windowOccluded(SDL_Window* window) {
+    SDL_SysWMinfo info{};
+    SDL_VERSION(&info.version);
+    if (!SDL_GetWindowWMInfo(window, &info) || info.subsystem != SDL_SYSWM_COCOA || info.info.cocoa.window == nullptr) return false;
+    constexpr unsigned long OcclusionStateVisible = 1ul << 1u;
+    static const auto selector = sel_registerName("occlusionState");
+    const auto state = reinterpret_cast<unsigned long (*)(void*, SEL)>(objc_msgSend)(static_cast<void*>(info.info.cocoa.window), selector);
+    return (state & OcclusionStateVisible) == 0;
+}
+#endif
+
+void windowDrawableSize(void* context, std::uint32_t* width, std::uint32_t* height) {`, file);
+    text = replaceOnce(text, '        if ((SDL_GetWindowFlags(static_cast<SDL_Window*>(context)) & SDL_WINDOW_MINIMIZED) != 0) {', `#ifdef __APPLE__
+        static const bool presentOccluded = std::getenv("APS5_PRESENT_OCCLUDED") != nullptr;
+        auto* window = static_cast<SDL_Window*>(context);
+        const bool queried = SDL_GetWindowData(window, "AnyPS5.drawableSizeQueried") != nullptr;
+        if (!queried) SDL_SetWindowData(window, "AnyPS5.drawableSizeQueried", window);
+        const bool hidden = queried && !presentOccluded && windowOccluded(window);
+#else
+        const bool hidden = false;
+#endif
+        if (hidden || (SDL_GetWindowFlags(static_cast<SDL_Window*>(context)) & SDL_WINDOW_MINIMIZED) != 0) {`, file);
+    return replaceOnce(text,
+      '            OnMainThread([&] { mouseInput->UpdateCapture(!padInput->MouseModeEnabled()); });',
+      '            OnMainThread([&] { mouseInput->UpdateCapture(padInput->GuestMouseCaptureAllowed(), padInput->MouseModeEnabled()); });', file);
+  });
+  edit('core/libs/prx/libSceVideoOut/CMakeLists.txt', (text, file) => replaceOnce(text,
+    'target_link_libraries(libSceVideoOut PRIVATE libSceAgcDriver libScePad libSceUserService libSceMouse libSceKeyboard libSceIme libc libkernel decoder_png SDL2-static)',
+    'target_link_libraries(libSceVideoOut PRIVATE libSceAgcDriver libScePad libSceUserService libSceMouse libSceKeyboard libSceIme libc libkernel decoder_png SDL2-static)\nif(APPLE)\n    target_link_libraries(libSceVideoOut PRIVATE objc)\nendif()', file));
+  edit('core/libs/prx/libSceAgcDriver/Execution/src/Driver/Presentation.cpp', (text, file) => replaceOnce(text,
+    '            presentable = presenting->Presentable();', `            presentable = presenting->Presentable();
+#ifdef __APPLE__
+            if (!presentable) {
+                presenting->WaitIdle();
+                timing.Mark("hidden_gpu_wait");
+            }
+#endif`, file));
   edit('core/libs/prx/libkernel_sys/Export.cpp', (text, file) => {
     text = replaceOnce(text, '#include "prx/libc/include/FilesystemError.hpp"',
       '#include "prx/libc/include/FilesystemError.hpp"\n#ifdef __APPLE__\n#include "prx/libc/include/HostErrno.hpp"\n#endif', file);
