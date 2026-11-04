@@ -1,0 +1,704 @@
+{
+  "id": "opengmk",
+  "version": "0.2.0-MCLv7",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "opengmk/0.2.0-MCLv7/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "fd74ccd5d0ceb8cc64dd6d4c72e23ae20d62aa81e5afb59a082c6ead7fd8ee8c",
+  "sourceSha256": "fd74ccd5d0ceb8cc64dd6d4c72e23ae20d62aa81e5afb59a082c6ead7fd8ee8c",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 18259,
+      "mode": 420,
+      "sha256": "72ebe59f79617f941474e3470cc3634b4b0e182d3c13d398be1193ccacc012ac"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "7c2264d7c5a35878c76a447ad8a75f7b6b16b4ed59f807a946f2038355eca7ab"
+    },
+    {
+      "path": "files/bin/gm8emulator",
+      "size": 5175472,
+      "sha256": "2955b4651a999536a735a69a73648b535c28b7a561bcdbaa8c20fa95f728ae30",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/licenses/adler2-2.0.1-2.txt",
+      "size": 10860,
+      "sha256": "8ada45cd9f843acf64e4722ae262c622a2b3b3007c7310ef36ac1061a30f6adb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/adler2-2.0.1-3.txt",
+      "size": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/adler2-2.0.1.txt",
+      "size": 665,
+      "sha256": "861399f8c21c042b110517e76dc6b63a2b334276c8cf17412fc3c8908ca8dc17",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/autocfg-1.5.1-2.txt",
+      "size": 1054,
+      "sha256": "27995d58ad5c1145c1a8cd86244ce844886958a35eb2b78c6b772748669999ac",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/autocfg-1.5.1.txt",
+      "size": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/base64-0.22.1.txt",
+      "size": 1076,
+      "sha256": "0dd882e53de11566d50f8e8e2d5a651bcf3fabee4987d70f306233cf39094ba7",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bincode-1.3.3.txt",
+      "size": 1097,
+      "sha256": "237710d4c9dd8eb7fead2c9c433be493a878f547d1093812feff43d18abe5896",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bitflags-1.3.2.txt",
+      "size": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bs58-0.5.1.txt",
+      "size": 1082,
+      "sha256": "42d3bf7e7d4d49d72c0555d14ed99c3ee7ce9ce3cbffbc38bbafe8c103f50969",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bytemuck-1.25.2-2.txt",
+      "size": 851,
+      "sha256": "84b34dd7608f7fb9b17bd588a6bf392bf7de504e2716f024a77d89f1b145a151",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bytemuck-1.25.2.txt",
+      "size": 1110,
+      "sha256": "9df9ba60a11af705f2e451b53762686e615d86f76b169cf075c3237730dbd7e2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/byteorder-1.5.0-2.txt",
+      "size": 1081,
+      "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/byteorder-1.5.0-3.txt",
+      "size": 1211,
+      "sha256": "7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/byteorder-1.5.0.txt",
+      "size": 126,
+      "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/cc-1.2.60.txt",
+      "size": 1057,
+      "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/chlorine-1.0.13-2.txt",
+      "size": 851,
+      "sha256": "29170fd8edfa5a6b0ebdde9364922bef596b3ce1c20a2baed30c633ab6a554b2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/chlorine-1.0.13.txt",
+      "size": 1108,
+      "sha256": "3f6fc27b972ebcb26e8f33f7cda143206236b7d972472abaf097460652a612be",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/chrono-0.4.45.txt",
+      "size": 12307,
+      "sha256": "946c9835d8034d24404f8cfec5f4654cee5dad17e944afc3d06d742cf2882831",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/clipboard-0.5.0-2.txt",
+      "size": 1061,
+      "sha256": "a81311ea112d2b3128579c8ac1dcbed6bfb1f6ecd57222f3dcfcf9a9ac8508d8",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/clipboard-0.5.0.txt",
+      "size": 11323,
+      "sha256": "6dc0e068dcf3a5bc8e054205b85b7720e1d49265bbc64bf515d2cf79197df69a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/color_quant-1.1.0.txt",
+      "size": 1083,
+      "sha256": "592dc80f1a865d20d61a2006a2d29ce34a2bc28cd7e868ab300fdeed6da154ca",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 9403,
+      "sha256": "cd171b6e0f9cc4d322f587bf074eaa70e89e598cb11e89e5ced12a38b1c02af1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/const-random-0.1.18.txt",
+      "size": 1060,
+      "sha256": "ff8f68cb076caf8cefe7a6430d4ac086ce6af2ca8ce2c4e5a2004d4552ef52a2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/crc32fast-1.5.3.txt",
+      "size": 1097,
+      "sha256": "61d383b05b87d78f94d2937e2580cce47226d17823c0430fbcad09596537efcf",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/crossbeam-deque-0.8.8.txt",
+      "size": 1099,
+      "sha256": "5734ed989dfca1f625b40281ee9f4530f91b2411ec01cb748223e7eb87e201ab",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/crunchy-0.2.4.txt",
+      "size": 1082,
+      "sha256": "3eab77734a181b2a2e8418af9004f960f715f04aac4d76a26cf774f63a7b13d1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/darling-0.23.0.txt",
+      "size": 1067,
+      "sha256": "8ea93490d74a5a1b1af3ff71d786271b3f1e5f0bea79ac16e02ec533cef040d6",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/defmt-1.2.0.txt",
+      "size": 1053,
+      "sha256": "2710a622a896bba67356913d4d0492cab5465f61b2ecce6d880aeb483834fb50",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/deranged-0.5.9-2.txt",
+      "size": 1062,
+      "sha256": "231c837c45eb53f108fb48929e488965bc4fcc14e9ea21d35f50e6b99d98685b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/deranged-0.5.9.txt",
+      "size": 11349,
+      "sha256": "edd65bdd88957a205c47d53fa499eed8865a70320f0f03f6391668cb304ea376",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dlv-list-0.5.2-2.txt",
+      "size": 1068,
+      "sha256": "77adcddfe9e50acd2df63ddbb8e566bb8d34b4d02a9d92e7a5c1b9c2225eda9f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dlv-list-0.5.2.txt",
+      "size": 9722,
+      "sha256": "95bd3988beee069fa2848f648dab43cc6e0b2add2ad6bcb17360caf749802bcc",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/either-1.19.0.txt",
+      "size": 1043,
+      "sha256": "7576269ea71f767b99297934c0b2367532690f8c4badc695edf8e04ab6a1e545",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/encoding_rs-0.8.44-2.txt",
+      "size": 1053,
+      "sha256": "3fa4ca83dcc9237839b1bdeb2e6d16bdfb5ec0c5ce42b24694d8bbf0dcbef72c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/encoding_rs-0.8.44-3.txt",
+      "size": 1501,
+      "sha256": "838118388fe5c2e7f1dbbaeed13e1c7f3ebf88be91319c7c1d77c18e987d1a50",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/encoding_rs-0.8.44.txt",
+      "size": 713,
+      "sha256": "11789f45bb180841cd362a5eee6789c68ddb573a11105e30768c308a6add0190",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/equivalent-1.0.3.txt",
+      "size": 1049,
+      "sha256": "7365cc8878a1d7ce155a58c4ca09c3d7a6be413efa5334a80ea842912b669349",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fax-0.2.7.txt",
+      "size": 1075,
+      "sha256": "7101390b4c8edd752f4c0de47f35d61b44d9cf0ee8dd032115e25644e277cfff",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fdeflate-0.3.7.txt",
+      "size": 1036,
+      "sha256": "c77a4cf9da729987d0fe7ccd811e3bd27393914ddf3d23467c18cc22954513b3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/flate2-1.1.10.txt",
+      "size": 1062,
+      "sha256": "025436edff4cfcdde17a5811fdea78892d8482efd1abdec5a17872d07a4f2112",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/getrandom-0.2.17-2.txt",
+      "size": 1130,
+      "sha256": "42fa16951ce7f24b5a467a40e5b449a1d41e662f97ca779864f053f39e097737",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/getrandom-0.2.17.txt",
+      "size": 10849,
+      "sha256": "aaff376532ea30a0cd5330b9502ad4a4c8bf769c539c87ffe78819d188a18ebf",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/gif-0.14.2.txt",
+      "size": 1071,
+      "sha256": "77257f3d2181236b1aee78920238062ae64efe13c5d858b2db126e79c9e1b14f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/hex-0.4.3.txt",
+      "size": 1125,
+      "sha256": "f7bdb3426d045cd50efd4953026e3eb5a83d0199f458a075602611b9344da5b9",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/imgui-0.12.0.txt",
+      "size": 1072,
+      "sha256": "75a5f085d8eefdd15d845cdb45dd6d0bf9c654e1aac1e01c96ce0e1fa5868994",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/imgui-sys-0.12.0-2.txt",
+      "size": 1067,
+      "sha256": "6d8cf28dba8f3db32a20787c462fad275a601dbba098bdf8b5ca531e6b4078a1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/imgui-sys-0.12.0.txt",
+      "size": 11354,
+      "sha256": "0d5ae5fed2b932285871f18d5cd92f1485d41d3f6d0e94d9aeffe3b1c800e867",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/indexmap-2.14.2.txt",
+      "size": 1049,
+      "sha256": "ecc269ef87fd38a1d98e30bfac9ba964a9dbd9315c3770fed98d4d7cb5882055",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/lewton-0.10.2.txt",
+      "size": 11660,
+      "sha256": "9e32628a9d574751cb0a0136a207221b55ca3d95bde271880343a73de20b5964",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/libc-0.2.191.txt",
+      "size": 1066,
+      "sha256": "123a331b5dbf04c30097fa43b8f858bc85df671fe776de498d01f3d6b7c1f69e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/libsoundio.txt",
+      "size": 1082,
+      "sha256": "12043f8e6dfb42e979158fbecbbeeb0cf70d2721ea2864f627379331b95c58e6",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/lock_api-0.4.14.txt",
+      "size": 1071,
+      "sha256": "c9a75f18b9ab2927829a208fc6aa2cf4e63b8420887ba29cdb265d6619ae82d5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/lzzzz-2.0.0.txt",
+      "size": 1063,
+      "sha256": "beae1a4a5a2246a2b7413a988e69e76100f58352f9feb74ff65459d9c7316e0c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/miniz_oxide-0.8.9-2.txt",
+      "size": 984,
+      "sha256": "0a54e647fe54104658b5e563c04c6f9edf251710e47bce692e0bd990a4ddaa39",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/miniz_oxide-0.8.9.txt",
+      "size": 1213,
+      "sha256": "4108245a1f2df9d4e94df8abed5b4ba0759bb2f9b40a6b939f1be141077ae50b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/mint-0.5.9.txt",
+      "size": 1073,
+      "sha256": "5ac8b41fe6bbad7f9d39b3424fe38e6d76745a85f4c6adc59de9eb1e470d0b4c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/moxcms-0.8.1-2.txt",
+      "size": 1506,
+      "sha256": "2aa92cada6431e75615e3fe6cb1a9082c98f777d48ae1c087c0da0e37f7b8bff",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/moxcms-0.8.1.txt",
+      "size": 11348,
+      "sha256": "90bf2d659c43045111b65c733ab2a6d4cbcb422a098368c8c58a9ba3db4ed0c5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/multiversion_no_op-1.0.0.txt",
+      "size": 644,
+      "sha256": "d2a809eafabba137f508bea16a1b93d8ff24df7da6f38129d830db9bc118bdfe",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/num_threads-0.1.8-2.txt",
+      "size": 1055,
+      "sha256": "b4bf94a9fceb8846320fda938ee53fc16b506572609da5cf1d2d289a5597a8f8",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/num_threads-0.1.8.txt",
+      "size": 11342,
+      "sha256": "c69b72788ec261765e460532016b4bb78372f238e449b5e70e3268ec1e18fd15",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/num-conv-0.2.2.txt",
+      "size": 1050,
+      "sha256": "e2e245f2b566d0bfafb0f6a04c16b82d710c4e6e7d799e39bb4ef6e541b85b98",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/objc-0.2.7.txt",
+      "size": 1066,
+      "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ogg-0.8.0.txt",
+      "size": 1739,
+      "sha256": "96635754c52c4cd1ec5d2903a890e7bc1a77dc30aa46ad486a92641cc5590bc0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/opengmk-10.txt",
+      "size": 919,
+      "sha256": "e34c58338bd89d43e709e226610d8f32b3e3c47f4ad9a99a8dc1d4ac7842488e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/opengmk-11.txt",
+      "size": 1078,
+      "sha256": "b85dcd3e453d05982552c52b5fc9e0bdd6d23c6f8e844b984a88af32570b0cc0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/opengmk-12.txt",
+      "size": 1676,
+      "sha256": "39cb0234065c92b9e6cee3830cbb52b1aa289aa8fe9ba2e66730fec5cf05c630",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/opengmk-13.txt",
+      "size": 4016,
+      "sha256": "8eea8287e5876b539670cadb82e99f9a7afddec6f6730811be1daf25d2e9bcfd",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/opengmk-14.txt",
+      "size": 1995,
+      "sha256": "f5062c9a188d81dfe66b56db4182dcf9e4b17c0d9b0d311a8e20b3a1b075c443",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/opengmk-2.txt",
+      "size": 1499465,
+      "sha256": "5647be074c8edf7339fd863055923a8fc80bc5610a8d4661ec3b767b9d392c27",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/opengmk-3.txt",
+      "size": 14423589,
+      "sha256": "d518ae2d76bc7a1f0cbf0069b8deafb56efc39c2614cab74a859ef0b467f8373",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/opengmk-4.txt",
+      "size": 1267,
+      "sha256": "f32fb3b417a194167cfad068223fc975ba96c5960513a10f66a3c28720aec1df",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/opengmk-5.txt",
+      "size": 20137,
+      "sha256": "23ee78c8bae49cf08ea2f0c84945c66b987ebe4520881fb51b3dad4fb43d07c2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/opengmk-6.txt",
+      "size": 3320,
+      "sha256": "a3966c9410ef94a1efbfa9ec04e9c1994026a70623fbf0885ce36737bfba3b54",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/opengmk-7.txt",
+      "size": 17642,
+      "sha256": "54b212ba1f97f6948fa5486239ab505dd820b02e50cbfd296b4062c8609a70af",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/opengmk-8.txt",
+      "size": 34795,
+      "sha256": "05315fce6c35f79b8a35454828995fa26336f235895ac64557abc028f4ffcea2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/opengmk-9.txt",
+      "size": 730,
+      "sha256": "0ff61769b238634e042ab759dddfd104a8e69d091e3600ae3410e401a6164381",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/opengmk.txt",
+      "size": 17919,
+      "sha256": "ef8b230ff0da89bec2cbed47d71f1456d331347d2df61bd63e0f5a04f218eb93",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ordered-multimap-0.7.3.txt",
+      "size": 1066,
+      "sha256": "047c1d2f1c28c30ced89bd0740ff251d8f51512e81b142711f958a0551729ec4",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/phf-0.13.1.txt",
+      "size": 1099,
+      "sha256": "0ab4d106b6faac07fb6a051815fd1b4d862d730895e2d7d7358c2f13565e7a38",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/png-0.18.1.txt",
+      "size": 1048,
+      "sha256": "eaf40297c75da471f7cda1f3458e8d91b4b2ec866e609527a13acfa93b638652",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/powerfmt-0.2.1-2.txt",
+      "size": 1062,
+      "sha256": "070dbc7dda03a29296f2d58bdb9b7331af90f2abc9f31df22875d1eabaf29852",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/powerfmt-0.2.1.txt",
+      "size": 11349,
+      "sha256": "155420c6403d4e0fca34105e3c03fdd6939b64c393c7ec6f95f5b72c5474eab0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/quick-error-2.0.1.txt",
+      "size": 1070,
+      "sha256": "058f01fe181608d027fcde7e528fc03ea3cf90f30903c407644b0a9bbc54f500",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ramen.txt",
+      "size": 827,
+      "sha256": "99e54bc503012a92dc1276c291ba877009974701343558a95518bd49f921f74e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/rayon-1.12.0.txt",
+      "size": 1071,
+      "sha256": "0621878e61f0d0fda054bcbe02df75192c28bde1ecc8289cbd86aeba2dd72720",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/rect_packer-0.2.1.txt",
+      "size": 1079,
+      "sha256": "4861ba69e71266ace2e9540de46018e33a7527abe253a9cf0b43b945f17c952d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/rmp3-0.3.1.txt",
+      "size": 6556,
+      "sha256": "6a1ee543e5282cd9061881edf462e6fdab181f328da71fc2c9a6950a80e94d01",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/rust-ini-0.21.3.txt",
+      "size": 1078,
+      "sha256": "ccf6244964385d34fef3799aa7792e9f8d35517de026f39a4f43f0e89b2079eb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/scopeguard-1.2.0.txt",
+      "size": 1097,
+      "sha256": "fb77f0a9c53e473abe5103c8632ef9f0f2874d4fb3f17cb2d8c661aab9cee9d7",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/shlex-1.3.0-2.txt",
+      "size": 1092,
+      "sha256": "4455bf75a91154108304cb283e0fea9948c14f13e20d60887cf2552449dea3b1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/shlex-1.3.0.txt",
+      "size": 566,
+      "sha256": "553fffcd9b1cb158bc3e9edc35da85ca5c3b3d7d2e61c883ebcfa8a65814b583",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/simd-adler32-0.3.10.txt",
+      "size": 1078,
+      "sha256": "42a35170233e83e18856792e748de4c1ce4a63b2afce9a370c89ef3fe23f9f2d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siphasher-1.0.4.txt",
+      "size": 281,
+      "sha256": "c962ee4d1d05ddc138b202b2540219ebc57893fcf97b364852094a9a94ce1365",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/smallvec-1.16.4.txt",
+      "size": 1072,
+      "sha256": "0b28172679e0009b655da42797c03fd163a3379d5cfa67ba1f1655e974a2a1a9",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/strsim-0.11.1.txt",
+      "size": 1166,
+      "sha256": "1e697ce8d21401fbf1bddd9b5c3fd4c4c79ae1e3bdf51f81761c85e11d5a89cd",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/tiff-0.11.3.txt",
+      "size": 1073,
+      "sha256": "20c097d0de27e2adc179140a3d542091951a030699c7e1c78655f2a2d08d4e3e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/time-0.3.55.txt",
+      "size": 1057,
+      "sha256": "2537228d9a1b44a5dc595241349cae7090b326c8de165aaf89bfddef4a00d0fc",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/tiny-keccak-2.0.2.txt",
+      "size": 7048,
+      "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/unicode-ident-1.0.27.txt",
+      "size": 1995,
+      "sha256": "f7db81051789b729fea528a63ec4c938fdcb93d9d61d97dc8cc2e9df6d47f2a1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/unicode-width-0.2.3-2.txt",
+      "size": 1071,
+      "sha256": "7b63ecd5f1902af1b63729947373683c32745c16a10e8e6292e2e2dcd7e90ae0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/unicode-width-0.2.3.txt",
+      "size": 321,
+      "sha256": "23860c2a7b5d96b21569afedf033469bab9fe14a1b24a35068b8641c578ce24d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/weezl-0.1.12.txt",
+      "size": 1080,
+      "sha256": "573f5227db835cd30bbdd3aed3f82615f80119a4d5c82b4daf642dbfe2b6afde",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/xml-rs-0.8.29.txt",
+      "size": 1083,
+      "sha256": "0dc18d924dc0a5f41172a393012843a5eaaef338e795b3645da9cc3b6068220b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/zerocopy-0.8.63-2.txt",
+      "size": 1275,
+      "sha256": "83c1763356e822adde0a2cae748d938a73fdc263849ccff6b27776dff213bd32",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/zerocopy-0.8.63-3.txt",
+      "size": 1060,
+      "sha256": "1a2f5c12ddc934d58956aa5dbdd3255fe55fd957633ab7d0d39e4f0daa73f7df",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/zerocopy-0.8.63.txt",
+      "size": 11350,
+      "sha256": "9d185ac6703c4b0453974c0d85e9eee43e6941009296bb1f5eb0b54e2329e9f3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/zlib-rs-0.6.8.txt",
+      "size": 856,
+      "sha256": "e72111c52b7d96ebe25348dee19f0744f444d3c95ae6b1ecb6ccaecc5bce05ba",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/zune-core-0.5.3-2.txt",
+      "size": 859,
+      "sha256": "d201d14804d3bcd3b944147173175e4abfbd838b7c8069b6bd3452496bf13e6c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/zune-core-0.5.3.txt",
+      "size": 1073,
+      "sha256": "d30047bca3b516639339a3c279bb84c3483124fb5a9dafe3c75056a85090e745",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 21816,
+      "mode": 420,
+      "sha256": "fd74ccd5d0ceb8cc64dd6d4c72e23ae20d62aa81e5afb59a082c6ead7fd8ee8c"
+    }
+  ],
+  "redistribution": "bundle"
+}

@@ -6,6 +6,44 @@
     {
       "schemaVersion": 2,
       "id": "opengmk",
+      "version": "0.2.0-MCLv7",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "fd74ccd5d0ceb8cc64dd6d4c72e23ae20d62aa81e5afb59a082c6ead7fd8ee8c",
+      "sourceSha256": "fd74ccd5d0ceb8cc64dd6d4c72e23ae20d62aa81e5afb59a082c6ead7fd8ee8c",
+      "updatePolicy": "manual",
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "f445a97387537e90d6f56d5e6b30d8ba395aa2aa"
+      },
+      "asset": {
+        "filename": "opengmk-0.2.0-MCLv7-arm64.tar.gz",
+        "sha256": "67b90d6c4b30511887d7e60ddb9947ad429fdc52878358a6603a06ef78a3a73f",
+        "bytes": 3056789,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/opengmk%2Fv0.2.0-MCLv7%2Farm64/opengmk-0.2.0-MCLv7-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "f445a97387537e90d6f56d5e6b30d8ba395aa2aa",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41840866378",
+        "runAttempt": "1"
+      },
+      "tag": "opengmk/v0.2.0-MCLv7/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "opengmk",
       "version": "0.2.0-MCLv4",
       "arch": "arm64",
       "launcherArchitectures": [
