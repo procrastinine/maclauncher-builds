@@ -1,0 +1,71 @@
+{
+  "id": "innoextract",
+  "version": "1.10-dev-MCLv7",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "innoextract/1.10-dev-MCLv7/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "d8ce0f9f61605c5179586917f92649bee779b1431fc4ed2cdd231520cc344eae",
+  "sourceSha256": "d8ce0f9f61605c5179586917f92649bee779b1431fc4ed2cdd231520cc344eae",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 18771,
+      "mode": 420,
+      "sha256": "6e4d72562c8d52136fa066a21d384c97452c0f5aebe91954c7947d3870c04a1b"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "ddaaac2c0eba5c8dd4019fb3906d1a81d33dd6ab9812e45d9c21b1337471302e"
+    },
+    {
+      "path": "files/bin/innoextract",
+      "size": 1033648,
+      "sha256": "5b36f596bc6b8cf63627b40124950cf8a057fdcb72241d9d93da5a9fd23a9770",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/bin/maclauncher-inno-inspect",
+      "size": 769520,
+      "sha256": "3e9dedbb65ca567e9a6ba6de0cac445725c6063387887a0a679dd9b486c263ff",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/licenses/Boost.txt",
+      "size": 1338,
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 46,
+      "sha256": "44e8eebbb3a31002c6355572b2623629e17186181147e36df0f0a2887a5ed5bb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/innoextract.txt",
+      "size": 886,
+      "sha256": "7cd6f3bf0c83f2c3ce8438aab20a4827a5de934fb87dd7966f6f3f2651685127",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 2243,
+      "mode": 420,
+      "sha256": "d8ce0f9f61605c5179586917f92649bee779b1431fc4ed2cdd231520cc344eae"
+    }
+  ],
+  "redistribution": "bundle"
+}
