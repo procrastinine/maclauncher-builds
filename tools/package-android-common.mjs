@@ -31,15 +31,16 @@ export function packageAndroidCommon({build,version,sourceRevision,output}){
   }
   addLicenses(payload,'MacLauncher',root);
   addLicenses(payload,'SDL3',path.join(payload,'native/SDL3.framework/Versions/A/Resources'));
-  addLicenses(payload,'ASM',path.join(root,'producers/android-inputs/licenses/asm'));
-  addLicenses(payload,'AOSP framework',path.join(root,'producers/android-inputs/licenses/aosp-framework'));
-  addLicenses(payload,'Apache HTTP',path.join(root,'producers/android-inputs/licenses/aosp-apache-http'));
-  addLicenses(payload,'Robolectric portability',path.join(root,'producers/android-inputs/licenses/robolectric-portability'));
-  addLicenses(payload,'fmt',path.join(root,'producers/android-inputs/licenses/aosp-fmt'));
-  addLicenses(payload,'libbase',path.join(root,'producers/android-inputs/licenses/aosp-libbase'));
-  addLicenses(payload,'AOSP native',path.join(root,'producers/android-inputs/licenses/aosp-native'));
-  addLicenses(payload,'Android platform packages',path.join(root,'producers/android-inputs/licenses/platform-packages'));
-  addLicenses(payload,'XmlPull',path.join(root,'producers/android-inputs/licenses/xmlpull'));
+  addLicense(payload,'ASM',new URL('../producers/android-inputs/licenses/asm/LICENSE',import.meta.url));
+  addLicense(payload,'AOSP framework',new URL('../producers/android-inputs/licenses/aosp-framework/LICENSE',import.meta.url));
+  addLicense(payload,'Apache HTTP',new URL('../producers/android-inputs/licenses/aosp-apache-http/NOTICE',import.meta.url));
+  addLicense(payload,'Robolectric portability',new URL('../producers/android-inputs/licenses/robolectric-portability/LICENSE',import.meta.url));
+  addLicense(payload,'fmt',new URL('../producers/android-inputs/licenses/aosp-fmt/LICENSE',import.meta.url));
+  addLicense(payload,'fmt',new URL('../producers/android-inputs/licenses/aosp-fmt/NOTICE',import.meta.url));
+  addLicense(payload,'libbase',new URL('../producers/android-inputs/licenses/aosp-libbase/NOTICE',import.meta.url));
+  addLicense(payload,'AOSP native',new URL('../producers/android-inputs/licenses/aosp-native/NOTICE',import.meta.url));
+  addLicense(payload,'Android platform packages',new URL('../producers/android-inputs/licenses/platform-packages/NOTICE',import.meta.url));
+  addLicense(payload,'XmlPull',new URL('../producers/android-inputs/licenses/xmlpull/LICENSE',import.meta.url));
   addLicense(payload,'GLES SGI-B 2.0',path.join(root,'producers/android-inputs/licenses/GLES-SGI-B-2.0.txt'));
 
   const files=[],dependencies=[];let minimumMacOS='0.0';

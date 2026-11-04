@@ -28,8 +28,8 @@ export async function buildBlueprintInput({output,work,arch='arm64'}){
  const identity={project:'platform/build/blueprint',repository:profile.upstream.repository,revision:profile.upstream.revision,files:rows.map(file=>({...file,sha256:sha(path.join(upstream,file.path))})),driverSha256:profile.driverSha256};
  const sources=path.join(output,'parser-sources.json');fs.writeFileSync(sources,JSON.stringify(identity,null,2)+'\n');
  addLicenses(output,'Blueprint',upstream);
- addLicenses(output,'Go',path.join(root,'producers/android-inputs/licenses/go'));
- addLicense(output,'Go patents',path.join(root,'producers/android-inputs/licenses/go/PATENTS'));
+ addLicense(output,'Go',new URL('../producers/android-inputs/licenses/go/LICENSE',import.meta.url));
+ addLicense(output,'Go patents',new URL('../producers/android-inputs/licenses/go/PATENTS',import.meta.url));
  return {parser,sources,source:upstream,parserSha256:sha(parser),profile,toolchain:read('go',['version'])};
 }
 

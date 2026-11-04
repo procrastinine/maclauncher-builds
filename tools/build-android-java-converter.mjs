@@ -1,5 +1,5 @@
 import {androidSource,androidUpstream} from '../lib/android-source.mjs';
-import {addLicenses} from '../lib/licenses.mjs';
+import {addLicenses,addLicense} from '../lib/licenses.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -41,7 +41,7 @@ export async function buildAndroidJavaConverterInput({output,work}){
  const built=await buildConverter({root:native,build,output,jdk,checkout:converter,apksig:path.join(tools,catalogs.apksig.files[0].path),asmClasspath:catalogs.asm.files.map(file=>path.join(tools,file.path)).join(path.delimiter)});
  fs.copyFileSync(built.apiHeaders,path.join(output,'android-api-headers.jar'),fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);
 
- addLicenses(output,'ASM',path.join(root,'producers/android-inputs/licenses/asm'));
+ addLicense(output,'ASM',new URL('../producers/android-inputs/licenses/asm/LICENSE',import.meta.url));
 
  addLicenses(output,definition.id,android);addLicenses(output,'dex2jvm',converter);
  return {root:output,record:{androidSource:androidSource(),converter:definition.converter,jdk:{sha256:jdkPin.sha256,version:read(path.join(jdk,'bin/java'),['--version']).split('\n')[0]},tools:catalogs}};
