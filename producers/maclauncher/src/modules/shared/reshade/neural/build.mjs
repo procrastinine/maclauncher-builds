@@ -44,6 +44,10 @@ export function buildProvider({ output = path.join(cacheDirectory, "output"),
   });
   addLicenses(output,'MLX-DLSS',sourceDirectory);
   addLicenses(output,'MLX-Swift',path.join(buildRoot,'owned-source/mlx-swift'));
+  addLicenses(output,'MLX',path.join(buildRoot,'owned-source/mlx-swift/Source/Cmlx/mlx'));
+  addLicenses(output,'Swift Argument Parser',path.join(buildRoot,'checkouts/swift-argument-parser'));
+  addLicenses(output,'Swift Numerics',path.join(buildRoot,'checkouts/swift-numerics'));
+  addLicenses(output,'neural models',path.join(directory,'native'));
   verifyTimingReceipt(JSON.parse(fs.readFileSync(path.join(output,'timing-adaptation.json'))));
   const symbols=execFileSync('nm',['-gU',path.join(output,source.library)],{encoding:'utf8'});
   if(['ml_neural_timing_api','ml_neural_timing_supported_v1','ml_neural_submit_timed_v1','ml_neural_submit_batch_timed_v1'].some(name=>!symbols.includes('_'+name+'\n')))

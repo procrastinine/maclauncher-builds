@@ -1,4 +1,4 @@
-import {addLicenses} from '../lib/licenses.mjs';
+import {addLicense,addLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
@@ -44,7 +44,12 @@ export async function buildPortableRuntime({project,arch,version,output,work}){
  if(recipe.reuse==='mixer-stack')options.mixerStack=mixer;
  if(recipe.reuse==='mixer-python'){const Python=require(path.join(modules,'shared/runtime/portable-python-v2.js'));options.dependencyStacks={mixer,python:await Python.buildPython({archive:archives.python,workRoot:work+'-python',sdk:mixer.sdk,architecture:arch,pathMappings})};}
  const built=await Builder[recipe.entry](options);
- for(const [name,directory] of Object.entries(built.dependencyClosure?.sourceRoots||{}))addLicenses(built.dependencyClosure.prefix,name,directory);
+ for(const [name,directory] of Object.entries(built.dependencyClosure?.sourceRoots||{})){
+  addLicenses(built.dependencyClosure.prefix,name,directory);
+  if(name==='turbojpeg')addLicense(built.dependencyClosure.prefix,name,`${directory}/README.ijg`);
+  if(name==='webp')addLicense(built.dependencyClosure.prefix,name,`${directory}/PATENTS`);
+  if(name==='lua')addLicense(built.dependencyClosure.prefix,name,`${directory}/doc/readme.html`);
+ }
  const payloads=!built.appRoot&&built.resources&&fs.existsSync(built.resources)?[{source:built.resources,relative:'share/'+recipe.share}]:[];
  const environmentRelative={};
  if(recipe.python){payloads.push({source:built.dependencyClosure.python.stdlib,relative:recipe.python.library});environmentRelative.PYTHONHOME=recipe.python.home;}

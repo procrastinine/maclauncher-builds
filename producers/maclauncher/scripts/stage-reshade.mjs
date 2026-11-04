@@ -2,7 +2,7 @@ import sharedDependencies from '../../dependencies.json' with {type:'json'};
 import dependencies from '../../../producers/dependencies.json' with {type:'json'};
 const {shaderc}=dependencies;
 import {gitlink} from "../../../lib/pins.mjs";
-import {addLicense,addLicenses} from '../../../lib/licenses.mjs';
+import {addLicense,addLicenses,includeLicenses} from '../../../lib/licenses.mjs';
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -619,7 +619,9 @@ if(options["--output"]&&fs.existsSync(destination))throw Error("Use a new isolat
 fs.mkdirSync(destination, { recursive: true });
 for (const directory of ["include", "effects"]) fs.mkdirSync(path.join(destination, directory), { recursive: true });
 addLicenses(destination,"ReShade",source);
-if(options["--xess-host"]){addLicenses(destination,"Intel-XeSS",xessSource);addLicense(destination,"Intel-XeSS headers",path.join(xessSource,"inc/MIT.txt"));}
+if(options["--xess-host"]){addLicenses(destination,"Intel-XeSS",xessSource);addLicense(destination,"Intel-XeSS headers",path.join(xessSource,"inc/MIT.txt"));addLicense(destination,"Intel-XeSS dependencies",path.join(xessSource,"third-party-programs.txt"));}
+for(const option of ["--godot","--streamline","--dxmt"])if(options[option])includeLicenses(destination,`${options[option]}/licenses`);
+addLicenses(destination,"native filters",path.resolve(import.meta.dirname,"../src/modules/shared/reshade/native"));
 const files = [];
 for (const [relative, input] of inputs) {
   const output = path.join(destination, relative);

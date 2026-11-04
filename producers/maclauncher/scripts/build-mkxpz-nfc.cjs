@@ -1,6 +1,6 @@
 const {gitlink} = require('../../../lib/pins.mjs');
 const REVISION = gitlink('producers/maclauncher/src/external/mkxp-z');
-const {addLicenses} = require('../../../lib/licenses.mjs');
+const {addLicense,addLicenses} = require('../../../lib/licenses.mjs');
 // Maintainer source build. Ordinary Play uses the sealed Included artifact.
 const fs = require('node:fs'), path = require('node:path'), os = require('node:os');
 const {execFileSync} = require('node:child_process');
@@ -120,8 +120,38 @@ function stage({work, source, output, version}) {
   for (const name of fs.readdirSync(installed).sort()) copy(path.join(installed, name), name);
   addLicenses(payload, 'MKXP-Z', source);
   const subprojects = path.join(source, 'subprojects');
-  for (const entry of fs.readdirSync(subprojects, {withFileTypes:true}))
-    if (entry.isDirectory()) addLicenses(payload, entry.name, path.join(subprojects,entry.name));
+  addLicenses(payload, 'SDL2-2.28.1', path.join(subprojects, 'SDL2-2.28.1'));
+  addLicenses(payload, 'SDL2_sound-2.0.4', path.join(subprojects, 'SDL2_sound-2.0.4'));
+  addLicenses(payload, 'SDL_ttf-release-2.0.18', path.join(subprojects, 'SDL_ttf-release-2.0.18'));
+  addLicenses(payload, 'SPIRV-Headers-vulkan-sdk-1.4.350.0', path.join(subprojects, 'SPIRV-Headers-vulkan-sdk-1.4.350.0'));
+  addLicenses(payload, 'SPIRV-Tools-vulkan-sdk-1.4.350.0', path.join(subprojects, 'SPIRV-Tools-vulkan-sdk-1.4.350.0'));
+  addLicenses(payload, 'angle-chromium-8037_21', path.join(subprojects, 'angle-chromium-8037_21'));
+  addLicenses(payload, 'fluidsynth-2.5.0', path.join(subprojects, 'fluidsynth-2.5.0'));
+  addLicenses(payload, 'fmt-12.1.0', path.join(subprojects, 'fmt-12.1.0'));
+  addLicenses(payload, 'freetype-VER-2-14-3', path.join(subprojects, 'freetype-VER-2-14-3'));
+  addLicenses(payload, 'gcem-1.18.0', path.join(subprojects, 'gcem-1.18.0'));
+  addLicenses(payload, 'icculus-physfs-eb3383b', path.join(subprojects, 'icculus-physfs-eb3383b'));
+  addLicenses(payload, 'libffi-3.5.2', path.join(subprojects, 'libffi-3.5.2'));
+  addLicenses(payload, 'libiconv-1.18', path.join(subprojects, 'libiconv-1.18'));
+  addLicenses(payload, 'libogg-1.3.6', path.join(subprojects, 'libogg-1.3.6'));
+  addLicenses(payload, 'libtheora-1.2.0', path.join(subprojects, 'libtheora-1.2.0'));
+  addLicenses(payload, 'libvorbis-1.3.7', path.join(subprojects, 'libvorbis-1.3.7'));
+  addLicenses(payload, 'libyaml-0.2.5', path.join(subprojects, 'libyaml-0.2.5'));
+  addLicenses(payload, 'openal-soft-1.24.3', path.join(subprojects, 'openal-soft-1.24.3'));
+  addLicenses(payload, 'openssl-3.0.8', path.join(subprojects, 'openssl-3.0.8'));
+  addLicenses(payload, 'pixman-0.46.4', path.join(subprojects, 'pixman-0.46.4'));
+  addLicenses(payload, 'ruby-3_1_3', path.join(subprojects, 'ruby-3_1_3'));
+  addLicenses(payload, 'sdl2_image', path.join(subprojects, 'sdl2_image'));
+  addLicenses(payload, 'theoraplay-ec1aad1ee43592f216946cdc03b1ee4c4e1e2e59', path.join(subprojects, 'theoraplay-ec1aad1ee43592f216946cdc03b1ee4c4e1e2e59'));
+  addLicenses(payload, 'uchardet-0.0.8', path.join(subprojects, 'uchardet-0.0.8'));
+  addLicenses(payload, 'xxHash-0.8.3', path.join(subprojects, 'xxHash-0.8.3'));
+  addLicenses(payload, 'zlib-1.3.1', path.join(subprojects, 'zlib-1.3.1'));
+  addLicenses(payload, 'SDL2 HIDAPI', path.join(subprojects, 'SDL2-2.28.1/src/hidapi'));
+  addLicense(payload, 'SDL2 HIDAPI authors', path.join(subprojects, 'SDL2-2.28.1/src/hidapi/AUTHORS.txt'));
+  addLicenses(payload, 'SDL2 yuv2rgb', path.join(subprojects, 'SDL2-2.28.1/src/video/yuv2rgb'));
+  addLicenses(payload, 'TiMidity', path.join(subprojects, 'SDL2_sound-2.0.4/src/timidity'));
+  addLicenses(payload, 'ANGLE xxhash', path.join(subprojects, 'angle-chromium-8037_21/src/common/third_party/xxhash'));
+  addLicense(payload, 'Mesa', path.join(subprojects, 'mesa-26.0.3/docs/license.rst'));
   const executableRelative = apps[0] + '/Contents/MacOS/bundle_mkxp-z';
   run('/usr/bin/codesign', ['--force','--sign','-',path.join(payload,apps[0])]);
   run('/usr/bin/codesign', ['--verify','--deep','--strict',path.join(payload,apps[0])]);

@@ -1,6 +1,6 @@
 import sharedDependencies from '../../../../../../dependencies.json' with {type:'json'};
 import {gitlink} from '../../../../../../../lib/pins.mjs';
-import {addLicenses} from '../../../../../../../lib/licenses.mjs';
+import {addLicense,addLicenses} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -72,6 +72,7 @@ const manifest={schemaVersion:1,managerId:source.id,version:source.version,platf
  executableRelative:source.libraries[backend],provider,files,dependencies:[]};
 const payload=path.join(out,'payload');fs.mkdirSync(payload,{recursive:true});
 addLicenses(payload,'FidelityFX-SDK',sdk);
+addLicense(payload,'Vulkan-Headers',path.join(sdk,'sdk/tools/ffx_shader_compiler/libs/SPIRV-Reflect/LICENSE'));
 for(const file of files){const target=path.join(payload,file.path);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(out,file.path),target);fs.chmodSync(target,file.mode);}
 // The game-library adapter reads this descriptor from its installed payload.
 // Source/build correspondence stays in the separate producer descriptor.

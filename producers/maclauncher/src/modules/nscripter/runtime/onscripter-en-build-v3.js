@@ -1,4 +1,4 @@
-const {addLicenses} = require('../../../../../../lib/licenses.mjs');
+const {addLicense,addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -143,6 +143,20 @@ async function buildRuntime({ manager: suppliedManager, userDataDir, version, pa
     addLicenses(payload, "ONScripter-EN", source);
     addLicenses(payload, "sdl12-compat", packageRoots.sdl12);
     addLicenses(payload, "SDL2", packageRoots.sdl2);
+    const extlib = path.join(source, "extlib/src");
+    addLicenses(payload, "SDL_image-1.2.12", path.join(extlib, "SDL_image-1.2.12"));
+    addLicenses(payload, "SDL_mixer-1.2.12", path.join(extlib, "SDL_mixer-1.2.12"));
+    addLicenses(payload, "SDL_ttf-2.0.11", path.join(extlib, "SDL_ttf-2.0.11"));
+    addLicenses(payload, "freetype-2.13.0", path.join(extlib, "freetype-2.13.0"));
+    addLicenses(payload, "libogg-1.3.5", path.join(extlib, "libogg-1.3.5"));
+    addLicenses(payload, "libvorbis-1.3.7", path.join(extlib, "libvorbis-1.3.7"));
+    addLicenses(payload, "libpng-1.6.39", path.join(extlib, "libpng-1.6.39"));
+    addLicenses(payload, "bzip2-1.0.8", path.join(extlib, "bzip2-1.0.8"));
+    addLicenses(payload, "smpeg", path.join(extlib, "smpeg"));
+    addLicense(payload, "FreeType FTL", path.join(extlib, "freetype-2.13.0/docs/FTL.TXT"));
+    addLicenses(payload, "SMPEG audio", path.join(extlib, "smpeg/audio"));
+    addLicenses(payload, "SMPEG video", path.join(extlib, "smpeg/video"));
+    addLicense(payload, "IJG JPEG", path.join(extlib, "jpeg-9f/README"));
     const verifiedBuild = { sourceRevision: REVISION, sourceTreeSha256, sourceArchiveSha256, sourceScope: SOURCE_SCOPE,
       adapterProfile: "mac-sdl12-v3", overlaySha256, overlayFiles, architecture, minimumMacOS: "13.0",
       compilerPrefixMaps: prefixMaps, compilerFlags, buildDirectory: work,

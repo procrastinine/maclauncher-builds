@@ -51,6 +51,7 @@ const shaderRoot=roots.VVMetalKit,air=[];
 for(const name of ["CopierMTLScene","SwizzleMTLScene"]){const file=path.join(output,name+".air");run("xcrun",["-sdk","macosx","metal","-std=metal3.0","-mmacosx-version-min=13.0","-I",shaderRoot,"-I",input,"-c",path.join(shaderRoot,name+".metal"),"-o",file]);air.push(file);}
 run("xcrun",["-sdk","macosx","metallib",...air,"-o",path.join(payload,"default.metallib")]);
 addLicenses(payload,'ISF',upstream);
+addLicenses(payload,'VVMetalKit',path.join(upstream,'submodules/VVMetalKit'));
 for(const [name,root]of Object.entries(roots))addLicenses(payload,name,root);
 for(const name of [source.library,...source.compilerLibraries.map(file=>path.basename(file))])run("codesign",["--force","--sign","-",path.join(payload,name)]);
 const files=fs.readdirSync(payload,{recursive:true}).filter(name=>name!=="provider.json"&&fs.statSync(path.join(payload,name)).isFile()).sort().map(name=>{const bytes=fs.readFileSync(path.join(payload,name));return {path:name,size:bytes.length,sha256:crypto.createHash("sha256").update(bytes).digest("hex")};});

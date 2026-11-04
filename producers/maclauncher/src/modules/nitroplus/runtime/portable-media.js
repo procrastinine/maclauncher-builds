@@ -1,3 +1,4 @@
+const {addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -109,6 +110,7 @@ async function buildUtilities({ archives, workRoot, signal, onProgress, dependen
       build = await Portable.buildProject({ sourceRoot: path.join(sourceRoot, "build/cmake"), outputRoot: path.join(workRoot, pin.id), prefix, sdk, tools, pathMappings, options, signal,
         dependencies: { ...dependencies, runBuildCommand: (command, args, options) => run(command, args, { ...options, env }) } });
     }
+    addLicenses(prefix,pin.id,sourceRoot);
     builds.push({ ...pin, sourceRoot, ...build });
   }
   return { version: "boost-glew-macos13-v1", architecture: "arm64", minimumMacOS: "13.0", recipeSha256: recipeIdentity(), prefix, sdk, tools, sources: builds };

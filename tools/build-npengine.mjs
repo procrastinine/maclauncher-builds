@@ -1,3 +1,4 @@
+import {addLicenses,includeLicenses} from '../lib/licenses.mjs';
 import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
 import fs from 'node:fs';
 import path from 'node:path';
@@ -49,6 +50,9 @@ export async function finishNPengine({project,arch,output,work,source,npa,reposi
  return sealNPengine({project,arch,output,work,source,npa,repository,npaRepository,media,built});
 }
 export async function sealNPengine({project,arch,output,work,source,npa,repository,npaRepository,media,built}){
+ addLicenses(built.prefix,'libnpa',npa);
+ addLicenses(built.prefix,'GStreamer media',path.resolve(import.meta.dirname,'../producers/maclauncher/src/modules/nitroplus/runtime'));
+ includeLicenses(built.prefix,`${built.dependencyClosure?.utilities?.prefix}/licenses`);
  const payloads=fs.readdirSync(built.prefix).filter(name=>name!=='bin').map(name=>({source:path.join(built.prefix,name),relative:'npengine/'+name}));
  return sealRuntime({project,arch,output,executable:built.executable,executableRelative:'npengine/bin/npengine-runner',sourceRoot:source,upstreamRevision:Builder.REVISION,payloads,runtimeFiles:{profile:'npengine/profile.json'},provenance:{mediaInputs:Media.PIN.officialPayloads.map(({url,member,sha256})=>({url,member,sha256})),dependencySources:Media.PIN.correspondingSources.map(({id,version,archiveUrl,archiveSha256})=>({id,version,archiveUrl,archiveSha256}))}});
 }
