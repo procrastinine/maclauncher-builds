@@ -1,0 +1,99 @@
+{
+  "id": "vulkan-moltenvk-scene",
+  "version": "1.4.2-MCLv7",
+  "arch": "universal",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "sourceRelative": null,
+  "sourceSha256": "3bdd94969b46dc3215b152bb43d5661a244d6ffda15b4b7255ccb202cf0a1f7d",
+  "directoryRelative": "vulkan-moltenvk-scene/1.4.2-MCLv7/universal",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "f7ed2c50d28c258264acb29d22f9c69d449916fd2ae425797b87825fddb9f6bd",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 18988,
+      "mode": 420,
+      "sha256": "299bca2c0e3a87fda4ef12ca10c8ab3f1d634dac6eddc3246bf2c9e6b42d69de"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "a629e86450aabef0ece302b3890a479309536b0e5685f8b25fe3ce52dc08c626"
+    },
+    {
+      "path": "libMoltenVK-scene.dylib",
+      "size": 10788704,
+      "mode": 493,
+      "sha256": "c9522bfe28cc0da46305fb17753de2e3d99c8ac4eb318186591f09fefe1900fc",
+      "architectures": [
+        "arm64",
+        "x86_64"
+      ]
+    },
+    {
+      "path": "licenses/cereal.txt",
+      "size": 1542,
+      "mode": 420,
+      "sha256": "58604a126af6a671ea390ee3d5b3e42228aa59b2858fb7af1d5b20b31739ccbb"
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 286,
+      "mode": 420,
+      "sha256": "8c03fc0f45241cd7b4a4bbdb75941f6bf8ef4a295df107b9132cbca4a54cb457"
+    },
+    {
+      "path": "licenses/MoltenVK.txt",
+      "size": 11358,
+      "mode": 420,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "licenses/SPIRV-Cross-2.txt",
+      "size": 1305,
+      "mode": 420,
+      "sha256": "fbeaca472f4f70e276dd1106ca5097435967a22ad6c1d8200aef7ad9f70aaf3f"
+    },
+    {
+      "path": "licenses/SPIRV-Cross-3.txt",
+      "size": 1108,
+      "mode": 420,
+      "sha256": "8f25018489d6fe0dec34a352314c38dc146247b7de65735790f4398a92afa84b"
+    },
+    {
+      "path": "licenses/SPIRV-Cross.txt",
+      "size": 16814,
+      "mode": 420,
+      "sha256": "b89aeb7c2a164a0576786dd2a8b57f2fb628b23981f0a06bd77e2f99a9befa0f"
+    },
+    {
+      "path": "licenses/Vulkan-Headers-2.txt",
+      "size": 1084,
+      "mode": 420,
+      "sha256": "1ca3502222d967f3be5751c55f6b7ee735b5383909c3b501495f54b216dbf227"
+    },
+    {
+      "path": "licenses/Vulkan-Headers.txt",
+      "size": 495,
+      "mode": 420,
+      "sha256": "95ad366d23fadf701d355bc45fb8b82ae2d700239471d35d41286ac3b08ff903"
+    },
+    {
+      "path": "manifest.json",
+      "size": 15470,
+      "mode": 420,
+      "sha256": "f7ed2c50d28c258264acb29d22f9c69d449916fd2ae425797b87825fddb9f6bd"
+    },
+    {
+      "path": "provider.json",
+      "size": 6614,
+      "mode": 420,
+      "sha256": "868613048ffad9bf48439a2d8a607078011e583e321792f97bdc6716fcb0adce"
+    }
+  ]
+}
