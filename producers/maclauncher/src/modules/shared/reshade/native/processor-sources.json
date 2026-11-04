@@ -17,7 +17,6 @@
       "sourcePath": "third_party/reshade/deps/spirv",
       "submodulePath": "src/external/macfx-spirv-headers",
       "repository": "https://github.com/KhronosGroup/SPIRV-Headers.git",
-      "commit": "7845730cab6ebbdeb621e7349b7dc1a59c3377be",
       "licensePaths": [
         "LICENSE"
       ]
@@ -27,7 +26,6 @@
       "sourcePath": "third_party/spirv-cross",
       "submodulePath": "src/external/macfx-spirv-cross",
       "repository": "https://github.com/KhronosGroup/SPIRV-Cross.git",
-      "commit": "300681bbcb8365a8d1eacdacdbdd0249bbf1d6b1",
       "licensePaths": [
         "LICENSE"
       ]

@@ -1,7 +1,14 @@
 {
   "schemaVersion": 1,
-  "targetArchitectures": ["arm64", "x86_64"],
-  "nativeCompilers": ["mesa_clc", "vtn_bindgen2", "kk_clc"],
+  "targetArchitectures": [
+    "arm64",
+    "x86_64"
+  ],
+  "nativeCompilers": [
+    "mesa_clc",
+    "vtn_bindgen2",
+    "kk_clc"
+  ],
   "nativeCompilerSource": "kosmickrisp-source.json",
   "sourcePath": "producers/maclauncher/src/external/mesa",
   "vulkanLoader": {
@@ -13,7 +20,6 @@
   "vulkanHeaders": {
     "path": "sources/anyps5/3rdparty/Vulkan-Headers",
     "repository": "https://github.com/KhronosGroup/Vulkan-Headers.git",
-    "revision": "2fa203425eb4af9dfc6b03f97ef72b0b5bcb8350",
     "license": "Apache-2.0 and MIT"
   },
   "tools": {

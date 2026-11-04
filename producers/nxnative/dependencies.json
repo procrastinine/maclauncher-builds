@@ -225,7 +225,6 @@
       "source": {
         "path": "producers/maclauncher/src/external/macfx-spirv-cross",
         "repository": "https://github.com/KhronosGroup/SPIRV-Cross",
-        "revision": "300681bbcb8365a8d1eacdacdbdd0249bbf1d6b1",
         "license": "Apache-2.0",
         "licenseFiles": [
           "LICENSE"
@@ -246,7 +245,6 @@
       "source": {
         "path": "sources/anyps5/3rdparty/glslang",
         "repository": "https://github.com/KhronosGroup/glslang.git",
-        "revision": "ba1640446f3826a518721d1f083f3a8cca1120c3",
         "license": "BSD-3-Clause AND MIT AND Apache-2.0",
         "licenseFiles": [
           "LICENSE.txt"
