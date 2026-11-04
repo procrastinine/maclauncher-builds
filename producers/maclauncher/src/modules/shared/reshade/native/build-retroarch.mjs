@@ -20,7 +20,6 @@ const sceneInputContractSha256=hash(new URL('../../effects/operation-contracts.m
 const run=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',stdio:'pipe',timeout:180000,...options});
 if(run('git',['-C',originalSource,'rev-parse','HEAD']).trim()!==gitlink(declaration.gitlink))throw new Error('The original librashader source pin differs.');
 run('git',['-C',originalSource,'diff','--exit-code','HEAD','--']);
-if(hash(path.join(originalSource,'include/librashader.h'))!==declaration.headerSha256)throw new Error('The original librashader C API header differs.');
 if(archive&&hash(archive)!==declaration.artifacts.arm64?.sha256)throw new Error('The official librashader archive checksum differs.');
 if(fs.existsSync(output))throw new Error('Use a new RetroArch shader output directory.');
 fs.mkdirSync(output,{recursive:true});
