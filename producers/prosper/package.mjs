@@ -1,4 +1,4 @@
-import {addLicenses} from '../../lib/licenses.mjs';
+import {addLicense,addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -32,6 +32,17 @@ export async function packageLocal({buildDirectory,output,version=recipe.version
  run('/usr/bin/strip',['-S',binary]);if(changes.length)run('/usr/bin/install_name_tool',[...changes,binary]);run('/usr/bin/codesign',['--force','--sign','-',binary]);run('/usr/bin/codesign',['--verify','--strict',binary]);
  const source=path.join(root,recipe.source.path);
  addLicenses(payload,'Prosper',source);
+ addLicenses(payload,'imgui',path.join(source,'prosper/third_party/imgui'));
+ addLicenses(payload,'libatrac9',path.join(source,'prosper/third_party/libatrac9'));
+ addLicenses(payload,'renderdoc',path.join(source,'prosper/third_party/renderdoc'));
+ addLicenses(payload,'stb',path.join(source,'prosper/third_party/stb'));
+ addLicenses(payload,'SDL3',path.join(buildDirectory,'dependencies/sdl3'));
+ addLicenses(payload,'SDL3 HIDAPI',path.join(buildDirectory,'dependencies/sdl3/src/hidapi'));
+ addLicense(payload,'SDL3 HIDAPI',path.join(buildDirectory,'dependencies/sdl3/src/hidapi/AUTHORS.txt'));
+ addLicenses(payload,'SDL3 yuv2rgb',path.join(buildDirectory,'dependencies/sdl3/src/video/yuv2rgb'));
+ addLicenses(payload,'Vulkan-Headers',path.join(buildDirectory,'dependencies/vulkan-headers'));
+ addLicenses(payload,'FFmpeg',path.join(buildDirectory,'dependencies/ffmpeg-macos-x64/share/ffmpeg'));
+ addLicense(payload,'ProggyClean',path.join(import.meta.dirname,'licenses/ProggyClean.txt'));
  const producerInputs=['build.mjs','package.mjs','source.json','dependencies.json'].map(file=>({path:file,sha256:sha(fs.readFileSync(path.join(import.meta.dirname,file)))}));
  fs.writeFileSync(path.join(payload,'source.json'),json({schemaVersion:1,source:recipe.source,dependencies:inputs.dependencies,artifacts:inputs.artifacts,vulkanLinkInput:result.vulkanLinkInput,producerInputs}));
  const files=filesIn(payload).map(file=>record(payload,file));
