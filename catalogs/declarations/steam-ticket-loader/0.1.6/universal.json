@@ -1,0 +1,57 @@
+{
+  "id": "steam-ticket-loader",
+  "version": "0.1.6",
+  "arch": "universal",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "sourceRelative": null,
+  "sourceSha256": "5b5604323f8d6a016efb50056403fe504271ddbd70ba738b268eb3b4dc223f00",
+  "directoryRelative": "steam-ticket-loader/0.1.6/universal",
+  "manifestRelative": "helper.json",
+  "manifestSha256": "9ef3680c7788f3c4f6f31853f1d82f1d7138bc0cc8061e17f8fa628f9053a29c",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 16437,
+      "mode": 420,
+      "sha256": "3ff68bf351fc4d3ad5e0b6b685deafa75de266253855b5258c7db09c72f943bb"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "45d4e8d830b1c3f781d2364bf4111558758b224d81faa881202c2cf06a1a80d8"
+    },
+    {
+      "path": "helper.json",
+      "size": 991,
+      "sha256": "9ef3680c7788f3c4f6f31853f1d82f1d7138bc0cc8061e17f8fa628f9053a29c",
+      "mode": 420
+    },
+    {
+      "path": "libsdkencryptedappticket.dylib",
+      "size": 50112,
+      "sha256": "6bbc5615b6d02465b9ccb858cf1cfe944d401cb6192dd6e2712d78b77a41eb2c",
+      "mode": 493,
+      "architectures": [
+        "arm64",
+        "x86_64"
+      ]
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 29,
+      "sha256": "5fae4a022fb97d8e3d41dc31e83fd092c1a87e5a48656a7f4b95b25659699d66",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MacLauncher.txt",
+      "size": 1081,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+      "mode": 420
+    }
+  ]
+}
