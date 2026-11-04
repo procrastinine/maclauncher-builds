@@ -1,0 +1,463 @@
+{
+  "id": "android-apk-metadata",
+  "version": "1.1.5",
+  "arch": "arm64",
+  "minimumMacOS": "13.0",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "34430ef0f71a136d9bf5a208964ef8b7ccdec1559dc721eca1868ed9b975ea96",
+  "directoryRelative": "android-apk-metadata/1.1.5/arm64",
+  "manifestRelative": "helper.json",
+  "manifestSha256": "f8722757a05c7acf19f2b97f7df980cebbf8209d42259b5047f02155af34e091",
+  "files": [
+    {
+      "path": "android-apk-metadata",
+      "size": 812176,
+      "sha256": "b35b2644f9a336bce0d76a239b78ed6f44563b61f15d3decdd46d010d6b00696",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "build-definition.json",
+      "size": 17364,
+      "mode": 420,
+      "sha256": "8ce3d5f6cc08db06bdbacb719f1af9e64fcfa84cbc273c69e4ff7c8cb84285d9"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "4e11678d7bbe2bd9a06c51dfc6b009afaa0c7d0ca018ba0917a4b6e3f5a3b1c3"
+    },
+    {
+      "path": "helper.json",
+      "size": 13273,
+      "sha256": "f8722757a05c7acf19f2b97f7df980cebbf8209d42259b5047f02155af34e091",
+      "mode": 420
+    },
+    {
+      "path": "licenses/adler2-2.0.1-2.txt",
+      "size": 10860,
+      "sha256": "8ada45cd9f843acf64e4722ae262c622a2b3b3007c7310ef36ac1061a30f6adb",
+      "mode": 420
+    },
+    {
+      "path": "licenses/adler2-2.0.1-3.txt",
+      "size": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "mode": 420
+    },
+    {
+      "path": "licenses/adler2-2.0.1.txt",
+      "size": 665,
+      "sha256": "861399f8c21c042b110517e76dc6b63a2b334276c8cf17412fc3c8908ca8dc17",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-10.txt",
+      "size": 1389,
+      "sha256": "6ffedbc0f7878612d2b23589f1ff2ab15633e1df7963a5d9fc750ec5500c7e7a",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-11.txt",
+      "size": 1451,
+      "sha256": "b2fdb88151f747b40f4a8b17ceba930136c8c1be873611972b413bce2c2eb587",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-12.txt",
+      "size": 10139,
+      "sha256": "494accc32e50eb523a0e384d0ae6d4b702db867a89d6971216760e92b240ee12",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-13.txt",
+      "size": 12534,
+      "sha256": "756a61a8300d105ae68e7f2993e27d41a765c946f3400422e2403b01e7ded527",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-14.txt",
+      "size": 1542,
+      "sha256": "58604a126af6a671ea390ee3d5b3e42228aa59b2858fb7af1d5b20b31739ccbb",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-15.txt",
+      "size": 1002,
+      "sha256": "e32ff4e00d9d94930537635291da39e7e612703334bf6fde8c7f1686fe8a45a2",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-16.txt",
+      "size": 36620,
+      "sha256": "ea75d2e79a97f8dfc1e1ca04beedc432a47af4993e0cd659cef062050a57d3f9",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-17.txt",
+      "size": 19263,
+      "sha256": "067d8f7f645efe1131a9df13aa80ec2910d4ff898f9b14d337443a4202d56ab6",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-18.txt",
+      "size": 5788,
+      "sha256": "ded3eab76e881c8c18ab9e4ed9e888b1afcac41435913930f88f8188cecb2e8f",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-19.txt",
+      "size": 407542,
+      "sha256": "46d411827d56eda34df30f901bfa4ea020119b2e38b6b7efb6a32e91461457a2",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-2.txt",
+      "size": 3544,
+      "sha256": "75d9526cb80680518a22a07587156dd52d58890c5e60dc6efee712e46d88c067",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-20.txt",
+      "size": 13928,
+      "sha256": "4e1144ff2b1369e7b9e8a1a3fb94ea3deee99d5b327cd94b423d148dfa34d25f",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-21.txt",
+      "size": 16703,
+      "sha256": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-22.txt",
+      "size": 16706,
+      "sha256": "e2b35be49f7284a45b7baca8fc7b3ab7440e7902392b2528a457816b5bb2a15c",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-23.txt",
+      "size": 14990,
+      "sha256": "9a682a56cffc9524dfa9b0b1c0dca9cb81a19e96d5bd0793aaf02c08a95ee7ca",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-24.txt",
+      "size": 1491,
+      "sha256": "68834f116f8ff545f05d14753357b620748156d60ee36b26beab4cb3f317efe4",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-25.txt",
+      "size": 23503,
+      "sha256": "ea43b1de38a6f90c488800d66dec1ed671e68cda530266bc96951fb5b6307613",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-26.txt",
+      "size": 1522,
+      "sha256": "a44eb7b5caf5534c6ef536b21edb40b4d6babf91bf97d9d45596868618b2c6fb",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-27.txt",
+      "size": 19274,
+      "sha256": "4b9abebc4338048a7c2dc184e9f800deb349366bdf28eb23c2677a77b4c87726",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-28.txt",
+      "size": 495,
+      "sha256": "95ad366d23fadf701d355bc45fb8b82ae2d700239471d35d41286ac3b08ff903",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-29.txt",
+      "size": 1084,
+      "sha256": "1ca3502222d967f3be5751c55f6b7ee735b5383909c3b501495f54b216dbf227",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-3.txt",
+      "size": 802,
+      "sha256": "8937b0397fdaea5ecb52945c9d2da894d338ed49397ef7824be365e60049d264",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-30.txt",
+      "size": 12809,
+      "sha256": "e8f66a474a1c1a0c1da2e85b5e84a50bf5e3161c96d2a3b92b76a32d05ae9ae8",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-4.txt",
+      "size": 11369,
+      "sha256": "a41c63d0b40a94fc5dae93d63c788b12385b98517e149b912be7d5913ad28e0f",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-5.txt",
+      "size": 3573,
+      "sha256": "6b716ac364d4b775726e7eb883ecdfa3a752202794b4f6129eabbe27d3edfb48",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-6.txt",
+      "size": 1330925,
+      "sha256": "2668d0cd8487b327b63ff4b9c7378f8b803beebab6f0bea406fb8c2bb7f98292",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-7.txt",
+      "size": 11361,
+      "sha256": "c79a7fea0e3cac04cd43f20e7b648e5a0ff8fa5344e644b0ee09ca1162b62747",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-8.txt",
+      "size": 16962,
+      "sha256": "1f8729233617b193fd619213792ae16a41b95d2bbbf525dfe66998252ba68b16",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-9.txt",
+      "size": 1643,
+      "sha256": "bf4da21bd20bcfb5b60b7ecc67fa864a79be049e21d6178076887f178dd6c71a",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM.txt",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "licenses/android-apk-metadata-10.txt",
+      "size": 1078,
+      "sha256": "b85dcd3e453d05982552c52b5fc9e0bdd6d23c6f8e844b984a88af32570b0cc0",
+      "mode": 420
+    },
+    {
+      "path": "licenses/android-apk-metadata-11.txt",
+      "size": 1676,
+      "sha256": "39cb0234065c92b9e6cee3830cbb52b1aa289aa8fe9ba2e66730fec5cf05c630",
+      "mode": 420
+    },
+    {
+      "path": "licenses/android-apk-metadata-12.txt",
+      "size": 4016,
+      "sha256": "8eea8287e5876b539670cadb82e99f9a7afddec6f6730811be1daf25d2e9bcfd",
+      "mode": 420
+    },
+    {
+      "path": "licenses/android-apk-metadata-13.txt",
+      "size": 1995,
+      "sha256": "f5062c9a188d81dfe66b56db4182dcf9e4b17c0d9b0d311a8e20b3a1b075c443",
+      "mode": 420
+    },
+    {
+      "path": "licenses/android-apk-metadata-2.txt",
+      "size": 14423589,
+      "sha256": "d518ae2d76bc7a1f0cbf0069b8deafb56efc39c2614cab74a859ef0b467f8373",
+      "mode": 420
+    },
+    {
+      "path": "licenses/android-apk-metadata-3.txt",
+      "size": 1267,
+      "sha256": "f32fb3b417a194167cfad068223fc975ba96c5960513a10f66a3c28720aec1df",
+      "mode": 420
+    },
+    {
+      "path": "licenses/android-apk-metadata-4.txt",
+      "size": 20137,
+      "sha256": "23ee78c8bae49cf08ea2f0c84945c66b987ebe4520881fb51b3dad4fb43d07c2",
+      "mode": 420
+    },
+    {
+      "path": "licenses/android-apk-metadata-5.txt",
+      "size": 3320,
+      "sha256": "a3966c9410ef94a1efbfa9ec04e9c1994026a70623fbf0885ce36737bfba3b54",
+      "mode": 420
+    },
+    {
+      "path": "licenses/android-apk-metadata-6.txt",
+      "size": 17642,
+      "sha256": "54b212ba1f97f6948fa5486239ab505dd820b02e50cbfd296b4062c8609a70af",
+      "mode": 420
+    },
+    {
+      "path": "licenses/android-apk-metadata-7.txt",
+      "size": 34795,
+      "sha256": "05315fce6c35f79b8a35454828995fa26336f235895ac64557abc028f4ffcea2",
+      "mode": 420
+    },
+    {
+      "path": "licenses/android-apk-metadata-8.txt",
+      "size": 730,
+      "sha256": "0ff61769b238634e042ab759dddfd104a8e69d091e3600ae3410e401a6164381",
+      "mode": 420
+    },
+    {
+      "path": "licenses/android-apk-metadata-9.txt",
+      "size": 919,
+      "sha256": "e34c58338bd89d43e709e226610d8f32b3e3c47f4ad9a99a8dc1d4ac7842488e",
+      "mode": 420
+    },
+    {
+      "path": "licenses/android-apk-metadata.txt",
+      "size": 1499465,
+      "sha256": "5647be074c8edf7339fd863055923a8fc80bc5610a8d4661ec3b767b9d392c27",
+      "mode": 420
+    },
+    {
+      "path": "licenses/block-buffer-0.10.4.txt",
+      "size": 1082,
+      "sha256": "d5c22aa3118d240e877ad41c5d9fa232f9c77d757d4aac0c2f943afc0a95e0ef",
+      "mode": 420
+    },
+    {
+      "path": "licenses/cfg-if-1.0.5.txt",
+      "size": 1057,
+      "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+      "mode": 420
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 2639,
+      "sha256": "e312ebdc252ed1b95c96982fd821f8cd1d0f7fe1b79d9a10f0edeb19588656a9",
+      "mode": 420
+    },
+    {
+      "path": "licenses/cpufeatures-0.2.17.txt",
+      "size": 1082,
+      "sha256": "ae9baa7beea910273c2f384c2a6b721fb7bd02bda3436074a1072e4ee689f985",
+      "mode": 420
+    },
+    {
+      "path": "licenses/crc32fast-1.5.3-2.txt",
+      "size": 1097,
+      "sha256": "61d383b05b87d78f94d2937e2580cce47226d17823c0430fbcad09596537efcf",
+      "mode": 420
+    },
+    {
+      "path": "licenses/crc32fast-1.5.3.txt",
+      "size": 11358,
+      "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08",
+      "mode": 420
+    },
+    {
+      "path": "licenses/crypto-common-0.1.7.txt",
+      "size": 1065,
+      "sha256": "3521672491a3479422d5fe1aca6645dd2984090f85da6e5205abfb18fb7a6897",
+      "mode": 420
+    },
+    {
+      "path": "licenses/digest-0.10.7.txt",
+      "size": 1057,
+      "sha256": "9e0dfd2dd4173a530e238cb6adb37aa78c34c6bc7444e0e10c1ab5d8881f63ba",
+      "mode": 420
+    },
+    {
+      "path": "licenses/flate2-1.1.10.txt",
+      "size": 1062,
+      "sha256": "025436edff4cfcdde17a5811fdea78892d8482efd1abdec5a17872d07a4f2112",
+      "mode": 420
+    },
+    {
+      "path": "licenses/generic-array-0.14.7.txt",
+      "size": 1107,
+      "sha256": "c09aae9d3c77b531f56351a9947bc7446511d6b025b3255312d3e3442a9a7583",
+      "mode": 420
+    },
+    {
+      "path": "licenses/itoa-1.0.18.txt",
+      "size": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "mode": 420
+    },
+    {
+      "path": "licenses/libc-0.2.189.txt",
+      "size": 1066,
+      "sha256": "123a331b5dbf04c30097fa43b8f858bc85df671fe776de498d01f3d6b7c1f69e",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MacLauncher.txt",
+      "size": 1081,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+      "mode": 420
+    },
+    {
+      "path": "licenses/memchr-2.8.3-2.txt",
+      "size": 1081,
+      "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f",
+      "mode": 420
+    },
+    {
+      "path": "licenses/memchr-2.8.3-3.txt",
+      "size": 1211,
+      "sha256": "7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c",
+      "mode": 420
+    },
+    {
+      "path": "licenses/memchr-2.8.3.txt",
+      "size": 126,
+      "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f",
+      "mode": 420
+    },
+    {
+      "path": "licenses/miniz_oxide-0.9.1-2.txt",
+      "size": 984,
+      "sha256": "0a54e647fe54104658b5e563c04c6f9edf251710e47bce692e0bd990a4ddaa39",
+      "mode": 420
+    },
+    {
+      "path": "licenses/miniz_oxide-0.9.1.txt",
+      "size": 1213,
+      "sha256": "4108245a1f2df9d4e94df8abed5b4ba0759bb2f9b40a6b939f1be141077ae50b",
+      "mode": 420
+    },
+    {
+      "path": "licenses/sha2-0.10.9.txt",
+      "size": 1138,
+      "sha256": "b4eb00df6e2a4d22518fcaa6a2b4646f249b3a3c9814509b22bd2091f1392ff1",
+      "mode": 420
+    },
+    {
+      "path": "licenses/simd-adler32-0.3.10.txt",
+      "size": 1078,
+      "sha256": "42a35170233e83e18856792e748de4c1ce4a63b2afce9a370c89ef3fe23f9f2d",
+      "mode": 420
+    },
+    {
+      "path": "licenses/typenum-1.20.1-2.txt",
+      "size": 10835,
+      "sha256": "516b24e051bf5630880ebbd55c40a25ce9552ebaf8970a53e8976eb70e522406",
+      "mode": 420
+    },
+    {
+      "path": "licenses/typenum-1.20.1-3.txt",
+      "size": 1083,
+      "sha256": "a825bd853ab71619a4923d7b4311221427848070ff44d990da39b0b274c1683f",
+      "mode": 420
+    },
+    {
+      "path": "licenses/typenum-1.20.1.txt",
+      "size": 17,
+      "sha256": "db11fec9946737df39ca3898d9cd8c10ec6f6c3a884a6802b0ad0b81b4e8f23a",
+      "mode": 420
+    },
+    {
+      "path": "licenses/version_check-0.9.5.txt",
+      "size": 1085,
+      "sha256": "b7e650f3fce5c53249d1cdc608b54df156a97edd636cf9d23498d0cfe7aec63e",
+      "mode": 420
+    }
+  ]
+}
