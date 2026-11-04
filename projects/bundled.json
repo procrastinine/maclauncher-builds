@@ -1023,7 +1023,10 @@
       ],
       "runners": {
         "universal": "ubuntu-24.04"
-      }
+      },
+      "submodules": [
+        "sources/maclauncher-android"
+      ]
     }
   },
   {
