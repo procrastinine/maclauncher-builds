@@ -1,0 +1,836 @@
+{
+  "id": "reminori",
+  "version": "0.1.0-MCLv7",
+  "arch": "x64",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "reminori/0.1.0-MCLv7/x64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "d1dd74518740d9f5d034c43d232dc31942842b52e282032f9060148c42b6cb51",
+  "sourceSha256": "d1dd74518740d9f5d034c43d232dc31942842b52e282032f9060148c42b6cb51",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 19517,
+      "mode": 420,
+      "sha256": "a11181e71c7f752fe3492f532b738b3bfa0769130142f5f3fa82eacd06f706f4"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "04fdd493a18984ee27d2e71f208323cc422c06d60f9f463719cc2e0dc73a4ba2"
+    },
+    {
+      "path": "files/bin/eden",
+      "size": 7154720,
+      "sha256": "80a9c8a8d0c8dd18e227f9bfb6a92e0dddc78b2db3efa874b42c6c411627569b",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/bin/maclauncher-minori-movie",
+      "size": 33744,
+      "sha256": "6537d9ceeec3f45d3c0ff1dc1e030ab2495bad1ed72b2728286264a73a6d2d06",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/bin/maclauncher-minori-probe",
+      "size": 669056,
+      "sha256": "c74e23db0f86341ccec85830025c150fc8ab365e15000f9b0fdbb7d1d473334c",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/lib/libavcodec.61.dylib",
+      "size": 3702368,
+      "sha256": "3d04007c222b8e4a81021f1f68d2100ae59df176c6b55afaf82a8ef025f4ea65",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/lib/libavformat.61.dylib",
+      "size": 582384,
+      "sha256": "c57755d8b91f5267ea28ad8cdf469aca7b2ab89204f1d6c4743ddc2bcd5ce52c",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/lib/libavutil.59.dylib",
+      "size": 839456,
+      "sha256": "c50fd38240fd5d9265ae268187a42c14cdd907272942cab64bb61df43f586030",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/lib/libswresample.5.dylib",
+      "size": 147024,
+      "sha256": "dc690b3c8662455c18014ccb743834026dec88eec1b18f280a124bec93302eb2",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/lib/libswscale.8.dylib",
+      "size": 1049936,
+      "sha256": "5ef4d0e6933c8db01e999453f70069bfad0ddf567916e68b6a3847c2e0edc97a",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "files/licenses/adler2-2.0.1-2.txt",
+      "size": 10860,
+      "sha256": "8ada45cd9f843acf64e4722ae262c622a2b3b3007c7310ef36ac1061a30f6adb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/adler2-2.0.1-3.txt",
+      "size": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/adler2-2.0.1.txt",
+      "size": 665,
+      "sha256": "861399f8c21c042b110517e76dc6b63a2b334276c8cf17412fc3c8908ca8dc17",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/aho-corasick-1.1.5-2.txt",
+      "size": 1081,
+      "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/aho-corasick-1.1.5-3.txt",
+      "size": 1211,
+      "sha256": "7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/aho-corasick-1.1.5.txt",
+      "size": 126,
+      "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/allocator-api2-0.2.21.txt",
+      "size": 9899,
+      "sha256": "20fe7b00e904ed690e3b9fd6073784d3fc428141dbd10b81c01fd143d0797f58",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/anstream-1.0.0-2.txt",
+      "size": 1062,
+      "sha256": "6efb0476a1cc085077ed49357026d8c173bf33017278ef440f222fb9cbcb66e6",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/anstream-1.0.0.txt",
+      "size": 11358,
+      "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/arrayvec-0.7.8-2.txt",
+      "size": 1071,
+      "sha256": "4da95ec4ecb65b738d470b7d762894ad9c97da93e6cbfb18b570fc2c96f4b871",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/arrayvec-0.7.8.txt",
+      "size": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ash-0.38.0+1.3.281-2.txt",
+      "size": 1047,
+      "sha256": "c733ccf8ab25df175a63d9d844677b98e3a5ab8f8de1c1616087e6868a7f948e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ash-0.38.0+1.3.281.txt",
+      "size": 9691,
+      "sha256": "0e8a410375e1ee5c75c6198b08b534fec6e5edef766cf971bab4a404542636ab",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/autocfg-1.5.1.txt",
+      "size": 1054,
+      "sha256": "27995d58ad5c1145c1a8cd86244ce844886958a35eb2b78c6b772748669999ac",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/base64-0.21.7.txt",
+      "size": 1076,
+      "sha256": "0dd882e53de11566d50f8e8e2d5a651bcf3fabee4987d70f306233cf39094ba7",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bindgen-0.72.1.txt",
+      "size": 1512,
+      "sha256": "c23953d9deb0a3312dbeaf6c128a657f3591acee45067612fa68405eaa4525db",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bit-set-0.8.0.txt",
+      "size": 1071,
+      "sha256": "f51ac2c59a222f7476ce507ca879960e2b64ea64bb2786eefdbeb7b0b538d1b7",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bitflags-1.3.2.txt",
+      "size": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bytemuck-1.25.2-2.txt",
+      "size": 851,
+      "sha256": "84b34dd7608f7fb9b17bd588a6bf392bf7de504e2716f024a77d89f1b145a151",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bytemuck-1.25.2.txt",
+      "size": 1110,
+      "sha256": "9df9ba60a11af705f2e451b53762686e615d86f76b169cf075c3237730dbd7e2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/cexpr-0.6.0.txt",
+      "size": 1061,
+      "sha256": "d9771b8c6cf4426d3846de54c1febe20907f1eeadf7adfb5ade89a83bd9ea77f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/cfg_aliases-0.2.2-2.txt",
+      "size": 1472,
+      "sha256": "1e2b7ade3fb228130408b9990cae6a7618eb314c75aa0b164bfe485d9d9756ee",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/cfg_aliases-0.2.2.txt",
+      "size": 1076,
+      "sha256": "31b94860253d8ec7b4529f51901044d3b459d6292d996504a36b1bae3a36a812",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/cfg-if-1.0.4.txt",
+      "size": 1057,
+      "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 11244,
+      "sha256": "9a523e2c62eb581fa82ffcdb336af71636d2a542056ccdd37463bf0492bca469",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/core_maths-0.1.1.txt",
+      "size": 1070,
+      "sha256": "9ebf8c4cc0b735ca13a766451f7b8097db3185975ceb2ba94b5abf439156a91f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/core-foundation-0.9.4.txt",
+      "size": 1067,
+      "sha256": "62065228e42caebca7e7d7db1204cbb867033de5982ca4009928915e4095f3a3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/core-graphics-0.23.2.txt",
+      "size": 321,
+      "sha256": "ec82b96487e9e778ee610c7ab245162464782cfa1f555c2299333f8dbe5c036a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/coreaudio-rs-0.11.3.txt",
+      "size": 1043,
+      "sha256": "7576269ea71f767b99297934c0b2367532690f8c4badc695edf8e04ab6a1e545",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/crc32fast-1.5.0.txt",
+      "size": 1097,
+      "sha256": "61d383b05b87d78f94d2937e2580cce47226d17823c0430fbcad09596537efcf",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/cursor-icon-1.2.0-2.txt",
+      "size": 1059,
+      "sha256": "c138726a726ac37bae09d0f8a48e74e8e3aa8a8952fcd10fae0fb224cc1c05f1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/cursor-icon-1.2.0-3.txt",
+      "size": 844,
+      "sha256": "01e533bd94e8f1c32b2c2531e2c398de7d35d7804add3d574b4e1fe581d53537",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/cursor-icon-1.2.0.txt",
+      "size": 11346,
+      "sha256": "b59affd015e517ed998dd735757f9a3693643cd389609947ed54074234a10784",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/defmt-1.1.1.txt",
+      "size": 1053,
+      "sha256": "2710a622a896bba67356913d4d0492cab5465f61b2ecce6d880aeb483834fb50",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dirs-6.0.0-2.txt",
+      "size": 1069,
+      "sha256": "6a2e0ade09a7d5f816f11566fee2b151b32235a7fad52b41d49cce96f833c1a9",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dirs-6.0.0.txt",
+      "size": 9694,
+      "sha256": "d3174ad63e721d4c9dccb8ad4320848992d314369bc46319720b5802c9153fe9",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/document-features-0.2.12.txt",
+      "size": 1082,
+      "sha256": "aa893340d14b9844625be6a50ac644169a01b52f0211cbf81b09e1874c8cd81d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dpi-0.1.2.txt",
+      "size": 2444,
+      "sha256": "9eff396a99bafd208e7126602420d6864f6066c08b84485a5b032320a9c01997",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/encoding_rs-0.8.35-2.txt",
+      "size": 1053,
+      "sha256": "3fa4ca83dcc9237839b1bdeb2e6d16bdfb5ec0c5ce42b24694d8bbf0dcbef72c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/encoding_rs-0.8.35-3.txt",
+      "size": 1501,
+      "sha256": "838118388fe5c2e7f1dbbaeed13e1c7f3ebf88be91319c7c1d77c18e987d1a50",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/encoding_rs-0.8.35.txt",
+      "size": 713,
+      "sha256": "11789f45bb180841cd362a5eee6789c68ddb573a11105e30768c308a6add0190",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/equivalent-1.0.2.txt",
+      "size": 1049,
+      "sha256": "7365cc8878a1d7ce155a58c4ca09c3d7a6be413efa5334a80ea842912b669349",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/extended-0.1.0.txt",
+      "size": 1052,
+      "sha256": "25a0874d15e7c834a47c3adc80901edb2219759254992023ef1010c3065413d5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fdeflate-0.3.7.txt",
+      "size": 1036,
+      "sha256": "c77a4cf9da729987d0fe7ccd811e3bd27393914ddf3d23467c18cc22954513b3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/FFmpeg-2.txt",
+      "size": 35147,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/FFmpeg-3.txt",
+      "size": 26526,
+      "sha256": "b634ab5640e258563c536e658cad87080553df6f34f62269a21d554844e58bfe",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/FFmpeg-4.txt",
+      "size": 7651,
+      "sha256": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/FFmpeg-5.txt",
+      "size": 4376,
+      "sha256": "cb48bf09a11f5fb576cddb0431c8f5ed0a60157a9ec942adffc13907cbe083f2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/FFmpeg.txt",
+      "size": 18092,
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/flate2-1.1.9.txt",
+      "size": 1062,
+      "sha256": "025436edff4cfcdde17a5811fdea78892d8482efd1abdec5a17872d07a4f2112",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/foldhash-0.1.5.txt",
+      "size": 856,
+      "sha256": "b1181a40b2a7b25cf66fd01481713bc1005df082c53ef73e851e55071b102744",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fontdue-0.9.4-2.txt",
+      "size": 872,
+      "sha256": "d829cfa632d2a44fe9e303ff293add677ed70e4b8f5e2176aa7a19d0936e61ac",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fontdue-0.9.4-3.txt",
+      "size": 1057,
+      "sha256": "42926e590380d9377ad083dcd5a7618b0952dac81a929244f84d43fb5619acdd",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fontdue-0.9.4.txt",
+      "size": 1074,
+      "sha256": "a72354dd6206c20dff7c9fd45b137261e00a31f71ffb8fe67d5ca0c8170b5fd5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/foreign-types-0.5.0.txt",
+      "size": 1072,
+      "sha256": "333ea3aaa3cadb819f4acd9f9153f9feee060a995ca8710f32bc5bd9a4b91734",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/glow-0.16.0.txt",
+      "size": 834,
+      "sha256": "636f644f1e149eb62961657c0e34953681eff64435653912e7bd19992666faa5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/hashbrown-0.15.5.txt",
+      "size": 1060,
+      "sha256": "ff8f68cb076caf8cefe7a6430d4ac086ce6af2ca8ce2c4e5a2004d4552ef52a2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/indexmap-2.14.0.txt",
+      "size": 1049,
+      "sha256": "ecc269ef87fd38a1d98e30bfac9ba964a9dbd9315c3770fed98d4d7cb5882055",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/lazy_static-1.5.0.txt",
+      "size": 1071,
+      "sha256": "0621878e61f0d0fda054bcbe02df75192c28bde1ecc8289cbd86aeba2dd72720",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/libc-0.2.189.txt",
+      "size": 1066,
+      "sha256": "123a331b5dbf04c30097fa43b8f858bc85df671fe776de498d01f3d6b7c1f69e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/libloading-0.8.9.txt",
+      "size": 736,
+      "sha256": "b29f8b01452350c20dd1af16ef83b598fea3053578ccc1c7a0ef40e57be2620f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/libm-0.2.16.txt",
+      "size": 14088,
+      "sha256": "3823dda7cf046602f4b4e77ec8e227863dc4736037cc85bb33d9f19febe16bb7",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/litrs-1.0.0.txt",
+      "size": 1062,
+      "sha256": "7dc1552e88f49132cb358b1b962fc5e79fa42d70bcbb88c526d33e45b8e98036",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/lock_api-0.4.14.txt",
+      "size": 1071,
+      "sha256": "c9a75f18b9ab2927829a208fc6aa2cf4e63b8420887ba29cdb265d6619ae82d5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/mach2-0.4.3-2.txt",
+      "size": 1077,
+      "sha256": "3f9f0f7e5a5911a8042e32c83ff5d061ce1ffd02e8a207ec2135a44ad73b4191",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/mach2-0.4.3.txt",
+      "size": 1320,
+      "sha256": "044983df14c97f2f9570766aaf977b3cdfc4a06cf1f36b776331c5ff89b4fb89",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/minimal-lexical-0.2.1.txt",
+      "size": 2003,
+      "sha256": "dbe1fff0fb1314b6af94f161511406275cf01c5a32441fbf24528a57a051d599",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/miniz_oxide-0.8.9-2.txt",
+      "size": 984,
+      "sha256": "0a54e647fe54104658b5e563c04c6f9edf251710e47bce692e0bd990a4ddaa39",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/miniz_oxide-0.8.9.txt",
+      "size": 1213,
+      "sha256": "4108245a1f2df9d4e94df8abed5b4ba0759bb2f9b40a6b939f1be141077ae50b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/nom-7.1.3.txt",
+      "size": 1065,
+      "sha256": "4dbda04344456f09a7a588140455413a9ac59b6b26a1ef7cdf9c800c012d87f0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/objc-0.2.7.txt",
+      "size": 1066,
+      "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/option-ext-0.2.0.txt",
+      "size": 16727,
+      "sha256": "66a3107d5ad6a058aab753eaac2047ccb2ed0e39465dd0fe5844da3e300d5172",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ordered-float-5.0.0.txt",
+      "size": 1057,
+      "sha256": "f7715d38a3fa1b4ac97c5729740752505a39cb92ee83ab5b102aeb5eaa7cdea4",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/png-0.17.16.txt",
+      "size": 1048,
+      "sha256": "eaf40297c75da471f7cda1f3458e8d91b4b2ec866e609527a13acfa93b638652",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/pollster-0.4.0.txt",
+      "size": 1064,
+      "sha256": "cc02a53316678ca2575cc69d12daa7b1833935d4b7742c31fbab7bd74a481077",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/raw-window-handle-0.6.2-2.txt",
+      "size": 836,
+      "sha256": "ae895c8576e682f310fb70d93d9f99b1dd82872094c54a8f6cdfe2ca5c2d6ecb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/raw-window-handle-0.6.2.txt",
+      "size": 1064,
+      "sha256": "9c5a80639a57c1c945570e7ebbca0706305849ce3c098021325cca9db2f7acc4",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/reminori-10.txt",
+      "size": 919,
+      "sha256": "e34c58338bd89d43e709e226610d8f32b3e3c47f4ad9a99a8dc1d4ac7842488e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/reminori-11.txt",
+      "size": 1078,
+      "sha256": "b85dcd3e453d05982552c52b5fc9e0bdd6d23c6f8e844b984a88af32570b0cc0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/reminori-12.txt",
+      "size": 1676,
+      "sha256": "39cb0234065c92b9e6cee3830cbb52b1aa289aa8fe9ba2e66730fec5cf05c630",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/reminori-13.txt",
+      "size": 4016,
+      "sha256": "8eea8287e5876b539670cadb82e99f9a7afddec6f6730811be1daf25d2e9bcfd",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/reminori-14.txt",
+      "size": 1995,
+      "sha256": "f5062c9a188d81dfe66b56db4182dcf9e4b17c0d9b0d311a8e20b3a1b075c443",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/reminori-15.txt",
+      "size": 561,
+      "sha256": "756c8d2ab2dc24f256e1455b5f03937f4933d83d7bc9f2d55009fc962377d512",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/reminori-2-2.txt",
+      "size": 1087,
+      "sha256": "b1d6df41ed3aa96806e74c729444d7c121d90e6660a6aed01d298e03fde475a0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/reminori-2.txt",
+      "size": 1499465,
+      "sha256": "5647be074c8edf7339fd863055923a8fc80bc5610a8d4661ec3b767b9d392c27",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/reminori-3-2.txt",
+      "size": 1339,
+      "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/reminori-3.txt",
+      "size": 14423589,
+      "sha256": "d518ae2d76bc7a1f0cbf0069b8deafb56efc39c2614cab74a859ef0b467f8373",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/reminori-4.txt",
+      "size": 1267,
+      "sha256": "f32fb3b417a194167cfad068223fc975ba96c5960513a10f66a3c28720aec1df",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/reminori-5-2.txt",
+      "size": 1093,
+      "sha256": "c8167fdeeed46d3f244d3f85c5bf998ce889343691c32be2c61a8bc4b5c08333",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/reminori-5.txt",
+      "size": 20137,
+      "sha256": "23ee78c8bae49cf08ea2f0c84945c66b987ebe4520881fb51b3dad4fb43d07c2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/reminori-6.txt",
+      "size": 3320,
+      "sha256": "a3966c9410ef94a1efbfa9ec04e9c1994026a70623fbf0885ce36737bfba3b54",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/reminori-7.txt",
+      "size": 17642,
+      "sha256": "54b212ba1f97f6948fa5486239ab505dd820b02e50cbfd296b4062c8609a70af",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/reminori-8.txt",
+      "size": 34795,
+      "sha256": "05315fce6c35f79b8a35454828995fa26336f235895ac64557abc028f4ffcea2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/reminori-9.txt",
+      "size": 730,
+      "sha256": "0ff61769b238634e042ab759dddfd104a8e69d091e3600ae3410e401a6164381",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/reminori.txt",
+      "size": 34523,
+      "sha256": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/renderdoc-sys-1.1.0.txt",
+      "size": 1057,
+      "sha256": "24b2f2eff5a7622e87162823e260f00c6dfbce0e26d585d3d28c785f1edc80ed",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ron-0.8.1.txt",
+      "size": 1058,
+      "sha256": "fa0598d520497731445a5bc89a2b3d47896d95568bd2be255b7bc43d771b9994",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/scopeguard-1.2.0.txt",
+      "size": 1097,
+      "sha256": "fb77f0a9c53e473abe5103c8632ef9f0f2874d4fb3f17cb2d8c661aab9cee9d7",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/shlex-1.3.0-2.txt",
+      "size": 1092,
+      "sha256": "4455bf75a91154108304cb283e0fea9948c14f13e20d60887cf2552449dea3b1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/shlex-1.3.0.txt",
+      "size": 566,
+      "sha256": "553fffcd9b1cb158bc3e9edc35da85ca5c3b3d7d2e61c883ebcfa8a65814b583",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/simd-adler32-0.3.10.txt",
+      "size": 1078,
+      "sha256": "42a35170233e83e18856792e748de4c1ce4a63b2afce9a370c89ef3fe23f9f2d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/smallvec-1.15.2.txt",
+      "size": 1072,
+      "sha256": "0b28172679e0009b655da42797c03fd163a3379d5cfa67ba1f1655e974a2a1a9",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/static_assertions-1.1.0.txt",
+      "size": 1072,
+      "sha256": "ea084a2373ebc1f0902c09266e7bf25a05ab3814c1805bb017ffa7308f90c061",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/tracing-0.1.44.txt",
+      "size": 1062,
+      "sha256": "898b1ae9821e98daf8964c8d6c7f61641f5f5aa78ad500020771c0939ee0dea1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ttf-parser-0.25.1.txt",
+      "size": 1061,
+      "sha256": "f3c9fe731c701ed77fd5fbaac573872af04dc5869385eb9bd5e3c73c42713814",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/unicode-ident-1.0.24.txt",
+      "size": 1995,
+      "sha256": "f7db81051789b729fea528a63ec4c938fdcb93d9d61d97dc8cc2e9df6d47f2a1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/unicode-width-0.2.2.txt",
+      "size": 1071,
+      "sha256": "7b63ecd5f1902af1b63729947373683c32745c16a10e8e6292e2e2dcd7e90ae0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/utf8parse-0.2.2.txt",
+      "size": 1052,
+      "sha256": "e4c9b06fa850cb9b540a5e400e9f6394cf15efcf4098144de477d1d3dae10150",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/version_check-0.9.5.txt",
+      "size": 1085,
+      "sha256": "b7e650f3fce5c53249d1cdc608b54df156a97edd636cf9d23498d0cfe7aec63e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/web-time-1.1.0-2.txt",
+      "size": 1065,
+      "sha256": "f428305bbf2e70fbd807af0f3c7ac1b7acfb95311640f451e9d2e48db6d7e96b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/web-time-1.1.0.txt",
+      "size": 11338,
+      "sha256": "54a744942eb3fa63a74d8d359989ed6962c04f3f10ff20cfa08ff8aa7efbe4e6",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/wgpu-26.0.1-2.txt",
+      "size": 14,
+      "sha256": "10b693f4060285108e21fbca779818813849a4bb52101b6ec0512e4b0750ba64",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/wgpu-26.0.1.txt",
+      "size": 17,
+      "sha256": "93322bf14207312d2ac79c0dc02f97f4592bc3c72d9e1a4f6012c21a0f6d816d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/wgpu-hal-26.0.6.txt",
+      "size": 1078,
+      "sha256": "c7fea58d1cfe49634cd92e54fc10a9d871f4b275321a4cd8c09e449122caaeb4",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/winresource-0.1.31.txt",
+      "size": 1049,
+      "sha256": "3564da09711c475669c15346bb25a1530a7de683c13f4a51489c15a6d74438fa",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/zerocopy-0.8.56-2.txt",
+      "size": 1275,
+      "sha256": "83c1763356e822adde0a2cae748d938a73fdc263849ccff6b27776dff213bd32",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/zerocopy-0.8.56-3.txt",
+      "size": 1060,
+      "sha256": "1a2f5c12ddc934d58956aa5dbdd3255fe55fd957633ab7d0d39e4f0daa73f7df",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/zerocopy-0.8.56.txt",
+      "size": 11350,
+      "sha256": "9d185ac6703c4b0453974c0d85e9eee43e6941009296bb1f5eb0b54e2329e9f3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/zip-7.2.0.txt",
+      "size": 1217,
+      "sha256": "04dc52136d82400b11df5f474949863a70a5d05d2278dec45b99c479494450a6",
+      "mode": 420
+    },
+    {
+      "path": "files/profile.json",
+      "size": 4093,
+      "sha256": "be8b46ccd4c3f7c59b265d72fbd982a825bff2e8dafcfa6917b471175ec3b16b",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 28193,
+      "mode": 420,
+      "sha256": "d1dd74518740d9f5d034c43d232dc31942842b52e282032f9060148c42b6cb51"
+    }
+  ],
+  "redistribution": "bundle"
+}
