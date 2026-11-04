@@ -1,3 +1,4 @@
+const {includeLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -64,6 +65,7 @@ async function buildPortableGemRB({ sourceDir = sourcePath, archives, workRoot, 
   // runtime packaging replaces it with a contained loader-relative name.
   const pythonLibrary = path.join(prefix, "lib/libpython3.14.dylib");
   fs.copyFileSync(python.library, pythonLibrary, fs.constants.COPYFILE_EXCL);
+  includeLicenses(prefix, path.join(python.prefix, 'licenses'));
   const pythonSourceSha256 = Native.hashFile(pythonLibrary);
   await run("/usr/bin/install_name_tool", ["-id", pythonLibrary, pythonLibrary], { cwd: workRoot, logPath, env, signal });
   const pythonLibraryAdapter = { originalSha256: pythonSourceSha256, adaptedSha256: Native.hashFile(pythonLibrary), library: pythonLibrary };

@@ -119,6 +119,9 @@ function stage({work, source, output, version}) {
   }
   for (const name of fs.readdirSync(installed).sort()) copy(path.join(installed, name), name);
   addLicenses(payload, 'MKXP-Z', source);
+  const subprojects = path.join(source, 'subprojects');
+  for (const entry of fs.readdirSync(subprojects, {withFileTypes:true}))
+    if (entry.isDirectory()) addLicenses(payload, entry.name, path.join(subprojects,entry.name));
   const executableRelative = apps[0] + '/Contents/MacOS/bundle_mkxp-z';
   run('/usr/bin/codesign', ['--force','--sign','-',path.join(payload,apps[0])]);
   run('/usr/bin/codesign', ['--verify','--deep','--strict',path.join(payload,apps[0])]);

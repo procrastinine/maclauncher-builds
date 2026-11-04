@@ -1,5 +1,5 @@
 import {gitlink} from "../../../lib/pins.mjs";
-import {addLicenses} from '../../../lib/licenses.mjs';
+import {addLicense,addLicenses} from '../../../lib/licenses.mjs';
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -616,7 +616,7 @@ if(options["--output"]&&fs.existsSync(destination))throw Error("Use a new isolat
 fs.mkdirSync(destination, { recursive: true });
 for (const directory of ["include", "effects"]) fs.mkdirSync(path.join(destination, directory), { recursive: true });
 addLicenses(destination,"ReShade",source);
-if(options["--xess-host"])addLicenses(destination,"Intel-XeSS",xessSource);
+if(options["--xess-host"]){addLicenses(destination,"Intel-XeSS",xessSource);addLicense(destination,"Intel-XeSS headers",path.join(xessSource,"inc/MIT.txt"));}
 const files = [];
 for (const [relative, input] of inputs) {
   const output = path.join(destination, relative);
