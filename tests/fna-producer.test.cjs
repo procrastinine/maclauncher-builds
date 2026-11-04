@@ -49,11 +49,10 @@ test("FNA host declares the original-path contract it reads and alone selects th
   for (const name of ["MACLAUNCHER_FNA_GAME_ROOT", "MACLAUNCHER_FNA_ASSEMBLY_ROOT", "MACLAUNCHER_FNA_USE_RUNTIME_FRAMEWORK"])
     assert.ok(host.includes('GetEnvironmentVariable("' + name + '")'), name);
   // New catalog records carry the same capability as fna-runtime.json, so a
-  // launcher can choose this host before download. Launchers that stage games
-  // without these variables accept only contract 1 records and never install it.
+  // launcher can choose this host before download.
   const { recordMetadata } = await import("../lib/record-metadata.mjs");
   const record = recordMetadata({ project: "fna", manifest: { upstreamRevision: Build.FNA_REVISION } });
   assert.deepEqual(record.capabilities, Build.__test.CAPABILITIES);
-  assert.equal(record.launcherContract, 2);
+  assert.equal(record.launcherContract, undefined);
 });
 

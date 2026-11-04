@@ -16,7 +16,9 @@ function fixture(t){
 }
 const selected=f=>({project:f.project,version:f.declaration.version,arch:f.declaration.arch});
 test('sealed data/runtime packages round trip and produce a manually updated catalog',async t=>{
- const f=fixture(t),record=await pack(f),result=await verify({...selected(f),archive:f.output,sha256:record.asset.sha256});
+ const f=fixture(t);fs.writeFileSync(path.join(f.input,'duplicate.txt'),'runtime data',{mode:0o644});f.declaration.files.push({...f.declaration.files[1],path:'duplicate.txt'});
+ const record=await pack(f),result=await verify({...selected(f),archive:f.output,sha256:record.asset.sha256,includeDeclaration:true});
+ assert.ok(result.declaration.aliases);assert.equal(record.launcherContract,undefined);
  assert.equal(result.files,4);assert.equal(result.id,'fixture');assert.equal(record.updatePolicy,'manual');
  const c=catalog([record],{project:f.project,repository:'owner/maclauncher-builds'});assert.equal(c.updatePolicy,'manual');
  assert.equal(c.projectId,'fixture');assert.equal(c.packages[0].tag,'fixture/v1.0.0/arm64');

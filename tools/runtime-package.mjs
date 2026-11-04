@@ -40,7 +40,7 @@ export async function pack({project,input,declaration,output,metadata={},directo
  const record={schemaVersion:2,id:declaration.id,version:declaration.version,arch:declaration.arch,
   launcherArchitectures:declaration.launcherArchitectures,minimumMacOS:declaration.minimumMacOS,
   manifestRelative:declaration.manifestRelative,manifestSha256:declaration.manifestSha256,
-  sourceSha256:declaration.sourceSha256,updatePolicy:'manual',...publication,...(declaration.aliases||declaration.dependencies?.length?{launcherContract:2}:{}),...(declaration.dependencies?.length?{dependencies:declaration.dependencies}:{}),
+  sourceSha256:declaration.sourceSha256,updatePolicy:'manual',...publication,...(declaration.dependencies?.length?{dependencies:declaration.dependencies}:{}),
   asset:{filename:path.basename(output),sha256:archive.sha256,bytes:archive.bytes}};
  fs.writeFileSync(output+'.json',JSON.stringify(record,null,2)+'\n',{flag:'wx'});
  return record;

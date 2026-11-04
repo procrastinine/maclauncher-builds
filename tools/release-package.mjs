@@ -17,7 +17,7 @@ export function recordFromDeclaration(d,asset,sourceAsset,source,catalogRecord={
  // Catalog metadata is validated by releaseRecord before this reconstruction.
  // Sealed declaration and archive facts always replace catalog payload fields.
  const {tag,asset:catalogAsset,source:catalogSource,sourceAsset:catalogSourceAsset,dependencies:catalogDependencies,launcherContract,...metadata}=catalogRecord;
- return {...metadata,schemaVersion:2,id:d.id,version:d.version,arch:d.arch,launcherArchitectures:d.launcherArchitectures,minimumMacOS:d.minimumMacOS,manifestRelative:d.manifestRelative,manifestSha256:d.manifestSha256,sourceSha256:d.sourceSha256,updatePolicy:'manual',asset,...(d.aliases||d.dependencies?.length?{launcherContract:2}:launcherContract===undefined?{}:{launcherContract}),...(d.dependencies?.length?{dependencies:d.dependencies}:{}),...(sourceAsset?{sourceAsset}:{}),...(source?{source}:{})};
+ return {...metadata,schemaVersion:2,id:d.id,version:d.version,arch:d.arch,launcherArchitectures:d.launcherArchitectures,minimumMacOS:d.minimumMacOS,manifestRelative:d.manifestRelative,manifestSha256:d.manifestSha256,sourceSha256:d.sourceSha256,updatePolicy:'manual',asset,...(launcherContract===undefined?{}:{launcherContract}),...(d.dependencies?.length?{dependencies:d.dependencies}:{}),...(sourceAsset?{sourceAsset}:{}),...(source?{source}:{})};
 }
 async function asset(directory,name,role){const file=path.join(directory,name);return {filename:name,role,sha256:await A.checksum(file),bytes:regular(file).size};}
 /** Package a new sealed build. Publication state is not a build input. */

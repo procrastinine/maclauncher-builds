@@ -379,7 +379,6 @@
       ]
     },
     "recordMetadata": {
-      "launcherContract": 2,
       "capabilities": {
         "originalGamePaths": true
       }

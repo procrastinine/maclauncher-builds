@@ -21,6 +21,8 @@ test('packaging stores identical payload bytes once while preserving component d
  const f=fixture(t);f.write('a.bin','same binary payload');f.write('sub/b.bin','same binary payload');f.write('assets/vendor.txt','original component data');
  preparePackageLayout({input:f.payload,declaration:f.declaration,environment:{}});
  assert.deepEqual(JSON.parse(JSON.stringify(f.declaration.aliases)),{schema:1,files:{'assets/vendor.txt':'a-data.txt','sub/b.bin':'a.bin'}});assert.equal(fs.existsSync(path.join(f.payload,'assets/vendor.txt')),false);
+ assert.equal(recordFromDeclaration(f.declaration,{filename:'test.tar.gz'}).launcherContract,undefined);
+ assert.equal(recordFromDeclaration(f.declaration,{filename:'test.tar.gz'},undefined,undefined,{launcherContract:2}).launcherContract,2);
 
  materializePackageAliases({root:f.payload,declaration:f.declaration,inputs:{}});assert.equal(fs.readFileSync(path.join(f.payload,'sub/b.bin'),'utf8'),'same binary payload');assert.ok(!fs.lstatSync(path.join(f.payload,'sub/b.bin')).isSymbolicLink());assert.equal(fs.readFileSync(path.join(f.payload,'assets/vendor.txt'),'utf8'),'original component data');
 });
