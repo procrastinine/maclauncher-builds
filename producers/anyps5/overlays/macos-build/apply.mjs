@@ -7,7 +7,10 @@ function replaceOnce(text,before,after,file){
 export function applyBuildOverlay(projectionRoot){
  const changes=[];
  const edit=(relative,adapt)=>{const file=path.join(projectionRoot,relative),before=fs.readFileSync(file,'utf8'),after=adapt(before,relative);if(before!==after){fs.writeFileSync(file,after);changes.push(relative);}};
- edit('core/libs/prx/libc/src/exception/StandardExceptions.cpp',(text,file)=>replaceOnce(text,'reinterpret_cast<Condition>(static_cast<const void* const*>(self->vtable)[4])','reinterpret_cast<Condition>(const_cast<void*>(static_cast<const void* const*>(self->vtable)[4]))',file));
+ edit('core/libs/prx/libc/src/GuestHeap.cpp',(text,file)=>replaceOnce(text,
+  '        static ArenaHeap heap;',
+  '        // Exit handlers and static destructors can allocate after the first heap use.\n        static auto& heap = *new ArenaHeap;',file));
+ edit('core/libs/prx/libSceNpCommon/Runtime.cpp',(text)=>text.replace(/(reinterpret_cast<\w+>)\((\w+->vtable\[\d+\])\)/g,'$1(const_cast<void*>($2))'));
  edit('core/libs/prx/libkernel/File/src/NativeStat.cpp',(text,file)=>{
   text=replaceOnce(text,'#else\n    sb->st_dev = static_cast<std::uint32_t>(st.st_dev);',
    '#else\n#if defined(__APPLE__)\n    const auto& hostAccess = st.st_atimespec;\n    const auto& hostModified = st.st_mtimespec;\n    const auto& hostChanged = st.st_ctimespec;\n#else\n    const auto& hostAccess = st.st_atim;\n    const auto& hostModified = st.st_mtim;\n    const auto& hostChanged = st.st_ctim;\n#endif\n    sb->st_dev = static_cast<std::uint32_t>(st.st_dev);',file);
@@ -44,8 +47,12 @@ export function applyBuildOverlay(projectionRoot){
   if(start<0||end<0)throw Error('AnyPS5 signal context overlay does not match '+file);
   return text.slice(0,start)+'#ifdef __APPLE__\n'+fs.readFileSync(new URL('./DarwinSignalContext.inc',import.meta.url),'utf8')+'#else\n'+text.slice(start,end)+'#endif\n'+text.slice(end);
  });
+ edit('core/libs/prx/libSceAgcDriver/Execution/src/HostReportSources.cpp',(text,file)=>replaceOnce(text,
+  '#include <unistd.h>', '#include <unistd.h>\nextern char** environ;',file));
  edit('core/libs/prx/libSceAgcDriver/Execution/src/VulkanDevice.cpp',(text,file)=>replaceOnce(text,
   '#ifndef _WIN32\n        state->dmaBufImport =', '#if defined(__linux__)\n        state->dmaBufImport =',file));
+ edit('core/libs/prx/libSceAudioOut/src/AudioOut.cpp',(text,file)=>replaceOnce(text,
+  '    HostGainRamp hostGain;', '    HostGainRamp hostGain{};',file));
  edit('core/libs/prx/libSceAudioIn/CMakeLists.txt',(text,file)=>replaceOnce(text,
   'target_link_options(libSceAudioIn PRIVATE LINKER:--exclude-libs,ALL)',
   'if(NOT APPLE)\n    target_link_options(libSceAudioIn PRIVATE LINKER:--exclude-libs,ALL)\nendif()',file));

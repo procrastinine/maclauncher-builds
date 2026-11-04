@@ -143,6 +143,10 @@ namespace {
   });
   await adapt(root, 'DirectMemory/DirectMemory.cpp', source => {
     source = source.replaceAll('#if defined(__linux__)\n', '#if defined(__linux__) || defined(__APPLE__)\n');
+    source = source.replaceAll('#if defined(__linux__) || defined(__EMSCRIPTEN__)\n', '#if defined(__linux__) || defined(__EMSCRIPTEN__) || defined(__APPLE__)\n');
+    source = replace(source, '        if (ArenaAvailable() && !GuestArena::GuestArenaContains_nid_postfix(addr, len))\n            throw std::invalid_argument("fixed mapping is outside the guest address space arena");\n        if (ArenaAvailable()) {', '#ifndef __APPLE__\n        if (ArenaAvailable() && !GuestArena::GuestArenaContains_nid_postfix(addr, len))\n            throw std::invalid_argument("fixed mapping is outside the guest address space arena");\n#endif\n        if (ArenaAvailable() && GuestArena::GuestArenaContains_nid_postfix(addr, len)) {');
+    source = replace(source, 'void Unmap(void* addr, size_t len) {', 'void Unmap(void* addr, size_t len) {\n#ifdef __APPLE__\n    GuestWriteWatch::GuestWriteWatchUnregister_nid_postfix(addr, len);\n#endif');
+    source = replace(source, '    ArenaForget(addr, len);\n    GuestWriteWatch::GuestWriteWatchUnregister_nid_postfix(addr, len);', '    ArenaForget(addr, len);\n#ifndef __APPLE__\n    GuestWriteWatch::GuestWriteWatchUnregister_nid_postfix(addr, len);\n#endif');
     source = replace(source, '#include <link.h>', '#ifdef __APPLE__\n#include "prx/libc/include/specifics/linux/ElfTypes.hpp"\n#include "DarwinMemory.hpp"\n#else\n#include <link.h>\n#endif');
     source = replace(source, 'static void MapUnmappedPages(void* addr, size_t len) {', 'static void MapUnmappedPages(void* addr, size_t len) {\n#ifdef __APPLE__\n    DarwinMemory::MapUnmappedPages(addr, len);\n#else');
     source = replace(source, '        cursor += bytes;\n    }\n}\n#endif\n\nnamespace {', '        cursor += bytes;\n    }\n#endif\n}\n#endif\n\nnamespace {');
@@ -157,6 +161,21 @@ namespace {
   await adapt(root, 'Pthread/include/Pthread.hpp', source => replace(source, '    clockid_t hostCpuClock{};', '#ifdef __APPLE__\n    pthread_t hostCpuThread{};\n#else\n    clockid_t hostCpuClock{};\n#endif'));
   await adapt(root, 'Pthread/src/Thread.cpp', source => {
     source = '#ifdef __APPLE__\n#include "prx/libkernel/Pthread/include/DarwinThread.hpp"\n#endif\n' + source;
+    source = replace(source, 'static std::atomic<thread_dtors_func_t> threadDtors{nullptr};', `#ifdef __APPLE__
+static void KeepHostFaultSignalsUnblocked(sigset_t& mask) {
+    for (const int signal : {SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGTRAP}) sigdelset(&mask, signal);
+}
+#endif
+
+static std::atomic<thread_dtors_func_t> threadDtors{nullptr};`);
+    source = replace(source, '    pthread_sigmask(SIG_SETMASK, &signalMask, nullptr);', `#ifdef __APPLE__
+    sigset_t hostMask = signalMask;
+    KeepHostFaultSignalsUnblocked(hostMask);
+    pthread_sigmask(SIG_SETMASK, &hostMask, nullptr);
+#else
+    pthread_sigmask(SIG_SETMASK, &signalMask, nullptr);
+#endif`);
+    source = replace(source, '        sigfillset(&allSignals);', '        sigfillset(&allSignals);\n#ifdef __APPLE__\n        KeepHostFaultSignalsUnblocked(allSignals);\n#endif');
     source = replace(source, '        pthread_attr_t attr;\n        if (pthread_getattr_np', '#ifdef __APPLE__\n        const auto thread = pthread_self();\n        const auto size = pthread_get_stacksize_np(thread);\n        stackHigh = reinterpret_cast<std::uintptr_t>(pthread_get_stackaddr_np(thread));\n        if (size == 0 || stackHigh < size) return false;\n        stackLow = stackHigh - size;\n#else\n        pthread_attr_t attr;\n        if (pthread_getattr_np');
     source = replace(source, '        stackHigh = stackLow + size;\n    }', '        stackHigh = stackLow + size;\n#endif\n    }');
     source = replace(source, '    (void)self;\n#else\n    clockid_t clock{};', '    (void)self;\n#elif defined(__APPLE__)\n    auto& registry = CpuClocks();\n    std::lock_guard lock(registry.lock);\n    self->hostCpuThread = pthread_self();\n    self->hostCpuClockBound = true;\n#else\n    clockid_t clock{};');

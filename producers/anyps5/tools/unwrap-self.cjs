@@ -10,7 +10,8 @@ const crypto = require("node:crypto");
 
 const SELF_MAGIC = 0x1d3d154f, SELF_MAGIC_KERNEL = 0xeef51454;
 const FIRST_REGION = 0x400, MAX_ALIGNMENT_PADDING = 64n * 1024n * 1024n;
-const PT_LOAD = 1, PT_NOTE = 4, ENTROPY_LIMIT = 7.5, ENTROPY_SAMPLE = 0x10000n;
+const MAX_OUTPUT_FACTOR = 4n, MIN_OUTPUT_LIMIT = 256n * 1024n * 1024n;
+const PT_LOAD = 1, PT_NOTE = 4, PT_PHDR = 6, PT_TLS = 7, ENTROPY_LIMIT = 7.5, ENTROPY_SAMPLE = 0x10000n;
 const PHDR_NAMES = new Map([[1,"PT_LOAD"],[2,"PT_DYNAMIC"],[3,"PT_INTERP"],[4,"PT_NOTE"],
   [6,"PT_PHDR"],[7,"PT_TLS"],[0x6474e550,"PT_GNU_EH_FRAME"],[0x6474e551,"PT_GNU_STACK"],
   [0x6474e552,"PT_GNU_RELRO"],[0x61000000,"PT_SCE_DYNLIBDATA"],[0x61000001,"PT_OS_PROCPARAM"],
@@ -57,11 +58,15 @@ function parseElf(data) {
       size: data.readBigUInt64LE(offset + 32), memory: data.readBigUInt64LE(offset + 40),
       align: data.readBigUInt64LE(offset + 48), host: null };
     item.source = item.offset;
-    if (item.type === PT_LOAD) {
+    if (item.type === PT_LOAD || item.type === PT_TLS) {
       if (item.size > item.memory) throw new Refused(`segment ${index} file size exceeds memory size`);
       if (item.align && !powerOfTwo(item.align)) throw new Refused(`segment ${index} alignment is not a power of two`);
-      if (item.memory > (1n << 64n) - item.vaddr) throw new Refused(`segment ${index} memory range exceeds ELF64`);
     }
+    if (item.type === PT_TLS) {
+      if (item.align > 8192n) throw new Refused(`segment ${index} TLS alignment exceeds 8192`);
+      if (item.memory > 0x7fff0000n) throw new Refused(`segment ${index} TLS memory size exceeds 0x7fff0000`);
+    }
+    if (item.type === PT_LOAD && item.memory > (1n << 64n) - item.vaddr) throw new Refused(`segment ${index} memory range exceeds ELF64`);
     headers.push(item);
   }
   return { inner, header, headers, programOffset };
@@ -104,10 +109,15 @@ function placeSegments(data, headers, records) {
   for (const item of headers) {
     if (item.type === PT_LOAD) continue;
     if (placed.has(item.index)) {
+      const host = loadFor(item.vaddr, item.size);
+      if (host) {
+        const offset = item.vaddr - host.vaddr;
+        if (host.size && offset <= host.size && item.size <= host.size - offset && item.source === host.source + offset) item.host = host;
+      }
       if (item.size && (!tail || item.offset > tail[0])) tail = [item.offset, item.source - item.offset];
       continue;
     }
-    if (item.vaddr !== 0n) {
+    if (item.vaddr !== 0n || item.type === PT_PHDR) {
       const host = loadFor(item.vaddr, item.size);
       if (!host) {
         if (item.size === 0n) { item.source = 0n; continue; }
@@ -142,8 +152,22 @@ function unwrapBuffer(data) {
   if (data.length < FIRST_REGION) throw new Refused("file is smaller than the SELF header area");
   const magic = data.readUInt32LE(0);
   if (![SELF_MAGIC,SELF_MAGIC_KERNEL].includes(magic)) throw new Refused(`not a SELF container (magic ${hex(magic)})`);
-  const records = readRecords(data), parsed = parseElf(data), { headers, header, programOffset } = parsed;
-  placeSegments(data, headers, records); checkDecrypted(data, headers);
+  const records = readRecords(data), parsed = parseElf(data), { headers, header } = parsed;
+  let { programOffset } = parsed;
+  const phdrs = headers.filter(item => item.type === PT_PHDR);
+  if (phdrs.length > 1) throw new Refused("more than one PT_PHDR segment");
+  const phdr = phdrs[0];
+  if (phdr) {
+    if (phdr.size < BigInt(headers.length * 56) || phdr.memory < BigInt(headers.length * 56)) throw new Refused("PT_PHDR does not cover the program header table");
+    if (headers.some(item => item.type === PT_LOAD && item.index < phdr.index)) throw new Refused("PT_PHDR must precede the load segments");
+  }
+  placeSegments(data, headers, records);
+  if (phdr) {
+    if (!phdr.host) throw new Refused("PT_PHDR is not in a file-backed load segment");
+    const table = parsed.inner + Number(programOffset), tableSize = headers.length * 56;
+    if (!data.subarray(Number(phdr.source), Number(phdr.source) + tableSize).equals(data.subarray(table, table + tableSize))) throw new Refused("PT_PHDR does not map the program header table");
+  }
+  checkDecrypted(data, headers);
   const regions = [], loadRegions = new Map();
   for (const item of headers) if (item.type === PT_LOAD && item.size) {
     const region = { old: item.source, size: item.size, vaddr: item.vaddr, align: item.align };
@@ -166,6 +190,8 @@ function unwrapBuffer(data) {
   padding += emptyEnd - cursor;
   if (padding > MAX_ALIGNMENT_PADDING) throw new Refused(`segment alignment requires more than ${MAX_ALIGNMENT_PADDING} bytes of output padding`);
   cursor = emptyEnd;
+  const outputLimit = max(MAX_OUTPUT_FACTOR * BigInt(data.length), MIN_OUTPUT_LIMIT);
+  if (cursor > outputLimit) throw new Refused(`the load segments need ${cursor} bytes of output, more than the ${outputLimit} allowed for a ${data.length} byte container`);
   if (cursor > BigInt(Number.MAX_SAFE_INTEGER)) throw new Refused("ELF output exceeds the host buffer range");
   const result = Buffer.alloc(Number(cursor));
   for (const region of regions) data.copy(result,Number(region.new),Number(region.old),Number(region.old + region.size));
@@ -177,6 +203,7 @@ function unwrapBuffer(data) {
     item.new = region ? region.new + (item.source - region.old) : item.source;
     if (item.new + item.size > BigInt(result.length)) throw new Refused(`segment ${item.index} escaped the output`);
   }
+  if (phdr) { programOffset = phdr.new; header.writeBigUInt64LE(programOffset,0x20); }
   header.copy(result,0); result.writeBigUInt64LE(0n,0x28); result.writeUInt16LE(0,0x3c); result.writeUInt16LE(0,0x3e);
   for (const item of headers) {
     const at = Number(programOffset) + item.index * 56;

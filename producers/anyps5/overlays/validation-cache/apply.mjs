@@ -25,7 +25,6 @@ export async function applyValidationCacheOverlay(root) {
 ` + block.slice(functionAt);
     block = block.replaceAll('std::vector<std::uint64_t>', 'ShaderValidationKey');
     block = replace(block, '        add(shaders.size());', '        add(shaders.size());\n        key.modules.reserve(shaders.size());');
-    block = replace(block, '            const bool generated = (state.rectList && (shader.stage == Stage::TessellationControl || shader.stage == Stage::TessellationEvaluation)) || shader.stage == Stage::Geometry;', `            const bool generated = ((state.rectList || BarycentricPatches(state, shaders)) && (shader.stage == Stage::TessellationControl || shader.stage == Stage::TessellationEvaluation)) || shader.stage == Stage::Geometry;`);
     block = replace(block, '            add(generated ? std::uint64_t{0} : program.PipelineVariantId());', `            add(program.PipelineVariantId());
             key.modules.push_back(program.spirv);`);
     block = replace(block, '            add(program.bdaAbiVersion);', `            add(program.bdaAbiVersion);

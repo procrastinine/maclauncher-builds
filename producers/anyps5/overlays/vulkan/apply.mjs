@@ -31,12 +31,12 @@ export function adaptVulkanSources(sourceRoot) {
     device = replaceOnce(device, '    std::vector<const char*> instanceExtensions;\n',
         '    std::vector<const char*> instanceExtensions;\n' + enumeration.replace(/^    /gm, ''), driver);
     const instanceStart = device.indexOf('    std::vector<const char*> instanceExtensions;');
-    const instanceEnd = device.indexOf('    check(state->InstanceFunction<PFN_vkCreateInstance>');
+    const instanceEnd = device.indexOf('    const VkResult instanceResult = state->InstanceFunction<PFN_vkCreateInstance>');
     device = device.slice(0, instanceStart) + device.slice(instanceStart, instanceEnd).replace(/\bavailableCount\b/g, 'availableInstanceExtensionCount').replace(/\bavailable\b/g, 'availableInstanceExtensions') + device.slice(instanceEnd);
     const extensionCounts = `        create.enabledExtensionCount = static_cast<std::uint32_t>(instanceExtensions.size());
         create.ppEnabledExtensionNames = instanceExtensions.data();
     }
-    check(state->InstanceFunction<PFN_vkCreateInstance>`;
+    const VkResult instanceResult = state->InstanceFunction<PFN_vkCreateInstance>`;
     device = replaceOnce(device, extensionCounts, `    }
     if (std::any_of(availableInstanceExtensions.begin(), availableInstanceExtensions.end(), [](const auto& item) { return std::strcmp(item.extensionName, VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME) == 0; })) {
         if (std::none_of(instanceExtensions.begin(), instanceExtensions.end(), [](const char* name) { return std::strcmp(name, VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME) == 0; })) instanceExtensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
@@ -44,7 +44,7 @@ export function adaptVulkanSources(sourceRoot) {
     }
     create.enabledExtensionCount = static_cast<std::uint32_t>(instanceExtensions.size());
     create.ppEnabledExtensionNames = instanceExtensions.data();
-    check(state->InstanceFunction<PFN_vkCreateInstance>`, driver);
+    const VkResult instanceResult = state->InstanceFunction<PFN_vkCreateInstance>`, driver);
     device = replaceOnce(device, '    if (window != nullptr) deviceExtensions.assign(presentationExtensions.begin(), presentationExtensions.end());\n',
         '    if (window != nullptr) deviceExtensions.assign(presentationExtensions.begin(), presentationExtensions.end());\n    if (hasExtension("VK_KHR_portability_subset")) deviceExtensions.push_back("VK_KHR_portability_subset");\n', driver);
 

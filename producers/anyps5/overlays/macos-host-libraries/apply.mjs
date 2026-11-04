@@ -33,7 +33,7 @@ export function applyHostLibrariesOverlay(projectionRoot) {
   edit('core/libs/CMakeLists.txt', (text, file) => replaceOnce(text,
     'target_link_libraries(libSceUsbStorageDialog PRIVATE libSceUserService)',
     'target_link_libraries(libSceUsbStorageDialog PRIVATE libSceUserService)\n\nif(APPLE)\n    target_link_libraries(libSceNetCtl PRIVATE "-framework SystemConfiguration" "-framework CoreFoundation")\nendif()', file));
-  for (const library of ['libSceMsgDialog', 'libSceErrorDialog']) {
+  for (const library of ['libSceErrorDialog']) {
     edit('core/libs/prx/' + library + '/Export.cpp', (text, file) => {
       text = replaceOnce(text, '#ifdef _WIN32\n#include <windows.h>\n#endif',
         '#ifdef _WIN32\n#include <windows.h>\n#elif defined(__APPLE__)\n#include "prx/libc/include/specifics/macos/VirtualMemory.hpp"\n#endif', file);

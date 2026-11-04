@@ -1882,10 +1882,14 @@
       {
         "version": "MCLv8",
         "label": "AnyPS5 MCLv8"
+      },
+      {
+        "version": "MCLv9",
+        "label": "AnyPS5 MCLv9"
       }
     ],
     "build": {
-      "version": "MCLv8",
+      "version": "MCLv9",
       "architectures": [
         "arm64",
         "x64"

@@ -42,16 +42,29 @@ export async function applyLoaderOverlay(root) {
   const memoryFile=path.join(root,memoryRelative);
   let memory=await fs.readFile(memoryFile,'utf8');
   memory=replace(memory,'#ifdef _WIN32\nbool readPages(std::byte* destination, std::uint64_t source, std::size_t bytes) {', '#if defined(_WIN32) || defined(__APPLE__)\nbool readPages(std::byte* destination, std::uint64_t source, std::size_t bytes) {\n#ifdef _WIN32');
-  memory=replace(memory,'    return ReadProcessMemory(GetCurrentProcess(), reinterpret_cast<const void*>(source), destination, bytes, &copied) != 0 && copied == bytes;\n}', `    return ReadProcessMemory(GetCurrentProcess(), reinterpret_cast<const void*>(source), destination, bytes, &copied) != 0 && copied == bytes;
+  memory=replace(memory,'    return false;\n}\n\ntemplate <class Visit>\nvoid visitReadablePages', `    return false;
 #else
     if (source == 0 || bytes > std::numeric_limits<std::uint64_t>::max() - source) return false;
     mach_vm_size_t copied = 0;
     return ::mach_vm_read_overwrite(::mach_task_self(), static_cast<mach_vm_address_t>(source), bytes,
         reinterpret_cast<mach_vm_address_t>(destination), &copied) == KERN_SUCCESS && copied == bytes;
 #endif
-}`);
+}
+
+template <class Visit>
+void visitReadablePages`);
+  memory=replace(memory,'        MEMORY_BASIC_INFORMATION memory{};\n        require(VirtualQuery(reinterpret_cast<const void*>(cursor), &memory, sizeof(memory)) == sizeof(memory), "cannot query guest memory after a failed committed read");\n        const bool readable = memory.State == MEM_COMMIT && (memory.Protect & (PAGE_GUARD | PAGE_NOACCESS)) == 0 && readableProtection(memory.Protect & 0xffu);\n        visit(offset, chunk, readable && readPages(destination + offset, cursor, chunk));',
+   '#ifdef _WIN32\n        MEMORY_BASIC_INFORMATION memory{};\n        require(VirtualQuery(reinterpret_cast<const void*>(cursor), &memory, sizeof(memory)) == sizeof(memory), "cannot query guest memory after a failed committed read");\n        const bool readable = memory.State == MEM_COMMIT && (memory.Protect & (PAGE_GUARD | PAGE_NOACCESS)) == 0 && readableProtection(memory.Protect & 0xffu);\n        visit(offset, chunk, readable && readPages(destination + offset, cursor, chunk));\n#else\n        visit(offset, chunk, readPages(destination + offset, cursor, chunk));\n#endif');
   memory=replace(memory,'#ifdef _WIN32\n    visitReadablePages(destination, source, bytes,', '#if defined(_WIN32) || defined(__APPLE__)\n    visitReadablePages(destination, source, bytes,');
   memory=replace(memory,'#ifdef _WIN32\n    constexpr std::size_t ChunkBytes = 64 * PageBytes;', '#if defined(_WIN32) || defined(__APPLE__)\n    constexpr std::size_t ChunkBytes = 64 * PageBytes;');
+  memory=replace(memory,'    std::memcpy(reinterpret_cast<void*>(address), source.data(), source.size());', `#ifdef __APPLE__
+    GuestWriteWatch::GuestWriteWatchBeginHostWrite_nid_postfix(reinterpret_cast<const void*>(address), source.size());
+#endif
+    std::memcpy(reinterpret_cast<void*>(address), source.data(), source.size());
+#ifdef __APPLE__
+    GuestWriteWatch::GuestWriteWatchEndHostWrite_nid_postfix(reinterpret_cast<const void*>(address), source.size());
+#endif`);
+  memory=replace(memory,'        if (source.size() >= PageBytes) copyOwnBytes(address, source);\n        else std::memcpy(destination, source.data(), source.size());', '        copyOwnBytes(address, source);');
   await fs.writeFile(memoryFile,memory);changes.push(memoryRelative);
   for(const name of ['DarwinImage.hpp','DarwinModuleInfo.inc']) {
     const destination=path.join(base,'Module',name);
