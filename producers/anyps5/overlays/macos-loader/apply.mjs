@@ -65,7 +65,70 @@ void visitReadablePages`);
     GuestWriteWatch::GuestWriteWatchEndHostWrite_nid_postfix(reinterpret_cast<const void*>(address), source.size());
 #endif`);
   memory=replace(memory,'        if (source.size() >= PageBytes) copyOwnBytes(address, source);\n        else std::memcpy(destination, source.data(), source.size());', '        copyOwnBytes(address, source);');
+  memory=replace(memory,'        if (importMayWriteGuest) open.emplace(reinterpret_cast<void*>(first), static_cast<std::size_t>(stop - first));', '        if (importMayWriteGuest) open.emplace(reinterpret_cast<void*>(first), static_cast<std::size_t>(stop - first), GuestArena::HostWrite::Import{});');
   await fs.writeFile(memoryFile,memory);changes.push(memoryRelative);
+  const arenaHeaderRelative='core/libs/prx/libc/include/GuestArena.hpp';
+  const arenaHeaderFile=path.join(root,arenaHeaderRelative);
+  let arenaHeader=await fs.readFile(arenaHeaderFile,'utf8');
+  arenaHeader=replace(arenaHeader,'bool GuestArenaBeginHostWrite_nid_postfix(void* pointer, std::size_t bytes);',`bool GuestArenaBeginHostWrite_nid_postfix(void* pointer, std::size_t bytes);
+#ifdef __APPLE__
+void GuestArenaSetHostWriteHook_nid_postfix(void (*hook)(std::uintptr_t address, std::size_t bytes));
+bool GuestArenaBeginImportWrite_nid_postfix(void* pointer, std::size_t bytes);
+#endif`);
+  arenaHeader=replace(arenaHeader,'class HostWrite {\npublic:',`class HostWrite {
+public:
+#ifdef __APPLE__
+    struct Import {};
+    HostWrite(void* pointer, std::size_t bytes, Import) : pointer(pointer), bytes(bytes), open(GuestArenaBeginImportWrite_nid_postfix(pointer, bytes)) {}
+#endif`);
+  await fs.writeFile(arenaHeaderFile,arenaHeader);changes.push(arenaHeaderRelative);
+  const arenaRelative='core/libs/prx/libc/src/GuestArena.cpp';
+  const arenaFile=path.join(root,arenaRelative);
+  let arena=await fs.readFile(arenaFile,'utf8');
+  arena=replace(arena,'std::atomic<void (*)(std::uintptr_t, std::size_t)> hostReadHook{nullptr};',`std::atomic<void (*)(std::uintptr_t, std::size_t)> hostReadHook{nullptr};
+#ifdef __APPLE__
+std::atomic<void (*)(std::uintptr_t, std::size_t)> hostWriteHook{nullptr};
+#endif`);
+  arena=replace(arena,'bool GuestArenaBeginHostWrite_nid_postfix(void* pointer, std::size_t bytes) {\n#ifdef _WIN32',`#ifdef __APPLE__
+void GuestArenaSetHostWriteHook_nid_postfix(void (*hook)(std::uintptr_t address, std::size_t bytes)) {
+    hostWriteHook.store(hook, std::memory_order_release);
+}
+
+bool GuestArenaBeginImportWrite_nid_postfix(void* pointer, std::size_t bytes) {
+    GuestWriteWatch::GuestWriteWatchBeginHostWrite_nid_postfix(pointer, bytes);
+    return true;
+}
+#endif
+
+bool GuestArenaBeginHostWrite_nid_postfix(void* pointer, std::size_t bytes) {
+#ifdef __APPLE__
+    if (const auto hook = hostWriteHook.load(std::memory_order_acquire); hook != nullptr && pointer != nullptr && bytes != 0)
+        hook(reinterpret_cast<std::uintptr_t>(pointer), bytes);
+    return GuestArenaBeginImportWrite_nid_postfix(pointer, bytes);
+#elif defined(_WIN32)`);
+  await fs.writeFile(arenaFile,arena);changes.push(arenaRelative);
+  const recorderRelative='core/libs/prx/libSceAgcDriver/Graphics/src/Recorder.cpp';
+  const recorderFile=path.join(root,recorderRelative);
+  let recorder=await fs.readFile(recorderFile,'utf8');
+  recorder=replace(recorder,'#include "prx/libc/include/GuestAllocations.hpp"',`#include "prx/libc/include/GuestAllocations.hpp"
+#ifdef __APPLE__
+#include "prx/libc/include/GuestArena.hpp"
+#endif`);
+  recorder=replace(recorder,'void FlushForAccess(std::uint64_t address, std::size_t bytes) {',`#ifdef __APPLE__
+void FlushForHostWrite(std::uintptr_t address, std::size_t bytes) {
+    const GuestMemory::ReadSiteScope site(GuestMemory::ReadSite::Store);
+    GuestMemory::TagGpuLockSite(GuestMemory::GpuLockSite::Hook);
+    std::lock_guard gpu(GuestMemory::GpuMutex());
+    GuestMemory::FlushGpuWrites(address, bytes);
+}
+#endif
+
+void FlushForAccess(std::uint64_t address, std::size_t bytes) {`);
+  recorder=replace(recorder,'    GuestMemory::SetFlushHook(&FlushForAccess);',`    GuestMemory::SetFlushHook(&FlushForAccess);
+#ifdef __APPLE__
+    GuestArena::GuestArenaSetHostWriteHook_nid_postfix(&FlushForHostWrite);
+#endif`);
+  await fs.writeFile(recorderFile,recorder);changes.push(recorderRelative);
   for(const name of ['DarwinImage.hpp','DarwinModuleInfo.inc']) {
     const destination=path.join(base,'Module',name);
     await fs.copyFile(path.join(import.meta.dirname,name),destination);changes.push('core/libs/prx/libkernel/Module/'+name);
