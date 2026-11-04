@@ -1056,6 +1056,9 @@ id<MTLRenderCommandEncoder> captureRenderPass(id object,SEL selector,MTLRenderPa
 RSMFrameDepth *capturedDepth(id<MTLCommandBuffer> commands,id<MTLTexture> color) {
     RSMFrameDepth *frame=objc_getAssociatedObject(commands,&frameDepthKey);
     if(!frame||!frame->valid||frame->color!=color)return nil;
+    // Keep the previously admitted, directly readable depth path unchanged.
+    if(frame->depth.pixelFormat==MTLPixelFormatDepth32Float&&frame->depth.sampleCount==1&&
+       (frame->depth.usage==MTLTextureUsageUnknown||(frame->depth.usage&MTLTextureUsageShaderRead)))return frame;
     if(frame->sampled)return frame;
     @try{try{
         id<MTLTexture> input=frame->depth;
