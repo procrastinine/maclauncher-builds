@@ -50,6 +50,7 @@
 	path = producers/maclauncher/src/external/fsr2
 	url = https://github.com/GPUOpen-Effects/FidelityFX-FSR2
 
+# FSR3 implementation sources use a different SDK version from the FSR4 header and model inputs.
 [submodule "producers/maclauncher/src/external/fsr3-sdk"]
 	path = producers/maclauncher/src/external/fsr3-sdk
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK
@@ -62,10 +63,12 @@
 	path = producers/maclauncher/src/external/fsr4-metal
 	url = https://github.com/UzenUPoZiTiV4ik/fsr4-native-macos
 
+# FSR4 helper headers use their matching SDK snapshot alongside the separate model-weight input.
 [submodule "producers/maclauncher/src/external/fsr4-sdk-headers"]
 	path = producers/maclauncher/src/external/fsr4-sdk-headers
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK
 
+# FSR4 model weights use the SDK snapshot that contains the selected model.
 [submodule "producers/maclauncher/src/external/fsr4-sdk-model"]
 	path = producers/maclauncher/src/external/fsr4-sdk-model
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK

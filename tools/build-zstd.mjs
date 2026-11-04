@@ -1,3 +1,4 @@
+import {gitlink} from '../lib/pins.mjs';
 // Build the original Zstandard runtime at the declared macOS floor.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,7 +12,7 @@ const read=(command,args)=>execFileSync(command,args,{maxBuffer:Infinity,encodin
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 export async function buildZstd({work,architecture='arm64',jobs=2,ninja='ninja'}){
  if(!['arm64','x64'].includes(architecture)||!path.isAbsolute(work||'')||fs.existsSync(work)||!Number.isSafeInteger(jobs)||jobs<1||jobs>4)throw Error('Zstandard needs a declared CPU, one to four jobs and a new absolute work directory.');
- const revision=read('git',['-C',path.join(root,'sources/anyps5'),'rev-parse','HEAD:3rdparty/zstd']);
+ const revision=read('git',['-C',path.join(root,'sources/anyps5'),'rev-parse',gitlink('sources/anyps5')+':3rdparty/zstd']);
  fs.mkdirSync(work,{recursive:true});const archive=await buildInput({...zstdProfile.archive,url:zstdProfile.repository+'/archive/'+revision+'.tar.gz'}),source=path.join(work,'source'),build=path.join(work,'build'),prefix=path.join(work,'install'),floor=zstdProfile.minimumMacOS;
  fs.mkdirSync(source);run('tar',['-xf',archive,'--strip-components=1','-C',source]);
  const sdk=process.env.SDKROOT||read('xcrun',['--sdk','macosx','--show-sdk-path']),flags=['-ffile-prefix-map='+work+'=zstd-build','-fdebug-prefix-map='+work+'=zstd-build','-Werror=unguarded-availability-new'];

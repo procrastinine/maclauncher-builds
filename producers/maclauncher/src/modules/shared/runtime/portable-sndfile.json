@@ -6,9 +6,21 @@
   "audioFormats": ["WAV", "AIFF", "FLAC", "Ogg Vorbis", "Ogg Opus", "MPEG audio"],
   "dependencies": [
     {
-      "id": "ogg", "name": "libogg", "version": "1.3.6",
-      "license": "BSD-3-Clause", "notices": ["COPYING"], "buildSystem": "cmake",
-      "options": ["-DBUILD_FRAMEWORK=OFF", "-DINSTALL_DOCS=OFF"]
+      "id": "ogg",
+      "name": "libogg",
+      "version": "1.3.6",
+      "license": "BSD-3-Clause",
+      "notices": [
+        "COPYING"
+      ],
+      "buildSystem": "cmake",
+      "options": [
+        "-DBUILD_FRAMEWORK=OFF",
+        "-DINSTALL_DOCS=OFF"
+      ],
+      "sourceUrl": "https://github.com/xiph/ogg",
+      "archiveSha256": "b2ff5c003e5697507169f7d614d64dc4e8bf030c85ad081bec75c164566f8246",
+      "archiveBytes": 254382
     },
     {
       "id": "flac", "name": "FLAC", "version": "1.5.0",
@@ -21,14 +33,43 @@
       "options": ["-DBUILD_CXXLIBS=OFF", "-DBUILD_PROGRAMS=OFF", "-DBUILD_EXAMPLES=OFF", "-DBUILD_DOCS=OFF", "-DINSTALL_MANPAGES=OFF", "-DWITH_OGG=ON"]
     },
     {
-      "id": "vorbis", "name": "libvorbis", "version": "1.3.7",
-      "license": "BSD-3-Clause", "notices": ["COPYING"], "buildSystem": "cmake", "options": ["-DBUILD_FRAMEWORK=OFF"]
+      "id": "vorbis",
+      "name": "libvorbis",
+      "version": "1.3.7",
+      "license": "BSD-3-Clause",
+      "notices": [
+        "COPYING"
+      ],
+      "buildSystem": "cmake",
+      "options": [
+        "-DBUILD_FRAMEWORK=OFF"
+      ],
+      "sourceUrl": "https://github.com/xiph/vorbis",
+      "archiveSha256": "95e908e8c3595ae017b07a376da83ed38a3edeeab9ad458451669f7076bee8b0",
+      "archiveBytes": 1238230
     },
     {
-      "id": "opus", "name": "Opus", "version": "1.6.1",
+      "id": "opus",
+      "name": "Opus",
+      "version": "1.6.1",
       "license": "BSD-3-Clause; see included patent and contribution notices",
-      "notices": ["COPYING", "LICENSE_PLEASE_READ.txt"], "buildSystem": "cmake",
-      "options": ["-DOPUS_BUILD_SHARED_LIBRARY=ON", "-DOPUS_BUILD_PROGRAMS=OFF", "-DOPUS_BUILD_TESTING=OFF", "-DOPUS_BUILD_FRAMEWORK=OFF", "-DOPUS_DEEP_PLC=OFF", "-DOPUS_DRED=OFF", "-DOPUS_OSCE=OFF"]
+      "notices": [
+        "COPYING",
+        "LICENSE_PLEASE_READ.txt"
+      ],
+      "buildSystem": "cmake",
+      "options": [
+        "-DOPUS_BUILD_SHARED_LIBRARY=ON",
+        "-DOPUS_BUILD_PROGRAMS=OFF",
+        "-DOPUS_BUILD_TESTING=OFF",
+        "-DOPUS_BUILD_FRAMEWORK=OFF",
+        "-DOPUS_DEEP_PLC=OFF",
+        "-DOPUS_DRED=OFF",
+        "-DOPUS_OSCE=OFF"
+      ],
+      "sourceUrl": "https://github.com/xiph/opus",
+      "archiveSha256": "3267aa969b2b26542417f57819a5bc25d5079355300307dd2dddc7c704aed418",
+      "archiveBytes": 4888967
     },
     {
       "id": "mpg123", "name": "mpg123", "version": "1.33.7", "sourceRelease": "mpg123-1.33.7",
