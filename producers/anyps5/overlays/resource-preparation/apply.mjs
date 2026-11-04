@@ -15,6 +15,28 @@ export async function applyResourcePreparationOverlay(root){
     }`);
  await fs.writeFile(header,memory);
  const file=path.join(base,'src/ShaderResources.cpp');let source=await fs.readFile(file,'utf8');
+ source=replace(source,'std::uint64_t TextureCacheBudget(const VkPhysicalDeviceMemoryProperties& memory) {',`#ifdef __APPLE__
+namespace {
+bool sharesSystemMemory(const VkPhysicalDeviceMemoryProperties& memory) {
+    return memory.memoryHeapCount == 1 && (memory.memoryHeaps[0].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) != 0;
+}
+}
+#endif
+
+std::uint64_t TextureCacheBudget(const VkPhysicalDeviceMemoryProperties& memory) {
+#ifdef __APPLE__
+    if (sharesSystemMemory(memory)) return std::max<std::uint64_t>(1024ull << 20u, memory.memoryHeaps[0].size / 8u);
+#endif`);
+ source=replace(source,'    return std::max<std::uint64_t>(2048ull << 20u, budget > reserved ? budget - reserved : 0u);',`    const auto sampled = std::max<std::uint64_t>(2048ull << 20u, budget > reserved ? budget - reserved : 0u);
+#ifdef __APPLE__
+    if (sharesSystemMemory(memory)) return std::min(sampled, TextureCacheBudget(memory));
+#endif
+    return sampled;`);
+ source=replace(source,'    return std::max<std::uint64_t>(512ull << 20u, std::min<std::uint64_t>(memory.memoryHeaps[*heap].size / 2u, reported->heapBudget[*heap] / 2u));',`    const auto ceiling = std::max<std::uint64_t>(512ull << 20u, std::min<std::uint64_t>(memory.memoryHeaps[*heap].size / 2u, reported->heapBudget[*heap] / 2u));
+#ifdef __APPLE__
+    if (sharesSystemMemory(memory)) return std::min(ceiling, TextureCacheBudget(memory));
+#endif
+    return ceiling;`);
  source='#include "prx/libSceAgcDriver/Graphics/include/ResourcePreparation.hpp"\n'+source;
  source=replace(source,'        std::set<std::uint32_t> occupied;',`        const auto capacity=CountResourcePreparation(shaders,std::max<std::size_t>(context.limits.maxDescriptorSetStorageBuffers,context.descriptorIndexingLimits.maxDescriptorSetUpdateAfterBindStorageBuffers),[](const std::uint32_t* words) {
             const ShaderRecompiler::ShaderBufferResource descriptor{{words[0],words[1]&~0x40000000u,words[2],words[3]}};
