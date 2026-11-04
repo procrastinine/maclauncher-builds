@@ -42,7 +42,7 @@ function stage({ references, jdkBin, resourcesRoot } = {}) {
         throw new Error("The publisher JNI CPU inventory changed.");
       execFileSync("/usr/bin/codesign", ["--verify", "--strict", libraryPath], { timeout: 30000, stdio: "pipe" });
       fs.copyFileSync(agent, path.join(directory, "steam-agent.jar"));
-      addLicenses(directory,"MacLauncher Java loader",__dirname);
+      addLicenses(directory,"MacLauncher Java loader",path.resolve(__dirname,"../../../../../../.."));
       const dependencies = [
         "steamworks4j " + original.version + ": publisher JNI binary, unchanged.",
         "Source: " + original.sourceUrl,

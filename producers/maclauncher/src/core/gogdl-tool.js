@@ -5,7 +5,7 @@ const Upstream = require('../modules/shared/runtime/upstream');
 const { assetArchitecture } = require('../modules/shared/runtime/architecture');
 const { isMacName } = require('../modules/shared/runtime/archive');
 
-const GOGDL = Object.freeze({ owner: 'Heroic-Games-Launcher', repo: 'heroic-gogdl', source: 'https://github.com/Heroic-Games-Launcher/heroic-gogdl', license: 'GPL-3.0' });
+const GOGDL = Object.freeze({ owner: 'Heroic-Games-Launcher', repo: 'heroic-gogdl', source: 'https://github.com/Heroic-Games-Launcher/heroic-gogdl' });
 // Heroic publishes a self-contained gogdl_macos_<cpu> executable with each
 // release. A renamed Mac executable, or one universal build, is used as well;
 // the current name wins.
@@ -92,7 +92,7 @@ async function ensureGogdl({ userDataDir, signal, onProgress, arch = process.arc
       if (!bytes) throw new Error('The GOG download helper download is empty.');
       await fs.promises.chmod(executable, 0o755);
       await fs.promises.writeFile(path.join(stage, 'source.json'), JSON.stringify({ version: release.version, source: GOGDL.source,
-        revision: release.revision, license: GOGDL.license, url: release.url, sha256, size: bytes, integrity }), { mode: 0o600, flag: 'wx' });
+        revision: release.revision, url: release.url, sha256, size: bytes, integrity }), { mode: 0o600, flag: 'wx' });
       const target = path.join(parent, `gogdl-${release.version}-${arch}-${sha256.slice(0, 12)}`);
       await fs.promises.rm(target, { recursive: true, force: true });
       await fs.promises.rename(stage, target);

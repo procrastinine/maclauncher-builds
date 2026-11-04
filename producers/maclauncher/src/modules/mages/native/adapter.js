@@ -16,7 +16,7 @@ const SOURCES = Object.freeze({
   bink2: { repository: "https://github.com/sharpemu/ffmpeg-core", revision: "3b502d4ed79ec2c14066ca09f514db1e2ebb5265",
     patchPath: "bink2.patch", upstreamPatchSha256: "2c1b70354bb32471a5b1bb46ca3479e641fdd9d971c3eb4317c935040dd28fdc",
     patchSha256: "0405b8f018baa818a3392d70637a0246c6cf4eb9f37f738cd223784b41f477a8",
-    adaptations: ["Normalize the alpha flag to a Boolean before plane iteration"], license: "LGPL-2.1-or-later" }
+    adaptations: ["Normalize the alpha flag to a Boolean before plane iteration"] }
 });
 
 function hash(file) { return crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex"); }

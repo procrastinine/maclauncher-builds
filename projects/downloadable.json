@@ -271,8 +271,7 @@
         "url": "https://github.com/nunuhara/ai5-sdl2",
         "repository": "nunuhara/ai5-sdl2",
         "pin": {
-          "file": "producers/maclauncher/src/modules/ai5/runtime/portable-build-v4.js",
-          "pointer": "/REVISION"
+          "gitlink": "producers/maclauncher/src/external/ai5-sdl2"
         }
       }
     ],
@@ -333,8 +332,7 @@
         "url": "https://github.com/FNA-XNA/FNA",
         "repository": "FNA-XNA/FNA",
         "pin": {
-          "file": "producers/maclauncher/src/modules/fna/runtime/build.js",
-          "pointer": "/FNA_REVISION"
+          "gitlink": "producers/maclauncher/src/external/FNA"
         }
       },
       {
@@ -343,8 +341,7 @@
         "url": "https://github.com/FNA-XNA/FNA3D",
         "repository": "FNA-XNA/FNA3D",
         "pin": {
-          "file": "producers/maclauncher/src/modules/fna/runtime/build.js",
-          "pointer": "/FNA3D_REVISION"
+          "gitlink": "producers/maclauncher/src/external/source-revisions/fna3d"
         }
       }
     ],
@@ -405,8 +402,7 @@
         "url": "https://github.com/gemrb/gemrb",
         "repository": "gemrb/gemrb",
         "pin": {
-          "file": "producers/maclauncher/src/modules/gemrb/runtime/portable-build-v5.js",
-          "pointer": "/REVISION"
+          "gitlink": "producers/maclauncher/src/external/gemrb"
         }
       }
     ],
@@ -464,8 +460,7 @@
         "url": "https://github.com/OpenGMK/OpenGMK",
         "repository": "OpenGMK/OpenGMK",
         "pin": {
-          "file": "producers/maclauncher/src/modules/gamemaker/overlays/opengmk-macos/apply-emulator.js",
-          "pointer": "/REVISION"
+          "gitlink": "producers/maclauncher/src/external/OpenGMK"
         }
       }
     ],
@@ -520,27 +515,12 @@
     },
     "upstreams": [
       {
-        "id": "hashlink",
-        "provider": "github",
-        "url": "https://github.com/HaxeFoundation/hashlink",
-        "repository": "HaxeFoundation/hashlink",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/hashlink/runtime/manager.js",
-          "pointer": "/core/catalog",
-          "match": {
-            "version": "1.16"
-          },
-          "field": "/upstreamRevision"
-        }
-      },
-      {
         "id": "hashlink-1-9",
         "provider": "github",
         "url": "https://github.com/HaxeFoundation/hashlink",
         "repository": "HaxeFoundation/hashlink",
         "pin": {
-          "file": "producers/maclauncher/src/modules/hashlink/runtime/legacy-build.js",
-          "pointer": "/REVISION"
+          "gitlink": "producers/maclauncher/src/external/source-revisions/hashlink-1-9"
         }
       },
       {
@@ -549,8 +529,8 @@
         "url": "https://github.com/HaxeFoundation/hashlink",
         "repository": "HaxeFoundation/hashlink",
         "pin": {
-          "file": "producers/maclauncher/src/modules/hashlink/runtime/dynamic-legacy-build.js",
-          "pointer": "/REVISION"
+          "file": "producers/maclauncher/src/modules/hashlink/runtime/source-1.12.json",
+          "pointer": ""
         }
       }
     ],
@@ -663,8 +643,7 @@
         "url": "https://github.com/CommitteeOfZero/impacto",
         "repository": "CommitteeOfZero/impacto",
         "pin": {
-          "file": "producers/maclauncher/src/modules/mages/native/current-build.js",
-          "pointer": "/REVISION"
+          "gitlink": "producers/maclauncher/src/external/impacto"
         }
       }
     ],
@@ -723,8 +702,7 @@
         "url": "https://github.com/dscharrer/innoextract",
         "repository": "dscharrer/innoextract",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/installers/runtime/innoextract-build.js",
-          "pointer": "/REVISION"
+          "gitlink": "producers/maclauncher/src/external/innoextract"
         }
       },
       {
@@ -733,8 +711,7 @@
         "url": "https://github.com/boostorg/filesystem",
         "repository": "boostorg/filesystem",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/installers/runtime/innoextract-build.js",
-          "pointer": "/DEPENDENCIES/boost-filesystem"
+          "gitlink": "producers/maclauncher/src/external/boost-filesystem"
         }
       },
       {
@@ -743,8 +720,7 @@
         "url": "https://github.com/boostorg/program_options",
         "repository": "boostorg/program_options",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/installers/runtime/innoextract-build.js",
-          "pointer": "/DEPENDENCIES/boost-program-options"
+          "gitlink": "producers/maclauncher/src/external/boost-program-options"
         }
       },
       {
@@ -753,8 +729,7 @@
         "url": "https://github.com/boostorg/iostreams",
         "repository": "boostorg/iostreams",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/installers/runtime/innoextract-build.js",
-          "pointer": "/DEPENDENCIES/boost-iostreams"
+          "gitlink": "producers/maclauncher/src/external/boost-iostreams"
         }
       }
     ],
@@ -898,8 +873,7 @@
         "url": "https://github.com/FGRE/libnpengine",
         "repository": "FGRE/libnpengine",
         "pin": {
-          "file": "producers/maclauncher/src/modules/nitroplus/runtime/build.js",
-          "pointer": "/REVISION"
+          "gitlink": "producers/maclauncher/src/external/libnpengine"
         }
       }
     ],
@@ -945,7 +919,6 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/nscripter/runtime/onscripter-en-build.js",
         "producers/maclauncher/src/modules/nscripter/runtime/onscripter-en-build-v3.js"
       ],
       "sourceDirectory": "producers/maclauncher"
@@ -957,8 +930,7 @@
         "url": "https://github.com/Galladite27/ONScripter-EN",
         "repository": "Galladite27/ONScripter-EN",
         "pin": {
-          "file": "producers/maclauncher/src/modules/nscripter/runtime/onscripter-en-manager.js",
-          "pointer": "/SNAPSHOT_REVISION"
+          "gitlink": "producers/maclauncher/src/external/onscripter-en"
         }
       }
     ],
@@ -1073,8 +1045,7 @@
         "url": "https://github.com/OpenGMK/OpenGMK",
         "repository": "OpenGMK/OpenGMK",
         "pin": {
-          "file": "producers/maclauncher/src/modules/gamemaker/overlays/opengmk-macos/apply-emulator.js",
-          "pointer": "/REVISION"
+          "gitlink": "producers/maclauncher/src/external/OpenGMK"
         }
       }
     ],
@@ -1130,8 +1101,7 @@
         "url": "https://github.com/luoyily/ReMinori",
         "repository": "luoyily/ReMinori",
         "pin": {
-          "file": "producers/maclauncher/src/modules/minori/runtime/overlay.js",
-          "pointer": "/REVISION"
+          "gitlink": "producers/maclauncher/src/external/ReMinori"
         }
       }
     ],
@@ -1262,8 +1232,7 @@
         "url": "https://github.com/kichikuou/system3-sdl2",
         "repository": "kichikuou/system3-sdl2",
         "pin": {
-          "file": "producers/maclauncher/src/modules/alicesoft/system3-portable.js",
-          "pointer": "/REVISION"
+          "gitlink": "producers/maclauncher/src/external/system3-sdl2"
         }
       },
       {
@@ -1465,8 +1434,7 @@
         "url": "https://github.com/kichikuou/xsystem35-sdl2",
         "repository": "kichikuou/xsystem35-sdl2",
         "pin": {
-          "file": "producers/maclauncher/src/modules/alicesoft/system35-portable-v3.js",
-          "pointer": "/REVISION"
+          "gitlink": "producers/maclauncher/src/external/xsystem35-sdl2"
         }
       }
     ],
@@ -1520,7 +1488,6 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/alicesoft/system4-portable.js",
         "producers/maclauncher/src/modules/alicesoft/system4-portable-v3.js",
         "producers/maclauncher/src/modules/alicesoft/system4-portable-overlay-v3.js"
       ],
@@ -1533,8 +1500,7 @@
         "url": "https://github.com/nunuhara/xsystem4",
         "repository": "nunuhara/xsystem4",
         "pin": {
-          "file": "producers/maclauncher/src/modules/alicesoft/system4-portable-v3.js",
-          "pointer": "/REVISION"
+          "gitlink": "producers/maclauncher/src/external/xsystem4"
         }
       }
     ],
@@ -1598,8 +1564,7 @@
         "provider": "git",
         "url": "https://gitlab.freedesktop.org/mesa/mesa",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/vulkan/native/kosmickrisp-source.json",
-          "pointer": ""
+          "gitlink": "producers/maclauncher/src/external/mesa"
         }
       },
       {
@@ -1707,8 +1672,7 @@
         "url": "https://github.com/mkxp-z/mkxp-z",
         "repository": "mkxp-z/mkxp-z",
         "pin": {
-          "file": "producers/maclauncher/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json",
-          "pointer": "/upstream"
+          "gitlink": "producers/maclauncher/src/external/mkxp-z"
         }
       },
       {
@@ -1781,8 +1745,7 @@
         "url": "https://github.com/ButterscotchRunner/Butterscotch",
         "repository": "ButterscotchRunner/Butterscotch",
         "pin": {
-          "file": "producers/maclauncher/src/modules/gamemaker/runtime/catalog.js",
-          "pointer": "/BUTTERSCOTCH_REVISION"
+          "gitlink": "producers/maclauncher/src/external/Butterscotch"
         }
       }
     ],

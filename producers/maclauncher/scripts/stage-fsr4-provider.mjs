@@ -30,7 +30,7 @@ export function stageFSR4Provider({directory,upstream,ownedRoot}){
     owned.set(path.posix.normalize("maclauncher/temporal/fsr4/"+relative),file);
   }
   const archive=metadata.sourceInputs?.find(row=>row.path==="source-inputs/weights_lossy2.npz");
-  if(!archive||metadata.sourceInputs.length!==1||archive.sha256!==spec.lite2.sha256||archive.repository!==spec.lite2.repository||archive.commit!==spec.lite2.commit||archive.sourceUrl!==spec.lite2.url)throw Error("The Lite 2 source archive identity is incomplete.");
+  if(!archive||metadata.sourceInputs.length!==1||archive.sha256!==spec.lite2.sha256||archive.repository!==spec.lite2.repository||archive.commit!==spec.lite2.commit||archive.sourceUrl!==spec.lite2.repository+"/tree/"+spec.lite2.commit)throw Error("The Lite 2 source archive identity is incomplete.");
   const archiveFile=path.join(path.dirname(directory),archive.path),archiveStat=fs.lstatSync(archiveFile);
   if(!archiveStat.isFile()||archiveStat.isSymbolicLink()||archiveStat.size!==archive.size||hash(archiveFile)!==archive.sha256)throw Error("A Lite 2 source input changed.");
   owned.set("maclauncher/temporal/fsr4/inputs/weights_lossy2.npz",archiveFile);

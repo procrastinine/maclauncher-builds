@@ -36,25 +36,6 @@
         "sha256": "d48c154d8d4778b2926dab3c3c5ff2eee0495ca4462b8418ffc1ef5c5799880e",
         "mode": 420
       }
-    ],
-    "notices": [
-      {
-        "name": "LuaSteam",
-        "license": "MIT",
-        "path": "LuaSteam-MIT.txt",
-        "sourceUrl": "https://github.com/uspgamedev/luasteam"
-      },
-      {
-        "name": "Lua C API headers from LuaJIT",
-        "license": "MIT",
-        "path": "LuaJIT-MIT.txt",
-        "sourceUrl": "https://luajit.org/"
-      },
-      {
-        "name": "MacLauncher LuaSteam adaptation",
-        "license": "MIT",
-        "path": "MacLauncher-MIT.txt"
-      }
     ]
   }
 ]

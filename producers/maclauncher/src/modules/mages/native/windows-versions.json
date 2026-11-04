@@ -72,8 +72,7 @@
         "patchSha256": "0405b8f018baa818a3392d70637a0246c6cf4eb9f37f738cd223784b41f477a8",
         "adaptations": [
           "Normalize the alpha flag to a Boolean before plane iteration"
-        ],
-        "license": "LGPL-2.1-or-later"
+        ]
       }
     },
     "installReason": "Windows MPK2/SC3; Apple Silicon; macOS 13 or later.",
@@ -158,8 +157,7 @@
         "patchSha256": "0405b8f018baa818a3392d70637a0246c6cf4eb9f37f738cd223784b41f477a8",
         "adaptations": [
           "Normalize the alpha flag to a Boolean before plane iteration"
-        ],
-        "license": "LGPL-2.1-or-later"
+        ]
       }
     },
     "installReason": "Windows MPK2/SC3; Apple Silicon; macOS 13 or later.",
@@ -241,8 +239,7 @@
         "patchSha256": "0405b8f018baa818a3392d70637a0246c6cf4eb9f37f738cd223784b41f477a8",
         "adaptations": [
           "Normalize the alpha flag to a Boolean before plane iteration"
-        ],
-        "license": "LGPL-2.1-or-later"
+        ]
       }
     },
     "installReason": "Windows MPK2/SC3; Apple Silicon; macOS 13 or later.",
@@ -323,8 +320,7 @@
         "patchSha256": "0405b8f018baa818a3392d70637a0246c6cf4eb9f37f738cd223784b41f477a8",
         "adaptations": [
           "Normalize the alpha flag to a Boolean before plane iteration"
-        ],
-        "license": "LGPL-2.1-or-later"
+        ]
       }
     },
     "installReason": "Windows MPK2/SC3; Apple Silicon; macOS 13 or later.",
@@ -404,8 +400,7 @@
         "patchSha256": "0405b8f018baa818a3392d70637a0246c6cf4eb9f37f738cd223784b41f477a8",
         "adaptations": [
           "Normalize the alpha flag to a Boolean before plane iteration"
-        ],
-        "license": "LGPL-2.1-or-later"
+        ]
       }
     },
     "installReason": "Windows MPK2/SC3; Apple Silicon; macOS 13 or later.",
@@ -484,8 +479,7 @@
         "patchSha256": "0405b8f018baa818a3392d70637a0246c6cf4eb9f37f738cd223784b41f477a8",
         "adaptations": [
           "Normalize the alpha flag to a Boolean before plane iteration"
-        ],
-        "license": "LGPL-2.1-or-later"
+        ]
       }
     },
     "installReason": "Apple Silicon Windows HD beta; macOS 13 or later. Story, saves and audio compatibility varies.",
@@ -563,8 +557,7 @@
         "patchSha256": "0405b8f018baa818a3392d70637a0246c6cf4eb9f37f738cd223784b41f477a8",
         "adaptations": [
           "Normalize the alpha flag to a Boolean before plane iteration"
-        ],
-        "license": "LGPL-2.1-or-later"
+        ]
       }
     },
     "installReason": "Apple Silicon Windows HD beta; macOS 13 or later. Story, saves and audio compatibility varies.",
@@ -620,8 +613,7 @@
         "patchSha256": "0405b8f018baa818a3392d70637a0246c6cf4eb9f37f738cd223784b41f477a8",
         "adaptations": [
           "Normalize the alpha flag to a Boolean before plane iteration"
-        ],
-        "license": "LGPL-2.1-or-later"
+        ]
       }
     }
   },
@@ -671,8 +663,7 @@
         "patchSha256": "0405b8f018baa818a3392d70637a0246c6cf4eb9f37f738cd223784b41f477a8",
         "adaptations": [
           "Normalize the alpha flag to a Boolean before plane iteration"
-        ],
-        "license": "LGPL-2.1-or-later"
+        ]
       }
     }
   },
@@ -722,8 +713,7 @@
         "patchSha256": "0405b8f018baa818a3392d70637a0246c6cf4eb9f37f738cd223784b41f477a8",
         "adaptations": [
           "Normalize the alpha flag to a Boolean before plane iteration"
-        ],
-        "license": "LGPL-2.1-or-later"
+        ]
       }
     },
     "dependencyOverlaySha256": "9d14f02f459e071fc79323d4e073e4d793f0af31dea2d5a26a4ae9a5bff79369",

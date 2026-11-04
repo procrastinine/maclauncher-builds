@@ -5,7 +5,7 @@ import {execFileSync} from 'node:child_process';
 import {SCENE_SHADER_INPUTS} from '../src/modules/shared/effects/operation-contracts.mjs';
 import {SOURCE,VULKAN_HEADERS,FAST_FLOAT} from '../src/modules/shared/reshade/libplacebo/scene-overlay.mjs';
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-const samePin=(value,pin)=>value?.origin===pin.origin&&value?.commit===pin.commit&&value?.license===pin.license;
+const samePin=(value,pin)=>value?.origin===pin.origin&&value?.commit===pin.commit;
 const fastFloat=FAST_FLOAT;
 export function stageLibplaceboScene({directory,metadata,recipeRoot}){
   if(metadata.sceneInputsAPI===undefined||metadata.sceneInputsAPI===0)return null;
