@@ -2,8 +2,6 @@
   "schema": 1,
   "repository": "https://github.com/KhronosGroup/ToneMapping",
   "commit": "180b1a7bddec33f73fe41712a2963cc3ad8e5547",
-  "license": "Apache-2.0",
-  "licenseFile": "color-tone-mapping-LICENSE.txt",
   "sources": [
     {
       "path": "PBR_Neutral/pbrNeutral.glsl",

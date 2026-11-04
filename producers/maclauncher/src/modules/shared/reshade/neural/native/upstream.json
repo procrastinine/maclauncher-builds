@@ -1,13 +1,11 @@
 {
   "source": {
     "repository": "https://github.com/iamwavecut/MLX-DLSS",
-    "revision": "7870371e8bf6c03967213f1a5d40db6c5a3bee38",
-    "license": "Apache-2.0"
+    "revision": "7870371e8bf6c03967213f1a5d40db6c5a3bee38"
   },
   "mlxSwift": {
     "repository": "https://github.com/ml-explore/mlx-swift",
-    "version": "0.31.6",
-    "license": "MIT"
+    "version": "0.31.6"
   },
   "metalLibrary": {
     "url": "https://github.com/ml-explore/mlx-swift/releases/download/0.31.6/Cmlx.xcframework.zip",

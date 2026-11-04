@@ -3,7 +3,6 @@
   "repository": "https://github.com/SnowflakePowered/librashader",
   "commit": "07ac790cdb9826f37cf8e1daf5011f03e3c4daa7",
   "version": "0.12.1",
-  "license": "MPL-2.0 OR GPL-3.0-only",
   "headerSha256": "5d478897c391af3f60015810b67785ae1a286d262a845485276e36ded9f21e62",
   "artifacts": {},
   "sourceBuilds": {

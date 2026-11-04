@@ -3,12 +3,19 @@
   "source": {
     "repository": "https://github.com/ml-explore/mlx-swift",
     "commit": "0bb916c67f4b9e5c682cbe02a42c701c93ab5021",
-    "version": "0.31.6",
-    "license": "MIT"
+    "version": "0.31.6"
   },
   "nested": [
-    {"path": "Source/Cmlx/mlx", "repository": "https://github.com/ml-explore/mlx", "commit": "ce45c52505c8158ea48d2a54e8caae05efd86bfe", "license": "MIT"},
-    {"path": "Source/Cmlx/mlx-c", "repository": "https://github.com/ml-explore/mlx-c", "commit": "0726ca922fc902c4c61ef9c27d94132be418e945", "license": "MIT"}
+    {
+      "path": "Source/Cmlx/mlx",
+      "repository": "https://github.com/ml-explore/mlx",
+      "commit": "ce45c52505c8158ea48d2a54e8caae05efd86bfe"
+    },
+    {
+      "path": "Source/Cmlx/mlx-c",
+      "repository": "https://github.com/ml-explore/mlx-c",
+      "commit": "0726ca922fc902c4c61ef9c27d94132be418e945"
+    }
   ],
   "files": {
     "Source/Cmlx/mlx/mlx/backend/metal/device.cpp": "d2000ba53a5f4137c91f0a6222ae86cc3c2c0c3d69dfda2f421f60bd55813a98",

@@ -4,7 +4,6 @@
     {
       "id": "sweetfx",
       "label": "SweetFX",
-      "license": "MIT",
       "description": "SMAA color-edge antialiasing, tone mapping, vibrance and contrast curves.",
       "includePaths": [
         "Shaders",
@@ -52,7 +51,6 @@
     {
       "id": "retroarch",
       "label": "RetroArch CRT",
-      "license": "GPL, GPL-3.0, GPL-2.0-or-later and public domain",
       "description": "CRT Easymode, Lottes, GTU and zfast screen filters.",
       "includePaths": [
         "Shaders"
@@ -63,29 +61,25 @@
           "id": "easymode",
           "label": "CRT Easymode",
           "file": "Shaders/CRTEasymode.fx",
-          "requires": [],
-          "license": "GPL (no version specified upstream)"
+          "requires": []
         },
         {
           "id": "lottes",
           "label": "CRT Lottes",
           "file": "Shaders/CRTLottes.fx",
-          "requires": [],
-          "license": "Public domain"
+          "requires": []
         },
         {
           "id": "gtu",
           "label": "GTU",
           "file": "Shaders/GTU.fx",
-          "requires": [],
-          "license": "GPL-3.0"
+          "requires": []
         },
         {
           "id": "zfast",
           "label": "zfast CRT",
           "file": "Shaders/zfast_crt.fx",
-          "requires": [],
-          "license": "GPL-2.0-or-later"
+          "requires": []
         }
       ],
       "revision": "73dc21fcc9f1e1d6e4bf0f1c5c95b882078d474d",
@@ -96,7 +90,6 @@
     {
       "id": "quint",
       "label": "qUINT",
-      "license": "Copyright Pascal Gilcher / Marty McFly; all rights reserved",
       "description": "Bloom, Lightroom color grading and debanding. MXAO, ADOF and SSR require game depth.",
       "includePaths": [
         "Shaders"
@@ -155,7 +148,6 @@
     {
       "id": "crt-royale",
       "label": "RetroArch CRT",
-      "license": "GPL-2.0-or-later and MIT",
       "description": "CRT Royale phosphor masks, electron beams, diffusion, bloom and screen geometry.",
       "includePaths": [
         "Shaders"
@@ -166,8 +158,7 @@
           "id": "royale",
           "label": "CRT Royale",
           "file": "Shaders/crt-royale.fx",
-          "requires": [],
-          "license": "GPL-2.0-or-later and MIT"
+          "requires": []
         }
       ],
       "revision": "7ca7f7cbb7e7d016ca1756d0855879c3b7d0cc05",
@@ -179,7 +170,6 @@
       "id": "anime4k",
       "label": "Anime4K",
       "format": "libplacebo",
-      "license": "MIT",
       "description": "RGB line restoration, soft line restoration, bilateral denoising and deblurring at the current frame size.",
       "includePaths": [],
       "texturePaths": [],
@@ -217,7 +207,6 @@
     {
       "id": "image",
       "label": "Image",
-      "license": "MIT",
       "description": "GPU color balance, threshold debanding, ordered palette quantization and soft highlight bloom.",
       "version": "1",
       "bundledPath": "shader-collection/image",
@@ -261,7 +250,6 @@
     {
       "id": "accessibility",
       "label": "Accessibility",
-      "license": "MIT",
       "description": "LMS daltonization with protanopia, deuteranopia and tritanopia modes, adjustable strength and preserved alpha.",
       "version": "1",
       "bundledPath": "shader-collection/accessibility",
@@ -280,7 +268,6 @@
     {
       "id": "ssim-superres",
       "label": "SSIM SuperRes",
-      "license": "LGPL-3.0-or-later",
       "description": "Original structural-similarity refinement of the selected spatial upscale, retaining its pre-kernel reference and multi-pass variance analysis.",
       "version": "15d93440d0a2",
       "revision": "15d93440d0a24fc4b8770070be6a9fa2af6f200b",
@@ -301,7 +288,6 @@
     {
       "id": "kuwahara",
       "label": "Artistic",
-      "license": "GPL-3.0-or-later",
       "description": "Anisotropic Kuwahara filtering with structure-tensor orientation and eight weighted sectors.",
       "version": "1",
       "revision": "a66ae5f84560959e64f6a1433f5d549d1fad303b",
@@ -322,7 +308,6 @@
     {
       "id": "native",
       "label": "Image",
-      "license": "MIT and Apache-2.0",
       "description": "Compiled GPU image filters with typed parameters.",
       "version": "1",
       "bundledPath": "shader-collection/native",
@@ -336,7 +321,6 @@
           "file": "histogram-exposure.mclfilter",
           "requires": [],
           "nativeMethod": "histogram-exposure",
-          "license": "MIT",
           "sourceUrl": "https://github.com/procrastinine/maclauncher"
         },
         {
@@ -346,8 +330,7 @@
           "requires": [],
           "nativeMethod": "local-laplacian",
           "sourceUrl": "https://github.com/halide/Halide",
-          "revision": "d62903bbf5166e05841e1346837c8367e2296a83",
-          "license": "MIT"
+          "revision": "d62903bbf5166e05841e1346837c8367e2296a83"
         },
         {
           "id": "cmaa2",
@@ -355,7 +338,6 @@
           "file": "cmaa2.mclfilter",
           "requires": [],
           "nativeMethod": "cmaa2",
-          "license": "Apache-2.0 and MIT",
           "sourceUrl": "https://github.com/GameTechDev/CMAA2",
           "revision": "071c6b0857559f4e36f614362e6d2aab1b61938a"
         },
@@ -368,7 +350,6 @@
             "projectionMatrix"
           ],
           "nativeMethod": "xegtao",
-          "license": "MIT",
           "sourceUrl": "https://github.com/GameTechDev/XeGTAO",
           "revision": "a5b1686c7ea37788eeb3576b5be47f7c03db532c"
         },
@@ -381,7 +362,6 @@
             "projectionMatrix"
           ],
           "nativeMethod": "cacao",
-          "license": "MIT",
           "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
           "revision": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55"
         },
@@ -394,7 +374,6 @@
             "projectionMatrix"
           ],
           "nativeMethod": "depth-fog",
-          "license": "MIT",
           "sourceUrl": "https://github.com/luluco250/FXShaders",
           "revision": "76365e35c48e30170985ca371e67d8daf8eb9a98"
         },
@@ -407,7 +386,6 @@
             "projectionMatrix"
           ],
           "nativeMethod": "depth-outlines",
-          "license": "MIT",
           "sourceUrl": "https://github.com/luluco250/FXShaders",
           "revision": "76365e35c48e30170985ca371e67d8daf8eb9a98"
         },
@@ -420,7 +398,6 @@
             "projectionMatrix"
           ],
           "nativeMethod": "ffx-dof",
-          "license": "MIT",
           "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
           "revision": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55"
         },
@@ -438,7 +415,6 @@
             "metallic"
           ],
           "nativeMethod": "screen-space-reflections",
-          "license": "MIT",
           "sourceUrl": "https://github.com/godotengine/godot",
           "revision": "4c311cbee68c0b66ff8ebb8b0defdd9979dd2a41"
         },
@@ -449,7 +425,6 @@
           "requires": [],
           "nativeMethod": "estimated-depth-fog",
           "modelOperation": "depth-anything-v2-small",
-          "license": "MIT",
           "sourceUrl": "https://github.com/luluco250/FXShaders",
           "revision": "76365e35c48e30170985ca371e67d8daf8eb9a98"
         },
@@ -459,7 +434,6 @@
           "file": "ffx-lens.mclfilter",
           "requires": [],
           "nativeMethod": "ffx-lens",
-          "license": "MIT",
           "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
           "revision": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55"
         },
@@ -469,7 +443,6 @@
           "file": "ffx-blur.mclfilter",
           "requires": [],
           "nativeMethod": "ffx-blur",
-          "license": "MIT",
           "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
           "revision": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55"
         }

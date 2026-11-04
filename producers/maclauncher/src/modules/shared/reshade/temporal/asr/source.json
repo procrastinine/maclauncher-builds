@@ -4,7 +4,6 @@
   "commit": "0501f490bd9946a2e1806b5363d7ab8a9a6a5e0a",
   "version": "25.06",
   "minimumMacOS": "13.0",
-  "license": "MIT",
   "sourceScope": [
     "include",
     "src",
