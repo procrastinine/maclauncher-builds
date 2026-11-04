@@ -1692,8 +1692,9 @@
         "url": "https://github.com/libffi/libffi",
         "repository": "libffi/libffi",
         "pin": {
-          "file": "producers/android-art-inputs/ffi.json",
-          "pointer": "/libffi"
+          "file": "producers/dependencies.json",
+          "pointer": "/libffi/revision",
+          "repositoryPointer": "/libffi/repository"
         }
       }
     ],

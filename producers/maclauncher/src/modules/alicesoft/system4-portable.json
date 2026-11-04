@@ -6,10 +6,7 @@
   "dependencies": [
     {
       "id": "libffi", "name": "libffi", "version": "3.8.0",
-      "revision": "12ffd1f9dc56fcea79d2f742f424301ae668d663",
       "archiveUrl": "https://github.com/libffi/libffi/releases/download/v3.8.0/libffi-3.8.0.tar.gz",
-      "archiveSha256": "7da3e2d9a171eb0a038f592ecad3ff2bb2550f3496d87b3b29ad0cf4430c0db4", "archiveBytes": 1581626,
-      "sourceUrl": "https://github.com/libffi/libffi/tree/12ffd1f9dc56fcea79d2f742f424301ae668d663",
       "license": "MIT", "notices": ["LICENSE"], "buildSystem": "autotools",
       "options": ["--enable-shared", "--disable-static", "--disable-docs", "--disable-dependency-tracking"]
     },

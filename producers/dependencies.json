@@ -57,5 +57,15 @@
     "revision": "c1bf2245b0ba63a25afe2f8574d305feca25af77",
     "sha256": "224b08c32c0fb6c769ca5f599f6da37e2b532b6ffd52886e9fa13656767cf1a2",
     "bytes": 6926417
+  },
+  "libffi": {
+    "repository": "https://github.com/libffi/libffi",
+    "revision": "bc553867367246d140cd156f060bd0409f57f157"
+  },
+  "libffiPortable": {
+    "repository": "https://github.com/libffi/libffi",
+    "revision": "12ffd1f9dc56fcea79d2f742f424301ae668d663",
+    "sha256": "7da3e2d9a171eb0a038f592ecad3ff2bb2550f3496d87b3b29ad0cf4430c0db4",
+    "bytes": 1581626
   }
 }
