@@ -1,5 +1,5 @@
 import {aimSource} from '../lib/android-source.mjs';
-import {addLicenses,addCargoLicenses} from '../lib/licenses.mjs';
+import {addLicense,addLicenses,addCargoLicenses} from '../lib/licenses.mjs';
 import {downloadFile} from './download.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -112,6 +112,7 @@ export async function packageImageData({project,version,arch,output,work,tool,in
  fs.writeFileSync(path.join(payload,'content.json'),JSON.stringify(content)+'\n');
 
 
+ addLicense(payload,'Android SDK system image',path.join(producer,'android-sdk-arm-dbt-license.txt'));
  addLicenses(payload,project,tool.upstream);addCargoLicenses(payload,project,tool.crate,tool.env);
  const result=helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{format:'android-image-data-v1',upstreamRevision:profile.revision,originalArchiveSha256:profile.archive.sha256,targetSymlinkMode:profile.targetSymlinkMode,content,transportSha256:sha(path.join(payload,'image-data.json')),dataShard:shard}});
  // Sealing computes actual data-object digests. Match those to the decoder's

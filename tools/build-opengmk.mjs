@@ -1,3 +1,4 @@
+import {addLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
@@ -23,8 +24,9 @@ export async function buildOpenGMK({project,arch,output,work}){
  fs.copyFileSync(path.join(root,'producers/maclauncher/helper-builds/opengmk.lock'),path.join(source,'Cargo.lock'));
  const target=arch==='x64'?'x86_64-apple-darwin':'aarch64-apple-darwin',env=rustEnvironment({work,minimumMacOS:'13.0'});
  run('cargo',['build','--release','--locked','--target',target,'--package','gm8emulator'],{cwd:source,env});
+ addLicenses(source,'ramen',sources[1].source);addLicenses(source,'libsoundio',path.join(sources[2].source,'libsoundio-sys/libsoundio'));
  const executable=path.join(work,'target',target,'release/gm8emulator');run(executable,['--version']);
 
- return sealRuntime({env,project,arch,output,executable,sourceRoot:sources[0].source,upstreamRevision:Emulator.REVISION,provenance:{...provenance,dependencies:sources.slice(1).map(({name,repository,revision})=>({name,repository,revision})),overlay:Emulator.OVERLAY_VERSION}});
+ return sealRuntime({cargoRoot:source,env,project,arch,output,executable,sourceRoot:sources[0].source,upstreamRevision:Emulator.REVISION,provenance:{...provenance,dependencies:sources.slice(1).map(({name,repository,revision})=>({name,repository,revision})),overlay:Emulator.OVERLAY_VERSION}});
 }
 recipeMain(import.meta,buildOpenGMK);

@@ -1150,7 +1150,7 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/minori/runtime/build.js"
+        "producers/maclauncher/src/modules/minori/runtime"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -2573,7 +2573,8 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/vn-adaptations",
       "entries": [
-        "producers/vn-adaptations/package.mjs"
+        "producers/vn-adaptations/package.mjs",
+        "producers/vn-adaptations/siglus"
       ]
     },
     "upstreams": [
