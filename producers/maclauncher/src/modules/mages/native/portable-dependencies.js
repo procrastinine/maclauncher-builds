@@ -7,8 +7,13 @@ const Native = require("../../shared/runtime/local-native");
 const Fonts = require("../../shared/runtime/portable-sdl2-fonts");
 const Prefix = require("./portable-prefix");
 const { throwIfAborted } = require("../../shared/runtime/download-utils");
-const PIN = Object.freeze(require("./portable-dependencies.json"));
-const RECIPE_FILES = [__filename, require.resolve("./portable-dependencies.json"), require.resolve("./portable-prefix"),
+const metadata = require("./portable-dependencies.json");
+const webp = require("../../alicesoft/system35-portable.json").dependencies.find(pin => pin.id === "webp");
+const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map(pin => pin.id === "webp" ? {
+  ...webp, ...pin, archiveUrl: webp.archiveUrl.replace("{revision}", webp.revision),
+  sourceUrl: `${webp.repository}/tree/${webp.revision}`
+} : pin) });
+const RECIPE_FILES = [__filename, require.resolve("./portable-dependencies.json"), require.resolve("../../alicesoft/system35-portable.json"), require.resolve("./portable-prefix"),
   require.resolve("../../shared/runtime/portable-sdl2-fonts"), require.resolve("../../shared/runtime/portable-sdl2-fonts.json"),
   require.resolve("../../shared/runtime/portable-sndfile"), require.resolve("../../shared/runtime/portable-sndfile.json")];
 

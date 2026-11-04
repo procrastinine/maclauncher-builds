@@ -6,7 +6,9 @@ const Source = require("./pinned-native-build");
 const Native = require("./local-native");
 const Portable = require("./portable-sdl2-fonts");
 const { throwIfAborted } = require("./download-utils");
-const PIN = Object.freeze(require("./portable-sndfile.json"));
+const metadata = require("./portable-sndfile.json");
+const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map(pin => ({ ...pin,
+  archiveUrl: pin.archiveUrl.replaceAll("{revision}", pin.revision) })) });
 
 function relative(value) {
   return typeof value === "string" && value.length > 0 && !path.isAbsolute(value) &&

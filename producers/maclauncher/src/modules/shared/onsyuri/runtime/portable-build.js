@@ -4,15 +4,20 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const Native = require("../../runtime/local-native");
 const metadata = require("./portable-build.json");
+const webp = require("../../../alicesoft/system35-portable.json").dependencies.find(pin => pin.id === "webp");
+const turbojpeg = require("../../../alicesoft/system4-portable.json").dependencies.find(pin => pin.id === "turbojpeg");
+const dependencies = metadata.dependencies.map(pin => pin.id === "webp" ? { ...webp, ...pin } :
+  pin.id === "turbojpeg" ? { ...turbojpeg, ...pin } : pin);
 const revision = gitlink("producers/maclauncher/src/external/onscripter-yuri");
-const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map(pin => ({ ...pin,
-  archiveUrl: pin.archiveUrl.replace("{revision}", pin.revision) })), engine: { ...metadata.engine, revision,
+const PIN = Object.freeze({ ...metadata, dependencies: dependencies.map(pin => ({ ...pin,
+  archiveUrl: pin.archiveUrl.replaceAll("{revision}", pin.revision) })), engine: { ...metadata.engine, revision,
   sourceUrl: `https://github.com/YuriSizuku/OnscripterYuri/tree/${revision}`,
   archiveUrl: `https://codeload.github.com/YuriSizuku/OnscripterYuri/tar.gz/${revision}` } });
 const VERSION = PIN.engine.version;
 const REVISION = PIN.engine.revision;
 const SOURCE_SHA256 = PIN.engine.sourceTreeSha256;
 const OWNED_FILES = [__filename, require.resolve("./portable-build.json"),
+  require.resolve("../../../alicesoft/system35-portable.json"), require.resolve("../../../alicesoft/system4-portable.json"),
   path.join(__dirname, "portable-native/CMakeLists.txt"), path.join(__dirname, "portable-native/lua.CMakeLists.txt"),
   require.resolve("../../runtime/pinned-native-build"), require.resolve("../../runtime/portable-sdl2-fonts"), require.resolve("../../runtime/portable-sdl2-fonts.json"),
   require.resolve("../../runtime/portable-sndfile"), require.resolve("../../runtime/portable-sndfile.json"),

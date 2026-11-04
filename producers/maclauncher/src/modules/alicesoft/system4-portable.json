@@ -79,13 +79,6 @@
     },
     {
       "id": "webp",
-      "name": "libwebp",
-      "version": "1.6.0",
-      "revision": "4fa21912338357f89e4fd51cf2368325b59e9bd9",
-      "archiveUrl": "https://codeload.github.com/webmproject/libwebp/tar.gz/{revision}",
-      "archiveSha256": "923f3382a47a2af185c3240c954cf004428b237bd7317413a95146d01eb4b94b",
-      "archiveBytes": 3834766,
-      "buildSystem": "cmake",
       "options": [
         "-DWEBP_BUILD_ANIM_UTILS=OFF",
         "-DWEBP_BUILD_CWEBP=OFF",
@@ -97,8 +90,7 @@
         "-DWEBP_BUILD_WEBPMUX=OFF",
         "-DWEBP_BUILD_EXTRAS=OFF",
         "-DWEBP_BUILD_FUZZTEST=OFF"
-      ],
-      "repository": "https://github.com/webmproject/libwebp"
+      ]
     }
   ]
 }

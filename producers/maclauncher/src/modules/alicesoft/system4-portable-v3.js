@@ -11,8 +11,10 @@ const Prefix = require("../shared/runtime/portable-dependency-prefix");
 const Overlay = require("./system4-portable-overlay-v3");
 const { throwIfAborted } = require("../shared/runtime/download-utils");
 const metadata = require("./system4-portable.json");
-const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map(pin => ({ ...pin,
-  archiveUrl: pin.archiveUrl.replace("{revision}", pin.revision) })) });
+const webp = require("./system35-portable.json").dependencies.find(pin => pin.id === "webp");
+const dependencies = metadata.dependencies.map(pin => pin.id === "webp" ? { ...webp, ...pin } : pin);
+const PIN = Object.freeze({ ...metadata, dependencies: dependencies.map(pin => ({ ...pin,
+  archiveUrl: pin.archiveUrl.replaceAll("{revision}", pin.revision) })) });
 const VERSION = "MCLv1-1021";
 const REVISION = gitlink("producers/maclauncher/src/external/xsystem4");
 const SOURCE_SHA256 = "3beeaf86056c10f4464c50cec45ed56a140a99443bec56e9930cbdbe09151acb";

@@ -12,7 +12,7 @@ const Overlay = require("./system35-overlay-v3");
 const { throwIfAborted } = require("../shared/runtime/download-utils");
 const metadata = require("./system35-portable.json");
 const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map(pin => ({ ...pin,
-  archiveUrl: pin.archiveUrl.replace("{revision}", pin.revision) })) });
+  archiveUrl: pin.archiveUrl.replaceAll("{revision}", pin.revision) })) });
 const VERSION = "MCLv1-1019";
 const REVISION = gitlink("producers/maclauncher/src/external/xsystem35-sdl2");
 const SOURCE_SHA256 = "73e633b7b9f3ecbbc760179347b542e4fe69fd18023981ff50224d099f2275a8";

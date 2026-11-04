@@ -5,7 +5,9 @@ const { execFileSync } = require("node:child_process");
 const Source = require("./pinned-native-build");
 const Native = require("./local-native");
 const { throwIfAborted } = require("./download-utils");
-const PIN = Object.freeze(require("./portable-sdl2-fonts.json"));
+const metadata = require("./portable-sdl2-fonts.json");
+const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map(pin => ({ ...pin,
+  archiveUrl: pin.archiveUrl.replaceAll("{revision}", pin.revision) })) });
 
 function validateArchives(archives, { catalog = PIN } = {}) {
   if (!catalog || catalog.schemaVersion !== 1 || catalog.architecture !== "arm64" || catalog.minimumMacOS !== "13.0" ||
