@@ -57,7 +57,7 @@ function adaptSource(root) {
   Previous.adaptSource(root);
   replace(root, "main.cpp", "Encrypted NPA payload has no reviewed native profile", "Encrypted NPA payloads are unsupported by this runtime");
   replace(root, "main.cpp", "NSS scripts with libnpengine 0.5.3 Mac v7", "NSS scripts with libnpengine 0.5.3 Mac v8");
-  replace(root, "main.cpp", "libnpengine 0.5.3 Mac v7 / da1a175e6b497c37f9714b77510cb47c0930cd42", "libnpengine 0.5.3 Mac v8 / da1a175e6b497c37f9714b77510cb47c0930cd42");
+  replace(root, "main.cpp", "libnpengine 0.5.3 Mac v7", "libnpengine 0.5.3 Mac v8");
   replace(root, "CMakeLists.txt", 'set(CMAKE_INSTALL_RPATH "@loader_path/../lib")', 'set(CMAKE_INSTALL_RPATH "${MACLAUNCHER_NATIVE_RPATHS}")');
   replace(root, "CMakeLists.txt", "find_path(BOOST_INCLUDE_DIR boost/locale.hpp HINTS /opt/homebrew/include /usr/local/include REQUIRED)", 'if(NOT IS_DIRECTORY "${BOOST_INCLUDE_DIR}" OR NOT EXISTS "${BOOST_INCLUDE_DIR}/boost/locale.hpp")\n  message(FATAL_ERROR "Pass the pinned Boost include directory")\nendif()');
   replace(root, "CMakeLists.txt", "find_library(BOOST_LOCALE_LIBRARY boost_locale HINTS /opt/homebrew/lib /usr/local/lib REQUIRED)", 'if(NOT EXISTS "${BOOST_LOCALE_LIBRARY}")\n  message(FATAL_ERROR "Pass the pinned Boost locale library")\nendif()');

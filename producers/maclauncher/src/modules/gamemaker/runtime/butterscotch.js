@@ -5,57 +5,7 @@ const { randomUUID } = require("node:crypto");
 const { execFile } = require("node:child_process");
 const { promisify } = require("node:util");
 const run = promisify(execFile);
-const { createPinnedNativeManager } = require("../../shared/runtime/pinned-native-manager");
-const { BUTTERSCOTCH_BUILDS, BUTTERSCOTCH_REVISION, BUTTERSCOTCH_ARGUMENTS_VERSION } = require("./catalog");
 const { findBuildTool } = require("../../shared/runtime/pinned-native-build");
-const { createBundledNativeRuntime } = require("../../shared/runtime/bundled-native");
-const { createGithubCommitDiscovery } = require("../../shared/runtime/github-runtime-catalog");
-const Downloads = require("./butterscotch-downloads");
-
-function mapCommit(commit, { sourceUrl }) {
-  const date = commit.commit?.committer?.date?.slice(0, 10);
-  if (!/^[a-f0-9]{40}$/.test(commit.sha || "") || !/^\d{4}-\d{2}-\d{2}$/.test(date || "")) throw new Error("Butterscotch source discovery requires exact commit and date metadata.");
-  const reviewed = BUTTERSCOTCH_BUILDS.find(pin => pin.upstreamRevision === commit.sha);
-  return reviewed ? { ...reviewed, sourceUrl, sourceKind: "commit", versionLabel: `${date} · ${commit.sha.slice(0, 12)} (AppKit)` } : {
-    version: `${date}-${commit.sha}-appkit`, versionLabel: `${date} · ${commit.sha.slice(0, 12)} (AppKit source)`,
-    upstreamRevision: commit.sha, sourceUrl, sourceKind: "commit", publishedAt: commit.commit.committer.date,
-    backend: "appkit", renderer: "legacy-opengl", videoBackend: "none", license: "AGPL-3.0-only",
-    minimumMacOS: "13.0", evidence: "upstream-commit-source-only", localBuild: true,
-    gameplayQualified: false, wadVersions: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17] };
-}
-const discoverSourceCatalog = createGithubCommitDiscovery({ owner: "ButterscotchRunner", repo: "Butterscotch", mapCommit, limit: 20 });
-const discoverCatalog = Downloads.createDownloadDiscovery();
-
-function createManager(dependencies = {}) {
-  const runtime = createPinnedNativeManager({ id: "butterscotch", label: "Butterscotch", catalog: [...Downloads.PUBLIC_BUILDS, ...BUTTERSCOTCH_BUILDS],
-  projectBuilds: { projectId: "butterscotch", repository: "procrastinine/maclauncher-builds", upstreamMacDownloads: true },
-  distributionRequired: false, importLocal: true,
-  discoverCatalog: Downloads.createDownloadDiscovery({ dependencies }),
-  buildRuntime: options => buildRuntime({ ...options, runtimeManager: runtime }),
-  buildSourcePath: path.resolve(__dirname, "../../../external/Butterscotch"),
-  legacyInstalledRuntime: createBundledNativeRuntime({ managerId: "butterscotch" }),
-  buildHelpUrl: `https://github.com/ButterscotchRunner/Butterscotch/tree/${BUTTERSCOTCH_REVISION}#building-butterscotch`,
-  sourceUrl: "https://github.com/ButterscotchRunner/Butterscotch/actions/workflows/build.yml",
-  resolveExecutable: Downloads.resolveExecutable, prepareInstall: options => Downloads.prepareInstall(options, dependencies), dependencies });
-  const refreshCatalog = runtime.refreshCatalog.bind(runtime), getState = runtime.getState.bind(runtime);
-  runtime.refreshCatalog = options => refreshCatalog({ latestOnly: true, ...options });
-  runtime.getState = options => {
-    const state = getState(options), catalog = { ...state.catalog, supportsLatestOnly: true };
-    return { ...state, catalog, sections: state.sections.map(section => ({ ...section, catalog })) };
-  };
-  const resolveSelection = runtime.resolveSelection.bind(runtime);
-  runtime.resolveSelection = (entry, settings, userDataDir, options = {}) => {
-    const gameVersion = entry?.runtimeData?.butterscotch?.version;
-    const configured = runtime.normalizeSettings(settings?.runtimes?.butterscotch).defaultVersion;
-    const explicit = options.version && options.version !== "auto" || gameVersion && gameVersion !== "auto" || configured;
-    // This game's argument declaration requires the owned repeat-game-arg ABI.
-    if (!explicit && typeof entry?.launchArguments === "string" && entry.launchArguments.trim())
-      return resolveSelection(entry, settings, userDataDir, { ...options, version: BUTTERSCOTCH_ARGUMENTS_VERSION });
-    return resolveSelection(entry, settings, userDataDir, options);
-  };
-  return runtime;
-}
-const manager = createManager();
 
 function resolveSourceRoot() {
   const source = path.resolve(__dirname, "../../../external/Butterscotch");
@@ -64,7 +14,7 @@ function resolveSourceRoot() {
   return source;
 }
 
-async function buildRuntime({ userDataDir, version, sourceDir, architecture = process.arch, logger, signal, runtimeManager = manager } = {}) {
+async function buildRuntime({ userDataDir, version, sourceDir, architecture = process.arch, logger, signal, runtimeManager } = {}) {
   if (!["arm64", "x64"].includes(architecture)) throw new Error("Select an arm64 or x64 Butterscotch build.");
   if (process.platform !== "darwin") throw new Error("Butterscotch AppKit builds require macOS.");
   version ||= runtimeManager.resolveSelection(null, {}, userDataDir).version;
@@ -129,4 +79,4 @@ async function buildRuntime({ userDataDir, version, sourceDir, architecture = pr
   } finally { fs.rmSync(temporary, { recursive: true, force: true }); }
 }
 
-module.exports = { manager, createManager, buildRuntime, resolveSourceRoot, mapCommit, discoverCatalog, discoverSourceCatalog };
+module.exports = { buildRuntime, resolveSourceRoot };

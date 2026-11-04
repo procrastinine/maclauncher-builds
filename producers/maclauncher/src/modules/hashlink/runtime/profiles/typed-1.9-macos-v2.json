@@ -2,7 +2,6 @@
   "schemaVersion": 1,
   "id": "typed-1.9-macos-v2",
   "version": "1.9-macos-v2",
-  "upstreamRevision": "4a4cfe91f3388a0b05bf2e45e7c4e38bae686dc6",
   "architecture": "x86_64",
   "libraries": {
     "std": {

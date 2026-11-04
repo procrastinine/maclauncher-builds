@@ -71,10 +71,3 @@ test("HashLink 1.9 source adaptation uses its pinned headers without changing SD
   assert.throws(() => Legacy.adaptSource(source, sdl), /source files do not match/);
 });
 
-test("HashLink source builds reject unreviewed historical profiles without creating a runtime directory", async t => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "hashlink-unreviewed-build-"));
-  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  await assert.rejects(() => require("../producers/maclauncher/src/modules/hashlink/runtime/build").buildRuntime({ userDataDir: root, version: "1.12" }), /supports HashLink 1\.16/);
-  await assert.rejects(() => require("../producers/maclauncher/src/modules/hashlink/runtime/build").buildRuntime({ userDataDir: root, version: "1.9" }), /1\.9.*Mac graphics v2/);
-  assert.deepEqual(fs.readdirSync(root), []);
-});

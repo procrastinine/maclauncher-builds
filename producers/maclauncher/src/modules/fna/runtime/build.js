@@ -1,4 +1,5 @@
-const {addLicense} = require('../../../../../../lib/licenses.mjs');
+const { gitlink } = require("../../../../../../lib/pins.mjs");
+const {addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -9,9 +10,8 @@ const Bundled = require("../../shared/runtime/bundled-native");
 const { downloadToFile, throwIfAborted } = require("../../shared/runtime/download-utils");
 
 const PROFILE = "26.10-MCLv1";
-const FNA_REVISION = "00498b0b81425b14bf8da23e68655215b9b5daa7";
-const FNA3D_REVISION = "fd1b24671fb0f5d1b544cd7843d3ad9e80d92219";
-const PREVIOUS_PROFILE = { profile: "26.10-net8-arm64-v2", revision: "651c0ffdf4db43cd112865ad368c5d6cc3dc7558", dotnetVersion: "8.0.31" };
+const FNA_REVISION = gitlink("producers/maclauncher/src/external/FNA");
+const FNA3D_REVISION = gitlink("producers/maclauncher/src/external/source-revisions/fna3d");
 const DOTNET_VERSION = "8.0.32";
 const REQUIRED_FILES = ["FNA.dll", "MacLauncherFnaHost.dll", "MacLauncherFnaHost.runtimeconfig.json",
   "native/lib/libSDL3.0.dylib", "native/lib/libFNA3D.0.dylib", "native/lib/libFAudio.0.dylib",
@@ -22,7 +22,6 @@ const REQUIRED_FILES = ["FNA.dll", "MacLauncherFnaHost.dll", "MacLauncherFnaHost
 // assembly. Its records carry launcher contract 2 (projects/downloadable.json).
 const CAPABILITIES = Object.freeze({ originalGamePaths: true });
 const PACKAGES = Object.freeze({
-  source: { filename: "FNA-2610.zip", url: "https://fna.flibitijibibo.com/archive/FNA-2610.zip", sha256: "863504b5712b17ce8d0ec32238411a10fb6cf56e90d3978f09a8a6c5571dd052" },
   compiler: { filename: "roslyn-4.8.0.zip", url: "https://api.nuget.org/v3-flatcontainer/microsoft.net.compilers.toolset/4.8.0/microsoft.net.compilers.toolset.4.8.0.nupkg", sha256: "37333f4f1e2ce55e621355d6da651dc23d4cb5f94a8f76b9478816e87f110ad9" },
   references: { filename: "net8-reference-pack.zip", url: "https://api.nuget.org/v3-flatcontainer/microsoft.netcore.app.ref/8.0.32/microsoft.netcore.app.ref.8.0.32.nupkg", sha256: "6088b3ebfe5af44511eaf8d592e029e1ef870da01b1fcb80aa790a6536bc14db" },
   sdl: { filename: "SDL3-3.4.18.tar.gz", url: "https://github.com/libsdl-org/SDL/releases/download/release-3.4.18/SDL3-3.4.18.tar.gz", sha256: "9c75cf16330322c217dedd2e0609f1124f1b54b8633e763467b4684d0f4334a3" },
@@ -176,9 +175,10 @@ async function prepareRuntime({ unpacked, pin, logger, signal, sourcePath, fna3d
       await run(cmake, ["--build", output, "--parallel", "4"], { logPath, signal, env });
       await run(cmake, ["--install", output], { logPath, signal, env });
     }
-    await cmakeLibrary(path.join(sdlSource, "SDL3-3.4.18"), "sdl", ["-DSDL_SHARED=ON", "-DSDL_STATIC=OFF", "-DSDL_TESTS=OFF", "-DSDL_TEST_LIBRARY=OFF", "-DSDL_EXAMPLES=OFF"]);
-    await cmakeLibrary(path.join(framework, "lib", "FNA3D"), "fna3d", ["-DBUILD_SDL3=ON", "-DBUILD_TESTS=OFF"]);
-    await cmakeLibrary(path.join(framework, "lib", "FAudio"), "faudio", ["-DBUILD_SDL3=ON", "-DBUILD_TESTS=OFF", "-DBUILD_UTILS=OFF"]);
+    const sdlRoot = path.join(sdlSource, "SDL3-3.4.18"), fna3dRoot = path.join(framework, "lib", "FNA3D"), faudioRoot = path.join(framework, "lib", "FAudio");
+    await cmakeLibrary(sdlRoot, "sdl", ["-DSDL_SHARED=ON", "-DSDL_STATIC=OFF", "-DSDL_TESTS=OFF", "-DSDL_TEST_LIBRARY=OFF", "-DSDL_EXAMPLES=OFF"]);
+    await cmakeLibrary(fna3dRoot, "fna3d", ["-DBUILD_SDL3=ON", "-DBUILD_TESTS=OFF"]);
+    await cmakeLibrary(faudioRoot, "faudio", ["-DBUILD_SDL3=ON", "-DBUILD_TESTS=OFF", "-DBUILD_UTILS=OFF"]);
     const nativeRoot = path.join(unpacked, "native", "lib"); fs.mkdirSync(nativeRoot, { recursive: true });
     for (const name of fs.readdirSync(path.join(nativePrefix, "lib")).filter(name => name.endsWith(".dylib"))) {
       const from = path.join(nativePrefix, "lib", name), to = path.join(nativeRoot, name);
@@ -190,19 +190,13 @@ async function prepareRuntime({ unpacked, pin, logger, signal, sourcePath, fna3d
       ...fs.readdirSync(abiRoot).map(name => "abi/" + name),
       ...fs.readdirSync(nativeRoot).map(name => "native/lib/" + name)];
 
-    for (const [label, source] of [["FNA", path.join(framework, "licenses")], ["FNA3D", path.join(framework, "lib", "FNA3D", "LICENSE")],
-      ["MojoShader", path.join(framework, "lib", "FNA3D", "MojoShader", "LICENSE.txt")],
-      ["FNA3D-stb-image.txt", path.join(framework, "lib", "FNA3D", "src", "stb_image.h")],
-      ["FNA3D-stb-image-write.txt", path.join(framework, "lib", "FNA3D", "src", "stb_image_write.h")],
-      ["FAudio", path.join(framework, "lib", "FAudio", "LICENSE")],
-      ["FAudio-stb-vorbis.txt", path.join(framework, "lib", "FAudio", "src", "stb_vorbis.h")],
-      ["FAudio-stb.txt", path.join(framework, "lib", "FAudio", "src", "stb.h")],
-      ["SDL3", path.join(sdlSource, "SDL3-3.4.18", "LICENSE.txt")]]) {
-      if(fs.existsSync(source)){if(fs.statSync(source).isDirectory()){for(const row of fs.readdirSync(source,{recursive:true,withFileTypes:true}))if(row.isFile())addLicense(unpacked,label,path.join(row.parentPath,row.name));}else addLicense(unpacked,label,source);}
-    }
+    addLicenses(unpacked, "FNA", framework);
+    addLicenses(unpacked, "FNA3D", fna3dRoot);
+    addLicenses(unpacked, "FAudio", faudioRoot);
+    addLicenses(unpacked, "SDL3", sdlRoot);
     fs.writeFileSync(path.join(unpacked, "fna-runtime.json"), JSON.stringify({ profile: PROFILE, frameworkVersion: "26.10.0.0",
       dotnetVersion: DOTNET_VERSION, upstreamRevision: FNA_REVISION, architecture: "arm64", sourceTreeSha256,
-      sourceArchiveSha256: sourceTreeSha256 ? null : PACKAGES.source.sha256, hostSourceSha256: Native.hashFile(stagedHost),
+      hostSourceSha256: Native.hashFile(stagedHost),
       capabilities: CAPABILITIES, overlaySha256,
       nativeVersions: { sdl: "3.4.18", fna3d: "26.10", faudio: "26.10" },
       nativeSources: { fna3d: { revision: FNA3D_REVISION, sourceTreeSha256: fna3dSourceSha256 } },
@@ -215,7 +209,7 @@ function verifyRuntime(install) {
   if (!install?.executablePath) throw new Error("FNA runtime is not installed.");
   const root = path.dirname(install.executablePath);
   const record = JSON.parse(fs.readFileSync(path.join(root, "fna-runtime.json"), "utf8"));
-  const specification = [PROFILE, "26.10-net8-arm64-v3"].includes(record.profile) ? { revision: FNA_REVISION, dotnetVersion: DOTNET_VERSION } : record.profile === PREVIOUS_PROFILE.profile ? PREVIOUS_PROFILE : null;
+  const specification = record.profile === PROFILE ? { revision: FNA_REVISION, dotnetVersion: DOTNET_VERSION } : null;
   if (!specification || record.upstreamRevision !== specification.revision || record.dotnetVersion !== specification.dotnetVersion || record.frameworkVersion !== "26.10.0.0" ||
       record.architecture !== "arm64" || !record.files) throw new Error("FNA runtime profile metadata is invalid.");
   let sealedManifest, sealedPayload;
@@ -229,7 +223,7 @@ function verifyRuntime(install) {
     sealedPayload = path.join(install.installDir, "files");
   } else if (install.source === "download" && install.catalogEntry?.projectPackage) {
     const selected = install.catalogEntry.projectPackage;
-    const matchingProfile = selected.version === record.profile || selected.version === PROFILE && record.profile === "26.10-net8-arm64-v3";
+    const matchingProfile = selected.version === record.profile;
     if (selected.id !== "fna" || !matchingProfile || selected.manifestRelative !== "manifest.json")
       throw new Error("FNA runtime package identity is invalid.");
     const directory = path.join(install.installDir, "project-payload");
@@ -259,5 +253,5 @@ function verifyRuntime(install) {
   return { root, ...record };
 }
 
-module.exports = { PROFILE, FNA_REVISION, FNA3D_REVISION, PREVIOUS_PROFILE, DOTNET_VERSION, PACKAGES, prepareRuntime, verifyRuntime,
+module.exports = { PROFILE, FNA_REVISION, FNA3D_REVISION, DOTNET_VERSION, PACKAGES, prepareRuntime, verifyRuntime,
   __test: { REQUIRED_FILES, frameworkFiles, frameworkResources, applyOpenGLPolicy, stageAbiSource, resolveBuildTool, writeCompilerResponse, runtimeConfig, hostDependencies, CAPABILITIES } };

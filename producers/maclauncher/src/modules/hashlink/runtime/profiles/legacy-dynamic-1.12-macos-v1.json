@@ -2,7 +2,6 @@
   "schemaVersion": 1,
   "id": "legacy-dynamic-1.12-macos-v1",
   "version": "1.12-macos-v1",
-  "upstreamRevision": "68daa125ad115a1f1d1db65d38e6045858d55013",
   "architecture": "x86_64",
   "libraries": {
     "std": {

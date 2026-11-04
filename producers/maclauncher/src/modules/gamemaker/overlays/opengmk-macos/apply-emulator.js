@@ -1,8 +1,9 @@
+const { gitlink } = require("../../../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 
-const REVISION = "9ccc47a9cab4681a889866f7233a6b016d36a15e";
+const REVISION = gitlink("producers/maclauncher/src/external/OpenGMK");
 const OVERLAY_VERSION = "maclauncher-appkit-gl-6";
 const SOURCE_HASHES = Object.freeze({
   "Cargo.toml": "dfc0b51bec4aff12670d09bbb1f921f87ba1c04eca3696c6eedf36914389eabc",
@@ -32,9 +33,9 @@ function applyEmulatorOverlay({ sourceDir, ramenDir, soundioDir }) {
     inputs[file] = fs.readFileSync(location, "utf8");
   }
   const ramen = JSON.parse(fs.readFileSync(path.join(ramenDir, "maclauncher-overlay.json"), "utf8"));
-  if (ramen.upstreamRevision !== "ef715f65981f6c96f7f889258ff43b63cb472626" || ramen.backend !== "AppKit") throw Error("The pinned AppKit ramen overlay is required.");
+  if (ramen.upstreamRevision !== require("./apply-ramen").REVISION || ramen.backend !== "AppKit") throw Error("The pinned AppKit ramen overlay is required.");
   const audioManifest = JSON.parse(fs.readFileSync(path.join(soundioDir, "maclauncher-overlay.json"), "utf8"));
-  if (audioManifest.upstreamRevision !== "1ae3cdce620acdaa7996315c05a98a0f12ed8745" || audioManifest.backend !== "CoreAudio") throw Error("The pinned CoreAudio build overlay is required.");
+  if (audioManifest.upstreamRevision !== require("./apply-audio").REVISION || audioManifest.backend !== "CoreAudio") throw Error("The pinned CoreAudio build overlay is required.");
   inputs["Cargo.toml"] += `\n[patch."https://github.com/viriuwu/ramen"]\nramen = { path = ${JSON.stringify(ramenDir)} }\n\n[patch."https://github.com/Adamcake/udon"]\nlibsoundio-sys = { path = ${JSON.stringify(soundioDir)} }\n`;
   inputs["gm8emulator/Cargo.toml"] = inputs["gm8emulator/Cargo.toml"].replace('[dependencies]\n', '[dependencies]\nserde_json = "=1.0.149"\nlewton = "=0.10.2"\n');
   inputs["gm8emulator/Cargo.toml"] += '\n[target.\'cfg(target_os = "macos")\'.build-dependencies]\ncc = "=1.2.60"\n';

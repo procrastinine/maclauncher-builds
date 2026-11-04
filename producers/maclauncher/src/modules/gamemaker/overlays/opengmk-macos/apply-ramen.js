@@ -1,8 +1,9 @@
+const { gitlink } = require("../../../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 
-const REVISION = "ef715f65981f6c96f7f889258ff43b63cb472626";
+const REVISION = gitlink("producers/maclauncher/src/external/ramen");
 const OVERLAY_VERSION = "maclauncher-appkit-4";
 const SOURCE_HASHES = Object.freeze({
   "Cargo.toml": "f5cccfa39ddbe172084077a5ff7edbaf00bf91eac45abd70b25596e355b103f0",
