@@ -309,11 +309,7 @@
         "url": "https://github.com/KhronosGroup/SPIRV-Headers",
         "repository": "KhronosGroup/SPIRV-Headers",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/native/processor-sources.json",
-          "pointer": "/sources",
-          "match": {
-            "id": "macfx-spirv-headers"
-          }
+          "gitlink": "producers/maclauncher/src/external/macfx-spirv-headers"
         }
       },
       {
@@ -322,11 +318,7 @@
         "url": "https://github.com/KhronosGroup/SPIRV-Cross",
         "repository": "KhronosGroup/SPIRV-Cross",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/native/processor-sources.json",
-          "pointer": "/sources",
-          "match": {
-            "id": "macfx-spirv-cross"
-          }
+          "gitlink": "producers/maclauncher/src/external/macfx-spirv-cross"
         }
       },
       {

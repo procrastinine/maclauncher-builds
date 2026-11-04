@@ -1611,25 +1611,14 @@
         }
       },
       {
-        "id": "spirv-tools",
+        "id": "shaderc",
         "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Tools",
-        "repository": "KhronosGroup/SPIRV-Tools",
+        "url": "https://github.com/google/shaderc",
+        "repository": "google/shaderc",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/vulkan/native/spirv-tools-source.json",
-          "pointer": "/sources/0/commit",
-          "repositoryPointer": "/sources/0/repository"
-        }
-      },
-      {
-        "id": "spirv-headers",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Headers",
-        "repository": "KhronosGroup/SPIRV-Headers",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/vulkan/native/spirv-tools-source.json",
-          "pointer": "/sources/1/commit",
-          "repositoryPointer": "/sources/1/repository"
+          "file": "producers/dependencies.json",
+          "pointer": "/shaderc/revision",
+          "repositoryPointer": "/shaderc/repository"
         }
       }
     ],
@@ -1736,8 +1725,9 @@
         "url": "https://github.com/libsdl-org/SDL_image",
         "repository": "libsdl-org/SDL_image",
         "pin": {
-          "file": "producers/maclauncher/helper-builds/mkxpz.json",
-          "pointer": "/sdlImage"
+          "file": "producers/dependencies.json",
+          "pointer": "/sdl2_image/revision",
+          "repositoryPointer": "/sdl2_image/repository"
         }
       }
     ],
@@ -2211,17 +2201,6 @@
         "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "pin": {
           "gitlink": "producers/maclauncher/src/external/fsr3-sdk"
-        }
-      },
-      {
-        "id": "vulkan-headers",
-        "provider": "github",
-        "url": "https://github.com/libsdl-org/SDL",
-        "repository": "libsdl-org/SDL",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/crossover/temporal/fidelityfx/source.json",
-          "pointer": "/vulkan/revision",
-          "repositoryPointer": "/vulkan/repository"
         }
       }
     ],
