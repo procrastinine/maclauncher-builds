@@ -2,10 +2,6 @@
   "schemaVersion": 1,
   "id": "android-java-converter",
   "version": "MCLv4",
-  "androidSource": {
-    "repository": "https://github.com/procrastinine/maclauncher-android",
-    "revision": "c71de272618e22a531d9259929a2478d838f9b1f"
-  },
   "converter": {
     "repository": "https://github.com/kksimp/dex2jvm",
     "revision": "b563cf8ee837348efa13c71797387345c9f3de5c"

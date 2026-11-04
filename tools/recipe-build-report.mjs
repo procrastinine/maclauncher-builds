@@ -78,7 +78,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   if(fs.existsSync(path.join(root,'.github/actions/build-runtime/action.yml')))enqueue('.github/actions/build-runtime/action.yml');
   for(const entry of project.producer.entries||[]){if(fs.statSync(path.join(root,entry),{throwIfNoEntry:false})?.isDirectory())for(const file of directoryFiles(entry))enqueue(file);else enqueue(entry);}
   if(project.producer.recipe)enqueue(project.producer.recipe);
-  for(const upstream of project.upstreams)if(upstream.pin){enqueue(upstream.pin.file);rememberLink(upstream.pin.file);}
+  for(const upstream of project.upstreams)if(upstream.pin){if(upstream.pin.gitlink)rememberLink(upstream.pin.gitlink);else{enqueue(upstream.pin.file);rememberLink(upstream.pin.file);}}
   while(queue.length){const file=queue.shift(),absolute=path.join(root,file);if(rememberLink(file))continue;
    if(!fs.statSync(absolute,{throwIfNoEntry:false})?.isFile())continue;
    const bytes=fs.readFileSync(absolute);
@@ -109,7 +109,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   const shared=builds.find(build=>commandProjects.get(build.command).size>1);
   if(shared&&!declared&&inputs.size)throw Error('The shared build command '+shared.command+' must report the inputs of '+id+' through recipeInputs.');
   const sources=project.upstreams.map(upstream=>{
-   if(upstream.pin&&rememberLink(upstream.pin.file))return {...upstream,gitlink:rememberLink(upstream.pin.file).revision};
+   if(upstream.pin&&rememberLink(upstream.pin.gitlink||upstream.pin.file))return {...upstream,gitlink:rememberLink(upstream.pin.gitlink||upstream.pin.file).revision};
    const resolved=resolveUpstream(upstream,root);
    if(upstream.pin&&(bindings.get(upstream.pin.file)||[]).some(binding=>!binding.select&&binding.pointer===upstream.pin.pointer+'/version')&&resolved.version!==undefined)resolved.version='$packageVersion';
    return resolved;

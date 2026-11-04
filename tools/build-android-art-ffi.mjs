@@ -1,3 +1,4 @@
+import {androidSource,ndkSource} from '../lib/android-source.mjs';
 import {addLicense} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -12,18 +13,18 @@ const read=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infin
 
 /** Compile the original Android libffi target with matching Linux host tools. */
 export async function buildAndroidArtFfi({project,version,arch,output,work}){
- const profile=JSON.parse(fs.readFileSync(descriptor));version??=profile.version;
+ const profile={...JSON.parse(fs.readFileSync(descriptor)),libffi:JSON.parse(fs.readFileSync(new URL('../producers/dependencies.json',import.meta.url))).libffi};version??=profile.version;
  if(project!==profile.id||version!==profile.version||[output,work].some(value=>!path.isAbsolute(value||'')||fs.existsSync(value)))throw Error('Select the declared ARM64 Android libffi input on Linux x64 with new absolute output/work directories.');
  fs.mkdirSync(work,{recursive:true});
- const android=checkoutSource({...profile.androidSource,destination:path.join(work,'android-source')}),source=checkoutSource({...profile.libffi,destination:path.join(work,'libffi-source')});
+ const android=checkoutSource({...androidSource(),destination:path.join(work,'android-source')}),source=checkoutSource({...profile.libffi,destination:path.join(work,'libffi-source')});
  const original=JSON.parse(fs.readFileSync(path.join(android,'src/modules/android/art/supplier.json'))).sources.libffi;
- if(original.url!==profile.libffi.repository||original.commit!==profile.libffi.revision)throw Error('The libffi input differs from the original ART profile.');
+ if(original.url.replace(/\.git$/,'')!==profile.libffi.repository.replace(/\.git$/,'')||original.commit!==profile.libffi.revision)throw Error('The libffi input differs from the original ART profile.');
  const producer=path.join(work,'producer'),sourceArchive=path.join(work,'producer.tar');fs.mkdirSync(producer);
- run('git',['-C',android,'archive','--format=tar','--output='+sourceArchive,profile.androidSource.revision,'--','src']);run('/usr/bin/tar',['-xf',sourceArchive,'-C',producer]);fs.unlinkSync(sourceArchive);
+ run('git',['-C',android,'archive','--format=tar','--output='+sourceArchive,androidSource().revision,'--','src']);run('/usr/bin/tar',['-xf',sourceArchive,'-C',producer]);fs.unlinkSync(sourceArchive);
  run('git',['apply',path.join(root,profile.buildOverlay)],{cwd:producer,env:{...process.env,GIT_CEILING_DIRECTORIES:work}});
  const ndkArchive=await buildInput(profile.ndk,path.join(work,'archives')),sdk=path.join(work,'sdk');fs.mkdirSync(sdk);run('/usr/bin/unzip',['-q',ndkArchive,'-d',sdk]);
- const ndk=path.join(sdk,profile.ndk.directory);
- if(!fs.readFileSync(path.join(ndk,'source.properties'),'utf8').includes('Pkg.Revision = '+profile.ndk.version))throw Error('The NDK archive differs from its declared version.');
+ const ndk=path.join(sdk,ndkSource().directory);
+ if(!fs.readFileSync(path.join(ndk,'source.properties'),'utf8').includes('Pkg.Revision = '+ndkSource().version))throw Error('The NDK archive differs from its declared version.');
  fs.unlinkSync(ndkArchive);
  const {buildArtFfi}=await import(pathToFileURL(path.join(producer,'src/modules/android/art/build-ffi.mjs')));
  const built=await buildArtFfi({source,output:path.join(work,'compiler'),ndk});
@@ -32,7 +33,7 @@ export async function buildAndroidArtFfi({project,version,arch,output,work}){
  if(!members.length||machines.length!==members.length||machines.some(machine=>machine!=='AArch64'))throw Error('The libffi archive contains a different target architecture.');
  const payload=path.join(output,'payload');fs.mkdirSync(path.join(payload,'lib'),{recursive:true});fs.mkdirSync(path.join(payload,'licenses'));
  fs.copyFileSync(built.archive,path.join(payload,'lib/libffi.a'));fs.cpSync(built.include,path.join(payload,'include'),{recursive:true});addLicense(payload,'libffi',built.license,'MIT');
- const result=helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{androidSource:profile.androidSource,upstream:profile.libffi,ndk:{version:profile.ndk.version,sha256:profile.ndk.sha256},target:'aarch64-linux-android35',archiveMembers:members,tools:{autoconf:read('autoconf',['--version']).split('\n')[0],automake:read('automake',['--version']).split('\n')[0],make:read('make',['--version']).split('\n')[0]}},notices:[]});
+ const result=helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{androidSource:androidSource(),upstream:profile.libffi,ndk:{version:ndkSource().version,sha256:profile.ndk.sha256},target:'aarch64-linux-android35',archiveMembers:members,tools:{autoconf:read('autoconf',['--version']).split('\n')[0],automake:read('automake',['--version']).split('\n')[0],make:read('make',['--version']).split('\n')[0]}},notices:[]});
  return result;
 }
 recipeMain(import.meta,buildAndroidArtFfi);

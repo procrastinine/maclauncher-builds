@@ -1,10 +1,6 @@
 {
   "schemaVersion": 1,
   "repository": "https://github.com/procrastinine/maclauncher-builds",
-  "android": {
-    "repository": "https://github.com/procrastinine/maclauncher-android",
-    "revision": "00f17cb15b1fcbe797a59027144dd8173424f06b"
-  },
   "files": [
     {
       "path": "supplied/resources/text-input.json",
@@ -44,11 +40,11 @@
     },
     {
       "path": "supplied/runtime/src/modules/android/art/supplier.json",
-      "sha256": "9055610b60a384aa7f04ad78b32afd62c7de437f057223179519c9496b2b91bb"
+      "sha256": "33fc77a44af6049b1a9d7b62df333ad6b8565a0ba1ef6390d6d82e9028a4d2e0"
     },
     {
       "path": "supplied/runtime/src/modules/android/native/arm32/components.json",
-      "sha256": "577dda96d7e9edec7a646d7f7cbf2800eab594dea32ddc37af32d775a929f532"
+      "sha256": "6e935ab1fc4204a106fbc271cca0a40e5ce5fe3a7b20a6623f1cb4602a2f0a68"
     },
     {
       "path": "supplied/runtime/src/modules/android/native/resources/ad-hosts.json",
@@ -61,12 +57,6 @@
     {
       "path": "supplied/runtime/src/modules/shared/runtime/zip.js",
       "sha256": "b3e018f075cc5e83e7daac48f6f08d0820ff2f31bb08689c3155b5ffe98aedc2"
-    },
-    {
-      "path": "supplied/text-input.LICENSE"
-    },
-    {
-      "path": "supplied/account-control.LICENSE"
     }
   ],
   "sourceFiles": [

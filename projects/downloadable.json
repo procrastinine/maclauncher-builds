@@ -2442,7 +2442,7 @@
   {
     "id": "vnds-love",
     "name": "VNDS-LOVE",
-    "purpose": "Adapted VNDS interpreter for the managed LÖVE host.",
+    "purpose": "Adapted VNDS interpreter for the managed L\u00d6VE host.",
     "producer": {
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",

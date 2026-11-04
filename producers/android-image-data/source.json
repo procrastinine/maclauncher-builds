@@ -1,7 +1,5 @@
 {
   "schemaVersion": 1,
-  "repository": "https://github.com/hahnlee/aim",
-  "revision": "9b5068fa8185d3f51f1862fe7c54d88d51f09ec8",
   "crate": "tools/android-image-extract",
   "archive": {
     "url": "https://dl.google.com/android/repository/sys-img/google_apis_playstore/arm64-v8a-playstore-ps16k-36_r07.zip",
@@ -12,9 +10,6 @@
     "sha256": "cc3e94ea29cb3c7ee6c9bd2805610efbf16a20a27335c18cc80a503ee61cb8ab",
     "records": 5920,
     "bytes": 4110736819
-  },
-  "license": {
-    "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-android/c71de272618e22a531d9259929a2478d838f9b1f/src/modules/android/art/licenses/android-sdk-arm-dbt-license.txt"
   },
   "targetSymlinkMode": 493,
   "chunkBytes": 134217728,

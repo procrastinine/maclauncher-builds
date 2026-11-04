@@ -16,8 +16,7 @@ export function stageJavaFrameworkModules({input,build}){
   const module=name.slice(0,-4),directory=path.join(build,'framework-modules',module),archive=path.join(directory,name);fs.rmSync(directory,{recursive:true,force:true});copy(input,manifest,'modules/'+name,archive);
   archives.push(archive);
  }
- const licenses=manifest.files.some(file=>file.path==='licenses/components.txt')?[path.join(input,'licenses')]:[];
- return {archives,licenses};
+ return {archives};
 }
 /** Native compilation consumes the same classes, complete framework and JNI declarations. */
 export function stageJavaFramework({input,build,output,graphicsRegistrations}){

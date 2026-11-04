@@ -1,3 +1,4 @@
+import {aimSource} from '../lib/android-source.mjs';
 import {addLicense} from '../lib/licenses.mjs';
 import {downloadFile} from './download.mjs';
 import fs from 'node:fs';
@@ -14,7 +15,7 @@ const descriptor=path.join(producer,'source.json');
 
 /** Compile the data-only decoder facade or its macOS metadata restoration command. */
 export function buildImageDataTool({work}){
- const profile=JSON.parse(fs.readFileSync(descriptor));
+ const profile={...JSON.parse(fs.readFileSync(descriptor)),...aimSource()};
  const upstream=checkoutSource({repository:profile.repository,revision:profile.revision,destination:path.join(work,'upstream')});
  const crate=path.join(work,'crate');fs.mkdirSync(crate);
  for(const name of ['Cargo.toml','main.rs','tree.rs'])fs.copyFileSync(path.join(producer,name),path.join(crate,name));
@@ -24,7 +25,7 @@ export function buildImageDataTool({work}){
  fs.mkdirSync(path.join(crate,'src'));fs.renameSync(path.join(crate,'main.rs'),path.join(crate,'src/main.rs'));fs.renameSync(path.join(crate,'tree.rs'),path.join(crate,'src/tree.rs'));
  fs.symlinkSync(upstream,path.join(crate,'src/upstream'),'dir');
  fs.copyFileSync(path.join(upstream,'Cargo.lock'),path.join(crate,'Cargo.lock'));
- const env={...rustEnvironment({work,minimumMacOS:'13.0',env:{...process.env,CARGO_HOME:path.join(work,'cargo')}}),CARGO_BUILD_JOBS:'2'};
+ const env={...rustEnvironment({work,minimumMacOS:'13.0',env:{...process.env,CARGO_HOME:path.join(work,'cargo')}}),CARGO_BUILD_JOBS:'2',AIM_REVISION:profile.revision};
  run('cargo',['fetch','--manifest-path',path.join(crate,'Cargo.toml')],{env});
  const packages=text=>text.split(/^\[\[package\]\]\s*$/m).slice(1).map(block=>Object.fromEntries([...block.matchAll(/^(name|version|source|checksum) = "([^"]+)"$/gm)].map(match=>[match[1],match[2]])));
  const original=packages(fs.readFileSync(path.join(upstream,'Cargo.lock'),'utf8'));
@@ -93,7 +94,7 @@ export function planImageDataShards(transport,profiles){
 
 /** Seal a completed original-parser export through the normal helper contract. */
 export async function packageImageData({project,version,arch,output,work,tool,input}){
- const profile=JSON.parse(fs.readFileSync(descriptor)),selected=profile.profiles.find(row=>row.id===project),payload=path.join(output,'payload');
+ const profile={...JSON.parse(fs.readFileSync(descriptor)),...aimSource()},selected=profile.profiles.find(row=>row.id===project),payload=path.join(output,'payload');
  if(!selected||version!==selected.version)throw Error('Select a declared original image data shard.');
  if(fs.existsSync(output))throw Error('Image data shard output already exists.');
  if(execFileSync('git',['-C',tool.upstream,'rev-parse','HEAD'],{maxBuffer:Infinity,encoding:'utf8'}).trim()!==profile.revision||execFileSync('git',['-C',tool.upstream,'status','--porcelain','--untracked-files=no'],{maxBuffer:Infinity,encoding:'utf8'}).trim())throw Error('Original image parser differs from its declared clean source.');
@@ -122,7 +123,7 @@ export async function packageImageData({project,version,arch,output,work,tool,in
 }
 /** Decode the complete original image into portable data and exact inode metadata. */
 export async function buildAndroidImageData(options){
- const {output,work}=options,profile=JSON.parse(fs.readFileSync(descriptor));
+ const {output,work}=options,profile={...JSON.parse(fs.readFileSync(descriptor)),...aimSource()};
  fs.mkdirSync(work,{recursive:true});
  const archive=await buildInput(profile.archive,path.join(work,'archive-cache')),tool=buildImageDataTool({work});
  const input=path.join(work,'decoded');

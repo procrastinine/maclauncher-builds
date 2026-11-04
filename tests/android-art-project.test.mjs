@@ -43,7 +43,7 @@ test('registered ART builds delegate unchanged inputs to the canonical ART entry
  git(producer,'add','.');git(producer,'commit','-qm','ART producer fixture');const revision=git(producer,'rev-parse','HEAD');
  git(directory,'update-index','--add','--cacheinfo','160000,'+revision+',sources/maclauncher-android');git(directory,'commit','-qm','Pin source');
  const hub=path.resolve(import.meta.dirname,'..');fs.writeFileSync(path.join(directory,'projects.json'),JSON.stringify(readProjects(hub)));
- write(path.join(directory,'runtimes/android/source.json'),JSON.stringify({schemaVersion:1,id:'android',path:'sources/maclauncher-android',revision,buildEntry:'tools/build.mjs',checkEntry:'tools/check-sources.mjs'}));
+ write(path.join(directory,'runtimes/android/source.json'),JSON.stringify({schemaVersion:1,id:'android',path:'sources/maclauncher-android',buildEntry:'tools/build.mjs',checkEntry:'tools/check-sources.mjs'}));
  write(path.join(directory,'tools/build-android-art.mjs'),fs.readFileSync(path.join(hub,'tools/build-android-art.mjs')));
  assert.deepEqual(buildRuntime(['--project','android-art','--check'],directory),{id:'android-art',revision,action:'check'});
  const output=path.join(directory,'output'),inputs=path.join(directory,'inputs.json'),options={output,sources:{source:producer,klepton:producer,glesHeaders:producer,aosp:producer},runner:{precise:{archives:['retained-cpu.a']}},sourceArchive:path.join(directory,'complete-source.tar.gz')};

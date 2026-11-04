@@ -2,10 +2,6 @@
   "schemaVersion": 1,
   "id": "android-art-java",
   "version": "0.1.2",
-  "androidSource": {
-    "repository": "https://github.com/procrastinine/maclauncher-android",
-    "revision": "c71de272618e22a531d9259929a2478d838f9b1f"
-  },
   "frameworkInput": "producers/android-inputs/java-framework.json",
   "imageInput": "producers/android-image-data/source.json",
   "publisherInputs": "producers/android-art-inputs/java.json",
