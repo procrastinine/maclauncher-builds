@@ -10,7 +10,7 @@ const descriptor=new URL('../producers/android-art-inputs/ffi.json',import.meta.
 /** Read the sealed Linux-built Android libffi input through its ordinary inventory. */
 export function readArtFfiInput(input){
  if(!path.isAbsolute(input||''))throw Error('The ART supplier requires a sealed Linux libffi input directory.');
- const profile=JSON.parse(fs.readFileSync(descriptor)),declaration=JSON.parse(fs.readFileSync(path.join(input,'declaration.json'))),payload=path.join(input,'payload');
+ const profile={...JSON.parse(fs.readFileSync(descriptor)),libffi:JSON.parse(fs.readFileSync(new URL('../producers/dependencies.json',import.meta.url))).libffi},declaration=JSON.parse(fs.readFileSync(path.join(input,'declaration.json'))),payload=path.join(input,'payload');
  validateDeclaration(declaration);
  if(declaration.id!==profile.id||declaration.version!==profile.version||declaration.arch!=='arm64'||declaration.manifestRelative!=='input.json'||declaration.sourceSha256!==sha(descriptor))throw Error('The sealed libffi input differs from its declared profile.');
  verifyPreparedPayload(payload,declaration);

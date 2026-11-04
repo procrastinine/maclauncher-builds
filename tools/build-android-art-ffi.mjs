@@ -13,12 +13,12 @@ const read=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infin
 
 /** Compile the original Android libffi target with matching Linux host tools. */
 export async function buildAndroidArtFfi({project,version,arch,output,work}){
- const profile=JSON.parse(fs.readFileSync(descriptor));version??=profile.version;
+ const profile={...JSON.parse(fs.readFileSync(descriptor)),libffi:JSON.parse(fs.readFileSync(new URL('../producers/dependencies.json',import.meta.url))).libffi};version??=profile.version;
  if(project!==profile.id||version!==profile.version||[output,work].some(value=>!path.isAbsolute(value||'')||fs.existsSync(value)))throw Error('Select the declared ARM64 Android libffi input on Linux x64 with new absolute output/work directories.');
  fs.mkdirSync(work,{recursive:true});
  const android=checkoutSource({...androidSource(),destination:path.join(work,'android-source')}),source=checkoutSource({...profile.libffi,destination:path.join(work,'libffi-source')});
  const original=JSON.parse(fs.readFileSync(path.join(android,'src/modules/android/art/supplier.json'))).sources.libffi;
- if(original.url!==profile.libffi.repository||original.commit!==profile.libffi.revision)throw Error('The libffi input differs from the original ART profile.');
+ if(original.url.replace(/\.git$/,'')!==profile.libffi.repository.replace(/\.git$/,'')||original.commit!==profile.libffi.revision)throw Error('The libffi input differs from the original ART profile.');
  const producer=path.join(work,'producer'),sourceArchive=path.join(work,'producer.tar');fs.mkdirSync(producer);
  run('git',['-C',android,'archive','--format=tar','--output='+sourceArchive,androidSource().revision,'--','src']);run('/usr/bin/tar',['-xf',sourceArchive,'-C',producer]);fs.unlinkSync(sourceArchive);
  run('git',['apply',path.join(root,profile.buildOverlay)],{cwd:producer,env:{...process.env,GIT_CEILING_DIRECTORIES:work}});
