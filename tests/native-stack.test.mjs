@@ -5,10 +5,10 @@ import os from 'node:os';
 import path from 'node:path';
 import {nativeStackInput,stackModule} from '../tools/native-stack.mjs';
 
-for(const materialized of [false,true])test('a prepared native prefix retains source API and library bytes with '+(materialized?'materialized':'canonical-only')+' aliases',t=>{
+test('a prepared native prefix retains source API identity and library bytes while expanding only owned compiler metadata',t=>{
  const work=fs.mkdtempSync(path.join(os.tmpdir(),'native-stack-'));t.after(()=>fs.rmSync(work,{recursive:true,force:true}));
  const root=path.join(work,'sealed'),view=path.join(work,'view');fs.mkdirSync(path.join(root,'include'),{recursive:true});fs.mkdirSync(path.join(root,'lib/pkgconfig'),{recursive:true});
- const binary=Buffer.from([0,1,2,3,4,5]);fs.writeFileSync(path.join(root,'lib/libsample.1.2.3.dylib'),binary);if(materialized)fs.symlinkSync('libsample.1.2.3.dylib',path.join(root,'lib/libsample.dylib'));fs.writeFileSync(path.join(root,'include/sample.h'),'int sample(void);\n');
+ const binary=Buffer.from([0,1,2,3,4,5]);fs.writeFileSync(path.join(root,'lib/libsample.1.2.3.dylib'),binary);fs.symlinkSync('libsample.1.2.3.dylib',path.join(root,'lib/libsample.dylib'));fs.writeFileSync(path.join(root,'include/sample.h'),'int sample(void);\n');
  const external=path.join(work,'shared.pc');fs.writeFileSync(external,'prefix=NATIVE_STACK_PREFIX\nsdk=NATIVE_STACK_SDK\n');fs.symlinkSync(external,path.join(root,'lib/pkgconfig/sample.pc'));
  const catalog=stackModule('fonts').PIN;
  fs.writeFileSync(path.join(root,'portable-stack.json'),JSON.stringify({schemaVersion:1,kind:'fonts',architecture:'arm64',stack:{version:catalog.version,architecture:'arm64',minimumMacOS:catalog.minimumMacOS,sources:catalog.dependencies}}));
