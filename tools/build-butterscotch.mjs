@@ -21,6 +21,8 @@ export async function buildButterscotch({project:id,version,arch,work,output}) {
   const built=await Builder.buildRuntime({userDataDir:work,version:pin.version,sourceDir,architecture:arch,runtimeManager:manager});
 
   addLicenses(work,'box2d',path.join(sourceDir,'vendor/box2d'));
+  addLicense(work,'FMOD Vorbis setup',path.join(sourceDir,'src/fmod/VORBIS_SETUP_LICENSE.txt'));
+  addLicense(work,'JetBrains Mono',path.join(root,'producers/maclauncher/src/modules/gamemaker/runtime/licenses/butterscotch/LICENSE-JetBrainsMono.txt'));
   addLicenses(work,'miniz',path.join(sourceDir,'vendor/miniz'));
   addLicenses(work,'mojoal',path.join(sourceDir,'vendor/mojoal'));
   addLicense(work,"base64",path.join(root,'producers/maclauncher/src/modules/gamemaker/runtime/licenses/butterscotch/LICENSE-base64.txt'));
