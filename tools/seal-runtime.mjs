@@ -33,7 +33,7 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
  try {
   copy(appRoot||executable,appRoot?path.basename(appRoot):executableRelative);
   for(const entry of payloads)copy(entry.source,entry.relative);
-  addLicenses(files,id,sourceRoot);addCargoLicenses(files,id,cargoRoot,env);
+  addLicenses(files,id,sourceRoot);addCargoLicenses(files,id,cargoRoot,env);includeLicenses(files,path.join(cargoRoot,'licenses'));
   const roots=[{source:appRoot||executable,relative:appRoot?path.basename(appRoot):executableRelative},...payloads];
   for(const relative of B.fileInventory(files)){
    const target=path.join(files,relative);if(!Tools.macho(target))continue;

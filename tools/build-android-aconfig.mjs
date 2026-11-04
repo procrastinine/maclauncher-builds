@@ -1,3 +1,4 @@
+import {addLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -41,6 +42,7 @@ export async function packageAndroidAconfig({project='android-aconfig',version,a
 
 
  const env=rustEnvironment({work,minimumMacOS:profile.minimumMacOS,env:process.env});
+ addLicenses(crate,project,path.resolve(import.meta.dirname,'../producers/android-inputs/aconfig'));
  return sealRuntime({cargoRoot:crate,env,project,version,arch,output,sourceRoot:source,upstreamRevision:profile.revision,executable:path.join(env.CARGO_TARGET_DIR,'release/aconfig'),maximumMacOS:profile.minimumMacOS,provenance:{sdk:{repository:profile.sdk.repository,revision:profile.sdk.revision,files:profile.sdk.files.map(({path,contentSha256})=>({path,sha256:contentSha256}))},rustLockSha256:sha(fs.readFileSync(path.join(crate,'Cargo.lock')))}});
 }
 recipeMain(import.meta,buildAndroidAconfig);
