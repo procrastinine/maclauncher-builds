@@ -11,9 +11,28 @@
       "options": ["--enable-shared", "--disable-static", "--disable-docs", "--disable-dependency-tracking"]
     },
     {
-      "id": "turbojpeg", "name": "libjpeg-turbo", "version": "3.2.0",
-      "license": "BSD-3-Clause, IJG and zlib; see included notices", "notices": ["LICENSE.md", "README.ijg", "src/spng/LICENSE"],
-      "buildSystem": "cmake", "options": ["-DENABLE_SHARED=ON", "-DENABLE_STATIC=OFF", "-DWITH_TOOLS=OFF", "-DWITH_TESTS=OFF", "-DWITH_TURBOJPEG=ON", "-DWITH_SIMD=ON", "-DBUILD=maclauncher-portable-v2"]
+      "id": "turbojpeg",
+      "name": "libjpeg-turbo",
+      "version": "3.2.0",
+      "license": "BSD-3-Clause, IJG and zlib; see included notices",
+      "notices": [
+        "LICENSE.md",
+        "README.ijg",
+        "src/spng/LICENSE"
+      ],
+      "buildSystem": "cmake",
+      "options": [
+        "-DENABLE_SHARED=ON",
+        "-DENABLE_STATIC=OFF",
+        "-DWITH_TOOLS=OFF",
+        "-DWITH_TESTS=OFF",
+        "-DWITH_TURBOJPEG=ON",
+        "-DWITH_SIMD=ON",
+        "-DBUILD=maclauncher-portable-v2"
+      ],
+      "sourceUrl": "https://github.com/libjpeg-turbo/libjpeg-turbo",
+      "archiveSha256": "45209a3f315ed6156dac8d7fa451b8be62d83f2daa5581cb6b94ee9f3f82cf6f",
+      "archiveBytes": 2540379
     },
     {
       "id": "cglm", "name": "cglm", "version": "0.9.6",

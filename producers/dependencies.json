@@ -10,30 +10,6 @@
     "sha256": "ef1bccad2b2a58eb3c09e06ffe3b72b8604abda8b5011e4c4bb5391989040f26",
     "bytes": 1601579
   },
-  "ogg": {
-    "repository": "https://github.com/xiph/ogg",
-    "revision": "be05b13e98b048f0b5a0f5fa8ce514d56db5f822",
-    "sha256": "b2ff5c003e5697507169f7d614d64dc4e8bf030c85ad081bec75c164566f8246",
-    "bytes": 254382
-  },
-  "vorbis": {
-    "repository": "https://github.com/xiph/vorbis",
-    "revision": "c2aa86b05e981c96bf381fc6aa11cdd03eccc2fb",
-    "sha256": "95e908e8c3595ae017b07a376da83ed38a3edeeab9ad458451669f7076bee8b0",
-    "bytes": 1238230
-  },
-  "opus": {
-    "repository": "https://github.com/xiph/opus",
-    "revision": "22244de5a79bd1d6d623c32e72bf1954b56235be",
-    "sha256": "3267aa969b2b26542417f57819a5bc25d5079355300307dd2dddc7c704aed418",
-    "bytes": 4888967
-  },
-  "turbojpeg": {
-    "repository": "https://github.com/libjpeg-turbo/libjpeg-turbo",
-    "revision": "c85e6b905bf237038faa936dab160ebfc5da0344",
-    "sha256": "45209a3f315ed6156dac8d7fa451b8be62d83f2daa5581cb6b94ee9f3f82cf6f",
-    "bytes": 2540379
-  },
   "webp": {
     "repository": "https://github.com/webmproject/libwebp",
     "revision": "4fa21912338357f89e4fd51cf2368325b59e9bd9",

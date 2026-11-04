@@ -2653,9 +2653,11 @@
         "url": "https://github.com/xiph/ogg",
         "repository": "xiph/ogg",
         "pin": {
-          "file": "producers/dependencies.json",
-          "pointer": "/ogg/revision",
-          "repositoryPointer": "/ogg/repository"
+          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.js",
+          "pointer": "/PIN/dependencies",
+          "match": {
+            "id": "ogg"
+          }
         }
       },
       {
@@ -2678,9 +2680,11 @@
         "url": "https://github.com/xiph/vorbis",
         "repository": "xiph/vorbis",
         "pin": {
-          "file": "producers/dependencies.json",
-          "pointer": "/vorbis/revision",
-          "repositoryPointer": "/vorbis/repository"
+          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.js",
+          "pointer": "/PIN/dependencies",
+          "match": {
+            "id": "vorbis"
+          }
         }
       },
       {

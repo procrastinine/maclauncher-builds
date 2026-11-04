@@ -11,7 +11,7 @@ const Movie = require("../shared/runtime/portable-ffmpeg");
 const Prefix = require("../shared/runtime/portable-dependency-prefix");
 const Overlay = require("./system4-portable-overlay-v3");
 const { throwIfAborted } = require("../shared/runtime/download-utils");
-const PIN = Object.freeze({...require("./system4-portable.json"),dependencies:require("./system4-portable.json").dependencies.map(row=>{const pin=sharedDependencies[row.id==='libffi'?'libffiPortable':row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:row.archiveUrl||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:row;})});
+const PIN = Object.freeze({...require("./system4-portable.json"),dependencies:require("./system4-portable.json").dependencies.map(row=>{if(row.id==='turbojpeg'){const pin=row,revision=require('node:child_process').execFileSync('git',['-C',require('node:path').resolve(__dirname,'../../../../../sources/anyps5'),'rev-parse','HEAD:3rdparty/'+'libjpeg-turbo'],{encoding:'utf8'}).trim();return {...row,revision,sourceUrl:pin.sourceUrl,archiveUrl:pin.sourceUrl+'/archive/'+revision+'.tar.gz',archiveSha256:pin.archiveSha256,archiveBytes:pin.archiveBytes};}const pin=sharedDependencies[row.id==='libffi'?'libffiPortable':row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:row.archiveUrl||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:row;})});
 const VERSION = "MCLv1-1021";
 const REVISION = "de65718ba72d5eb291a4d0ddb691627f1d401909";
 const LIBSYS4_REVISION = "e2bf438d0156a2ca70fc6018fddf7c870794a2ca";
