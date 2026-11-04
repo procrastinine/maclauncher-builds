@@ -12,7 +12,7 @@ const version='1.0.0-'+hash.digest('hex').slice(0,12),directoryRelative=`${id}/$
 const output=path.resolve('src/resources/native-runtimes',directoryRelative);fs.mkdirSync(output,{recursive:true});
 for(const name of names)fs.copyFileSync(path.join(source,name),path.join(output,name));
 fs.copyFileSync(new URL(import.meta.url),path.join(output,'build.mjs'));
-addLicense(output,'MacLauncher','LICENSE','MIT');
+addLicense(output,'MacLauncher',new URL('../../../LICENSE',import.meta.url));
 execFileSync('/usr/bin/xcrun',['clang++','-target','arm64-apple-macos13','-std=c++20','-O2','-fobjc-arc','-framework','AppKit','-framework','Carbon','-framework','CoreGraphics',path.join(source,'clipboard-helper.mm'),'-o',path.join(output,'clipboard-helper')],{stdio:'inherit'});
 execFileSync('/usr/bin/codesign',['--force','--sign','-',path.join(output,'clipboard-helper')],{stdio:'inherit'});
 const metadata={schemaVersion:1,id,version,minimumMacOS:'13.0',executable:'clipboard-helper',clipboard:'explicit-plain-text'};

@@ -17,7 +17,7 @@ function fixture(t,{external=false,version='1.0'}={}){
  const data={'runtime.json':JSON.stringify({version}),'LICENSE':'MIT','source.tar.gz':'source bytes'};
  if(external)delete data['source.tar.gz'];
  const files=Object.entries(data).map(([name,bytes])=>{fs.writeFileSync(path.join(input,name),bytes,{mode:0o644});return {path:name,size:Buffer.byteLength(bytes),mode:0o644,sha256:digest(bytes)};});
- const declaration={id:'engine',version,arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS:'13.0',directoryRelative:'engine/'+version+'/arm64',manifestRelative:'runtime.json',manifestSha256:files[0].sha256,sourceSha256:digest('source bytes'),files,notices:[{name:'Engine',license:'MIT',path:'LICENSE'}],redistribution:'bundle'};
+ const declaration={id:'engine',version,arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS:'13.0',directoryRelative:'engine/'+version+'/arm64',manifestRelative:'runtime.json',manifestSha256:files[0].sha256,sourceSha256:digest('source bytes'),files,redistribution:'bundle'};
  let source;if(external){source=path.join(directory,'source.tar.gz');fs.writeFileSync(source,'source bytes');declaration.sourceArtifact={directoryRelative:'engine/'+version+'-source.tar.gz',sha256:digest('source bytes'),bytes:12};}else declaration.sourceRelative='source.tar.gz';
  return {project:'engine',input,declaration,source,output:path.join(directory,'release'),directory};
 }
@@ -204,8 +204,7 @@ function managerOutput(directory,arch){
  const cpus=arch==='universal'?['arm64','x86_64']:[arch==='x64'?'x86_64':'arm64'],binary=machO(cpus);
  fs.writeFileSync(path.join(files,'bin/engine'),binary,{mode:0o755});fs.writeFileSync(path.join(files,'LICENSE'),'MIT',{mode:0o644});
  const revision='1'.repeat(40);
- fs.writeFileSync(path.join(input,'manifest.json'),JSON.stringify({schemaVersion:1,managerId:'engine',version:'1.0',upstreamRevision:revision,platform:'darwin',arch,minimumMacOS:'13.0',executableRelative:'bin/engine',
-  files:[{path:'bin/engine',size:binary.length,mode:0o755,sha256:digest(binary),architectures:cpus},{path:'LICENSE',size:3,mode:0o644,sha256:digest('MIT')}],dependencies:[],notices:[{name:'Engine',license:'MIT',sourceUrl:'https://example.com/engine',path:'LICENSE'}],provenance:{sourceRevision:revision}}));
+ fs.writeFileSync(path.join(input,'manifest.json'),JSON.stringify({schemaVersion:1,managerId:'engine',version:'1.0',upstreamRevision:revision,platform:'darwin',arch,minimumMacOS:'13.0',executableRelative:'bin/engine',files:[{path:'bin/engine',size:binary.length,mode:0o755,sha256:digest(binary),architectures:cpus},{path:'LICENSE',size:3,mode:0o644,sha256:digest('MIT')}],dependencies:[],provenance:{sourceRevision:revision}}));
  return input;
 }
 test('manager outputs declare the Mac CPUs of their architecture',async t=>{

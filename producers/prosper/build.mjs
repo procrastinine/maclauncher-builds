@@ -1,3 +1,4 @@
+import sharedDependencies from '../dependencies.json' with {type:'json'};
 import {gitlink} from '../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10,8 +11,8 @@ const root=path.resolve(import.meta.dirname,'../..');
 export const recipe=JSON.parse(fs.readFileSync(new URL('./source.json',import.meta.url)));
 recipe.source.revision=gitlink(recipe.source.path);
 export const inputs=JSON.parse(fs.readFileSync(new URL('./dependencies.json',import.meta.url)));
+for(const entry of inputs.dependencies)Object.assign(entry,sharedDependencies[entry.id==='sdl3'?'sdl3Prosper':'vulkanHeaders']);
 inputs.artifacts=JSON.parse(fs.readFileSync(new URL('../anyps5/dependencies.json',import.meta.url))).artifacts.filter(entry=>entry.id==='ffmpeg-macos-x64');
-for(const entry of inputs.dependencies)if(entry.reusePath)Object.defineProperty(entry,'revision',{enumerable:true,get:()=>git(path.join(root,'sources/anyps5'),['rev-parse','HEAD:'+entry.reusePath.replace('sources/anyps5/','')]).trim()});
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
 const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',maxBuffer: Infinity});
@@ -36,7 +37,6 @@ function vulkanInput(library){
  throw Error('Choose a library from an existing managed Vulkan runtime with its source manifest.');
 }
 async function dependency(entry,buildDirectory){
- if(entry.reusePath&&fs.existsSync(path.join(root,entry.reusePath))){const selected=path.join(root,entry.reusePath);verify(entry,selected);return selected;}
  const selected=path.join(buildDirectory,'dependencies',entry.id);
  if(!fs.existsSync(path.join(selected,'.git'))){fs.mkdirSync(path.dirname(selected),{recursive:true});retryNetwork(()=>run('git',['clone','--filter=blob:none','--no-checkout',entry.repository,selected]));}
  try{verify(entry,selected);return selected;}catch{}

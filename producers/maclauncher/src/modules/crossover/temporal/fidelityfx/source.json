@@ -1,16 +1,14 @@
 {
   "schema": 1,
   "id": "fidelityfx-api",
-  "version": "1.0.1-MCLv3",
+  "version": "1.0.1-MCLv6",
   "minimumMacOS": "10.15",
   "profile": "fidelityfx-api-1.0.1-sdk1.1.4",
   "sdk": {
     "repository": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-    "revision": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55",
     "version": "1.1.4",
     "apiVersion": "1.0.1",
     "referenceFileVersion": "1.0.1.41314",
-    "license": "MIT",
     "referenceLibraries": {
       "vk": {
         "path": "PrebuiltSignedDLL/amd_fidelityfx_vk.dll",
@@ -30,15 +28,12 @@
   },
   "vulkan": {
     "repository": "https://github.com/libsdl-org/SDL",
-    "revision": "53dea9830964eee8b5c2a7ee0a65d6e268dc78a1",
     "directory": "src/video/khronos/vulkan",
     "headers": [
       "vulkan.h",
       "vulkan_core.h",
       "vk_platform.h"
-    ],
-    "license": "Apache-2.0",
-    "licenseFile": "Apache-2.0.txt"
+    ]
   },
   "exports": [
     "ffxCreateContext",

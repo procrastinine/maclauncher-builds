@@ -2,9 +2,10 @@
   "schemaVersion": 1,
   "id": "mkxpz",
   "sdlImage": {
-    "repository": "https://github.com/libsdl-org/SDL_image",
-    "revision": "d3c6d5963dbe438bcae0e2b6f3d7cfea23d02829",
     "upstreamWrapRevision": "release-2.6.3",
-    "wrap": "subprojects/sdl2_image.wrap"
+    "wrap": "subprojects/sdl2_image.wrap",
+    "comment": "Commit of MKXP-Z's declared release-2.6.3 wrap; its patches target this source.",
+    "repository": "https://github.com/libsdl-org/SDL_image",
+    "revision": "d3c6d5963dbe438bcae0e2b6f3d7cfea23d02829"
   }
 }

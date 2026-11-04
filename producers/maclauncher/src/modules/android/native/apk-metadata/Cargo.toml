@@ -2,7 +2,6 @@
 name = "android-apk-metadata"
 version = "1.1.0"
 edition = "2024"
-license = "MIT"
 
 [[bin]]
 name = "android-apk-metadata"
@@ -13,6 +12,7 @@ resolver = "2"
 members = ["upstream/crates/aim-apps", "upstream/crates/aim-android-xml", "upstream/tools/android-image-extract"]
 
 [workspace.package]
+# Original upstream workspace members inherit this Cargo metadata field.
 license = "Apache-2.0"
 
 [workspace.dependencies]

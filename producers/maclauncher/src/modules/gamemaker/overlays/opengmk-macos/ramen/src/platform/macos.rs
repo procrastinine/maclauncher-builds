@@ -1,4 +1,4 @@
-// Owned macOS overlay for ramen ef715f65981f6c96f7f889258ff43b63cb472626.
+// Owned macOS overlay for the ramen source gitlink.
 // AppKit stays on the process main thread. Native objects never cross this ABI;
 // window/view pointers are borrowed only for renderer attachment on that thread.
 use crate::{connection, error::Error, event::Event, window};

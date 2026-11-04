@@ -1,3 +1,4 @@
+import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -18,7 +19,7 @@ const digest = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 const hash = file => digest(fs.readFileSync(file));
 if (hash(libraHeader) !== "5d478897c391af3f60015810b67785ae1a286d262a845485276e36ded9f21e62")
   throw new Error("The original librashader C API header changed.");
-const owned = ["CMakeLists.txt", "README.md", "THIRD_PARTY.md", ...["src", "compat"].flatMap(dir =>
+const owned = ["CMakeLists.txt", "README.md", ...["src", "compat"].flatMap(dir =>
   fs.readdirSync(path.join(source, dir), { recursive: true }).map(name => path.join(dir, name))
     .filter(name => fs.statSync(path.join(source, name)).isFile()))].sort();
 const sourceHash = digest(Buffer.concat(owned.map(name => Buffer.concat([Buffer.from(name + "\0"), fs.readFileSync(path.join(source, name))]))));
@@ -33,7 +34,8 @@ for (const entry of overlay.files) {
 if (fs.existsSync(output)) throw new Error("Use a new output directory.");
 const applied = path.join(output, "source");
 fs.mkdirSync(applied, { recursive: true });
-for (const name of [...owned, "LICENSE", ".gitmodules"]) {
+addLicenses(applied,"ReShade",source);
+for (const name of [...owned, ".gitmodules"]) {
   const target = path.join(applied, name);
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.copyFileSync(path.join(source, name), target);

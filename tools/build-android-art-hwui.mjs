@@ -1,3 +1,4 @@
+import {androidSource} from '../lib/android-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -20,7 +21,7 @@ export async function acquireHwuiTools(output){
  fs.mkdirSync(output,{recursive:true});
  const cache=path.join(output,'archives'),archive=await buildInput(profile.protoc,cache),protoc=path.join(output,'protoc');fs.mkdirSync(protoc);
  try{run('/usr/bin/unzip',['-q',archive,'-d',protoc]);fs.accessSync(path.join(protoc,'bin/protoc'),fs.constants.X_OK);fs.accessSync(path.join(protoc,'include/google/protobuf/descriptor.proto'));}finally{fs.rmSync(archive,{force:true});}
- const encoded=await buildInput(profile.hidlGen.transport,cache),bytes=Buffer.from(fs.readFileSync(encoded,'utf8'),'base64');
+ const encoded=await buildInput({...profile.hidlGen.transport,url:profile.hidlGen.repository+'/+/'+profile.hidlGen.revision+'/'+profile.hidlGen.path+'?format=TEXT'},cache),bytes=Buffer.from(fs.readFileSync(encoded,'utf8'),'base64');
  const gitBlob=crypto.createHash('sha1').update('blob '+bytes.length+'\0').update(bytes).digest('hex');
  if(bytes.length!==profile.hidlGen.bytes||sha(bytes)!==profile.hidlGen.sha256||gitBlob!==profile.hidlGen.gitBlob)throw Error('The original HIDL generator differs from its pinned Git object.');
  const hidlGen=path.join(output,'hidl-gen');fs.writeFileSync(hidlGen,bytes,{mode:0o755,flag:'wx'});fs.rmSync(encoded);fs.rmdirSync(cache);
@@ -45,7 +46,7 @@ export function acquireHwuiSources({android,common,work}){
 
 /** Use the shared toolchain flags and an owned Cargo cache for original HWUI. */
 export function artHwuiBuildEnvironment({work,env=process.env}){
- return {...rustEnvironment({work,minimumMacOS:'13.0',env:{...env,CARGO_HOME:path.join(work,'cargo')}}),CARGO_BUILD_JOBS:'2'};
+ return {...rustEnvironment({work,minimumMacOS:'13.0',env}),CARGO_BUILD_JOBS:'2'};
 }
 
 /** Stage the original host tool's declared templates and give it their owned working directory. */
@@ -80,11 +81,11 @@ export async function prepareStatsGenerator({producer,compile,executable,bluepri
 export async function prepareArtHwui({common,image,ndk,work}){
  if(!common?.buildWork||!common?.tools||!path.isAbsolute(image?.root||'')||!path.isAbsolute(ndk||'')||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('HWUI requires completed common source products, the original image, NDK and a new absolute work directory.');
  fs.mkdirSync(work,{recursive:true});
- const android=acquireArtProducer({source:profile.androidSource,work});
+ const android=acquireArtProducer({source:androidSource(),work});
  const {sources,manifest}=acquireHwuiSources({android,common,work:path.join(work,'sources')});
  if(image.contentSha256!==manifest.target.imageContentSha256)throw Error('HWUI requires its original selected Android image ABI.');
  const producer=path.join(work,'producer'),archive=path.join(work,'producer.tar');fs.mkdirSync(producer);
- run('git',['-C',android,'archive','--format=tar','--output='+archive,profile.androidSource.revision,'--','src']);
+ run('git',['-C',android,'archive','--format=tar','--output='+archive,androidSource().revision,'--','src']);
  run('/usr/bin/tar',['-xf',archive,'-C',producer]);fs.rmSync(archive);
  run('git',['apply',path.join(root,profile.buildOverlay)],{cwd:producer,env:{...process.env,GIT_CEILING_DIRECTORIES:path.dirname(producer)}});
  const original=await acquireHwuiTools(path.join(work,'publisher-tools'));
@@ -94,8 +95,7 @@ export async function prepareArtHwui({common,image,ndk,work}){
  const maps=['-ffile-prefix-map='+work+'=/android-hwui-build','-fdebug-prefix-map='+work+'=/android-hwui-build'].join(' ');
  run('cmake',['-S',sources.protobuf,'-B',hostProtobufRoot,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_DEPLOYMENT_TARGET=13.0','-DCMAKE_POLICY_VERSION_MINIMUM=3.12','-DCMAKE_CXX_FLAGS='+maps+' -I'+path.join(sources.protobuf,'android'),'-Dprotobuf_BUILD_TESTS=OFF','-Dprotobuf_BUILD_CONFORMANCE=OFF','-Dprotobuf_BUILD_EXAMPLES=OFF','-Dprotobuf_BUILD_PROTOC_BINARIES=OFF','-Dprotobuf_BUILD_LIBPROTOC=ON','-Dprotobuf_BUILD_SHARED_LIBS=OFF']);
  run('cmake',['--build',hostProtobufRoot,'--parallel','2','--target','libprotobuf','libprotoc']);
- const bin=path.join(ndk,'toolchains/llvm/prebuilt/darwin-x86_64/bin'),compile=path.join(work,'compile'),cargoHome=path.join(work,'cargo');fs.mkdirSync(cargoHome);
- const buildEnvironment=artHwuiBuildEnvironment({work});
+ const buildEnvironment=artHwuiBuildEnvironment({work}),bin=path.join(ndk,'toolchains/llvm/prebuilt/darwin-x86_64/bin'),compile=path.join(work,'compile'),cargoHome=buildEnvironment.CARGO_HOME;fs.mkdirSync(cargoHome);
  const tools={...original,clangxx:path.join(bin,'clang++'),ninja:common.tools.ninja,blueprintParser:common.tools.blueprintParser,
   aidl:common.tools.aidl,aconfig:common.tools.aconfig,python:common.tools.python,rustc:read('which',['rustc']),cargo:read('which',['cargo']),cargoHome,
   libclang:path.resolve(bin,'../lib'),foundationHost,hostProtobufRoot};
@@ -117,9 +117,8 @@ export async function prepareArtHwui({common,image,ndk,work}){
  const {buildAvif}=await import(pathToFileURL(path.join(producer,native,'buildAvif.mjs')));
  const prepared=await buildAvif({...ctx,prepareOnly:true});
  run(tools.cargo,['fetch','--locked','--target','aarch64-linux-android','--manifest-path',path.join(prepared.workspace,'Cargo.toml')],{env:{...prepared.env,CARGO_BUILD_JOBS:'2'}});
- const sysroot=read(tools.rustc,['--print','sysroot']),rustRoot=['share/doc/rust','share/doc/rustc'].map(relative=>path.join(sysroot,relative)).find(directory=>fs.existsSync(path.join(directory,'COPYRIGHT-library.html'))&&fs.existsSync(path.join(directory,'licenses')));
- const licenseInputs={rust:{root:rustRoot||sysroot,version:read(tools.rustc,['--version'])},ndk:{root:ndk,version:'28.2.13676358',files:['NOTICE','NOTICE.toolchain']}};
- return {producer,options:{work:compile,sources,tools,image,licenseInputs,buildEnvironment}};
+
+ return {producer,options:{work:compile,sources,tools,image,buildEnvironment}};
 }
 
 /** Build the unchanged complete HWUI target with sequential source groups and original notices. */

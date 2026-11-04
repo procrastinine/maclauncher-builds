@@ -26,17 +26,17 @@ The recipe compiles FNA, the managed game host and the XNA facade assemblies wit
 
 The managed host runs a game from its original directory. `MACLAUNCHER_FNA_GAME_ROOT` names that directory, which becomes the working directory and the base directory FNA uses for content. Game assemblies resolve first from `MACLAUNCHER_FNA_ASSEMBLY_ROOT`, which holds only copies retargeted for ARM64, and then from the original directory, including culture subdirectories for satellite assemblies. Upstream launchers such as MonoKickstart search only the game directory; the earlier assembly root is MacLauncher's addition for the retargeted copies. With `MACLAUNCHER_FNA_USE_RUNTIME_FRAMEWORK=1`, FNA and the XNA facades load from the package; otherwise the game's own FNA loads. The host's dependency file lists only the host, so the CLR does not bind the package's `FNA.dll` before the host chooses. The game assembly becomes the process entry assembly, as in a direct launch, so FNA names its storage folder and default window title after the game and code that locates content from the entry assembly finds the game's own location. SDL3, FNA3D and FAudio load from the package; an assembly that sets its own native library resolver, as FNA built for .NET 7 or later does, keeps it. Packages with this behavior record `capabilities.originalGamePaths` as `true` both in `fna-runtime.json` and in their catalog records. The host requires `MACLAUNCHER_FNA_GAME_ROOT`, and its package records carry launcher contract 2, so launchers that do not set the variables list these packages as requiring a newer MacLauncher.
 
-The SDL notice collector retains the original SDL, HIDAPI and YUV license files from each declared SDL source. FNA also includes the complete original copyright and permission comments for the fallback math code in its SDL library. The stb notices retain both original license alternatives without packaging the header code.
+Component licence texts use the shared [licence intake](SOURCE_PINS.md#licences) from available source directories.
 
 ## OpenGMK
 
 The recipe keeps the upstream checkouts unchanged and applies the Mac adaptations to owned copies. The ramen window backend uses AppKit, the renderer uses OpenGL and the udon audio dependency uses CoreAudio. Cargo uses [the declared lock](../producers/maclauncher/helper-builds/opengmk.lock) with `--locked`.
 
-Some locked crate archives omit their license texts. [The notice declaration](../producers/opengmk/licenses.json) identifies those exact crate versions, their original author lists and checked notice files. The files contain original upstream notices or the standard SPDX license text with the crate's author attribution. A missing or mismatched notice stops packaging.
+The shared licence intake reads available Cargo source directories. Missing or unreadable texts produce a warning and do not stop packaging.
 
 ## npengine
 
-The recipe reconstructs the exact GStreamer SDK subset from checksum-verified byte ranges in the official runtime and development installers. It decodes their package payloads and selects only the files in the producer's SDK declaration. It does not install a system framework. The source archives named by that declaration and original notices from the matching fontconfig and libpng source revisions supply the dependency notices. The native runner, script compiler, Boost locale library, GLEW and SDL2 are compiled from their declared sources.
+The recipe reconstructs the exact GStreamer SDK subset from checksum-verified byte ranges in the official runtime and development installers. It decodes their package payloads and selects only the files in the producer's SDK declaration. It does not install a system framework. The native runner, script compiler, Boost locale library, GLEW and SDL2 are compiled from their declared sources.
 
 ## Impacto
 

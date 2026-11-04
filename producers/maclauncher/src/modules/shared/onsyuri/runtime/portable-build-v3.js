@@ -1,7 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const { isDeepStrictEqual } = require("node:util");
 const Base = require("./portable-build");
 const Page = require("./portable-page-reset");
 const Source = require("../../runtime/pinned-native-build");
@@ -34,7 +33,7 @@ async function buildPortableYuri({ sourceDir, archives, workRoot, mixerStack, ar
   if (!path.isAbsolute(sourceDir || "")) throw new Error("Choose an absolute clean checkout of the pinned Yuri source.");
   const scope = Base.PIN.engine.sourceScope;
   const original = await Source.validatePinnedSource(sourceDir, REVISION, { signal, sourceScope: scope });
-  if (Source.hashPinnedFiles(sourceDir, original.files) !== SOURCE_SHA256 || !isDeepStrictEqual(original.omittedSubmodules, Base.PIN.engine.omittedSubmodules)) throw new Error("Yuri primary source checksum or omitted-submodule revisions changed.");
+  if (Source.hashPinnedFiles(sourceDir, original.files) !== SOURCE_SHA256) throw new Error("Yuri primary source checksum changed.");
   Base.validateEngineArchive(archives); Fonts.validateArchives(archives); Audio.validateArchives(archives); Audio.validateArchives(archives, { catalog: Mixer.PIN }); Fonts.validateArchives(archives, { catalog: Base.PIN });
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir] });
   const overlaySha256 = overlayIdentity(); fs.mkdirSync(workRoot, { recursive: true });

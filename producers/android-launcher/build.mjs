@@ -1,4 +1,3 @@
-import {addLicense} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -15,9 +14,9 @@ const definitions={
  privacy:{sources:['PrivacyAgent.java','PrivacyBridge.java','AuthBridge.java','JsonRpc.java','IconPreparation.java','AccountControl.java','Capabilities.java'].map(name=>'providers/macapk/java/'+name),
   level:17,date:'2026-10-19T00:00:00Z',output:'providers/macapk/resources/privacy.jar',premain:'com.maclauncher.android.macapk.PrivacyAgent'},
  'text-input':{sources:['text-input/java/maclauncher/android/framework/HostTextInput.java'],
-  level:21,date:'2026-10-21T00:00:00Z',output:'resources/text-input.jar',license:'text-input.LICENSE',metadata:'resources/text-input.json'},
+  level:21,date:'2026-10-21T00:00:00Z',output:'resources/text-input.jar',metadata:'resources/text-input.json'},
  'account-control':{sources:['store/java/maclauncher/android/AccountControl.java','store/java/maclauncher/android/framework/HostAccountAccess.java'],
-  level:21,date:'2026-10-21T00:00:00Z',output:'store/resources/account-control.jar',license:'account-control.LICENSE',metadata:'store/resources/account-control.json'}
+  level:21,date:'2026-10-21T00:00:00Z',output:'store/resources/account-control.jar',metadata:'store/resources/account-control.json'}
 };
 function regular(file){const stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink())throw Error('Build inputs must be regular files.');return fs.readFileSync(file);}
 function directory(value,label){if(!path.isAbsolute(value||''))throw Error(label+' requires an absolute directory.');const actual=fs.realpathSync(value);if(!fs.statSync(actual).isDirectory())throw Error(label+' requires a directory.');return actual;}
@@ -60,7 +59,6 @@ export function build({jdk,classpath,output,only=Object.keys(definitions)}){
    }
    result.push({component:name,path:definition.output,sha256,bytes:fs.statSync(target).size,javaMajor:definition.level});
   }
-  addLicense(output,'android-launcher',path.join(root,'supplied/LICENSE'));
   return result;
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
  finally{fs.rmSync(temporary,{recursive:true,force:true});}

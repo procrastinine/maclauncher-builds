@@ -17,11 +17,10 @@ function temporary(t) {
 test("portable dependency archives bind exact sizes and hashes and reject aliases or missing inputs", t => {
   const root = temporary(t), file = path.join(root, "source.tar.gz"), bytes = Buffer.from("source archive fixture");
   fs.writeFileSync(file, bytes);
-  const pin = { id: "fixture", version: "1.0", revision: "a".repeat(40), archiveSha256: crypto.createHash("sha256").update(bytes).digest("hex"),
-    archiveBytes: bytes.length, archiveUrl: "https://example.invalid/source.tar.gz", notices: ["LICENSE"], options: ["-DFEATURE=ON"] };
+  const pin = {id: "fixture",version: "1.0",revision: "a".repeat(40),archiveSha256: crypto.createHash("sha256").update(bytes).digest("hex"),archiveBytes: bytes.length,archiveUrl: "https://example.invalid/source.tar.gz",options: ["-DFEATURE=ON"]};
   const catalog = { schemaVersion: 1, version: "fixture-v1", architecture: "arm64", minimumMacOS: "13.0", dependencies: [pin] };
   assert.deepEqual(Fonts.validateArchives({ fixture: file }, { catalog }), [pin]);
-  assert.equal(Fonts.validateArchives({ fixture: file }, { catalog: { ...catalog, dependencies: [{ ...pin, notices: ["../LICENSE"] }] } }).length, 1);
+  assert.equal(Fonts.validateArchives({ fixture: file }, { catalog: { ...catalog, dependencies: [{...pin}] } }).length, 1);
   const alias = path.join(root, "alias.tar.gz"); fs.symlinkSync(file, alias);
   assert.throws(() => Fonts.validateArchives({ fixture: alias }, { catalog }), /checksum or size/);
   assert.throws(() => Fonts.validateArchives({}, { catalog }), /checksum or size/);

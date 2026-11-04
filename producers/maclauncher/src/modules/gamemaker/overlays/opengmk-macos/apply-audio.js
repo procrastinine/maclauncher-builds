@@ -1,8 +1,9 @@
+const { gitlink } = require("../../../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 
-const REVISION = "1ae3cdce620acdaa7996315c05a98a0f12ed8745";
+const REVISION = gitlink("producers/maclauncher/src/external/udon");
 const SOURCE_SHA256 = "78ea114057135516af51270bce24db32b3eab18b83c12aba9d2aadff1df0d778";
 const OVERLAY_VERSION = "maclauncher-coreaudio-build-1";
 const digest = bytes => crypto.createHash("sha256").update(bytes).digest("hex");

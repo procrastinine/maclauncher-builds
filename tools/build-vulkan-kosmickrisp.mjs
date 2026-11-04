@@ -1,4 +1,6 @@
-import {sourceNotices} from './build-source.mjs';
+import {checkoutSource} from './build-source.mjs';
+import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
+import {gitlink} from '../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -19,10 +21,8 @@ export async function buildKosmicKrisp({project:id,arch,output,work}){
  const spirv=await buildSpirvTools({work:path.join(work,'spirv-tools'),ninja,python:tools.python,architecture:arch,jobs:2});
  const zstd=await buildZstd({work:path.join(work,'zstd'),architecture:arch,jobs:2,ninja});
  const built=buildKosmic({source,work:path.join(work,'mesa'),meson,ninja,llvm,architecture:arch,jobs:2,pkgConfigPath:[zstd.pkgConfigPath,spirv.pkgConfigPath,process.env.PKG_CONFIG_PATH].filter(Boolean).join(path.delimiter)});
- const loader=buildKosmicLoader({source:path.join(root,inputs.vulkanLoader.path),headersSource:path.join(root,inputs.vulkanHeaders.path),work:path.join(work,'loader'),architecture:arch,jobs:2});
- const notices=[...spirv.notices,...zstd.notices,{file:path.join(source,'docs/license.rst'),name:'Mesa',license:'MIT and upstream notices',sourceUrl:pin.repository},{file:loader.loaderNotice,name:'Vulkan-Loader',license:'Apache-2.0',sourceUrl:inputs.vulkanLoader.repository}];
- notices.push(...sourceNotices(path.join(source,'licenses'),{all:true,name:'Mesa',repository:pin.repository}));
- return sealRuntime({project:id,arch,output,sourceRoot:source,upstreamRevision:pin.revision,executable:built.library,executableRelative:pin.library,maximumMacOS:'26.0',notices,
-  payloads:[{source:loader.loader,relative:'libvulkan.1.dylib'}],runtimeFiles:{loader:'libvulkan.1.dylib'},provenance:{targetInputs:observedInputs,spirvToolsSource:spirv.provenance,zstdSource:zstd.provenance,capabilities:{openglES:'3.2',geometry:'Mesa Poly',transformFeedback:'Mesa Poly'}}});
+ const loader=buildKosmicLoader({source:path.join(root,inputs.vulkanLoader.path),headersSource:checkoutSource({...sharedDependencies.vulkanHeaders,destination:path.join(work,'vulkan-headers')}),work:path.join(work,'loader'),architecture:arch,jobs:2});
+
+ return sealRuntime({project:id,arch,output,sourceRoot:source,upstreamRevision:gitlink(pin.gitlink),executable:built.library,executableRelative:pin.library,maximumMacOS:'26.0',payloads:[{source:loader.loader,relative:'libvulkan.1.dylib'}],runtimeFiles:{loader:'libvulkan.1.dylib'},provenance:{targetInputs:observedInputs,spirvToolsSource:spirv.provenance,zstdSource:zstd.provenance,capabilities:{openglES:'3.2',geometry:'Mesa Poly',transformFeedback:'Mesa Poly'}}});
 }
 recipeMain(import.meta,buildKosmicKrisp);

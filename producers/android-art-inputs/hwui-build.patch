@@ -2,14 +2,13 @@ diff --git a/src/modules/android/native/hwui/build.mjs b/src/modules/android/nat
 index 8427ef1..221952b 100644
 --- a/src/modules/android/native/hwui/build.mjs
 +++ b/src/modules/android/native/hwui/build.mjs
-@@ -21,5 +21,6 @@ export async function buildHwui(options) {
-  const prepared=options.preparedLicenses;
+@@ -21,4 +21,5 @@ export async function buildHwui(options) {
   const ctx=await prepareHwuiInputs(options);
 + ctx.buildEnvironment=options.buildEnvironment;
   for(const name of ['clangxx','ninja','blueprintParser','aidl','aconfig','protoc','python','syspropCpp','statsLogApiGen','hidlGen','rustc','cargo','cargoHome','libclang'])if(!ctx.tools[name])throw Error('An explicit HWUI build tool is required: '+name);
   const sysroot=ctx.tools.sysroot||path.join(path.dirname(path.dirname(ctx.tools.clangxx)),'sysroot');
   const configFile=path.join(sysroot,'usr/include/c++/v1/__config_site');let config=fs.readFileSync(configFile,'utf8');
-@@ -35,7 +36,7 @@ export async function buildHwui(options) {
+@@ -35,6 +36,6 @@ export async function buildHwui(options) {
   await buildCore({...ctx,build:false});
   // Each target owns a separate output/depfile directory; all use the same
   // original class definition and explicit source/tool inputs.
@@ -17,7 +16,6 @@ index 8427ef1..221952b 100644
 + for (const build of [buildCore,buildStatics,buildAvif,buildGenerated,buildPerfetto]) await build(ctx);
   await prepareLinkInputs(ctx);
   const product=validateHwui(ctx,await linkHwui(ctx));
-  const licenses=prepared?{root:prepared,sourceRecords:options.preparedSourceRecords}:await (await import('./licenses.mjs')).collectHwuiLicenses(ctx,options.licenseInputs||{});
 diff --git a/src/modules/android/native/hwui/buildAvif.mjs b/src/modules/android/native/hwui/buildAvif.mjs
 index c2fe0f3..a2615c8 100644
 --- a/src/modules/android/native/hwui/buildAvif.mjs
@@ -43,7 +41,7 @@ index c2fe0f3..a2615c8 100644
 +export function avifBuildEnvironment({tools,repo,source,output,bin,env=process.env}) {
 + const inherited=env.CARGO_ENCODED_RUSTFLAGS?env.CARGO_ENCODED_RUSTFLAGS.split(String.fromCharCode(31)):(env.RUSTFLAGS||'').split(/\s+/).filter(Boolean);
 + const flags=[...inherited,'--cfg','android_soong','-C','panic=abort','-C','relocation-model=pic','--remap-path-prefix='+repo+'=/src/maclauncher','--remap-path-prefix='+source+'=/src/aosp','--remap-path-prefix='+output+'=/src/android-hwui/avif'];
-+ const result={...env,CARGO_HOME:tools.cargoHome,RUSTC:tools.rustc,CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER:path.join(bin,'aarch64-linux-android35-clang'),LIBCLANG_PATH:tools.libclang,CARGO_ENCODED_RUSTFLAGS:flags.join(String.fromCharCode(31)),CARGO_TARGET_DIR:path.join(output,'cargo-target')};
++ const result={...env,RUSTC:tools.rustc,CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER:path.join(bin,'aarch64-linux-android35-clang'),LIBCLANG_PATH:tools.libclang,CARGO_ENCODED_RUSTFLAGS:flags.join(String.fromCharCode(31)),CARGO_TARGET_DIR:path.join(output,'cargo-target')};
 + delete result.RUSTFLAGS;return result;
 +}
 diff --git a/src/modules/android/native/hwui/buildStatics.mjs b/src/modules/android/native/hwui/buildStatics.mjs

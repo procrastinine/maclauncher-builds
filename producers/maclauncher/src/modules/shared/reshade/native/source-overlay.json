@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "baseSourceHash": "e51a17a502fcfbed87bf868c0b555ad160466002f8856c14e4732ed7fc6bba5b",
+  "baseSourceHash": "10266c6b10f2197f27a8598166373f5aeaf05e42c99d7e0c74723628c6c6ca06",
   "files": [
     {
       "source": "../temporal/command-order.hpp",
@@ -99,11 +99,6 @@
     {
       "path": "src/color-island.hpp",
       "source": "color-island.hpp",
-      "baseSha256": null
-    },
-    {
-      "path": "src/color-tone-mapping-LICENSE.txt",
-      "source": "color-tone-mapping-LICENSE.txt",
       "baseSha256": null
     },
     {
@@ -943,16 +938,6 @@
     {
       "source": "cmaa2-source.json",
       "path": "src/cmaa2-source.json",
-      "baseSha256": null
-    },
-    {
-      "source": "cmaa2-APACHE-2.0.txt",
-      "path": "src/cmaa2-APACHE-2.0.txt",
-      "baseSha256": null
-    },
-    {
-      "source": "cmaa2-THIRD-PARTY.txt",
-      "path": "src/cmaa2-THIRD-PARTY.txt",
       "baseSha256": null
     },
     {

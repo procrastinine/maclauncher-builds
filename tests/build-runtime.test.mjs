@@ -28,10 +28,11 @@ test('runtime builds require the exact clean source commit recorded by the hub',
  git(source,'add','tools');git(source,'commit','-qm','Runtime source');const revision=git(source,'rev-parse','HEAD');
  git(root,'init','-q');git(root,'config','user.name','Build test');git(root,'config','user.email','test@example.invalid');
  git(root,'update-index','--add','--cacheinfo',`160000,${revision},sources/android`);git(root,'commit','-qm','Pin producer');
- const recipe={schemaVersion:1,id:'android',revision,path:'sources/android',buildEntry:'tools/build.mjs',checkEntry:'tools/check-sources.mjs'};
+ const recipe={schemaVersion:1,id:'android',path:'sources/android',buildEntry:'tools/build.mjs',checkEntry:'tools/check-sources.mjs'};
  assert.equal(verifyProducer(root,recipe),source);
- assert.throws(()=>verifyProducer(root,{...recipe,revision:'0'.repeat(40)}),/pinned/);
+ assert.equal(recipe.revision,revision);
  fs.appendFileSync(path.join(source,'tools/build.mjs'),'// changed\n');assert.throws(()=>verifyProducer(root,recipe),/local changes/);
+ git(source,'add','tools');git(source,'commit','-qm','Changed producer');assert.throws(()=>verifyProducer(root,recipe),/selected revision/);
 });
 
 // A registry with one GitHub-built project and a command that writes a data-only package.
@@ -49,7 +50,7 @@ const files={'manifest.json':JSON.stringify({version:'1.0.0',arch:o.arch}),'LICE
 for(const [name,bytes] of Object.entries(files))fs.writeFileSync(path.join(payload,name),bytes,{mode:0o644});
 const record=name=>({path:name,size:Buffer.byteLength(files[name]),mode:0o644,sha256:crypto.createHash('sha256').update(files[name]).digest('hex')});
 const cpus=o.arch==='arm64'?['arm64']:o.arch==='x64'?(process.env.ENGINE_CPUS||'arm64,x64').split(','):['arm64','x64'];
-fs.writeFileSync(path.join(o.output,'declaration.json'),JSON.stringify({id:o.project,version:'1.0.0',arch:o.arch,launcherArchitectures:cpus,minimumMacOS:'13.0',directoryRelative:o.project+'/1.0.0/'+o.arch,manifestRelative:'manifest.json',manifestSha256:record('manifest.json').sha256,sourceSha256:record('manifest.json').sha256,sourceRelative:'manifest.json',files:Object.keys(files).map(record),notices:[{name:'Engine',license:'MIT',path:'LICENSE'}]}));
+fs.writeFileSync(path.join(o.output,'declaration.json'),JSON.stringify({id:o.project,version:'1.0.0',arch:o.arch,launcherArchitectures:cpus,minimumMacOS:'13.0',directoryRelative:o.project+'/1.0.0/'+o.arch,manifestRelative:'manifest.json',manifestSha256:record('manifest.json').sha256,sourceSha256:record('manifest.json').sha256,sourceRelative:'manifest.json',files:Object.keys(files).map(record)}));
 if(process.env.ENGINE_EXTRA)fs.writeFileSync(path.join(o.output,'extra.txt'),'extra');
 `);
  return root;
@@ -134,7 +135,7 @@ test('a VNDS-LOVE package revision preserves engine files and historical packagi
  const release=await prepareRelease({project:'vnds-love',input,declaration,output:path.join(work,'release')});
  assert.equal(release.id,'vnds-love');
  const actual=JSON.parse(fs.readFileSync(built.declaration));
- assert.deepEqual(actual.files.filter(row=>row.path!=='manifest.json'&&row.path!=='package-notice.txt'),declaration.files.filter(row=>row.path!=='manifest.json'&&row.path!=='package-notice.txt'));
+ assert.deepEqual(actual.files.filter(row=>row.path!=='manifest.json'),declaration.files.filter(row=>row.path!=='manifest.json'));
 });
 
 test('build jobs cannot mutate repository contents',()=>{

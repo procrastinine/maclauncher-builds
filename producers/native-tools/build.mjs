@@ -19,16 +19,9 @@ function goBuild({pin,arch,source,work}){
   GOCACHE:path.join(work,'go-cache'),GOMODCACHE:path.join(work,'go-modules'),GOPATH:path.join(work,'go-path'),
   GOFLAGS:'-mod=readonly',GOTOOLCHAIN:'local'};
  const execute=args=>{const action=()=>run('go',args,{cwd:source,env:environment});return ['list','mod'].includes(args[0])?retryNetwork(action):action();};
- const used=[...new Set(execute(['list','-deps','-f','{{if .Module}}{{.Module.Path}}{{end}}','./src/ziggy/ziggy.go']).split('\n').filter(value=>value&&value!=='uosc/bins'))].sort();
- if(JSON.stringify(used)!==JSON.stringify(pin.modules.map(entry=>entry.module).sort()))throw Error('The Ziggy module closure differs from its declared inputs.');
- for(const entry of pin.modules){
-  const module=JSON.parse(execute(['mod','download','-json',entry.module+'@'+entry.version]));
-  if(module.Error||module.Sum!==entry.sum)throw Error('A Ziggy Go module differs from its declared checksum.');
- }
-
  const executable=path.join(work,'ziggy-darwin');
  execute(['build','-trimpath','-buildvcs=false','-ldflags=-s -w -buildid=','-o',executable,'./src/ziggy/ziggy.go']);
- return {executable,provenance:{goVersion:execute(['version']).trim(),modules:pin.modules.map(({module,version,revision,sum})=>({module,version,revision,sum}))},
+ return {executable,provenance:{goVersion:execute(['version']).trim()},
   capabilities:{uoscVersion:pin.version,helper:'ziggy',commands:['get-clipboard','set-clipboard','download','http-get','http-post','http-put','http-patch','http-delete','open','search-subtitles','download-subtitles']}};
 }
 

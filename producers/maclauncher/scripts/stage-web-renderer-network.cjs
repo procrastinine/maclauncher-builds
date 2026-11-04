@@ -1,7 +1,6 @@
-const {addLicense} = require('../../../lib/licenses.mjs');
 // Build the invisible Node-API network boundary included with the launcher.
-// The payload holds the binary, its build record and the license; the source
-// stays in the producer repository and is identified by its checksum.
+// The payload holds the binary and its build record. The source stays in the
+// producer repository and is identified by its checksum.
 const fs = require('node:fs');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
@@ -26,8 +25,6 @@ function stage({ output }) {
     if (JSON.stringify(architectures) !== JSON.stringify(['arm64', 'x86_64'])) throw new Error('Both Mac architectures are required.');
     const minimumMacOS = loadCommands(binary).minimumMacOS;
     if (minimumMacOS !== '11.0') throw new Error('Unexpected browser network helper deployment target.');
-    addLicense(directory,'MacLauncher',path.resolve(__dirname, '../LICENSE'),'MIT');
-    fs.chmodSync(path.join(directory, 'license.txt'), 0o644);
     const manifest = { schemaVersion: 1, id: ID, version: VERSION, sourceSha256: Native.hashFile(source),
       binarySha256: Native.hashFile(binary), minimumMacOS, architectures, nodeAPI: 1,
       scope: 'node-capable-game-renderer-network', build: {

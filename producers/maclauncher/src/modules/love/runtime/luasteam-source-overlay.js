@@ -1,12 +1,12 @@
+const {gitlink} = require("../../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const INPUTS = require("./luasteam-source-inputs.json");
 
 const VERSION = "4.0.2-MCLv1";
-const SOURCE_REVISION = "fbb72bd22c0c526f4276800024967323acd9d10d";
-const LUA_HEADERS_REVISION = "45b771bb2c693a4cc7e34e79b7d30ab10bb7776a";
-const SDK_HEADERS_REVISION = "494c2d680b9e47bbc369496b57568f44ef2f6796";
+const SOURCE_REVISION = gitlink("producers/maclauncher/src/external/luasteam");
+const SDK_HEADERS_REVISION = gitlink("producers/maclauncher/src/external/SteamworksSDK");
 const SDK_VERSION = "1.63";
 const HOST_LUA_ABI = "Lua 5.1 C API";
 
@@ -25,7 +25,7 @@ function canonicalDestination(directory) {
 }
 
 /** Stage reviewed sources and headers only. A second Lua VM is never linked. */
-function stageSource({ roots, destination, inputs = INPUTS } = {}) {
+function stageSource({ roots, destination, luaHeadersRevision, inputs = INPUTS } = {}) {
   if (!path.isAbsolute(destination || "") || !roots || !Array.isArray(inputs) || !inputs.length)
     throw new Error("Explicit source roots and a fresh absolute LuaSteam build directory are required.");
   destination = canonicalDestination(destination);
@@ -59,7 +59,7 @@ function stageSource({ roots, destination, inputs = INPUTS } = {}) {
     fs.writeFileSync(target, bytes, { flag: "wx", mode: 0o644 });
     records.push({ ...input });
   }
-  return { version: VERSION, sourceRevision: SOURCE_REVISION, luaHeadersRevision: LUA_HEADERS_REVISION,
+  return { version: VERSION, sourceRevision: SOURCE_REVISION, luaHeadersRevision,
     sdkHeadersRevision: SDK_HEADERS_REVISION, sdkVersion: SDK_VERSION, hostLuaAbi: HOST_LUA_ABI,
     sourceTreeSha256: sha256(JSON.stringify(records)), files: records };
 }
@@ -78,5 +78,5 @@ function compilerArguments({ sourceRoot, architecture, steamLibraryPath, outputP
     "-Wl,-headerpad_max_install_names", "-Wl,-install_name,@loader_path/luasteam.so", "-o", outputPath];
 }
 
-module.exports = { VERSION, SOURCE_REVISION, LUA_HEADERS_REVISION, SDK_HEADERS_REVISION, SDK_VERSION, HOST_LUA_ABI,
+module.exports = { VERSION, SOURCE_REVISION, SDK_HEADERS_REVISION, SDK_VERSION, HOST_LUA_ABI,
   stageSource, compilerArguments, sha256, INPUTS };

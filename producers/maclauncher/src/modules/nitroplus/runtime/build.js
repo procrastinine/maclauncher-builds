@@ -1,17 +1,11 @@
+const { gitlink } = require("../../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 
 const VERSION = "0.5.3-macos-v7";
-const LEGACY_VERSION = "0.5.3-macos-v1";
-const V2_VERSION = "0.5.3-macos-v2";
-const V3_VERSION = "0.5.3-macos-v3";
-const V4_VERSION = "0.5.3-macos-v4";
-const V5_VERSION = "0.5.3-macos-v5";
-const PREVIOUS_VERSION = "0.5.3-macos-v6";
-const SUPPORTED_VERSIONS = Object.freeze([VERSION, PREVIOUS_VERSION, V5_VERSION, V4_VERSION, V3_VERSION, V2_VERSION, LEGACY_VERSION]);
 const PROFILE_REVISION = "macos-npa-nss-private-v7";
-const REVISION = "da1a175e6b497c37f9714b77510cb47c0930cd42";
-const NPA_REVISION = "5bdf666155d828d9ef4003fd9dc39e154aa4b0f1";
+const REVISION = gitlink("producers/maclauncher/src/external/libnpengine");
+const NPA_REVISION = gitlink("producers/maclauncher/src/external/libnpa");
 const sourcePath = path.resolve(__dirname, "../../../external/libnpengine");
 const npaSourcePath = path.resolve(__dirname, "../../../external/libnpa");
 const ChoiceOverlay = require("./choice-overlay");
@@ -170,4 +164,4 @@ function adaptSource(root) {
   for (const file of ["main.cpp", "private-files.cpp", "text-markup.cpp", "text-markup.hpp"]) fs.copyFileSync(path.join(__dirname, "native", file), path.join(root, file));
 }
 
-module.exports = { VERSION, LEGACY_VERSION, V2_VERSION, V3_VERSION, V4_VERSION, V5_VERSION, PREVIOUS_VERSION, SUPPORTED_VERSIONS, PROFILE_REVISION, REVISION, NPA_REVISION, sourcePath, npaSourcePath, PLUGINS, sourcePathFlags, adaptObjectSources, adaptSource };
+module.exports = { VERSION, PROFILE_REVISION, REVISION, NPA_REVISION, sourcePath, npaSourcePath, PLUGINS, sourcePathFlags, adaptObjectSources, adaptSource };

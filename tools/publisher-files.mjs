@@ -66,11 +66,11 @@ function compareSupplied(declaration,input){
 }
 function validateMetadata(declaration,extra,rows){
  if(!Array.isArray(rows)||rows.length!==extra.length)fail('every additional metadata file needs its bounded original bytes.');
- const map=new Map(),notices=new Set(declaration.notices.map(notice=>notice.path));let total=0;
+ const map=new Map();let total=0;
  for(const row of rows){if(!keys(row,['path','base64'])||!text(row.path)||typeof row.base64!=='string'||row.base64.length>Math.ceil(A.LIMITS.metadataBytes*4/3)||map.has(row.path))fail('invalid bounded metadata contents.');const bytes=Buffer.from(row.base64,'base64');if(bytes.toString('base64')!==row.base64||(total+=bytes.length)>A.LIMITS.metadataBytes)fail('metadata content exceeds its bounds.');map.set(row.path,bytes);}
  for(const file of extra){
   const json=file.path===declaration.manifestRelative||file.path===declaration.sourceRelative;
-  if(![0o640,0o644].includes(file.mode)||file.architectures||file.format||file.executionArchitecture||file.optionalLoad||!json&&!notices.has(file.path)||json&&!file.path.endsWith('.json')||/\.(?:mjs|cjs|js|py|sh|rb|jar|wasm|so|dylib|exe|dll|bat|cmd|zip|gz|tar|xz|zst|7z)$/i.test(file.path))fail('extra production code is not supplied metadata: '+file.path);
+  if(![0o640,0o644].includes(file.mode)||file.architectures||file.format||file.executionArchitecture||file.optionalLoad||!json||json&&!file.path.endsWith('.json')||/\.(?:mjs|cjs|js|py|sh|rb|jar|wasm|so|dylib|exe|dll|bat|cmd|zip|gz|tar|xz|zst|7z)$/i.test(file.path))fail('extra production code is not supplied metadata: '+file.path);
   const bytes=map.get(file.path);if(!bytes||bytes.length!==file.size||hash(bytes)!==file.sha256)fail('additional metadata differs from its declared bytes: '+file.path);
   let content;try{content=new TextDecoder('utf-8',{fatal:true}).decode(bytes);}catch{fail('additional metadata must be UTF-8 text.');}
   if(content.includes('\0')||content.startsWith('#!'))fail('additional metadata cannot be binary or executable script content.');

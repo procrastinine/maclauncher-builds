@@ -2,7 +2,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
-import source from './source.json' with {type:'json'};
+import definition from './source.json' with {type:'json'};
+import image from '../../../../../../../producers/android-image-data/source.json' with {type:'json'};
+import {gitlink} from '../../../../../../../lib/pins.mjs';
+const source={...definition,commit:gitlink('producers/maclauncher/src/external/aim'),androidImage:{...image.archive,...definition.androidImage,size:image.archive.bytes}};
 
 export {source};
 

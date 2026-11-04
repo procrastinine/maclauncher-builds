@@ -1,3 +1,4 @@
+const { gitlink } = require("../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -5,8 +6,9 @@ const Archive = require("./archive");
 const { readPeVersion } = require("../shared/runtime/pe-version");
 const manifest = require("./manifest.json");
 
-const IMPACTO = Object.freeze({ version: "0.10.8.810", revision: "ba51381fb65da70697be29e6a817dc4af5c98d19",
-  source: "https://github.com/CommitteeOfZero/impacto/tree/ba51381fb65da70697be29e6a817dc4af5c98d19",
+const IMPACTO_REVISION = gitlink("producers/maclauncher/src/external/impacto");
+const IMPACTO = Object.freeze({ revision: IMPACTO_REVISION,
+  source: `https://github.com/CommitteeOfZero/impacto/tree/${IMPACTO_REVISION}`,
   support: "https://github.com/CommitteeOfZero/impacto/issues/1" });
 const LIMITS = Object.freeze({ roots: 32, directoryEntries: 4096, archives: 64, totalIndexBytes: 24 * 1024 * 1024,
   scripts: 1024, scriptBytes: 64 * 1024 * 1024, bootStoredBytes: 1024 * 1024, bootDecodedBytes: 1024 * 1024 });
@@ -72,8 +74,8 @@ function compatibility(edition) {
   if (manifest.supports.launch && edition === "steins-gate-windows-hd")
     return "Runs the Windows HD data profile with native input, voice, sound effects and Bink 2 video.";
   return edition === "steins-gate-windows-hd"
-    ? `Impacto ${IMPACTO.version} has no Windows STEINS;GATE profile. Its STEINS;GATE profile targets English PS3 CPK data and the SGPS3 instruction set.`
-    : `Native gameplay is unavailable: no compatible Windows MPK/SC3 game profile is available for Impacto ${IMPACTO.version}.`;
+    ? `Impacto has no Windows STEINS;GATE profile. Its STEINS;GATE profile targets English PS3 CPK data and the SGPS3 instruction set.`
+    : `Native gameplay is unavailable: no compatible Windows MPK/SC3 game profile is available for Impacto.`;
 }
 
 function inspectLayout(layout, { inputPath, detection } = {}) {

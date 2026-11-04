@@ -31,7 +31,7 @@ test('producer records and consumers share generic capability and exact source v
  assert.throws(()=>releaseRecord({...value,accessToken:'private'},options),/Invalid|private/);
 });
 
-test('generated contract and bundle verifier copies are hash-pinned and refresh rejects drift',async t=>{
+test('remaining shared-library copies are hash-pinned and refresh rejects drift',async t=>{
  const fixture=fs.mkdtempSync(path.join(os.tmpdir(),'native-contract-copy-'));t.after(()=>fs.rmSync(fixture,{recursive:true,force:true}));
  const producer=path.join(root,'producers/maclauncher'),targetProducer=path.join(fixture,'builds/producers/maclauncher'),sourceRoot=path.join(fixture,'source');
  fs.mkdirSync(targetProducer,{recursive:true});
@@ -49,7 +49,7 @@ test('generated contract and bundle verifier copies are hash-pinned and refresh 
  }
  const {refreshNativeTools}=await import(pathToFileURL(path.join(targetProducer,'refresh-native-tools.mjs')));
  assert.equal(refreshNativeTools(sourceRoot,{check:true}).files,recipe.files.length);
- const row=recipe.files.find(row=>row.destination==='lib/package-contract.cjs');assert.ok(row);
+ const row=recipe.files.find(row=>row.destination==='lib/macho-load-commands.cjs');assert.ok(row);
  const target=path.join(fixture,'builds',row.destination);fs.appendFileSync(target,'\n');
  assert.throws(()=>refreshNativeTools(sourceRoot,{check:true}),/local changes/);
  assert.throws(()=>refreshNativeTools(sourceRoot),/local changes/);

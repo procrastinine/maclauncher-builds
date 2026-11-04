@@ -1,4 +1,4 @@
-import {addLicense} from '../lib/licenses.mjs';
+import {addLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -11,10 +11,9 @@ export function buildIOSHelper({project:id,arch,output,work}){
  fs.mkdirSync(payload,{recursive:true});fs.mkdirSync(work,{recursive:true});
  try {
   execFileSync(process.execPath,[path.join(source,'build.mjs'),payload],{maxBuffer:Infinity,stdio:'inherit',env:{...process.env,CLANG_MODULE_CACHE_PATH:path.join(work,'clang-modules'),SWIFT_MODULECACHE_PATH:path.join(work,'swift-modules')},timeout:120000});
-  addLicense(payload,'MacLauncher PlayTools storage adapter',path.join(root,'producers/maclauncher/LICENSE'),'MIT');
+  addLicenses(payload,'MacLauncher',root);
   const library=path.join(payload,'libplaytools-paths.dylib');
-  return helperPackage({id,version:project.build.version,arch,output,minimumMacOS:'12.0',sourceSha256:sha(path.join(source,'playtools-paths.swift')),
-   record:{binarySha256:sha(library),scope:'private-playtools-file-url-and-vendor-identifier',build:{signing:'ad-hoc',installName:'@rpath/libplaytools-paths.dylib'}},notices:[{name:'MacLauncher PlayTools storage adapter',license:'MIT',path:'licenses/PlayTools-paths.txt'}]});
+  return helperPackage({id,version:project.build.version,arch,output,minimumMacOS:'12.0',sourceSha256:sha(path.join(source,'playtools-paths.swift')),record:{binarySha256:sha(library),scope:'private-playtools-file-url-and-vendor-identifier',build:{signing:'ad-hoc',installName:'@rpath/libplaytools-paths.dylib'}}});
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}finally{fs.rmSync(work,{recursive:true,force:true});}
 }
 recipeMain(import.meta,buildIOSHelper);

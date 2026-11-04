@@ -16,10 +16,10 @@ const supplied={'vendor/Player':{bytes:Buffer.from('#!/bin/sh\nexit 0\n'),mode:0
 async function bundle(directory,version,change=()=>{}){
  const files=Object.fromEntries(Object.entries(supplied).map(([name,row])=>[name,{...row}]));
  files['manifest.json']={bytes:Buffer.from(json({version,executableRelative:'vendor/Player'})),mode:0o644};
- const notices=[{name:'Supplied publisher',license:'MIT',path:'vendor/LICENSE'}];change(files,notices);
+ change(files);
  const inventory=Object.entries(files).map(([name,row])=>({path:name,size:row.bytes.length,mode:row.mode,sha256:sha(row.bytes)}));
  const manifest=inventory.find(file=>file.path==='manifest.json');
- const declaration={id,version,arch:'universal',launcherArchitectures:['arm64','x64'],minimumMacOS:'11.0',directoryRelative:id+'/'+version+'/universal',manifestRelative:'manifest.json',manifestSha256:manifest.sha256,sourceRelative:null,sourceSha256:sha('baseline'),files:inventory,notices,redistribution:'bundle'};
+ const declaration={id,version,arch:'universal',launcherArchitectures:['arm64','x64'],minimumMacOS:'11.0',directoryRelative:id+'/'+version+'/universal',manifestRelative:'manifest.json',manifestSha256:manifest.sha256,sourceRelative:null,sourceSha256:sha('baseline'),files:inventory,redistribution:'bundle'};
  const output=fs.mkdtempSync(path.join(directory,'bundle-')),archive=path.join(output,id+'-'+version+'-universal.tar.gz'),bytes=Buffer.from(json(declaration));
  const packed=await Archive.writeArchive([{name:'runtime-package.json',bytes,size:bytes.length,mode:0o644,sha256:sha(bytes)},...inventory.map(file=>({...file,name:'files/'+file.path,bytes:files[file.path].bytes}))],archive);
  const record={schemaVersion:2,id,version,arch:'universal',launcherArchitectures:declaration.launcherArchitectures,minimumMacOS:'11.0',manifestRelative:'manifest.json',manifestSha256:manifest.sha256,sourceSha256:declaration.sourceSha256,updatePolicy:'manual',asset:{filename:path.basename(archive),sha256:packed.sha256,bytes:packed.bytes}};
@@ -56,20 +56,13 @@ test('a prebuilt flag or forged equality flag cannot authorize compiled or chang
 
 test('publisher comparison rejects changed bytes, modes, missing files and extra helpers before writing receipts',async t=>{
  const f=await fixture(t);let index=0;
- for(const change of [files=>{files['vendor/Player'].bytes=Buffer.from('changed executable');},files=>{files['vendor/data'].mode=0o755;},files=>{delete files['vendor/data'];},files=>{files['vendor/extra']={bytes:Buffer.from('helper'),mode:0o755};},files=>{files['adapter.dylib']={bytes:Buffer.from('compiled helper'),mode:0o755};},(files,notices)=>{files['helper.js']={bytes:Buffer.from('console.log(1)'),mode:0o644};notices.push({name:'Fake notice',license:'MIT',path:'helper.js'});}]){
+ for(const change of [files=>{files['vendor/Player'].bytes=Buffer.from('changed executable');},files=>{files['vendor/data'].mode=0o755;},files=>{delete files['vendor/data'];},files=>{files['vendor/extra']={bytes:Buffer.from('helper'),mode:0o755};},files=>{files['adapter.dylib']={bytes:Buffer.from('compiled helper'),mode:0o755};},(files,notices)=>{files['helper.js']={bytes:Buffer.from('console.log(1)'),mode:0o644};}]){
   const changed=await bundle(f.directory,'1.0',change),outputDir=path.join(f.directory,'refused-'+index++);
   await assert.rejects(f.record({...changed,outputDir}),/supplied bytes|omits supplied|extra supplied|metadata|production/);assert.equal(fs.existsSync(outputDir),false);
  }
 });
 
-test('metadata must be bounded non-executable JSON or a declared textual notice',async t=>{
- const f=await fixture(t);
- for(const change of [files=>{files['manifest.json'].bytes=Buffer.from('invalid json');},files=>{files['manifest.json'].mode=0o755;},(files,notices)=>{files['NOTICE']={bytes:Buffer.from([0,1,2]),mode:0o644};notices.push({name:'Notice',license:'MIT',path:'NOTICE'});}]){
-  const changed=await bundle(f.directory,'1.0',change);await assert.rejects(f.record({...changed}),/metadata|UTF-8|binary|JSON/);
- }
- const permitted=await bundle(f.directory,'1.0',(files,notices)=>{files['NOTICE']={bytes:Buffer.from('Publisher license notice\n'),mode:0o644};notices.push({name:'Notice',license:'MIT',path:'NOTICE'});});
- assert.equal((await f.record({...permitted})).kind,'supplied-publisher');
-});
+test('metadata remains non-executable JSON',async t=>{const f=await fixture(t);for(const change of [files=>{files['manifest.json'].bytes=Buffer.from('invalid json');},files=>{files['manifest.json'].mode=0o755;}]){const changed=await bundle(f.directory,'1.0',change);await assert.rejects(f.record({...changed}),/metadata|JSON/);}});
 
 test('actual pinned input and output archives remain mandatory for publication equality',async t=>{
  const f=await fixture(t),badInput=path.join(f.directory,'bad-input.tar.gz'),bytes=fs.readFileSync(f.input.archive);bytes[bytes.length-1]^=1;fs.writeFileSync(badInput,bytes);

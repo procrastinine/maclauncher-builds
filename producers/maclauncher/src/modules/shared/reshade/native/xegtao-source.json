@@ -1,13 +1,9 @@
 {
   "schema": 1,
   "repository": "https://github.com/GameTechDev/XeGTAO",
-  "commit": "a5b1686c7ea37788eeb3576b5be47f7c03db532c",
-  "license": "MIT",
   "source": {
     "schema": 1,
     "repository": "https://github.com/GameTechDev/XeGTAO",
-    "commit": "a5b1686c7ea37788eeb3576b5be47f7c03db532c",
-    "license": "MIT",
     "files": [
       {
         "path": "Source/Rendering/Shaders/XeGTAO.h",
@@ -30,7 +26,7 @@
       "CSApplyAO"
     ]
   },
-  "owned": "b48cd8f49e4970e3405892a82a20ab72a80c5ba8cf683c1e3f917f3e74fa93c5",
+  "owned": "2e37111f59250a29f8f68a23d09341416b94e440057674b8bb54cd117a3dc696",
   "ownedFiles": {
     "wrapper.hlsl": "5ebdb97d74896693d3e82608ccb09083ad8e47c136410c49671bc6d0aa9506f3"
   },
@@ -410,5 +406,6 @@
     "dxc": "cb0a0535c212ac31ca25ff18a3c43270d9a7c379fb2f3c28692cf8c44afee09d",
     "spirv-cross": "00c168bc2bb03a96943023656007591915057e4d1820dd79d8efa32c75628403",
     "spirv-val": "5e6ad0282e525bde7a764bfa3c0de5beca5cf65615fbc5def854c54d13bb9f67"
-  }
+  },
+  "sourceFile": "xegtao/source.json"
 }

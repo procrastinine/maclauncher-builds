@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {addLicense} from '../../../lib/licenses.mjs';
+import {addLicenses} from '../../../lib/licenses.mjs';
 // Developer build and publication of the fixed AIM adaptation. Play uses only
 // this sealed payload and a separately acquired original Android image.
 import fs from 'node:fs';
@@ -48,11 +48,8 @@ function overlaySources(root,manifest,seen=new Set()) {
   }
   return seen;
 }
-function noticeTree(from,payload,component) {
-  try{for(const file of files(from))addLicense(payload,component,path.join(from,file));}catch(error){console.warn('::warning::Notice candidates unavailable: '+error.message);}
-}
-export function stageAim({build,angle,angleNotices,output,writeDistribution=true,environment=process.env,version=source.version}) {
-  build=path.resolve(build);angle=path.resolve(angle);angleNotices=path.resolve(angleNotices||path.join(build,'licenses/angle'));output=path.resolve(output);
+export function stageAim({build,angle,output,writeDistribution=true,environment=process.env,version=source.version}) {
+  build=path.resolve(build);angle=path.resolve(angle);output=path.resolve(output);
   if(fs.existsSync(output))throw new Error('The AIM runtime version already exists. Staging requires a new immutable version.');
   const temporary=output+'.stage-'+process.pid;
   fs.rmSync(temporary,{recursive:true,force:true});
@@ -77,33 +74,10 @@ export function stageAim({build,angle,angleNotices,output,writeDistribution=true
     for(const name of ['libMoltenVK.dylib']) copy(path.join(build,'target/aim/moltenvk',name),path.join(payload,'target/aim/moltenvk',name));
     const molten=path.join(payload,'target/aim/moltenvk/libMoltenVK.dylib');
     if(architecture(molten).length>1) run('/usr/bin/lipo',[molten,'-thin','arm64','-output',molten]);
-    for(const [name,license,from,to,url] of [
-      ['AIM','Apache-2.0',path.join(build,'LICENSE'),'notices/aim/LICENSE','https://github.com/hahnlee/aim'],
-      ['AIM notice','See notice',path.join(build,'NOTICE'),'notices/aim/NOTICE','https://github.com/hahnlee/aim'],
-      ['AIM third-party notices','Multiple',path.join(build,'THIRD_PARTY_NOTICES.md'),'notices/aim/THIRD_PARTY_NOTICES.md','https://github.com/hahnlee/aim'],
-      ['AIM licensing exceptions','Multiple',path.join(build,'LICENSING.md'),'notices/aim/LICENSING.md','https://github.com/hahnlee/aim'],
-      ['MoltenVK','Apache-2.0',path.join(build,'target/aim/moltenvk/LICENSE'),'notices/moltenvk/LICENSE','https://github.com/KhronosGroup/MoltenVK'],
-      ['BoringSSL','ISC AND OpenSSL',path.join(build,'_build/aosp/external/boringssl/src/LICENSE'),'notices/boringssl/LICENSE','https://boringssl.googlesource.com/boringssl'],
-    ]) {addLicense(payload,name,from,license);}
-    const modifications='MacLauncher-modifications.txt';
-    fs.writeFileSync(path.join(payload,modifications),
-      `AIM runtime modified by MacLauncher.\nRuntime version: ${version}\nOriginal AIM revision: ${source.commit}\n`+
-      'Modifications cover filesystem paths, process ownership, display routing and build integration.\n'+
-      'Cgroup pruning reuses owner thread lists within each transaction; anonymous memfd retirement queries VM region information without vnode paths.\n'+
-      'Cgroup writes acquire descriptor ownership before file position; the controller preserves pending first-draw activity starts.\n'+
-      'Build recipes and modification sources: https://github.com/procrastinine/maclauncher-builds\n');
-    noticeTree(path.join(build,'licensing'),payload,'AIM');
-    noticeTree(angleNotices,payload,'ANGLE');
+    addLicenses(payload,'AIM',build);
+    addLicenses(payload,'ANGLE',angle);
     const angleManifest=path.join(angle,'angle-manifest.json');
     if(fs.existsSync(angleManifest))copy(angleManifest,path.join(payload,'angle-manifest.json'));
-    // Rust crate notices cover statically linked registry code too. Cargo's
-    // locked metadata identifies the exact supplier for every included text.
-    for(const pkg of metadata.packages.filter(pkg=>pkg.source?.startsWith('registry+'))) {
-      const directory=path.dirname(pkg.manifest_path);
-      for(const name of fs.readdirSync(directory).filter(file=>/^(LICENSE|COPYING|NOTICE|COPYRIGHT)(?:$|[-_.])/i.test(file)&&fs.statSync(path.join(directory,file)).isFile())) {
-        addLicense(payload,pkg.name,path.join(directory,name),pkg.license||pkg.name);
-      }
-    }
     for(const file of files(payload)) {
       const full=path.join(payload,file),arch=architecture(full);
       fs.chmodSync(full,arch||(fs.statSync(full).mode&0o111)?0o755:0o644);
@@ -168,10 +142,10 @@ if(process.argv[1]===fileURLToPath(import.meta.url)) {
   // during Play, so a build needs no additional mounted derived-image copy.
   if(args.includes('--build')) run('cargo',['aim','build','-j',String(jobs),...(args.includes('--image-only')?['image']:[...binaries.map(name=>'host/'+name),...imageProducts])],{cwd:build,env:aimCompilerEnvironment({build,jobs})});
   if(args.includes('--stage')) {
-    const angle=value('--angle'),angleNotices=value('--angle-notices');
+    const angle=value('--angle');
     if(!angle) throw new Error('Staging needs the pinned ANGLE supplier.');
     const output=path.join(repo,'build/managed-runtimes/android-aim',source.version,'arm64');
-    const staged=stageAim({build,angle,angleNotices,output});
+    const staged=stageAim({build,angle,output});
     console.log(JSON.stringify({output:staged.output,files:staged.declaration.files.length,bytes:staged.declaration.files.reduce((total,file)=>total+file.size,0),minimumMacOS}));
   }
 }

@@ -1,4 +1,4 @@
-const {addLicense} = require('../../../../../../lib/licenses.mjs');
+const {addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs"), path = require("node:path"), crypto = require("node:crypto");
 const { cloneOrCopySync } = require("../copy-file");
 const Catalog = require("./managed-shader-packs.json"), Traits = require("./shader-traits"), Providers = require("./shader-providers");
@@ -250,15 +250,15 @@ const tree = (pack, commit, signal) => Upstream.githubTree({ repository: pack.re
 const raw = (pack, ref, relative) => Upstream.listedFile({ filename: path.posix.basename(relative),
   url: `https://raw.githubusercontent.com/${pack.repository}/${ref}/${relative.split("/").map(encodeURIComponent).join("/")}` });
 // The files one revision provides for installation, or the reason it cannot
-// be installed: a declared recipe input or the license notice is missing, no
+// be installed: a declared recipe input is missing, no
 // supported shader remains (a recipe writes its own), or the selection
 // exceeds the library limits.
 function selectTree(pack, tree, recipe) {
   if (tree?.truncated || !Array.isArray(tree?.tree) || tree.tree.length > 20000) return { reason: "The shader source listing is too large." };
   const blobs = tree.tree.filter(item => item?.type === "blob" && safe(item.path)), inputs = new Set(recipe?.sourceFiles || []);
   const files = pack.delivery !== "tree" ? blobs.filter(item => keep(item.path)) : blobs.filter(item => inputs.has(item.path) || keep(item.path) &&
-    (pack.prefixes.some(prefix => item.path.startsWith(prefix)) || item.path === pack.licenseFile || /^README/i.test(item.path)));
-  const missing = [...inputs, pack.licenseFile].find(file => !blobs.some(item => item.path === file));
+    (pack.prefixes.some(prefix => item.path.startsWith(prefix)) || /^README/i.test(item.path)));
+  const missing = [...inputs].find(file => !blobs.some(item => item.path === file));
   if (missing) return { reason: `This revision does not contain ${missing}.` };
   if (!recipe && !files.some(item => formats[path.extname(item.path).toLowerCase()])) return { reason: "This revision contains no supported shader files." };
   if (pack.delivery === "tree" && (files.length > LIMITS.entries || files.some(item => item.size > LIMITS.file) ||
@@ -311,7 +311,7 @@ async function refreshCatalog(context = {}) {
 }
 function keep(relative) {
   return Boolean(formats[path.extname(relative).toLowerCase()]) || /\.(?:vs|fxh|h|hlsl|hlsli|inc|glslinc|png|jpg|jpeg|bmp|tga|dds|webp|cube|lut|txt|md|json|ini)$/i.test(relative) ||
-    /^(?:LICENSE|NOTICE|COPYING|AUTHORS)(?:[._-].*)?$/i.test(path.posix.basename(relative));
+    /^(licen[cs]e|copying|notice|copyright)/i.test(path.posix.basename(relative));
 }
 function extract(archive, destination) {
   const info = Zip.readZipEntries(archive)?.info;
@@ -349,7 +349,7 @@ async function download(listed, file, context, maxBytes = LIMITS.archive) {
   } catch (error) { if (limit.signal.aborted && !context.signal?.aborted) throw new Error("The shader download is too large."); throw error; }
 }
 // Zip archives are read entry by entry; other formats are unpacked by the
-// shared extractor first. Both keep only shader, resource and notice files
+// shared extractor first. Both retain shader sources, resources and publisher text files
 // below a single top folder.
 async function unpack(archive, destination, signal) {
   if (Release.archiveFormat(archive) === ".zip") return extract(archive, destination);
@@ -439,7 +439,7 @@ async function installRuntime(context = {}) {
   let rows = available(context.userDataDir, pack.id), selected = context.version ? version(context.version) : rows.find(row => !row.reason)?.version;
   const current = selected && installed(context.userDataDir, pack.id, selected, true); if (current) return current;
   await confirmToolInstall(context, { managerId: ID, label: pack.label, version: selected || null, requiresDownload: true,
-    installOptions: { sectionId: pack.id }, detail: "Downloads the selected shader source collection and its license notices." });
+    installOptions: { sectionId: pack.id }, detail: "Downloads the selected shader source collection." });
   if (!rows.some(row => row.version === selected)) {
     await module.exports.refreshCatalog({ ...context, sectionId: pack.id });
     rows = available(context.userDataDir, pack.id);
@@ -485,19 +485,14 @@ async function installRuntime(context = {}) {
           const archive = path.join(temporary, listed.name);
           await download(listed, archive, downloadContext);
           await unpack(archive, files, signal); fs.rmSync(archive);
-          if (!fs.existsSync(path.join(files, pack.licenseFile)))
-            await download(raw(pack, row.commit || row.tag, pack.licenseFile), path.join(files, pack.licenseFile), downloadContext, 1 << 20);
         }
-        for(const relative of pack.bundledNotices||[]){
-          const moduleRoot=require('./shader-packs').physicalModuleRoot();
-          addLicense(files,pack.id,path.join(moduleRoot,relative));
-        }
+        addLicenses(files,pack.id,files);
         let sourceOverlay;
         if(sourceRecipe){
           sourceOverlay=sourceRecipe.apply(files,row);
           if(sourceOverlay?.version!==row.adaptationVersion)throw Error("The shader collection source recipe version changed.");
         }
-        const record = { schema: 1, packId: pack.id, version: selected, source: row, license: pack.license,
+        const record = { schema: 1, packId: pack.id, version: selected, source: row,
           ...(sourceOverlay?{sourceOverlay}:{}),installedAt: new Date().toISOString(), ...discover(files, pack) };
         for (const relative of Object.keys(record.files)) fs.chmodSync(path.join(files, relative), 0o444);
         fs.writeFileSync(path.join(temporary, "pack.json"), JSON.stringify(record, null, 2) + "\n");

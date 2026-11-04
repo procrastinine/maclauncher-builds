@@ -166,7 +166,7 @@ int main(int argc, char** argv) {
         std::string root, saves, boot = "nss/boot.nss", title = "Nitroplus"; int width = 800, height = 600; bool check = false, checkBoot = false; Defaults values;
         for (int i = 1; i < argc; i++) {
             const std::string option = argv[i];
-            if (option == "--version") { std::cout << "libnpengine 0.5.3 Mac v7 / da1a175e6b497c37f9714b77510cb47c0930cd42 / libnpa 5bdf666155d828d9ef4003fd9dc39e154aa4b0f1" << std::endl; return 0; }
+            if (option == "--version") { std::cout << "libnpengine 0.5.3 Mac v7" << std::endl; return 0; }
             if (option == "--check-scripts") { check = true; continue; }
             if (option == "--check-bootstrap") { checkBoot = true; continue; }
             if (i + 1 >= argc) throw std::runtime_error("Missing Nitroplus option value");

@@ -1,10 +1,5 @@
 {
   "schemaVersion": 1,
-  "androidSource": {
-    "revision": "f4ae6717620c32b5e22102be87ab63f43c22d096",
-    "directory": "sources/maclauncher-android",
-    "repository": "https://github.com/procrastinine/maclauncher-android"
-  },
   "binderFlags": [
     "-nostdlibinc",
     "-Werror=implicit-function-declaration",
@@ -303,7 +298,6 @@
         "clang-r547379/bin/clang-20",
         "clang-r547379/lib/libc++.dylib",
         "clang-r547379/lib/clang/20/include",
-        "clang-r547379/NOTICE",
         "clang-r547379/AndroidVersion.txt"
       ],
       "objects": {
@@ -332,11 +326,6 @@
           "type": "tree",
           "mode": "40000"
         },
-        "clang-r547379/NOTICE": {
-          "id": "b051002f8a69f553700ee907ccd3c56d9a2c6c8e",
-          "type": "blob",
-          "mode": "100644"
-        },
         "clang-r547379/AndroidVersion.txt": {
           "id": "71e11d81366f35a6eeef3db370537fcd8ef6bed4",
           "type": "blob",
@@ -350,8 +339,7 @@
       "revision": "2d4dcbff7cb42f360f368bacf51cfe711fd1cb0f",
       "selection": [
         "clang-r547379/android_libc++/platform/aarch64/include/c++/v1",
-        "clang-r547379/include/c++/v1",
-        "clang-r547379/NOTICE"
+        "clang-r547379/include/c++/v1"
       ],
       "objects": {
         "clang-r547379/android_libc++/platform/aarch64/include/c++/v1": {
@@ -361,10 +349,6 @@
         "clang-r547379/include/c++/v1": {
           "id": "6ac56266fada7daaebd5f0b676cb65040c58cc2e",
           "type": "tree"
-        },
-        "clang-r547379/NOTICE": {
-          "id": "b051002f8a69f553700ee907ccd3c56d9a2c6c8e",
-          "type": "blob"
         }
       }
     },
@@ -394,9 +378,17 @@
     "frameworks/av/media/aidl"
   ],
   "cppAidlModules": {
-    "frameworks/native/libs/gui": ["guiconstants_aidl", "android_gui_aidl"],
-    "frameworks/native/libs/input": ["inputconstants"],
-    "frameworks/av/media/aidl": ["av-types-aidl", "audio-permission-aidl"]
+    "frameworks/native/libs/gui": [
+      "guiconstants_aidl",
+      "android_gui_aidl"
+    ],
+    "frameworks/native/libs/input": [
+      "inputconstants"
+    ],
+    "frameworks/av/media/aidl": [
+      "av-types-aidl",
+      "audio-permission-aidl"
+    ]
   },
   "cppAidlImportRoots": [
     "frameworks/native/libs/gui",

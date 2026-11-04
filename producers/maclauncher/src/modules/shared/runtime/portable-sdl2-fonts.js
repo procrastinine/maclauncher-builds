@@ -1,3 +1,4 @@
+const sharedDependencies=require('../../../../../dependencies.json');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -5,7 +6,7 @@ const { execFileSync } = require("node:child_process");
 const Source = require("./pinned-native-build");
 const Native = require("./local-native");
 const { throwIfAborted } = require("./download-utils");
-const PIN = Object.freeze(require("./portable-sdl2-fonts.json"));
+const PIN = Object.freeze({...require("./portable-sdl2-fonts.json"),dependencies:require("./portable-sdl2-fonts.json").dependencies.map(row=>{const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};})});
 
 function validateArchives(archives, { catalog = PIN } = {}) {
   if (!catalog || catalog.schemaVersion !== 1 || catalog.architecture !== "arm64" || catalog.minimumMacOS !== "13.0" ||

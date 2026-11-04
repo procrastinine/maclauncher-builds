@@ -20,12 +20,6 @@
     "CoreGraphics"
   ],
   "minimumMacOS": "13.0",
-  "license": {
-    "from": "LICENSE",
-    "path": "license.txt",
-    "name": "MacLauncher clipboard integration",
-    "license": "MIT"
-  },
   "record": {
     "executable": "clipboard-helper",
     "clipboard": "explicit-plain-text"

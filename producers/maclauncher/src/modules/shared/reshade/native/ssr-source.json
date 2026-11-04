@@ -1,10 +1,7 @@
 {
   "schema": 1,
   "repository": "https://github.com/godotengine/godot",
-  "commit": "4c311cbee68c0b66ff8ebb8b0defdd9979dd2a41",
   "version": "Godot 4.4",
-  "license": "MIT",
-  "licenseFile": "LICENSE.txt",
   "files": {
     "servers/rendering/renderer_rd/effects/ss_effects.cpp": "b8b3e6a2253d47a8c72130b811636741bfa2200c3b9e26df62842483be71c916",
     "servers/rendering/renderer_rd/effects/ss_effects.h": "1834eae848c5a2e591c349a6bcc2d2b32d6af21e59f41649da991b68d4fd8b52",
@@ -14,7 +11,7 @@
     "servers/rendering/renderer_rd/shaders/effects/screen_space_reflection_inc.glsl": "8167dd11d8f8b604e258c25bcc751e487372328e2b712859e56d11ad8264a00d",
     "servers/rendering/renderer_rd/shaders/effects/specular_merge.glsl": "8f0ad1e522214fdd9498219ec4ed8c9f0b588ea6c768435c9c78b2ab9b5a4e8c"
   },
-  "ownedRecipeSha256": "2fc3a3a994042a943960ff603ae11ed9e2943b3941a20b173bacd251ba1bdd05",
+  "ownedRecipeSha256": "71afd141da42b3527cab54c53da81ecce9e55c11913a8a43f4876e96d7329203",
   "shaders": [
     {
       "name": "scale",
@@ -1379,5 +1376,6 @@
       "glslSha256": "01d55c687628c0023e02bbaeea1d6cad38a32f73d150808d8cbbef81c8debf08",
       "mslSha256": "d4d173ec30d85571e3903ac92d47c48f9acf08fb837f66234d6482ef8006d7b4"
     }
-  ]
+  ],
+  "gitlink": "producers/maclauncher/src/external/godot-camera"
 }

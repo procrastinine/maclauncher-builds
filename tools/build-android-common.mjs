@@ -1,3 +1,4 @@
+import {rustEnvironment} from './rust-build.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -34,7 +35,7 @@ export async function buildAndroidCommonInput({version,output,work,angle,codecs,
   const from=path.join(platformPackages,file.path),to=path.join(publisher.framework,file.path);
   fs.copyFileSync(from,to,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);
  }
- const pythonRoot=path.join(work,'python'),cargoHome=path.join(work,'cargo');fs.mkdirSync(cargoHome,{recursive:true});
+ const buildEnvironment=rustEnvironment({work,minimumMacOS:'13.0'}),pythonRoot=path.join(work,'python'),cargoHome=buildEnvironment.CARGO_HOME;fs.mkdirSync(cargoHome,{recursive:true});
  const pythonEnvironment={...process.env,UV_CACHE_DIR:path.join(work,'uv-cache'),UV_PYTHON_INSTALL_DIR:pythonRoot,UV_PYTHON_BIN_DIR:path.join(work,'python-bin')};
  const pythonVersion=JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/aim.json'))).pythonVersion;
  run('uv',['python','install',pythonVersion],{env:pythonEnvironment});
@@ -55,13 +56,13 @@ export async function buildAndroidCommonInput({version,output,work,angle,codecs,
  const {acquireNdkHeaders}=await import(new URL('../sources/maclauncher-android/src/modules/android/native/arm32/acquire-headers.mjs',import.meta.url));
  const ndk=acquireNdkHeaders(path.join(work,'ndk-headers'));
  const options={...sources,converter,jdk:publisher.jdk,sdl:publisher.sdl,'vulkan-headers':publisher.vulkanHeaders,'sndfile-headers':codecs.include,
-  codecs:codecs.codecs,'codec-licenses':codecs.codecLicenses,angle:angle.angle,'angle-manifest':path.join(angle.angle,'angle-manifest.json'),framework:publisher.framework,
+  codecs:codecs.codecs,angle:angle.angle,'angle-manifest':path.join(angle.angle,'angle-manifest.json'),framework:publisher.framework,
   output:build,'build-work':buildWork,'ndk-headers':ndk.include||path.join(work,'ndk-headers/include'),aidl:publisher.aidl,aconfig,'rust-toolchain':tools.rustToolchain,python,ninja:tools.ninja,
   'blueprint-parser':blueprint.parser,'blueprint-parser-sources':blueprint.sources};
  if(javaInput)options['java-inputs']=java;
  if(frameworkInput)options['java-framework-input']=javaFramework;
  const inputFile=path.join(work,'common-inputs.json');fs.writeFileSync(inputFile,JSON.stringify(options,null,2)+'\n');
- run(process.execPath,[path.join(producer,recipe.buildEntry),'--inputs',inputFile],{env:{...process.env,PATH:path.dirname(python)+path.delimiter+process.env.PATH,CARGO_BUILD_JOBS:'2',CARGO_HOME:cargoHome}});
+ run(process.execPath,[path.join(producer,recipe.buildEntry),'--inputs',inputFile],{env:{...buildEnvironment,PATH:path.dirname(python)+path.delimiter+process.env.PATH,CARGO_BUILD_JOBS:'2'}});
  const packaged=packageAndroidCommon({build,version,sourceRevision:recipe.revision,output});
  return {...packaged,build,buildWork,inputs:options,sources,tools,sdl:publisher.sdl,codecs,buildTools:publisher.buildTools,
   arm32Work:path.join(buildWork,'build/arm32'),arm32Inputs:{importsDirectory:path.join(buildWork,'build/arm32/imports'),syscalls:path.join(buildWork,'build/arm32/syscalls'),format:path.join(buildWork,'build/arm32/format'),ndkHeaders:options['ndk-headers']},foundationHost:path.join(buildWork,'build/keystore/foundation/libkeymint-soft-host.a')};

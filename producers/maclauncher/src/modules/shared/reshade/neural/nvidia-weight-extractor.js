@@ -1,3 +1,4 @@
+const {gitlink}=require('../../../../../../../lib/pins.mjs');
 // Copyright (c) MacLauncher contributors. MIT license.
 // Packed-layout tables and decoding are derived from MLX-DLSS (Apache-2.0),
 // pinned in nvidia-weight-spec.json. Extracted parameters retain vendor terms.
@@ -111,7 +112,7 @@ async function convert(source, destination, {signal} = {}) {
     await yieldTurn();
   }
   header.__metadata__ = {source_sha256: inputHash, source: path.basename(source.file), layout: 'OIHW',
-    adapter: source.adapter, extractor_repository: Spec.source.repository, extractor_commit: Spec.source.commit};
+    adapter: source.adapter, extractor_repository: Spec.source.repository, extractor_commit: gitlink(Spec.source.gitlink)};
   const json = Buffer.from(JSON.stringify(header)), length = Buffer.alloc(8);
   length.writeBigUInt64LE(BigInt(json.length));
   const output = Buffer.concat([length, json, ...parts]);
@@ -126,7 +127,7 @@ async function convert(source, destination, {signal} = {}) {
   } catch (error) { await fs.promises.unlink(destination); throw error; }
   return {architecture: source.architecture, operation: source.operation, tensors, sha256: sha256(output),
     sourceFiles: [{file: path.basename(source.file), sha256: inputHash, adapter: source.adapter,
-      extractorRepository: Spec.source.repository, extractorCommit: Spec.source.commit}]};
+      extractorRepository: Spec.source.repository, extractorCommit: gitlink(Spec.source.gitlink)}]};
 }
 
 module.exports = {inspect, convert};

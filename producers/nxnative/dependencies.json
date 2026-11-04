@@ -158,7 +158,6 @@
     {
       "name": "spirv-cross",
       "source": {
-        "path": "producers/maclauncher/src/external/macfx-spirv-cross",
         "repository": "https://github.com/KhronosGroup/SPIRV-Cross"
       },
       "cmakeSource": ".",
@@ -174,7 +173,6 @@
     {
       "name": "glslangValidator",
       "source": {
-        "path": "sources/anyps5/3rdparty/glslang",
         "repository": "https://github.com/KhronosGroup/glslang.git"
       },
       "cmakeSource": ".",
@@ -190,7 +188,6 @@
     {
       "name": "zstd",
       "source": {
-        "path": "sources/anyps5/3rdparty/zstd",
         "repository": "https://github.com/facebook/zstd.git"
       },
       "cmakeSource": "build/cmake",

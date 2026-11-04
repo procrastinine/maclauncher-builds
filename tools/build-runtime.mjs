@@ -24,8 +24,9 @@ const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{maxBuff
 export function verifyProducer(directory,recipe){
  directory=fs.realpathSync(directory);
  if(!recipe||recipe.schemaVersion!==1||!/^[a-z0-9-]+$/.test(recipe.id||'')||
-  !/^[a-f0-9]{40}$/.test(recipe.revision||'')||!/^sources\/[a-z0-9-]+$/.test(recipe.path||'')||
+  !/^sources\/[a-z0-9-]+$/.test(recipe.path||'')||
   recipe.buildEntry!=='tools/build.mjs'||recipe.checkEntry!=='tools/check-sources.mjs')throw Error('Invalid runtime producer recipe.');
+ recipe.revision=git(directory,['rev-parse','HEAD:'+recipe.path]);
  const source=path.join(directory,recipe.path),record=git(directory,['ls-tree','HEAD','--',recipe.path]);
  if(record!==`160000 commit ${recipe.revision}\t${recipe.path}`)throw Error('Producer recipe differs from the pinned source submodule.');
  if(!fs.existsSync(path.join(source,'.git')))throw Error('Initialize the pinned runtime source submodule before building.');
@@ -165,8 +166,8 @@ export function main(args,directory=root){
  if(project.producer.kind==='maclauncher'&&!adapter&&project.producer.sourceDirectory){
   const source=fs.realpathSync(path.join(directory,project.producer.sourceDirectory));
   for(const entry of project.producer.entries){
-   const file=path.join(directory,entry),actual=fs.realpathSync(file);
-   if(!actual.startsWith(source+path.sep)||!fs.statSync(actual).isFile())throw Error('Producer source entries must be contained regular files.');
+   const file=path.join(directory,entry),actual=fs.realpathSync(file),stat=fs.statSync(actual);
+   if(!actual.startsWith(source+path.sep)||!(stat.isFile()||stat.isDirectory()))throw Error('Producer source entries must be contained regular files or directories.');
   }
   if(!options.check)throw Error('Use the selected producer entry with its documented build arguments: '+project.producer.entries.join(', '));
   return {id:project.id,action:'check',sourceDirectory:project.producer.sourceDirectory,entries:project.producer.entries};

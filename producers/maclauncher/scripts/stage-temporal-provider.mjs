@@ -1,3 +1,4 @@
+import {gitlink} from "../../../lib/pins.mjs";
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -9,7 +10,7 @@ export function stageTemporalProvider({name,directory,upstream,ownedRoot}){
   if(!["asr","sgsr2"].includes(name))throw Error("Choose a registered temporal provider.");
   const spec=JSON.parse(fs.readFileSync(path.join(ownedRoot,"source.json"),"utf8")),metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json"),"utf8"));
   const library=`libmaclauncher-${name}.dylib`;
-  if(metadata.providerABI!==1||metadata.complete!==true||metadata.methods?.join()!==name||metadata.architectures?.join()!=="arm64,x86_64"||metadata.minimumMacOS!==spec.minimumMacOS||metadata.resourcePreparation!==1||metadata.source?.repository!==spec.repository||metadata.source?.commit!==spec.commit||metadata.libraries?.join()!==library||!Array.isArray(metadata.files)||!metadata.owned)throw Error("A complete compatible native temporal provider is required: "+name);
+  if(metadata.providerABI!==1||metadata.complete!==true||metadata.methods?.join()!==name||metadata.architectures?.join()!=="arm64,x86_64"||metadata.minimumMacOS!==spec.minimumMacOS||metadata.resourcePreparation!==1||metadata.source?.repository!==spec.repository||metadata.source?.commit!==gitlink(spec.gitlink)||metadata.libraries?.join()!==library||!Array.isArray(metadata.files)||!metadata.owned)throw Error("A complete compatible native temporal provider is required: "+name);
   const files=new Map();
   for(const row of metadata.files){
     if(!safe(row.path)||Content.excludedReason(row.path)||files.has(row.path)||!Number.isSafeInteger(row.size)||row.size<1||!/^[a-f0-9]{64}$/.test(row.sha256))throw Error("Invalid temporal provider inventory: "+name);
@@ -29,9 +30,9 @@ export function stageTemporalProvider({name,directory,upstream,ownedRoot}){
   if(!upstream)throw Error("Supply the declared source checkout for the optional "+name+" provider.");
   const git=args=>execFileSync("git",["-C",upstream,...args],{encoding:"utf8"}).trim();
   const canonical=url=>url.replace(/\.git$/,"").replace(/\/$/,"");
-  if(git(["rev-parse","HEAD"])!==spec.commit||canonical(git(["remote","get-url","origin"]))!==canonical(spec.repository))throw Error("Temporal provider checkout differs from its declared public origin or exact commit.");
+  if(git(["rev-parse","HEAD"])!==gitlink(spec.gitlink)||canonical(git(["remote","get-url","origin"]))!==canonical(spec.repository))throw Error("Temporal provider checkout differs from its declared public origin or exact commit.");
   git(["diff","--exit-code","--ignore-submodules=all","HEAD","--"]);
   if(!Array.isArray(spec.sourceScope)||!spec.sourceScope.length||spec.sourceScope.some(value=>!safe(value)))throw Error("The temporal provider source scope is undeclared.");
   return {files:new Map([...files].map(([relative,file])=>[`temporal/${name}/${relative}`,file]).concat([[`temporal/${name}/provider.json`,path.join(directory,"provider.json")]])),owned,
-    source:{directory:upstream,relative:"third_party/"+name,commit:spec.commit,scope:spec.sourceScope},pin:` ${spec.commit} third_party/${name}`};
+    source:{directory:upstream,relative:"third_party/"+name,commit:gitlink(spec.gitlink),scope:spec.sourceScope},pin:` ${gitlink(spec.gitlink)} third_party/${name}`};
 }

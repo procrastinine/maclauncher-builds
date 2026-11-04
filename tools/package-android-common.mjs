@@ -1,4 +1,4 @@
-import {addLicense} from '../lib/licenses.mjs';
+import {addLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -29,7 +29,7 @@ export function packageAndroidCommon({build,version,sourceRevision,output}){
    verify(original.path,original);
    for(const data of original.data||[]){if(!/^icudt[0-9]+l\.dat$/.test(data.path))throw Error('Unexpected Android framework native data.');verify(data.path,data);}
   }
-  addLicense(payload,'MacLauncher',path.join(root,'producers/maclauncher/LICENSE'),'MIT');
+  addLicenses(payload,'MacLauncher',root);
 
   const files=[],dependencies=[];let minimumMacOS='0.0';
   for(const name of B.fileInventory(payload)){

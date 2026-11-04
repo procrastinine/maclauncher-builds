@@ -29,10 +29,14 @@
       {
         "version": "1.1.2",
         "label": "CatSystem2 KIF cryptography helper 1.1.2"
+      },
+      {
+        "version": "1.1.5",
+        "label": "CatSystem2 KIF cryptography helper 1.1.5"
       }
     ],
     "build": {
-      "version": "1.1.2",
+      "version": "1.1.5",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "arm64",
@@ -70,10 +74,14 @@
       {
         "version": "1.1.2",
         "label": "Android privacy helper 1.1.2"
+      },
+      {
+        "version": "1.1.5",
+        "label": "Android privacy helper 1.1.5"
       }
     ],
     "build": {
-      "version": "1.1.2",
+      "version": "1.1.5",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "arm64"
@@ -113,10 +121,14 @@
       {
         "version": "1.1.2",
         "label": "PlayTools storage adapter 1.1.2"
+      },
+      {
+        "version": "1.1.5",
+        "label": "PlayTools storage adapter 1.1.5"
       }
     ],
     "build": {
-      "version": "1.1.2",
+      "version": "1.1.5",
       "command": "tools/build-ios-helper.mjs",
       "architectures": [
         "arm64"
@@ -131,7 +143,7 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/love/runtime/luasteam-build.js"
+        "producers/maclauncher/src/modules/love/runtime/luasteam-source-overlay.js"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -142,17 +154,7 @@
         "url": "https://github.com/uspgamedev/luasteam",
         "repository": "uspgamedev/luasteam",
         "pin": {
-          "file": "producers/maclauncher/src/modules/love/runtime/luasteam-source-overlay.js",
-          "pointer": "/SOURCE_REVISION"
-        }
-      },
-      {
-        "id": "luajit",
-        "provider": "git",
-        "url": "https://luajit.org/git/luajit.git",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/love/runtime/luasteam-source-overlay.js",
-          "pointer": "/LUA_HEADERS_REVISION"
+          "gitlink": "producers/maclauncher/src/external/luasteam"
         }
       },
       {
@@ -161,8 +163,7 @@
         "url": "https://github.com/rlabrecque/SteamworksSDK",
         "repository": "rlabrecque/SteamworksSDK",
         "pin": {
-          "file": "producers/maclauncher/src/modules/love/runtime/luasteam-source-overlay.js",
-          "pointer": "/SDK_HEADERS_REVISION"
+          "gitlink": "producers/maclauncher/src/external/SteamworksSDK"
         }
       }
     ],
@@ -182,10 +183,14 @@
       {
         "version": "4.0.2-MCLv4",
         "label": "Lua 5.1 host ABI 4.0.2-MCLv4"
+      },
+      {
+        "version": "4.0.2-MCLv7",
+        "label": "Lua 5.1 host ABI 4.0.2-MCLv7"
       }
     ],
     "build": {
-      "version": "4.0.2-MCLv4",
+      "version": "4.0.2-MCLv7",
       "command": "tools/build-luasteam.mjs",
       "architectures": [
         "universal"
@@ -227,10 +232,14 @@
       {
         "version": "1.1.2",
         "label": "MKXP-Z configuration helper 1.1.2"
+      },
+      {
+        "version": "1.1.5",
+        "label": "MKXP-Z configuration helper 1.1.5"
       }
     ],
     "build": {
-      "version": "1.1.2",
+      "version": "1.1.5",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "universal"
@@ -295,24 +304,7 @@
         "url": "https://github.com/crosire/reshade",
         "repository": "crosire/reshade",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/native/processor-sources.json",
-          "pointer": "/sources",
-          "match": {
-            "id": "macfx-reshade"
-          }
-        }
-      },
-      {
-        "id": "spirv-headers",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Headers",
-        "repository": "KhronosGroup/SPIRV-Headers",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/native/processor-sources.json",
-          "pointer": "/sources",
-          "match": {
-            "id": "macfx-spirv-headers"
-          }
+          "gitlink": "producers/maclauncher/src/external/macfx-reshade"
         }
       },
       {
@@ -321,11 +313,9 @@
         "url": "https://github.com/KhronosGroup/SPIRV-Cross",
         "repository": "KhronosGroup/SPIRV-Cross",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/native/processor-sources.json",
-          "pointer": "/sources",
-          "match": {
-            "id": "macfx-spirv-cross"
-          }
+          "file": "producers/dependencies.json",
+          "pointer": "/spirvCross/revision",
+          "repositoryPointer": "/spirvCross/repository"
         }
       },
       {
@@ -334,11 +324,7 @@
         "url": "https://github.com/crosire/reshade-shaders",
         "repository": "crosire/reshade-shaders",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/native/processor-sources.json",
-          "pointer": "/sources",
-          "match": {
-            "id": "macfx-reshade-shaders"
-          }
+          "gitlink": "producers/maclauncher/src/external/macfx-reshade-shaders"
         }
       },
       {
@@ -347,11 +333,7 @@
         "url": "https://github.com/eugeniosegala/MAKO",
         "repository": "eugeniosegala/MAKO",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/native/processor-sources.json",
-          "pointer": "/sources",
-          "match": {
-            "id": "macfx-mako"
-          }
+          "gitlink": "producers/maclauncher/src/external/macfx-mako"
         }
       },
       {
@@ -359,11 +341,7 @@
         "provider": "git",
         "url": "https://codeberg.org/vkd3d/vkd3d",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/native/processor-sources.json",
-          "pointer": "/sources",
-          "match": {
-            "id": "macfx-vkd3d"
-          }
+          "gitlink": "producers/maclauncher/src/external/macfx-vkd3d"
         }
       },
       {
@@ -372,11 +350,7 @@
         "url": "https://github.com/GPUOpen-Effects/FidelityFX-FSR",
         "repository": "GPUOpen-Effects/FidelityFX-FSR",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/native/processor-sources.json",
-          "pointer": "/sources",
-          "match": {
-            "id": "macfx-fsr1"
-          }
+          "gitlink": "producers/maclauncher/src/external/macfx-fsr1"
         }
       },
       {
@@ -385,8 +359,7 @@
         "url": "https://github.com/SnowflakePowered/librashader",
         "repository": "SnowflakePowered/librashader",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/native/retroarch-source.json",
-          "pointer": ""
+          "gitlink": "producers/maclauncher/src/external/librashader"
         }
       },
       {
@@ -395,8 +368,7 @@
         "url": "https://github.com/godotengine/godot",
         "repository": "godotengine/godot",
         "pin": {
-          "file": "producers/maclauncher/src/modules/godot/graphics/source.json",
-          "pointer": ""
+          "gitlink": "producers/maclauncher/src/external/godot-camera"
         }
       },
       {
@@ -405,8 +377,7 @@
         "url": "https://github.com/3Shain/dxmt",
         "repository": "3Shain/dxmt",
         "pin": {
-          "file": "producers/maclauncher/src/modules/crossover/temporal/dxmt/source.json",
-          "pointer": ""
+          "gitlink": "producers/maclauncher/src/external/dxmt-camera"
         }
       },
       {
@@ -415,8 +386,7 @@
         "url": "https://github.com/NVIDIA-RTX/Streamline",
         "repository": "NVIDIA-RTX/Streamline",
         "pin": {
-          "file": "producers/maclauncher/src/modules/crossover/temporal/streamline/source.json",
-          "pointer": ""
+          "gitlink": "producers/maclauncher/src/external/streamline-camera"
         }
       },
       {
@@ -425,31 +395,7 @@
         "provider": "github",
         "url": "https://github.com/haasn/libplacebo",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/scene-profile.json",
-          "pointer": "/SOURCE",
-          "repositoryPointer": "/SOURCE/origin"
-        }
-      },
-      {
-        "id": "libplacebo-vulkan-headers",
-        "repository": "KhronosGroup/Vulkan-Headers",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/Vulkan-Headers",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/scene-profile.json",
-          "pointer": "/VULKAN_HEADERS",
-          "repositoryPointer": "/VULKAN_HEADERS/origin"
-        }
-      },
-      {
-        "id": "libplacebo-fast-float",
-        "repository": "fastfloat/fast_float",
-        "provider": "github",
-        "url": "https://github.com/fastfloat/fast_float",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/scene-profile.json",
-          "pointer": "/FAST_FLOAT",
-          "repositoryPointer": "/FAST_FLOAT/origin"
+          "gitlink": "producers/maclauncher/src/external/libplacebo"
         }
       },
       {
@@ -467,8 +413,7 @@
         "url": "https://github.com/GPUOpen-Effects/FidelityFX-FSR2",
         "repository": "GPUOpen-Effects/FidelityFX-FSR2",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/fsr/source.json",
-          "pointer": "/fsr2"
+          "gitlink": "producers/maclauncher/src/external/fsr2"
         }
       },
       {
@@ -477,8 +422,7 @@
         "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/fsr/source.json",
-          "pointer": "/fsr3"
+          "gitlink": "producers/maclauncher/src/external/fsr3-sdk"
         }
       },
       {
@@ -487,8 +431,7 @@
         "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/generation/fsr3/source.json",
-          "pointer": ""
+          "gitlink": "producers/maclauncher/src/external/fsr3-sdk"
         }
       },
       {
@@ -506,11 +449,7 @@
         "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/fsr4/source.json",
-          "pointer": "/sources",
-          "match": {
-            "use": "MIT shader helper headers"
-          }
+          "gitlink": "producers/maclauncher/src/external/fsr4-sdk-headers"
         }
       },
       {
@@ -519,11 +458,7 @@
         "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/fsr4/source.json",
-          "pointer": "/sources",
-          "match": {
-            "use": "FSR 4.1.1 model weights from MIT-excepted provider"
-          }
+          "gitlink": "producers/maclauncher/src/external/fsr4-sdk-model"
         }
       },
       {
@@ -532,11 +467,7 @@
         "url": "https://github.com/int3rrobang/fsr4-int8-reverse-engineering",
         "repository": "int3rrobang/fsr4-int8-reverse-engineering",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/fsr4/source.json",
-          "pointer": "/sources",
-          "match": {
-            "use": "MIT FSR 4.1.1 shader reimplementation"
-          }
+          "gitlink": "producers/maclauncher/src/external/fsr4-int8"
         }
       },
       {
@@ -556,8 +487,7 @@
         "url": "https://github.com/arm/accuracy-super-resolution-generic-library",
         "repository": "arm/accuracy-super-resolution-generic-library",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/asr/source.json",
-          "pointer": ""
+          "gitlink": "producers/maclauncher/src/external/asr"
         }
       },
       {
@@ -566,8 +496,7 @@
         "url": "https://github.com/SnapdragonGameStudios/snapdragon-gsr",
         "repository": "SnapdragonGameStudios/snapdragon-gsr",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/sgsr2/source.json",
-          "pointer": ""
+          "gitlink": "producers/maclauncher/src/external/sgsr2"
         }
       },
       {
@@ -580,23 +509,12 @@
         }
       },
       {
-        "id": "xess-vulkan-headers",
-        "provider": "github",
-        "url": "https://github.com/libsdl-org/SDL",
-        "repository": "libsdl-org/SDL",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/xess/native/vulkan-source.json",
-          "pointer": ""
-        }
-      },
-      {
         "id": "mlx-dlss",
         "provider": "github",
         "url": "https://github.com/iamwavecut/MLX-DLSS",
         "repository": "iamwavecut/MLX-DLSS",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/neural/source.json",
-          "pointer": ""
+          "gitlink": "producers/maclauncher/src/external/MLX-DLSS"
         }
       },
       {
@@ -605,50 +523,7 @@
         "url": "https://github.com/mrRay/ISFMSLKit",
         "repository": "mrRay/ISFMSLKit",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
-          "pointer": "/sources",
-          "match": {
-            "repository": "https://github.com/mrRay/ISFMSLKit"
-          }
-        }
-      },
-      {
-        "id": "isfglslgenerator",
-        "provider": "github",
-        "url": "https://github.com/mrRay/ISFGLSLGenerator",
-        "repository": "mrRay/ISFGLSLGenerator",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
-          "pointer": "/sources",
-          "match": {
-            "repository": "https://github.com/mrRay/ISFGLSLGenerator"
-          }
-        }
-      },
-      {
-        "id": "vvmetalkit",
-        "provider": "github",
-        "url": "https://github.com/mrRay/VVMetalKit",
-        "repository": "mrRay/VVMetalKit",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
-          "pointer": "/sources",
-          "match": {
-            "repository": "https://github.com/mrRay/VVMetalKit"
-          }
-        }
-      },
-      {
-        "id": "pincache",
-        "provider": "github",
-        "url": "https://github.com/mrRay/PINCache",
-        "repository": "mrRay/PINCache",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
-          "pointer": "/sources",
-          "match": {
-            "repository": "https://github.com/mrRay/PINCache"
-          }
+          "gitlink": "producers/maclauncher/src/external/ISFMSLKit"
         }
       },
       {
@@ -657,42 +532,9 @@
         "url": "https://github.com/google/shaderc",
         "repository": "google/shaderc",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies.json",
-          "pointer": "/sources/0/commit",
-          "repositoryPointer": "/sources/0/repository"
-        }
-      },
-      {
-        "id": "libplacebo-glslang",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/glslang",
-        "repository": "KhronosGroup/glslang",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies.json",
-          "pointer": "/sources/1/commit",
-          "repositoryPointer": "/sources/1/repository"
-        }
-      },
-      {
-        "id": "libplacebo-spirv-tools",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Tools",
-        "repository": "KhronosGroup/SPIRV-Tools",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies.json",
-          "pointer": "/sources/2/commit",
-          "repositoryPointer": "/sources/2/repository"
-        }
-      },
-      {
-        "id": "libplacebo-spirv-headers",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Headers",
-        "repository": "KhronosGroup/SPIRV-Headers",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies.json",
-          "pointer": "/sources/3/commit",
-          "repositoryPointer": "/sources/3/repository"
+          "file": "producers/dependencies.json",
+          "pointer": "/shaderc/revision",
+          "repositoryPointer": "/shaderc/repository"
         }
       },
       {
@@ -727,28 +569,6 @@
           "pointer": "/compilerSources/1/commit",
           "repositoryPointer": "/compilerSources/1/repository"
         }
-      },
-      {
-        "id": "isf-spirv-tools",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Tools",
-        "repository": "KhronosGroup/SPIRV-Tools",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
-          "pointer": "/compilerSources/2/commit",
-          "repositoryPointer": "/compilerSources/2/repository"
-        }
-      },
-      {
-        "id": "isf-spirv-headers",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Headers",
-        "repository": "KhronosGroup/SPIRV-Headers",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
-          "pointer": "/compilerSources/3/commit",
-          "repositoryPointer": "/compilerSources/3/repository"
-        }
       }
     ],
     "packageProfiles": [
@@ -775,10 +595,14 @@
       {
         "version": "0.3.3",
         "label": "MacLauncher graphics 0.3.3"
+      },
+      {
+        "version": "0.3.6",
+        "label": "MacLauncher graphics 0.3.6"
       }
     ],
     "build": {
-      "version": "0.3.3",
+      "version": "0.3.6",
       "command": "tools/build-graphics.mjs",
       "architectures": [
         "universal",
@@ -800,8 +624,6 @@
         "producers/maclauncher/src/external/fsr3-sdk",
         "producers/maclauncher/src/external/fsr4-metal",
         "producers/maclauncher/src/external/godot-camera",
-        "producers/maclauncher/src/external/krkrsdl2",
-        "producers/maclauncher/src/external/krkrsdl2/external/SDL",
         "producers/maclauncher/src/external/libplacebo",
         "producers/maclauncher/src/external/libplacebo/3rdparty/Vulkan-Headers",
         "producers/maclauncher/src/external/libplacebo/3rdparty/fast_float",
@@ -810,8 +632,7 @@
         "producers/maclauncher/src/external/macfx-mako",
         "producers/maclauncher/src/external/macfx-reshade",
         "producers/maclauncher/src/external/macfx-reshade-shaders",
-        "producers/maclauncher/src/external/macfx-spirv-cross",
-        "producers/maclauncher/src/external/macfx-spirv-headers",
+        "producers/maclauncher/src/external/macfx-reshade/deps/spirv",
         "producers/maclauncher/src/external/macfx-vkd3d",
         "producers/maclauncher/src/external/sgsr2",
         "producers/maclauncher/src/external/streamline-camera",
@@ -870,10 +691,14 @@
       {
         "version": "0.5.3",
         "label": "Offline Steam API compatibility helper 0.5.3"
+      },
+      {
+        "version": "0.5.6",
+        "label": "Offline Steam API compatibility helper 0.5.6"
       }
     ],
     "build": {
-      "version": "0.5.3",
+      "version": "0.5.6",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "universal"
@@ -910,10 +735,14 @@
       {
         "version": "0.1.3",
         "label": "Steam ticket availability adapter 0.1.3"
+      },
+      {
+        "version": "0.1.6",
+        "label": "Steam ticket availability adapter 0.1.6"
       }
     ],
     "build": {
-      "version": "0.1.3",
+      "version": "0.1.6",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "universal"
@@ -928,7 +757,6 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/java/runtime/steamworks/stage-bridge.cjs",
         "producers/maclauncher/src/modules/java/runtime/steamworks/build-agent.cjs",
         "producers/maclauncher/src/modules/java/runtime/steamworks/versions.json"
       ],
@@ -941,7 +769,8 @@
         "url": "https://github.com/code-disaster/steamworks4j",
         "repository": "code-disaster/steamworks4j",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/source-revisions/steamworks4j"
+          "file": "producers/maclauncher/src/modules/java/runtime/steamworks/versions.json",
+          "pointer": "/0/sourceRevision"
         }
       },
       {
@@ -989,18 +818,26 @@
       {
         "version": "1.9.0-MCLv4",
         "label": "Steamworks4j 1.9.0 JNI ABI 1.9.0-MCLv4"
+      },
+      {
+        "version": "1.10.0-MCLv7",
+        "label": "Steamworks4j 1.10.0 JNI ABI 1.10.0-MCLv7"
+      },
+      {
+        "version": "1.9.0-MCLv7",
+        "label": "Steamworks4j 1.9.0 JNI ABI 1.9.0-MCLv7"
       }
     ],
     "build": [
       {
-        "version": "1.9.0-MCLv4",
+        "version": "1.9.0-MCLv7",
         "command": "tools/build-java-steamworks.mjs",
         "architectures": [
           "x64"
         ]
       },
       {
-        "version": "1.10.0-MCLv4",
+        "version": "1.10.0-MCLv7",
         "command": "tools/build-java-steamworks.mjs",
         "architectures": [
           "universal"
@@ -1034,7 +871,8 @@
         "repository": "hahnlee/aim",
         "pin": {
           "file": "producers/maclauncher/src/modules/android/native/apk-metadata/sources.json",
-          "pointer": "/aim/revision"
+          "pointer": "/aim/revision",
+          "repositoryPointer": "/aim/repository"
         }
       }
     ],
@@ -1058,10 +896,14 @@
       {
         "version": "1.1.3",
         "label": "Android package metadata helper 1.1.3"
+      },
+      {
+        "version": "1.1.5",
+        "label": "Android package metadata helper 1.1.5"
       }
     ],
     "build": {
-      "version": "1.1.3",
+      "version": "1.1.5",
       "command": "tools/build-apk-metadata.mjs",
       "architectures": [
         "arm64",
@@ -1106,10 +948,14 @@
       {
         "version": "1.1.2",
         "label": "Browser network helper 1.1.2"
+      },
+      {
+        "version": "1.1.5",
+        "label": "Browser network helper 1.1.5"
       }
     ],
     "build": {
-      "version": "1.1.2",
+      "version": "1.1.5",
       "command": "tools/build-helper.mjs",
       "architectures": [
         "arm64",
@@ -1129,8 +975,7 @@
         "producers/included-helpers/prepare.mjs",
         "producers/included-helpers/profiles/android-launcher.json",
         "producers/android-launcher/build.mjs",
-        "producers/android-launcher/source.json",
-        "producers/android-launcher/build-inputs.json"
+        "producers/android-launcher/source.json"
       ]
     },
     "upstreams": [
@@ -1140,8 +985,7 @@
         "url": "https://github.com/procrastinine/maclauncher-android",
         "repository": "procrastinine/maclauncher-android",
         "pin": {
-          "file": "producers/android-launcher/source.json",
-          "pointer": "/android"
+          "gitlink": "sources/maclauncher-android"
         }
       }
     ],
@@ -1165,10 +1009,14 @@
       {
         "version": "1.0.3",
         "label": "Android launcher integrations 1.0.3"
+      },
+      {
+        "version": "1.0.6",
+        "label": "Android launcher integrations 1.0.6"
       }
     ],
     "build": {
-      "version": "1.0.3",
+      "version": "1.0.6",
       "command": "tools/build-android-launcher.mjs",
       "architectures": [
         "universal"
@@ -1197,8 +1045,9 @@
         "url": "https://github.com/hahnlee/aim",
         "repository": "hahnlee/aim",
         "pin": {
-          "file": "producers/android-art-inputs/source.json",
-          "pointer": "/revision"
+          "file": "sources/maclauncher-android/src/modules/android/art/supplier.json",
+          "pointer": "/sources/aim/commit",
+          "repositoryPointer": "/sources/aim/url"
         }
       }
     ],
@@ -1218,10 +1067,14 @@
       {
         "version": "0.1.0-MCLv4",
         "label": "ART image reader 0.1.0-MCLv4"
+      },
+      {
+        "version": "0.1.0-MCLv7",
+        "label": "ART image reader 0.1.0-MCLv7"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv4",
+      "version": "0.1.0-MCLv7",
       "command": "tools/build-android-art-input.mjs",
       "architectures": [
         "arm64"
@@ -1272,10 +1125,14 @@
       {
         "version": "MCLv4",
         "label": "Android Blueprint parser MCLv4"
+      },
+      {
+        "version": "MCLv7",
+        "label": "Android Blueprint parser MCLv7"
       }
     ],
     "build": {
-      "version": "MCLv4",
+      "version": "MCLv7",
       "command": "tools/build-android-blueprint.mjs",
       "architectures": [
         "arm64"
@@ -1340,10 +1197,14 @@
       {
         "version": "0.1.0-MCLv4",
         "label": "Android flag generator 0.1.0-MCLv4"
+      },
+      {
+        "version": "0.1.0-MCLv7",
+        "label": "Android flag generator 0.1.0-MCLv7"
       }
     ],
     "build": {
-      "version": "0.1.0-MCLv4",
+      "version": "0.1.0-MCLv7",
       "command": "tools/build-android-aconfig.mjs",
       "architectures": [
         "arm64"
@@ -1380,12 +1241,9 @@
         "url": "https://github.com/libsndfile/libsndfile",
         "repository": "libsndfile/libsndfile",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "sndfile"
-          },
-          "field": "/revision"
+          "file": "producers/dependencies.json",
+          "pointer": "/sndfile/revision",
+          "repositoryPointer": "/sndfile/repository"
         }
       }
     ],
@@ -1405,10 +1263,14 @@
       {
         "version": "1.2.2-MCLv4",
         "label": "Android audio codec input libraries 1.2.2-MCLv4"
+      },
+      {
+        "version": "1.2.2-MCLv7",
+        "label": "Android audio codec input libraries 1.2.2-MCLv7"
       }
     ],
     "build": {
-      "version": "1.2.2-MCLv4",
+      "version": "1.2.2-MCLv7",
       "command": "tools/build-android-codecs.mjs",
       "architectures": [
         "arm64"
@@ -1444,9 +1306,9 @@
         "provider": "gitiles",
         "url": "https://chromium.googlesource.com/angle/angle",
         "pin": {
-          "file": "producers/android-inputs/angle.json",
-          "pointer": "/angle/revision",
-          "repositoryPointer": "/angle/repository"
+          "file": "sources/maclauncher-android/src/modules/android/native/angle-source.json",
+          "pointer": "/revision",
+          "repositoryPointer": "/repository"
         }
       },
       {
@@ -1465,26 +1327,7 @@
         "url": "https://github.com/procrastinine/maclauncher-android",
         "repository": "procrastinine/maclauncher-android",
         "pin": {
-          "file": "producers/android-inputs/angle.json",
-          "pointer": "/profiles",
-          "match": {
-            "id": "common"
-          },
-          "field": "/androidSource"
-        }
-      },
-      {
-        "id": "android-aim6",
-        "provider": "github",
-        "url": "https://github.com/procrastinine/maclauncher-android",
-        "repository": "procrastinine/maclauncher-android",
-        "pin": {
-          "file": "producers/android-inputs/angle.json",
-          "pointer": "/profiles",
-          "match": {
-            "id": "aim6"
-          },
-          "field": "/androidSource"
+          "gitlink": "sources/maclauncher-android"
         }
       }
     ],
@@ -1504,10 +1347,14 @@
       {
         "version": "MCLv4",
         "label": "Android ANGLE for JVM and ART MCLv4"
+      },
+      {
+        "version": "MCLv7",
+        "label": "Android ANGLE for JVM and ART MCLv7"
       }
     ],
     "build": {
-      "version": "MCLv4",
+      "version": "MCLv7",
       "command": "tools/build-android-angle.mjs",
       "architectures": [
         "arm64"
@@ -1551,7 +1398,8 @@
         "repository": "hahnlee/aim",
         "pin": {
           "file": "sources/maclauncher-android/src/modules/android/art/supplier.json",
-          "pointer": "/sources/aim/commit"
+          "pointer": "/sources/aim/commit",
+          "repositoryPointer": "/sources/aim/url"
         }
       }
     ],
@@ -1571,10 +1419,14 @@
       {
         "version": "16.0.0-MCLv4",
         "label": "ART ELF input 16.0.0-MCLv4"
+      },
+      {
+        "version": "16.0.0-MCLv7",
+        "label": "ART ELF input 16.0.0-MCLv7"
       }
     ],
     "build": {
-      "version": "16.0.0-MCLv4",
+      "version": "16.0.0-MCLv7",
       "command": "tools/build-android-art-elf.mjs",
       "architectures": [
         "arm64"
@@ -1616,8 +1468,7 @@
         "url": "https://github.com/procrastinine/maclauncher-android",
         "repository": "procrastinine/maclauncher-android",
         "pin": {
-          "file": "producers/android-inputs/java-converter.json",
-          "pointer": "/androidSource"
+          "gitlink": "sources/maclauncher-android"
         }
       },
       {
@@ -1626,8 +1477,12 @@
         "url": "https://github.com/kksimp/dex2jvm",
         "repository": "kksimp/dex2jvm",
         "pin": {
-          "file": "producers/android-inputs/java-converter.json",
-          "pointer": "/converter"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects",
+          "match": {
+            "id": "dex2jvm"
+          },
+          "field": "/revision"
         }
       }
     ],
@@ -1647,10 +1502,14 @@
       {
         "version": "MCLv4",
         "label": "Android Java converter MCLv4"
+      },
+      {
+        "version": "MCLv7",
+        "label": "Android Java converter MCLv7"
       }
     ],
     "build": {
-      "version": "MCLv4",
+      "version": "MCLv7",
       "command": "tools/build-android-java-converter.mjs",
       "architectures": [
         "arm64"
@@ -1686,8 +1545,7 @@
         "url": "https://github.com/procrastinine/maclauncher-android",
         "repository": "procrastinine/maclauncher-android",
         "pin": {
-          "file": "producers/android-art-inputs/ffi.json",
-          "pointer": "/androidSource"
+          "gitlink": "sources/maclauncher-android"
         }
       },
       {
@@ -1696,8 +1554,9 @@
         "url": "https://github.com/libffi/libffi",
         "repository": "libffi/libffi",
         "pin": {
-          "file": "producers/android-art-inputs/ffi.json",
-          "pointer": "/libffi"
+          "file": "producers/dependencies.json",
+          "pointer": "/libffi/revision",
+          "repositoryPointer": "/libffi/repository"
         }
       }
     ],
@@ -1717,10 +1576,14 @@
       {
         "version": "3.8.0-MCLv4",
         "label": "Android ART libffi 3.8.0-MCLv4"
+      },
+      {
+        "version": "3.8.0-MCLv7",
+        "label": "Android ART libffi 3.8.0-MCLv7"
       }
     ],
     "build": {
-      "version": "3.8.0-MCLv4",
+      "version": "3.8.0-MCLv7",
       "command": "tools/build-android-art-ffi.mjs",
       "architectures": [
         "arm64"
@@ -1766,8 +1629,7 @@
         "url": "https://github.com/procrastinine/maclauncher-android",
         "repository": "procrastinine/maclauncher-android",
         "pin": {
-          "file": "producers/android-inputs/java-framework.json",
-          "pointer": "/androidSource"
+          "gitlink": "sources/maclauncher-android"
         }
       },
       {
@@ -1775,8 +1637,12 @@
         "provider": "gitiles",
         "url": "https://android.googlesource.com/platform/external/apache-http",
         "pin": {
-          "file": "producers/android-inputs/java-framework.json",
-          "pointer": "/sources/0"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects",
+          "match": {
+            "id": "aosp-apache-http"
+          },
+          "field": "/revision"
         }
       },
       {
@@ -1784,8 +1650,12 @@
         "provider": "gitiles",
         "url": "https://android.googlesource.com/platform/packages/modules/StatsD",
         "pin": {
-          "file": "producers/android-inputs/java-framework.json",
-          "pointer": "/sources/1"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects",
+          "match": {
+            "id": "aosp-statsd"
+          },
+          "field": "/revision"
         }
       },
       {
@@ -1793,8 +1663,12 @@
         "provider": "gitiles",
         "url": "https://android.googlesource.com/platform/frameworks/base",
         "pin": {
-          "file": "producers/android-inputs/java-framework.json",
-          "pointer": "/sources/2"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects",
+          "match": {
+            "id": "aosp-framework"
+          },
+          "field": "/revision"
         }
       },
       {
@@ -1802,8 +1676,12 @@
         "provider": "gitiles",
         "url": "https://android.googlesource.com/platform/frameworks/native",
         "pin": {
-          "file": "producers/android-inputs/java-framework.json",
-          "pointer": "/sources/3"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects",
+          "match": {
+            "id": "aosp-native"
+          },
+          "field": "/revision"
         }
       },
       {
@@ -1832,10 +1710,14 @@
       {
         "version": "16.0.0-MCLv4",
         "label": "Android Java framework 16.0.0-MCLv4"
+      },
+      {
+        "version": "16.0.0-MCLv7",
+        "label": "Android Java framework 16.0.0-MCLv7"
       }
     ],
     "build": {
-      "version": "16.0.0-MCLv4",
+      "version": "16.0.0-MCLv7",
       "command": "tools/build-android-java-framework.mjs",
       "architectures": [
         "arm64"
@@ -1875,9 +1757,7 @@
         "repository": "hahnlee/aim",
         "url": "https://github.com/hahnlee/aim",
         "pin": {
-          "file": "producers/android-image-data/source.json",
-          "pointer": "/revision",
-          "repositoryPointer": "/repository"
+          "gitlink": "producers/maclauncher/src/external/aim"
         }
       }
     ],
@@ -1897,10 +1777,14 @@
       {
         "version": "16.0.0-MCLv4",
         "label": "Android original image data 1 16.0.0-MCLv4"
+      },
+      {
+        "version": "16.0.0-MCLv7",
+        "label": "Android original image data 1 16.0.0-MCLv7"
       }
     ],
     "build": {
-      "version": "16.0.0-MCLv4",
+      "version": "16.0.0-MCLv7",
       "command": "tools/build-android-image-data.mjs",
       "architectures": [
         "arm64"
@@ -1944,9 +1828,7 @@
         "repository": "hahnlee/aim",
         "url": "https://github.com/hahnlee/aim",
         "pin": {
-          "file": "producers/android-image-data/source.json",
-          "pointer": "/revision",
-          "repositoryPointer": "/repository"
+          "gitlink": "producers/maclauncher/src/external/aim"
         }
       }
     ],
@@ -1966,10 +1848,14 @@
       {
         "version": "16.0.0-MCLv4",
         "label": "Android original image data 2 16.0.0-MCLv4"
+      },
+      {
+        "version": "16.0.0-MCLv7",
+        "label": "Android original image data 2 16.0.0-MCLv7"
       }
     ],
     "build": {
-      "version": "16.0.0-MCLv4",
+      "version": "16.0.0-MCLv7",
       "command": "tools/build-android-image-data.mjs",
       "architectures": [
         "arm64"
@@ -2013,9 +1899,7 @@
         "repository": "hahnlee/aim",
         "url": "https://github.com/hahnlee/aim",
         "pin": {
-          "file": "producers/android-image-data/source.json",
-          "pointer": "/revision",
-          "repositoryPointer": "/repository"
+          "gitlink": "producers/maclauncher/src/external/aim"
         }
       }
     ],
@@ -2035,10 +1919,14 @@
       {
         "version": "16.0.0-MCLv4",
         "label": "Android original image data 3 16.0.0-MCLv4"
+      },
+      {
+        "version": "16.0.0-MCLv7",
+        "label": "Android original image data 3 16.0.0-MCLv7"
       }
     ],
     "build": {
-      "version": "16.0.0-MCLv4",
+      "version": "16.0.0-MCLv7",
       "command": "tools/build-android-image-data.mjs",
       "architectures": [
         "arm64"
@@ -2082,9 +1970,7 @@
         "repository": "hahnlee/aim",
         "url": "https://github.com/hahnlee/aim",
         "pin": {
-          "file": "producers/android-image-data/source.json",
-          "pointer": "/revision",
-          "repositoryPointer": "/repository"
+          "gitlink": "producers/maclauncher/src/external/aim"
         }
       }
     ],
@@ -2104,10 +1990,14 @@
       {
         "version": "16.0.0-MCLv4",
         "label": "Android original image data 4 16.0.0-MCLv4"
+      },
+      {
+        "version": "16.0.0-MCLv7",
+        "label": "Android original image data 4 16.0.0-MCLv7"
       }
     ],
     "build": {
-      "version": "16.0.0-MCLv4",
+      "version": "16.0.0-MCLv7",
       "command": "tools/build-android-image-data.mjs",
       "architectures": [
         "arm64"
@@ -2151,9 +2041,7 @@
         "repository": "hahnlee/aim",
         "url": "https://github.com/hahnlee/aim",
         "pin": {
-          "file": "producers/android-image-data/source.json",
-          "pointer": "/revision",
-          "repositoryPointer": "/repository"
+          "gitlink": "producers/maclauncher/src/external/aim"
         }
       }
     ],
@@ -2173,10 +2061,14 @@
       {
         "version": "16.0.0-MCLv4",
         "label": "Android original image data 5 16.0.0-MCLv4"
+      },
+      {
+        "version": "16.0.0-MCLv7",
+        "label": "Android original image data 5 16.0.0-MCLv7"
       }
     ],
     "build": {
-      "version": "16.0.0-MCLv4",
+      "version": "16.0.0-MCLv7",
       "command": "tools/build-android-image-data.mjs",
       "architectures": [
         "arm64"
@@ -2210,7 +2102,6 @@
         "tools/build-android-art-java.mjs",
         "tools/android-art-java-stage.mjs",
         "producers/android-art-inputs/java-stage.json",
-        "producers/android-art-inputs/java-declarations.patch",
         "producers/android-art-inputs/java-consumer.patch",
         "producers/android-art-inputs/java.json",
         "producers/android-inputs/java-converter.json",
@@ -2229,8 +2120,7 @@
         "url": "https://github.com/procrastinine/maclauncher-android",
         "repository": "procrastinine/maclauncher-android",
         "pin": {
-          "file": "producers/android-art-inputs/java-stage.json",
-          "pointer": "/androidSource"
+          "gitlink": "sources/maclauncher-android"
         }
       },
       {
@@ -2239,9 +2129,7 @@
         "url": "https://github.com/hahnlee/aim",
         "repository": "hahnlee/aim",
         "pin": {
-          "file": "producers/android-image-data/source.json",
-          "pointer": "/revision",
-          "repositoryPointer": "/repository"
+          "gitlink": "producers/maclauncher/src/external/aim"
         }
       }
     ],
@@ -2261,10 +2149,14 @@
       {
         "version": "0.1.2",
         "label": "Android ART Java 0.1.2"
+      },
+      {
+        "version": "0.1.5",
+        "label": "Android ART Java 0.1.5"
       }
     ],
     "build": {
-      "version": "0.1.2",
+      "version": "0.1.5",
       "command": "tools/build-android-art-java.mjs",
       "architectures": [
         "arm64"
@@ -2306,11 +2198,9 @@
         "url": "https://github.com/libsdl-org/SDL",
         "repository": "libsdl-org/SDL",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "sdl2"
-          }
+          "file": "producers/dependencies.json",
+          "pointer": "/sdl2/revision",
+          "repositoryPointer": "/sdl2/repository"
         }
       }
     ],
@@ -2326,10 +2216,14 @@
       {
         "version": "2.32.10-MCLv3",
         "label": "SDL2 and fonts 2.32.10 2.32.10-MCLv3"
+      },
+      {
+        "version": "2.32.10-MCLv6",
+        "label": "SDL2 and fonts 2.32.10 2.32.10-MCLv6"
       }
     ],
     "build": {
-      "version": "2.32.10-MCLv3",
+      "version": "2.32.10-MCLv6",
       "command": "tools/build-native-sdl2-fonts.mjs",
       "architectures": [
         "arm64",
@@ -2365,11 +2259,9 @@
         "url": "https://github.com/libsndfile/libsndfile",
         "repository": "libsndfile/libsndfile",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "sndfile"
-          }
+          "file": "producers/dependencies.json",
+          "pointer": "/sndfile/revision",
+          "repositoryPointer": "/sndfile/repository"
         }
       }
     ],
@@ -2385,10 +2277,14 @@
       {
         "version": "1.2.2-MCLv3",
         "label": "libsndfile and codecs 1.2.2 1.2.2-MCLv3"
+      },
+      {
+        "version": "1.2.2-MCLv6",
+        "label": "libsndfile and codecs 1.2.2 1.2.2-MCLv6"
       }
     ],
     "build": {
-      "version": "1.2.2-MCLv3",
+      "version": "1.2.2-MCLv6",
       "command": "tools/build-native-sndfile.mjs",
       "architectures": [
         "arm64",
@@ -2430,10 +2326,14 @@
       {
         "version": "7.1.2-MCLv3",
         "label": "FFmpeg native video codecs 7.1.2 7.1.2-MCLv3"
+      },
+      {
+        "version": "7.1.2-MCLv6",
+        "label": "FFmpeg native video codecs 7.1.2 7.1.2-MCLv6"
       }
     ],
     "build": {
-      "version": "7.1.2-MCLv3",
+      "version": "7.1.2-MCLv6",
       "command": "tools/build-native-ffmpeg.mjs",
       "architectures": [
         "arm64",
@@ -2470,11 +2370,9 @@
         "url": "https://github.com/libsdl-org/SDL_mixer",
         "repository": "libsdl-org/SDL_mixer",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-mixer.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "sdl2_mixer"
-          }
+          "file": "producers/dependencies.json",
+          "pointer": "/sdl2_mixer/revision",
+          "repositoryPointer": "/sdl2_mixer/repository"
         }
       }
     ],
@@ -2490,10 +2388,14 @@
       {
         "version": "2.8.2-MCLv3",
         "label": "SDL2_mixer 2.8.2 2.8.2-MCLv3"
+      },
+      {
+        "version": "2.8.2-MCLv6",
+        "label": "SDL2_mixer 2.8.2 2.8.2-MCLv6"
       }
     ],
     "build": {
-      "version": "2.8.2-MCLv3",
+      "version": "2.8.2-MCLv6",
       "command": "tools/build-native-sdl2-mixer.mjs",
       "architectures": [
         "arm64",
@@ -2545,10 +2447,14 @@
       {
         "version": "1.24.3-MCLv3",
         "label": "OpenAL Soft 1.24.3 1.24.3-MCLv3"
+      },
+      {
+        "version": "1.24.3-MCLv6",
+        "label": "OpenAL Soft 1.24.3 1.24.3-MCLv6"
       }
     ],
     "build": {
-      "version": "1.24.3-MCLv3",
+      "version": "1.24.3-MCLv6",
       "command": "tools/build-native-openal.mjs",
       "architectures": [
         "arm64",
@@ -2590,10 +2496,14 @@
       {
         "version": "3.4.18-MCLv3",
         "label": "SDL3 3.4.18 Universal framework 3.4.18-MCLv3"
+      },
+      {
+        "version": "3.4.18-MCLv6",
+        "label": "SDL3 3.4.18 Universal framework 3.4.18-MCLv6"
       }
     ],
     "build": {
-      "version": "3.4.18-MCLv3",
+      "version": "3.4.18-MCLv6",
       "command": "tools/build-android-sdl3.mjs",
       "architectures": [
         "universal"
@@ -2621,9 +2531,9 @@
         "provider": "gitiles",
         "url": "https://chromium.googlesource.com/angle/angle",
         "pin": {
-          "file": "producers/android-inputs/angle.json",
-          "pointer": "/angle/revision",
-          "repositoryPointer": "/angle/repository"
+          "file": "sources/maclauncher-android/src/modules/android/native/angle-source.json",
+          "pointer": "/revision",
+          "repositoryPointer": "/repository"
         }
       },
       {
@@ -2634,20 +2544,6 @@
           "file": "producers/android-inputs/angle.json",
           "pointer": "/gn/revision",
           "repositoryPointer": "/gn/repository"
-        }
-      },
-      {
-        "id": "android-common",
-        "provider": "github",
-        "url": "https://github.com/procrastinine/maclauncher-android",
-        "repository": "procrastinine/maclauncher-android",
-        "pin": {
-          "file": "producers/android-inputs/angle.json",
-          "pointer": "/profiles",
-          "match": {
-            "id": "common"
-          },
-          "field": "/androidSource"
         }
       },
       {
@@ -2677,10 +2573,14 @@
       {
         "version": "MCLv3",
         "label": "AIM original ANGLE profile MCLv3"
+      },
+      {
+        "version": "MCLv6",
+        "label": "AIM original ANGLE profile MCLv6"
       }
     ],
     "build": {
-      "version": "MCLv3",
+      "version": "MCLv6",
       "command": "tools/build-android-angle.mjs",
       "architectures": [
         "arm64"

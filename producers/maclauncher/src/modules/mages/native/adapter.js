@@ -1,22 +1,20 @@
+const { gitlink } = require("../../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const Inspect = require("../inspect");
 const Archive = require("../archive");
-const NativeBuild = require("../../shared/runtime/pinned-native-build");
-const overlay = require("./impacto-overlay.json");
-const SourcePatches = require("./source-patches");
 
 const SOURCES = Object.freeze({
   impacto: { repository: "https://github.com/CommitteeOfZero/impacto", revision: Inspect.IMPACTO.revision },
-  avcpp: { repository: "https://github.com/h4tr3d/avcpp", revision: "6bf8c76b120cf2cc448d706ea22f112017803605" },
-  atrac9: { repository: "https://github.com/Thealexbarney/LibAtrac9", revision: "efca2e3af35562a09a9bb6deed90e45b4b824dc4" },
-  magicEnum: { repository: "https://github.com/Neargye/magic_enum", revision: "591b64351ea8442f8b8fa044ff335d6943e8e6e0" },
+  avcpp: { repository: "https://github.com/h4tr3d/avcpp", revision: gitlink("producers/maclauncher/src/external/avcpp") },
+  atrac9: { repository: "https://github.com/Thealexbarney/LibAtrac9", revision: gitlink("producers/maclauncher/src/external/atrac9") },
+  magicEnum: { repository: "https://github.com/Neargye/magic_enum", revision: gitlink("producers/maclauncher/src/external/magic-enum") },
   ffmpeg: { archive: "https://ffmpeg.org/releases/ffmpeg-7.1.2.tar.xz", version: "7.1.2", sha256: "089bc60fb59d6aecc5d994ff530fd0dcb3ee39aa55867849a2bbc4e555f9c304" },
-  bink2: { repository: "https://github.com/sharpemu/ffmpeg-core", revision: "3b502d4ed79ec2c14066ca09f514db1e2ebb5265",
+  bink2: { repository: "https://github.com/sharpemu/ffmpeg-core", revision: gitlink("producers/maclauncher/src/external/ffmpeg-core-bink2"),
     patchPath: "bink2.patch", upstreamPatchSha256: "2c1b70354bb32471a5b1bb46ca3479e641fdd9d971c3eb4317c935040dd28fdc",
     patchSha256: "0405b8f018baa818a3392d70637a0246c6cf4eb9f37f738cd223784b41f477a8",
-    adaptations: ["Normalize the alpha flag to a Boolean before plane iteration"], license: "LGPL-2.1-or-later" }
+    adaptations: ["Normalize the alpha flag to a Boolean before plane iteration"] }
 });
 
 function hash(file) { return crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex"); }
@@ -63,27 +61,6 @@ function writeOwnedFile(file, data) {
   requireOwnedFile(file);
   const fd = fs.openSync(file, fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_TRUNC | (fs.constants.O_NOFOLLOW || 0), 0o600);
   try { fs.writeFileSync(fd, data); } finally { fs.closeSync(fd); }
-}
-
-async function applyImpactoOverlay(stagedSource, { logPath, signal } = {}) {
-  const patch = path.join(__dirname, "impacto.patch");
-  if (hash(patch) !== overlay.overlaySha256) throw new Error("Impacto overlay hash differs from its pinned record.");
-  // This hook accepts a copy owned by the build, never a Git checkout.
-  if (fs.existsSync(path.join(stagedSource, ".git"))) throw new Error("Apply native overlays only to an owned staged source copy.");
-  for (const file of overlay.files) {
-    const target = path.join(stagedSource, file.path);
-    if (file.originalSha256 === null ? fs.existsSync(target) : hash(target) !== file.originalSha256) {
-      throw new Error(`Pinned Impacto source file differs: ${file.path}.`);
-    }
-  }
-  const command = NativeBuild.findBuildTool("git");
-  const options = { cwd: stagedSource, logPath, signal, env: SourcePatches.patchEnvironment(stagedSource) };
-  await NativeBuild.runBuildCommand(command, ["apply", "--check", patch], options);
-  await NativeBuild.runBuildCommand(command, ["apply", patch], options);
-  for (const file of overlay.files) {
-    if (hash(path.join(stagedSource, file.path)) !== file.adaptedSha256) throw new Error(`Impacto overlay result differs: ${file.path}.`);
-  }
-  return { upstreamRevision: overlay.upstreamRevision, overlaySha256: overlay.overlaySha256, files: overlay.files };
 }
 
 function validateWindowsData(gamePath) {
@@ -151,4 +128,4 @@ function prepareWindowsSession({ gamePath, runtimeRoot, sessionDir, diagnosticFr
     qualification: "Windows HD beta; story and save compatibility varies." };
 }
 
-module.exports = { SOURCES, hash, futureRealPath, separateStorage, luaString, requireOwnedFile, writeOwnedFile, applyImpactoOverlay, validateWindowsData, prepareWindowsSession };
+module.exports = { SOURCES, hash, futureRealPath, separateStorage, luaString, requireOwnedFile, writeOwnedFile, validateWindowsData, prepareWindowsSession };

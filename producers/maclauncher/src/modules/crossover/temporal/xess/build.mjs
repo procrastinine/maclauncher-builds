@@ -1,3 +1,5 @@
+import {addLicenses} from '../../../../../../../lib/licenses.mjs';
+import {gitlink} from '../../../../../../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -8,14 +10,14 @@ const args=Object.fromEntries(process.argv.slice(2).reduce((rows,value,index,all
 if(!['xess-source','dxmt-source','compiler','out'].every(key=>args[key]))throw Error('Use --xess-source SDK --dxmt-source DXMT --compiler CLANG++ --out DIRECTORY');
 const xess=fs.realpathSync(args['xess-source']),dxmt=fs.realpathSync(args['dxmt-source']),output=path.resolve(args.out),compiler=path.resolve(args.compiler);
 fs.accessSync(compiler,fs.constants.X_OK);
-for(const [directory,pin] of [[xess,source.xess],[dxmt,source.dxmt]])if(execFileSync('git',['-C',directory,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==pin.revision)throw Error('Initialize the exact XeSS adapter source commit: '+pin.repository);
+for(const [directory,pin] of [[xess,source.xess],[dxmt,source.dxmt]])if(execFileSync('git',['-C',directory,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==gitlink(pin.gitlink))throw Error('Initialize the exact XeSS adapter source commit: '+pin.repository);
 fs.mkdirSync(output,{recursive:true});
 const headers=['inc/xess/xess.h','inc/xess/xess_d3d11.h'];
 const hooks=new Set(headers.flatMap(file=>[...fs.readFileSync(path.join(xess,file),'utf8').matchAll(/XESS_API\s+xess_result_t\s+(xess\w+)\s*\(/g)].map(row=>row[1])));
 const owned=fs.readFileSync(path.join(here,'proxy.cpp'),'utf8');
 for(const hook of hooks)if(!new RegExp('XESS_API\\s+xess_result_t\\s+'+hook+'\\s*\\(').test(owned))throw Error('The selected public XeSS API is not implemented: '+hook);
 const reference=JSON.parse(fs.readFileSync(path.join(here,'reference-exports.json'))),original=reference.exports;
-if(reference.revision!==source.xess.revision||reference.repository!==source.xess.repository)throw Error('The reference XeSS export profile does not match the declared SDK');
+if(gitlink(reference.gitlink)!==gitlink(source.xess.gitlink)||reference.repository!==source.xess.repository)throw Error('The reference XeSS export profile does not match the declared SDK');
 if(!original?.length)throw Error('The pinned XeSS D3D11 export profile is unavailable');
 const exports=[...original];let ordinal=Math.max(...exports.map(row=>row.ordinal));
 for(const name of hooks)if(!exports.some(row=>row.name===name))exports.push({name,ordinal:++ordinal});
@@ -71,7 +73,8 @@ const actual=require('../streamline/pe-exports').inspect(library);
 if(JSON.stringify(actual)!==JSON.stringify([...exports].sort((a,b)=>a.name.localeCompare(b.name,'en',{sensitivity:'variant'})))){
   const supplied=new Map(actual.map(row=>[row.name,row.ordinal]));if(exports.some(row=>supplied.get(row.name)!==row.ordinal)||actual.length!==exports.length)throw Error('The XeSS export names or ordinals changed');
 }
-for(const [input,name] of [[path.join(xess,'inc/MIT.txt'),'XeSS-Headers-LICENSE.txt'],[path.join(dxmt,'LICENSE'),'DXMT-LICENSE.txt']])fs.copyFileSync(input,path.join(output,name));
+addLicenses(output,'Intel-XeSS',xess);
+addLicenses(output,'DXMT',dxmt);
 const metadata={schema:1,profile:source.profile,version:'1',library:source.library,sha256:hash(library),exports:actual,
   sources:source,compiler:execFileSync(compiler,['--version'],{encoding:'utf8'}).split('\n')[0],
   owned:Object.fromEntries(['source.json','proxy.cpp','build.mjs','reference-exports.json','export-profile.js'].map(file=>[file,hash(path.join(here,file))])),

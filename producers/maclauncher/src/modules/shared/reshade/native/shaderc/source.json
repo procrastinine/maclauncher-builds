@@ -1,9 +1,6 @@
 {
   "schema": 1,
-  "repository": "https://github.com/google/shaderc",
-  "commit": "d393a813c9b67c709d37b329203d72beb69d719e",
   "version": "2026.4",
-  "license": "Apache-2.0",
   "files": [
     {
       "path": "shaderc.h",

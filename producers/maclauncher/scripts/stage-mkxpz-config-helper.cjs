@@ -1,4 +1,3 @@
-const {addLicense} = require('../../../lib/licenses.mjs');
 // Developer staging only. Play reads the reviewed supplemental directly.
 const fs = require('node:fs');
 const path = require('node:path');
@@ -32,7 +31,6 @@ function stage({ output }) {
     if (identifiers.length !== 2 || identifiers.some(value => value !== installName)) throw new Error('The config helper contains an unexpected or private dynamic-library identity.');
     fs.copyFileSync(source, path.join(directory, 'mkxpz-config.c'));
     fs.copyFileSync(identitySource, path.join(directory, 'mkxpz-identity.m'));
-    addLicense(directory,'MacLauncher',path.resolve(__dirname, '../LICENSE'),'MIT');
     for (const name of ['mkxpz-config.c', 'mkxpz-identity.m']) fs.chmodSync(path.join(directory, name), 0o644);
     const compiler = execFileSync('/usr/bin/xcrun', ['clang', '--version'], { encoding: 'utf8', timeout: 10000 }).split('\n')[0];
     const manifest = { schemaVersion: 1, id: ID, version: VERSION, sourceSha256: Native.hashFile(source),

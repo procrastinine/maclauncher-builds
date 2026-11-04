@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import sharedDependencies from '../../dependencies.json' with {type:'json'};
+import {prepareSources} from '../src/modules/shared/reshade/libplacebo/dependencies-build.mjs';
 // Builds the shared graphics runtime from owned sources, exact Git pins and
 // declared binary inputs, then optionally stages it with stage-reshade.mjs.
 import fs from "node:fs";
@@ -8,7 +10,7 @@ import {execFileSync, spawnSync} from "node:child_process";
 import {pathToFileURL} from "node:url";
 import {createRequire} from "node:module";
 import {buildInput} from "../../../tools/build-input.mjs";
-import {downloadFile} from "../../../tools/download.mjs";
+import {gitlink} from "../../../lib/pins.mjs";
 
 const repository = path.resolve(import.meta.dirname, "..");
 export const recipe = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, "graphics-runtime.json"), "utf8"));
@@ -70,7 +72,10 @@ function registration(relative, root = repository) {
 export function resolveSource(id, override) {
   const entry = recipe.sources[id];
   if (!entry) throw Error("Unknown graphics source: " + id);
-  const commit = pinned({file: entry.pin.file, pointer: entry.pin.commit}), origin = pinned({file: entry.pin.file, pointer: entry.pin.repository});
+  const commit = id==='fsr3-sdk' ? gitlink('producers/maclauncher/src/external/fsr3-sdk') :
+    id==='sdl-vulkan' ? sharedDependencies.sdlHeaders.revision :
+    id==='libplacebo-vulkan-headers' ? git(path.join(repository,'src/external/libplacebo'),['rev-parse',gitlink('producers/maclauncher/src/external/libplacebo')+':3rdparty/Vulkan-Headers']) :
+    entry.pin.gitlink ? gitlink(pinned({file: entry.pin.file, pointer: entry.pin.gitlink})) : pinned({file: entry.pin.file, pointer: entry.pin.commit}), origin = pinned({file: entry.pin.file, pointer: entry.pin.repository});
   const directory = override ? path.resolve(override) : path.join(repository, entry.path);
   const result = {id, path: directory, commit, repository: canonical(origin)};
   if (!override) {
@@ -137,17 +142,20 @@ export function resolveInput(id, {overrides = {}, work, coreRoot = work && path.
     return file && fs.existsSync(file) ? {...declared, path: file, state: verifyInput(location, file, null)} : {...declared, state: "missing", producer: entry.product.provider};
   }
   if (fetched && fs.existsSync(fetched)) return {...declared, path: fetched, state: verifyInput(location, fetched, archiveSha256)};
-  return {...declared, state: url || archives?.every(row => row.url && row.sha256) ? "fetchable" : "missing"};
+  return {...declared, state: url || archives?.every(row => row.url && row.sha256) || ["fsr-glslang","isf-spirv-tools","isf-spirv-headers"].includes(id) ? "fetchable" : "missing"};
 }
 
 /** Download a pinned input into the work directory and verify its checksum. */
 export async function fetchInput(id, work) {
-  const {entry, url, sha256, archives, member, directory, fetched} = inputLocation(id, work);
-  if(entry.notice){
-    fs.mkdirSync(directory,{recursive:true});
-    await downloadFile(url,fetched).catch(error=>console.warn('::warning::Notice candidate was not fetched: '+error.message));
-    return fetched;
+  if(id==='fsr-glslang')return path.join((await prepareSources({work:path.join(work,'inputs',id)})).source,'glslang');
+  if(['isf-spirv-tools','isf-spirv-headers'].includes(id)){
+    const name=id.slice(4),glslang=await fetchInput('isf-glslang',work);
+    const upstream=JSON.parse(fs.readFileSync(path.join(glslang,'known_good.json'),'utf8')).commits.find(row=>row.name===(name==='spirv-tools'?'spirv-tools':'spirv-tools/external/spirv-headers'));
+    const source=JSON.parse(fs.readFileSync(path.join(repository,'src/modules/shared/reshade/isf/source.json'),'utf8')).compilerSources.find(row=>row.id===name);
+    const archive=await buildInput({url:'https://github.com/'+upstream.subrepo+'/archive/'+upstream.commit+'.tar.gz',sha256:source.sha256}),target=path.join(work,'inputs',id,'source',name);
+    fs.mkdirSync(target,{recursive:true});execFileSync('tar',['-xf',archive,'--strip-components=1','-C',target],{stdio:'inherit'});return target;
   }
+  const {entry, url, sha256, archives, member, directory, fetched} = inputLocation(id, work);
   if (!(archives || [{url, sha256}]).every(row => row.url && row.sha256)) throw Error("This graphics input has no pinned download: " + id);
   if (fs.existsSync(fetched)) return fetched;
   const download=(address,expected)=>buildInput({url:address,sha256:expected,headers:entry.headers||{}});

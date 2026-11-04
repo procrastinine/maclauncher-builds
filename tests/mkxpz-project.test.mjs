@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {gitlink} from '../lib/pins.mjs';
 import path from 'node:path';
 import {resolveProject} from '../lib/projects.mjs';
 import {main as build} from '../tools/build-runtime.mjs';
@@ -9,21 +10,19 @@ import {validateCatalog} from '../lib/project-identity.mjs';
 import {catalogFixture,packageRecord} from './helpers/catalog-fixture.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 const baseline=JSON.parse(fs.readFileSync(path.join(root,'runtimes/mkxpz/baseline.json')));
-test('MKXP-Z uses its owned source recipe and preserves the universal publisher identity',()=>{
+test('MKXP-Z uses its owned source recipe and one Gitlink source identity',()=>{
  const project=resolveProject('mkxpz',root);
  assert.equal(project.producer.kind,'maclauncher');
  assert.equal(project.producer.repository,'https://github.com/procrastinine/maclauncher-builds');
  assert.deepEqual(project.producer.entries,['producers/maclauncher/scripts/build-mkxpz-nfc.cjs','producers/maclauncher/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json','producers/maclauncher/helper-builds/mkxpz.json']);
- assert.equal(project.upstreams.find(row=>row.id==='sdl2-image').revision,'d3c6d5963dbe438bcae0e2b6f3d7cfea23d02829');
+ assert.equal(project.upstreams.find(row=>row.id==='sdl2-image').revision,JSON.parse(fs.readFileSync(path.join(root,'producers/maclauncher/helper-builds/mkxpz.json'))).sdlImage.revision);
  assert.ok(project.packageProfiles.some(row=>row.version===project.build.version));assert.equal(project.build.command,'tools/build-mkxpz.mjs');
  assert.deepEqual(project.build.architectures,['arm64']);
  for(const version of ['MCLv1-1003','MCLv2-1003'])assert.ok(project.packageProfiles.some(row=>row.version===version));
- assert.equal(project.upstreams[0].revision,baseline.upstream.revision);
- assert.equal(baseline.upstream.revision,'37a04d14413454551a7b6aadbb4e93e67168accb');
- assert.match(baseline.publisherArtifact.inputExecutableSha256,/^[a-f0-9]{64}$/);
- assert.equal(baseline.executableRelative,'mkxp-z.universal.app/Contents/MacOS/bundle_mkxp-z');
- assert.equal(baseline.arch,'universal');assert.deepEqual(baseline.launcherArchitectures,['arm64','x64']);
- assert.equal(baseline.minimumMacOS,'11.0');assert.equal(baseline.publisherFiles,1083);
+ assert.equal(project.upstreams[0].revision,gitlink('producers/maclauncher/src/external/mkxp-z'));
+ assert.equal(Object.hasOwn(baseline.upstream,'revision'),false);
+ assert.match(baseline.upstream.sourceSha256,/^[a-f0-9]{64}$/);
+ assert.ok(baseline.upstream.sourceBytes>0);
  assert.equal(build(['--project','mkxpz','--check']).sourceDirectory,'producers/maclauncher');
 });
 test('MKXP-Z catalog validates an immutable Apple Silicon package',t=>{

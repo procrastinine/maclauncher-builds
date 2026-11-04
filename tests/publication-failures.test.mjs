@@ -17,7 +17,7 @@ async function fixture(t,id='engine',version='1.0.0',arch='arm64'){
  fs.writeFileSync(path.join(directory,'projects.json'),JSON.stringify({schemaVersion:1,repository,updatePolicy:'manual',projects:[project]}));
  const input=path.join(directory,'input');fs.mkdirSync(input);const data={'manifest.json':JSON.stringify({version}),'LICENSE':'MIT'};
  const files=Object.entries(data).map(([name,bytes])=>{fs.writeFileSync(path.join(input,name),bytes,{mode:0o644});return {path:name,size:Buffer.byteLength(bytes),mode:0o644,sha256:sha(bytes)};});
- const declaration={id,version,arch,launcherArchitectures:arch==='arm64'?['arm64']:['arm64','x64'],minimumMacOS:'13.0',directoryRelative:id+'/'+version+'/'+arch,manifestRelative:'manifest.json',manifestSha256:files[0].sha256,sourceSha256:files[0].sha256,sourceRelative:'manifest.json',files,notices:[{name:'Engine',license:'MIT',path:'LICENSE'}],redistribution:'bundle'};
+ const declaration={id,version,arch,launcherArchitectures:arch==='arm64'?['arm64']:['arm64','x64'],minimumMacOS:'13.0',directoryRelative:id+'/'+version+'/'+arch,manifestRelative:'manifest.json',manifestSha256:files[0].sha256,sourceSha256:files[0].sha256,sourceRelative:'manifest.json',files,redistribution:'bundle'};
  const bundle=path.join(directory,'bundle');await prepareRelease({project:id,input,declaration,output:bundle,directory});const {record}=await verifyRelease({bundle,directory});
  return {directory,bundle,record};
 }

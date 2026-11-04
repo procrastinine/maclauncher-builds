@@ -1,12 +1,19 @@
+const {gitlink}=require('../../../../../../../lib/pins.mjs');
+const sharedDependencies=require('../../../../../../dependencies.json');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const Native = require("../../runtime/local-native");
-const PIN = Object.freeze(require("./portable-build.json"));
+const metadata = require("./portable-build.json");
+const revision = gitlink("producers/maclauncher/src/external/onscripter-yuri");
+const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map(row=>{if(row.id==='webp')row={...require('../../../alicesoft/system35-portable.json').dependencies.find(pin=>pin.id==='webp'),...row};if(row.id==='turbojpeg')row={...require('../../../alicesoft/system4-portable.json').dependencies.find(pin=>pin.id==='turbojpeg'),...row};const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};}), engine: { ...metadata.engine, revision,
+  sourceUrl: `https://github.com/YuriSizuku/OnscripterYuri/tree/${revision}`,
+  archiveUrl: `https://codeload.github.com/YuriSizuku/OnscripterYuri/tar.gz/${revision}` } });
 const VERSION = PIN.engine.version;
 const REVISION = PIN.engine.revision;
 const SOURCE_SHA256 = PIN.engine.sourceTreeSha256;
 const OWNED_FILES = [__filename, require.resolve("./portable-build.json"),
+  require.resolve("../../../alicesoft/system35-portable.json"), require.resolve("../../../alicesoft/system4-portable.json"),
   path.join(__dirname, "portable-native/CMakeLists.txt"), path.join(__dirname, "portable-native/lua.CMakeLists.txt"),
   require.resolve("../../runtime/pinned-native-build"), require.resolve("../../runtime/portable-sdl2-fonts"), require.resolve("../../runtime/portable-sdl2-fonts.json"),
   require.resolve("../../runtime/portable-sndfile"), require.resolve("../../runtime/portable-sndfile.json"),

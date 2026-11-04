@@ -1,16 +1,11 @@
 {
   "schema": 1,
   "repository": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-  "commit": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55",
-  "license": "MIT",
   "source": {
     "schema": 1,
     "repository": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-    "commit": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55",
     "version": "FidelityFX DoF 1.1.0",
-    "license": "MIT",
     "sourceScope": [
-      "LICENSE.txt",
       "sdk/include/FidelityFX/gpu/dof/CMakeCompileDOFShaders.txt",
       "sdk/include/FidelityFX/gpu/dof/ffx_dof_blur.h",
       "sdk/include/FidelityFX/gpu/dof/ffx_dof_callbacks_glsl.h",
@@ -108,7 +103,7 @@
       "sdk/include/FidelityFX/gpu/ffx_core_gpu_common_half.h": "d10466cbf027c8c23858a25f8e8cbbbf521d29f373db663c9354221651e9a498"
     }
   },
-  "owned": "f2d3a4f42f80f32b39a935de03c91a46a2e573136acba86bd073bccb9536dd24",
+  "owned": "48f221ee44d4a4b7fd9aabc596491fd930bbc9fa0132e5a3cd7df96b4994d08d",
   "ownedFiles": {
     "boundary.hlsl": "e80f0198b1f2c568abed50922656897c4806e5a41869aa35a9b725a55fcfffb6",
     "../native/scene-projection.hlsl": "292d888ad8ec2cbc8d8351f6597d9558932433b66a54dbc4b7baac7f171f884c"
@@ -460,5 +455,6 @@
       ],
       "sha256": "32bac9d6ba58989634361239c721bc7d9adec8d29e4bc3b55f99e667c4260b1c"
     }
-  ]
+  ],
+  "sourceFile": "dof/source.json"
 }

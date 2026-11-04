@@ -1,3 +1,4 @@
+import {androidSource} from '../lib/android-source.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -21,7 +22,7 @@ export async function prepareArtMacBuildContext({elfInput,work}){
  validateDeclaration(declaration);verifyPreparedPayload(elfInput.root,declaration);
  if(declaration.id!==profile.id||declaration.version!==profile.version||declaration.arch!=='arm64'||declaration.sourceSha256!==sha(descriptor))throw Error('ART ELF input differs from its declared leaf profile.');
  const record=json(path.join(elfInput.root,declaration.manifestRelative)),android=verifyProducer(root,json(path.join(root,'runtimes/android/source.json'))),supplier=json(path.join(android,'src/modules/android/art/supplier.json'));
- if(record.aimRevision!==supplier.sources.aim.commit||record.androidSource?.repository!==profile.androidSource.repository||record.androidSource?.revision!==profile.androidSource.revision||record.sourceLockSha256!==sha(path.join(android,profile.sourceLock)))throw Error('ART ELF and host context select different original source profiles.');
+ if(record.aimRevision!==supplier.sources.aim.commit||record.androidSource?.repository!==androidSource().repository||record.androidSource?.revision!==androidSource().revision||record.sourceLockSha256!==sha(path.join(android,profile.sourceLock)))throw Error('ART ELF and host context select different original source profiles.');
  fs.mkdirSync(work,{recursive:true});
  const checkout=checkoutSource({repository:supplier.sources.aim.url,revision:supplier.sources.aim.commit,destination:path.join(work,'upstream')}),source=path.join(work,'source');await stageSource(checkout,supplier.sources.aim.commit,source);
  const {prepareArtCompilerPaths}=await import(pathToFileURL(path.join(android,profile.compilerSource)));prepareArtCompilerPaths(source,{source:checkout});
@@ -37,6 +38,6 @@ export async function prepareArtMacBuildContext({elfInput,work}){
  const xsdc=lockValue(path.join(source,'upstream/android16-xsdc.lock'),'XSDC_REVISION');checkoutSource({repository:'https://android.googlesource.com/platform/system/tools/xsdc',revision:xsdc,destination:path.join(fetched,'xsdc')});
  const art=path.join(work,'art-products');fs.mkdirSync(art);
  for(const relative of profile.outputs){const destination=path.join(art,relative);fs.mkdirSync(path.dirname(destination),{recursive:true});fs.copyFileSync(path.join(elfInput.root,relative),destination,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);}
- try{fs.cpSync(path.join(elfInput.root,'licenses'),path.join(art,'licenses'),{recursive:true});}catch{}
+ 
  return {art,build:{source,checkout,fetched,sdk,jdk:homes[0],python,target,env},record};
 }

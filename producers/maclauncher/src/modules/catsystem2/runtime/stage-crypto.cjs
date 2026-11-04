@@ -1,4 +1,4 @@
-const {addLicense} = require('../../../../../../lib/licenses.mjs');
+const {addLicenses} = require('../../../../../../lib/licenses.mjs');
 // Developer-only build recipe. CatSystem2 tools execute the sealed Included
 // helper directly; end users need neither a compiler nor a runtime install.
 const fs = require("node:fs");
@@ -41,8 +41,8 @@ function stage({ resourcesRoot } = {}) {
     if (command(executable, ["--version"]) !== "maclauncher-kif-crypto 1.0.0") throw new Error("The new KIF helper cannot execute its declared protocol.");
     if (JSON.stringify(Native.readMachOArchitectures(executable).sort()) !== JSON.stringify(["arm64", "x86_64"])) throw new Error("KIF helper CPU slices differ.");
     for (const name of ["kif-crypto.c", "stage-crypto.cjs"]) fs.copyFileSync(path.join(__dirname, name), path.join(destination, name));
-    addLicense(destination,'MacLauncher',path.join(REPO, "LICENSE"),'MIT');
-    const dependencies = ["MacLauncher KIF cipher helper: owned MIT source, no third-party engine code or game assets.",
+    addLicenses(destination,'MacLauncher',path.resolve(REPO,'../..'));
+    const dependencies = ["MacLauncher KIF cipher helper: owned source, no third-party engine code or game assets.",
       "CommonCrypto: supplied by macOS through libSystem; not redistributed in this package.",
       "Protocol version: maclauncher-kif-crypto 1.0.0 / KBF1, four-byte minimum cyclic key, eight-byte little-endian blocks.",
       "Formats: https://github.com/trigger-segfault/TriggersTools.CatSystem2/wiki/KIF-Archive",
@@ -55,7 +55,7 @@ function stage({ resourcesRoot } = {}) {
       return { path: name, size: file.size, sha256: file.sha256, mode: file.mode,
         ...(name === "kif-crypto" ? { architectures: ["arm64", "x86_64"] } : {}) };
     });
-    const notices = [{ name: "MacLauncher KIF cipher helper", license: "MIT", path: "MacLauncher-MIT.txt" }];
+
     const record = { schemaVersion: 1, id: "catsystem2-kif-crypto", version: VERSION, protocolVersion: "KBF1",
       sourceSha256: source.sha256, binarySha256: files.find(file => file.path === "kif-crypto").sha256,
       minimumMacOS: MINIMUM_MACOS, architectures: ["arm64", "x86_64"], scope: "kif-little-endian-blowfish",

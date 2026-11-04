@@ -1,4 +1,5 @@
-import {addLicense} from '../../../../../../../lib/licenses.mjs';
+import {gitlink} from '../../../../../../../lib/pins.mjs';
+import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -24,7 +25,7 @@ const system=value=>value.startsWith('/System/Library/')||value.startsWith('/usr
 export function buildKosmic(options){
  if(options.architecture&&options.architecture!=='arm64')return buildKosmicTargets(options,buildKosmic);
  const {source,work,meson,ninja,llvm}=options;
- if(read('git',['-C',source,'rev-parse','HEAD'])!==pin.revision)throw Error('Kosmic source revision differs from its pin');
+ if(read('git',['-C',source,'rev-parse','HEAD'])!==gitlink(pin.gitlink))throw Error('Kosmic source revision differs from its pin');
  const projected=path.join(work,'source'),build=path.join(work,'build');
  prepareSourceTree(projected,temporary=>{
   fs.cpSync(source,temporary,{recursive:true,filter:file=>path.basename(file)!=='.git'});
@@ -33,7 +34,7 @@ export function buildKosmic(options){
  const environment={...process.env,CC:'/usr/bin/clang',CXX:'/usr/bin/clang++',
   LLVM_CONFIG:path.join(llvm,'bin/llvm-config'),MACOSX_DEPLOYMENT_TARGET:pin.minimumMacOS,
   ...(options.pkgConfigPath?{PKG_CONFIG_PATH:options.pkgConfigPath}:{}),
-  MESA_GIT_SHA1_OVERRIDE:pin.revision,CCACHE_DIR:path.join(work,'ccache'),CCACHE_MAXSIZE:'128M',
+  MESA_GIT_SHA1_OVERRIDE:gitlink(pin.gitlink),CCACHE_DIR:path.join(work,'ccache'),CCACHE_MAXSIZE:'128M',
   PATH:[path.dirname(meson),path.join(llvm,'bin'),process.env.PATH].join(path.delimiter)};
  const args=['--buildtype=release','--wrap-mode=nofallback','-Dvulkan-drivers=kosmickrisp',
   '-Dgallium-drivers=[]','-Dplatforms=macos','-Dopengl=false','-Dgles1=disabled','-Dgles2=disabled',
@@ -48,7 +49,7 @@ export function buildKosmic(options){
 }
 
 /** Publish a closed component using the existing native manifest semantics. */
-export function publishKosmic({source,work,library,loader,loaderNotice,spirvNotice,zstdNotice,output,architecture='arm64',nativeBuild,version:requestedVersion}){
+export function publishKosmic({source,work,library,loader,output,architecture='arm64',nativeBuild,version:requestedVersion}){
  const targetArchitecture=architecture==='x64'?'x86_64':'arm64';
  const temporary=fs.mkdtempSync(path.join(work,'.kosmic-publication-'));
  try{
@@ -75,23 +76,7 @@ export function publishKosmic({source,work,library,loader,loaderNotice,spirvNoti
    run('/usr/bin/codesign',['--verify','--strict',destination]);
    links.push({file:name,links:dependencies});
   }
-  const licenseRoot=path.join(payload,'licenses');fs.mkdirSync(licenseRoot,{recursive:true});
-  addLicense(payload,'Mesa',path.join(source,'docs/license.rst'));
-  const notices=[{name:'Mesa',license:'MIT and upstream notices',sourceUrl:pin.repository,path:'licenses/Mesa-license.rst'}];
-  for(const name of read('git',['-C',source,'ls-tree','-r','--name-only',pin.revision,'licenses/']).split('\n')){
-   const relative='licenses/Mesa-'+path.basename(name);
-   addLicense(payload,'Mesa',path.join(source,name));
-   notices.push({name:'Mesa '+path.basename(name),license:path.basename(name),sourceUrl:pin.repository,path:relative});
-  }
-  for(const item of [
-   ['Vulkan-Loader','Apache-2.0','https://github.com/KhronosGroup/Vulkan-Loader',loaderNotice],
-   ['SPIRV-Tools','Apache-2.0','https://github.com/KhronosGroup/SPIRV-Tools',spirvNotice],
-   ['Zstandard','BSD-3-Clause','https://github.com/facebook/zstd',zstdNotice]
-  ]){
-   const [name,license,sourceUrl,file]=item,relative='licenses/'+name+'.txt';
-   if(!file)continue;
-   addLicense(payload,name,file,license);notices.push({name,license,sourceUrl,path:relative});
-  }
+  addLicenses(payload,'Mesa',source);
   const files=Bundled.fileInventory(payload).map(relative=>{
    const file=path.join(payload,relative),stat=fs.statSync(file);
    const native=links.some(item=>item.file===relative);
@@ -105,9 +90,9 @@ export function publishKosmic({source,work,library,loader,loaderNotice,spirvNoti
   const adaptations=['kosmickrisp-build.mjs','kosmickrisp-source.mjs','kosmickrisp-source.json','source-files.mjs',
    ...(architecture==='arm64'?[]:['kosmickrisp-targets.mjs','kosmickrisp-targets.json'])].map(file=>({file,sha256:sha(fs.readFileSync(path.join(root,file)))}));
   const sourceHash=sha(JSON.stringify({pin,adaptations})),version=requestedVersion||'0.1.0-'+sourceHash.slice(0,8)+'-'+sha(JSON.stringify(files)).slice(0,8);
-  const manifest={schemaVersion:1,managerId:'vulkan-kosmickrisp-gles32',version,upstreamRevision:pin.revision,
+  const manifest={schemaVersion:1,managerId:'vulkan-kosmickrisp-gles32',version,upstreamRevision:gitlink(pin.gitlink),
    platform:'darwin',arch:architecture==='x64'?'x64':'arm64',minimumMacOS,executableRelative:pin.library,files,dependencies:links,
-   runtimeFiles:{loader:'libvulkan.1.dylib'},provenance:{sourceRevision:pin.revision,verifiedBuild:true,
+   runtimeFiles:{loader:'libvulkan.1.dylib'},provenance:{sourceRevision:gitlink(pin.gitlink),verifiedBuild:true,
     sourceUrl:pin.repository,adaptations,...(nativeBuild&&architecture!=='arm64'?{
      nativeCompilers:JSON.parse(fs.readFileSync(path.join(nativeBuild,'native-tools.json'))),
      targetInputs:JSON.parse(fs.readFileSync(path.join(root,'kosmickrisp-targets.json')))}:{}),
@@ -152,10 +137,10 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
   options['loader-source']||=path.join(buildsRoot,inputs.vulkanLoader.path);
   options['headers-source']||=path.join(buildsRoot,inputs.vulkanHeaders.path);
  }
- for(const name of ['source','work','meson','ninja','output',...(!targeted||!options['native-build']?['llvm']:[]),...(targeted?['loader-source','headers-source']:['loader','loader-notice','spirv-notice','zstd-notice'])])if(!options[name])throw Error('Missing --'+name);
+ for(const name of ['source','work','meson','ninja','output',...(!targeted||!options['native-build']?['llvm']:[]),...(targeted?['loader-source','headers-source']:['loader'])])if(!options[name])throw Error('Missing --'+name);
  const built=buildKosmic(options);
  const loader=targeted?buildKosmicLoader({source:options['loader-source'],headersSource:options['headers-source'],work:options.work,architecture:options.architecture,jobs:Number(options.jobs||2)}):{};
- const manifest=publishKosmic({...options,...built,...loader,loaderNotice:loader.loaderNotice||options['loader-notice'],spirvNotice:options['spirv-notice'],zstdNotice:options['zstd-notice']});
+ const manifest=publishKosmic({...options,...built,...loader});
  if(options['resource-root'])stageKosmic({output:options.output,resourceRoot:options['resource-root'],...(options.declaration?{declarationFile:options.declaration}:{})});
  console.log(JSON.stringify({output:options.output,version:manifest.version,minimumMacOS:manifest.minimumMacOS,bytes:manifest.files.reduce((sum,file)=>sum+file.size,0)}));
 }

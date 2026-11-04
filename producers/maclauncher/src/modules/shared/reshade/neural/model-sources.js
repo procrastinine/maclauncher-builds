@@ -2,9 +2,8 @@ const fs = require("node:fs"), path = require("node:path"), crypto = require("no
 const { cloneOrCopy } = require("../../copy-file");
 const Zip = require("../../runtime/zip"), Models = require("./models");
 const PICKER_EXTENSIONS=Object.freeze([...Models.PACKAGE_EXTENSIONS,"safetensors","pth","dll","so","app","zip"]);
-const LIMITS = {entries: 16384, directory: 16 << 20, packages: 16, notice: 2 << 20, notices: 8 << 20,
+const LIMITS = {entries: 16384, directory: 16 << 20, packages: 16,
   archive: 2 * Models.MAX_WEIGHTS + (32 << 20)};
-const noticeName = name => /^(?:LICENSE|NOTICE|COPYING)(?:[._-][A-Za-z0-9._-]+)?$/i.test(name);
 const safeName = name => typeof name === "string" && name.length <= 4096 && !/[\\\x00-\x1f]/.test(name) &&
   !name.startsWith("/") && !/^[A-Za-z]:/.test(name) && name.split("/").every(part => part && part !== "." && part !== "..");
 function regular(file, maximum) {
@@ -16,9 +15,6 @@ function children(directory, maximum) {
   const rows = [], opened = fs.opendirSync(directory);
   try { let row;while ((row = opened.readSync())) { if (rows.length >= maximum) throw new Error("The model source contains too many entries.");rows.push(row); } }
   finally { opened.closeSync(); }return rows;
-}
-function localNotices(directory, maximum) {
-  try{return fs.readdirSync(directory,{withFileTypes:true}).filter(row=>row.isFile()&&noticeName(row.name)).map(row=>({name:row.name,source:path.join(directory,row.name)}));}catch{return [];}
 }
 function appSource(file) {
   const canonical = fs.realpathSync(file), resources = path.join(canonical, "Contents/Resources"), folder = path.join(resources, "models");
@@ -32,8 +28,7 @@ function appSource(file) {
   }
   if (!packages.length) throw new Error("This application contains no compatible neural model package.");
   if (packages.reduce((sum, row) => sum + row.weightsStat.size, 0) > Models.MAX_WEIGHTS) throw new Error("The model source exceeds the combined weights size limit.");
-  const notices = localNotices(resources, 512);
-  return {kind: "application", file: canonical, packages, notices};
+  return {kind: "application", file: canonical, packages};
 }
 function archiveSource(file) {
   const stat = regular(file, LIMITS.archive), fd = fs.openSync(file, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW);let entries;
@@ -80,32 +75,26 @@ function archiveSource(file) {
   if (!packages.length) throw new Error("This ZIP contains no compatible neural model package.");
   if (packages.length > LIMITS.packages || expanded > Models.MAX_WEIGHTS + (LIMITS.packages * Models.MAX_MANIFEST))
     throw new Error("The model ZIP exceeds the expanded model size limit.");
-  const notices = [];
-  for (const entry of entries) {
-    const parent = entry.name.slice(0, entry.name.lastIndexOf("/") + 1);
-    if (!safeName(entry.name) || !noticeName(path.posix.basename(entry.name)) || !(parent === "" || resources.has(parent))) continue;
-    notices.push(entry);
-  }
-  return {kind: "archive", file, stat, packages, notices};
+  return {kind: "archive", file, stat, packages};
 }
 function inspect(file) {
   if (typeof file !== "string" || !path.isAbsolute(file) || /[\x00-\x1f]/.test(file)) throw new Error("Choose a local neural model source.");
   if(path.basename(file)==='libnvidia-ngx-dlss.so.310.7.0')return inspect(path.dirname(file));
-  if(fs.statSync(file).isDirectory()&&fs.existsSync(path.join(file,'libnvidia-ngx-dlss.so.310.7.0')))return {kind:'nvidia-sr-capture',file:fs.realpathSync(file),capture:require('./nvidia-sr-capture').inspect(file),notices:localNotices(file,512)};
-  if(fs.statSync(file).isDirectory()&&fs.existsSync(path.join(file,"flownet.param"))&&fs.existsSync(path.join(file,"flownet.bin")))return {kind:"ncnn-rife",file:fs.realpathSync(file),model:require("./ncnn-rife").inspect(file),notices:localNotices(file,512)};
+  if(fs.statSync(file).isDirectory()&&fs.existsSync(path.join(file,'libnvidia-ngx-dlss.so.310.7.0')))return {kind:'nvidia-sr-capture',file:fs.realpathSync(file),capture:require('./nvidia-sr-capture').inspect(file)};
+  if(fs.statSync(file).isDirectory()&&fs.existsSync(path.join(file,"flownet.param"))&&fs.existsSync(path.join(file,"flownet.bin")))return {kind:"ncnn-rife",file:fs.realpathSync(file),model:require("./ncnn-rife").inspect(file)};
   if(fs.lstatSync(file).isDirectory()&&!fs.lstatSync(file).isSymbolicLink()&&!Models.packagePattern.test(file)&&!/\.app$/i.test(file)){
     const candidates=['nvngx_dlssnr.dll','nvngx_dlssg.dll','libnvidia-ngx-vsr.so.1.8.2'].filter(name=>fs.existsSync(path.join(file,name)));
     if(candidates.length===1)return inspect(path.join(file,candidates[0]));
     if(candidates.length>1)throw new Error('Choose one original model library from this folder.');
   }
   if(/\.dll$/i.test(file)) {
-    if(/^nvngx_dlssnr\.dll$/i.test(path.basename(file)))return {kind:'nvidia-nr-weights',file:fs.realpathSync(file),weights:require('./nvidia-nr-weights').inspect(file),notices:localNotices(path.dirname(file),512)};
+    if(/^nvngx_dlssnr\.dll$/i.test(path.basename(file)))return {kind:'nvidia-nr-weights',file:fs.realpathSync(file),weights:require('./nvidia-nr-weights').inspect(file)};
     let nr;try { nr=require('./nvidia-nr-weights').inspect(file); } catch {}
-    if(nr)return {kind:'nvidia-nr-weights',file:fs.realpathSync(file),weights:nr,notices:localNotices(path.dirname(file),512)};
+    if(nr)return {kind:'nvidia-nr-weights',file:fs.realpathSync(file),weights:nr};
   }
-  if(/\.(?:dll|so(?:\.\d+)*)$/i.test(file))return {kind:'nvidia-weights',file:fs.realpathSync(file),weights:require('./nvidia-weight-extractor').inspect(file),notices:localNotices(path.dirname(file),512)};
-  if(/\.pth$/i.test(file))return {kind:'torch-weights',file:fs.realpathSync(file),weights:require('./torch-checkpoint').inspect(file),notices:localNotices(path.dirname(file),512)};
-  if (Models.packagePattern.test(file)) return {kind: "package", file, packages: [Models.inspectPackage(file)], notices: localNotices(file,512)};
+  if(/\.(?:dll|so(?:\.\d+)*)$/i.test(file))return {kind:'nvidia-weights',file:fs.realpathSync(file),weights:require('./nvidia-weight-extractor').inspect(file)};
+  if(/\.pth$/i.test(file))return {kind:'torch-weights',file:fs.realpathSync(file),weights:require('./torch-checkpoint').inspect(file)};
+  if (Models.packagePattern.test(file)) return {kind: "package", file, packages: [Models.inspectPackage(file)]};
   if(/\.safetensors$/i.test(file)) {
     const weights=require('./weight-adapters').inspect(file),canonical=fs.realpathSync(file);
     let denoiseWeights;
@@ -117,7 +106,7 @@ function inspect(file) {
         denoiseWeights={...inspected,file:fs.realpathSync(companion)};break;
       }
     }
-    return {kind:"weights",file:canonical,weights,denoiseWeights,notices:localNotices(path.dirname(file),512)};
+    return {kind:"weights",file:canonical,weights,denoiseWeights};
   }
   if (/\.app$/i.test(file)) return appSource(file);
   if (/\.zip$/i.test(file)) return archiveSource(file);
@@ -135,19 +124,19 @@ async function materialize(source, destination, {signal, onProgress, modelIdenti
     for(const output of outputs){
       const folder=path.join(destination,output.name);fs.mkdirSync(folder);
       const weights=Models.inspectWeights(output.file),topology=require('./nr-models').logicalTopology(weights.tensors),label=output.name==='small'?'Small31':output.name==='ht'?'HT71':`${topology.blocks.length} blocks`;
-      const logical=await materialize({kind:'weights',file:output.file,weights,notices:source.notices,provenance:output.sourceFiles},folder,{signal,onProgress,modelIdentifier:`${modelIdentifier||'DLSS neural rendering'} · ${label}`});
+      const logical=await materialize({kind:'weights',file:output.file,weights,provenance:output.sourceFiles},folder,{signal,onProgress,modelIdentifier:`${modelIdentifier||'DLSS neural rendering'} · ${label}`});
       packages.push(...logical.packages);
     }
     return {...source,packages};
   }
   if(source.kind==='nvidia-weights'){
     const file=path.join(destination,'converted.safetensors'),provenance=await require('./nvidia-weight-extractor').convert(source.weights,file,{signal});
-    const converted=await materialize({kind:'weights',file,weights:Models.inspectWeights(file),notices:source.notices,provenance:provenance.sourceFiles},destination,{signal,onProgress,modelIdentifier});
+    const converted=await materialize({kind:'weights',file,weights:Models.inspectWeights(file),provenance:provenance.sourceFiles},destination,{signal,onProgress,modelIdentifier});
     return {...converted,kind:source.kind,file:source.file};
   }
   if(source.kind==='torch-weights'){
     const file=path.join(destination,'converted.safetensors'),provenance=await require('./torch-checkpoint').convert(source.weights,file,{signal,onProgress});
-    const converted=await materialize({kind:'weights',file,weights:Models.inspectWeights(file),notices:source.notices,provenance:provenance.sourceFiles},destination,{signal,onProgress,modelIdentifier});
+    const converted=await materialize({kind:'weights',file,weights:Models.inspectWeights(file),provenance:provenance.sourceFiles},destination,{signal,onProgress,modelIdentifier});
     return {...converted,kind:source.kind,file:source.file};
   }
   if(source.kind==="ncnn-rife"){
@@ -184,7 +173,7 @@ async function materialize(source, destination, {signal, onProgress, modelIdenti
     return {...source,packages:[Models.inspectPackage(modelPath)]};
   }
   if (source.kind !== "archive") return source;
-  const packages = [], notices = [];
+  const packages = [];
   for (const [index, row] of source.packages.entries()) {
     signal?.throwIfAborted();
     const modelPath = path.join(destination, index + (row.value.architecture===Models.SR_ARCHITECTURE?".srmodel":".dlssmodel"));fs.mkdirSync(modelPath);
@@ -198,12 +187,8 @@ async function materialize(source, destination, {signal, onProgress, modelIdenti
     for(const entry of row.auxiliary||[])await Zip.extractZipEntry(source.file,entry,path.join(modelPath,path.posix.basename(entry.name)),{maxOutputBytes:Models.MAX_WEIGHTS,signal});
     packages.push({...Models.inspectPackage(modelPath), sourcePackage: row.prefix.replace(/\/$/, "")});
   }
-  for (const [index, row] of source.notices.entries()) {
-    signal?.throwIfAborted();const file = path.join(destination, "notice-" + index);
-    try{await Zip.extractZipEntry(source.file,row,file,{maxOutputBytes:LIMITS.notice,signal});notices.push({name:path.posix.basename(row.name),source:file});}catch(error){console.warn("::warning::Skipped model notice: "+error.message);}
-  }
   const after = fs.lstatSync(source.file);
   if (["dev", "ino", "size", "mtimeMs", "ctimeMs"].some(key => source.stat[key] !== after[key])) throw new Error("The model ZIP changed during import.");
-  return {...source, packages, notices};
+  return {...source, packages};
 }
 module.exports = {LIMITS, PICKER_EXTENSIONS, inspect, recognizes, materialize};

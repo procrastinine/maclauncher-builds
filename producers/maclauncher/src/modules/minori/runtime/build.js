@@ -1,4 +1,4 @@
-const {addLicense} = require('../../../../../../lib/licenses.mjs');
+const {addLicenses,includeLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -96,14 +96,14 @@ async function buildCandidate({ sourceDir = sourcePath, destination, decoderPref
       const source = path.join(target, targetTriple, "release", name);
       fs.copyFileSync(source, path.join(candidate, "bin", name)); fs.chmodSync(path.join(candidate, "bin", name), 0o755);
     }
-    addLicense(candidate,'ReMinori',path.join(sourceRoot, "LICENSE"));
+    addLicenses(candidate,'ReMinori',sourceRoot);
     let movieDecoder = null;
     if (decoderPrefix) {
       const built = await buildMovieDecoder({ prefix: decoderPrefix, directory: path.join(candidate, "bin"), architecture, signal, dependencies });
       const files = closeMovieDependencies(decoderPrefix, candidate);
       movieDecoder = { version: built.version, bridgeVersion: "maclauncher-minori-movie-v1",
         sha256: Native.hashFile(built.executable), sourceSha256: built.sourceSha256, files };
-      addLicense(candidate,'ReMinori',path.join(decoderPrefix, "FFmpeg-LICENSE.txt"));
+      includeLicenses(candidate,path.join(decoderPrefix,'licenses'));
     }
     const profile = { schemaVersion: 1, version: Overlay.VERSION, upstreamRevision: Overlay.REVISION,
       profileRevision: Overlay.PROFILE, dataProfiles: ["paz-bf-slot0-rc4-v1", "paz-pe-keytables-rc4-v1"], minimumMacOS: "13.0",

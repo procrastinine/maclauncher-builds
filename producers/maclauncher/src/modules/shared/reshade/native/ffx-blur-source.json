@@ -1,17 +1,12 @@
 {
   "schema": 1,
   "repository": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-  "commit": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55",
   "version": "FidelityFX Blur 1.1.0",
-  "license": "MIT",
   "source": {
     "schema": 1,
     "repository": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-    "commit": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55",
     "version": "FidelityFX Blur 1.1.0",
-    "license": "MIT",
     "sourceScope": [
-      "LICENSE.txt",
       "sdk/include/FidelityFX/gpu/blur/CMakeCompileBlurShaders.txt",
       "sdk/include/FidelityFX/gpu/blur/ffx_blur.h",
       "sdk/include/FidelityFX/gpu/blur/ffx_blur_blur.h",
@@ -52,7 +47,7 @@
       "sdk/src/components/blur/ffx_blur_private.h": "46c638f23e33ed44dc5bb879299d9bf10900f70a496620efc1607aa89b26bac4"
     }
   },
-  "owned": "6bd64b8ad39c6ae41324b2d7f7f2a074c21a8947479ca53f66a9ae73dde6f764",
+  "owned": "ec12bfd3ca480afe6accd6a96557bc609cebebc535713284ae7abd635aca1308",
   "adaptations": {
     "boundedLogicalImages": true,
     "originalDispatch": true,
@@ -947,5 +942,6 @@
     "dxc": "cb0a0535c212ac31ca25ff18a3c43270d9a7c379fb2f3c28692cf8c44afee09d",
     "spirv-cross": "00c168bc2bb03a96943023656007591915057e4d1820dd79d8efa32c75628403",
     "spirv-val": "5e6ad0282e525bde7a764bfa3c0de5beca5cf65615fbc5def854c54d13bb9f67"
-  }
+  },
+  "sourceFile": "blur/source.json"
 }

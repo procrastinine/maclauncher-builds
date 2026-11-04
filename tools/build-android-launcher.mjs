@@ -1,3 +1,4 @@
+import {androidSource} from '../lib/android-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -9,7 +10,7 @@ import {build} from '../producers/android-launcher/build.mjs';
 import {recipeMain} from './build-source.mjs';
 const root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/android-launcher');
 export async function buildAndroidLauncher({project:id,arch,output,work}){
- const project=resolveProject(id,root,{resolvePins:false}),profile=JSON.parse(fs.readFileSync(path.join(root,'producers/included-helpers/profiles/android-launcher.json'))),input=JSON.parse(fs.readFileSync(path.join(base,'build-inputs.json')));
+ const project=resolveProject(id,root,{resolvePins:false}),profile=JSON.parse(fs.readFileSync(path.join(root,'producers/included-helpers/profiles/android-launcher.json'))),input=JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/java-converter.json')));
  fs.mkdirSync(work,{recursive:true});const cache=path.join(work,'archives');
  try {
   // Android's android-host.jar classes and android-framework.jar are this build stage's products, unchanged.
@@ -32,7 +33,7 @@ export async function buildAndroidLauncher({project:id,arch,output,work}){
    if(!fs.existsSync(generated)&&sha(file)!==entry.sha256)throw Error('Supplied integration file differs: '+entry.path);
    const target=path.join(payload,entry.output);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(file,target);fs.chmodSync(target,entry.mode);
   }
-  return helperPackage({id:project.id,version:project.build.version,arch,output,minimumMacOS:profile.minimumMacOS,sourceSha256:sha(path.join(base,'source.json')),manifestRelative:'manifest.json',record:{source:profile.source},notices:profile.notices});
+  return helperPackage({id:project.id,version:project.build.version,arch,output,minimumMacOS:profile.minimumMacOS,sourceSha256:sha(path.join(base,'source.json')),manifestRelative:'manifest.json',record:{source:profile.source}});
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}finally{fs.rmSync(work,{recursive:true,force:true});}
 }
 recipeMain(import.meta,buildAndroidLauncher);

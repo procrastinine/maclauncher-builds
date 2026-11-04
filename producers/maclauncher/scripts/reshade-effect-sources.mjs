@@ -1,3 +1,4 @@
+import {gitlink} from "../../../lib/pins.mjs";
 import Supplementals from "./native-supplementals.cjs";
 
 // Third-party presets carry their complete source and notice in the effect file.
@@ -5,8 +6,9 @@ import Supplementals from "./native-supplementals.cjs";
 export function validateEffectSources(sources, files) {
   if (!Array.isArray(sources)) throw new Error("Invalid ReShade effect sources.");
   const paths = new Set();
-  const keys = ["name", "license", "path", "sourceUrl", "revision", "sourceSha256", "sha256", "adaptation"];
+  const keys = ["name", "path", "sourceUrl", "revision", "sourceSha256", "sha256", "adaptation"];
   for (const source of sources) {
+    if(source.gitlink){source.revision=gitlink(source.gitlink);source.sourceUrl+="/blob/"+source.revision+"/"+source.sourcePath;delete source.gitlink;delete source.sourcePath;}
     if (!source || Object.keys(source).length !== keys.length || Object.keys(source).some(key => !keys.includes(key)) ||
         keys.some(key => typeof source[key] !== "string" || !source[key].trim() || source[key].length > 1024) ||
         !/^effects\/[A-Za-z0-9_-]+\.fxh?$/.test(source.path) || paths.has(source.path) ||
@@ -18,5 +20,4 @@ export function validateEffectSources(sources, files) {
     paths.add(source.path);
   }
   Supplementals.validatePublicMetadata(sources);
-  return sources.map(({ name, license, path, sourceUrl }) => ({ name, license, path, sourceUrl }));
 }

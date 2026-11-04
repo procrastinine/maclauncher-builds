@@ -5,9 +5,22 @@
   "compiler": "clang",
   "kind": "executable",
   "output": "kif-crypto",
-  "sources": ["src/modules/catsystem2/runtime/kif-crypto.c"],
-  "flags": ["-O2", "-std=c11", "-Wall", "-Wextra", "-Werror", "-Wno-deprecated-declarations"],
+  "sources": [
+    "src/modules/catsystem2/runtime/kif-crypto.c"
+  ],
+  "flags": [
+    "-O2",
+    "-std=c11",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-Wno-deprecated-declarations"
+  ],
   "minimumMacOS": "11.0",
-  "license": {"from": "LICENSE", "path": "MacLauncher-MIT.txt", "name": "MacLauncher KIF cipher helper", "license": "MIT"},
-  "record": {"protocolVersion": "KBF1", "scope": "kif-little-endian-blowfish", "sourceKind": "owned-source", "verifiedBuild": true}
+  "record": {
+    "protocolVersion": "KBF1",
+    "scope": "kif-little-endian-blowfish",
+    "sourceKind": "owned-source",
+    "verifiedBuild": true
+  }
 }

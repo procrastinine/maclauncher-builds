@@ -3,9 +3,7 @@
   "id": "macos-filename-nfc-v1",
   "kind": "developer-source-adaptation",
   "upstream": {
-    "repository": "https://github.com/mkxp-z/mkxp-z",
-    "revision": "37a04d14413454551a7b6aadbb4e93e67168accb",
-    "license": "GPL-2.0-or-later"
+    "repository": "https://github.com/mkxp-z/mkxp-z"
   },
   "files": [
     {

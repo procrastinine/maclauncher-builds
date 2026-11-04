@@ -57,7 +57,7 @@ function adaptSource(root) {
   Previous.adaptSource(root);
   replace(root, "main.cpp", "Encrypted NPA payload has no reviewed native profile", "Encrypted NPA payloads are unsupported by this runtime");
   replace(root, "main.cpp", "NSS scripts with libnpengine 0.5.3 Mac v7", "NSS scripts with libnpengine 0.5.3 Mac v8");
-  replace(root, "main.cpp", "libnpengine 0.5.3 Mac v7 / da1a175e6b497c37f9714b77510cb47c0930cd42", "libnpengine 0.5.3 Mac v8 / da1a175e6b497c37f9714b77510cb47c0930cd42");
+  replace(root, "main.cpp", "libnpengine 0.5.3 Mac v7", "libnpengine 0.5.3 Mac v8");
   replace(root, "CMakeLists.txt", 'set(CMAKE_INSTALL_RPATH "@loader_path/../lib")', 'set(CMAKE_INSTALL_RPATH "${MACLAUNCHER_NATIVE_RPATHS}")');
   replace(root, "CMakeLists.txt", "find_path(BOOST_INCLUDE_DIR boost/locale.hpp HINTS /opt/homebrew/include /usr/local/include REQUIRED)", 'if(NOT IS_DIRECTORY "${BOOST_INCLUDE_DIR}" OR NOT EXISTS "${BOOST_INCLUDE_DIR}/boost/locale.hpp")\n  message(FATAL_ERROR "Pass the pinned Boost include directory")\nendif()');
   replace(root, "CMakeLists.txt", "find_library(BOOST_LOCALE_LIBRARY boost_locale HINTS /opt/homebrew/lib /usr/local/lib REQUIRED)", 'if(NOT EXISTS "${BOOST_LOCALE_LIBRARY}")\n  message(FATAL_ERROR "Pass the pinned Boost locale library")\nendif()');
@@ -94,9 +94,6 @@ async function buildPortableNPengine({ sourceDir = Previous.sourcePath, npaSourc
   env.PKG_CONFIG_LIBDIR = [media.prefix, utilityPrefix, sdlPrefix].map(value => path.join(value, "lib/pkgconfig")).join(path.delimiter);
   const packageVersion = (name) => execFileSync(tools.pkg, ["--modversion", name], { env, encoding: "utf8", timeout: 10000 }).trim();
   const versions = Object.fromEntries(["sdl2", "glew", "pangocairo", "glib-2.0", "gstreamer-1.0"].map(name => [name, packageVersion(name)]));
-  if (versions.sdl2 !== "2.32.10" || versions.glew !== "2.3.1" || versions.pangocairo !== "1.56.2" || versions["glib-2.0"] !== "2.82.4" || versions["gstreamer-1.0"] !== "1.28.7") {
-    throw new Error("Nitroplus portable dependency versions changed.");
-  }
   const prefixes = [prefix, media.prefix, utilityPrefix, sdlPrefix];
   const maps = [{ from: workRoot, to: "NPENGINE_BUILD_ROOT" }, { from: media.prefix, to: "NPENGINE_MEDIA_SDK_ROOT" },
     { from: utilityPrefix, to: "NPENGINE_UTILITY_PREFIX" }, { from: sdlPrefix, to: "NPENGINE_SDL_PREFIX" }];

@@ -51,10 +51,8 @@ export async function buildMPV({project:id,arch,output,work}){
   ...Object.fromEntries(['decodedFrameAPI','decodedColorAPI','preparationNotificationAPI','osdLayerAPI','playerScriptsAPI','playerInputAPI','intermediateColor','outputColor'].map(key=>[key,recipe[key]??1])),
   ownedInputs:recipe.ownedInputs};
  const descriptor=path.join(staged,'video-runtime.json');fs.writeFileSync(descriptor,JSON.stringify(video,null,2)+'\n');
- const notices=['Copyright','LICENSE.GPL','LICENSE.LGPL'].map(name=>({file:path.join(source,name),name:'mpv '+name,license:'GPL-2.0-or-later AND LGPL-2.1-or-later',sourceUrl:recipe.source.repository}));
- const result=await sealRuntime({project:id,arch,output,sourceRoot:source,upstreamRevision:Builder.REVISION,executable,appRoot:app,maximumMacOS:'27.0',notices,
-  payloads:[{source:descriptor,relative:'video-runtime.json'}],runtimeFiles:{decodedFrameManifest:'video-runtime.json'},provenance:{libraryBuild:built.metadata},
-  jsonMetadata:{'video-runtime.json':(value,{files})=>{
+
+ const result=await sealRuntime({project:id,arch,output,sourceRoot:source,upstreamRevision:Builder.REVISION,executable,appRoot:app,maximumMacOS:'27.0',payloads:[{source:descriptor,relative:'video-runtime.json'}],runtimeFiles:{decodedFrameManifest:'video-runtime.json'},provenance:{libraryBuild:built.metadata},jsonMetadata:{'video-runtime.json':(value,{files})=>{
    const inventory=directory=>fs.readdirSync(directory,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?inventory(path.join(directory,entry.name)):[path.join(directory,entry.name)]);
    const images=inventory(files).filter(file=>Native.macho(file)).map(file=>({path:path.relative(files,file).split(path.sep).join('/'),sha256:hash(file)}));
    const minimumMacOS=images.map(image=>Native.loadCommands(path.join(files,image.path),'arm64').minimumMacOS).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).at(-1);

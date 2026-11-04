@@ -19,18 +19,11 @@
     "@rpath/libsteam_api.dylib"
   ],
   "minimumMacOS": "13.0",
-  "license": {
-    "from": "src/modules/shared/runtime/steamworks/native/offline-0.5.0/LICENSE",
-    "path": "LICENSE",
-    "name": "MacLauncher offline Steam API",
-    "license": "MIT"
-  },
   "binaryField": "librarySha256",
   "record": {
     "sourceKind": "owned",
     "sourceRevision": null,
     "sourcePackageVersion": 1,
-    "license": "MIT",
     "qualifiedInterfaces": [
       "STEAMAPPLIST_INTERFACE_VERSION001",
       "STEAMAPPS_INTERFACE_VERSION007",

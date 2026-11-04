@@ -4,7 +4,7 @@ import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {recipeMain,run} from './build-source.mjs';
 import {prepareAndroidBuildInputs,releaseAndroidImageArchive} from './android-build-inputs.mjs';
-import {buildAngleInput} from './build-android-angle.mjs';
+import {buildAngleInput,angleDefinition} from './build-android-angle.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {rustEnvironment} from './rust-build.mjs';
@@ -15,7 +15,7 @@ const producer=path.join(root,'producers/maclauncher');
 const read=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8',...options}).trim();
 /** Use the shared Rust toolchain maps while retaining this producer's paths and profile. */
 export function aimBuildEnvironment({work,upstream,sdk,python,minimumMacOS='26.0',env=process.env}){
- const cargo=path.join(work,'cargo'),result=rustEnvironment({work,minimumMacOS,env:{...env,CARGO_HOME:cargo}});
+ const result=rustEnvironment({work,minimumMacOS,env});
  const maps=['--remap-path-prefix='+work+'=/aim-build','--remap-path-prefix='+root+'=/maclauncher-builds'];
  result.CARGO_ENCODED_RUSTFLAGS=[result.CARGO_ENCODED_RUSTFLAGS,...maps].join(String.fromCharCode(31));
  return {...result,CARGO_BUILD_JOBS:'2',SDKROOT:env.SDKROOT||read('xcrun',['--sdk','macosx','--show-sdk-path'],{env}),PATH:path.dirname(python)+path.delimiter+(env.PATH||''),CARGO_TARGET_DIR:path.join(upstream,'target'),ANDROID_SDK_ROOT:sdk,MACLAUNCHER_AIM_ROOT:upstream};
@@ -48,10 +48,10 @@ function detachAimImage(work,upstream){
 }
 /** Keep AIM's original program-binary transport distinct from the common profile. */
 export function aimAngleInput(input){
- const definition=JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/angle.json'))),profile=definition.profiles.find(row=>row.id==='aim6');
+ const definition=angleDefinition(),profile=definition.profiles.find(row=>row.id==='aim6');
  const manifest=JSON.parse(fs.readFileSync(path.join(input.root,'angle-manifest.json')));
- if(input.record?.id!==profile.project||input.record.version!==profile.packageVersion||manifest.version!==profile.providerVersion||manifest.programBinaryVersion!==profile.programBinaryVersion||manifest.angleRevision!==definition.angle.revision)throw Error('The shared AIM ANGLE input differs from its original profile.');
- return {angle:input.root,angleLicenses:path.join(input.root,'licenses'),manifest,profileId:'aim6'};
+ if(input.record?.id!==profile.project||input.record.version!==profile.packageVersion||manifest.version!==profile.providerVersion||manifest.angleRevision!==definition.angle.revision)throw Error('The shared AIM ANGLE input differs from its original profile.');
+ return {angle:input.root,manifest,profileId:'aim6'};
 }
 /** Build the existing AIM adaptation and seal it without changing app declarations. */
 export async function buildAndroidAim({project,version,arch,output,work}){
@@ -59,12 +59,11 @@ export async function buildAndroidAim({project,version,arch,output,work}){
  if(ownedWork===ownedOutput||ownedOutput.startsWith(ownedWork+path.sep)||ownedWork.startsWith(ownedOutput+path.sep))throw Error('AIM output and build directories must be separate.');
  const selected=resolveProject(project,root),record=buildRecord(selected,version);
  version=record.version;
- const source=JSON.parse(fs.readFileSync(path.join(producer,'src/modules/android/providers/aim/source.json')));
+ const {source,prepareAimSources}=await import(pathToFileURL(path.join(producer,'src/modules/android/providers/aim/source.mjs')));
  const upstream=path.join(work,'upstream');
  const checkout=path.join(producer,'src/external/aim');
  if(read('git',['-C',checkout,'rev-parse','HEAD'])!==source.commit||read('git',['-C',checkout,'status','--porcelain','--untracked-files=no']))throw Error('AIM sources differ from their declared clean revision.');
  fs.mkdirSync(work,{recursive:true});
- const {prepareAimSources}=await import(pathToFileURL(path.join(producer,'src/modules/android/providers/aim/source.mjs')));
  prepareAimSources({checkout,output:upstream,controllerSource:path.join(root,'producers/android-aim-controller/keeper.rs'),buildJobs:2});
  const {sdk,python,cache}=await prepareAndroidBuildInputs({source:upstream,work:path.join(work,'inputs'),image:source.androidImage});
  const env=aimBuildEnvironment({work,upstream,sdk,python,minimumMacOS:source.minimumMacOS||'26.0'});

@@ -1,4 +1,5 @@
-import {includeLicenses} from '../sources/maclauncher-android/src/modules/android/native/upstream/licenses.mjs';
+import {androidSource,aimSource} from '../lib/android-source.mjs';
+import {includeLicenses,addLicenses} from '../lib/licenses.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -17,7 +18,7 @@ const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 
 /** Select original image members from the verified portable image-data group. */
 export function copyArtJavaImageMembers({input,output}){
- const inputs=Array.isArray(input)?input:[input],expected=json(path.join(root,'producers/android-image-data/source.json')),locations=new Map();let manifest,transportSha256;
+ const inputs=Array.isArray(input)?input:[input],expected={...json(path.join(root,'producers/android-image-data/source.json')),...aimSource()},locations=new Map();let manifest,transportSha256;
  if(!inputs.length)throw Error('The original image data shards are required.');
  for(const selected of inputs){
   const declaration=json(path.join(selected,'../declaration.json'));validateDeclaration(declaration);verifyPreparedPayload(selected,declaration);
@@ -45,7 +46,7 @@ export async function buildAndroidArtJavaInput({framework,image,output,work,arch
  if([output,work].some(file=>!path.isAbsolute(file||'')||fs.existsSync(file)))throw Error('ART Java inputs require new absolute output/work directories.');
  const stage=json(descriptor),checked=verifyAndroidJavaFrameworkInput(framework),definition=json(path.join(root,stage.frameworkInput)),javaProfile=json(path.join(root,stage.jdkInput)),jdkPin=javaProfile.jdk[process.platform+'-'+process.arch];if(!jdkPin)throw Error('ART Java has no declared JDK for this host.');
  fs.mkdirSync(work,{recursive:true});const members=copyArtJavaImageMembers({input:image,output:path.join(work,'image')});
- const android=checkoutSource({...definition.androidSource,destination:path.join(work,'android')}),cache=path.join(work,'archives'),jdkArchive=await buildInput(jdkPin,cache),jdkRoot=path.join(work,'jdk');fs.mkdirSync(jdkRoot);run('/usr/bin/tar',['-xzf',jdkArchive,'-C',jdkRoot]);fs.unlinkSync(jdkArchive);
+ const android=checkoutSource({...androidSource(),destination:path.join(work,'android')}),cache=path.join(work,'archives'),jdkArchive=await buildInput(jdkPin,cache),jdkRoot=path.join(work,'jdk');fs.mkdirSync(jdkRoot);run('/usr/bin/tar',['-xzf',jdkArchive,'-C',jdkRoot]);fs.unlinkSync(jdkArchive);
  const homes=fs.readdirSync(jdkRoot).map(name=>path.join(jdkRoot,name,...(process.platform==='darwin'?['Contents','Home']:[]))).filter(home=>fs.existsSync(path.join(home,'bin/javac')));if(homes.length!==1)throw Error('The declared JDK must supply one compiler.');const jdk=homes[0];
  const profile=json(path.join(root,stage.publisherInputs)),tools=path.join(work,'tools');fs.mkdirSync(tools);
  const r8=path.join(tools,'r8.jar'),r8Archive=await buildInput(profile.r8,cache);fs.copyFileSync(r8Archive,r8,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.unlinkSync(r8Archive);
@@ -54,9 +55,7 @@ export async function buildAndroidArtJavaInput({framework,image,output,work,arch
  for(const filename of ['smali-dexlib2-3.0.10.jar','guava-31.1-android.jar','jsr305-3.0.2.jar']){const pin=dex.artifacts.find(file=>file.file===filename);if(!pin)throw Error('The original DEX compiler dependency is unavailable.');const archive=await buildInput({...pin,bytes:pin.size},cache),destination=path.join(tools,filename);fs.copyFileSync(archive,destination,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.unlinkSync(archive);libraries.push(destination);}
  const dexBodies={command:path.join(jdk,'bin/java'),arguments:['-Xmx512m','-cp',[path.join(framework,'dex-tool/classes'),...libraries].join(path.delimiter),'maclauncher.build.DexBodies']};
  const producer=path.join(work,'producer'),sourceArchive=path.join(work,'producer.tar');fs.mkdirSync(producer);
- if(sha(path.join(root,stage.compileOverlay.file))!==stage.compileOverlay.sha256)throw Error('ART compile declaration transport differs from its declared recipe.');
  try{run('git',['-C',android,'archive','--format=tar','--output='+sourceArchive,'HEAD']);run('/usr/bin/tar',['-xf',sourceArchive,'-C',producer]);}finally{fs.rmSync(sourceArchive,{force:true});}
- run('git',['apply',path.join(root,stage.compileOverlay.file)],{cwd:producer,env:{...process.env,GIT_CEILING_DIRECTORIES:path.dirname(producer)}});
  const {buildArtJava}=await import(pathToFileURL(path.join(producer,'src/modules/android/art/build-java.mjs'))),built=await buildArtJava({output:path.join(work,'compile'),jdk,api:path.join(framework,'products/android-framework.jar'),coreSystemModules,sharedClasses:path.join(framework,'build/classes'),r8,...members,dexBodies});
  return packageAndroidArtJavaInput({framework,image,output,work,arch});
 }
@@ -65,23 +64,23 @@ export async function buildAndroidArtJavaInput({framework,image,output,work,arch
 export function packageAndroidArtJavaInput({framework,image,output,work,arch='arm64'}){
  const stage=json(descriptor),checked=verifyAndroidJavaFrameworkInput(framework),definition=json(path.join(root,stage.frameworkInput)),javaProfile=json(path.join(root,stage.jdkInput)),jdkPin=javaProfile.jdk[process.platform+'-'+process.arch],profile=json(path.join(root,stage.publisherInputs)),android=path.join(work,'android'),dex=json(path.join(android,'src/modules/android/art/dex-tools.json'));
  if(!jdkPin||fs.existsSync(output))throw Error('The declared ART Java host and a new package output are required.');
- if(execFileSync('git',['-C',android,'rev-parse','HEAD'],{maxBuffer:Infinity,encoding:'utf8'}).trim()!==stage.androidSource.revision||execFileSync('git',['-C',android,'status','--porcelain','--untracked-files=no'],{maxBuffer:Infinity,encoding:'utf8'}).trim())throw Error('The original ART Java source changed.');
+ if(execFileSync('git',['-C',android,'rev-parse','HEAD'],{maxBuffer:Infinity,encoding:'utf8'}).trim()!==androidSource().revision||execFileSync('git',['-C',android,'status','--porcelain','--untracked-files=no'],{maxBuffer:Infinity,encoding:'utf8'}).trim())throw Error('The original ART Java source changed.');
  const completed=json(path.join(work,'compile/bootstrap-cache.json'));
- if(completed.value!==true||!Array.isArray(completed.inputs)||!completed.inputs.length||sha(path.join(work,'producer/src/modules/android/art/build-java.mjs'))!==stage.compileProducerSha256)throw Error('The original ART Java producer has not completed.');
+ if(completed.value!==true||!Array.isArray(completed.inputs)||!completed.inputs.length||sha(path.join(work,'producer/src/modules/android/art/build-java.mjs'))!==stage.consumerSourceSha256)throw Error('The original ART Java producer has not completed.');
  for(const record of completed.inputs)if(!path.isAbsolute(record.file||'')||sha(record.file)!==record.sha256||(fs.statSync(record.file).mode&0o7777)!==record.mode)throw Error('Completed ART Java source or output changed: '+record.file);
  const built={bootstrapDex:path.join(work,'compile/bootstrap/hooks-dex.jar'),servicesJar:path.join(work,'compile/bootstrap/services.jar'),frameworkJar:path.join(work,'compile/bootstrap/framework.jar'),frameworkResourcePreinitVersion:1};
  for(const file of [built.bootstrapDex,built.servicesJar,built.frameworkJar])if(!completed.inputs.some(record=>record.file===file))throw Error('ART Java completion does not include every declared product.');
  const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});for(const [key,name]of Object.entries({bootstrapDex:'hooks-dex.jar',servicesJar:'services.jar',frameworkJar:'framework.jar'}))fs.copyFileSync(built[key],path.join(payload,name),fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);
  includeLicenses(payload,path.join(framework,'licenses'));
- includeLicenses(payload,path.join(Array.isArray(image)?image[0]:image,'licenses'));
- const notices=[];
- return helperPackage({id:stage.id,version:stage.version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{androidSource:definition.androidSource,frameworkInputSha256:checked.declaration.manifestSha256,originalImageSha256:json(path.join(root,'producers/android-image-data/source.json')).archive.sha256,buildOverlay:stage.compileOverlay,jdk:{sha256:jdkPin.sha256},compilerInputs:profile,dexTools:dex,frameworkResourcePreinitVersion:built.frameworkResourcePreinitVersion},notices});
+ addLicenses(payload,stage.id,android);
+
+ return helperPackage({id:stage.id,version:stage.version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{androidSource:androidSource(),frameworkInputSha256:checked.declaration.manifestSha256,originalImageSha256:json(path.join(root,'producers/android-image-data/source.json')).archive.sha256,jdk:{sha256:jdkPin.sha256},compilerInputs:profile,dexTools:dex,frameworkResourcePreinitVersion:built.frameworkResourcePreinitVersion}});
 }
 
 /** Validate the neutral Java product group before adding its transport to an owned supplier export. */
 export function verifyAndroidArtJavaInput(input){
  const definition=json(descriptor),declaration=json(path.join(input,'../declaration.json'));validateDeclaration(declaration);verifyPreparedPayload(input,declaration);const manifest=json(path.join(input,'input.json'));
- if(declaration.id!==definition.id||declaration.version!==definition.version||declaration.sourceSha256!==sha(descriptor)||JSON.stringify(manifest.androidSource)!==JSON.stringify(definition.androidSource))throw Error('ART Java input differs from its declared source profile.');return {root:input,declaration,manifest};
+ if(declaration.id!==definition.id||declaration.version!==definition.version||declaration.sourceSha256!==sha(descriptor)||JSON.stringify(manifest.androidSource)!==JSON.stringify(androidSource()))throw Error('ART Java input differs from its declared source profile.');return {root:input,declaration,manifest};
 }
 export function prepareArtJavaProducer({producer,input,work}){
  const checked=verifyAndroidArtJavaInput(input),owned=fs.realpathSync(work),source=fs.realpathSync(producer),definition=json(descriptor);

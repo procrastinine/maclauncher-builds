@@ -66,7 +66,7 @@ function resolve(root, { platform = process.platform, macOSVersion, graphicsArch
   if (!hostSupported({platform, macOSVersion, hostArchitecture: physicalHost}) || !["arm64","x64","x86_64"].includes(graphicsArchitecture)) return null;
   try {
     const directory = fs.realpathSync(path.join(root, "neural")), descriptor = JSON.parse(fs.readFileSync(path.join(directory, "provider.json"), "utf8"));
-    if (descriptor.providerABI !== Source.providerABI || descriptor.commit !== Source.commit || descriptor.library !== Source.library ||
+    if (descriptor.providerABI !== Source.providerABI || descriptor.library !== Source.library ||
         descriptor.minimumMacOS !== Source.minimumMacOS || descriptor.architectures?.join() !== "arm64" || !Array.isArray(descriptor.files)) return null;
     if(descriptor.operations!=null&&(!Array.isArray(descriptor.operations)||descriptor.operations.some(method=>!Object.hasOwn(OPERATIONS,method)&&!Object.hasOwn(ATTACHMENTS,method))))return null;
     if(descriptor.operations?.some(method=>Object.hasOwn(ATTACHMENTS,method))&&descriptor.estimatedDepthAPI!==1)return null;
@@ -90,7 +90,7 @@ function prepare(value, { root, ...options }) {
   for (const row of installed.descriptor.files) {
     if (typeof row.path !== "string" || path.isAbsolute(row.path) || row.path.split(/[\\/]/).some(part => !part || part === "..") || !/^[a-f0-9]{64}$/.test(row.sha256 || ""))
       throw new Error("The neural rendering provider inventory is invalid.");
-    if (row.path.startsWith("notices/") || row.path === "maclauncher-neural-video" && !options.offlineVideo) continue;
+    if (row.path === "maclauncher-neural-video" && !options.offlineVideo) continue;
     try { require("../payload-verification").verifyFile(installed.directory, row, {reuse: true}); }
     catch { throw new Error("The neural rendering provider changed. Reinstall the selected provider."); }
   }
