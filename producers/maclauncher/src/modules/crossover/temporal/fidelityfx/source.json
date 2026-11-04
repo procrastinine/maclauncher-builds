@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "id": "fidelityfx-api",
-  "version": "1.0.1-MCLv3",
+  "version": "1.0.1-MCLv6",
   "minimumMacOS": "10.15",
   "profile": "fidelityfx-api-1.0.1-sdk1.1.4",
   "sdk": {

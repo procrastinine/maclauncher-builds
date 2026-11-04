@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "android-aconfig",
-  "version": "0.1.0-MCLv4",
+  "version": "0.1.0-MCLv7",
   "repository": "https://android.googlesource.com/platform/build",
   "revision": "874fa586c48ae230ebfcff0df1b9c1b004fa8f7c",
   "crate": "tools/aconfig",

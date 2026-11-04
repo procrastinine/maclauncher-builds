@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "android-codecs",
-  "version": "1.2.2-MCLv4",
+  "version": "1.2.2-MCLv7",
   "sourceProfile": "sndfile-macos13-v1",
   "catalog": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.json",
   "recipe": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.js"

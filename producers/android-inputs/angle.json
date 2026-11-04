@@ -4,7 +4,7 @@
   "profiles": [
     {
       "id": "common",
-      "version": "MCLv4",
+      "version": "MCLv7",
       "providerVersion": "cbc4153da8d5-metal-vulkan-12"
     },
     {
@@ -12,7 +12,7 @@
       "version": "0.1.0-MCLv2",
       "providerVersion": "cbc4153da8d5-metal-vulkan-12",
       "project": "android-angle-aim",
-      "packageVersion": "MCLv3"
+      "packageVersion": "MCLv6"
     }
   ],
   "angleSource": "src/modules/android/native/angle-source.json",

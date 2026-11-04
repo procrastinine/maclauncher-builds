@@ -16,27 +16,27 @@
   "profiles": [
     {
       "id": "android-image-data-1",
-      "version": "16.0.0-MCLv4",
+      "version": "16.0.0-MCLv7",
       "shard": 1
     },
     {
       "id": "android-image-data-2",
-      "version": "16.0.0-MCLv4",
+      "version": "16.0.0-MCLv7",
       "shard": 2
     },
     {
       "id": "android-image-data-3",
-      "version": "16.0.0-MCLv4",
+      "version": "16.0.0-MCLv7",
       "shard": 3
     },
     {
       "id": "android-image-data-4",
-      "version": "16.0.0-MCLv4",
+      "version": "16.0.0-MCLv7",
       "shard": 4
     },
     {
       "id": "android-image-data-5",
-      "version": "16.0.0-MCLv4",
+      "version": "16.0.0-MCLv7",
       "shard": 5
     }
   ]
