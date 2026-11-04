@@ -7,6 +7,7 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {buildInput} from '../../../../../../../tools/build-input.mjs';
 export const profile=JSON.parse(fs.readFileSync(new URL('./dependencies.json',import.meta.url)));
+profile.sources=profile.sources.map(row=>({...row,url:row.repository.replace('https://github.com/','https://codeload.github.com/')+'/tar.gz/'+row.commit}));
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
 export async function prepareSources({work}) {
