@@ -165,8 +165,8 @@ export function main(args,directory=root){
  if(project.producer.kind==='maclauncher'&&!adapter&&project.producer.sourceDirectory){
   const source=fs.realpathSync(path.join(directory,project.producer.sourceDirectory));
   for(const entry of project.producer.entries){
-   const file=path.join(directory,entry),actual=fs.realpathSync(file);
-   if(!actual.startsWith(source+path.sep)||!fs.statSync(actual).isFile())throw Error('Producer source entries must be contained regular files.');
+   const file=path.join(directory,entry),actual=fs.realpathSync(file),stat=fs.statSync(actual);
+   if(!actual.startsWith(source+path.sep)||!(stat.isFile()||stat.isDirectory()))throw Error('Producer source entries must be contained regular files or directories.');
   }
   if(!options.check)throw Error('Use the selected producer entry with its documented build arguments: '+project.producer.entries.join(', '));
   return {id:project.id,action:'check',sourceDirectory:project.producer.sourceDirectory,entries:project.producer.entries};
