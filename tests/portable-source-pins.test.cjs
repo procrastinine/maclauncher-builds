@@ -36,3 +36,13 @@ test('portable URLs derive from canonical pins and retain archive integrity and 
     }
   }
 });
+
+test('portable libffi keeps its configured release archive separate from raw Git source',()=>{
+ const pin=modulePin('alicesoft/system4-portable-v3').dependencies.find(pin=>pin.id==='libffi');
+ assert.equal(pin.revision,shared.libffiPortable.revision);
+ assert.equal(pin.archiveUrl,shared.libffiPortable.url);
+ assert.equal(pin.archiveSha256,shared.libffiPortable.sha256);
+ assert.equal(pin.archiveBytes,shared.libffiPortable.bytes);
+ assert.match(pin.archiveUrl,/\/releases\/download\//);
+ assert.equal(require(base+'alicesoft/system4-portable.json').dependencies.find(pin=>pin.id==='libffi').archiveUrl,undefined);
+});

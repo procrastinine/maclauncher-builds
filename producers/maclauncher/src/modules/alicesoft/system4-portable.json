@@ -8,7 +8,6 @@
       "id": "libffi",
       "name": "libffi",
       "version": "3.8.0",
-      "archiveUrl": "https://github.com/libffi/libffi/releases/download/v3.8.0/libffi-3.8.0.tar.gz",
       "buildSystem": "autotools",
       "options": [
         "--enable-shared",
