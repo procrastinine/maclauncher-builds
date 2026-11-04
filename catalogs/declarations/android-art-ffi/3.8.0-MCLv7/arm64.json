@@ -1,0 +1,70 @@
+{
+  "id": "android-art-ffi",
+  "version": "3.8.0-MCLv7",
+  "arch": "arm64",
+  "minimumMacOS": "13.0",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "d4d549f4f36e0cd2308aa087a3dba26ba568c915e18f7b879ed312f595a668fc",
+  "directoryRelative": "android-art-ffi/3.8.0-MCLv7/arm64",
+  "manifestRelative": "input.json",
+  "manifestSha256": "bb3a9a9a0f1d1feb7e779c77096244d3b32459c08eb09bd339738410fcfca6b3",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 17579,
+      "mode": 420,
+      "sha256": "69ed2a692f111a578cc2e431723ed79a74b2eb5307045c7583734044e0f46dcf"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "e278e5a129eb0098fec50af2f2d427855e0e15409d4588122dd6863a37f34c27"
+    },
+    {
+      "path": "include/ffi.h",
+      "size": 16188,
+      "sha256": "3e34056b78377d1e2331a15b3758ad790dd2c9a06d1d5ca63fa98a9d33ba06b7",
+      "mode": 420
+    },
+    {
+      "path": "include/ffitarget.h",
+      "size": 2997,
+      "sha256": "ca1c2f5b66fac019373a031b4c47acd67f508ac43a0f18fe620bb5890a26d50e",
+      "mode": 420
+    },
+    {
+      "path": "input.json",
+      "size": 2103,
+      "sha256": "bb3a9a9a0f1d1feb7e779c77096244d3b32459c08eb09bd339738410fcfca6b3",
+      "mode": 420
+    },
+    {
+      "path": "lib/libffi.a",
+      "size": 120784,
+      "sha256": "6382bf68db384e8d17ea9f51877ef18252ed6bf28422f9b0e46a10acda32ca02",
+      "mode": 420
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 40,
+      "sha256": "54749bef3e545f23488710f9ff9f0cc60a3ef09262dedff6e4e19bfa4d907dbe",
+      "mode": 420
+    },
+    {
+      "path": "licenses/libffi-2.txt",
+      "size": 18698,
+      "sha256": "e67978cd18816c0cb7d29aaaacde7b7447402c2fb321a051698890a8eaedda94",
+      "mode": 420
+    },
+    {
+      "path": "licenses/libffi.txt",
+      "size": 1132,
+      "sha256": "17b64dc60f3b6897a60f971e288b973f655c2edcdf08b25f3c3dd5549857881c",
+      "mode": 420
+    }
+  ]
+}
