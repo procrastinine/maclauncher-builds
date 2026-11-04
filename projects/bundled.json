@@ -1081,6 +1081,9 @@
       ],
       "rustComponents": [
         "rustfmt"
+      ],
+      "submodules": [
+        "sources/maclauncher-android"
       ]
     }
   },
@@ -1362,7 +1365,10 @@
         "ninja",
         "uv"
       ],
-      "cleanupRunner": true
+      "cleanupRunner": true,
+      "submodules": [
+        "sources/maclauncher-android"
+      ]
     },
     "versionBindings": [
       {
@@ -1515,7 +1521,10 @@
       ],
       "runners": {
         "arm64": "ubuntu-24.04"
-      }
+      },
+      "submodules": [
+        "sources/maclauncher-android"
+      ]
     },
     "versionBindings": [
       {
@@ -1726,6 +1735,9 @@
       },
       "tools": [
         "go"
+      ],
+      "submodules": [
+        "sources/maclauncher-android"
       ]
     },
     "versionBindings": [
@@ -2588,7 +2600,10 @@
         "ninja",
         "uv"
       ],
-      "cleanupRunner": true
+      "cleanupRunner": true,
+      "submodules": [
+        "sources/maclauncher-android"
+      ]
     },
     "versionBindings": [
       {

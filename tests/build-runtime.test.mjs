@@ -8,9 +8,22 @@ import {execFileSync,spawnSync} from 'node:child_process';
 import {verifyProducer,main,buildPlan,runBuild,checkBuildRequest,checkBuildOutput,RUNNERS,HOSTED_RUNNERS} from '../tools/build-runtime.mjs';
 import {findBuildTool} from '../tools/build-source.mjs';
 import {prepareBuildHost} from '../tools/build-host.mjs';
+import {initializeSources} from '../tools/init-runtime-sources.mjs';
 import {prepareRelease} from '../tools/release-runtime.mjs';
 import {readProjects,buildRecord,buildRecords} from '../lib/projects.mjs';
 const root=path.resolve(import.meta.dirname,'..');
+
+test('Android recipes initialize the producer whose metadata they read from a cold checkout',()=>{
+ for(const project of ['android-java-framework','android-java-converter','android-angle','android-angle-aim','android-art-image-extractor']){
+  const commands=[],result=initializeSources({project,directory:root,run:(args,cwd)=>{
+   commands.push({args,cwd});
+   if(args[0]==='ls-files')return '160000 '+ 'a'.repeat(40)+' 0\tsources/maclauncher-android\n';
+   return '';
+  }});
+  assert.deepEqual(result.initialized,[{path:'sources/maclauncher-android',recursive:false}],project);
+  assert.ok(commands.some(({args})=>args[0]==='submodule'&&args.includes('--init')&&args.at(-1)==='sources/maclauncher-android'),project);
+ }
+});
 
 test('producer routing never substitutes Android for a different project',()=>{
  const selected=main(['--project','fna','--check']);assert.equal(selected.id,'fna');assert.equal(selected.sourceDirectory,'producers/maclauncher');assert.ok(selected.entries.every(entry=>entry.startsWith('producers/maclauncher/')));
