@@ -19,8 +19,10 @@ export function buildSceneLibrary({source,vulkanSource,inputs,dependencyHeaders=
   if(!["arm64","x86_64"].includes(architecture))throw new Error("Unsupported library architecture.");
   if(fs.existsSync(output))throw new Error("Choose an unused libplacebo source-build directory.");
   const tree=path.join(output,"source"),build=path.join(output,"build"),prefix=path.join(output,"install"),pc=path.join(output,"pkgconfig");
-  archive(source,SOURCE,tree);archive(vulkanSource,{...VULKAN_HEADERS,commit:run('git',['-C',source,'rev-parse',SOURCE.commit+':3rdparty/Vulkan-Headers']).trim()},path.join(tree,"3rdparty/Vulkan-Headers"));
+  const vulkanHeaders={...VULKAN_HEADERS,commit:run('git',['-C',source,'rev-parse',SOURCE.commit+':3rdparty/Vulkan-Headers']).trim()};
+  archive(source,SOURCE,tree);archive(vulkanSource,vulkanHeaders,path.join(tree,"3rdparty/Vulkan-Headers"));
   const manifest=applySceneOverlay(tree);
+  manifest.vulkanHeaders=vulkanHeaders;
   const fastFloatSource=path.join(source,"3rdparty/fast_float");
   const dependency={origin:run("git",["-C",source,"config","--blob",SOURCE.commit+":.gitmodules","--get","submodule.3rdparty/fast_float.url"]).trim(),commit:run("git",["-C",source,"rev-parse",SOURCE.commit+":3rdparty/fast_float"]).trim()};
   archive(fastFloatSource,dependency,path.join(tree,"3rdparty/fast_float"));manifest.fastFloat=dependency;

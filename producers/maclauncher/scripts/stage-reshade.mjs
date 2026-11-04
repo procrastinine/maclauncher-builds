@@ -260,7 +260,7 @@ if(options["--libplacebo"]) {
     if(required.delete(entry.path))optionalLoad.set(entry.path,{architectures:metadata.architectures,minimumMacOS:metadata.minimumMacOS});
   }
   if(required.size)throw new Error("The optional shader provider dependency closure is incomplete.");
-  const scene=stageLibplaceboScene({directory,metadata,recipeRoot:path.resolve(import.meta.dirname,"../src/modules/shared/reshade")});
+  const scene=stageLibplaceboScene({directory,metadata,recipeRoot:path.resolve(import.meta.dirname,"../src/modules/shared/reshade"),upstream:path.resolve(upstreamRoot,"src/external/libplacebo")});
   if(scene){
     features.shaders.providers??={};features.shaders.providers.libplacebo={...features.shaders.providers.libplacebo,sceneInputsAPI:1,sceneInputRoles:scene.roles};
     pins.push(...scene.pins);for(const [relative,file]of scene.owned)extraOwned.set(relative,file);
