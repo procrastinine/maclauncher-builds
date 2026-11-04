@@ -2210,7 +2210,6 @@
         "tools/build-android-art-java.mjs",
         "tools/android-art-java-stage.mjs",
         "producers/android-art-inputs/java-stage.json",
-        "producers/android-art-inputs/java-declarations.patch",
         "producers/android-art-inputs/java-consumer.patch",
         "producers/android-art-inputs/java.json",
         "producers/android-inputs/java-converter.json",

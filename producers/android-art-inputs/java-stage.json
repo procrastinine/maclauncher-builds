@@ -6,17 +6,12 @@
   "imageInput": "producers/android-image-data/source.json",
   "publisherInputs": "producers/android-art-inputs/java.json",
   "jdkInput": "producers/android-inputs/java-converter.json",
-  "consumerSourceSha256": "cf90c065a2cd12df85155e8b4c91adc3a35053c4b05a2b356f5556494344ba7c",
+  "consumerSourceSha256": "31f087d95814c9339d838ab96af3315f60ad6240bf9d07a9e2f56f66966e314f",
   "frameworkArtifact": {
     "project": "android-java-framework"
   },
   "imageProfiles": [
     "android-image-data-1",
     "android-image-data-3"
-  ],
-  "compileOverlay": {
-    "file": "producers/android-art-inputs/java-declarations.patch",
-    "sha256": "3bd0fa5784c53d22b1c40c269678ee0c4367b3c0d541434a3e7b97896b0c44cc"
-  },
-  "compileProducerSha256": "f6ae4eb67925c7fe80d9c1408a54cb4d193826820d1a1b7c6f0e35ecde8ef0ee"
+  ]
 }
