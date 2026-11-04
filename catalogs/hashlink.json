@@ -6,6 +6,60 @@
     {
       "schemaVersion": 2,
       "id": "hashlink",
+      "version": "1.12-MCLv8",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "ce355a16fe9ada3c044f9f90bd20173d8b23b198233a45cdf248333acc203798",
+      "sourceSha256": "ce355a16fe9ada3c044f9f90bd20173d8b23b198233a45cdf248333acc203798",
+      "updatePolicy": "manual",
+      "capabilities": {
+        "supportedBytecodeVersions": [
+          2,
+          3,
+          4,
+          5
+        ],
+        "nativeAbi": {
+          "sdlEventLoop": "dynamic"
+        },
+        "primitiveProfileId": "legacy-dynamic-1.12-macos-v1",
+        "primitiveProfileSha256": "28c7284f83726f82cd6aef19bbd4e3815cb9a403da28f5b0f0490769b50191e4",
+        "macPackageVersion": "1.12-MCLv8",
+        "sourceKind": "commit"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "f445a97387537e90d6f56d5e6b30d8ba395aa2aa"
+      },
+      "asset": {
+        "filename": "hashlink-1.12-MCLv8-x64.tar.gz",
+        "sha256": "51b10666ec860fd5c78ba570ccfb4b91154372aa2e81c486f81df19a6a826ca0",
+        "bytes": 2087690,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/hashlink%2Fv1.12-MCLv8%2Fx64/hashlink-1.12-MCLv8-x64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "f445a97387537e90d6f56d5e6b30d8ba395aa2aa",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "41840822493",
+        "runAttempt": "1"
+      },
+      "tag": "hashlink/v1.12-MCLv8/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "hashlink",
       "version": "1.9-MCLv5",
       "arch": "x64",
       "launcherArchitectures": [
