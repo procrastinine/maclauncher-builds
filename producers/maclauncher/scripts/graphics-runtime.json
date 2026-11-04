@@ -36,7 +36,6 @@
       "path": "src/external/fsr3-sdk",
       "pin": {
         "file": "src/modules/shared/reshade/generation/fsr3/source.json",
-        "commit": "/commit",
         "repository": "/repository"
       }
     },
@@ -100,7 +99,6 @@
       "path": "src/external/krkrsdl2/external/SDL",
       "pin": {
         "file": "src/modules/shared/reshade/xess/native/vulkan-source.json",
-        "commit": "/commit",
         "repository": "/repository"
       }
     },
@@ -142,7 +140,6 @@
       "match": "object",
       "pin": {
         "file": "src/modules/shared/reshade/libplacebo/scene-profile.json",
-        "commit": "/VULKAN_HEADERS/commit",
         "repository": "/VULKAN_HEADERS/origin"
       }
     }

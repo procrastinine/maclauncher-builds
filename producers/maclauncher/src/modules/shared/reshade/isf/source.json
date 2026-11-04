@@ -48,11 +48,13 @@
     },
     {
       "id": "spirv-tools",
-      "repository": "https://github.com/KhronosGroup/SPIRV-Tools"
+      "repository": "https://github.com/KhronosGroup/SPIRV-Tools",
+      "sha256": "a5277538fec0868452b1f616553c2fca80939a6a3ee0b7322e21ff063750a482"
     },
     {
       "id": "spirv-headers",
-      "repository": "https://github.com/KhronosGroup/SPIRV-Headers"
+      "repository": "https://github.com/KhronosGroup/SPIRV-Headers",
+      "sha256": "425da1e3e4ba8de41dc8c8273d281ae82f1e18a397ec476649df3c832e242329"
     }
   ]
 }
