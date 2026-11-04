@@ -1,11 +1,11 @@
-const {addLicense} = require('../../../../../../lib/licenses.mjs');
+const {addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const Build = require("../../shared/runtime/pinned-native-build");
 const Native = require("../../shared/runtime/local-native");
 const SOURCE = Object.freeze({ version: "7.1.2", url: "https://ffmpeg.org/releases/ffmpeg-7.1.2.tar.xz",
-  sha256: "089bc60fb59d6aecc5d994ff530fd0dcb3ee39aa55867849a2bbc4e555f9c304", license: "LGPL-2.1-or-later" });
+  sha256: "089bc60fb59d6aecc5d994ff530fd0dcb3ee39aa55867849a2bbc4e555f9c304" });
 const DECODERS = Object.freeze(["mpeg1video", "mpeg2video", "mpeg4", "msmpeg4v1", "msmpeg4v2", "msmpeg4v3",
   "wmv1", "wmv2", "wmv3", "vc1", "h264", "mjpeg", "png", "rawvideo", "cinepak", "indeo3", "indeo5",
   "aac", "mp3", "wmav1", "wmav2", "wmapro", "wmalossless", "wmavoice", "vorbis",
@@ -46,7 +46,7 @@ async function buildMovieDependencies({ archive, destination, architecture = pro
   const diagnostics = normalizeDiagnostics(output, mappings);
   await run("/usr/bin/make", ["-j6"], { cwd: output, logPath, env, signal });
   await run("/usr/bin/make", ["install"], { cwd: output, logPath, env, signal });
-  addLicense(prefix,'FFmpeg',path.join(sourceRoot, "COPYING.LGPLv2.1"));
+  addLicenses(prefix,'FFmpeg',sourceRoot);
   fs.mkdirSync(path.dirname(destination), { recursive: true });
   fs.cpSync(prefix, destination, { recursive: true, force: false, errorOnExist: true });
   const receipt = { source: SOURCE, decoders: DECODERS, demuxers: DEMUXERS, options, diagnostics, workspace, prefix: destination,
