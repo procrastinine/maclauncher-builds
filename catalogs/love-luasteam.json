@@ -6,6 +6,45 @@
     {
       "schemaVersion": 2,
       "id": "love-luasteam",
+      "version": "4.0.2-MCLv7",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "718b30d2755948a80a5dda1654a15c6fdd756d4d619ba26a2906656aa56ae75d",
+      "sourceSha256": "9081894e5ec77cdaf43b4812bffb84c879d32ea452bc5ed914d9fd298c26dddf",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "love-luasteam-4.0.2-MCLv7-universal.tar.gz",
+        "sha256": "b64ee7056b29e6228a58f8990d33f6110021f1d39abe1e7a812942bd39ac6ed2",
+        "bytes": 84717,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/love-luasteam%2Fv4.0.2-MCLv7%2Funiversal/love-luasteam-4.0.2-MCLv7-universal.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "f445a97387537e90d6f56d5e6b30d8ba395aa2aa",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41840844461",
+        "runAttempt": "1"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "f445a97387537e90d6f56d5e6b30d8ba395aa2aa"
+      },
+      "tag": "love-luasteam/v4.0.2-MCLv7/universal"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "love-luasteam",
       "version": "4.0.2-MCLv4",
       "arch": "universal",
       "launcherArchitectures": [

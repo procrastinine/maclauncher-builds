@@ -1,0 +1,69 @@
+{
+  "id": "love-luasteam",
+  "version": "4.0.2-MCLv7",
+  "arch": "universal",
+  "minimumMacOS": "13.0",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "9081894e5ec77cdaf43b4812bffb84c879d32ea452bc5ed914d9fd298c26dddf",
+  "directoryRelative": "love-luasteam/4.0.2-MCLv7/universal",
+  "manifestRelative": "helper.json",
+  "manifestSha256": "718b30d2755948a80a5dda1654a15c6fdd756d4d619ba26a2906656aa56ae75d",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 17326,
+      "mode": 420,
+      "sha256": "1a8b8f4aea6685107b0d3a112e1a0f1f45867bcbea101ca8657daf04a9ec6b45"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "d1fda9c4e206280b28acb0205f88294a2e4e2a4690673ede8e94dd081fb92c6b"
+    },
+    {
+      "path": "helper.json",
+      "size": 1764,
+      "sha256": "718b30d2755948a80a5dda1654a15c6fdd756d4d619ba26a2906656aa56ae75d",
+      "mode": 420
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 71,
+      "sha256": "61014953d8e2798272825fbfd1b240e50a0c274ab35daa8f8abf42a169dd9221",
+      "mode": 420
+    },
+    {
+      "path": "licenses/LuaJIT.txt",
+      "size": 2935,
+      "sha256": "5b79fb4754728487cf43d55b213bb68369912484f2dd7ab68380435e994bce39",
+      "mode": 420
+    },
+    {
+      "path": "licenses/LuaSteam.txt",
+      "size": 1067,
+      "sha256": "115ab018030b37f892e33da0f2af96d01b3d03c845c6ad41ce4ad19c4b342f73",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MacLauncher.txt",
+      "size": 1081,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+      "mode": 420
+    },
+    {
+      "path": "luasteam.so",
+      "size": 309552,
+      "sha256": "d9c0bb486e268d79dfcb2b7641159badcb016c5504f5eb3d9b6d859a7623e81a",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    }
+  ]
+}
