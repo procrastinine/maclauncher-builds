@@ -6,11 +6,6 @@
       "crates/aim-apps",
       "crates/aim-android-xml",
       "tools/android-image-extract"
-    ],
-    "licensePaths": [
-      "LICENSE",
-      "NOTICE",
-      "THIRD_PARTY_NOTICES.md"
     ]
   },
   "registryDependencies": [

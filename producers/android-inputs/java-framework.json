@@ -11,8 +11,7 @@
       "prefetch": [
         "Android.bp",
         "src",
-        "android/src",
-        "NOTICE"
+        "android/src"
       ]
     },
     {
@@ -44,12 +43,5 @@
         "include/android/bitmap.h"
       ]
     }
-  ],
-  "licenses": [
-    "aosp-framework",
-    "aosp-apache-http",
-    "aosp-framework-base",
-    "robolectric-portability",
-    "asm"
   ]
 }

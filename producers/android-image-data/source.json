@@ -11,9 +11,6 @@
     "records": 5920,
     "bytes": 4110736819
   },
-  "license": {
-    "url": "https://raw.githubusercontent.com/procrastinine/maclauncher-android/c71de272618e22a531d9259929a2478d838f9b1f/src/modules/android/art/licenses/android-sdk-arm-dbt-license.txt"
-  },
   "targetSymlinkMode": 493,
   "chunkBytes": 134217728,
   "profiles": [

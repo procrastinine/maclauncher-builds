@@ -11,7 +11,7 @@
 +path = "src/lib.rs"
 --- a/hal/graphics/allocator/src/main.rs
 +++ b/hal/graphics/allocator/src/main.rs
-@@ -160,3 +160,8 @@
+@@ -160,4 +160,9 @@
      }
      binder::ProcessState::join_thread_pool();
  }

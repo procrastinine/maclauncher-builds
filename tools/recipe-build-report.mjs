@@ -109,7 +109,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   const shared=builds.find(build=>commandProjects.get(build.command).size>1);
   if(shared&&!declared&&inputs.size)throw Error('The shared build command '+shared.command+' must report the inputs of '+id+' through recipeInputs.');
   const sources=project.upstreams.map(upstream=>{
-   if(upstream.pin&&rememberLink(upstream.pin.file))return {...upstream,gitlink:rememberLink(upstream.pin.file).revision};
+   if(upstream.pin&&rememberLink(upstream.pin.gitlink||upstream.pin.file))return {...upstream,gitlink:rememberLink(upstream.pin.gitlink||upstream.pin.file).revision};
    const resolved=resolveUpstream(upstream,root);
    if(upstream.pin&&(bindings.get(upstream.pin.file)||[]).some(binding=>!binding.select&&binding.pointer===upstream.pin.pointer+'/version')&&resolved.version!==undefined)resolved.version='$packageVersion';
    return resolved;
