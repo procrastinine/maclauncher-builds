@@ -308,11 +308,7 @@
         "url": "https://github.com/KhronosGroup/SPIRV-Headers",
         "repository": "KhronosGroup/SPIRV-Headers",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/native/processor-sources.json",
-          "pointer": "/sources",
-          "match": {
-            "id": "macfx-spirv-headers"
-          }
+          "gitlink": "producers/maclauncher/src/external/macfx-spirv-headers"
         }
       },
       {
@@ -321,11 +317,7 @@
         "url": "https://github.com/KhronosGroup/SPIRV-Cross",
         "repository": "KhronosGroup/SPIRV-Cross",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/native/processor-sources.json",
-          "pointer": "/sources",
-          "match": {
-            "id": "macfx-spirv-cross"
-          }
+          "gitlink": "producers/maclauncher/src/external/macfx-spirv-cross"
         }
       },
       {
@@ -431,17 +423,6 @@
         }
       },
       {
-        "id": "libplacebo-vulkan-headers",
-        "repository": "KhronosGroup/Vulkan-Headers",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/Vulkan-Headers",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/scene-profile.json",
-          "pointer": "/VULKAN_HEADERS",
-          "repositoryPointer": "/VULKAN_HEADERS/origin"
-        }
-      },
-      {
         "id": "libplacebo-fast-float",
         "repository": "fastfloat/fast_float",
         "provider": "github",
@@ -477,8 +458,7 @@
         "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/fsr/source.json",
-          "pointer": "/fsr3"
+          "gitlink": "producers/maclauncher/src/external/fsr3-sdk"
         }
       },
       {
@@ -487,8 +467,7 @@
         "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/generation/fsr3/source.json",
-          "pointer": ""
+          "gitlink": "producers/maclauncher/src/external/fsr3-sdk"
         }
       },
       {
@@ -506,11 +485,7 @@
         "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/fsr4/source.json",
-          "pointer": "/sources",
-          "match": {
-            "use": "MIT shader helper headers"
-          }
+          "gitlink": "producers/maclauncher/src/external/fsr3-sdk"
         }
       },
       {
@@ -519,11 +494,7 @@
         "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/temporal/fsr4/source.json",
-          "pointer": "/sources",
-          "match": {
-            "use": "FSR 4.1.1 model weights from MIT-excepted provider"
-          }
+          "gitlink": "producers/maclauncher/src/external/fsr3-sdk"
         }
       },
       {
@@ -577,16 +548,6 @@
         "repository": "intel/xess",
         "pin": {
           "gitlink": "producers/maclauncher/src/external/xess"
-        }
-      },
-      {
-        "id": "xess-vulkan-headers",
-        "provider": "github",
-        "url": "https://github.com/libsdl-org/SDL",
-        "repository": "libsdl-org/SDL",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/xess/native/vulkan-source.json",
-          "pointer": ""
         }
       },
       {
@@ -657,42 +618,9 @@
         "url": "https://github.com/google/shaderc",
         "repository": "google/shaderc",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies.json",
-          "pointer": "/sources/0/commit",
-          "repositoryPointer": "/sources/0/repository"
-        }
-      },
-      {
-        "id": "libplacebo-glslang",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/glslang",
-        "repository": "KhronosGroup/glslang",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies.json",
-          "pointer": "/sources/1/commit",
-          "repositoryPointer": "/sources/1/repository"
-        }
-      },
-      {
-        "id": "libplacebo-spirv-tools",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Tools",
-        "repository": "KhronosGroup/SPIRV-Tools",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies.json",
-          "pointer": "/sources/2/commit",
-          "repositoryPointer": "/sources/2/repository"
-        }
-      },
-      {
-        "id": "libplacebo-spirv-headers",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Headers",
-        "repository": "KhronosGroup/SPIRV-Headers",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies.json",
-          "pointer": "/sources/3/commit",
-          "repositoryPointer": "/sources/3/repository"
+          "file": "producers/dependencies.json",
+          "pointer": "/shaderc/revision",
+          "repositoryPointer": "/shaderc/repository"
         }
       },
       {
@@ -726,28 +654,6 @@
           "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
           "pointer": "/compilerSources/1/commit",
           "repositoryPointer": "/compilerSources/1/repository"
-        }
-      },
-      {
-        "id": "isf-spirv-tools",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Tools",
-        "repository": "KhronosGroup/SPIRV-Tools",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
-          "pointer": "/compilerSources/2/commit",
-          "repositoryPointer": "/compilerSources/2/repository"
-        }
-      },
-      {
-        "id": "isf-spirv-headers",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Headers",
-        "repository": "KhronosGroup/SPIRV-Headers",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/isf/source.json",
-          "pointer": "/compilerSources/3/commit",
-          "repositoryPointer": "/compilerSources/3/repository"
         }
       }
     ],
@@ -1681,7 +1587,8 @@
         "repository": "libffi/libffi",
         "pin": {
           "file": "producers/dependencies.json",
-          "pointer": "/libffi"
+          "pointer": "/libffi/revision",
+          "repositoryPointer": "/libffi/repository"
         }
       }
     ],
@@ -2276,8 +2183,8 @@
         "url": "https://github.com/libsdl-org/SDL",
         "repository": "libsdl-org/SDL",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
-          "pointer": "/dependencies",
+          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.js",
+          "pointer": "/PIN/dependencies",
           "match": {
             "id": "sdl2"
           }
@@ -2440,11 +2347,9 @@
         "url": "https://github.com/libsdl-org/SDL_mixer",
         "repository": "libsdl-org/SDL_mixer",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-mixer.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "sdl2_mixer"
-          }
+          "file": "producers/dependencies.json",
+          "pointer": "/sdl2_mixer/revision",
+          "repositoryPointer": "/sdl2_mixer/repository"
         }
       }
     ],

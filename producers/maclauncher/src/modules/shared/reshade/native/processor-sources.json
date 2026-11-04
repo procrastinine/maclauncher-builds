@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "baseSourceHash": "e51a17a502fcfbed87bf868c0b555ad160466002f8856c14e4732ed7fc6bba5b",
+  "baseSourceHash": "7cb73742c53f2c4c37262f474e48dca111d9c256d9e6c94a0cdfffc410cc99e0",
   "sources": [
     {
       "id": "macfx-reshade",
@@ -13,15 +13,13 @@
       "id": "macfx-spirv-headers",
       "sourcePath": "third_party/reshade/deps/spirv",
       "submodulePath": "src/external/macfx-spirv-headers",
-      "repository": "https://github.com/KhronosGroup/SPIRV-Headers.git",
-      "commit": "7845730cab6ebbdeb621e7349b7dc1a59c3377be"
+      "repository": "https://github.com/KhronosGroup/SPIRV-Headers.git"
     },
     {
       "id": "macfx-spirv-cross",
       "sourcePath": "third_party/spirv-cross",
       "submodulePath": "src/external/macfx-spirv-cross",
-      "repository": "https://github.com/KhronosGroup/SPIRV-Cross.git",
-      "commit": "300681bbcb8365a8d1eacdacdbdd0249bbf1d6b1"
+      "repository": "https://github.com/KhronosGroup/SPIRV-Cross.git"
     },
     {
       "id": "macfx-reshade-shaders",

@@ -18,8 +18,7 @@
   },
   "vulkanHeaders": {
     "path": "sources/anyps5/3rdparty/Vulkan-Headers",
-    "repository": "https://github.com/KhronosGroup/Vulkan-Headers.git",
-    "revision": "2fa203425eb4af9dfc6b03f97ef72b0b5bcb8350"
+    "repository": "https://github.com/KhronosGroup/Vulkan-Headers.git"
   },
   "tools": {
     "meson": "1.12.1",

@@ -1,3 +1,4 @@
+import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
@@ -20,13 +21,13 @@ export async function buildMKXPZ({project,version,arch,output,work}){
  const inputs=JSON.parse(fs.readFileSync(path.join(root,'producers/maclauncher/helper-builds/mkxpz.json')));
  const source=producer.prepareSource(archive,buildWork),wrap=path.join(source,inputs.sdlImage.wrap),original=fs.readFileSync(wrap,'utf8');
  const expected='revision = '+inputs.sdlImage.upstreamWrapRevision;
- if(!original.includes(expected)||!original.includes('url = '+inputs.sdlImage.repository+'\n'))throw Error('The declared SDL_image source wrap changed.');
- fs.writeFileSync(wrap,original.replace(expected,'revision = '+inputs.sdlImage.revision));
+ if(!original.includes(expected)||!original.includes('url = '+sharedDependencies.sdl2_image.repository+'\n'))throw Error('The declared SDL_image source wrap changed.');
+ fs.writeFileSync(wrap,original.replace(expected,'revision = '+sharedDependencies.sdl2_image.revision));
  run(process.execPath,[path.join(root,'producers/maclauncher/scripts/build-mkxpz-nfc.cjs'),'--version',version,'--archive',archive,'--work',buildWork,'--meson',path.join(environment,'bin/meson'),'--ninja',path.join(environment,'bin/ninja'),'--output',staged]);
  const result=JSON.parse(fs.readFileSync(path.join(buildWork,'STAGED.json'))),sdlImage=path.join(source,'subprojects/sdl2_image');
  const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{maxBuffer:Infinity,encoding:'utf8',env:{...process.env,GIT_NO_LAZY_FETCH:'1'}}).trim();
- if(git(sdlImage,['rev-parse','HEAD'])!==inputs.sdlImage.revision)throw Error('SDL_image differs from its declared commit.');
- const dependencies=[{path:'sdl2_image',revision:inputs.sdlImage.revision,repository:inputs.sdlImage.repository}];
+ if(git(sdlImage,['rev-parse','HEAD'])!==sharedDependencies.sdl2_image.revision)throw Error('SDL_image differs from its declared commit.');
+ const dependencies=[{path:'sdl2_image',revision:sharedDependencies.sdl2_image.revision,repository:sharedDependencies.sdl2_image.repository}];
  for(const line of git(sdlImage,['submodule','status','--recursive']).split('\n').filter(Boolean)){
   const match=/^ ([a-f0-9]{40}) (\S+)/.exec(' '+line.trim());
   if(!match)throw Error('SDL_image has an uninitialized or changed dependency.');

@@ -5,8 +5,7 @@
     "version": "7.360.1"
   },
   "VULKAN_HEADERS": {
-    "origin": "https://github.com/KhronosGroup/Vulkan-Headers.git",
-    "commit": "450bd2232225d6c7728a4108055ac2e37cef6475"
+    "origin": "https://github.com/KhronosGroup/Vulkan-Headers.git"
   },
   "FAST_FLOAT": {
     "origin": "https://github.com/fastfloat/fast_float.git",

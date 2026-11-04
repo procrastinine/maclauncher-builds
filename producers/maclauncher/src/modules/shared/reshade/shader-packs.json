@@ -362,8 +362,7 @@
             "projectionMatrix"
           ],
           "nativeMethod": "cacao",
-          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-          "revision": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55"
+          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK"
         },
         {
           "id": "depth-fog",
@@ -398,8 +397,7 @@
             "projectionMatrix"
           ],
           "nativeMethod": "ffx-dof",
-          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-          "revision": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55"
+          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK"
         },
         {
           "id": "screen-space-reflections",
@@ -434,8 +432,7 @@
           "file": "ffx-lens.mclfilter",
           "requires": [],
           "nativeMethod": "ffx-lens",
-          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-          "revision": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55"
+          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK"
         },
         {
           "id": "ffx-blur",
@@ -443,8 +440,7 @@
           "file": "ffx-blur.mclfilter",
           "requires": [],
           "nativeMethod": "ffx-blur",
-          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-          "revision": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55"
+          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK"
         }
       ]
     }

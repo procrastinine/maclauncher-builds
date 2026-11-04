@@ -27,10 +27,6 @@
       "id": "turbojpeg",
       "name": "libjpeg-turbo",
       "version": "3.2.0",
-      "revision": "c85e6b905bf237038faa936dab160ebfc5da0344",
-      "archiveUrl": "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.2.0/libjpeg-turbo-3.2.0.tar.gz",
-      "archiveSha256": "6f30092cef9fb839779646608f4ee14ae3cbac989c47fa05e841b0841f09878e",
-      "archiveBytes": 2537858,
       "buildSystem": "cmake",
       "options": [
         "-DENABLE_SHARED=ON",
@@ -47,10 +43,6 @@
       "id": "webp",
       "name": "libwebp",
       "version": "1.6.0",
-      "revision": "4fa21912338357f89e4fd51cf2368325b59e9bd9",
-      "archiveUrl": "https://codeload.github.com/webmproject/libwebp/tar.gz/{revision}",
-      "archiveSha256": "923f3382a47a2af185c3240c954cf004428b237bd7317413a95146d01eb4b94b",
-      "archiveBytes": 3834766,
       "buildSystem": "cmake",
       "options": [
         "-DWEBP_BUILD_ANIM_UTILS=OFF",
@@ -72,10 +64,6 @@
       "id": "sdl2_image",
       "name": "SDL2_image",
       "version": "2.8.8",
-      "revision": "c1bf2245b0ba63a25afe2f8574d305feca25af77",
-      "archiveUrl": "https://codeload.github.com/libsdl-org/SDL_image/tar.gz/{revision}",
-      "archiveSha256": "224b08c32c0fb6c769ca5f599f6da37e2b532b6ffd52886e9fa13656767cf1a2",
-      "archiveBytes": 6926417,
       "buildSystem": "cmake",
       "options": [
         "-DSDL2IMAGE_INSTALL=ON",

@@ -1,3 +1,4 @@
+import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';

@@ -1,3 +1,4 @@
+const sharedDependencies=require('../../../../dependencies.json');
 const {gitlink} = require("../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -10,9 +11,7 @@ const Movie = require("../shared/runtime/portable-ffmpeg");
 const Prefix = require("../shared/runtime/portable-dependency-prefix");
 const Overlay = require("./system4-portable-overlay-v3");
 const { throwIfAborted } = require("../shared/runtime/download-utils");
-const metadata = require("./system4-portable.json");
-const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map(pin => ({ ...pin,
-  archiveUrl: pin.archiveUrl.replace("{revision}", pin.revision) })) });
+const PIN = Object.freeze({...require("./system4-portable.json"),dependencies:require("./system4-portable.json").dependencies.map(row=>{const pin=sharedDependencies[row.id==='libffi'?'libffiPortable':row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:row.archiveUrl||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:row;})});
 const VERSION = "MCLv1-1021";
 const REVISION = gitlink("producers/maclauncher/src/external/xsystem4");
 const SOURCE_SHA256 = "3beeaf86056c10f4464c50cec45ed56a140a99443bec56e9930cbdbe09151acb";

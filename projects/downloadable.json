@@ -1272,8 +1272,8 @@
         "url": "https://github.com/libsdl-org/SDL",
         "repository": "libsdl-org/SDL",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
-          "pointer": "/dependencies",
+          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.js",
+          "pointer": "/PIN/dependencies",
           "match": {
             "id": "sdl2"
           }
@@ -1285,11 +1285,9 @@
         "url": "https://github.com/pnggroup/libpng",
         "repository": "pnggroup/libpng",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "libpng"
-          }
+          "file": "producers/dependencies.json",
+          "pointer": "/libpng/revision",
+          "repositoryPointer": "/libpng/repository"
         }
       },
       {
@@ -1605,25 +1603,14 @@
         }
       },
       {
-        "id": "spirv-tools",
+        "id": "shaderc",
         "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Tools",
-        "repository": "KhronosGroup/SPIRV-Tools",
+        "url": "https://github.com/google/shaderc",
+        "repository": "google/shaderc",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/vulkan/native/spirv-tools-source.json",
-          "pointer": "/sources/0/commit",
-          "repositoryPointer": "/sources/0/repository"
-        }
-      },
-      {
-        "id": "spirv-headers",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Headers",
-        "repository": "KhronosGroup/SPIRV-Headers",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/vulkan/native/spirv-tools-source.json",
-          "pointer": "/sources/1/commit",
-          "repositoryPointer": "/sources/1/repository"
+          "file": "producers/dependencies.json",
+          "pointer": "/shaderc/revision",
+          "repositoryPointer": "/shaderc/repository"
         }
       }
     ],
@@ -1730,8 +1717,9 @@
         "url": "https://github.com/libsdl-org/SDL_image",
         "repository": "libsdl-org/SDL_image",
         "pin": {
-          "file": "producers/maclauncher/helper-builds/mkxpz.json",
-          "pointer": "/sdlImage"
+          "file": "producers/dependencies.json",
+          "pointer": "/sdl2_image/revision",
+          "repositoryPointer": "/sdl2_image/repository"
         }
       }
     ],
@@ -2206,17 +2194,6 @@
         "pin": {
           "gitlink": "producers/maclauncher/src/external/fsr3-sdk"
         }
-      },
-      {
-        "id": "vulkan-headers",
-        "provider": "github",
-        "url": "https://github.com/libsdl-org/SDL",
-        "repository": "libsdl-org/SDL",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/crossover/temporal/fidelityfx/source.json",
-          "pointer": "/vulkan/revision",
-          "repositoryPointer": "/vulkan/repository"
-        }
       }
     ],
     "packageProfiles": [
@@ -2268,45 +2245,6 @@
         "pin": {
           "file": "producers/maclauncher/src/modules/shared/vulkan/native/moltenvk-scene-source.json",
           "pointer": ""
-        }
-      },
-      {
-        "id": "spirv-cross",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/SPIRV-Cross",
-        "repository": "KhronosGroup/SPIRV-Cross",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/vulkan/native/moltenvk-scene-source.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "SPIRV-Cross"
-          }
-        }
-      },
-      {
-        "id": "vulkan-headers",
-        "provider": "github",
-        "url": "https://github.com/KhronosGroup/Vulkan-Headers",
-        "repository": "KhronosGroup/Vulkan-Headers",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/vulkan/native/moltenvk-scene-source.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "Vulkan-Headers"
-          }
-        }
-      },
-      {
-        "id": "cereal",
-        "provider": "github",
-        "url": "https://github.com/USCiLab/cereal",
-        "repository": "USCiLab/cereal",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/vulkan/native/moltenvk-scene-source.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "cereal"
-          }
         }
       }
     ],
@@ -2707,12 +2645,9 @@
         "url": "https://github.com/xiph/ogg",
         "repository": "xiph/ogg",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "ogg"
-          },
-          "field": ""
+          "file": "producers/dependencies.json",
+          "pointer": "/ogg/revision",
+          "repositoryPointer": "/ogg/repository"
         }
       },
       {
@@ -2735,12 +2670,9 @@
         "url": "https://github.com/xiph/vorbis",
         "repository": "xiph/vorbis",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "vorbis"
-          },
-          "field": ""
+          "file": "producers/dependencies.json",
+          "pointer": "/vorbis/revision",
+          "repositoryPointer": "/vorbis/repository"
         }
       },
       {
@@ -2749,12 +2681,9 @@
         "url": "https://github.com/pnggroup/libpng",
         "repository": "pnggroup/libpng",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "libpng"
-          },
-          "field": ""
+          "file": "producers/dependencies.json",
+          "pointer": "/libpng/revision",
+          "repositoryPointer": "/libpng/repository"
         }
       }
     ],

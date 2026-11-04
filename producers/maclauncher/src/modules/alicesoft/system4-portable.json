@@ -8,10 +8,7 @@
       "id": "libffi",
       "name": "libffi",
       "version": "3.8.0",
-      "revision": "12ffd1f9dc56fcea79d2f742f424301ae668d663",
       "archiveUrl": "https://github.com/libffi/libffi/releases/download/v3.8.0/libffi-3.8.0.tar.gz",
-      "archiveSha256": "7da3e2d9a171eb0a038f592ecad3ff2bb2550f3496d87b3b29ad0cf4430c0db4",
-      "archiveBytes": 1581626,
       "buildSystem": "autotools",
       "options": [
         "--enable-shared",
@@ -25,10 +22,6 @@
       "id": "turbojpeg",
       "name": "libjpeg-turbo",
       "version": "3.2.0",
-      "revision": "c85e6b905bf237038faa936dab160ebfc5da0344",
-      "archiveUrl": "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.2.0/libjpeg-turbo-3.2.0.tar.gz",
-      "archiveSha256": "6f30092cef9fb839779646608f4ee14ae3cbac989c47fa05e841b0841f09878e",
-      "archiveBytes": 2537858,
       "buildSystem": "cmake",
       "options": [
         "-DENABLE_SHARED=ON",
@@ -81,10 +74,6 @@
       "id": "webp",
       "name": "libwebp",
       "version": "1.6.0",
-      "revision": "4fa21912338357f89e4fd51cf2368325b59e9bd9",
-      "archiveUrl": "https://codeload.github.com/webmproject/libwebp/tar.gz/{revision}",
-      "archiveSha256": "923f3382a47a2af185c3240c954cf004428b237bd7317413a95146d01eb4b94b",
-      "archiveBytes": 3834766,
       "buildSystem": "cmake",
       "options": [
         "-DWEBP_BUILD_ANIM_UTILS=OFF",

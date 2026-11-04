@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {prepareSources} from '../src/modules/shared/reshade/libplacebo/dependencies-build.mjs';
 // Builds the shared graphics runtime from owned sources, exact Git pins and
 // declared binary inputs, then optionally stages it with stage-reshade.mjs.
 import fs from "node:fs";
@@ -143,6 +144,7 @@ export function resolveInput(id, {overrides = {}, work, coreRoot = work && path.
 
 /** Download a pinned input into the work directory and verify its checksum. */
 export async function fetchInput(id, work) {
+  if(['fsr-glslang','isf-spirv-tools','isf-spirv-headers'].includes(id))return path.join((await prepareSources({work:path.join(work,'inputs',id)})).source,id==='fsr-glslang'?'glslang':id.slice(4));
   const {entry, url, sha256, archives, member, directory, fetched} = inputLocation(id, work);
   if(entry.notice){
     fs.mkdirSync(directory,{recursive:true});

@@ -25,10 +25,6 @@
       "id": "webp",
       "name": "libwebp",
       "version": "1.6.0",
-      "revision": "4fa21912338357f89e4fd51cf2368325b59e9bd9",
-      "archiveUrl": "https://codeload.github.com/webmproject/libwebp/tar.gz/{revision}",
-      "archiveSha256": "923f3382a47a2af185c3240c954cf004428b237bd7317413a95146d01eb4b94b",
-      "archiveBytes": 3834766,
       "buildSystem": "cmake",
       "options": [
         "-DWEBP_BUILD_ANIM_UTILS=OFF",
@@ -51,9 +47,6 @@
       "name": "opusfile",
       "version": "0.12",
       "sourceRelease": "opusfile-0.12",
-      "archiveUrl": "https://downloads.xiph.org/releases/opus/opusfile-0.12.tar.gz",
-      "archiveSha256": "118d8601c12dd6a44f52423e68ca9083cc9f2bfe72da7a8c1acb22a80ae3550b",
-      "archiveBytes": 471354,
       "buildSystem": "autotools",
       "options": [
         "--enable-shared",
@@ -70,10 +63,6 @@
       "id": "sdl2_mixer",
       "name": "SDL2_mixer",
       "version": "2.8.2",
-      "revision": "b208916aed9250fe434360e6c6a95f0697bb7b01",
-      "archiveUrl": "https://codeload.github.com/libsdl-org/SDL_mixer/tar.gz/{revision}",
-      "archiveSha256": "f503e37eb7b7a4fab99448d849be1aa4154536fd41a5291f3db7afbb3777c252",
-      "archiveBytes": 6050720,
       "buildSystem": "cmake",
       "options": [
         "-DSDL2MIXER_INSTALL=ON",

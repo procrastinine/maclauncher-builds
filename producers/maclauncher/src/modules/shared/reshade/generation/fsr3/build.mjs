@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {gitlink} from '../../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10,11 +11,11 @@ if(!outputArg)throw Error('Usage: build.mjs SOURCE_GIT TOOLS OUTPUT [--shaders-o
 const source=path.resolve(sourceArg),tools=path.resolve(toolsArg),output=path.resolve(outputArg);
 const run=(file,args)=>execFileSync(file,args,{encoding:'utf8',maxBuffer: Infinity});
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
-if(run('git',['-C',source,'rev-parse','HEAD']).trim()!==pin.commit)throw Error('Select the declared FidelityFX SDK commit.');
+if(run('git',['-C',source,'rev-parse','HEAD']).trim()!==gitlink('producers/maclauncher/src/external/fsr3-sdk'))throw Error('Select the declared FidelityFX SDK commit.');
 for(const name of ['dxc','spirv-cross'])if(hash(fs.readFileSync(path.join(tools,name)))!==pin.tools[name])throw Error('The shader compiler differs from the declared build input: '+name);
 fs.mkdirSync(output,{recursive:true});
 const exported=path.join(output,'source'),archive=path.join(output,'source.tar');fs.mkdirSync(exported,{recursive:true});
-run('git',['-C',source,'archive','--format=tar','--output='+archive,pin.commit,'LICENSE.txt','sdk/include','sdk/src/components/opticalflow','sdk/src/components/frameinterpolation','sdk/src/shared','sdk/src/backends/shared','sdk/src/backends/dx12/shaders/opticalflow','sdk/src/backends/dx12/shaders/frameinterpolation']);
+run('git',['-C',source,'archive','--format=tar','--output='+archive,gitlink('producers/maclauncher/src/external/fsr3-sdk'),'LICENSE.txt','sdk/include','sdk/src/components/opticalflow','sdk/src/components/frameinterpolation','sdk/src/shared','sdk/src/backends/shared','sdk/src/backends/dx12/shaders/opticalflow','sdk/src/backends/dx12/shaders/frameinterpolation']);
 run('tar',['-xf',archive,'-C',exported]);fs.rmSync(archive);
 // The SDK's alpha channel is an internal inpainting mask. The final pass has
 // consumed that mask; an opaque presentation image requires alpha one even
@@ -60,5 +61,5 @@ for(const architecture of pin.architectures){
  run('xcrun',['clang++',...flags,'-fobjc-arc','-dynamiclib',path.join(here,'backend.mm'),...objects,'-framework','Metal','-framework','Foundation','-install_name','@rpath/libmaclauncher-fsr3-generation.dylib','-o',path.join(output,architecture+'.dylib')]);
 }
 const library=path.join(payload,'libmaclauncher-fsr3-generation.dylib');run('lipo',['-create',...pin.architectures.map(name=>path.join(output,name+'.dylib')),'-output',library]);run('codesign',['--force','--sign','-',library]);
-fs.writeFileSync(path.join(payload,'provider.json'),JSON.stringify({providerABI:1,interfaces:{generation:1,preparation:1},shaderVariants:{opticalflow:2,frameinterpolation:8},shaderPasses:{opticalflow:7,frameinterpolation:11},complete:true,method:'fsr3',source:pin.repository,commit:pin.commit,effects:pin.effects,resolvedPaths:pin.effects.map(effect=>effect+'/'),architectures:pin.architectures,minimumMacOS:pin.minimumMacOS,tools:pin.tools,adaptations:['opaque-presentation-alpha','darwin-wchar-context-size','inactive-SPD-UAV-bindings'],library:path.basename(library)},null,2)+'\n');
+fs.writeFileSync(path.join(payload,'provider.json'),JSON.stringify({providerABI:1,interfaces:{generation:1,preparation:1},shaderVariants:{opticalflow:2,frameinterpolation:8},shaderPasses:{opticalflow:7,frameinterpolation:11},complete:true,method:'fsr3',source:pin.repository,commit:gitlink('producers/maclauncher/src/external/fsr3-sdk'),effects:pin.effects,resolvedPaths:pin.effects.map(effect=>effect+'/'),architectures:pin.architectures,minimumMacOS:pin.minimumMacOS,tools:pin.tools,adaptations:['opaque-presentation-alpha','darwin-wchar-context-size','inactive-SPD-UAV-bindings'],library:path.basename(library)},null,2)+'\n');
 console.log('Built FidelityFX optical flow and frame interpolation provider: '+payload);

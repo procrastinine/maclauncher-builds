@@ -1,3 +1,4 @@
+const sharedDependencies=require('../../../../../../dependencies.json');
 const {gitlink} = require("../../../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -5,8 +6,7 @@ const crypto = require("node:crypto");
 const Native = require("../../runtime/local-native");
 const metadata = require("./portable-build.json");
 const revision = gitlink("producers/maclauncher/src/external/onscripter-yuri");
-const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map(pin => ({ ...pin,
-  archiveUrl: pin.archiveUrl.replace("{revision}", pin.revision) })), engine: { ...metadata.engine, revision,
+const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map(row=>{const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:row;}), engine: { ...metadata.engine, revision,
   sourceUrl: `https://github.com/YuriSizuku/OnscripterYuri/tree/${revision}`,
   archiveUrl: `https://codeload.github.com/YuriSizuku/OnscripterYuri/tar.gz/${revision}` } });
 const VERSION = PIN.engine.version;

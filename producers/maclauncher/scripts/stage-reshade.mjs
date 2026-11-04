@@ -1,3 +1,5 @@
+import dependencies from '../../../producers/dependencies.json' with {type:'json'};
+const {shaderc}=dependencies;
 import {gitlink} from "../../../lib/pins.mjs";
 import {addLicenses} from '../../../lib/licenses.mjs';
 import fs from "node:fs";
@@ -106,7 +108,7 @@ if(options["--xess-host"]){
   const upstream=path.resolve(upstreamRoot,"src/external/xess"),actual=execFileSync("git",["-C",upstream,"rev-parse","HEAD"],{encoding:"utf8"}).trim();if(actual!==gitlink(source.gitlink))throw Error("The original XeSS SDK pin differs from the GPU host.");execFileSync("git",["-C",upstream,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});pins.push(` ${actual} third_party/xess-original`);
   if(backends.includes("vulkan")){
     const headers=JSON.parse(fs.readFileSync(path.join(ownedRoot,"native/vulkan-source.json"))),headerRoot=path.resolve(upstreamRoot,"src/external/krkrsdl2/external/SDL");
-    if(hostPaths.vulkan!=="x86_64-windows/maclauncher-xess-vulkan-host.exe"||JSON.stringify(metadata.source.vulkanHeaders)!==JSON.stringify(headers)||headers.repository!=="https://github.com/libsdl-org/SDL"||!Array.isArray(headers.headers)||headers.headers.length!==3||execFileSync("git",["-C",headerRoot,"rev-parse","HEAD"],{encoding:"utf8"}).trim()!==headers.commit||execFileSync("git",["-C",headerRoot,"remote","get-url","origin"],{encoding:"utf8"}).trim().replace(/\.git$/,"")!==headers.repository)throw Error("The XeSS Vulkan header source differs from its declared pin.");
+    if(hostPaths.vulkan!=="x86_64-windows/maclauncher-xess-vulkan-host.exe"||JSON.stringify(metadata.source.vulkanHeaders)!==JSON.stringify(headers)||headers.repository!=="https://github.com/libsdl-org/SDL"||!Array.isArray(headers.headers)||headers.headers.length!==3||execFileSync("git",["-C",headerRoot,"rev-parse","HEAD"],{encoding:"utf8"}).trim()!==execFileSync('git',['-C',path.resolve(upstreamRoot,'src/external/krkrsdl2'),'rev-parse','HEAD:external/SDL'],{encoding:'utf8'}).trim()||execFileSync("git",["-C",headerRoot,"remote","get-url","origin"],{encoding:"utf8"}).trim().replace(/\.git$/,"")!==headers.repository)throw Error("The XeSS Vulkan header source differs from its declared pin.");
     execFileSync("git",["-C",headerRoot,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});
     required.add(hostPaths.vulkan);
     for(const row of headers.headers){
@@ -575,9 +577,9 @@ const inputs = new Map([
 ]);
 if(nativeFiles.includes("shaderc-offline")){
   const metadata=JSON.parse(fs.readFileSync(path.join(ownedSource,"compat/shaderc/source.json"),"utf8"));
-  if(metadata.repository!=="https://github.com/google/shaderc"||metadata.commit!=="d393a813c9b67c709d37b329203d72beb69d719e"||metadata.version!=="2026.4"||metadata.files?.length!==4)throw Error("The shader compiler API source pin is invalid.");
+  if(metadata.version!=="2026.4"||metadata.files?.length!==4)throw Error("The shader compiler API source pin is invalid.");
   for(const row of metadata.files)if(!["shaderc.h","env.h","status.h","visibility.h"].includes(row.path)||digest(fs.readFileSync(path.join(ownedSource,"compat/shaderc",row.path)))!==row.sha256)throw Error("A shader compiler API declaration changed.");
-  pins.push(` ${metadata.commit} third_party/shaderc-headers`);
+  pins.push(` ${shaderc.revision} third_party/shaderc-headers`);
 }
 if(fs.existsSync(path.join(ownedSource,"src/color-source.json"))){
   const colorSource=JSON.parse(fs.readFileSync(path.join(ownedSource,"src/color-source.json"),"utf8"));

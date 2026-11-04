@@ -1,11 +1,9 @@
 {
   "schema": 1,
   "repository": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-  "commit": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55",
   "source": {
     "schema": 1,
     "repository": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-    "commit": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55",
     "version": "CACAO 1.4.0",
     "roles": [
       {
@@ -191,7 +189,7 @@
       "sdk/src/backends/dx12/shaders/cacao"
     ]
   },
-  "owned": "cef658000e21c7edccfd649e410599b6e66b961194ef6829ebe08148ea9be8c5",
+  "owned": "64670c9dab0cde708ea789284b77d8e5e886454f6f2ef4dc3c9fe471a00b9fd6",
   "ownedFiles": {
     "boundary.hlsl": "27cb30c154d2ea0ed55cb7567b04c8e6956dc33795b1da6394165afdd8051409",
     "../native/scene-projection.hlsl": "292d888ad8ec2cbc8d8351f6597d9558932433b66a54dbc4b7baac7f171f884c"

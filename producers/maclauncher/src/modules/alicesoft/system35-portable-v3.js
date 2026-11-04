@@ -1,3 +1,4 @@
+const sharedDependencies=require('../../../../dependencies.json');
 const {gitlink} = require("../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -10,9 +11,7 @@ const Mixer = require("../shared/runtime/portable-sdl2-mixer");
 const Prefix = require("../shared/runtime/portable-dependency-prefix");
 const Overlay = require("./system35-overlay-v3");
 const { throwIfAborted } = require("../shared/runtime/download-utils");
-const metadata = require("./system35-portable.json");
-const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map(pin => ({ ...pin,
-  archiveUrl: pin.archiveUrl.replace("{revision}", pin.revision) })) });
+const PIN = Object.freeze({...require("./system35-portable.json"),dependencies:require("./system35-portable.json").dependencies.map(row=>{const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:row;})});
 const VERSION = "MCLv1-1019";
 const REVISION = gitlink("producers/maclauncher/src/external/xsystem35-sdl2");
 const SOURCE_SHA256 = "73e633b7b9f3ecbbc760179347b542e4fe69fd18023981ff50224d099f2275a8";

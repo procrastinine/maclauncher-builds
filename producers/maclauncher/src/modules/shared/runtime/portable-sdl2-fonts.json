@@ -8,27 +8,35 @@
       "id": "sdl2",
       "name": "SDL2",
       "version": "2.32.10",
-      "revision": "5d249570393f7a37e037abf22cd6012a4cc56a71",
-      "archiveUrl": "https://github.com/libsdl-org/SDL/releases/download/release-2.32.10/SDL2-2.32.10.tar.gz",
-      "archiveSha256": "5f5993c530f084535c65a6879e9b26ad441169b3e25d789d83287040a9ca5165",
-      "archiveBytes": 7630262,
-      "sourceUrl": "https://github.com/libsdl-org/SDL/tree/5d249570393f7a37e037abf22cd6012a4cc56a71",
       "license": "Zlib",
-      "notices": ["LICENSE.txt"],
-      "options": ["-DSDL_SHARED=ON", "-DSDL_STATIC=OFF", "-DSDL_TEST=OFF", "-DSDL_TESTS=OFF"]
+      "notices": [
+        "LICENSE.txt"
+      ],
+      "options": [
+        "-DSDL_SHARED=ON",
+        "-DSDL_STATIC=OFF",
+        "-DSDL_TEST=OFF",
+        "-DSDL_TESTS=OFF"
+      ],
+      "archiveSha256": "46237ea6c05cbcd11ef374382e91a4854aa15de2cf055aa061862ad1438003d7",
+      "archiveBytes": 7908510
     },
     {
       "id": "libpng",
       "name": "libpng",
       "version": "1.6.59",
-      "revision": "cd952f49f95bb27154ae77dbb103032d95f6e580",
-      "archiveUrl": "https://codeload.github.com/pnggroup/libpng/tar.gz/cd952f49f95bb27154ae77dbb103032d95f6e580",
-      "archiveSha256": "ef1bccad2b2a58eb3c09e06ffe3b72b8604abda8b5011e4c4bb5391989040f26",
-      "archiveBytes": 1601579,
-      "sourceUrl": "https://github.com/pnggroup/libpng/tree/cd952f49f95bb27154ae77dbb103032d95f6e580",
       "license": "libpng-2.0",
-      "notices": ["LICENSE"],
-      "options": ["-DPNG_SHARED=ON", "-DPNG_STATIC=OFF", "-DPNG_FRAMEWORK=OFF", "-DPNG_TESTS=OFF", "-DPNG_TOOLS=OFF", "-DPNG_EXECUTABLES=OFF"]
+      "notices": [
+        "LICENSE"
+      ],
+      "options": [
+        "-DPNG_SHARED=ON",
+        "-DPNG_STATIC=OFF",
+        "-DPNG_FRAMEWORK=OFF",
+        "-DPNG_TESTS=OFF",
+        "-DPNG_TOOLS=OFF",
+        "-DPNG_EXECUTABLES=OFF"
+      ]
     },
     {
       "id": "freetype",
