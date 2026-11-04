@@ -37,10 +37,6 @@ export function applyBuildOverlay(projectionRoot){
   return replaceOnce(text,'#else\n        const auto generation = GuestAllocations::GuestAllocationsGeneration_nid_postfix();',
    '#elif defined(__APPLE__)\n'+branch+'#else\n        const auto generation = GuestAllocations::GuestAllocationsGeneration_nid_postfix();',file);
  });
- edit('core/libs/prx/libSceAgcDriver/Execution/src/FrameRecorder.cpp',(text,file)=>{
-  text=replaceOnce(text,'#include <unistd.h>','#include <unistd.h>\n#ifdef __APPLE__\n#include <crt_externs.h>\n#endif',file);
-  return replaceOnce(text,'#else\n    char** entries = environ;','#elif defined(__APPLE__)\n    char** entries = *_NSGetEnviron();\n#else\n    char** entries = environ;',file);
- });
  edit('core/libs/prx/libkernel/System/src/Exception.cpp',(text,file)=>{
   text=replaceOnce(text,'#include <ucontext.h>','#ifdef __APPLE__\n#include <sys/ucontext.h>\n#include <mach/i386/thread_status.h>\n#else\n#include <ucontext.h>\n#endif',file);
   const start=text.indexOf('void FromHost(const mcontext_t& host, GuestMcontext& m) {'),end=text.indexOf('\nvoid Deliver(int signum, siginfo_t*, void* context)',start);

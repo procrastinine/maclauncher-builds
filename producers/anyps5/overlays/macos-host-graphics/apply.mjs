@@ -32,12 +32,6 @@ export async function applyHostGraphicsOverlay(root) {
         else maybe.push_back({from, to, mapping.readable});
     });`);
   });
-  await edit('Execution/src/PerformanceOverlay.cpp', source => wrapFunction(include + source,
-    'std::optional<std::uint64_t> ReadProcessPrivateBytes()', '    return DarwinAgcMemory::PrivateBytes();'));
-  await edit('Execution/src/PerformanceTrace.cpp', source => {
-    source = replace(source, '#include <unistd.h>', '#include <unistd.h>\n#ifdef __APPLE__\n#include <crt_externs.h>\n#endif');
-    return replace(source, '#else\n    char** entries = environ;', '#elif defined(__APPLE__)\n    char** entries = *_NSGetEnviron();\n#else\n    char** entries = environ;');
-  });
   await edit('Graphics/src/GuestBufferMemory.cpp', source => replace(include + source,
     '#else\n        static const bool trace = std::getenv("APS5_TRACE_HOST_IMPORT") != nullptr;\n        if (std::FILE* maps = trace ? std::fopen("/proc/self/maps", "r") : nullptr)',
     '#elif defined(__APPLE__)\n        if (std::getenv("APS5_TRACE_HOST_IMPORT") != nullptr) DarwinAgcMemory::TraceMappings(base, bytes);\n#else\n        static const bool trace = std::getenv("APS5_TRACE_HOST_IMPORT") != nullptr;\n        if (std::FILE* maps = trace ? std::fopen("/proc/self/maps", "r") : nullptr)'));

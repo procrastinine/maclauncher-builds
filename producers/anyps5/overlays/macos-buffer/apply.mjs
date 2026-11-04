@@ -9,7 +9,7 @@ function replace(source, before, after) {
 export async function applyBufferOverlay(root) {
   const location = path.join(root, 'core/libs/prx/libSceAgcDriver/Graphics/src/GuestBufferMemory.cpp');
   let source = await fs.readFile(location, 'utf8');
-  source = replace(source, '#include <linux/udmabuf.h>', '#ifdef __linux__\n#include <linux/udmabuf.h>\n#endif\n#ifdef __APPLE__\n#include <sys/sysctl.h>\n#endif');
+  source = replace(source, '#include <linux/udmabuf.h>', '#ifdef __linux__\n#include <linux/udmabuf.h>\n#endif');
   for (const boundary of ['struct ImportFamilies {', '    ImportFamilies families;', 'int udmabufDevice() {', 'constexpr std::uint64_t ImportChunkBytes', 'struct BackingFile {', '    BackingFile backing;', '    if (BackingFile backing;']) {
     source = replace(source, '#ifndef _WIN32\n' + boundary, '#ifdef __linux__\n' + boundary);
   }
@@ -29,7 +29,6 @@ export async function applyBufferOverlay(root) {
     }
 #endif
     VkMemoryHostPointerPropertiesEXT pointer{VK_STRUCTURE_TYPE_MEMORY_HOST_POINTER_PROPERTIES_EXT};`);
-  source = replace(source, '    return GlobalMemoryStatusEx(&status) ? status.ullTotalPhys : 0;\n#else', '    return GlobalMemoryStatusEx(&status) ? status.ullTotalPhys : 0;\n#elif defined(__APPLE__)\n    std::uint64_t bytes = 0;\n    std::size_t length = sizeof(bytes);\n    return ::sysctlbyname("hw.memsize", &bytes, &length, nullptr, 0) == 0 ? bytes : 0;\n#else');
   source = replace(source, 'ImportProbe ProbeDmaBufImportWriteProtection(const Context& context) {\n    ImportProbe probe;\n#ifdef _WIN32\n    static_cast<void>(context);\n    probe.failure = "the Linux write watch";', 'ImportProbe ProbeDmaBufImportWriteProtection(const Context& context) {\n    ImportProbe probe;\n#ifndef __linux__\n    static_cast<void>(context);\n    probe.failure = "DMA-BUF import requires Linux";');
   await fs.writeFile(location, source);
 }

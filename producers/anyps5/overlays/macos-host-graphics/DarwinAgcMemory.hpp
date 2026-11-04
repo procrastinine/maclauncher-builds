@@ -2,7 +2,6 @@
 #ifndef ANYPS5_DARWIN_AGC_MEMORY_HPP
 #define ANYPS5_DARWIN_AGC_MEMORY_HPP
 #include "prx/libc/include/specifics/macos/VirtualMemory.hpp"
-#include <mach/task_info.h>
 #include <mach/vm_statistics.h>
 #include <unistd.h>
 #include <algorithm>
@@ -10,7 +9,6 @@
 #include <cstdint>
 #include <cstdio>
 #include <limits>
-#include <optional>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -75,13 +73,6 @@ void PopulatedPages(const Mapping& mapping, Visit&& visit) {
         }
         cursor += pages * page;
     }
-}
-inline std::optional<std::uint64_t> PrivateBytes() {
-    task_vm_info_data_t info{};
-    auto count = static_cast<mach_msg_type_number_t>(TASK_VM_INFO_COUNT);
-    if (task_info(mach_task_self(), TASK_VM_INFO, reinterpret_cast<task_info_t>(&info), &count) != KERN_SUCCESS || count < TASK_VM_INFO_REV1_COUNT)
-        return std::nullopt;
-    return info.phys_footprint;
 }
 inline void TraceMappings(std::uint64_t begin, std::uint64_t bytes) {
     if (bytes > std::numeric_limits<std::uint64_t>::max() - begin) throw std::runtime_error("macOS GPU trace range overflow");
