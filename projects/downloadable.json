@@ -2040,6 +2040,10 @@
       {
         "version": "0.41.0-MCLv8-2",
         "label": "Decoded video with separate controls and subtitles 0.41.0-MCLv8-2"
+      },
+      {
+        "version": "0.41.0-MCLv10",
+        "label": "Decoded video with separate controls and subtitles 0.41.0-MCLv10"
       }
     ],
     "compatibility": "Apple Silicon with macOS 27 or later; the original command-line profile remains separate.",
@@ -2054,7 +2058,7 @@
       }
     },
     "build": {
-      "version": "0.41.0-MCLv8-2",
+      "version": "0.41.0-MCLv10",
       "command": "tools/build-mpv.mjs",
       "architectures": [
         "arm64"
