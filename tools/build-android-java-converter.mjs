@@ -7,10 +7,10 @@ import {createRequire} from 'node:module';
 import {checkoutSource,run,recipeMain,sourceNotices} from './build-source.mjs';
 import {buildInput} from './build-input.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
-import {copyNotices,printWarnings} from '../lib/notices.mjs';
+import {addLicense} from '../lib/licenses.mjs';
 const root=path.resolve(import.meta.dirname,'..'),descriptor=path.join(root,'producers/android-inputs/java-converter.json');
 const profile=()=>JSON.parse(fs.readFileSync(descriptor));
-const read=(command,args)=>execFileSync(command,args,{encoding:'utf8',maxBuffer:32<<20}).trim();
+const read=(command,args)=>execFileSync(command,args,{encoding:'utf8',maxBuffer:Infinity}).trim();
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),{validateDeclaration}=require('../lib/declaration.cjs');
 
 /** Compile the unchanged Java converter and its complete production overlay on either build host. */
@@ -39,9 +39,9 @@ export async function buildAndroidJavaConverterInput({output,work}){
  const {buildConverter}=await import(pathToFileURL(path.join(native,'converter-build.mjs'))),build=path.join(work,'build');
  const built=await buildConverter({root:native,build,output,jdk,checkout:converter,apksig:path.join(tools,catalogs.apksig.files[0].path),asmClasspath:catalogs.asm.files.map(file=>path.join(tools,file.path)).join(path.delimiter)});
  fs.copyFileSync(built.apiHeaders,path.join(output,'android-api-headers.jar'),fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);
- const candidates=sourceNotices(converter,{name:'dex2jvm',repository:definition.converter.repository}).map((notice,index)=>({...notice,path:'notices/converter/'+index+'-'+path.basename(notice.file)}));
- for(const name of ['asm','apksig'])for(const notice of sourceNotices(path.join(native,'notices',name),{all:true,name,repository:catalogs[name].url}))candidates.push({...notice,path:'notices/'+name+'/'+path.relative(path.join(native,'notices',name),notice.file)});
- const copied=copyNotices(candidates,{output});printWarnings(copied.warnings);const notices=copied.notices.map(({file,...notice})=>notice);
+ const candidates=sourceNotices(converter,{name:'dex2jvm',repository:definition.converter.repository}).map((notice,index)=>({...notice,path:'licenses/converter-'+index+'-'+path.basename(notice.file)}));
+ for(const name of ['asm','apksig'])for(const notice of sourceNotices(path.join(native,'license-inputs',name),{all:true,name,repository:catalogs[name].url}))candidates.push({...notice,path:'licenses/'+name+'-'+path.relative(path.join(native,'license-inputs',name),notice.file).split(path.sep).join('-')});
+ const notices=[];for(const notice of candidates)addLicense(output,notice.name,notice.file,notice.license);
  return {root:output,notices,record:{androidSource:definition.androidSource,converter:definition.converter,jdk:{sha256:jdkPin.sha256,version:read(path.join(jdk,'bin/java'),['--version']).split('\n')[0]},tools:catalogs}};
 }
 

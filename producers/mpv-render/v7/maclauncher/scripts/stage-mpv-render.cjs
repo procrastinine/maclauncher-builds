@@ -1,4 +1,4 @@
-const NoticeIntake = require('../../../../../lib/notices.mjs');
+const {addLicense} = require('../../../../../lib/licenses.mjs');
 // Build an owned GPU render host around an explicit, unchanged libmpv input.
 // The result is a managed media runtime, separate from launcher resources.
 const fs = require('node:fs'), path = require('node:path'), {execFileSync} = require('node:child_process');
@@ -15,7 +15,7 @@ function stage({library,referenceExecutable,dependencyRoots=[],output,version,so
   if(!source||!/^https:\/\//.test(source.url||'')||!/^[a-f0-9]{40}$/.test(source.commit||'')||!source.version)throw Error('The library source identity is required.');
   library=fs.realpathSync(library);referenceExecutable=fs.realpathSync(referenceExecutable);output=path.resolve(output);
   if(fs.existsSync(output))throw Error('Choose an empty output; managed runtime inputs are never modified.');
-  const cpu=arch==='x64'?'x86_64':arch,images=new Map(),targets=new Map(),originalHashes=new Map(),included=[],noticeRoots=new Set();
+  const cpu=arch==='x64'?'x86_64':arch,images=new Map(),targets=new Map(),originalHashes=new Map(),noticeRoots=new Set();
   let effectiveMinimum=minimumMacOS;
   const app=path.join(output,'mpv.app'),executable=path.join(app,'Contents/MacOS/mpv'),libraries=path.join(app,'Contents/Frameworks/video');
   fs.mkdirSync(path.dirname(executable),{recursive:true});fs.mkdirSync(libraries,{recursive:true});fs.mkdirSync(path.join(app,'Contents/Resources'),{recursive:true});
@@ -49,7 +49,7 @@ function stage({library,referenceExecutable,dependencyRoots=[],output,version,so
       const floor=Stage.loadCommands(target,cpu).minimumMacOS;
       if(!floor)throw Error('A media dependency has no declared macOS deployment target.');
       if(!versionAtLeast(effectiveMinimum,floor))effectiveMinimum=floor;
-      Stage.addDependencyNotices(original,output,included,noticeRoots,path.join(output,'.build-records'));
+      Stage.addDependencyNotices(original,output,noticeRoots);
     }
     const flags=['clang++','-std=c++17','-O2','-fobjc-arc','-Wno-deprecated-declarations','-arch',cpu,'-mmacosx-version-min='+minimumMacOS,
       '-ffile-prefix-map='+root+'=.','-I'+path.join(root,'src/external/mpv-player/include'),
@@ -60,11 +60,7 @@ function stage({library,referenceExecutable,dependencyRoots=[],output,version,so
     run('/usr/bin/codesign',['--force','--sign','-',executable]);
     const info=JSON.parse(run(executable,['--maclauncher-info']));
     if(info.schema!==1||info.decodedFrameAPI!==1||info.decodedColorAPI!==1||info.preparationNotificationAPI!==1||info.osdLayerAPI!==1||!String(info.libraryVersion).includes(source.version))throw Error('The prepared media library differs from its selected version or lacks separate video and OSD output.');
-    const licenseDirectory=path.join(output,'licenses');fs.mkdirSync(licenseDirectory,{recursive:true});
-    included.push(...notices.map((notice,index)=>{
-      const destination=path.join(licenseDirectory,index+'-'+path.basename(notice.file));NoticeIntake.copyNotice(notice.file,destination);
-      return {name:notice.name,license:notice.license,path:path.relative(output,destination),sha256:Native.hashFile(destination),...(notice.sourceUrl?{sourceUrl:notice.sourceUrl}:{})};
-    }));
+    for(const notice of notices)addLicense(output,notice.name,notice.file,notice.license);
     const plist='<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>org.maclauncher.video</string><key>CFBundleName</key><string>Video</string><key>CFBundleExecutable</key><string>mpv</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleShortVersionString</key><string>'+source.version+'</string><key>LSMinimumSystemVersion</key><string>'+effectiveMinimum+'</string><key>NSHighResolutionCapable</key><true/></dict></plist>';
     fs.writeFileSync(path.join(app,'Contents/Info.plist'),plist);
     run('/usr/bin/codesign',['--force','--sign','-',app]);run('/usr/bin/codesign',['--verify','--strict','--deep',app]);
@@ -76,7 +72,7 @@ function stage({library,referenceExecutable,dependencyRoots=[],output,version,so
       headerSource:{repository:'https://github.com/mpv-player/mpv.git',commit:'41f6a645068483470267271e1d09966ca3b9f413'},
       ownedSources:sourceFiles.map(file=>({file,sha256:Native.hashFile(path.join(root,'src/modules/video/native',file))})),
       ownedHeaders:headerFiles.map(file=>({file,sha256:Native.hashFile(path.join(root,file))})),
-      images:[{path:path.relative(output,executable),sha256:Native.hashFile(executable)},...[...processed].map(target=>({path:path.relative(output,target),sha256:Native.hashFile(target),inputSha256:originalHashes.get(images.get(target))}))],notices:included};
+      images:[{path:path.relative(output,executable),sha256:Native.hashFile(executable)},...[...processed].map(target=>({path:path.relative(output,target),sha256:Native.hashFile(target),inputSha256:originalHashes.get(images.get(target))}))]};
     fs.writeFileSync(path.join(output,'video-runtime.json'),JSON.stringify(metadata,null,2)+'\n',{flag:'wx'});
     for(const [original,sha256] of originalHashes)if(Native.hashFile(original)!==sha256)throw Error('An original media input changed during staging.');
     fs.rmSync(path.join(output,'.build-records'),{recursive:true,force:true});return metadata;

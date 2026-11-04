@@ -1,4 +1,4 @@
-const NoticeIntake = require('../../../../../../lib/notices.mjs');
+const {addLicense} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -84,9 +84,8 @@ function stageRuntime({ sourceRoot, buildRoot, prefix, pathMappings = [] }) {
   const mappings = [...pathMappings, { from: sourceRoot, to: "python-source" }, { from: buildRoot, to: "python-build" }, { from: prefix, to: "/maclauncher/python" }].sort((a,b) => b.from.length-a.from.length);
   for (const mapping of mappings) text = text.replaceAll(mapping.from, mapping.to);
   fs.writeFileSync(path.join(stdlib, sysconfig[0]), text);
-  const notices = path.join(prefix, "licenses/python"); fs.mkdirSync(notices, { recursive: true });
-  for (const notice of PIN.source.notices) NoticeIntake.copyNotice(path.join(sourceRoot, notice), path.join(notices, path.basename(notice)));
-  return { prefix, library: path.join(libDir, path.basename(library)), includeDir, stdlib, extensions, notices };
+  for (const notice of PIN.source.notices) addLicense(prefix,'Python',path.join(sourceRoot, notice));
+  return { prefix, library: path.join(libDir, path.basename(library)), includeDir, stdlib, extensions };
 }
 
 async function buildPython({ archive, workRoot, sdk, architecture = process.arch, pathMappings = [], signal, onProgress, dependencies = {} }) {

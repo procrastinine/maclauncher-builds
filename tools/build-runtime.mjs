@@ -19,7 +19,7 @@ import {reproducibleEnvironment} from '../lib/reproducible-build.mjs';
 const B=createRequire(import.meta.url)('../lib/bundled-native.cjs');
 
 const root=path.resolve(import.meta.dirname,'..');
-const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
+const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{maxBuffer:Infinity,encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
 
 export function verifyProducer(directory,recipe){
  directory=fs.realpathSync(directory);
@@ -105,7 +105,7 @@ export function prepareBuild({project:id,arch,version,directory=root,environment
  if(host.os==='linux')linuxToolSelection(build.tools||[]);
  const prepared=prepareBuildHost({build,label:runner,runner:host,rustToolchain:RUST_TOOLCHAIN,environment,...hostOptions});
  const env={...environment,...prepared.env,PATH:[...prepared.paths,environment.PATH].filter(Boolean).join(path.delimiter)};
- const {initialized}=initialize({project:project.id,version:build.version,directory,run:(args,cwd)=>execFileSync('git',args,{cwd,env,encoding:'utf8',stdio:['ignore','pipe','pipe'],maxBuffer:32<<20})});
+ const {initialized}=initialize({project:project.id,version:build.version,directory,run:(args,cwd)=>execFileSync('git',args,{cwd,env,encoding:'utf8',stdio:['ignore','pipe','pipe'],maxBuffer:Infinity})});
  if(environment.GITHUB_ENV)fs.appendFileSync(environment.GITHUB_ENV,Object.entries(prepared.env).map(([key,value])=>key+'='+value+'\n').join(''));
  if(environment.GITHUB_PATH&&prepared.paths.length)fs.appendFileSync(environment.GITHUB_PATH,prepared.paths.join('\n')+'\n');
  return {project:project.id,version:build.version,arch,runner,...prepared,initialized};

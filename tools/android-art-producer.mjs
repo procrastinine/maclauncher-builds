@@ -3,7 +3,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {checkoutSource} from './build-source.mjs';
 const root=path.resolve(import.meta.dirname,'..');
-const read=(source,args)=>execFileSync('git',['-C',source,...args],{encoding:'utf8'}).trim();
+const read=(source,args)=>execFileSync('git',['-C',source,...args],{maxBuffer:Infinity,encoding:'utf8'}).trim();
 
 /** Select one exact ART producer without coupling leaf profiles to the final runtime Gitlink. */
 export function acquireArtProducer({source,work}){

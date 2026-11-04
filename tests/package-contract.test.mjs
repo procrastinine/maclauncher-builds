@@ -22,9 +22,8 @@ test('producer records and consumers share generic capability and exact source v
  assert.throws(()=>Contract.packageRecord(value,{projectId:'sample',repository:'owner/builds',requireUrl:false}),/newer MacLauncher/);
  const current=Contract.packageRecord(value,{projectId:'sample',repository:'owner/builds',launcherContract:2,requireUrl:false});
  assert.deepEqual(current.source,source);assert.deepEqual(current.capabilities,metadata.capabilities);
- const tooMany=Object.fromEntries(Array.from({length:65},(_,n)=>['feature'+n,n]));
- for(const changes of [{launcherContract:0},{launcherContract:1.5},{capabilities:[]},{capabilities:{'invalid key':1}},{capabilities:tooMany},
-  {capabilities:{engine:{profile:{abi:{version:1}}}}},{capabilities:{note:'x'.repeat(8192)}},{nativeApi:'legacy-field'},
+ for(const changes of [{launcherContract:0},{launcherContract:1.5},{capabilities:[]},{capabilities:{'invalid key':1}},
+  {nativeApi:'legacy-field'},
   {source:{...source,extra:true}},{source:{...source,path:'../outside'}},{source:{...source,revision:'branch'}},
   {source:{...source,repository:'https://github.com/owner/repo'}}])assert.throws(()=>releaseRecord({...value,...changes},options));
  for(const source of [{...value.source,path:'/Users/private/source'}, {...value.source,path:'src/.local/data'}])assert.throws(()=>releaseRecord({...value,source},options));

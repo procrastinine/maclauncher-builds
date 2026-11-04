@@ -36,7 +36,6 @@ function inventory(root) {
       if (stat.isDirectory()) pending.push(file);
       else if (stat.isFile()) files.set(path.relative(root, file).split(path.sep).join("/"), Native.hashFile(file));
       else throw new Error("Nitroplus source export contains a special file.");
-      if (files.size + pending.length > 4096) throw new Error("Nitroplus source export exceeds its file limit.");
     }
   }
   return files;

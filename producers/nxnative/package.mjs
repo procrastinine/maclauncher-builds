@@ -83,7 +83,7 @@ export async function packageNxNative({input,outputDirectory,catalogFile,buildOu
  const declaration={id:manifest.managerId,version:manifest.version,arch:manifest.arch,launcherArchitectures:['arm64'],minimumMacOS:manifest.minimumMacOS,
   directoryRelative:manifest.managerId+'/'+manifest.version+'/'+manifest.arch,manifestRelative:'manifest.json',manifestSha256:digest(manifestBytes),
   sourceRelative:'source.json',sourceSha256:digest(fs.readFileSync(path.join(input,'source.json'))),
-  files:[...manifest.files,{path:'manifest.json',size:manifestBytes.length,mode:0o644,sha256:digest(manifestBytes)}],notices:manifest.notices,redistribution:'bundle'};
+  files:[...manifest.files,{path:'manifest.json',size:manifestBytes.length,mode:0o644,sha256:digest(manifestBytes)}],redistribution:'bundle'};
  Bundled.verifyPayload(input,declaration);
  fs.mkdirSync(outputDirectory,{recursive:true});
  if(buildOutput){

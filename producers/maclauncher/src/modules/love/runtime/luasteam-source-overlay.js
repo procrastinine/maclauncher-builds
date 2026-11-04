@@ -26,7 +26,7 @@ function canonicalDestination(directory) {
 
 /** Stage reviewed sources and headers only. A second Lua VM is never linked. */
 function stageSource({ roots, destination, inputs = INPUTS } = {}) {
-  if (!path.isAbsolute(destination || "") || !roots || !Array.isArray(inputs) || !inputs.length || inputs.length > 512)
+  if (!path.isAbsolute(destination || "") || !roots || !Array.isArray(inputs) || !inputs.length)
     throw new Error("Explicit source roots and a fresh absolute LuaSteam build directory are required.");
   destination = canonicalDestination(destination);
   const sourceRoots = {};
@@ -45,7 +45,7 @@ function stageSource({ roots, destination, inputs = INPUTS } = {}) {
     const safe = value => typeof value === "string" && value && !path.isAbsolute(value) &&
       !value.split(/[\\/]/).some(part => part === ".." || part === ".git" || !part);
     if (!root || !safe(input.path) || !safe(input.destination) || outputPaths.has(input.destination) ||
-        !/^[a-f0-9]{64}$/.test(input.sha256 || "") || !Number.isSafeInteger(input.size) || input.size < 0 || input.size > 1024 * 1024)
+        !/^[a-f0-9]{64}$/.test(input.sha256 || "") || !Number.isSafeInteger(input.size) || input.size < 0)
       throw new Error("Invalid pinned LuaSteam source input.");
     outputPaths.add(input.destination);
     const file = path.join(root, input.path), stat = fs.lstatSync(file, { bigint: true });

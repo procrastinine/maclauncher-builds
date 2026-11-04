@@ -11,7 +11,7 @@ function inspectPackage(root, record, { projectId, manifestRelative, sourceRelat
   if (stored.sha256 !== record.manifestSha256 || stored.mode !== 0o644) throw new Error("The runtime package manifest changed.");
   const manifest = JSON.parse(stored.bytes);
   if (manifest.schemaVersion !== 1 || manifest.version !== record.version || manifest.minimumMacOS !== record.minimumMacOS ||
-      !Array.isArray(manifest.files) || !manifest.files.length || manifest.files.length > Bundled.LIMITS.files)
+      !Array.isArray(manifest.files) || !manifest.files.length)
     throw new Error("The runtime package differs from its selected catalog entry.");
   validateManifest(manifest, record);
   const prefix = typeof filesPrefix === "function" ? filesPrefix(manifest, record) : filesPrefix;
@@ -23,7 +23,7 @@ function inspectPackage(root, record, { projectId, manifestRelative, sourceRelat
     ? executableRelative(manifest, record) : executableRelative);
   const names = new Set(), files = manifest.files.map(file => {
     const name = Bundled.relativeFile(prefix + Bundled.relativeFile(file.path));
-    if (names.has(name) || !Number.isSafeInteger(file.size) || file.size < 0 || file.size > Bundled.LIMITS.fileBytes ||
+    if (names.has(name) || !Number.isSafeInteger(file.size) || file.size < 0 ||
         !Number.isInteger(file.mode) || file.mode < 0 || file.mode > 0o777 || !SHA.test(file.sha256 || "") ||
         file.format !== undefined && !["mach-o", "pe"].includes(file.format) || file.format === "pe" && !file.architectures?.length ||
         file.architectures && (!Array.isArray(file.architectures) || !file.architectures.length ||
@@ -101,12 +101,12 @@ function createProjectBuildManager({ projectId, runtimeId = projectId, label, re
     },
     dependencies: { ...dependencies, extractArchive: async (archive, unpacked, signal) => {
       const extracted = path.join(unpacked, ".package"); fs.mkdirSync(extracted);
-      const options = { signal, timeout: 120000, maxBuffer: 8 * 1024 * 1024 };
+      const options = { signal, timeout: 120000, maxBuffer: Infinity};
       if (dependencies.extractArchive) await dependencies.extractArchive(archive, extracted, signal);
       else {
         const list = await execute("/usr/bin/tar", ["-tzf", archive], options);
         const names = list.stdout.trim().split("\n").map(name => name.replace(/^\.\//, "").replace(/\/$/, "")).filter(Boolean);
-        if (names.length > Bundled.LIMITS.files * 2 || names.some(name => { try { Bundled.relativeFile(name); return false; } catch { return true; } }))
+        if (names.some(name => { try { Bundled.relativeFile(name); return false; } catch { return true; } }))
           throw new Error("The runtime archive contains an unsafe path.");
         const types = await execute("/usr/bin/tar", ["-tvzf", archive], options);
         if (types.stdout.trim().split("\n").some(line => !/^[d-]/.test(line))) throw new Error("The runtime archive contains unsupported links.");

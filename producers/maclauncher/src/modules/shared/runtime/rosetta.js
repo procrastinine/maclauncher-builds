@@ -53,7 +53,7 @@ function requiredError(status, code = "ROSETTA_REQUIRED", detail = "Rosetta is r
 // credentials never pass through Node or launcher settings.
 function createAppleInstaller({ execFile = nodeExecFile } = {}) {
   const execute = (command, args, context) => new Promise((resolve, reject) => {
-    const child = execFile(command, args, { encoding: "utf8", maxBuffer: 256 * 1024,
+    const child = execFile(command, args, { encoding: "utf8", maxBuffer: Infinity,
       timeout: 10 * 60 * 1000, env: systemEnvironment(), ...(context.signal ? { signal: context.signal } : {}) },
     (error, stdout, stderr) => {
       if (error) {
@@ -124,7 +124,7 @@ function createRosettaService({ platform = process.platform, arch, fileSystem = 
   function readPackage() {
     try {
       const result = spawnSync("/usr/sbin/pkgutil", ["--pkg-info", PACKAGE_ID], {
-        encoding: "utf8", maxBuffer: 64 * 1024, timeout: 3000, env: systemEnvironment()
+        encoding: "utf8", maxBuffer: Infinity, timeout: 3000, env: systemEnvironment()
       });
       if (result.status === 0 && !result.error) return parsePackageInfo(result.stdout);
     } catch {}

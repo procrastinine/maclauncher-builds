@@ -19,7 +19,7 @@ function bytecodeFacts(source){
  const code=fs.readFileSync(path.join(source,'src/code.c'),'utf8'),sdl=fs.readFileSync(path.join(source,'libs/sdl/sdl.c'),'utf8');
  const maximum=Number(/\bmax_version\s*=\s*(\d+)/.exec(code)?.[1]),minimum=Number(/c->version\s*<=\s*(\d+)\s*\|\|\s*c->version\s*>\s*max_version/.exec(code)?.[1]);
  const loop=/DEFINE_PRIM\s*\(\s*_BOOL\s*,\s*event_loop\s*,\s*(_DYN|_OBJ)/.exec(sdl)?.[1];
- if(!Number.isInteger(minimum)||!Number.isInteger(maximum)||maximum<=minimum||maximum>32||!loop)throw Error('HashLink bytecode or SDL primitive facts are unavailable.');
+ if(!Number.isInteger(minimum)||!Number.isInteger(maximum)||maximum<=minimum||!loop)throw Error('HashLink bytecode or SDL primitive facts are unavailable.');
  return {supportedBytecodeVersions:Array.from({length:maximum-minimum},(_,i)=>minimum+i+1),nativeAbi:{sdlEventLoop:loop==='_DYN'?'dynamic':'typed-event'}};
 }
 export async function buildHashLink({project,arch,version,output,work,sourceRoot:cachedSourceRoot}){

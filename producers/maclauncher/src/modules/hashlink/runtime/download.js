@@ -95,8 +95,8 @@ async function prepareInstall({ unpacked, pin, signal }, dependencies = {}) {
       const symbols = new Set(await exports(item.file, { arch: "x86_64", signal }));
       if (!required.every(symbol => symbols.has(symbol))) throw new Error("The HashLink archive is missing required VM or native-module symbols.");
     }
-    await (dependencies.run || run)("/usr/bin/codesign", ["--force", "--sign", "-", item.file], { signal, timeout: 30000, maxBuffer: 1024 * 1024 });
-    await (dependencies.run || run)("/usr/bin/codesign", ["--verify", "--strict", item.file], { signal, timeout: 30000, maxBuffer: 1024 * 1024 });
+    await (dependencies.run || run)("/usr/bin/codesign", ["--force", "--sign", "-", item.file], { signal, timeout: 30000, maxBuffer: Infinity});
+    await (dependencies.run || run)("/usr/bin/codesign", ["--verify", "--strict", item.file], { signal, timeout: 30000, maxBuffer: Infinity});
   }
   const profile = (dependencies.packageProfile || Primitives.packageProfile)({ executablePath: inspected.executablePath,
     corePath: inspected.core.file, nativeFiles: inspected.nativeFiles.map(item => item.file) });

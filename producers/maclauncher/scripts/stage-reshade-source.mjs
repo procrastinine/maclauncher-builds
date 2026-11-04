@@ -27,7 +27,7 @@ export function copyPinnedReShadeSources(source, destination, consumed, sourceDi
       : relative === "third_party/spirv-cross" ? ["*.cpp", "*.hpp", "*.h", "include", "CMakeLists.txt", "cmake", "pkg-config", "LICENSE", "LICENSES", "README.md"]
       : relative === "third_party/vkd3d" ? ["libs/vkd3d-shader", "libs/vkd3d-common", "include", "COPYING", "LICENSE", "AUTHORS", "README"]
       : relative === "third_party/reshade-shaders" ? ["Shaders", "Textures", "README.md", "REFERENCE.md"] : [];
-    const archive = execFileSync("git", ["-C", directory, "archive", "--format=tar", "HEAD", ...scope], { maxBuffer: 64 * 1024 * 1024 });
+    const archive = execFileSync("git", ["-C", directory, "archive", "--format=tar", "HEAD", ...scope], { maxBuffer: Infinity});
     const target = path.join(destination, relative);
     fs.mkdirSync(target, { recursive: true });
     execFileSync("/usr/bin/tar", ["-xf", "-", "-C", target], { input: archive, stdio: ["pipe", "pipe", "pipe"] });

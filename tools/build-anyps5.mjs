@@ -15,10 +15,10 @@ export async function buildAnyPS5({project,version,arch,output,work}){
  const pythonPin=JSON.parse(fs.readFileSync(path.join(root,'producers/anyps5/dependencies.json'))).artifacts.find(input=>input.id==='build-python-'+arch);
  if(!pythonPin)throw Error('The requested CPU has no declared Python build interpreter.');
  const archive=await buildInput(pythonPin,path.join(work,'downloads')),pythonBase=path.join(work,'python-source'),pythonEnvironment=path.join(work,'python');
- fs.mkdirSync(pythonBase);execFileSync('/usr/bin/tar',['-xzf',archive,'-C',pythonBase]);
- execFileSync(path.join(pythonBase,'python/bin/python3'),['-m','venv','--without-pip',pythonEnvironment],{stdio:'inherit'});
+ fs.mkdirSync(pythonBase);execFileSync('/usr/bin/tar',['-xzf',archive,'-C',pythonBase],{maxBuffer:Infinity});
+ execFileSync(path.join(pythonBase,'python/bin/python3'),['-m','venv','--without-pip',pythonEnvironment],{maxBuffer:Infinity,stdio:'inherit'});
  const python=path.join(pythonEnvironment,'bin/python3');
- if(execFileSync(python,['--version'],{encoding:'utf8'}).trim()!=='Python '+pythonPin.version)throw Error('The declared Python build interpreter has a different version.');
+ if(execFileSync(python,['--version'],{maxBuffer:Infinity,encoding:'utf8'}).trim()!=='Python '+pythonPin.version)throw Error('The declared Python build interpreter has a different version.');
  await buildRelinker({buildDirectory:relinkerBuild,jobs:4,architecture:arch});
  await buildRuntime({buildDirectory:runtimeBuild,jobs:4,python});
  return packageRuntime({runtimeBuild,relinkerBuild,output,version:record.version,arch,buildOutput:true});

@@ -11,7 +11,7 @@ const building = new Set();
 
 async function git(sourceDir, args, signal) {
   const result = await execFileAsync("git", ["-c", "core.fsmonitor=false", "-C", sourceDir, ...args], {
-    encoding: "utf8", maxBuffer: 16 * 1024 * 1024, timeout: 30000,
+    encoding: "utf8", maxBuffer: Infinity, timeout: 30000,
     env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" }, ...(signal ? { signal } : {})
   });
   return result.stdout;
@@ -22,7 +22,7 @@ function validateSourceScope(sourceScope) {
   if (!sourceScope || typeof sourceScope !== "object" || Array.isArray(sourceScope) ||
       Object.keys(sourceScope).some(key => !["kind", "omittedSubmodules"].includes(key)) ||
       sourceScope.kind !== "primary-tree" || !Array.isArray(sourceScope.omittedSubmodules) ||
-      !sourceScope.omittedSubmodules.length || sourceScope.omittedSubmodules.length > 64 ||
+      !sourceScope.omittedSubmodules.length ||
       sourceScope.omittedSubmodules.some(value => typeof value !== "string" || !value || value.length > 1024 ||
         /[\\\r\n\0]/.test(value) || path.isAbsolute(value) || /^[A-Za-z]:/.test(value) ||
         value.split("/").some(part => ["", ".", "..", ".git"].includes(part))) ||
@@ -54,13 +54,13 @@ async function validatePinnedSource(sourceDir, revision, { signal, sourceScope }
     if (JSON.stringify(omittedSubmodules.map(item => item.path).sort()) !== JSON.stringify([...scope.omittedSubmodules].sort())) {
       throw new Error("Primary source scope must list every direct pinned Git submodule exactly.");
     }
-    if (!files.length || files.length > 100000) throw new Error("Pinned source file inventory is empty or exceeds supported bounds.");
+    if (!files.length) throw new Error("Pinned source file inventory is empty or exceeds supported bounds.");
     return { head, files, sourceScope: scope, omittedSubmodules };
   }
   const submodules = await git(sourceDir, ["submodule", "status", "--recursive"], signal);
   if (submodules.split("\n").some(line => line && line[0] !== " ")) throw new Error("Pinned source submodules are missing or use a different revision. Initialize them explicitly before building.");
   const files = (await git(sourceDir, ["ls-files", "-z", "--recurse-submodules"], signal)).split("\0").filter(Boolean);
-  if (!files.length || files.length > 100000) throw new Error("Pinned source file inventory is empty or exceeds supported bounds.");
+  if (!files.length) throw new Error("Pinned source file inventory is empty or exceeds supported bounds.");
   return { head, files };
 }
 

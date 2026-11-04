@@ -8,7 +8,7 @@ import {execFileSync, spawnSync} from "node:child_process";
 import {pathToFileURL} from "node:url";
 import {createRequire} from "node:module";
 import {buildInput} from "../../../tools/build-input.mjs";
-import {fetchNotices} from "../../../lib/notices.mjs";
+import {downloadFile} from "../../../tools/download.mjs";
 
 const repository = path.resolve(import.meta.dirname, "..");
 export const recipe = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, "graphics-runtime.json"), "utf8"));
@@ -51,7 +51,7 @@ const gitlinks = new Map();
 function recordedLinks(root) {
   if (!gitlinks.has(root)) {
     let rows = "";
-    try { rows = execFileSync("git", ["-C", root, "ls-files", "-s"], {encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], maxBuffer: 256 * 1024 * 1024}); } catch {}
+    try { rows = execFileSync("git", ["-C", root, "ls-files", "-s"], {encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], maxBuffer: Infinity}); } catch {}
     gitlinks.set(root, new Map(rows.split("\n").flatMap(row => { const match = /^160000 ([a-f0-9]{40}) 0\t(.+)$/.exec(row); return match ? [[match[2], match[1]]] : []; })));
   }
   return gitlinks.get(root);
@@ -144,7 +144,8 @@ export function resolveInput(id, {overrides = {}, work, coreRoot = work && path.
 export async function fetchInput(id, work) {
   const {entry, url, sha256, archives, member, directory, fetched} = inputLocation(id, work);
   if(entry.notice){
-    await fetchNotices([{url,path:path.basename(fetched),name:id,license:'See original notice'}],{output:directory});
+    fs.mkdirSync(directory,{recursive:true});
+    await downloadFile(url,fetched).catch(error=>console.warn('::warning::Notice candidate was not fetched: '+error.message));
     return fetched;
   }
   if (!(archives || [{url, sha256}]).every(row => row.url && row.sha256)) throw Error("This graphics input has no pinned download: " + id);

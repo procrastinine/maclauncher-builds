@@ -20,9 +20,9 @@ function fixture(t){
 test('packaging stores identical payload bytes once while preserving component notices and logical paths',t=>{
  const f=fixture(t);f.write('a.bin','same binary payload');f.write('sub/b.bin','same binary payload');f.write('licenses/vendor.txt','original component notice');
  preparePackageLayout({input:f.payload,declaration:f.declaration,environment:{}});
- assert.deepEqual(JSON.parse(JSON.stringify(f.declaration.aliases)),{schema:1,files:{'sub/b.bin':'a.bin'}});assert.ok(fs.existsSync(path.join(f.payload,'licenses/vendor.txt')));
- assert.equal(checkPackageDuplicates({declaration:f.declaration,environment:{}}).aliases,1);
- materializePackageAliases({root:f.payload,declaration:f.declaration,inputs:{}});assert.equal(fs.readFileSync(path.join(f.payload,'sub/b.bin'),'utf8'),'same binary payload');assert.ok(!fs.lstatSync(path.join(f.payload,'sub/b.bin')).isSymbolicLink());
+ assert.deepEqual(JSON.parse(JSON.stringify(f.declaration.aliases)),{schema:1,files:{'licenses/vendor.txt':'LICENSE','sub/b.bin':'a.bin'}});assert.equal(fs.existsSync(path.join(f.payload,'licenses/vendor.txt')),false);
+ assert.equal(checkPackageDuplicates({declaration:f.declaration,environment:{}}).aliases,2);
+ materializePackageAliases({root:f.payload,declaration:f.declaration,inputs:{}});assert.equal(fs.readFileSync(path.join(f.payload,'sub/b.bin'),'utf8'),'same binary payload');assert.ok(!fs.lstatSync(path.join(f.payload,'sub/b.bin')).isSymbolicLink());assert.equal(fs.readFileSync(path.join(f.payload,'licenses/vendor.txt'),'utf8'),'original component notice');
 });
 test('prepared build inputs remain copied into the self-contained consumer',t=>{
  const f=fixture(t),shared=f.write('lib/shared.bin','a shared binary'),depRoot=path.join(f.root,'dependency');fs.mkdirSync(depRoot);fs.writeFileSync(path.join(depRoot,'shared.bin'),'a shared binary');

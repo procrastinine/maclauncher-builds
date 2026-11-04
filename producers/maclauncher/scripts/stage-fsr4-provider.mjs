@@ -1,4 +1,3 @@
-import * as NoticeIntake from '../../../lib/notices.mjs';
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -14,10 +13,9 @@ export function stageFSR4Provider({directory,upstream,ownedRoot}){
     return null;
   }
   if(metadata.profilesAPI!==1||metadata.resourcePreparation!==1||metadata.commit!==spec.commit||metadata.model!==spec.model||
-     JSON.stringify(metadata.supportedProfiles)!==JSON.stringify(spec.supportedProfiles)||!Array.isArray(metadata.files)||metadata.files.length>16000||!metadata.owned)throw Error("The FSR 4 profile and resource contracts are incomplete.");
+     JSON.stringify(metadata.supportedProfiles)!==JSON.stringify(spec.supportedProfiles)||!Array.isArray(metadata.files)||!metadata.owned)throw Error("The FSR 4 profile and resource contracts are incomplete.");
   const files=new Map();
   for(const row of metadata.files){
-    if(NoticeIntake.isNoticePath(row.path))continue;
     if(!safe(row.path)||row.path==="provider.json"||Content.excludedReason(row.path)||files.has(row.path)||!Number.isSafeInteger(row.size)||row.size<0||!/^[a-f0-9]{64}$/.test(row.sha256))throw Error("Invalid FSR 4 runtime inventory.");
     const file=path.join(directory,row.path),stat=fs.lstatSync(file);
     if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==row.size||hash(file)!==row.sha256)throw Error("An FSR 4 runtime input changed: "+row.path);
@@ -30,7 +28,6 @@ export function stageFSR4Provider({directory,upstream,ownedRoot}){
   const owned=new Map();
   for(const required of ["source.json","build.mjs","adapt-runtime.mjs","provider.mm","index.js","../frame.h"])if(!Object.hasOwn(metadata.owned,required))throw Error("An FSR 4 build input is undeclared: "+required);
   for(const [relative,expected]of Object.entries(metadata.owned)){
-    if(NoticeIntake.isNoticePath(relative))continue;
     if((!safe(relative)&&!["../frame.h","../payload-files.hpp"].includes(relative))||!/^[a-f0-9]{64}$/.test(expected))throw Error("Invalid owned FSR 4 build input.");
     const file=path.resolve(ownedRoot,relative);if(!fs.lstatSync(file).isFile()||hash(file)!==expected)throw Error("An FSR 4 build input changed: "+relative);
     owned.set(path.posix.normalize("maclauncher/temporal/fsr4/"+relative),file);
@@ -47,6 +44,5 @@ export function stageFSR4Provider({directory,upstream,ownedRoot}){
   files.set("provider.json",path.join(directory,"provider.json"));
   return {files:new Map([...files].map(([name,file])=>["temporal/fsr4/"+name,file])),owned,profiles:[...metadata.supportedProfiles],
     source:{directory:upstream,relative:"third_party/fsr4-native-macos",commit:spec.commit},
-    pins:[` ${spec.commit} third_party/fsr4-native-macos`,` ${spec.lite2.commit} third_party/fsr4-lite2-weights`,...(spec.sources||[]).map((row,index)=>{if(!/^https:\/\//.test(row.repository||" ")||!/^[a-f0-9]{40}$/.test(row.commit||" "))throw Error("An FSR 4 consumed source pin is incomplete.");return ` ${row.commit} third_party/fsr4-input-${index+1}`;})],
-    notices:[{name:"FSR 4 Lite 2 trained weights",license:spec.lite2.license,path:"temporal/fsr4/third_party/fsr411/LICENSE.Lite2.txt",sourceUrl:spec.lite2.repository}]};
+    pins:[` ${spec.commit} third_party/fsr4-native-macos`,` ${spec.lite2.commit} third_party/fsr4-lite2-weights`,...(spec.sources||[]).map((row,index)=>{if(!/^https:\/\//.test(row.repository||" ")||!/^[a-f0-9]{40}$/.test(row.commit||" "))throw Error("An FSR 4 consumed source pin is incomplete.");return ` ${row.commit} third_party/fsr4-input-${index+1}`;})]};
 }

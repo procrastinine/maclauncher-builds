@@ -1,4 +1,4 @@
-const NoticeIntake = require('../../../../../../lib/notices.mjs');
+const {addLicense} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -65,7 +65,6 @@ function sourceFiles(root, depth = 0, prefix = "", output = []) {
     if (entry.isDirectory()) sourceFiles(root, depth + 1, relative, output);
     else if (entry.isFile()) output.push(relative);
     else throw new Error("Source archive contains unsupported symbolic or special files.");
-    if (output.length > 100000) throw new Error("Source archive exceeds its file inventory limit.");
   }
   return output;
 }
@@ -83,7 +82,7 @@ function stageNotices({ source, sdl12, sdl2, destination, revision }) {
   return notices.map(([name, version, from, license, sourceUrl], index) => {
     const relative = `licenses/${index}-${name.replace(/[^A-Za-z0-9_-]/g, "_")}-${version}.txt`;
     fs.mkdirSync(path.dirname(path.join(destination, relative)), { recursive: true });
-    NoticeIntake.copyNotice(from, path.join(destination, relative));
+    addLicense(destination,name,from);
     return { name: `${name} ${version}`, license, sourceUrl, path: relative };
   });
 }

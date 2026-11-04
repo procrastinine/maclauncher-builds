@@ -10,7 +10,7 @@ export const recipe=JSON.parse(fs.readFileSync(new URL('./source.json',import.me
 export const inputs=JSON.parse(fs.readFileSync(new URL('./dependencies.json',import.meta.url)));
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
-const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',maxBuffer:64*1024**2});
+const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',maxBuffer: Infinity});
 function verify(entry,directory){
  if(git(directory,['rev-parse','HEAD']).trim()!==entry.revision||git(directory,['remote','get-url','origin']).trim()!==entry.repository||git(directory,['status','--porcelain']).trim())throw Error('Source identity differs: '+(entry.id||'prosper'));
 }

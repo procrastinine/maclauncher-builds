@@ -9,7 +9,7 @@ import {sealRuntime} from './seal-runtime.mjs';
 import {pythonBuildTools,recipeMain} from './build-source.mjs';
 import {retryNetwork} from './download.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Native=require('../producers/maclauncher/scripts/native-binary-tools.cjs');
-const run=(command,args,options={})=>String(execFileSync(command,args,{encoding:'utf8',maxBuffer:64<<20,...options})||'').trim();
+const run=(command,args,options={})=>String(execFileSync(command,args,{encoding:'utf8',maxBuffer:Infinity,...options})||'').trim();
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const prefix=name=>run('brew',['--prefix',name]);
 /** pkgconf follows private cflags requirements even for dynamic linking. The
@@ -47,7 +47,7 @@ export async function buildMPV({project:id,arch,output,work}){
  if(info.schema!==1||!String(info.libraryVersion).includes('0.41.0'))throw Error('The fresh media library version differs.');
  fs.writeFileSync(path.join(app,'Contents/Info.plist'),'<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>org.maclauncher.video</string><key>CFBundleExecutable</key><string>mpv</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleShortVersionString</key><string>0.41.0</string><key>LSMinimumSystemVersion</key><string>14.0</string><key>NSHighResolutionCapable</key><true/></dict></plist>');
  const librarySource={url:recipe.source.repository,commit:Builder.REVISION,version:'0.41.0',backports:Builder.BACKPORTS,inputSha256:hash(built.library),verifiedBuild:true,build:built.metadata};
- const video={schema:1,id:'mpv-render',version:record.version,minimumMacOS:'14.0',architecture:'arm64',libraryVersion:info.libraryVersion,librarySource,headerSource:{repository:recipe.source.repository,commit:Builder.REVISION},scaleFilters:info.scaleFilters,images:[],notices:[],
+ const video={schema:1,id:'mpv-render',version:record.version,minimumMacOS:'14.0',architecture:'arm64',libraryVersion:info.libraryVersion,librarySource,headerSource:{repository:recipe.source.repository,commit:Builder.REVISION},scaleFilters:info.scaleFilters,images:[],
   ...Object.fromEntries(['decodedFrameAPI','decodedColorAPI','preparationNotificationAPI','osdLayerAPI','playerScriptsAPI','playerInputAPI','intermediateColor','outputColor'].map(key=>[key,recipe[key]??1])),
   ownedInputs:recipe.ownedInputs};
  const descriptor=path.join(staged,'video-runtime.json');fs.writeFileSync(descriptor,JSON.stringify(video,null,2)+'\n');

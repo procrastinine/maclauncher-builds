@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {addLicense} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 // Compile the original Godot SSR kernels without changing upstream sources.
 import fs from 'node:fs';
@@ -14,7 +15,7 @@ for(let i=2;i<process.argv.length;i+=2){
 for(const key of ['--source','--compiler-root','--output'])if(!options[key])throw Error('Missing '+key);
 const source=options['--source'],compiler=options['--compiler-root'],out=options['--output'];
 const sha=value=>crypto.createHash('sha256').update(value).digest('hex');
-const run=(command,args)=>execFileSync(command,args,{encoding:'utf8',maxBuffer:32*1024*1024});
+const run=(command,args)=>execFileSync(command,args,{encoding:'utf8',maxBuffer: Infinity});
 if(fs.existsSync(path.join(source,'.git'))&&run('git',['-C',source,'rev-parse','HEAD']).trim()!==spec.commit)throw Error('Godot SSR source pin changed.');
 const original={};
 for(const [file,expected]of Object.entries(spec.files)){
@@ -75,7 +76,7 @@ results.forEach((row,i)=>{
  header+='inline constexpr const char*source'+i+'=R"SSR_GPU('+row.msl+')SSR_GPU";\n';
 });
 header+='inline constexpr Shader shaders[]={'+results.map((row,i)=>'{'+JSON.stringify(row.name)+','+JSON.stringify(row.entry)+',source'+i+',bindings'+i+','+row.bindings.length+','+row.threads.join(',')+'}').join(',')+'};\n}\n';
-fs.writeFileSync(path.join(out,'ssr-shaders.hpp'),header);NoticeIntake.copyNotice(license,path.join(out,'ssr-MIT.txt'));
+fs.writeFileSync(path.join(out,'ssr-shaders.hpp'),header);addLicense(out,'Godot',license);
 const metadata={schema:1,...spec,ownedRecipeSha256:sha(fs.readFileSync(import.meta.filename)),shaders:results.map(({msl,...row})=>row)};
 fs.writeFileSync(path.join(out,'ssr-source.json'),JSON.stringify(metadata,null,2)+'\n');
 console.log(JSON.stringify({output:out,shaders:results.length,roles:results.map(row=>row.name)}));

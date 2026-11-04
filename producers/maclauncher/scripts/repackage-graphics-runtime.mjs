@@ -1,4 +1,3 @@
-import * as NoticeIntake from '../../../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -22,13 +21,13 @@ export function repackageGraphics({declarationFile,resourceRoot,replacements={},
  try{
   for(const row of selected){const target=path.join(temporary,row.path);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(replacements[row.path]||path.join(input,row.path),target,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.chmodSync(target,row.mode);}
   // Optional providers retain their own exact inventory after a native file changes.
-  for(const row of selected.filter(f=>f.path.endsWith('/provider.json'))){const file=path.join(temporary,row.path),descriptor=JSON.parse(fs.readFileSync(file));if(!Array.isArray(descriptor.files))continue;descriptor.files=descriptor.files.filter(entry=>!NoticeIntake.isNoticePath(entry.path,descriptor.notices));for(const entry of descriptor.files){B.relativeFile(entry.path);let member=path.join(path.dirname(file),entry.path);if(!fs.existsSync(member))member=path.join(temporary,entry.path);if(!fs.existsSync(member))throw Error('Optional graphics provider inventory is incomplete: '+entry.path);entry.size=fs.statSync(member).size;entry.sha256=digest(fs.readFileSync(member));}fs.writeFileSync(file,JSON.stringify(descriptor,null,2)+'\n');}
+  for(const row of selected.filter(f=>f.path.endsWith('/provider.json'))){const file=path.join(temporary,row.path),descriptor=JSON.parse(fs.readFileSync(file));if(!Array.isArray(descriptor.files))continue;for(const entry of descriptor.files){B.relativeFile(entry.path);let member=path.join(path.dirname(file),entry.path);if(!fs.existsSync(member))member=path.join(temporary,entry.path);if(!fs.existsSync(member))throw Error('Optional graphics provider inventory is incomplete: '+entry.path);entry.size=fs.statSync(member).size;entry.sha256=digest(fs.readFileSync(member));}fs.writeFileSync(file,JSON.stringify(descriptor,null,2)+'\n');}
   const manifestFile=path.join(temporary,previous.manifestRelative),manifest=JSON.parse(fs.readFileSync(manifestFile));manifest.version=version;
   if(sourceIdentity){manifest.sourceHash=sourceIdentity.sha256;manifest.sourcePins=sourceIdentity.pins;}
   const prefix=manifest.schemaVersion===1&&manifest.managerId?'files/':'';
-  manifest.files=manifest.files.filter(f=>!sourceArchive(f.path)&&!NoticeIntake.isNoticePath(f.path,manifest.notices)).map(row=>{const file=path.join(temporary,prefix+row.path),stat=fs.statSync(file);return {...row,size:stat.size,mode:stat.mode&0o777,sha256:digest(fs.readFileSync(file))};});
+  manifest.files=manifest.files.filter(f=>!sourceArchive(f.path)).map(row=>{const file=path.join(temporary,prefix+row.path),stat=fs.statSync(file);return {...row,size:stat.size,mode:stat.mode&0o777,sha256:digest(fs.readFileSync(file))};});
   fs.writeFileSync(manifestFile,JSON.stringify(manifest,null,2)+'\n');
-  const files=selected.filter(row=>!NoticeIntake.isNoticePath(row.path,previous.notices)).map(row=>{const file=path.join(temporary,row.path),stat=fs.statSync(file);return {...row,size:stat.size,mode:stat.mode&0o777,sha256:digest(fs.readFileSync(file))};});
+  const files=selected.map(row=>{const file=path.join(temporary,row.path),stat=fs.statSync(file);return {...row,size:stat.size,mode:stat.mode&0o777,sha256:digest(fs.readFileSync(file))};});
   const manifestSha256=files.find(f=>f.path===previous.manifestRelative).sha256;
   const {sourceArtifact:oldSourceArtifact,...base}=previous;
   const declaration=S.validateDeclaration({...base,version,directoryRelative,sourceRelative:null,sourceSha256:sourceIdentity?.sha256||previous.sourceSha256,manifestSha256,files});

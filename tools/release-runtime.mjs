@@ -83,12 +83,12 @@ export function releaseNotes(record,project){
  lines.push('','</details>');return lines.join('\n');
 }
 
-const runGitHub=(args,options={})=>{requireHostedPublication();return retryNetwork(()=>execFileSync('gh',args,{encoding:'utf8',...options}));};
+const runGitHub=(args,options={})=>{requireHostedPublication();return retryNetwork(()=>execFileSync('gh',args,{maxBuffer:Infinity,encoding:'utf8',...options}));};
 function missingRef(error){return error.status===404||error.statusCode===404||/\bHTTP 404\b/.test(String(error.stderr||''));}
 async function releaseTagCommit(ref,{repository,runGh}){
  const seen=new Set();let object=ref.object;
  while(object?.type==='tag'){
-  if(seen.has(object.sha)||seen.size>=10)throw Error('Release tag annotation chain is invalid.');
+  if(seen.has(object.sha))throw Error('Release tag annotation chain is invalid.');
   seen.add(object.sha);object=JSON.parse(await runGh(['api','repos/'+repository+'/git/tags/'+object.sha])).object;
  }
  if(object?.type!=='commit'||!/^[a-f0-9]{40}$/.test(object.sha))throw Error('Release tag does not identify a source commit.');

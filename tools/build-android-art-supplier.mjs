@@ -11,7 +11,7 @@ import {rustEnvironment} from './rust-build.mjs';
 import {readArtFfiInput} from './android-art-ffi-input.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 const profile=JSON.parse(fs.readFileSync(new URL('../producers/android-art-inputs/supplier.json',import.meta.url)));
-const read=(program,args,options={})=>execFileSync(program,args,{encoding:'utf8',...options}).trim();
+const read=(program,args,options={})=>execFileSync(program,args,{maxBuffer:Infinity,encoding:'utf8',...options}).trim();
 const original=async(producer,file)=>import(pathToFileURL(path.join(producer,'src/modules/android',file)));
 function file(value,label){if(!path.isAbsolute(value||'')||!fs.statSync(value,{throwIfNoEntry:false})?.isFile())throw Error('Missing source-built ART input: '+label);return value;}
 function directory(value,label){if(!path.isAbsolute(value||'')||!fs.statSync(value,{throwIfNoEntry:false})?.isDirectory())throw Error('Missing source-built ART input: '+label);return value;}
@@ -100,11 +100,11 @@ export async function buildAndroidArtSupplier({common,elf,ffiInput,artJava,outpu
   runner:{aim,unicorn,jobs:2,env},guest:{...guest,libraryDirectories},sensors:rustGuest,composer:rustGuest,graphics:rustGuest,
   nativeBridge:{ndk,ffi,imports,ninja:common.tools.ninja,python:common.tools.python,bionicSource:common.sources['bionic-source'],artSource:common.sources['art-source'],image:image.root,arm32},java,
   inputs:{image:image.root,art:elf.art,linuxTranslate:file(path.join(elf.build.target,'release/linux-translate'),'original source-built image translator'),halRoot,halManifests,
-   vendorManifest:file(path.join(aim,'image/vendor/etc/vintf/manifest.xml'),'original derived vendor manifest'),hwuiLibrary:hwui.path,hwuiNotices:hwui.notices},
+   vendorManifest:file(path.join(aim,'image/vendor/etc/vintf/manifest.xml'),'original derived vendor manifest'),hwuiLibrary:hwui.path,hwuiLicenses:hwui.licenses},
   bootClasspath:profile.bootClasspath,includeImage:false,originalImage:profile.originalImage});
  const sourceArchiveInputs={sources:{source:elf.build.checkout,klepton:common.sources.klepton,glesHeaders,aosp:path.join(elf.build.fetched,'aosp'),xsdc:path.join(elf.build.fetched,'xsdc')},unicorn,
   sourceCheckouts:{'aosp-native':common.sources['native-source'],'aosp-bionic':common.sources['bionic-source'],'aosp-art':common.sources['art-source'],libffi,dynarmic:common.sources['dynarmic-source']},
-  nativeBridgeSources:{ndkHeaders:arm32Inputs.ndkHeaders,arm32Notices:arm32.notices},hwuiSources:{sources:hwui.sources,registry:path.join(hwui.notices,'SOURCES.json'),registryCache:path.join(hwui.tools.cargoHome,'registry/cache')}};
+  nativeBridgeSources:{ndkHeaders:arm32Inputs.ndkHeaders,arm32Licenses:arm32.licenses},hwuiSources:{sources:hwui.sources,registry:path.join(hwui.sourceRecords,'SOURCES.json'),registryCache:path.join(hwui.tools.cargoHome,'registry/cache')}};
  return {root:path.join(output,'runtime'),manifest,originalImage:profile.originalImage,sourceArchiveInputs,build:{producer,aim,hwui,guest,libffi,unicorn,java,halRoot,halManifests},record:{androidSource:profile.androidSource,aimRevision:sourceProfile.sources.aim.commit,unicornRevision:unicornProfile.revision,libffiRevision:sourceProfile.sources.libffi.commit}};
  }finally{if(!wasMounted&&fs.existsSync(path.join(mount,'root.identity')))run('hdiutil',['detach',mount]);}
 }

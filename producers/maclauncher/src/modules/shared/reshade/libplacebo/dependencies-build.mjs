@@ -1,4 +1,4 @@
-import * as NoticeIntake from '../../../../../../../lib/notices.mjs';
+import {addLicense} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -29,13 +29,13 @@ export async function buildDependencies({work,architecture,meson,ninja,python}) 
  run('cmake',['--build',shaderBuild,'--target','shaderc_shared','-j','4'],{env});
  const shaderRoot=path.join(prefix,'shaderc/shaderc/'+profile.shadercVersion),shaderLib=path.join(shaderRoot,'lib');fs.mkdirSync(shaderLib,{recursive:true});
  fs.copyFileSync(path.join(shaderBuild,'upstream/libshaderc/libshaderc_shared.1.dylib'),path.join(shaderLib,'libshaderc_shared.1.dylib'));
- fs.cpSync(path.join(source,'shaderc/libshaderc/include'),path.join(shaderRoot,'include'),{recursive:true});NoticeIntake.copyNotice(path.join(source,'shaderc/LICENSE'),path.join(shaderRoot,'LICENSE'));
+ fs.cpSync(path.join(source,'shaderc/libshaderc/include'),path.join(shaderRoot,'include'),{recursive:true});addLicense(shaderRoot,'shaderc',path.join(source,'shaderc/LICENSE'));
  const lcmsBuild=path.join(build,'lcms2'),lcmsRoot=path.join(prefix,'little-cms2/little-cms2/'+profile.lcmsVersion);
  if(!fs.existsSync(path.join(lcmsBuild,'build.ninja')))run(meson,['setup',lcmsBuild,path.join(source,'lcms2'),'--prefix',lcmsRoot,'--libdir=lib','--buildtype=release','--wrap-mode=nodownload','-Ddefault_library=shared','-Djpeg=disabled','-Dtiff=disabled','-Dutils=false','-Dtests=disabled'],{env});
  run(ninja,['-C',lcmsBuild,'-j4'],{env});run(ninja,['-C',lcmsBuild,'install'],{env});
  const lcmsLib=path.join(lcmsRoot,'lib'),actual=fs.readdirSync(lcmsLib).find(name=>/^liblcms2\..*\.dylib$/.test(name)&&fs.lstatSync(path.join(lcmsLib,name)).isFile());
  if(!actual)throw Error('Little CMS did not produce a shared library.');if(actual!=='liblcms2.2.dylib')fs.copyFileSync(path.join(lcmsLib,actual),path.join(lcmsLib,'liblcms2.2.dylib'));
- NoticeIntake.copyNotice(path.join(source,'lcms2/LICENSE'),path.join(lcmsRoot,'LICENSE'));
+ addLicense(lcmsRoot,'Little-CMS',path.join(source,'lcms2/LICENSE'));
  const notices=profile.sources.map(row=>{const root=path.join(source,row.id),name=fs.existsSync(path.join(root,'LICENSE'))?'LICENSE':fs.existsSync(path.join(root,'COPYING'))?'COPYING':'LICENSE.txt';return {name:row.id+'.LICENSE',file:path.join(root,name)};});
  return {inputs:prefix,source:profile.sources,notices,shadercVersion:profile.shadercVersion,lcmsVersion:profile.lcmsVersion};
 }

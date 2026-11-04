@@ -10,7 +10,7 @@ import {rustEnvironment} from './rust-build.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
 const profile=JSON.parse(fs.readFileSync(new URL('../producers/android-art-inputs/hwui.json',import.meta.url)));
-const read=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',...options}).trim();
+const read=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8',...options}).trim();
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const native='src/modules/android/native/hwui';
 
@@ -118,8 +118,8 @@ export async function prepareArtHwui({common,image,ndk,work}){
  const prepared=await buildAvif({...ctx,prepareOnly:true});
  run(tools.cargo,['fetch','--locked','--target','aarch64-linux-android','--manifest-path',path.join(prepared.workspace,'Cargo.toml')],{env:{...prepared.env,CARGO_BUILD_JOBS:'2'}});
  const sysroot=read(tools.rustc,['--print','sysroot']),rustRoot=['share/doc/rust','share/doc/rustc'].map(relative=>path.join(sysroot,relative)).find(directory=>fs.existsSync(path.join(directory,'COPYRIGHT-library.html'))&&fs.existsSync(path.join(directory,'licenses')));
- const noticeInputs={rust:{root:rustRoot||sysroot,version:read(tools.rustc,['--version'])},ndk:{root:ndk,version:'28.2.13676358',files:['NOTICE','NOTICE.toolchain']}};
- return {producer,options:{work:compile,sources,tools,image,noticeInputs,buildEnvironment}};
+ const licenseInputs={rust:{root:rustRoot||sysroot,version:read(tools.rustc,['--version'])},ndk:{root:ndk,version:'28.2.13676358',files:['NOTICE','NOTICE.toolchain']}};
+ return {producer,options:{work:compile,sources,tools,image,licenseInputs,buildEnvironment}};
 }
 
 /** Build the unchanged complete HWUI target with sequential source groups and original notices. */

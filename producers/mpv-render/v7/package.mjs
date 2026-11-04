@@ -1,4 +1,3 @@
-import * as NoticeIntake from '../../../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -36,16 +35,15 @@ export async function packageRuntime({input,output,version=recipe.version,catalo
  const headers=new Set();for(const owned of video.ownedHeaders||[]){B.relativeFile(owned.file);const pin=recipe.ownedInputs.find(row=>row.path==='producers/mpv-render/v7/maclauncher/'+owned.file);if(headers.has(owned.file)||!pin||pin.sha256!==owned.sha256)throw Error('The media host header differs from its declared source.');headers.add(owned.file);}
  if(headers.size!==7)throw Error('The media host header inventory is incomplete.');
  const allowed=new Set(['video-runtime.json',...imageNames,'mpv.app/Contents/Info.plist','mpv.app/Contents/_CodeSignature/CodeResources']);
- for(const notice of Array.isArray(video.notices)?video.notices:[])if(typeof notice?.path==='string'&&fs.existsSync(path.join(input,notice.path)))allowed.add(notice.path);
  // Original dependency receipts are consumed source metadata alongside notices.
- for(const name of filesIn(input))if(!allowed.has(name)&&!/^licenses\/dependencies\/[^/]+\/INSTALL_RECEIPT\.json$/.test(name))throw Error('Unexpected media input: '+name);
+ for(const name of filesIn(input))if(!allowed.has(name)&&!name.startsWith('licenses/'))throw Error('Unexpected media input: '+name);
  fs.mkdirSync(output,{recursive:true});const payload=path.join(output,'payload'),content=path.join(payload,'files');fs.mkdirSync(content,{recursive:true});
  try{
   for(const name of filesIn(input)){const target=path.join(content,name);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(input,name),target,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.chmodSync(target,fs.statSync(path.join(input,name)).mode&0o777);}
   const producerInputs=['source.json','package.mjs','build.mjs'].map(name=>({path:'producers/mpv-render/v7/'+name,sha256:hash(fs.readFileSync(path.join(import.meta.dirname,name)))}));
   const source={schemaVersion:1,id:recipe.id,version,source:recipe.source,artifact:recipe.artifact,backports:recipe.backports,libraryInputSha256:recipe.libraryInputSha256,ownedInputs:recipe.ownedInputs,libraryBuild:recipe.libraryBuild,producerInputs};
   fs.writeFileSync(path.join(content,'source.json'),json(source));
-  const files=filesIn(content).filter(name=>!NoticeIntake.isNoticePath(name)).map(name=>record(content,name)),notices=video.notices.map(({name,license,path:noticePath,sourceUrl})=>({name,license,path:noticePath,sourceUrl:sourceUrl||recipe.source.repository}));
+  const files=filesIn(content).map(name=>record(content,name));
   const dependencies=[];
   for(const file of files.filter(file=>file.architectures)){
    if(JSON.stringify(file.architectures)!==JSON.stringify(['arm64']))throw Error('The media closure requires native ARM64 images.');
@@ -61,7 +59,7 @@ export async function packageRuntime({input,output,version=recipe.version,catalo
   fs.writeFileSync(path.join(payload,'manifest.json'),json(manifest));
   const manifestFile=record(payload,'manifest.json'),sourceFile=files.find(file=>file.path==='source.json');
   const declaration={id:'mpv',version,arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS:recipe.minimumMacOS,directoryRelative:'mpv/'+version+'/arm64',sourceRelative:null,sourceSha256:sourceFile.sha256,manifestRelative:'manifest.json',manifestSha256:manifestFile.sha256,
-   files:[...files.map(file=>({...file,path:'files/'+file.path})),manifestFile],notices:notices.map(notice=>({...notice,path:'files/'+notice.path})),redistribution:'bundle'};
+   files:[...files.map(file=>({...file,path:'files/'+file.path})),manifestFile],redistribution:'bundle'};
   const archive=path.join(output,'mpv-'+version+'-arm64.tar.gz'),release=await pack({project:'mpv',input:payload,declaration,output:archive});
   fs.writeFileSync(path.join(output,'declaration.json'),json(declaration));
   if(catalogFile){if(fs.existsSync(catalogFile))throw Error('The catalog output already exists.');fs.writeFileSync(catalogFile,json(catalog([release],{project:'mpv',repository:'procrastinine/maclauncher-builds'})));}

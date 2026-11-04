@@ -3,7 +3,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {checkoutSource} from './build-source.mjs';
-const read=(directory,args)=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
+const read=(directory,args)=>execFileSync('git',['-C',directory,...args],{maxBuffer:Infinity,encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
 
 /** The original producer's consumed source options select its exact Git inputs. */
 export async function androidCommonSourceRecords(android){

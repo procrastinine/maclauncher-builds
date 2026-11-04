@@ -5,7 +5,7 @@ import {execFileSync} from 'node:child_process';
 import {run} from './build-source.mjs';
 import {buildInput} from './build-input.mjs';
 const root=path.resolve(import.meta.dirname,'..');
-const read=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',...options}).trim();
+const read=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8',...options}).trim();
 function lockValue(file,key){
  const matches=[...fs.readFileSync(file,'utf8').matchAll(new RegExp('^'+key+'=([^\\r\\n]+)$','gm'))];
  if(matches.length!==1)throw Error('Missing or ambiguous Android input '+key+'.');

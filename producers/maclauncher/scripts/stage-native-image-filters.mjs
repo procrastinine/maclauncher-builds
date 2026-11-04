@@ -11,7 +11,7 @@ export function stageNativeImageFilters({ownedSource,symbols,recipeRoot}){
   const manifest=path.join(ownedSource,"src/native-filter-sources.json"),dispatcher=symbols.includes("makeNativeImageShaderNode");
   if(!fs.existsSync(manifest)){if(dispatcher)throw Error("The native image filter source declaration is missing.");return null;}
   const metadata=JSON.parse(fs.readFileSync(manifest,"utf8"));
-  if(metadata.schema!==1||!Array.isArray(metadata.providers)||metadata.providers.length>32)throw Error("The native image filter source declaration is invalid.");
+  if(metadata.schema!==1||!Array.isArray(metadata.providers))throw Error("The native image filter source declaration is invalid.");
   const methods=[],inputs=new Map(),owned=new Map(),notices=[],pins=[],seen=new Set();
   for(const provider of metadata.providers){
     if(!Object.hasOwn(factories,provider.method)||seen.has(provider.method)||!filename(provider.sourceManifest))throw Error("A native image filter source contract is invalid.");
@@ -21,7 +21,7 @@ export function stageNativeImageFilters({ownedSource,symbols,recipeRoot}){
     const ownedImplementation=source.implementation==="owned";
     if(source.schema!==1||!/^https:\/\//.test(source.repository||"")||!ownedImplementation&&!/^[a-f0-9]{40}$/.test(source.commit||""))throw Error("A native image filter source pin is missing.");
     if(ownedImplementation){
-      if(provider.method!=="histogram-exposure"||source.repository!=="https://github.com/procrastinine/maclauncher"||!Array.isArray(source.files)||!source.files.length||source.files.length>16)throw Error("The owned image implementation declaration is invalid.");
+      if(provider.method!=="histogram-exposure"||source.repository!=="https://github.com/procrastinine/maclauncher"||!Array.isArray(source.files)||!source.files.length)throw Error("The owned image implementation declaration is invalid.");
       for(const name of source.files){if(!filename(name))throw Error("The owned image source filename is invalid.");const file=path.join(ownedSource,"src",name),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||!stat.size)throw Error("An owned image implementation source is missing.");owned.set(`maclauncher/native/${name}`,file);}
     }
     if(Object.hasOwn(translated,provider.method)){
@@ -39,7 +39,7 @@ export function stageNativeImageFilters({ownedSource,symbols,recipeRoot}){
         if(crypto.createHash("sha256").update(fs.readFileSync(path.join(ownedSource,"src",header))).digest("hex")!==source.headerSha256)throw Error("The native image shader source changed.");
       }
       const resources=Object.entries(source.ownedFiles||{});
-      if(resources.length>64||provider.method==="xegtao"&&!resources.some(([name])=>name==="wrapper.hlsl"))throw Error("The native image shader translation resources are undeclared.");
+      if(provider.method==="xegtao"&&!resources.some(([name])=>name==="wrapper.hlsl"))throw Error("The native image shader translation resources are undeclared.");
       if(["cacao","ffx-dof"].includes(provider.method)&&!["boundary.hlsl","../native/scene-projection.hlsl"].every(required=>resources.some(([name])=>name===required)))throw Error("The native scene projection shader inputs are undeclared.");
       for(const [name,expected]of resources){
         if((!filename(name)&&!sharedInputs.has(name))||!/^[a-f0-9]{64}$/.test(expected))throw Error("A native image shader translation resource is invalid.");

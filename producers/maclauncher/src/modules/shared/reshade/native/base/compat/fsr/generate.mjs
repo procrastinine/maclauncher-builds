@@ -18,13 +18,13 @@ const upstream = path.join(root, "third_party/fsr"), destination = import.meta.d
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "fsr-shaders-"));
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 try {
-  const compilerVersion = execFileSync(compiler, ["--version"], { encoding: "utf8", timeout: 30_000, maxBuffer: 1024 * 1024 }).split("\n")[0];
+  const compilerVersion = execFileSync(compiler, ["--version"], { encoding: "utf8", timeout: 30_000, maxBuffer: Infinity}).split("\n")[0];
   const pin = "a21ffb8f6c13233ba336352bdff293894c706575";
   let header = `// Generated from the owned FSR GLSL wrapper and AMD FSR1 ${pin}.\n#pragma once\n#include <array>\n#include <cstdint>\nnamespace macfx::fsr1::embedded {\n`;
   const receipt = { upstreamCommit: pin, compilerVersion, target: "vulkan1.1", sourceSha256: hash(fs.readFileSync(path.join(destination, "fsr.comp"))), shaders: {} };
   for (const [name, easu, format] of [["easu", 1, "rgba16f"], ["rcas8", 0, "rgba8"], ["rcas16", 0, "rgba16f"]]) {
     const output = path.join(temporary, name + ".spv");
-    execFileSync(compiler, ["-V", "--target-env", "vulkan1.1", "-I" + path.join(upstream, "ffx-fsr"), "-DEASU=" + easu, "-DOUTPUT_FORMAT=" + format, path.join(destination, "fsr.comp"), "-o", output], { timeout: 30_000, maxBuffer: 1024 * 1024 });
+    execFileSync(compiler, ["-V", "--target-env", "vulkan1.1", "-I" + path.join(upstream, "ffx-fsr"), "-DEASU=" + easu, "-DOUTPUT_FORMAT=" + format, path.join(destination, "fsr.comp"), "-o", output], { timeout: 30_000, maxBuffer: Infinity});
     const bytes = fs.readFileSync(output);
     if (bytes.length % 4 || bytes.readUInt32LE(0) !== 0x07230203) throw new Error("Invalid generated SPIR-V");
     receipt.shaders[name] = { bytes: bytes.length, sha256: hash(bytes) };

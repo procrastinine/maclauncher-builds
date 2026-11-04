@@ -1,4 +1,4 @@
-const NoticeIntake = require('../../../../../../lib/notices.mjs');
+const {addLicense} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
 const { execFile } = require("node:child_process");
@@ -29,20 +29,20 @@ require an authorized SDK header checkout and Apple's command-line developer too
 async function stageBundledHelper({ libraryPath, sourceRoot, destination, profile, projectLicense } = {}) {
   if (!path.isAbsolute(destination || "") || fs.existsSync(destination) || profile?.bridgeVersion !== Overlay.VERSION)
     throw new Error("Choose the exact LuaSteam profile and a fresh absolute bundle directory.");
-  const library = Bundle.readRegular(libraryPath, 4 * 1024 * 1024);
+  const library = Bundle.readRegular(libraryPath);
   if (library.sha256 !== profile.bridgeLibrarySha256 ||
       !["arm64", "x86_64"].every(cpu => Native.readMachOArchitectures(libraryPath, { allowLibrary: true }).includes(cpu)))
     throw new Error("The LuaSteam candidate differs from its native qualification profile.");
-  await run("/usr/bin/codesign", ["--verify", "--strict", libraryPath], { timeout: 30000, maxBuffer: 1024 * 1024 });
+  await run("/usr/bin/codesign", ["--verify", "--strict", libraryPath], { timeout: 30000, maxBuffer: Infinity });
   fs.mkdirSync(destination, { recursive: true, mode: 0o755 });
   const copy = (name, bytes, mode = 0o644) => fs.writeFileSync(path.join(destination, name), bytes, { flag: "wx", mode });
   copy("luasteam.so", library.bytes, 0o755);
-  NoticeIntake.copyNotice(path.join(sourceRoot,"notices/LuaSteam-LICENSE"),path.join(destination,"LuaSteam-MIT.txt"));
-  NoticeIntake.copyNotice(path.join(sourceRoot,"notices/LuaJIT-COPYRIGHT"),path.join(destination,"LuaJIT-MIT.txt"));
-  NoticeIntake.copyNotice(projectLicense,path.join(destination,"MacLauncher-MIT.txt"));
+  addLicense(destination,'LuaSteam',path.join(sourceRoot,"notices/LuaSteam-LICENSE"));
+  addLicense(destination,'LuaJIT',path.join(sourceRoot,"notices/LuaJIT-COPYRIGHT"));
+  addLicense(destination,'MacLauncher',projectLicense,'MIT');
   copy("DEPENDENCIES.txt", Buffer.from(DEPENDENCIES));
-  const files = fs.readdirSync(destination).sort().filter(name=>!NoticeIntake.isNoticePath(name)).map(name => {
-    const file = Bundle.readRegular(path.join(destination, name), 4 * 1024 * 1024);
+  const files = fs.readdirSync(destination,{recursive:true}).filter(name=>fs.statSync(path.join(destination,name)).isFile()).sort().map(name => {
+    const file = Bundle.readRegular(path.join(destination, name));
     return { path: name, size: file.size, sha256: file.sha256, mode: file.mode,
       ...(name === "luasteam.so" ? { architectures: ["arm64", "x86_64"] } : {}) };
   });
@@ -56,14 +56,14 @@ async function stageBundledHelper({ libraryPath, sourceRoot, destination, profil
     sdkHeadersRevision: Overlay.SDK_HEADERS_REVISION, sdkVersion: Overlay.SDK_VERSION,
     hostLuaAbi: Overlay.HOST_LUA_ABI, minimumMacOS: "13.0", abiProfile: profile.id,
     librarySha256: library.sha256, steamHelperVersion: profile.helperVersion,
-    steamHelperLibrarySha256: profile.helperLibrarySha256, files, notices };
+    steamHelperLibrarySha256: profile.helperLibrarySha256, files};
   copy("helper.json", Buffer.from(JSON.stringify(manifest, null, 2) + "\n"));
   const sealed = Bundle.readRegular(path.join(destination, "helper.json"), 128 * 1024);
   const declaration = { id: "love-luasteam", version: Overlay.VERSION, arch: "universal",
     launcherArchitectures: ["arm64", "x64"], minimumMacOS: "13.0", sourceRelative: null,
     sourceSha256: Bundle.readRegular(path.join(__dirname, "luasteam-source-overlay.js"), 128 * 1024).sha256,
     directoryRelative: `love-luasteam/${Overlay.VERSION}/universal`, manifestRelative: "helper.json", manifestSha256: sealed.sha256,
-    files: [...files, { path: "helper.json", size: sealed.size, sha256: sealed.sha256, mode: 0o644 }], notices };
+    files: [...files, { path: "helper.json", size: sealed.size, sha256: sealed.sha256, mode: 0o644 }]};
   Bundle.verifyPayload(destination, declaration);
   return { manifest, declaration };
 }

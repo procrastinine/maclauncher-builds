@@ -1,4 +1,4 @@
-const NoticeIntake = require('../../../../../lib/notices.mjs');
+const {addLicense} = require('../../../../../lib/licenses.mjs');
 // Shared native binary inspection, copying and dependency notices.
 const fs = require("node:fs"), path = require("node:path"), crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
@@ -7,7 +7,7 @@ const B = require("../src/modules/shared/runtime/bundled-native");
 const Native = require("../src/modules/shared/runtime/local-native");
 const REPO = path.resolve(__dirname, "..");
 const systemLink = value => value.startsWith("/usr/lib/") || value.startsWith("/System/Library/");
-const run = (command, args) => execFileSync(command, args, { encoding: "utf8", timeout: 60000, maxBuffer: 16 * 1024 * 1024 });
+const run = (command, args) => execFileSync(command, args, { encoding: "utf8", timeout: 60000, maxBuffer: Infinity});
 
 function macho(file) {
   try { return Native.readMachOArchitectures(file, { allowLibrary: true }); } catch { return null; }
@@ -138,37 +138,11 @@ function publicProvenance(provenance, pathMappings = []) {
   return assertPublicMetadata(project(provenance));
 }
 
-function sanitizeHomebrewReceipt(receipt, formula) {
-  if (!receipt || typeof receipt !== "object" || Array.isArray(receipt) || !/^[A-Za-z0-9][A-Za-z0-9@+_.-]*$/.test(formula?.name || "") ||
-    !/^[A-Za-z0-9][A-Za-z0-9+_.-]*$/.test(formula?.version || "")) throw new Error("A Homebrew receipt requires a public formula identity.");
-  const sanitized = JSON.parse(JSON.stringify(receipt));
-  if (!sanitized.source || typeof sanitized.source !== "object" || Array.isArray(sanitized.source)) throw new Error("Homebrew receipt source identity is missing.");
-  delete sanitized.source.path;
-  const tap = sanitized.source.tap || "homebrew/core";
-  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(tap)) throw new Error("Homebrew receipt tap identity is invalid.");
-  sanitized.source.formula = `${tap}/${formula.name}`;
-  sanitized.source.pkg_version = formula.version;
-  return assertPublicMetadata(sanitized);
-}
-
-function addDependencyNotices(source, payload, notices, seen, receiptRoot) {
+function addDependencyNotices(source, payload, seen) {
   const formula = formulaRoot(source);
   if (!formula || seen.has(formula.root)) return;
-  if (notices.some(notice => notice.dependencyName === formula.name)) { seen.add(formula.root); return; }
-  let candidates=[];try { candidates=fs.readdirSync(formula.root).filter(name=>/^(?:licen[sc]e|copying|copyright|notice)(?:[._-].*)?$/i.test(name)); } catch {}
   seen.add(formula.root);
-  for(const name of candidates){
-    const relative=`licenses/dependencies/${formula.name}-${formula.version}/${name}`;
-    if(NoticeIntake.copyNotice(path.join(formula.root,name),path.join(payload,relative)))notices.push({name:`${formula.name} ${formula.version}`,license:'See included upstream license',sourceUrl:`https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/${formula.name[0]}/${formula.name}.rb`,path:relative});
-  }
-  const receipt = path.join(formula.root, "INSTALL_RECEIPT.json");
-  if (fs.existsSync(receipt)) {
-    const bytes = fs.readFileSync(receipt), directory = `${formula.name}-${formula.version}`;
-    const privateDirectory = path.join(receiptRoot, "dependencies", B.relativeFile(directory));
-    fs.mkdirSync(privateDirectory, { recursive: true, mode: 0o700 });
-    fs.writeFileSync(path.join(privateDirectory, "INSTALL_RECEIPT.json"), bytes, { flag: "wx", mode: 0o600 });
-    const sanitized = sanitizeHomebrewReceipt(JSON.parse(bytes), formula);
-    fs.writeFileSync(path.join(payload, `licenses/dependencies/${directory}/INSTALL_RECEIPT.json`), JSON.stringify(sanitized, null, 2) + "\n", { flag: "wx", mode: 0o644 });
-  }
+  const candidates=fs.readdirSync(formula.root).filter(name=>/^(?:(?:licen[sc]e|copying|copyright|notice)(?:[._-].*)?|(?:AGPL|GPL|LGPL|MPL|Apache|MIT|BSD|ISC|Zlib)(?:[-_.].*)?)$/i.test(name));
+  for(const name of candidates)addLicense(payload,`${formula.name} ${formula.version}`,path.join(formula.root,name));
 }
-module.exports = { macho, loadCommands, parseLinkedLibraries, links, libraryIds, thinStagedMachO, resolveLink, copyTree, formulaRoot, assertPublicMetadata, publicProvenance, sanitizeHomebrewReceipt, addDependencyNotices };
+module.exports = { macho, loadCommands, parseLinkedLibraries, links, libraryIds, thinStagedMachO, resolveLink, copyTree, formulaRoot, assertPublicMetadata, publicProvenance, addDependencyNotices };

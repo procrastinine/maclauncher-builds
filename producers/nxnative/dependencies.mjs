@@ -1,4 +1,4 @@
-import * as NoticeIntake from '../../lib/notices.mjs';
+import {addLicense} from '../../lib/licenses.mjs';
 import fs from 'node:fs/promises';
 import { constants as fsConstants } from 'node:fs';
 import path from 'node:path';
@@ -17,7 +17,7 @@ const lock = JSON.parse(await fs.readFile(path.join(directory, 'dependencies.jso
 
 async function run(program, args, options = {}) {
   try {
-    const result = await execute(program, args, { maxBuffer: 32 * 1024 * 1024, ...options });
+    const result = await execute(program, args, { maxBuffer: Infinity, ...options });
     if (options.log) await fs.appendFile(options.log, result.stdout + result.stderr);
     return result.stdout.trim();
   } catch (error) {
@@ -67,11 +67,8 @@ async function verifySource(input) {
   return source;
 }
 
-async function copyLicense(from,to,output,licenses){
-  if(NoticeIntake.copyNotice(from,to).notices.length)licenses.push(path.relative(output,to).split(path.sep).join('/'));
-}
 
-async function buildTool(tool, { work, output, jobs, licenses }) {
+async function buildTool(tool, { work, output, jobs }) {
   const source = await verifySource(tool.source);
   const build = path.join(work, 'build', tool.name);
   const log = path.join(work, tool.name + '.log');
@@ -92,10 +89,9 @@ async function buildTool(tool, { work, output, jobs, licenses }) {
     return library && !library.startsWith('/usr/lib/') && !library.startsWith('/System/Library/');
   })) throw new Error(`Dependency tool has an external native library: ${tool.name}`);
   for (const relative of tool.source.licenseFiles)
-    await copyLicense(path.join(source, relative), path.join(output, 'licenses/dependencies', tool.name, path.basename(relative)), output, licenses);
+    addLicense(output,tool.name,path.join(source,relative),tool.source.license||tool.name);
   if (tool.name === 'zstd') {
-    const location=path.join(output,'licenses/dependencies/zstd/DIVSUFSORT_LICENSE.txt');
-    if(NoticeIntake.copyNotice(path.join(source,'lib/dictBuilder/divsufsort.c'),location).notices.length)licenses.push(path.relative(output,location).split(path.sep).join('/'));
+    addLicense(output,'zstd',path.join(source,'lib/dictBuilder/divsufsort.c'));
   }
   return { id: tool.name, ...tool.source, executable: `bin/${tool.name}`, sha256: await digest(destination) };
 }
@@ -120,6 +116,7 @@ for row in rows:
             target.write_bytes(archive.read(entry))
             target.chmod((entry.external_attr >> 16) & 0o777 or 0o644)
         for relative in row['licenseFiles']:
+            if relative not in archive.namelist(): continue
             target = license_root / row['name'] / relative
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(archive.read(relative))
@@ -186,7 +183,6 @@ export async function prepareDependencies({ work, output, jobs = 4 }) {
   await fs.mkdir(work, { recursive: true });
   await fs.mkdir(path.join(work, 'wheels'), { recursive: true });
   await fs.mkdir(path.join(output, 'bin'), { recursive: true });
-  const licenses = [];
   const [pythonArchive, dotnetArchive, pythonLicenseArchive] = await Promise.all([
     acquire(lock.python, work), acquire(lock.dotnet, work), acquire(lock.python.licenseArchive, work),
     ...lock.wheels.map(wheel => acquire(wheel, path.join(work, 'wheels')))
@@ -205,7 +201,7 @@ export async function prepareDependencies({ work, output, jobs = 4 }) {
     await fs.copyFile(target, python, fsConstants.COPYFILE_FICLONE);
     await fs.chmod(python, mode & 0o777);
   }
-  const wheelLicenses = path.join(output, 'licenses/dependencies/python-wheels');
+  const wheelLicenses = path.join(work,'wheel-license-texts');
   await run(python, ['-B', '-I', '-c', installWheels, path.join(pythonRoot, 'lib/python3.12/site-packages'), path.join(work, 'wheels'), wheelLicenses, JSON.stringify(lock.wheels)]);
   await prunePython(pythonRoot, excludedReason);
   const licenseStage = path.join(work, 'python-license-extract');
@@ -213,25 +209,25 @@ export async function prepareDependencies({ work, output, jobs = 4 }) {
   await extractTar(pythonLicenseArchive, licenseStage, lock.python.licenseArchive.path);
   const pythonLicenseSource = path.join(licenseStage, lock.python.licenseArchive.path);
   for (const relative of await fs.readdir(pythonLicenseSource))
-    await copyLicense(path.join(pythonLicenseSource, relative), path.join(output, 'licenses/dependencies/python', relative), output, licenses);
+    addLicense(output,'Python',path.join(pythonLicenseSource,relative),lock.python.license||'Python');
   for (const wheel of lock.wheels) for (const relative of wheel.licenseFiles)
-    licenses.push(path.posix.join('licenses/dependencies/python-wheels', wheel.name, relative));
+    addLicense(output,wheel.name,path.join(wheelLicenses,wheel.name,relative),wheel.license||wheel.name);
   const dotnetRoot = path.join(output, 'dotnet');
   await fs.rm(dotnetRoot, { recursive: true, force: true });
   await extractTar(dotnetArchive, dotnetRoot);
   for (const relative of lock.dotnet.licenseFiles)
-    await copyLicense(path.join(dotnetRoot, relative), path.join(output, 'licenses/dependencies/dotnet', relative), output, licenses);
+    addLicense(output,'dotnet',path.join(dotnetRoot,relative),lock.dotnet.license||'dotnet');
   await run(python, ['-B', '-I', '-c', 'import sys,lz4.block,capstone,fontTools,backports.zstd,nsz,zstandard; from Crypto.Cipher import AES; assert sys.version_info[:3] == (3,12,15)']);
   const dotnet = await run(path.join(dotnetRoot, 'dotnet'), ['--list-runtimes'], {
     env: { ...process.env, DOTNET_ROOT: dotnetRoot, DOTNET_ROOT_ARM64: dotnetRoot, DOTNET_MULTILEVEL_LOOKUP: '0', DOTNET_CLI_TELEMETRY_OPTOUT: '1', DOTNET_SKIP_FIRST_TIME_EXPERIENCE: '1' }
   });
   if (!dotnet.includes('Microsoft.NETCore.App ' + lock.dotnet.version + ' [')) throw new Error('The .NET runtime version differs from its input');
   const perToolJobs = Math.max(1, Math.floor(Math.max(1, Number(jobs) || 1) / lock.tools.length));
-  const tools = await Promise.all(lock.tools.map(tool => buildTool(tool, { work, output, jobs: perToolJobs, licenses })));
+  const tools = await Promise.all(lock.tools.map(tool => buildTool(tool, { work, output, jobs: perToolJobs })));
   await finalizePayload(output, excludedReason);
   await fs.rm(pythonStage, { recursive: true, force: true });
   await fs.rm(licenseStage, { recursive: true, force: true });
   return { schemaVersion: 1, architecture: lock.architecture, minimumMacOS: lock.minimumMacOS,
     inputs: [{ id: 'python', ...lock.python }, { id: 'dotnet', ...lock.dotnet }, ...lock.wheels.map(wheel => ({ id: 'python:' + wheel.name, ...wheel })), ...tools],
-    licenses: licenses.sort(), tools: { python: 'python/bin/python3', dotnet: 'dotnet/dotnet', spirvCross: 'bin/spirv-cross', glslang: 'bin/glslangValidator', zstd: 'bin/zstd' } };
+    tools: { python: 'python/bin/python3', dotnet: 'dotnet/dotnet', spirvCross: 'bin/spirv-cross', glslang: 'bin/glslangValidator', zstd: 'bin/zstd' } };
 }

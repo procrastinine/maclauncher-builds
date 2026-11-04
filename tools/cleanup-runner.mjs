@@ -9,7 +9,7 @@ const absolute=value=>typeof value==='string'&&path.isAbsolute(value)&&path.norm
 const xcodeRoot=file=>/^\/Applications\/Xcode[^/]*\.app(?:\/|$)/.exec(file||'')?.[0].replace(/\/$/,'');
 const caches=(home,platform='darwin')=>(platform==='darwin'?['Library/Caches/Homebrew','Library/Developer/Xcode/DerivedData','Library/Caches/pip','.cache/pip','.npm/_cacache']:['.cache/pip','.npm/_cacache']).map(name=>path.join(home,name));
 const linuxSdks=new Map([['/usr/share/dotnet',/^(?:dotnet|aspnet)(?:$|[-@])/],['/opt/ghc',/^(?:ghc|ghcup|haskell|cabal|stack)(?:$|[-@])/],['/usr/local/.ghcup',/^(?:ghc|ghcup|haskell|cabal|stack)(?:$|[-@])/],['/usr/local/swift',/^(?:swift|sourcekit)(?:$|[-@])/],['/usr/local/lib/android',/^(?:android|ndk|sdkmanager|adb|emulator)(?:$|[-@])/]]);
-const read=(program,args,env=process.env)=>execFileSync(program,args,{env,encoding:'utf8',timeout:60000,maxBuffer:4<<20}).trim();
+const read=(program,args,env=process.env)=>execFileSync(program,args,{env,encoding:'utf8',timeout:60000,maxBuffer:Infinity}).trim();
 export const canonicalDirectory=file=>fs.realpathSync(file);
 
 /** Applying cleanup is restricted to GitHub's disposable hosted machines. */
@@ -102,8 +102,8 @@ export function applyCleanupAction(action,plan,{environment=process.env,platform
  const target=action.measurementPath||action.path,prior=target&&completed.find(row=>inside(target,row.target));
  if(action.kind==='simulator-runtime'&&prior&&!exists(target))return {status:'already-removed',removedBy:prior.identifier||prior.target};
  if(action.kind==='simulator-runtime'){
-  execute('/usr/bin/xcrun',['simctl','runtime','delete',action.identifier],environment);
- }else{assertPhysicalTarget(action,plan);execute('/usr/bin/sudo',['-n','/bin/rm','-rf','--',action.path],environment);}
+  execute('/usr/bin/xcrun',['simctl','runtime','delete',action.identifier],{...environment,maxBuffer:Infinity});
+ }else{assertPhysicalTarget(action,plan);execute('/usr/bin/sudo',['-n','/bin/rm','-rf','--',action.path],{...environment,maxBuffer:Infinity});}
  if(target&&!exists(target))completed.push({target,identifier:action.identifier});
  return {status:'removed'};
 }

@@ -49,7 +49,7 @@
       ]
     }
   ],
-  "notices": [
+  "licenses": [
     "aosp-framework",
     "aosp-apache-http",
     "aosp-framework-base",

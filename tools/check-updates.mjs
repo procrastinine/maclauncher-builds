@@ -12,14 +12,14 @@ async function request(url,{json=true}={}){
  if(parsed.hostname==='api.github.com'&&(process.env.GH_TOKEN||process.env.GITHUB_TOKEN))headers.Authorization='Bearer '+(process.env.GH_TOKEN||process.env.GITHUB_TOKEN);
  return retryNetworkAsync(async()=>{
  const response=await fetch(url,{headers,redirect:'error',signal:AbortSignal.timeout(20000)});if(!response.ok)throw Object.assign(Error('Upstream HTTP '+response.status),{statusCode:response.status});
- let size=0;const chunks=[];
- for await(const chunk of response.body){size+=chunk.length;if(size>2*1024**2)throw Error('Upstream metadata exceeds its size limit.');chunks.push(chunk);}
+ const chunks=[];
+ for await(const chunk of response.body){chunks.push(chunk);}
  let text=Buffer.concat(chunks).toString('utf8');if(text.startsWith(")]}'"))text=text.slice(text.indexOf('\n')+1);
  return json?JSON.parse(text):text;
  });
 }
 async function gitHead(url){
- const {stdout}=await retryNetworkAsync(()=>execute('git',['ls-remote','--symref',url,'HEAD'],{encoding:'utf8',maxBuffer:1024*1024,timeout:30000,env:{...process.env,GIT_TERMINAL_PROMPT:'0'}}));
+ const {stdout}=await retryNetworkAsync(()=>execute('git',['ls-remote','--symref',url,'HEAD'],{encoding:'utf8',maxBuffer:Infinity,timeout:30000,env:{...process.env,GIT_TERMINAL_PROMPT:'0'}}));
  const revision=/^([a-f0-9]{40})\s+HEAD$/m.exec(stdout)?.[1],branch=/^ref: refs\/heads\/([^\s]+)\s+HEAD$/m.exec(stdout)?.[1];
  if(!revision)throw Error('Upstream HEAD is unavailable.');return {revision,branch};
 }
@@ -35,7 +35,7 @@ export async function checkProjects(projects,{request:read=request,gitHead:readH
      const base='https://api.github.com/repos/'+upstream.repository;
      try{commits=await memo(base+'/commits',()=>read(base+'/commits?per_page=5'));head={revision:commits[0]?.sha,date:commits[0]?.commit?.committer?.date,title:commits[0]?.commit?.message?.split('\n')[0]};if(!/^[a-f0-9]{40}$/.test(head.revision||''))throw Error('Invalid upstream commit response.');}
      catch{head=await memo(upstream.url+'/HEAD',()=>readHead(upstream.url));}
-     try{const releases=await memo(base+'/releases',()=>read(base+'/releases?per_page=10'));const describe=value=>value?{tag:value.tag_name,url:value.html_url,date:value.published_at,prerelease:Boolean(value.prerelease),notes:String(value.body||'').slice(0,6000)}:null;release=describe(releases.find(value=>!value.draft));stableRelease=describe(releases.find(value=>!value.draft&&!value.prerelease));releaseStatus='checked-recent-releases';}
+     try{const releases=await memo(base+'/releases',()=>read(base+'/releases?per_page=10'));const describe=value=>value?{tag:value.tag_name,url:value.html_url,date:value.published_at,prerelease:Boolean(value.prerelease),notes:String(value.body||'')}:null;release=describe(releases.find(value=>!value.draft));stableRelease=describe(releases.find(value=>!value.draft&&!value.prerelease));releaseStatus='checked-recent-releases';}
      catch{
       try{const atom=await memo(upstream.url+'/releases.atom',()=>read(upstream.url+'/releases.atom',{json:false}));const entry=/<entry>([\s\S]*?)<\/entry>/.exec(atom)?.[1],url=entry&&/<link[^>]+href="([^"]+\/releases\/tag\/([^"]+))"/.exec(entry);release=url?{tag:decodeURIComponent(url[2]),url:url[1],date:/<updated>([^<]+)<\/updated>/.exec(entry)?.[1]}:null;releaseStatus='atom-feed-unfiltered';}
       catch{releaseStatus='unavailable';}

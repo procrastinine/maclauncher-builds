@@ -15,8 +15,8 @@ export function stripAndroidFrameworkBuildInputs(root,{resign=false}={}){
  for(const relative of frameworkBuildDirectories){const directory=path.join(root,relative);if(fs.existsSync(directory)){fs.rmSync(directory,{recursive:true});removed=true;}}
  if(removed||resign){
   const framework=path.join(root,'native/SDL3.framework/Versions/A');
-  execFileSync('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',framework],{stdio:['ignore','pipe','pipe']});
-  execFileSync('/usr/bin/codesign',['--verify','--strict',framework],{stdio:['ignore','pipe','pipe']});
+  execFileSync('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',framework],{maxBuffer:Infinity,stdio:['ignore','pipe','pipe']});
+  execFileSync('/usr/bin/codesign',['--verify','--strict',framework],{maxBuffer:Infinity,stdio:['ignore','pipe','pipe']});
  }
  return removed;
 }
@@ -37,10 +37,10 @@ export function repackageAndroid({input,declaration,output}){
   stripAndroidFrameworkBuildInputs(output,{resign:declaration.files.some(file=>androidFrameworkBuildInput(file.path))});
   const metadata=path.join(output,declaration.manifestRelative),manifest=JSON.parse(fs.readFileSync(metadata));
   manifest.files=manifest.files.filter(file=>!omitted(prefix+file.path)).map(file=>{
-   const {bytes,...content}=B.readRegular(path.join(output,prefix+file.path),B.LIMITS.fileBytes);return {...file,...content};
+   const {bytes,...content}=B.readRegular(path.join(output,prefix+file.path),Infinity);return {...file,...content};
   });
   fs.writeFileSync(metadata,JSON.stringify(manifest,null,2)+'\n');fs.chmodSync(metadata,0o644);
-  const files=retained.map(file=>{const {bytes,...content}=B.readRegular(path.join(output,file.path),B.LIMITS.fileBytes);return {...file,...content};});
+  const files=retained.map(file=>{const {bytes,...content}=B.readRegular(path.join(output,file.path),Infinity);return {...file,...content};});
   const result={...declaration,sourceRelative:null,manifestSha256:B.digest(fs.readFileSync(metadata)),files};
   delete result.sourceArtifact;
   validateDeclaration(result);B.verifyPayload(output,result);

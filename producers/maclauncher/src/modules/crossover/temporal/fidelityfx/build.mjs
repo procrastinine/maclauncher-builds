@@ -1,4 +1,4 @@
-import * as NoticeIntake from '../../../../../../../lib/notices.mjs';
+import {addLicense} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,7 +11,7 @@ if(!['sdk-source','vulkan-source','compiler','out'].every(key=>args[key]))throw 
 const sdk=fs.realpathSync(args['sdk-source']),vulkan=fs.realpathSync(args['vulkan-source']),out=path.resolve(args.out),compiler=path.resolve(args.compiler),backend=args.backend||'vk';
 fs.accessSync(compiler,fs.constants.X_OK);
 if(!source.libraries[backend])throw Error('Choose vk or dx12.');
-const git=(directory,...parameters)=>execFileSync('git',['-C',directory,...parameters],{env:{...process.env,GIT_NO_LAZY_FETCH:'1'},maxBuffer:32*1024*1024});
+const git=(directory,...parameters)=>execFileSync('git',['-C',directory,...parameters],{env:{...process.env,GIT_NO_LAZY_FETCH:'1'},maxBuffer: Infinity});
 for(const [directory,pin]of[[sdk,source.sdk],[vulkan,source.vulkan]])if(git(directory,'rev-parse','HEAD').toString().trim()!==pin.revision)throw Error('The source commit does not match '+pin.repository);
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 fs.mkdirSync(out,{recursive:true});const inputs=path.join(out,'inputs');fs.mkdirSync(inputs,{recursive:true});
@@ -48,9 +48,9 @@ const clang=execFileSync('xcrun',['--find','clang++'],{encoding:'utf8'}).trim(),
 for(const architecture of ['arm64','x86_64']){const object=path.join(out,'recorded-source-'+architecture+'.o');execFileSync(clang,['-std=c++17','-O2','-arch',architecture,'-isysroot',macSDK,'-mmacosx-version-min=13.0','-fdeclspec','-Wno-ignored-attributes',
  '-ffile-prefix-map='+repository+'=MacLauncher','-ffile-prefix-map='+out+'=FidelityFXBuild','-I'+inputs,'-I'+path.resolve(here,'../../../shared/vulkan/native'),'-c',path.join(here,'recorded-source.cpp'),'-o',object],{stdio:'inherit'});objects.push(object);}
 const producer=path.join(out,'libffx-vulkan-scene-source.a');execFileSync('libtool',['-static','-o',producer,...objects],{stdio:'inherit'});
-for(const file of ['LICENSE.txt','LICENSE.md','LICENSE']){if(NoticeIntake.copyNotice(path.join(sdk,file),path.join(out,'FidelityFX-SDK-LICENSE.txt')).notices.length)break;}
-NoticeIntake.copyNotice(path.join(here,source.vulkan.licenseFile),path.join(out,'Vulkan-Headers-Apache-2.0.txt'));
-NoticeIntake.copyNotice(path.resolve(here,'../../../../../LICENSE'),path.join(out,'MacLauncher-MIT.txt'));
+for(const file of ['LICENSE.txt','LICENSE.md','LICENSE']){addLicense(out,'FidelityFX-SDK',path.join(sdk,file));}
+addLicense(out,'Vulkan-Headers',path.join(here,source.vulkan.licenseFile));
+addLicense(out,'MacLauncher',path.resolve(here,'../../../../../LICENSE'),'MIT');
 // The Vulkan headers also retain their original copyright notices in inputs/.
 const owned=['source.json','Apache-2.0.txt','capture.hpp','observation.h','proxy.cpp','wine-observer.hpp','wine-observer.cpp','scalar-mapping.hpp','native-source.h','recorded-source.hpp','recorded-source.cpp','index.js','build.mjs'];
 const metadata={schema:1,version:source.version,profile:source.profile,backend,library:source.libraries[backend],sha256:hash(library),exports:actual,
@@ -64,17 +64,17 @@ const metadata={schema:1,version:source.version,profile:source.profile,backend,l
 fs.writeFileSync(path.join(out,'provider.json'),JSON.stringify(metadata,null,2)+'\n');
 // Runtime packages select binary and notice files only. Compiler inputs and
 // the native source archive remain producer outputs outside that selection.
-const runtimeFiles=[source.libraries[backend],source.original[backend],'FidelityFX-SDK-LICENSE.txt','Vulkan-Headers-Apache-2.0.txt','MacLauncher-MIT.txt'];
-const files=runtimeFiles.filter(file=>!NoticeIntake.isNoticePath(file)).map(file=>{const target=path.join(out,file),binary=file.endsWith('.dll');fs.chmodSync(target,binary?0o755:0o644);return{
+const runtimeFiles=[source.libraries[backend],source.original[backend],...(fs.existsSync(path.join(out,'licenses'))?fs.readdirSync(path.join(out,'licenses')):[]).map(file=>'licenses/'+file)];
+const files=runtimeFiles.map(file=>{const target=path.join(out,file),binary=file.endsWith('.dll');fs.chmodSync(target,binary?0o755:0o644);return{
  path:file,size:fs.statSync(target).size,mode:binary?0o755:0o644,sha256:hash(target),...(binary?{format:'pe',architectures:['x86_64']}:{})};});
 const notices=[{name:'FidelityFX SDK',license:source.sdk.license,sourceUrl:source.sdk.repository,path:'FidelityFX-SDK-LICENSE.txt'},
  {name:'Vulkan headers',license:source.vulkan.license,sourceUrl:source.vulkan.repository,path:'Vulkan-Headers-Apache-2.0.txt'},
  {name:'MacLauncher',license:'MIT',sourceUrl:'https://github.com/procrastinine/maclauncher',path:'MacLauncher-MIT.txt'}];
 const provider=Object.fromEntries(['schema','version','profile','backend','library','sha256','exports','sourceExports','observationAPI','referenceSha256','referenceFileVersion','originalLibrary','execution'].map(key=>[key,metadata[key]]));
 const manifest={schemaVersion:1,managerId:source.id,version:source.version,platform:'darwin',arch:'x64',minimumMacOS:source.minimumMacOS,
- executableRelative:source.libraries[backend],provider,files,notices,dependencies:[]};
+ executableRelative:source.libraries[backend],provider,files,dependencies:[]};
 const payload=path.join(out,'payload');fs.mkdirSync(payload,{recursive:true});
-for(const file of files){const target=path.join(payload,file.path);fs.copyFileSync(path.join(out,file.path),target);fs.chmodSync(target,file.mode);}
+for(const file of files){const target=path.join(payload,file.path);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(out,file.path),target);fs.chmodSync(target,file.mode);}
 // The game-library adapter reads this descriptor from its installed payload.
 // Source/build correspondence stays in the separate producer descriptor.
 const providerFile=path.join(payload,'provider.json');fs.writeFileSync(providerFile,JSON.stringify(provider,null,2)+'\n');fs.chmodSync(providerFile,0o644);
@@ -82,6 +82,6 @@ files.push({path:'provider.json',size:fs.statSync(providerFile).size,mode:0o644,
 const manifestFile=path.join(payload,'manifest.json');fs.writeFileSync(manifestFile,JSON.stringify(manifest,null,2)+'\n');fs.chmodSync(manifestFile,0o644);
 const declaration={id:source.id,version:source.version,arch:'x64',launcherArchitectures:['arm64','x64'],minimumMacOS:source.minimumMacOS,
  sourceRelative:null,sourceSha256:hash(path.join(here,'source.json')),directoryRelative:[source.id,source.version,'x64'].join('/'),
- manifestRelative:'manifest.json',manifestSha256:hash(manifestFile),files:[...files,{path:'manifest.json',size:fs.statSync(manifestFile).size,mode:0o644,sha256:hash(manifestFile)}],notices};
+ manifestRelative:'manifest.json',manifestSha256:hash(manifestFile),files:[...files,{path:'manifest.json',size:fs.statSync(manifestFile).size,mode:0o644,sha256:hash(manifestFile)}]};
 fs.writeFileSync(path.join(out,'runtime-package.json'),JSON.stringify(declaration,null,2)+'\n');
 console.log(JSON.stringify({library,sha256:metadata.sha256,exports:actual.length,nativeProducer:producer,wineVulkanInterop:false}));

@@ -5,7 +5,7 @@ import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {retryNetwork} from './download.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 /** Initialize only declared Gitlink paths, including nested production sources. */
-export function initializeSources({project:id,version,directory=root,run=(args,cwd)=>execFileSync('git',args,{cwd,encoding:'utf8',stdio:['ignore','pipe','pipe'],maxBuffer:32<<20})}){
+export function initializeSources({project:id,version,directory=root,run=(args,cwd)=>execFileSync('git',args,{cwd,encoding:'utf8',stdio:['ignore','pipe','pipe'],maxBuffer:Infinity})}){
  const project=resolveProject(id,directory,{resolvePins:false}),build=buildRecord(project,version),initialized=[],done=new Set();
  for(const selected of build.submodules||[]){
   let current=directory,remaining=selected;

@@ -19,7 +19,7 @@ export async function buildMoltenVKScene({project:id,arch,output,work}){
  const directory=path.join(work,'package'),manifest=producer.publishScenePackage({providerDirectory:providers[0],peerDirectory:providers[1],output:directory});
  const manifestFile=path.join(directory,'manifest.json'),files=[...manifest.files,{path:'manifest.json',size:fs.statSync(manifestFile).size,mode:0o644,sha256:hash(manifestFile)}];
  const declaration={id,version:record.version,arch,launcherArchitectures:arch==='arm64'?['arm64']:['arm64','x64'],minimumMacOS:manifest.minimumMacOS,
-  sourceRelative:null,sourceSha256:hash(path.join(native,'moltenvk-scene-source.json')),directoryRelative:[id,record.version,arch].join('/'),manifestRelative:'manifest.json',manifestSha256:hash(manifestFile),files,notices:manifest.notices};
+  sourceRelative:null,sourceSha256:hash(path.join(native,'moltenvk-scene-source.json')),directoryRelative:[id,record.version,arch].join('/'),manifestRelative:'manifest.json',manifestSha256:hash(manifestFile),files};
  return finish({directory,declaration,output});
 }
 recipeMain(import.meta,buildMoltenVKScene);

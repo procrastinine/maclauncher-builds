@@ -46,7 +46,7 @@ async function prepare(file, options, provider) {
   const temporary = path.join(directory, ".prepare-" + crypto.randomUUID());
   try {
     await execute(path.join(root, provider.helper), ["--prepare", provider.input(file), temporary],
-      { env: environment(), signal, timeout: 120000, maxBuffer: LIMITS.metadata });
+      { env: environment(), signal, timeout: 120000, maxBuffer: Infinity});
     const result = verify(temporary, provider), destination = path.join(directory, result.revision);
     if (fs.existsSync(destination)) { const previous = verify(destination, provider);if (previous.revision !== result.revision) throw new Error("The prepared shader cache changed."); }
     else {

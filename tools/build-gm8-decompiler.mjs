@@ -17,7 +17,7 @@ export async function buildGM8Decompiler({project:id,version,arch,output,work}){
   const tools=prepareDecompiler({sourceDir:owned,output:work}),target=arch==='x64'?'x86_64-apple-darwin':'aarch64-apple-darwin';
   fs.copyFileSync(path.join(root,'producers/maclauncher/helper-builds/gm8-decompiler.lock'),path.join(owned,'Cargo.lock'));
   const env=rustEnvironment({work,minimumMacOS:'11.0',env:{...process.env,PATH:[tools,path.dirname(process.execPath),process.env.PATH].join(path.delimiter)}});
-  execFileSync('cargo',['build','--release','--locked','--target',target,'--package','gm8decompiler'],{cwd:owned,stdio:'inherit',timeout:900000,env});
+  execFileSync('cargo',['build','--release','--locked','--target',target,'--package','gm8decompiler'],{maxBuffer:Infinity,cwd:owned,stdio:'inherit',timeout:900000,env});
   return await sealRuntime({project:id,version,arch,executable:path.join(work,'target',target,'release/gm8decompiler'),sourceRoot:source,upstreamRevision:revision,output,maximumMacOS:'11.0',
    notices:[{file:path.join(source,'LICENCE.md'),name:'OpenGMK',license:'GPL-2.0-only',sourceUrl:'https://github.com/OpenGMK/OpenGMK'},...rustNotices({source:owned,output:path.join(work,'notices'),env})]});
  }finally{fs.rmSync(work,{recursive:true,force:true});}

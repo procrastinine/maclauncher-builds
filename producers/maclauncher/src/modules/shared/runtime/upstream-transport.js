@@ -91,7 +91,6 @@ async function fetchUrlBufferOnce(
   url,
   { headers = {}, redirectDepth = 0, maxRedirects = 5, signal, maxBytes = MAX_BUFFER_BYTES, idleTimeoutMs, method = "GET", body } = {}
 ) {
-  if (!Number.isSafeInteger(maxBytes) || maxBytes < 1) throw new Error("Buffered download limit must be a positive byte count.");
   if (redirectDepth > maxRedirects) throw new Error("Too many redirects while fetching data");
   throwIfAborted(signal);
 
@@ -120,16 +119,11 @@ async function fetchUrlBufferOnce(
   const chunks = [];
   let received = 0;
   try {
-    const checkSize = size => {
-      if (size > maxBytes) throw new Error(`Download response exceeds the ${maxBytes} byte limit.`);
-    };
     // A HEAD response's length describes the file, not this response.
-    if (method !== "HEAD") checkSize(Number(res.headers?.["content-length"]));
     for await (const chunk of res) {
       touch();
       const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
       received += bytes.length;
-      checkSize(received);
       chunks.push(bytes);
     }
     throwIfAborted(signal);

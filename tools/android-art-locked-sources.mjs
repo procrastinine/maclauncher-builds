@@ -46,7 +46,7 @@ export function acquireLockedArtSources({source,output,work}){
     downloadFileSync(url,archive);
     if(record.file)fs.writeFileSync(destination,Buffer.from(fs.readFileSync(archive,'utf8'),'base64'),{flag:'wx'});
     else{
-     const names=execFileSync('/usr/bin/tar',['-tzf',archive],{encoding:'utf8',maxBuffer:16<<20}).split('\n').filter(Boolean);
+     const names=execFileSync('/usr/bin/tar',['-tzf',archive],{encoding:'utf8',maxBuffer:Infinity}).split('\n').filter(Boolean);
      if(names.some(name=>path.isAbsolute(name)||name.split('/').includes('..')))throw Error('The original source archive leaves its root.');
      fs.mkdirSync(destination);run('/usr/bin/tar',['-xzf',archive,'-C',destination]);
     }

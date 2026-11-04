@@ -5,7 +5,7 @@ import {verifyAndroidJavaConverterInput} from './build-android-java-converter.mj
 import {verifyAndroidJavaFrameworkInput} from './build-android-java-framework.mjs';
 import {run} from './build-source.mjs';
 const root=path.resolve(import.meta.dirname,'..');
-const read=(directory,args)=>execFileSync('git',['-C',directory,...args],{encoding:'utf8'}).trim();
+const read=(directory,args)=>execFileSync('git',['-C',directory,...args],{maxBuffer:Infinity,encoding:'utf8'}).trim();
 
 /** Add only the declared Java-product transport to an owned export of its original compiler. */
 export function prepareAndroidCommonJavaProducer({android,input,framework,output}){

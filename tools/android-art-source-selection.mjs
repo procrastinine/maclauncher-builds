@@ -29,9 +29,9 @@ export async function acquireArtSourceSelection(record,destination){
    await downloadFile(url,archive);
    const size=fs.statSync(archive).size,transportSha256=crypto.createHash('sha256');for await(const bytes of fs.createReadStream(archive))transportSha256.update(bytes);
    if(expected.type==='tree'){
-    const {stdout}=await execute('/usr/bin/tar',['-tzf',archive],{maxBuffer:8<<20});
+    const {stdout}=await execute('/usr/bin/tar',['-tzf',archive],{maxBuffer:Infinity});
     if(stdout.split('\n').filter(Boolean).some(name=>path.isAbsolute(name)||name.split('/').includes('..')))throw Error('Selected Git archive leaves its source root.');
-    fs.mkdirSync(output);await execute('/usr/bin/tar',['-xzf',archive,'-C',output],{maxBuffer:4<<20});
+    fs.mkdirSync(output);await execute('/usr/bin/tar',['-xzf',archive,'-C',output],{maxBuffer:Infinity});
    }else{
     const bytes=Buffer.from(fs.readFileSync(archive,'utf8'),'base64');
     if(expected.mode==='120000'){

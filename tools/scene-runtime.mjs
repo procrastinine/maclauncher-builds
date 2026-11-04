@@ -6,7 +6,7 @@ import {publicDeclaration} from './runtime-package.mjs';
 /** Shared steps of the scene adapter recipes. */
 export const root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/maclauncher');
 export const read=file=>JSON.parse(fs.readFileSync(file));
-export const run=(command,args)=>execFileSync(command,args,{stdio:'inherit'});
+export const run=(command,args)=>execFileSync(command,args,{maxBuffer:Infinity,stdio:'inherit'});
 /** The declared llvm-mingw toolchain for Windows-side adapter libraries. */
 export async function mingw(work){
  const pin=read(path.join(base,'src/modules/crossover/temporal/xess/source.json')).toolchain;

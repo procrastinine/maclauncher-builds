@@ -20,7 +20,7 @@ const root=path.resolve(import.meta.dirname,'..');
 const json=value=>JSON.stringify(value,null,2)+'\n';
 const stable=value=>JSON.stringify(value,(_,item)=>item&&typeof item==='object'&&!Array.isArray(item)?Object.fromEntries(Object.entries(item).sort()):item);
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
-const run=(command,args,options={})=>{const step=()=>execFileSync(command,args,{encoding:'utf8',stdio:['ignore','pipe','pipe'],...options});return command==='gh'||command==='git'&&args.some(arg=>['fetch','clone','submodule','checkout'].includes(arg))?retryNetwork(step):step();};
+const run=(command,args,options={})=>{const step=()=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8',stdio:['ignore','pipe','pipe'],...options});return command==='gh'||command==='git'&&args.some(arg=>['fetch','clone','submodule','checkout'].includes(arg))?retryNetwork(step):step();};
 
 /** Read regular members without extracting files or running package contents. */
 async function members(archive){
@@ -33,8 +33,8 @@ async function members(archive){
    const header=await reader.read(512);
    if(header.every(byte=>byte===0)){if(!(await reader.read(512)).every(byte=>byte===0))throw Error('Invalid archive terminator.');await reader.end();break;}
    const item=A.parseHeader(header);
-   if(entries.has(item.name)||entries.size>=A.LIMITS.entries)throw Error('Duplicate or excessive archive members.');
-   const digest=crypto.createHash('sha256'),chunks=[],capture=/\.json$/.test(item.name)&&item.size<=A.LIMITS.metadataBytes;
+   if(entries.has(item.name))throw Error('Duplicate or excessive archive members.');
+   const digest=crypto.createHash('sha256'),chunks=[],capture=/\.json$/.test(item.name);
    let remaining=item.size;
    while(remaining){const chunk=await reader.read(Math.min(remaining,65536));remaining-=chunk.length;digest.update(chunk);if(capture)chunks.push(chunk);}
    const value={size:item.size,mode:item.mode,sha256:digest.digest('hex'),headerSha256:hash(header)};
@@ -48,7 +48,6 @@ async function members(archive){
 
 function jsonDifferences(original,rebuilt,pointer='',result=[]){
  if(stable(original)===stable(rebuilt))return result;
- if(result.length>=256)return result;
  if(original&&rebuilt&&typeof original==='object'&&typeof rebuilt==='object'&&!Array.isArray(original)&&!Array.isArray(rebuilt)){
   for(const key of [...new Set([...Object.keys(original),...Object.keys(rebuilt)])].sort())jsonDifferences(original[key],rebuilt[key],pointer+'/'+key.replaceAll('~','~0').replaceAll('/','~1'),result);
  }else result.push({pointer:pointer||'/',originalPresent:original!==undefined,rebuiltPresent:rebuilt!==undefined,original:original===undefined?null:original,rebuilt:rebuilt===undefined?null:rebuilt});
@@ -63,7 +62,7 @@ function differenceReason(name,fields){
 
 /** Equality is always the hash of complete archive bytes, including metadata. */
 export async function compareArchives({original,rebuilt,context={}}){
- for(const file of [original,rebuilt]){const stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size>A.LIMITS.archiveBytes)throw Error('Select regular runtime archives within the package size limit.');}
+ for(const file of [original,rebuilt]){const stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink())throw Error('Select regular runtime archives files.');}
  const originalSha256=await A.checksum(original),rebuiltSha256=await A.checksum(rebuilt);
  const originalTar=await members(original),rebuiltTar=await members(rebuilt),left=originalTar.entries,right=rebuiltTar.entries,files=[],headers=[];
  for(const name of [...new Set([...left.keys(),...right.keys()])].sort()){
@@ -71,7 +70,7 @@ export async function compareArchives({original,rebuilt,context={}}){
   if(!a||!b){files.push({path:name,kind:a?'removed':'added',original:facts(a),rebuilt:facts(b),reason:a?'The rebuild omits this archive member.':'The rebuild adds this archive member.'});continue;}
   if(a.sha256!==b.sha256||a.size!==b.size||a.mode!==b.mode){
    const fields=a.json!==undefined&&b.json!==undefined?jsonDifferences(a.json,b.json):undefined;
-   files.push({path:name,kind:'changed',original:facts(a),rebuilt:facts(b),...(fields?.length?{jsonDifferences:fields,jsonDifferenceLimit:256}:{}),reason:a.sha256===b.sha256?'File permissions differ; content bytes agree.':differenceReason(name,fields)});
+   files.push({path:name,kind:'changed',original:facts(a),rebuilt:facts(b),...(fields?.length?{jsonDifferences:fields}:{}),reason:a.sha256===b.sha256?'File permissions differ; content bytes agree.':differenceReason(name,fields)});
   }
   if(a.headerSha256!==b.headerSha256)headers.push(name);
  }
@@ -110,7 +109,7 @@ function selectedRecord({project,version,arch,bundle,directory=root}){
 }
 function tagRevision(repository,tag){
  let ref=JSON.parse(run('gh',['api',`repos/${repository}/git/ref/tags/${tag}`])).object;
- for(let count=0;ref?.type==='tag'&&count<10;count++)ref=JSON.parse(run('gh',['api',`repos/${repository}/git/tags/${ref.sha}`])).object;
+ const seen=new Set();while(ref?.type==='tag'){if(seen.has(ref.sha))throw Error('The release tag annotation chain is cyclic.');seen.add(ref.sha);ref=JSON.parse(run('gh',['api',`repos/${repository}/git/tags/${ref.sha}`])).object;}
  if(ref?.type!=='commit'||!/^[a-f0-9]{40}$/.test(ref.sha||''))throw Error('The release tag does not identify a source commit.');
  return ref.sha;
 }
@@ -184,7 +183,7 @@ export async function prepareHistoricalHost({checkout,plan,environment=process.e
   if(fs.existsSync(installer))({installBuildTools:installTools}=await import(pathToFileURL(installer)));
   else installTools=(tools,{platform,environment:env,execute})=>{
    if(platform!=='darwin')throw Error('The historical Linux recipe has no declared build-tool installer.');
-   execute('brew',['install',...tools],{env,stdio:'inherit'});
+   execute('brew',['install',...tools],{maxBuffer:Infinity,env,stdio:'inherit'});
   };
  }
  return (historical?.prepareBuildHost||prepareBuildHost)({build:plan.build,label:plan.runner,runner:host,rustToolchain:RUST_TOOLCHAIN,environment,install,verifyHost:verifyHost&&(plan.toolchainDeclared||Boolean(plan.host)),...(installTools?{installTools}:{})});

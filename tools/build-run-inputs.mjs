@@ -23,12 +23,12 @@ async function publishedInput({url,sha256,bytes},directory){
 }
 const canonical=value=>JSON.stringify(value,(_,item)=>item&&typeof item==='object'&&!Array.isArray(item)?Object.fromEntries(Object.entries(item).sort()):item);
 /** Materialize only declared direct dependencies from this run or exact verified releases. */
-export async function prepareBuildInputs({project,output,directory=root,environment=process.env,runGh,download=publishedInput,verifyBundle=verifyRelease,verifyArchive=verify,extract=async(archive,destination)=>{await exec('tar',['-xzf',archive,'-C',destination]);}}={}){
+export async function prepareBuildInputs({project,output,directory=root,environment=process.env,runGh,download=publishedInput,verifyBundle=verifyRelease,verifyArchive=verify,extract=async(archive,destination)=>{await exec('tar',['-xzf',archive,'-C',destination],{maxBuffer:Infinity});}}={}){
  projectId(project);if(!path.isAbsolute(output||'')||fs.existsSync(output)||/[\r\n]/.test(output))throw Error('Build inputs require a new absolute output directory.');
  const graph=JSON.parse(environment.RELEASE_GRAPH||'{}'),reports=reportMap(environment.BUILD_REPORTS),reuse=JSON.parse(environment.RELEASE_REUSE||'{}'),selection=parseSelection(environment.RELEASE_SELECTION||'[]'),repository=readProjects(directory,{resolvePins:false}).repository;
  const direct=graph[project]||[],deps=[],seen=new Set();if(!Array.isArray(direct))throw Error('Invalid release dependency graph.');
  const visit=id=>{if(seen.has(id))return;seen.add(id);for(const dependency of graph[id]||[])visit(dependency);deps.push(id);};for(const id of direct)visit(id);
- const gh=runGh||(async(args)=>{if(environment.GITHUB_ACTIONS!=='true')throw Error('Build input transport runs only inside GitHub Actions.');return retryNetwork(()=>execFileSync('gh',args,{env:environment,encoding:'utf8',maxBuffer:64*1024**2}));});
+ const gh=runGh||(async(args)=>{if(environment.GITHUB_ACTIONS!=='true')throw Error('Build input transport runs only inside GitHub Actions.');return retryNetwork(()=>execFileSync('gh',args,{env:environment,encoding:'utf8',maxBuffer:Infinity}));});
  const consumer=resolveProject(project,directory,{resolvePins:false}),consumerVersion=selection.find(row=>row.id===project)?.version,consumerBuild=buildRecord(consumer,consumerVersion),consumerArch=environment.BUILD_ARCH||environment.RUNTIME_ARCH||consumerBuild.architectures[0];
  const choose=records=>records.find(record=>record.arch===consumerArch)||records.find(record=>record.arch==='universal')||records.find(record=>record.arch==='arm64');
  fs.mkdirSync(output,{recursive:true});const result={};

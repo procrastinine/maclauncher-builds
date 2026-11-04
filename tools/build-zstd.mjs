@@ -6,8 +6,8 @@ import {execFileSync} from 'node:child_process';
 import {buildInput} from './build-input.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 export const zstdProfile=JSON.parse(fs.readFileSync(path.join(root,'producers/maclauncher/src/modules/shared/vulkan/native/zstd-source.json')));
-const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
-const read=(command,args)=>execFileSync(command,args,{encoding:'utf8'}).trim();
+const run=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infinity,stdio:'inherit',...options});
+const read=(command,args)=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8'}).trim();
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 export async function buildZstd({work,architecture='arm64',jobs=2,ninja='ninja'}){
  if(!['arm64','x64'].includes(architecture)||!path.isAbsolute(work||'')||fs.existsSync(work)||!Number.isSafeInteger(jobs)||jobs<1||jobs>4)throw Error('Zstandard needs a declared CPU, one to four jobs and a new absolute work directory.');

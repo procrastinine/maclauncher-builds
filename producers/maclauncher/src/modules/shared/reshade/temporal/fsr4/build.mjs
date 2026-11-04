@@ -1,4 +1,4 @@
-import * as NoticeIntake from '../../../../../../../../lib/notices.mjs';
+import {addLicense} from '../../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import {spawn} from 'node:child_process';
 import {createHash} from 'node:crypto';
@@ -181,7 +181,6 @@ if (repackage) {
       JSON.stringify(previous.tools) !== JSON.stringify(tools))
     throw Error('Repackaging cannot change compiled shader/model inputs.');
   for (const entry of previous.files) {
-    if(NoticeIntake.isNoticePath(entry.path))continue;
     const file = path.join(payload, entry.path);
     if ((await fs.stat(file)).size !== entry.size ||
         hash(await fs.readFile(file)) !== entry.sha256)
@@ -281,8 +280,8 @@ if (!repackage) {
   for (const file of ['initializers.bin', 'initializers-ultraperformance.bin'])
     await fs.copyFile(path.join(work, 'third_party/fsr411', file),
                       path.join(payload, 'third_party/fsr411', file));
-  for(const file of ['LICENSE','LICENSE.AMD.md'])NoticeIntake.copyNotice(path.join(work,'third_party/fsr411',file),path.join(payload,'third_party/fsr411',file));
-  if(options['--lite2-license'])NoticeIntake.copyNotice(options['--lite2-license'],path.join(payload,'third_party/fsr411/LICENSE.Lite2.txt'));
+  for(const file of ['LICENSE','LICENSE.AMD.md'])addLicense(payload,'FSR4',path.join(work,'third_party/fsr411',file));
+  if(options['--lite2-license'])addLicense(payload,'FSR4',options['--lite2-license']);
 }
 await fs.mkdir(path.join(destination, 'source-inputs'), {recursive : true});
 await fs.copyFile(options['--lite2-weights'],
@@ -319,7 +318,7 @@ await run('xcrun', [
 await run('codesign', [
   '--force', '--sign', '-', path.join(payload, 'libmaclauncher-fsr4.dylib')
 ]);
-NoticeIntake.copyNotice(path.join(here,'NOTICE.md'),path.join(payload,'NOTICE.md'));
+addLicense(payload,'FSR4',path.join(here,'NOTICE.md'));
 const owned = {};
 for (const [name, bytes] of ownedSnapshot) {
   owned[name] = hash(bytes);
@@ -329,7 +328,7 @@ for (const [name, bytes] of ownedSnapshot) {
 }
 const files = [];
 for (const relative of (await fs.readdir(payload, {recursive : true})).sort()) {
-  if (relative === 'provider.json'||NoticeIntake.isNoticePath(relative))
+  if (relative === 'provider.json')
     continue;
   const file = path.join(payload, relative), stat = await fs.stat(file);
   if (stat.isFile())

@@ -193,7 +193,7 @@ A published package never changes: different archive bytes, a changed manifest o
 
 Packages of tagged upstream releases use versions such as `1.2.3-MCLv1`, and the revision restarts at 1 for each new upstream version. Commit snapshots use `MCLv1-MMDD`, and their revision increases with every upstream or adaptation change. The [release reference](RELEASES.md#versions) defines these rules and describes how to change the version of an existing package.
 
-Downloadable records give the upstream repository and commit in `source: {repository, revision, path?}`, matching the package's manifest, and the package's game and runtime requirements in a `capabilities` object of limited shape and size. `launcherContract` is a positive integer; a record without it uses contract 1. Records of bundled components identify exactly the package that MacLauncher selected.
+Downloadable records give the upstream repository and commit in `source: {repository, revision, path?}`, matching the package's manifest, and the package's game and runtime requirements in a `capabilities` object. `launcherContract` is a positive integer; a record without it uses contract 1. Records of bundled components identify exactly the package that MacLauncher selected.
 
 ## Android producer
 
@@ -236,7 +236,7 @@ The source project records its upstream checkouts and build prerequisites. Andro
 
 ## Package tools
 
-A package is made from a finished runtime directory and its declaration, a JSON file that records the runtime's name and version, architecture, macOS requirement, manifest, corresponding source, file permissions, checksums and notices. `pack` checks every input file against the declaration, writes the archive as a stream and then verifies the result without running any runtime code.
+A package is made from a finished runtime directory and its declaration, a JSON file that records the runtime's name and version, architecture, macOS requirement, manifest, corresponding source, file permissions and checksums. Licence texts are ordinary files in `licenses/`, with component names recorded in `licenses/components.txt`. `pack` checks every input file against the declaration, writes the archive as a stream and then verifies the result without running any runtime code.
 
 ```sh
 node tools/runtime-package.mjs pack --project android \

@@ -33,7 +33,7 @@ async function extractDmg(archivePath, destination, signal, { payloadName, proje
       tool = name;
       try {
         const [command, args] = TOOLS[name].attach(archivePath, mount);
-        await run(command, args, { signal, timeout: 60000, maxBuffer: 64 * 1024 });
+        await run(command, args, { signal, timeout: 60000, maxBuffer: Infinity});
         break;
       } catch (error) {
         if (name === "hdiutil" || signal?.aborted) throw error;
@@ -49,7 +49,7 @@ async function extractDmg(archivePath, destination, signal, { payloadName, proje
       copy(source, path.join(destination, payloadName));
     } else for (const item of fs.readdirSync(mount, { withFileTypes: true })) {
       if (item.name.startsWith(".") || item.isSymbolicLink()) continue;
-      await run("/usr/bin/ditto", [path.join(mount, item.name), path.join(destination, item.name)], { signal, timeout: 600000, maxBuffer: 64 * 1024 });
+      await run("/usr/bin/ditto", [path.join(mount, item.name), path.join(destination, item.name)], { signal, timeout: 600000, maxBuffer: Infinity});
     }
     throwIfAborted(signal);
   } finally {
@@ -59,7 +59,7 @@ async function extractDmg(archivePath, destination, signal, { payloadName, proje
     if (tool) {
       try {
         const [command, args] = TOOLS[tool].detach(mount);
-        await run(command, args, { timeout: 30000, maxBuffer: 64 * 1024 });
+        await run(command, args, { timeout: 30000, maxBuffer: Infinity});
         detached = true;
       } catch (error) { if (attached) throw error; }
     }

@@ -1,4 +1,3 @@
-import {copyNotices,printWarnings} from '../lib/notices.mjs';
 import {recipeMain} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -25,11 +24,12 @@ export async function buildButterscotch({project:id,version,arch,work,output}) {
     if(!entry.isFile()||!/[.](?:h|c)$/.test(entry.name))continue;
     const file=path.join(entry.parentPath,entry.name),relative=path.relative(sourceDir,file);
     if(relative.startsWith('vendor/ps3gl/'))continue;
-    const copied=copyNotices([{file,path:relative.replaceAll('/','_')+'.txt',name:relative,license:'LicenseRef-Upstream-Notice',sourceUrl:'https://github.com/ButterscotchRunner/Butterscotch'}],{output:noticeRoot});printWarnings(copied.warnings);notices.push(...copied.notices);
+    notices.push({file,name:relative,license:'LicenseRef-Upstream-Notice',sourceUrl:'https://github.com/ButterscotchRunner/Butterscotch'});
   }
   try{const bzip=await buildInput({url:'https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz',sha256:'ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269',bytes:810029});
-  const copied=copyNotices([{text:execFileSync('/usr/bin/tar',['-xOzf',bzip,'bzip2-1.0.8/LICENSE'],{encoding:'utf8'}),path:'bzip2-LICENSE.txt',name:'bzip2 1.0.8',license:'bzip2-1.0.6',sourceUrl:'https://sourceware.org/bzip2/'}],{output:noticeRoot});printWarnings(copied.warnings);notices.push(...copied.notices);
-  }catch(error){printWarnings(['Could not collect bzip2 notice: '+error.message]);}
+  const extracted=path.join(work,'bzip2-notice');fs.mkdirSync(extracted);execFileSync('/usr/bin/tar',['-xzf',bzip,'-C',extracted,'bzip2-1.0.8/LICENSE'],{maxBuffer:Infinity});
+  notices.push({file:path.join(extracted,'bzip2-1.0.8/LICENSE'),name:'bzip2 1.0.8',license:'bzip2-1.0.6',sourceUrl:'https://sourceware.org/bzip2/'});
+  }catch(error){console.warn('::warning::Could not collect bzip2 notice: '+error.message);}
   return sealRuntime({project:id,version:build.version,arch,output,executable:built.runtimePath,sourceRoot:sourceDir,upstreamRevision:pin.upstreamRevision,notices,provenance:{backend:'appkit',renderer:'legacy-opengl',videoBackend:'none',gameArguments:pin.gameArguments}});
 }
 recipeMain(import.meta,buildButterscotch);

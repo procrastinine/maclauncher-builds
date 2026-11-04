@@ -1,4 +1,4 @@
-import * as NoticeIntake from '../../lib/notices.mjs';
+import {addLicense} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -162,31 +162,24 @@ export async function buildNxNative({work,output,dependencyWork,jobs=4,version=p
     runtime.requirements={metalCompiler:{delivery:'system',required:true,command:'/usr/bin/xcrun',sdk:'macosx',tools:['metal','metallib'],options:['-O1','-fpreserve-invariance'],version:read('/usr/bin/xcrun',['-sdk','macosx','metal','--version']).split('\n')[0],managedAcquisition:false}};
     json(path.join(output,'runtime.json'),runtime);
     const origins={schemaVersion:1,id:pin.id,version,source:pin.source,producerInputs:owned,dependencies,nuget:JSON.parse(fs.readFileSync(lock))};json(path.join(output,'source.json'),origins);
-    const notices=(dependencies.licenses||[]).map(file=>{
-        const parts=file.split('/'),group=parts[2];
-        const wheel=group==='python-wheels'?dependencies.inputs.find(input=>input.id==='python:'+parts[3]):null;
-        const input=wheel||dependencies.inputs.find(input=>input.id===group);
-        return {name:wheel?parts[3]:group,license:input?.license||'Upstream license notices',path:file,sourceUrl:(input?.repository||'https://github.com/seedds/nxnative').replace(/^http:\/\/github\.com\//,'https://github.com/')};
-    });
     for(const [name,relative,license]of[['nxnative','LICENSE','MIT'],['libvpx','dm/third_party/libvpx/LICENSE','BSD-3-Clause'],['libvpx patent grant','dm/third_party/libvpx/PATENTS','Patent grant'],['stb_vorbis','dm/third_party/stb_vorbis/LICENSE','MIT'],['Ryujinx','dm/third_party/ryujinx/LICENSE.txt','MIT'],['Spv.Generator','dm/third_party/ryujinx/src/Spv.Generator/LICENSE','MIT'],['Vulkan-Headers','dm/third_party/vulkan-headers/LICENSE.md','Apache-2.0 or MIT'],['MacNativeGames','dm/third_party/macnativegames/LICENSE','MIT']]){
         let file=path.join(source,relative);if(!fs.existsSync(file)&&name==='MacNativeGames')file=path.join(source,'dm/gfx/nvn/macnativegames/LICENSE');
 
-        const destination='licenses/nxnative/'+name.replace(/[^A-Za-z0-9.-]/g,'-')+'.txt';NoticeIntake.copyNotice(file,path.join(output,destination));notices.push({name,license,sourceUrl:pin.source.repository,path:destination});
+        const destination='licenses/nxnative/'+name.replace(/[^A-Za-z0-9.-]/g,'-')+'.txt';addLicense(output,name,file);
     }
-    NoticeIntake.copyNotice(path.join(source,'dm/gfx/nvn/include/nvn.h'),path.join(output,'licenses/nxnative/NVN.txt'));
-    notices.push({name:'NVN interface',license:'MIT',sourceUrl:pin.source.repository,path:'licenses/nxnative/NVN.txt'});
+    addLicense(output,'NVN',path.join(source,'dm/gfx/nvn/include/nvn.h'));
     for(const [name,file,license,url]of[['deko3d','deko3d.txt','Zlib','https://github.com/devkitPro/deko3d'],['LibHac','LibHac.txt','MIT','https://www.nuget.org/packages/LibHac/0.19.0']]){
-        const destination='licenses/nxnative/'+file;copyFile(path.join(producer,'licenses',file),path.join(output,destination));notices.push({name,license,sourceUrl:url,path:destination});
+        const destination='licenses/nxnative/'+file;addLicense(output,name,path.join(producer,'licenses',file),license);
     }
     const closure=nativeClosure(output);
     for(const file of files(output)){const mode=fs.statSync(file).mode&0o777;fs.chmodSync(file,mode&0o111?0o755:0o644);}
-    const inventory=B.fileInventory(output).filter(file=>!file.endsWith('.inputs')&&!NoticeIntake.isNoticePath(file,notices)).filter(relative=>!NoticeIntake.isNoticePath(relative)).map(relative=>{
+    const inventory=B.fileInventory(output).filter(file=>!file.endsWith('.inputs')).map(relative=>{
         const file=path.join(output,relative),stat=fs.statSync(file);let architectures;
         if(nativeFile(file))architectures=Native.readMachOArchitectures(file,{allowLibrary:true});
         return {path:relative,size:stat.size,mode:stat.mode&0o777,sha256:sha(fs.readFileSync(file)),...(architectures?{architectures}:{})};
     });
     for(const file of files(output).filter(file=>file.endsWith('.inputs')))fs.unlinkSync(file);
-    const manifest={schemaVersion:1,managerId:pin.id,version,upstreamRevision:pin.source.revision,platform:pin.platform,arch:pin.architecture,minimumMacOS:pin.minimumMacOS,executableRelative:pin.output.executableRelative,files:inventory,dependencies:closure,notices,provenance:{sourceUrl:pin.source.repository,sourceRevision:pin.source.revision,verifiedBuild:true,producerInputs:owned}};
+    const manifest={schemaVersion:1,managerId:pin.id,version,upstreamRevision:pin.source.revision,platform:pin.platform,arch:pin.architecture,minimumMacOS:pin.minimumMacOS,executableRelative:pin.output.executableRelative,files:inventory,dependencies:closure,provenance:{sourceUrl:pin.source.repository,sourceRevision:pin.source.revision,verifiedBuild:true,producerInputs:owned}};
     B.validateManifest(manifest);B.verifyPayload(output,manifest);json(path.join(output,'manifest.json'),manifest);
     return {id:pin.id,version,output,executable:path.join(output,pin.output.executableRelative)};
 }

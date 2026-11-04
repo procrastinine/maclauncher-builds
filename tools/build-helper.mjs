@@ -1,4 +1,4 @@
-import {copyNotice} from '../lib/notices.mjs';
+import {addLicense} from '../lib/licenses.mjs';
 // GitHub build of an owned-source native helper from its build profile. One profile
 // per helper names the sources, compiler flags, output and identity fields; this
 // command compiles them for one package architecture, signs the result ad hoc and
@@ -16,7 +16,7 @@ const B=require('../lib/bundled-native.cjs'),Native=require('../lib/local-native
 const root=path.resolve(import.meta.dirname,'..');
 const CPUS={arm64:['arm64'],x64:['x86_64'],universal:['arm64','x86_64']};
 const KINDS={executable:[],dylib:['-dynamiclib'],bundle:['-bundle']};
-const run=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',timeout:120000,stdio:['ignore','pipe','pipe'],...options}).trim();
+const run=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8',timeout:120000,stdio:['ignore','pipe','pipe'],...options}).trim();
 const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const contained=(value,base)=>typeof value==='string'&&!path.isAbsolute(value)&&!value.split('/').includes('..')&&path.join(base,value).startsWith(base+path.sep);
 
@@ -59,7 +59,7 @@ export function buildHelper({project:id,version,arch,output,work=path.join(fs.mk
   run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',binary]);run('/usr/bin/codesign',['--verify','--strict',binary]);
   const architectures=Native.readMachOArchitectures(binary,{allowLibrary:true}).sort();
   if(JSON.stringify(architectures)!==JSON.stringify(CPUS[arch]))throw Error('The helper was built for different CPUs.');
-  copyNotice(path.join(base,profile.license?.from||''),path.join(payload,profile.license?.path||'package-notice.txt'));
+  addLicense(payload,id,path.join(base,profile.license?.from||''),profile.license?.license||id);
   // The first source is the helper's primary source; the release tag holds all of them.
   const sourceSha256=sha(sources[0]);
   const record={schemaVersion:1,id,version:profile.version,...profile.record,sourceSha256,[profile.binaryField||'binarySha256']:sha(binary),minimumMacOS:profile.minimumMacOS,architectures,
@@ -69,11 +69,11 @@ export function buildHelper({project:id,version,arch,output,work=path.join(fs.mk
   // An Intel executable also runs as its own process on Apple Silicon through Rosetta;
   // an Intel library loads only into an Intel process.
   const rosetta=arch==='x64'&&profile.kind==='executable';
-  const files=fs.readdirSync(payload).sort().map(name=>{const file=path.join(payload,name),stat=fs.statSync(file);
+  const files=B.fileInventory(payload).map(name=>{const file=path.join(payload,name),stat=fs.statSync(file);
    return {path:name,size:stat.size,sha256:sha(file),mode:stat.mode&0o777,...(name===profile.output?{architectures,...(rosetta?{executionArchitecture:'x86_64'}:{})}:{})};});
   const declaration={id,version:profile.version,arch,launcherArchitectures:arch==='arm64'?['arm64']:arch==='x64'&&!rosetta?['x64']:['arm64','x64'],minimumMacOS:profile.minimumMacOS,
-   sourceRelative:null,sourceSha256,directoryRelative:[id,profile.version,arch].join('/'),manifestRelative:'helper.json',manifestSha256:B.digest(metadata),files,
-   notices:[{name:profile.license?.name,license:profile.license?.license,path:profile.license?.path}]};
+   sourceRelative:null,sourceSha256,directoryRelative:[id,profile.version,arch].join('/'),manifestRelative:'helper.json',manifestSha256:B.digest(metadata),files
+   };
   validateDeclaration(declaration);B.verifyPayload(payload,declaration);
   fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});
   return {project:id,version:profile.version,arch,output};

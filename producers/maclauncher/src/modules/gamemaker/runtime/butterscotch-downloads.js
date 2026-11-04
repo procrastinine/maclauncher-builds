@@ -103,9 +103,9 @@ async function prepareInstall({ unpacked, pin, signal }, dependencies = {}) {
   const native = readMachOLoadCommands(executable, { signal });
   if (native.architectures.length !== 1 || native.architectures[0] !== pin.architecture) throw new Error("The Butterscotch archive has a different CPU architecture.");
   assertSystemLibraryClosure(native, { fileType: 2, maximumMacOS: pin.minimumMacOS });
-  await (dependencies.run || run)("/usr/bin/codesign", ["--force", "--sign", "-", executable], { signal, timeout: 30000, maxBuffer: 1024 * 1024 });
-  await (dependencies.run || run)("/usr/bin/codesign", ["--verify", "--strict", executable], { signal, timeout: 30000, maxBuffer: 1024 * 1024 });
-  const help = await (dependencies.run || run)(executable, ["--help"], { signal, timeout: 10000, maxBuffer: 1024 * 1024, cwd: unpacked });
+  await (dependencies.run || run)("/usr/bin/codesign", ["--force", "--sign", "-", executable], { signal, timeout: 30000, maxBuffer: Infinity});
+  await (dependencies.run || run)("/usr/bin/codesign", ["--verify", "--strict", executable], { signal, timeout: 30000, maxBuffer: Infinity});
+  const help = await (dependencies.run || run)(executable, ["--help"], { signal, timeout: 10000, maxBuffer: Infinity, cwd: unpacked });
   if (!/--save-folder\s+</.test(help.stdout || "") || !/--renderer\s+</.test(help.stdout || "")) throw new Error("This Butterscotch build has incompatible launch options.");
   return { schemaVersion: 1, architecture: pin.architecture, minimumMacOS: native.slices[0].minimumMacOS,
     cliProfile: pin.cliProfile, executableSha256: hashFile(executable), sourceMetadata: pin.sourceMetadata,

@@ -1,4 +1,4 @@
-const NoticeIntake = require('../../../lib/notices.mjs');
+const {addLicense} = require('../../../lib/licenses.mjs');
 // Maintainer source build. Ordinary Play uses the sealed Included artifact.
 const fs = require('node:fs'), path = require('node:path'), os = require('node:os');
 const {execFileSync} = require('node:child_process');
@@ -116,7 +116,7 @@ function stage({work, source, output, version}) {
       fs.writeFileSync(target,fs.readFileSync(target,'utf8').split(work).join('/usr/local/src/mkxpz'),{mode:0o644});
   }
   for (const name of fs.readdirSync(installed).sort()) copy(path.join(installed, name), name);
-  const sourceNotice = path.join(payload, 'licenses/SOURCE.txt'); fs.mkdirSync(path.dirname(sourceNotice), {recursive: true});
+  const sourceNotice = path.join(payload, 'SOURCE.txt'); fs.mkdirSync(path.dirname(sourceNotice), {recursive: true});
   fs.writeFileSync(sourceNotice, 'MKXP-Z '+Overlay.upstream.revision+' with MacLauncher '+Overlay.id+'\n'+Overlay.upstream.repository+'\n', {mode: 0o644});
   notices.push({name:'MKXP-Z with macOS filename normalization',license:'GPL-3.0-or-later',path:'LICENSE.txt',sourceUrl:Overlay.upstream.repository});
   function collectNotices(directory, relative = '') {
@@ -125,7 +125,7 @@ function stage({work, source, output, version}) {
       const name = relative ? relative + '/' + entry.name : entry.name;
       if (entry.isDirectory()) { if (!Content.excludedReason(name)) collectNotices(path.join(directory,entry.name),name); }
       else if (entry.isFile() && /^(?:COPYING|LICENSE|NOTICE)(?:[.-].*)?$/i.test(entry.name)) {
-        const target = 'licenses/dependencies/' + name; copy(path.join(directory,entry.name),target);
+        const target = name;addLicense(payload,relative||'MKXP-Z',path.join(directory,entry.name));
         notices.push({name:'Included dependency '+relative,license:'Included license notice',path:target,
           sourceUrl:Overlay.upstream.repository+'/tree/'+Overlay.upstream.revision+'/subprojects'});
       }
@@ -136,7 +136,6 @@ function stage({work, source, output, version}) {
   run('/usr/bin/codesign', ['--force','--sign','-',path.join(payload,apps[0])]);
   run('/usr/bin/codesign', ['--verify','--deep','--strict',path.join(payload,apps[0])]);
   for (const relative of B.fileInventory(payload)) {
-    if(NoticeIntake.isNoticePath(relative,notices))continue;
     const file = path.join(payload,relative), stat = fs.lstatSync(file); let architectures;
     try { architectures = Native.readMachOArchitectures(file,{allowLibrary:true}); } catch {}
     if (architectures) {
@@ -151,15 +150,14 @@ function stage({work, source, output, version}) {
   sourceArchive(source,archive,work); fs.chmodSync(archive,0o644);
   const sourceArtifact = {directoryRelative:sourceRelative,sha256:Native.hashFile(archive),bytes:fs.statSync(archive).size};
   const manifest = {schemaVersion:1,managerId:'mkxpz',version:version,upstreamRevision:Overlay.upstream.revision,platform:'darwin',arch:'arm64',minimumMacOS:'11.0',
-    executableRelative,files:inventory,notices,dependencies:[],provenance:{sourceKind:'owned-source-adaptation',verifiedBuild:true,sourceRevision:Overlay.upstream.revision,
+    executableRelative,files:inventory,dependencies:[],provenance:{sourceKind:'owned-source-adaptation',verifiedBuild:true,sourceRevision:Overlay.upstream.revision,
       adaptationId:Overlay.id,patchSha256:Overlay.patch.sha256,headerSha256:Overlay.addedFiles[0].sha256,implementationSha256:Overlay.addedFiles[1].sha256,sourceArchiveSha256:SOURCE_SHA256,
       compiler:execFileSync('/usr/bin/xcrun',['clang','--version'],{encoding:'utf8'}).split('\n')[0]}};
   B.validateManifest(manifest); B.verifyPayload(payload,manifest);
   const bytes=Buffer.from(JSON.stringify(manifest,null,2)+'\n');fs.writeFileSync(path.join(directory,'manifest.json'),bytes,{flag:'wx',mode:0o644});
   const declaration={id:'mkxpz',version:version,arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS:'11.0',directoryRelative:'mkxpz/'+version+'/arm64',
     manifestRelative:'manifest.json',manifestSha256:B.digest(bytes),sourceSha256:sourceArtifact.sha256,sourceArtifact,
-    files:[...inventory.map(file=>({...file,path:'files/'+file.path})),{path:'manifest.json',size:bytes.length,mode:0o644,sha256:B.digest(bytes)}],
-    notices:notices.map(notice=>({...notice,path:'files/'+notice.path}))};
+    files:[...inventory.map(file=>({...file,path:'files/'+file.path})),{path:'manifest.json',size:bytes.length,mode:0o644,sha256:B.digest(bytes)}]};
   const pin={version:version,arch:'arm64',minimumMacOS:'11.0',appName:apps[0],executableRelative,upstreamRevision:Overlay.upstream.revision,
     sourceUrl:Overlay.upstream.repository+'/tree/'+Overlay.upstream.revision,sourceKind:'owned-source-adaptation',adaptationId:Overlay.id,
     patchSha256:Overlay.patch.sha256,headerSha256:Overlay.addedFiles[0].sha256,implementationSha256:Overlay.addedFiles[1].sha256,

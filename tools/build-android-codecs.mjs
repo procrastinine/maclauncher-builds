@@ -1,4 +1,3 @@
-import {copyNotices,printWarnings} from '../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
@@ -15,16 +14,16 @@ export async function buildAndroidCodecsInput({output,work,arch='arm64'}){
  if(!['arm64','x64'].includes(arch)||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('Android codec input builds need a CPU and new absolute output/work directories.');
  const profile=JSON.parse(fs.readFileSync(descriptor));
  if(Audio.PIN.version!==profile.sourceProfile)throw Error('The shared codec source catalog differs from this input profile.');
- const built=nativeStackInput(preparedBuildInput('native-sndfile'),{arch,work}),libraries=path.join(built.prefix,'lib'),codecs=path.join(output,'codecs'),codecNotices=path.join(output,'notices');
- fs.mkdirSync(codecs,{recursive:true});fs.mkdirSync(codecNotices);
+ const built=nativeStackInput(preparedBuildInput('native-sndfile'),{arch,work}),libraries=path.join(built.prefix,'lib'),codecs=path.join(output,'codecs'),codecLicenses=path.join(output,'licenses');
+ fs.mkdirSync(codecs,{recursive:true});fs.mkdirSync(codecLicenses);
  // Retain every original loader name without stripping or signing its bytes
  // again. Common packaging converts these copies into dependency aliases.
  for(const name of fs.readdirSync(libraries).filter(name=>name.endsWith('.dylib')))fs.copyFileSync(path.join(libraries,name),path.join(codecs,name));
- const copied=copyNotices(built.notices.map((notice,index)=>({...notice,path:'notices/'+index+'-'+path.basename(notice.file)})),{output});printWarnings(copied.warnings);const notices=copied.notices.map(({file,...notice})=>notice);
+ const notices=[];try{fs.cpSync(path.join(built.prefix,'licenses'),codecLicenses,{recursive:true});}catch{}
  const include=path.join(output,'include');fs.cpSync(path.join(built.prefix,'include'),include,{recursive:true,dereference:true});
  const sourceIdentity={profile:Audio.PIN.version,architecture:arch,recipeSha256:built.recipeSha256,audioFormats:built.audioFormats,dependencies:Audio.PIN.dependencies};
  fs.writeFileSync(path.join(output,'sources.json'),JSON.stringify(sourceIdentity,null,2)+'\n');
- return {codecs,codecNotices,include,sourceArchives:{},sources:built.sourceRoots,profile,notices,audioFormats:built.audioFormats,recipeSha256:built.recipeSha256};
+ return {codecs,codecLicenses,include,sourceArchives:{},sources:built.sourceRoots,profile,notices,audioFormats:built.audioFormats,recipeSha256:built.recipeSha256};
 }
 
 /** Seal the same codec input closure for the shared Runtime build path. */

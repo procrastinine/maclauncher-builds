@@ -19,7 +19,7 @@ function validateDeclaration(item) {
 }
 function nativeHostDependencies(dependencies) {
   const rows = dependencies?.nativeHostDependencies ? dependencies.nativeHostDependencies() : [];
-  if (!Array.isArray(rows) || rows.length > 128) throw new Error('Invalid native host dependency declarations.');
+  if (!Array.isArray(rows)) throw new Error('Invalid native host dependency declarations.');
   for (const row of rows) {
     if (!row || !/^[a-z0-9-]+$/.test(row.id || '') || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(row.version || '') ||
         !SHA.test(row.sha256 || '') || B.relativeFile(row.file) !== row.file ||

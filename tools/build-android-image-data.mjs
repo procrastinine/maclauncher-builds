@@ -1,4 +1,5 @@
-import {copyNotices,fetchNotices,printWarnings} from '../lib/notices.mjs';
+import {addLicense} from '../lib/licenses.mjs';
+import {downloadFile} from './download.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -62,7 +63,7 @@ export function imageDataContentIdentity(transport,{targetSymlinkMode=0o755}={})
 }
 /** Split large data members while retaining their complete source-file identity. */
 export function chunkImageData(transport,payload,chunkBytes){
- if(chunkBytes!==128*1024*1024)throw Error('Select the declared image data chunk size.');
+ if(!Number.isSafeInteger(chunkBytes)||chunkBytes<=0)throw Error('Select a positive image data chunk size.');
  for(const row of transport.records.filter(row=>row.kind==='file'&&!row.chunks?.length&&row.size>chunkBytes)){
   if(!(/^\d{8}$/).test(row.data||''))throw Error('Invalid image data object name.');
   const input=path.join(payload,'data',row.data),fd=fs.openSync(input,'r'),whole=crypto.createHash('sha256'),buffer=Buffer.allocUnsafe(4*1024*1024),chunks=[];let consumed=0;
@@ -83,10 +84,10 @@ export function chunkImageData(transport,payload,chunkBytes){
 export function planImageDataShards(transport,profiles){
  const shards=profiles.map(profile=>({...profile,bytes:0,objects:[]}));
  const objects=transport.records.filter(row=>row.kind==='file').flatMap(row=>row.chunks?.length?row.chunks:[{data:row.data,size:row.size,sha256:row.sha256}]);
- const seen=new Set();for(const object of objects){if(!(/^\d{8}(?:-\d{4})?$/).test(object.data||'')||seen.has(object.data)||!Number.isSafeInteger(object.size)||object.size<0||object.size>128*1024*1024||!(/^[a-f0-9]{64}$/).test(object.sha256||''))throw Error('Invalid image data shard object.');seen.add(object.data);}
+ const seen=new Set();for(const object of objects){if(!(/^\d{8}(?:-\d{4})?$/).test(object.data||'')||seen.has(object.data)||!Number.isSafeInteger(object.size)||object.size<0||!(/^[a-f0-9]{64}$/).test(object.sha256||''))throw Error('Invalid image data shard object.');seen.add(object.data);}
  objects.sort((a,b)=>b.size-a.size||(a.data<b.data?-1:a.data>b.data?1:0));
  for(const object of objects){const selected=shards.reduce((a,b)=>a.bytes<=b.bytes?a:b);selected.objects.push(object);selected.bytes+=object.size;}
- for(const shard of shards){if(shard.bytes>850*1024*1024)throw Error('Original image shard exceeds its declared data budget.');shard.objects.sort((a,b)=>a.data<b.data?-1:a.data>b.data?1:0);}
+ for(const shard of shards){shard.objects.sort((a,b)=>a.data<b.data?-1:a.data>b.data?1:0);}
  return shards;
 }
 
@@ -95,7 +96,7 @@ export async function packageImageData({project,version,arch,output,work,tool,in
  const profile=JSON.parse(fs.readFileSync(descriptor)),selected=profile.profiles.find(row=>row.id===project),payload=path.join(output,'payload');
  if(!selected||version!==selected.version)throw Error('Select a declared original image data shard.');
  if(fs.existsSync(output))throw Error('Image data shard output already exists.');
- if(execFileSync('git',['-C',tool.upstream,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==profile.revision||execFileSync('git',['-C',tool.upstream,'status','--porcelain','--untracked-files=no'],{encoding:'utf8'}).trim())throw Error('Original image parser differs from its declared clean source.');
+ if(execFileSync('git',['-C',tool.upstream,'rev-parse','HEAD'],{maxBuffer:Infinity,encoding:'utf8'}).trim()!==profile.revision||execFileSync('git',['-C',tool.upstream,'status','--porcelain','--untracked-files=no'],{maxBuffer:Infinity,encoding:'utf8'}).trim())throw Error('Original image parser differs from its declared clean source.');
  const transport=JSON.parse(fs.readFileSync(path.join(input,'image-data.json')));
  if(transport.archive_sha256!==profile.archive.sha256||transport.source_revision!==profile.revision||profile.targetSymlinkMode!==0o755)throw Error('Image transport differs from its declared original.');
  const content=imageDataContentIdentity(transport,{targetSymlinkMode:profile.targetSymlinkMode});
@@ -110,8 +111,8 @@ export async function packageImageData({project,version,arch,output,work,tool,in
  fs.writeFileSync(path.join(payload,'content.json'),JSON.stringify(content)+'\n');
  const notices=sourceNotices(tool.upstream,{name:'AIM image parser',repository:profile.repository});
  const rust=rustNotices({source:tool.crate,output:path.join(work,'rust-notices'),env:tool.env});
- const copied=copyNotices([...notices,...rust].map((notice,index)=>({...notice,path:'notices/'+index+'-'+path.basename(notice.file)})),{output:payload});printWarnings(copied.warnings);const records=copied.notices.map(({file,...notice})=>notice);
- const fetched=await fetchNotices([{url:profile.license.url,path:'notices/android-sdk-arm-dbt-license.txt',name:'Android SDK system image',license:'Android SDK ARM DBT license',sourceUrl:profile.license.url}],{output:payload});printWarnings(fetched.warnings);records.push(...fetched.notices.map(({file,...notice})=>notice));
+ const records=[];for(const notice of [...notices,...rust])addLicense(payload,notice.name,notice.file,notice.license);
+ const license=path.join(work,'android-sdk-arm-dbt-license.txt');try{await downloadFile(profile.license.url,license);addLicense(payload,'Android SDK system image',license,'Android SDK ARM DBT license');}catch(error){console.warn('::warning::Could not collect Android SDK notice: '+error.message);}
  const result=helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{format:'android-image-data-v1',upstreamRevision:profile.revision,originalArchiveSha256:profile.archive.sha256,targetSymlinkMode:profile.targetSymlinkMode,content,transportSha256:sha(path.join(payload,'image-data.json')),dataShard:shard},notices:records});
  // Sealing computes actual data-object digests. Match those to the decoder's
  // records, so the target identity authenticates the delivered bytes as well.

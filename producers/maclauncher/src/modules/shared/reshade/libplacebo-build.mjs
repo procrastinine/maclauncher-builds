@@ -1,4 +1,4 @@
-import * as NoticeIntake from '../../../../../../lib/notices.mjs';
+import {addLicense} from '../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -12,18 +12,18 @@ const directory=path.dirname(fileURLToPath(import.meta.url)),repository=path.res
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const run=(program,args)=>execFileSync(program,args,{stdio:'pipe',encoding:'utf8'});
 export const MOLTENVK=Object.freeze({version:'1.4.2',sha256:'aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f',license:'Apache-2.0',source:'https://github.com/KhronosGroup/MoltenVK/releases/tag/v1.4.2',archive:Object.freeze({url:'https://github.com/KhronosGroup/MoltenVK/releases/download/v1.4.2/MoltenVK-macos.tar',sha256:'f95765a6229cb7b915990a2890ce12ebe36a730b021545d3d52ae69ce4c4024e'})});
-function inventory(output){const files=[];function visit(relative=''){for(const row of fs.readdirSync(path.join(output,relative),{withFileTypes:true})){const file=relative?relative+'/'+row.name:row.name;if(NoticeIntake.isNoticePath(file))continue;if(row.isDirectory())visit(file);else if(file!=='provider.json')files.push({path:file,size:fs.statSync(path.join(output,file)).size,sha256:hash(path.join(output,file))});}}visit();return files.sort((a,b)=>a.path.localeCompare(b.path));}
+function inventory(output){const files=[];function visit(relative=''){for(const row of fs.readdirSync(path.join(output,relative),{withFileTypes:true})){const file=relative?relative+'/'+row.name:row.name;if(row.isDirectory())visit(file);else if(file!=='provider.json')files.push({path:file,size:fs.statSync(path.join(output,file)).size,sha256:hash(path.join(output,file))});}}visit();return files.sort((a,b)=>a.path.localeCompare(b.path));}
 export function build({moltenvk,headers,output,sceneLibrary,dependencies,architecture}){
  if(fs.existsSync(output))throw Error('Choose a new libplacebo output directory.');
  if(sceneLibrary.architecture!==architecture||hash(sceneLibrary.library)!==sceneLibrary.sha256)throw Error('The source-built libplacebo library changed.');
- const lib=path.join(output,'libplacebo'),notices=path.join(output,'notices/libplacebo');fs.mkdirSync(lib,{recursive:true});fs.mkdirSync(notices,{recursive:true});
+ const lib=path.join(output,'libplacebo'),notices=output;fs.mkdirSync(lib,{recursive:true});fs.mkdirSync(notices,{recursive:true});
  const mvk=path.join(moltenvk,'MoltenVK/MoltenVK/dynamic/dylib/macOS/libMoltenVK.dylib');if(hash(mvk)!==MOLTENVK.sha256)throw Error('The MoltenVK binary input changed.');
  const inputs=[['libplacebo.360.dylib',sceneLibrary.library],['libshaderc_shared.1.dylib',path.join(dependencies.inputs,'shaderc/shaderc/'+profile.shadercVersion+'/lib/libshaderc_shared.1.dylib')],['liblcms2.2.dylib',path.join(dependencies.inputs,'little-cms2/little-cms2/'+profile.lcmsVersion+'/lib/liblcms2.2.dylib')],['libMoltenVK.dylib',mvk]];
  for(const [name,source]of inputs){const file=path.join(lib,name);fs.copyFileSync(source,file);fs.chmodSync(file,0o755);run('install_name_tool',['-id','@rpath/'+(name==='libplacebo.360.dylib'?'libplacebo/':'')+name,file]);
   for(const line of run('otool',['-arch',architecture,'-L',file]).split('\n').slice(2)){const dependency=line.trim().split(' (')[0];if(!dependency||dependency.startsWith('/System/')||dependency.startsWith('/usr/lib/'))continue;let next=path.basename(dependency);if(next.startsWith('liblcms2.'))next='liblcms2.2.dylib';if(next.startsWith('libvulkan.'))next='libMoltenVK.dylib';if(!inputs.some(([name])=>name===next))throw Error('Unexpected libplacebo dependency: '+dependency);if(dependency!=='@loader_path/'+next)run('install_name_tool',['-change',dependency,'@loader_path/'+next,file]);}
   if(name==='libshaderc_shared.1.dylib')isolateCompiler(file,[['pirv_cross','pplc_cross'],['spvtools','spvplctl'],['glslang','mclplcg'],['3spv','3plv']]);run('codesign',['--force','-s','-',file]);}
  const {library:_library,include:_include,notices:sceneNotices=[],...provenance}=sceneLibrary;fs.writeFileSync(path.join(notices,architecture==='arm64'?'scene-source.json':'scene-source.x86_64.json'),JSON.stringify(provenance,null,2)+'\n');
- for(const notice of [...sceneNotices,...dependencies.notices]){NoticeIntake.copyNotice(notice.file,path.join(notices,notice.name));}NoticeIntake.copyNotice(path.join(moltenvk,'MoltenVK/LICENSE'),path.join(notices,'MoltenVK.LICENSE'));
+ for(const notice of [...sceneNotices,...dependencies.notices]){addLicense(output,notice.name,notice.file);}addLicense(output,'MoltenVK',path.join(moltenvk,'MoltenVK/LICENSE'));
  const native=path.join(directory,'native'),common=['clang++','-std=c++17','-O2','-fobjc-arc','-Wno-deprecated-declarations','-Werror=unguarded-availability-new','-DVK_USE_PLATFORM_METAL_EXT','-DMACFX_LIBPLACEBO_SCENE_INPUTS=1','-arch',architecture,'-mmacosx-version-min='+profile.minimumMacOS,'-ffile-prefix-map='+repository+'=.','-ffile-prefix-map='+headers+'=upstream','-I'+native,'-I'+headers,'-I'+sceneLibrary.include,'-I'+path.join(moltenvk,'MoltenVK/MoltenVK/include')];
  const provider=path.join(output,'libmacfx-libplacebo.dylib');run('xcrun',[...common,'-dynamiclib',path.join(native,'libplacebo-node.mm'),'-L'+lib,'-lplacebo.360','-lMoltenVK','-Wl,-rpath,@loader_path/libplacebo','-Wl,-rpath,@loader_path','-Wl,-install_name,@rpath/libmacfx-libplacebo.dylib','-framework','Foundation','-framework','Metal','-o',provider]);
  const helper=path.join(output,'libplacebo-prepare');run('xcrun',[...common,path.join(native,'libplacebo-prepare.mm'),'-L'+output,'-lmacfx-libplacebo','-Wl,-rpath,@executable_path','-framework','Foundation','-framework','Metal','-o',helper]);for(const file of[provider,helper]){run('strip',['-x',file]);run('codesign',['--force','-s','-',file]);}
@@ -46,7 +46,7 @@ export function combineStages({stages,output}){
  for(const key of['sceneInputsAPI','sceneInputRoles','imageFiltersAPI','imageFilters'])if(JSON.stringify(stages[0].metadata[key])!==JSON.stringify(stages[1].metadata[key]))throw Error('Provider interfaces differ between architectures: '+key);
  fs.mkdirSync(output,{recursive:true});fs.cpSync(stages[0].stage,output,{recursive:true});
  for(const row of stages[0].metadata.files){const destination=path.join(output,row.path);if((row.path.endsWith('.dylib')||row.path==='libplacebo-prepare')&&hash(path.join(stages[0].stage,row.path))!==hash(path.join(stages[1].stage,row.path))){run('lipo',['-create',...stages.map(({stage})=>path.join(stage,row.path)),'-output',destination+'.fat']);fs.renameSync(destination+'.fat',destination);run('codesign',['--force','-s','-',destination]);}}
- fs.copyFileSync(path.join(stages[1].stage,'notices/libplacebo/scene-source.x86_64.json'),path.join(output,'notices/libplacebo/scene-source.x86_64.json'));
+ fs.copyFileSync(path.join(stages[1].stage,'scene-source.x86_64.json'),path.join(output,'scene-source.x86_64.json'));
  const metadata={...stages[0].metadata,architectures:['arm64','x86_64'],inputs:stages.flatMap(({metadata})=>metadata.inputs),files:inventory(output)};fs.writeFileSync(path.join(output,'provider.json'),JSON.stringify(metadata,null,2)+'\n');return metadata;
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){

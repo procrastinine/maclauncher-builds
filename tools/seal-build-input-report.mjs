@@ -6,14 +6,11 @@ import {canonicalReport} from '../lib/canonical-report.mjs';
 import {releaseTag} from '../lib/project-identity.mjs';
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs');
 const read=value=>JSON.parse(value.trim().startsWith('{')?value:fs.readFileSync(value,'utf8'));
-import {tidyNotices} from '../lib/notices.mjs';
-export {tidyNotices};
 /** Add generated input facts to a new build, before its archive is attested. */
 export function sealBuildInputReport({project,output,environment=process.env}){
  if(!environment.BUILD_REPORTS)return;
  const reports=read(environment.BUILD_REPORTS),report=reports[project];if(!report?.definition)throw Error('The build has no resolved input report: '+project);
  const payload=path.join(output,'payload'),file=path.join(output,'declaration.json'),declaration=JSON.parse(fs.readFileSync(file));
- tidyNotices(payload,declaration,{share:!Object.values(reports).some(other=>other.inputs?.some(input=>input.id===project))});
  const definition=canonicalReport(report.definition),digest=crypto.createHash('sha256').update(definition).digest('hex');
  if(digest!==report.definitionDigest)throw Error('The build definition differs from its plan.');
  const prepared=environment.MACLAUNCHER_BUILD_INPUTS?read(environment.MACLAUNCHER_BUILD_INPUTS):{};

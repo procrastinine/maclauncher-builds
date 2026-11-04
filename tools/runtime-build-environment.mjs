@@ -4,7 +4,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {linuxToolSelection,installedToolsDirectory} from './build-tools.mjs';
 const systemDirectories=process.platform==='win32'?[]:['/usr/bin','/bin','/usr/sbin','/sbin'];
-const locate=(name,env)=>{try{return execFileSync('/usr/bin/which',[name],{encoding:'utf8',env,stdio:['ignore','pipe','ignore']}).trim();}catch{return undefined;}};
+const locate=(name,env)=>{try{return execFileSync('/usr/bin/which',[name],{maxBuffer:Infinity,encoding:'utf8',env,stdio:['ignore','pipe','ignore']}).trim();}catch{return undefined;}};
 /** Limit additional executable and library discovery to declared build tools. */
 export function runtimeBuildEnvironment(build,{environment=process.env,platform=process.platform}={}){
  const env={...environment},aliases=fs.mkdtempSync(path.join(os.tmpdir(),'runtime-build-tools-'));
@@ -22,10 +22,10 @@ export function runtimeBuildEnvironment(build,{environment=process.env,platform=
   }
   if(platform==='darwin'&&names.size){
    if(!brew)throw Error('Install the declared Homebrew build formulae.');
-   const dependencies=execFileSync(brew,['deps','--installed','--union',...names],{encoding:'utf8',env:environment,stdio:['ignore','pipe','pipe']}).trim();
+   const dependencies=execFileSync(brew,['deps','--installed','--union',...names],{maxBuffer:Infinity,encoding:'utf8',env:environment,stdio:['ignore','pipe','pipe']}).trim();
    for(const name of dependencies.split('\n').filter(Boolean))names.add(name);
    for(const name of names){
-    const prefix=execFileSync(brew,['--prefix',name],{encoding:'utf8',env:environment,stdio:['ignore','pipe','pipe']}).trim();
+    const prefix=execFileSync(brew,['--prefix',name],{maxBuffer:Infinity,encoding:'utf8',env:environment,stdio:['ignore','pipe','pipe']}).trim();
     if(!path.isAbsolute(prefix)||!fs.statSync(prefix).isDirectory())throw Error('Declared build formula is not installed: '+name);
     prefixes.push(prefix);
    }
@@ -33,10 +33,10 @@ export function runtimeBuildEnvironment(build,{environment=process.env,platform=
   const binaries=prefixes.flatMap(prefix=>['bin','sbin'].map(name=>path.join(prefix,name))).filter(file=>fs.existsSync(file));
   let compilerDirectory;
   if(platform==='darwin'){
-   compilerDirectory=path.dirname(execFileSync('/usr/bin/xcrun',['--find','clang'],{encoding:'utf8',env:environment,stdio:['ignore','pipe','pipe']}).trim());
+   compilerDirectory=path.dirname(execFileSync('/usr/bin/xcrun',['--find','clang'],{maxBuffer:Infinity,encoding:'utf8',env:environment,stdio:['ignore','pipe','pipe']}).trim());
    // PATH invokes Xcode's compiler directly. Its C++ standard-library headers
    // need the same selected SDK that the xcrun compiler wrapper supplies.
-   env.SDKROOT=environment.SDKROOT||execFileSync('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path'],{encoding:'utf8',env:environment,stdio:['ignore','pipe','pipe']}).trim();
+   env.SDKROOT=environment.SDKROOT||execFileSync('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path'],{maxBuffer:Infinity,encoding:'utf8',env:environment,stdio:['ignore','pipe','pipe']}).trim();
   }
   fs.symlinkSync(process.execPath,path.join(aliases,'node'));
   const hostTools=[...(platform==='darwin'?['brew']:[]),'npm','npx','corepack','java','javac','jar',...(build.rustComponents?.length||build.rustTargets?.length?['rustup','cargo','rustc','rustdoc','rustfmt','cargo-fmt','cargo-clippy','clippy-driver']:[])];

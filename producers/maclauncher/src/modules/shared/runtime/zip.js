@@ -234,7 +234,6 @@ function findZipEntry(entries, entryName) {
 
 function inflateZipEntry(buffer, compressionMethod, maxOutputBytes) {
   if (compressionMethod === 0) {
-    if (maxOutputBytes !== undefined && buffer.length > maxOutputBytes) throw new Error("ZIP entry exceeds its expanded size limit.");
     return buffer;
   }
   if (compressionMethod === 8) return zlib.inflateRawSync(buffer, maxOutputBytes === undefined ? {} : {maxOutputLength: Math.max(1, maxOutputBytes)});
@@ -253,11 +252,9 @@ function readZipEntryBuffer(filePath, entryName) {
 // preserves distinct case-sensitive names and avoids rescanning large archives.
 function readZipEntry(filePath, entry, {maxOutputBytes} = {}) {
   if (!entry || typeof entry.name !== "string") return null;
-  if (maxOutputBytes !== undefined && (!Number.isSafeInteger(maxOutputBytes) || maxOutputBytes < 0)) throw new Error("Invalid ZIP entry size limit.");
   const declared = entry.uncompressedSize;
   if (declared !== undefined && (!Number.isSafeInteger(declared) || declared < 0)) return null;
-  if (maxOutputBytes !== undefined && declared > maxOutputBytes) throw new Error("ZIP entry exceeds its expanded size limit.");
-  const limit = declared === undefined ? maxOutputBytes : maxOutputBytes === undefined ? declared : Math.min(declared, maxOutputBytes);
+  const limit = declared;
   const fd = fs.openSync(filePath, "r");
   try {
     const header = readFixedBuffer(fd, entry.absoluteLocalHeaderOffset, 30);
@@ -286,8 +283,8 @@ function readZipEntry(filePath, entry, {maxOutputBytes} = {}) {
 // so large model resources never need a whole-file Buffer allocation.
 async function extractZipEntry(filePath, entry, destination, {maxOutputBytes, signal, onProgress} = {}) {
   signal?.throwIfAborted();
-  if (!entry || !Number.isSafeInteger(maxOutputBytes) || maxOutputBytes < 0 ||
-      !Number.isSafeInteger(entry.uncompressedSize) || entry.uncompressedSize < 0 || entry.uncompressedSize > maxOutputBytes ||
+  if (!entry ||
+      !Number.isSafeInteger(entry.uncompressedSize) || entry.uncompressedSize < 0 ||
       !Number.isSafeInteger(entry.compressedSize) || entry.compressedSize < 0 || entry.flags & 1 ||
       ![0, 0o100000].includes(entry.externalAttributes >>> 16 & 0o170000))
     throw new Error("The ZIP entry is unsafe or exceeds its size limit.");
@@ -310,7 +307,7 @@ async function extractZipEntry(filePath, entry, destination, {maxOutputBytes, si
   output.once("open", () => { created = true; });
   const bounded = new Transform({transform(chunk, _encoding, callback) {
     bytes += chunk.length;
-    if (bytes > maxOutputBytes || bytes > entry.uncompressedSize) return callback(new Error("ZIP entry exceeds its expanded size limit."));
+    if (bytes > entry.uncompressedSize) return callback(new Error("ZIP entry exceeds its expanded size limit."));
     if (typeof zlib.crc32 === "function") crc = zlib.crc32(chunk, crc);
     try { onProgress?.(bytes);callback(null, chunk); } catch (error) { callback(error); }
   }});

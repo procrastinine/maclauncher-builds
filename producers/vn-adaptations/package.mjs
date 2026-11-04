@@ -1,4 +1,3 @@
-import * as NoticeIntake from '../../lib/notices.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -27,7 +26,7 @@ function copy(from,to){
   fs.chmodSync(to,(fs.statSync(from).mode&0o111)?0o755:0o644);
 }
 function inventory(root){
-  return B.fileInventory(root).filter(relative=>!NoticeIntake.isNoticePath(relative)).map(name=>{
+  return B.fileInventory(root).map(name=>{
     const file=path.join(root,name),stored=B.readRegular(file,B.LIMITS.fileBytes);
     const magic=stored.bytes.length>=4?stored.bytes.readUInt32BE(0):0;
     let architectures;
@@ -68,7 +67,7 @@ export async function packageRuntime({project,input,output,arch='arm64'}){
       const polyfill=read(path.join(here,'kag3-polyfill/manifest.json'));
       for(const name of [...Object.keys(polyfill.files),'manifest.json'])copy(path.join(here,'kag3-polyfill',name),path.join(files,'share/kag3-polyfill',name));
       executableRelative=original.executableRelative;provenance={...original.provenance,inputManifestSha256:pin.inputManifestSha256,kag3Revision:pin.polyfill.revision};
-      notices=[...original.notices,{name:'KAG3 polyfill font',license:'See included font license',sourceUrl:pin.polyfill.url,path:'share/kag3-polyfill/FONT_LICENSE.txt'}];
+      notices=[{name:'KAG3 polyfill font',license:'See included font license',sourceUrl:pin.polyfill.url,path:'share/kag3-polyfill/FONT_LICENSE.txt'}];
       runtimeFiles={...original.runtimeFiles,kag3Manifest:'share/kag3-polyfill/manifest.json'};
 
     }
@@ -76,11 +75,11 @@ export async function packageRuntime({project,input,output,arch='arm64'}){
     if(nativeFiles.some(file=>file.architectures&&!file.architectures.includes(arch==='x64'?'x86_64':arch)))throw Error('The package contains a library for a different CPU.');
     const dependencies=nativeFiles.filter(file=>file.architectures).map(file=>({file:file.path,links:[...new Set(M.readMachOLoadCommands(path.join(files,file.path)).slices.flatMap(slice=>slice.dependencies.map(dependency=>dependency.path)))]}));
     const sourceSha256=hash(path.join(here,'source.json'));
-    const manifest={schemaVersion:1,managerId:project,version:pin.version,upstreamRevision:pin.upstream.revision,platform:'darwin',arch,minimumMacOS:'13.0',executableRelative,files:nativeFiles,notices,dependencies,runtimeFiles,provenance:{...provenance,producerSourceSha256:sourceSha256}};
+    const manifest={schemaVersion:1,managerId:project,version:pin.version,upstreamRevision:pin.upstream.revision,platform:'darwin',arch,minimumMacOS:'13.0',executableRelative,files:nativeFiles,dependencies,runtimeFiles,provenance:{...provenance,producerSourceSha256:sourceSha256}};
     B.validateManifest(manifest);B.verifyPayload(files,manifest);
     const manifestPath=path.join(payload,'manifest.json');fs.writeFileSync(manifestPath,JSON.stringify(manifest,null,2)+'\n',{mode:0o644,flag:'wx'});
     const launcherArchitectures=arch==='x64'?['arm64','x64']:['arm64'];
-    const declaration={id:project,version:pin.version,arch,launcherArchitectures,minimumMacOS:manifest.minimumMacOS,sourceRelative:null,sourceSha256,directoryRelative:[project,pin.version,arch].join('/'),manifestRelative:'manifest.json',manifestSha256:hash(manifestPath),files:[...nativeFiles.map(file=>({...file,path:'files/'+file.path})),{path:'manifest.json',...(({bytes,...rest})=>rest)(B.readRegular(manifestPath,B.LIMITS.manifestBytes))}],notices:notices.map(notice=>({...notice,path:'files/'+notice.path}))};
+    const declaration={id:project,version:pin.version,arch,launcherArchitectures,minimumMacOS:manifest.minimumMacOS,sourceRelative:null,sourceSha256,directoryRelative:[project,pin.version,arch].join('/'),manifestRelative:'manifest.json',manifestSha256:hash(manifestPath),files:[...nativeFiles.map(file=>({...file,path:'files/'+file.path})),{path:'manifest.json',...(({bytes,...rest})=>rest)(B.readRegular(manifestPath,B.LIMITS.manifestBytes))}]};
     fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});
     const archive=path.join(output,`${project}-${pin.version}-${arch}.tar.gz`);
     const record=await pack({project,input:payload,declaration,output:archive});

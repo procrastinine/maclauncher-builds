@@ -1,4 +1,3 @@
-const Notices = require('../../../../../../lib/notices.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -8,19 +7,18 @@ const Native = require("./local-native");
 const PE = require("./pe-exports");
 const run = promisify(execFile);
 
-const LIMITS = Object.freeze({ manifestBytes: 8 * 1024 * 1024, files: 20000, fileBytes: 256 * 1024 * 1024, bytes: 1024 * 1024 * 1024 });
+const LIMITS = Object.freeze({ manifestBytes: Infinity, files: Infinity, fileBytes: Infinity, bytes: Infinity });
 const digest = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 const SHA = /^[a-f0-9]{64}$/;
 // Display refreshes share parsed manifests, not payload verification results.
 // Full install/launch verification always rereads every payload byte.
 const manifestCache = new Map();
-const MANIFEST_CACHE_LIMIT = 128;
 let hostSystemVersion;
 
 function fileIdentity(file, { maximum = LIMITS.fileBytes } = {}) {
   if (!realDirectory(path.dirname(file))) throw new Error("Bundled runtime directory is missing.");
   const stat = fs.lstatSync(file, { bigint: true });
-  if (!stat.isFile() || stat.size > BigInt(maximum)) throw new Error("Bundled runtime file is not regular or exceeds its limit.");
+  if (!stat.isFile()) throw new Error("Bundled runtime file is not regular.");
   return [stat.dev, stat.ino, stat.size, stat.mode, stat.mtimeNs, stat.ctimeNs].join(":");
 }
 
@@ -43,7 +41,6 @@ function readManifest(file, expected, { cached = false } = {}) {
       // A write during the initial read must not populate a stale display entry.
       if (fileIdentity(absolute, { maximum: LIMITS.manifestBytes }) !== identity) throw new Error("Bundled runtime manifest changed while being read.");
       manifestCache.delete(absolute);
-      if (manifestCache.size >= MANIFEST_CACHE_LIMIT) manifestCache.delete(manifestCache.keys().next().value);
       manifestCache.set(absolute, stored);
     }
   }
@@ -85,7 +82,7 @@ function readRegular(file, maximum) {
   const fd = fs.openSync(file, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0));
   try {
     const stat = fs.fstatSync(fd);
-    if (!stat.isFile() || stat.size > maximum) throw new Error("Bundled runtime file is not regular or exceeds its limit.");
+    if (!stat.isFile()) throw new Error("Bundled runtime file is not regular.");
     const bytes = Buffer.alloc(stat.size);
     let offset = 0;
     while (offset < bytes.length) {
@@ -104,17 +101,17 @@ function validateManifest(manifest, { managerId, version, upstreamRevision, arch
       !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(manifest.version || "") || !/^[a-f0-9]{40}$/.test(manifest.upstreamRevision || "") ||
       manifest.platform !== "darwin" || !["arm64", "x64", "universal"].includes(manifest.arch) ||
       !/^\d+\.\d+(?:\.\d+)?$/.test(manifest.minimumMacOS || "") ||
-      !Array.isArray(manifest.files) || !manifest.files.length || manifest.files.length > LIMITS.files ||
+      !Array.isArray(manifest.files) || !manifest.files.length ||
       manifest.provenance?.sourceRevision !== manifest.upstreamRevision || !Array.isArray(manifest.dependencies)) throw new Error("Invalid bundled runtime manifest.");
   if (managerId && manifest.managerId !== managerId || version && manifest.version !== version ||
       upstreamRevision && manifest.upstreamRevision !== upstreamRevision || arch && manifest.arch !== arch) throw new Error("Bundled runtime version, source pin or architecture differs from the selected catalog entry.");
   relativeFile(manifest.executableRelative);
   const names = new Set(), filesByPath = new Map(), directories = new Set();
   let total = 0;
-  for (const file of manifest.files.filter(file=>!Notices.isNoticePath(file.path,manifest.notices))) {
+  for (const file of manifest.files) {
     relativeFile(file.path);
     const key = file.path.normalize("NFC").toLowerCase();
-    if (names.has(key) || !Number.isSafeInteger(file.size) || file.size < 0 || file.size > LIMITS.fileBytes ||
+    if (names.has(key) || !Number.isSafeInteger(file.size) || file.size < 0 ||
         !SHA.test(file.sha256 || "") || !Number.isInteger(file.mode) || file.mode < 0 || file.mode > 0o777 ||
         file.format !== undefined && (!["mach-o", "pe"].includes(file.format) || !file.architectures) ||
         file.architectures && (!Array.isArray(file.architectures) || !file.architectures.length || file.architectures.some(value => !(file.format === "pe" ? ["arm64", "x86_64", "x86"] : ["arm64", "x86_64"]).includes(value)))) throw new Error("Invalid bundled runtime file record.");
@@ -122,12 +119,10 @@ function validateManifest(manifest, { managerId, version, upstreamRevision, arch
     filesByPath.set(file.path, file);
     for (let directory = path.posix.dirname(file.path); directory !== "."; directory = path.posix.dirname(directory)) directories.add(directory);
     total += file.size;
-    if (total > LIMITS.bytes) throw new Error("Bundled runtime exceeds its size limit.");
   }
   const executable = filesByPath.get(manifest.executableRelative);
   const requiredArchitectures = manifest.arch === "universal" ? ["arm64", "x86_64"] : [manifest.arch === "x64" ? "x86_64" : "arm64"];
   if (!executable || !(executable.mode & 0o111) || !requiredArchitectures.every(architecture => executable.architectures?.includes(architecture))) throw new Error("Bundled runtime has no matching executable.");
-  Notices.printWarnings(Notices.noticeRows(manifest.notices,{packageName:manifest.managerId}).warnings);
   for (const dependency of manifest.dependencies) {
     if (!dependency || !filesByPath.has(relativeFile(dependency.file)) ||
         !Array.isArray(dependency.links) || dependency.links.some(link => typeof link !== "string" || !(
@@ -150,15 +145,12 @@ function validateManifest(manifest, { managerId, version, upstreamRevision, arch
 function fileInventory(root) {
   const files = [];
   function walk(relative, depth) {
-    if (depth > 32) throw new Error("Bundled runtime directory nesting exceeds its limit.");
     for (const entry of fs.readdirSync(path.join(root, relative), { withFileTypes: true })) {
       const name = relativeFile(path.posix.join(relative, entry.name));
-      if(Notices.isNoticePath(name,notices))continue;
       if (entry.isSymbolicLink()) throw new Error("Bundled runtime packages cannot contain symlinks.");
       if (entry.isDirectory()) walk(name, depth + 1);
       else if (entry.isFile()) files.push(name);
       else throw new Error("Bundled runtimes may contain only regular files and directories.");
-      if (files.length > LIMITS.files) throw new Error("Bundled runtime has too many files.");
     }
   }
   if (!realDirectory(root)) throw new Error("Bundled runtime payload is missing.");
@@ -167,9 +159,9 @@ function fileInventory(root) {
 }
 
 function verifyPayload(root, manifest) {
-  const expected = manifest.files.filter(file=>!Notices.isNoticePath(file.path,manifest.notices)).map(file => file.path).sort();
-  if (JSON.stringify(fileInventory(root,{notices:manifest.notices})) !== JSON.stringify(expected)) throw new Error("Bundled runtime file inventory differs from its manifest.");
-  for (const file of manifest.files.filter(file=>!Notices.isNoticePath(file.path,manifest.notices))) {
+  const expected = manifest.files.map(file => file.path).sort();
+  if (JSON.stringify(fileInventory(root)) !== JSON.stringify(expected)) throw new Error("Bundled runtime file inventory differs from its manifest.");
+  for (const file of manifest.files) {
     const full = path.join(root, file.path);
     const actual = readRegular(full, file.size);
     if (actual.size !== file.size || actual.sha256 !== file.sha256 || actual.mode !== file.mode) throw new Error(`Bundled runtime checksum or permissions changed: ${file.path}`);
@@ -223,13 +215,13 @@ function versionAtLeast(actual, required) {
 
 async function verifySignatures(root, manifest, { signal } = {}) {
   for (const file of manifest.files.filter(file => file.architectures && file.format !== "pe")) {
-    await run("/usr/bin/codesign", ["--verify", "--strict", path.join(root, file.path)], { ...(signal ? { signal } : {}), timeout: 30000, maxBuffer: 1024 * 1024 });
+    await run("/usr/bin/codesign", ["--verify", "--strict", path.join(root, file.path)], { ...(signal ? { signal } : {}), timeout: 30000, maxBuffer: Infinity });
   }
 }
 
 function verifySignaturesSync(root, manifest) {
   for (const file of manifest.files.filter(file => file.architectures && file.format !== "pe")) {
-    execFileSync("/usr/bin/codesign", ["--verify", "--strict", path.join(root, file.path)], { timeout: 30000, stdio: "pipe", maxBuffer: 1024 * 1024 });
+    execFileSync("/usr/bin/codesign", ["--verify", "--strict", path.join(root, file.path)], { timeout: 30000, stdio: "pipe", maxBuffer: Infinity });
   }
 }
 
@@ -285,7 +277,6 @@ function createBundledNativeRuntime({ managerId, resourceRoot, platform = proces
         manifest.files.filter(file => file.architectures).map(file => fileIdentity(path.join(payload, file.path)))]);
       if (signatureCache.get(payload) !== signatureKey) {
         (dependencies.verifySignaturesSync || verifySignaturesSync)(payload, manifest);
-        if (signatureCache.size >= MANIFEST_CACHE_LIMIT) signatureCache.delete(signatureCache.keys().next().value);
         signatureCache.set(payload, signatureKey);
       }
       if (readRegular(path.join(bundle.directory, "manifest.json"), LIMITS.manifestBytes).sha256 !== bundle.manifestSha256)

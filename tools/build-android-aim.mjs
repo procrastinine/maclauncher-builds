@@ -12,7 +12,7 @@ import {stageAim} from '../producers/maclauncher/scripts/build-android-aim.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
 const producer=path.join(root,'producers/maclauncher');
-const read=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',...options}).trim();
+const read=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8',...options}).trim();
 /** Use the shared Rust toolchain maps while retaining this producer's paths and profile. */
 export function aimBuildEnvironment({work,upstream,sdk,python,minimumMacOS='26.0',env=process.env}){
  const cargo=path.join(work,'cargo'),result=rustEnvironment({work,minimumMacOS,env:{...env,CARGO_HOME:cargo}});
@@ -51,7 +51,7 @@ export function aimAngleInput(input){
  const definition=JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/angle.json'))),profile=definition.profiles.find(row=>row.id==='aim6');
  const manifest=JSON.parse(fs.readFileSync(path.join(input.root,'angle-manifest.json')));
  if(input.record?.id!==profile.project||input.record.version!==profile.packageVersion||manifest.version!==profile.providerVersion||manifest.programBinaryVersion!==profile.programBinaryVersion||manifest.angleRevision!==definition.angle.revision)throw Error('The shared AIM ANGLE input differs from its original profile.');
- return {angle:input.root,angleNotices:path.join(input.root,'notices'),manifest,profileId:'aim6'};
+ return {angle:input.root,angleLicenses:path.join(input.root,'licenses'),manifest,profileId:'aim6'};
 }
 /** Build the existing AIM adaptation and seal it without changing app declarations. */
 export async function buildAndroidAim({project,version,arch,output,work}){

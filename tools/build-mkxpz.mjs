@@ -7,7 +7,7 @@ import {recipeMain} from './build-source.mjs';
 import {managerDeclaration} from './manager-declaration.mjs';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
-const run=(command,args)=>execFileSync(command,args,{stdio:'inherit',env:{...process.env,SDKROOT:process.env.SDKROOT||execFileSync('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path'],{encoding:'utf8'}).trim()}});
+const run=(command,args)=>execFileSync(command,args,{maxBuffer:Infinity,stdio:'inherit',env:{...process.env,SDKROOT:process.env.SDKROOT||execFileSync('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path'],{maxBuffer:Infinity,encoding:'utf8'}).trim()}});
 export async function buildMKXPZ({project,version,arch,output,work}){
  version=buildRecord(resolveProject(project,root,{resolvePins:false}),version).version;
  fs.mkdirSync(work,{recursive:true});
@@ -23,7 +23,7 @@ export async function buildMKXPZ({project,version,arch,output,work}){
  fs.writeFileSync(wrap,original.replace(expected,'revision = '+inputs.sdlImage.revision));
  run(process.execPath,[path.join(root,'producers/maclauncher/scripts/build-mkxpz-nfc.cjs'),'--version',version,'--archive',archive,'--work',buildWork,'--meson',path.join(environment,'bin/meson'),'--ninja',path.join(environment,'bin/ninja'),'--output',staged]);
  const result=JSON.parse(fs.readFileSync(path.join(buildWork,'STAGED.json'))),sdlImage=path.join(source,'subprojects/sdl2_image');
- const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',env:{...process.env,GIT_NO_LAZY_FETCH:'1'}}).trim();
+ const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{maxBuffer:Infinity,encoding:'utf8',env:{...process.env,GIT_NO_LAZY_FETCH:'1'}}).trim();
  if(git(sdlImage,['rev-parse','HEAD'])!==inputs.sdlImage.revision)throw Error('SDL_image differs from its declared commit.');
  const dependencies=[{path:'sdl2_image',revision:inputs.sdlImage.revision,repository:inputs.sdlImage.repository}];
  for(const line of git(sdlImage,['submodule','status','--recursive']).split('\n').filter(Boolean)){

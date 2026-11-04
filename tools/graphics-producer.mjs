@@ -16,15 +16,15 @@ export async function buildGraphicsSource({version,arch,output,work,sdkPath,sour
  if(!fs.existsSync(context))fs.writeFileSync(context,JSON.stringify(identity)+"\n",{flag:"wx"});
  if(!tools.meson||!tools.ninja){
   const environment=path.join(work,'build-tools');
-  if(!fs.existsSync(environment))execFileSync('uv',['venv','--python','3.13',environment],{stdio:'inherit',timeout:120000});
-  execFileSync('uv',['pip','install','--python',path.join(environment,'bin/python'),'--no-deps','--requirement',path.join(root,'producers/maclauncher/scripts/graphics-build-requirements.txt')],{stdio:'inherit',timeout:120000});
+  if(!fs.existsSync(environment))execFileSync('uv',['venv','--python','3.13',environment],{maxBuffer:Infinity,stdio:'inherit',timeout:120000});
+  execFileSync('uv',['pip','install','--python',path.join(environment,'bin/python'),'--no-deps','--requirement',path.join(root,'producers/maclauncher/scripts/graphics-build-requirements.txt')],{maxBuffer:Infinity,stdio:'inherit',timeout:120000});
   Object.assign(tools,{meson:path.join(environment,'bin/meson'),ninja:path.join(environment,'bin/ninja'),python:path.join(environment,'bin/python')});
  }
  for(const input of Object.values(initial.inputs))if(input.state==='fetchable')await fetchInput(input.id,work);
  const resolved=await build(options);fs.mkdirSync(output,{recursive:true});
  try {
   execFileSync(process.execPath,[...resolved.stage,'--version',version,'--output',path.join(output,'payload'),'--declaration',path.join(output,'declaration.json'),...(sourceRoot?['--source-root',sourceRoot]:[])],
-   {cwd:path.join(root,'producers/maclauncher'),stdio:'inherit',timeout:600000});
+   {maxBuffer:Infinity,cwd:path.join(root,'producers/maclauncher'),stdio:'inherit',timeout:600000});
   return {project:'reshade',version,arch,output,resolved,tools};
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }

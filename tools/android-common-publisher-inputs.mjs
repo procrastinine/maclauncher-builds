@@ -7,7 +7,7 @@ import {verifyProducer} from './build-runtime.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
-const read=(command,args)=>execFileSync(command,args,{encoding:'utf8',maxBuffer:64<<20}).trim();
+const read=(command,args)=>execFileSync(command,args,{encoding:'utf8',maxBuffer:Infinity}).trim();
 const descriptor=path.join(root,'producers/android-inputs/common-publishers.json');
 const archiveNames=(archive,gzip=false)=>read('/usr/bin/tar',[gzip?'-tzf':'-tf',archive]).split('\n').filter(Boolean).map(name=>{
  if(path.isAbsolute(name)||name.includes('\\')||name.split('/').includes('..'))throw Error('The publisher archive contains an unsafe path.');

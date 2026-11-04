@@ -6,7 +6,7 @@ import {checkoutSource,run} from './build-source.mjs';
 import {acquireArtSourceSelection} from './android-art-source-selection.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 const profile=JSON.parse(fs.readFileSync(new URL('../producers/android-art-inputs/guest.json',import.meta.url)));
-const read=(program,args)=>execFileSync(program,args,{encoding:'utf8'}).trim();
+const read=(program,args)=>execFileSync(program,args,{maxBuffer:Infinity,encoding:'utf8'}).trim();
 function alias(destination,source){
  fs.mkdirSync(path.dirname(destination),{recursive:true});
  if(fs.existsSync(destination))throw Error('The ART source input already exists: '+destination);

@@ -13,7 +13,7 @@ function build({ sourceCheckout, workDirectory, pkgConfigPath, toolsDirectory, m
   if (process.platform !== "darwin" || process.arch !== "arm64") throw new Error("The managed video library requires an Apple Silicon Mac.");
   if (![sourceCheckout, workDirectory, toolsDirectory].every(value => typeof value === "string" && path.isAbsolute(value)) || !/^\d+\.\d+$/.test(minimumMacOS))
     throw new Error("Choose absolute source, build and isolated build-tool folders, and a macOS deployment target.");
-  const run = (command, args, options = {}) => execFileSync(command, args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024, ...options });
+  const run = (command, args, options = {}) => execFileSync(command, args, { encoding: "utf8", maxBuffer: Infinity, ...options });
   if (run("git", ["-C", sourceCheckout, "rev-parse", "HEAD"]).trim() !== REVISION || run("git", ["-C", sourceCheckout, "status", "--porcelain", "--untracked-files=no"]).trim())
     throw new Error("Initialize the exact clean mpv source checkout.");
   const root = path.resolve(__dirname, ".."), patches = PATCHES.map(file => ({ file: path.join(root, "src/modules/video/native", file), name: file }));
@@ -26,7 +26,7 @@ function build({ sourceCheckout, workDirectory, pkgConfigPath, toolsDirectory, m
   if (!exists || JSON.stringify(previous) !== JSON.stringify(sourceInputs)) {
     if (exists) fs.rmSync(source, { recursive: true, force: true });
     fs.mkdirSync(source, { recursive: true });
-    run("/usr/bin/tar", ["-xf", "-", "-C", source], { input: execFileSync("git", ["-C", sourceCheckout, "archive", REVISION], { maxBuffer: 64 * 1024 * 1024 }) });
+    run("/usr/bin/tar", ["-xf", "-", "-C", source], { input: execFileSync("git", ["-C", sourceCheckout, "archive", REVISION], { maxBuffer: Infinity}) });
     const applyEnvironment = { ...process.env, GIT_CEILING_DIRECTORIES: workDirectory };
     const apply = input => {
       const result = spawnSync("git", ["apply", "--verbose", "-"], { cwd: source, env: applyEnvironment, input, encoding: "utf8" });

@@ -4,6 +4,7 @@ import {buildInput} from './build-input.mjs';
 import {prepareSdl} from './android-sdl3-publisher.mjs';
 import {helperPackage} from './helper-package.mjs';
 import {recipeMain} from './build-source.mjs';
+import {addLicense} from '../lib/licenses.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 /** Keep the original publisher framework API, including the headers consumers compile against. */
 export function packageSdl3Framework({project,version,output,sdl,profile}){
@@ -22,8 +23,8 @@ export function packageSdl3Framework({project,version,output,sdl,profile}){
   else throw Error('SDL framework contains a non-file input.');
  }
  copy(source,framework);
- return helperPackage({id:project,version,arch:'universal',output,minimumMacOS:'13.0',sourceSha256:profile.sha256,record:{publisherVersion:profile.version,publisherArchive:profile},
-  notices:[{name:'SDL3 '+profile.version,license:'Zlib',path:'native/SDL3.framework/Versions/A/Resources/LICENSE.txt',sourceUrl:profile.url}]});
+ addLicense(payload,'SDL3 '+profile.version,path.join(source,'Resources/LICENSE.txt'),'Zlib');
+ return helperPackage({id:project,version,arch:'universal',output,minimumMacOS:'13.0',sourceSha256:profile.sha256,record:{publisherVersion:profile.version,publisherArchive:profile}});
 }
 export async function buildAndroidSdl3({project,version,arch,output,work}){
  if(project!=='native-sdl3'||arch!=='universal')throw Error('Select the universal SDL3 framework package.');

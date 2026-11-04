@@ -13,7 +13,7 @@ export const commonHeaders={
  'image-color.h':'../../reshade/native/image-color.h',
  'vulkan-scene.h':'../../reshade/native/vulkan-scene.h'
 };
-function original(repository,file){return execFileSync('git',['-C',repository,'show',source.revision+':'+file],{encoding:'utf8',env:{...process.env,GIT_NO_LAZY_FETCH:'1'},maxBuffer:16<<20});}
+function original(repository,file){return execFileSync('git',['-C',repository,'show',source.revision+':'+file],{encoding:'utf8',env:{...process.env,GIT_NO_LAZY_FETCH:'1'},maxBuffer: Infinity});}
 function replace(text,from,to,file){if(text.split(from).length!==2)throw Error('MoltenVK source anchor changed: '+file);return text.replace(from,to);}
 export function sceneSources(repository){
  const files=new Map();

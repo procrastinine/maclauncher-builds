@@ -52,7 +52,7 @@ function preparedInput(file, options) {
 async function inspect(file, { root, execute, signal, nativeVideo = false, userDataDir }) {
   file = preparedInput(file, {userDataDir});
   const result = await execute(path.join(root, provider.helper), ["--inspect", input(file)],
-    { env: Bundle.environment(), signal, timeout: 30000, maxBuffer: Bundle.LIMITS.metadata });
+    { env: Bundle.environment(), signal, timeout: 30000, maxBuffer: Infinity});
   return metadata(JSON.parse(result.stdout), {nativeVideo});
 }
 module.exports = { sourceFormat, input, metadata, inspect, preparedInput, sourceAvailability:require("./libplacebo-filter").sourceAvailability,

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import * as NoticeIntake from '../../../lib/notices.mjs';
+import {addLicense} from '../../../lib/licenses.mjs';
 // Developer build and publication of the fixed AIM adaptation. Play uses only
 // this sealed payload and a separately acquired original Android image.
 import fs from 'node:fs';
@@ -32,7 +32,7 @@ function files(root,relative='') {
   });
 }
 function architecture(file) { try { return Native.readMachOArchitectures(file,{allowLibrary:true}); } catch { return null; } }
-function inventory(root) { return files(root).filter(file=>!NoticeIntake.isNoticePath(file)).map(file=>{
+function inventory(root) { return files(root).map(file=>{
   const full=path.join(root,file),stat=fs.statSync(full),arch=architecture(full);
   return {path:file,size:stat.size,mode:stat.mode&0o777,sha256:sha(full),...(arch?{architectures:arch}:{})};
 }); }
@@ -48,17 +48,17 @@ function overlaySources(root,manifest,seen=new Set()) {
   }
   return seen;
 }
-function noticeTree(from,to) {
-  try{for(const file of files(from))NoticeIntake.copyNotice(path.join(from,file),path.join(to,file));}catch(error){console.warn('::warning::Notice candidates unavailable: '+error.message);}
+function noticeTree(from,payload,component) {
+  try{for(const file of files(from))addLicense(payload,component,path.join(from,file));}catch(error){console.warn('::warning::Notice candidates unavailable: '+error.message);}
 }
 export function stageAim({build,angle,angleNotices,output,writeDistribution=true,environment=process.env,version=source.version}) {
-  build=path.resolve(build);angle=path.resolve(angle);angleNotices=path.resolve(angleNotices||path.join(build,'notices/angle'));output=path.resolve(output);
+  build=path.resolve(build);angle=path.resolve(angle);angleNotices=path.resolve(angleNotices||path.join(build,'licenses/angle'));output=path.resolve(output);
   if(fs.existsSync(output))throw new Error('The AIM runtime version already exists. Staging requires a new immutable version.');
   const temporary=output+'.stage-'+process.pid;
   fs.rmSync(temporary,{recursive:true,force:true});
   const payload=path.join(temporary,'files');fs.mkdirSync(payload,{recursive:true});
   try {
-    const metadata=JSON.parse(run('cargo',['metadata','--format-version','1','--locked'],{cwd:build,env:environment,encoding:'utf8',stdio:['ignore','pipe','inherit'],maxBuffer:32*1024*1024}));
+    const metadata=JSON.parse(run('cargo',['metadata','--format-version','1','--locked'],{cwd:build,env:environment,encoding:'utf8',stdio:['ignore','pipe','inherit'],maxBuffer: Infinity}));
     // cargo-aim compiles host programs here before publishing executable
     // copies. Other source builds may share the public target directory.
     const hostBinaries=path.join(metadata.target_directory,'aim-host-build/release');
@@ -74,10 +74,9 @@ export function stageAim({build,angle,angleNotices,output,writeDistribution=true
     for(const file of overlaySources(build,'image/overlay.toml')) copy(path.join(build,file),path.join(payload,file));
     for(const file of appHostFiles) copy(path.join(build,file),path.join(payload,file));
     for(const name of ['libEGL.dylib','libGLESv2.dylib']) copy(path.join(angle,name),path.join(payload,'_build/angle-source/out/AimRelease',name));
-    for(const name of ['libMoltenVK.dylib','LICENSE']) copy(path.join(build,'target/aim/moltenvk',name),path.join(payload,'target/aim/moltenvk',name));
+    for(const name of ['libMoltenVK.dylib']) copy(path.join(build,'target/aim/moltenvk',name),path.join(payload,'target/aim/moltenvk',name));
     const molten=path.join(payload,'target/aim/moltenvk/libMoltenVK.dylib');
     if(architecture(molten).length>1) run('/usr/bin/lipo',[molten,'-thin','arm64','-output',molten]);
-    const notices=[];
     for(const [name,license,from,to,url] of [
       ['AIM','Apache-2.0',path.join(build,'LICENSE'),'notices/aim/LICENSE','https://github.com/hahnlee/aim'],
       ['AIM notice','See notice',path.join(build,'NOTICE'),'notices/aim/NOTICE','https://github.com/hahnlee/aim'],
@@ -85,28 +84,24 @@ export function stageAim({build,angle,angleNotices,output,writeDistribution=true
       ['AIM licensing exceptions','Multiple',path.join(build,'LICENSING.md'),'notices/aim/LICENSING.md','https://github.com/hahnlee/aim'],
       ['MoltenVK','Apache-2.0',path.join(build,'target/aim/moltenvk/LICENSE'),'notices/moltenvk/LICENSE','https://github.com/KhronosGroup/MoltenVK'],
       ['BoringSSL','ISC AND OpenSSL',path.join(build,'_build/aosp/external/boringssl/src/LICENSE'),'notices/boringssl/LICENSE','https://boringssl.googlesource.com/boringssl'],
-    ]) {NoticeIntake.copyNotice(from,path.join(payload,to));notices.push({name,license,path:to,sourceUrl:url});}
-    const modifications='notices/aim/MacLauncher-modifications.txt';
+    ]) {addLicense(payload,name,from,license);}
+    const modifications='MacLauncher-modifications.txt';
     fs.writeFileSync(path.join(payload,modifications),
       `AIM runtime modified by MacLauncher.\nRuntime version: ${version}\nOriginal AIM revision: ${source.commit}\n`+
       'Modifications cover filesystem paths, process ownership, display routing and build integration.\n'+
       'Cgroup pruning reuses owner thread lists within each transaction; anonymous memfd retirement queries VM region information without vnode paths.\n'+
       'Cgroup writes acquire descriptor ownership before file position; the controller preserves pending first-draw activity starts.\n'+
       'Build recipes and modification sources: https://github.com/procrastinine/maclauncher-builds\n');
-    notices.push({name:'MacLauncher AIM modifications',license:'See source licenses',path:modifications,sourceUrl:'https://github.com/procrastinine/maclauncher-builds'});
-    noticeTree(path.join(build,'licensing'),path.join(payload,'notices/aim/licensing'));
-    for(const file of NoticeIntake.sourceNotices(path.join(payload,'notices/aim/licensing/third-party')).map(row=>path.relative(path.join(payload,'notices/aim/licensing/third-party'),row.file))) notices.push({name:'AIM dependency '+file,license:'See notice',path:'notices/aim/licensing/third-party/'+file,sourceUrl:'https://github.com/hahnlee/aim'});
-    noticeTree(angleNotices,path.join(payload,'notices/angle'));
+    noticeTree(path.join(build,'licensing'),payload,'AIM');
+    noticeTree(angleNotices,payload,'ANGLE');
     const angleManifest=path.join(angle,'angle-manifest.json');
-    if(fs.existsSync(angleManifest))copy(angleManifest,path.join(payload,'notices/angle/angle-manifest.json'));
-    for(const file of NoticeIntake.sourceNotices(angleNotices).map(row=>path.relative(angleNotices,row.file))) notices.push({name:'ANGLE '+file,license:'See notice',path:'notices/angle/'+file,sourceUrl:'https://chromium.googlesource.com/angle/angle'});
+    if(fs.existsSync(angleManifest))copy(angleManifest,path.join(payload,'angle-manifest.json'));
     // Rust crate notices cover statically linked registry code too. Cargo's
     // locked metadata identifies the exact supplier for every included text.
     for(const pkg of metadata.packages.filter(pkg=>pkg.source?.startsWith('registry+'))) {
       const directory=path.dirname(pkg.manifest_path);
       for(const name of fs.readdirSync(directory).filter(file=>/^(LICENSE|COPYING|NOTICE|COPYRIGHT)(?:$|[-_.])/i.test(file)&&fs.statSync(path.join(directory,file)).isFile())) {
-        const relative=`notices/rust/${pkg.name}-${pkg.version}/${name}`;NoticeIntake.copyNotice(path.join(directory,name),path.join(payload,relative));
-        notices.push({name:pkg.name+' '+pkg.version,license:pkg.license||'See notice',path:relative,sourceUrl:`https://crates.io/crates/${pkg.name}/${pkg.version}`});
+        addLicense(payload,pkg.name,path.join(directory,name),pkg.license||pkg.name);
       }
     }
     for(const file of files(payload)) {
@@ -129,12 +124,12 @@ export function stageAim({build,angle,angleNotices,output,writeDistribution=true
     if(unlockCodes.length!==1)throw new Error('AIM user-state transaction is unavailable.');
     const appHostUserUnlockTransaction=Number(unlockCodes[0][1]);
     const manifest={schemaVersion:1,managerId:'android-aim',version:version,upstreamRevision:source.commit,platform:'darwin',arch:'arm64',minimumMacOS,capabilities:{appHost:true,appHostUserUnlockTransaction},
-      executableRelative:'bin/aimctl',runtimeFiles:{controller:'bin/maclauncher-aim'},files:records,notices,dependencies,provenance:{sourceRevision:source.commit,verifiedBuild:true}};
+      executableRelative:'bin/aimctl',runtimeFiles:{controller:'bin/maclauncher-aim'},files:records,dependencies,provenance:{sourceRevision:source.commit,verifiedBuild:true}};
     B.validateManifest(manifest);B.verifyPayload(payload,manifest);
     fs.writeFileSync(path.join(temporary,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
     const declaration={id:'android-aim',version:version,arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS,directoryRelative:`android-aim/${version}/arm64`,
       manifestRelative:'manifest.json',manifestSha256:sha(path.join(temporary,'manifest.json')),sourceRelative:null,sourceSha256:sha(path.join(temporary,'manifest.json')),
-      files:inventory(temporary),notices:notices.map(notice=>({...notice,path:'files/'+notice.path})),redistribution:'bundle'};
+      files:inventory(temporary),redistribution:'bundle'};
     Supplemental.validateDeclaration(declaration);
     fs.mkdirSync(path.dirname(output),{recursive:true});
     fs.renameSync(temporary,output);

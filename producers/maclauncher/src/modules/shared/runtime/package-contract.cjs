@@ -1,13 +1,11 @@
-const Notices = require('../../../../../../lib/notices.mjs');
 // Shared public contracts for the launcher and native package producer.
 const B = require("./bundled-native");
 const SHA256 = /^[a-f0-9]{64}$/;
 const SHA = SHA256, FLOOR = /^\d{1,2}\.\d{1,2}(?:\.\d{1,2})?$/;
 const ARCHITECTURES = new Set(["arm64", "x64", "universal"]);
 const LAUNCHER_ARCHITECTURES = new Set(["arm64", "x64"]);
-const MAX_ARCHIVE_BYTES = 4 * 1024 * 1024 * 1024;
 const RECORD_KEYS = ["schemaVersion","id","version","arch","launcherArchitectures","minimumMacOS","manifestRelative","manifestSha256","sourceSha256","updatePolicy","tag","asset","sourceAsset","source","launcherContract","capabilities","dependencies"];
-const ARCHITECTURE_NAME = /^[a-z][a-z0-9_]{0,31}$/, CAPABILITY_NAME = /^[A-Za-z][A-Za-z0-9_]{0,63}$/;
+const ARCHITECTURE_NAME = /^[a-z][a-z0-9_]*$/, CAPABILITY_NAME = /^[A-Za-z][A-Za-z0-9_]*$/;
 
 function object(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value) &&
@@ -19,27 +17,27 @@ function checksum(value) {
 }
 
 function identity({ projectId, repository } = {}) {
-  if (typeof projectId !== "string" || projectId.length > 80 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(projectId))
+  if (typeof projectId !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(projectId))
     throw new Error("A runtime catalog requires a valid project ID.");
-  if (typeof repository !== "string" || !/^[A-Za-z0-9][A-Za-z0-9_.-]{0,99}\/[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$/.test(repository) ||
+  if (typeof repository !== "string" || !/^[A-Za-z0-9][A-Za-z0-9_.-]*\/[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(repository) ||
       repository.includes("..") || repository.split("/").some(part => part.endsWith(".")))
     throw new Error("A runtime catalog requires an explicit GitHub owner/repository.");
   return { projectId, repository };
 }
 
 function version(value) {
-  return typeof value === "string" && value.length <= 128 && /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value) &&
+  return typeof value === "string" && /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value) &&
     !value.includes("..") && !value.endsWith(".") && !value.endsWith(".lock");
 }
 
 function relativeFile(value) {
-  return typeof value === "string" && value.length <= 1024 && value.split("/").every(part =>
+  return typeof value === "string" && value.split("/").every(part =>
     part !== "." && part !== ".." && /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(part));
 }
 
 function packageDependencies(value) {
   if (value === undefined) return [];
-  if (!Array.isArray(value) || value.length > 128) throw new Error("Invalid package dependencies.");
+  if (!Array.isArray(value)) throw new Error("Invalid package dependencies.");
   const projects = new Set();
   return value.map(item => {
     if (!object(item) || Object.keys(item).sort().join(',') !== 'project,release,sha256' ||
@@ -50,8 +48,7 @@ function packageDependencies(value) {
 }
 function packageAliases(value, files, dependencies) {
   if (value === undefined) return undefined;
-  if (!object(value) || value.schema !== 1 || Object.keys(value).sort().join(',') !== 'files,schema' || !object(value.files) ||
-      Object.keys(value.files).length > B.LIMITS.files) throw new Error("Invalid package alias index.");
+  if (!object(value) || value.schema !== 1 || Object.keys(value).sort().join(',') !== 'files,schema' || !object(value.files)) throw new Error("Invalid package alias index.");
   const stored = new Set(files.map(file => B.relativeFile(file.path))), projects = new Set(packageDependencies(dependencies).map(item => item.project));
   const names = new Set([...stored].map(name=>name.normalize('NFC').toLowerCase()));
   for (const [name, target] of Object.entries(value.files)) {
@@ -108,11 +105,11 @@ function manifestPayload(manifest, record, { executableRelative, filesPrefix = "
   // Included packages seal their inventory in runtime-package.json; the helper
   // manifest describes its protocol and need not repeat that inventory.
   const sealed = Array.isArray(record.files), inventory = sealed ? logicalFiles(record, resolveDependency).filter(file => file.path !== record.manifestRelative) : manifest.files;
-  if (!Array.isArray(inventory) || !inventory.length || inventory.length > B.LIMITS.files)
+  if (!Array.isArray(inventory) || !inventory.length)
     throw new Error("The runtime package differs from its selected catalog entry.");
   const names = new Set(), files = inventory.map(file => {
     const name = B.relativeFile((sealed ? "" : prefix) + B.relativeFile(file.path));
-    if (names.has(name) || !Number.isSafeInteger(file.size) || file.size < 0 || file.size > B.LIMITS.fileBytes ||
+    if (names.has(name) || !Number.isSafeInteger(file.size) || file.size < 0 ||
         !Number.isInteger(file.mode) || file.mode < 0 || file.mode > 0o777 || !SHA256.test(file.sha256 || "") ||
         file.format !== undefined && !["mach-o", "pe"].includes(file.format) || file.format === "pe" && !file.architectures?.length ||
         file.architectures && (!Array.isArray(file.architectures) || !file.architectures.length ||
@@ -155,10 +152,9 @@ function laterArchitecture(value) {
 // Facts that modules read to match a game and runtime. Each module checks the
 // values it reads; this contract only bounds the shape and size.
 function capabilities(value) {
-  const plain = (item, depth) => item === null || ["string", "number", "boolean"].includes(typeof item) || depth < 3 &&
-    (Array.isArray(item) ? item.every(entry => plain(entry, depth + 1)) : object(item) && Object.values(item).every(entry => plain(entry, depth + 1)));
-  if (!object(value) || Object.keys(value).length > 64 || Object.keys(value).some(key => !CAPABILITY_NAME.test(key)) ||
-      !plain(value, 0) || JSON.stringify(value).length > 8192)
+  const plain = (item, depth) => item === null || ["string", "number", "boolean"].includes(typeof item) || (Array.isArray(item) ? item.every(entry => plain(entry, depth + 1)) : object(item) && Object.values(item).every(entry => plain(entry, depth + 1)));
+  if (!object(value) || Object.keys(value).some(key => !CAPABILITY_NAME.test(key)) ||
+      !plain(value, 0))
     throw new Error("The runtime catalog contains invalid capabilities.");
   return Object.freeze(JSON.parse(JSON.stringify(value)));
 }
@@ -198,7 +194,7 @@ function validatePublicMetadata(value) {
 function validateSourceArtifact(item) {
   if (!object(item) || Object.keys(item).some(key => !["managerId", "version", "directoryRelative", "sha256", "bytes"].includes(key)) ||
       !/^[a-z0-9-]+$/.test(item.managerId || "") || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(item.version || "") ||
-      !SHA.test(item.sha256 || "") || !Number.isSafeInteger(item.bytes) || item.bytes < 1 || item.bytes > B.LIMITS.fileBytes ||
+      !SHA.test(item.sha256 || "") || !Number.isSafeInteger(item.bytes) || item.bytes < 1 ||
       B.relativeFile(item.directoryRelative) !== item.directoryRelative || item.directoryRelative !== item.managerId + "/" + item.version + "-source.tar.gz")
     throw new Error("Invalid corresponding-source archive identity.");
   return validatePublicMetadata(item);
@@ -237,7 +233,7 @@ function packageRecord(record, { projectId, repository, launcherContract = 1, pu
     throw new Error("The runtime download URL does not match its project, version, architecture or repository.");
   if (record.asset.filename !== filename ||
       !checksum(record.asset.sha256) || !Number.isSafeInteger(record.asset.bytes) ||
-      record.asset.bytes < 1 || record.asset.bytes > MAX_ARCHIVE_BYTES)
+      record.asset.bytes < 1)
     throw new Error("The runtime download does not match its project, version, architecture or repository.");
 
   let sourceAsset;
@@ -245,7 +241,7 @@ function packageRecord(record, { projectId, repository, launcherContract = 1, pu
     const source = record.sourceAsset;
     if (!object(source) || source.filename !== `${record.version}-source.tar.gz` ||
         !source.filename.endsWith("-source.tar.gz") || !checksum(source.sha256) ||
-        !Number.isSafeInteger(source.bytes) || source.bytes < 1 || source.bytes > MAX_ARCHIVE_BYTES ||
+        !Number.isSafeInteger(source.bytes) || source.bytes < 1 ||
         source.url !== `https://github.com/${repository}/releases/download/${encodeURIComponent(tag)}/${source.filename}`)
       throw new Error("The runtime source download does not match its release.");
     sourceAsset = Object.freeze({ filename: source.filename, url: source.url, sha256: source.sha256, bytes: source.bytes });
@@ -269,13 +265,12 @@ function validateDeclaration(item) {
     !FLOOR.test(item.minimumMacOS || '') || !SHA.test(item.sourceSha256 || '') || !SHA.test(item.manifestSha256 || '') ||
     !Array.isArray(item.launcherArchitectures) || !item.launcherArchitectures.length || new Set(item.launcherArchitectures).size !== item.launcherArchitectures.length ||
     item.launcherArchitectures.some(arch => !['arm64', 'x64'].includes(arch)) ||
-    item.directoryRelative !== `${item.id}/${item.version}/${item.arch}` || !Array.isArray(item.files) || !item.files.length || item.files.length > B.LIMITS.files ||
+    item.directoryRelative !== `${item.id}/${item.version}/${item.arch}` || !Array.isArray(item.files) || !item.files.length ||
       item.redistribution !== undefined && !['bundle', 'local-only'].includes(item.redistribution)) throw new Error('Invalid supplemental native declaration.');
   const names = new Set(); let bytes = 0;
   for (const file of item.files) {
-    if(Notices.isNoticePath(file?.path,item.notices))continue;
     if (!file || Object.keys(file).some(key => !['path', 'size', 'mode', 'sha256', 'architectures', 'format', 'executionArchitecture', 'optionalLoad'].includes(key)) ||
-      B.relativeFile(file.path) !== file.path || names.has(file.path) || !Number.isSafeInteger(file.size) || file.size < 0 || file.size > B.LIMITS.fileBytes ||
+      B.relativeFile(file.path) !== file.path || names.has(file.path) || !Number.isSafeInteger(file.size) || file.size < 0 ||
       ![0o640, 0o644, 0o755].includes(file.mode) || !SHA.test(file.sha256 || '')) throw new Error('Invalid sealed supplemental native file.');
     if (file.format !== undefined && (!['mach-o', 'pe'].includes(file.format) || !file.architectures)) throw new Error('Invalid supplemental file format.');
     if (file.architectures && (!Array.isArray(file.architectures) || !file.architectures.length || new Set(file.architectures).size !== file.architectures.length ||
@@ -307,11 +302,10 @@ function validateDeclaration(item) {
     const source = validateSourceArtifact({ managerId: item.id, version: item.version, ...item.sourceArtifact });
     if (source.managerId !== item.id || source.version !== item.version) throw new Error('Supplemental corresponding source must match its package identity.');
   }
-  if (bytes > B.LIMITS.bytes || (item.files.some(file => file.optionalLoad) && !item.files.some(file => file.architectures && !file.optionalLoad)) ||
+  if ((item.files.some(file => file.optionalLoad) && !item.files.some(file => file.architectures && !file.optionalLoad)) ||
     (!item.sourceArtifact && item.sourceRelative === undefined) ||
     item.sourceRelative != null && !item.files.some(file => file.path === item.sourceRelative && file.sha256 === item.sourceSha256) ||
     !item.files.some(file => file.path === item.manifestRelative && file.sha256 === item.manifestSha256)) throw new Error('Supplemental native source, manifest or dependency inventory is incomplete.');
-  Notices.printWarnings(Notices.noticeRows(item.notices,{packageName:item.id}).warnings);
   const {notices:noticeMetadata,...metadata}=item;validatePublicMetadata(metadata);
   return item;
 }

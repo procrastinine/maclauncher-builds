@@ -4,16 +4,15 @@ import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import {retryNetwork} from './download.mjs';
-import {sourceNotices as collectSourceNotices} from '../lib/notices.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Source=require('../producers/maclauncher/src/modules/shared/runtime/pinned-native-build.js');
 /** A build tool from the declared Homebrew formulae, then from PATH. */
 export const findBuildTool=Source.findBuildTool;
 export const run=(command,args,options={})=>{
  const network=['gh','curl','uv','rustup'].includes(command)||command==='git'&&args.some(arg=>['fetch','clone','submodule','checkout'].includes(arg));
  const stdio=network?(Array.isArray(options.stdio)?options.stdio.map((value,index)=>index===2&&value==='inherit'?'pipe':value):['inherit','inherit','pipe']):(options.stdio||'inherit');
- const step=()=>execFileSync(command,args,{...options,stdio});return network?retryNetwork(step):step();
+ const step=()=>execFileSync(command,args,{maxBuffer:Infinity,...options,stdio});return network?retryNetwork(step):step();
 };
-const git=(source,args)=>execFileSync('git',['-C',source,...args],{encoding:'utf8',maxBuffer:32<<20}).trim();
+const git=(source,args)=>execFileSync('git',['-C',source,...args],{encoding:'utf8',maxBuffer:Infinity}).trim();
 /** Fetch one exact declared HTTPS source revision into a new owned directory. */
 export function checkoutSource({repository,revision,destination}){
  const url=new URL(repository);if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash||!/^[a-f0-9]{40}$/.test(revision||'')||!path.isAbsolute(destination||'')||fs.existsSync(destination))throw Error('Source checkout needs a public HTTPS origin, exact revision and new absolute directory.');
@@ -32,7 +31,15 @@ export async function stageSource(source,revision,destination){
  return {treeSha256,dependencies};
 }
 /** Preserve source-tree license notices, including statically linked libraries. */
-export const sourceNotices=collectSourceNotices;
+export function sourceNotices(source,{name='Package',repository,all=false}={}){
+ const rows=[];
+ function visit(directory){try{for(const entry of fs.readdirSync(directory,{withFileTypes:true})){
+  if(entry.name==='.git')continue;const file=path.join(directory,entry.name);
+  if(entry.isDirectory())visit(file);
+  else if(all||/^(?:LICEN[CS]E|COPYING|NOTICE|COPYRIGHT)(?:[._-]|$)/i.test(entry.name)||entry.name==='FTL.TXT')rows.push({file,name:name+' '+path.relative(source,file),license:'See original notice',sourceUrl:repository});
+ }}catch{}}
+ visit(source);return rows;
+}
 /** A Python 3.13 environment in the work directory holding the exact tools of a requirements file. */
 export function pythonBuildTools(work,requirements){
  const environment=path.join(work,'tools'),python=path.join(environment,'bin/python');

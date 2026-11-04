@@ -1,4 +1,4 @@
-import {sourceNotices} from '../lib/notices.mjs';
+import {sourceNotices} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -9,7 +9,7 @@ import {pythonBuildTools,recipeMain} from './build-source.mjs';
 import {buildKosmic} from '../producers/maclauncher/src/modules/shared/vulkan/native/kosmickrisp-build.mjs';
 import {buildKosmicLoader} from '../producers/maclauncher/src/modules/shared/vulkan/native/kosmickrisp-targets.mjs';
 const root=path.resolve(import.meta.dirname,'..');
-const run=(command,args,options={})=>String(execFileSync(command,args,{encoding:'utf8',maxBuffer:64<<20,...options})||'').trim();
+const run=(command,args,options={})=>String(execFileSync(command,args,{encoding:'utf8',maxBuffer:Infinity,...options})||'').trim();
 const prefix=name=>run('brew',['--prefix',name]);
 export async function buildKosmicKrisp({project:id,arch,output,work}){
  fs.mkdirSync(work,{recursive:true});

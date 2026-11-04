@@ -1,4 +1,4 @@
-import * as NoticeIntake from '../../../../../../../lib/notices.mjs';
+import {addLicense} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,7 +11,7 @@ const here=import.meta.dirname;
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const quote=value=>"'"+String(value).replaceAll("'","'\\''")+"'";
 const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
-const read=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',maxBuffer:16<<20,...options}).trim();
+const read=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',maxBuffer: Infinity,...options}).trim();
 async function verifyArchive(file,description){
     file=fs.realpathSync(file);const hash=crypto.createHash('sha256');
     for await(const bytes of fs.createReadStream(file))hash.update(bytes);
@@ -135,11 +135,10 @@ export function publishModule(built,output){
         if(name.endsWith('.dll'))run(built.strip,['--strip-debug',target]);
         else run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);
     }
-    fs.mkdirSync(path.join(output,'notices'));
-    for(const file of source.licenses)NoticeIntake.copyNotice(path.join(built.directory,file),path.join(output,'notices/Wine-'+file));
-    NoticeIntake.copyNotice(path.resolve(here,'../../../../../LICENSE'),path.join(output,'notices/MacLauncher-MIT'));
-    NoticeIntake.copyNotice(path.resolve(here,'../../../../../LICENSE'),path.join(output,'notices/Khronos-Vulkan-MIT'));
-    const files=[...binaries.map(([name])=>name),...source.licenses.map(name=>'notices/Wine-'+name),'notices/MacLauncher-MIT','notices/Khronos-Vulkan-MIT'].filter(file=>!NoticeIntake.isNoticePath(file)&&fs.existsSync(path.join(output,file))).map(file=>{
+    for(const file of source.licenses)addLicense(output,'Wine',path.join(built.directory,file));
+    addLicense(output,'Wine',path.resolve(here,'../../../../../LICENSE'));
+    addLicense(output,'Wine',path.resolve(here,'../../../../../LICENSE'));
+    const files=[...binaries.map(([name])=>name),...(fs.existsSync(path.join(output,'licenses'))?fs.readdirSync(path.join(output,'licenses')).map(name=>'licenses/'+name):[])].map(file=>{
         const binary=binaries.some(([name])=>name===file),native=file.endsWith('.so'),target=path.join(output,file);
         fs.chmodSync(target,binary?0o755:0o644);
         return {path:file,size:fs.statSync(target).size,mode:binary?0o755:0o644,sha256:digest(fs.readFileSync(target)),
@@ -151,19 +150,15 @@ export function publishModule(built,output){
         minimumMacOS:source.minimumMacOS,architectures:source.architectures,originalGpuWorkRetained:true,
         libraries:Object.fromEntries(binaries.map(([file])=>[file.split('/')[0],file])),files};
     writeChanged(path.join(output,'provider.json'),JSON.stringify(provider,null,2)+'\n');
-    const notices=[...source.licenses.map(name=>({name:'Wine '+name,license:name==='COPYING.LIB'?'LGPL-2.1-or-later':'See included notice',
-        sourceUrl:source.sourcePage,path:'notices/Wine-'+name})),
-        {name:'MacLauncher',license:'MIT',sourceUrl:'https://github.com/procrastinine/maclauncher',path:'notices/MacLauncher-MIT'},
-        {name:'Khronos Vulkan',license:'MIT',sourceUrl:'https://github.com/KhronosGroup/Vulkan-Headers',path:'notices/Khronos-Vulkan-MIT'}];
     const manifest={schemaVersion:1,managerId:source.id,version:source.version,platform:'darwin',arch:'x64',minimumMacOS:source.minimumMacOS,
-        executableRelative:provider.libraries['x86_64-unix'],provider,files,notices,dependencies:[]};
+        executableRelative:provider.libraries['x86_64-unix'],provider,files,dependencies:[]};
     const payload=path.join(output,'payload');fs.mkdirSync(payload);
     for(const file of files){const target=path.join(payload,file.path);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(output,file.path),target);fs.chmodSync(target,file.mode);}
     const manifestFile=path.join(payload,'manifest.json');writeChanged(manifestFile,JSON.stringify(manifest,null,2)+'\n');
     const declaration={id:source.id,version:source.version,arch:'x64',launcherArchitectures:['arm64','x64'],minimumMacOS:source.minimumMacOS,
         sourceRelative:null,sourceSha256:digest(fs.readFileSync(path.join(here,'source.json'))),directoryRelative:[source.id,source.version,'x64'].join('/'),
         manifestRelative:'manifest.json',manifestSha256:digest(fs.readFileSync(manifestFile)),files:[...files,{path:'manifest.json',
-            size:fs.statSync(manifestFile).size,mode:0o644,sha256:digest(fs.readFileSync(manifestFile))}],notices};
+            size:fs.statSync(manifestFile).size,mode:0o644,sha256:digest(fs.readFileSync(manifestFile))}]};
     writeChanged(path.join(output,'runtime-package.json'),JSON.stringify(declaration,null,2)+'\n');return provider;
 }
 if(process.argv[1]&&fs.existsSync(process.argv[1])&&pathToFileURL(fs.realpathSync(process.argv[1])).href===import.meta.url){

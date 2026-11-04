@@ -104,20 +104,21 @@ if [[ ! -f "$destination/mlx.metallib" || "$(shasum -a 256 "$destination/mlx.met
 fi
 
 upstream_root="${MACLAUNCHER_MLX_DLSS_SOURCE:-$build_root/checkouts/MLX-DLSS}"
-mkdir -p "$destination/notices"
-cp -f "$upstream_root/LICENSE" "$destination/notices/MLX-DLSS-LICENSE"
-cp -f "$upstream_root/NOTICE" "$destination/notices/MLX-DLSS-NOTICE"
-cp -f "$mlx_source/LICENSE" "$destination/notices/MLX-Swift-LICENSE"
-cp -f "$mlx_source/Source/Cmlx/mlx/LICENSE" "$destination/notices/MLX-LICENSE"
-cp -f "$build_root/checkouts/swift-numerics/LICENSE.txt" "$destination/notices/Swift-Numerics-LICENSE"
-cp -f "$build_root/checkouts/swift-argument-parser/LICENSE.txt" "$destination/notices/Swift-Argument-Parser-LICENSE"
-cp "$native_root/REAL-ESRGAN-BSD-3-CLAUSE.txt" "$destination/notices/Real-ESRGAN-BSD-3-CLAUSE.txt"
-cp "$native_root/SRVGG-SWIFT-MIT.txt" "$destination/notices/SRVGG-Swift-MIT.txt"
-for notice in REAL-CUGAN-MIT.txt NAFNET-SWIFT-MIT.txt NAFNET-NOTICE.txt RIFE-NCNN-MIT.txt RIFE-MIT.txt NCNN-BSD-3-CLAUSE.txt NAFNET-ORIGINAL-MIT.txt; do
-  cp "$native_root/$notice" "$destination/notices/$notice"
-done
-cp "$native_root/DEPTH-ANYTHING-APACHE-2.0.txt" "$destination/notices/DEPTH-ANYTHING-APACHE-2.0.txt"
-cp "$native_root/DEPTH-ANYTHING-NOTICE.txt" "$destination/notices/DEPTH-ANYTHING-NOTICE.txt"
+node --input-type=module - "$destination" "$native_root" "$upstream_root" "$mlx_source" "$build_root" <<'LICENSES'
+import path from 'node:path';
+import {pathToFileURL} from 'node:url';
+const [output,native,upstream,mlx,build]=process.argv.slice(2);
+const {addLicense}=await import(pathToFileURL(path.resolve(native,'../../../../../../../../lib/licenses.mjs')));
+for(const [component,file,licence] of [
+ ['MLX-DLSS',path.join(upstream,'LICENSE'),'Apache-2.0'],
+ ['MLX-DLSS',path.join(upstream,'NOTICE'),'Apache-2.0'],
+ ['MLX-Swift',path.join(mlx,'LICENSE'),'MIT'],
+ ['MLX',path.join(mlx,'Source/Cmlx/mlx/LICENSE'),'MIT'],
+ ['Swift-Numerics',path.join(build,'checkouts/swift-numerics/LICENSE.txt'),'Apache-2.0-WITH-Swift-exception'],
+ ['Swift-Argument-Parser',path.join(build,'checkouts/swift-argument-parser/LICENSE.txt'),'Apache-2.0-WITH-Swift-exception'],
+ ...['REAL-ESRGAN-BSD-3-CLAUSE.txt','SRVGG-SWIFT-MIT.txt','REAL-CUGAN-MIT.txt','NAFNET-SWIFT-MIT.txt','NAFNET-NOTICE.txt','RIFE-NCNN-MIT.txt','RIFE-MIT.txt','NCNN-BSD-3-CLAUSE.txt','NAFNET-ORIGINAL-MIT.txt','DEPTH-ANYTHING-APACHE-2.0.txt','DEPTH-ANYTHING-NOTICE.txt'].map(file=>[file,path.join(native,file),file])
+])addLicense(output,component,file,licence);
+LICENSES
 cp "$native_root/upstream.json" "$destination/upstream.json"
 cp "$upstream_root/maclauncher-adaptation.json" "$destination/adaptation.json"
 cp "$mlx_source/maclauncher-gpu-timing.json" "$destination/timing-adaptation.json"

@@ -10,7 +10,7 @@ const relative=value=>typeof value==='string'&&value.split('/').every(part=>/^[A
 export function refreshNativeTools(sourceRoot,{check=false}={}){
   if(!path.isAbsolute(sourceRoot||''))throw Error('An absolute MacLauncher source directory is required.');
   sourceRoot=fs.realpathSync(sourceRoot);
-  if(recipe.schemaVersion!==1||!Array.isArray(recipe.files)||recipe.files.length>16)throw Error('Invalid native tool source recipe.');
+  if(recipe.schemaVersion!==1||!Array.isArray(recipe.files))throw Error('Invalid native tool source recipe.');
   const prepared=recipe.files.map(record=>{
     if(!relative(record.path)||record.destination!==undefined&&!relative(record.destination))throw Error('Invalid native tool source path.');
     const targetRoot=record.destination===undefined?root:buildsRoot;

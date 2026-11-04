@@ -28,7 +28,7 @@ function readBundleBytes(filePath, detection, maximum) {
   let fd;
   try {
     const stat = detection?.stat ? detection.stat(filePath) : fs.statSync(filePath);
-    if (!stat?.isFile() || stat.size > maximum) return null;
+    if (!stat?.isFile()) return null;
     if (detection?.readBytes) return detection.readBytes(filePath, 0, stat.size);
     fd = fs.openSync(filePath, "r");
     const data = Buffer.alloc(stat.size);
@@ -46,7 +46,7 @@ function readInfoPlist(appPath, { detection } = {}) {
 
   try {
     const result = spawnSync("/usr/bin/plutil", ["-convert", "json", "-o", "-", "--", "-"], {
-      input: raw, encoding: "utf8", timeout: 1000, maxBuffer: 2 * MAX_PLIST_BYTES
+      input: raw, encoding: "utf8", timeout: 1000, maxBuffer: Infinity
     });
     if (result.status === 0 && result.stdout) {
       const parsed = JSON.parse(result.stdout);

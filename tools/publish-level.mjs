@@ -8,14 +8,14 @@ import {readProjects} from '../lib/projects.mjs';
 import {parseSelection} from './release-selection.mjs';
 import {publishPackage,appendPackageCatalog} from './publish-package.mjs';
 const root=path.resolve(import.meta.dirname,'..'),exec=promisify(execFile);
-const github=async(args)=>retryNetworkAsync(async()=>(await exec('gh',args,{encoding:'utf8',maxBuffer:32<<20})).stdout);
+const github=async(args)=>retryNetworkAsync(async()=>(await exec('gh',args,{encoding:'utf8',maxBuffer:Infinity})).stdout);
 async function downloadArtifact({artifact,bundle,repository,env}){
  const zip=bundle+'.zip';
  try{
   await downloadFile('https://api.github.com/repos/'+repository+'/actions/artifacts/'+artifact.id+'/zip',zip,{environment:env,headers:{Authorization:'Bearer '+(env.GH_TOKEN||env.GITHUB_TOKEN)}});
-  const names=execFileSync('unzip',['-Z1',zip],{encoding:'utf8'}).trim().split('\n');
+  const names=execFileSync('unzip',['-Z1',zip],{maxBuffer:Infinity,encoding:'utf8'}).trim().split('\n');
   if(new Set(names).size!==names.length||names.some(name=>path.basename(name)!==name||name==='.'||name==='..'))throw Error('The package artifact has unsafe members.');
-  for(const name of names){const fd=fs.openSync(path.join(bundle,name),'wx',0o644);try{execFileSync('unzip',['-p',zip,name],{stdio:['ignore',fd,'pipe']});}finally{fs.closeSync(fd);}}
+  for(const name of names){const fd=fs.openSync(path.join(bundle,name),'wx',0o644);try{execFileSync('unzip',['-p',zip,name],{maxBuffer:Infinity,stdio:['ignore',fd,'pipe']});}finally{fs.closeSync(fd);}}
  }finally{fs.rmSync(zip,{force:true});}
 }
 /** A clean publisher handles only its completed build level. Other levels and

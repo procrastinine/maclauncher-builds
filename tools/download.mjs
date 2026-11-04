@@ -30,18 +30,18 @@ export async function retryNetworkAsync(step,{wait=sleep}={}){
  }
 }
 
-function request(url,output,{headers={},config='',environment=process.env,bytes}={}){
+function request(url,output,{headers={},config='',environment=process.env}={}){
  const protocol=new URL(url).protocol;
  if(protocol!=='https:')throw Error('A download needs an HTTPS URL.');
  // Keep HTTPS redirects on HTTPS, and credentials out of command arguments.
  const args=['--config','-','--fail','--silent','--show-error','--location','--proto','=https',
   '--proto-redir','=https','--connect-timeout','20','--speed-limit','1024','--speed-time','60',
-  ...(bytes?['--max-filesize',String(bytes)]:[]),'--output',output,'--write-out','%{http_code}',url];
+  '--output',output,'--write-out','%{http_code}',url];
  for(const [name,value] of Object.entries(headers)){
   if(/[\r\n]/.test(name+value))throw Error('Invalid download header.');
   config+='header = '+JSON.stringify(name+': '+value)+'\n';
  }
- return {args,options:{input:config,env:environment,encoding:'utf8',maxBuffer:4<<20}};
+ return {args,options:{input:config,env:environment,encoding:'utf8',maxBuffer:Infinity}};
 }
 /** Six transient-only attempts, including response bodies, with stall detection.
  * Identity checks belong to callers, outside this transport retry boundary. */

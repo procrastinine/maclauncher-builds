@@ -26,7 +26,7 @@ function relative(value) {
 function validateArchives(archives, { catalog = PIN } = {}) {
   if (catalog?.schemaVersion !== 1 || catalog.architecture !== "arm64" || catalog.minimumMacOS !== "13.0" ||
       !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(catalog.version || "") || !Array.isArray(catalog.dependencies) ||
-      !catalog.dependencies.length || catalog.dependencies.length > 32) throw new Error("Invalid Impacto dependency source catalog.");
+      !catalog.dependencies.length) throw new Error("Invalid Impacto dependency source catalog.");
   const seen = new Set();
   for (const pin of catalog.dependencies) {
     if (!/^[a-z0-9_]+$/.test(pin.id || "") || seen.has(pin.id) ||

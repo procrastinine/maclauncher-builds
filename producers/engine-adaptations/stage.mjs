@@ -1,4 +1,4 @@
-import * as NoticeIntake from '../../lib/notices.mjs';
+import {addLicense} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
@@ -15,7 +15,6 @@ function inventory(directory,prefix=''){
  const files=[];
  for(const entry of fs.readdirSync(path.join(directory,prefix),{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))){
   const relative=prefix?prefix+'/'+entry.name:entry.name;
-  if(NoticeIntake.isNoticePath(relative))continue;
   if(entry.isDirectory())files.push(...inventory(directory,relative));
   else if(entry.isFile())files.push({path:relative,...metadata(path.join(directory,relative))});
   else throw Error('Engine packages require regular files.');
@@ -36,16 +35,16 @@ function seal(project,version,arch,minimumMacOS,output,manifest,sourceSha256){
  const file=path.join(output,'manifest.json');fs.writeFileSync(file,JSON.stringify(manifest,null,2)+'\n');fs.chmodSync(file,0o644);
  const declaration={id:project,version,arch,launcherArchitectures:arch==='universal'?['arm64','x64']:[arch],minimumMacOS,
   sourceRelative:null,sourceSha256:sourceSha256||metadata(file).sha256,directoryRelative:[project,version,arch].join('/'),
-  manifestRelative:'manifest.json',manifestSha256:metadata(file).sha256,files:inventory(output),notices:manifest.notices};
+  manifestRelative:'manifest.json',manifestSha256:metadata(file).sha256,files:inventory(output)};
  validateDeclaration(declaration);B.verifyPayload(output,declaration);return declaration;
 }
 export function stageData({project,output,version=profiles[project]?.version}){
  const profile=profiles[project];if(!profile||!path.isAbsolute(output||'')||fs.existsSync(output)||!version||/[\\/]/.test(version))throw Error('Select an engine-data project and a new absolute output directory.');
  fs.mkdirSync(output,{recursive:true});
  try{
-  const source=copySources(profile,output),files=inventory(output),notices=[{name:project,license:profile.licenseName,path:profile.license,sourceUrl:source.repository}];
+  const source=copySources(profile,output);addLicense(output,project,path.join(root,profile.source,profile.license),profile.licenseName);const files=inventory(output),notices=[{name:project,license:profile.licenseName,path:profile.license,sourceUrl:source.repository}];
   const manifest={schemaVersion:1,kind:'data',managerId:project,version,arch:'universal',minimumMacOS:profile.minimumMacOS,
-   sourceRevision:source.revision,sourceUrl:source.repository,entryRelative:profile.entry,files,notices,loveVersion:'11.5'};
+   sourceRevision:source.revision,sourceUrl:source.repository,entryRelative:profile.entry,files,loveVersion:'11.5'};
   const declaration=seal(project,version,'universal',profile.minimumMacOS,output,manifest);
   declaration.sourceRelative='manifest.json';validateDeclaration(declaration);return declaration;
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}

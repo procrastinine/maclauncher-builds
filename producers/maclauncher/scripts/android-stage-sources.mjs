@@ -38,7 +38,7 @@ export function copyAndroidSourceSnapshot(buildSource, identity, sources, copy) 
  * test trees. Literal path exclusions preserve other upstream helper names. */
 export function archiveAndroidUpstreamSource(checkout, revision, archive) {
   const members = execFileSync("git", ["-C", checkout, "ls-tree", "-r", "--name-only", "-z", revision],
-    {encoding:"utf8", maxBuffer:32 * 1024 ** 2}).split("\0").filter(Boolean);
+    {encoding:"utf8", maxBuffer: Infinity}).split("\0").filter(Boolean);
   const excluded = new Set();
   for (const member of members) {
     const parts = member.split("/");
@@ -68,7 +68,7 @@ export function archiveAndroidSourceTree(sources, archive) {
   normalize(sources);
   execFileSync("/usr/bin/tar", ["--uid", "0", "--gid", "0", "--uname", "root", "--gname", "wheel",
     "--options", "gzip:!timestamp", "-czf", archive, "-C", sources, ...fs.readdirSync(sources).sort()],
-    {timeout:60000, maxBuffer:32 * 1024 ** 2});
+    {timeout:60000, maxBuffer: Infinity});
 }
 
 /** Corresponding source can arrive as a pinned release archive as well as Git.
@@ -77,7 +77,7 @@ export function archiveAndroidSourceTree(sources, archive) {
 export function filterAndroidSourceArchive(input, output) {
   if (path.resolve(input) === path.resolve(output)) throw new Error("Source publication requires a new archive.");
   const members = execFileSync("/usr/bin/tar", ["-tf", input],
-    {encoding:"utf8", maxBuffer:32 * 1024 ** 2}).split("\n").filter(Boolean);
+    {encoding:"utf8", maxBuffer: Infinity}).split("\n").filter(Boolean);
   const excluded = members.filter(member => Content.excludedReason(member));
   if (!excluded.length) fs.copyFileSync(input, output);
   else {
@@ -85,10 +85,10 @@ export function filterAndroidSourceArchive(input, output) {
     const format = output.endsWith(".gz") ? "-czf" : output.endsWith(".bz2") ? "-cjf" : output.endsWith(".xz") ? "-cJf" : "-cf";
     execFileSync("/usr/bin/tar", [format, output, ...(format === "-czf" ? ["--options", "gzip:!timestamp"] : []),
       ...excluded.flatMap(member => ["--exclude", escape(member)]), "@" + input],
-      {timeout:60000, maxBuffer:32 * 1024 ** 2});
+      {timeout:60000, maxBuffer: Infinity});
   }
   const published = execFileSync("/usr/bin/tar", ["-tf", output],
-    {encoding:"utf8", maxBuffer:32 * 1024 ** 2}).split("\n").filter(Boolean);
+    {encoding:"utf8", maxBuffer: Infinity}).split("\n").filter(Boolean);
   if (published.some(member => Content.excludedReason(member))) throw new Error("Source archive contains test or generated inputs.");
   return {sourceMembers:members.length, publishedMembers:published.length, excludedMembers:excluded};
 }

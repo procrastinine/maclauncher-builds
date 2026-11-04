@@ -19,10 +19,10 @@ export async function buildAndroidLauncher({project:id,arch,output,work}){
   if(process.platform==='linux'){
    const pin=input.jdk?.['linux-'+process.arch];if(!pin)throw Error('No JDK input is declared for this Linux host.');
    const archive=await buildInput(pin,cache),directory=path.join(work,'jdk');fs.mkdirSync(directory);
-   execFileSync('/usr/bin/tar',['-xzf',archive,'-C',directory]);fs.unlinkSync(archive);
+   execFileSync('/usr/bin/tar',['-xzf',archive,'-C',directory],{maxBuffer:Infinity});fs.unlinkSync(archive);
    const homes=fs.readdirSync(directory).map(name=>path.join(directory,name)).filter(home=>fs.existsSync(path.join(home,'bin/javac')));
    if(homes.length!==1)throw Error('The pinned JDK must contain one Java compiler.');jdk=homes[0];
-  }else jdk=process.env.JAVA_HOME||execFileSync('/usr/libexec/java_home',['-v','21'],{encoding:'utf8'}).trim();
+  }else jdk=process.env.JAVA_HOME||execFileSync('/usr/libexec/java_home',['-v','21'],{maxBuffer:Infinity,encoding:'utf8'}).trim();
   const built=path.join(work,'compiled');build({jdk,classpath,output:built});
   const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});
   for(const entry of profile.inputs){

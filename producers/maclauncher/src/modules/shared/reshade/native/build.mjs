@@ -50,7 +50,7 @@ for(const relative of companions) {
 
 const env = { ...process.env };
 for (const key of Object.keys(env)) if (/^(DYLD_|RESHADE_|KLEPTON_|KL_)/.test(key)) delete env[key];
-const run = (command, args) => execFileSync(command, args, { cwd: output, env, encoding: "utf8", timeout: 120000, maxBuffer: 8 << 20 });
+const run = (command, args) => execFileSync(command, args, { cwd: output, env, encoding: "utf8", timeout: 120000, maxBuffer: Infinity});
 const tokenize = line => (line.match(/"[^"]*"|[^\s]+/g) || [])
   .map(token => token.startsWith('"') ? token.slice(1, -1) : token);
 const recipe = path.join(build, "CMakeFiles/reshade-macos.dir/link.txt");

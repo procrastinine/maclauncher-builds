@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import * as NoticeIntake from '../../../../../../../../lib/notices.mjs';
+import {addLicense} from '../../../../../../../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -8,7 +8,7 @@ const here=import.meta.dirname,pin=JSON.parse(fs.readFileSync(path.join(here,'so
 const [sourceArg,toolsArg,outputArg,...options]=process.argv.slice(2);
 if(!outputArg)throw Error('Usage: build.mjs SOURCE_GIT TOOLS OUTPUT [--shaders-only] [--native-only]');
 const source=path.resolve(sourceArg),tools=path.resolve(toolsArg),output=path.resolve(outputArg);
-const run=(file,args)=>execFileSync(file,args,{encoding:'utf8',maxBuffer:32*1024*1024});
+const run=(file,args)=>execFileSync(file,args,{encoding:'utf8',maxBuffer: Infinity});
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 if(run('git',['-C',source,'rev-parse','HEAD']).trim()!==pin.commit)throw Error('Select the declared FidelityFX SDK commit.');
 for(const name of ['dxc','spirv-cross'])if(hash(fs.readFileSync(path.join(tools,name)))!==pin.tools[name])throw Error('The shader compiler differs from the declared build input: '+name);
@@ -43,7 +43,7 @@ if(!options.includes('--native-only'))for(const [effect,passes]of Object.entries
   fs.writeFileSync(path.join(directory,pass+'.metal'),metal);fs.writeFileSync(path.join(directory,pass+'.json'),JSON.stringify(signature(metal,reflection)));fs.rmSync(spv);
  }
 }
-NoticeIntake.copyNotice(path.join(exported,'LICENSE.txt'),path.join(payload,'FSR3-LICENSE.txt'));
+addLicense(payload,'FSR3',path.join(exported,'LICENSE.txt'));
 if(options.includes('--shaders-only')){console.log('Translated FidelityFX optical flow and frame interpolation shaders: '+payload);process.exit(0);}
 const overlay=path.join(output,'host-overlay/FidelityFX/host');fs.mkdirSync(overlay,{recursive:true});
 for(const effect of ['opticalflow','frameinterpolation']){

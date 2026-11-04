@@ -10,7 +10,7 @@ import {verifyAndroidJavaConverterInput} from './build-android-java-converter.mj
 import {verifyAndroidJavaFrameworkInput} from './build-android-java-framework.mjs';
 import {prepareAndroidCommonJavaProducer} from './android-common-java-inputs.mjs';
 const root=path.resolve(import.meta.dirname,'..');
-const read=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',...options}).trim();
+const read=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8',...options}).trim();
 const javaSources=directory=>fs.readdirSync(directory,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?javaSources(path.join(directory,entry.name)):entry.isFile()&&entry.name.endsWith('.java')?[path.join(directory,entry.name)]:[]).sort();
 
 /** Forward declared Ninja invocations with bounded compiler concurrency. */
@@ -55,7 +55,7 @@ export async function buildAndroidCommonInput({version,output,work,angle,codecs,
  const {acquireNdkHeaders}=await import(new URL('../sources/maclauncher-android/src/modules/android/native/arm32/acquire-headers.mjs',import.meta.url));
  const ndk=acquireNdkHeaders(path.join(work,'ndk-headers'));
  const options={...sources,converter,jdk:publisher.jdk,sdl:publisher.sdl,'vulkan-headers':publisher.vulkanHeaders,'sndfile-headers':codecs.include,
-  codecs:codecs.codecs,'codec-notices':codecs.codecNotices,angle:angle.angle,'angle-manifest':path.join(angle.angle,'angle-manifest.json'),framework:publisher.framework,
+  codecs:codecs.codecs,'codec-licenses':codecs.codecLicenses,angle:angle.angle,'angle-manifest':path.join(angle.angle,'angle-manifest.json'),framework:publisher.framework,
   output:build,'build-work':buildWork,'ndk-headers':ndk.include||path.join(work,'ndk-headers/include'),aidl:publisher.aidl,aconfig,'rust-toolchain':tools.rustToolchain,python,ninja:tools.ninja,
   'blueprint-parser':blueprint.parser,'blueprint-parser-sources':blueprint.sources};
  if(javaInput)options['java-inputs']=java;

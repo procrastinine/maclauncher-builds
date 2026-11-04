@@ -23,8 +23,8 @@ export function rustSetupCommands(build,toolchain){
 /** Prepare the selected host's SDK, declared tools and Rust toolchain.
  * Returns the environment and PATH entries that source initialization and later steps keep. */
 export function prepareBuildHost({build,label,runner,rustToolchain,install=true,verifyHost=true,environment=process.env,platform=process.platform,cpu=process.arch,
- run=(command,args,options)=>execFileSync(command,args,{stdio:'inherit',...options}),
- read=(command,args,options)=>execFileSync(command,args,{encoding:'utf8',stdio:['ignore','pipe','pipe'],...options}).trim(),
+ run=(command,args,options)=>execFileSync(command,args,{maxBuffer:Infinity,stdio:'inherit',...options}),
+ read=(command,args,options)=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8',stdio:['ignore','pipe','pipe'],...options}).trim(),
  installTools=installBuildTools}){
  if(verifyHost)assertBuildHost(label,runner,{platform,cpu,exact:true});
  const env={},paths=[],current=()=>({...environment,...env,PATH:[...paths,environment.PATH].filter(Boolean).join(path.delimiter)});

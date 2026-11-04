@@ -5,18 +5,14 @@ const { randomUUID } = require("node:crypto");
 const { Transform } = require("node:stream");
 const { pipeline } = require("node:stream/promises");
 const zlib = require("node:zlib");
-const MAX_BUFFER_BYTES = 32 * 1024 * 1024;
+const MAX_BUFFER_BYTES = Infinity;
 
 function decodeResponseBody(body, headers, { maxBytes = MAX_BUFFER_BYTES } = {}) {
-  if (!Number.isSafeInteger(maxBytes) || maxBytes < 1) throw new Error("Buffered download limit must be a positive byte count.");
-  const tooLarge = () => new Error(`Download response exceeds the ${maxBytes} byte limit.`);
-  if (body.length > maxBytes) throw tooLarge();
   const encoding = String(headers?.["content-encoding"] || "").toLowerCase();
   const decode = encoding.includes("gzip") ? zlib.gunzipSync
     : encoding.includes("deflate") ? zlib.inflateSync : encoding.includes("br") ? zlib.brotliDecompressSync : null;
   if (decode) {
-    try { return decode(body, { maxOutputLength: maxBytes }); }
-    catch (error) { if (error.code === "ERR_BUFFER_TOO_LARGE") throw tooLarge(); }
+    try { return decode(body); } catch {}
   }
   return body;
 }
@@ -68,7 +64,6 @@ async function fetchUrlBuffer(
   url,
   { headers = {}, redirectDepth = 0, maxRedirects = 5, signal, maxBytes = MAX_BUFFER_BYTES } = {}
 ) {
-  if (!Number.isSafeInteger(maxBytes) || maxBytes < 1) throw new Error("Buffered download limit must be a positive byte count.");
   if (redirectDepth > maxRedirects) throw new Error("Too many redirects while fetching data");
   throwIfAborted(signal);
 
@@ -92,14 +87,9 @@ async function fetchUrlBuffer(
   const chunks = [];
   let received = 0;
   try {
-    const checkSize = size => {
-      if (size > maxBytes) throw new Error(`Download response exceeds the ${maxBytes} byte limit.`);
-    };
-    checkSize(Number(res.headers?.["content-length"]));
     for await (const chunk of res) {
       const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
       received += bytes.length;
-      checkSize(received);
       chunks.push(bytes);
     }
     throwIfAborted(signal);

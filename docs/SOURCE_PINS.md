@@ -50,4 +50,4 @@ Build-input downloads use one HTTP transport with up to six attempts and exponen
 
 Git source fetches and submodule initialization use the same transient-only policy as attestation, artifact transfers and release API requests.
 
-Licence notices are copied as candidates without size or checksum pins. Sealing retains usable text and reports unusable candidates as warnings; when none remain, package-notice.txt names the package and source repository. Notice files are separate archive members without per-file size or digest facts. Source archives, executables and non-notice payload inventories retain their ordinary integrity checks; the archive digest and attestation cover all archive bytes.
+Recipes add component licence texts to `licenses/`. Texts with the same bytes after whitespace is removed share one file; `licenses/components.txt` records each component’s file. Missing or unreadable sources produce a warning. Licence files are ordinary payload files: inventories, archive digests and attestations cover their bytes. Included package payloads keep their existing licence directories.

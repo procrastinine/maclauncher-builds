@@ -28,6 +28,12 @@
           "arm64",
           "x86_64"
         ]
+      },
+      {
+        "path": "LICENSE",
+        "size": 1081,
+        "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+        "mode": 420
       }
     ],
     "notices": [
@@ -68,6 +74,12 @@
           "arm64",
           "x86_64"
         ]
+      },
+      {
+        "path": "LICENSE",
+        "size": 1081,
+        "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+        "mode": 420
       }
     ],
     "notices": [

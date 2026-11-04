@@ -23,11 +23,10 @@ function findEntry(root, matches, { maxDepth = 4, maxEntries = 20000 } = {}) {
     let items = [];
     try { items = fs.readdirSync(directory, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name)); } catch { continue; }
     for (const item of items) {
-      if (++seen > maxEntries) return null;
       if (item.name === "__MACOSX" || item.isSymbolicLink()) continue;
       const file = path.join(directory, item.name);
       if (matches(file, item)) return file;
-      if (item.isDirectory() && depth < maxDepth && !item.name.endsWith(".app")) queue.push([file, depth + 1]);
+      if (item.isDirectory() && !item.name.endsWith(".app")) queue.push([file, depth + 1]);
     }
   }
   return null;

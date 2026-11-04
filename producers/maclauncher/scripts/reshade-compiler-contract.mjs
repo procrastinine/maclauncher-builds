@@ -25,7 +25,7 @@ export function verifyReShadeCompiler(compiler) {
   const input = path.join(directory, "effect.fx"), prepared = path.join(directory, "effect.prepared.fx");
   const output = path.join(directory, "compiled"), env = { ...process.env };
   for (const name of Object.keys(env)) if (name.startsWith("DYLD_") || name.startsWith("RESHADE_")) delete env[name];
-  const invoke = args => execFileSync(compiler, args, { env, timeout: 30000, maxBuffer: 1 << 20 });
+  const invoke = args => execFileSync(compiler, args, { env, timeout: 30000, maxBuffer: Infinity});
   const fail = detail => { throw new Error(`The ReShade compiler output is incomplete: ${detail}`); };
   const metadata = name => {
     const file = path.join(output, name);

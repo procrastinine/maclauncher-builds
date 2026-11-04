@@ -45,7 +45,7 @@ export async function planReleaseDispatch({selection,directory=root,releases=[],
   components:components.map(selection=>({selection,releases:pairs(selection),targets:registration.include.filter(row=>selection.some(pair=>pair.id===row.project&&pair.version===row.version))}))};
 }
 /** One ordinary dispatch per component; all validation precedes the first remote write. */
-export async function dispatchReleaseComponents(plan,{runGh=(args)=>execFileSync('gh',args,{encoding:'utf8',stdio:['ignore','pipe','pipe']}),wait=sleep}={}){
+export async function dispatchReleaseComponents(plan,{runGh=(args)=>execFileSync('gh',args,{maxBuffer:Infinity,encoding:'utf8',stdio:['ignore','pipe','pipe']}),wait=sleep}={}){
  if(plan.workflow!=='runtime-build.yml'||plan.ref!=='main'||!/^[-\w.]+\/[-\w.]+$/.test(plan.repository||''))throw Error('Use the ordinary main Build and release workflow.');
  const components=plan.components.map(component=>exactSelection(component.selection));
  if(!components.length)throw Error('No release components to dispatch.');
@@ -73,7 +73,7 @@ export async function main([operation,...args],{directory=root,runGh}={}){
  let releases=[];
  if(operation==='dispatch'){
   const repository=readProjects(directory,{resolvePins:false}).repository;
-  const text=await retryNetworkAsync(()=>(runGh?runGh(['api','--paginate','--slurp','repos/'+repository+'/releases?per_page=100']):execFileSync('gh',['api','--paginate','--slurp','repos/'+repository+'/releases?per_page=100'],{encoding:'utf8',maxBuffer:32<<20})));
+  const text=await retryNetworkAsync(()=>(runGh?runGh(['api','--paginate','--slurp','repos/'+repository+'/releases?per_page=100']):execFileSync('gh',['api','--paginate','--slurp','repos/'+repository+'/releases?per_page=100'],{encoding:'utf8',maxBuffer:Infinity})));
   releases=JSON.parse(text).flat();
  }
  if(operation==='dispatch'){

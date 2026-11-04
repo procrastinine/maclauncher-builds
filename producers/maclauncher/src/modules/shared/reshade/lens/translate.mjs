@@ -1,3 +1,4 @@
+import {addLicense} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 // Build the original FidelityFX image kernels from a declared read-only SDK.
 import fs from 'node:fs';
@@ -7,7 +8,7 @@ import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 const directory=path.dirname(fileURLToPath(import.meta.url));
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
-const run=(program,args)=>execFileSync(program,args,{encoding:'utf8',maxBuffer:64*1024*1024,env:{...process.env,GIT_NO_LAZY_FETCH:'1'}});
+const run=(program,args)=>execFileSync(program,args,{encoding:'utf8',maxBuffer: Infinity,env:{...process.env,GIT_NO_LAZY_FETCH:'1'}});
 function replace(source,before,after,count=1){if(source.split(before).length!==count+1)throw Error('The FidelityFX image adaptation seam changed: '+before);return source.split(before).join(after);}
 export function translate(effect,args){
  const options={};for(let i=0;i<args.length;i+=2){const key=args[i];if(!['--source','--tools','--output'].includes(key)||!args[i+1]||options[key])throw Error('Expected unique --source, --tools and --output paths.');options[key]=path.resolve(args[i+1]);}
@@ -55,7 +56,7 @@ export function translate(effect,args){
  }
  let header='// Copyright (C) 2024 Advanced Micro Devices, Inc. MIT; see ffx-'+effect+'-MIT.txt.\n// Generated original FidelityFX '+effect+' compute kernels.\n#pragma once\n#include <cstddef>\nnamespace macfx::ffx_'+effect+'_shaders {\nstruct Binding{const char*name;const char*kind;unsigned index;};\nstruct Shader{const char*name;const char*entry;const char*source;const Binding*bindings;size_t count;unsigned dimension,sigma,x,y,z;};\n';
  shaders.forEach((s,i)=>{header+=`inline constexpr Binding bindings${i}[]={${s.bindings.map(b=>'{'+JSON.stringify(b.name)+','+JSON.stringify(b.kind)+','+b.index+'}').join(',')}};\ninline constexpr const char*source${i}=R"FFX_IMAGE(${s.source})FFX_IMAGE";\n`;});header+='inline constexpr Shader shaders[]={'+shaders.map((s,i)=>`{${JSON.stringify(s.name)},${JSON.stringify(s.entry)},source${i},bindings${i},sizeof(bindings${i})/sizeof(Binding),${s.dimension},${s.sigma},${s.threads.join(',')}}`).join(',')+'};\n}\n';
- fs.writeFileSync(path.join(out,'ffx-'+effect+'-shaders.hpp'),header);fs.writeFileSync(path.join(out,'ffx-'+effect+'-MIT.txt'),read('LICENSE.txt'));
+ fs.writeFileSync(path.join(out,'ffx-'+effect+'-shaders.hpp'),header);addLicense(out,'FidelityFX-'+effect,path.join(source,'LICENSE.txt'),'MIT');
  const record={schema:1,repository:spec.repository,commit:spec.commit,version:spec.version,license:spec.license,source:spec,owned:hash(fs.readFileSync(fileURLToPath(import.meta.url))),adaptations:{boundedLogicalImages:true,originalDispatch:true,float32Arithmetic:true,exactSourceAlphaBoundary:true,callbacks:{sourceSha256:hash(original),appliedSha256:hash(callbacks)},...(algorithm?{algorithm:{sourceSha256:spec.files['sdk/include/FidelityFX/gpu/blur/ffx_blur.h'],appliedSha256:hash(algorithm),unpackedFloat32Cache:true,smallImageSignedLoopBounds:true,paddedThreadsParticipateInBarriers:true}}:{})},shaders:shaders.map(({source,...s})=>s),headerSha256:hash(header),tools:Object.fromEntries(['dxc','spirv-cross','spirv-val'].map(name=>[name,hash(fs.readFileSync(path.join(tools,name)))]))};
  fs.writeFileSync(path.join(out,'ffx-'+effect+'-source.json'),JSON.stringify(record,null,2)+'\n');console.log(JSON.stringify({effect,output:out,kernels:shaders.length}));
 }

@@ -38,10 +38,10 @@ export function installedToolsDirectory(environment=process.env){
  return path.join(root,'runtime-installed-tools');
 }
 /** Install the declared host tools; source and package architectures are independent. */
-export function installBuildTools(tools,{platform=process.platform,environment=process.env,execute=(command,args,options)=>execFileSync(command,args,options),rootUser=process.getuid?.()===0}={}){
+export function installBuildTools(tools,{platform=process.platform,environment=process.env,execute=(command,args,options)=>execFileSync(command,args,{...options,maxBuffer:Infinity}),rootUser=process.getuid?.()===0}={}){
  if(!Array.isArray(tools)||tools.some(name=>!(/^[a-z0-9][a-z0-9@+._-]{0,63}$/).test(name)))throw Error('Choose declared build-tool names.');
  if(!tools.length)return {tools:[],platform};
- const run=(command,args)=>{const step=()=>execute(command,args,{env:{...environment,DEBIAN_FRONTEND:'noninteractive'},stdio:['inherit','inherit','pipe']});return ['brew','apt-get','sudo'].includes(command)||args.includes('pip')?retryNetwork(step):step();};
+ const run=(command,args)=>{const step=()=>execute(command,args,{maxBuffer:Infinity,env:{...environment,DEBIAN_FRONTEND:'noninteractive'},stdio:['inherit','inherit','pipe']});return ['brew','apt-get','sudo'].includes(command)||args.includes('pip')?retryNetwork(step):step();};
  if(platform==='darwin'){run('brew',['install',...tools]);return {tools,platform};}
  if(platform!=='linux')throw Error('Runtime build tools support macOS and Linux.');
  const selected=linuxToolSelection(tools),apt=args=>rootUser?run('apt-get',args):run('sudo',['apt-get',...args]);

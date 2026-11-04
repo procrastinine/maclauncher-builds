@@ -23,8 +23,8 @@ export function androidBuildInputViews(inputs){
  const checked={};for(const requirement of androidBuildInputRequirements())checked[requirement.key]=verifyAndroidBuildInput(requirement,inputs[requirement.key]);
  const angleDefinition=json(path.join(root,'producers/android-inputs/angle.json')),profile=angleDefinition.profiles.find(profile=>profile.id==='common'),angleManifest=json(product(checked.angle.root,'angle-manifest.json'));
  if(angleManifest.version!==profile.providerVersion||angleManifest.programBinaryVersion!==profile.programBinaryVersion||angleManifest.angleRevision!==angleDefinition.angle.revision)throw Error('The Android ANGLE input differs from its common profile.');
- return {checked,angle:{angle:checked.angle.root,angleNotices:path.join(checked.angle.root,'notices')},
-  codecs:{codecs:path.join(checked.codecs.root,'codecs'),codecNotices:path.join(checked.codecs.root,'notices'),include:path.join(checked.codecs.root,'include')},
+ return {checked,angle:{angle:checked.angle.root,angleLicenses:path.join(checked.angle.root,'licenses')},
+  codecs:{codecs:path.join(checked.codecs.root,'codecs'),codecLicenses:path.join(checked.codecs.root,'licenses'),include:path.join(checked.codecs.root,'include')},
   blueprint:{parser:product(checked.blueprint.root,'bin/android-blueprint-parser'),sources:product(checked.blueprint.root,'parser-sources.json')},
   aconfig:product(checked.aconfig.root,'files/bin/aconfig'),extractor:product(checked.extractor.root,'files/bin/android-image-extract'),
   java:checked.java.root,javaFramework:checked.javaFramework.root,artJava:checked.artJava.root,ffiInput:path.dirname(checked.ffi.root),

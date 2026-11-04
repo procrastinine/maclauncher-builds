@@ -8,7 +8,7 @@ import {createRequire} from 'node:module';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {managerDeclaration} from './manager-declaration.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
-import {intakeNotices,printWarnings,tidyNotices} from '../lib/notices.mjs';
+import {addLicense} from '../lib/licenses.mjs';
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),Native=require('../producers/maclauncher/src/modules/shared/runtime/local-native.js');
 const Source=require('../producers/maclauncher/src/modules/shared/runtime/pinned-native-build.js');
 const Tools=require('../producers/maclauncher/scripts/native-binary-tools.cjs');
@@ -19,7 +19,7 @@ function preparedNativeFiles(){
  for(const id of Object.keys(map)){const input=preparedBuildInput(id);for(const file of input.declaration.files)if(file.architectures)files.add(file.size+'/'+file.sha256);}
  return files;
 }
-const run=(command,args)=>execFileSync(command,args,{encoding:'utf8',timeout:120000,maxBuffer:16<<20});
+const run=(command,args)=>execFileSync(command,args,{encoding:'utf8',timeout:120000,maxBuffer:Infinity});
 
 export async function sealRuntime({project:id,version:selectedVersion,arch,executable,sourceRoot,sourceScope,upstreamRevision,output,executableRelative,appRoot,payloads=[],notices=[],extraLibraries=[],runtimeFiles={},environmentRelative={},jsonMetadata={},capabilities,maximumMacOS='13.0',provenance={},directory=path.resolve(import.meta.dirname,'..')}) {
  const project=resolveProject(id,directory),build=buildRecord(project,selectedVersion),version=build.version,cpu=arch==='x64'?'x86_64':arch,preparedFiles=preparedNativeFiles(),shared=new Set();
@@ -27,17 +27,15 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
   throw Error('Sealing needs a registered build, target CPU, pinned public source and a new absolute output directory.');
  await Source.validatePinnedSource(sourceRoot,upstreamRevision,{sourceScope});
  executable=fs.realpathSync(executable);executableRelative??=appRoot?path.basename(appRoot)+'/Contents/MacOS/'+path.basename(executable):'bin/'+path.basename(executable);B.relativeFile(executableRelative);
- const payload=path.join(output,'payload'),files=path.join(payload,'files'),originals=new Map(),targets=new Map(),sources=new Map(),licenseRows=[];
+ const payload=path.join(output,'payload'),files=path.join(payload,'files'),originals=new Map(),targets=new Map(),sources=new Map();
  const copy=(source,relative)=>{B.relativeFile(relative);const target=path.join(files,relative);Tools.copyTree(source,target);return target;};
  fs.mkdirSync(files,{recursive:true});
  try {
   copy(appRoot||executable,appRoot?path.basename(appRoot):executableRelative);
   for(const entry of payloads)copy(entry.source,entry.relative);
-  const collected=intakeNotices((Array.isArray(notices)?notices:[]).map((notice,index)=>({...notice,path:'licenses/upstream/'+index+'-'+path.basename(typeof notice?.file==='string'?notice.file:'notice.txt')})),{output:files,packageName:project.name,sourceUrl:project.upstreams[0]?.repository});
-  printWarnings(collected.warnings);licenseRows.push(...collected.notices.map(({file,...notice})=>notice));
-  licenseRows.splice(0,licenseRows.length,...tidyNotices(files,{id,version,notices:licenseRows,files:licenseRows.filter(row=>typeof row?.path==='string').map(row=>({path:row.path}))},{share:false}).notices);
+  for(const notice of notices)addLicense(files,notice.name,notice.file,notice.license);
   const roots=[{source:appRoot||executable,relative:appRoot?path.basename(appRoot):executableRelative},...payloads];
-  for(const relative of B.fileInventory(files).filter(relative=>!licenseRows.some(row=>row.path===relative))){
+  for(const relative of B.fileInventory(files)){
    const target=path.join(files,relative);if(!Tools.macho(target))continue;
    const entry=roots.find(entry=>relative===entry.relative||relative.startsWith(entry.relative+'/'));
    if(!entry)throw Error('Native input is not a production binary.');
@@ -53,12 +51,11 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
   };
   for(const file of extraLibraries)addLibrary(file);
   const queue=[...sources.keys()],seen=new Set(),noticeRoots=new Set(),aliases=new Map(),inherited=Tools.loadCommands(executable,cpu).rpaths;
-  const receipts=path.join(output,'dependency-receipts');fs.mkdirSync(receipts);
-  try {for(let i=0;i<queue.length;i++){
+  for(let i=0;i<queue.length;i++){
    const target=queue[i];if(seen.has(target))continue;seen.add(target);const source=sources.get(target);
    const immutable=preparedFiles.has(fs.statSync(source).size+'/'+Native.hashFile(source));if(immutable)shared.add(target);
    if(!immutable)Tools.thinStagedMachO(target,files,cpu,run);
-   Tools.addDependencyNotices(source,files,licenseRows,noticeRoots,receipts);
+   Tools.addDependencyNotices(source,files,noticeRoots);
    const commands=Tools.loadCommands(source,cpu),ids=Tools.libraryIds(source,cpu);
    for(const link of Tools.links(source,cpu)){
     if(system(link)||ids.includes(link))continue;
@@ -72,9 +69,9 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
    }
    if(!immutable)for(const rpath of new Set(commands.rpaths.filter(value=>path.isAbsolute(value)&&!system(value))))run('/usr/bin/install_name_tool',['-delete_rpath',rpath,target]);
    if(!immutable&&ids.length)run('/usr/bin/install_name_tool',['-id','@rpath/'+path.basename(target),target]);
-  }}finally{fs.rmSync(receipts,{recursive:true,force:true});}
+  }
   // Upstream source and bottles may use read-only modes; package files are owned copies.
-  for(const relative of B.fileInventory(files).filter(relative=>!licenseRows.some(row=>row.path===relative))){
+  for(const relative of B.fileInventory(files)){
    const file=path.join(files,relative),executable=Tools.macho(file)||Boolean(fs.statSync(file).mode&0o111);
    fs.chmodSync(file,executable?0o755:0o644);
   }
@@ -114,12 +111,10 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
   }
   for(const [file,hash] of signedHashes)if(Native.hashFile(file)!==hash)throw Error('Metadata update changed signed native code.');
   if(Object.keys(jsonMetadata).length)for(const file of seen)run('/usr/bin/codesign',['--verify','--strict',file]);
-  licenseRows.splice(0,licenseRows.length,...tidyNotices(files,{id,version,notices:licenseRows,files:licenseRows.filter(row=>typeof row?.path==='string').map(row=>({path:row.path}))},{share:false}).notices);
-  const noticePaths=new Set(licenseRows.map(row=>row.path));
-  const inventory=B.fileInventory(files).filter(relative=>!noticePaths.has(relative)).map(relative=>{const target=path.join(files,relative),stat=fs.statSync(target),architectures=Tools.macho(target);return {path:relative,size:stat.size,sha256:Native.hashFile(target),mode:stat.mode&0o777,...(architectures?{architectures}:{})};});
+  const inventory=B.fileInventory(files).map(relative=>{const target=path.join(files,relative),stat=fs.statSync(target),architectures=Tools.macho(target);return {path:relative,size:stat.size,sha256:Native.hashFile(target),mode:stat.mode&0o777,...(architectures?{architectures}:{})};});
   const manifest={schemaVersion:1,managerId:id,version,upstreamRevision,platform:'darwin',arch,minimumMacOS,executableRelative,files:inventory,
    dependencies:[...seen].map(file=>({file:path.relative(files,file).split(path.sep).join('/'),links:Tools.links(file,cpu).filter(link=>!Tools.libraryIds(file,cpu).includes(link))})),
-   notices:licenseRows,runtimeFiles,environmentRelative,...(capabilities?{capabilities}:{}),signature:{identity:'-',verified:true},
+   runtimeFiles,environmentRelative,...(capabilities?{capabilities}:{}),signature:{identity:'-',verified:true},
    provenance:Tools.publicProvenance({...provenance,sourceRevision:upstreamRevision,inputExecutableSha256:originals.get(executable)||Native.hashFile(executable),verifiedBuild:true})};
   B.validateManifest(manifest);B.verifyPayload(files,manifest);
   await Source.validatePinnedSource(sourceRoot,upstreamRevision,{sourceScope});

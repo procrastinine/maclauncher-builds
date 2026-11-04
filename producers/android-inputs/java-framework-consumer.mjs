@@ -10,14 +10,14 @@ function copy(input,manifest,name,destination){
 }
 /** Restore original supplemental module products into this invocation's owned build tree. */
 export function stageJavaFrameworkModules({input,build}){
- const manifest=metadata(input),archives=[],notices=[];
+ const manifest=metadata(input),archives=[];
  for(const name of manifest.modules){
   if(path.basename(name)!==name||!name.endsWith('.jar'))throw Error('The Java framework module name is invalid.');
-  const module=name.slice(0,-4),directory=path.join(build,'framework-modules',module),archive=path.join(directory,name),notice=path.join(directory,'notices');fs.rmSync(directory,{recursive:true,force:true});copy(input,manifest,'modules/'+name,archive);
-  for(const file of manifest.files.filter(file=>file.path.startsWith('notices/'+module+'/')))copy(input,manifest,file.path,path.join(notice,file.path.slice(('notices/'+module+'/').length)));
-  archives.push(archive);notices.push({name:module,path:notice});
+  const module=name.slice(0,-4),directory=path.join(build,'framework-modules',module),archive=path.join(directory,name);fs.rmSync(directory,{recursive:true,force:true});copy(input,manifest,'modules/'+name,archive);
+  archives.push(archive);
  }
- return {archives,notices};
+ const licenses=manifest.files.some(file=>file.path==='licenses/components.txt')?[path.join(input,'licenses')]:[];
+ return {archives,licenses};
 }
 /** Native compilation consumes the same classes, complete framework and JNI declarations. */
 export function stageJavaFramework({input,build,output,graphicsRegistrations}){

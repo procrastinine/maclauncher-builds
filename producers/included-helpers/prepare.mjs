@@ -1,4 +1,4 @@
-import * as NoticeIntake from '../../lib/notices.mjs';
+import {addLicense} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -21,9 +21,9 @@ export function prepare({id,input,output}){
  if(profile.id!==id||!path.isAbsolute(input||'')||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select a helper profile, absolute input and new output directory.');
  input=fs.realpathSync(input);output=path.resolve(output);
  if(output===input||output.startsWith(input+path.sep)||input.startsWith(output+path.sep))throw Error('Helper output must be separate from its input.');
- const names=new Set();
+ const names=new Set(),noticeNames=new Set((profile.notices||[]).map(row=>row?.path));
  for(const file of profile.inputs){
-  if(NoticeIntake.isNoticePath(file.output,profile.notices))continue;
+  if(noticeNames.has(file.output))continue;
   B.relativeFile(file.path);B.relativeFile(file.output);
   if(names.has(file.output)||!['file'].includes(file.kind))throw Error('Invalid helper source inventory.');
   names.add(file.output);
@@ -33,7 +33,7 @@ export function prepare({id,input,output}){
  fs.mkdirSync(output,{recursive:true});
  try{
   for(const file of profile.inputs){
-   if(NoticeIntake.isNoticePath(file.output,profile.notices)){NoticeIntake.copyNotice(path.join(input,file.path),path.join(output,file.output));continue;}
+   if(noticeNames.has(file.output)){addLicense(output,profile.id,path.join(input,file.path));continue;}
    const target=path.join(output,file.output);fs.mkdirSync(path.dirname(target),{recursive:true});
    fs.copyFileSync(path.join(input,file.path),target,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.chmodSync(target,file.mode);
    if(file.architectures){
@@ -52,17 +52,17 @@ export function prepare({id,input,output}){
     catch{run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);run('/usr/bin/codesign',['--verify','--strict',target]);}
    }
   }
-  const files=profile.inputs.filter(input=>!NoticeIntake.isNoticePath(input.output,profile.notices)).map(input=>{
-   const stored=B.readRegular(path.join(output,input.output),B.LIMITS.fileBytes);
-   return {path:input.output,size:stored.size,mode:stored.mode,sha256:stored.sha256,...(input.architectures?{architectures:input.architectures}:{})};
+  const files=B.fileInventory(output).map(relative=>{
+   const input=profile.inputs.find(input=>input.output===relative),stored=B.readRegular(path.join(output,relative),B.LIMITS.fileBytes);
+   return {path:relative,size:stored.size,mode:stored.mode,sha256:stored.sha256,...(input?.architectures?{architectures:input.architectures}:{})};
   });
   const manifest={schemaVersion:1,id:profile.id,...(profile.managedManifest || {}),version:profile.version,arch:profile.arch,minimumMacOS:profile.minimumMacOS,
-   ...(profile.executableRelative?{executableRelative:profile.executableRelative}:{}),files,notices:profile.notices,source:profile.source};
+   ...(profile.executableRelative?{executableRelative:profile.executableRelative}:{}),files,source:profile.source};
   const manifestBytes=json(manifest);fs.writeFileSync(path.join(output,'manifest.json'),manifestBytes,{flag:'wx',mode:0o644});
   files.push({path:'manifest.json',size:manifestBytes.length,mode:0o644,sha256:hash(manifestBytes)});
   const declaration={id:profile.id,version:profile.version,arch:profile.arch,launcherArchitectures:profile.launcherArchitectures,
    minimumMacOS:profile.minimumMacOS,sourceRelative:null,sourceSha256:hash(json(profile)),directoryRelative:[id,profile.version,profile.arch].join('/'),
-   manifestRelative:'manifest.json',manifestSha256:hash(manifestBytes),files,notices:profile.notices,redistribution:'bundle'};
+   manifestRelative:'manifest.json',manifestSha256:hash(manifestBytes),files,redistribution:'bundle'};
   validateDeclaration(declaration);B.verifyPayload(output,declaration);
   return declaration;
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}

@@ -1,4 +1,3 @@
-import {copyNotices,sourceNotices,printWarnings} from '../lib/notices.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -38,6 +37,6 @@ export async function prepareArtMacBuildContext({elfInput,work}){
  const xsdc=lockValue(path.join(source,'upstream/android16-xsdc.lock'),'XSDC_REVISION');checkoutSource({repository:'https://android.googlesource.com/platform/system/tools/xsdc',revision:xsdc,destination:path.join(fetched,'xsdc')});
  const art=path.join(work,'art-products');fs.mkdirSync(art);
  for(const relative of profile.outputs){const destination=path.join(art,relative);fs.mkdirSync(path.dirname(destination),{recursive:true});fs.copyFileSync(path.join(elfInput.root,relative),destination,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);}
- const noticeRoot=path.join(elfInput.root,'notices'),copied=copyNotices(sourceNotices(noticeRoot,{all:true,name:'Android ART',repository:'https://android.googlesource.com'}).map(notice=>({...notice,path:'notices/'+path.relative(noticeRoot,notice.file)})),{output:art});printWarnings(copied.warnings);
+ try{fs.cpSync(path.join(elfInput.root,'licenses'),path.join(art,'licenses'),{recursive:true});}catch{}
  return {art,build:{source,checkout,fetched,sdk,jdk:homes[0],python,target,env},record};
 }

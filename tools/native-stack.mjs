@@ -5,11 +5,11 @@ import {createRequire} from 'node:module';
 import {buildInput} from './build-input.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 import {collectSdlNotices} from './sdl-notices.mjs';
-import {intakeNotices,printWarnings} from '../lib/notices.mjs';
+import {addLicense} from '../lib/licenses.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/maclauncher/src/modules/shared/runtime');
 const Source=require(path.join(base,'pinned-native-build.js')),Tools=require('../producers/maclauncher/scripts/native-binary-tools.cjs');
 const system=value=>value.startsWith('/usr/lib/')||value.startsWith('/System/Library/');
-const command=(tool,args)=>execFileSync(tool,args,{encoding:'utf8',maxBuffer:16<<20}).trim();
+const command=(tool,args)=>execFileSync(tool,args,{encoding:'utf8',maxBuffer:Infinity}).trim();
 const metadataFile=file=>/\.(?:pc|cmake|la)$/.test(file)||/-config$/.test(file);
 const PREFIX='NATIVE_STACK_PREFIX',SDK='NATIVE_STACK_SDK';
 const modules={fonts:'portable-sdl2-fonts',audio:'portable-sndfile',movie:'portable-ffmpeg',mixer:'portable-sdl2-mixer'};
@@ -31,7 +31,7 @@ export function nativeStackInput(input,{arch,work,fonts,audio,sdk=process.env.SD
  function visit(directory){for(const entry of fs.readdirSync(directory,{withFileTypes:true})){const file=path.join(directory,entry.name);if(entry.isDirectory())visit(file);else if(metadataFile(file))fs.writeFileSync(file,expand(fs.readFileSync(file,'utf8')));}}
  visit(prefix);
  const stack={...expand(metadata.stack),prefix,sdk,tools:tools||{cmake:Source.findBuildTool('cmake'),ninja:Source.findBuildTool('ninja')},sourceRoots:{},preparedInput:input,
-  notices:(Array.isArray(metadata.notices)?metadata.notices:[]).map(notice=>{const {path:relative,...noticeMetadata}=notice;return {...noticeMetadata,file:path.join(input.root,relative)};})};
+  notices:[]};
  if(metadata.kind==='mixer'){if(!fonts||!audio)throw Error('The shared mixer requires its prepared font and audio stacks.');Object.assign(stack,{fonts,audio,readRoots:[fonts.prefix,audio.prefix]});}
  return stack;
 }
@@ -63,17 +63,16 @@ export function stageNativeStack({built,kind,arch,output,work}){
  }
  const notices=[];
  for(const pin of built.sources||[]){const source=built.sourceRoots?.[pin.id]||pin.sourceRoot;if(!source)continue;
-  if(pin.id==='sdl2'){const collected=collectSdlNotices({source,output:path.join(work,'sdl-notices'),name:pin.name+' '+pin.version,sourceUrl:pin.sourceUrl||pin.archiveUrl,includeLibm:true});for(const notice of collected.notices)copyNotice(notice);}
-  else for(const name of pin.notices||[])copyNotice({file:path.join(source,name),name:pin.name,license:pin.license,sourceUrl:pin.sourceUrl||pin.archiveUrl});
+  if(pin.id==='sdl2'){const collected=collectSdlNotices({source,output:path.join(work,'sdl-notices'),name:pin.name+' '+pin.version,sourceUrl:pin.sourceUrl||pin.archiveUrl,includeLibm:true});for(const notice of collected.notices)addLicense(payload,notice.name,notice.file,notice.license);}
+  else for(const name of pin.notices||[])addLicense(payload,pin.name,path.join(source,name),pin.license);
  }
- if(built.source?.notices)for(const name of built.source.notices)copyNotice({file:path.join(built.sourceRoot,name),name:kind,license:built.source.license,sourceUrl:built.source.url});
- function copyNotice(notice){const relative='notices/'+notices.length+'-'+path.basename(notice?.file||'notice.txt');const result=intakeNotices([{...notice,path:relative}],{output:payload,packageName:kind,sourceUrl:notice.sourceUrl,standIn:false});printWarnings(result.warnings);notices.push(...result.notices.map(({file,...row})=>row));}
+ if(built.source?.notices)for(const name of built.source.notices)addLicense(payload,kind,path.join(built.sourceRoot,name),built.source.license);
  const {fonts,audio,preparedInput,notices:oldNotices,readRoots,...metadata}=built;
  const stack=Tools.publicProvenance(metadata,[{from:built.prefix,to:PREFIX},{from:built.sdk,to:SDK},{from:work,to:'NATIVE_STACK_BUILD'}]);
  for(const key of ['prefix','sdk','tools','sourceRoots','sourceRoot','outputRoot'])delete stack[key];
  // Source identities remain complete; compiler work locations are not inputs.
  for(const source of stack.sources||[])for(const key of ['sourceRoot','outputRoot'])delete source[key];
- fs.writeFileSync(path.join(payload,'portable-stack.json'),JSON.stringify({schemaVersion:1,kind,architecture:arch,stack,notices},null,2)+'\n');
+ fs.writeFileSync(path.join(payload,'portable-stack.json'),JSON.stringify({schemaVersion:1,kind,architecture:arch,stack},null,2)+'\n');
  return {payload,notices};
 }
 

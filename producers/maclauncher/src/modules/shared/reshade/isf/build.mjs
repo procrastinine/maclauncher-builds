@@ -1,4 +1,4 @@
-import * as NoticeIntake from '../../../../../../../lib/notices.mjs';
+import {addLicense} from '../../../../../../../lib/licenses.mjs';
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -41,7 +41,7 @@ for(const entry of compilers){
   isolateCompiler(library);
   write(path.join(input,path.basename(entry.header)),fs.readFileSync(entry.header));
 }
-for(const entry of source.compilerSources)NoticeIntake.copyNotice(path.join(compilerSources[entry.id],entry.notice),path.join(payload,entry.id+"-LICENSE.txt"));
+for(const entry of source.compilerSources)addLicense(payload,entry.id,path.join(compilerSources[entry.id],entry.notice));
 run("cmake",["-S",owned,"-B",path.join(output,"cmake"),"-DISF_INPUT="+input,"-DMACFX_INPUT="+path.resolve(owned,"../native"),"-DCMAKE_BUILD_TYPE=Release","-DCMAKE_OSX_ARCHITECTURES="+architectures.join(";")]);
 run("cmake",["--build",path.join(output,"cmake"),"--parallel","2"]);
 fs.copyFileSync(path.join(output,"cmake/libmacfx-isf.dylib"),path.join(payload,source.library));
@@ -49,12 +49,12 @@ for(const file of source.compilerLibraries){const filename=path.basename(file);f
 const shaderRoot=roots.VVMetalKit,air=[];
 for(const name of ["CopierMTLScene","SwizzleMTLScene"]){const file=path.join(output,name+".air");run("xcrun",["-sdk","macosx","metal","-std=metal3.0","-mmacosx-version-min=13.0","-I",shaderRoot,"-I",input,"-c",path.join(shaderRoot,name+".metal"),"-o",file]);air.push(file);}
 run("xcrun",["-sdk","macosx","metallib",...air,"-o",path.join(payload,"default.metallib")]);
-NoticeIntake.copyNotice(path.join(upstream,"LICENSE.txt"),path.join(payload,"ISF-LICENSE.txt"));
+addLicense(payload,'ISF',path.join(upstream,"LICENSE.txt"));
 for(const [name,root]of [["VVMetalKit",path.join(upstream,"submodules/VVMetalKit")],["ISFGLSLGenerator",path.join(upstream,"submodules/ISFGLSLGenerator")],["PINCache",path.join(upstream,"submodules/PINCache")],["PINOperation",path.join(upstream,"submodules/PINCache/Carthage/Checkouts/PINOperation")]]){
-  const license=fs.readdirSync(root).find(file=>/^license(?:\.txt|\.md)?$/i.test(file));if(license)NoticeIntake.copyNotice(path.join(root,license),path.join(payload,name+"-LICENSE.txt"));
+  const license=fs.readdirSync(root).find(file=>/^license(?:\.txt|\.md)?$/i.test(file));if(license)addLicense(payload,name,path.join(root,license));
 }
 for(const name of [source.library,...source.compilerLibraries.map(file=>path.basename(file))])run("codesign",["--force","--sign","-",path.join(payload,name)]);
-const files=fs.readdirSync(payload).filter(name=>name!=="provider.json"&&!NoticeIntake.isNoticePath(name)).sort().map(name=>{const bytes=fs.readFileSync(path.join(payload,name));return {path:name,size:bytes.length,sha256:crypto.createHash("sha256").update(bytes).digest("hex")};});
+const files=fs.readdirSync(payload,{recursive:true}).filter(name=>name!=="provider.json"&&fs.statSync(path.join(payload,name)).isFile()).sort().map(name=>{const bytes=fs.readFileSync(path.join(payload,name));return {path:name,size:bytes.length,sha256:crypto.createHash("sha256").update(bytes).digest("hex")};});
 const ownedInputs=Object.fromEntries(["source.json","build.mjs","build-compilers.mjs","compiler-CMakeLists.txt","isolate-compiler.mjs","../compiler-isolation.mjs","../../effects/operation-contracts.mjs","CMakeLists.txt","provider.mm","index.js"].map(name=>[name,crypto.createHash("sha256").update(fs.readFileSync(path.join(owned,name))).digest("hex")]));
 const nativeRoot=path.resolve(owned,"../native"),dependencyText=fs.readFileSync(path.join(output,"cmake/CMakeFiles/macfx-isf.dir/provider.mm.o.d"),"utf8").replace(/\\\r?\n/g," ");
 const dependencies=[...dependencyText.matchAll(/(?:\\.|[^\s])+/g)].map(match=>match[0].replace(/\\(.)/g,"$1")).filter(file=>file.startsWith(nativeRoot+path.sep)&&/\.(?:h|hpp)$/.test(file));

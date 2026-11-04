@@ -93,7 +93,7 @@ async function buildRuntime({ userDataDir, version, sourceDir, architecture = pr
     fs.rmSync(archive);
     const overlay = pin.gameArguments === "repeat-game-arg-v1"
       ? require("../overlays/butterscotch-game-arguments").apply(snapshot) : null;
-    const options = { ...abortOptions, timeout: 15 * 60 * 1000, maxBuffer: 8 * 1024 * 1024 };
+    const options = { ...abortOptions, timeout: 15 * 60 * 1000, maxBuffer: Infinity};
     const cmake = findBuildTool("cmake");
     const maps = ["-ffile-prefix-map", "-fmacro-prefix-map", "-fdebug-prefix-map"].flatMap(option =>
       [`${option}=${temporary}=butterscotch-build`, `${option}=${snapshot}=butterscotch-source`]).join(" ");

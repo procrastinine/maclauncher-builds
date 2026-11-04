@@ -1,3 +1,4 @@
+import {addLicense} from '../../../../../../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -24,9 +25,9 @@ const dependencies=new Map();
 function visit(dependency){const [name,version]=dependency.split(' '),matches=packages.filter(p=>p.name===name&&(!version||p.version===version));if(matches.length!==1)throw Error('Ambiguous locked dependency: '+dependency);const item=matches[0],key=item.name+'-'+item.version;if(dependencies.has(key))return;dependencies.set(key,item);for(const child of item.dependencies)visit(child);}
 for(const dependency of specification.registryDependencies)visit(dependency);
 const notices=path.join(output,'licenses');fs.mkdirSync(notices,{recursive:true});
-copy(fs.realpathSync(options['maclauncher-license']),path.join(notices,'maclauncher/LICENSE'));
-copy(path.join(aim,'LICENSE'),path.join(notices,'aim/LICENSE'));
-copy(path.join(aim,'NOTICE'),path.join(notices,'aim/NOTICE'));
+addLicense(output,'MacLauncher',options['maclauncher-license'],'MIT');
+addLicense(output,'AIM',path.join(aim,'LICENSE'),'Apache-2.0');
+addLicense(output,'AIM',path.join(aim,'NOTICE'),'Apache-2.0');
 const records=[];
 for(const [key,item] of [...dependencies].sort(([a],[b])=>a.localeCompare(b))){
   const directory=path.join(registry,key),archive=path.join(cache,key+'.crate');
@@ -38,18 +39,18 @@ for(const [key,item] of [...dependencies].sort(([a],[b])=>a.localeCompare(b))){
   copy(directory,path.join(temporary,'upstream/crates',key));
   const licenseFiles=fs.readdirSync(directory).filter(name=>/^(LICEN[CS]E|COPYING|NOTICE|COPYRIGHT)([.\-_]|$)/i.test(name)&&fs.statSync(path.join(directory,name)).isFile());
 
-  for(const name of licenseFiles)copy(path.join(directory,name),path.join(notices,'crates',key,name));
-  records.push({name:item.name,version:item.version,source:item.source,checksum:item.checksum,licensePaths:licenseFiles.map(name=>'licenses/crates/'+key+'/'+name)});
+  for(const name of licenseFiles)addLicense(output,item.name,path.join(directory,name));
+  records.push({name:item.name,version:item.version,source:item.source,checksum:item.checksum,licensePaths:licenseFiles.map(name=>'upstream/crates/'+key+'/'+name)});
 }
-copy(path.join(rust,'share/doc/rust/COPYRIGHT-library.html'),path.join(notices,'rust/COPYRIGHT-library.html'));
-copy(path.join(rust,'share/doc/rust/licenses'),path.join(notices,'rust/licenses'));
+addLicense(output,'Rust',path.join(rust,'share/doc/rust/COPYRIGHT-library.html'));
+for(const row of fs.readdirSync(path.join(rust,'share/doc/rust/licenses'),{withFileTypes:true}))if(row.isFile())addLicense(output,'Rust',path.join(rust,'share/doc/rust/licenses',row.name));
 copy(notices,path.join(temporary,'licenses'));
 const owned=fs.readdirSync(import.meta.dirname).sort().map(name=>({path:'maclauncher/apk-metadata/'+name,sha256:sha(path.join(import.meta.dirname,name))}));
 const provenance={schemaVersion:1,id:'android-apk-metadata',aim:specification.aim,minimumMacOS:'13.0',architecture:'arm64',compiler:build.compiler,originalParser:[...build.originals,...build.dependencies.originalSources||[]],owned,registryDependencySources:records,cargoLockSha256:sha(path.join(aim,'Cargo.lock')),binary:{sha256:build.binary.sha256,size:build.binary.bytes},dependencyArchives:Object.fromEntries(Object.entries(build.dependencies).filter(([,input])=>typeof input?.sha256==='string').map(([name,input])=>[name,{sha256:input.sha256}]))};
 fs.writeFileSync(path.join(temporary,'source.json'),JSON.stringify(provenance,null,2)+'\n');
 execFileSync('/usr/bin/tar',['-czf',path.join(output,'source.tar.gz'),'-C',temporary,'.'],{env:{...process.env,COPYFILE_DISABLE:'1'}});
 fs.writeFileSync(path.join(output,'source.json'),JSON.stringify(provenance,null,2)+'\n');
-fs.writeFileSync(path.join(output,'NOTICE.txt'),'Android APK Metadata\n\nAPK/resource/drawable parsing: AIM '+specification.aim.revision+' (Apache-2.0).\nMacLauncher metadata protocol and locale/split adaptation: MIT.\nOwned source/build entries and component identities are described in README.md and source.json. The complete corresponding-source archive is distributed separately.\nRust standard library, registry dependency and MacLauncher license notices are included under licenses/.\n');
+fs.writeFileSync(path.join(output,'SOURCE-NOTES.txt'),'Android APK Metadata\n\nAPK/resource/drawable parsing: AIM '+specification.aim.revision+' (Apache-2.0).\nMacLauncher metadata protocol and locale/split adaptation: MIT.\nOwned source/build entries and component identities are described in README.md and source.json. The complete corresponding-source archive is distributed separately.\nRust standard library, registry dependency and MacLauncher license notices are included under licenses/.\n');
 const result={schemaVersion:1,source:{path:path.join(output,'source.tar.gz'),sha256:sha(path.join(output,'source.tar.gz')),size:fs.statSync(path.join(output,'source.tar.gz')).size},sourceMetadata:{path:path.join(output,'source.json'),sha256:sha(path.join(output,'source.json'))},registryCrates:records.length,owned,licenses:notices};
 fs.writeFileSync(path.join(output,'SOURCE-RESULT.json'),JSON.stringify(result,null,2)+'\n');
 fs.rmSync(temporary,{recursive:true});

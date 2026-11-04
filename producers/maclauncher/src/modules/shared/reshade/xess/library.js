@@ -1,4 +1,4 @@
-const NoticeIntake = require('../../../../../../../lib/notices.mjs');
+const {addLicense} = require('../../../../../../../lib/licenses.mjs');
 // Copyright (c) MacLauncher contributors. MIT license.
 const fs=require("node:fs"),path=require("node:path"),crypto=require("node:crypto");
 const Source=require("./source.json"),Writable=require("../../writable-input"),Upstream=require("../../runtime/upstream");
@@ -33,7 +33,7 @@ async function inspect(file,signal,spec=Source){
 // A downloaded file must be Intel's file at the declared commit.
 async function downloaded(file,signal,spec=Source){try{return await inspect(file,signal,spec);}catch(error){signal?.throwIfAborted();throw Error(`The downloaded ${spec.file} is not the declared Intel XeSS file: its size or checksum differs.`,{cause:error});}}
 async function resolve(userDataDir,context={}){assertVersion(context);const {signal,useRuntime,operation}=context;const record=operation==="interpolate"?readComponents(userDataDir):read(userDataDir);if(!record)throw Object.assign(new Error("Install or import the Intel XeSS runtime in Graphics."),{code:"GRAPHICS_XESS_RUNTIME_MISSING",managerId:Source.managerId});if(operation==="interpolate"){for(const spec of Components.files)record.libraries[spec.id]=await inspect(record.libraries[spec.id],signal,spec);record.library=record.sourcePath=record.runtimePath=record.libraries.frameGeneration;for(const sourcePath of Object.values(record.libraries))await useRuntime?.({managerId:Source.managerId,sectionId:"interpolation",version:record.version,sourcePath});}else{record.library=await inspect(record.library,signal);await useRuntime?.({managerId:Source.managerId,sectionId:"default",version:record.version,sourcePath:record.library});}return record;}
-function receipt(userDataDir,file,external){const root=directory(userDataDir);Writable.assertOwnDirectory(userDataDir,root);NoticeIntake.copyNotice(path.join(__dirname,Source.licenseFile),path.join(root,Source.licenseFile));Writable.atomicWrite(path.join(root,"runtime.json"),JSON.stringify({schema:1,version:Source.version,sha256:Source.sha256,file:external?file:Source.file,external,sourceUrl:Source.sourceUrl}),{root:userDataDir});return read(userDataDir);}
+function receipt(userDataDir,file,external){const root=directory(userDataDir);Writable.assertOwnDirectory(userDataDir,root);addLicense(root,'Intel-XeSS',path.join(__dirname,Source.licenseFile));Writable.atomicWrite(path.join(root,"runtime.json"),JSON.stringify({schema:1,version:Source.version,sha256:Source.sha256,file:external?file:Source.file,external,sourceUrl:Source.sourceUrl}),{root:userDataDir});return read(userDataDir);}
 async function importRuntime(context={}){if(context.operation==="interpolate"||fs.statSync(context.runtimePath).isDirectory()||path.basename(context.runtimePath).toLowerCase()==="libxess_fg.dll")return importComponents(context);const file=await inspect(context.runtimePath,context.signal);return withRuntimeMutation({managerId:Source.managerId,sectionId:"default",version:Source.version,sourcePath:file},()=>{
   const root=directory(context.userDataDir),current=read(context.userDataDir);
   if(current&&file===current.library)return current;
@@ -62,7 +62,7 @@ async function remove(context={}){const record=read(context.userDataDir)||readCo
 function componentsReceipt(userDataDir,files,external){
   const root=directory(userDataDir);Writable.assertOwnDirectory(userDataDir,root);
 
-  NoticeIntake.copyNotice(path.join(__dirname,Source.licenseFile),path.join(root,Source.licenseFile));
+  addLicense(root,'Intel-XeSS',path.join(__dirname,Source.licenseFile));
   Writable.atomicWrite(path.join(root,"interpolation.json"),JSON.stringify({schema:1,version:Source.version,commit:Components.commit,files:Object.fromEntries(Components.files.map(spec=>[spec.id,{file:external?files[spec.id]:spec.file,external}]))}),{root:userDataDir});
   return readComponents(userDataDir);
 }

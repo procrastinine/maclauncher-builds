@@ -1,4 +1,4 @@
-import * as NoticeIntake from '../../../lib/notices.mjs';
+import {addLicense} from '../../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -23,7 +23,7 @@ export function build({version=pins[0].version,output}){
  if(output===root||output.startsWith(root+path.sep)||root.startsWith(output+path.sep))throw Error('Build output must be separate from source.');
  const args=['-dynamiclib','-arch','arm64','-arch','x86_64','-mmacosx-version-min=13.0','-Wno-deprecated-declarations',
   ...(version==='software-gl-v1-universal'?[]:['-install_name','@rpath/software-opengl.dylib']),'-framework','AppKit'];
- const run=(command,args)=>execFileSync(command,args,{encoding:'utf8',timeout:120000,maxBuffer:1024*1024});
+ const run=(command,args)=>execFileSync(command,args,{encoding:'utf8',timeout:120000,maxBuffer: Infinity});
  fs.mkdirSync(output);
  try{
   const dylibPath=path.join(output,'software-opengl.dylib');
@@ -42,7 +42,7 @@ export function build({version=pins[0].version,output}){
    minimumMacOS:'13.0',architectures:['arm64','x86_64'],supportedRunnerVersions:runners,testedVendorSha256:vendor,
    legacyLogicalRunnerVersions:pin.legacyLogicalRunnerVersions,compilerArgs:args};
   fs.writeFileSync(path.join(output,'helper.json'),JSON.stringify(record,null,2)+'\n');
-  NoticeIntake.copyNotice(path.join(root,'LICENSE'),path.join(output,'license.txt'));
+  addLicense(output,'gamemaker-opengl-helper',path.join(root,'LICENSE'));
   return {...record,dylibPath,output};
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }

@@ -43,8 +43,8 @@ function prune(root) {
 function projectArchive(source, destination) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'maclauncher-production-source-'));
   try {
-    const entries = execFileSync('/usr/bin/tar', ['-tzf', source], { encoding: 'utf8', maxBuffer: 32 * 1024 ** 2 }).trim().split('\n');
-    if (entries.length > 100000 || entries.some(name => name.startsWith('/') || name.split('/').includes('..') || /[\0\r]/.test(name))) throw new Error('Source archive has an unsafe path or too many entries.');
+    const entries = execFileSync('/usr/bin/tar', ['-tzf', source], { encoding: 'utf8', maxBuffer: Infinity}).trim().split('\n');
+    if (entries.some(name => name.startsWith('/') || name.split('/').includes('..') || /[\0\r]/.test(name))) throw new Error('Source archive has an unsafe path or too many entries.');
     execFileSync('/usr/bin/tar', ['-xzf', source, '-C', directory], { stdio: 'pipe' });
     const profile = { ...prune(directory), inputSha256: digest(fs.readFileSync(source)) };
     const profileFile = path.join(directory, 'PRODUCTION_SOURCE_PROFILE.json');

@@ -16,7 +16,7 @@ function redirectHeaders(headers, before, after) {
 }
 function requestOfficial(value, { headers = {}, signal, maxBytes = LIMIT, method = "GET", redirectDepth = 0, httpsRequest = https.request } = {}) {
   const url = officialUrl(value); throwIfAborted(signal);
-  if (!["GET", "HEAD"].includes(method) || !Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > LIMIT || redirectDepth > 5) return Promise.reject(new Error("GitHub request exceeds its method or response limits."));
+  if (!["GET", "HEAD"].includes(method) || redirectDepth > 5) return Promise.reject(new Error("GitHub request exceeds its method or response limits."));
   return new Promise((resolve, reject) => {
     const request = httpsRequest(url, { headers, method }, async response => {
       const status = Number(response.statusCode || 0);
@@ -28,8 +28,7 @@ function requestOfficial(value, { headers = {}, signal, maxBytes = LIMIT, method
         const chunks = []; let size = 0;
         if (method === "HEAD") response.resume();
         else {
-          if (Number(response.headers["content-length"]) > maxBytes) throw new Error("GitHub response exceeds its size limit.");
-          for await (const chunk of response) { size += chunk.length; if (size > maxBytes) throw new Error("GitHub response exceeds its size limit."); chunks.push(Buffer.from(chunk)); }
+          for await (const chunk of response) { size += chunk.length; chunks.push(Buffer.from(chunk)); }
         }
         throwIfAborted(signal);
         const safeHeaders = Object.fromEntries(Object.entries(response.headers).filter(([key]) => !/^(?:set-cookie|authorization|proxy-authorization)$/i.test(key)));
@@ -75,7 +74,7 @@ function createGithubTransport({ request = requestOfficial, runCommand = execute
       const fromEnvironment = env.GH_TOKEN || env.GITHUB_TOKEN;
       if (fromEnvironment && /^[A-Za-z0-9_.-]{10,4096}$/.test(fromEnvironment)) { auth.authenticated = true; return fromEnvironment; }
       try {
-        const result = await runCommand(executable, ["auth", "token", "--hostname", "github.com"], { timeout: 10000, maxBuffer: 8192, encoding: "utf8", windowsHide: true });
+        const result = await runCommand(executable, ["auth", "token", "--hostname", "github.com"], { timeout: 10000, maxBuffer: Infinity, encoding: "utf8", windowsHide: true });
         auth.available = true; const token = String(result.stdout || "").trim();
         if (/^[A-Za-z0-9_.-]{10,4096}$/.test(token)) { auth.authenticated = true; return token; }
       } catch (error) { auth.available = error.code !== "ENOENT"; }
@@ -127,7 +126,7 @@ function createGithubTransport({ request = requestOfficial, runCommand = execute
   }
   function cached(value, options = {}) {
     const url = officialUrl(value).href, method = options.method || "GET", maxBytes = options.maxBytes ?? LIMIT;
-    if (!["GET", "HEAD"].includes(method) || !Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > LIMIT)
+    if (!["GET", "HEAD"].includes(method))
       return Promise.reject(new Error("GitHub request exceeds its method or response limits."));
     const identity = /^sha256:[a-f0-9]{64}$/i.test(options.assetDigest || "") ? options.assetDigest.toLowerCase() : "";
     const representation = Object.entries(options.headers || {}).filter(([name]) => /^(?:accept|x-github-api-version|git-protocol)$/i.test(name))
@@ -141,7 +140,6 @@ function createGithubTransport({ request = requestOfficial, runCommand = execute
       entry = { controller: new AbortController(), subscribers: new Set(), done: false };
       entry.promise = perform(url, { ...options, signal: entry.controller.signal }).then(response => {
         const normalized = { status: response.status, headers: response.headers || {}, body: Buffer.from(response.body || []) };
-        if (normalized.body.length > maxBytes) throw new Error("GitHub response exceeds its size limit.");
         if (normalized.status === 200 && cacheMs > 0 && normalized.body.length <= 8 * 1024 * 1024) {
           if (cache.has(key)) { cacheBytes -= cache.get(key).response.body.length; cache.delete(key); }
           while (cache.size && (cache.size >= 128 || cacheBytes + normalized.body.length > 32 * 1024 * 1024)) { const oldest = cache.keys().next().value; cacheBytes -= cache.get(oldest).response.body.length; cache.delete(oldest); }

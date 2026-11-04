@@ -8,11 +8,12 @@ import {checkoutSource,run,recipeMain} from './build-source.mjs';
 import {buildInput} from './build-input.mjs';
 import {retryNetwork} from './download.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
-import {copyNotices,printWarnings,sourceNotices} from '../lib/notices.mjs';
+import {addLicense} from '../lib/licenses.mjs';
+import {sourceNotices} from './build-source.mjs';
 const root=path.resolve(import.meta.dirname,'..'),descriptor=path.join(root,'producers/android-inputs/java-framework.json');
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),{validateDeclaration}=require('../lib/declaration.cjs');
 const json=file=>JSON.parse(fs.readFileSync(file));
-const read=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',maxBuffer:64<<20,...options}).trim();
+const read=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',maxBuffer:Infinity,...options}).trim();
 
 /** Retain exact original Git trees while fetching only consumed source blobs. */
 function sourceObjects({repository,revision},destination){
@@ -29,6 +30,7 @@ export async function buildAndroidJavaFrameworkInput({output,work}){
  if(!jdkPin)throw Error('The framework Java stage has no declared JDK for this build host.');
  fs.mkdirSync(work,{recursive:true});fs.mkdirSync(output,{recursive:true});
  const android=checkoutSource({...profile.androidSource,destination:path.join(work,'android')}),native=path.join(android,'src/modules/android/native'),pins=json(path.join(native,'source-pins.json'));
+ const {includeLicenses}=await import(pathToFileURL(path.join(native,'upstream/licenses.mjs')));
  const cache=path.join(work,'archives'),jdkArchive=await buildInput(jdkPin,cache),jdkRoot=path.join(work,'jdk');fs.mkdirSync(jdkRoot);run('/usr/bin/tar',['-xzf',jdkArchive,'-C',jdkRoot]);fs.unlinkSync(jdkArchive);
  const homes=fs.readdirSync(jdkRoot).map(name=>path.join(jdkRoot,name,...(process.platform==='darwin'?['Contents','Home']:[]))).filter(home=>fs.existsSync(path.join(home,'bin/javac')));if(homes.length!==1)throw Error('The declared JDK must supply one Java compiler.');const jdk=homes[0];
  const frameworkPin=json(path.join(native,'framework-binary.json')),frameworkDirectory=path.join(work,'framework-input');fs.mkdirSync(frameworkDirectory);
@@ -60,10 +62,10 @@ export async function buildAndroidJavaFrameworkInput({output,work}){
   const pin=dexProfile.artifacts.find(file=>file.file===filename);if(!pin)throw Error('The original DEX tool profile is incomplete.');const archive=await buildInput({...pin,bytes:pin.size},cache),destination=path.join(tools,filename);fs.copyFileSync(archive,destination,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.unlinkSync(archive);dexDependencies[name]=destination;
  }
  const {buildDexBodies}=await import(pathToFileURL(path.join(android,'src/modules/android/art/dex-bodies.mjs'))),dexBuild=path.join(work,'dex-tool');await buildDexBodies({output:dexBuild,jdk,dependencies:dexDependencies});fs.cpSync(path.join(dexBuild,'classes'),path.join(output,'dex-tool/classes'),{recursive:true});
- const candidates=[];for(const [index,archive]of modules.archives.entries()){const name=path.basename(archive);fs.mkdirSync(path.join(output,'modules'),{recursive:true});fs.copyFileSync(archive,path.join(output,'modules',name));const notice=modules.notices?.[index];if(notice)for(const row of sourceNotices(notice.path,{all:true,name:notice.name,repository:profile.androidSource.repository}))candidates.push({...row,path:'notices/'+notice.name+'/'+path.relative(notice.path,row.file)});}
- for(const name of profile.notices||[])for(const row of sourceNotices(path.join(native,'notices',name),{all:true,name:'Android framework '+name,repository:profile.androidSource.repository}))candidates.push({...row,path:'notices/'+name+'/'+path.relative(path.join(native,'notices',name),row.file)});
- candidates.push({file:path.join(android,'LICENSE'),path:'notices/Android-adapters-LICENSE',name:'Android adapters',license:'See original notice',sourceUrl:profile.androidSource.repository});
- const copied=copyNotices(candidates,{output});printWarnings(copied.warnings);const notices=copied.notices.map(({file,...notice})=>notice);
+ const candidates=[];for(const [index,archive]of modules.archives.entries()){const name=path.basename(archive);fs.mkdirSync(path.join(output,'modules'),{recursive:true});fs.copyFileSync(archive,path.join(output,'modules',name));const licenses=modules.licenses?.[index];if(licenses)includeLicenses(output,licenses);}
+ for(const name of profile.licenses||[])for(const row of sourceNotices(path.join(native,'license-inputs',name),{all:true,name:'Android framework '+name,repository:profile.androidSource.repository}))candidates.push({...row,path:'licenses/'+name+'-'+path.relative(path.join(native,'license-inputs',name),row.file).split(path.sep).join('-')});
+ candidates.push({file:path.join(android,'LICENSE'),path:'licenses/Android-adapters-LICENSE',name:'Android adapters',license:'See original notice',sourceUrl:profile.androidSource.repository});
+ const notices=[];for(const notice of candidates)addLicense(output,notice.name,notice.file,notice.license);
  return {root:output,notices,record:{androidSource:profile.androidSource,framework:frameworkPin,sources:profile.sources,blueprint:{...blueprintProfile.upstream,driverSha256:blueprintProfile.driverSha256,toolchain:read('go',['version'])},jdk:{sha256:jdkPin.sha256,version:read(path.join(jdk,'bin/java'),['--version']).split('\n')[0]},graphicsRegistrationsSha256:sha(path.join(output,'graphics-registrations.txt')),modules:modules.archives.map(file=>path.basename(file)),dexTools:dexProfile}};
 }
 

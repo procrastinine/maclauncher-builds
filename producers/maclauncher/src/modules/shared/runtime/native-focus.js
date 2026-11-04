@@ -97,7 +97,7 @@ async function focusOwnedNativeGame(child, { executablePath, launchedAt = Date.n
   try {
     const script = activationScript({ pid: child.pid, executablePath, launchedAt });
     const result = await run("/usr/bin/osascript", ["-l", "JavaScript", "-e", script],
-      { signal: controller.signal, timeout: 8000, maxBuffer: 4096 });
+      { signal: controller.signal, timeout: 8000, maxBuffer: Infinity});
     const reason = result.stdout.trim();
     logActivation(() => logger?.debug?.("[runtime] native window activation", { pid: child.pid, reason }));
     return { activated: reason === "activated" || reason === "already-frontmost", reason };

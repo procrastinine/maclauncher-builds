@@ -7,7 +7,7 @@ import {createHash} from 'node:crypto';
 const root=path.resolve(import.meta.dirname,'../..');
 export const recipe=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'source.json'),'utf8'));
 export const inputs=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'dependencies.json'),'utf8'));
-const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',maxBuffer:64*1024*1024,stdio:['ignore','pipe','pipe']});
+const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',maxBuffer: Infinity,stdio:['ignore','pipe','pipe']});
 
 export function writeChanged(file,bytes,mode=0o644){
  fs.mkdirSync(path.dirname(file),{recursive:true});

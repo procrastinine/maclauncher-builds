@@ -8,7 +8,7 @@ export function changedReleaseLines(before,after){
 }
 export function main([before,output]){
  if(!/^[a-f0-9]{40}$/.test(before||'')||!output)throw Error('Use changed-releases.mjs <before commit> <output file>.');
- let previous='';if(!/^0+$/.test(before)&&spawnSync('git',['cat-file','-e',before+':releases.txt'],{stdio:'ignore'}).status===0)previous=execFileSync('git',['show',before+':releases.txt'],{encoding:'utf8'});
+ let previous='';if(!/^0+$/.test(before)&&spawnSync('git',['cat-file','-e',before+':releases.txt'],{stdio:'ignore'}).status===0)previous=execFileSync('git',['show',before+':releases.txt'],{maxBuffer:Infinity,encoding:'utf8'});
  const changed=changedReleaseLines(previous,fs.readFileSync('releases.txt','utf8'));
  fs.writeFileSync(output,changed.join('\n')+(changed.length?'\n':''));
  if(process.env.GITHUB_OUTPUT)fs.appendFileSync(process.env.GITHUB_OUTPUT,'changed='+Boolean(changed.length)+'\n');

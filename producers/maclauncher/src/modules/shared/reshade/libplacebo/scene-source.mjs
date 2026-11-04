@@ -5,7 +5,7 @@ import crypto from "node:crypto";
 import {execFileSync} from "node:child_process";
 import {SOURCE,VULKAN_HEADERS,FAST_FLOAT,applySceneOverlay} from "./scene-overlay.mjs";
 const hash=file=>crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
-const run=(program,args,options={})=>execFileSync(program,args,{encoding:"utf8",stdio:"pipe",maxBuffer:64*1024*1024,...options});
+const run=(program,args,options={})=>execFileSync(program,args,{encoding:"utf8",stdio:"pipe",maxBuffer: Infinity,...options});
 function archive(repository,dependency,output){
   if(run("git",["-C",repository,"rev-parse",dependency.commit+"^{commit}"]).trim()!==dependency.commit)throw new Error("A required source commit is unavailable.");
   const origin=run("git",["-C",repository,"remote","get-url","origin"]).trim();

@@ -1,4 +1,4 @@
-import * as NoticeIntake from '../../lib/notices.mjs';
+import {addLicense} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -66,23 +66,23 @@ export async function packageRuntime({runtimeBuild,relinkerBuild,output,version,
  const source=path.join(root,recipe.source.path),notices=[];
  for(const entry of [{path:'',id:'anyps5',repository:recipe.source.repository,license:'GPL-2.0-only'},...dependencies.dependencies.map(entry=>({...entry,id:entry.path.replaceAll('/','-'),license:'See notice'}))]){
   const directory=path.join(source,entry.path),names=fs.readdirSync(directory).filter(name=>/^(?:LICENSE|COPYING|COPYRIGHT)(?:[._-].*)?$/i.test(name)&&fs.statSync(path.join(directory,name)).isFile());
-  for(const name of [...names,...(entry.noticeFiles||[])]){const relative=path.posix.join('notices',entry.id,name);copy(path.join(directory,name),path.join(payload,relative));notices.push({name:entry.id,license:entry.license,path:relative,sourceUrl:entry.repository});}
+  for(const name of [...names,...(entry.noticeFiles||[])]){const relative=path.posix.join('notices',entry.id,name);addLicense(payload,entry.id,path.join(directory,name),entry.license);notices.push({name:entry.id,license:entry.license,path:relative,sourceUrl:entry.repository});}
  }
  const ffmpeg=path.join(runtimeBuild,'dependencies/ffmpeg-macos-x64/share/ffmpeg');
- for(const relative of filesIn(ffmpeg).filter(relative=>relative!=='build-log.txt'))copy(path.join(ffmpeg,relative),path.join(payload,'notices/ffmpeg',relative));
+ for(const relative of filesIn(ffmpeg).filter(relative=>relative!=='build-log.txt'))addLicense(payload,'FFmpeg',path.join(ffmpeg,relative));
  notices.push({name:'FFmpeg',license:'See notice',path:'notices/ffmpeg/copyright',sourceUrl:dependencies.artifacts[0].repository});
  const overlays=filesIn(path.join(import.meta.dirname,'overlays')).map(relative=>({path:'overlays/'+relative,sha256:sha(fs.readFileSync(path.join(import.meta.dirname,'overlays',relative)))}));
  const tools=[{path:'tools/unwrap-self.cjs',sha256:sha(fs.readFileSync(path.join(import.meta.dirname,'tools/unwrap-self.cjs')))}];
  const producerInputs=[...['build-relinker.mjs','build-runtime.mjs','source-projection.mjs','package-runtime.mjs','source.json','dependencies.json']
   .map(relative=>({path:relative,sha256:sha(fs.readFileSync(path.join(import.meta.dirname,relative)))})),...overlays,...tools].sort((a,b)=>a.path.localeCompare(b.path));
  fs.writeFileSync(path.join(payload,'source.json'),json({schemaVersion:1,source:recipe.source,dependencies:dependencies.dependencies,artifacts:dependencies.artifacts,overlays,tools,producerInputs}));
- const files=filesIn(payload).filter(name=>!NoticeIntake.isNoticePath(name)).map(relative=>record(payload,relative));
+ const files=filesIn(payload).map(relative=>record(payload,relative));
  const manifest={schemaVersion:1,managerId:'anyps5',version,platform:'darwin',arch,minimumMacOS:'26.0',upstreamRevision:recipe.source.revision,
-  gameArchitecture:'x86_64',capabilities:{mouseRouting:true,touchPadBinding:true},provenance:{sourceUrl:recipe.source.repository,sourceRevision:recipe.source.revision,producerInputs},executableRelative:'tools/relinker',runtimeFiles:{libraries:'libs',unwrap:'tools/unwrap-self.cjs'},files,notices};
+  gameArchitecture:'x86_64',capabilities:{mouseRouting:true,touchPadBinding:true},provenance:{sourceUrl:recipe.source.repository,sourceRevision:recipe.source.revision,producerInputs},executableRelative:'tools/relinker',runtimeFiles:{libraries:'libs',unwrap:'tools/unwrap-self.cjs'},files};
  fs.writeFileSync(path.join(payload,'runtime.json'),json(manifest));
  const manifestFile=record(payload,'runtime.json'),sourceFile=files.find(file=>file.path==='source.json');
  const declaration={id:'anyps5',version,arch,launcherArchitectures:[arch],minimumMacOS:manifest.minimumMacOS,directoryRelative:'anyps5/'+version+'/'+arch,
-  sourceRelative:'source.json',sourceSha256:sourceFile.sha256,manifestRelative:'runtime.json',manifestSha256:manifestFile.sha256,files:[...files,manifestFile],notices,redistribution:'bundle'};
+  sourceRelative:'source.json',sourceSha256:sourceFile.sha256,manifestRelative:'runtime.json',manifestSha256:manifestFile.sha256,files:[...files,manifestFile],redistribution:'bundle'};
  fs.writeFileSync(path.join(output,'declaration.json'),json(declaration));
  if(buildOutput)return {output,declaration};
  const archive=path.join(output,assetName(declaration));

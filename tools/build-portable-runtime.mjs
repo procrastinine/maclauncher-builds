@@ -1,4 +1,4 @@
-import {sourceNotices as collectSourceNotices} from '../lib/notices.mjs';
+import {sourceNotices as collectSourceNotices} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';

@@ -1,4 +1,4 @@
-const NoticeIntake = require('../../../lib/notices.mjs');
+const {addLicense} = require('../../../lib/licenses.mjs');
 // Source recipe for the hosted RPGMakerDecrypter packages.
 const fs = require("node:fs");
 const path = require("node:path");
@@ -109,14 +109,14 @@ function buildTool({ sourceArchive, sdkArchive, outputDir, packageRoot, offline 
   } finally { if (log != null) fs.closeSync(log); }
   const executable = path.join(publishRoot, "RPGMakerDecrypter-cli");
   if (!fs.statSync(executable).isFile()) throw new Error("The build did not produce the reviewed CLI.");
-  NoticeIntake.copyNotice(path.join(input, "LICENSE.txt"), path.join(publishRoot, "LICENSE-RPGMakerDecrypter.txt"));
+  addLicense(publishRoot,'RPGMakerDecrypter',path.join(input, "LICENSE.txt"),'MIT');
   for (const name of ["LICENSE.txt", "ThirdPartyNotices.txt"]) {
     const notice = path.join(sdk, name);
-    NoticeIntake.copyNotice(notice, path.join(publishRoot, "DOTNET-" + name));
+    addLicense(publishRoot,'dotnet',notice,name==='LICENSE.txt'?'MIT':'LicenseRef-Dotnet-Third-Party');
   }
   for (const [name, file] of [["commandlineparser", "License.md"], ["newtonsoft.json", "LICENSE.md"]]) {
     const dependency = pin.packages.find(item => item.name === name);
-    NoticeIntake.copyNotice(path.join(packages, name, dependency.version, file), path.join(publishRoot, "LICENSE-" + name + ".md"));
+    addLicense(publishRoot,name,path.join(packages, name, dependency.version, file),'MIT');
   }
   const lockSha256 = Object.fromEntries(PROJECTS.map(project => [project, sha256(path.join(architecture?path.join(LOCK_ROOT,architecture):LOCK_ROOT, project + ".json"))]));
   const record = { schemaVersion: 1, profile: pin.profile, version: pin.informationalVersion,

@@ -4,11 +4,11 @@ const fs = require("node:fs");
 function inspect(file) {
   try {
     const stat = fs.statSync(file);
-    if (!stat.isFile() || stat.size < 256 || stat.size > 32 * 1024 * 1024) return null;
+    if (!stat.isFile() || stat.size < 256) return null;
     const b = fs.readFileSync(file), pe = b.readUInt32LE(60);
     if (b.readUInt16LE(0) !== 0x5a4d || pe < 64 || pe + 24 > b.length || b.readUInt32LE(pe) !== 0x4550 || b.readUInt16LE(pe + 4) !== 0x8664) return null;
     const count = b.readUInt16LE(pe + 6), size = b.readUInt16LE(pe + 20), optional = pe + 24;
-    if (!count || count > 96 || size < 120 || optional + size + count * 40 > b.length || b.readUInt16LE(optional) !== 0x20b || b.readUInt32LE(optional + 108) < 1) return null;
+    if (!count || size < 120 || optional + size + count * 40 > b.length || b.readUInt16LE(optional) !== 0x20b || b.readUInt32LE(optional + 108) < 1) return null;
     const sections = Array.from({ length: count }, (_, i) => { const p = optional + size + 40 * i;return { rva: b.readUInt32LE(p + 12), size: b.readUInt32LE(p + 16), offset: b.readUInt32LE(p + 20) }; });
     function raw(rva, length) {
       const section = sections.find(s => rva >= s.rva && rva - s.rva <= s.size && length <= s.size - (rva - s.rva));
@@ -19,14 +19,14 @@ function inspect(file) {
     }
     function name(rva) {
       const at = raw(rva, 1), end = b.indexOf(0, at);
-      if (end < at || end - at > 256 || raw(rva, end - at + 1) !== at) throw Error("Invalid export name");
+      if (end < at || raw(rva, end - at + 1) !== at) throw Error("Invalid export name");
       const value = b.toString("ascii", at, end);
       if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(value)) throw Error("Invalid export name");
       return value;
     }
     const exportRva = b.readUInt32LE(optional + 112), exportSize = b.readUInt32LE(optional + 116), e = raw(exportRva, 40);
     const base = b.readUInt32LE(e + 16), functions = b.readUInt32LE(e + 20), names = b.readUInt32LE(e + 24);
-    if (!functions || functions > 1024 || names !== functions || base + functions > 65536) return null;
+    if (!functions || names !== functions || base + functions > 65536) return null;
     const table = raw(b.readUInt32LE(e + 28), functions * 4), strings = raw(b.readUInt32LE(e + 32), names * 4), ordinals = raw(b.readUInt32LE(e + 36), names * 2);
     const result = [], seen = new Set();
     for (let i = 0; i < names; i++) {

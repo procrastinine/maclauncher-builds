@@ -13,9 +13,9 @@ import {releaseTag} from '../lib/project-identity.mjs';
 const root=path.resolve(import.meta.dirname,'..'),exec=promisify(execFile);
 const json=file=>JSON.parse(fs.readFileSync(file,'utf8'));
 const identity={GIT_AUTHOR_NAME:'procrastinine',GIT_AUTHOR_EMAIL:'24549552+procrastinine@users.noreply.github.com',GIT_COMMITTER_NAME:'procrastinine',GIT_COMMITTER_EMAIL:'24549552+procrastinine@users.noreply.github.com'};
-const git=async(args,{cwd,env=process.env}={})=>{const step=async()=>(await exec('git',args,{cwd,env:{...env,...identity},maxBuffer:16<<20})).stdout.trim();return ['fetch','push'].includes(args[0])?retryNetworkAsync(step):step();};
-const github=async(args,options={})=>retryNetworkAsync(async()=>(await exec('gh',args,{encoding:'utf8',maxBuffer:32<<20,...options})).stdout);
-const archiveEntry=async(archive,name,maxBytes)=>(await exec('tar',['-xzOf',archive,name],{encoding:'buffer',maxBuffer:maxBytes})).stdout;
+const git=async(args,{cwd,env=process.env}={})=>{const step=async()=>(await exec('git',args,{cwd,env:{...env,...identity},maxBuffer:Infinity})).stdout.trim();return ['fetch','push'].includes(args[0])?retryNetworkAsync(step):step();};
+const github=async(args,options={})=>retryNetworkAsync(async()=>(await exec('gh',args,{encoding:'utf8',maxBuffer:Infinity,...options})).stdout);
+const archiveEntry=async(archive,name)=>(await exec('tar',['-xzOf',archive,name],{encoding:'buffer',maxBuffer:Infinity})).stdout;
 const stable=value=>JSON.stringify(value,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))):v);
 async function sha256File(file){const hash=crypto.createHash('sha256');for await(const chunk of fs.createReadStream(file))hash.update(chunk);return hash.digest('hex');}
 /** The build job verified every archived file and its declaration. Publication checks only that this archive and its record are that sealed package. */

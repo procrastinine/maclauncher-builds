@@ -4,7 +4,7 @@ index fe0e7f1..64e643b 100644
 +++ b/src/modules/android/native/build-options.mjs
 @@ -3,7 +3,7 @@ import path from 'node:path';
  
- export const requiredInputs=['klepton','converter','jdk','sdl','vulkan-headers','sndfile-headers','codecs','codec-notices','angle','gles-headers','framework','output'];
+ export const requiredInputs=['klepton','converter','jdk','sdl','vulkan-headers','sndfile-headers','codecs','codec-licenses','angle','gles-headers','framework','output'];
  export const platformTools=['aidl','aconfig','rust-toolchain','python'];
 -export const optionalInputs=['ndk-headers','blueprint-parser','blueprint-parser-sources','ninja','build-work','tool-inputs','java-inputs','ndk','bionic-inputs','bionic-target'];
 +export const optionalInputs=['ndk-headers','blueprint-parser','blueprint-parser-sources','ninja','build-work','tool-inputs','java-inputs','java-framework-input','ndk','bionic-inputs','bionic-target'];
@@ -23,7 +23,7 @@ index 0a67e9d..15b5293 100644
 +  apacheHttpSource:options['apache-http-source'],statsdSource:options['statsd-source'],prebuilt:options['java-framework-input']});
 +if(options['java-framework-input'])inputs.javaFramework=inputFile(path.join(options['java-framework-input'],'input.json'));
  inputs.frameworkModules=frameworkModules.archives.map(file=>({name:path.basename(file),sha256:inputFile(file)}));
- for(const notice of frameworkModules.notices)copyOptional(notice.path,path.join(output,'notices',notice.name));
+ for(const directory of frameworkModules.licenses)includeLicenses(output,directory);
  const frameworkGles=prepareFrameworkGles(options['framework-source'],pins.aospFramework,build,root,options['native-source'],pins.aospNative);
  const {frameworkTool,hostClasses}=await buildFramework({root,build,output,jdk:options.jdk,framework,
 -  frameworkArchives:frameworkModules.archives,asmClasspath,graphicsRegistrations:path.join(build,'framework-gles/registrations.txt')});
@@ -56,7 +56,7 @@ index 009ed31..e55af9c 100644
 --- a/src/modules/android/native/framework-modules.mjs
 +++ b/src/modules/android/native/framework-modules.mjs
 @@ -1,5 +1,6 @@
- import {copyOptional} from './upstream/source-files.mjs';
+ import {addLicense} from './upstream/licenses.mjs';
  import fs from 'node:fs';
 +import {stageJavaFrameworkModules} from './java-framework-input.mjs';
  import path from 'node:path';

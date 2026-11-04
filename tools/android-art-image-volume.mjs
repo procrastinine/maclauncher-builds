@@ -4,7 +4,7 @@ import {execFileSync} from 'node:child_process';
 import {materializeImageDataInputs} from './android-image-data-input.mjs';
 import {buildImageDataTool} from './build-android-image-data.mjs';
 import {run} from './build-source.mjs';
-const read=(program,args,options={})=>execFileSync(program,args,{encoding:'utf8',timeout:120000,...options}).trim();
+const read=(program,args,options={})=>execFileSync(program,args,{maxBuffer:Infinity,encoding:'utf8',timeout:120000,...options}).trim();
 function attach(image,mount,readOnly=false){
  const text=read('/usr/sbin/diskutil',['image','attach',...(readOnly?['--readOnly']:[]),...(mount?['--nobrowse','--mountPoint',mount]:['--noMount']),image]);
  const device=text.split(/\s+/).find(value=>/^\/dev\/disk\d+$/.test(value));if(!device)throw Error('The original image attachment has no device.');return device;

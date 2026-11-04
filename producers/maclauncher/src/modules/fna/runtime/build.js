@@ -1,3 +1,4 @@
+const {addLicense} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -37,7 +38,7 @@ function frameworkFiles(root) {
     if (!fs.statSync(file).isFile()) throw new Error("Pinned FNA compile input is missing.");
     return file;
   });
-  if (!files.length || files.length > 2000) throw new Error("Invalid FNA compile inventory.");
+  if (!files.length) throw new Error("Invalid FNA compile inventory.");
   return files;
 }
 function frameworkResources(root) {
@@ -52,7 +53,7 @@ function frameworkResources(root) {
     if (!fs.statSync(file).isFile()) throw new Error("Pinned FNA shader resource is missing.");
     return { file, name };
   });
-  if (!resources.length || resources.length > 64) throw new Error("Invalid FNA embedded resource inventory.");
+  if (!resources.length) throw new Error("Invalid FNA embedded resource inventory.");
   return resources;
 }
 function applyOpenGLPolicy(root) {
@@ -188,7 +189,7 @@ async function prepareRuntime({ unpacked, pin, logger, signal, sourcePath, fna3d
     const files = [...REQUIRED_FILES, "MacLauncherFnaHost.deps.json",
       ...fs.readdirSync(abiRoot).map(name => "abi/" + name),
       ...fs.readdirSync(nativeRoot).map(name => "native/lib/" + name)];
-    const licenseRoot = path.join(unpacked, "licenses"); fs.mkdirSync(licenseRoot);
+
     for (const [label, source] of [["FNA", path.join(framework, "licenses")], ["FNA3D", path.join(framework, "lib", "FNA3D", "LICENSE")],
       ["MojoShader", path.join(framework, "lib", "FNA3D", "MojoShader", "LICENSE.txt")],
       ["FNA3D-stb-image.txt", path.join(framework, "lib", "FNA3D", "src", "stb_image.h")],
@@ -197,7 +198,7 @@ async function prepareRuntime({ unpacked, pin, logger, signal, sourcePath, fna3d
       ["FAudio-stb-vorbis.txt", path.join(framework, "lib", "FAudio", "src", "stb_vorbis.h")],
       ["FAudio-stb.txt", path.join(framework, "lib", "FAudio", "src", "stb.h")],
       ["SDL3", path.join(sdlSource, "SDL3-3.4.18", "LICENSE.txt")]]) {
-      if (fs.existsSync(source)) fs.cpSync(source, path.join(licenseRoot, label), { recursive: true });
+      if(fs.existsSync(source)){if(fs.statSync(source).isDirectory()){for(const row of fs.readdirSync(source,{recursive:true,withFileTypes:true}))if(row.isFile())addLicense(unpacked,label,path.join(row.parentPath,row.name));}else addLicense(unpacked,label,source);}
     }
     fs.writeFileSync(path.join(unpacked, "fna-runtime.json"), JSON.stringify({ profile: PROFILE, frameworkVersion: "26.10.0.0",
       dotnetVersion: DOTNET_VERSION, upstreamRevision: FNA_REVISION, architecture: "arm64", sourceTreeSha256,
@@ -216,7 +217,7 @@ function verifyRuntime(install) {
   const record = JSON.parse(fs.readFileSync(path.join(root, "fna-runtime.json"), "utf8"));
   const specification = [PROFILE, "26.10-net8-arm64-v3"].includes(record.profile) ? { revision: FNA_REVISION, dotnetVersion: DOTNET_VERSION } : record.profile === PREVIOUS_PROFILE.profile ? PREVIOUS_PROFILE : null;
   if (!specification || record.upstreamRevision !== specification.revision || record.dotnetVersion !== specification.dotnetVersion || record.frameworkVersion !== "26.10.0.0" ||
-      record.architecture !== "arm64" || !record.files || Object.keys(record.files).length > 128) throw new Error("FNA runtime profile metadata is invalid.");
+      record.architecture !== "arm64" || !record.files) throw new Error("FNA runtime profile metadata is invalid.");
   let sealedManifest, sealedPayload;
   if (install.source === "bundled") {
     // Distribution relocation and signing change native bytes. The sealed

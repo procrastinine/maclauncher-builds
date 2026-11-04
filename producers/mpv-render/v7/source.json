@@ -27,15 +27,15 @@
     },
     {
       "path": "producers/mpv-render/v7/maclauncher/scripts/build-mpv-library.cjs",
-      "sha256": "1b7a1a36eff50974cbd9c5dcc4be4574cdeff3c456cc9f582150cd80119684e3"
+      "sha256": "56369e6b305cd3003241527f9199a0970c907b438249557b7a766944c59e00bd"
     },
     {
       "path": "producers/mpv-render/v7/maclauncher/scripts/native-binary-tools.cjs",
-      "sha256": "8e78125d5d7cf225ffc661354c30390ab0dcad995fb31f433531b6f967173a5a"
+      "sha256": "bd0be31fbe8e8861698e689ce81b134c5922fe0dce55a2590bde44c881493544"
     },
     {
       "path": "producers/mpv-render/v7/maclauncher/scripts/stage-mpv-render.cjs",
-      "sha256": "89448c1b0cad61dc237c1293ba911f3e1b9ce98c17476237ab792e567b8fecdb"
+      "sha256": "83c8a0b6b8abba4c13e7ebc4e0a056740a20c4c2010bc4eea7e15738b10c53d4"
     },
     {
       "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/frame.h",
@@ -67,11 +67,11 @@
     },
     {
       "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/app-bundle.js",
-      "sha256": "a0e4cdef49e0892bf60ab9777cb53af77c88dc97cd607efcd31b70ec10622ca2"
+      "sha256": "fe273deaeaf2cbc8d31ef4fdc7aab78a638f1609902e290eb056551b46e67c13"
     },
     {
       "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/bundled-native.js",
-      "sha256": "307b3c53ec14e03a0ccf8ef6e325b8c5944d6b647003fb96327f5a1751059ba3"
+      "sha256": "653e909b9769b63bd32b5efa210fbf953554f888bbc0ab880c2ea6439af49b3e"
     },
     {
       "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/local-native.js",
@@ -79,7 +79,7 @@
     },
     {
       "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/native-focus.js",
-      "sha256": "73175acb9fa527e32fd17a3864122a5755274b02f4a5f9f2c8f8ffb6ba339d78"
+      "sha256": "2950d836eb39dc2e0a873b8f2bf2b5988dcf98ae000f0c0301cadb643ae5bdca"
     },
     {
       "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/gpu-surface.hpp",

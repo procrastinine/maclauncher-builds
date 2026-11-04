@@ -1,4 +1,4 @@
-const NoticeIntake = require('../../../../../../lib/notices.mjs');
+const {addLicense} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -46,7 +46,7 @@ async function buildMovieDependencies({ archive, destination, architecture = pro
   const diagnostics = normalizeDiagnostics(output, mappings);
   await run("/usr/bin/make", ["-j6"], { cwd: output, logPath, env, signal });
   await run("/usr/bin/make", ["install"], { cwd: output, logPath, env, signal });
-  NoticeIntake.copyNotice(path.join(sourceRoot, "COPYING.LGPLv2.1"), path.join(prefix, "FFmpeg-LICENSE.txt"));
+  addLicense(prefix,'FFmpeg',path.join(sourceRoot, "COPYING.LGPLv2.1"));
   fs.mkdirSync(path.dirname(destination), { recursive: true });
   fs.cpSync(prefix, destination, { recursive: true, force: false, errorOnExist: true });
   const receipt = { source: SOURCE, decoders: DECODERS, demuxers: DEMUXERS, options, diagnostics, workspace, prefix: destination,

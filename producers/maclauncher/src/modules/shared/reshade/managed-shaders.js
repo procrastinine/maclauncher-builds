@@ -1,4 +1,4 @@
-const NoticeIntake = require('../../../../../../lib/notices.mjs');
+const {addLicense} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs"), path = require("node:path"), crypto = require("node:crypto");
 const { cloneOrCopySync } = require("../copy-file");
 const Catalog = require("./managed-shader-packs.json"), Traits = require("./shader-traits"), Providers = require("./shader-providers");
@@ -490,7 +490,7 @@ async function installRuntime(context = {}) {
         }
         for(const relative of pack.bundledNotices||[]){
           const moduleRoot=require('./shader-packs').physicalModuleRoot();
-          NoticeIntake.copyNotice(path.join(moduleRoot,relative),path.join(files,'notices',path.basename(relative)));
+          addLicense(files,pack.id,path.join(moduleRoot,relative));
         }
         let sourceOverlay;
         if(sourceRecipe){

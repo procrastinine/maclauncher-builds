@@ -53,13 +53,13 @@ function createProjectNativePackage({ projectId, repository, validateManifest },
     });
   }
   async function extract(archive, destination, signal) {
-    const options = { signal, timeout: 120000, maxBuffer: 8 * 1024 * 1024 };
+    const options = { signal, timeout: 120000, maxBuffer: Infinity};
     const listed = await execute("/usr/bin/tar", ["-tzf", archive], options), names = new Set();
     for (const original of listed.stdout.split("\n").filter(Boolean)) {
       const name = original.replace(/^\.\//, "").replace(/\/$/, "");
       if (!name) continue;
       Bundled.relativeFile(name);
-      if (names.has(name) || names.size >= Bundled.LIMITS.files * 2 ||
+      if (names.has(name) ||
           name !== "runtime-package.json" && name !== "files" && !name.startsWith("files/"))
         throw new Error("The hosted runtime archive layout is invalid.");
       names.add(name);
@@ -88,7 +88,7 @@ function createProjectNativePackage({ projectId, repository, validateManifest },
     if (dependencies.verifySignatures) await dependencies.verifySignatures(selected.payloadRoot, selected.manifest, { signal });
     else for (const file of selected.manifest.files.filter(file => file.architectures))
       await execute("/usr/bin/codesign", ["--verify", "--strict", path.join(selected.payloadRoot, file.path)],
-        { signal, timeout: 30000, maxBuffer: 1024 * 1024 });
+        { signal, timeout: 30000, maxBuffer: Infinity});
     fs.renameSync(path.join(unpacked, "files"), path.join(unpacked, "project-payload"));
     fs.renameSync(path.join(unpacked, "runtime-package.json"), path.join(unpacked, "project-package.json"));
     const relative = value => path.posix.join("project-payload/files", value);

@@ -8,12 +8,10 @@ const readMap=env=>env.MACLAUNCHER_BUILD_INPUTS?JSON.parse(env.MACLAUNCHER_BUILD
 const relative=value=>{B.relativeFile(value);return value;};
 const same=(a,b)=>a.size===b.size&&a.sha256===b.sha256;
 const macho=file=>B.localMachO(file);
-/** Notices, artwork and source texts are outside the binary duplication rule. */
+/** Artwork and source code remain outside stored-payload deduplication. */
 export function duplicateCandidate(file,declaration){
  return file.size>0&&file.path!==declaration.manifestRelative&&file.path!==declaration.sourceRelative&&
-  !(Array.isArray(declaration.notices)?declaration.notices:[]).some(notice=>notice?.path===file.path)&&
-  !/(?:^|\/)(?:licenses?|notices?|copyright|copying)(?:[./_-]|$)/i.test(file.path)&&
-  !/\.(?:png|jpe?g|gif|webp|ico|icns|svg|bmp|tiff?|avif|heic|ttf|otf|woff2?|eot|pyi?|md|rst|txt|[ch]|hpp|cc|cpp)$/i.test(file.path);
+  !/\.(?:png|jpe?g|gif|webp|ico|icns|svg|bmp|tiff?|avif|heic|ttf|otf|woff2?|eot|pyi?|md|rst|[ch]|hpp|cc|cpp)$/i.test(file.path);
 }
 function canonicalAlias(target,files,inputs){
  if(typeof target==='string'){relative(target);const file=files.get(target);if(!file)throw Error('Alias target is not a stored file: '+target);return {file};}
