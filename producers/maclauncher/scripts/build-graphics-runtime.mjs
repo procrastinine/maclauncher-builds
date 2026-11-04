@@ -71,7 +71,10 @@ function registration(relative, root = repository) {
 export function resolveSource(id, override) {
   const entry = recipe.sources[id];
   if (!entry) throw Error("Unknown graphics source: " + id);
-  const commit = entry.pin.gitlink ? gitlink(pinned({file: entry.pin.file, pointer: entry.pin.gitlink})) : pinned({file: entry.pin.file, pointer: entry.pin.commit}), origin = pinned({file: entry.pin.file, pointer: entry.pin.repository});
+  const commit = id==='fsr3-sdk' ? gitlink('producers/maclauncher/src/external/fsr3-sdk') :
+    id==='sdl-vulkan' ? git(path.join(repository,'src/external/krkrsdl2'),['rev-parse',gitlink('producers/maclauncher/src/external/krkrsdl2')+':external/SDL']) :
+    id==='libplacebo-vulkan-headers' ? git(path.join(repository,'src/external/libplacebo'),['rev-parse',gitlink('producers/maclauncher/src/external/libplacebo')+':3rdparty/Vulkan-Headers']) :
+    entry.pin.gitlink ? gitlink(pinned({file: entry.pin.file, pointer: entry.pin.gitlink})) : pinned({file: entry.pin.file, pointer: entry.pin.commit}), origin = pinned({file: entry.pin.file, pointer: entry.pin.repository});
   const directory = override ? path.resolve(override) : path.join(repository, entry.path);
   const result = {id, path: directory, commit, repository: canonical(origin)};
   if (!override) {
@@ -138,12 +141,19 @@ export function resolveInput(id, {overrides = {}, work, coreRoot = work && path.
     return file && fs.existsSync(file) ? {...declared, path: file, state: verifyInput(location, file, null)} : {...declared, state: "missing", producer: entry.product.provider};
   }
   if (fetched && fs.existsSync(fetched)) return {...declared, path: fetched, state: verifyInput(location, fetched, archiveSha256)};
-  return {...declared, state: url || archives?.every(row => row.url && row.sha256) ? "fetchable" : "missing"};
+  return {...declared, state: url || archives?.every(row => row.url && row.sha256) || ["fsr-glslang","isf-spirv-tools","isf-spirv-headers"].includes(id) ? "fetchable" : "missing"};
 }
 
 /** Download a pinned input into the work directory and verify its checksum. */
 export async function fetchInput(id, work) {
-  if(['fsr-glslang','isf-spirv-tools','isf-spirv-headers'].includes(id))return path.join((await prepareSources({work:path.join(work,'inputs',id)})).source,id==='fsr-glslang'?'glslang':id.slice(4));
+  if(id==='fsr-glslang')return path.join((await prepareSources({work:path.join(work,'inputs',id)})).source,'glslang');
+  if(['isf-spirv-tools','isf-spirv-headers'].includes(id)){
+    const name=id.slice(4),glslang=await fetchInput('isf-glslang',work);
+    const upstream=JSON.parse(fs.readFileSync(path.join(glslang,'known_good.json'),'utf8')).commits.find(row=>row.name===(name==='spirv-tools'?'spirv-tools':'spirv-tools/external/spirv-headers'));
+    const source=JSON.parse(fs.readFileSync(path.join(repository,'src/modules/shared/reshade/isf/source.json'),'utf8')).compilerSources.find(row=>row.id===name);
+    const archive=await buildInput({url:'https://github.com/'+upstream.subrepo+'/archive/'+upstream.commit+'.tar.gz',sha256:source.sha256}),target=path.join(work,'inputs',id,'source',name);
+    fs.mkdirSync(target,{recursive:true});execFileSync('tar',['-xf',archive,'--strip-components=1','-C',target],{stdio:'inherit'});return target;
+  }
   const {entry, url, sha256, archives, member, directory, fetched} = inputLocation(id, work);
   if (!(archives || [{url, sha256}]).every(row => row.url && row.sha256)) throw Error("This graphics input has no pinned download: " + id);
   if (fs.existsSync(fetched)) return fetched;
