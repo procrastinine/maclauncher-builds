@@ -1,0 +1,73 @@
+{
+  "id": "android-blueprint-parser",
+  "version": "MCLv7",
+  "arch": "arm64",
+  "minimumMacOS": "13.0",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "7b23d6cc6eaa6a738b773a7e111202a26b79a837da7b95af5af7a9ad91c9bb52",
+  "directoryRelative": "android-blueprint-parser/MCLv7/arm64",
+  "manifestRelative": "input.json",
+  "manifestSha256": "de1b4c92332c92ad5dbe58e69d860fac2681a82e73f031adf2cd3f487bdf2b8a",
+  "files": [
+    {
+      "path": "bin/android-blueprint-parser",
+      "size": 2631568,
+      "sha256": "c0c47e4e7603dedfc8b78215e7b607fef67c6dbcc33be8d249518b0c49f6f7a6",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "build-definition.json",
+      "size": 16764,
+      "mode": 420,
+      "sha256": "31f0b717a5b218281f61641374cd7aca39db52b562f0d0fe9d7fcd34dfe6c4ef"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "60a0678d5f5925d455498652ea9c5ab87b8852805d94357ab4a1fa730acf0a71"
+    },
+    {
+      "path": "input.json",
+      "size": 1486,
+      "sha256": "de1b4c92332c92ad5dbe58e69d860fac2681a82e73f031adf2cd3f487bdf2b8a",
+      "mode": 420
+    },
+    {
+      "path": "licenses/Blueprint.txt",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 63,
+      "sha256": "f5d90a49facc9ca340ee423b9712bb87110694876f2680a606e4a85bf432e8a9",
+      "mode": 420
+    },
+    {
+      "path": "licenses/Go-patents.txt",
+      "size": 1303,
+      "sha256": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc",
+      "mode": 420
+    },
+    {
+      "path": "licenses/Go.txt",
+      "size": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "mode": 420
+    },
+    {
+      "path": "parser-sources.json",
+      "size": 2034,
+      "sha256": "e331858784e52335bae8cad4bf7bb5b5bf1b7e023695e3bd40b273f38e4c6850",
+      "mode": 420
+    }
+  ]
+}
