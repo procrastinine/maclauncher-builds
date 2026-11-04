@@ -1,3 +1,4 @@
+import {androidSource} from '../lib/android-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -28,7 +29,7 @@ export function artElfBuildEnvironment({work,target,sdk,jdk,python,env=process.e
 export async function buildArtElfsInput({output,work}){
  if(!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('ART ELF builds require Apple Silicon macOS and new absolute output/work paths.');
  const profile=JSON.parse(fs.readFileSync(descriptor));fs.mkdirSync(work,{recursive:true});
- const android=acquireArtProducer({source:profile.androidSource,work});
+ const android=acquireArtProducer({source:androidSource(),work});
  const supplier=JSON.parse(fs.readFileSync(path.join(android,profile.supplier)));
  const checkout=checkoutSource({repository:supplier.sources.aim.url,revision:supplier.sources.aim.commit,destination:path.join(work,'upstream')});
  const source=path.join(work,'source'),staged=await stageSource(checkout,supplier.sources.aim.commit,source);
@@ -60,7 +61,7 @@ export async function buildArtElfsInput({output,work}){
  const notices=sourceNotices(checkout,{name:'AIM ART producer',repository:supplier.sources.aim.url});
  for(const notice of sourceNotices(path.join(fetched,'aosp'),{name:'Android ART',repository:'https://android.googlesource.com'}))notices.push(notice);
  const records=[];for(const notice of notices)addLicense(output,notice.name,notice.file,notice.license);
- return {art:output,notices:records,build:{source,checkout,fetched,sdk,jdk:homes[0],python,target,env},record:{androidSource:profile.androidSource,aimRevision:supplier.sources.aim.commit,sourceTreeSha256:staged.treeSha256,sourceLockSha256:sha(path.join(android,profile.sourceLock))}};
+ return {art:output,notices:records,build:{source,checkout,fetched,sdk,jdk:homes[0],python,target,env},record:{androidSource:androidSource(),aimRevision:supplier.sources.aim.commit,sourceTreeSha256:staged.treeSha256,sourceLockSha256:sha(path.join(android,profile.sourceLock))}};
  }finally{const mount=path.join(fetched,'android16-image');if(fs.existsSync(path.join(mount,'root.identity')))run('hdiutil',['detach',mount]);}
 }
 

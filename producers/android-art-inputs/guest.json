@@ -1,10 +1,5 @@
 {
   "schemaVersion": 1,
-  "androidSource": {
-    "revision": "f4ae6717620c32b5e22102be87ab63f43c22d096",
-    "directory": "sources/maclauncher-android",
-    "repository": "https://github.com/procrastinine/maclauncher-android"
-  },
   "binderFlags": [
     "-nostdlibinc",
     "-Werror=implicit-function-declaration",
@@ -394,9 +389,17 @@
     "frameworks/av/media/aidl"
   ],
   "cppAidlModules": {
-    "frameworks/native/libs/gui": ["guiconstants_aidl", "android_gui_aidl"],
-    "frameworks/native/libs/input": ["inputconstants"],
-    "frameworks/av/media/aidl": ["av-types-aidl", "audio-permission-aidl"]
+    "frameworks/native/libs/gui": [
+      "guiconstants_aidl",
+      "android_gui_aidl"
+    ],
+    "frameworks/native/libs/input": [
+      "inputconstants"
+    ],
+    "frameworks/av/media/aidl": [
+      "av-types-aidl",
+      "audio-permission-aidl"
+    ]
   },
   "cppAidlImportRoots": [
     "frameworks/native/libs/gui",

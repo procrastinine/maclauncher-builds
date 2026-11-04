@@ -1,3 +1,4 @@
+import {aimSource} from '../lib/android-source.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -9,7 +10,7 @@ const descriptor=new URL('../producers/android-image-data/source.json',import.me
 
 /** Read the complete ordinary sealed input group before restoring its Mac image. */
 export function readImageDataInputs(inputs){
- const profile=JSON.parse(fs.readFileSync(descriptor)),sourceSha256=sha(descriptor);
+ const profile={...JSON.parse(fs.readFileSync(descriptor)),...aimSource()},sourceSha256=sha(descriptor);
  if(!Array.isArray(inputs)||inputs.length!==profile.profiles.length)throw Error('The complete original image input group is required.');
  const parts=[],ids=new Set(),objects=new Map();let transport,transportSha256,content;
  for(const input of inputs){

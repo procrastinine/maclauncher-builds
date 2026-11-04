@@ -4,7 +4,7 @@ import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {recipeMain,run} from './build-source.mjs';
 import {prepareAndroidBuildInputs,releaseAndroidImageArchive} from './android-build-inputs.mjs';
-import {buildAngleInput} from './build-android-angle.mjs';
+import {buildAngleInput,angleDefinition} from './build-android-angle.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {rustEnvironment} from './rust-build.mjs';
@@ -48,9 +48,9 @@ function detachAimImage(work,upstream){
 }
 /** Keep AIM's original program-binary transport distinct from the common profile. */
 export function aimAngleInput(input){
- const definition=JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/angle.json'))),profile=definition.profiles.find(row=>row.id==='aim6');
+ const definition=angleDefinition(),profile=definition.profiles.find(row=>row.id==='aim6');
  const manifest=JSON.parse(fs.readFileSync(path.join(input.root,'angle-manifest.json')));
- if(input.record?.id!==profile.project||input.record.version!==profile.packageVersion||manifest.version!==profile.providerVersion||manifest.programBinaryVersion!==profile.programBinaryVersion||manifest.angleRevision!==definition.angle.revision)throw Error('The shared AIM ANGLE input differs from its original profile.');
+ if(input.record?.id!==profile.project||input.record.version!==profile.packageVersion||manifest.version!==profile.providerVersion||manifest.angleRevision!==definition.angle.revision)throw Error('The shared AIM ANGLE input differs from its original profile.');
  return {angle:input.root,angleLicenses:path.join(input.root,'licenses'),manifest,profileId:'aim6'};
 }
 /** Build the existing AIM adaptation and seal it without changing app declarations. */

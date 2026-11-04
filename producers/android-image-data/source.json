@@ -1,7 +1,5 @@
 {
   "schemaVersion": 1,
-  "repository": "https://github.com/hahnlee/aim",
-  "revision": "9b5068fa8185d3f51f1862fe7c54d88d51f09ec8",
   "crate": "tools/android-image-extract",
   "archive": {
     "url": "https://dl.google.com/android/repository/sys-img/google_apis_playstore/arm64-v8a-playstore-ps16k-36_r07.zip",

@@ -1,3 +1,4 @@
+import {androidSource} from '../lib/android-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -37,8 +38,8 @@ export async function cppAidlSources({directory,android,parser,targets}){
 /** Reconstruct the original ART guest's coherent AIDL/HIDL input groups. */
 export async function prepareArtGuestInputs({common,hwui,image,ndk,work}){
  if(!common?.sources||!hwui?.sources||!hwui?.tools||!path.isAbsolute(image?.root||'')||!path.isAbsolute(ndk||'')||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('ART guest inputs require completed common/HWUI inputs, original image, NDK and a new absolute work directory.');
- const android=path.join(root,profile.androidSource.directory);
- if(read('git',['-C',android,'rev-parse','HEAD'])!==profile.androidSource.revision)throw Error('The ART source profile differs from its selected revision.');
+ const android=path.join(root,androidSource().directory);
+ if(read('git',['-C',android,'rev-parse','HEAD'])!==androidSource().revision)throw Error('The ART source profile differs from its selected revision.');
  const sourceRoot=path.join(work,'source');fs.mkdirSync(sourceRoot,{recursive:true});
  for(const[relative,key]of Object.entries(profile.sourceLinks)){
   const source=common.sources[key]||common.inputs?.[key];if(!path.isAbsolute(source||''))throw Error('The common producer must supply '+key+'.');

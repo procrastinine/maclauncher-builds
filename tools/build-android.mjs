@@ -1,3 +1,4 @@
+import {angleDefinition} from './build-android-angle.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
@@ -21,8 +22,8 @@ function product(root,relative){const file=path.join(root,relative);if(!fs.statS
 /** Adapt ordinary sealed groups to the unchanged common and ART producer APIs. */
 export function androidBuildInputViews(inputs){
  const checked={};for(const requirement of androidBuildInputRequirements())checked[requirement.key]=verifyAndroidBuildInput(requirement,inputs[requirement.key]);
- const angleDefinition=json(path.join(root,'producers/android-inputs/angle.json')),profile=angleDefinition.profiles.find(profile=>profile.id==='common'),angleManifest=json(product(checked.angle.root,'angle-manifest.json'));
- if(angleManifest.version!==profile.providerVersion||angleManifest.programBinaryVersion!==profile.programBinaryVersion||angleManifest.angleRevision!==angleDefinition.angle.revision)throw Error('The Android ANGLE input differs from its common profile.');
+ const definition=angleDefinition(),profile=definition.profiles.find(profile=>profile.id==='common'),angleManifest=json(product(checked.angle.root,'angle-manifest.json'));
+ if(angleManifest.version!==profile.providerVersion||angleManifest.angleRevision!==definition.angle.revision)throw Error('The Android ANGLE input differs from its common profile.');
  return {checked,angle:{angle:checked.angle.root,angleLicenses:path.join(checked.angle.root,'licenses')},
   codecs:{codecs:path.join(checked.codecs.root,'codecs'),codecLicenses:path.join(checked.codecs.root,'licenses'),include:path.join(checked.codecs.root,'include')},
   blueprint:{parser:product(checked.blueprint.root,'bin/android-blueprint-parser'),sources:product(checked.blueprint.root,'parser-sources.json')},

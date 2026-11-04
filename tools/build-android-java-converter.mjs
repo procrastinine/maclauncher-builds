@@ -1,3 +1,4 @@
+import {androidSource} from '../lib/android-source.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -18,7 +19,7 @@ export async function buildAndroidJavaConverterInput({output,work}){
  const definition=profile(),jdkPin=definition.jdk[process.platform+'-'+process.arch];
  if(!jdkPin||[output,work].some(file=>!path.isAbsolute(file||'')||fs.existsSync(file)))throw Error('Java converter inputs require a declared host JDK and new absolute output/work paths.');
  fs.mkdirSync(work,{recursive:true});fs.mkdirSync(output,{recursive:true});
- const android=checkoutSource({...definition.androidSource,destination:path.join(work,'android')}),native=path.join(android,'src/modules/android/native');
+ const android=checkoutSource({...androidSource(),destination:path.join(work,'android')}),native=path.join(android,'src/modules/android/native');
  const pins=JSON.parse(fs.readFileSync(path.join(native,'source-pins.json')));
  if(pins.dex2jvm!==definition.converter.revision||!fs.readFileSync(path.join(android,'.gitmodules'),'utf8').includes('url = '+definition.converter.repository+'\n'))throw Error('The Java converter source differs from its original Android pin.');
  const converter=checkoutSource({...definition.converter,destination:path.join(work,'converter')});
@@ -42,14 +43,14 @@ export async function buildAndroidJavaConverterInput({output,work}){
  const candidates=sourceNotices(converter,{name:'dex2jvm',repository:definition.converter.repository}).map((notice,index)=>({...notice,path:'licenses/converter-'+index+'-'+path.basename(notice.file)}));
  for(const name of ['asm','apksig'])for(const notice of sourceNotices(path.join(native,'license-inputs',name),{all:true,name,repository:catalogs[name].url}))candidates.push({...notice,path:'licenses/'+name+'-'+path.relative(path.join(native,'license-inputs',name),notice.file).split(path.sep).join('-')});
  const notices=[];for(const notice of candidates)addLicense(output,notice.name,notice.file,notice.license);
- return {root:output,notices,record:{androidSource:definition.androidSource,converter:definition.converter,jdk:{sha256:jdkPin.sha256,version:read(path.join(jdk,'bin/java'),['--version']).split('\n')[0]},tools:catalogs}};
+ return {root:output,notices,record:{androidSource:androidSource(),converter:definition.converter,jdk:{sha256:jdkPin.sha256,version:read(path.join(jdk,'bin/java'),['--version']).split('\n')[0]},tools:catalogs}};
 }
 
 /** Verify the sealed Java products before native composition consumes them. */
 export function verifyAndroidJavaConverterInput(input){
  const declaration=JSON.parse(fs.readFileSync(path.join(path.dirname(input),'declaration.json')));validateDeclaration(declaration);verifyPreparedPayload(input,declaration);
  const definition=profile(),manifest=JSON.parse(fs.readFileSync(path.join(input,'input.json')));
- if(declaration.id!==definition.id||declaration.version!==definition.version||declaration.sourceSha256!==sha(descriptor)||JSON.stringify(manifest.androidSource)!==JSON.stringify(definition.androidSource)||JSON.stringify(manifest.converter)!==JSON.stringify(definition.converter))throw Error('Java converter input differs from its declared producer profile.');
+ if(declaration.id!==definition.id||declaration.version!==definition.version||declaration.sourceSha256!==sha(descriptor)||JSON.stringify(manifest.androidSource)!==JSON.stringify(androidSource())||JSON.stringify(manifest.converter)!==JSON.stringify(definition.converter))throw Error('Java converter input differs from its declared producer profile.');
  for(const file of ['dex2jvm.jar','converter-overlay.jar','android-api-headers.jar'])if(!declaration.files.some(record=>record.path===file))throw Error('Java converter input is incomplete.');
  return {root:input,declaration,manifest};
 }

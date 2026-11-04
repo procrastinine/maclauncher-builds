@@ -1,3 +1,4 @@
+import {androidSource} from '../lib/android-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -21,18 +22,18 @@ function overlay(cwd,name){run('git',['apply',path.join(root,'producers/android-
 /** Export the selected ART component producer independently of HWUI's leaf source. */
 export function prepareArtSupplierProducer({output}){
  if(!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('The ART component producer requires a new absolute export directory.');
- const android=path.join(root,profile.androidSource.directory);
- if(read('git',['-C',android,'rev-parse','HEAD'])!==profile.androidSource.revision||read('git',['-C',android,'status','--porcelain','--untracked-files=no']))throw Error('The ART component source differs from its selected revision.');
+ const android=path.join(root,androidSource().directory);
+ if(read('git',['-C',android,'rev-parse','HEAD'])!==androidSource().revision||read('git',['-C',android,'status','--porcelain','--untracked-files=no']))throw Error('The ART component source differs from its selected revision.');
  const archive=output+'.tar';fs.mkdirSync(output,{recursive:true});
  try{
-  run('git',['-C',android,'archive','--format=tar','--output='+archive,profile.androidSource.revision,'--','src','package.json']);
+  run('git',['-C',android,'archive','--format=tar','--output='+archive,androidSource().revision,'--','src','package.json']);
   run('/usr/bin/tar',['-xf',archive,'-C',output]);overlay(output,'supplier-build.patch');return output;
  }finally{fs.rmSync(archive,{force:true});}
 }
 
 /** Export the exact existing runtime projection and its retained allocator adapter without compiling. */
 export async function prepareArtSupplierSource({source,klepton,glesHeaders,output}){
- const android=path.join(root,profile.androidSource.directory);
+ const android=path.join(root,androidSource().directory);
  const selected=JSON.parse(fs.readFileSync(path.join(android,'src/modules/android/art/supplier.json'))).sources.aim;
  if(read('git',['-C',source,'rev-parse','HEAD'])!==selected.commit||read('git',['-C',source,'status','--porcelain','--untracked-files=no']))throw Error('The original ART source differs from its selected immutable checkout.');
  const aim=output,{prepareAimSource}=await original(android,'art/source.mjs');
@@ -53,8 +54,8 @@ export function artSupplierBuildEnvironment({work,target,sdk,python,env=process.
 /** Build the complete existing ART supplier from source-built common and ELF inputs. */
 export async function buildAndroidArtSupplier({common,elf,ffiInput,artJava,output,work}){
  if(process.platform!=='darwin'||process.arch!=='arm64'||[output,work].some(value=>!path.isAbsolute(value||'')||fs.existsSync(value))||!common?.tools||!elf?.build)throw Error('The ART supplier requires source-built common/ELF results and new absolute output/work paths on Apple Silicon macOS.');
- const android=path.join(root,profile.androidSource.directory);
- if(read('git',['-C',android,'rev-parse','HEAD'])!==profile.androidSource.revision||read('git',['-C',android,'status','--porcelain','--untracked-files=no']))throw Error('The ART supplier producer differs from its declared source.');
+ const android=path.join(root,androidSource().directory);
+ if(read('git',['-C',android,'rev-parse','HEAD'])!==androidSource().revision||read('git',['-C',android,'status','--porcelain','--untracked-files=no']))throw Error('The ART supplier producer differs from its declared source.');
  const sourceProfile=JSON.parse(fs.readFileSync(path.join(android,'src/modules/android/art/supplier.json'))),inputsProfile=JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/aim.json')));
  if(elf.record?.aimRevision!==sourceProfile.sources.aim.commit)throw Error('ART ELF and supplier inputs select different original AIM revisions.');
  const ffi=readArtFfiInput(ffiInput);if(ffi.revision!==sourceProfile.sources.libffi.commit)throw Error('The Linux libffi input differs from the original ART source.');
@@ -105,7 +106,7 @@ export async function buildAndroidArtSupplier({common,elf,ffiInput,artJava,outpu
  const sourceArchiveInputs={sources:{source:elf.build.checkout,klepton:common.sources.klepton,glesHeaders,aosp:path.join(elf.build.fetched,'aosp'),xsdc:path.join(elf.build.fetched,'xsdc')},unicorn,
   sourceCheckouts:{'aosp-native':common.sources['native-source'],'aosp-bionic':common.sources['bionic-source'],'aosp-art':common.sources['art-source'],libffi,dynarmic:common.sources['dynarmic-source']},
   nativeBridgeSources:{ndkHeaders:arm32Inputs.ndkHeaders,arm32Licenses:arm32.licenses},hwuiSources:{sources:hwui.sources,registry:path.join(hwui.sourceRecords,'SOURCES.json'),registryCache:path.join(hwui.tools.cargoHome,'registry/cache')}};
- return {root:path.join(output,'runtime'),manifest,originalImage:profile.originalImage,sourceArchiveInputs,build:{producer,aim,hwui,guest,libffi,unicorn,java,halRoot,halManifests},record:{androidSource:profile.androidSource,aimRevision:sourceProfile.sources.aim.commit,unicornRevision:unicornProfile.revision,libffiRevision:sourceProfile.sources.libffi.commit}};
+ return {root:path.join(output,'runtime'),manifest,originalImage:profile.originalImage,sourceArchiveInputs,build:{producer,aim,hwui,guest,libffi,unicorn,java,halRoot,halManifests},record:{androidSource:androidSource(),aimRevision:sourceProfile.sources.aim.commit,unicornRevision:unicornProfile.revision,libffiRevision:sourceProfile.sources.libffi.commit}};
  }finally{if(!wasMounted&&fs.existsSync(path.join(mount,'root.identity')))run('hdiutil',['detach',mount]);}
 }
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){

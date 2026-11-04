@@ -47,7 +47,7 @@ fn export(archive:&Path,root:&Path,payload:&Path)->Result<()>{
   let file=named(root,&row.path)?;row.sha256=Some(digest(&file)?);row.size=fs::metadata(&file)?.len();let name=format!("{index:08}");
   fs::rename(file,data.join(&name))?;fs::set_permissions(data.join(&name),fs::Permissions::from_mode(0o644))?;row.data=Some(name);
  }}
- let manifest=Transport{schema_version:1,archive_sha256,source_revision:"9b5068fa8185d3f51f1862fe7c54d88d51f09ec8".into(),records};
+ let manifest=Transport{schema_version:1,archive_sha256,source_revision:env!("AIM_REVISION").into(),records};
  serde_json::to_writer(File::create_new(payload.join("image-data.json"))?,&manifest)?;
  serde_json::to_writer(File::create_new(payload.join("content.json"))?,&content)?;
  fs::remove_dir_all(root)?;fs::remove_file(tree::metadata_path(root))?;fs::remove_file(identity_file)?;Ok(())
@@ -61,7 +61,7 @@ fn restore(payload:&Path,root:&Path)->Result<()>{
  unsafe extern "C"{fn lchmod(path:*const c_char,mode:u16)->c_int;fn fsetxattr(fd:c_int,name:*const c_char,value:*const c_void,size:usize,position:u32,options:c_int)->c_int;fn setxattr(path:*const c_char,name:*const c_char,value:*const c_void,size:usize,position:u32,options:c_int)->c_int;}
  fn label(file:&File,value:&[u8])->Result<()>{if unsafe{fsetxattr(file.as_raw_fd(),c"dev.aim.xattr.security.selinux".as_ptr(),value.as_ptr().cast(),value.len(),0,2)}!=0{return Err(std::io::Error::last_os_error().into());}Ok(())}
  let transport:Transport=serde_json::from_reader(File::open(payload.join("image-data.json"))?)?;
- if transport.schema_version!=1||transport.source_revision!="9b5068fa8185d3f51f1862fe7c54d88d51f09ec8"{return Err(invalid("unsupported Android image transport"));}
+ if transport.schema_version!=1||transport.source_revision!=env!("AIM_REVISION"){return Err(invalid("unsupported Android image transport"));}
  if root.exists(){return Err(invalid("image restore root already exists"));}
  let mut paths=std::collections::BTreeSet::new();
  for row in &transport.records{named(root,&row.path)?;if !paths.insert(row.path.clone()){return Err(invalid("duplicate image transport path"));}}

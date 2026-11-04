@@ -1,3 +1,4 @@
+import {aimSource} from '../lib/android-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {checkoutSource,stageSource,sourceNotices,run,recipeMain} from './build-source.mjs';
@@ -5,7 +6,7 @@ import {rustEnvironment,rustNotices} from './rust-build.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
-const descriptor=JSON.parse(fs.readFileSync(new URL('../producers/android-art-inputs/source.json',import.meta.url)));
+const descriptor={...JSON.parse(fs.readFileSync(new URL('../producers/android-art-inputs/source.json',import.meta.url))),...aimSource()};
 
 /** Build the original image reader independently of the Android system image. */
 export async function buildArtInput({project,arch,version,output,work}){
