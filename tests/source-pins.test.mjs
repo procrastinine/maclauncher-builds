@@ -158,3 +158,11 @@ test('source-free preparation retains its declared digest and later source resol
  f.source({source:{repository:'https://github.com/owner/source.git',revision:next}});
  assert.equal(resolveProject('engine',f.root).upstreams[0].revision,next);
 });
+
+
+test('gitlink references resolve the recorded commit and original submodule URL without checkout',async()=>{
+ const {resolveUpstream}=await import('../lib/source-pins.mjs'),{gitlink}=await import('../lib/pins.mjs');
+ const root=path.resolve(import.meta.dirname,'..'),pin={gitlink:'sources/maclauncher-android'},upstream={id:'android',provider:'github',url:'https://github.com/procrastinine/maclauncher-android',repository:'procrastinine/maclauncher-android',pin};
+ assert.equal(resolveUpstream(upstream,root).revision,gitlink(pin.gitlink));
+ assert.deepEqual(resolveUpstream(upstream,root,{resolvePins:false}),upstream);
+});
