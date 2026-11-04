@@ -1,4 +1,5 @@
-import {addLicense} from '../../../lib/licenses.mjs';
+import {gitlink} from '../../../lib/pins.mjs';
+import {addLicenses} from '../../../lib/licenses.mjs';
 // GitHub build of an AliceSoft decompiler for one Mac CPU, sealed as a runtime
 // manager output with the package declaration that release preparation reads.
 import fs from 'node:fs';
@@ -21,22 +22,22 @@ const systemLink=value=>value.startsWith('/usr/lib/')||value.startsWith('/System
 
 export async function buildDecompiler({project,version:selectedVersion,arch,output,work=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'decompiler-')),'work'),dependencies}){
  const version=buildRecord(resolveProject(project,path.resolve(import.meta.dirname,'../../..'),{resolvePins:false}),selectedVersion).version;
- const profile=profiles.find(row=>row.managerId===project),release=profile?.releases.find(row=>row.version===version&&row.upstreamRevision===profile.upstreamRevision);
+ const metadata=profiles.find(row=>row.managerId===project),profile={...metadata,upstreamRevision:gitlink("producers/maclauncher/src/external/"+metadata.repo)},release=profile.releases.find(row=>row.version===version);
  if(!release)throw Error('The decompiler profiles have no release for '+project+'.');
  const cpu=arch==='x64'?'x86_64':'arm64',sourceDir=path.join(external,profile.repo),userDataDir=path.join(work,'user-data');
  // CMake reads its target CPU from this variable; a runner of the same CPU builds natively.
  const previous=process.env.CMAKE_OSX_ARCHITECTURES;process.env.CMAKE_OSX_ARCHITECTURES=cpu;
  let built;
  try{
-  const manager={id:project,core:{normalizeVersion:value=>value,catalog:[{version:release.version,upstreamRevision:release.upstreamRevision}],
+  const manager={id:project,core:{normalizeVersion:value=>value,catalog:[{version:release.version,upstreamRevision:profile.upstreamRevision}],
    getInstallDir:({version})=>path.join(userDataDir,project,version),resolveInstalled:()=>null,registerLocal:({runtimePath,verifiedBuild})=>({runtimePath,verifiedBuild})}};
   built=await buildManagedDecompiler({manager,version:release.version,sourceDir,userDataDir,dependencies});
  }finally{if(previous===undefined)delete process.env.CMAKE_OSX_ARCHITECTURES;else process.env.CMAKE_OSX_ARCHITECTURES=previous;}
- const payload=path.join(output,'payload'),files=path.join(payload,'files'),executableRelative='bin/'+profile.executable,license='licenses/upstream/0-COPYING';
- fs.mkdirSync(path.join(files,'bin'),{recursive:true});fs.mkdirSync(path.join(files,'licenses/upstream'),{recursive:true});
+ const payload=path.join(output,'payload'),files=path.join(payload,'files'),executableRelative='bin/'+profile.executable;
+ fs.mkdirSync(path.join(files,'bin'),{recursive:true});
  const executable=path.join(files,executableRelative);
  fs.copyFileSync(built.runtimePath,executable,fs.constants.COPYFILE_EXCL);fs.chmodSync(executable,0o755);
- addLicense(files,profile.repo,path.join(sourceDir,'COPYING'));
+ addLicenses(files,profile.repo,sourceDir);
  if(JSON.stringify(macho(executable))!==JSON.stringify([cpu]))throw Error('The decompiler was built for a different CPU.');
  const ids=libraryIds(executable),linked=links(executable).filter(link=>!ids.includes(link));
  if(linked.some(link=>!systemLink(link)))throw Error('The decompiler links a library outside macOS.');
@@ -46,11 +47,11 @@ export async function buildDecompiler({project,version:selectedVersion,arch,outp
  const inventory=B.fileInventory(files).map(relative=>{const file=path.join(files,relative),stat=fs.statSync(file),architectures=macho(file);
   return {path:relative,size:stat.size,sha256:Native.hashFile(file),mode:stat.mode&0o777,...(architectures?{architectures}:{})};});
  const {logPath,...verifiedBuild}=built.verifiedBuild;
- const manifest={schemaVersion:1,managerId:project,version,upstreamRevision:release.upstreamRevision,platform:'darwin',arch,minimumMacOS,executableRelative,
+ const manifest={schemaVersion:1,managerId:project,version,upstreamRevision:profile.upstreamRevision,platform:'darwin',arch,minimumMacOS,executableRelative,
   files:inventory,dependencies:[{file:executableRelative,links:linked}],
   environmentRelative:{},runtimeFiles:{},signature:{identity:'-',verified:true},
   provenance:{...verifiedBuild,configureOptions:verifiedBuild.configureOptions.map(option=>option.split(work).join('maclauncher-build')),inputExecutableSha256:Native.hashFile(built.runtimePath),verifiedBuild:true}};
- B.validateManifest(manifest,{managerId:project,version:release.version,upstreamRevision:release.upstreamRevision,arch});B.verifyPayload(files,manifest);
+ B.validateManifest(manifest,{managerId:project,version:release.version,upstreamRevision:profile.upstreamRevision,arch});B.verifyPayload(files,manifest);
  fs.writeFileSync(path.join(payload,'manifest.json'),JSON.stringify(manifest,null,2)+'\n',{mode:0o644,flag:'wx'});
  const declaration=await managerDeclaration({project,input:payload});
  fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});

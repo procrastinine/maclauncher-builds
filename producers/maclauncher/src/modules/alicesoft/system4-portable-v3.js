@@ -1,3 +1,4 @@
+const {gitlink} = require("../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -11,12 +12,11 @@ const Overlay = require("./system4-portable-overlay-v3");
 const { throwIfAborted } = require("../shared/runtime/download-utils");
 const PIN = Object.freeze(require("./system4-portable.json"));
 const VERSION = "MCLv1-1021";
-const REVISION = "de65718ba72d5eb291a4d0ddb691627f1d401909";
-const LIBSYS4_REVISION = "e2bf438d0156a2ca70fc6018fddf7c870794a2ca";
+const REVISION = gitlink("producers/maclauncher/src/external/xsystem4");
 const SOURCE_SHA256 = "3beeaf86056c10f4464c50cec45ed56a140a99443bec56e9930cbdbe09151acb";
 const sourcePath = path.resolve(__dirname, "../../external/xsystem4");
 const recipeFiles = [__filename, require.resolve("./system4-portable-overlay-v3"), require.resolve("./system4-portable.json"),
-  require.resolve("./system35-portable"), require.resolve("./system35-overlay"), require.resolve("./system35-portable.json"),
+  require.resolve("./system35-portable"), require.resolve("./system35-portable.json"),
   require.resolve("../shared/runtime/portable-sdl2-fonts"), require.resolve("../shared/runtime/portable-sdl2-fonts.json"),
   require.resolve("../shared/runtime/portable-sndfile"), require.resolve("../shared/runtime/portable-sndfile.json"),
   require.resolve("../shared/runtime/portable-ffmpeg"), require.resolve("../shared/runtime/portable-ffmpeg.json")];
@@ -49,6 +49,7 @@ async function buildPortableSystem4({ sourceDir=sourcePath,archives,workRoot,dep
   Fonts.validateArchives(archives);Audio.validateArchives(archives);Audio.validateArchives(archives,{catalog:PIN});
   if(!path.isAbsolute(archives?.ffmpeg||"")||Native.hashFile(archives.ffmpeg)!==Movie.PIN.source.sha256)throw new Error("Portable movies require the exact FFmpeg source archive.");
   const source=await Source.validatePinnedSource(sourceDir,REVISION,{signal});
+  const libsys4Revision = require("node:child_process").execFileSync("git", ["-C", sourceDir, "rev-parse", "HEAD:subprojects/libsys4"], { encoding: "utf8" }).trim();
   if(Source.hashPinnedFiles(sourceDir,source.files)!==SOURCE_SHA256)throw new Error("xsystem4 and libsys4 source checksum differs from the selected version.");
   const overlaySha256=overlayIdentity();
   let fonts,audio,movie;
@@ -91,9 +92,9 @@ async function buildPortableSystem4({ sourceDir=sourcePath,archives,workRoot,dep
   await Source.validatePinnedSource(sourceDir,REVISION,{signal});
   if(Source.hashPinnedFiles(sourceDir,source.files)!==sourceTreeSha256||overlayIdentity()!==overlaySha256)throw new Error("xsystem4 source or build adapter changed during compilation.");
   const executable=path.join(prefix,"bin/xsystem4");
-  return {managerId:"xsystem4",version:VERSION,sourceRevision:REVISION,libsys4Revision:LIBSYS4_REVISION,sourceTreeSha256,overlaySha256,sourceOverlay,
+  return {managerId:"xsystem4",version:VERSION,sourceRevision:REVISION,libsys4Revision,sourceTreeSha256,overlaySha256,sourceOverlay,
     architecture,minimumMacOS:"13.0",executable,executableSha256:Native.hashFile(executable),resources:path.join(prefix,"share/xsystem4"),features,
     sourceRoot,outputRoot,prefix,sdk:fonts.sdk,tools,configureOptions,startedAt,completedAt:new Date().toISOString(),logPath,
     dependencyClosure:{version:PIN.version,prefix,fonts,audio,movie,sources,sourceRoots}};
 }
-module.exports={VERSION,REVISION,LIBSYS4_REVISION,SOURCE_SHA256,PIN,sourcePath,recipeFiles,overlayIdentity,nativeFile,validateFeatures,buildPortableSystem4};
+module.exports={VERSION,REVISION,SOURCE_SHA256,PIN,sourcePath,recipeFiles,overlayIdentity,nativeFile,validateFeatures,buildPortableSystem4};

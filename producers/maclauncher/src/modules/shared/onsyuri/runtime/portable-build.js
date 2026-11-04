@@ -1,8 +1,13 @@
+const {gitlink} = require("../../../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const Native = require("../../runtime/local-native");
-const PIN = Object.freeze(require("./portable-build.json"));
+const metadata = require("./portable-build.json");
+const revision = gitlink("producers/maclauncher/src/external/onscripter-yuri");
+const PIN = Object.freeze({ ...metadata, engine: { ...metadata.engine, revision,
+  sourceUrl: `https://github.com/YuriSizuku/OnscripterYuri/tree/${revision}`,
+  archiveUrl: `https://codeload.github.com/YuriSizuku/OnscripterYuri/tar.gz/${revision}` } });
 const VERSION = PIN.engine.version;
 const REVISION = PIN.engine.revision;
 const SOURCE_SHA256 = PIN.engine.sourceTreeSha256;

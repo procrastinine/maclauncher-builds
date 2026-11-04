@@ -12,8 +12,6 @@
   "executableRelative": "mkxp-z.universal.app/Contents/MacOS/bundle_mkxp-z",
   "upstream": {
     "repository": "https://github.com/mkxp-z/mkxp-z",
-    "revision": "37a04d14413454551a7b6aadbb4e93e67168accb",
-    "sourceUrl": "https://codeload.github.com/mkxp-z/mkxp-z/tar.gz/37a04d14413454551a7b6aadbb4e93e67168accb",
     "sourceSha256": "364394e8cb3089b1f5adb12a4ab524770e743bf3973ec53e8f411ba5e11886d6",
     "sourceBytes": 14544828
   },
@@ -31,6 +29,5 @@
   "publisherFiles": 1083,
   "publisherBytes": 82814450,
   "payloadFiles": 1085,
-  "payloadBytes": 82970752,
-  "notice": "licenses/upstream/0-LICENSE.txt"
+  "payloadBytes": 82970752
 }

@@ -1,3 +1,4 @@
+const {gitlink} = require("../../../../../../../lib/pins.mjs");
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
@@ -5,12 +6,12 @@ const cp = require('node:child_process');
 const Pinned = require('../../runtime/pinned-native-build');
 
 const VERSION = 'MCLv1-0206';
-const REVISION = '6e9e34ed0876014fdb46e684103ef8c3605e382e';
+const REVISION = gitlink("producers/maclauncher/src/external/innoextract");
 const BOOST_VERSION = '1.92.0';
 const DEPENDENCIES = Object.freeze({
-  'boost-filesystem': 'd73863751bf0570fc82f1b49246f909cea61083b',
-  'boost-program-options': 'ae25c112b7032d288df90be95e10876ece30bee3',
-  'boost-iostreams': 'dacdb3db57e9f372ad575f02a45b5efb439d8889'
+  'boost-filesystem': gitlink('producers/maclauncher/src/external/boost-filesystem'),
+  'boost-program-options': gitlink('producers/maclauncher/src/external/boost-program-options'),
+  'boost-iostreams': gitlink('producers/maclauncher/src/external/boost-iostreams')
 });
 const NATIVE = path.join(__dirname, '../native');
 const hash = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');

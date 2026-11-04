@@ -1,4 +1,6 @@
-const {addLicense} = require('../../../lib/licenses.mjs');
+const {gitlink} = require('../../../lib/pins.mjs');
+const REVISION = gitlink('producers/maclauncher/src/external/mkxp-z');
+const {addLicenses} = require('../../../lib/licenses.mjs');
 // Maintainer source build. Ordinary Play uses the sealed Included artifact.
 const fs = require('node:fs'), path = require('node:path'), os = require('node:os');
 const {execFileSync} = require('node:child_process');
@@ -41,7 +43,7 @@ function prepareSource(archive, work) {
     for (const item of Overlay.addedFiles) fs.copyFileSync(path.join(overlayDirectory, item.file), path.join(source, item.destination));
   }
   verifySource(source);
-  const revisionFile=path.join(source,'git-hash'),revision=Overlay.upstream.revision+'\n';
+  const revisionFile=path.join(source,'git-hash'),revision=REVISION+'\n';
   if(!fs.existsSync(revisionFile)||fs.readFileSync(revisionFile,'utf8')!==revision)fs.writeFileSync(revisionFile,revision);
   return source;
 }
@@ -102,7 +104,7 @@ function stage({work, source, output, version}) {
   const directory = path.join(output, 'mkxpz', version, 'arm64'), payload = path.join(directory, 'files');
   if (fs.existsSync(directory)) throw new Error('Choose a new MKXP-Z publication; existing artifacts are never overwritten.');
   fs.mkdirSync(payload, {recursive: true});
-  const inventory = [], notices = [];
+  const inventory = [];
   function copy(from, relative) {
     const stat = fs.lstatSync(from);
     if (Content.excludedReason(relative)) return;
@@ -117,21 +119,11 @@ function stage({work, source, output, version}) {
   }
   for (const name of fs.readdirSync(installed).sort()) copy(path.join(installed, name), name);
   const sourceNotice = path.join(payload, 'SOURCE.txt'); fs.mkdirSync(path.dirname(sourceNotice), {recursive: true});
-  fs.writeFileSync(sourceNotice, 'MKXP-Z '+Overlay.upstream.revision+' with MacLauncher '+Overlay.id+'\n'+Overlay.upstream.repository+'\n', {mode: 0o644});
-  notices.push({name:'MKXP-Z with macOS filename normalization',license:'GPL-3.0-or-later',path:'LICENSE.txt',sourceUrl:Overlay.upstream.repository});
-  function collectNotices(directory, relative = '') {
-    for (const entry of fs.readdirSync(directory, {withFileTypes:true})) {
-      if (['.git', 'packagecache', '__pycache__'].includes(entry.name)) continue;
-      const name = relative ? relative + '/' + entry.name : entry.name;
-      if (entry.isDirectory()) { if (!Content.excludedReason(name)) collectNotices(path.join(directory,entry.name),name); }
-      else if (entry.isFile() && /^(?:COPYING|LICENSE|NOTICE)(?:[.-].*)?$/i.test(entry.name)) {
-        const target = name;addLicense(payload,relative||'MKXP-Z',path.join(directory,entry.name));
-        notices.push({name:'Included dependency '+relative,license:'Included license notice',path:target,
-          sourceUrl:Overlay.upstream.repository+'/tree/'+Overlay.upstream.revision+'/subprojects'});
-      }
-    }
-  }
-  collectNotices(path.join(source,'subprojects'));
+  fs.writeFileSync(sourceNotice, 'MKXP-Z '+REVISION+' with MacLauncher '+Overlay.id+'\n'+Overlay.upstream.repository+'\n', {mode: 0o644});
+  addLicenses(payload, 'MKXP-Z', source);
+  const subprojects = path.join(source, 'subprojects');
+  for (const entry of fs.readdirSync(subprojects, {withFileTypes:true}))
+    if (entry.isDirectory()) addLicenses(payload, entry.name, path.join(subprojects,entry.name));
   const executableRelative = apps[0] + '/Contents/MacOS/bundle_mkxp-z';
   run('/usr/bin/codesign', ['--force','--sign','-',path.join(payload,apps[0])]);
   run('/usr/bin/codesign', ['--verify','--deep','--strict',path.join(payload,apps[0])]);
@@ -149,8 +141,8 @@ function stage({work, source, output, version}) {
   const sourceRelative = 'mkxpz/' + version + '-source.tar.gz', archive = path.join(output,sourceRelative);
   sourceArchive(source,archive,work); fs.chmodSync(archive,0o644);
   const sourceArtifact = {directoryRelative:sourceRelative,sha256:Native.hashFile(archive),bytes:fs.statSync(archive).size};
-  const manifest = {schemaVersion:1,managerId:'mkxpz',version:version,upstreamRevision:Overlay.upstream.revision,platform:'darwin',arch:'arm64',minimumMacOS:'11.0',
-    executableRelative,files:inventory,dependencies:[],provenance:{sourceKind:'owned-source-adaptation',verifiedBuild:true,sourceRevision:Overlay.upstream.revision,
+  const manifest = {schemaVersion:1,managerId:'mkxpz',version:version,upstreamRevision:REVISION,platform:'darwin',arch:'arm64',minimumMacOS:'11.0',
+    executableRelative,files:inventory,dependencies:[],provenance:{sourceKind:'owned-source-adaptation',verifiedBuild:true,sourceRevision:REVISION,
       adaptationId:Overlay.id,patchSha256:Overlay.patch.sha256,headerSha256:Overlay.addedFiles[0].sha256,implementationSha256:Overlay.addedFiles[1].sha256,sourceArchiveSha256:SOURCE_SHA256,
       compiler:execFileSync('/usr/bin/xcrun',['clang','--version'],{encoding:'utf8'}).split('\n')[0]}};
   B.validateManifest(manifest); B.verifyPayload(payload,manifest);
@@ -158,8 +150,8 @@ function stage({work, source, output, version}) {
   const declaration={id:'mkxpz',version:version,arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS:'11.0',directoryRelative:'mkxpz/'+version+'/arm64',
     manifestRelative:'manifest.json',manifestSha256:B.digest(bytes),sourceSha256:sourceArtifact.sha256,sourceArtifact,
     files:[...inventory.map(file=>({...file,path:'files/'+file.path})),{path:'manifest.json',size:bytes.length,mode:0o644,sha256:B.digest(bytes)}]};
-  const pin={version:version,arch:'arm64',minimumMacOS:'11.0',appName:apps[0],executableRelative,upstreamRevision:Overlay.upstream.revision,
-    sourceUrl:Overlay.upstream.repository+'/tree/'+Overlay.upstream.revision,sourceKind:'owned-source-adaptation',adaptationId:Overlay.id,
+  const pin={version:version,arch:'arm64',minimumMacOS:'11.0',appName:apps[0],executableRelative,upstreamRevision:REVISION,
+    sourceUrl:Overlay.upstream.repository+'/tree/'+REVISION,sourceKind:'owned-source-adaptation',adaptationId:Overlay.id,
     patchSha256:Overlay.patch.sha256,headerSha256:Overlay.addedFiles[0].sha256,implementationSha256:Overlay.addedFiles[1].sha256,
     label:'20261003 · NFC 1 · Apple Silicon',executableSha256:inventory.find(file=>file.path===executableRelative).sha256,sourceArtifact};
   return {pin,declaration,directory,sourceArtifact};

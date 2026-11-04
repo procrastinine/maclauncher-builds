@@ -6,7 +6,6 @@
   "engine": {
     "version": "0.7.7beta-MCLv2",
     "upstreamVersion": "0.7.7beta",
-    "revision": "08f744b31cc1907b66a15f0402e62321a131ed81",
     "sourceTreeSha256": "bc02f1dcb85c2f6dbf883d49052f0a6d88b47c1cdef473835c7a57c45c43b2df"
   },
   "base": {
