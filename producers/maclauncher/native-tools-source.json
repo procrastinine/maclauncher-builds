@@ -21,7 +21,7 @@
     {
       "path": "scripts/build-mkxpz-nfc.cjs",
       "sourceSha256": "942c130d29f93191948828505b57e79c07030c5d414882d96214a0d36068ff2a",
-      "sha256": "935fd4483222830316211cc75bc07129fe6fa2552c82fe10339d4a5abe4f6531",
+      "sha256": "451faa4be6167403ec076117fe60c4dcb4f9e46e021e30979c7811f5ea58ba46",
       "replacements": [
         {
           "from": "// Maintainer source build. Ordinary Play uses the sealed Included artifact.\nconst fs = require('node:fs'), path = require('node:path'), os = require('node:os');\n",
@@ -34,6 +34,10 @@
         {
           "from": "  }\n  verifySource(source);\n  const revisionFile=path.join(source,'git-hash'),revision=Overlay.upstream.revision+'\\n';\n  if(!fs.existsSync(revisionFile)||fs.readFileSync(revisionFile,'utf8')!==revision)fs.writeFileSync(revisionFile,revision);\n  return source;\n",
           "to": "  }\n  verifySource(source);\n  const revisionFile=path.join(source,'git-hash'),revision=REVISION+'\\n';\n  if(!fs.existsSync(revisionFile)||fs.readFileSync(revisionFile,'utf8')!==revision)fs.writeFileSync(revisionFile,revision);\n  return source;\n"
+        },
+        {
+          "from": "    /^subprojects\\/(?:SDL_ttf-release-2\\.0\\.18|sdl2_image)\\/Xcode\\/(?:macOS|iOS|tvOS)\\/SDL2\\.framework(?:\\/|$)/.test(name) ||\n    /(?:^|\\/)\\.DS_Store$|\\.(?:pyc|pyo)$/.test(name) || name.startsWith(mesa) &&\n    !/^(?:include(?:\\/|$)|src(?:$|\\/gbm(?:\\/|$))|meson\\.build$|meson_options\\.txt$|meson\\.options$|COPYING[^/]*$|LICENSE[^/]*$)/.test(name.slice(mesa.length));\n  function walk(directory, relative = '') {\n    for (const entry of fs.readdirSync(directory, {withFileTypes: true}).sort((a,b) => a.name.localeCompare(b.name))) {\n",
+          "to": "    /^subprojects\\/(?:SDL_ttf-release-2\\.0\\.18|sdl2_image)\\/Xcode\\/(?:macOS|iOS|tvOS)\\/SDL2\\.framework(?:\\/|$)/.test(name) ||\n    /(?:^|\\/)\\.DS_Store$|\\.(?:pyc|pyo)$/.test(name) || name.startsWith(mesa) &&\n    !/^(?:include(?:\\/|$)|src(?:$|\\/gbm(?:\\/|$))|meson\\.build$|meson_options\\.txt$|meson\\.options$)/.test(name.slice(mesa.length));\n  function walk(directory, relative = '') {\n    for (const entry of fs.readdirSync(directory, {withFileTypes: true}).sort((a,b) => a.name.localeCompare(b.name))) {\n"
         },
         {
           "from": "}\n\nfunction stage({work, source, output}) {\n  verifySource(source);\n  const installed = path.join(work, 'install/usr/local'), apps = fs.readdirSync(installed).filter(name => name.endsWith('.app'));\n  if (apps.length !== 1) throw new Error('The MKXP-Z build must install exactly one app.');\n  const directory = path.join(output, 'mkxpz', VERSION, 'arm64'), payload = path.join(directory, 'files');\n  if (fs.existsSync(directory)) throw new Error('Choose a new MKXP-Z publication; existing artifacts are never overwritten.');\n  fs.mkdirSync(payload, {recursive: true});\n  const inventory = [], notices = [];\n  function copy(from, relative) {\n    const stat = fs.lstatSync(from);\n",

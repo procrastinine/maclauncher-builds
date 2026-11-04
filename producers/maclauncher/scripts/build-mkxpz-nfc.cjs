@@ -79,7 +79,7 @@ function sourceArchive(source, output, work) {
     /^subprojects\/ruby-3_1_3\/test(?:\/|$)/.test(name) ||
     /^subprojects\/(?:SDL_ttf-release-2\.0\.18|sdl2_image)\/Xcode\/(?:macOS|iOS|tvOS)\/SDL2\.framework(?:\/|$)/.test(name) ||
     /(?:^|\/)\.DS_Store$|\.(?:pyc|pyo)$/.test(name) || name.startsWith(mesa) &&
-    !/^(?:include(?:\/|$)|src(?:$|\/gbm(?:\/|$))|meson\.build$|meson_options\.txt$|meson\.options$|COPYING[^/]*$|LICENSE[^/]*$)/.test(name.slice(mesa.length));
+    !/^(?:include(?:\/|$)|src(?:$|\/gbm(?:\/|$))|meson\.build$|meson_options\.txt$|meson\.options$)/.test(name.slice(mesa.length));
   function walk(directory, relative = '') {
     for (const entry of fs.readdirSync(directory, {withFileTypes: true}).sort((a,b) => a.name.localeCompare(b.name))) {
       const name = relative ? relative + '/' + entry.name : entry.name;

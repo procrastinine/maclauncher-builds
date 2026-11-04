@@ -277,17 +277,6 @@ function listedFile(cached) {
     digest: cached?.sha256 ? { algorithm: "sha256", value: cached.sha256 } : cached?.digest }, true);
 }
 
-// A GitHub repository's license notice at the exact revision of a listed
-// release, for downloads that carry none. A notice moved or named otherwise is
-// found through GitHub's license lookup. Null when the repository publishes
-// none; the download proceeds without a notice.
-function githubLicense({ repository: name, revision, destination, signal }) {
-  const { owner, repo } = repository(name) || {};
-  return require("./github-releases").fetchGithubLicense({ owner, repo, revision, destination, signal,
-    request: (url, options) => Transport.fetchUrlBuffer(url, options),
-    download: (url, target, options) => Transport.downloadToFile(url, target, options) });
-}
-
 // The file tree GitHub lists for a commit: each path with its size and Git
 // blob SHA-1.
 async function githubTree({ repository: name, revision, signal }) {
@@ -312,6 +301,6 @@ async function range(listed, start, length, { signal } = {}) {
 
 module.exports = {
   github, githubCommits, githubActions, index, pypi, nuget, vendor, service,
-  download, asset, listedFile, readDigest, githubDigest, githubLicense, githubTree, range,
+  download, asset, listedFile, readDigest, githubDigest, githubTree, range,
   KINDS
 };
