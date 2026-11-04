@@ -1264,14 +1264,20 @@ void presentTime(id object,SEL selector,id<MTLDrawable> drawable,CFTimeInterval 
 struct PendingPresent { id<MTLDrawable> drawable; SEL selector; CFTimeInterval time; uint64_t captureFrame=0; };
 struct ScheduledContext { std::vector<PendingPresent> pending; };
 thread_local ScheduledContext *scheduledContext=nullptr;
+struct DrawableForward {id object;SEL selector;Class parent;DrawableForward *previous;};
+thread_local DrawableForward *forwardingDrawable=nullptr;
 void finishPresent(const PendingPresent &pending) {
-    IMP implementation=original(pending.drawable,pending.selector);
+    const bool nested=forwardingDrawable&&forwardingDrawable->object==pending.drawable&&forwardingDrawable->selector==pending.selector;
+    const auto found=hooks().find(nested?forwardingDrawable->parent:object_getClass(pending.drawable),pending.selector);
+    DrawableForward active{pending.drawable,pending.selector,class_getSuperclass(found.owner),forwardingDrawable};
+    struct Restore {DrawableForward *previous;~Restore(){forwardingDrawable=previous;}} restore{forwardingDrawable};forwardingDrawable=&active;
+    IMP implementation=found.implementation;
     if(pending.selector==@selector(present))
         reinterpret_cast<void(*)(id,SEL)>(implementation)(pending.drawable,pending.selector);
     else reinterpret_cast<void(*)(id,SEL,CFTimeInterval)>(implementation)(pending.drawable,pending.selector,pending.time);
 }
 bool deferPresent(id<MTLDrawable> drawable,SEL selector,CFTimeInterval time=0) {
-    if(!scheduledContext || ![drawable conformsToProtocol:@protocol(CAMetalDrawable)] ||
+    if((forwardingDrawable&&forwardingDrawable->object==drawable)||!scheduledContext || ![drawable conformsToProtocol:@protocol(CAMetalDrawable)] ||
         objc_getAssociatedObject(drawable,&nativePresentationKey) || macfx::ownsPresentation(((id<CAMetalDrawable>)drawable).layer)) return false;
     if(!layerPresentationDemand(((id<CAMetalDrawable>)drawable).layer)){observeBypassedLayer(((id<CAMetalDrawable>)drawable).layer);return false;}
     if(!acceptsNativeLayer(((id<CAMetalDrawable>)drawable).layer)) return false;
@@ -1290,6 +1296,17 @@ void drawablePresent(id object,SEL selector) {
 }
 void drawablePresentTime(id object,SEL selector,CFTimeInterval time) {
     if(!deferPresent(object,selector,time)) finishPresent({object,selector,time});
+}
+void hookDrawableClass(Class cls) {
+    replace(cls,@selector(present),reinterpret_cast<IMP>(drawablePresent));
+    replace(cls,@selector(presentAtTime:),reinterpret_cast<IMP>(drawablePresentTime));
+    replace(cls,@selector(presentAfterMinimumDuration:),reinterpret_cast<IMP>(drawablePresentTime));
+}
+void hookDrawableClasses() {
+    unsigned count=0;Class *classes=objc_copyClassList(&count);
+    for(unsigned i=0;i<count;++i)for(Class cls=classes[i];cls;cls=class_getSuperclass(cls))
+        if(class_conformsToProtocol(cls,@protocol(CAMetalDrawable))){hookDrawableClass(classes[i]);break;}
+    free(classes);
 }
 char scheduledEffectsKey;
 RSMScheduledEffects *scheduledEffects(id<MTLCommandQueue> producer) {
@@ -1395,6 +1412,7 @@ void signalMetal4Drawable(id object,SEL selector,id<MTLDrawable> drawable) {
     auto forward=reinterpret_cast<void(*)(id,SEL,id<MTLDrawable>)>(original(object,selector));
     if(![drawable conformsToProtocol:@protocol(CAMetalDrawable)]) {forward(object,selector,drawable);return;}
     id<CAMetalDrawable> metal=(id<CAMetalDrawable>)drawable;
+    hookDrawableClass(object_getClass(drawable));
     const auto captureFrame=pendingCaptureFrame(metal.layer);
     const bool explicitFrame=nativeLayer(metal.layer)!=nil;
     if((!explicitFrame&&!macfx::effectRequested()&&!macfx::graphicsRequested()&&!captureFrame)||macfx::ownsPresentation(metal.layer) || !acceptsNativeLayer(metal.layer) || objc_getAssociatedObject(drawable,&nativePresentationKey)) {forward(object,selector,drawable);return;}
@@ -1678,6 +1696,25 @@ void observeGameDrawable(CAMetalLayer *layer,bool acquired,double milliseconds,b
     if(first)log("Game drawable request on layer "+std::to_string(key)+(acquired?" waited ":" returned nil after ")+waited+
         " ms during graphics processing; edits report this until a later request succeeds within 500 ms");
 }
+// Only restore a layer property that this adapter changed. A later game
+// setter owns the new choice, including an explicit NO while effects are idle.
+char framebufferOverrideKey;
+thread_local const void *adjustingFramebuffer=nullptr;
+void setFramebufferOnly(id object,SEL selector,BOOL value) {
+    @synchronized(object) {
+        if(adjustingFramebuffer!=(__bridge const void*)object)objc_setAssociatedObject(object,&framebufferOverrideKey,nil,OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        reinterpret_cast<void(*)(id,SEL,BOOL)>(original(object,selector))(object,selector,value);
+    }
+}
+void updateFramebufferAccess(CAMetalLayer *layer,bool readable) {
+    @synchronized(layer) {
+        const bool restore=!readable&&objc_getAssociatedObject(layer,&framebufferOverrideKey);
+        if(!(readable&&layer.framebufferOnly)&&!restore)return;
+        objc_setAssociatedObject(layer,&framebufferOverrideKey,readable?@YES:nil,OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        const auto previous=adjustingFramebuffer;adjustingFramebuffer=(__bridge const void*)layer;
+        @try{[layer setFramebufferOnly:!readable];}@finally{adjustingFramebuffer=previous;}
+    }
+}
 void installMetalDeviceHooks(id<MTLDevice> device);
 id<CAMetalDrawable> nextDrawable(id object,SEL selector) {
     if(macfx::ownsPresentation(object)||(explicitHost()&&!nativeLayer(object))) return reinterpret_cast<id<CAMetalDrawable>(*)(id,SEL)>(original(object,selector))(object,selector);
@@ -1688,6 +1725,10 @@ id<CAMetalDrawable> nextDrawable(id object,SEL selector) {
     const auto activePresentation=macfx::metalPresentation((CAMetalLayer*)object);
     const bool readsSource=activePresentation&&!activePresentation->snapshot().stopped;
     bool source=false;try{source=macfx::drawableResolutionRequested();}catch(...){}
+    CAMetalLayer *layer=(CAMetalLayer*)object;
+    const bool processing=macfx::imageProcessingRequested(readsSource)||macfx::FrameCapture::forcesAttachment();
+    const bool readable=nativeLayer(object)||(processing&&!macfx::nativeMetalSourceReadable(layer.pixelFormat,true,macfx::framebuffer::supported(layer.device)));
+    updateFramebufferAccess(layer,readable);
     if(!nativeLayer(object)&&!macfx::imageProcessingRequested(readsSource)&&!source&&!macfx::virtualWindowEnabled()&&!macfx::timingEnabled()&&!macfx::FrameCapture::forcesAttachment())
         return reinterpret_cast<id<CAMetalDrawable>(*)(id,SEL)>(original(object,selector))(object,selector);
     installMetalDeviceHooks(((CAMetalLayer*)object).device);
@@ -1698,10 +1739,6 @@ id<CAMetalDrawable> nextDrawable(id object,SEL selector) {
     // The attachment-fetch adapter preserves the producer's framebuffer-only
     // contract (which SpriteKit uses for its Y convention) for its supported
     // layer formats. Other cases need a sampleable drawable.
-    CAMetalLayer *layer=(CAMetalLayer*)object;
-    if(nativeLayer(object)||(macfx::imageProcessingRequested(readsSource)&&
-       !macfx::nativeMetalSourceReadable(layer.pixelFormat,layer.framebufferOnly,
-           macfx::framebuffer::supported(layer.device))))[layer setFramebufferOnly:NO];
     id<CAMetalDrawable> drawable;const auto requested=layer.drawableSize;const auto began=std::chrono::steady_clock::now();
     {macfx::DiagnosticScope scope(macfx::DiagnosticStage::MetalDrawable,reinterpret_cast<uintptr_t>((__bridge void*)layer),unsigned(requested.width),unsigned(requested.height),"game.next-drawable");
      drawable=reinterpret_cast<id<CAMetalDrawable>(*)(id,SEL)>(original(object,selector))(object,selector);}
@@ -1715,40 +1752,48 @@ id<CAMetalDrawable> nextDrawable(id object,SEL selector) {
             if(required)captureDepth.store(true,std::memory_order_relaxed);
         }catch(const std::exception &error){log("Cannot inspect selected Metal effect: "+std::string(error.what()));}
         objc_setAssociatedObject(drawable,&nativePresentationKey,nil,OBJC_ASSOCIATION_RETAIN);
-        Class cls=object_getClass(drawable);
-        replace(cls,@selector(present),reinterpret_cast<IMP>(drawablePresent));
-        replace(cls,@selector(presentAtTime:),reinterpret_cast<IMP>(drawablePresentTime));
-        replace(cls,@selector(presentAfterMinimumDuration:),reinterpret_cast<IMP>(drawablePresentTime));
+        hookDrawableClass(object_getClass(drawable));
     }
     return drawable;
 }
 void replace(Class cls,SEL selector,IMP hook) { hooks().replace(cls,selector,hook); }
 void installMetalDeviceHooks(id<MTLDevice> device) {
-    static std::atomic<bool> installed{false};static std::mutex installing;
-    if(!device||installed.load(std::memory_order_acquire))return;
-    std::lock_guard<std::mutex> lock(installing);if(installed.load())return;
-    // Device allocation belongs after the application creates its renderer.
-    // In particular, Wine must reserve its Windows address space before Metal
-    // allocates GPU mappings. The layer hook runs before the first presentation.
-    id<MTLCommandQueue> queue=[device newCommandQueue];id<MTLCommandBuffer> buffer=[queue commandBuffer];
-    if(!buffer) { log("Metal is unavailable"); return; }
-    Class cls=object_getClass(buffer);
-    replace(cls,@selector(presentDrawable:),reinterpret_cast<IMP>(present));
-    replace(cls,@selector(presentDrawable:atTime:),reinterpret_cast<IMP>(presentTime));
-    replace(cls,@selector(presentDrawable:afterMinimumDuration:),reinterpret_cast<IMP>(presentTime));
-    replace(cls,@selector(commit),reinterpret_cast<IMP>(commit));
-    replace(cls,@selector(addScheduledHandler:),reinterpret_cast<IMP>(addScheduled));
-    replace(cls,@selector(renderCommandEncoderWithDescriptor:),reinterpret_cast<IMP>(captureRenderPass));
-    macfx::installSceneCopyBoundaryHooks(buffer);
-    if(@available(macOS 26.0,*)) {
-        Class deviceClass=object_getClass(device);
-        replace(deviceClass,@selector(newMTL4CommandQueue),reinterpret_cast<IMP>(newMetal4Queue));
-        replace(deviceClass,@selector(newMTL4CommandQueueWithDescriptor:error:),reinterpret_cast<IMP>(newMetal4QueueDescriptor));
-        hookMetal4Queue([device newMTL4CommandQueue]);
-        log("Metal 4 queue presentation hooks installed");
+    if(!device)return;
+    static char installedKey;
+    @synchronized(device) {
+        if(objc_getAssociatedObject(device,&installedKey))return;
+        // The game has already created this device. Never create a default
+        // device or acquire a sample drawable before Wine reserves its memory.
+        bool metal4=false;
+        if(@available(macOS 26.0,*)) {
+            Class deviceClass=object_getClass(device);
+            replace(deviceClass,@selector(newMTL4CommandQueue),reinterpret_cast<IMP>(newMetal4Queue));
+            replace(deviceClass,@selector(newMTL4CommandQueueWithDescriptor:error:),reinterpret_cast<IMP>(newMetal4QueueDescriptor));
+            if([device respondsToSelector:@selector(newMTL4CommandQueue)]) {
+                auto queue=[device newMTL4CommandQueue];hookMetal4Queue(queue);metal4=queue!=nil;
+            }
+        }
+        id<MTLCommandQueue> queue=[device newCommandQueue];id<MTLCommandBuffer> buffer=[queue commandBuffer];
+        if(buffer) {
+            Class cls=object_getClass(buffer);
+            replace(cls,@selector(presentDrawable:),reinterpret_cast<IMP>(present));
+            replace(cls,@selector(presentDrawable:atTime:),reinterpret_cast<IMP>(presentTime));
+            replace(cls,@selector(presentDrawable:afterMinimumDuration:),reinterpret_cast<IMP>(presentTime));
+            replace(cls,@selector(commit),reinterpret_cast<IMP>(commit));
+            replace(cls,@selector(addScheduledHandler:),reinterpret_cast<IMP>(addScheduled));
+            replace(cls,@selector(renderCommandEncoderWithDescriptor:),reinterpret_cast<IMP>(captureRenderPass));
+            macfx::installSceneCopyBoundaryHooks(buffer);
+        }
+        hookDrawableClasses();
+        if(buffer||metal4) {
+            objc_setAssociatedObject(device,&installedKey,@YES,OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            log("Metal presentation hooks installed on the application device");
+        }
     }
-    installed.store(true,std::memory_order_release);
-    log("Metal presentation hooks installed: "+std::string(object_getClassName(buffer))+" device="+device.name.UTF8String);
+}
+void setMetalDevice(id object,SEL selector,id<MTLDevice> device) {
+    reinterpret_cast<void(*)(id,SEL,id<MTLDevice>)>(original(object,selector))(object,selector,device);
+    if(!macfx::ownsPresentation(object)&&(!explicitHost()||nativeLayer(object)))installMetalDeviceHooks(device);
 }
 }
 void macfx::writeCapturedFrame(const std::string &file,const void *bytes,unsigned width,unsigned height,bool bgra,bool flip,unsigned stride){writeCaptureFile(file,bytes,width,height,bgra,flip,stride);}
@@ -1760,6 +1805,8 @@ __attribute__((constructor)) static void loadMetal() { @autoreleasepool {
     try { if(macfx::effectRequested())prepareLaunchEffect(); }
     catch(const std::exception &error) { log("Effect preload failed: "+std::string(error.what())); return; }
     Class layer=(Class)objc_getClass("CAMetalLayer");
+    replace(layer,@selector(setDevice:),reinterpret_cast<IMP>(setMetalDevice));
+    replace(layer,@selector(setFramebufferOnly:),reinterpret_cast<IMP>(setFramebufferOnly));
     replace(layer,@selector(nextDrawable),reinterpret_cast<IMP>(nextDrawable));
     replace(layer,@selector(setDrawableSize:),reinterpret_cast<IMP>(setDrawableSize));
 }}
@@ -1774,6 +1821,8 @@ extern "C" int rsRegisterNativeMetalLayer(void *value,RSNativeMetalFrame frame,v
         objc_setAssociatedObject(layer,&nativeLayerKey,registration,OBJC_ASSOCIATION_RETAIN);
     }
     retireNativeLayer(previous);
+    replace(CAMetalLayer.class,@selector(setDevice:),reinterpret_cast<IMP>(setMetalDevice));
+    replace(CAMetalLayer.class,@selector(setFramebufferOnly:),reinterpret_cast<IMP>(setFramebufferOnly));
     replace(CAMetalLayer.class,@selector(nextDrawable),reinterpret_cast<IMP>(nextDrawable));
     replace(CAMetalLayer.class,@selector(setDrawableSize:),reinterpret_cast<IMP>(setDrawableSize));
     installMetalDeviceHooks(((CAMetalLayer*)layer).device);
