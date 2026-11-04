@@ -831,7 +831,6 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/java/runtime/steamworks/stage-bridge.cjs",
         "producers/maclauncher/src/modules/java/runtime/steamworks/build-agent.cjs",
         "producers/maclauncher/src/modules/java/runtime/steamworks/versions.json"
       ],
