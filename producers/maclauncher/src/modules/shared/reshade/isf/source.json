@@ -38,33 +38,25 @@
       "id": "glslang",
       "repository": "https://github.com/mrRay/glslang",
       "commit": "278eba154ac4006f662fa7eefed5d5797fd33d75",
-      "url": "https://codeload.github.com/mrRay/glslang/tar.gz/278eba154ac4006f662fa7eefed5d5797fd33d75",
-      "sha256": "c4fe4931e9f8d04179ecdccd01df3ef20e4a4e8b9dfb34f75a65e7d00ecdc758",
-      "entry": "glslang-278eba154ac4006f662fa7eefed5d5797fd33d75"
+      "sha256": "c4fe4931e9f8d04179ecdccd01df3ef20e4a4e8b9dfb34f75a65e7d00ecdc758"
     },
     {
       "id": "spirv-cross",
       "repository": "https://github.com/mrRay/SPIRV-Cross",
       "commit": "774b272260baef494a79fa90c655d248bf02b00b",
-      "url": "https://codeload.github.com/mrRay/SPIRV-Cross/tar.gz/774b272260baef494a79fa90c655d248bf02b00b",
-      "sha256": "ce7f77bb5074d21170cba11a6bfd88a44f131c2b69f2f51fbec303fa29f6fdca",
-      "entry": "SPIRV-Cross-774b272260baef494a79fa90c655d248bf02b00b"
+      "sha256": "ce7f77bb5074d21170cba11a6bfd88a44f131c2b69f2f51fbec303fa29f6fdca"
     },
     {
       "id": "spirv-tools",
       "repository": "https://github.com/KhronosGroup/SPIRV-Tools",
       "commit": "0cfe9e7219148716dfd30b37f4d21753f098707a",
-      "url": "https://codeload.github.com/KhronosGroup/SPIRV-Tools/tar.gz/0cfe9e7219148716dfd30b37f4d21753f098707a",
-      "sha256": "a5277538fec0868452b1f616553c2fca80939a6a3ee0b7322e21ff063750a482",
-      "entry": "SPIRV-Tools-0cfe9e7219148716dfd30b37f4d21753f098707a"
+      "sha256": "a5277538fec0868452b1f616553c2fca80939a6a3ee0b7322e21ff063750a482"
     },
     {
       "id": "spirv-headers",
       "repository": "https://github.com/KhronosGroup/SPIRV-Headers",
       "commit": "2acb319af38d43be3ea76bfabf3998e5281d8d12",
-      "url": "https://codeload.github.com/KhronosGroup/SPIRV-Headers/tar.gz/2acb319af38d43be3ea76bfabf3998e5281d8d12",
-      "sha256": "425da1e3e4ba8de41dc8c8273d281ae82f1e18a397ec476649df3c832e242329",
-      "entry": "SPIRV-Headers-2acb319af38d43be3ea76bfabf3998e5281d8d12"
+      "sha256": "425da1e3e4ba8de41dc8c8273d281ae82f1e18a397ec476649df3c832e242329"
     }
   ]
 }
