@@ -104,7 +104,7 @@ export async function buildAndroidArtSupplier({common,elf,ffiInput,artJava,outpu
   bootClasspath:profile.bootClasspath,includeImage:false,originalImage:profile.originalImage});
  const sourceArchiveInputs={sources:{source:elf.build.checkout,klepton:common.sources.klepton,glesHeaders,aosp:path.join(elf.build.fetched,'aosp'),xsdc:path.join(elf.build.fetched,'xsdc')},unicorn,
   sourceCheckouts:{'aosp-native':common.sources['native-source'],'aosp-bionic':common.sources['bionic-source'],'aosp-art':common.sources['art-source'],libffi,dynarmic:common.sources['dynarmic-source']},
-  nativeBridgeSources:{ndkHeaders:arm32Inputs.ndkHeaders},hwuiSources:{sources:hwui.sources,registry:path.join(hwui.sourceRecords,'SOURCES.json'),registryCache:path.join(hwui.tools.cargoHome,'registry/cache')}};
+  nativeBridgeSources:{ndkHeaders:arm32Inputs.ndkHeaders,arm32Sources:arm32.sources},hwuiSources:{sources:hwui.sources,registry:path.join(hwui.sourceRecords,'SOURCES.json'),registryCache:path.join(hwui.tools.cargoHome,'registry/cache')}};
  return {root:path.join(output,'runtime'),manifest,originalImage:profile.originalImage,sourceArchiveInputs,build:{producer,aim,hwui,guest,libffi,unicorn,java,halRoot,halManifests},record:{androidSource:androidSource(),aimRevision:sourceProfile.sources.aim.commit,unicornRevision:unicornProfile.revision,libffiRevision:sourceProfile.sources.libffi.commit}};
  }finally{if(!wasMounted&&fs.existsSync(path.join(mount,'root.identity')))run('hdiutil',['detach',mount]);}
 }
