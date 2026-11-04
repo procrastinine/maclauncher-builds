@@ -245,11 +245,20 @@ test('cataloging an identical public entry preserves existing row order',async t
  await applyRelease(options);assert.deepEqual(fs.readFileSync(file),bytes);
 });
 
-test('publication reads build inputs only after their archived bytes pass the sealed inventory',async t=>{
- const f=fixture(t),bytes=Buffer.from(JSON.stringify({schemaVersion:1,inputs:[]}));
- fs.writeFileSync(path.join(f.input,'build-inputs.json'),bytes,{mode:0o644});f.declaration.files.push({path:'build-inputs.json',size:bytes.length,mode:0o644,sha256:digest(bytes)});
- await prepareRelease(f);const checked=await verifyRelease({bundle:f.output,directory:f.directory,includeMetadata:true});
- assert.deepEqual(checked.metadata['build-inputs.json'],bytes);
+test('build provenance travels beside the archive without changing its producer-sealed payload',async t=>{
+ const f=fixture(t),before=JSON.stringify(f.declaration),payloadBefore=fs.readdirSync(f.input);
+ const {sealBuildInputReport}=await import('../tools/seal-build-input-report.mjs');
+ const {canonicalReport}=await import('../lib/canonical-report.mjs');
+ const definition={schemaVersion:1,files:[]},definitionDigest=digest(canonicalReport(definition));
+ sealBuildInputReport({project:'engine',output:f.directory,environment:{BUILD_REPORTS:JSON.stringify({engine:{definition,definitionDigest}})}});
+ assert.equal(JSON.stringify(f.declaration),before);assert.deepEqual(fs.readdirSync(f.input),payloadBefore);
+ await prepareRelease({...f,reports:f.directory});
+ const checked=await verifyRelease({bundle:f.output,directory:f.directory,includeDeclaration:true});
+ assert.equal(checked.definitionDigest,definitionDigest);
+ const plain=path.join(f.directory,'plain-release');await prepareRelease({...f,output:plain});assert.equal(digest(fs.readFileSync(path.join(plain,checked.record.asset.filename))),checked.record.asset.sha256);
+ assert.deepEqual(checked.declaration,f.declaration);
+ assert.deepEqual(JSON.parse(fs.readFileSync(path.join(f.output,'build-inputs.json'))),{schemaVersion:1,definitionDigest,inputs:[]});
+ assert.deepEqual(execFileSync('tar',['-tzf',path.join(f.output,checked.record.asset.filename)],{encoding:'utf8'}).trim().split('\n').sort(),['runtime-package.json',...f.declaration.files.map(row=>'files/'+row.path)].sort());
 });
 
 test('catalog envelope and runtime row retain the fc173327 format',async t=>{
@@ -276,4 +285,14 @@ test('catalog envelope and runtime row retain the fc173327 format',async t=>{
   if(failures===2){assert.equal((await operation).draft,false);assert.equal(attempts,3);assert.equal(deletes,0);assert.deepEqual(delays,[5000,10000]);}
   else{await assert.rejects(operation,error=>error===errors[5]);assert.equal(attempts,6);assert.equal(deletes,1);assert.deepEqual(delays,[5000,10000,20000,40000,80000]);}
  }
+});
+
+test('a stage error never deletes a public release even if a create response is unexpected',async t=>{
+ const f=fixture(t);await prepareRelease(f);const {record}=await verifyRelease({bundle:f.output,directory:f.directory}),calls=[];
+ await assert.rejects(stageRelease({bundle:f.output,directory:f.directory,target:sourceTarget,runGh:async args=>{
+  calls.push(args);if(args[1].includes('/releases/tags/'))throw notFound();
+  if(args.includes('POST'))return JSON.stringify({...remoteRelease(record,false),assets:[]});
+  assert.fail('No public release deletion: '+args.join(' '));
+ }}),/Existing release differs/);
+ assert.equal(calls.some(args=>args.includes('DELETE')),false);
 });

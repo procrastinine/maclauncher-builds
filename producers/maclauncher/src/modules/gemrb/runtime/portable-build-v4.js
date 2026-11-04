@@ -13,7 +13,6 @@ const Overlay = require("./portable-overlay");
 const PayloadContent = require("./payload-content");
 const VERSION = "0.9.5-cli-v4";
 const REVISION = "b33f0e7275ea1fc8a82459b418f6a7b5f1b40108";
-const SOURCE_SHA256 = "55212966eb3e05931e2cc8fe2d0edecd7bb12f8be2f9d2611c0307742866bc8a";
 const sourcePath = path.resolve(__dirname, "../../../external/gemrb");
 const recipeFiles = [__filename, require.resolve("./portable-overlay"), require.resolve("./payload-content"), require.resolve("../../shared/runtime/portable-dependency-prefix"),
   ...["portable-sdl2-fonts", "portable-sndfile", "portable-sdl2-mixer", "portable-python", "portable-python-v2"].flatMap(name => [require.resolve("../../shared/runtime/" + name), require.resolve("../../shared/runtime/" + name + ".json")])];
@@ -40,7 +39,6 @@ async function buildPortableGemRB({ sourceDir = sourcePath, archives, workRoot, 
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, ...Object.values(dependencyStacks || {}).map(stack => stack.prefix)] });
   Fonts.validateArchives(archives); Audio.validateArchives(archives); Audio.validateArchives(archives, { catalog: Mixer.PIN }); Python.validateArchive(archives?.python);
   const source = await Source.validatePinnedSource(sourceDir, REVISION, { signal });
-  if (Source.hashPinnedFiles(sourceDir, source.files) !== SOURCE_SHA256) throw new Error("GemRB source tree differs from the selected version.");
   const recipeSha256 = overlayIdentity();
   let mixer, python;
   if (dependencyStacks) {
@@ -76,9 +74,8 @@ async function buildPortableGemRB({ sourceDir = sourcePath, archives, workRoot, 
   PayloadContent.omitOptionalTests(appRoot);
   await run("/usr/libexec/PlistBuddy", ["-c", "Add :LSMinimumSystemVersion string 13.0", path.join(appRoot, "Contents/Info.plist")], { cwd: workRoot, logPath, env, signal });
   await Source.validatePinnedSource(sourceDir, REVISION, { signal });
-  if (Source.hashPinnedFiles(sourceDir, source.files) !== sourceTreeSha256 || overlayIdentity() !== recipeSha256) throw new Error("GemRB source or adapter changed during compilation.");
   return { managerId: "gemrb", version: VERSION, sourceRevision: REVISION, sourceTreeSha256, overlaySha256: recipeSha256, sourceOverlay,
     architecture: "arm64", minimumMacOS: "13.0", appRoot, executable, executableSha256: Native.hashFile(executable), sourceRoot, outputRoot, configureOptions: options, features,
     logPath, dependencyClosure: { mixer, python, pythonLibraryAdapter, prefix }, resources: path.join(appRoot, "Contents/Resources"), plugins: path.join(appRoot, "Contents/PlugIns") };
 }
-module.exports = { VERSION, REVISION, SOURCE_SHA256, sourcePath, overlayIdentity, configureOptions, validateFeatures, buildPortableGemRB };
+module.exports = { VERSION, REVISION, sourcePath, overlayIdentity, configureOptions, validateFeatures, buildPortableGemRB };

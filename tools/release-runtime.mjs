@@ -157,7 +157,7 @@ export async function stageRelease({bundle,target,resume=false,directory=root,ru
   await releaseAsset(remote.assets[0],record,{repository:release.repository,runGh});
  }
  return publication;
- }catch(error){if(created)await runGh(['api','--method','DELETE','repos/'+release.repository+'/releases/'+remote.id]);throw error;}
+ }catch(error){if(created&&remote.draft===true)await runGh(['api','--method','DELETE','repos/'+release.repository+'/releases/'+remote.id]);throw error;}
 }
 /** Finalize the exact staged REST ID; no tag or releases-list lookup follows upload. */
 export async function publishRelease({bundle,directory=root,runGh=runGitHub,publication,wait=sleep,checked}){
@@ -184,7 +184,7 @@ export function requireHostedPublication({env=process.env}={}){
 
 function options(args){const result={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!args[i]?.startsWith('--')||!args[i+1]||Object.hasOwn(result,key))throw Error('Use unique --option value pairs.');result[key]=args[i+1];}return result;}
 export async function main([command,...args],directory=root,env=process.env){
- const o=options(args),allowed={prepare:['project','input','declaration','archive','record','source','source-revision','output'],verify:['bundle','project','version','arch'],'verify-assets':['project','version','arch','assets','output'],index:['output']}[command];
+ const o=options(args),allowed={prepare:['project','input','declaration','archive','record','source','source-revision','output','reports'],verify:['bundle','project','version','arch'],'verify-assets':['project','version','arch','assets','output'],index:['output']}[command];
  if(!allowed||Object.keys(o).some(k=>!allowed.includes(k)))throw Error('Use prepare, verify, verify-assets or index with explicit options.');
  if(command==='prepare'){
   if(!o.project||!o.output)throw Error('prepare requires --project and --output.');

@@ -20,13 +20,13 @@ const stable=value=>JSON.stringify(value,(_,v)=>v&&typeof v==='object'&&!Array.i
 async function sha256File(file){const hash=crypto.createHash('sha256');for await(const chunk of fs.createReadStream(file))hash.update(chunk);return hash.digest('hex');}
 /** The build job verified every archived file and its declaration. Publication checks only that this archive and its record are that sealed package. */
 export async function sealedBundle({bundle,directory=root}){
- const names=fs.readdirSync(bundle),sidecar=names.find(name=>name.endsWith('.tar.gz.json'));
- if(names.length!==2||!sidecar)throw Error('Select a directory containing exactly one runtime archive and its package record.');
+ const sidecars=fs.readdirSync(bundle).filter(name=>name.endsWith('.tar.gz.json')),sidecar=sidecars[0];
+ if(sidecars.length!==1)throw Error('Select a directory containing exactly one runtime archive and its package record.');
  const record=json(path.join(bundle,sidecar)),{filename,sha256,bytes}=record.asset,archive=path.join(bundle,filename);
  if(sidecar!==filename+'.json'||fs.statSync(archive).size!==bytes||await sha256File(archive)!==sha256)throw Error('Release asset checksum or size changed.');
  const declaration=JSON.parse(await archiveEntry(archive,'runtime-package.json',Infinity));
  if(stable(recordFromDeclaration(declaration,{filename,sha256,bytes},record.sourceAsset,record.source,record))!==stable(record))throw Error('Release record differs from the sealed runtime archive.');
- return {record,declaration,release:{repository:resolveProject(record.id,directory,{resolvePins:false}).releaseRepository,id:record.id,version:record.version,arch:record.arch,tag:releaseTag(record)}};
+ return {definitionDigest:fs.existsSync(path.join(bundle,'build-definition.json'))?await sha256File(path.join(bundle,'build-definition.json')):undefined,record,declaration,release:{repository:resolveProject(record.id,directory,{resolvePins:false}).releaseRepository,id:record.id,version:record.version,arch:record.arch,tag:releaseTag(record)}};
 }
 function hosted(env,directory){
  const repository=readProjects(directory,{resolvePins:false}).repository;
@@ -63,19 +63,18 @@ export async function appendPackageCatalog({bundle,record,publication,checked,di
  }
 }
 /** The already sealed archive is attested, released, then made discoverable. */
-export async function publishPackage({bundle,directory=root,env=process.env,runGh=github,verifyBundle=sealedBundle,stageBundle=stageRelease,publishBundle=publishRelease,append=appendPackageCatalog,wait=sleep,readMember=archiveEntry}={}){
+export async function publishPackage({bundle,directory=root,env=process.env,runGh=github,verifyBundle=sealedBundle,stageBundle=stageRelease,publishBundle=publishRelease,append=appendPackageCatalog,wait=sleep}={}){
  const repository=hosted(env,directory),project=resolveProject(env.BUILD_PROJECT,directory,{resolvePins:false});
  if(!project.packageProfiles.some(profile=>profile.version===env.BUILD_VERSION))registerSelection({selection:[{id:env.BUILD_PROJECT,version:env.BUILD_VERSION}],directory});
  const sourceRevision=env.GITHUB_SHA,runId=env.GITHUB_RUN_ID;
- const checked=await verifyBundle({bundle,directory}),{record,declaration}=checked;
+ const checked=await verifyBundle({bundle,directory}),{record}=checked;
  if(record.id!==env.BUILD_PROJECT||record.version!==env.BUILD_VERSION||record.arch!==env.BUILD_ARCH||record.build?.sourceRevision!==sourceRevision||String(record.build?.runId)!==runId)throw Error('The sealed package differs from this build job.');
  const reports=env.BUILD_REPORTS?json(env.BUILD_REPORTS):null;
- if(reports&&declaration.files.find(file=>file.path==='build-definition.json')?.sha256!==reports[record.id]?.definitionDigest)throw Error('The sealed build definition differs from the plan.');
- const traceFile=declaration.files.find(file=>file.path==='build-inputs.json');
- if(traceFile){
-  // Only the input trace is read back from the verified archive.
-  const bytes=await readMember(path.join(bundle,record.asset.filename),'files/build-inputs.json',traceFile.size+1);
-  const trace=crypto.createHash('sha256').update(bytes).digest('hex')===traceFile.sha256?JSON.parse(bytes.toString('utf8')):null;
+ if(reports&&checked.definitionDigest!==reports[record.id]?.definitionDigest)throw Error('The sealed build definition differs from the plan.');
+ const traceFile=path.join(bundle,'build-inputs.json');
+ if(fs.existsSync(traceFile)){
+  for(const name of ['build-definition.json','build-inputs.json'])await retryNetworkAsync(()=>runGh(['attestation','verify',path.join(bundle,name),'--repo',repository,'--signer-workflow',repository+'/.github/workflows/runtime-build.yml']),{wait});
+  const trace=json(traceFile);
   if(trace?.schemaVersion!==1||!Array.isArray(trace.inputs))throw Error('The sealed build-input report is missing or invalid.');
   for(const input of trace.inputs){
    const tag=releaseTag(input);

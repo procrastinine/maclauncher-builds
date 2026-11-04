@@ -87,7 +87,7 @@ test('the current publisher uses exactly the environment supplied by the origina
  const env={GITHUB_ACTIONS:'true',GITHUB_REPOSITORY:'owner/builds',GITHUB_WORKFLOW:'Build and release',GITHUB_WORKFLOW_REF:'owner/builds/.github/workflows/runtime-build.yml@refs/heads/main',GITHUB_SHA:f.record.build.sourceRevision,GITHUB_RUN_ID:f.record.build.runId,
   RELEASE_SELECTION:JSON.stringify([{id:'engine',version:'1.0.0'}]),RELEASE_GRAPH:JSON.stringify({engine:[]}),RELEASE_REUSE:'[]',PUBLICATION_TARGETS:JSON.stringify({include:[{project:'engine',version:'1.0.0',arch:'arm64'}]}),BUILD_REPORTS:reports};
  const result=await publishLevel({directory:f.directory,env,output:path.join(f.directory,'publication'),runGh:async()=>JSON.stringify([{artifacts:[{id:1,name:'runtime-engine-1.0.0-arm64'}]}]),download:async options=>downloaded.push(options),publish:options=>publishPackage({...options,
-  verifyBundle:async()=>({record:f.record,declaration:{files:[{path:'build-definition.json',sha256:definition}]}}),
+  verifyBundle:async()=>({record:f.record,definitionDigest:definition,declaration:{files:[]}}),
   stageBundle:async options=>{assert.equal(options.target,env.GITHUB_SHA);return {id:17};},publishBundle:async()=>({id:17,draft:false}),append:async()=>({commit:'c'.repeat(40)})})});
  assert.equal(result.failed,0,result.errors[0]?.error);assert.equal(result.published,1);assert.equal(downloaded[0].artifact.name,'runtime-engine-1.0.0-arm64');
 });

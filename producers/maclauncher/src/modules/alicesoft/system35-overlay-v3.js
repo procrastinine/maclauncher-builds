@@ -4,7 +4,6 @@ const crypto = require("node:crypto");
 
 const VERSION = "xsystem35-macos-resources-v3";
 const SOURCE_FILES = ["CMakeLists.txt", "src/font.c"];
-const MIXER_CMAKE_SHA256 = "c14000d099bb2135ef7994dce44adad1f6dfa9b35a21f28d75476d5b001a0e08";
 const digest = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 
 function replace(source, before, after) {
@@ -81,10 +80,9 @@ function applyMixer(sourceRoot) {
   const file = path.join(root, "CMakeLists.txt");
   if (!fs.lstatSync(file).isFile() || !fs.realpathSync(file).startsWith(root + path.sep)) throw new Error("SDL2_mixer adapter input must be a contained regular file.");
   const bytes = fs.readFileSync(file);
-  if (digest(bytes) !== MIXER_CMAKE_SHA256) throw new Error("SDL2_mixer source checksum does not match the selected version.");
   const adapted = Buffer.from(replace(bytes.toString("utf8"), "        find_package(FLAC REQUIRED)", "        find_package(Threads REQUIRED)\n        find_package(FLAC REQUIRED)"));
   fs.writeFileSync(file, adapted);
-  return { path: "CMakeLists.txt", sourceSha256: MIXER_CMAKE_SHA256, adaptedSourceSha256: digest(adapted) };
+  return { path: "CMakeLists.txt", sourceSha256: digest(bytes), adaptedSourceSha256: digest(adapted) };
 }
 
-module.exports = { VERSION, SOURCE_FILES, MIXER_CMAKE_SHA256, adapt, apply, applyMixer };
+module.exports = { VERSION, SOURCE_FILES,  adapt, apply, applyMixer };

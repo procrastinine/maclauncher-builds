@@ -21,7 +21,7 @@ export function recordFromDeclaration(d,asset,sourceAsset,source,catalogRecord={
 }
 async function asset(directory,name,role){const file=path.join(directory,name);return {filename:name,role,sha256:await A.checksum(file),bytes:regular(file).size};}
 /** Package a new sealed build. Publication state is not a build input. */
-export async function prepareRelease({project,input,declaration,sourceRevision,output,directory=root}){
+export async function prepareRelease({project,input,declaration,sourceRevision,output,reports,directory=root}){
  const registration=resolveProject(project,directory,{resolvePins:false}),repo=registration.releaseRepository;
  if(!input||!declaration||!output||fs.existsSync(output))throw Error('Preparation needs sealed input, a declaration and a new output directory.');
  declaration=publicDeclaration(declaration);if(declaration.id!==project)throw Error('Declaration belongs to another project.');
@@ -31,6 +31,7 @@ export async function prepareRelease({project,input,declaration,sourceRevision,o
   const archive=path.join(staging,assetName(declaration)),record=await pack({project,input,declaration,output:archive,directory});
   if(sourceRevision)record.build={sourceRevision,workflow:repo+'/.github/workflows/runtime-build.yml',toolchain:buildToolchain(),...(process.env.GITHUB_ACTIONS==='true'&&process.env.GITHUB_REPOSITORY===repo?{runId:process.env.GITHUB_RUN_ID,runAttempt:process.env.GITHUB_RUN_ATTEMPT}:{})};
   const source=sourceRevision?{repository:repo,revision:sourceRevision}:registration.producer.source;if(source)record.source=source;
+  if(reports)for(const name of ['build-definition.json','build-inputs.json']){const file=path.join(reports,name);regular(file);fs.copyFileSync(file,path.join(staging,name),fs.constants.COPYFILE_EXCL);}
   fs.writeFileSync(archive+'.json',json(record));fs.renameSync(staging,path.resolve(output));return {schemaVersion:1,repository:repo,id:record.id,version:record.version,arch:record.arch,tag:releaseTag(record),assets:[await asset(output,path.basename(archive),'runtime'),await asset(output,path.basename(archive)+'.json','record')]};
  }finally{fs.rmSync(staging,{recursive:true,force:true});}
 }
@@ -47,12 +48,12 @@ export async function verifyRelease({bundle,project,version,arch,includeDeclarat
  const expected=recordFromDeclaration(checked.declaration,{filename:name,sha256:record.asset.sha256,bytes:record.asset.bytes},record.sourceAsset,record.source,record);
  if(stable(record)!==stable(expected))throw Error('Release record differs from the sealed runtime archive.');
  const assets=[await asset(bundle,name,'runtime'),await asset(bundle,name+'.json','record')];
- return {release:{schemaVersion:1,repository:repo,id:record.id,version:record.version,arch:record.arch,tag:releaseTag(record),assets},record,...(includeDeclaration?{declaration:checked.declaration}:{}),...(includeMetadata?{metadata:checked.metadata}:{})};
+ return {definitionDigest:fs.existsSync(path.join(bundle,'build-definition.json'))?await A.checksum(path.join(bundle,'build-definition.json')):undefined,release:{schemaVersion:1,repository:repo,id:record.id,version:record.version,arch:record.arch,tag:releaseTag(record),assets},record,...(includeDeclaration?{declaration:checked.declaration}:{}),...(includeMetadata?{metadata:checked.metadata}:{})};
 }
 
 function options(args){const result={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!args[i]?.startsWith('--')||!args[i+1]||Object.hasOwn(result,key))throw Error('Use unique --option value pairs.');result[key]=args[i+1];}return result;}
 export async function main([command,...args],directory=root){
- const o=options(args),allowed={prepare:['project','input','declaration','source-revision','output'],verify:['bundle','project','version','arch']}[command];
+ const o=options(args),allowed={prepare:['project','input','declaration','source-revision','output','reports'],verify:['bundle','project','version','arch']}[command];
  if(!allowed||Object.keys(o).some(k=>!allowed.includes(k)))throw Error('Use prepare or verify with explicit options.');
  if(command==='prepare'){
   if(!o.project||!o.output)throw Error('prepare requires --project and --output.');

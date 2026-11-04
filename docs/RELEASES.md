@@ -31,7 +31,7 @@ One matrix builds the selected packages on their declared GitHub-hosted Mac or L
 
 Recipes report their source pins, recipe files and consumed packages. Only the requested lines build. Every other input with a public release is used as published, pinned by the archive digest of each architecture. An input without a public release builds first in the same run at the version its `releases.txt` line names, and its verified artifacts pass directly to consumers on GitHub. Independent projects build in parallel with that chain. The plan summary lists every input it builds, with its version, before any build starts.
 
-Each archive seals `build-definition.json` and `build-inputs.json` in its regular file inventory. The latter lists the digest, release and source build of every resolved input. The ordinary archive attestation covers those records.
+The retained release bundle contains `build-definition.json` and `build-inputs.json` beside the archive and its package record. The latter lists the digest, release and source build of every resolved input. The build attests all bundle files; publication verifies the reports before using them. These provenance reports are not installed payload files, and packaging preserves the producer-sealed inventory.
 
 Recipes add component licence texts to `licenses/`. Texts with the same bytes after whitespace is removed share one file; `licenses/components.txt` records each component’s file. Missing or unreadable sources produce a warning. Licence files are ordinary payload files: inventories, archive digests and attestations cover their bytes. Included package payloads keep their existing licence directories.
 

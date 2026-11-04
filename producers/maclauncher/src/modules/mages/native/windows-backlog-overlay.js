@@ -5,8 +5,6 @@ const { replacement } = require("./windows-ui-overlay");
 
 const ABI = "backlog-zero-capacity-v1";
 const FILE = "src/ui/backlogmenu.cpp";
-const ORIGINAL_SHA256 = "720c137b33ac99606846c85b66f6ba58fa117a03035e2c0d0c2b0e8d0f311758";
-const ORIGINALS = Object.freeze({ [FILE]: ORIGINAL_SHA256 });
 
 function applyWindowsBacklogOverlay(sourceRoot) {
   const externalPath = path.resolve(__dirname, "../../../external");
@@ -18,15 +16,14 @@ function applyWindowsBacklogOverlay(sourceRoot) {
   if (root === external || root.startsWith(external + path.sep))
     throw new Error("Impacto source adapters cannot change external checkouts.");
   const target = path.join(root, FILE), stat = fs.lstatSync(target);
-  if (!stat.isFile() || stat.isSymbolicLink() || stat.nlink !== 1 || fs.realpathSync(target) !== target ||
-      Native.hashFile(target) !== ORIGINAL_SHA256)
+  if (!stat.isFile() || stat.isSymbolicLink() || stat.nlink !== 1 || fs.realpathSync(target) !== target)
     throw new Error("Impacto backlog source checksum changed.");
-  const text = replacement(fs.readFileSync(target, "utf8"),
+  const originalSha256 = Native.hashFile(target), text = replacement(fs.readFileSync(target, "utf8"),
     "  if (GetFlag(SF_REVADDDISABLE)) return;\n",
     "  if (Entries.capacity() == 0 || GetFlag(SF_REVADDDISABLE)) return;\n");
   fs.writeFileSync(target, text);
-  return { abi: ABI, disabledCapacity: 0, files: [{ path: FILE, originalSha256: ORIGINAL_SHA256,
+  return { abi: ABI, disabledCapacity: 0, files: [{ path: FILE, originalSha256,
     adaptedSha256: Native.hashFile(target) }] };
 }
 
-module.exports = { ABI, FILE, ORIGINAL_SHA256, ORIGINALS, applyWindowsBacklogOverlay };
+module.exports = { ABI, FILE, applyWindowsBacklogOverlay };

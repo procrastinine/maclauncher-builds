@@ -64,7 +64,7 @@ export async function verify({archive,sha256,project,version,arch,includeDeclara
     if(entry.name!=='runtime-package.json'||entry.mode!==0o644)throw Error('Runtime inventory must be the first archive member.');
     declaration=publicDeclaration(JSON.parse((await reader.read(entry.size)).toString('utf8')));
     if(declaration.id!==project||declaration.version!==version||declaration.arch!==arch)throw Error('Runtime archive belongs to a different project, version or architecture.');
-    metadataPaths=new Set(['build-inputs.json',declaration.manifestRelative,declaration.sourceRelative].filter(value=>typeof value==='string'));
+    metadataPaths=new Set([declaration.manifestRelative,declaration.sourceRelative].filter(value=>typeof value==='string'));
    }else{
     const capture=includeManifest&&entry.name==='files/'+declaration.manifestRelative||includeMetadata&&metadataPaths.has(entry.name.slice(6)),chunks=[];let left=entry.size;
     while(left){const chunk=await reader.read(Math.min(left,65536));left-=chunk.length;if(capture)chunks.push(chunk);}

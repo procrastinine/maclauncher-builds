@@ -42,7 +42,7 @@ test('existing recipe references discover the consumed graph and build unpublish
   helperPackage({id,version,arch:'arm64',output,minimumMacOS:'13.0',sourceSha256:'c'.repeat(64),record:{}});return output;
  }
  const inputOutput=dataHelper('input','new-input-name','fresh data from this run');sealBuildInputReport({project:'input',output:inputOutput,environment});
- const bundle=path.join(f.directory,'input-release');await prepareRelease({project:'input',input:path.join(inputOutput,'payload'),declaration:JSON.parse(fs.readFileSync(path.join(inputOutput,'declaration.json'))),output:bundle,directory:f.directory});
+ const bundle=path.join(f.directory,'input-release');await prepareRelease({project:'input',input:path.join(inputOutput,'payload'),declaration:JSON.parse(fs.readFileSync(path.join(inputOutput,'declaration.json'))),output:bundle,reports:inputOutput,directory:f.directory});
  // Only Actions transport is injected. Bind the real archive record
  // to that fixture run, as the production prepare step does on GitHub.
  const sidecar=fs.readdirSync(bundle).find(name=>name.endsWith('.tar.gz.json')),record=JSON.parse(fs.readFileSync(path.join(bundle,sidecar)));
@@ -59,9 +59,9 @@ test('existing recipe references discover the consumed graph and build unpublish
  let bridged;try{bridged=await buildInput({url:'https://github.com/owner/maclauncher-builds/releases/download/input%2Fvold%2Farm64/old.tar.gz',sha256:'0'.repeat(64)});}finally{if(previous===undefined)delete process.env.MACLAUNCHER_BUILD_INPUTS;else process.env.MACLAUNCHER_BUILD_INPUTS=previous;}
  assert.equal(bridged,fresh.archive);await verify({archive:bridged,sha256:record.asset.sha256,project:'input',version:'new-input-name',arch:'arm64'});
  const consumerOutput=dataHelper('consumer','keep-this-name',fs.readFileSync(path.join(fresh.root,'data.txt'),'utf8'));sealBuildInputReport({project:'consumer',output:consumerOutput,environment});
- const trace=JSON.parse(fs.readFileSync(path.join(consumerOutput,'payload/build-inputs.json')));
+ const trace=JSON.parse(fs.readFileSync(path.join(consumerOutput,'build-inputs.json')));
  assert.deepEqual(trace.inputs,[{id:'input',version:'new-input-name',arch:'arm64',sha256:record.asset.sha256,release:'input/vnew-input-name/arm64',url:fresh.record.asset.url,sourceRevision:environment.GITHUB_SHA,runId:'42'}]);
- const consumerRelease=path.join(f.directory,'consumer-release');await prepareRelease({project:'consumer',input:path.join(consumerOutput,'payload'),declaration:JSON.parse(fs.readFileSync(path.join(consumerOutput,'declaration.json'))),output:consumerRelease,directory:f.directory});await verifyRelease({bundle:consumerRelease,directory:f.directory});
+ const consumerRelease=path.join(f.directory,'consumer-release');await prepareRelease({project:'consumer',input:path.join(consumerOutput,'payload'),declaration:JSON.parse(fs.readFileSync(path.join(consumerOutput,'declaration.json'))),output:consumerRelease,reports:consumerOutput,directory:f.directory});await verifyRelease({bundle:consumerRelease,directory:f.directory});
 });
 
 test('a published input is reused as published until its own line is requested',async t=>{

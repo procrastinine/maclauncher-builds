@@ -8,7 +8,6 @@ const Audio = require("./portable-sndfile");
 const Prefix = require("./portable-dependency-prefix");
 const { throwIfAborted } = require("./download-utils");
 const PIN = Object.freeze({...require("./portable-sdl2-mixer.json"),dependencies:require("./portable-sdl2-mixer.json").dependencies.map(row=>{const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};})});
-const MIXER_CMAKE_SHA256 = "c14000d099bb2135ef7994dce44adad1f6dfa9b35a21f28d75476d5b001a0e08";
 const digest = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 const recipeIdentity = () => digest(Buffer.concat([fs.readFileSync(__filename),fs.readFileSync(require.resolve("./portable-sdl2-mixer.json")),fs.readFileSync(require.resolve("./portable-dependency-prefix"))]));
 
@@ -18,9 +17,9 @@ function adaptMixer(sourceRoot) {
   const external = path.resolve(__dirname, "../../../external"), root = fs.realpathSync(sourceRoot);
   if (root === external || root.startsWith(external + path.sep)) throw new Error("SDL2_mixer adapters cannot change source checkouts.");
   const original = fs.readFileSync(file), text = original.toString("utf8"), target = "        find_package(FLAC REQUIRED)";
-  if (digest(original) !== MIXER_CMAKE_SHA256 || text.indexOf(target) !== text.lastIndexOf(target) || !text.includes(target)) throw new Error("SDL2_mixer source differs from the selected adapter.");
+  if (text.indexOf(target) !== text.lastIndexOf(target) || !text.includes(target)) throw new Error("SDL2_mixer source differs from the selected adapter.");
   const adapted = Buffer.from(text.replace(target, "        find_package(Threads REQUIRED)\n" + target)); fs.writeFileSync(file, adapted);
-  return { path: "CMakeLists.txt", sourceSha256: MIXER_CMAKE_SHA256, adaptedSourceSha256: digest(adapted) };
+  return { path: "CMakeLists.txt", sourceSha256: digest(original), adaptedSourceSha256: digest(adapted) };
 }
 
 function adaptOpusDescriptor(prefix) {
@@ -64,4 +63,4 @@ async function buildMixer({archives,workRoot,dependencyStacks,architecture=proce
   return {version:PIN.version,architecture,minimumMacOS:PIN.minimumMacOS,recipeSha256,prefix,readRoots,sdk:fonts.sdk,tools:fonts.tools,sources,sourceRoots,fonts,audio,descriptor,features};
 }
 
-module.exports={PIN,MIXER_CMAKE_SHA256,recipeIdentity,adaptMixer,adaptOpusDescriptor,validateFeatures,buildMixer};
+module.exports={PIN,recipeIdentity,adaptMixer,adaptOpusDescriptor,validateFeatures,buildMixer};

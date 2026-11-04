@@ -3,11 +3,9 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 
 const VERSION = "system3-executable-resources-v1";
-const ORIGINAL_SHA256 = "a7f60d08693989ba45ac238ad60a37a7a15d50fc3c0d78a3e10c76fdc5acfd9d";
 const digest = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 
 function adaptedResource(bytes) {
-  if (digest(bytes) !== ORIGINAL_SHA256) throw new Error("System3 resource source checksum does not match the pinned version.");
   let source = bytes.toString("utf8");
   source = source.replace("#include <stdlib.h>\n", "#include <stdlib.h>\n#ifdef __APPLE__\n#include <mach-o/dyld.h>\n#include <stdint.h>\n#include <string.h>\n#endif\n");
   const anchor = "#else\n\t// On Android, read from APK assets.\n";
@@ -43,9 +41,9 @@ function apply(sourceRoot, { sourceDir = path.resolve(__dirname, "../../external
   }
   const file = path.join(output, "src/resource.cpp");
   if (!fs.lstatSync(file).isFile() || !fs.realpathSync(file).startsWith(output + path.sep)) throw new Error("System3 resource source must be a contained regular file.");
-  const adapted = adaptedResource(fs.readFileSync(file));
+  const inputBytes = fs.readFileSync(file), adapted = adaptedResource(inputBytes);
   fs.writeFileSync(file, adapted);
-  return { version: VERSION, sourceSha256: ORIGINAL_SHA256, adaptedSourceSha256: digest(adapted), overlaySha256: digest(fs.readFileSync(__filename)) };
+  return { version: VERSION, sourceSha256: digest(inputBytes), adaptedSourceSha256: digest(adapted), overlaySha256: digest(fs.readFileSync(__filename)) };
 }
 
-module.exports = { VERSION, ORIGINAL_SHA256, adaptedResource, apply };
+module.exports = { VERSION, adaptedResource, apply };

@@ -29,7 +29,7 @@ runs:
       run: node tools/build-runtime.mjs --project "$BUILD_PROJECT" --arch "$BUILD_ARCH" --version "$BUILD_VERSION" --output "$RUNNER_TEMP/build" --work "$RUNNER_TEMP/work"
     - name: Package the release
       shell: bash
-      run: node tools/release-package.mjs prepare --project "$BUILD_PROJECT" --input "$RUNNER_TEMP/build/payload" --declaration "$RUNNER_TEMP/build/declaration.json" --source-revision "$GITHUB_SHA" --output "$RUNNER_TEMP/release"
+      run: node tools/release-package.mjs prepare --project "$BUILD_PROJECT" --input "$RUNNER_TEMP/build/payload" --declaration "$RUNNER_TEMP/build/declaration.json" --source-revision "$GITHUB_SHA" --reports "$RUNNER_TEMP/build" --output "$RUNNER_TEMP/release"
     - name: Report output symptoms
       continue-on-error: true
       shell: bash
@@ -40,7 +40,7 @@ runs:
       env:
         NODE_OPTIONS: --max-http-header-size=32768
       with:
-        inputs: '{"subject-path":"${{ runner.temp }}/release/*.tar.gz","github-token":"${{ github.token }}"}'
+        inputs: '{"subject-path":"${{ runner.temp }}/release/*","github-token":"${{ github.token }}"}'
     - uses: ./.github/actions/upload-artifact
       if: ${{ !cancelled() && steps.attest.outcome == 'success' }}
       with:
