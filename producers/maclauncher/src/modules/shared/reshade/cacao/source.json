@@ -1,7 +1,6 @@
 {
   "schema": 1,
   "repository": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-  "commit": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55",
   "version": "CACAO 1.4.0",
   "roles": [
     {
@@ -185,5 +184,6 @@
     "sdk/include/FidelityFX/host/ffx_cacao.h",
     "sdk/src/components/cacao/ffx_cacao.cpp",
     "sdk/src/backends/dx12/shaders/cacao"
-  ]
+  ],
+  "gitlink": "producers/maclauncher/src/external/fsr3-sdk"
 }
