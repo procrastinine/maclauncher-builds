@@ -3,6 +3,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import crypto from 'node:crypto';
+import {createRequire} from 'node:module';
+import {preparePackageLayout,materializePackageAliases} from '../tools/package-layout.mjs';
+const Native=createRequire(import.meta.url)('../producers/maclauncher/scripts/native-binary-tools.cjs');
 import {addLicense,addLicenses,includeLicenses,addCargoLicenses} from '../lib/licenses.mjs';
 const fixture=t=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'licence-intake-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;};
 test('the shared licence functions never throw for unavailable inputs or failed logging',t=>{
@@ -25,4 +29,16 @@ test('Cargo intake uses its supplied staged lock and toolchain availability is i
  const root=fixture(t),staged=path.join(root,'staged'),cargo=path.join(root,'cargo'),registry=path.join(cargo,'registry/src/test/crate-2.0.0'),home=path.join(root,'rustup'),docs=path.join(home,'toolchains/test/share/doc/rust/licenses');fs.mkdirSync(staged);fs.mkdirSync(registry,{recursive:true});fs.mkdirSync(docs,{recursive:true});fs.writeFileSync(path.join(staged,'Cargo.lock'),'[[package]]\nname = "crate"\nversion = "2.0.0"\n');fs.writeFileSync(path.join(registry,'LICENSE'),'compiled crate text');fs.writeFileSync(path.join(docs,'Apache-2.0.txt'),'standard library text');t.mock.method(console,'log',()=>{});
  const env={CARGO_HOME:cargo,RUSTUP_HOME:home,RUSTUP_TOOLCHAIN:'test'},payload=path.join(root,'payload');assert.doesNotThrow(()=>addCargoLicenses(payload,'Rust',staged,{...env,RUSTUP_HOME:path.join(root,'absent')}));assert.equal(fs.readFileSync(path.join(payload,'licenses/crate-2.0.0.txt'),'utf8'),'compiled crate text');
  const std=path.join(root,'std-only');assert.doesNotThrow(()=>addCargoLicenses(std,'Rust',path.join(root,'absent-lock'),env));assert.equal(fs.readFileSync(path.join(std,'licenses/Rust.txt'),'utf8'),'standard library text');
+});
+
+test('compatibility licence bytes and metadata survive aliases while failed intake remains optional',t=>{
+ const root=fixture(t),source=path.join(root,'source.txt'),payload=path.join(root,'payload');fs.mkdirSync(payload);fs.writeFileSync(source,'verbatim upstream text');
+ const result=addLicense(payload,'upstream',source,'upstream','LICENSE-upstream.txt');assert.equal(result.sha256,crypto.createHash('sha256').update(fs.readFileSync(source)).digest('hex'));
+ const profile={files:{native:'native checksum',...(result?{'LICENSE-upstream.txt':result.sha256}:{})}};fs.writeFileSync(path.join(payload,'manifest.json'),JSON.stringify(profile));
+ const files=fs.readdirSync(payload,{recursive:true}).filter(name=>fs.statSync(path.join(payload,name)).isFile()).map(name=>{const bytes=fs.readFileSync(path.join(payload,name));return {path:name,size:bytes.length,sha256:crypto.createHash('sha256').update(bytes).digest('hex'),mode:fs.statSync(path.join(payload,name)).mode&0o777};});
+ const declaration={id:'fixture',version:'1.0.0',arch:'arm64',manifestRelative:'manifest.json',sourceRelative:null,files};preparePackageLayout({input:payload,declaration,environment:{}});materializePackageAliases({root:payload,declaration,inputs:{}});assert.equal(fs.readFileSync(path.join(payload,'LICENSE-upstream.txt'),'utf8'),'verbatim upstream text');assert.equal(JSON.parse(fs.readFileSync(path.join(payload,'manifest.json'))).files['LICENSE-upstream.txt'],result.sha256);
+ t.mock.method(console,'log',()=>{throw Error('logger failure');});let missing;assert.doesNotThrow(()=>{missing=addLicense(payload,'missing',path.join(root,'missing'),'missing','LICENSE-missing.txt');});assert.deepEqual({native:'native checksum',...(missing?{'LICENSE-missing.txt':missing.sha256}:{})},{native:'native checksum'});
+});
+test('Homebrew classification uses canonical closure paths without filesystem work',t=>{
+ t.mock.method(fs,'realpathSync',()=>{throw Error('must not reread a canonical source');});assert.deepEqual(Native.formulaRoot('/opt/homebrew/Cellar/glib/2.90.1/lib/libglib.dylib'),{root:'/opt/homebrew/Cellar/glib/2.90.1',name:'glib',version:'2.90.1'});assert.equal(Native.formulaRoot('/usr/lib/libSystem.B.dylib'),null);
 });
