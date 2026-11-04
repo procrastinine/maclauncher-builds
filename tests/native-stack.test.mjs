@@ -18,3 +18,17 @@ test('a prepared native prefix retains source API identity and library bytes whi
  assert.equal(fs.readFileSync(path.join(view,'lib/pkgconfig/sample.pc'),'utf8'),'prefix='+view+'\nsdk=/selected/sdk\n');assert.equal(fs.readFileSync(external,'utf8'),'prefix=NATIVE_STACK_PREFIX\nsdk=NATIVE_STACK_SDK\n');assert.equal(fs.lstatSync(path.join(view,'lib/pkgconfig/sample.pc')).isSymbolicLink(),false);
  assert.throws(()=>nativeStackInput(input,{...options,arch:'x64',work:path.join(work,'wrong-cpu')}),/different target CPU/);assert.equal(fs.existsSync(path.join(work,'wrong-cpu')),false);
 });
+
+test('shared native stacks initialize the upstream parent before their recipe reads nested pins',async()=>{
+ const {initializeSources}=await import('../tools/init-runtime-sources.mjs');
+ for(const project of ['native-sdl2-fonts','native-sndfile','native-sdl2-mixer','native-ffmpeg']){
+  const updates=[];
+  const result=initializeSources({project,run:args=>{
+   if(args[0]==='ls-files')return '160000 '+ '0'.repeat(40)+' 0\tsources/anyps5\n';
+   updates.push(args);return '';
+  }});
+  assert.deepEqual(result.initialized,[{path:'sources/anyps5',recursive:false}],project);
+  assert.equal(updates.length,1,project);
+  assert.equal(updates[0].at(-1),'sources/anyps5',project);
+ }
+});

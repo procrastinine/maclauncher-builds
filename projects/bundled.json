@@ -1280,6 +1280,9 @@
         "cmake",
         "ninja",
         "pkgconf"
+      ],
+      "submodules": [
+        "sources/anyps5"
       ]
     },
     "versionBindings": [
@@ -2244,6 +2247,9 @@
         "ninja",
         "pkgconf",
         "python@3.14"
+      ],
+      "submodules": [
+        "sources/anyps5"
       ]
     }
   },
@@ -2307,6 +2313,9 @@
         "ninja",
         "pkgconf",
         "python@3.14"
+      ],
+      "submodules": [
+        "sources/anyps5"
       ]
     }
   },
@@ -2357,6 +2366,9 @@
         "pkgconf",
         "nasm",
         "python@3.14"
+      ],
+      "submodules": [
+        "sources/anyps5"
       ]
     }
   },
@@ -2418,6 +2430,9 @@
         "ninja",
         "pkgconf",
         "python@3.14"
+      ],
+      "submodules": [
+        "sources/anyps5"
       ]
     }
   },
