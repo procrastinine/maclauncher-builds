@@ -329,8 +329,7 @@
           "file": "local-laplacian.mclfilter",
           "requires": [],
           "nativeMethod": "local-laplacian",
-          "sourceUrl": "https://github.com/halide/Halide",
-          "revision": "d62903bbf5166e05841e1346837c8367e2296a83"
+          "sourceUrl": "https://github.com/halide/Halide"
         },
         {
           "id": "cmaa2",
@@ -338,8 +337,7 @@
           "file": "cmaa2.mclfilter",
           "requires": [],
           "nativeMethod": "cmaa2",
-          "sourceUrl": "https://github.com/GameTechDev/CMAA2",
-          "revision": "071c6b0857559f4e36f614362e6d2aab1b61938a"
+          "sourceUrl": "https://github.com/GameTechDev/CMAA2"
         },
         {
           "id": "xegtao",
@@ -350,8 +348,7 @@
             "projectionMatrix"
           ],
           "nativeMethod": "xegtao",
-          "sourceUrl": "https://github.com/GameTechDev/XeGTAO",
-          "revision": "a5b1686c7ea37788eeb3576b5be47f7c03db532c"
+          "sourceUrl": "https://github.com/GameTechDev/XeGTAO"
         },
         {
           "id": "cacao",
@@ -373,8 +370,7 @@
             "projectionMatrix"
           ],
           "nativeMethod": "depth-fog",
-          "sourceUrl": "https://github.com/luluco250/FXShaders",
-          "revision": "76365e35c48e30170985ca371e67d8daf8eb9a98"
+          "sourceUrl": "https://github.com/luluco250/FXShaders"
         },
         {
           "id": "depth-outlines",
@@ -385,8 +381,7 @@
             "projectionMatrix"
           ],
           "nativeMethod": "depth-outlines",
-          "sourceUrl": "https://github.com/luluco250/FXShaders",
-          "revision": "76365e35c48e30170985ca371e67d8daf8eb9a98"
+          "sourceUrl": "https://github.com/luluco250/FXShaders"
         },
         {
           "id": "ffx-dof",
@@ -423,8 +418,7 @@
           "requires": [],
           "nativeMethod": "estimated-depth-fog",
           "modelOperation": "depth-anything-v2-small",
-          "sourceUrl": "https://github.com/luluco250/FXShaders",
-          "revision": "76365e35c48e30170985ca371e67d8daf8eb9a98"
+          "sourceUrl": "https://github.com/luluco250/FXShaders"
         },
         {
           "id": "ffx-lens",

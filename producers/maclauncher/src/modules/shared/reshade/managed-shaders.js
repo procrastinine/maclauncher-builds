@@ -310,8 +310,7 @@ async function refreshCatalog(context = {}) {
   return true;
 }
 function keep(relative) {
-  return Boolean(formats[path.extname(relative).toLowerCase()]) || /\.(?:vs|fxh|h|hlsl|hlsli|inc|glslinc|png|jpg|jpeg|bmp|tga|dds|webp|cube|lut|txt|md|json|ini)$/i.test(relative) ||
-    /^(?:LICENSE|NOTICE|COPYING|AUTHORS)(?:[._-].*)?$/i.test(path.posix.basename(relative));
+  return Boolean(formats[path.extname(relative).toLowerCase()]) || /\.(?:vs|fxh|h|hlsl|hlsli|inc|glslinc|png|jpg|jpeg|bmp|tga|dds|webp|cube|lut|txt|md|json|ini)$/i.test(relative);
 }
 function extract(archive, destination) {
   const info = Zip.readZipEntries(archive)?.info;

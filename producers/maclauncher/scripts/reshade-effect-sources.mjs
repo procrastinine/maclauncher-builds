@@ -1,3 +1,4 @@
+import {gitlink} from "../../../lib/pins.mjs";
 import Supplementals from "./native-supplementals.cjs";
 
 // Third-party presets carry their complete source and notice in the effect file.
@@ -7,6 +8,7 @@ export function validateEffectSources(sources, files) {
   const paths = new Set();
   const keys = ["name", "path", "sourceUrl", "revision", "sourceSha256", "sha256", "adaptation"];
   for (const source of sources) {
+    if(source.gitlink){source.revision=gitlink(source.gitlink);source.sourceUrl+="/blob/"+source.revision+"/"+source.sourcePath;delete source.gitlink;delete source.sourcePath;}
     if (!source || Object.keys(source).length !== keys.length || Object.keys(source).some(key => !keys.includes(key)) ||
         keys.some(key => typeof source[key] !== "string" || !source[key].trim() || source[key].length > 1024) ||
         !/^effects\/[A-Za-z0-9_-]+\.fxh?$/.test(source.path) || paths.has(source.path) ||

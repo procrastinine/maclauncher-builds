@@ -54,10 +54,9 @@ for(const [inputs,target] of [[libraries,library],[helpers,helper]]){
 }
 run('/usr/bin/install_name_tool',['-id','@rpath/librashader.dylib',library]);
 for(const file of [library,helper]){run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',file]);run('/usr/bin/codesign',['--verify','--strict',file]);}
-const notice=output;
 addLicenses(output,'librashader',source);
-fs.writeFileSync(path.join(notice,'source.json'),JSON.stringify(declaration,null,2)+'\n');
-const files=[library,helper,path.join(output,'source.json'),...(fs.existsSync(path.join(output,'licenses'))?fs.readdirSync(path.join(output,'licenses')):[]).map(file=>path.join(output,'licenses',file))].map(file=>({path:path.relative(output,file),source:file,size:fs.statSync(file).size,mode:fs.statSync(file).mode&0o777,sha256:hash(file)}));
+fs.writeFileSync(path.join(output,'source.json'),JSON.stringify(declaration,null,2)+'\n');
+const files=fs.readdirSync(output).filter(name=>!['upstream-source','prepare-source','target','capi-target'].includes(name)).flatMap(name=>{const file=path.join(output,name);return fs.statSync(file).isDirectory()?fs.readdirSync(file,{recursive:true}).map(relative=>path.join(file,relative)).filter(file=>fs.statSync(file).isFile()):[file];}).map(file=>({path:path.relative(output,file),source:file,size:fs.statSync(file).size,mode:fs.statSync(file).mode&0o777,sha256:hash(file)}));
 const exports=run('/usr/bin/nm',['-gU',library]);
 for(const name of ['libra_mtl_external_inputs_api','libra_mtl_filter_chain_create_external','libra_mtl_filter_chain_set_external','libra_mtl_filter_chain_uniform_snapshots','libra_mtl_filter_chain_uniform_snapshot_bytes','libra_mtl_filter_chain_uniform_snapshots_available','libra_mtl_filter_chain_prepare_uniform_snapshots'])
   if(!new RegExp('\\b_'+name+'\\b').test(exports))throw Error('The Slang immutable input API is missing: '+name);

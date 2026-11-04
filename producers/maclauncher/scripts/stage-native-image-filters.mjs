@@ -19,7 +19,9 @@ export function stageNativeImageFilters({ownedSource,symbols,recipeRoot}){
     seen.add(provider.method);
     if(!dispatcher||!symbols.includes(factories[provider.method]))continue;
     const source=JSON.parse(fs.readFileSync(path.join(ownedSource,"src",provider.sourceManifest),"utf8"));
-    const revision=source.repository==='https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK'?gitlink('producers/maclauncher/src/external/fsr3-sdk'):source.commit;
+    if(source.gitlink)source.commit=gitlink(source.gitlink);
+    if(source.sourceFile){const declaration=JSON.parse(fs.readFileSync(path.join(recipeRoot,source.sourceFile),"utf8"));source.commit=declaration.gitlink?gitlink(declaration.gitlink):declaration.commit;}
+    const revision=source.commit;
     const ownedImplementation=source.implementation==="owned";
     if(source.schema!==1||!/^https:\/\//.test(source.repository||"")||!ownedImplementation&&!/^[a-f0-9]{40}$/.test(revision||""))throw Error("A native image filter source pin is missing.");
     if(ownedImplementation){

@@ -1,7 +1,6 @@
 {
   "schema": 1,
   "repository": "https://github.com/luluco250/FXShaders",
-  "commit": "76365e35c48e30170985ca371e67d8daf8eb9a98",
   "sources": {
     "Shaders/Sketch.fx": "0e63beb41a7123235216f160361761a0e0c7fa890747fd6eb37660ebff39fb75"
   },
@@ -10,5 +9,6 @@
     "GPU raw-depth unprojection using actual renderer matrix, explicit clip range, sample jitter, ROI and image origin",
     "Source linear RGB and alpha through the shared color converter; HDR range retained",
     "Relative view-depth gradients retain the original scale-invariant normal; stable normalization handles infinite far backgrounds without overflow"
-  ]
+  ],
+  "sourceFile": "native/depth-fog-source.json"
 }
