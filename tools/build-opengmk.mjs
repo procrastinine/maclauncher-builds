@@ -25,6 +25,6 @@ export async function buildOpenGMK({project,arch,output,work}){
  run('cargo',['build','--release','--locked','--target',target,'--package','gm8emulator'],{cwd:source,env});
  const executable=path.join(work,'target',target,'release/gm8emulator');run(executable,['--version']);
 
- return sealRuntime({env,project,arch,output,executable,sourceRoot:sources[0].source,upstreamRevision:Emulator.REVISION,provenance:{...provenance,dependencies:sources.slice(1).map(({name,repository,revision})=>({name,repository,revision})),overlay:Emulator.OVERLAY_VERSION}});
+ return sealRuntime({cargoRoot:source,env,project,arch,output,executable,sourceRoot:sources[0].source,upstreamRevision:Emulator.REVISION,provenance:{...provenance,dependencies:sources.slice(1).map(({name,repository,revision})=>({name,repository,revision})),overlay:Emulator.OVERLAY_VERSION}});
 }
 recipeMain(import.meta,buildOpenGMK);

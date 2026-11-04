@@ -21,7 +21,7 @@ function preparedNativeFiles(){
 }
 const run=(command,args)=>execFileSync(command,args,{encoding:'utf8',timeout:120000,maxBuffer:Infinity});
 
-export async function sealRuntime({project:id,version:selectedVersion,arch,executable,sourceRoot,sourceScope,upstreamRevision,output,executableRelative,appRoot,payloads=[],extraLibraries=[],runtimeFiles={},environmentRelative={},jsonMetadata={},capabilities,maximumMacOS='13.0',env=process.env,provenance={},directory=path.resolve(import.meta.dirname,'..')}) {
+export async function sealRuntime({project:id,version:selectedVersion,arch,executable,sourceRoot,sourceScope,cargoRoot=sourceRoot,upstreamRevision,output,executableRelative,appRoot,payloads=[],extraLibraries=[],runtimeFiles={},environmentRelative={},jsonMetadata={},capabilities,maximumMacOS='13.0',env=process.env,provenance={},directory=path.resolve(import.meta.dirname,'..')}) {
  const project=resolveProject(id,directory),build=buildRecord(project,selectedVersion),version=build.version,cpu=arch==='x64'?'x86_64':arch,preparedFiles=preparedNativeFiles(),shared=new Set();
  if(!version||!['arm64','x64'].includes(arch)||!build.architectures.includes(arch)||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(executable||'')||!path.isAbsolute(sourceRoot||'')||!project.upstreams.some(pin=>pin.revision===upstreamRevision))
   throw Error('Sealing needs a registered build, target CPU, pinned public source and a new absolute output directory.');
@@ -33,7 +33,7 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
  try {
   copy(appRoot||executable,appRoot?path.basename(appRoot):executableRelative);
   for(const entry of payloads)copy(entry.source,entry.relative);
-  addLicenses(files,id,sourceRoot);addCargoLicenses(files,id,sourceRoot,env);
+  addLicenses(files,id,sourceRoot);addCargoLicenses(files,id,cargoRoot,env);
   const roots=[{source:appRoot||executable,relative:appRoot?path.basename(appRoot):executableRelative},...payloads];
   for(const relative of B.fileInventory(files)){
    const target=path.join(files,relative);if(!Tools.macho(target))continue;

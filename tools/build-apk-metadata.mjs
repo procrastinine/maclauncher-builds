@@ -26,7 +26,7 @@ export async function buildAPK({project:id,arch,output,work}){
   const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});const binary=path.join(payload,'android-apk-metadata');fs.copyFileSync(path.join(work,'target',target,'release/android-apk-metadata'),binary);fs.chmodSync(binary,0o755);
   execFileSync('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',binary],{maxBuffer:Infinity});execFileSync('/usr/bin/codesign',['--verify','--strict',binary],{maxBuffer:Infinity});
 
-  addLicenses(payload,id,source);addCargoLicenses(payload,id,source,env);addLicenses(payload,'MacLauncher',root);
+  addLicenses(payload,'AIM',upstream);addLicenses(payload,id,source);addCargoLicenses(payload,id,source,env);addLicenses(payload,'MacLauncher',root);
 
   return helperPackage({id,version:project.build.version,arch,output,minimumMacOS:'13.0',rosettaFiles:arch==='x64'?['android-apk-metadata']:[],sourceSha256:sha(path.join(base,'main.rs')),record:{executable:'android-apk-metadata',upstreamRevision:spec.aim.revision,binarySha256:sha(binary),cargoLockSha256:sha(path.join(base,'Cargo.lock'))}});
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}finally{fs.rmSync(work,{recursive:true,force:true});}
