@@ -7,6 +7,45 @@
       "schemaVersion": 2,
       "id": "native-ffmpeg",
       "version": "7.1.2-MCLv6",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "input.json",
+      "manifestSha256": "ab7fa29aac146d96ddb5b5d4a2e2d4cee40f9ee59fd89ef91435332f811cc24c",
+      "sourceSha256": "7e5b885e0b2f20732eb93ffab23d93820fc73dbccf5aa981eabce5c1885b0420",
+      "updatePolicy": "manual",
+      "launcherContract": 2,
+      "asset": {
+        "filename": "native-ffmpeg-7.1.2-MCLv6-x64.tar.gz",
+        "sha256": "55ec0852589d07a728862c2e48dbbf30df44c5ce1f628491d814ef72eb5a30a7",
+        "bytes": 2872351,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/native-ffmpeg%2Fv7.1.2-MCLv6%2Fx64/native-ffmpeg-7.1.2-MCLv6-x64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "f445a97387537e90d6f56d5e6b30d8ba395aa2aa",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "41840780781",
+        "runAttempt": "1"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "f445a97387537e90d6f56d5e6b30d8ba395aa2aa"
+      },
+      "tag": "native-ffmpeg/v7.1.2-MCLv6/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "native-ffmpeg",
+      "version": "7.1.2-MCLv6",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
