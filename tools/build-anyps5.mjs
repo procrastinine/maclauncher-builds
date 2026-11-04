@@ -12,7 +12,7 @@ export async function buildAnyPS5({project,version,arch,output,work}){
  const record=buildRecord(resolveProject(project,root),version);
  const relinkerBuild=path.join(work,'relinker'),runtimeBuild=path.join(work,'runtime');
  fs.mkdirSync(work,{recursive:true});
- const pythonPin=JSON.parse(fs.readFileSync(path.join(root,'producers/anyps5/dependencies.json'))).artifacts.find(input=>input.id==='build-python-'+arch);
+ const pythonPin=arch==='arm64'?JSON.parse(fs.readFileSync(path.join(root,'producers/nxnative/dependencies.json'))).python:JSON.parse(fs.readFileSync(path.join(root,'producers/anyps5/dependencies.json'))).artifacts.find(input=>input.id==='build-python-'+arch);
  if(!pythonPin)throw Error('The requested CPU has no declared Python build interpreter.');
  const archive=await buildInput(pythonPin,path.join(work,'downloads')),pythonBase=path.join(work,'python-source'),pythonEnvironment=path.join(work,'python');
  fs.mkdirSync(pythonBase);execFileSync('/usr/bin/tar',['-xzf',archive,'-C',pythonBase],{maxBuffer:Infinity});

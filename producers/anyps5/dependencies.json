@@ -135,15 +135,6 @@
       "sha256": "b92c60ac99f9b2277f62d42e7424c24bc991d5723f4fa388a5d2e452be18f40b"
     },
     {
-      "id": "build-python-arm64",
-      "version": "3.12.15",
-      "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261013/cpython-3.12.15%2B20261013-aarch64-apple-darwin-install_only_stripped.tar.gz",
-      "sha256": "9866e11cf2ae9caa1e671383786f248859a52dd8bfb702fb4c0dc2c65f1d36de",
-      "bytes": 25052618,
-      "repository": "https://github.com/astral-sh/python-build-standalone",
-      "buildOnly": true
-    },
-    {
       "id": "build-python-x64",
       "version": "3.12.15",
       "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261013/cpython-3.12.15%2B20261013-x86_64-apple-darwin-install_only_stripped.tar.gz",

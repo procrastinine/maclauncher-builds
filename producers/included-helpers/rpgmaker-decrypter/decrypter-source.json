@@ -156,22 +156,10 @@
       "url": "https://api.nuget.org/v3-flatcontainer/commandlineparser/2.9.1/commandlineparser.2.9.1.nupkg"
     },
     {
-      "name": "microsoft.aspnetcore.app.runtime.osx-arm64",
-      "version": "8.0.32",
-      "sha256": "4f8b4c89324a540aa03eb59ea6678b93605cb0c06ed1f0a112bb8c2777afe1f4",
-      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.app.runtime.osx-arm64/8.0.32/microsoft.aspnetcore.app.runtime.osx-arm64.8.0.32.nupkg"
-    },
-    {
       "name": "microsoft.net.illink.tasks",
       "version": "8.0.32",
       "sha256": "c10f7630218ba0b55780b4fb5e98bc3cd895659179607fcdf9a4da065358abe8",
       "url": "https://api.nuget.org/v3-flatcontainer/microsoft.net.illink.tasks/8.0.32/microsoft.net.illink.tasks.8.0.32.nupkg"
-    },
-    {
-      "name": "microsoft.netcore.app.runtime.osx-arm64",
-      "version": "8.0.32",
-      "sha256": "760049c8549dd4e2f6210815eea2e2eb7308e45a7d6516740c60356475144491",
-      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.netcore.app.runtime.osx-arm64/8.0.32/microsoft.netcore.app.runtime.osx-arm64.8.0.32.nupkg"
     },
     {
       "name": "microsoft.netcore.platforms",

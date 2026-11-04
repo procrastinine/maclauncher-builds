@@ -4,13 +4,6 @@
     "arm64": {
       "profile": "3.0.0-465c88c3-net8.0.32-osx-arm64-v1",
       "runtimeIdentifier": "osx-arm64",
-      "sdk": {
-        "version": "8.0.426",
-        "runtimeVersion": "8.0.32",
-        "url": "https://builds.dotnet.microsoft.com/dotnet/Sdk/8.0.426/dotnet-sdk-8.0.426-osx-arm64.tar.gz",
-        "sha512": "17cd408c92eb6ceedc06d41fa726c783b9be020c6ae5f3624ad3a0b2c26a78aa7d09f38338003163a72bb14d437731debf533c0451a5c6a05de3b1e37a3aa50a",
-        "sha256": "c4e88383ff1ffcf9e80d91367a83690f77dff32a68c742fab6fa5644173875aa"
-      },
       "runtimePackages": [
         {
           "name": "microsoft.aspnetcore.app.runtime.osx-arm64",

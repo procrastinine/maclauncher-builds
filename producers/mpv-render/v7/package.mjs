@@ -42,7 +42,7 @@ export async function packageRuntime({input,output,version=recipe.version,catalo
  try{
   for(const name of filesIn(input)){const target=path.join(content,name);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(input,name),target,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.chmodSync(target,fs.statSync(path.join(input,name)).mode&0o777);}
   const producerInputs=['source.json','package.mjs','build.mjs'].map(name=>({path:'producers/mpv-render/v7/'+name,sha256:hash(fs.readFileSync(path.join(import.meta.dirname,name)))}));
-  const source={schemaVersion:1,id:recipe.id,version,source:recipe.source,artifact:recipe.artifact,backports:recipe.backports,libraryInputSha256:recipe.libraryInputSha256,ownedInputs:recipe.ownedInputs,libraryBuild:recipe.libraryBuild,producerInputs};
+  const source={schemaVersion:1,id:recipe.id,version,source:recipe.source,artifact:recipe.artifact,backports:recipe.backports,libraryInputSha256:recipe.libraryInputSha256,ownedInputs:recipe.ownedInputs,producerInputs};
   fs.writeFileSync(path.join(content,'source.json'),json(source));
   const files=filesIn(content).map(name=>record(content,name));
   const dependencies=[];

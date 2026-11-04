@@ -21,19 +21,15 @@
   "ownedInputs": [
     {
       "path": "producers/mpv-render/v7/maclauncher/package.json",
-      "sha256": "965af71b1c6daad229456928c9b178c04e3241f76c4a260b7f65afd130c81f6e"
+      "sha256": "0ed97b28e7d33d371ba351669602cf554166e8b55ed00702fd320c5d5a844a27"
     },
     {
       "path": "producers/mpv-render/v7/maclauncher/scripts/build-mpv-library.cjs",
-      "sha256": "56369e6b305cd3003241527f9199a0970c907b438249557b7a766944c59e00bd"
-    },
-    {
-      "path": "producers/mpv-render/v7/maclauncher/scripts/native-binary-tools.cjs",
-      "sha256": "bd0be31fbe8e8861698e689ce81b134c5922fe0dce55a2590bde44c881493544"
+      "sha256": "ed75a082db1a5e4537c23cade73a4f0fc9a906f0f5f2fbf76df929bca34c6719"
     },
     {
       "path": "producers/mpv-render/v7/maclauncher/scripts/stage-mpv-render.cjs",
-      "sha256": "83c8a0b6b8abba4c13e7ebc4e0a056740a20c4c2010bc4eea7e15738b10c53d4"
+      "sha256": "6b80c03b5a618c71fe1b65c2c90d40de7ef3ff3b5c063e309cdaad3ba462e06f"
     },
     {
       "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/frame.h",
@@ -102,6 +98,10 @@
     {
       "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/mpv-render.mm",
       "sha256": "173ff3b68dc8d675f0603947fa71683303c810a0a56bc588e877d2374c06250b"
+    },
+    {
+      "path": "producers/maclauncher/scripts/native-binary-tools.cjs",
+      "sha256": "c006d998c9cd1ad1b7084e9d5b7aaf3440e5e907b925a7b7506ed90343448c42"
     }
   ],
   "buildEntry": "producers/mpv-render/v7/build.mjs",
@@ -123,118 +123,5 @@
   "preparationNotificationAPI": 1,
   "playerScriptsAPI": 1,
   "playerInputAPI": 1,
-  "osdLayerAPI": 1,
-  "libraryBuild": {
-    "entry": "producers/mpv-render/v7/maclauncher/scripts/build-mpv-library.cjs",
-    "schema": 1,
-    "repository": "https://github.com/mpv-player/mpv.git",
-    "patches": [
-      {
-        "path": "src/modules/video/native/mpv-frame-metadata.patch",
-        "sha256": "0ad025b167501139f55cfce513431c1b76df22546b775413b3021f0871696f48"
-      },
-      {
-        "path": "src/modules/video/native/mpv-render-layers.patch",
-        "sha256": "33ab29d1c56c13fb186f0534455b856a4e28a15d8df06bf21ffdbf9580b4664b"
-      }
-    ],
-    "options": [
-      "--buildtype=release",
-      "--wrap-mode=nofallback",
-      "-Dlibmpv=true",
-      "-Dcplayer=false",
-      "-Dbuild-date=false",
-      "-Dtests=false",
-      "-Dmanpage-build=disabled",
-      "-Dhtml-build=disabled",
-      "-Dpdf-build=disabled",
-      "-Dgl=enabled",
-      "-Dplain-gl=enabled",
-      "-Dvideotoolbox-gl=enabled",
-      "-Dlua=luajit",
-      "-Djavascript=enabled",
-      "-Dswift-build=enabled",
-      "-Dcocoa=enabled",
-      "-Dgl-cocoa=enabled",
-      "-Dmacos-cocoa-cb=disabled",
-      "-Dvulkan=disabled"
-    ],
-    "minimumMacOS": "27.0",
-    "architecture": "arm64",
-    "meson": "1.10.2",
-    "ninja": "1.13.0.git.kitware.jobserver-pipe-1",
-    "dependencies": [
-      {
-        "name": "libass",
-        "version": "0.17.4"
-      },
-      {
-        "name": "libplacebo",
-        "version": "7.360.1"
-      },
-      {
-        "name": "libavcodec",
-        "version": "63.1.102"
-      },
-      {
-        "name": "libavformat",
-        "version": "63.1.102"
-      },
-      {
-        "name": "libavfilter",
-        "version": "12.1.102"
-      },
-      {
-        "name": "libavutil",
-        "version": "61.1.102"
-      },
-      {
-        "name": "libswscale",
-        "version": "10.1.102"
-      },
-      {
-        "name": "libswresample",
-        "version": "7.1.102"
-      },
-      {
-        "name": "luajit",
-        "version": "2.1.1788856981"
-      },
-      {
-        "name": "mujs",
-        "version": "1.3.11"
-      }
-    ],
-    "dependencyInputs": [
-      {
-        "name": "libass",
-        "version": "0.17.4",
-        "url": "https://github.com/libass/libass/releases/download/0.17.4/libass-0.17.4.tar.gz",
-        "archive": "libass-0.17.4.tar.gz",
-        "sha256": "a886b3b80867f437bc55cff3280a652bfa0d37b43d2aff39ddf3c4f288b8c5a8",
-        "publicHeaders": [
-          "libass/ass.h",
-          "libass/ass_types.h"
-        ]
-      },
-      {
-        "name": "libplacebo",
-        "version": "7.360.1",
-        "url": "https://codeload.github.com/haasn/libplacebo/tar.gz/refs/tags/v7.360.1",
-        "archive": "libplacebo-v7.360.1.tar.gz",
-        "sha256": "d05fdf90bea2f629eaa2d115e909fd356388ac639e54f77b87a018a6d76224bd",
-        "generatedHeader": "include/libplacebo/config.h",
-        "clientFeatureProfile": "OpenGL only; source template substitution major=7 API=360. Other binary backends are intentionally not declared to this compilation."
-      },
-      {
-        "name": "mujs",
-        "headerRelease": "1.3.11",
-        "headerApiVersion": "1.3.8",
-        "url": "https://ghcr.io/v2/homebrew/core/mujs/blobs/sha256:462a216d223d3cf43356216410830a2618ed18dbe8f0149e2dac38a78a5ea75e",
-        "archive": "mujs.tar.gz",
-        "sha256": "462a216d223d3cf43356216410830a2618ed18dbe8f0149e2dac38a78a5ea75e",
-        "note": "Stable public header reused; dynamic linking targets the original mpv libmujs.dylib, never the downloaded bottle library."
-      }
-    ]
-  }
+  "osdLayerAPI": 1
 }

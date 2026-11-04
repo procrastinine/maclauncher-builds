@@ -4,7 +4,7 @@
   "repository": "https://github.com/ajusa/VNDS-LOVE",
   "files": {
     "engine/audio.lua": "ead0eddc0e20ccc18ff222b13bc8885f6fec0922ef85ac11619a70735ceb9f1d",
-    "engine/bundle-profile.json": "928f344ddd2fe548393a030e0e1d37b613d194169a9a363b7d08b0d034a89a95",
+    "engine/bundle-profile.json": "b8235e0876fe1a85355d7976f14a92699c7fef705f62337a9dacbd826e636bbd",
     "engine/choose.lua": "dcfcbf7850f2acf7feeae991abb1d0064ad56a36d32ebf7e08afd58c0a0b4e89",
     "engine/conf.lua": "f5a14918909729a5aa6158248b03b96286efeca54f54ecb9f28cd3ddf8f8d40b",
     "engine/config.lua": "20f2150e88354cd4fc21fa5c39356030e082b1b2efaef645c2008d9d8a79c965",
@@ -23,7 +23,7 @@
     "engine/listbox.lua": "69d5e40bb4d13993c3a2376bd4f549cb7054bb46a1ad5a4155ec3ac28e2114cc",
     "engine/main.lua": "d450b8cad7a6e56516db4d573ad40d2ac9795b11481a2b60464dddfd8412b268",
     "engine/menu.lua": "18747ca2533eb102c8677be99aaba39b301a50f3900955f5c7dbc6bea9103e10",
-    "engine/profile.json": "04d0626913053baa0cd36ef879235cc13d5c03a14288caee99d552a94cce0c8c",
+    "engine/profile.json": "0500482daeae4fa4791fa2af644fae4a689c825bf3e45574fb137bdd3dabde4d",
     "engine/save.lua": "dd3b46aa9856afe4fce478e1fcaf52d0f7ff848335d85fde1948bc9365adac0b",
     "engine/script.lua": "f94a6668e85c1aa2fc12688c1a1c1fdafa1a43e975e9670454c0b2cbd9bb158c",
     "engine/text/text.lua": "ccf1f6af79ff0dc50432412d799ac2edc1563eb4f7fa7bb7e65e4e6d496428c9",
