@@ -1,4 +1,4 @@
-import {addLicenses,includeLicenses} from '../lib/licenses.mjs';
+import {addLicenses,addLicense,includeLicenses} from '../lib/licenses.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -28,6 +28,8 @@ export async function buildBlueprintInput({output,work,arch='arm64'}){
  const identity={project:'platform/build/blueprint',repository:profile.upstream.repository,revision:profile.upstream.revision,files:rows.map(file=>({...file,sha256:sha(path.join(upstream,file.path))})),driverSha256:profile.driverSha256};
  const sources=path.join(output,'parser-sources.json');fs.writeFileSync(sources,JSON.stringify(identity,null,2)+'\n');
  addLicenses(output,'Blueprint',upstream);
+ addLicense(output,'Go',new URL('../producers/android-inputs/licenses/go/LICENSE',import.meta.url));
+ addLicense(output,'Go patents',new URL('../producers/android-inputs/licenses/go/PATENTS',import.meta.url));
  return {parser,sources,source:upstream,parserSha256:sha(parser),profile,toolchain:read('go',['version'])};
 }
 
@@ -51,7 +53,7 @@ export function packageBlueprintInput({project='android-blueprint-parser',versio
  for(const relative of ['bin/android-blueprint-parser','parser-sources.json']){
   const target=path.join(payload,relative);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(inputRoot,relative),target);
  }
- 
+
  run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',path.join(payload,'bin/android-blueprint-parser')]);
  includeLicenses(payload,path.join(inputRoot,'licenses'));
  return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(path.join(base,'source.json')),manifestRelative:'input.json',record:{upstreamRevision:profile.upstream.revision,toolchain}});

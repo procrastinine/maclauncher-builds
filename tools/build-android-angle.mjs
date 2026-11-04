@@ -1,5 +1,5 @@
 import {androidSource,androidSourceJson} from '../lib/android-source.mjs';
-import {includeLicenses} from '../lib/licenses.mjs';
+import {includeLicenses,addLicenses,addLicense} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -67,6 +67,10 @@ export async function buildAngleInput({output,work,profile:profileId='common'}){
  const clang=path.dirname(path.dirname(read('xcrun',['--find','clang'])));
  const toolEnv={...compilerEnv,PATH:path.dirname(python)+path.delimiter+process.env.PATH};
  run(process.execPath,[entry,'--source',upstream,'--dependencies',dependencies,'--output',output,'--gn',path.join(gnBuild,'gn'),'--ninja',read('which',['ninja']),'--clang',clang,'--python',python,'--backend',definition.backend,'--jobs','2'],{env:toolEnv});
+ addLicenses(output,'ANGLE',upstream);
+ for(const dependency of pins.dependencies.filter(item=>!item.backends||item.backends.includes(definition.backend)))addLicenses(output,dependency.name,path.join(dependencies,path.basename(dependency.directory)));
+ addLicense(output,'Khronos headers',path.join(root,'producers/android-inputs/licenses/angle/Khronos-Headers.txt'));
+ addLicense(output,'libc++',path.join(root,'producers/android-inputs/licenses/angle/libcxx.txt'));
  const manifest=JSON.parse(fs.readFileSync(path.join(output,'angle-manifest.json')));
  if(manifest.version!==profile.providerVersion||manifest.angleRevision!==pins.revision)throw Error('Generated ANGLE profile differs from its declared identity.');
  return {angle:output,manifest,source:android,profileId};

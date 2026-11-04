@@ -43,6 +43,8 @@ test('SDL3 seals only its canonical Mach-O directory and restores the compile-ti
  const output=path.join(root,'output');packageSdl3Framework({project:'native-sdl3',version:'3.4.18-MCLv1',output,sdl,profile:{version:'3.4.18',url:'https://example.com/SDL3.dmg',sha256:'a'.repeat(64)}});
  const declaration=JSON.parse(fs.readFileSync(path.join(output,'declaration.json')));assert.equal(declaration.id,'native-sdl3');assert.equal(declaration.arch,'universal');assert.ok(!declaration.files.some(file=>file.path==='native/SDL3.framework/Headers/SDL.h'));assert.ok(declaration.files.some(file=>file.path==='native/SDL3.framework/Versions/A/Headers/SDL.h'));;for(const file of declaration.files)assert.equal(fs.lstatSync(path.join(output,'payload',file.path)).isSymbolicLink(),false);
  assert.deepEqual(declaration.files.filter(file=>file.architectures).map(file=>file.path),['native/SDL3.framework/Versions/A/SDL3']);
+ assert.equal(fs.readFileSync(path.join(output,'payload/licenses/SDL3.txt'),'utf8'),'original publisher licence');
+ assert.match(fs.readFileSync(path.join(output,'payload/licenses/components.txt'),'utf8'),/^SDL3: SDL3\.txt$/m);
  const payload=path.join(output,'payload');preparePackageLayout({input:payload,declaration,environment:{}});
  ;
  const archive=path.join(root,'native-sdl3-3.4.18-MCLv1-universal.tar.gz'),record=await pack({project:'native-sdl3',input:payload,declaration,output:archive});

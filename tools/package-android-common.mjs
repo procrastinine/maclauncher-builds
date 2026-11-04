@@ -1,4 +1,4 @@
-import {addLicenses} from '../lib/licenses.mjs';
+import {addLicenses,addLicense} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -30,6 +30,18 @@ export function packageAndroidCommon({build,version,sourceRevision,output}){
    for(const data of original.data||[]){if(!/^icudt[0-9]+l\.dat$/.test(data.path))throw Error('Unexpected Android framework native data.');verify(data.path,data);}
   }
   addLicenses(payload,'MacLauncher',root);
+  addLicenses(payload,'SDL3',path.join(payload,'native/SDL3.framework/Versions/A/Resources'));
+  addLicense(payload,'ASM',new URL('../producers/android-inputs/licenses/asm/LICENSE',import.meta.url));
+  addLicense(payload,'AOSP framework',new URL('../producers/android-inputs/licenses/aosp-framework/LICENSE',import.meta.url));
+  addLicense(payload,'Apache HTTP',new URL('../producers/android-inputs/licenses/aosp-apache-http/NOTICE',import.meta.url));
+  addLicense(payload,'Robolectric portability',new URL('../producers/android-inputs/licenses/robolectric-portability/LICENSE',import.meta.url));
+  addLicense(payload,'fmt',new URL('../producers/android-inputs/licenses/aosp-fmt/LICENSE',import.meta.url));
+  addLicense(payload,'fmt',new URL('../producers/android-inputs/licenses/aosp-fmt/NOTICE',import.meta.url));
+  addLicense(payload,'libbase',new URL('../producers/android-inputs/licenses/aosp-libbase/NOTICE',import.meta.url));
+  addLicense(payload,'AOSP native',new URL('../producers/android-inputs/licenses/aosp-native/NOTICE',import.meta.url));
+  addLicense(payload,'Android platform packages',new URL('../producers/android-inputs/licenses/platform-packages/NOTICE',import.meta.url));
+  addLicense(payload,'XmlPull',new URL('../producers/android-inputs/licenses/xmlpull/LICENSE',import.meta.url));
+  addLicense(payload,'GLES SGI-B 2.0',path.join(root,'producers/android-inputs/licenses/GLES-SGI-B-2.0.txt'));
 
   const files=[],dependencies=[];let minimumMacOS='0.0';
   for(const name of B.fileInventory(payload)){

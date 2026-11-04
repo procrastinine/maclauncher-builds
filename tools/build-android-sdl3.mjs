@@ -23,7 +23,7 @@ export function packageSdl3Framework({project,version,output,sdl,profile}){
   else throw Error('SDL framework contains a non-file input.');
  }
  copy(source,framework);
- addLicenses(payload,'SDL3',source);
+ addLicenses(payload,'SDL3',path.join(source,'Resources'));
  return helperPackage({id:project,version,arch:'universal',output,minimumMacOS:'13.0',sourceSha256:profile.sha256,record:{publisherVersion:profile.version,publisherArchive:profile}});
 }
 export async function buildAndroidSdl3({project,version,arch,output,work}){

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {addLicenses} from '../../../lib/licenses.mjs';
+import {addLicenses,addLicense,includeLicenses,addCargoLicenses} from '../../../lib/licenses.mjs';
 // Developer build and publication of the fixed AIM adaptation. Play uses only
 // this sealed payload and a separately acquired original Android image.
 import fs from 'node:fs';
@@ -75,7 +75,11 @@ export function stageAim({build,angle,output,writeDistribution=true,environment=
     const molten=path.join(payload,'target/aim/moltenvk/libMoltenVK.dylib');
     if(architecture(molten).length>1) run('/usr/bin/lipo',[molten,'-thin','arm64','-output',molten]);
     addLicenses(payload,'AIM',build);
-    addLicenses(payload,'ANGLE',angle);
+    addLicense(payload,'AIM',path.join(build,'THIRD_PARTY_NOTICES.md'));
+    addLicenses(payload,'MoltenVK',path.join(build,'target/aim/moltenvk'));
+    addLicenses(payload,'BoringSSL',path.join(build,'_build/aosp/external/boringssl/src'));
+    addCargoLicenses(payload,'AIM',build,environment);
+    includeLicenses(payload,path.join(angle,'licenses'));
     const angleManifest=path.join(angle,'angle-manifest.json');
     if(fs.existsSync(angleManifest))copy(angleManifest,path.join(payload,'angle-manifest.json'));
     for(const file of files(payload)) {

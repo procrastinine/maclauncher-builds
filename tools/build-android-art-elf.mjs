@@ -1,5 +1,5 @@
 import {androidSource} from '../lib/android-source.mjs';
-import {addLicenses} from '../lib/licenses.mjs';
+import {addLicenses,addLicense} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -59,8 +59,19 @@ export async function buildArtElfsInput({output,work}){
   const file=path.join(built.art,relative),destination=path.join(output,relative);fs.mkdirSync(path.dirname(destination),{recursive:true});fs.copyFileSync(file,destination);fs.chmodSync(destination,fs.statSync(file).mode&0o111?0o755:0o644);
  }
 
- const records=[];;
  addLicenses(output,'AIM',checkout);
+    addLicense(output,'AIM',path.join(checkout,'THIRD_PARTY_NOTICES.md'));
+ addLicenses(output,'ART OpenJDK',path.join(fetched,'aosp/art/openjdkjvm'));
+ addLicenses(output,'ART JVMTI',path.join(fetched,'aosp/art/openjdkjvmti'));
+ addLicenses(output,'nativehelper',path.join(fetched,'aosp/libnativehelper'));
+ addLicenses(output,'dlmalloc',path.join(fetched,'aosp/external/dlmalloc'));
+ addLicenses(output,'tinyxml2',path.join(fetched,'aosp/external/tinyxml2'));
+ addLicenses(output,'zlib',path.join(fetched,'aosp/external/zlib'));
+ addLicenses(output,'cpu_features',path.join(fetched,'aosp/external/cpu_features'));
+ addLicenses(output,'LZ4',path.join(fetched,'aosp/external/lz4/lib'));
+ addLicenses(output,'libcap',path.join(fetched,'aosp/external/libcap'));
+ addLicenses(output,'BoringSSL',path.join(fetched,'aosp/external/boringssl/src'));
+ addLicenses(output,'fiat-crypto',path.join(fetched,'aosp/external/boringssl/src/third_party/fiat'));
  return {art:output,build:{source,checkout,fetched,sdk,jdk:homes[0],python,target,env},record:{androidSource:androidSource(),aimRevision:supplier.sources.aim.commit,sourceTreeSha256:staged.treeSha256,sourceLockSha256:sha(path.join(android,profile.sourceLock))}};
  }finally{const mount=path.join(fetched,'android16-image');if(fs.existsSync(path.join(mount,'root.identity')))run('hdiutil',['detach',mount]);}
 }
