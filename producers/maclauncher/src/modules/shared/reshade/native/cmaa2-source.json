@@ -1,11 +1,9 @@
 {
   "schema": 1,
   "repository": "https://github.com/GameTechDev/CMAA2",
-  "commit": "071c6b0857559f4e36f614362e6d2aab1b61938a",
   "source": {
     "schema": 1,
     "repository": "https://github.com/GameTechDev/CMAA2",
-    "commit": "071c6b0857559f4e36f614362e6d2aab1b61938a",
     "shader": {
       "path": "Projects/CMAA2/CMAA2/CMAA2.hlsl",
       "sha256": "ca88dd447c1055436d2e35e0d9bb4d9bdb29dd2487da6c01d4a913b292294c8c"
@@ -759,5 +757,6 @@
     "dxc": "cb0a0535c212ac31ca25ff18a3c43270d9a7c379fb2f3c28692cf8c44afee09d",
     "spirv-cross": "00c168bc2bb03a96943023656007591915057e4d1820dd79d8efa32c75628403",
     "spirv-val": "5e6ad0282e525bde7a764bfa3c0de5beca5cf65615fbc5def854c54d13bb9f67"
-  }
+  },
+  "sourceFile": "cmaa2/source.json"
 }

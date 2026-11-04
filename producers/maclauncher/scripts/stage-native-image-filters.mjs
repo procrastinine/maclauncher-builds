@@ -19,6 +19,8 @@ export function stageNativeImageFilters({ownedSource,symbols,recipeRoot}){
     seen.add(provider.method);
     if(!dispatcher||!symbols.includes(factories[provider.method]))continue;
     const source=JSON.parse(fs.readFileSync(path.join(ownedSource,"src",provider.sourceManifest),"utf8"));
+    if(source.gitlink)source.commit=gitlink(source.gitlink);
+    if(source.sourceFile){const declaration=JSON.parse(fs.readFileSync(path.join(recipeRoot,source.sourceFile),"utf8"));source.commit=declaration.gitlink?gitlink(declaration.gitlink):declaration.commit;}
     const ownedImplementation=source.implementation==="owned";
     if(source.schema!==1||!/^https:\/\//.test(source.repository||"")||!ownedImplementation&&!/^[a-f0-9]{40}$/.test(source.commit||""))throw Error("A native image filter source pin is missing.");
     if(ownedImplementation){

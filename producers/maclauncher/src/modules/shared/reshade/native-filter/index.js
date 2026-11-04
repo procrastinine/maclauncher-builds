@@ -27,16 +27,16 @@ const methods=Object.freeze({
   {name:"AdaptationSpeed",label:"Adaptation speed",description:"Exposure adaptation per second. Zero applies the measured exposure immediately.",type:"float",default:[3],min:0,max:60},
   {name:"CutThreshold",label:"Cut threshold",description:"EV change for an image-derived histogram cut reset. Zero disables this estimate.",type:"float",default:[4],min:0,max:16}
  ])}),
- "local-laplacian":Object.freeze({label:"Local Laplacian",purpose:"Colour and tone",sourceUrl:"https://github.com/halide/Halide",revision:"d62903bbf5166e05841e1346837c8367e2296a83",inputPolicy:"srgb-sdr",parameters:Object.freeze([
+ "local-laplacian":Object.freeze({label:"Local Laplacian",purpose:"Colour and tone",sourceUrl:"https://github.com/halide/Halide",revision:require("../native/local-laplacian-source.json").commit,inputPolicy:"srgb-sdr",parameters:Object.freeze([
   {name:"Detail",label:"Detail",type:"float",default:[1],min:-1,max:4},
   {name:"Contrast",label:"Contrast",type:"float",default:[1],min:0,max:4},
   {name:"Samples",label:"Intensity samples",type:"int",default:[8],min:2,max:16}
  ])}),
- "cmaa2":Object.freeze({label:"CMAA2",purpose:"Anti-aliasing and blur",sourceUrl:"https://github.com/GameTechDev/CMAA2",revision:"071c6b0857559f4e36f614362e6d2aab1b61938a",inputPolicy:"source",parameters:Object.freeze([
+ "cmaa2":Object.freeze({label:"CMAA2",purpose:"Anti-aliasing and blur",sourceUrl:"https://github.com/GameTechDev/CMAA2",revision:require("../cmaa2/source.json").commit,inputPolicy:"source",parameters:Object.freeze([
   {name:"Quality",label:"Quality",type:"int",default:[2],min:0,max:3,options:[{value:0,label:"Low"},{value:1,label:"Medium"},{value:2,label:"High"},{value:3,label:"Ultra"}]},
   {name:"ExtraSharpness",label:"Preserve detail",type:"bool",default:[0],min:0,max:1}
  ])}),
- "xegtao":Object.freeze({label:"XeGTAO",sourceUrl:"https://github.com/GameTechDev/XeGTAO",revision:"a5b1686c7ea37788eeb3576b5be47f7c03db532c",inputPolicy:"source",requirements:Object.freeze({depth:true,motion:false,projectionMatrix:true}),sceneInputs:Object.freeze(["depth","projectionMatrix"]),parameters:Object.freeze([
+ "xegtao":Object.freeze({label:"XeGTAO",sourceUrl:"https://github.com/GameTechDev/XeGTAO",revision:require("../xegtao/source.json").commit,inputPolicy:"source",requirements:Object.freeze({depth:true,motion:false,projectionMatrix:true}),sceneInputs:Object.freeze(["depth","projectionMatrix"]),parameters:Object.freeze([
   {name:"Radius",label:"Radius",type:"float",default:[.5],min:.0001,max:100000},
   {name:"Strength",label:"Strength",type:"float",default:[1],min:0,max:1},
   {name:"Quality",label:"Quality",type:"int",default:[2],min:0,max:3,options:[{value:0,label:"Low"},{value:1,label:"Medium"},{value:2,label:"High"},{value:3,label:"Ultra"}]},
@@ -51,8 +51,8 @@ const methods=Object.freeze({
   {name:"HalfResolution",label:"Half resolution",type:"bool",default:[0],min:0,max:1},
   {name:"FadeDistance",label:"Fade distance",type:"float",default:[300],min:.0001,max:100000}
  ])}),
- "depth-fog":Object.freeze({label:"Depth fog",sourceUrl:"https://github.com/luluco250/FXShaders",revision:"76365e35c48e30170985ca371e67d8daf8eb9a98",inputPolicy:"source",requirements:Object.freeze({depth:true,motion:false,projectionMatrix:true}),sceneInputs:Object.freeze(["depth","projectionMatrix"]),parameters:fogParameters}),
- "depth-outlines":Object.freeze({label:"Depth outlines",sourceUrl:"https://github.com/luluco250/FXShaders",revision:"76365e35c48e30170985ca371e67d8daf8eb9a98",inputPolicy:"source",requirements:Object.freeze({depth:true,motion:false,projectionMatrix:true}),sceneInputs:Object.freeze(["depth","projectionMatrix"]),parameters:Object.freeze([
+ "depth-fog":Object.freeze({label:"Depth fog",sourceUrl:"https://github.com/luluco250/FXShaders",revision:require("../native/depth-fog-source.json").commit,inputPolicy:"source",requirements:Object.freeze({depth:true,motion:false,projectionMatrix:true}),sceneInputs:Object.freeze(["depth","projectionMatrix"]),parameters:fogParameters}),
+ "depth-outlines":Object.freeze({label:"Depth outlines",sourceUrl:"https://github.com/luluco250/FXShaders",revision:require("../native/depth-fog-source.json").commit,inputPolicy:"source",requirements:Object.freeze({depth:true,motion:false,projectionMatrix:true}),sceneInputs:Object.freeze(["depth","projectionMatrix"]),parameters:Object.freeze([
   {name:"Threshold",label:"Threshold",type:"float",default:[.9],min:0,max:1},
   {name:"Strength",label:"Strength",type:"float",default:[1],min:0,max:1}
  ])}),
@@ -72,7 +72,7 @@ const methods=Object.freeze({
    {name:"RoughnessQuality",label:"Roughness filtering",type:"int",default:[2],min:0,max:3,options:[{value:0,label:"Off"},{value:1,label:"Low"},{value:2,label:"Medium"},{value:3,label:"High"}]},
    {name:"Strength",label:"Strength",type:"float",default:[1],min:0,max:1}
   ])}),
- "estimated-depth-fog":Object.freeze({label:"Estimated depth fog",purpose:"Depth",sourceUrl:"https://github.com/luluco250/FXShaders",revision:"76365e35c48e30170985ca371e67d8daf8eb9a98",inputPolicy:"source",modelOperation:"depth-anything-v2-small",parameters:Object.freeze([
+ "estimated-depth-fog":Object.freeze({label:"Estimated depth fog",purpose:"Depth",sourceUrl:"https://github.com/luluco250/FXShaders",revision:require("../native/depth-fog-source.json").commit,inputPolicy:"source",modelOperation:"depth-anything-v2-small",parameters:Object.freeze([
   {name:"InputSize",label:"Depth input size",description:"Short-axis size for depth estimation, in multiples of 14. Larger values increase GPU work and memory.",type:"int",default:[252],min:14,max:4088,step:14},
   ...fogParameters.filter(parameter=>parameter.name!=="Distance")
  ])}),
