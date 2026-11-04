@@ -125,7 +125,7 @@
   },
   {
     "id": "love-luasteam",
-    "name": "LÖVE LuaSteam bridge",
+    "name": "L\u00d6VE LuaSteam bridge",
     "purpose": "LuaSteam 4 binding against the selected host Lua VM.",
     "producer": {
       "kind": "maclauncher",
@@ -1527,14 +1527,10 @@
       {
         "version": "3.8.0-MCLv7",
         "label": "Android ART libffi 3.8.0-MCLv7"
-      },
-      {
-        "version": "3.8.0-MCLv8",
-        "label": "Android ART libffi 3.8.0-MCLv8"
       }
     ],
     "build": {
-      "version": "3.8.0-MCLv8",
+      "version": "3.8.0-MCLv7",
       "command": "tools/build-android-art-ffi.mjs",
       "architectures": [
         "arm64"

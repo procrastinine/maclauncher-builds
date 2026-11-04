@@ -23,7 +23,7 @@ test('sealed ART FFI requires its archive and both API headers even when omitted
  for(const [index,missing]of [undefined,...files].entries()){
   const output=path.join(directory,String(index)),payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});
   for(const file of files.filter(file=>file!==missing)){const destination=path.join(payload,file);fs.mkdirSync(path.dirname(destination),{recursive:true});fs.writeFileSync(destination,'temporary archive/header fixture '+file);}
-  helperPackage({id:profile.id,version:profile.version,arch:'arm64',output,minimumMacOS:'13.0',sourceSha256:sha(path.join(root,descriptor)),manifestRelative:'input.json',record:{androidSource:androidSource(),upstream:libffi,ndk:{version:ndkSource().version,sha256:profile.ndk.sha256},target:'aarch64-linux-android35'}});
+  helperPackage({id:profile.id,version:profile.version,arch:'arm64',output,minimumMacOS:'13.0',sourceSha256:sha(path.join(root,descriptor)),manifestRelative:'input.json',record:{androidSource:{...androidSource(),revision:'1'.repeat(40)},upstream:libffi,ndk:{version:ndkSource().version,sha256:profile.ndk.sha256},target:'aarch64-linux-android35'}});
   if(missing)assert.throws(()=>readArtFfiInput(output),undefined,missing);else assert.equal(readArtFfiInput(output).archive,path.join(payload,'lib/libffi.a'));
  }
  }finally{fs.rmSync(directory,{recursive:true,force:true});}
