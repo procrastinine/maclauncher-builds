@@ -1,7 +1,4 @@
-xsystem4=MCLv9
-butterscotch=MCLv8
-gemrb=0.9.5-git-MCLv9
-mkxpz=2.4.2-MCLv8
-native-openal=1.25.2-MCLv7
-hashlink=1.9-MCLv9
-hashlink=1.12-MCLv9
+nxnative-tools=MCLv8
+impacto=0.10.8.937-MCLv1
+prosper=MCLv7
+vulkan-kosmickrisp-gles32=27.0.0-devel-MCLv9
