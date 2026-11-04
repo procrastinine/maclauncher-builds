@@ -1,0 +1,20 @@
+name: deploy-pages
+description: Run the shared pinned action with transport retries.
+inputs:
+  inputs:
+    description: Action inputs as JSON
+    required: true
+outputs:
+  page_url:
+    description: Published page URL
+    value: ${{ steps.run.outputs.page_url }}
+runs:
+  using: composite
+  steps:
+    - uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e
+      if: ${{ false }} # Download the implementation for the retry wrapper.
+    - uses: ./.github/actions/network
+      id: run
+      with:
+        action: actions/deploy-pages
+        inputs: ${{ inputs.inputs }}

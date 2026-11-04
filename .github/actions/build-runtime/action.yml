@@ -3,10 +3,7 @@ description: Build, verify and attest one declared runtime package.
 runs:
   using: composite
   steps:
-    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-      with:
-        node-version: '24'
-        package-manager-cache: false
+    - uses: ./.github/actions/setup-node
     - name: Register the selected names for this build
       shell: bash
       run: |
@@ -14,12 +11,9 @@ runs:
         import {registerSelection} from './tools/release-selection.mjs';
         registerSelection({selection: process.env.RELEASE_SELECTION, directory: process.cwd()});
         JS
-    - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
-      if: ${{ false }} # Download the pinned implementation; the shared wrapper executes it.
     - name: Read the generated package definitions
-      uses: ./.github/actions/network
+      uses: ./.github/actions/download-artifact
       with:
-        action: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         inputs: '{"name":"release-plan","path":"${{ runner.temp }}/release-plan"}'
     - name: Use the package definition file
       shell: bash
@@ -41,19 +35,13 @@ runs:
       shell: bash
       run: node tools/release-package.mjs verify --bundle "$RUNNER_TEMP/release" --project "$BUILD_PROJECT" --version "$BUILD_VERSION" --arch "$BUILD_ARCH"
     # Signed provenance ties the archive to this workflow run and commit.
-    - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
-      if: ${{ false }} # Download the pinned implementation; the shared wrapper executes it.
-    - uses: ./.github/actions/network
+    - uses: ./.github/actions/attest
       id: attest
       env:
         NODE_OPTIONS: --max-http-header-size=32768
       with:
-        action: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d
         inputs: '{"subject-path":"${{ runner.temp }}/release/*.tar.gz","github-token":"${{ github.token }}"}'
-    - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
-      if: ${{ false }} # Download the pinned implementation; the shared wrapper executes it.
-    - uses: ./.github/actions/network
+    - uses: ./.github/actions/upload-artifact
       if: ${{ !cancelled() && steps.verify.outcome == 'success' && steps.attest.outcome == 'success' }}
       with:
-        action: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
         inputs: '{"name":"runtime-${{ env.BUILD_PROJECT }}-${{ env.BUILD_VERSION }}-${{ env.BUILD_ARCH }}","path":"${{ runner.temp }}/release","if-no-files-found":"error","overwrite":"true","retention-days":"90","compression-level":"0"}'

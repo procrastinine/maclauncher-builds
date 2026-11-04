@@ -1,7 +1,12 @@
 const fs=require('node:fs'),path=require('node:path'),{spawn}=require('node:child_process');
 const {retryNetworkAsync}=require('./download.mjs');
 async function runAction({environment=process.env,wait}={}){
- const ref=environment.INPUT_ACTION,inputs=JSON.parse(environment.INPUT_INPUTS||'{}');
+ let ref=environment.INPUT_ACTION;
+ if(ref&&!ref.includes('@')){
+  const declaration=fs.readFileSync(path.join(__dirname,'../.github/actions',ref.split('/')[1],'action.yml'),'utf8');
+  ref=declaration.match(/uses: (actions\/[\w.-]+@[a-f0-9]{40})/)[1];
+ }
+ const inputs=JSON.parse(environment.INPUT_INPUTS||'{}');
  if(!/^[\w.-]+\/[\w.-]+@[a-f0-9]{40}$/.test(ref||''))throw Error('A network action requires an exact pinned action.');
  const [name,revision]=ref.split('@'),directory=path.join(environment.RUNNER_WORKSPACE,'..','_actions',name,revision);
  const metadata=fs.readFileSync(path.join(directory,'action.yml'),'utf8'),entry=/^\s+main:\s*['"]?([^'"\r\n]+)['"]?\s*$/m.exec(metadata)?.[1]?.trim();

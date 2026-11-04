@@ -1,0 +1,16 @@
+name: download-artifact
+description: Run the shared pinned action with transport retries.
+inputs:
+  inputs:
+    description: Action inputs as JSON
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+      if: ${{ false }} # Download the implementation for the retry wrapper.
+    - uses: ./.github/actions/network
+      id: run
+      with:
+        action: actions/download-artifact
+        inputs: ${{ inputs.inputs }}

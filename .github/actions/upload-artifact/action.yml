@@ -1,0 +1,16 @@
+name: upload-artifact
+description: Run the shared pinned action with transport retries.
+inputs:
+  inputs:
+    description: Action inputs as JSON
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+      if: ${{ false }} # Download the implementation for the retry wrapper.
+    - uses: ./.github/actions/network
+      id: run
+      with:
+        action: actions/upload-artifact
+        inputs: ${{ inputs.inputs }}

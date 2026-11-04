@@ -1,0 +1,16 @@
+name: attest
+description: Run the shared pinned action with transport retries.
+inputs:
+  inputs:
+    description: Action inputs as JSON
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d
+      if: ${{ false }} # Download the implementation for the retry wrapper.
+    - uses: ./.github/actions/network
+      id: run
+      with:
+        action: actions/attest
+        inputs: ${{ inputs.inputs }}
