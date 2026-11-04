@@ -1,0 +1,1061 @@
+{
+  "id": "siglus",
+  "version": "0.1.0-MCLv7",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "siglus/0.1.0-MCLv7/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "a6488a2f0a3ca80e29a3fdb9311a2f0c2528532a3b24d2404e1da02f85235e28",
+  "sourceSha256": "a6488a2f0a3ca80e29a3fdb9311a2f0c2528532a3b24d2404e1da02f85235e28",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 19431,
+      "mode": 420,
+      "sha256": "a92978f355ba9f7ee4d7fa9bbbcb5a1a89fe51bafe726894241075bb506950dd"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "e962540dfd62dc3add41382936fe13e8a02af5e8b99db08ac00dece38492fe3f"
+    },
+    {
+      "path": "files/bin/siglus-host",
+      "size": 50672,
+      "sha256": "838d1ef0d770331294b96a567ce8729555b86af091af0eab6d0fc53f2f574ade",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libsiglus.dylib",
+      "size": 23151376,
+      "sha256": "275674e57939785691d4aebcfc4b5dedaed4becdb4202fcf2ed0fca3e80d6814",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/LICENSE-siglus_rs.txt",
+      "size": 16726,
+      "sha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ab_glyph-0.2.32.txt",
+      "size": 10173,
+      "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/adler2-2.0.1-2.txt",
+      "size": 10860,
+      "sha256": "8ada45cd9f843acf64e4722ae262c622a2b3b3007c7310ef36ac1061a30f6adb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/adler2-2.0.1-3.txt",
+      "size": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/adler2-2.0.1.txt",
+      "size": 665,
+      "sha256": "861399f8c21c042b110517e76dc6b63a2b334276c8cf17412fc3c8908ca8dc17",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ahash-0.8.12-2.txt",
+      "size": 1057,
+      "sha256": "0444c6991eead6822f7b9102e654448d51624431119546492e8b231db42c48bb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ahash-0.8.12.txt",
+      "size": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/aho-corasick-1.1.4-2.txt",
+      "size": 1081,
+      "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/aho-corasick-1.1.4-3.txt",
+      "size": 1211,
+      "sha256": "7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/aho-corasick-1.1.4.txt",
+      "size": 126,
+      "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/anstream-0.6.21-2.txt",
+      "size": 1062,
+      "sha256": "6efb0476a1cc085077ed49357026d8c173bf33017278ef440f222fb9cbcb66e6",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/anstream-0.6.21.txt",
+      "size": 11358,
+      "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/arrayvec-0.7.8.txt",
+      "size": 1071,
+      "sha256": "4da95ec4ecb65b738d470b7d762894ad9c97da93e6cbfb18b570fc2c96f4b871",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ash-0.37.3+1.3.251-2.txt",
+      "size": 1047,
+      "sha256": "c733ccf8ab25df175a63d9d844677b98e3a5ab8f8de1c1616087e6868a7f948e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ash-0.37.3+1.3.251.txt",
+      "size": 9691,
+      "sha256": "0e8a410375e1ee5c75c6198b08b534fec6e5edef766cf971bab4a404542636ab",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/autocfg-1.5.0.txt",
+      "size": 1054,
+      "sha256": "27995d58ad5c1145c1a8cd86244ce844886958a35eb2b78c6b772748669999ac",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/base64-0.22.1.txt",
+      "size": 1076,
+      "sha256": "0dd882e53de11566d50f8e8e2d5a651bcf3fabee4987d70f306233cf39094ba7",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bindgen-0.72.1.txt",
+      "size": 1512,
+      "sha256": "c23953d9deb0a3312dbeaf6c128a657f3591acee45067612fa68405eaa4525db",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bit-set-0.5.3.txt",
+      "size": 1071,
+      "sha256": "c9a75f18b9ab2927829a208fc6aa2cf4e63b8420887ba29cdb265d6619ae82d5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bit-vec-0.6.3.txt",
+      "size": 1071,
+      "sha256": "7b63ecd5f1902af1b63729947373683c32745c16a10e8e6292e2e2dcd7e90ae0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bitflags-1.3.2.txt",
+      "size": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/borsh-1.8.1.txt",
+      "size": 11334,
+      "sha256": "7b724c8fa4a82af733caccabdaa21e2bf8bcb0822fe62d5cf03f99d458438705",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bytemuck-1.25.0-2.txt",
+      "size": 851,
+      "sha256": "84b34dd7608f7fb9b17bd588a6bf392bf7de504e2716f024a77d89f1b145a151",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bytemuck-1.25.0.txt",
+      "size": 1110,
+      "sha256": "9df9ba60a11af705f2e451b53762686e615d86f76b169cf075c3237730dbd7e2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/bytes-1.11.1.txt",
+      "size": 1055,
+      "sha256": "45f522cacecb1023856e46df79ca625dfc550c94910078bd8aec6e02880b3d42",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/cc-1.2.56.txt",
+      "size": 1057,
+      "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/cexpr-0.6.0.txt",
+      "size": 1061,
+      "sha256": "d9771b8c6cf4426d3846de54c1febe20907f1eeadf7adfb5ade89a83bd9ea77f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/cfg_aliases-0.1.1-2.txt",
+      "size": 1472,
+      "sha256": "1e2b7ade3fb228130408b9990cae6a7618eb314c75aa0b164bfe485d9d9756ee",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/cfg_aliases-0.1.1.txt",
+      "size": 1076,
+      "sha256": "31b94860253d8ec7b4529f51901044d3b459d6292d996504a36b1bae3a36a812",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/chrono-0.4.44.txt",
+      "size": 12307,
+      "sha256": "946c9835d8034d24404f8cfec5f4654cee5dad17e944afc3d06d742cf2882831",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/color_quant-1.1.0.txt",
+      "size": 1083,
+      "sha256": "592dc80f1a865d20d61a2006a2d29ce34a2bc28cd7e868ab300fdeed6da154ca",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 15551,
+      "sha256": "a9c8b557fcf3b1d9f9bc86bc8a33833a12e098f06d4a37be1630ec3bd1e824a0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/core-foundation-0.9.4.txt",
+      "size": 1067,
+      "sha256": "62065228e42caebca7e7d7db1204cbb867033de5982ca4009928915e4095f3a3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/coreaudio-rs-0.11.3.txt",
+      "size": 1043,
+      "sha256": "7576269ea71f767b99297934c0b2367532690f8c4badc695edf8e04ab6a1e545",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/crc32fast-1.5.0.txt",
+      "size": 1097,
+      "sha256": "61d383b05b87d78f94d2937e2580cce47226d17823c0430fbcad09596537efcf",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/crossbeam-utils-0.8.21.txt",
+      "size": 1099,
+      "sha256": "5734ed989dfca1f625b40281ee9f4530f91b2411ec01cb748223e7eb87e201ab",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/cursor-icon-1.2.0-2.txt",
+      "size": 1059,
+      "sha256": "c138726a726ac37bae09d0f8a48e74e8e3aa8a8952fcd10fae0fb224cc1c05f1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/cursor-icon-1.2.0-3.txt",
+      "size": 844,
+      "sha256": "01e533bd94e8f1c32b2c2531e2c398de7d35d7804add3d574b4e1fe581d53537",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/cursor-icon-1.2.0.txt",
+      "size": 11346,
+      "sha256": "b59affd015e517ed998dd735757f9a3693643cd389609947ed54074234a10784",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dlib-0.5.3.txt",
+      "size": 1056,
+      "sha256": "10e5daea68c3ab7da6468ea51860e9d4ac87ea6a9a2d34127beff17b7193b618",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/document-features-0.2.12.txt",
+      "size": 1082,
+      "sha256": "aa893340d14b9844625be6a50ac644169a01b52f0211cbf81b09e1874c8cd81d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/dpi-0.1.2.txt",
+      "size": 2444,
+      "sha256": "9eff396a99bafd208e7126602420d6864f6066c08b84485a5b032320a9c01997",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/encoding_rs-0.8.35-2.txt",
+      "size": 1053,
+      "sha256": "3fa4ca83dcc9237839b1bdeb2e6d16bdfb5ec0c5ce42b24694d8bbf0dcbef72c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/encoding_rs-0.8.35-3.txt",
+      "size": 1501,
+      "sha256": "838118388fe5c2e7f1dbbaeed13e1c7f3ebf88be91319c7c1d77c18e987d1a50",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/encoding_rs-0.8.35.txt",
+      "size": 713,
+      "sha256": "11789f45bb180841cd362a5eee6789c68ddb573a11105e30768c308a6add0190",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/equivalent-1.0.2.txt",
+      "size": 1049,
+      "sha256": "7365cc8878a1d7ce155a58c4ca09c3d7a6be413efa5334a80ea842912b669349",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/extended-0.1.0.txt",
+      "size": 1052,
+      "sha256": "25a0874d15e7c834a47c3adc80901edb2219759254992023ef1010c3065413d5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fdeflate-0.3.7.txt",
+      "size": 1036,
+      "sha256": "c77a4cf9da729987d0fe7ccd811e3bd27393914ddf3d23467c18cc22954513b3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/flate2-1.1.9.txt",
+      "size": 1062,
+      "sha256": "025436edff4cfcdde17a5811fdea78892d8482efd1abdec5a17872d07a4f2112",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/foldhash-0.1.5.txt",
+      "size": 856,
+      "sha256": "b1181a40b2a7b25cf66fd01481713bc1005df082c53ef73e851e55071b102744",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/foreign-types-0.5.0.txt",
+      "size": 1072,
+      "sha256": "333ea3aaa3cadb819f4acd9f9153f9feee060a995ca8710f32bc5bd9a4b91734",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/form_urlencoded-1.2.2.txt",
+      "size": 1072,
+      "sha256": "20c7855c364d57ea4c97889a5e8d98470a9952dade37bd9248b9a54431670e5e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/getrandom-0.2.17-2.txt",
+      "size": 1130,
+      "sha256": "42fa16951ce7f24b5a467a40e5b449a1d41e662f97ca779864f053f39e097737",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/getrandom-0.2.17.txt",
+      "size": 10849,
+      "sha256": "aaff376532ea30a0cd5330b9502ad4a4c8bf769c539c87ffe78819d188a18ebf",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/getrandom-0.3.4.txt",
+      "size": 1130,
+      "sha256": "29e9fe5074bd27e0e5d5d110394fbbcd841baee2651a3c4b4560a632702cede4",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/glam-0.29.3.txt",
+      "size": 10834,
+      "sha256": "be33ddb87a30fd321ab100e2d922cba512e50ec7a63d8e62e5bfc0798dd4b585",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/glow-0.13.1.txt",
+      "size": 834,
+      "sha256": "636f644f1e149eb62961657c0e34953681eff64435653912e7bd19992666faa5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/hashbrown-0.15.5.txt",
+      "size": 1060,
+      "sha256": "ff8f68cb076caf8cefe7a6430d4ac086ce6af2ca8ce2c4e5a2004d4552ef52a2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/hex-0.4.3.txt",
+      "size": 1125,
+      "sha256": "f7bdb3426d045cd50efd4953026e3eb5a83d0199f458a075602611b9344da5b9",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/iana-time-zone-0.1.65-2.txt",
+      "size": 1059,
+      "sha256": "da28ccc6b158fc2d8cccc74e99794b1cff1d29bd7bbeb019442fcf0c04c6cad9",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/iana-time-zone-0.1.65.txt",
+      "size": 10832,
+      "sha256": "696759d65dfe558ff7d9f031c76db19ec5c0767470fb67c4e8d990820d1e99c9",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/icu_collections-2.2.0.txt",
+      "size": 2195,
+      "sha256": "f367c1b8e1aa262435251e442901da4607b4650e0e63a026f5044473ecfb90f2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/idna_adapter-1.2.2.txt",
+      "size": 1062,
+      "sha256": "8b43ce8accd61e9d370b5ca9e9c4f953279b5c239926c62315b40e24df51b726",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/idna-1.1.0.txt",
+      "size": 1072,
+      "sha256": "b38f11f6096706e6de553dabe2a7ed142d59b6fa8c97e290c67496154745cdd5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/indexmap-2.13.0.txt",
+      "size": 1049,
+      "sha256": "ecc269ef87fd38a1d98e30bfac9ba964a9dbd9315c3770fed98d4d7cb5882055",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/jpeg-decoder-0.3.2.txt",
+      "size": 1084,
+      "sha256": "22b83fb92a50418c7df9564b9c179fa2a0e74f293bc58b72dd7e218fc0902143",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/keyboard-types-0.8.3.txt",
+      "size": 1050,
+      "sha256": "31dbbab009f1b2e59a1622d5955dfafc38ebe834000215b49d954c6f85fe927c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/lazy_static-1.5.0.txt",
+      "size": 1071,
+      "sha256": "0621878e61f0d0fda054bcbe02df75192c28bde1ecc8289cbd86aeba2dd72720",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/lewton-0.10.2.txt",
+      "size": 11660,
+      "sha256": "9e32628a9d574751cb0a0136a207221b55ca3d95bde271880343a73de20b5964",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/libc-0.2.182.txt",
+      "size": 1066,
+      "sha256": "123a331b5dbf04c30097fa43b8f858bc85df671fe776de498d01f3d6b7c1f69e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/libloading-0.7.4.txt",
+      "size": 736,
+      "sha256": "b29f8b01452350c20dd1af16ef83b598fea3053578ccc1c7a0ef40e57be2620f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/litrs-1.0.0.txt",
+      "size": 1062,
+      "sha256": "7dc1552e88f49132cb358b1b962fc5e79fa42d70bcbb88c526d33e45b8e98036",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/lz4_flex-0.11.6.txt",
+      "size": 1079,
+      "sha256": "0982c33390159842ecce8e9d6ce2e5e39961fe0e0ffbb2eec39c9ba46db6db10",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/mach2-0.4.3-2.txt",
+      "size": 1077,
+      "sha256": "3f9f0f7e5a5911a8042e32c83ff5d061ce1ffd02e8a207ec2135a44ad73b4191",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/mach2-0.4.3.txt",
+      "size": 1320,
+      "sha256": "044983df14c97f2f9570766aaf977b3cdfc4a06cf1f36b776331c5ff89b4fb89",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/memmap2-0.9.10-2.txt",
+      "size": 1091,
+      "sha256": "0d25d03b5ab49576178ad0cae7a2648d12c17ad0452fe49c07e55e4b59aa5257",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/memmap2-0.9.10.txt",
+      "size": 10835,
+      "sha256": "04ea4849dba9dcae07113850c6f1b1a69052c625210639914eee352023f750ad",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/minimal-lexical-0.2.1.txt",
+      "size": 2003,
+      "sha256": "dbe1fff0fb1314b6af94f161511406275cf01c5a32441fbf24528a57a051d599",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/miniz_oxide-0.8.9-2.txt",
+      "size": 984,
+      "sha256": "0a54e647fe54104658b5e563c04c6f9edf251710e47bce692e0bd990a4ddaa39",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/miniz_oxide-0.8.9.txt",
+      "size": 1213,
+      "sha256": "4108245a1f2df9d4e94df8abed5b4ba0759bb2f9b40a6b939f1be141077ae50b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/mint-0.5.9.txt",
+      "size": 1073,
+      "sha256": "5ac8b41fe6bbad7f9d39b3424fe38e6d76745a85f4c6adc59de9eb1e470d0b4c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/nohash-hasher-0.2.0.txt",
+      "size": 1069,
+      "sha256": "ec353d4fecf7963b4c054384557e5dbc3c7a717997eb4a3815b315721a6aa75a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/nom-7.1.3.txt",
+      "size": 1065,
+      "sha256": "4dbda04344456f09a7a588140455413a9ac59b6b26a1ef7cdf9c800c012d87f0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/objc-0.2.7.txt",
+      "size": 1066,
+      "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ogg-0.8.0.txt",
+      "size": 1739,
+      "sha256": "96635754c52c4cd1ec5d2903a890e7bc1a77dc30aa46ad486a92641cc5590bc0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/oxideav-ac3-0.0.10.txt",
+      "size": 1075,
+      "sha256": "4ecae6b086e0d2663c8629e7d3d7ab7d8b39958e8853f9e1371159499a0c3bf2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/png-0.17.16.txt",
+      "size": 1048,
+      "sha256": "eaf40297c75da471f7cda1f3458e8d91b4b2ec866e609527a13acfa93b638652",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/pollster-0.3.0.txt",
+      "size": 1064,
+      "sha256": "cc02a53316678ca2575cc69d12daa7b1833935d4b7742c31fbab7bd74a481077",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ppv-lite86-0.2.21-2.txt",
+      "size": 1076,
+      "sha256": "4cada0bd02ea3692eee6f16400d86c6508bbd3bafb2b65fed0419f36d4f83e8f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ppv-lite86-0.2.21.txt",
+      "size": 10854,
+      "sha256": "0218327e7a480793ffdd4eb792379a9709e5c135c7ba267f709d6f6d4d70af0a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/rand_core-0.9.5.txt",
+      "size": 10282,
+      "sha256": "6df43f6f4b5d4587f3d8d71e45532c688fd168afa5fe89d571cb32fa09c4ef51",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/rand-0.9.5-2.txt",
+      "size": 9724,
+      "sha256": "35242e7a83f69875e6edeff02291e688c97caafe2f8902e4e19b49d3e78b4cab",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/rand-0.9.5-3.txt",
+      "size": 1117,
+      "sha256": "209fbbe0ad52d9235e37badf9cadfe4dbdc87203179c0899e738b39ade42177b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/rand-0.9.5.txt",
+      "size": 569,
+      "sha256": "90eb64f0279b0d9432accfa6023ff803bc4965212383697eee27a0f426d5f8d5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/raw-window-handle-0.6.2-2.txt",
+      "size": 836,
+      "sha256": "ae895c8576e682f310fb70d93d9f99b1dd82872094c54a8f6cdfe2ca5c2d6ecb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/raw-window-handle-0.6.2.txt",
+      "size": 1064,
+      "sha256": "9c5a80639a57c1c945570e7ebbca0706305849ce3c098021325cca9db2f7acc4",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/renderdoc-sys-1.1.0.txt",
+      "size": 1057,
+      "sha256": "24b2f2eff5a7622e87162823e260f00c6dfbce0e26d585d3d28c785f1edc80ed",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ring-0.17.14-2.txt",
+      "size": 14870,
+      "sha256": "005fc765ddc5115da796cca915baa9557abae13ff35e0a47c47affc56f6c414d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ring-0.17.14-3.txt",
+      "size": 731,
+      "sha256": "f025ccfb7dfb6bdfedc75ca0f67acc69e6fb4998143d834f7c2f38a29989680f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ring-0.17.14.txt",
+      "size": 499,
+      "sha256": "b3d734001a94efff3579978d953391aa7115f877657d25eb54037a43875d078a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ringbuf-0.3.3.txt",
+      "size": 1058,
+      "sha256": "6683f8a2ba538c11948da65a5c0d03ba4a7c6bbbd430c77f950b477a67586729",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/rustls-0.23.40-2.txt",
+      "size": 1082,
+      "sha256": "709e3175b4212f7b13aa93971c9f62ff8c69ec45ad8c6532a7e0c41d7a7d6f8c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/rustls-0.23.40.txt",
+      "size": 775,
+      "sha256": "7cfafc877eccc46c0e346ccbaa5c51bb6b894d2b818e617d970211e232785ad4",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/rustls-pki-types-1.14.1-2.txt",
+      "size": 1080,
+      "sha256": "9117d922e667125508dde62b02c1f57ed22f5ad21eb536aa2e2d99e1c796e639",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/rustls-pki-types-1.14.1.txt",
+      "size": 10835,
+      "sha256": "45fd05c4865e7c350b98ad7ac50e1b15462d49af4a91e9b0c9dd933dc9a69742",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/rustls-webpki-0.103.13.txt",
+      "size": 916,
+      "sha256": "5b698ca13897be3afdb7174256fa1574f8c6892b8bea1a66dd6469d3fe27885a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/scopeguard-1.2.0.txt",
+      "size": 1097,
+      "sha256": "fb77f0a9c53e473abe5103c8632ef9f0f2874d4fb3f17cb2d8c661aab9cee9d7",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/shlex-1.3.0-2.txt",
+      "size": 1092,
+      "sha256": "4455bf75a91154108304cb283e0fea9948c14f13e20d60887cf2552449dea3b1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/shlex-1.3.0.txt",
+      "size": 566,
+      "sha256": "553fffcd9b1cb158bc3e9edc35da85ca5c3b3d7d2e61c883ebcfa8a65814b583",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-10-2.txt",
+      "size": 1054,
+      "sha256": "1d075e895672c131d6adda4c0d03933e4162ca732d8c99b0cc497af884b8e703",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-10.txt",
+      "size": 919,
+      "sha256": "e34c58338bd89d43e709e226610d8f32b3e3c47f4ad9a99a8dc1d4ac7842488e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-11-2.txt",
+      "size": 1093,
+      "sha256": "c8167fdeeed46d3f244d3f85c5bf998ce889343691c32be2c61a8bc4b5c08333",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-11.txt",
+      "size": 1078,
+      "sha256": "b85dcd3e453d05982552c52b5fc9e0bdd6d23c6f8e844b984a88af32570b0cc0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-12.txt",
+      "size": 1676,
+      "sha256": "39cb0234065c92b9e6cee3830cbb52b1aa289aa8fe9ba2e66730fec5cf05c630",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-13.txt",
+      "size": 4016,
+      "sha256": "8eea8287e5876b539670cadb82e99f9a7afddec6f6730811be1daf25d2e9bcfd",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-14.txt",
+      "size": 1995,
+      "sha256": "f5062c9a188d81dfe66b56db4182dcf9e4b17c0d9b0d311a8e20b3a1b075c443",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-15.txt",
+      "size": 1339,
+      "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-2-2.txt",
+      "size": 561,
+      "sha256": "756c8d2ab2dc24f256e1455b5f03937f4933d83d7bc9f2d55009fc962377d512",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-2.txt",
+      "size": 1499465,
+      "sha256": "5647be074c8edf7339fd863055923a8fc80bc5610a8d4661ec3b767b9d392c27",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-3-2.txt",
+      "size": 1087,
+      "sha256": "b1d6df41ed3aa96806e74c729444d7c121d90e6660a6aed01d298e03fde475a0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-3.txt",
+      "size": 14423589,
+      "sha256": "d518ae2d76bc7a1f0cbf0069b8deafb56efc39c2614cab74a859ef0b467f8373",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-4.txt",
+      "size": 1267,
+      "sha256": "f32fb3b417a194167cfad068223fc975ba96c5960513a10f66a3c28720aec1df",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-5-2.txt",
+      "size": 1092,
+      "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-5.txt",
+      "size": 20137,
+      "sha256": "23ee78c8bae49cf08ea2f0c84945c66b987ebe4520881fb51b3dad4fb43d07c2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-6-2.txt",
+      "size": 4301,
+      "sha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-6.txt",
+      "size": 3320,
+      "sha256": "a3966c9410ef94a1efbfa9ec04e9c1994026a70623fbf0885ce36737bfba3b54",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-7-2.txt",
+      "size": 4769,
+      "sha256": "0cebe8aa1ba75c4fdf57946d6109ed0a8ce12ae6bb420bad4e4f302c5c147d78",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-7.txt",
+      "size": 17642,
+      "sha256": "54b212ba1f97f6948fa5486239ab505dd820b02e50cbfd296b4062c8609a70af",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-8-2.txt",
+      "size": 1069,
+      "sha256": "b9d2c1d909aa149996fd4c91dcb92b2362a04431640c1d200959da94caf8cde1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-8.txt",
+      "size": 34795,
+      "sha256": "05315fce6c35f79b8a35454828995fa26336f235895ac64557abc028f4ffcea2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-9-2.txt",
+      "size": 11344,
+      "sha256": "85bb5389360900e5ef360073a906f7ff6c2866995743242671091f376fe2c92d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/siglus-9.txt",
+      "size": 730,
+      "sha256": "0ff61769b238634e042ab759dddfd104a8e69d091e3600ae3410e401a6164381",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/simd-adler32-0.3.8.txt",
+      "size": 1078,
+      "sha256": "42a35170233e83e18856792e748de4c1ce4a63b2afce9a370c89ef3fe23f9f2d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/smallvec-1.15.1.txt",
+      "size": 1072,
+      "sha256": "0b28172679e0009b655da42797c03fd163a3379d5cfa67ba1f1655e974a2a1a9",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/stable_deref_trait-1.2.1.txt",
+      "size": 1056,
+      "sha256": "5e05b024f653a5ce199e77cbbbd42fb5553562ec714b819421ed0c3e552a75d7",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/static_assertions-1.1.0.txt",
+      "size": 1072,
+      "sha256": "ea084a2373ebc1f0902c09266e7bf25a05ab3814c1805bb017ffa7308f90c061",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/strsim-0.11.1.txt",
+      "size": 1166,
+      "sha256": "1e697ce8d21401fbf1bddd9b5c3fd4c4c79ae1e3bdf51f81761c85e11d5a89cd",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/subtle-2.6.1.txt",
+      "size": 1582,
+      "sha256": "d1fc1bc0d155df60b2e7705b6b2ae02a05c96f948e1cec6e2fb86360b09f346b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/synstructure-0.13.2.txt",
+      "size": 1052,
+      "sha256": "219920e865eee70b7dcfc948a86b099e7f4fe2de01bcca2ca9a20c0a033f2b59",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/tinyvec_macros-0.1.1-2.txt",
+      "size": 1062,
+      "sha256": "1dd8eca0f83669e75fa119e34fb9e1be9d16e3e9b6368962b8019db6e8ae5f7b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/tinyvec_macros-0.1.1-3.txt",
+      "size": 864,
+      "sha256": "41ace205715d9f19a3214218cc1c01d57c533e02cd0fef7c8e51a49a7fce5ac5",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/tinyvec_macros-0.1.1.txt",
+      "size": 11350,
+      "sha256": "4f44572785f35152c1fd2eadf565b7e079c0f300b4324f0af653419f9d76b735",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/tracing-0.1.44.txt",
+      "size": 1062,
+      "sha256": "898b1ae9821e98daf8964c8d6c7f61641f5f5aa78ad500020771c0939ee0dea1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ttf-parser-0.25.1.txt",
+      "size": 1061,
+      "sha256": "f3c9fe731c701ed77fd5fbaac573872af04dc5869385eb9bd5e3c73c42713814",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/twox-hash-2.1.3.txt",
+      "size": 1080,
+      "sha256": "f59bcb1c02654665f78a5f290bae76b6358137675f6459f51e6d474a4623d8ea",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/type-map-0.5.1-2.txt",
+      "size": 3225,
+      "sha256": "b47fb719a40d9ef9c8e3be525c41ce129c46d613cfc96a91bddd7c19dcebf7a1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/type-map-0.5.1.txt",
+      "size": 22600,
+      "sha256": "f70ebc7cddd5befd46ce2aa9a8782deb7b59ac9fd55e8c0e10647d1ac66cecd1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/unicode-ident-1.0.24.txt",
+      "size": 1995,
+      "sha256": "f7db81051789b729fea528a63ec4c938fdcb93d9d61d97dc8cc2e9df6d47f2a1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/unicode-width-0.1.14.txt",
+      "size": 321,
+      "sha256": "23860c2a7b5d96b21569afedf033469bab9fe14a1b24a35068b8641c578ce24d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/untrusted-0.9.0.txt",
+      "size": 769,
+      "sha256": "7abd9b6960dcf7d4d0a48606a5b71bfe37d472db68d70637f3a58a56785f1621",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/ureq-2.12.1.txt",
+      "size": 1072,
+      "sha256": "7e5886959f67f8c75063a9d55cd3cb08c5a8cbea9a944fa1df2d4ae038f53721",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/utf8_iter-1.0.4.txt",
+      "size": 1742,
+      "sha256": "c30152c94a6d75e021adbc52b3a52470366a46edb917e17deae3259251af244c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/utf8parse-0.2.2.txt",
+      "size": 1052,
+      "sha256": "e4c9b06fa850cb9b540a5e400e9f6394cf15efcf4098144de477d1d3dae10150",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/version_check-0.9.5.txt",
+      "size": 1085,
+      "sha256": "b7e650f3fce5c53249d1cdc608b54df156a97edd636cf9d23498d0cfe7aec63e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/web-time-0.2.4-2.txt",
+      "size": 1065,
+      "sha256": "f428305bbf2e70fbd807af0f3c7ac1b7acfb95311640f451e9d2e48db6d7e96b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/web-time-0.2.4.txt",
+      "size": 11338,
+      "sha256": "54a744942eb3fa63a74d8d359989ed6962c04f3f10ff20cfa08ff8aa7efbe4e6",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/webpki-roots-0.26.11.txt",
+      "size": 2371,
+      "sha256": "e271993808fec50ab29350b39539cdec611a9103f827e0aa26d61da70e2d33f8",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/wgpu-0.20.1.txt",
+      "size": 1099,
+      "sha256": "885bec93203d42cd1e93c5b273626e1cf52b519a31fc49f45bd689f77ff62378",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/xkbcommon-dl-0.4.2.txt",
+      "size": 1082,
+      "sha256": "d1459611105ccc285fd21dec180864b33490d946150356599bd3105e40705861",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/xkeysym-0.2.1-2.txt",
+      "size": 1060,
+      "sha256": "875e64a5df9f892ebd29c71ad0b58a765b5789d7e9142aa70ec07fae74a67686",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/xkeysym-0.2.1-3.txt",
+      "size": 845,
+      "sha256": "319736510aa7dbd6f49546f6ee57c787dbe2c7dfa0507dfbd543375f86a4416d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/xkeysym-0.2.1.txt",
+      "size": 11347,
+      "sha256": "d4aca2f5936fa638b062f0585df37eec086ca8620d437b2d6be2c95f01199d1a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/zerocopy-0.8.39-2.txt",
+      "size": 1275,
+      "sha256": "83c1763356e822adde0a2cae748d938a73fdc263849ccff6b27776dff213bd32",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/zerocopy-0.8.39-3.txt",
+      "size": 1060,
+      "sha256": "1a2f5c12ddc934d58956aa5dbdd3255fe55fd957633ab7d0d39e4f0daa73f7df",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/zerocopy-0.8.39.txt",
+      "size": 11350,
+      "sha256": "9d185ac6703c4b0453974c0d85e9eee43e6941009296bb1f5eb0b54e2329e9f3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/zeroize-1.8.2.txt",
+      "size": 1095,
+      "sha256": "0b04ee3ce0021a922f43f37a17fee09a5a1ee6d1f4e149d5bf75b72395a49c72",
+      "mode": 420
+    },
+    {
+      "path": "files/siglus-profile.json",
+      "size": 561,
+      "sha256": "8319a7e5ac7b2c5243b90d19d351edb21e00d2024bc2e80523d0fe6df8cff054",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 33360,
+      "mode": 420,
+      "sha256": "a6488a2f0a3ca80e29a3fdb9311a2f0c2528532a3b24d2404e1da02f85235e28"
+    }
+  ],
+  "redistribution": "bundle",
+  "aliases": {
+    "schema": 1,
+    "files": {
+      "files/licenses/siglus.txt": "files/LICENSE-siglus_rs.txt"
+    }
+  }
+}
