@@ -165,6 +165,8 @@ export async function buildNxNative({work,output,dependencyWork,jobs=4,version=p
     json(path.join(output,'runtime.json'),runtime);
     const origins={schemaVersion:1,id:pin.id,version,source:pin.source,producerInputs:owned,dependencies,nuget:JSON.parse(fs.readFileSync(lock))};json(path.join(output,'source.json'),origins);
     addLicenses(output,pin.id,source);
+    const closure=nativeClosure(output);
+    for(const file of files(output)){const mode=fs.statSync(file).mode&0o777;fs.chmodSync(file,mode&0o111?0o755:0o644);}
     const inventory=B.fileInventory(output).filter(file=>!file.endsWith('.inputs')).map(relative=>{
         const file=path.join(output,relative),stat=fs.statSync(file);let architectures;
         if(nativeFile(file))architectures=Native.readMachOArchitectures(file,{allowLibrary:true});
