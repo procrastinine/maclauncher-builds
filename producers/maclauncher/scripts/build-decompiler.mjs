@@ -22,7 +22,7 @@ const systemLink=value=>value.startsWith('/usr/lib/')||value.startsWith('/System
 
 export async function buildDecompiler({project,version:selectedVersion,arch,output,work=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'decompiler-')),'work'),dependencies}){
  const version=buildRecord(resolveProject(project,path.resolve(import.meta.dirname,'../../..'),{resolvePins:false}),selectedVersion).version;
- const metadata=profiles.find(row=>row.managerId===project),profile={...metadata,upstreamRevision:gitlink("producers/maclauncher/src/external/"+metadata.repo)},release=profile.releases.find(row=>row.version===version);
+ const metadata=profiles.find(row=>row.managerId===project),profile=metadata&&{...metadata,upstreamRevision:gitlink("producers/maclauncher/src/external/"+metadata.repo)},release=profile?.releases.find(row=>row.version===version);
  if(!release)throw Error('The decompiler profiles have no release for '+project+'.');
  const cpu=arch==='x64'?'x86_64':'arm64',sourceDir=path.join(external,profile.repo),userDataDir=path.join(work,'user-data');
  // CMake reads its target CPU from this variable; a runner of the same CPU builds natively.
