@@ -16,10 +16,7 @@
     "repository": "https://chromium.googlesource.com/external/github.com/KhronosGroup/Vulkan-Loader",
     "gitlink": "sources/vulkan-loader"
   },
-  "vulkanHeaders": {
-    "path": "sources/anyps5/3rdparty/Vulkan-Headers",
-    "repository": "https://github.com/KhronosGroup/Vulkan-Headers.git"
-  },
+  "vulkanHeaders": {},
   "tools": {
     "meson": "1.12.1",
     "ninja": "1.13.2",

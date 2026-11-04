@@ -44,5 +44,112 @@
     "sha256": "118d8601c12dd6a44f52423e68ca9083cc9f2bfe72da7a8c1acb22a80ae3550b",
     "bytes": 471354,
     "url": "https://downloads.xiph.org/releases/opus/opusfile-0.12.tar.gz"
+  },
+  "sdl2": {
+    "repository": "https://github.com/libsdl-org/SDL",
+    "revision": "5d249570393f7a37e037abf22cd6012a4cc56a71",
+    "sha256": "5f5993c530f084535c65a6879e9b26ad441169b3e25d789d83287040a9ca5165",
+    "bytes": 7630262,
+    "url": "https://github.com/libsdl-org/SDL/releases/download/release-2.32.10/SDL2-2.32.10.tar.gz"
+  },
+  "freetype": {
+    "repository": "https://gitlab.com/freetype/freetype",
+    "revision": "0a0221a1347e2f1e07c395263540026e9a0aa7c7",
+    "sha256": "11cd478953fc1d382f20a233b8e2aed6c31b47cbf0568c4bdb3334bcc1550698",
+    "bytes": 2517889,
+    "url": "https://gitlab.com/freetype/freetype/-/archive/0a0221a1347e2f1e07c395263540026e9a0aa7c7/freetype-0a0221a1347e2f1e07c395263540026e9a0aa7c7.tar.gz"
+  },
+  "graphite2": {
+    "repository": "https://github.com/silnrsi/graphite",
+    "revision": "ca8d821e60a15b6c24e404c9086992c975d8e1cf",
+    "sha256": "7bd38dd34db4f52de113c1b3645de5d185f496381a7aee2a6c4a8f0721b1015f",
+    "bytes": 13700302
+  },
+  "harfbuzz": {
+    "repository": "https://github.com/harfbuzz/harfbuzz",
+    "revision": "c7a7457b7385f33178e8cf87615ca077a810bbe7",
+    "sha256": "10dcea60bd85ff219490d55525630650ac8c57044c4efdc878162f286451775b",
+    "bytes": 38888629
+  },
+  "sdl2_ttf": {
+    "repository": "https://github.com/libsdl-org/SDL_ttf",
+    "revision": "2a891473eaf05ba1707a4b7913e6c4db7de7458a",
+    "sha256": "95a5cc1b0f244cdb63bef358899ad2e95261292a1658cc7b833992381d6e4af5",
+    "bytes": 8841206
+  },
+  "ogg": {
+    "repository": "https://github.com/xiph/ogg",
+    "revision": "be05b13e98b048f0b5a0f5fa8ce514d56db5f822",
+    "sha256": "b2ff5c003e5697507169f7d614d64dc4e8bf030c85ad081bec75c164566f8246",
+    "bytes": 254382
+  },
+  "flac": {
+    "repository": "https://github.com/xiph/flac",
+    "revision": "1507800de4b70e21be71f38caa0d9079d0bc6e45",
+    "sha256": "d80ef5facdb21972efe91774da03d6b9abf216aa17093d740fcc411cd8afbb41",
+    "bytes": 976062
+  },
+  "vorbis": {
+    "repository": "https://github.com/xiph/vorbis",
+    "revision": "0657aee69dec8508a0011f47f3b69d7538e9d262",
+    "sha256": "6ccc3fa4cfd3072f9a772025cc8fd712098d081c00171b09b6627ffced7faa88",
+    "bytes": 1235008
+  },
+  "opus": {
+    "repository": "https://github.com/xiph/opus",
+    "revision": "22244de5a79bd1d6d623c32e72bf1954b56235be",
+    "sha256": "3267aa969b2b26542417f57819a5bc25d5079355300307dd2dddc7c704aed418",
+    "bytes": 4888967
+  },
+  "sndfile": {
+    "repository": "https://github.com/libsndfile/libsndfile",
+    "revision": "72f6af15e8f85157bd622ed45b979025828b7001",
+    "sha256": "188839b1bedccdf213034fcc74cc2773b170cfa3b2d7a462ac04fb982fcef7b3",
+    "bytes": 685430
+  },
+  "turbojpeg": {
+    "repository": "https://github.com/libjpeg-turbo/libjpeg-turbo",
+    "revision": "c85e6b905bf237038faa936dab160ebfc5da0344",
+    "sha256": "6f30092cef9fb839779646608f4ee14ae3cbac989c47fa05e841b0841f09878e",
+    "bytes": 2537858,
+    "url": "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.2.0/libjpeg-turbo-3.2.0.tar.gz"
+  },
+  "cglm": {
+    "repository": "https://github.com/recp/cglm",
+    "revision": "144d1e7c29b3b0c6dede7917a0476cc95248559c",
+    "sha256": "601a0e687ff4b67a285d10e74c6aeff12be9accb9a38e1aecd2dc999c3536021",
+    "bytes": 707260
+  },
+  "glew": {
+    "repository": "https://github.com/nigels-com/glew",
+    "revision": "285c35d395979771f9409710b2d401db8026e15a",
+    "sha256": "b64790f94b926acd7e8f84c5d6000a86cb43967bd1e688b03089079799c9e889",
+    "bytes": 866060,
+    "url": "https://github.com/nigels-com/glew/releases/download/glew-2.3.1/glew-2.3.1.tgz"
+  },
+  "sdlHeaders": {
+    "repository": "https://github.com/libsdl-org/SDL",
+    "revision": "53dea9830964eee8b5c2a7ee0a65d6e268dc78a1"
+  },
+  "zstd": {
+    "repository": "https://github.com/facebook/zstd",
+    "revision": "f8745da6ff1ad1e7bab384bd1f9d742439278e99",
+    "sha256": "4b0bd1f0cfb25e61b9103c35f27395530ff5b4c0d2513a00fd745849e85ea52c"
+  },
+  "vulkanHeaders": {
+    "repository": "https://github.com/KhronosGroup/Vulkan-Headers",
+    "revision": "2fa203425eb4af9dfc6b03f97ef72b0b5bcb8350"
+  },
+  "glslangNx": {
+    "repository": "https://github.com/KhronosGroup/glslang",
+    "revision": "ba1640446f3826a518721d1f083f3a8cca1120c3"
+  },
+  "spirvCross": {
+    "repository": "https://github.com/KhronosGroup/SPIRV-Cross",
+    "revision": "300681bbcb8365a8d1eacdacdbdd0249bbf1d6b1"
+  },
+  "sdl3Prosper": {
+    "repository": "https://github.com/libsdl-org/SDL",
+    "revision": "f5e5f6588921eed3d7d048ce43d9eb1ff0da0ffc"
   }
 }

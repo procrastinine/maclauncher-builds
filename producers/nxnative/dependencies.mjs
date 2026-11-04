@@ -1,3 +1,5 @@
+import {checkoutSource} from '../../tools/build-source.mjs';
+import sharedDependencies from '../dependencies.json' with {type:'json'};
 import {gitlink} from '../../lib/pins.mjs';
 import {addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs/promises';
@@ -57,21 +59,12 @@ async function extractTar(archive, destination, selected) {
   await run('/usr/bin/tar', ['-xf', archive, '-C', destination, ...(selected ? [selected] : [])]);
 }
 
-async function verifySource(input) {
-  const source = path.join(repository, input.path);
-  input.revision=input.path.startsWith('sources/anyps5/')?await run('git',['-C',path.join(repository,'sources/anyps5'),'rev-parse','HEAD:'+input.path.slice('sources/anyps5/'.length)]):gitlink(input.path);
-  const revision = await run('git', ['-C', source, 'rev-parse', 'HEAD']);
-  const origin = await run('git', ['-C', source, 'remote', 'get-url', 'origin']);
-  const status = await run('git', ['-C', source, 'status', '--porcelain', '--untracked-files=all']);
-  const normalize = value => value.replace(/\.git$/, '').replace(/\/$/, '');
-  if (revision !== input.revision || normalize(origin) !== normalize(input.repository) || status)
-    throw new Error(`Dependency source differs from its pin: ${input.path}`);
-  return source;
-}
 
 
 async function buildTool(tool, { work, output, jobs }) {
-  const source = await verifySource(tool.source);
+  const pin=sharedDependencies[{glslangValidator:'glslangNx','spirv-cross':'spirvCross',zstd:'zstd'}[tool.name]];
+  const source=checkoutSource({...pin,destination:path.join(work,'source',tool.name)});
+  tool.source={...tool.source,...pin};
   const build = path.join(work, 'build', tool.name);
   const log = path.join(work, tool.name + '.log');
   await fs.mkdir(build, { recursive: true });

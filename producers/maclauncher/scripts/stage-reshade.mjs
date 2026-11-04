@@ -1,3 +1,4 @@
+import sharedDependencies from '../../dependencies.json' with {type:'json'};
 import dependencies from '../../../producers/dependencies.json' with {type:'json'};
 const {shaderc}=dependencies;
 import {gitlink} from "../../../lib/pins.mjs";
@@ -68,7 +69,7 @@ const pins = registeredSources.sources.map(entry => {
   if (!consumed.has(entry.sourcePath)) throw new Error("The graphics source profile contains an undeclared dependency.");
   const directory = options["--source-root"]?path.resolve(options["--source-root"],entry.submodulePath):path.resolve(import.meta.dirname, "..", entry.submodulePath);
   const actual = execFileSync("git", ["-C", directory, "rev-parse", "HEAD"], {encoding: "utf8"}).trim();
-  if (actual !== (entry.commit||(entry.id==='macfx-spirv-headers'?execFileSync('git',['-C',path.resolve(directory,'../..'),'rev-parse',gitlink('producers/maclauncher/src/external/macfx-reshade')+':deps/spirv'],{encoding:'utf8'}).trim():gitlink('producers/maclauncher/'+entry.submodulePath)))) throw new Error("Initialize the selected graphics source commit: " + entry.submodulePath);
+  if (actual !== (entry.commit||(entry.id==='macfx-spirv-cross'?sharedDependencies.spirvCross.revision:entry.id==='macfx-spirv-headers'?execFileSync('git',['-C',path.resolve(directory,'../..'),'rev-parse',gitlink('producers/maclauncher/src/external/macfx-reshade')+':deps/spirv'],{encoding:'utf8'}).trim():gitlink('producers/maclauncher/'+entry.submodulePath)))) throw new Error("Initialize the selected graphics source commit: " + entry.submodulePath);
   execFileSync("git", ["-C", directory, "diff", "--exit-code", "HEAD", "--"], {stdio: "pipe"});
   return ` ${actual} ${entry.sourcePath}`;
 });
@@ -107,17 +108,16 @@ if(options["--xess-host"]){
   }else if(features.graphics.xessGenerationAPI===1)throw Error("The declared XeSS frame-generation operation requires its complete original GPU host.");
   const upstream=path.resolve(upstreamRoot,"src/external/xess"),actual=execFileSync("git",["-C",upstream,"rev-parse","HEAD"],{encoding:"utf8"}).trim();if(actual!==gitlink(source.gitlink))throw Error("The original XeSS SDK pin differs from the GPU host.");execFileSync("git",["-C",upstream,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});pins.push(` ${actual} third_party/xess-original`);
   if(backends.includes("vulkan")){
-    const headers=JSON.parse(fs.readFileSync(path.join(ownedRoot,"native/vulkan-source.json"))),headerRoot=path.resolve(upstreamRoot,"src/external/krkrsdl2/external/SDL");
-    if(hostPaths.vulkan!=="x86_64-windows/maclauncher-xess-vulkan-host.exe"||JSON.stringify(metadata.source.vulkanHeaders)!==JSON.stringify(headers)||headers.repository!=="https://github.com/libsdl-org/SDL"||!Array.isArray(headers.headers)||headers.headers.length!==3||execFileSync("git",["-C",headerRoot,"rev-parse","HEAD"],{encoding:"utf8"}).trim()!==execFileSync('git',['-C',path.resolve(upstreamRoot,'src/external/krkrsdl2'),'rev-parse',gitlink('producers/maclauncher/src/external/krkrsdl2')+':external/SDL'],{encoding:'utf8'}).trim()||execFileSync("git",["-C",headerRoot,"remote","get-url","origin"],{encoding:"utf8"}).trim().replace(/\.git$/,"")!==headers.repository)throw Error("The XeSS Vulkan header source differs from its declared pin.");
-    execFileSync("git",["-C",headerRoot,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});
+    const headers=JSON.parse(fs.readFileSync(path.join(ownedRoot,"native/vulkan-source.json")));
+    if(hostPaths.vulkan!=="x86_64-windows/maclauncher-xess-vulkan-host.exe"||JSON.stringify(metadata.source.vulkanHeaders)!==JSON.stringify(headers)||headers.repository!=="https://github.com/libsdl-org/SDL"||!Array.isArray(headers.headers)||headers.headers.length!==3)throw Error("The XeSS Vulkan header source differs from its declared pin.");
     required.add(hostPaths.vulkan);
     for(const row of headers.headers){
       if(!["vulkan.h","vulkan_core.h","vk_platform.h"].includes(row.path)||!/^\w{64}$/.test(row.sha256))throw Error("Invalid XeSS Vulkan header identity.");
-      const file=path.join(headerRoot,headers.headerDirectory,row.path),snapshot=path.join(directory,"source/vulkan",row.path);
+      const file=path.join(directory,"source/vulkan",row.path),snapshot=file;
       if(digest(fs.readFileSync(file))!==row.sha256||digest(fs.readFileSync(snapshot))!==row.sha256)throw Error("The XeSS Vulkan header changed: "+row.path);
       required.add("source/vulkan/"+row.path);extraOwned.set("maclauncher/xess/native/vulkan/"+row.path,file);
     }
-    pins.push(` ${headers.commit} third_party/xess-vulkan-headers`);
+    pins.push(` ${sharedDependencies.sdlHeaders.revision} third_party/xess-vulkan-headers`);
   }else if(metadata.source.vulkanHeaders)throw Error("The XeSS Vulkan source is declared without its GPU host.");
   for(const row of metadata.files){if(typeof row.path!=="string")throw Error("The XeSS GPU host contains an undeclared resource.");required.delete(row.path);const file=path.join(directory,row.path),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==row.size||digest(fs.readFileSync(file))!==row.sha256)throw Error("The XeSS GPU host resource changed: "+row.path);if(!row.path.startsWith("source/"))optionalInputs.set("xess/"+row.path,file);if(row.path.endsWith(".so"))optionalLoad.set("xess/"+row.path,{architectures:["x86_64"],minimumMacOS:metadata.minimumMacOS});}
   if(required.size||digest(fs.readFileSync(path.join(directory,"source/source.json")))!==digest(fs.readFileSync(path.join(ownedRoot,"source.json"))))throw Error("The XeSS GPU host source closure is incomplete.");

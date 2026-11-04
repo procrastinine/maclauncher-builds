@@ -313,7 +313,9 @@
         "url": "https://github.com/KhronosGroup/SPIRV-Cross",
         "repository": "KhronosGroup/SPIRV-Cross",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/macfx-spirv-cross"
+          "file": "producers/dependencies.json",
+          "pointer": "/spirvCross/revision",
+          "repositoryPointer": "/spirvCross/repository"
         }
       },
       {
@@ -622,8 +624,6 @@
         "producers/maclauncher/src/external/fsr3-sdk",
         "producers/maclauncher/src/external/fsr4-metal",
         "producers/maclauncher/src/external/godot-camera",
-        "producers/maclauncher/src/external/krkrsdl2",
-        "producers/maclauncher/src/external/krkrsdl2/external/SDL",
         "producers/maclauncher/src/external/libplacebo",
         "producers/maclauncher/src/external/libplacebo/3rdparty/Vulkan-Headers",
         "producers/maclauncher/src/external/libplacebo/3rdparty/fast_float",
@@ -632,7 +632,6 @@
         "producers/maclauncher/src/external/macfx-mako",
         "producers/maclauncher/src/external/macfx-reshade",
         "producers/maclauncher/src/external/macfx-reshade-shaders",
-        "producers/maclauncher/src/external/macfx-spirv-cross",
         "producers/maclauncher/src/external/macfx-reshade/deps/spirv",
         "producers/maclauncher/src/external/macfx-vkd3d",
         "producers/maclauncher/src/external/sgsr2",
@@ -1238,12 +1237,9 @@
         "url": "https://github.com/libsndfile/libsndfile",
         "repository": "libsndfile/libsndfile",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "sndfile"
-          },
-          "field": "/revision"
+          "file": "producers/dependencies.json",
+          "pointer": "/sndfile/revision",
+          "repositoryPointer": "/sndfile/repository"
         }
       }
     ],
@@ -1279,9 +1275,6 @@
         "cmake",
         "ninja",
         "pkgconf"
-      ],
-      "submodules": [
-        "sources/anyps5"
       ]
     },
     "versionBindings": [
@@ -2208,11 +2201,9 @@
         "url": "https://github.com/libsdl-org/SDL",
         "repository": "libsdl-org/SDL",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.js",
-          "pointer": "/PIN/dependencies",
-          "match": {
-            "id": "sdl2"
-          }
+          "file": "producers/dependencies.json",
+          "pointer": "/sdl2/revision",
+          "repositoryPointer": "/sdl2/repository"
         }
       }
     ],
@@ -2246,9 +2237,6 @@
         "ninja",
         "pkgconf",
         "python@3.14"
-      ],
-      "submodules": [
-        "sources/anyps5"
       ]
     }
   },
@@ -2274,11 +2262,9 @@
         "url": "https://github.com/libsndfile/libsndfile",
         "repository": "libsndfile/libsndfile",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "sndfile"
-          }
+          "file": "producers/dependencies.json",
+          "pointer": "/sndfile/revision",
+          "repositoryPointer": "/sndfile/repository"
         }
       }
     ],
@@ -2312,9 +2298,6 @@
         "ninja",
         "pkgconf",
         "python@3.14"
-      ],
-      "submodules": [
-        "sources/anyps5"
       ]
     }
   },
@@ -2365,9 +2348,6 @@
         "pkgconf",
         "nasm",
         "python@3.14"
-      ],
-      "submodules": [
-        "sources/anyps5"
       ]
     }
   },
@@ -2429,9 +2409,6 @@
         "ninja",
         "pkgconf",
         "python@3.14"
-      ],
-      "submodules": [
-        "sources/anyps5"
       ]
     }
   },

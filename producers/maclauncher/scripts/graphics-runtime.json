@@ -96,7 +96,7 @@
       }
     },
     "sdl-vulkan": {
-      "path": "src/external/krkrsdl2/external/SDL",
+      "path": "src/external/shared-sdl-headers",
       "pin": {
         "file": "src/modules/shared/reshade/xess/native/vulkan-source.json",
         "repository": "/repository"

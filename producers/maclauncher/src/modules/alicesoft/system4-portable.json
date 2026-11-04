@@ -31,35 +31,23 @@
         "-DWITH_TURBOJPEG=ON",
         "-DWITH_SIMD=ON",
         "-DBUILD=maclauncher-portable-v2"
-      ],
-      "sourceUrl": "https://github.com/libjpeg-turbo/libjpeg-turbo",
-      "archiveSha256": "45209a3f315ed6156dac8d7fa451b8be62d83f2daa5581cb6b94ee9f3f82cf6f",
-      "archiveBytes": 2540379
+      ]
     },
     {
       "id": "cglm",
       "name": "cglm",
       "version": "0.9.6",
-      "revision": "144d1e7c29b3b0c6dede7917a0476cc95248559c",
-      "archiveUrl": "https://codeload.github.com/recp/cglm/tar.gz/{revision}",
-      "archiveSha256": "601a0e687ff4b67a285d10e74c6aeff12be9accb9a38e1aecd2dc999c3536021",
-      "archiveBytes": 707260,
       "buildSystem": "cmake",
       "options": [
         "-DCGLM_SHARED=ON",
         "-DCGLM_STATIC=OFF",
         "-DCGLM_USE_TEST=OFF"
-      ],
-      "repository": "https://github.com/recp/cglm"
+      ]
     },
     {
       "id": "glew",
       "name": "GLEW",
       "version": "2.3.1",
-      "revision": "285c35d395979771f9409710b2d401db8026e15a",
-      "archiveUrl": "https://github.com/nigels-com/glew/releases/download/glew-2.3.1/glew-2.3.1.tgz",
-      "archiveSha256": "b64790f94b926acd7e8f84c5d6000a86cb43967bd1e688b03089079799c9e889",
-      "archiveBytes": 866060,
       "buildSystem": "cmake",
       "sourceSubdirectory": "build/cmake",
       "options": [
@@ -69,8 +57,7 @@
         "-DGLEW_EGL=OFF",
         "-DGLEW_OSMESA=OFF",
         "-DGLEW_REGAL=OFF"
-      ],
-      "repository": "https://github.com/nigels-com/glew"
+      ]
     },
     {
       "id": "webp",
@@ -85,7 +72,8 @@
         "-DWEBP_BUILD_WEBPMUX=OFF",
         "-DWEBP_BUILD_EXTRAS=OFF",
         "-DWEBP_BUILD_FUZZTEST=OFF"
-      ]
+      ],
+      "version": "1.6.0"
     }
   ]
 }
