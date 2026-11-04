@@ -125,7 +125,7 @@
   },
   {
     "id": "love-luasteam",
-    "name": "L\u00d6VE LuaSteam bridge",
+    "name": "LÖVE LuaSteam bridge",
     "purpose": "LuaSteam 4 binding against the selected host Lua VM.",
     "producer": {
       "kind": "maclauncher",
@@ -363,8 +363,7 @@
         "url": "https://github.com/godotengine/godot",
         "repository": "godotengine/godot",
         "pin": {
-          "file": "producers/maclauncher/src/modules/godot/graphics/source.json",
-          "pointer": ""
+          "gitlink": "producers/maclauncher/src/external/godot-camera"
         }
       },
       {
@@ -373,8 +372,7 @@
         "url": "https://github.com/3Shain/dxmt",
         "repository": "3Shain/dxmt",
         "pin": {
-          "file": "producers/maclauncher/src/modules/crossover/temporal/dxmt/source.json",
-          "pointer": ""
+          "gitlink": "producers/maclauncher/src/external/dxmt-camera"
         }
       },
       {
@@ -392,9 +390,7 @@
         "provider": "github",
         "url": "https://github.com/haasn/libplacebo",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/scene-profile.json",
-          "pointer": "/SOURCE",
-          "repositoryPointer": "/SOURCE/origin"
+          "gitlink": "producers/maclauncher/src/external/libplacebo"
         }
       },
       {
@@ -406,17 +402,6 @@
           "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/scene-profile.json",
           "pointer": "/VULKAN_HEADERS",
           "repositoryPointer": "/VULKAN_HEADERS/origin"
-        }
-      },
-      {
-        "id": "libplacebo-fast-float",
-        "repository": "fastfloat/fast_float",
-        "provider": "github",
-        "url": "https://github.com/fastfloat/fast_float",
-        "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/scene-profile.json",
-          "pointer": "/FAST_FLOAT",
-          "repositoryPointer": "/FAST_FLOAT/origin"
         }
       },
       {

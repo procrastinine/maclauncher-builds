@@ -68,7 +68,6 @@
     "repository": "https://github.com/zgauthier2000/fsr4-shader-performance-overrides",
     "commit": "69cc9b9979a8fe90b97b1ed2f20e94487df261e2",
     "path": "research/lossy2/weights_lossy2.npz",
-    "url": "https://raw.githubusercontent.com/zgauthier2000/fsr4-shader-performance-overrides/69cc9b9979a8fe90b97b1ed2f20e94487df261e2/research/lossy2/weights_lossy2.npz",
     "sha256": "9a458f65812848b273dace03edcbd346d66364d5d41a99d0963adaa601a3c93c"
   },
   "gitlink": "producers/maclauncher/src/external/fsr4-metal"

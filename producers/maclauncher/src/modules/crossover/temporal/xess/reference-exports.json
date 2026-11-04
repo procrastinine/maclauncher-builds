@@ -1,7 +1,6 @@
 {
   "schema": 1,
   "repository": "https://github.com/intel/xess",
-  "revision": "de0fb9c1c510661c571164e1418ceca8101dab69",
   "library": "libxess_dx11.dll",
   "sha256": "c7cfe86f0c9d94e4fb3696d3cd5035e2bbb6a8b1b0572f8b7395a4cdfd0c625e",
   "exports": [
@@ -209,5 +208,6 @@
       "name": "xessStartDump",
       "ordinal": 51
     }
-  ]
+  ],
+  "gitlink": "producers/maclauncher/src/external/xess"
 }

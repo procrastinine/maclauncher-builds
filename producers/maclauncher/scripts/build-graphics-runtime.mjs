@@ -8,7 +8,6 @@ import {execFileSync, spawnSync} from "node:child_process";
 import {pathToFileURL} from "node:url";
 import {createRequire} from "node:module";
 import {buildInput} from "../../../tools/build-input.mjs";
-import {downloadFile} from "../../../tools/download.mjs";
 import {gitlink} from "../../../lib/pins.mjs";
 
 const repository = path.resolve(import.meta.dirname, "..");
@@ -144,11 +143,6 @@ export function resolveInput(id, {overrides = {}, work, coreRoot = work && path.
 /** Download a pinned input into the work directory and verify its checksum. */
 export async function fetchInput(id, work) {
   const {entry, url, sha256, archives, member, directory, fetched} = inputLocation(id, work);
-  if(entry.notice){
-    fs.mkdirSync(directory,{recursive:true});
-    await downloadFile(url,fetched).catch(error=>console.warn('::warning::Notice candidate was not fetched: '+error.message));
-    return fetched;
-  }
   if (!(archives || [{url, sha256}]).every(row => row.url && row.sha256)) throw Error("This graphics input has no pinned download: " + id);
   if (fs.existsSync(fetched)) return fetched;
   const download=(address,expected)=>buildInput({url:address,sha256:expected,headers:entry.headers||{}});

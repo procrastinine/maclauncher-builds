@@ -1,4 +1,4 @@
-import {addLicense} from '../../../../../../../lib/licenses.mjs';
+import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -14,7 +14,7 @@ export async function buildDependencies({work,architecture,meson,ninja,python}) 
  const source=path.join(work,'source'),build=path.join(work,'build'),prefix=path.join(work,'install');
  fs.mkdirSync(source,{recursive:true});fs.mkdirSync(build,{recursive:true});fs.mkdirSync(prefix,{recursive:true});
  for(const row of profile.sources){const target=path.join(source,row.id);if(fs.existsSync(target))continue;
-  const archive=await buildInput(row);fs.mkdirSync(target);run('tar',['-xf',archive,'--strip-components=1','-C',target]);}
+  const archive=await buildInput(row);fs.mkdirSync(target);run('tar',['-xf',archive,'--strip-components=1','-C',target]);addLicenses(prefix,row.id,target);}
  const sdk=execFileSync('xcrun',['--sdk','macosx','--show-sdk-path'],{encoding:'utf8'}).trim();
  const flags=['-arch',architecture,'-mmacosx-version-min='+profile.minimumMacOS,'-Werror=unguarded-availability-new','-ffile-prefix-map='+work+'=dependencies'];
  const env={...process.env,MACOSX_DEPLOYMENT_TARGET:profile.minimumMacOS,SDKROOT:sdk,
@@ -29,13 +29,11 @@ export async function buildDependencies({work,architecture,meson,ninja,python}) 
  run('cmake',['--build',shaderBuild,'--target','shaderc_shared','-j','4'],{env});
  const shaderRoot=path.join(prefix,'shaderc/shaderc/'+profile.shadercVersion),shaderLib=path.join(shaderRoot,'lib');fs.mkdirSync(shaderLib,{recursive:true});
  fs.copyFileSync(path.join(shaderBuild,'upstream/libshaderc/libshaderc_shared.1.dylib'),path.join(shaderLib,'libshaderc_shared.1.dylib'));
- fs.cpSync(path.join(source,'shaderc/libshaderc/include'),path.join(shaderRoot,'include'),{recursive:true});addLicense(shaderRoot,'shaderc',path.join(source,'shaderc/LICENSE'));
+ fs.cpSync(path.join(source,'shaderc/libshaderc/include'),path.join(shaderRoot,'include'),{recursive:true});
  const lcmsBuild=path.join(build,'lcms2'),lcmsRoot=path.join(prefix,'little-cms2/little-cms2/'+profile.lcmsVersion);
  if(!fs.existsSync(path.join(lcmsBuild,'build.ninja')))run(meson,['setup',lcmsBuild,path.join(source,'lcms2'),'--prefix',lcmsRoot,'--libdir=lib','--buildtype=release','--wrap-mode=nodownload','-Ddefault_library=shared','-Djpeg=disabled','-Dtiff=disabled','-Dutils=false','-Dtests=disabled'],{env});
  run(ninja,['-C',lcmsBuild,'-j4'],{env});run(ninja,['-C',lcmsBuild,'install'],{env});
  const lcmsLib=path.join(lcmsRoot,'lib'),actual=fs.readdirSync(lcmsLib).find(name=>/^liblcms2\..*\.dylib$/.test(name)&&fs.lstatSync(path.join(lcmsLib,name)).isFile());
  if(!actual)throw Error('Little CMS did not produce a shared library.');if(actual!=='liblcms2.2.dylib')fs.copyFileSync(path.join(lcmsLib,actual),path.join(lcmsLib,'liblcms2.2.dylib'));
- addLicense(lcmsRoot,'Little-CMS',path.join(source,'lcms2/LICENSE'));
- const notices=profile.sources.map(row=>{const root=path.join(source,row.id),name=fs.existsSync(path.join(root,'LICENSE'))?'LICENSE':fs.existsSync(path.join(root,'COPYING'))?'COPYING':'LICENSE.txt';return {name:row.id+'.LICENSE',file:path.join(root,name)};});
- return {inputs:prefix,source:profile.sources,notices,shadercVersion:profile.shadercVersion,lcmsVersion:profile.lcmsVersion};
+ return {inputs:prefix,source:profile.sources,shadercVersion:profile.shadercVersion,lcmsVersion:profile.lcmsVersion};
 }

@@ -609,7 +609,7 @@ const directoryRelative = `reshade/${version}/${packageArch}`;
 const destination = options["--output"]||path.join(resourceRoot, directoryRelative);
 if(options["--output"]&&fs.existsSync(destination))throw Error("Use a new isolated graphics output directory.");
 fs.mkdirSync(destination, { recursive: true });
-for (const directory of ["include", "effects", "licenses"]) fs.mkdirSync(path.join(destination, directory), { recursive: true });
+for (const directory of ["include", "effects"]) fs.mkdirSync(path.join(destination, directory), { recursive: true });
 addLicenses(destination,"ReShade",source);
 const files = [];
 for (const [relative, input] of inputs) {
@@ -662,7 +662,7 @@ function record(relative) {
 if(packageArch!=="universal")for(const specification of Object.values(features.shaders?.providers||{}))
  if(Array.isArray(specification.architectures))specification.architectures=specification.architectures.filter(cpu=>packageCPUs.includes(cpu));
 for (const [relative, bytes] of aliasIndexes) { fs.writeFileSync(path.join(destination, relative), bytes); files.push(record(relative)); }
-if(fs.existsSync(path.join(destination,'licenses')))for(const name of fs.readdirSync(path.join(destination,'licenses')))files.push(record('licenses/'+name));
+for(const relative of fs.readdirSync(destination,{recursive:true}))if(fs.statSync(path.join(destination,relative)).isFile()&&!files.some(row=>row.path===relative))files.push(record(relative));
 fs.writeFileSync(path.join(destination, "runtime.json"), JSON.stringify({ schema: 1, version,
   minimumMacOS, build:{sdkVersion:buildSDK}, architectures: packageCPUs, features, effectSources, sourceHash, sourcePins: pins.map(line => line.trim()), files }, null, 2) + "\n");
 const manifest = record("runtime.json"); files.push(manifest);

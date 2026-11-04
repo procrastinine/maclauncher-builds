@@ -1,3 +1,4 @@
+import {gitlink} from '../../../../../../../lib/pins.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 // Additive API over the original mpv BIND resolver. Apply only to an owned
 // build tree of the declared source; the original Git checkout is read-only.
@@ -5,9 +6,8 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 const PROFILE=JSON.parse(fs.readFileSync(new URL('./scene-profile.json',import.meta.url),'utf8'));
-export const SOURCE=Object.freeze(PROFILE.SOURCE);
+export const SOURCE=Object.freeze({...PROFILE.SOURCE,commit:gitlink(PROFILE.SOURCE.gitlink)});
 export const VULKAN_HEADERS=Object.freeze(PROFILE.VULKAN_HEADERS);
-export const FAST_FLOAT=Object.freeze(PROFILE.FAST_FLOAT);
 const originals={"src/shaders/custom_mpv.c":"0091602f4d94a5e23de05b560a43658c1cffcc50455012a323f23c814ef5a984","src/include/libplacebo/shaders/custom.h":"eb7c317f6c93ce76a67f5e622d5c784e702545752a88535a4eb577fdcc74e50e"};
 const sha=value=>crypto.createHash("sha256").update(value).digest("hex");
 function replaceOnce(source,before,after){if(source.split(before).length!==2)throw new Error("The pinned libplacebo overlay seam changed.");return source.replace(before,after);}
