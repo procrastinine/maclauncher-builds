@@ -46,12 +46,12 @@ function detachAimImage(work,upstream){
  if(!fs.realpathSync(mount).startsWith(fs.realpathSync(work)+path.sep))throw Error('The AIM image mount is outside its owned build directory.');
  if(fs.statSync(mount).dev!==fs.statSync(path.dirname(mount)).dev)run('hdiutil',['detach',mount]);
 }
-/** Keep AIM's original program-binary transport distinct from the common profile. */
+/** Reuse the common adapted ANGLE input for AIM's existing graphics boundary. */
 export function aimAngleInput(input){
- const definition=angleDefinition(),profile=definition.profiles.find(row=>row.id==='aim6');
+ const definition=angleDefinition(),profile=definition.profiles.find(row=>row.id==='common');
  const manifest=JSON.parse(fs.readFileSync(path.join(input.root,'angle-manifest.json')));
- if(input.record?.id!==profile.project||input.record.version!==profile.packageVersion||manifest.version!==profile.providerVersion||manifest.angleRevision!==definition.angle.revision)throw Error('The shared AIM ANGLE input differs from its original profile.');
- return {angle:input.root,manifest,profileId:'aim6'};
+ if(input.record?.id!==definition.id||input.record.version!==profile.version||manifest.version!==profile.providerVersion||manifest.angleRevision!==definition.angle.revision)throw Error('The shared AIM ANGLE input differs from its original profile.');
+ return {angle:input.root,manifest,profileId:'common'};
 }
 /** Build the existing AIM adaptation and seal it without changing app declarations. */
 export async function buildAndroidAim({project,version,arch,output,work}){
@@ -74,8 +74,8 @@ export async function buildAndroidAim({project,version,arch,output,work}){
  }finally{detachAimImage(work,upstream);}
  // Compilation is complete. Staging reads detached runtime products, metadata and notices.
  cleanupAimBuild({work});
- const preparedAngle=preparedBuildInput('android-angle-aim');
- const angle=preparedAngle?aimAngleInput(preparedAngle):await buildAngleInput({output:path.join(work,'angle'),work:path.join(work,'angle-build'),profile:'aim6'});
+ const preparedAngle=preparedBuildInput('android-angle');
+ const angle=preparedAngle?aimAngleInput(preparedAngle):await buildAngleInput({output:path.join(work,'angle'),work:path.join(work,'angle-build'),profile:'common'});
  fs.mkdirSync(output,{recursive:true});
  try{
   // stageAim owns this runtime's existing overlay, service-ABI and native metadata.

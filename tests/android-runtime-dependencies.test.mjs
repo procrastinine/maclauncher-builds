@@ -11,21 +11,22 @@ import {prepareSharedSdlFramework} from '../tools/android-common-publisher-input
 import {preparePackageLayout,materializePackageAliases} from '../tools/package-layout.mjs';
 import {pack,verify} from '../tools/runtime-package.mjs';
 const Native=createRequire(import.meta.url)('../producers/maclauncher/scripts/native-binary-tools.cjs');
-const profiles=JSON.parse(fs.readFileSync(new URL('../producers/android-inputs/angle.json',import.meta.url))).profiles,commonVersion=profiles.find(row=>row.id==='common').version,aimProfile=profiles.find(row=>row.id==='aim6');
+const profiles=JSON.parse(fs.readFileSync(new URL('../producers/android-inputs/angle.json',import.meta.url))).profiles,commonVersion=profiles.find(row=>row.id==='common').version;
 const temp=t=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'android-runtime-deps-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;};
-test('Android and AIM ANGLE profiles share the selected Android producer',()=>{
- const common=anglePackageProfile('android-angle',commonVersion).profile,aim=anglePackageProfile('android-angle-aim',aimProfile.packageVersion).profile;
- assert.equal(common.id,'common');assert.equal(aim.id,'aim6');assert.equal(Object.hasOwn(common,'androidSource'),false);assert.equal(Object.hasOwn(aim,'androidSource'),false);assert.equal(aim.providerVersion,common.providerVersion);
- if(commonVersion!==aimProfile.version)assert.deepEqual(anglePackageProfile('android-angle',aimProfile.version).profile,aim);
+test('Android and AIM share the one published ANGLE input',()=>{
+ const common=anglePackageProfile('android-angle',commonVersion).profile;
+ assert.equal(common.id,'common');assert.equal(Object.hasOwn(common,'androidSource'),false);
+ assert.equal(profiles.length,1);
+ assert.throws(()=>anglePackageProfile('android-angle-aim','MCLv6'),/declared source profile/);
+});
+test('AIM consumes the sealed common ANGLE profile',t=>{
+ const root=temp(t),{definition,profile}=anglePackageProfile('android-angle',commonVersion);
+ fs.writeFileSync(path.join(root,'angle-manifest.json'),JSON.stringify({version:profile.providerVersion,angleRevision:definition.angle.revision}));
+ const input={root,record:{id:'android-angle',version:commonVersion}};
+ const result=aimAngleInput(input);assert.equal(result.angle,root);assert.equal(result.profileId,'common');
+ assert.throws(()=>aimAngleInput({...input,record:{id:'android-angle-aim',version:'MCLv6'}}),/differs from its original profile/);
+});
 
- assert.throws(()=>anglePackageProfile('android-angle-aim','unknown'),/declared source profile/);
-});
-test('AIM accepts only the prepared original AIM ANGLE package and rejects the common profile',t=>{
- const root=temp(t),{definition,profile}=anglePackageProfile('android-angle-aim',aimProfile.packageVersion);
- const manifest={version:profile.providerVersion,programBinaryVersion:'a'.repeat(32),angleRevision:definition.angle.revision};fs.writeFileSync(path.join(root,'angle-manifest.json'),JSON.stringify(manifest));
- const input={root,record:{id:'android-angle-aim',version:aimProfile.packageVersion}};const result=aimAngleInput(input);assert.equal(result.angle,root);assert.equal(result.profileId,'aim6');
- manifest.angleRevision='b'.repeat(40);fs.writeFileSync(path.join(root,'angle-manifest.json'),JSON.stringify(manifest));assert.throws(()=>aimAngleInput(input),/original profile/);
-});
 function frameworkImage(){
  const command=(type,offset,text)=>{const bytes=Buffer.alloc(Math.ceil((offset+Buffer.byteLength(text)+1)/8)*8);bytes.writeUInt32LE(type);bytes.writeUInt32LE(bytes.length,4);bytes.writeUInt32LE(offset,8);bytes.write(text,offset);return bytes;};
  const minimum=Buffer.alloc(16);minimum.writeUInt32LE(0x24);minimum.writeUInt32LE(16,4);minimum.writeUInt32LE(13<<16,8);minimum.writeUInt32LE(27<<16,12);

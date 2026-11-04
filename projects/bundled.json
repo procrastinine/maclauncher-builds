@@ -961,14 +961,10 @@
       {
         "version": "1.0.6",
         "label": "Android launcher integrations 1.0.6"
-      },
-      {
-        "version": "1.0.7",
-        "label": "Android launcher integrations 1.0.7"
       }
     ],
     "build": {
-      "version": "1.0.7",
+      "version": "1.0.6",
       "command": "tools/build-android-launcher.mjs",
       "architectures": [
         "universal"
@@ -1292,14 +1288,10 @@
       {
         "version": "MCLv7",
         "label": "Android ANGLE for JVM and ART MCLv7"
-      },
-      {
-        "version": "MCLv8",
-        "label": "Android ANGLE for JVM and ART MCLv8"
       }
     ],
     "build": {
-      "version": "MCLv8",
+      "version": "MCLv7",
       "command": "tools/build-android-angle.mjs",
       "architectures": [
         "arm64"
@@ -2509,31 +2501,6 @@
       {
         "version": "MCLv6",
         "label": "AIM original ANGLE profile MCLv6"
-      },
-      {
-        "version": "MCLv7",
-        "label": "AIM original ANGLE profile MCLv7"
-      }
-    ],
-    "build": {
-      "version": "MCLv7",
-      "command": "tools/build-android-angle.mjs",
-      "architectures": [
-        "arm64"
-      ],
-      "tools": [
-        "ninja",
-        "uv"
-      ],
-      "cleanupRunner": true,
-      "submodules": [
-        "sources/maclauncher-android"
-      ]
-    },
-    "versionBindings": [
-      {
-        "file": "producers/android-inputs/angle.json",
-        "pointer": "/profiles/1/packageVersion"
       }
     ]
   }
