@@ -1,0 +1,57 @@
+{
+  "id": "steam-api-helper",
+  "version": "0.5.6",
+  "arch": "universal",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "sourceRelative": null,
+  "sourceSha256": "40597e2596bf3df91e7a8d1be6939f75d2d427bbeb91d0ac2316420c1c0cb23e",
+  "directoryRelative": "steam-api-helper/0.5.6/universal",
+  "manifestRelative": "helper.json",
+  "manifestSha256": "3f9feacb55307d164bae819a78dd492614f32df95eb9bcc124ad58d8cda05aed",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 16434,
+      "mode": 420,
+      "sha256": "a896ff3c3f1f14776c6bdbae554837e2a202d3817b03c1d6fd370d4f8a7bc734"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "3554f36d8a35061797ac589bc763e5fca54b357305a4f90701a0f2115cdda6a1"
+    },
+    {
+      "path": "helper.json",
+      "size": 3415,
+      "sha256": "3f9feacb55307d164bae819a78dd492614f32df95eb9bcc124ad58d8cda05aed",
+      "mode": 420
+    },
+    {
+      "path": "libsteam_api.dylib",
+      "size": 465552,
+      "sha256": "6a9ce700bf002fb817518221ebe093213ad84e093cb5d63d7a3315f004e74cae",
+      "mode": 493,
+      "architectures": [
+        "arm64",
+        "x86_64"
+      ]
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 29,
+      "sha256": "5fae4a022fb97d8e3d41dc31e83fd092c1a87e5a48656a7f4b95b25659699d66",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MacLauncher.txt",
+      "size": 1081,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+      "mode": 420
+    }
+  ]
+}
