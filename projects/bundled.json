@@ -27,10 +27,6 @@
         "label": "CatSystem2 KIF cryptography helper 1.1.1"
       },
       {
-        "version": "1.1.2",
-        "label": "CatSystem2 KIF cryptography helper 1.1.2"
-      },
-      {
         "version": "1.1.5",
         "label": "CatSystem2 KIF cryptography helper 1.1.5"
       }
@@ -70,10 +66,6 @@
       {
         "version": "1.1.1",
         "label": "Android privacy helper 1.1.1"
-      },
-      {
-        "version": "1.1.2",
-        "label": "Android privacy helper 1.1.2"
       },
       {
         "version": "1.1.5",
@@ -117,10 +109,6 @@
       {
         "version": "1.1.1",
         "label": "PlayTools storage adapter 1.1.1"
-      },
-      {
-        "version": "1.1.2",
-        "label": "PlayTools storage adapter 1.1.2"
       },
       {
         "version": "1.1.5",
@@ -181,10 +169,6 @@
         "label": "Lua 5.1 host ABI 4.0.2-MCLv3"
       },
       {
-        "version": "4.0.2-MCLv4",
-        "label": "Lua 5.1 host ABI 4.0.2-MCLv4"
-      },
-      {
         "version": "4.0.2-MCLv7",
         "label": "Lua 5.1 host ABI 4.0.2-MCLv7"
       }
@@ -228,10 +212,6 @@
       {
         "version": "1.1.1",
         "label": "MKXP-Z configuration helper 1.1.1"
-      },
-      {
-        "version": "1.1.2",
-        "label": "MKXP-Z configuration helper 1.1.2"
       },
       {
         "version": "1.1.5",
@@ -593,10 +573,6 @@
         "label": "MacLauncher graphics 0.3.2"
       },
       {
-        "version": "0.3.3",
-        "label": "MacLauncher graphics 0.3.3"
-      },
-      {
         "version": "0.3.6",
         "label": "MacLauncher graphics 0.3.6"
       }
@@ -689,10 +665,6 @@
         "label": "Offline Steam API compatibility helper 0.5.2"
       },
       {
-        "version": "0.5.3",
-        "label": "Offline Steam API compatibility helper 0.5.3"
-      },
-      {
         "version": "0.5.6",
         "label": "Offline Steam API compatibility helper 0.5.6"
       }
@@ -731,10 +703,6 @@
       {
         "version": "0.1.2",
         "label": "Steam ticket availability adapter 0.1.2"
-      },
-      {
-        "version": "0.1.3",
-        "label": "Steam ticket availability adapter 0.1.3"
       },
       {
         "version": "0.1.6",
@@ -812,14 +780,6 @@
         "label": "Steamworks4j 1.9.0 JNI ABI 1.9.0-MCLv3"
       },
       {
-        "version": "1.10.0-MCLv4",
-        "label": "Steamworks4j 1.10.0 JNI ABI 1.10.0-MCLv4"
-      },
-      {
-        "version": "1.9.0-MCLv4",
-        "label": "Steamworks4j 1.9.0 JNI ABI 1.9.0-MCLv4"
-      },
-      {
         "version": "1.10.0-MCLv7",
         "label": "Steamworks4j 1.10.0 JNI ABI 1.10.0-MCLv7"
       },
@@ -890,14 +850,6 @@
         "label": "Android package metadata helper 1.1.1"
       },
       {
-        "version": "1.1.2",
-        "label": "Android package metadata helper 1.1.2"
-      },
-      {
-        "version": "1.1.3",
-        "label": "Android package metadata helper 1.1.3"
-      },
-      {
         "version": "1.1.5",
         "label": "Android package metadata helper 1.1.5"
       }
@@ -944,10 +896,6 @@
       {
         "version": "1.1.1",
         "label": "Browser network helper 1.1.1"
-      },
-      {
-        "version": "1.1.2",
-        "label": "Browser network helper 1.1.2"
       },
       {
         "version": "1.1.5",
@@ -1007,10 +955,6 @@
         "label": "Android launcher integrations 1.0.2"
       },
       {
-        "version": "1.0.3",
-        "label": "Android launcher integrations 1.0.3"
-      },
-      {
         "version": "1.0.6",
         "label": "Android launcher integrations 1.0.6"
       }
@@ -1068,10 +1012,6 @@
         "label": "ART image reader 0.1.0-MCLv3"
       },
       {
-        "version": "0.1.0-MCLv4",
-        "label": "ART image reader 0.1.0-MCLv4"
-      },
-      {
         "version": "0.1.0-MCLv7",
         "label": "ART image reader 0.1.0-MCLv7"
       }
@@ -1127,10 +1067,6 @@
       {
         "version": "MCLv3",
         "label": "Android Blueprint parser MCLv3"
-      },
-      {
-        "version": "MCLv4",
-        "label": "Android Blueprint parser MCLv4"
       },
       {
         "version": "MCLv7",
@@ -1200,10 +1136,6 @@
         "label": "Android flag generator 0.1.0-MCLv3"
       },
       {
-        "version": "0.1.0-MCLv4",
-        "label": "Android flag generator 0.1.0-MCLv4"
-      },
-      {
         "version": "0.1.0-MCLv7",
         "label": "Android flag generator 0.1.0-MCLv7"
       }
@@ -1264,10 +1196,6 @@
       {
         "version": "1.2.2-MCLv3",
         "label": "Android audio codec input libraries 1.2.2-MCLv3"
-      },
-      {
-        "version": "1.2.2-MCLv4",
-        "label": "Android audio codec input libraries 1.2.2-MCLv4"
       },
       {
         "version": "1.2.2-MCLv7",
@@ -1350,10 +1278,6 @@
         "label": "Android ANGLE for JVM and ART MCLv3"
       },
       {
-        "version": "MCLv4",
-        "label": "Android ANGLE for JVM and ART MCLv4"
-      },
-      {
         "version": "MCLv7",
         "label": "Android ANGLE for JVM and ART MCLv7"
       }
@@ -1423,10 +1347,6 @@
       {
         "version": "16.0.0-MCLv3",
         "label": "ART ELF input 16.0.0-MCLv3"
-      },
-      {
-        "version": "16.0.0-MCLv4",
-        "label": "ART ELF input 16.0.0-MCLv4"
       },
       {
         "version": "16.0.0-MCLv7",
@@ -1508,10 +1428,6 @@
         "label": "Android Java converter MCLv3"
       },
       {
-        "version": "MCLv4",
-        "label": "Android Java converter MCLv4"
-      },
-      {
         "version": "MCLv7",
         "label": "Android Java converter MCLv7"
       }
@@ -1583,10 +1499,6 @@
       {
         "version": "3.8.0-MCLv3",
         "label": "Android ART libffi 3.8.0-MCLv3"
-      },
-      {
-        "version": "3.8.0-MCLv4",
-        "label": "Android ART libffi 3.8.0-MCLv4"
       },
       {
         "version": "3.8.0-MCLv7",
@@ -1719,10 +1631,6 @@
         "label": "Android Java framework 16.0.0-MCLv3"
       },
       {
-        "version": "16.0.0-MCLv4",
-        "label": "Android Java framework 16.0.0-MCLv4"
-      },
-      {
         "version": "16.0.0-MCLv7",
         "label": "Android Java framework 16.0.0-MCLv7"
       }
@@ -1787,10 +1695,6 @@
       {
         "version": "16.0.0-MCLv3",
         "label": "Android original image data 1 16.0.0-MCLv3"
-      },
-      {
-        "version": "16.0.0-MCLv4",
-        "label": "Android original image data 1 16.0.0-MCLv4"
       },
       {
         "version": "16.0.0-MCLv7",
@@ -1860,10 +1764,6 @@
         "label": "Android original image data 2 16.0.0-MCLv3"
       },
       {
-        "version": "16.0.0-MCLv4",
-        "label": "Android original image data 2 16.0.0-MCLv4"
-      },
-      {
         "version": "16.0.0-MCLv7",
         "label": "Android original image data 2 16.0.0-MCLv7"
       }
@@ -1929,10 +1829,6 @@
       {
         "version": "16.0.0-MCLv3",
         "label": "Android original image data 3 16.0.0-MCLv3"
-      },
-      {
-        "version": "16.0.0-MCLv4",
-        "label": "Android original image data 3 16.0.0-MCLv4"
       },
       {
         "version": "16.0.0-MCLv7",
@@ -2002,10 +1898,6 @@
         "label": "Android original image data 4 16.0.0-MCLv3"
       },
       {
-        "version": "16.0.0-MCLv4",
-        "label": "Android original image data 4 16.0.0-MCLv4"
-      },
-      {
         "version": "16.0.0-MCLv7",
         "label": "Android original image data 4 16.0.0-MCLv7"
       }
@@ -2071,10 +1963,6 @@
       {
         "version": "16.0.0-MCLv3",
         "label": "Android original image data 5 16.0.0-MCLv3"
-      },
-      {
-        "version": "16.0.0-MCLv4",
-        "label": "Android original image data 5 16.0.0-MCLv4"
       },
       {
         "version": "16.0.0-MCLv7",
@@ -2161,10 +2049,6 @@
         "label": "Android ART Java 0.1.1"
       },
       {
-        "version": "0.1.2",
-        "label": "Android ART Java 0.1.2"
-      },
-      {
         "version": "0.1.5",
         "label": "Android ART Java 0.1.5"
       }
@@ -2228,10 +2112,6 @@
         "label": "SDL2 and fonts 2.32.10 2.32.10-MCLv2"
       },
       {
-        "version": "2.32.10-MCLv3",
-        "label": "SDL2 and fonts 2.32.10 2.32.10-MCLv3"
-      },
-      {
         "version": "2.32.10-MCLv6",
         "label": "SDL2 and fonts 2.32.10 2.32.10-MCLv6"
       }
@@ -2289,10 +2169,6 @@
         "label": "libsndfile and codecs 1.2.2 1.2.2-MCLv2"
       },
       {
-        "version": "1.2.2-MCLv3",
-        "label": "libsndfile and codecs 1.2.2 1.2.2-MCLv3"
-      },
-      {
         "version": "1.2.2-MCLv6",
         "label": "libsndfile and codecs 1.2.2 1.2.2-MCLv6"
       }
@@ -2336,10 +2212,6 @@
       {
         "version": "7.1.2-MCLv2",
         "label": "FFmpeg native video codecs 7.1.2 7.1.2-MCLv2"
-      },
-      {
-        "version": "7.1.2-MCLv3",
-        "label": "FFmpeg native video codecs 7.1.2 7.1.2-MCLv3"
       },
       {
         "version": "7.1.2-MCLv6",
@@ -2400,10 +2272,6 @@
         "label": "SDL2_mixer 2.8.2 2.8.2-MCLv2"
       },
       {
-        "version": "2.8.2-MCLv3",
-        "label": "SDL2_mixer 2.8.2 2.8.2-MCLv3"
-      },
-      {
         "version": "2.8.2-MCLv6",
         "label": "SDL2_mixer 2.8.2 2.8.2-MCLv6"
       }
@@ -2459,10 +2327,6 @@
         "label": "OpenAL Soft 1.24.3 1.24.3-MCLv2"
       },
       {
-        "version": "1.24.3-MCLv3",
-        "label": "OpenAL Soft 1.24.3 1.24.3-MCLv3"
-      },
-      {
         "version": "1.24.3-MCLv6",
         "label": "OpenAL Soft 1.24.3 1.24.3-MCLv6"
       }
@@ -2506,10 +2370,6 @@
       {
         "version": "3.4.18-MCLv2",
         "label": "SDL3 3.4.18 Universal framework 3.4.18-MCLv2"
-      },
-      {
-        "version": "3.4.18-MCLv3",
-        "label": "SDL3 3.4.18 Universal framework 3.4.18-MCLv3"
       },
       {
         "version": "3.4.18-MCLv6",
@@ -2583,10 +2443,6 @@
       {
         "version": "MCLv2",
         "label": "AIM original ANGLE profile MCLv2"
-      },
-      {
-        "version": "MCLv3",
-        "label": "AIM original ANGLE profile MCLv3"
       },
       {
         "version": "MCLv6",

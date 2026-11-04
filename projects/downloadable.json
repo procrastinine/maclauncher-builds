@@ -228,10 +228,6 @@
         "label": "AIM with MacLauncher integration 0.1.0-MCLv4"
       },
       {
-        "version": "0.1.0-MCLv5",
-        "label": "AIM with MacLauncher integration 0.1.0-MCLv5"
-      },
-      {
         "version": "0.1.0-MCLv8",
         "label": "AIM with MacLauncher integration 0.1.0-MCLv8"
       }
@@ -295,10 +291,6 @@
       {
         "version": "1.5.0-MCLv3",
         "label": "AI5 SDL2 1.5.0-MCLv3"
-      },
-      {
-        "version": "1.5.0-MCLv5",
-        "label": "AI5 SDL2 1.5.0-MCLv5"
       },
       {
         "version": "1.5.0-MCLv8",
@@ -371,10 +363,6 @@
         "label": ".NET 8 host 26.10-MCLv3"
       },
       {
-        "version": "26.10-MCLv4",
-        "label": ".NET 8 host 26.10-MCLv4"
-      },
-      {
         "version": "26.10-MCLv7",
         "label": ".NET 8 host 26.10-MCLv7"
       }
@@ -437,10 +425,6 @@
         "label": "GemRB 0.9.5-git-MCLv3"
       },
       {
-        "version": "0.9.5-git-MCLv4",
-        "label": "GemRB 0.9.5-git-MCLv4"
-      },
-      {
         "version": "0.9.5-git-MCLv8",
         "label": "GemRB 0.9.5-git-MCLv8"
       }
@@ -497,10 +481,6 @@
       {
         "version": "2.2.0-MCLv3",
         "label": "GameMaker 8 decompiler 2.2.0-MCLv3"
-      },
-      {
-        "version": "2.2.0-MCLv4",
-        "label": "GameMaker 8 decompiler 2.2.0-MCLv4"
       },
       {
         "version": "2.2.0-MCLv7",
@@ -601,16 +581,6 @@
         "anchor": "hashlink-1-9"
       },
       {
-        "version": "1.12-MCLv5",
-        "label": "HashLink 1.12 ABI 1.12-MCLv5",
-        "anchor": "hashlink-1-12"
-      },
-      {
-        "version": "1.9-MCLv5",
-        "label": "HashLink 1.9 ABI 1.9-MCLv5",
-        "anchor": "hashlink-1-9"
-      },
-      {
         "version": "1.12-MCLv8",
         "label": "HashLink 1.12 ABI 1.12-MCLv8",
         "anchor": "hashlink-1-12"
@@ -692,10 +662,6 @@
       {
         "version": "0.10.8.903-MCLv3",
         "label": "impacto Windows-game profile 0.10.8.903-MCLv3"
-      },
-      {
-        "version": "0.10.8.903-MCLv5",
-        "label": "impacto Windows-game profile 0.10.8.903-MCLv5"
       },
       {
         "version": "0.10.8.903-MCLv8",
@@ -784,10 +750,6 @@
         "label": "Inno Setup extraction tools 1.10-dev-MCLv3"
       },
       {
-        "version": "1.10-dev-MCLv4",
-        "label": "Inno Setup extraction tools 1.10-dev-MCLv4"
-      },
-      {
         "version": "1.10-dev-MCLv7",
         "label": "Inno Setup extraction tools 1.10-dev-MCLv7"
       }
@@ -873,10 +835,6 @@
         "label": "KiriKiri SDL2 macOS MCLv3"
       },
       {
-        "version": "MCLv4",
-        "label": "KiriKiri SDL2 macOS MCLv4"
-      },
-      {
         "version": "MCLv7",
         "label": "KiriKiri SDL2 macOS MCLv7"
       }
@@ -936,10 +894,6 @@
         "label": "libnpengine Mac runner 0.5.3-MCLv3"
       },
       {
-        "version": "0.5.3-MCLv5",
-        "label": "libnpengine Mac runner 0.5.3-MCLv5"
-      },
-      {
         "version": "0.5.3-MCLv8",
         "label": "libnpengine Mac runner 0.5.3-MCLv8"
       }
@@ -997,10 +951,6 @@
         "label": "ONScripter-EN 20250608-en-MCLv3"
       },
       {
-        "version": "20250608-en-MCLv4",
-        "label": "ONScripter-EN 20250608-en-MCLv4"
-      },
-      {
         "version": "20250608-en-MCLv7",
         "label": "ONScripter-EN 20250608-en-MCLv7"
       }
@@ -1056,10 +1006,6 @@
       {
         "version": "0.7.7beta-MCLv3",
         "label": "ONScripter-Yuri 0.7.7beta-MCLv3"
-      },
-      {
-        "version": "0.7.7beta-MCLv4",
-        "label": "ONScripter-Yuri 0.7.7beta-MCLv4"
       },
       {
         "version": "0.7.7beta-MCLv8",
@@ -1120,10 +1066,6 @@
         "label": "OpenGMK 0.2.0-MCLv3"
       },
       {
-        "version": "0.2.0-MCLv4",
-        "label": "OpenGMK 0.2.0-MCLv4"
-      },
-      {
         "version": "0.2.0-MCLv7",
         "label": "OpenGMK 0.2.0-MCLv7"
       }
@@ -1178,10 +1120,6 @@
       {
         "version": "0.1.0-MCLv3",
         "label": "ReMinori 0.1.0-MCLv3"
-      },
-      {
-        "version": "0.1.0-MCLv4",
-        "label": "ReMinori 0.1.0-MCLv4"
       },
       {
         "version": "0.1.0-MCLv7",
@@ -1247,10 +1185,6 @@
       {
         "version": "0.5.0-MCLv3",
         "label": "System3 decompiler 0.5.0-MCLv3"
-      },
-      {
-        "version": "0.5.0-MCLv4",
-        "label": "System3 decompiler 0.5.0-MCLv4"
       },
       {
         "version": "0.5.0-MCLv7",
@@ -1384,10 +1318,6 @@
         "label": "System3 SDL2 1.8.0-MCLv3"
       },
       {
-        "version": "1.8.0-MCLv5",
-        "label": "System3 SDL2 1.8.0-MCLv5"
-      },
-      {
         "version": "1.8.0-MCLv8",
         "label": "System3 SDL2 1.8.0-MCLv8"
       }
@@ -1446,10 +1376,6 @@
       {
         "version": "1.13.0-MCLv3",
         "label": "System3.5 decompiler 1.13.0-MCLv3"
-      },
-      {
-        "version": "1.13.0-MCLv4",
-        "label": "System3.5 decompiler 1.13.0-MCLv4"
       },
       {
         "version": "1.13.0-MCLv7",
@@ -1524,10 +1450,6 @@
         "label": "xsystem35 SDL2 2.20.0-MCLv3"
       },
       {
-        "version": "2.20.0-MCLv4",
-        "label": "xsystem35 SDL2 2.20.0-MCLv4"
-      },
-      {
         "version": "2.20.0-MCLv8",
         "label": "xsystem35 SDL2 2.20.0-MCLv8"
       }
@@ -1587,10 +1509,6 @@
       {
         "version": "MCLv3",
         "label": "xsystem4 MCLv3"
-      },
-      {
-        "version": "MCLv5",
-        "label": "xsystem4 MCLv5"
       },
       {
         "version": "MCLv8",
@@ -1670,10 +1588,6 @@
       {
         "version": "27.0.0-devel-MCLv4",
         "label": "KosmicKrisp geometry and transform feedback 27.0.0-devel-MCLv4"
-      },
-      {
-        "version": "27.0.0-devel-MCLv5",
-        "label": "KosmicKrisp geometry and transform feedback 27.0.0-devel-MCLv5"
       },
       {
         "version": "27.0.0-devel-MCLv8",
@@ -1778,10 +1692,6 @@
         "label": "Unicode filename normalization 2.4.2-MCLv3"
       },
       {
-        "version": "2.4.2-MCLv4",
-        "label": "Unicode filename normalization 2.4.2-MCLv4"
-      },
-      {
         "version": "2.4.2-MCLv7",
         "label": "Unicode filename normalization 2.4.2-MCLv7"
       }
@@ -1862,10 +1772,6 @@
         "label": "Butterscotch MCLv3"
       },
       {
-        "version": "MCLv4",
-        "label": "Butterscotch MCLv4"
-      },
-      {
         "version": "MCLv7",
         "label": "Butterscotch MCLv7"
       }
@@ -1930,10 +1836,6 @@
       {
         "version": "MCLv4",
         "label": "AnyPS5 MCLv4"
-      },
-      {
-        "version": "MCLv5",
-        "label": "AnyPS5 MCLv5"
       },
       {
         "version": "MCLv8",
@@ -2005,10 +1907,6 @@
         "label": "nxnative native tools MCLv3"
       },
       {
-        "version": "MCLv4",
-        "label": "nxnative native tools MCLv4"
-      },
-      {
         "version": "MCLv7",
         "label": "nxnative native tools MCLv7"
       }
@@ -2066,14 +1964,6 @@
       {
         "version": "0.41.0-MCLv8-1",
         "label": "Decoded video with separate controls and subtitles 0.41.0-MCLv8-1"
-      },
-      {
-        "version": "0.41.0-MCLv8-2",
-        "label": "Decoded video with separate controls and subtitles 0.41.0-MCLv8-2"
-      },
-      {
-        "version": "0.41.0-MCLv10",
-        "label": "Decoded video with separate controls and subtitles 0.41.0-MCLv10"
       },
       {
         "version": "0.41.0-MCLv11",
@@ -2149,10 +2039,6 @@
         "label": "Prosper x86-64 MCLv2"
       },
       {
-        "version": "MCLv3",
-        "label": "Prosper x86-64 MCLv3"
-      },
-      {
         "version": "MCLv6",
         "label": "Prosper x86-64 MCLv6"
       }
@@ -2206,10 +2092,6 @@
       {
         "version": "26.3.0-MCLv2",
         "label": "WineVulkan scene adapter 26.3.0-MCLv2"
-      },
-      {
-        "version": "26.3.0-MCLv3",
-        "label": "WineVulkan scene adapter 26.3.0-MCLv3"
       },
       {
         "version": "26.3.0-MCLv6",
@@ -2267,10 +2149,6 @@
         "label": "FidelityFX API 1.0.1 Vulkan 1.0.1-MCLv2"
       },
       {
-        "version": "1.0.1-MCLv3",
-        "label": "FidelityFX API 1.0.1 Vulkan 1.0.1-MCLv3"
-      },
-      {
         "version": "1.0.1-MCLv6",
         "label": "FidelityFX API 1.0.1 Vulkan 1.0.1-MCLv6"
       }
@@ -2321,10 +2199,6 @@
       {
         "version": "1.4.2-MCLv3",
         "label": "MoltenVK 1.4.2 scene recording 1.4.2-MCLv3"
-      },
-      {
-        "version": "1.4.2-MCLv4",
-        "label": "MoltenVK 1.4.2 scene recording 1.4.2-MCLv4"
       },
       {
         "version": "1.4.2-MCLv7",
@@ -2390,10 +2264,6 @@
         "label": "RPGMakerDecrypter 3.0.0-MCLv4"
       },
       {
-        "version": "3.0.0-MCLv5",
-        "label": "RPGMakerDecrypter 3.0.0-MCLv5"
-      },
-      {
         "version": "3.0.0-MCLv8",
         "label": "RPGMakerDecrypter 3.0.0-MCLv8"
       }
@@ -2436,10 +2306,6 @@
       {
         "version": "3.0.1",
         "label": "GameMaker OpenGL helper 3.0.1"
-      },
-      {
-        "version": "3.0.2",
-        "label": "GameMaker OpenGL helper 3.0.2"
       },
       {
         "version": "3.0.5",
@@ -2492,18 +2358,6 @@
         "label": "VNDS-LOVE 0.0.13-MCLv3"
       },
       {
-        "version": "0.0.13-MCLv4",
-        "label": "VNDS-LOVE 0.0.13-MCLv4"
-      },
-      {
-        "version": "0.0.13-MCLv5",
-        "label": "VNDS-LOVE 0.0.13-MCLv5"
-      },
-      {
-        "version": "0.0.13-MCLv6",
-        "label": "VNDS-LOVE 0.0.13-MCLv6"
-      },
-      {
         "version": "0.0.13-MCLv7",
         "label": "VNDS-LOVE 0.0.13-MCLv7"
       }
@@ -2547,10 +2401,6 @@
       {
         "version": "1.0.1",
         "label": "MacLauncher RLVM adapter 1.0.1"
-      },
-      {
-        "version": "1.0.2",
-        "label": "MacLauncher RLVM adapter 1.0.2"
       },
       {
         "version": "1.0.5",
@@ -2609,10 +2459,6 @@
         "label": "siglus_rs 0.1.0-MCLv3"
       },
       {
-        "version": "0.1.0-MCLv4",
-        "label": "siglus_rs 0.1.0-MCLv4"
-      },
-      {
         "version": "0.1.0-MCLv7",
         "label": "siglus_rs 0.1.0-MCLv7"
       }
@@ -2666,10 +2512,6 @@
       {
         "version": "5.13.0-MCLv2",
         "label": "uosc helper 5.13.0-MCLv2"
-      },
-      {
-        "version": "5.13.0-MCLv3",
-        "label": "uosc helper 5.13.0-MCLv3"
       },
       {
         "version": "5.13.0-MCLv6",
@@ -2765,10 +2607,6 @@
       {
         "version": "2.9.0-MCLv2",
         "label": "ScummVM Tools 2.9.0-MCLv2"
-      },
-      {
-        "version": "2.9.0-MCLv4",
-        "label": "ScummVM Tools 2.9.0-MCLv4"
       },
       {
         "version": "2.9.0-MCLv7",

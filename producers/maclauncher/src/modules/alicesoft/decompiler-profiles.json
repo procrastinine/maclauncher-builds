@@ -9,22 +9,6 @@
       {
         "version": "0.5.0-MCLv7",
         "toolVersion": "0.5.0"
-      },
-      {
-        "version": "0.5.0-MCLv4",
-        "toolVersion": "0.5.0"
-      },
-      {
-        "version": "0.5.0-MCLv3",
-        "toolVersion": "0.5.0"
-      },
-      {
-        "version": "0.5.0-MCLv2",
-        "toolVersion": "0.5.0"
-      },
-      {
-        "version": "0.5.0-MCLv1",
-        "toolVersion": "0.5.0"
       }
     ]
   },
@@ -37,22 +21,6 @@
     "releases": [
       {
         "version": "1.13.0-MCLv7",
-        "toolVersion": "1.13.0"
-      },
-      {
-        "version": "1.13.0-MCLv4",
-        "toolVersion": "1.13.0"
-      },
-      {
-        "version": "1.13.0-MCLv3",
-        "toolVersion": "1.13.0"
-      },
-      {
-        "version": "1.13.0-MCLv2",
-        "toolVersion": "1.13.0"
-      },
-      {
-        "version": "1.13.0-MCLv1",
         "toolVersion": "1.13.0"
       }
     ]
