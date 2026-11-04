@@ -652,8 +652,7 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
         "producers/maclauncher/src/modules/mages/native/current-build.js",
-        "producers/maclauncher/src/modules/mages/native/dependency-overlays.json",
-        "producers/maclauncher/src/modules/mages/native/bink2-license.txt"
+        "producers/maclauncher/src/modules/mages/native/dependency-overlays.json"
       ],
       "sourceDirectory": "producers/maclauncher"
     },

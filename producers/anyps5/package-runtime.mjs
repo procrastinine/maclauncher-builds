@@ -1,5 +1,5 @@
 import {gitlink} from '../../lib/pins.mjs';
-import {addLicense} from '../../lib/licenses.mjs';
+import {addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -65,14 +65,8 @@ export async function packageRuntime({runtimeBuild,relinkerBuild,output,version,
  copy(path.join(import.meta.dirname,'tools/unwrap-self.cjs'),path.join(payload,'tools/unwrap-self.cjs'));
  for(const name of fs.readdirSync(libraryRoot).filter(name=>/\.(prx|dylib)$/.test(name)&&fs.lstatSync(path.join(libraryRoot,name)).isFile()))copy(path.join(libraryRoot,name),path.join(payload,'libs',name),0o755);
  makePortable(path.join(payload,'libs'));
- const source=path.join(root,recipe.source.path),notices=[];
- for(const entry of [{path:'',id:'anyps5',repository:recipe.source.repository,license:'GPL-2.0-only'},...dependencies.dependencies.map(entry=>({...entry,id:entry.path.replaceAll('/','-'),license:'See notice'}))]){
-  const directory=path.join(source,entry.path),names=fs.readdirSync(directory).filter(name=>/^(?:LICENSE|COPYING|COPYRIGHT)(?:[._-].*)?$/i.test(name)&&fs.statSync(path.join(directory,name)).isFile());
-  for(const name of [...names,...(entry.noticeFiles||[])]){const relative=path.posix.join('notices',entry.id,name);addLicense(payload,entry.id,path.join(directory,name),entry.license);notices.push({name:entry.id,license:entry.license,path:relative,sourceUrl:entry.repository});}
- }
- const ffmpeg=path.join(runtimeBuild,'dependencies/ffmpeg-macos-x64/share/ffmpeg');
- for(const relative of filesIn(ffmpeg).filter(relative=>relative!=='build-log.txt'))addLicense(payload,'FFmpeg',path.join(ffmpeg,relative));
- notices.push({name:'FFmpeg',license:'See notice',path:'notices/ffmpeg/copyright',sourceUrl:dependencies.artifacts[0].repository});
+ const source=path.join(root,recipe.source.path);
+ addLicenses(payload,'anyps5',source);
  const overlays=filesIn(path.join(import.meta.dirname,'overlays')).map(relative=>({path:'overlays/'+relative,sha256:sha(fs.readFileSync(path.join(import.meta.dirname,'overlays',relative)))}));
  const tools=[{path:'tools/unwrap-self.cjs',sha256:sha(fs.readFileSync(path.join(import.meta.dirname,'tools/unwrap-self.cjs')))}];
  const producerInputs=[...['build-relinker.mjs','build-runtime.mjs','source-projection.mjs','package-runtime.mjs','source.json','dependencies.json']

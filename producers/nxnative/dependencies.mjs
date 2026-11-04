@@ -1,5 +1,5 @@
 import {gitlink} from '../../lib/pins.mjs';
-import {addLicense} from '../../lib/licenses.mjs';
+import {addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs/promises';
 import { constants as fsConstants } from 'node:fs';
 import path from 'node:path';
@@ -90,17 +90,13 @@ async function buildTool(tool, { work, output, jobs }) {
     const library = line.trim().split(' (')[0];
     return library && !library.startsWith('/usr/lib/') && !library.startsWith('/System/Library/');
   })) throw new Error(`Dependency tool has an external native library: ${tool.name}`);
-  for (const relative of tool.source.licenseFiles)
-    addLicense(output,tool.name,path.join(source,relative),tool.source.license||tool.name);
-  if (tool.name === 'zstd') {
-    addLicense(output,'zstd',path.join(source,'lib/dictBuilder/divsufsort.c'));
-  }
+  addLicenses(output,tool.name,source);
   return { id: tool.name, ...tool.source, executable: `bin/${tool.name}`, sha256: await digest(destination) };
 }
 
 const installWheels = String.raw`
 import json, os, pathlib, stat, sys, zipfile
-root, cache, license_root, rows = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2]), pathlib.Path(sys.argv[3]), json.loads(sys.argv[4])
+root, cache, rows = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2]), json.loads(sys.argv[3])
 for row in rows:
     with zipfile.ZipFile(cache / row['filename']) as archive:
         for entry in archive.infolist():
@@ -117,11 +113,6 @@ for row in rows:
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(archive.read(entry))
             target.chmod((entry.external_attr >> 16) & 0o777 or 0o644)
-        for relative in row['licenseFiles']:
-            if relative not in archive.namelist(): continue
-            target = license_root / row['name'] / relative
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_bytes(archive.read(relative))
 `;
 
 async function prunePython(root, excludedReason) {
@@ -144,8 +135,7 @@ async function finalizePayload(root, excludedReason) {
     for (const entry of await fs.readdir(directory, { withFileTypes: true })) {
       const name = relative ? relative + '/' + entry.name : entry.name;
       const file = path.join(directory, entry.name);
-      const license = name === 'licenses' || name.startsWith('licenses/');
-      if (!license && (excludedReason(name) || entry.name === '__pycache__' || /\.(?:pyc|pdb)$/i.test(entry.name))) {
+      if ((excludedReason(name) || entry.name === '__pycache__' || /\.(?:pyc|pdb)$/i.test(entry.name))) {
         await fs.rm(file, { recursive: true, force: true });
         continue;
       }
@@ -185,8 +175,8 @@ export async function prepareDependencies({ work, output, jobs = 4 }) {
   await fs.mkdir(work, { recursive: true });
   await fs.mkdir(path.join(work, 'wheels'), { recursive: true });
   await fs.mkdir(path.join(output, 'bin'), { recursive: true });
-  const [pythonArchive, dotnetArchive, pythonLicenseArchive] = await Promise.all([
-    acquire(lock.python, work), acquire(lock.dotnet, work), acquire(lock.python.licenseArchive, work),
+  const [pythonArchive, dotnetArchive] = await Promise.all([
+    acquire(lock.python, work), acquire(lock.dotnet, work),
     ...lock.wheels.map(wheel => acquire(wheel, path.join(work, 'wheels')))
   ]);
   const pythonStage = path.join(work, 'python-extract');
@@ -203,22 +193,13 @@ export async function prepareDependencies({ work, output, jobs = 4 }) {
     await fs.copyFile(target, python, fsConstants.COPYFILE_FICLONE);
     await fs.chmod(python, mode & 0o777);
   }
-  const wheelLicenses = path.join(work,'wheel-license-texts');
-  await run(python, ['-B', '-I', '-c', installWheels, path.join(pythonRoot, 'lib/python3.12/site-packages'), path.join(work, 'wheels'), wheelLicenses, JSON.stringify(lock.wheels)]);
+  await run(python, ['-B', '-I', '-c', installWheels, path.join(pythonRoot, 'lib/python3.12/site-packages'), path.join(work, 'wheels'), JSON.stringify(lock.wheels)]);
   await prunePython(pythonRoot, excludedReason);
-  const licenseStage = path.join(work, 'python-license-extract');
-  await fs.rm(licenseStage, { recursive: true, force: true });
-  await extractTar(pythonLicenseArchive, licenseStage, lock.python.licenseArchive.path);
-  const pythonLicenseSource = path.join(licenseStage, lock.python.licenseArchive.path);
-  for (const relative of await fs.readdir(pythonLicenseSource))
-    addLicense(output,'Python',path.join(pythonLicenseSource,relative),lock.python.license||'Python');
-  for (const wheel of lock.wheels) for (const relative of wheel.licenseFiles)
-    addLicense(output,wheel.name,path.join(wheelLicenses,wheel.name,relative),wheel.license||wheel.name);
+  addLicenses(output,'Python',pythonRoot);
   const dotnetRoot = path.join(output, 'dotnet');
   await fs.rm(dotnetRoot, { recursive: true, force: true });
   await extractTar(dotnetArchive, dotnetRoot);
-  for (const relative of lock.dotnet.licenseFiles)
-    addLicense(output,'dotnet',path.join(dotnetRoot,relative),lock.dotnet.license||'dotnet');
+  addLicenses(output,'dotnet',dotnetRoot);
   await run(python, ['-B', '-I', '-c', 'import sys,lz4.block,capstone,fontTools,backports.zstd,nsz,zstandard; from Crypto.Cipher import AES; assert sys.version_info[:3] == (3,12,15)']);
   const dotnet = await run(path.join(dotnetRoot, 'dotnet'), ['--list-runtimes'], {
     env: { ...process.env, DOTNET_ROOT: dotnetRoot, DOTNET_ROOT_ARM64: dotnetRoot, DOTNET_MULTILEVEL_LOOKUP: '0', DOTNET_CLI_TELEMETRY_OPTOUT: '1', DOTNET_SKIP_FIRST_TIME_EXPERIENCE: '1' }
@@ -228,7 +209,6 @@ export async function prepareDependencies({ work, output, jobs = 4 }) {
   const tools = await Promise.all(lock.tools.map(tool => buildTool(tool, { work, output, jobs: perToolJobs })));
   await finalizePayload(output, excludedReason);
   await fs.rm(pythonStage, { recursive: true, force: true });
-  await fs.rm(licenseStage, { recursive: true, force: true });
   return { schemaVersion: 1, architecture: lock.architecture, minimumMacOS: lock.minimumMacOS,
     inputs: [{ id: 'python', ...lock.python }, { id: 'dotnet', ...lock.dotnet }, ...lock.wheels.map(wheel => ({ id: 'python:' + wheel.name, ...wheel })), ...tools],
     tools: { python: 'python/bin/python3', dotnet: 'dotnet/dotnet', spirvCross: 'bin/spirv-cross', glslang: 'bin/glslangValidator', zstd: 'bin/zstd' } };

@@ -1,4 +1,3 @@
-import {addLicense} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -21,9 +20,8 @@ export function prepare({id,input,output}){
  if(profile.id!==id||!path.isAbsolute(input||'')||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select a helper profile, absolute input and new output directory.');
  input=fs.realpathSync(input);output=path.resolve(output);
  if(output===input||output.startsWith(input+path.sep)||input.startsWith(output+path.sep))throw Error('Helper output must be separate from its input.');
- const names=new Set(),noticeNames=new Set((profile.notices||[]).map(row=>row?.path));
+ const names=new Set();
  for(const file of profile.inputs){
-  if(noticeNames.has(file.output))continue;
   B.relativeFile(file.path);B.relativeFile(file.output);
   if(names.has(file.output)||!['file'].includes(file.kind))throw Error('Invalid helper source inventory.');
   names.add(file.output);
@@ -33,7 +31,6 @@ export function prepare({id,input,output}){
  fs.mkdirSync(output,{recursive:true});
  try{
   for(const file of profile.inputs){
-   if(noticeNames.has(file.output)){addLicense(output,profile.id,path.join(input,file.path));continue;}
    const target=path.join(output,file.output);fs.mkdirSync(path.dirname(target),{recursive:true});
    fs.copyFileSync(path.join(input,file.path),target,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.chmodSync(target,file.mode);
    if(file.architectures){

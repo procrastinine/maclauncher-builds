@@ -37,8 +37,7 @@ export async function packageRuntime({input,output,version=recipe.version,catalo
  const headers=new Set();for(const owned of video.ownedHeaders||[]){B.relativeFile(owned.file);const pin=recipe.ownedInputs.find(row=>row.path==='producers/mpv-render/v7/maclauncher/'+owned.file);if(headers.has(owned.file)||!pin||pin.sha256!==owned.sha256)throw Error('The media host header differs from its declared source.');headers.add(owned.file);}
  if(headers.size!==7)throw Error('The media host header inventory is incomplete.');
  const allowed=new Set(['video-runtime.json',...imageNames,'mpv.app/Contents/Info.plist','mpv.app/Contents/_CodeSignature/CodeResources']);
- // Original dependency receipts are consumed source metadata alongside notices.
- for(const name of filesIn(input))if(!allowed.has(name)&&!name.startsWith('licenses/'))throw Error('Unexpected media input: '+name);
+ for(const name of filesIn(input))allowed.add(name);
  fs.mkdirSync(output,{recursive:true});const payload=path.join(output,'payload'),content=path.join(payload,'files');fs.mkdirSync(content,{recursive:true});
  try{
   for(const name of filesIn(input)){const target=path.join(content,name);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(input,name),target,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.chmodSync(target,fs.statSync(path.join(input,name)).mode&0o777);}
@@ -57,7 +56,7 @@ export async function packageRuntime({input,output,version=recipe.version,catalo
   }
   const manifest=B.validateManifest({schemaVersion:1,managerId:'mpv',version,platform:'darwin',arch:'arm64',minimumMacOS:recipe.minimumMacOS,upstreamRevision:recipe.source.revision,
    executableRelative:'mpv.app/Contents/MacOS/mpv',runtimeFiles:{decodedFrameManifest:'video-runtime.json'},
-   provenance:{sourceRevision:recipe.source.revision,sourceKind:'official-release',verifiedBuild:false},files,notices,dependencies});
+   provenance:{sourceRevision:recipe.source.revision,sourceKind:'official-release',verifiedBuild:false},files,dependencies});
   fs.writeFileSync(path.join(payload,'manifest.json'),json(manifest));
   const manifestFile=record(payload,'manifest.json'),sourceFile=files.find(file=>file.path==='source.json');
   const declaration={id:'mpv',version,arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS:recipe.minimumMacOS,directoryRelative:'mpv/'+version+'/arm64',sourceRelative:null,sourceSha256:sourceFile.sha256,manifestRelative:'manifest.json',manifestSha256:manifestFile.sha256,

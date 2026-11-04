@@ -43,11 +43,7 @@
     },
     {
       "path": "3rdparty/freetype",
-      "repository": "https://github.com/freetype/freetype.git",
-      "noticeFiles": [
-        "docs/FTL.TXT",
-        "docs/GPLv2.TXT"
-      ]
+      "repository": "https://github.com/freetype/freetype.git"
     },
     {
       "path": "3rdparty/freetype/subprojects/dlg",
@@ -67,10 +63,7 @@
     },
     {
       "path": "3rdparty/libjpeg-turbo",
-      "repository": "https://github.com/libjpeg-turbo/libjpeg-turbo.git",
-      "noticeFiles": [
-        "README.ijg"
-      ]
+      "repository": "https://github.com/libjpeg-turbo/libjpeg-turbo.git"
     },
     {
       "path": "3rdparty/libusb-cmake",
@@ -148,7 +141,6 @@
       "sha256": "9866e11cf2ae9caa1e671383786f248859a52dd8bfb702fb4c0dc2c65f1d36de",
       "bytes": 25052618,
       "repository": "https://github.com/astral-sh/python-build-standalone",
-      "license": "Python-2.0 AND CNRI-Python",
       "buildOnly": true
     },
     {
@@ -158,7 +150,6 @@
       "sha256": "d09998f85752b646873a8a6bc7eea442a0d251b1c8d2413aa8ea06ef131c3335",
       "bytes": 24774808,
       "repository": "https://github.com/astral-sh/python-build-standalone",
-      "license": "Python-2.0 AND CNRI-Python",
       "buildOnly": true
     }
   ]

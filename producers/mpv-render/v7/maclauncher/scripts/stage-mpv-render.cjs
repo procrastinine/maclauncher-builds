@@ -1,4 +1,3 @@
-const {addLicense} = require('../../../../../lib/licenses.mjs');
 // Build an owned GPU render host around an explicit, unchanged libmpv input.
 // The result is a managed media runtime, separate from launcher resources.
 const fs = require('node:fs'), path = require('node:path'), {execFileSync} = require('node:child_process');
@@ -9,13 +8,13 @@ const root = path.resolve(__dirname, '..');
 const sourceFiles = ['mpv-render.mm', 'gpu-surface.mm', 'gpu-surface.hpp', 'mpv-frame-metadata.h'];
 const headerFiles = ['frame.h','presentation.h','presentation-content.h','presentation-observed.h','presentation-source.h','target-time.h','image-color.h'].map(file=>'src/modules/shared/reshade/native/'+file);
 const run = (command, args) => execFileSync(command, args, {encoding:'utf8',stdio:'pipe',timeout:120000});
-function stage({library,referenceExecutable,dependencyRoots=[],output,version,source,notices,arch=process.arch,minimumMacOS='14.0'}) {
+function stage({library,referenceExecutable,dependencyRoots=[],output,version,source,arch=process.arch,minimumMacOS='14.0'}) {
   if(process.platform!=='darwin'||!['arm64','x64'].includes(arch))throw Error('Choose a supported native Mac architecture.');
   if(!/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(version||'')||!/^\d+\.\d+$/.test(minimumMacOS))throw Error('An explicit runtime version and macOS floor are required.');
   if(!source||!/^https:\/\//.test(source.url||'')||!/^[a-f0-9]{40}$/.test(source.commit||'')||!source.version)throw Error('The library source identity is required.');
   library=fs.realpathSync(library);referenceExecutable=fs.realpathSync(referenceExecutable);output=path.resolve(output);
   if(fs.existsSync(output))throw Error('Choose an empty output; managed runtime inputs are never modified.');
-  const cpu=arch==='x64'?'x86_64':arch,images=new Map(),targets=new Map(),originalHashes=new Map(),noticeRoots=new Set();
+  const cpu=arch==='x64'?'x86_64':arch,images=new Map(),targets=new Map(),originalHashes=new Map();
   let effectiveMinimum=minimumMacOS;
   const app=path.join(output,'mpv.app'),executable=path.join(app,'Contents/MacOS/mpv'),libraries=path.join(app,'Contents/Frameworks/video');
   fs.mkdirSync(path.dirname(executable),{recursive:true});fs.mkdirSync(libraries,{recursive:true});fs.mkdirSync(path.join(app,'Contents/Resources'),{recursive:true});
@@ -49,7 +48,6 @@ function stage({library,referenceExecutable,dependencyRoots=[],output,version,so
       const floor=Stage.loadCommands(target,cpu).minimumMacOS;
       if(!floor)throw Error('A media dependency has no declared macOS deployment target.');
       if(!versionAtLeast(effectiveMinimum,floor))effectiveMinimum=floor;
-      Stage.addDependencyNotices(original,output,noticeRoots);
     }
     const flags=['clang++','-std=c++17','-O2','-fobjc-arc','-Wno-deprecated-declarations','-arch',cpu,'-mmacosx-version-min='+minimumMacOS,
       '-ffile-prefix-map='+root+'=.','-I'+path.join(root,'src/external/mpv-player/include'),
@@ -60,7 +58,6 @@ function stage({library,referenceExecutable,dependencyRoots=[],output,version,so
     run('/usr/bin/codesign',['--force','--sign','-',executable]);
     const info=JSON.parse(run(executable,['--maclauncher-info']));
     if(info.schema!==1||info.decodedFrameAPI!==1||info.decodedColorAPI!==1||info.preparationNotificationAPI!==1||info.osdLayerAPI!==1||!String(info.libraryVersion).includes(source.version))throw Error('The prepared media library differs from its selected version or lacks separate video and OSD output.');
-    for(const notice of notices)addLicense(output,notice.name,notice.file,notice.license);
     const plist='<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>org.maclauncher.video</string><key>CFBundleName</key><string>Video</string><key>CFBundleExecutable</key><string>mpv</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleShortVersionString</key><string>'+source.version+'</string><key>LSMinimumSystemVersion</key><string>'+effectiveMinimum+'</string><key>NSHighResolutionCapable</key><true/></dict></plist>';
     fs.writeFileSync(path.join(app,'Contents/Info.plist'),plist);
     run('/usr/bin/codesign',['--force','--sign','-',app]);run('/usr/bin/codesign',['--verify','--strict','--deep',app]);

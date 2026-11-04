@@ -5,14 +5,12 @@
       "id": "sdl3",
       "repository": "https://github.com/libsdl-org/SDL.git",
       "revision": "f5e5f6588921eed3d7d048ce43d9eb1ff0da0ffc",
-      "version": "3.2.30",
-      "license": "Zlib"
+      "version": "3.2.30"
     },
     {
       "id": "vulkan-headers",
       "repository": "https://github.com/KhronosGroup/Vulkan-Headers.git",
-      "reusePath": "sources/anyps5/3rdparty/Vulkan-Headers",
-      "license": "Apache-2.0 OR MIT"
+      "reusePath": "sources/anyps5/3rdparty/Vulkan-Headers"
     }
   ]
 }

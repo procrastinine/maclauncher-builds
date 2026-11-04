@@ -22,12 +22,6 @@
       "mode": 420
     },
     {
-      "path": "license.txt",
-      "output": "license.txt",
-      "kind": "file",
-      "mode": 420
-    },
-    {
       "path": "software-opengl.dylib",
       "output": "software-opengl.dylib",
       "kind": "file",
@@ -38,14 +32,6 @@
         "x86_64",
         "arm64"
       ]
-    }
-  ],
-  "notices": [
-    {
-      "name": "MacLauncher software OpenGL integration",
-      "license": "MIT",
-      "path": "license.txt",
-      "sourceUrl": "https://github.com/procrastinine/maclauncher-builds"
     }
   ],
   "executableRelative": "software-opengl.dylib",

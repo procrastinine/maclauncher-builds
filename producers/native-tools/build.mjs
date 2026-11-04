@@ -21,30 +21,26 @@ function goBuild({pin,arch,source,work}){
  const execute=args=>{const action=()=>run('go',args,{cwd:source,env:environment});return ['list','mod'].includes(args[0])?retryNetwork(action):action();};
  const used=[...new Set(execute(['list','-deps','-f','{{if .Module}}{{.Module.Path}}{{end}}','./src/ziggy/ziggy.go']).split('\n').filter(value=>value&&value!=='uosc/bins'))].sort();
  if(JSON.stringify(used)!==JSON.stringify(pin.modules.map(entry=>entry.module).sort()))throw Error('The Ziggy module closure differs from its declared inputs.');
- const notices=[{file:path.join(source,'LICENSE.LGPL'),name:'uosc',license:pin.license,sourceUrl:pin.repository}];
  for(const entry of pin.modules){
   const module=JSON.parse(execute(['mod','download','-json',entry.module+'@'+entry.version]));
   if(module.Error||module.Sum!==entry.sum)throw Error('A Ziggy Go module differs from its declared checksum.');
-  notices.push({file:path.join(module.Dir,'LICENSE'),name:entry.module,license:entry.license,sourceUrl:'https://'+entry.module+'/tree/'+entry.revision});
  }
- const goRoot=execute(['env','GOROOT']).trim(),goLicense=[path.join(goRoot,'LICENSE'),path.join(goRoot,'../LICENSE')].find(file=>fs.statSync(file,{throwIfNoEntry:false})?.isFile());
 
- notices.push({file:goLicense,name:'Go runtime',license:'BSD-3-Clause',sourceUrl:'https://go.dev/'});
  const executable=path.join(work,'ziggy-darwin');
  execute(['build','-trimpath','-buildvcs=false','-ldflags=-s -w -buildid=','-o',executable,'./src/ziggy/ziggy.go']);
- return {executable,notices,provenance:{goVersion:execute(['version']).trim(),modules:pin.modules.map(({module,version,revision,sum})=>({module,version,revision,sum}))},
+ return {executable,provenance:{goVersion:execute(['version']).trim(),modules:pin.modules.map(({module,version,revision,sum})=>({module,version,revision,sum}))},
   capabilities:{uoscVersion:pin.version,helper:'ziggy',commands:['get-clipboard','set-clipboard','download','http-get','http-post','http-put','http-patch','http-delete','open','search-subtitles','download-subtitles']}};
 }
 
 async function scummvmBuild({pin,arch,source,work}){
  const sdk=process.env.SDKROOT||run('/usr/bin/xcrun',['--show-sdk-path']).trim(),prefix=path.join(work,'prefix');fs.mkdirSync(prefix);
- const tools={cmake:Source.findBuildTool('cmake'),ninja:Source.findBuildTool('ninja')},notices=[];
+ const tools={cmake:Source.findBuildTool('cmake'),ninja:Source.findBuildTool('ninja')};
  const mappings=[{from:source,to:'scummvm-tools'},{from:work,to:'build'}];
  fs.mkdirSync(path.join(work,'dependencies'));
  const compilerFlags=['-O2','-Werror=unguarded-availability-new','-arch',arch==='x64'?'x86_64':'arm64','-isysroot',sdk,'-mmacosx-version-min=13.0',
   '-ffile-prefix-map='+source+'=scummvm-tools','-ffile-prefix-map='+work+'=build','-I'+path.join(prefix,'include')].join(' ');
  const fonts=nativeStackInput(preparedBuildInput('native-sdl2-fonts'),{arch,work:path.join(work,'fonts')}),audio=nativeStackInput(preparedBuildInput('native-sndfile'),{arch,work:path.join(work,'audio')});
- Prefix.linkPrefix(fonts.prefix,prefix);Prefix.linkPrefix(audio.prefix,prefix);notices.push(...fonts.notices,...audio.notices);
+ Prefix.linkPrefix(fonts.prefix,prefix);Prefix.linkPrefix(audio.prefix,prefix);
  const build=path.join(work,'cli');fs.mkdirSync(build);
  const toolDirectory=path.join(work,'tools');fs.mkdirSync(toolDirectory);fs.symlinkSync(Source.findBuildTool('pkg-config'),path.join(toolDirectory,'pkg-config'));
  const env={...Portable.buildEnvironment(prefix,sdk),PATH:toolDirectory+':/usr/bin:/bin:/usr/sbin:/sbin',CPPFLAGS:'',CXX:'/usr/bin/clang++',CXXFLAGS:compilerFlags,
@@ -57,8 +53,7 @@ async function scummvmBuild({pin,arch,source,work}){
  fs.writeFileSync(path.join(work,'make.log'),run('/usr/bin/make',['-j4','scummvm-tools-cli'],{cwd:build,env}));
  const configuration=fs.readFileSync(path.join(build,'config.h'),'utf8');
  for(const symbol of ['USE_VORBIS','USE_FLAC','USE_PNG','USE_ZLIB'])if(!new RegExp('^#define '+symbol+'(?: 1)?$','m').test(configuration))throw Error('The CLI codec is absent: '+symbol);
- for(const file of ['COPYING','COPYING.BSD2','COPYING.LUA'])notices.push({file:path.join(source,file),name:'ScummVM Tools',license:pin.license,sourceUrl:pin.repository});
- return {executable:path.join(build,'scummvm-tools-cli'),notices,provenance:{sdkVersion:run('/usr/bin/xcrun',['--show-sdk-version']).trim()},capabilities:{tools:['extract_kyra','extract_gob_stk'],codecs:['vorbis','flac','png','zlib']}};
+ return {executable:path.join(build,'scummvm-tools-cli'),provenance:{sdkVersion:run('/usr/bin/xcrun',['--show-sdk-version']).trim()},capabilities:{tools:['extract_kyra','extract_gob_stk'],codecs:['vorbis','flac','png','zlib']}};
 }
 
 // Each project's build path and the published packages that path uses.

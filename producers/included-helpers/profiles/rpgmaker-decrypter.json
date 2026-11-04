@@ -39,36 +39,6 @@
   },
   "inputs": [
     {
-      "path": "DOTNET-LICENSE.txt",
-      "output": "files/licenses/DOTNET-LICENSE.txt",
-      "kind": "file",
-      "mode": 420
-    },
-    {
-      "path": "DOTNET-ThirdPartyNotices.txt",
-      "output": "files/licenses/DOTNET-ThirdPartyNotices.txt",
-      "kind": "file",
-      "mode": 420
-    },
-    {
-      "path": "LICENSE-RPGMakerDecrypter.txt",
-      "output": "files/licenses/LICENSE-RPGMakerDecrypter.txt",
-      "kind": "file",
-      "mode": 420
-    },
-    {
-      "path": "LICENSE-commandlineparser.md",
-      "output": "files/licenses/LICENSE-commandlineparser.md",
-      "kind": "file",
-      "mode": 420
-    },
-    {
-      "path": "LICENSE-newtonsoft.json.md",
-      "output": "files/licenses/LICENSE-newtonsoft.json.md",
-      "kind": "file",
-      "mode": 420
-    },
-    {
       "path": "RPGMakerDecrypter-cli",
       "output": "files/bin/RPGMakerDecrypter-cli",
       "kind": "file",
@@ -78,38 +48,6 @@
       "architectures": [
         "arm64"
       ]
-    }
-  ],
-  "notices": [
-    {
-      "name": "RPGMakerDecrypter",
-      "license": "MIT",
-      "path": "files/licenses/LICENSE-RPGMakerDecrypter.txt",
-      "sourceUrl": "https://github.com/uuksu/RPGMakerDecrypter"
-    },
-    {
-      "name": ".NET runtime",
-      "license": "MIT",
-      "path": "files/licenses/DOTNET-LICENSE.txt",
-      "sourceUrl": "https://github.com/dotnet/runtime"
-    },
-    {
-      "name": ".NET dependencies",
-      "license": "LicenseRef-Dotnet-ThirdPartyNotices",
-      "path": "files/licenses/DOTNET-ThirdPartyNotices.txt",
-      "sourceUrl": "https://github.com/dotnet/runtime"
-    },
-    {
-      "name": "CommandLineParser",
-      "license": "MIT",
-      "path": "files/licenses/LICENSE-commandlineparser.md",
-      "sourceUrl": "https://github.com/commandlineparser/commandline"
-    },
-    {
-      "name": "Newtonsoft.Json",
-      "license": "MIT",
-      "path": "files/licenses/LICENSE-newtonsoft.json.md",
-      "sourceUrl": "https://github.com/JamesNK/Newtonsoft.Json"
     }
   ],
   "managedManifest": {

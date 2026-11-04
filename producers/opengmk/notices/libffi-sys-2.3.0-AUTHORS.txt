@@ -1,4 +1,0 @@
-libffi-sys 2.3.0
-
-Authors from the locked crate Cargo.toml:
-Jesse A. Tov <jesse.tov@gmail.com>

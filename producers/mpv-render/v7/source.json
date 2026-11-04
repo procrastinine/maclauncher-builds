@@ -4,8 +4,7 @@
   "version": "0.41.0-MCLv7",
   "source": {
     "path": "producers/maclauncher/src/external/mpv-player",
-    "repository": "https://github.com/mpv-player/mpv.git",
-    "license": "GPL-2.0-or-later, LGPL-2.1-or-later"
+    "repository": "https://github.com/mpv-player/mpv.git"
   },
   "architecture": "arm64",
   "minimumMacOS": "27.0",

@@ -5,7 +5,6 @@
   "source": {
     "path": "sources/nxnative",
     "repository": "https://github.com/seedds/nxnative.git",
-    "license": "MIT",
     "committedAt": "2026-10-28T00:36:48.000Z"
   },
   "platform": "darwin",

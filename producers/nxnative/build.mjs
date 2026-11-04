@@ -1,5 +1,5 @@
 import {gitlink} from '../../lib/pins.mjs';
-import {addLicense} from '../../lib/licenses.mjs';
+import {addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -164,17 +164,7 @@ export async function buildNxNative({work,output,dependencyWork,jobs=4,version=p
     runtime.requirements={metalCompiler:{delivery:'system',required:true,command:'/usr/bin/xcrun',sdk:'macosx',tools:['metal','metallib'],options:['-O1','-fpreserve-invariance'],version:read('/usr/bin/xcrun',['-sdk','macosx','metal','--version']).split('\n')[0],managedAcquisition:false}};
     json(path.join(output,'runtime.json'),runtime);
     const origins={schemaVersion:1,id:pin.id,version,source:pin.source,producerInputs:owned,dependencies,nuget:JSON.parse(fs.readFileSync(lock))};json(path.join(output,'source.json'),origins);
-    for(const [name,relative,license]of[['nxnative','LICENSE','MIT'],['libvpx','dm/third_party/libvpx/LICENSE','BSD-3-Clause'],['libvpx patent grant','dm/third_party/libvpx/PATENTS','Patent grant'],['stb_vorbis','dm/third_party/stb_vorbis/LICENSE','MIT'],['Ryujinx','dm/third_party/ryujinx/LICENSE.txt','MIT'],['Spv.Generator','dm/third_party/ryujinx/src/Spv.Generator/LICENSE','MIT'],['Vulkan-Headers','dm/third_party/vulkan-headers/LICENSE.md','Apache-2.0 or MIT'],['MacNativeGames','dm/third_party/macnativegames/LICENSE','MIT']]){
-        let file=path.join(source,relative);if(!fs.existsSync(file)&&name==='MacNativeGames')file=path.join(source,'dm/gfx/nvn/macnativegames/LICENSE');
-
-        const destination='licenses/nxnative/'+name.replace(/[^A-Za-z0-9.-]/g,'-')+'.txt';addLicense(output,name,file);
-    }
-    addLicense(output,'NVN',path.join(source,'dm/gfx/nvn/include/nvn.h'));
-    for(const [name,file,license,url]of[['deko3d','deko3d.txt','Zlib','https://github.com/devkitPro/deko3d'],['LibHac','LibHac.txt','MIT','https://www.nuget.org/packages/LibHac/0.19.0']]){
-        const destination='licenses/nxnative/'+file;addLicense(output,name,path.join(producer,'licenses',file),license);
-    }
-    const closure=nativeClosure(output);
-    for(const file of files(output)){const mode=fs.statSync(file).mode&0o777;fs.chmodSync(file,mode&0o111?0o755:0o644);}
+    addLicenses(output,pin.id,source);
     const inventory=B.fileInventory(output).filter(file=>!file.endsWith('.inputs')).map(relative=>{
         const file=path.join(output,relative),stat=fs.statSync(file);let architectures;
         if(nativeFile(file))architectures=Native.readMachOArchitectures(file,{allowLibrary:true});

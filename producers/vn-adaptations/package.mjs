@@ -50,7 +50,7 @@ export async function packageRuntime({project,input,output,arch='arm64'}){
   if(fs.existsSync(output)||output===input||output.startsWith(input+path.sep))throw Error('Choose a new immutable output outside the input tree.');
   fs.mkdirSync(output,{recursive:true});
   const payload=path.join(output,'payload'),files=path.join(payload,'files');fs.mkdirSync(files,{recursive:true});
-  let executableRelative,notices=[],provenance,runtimeFiles={};
+  let executableRelative,provenance,runtimeFiles={};
   try{
     if(project==='siglus'){
       if(hash(path.join(input,'siglus-profile.json'))!==pin.inputProfileSha256)throw Error('The Siglus input profile differs from its selected publisher artifact.');
@@ -59,7 +59,6 @@ export async function packageRuntime({project,input,output,arch='arm64'}){
       const profile=read(path.join(input,'siglus-profile.json'));profile.version=pin.version;
       fs.writeFileSync(path.join(files,'siglus-profile.json'),JSON.stringify(profile,null,2)+'\n',{mode:0o644,flag:'wx'});
       executableRelative='bin/siglus-host';runtimeFiles={siglusLibrary:'lib/libsiglus.dylib',siglusProfile:'siglus-profile.json'};
-      notices=[{name:'siglus_rs',license:'MPL-2.0',sourceUrl:pin.upstream.url,path:'LICENSE-siglus_rs.txt'}];
       provenance={sourceRevision:pin.upstream.revision,sourceKind:'publisher-binary',verifiedBuild:false,inputProfileSha256:pin.inputProfileSha256};
     }else if(project==='krkrsdl2'){
       if(hash(path.join(input,'manifest.json'))!==pin.inputManifestSha256)throw Error('The KiriKiri input differs from its selected sealed package.');
@@ -69,7 +68,6 @@ export async function packageRuntime({project,input,output,arch='arm64'}){
       const polyfill=read(path.join(here,'kag3-polyfill/manifest.json'));
       for(const name of [...Object.keys(polyfill.files),'manifest.json'])copy(path.join(here,'kag3-polyfill',name),path.join(files,'share/kag3-polyfill',name));
       executableRelative=original.executableRelative;provenance={...original.provenance,inputManifestSha256:pin.inputManifestSha256,kag3Revision:pin.polyfill.revision};
-      notices=[{name:'KAG3 polyfill font',license:'See included font license',sourceUrl:pin.polyfill.url,path:'share/kag3-polyfill/FONT_LICENSE.txt'}];
       runtimeFiles={...original.runtimeFiles,kag3Manifest:'share/kag3-polyfill/manifest.json'};
 
     }

@@ -1,5 +1,4 @@
 import {gitlink} from '../../lib/pins.mjs';
-import {addLicense} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
@@ -9,7 +8,7 @@ const require=createRequire(import.meta.url),B=require('../../lib/bundled-native
 const {validateDeclaration}=require('../../lib/declaration.cjs');
 const root=import.meta.dirname;
 const profiles={
- 'vnds-love':{source:'vnds-love',version:'0.0.13-838e47b-MCLv1',entry:'engine/main.lua',license:'engine/LICENSE',licenseName:'MIT',minimumMacOS:'11.0'}
+ 'vnds-love':{source:'vnds-love',version:'0.0.13-838e47b-MCLv1',entry:'engine/main.lua',minimumMacOS:'11.0'}
 };
 const metadata=file=>{const {bytes,...record}=B.readRegular(file,B.LIMITS.fileBytes);return record;};
 function inventory(directory,prefix=''){
@@ -43,7 +42,7 @@ export function stageData({project,output,version=profiles[project]?.version}){
  const profile=profiles[project];if(!profile||!path.isAbsolute(output||'')||fs.existsSync(output)||!version||/[\\/]/.test(version))throw Error('Select an engine-data project and a new absolute output directory.');
  fs.mkdirSync(output,{recursive:true});
  try{
-  const source=copySources(profile,output);addLicense(output,project,path.join(root,profile.source,profile.license),profile.licenseName);const files=inventory(output),notices=[{name:project,license:profile.licenseName,path:profile.license,sourceUrl:source.repository}];
+  const source=copySources(profile,output);const files=inventory(output);
   const manifest={schemaVersion:1,kind:'data',managerId:project,version,arch:'universal',minimumMacOS:profile.minimumMacOS,
    sourceRevision:gitlink('producers/engine-adaptations/sources/VNDS-LOVE'),sourceUrl:source.repository,entryRelative:profile.entry,files,loveVersion:'11.5'};
   const declaration=seal(project,version,'universal',profile.minimumMacOS,output,manifest);

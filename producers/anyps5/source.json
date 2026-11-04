@@ -4,7 +4,6 @@
   "source": {
     "path": "sources/anyps5",
     "repository": "https://github.com/boykopovar/AnyPS5.git",
-    "license": "GPL-2.0-only",
     "committedAt": "2026-10-28T00:32:37.000Z"
   },
   "buildEntry": "producers/anyps5/build-relinker.mjs",
