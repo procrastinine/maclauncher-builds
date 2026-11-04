@@ -46,7 +46,7 @@ export async function packageLocal({buildDirectory,output,version=recipe.version
  fs.writeFileSync(path.join(payload,'source.json'),json({schemaVersion:1,source:recipe.source,dependencies:inputs.dependencies,artifacts:inputs.artifacts,vulkanLinkInput:result.vulkanLinkInput,producerInputs}));
  const files=filesIn(payload).map(file=>record(payload,file));
  const manifest={schemaVersion:1,managerId:'prosper',version,arch:'x64',platform:'darwin',minimumMacOS:recipe.output.minimumMacOS,upstreamRevision:recipe.source.revision,
-  committedAt:recipe.source.committedAt,gameArchitecture:'x86_64',executableRelative:'bin/prosper-app',runtimeFiles:{vulkan:'managed'},files};
+  gameArchitecture:'x86_64',executableRelative:'bin/prosper-app',runtimeFiles:{vulkan:'managed'},files};
  fs.writeFileSync(path.join(payload,'runtime.json'),json(manifest));
  const identity=record(payload,'runtime.json'),sourceFile=files.find(file=>file.path==='source.json');
  const declaration={id:'prosper',version,arch:'x64',launcherArchitectures:['arm64','x64'],minimumMacOS:manifest.minimumMacOS,directoryRelative:'prosper/'+version+'/x64',
