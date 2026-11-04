@@ -388,8 +388,7 @@ class MetalImageGeneration final:public GenerationEncoder {
     next->motion=newAdmittedTexture(device,image,0,"MetalFX image interpolation motion");
     image=[MTLTextureDescriptor texture2DDescriptorWithPixelFormat:request->color width:request->width height:request->height mipmapped:NO];image.storageMode=MTLStorageModePrivate;image.usage=MTLTextureUsageShaderRead|MTLTextureUsageShaderWrite|interpolator.colorTextureUsage;
     for(auto&slot:next->history)slot=newAdmittedTexture(device,image,0,"MetalFX image interpolation history");
-    image.usage=MTLTextureUsageShaderRead|MTLTextureUsageShaderWrite|interpolator.outputTextureUsage;next->generated=newAdmittedTexture(device,image,0,"MetalFX image interpolation resized output");
-    if(!next->generated||!next->depth||!next->motion||!next->history[0]||!next->history[1])throw std::runtime_error("MetalFX image interpolation could not allocate its images");
+    if(!next->depth||!next->motion||!next->history[0]||!next->history[1])throw std::runtime_error("MetalFX image interpolation could not allocate its images");
     request->value=std::move(next);
    }else request->error="MetalFX image interpolation requires macOS 26 or later";
   }catch(const std::exception&error){request->error=error.what();}}@catch(NSException*error){request->error=error.reason.UTF8String?:"MetalFX image interpolation preparation failed";}}
@@ -471,8 +470,14 @@ public:
    if(!gpu->encode(commands,gpu->expand,{blocks,current->motion},values,current->width,current->height,step->valid))return rejected(sequence,"Cannot expand the motion field");
    id<MTLFXFrameInterpolator>interpolator=current->interpolator;
    const bool resized=source.width!=current->width||source.height!=current->height;
-   if((!resized&&(outputs[0].usage&interpolator.outputTextureUsage)!=interpolator.outputTextureUsage)||(snapshot.usage&interpolator.colorTextureUsage)!=interpolator.colorTextureUsage)return rejected(sequence,"The image does not satisfy MetalFX interpolation usage requirements");
-   interpolator.colorTexture=snapshot;interpolator.prevColorTexture=previousColor;interpolator.depthTexture=current->depth;interpolator.motionTexture=current->motion;interpolator.uiTexture=nil;
+   if((!resized&&(outputs[0].usage&interpolator.outputTextureUsage)!=interpolator.outputTextureUsage)||((resized?snapshot:source).usage&interpolator.colorTextureUsage)!=interpolator.colorTextureUsage)return rejected(sequence,"The image does not satisfy MetalFX interpolation usage requirements");
+   if(resized&&!current->generated){
+    auto image=[MTLTextureDescriptor texture2DDescriptorWithPixelFormat:current->color width:current->width height:current->height mipmapped:NO];
+    image.storageMode=MTLStorageModePrivate;image.usage=MTLTextureUsageShaderRead|MTLTextureUsageShaderWrite|interpolator.outputTextureUsage;
+    current->generated=newAdmittedTexture(device,image,0,"MetalFX image interpolation resized output");
+    if(!current->generated)return rejected(sequence,"Cannot allocate the serving interpolation output");
+   }
+   interpolator.colorTexture=resized?snapshot:source;interpolator.prevColorTexture=previousColor;interpolator.depthTexture=current->depth;interpolator.motionTexture=current->motion;interpolator.uiTexture=nil;
    interpolator.motionVectorScaleX=interpolator.motionVectorScaleY=1;interpolator.jitterOffsetX=interpolator.jitterOffsetY=0;interpolator.deltaTime=float(interval);
    // Captured content is a flat plane at the far end of a nominal camera.
    interpolator.nearPlane=.1f;interpolator.farPlane=1000;interpolator.fieldOfView=60;interpolator.aspectRatio=float(current->width)/current->height;interpolator.depthReversed=NO;interpolator.shouldResetHistory=resetHistory;resetHistory=false;

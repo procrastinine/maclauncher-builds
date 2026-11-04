@@ -21,7 +21,7 @@ DepthResampler::DepthResampler(id<MTLDevice> value):device(value){
     color=[device newComputePipelineStateWithFunction:[library newFunctionWithName:@"resize_color"] error:&error];
     depth=[device newComputePipelineStateWithFunction:[library newFunctionWithName:@"resize_depth"] error:&error];
     depthMS=[device newComputePipelineStateWithFunction:[library newFunctionWithName:@"resize_depth_ms"] error:&error];
-    if(!color||!depth||!depthMS)throw std::runtime_error(error.localizedDescription.UTF8String?:"The depth resize pipeline could not be created.");
+    if(!color||!depth)throw std::runtime_error(error.localizedDescription.UTF8String?:"The depth resize pipeline could not be created.");
 }
 bool DepthResampler::encode(id<MTLCommandBuffer> commands,const DepthFrame &input,id<MTLTexture> output,FrameOrigin outputOrigin,std::string &reason,float jitterX,float jitterY){
     if(!std::isfinite(jitterX)||!std::isfinite(jitterY)||!commands||commands.status>=MTLCommandBufferStatusCommitted||!input.texture||!output||
@@ -36,7 +36,7 @@ bool DepthResampler::encode(id<MTLCommandBuffer> commands,const DepthFrame &inpu
       case MTLPixelFormatR16Float:case MTLPixelFormatR32Float:case MTLPixelFormatR16Unorm:break;
       default:reason="The resolved depth texture has an unsupported numeric format.";return false;
     }
-    if(input.texture.sampleCount>1&&!depthFormat){reason="Multisample depth sampling requires a depth format.";return false;}
+    if(input.texture.sampleCount>1&&(!depthFormat||!depthMS)){reason="Multisample depth sampling is unavailable for this depth texture.";return false;}
     auto encoder=[commands computeCommandEncoder];if(!encoder){reason="The depth resize encoder could not be created.";return false;}
     const float policy[4]={input.origin==outputOrigin?0.f:1.f,jitterX,jitterY,0};
     [encoder setComputePipelineState:input.texture.sampleCount>1?depthMS:depthFormat?depth:color];[encoder setTexture:input.texture atIndex:0];[encoder setTexture:output atIndex:1];

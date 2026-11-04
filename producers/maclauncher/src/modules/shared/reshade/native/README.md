@@ -385,7 +385,7 @@ preparation does not count as overload for Automatic selection.
 
 Measured processing time selects VideoToolbox interpolation limits of the
 framework maximum, 1280x720 and 960x540, and motion-search limits of 1920x1080,
-1280x720, 960x540 and 640x360, preserving source aspect ratio. A smoothed processing-time ratio above 80 percent of the capture interval
+1280x720 and 960x540, preserving source aspect ratio. A smoothed processing-time ratio above 80 percent of the capture interval
 for three observations reduces the work size; 120 observations below
 40 percent restore one size step. Invalid measurements are
 ignored. Provider status includes the active processing dimensions.

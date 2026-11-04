@@ -89,7 +89,7 @@ std::string legacyInputIdentity(const macfx::LivePacket&packet){
 }
 struct macfx::FramePresenter::Impl:std::enable_shared_from_this<Impl>{
  CAMetalLayer*layer;void*owner;PresenterConfig config;ImageColorSpace colorSpace=ImageColorSpace::LegacySDR;ImageRetry frameRetry;id<MTLCommandQueue>queue;id<MTLRenderPipelineState>flipPipeline,motionPipeline;dispatch_queue_t worker;dispatch_source_t wakeup=nullptr;CVDisplayLinkRef link=nullptr;
- std::unique_ptr<PresentationDisplayLink>metalLink;std::atomic<bool>metalTiming{false};std::atomic<uint64_t>timingEpoch{0};
+ std::unique_ptr<PresentationDisplayLink>metalLink;std::atomic<bool>metalTiming{false};bool metalTimingUnavailable=false;std::atomic<uint64_t>timingEpoch{0};
  std::mutex displayDrawableMutex;id<CAMetalDrawable>displayDrawable=nil;
  ImageColorDescription sourceColor,outputColor;MTLPixelFormat graphFormat=MTLPixelFormatInvalid;std::shared_ptr<ColorEncoder>colorEncoder;std::atomic<float>displayHeadroom{1};
  std::atomic<PresenterPreparation>preparation{PresenterPreparation::Ready};
@@ -215,6 +215,15 @@ worker=dispatch_queue_create("macfx.presentation",DISPATCH_QUEUE_SERIAL);layer.f
  void retryPrivateQueue(){std::lock_guard lock(privateQueueMutex);privateQueueUnavailable.store(false);generationUnavailable=false;}
  void displayUpdate(uint64_t epoch,id<CAMetalDrawable> drawable,double target,unsigned rate){
   if(stopping.load()||epoch!=timingEpoch||!metalTiming.load())return;
+  if(!drawable&&target==0){
+   const auto weak=weak_from_this();dispatch_async(worker,^{if(auto self=weak.lock()){
+    std::lock_guard serial(self->submission);if(self->stopping.load()||epoch!=self->timingEpoch)return;
+    self->metalTimingUnavailable=true;self->metalTiming=false;++self->timingEpoch;
+    if(self->metalLink){self->metalLink->invalidate();self->metalLink.reset();}
+    {std::lock_guard lock(self->displayDrawableMutex);self->displayDrawable=nil;}
+    self->start();
+   }});return;
+  }
   if(std::isfinite(target)&&target>0)refreshTime.store(target);if(rate>=20&&rate<=1000)displayHz.store(rate);
   CAMetalLayer *output=layerSnapshot();if(!output)return;
   {std::lock_guard lock(displayDrawableMutex);if(stopping.load()||epoch!=timingEpoch)return;
@@ -250,13 +259,17 @@ worker=dispatch_queue_create("macfx.presentation",DISPATCH_QUEUE_SERIAL);layer.f
     std::weak_ptr<Impl>weak=shared_from_this();dispatch_source_set_event_handler(wakeup,^{if(auto self=weak.lock())self->schedule();});
     dispatch_source_set_timer(wakeup,DISPATCH_TIME_FOREVER,DISPATCH_TIME_FOREVER,0);dispatch_resume(wakeup);
    }
-   if(@available(macOS 14.0,*)){
-    if(!metalLink){
-     const auto epoch=++timingEpoch;const std::weak_ptr<Impl>weak=shared_from_this();
-     metalLink=std::make_unique<PresentationDisplayLink>(layer,[weak,epoch](id<CAMetalDrawable> drawable,double target,unsigned rate){if(auto self=weak.lock())self->displayUpdate(epoch,drawable,target,rate);});
-     metalLink->setDisplay(currentDisplay);metalTiming=true;
-    }
-    metalLink->resume();return true;
+   if(@available(macOS 14.0,*))if(!metalTimingUnavailable){
+    @try{try{
+     if(!metalLink){
+      const auto epoch=++timingEpoch;const std::weak_ptr<Impl>weak=shared_from_this();
+      metalLink=std::make_unique<PresentationDisplayLink>(layer,[weak,epoch](id<CAMetalDrawable> drawable,double target,unsigned rate){if(auto self=weak.lock())self->displayUpdate(epoch,drawable,target,rate);});
+      metalLink->setDisplay(currentDisplay);metalTiming=true;
+     }
+     metalLink->resume();return true;
+    }catch(const std::exception&){metalLink.reset();metalTiming=false;metalTimingUnavailable=true;}}
+    @catch(NSException*){metalLink.reset();metalTiming=false;metalTimingUnavailable=true;}
+    // Keep the existing timing route when the optional Metal driver is unavailable.
    }
    if(!link){
     if(CVDisplayLinkCreateWithActiveCGDisplays(&link)!=kCVReturnSuccess||!link)throw std::runtime_error("Frame generation display timing is unavailable");
@@ -1228,12 +1241,12 @@ macfx::FrameResult macfx::FramePresenter::submitDisplayFrame(id<MTLCommandBuffer
 void macfx::FramePresenter::setDisplay(uint32_t displayId){std::unique_lock<std::mutex>serial(impl->submission,std::try_to_lock);if(!serial.owns_lock())return;if(displayId&&displayId!=impl->currentDisplay&&!impl->stopping.load()){
  impl->currentDisplay=displayId;
  unsigned refresh=0;
+ if(impl->link&&CVDisplayLinkSetCurrentCGDisplay(impl->link,displayId)!=kCVReturnSuccess)impl->bypassGeneration("Frame generation display selection is unavailable");
  if(@available(macOS 14.0,*)){
   if(impl->metalLink)impl->metalLink->setDisplay(displayId);
   if(auto mode=CGDisplayCopyDisplayMode(displayId)){const double rate=CGDisplayModeGetRefreshRate(mode);CGDisplayModeRelease(mode);
    if(std::isfinite(rate)&&rate>=20&&rate<=1000)refresh=unsigned(std::lround(rate));}
  }else{
-  if(impl->link&&CVDisplayLinkSetCurrentCGDisplay(impl->link,displayId)!=kCVReturnSuccess)impl->bypassGeneration("Frame generation display selection is unavailable");
   CVDisplayLinkRef timing=impl->link;const bool temporary=!timing;
   if(!timing&&CVDisplayLinkCreateWithCGDisplay(displayId,&timing)!=kCVReturnSuccess)timing=nullptr;
   if(timing){const auto period=CVDisplayLinkGetNominalOutputVideoRefreshPeriod(timing);

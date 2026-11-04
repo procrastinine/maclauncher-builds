@@ -65,8 +65,11 @@ API_AVAILABLE(macos(14.0))
         CFRunLoopSourceRef idle=CFRunLoopSourceCreate(kCFAllocatorDefault,0,&context);
         CFRunLoopAddSource(loop,idle,kCFRunLoopCommonModes);
         {std::lock_guard lock(_loopMutex);_loop=(CFRunLoopRef)CFRetain(loop);}
-        [self applyLoopState];[_link addToRunLoop:NSRunLoop.currentRunLoop forMode:NSRunLoopCommonModes];
-        while(!_state->invalidated){@autoreleasepool{CFRunLoopRunInMode(kCFRunLoopDefaultMode,1,true);}}
+        @try{try{
+            [self applyLoopState];[_link addToRunLoop:NSRunLoop.currentRunLoop forMode:NSRunLoopCommonModes];
+            while(!_state->invalidated){@autoreleasepool{CFRunLoopRunInMode(kCFRunLoopDefaultMode,1,true);}}
+        }catch(const std::exception&){if(!_state->invalidated)_state->update(nil,0,0);}}
+        @catch(NSException*){if(!_state->invalidated)_state->update(nil,0,0);}
         [_link invalidate];_link.delegate=nil;
         {std::lock_guard lock(_loopMutex);CFRelease(_loop);_loop=nullptr;}
         CFRunLoopSourceInvalidate(idle);CFRelease(idle);

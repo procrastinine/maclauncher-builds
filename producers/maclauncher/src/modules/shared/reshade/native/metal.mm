@@ -1270,11 +1270,12 @@ void finishPresent(const PendingPresent &pending) {
     const bool nested=forwardingDrawable&&forwardingDrawable->object==pending.drawable&&forwardingDrawable->selector==pending.selector;
     const auto found=hooks().find(nested?forwardingDrawable->parent:object_getClass(pending.drawable),pending.selector);
     DrawableForward active{pending.drawable,pending.selector,class_getSuperclass(found.owner),forwardingDrawable};
-    struct Restore {DrawableForward *previous;~Restore(){forwardingDrawable=previous;}} restore{forwardingDrawable};forwardingDrawable=&active;
-    IMP implementation=found.implementation;
-    if(pending.selector==@selector(present))
-        reinterpret_cast<void(*)(id,SEL)>(implementation)(pending.drawable,pending.selector);
-    else reinterpret_cast<void(*)(id,SEL,CFTimeInterval)>(implementation)(pending.drawable,pending.selector,pending.time);
+    forwardingDrawable=&active;IMP implementation=found.implementation;
+    @try {
+        if(pending.selector==@selector(present))
+            reinterpret_cast<void(*)(id,SEL)>(implementation)(pending.drawable,pending.selector);
+        else reinterpret_cast<void(*)(id,SEL,CFTimeInterval)>(implementation)(pending.drawable,pending.selector,pending.time);
+    } @finally {forwardingDrawable=active.previous;}
 }
 bool deferPresent(id<MTLDrawable> drawable,SEL selector,CFTimeInterval time=0) {
     if((forwardingDrawable&&forwardingDrawable->object==drawable)||!scheduledContext || ![drawable conformsToProtocol:@protocol(CAMetalDrawable)] ||
@@ -1769,9 +1770,9 @@ void installMetalDeviceHooks(id<MTLDevice> device) {
             Class deviceClass=object_getClass(device);
             replace(deviceClass,@selector(newMTL4CommandQueue),reinterpret_cast<IMP>(newMetal4Queue));
             replace(deviceClass,@selector(newMTL4CommandQueueWithDescriptor:error:),reinterpret_cast<IMP>(newMetal4QueueDescriptor));
-            if([device respondsToSelector:@selector(newMTL4CommandQueue)]) {
+            @try {if([device respondsToSelector:@selector(newMTL4CommandQueue)]) {
                 auto queue=[device newMTL4CommandQueue];hookMetal4Queue(queue);metal4=queue!=nil;
-            }
+            }} @catch(NSException*){} // Optional Metal 4 probing cannot prevent classic hooks.
         }
         id<MTLCommandQueue> queue=[device newCommandQueue];id<MTLCommandBuffer> buffer=[queue commandBuffer];
         if(buffer) {
@@ -1793,7 +1794,10 @@ void installMetalDeviceHooks(id<MTLDevice> device) {
 }
 void setMetalDevice(id object,SEL selector,id<MTLDevice> device) {
     reinterpret_cast<void(*)(id,SEL,id<MTLDevice>)>(original(object,selector))(object,selector,device);
-    if(!macfx::ownsPresentation(object)&&(!explicitHost()||nativeLayer(object)))installMetalDeviceHooks(device);
+    if(!macfx::ownsPresentation(object)&&(!explicitHost()||nativeLayer(object))&&(nativeLayer(object)||currentPresentationDemand())){
+        @try{try{installMetalDeviceHooks(device);}catch(const std::exception&){}}
+        @catch(NSException*){} // nextDrawable retains its existing installation route.
+    }
 }
 }
 void macfx::writeCapturedFrame(const std::string &file,const void *bytes,unsigned width,unsigned height,bool bgra,bool flip,unsigned stride){writeCaptureFile(file,bytes,width,height,bgra,flip,stride);}
