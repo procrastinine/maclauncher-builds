@@ -376,3 +376,16 @@ Owned image allocations reserve device working-set capacity before allocation. A
 Owned SDR output retains a publisher's nil, sRGB or Display P3 color-space tag. A nil tag preserves the publisher's existing untagged interpretation. Model stages that require sRGB bypass Display P3 input; compatible shaders and spatial filters can continue. Unsupported color spaces and extended-range layers retain original rendering. Live tag changes prepare a separate tagged output while retaining the accepted output until its replacement completes.
 
 Terminal command-buffer failure stops processing in the affected presentation. Automatic publishers retry only after a changed processing or source contract, and Off removes the failed owner. A presentation hold can release its cover after restoration through `presentationHoldAbandonAPI: 1`; the `abandoned` status identifies completed restoration of original rendering. Compatibility surface-copy paths use bounded completion waits, retain borrowed backing through actual completion, and discard late results.
+
+VideoToolbox and MetalFX image interpolation keep a compatible serving session
+while replacement dimensions prepare asynchronously. VideoToolbox resamples
+through its existing processor buffers; MetalFX uses retained history and an
+internal output at the serving extent until the replacement is ready. Pending
+preparation does not count as overload for Automatic selection.
+
+Measured processing time selects VideoToolbox interpolation limits of the
+framework maximum, 1280x720 and 960x540, and motion-search limits of 1920x1080,
+1280x720, 960x540 and 640x360, preserving source aspect ratio. A smoothed processing-time ratio above 80 percent of the capture interval
+for three observations reduces the work size; 120 observations below
+40 percent restore one size step. Invalid measurements are
+ignored. Provider status includes the active processing dimensions.
