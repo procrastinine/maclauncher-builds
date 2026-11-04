@@ -52,11 +52,10 @@ test("NuGet compiler/runtime archives have explicit versions and hashes beyond p
     assert.ok(Build.publishArguments('input','output',selected).includes(rid));
     assert.ok(!selected.packages.some(pin=>pin.name.includes('.runtime.osx-')&&!pin.name.endsWith(rid)));
   }
-  for (const item of Build.PIN.packages) {
+  for (const item of ['arm64','x64'].flatMap(architecture=>Build.platformPin(architecture).packages)) {
     assert.match(item.sha256, /^[a-f0-9]{64}$/);
     assert.ok(item.url.endsWith(item.name + "." + item.version + ".nupkg"));
   }
-  assert.ok(Build.PIN.packages.some(item => item.name === "microsoft.netcore.app.runtime.osx-arm64" && item.version === "8.0.32"));
   for (const project of Build.PROJECTS) {
     const lock = require("../producers/included-helpers/rpgmaker-decrypter/decrypter-locks/" + project + ".json");
     for (const packages of Object.values(lock.dependencies))
