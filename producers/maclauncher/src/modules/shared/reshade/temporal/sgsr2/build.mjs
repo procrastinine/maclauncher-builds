@@ -74,7 +74,7 @@ const library=path.join(out,'libmaclauncher-sgsr2.dylib');
 run('lipo',['-create',...['arm64','x86_64'].map(arch=>path.join(out,`libmaclauncher-sgsr2-${arch}.dylib`)),'-output',library]);
 run('codesign',['--force','--sign','-',library]);
 addLicenses(out,'SGSR2',source);
-const files=[];for(const relative of ['libmaclauncher-sgsr2.dylib',...(fs.existsSync(path.join(out,'licenses'))?fs.readdirSync(path.join(out,'licenses')):[]).map(file=>'licenses/'+file),...['convert','upscale'].flatMap(pass=>['metal','json'].map(ext=>'sgsr2/'+pass+'.'+ext))].filter(relative=>fs.existsSync(path.join(out,relative))))files.push({path:relative,size:fs.statSync(path.join(out,relative)).size,sha256:hash(path.join(out,relative))});
+const files=fs.readdirSync(out,{recursive:true}).filter(relative=>!['provider.json','shaderc-offline','libmaclauncher-sgsr2-arm64.dylib','libmaclauncher-sgsr2-x86_64.dylib'].includes(relative)&&fs.statSync(path.join(out,relative)).isFile()).map(relative=>({path:relative,size:fs.statSync(path.join(out,relative)).size,sha256:hash(path.join(out,relative))}));
 const owned=Object.fromEntries(['source.json','build.mjs','backend.mm','descriptor.js','../frame.h','../command-order.hpp','../../shaderc-offline.cpp'].map(name=>[name,hash(path.join(here,name))]));
 fs.writeFileSync(path.join(out,'provider.json'),JSON.stringify({providerABI:1,complete:true,methods:['sgsr2'],minimumMacOS:spec.minimumMacOS,architectures:['arm64','x86_64'],libraries:['libmaclauncher-sgsr2.dylib'],shaders:['sgsr2'],resourcePreparation:1,files,source:{repository:spec.repository,commit:gitlink(spec.gitlink)},owned,adaptations,buildInputs},null,2)+'\n');
 console.log('Built SGSR2 Metal provider: '+out);
