@@ -1,9 +1,5 @@
 {
   "schemaVersion": 1,
   "version": "1.5.7",
-  "minimumMacOS": "26.0",
-  "repository": "https://github.com/facebook/zstd",
-  "archive": {
-    "sha256": "4b0bd1f0cfb25e61b9103c35f27395530ff5b4c0d2513a00fd745849e85ea52c"
-  }
+  "minimumMacOS": "26.0"
 }

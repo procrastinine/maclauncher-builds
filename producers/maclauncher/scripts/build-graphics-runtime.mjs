@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import sharedDependencies from '../../dependencies.json' with {type:'json'};
 import {prepareSources} from '../src/modules/shared/reshade/libplacebo/dependencies-build.mjs';
 // Builds the shared graphics runtime from owned sources, exact Git pins and
 // declared binary inputs, then optionally stages it with stage-reshade.mjs.
@@ -72,7 +73,7 @@ export function resolveSource(id, override) {
   const entry = recipe.sources[id];
   if (!entry) throw Error("Unknown graphics source: " + id);
   const commit = id==='fsr3-sdk' ? gitlink('producers/maclauncher/src/external/fsr3-sdk') :
-    id==='sdl-vulkan' ? git(path.join(repository,'src/external/krkrsdl2'),['rev-parse',gitlink('producers/maclauncher/src/external/krkrsdl2')+':external/SDL']) :
+    id==='sdl-vulkan' ? sharedDependencies.sdlHeaders.revision :
     id==='libplacebo-vulkan-headers' ? git(path.join(repository,'src/external/libplacebo'),['rev-parse',gitlink('producers/maclauncher/src/external/libplacebo')+':3rdparty/Vulkan-Headers']) :
     entry.pin.gitlink ? gitlink(pinned({file: entry.pin.file, pointer: entry.pin.gitlink})) : pinned({file: entry.pin.file, pointer: entry.pin.commit}), origin = pinned({file: entry.pin.file, pointer: entry.pin.repository});
   const directory = override ? path.resolve(override) : path.join(repository, entry.path);

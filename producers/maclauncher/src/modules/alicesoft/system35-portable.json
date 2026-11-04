@@ -39,8 +39,7 @@
         "-DWEBP_BUILD_EXTRAS=OFF",
         "-DWEBP_BUILD_WEBP_JS=OFF",
         "-DWEBP_BUILD_FUZZTEST=OFF"
-      ],
-      "repository": "https://github.com/webmproject/libwebp"
+      ]
     }
   ]
 }

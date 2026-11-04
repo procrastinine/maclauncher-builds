@@ -8,15 +8,12 @@
       "id": "sdl2",
       "name": "SDL2",
       "version": "2.32.10",
-      "archiveSha256": "46237ea6c05cbcd11ef374382e91a4854aa15de2cf055aa061862ad1438003d7",
-      "archiveBytes": 7908510,
       "options": [
         "-DSDL_SHARED=ON",
         "-DSDL_STATIC=OFF",
         "-DSDL_TEST=OFF",
         "-DSDL_TESTS=OFF"
-      ],
-      "repository": "https://github.com/libsdl-org/SDL"
+      ]
     },
     {
       "id": "libpng",
@@ -29,45 +26,30 @@
         "-DPNG_TESTS=OFF",
         "-DPNG_TOOLS=OFF",
         "-DPNG_EXECUTABLES=OFF"
-      ],
-      "repository": "https://github.com/pnggroup/libpng"
+      ]
     },
     {
       "id": "freetype",
       "name": "FreeType",
       "version": "2.14.3",
-      "revision": "0a0221a1347e2f1e07c395263540026e9a0aa7c7",
-      "archiveUrl": "https://gitlab.com/freetype/freetype/-/archive/{revision}/freetype-{revision}.tar.gz",
-      "archiveSha256": "11cd478953fc1d382f20a233b8e2aed6c31b47cbf0568c4bdb3334bcc1550698",
-      "archiveBytes": 2517889,
       "options": [
         "-DFT_DISABLE_HARFBUZZ=ON",
         "-DFT_DISABLE_BROTLI=ON",
         "-DFT_REQUIRE_ZLIB=ON",
         "-DFT_REQUIRE_PNG=ON",
         "-DFT_REQUIRE_BZIP2=ON"
-      ],
-      "repository": "https://gitlab.com/freetype/freetype"
+      ]
     },
     {
       "id": "graphite2",
       "name": "Graphite2",
       "version": "1.3.15",
-      "revision": "ca8d821e60a15b6c24e404c9086992c975d8e1cf",
-      "archiveUrl": "https://codeload.github.com/silnrsi/graphite/tar.gz/{revision}",
-      "archiveSha256": "7bd38dd34db4f52de113c1b3645de5d185f496381a7aee2a6c4a8f0721b1015f",
-      "archiveBytes": 13700302,
-      "options": [],
-      "repository": "https://github.com/silnrsi/graphite"
+      "options": []
     },
     {
       "id": "harfbuzz",
       "name": "HarfBuzz",
       "version": "14.6.0",
-      "revision": "c7a7457b7385f33178e8cf87615ca077a810bbe7",
-      "archiveUrl": "https://codeload.github.com/harfbuzz/harfbuzz/tar.gz/{revision}",
-      "archiveSha256": "10dcea60bd85ff219490d55525630650ac8c57044c4efdc878162f286451775b",
-      "archiveBytes": 38888629,
       "options": [
         "-DHB_HAVE_FREETYPE=ON",
         "-DHB_HAVE_GRAPHITE2=ON",
@@ -84,24 +66,18 @@
         "-DHB_BUILD_GPU_DEMO=OFF",
         "-DHB_BUILD_UTILS=OFF",
         "-DBUILD_FRAMEWORK=OFF"
-      ],
-      "repository": "https://github.com/harfbuzz/harfbuzz"
+      ]
     },
     {
       "id": "sdl2_ttf",
       "name": "SDL2_ttf",
       "version": "2.24.0",
-      "revision": "2a891473eaf05ba1707a4b7913e6c4db7de7458a",
-      "archiveUrl": "https://codeload.github.com/libsdl-org/SDL_ttf/tar.gz/{revision}",
-      "archiveSha256": "95a5cc1b0f244cdb63bef358899ad2e95261292a1658cc7b833992381d6e4af5",
-      "archiveBytes": 8841206,
       "options": [
         "-DSDL2TTF_VENDORED=OFF",
         "-DSDL2TTF_SAMPLES=OFF",
         "-DSDL2TTF_INSTALL=ON",
         "-DSDL2TTF_HARFBUZZ=ON"
-      ],
-      "repository": "https://github.com/libsdl-org/SDL_ttf"
+      ]
     }
   ]
 }

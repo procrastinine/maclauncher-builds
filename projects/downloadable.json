@@ -99,7 +99,6 @@
         "arm64"
       ],
       "submodules": [
-        "sources/anyps5",
         "sources/maclauncher-android"
       ],
       "tools": [
@@ -314,7 +313,6 @@
         "arm64"
       ],
       "submodules": [
-        "sources/anyps5",
         "producers/maclauncher/src/external/ai5-sdl2"
       ],
       "recursiveSubmodules": true,
@@ -454,7 +452,6 @@
         "arm64"
       ],
       "submodules": [
-        "sources/anyps5",
         "producers/maclauncher/src/external/gemrb"
       ],
       "tools": [
@@ -632,7 +629,6 @@
         ],
         "submodules": [
           "producers/maclauncher/src/external/source-revisions/hashlink-1-9",
-          "producers/maclauncher/src/external/krkrsdl2/external/SDL",
           "producers/maclauncher/src/external/openal-soft"
         ],
         "tools": [
@@ -649,7 +645,6 @@
         ],
         "submodules": [
           "producers/maclauncher/src/external/source-revisions/hashlink-1-9",
-          "producers/maclauncher/src/external/krkrsdl2/external/SDL",
           "producers/maclauncher/src/external/openal-soft"
         ],
         "tools": [
@@ -719,9 +714,6 @@
         "pkgconf",
         "nasm",
         "git"
-      ],
-      "submodules": [
-        "sources/anyps5"
       ]
     }
   },
@@ -964,9 +956,6 @@
         "flex",
         "bison",
         "xz"
-      ],
-      "submodules": [
-        "sources/anyps5"
       ]
     }
   },
@@ -1084,7 +1073,6 @@
         "x64"
       ],
       "submodules": [
-        "sources/anyps5",
         "producers/maclauncher/src/external/onscripter-yuri"
       ],
       "tools": [
@@ -1321,11 +1309,9 @@
         "url": "https://github.com/libsdl-org/SDL",
         "repository": "libsdl-org/SDL",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.js",
-          "pointer": "/PIN/dependencies",
-          "match": {
-            "id": "sdl2"
-          }
+          "file": "producers/dependencies.json",
+          "pointer": "/sdl2/revision",
+          "repositoryPointer": "/sdl2/repository"
         }
       },
       {
@@ -1344,11 +1330,9 @@
         "provider": "git",
         "url": "https://gitlab.com/freetype/freetype",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "freetype"
-          }
+          "file": "producers/dependencies.json",
+          "pointer": "/freetype/revision",
+          "repositoryPointer": "/freetype/repository"
         }
       },
       {
@@ -1357,11 +1341,9 @@
         "url": "https://github.com/silnrsi/graphite",
         "repository": "silnrsi/graphite",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "graphite2"
-          }
+          "file": "producers/dependencies.json",
+          "pointer": "/graphite2/revision",
+          "repositoryPointer": "/graphite2/repository"
         }
       },
       {
@@ -1370,11 +1352,9 @@
         "url": "https://github.com/harfbuzz/harfbuzz",
         "repository": "harfbuzz/harfbuzz",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "harfbuzz"
-          }
+          "file": "producers/dependencies.json",
+          "pointer": "/harfbuzz/revision",
+          "repositoryPointer": "/harfbuzz/repository"
         }
       },
       {
@@ -1383,11 +1363,9 @@
         "url": "https://github.com/libsdl-org/SDL_ttf",
         "repository": "libsdl-org/SDL_ttf",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "sdl2_ttf"
-          }
+          "file": "producers/dependencies.json",
+          "pointer": "/sdl2_ttf/revision",
+          "repositoryPointer": "/sdl2_ttf/repository"
         }
       }
     ],
@@ -1421,7 +1399,6 @@
         "arm64"
       ],
       "submodules": [
-        "sources/anyps5",
         "producers/maclauncher/src/external/system3-sdl2"
       ],
       "tools": [
@@ -1562,7 +1539,6 @@
         "arm64"
       ],
       "submodules": [
-        "sources/anyps5",
         "producers/maclauncher/src/external/xsystem35-sdl2"
       ],
       "recursiveSubmodules": false,
@@ -1628,7 +1604,6 @@
         "arm64"
       ],
       "submodules": [
-        "sources/anyps5",
         "producers/maclauncher/src/external/xsystem4"
       ],
       "recursiveSubmodules": true,
@@ -1711,10 +1686,8 @@
         "arm64"
       ],
       "submodules": [
-        "sources/anyps5",
         "producers/maclauncher/src/external/mesa",
-        "sources/vulkan-loader",
-        "sources/anyps5/3rdparty/Vulkan-Headers"
+        "sources/vulkan-loader"
       ],
       "tools": [
         "uv",
@@ -2046,11 +2019,7 @@
       ],
       "command": "tools/build-nxnative.mjs",
       "submodules": [
-        "sources/anyps5",
-        "sources/nxnative",
-        "sources/anyps5/3rdparty/glslang",
-        "sources/anyps5/3rdparty/zstd",
-        "producers/maclauncher/src/external/macfx-spirv-cross"
+        "sources/nxnative"
       ],
       "tools": [
         "cmake",
@@ -2310,9 +2279,6 @@
       "command": "tools/build-fidelityfx-api.mjs",
       "architectures": [
         "x64"
-      ],
-      "submodules": [
-        "producers/maclauncher/src/external/krkrsdl2"
       ]
     },
     "versionBindings": [
@@ -2717,9 +2683,6 @@
       ],
       "tools": [
         "go"
-      ],
-      "submodules": [
-        "sources/anyps5"
       ]
     }
   },
@@ -2753,11 +2716,9 @@
         "url": "https://github.com/xiph/ogg",
         "repository": "xiph/ogg",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.js",
-          "pointer": "/PIN/dependencies",
-          "match": {
-            "id": "ogg"
-          }
+          "file": "producers/dependencies.json",
+          "pointer": "/ogg/revision",
+          "repositoryPointer": "/ogg/repository"
         }
       },
       {
@@ -2766,12 +2727,9 @@
         "url": "https://github.com/xiph/flac",
         "repository": "xiph/flac",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "flac"
-          },
-          "field": ""
+          "file": "producers/dependencies.json",
+          "pointer": "/flac/revision",
+          "repositoryPointer": "/flac/repository"
         }
       },
       {
@@ -2780,11 +2738,9 @@
         "url": "https://github.com/xiph/vorbis",
         "repository": "xiph/vorbis",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.js",
-          "pointer": "/PIN/dependencies",
-          "match": {
-            "id": "vorbis"
-          }
+          "file": "producers/dependencies.json",
+          "pointer": "/vorbis/revision",
+          "repositoryPointer": "/vorbis/repository"
         }
       },
       {
@@ -2828,9 +2784,6 @@
         "cmake",
         "ninja",
         "pkgconf"
-      ],
-      "submodules": [
-        "sources/anyps5"
       ]
     }
   }

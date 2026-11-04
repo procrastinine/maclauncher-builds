@@ -72,8 +72,7 @@
         "-DSDL2IMAGE_JPG=ON",
         "-DSDL2IMAGE_PNG=ON",
         "-DSDL2IMAGE_WEBP=ON"
-      ],
-      "repository": "https://github.com/libsdl-org/SDL_image"
+      ]
     },
     {
       "id": "lua",

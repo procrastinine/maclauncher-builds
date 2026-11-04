@@ -46,8 +46,7 @@
         "-DSDL2MIXER_VORBIS=VORBISFILE",
         "-DSDL2MIXER_WAVE=ON",
         "-DSDL2MIXER_WAVPACK=OFF"
-      ],
-      "repository": "https://github.com/libsdl-org/SDL_mixer"
+      ]
     }
   ]
 }

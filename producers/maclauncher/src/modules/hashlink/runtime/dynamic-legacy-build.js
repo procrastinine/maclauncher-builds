@@ -1,3 +1,4 @@
+const sharedDependencies=require('../../../../../dependencies.json');
 const { gitlink } = require("../../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -7,7 +8,7 @@ const Native = require("../../shared/runtime/local-native");
 const UPSTREAM_VERSION = "1.12";
 const VERSION = "1.12-MCLv1";
 const REVISION = require("./source-1.12.json").revision;
-const SDL_REVISION = "53dea9830964eee8b5c2a7ee0a65d6e268dc78a1";
+const SDL_REVISION = sharedDependencies.sdlHeaders.revision;
 const OPENAL_REVISION = gitlink("producers/maclauncher/src/external/openal-soft");
 
 function adaptSource(source, sdlSource) {

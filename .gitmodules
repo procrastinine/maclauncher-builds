@@ -129,10 +129,6 @@
 	path = producers/maclauncher/src/external/macfx-reshade-shaders
 	url = https://github.com/crosire/reshade-shaders
 
-[submodule "producers/maclauncher/src/external/macfx-spirv-cross"]
-	path = producers/maclauncher/src/external/macfx-spirv-cross
-	url = https://github.com/KhronosGroup/SPIRV-Cross
-
 [submodule "producers/maclauncher/src/external/macfx-vkd3d"]
 	path = producers/maclauncher/src/external/macfx-vkd3d
 	url = https://codeberg.org/vkd3d/vkd3d
