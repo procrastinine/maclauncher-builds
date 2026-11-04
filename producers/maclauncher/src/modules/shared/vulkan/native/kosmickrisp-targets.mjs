@@ -110,5 +110,5 @@ export function buildKosmicLoader({source, headersSource, work, architecture = '
         '-DCMAKE_C_FLAGS=-ffile-prefix-map=' + source + '=/Vulkan-Loader -ffile-prefix-map=' + work + '=/build',
         '-DVulkanHeaders_DIR=' + path.join(headers, 'share/cmake/VulkanHeaders'), '-DBUILD_TESTS=OFF']);
     run('cmake', ['--build', build, '--target', 'vulkan', '--parallel', String(jobs)]);
-    return {loader: fs.realpathSync(path.join(build, 'loader/libvulkan.1.dylib')), loaderNotice: path.join(source, 'LICENSE.txt')};
+    return {loader: fs.realpathSync(path.join(build, 'loader/libvulkan.1.dylib'))};
 }

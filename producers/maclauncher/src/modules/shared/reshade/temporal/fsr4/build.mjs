@@ -1,4 +1,4 @@
-import {addLicense} from '../../../../../../../../lib/licenses.mjs';
+import {addLicenses} from '../../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import {spawn} from 'node:child_process';
 import {createHash} from 'node:crypto';
@@ -12,7 +12,7 @@ const here = import.meta.dirname,
       [ sourceArg, destinationArg, ...flags ] = process.argv.slice(2);
 if (!sourceArg || !destinationArg)
   throw Error(
-      'Usage: build.mjs SOURCE OUTPUT --tools DIR --lite2-weights FILE --lite2-license FILE [--quick]');
+      'Usage: build.mjs SOURCE OUTPUT --tools DIR --lite2-weights FILE [--quick]');
 const source = path.resolve(sourceArg),
       destination = path.resolve(destinationArg), options = {};
 const ownedNames =
@@ -33,7 +33,7 @@ for (let i = 0; i < flags.length; i++) {
     quick = true;
     continue;
   }
-  if (!['--tools', '--lite2-weights', '--lite2-license', '--base-payload']
+  if (!['--tools', '--lite2-weights']
            .includes(flags[i]) ||
       !flags[i + 1] || options[flags[i]])
     throw Error('Unknown or repeated build option.');
@@ -122,39 +122,6 @@ await fs.writeFile(
 const build = path.join(work, 'build'),
       tiers = quick ? [ 1080 ] : [ 1080, 2160, 4320 ];
 await fs.mkdir(build, {recursive : true});
-// Optional reuse keeps an existing exact-fast model and shader identity intact.
-// The build works without this optimization and never depends on private paths.
-if (options['--base-payload']) {
-  const base = options['--base-payload'],
-        metadata =
-            JSON.parse(await fs.readFile(path.join(base, 'provider.json')));
-  if (metadata.providerABI !== 1 ||
-      !pin.legacyPayloads.some(p => p.commit === metadata.commit) ||
-      metadata.profile !== 'exact-fast')
-    throw Error('The exact-fast reuse payload has an unknown identity.');
-  for (const name of await fs.readdir(path.join(base, 'build'))) {
-    if (!/^fsr411_\d.*_fast_pc1_ca1$|^fsr411_native_\d+(?:_ultraperformance)?$|^libraries$/
-             .test(name))
-      throw Error('Unknown exact-fast cache entry.');
-    await fs.cp(path.join(base, 'build', name), path.join(build, name),
-                {recursive : true});
-  }
-  for (const dir of await fs.readdir(build)) {
-    if (!/^fsr411_\d.*_fast_pc1_ca1$/.test(dir))
-      continue;
-    const manifest =
-        JSON.parse(await fs.readFile(path.join(build, dir, 'bindings.json')));
-    if (manifest.profile !== 'exact-fast')
-      throw Error('Reused profile is not exact-fast.');
-    for (const entry of Object.values(manifest.kernels))
-      for (const [k, digest] of [[ 'library', 'library_sha256' ],
-                                 [ 'literal_tables', 'literal_tables_sha256' ]])
-        if (entry[k] &&
-            hash(await fs.readFile(path.resolve(build, dir, entry[k]))) !==
-                entry[digest])
-          throw Error('Reused exact-fast shader changed.');
-  }
-}
 // The translation tools use only the standard library; a cache inside the
 // output directory keeps uv from writing outside the build.
 const python = (script, args) => run(
@@ -318,7 +285,7 @@ await run('xcrun', [
 await run('codesign', [
   '--force', '--sign', '-', path.join(payload, 'libmaclauncher-fsr4.dylib')
 ]);
-addLicense(payload,'FSR4',path.join(here,'NOTICE.md'));
+addLicenses(payload,'FSR4',source);
 const owned = {};
 for (const [name, bytes] of ownedSnapshot) {
   owned[name] = hash(bytes);

@@ -1,4 +1,4 @@
-import {addLicense} from '../../../../../../../lib/licenses.mjs';
+import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -48,7 +48,7 @@ export function buildKosmic(options){
 }
 
 /** Publish a closed component using the existing native manifest semantics. */
-export function publishKosmic({source,work,library,loader,loaderNotice,spirvNotice,zstdNotice,output,architecture='arm64',nativeBuild,version:requestedVersion}){
+export function publishKosmic({source,work,library,loader,output,architecture='arm64',nativeBuild,version:requestedVersion}){
  const targetArchitecture=architecture==='x64'?'x86_64':'arm64';
  const temporary=fs.mkdtempSync(path.join(work,'.kosmic-publication-'));
  try{
@@ -75,23 +75,7 @@ export function publishKosmic({source,work,library,loader,loaderNotice,spirvNoti
    run('/usr/bin/codesign',['--verify','--strict',destination]);
    links.push({file:name,links:dependencies});
   }
-  const licenseRoot=path.join(payload,'licenses');fs.mkdirSync(licenseRoot,{recursive:true});
-  addLicense(payload,'Mesa',path.join(source,'docs/license.rst'));
-  const notices=[{name:'Mesa',license:'MIT and upstream notices',sourceUrl:pin.repository,path:'licenses/Mesa-license.rst'}];
-  for(const name of read('git',['-C',source,'ls-tree','-r','--name-only',pin.revision,'licenses/']).split('\n')){
-   const relative='licenses/Mesa-'+path.basename(name);
-   addLicense(payload,'Mesa',path.join(source,name));
-   notices.push({name:'Mesa '+path.basename(name),license:path.basename(name),sourceUrl:pin.repository,path:relative});
-  }
-  for(const item of [
-   ['Vulkan-Loader','Apache-2.0','https://github.com/KhronosGroup/Vulkan-Loader',loaderNotice],
-   ['SPIRV-Tools','Apache-2.0','https://github.com/KhronosGroup/SPIRV-Tools',spirvNotice],
-   ['Zstandard','BSD-3-Clause','https://github.com/facebook/zstd',zstdNotice]
-  ]){
-   const [name,license,sourceUrl,file]=item,relative='licenses/'+name+'.txt';
-   if(!file)continue;
-   addLicense(payload,name,file,license);notices.push({name,license,sourceUrl,path:relative});
-  }
+  addLicenses(payload,'Mesa',source);
   const files=Bundled.fileInventory(payload).map(relative=>{
    const file=path.join(payload,relative),stat=fs.statSync(file);
    const native=links.some(item=>item.file===relative);
@@ -152,10 +136,10 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
   options['loader-source']||=path.join(buildsRoot,inputs.vulkanLoader.path);
   options['headers-source']||=path.join(buildsRoot,inputs.vulkanHeaders.path);
  }
- for(const name of ['source','work','meson','ninja','output',...(!targeted||!options['native-build']?['llvm']:[]),...(targeted?['loader-source','headers-source']:['loader','loader-notice','spirv-notice','zstd-notice'])])if(!options[name])throw Error('Missing --'+name);
+ for(const name of ['source','work','meson','ninja','output',...(!targeted||!options['native-build']?['llvm']:[]),...(targeted?['loader-source','headers-source']:['loader'])])if(!options[name])throw Error('Missing --'+name);
  const built=buildKosmic(options);
  const loader=targeted?buildKosmicLoader({source:options['loader-source'],headersSource:options['headers-source'],work:options.work,architecture:options.architecture,jobs:Number(options.jobs||2)}):{};
- const manifest=publishKosmic({...options,...built,...loader,loaderNotice:loader.loaderNotice||options['loader-notice'],spirvNotice:options['spirv-notice'],zstdNotice:options['zstd-notice']});
+ const manifest=publishKosmic({...options,...built,...loader});
  if(options['resource-root'])stageKosmic({output:options.output,resourceRoot:options['resource-root'],...(options.declaration?{declarationFile:options.declaration}:{})});
  console.log(JSON.stringify({output:options.output,version:manifest.version,minimumMacOS:manifest.minimumMacOS,bytes:manifest.files.reduce((sum,file)=>sum+file.size,0)}));
 }
