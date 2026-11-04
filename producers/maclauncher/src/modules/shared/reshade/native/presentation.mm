@@ -6,6 +6,7 @@
 #include "presentation-internal.hpp"
 #include "presentation-ticket.hpp"
 #include "overlay-drawables.hpp"
+#include "presentation-display-link.hpp"
 #include "source-timing.hpp"
 #include "diagnostics.hpp"
 #include "log.hpp"
@@ -88,6 +89,8 @@ std::string legacyInputIdentity(const macfx::LivePacket&packet){
 }
 struct macfx::FramePresenter::Impl:std::enable_shared_from_this<Impl>{
  CAMetalLayer*layer;void*owner;PresenterConfig config;ImageColorSpace colorSpace=ImageColorSpace::LegacySDR;ImageRetry frameRetry;id<MTLCommandQueue>queue;id<MTLRenderPipelineState>flipPipeline,motionPipeline;dispatch_queue_t worker;dispatch_source_t wakeup=nullptr;CVDisplayLinkRef link=nullptr;
+ std::unique_ptr<PresentationDisplayLink>metalLink;std::atomic<bool>metalTiming{false};std::atomic<uint64_t>timingEpoch{0};
+ std::mutex displayDrawableMutex;id<CAMetalDrawable>displayDrawable=nil;
  ImageColorDescription sourceColor,outputColor;MTLPixelFormat graphFormat=MTLPixelFormatInvalid;std::shared_ptr<ColorEncoder>colorEncoder;std::atomic<float>displayHeadroom{1};
  std::atomic<PresenterPreparation>preparation{PresenterPreparation::Ready};
  std::atomic<RuntimeFrameSource>frameSource{RuntimeFrameSource::Unknown};
@@ -143,8 +146,9 @@ worker=dispatch_queue_create("macfx.presentation",DISPATCH_QUEUE_SERIAL);layer.f
   // after this lock is released, so their callbacks may query presenter state.
   std::lock_guard lock(mutex);return layer;
  }
- // Owned output layer options, set outside the state lock like other layer
- // properties. An unset option restores the layer's own default.
+ // Display sync is a layer property; drawable count limits admission within
+ // the backing pool configured before attachment. Unset options restore the
+ // layer's initial values without changing an attached pool.
  void applyPresentationOptions(){
   std::optional<bool>sync;std::optional<unsigned>count;
   {std::lock_guard<std::mutex>lock(mutex);
@@ -154,7 +158,7 @@ worker=dispatch_queue_create("macfx.presentation",DISPATCH_QUEUE_SERIAL);layer.f
   if(!sync&&!count)return;
   CAMetalLayer*target=layerSnapshot();if(!target)return;
   if(sync)target.displaySyncEnabled=*sync;
-  if(count)target.maximumDrawableCount=*count;
+  if(count)drawables.setCapacity(*count);
  }
  // Overlay counters come from the presenter's own status and timing; nothing
  // here adds work to a frame that the overlay does not draw.
@@ -191,9 +195,13 @@ worker=dispatch_queue_create("macfx.presentation",DISPATCH_QUEUE_SERIAL);layer.f
   if(!outputVisible.load(std::memory_order_acquire)||outputIdleCut.load(std::memory_order_acquire))return nil;
   const auto size=target.drawableSize;
   DiagnosticScope scope(DiagnosticStage::MetalDrawable,reinterpret_cast<uintptr_t>((__bridge void*)target),unsigned(size.width),unsigned(size.height),"presentation.next-drawable");
-  auto drawable=drawables.acquire(target);
+  id<CAMetalDrawable>drawable=nil;
+  if(metalTiming.load()){
+   std::lock_guard lock(displayDrawableMutex);drawable=std::exchange(displayDrawable,nil);
+   if(drawable&&(drawable.texture.width!=unsigned(size.width)||drawable.texture.height!=unsigned(size.height)||drawable.texture.pixelFormat!=target.pixelFormat))drawable=nil;
+  }else drawable=drawables.acquire(target);
   if(!drawable&&drawables.refusingSeconds()>=2&&!drawablesReported.exchange(true))
-   nativeLog("Presentation output drawables have all been in use for 2 s: "+std::to_string(drawables.held())+" of "+std::to_string(target.maximumDrawableCount));
+   nativeLog("Presentation output drawables have all been in use for 2 s: "+std::to_string(drawables.held())+" of "+std::to_string(drawables.capacity(target)));
   return drawable;
  }
  id<MTLCommandQueue> privateCommandsQueue(){
@@ -205,7 +213,22 @@ worker=dispatch_queue_create("macfx.presentation",DISPATCH_QUEUE_SERIAL);layer.f
   }return queue;
  }
  void retryPrivateQueue(){std::lock_guard lock(privateQueueMutex);privateQueueUnavailable.store(false);generationUnavailable=false;}
+ void displayUpdate(uint64_t epoch,id<CAMetalDrawable> drawable,double target,unsigned rate){
+  if(stopping.load()||epoch!=timingEpoch||!metalTiming.load())return;
+  if(std::isfinite(target)&&target>0)refreshTime.store(target);if(rate>=20&&rate<=1000)displayHz.store(rate);
+  CAMetalLayer *output=layerSnapshot();if(!output)return;
+  {std::lock_guard lock(displayDrawableMutex);if(stopping.load()||epoch!=timingEpoch)return;
+   if(displayDrawable!=drawable){displayDrawable=nil;displayDrawable=drawables.adopt(output,drawable);}}
+  schedule();
+ }
+ void pauseGenerationTiming(){
+  if(metalLink)metalLink->pause();
+  if(link&&CVDisplayLinkIsRunning(link))CVDisplayLinkStop(link);
+  std::lock_guard lock(displayDrawableMutex);displayDrawable=nil;
+ }
  void stopGenerationTiming(){
+  ++timingEpoch;metalTiming=false;if(metalLink){metalLink->invalidate();metalLink.reset();}
+  {std::lock_guard lock(displayDrawableMutex);displayDrawable=nil;}
   if(link){CVDisplayLinkStop(link);CVDisplayLinkRelease(link);link=nullptr;}
   if(wakeup){dispatch_source_cancel(wakeup);wakeup=nullptr;}
  }
@@ -216,16 +239,26 @@ worker=dispatch_queue_create("macfx.presentation",DISPATCH_QUEUE_SERIAL);layer.f
  }
  bool start(bool enabled=true){
   if((!generator&&!outputPolicy.active())||generationUnavailable)return false;
-  if(!enabled){if(link&&CVDisplayLinkIsRunning(link))CVDisplayLinkStop(link);return true;}
+  if(!enabled){pauseGenerationTiming();return true;}
   @try{try{
    if(!privateCommandsQueue())throw std::runtime_error("Frame generation delivery is unavailable; other effects use the source command buffer");
-   if(!link){
+   if(!wakeup){
     // Generated phases can fall between display-link callbacks. One rearmed
     // timer services the next phase; it never builds an asynchronous frame queue.
     wakeup=dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER,0,0,worker);
     if(!wakeup)throw std::runtime_error("Frame generation scheduling is unavailable");
     std::weak_ptr<Impl>weak=shared_from_this();dispatch_source_set_event_handler(wakeup,^{if(auto self=weak.lock())self->schedule();});
     dispatch_source_set_timer(wakeup,DISPATCH_TIME_FOREVER,DISPATCH_TIME_FOREVER,0);dispatch_resume(wakeup);
+   }
+   if(@available(macOS 14.0,*)){
+    if(!metalLink){
+     const auto epoch=++timingEpoch;const std::weak_ptr<Impl>weak=shared_from_this();
+     metalLink=std::make_unique<PresentationDisplayLink>(layer,[weak,epoch](id<CAMetalDrawable> drawable,double target,unsigned rate){if(auto self=weak.lock())self->displayUpdate(epoch,drawable,target,rate);});
+     metalLink->setDisplay(currentDisplay);metalTiming=true;
+    }
+    metalLink->resume();return true;
+   }
+   if(!link){
     if(CVDisplayLinkCreateWithActiveCGDisplays(&link)!=kCVReturnSuccess||!link)throw std::runtime_error("Frame generation display timing is unavailable");
     if(CVDisplayLinkSetOutputCallback(link,[](CVDisplayLinkRef,const CVTimeStamp*,const CVTimeStamp*out,CVOptionFlags,CVOptionFlags*,void*opaque)->CVReturn{auto*self=static_cast<Impl*>(opaque);static const double hostSeconds=[]{mach_timebase_info_data_t base{};mach_timebase_info(&base);return double(base.numer)/base.denom/1e9;}();if(out&&(out->flags&kCVTimeStampHostTimeValid))self->refreshTime.store(double(out->hostTime)*hostSeconds);if(out&&(out->flags&kCVTimeStampVideoRefreshPeriodValid)&&out->videoRefreshPeriod>0){const auto hz=unsigned(std::lround(double(out->videoTimeScale)/out->videoRefreshPeriod));if(hz>=20&&hz<=1000)self->displayHz.store(hz);}self->schedule();return kCVReturnSuccess;},this)!=kCVReturnSuccess)throw std::runtime_error("Frame generation display callback is unavailable");
     if(currentDisplay&&CVDisplayLinkSetCurrentCGDisplay(link,currentDisplay)!=kCVReturnSuccess)throw std::runtime_error("Frame generation display selection is unavailable");
@@ -502,7 +535,7 @@ worker=dispatch_queue_create("macfx.presentation",DISPATCH_QUEUE_SERIAL);layer.f
     pacing=config.adaptive?std::make_unique<AdaptivePacing>(*config.adaptive):nullptr;
    }
    if(generator||outputPolicy.active())start();
-   else if(link&&CVDisplayLinkIsRunning(link))CVDisplayLinkStop(link);
+   else pauseGenerationTiming();
   }else if(planMode){
    auto desired=presentationGraphicsEnvironment();auto next=desired.generation?prepareGenerator(desired.generationMethod,*desired.generation):nullptr;
    {std::lock_guard<std::mutex>lock(mutex);if(inFlight){result.busy=true;result.reason="Waiting for the current graphics frame";return false;}retireDelivery();generator=std::move(next);execution.reset();outputPolicy={};motionFrame.reset();planMode=false;config.generation=desired.generation;config.generationMethod=desired.generationMethod;config.adaptive=desired.adaptive;pool.clear();historyReady=false;generationSequence=0;appliedControls=~uint64_t(0);}
@@ -831,7 +864,7 @@ fragment float4 motion_fragment(float4 p[[position]],texture2d<float,access::rea
  std::shared_ptr<Batch>acquire(unsigned w,unsigned h,const GenerationDelivery*mode=nullptr){
   const unsigned gw=planMode&&execution&&generator?execution->generationOutputWidth():w,gh=planMode&&execution&&generator?execution->generationOutputHeight():h;
   const bool displayLimited=mode&&mode->displayLimited;
-  std::lock_guard<std::mutex>lock(mutex);const unsigned capacity=mode?mode->sourceCapacity:generator&&generationEnabled?1:std::min(4u,unsigned(layer.maximumDrawableCount));if(inFlight>=capacity)return {};
+  std::lock_guard<std::mutex>lock(mutex);const unsigned capacity=mode?mode->sourceCapacity:generator&&generationEnabled?1:std::min(4u,drawables.capacity(layer));if(inFlight>=capacity)return {};
   if(width!=w||height!=h||!pool.empty()&&(pool.front()->real.width!=gw||pool.front()->real.height!=gh)){cancelRetirements();completedReplay.reset();pool.clear();immediate.reset();motionFrame.reset();latest.reset();delivery.reset();accountedDeliveryDrops=0;if(pacing)pacing->reset();historyReady=false;width=w;height=h;}
   generationBudgetContract(gw,gh);
   std::shared_ptr<Batch>batch;for(auto&candidate:pool)if(candidate.use_count()==1){batch=candidate;break;}
@@ -1016,7 +1049,7 @@ fragment float4 motion_fragment(float4 p[[position]],texture2d<float,access::rea
   const auto observer=retainedObserver?&*retainedObserver:nullptr;
   FrameResult result;const DepthFrame*depth=copiedDepth.texture?&copiedDepth:nullptr;const DepthFrame*effectDepth=depth;
   const bool windowCapture=frameSource.load(std::memory_order_relaxed)==RuntimeFrameSource::ExternalWindow;
-  const auto deliveryMode=generationDelivery(generator&&generationEnabled,outputPolicy.active(),windowCapture?displayHz.load():0,sourcePeriod,unsigned(layer.maximumDrawableCount));
+  const auto deliveryMode=generationDelivery(generator&&generationEnabled,outputPolicy.active(),windowCapture?displayHz.load():0,sourcePeriod,drawables.capacity(layer));
   // Retire an older paced interval only when its delivery route changes.
   // A real-only source buffer must not race a previously queued image.
   {std::lock_guard lock(mutex);if(displayLimitedDelivery!=deliveryMode.displayLimited){retireDelivery();displayLimitedDelivery=deliveryMode.displayLimited;}}
@@ -1194,19 +1227,19 @@ macfx::FrameResult macfx::FramePresenter::submitDisplayFrame(id<MTLCommandBuffer
 
 void macfx::FramePresenter::setDisplay(uint32_t displayId){std::unique_lock<std::mutex>serial(impl->submission,std::try_to_lock);if(!serial.owns_lock())return;if(displayId&&displayId!=impl->currentDisplay&&!impl->stopping.load()){
  impl->currentDisplay=displayId;
- if(impl->link&&CVDisplayLinkSetCurrentCGDisplay(impl->link,displayId)!=kCVReturnSuccess)impl->bypassGeneration("Frame generation display selection is unavailable");
- // The HUD also needs display timing when no generator starts the delivery
- // link. Read the display's nominal period without starting another timer.
- CVDisplayLinkRef timing=impl->link;const bool temporary=!timing;
- if(!timing&&CVDisplayLinkCreateWithCGDisplay(displayId,&timing)!=kCVReturnSuccess)timing=nullptr;
  unsigned refresh=0;
- if(timing){
-  const auto period=CVDisplayLinkGetNominalOutputVideoRefreshPeriod(timing);
-  if(!(period.flags&kCVTimeIsIndefinite)&&period.timeValue>0&&period.timeScale>0){
-   const double hz=double(period.timeScale)/period.timeValue;
-   if(std::isfinite(hz)&&hz>=20&&hz<=1000)refresh=unsigned(std::lround(hz));
-  }
-  if(temporary)CVDisplayLinkRelease(timing);
+ if(@available(macOS 14.0,*)){
+  if(impl->metalLink)impl->metalLink->setDisplay(displayId);
+  if(auto mode=CGDisplayCopyDisplayMode(displayId)){const double rate=CGDisplayModeGetRefreshRate(mode);CGDisplayModeRelease(mode);
+   if(std::isfinite(rate)&&rate>=20&&rate<=1000)refresh=unsigned(std::lround(rate));}
+ }else{
+  if(impl->link&&CVDisplayLinkSetCurrentCGDisplay(impl->link,displayId)!=kCVReturnSuccess)impl->bypassGeneration("Frame generation display selection is unavailable");
+  CVDisplayLinkRef timing=impl->link;const bool temporary=!timing;
+  if(!timing&&CVDisplayLinkCreateWithCGDisplay(displayId,&timing)!=kCVReturnSuccess)timing=nullptr;
+  if(timing){const auto period=CVDisplayLinkGetNominalOutputVideoRefreshPeriod(timing);
+   if(!(period.flags&kCVTimeIsIndefinite)&&period.timeValue>0&&period.timeScale>0){const double hz=double(period.timeScale)/period.timeValue;
+    if(std::isfinite(hz)&&hz>=20&&hz<=1000)refresh=unsigned(std::lround(hz));}
+   if(temporary)CVDisplayLinkRelease(timing);}
  }
  impl->displayHz.store(refresh);
 }}

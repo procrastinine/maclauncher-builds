@@ -1227,6 +1227,27 @@
     {
       "path": "src/opengl-flip.hpp",
       "source": "opengl-flip.hpp"
+    },
+    {
+      "source": "presentation-display-link.hpp",
+      "path": "src/presentation-display-link.hpp"
+    },
+    {
+      "source": "presentation-display-link.mm",
+      "path": "src/presentation-display-link.mm",
+      "nativeLink": true
+    },
+    {
+      "source": "presentation-refresh.hpp",
+      "path": "src/presentation-refresh.hpp"
+    },
+    {
+      "source": "capture-frame-geometry.hpp",
+      "path": "src/capture-frame-geometry.hpp"
+    },
+    {
+      "source": "iosurface-texture.hpp",
+      "path": "src/iosurface-texture.hpp"
     }
   ]
 }

@@ -448,6 +448,8 @@ addLicenses(destination,"ReShade",source);
 if(options["--xess-host"]){addLicenses(destination,"Intel-XeSS",xessSource);addLicense(destination,"Intel-XeSS headers",path.join(xessSource,"inc/MIT.txt"));addLicense(destination,"Intel-XeSS dependencies",path.join(xessSource,"third-party-programs.txt"));}
 for(const option of ["--godot","--streamline","--dxmt"])if(options[option])includeLicenses(destination,`${options[option]}/licenses`);
 addLicenses(destination,"native filters",path.resolve(import.meta.dirname,"../src/modules/shared/reshade/native"));
+addLicense(destination,"MacShade",path.resolve(import.meta.dirname,"../src/modules/shared/reshade/native/macshade-BSD-3-Clause.txt"),"MacShade-BSD-3-Clause");
+addLicense(destination,"MetalDuck",path.resolve(import.meta.dirname,"../src/modules/shared/reshade/native/metalduck-MIT.txt"),"MetalDuck-MIT");
 const files = [];
 for (const [relative, input] of inputs) {
   const output = path.join(destination, relative);
