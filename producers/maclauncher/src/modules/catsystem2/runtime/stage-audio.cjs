@@ -1,4 +1,4 @@
-const {addLicense} = require('../../../../../../lib/licenses.mjs');
+const {addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs"), path = require("node:path"), os = require("node:os");
 const { execFileSync } = require("node:child_process");
 const B = require("../../shared/runtime/bundled-native"), Native = require("../../shared/runtime/local-native");
@@ -6,8 +6,8 @@ const Supplemental = require("../../../../scripts/native-supplementals.cjs");
 const VERSION = "1.0.0-ml1", MINIMUM_MACOS = "13.0", SDK_VERSION = "27.0", COMPILER_VERSION = "Apple clang version 21.0.0 (clang-2100.3.34.2)";
 const REPO = path.resolve(__dirname, "../../../.."), SOURCE = path.join(__dirname, "native/ogg-decode.c");
 const SOURCES = Object.freeze([
-  { id: "libogg", version: "1.3.6", name: "libogg-1.3.6.tar.xz", url: "https://downloads.xiph.org/releases/ogg/libogg-1.3.6.tar.xz", sha256: "5c8253428e181840cd20d41f3ca16557a9cc04bad4a3d04cce84808677fa1061", license: "BSD-3-Clause" },
-  { id: "libvorbis", version: "1.3.7", name: "libvorbis-1.3.7.tar.xz", url: "https://downloads.xiph.org/releases/vorbis/libvorbis-1.3.7.tar.xz", sha256: "b33cc4934322bcbf6efcbacf49e3ca01aadbea4114ec9589d1b1e9d20f72954b", license: "BSD-3-Clause" }
+  { id: "libogg", version: "1.3.6", name: "libogg-1.3.6.tar.xz", url: "https://downloads.xiph.org/releases/ogg/libogg-1.3.6.tar.xz", sha256: "5c8253428e181840cd20d41f3ca16557a9cc04bad4a3d04cce84808677fa1061" },
+  { id: "libvorbis", version: "1.3.7", name: "libvorbis-1.3.7.tar.xz", url: "https://downloads.xiph.org/releases/vorbis/libvorbis-1.3.7.tar.xz", sha256: "b33cc4934322bcbf6efcbacf49e3ca01aadbea4114ec9589d1b1e9d20f72954b" }
 ]);
 const VORBIS_FILES = Object.freeze(["mdct", "smallft", "block", "envelope", "window", "lsp", "lpc", "analysis", "synthesis", "psy", "info", "floor1", "floor0", "res0", "mapping0", "registry", "codebook", "sharedbook", "lookup", "bitrate", "vorbisfile"]);
 const command = (file, args) => execFileSync(file, args, { timeout: 60000, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
@@ -45,19 +45,20 @@ function stage({ resourcesRoot, sourceArchives } = {}) {
     if (protocol.version !== VERSION || protocol.protocolVersion !== 1 || protocol.libogg !== "1.3.6" || protocol.libvorbis !== "1.3.7") throw new Error("The audio helper codec or protocol differs.");
     if (JSON.stringify(Native.readMachOArchitectures(executable).sort()) !== JSON.stringify(["arm64", "x86_64"])) throw new Error("The audio helper CPU slices differ.");
     fs.copyFileSync(SOURCE, path.join(destination, "ogg-decode.c")); fs.copyFileSync(__filename, path.join(destination, "stage-audio.cjs"));
-    addLicense(destination,'MacLauncher',path.join(REPO, "LICENSE"),'MIT');
+    addLicenses(destination,'MacLauncher',path.resolve(REPO,'../..'));
+    addLicenses(destination,"libogg",ogg);
+    addLicenses(destination,"libvorbis",vorbis);
     for (const descriptor of SOURCES) {
-      addLicense(destination,descriptor.id,path.join(temporary, `${descriptor.id}-${descriptor.version}/COPYING`),descriptor.license);
       fs.copyFileSync(sourceArchives[descriptor.id], path.join(destination, descriptor.name));
     }
-    fs.writeFileSync(path.join(destination, "DEPENDENCIES.txt"), "MacLauncher Ogg decoder: MIT; libogg 1.3.6 and libvorbis 1.3.7: BSD-3-Clause.\nOriginal compressed streams are received through stdin; MLPC v1 returns bounded signed 16-bit little-endian PCM.\nSingle logical Vorbis stream, one or two channels, 8–192 kHz, maximum 600 seconds / 256 MiB decoded.\nPlayback uses macOS /usr/bin/afplay.\n");
-    const notices = [{ name: "MacLauncher Ogg decoder", license: "MIT", path: "MacLauncher-MIT.txt" }, ...SOURCES.map(descriptor => ({ name: `${descriptor.id} ${descriptor.version}`, license: descriptor.license, path: descriptor.id + "-BSD.txt" }))];
+    fs.writeFileSync(path.join(destination, "DEPENDENCIES.txt"), "MacLauncher Ogg decoder with libogg 1.3.6 and libvorbis 1.3.7.\nOriginal compressed streams are received through stdin; MLPC v1 returns bounded signed 16-bit little-endian PCM.\nSingle logical Vorbis stream, one or two channels, 8–192 kHz, maximum 600 seconds / 256 MiB decoded.\nPlayback uses macOS /usr/bin/afplay.\n");
+
     const files = fs.readdirSync(destination,{recursive:true}).filter(name=>fs.statSync(path.join(destination,name)).isFile()).sort().map(name => {
       fs.chmodSync(path.join(destination, name), name === "ogg-decode" ? 0o755 : 0o644); const file = B.readRegular(path.join(destination, name), 4 * 1024 * 1024);
       return { path: name, size: file.size, sha256: file.sha256, mode: file.mode, ...(name === "ogg-decode" ? { architectures: ["arm64", "x86_64"] } : {}) };
     });
     const metadata = Buffer.from(JSON.stringify({ schemaVersion: 1, id: "catsystem2-ogg-decode", version: VERSION, protocolVersion: 1, minimumMacOS: MINIMUM_MACOS,
-      sourceKind: "owned-source-with-bsd-codecs", sourceSha256: source.sha256, binarySha256: files.find(file => file.path === "ogg-decode").sha256,
+      sourceKind: "owned-source-with-codecs", sourceSha256: source.sha256, binarySha256: files.find(file => file.path === "ogg-decode").sha256,
       dependencySources: SOURCES, architectures: ["arm64", "x86_64"], files,
       build: { compiler, sdk, signing: "ad-hoc", minimumMacOS: MINIMUM_MACOS, recipe: "src/modules/catsystem2/runtime/stage-audio.cjs", recipeSha256: files.find(file => file.path === "stage-audio.cjs").sha256,
         oggConfigTypesSha256: B.digest(Buffer.from(generatedTypes)), oggFiles: ["src/bitwise.c", "src/framing.c"], vorbisFiles: VORBIS_FILES.map(name => `lib/${name}.c`) } }, null, 2) + "\n");

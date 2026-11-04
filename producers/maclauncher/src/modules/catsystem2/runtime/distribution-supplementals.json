@@ -30,13 +30,6 @@
         "sha256": "80d33b5de288acede5667f512baabcb6cfe0765acf671dab994da01a6946ef30",
         "mode": 420
       }
-    ],
-    "notices": [
-      {
-        "name": "MacLauncher KIF cipher helper",
-        "license": "MIT",
-        "path": "MacLauncher-MIT.txt"
-      }
     ]
   }
 ]
