@@ -1,5 +1,5 @@
 import {gitlink} from '../../../../../../../lib/pins.mjs';
-import {addLicenses} from '../../../../../../../lib/licenses.mjs';
+import {addLicense,addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -45,6 +45,7 @@ export function buildKosmic(options){
  const jobs=Number(options.jobs||2);
  if(!Number.isInteger(jobs)||jobs<1||jobs>4)throw Error('Kosmic builds use one to four compiler jobs');
  run(ninja,['-C',build,'-j',String(jobs),'src/kosmickrisp/vulkan/'+pin.library],{env:environment});
+ addLicense(path.join(build,'src/kosmickrisp'),'Mesa',path.join(source,'docs/license.rst'));
  return {library:path.join(build,'src/kosmickrisp/vulkan',pin.library),projected,nativeBuild:describeNativeTools({source,build})};
 }
 

@@ -284,7 +284,8 @@ await run('xcrun', [
 await run('codesign', [
   '--force', '--sign', '-', path.join(payload, 'libmaclauncher-fsr4.dylib')
 ]);
-addLicenses(payload,'FSR4',source);
+addLicenses(payload,'FSR4',path.join(source,'third_party/fsr411'));
+addLicenses(payload,'FSR4 provider',here);
 const owned = {};
 for (const [name, bytes] of ownedSnapshot) {
   owned[name] = hash(bytes);

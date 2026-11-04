@@ -619,7 +619,9 @@ if(options["--output"]&&fs.existsSync(destination))throw Error("Use a new isolat
 fs.mkdirSync(destination, { recursive: true });
 for (const directory of ["include", "effects"]) fs.mkdirSync(path.join(destination, directory), { recursive: true });
 addLicenses(destination,"ReShade",source);
-if(options["--xess-host"]){addLicenses(destination,"Intel-XeSS",xessSource);addLicense(destination,"Intel-XeSS headers",path.join(xessSource,"inc/MIT.txt"));}
+if(options["--xess-host"]){addLicenses(destination,"Intel-XeSS",xessSource);addLicense(destination,"Intel-XeSS headers",path.join(xessSource,"inc/MIT.txt"));addLicense(destination,"Intel-XeSS dependencies",path.join(xessSource,"third-party-programs.txt"));}
+for(const [option,component] of [["--godot","Godot"],["--streamline","Streamline"],["--dxmt","DXMT"]])if(options[option])addLicenses(destination,component,options[option]);
+addLicenses(destination,"native filters",path.resolve(import.meta.dirname,"../src/modules/shared/reshade/native"));
 const files = [];
 for (const [relative, input] of inputs) {
   const output = path.join(destination, relative);

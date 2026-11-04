@@ -333,7 +333,7 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/fna/runtime/build.js"
+        "producers/maclauncher/src/modules/fna/runtime"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -407,6 +407,7 @@
       "entries": [
         "producers/maclauncher/src/modules/gemrb/runtime/portable-build-v4.js",
         "producers/maclauncher/src/modules/gemrb/runtime/portable-build-v5.js",
+        "producers/maclauncher/src/modules/shared/runtime",
         "producers/maclauncher/src/modules/gemrb/runtime/portable-overlay-v5.js"
       ],
       "sourceDirectory": "producers/maclauncher"
@@ -906,7 +907,7 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/nitroplus/runtime/portable-build.js"
+        "producers/maclauncher/src/modules/nitroplus/runtime"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -1813,7 +1814,7 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/gamemaker/runtime/butterscotch.js",
+        "producers/maclauncher/src/modules/gamemaker/runtime",
         "producers/maclauncher/src/modules/gamemaker/overlays/butterscotch-game-arguments.js"
       ],
       "sourceDirectory": "producers/maclauncher"
@@ -2187,7 +2188,7 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/crossover/temporal/vulkan/build.mjs"
+        "producers/maclauncher/src/modules/crossover/temporal/vulkan"
       ],
       "sourceDirectory": "producers/maclauncher",
       "sourceRepository": "https://github.com/wine-mirror/wine"
