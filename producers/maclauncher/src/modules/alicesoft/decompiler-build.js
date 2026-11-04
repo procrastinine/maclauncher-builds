@@ -10,7 +10,7 @@ const templatePath = path.join(__dirname, "overlays/decompiler-cmake-v1.cmake");
 
 async function buildManagedDecompiler({ manager, version, sourceDir, userDataDir, logger, signal, onProgress, dependencies }) {
   const metadata = profiles.find(row => row.managerId === manager.id);
-  const profile = { ...metadata, upstreamRevision: gitlink("producers/maclauncher/src/external/" + metadata.repo) };
+  const profile = metadata && { ...metadata, upstreamRevision: gitlink("producers/maclauncher/src/external/" + metadata.repo) };
   // Each package revision of the pinned source has its own release row.
   const release = profile?.releases.find(row => row.version === version);
   if (!release) throw new Error("No Mac build is available for this decompiler source version.");
