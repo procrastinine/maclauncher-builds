@@ -14,7 +14,7 @@ export function materializeSource({output,sources={},baseOnly=false}){
  if(!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Choose a new absolute graphics source directory.');
  const base=path.join(root,'base'),overlay=JSON.parse(fs.readFileSync(path.join(root,'source-overlay.json')));
  const processor=JSON.parse(fs.readFileSync(path.join(root,'processor-sources.json')));
- const inputs=['CMakeLists.txt','README.md','THIRD_PARTY.md',...['src','compat'].flatMap(dir=>fs.readdirSync(path.join(base,dir),{recursive:true}).map(name=>path.join(dir,name)).filter(name=>fs.statSync(path.join(base,name)).isFile()))].sort();
+ const inputs=['CMakeLists.txt','README.md',...['src','compat'].flatMap(dir=>fs.readdirSync(path.join(base,dir),{recursive:true}).map(name=>path.join(dir,name)).filter(name=>fs.statSync(path.join(base,name)).isFile()))].sort();
  if(digest(Buffer.concat(inputs.map(name=>Buffer.concat([Buffer.from(name+'\0'),fs.readFileSync(path.join(base,name))]))))!==overlay.baseSourceHash)throw Error('Graphics base source differs from its declared identity.');
  const directories={};
  for(const entry of processor.sources){

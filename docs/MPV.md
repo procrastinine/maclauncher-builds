@@ -19,7 +19,7 @@ node producers/mpv-render/v7/package.mjs \
   --output /absolute/path/to/new-package-directory
 ```
 
-The JSON file passed with `--config` has the fields `library`, `referenceExecutable`, `dependencyRoots`, `output`, `source` and `notices`. `source` identifies the original version, the commit and the SHA-256 of the library artifact. Each notice entry names the original files, their licenses and source links. The producer verifies the selected library image, builds the native host, finds every library the host actually loads and records the hash of each, without downloading any dependencies.
+The JSON file passed with `--config` has the fields `library`, `referenceExecutable`, `dependencyRoots`, `output`, `source`. `source` identifies the original version, the commit and the SHA-256 of the library artifact. The producer verifies the selected library image, builds the native host, finds every library the host actually loads and records the hash of each, without downloading any dependencies.
 
 ## Package layout
 
