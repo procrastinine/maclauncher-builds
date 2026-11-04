@@ -2296,6 +2296,9 @@
       "command": "tools/build-fidelityfx-api.mjs",
       "architectures": [
         "x64"
+      ],
+      "submodules": [
+        "producers/maclauncher/src/external/krkrsdl2"
       ]
     },
     "versionBindings": [

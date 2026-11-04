@@ -1,3 +1,4 @@
+import {addLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -25,9 +26,9 @@ export async function buildJavaSteamworks({project:id,arch,version,output,work})
   execFileSync('/usr/bin/codesign',['--verify','--strict',library],{maxBuffer:Infinity,stdio:'pipe'});
   const jdkBin=process.env.JAVA_HOME?path.join(process.env.JAVA_HOME,'bin'):path.join(execFileSync('/usr/libexec/java_home',['-v','17+'],{maxBuffer:Infinity,encoding:'utf8'}).trim(),'bin');
   const agent=build(jdkBin,path.join(payload,'steam-agent.jar'));
-  fs.copyFileSync(path.join(base,'steamworks4j-'+original.version+'-MIT.txt'),path.join(payload,'steamworks4j-MIT.txt'));
-
-  return helperPackage({id:project.id,version,arch,output,minimumMacOS:arch==='x64'?'10.9':'11.0',sourceSha256:agent.sourceSha256,rosettaFiles:arch==='x64'?['libsteamworks4j.dylib']:[],record:{wrapperVersion:original.version,sourceRevision:original.sourceRevision,sourceUrl:original.sourceUrl,sourceKind:'reviewed-binary',verifiedBuild:false,publisherUrl:original.publisherUrl,publisherJarSha256:original.publisherJarSha256,
+  addLicenses(payload,'MacLauncher',root);
+  return helperPackage({id:project.id,version,arch,output,minimumMacOS:arch==='x64'?'10.9':'11.0',sourceSha256:agent.sourceSha256,rosettaFiles:arch==='x64'?['libsteamworks4j.dylib']:[],
+   record:{wrapperVersion:original.version,sourceRevision:original.sourceRevision,sourceUrl:original.sourceUrl,sourceKind:'reviewed-binary',verifiedBuild:false,publisherUrl:original.publisherUrl,publisherJarSha256:original.publisherJarSha256,
     librarySha256:original.jniSha256,agentSha256:agent.sha256,agentSourceSha256:agent.sourceSha256,agentCompilerRuntime:execFileSync(path.join(jdkBin,'javac'),['-version'],{maxBuffer:Infinity,encoding:'utf8'}).trim(),agentClassMajor:52,abiProfile:original.abiProfile,interfaces:original.interfaces,symbols:original.symbols}});
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}finally{fs.rmSync(work,{recursive:true,force:true});}
 }
