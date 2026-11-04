@@ -125,7 +125,7 @@
   },
   {
     "id": "love-luasteam",
-    "name": "L\u00d6VE LuaSteam bridge",
+    "name": "LÖVE LuaSteam bridge",
     "purpose": "LuaSteam 4 binding against the selected host Lua VM.",
     "producer": {
       "kind": "maclauncher",
@@ -763,7 +763,8 @@
         "url": "https://github.com/code-disaster/steamworks4j",
         "repository": "code-disaster/steamworks4j",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/source-revisions/steamworks4j"
+          "file": "producers/maclauncher/src/modules/java/runtime/steamworks/versions.json",
+          "pointer": "/0/sourceRevision"
         }
       },
       {

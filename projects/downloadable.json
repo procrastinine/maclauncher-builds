@@ -1824,8 +1824,7 @@
         "url": "https://github.com/boykopovar/AnyPS5",
         "repository": "boykopovar/AnyPS5",
         "pin": {
-          "file": "producers/anyps5/source.json",
-          "pointer": "/source"
+          "gitlink": "sources/anyps5"
         }
       }
     ],
@@ -1898,8 +1897,7 @@
         "url": "https://github.com/seedds/nxnative",
         "repository": "seedds/nxnative",
         "pin": {
-          "file": "producers/nxnative/source.json",
-          "pointer": "/source"
+          "gitlink": "sources/nxnative"
         }
       }
     ],
@@ -1962,8 +1960,7 @@
         "url": "https://github.com/mpv-player/mpv",
         "repository": "mpv-player/mpv",
         "pin": {
-          "file": "producers/mpv-render/v7/source.json",
-          "pointer": "/source"
+          "gitlink": "producers/maclauncher/src/external/mpv-player"
         }
       }
     ],
@@ -2043,8 +2040,7 @@
         "url": "https://github.com/mattias800/prosper",
         "repository": "mattias800/prosper",
         "pin": {
-          "file": "producers/prosper/source.json",
-          "pointer": "/source"
+          "gitlink": "sources/prosper"
         }
       }
     ],
@@ -2343,7 +2339,7 @@
   {
     "id": "vnds-love",
     "name": "VNDS-LOVE",
-    "purpose": "Adapted VNDS interpreter for the managed L\u00d6VE host.",
+    "purpose": "Adapted VNDS interpreter for the managed LÖVE host.",
     "producer": {
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
@@ -2528,26 +2524,6 @@
         "pin": {
           "file": "producers/native-tools/source.json",
           "pointer": "/projects/uosc-helper"
-        }
-      },
-      {
-        "id": "clipboard",
-        "provider": "github",
-        "url": "https://github.com/atotto/clipboard",
-        "repository": "atotto/clipboard",
-        "pin": {
-          "file": "producers/native-tools/source.json",
-          "pointer": "/projects/uosc-helper/modules/0"
-        }
-      },
-      {
-        "id": "browser",
-        "provider": "github",
-        "url": "https://github.com/pkg/browser",
-        "repository": "pkg/browser",
-        "pin": {
-          "file": "producers/native-tools/source.json",
-          "pointer": "/projects/uosc-helper/modules/1"
         }
       }
     ],
