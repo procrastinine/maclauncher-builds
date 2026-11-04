@@ -42,3 +42,11 @@ test('compatibility licence bytes and metadata survive aliases while failed inta
 test('Homebrew classification uses canonical closure paths without filesystem work',t=>{
  t.mock.method(fs,'realpathSync',()=>{throw Error('must not reread a canonical source');});assert.deepEqual(Native.formulaRoot('/opt/homebrew/Cellar/glib/2.90.1/lib/libglib.dylib'),{root:'/opt/homebrew/Cellar/glib/2.90.1',name:'glib',version:'2.90.1'});assert.equal(Native.formulaRoot('/usr/lib/libSystem.B.dylib'),null);
 });
+test('immediate-child licence intake names each directory and contains missing, unreadable and logger failures',t=>{
+ const root=fixture(t),source=path.join(root,'subprojects'),payload=path.join(root,'payload');
+ for(const name of ['one','two']){fs.mkdirSync(path.join(source,name),{recursive:true});fs.writeFileSync(path.join(source,name,'LICENSE'),name+' upstream text');}
+ fs.writeFileSync(path.join(source,'not-a-directory'),'ignored');fs.mkdirSync(path.join(source,'one','unrelated'));fs.writeFileSync(path.join(source,'one','unrelated','LICENSE'),'not a selected collection');
+ addLicenses(payload,'group',source,true);const index=fs.readFileSync(path.join(payload,'licenses/components.txt'),'utf8');assert.ok(index.includes('one: one.txt\n'));assert.ok(index.includes('two: two.txt\n'));assert.equal(fs.readdirSync(path.join(payload,'licenses')).length,3);
+ const read=fs.readdirSync;t.mock.method(fs,'readdirSync',(directory,...args)=>{if(directory===source)throw Object.assign(Error('unreadable'),{code:'EACCES'});return read(directory,...args);});t.mock.method(console,'log',()=>{throw Error('logger failure');});
+ assert.doesNotThrow(()=>addLicenses(payload,'group',source,true));assert.doesNotThrow(()=>addLicenses(payload,'group',path.join(root,'missing'),true));
+});
