@@ -101,7 +101,7 @@
     },
     {
       "path": "producers/maclauncher/scripts/native-binary-tools.cjs",
-      "sha256": "c006d998c9cd1ad1b7084e9d5b7aaf3440e5e907b925a7b7506ed90343448c42"
+      "sha256": "8923effaa1c63019c89bd15d6985197627d2a12ef69d53122b1f785bff03b2b3"
     }
   ],
   "buildEntry": "producers/mpv-render/v7/build.mjs",
