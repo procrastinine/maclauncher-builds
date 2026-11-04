@@ -1,0 +1,56 @@
+{
+  "id": "sys3-decompiler",
+  "version": "0.5.0-MCLv7",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "sys3-decompiler/0.5.0-MCLv7/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "b54372a09364901ae5daec22b4d655199e0118474d46b6f23521a1e02516927e",
+  "sourceSha256": "b54372a09364901ae5daec22b4d655199e0118474d46b6f23521a1e02516927e",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 16983,
+      "mode": 420,
+      "sha256": "7e32c196815b2337f324c2101264b43a7fb996c6e40740e5355989f91417942e"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "730f951a1f8ffe1ed44f7c0d576778bf806e0a7743cd3ca4dec884dfa179cee5"
+    },
+    {
+      "path": "files/bin/sys3dc",
+      "size": 106752,
+      "sha256": "a46eb1517099ef96bfd1bd9471b389c8e25aaf9b1988d112598e89a6a852ebb5",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 17,
+      "sha256": "0e64290ea78370eedfcdd9ca9810979b3bbf74054b1a62adf90d1df24b16a5e1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/sys3c.txt",
+      "size": 18092,
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 2868,
+      "mode": 420,
+      "sha256": "b54372a09364901ae5daec22b4d655199e0118474d46b6f23521a1e02516927e"
+    }
+  ],
+  "redistribution": "bundle"
+}
