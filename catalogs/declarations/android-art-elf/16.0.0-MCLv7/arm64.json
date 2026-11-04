@@ -1,0 +1,352 @@
+{
+  "id": "android-art-elf",
+  "version": "16.0.0-MCLv7",
+  "arch": "arm64",
+  "minimumMacOS": "13.0",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "a3afd26773bf2ba6dd0d28c22758cdbcd7f8011ee504ae2835c847031ae3080c",
+  "directoryRelative": "android-art-elf/16.0.0-MCLv7/arm64",
+  "manifestRelative": "input.json",
+  "manifestSha256": "7739a436785b5ef511d04e79f45dd93ce545852ad525c3337b62ea0f61b5a874",
+  "files": [
+    {
+      "path": "bin/dex2oat64",
+      "size": 1909408,
+      "sha256": "74924abd112c1590b1588c2b55797e1bece024fceb4c9f583b8529a9135dfa92",
+      "mode": 493
+    },
+    {
+      "path": "build-definition.json",
+      "size": 17485,
+      "mode": 420,
+      "sha256": "498c09886042c446af0830617c80867af6e8d007a2d213fec628a0026ca7d0f2"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "cd83f785cafba5b053770eda2e56ac6a83e09cb791ccaa26cee35422afb72417"
+    },
+    {
+      "path": "input.json",
+      "size": 9886,
+      "sha256": "7739a436785b5ef511d04e79f45dd93ce545852ad525c3337b62ea0f61b5a874",
+      "mode": 420
+    },
+    {
+      "path": "lib64/libadbconnection.so",
+      "size": 122104,
+      "sha256": "2ca7f46e8efcd839dc52a09dab1f92c36f235d3e05e5860e08b33767c507d0cf",
+      "mode": 493
+    },
+    {
+      "path": "lib64/libart.so",
+      "size": 18070704,
+      "sha256": "a4ab9d7b1e142960842d0816ba8f8ce263642f3852279c95ea67b39476ea6026",
+      "mode": 493
+    },
+    {
+      "path": "lib64/libartbase.so",
+      "size": 642064,
+      "sha256": "94e3c5354b2592e481ed9fe3d5468c5c1904588a291cb3a04e882945f53b28c4",
+      "mode": 493
+    },
+    {
+      "path": "lib64/libdexfile.so",
+      "size": 435096,
+      "sha256": "4bd3012aa7176cd6e00e86491e831f8c899a405da541613b3afdb0e19c06b227",
+      "mode": 493
+    },
+    {
+      "path": "lib64/libopenjdkjvm.so",
+      "size": 46024,
+      "sha256": "b4601fbe58a32437c22bae70ba55a7db4ec6271e5bcd3232f8d61e9944573dea",
+      "mode": 493
+    },
+    {
+      "path": "lib64/libopenjdkjvmti.so",
+      "size": 1293920,
+      "sha256": "d3d4008acd221393a124cdd647e8ffe13430746dd89c14e6f4c92b6f7cb8433b",
+      "mode": 493
+    },
+    {
+      "path": "lib64/libprofile.so",
+      "size": 306024,
+      "sha256": "95a8ef1a7f54e77e3c9ca9ea5f67a53dd0ba740af2b65e5a83fac5849eb8c8bd",
+      "mode": 493
+    },
+    {
+      "path": "licenses/AIM-10.txt",
+      "size": 1389,
+      "sha256": "6ffedbc0f7878612d2b23589f1ff2ab15633e1df7963a5d9fc750ec5500c7e7a",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-11.txt",
+      "size": 1451,
+      "sha256": "b2fdb88151f747b40f4a8b17ceba930136c8c1be873611972b413bce2c2eb587",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-12.txt",
+      "size": 10139,
+      "sha256": "494accc32e50eb523a0e384d0ae6d4b702db867a89d6971216760e92b240ee12",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-13.txt",
+      "size": 12534,
+      "sha256": "756a61a8300d105ae68e7f2993e27d41a765c946f3400422e2403b01e7ded527",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-14.txt",
+      "size": 1542,
+      "sha256": "58604a126af6a671ea390ee3d5b3e42228aa59b2858fb7af1d5b20b31739ccbb",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-15.txt",
+      "size": 1002,
+      "sha256": "e32ff4e00d9d94930537635291da39e7e612703334bf6fde8c7f1686fe8a45a2",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-16.txt",
+      "size": 36620,
+      "sha256": "ea75d2e79a97f8dfc1e1ca04beedc432a47af4993e0cd659cef062050a57d3f9",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-17.txt",
+      "size": 19263,
+      "sha256": "067d8f7f645efe1131a9df13aa80ec2910d4ff898f9b14d337443a4202d56ab6",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-18.txt",
+      "size": 5788,
+      "sha256": "ded3eab76e881c8c18ab9e4ed9e888b1afcac41435913930f88f8188cecb2e8f",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-19.txt",
+      "size": 407542,
+      "sha256": "46d411827d56eda34df30f901bfa4ea020119b2e38b6b7efb6a32e91461457a2",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-2.txt",
+      "size": 3544,
+      "sha256": "75d9526cb80680518a22a07587156dd52d58890c5e60dc6efee712e46d88c067",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-20.txt",
+      "size": 13928,
+      "sha256": "4e1144ff2b1369e7b9e8a1a3fb94ea3deee99d5b327cd94b423d148dfa34d25f",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-21.txt",
+      "size": 16703,
+      "sha256": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-22.txt",
+      "size": 16706,
+      "sha256": "e2b35be49f7284a45b7baca8fc7b3ab7440e7902392b2528a457816b5bb2a15c",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-23.txt",
+      "size": 14990,
+      "sha256": "9a682a56cffc9524dfa9b0b1c0dca9cb81a19e96d5bd0793aaf02c08a95ee7ca",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-24.txt",
+      "size": 1491,
+      "sha256": "68834f116f8ff545f05d14753357b620748156d60ee36b26beab4cb3f317efe4",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-25.txt",
+      "size": 23503,
+      "sha256": "ea43b1de38a6f90c488800d66dec1ed671e68cda530266bc96951fb5b6307613",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-26.txt",
+      "size": 1522,
+      "sha256": "a44eb7b5caf5534c6ef536b21edb40b4d6babf91bf97d9d45596868618b2c6fb",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-27.txt",
+      "size": 19274,
+      "sha256": "4b9abebc4338048a7c2dc184e9f800deb349366bdf28eb23c2677a77b4c87726",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-28.txt",
+      "size": 495,
+      "sha256": "95ad366d23fadf701d355bc45fb8b82ae2d700239471d35d41286ac3b08ff903",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-29.txt",
+      "size": 1084,
+      "sha256": "1ca3502222d967f3be5751c55f6b7ee735b5383909c3b501495f54b216dbf227",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-3.txt",
+      "size": 802,
+      "sha256": "8937b0397fdaea5ecb52945c9d2da894d338ed49397ef7824be365e60049d264",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-30.txt",
+      "size": 12809,
+      "sha256": "e8f66a474a1c1a0c1da2e85b5e84a50bf5e3161c96d2a3b92b76a32d05ae9ae8",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-4.txt",
+      "size": 11369,
+      "sha256": "a41c63d0b40a94fc5dae93d63c788b12385b98517e149b912be7d5913ad28e0f",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-5.txt",
+      "size": 3573,
+      "sha256": "6b716ac364d4b775726e7eb883ecdfa3a752202794b4f6129eabbe27d3edfb48",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-6.txt",
+      "size": 1330925,
+      "sha256": "2668d0cd8487b327b63ff4b9c7378f8b803beebab6f0bea406fb8c2bb7f98292",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-7.txt",
+      "size": 11361,
+      "sha256": "c79a7fea0e3cac04cd43f20e7b648e5a0ff8fa5344e644b0ee09ca1162b62747",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-8.txt",
+      "size": 16962,
+      "sha256": "1f8729233617b193fd619213792ae16a41b95d2bbbf525dfe66998252ba68b16",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM-9.txt",
+      "size": 1643,
+      "sha256": "bf4da21bd20bcfb5b60b7ecc67fa864a79be049e21d6178076887f178dd6c71a",
+      "mode": 420
+    },
+    {
+      "path": "licenses/AIM.txt",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "licenses/ART-JVMTI.txt",
+      "size": 1457,
+      "sha256": "d5dde6ff1463281d19c920f2a3241bb12055ac78f0d2a27b4c8b457dc45db5d9",
+      "mode": 420
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 857,
+      "sha256": "e2d698b7f151ba77a2047f2fabe3bfbdad26e6885d570408a23ffd6adec0eeec",
+      "mode": 420
+    },
+    {
+      "path": "licenses/cpu_features.txt",
+      "size": 12876,
+      "sha256": "af272c1b4dd08dd61d43e001d3134119d03ca7a2b057a64f7355fdf27fbea3dd",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dlmalloc.txt",
+      "size": 257,
+      "sha256": "5791fb3131f2e81e8065cd8080b62c155eb292b3fc1de26eb85150ab1aafb890",
+      "mode": 420
+    },
+    {
+      "path": "licenses/fiat-crypto.txt",
+      "size": 1161,
+      "sha256": "43e358d7b6eb109d0f51f7b3a090fd82607965767c25fadee39e922475de2061",
+      "mode": 420
+    },
+    {
+      "path": "licenses/libcap-2.txt",
+      "size": 20240,
+      "sha256": "088cabde4662b4121258d298b0b2967bc1abffa134457ed9bc4a359685ab92bc",
+      "mode": 420
+    },
+    {
+      "path": "licenses/libcap.txt",
+      "size": 20318,
+      "sha256": "68467e731f4744bd6e0bb69e8df9c3a994e09cd6b203d0c41327ac6d079c581d",
+      "mode": 420
+    },
+    {
+      "path": "licenses/LZ4.txt",
+      "size": 1311,
+      "sha256": "8b58c446121a109ccf32edc094bba3010a3d85e4ee3702950db55e4d3e87736c",
+      "mode": 420
+    },
+    {
+      "path": "licenses/nativehelper.txt",
+      "size": 10695,
+      "sha256": "38751245389e1e23f73e6f5384b5cbe7fa972cc4410c5adc9c04b082a0b9561a",
+      "mode": 420
+    },
+    {
+      "path": "licenses/tinyxml2.txt",
+      "size": 808,
+      "sha256": "9332252e9b9e46db8285d4a3f0bf25f139bf1dca6781b956d57f2302efca6432",
+      "mode": 420
+    },
+    {
+      "path": "licenses/zlib-2.txt",
+      "size": 4480,
+      "sha256": "a2eb01e4ab880d857e4034ca4a1cb709afe3d8fdbf2a3531d471dd98a82f6389",
+      "mode": 420
+    },
+    {
+      "path": "licenses/zlib-3.txt",
+      "size": 99382,
+      "sha256": "9fddc625028f43db3b278cf3af562b29c00fadd91cb893b2223120a330d5bb8f",
+      "mode": 420
+    },
+    {
+      "path": "licenses/zlib-4.txt",
+      "size": 1553,
+      "sha256": "33e2a7c4defd6222945bb0f7191b6380afb4f518e804af86a44aad4a9090bf9e",
+      "mode": 420
+    },
+    {
+      "path": "licenses/zlib-5.txt",
+      "size": 294,
+      "sha256": "2f1d0b18ce37c2af415a469857f02aee2c41a58877aff21d29e9c6db32b55cb7",
+      "mode": 420
+    },
+    {
+      "path": "licenses/zlib.txt",
+      "size": 910,
+      "sha256": "e1cfcc55c325b3f78cf55df9664abaa066e2271dffe8213347d9fccdfbac8f2c",
+      "mode": 420
+    }
+  ]
+}
