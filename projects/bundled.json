@@ -664,9 +664,9 @@
         "url": "https://github.com/google/shaderc",
         "repository": "google/shaderc",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies.json",
-          "pointer": "/sources/0/commit",
-          "repositoryPointer": "/sources/0/repository"
+          "file": "producers/dependencies.json",
+          "pointer": "/shaderc/revision",
+          "repositoryPointer": "/shaderc/repository"
         }
       },
       {
