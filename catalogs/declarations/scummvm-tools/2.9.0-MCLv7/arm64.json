@@ -1,0 +1,315 @@
+{
+  "id": "scummvm-tools",
+  "version": "2.9.0-MCLv7",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "scummvm-tools/2.9.0-MCLv7/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "61604d96bd297e05b0d9fa613fbc80176cb76191915f9c83d1729805e0506602",
+  "sourceSha256": "61604d96bd297e05b0d9fa613fbc80176cb76191915f9c83d1729805e0506602",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 18847,
+      "mode": 420,
+      "sha256": "c322aa88c061e8cf0a87c03889192a3009b22fe9c72e03d355924f17008fdd24"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 982,
+      "mode": 420,
+      "sha256": "6ec8abbfda5f0dd5c551ee4588b403c5f4f5a5f1e16b8fbf50b3ab3e78242a45"
+    },
+    {
+      "path": "files/bin/scummvm-tools-cli",
+      "size": 681552,
+      "sha256": "e16fbe4c81fc2f1f242e65628bac78c207c8bade499a348117d8ee2df148e9c1",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libFLAC.14.0.0.dylib",
+      "size": 322384,
+      "sha256": "a26ec8f1f81a373ae17dc18f9d6ff468a481d79146d609af2f8eb6986c0cab0d",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libogg.0.8.6.dylib",
+      "size": 53664,
+      "sha256": "84ebfcc7780d5592740e8a40475b777bf334518ea193ec6e8558fc02ef6b16ec",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libpng.dylib",
+      "size": 241728,
+      "sha256": "209888f1fc1081ea397bae6981db53e63666422e9678081409b6da4c12589b04",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libvorbis.0.4.9.dylib",
+      "size": 240752,
+      "sha256": "6b301fcd7992ae4a608f1f9fee78ae55f1ab216475e22ee60323965432d2448e",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libvorbisenc.2.0.12.dylib",
+      "size": 705696,
+      "sha256": "c5b1c352af13d7bec8368384e4064e6f257ceb148e40363379bc3a0adee5f04f",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libvorbisfile.3.3.8.dylib",
+      "size": 55248,
+      "sha256": "8651fe0eb488b218c36f60f2c5da13d2fcf1481d250d322a227f22581240c0eb",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/licenses/audio-10.txt",
+      "size": 25281,
+      "sha256": "e64f9c5a18f56828c10a575df13ade641aa3af4512a7afe6c411256943b57aaf",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-11.txt",
+      "size": 503,
+      "sha256": "5c1f8d44f1eacbea3e1c31ff6ee11a4e1690ccbed4ee4af16de3b6eb61dc69a8",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-12.txt",
+      "size": 26518,
+      "sha256": "ad01ea5cd2755f6048383c8d54c88459cd6fcb17757c5c8892f8c5ea060f6140",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-2.txt",
+      "size": 22954,
+      "sha256": "c5d2b95c2538d2e41d8eedd9ecc750cd5fee085c7bb2bc3e2f95f4e59cc0b10d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-3.txt",
+      "size": 18092,
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-4.txt",
+      "size": 26436,
+      "sha256": "5df07007198989c622f5d41de8d703e7bef3d0e79d62e24332ee739a452af62a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-5.txt",
+      "size": 1509,
+      "sha256": "7866ee98760fc1f0156b4fe6bf530257e02be487ab3fd94e2b63799dd32d6b2c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-6.txt",
+      "size": 1470,
+      "sha256": "ec1815db59fcd302846df949d7424876cb2e2dc5ed1606c5fb0b36787b1cf43a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-7.txt",
+      "size": 1945,
+      "sha256": "01e1167d54a096d123cf6dfbbeb19587278845c6481d2d66d545669846079551",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-8.txt",
+      "size": 703,
+      "sha256": "7efb4989e0cd1b256229bdf2f09300c5d14e35db0e7476bfb87fac243498273d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio-9.txt",
+      "size": 40718,
+      "sha256": "c22482728a634a8dfdb4ff72a96d4c1ed64cd8f3e79335c401751ac591609366",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/audio.txt",
+      "size": 1466,
+      "sha256": "d2ab5758336489da61c12cc5bb757da5339c4ae9001f9bb0562b4370249af814",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 733,
+      "sha256": "76d03964186d5d467c27dc91b7f62f7f6a4c93355c7833e44d721c2839b6e95c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-10.txt",
+      "size": 35147,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-11.txt",
+      "size": 264,
+      "sha256": "fb5436aa63d1b71a8dfbf74ecaf1a5b4e1ec4df7f80074d11fec99284f69ca5f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-12.txt",
+      "size": 530,
+      "sha256": "7d3b087c34f35d4d538e3bcddd1ff8f66e92f9ef336881999482800ddf840913",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-13.txt",
+      "size": 355,
+      "sha256": "b327a7b3a4597e5902556ec3e8407cbdd1e288abd4623b7b4b56d14d49e84ecb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-14.txt",
+      "size": 1480,
+      "sha256": "f7d74004cc75778cae46c5f0139f244d67c07ef64cf51937e8272352197dcb18",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-15.txt",
+      "size": 4791,
+      "sha256": "8f6e13bd28818e5aec0a054eb82e7618b0613fdc7a9015e6e92f22c4c5f9ad34",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-16.txt",
+      "size": 1724,
+      "sha256": "7e547b692449e35f57a4d8cd963294eed698c1505631d303d97c59189e8f6f70",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-17.txt",
+      "size": 6743,
+      "sha256": "5a5ee54c5001bbad1cdc1a57cc3dd4c42199b2da09d39c7ee41fab002d02967f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-18.txt",
+      "size": 17994,
+      "sha256": "c4120c6752c910c299e3bd9cb3a46ff262c268303ca2069b61f92f10a5656c18",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-2.txt",
+      "size": 5345,
+      "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-3.txt",
+      "size": 878,
+      "sha256": "8876cdca96eb380d16d5ea32bf4529d85e87dedc7765ae2861a9bec7f34acbed",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-4.txt",
+      "size": 1036,
+      "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-5.txt",
+      "size": 2149,
+      "sha256": "bd36c8b474855fa294c2ec5c184544478ef3720aad37d65a6296a4f264fd2d3b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-6.txt",
+      "size": 1235,
+      "sha256": "2c272829ff23f182c8bf7ea12fedea69b0ae148663123ed5240c117cb129c9c1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-7.txt",
+      "size": 29228,
+      "sha256": "cab46cd45adbfea4b1d0f14b033c70062c73074fa0b56532c2f351576ddf455e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-8.txt",
+      "size": 1971,
+      "sha256": "ba8f810f2455c2f08e2d56bb49b72f37fcf68f1f4fade38977cfd7372050ad64",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts-9.txt",
+      "size": 1534,
+      "sha256": "30eb1bef29b46f8ba7ab8b416035dbd93cb034a45481dd97815b944284582cd2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/fonts.txt",
+      "size": 884,
+      "sha256": "97f35b302b361680ec1e891e95d2d52097bb95abff361434916d99dc1305f127",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/scummvm-tools-2.txt",
+      "size": 1270,
+      "sha256": "b94b949c2d01ac9dabe1cfecf916b58bf5c63b8decc62fed3953778e08302d49",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/scummvm-tools-3.txt",
+      "size": 2035,
+      "sha256": "8e0272ae02203977f9d0312bd82fe2498f37741b51c52731b9af0d66dbde7b6a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/scummvm-tools-4.txt",
+      "size": 1934,
+      "sha256": "010193c6d99cb6945c864502ff8bce2ee5eb0ef9298d6fcd97fd18158a0bce5f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/scummvm-tools.txt",
+      "size": 35149,
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 11006,
+      "mode": 420,
+      "sha256": "61604d96bd297e05b0d9fa613fbc80176cb76191915f9c83d1729805e0506602"
+    }
+  ],
+  "redistribution": "bundle",
+  "aliases": {
+    "schema": 1,
+    "files": {
+      "files/lib/libogg.dylib": "files/lib/libogg.0.8.6.dylib",
+      "files/lib/libvorbis.dylib": "files/lib/libvorbis.0.4.9.dylib"
+    }
+  }
+}
