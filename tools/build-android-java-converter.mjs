@@ -1,4 +1,4 @@
-import {androidSource} from '../lib/android-source.mjs';
+import {androidSource,androidUpstream} from '../lib/android-source.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10,7 +10,7 @@ import {buildInput} from './build-input.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 import {addLicense} from '../lib/licenses.mjs';
 const root=path.resolve(import.meta.dirname,'..'),descriptor=path.join(root,'producers/android-inputs/java-converter.json');
-const profile=()=>JSON.parse(fs.readFileSync(descriptor));
+const profile=()=>{const value=JSON.parse(fs.readFileSync(descriptor));return {...value,converter:{...value.converter,revision:androidUpstream(value.converter.repository).revision}};};
 const read=(command,args)=>execFileSync(command,args,{encoding:'utf8',maxBuffer:Infinity}).trim();
 const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),{validateDeclaration}=require('../lib/declaration.cjs');
 

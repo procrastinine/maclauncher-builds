@@ -1618,8 +1618,12 @@
         "url": "https://github.com/kksimp/dex2jvm",
         "repository": "kksimp/dex2jvm",
         "pin": {
-          "file": "producers/android-inputs/java-converter.json",
-          "pointer": "/converter"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects",
+          "match": {
+            "id": "dex2jvm"
+          },
+          "field": "/revision"
         }
       }
     ],
@@ -1765,8 +1769,12 @@
         "provider": "gitiles",
         "url": "https://android.googlesource.com/platform/external/apache-http",
         "pin": {
-          "file": "producers/android-inputs/java-framework.json",
-          "pointer": "/sources/0"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects",
+          "match": {
+            "id": "aosp-apache-http"
+          },
+          "field": "/revision"
         }
       },
       {
@@ -1774,8 +1782,12 @@
         "provider": "gitiles",
         "url": "https://android.googlesource.com/platform/packages/modules/StatsD",
         "pin": {
-          "file": "producers/android-inputs/java-framework.json",
-          "pointer": "/sources/1"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects",
+          "match": {
+            "id": "aosp-statsd"
+          },
+          "field": "/revision"
         }
       },
       {
@@ -1783,8 +1795,12 @@
         "provider": "gitiles",
         "url": "https://android.googlesource.com/platform/frameworks/base",
         "pin": {
-          "file": "producers/android-inputs/java-framework.json",
-          "pointer": "/sources/2"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects",
+          "match": {
+            "id": "aosp-framework"
+          },
+          "field": "/revision"
         }
       },
       {
@@ -1792,8 +1808,12 @@
         "provider": "gitiles",
         "url": "https://android.googlesource.com/platform/frameworks/native",
         "pin": {
-          "file": "producers/android-inputs/java-framework.json",
-          "pointer": "/sources/3"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects",
+          "match": {
+            "id": "aosp-native"
+          },
+          "field": "/revision"
         }
       },
       {

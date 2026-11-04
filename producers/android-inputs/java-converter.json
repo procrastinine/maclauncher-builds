@@ -3,8 +3,7 @@
   "id": "android-java-converter",
   "version": "MCLv4",
   "converter": {
-    "repository": "https://github.com/kksimp/dex2jvm",
-    "revision": "b563cf8ee837348efa13c71797387345c9f3de5c"
+    "repository": "https://github.com/kksimp/dex2jvm"
   },
   "jdk": {
     "linux-x64": {
