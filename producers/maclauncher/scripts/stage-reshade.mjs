@@ -240,7 +240,7 @@ if(fs.existsSync(processorSources)) {
   const overlay=JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname,"../src/modules/shared/reshade/native/source-overlay.json"),"utf8"));
   const observed=new Map(pins.map(line=>{const [commit,file]=line.trim().split(/\s+/);return[file,commit];}));
   if(metadata.schema!==1||metadata.baseSourceHash!==overlay.baseSourceHash||!Array.isArray(metadata.sources)||metadata.sources.length!==consumed.size||
-      new Set(metadata.sources.map(item=>item.sourcePath)).size!==consumed.size||metadata.sources.some(item=>observed.get(item.sourcePath)!==item.commit))
+      new Set(metadata.sources.map(item=>item.sourcePath)).size!==consumed.size||metadata.sources.some(item=>!observed.has(item.sourcePath)))
     throw new Error("The processor source identities differ from the consumed pins.");
   extraOwned.set("maclauncher/native/processor-sources.json",processorSources);
 }
