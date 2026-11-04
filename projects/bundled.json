@@ -2227,9 +2227,11 @@
         "url": "https://github.com/libsdl-org/SDL",
         "repository": "libsdl-org/SDL",
         "pin": {
-          "file": "producers/dependencies.json",
-          "pointer": "/sdl2/revision",
-          "repositoryPointer": "/sdl2/repository"
+          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.js",
+          "pointer": "/PIN/dependencies",
+          "match": {
+            "id": "sdl2"
+          }
         }
       }
     ],

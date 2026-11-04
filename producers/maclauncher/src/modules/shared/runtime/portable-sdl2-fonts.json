@@ -9,16 +9,34 @@
       "name": "SDL2",
       "version": "2.32.10",
       "license": "Zlib",
-      "notices": ["LICENSE.txt"],
-      "options": ["-DSDL_SHARED=ON", "-DSDL_STATIC=OFF", "-DSDL_TEST=OFF", "-DSDL_TESTS=OFF"]
+      "notices": [
+        "LICENSE.txt"
+      ],
+      "options": [
+        "-DSDL_SHARED=ON",
+        "-DSDL_STATIC=OFF",
+        "-DSDL_TEST=OFF",
+        "-DSDL_TESTS=OFF"
+      ],
+      "archiveSha256": "46237ea6c05cbcd11ef374382e91a4854aa15de2cf055aa061862ad1438003d7",
+      "archiveBytes": 7908510
     },
     {
       "id": "libpng",
       "name": "libpng",
       "version": "1.6.59",
       "license": "libpng-2.0",
-      "notices": ["LICENSE"],
-      "options": ["-DPNG_SHARED=ON", "-DPNG_STATIC=OFF", "-DPNG_FRAMEWORK=OFF", "-DPNG_TESTS=OFF", "-DPNG_TOOLS=OFF", "-DPNG_EXECUTABLES=OFF"]
+      "notices": [
+        "LICENSE"
+      ],
+      "options": [
+        "-DPNG_SHARED=ON",
+        "-DPNG_STATIC=OFF",
+        "-DPNG_FRAMEWORK=OFF",
+        "-DPNG_TESTS=OFF",
+        "-DPNG_TOOLS=OFF",
+        "-DPNG_EXECUTABLES=OFF"
+      ]
     },
     {
       "id": "freetype",

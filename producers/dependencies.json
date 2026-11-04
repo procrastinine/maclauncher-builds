@@ -4,12 +4,6 @@
     "revision": "b64fd42c4a2a9d501c47aca5d3571f7673a5e9cc",
     "sha256": "b0f73c2f50df5f24e78fae6d04f1e95131c65ea3ea13fd8998a317a5d632a51f"
   },
-  "sdl2": {
-    "repository": "https://github.com/libsdl-org/SDL",
-    "revision": "5d249570393f7a37e037abf22cd6012a4cc56a71",
-    "sha256": "10f1194f8d2e4a73ca1c7c553b3189d0b68ab9ef3544e8d2a268e4429456b373",
-    "bytes": 7890728
-  },
   "libpng": {
     "repository": "https://github.com/pnggroup/libpng",
     "revision": "cd952f49f95bb27154ae77dbb103032d95f6e580",
