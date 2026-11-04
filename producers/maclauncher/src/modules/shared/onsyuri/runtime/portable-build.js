@@ -1,8 +1,9 @@
+const sharedDependencies=require('../../../../../../dependencies.json');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const Native = require("../../runtime/local-native");
-const PIN = Object.freeze(require("./portable-build.json"));
+const PIN = Object.freeze({...require("./portable-build.json"),dependencies:require("./portable-build.json").dependencies.map(row=>{const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:row;})});
 const VERSION = PIN.engine.version;
 const REVISION = PIN.engine.revision;
 const SOURCE_SHA256 = PIN.engine.sourceTreeSha256;

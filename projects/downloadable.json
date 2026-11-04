@@ -1279,11 +1279,9 @@
         "url": "https://github.com/libsdl-org/SDL",
         "repository": "libsdl-org/SDL",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "sdl2"
-          }
+          "file": "producers/dependencies.json",
+          "pointer": "/sdl2/revision",
+          "repositoryPointer": "/sdl2/repository"
         }
       },
       {
@@ -1292,11 +1290,9 @@
         "url": "https://github.com/pnggroup/libpng",
         "repository": "pnggroup/libpng",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "libpng"
-          }
+          "file": "producers/dependencies.json",
+          "pointer": "/libpng/revision",
+          "repositoryPointer": "/libpng/repository"
         }
       },
       {
@@ -2717,12 +2713,9 @@
         "url": "https://github.com/xiph/ogg",
         "repository": "xiph/ogg",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "ogg"
-          },
-          "field": ""
+          "file": "producers/dependencies.json",
+          "pointer": "/ogg/revision",
+          "repositoryPointer": "/ogg/repository"
         }
       },
       {
@@ -2745,12 +2738,9 @@
         "url": "https://github.com/xiph/vorbis",
         "repository": "xiph/vorbis",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "vorbis"
-          },
-          "field": ""
+          "file": "producers/dependencies.json",
+          "pointer": "/vorbis/revision",
+          "repositoryPointer": "/vorbis/repository"
         }
       },
       {
@@ -2759,12 +2749,9 @@
         "url": "https://github.com/pnggroup/libpng",
         "repository": "pnggroup/libpng",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "libpng"
-          },
-          "field": ""
+          "file": "producers/dependencies.json",
+          "pointer": "/libpng/revision",
+          "repositoryPointer": "/libpng/repository"
         }
       }
     ],

@@ -1,3 +1,4 @@
+const sharedDependencies=require('../../../../dependencies.json');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -9,7 +10,7 @@ const Movie = require("../shared/runtime/portable-ffmpeg");
 const Prefix = require("./system35-portable");
 const Overlay = require("./system4-portable-overlay");
 const { throwIfAborted } = require("../shared/runtime/download-utils");
-const PIN = Object.freeze(require("./system4-portable.json"));
+const PIN = Object.freeze({...require("./system4-portable.json"),dependencies:require("./system4-portable.json").dependencies.map(row=>{const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:row;})});
 const VERSION = "snapshot-04333ad-macos-v2";
 const REVISION = "04333ad689d7e517a93d58141bb214c19ba16129";
 const LIBSYS4_REVISION = "20560d4d6d41a7196bd6b8409bcbb974f9de4af0";

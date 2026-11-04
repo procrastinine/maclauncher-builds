@@ -31,11 +31,6 @@
       "id": "sdl2_mixer",
       "name": "SDL2_mixer",
       "version": "2.8.2",
-      "revision": "b208916aed9250fe434360e6c6a95f0697bb7b01",
-      "archiveUrl": "https://codeload.github.com/libsdl-org/SDL_mixer/tar.gz/b208916aed9250fe434360e6c6a95f0697bb7b01",
-      "archiveSha256": "f503e37eb7b7a4fab99448d849be1aa4154536fd41a5291f3db7afbb3777c252",
-      "archiveBytes": 6050720,
-      "sourceUrl": "https://github.com/libsdl-org/SDL_mixer/tree/b208916aed9250fe434360e6c6a95f0697bb7b01",
       "license": "Zlib",
       "notices": [
         "LICENSE.txt"

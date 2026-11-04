@@ -2314,11 +2314,9 @@
         "url": "https://github.com/libsdl-org/SDL",
         "repository": "libsdl-org/SDL",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "sdl2"
-          }
+          "file": "producers/dependencies.json",
+          "pointer": "/sdl2/revision",
+          "repositoryPointer": "/sdl2/repository"
         }
       }
     ],
@@ -2478,11 +2476,9 @@
         "url": "https://github.com/libsdl-org/SDL_mixer",
         "repository": "libsdl-org/SDL_mixer",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-mixer.json",
-          "pointer": "/dependencies",
-          "match": {
-            "id": "sdl2_mixer"
-          }
+          "file": "producers/dependencies.json",
+          "pointer": "/sdl2_mixer/revision",
+          "repositoryPointer": "/sdl2_mixer/repository"
         }
       }
     ],

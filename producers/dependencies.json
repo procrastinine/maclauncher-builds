@@ -3,5 +3,59 @@
     "repository": "https://github.com/google/shaderc",
     "revision": "b64fd42c4a2a9d501c47aca5d3571f7673a5e9cc",
     "sha256": "b0f73c2f50df5f24e78fae6d04f1e95131c65ea3ea13fd8998a317a5d632a51f"
+  },
+  "sdl2": {
+    "repository": "https://github.com/libsdl-org/SDL",
+    "revision": "5d249570393f7a37e037abf22cd6012a4cc56a71",
+    "sha256": "10f1194f8d2e4a73ca1c7c553b3189d0b68ab9ef3544e8d2a268e4429456b373",
+    "bytes": 7890728
+  },
+  "libpng": {
+    "repository": "https://github.com/pnggroup/libpng",
+    "revision": "cd952f49f95bb27154ae77dbb103032d95f6e580",
+    "sha256": "ef1bccad2b2a58eb3c09e06ffe3b72b8604abda8b5011e4c4bb5391989040f26",
+    "bytes": 1601579
+  },
+  "ogg": {
+    "repository": "https://github.com/xiph/ogg",
+    "revision": "be05b13e98b048f0b5a0f5fa8ce514d56db5f822",
+    "sha256": "b2ff5c003e5697507169f7d614d64dc4e8bf030c85ad081bec75c164566f8246",
+    "bytes": 254382
+  },
+  "vorbis": {
+    "repository": "https://github.com/xiph/vorbis",
+    "revision": "c2aa86b05e981c96bf381fc6aa11cdd03eccc2fb",
+    "sha256": "95e908e8c3595ae017b07a376da83ed38a3edeeab9ad458451669f7076bee8b0",
+    "bytes": 1238230
+  },
+  "opus": {
+    "repository": "https://github.com/xiph/opus",
+    "revision": "22244de5a79bd1d6d623c32e72bf1954b56235be",
+    "sha256": "3267aa969b2b26542417f57819a5bc25d5079355300307dd2dddc7c704aed418",
+    "bytes": 4888967
+  },
+  "turbojpeg": {
+    "repository": "https://github.com/libjpeg-turbo/libjpeg-turbo",
+    "revision": "c85e6b905bf237038faa936dab160ebfc5da0344",
+    "sha256": "45209a3f315ed6156dac8d7fa451b8be62d83f2daa5581cb6b94ee9f3f82cf6f",
+    "bytes": 2540379
+  },
+  "webp": {
+    "repository": "https://github.com/webmproject/libwebp",
+    "revision": "4fa21912338357f89e4fd51cf2368325b59e9bd9",
+    "sha256": "923f3382a47a2af185c3240c954cf004428b237bd7317413a95146d01eb4b94b",
+    "bytes": 3834766
+  },
+  "sdl2_mixer": {
+    "repository": "https://github.com/libsdl-org/SDL_mixer",
+    "revision": "b208916aed9250fe434360e6c6a95f0697bb7b01",
+    "sha256": "f503e37eb7b7a4fab99448d849be1aa4154536fd41a5291f3db7afbb3777c252",
+    "bytes": 6050720
+  },
+  "sdl2_image": {
+    "repository": "https://github.com/libsdl-org/SDL_image",
+    "revision": "c1bf2245b0ba63a25afe2f8574d305feca25af77",
+    "sha256": "224b08c32c0fb6c769ca5f599f6da37e2b532b6ffd52886e9fa13656767cf1a2",
+    "bytes": 6926417
   }
 }
