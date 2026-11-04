@@ -2312,8 +2312,7 @@
         "url": "https://github.com/kcat/openal-soft",
         "repository": "kcat/openal-soft",
         "pin": {
-          "file": "producers/maclauncher/src/modules/hashlink/runtime/legacy-build.js",
-          "pointer": "/OPENAL_REVISION"
+          "gitlink": "producers/maclauncher/src/external/openal-soft"
         }
       }
     ],

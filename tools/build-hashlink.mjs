@@ -44,7 +44,7 @@ export async function buildHashLink({project,arch,version,output,work,sourceRoot
 export function compileHashLinkVM({work,flags,common,openalPrefix}){
  const source=path.join(work,'source'),sdlBuild=path.join(work,'sdl-build'),openal=path.join(work,'openal'),openalBuild=path.join(work,'openal-build');
  run('make',['-j2','hl','ui','CC=/usr/bin/clang -arch x86_64 -mmacosx-version-min=13.0 '+Paths.flagsString([...flags,'-I',path.join(source,'include/pcre')])],{cwd:source});
- run('cmake',['-S',source,'-B',path.join(work,'native'),...common,'-DCMAKE_SKIP_BUILD_RPATH=ON','-DHASHLINK_SDL_LIBRARY='+path.join(sdlBuild,'libSDL2.a'),'-DHASHLINK_OPENAL_LIBRARY='+(openalPrefix?path.join(openalPrefix,'lib/libopenal.1.24.3.dylib'):path.join(openalBuild,'libopenal.1.24.3.dylib')),'-DHASHLINK_OPENAL_INCLUDE='+path.join(openalPrefix||openal,'include')]);run('cmake',['--build',path.join(work,'native'),'--parallel','2']);
+ run('cmake',['-S',source,'-B',path.join(work,'native'),...common,'-DCMAKE_SKIP_BUILD_RPATH=ON','-DHASHLINK_SDL_LIBRARY='+path.join(sdlBuild,'libSDL2.a'),'-DHASHLINK_OPENAL_LIBRARY='+(openalPrefix?path.join(openalPrefix,'lib/libopenal.1.25.2.dylib'):path.join(openalBuild,'libopenal.1.25.2.dylib')),'-DHASHLINK_OPENAL_INCLUDE='+path.join(openalPrefix||openal,'include')]);run('cmake',['--build',path.join(work,'native'),'--parallel','2']);
 }
 /** Relocate and seal completed build products without changing upstream checkouts. */
 export function sealHashLink({project='hashlink',version,arch='x64',output,work,sourceRoot,staged,sdlStage,openalStage,overlaySha256,openalStack}){
@@ -55,12 +55,12 @@ export function sealHashLink({project='hashlink',version,arch='x64',output,work,
  addLicenses(work,'SDL2 yuv2rgb',`${sdl}/src/video/yuv2rgb`);
  addLicenses(work,'libpng',`${source}/include/png`);
  addLicenses(work,'minimp3',`${source}/include/minimp3`);
- const openalLibrary=openalStack?path.join(openalStack.prefix,'lib/libopenal.1.24.3.dylib'):path.join(openalBuild,'libopenal.1.24.3.dylib');
+ const openalLibrary=openalStack?path.join(openalStack.prefix,'lib/libopenal.1.25.2.dylib'):path.join(openalBuild,'libopenal.1.25.2.dylib');
  for(const name of ['hl','fmt.hdll','ui.hdll','sdl.hdll','openal.hdll'])run('/usr/bin/install_name_tool',['-change','libhl.dylib','@loader_path/libhl.dylib',path.join(source,name)]);
  for(const link of Binary.links(path.join(source,'openal.hdll'),arch==='x64'?'x86_64':arch).filter(link=>/\/(?:libopenal)(?:\.[^/]*)?\.dylib$/.test(link)))run('/usr/bin/install_name_tool',['-change',link,openalLibrary,path.join(source,'openal.hdll')]);
  const payloads=['libhl.dylib','fmt.hdll','ui.hdll','sdl.hdll','openal.hdll'].map(name=>({source:path.join(source,name),relative:'bin/'+name}));
  payloads.push({source:openalLibrary,relative:'bin/libopenal.1.dylib'});
  payloads.push({source:path.join(source,'src/hl.h'),relative:'bin/include/hl.h'});
- return sealRuntime({project,version,arch,output,executable:path.join(source,'hl'),executableRelative:'bin/hl',sourceRoot,upstreamRevision:Builder.REVISION,payloads,capabilities:{...bytecodeFacts(source),primitiveProfileId:legacy?'typed-1.9-macos-v2':'legacy-dynamic-1.12-macos-v1',primitiveProfileSha256:createHash('sha256').update(fs.readFileSync(path.join(moduleRoot,'profiles',legacy?'typed-1.9-macos-v2.json':'legacy-dynamic-1.12-macos-v1.json'))).digest('hex'),macPackageVersion:version,sourceKind:'commit'},provenance:{upstreamVersion:legacy?'1.9':'1.12',nativeProfile:legacy?'1.9-sdl2.0.22-openal-soft1.24.3-macos-v2':'1.12-sdl2.0.22-openal-soft1.24.3-macos-v1',sourceTreeSha256:staged.treeSha256,overlaySha256,dependencies:[{name:'SDL2',revision:Builder.SDL_REVISION,sourceTreeSha256:sdlStage.treeSha256},{name:'OpenAL-soft',revision:Builder.OPENAL_REVISION,sourceTreeSha256:openalStage.treeSha256}]}});
+ return sealRuntime({project,version,arch,output,executable:path.join(source,'hl'),executableRelative:'bin/hl',sourceRoot,upstreamRevision:Builder.REVISION,payloads,capabilities:{...bytecodeFacts(source),primitiveProfileId:legacy?'typed-1.9-macos-v2':'legacy-dynamic-1.12-macos-v1',primitiveProfileSha256:createHash('sha256').update(fs.readFileSync(path.join(moduleRoot,'profiles',legacy?'typed-1.9-macos-v2.json':'legacy-dynamic-1.12-macos-v1.json'))).digest('hex'),macPackageVersion:version,sourceKind:'commit'},provenance:{upstreamVersion:legacy?'1.9':'1.12',nativeProfile:legacy?'1.9-sdl2.0.22-openal-soft1.25.2-macos-v2':'1.12-sdl2.0.22-openal-soft1.25.2-macos-v1',sourceTreeSha256:staged.treeSha256,overlaySha256,dependencies:[{name:'SDL2',revision:Builder.SDL_REVISION,sourceTreeSha256:sdlStage.treeSha256},{name:'OpenAL-soft',revision:Builder.OPENAL_REVISION,sourceTreeSha256:openalStage.treeSha256}]}});
 }
 recipeMain(import.meta,buildHashLink);
