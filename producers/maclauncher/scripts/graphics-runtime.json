@@ -261,9 +261,9 @@
         "file": "src/modules/shared/reshade/isf/source.json",
         "pointer": "/compilerSources/0"
       },
-      "url": "{url}",
+      "url": "{repository}/archive/{commit}.tar.gz",
       "sha256": "{sha256}",
-      "entry": "{entry}"
+      "entry": "glslang-{commit}"
     },
     "isf-spirv-cross": {
       "kind": "archive",
@@ -272,9 +272,9 @@
         "file": "src/modules/shared/reshade/isf/source.json",
         "pointer": "/compilerSources/1"
       },
-      "url": "{url}",
+      "url": "{repository}/archive/{commit}.tar.gz",
       "sha256": "{sha256}",
-      "entry": "{entry}"
+      "entry": "SPIRV-Cross-{commit}"
     },
     "isf-spirv-tools": {
       "kind": "archive",
