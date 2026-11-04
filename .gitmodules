@@ -214,10 +214,6 @@
 	path = producers/maclauncher/src/external/source-revisions/hashlink-1-9
 	url = https://github.com/HaxeFoundation/hashlink
 
-[submodule "producers/maclauncher/src/external/source-revisions/steamworks4j"]
-	path = producers/maclauncher/src/external/source-revisions/steamworks4j
-	url = https://github.com/code-disaster/steamworks4j
-
 [submodule "producers/maclauncher/src/external/SteamworksSDK"]
 	path = producers/maclauncher/src/external/SteamworksSDK
 	url = https://github.com/rlabrecque/SteamworksSDK.git
