@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {gitlink} from '../../../../../../../lib/pins.mjs';
 import {addLicense} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 // Original FidelityFX DoF kernels, constants and dispatch schedule.
@@ -11,9 +12,9 @@ for(let i=2;i<process.argv.length;i+=2){const key=process.argv[i];if(!['--source
 for(const key of ['--source','--tools','--output'])if(!options[key])throw Error('Missing '+key);
 const source=options['--source'],tools=options['--tools'],out=options['--output'];
 const hash=b=>crypto.createHash('sha256').update(b).digest('hex'),run=(exe,args)=>execFileSync(exe,args,{encoding:'utf8',maxBuffer:64*1024*1024});
-if(run('git',['-C',source,'rev-parse','HEAD']).trim()!==spec.commit)throw Error('DoF source pin changed.');
+if(run('git',['-C',source,'rev-parse','HEAD']).trim()!==gitlink('producers/maclauncher/src/external/fsr3-sdk'))throw Error('DoF source pin changed.');
 run('git',['-C',source,'diff','--exit-code','HEAD','--']);
-const read=file=>fs.existsSync(path.join(source,file))?fs.readFileSync(path.join(source,file),'utf8'):run('git',['-C',source,'show',spec.commit+':'+file]);
+const read=file=>fs.existsSync(path.join(source,file))?fs.readFileSync(path.join(source,file),'utf8'):run('git',['-C',source,'show',gitlink('producers/maclauncher/src/external/fsr3-sdk')+':'+file]);
 for(const [file,digest]of Object.entries(spec.files))if(hash(read(file))!==digest)throw Error('DoF source changed: '+file);
 fs.mkdirSync(out,{recursive:true});const overlay=path.join(out,'overlay'),gpu=path.join(source,'sdk/include/FidelityFX/gpu');fs.mkdirSync(path.join(overlay,'dof'),{recursive:true});
 for(const file of Object.keys(spec.files))if(file.startsWith('sdk/include/FidelityFX/gpu/dof/'))fs.writeFileSync(path.join(overlay,'dof',path.basename(file)),read(file));
@@ -63,5 +64,5 @@ let header='// Copyright (C) 2024 Advanced Micro Devices, Inc. MIT; see dof-MIT.
 shaders.forEach((s,i)=>{header+=`inline constexpr Binding bindings${i}[]={${s.bindings.map(b=>'{'+JSON.stringify(b.name)+','+JSON.stringify(b.kind)+','+b.index+'}').join(',')}};\ninline constexpr const char*source${i}=R"DOF_GPU(${s.source})DOF_GPU";\n`;});header+='inline constexpr Shader shaders[]={'+shaders.map((s,i)=>`{${JSON.stringify(s.name)},${JSON.stringify(s.entry)},source${i},bindings${i},sizeof(bindings${i})/sizeof(Binding),${s.threads.join(',')}}`).join(',')+'};\n}\n';
 fs.writeFileSync(path.join(out,'dof-shaders.hpp'),header);addLicense(out,'FidelityFX-DoF',path.join(source,'LICENSE.txt'),'MIT');
 addLicense(out,'Hash22',path.join(source,'sdk/include/FidelityFX/gpu/dof/ffx_dof_blur.h'),'MIT');
-fs.writeFileSync(path.join(out,'translation.json'),JSON.stringify({schema:1,repository:spec.repository,commit:spec.commit,license:spec.license,source:spec,owned:hash(fs.readFileSync(import.meta.filename)),ownedFiles:Object.fromEntries(['boundary.hlsl','../native/scene-projection.hlsl'].map(file=>[file,hash(fs.readFileSync(path.join(here,file)))])),adaptations:{callbacks:{sourceSha256:hash(original),appliedSha256:hash(callbacks)},inverseDepthDomain:{sourceSha256:hash(originalDepth),appliedSha256:hash(depth)}},shaders:shaders.map(({source,...s})=>s)},null,2)+'\n');
+fs.writeFileSync(path.join(out,'translation.json'),JSON.stringify({schema:1,repository:spec.repository,commit:gitlink('producers/maclauncher/src/external/fsr3-sdk'),license:spec.license,source:spec,owned:hash(fs.readFileSync(import.meta.filename)),ownedFiles:Object.fromEntries(['boundary.hlsl','../native/scene-projection.hlsl'].map(file=>[file,hash(fs.readFileSync(path.join(here,file)))])),adaptations:{callbacks:{sourceSha256:hash(original),appliedSha256:hash(callbacks)},inverseDepthDomain:{sourceSha256:hash(originalDepth),appliedSha256:hash(depth)}},shaders:shaders.map(({source,...s})=>s)},null,2)+'\n');
 console.log(JSON.stringify({output:out,kernels:shaders.length}));

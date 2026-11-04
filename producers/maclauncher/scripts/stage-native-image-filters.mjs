@@ -1,3 +1,4 @@
+import {gitlink} from '../../../lib/pins.mjs';
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -18,8 +19,9 @@ export function stageNativeImageFilters({ownedSource,symbols,recipeRoot}){
     seen.add(provider.method);
     if(!dispatcher||!symbols.includes(factories[provider.method]))continue;
     const source=JSON.parse(fs.readFileSync(path.join(ownedSource,"src",provider.sourceManifest),"utf8"));
+    const revision=source.repository==='https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK'?gitlink('producers/maclauncher/src/external/fsr3-sdk'):source.commit;
     const ownedImplementation=source.implementation==="owned";
-    if(source.schema!==1||!/^https:\/\//.test(source.repository||"")||!ownedImplementation&&!/^[a-f0-9]{40}$/.test(source.commit||""))throw Error("A native image filter source pin is missing.");
+    if(source.schema!==1||!/^https:\/\//.test(source.repository||"")||!ownedImplementation&&!/^[a-f0-9]{40}$/.test(revision||""))throw Error("A native image filter source pin is missing.");
     if(ownedImplementation){
       if(provider.method!=="histogram-exposure"||source.repository!=="https://github.com/procrastinine/maclauncher"||!Array.isArray(source.files)||!source.files.length)throw Error("The owned image implementation declaration is invalid.");
       for(const name of source.files){if(!filename(name))throw Error("The owned image source filename is invalid.");const file=path.join(ownedSource,"src",name),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||!stat.size)throw Error("An owned image implementation source is missing.");owned.set(`maclauncher/native/${name}`,file);}
@@ -31,7 +33,7 @@ export function stageNativeImageFilters({ownedSource,symbols,recipeRoot}){
         recipe=path.join(recipeRoot,sharedImageRecipe?"lens/translate.mjs":recipeName+"/build.mjs");
       if(crypto.createHash("sha256").update(fs.readFileSync(recipe)).digest("hex")!==recipeHash)throw Error("The native image shader translation recipe changed.");
       const declaration=path.join(recipeRoot,recipeName,"source.json"),pin=JSON.parse(fs.readFileSync(declaration,"utf8"));
-      if(pin.repository!==source.repository||pin.commit!==source.commit)throw Error("The native image shader translation source pin changed.");
+      if(pin.repository!==source.repository||(pin.repository==='https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK'?gitlink('producers/maclauncher/src/external/fsr3-sdk'):pin.commit)!==revision)throw Error("The native image shader translation source pin changed.");
       owned.set(`maclauncher/${recipeName}/build.mjs`,path.join(recipeRoot,recipeName,"build.mjs"));owned.set(`maclauncher/${recipeName}/source.json`,declaration);
       if(sharedImageRecipe){
         owned.set("maclauncher/lens/translate.mjs",recipe);
@@ -54,7 +56,7 @@ export function stageNativeImageFilters({ownedSource,symbols,recipeRoot}){
       const file=path.join(ownedSource,'src',notice.path),target='licenses/native-filters/'+path.basename(notice.path);
       inputs.set(target,file);notices.push({...notice,path:target});
     }
-    methods.push(provider.method);if(!ownedImplementation)pins.push(` ${source.commit} third_party/native-filter/${provider.method}`);
+    methods.push(provider.method);if(!ownedImplementation)pins.push(` ${revision} third_party/native-filter/${provider.method}`);
   }
   return methods.length?{methods,inputs,owned,notices,pins}:null;
 }

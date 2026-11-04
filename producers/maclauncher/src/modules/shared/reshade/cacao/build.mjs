@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {gitlink} from '../../../../../../../lib/pins.mjs';
 import {addLicense} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 // Original FidelityFX CACAO kernels and constant/scheduling contract.
@@ -23,13 +24,13 @@ const source = options['--source'], tools = options['--tools'],
       hash = b => crypto.createHash('sha256').update(b).digest('hex'),
       run = (exe, args) => execFileSync(
           exe, args, {encoding : 'utf8', maxBuffer : 32 * 1024 * 1024});
-if (run('git', [ '-C', source, 'rev-parse', 'HEAD' ]).trim() !== spec.commit)
+if (run('git', [ '-C', source, 'rev-parse', 'HEAD' ]).trim() !== gitlink('producers/maclauncher/src/external/fsr3-sdk'))
   throw Error('CACAO source pin changed.');
 run('git', [ '-C', source, 'diff', '--exit-code', 'HEAD', '--' ]);
 const read = file =>
     fs.existsSync(path.join(source, file))
         ? fs.readFileSync(path.join(source, file), 'utf8')
-        : run('git', [ '-C', source, 'show', spec.commit + ':' + file ]);
+        : run('git', [ '-C', source, 'show', gitlink('producers/maclauncher/src/external/fsr3-sdk') + ':' + file ]);
 for (const [file, digest] of Object.entries(spec.files))
   if (hash(read(file)) !== digest)
     throw Error('CACAO source changed: ' + file);
@@ -283,7 +284,7 @@ addLicense(out,'FidelityFX-CACAO',path.join(source,'LICENSE.txt'),'MIT');
 fs.writeFileSync(path.join(out, 'translation.json'), JSON.stringify({
   schema : 1,
   repository : spec.repository,
-  commit : spec.commit,
+  commit : gitlink('producers/maclauncher/src/external/fsr3-sdk'),
   license : spec.license,
   source : spec,
   owned : hash(fs.readFileSync(import.meta.filename)),

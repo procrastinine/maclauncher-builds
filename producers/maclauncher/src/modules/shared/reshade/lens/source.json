@@ -1,7 +1,6 @@
 {
   "schema": 1,
   "repository": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-  "commit": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55",
   "version": "FidelityFX Lens 1.1.0",
   "license": "MIT",
   "sourceScope": [

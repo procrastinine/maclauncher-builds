@@ -11,12 +11,10 @@
   "sources": [
     {
       "repository": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-      "commit": "01446e6a74888bf349652fcf2cbf5f642d30c2bf",
       "use": "MIT shader helper headers"
     },
     {
       "repository": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-      "commit": "60f4ea81909200d8542eca14dccb2628b763a9a3",
       "use": "FSR 4.1.1 model weights from MIT-excepted provider"
     },
     {

@@ -16156,7 +16156,7 @@
         "name": "AMD FidelityFX CACAO",
         "license": "MIT",
         "path": "licenses/native-filters/cacao-MIT.txt",
-        "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/tree/c6efa6bf7f2027b3ec94f28578bb5965eabb9e55/sdk/include/FidelityFX/gpu/cacao"
+        "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/sdk/include/FidelityFX/gpu/cacao"
       },
       {
         "name": "FXShaders Retro Fog",
@@ -16180,25 +16180,25 @@
         "name": "AMD FidelityFX Depth of Field",
         "license": "MIT",
         "path": "licenses/native-filters/dof-MIT.txt",
-        "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/tree/c6efa6bf7f2027b3ec94f28578bb5965eabb9e55/sdk/include/FidelityFX/gpu/dof"
+        "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/sdk/include/FidelityFX/gpu/dof"
       },
       {
         "name": "David Hoskins hash22",
         "license": "MIT",
         "path": "licenses/native-filters/dof-HASH22-MIT.txt",
-        "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/blob/c6efa6bf7f2027b3ec94f28578bb5965eabb9e55/sdk/include/FidelityFX/gpu/dof/ffx_dof_blur.h"
+        "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/blob/HEAD/sdk/include/FidelityFX/gpu/dof/ffx_dof_blur.h"
       },
       {
         "name": "AMD FidelityFX Lens",
         "license": "MIT",
         "path": "licenses/native-filters/ffx-lens-MIT.txt",
-        "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/tree/c6efa6bf7f2027b3ec94f28578bb5965eabb9e55/sdk/include/FidelityFX/gpu/lens"
+        "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/sdk/include/FidelityFX/gpu/lens"
       },
       {
         "name": "AMD FidelityFX Blur",
         "license": "MIT",
         "path": "licenses/native-filters/ffx-blur-MIT.txt",
-        "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/tree/c6efa6bf7f2027b3ec94f28578bb5965eabb9e55/sdk/include/FidelityFX/gpu/blur"
+        "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/sdk/include/FidelityFX/gpu/blur"
       },
       {
         "name": "Real-ESRGAN",

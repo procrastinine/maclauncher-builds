@@ -42,7 +42,7 @@ const methods=Object.freeze({
   {name:"Quality",label:"Quality",type:"int",default:[2],min:0,max:3,options:[{value:0,label:"Low"},{value:1,label:"Medium"},{value:2,label:"High"},{value:3,label:"Ultra"}]},
   {name:"DenoisePasses",label:"Denoising",type:"int",default:[1],min:0,max:3,options:[{value:0,label:"Off"},{value:1,label:"Sharp"},{value:2,label:"Medium"},{value:3,label:"Soft"}]}
  ])}),
- "cacao":Object.freeze({label:"CACAO",license:"MIT",sourceUrl:"https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",revision:"c6efa6bf7f2027b3ec94f28578bb5965eabb9e55",inputPolicy:"source",requirements:Object.freeze({depth:true,motion:false,projectionMatrix:true}),sceneInputs:Object.freeze(["depth","projectionMatrix"]),parameters:Object.freeze([
+ "cacao":Object.freeze({label:"CACAO",license:"MIT",sourceUrl:"https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",inputPolicy:"source",requirements:Object.freeze({depth:true,motion:false,projectionMatrix:true}),sceneInputs:Object.freeze(["depth","projectionMatrix"]),parameters:Object.freeze([
   {name:"Radius",label:"Radius",type:"float",default:[1.2],min:.0001,max:100000},
   {name:"Strength",label:"Strength",type:"float",default:[1],min:0,max:5},
   {name:"Quality",label:"Quality",type:"int",default:[4],min:0,max:4,options:[{value:0,label:"Lowest"},{value:1,label:"Low"},{value:2,label:"Medium"},{value:3,label:"High"},{value:4,label:"Adaptive"}]},
@@ -56,7 +56,7 @@ const methods=Object.freeze({
   {name:"Threshold",label:"Threshold",type:"float",default:[.9],min:0,max:1},
   {name:"Strength",label:"Strength",type:"float",default:[1],min:0,max:1}
  ])}),
- "ffx-dof":Object.freeze({label:"FidelityFX DoF",license:"MIT",sourceUrl:"https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",revision:"c6efa6bf7f2027b3ec94f28578bb5965eabb9e55",inputPolicy:"source",requirements:Object.freeze({depth:true,motion:false,projectionMatrix:true}),sceneInputs:Object.freeze(["depth","projectionMatrix"]),parameters:Object.freeze([
+ "ffx-dof":Object.freeze({label:"FidelityFX DoF",license:"MIT",sourceUrl:"https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",inputPolicy:"source",requirements:Object.freeze({depth:true,motion:false,projectionMatrix:true}),sceneInputs:Object.freeze(["depth","projectionMatrix"]),parameters:Object.freeze([
   {name:"FocusDistance",label:"Focus distance",description:"Distance from the camera in scene view-space units.",type:"float",default:[10],min:.0001,max:1000000},
   {name:"BlurRadius",label:"Blur radius",description:"Maximum circle-of-confusion radius in the current image's output pixels.",type:"float",default:[12],min:0,max:256},
   {name:"Quality",label:"Quality",description:"Number of sample rings in the original depth-of-field kernel.",type:"int",default:[3],min:1,max:8},
@@ -76,7 +76,7 @@ const methods=Object.freeze({
   {name:"InputSize",label:"Depth input size",description:"Short-axis size for depth estimation, in multiples of 14. Larger values increase GPU work and memory.",type:"int",default:[252],min:14,max:4088,step:14},
   ...fogParameters.filter(parameter=>parameter.name!=="Distance")
  ])}),
- "ffx-lens":Object.freeze({label:"FidelityFX Lens",purpose:"Lighting and lens",license:"MIT",sourceUrl:"https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",revision:"c6efa6bf7f2027b3ec94f28578bb5965eabb9e55",inputPolicy:"source",preservesCoordinates:false,parameters:Object.freeze([
+ "ffx-lens":Object.freeze({label:"FidelityFX Lens",purpose:"Lighting and lens",license:"MIT",sourceUrl:"https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",inputPolicy:"source",preservesCoordinates:false,parameters:Object.freeze([
   {"name":"GrainScale","label":"Grain scale","type":"float","default":[1],"min":0.25,"max":64},
   {"name":"GrainAmount","label":"Grain amount","type":"float","default":[0.15],"min":0,"max":1},
   {"name":"ChromaticAberration","label":"Chromatic aberration","type":"float","default":[0.25],"min":0,"max":10},
@@ -84,7 +84,7 @@ const methods=Object.freeze({
   {"name":"GrainSeed","label":"Grain seed","type":"int","default":[0],"min":0,"max":16777215,"step":1},
   {"name":"AnimateGrain","label":"Animate grain","type":"bool","default":[1],"min":0,"max":1,"step":1}
  ])}),
- "ffx-blur":Object.freeze({label:"FidelityFX Blur",purpose:"Anti-aliasing and blur",license:"MIT",sourceUrl:"https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",revision:"c6efa6bf7f2027b3ec94f28578bb5965eabb9e55",inputPolicy:"source",preservesCoordinates:true,parameters:Object.freeze([
+ "ffx-blur":Object.freeze({label:"FidelityFX Blur",purpose:"Anti-aliasing and blur",license:"MIT",sourceUrl:"https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",inputPolicy:"source",preservesCoordinates:true,parameters:Object.freeze([
   {"name":"KernelSize","label":"Kernel size","type":"int","default":[9],"min":3,"max":21,"step":2},
   {"name":"SigmaPreset","label":"Sigma","type":"int","default":[1],"min":0,"max":2,"step":1,"options":[{"value":0,"label":"1.6"},{"value":1,"label":"2.8"},{"value":2,"label":"4.0"}]}
  ])})

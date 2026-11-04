@@ -382,9 +382,8 @@
           ],
           "nativeMethod": "cacao",
           "license": "MIT",
-          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-          "revision": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55"
-        },
+          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK"
+    },
         {
           "id": "depth-fog",
           "label": "Depth fog",
@@ -421,9 +420,8 @@
           ],
           "nativeMethod": "ffx-dof",
           "license": "MIT",
-          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-          "revision": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55"
-        },
+          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK"
+    },
         {
           "id": "screen-space-reflections",
           "label": "Screen-space reflections",
@@ -460,9 +458,8 @@
           "requires": [],
           "nativeMethod": "ffx-lens",
           "license": "MIT",
-          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-          "revision": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55"
-        },
+          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK"
+    },
         {
           "id": "ffx-blur",
           "label": "FidelityFX Blur",
@@ -470,9 +467,8 @@
           "requires": [],
           "nativeMethod": "ffx-blur",
           "license": "MIT",
-          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-          "revision": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55"
-        }
+          "sourceUrl": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK"
+    }
       ]
     }
   ]

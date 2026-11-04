@@ -2208,9 +2208,7 @@
         "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "pin": {
-          "file": "producers/maclauncher/src/modules/crossover/temporal/fidelityfx/source.json",
-          "pointer": "/sdk/revision",
-          "repositoryPointer": "/sdk/repository"
+          "gitlink": "producers/maclauncher/src/external/fsr3-sdk"
         }
       },
       {
