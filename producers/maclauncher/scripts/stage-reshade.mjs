@@ -120,7 +120,8 @@ if(options["--xess-host"]){
     }
     pins.push(` ${sharedDependencies.sdlHeaders.revision} third_party/xess-vulkan-headers`);
   }else if(metadata.source.vulkanHeaders)throw Error("The XeSS Vulkan source is declared without its GPU host.");
-  for(const row of metadata.files){if(typeof row.path!=="string")throw Error("The XeSS GPU host contains an undeclared resource.");required.delete(row.path);const file=path.join(directory,row.path),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==row.size||digest(fs.readFileSync(file))!==row.sha256)throw Error("The XeSS GPU host resource changed: "+row.path);if(!row.path.startsWith("source/"))optionalInputs.set("xess/"+row.path,file);if(row.path.endsWith(".so"))optionalLoad.set("xess/"+row.path,{architectures:["x86_64"],minimumMacOS:metadata.minimumMacOS});}
+  const resources=new Set();
+  for(const row of metadata.files){if(typeof row.path!=="string"||path.isAbsolute(row.path)||row.path.split(/[\\/]/).some(part=>!part||part==="."||part==="..")||resources.has(row.path))throw Error("The XeSS GPU host contains an undeclared resource.");resources.add(row.path);required.delete(row.path);const file=path.join(directory,row.path),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==row.size||digest(fs.readFileSync(file))!==row.sha256)throw Error("The XeSS GPU host resource changed: "+row.path);if(!row.path.startsWith("source/"))optionalInputs.set("xess/"+row.path,file);if(row.path.endsWith(".so"))optionalLoad.set("xess/"+row.path,{architectures:["x86_64"],minimumMacOS:metadata.minimumMacOS});}
   if(required.size||digest(fs.readFileSync(path.join(directory,"source/source.json")))!==digest(fs.readFileSync(path.join(ownedRoot,"source.json"))))throw Error("The XeSS GPU host source closure is incomplete.");
   optionalInputs.set("xess/provider.json",path.join(directory,"provider.json"));features.graphics.xessSceneAPI=1;
 }
@@ -143,8 +144,9 @@ if(options["--isf"]){
     execFileSync("git",["-C",upstream,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});pins.push(` ${actual} third_party/isf/${path.basename(entry.path)}`);
   }
   const required=new Set([source.library,...source.compilerLibraries.map(file=>path.basename(file)),"default.metallib"]);
+  const resources=new Set();
   for(const row of metadata.files){
-    if(typeof row.path!=="string")throw Error("The ISF provider contains an undeclared or duplicate resource.");required.delete(row.path);
+    if(typeof row.path!=="string"||path.isAbsolute(row.path)||row.path.split(/[\\/]/).some(part=>!part||part==="."||part==="..")||resources.has(row.path))throw Error("The ISF provider contains an undeclared or duplicate resource.");resources.add(row.path);required.delete(row.path);
     const file=path.join(directory,row.path),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==row.size||digest(fs.readFileSync(file))!==row.sha256)throw Error("The ISF provider resource changed: "+row.path);
     optionalInputs.set("isf/"+row.path,file);if(row.path.endsWith(".dylib"))optionalLoad.set("isf/"+row.path,{architectures:source.architectures,minimumMacOS:source.minimumMacOS});
   }
@@ -196,6 +198,7 @@ if (options["--neural"]) {
     const file = path.join(directory, entry.path), stat = fs.lstatSync(file);
     if (!stat.isFile() || stat.size !== entry.size || digest(fs.readFileSync(file)) !== entry.sha256) throw new Error("The neural provider changed.");
     const relative = "neural/" + entry.path;
+    if(optionalInputs.has(relative))throw new Error("Invalid neural provider path.");
     optionalInputs.set(relative, file); required.delete(entry.path);
     if (/\.(dylib|so)$/.test(entry.path) || ["maclauncher-neural-video","maclauncher-neural-service"].includes(entry.path)) optionalLoad.set(relative, {architectures: ["arm64"], minimumMacOS: entry.path === "maclauncher-neural-video" ? "26.0" : source.minimumMacOS});
   }
@@ -281,6 +284,7 @@ if(options["--retroarch"]) {
   const required=new Set(["librashader.dylib","retroarch-prepare","source.json"]);
   if(!Array.isArray(manifest.files))throw new Error("A complete RetroArch shader payload is required.");
   for(const entry of manifest.files) {
+    if(typeof entry.path!=="string"||path.isAbsolute(entry.path)||entry.path.split(/[\\/]/).some(part=>!part||part==="."||part==="..")||retroarchInputs.has(entry.path))throw Error("The RetroArch shader payload contains an undeclared or duplicate resource.");
     required.delete(entry.path);
     const file=path.join(directory,entry.path),stat=fs.lstatSync(file);
     if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==entry.size||digest(fs.readFileSync(file))!==entry.sha256)
@@ -320,16 +324,16 @@ if(options["--fsr4-source"]&&!options["--fsr4"])throw Error("An FSR 4 source che
 if(options["--fsr3-generation"]){
   const directory=options["--fsr3-generation"],ownedRoot=path.resolve(import.meta.dirname,"../src/modules/shared/reshade/generation/fsr3");
   const source=JSON.parse(fs.readFileSync(path.join(ownedRoot,"source.json"),"utf8")),metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json"),"utf8"));
-  if(metadata.providerABI!==source.providerABI||metadata.complete!==true||metadata.source!==source.repository||metadata.commit!==source.commit||metadata.method!=="fsr3"||metadata.interfaces?.preparation!==1||metadata.library!=="libmaclauncher-fsr3-generation.dylib"||metadata.architectures?.join()!==source.architectures.join()||metadata.minimumMacOS!==source.minimumMacOS||metadata.shaderVariants?.opticalflow!==2||metadata.shaderVariants?.frameinterpolation!==8||metadata.shaderPasses?.opticalflow!==7||metadata.shaderPasses?.frameinterpolation!==11||["dxc","spirv-cross"].some(name=>metadata.tools?.[name]!==source.tools[name]))throw Error("A complete compatible AMD optical-flow/frame-interpolation provider is required.");
+  if(metadata.providerABI!==source.providerABI||metadata.complete!==true||metadata.source!==source.repository||metadata.commit!==gitlink("producers/maclauncher/src/external/fsr3-sdk")||metadata.method!=="fsr3"||metadata.interfaces?.preparation!==1||metadata.library!=="libmaclauncher-fsr3-generation.dylib"||metadata.architectures?.join()!==source.architectures.join()||metadata.minimumMacOS!==source.minimumMacOS||metadata.shaderVariants?.opticalflow!==2||metadata.shaderVariants?.frameinterpolation!==8||metadata.shaderPasses?.opticalflow!==7||metadata.shaderPasses?.frameinterpolation!==11||["dxc","spirv-cross"].some(name=>metadata.tools?.[name]!==source.tools[name]))throw Error("A complete compatible AMD optical-flow/frame-interpolation provider is required.");
   const expected=new Set([metadata.library,"provider.json"]);
   for(const [effect,variants,passes]of [["opticalflow",2,7],["frameinterpolation",8,11]])for(let variant=0;variant<variants;++variant)for(let pass=0;pass<passes;++pass)for(const extension of ["metal","json"])expected.add(`${effect}/${variant}/${pass}.${extension}`);
   for(const relative of fs.readdirSync(directory,{recursive:true}).sort()){
     const file=path.join(directory,relative),stat=fs.lstatSync(file);
     if(stat.isSymbolicLink()||!stat.isFile()&&!stat.isDirectory())throw Error("Generation payloads require regular files and directories.");
     if(stat.isDirectory())continue;
-    expected.delete(relative);
-    if(Content.excludedReason(relative))throw Error("Unexpected AMD generation payload input: "+relative);
-    if(relative.endsWith(".json")&&relative!=="provider.json"){
+    const generated=relative.startsWith("opticalflow/")||relative.startsWith("frameinterpolation/"),declared=expected.delete(relative);
+    if(generated&&!declared||Content.excludedReason(relative))throw Error("Unexpected AMD generation payload input: "+relative);
+    if(generated&&relative.endsWith(".json")){
       const shader=JSON.parse(fs.readFileSync(file,"utf8"));
       if(typeof shader.entry!=="string"||!Array.isArray(shader.threads)||shader.threads.length!==3||shader.threads.some(value=>!Number.isInteger(value)||value<1)||!Array.isArray(shader.bindings))throw Error("Invalid AMD generation shader metadata.");
     }
@@ -339,7 +343,7 @@ if(options["--fsr3-generation"]){
   const symbols=execFileSync("/usr/bin/nm",["-gU",path.join(directory,metadata.library)],{encoding:"utf8"});
   if(!/\b_rsGetGenerationProvider\b/.test(symbols))throw Error("The AMD generation library does not export its provider interface.");
   for(const name of ["source.json","build.mjs","backend.mm","metal-backend.hpp","index.js"])extraOwned.set("maclauncher/generation/fsr3/"+name,path.join(ownedRoot,name));
-  pins.push(` ${source.commit} third_party/FidelityFX-SDK-generation`);
+  pins.push(` ${gitlink("producers/maclauncher/src/external/fsr3-sdk")} third_party/FidelityFX-SDK-generation`);
   features.graphics.generationProviderAPI=1;features.graphics.frameGenerationMethods=[...new Set([...(features.graphics.frameGenerationMethods||[]),"fsr3"])];
 }
 if(options["--xess"]){
@@ -471,6 +475,7 @@ for (const file of nativeFiles) {
 // Verify the compiler's CPU-only inspection entry point before advertising it.
 let inspection;
 try {
+  execFileSync(path.join(build, "fx-compile"), ["--inspect-lossless", path.join(source, "LICENSE")], { stdio: "pipe", timeout: 10000 });
 } catch (error) {
   if (error.status === 1) {
     try { inspection = JSON.parse(String(error.stdout)); } catch {}

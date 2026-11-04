@@ -75,7 +75,7 @@ function compatibility(edition) {
     return "Runs the Windows HD data profile with native input, voice, sound effects and Bink 2 video.";
   return edition === "steins-gate-windows-hd"
     ? `Impacto has no Windows STEINS;GATE profile. Its STEINS;GATE profile targets English PS3 CPK data and the SGPS3 instruction set.`
-    : `Native gameplay is unavailable: no compatible Windows MPK/SC3 game profile is available for Impacto ${IMPACTO.version}.`;
+    : `Native gameplay is unavailable: no compatible Windows MPK/SC3 game profile is available for Impacto.`;
 }
 
 function inspectLayout(layout, { inputPath, detection } = {}) {

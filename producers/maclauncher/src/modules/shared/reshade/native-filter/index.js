@@ -1,3 +1,4 @@
+const {gitlink}=require('../../../../../../../lib/pins.mjs');
 // Typed selection of compiled image algorithms; descriptors contain no code.
 const fs=require("node:fs"),path=require("node:path"),crypto=require("node:crypto");
 const Writable=require("../../writable-input"),Bundle=require("../shader-bundle");
@@ -62,7 +63,7 @@ const methods=Object.freeze({
   {name:"Quality",label:"Quality",description:"Number of sample rings in the original depth-of-field kernel.",type:"int",default:[3],min:1,max:8},
   {name:"MergeRings",label:"Merge sample rings",type:"bool",default:[1],min:0,max:1}
  ])}),
- "screen-space-reflections":Object.freeze({label:"Screen-space reflections",sourceUrl:"https://github.com/godotengine/godot",inputPolicy:"source",
+ "screen-space-reflections":Object.freeze({label:"Screen-space reflections",sourceUrl:"https://github.com/godotengine/godot",revision:gitlink(require("../ssr/source.json").gitlink),inputPolicy:"source",
   requirements:Object.freeze({depth:true,motion:false,projectionMatrix:true,sceneAovs:Object.freeze(["normal","roughness","resolvedRadiance","resolvedSpecular","metallic"])}),
   sceneInputs:Object.freeze(["depth","projectionMatrix","normal","roughness","resolvedRadiance","resolvedSpecular","metallic"]),parameters:Object.freeze([
    {name:"MaxSteps",label:"Ray steps",type:"int",default:[64],min:1,max:512},
