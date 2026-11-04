@@ -1,3 +1,4 @@
+import {addLicenses} from '../lib/licenses.mjs';
 import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
 import fs from 'node:fs';
 import path from 'node:path';
@@ -49,6 +50,11 @@ export function compileHashLinkVM({work,flags,common,openalPrefix}){
 export function sealHashLink({project='hashlink',version,arch='x64',output,work,sourceRoot,staged,sdlStage,openalStage,overlaySha256,openalStack}){
  const legacy=hashLinkProfile(version,resolveProject(project,root,{resolvePins:false}))==='1.9',Builder=require(path.join(moduleRoot,legacy?'legacy-build.js':'dynamic-legacy-build.js'));
  const source=path.join(work,'source'),sdl=path.join(work,'sdl'),openal=path.join(work,'openal'),openalBuild=path.join(work,'openal-build');
+ addLicenses(work,'SDL2',sdl);
+ addLicenses(work,'SDL2 HIDAPI',`${sdl}/src/hidapi`);
+ addLicenses(work,'SDL2 yuv2rgb',`${sdl}/src/video/yuv2rgb`);
+ addLicenses(work,'libpng',`${source}/include/png`);
+ addLicenses(work,'minimp3',`${source}/include/minimp3`);
  const openalLibrary=openalStack?path.join(openalStack.prefix,'lib/libopenal.1.24.3.dylib'):path.join(openalBuild,'libopenal.1.24.3.dylib');
  for(const name of ['hl','fmt.hdll','ui.hdll','sdl.hdll','openal.hdll'])run('/usr/bin/install_name_tool',['-change','libhl.dylib','@loader_path/libhl.dylib',path.join(source,name)]);
  for(const link of Binary.links(path.join(source,'openal.hdll'),arch==='x64'?'x86_64':arch).filter(link=>/\/(?:libopenal)(?:\.[^/]*)?\.dylib$/.test(link)))run('/usr/bin/install_name_tool',['-change',link,openalLibrary,path.join(source,'openal.hdll')]);

@@ -85,6 +85,8 @@ function stageRuntime({ sourceRoot, buildRoot, prefix, pathMappings = [] }) {
   for (const mapping of mappings) text = text.replaceAll(mapping.from, mapping.to);
   fs.writeFileSync(path.join(stdlib, sysconfig[0]), text);
   addLicenses(prefix,'Python',sourceRoot);
+  addLicenses(prefix,'CPython expat',`${sourceRoot}/Modules/expat`);
+  addLicenses(prefix,'CPython HACL*',`${__dirname}/python-licenses`);
   return { prefix, library: path.join(libDir, path.basename(library)), includeDir, stdlib, extensions };
 }
 

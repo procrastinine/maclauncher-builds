@@ -1,3 +1,4 @@
+import {addLicense,addLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
@@ -31,6 +32,7 @@ export async function finishImpacto({project,arch,output,work,sources,fonts,audi
 }
 export async function finishImpactoEngine({project,arch,output,work,sources,fonts,audio,dependencyStack,maps,ffmpegPrefix}){
  const sdk=dependencyStack.sdk,ffmpeg=path.join(work,'ffmpeg-source'),avcpp=path.join(work,'avcpp-source'),avcppPrefix=path.join(work,'avcpp');
+ addLicenses(ffmpegPrefix,'FFmpeg 7.1.2',ffmpeg);
  const checked=await Source.validatePinnedSource(sources.avcpp,Adapter.SOURCES.avcpp.revision,{sourceScope:AVCPP_SOURCE_SCOPE});Source.stagePinnedFiles(sources.avcpp,checked.files,avcpp);
  await Patches.applyPinnedPatch(avcpp,path.join(sources.impacto,'portfiles/avcpp/0002-av_init_packet_deprecation.patch'),DependencyOverlays.avcppPacket,{logPath:path.join(work,'patches.log')});
  const tools=dependencyStack.tools;await Dependency.buildCmake({sourceRoot:avcpp,outputRoot:path.join(work,'avcpp-build'),prefix:avcppPrefix,sdk,tools,prefixes:[ffmpegPrefix,dependencyStack.prefix],pathMappings:maps,dependencies,options:['-DAV_ENABLE_STATIC=ON','-DAV_ENABLE_SHARED=OFF','-DAV_BUILD_EXAMPLES=OFF','-DAV_BUILD_TESTS=OFF','-DAV_DISABLE_AVDEVICE=ON','-DAV_DISABLE_AVFILTER=ON']});
@@ -40,6 +42,16 @@ export async function finishImpactoEngine({project,arch,output,work,sources,font
  return sealImpacto({project,arch,output,built,sources});
 }
 export function sealImpacto({project,arch,output,built,sources}){
+ for(const id of ['avcpp','atrac9','magicEnum'])addLicenses(built.runtimeRoot,id,sources[id]);
+ for(const [id,directory] of Object.entries(built.dependencyStack?.sourceRoots||{})){
+  addLicenses(built.runtimeRoot,id,directory);
+  if(id==='sdl3'){
+   addLicenses(built.runtimeRoot,'SDL3 HIDAPI',`${directory}/src/hidapi`);
+   addLicense(built.runtimeRoot,'SDL3 HIDAPI authors',`${directory}/src/hidapi/AUTHORS.txt`);
+   addLicenses(built.runtimeRoot,'SDL3 yuv2rgb',`${directory}/src/video/yuv2rgb`);
+  }
+  if(id==='webp')addLicense(built.runtimeRoot,id,`${directory}/PATENTS`);
+ }
  return sealRuntime({project,arch,output,executable:built.executable,appRoot:path.dirname(path.dirname(path.dirname(built.executable))),payloads:fs.readdirSync(built.runtimeRoot).filter(name=>name!=='Impacto.app').map(name=>({source:path.join(built.runtimeRoot,name),relative:name})),sourceRoot:sources.impacto,upstreamRevision:Builder.REVISION,provenance:{profile:Builder.PROFILE,upstreamRevision:Builder.REVISION,avcppSourceScope:AVCPP_SOURCE_SCOPE,codecSource:{version:Adapter.SOURCES.ffmpeg.version,archiveSha256:Adapter.SOURCES.ffmpeg.sha256,bink2:Adapter.SOURCES.bink2},additionalSources:Object.fromEntries(Object.entries(Adapter.SOURCES).filter(([id])=>['avcpp','atrac9','magicEnum'].includes(id)))}});
 }
 recipeMain(import.meta,buildImpacto);
