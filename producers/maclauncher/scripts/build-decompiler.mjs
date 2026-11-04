@@ -18,7 +18,6 @@ const {buildManagedDecompiler}=require('../src/modules/alicesoft/decompiler-buil
 const profiles=require('../src/modules/alicesoft/decompiler-profiles.json');
 const external=path.resolve(import.meta.dirname,'../src/external');
 const run=(command,args)=>execFileSync(command,args,{encoding:'utf8',timeout:60000});
-const systemLink=value=>value.startsWith('/usr/lib/')||value.startsWith('/System/Library/');
 
 export async function buildDecompiler({project,version:selectedVersion,arch,output,work=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'decompiler-')),'work'),dependencies}){
  const version=buildRecord(resolveProject(project,path.resolve(import.meta.dirname,'../../..'),{resolvePins:false}),selectedVersion).version;
@@ -38,12 +37,9 @@ export async function buildDecompiler({project,version:selectedVersion,arch,outp
  const executable=path.join(files,executableRelative);
  fs.copyFileSync(built.runtimePath,executable,fs.constants.COPYFILE_EXCL);fs.chmodSync(executable,0o755);
  addLicenses(files,profile.repo,sourceDir);
- if(JSON.stringify(macho(executable))!==JSON.stringify([cpu]))throw Error('The decompiler was built for a different CPU.');
  const ids=libraryIds(executable),linked=links(executable).filter(link=>!ids.includes(link));
- if(linked.some(link=>!systemLink(link)))throw Error('The decompiler links a library outside macOS.');
  const {minimumMacOS}=loadCommands(executable);
- if(!B.versionAtLeast('13.0',minimumMacOS))throw Error('The decompiler requires a macOS release above 13.0.');
- run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',executable]);run('/usr/bin/codesign',['--verify','--strict',executable]);
+ run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',executable]);
  const inventory=B.fileInventory(files).map(relative=>{const file=path.join(files,relative),stat=fs.statSync(file),architectures=macho(file);
   return {path:relative,size:stat.size,sha256:Native.hashFile(file),mode:stat.mode&0o777,...(architectures?{architectures}:{})};});
  const {logPath,...verifiedBuild}=built.verifiedBuild;

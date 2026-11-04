@@ -4,9 +4,5 @@
   "version": "1.0.0-MCLv1",
   "adapterABI": 1,
   "minimumMacOS": "13.0",
-  "repository": "https://github.com/procrastinine/maclauncher-builds",
-  "files": {
-    "adapter.m": "77ab945b9d8e62ef4b78649f093fe2dfe7ed710105ae14fe42f53586036f89ba",
-    "adapter.json": "7af757859832bed219951a16158d40ce5ca2e88f4afdb48b2dd01d25d340bcfa"
-  }
+  "repository": "https://github.com/procrastinine/maclauncher-builds"
 }

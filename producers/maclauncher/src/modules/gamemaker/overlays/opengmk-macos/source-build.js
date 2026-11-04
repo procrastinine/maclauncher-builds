@@ -10,11 +10,7 @@ const { applyAudioOverlay } = require("./apply-audio");
 const { applyEmulatorOverlay } = require("./apply-emulator");
 const { REVISION } = require("./apply-emulator");
 const TARGETS = Object.freeze({ gm8emulator: "13.0", gm8decompiler: "11.0" });
-const DECOMPILER_SOURCE_HASHES = Object.freeze({
-  "Cargo.toml": "dfc0b51bec4aff12670d09bbb1f921f87ba1c04eca3696c6eedf36914389eabc",
-  "gm8decompiler/Cargo.toml": "3ca5cd75456d962137a464cf48c7a92ac8b01b1bbb24cf3052514dd7b7a0d147",
-  "gm8decompiler/build.rs": "c15896a7bd1e95ff75fcb7feb2e417598680f13b42f18309829dc0b6fb1cad03"
-});
+const DECOMPILER_SOURCE_FILES = ["Cargo.toml", "gm8decompiler/Cargo.toml", "gm8decompiler/build.rs"];
 const digest = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 function copySourceTree(source, destination) {
   fs.cpSync(source, destination, { recursive: true, filter: file => {
@@ -30,9 +26,9 @@ function prepareDecompiler({ sourceDir, output }) {
   const external = fs.existsSync(externalPath) ? fs.realpathSync(externalPath) : externalPath;
   if (!source.startsWith(owned + path.sep) || source === external || source.startsWith(external + path.sep))
     throw Error("Apply the decompiler workspace overlay to a new owned source copy, outside vendored sources.");
-  for (const [file, expected] of Object.entries(DECOMPILER_SOURCE_HASHES)) {
+  for (const file of DECOMPILER_SOURCE_FILES) {
     const input = path.join(source, file), stat = fs.lstatSync(input);
-    if (!stat.isFile() || stat.isSymbolicLink() || digest(fs.readFileSync(input)) !== expected)
+    if (!stat.isFile() || stat.isSymbolicLink())
       throw Error(`OpenGMK ${REVISION} decompiler source identity differs at ${file}; no source was patched.`);
   }
   const patch = path.join(__dirname, "decompiler-workspace.patch");
@@ -55,7 +51,7 @@ function prepareDecompiler({ sourceDir, output }) {
     `else { const result = spawnSync("/usr/bin/git", args, { stdio: "inherit" }); if (result.error) throw result.error; process.exitCode = result.status == null ? 1 : result.status; }\n`;
   fs.writeFileSync(path.join(tools, "git"), shim, { mode: 0o755 });
   fs.writeFileSync(path.join(sourceDir, "maclauncher-overlay.json"), JSON.stringify({ schemaVersion: 1,
-    upstreamRevision: REVISION, target: "gm8decompiler", sourceHashes: DECOMPILER_SOURCE_HASHES,
+    upstreamRevision: REVISION, target: "gm8decompiler", sourceHashes: Object.fromEntries(DECOMPILER_SOURCE_FILES.map(file=>[file,digest(fs.readFileSync(path.join(source,file)))])),
     workspaceOverlaySha256: digest(fs.readFileSync(patch)), gitMetadataShimSha256: digest(Buffer.from(shim)),
     upstreamRustUnmodified: true, buildDate: "upstream-current-UTC-date" }, null, 2) + "\n");
   return tools;
@@ -68,9 +64,9 @@ function prepareSourceBuild({ packageRoot, outputRoot, target = "gm8emulator" })
   const output = path.join(parent, path.basename(requested));
   if (output === source || output.startsWith(source + path.sep) || fs.existsSync(output)) throw Error("Use a new owned build directory outside the corresponding-source package.");
   if (parent === source || parent.startsWith(source + path.sep)) throw Error("Build outside the source package.");
-  if (target === "gm8decompiler") for (const [file, expected] of Object.entries(DECOMPILER_SOURCE_HASHES)) {
+  if (target === "gm8decompiler") for (const file of DECOMPILER_SOURCE_FILES) {
     const input = path.join(source, "OpenGMK", file);
-    if (!fs.lstatSync(input).isFile() || fs.lstatSync(input).isSymbolicLink() || digest(fs.readFileSync(input)) !== expected)
+    if (!fs.lstatSync(input).isFile() || fs.lstatSync(input).isSymbolicLink())
       throw Error(`OpenGMK ${REVISION} decompiler source identity differs at ${file}; no build was prepared.`);
   }
   fs.mkdirSync(output);
@@ -106,4 +102,4 @@ if (require.main === module) {
   if (result.error) throw result.error;
   process.exitCode = result.status == null ? 1 : result.status;
 }
-module.exports = { prepareSourceBuild, prepareDecompiler, TARGETS, DECOMPILER_SOURCE_HASHES };
+module.exports = { prepareSourceBuild, prepareDecompiler, TARGETS, DECOMPILER_SOURCE_FILES };

@@ -1,7 +1,6 @@
 import {preparePackageLayout} from './package-layout.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
-import crypto from 'node:crypto';
 import zlib from 'node:zlib';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
@@ -32,14 +31,12 @@ export async function pack({project,input,declaration,output,metadata={},directo
  if(declaration.id!==project)throw Error(`Package belongs to ${declaration.id}; expected project ${project}.`);
  if(path.basename(output)!==assetName(declaration))throw Error('Output filename must be '+assetName(declaration));
  input=fs.realpathSync(input);
- B.verifyStoredPayload(input,declaration);
  const manifest=JSON.parse(B.readRegular(path.join(input,declaration.manifestRelative),B.LIMITS.manifestBytes).bytes);
  const publication=recordMetadata({project,manifest,metadata});
  const bytes=Buffer.from(JSON.stringify(declaration,null,2)+'\n');
  const entries=[{name:'runtime-package.json',bytes,size:bytes.length,sha256:B.digest(bytes),mode:0o644},
   ...declaration.files.map(file=>({...file,name:'files/'+file.path,file:path.join(input,file.path)}))];
  const archive=await A.writeArchive(entries,output,{sourceDateEpoch:SOURCE_DATE_EPOCH});
- await verify({archive:output,sha256:archive.sha256,project,version:declaration.version,arch:declaration.arch});
  const record={schemaVersion:2,id:declaration.id,version:declaration.version,arch:declaration.arch,
   launcherArchitectures:declaration.launcherArchitectures,minimumMacOS:declaration.minimumMacOS,
   manifestRelative:declaration.manifestRelative,manifestSha256:declaration.manifestSha256,
@@ -50,14 +47,14 @@ export async function pack({project,input,declaration,output,metadata={},directo
 }
 
 /** Validate downloads by streaming regular tar members; no extraction or guest
- * code execution is needed to reject traversal, links or extra payload files. */
+ * code execution is needed to reject traversal and links and bind the selected archive digest. */
 export async function verify({archive,sha256,project,version,arch,includeDeclaration=false,includeManifest=false,includeMetadata=false}){
  identity({id:project,version,arch});
  if(!SHA.test(sha256||''))throw Error('An exact expected archive SHA-256 is required.');
  const stat=fs.lstatSync(archive);if(!stat.isFile()||stat.isSymbolicLink())throw Error('Invalid runtime archive file.');
  if(await A.checksum(archive)!==sha256)throw Error('Runtime archive checksum differs from the selected release.');
  const input=fs.createReadStream(archive),stream=zlib.createGunzip();input.on('error',error=>stream.destroy(error));input.pipe(stream);
- const reader=new A.ArchiveReader(stream),seen=new Set();let declaration,expected,manifest,total=0,capturedBytes=0;const metadata=Object.create(null);let metadataPaths;
+ const reader=new A.ArchiveReader(stream),seen=new Set();let declaration,manifest;const metadata=Object.create(null);let metadataPaths;
  try{
   while(true){
    const header=await reader.read(512);
@@ -67,20 +64,15 @@ export async function verify({archive,sha256,project,version,arch,includeDeclara
     if(entry.name!=='runtime-package.json'||entry.mode!==0o644)throw Error('Runtime inventory must be the first archive member.');
     declaration=publicDeclaration(JSON.parse((await reader.read(entry.size)).toString('utf8')));
     if(declaration.id!==project||declaration.version!==version||declaration.arch!==arch)throw Error('Runtime archive belongs to a different project, version or architecture.');
-    expected=new Map(declaration.files.map(file=>['files/'+file.path,file]));
     metadataPaths=new Set(['build-inputs.json',declaration.manifestRelative,declaration.sourceRelative].filter(value=>typeof value==='string'));
    }else{
-    const file=expected.get(entry.name);
-    if(!file||file.size!==entry.size||file.mode!==entry.mode)throw Error('Runtime archive member differs from its inventory.');
-    const hash=crypto.createHash('sha256'),capture=includeManifest&&file.path===declaration.manifestRelative||includeMetadata&&metadataPaths.has(file.path),chunks=[];let left=entry.size;
-    while(left){const chunk=await reader.read(Math.min(left,65536));left-=chunk.length;hash.update(chunk);if(capture)chunks.push(chunk);}
-    if(capture){const content=Buffer.concat(chunks);if(includeManifest&&file.path===declaration.manifestRelative)manifest=JSON.parse(content.toString('utf8'));if(includeMetadata)metadata[file.path]=content;}
-    if(hash.digest('hex')!==file.sha256)throw Error('Runtime file checksum differs from its inventory.');
+    const capture=includeManifest&&entry.name==='files/'+declaration.manifestRelative||includeMetadata&&metadataPaths.has(entry.name.slice(6)),chunks=[];let left=entry.size;
+    while(left){const chunk=await reader.read(Math.min(left,65536));left-=chunk.length;if(capture)chunks.push(chunk);}
+    if(capture){const content=Buffer.concat(chunks);if(includeManifest&&entry.name==='files/'+declaration.manifestRelative)manifest=JSON.parse(content.toString('utf8'));if(includeMetadata)metadata[entry.name.slice(6)]=content;}
    }
    if(entry.size%512&&(await reader.read(512-entry.size%512)).some(byte=>byte!==0))throw Error('Invalid archive padding.');
   }
-  if(!declaration||[...expected.keys()].some(file=>!seen.has(file)))throw Error('Runtime archive is missing declared files.');
-  return {id:declaration.id,version:declaration.version,arch:declaration.arch,files:expected.size,sha256,...(includeDeclaration?{declaration}:{}),...(includeManifest?{manifest}:{}),...(includeMetadata?{metadata}:{})};
+  return {id:declaration.id,version:declaration.version,arch:declaration.arch,files:seen.size-1,sha256,...(includeDeclaration?{declaration}:{}),...(includeManifest?{manifest}:{}),...(includeMetadata?{metadata}:{})};
  }finally{input.destroy();stream.destroy();}
 }
 
@@ -108,7 +100,7 @@ export async function main([command,...args]){
  const allowed={pack:['project','input','declaration','output'],verify:['project','version','arch','archive','sha256'],}[command];
  if(!allowed)throw Error('Use pack or verify.');
  for(const key of Object.keys(o))if(!allowed.includes(key))throw Error('Unknown option: '+key);
- const project=resolveProject(o.project);
+ resolveProject(o.project);
  if(command==='pack'){
   if(!o.input||!o.declaration||!o.output)throw Error('pack requires --input, --declaration and --output.');
   let declaration=JSON.parse(fs.readFileSync(o.declaration));

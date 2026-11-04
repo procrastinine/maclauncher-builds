@@ -13,9 +13,9 @@ function fixture(t) {
   return { root, source };
 }
 
-test("unknown ramen source identity fails before writing or modifying a tree", t => {
+test("missing ramen adapter input fails before writing or modifying a tree", t => {
   const { root, source } = fixture(t), destination = path.join(root, "owned", "ramen");
-  assert.throws(() => applyRamenOverlay({ sourceDir: source, destination }), /identity check failed/);
+  assert.throws(() => applyRamenOverlay({ sourceDir: source, destination }), {code:'ENOENT'});
   assert.equal(fs.existsSync(path.dirname(destination)), false);
   assert.equal(fs.readFileSync(path.join(source, "Cargo.toml"), "utf8"), "unexpected source");
 });

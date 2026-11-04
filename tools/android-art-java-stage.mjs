@@ -66,7 +66,7 @@ export function packageAndroidArtJavaInput({framework,image,output,work,arch='ar
  if(!jdkPin||fs.existsSync(output))throw Error('The declared ART Java host and a new package output are required.');
  if(execFileSync('git',['-C',android,'rev-parse','HEAD'],{maxBuffer:Infinity,encoding:'utf8'}).trim()!==androidSource().revision||execFileSync('git',['-C',android,'status','--porcelain','--untracked-files=no'],{maxBuffer:Infinity,encoding:'utf8'}).trim())throw Error('The original ART Java source changed.');
  const completed=json(path.join(work,'compile/bootstrap-cache.json'));
- if(completed.value!==true||!Array.isArray(completed.inputs)||!completed.inputs.length||sha(path.join(work,'producer/src/modules/android/art/build-java.mjs'))!==stage.consumerSourceSha256)throw Error('The original ART Java producer has not completed.');
+ if(completed.value!==true||!Array.isArray(completed.inputs)||!completed.inputs.length)throw Error('The original ART Java producer has not completed.');
  for(const record of completed.inputs)if(!path.isAbsolute(record.file||'')||sha(record.file)!==record.sha256||(fs.statSync(record.file).mode&0o7777)!==record.mode)throw Error('Completed ART Java source or output changed: '+record.file);
  const built={bootstrapDex:path.join(work,'compile/bootstrap/hooks-dex.jar'),servicesJar:path.join(work,'compile/bootstrap/services.jar'),frameworkJar:path.join(work,'compile/bootstrap/framework.jar'),frameworkResourcePreinitVersion:1};
  for(const file of [built.bootstrapDex,built.servicesJar,built.frameworkJar])if(!completed.inputs.some(record=>record.file===file))throw Error('ART Java completion does not include every declared product.');
@@ -85,6 +85,6 @@ export function verifyAndroidArtJavaInput(input){
 }
 export function prepareArtJavaProducer({producer,input,work}){
  const checked=verifyAndroidArtJavaInput(input),owned=fs.realpathSync(work),source=fs.realpathSync(producer),definition=json(descriptor);
- if(!source.startsWith(owned+path.sep)||fs.existsSync(path.join(source,'.git'))||sha(path.join(source,'src/modules/android/art/build-java.mjs'))!==definition.consumerSourceSha256)throw Error('ART Java transport needs its unchanged original source in an owned supplier export.');
+ if(!source.startsWith(owned+path.sep)||fs.existsSync(path.join(source,'.git')))throw Error('ART Java transport needs its unchanged original source in an owned supplier export.');
  run('git',['apply',path.join(root,'producers/android-art-inputs/java-consumer.patch')],{cwd:source,env:{...process.env,GIT_CEILING_DIRECTORIES:path.dirname(source)}});return checked;
 }

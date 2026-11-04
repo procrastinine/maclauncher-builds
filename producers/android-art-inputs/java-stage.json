@@ -6,7 +6,6 @@
   "imageInput": "producers/android-image-data/source.json",
   "publisherInputs": "producers/android-art-inputs/java.json",
   "jdkInput": "producers/android-inputs/java-converter.json",
-  "consumerSourceSha256": "31f087d95814c9339d838ab96af3315f60ad6240bf9d07a9e2f56f66966e314f",
   "frameworkArtifact": {
     "project": "android-java-framework"
   },

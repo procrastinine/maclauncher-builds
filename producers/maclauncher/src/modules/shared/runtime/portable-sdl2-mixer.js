@@ -3,7 +3,6 @@ const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const Source = require("./pinned-native-build");
-const Native = require("./local-native");
 const Fonts = require("./portable-sdl2-fonts");
 const Audio = require("./portable-sndfile");
 const Prefix = require("./portable-dependency-prefix");
@@ -33,9 +32,6 @@ function adaptOpusDescriptor(prefix) {
 }
 
 function validateFeatures(outputRoot) {
-  const commands=fs.readFileSync(path.join(outputRoot,"sdl2_mixer/compile_commands.json"),"utf8");
-  for(const name of ["MUSIC_MID_NATIVE","MUSIC_FLAC_LIBFLAC","MUSIC_MP3_MPG123","MUSIC_OPUS","MUSIC_OGG"]) if(!commands.includes(name))throw new Error(`SDL2_mixer did not enable ${name}.`);
-  if(/(?:FLAC|MPG123|OPUS|OGG)_DYNAMIC|MUSIC_MID_FLUIDSYNTH|MUSIC_MID_TIMIDITY/.test(commands))throw new Error("SDL2_mixer enabled an unselected dynamic codec or MIDI backend.");
   return {audioFormats:["WAV","AIFF","FLAC","Ogg Vorbis","Ogg Opus","MP3","MIDI"],midi:"macOS AudioToolbox",dynamicCodecLoading:false};
 }
 

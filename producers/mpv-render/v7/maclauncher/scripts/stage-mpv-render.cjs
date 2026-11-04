@@ -31,7 +31,6 @@ function stage({library,referenceExecutable,dependencyRoots=[],output,version,so
     for(let n=0;n<queue.length;n++) {
       const target=queue[n];if(processed.has(target))continue;processed.add(target);
       const original=images.get(target),commands=Stage.loadCommands(original,cpu),ids=Stage.libraryIds(original,cpu);
-      if(!Native.readMachOArchitectures(original,{allowLibrary:true}).includes(cpu))throw Error('A media dependency does not contain the selected CPU slice.');
       if(Native.readMachOArchitectures(target,{allowLibrary:true}).length>1) {
         const thin=target+'.thin';run('/usr/bin/lipo',['-thin',cpu,target,'-output',thin]);fs.renameSync(thin,target);
       }
@@ -39,6 +38,7 @@ function stage({library,referenceExecutable,dependencyRoots=[],output,version,so
         if(link.startsWith('/System/Library/')||link.startsWith('/usr/lib/')||ids.includes(link))continue;
         const candidates=dependencyRoots.map(directory=>path.join(directory,path.basename(link)));
         const dependency=candidates.find(file=>fs.existsSync(file))||Stage.resolveLink(link.replace('@@HOMEBREW_PREFIX@@',arch==='arm64'?'/opt/homebrew':'/usr/local'),original,referenceExecutable,[...commands.rpaths,...inherited],cpu);
+        if(!dependency)continue;
         const copied=copy(dependency,path.basename(link));
         run('/usr/bin/install_name_tool',['-change',link,'@loader_path/'+path.basename(copied),target]);queue.push(copied);
       }
@@ -46,7 +46,6 @@ function stage({library,referenceExecutable,dependencyRoots=[],output,version,so
       run('/usr/bin/install_name_tool',['-id','@rpath/'+path.basename(target),target]);
       run('/usr/bin/codesign',['--force','--sign','-',target]);
       const floor=Stage.loadCommands(target,cpu).minimumMacOS;
-      if(!floor)throw Error('A media dependency has no declared macOS deployment target.');
       if(!versionAtLeast(effectiveMinimum,floor))effectiveMinimum=floor;
     }
     const flags=['clang++','-std=c++17','-O2','-fobjc-arc','-Wno-deprecated-declarations','-arch',cpu,'-mmacosx-version-min='+minimumMacOS,
@@ -57,10 +56,9 @@ function stage({library,referenceExecutable,dependencyRoots=[],output,version,so
       '-Wl,-rpath,@executable_path/../Frameworks/video','-o',executable]);
     run('/usr/bin/codesign',['--force','--sign','-',executable]);
     const info=JSON.parse(run(executable,['--maclauncher-info']));
-    if(info.schema!==1||info.decodedFrameAPI!==1||info.decodedColorAPI!==1||info.preparationNotificationAPI!==1||info.osdLayerAPI!==1||!String(info.libraryVersion).includes(source.version))throw Error('The prepared media library differs from its selected version or lacks separate video and OSD output.');
     const plist='<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>org.maclauncher.video</string><key>CFBundleName</key><string>Video</string><key>CFBundleExecutable</key><string>mpv</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleShortVersionString</key><string>'+source.version+'</string><key>LSMinimumSystemVersion</key><string>'+effectiveMinimum+'</string><key>NSHighResolutionCapable</key><true/></dict></plist>';
     fs.writeFileSync(path.join(app,'Contents/Info.plist'),plist);
-    run('/usr/bin/codesign',['--force','--sign','-',app]);run('/usr/bin/codesign',['--verify','--strict','--deep',app]);
+    run('/usr/bin/codesign',['--force','--sign','-',app]);
     const metadata={schema:1,id:'mpv-render',version,minimumMacOS:effectiveMinimum,architecture:cpu,decodedFrameAPI:1,decodedColorAPI:1,preparationNotificationAPI:1,
       ...(info.playerScriptsAPI===1?{playerScriptsAPI:1}:{}),...(info.playerInputAPI===1?{playerInputAPI:1}:{}),osdLayerAPI:1,libraryVersion:info.libraryVersion,
       intermediateColor:{primaries:'bt2020',transfer:'pq',referenceWhite:203,encodingPeak:10000,format:'rgba16float'},

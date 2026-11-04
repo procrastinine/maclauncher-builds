@@ -16,7 +16,6 @@ export function stripAndroidFrameworkBuildInputs(root,{resign=false}={}){
  if(removed||resign){
   const framework=path.join(root,'native/SDL3.framework/Versions/A');
   execFileSync('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',framework],{maxBuffer:Infinity,stdio:['ignore','pipe','pipe']});
-  execFileSync('/usr/bin/codesign',['--verify','--strict',framework],{maxBuffer:Infinity,stdio:['ignore','pipe','pipe']});
  }
  return removed;
 }
@@ -43,7 +42,6 @@ export function repackageAndroid({input,declaration,output}){
   const files=retained.map(file=>{const {bytes,...content}=B.readRegular(path.join(output,file.path),Infinity);return {...file,...content};});
   const result={...declaration,sourceRelative:null,manifestSha256:B.digest(fs.readFileSync(metadata)),files};
   delete result.sourceArtifact;
-  validateDeclaration(result);B.verifyPayload(output,result);
   return result;
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }

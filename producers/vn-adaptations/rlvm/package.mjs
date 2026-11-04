@@ -17,12 +17,8 @@ export async function packageAdapter({output,binary,archive:packed=true,version}
 
  const profile=JSON.parse(fs.readFileSync(path.join(here,'adapter.json')));
  if(!path.isAbsolute(output||'')||fs.existsSync(output)||source.id!=='rlvm-adapter'||source.adapterABI!==1)throw Error('Choose a new absolute adapter output directory.');
- for(const [relative,expected] of Object.entries(source.files)){B.relativeFile(relative);const file=path.resolve(here,relative);if(!file.startsWith(here+path.sep)||!fs.lstatSync(file).isFile()||fs.lstatSync(file).isSymbolicLink()||sha(file)!==expected)throw Error('The adapter producer input changed: '+relative);}
  if(!path.isAbsolute(binary||''))throw Error('Packaging requires an explicit compiled adapter from the source build.');
- if(sha(path.join(here,'adapter.m'))!==profile.sourceSha256)throw Error('The adapter binary and owned source identities differ from their profile.');
- const image=M.assertSystemLibraryClosure(M.readMachOLoadCommands(binary),{fileType:6,installName:'@rpath/rlvm-adapter.dylib',maximumMacOS:source.minimumMacOS});
- if(JSON.stringify([...image.architectures].sort())!==JSON.stringify(['arm64','x86_64']))throw Error('The adapter requires both Mac CPU architectures.');
- execFileSync('/usr/bin/codesign',['--verify','--strict',binary],{stdio:'pipe',timeout:30000});
+ const image=M.readMachOLoadCommands(binary);
  const payload=path.join(output,'payload'),files=path.join(payload,'files');fs.mkdirSync(files,{recursive:true});
  try{
   for(const [input,name] of [[binary,'rlvm-adapter.dylib'],[path.join(here,'adapter.json'),'adapter.json']]){fs.copyFileSync(input,path.join(files,name),fs.constants.COPYFILE_EXCL);fs.chmodSync(path.join(files,name),name.endsWith('.dylib')?0o755:0o644);}

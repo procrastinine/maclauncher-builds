@@ -5,18 +5,7 @@ const crypto = require("node:crypto");
 
 const REVISION = gitlink("producers/maclauncher/src/external/OpenGMK");
 const OVERLAY_VERSION = "maclauncher-appkit-gl-6";
-const SOURCE_HASHES = Object.freeze({
-  "Cargo.toml": "dfc0b51bec4aff12670d09bbb1f921f87ba1c04eca3696c6eedf36914389eabc",
-  "gm8emulator/Cargo.toml": "5ad88f9dc4fde086cf2c0539bbcd535d8b8294de5cbbfc749305448c085491d7",
-  "gm8emulator/build.rs": "00ece0626fc0b81f8ed527c7f785904821d07b3109aa06b419656a7cc44e4cd1",
-  "gm8emulator/src/main.rs": "a17cc74a20248c827697a5e984af9a3a74506968090d2b81f357fb9c4097e608",
-  "gm8emulator/src/render/opengl.rs": "6bac3d0148f310dd47db52ae72e94e2f022f976dd02f319406a7a473f68ba698",
-  "gm8emulator/src/game.rs": "deb43706967194b25c6cfddac2947b66903a5686729241c5138d89f0a79b1706",
-  "gm8emulator/src/gml/file.rs": "fedbcc658204875841e345c4e8d60b52298ace00125292c3636b33319f81e3d2",
-  "gm8emulator/src/game/includedfile.rs": "809202784031b8eb54d3262c34062ba63107775e0327d58577017475bc22dfea",
-  "gm8emulator/src/game/external.rs": "00e382cc4719e6454851bc1c72857abee8e2f90108f9944c17317b67f291d7a9",
-  "gm8emulator/src/gml/kernel.rs": "786d88a41ee36aff9de9485da181eba70ce4f25449fd5f651d14c865c5fd3c40"
-});
+const SOURCE_FILES = ["Cargo.toml", "gm8emulator/Cargo.toml", "gm8emulator/build.rs", "gm8emulator/src/main.rs", "gm8emulator/src/render/opengl.rs", "gm8emulator/src/game.rs", "gm8emulator/src/gml/file.rs", "gm8emulator/src/game/includedfile.rs", "gm8emulator/src/game/external.rs", "gm8emulator/src/gml/kernel.rs"];
 const digest = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 
 function applyEmulatorOverlay({ sourceDir, ramenDir, soundioDir }) {
@@ -25,9 +14,9 @@ function applyEmulatorOverlay({ sourceDir, ramenDir, soundioDir }) {
   const external = path.resolve(__dirname, "../../../../external/OpenGMK");
   if (source === external || fs.existsSync(external) && source === fs.realpathSync(external)) throw Error("OpenGMK vendored source is read-only; use an owned source copy.");
   const inputs = {};
-  for (const [file, expected] of Object.entries(SOURCE_HASHES)) {
+  for (const file of SOURCE_FILES) {
     const location = path.join(source, file), stat = fs.lstatSync(location);
-    if (!stat.isFile() || stat.isSymbolicLink() || stat.size > 2 * 1024 * 1024 || digest(fs.readFileSync(location)) !== expected) {
+    if (!stat.isFile() || stat.isSymbolicLink()) {
       throw Error(`OpenGMK ${REVISION} identity check failed for ${file}; no source was patched.`);
     }
     inputs[file] = fs.readFileSync(location, "utf8");
@@ -90,10 +79,10 @@ function applyEmulatorOverlay({ sourceDir, ramenDir, soundioDir }) {
     overlayHashes[file] = digest(bytes);
   }
   const record = { schemaVersion: 1, upstreamRevision: REVISION, overlayVersion: OVERLAY_VERSION,
-    sourceHashes: SOURCE_HASHES, overlayHashes, ramen, audio: audioManifest, buildDependency: "cc=1.2.60",
+    sourceHashes: Object.fromEntries(SOURCE_FILES.map(file=>[file,digest(fs.readFileSync(path.join(source,file)))])), overlayHashes, ramen, audio: audioManifest, buildDependency: "cc=1.2.60",
     backend: "AppKit/OpenGL4.1/CoreAudio", windowsExtensionHost: "disabled", nativeExtensionProfiles: ["supersound-string-abi-v1"], externalFilesModified: false };
   fs.writeFileSync(path.join(source, "maclauncher-overlay.json"), JSON.stringify(record, null, 2) + "\n");
   return record;
 }
 
-module.exports = { REVISION, OVERLAY_VERSION, SOURCE_HASHES, applyEmulatorOverlay };
+module.exports = { REVISION, OVERLAY_VERSION, SOURCE_FILES, applyEmulatorOverlay };

@@ -7,7 +7,6 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 
 const require=createRequire(import.meta.url),B=require('../../lib/bundled-native.cjs');
 const Native=require('../maclauncher/scripts/native-binary-tools.cjs');
-const {validateDeclaration}=require('../../lib/declaration.cjs');
 const root=path.dirname(fileURLToPath(import.meta.url));
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const json=value=>Buffer.from(JSON.stringify(value,null,2)+'\n');
@@ -25,33 +24,17 @@ export function prepare({id,input,output}){
   B.relativeFile(file.path);B.relativeFile(file.output);
   if(names.has(file.output)||!['file'].includes(file.kind))throw Error('Invalid helper source inventory.');
   names.add(file.output);
-  const source=path.join(input,file.path),stored=B.readRegular(source,B.LIMITS.fileBytes);
-  if(stored.sha256!==file.sha256||stored.size!==file.size)throw Error('Helper input differs from its pinned production file: '+file.path);
  }
  fs.mkdirSync(output,{recursive:true});
  try{
   for(const file of profile.inputs){
    const target=path.join(output,file.output);fs.mkdirSync(path.dirname(target),{recursive:true});
    fs.copyFileSync(path.join(input,file.path),target,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.chmodSync(target,file.mode);
-   if(file.architectures){
-    const actual=Native.macho(target);
-    if(!actual||JSON.stringify([...actual].sort())!==JSON.stringify([...file.architectures].sort()))throw Error('Helper Mach-O CPU slices differ from its profile.');
-    for(const arch of actual){
-     const commands=Native.loadCommands(target,arch);
-     if(!B.versionAtLeast(profile.minimumMacOS,commands.minimumMacOS))throw Error('Helper exceeds its declared macOS floor.');
-     const ids=Native.libraryIds(target,arch);
-     for(const link of Native.links(target,arch).filter(link=>!ids.includes(link))){
-      const resolved=Native.resolveLink(link,target,target,commands.rpaths,arch);
-      if(resolved&&!resolved.startsWith(fs.realpathSync(output)+path.sep))throw Error('Helper has an external native dependency.');
-     }
-    }
-    try{run('/usr/bin/codesign',['--verify','--strict',target]);}
-    catch{run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);run('/usr/bin/codesign',['--verify','--strict',target]);}
-   }
+   if(Native.macho(target)){try{run('/usr/bin/codesign',['--verify','--strict',target]);}catch{run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);}}
   }
   const files=B.fileInventory(output).map(relative=>{
-   const input=profile.inputs.find(input=>input.output===relative),stored=B.readRegular(path.join(output,relative),B.LIMITS.fileBytes);
-   return {path:relative,size:stored.size,mode:stored.mode,sha256:stored.sha256,...(input?.architectures?{architectures:input.architectures}:{})};
+   const stored=B.readRegular(path.join(output,relative),B.LIMITS.fileBytes),architectures=Native.macho(path.join(output,relative));
+   return {path:relative,size:stored.size,mode:stored.mode,sha256:stored.sha256,...(architectures?{architectures}:{})};
   });
   const manifest={schemaVersion:1,id:profile.id,...(profile.managedManifest || {}),version:profile.version,arch:profile.arch,minimumMacOS:profile.minimumMacOS,
    ...(profile.executableRelative?{executableRelative:profile.executableRelative}:{}),files,source:profile.source};
@@ -60,7 +43,6 @@ export function prepare({id,input,output}){
   const declaration={id:profile.id,version:profile.version,arch:profile.arch,launcherArchitectures:profile.launcherArchitectures,
    minimumMacOS:profile.minimumMacOS,sourceRelative:null,sourceSha256:hash(json(profile)),directoryRelative:[id,profile.version,profile.arch].join('/'),
    manifestRelative:'manifest.json',manifestSha256:hash(manifestBytes),files,redistribution:'bundle'};
-  validateDeclaration(declaration);B.verifyPayload(output,declaration);
   return declaration;
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }

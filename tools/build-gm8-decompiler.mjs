@@ -18,7 +18,7 @@ export async function buildGM8Decompiler({project:id,version,arch,output,work}){
   fs.copyFileSync(path.join(root,'producers/maclauncher/helper-builds/gm8-decompiler.lock'),path.join(owned,'Cargo.lock'));
   const env=rustEnvironment({work,minimumMacOS:'11.0',env:{...process.env,PATH:[tools,path.dirname(process.execPath),process.env.PATH].join(path.delimiter)}});
   execFileSync('cargo',['build','--release','--locked','--target',target,'--package','gm8decompiler'],{maxBuffer:Infinity,cwd:owned,stdio:'inherit',timeout:900000,env});
-  return await sealRuntime({cargoRoot:owned,env,project:id,version,arch,executable:path.join(work,'target',target,'release/gm8decompiler'),sourceRoot:source,upstreamRevision:revision,output,maximumMacOS:'11.0'});
+  return await sealRuntime({cargoRoot:owned,env,project:id,version,arch,executable:path.join(work,'target',target,'release/gm8decompiler'),sourceRoot:source,upstreamRevision:revision,output});
  }finally{fs.rmSync(work,{recursive:true,force:true});}
 }
 recipeMain(import.meta,buildGM8Decompiler);

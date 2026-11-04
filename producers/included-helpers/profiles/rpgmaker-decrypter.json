@@ -42,12 +42,7 @@
       "path": "RPGMakerDecrypter-cli",
       "output": "files/bin/RPGMakerDecrypter-cli",
       "kind": "file",
-      "size": 13914832,
-      "sha256": "7319e37e375132d0f3a1c6cd059a39b1b74d864232691698b944cb3c709c0a30",
-      "mode": 493,
-      "architectures": [
-        "arm64"
-      ]
+      "mode": 493
     }
   ],
   "managedManifest": {

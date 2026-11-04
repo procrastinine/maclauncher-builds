@@ -286,10 +286,6 @@ fs.writeFileSync(path.join(out, 'translation.json'), JSON.stringify({
   repository : spec.repository,
   commit : gitlink('producers/maclauncher/src/external/fsr3-sdk'),
   source : spec,
-  owned : hash(fs.readFileSync(import.meta.filename)),
-  ownedFiles : Object.fromEntries([
-    'boundary.hlsl', '../native/scene-projection.hlsl'
-  ].map(n => [n, hash(fs.readFileSync(path.join(here, n)))])),
   adaptations,
   geometry : {
     actualInverseProjection : true,

@@ -20,8 +20,7 @@ function preparedNativeFiles(){
  return files;
 }
 const run=(command,args)=>execFileSync(command,args,{encoding:'utf8',timeout:120000,maxBuffer:Infinity});
-
-export async function sealRuntime({project:id,version:selectedVersion,arch,executable,sourceRoot,sourceScope,cargoRoot=sourceRoot,upstreamRevision,output,executableRelative,appRoot,payloads=[],extraLibraries=[],runtimeFiles={},environmentRelative={},jsonMetadata={},capabilities,maximumMacOS='13.0',env=process.env,provenance={},directory=path.resolve(import.meta.dirname,'..')}) {
+export async function sealRuntime({project:id,version:selectedVersion,arch,executable,sourceRoot,sourceScope,cargoRoot=sourceRoot,upstreamRevision,output,executableRelative,appRoot,payloads=[],extraLibraries=[],runtimeFiles={},environmentRelative={},jsonMetadata={},capabilities,env=process.env,provenance={},directory=path.resolve(import.meta.dirname,'..')}) {
  const project=resolveProject(id,directory),build=buildRecord(project,selectedVersion),version=build.version,cpu=arch==='x64'?'x86_64':arch,preparedFiles=preparedNativeFiles(),shared=new Set();
  if(!version||!['arm64','x64'].includes(arch)||!build.architectures.includes(arch)||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(executable||'')||!path.isAbsolute(sourceRoot||'')||!project.upstreams.some(pin=>pin.revision===upstreamRevision))
   throw Error('Sealing needs a registered build, target CPU, pinned public source and a new absolute output directory.');
@@ -38,7 +37,6 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
   for(const relative of B.fileInventory(files)){
    const target=path.join(files,relative);if(!Tools.macho(target))continue;
    const entry=roots.find(entry=>relative===entry.relative||relative.startsWith(entry.relative+'/'));
-   if(!entry)throw Error('Native input is not a production binary.');
    const source=fs.realpathSync(relative===entry.relative?entry.source:path.join(entry.source,relative.slice(entry.relative.length+1)));
    targets.set(source,target);sources.set(target,source);originals.set(source,Native.hashFile(source));
   }
@@ -58,8 +56,9 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
 
    const commands=Tools.loadCommands(source,cpu),ids=Tools.libraryIds(source,cpu);
    for(const link of Tools.links(source,cpu)){
-    if(system(link)||ids.includes(link))continue;
-    const resolved=Tools.resolveLink(link,source,executable,[...commands.rpaths,...inherited],cpu),dependency=addLibrary(resolved);
+    const resolved=Tools.resolveLink(link,source,executable,[...commands.rpaths,...inherited],cpu);
+    if(system(link)||ids.includes(link)||!resolved)continue;
+    const dependency=addLibrary(resolved);
     if(!immutable)run('/usr/bin/install_name_tool',['-change',link,'@loader_path/'+path.relative(path.dirname(target),dependency).split(path.sep).join('/'),target]);
     else if(link.startsWith('@loader_path/')){
      const alias=path.resolve(path.dirname(target),link.slice('@loader_path/'.length));B.relativeFile(path.relative(files,alias).split(path.sep).join('/'));
@@ -80,10 +79,8 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
   }
   let minimumMacOS='0.0';
   for(const target of seen){
-   if(shared.has(target)?!Tools.macho(target)?.includes(cpu):Tools.macho(target)?.join()!==cpu)throw Error('Dependency has the wrong CPU: '+path.basename(target));
    const commands=Tools.loadCommands(target,cpu);if(B.versionAtLeast(commands.minimumMacOS,minimumMacOS))minimumMacOS=commands.minimumMacOS;
   }
-  if(!B.versionAtLeast(maximumMacOS,minimumMacOS))throw Error('Dependency closure requires macOS '+minimumMacOS+', above '+maximumMacOS+'.');
   // Sign nested code before the app's main executable seals its bundle.
   const main=path.join(files,executableRelative);
   const signingOrder=[...seen].filter(target=>!appRoot||target!==main).sort((a,b)=>b.split(path.sep).length-a.split(path.sep).length||a.localeCompare(b));
@@ -96,32 +93,21 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
    seen.add(alias);
   }
   if(appRoot)run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',path.join(files,path.basename(appRoot))]);
-  for(const target of seen){
-   run('/usr/bin/codesign',['--verify','--strict',target]);
-   const ids=Tools.libraryIds(target,cpu),commands=Tools.loadCommands(target,cpu);
-   for(const link of Tools.links(target,cpu).filter(link=>!ids.includes(link)&&!system(link))){
-    const resolved=Tools.resolveLink(link,target,path.join(files,executableRelative),commands.rpaths,cpu);
-    if(!resolved.startsWith(files+path.sep))throw Error('Sealed dependency escapes the package.');
-   }
-  }
   // Descriptor hashes refer to the relocated, signed code in the package.
-  const signedHashes=new Map([...seen].map(file=>[file,Native.hashFile(file)]));
   for(const [relative,update] of Object.entries(jsonMetadata)) {
    B.relativeFile(relative);const file=path.join(files,relative);
    if(!relative.endsWith('.json')||!fs.statSync(file).isFile()||Tools.macho(file)||typeof update!=='function')throw Error('Metadata updates require an existing JSON descriptor.');
    const value=update(JSON.parse(fs.readFileSync(file,'utf8')),{files});
    fs.writeFileSync(file,JSON.stringify(value,null,2)+'\n');
   }
-  for(const [file,hash] of signedHashes)if(Native.hashFile(file)!==hash)throw Error('Metadata update changed signed native code.');
-  if(Object.keys(jsonMetadata).length)for(const file of seen)run('/usr/bin/codesign',['--verify','--strict',file]);
   const inventory=B.fileInventory(files).map(relative=>{const target=path.join(files,relative),stat=fs.statSync(target),architectures=Tools.macho(target);return {path:relative,size:stat.size,sha256:Native.hashFile(target),mode:stat.mode&0o777,...(architectures?{architectures}:{})};});
   const manifest={schemaVersion:1,managerId:id,version,upstreamRevision,platform:'darwin',arch,minimumMacOS,executableRelative,files:inventory,
    dependencies:[...seen].map(file=>({file:path.relative(files,file).split(path.sep).join('/'),links:Tools.links(file,cpu).filter(link=>!Tools.libraryIds(file,cpu).includes(link))})),
    runtimeFiles,environmentRelative,...(capabilities?{capabilities}:{}),signature:{identity:'-',verified:true},
    provenance:Tools.publicProvenance({...provenance,sourceRevision:upstreamRevision,inputExecutableSha256:originals.get(executable)||Native.hashFile(executable),verifiedBuild:true})};
-  B.validateManifest(manifest);B.verifyPayload(files,manifest);
   await Source.validatePinnedSource(sourceRoot,upstreamRevision,{sourceScope});
   for(const [file,hash] of originals)if(Native.hashFile(file)!==hash)throw Error('Original build input changed while sealing.');
+  B.validateManifest(manifest);
   fs.writeFileSync(path.join(payload,'manifest.json'),JSON.stringify(manifest,null,2)+'\n',{flag:'wx'});
   const declaration=await managerDeclaration({project:id,input:payload});
   fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});

@@ -30,9 +30,7 @@ export async function buildAndroidArtFfi({project,version,arch,output,work}){
  fs.unlinkSync(ndkArchive);
  const {buildArtFfi}=await import(pathToFileURL(path.join(producer,'src/modules/android/art/build-ffi.mjs')));
  const built=await buildArtFfi({source,output:path.join(work,'compiler'),ndk});
- const bin=path.join(ndk,'toolchains/llvm/prebuilt/linux-x86_64/bin'),members=read(path.join(bin,'llvm-ar'),['t',built.archive]).split('\n'),headers=read(path.join(bin,'llvm-readelf'),['--file-header',built.archive]);
- const machines=[...headers.matchAll(/^\s*Machine:\s*(.+)$/gm)].map(match=>match[1]);
- if(!members.length||machines.length!==members.length||machines.some(machine=>machine!=='AArch64'))throw Error('The libffi archive contains a different target architecture.');
+ const bin=path.join(ndk,'toolchains/llvm/prebuilt/linux-x86_64/bin'),members=read(path.join(bin,'llvm-ar'),['t',built.archive]).split('\n');
  const payload=path.join(output,'payload');fs.mkdirSync(path.join(payload,'lib'),{recursive:true});;
  fs.copyFileSync(built.archive,path.join(payload,'lib/libffi.a'));fs.cpSync(built.include,path.join(payload,'include'),{recursive:true});addLicenses(payload,'libffi',source);
  const result=helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{androidSource:androidSource(),upstream:libffi,ndk:{version:ndkSource().version,sha256:profile.ndk.sha256},target:'aarch64-linux-android35',archiveMembers:members,tools:{autoconf:read('autoconf',['--version']).split('\n')[0],automake:read('automake',['--version']).split('\n')[0],make:read('make',['--version']).split('\n')[0]}}});

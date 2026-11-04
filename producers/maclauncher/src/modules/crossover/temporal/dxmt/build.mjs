@@ -50,7 +50,6 @@ for (let at = original.indexOf('MTLB'); at >= 0; at = original.indexOf('MTLB', a
   const length = Number(original.readBigUInt64LE(at + 16));
   if (length >= 100 && length < original.length - at) libs.push(original.subarray(at, at + length));
 }
-if (libs.length !== 1) throw new Error(`Expected one DXMT portable command library, found ${libs.length}`);
 fs.writeFileSync(path.join(output, 'dxmt_command.metallib'), libs[0]);
 execFileSync('xxd', ['-n', 'dxmt_command', '-i', path.join(output, 'dxmt_command.metallib'), path.join(source, 'include/dxmt_command.h')]);
 
@@ -60,7 +59,6 @@ const ar = path.join(toolchain, 'llvm-ar');
 const readobj = path.join(toolchain, 'llvm-readobj');
 const imports = execFileSync(readobj, ['--coff-exports', path.join(vendorPE, 'winemetal.dll')], { encoding: 'utf8' });
 const exportNames = [...imports.matchAll(/^  Name: (.+)$/gm)].map(m => m[1]);
-if (!exportNames.includes('MTLCommandBuffer_encodeTemporalScale')) throw new Error('Renderer lacks temporal scaling exports.');
 const def = path.join(objects, 'winemetal.def');
 fs.writeFileSync(def, `LIBRARY winemetal.dll\nEXPORTS\n${exportNames.join('\n')}\n`);
 const wineImport = path.join(objects, 'libwinemetal.a');

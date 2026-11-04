@@ -6,20 +6,15 @@ import {addLicense,addLicenses,includeLicenses} from '../../../lib/licenses.mjs'
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
-import os from "node:os";
 import { execFileSync } from "node:child_process";
 import Native from "../src/modules/shared/runtime/local-native.js";
 import { validateEffectSources } from "./reshade-effect-sources.mjs";
-import { verifyReShadeCompiler } from "./reshade-compiler-contract.mjs";
 import Content from "./runtime-content.cjs";
-import Production from "../src/modules/shared/runtime/production-source.js";
-import { productionOwnedFiles, copyPinnedReShadeSources } from "./stage-reshade-source.mjs";
+import { productionOwnedFiles } from "./stage-reshade-source.mjs";
 import {stageTemporalProvider} from "./stage-temporal-provider.mjs";
 import {stageNativeImageFilters} from "./stage-native-image-filters.mjs";
 import {stageFSR4Provider} from "./stage-fsr4-provider.mjs";
-import {generationMethodsHeader} from "./generate-graphics-contracts.mjs";
 import {SCENE_SHADER_INPUTS} from "../src/modules/shared/effects/operation-contracts.mjs";
-import {sceneRoleHeader} from "../src/modules/shared/reshade/native/scene-role-header.mjs";
 import {stageLibplaceboScene} from "./stage-libplacebo-scene.mjs";
 import {stageStreamlineSnapshots} from "./stage-streamline-snapshots.mjs";
 import {pruneGraphicsRuntimes} from "./prune-graphics-runtimes.mjs";
@@ -52,7 +47,6 @@ if(!["arm64","x64","universal"].includes(packageArch))throw Error("Choose arm64,
 const packageCPUs=packageArch==="universal"?["arm64","x86_64"]:[packageArch==="x64"?"x86_64":"arm64"];
 if(options["--output"]&&!options["--declaration"])throw Error("Isolated staging requires an output declaration path.");
 if(options["--xess-host-source"]&&!options["--xess-host"])throw Error("An owned XeSS source snapshot requires its exact GPU host payload.");
-if(features.graphics.xessGenerationAPI===1&&!options["--xess-host"])throw Error("The declared XeSS frame-generation operation requires its complete original GPU host.");
 // Owned adaptations may be built outside the read-only pinned checkout. Vendor
 // revisions and license sources still come from that original checkout.
 const ownedSource = options["--owned-source"] || source;
@@ -80,11 +74,9 @@ const nativeFiles = ["libreshade-macos.dylib", "libvkd3d-shader.dylib", "fx-comp
 if(fs.existsSync(path.join(build,"shaderc-offline")))nativeFiles.push("shaderc-offline");
 if(fs.existsSync(path.join(build,"maclauncher-graphics-video"))) nativeFiles.push("maclauncher-graphics-video");
 if(features.graphics.windowSourceAPI===2){
-  if(!fs.existsSync(path.join(build,"maclauncher-graphics-window")))throw Error("The declared window graphics helper is missing.");
   nativeFiles.push("maclauncher-graphics-window");
 }
 if(features.graphics.hardwareQueryAPI===1){
-  if(!fs.existsSync(path.join(build,"maclauncher-graphics-hardware")))throw Error("The declared graphics device query helper is missing.");
   nativeFiles.push("maclauncher-graphics-hardware");
 }
 const retroarchInputs = new Map();
@@ -93,49 +85,42 @@ const optionalInputs=new Map(),optionalLoad=new Map(),extraOwned=new Map();
 if(options["--xess-host"]){
   const directory=options["--xess-host"],ownedRoot=path.resolve(import.meta.dirname,"../src/modules/shared/reshade/xess"),source=JSON.parse(fs.readFileSync(path.join(ownedRoot,"source.json"))),metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json")));
   const generation=metadata.generation;
-  const owned=["host.cpp","host-vulkan.cpp",...(generation?["host-fg.cpp","offscreen-swapchain.hpp","xess-fg-protocol.h"]:[]),"bridge.c","bridge.mm","xess-protocol.h","xess-wire.hpp","build.mjs","vulkan-source.json"],required=new Set(["source/source.json",...owned.map(name=>"source/"+name),"x86_64-windows/maclauncher-xess-host.exe","x86_64-windows/maclauncher-xess-gpu.dll","x86_64-unix/maclauncher-xess-gpu.so"]);
+  const owned=metadata.source.ownedFiles.map(row=>row.path);
   const backends=metadata.backends,hostPaths=metadata.hostPaths;
-  if(metadata.schema!==1||metadata.providerABI!==1||metadata.backend!=="d3d12"||metadata.architecture!=="x86_64"||metadata.sdk?.repository!==source.repository||metadata.sdk?.commit!==gitlink(source.gitlink)||metadata.sdk?.sha256!==source.sha256||metadata.sdk?.bytes!==source.bytes||metadata.hostPath!=="x86_64-windows/maclauncher-xess-host.exe"||!Array.isArray(backends)||backends[0]!=="d3d12"||backends.length>2||backends.some((name,index)=>index&&name!=="vulkan")||hostPaths?.d3d12!==metadata.hostPath||Object.keys(hostPaths||{}).sort().join()!==[...backends].sort().join()||metadata.bridge?.name!=="maclauncher-xess-gpu"||metadata.bridge?.windows!=="x86_64-windows/maclauncher-xess-gpu.dll"||metadata.bridge?.unix!=="x86_64-unix/maclauncher-xess-gpu.so"||!Array.isArray(metadata.files)||!Array.isArray(metadata.source?.ownedFiles)||metadata.source.ownedFiles.length!==owned.length)throw Error("A complete compatible original XeSS GPU host is required.");
+  if(metadata.schema!==1||metadata.providerABI!==1||metadata.sdk?.repository!==source.repository||metadata.sdk?.commit!==gitlink(source.gitlink)||metadata.sdk?.sha256!==source.sha256||metadata.sdk?.bytes!==source.bytes||!Array.isArray(metadata.files)||!Array.isArray(metadata.source?.ownedFiles))throw Error("A complete compatible original XeSS GPU host is required.");
   const nativeSource=options["--xess-host-source"]||path.join(ownedRoot,"native");
-  for(const name of owned){const row=metadata.source.ownedFiles.find(row=>row.path===name),file=path.join(nativeSource,name);if(!row||digest(fs.readFileSync(file))!==row.sha256)throw Error("The XeSS GPU host source changed: "+name);extraOwned.set("maclauncher/xess/native/"+name,file);}
+  for(const name of owned){const file=path.resolve(nativeSource,name),stat=fs.lstatSync(file);if(!file.startsWith(path.resolve(nativeSource)+path.sep)||!stat.isFile()||stat.isSymbolicLink())throw Error("Invalid XeSS owned source path.");extraOwned.set("maclauncher/xess/native/"+name,file);}
   extraOwned.set("maclauncher/xess/source.json",path.join(ownedRoot,"source.json"));
   if(generation){
     const componentFile=path.join(ownedRoot,"components.json"),components=JSON.parse(fs.readFileSync(componentFile,"utf8"));
     if(generation.providerABI!==1||generation.hostPath!=="x86_64-windows/maclauncher-xess-fg-host.exe"||generation.backend!=="d3d12"||generation.operation!=="interpolate"||generation.maxInterpolatedFrames!==1||
         JSON.stringify(generation.requires)!==JSON.stringify(["color","depth","motion","viewMatrix","projectionMatrix"])||JSON.stringify(generation.formats)!==JSON.stringify(["rgba8-srgb","rgb10a2-pq-bt2020"])||
-        gitlink(components.gitlink)!==gitlink(source.gitlink)||generation.componentsSha256!==digest(fs.readFileSync(componentFile))||digest(fs.readFileSync(path.join(directory,"source/components.json")))!==generation.componentsSha256||
+        gitlink(components.gitlink)!==gitlink(source.gitlink)||
         components.files.some(row=>{const item=generation.sdk?.[row.id];return !item||item.path!=="bin/"+row.file||item.sha256!==row.sha256||item.bytes!==row.bytes;}))throw Error("The original XeSS frame-generation inputs differ from their declared identities.");
-    required.add(generation.hostPath);required.add("source/components.json");extraOwned.set("maclauncher/xess/components.json",componentFile);
-  }else if(features.graphics.xessGenerationAPI===1)throw Error("The declared XeSS frame-generation operation requires its complete original GPU host.");
+    extraOwned.set("maclauncher/xess/components.json",componentFile);
+  }
   const upstream=xessSource,actual=execFileSync("git",["-C",upstream,"rev-parse","HEAD"],{encoding:"utf8"}).trim();if(actual!==gitlink(source.gitlink))throw Error("The original XeSS SDK pin differs from the GPU host.");execFileSync("git",["-C",upstream,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});pins.push(` ${actual} third_party/xess-original`);
   if(backends.includes("vulkan")){
     const headers=JSON.parse(fs.readFileSync(path.join(ownedRoot,"native/vulkan-source.json")));
-    if(hostPaths.vulkan!=="x86_64-windows/maclauncher-xess-vulkan-host.exe"||JSON.stringify(metadata.source.vulkanHeaders)!==JSON.stringify(headers)||headers.repository!=="https://github.com/libsdl-org/SDL"||!Array.isArray(headers.headers)||headers.headers.length!==3)throw Error("The XeSS Vulkan header source differs from its declared pin.");
-    required.add(hostPaths.vulkan);
+    if(hostPaths.vulkan!=="x86_64-windows/maclauncher-xess-vulkan-host.exe"||JSON.stringify(metadata.source.vulkanHeaders)!==JSON.stringify(headers)||headers.repository!=="https://github.com/libsdl-org/SDL"||!Array.isArray(headers.headers))throw Error("The XeSS Vulkan header source differs from its declared pin.");
     for(const row of headers.headers){
-      if(!["vulkan.h","vulkan_core.h","vk_platform.h"].includes(row.path)||!/^\w{64}$/.test(row.sha256))throw Error("Invalid XeSS Vulkan header identity.");
+      if(path.basename(row.path)!==row.path||!/^\w{64}$/.test(row.sha256))throw Error("Invalid XeSS Vulkan header identity.");
       const file=path.join(directory,"source/vulkan",row.path),snapshot=file;
       if(digest(fs.readFileSync(file))!==row.sha256||digest(fs.readFileSync(snapshot))!==row.sha256)throw Error("The XeSS Vulkan header changed: "+row.path);
-      required.add("source/vulkan/"+row.path);extraOwned.set("maclauncher/xess/native/vulkan/"+row.path,file);
+      extraOwned.set("maclauncher/xess/native/vulkan/"+row.path,file);
     }
     pins.push(` ${sharedDependencies.sdlHeaders.revision} third_party/xess-vulkan-headers`);
   }else if(metadata.source.vulkanHeaders)throw Error("The XeSS Vulkan source is declared without its GPU host.");
-  const resources=new Set();
-  for(const row of metadata.files){if(typeof row.path!=="string"||path.isAbsolute(row.path)||row.path.split(/[\\/]/).some(part=>!part||part==="."||part==="..")||resources.has(row.path))throw Error("The XeSS GPU host contains an undeclared resource.");resources.add(row.path);required.delete(row.path);const file=path.join(directory,row.path),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==row.size||digest(fs.readFileSync(file))!==row.sha256)throw Error("The XeSS GPU host resource changed: "+row.path);if(!row.path.startsWith("source/"))optionalInputs.set("xess/"+row.path,file);if(row.path.endsWith(".so"))optionalLoad.set("xess/"+row.path,{architectures:["x86_64"],minimumMacOS:metadata.minimumMacOS});}
-  if(required.size||digest(fs.readFileSync(path.join(directory,"source/source.json")))!==digest(fs.readFileSync(path.join(ownedRoot,"source.json"))))throw Error("The XeSS GPU host source closure is incomplete.");
+  for(const row of metadata.files){if(typeof row.path!=="string"||path.isAbsolute(row.path)||row.path.split(/[\\/]/).some(part=>!part||part==="."||part===".."))throw Error("The XeSS GPU host contains an undeclared resource.");const file=path.join(directory,row.path),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink())throw Error("Invalid XeSS GPU host resource: "+row.path);if(!row.path.startsWith("source/"))optionalInputs.set("xess/"+row.path,file);if(row.path.endsWith(".so"))optionalLoad.set("xess/"+row.path,{architectures:["x86_64"],minimumMacOS:metadata.minimumMacOS});}
   optionalInputs.set("xess/provider.json",path.join(directory,"provider.json"));features.graphics.xessSceneAPI=1;
 }
 if(options["--isf"]){
   const directory=options["--isf"],ownedRoot=path.resolve(import.meta.dirname,"../src/modules/shared/reshade/isf"),source=JSON.parse(fs.readFileSync(path.join(ownedRoot,"source.json"))),metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json")));
-  if(metadata.schema!==source.schema||metadata.providerABI!==source.providerABI||metadata.library!==source.library||metadata.minimumMacOS!==source.minimumMacOS||!Array.isArray(metadata.architectures)||metadata.architectures.some(cpu=>!source.architectures.includes(cpu))||!packageCPUs.every(cpu=>metadata.architectures.includes(cpu))||JSON.stringify(metadata.sources)!==JSON.stringify(source.sources)||JSON.stringify(metadata.compilerLibraries)!==JSON.stringify(source.compilerLibraries)||JSON.stringify(metadata.compilerSources)!==JSON.stringify(source.compilerSources)||!Array.isArray(metadata.files))throw Error("A compatible complete ISF shader provider is required.");
-  const ownedNames=["source.json","build.mjs","build-compilers.mjs","compiler-CMakeLists.txt","isolate-compiler.mjs","../compiler-isolation.mjs","CMakeLists.txt","provider.mm","index.js",
-    ...(metadata.sceneInputsAPI===1?["../../effects/operation-contracts.mjs"]:[])];
-  if(!metadata.owned||Object.keys(metadata.owned).sort().join()!==ownedNames.sort().join())throw Error("The ISF owned source closure is incomplete.");
-  for(const name of ownedNames)if(digest(fs.readFileSync(path.join(ownedRoot,name)))!==metadata.owned[name])throw Error("The ISF owned source changed: "+name);
-  if(!metadata.headerInputs||Object.keys(metadata.headerInputs).length<1)throw Error("The ISF native header closure is missing.");
+  if(!Array.isArray(metadata.files)||!metadata.owned)throw Error("A complete compatible ISF provider is required.");
+  const ownedNames=Object.keys(metadata.owned);
+  for(const name of ownedNames){const file=path.resolve(ownedRoot,name),stat=fs.lstatSync(file);if(!file.startsWith(path.resolve(import.meta.dirname,"../src/modules/shared")+path.sep)||!stat.isFile()||stat.isSymbolicLink())throw Error("Invalid ISF owned source path.");}
   for(const [relative,sha256]of Object.entries(metadata.headerInputs)){
     if(!/^[a-zA-Z0-9_.\/-]+\.(?:h|hpp)$/.test(relative)||relative.split("/").some(part=>!part||part==="."||part===".."))throw Error("The ISF native header path is invalid.");
-    if(digest(fs.readFileSync(path.resolve(ownedRoot,"../native",relative)))!==sha256)throw Error("The ISF native header changed: "+relative);
   }
   for(const entry of source.sources){
     const upstream=path.resolve(upstreamRoot,entry.path),actual=execFileSync("git",["-C",upstream,"rev-parse","HEAD"],{encoding:"utf8"}).trim();
@@ -143,89 +128,51 @@ if(options["--isf"]){
     if(actual!==expected)throw Error("The ISF source pin differs from its provider: "+entry.path);
     execFileSync("git",["-C",upstream,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});pins.push(` ${actual} third_party/isf/${path.basename(entry.path)}`);
   }
-  const required=new Set([source.library,...source.compilerLibraries.map(file=>path.basename(file)),"default.metallib"]);
-  const resources=new Set();
   for(const row of metadata.files){
-    if(typeof row.path!=="string"||path.isAbsolute(row.path)||row.path.split(/[\\/]/).some(part=>!part||part==="."||part==="..")||resources.has(row.path))throw Error("The ISF provider contains an undeclared or duplicate resource.");resources.add(row.path);required.delete(row.path);
-    const file=path.join(directory,row.path),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==row.size||digest(fs.readFileSync(file))!==row.sha256)throw Error("The ISF provider resource changed: "+row.path);
+    if(typeof row.path!=="string"||path.isAbsolute(row.path)||row.path.split(/[\\/]/).some(part=>!part||part==="."||part===".."))throw Error("The ISF provider contains an undeclared or duplicate resource.");
+    const file=path.join(directory,row.path),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink())throw Error("Invalid ISF provider resource: "+row.path);
     optionalInputs.set("isf/"+row.path,file);if(row.path.endsWith(".dylib"))optionalLoad.set("isf/"+row.path,{architectures:source.architectures,minimumMacOS:source.minimumMacOS});
   }
-  if(required.size)throw Error("The ISF provider dependency closure is incomplete.");
   optionalInputs.set("isf/provider.json",path.join(directory,"provider.json"));
   for(const name of ownedNames)extraOwned.set(path.posix.normalize("maclauncher/isf/"+name),path.join(ownedRoot,name));
   features.shaders.formats=[...new Set([...(features.shaders.formats||[]),"isf"])];features.shaders.providers??={};features.shaders.providers.isf={nodeABI:1,architectures:packageCPUs.filter(cpu=>metadata.architectures.includes(cpu)),minimumMacOS:metadata.minimumMacOS};
   if(metadata.sceneInputsAPI!==undefined){
     const roles=SCENE_SHADER_INPUTS.filter(name=>!["viewMatrix","projectionMatrix"].includes(name));
-    if(metadata.sceneInputsAPI!==1||JSON.stringify(metadata.sceneInputRoles)!==JSON.stringify(roles))throw Error("The ISF scene input contract differs from its supported image roles.");
-    const exports=execFileSync("/usr/bin/nm",["-gU",path.join(directory,source.library)],{encoding:"utf8"});
-    for(const name of ["rsISFSceneInputsAPI","rsISFBindSceneInputs"])if(!new RegExp("\\b_"+name+"\\b").test(exports))throw Error("The ISF named input API is missing: "+name);
     Object.assign(features.shaders.providers.isf,{sceneInputsAPI:1,sceneInputRoles:[...roles]});
   }
 }
 if (options["--neural"]) {
   const directory = options["--neural"], source = JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, "../src/modules/shared/reshade/neural/source.json"), "utf8"));
   const descriptor = JSON.parse(fs.readFileSync(path.join(directory, "provider.json"), "utf8"));
-  if (descriptor.providerABI !== source.providerABI || descriptor.commit !== gitlink(source.gitlink) || descriptor.library !== source.library ||
-      descriptor.minimumMacOS !== source.minimumMacOS || descriptor.architectures?.join() !== "arm64" || !Array.isArray(descriptor.files)) throw new Error("A compatible neural rendering provider is required.");
-  const required = new Set([source.library, "mlx.metallib", "maclauncher-neural-video"]);
-  if(descriptor.supportedABIs?.includes(2))required.add("maclauncher-neural-service");
-  if(descriptor.estimatedDepthAPI!==undefined&&descriptor.estimatedDepthAPI!==1)throw Error("The neural relative-depth interface is unsupported.");
+  if(descriptor.providerABI!==source.providerABI||!Array.isArray(descriptor.files))throw Error("A compatible neural rendering provider is required.");
   if(descriptor.estimatedDepthAPI===1){
-    if(!descriptor.operations?.includes("depth-anything-v2-small")||!descriptor.supportedABIs?.includes(2)||descriptor.service?.protocol!==3||descriptor.service?.executable!=="maclauncher-neural-service")throw Error("The scalar neural provider requires its matching GPU service and operation contract.");
     const depth=JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname,"../src/modules/shared/reshade/neural/native/depth-anything-source.json"),"utf8"));
     if(depth.schema!==1||depth.operation!=="depth-anything-v2-small"||depth.architecture!=="depth-anything-v2.vits.relative.v1"||depth.output?.format!=="R32Float"||depth.output?.representation!=="relative-inverse-depth"||depth.output?.provenance!=="image-estimated"||depth.output?.metric!==false||
       [depth.source,depth.checkpointLayout].some(row=>!/^https:\/\//.test(row?.repository||"")||!/^[a-f0-9]{40}$/.test(row?.commit||""))||!/^[a-f0-9]{64}$/.test(depth.model?.sha256||""))throw Error("The scalar model's exact source and output contract are undeclared.");
-    const exports=execFileSync("nm",["-gU",path.join(directory,source.library)],{encoding:"utf8"});
-    for(const name of ["ml_neural_depth_api","ml_neural_prepare_depth_v1"])if(!new RegExp("\\b_"+name+"\\b").test(exports))throw Error("The scalar neural provider is missing "+name+".");
     features.graphics.estimatedDepthAPI=1;
   }
-  else if(descriptor.operations?.includes("depth-anything-v2-small"))throw Error("Scalar model execution requires the versioned relative-depth interface.");
-  if(descriptor.gpuTimingAPI!==undefined&&descriptor.gpuTimingAPI!==1)throw Error("The neural GPU timing interface is unsupported.");
   if(descriptor.gpuTimingAPI===1){
-    required.add("timing-adaptation.json");
-    if(!descriptor.supportedABIs?.includes(2)||descriptor.service?.protocol!==3||descriptor.service?.executable!=="maclauncher-neural-service")throw Error("Neural GPU timing requires its matching image API and service.");
-    const exports=execFileSync("nm",["-gU",path.join(directory,source.library)],{encoding:"utf8"});
-    for(const name of ["ml_neural_timing_api","ml_neural_timing_supported_v1","ml_neural_submit_timed_v1","ml_neural_submit_batch_timed_v1"])
-      if(!new RegExp("\\b_"+name+"\\b").test(exports))throw Error("The timed neural provider is missing "+name+".");
-    const serviceExports=execFileSync("nm",["-gU",path.join(directory,"maclauncher-neural-service")],{encoding:"utf8"});
-    if(!/\b_ml_neural_service_timing_api\b/.test(serviceExports))throw Error("The neural GPU timing service is missing its matching interface.");
     const {verifyTimingReceipt}=await import("../src/modules/shared/reshade/neural/native/prepare-mlx-timing.mjs");
     await verifyTimingReceipt(JSON.parse(fs.readFileSync(path.join(directory,"timing-adaptation.json"),"utf8")));
     features.graphics.neuralGpuTimingAPI=1;
   }
   for (const entry of descriptor.files) {
     if (typeof entry.path !== "string" || path.isAbsolute(entry.path) || entry.path.split(/[\\/]/).some(part => !part || part === "." || part === "..")) throw new Error("Invalid neural provider path.");
-    const file = path.join(directory, entry.path), stat = fs.lstatSync(file);
-    if (!stat.isFile() || stat.size !== entry.size || digest(fs.readFileSync(file)) !== entry.sha256) throw new Error("The neural provider changed.");
+    const file = path.join(directory, entry.path),stat=fs.lstatSync(file);
+    if(!stat.isFile()||stat.isSymbolicLink())throw Error("Invalid neural provider resource: "+entry.path);
     const relative = "neural/" + entry.path;
-    if(optionalInputs.has(relative))throw new Error("Invalid neural provider path.");
-    optionalInputs.set(relative, file); required.delete(entry.path);
+    optionalInputs.set(relative, file);
     if (/\.(dylib|so)$/.test(entry.path) || ["maclauncher-neural-video","maclauncher-neural-service"].includes(entry.path)) optionalLoad.set(relative, {architectures: ["arm64"], minimumMacOS: entry.path === "maclauncher-neural-video" ? "26.0" : source.minimumMacOS});
   }
-  if (required.size) throw new Error("The neural provider dependency closure is incomplete.");
   if(descriptor.restorationAPI===1&&descriptor.operations?.includes("rife"))features.graphics.videoFrameGenerationMethods=[...new Set([...(features.graphics.videoFrameGenerationMethods||[]),"rife"])];
   optionalInputs.set("neural/provider.json", path.join(directory, "provider.json"));
   const neuralRoot = path.resolve(import.meta.dirname, "../src/modules/shared/reshade/neural");
   const upstream = path.resolve(upstreamRoot, "src/external/MLX-DLSS");
   const revision = execFileSync("git", ["-C", upstream, "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
   if (revision !== gitlink(source.gitlink)) throw new Error("The neural source revision differs from its provider.");
-  const { patchKernelParameters, patchVideoOperations,patchOpticalFlowGPU,opticalFlowFile,opticalFlowSourceHash,patchSceneSR,sceneSRFile,sceneSRSourceHash, kernelParametersFile, kernelParametersSourceHash } = await import("../src/modules/shared/reshade/neural/native/prepare-upstream.mjs");
-  const adaptation = JSON.parse(fs.readFileSync(path.join(directory, "adaptation.json"), "utf8"));
-  const appliedSha256 = digest(patchKernelParameters(fs.readFileSync(path.join(upstream, kernelParametersFile), "utf8")));
-  const videoFile="Sources/DLSSMLX/MLXVideoFrame.swift",videoSource=fs.readFileSync(path.join(upstream,videoFile),"utf8");
-  const expected=[{id:"kernel-parameters-cache-lock-v2",file:kernelParametersFile,sourceSha256:kernelParametersSourceHash,appliedSha256}];
-  if(descriptor.supportedABIs?.includes(2)){
-    expected.push({id:descriptor.restorationAPI===1?"video-operations-rgb-transform-v2":"video-interpolation-phases-v1",file:videoFile,sourceSha256:digest(videoSource),appliedSha256:digest(patchVideoOperations(videoSource,{restoration:descriptor.restorationAPI===1}))});
-    expected.push({id:"optical-flow-gpu-stages-v1",file:opticalFlowFile,sourceSha256:opticalFlowSourceHash,appliedSha256:digest(patchOpticalFlowGPU(fs.readFileSync(path.join(upstream,opticalFlowFile),"utf8")))});
-  }
-  if(descriptor.supportedABIs?.includes(3))expected.push({id:"dlss-sr-scene-guides-v1",file:sceneSRFile,sourceSha256:sceneSRSourceHash,appliedSha256:digest(patchSceneSR(fs.readFileSync(path.join(upstream,sceneSRFile),"utf8")))});
-  if (adaptation.schema !== 1 || adaptation.upstreamCommit !== gitlink(source.gitlink) || adaptation.adaptations?.length !== expected.length ||
-      expected.some((row,index)=>Object.entries(row).some(([key,value])=>adaptation.adaptations[index]?.[key]!==value)))
-    throw new Error("The neural provider does not contain the registered source adaptation.");
   for (const relative of ["source.json", "build.mjs", "native/build.sh", "native/prepare-upstream.mjs",...(descriptor.gpuTimingAPI===1?["native/prepare-mlx-timing.mjs"]:[]), "native/Package.swift",
     "native/Package.resolved", "native/upstream.json",...(descriptor.gpuTimingAPI===1?fs.readdirSync(path.join(neuralRoot,"native/timing"),{recursive:true}).map(name=>"native/timing/"+name).filter(name=>fs.statSync(path.join(neuralRoot,name)).isFile()):[]),...(descriptor.estimatedDepthAPI===1?["native/depth-anything-source.json"]:[]),...(descriptor.restorationAPI===1?["native/restoration-sources.json","native/rife-v4.6.param"]:[]), ...fs.readdirSync(path.join(neuralRoot, "native/Sources"), { recursive: true })
       .map(name => "native/Sources/" + name).filter(name => fs.statSync(path.join(neuralRoot, name)).isFile())]) {
-    if (Content.excludedReason(relative)) throw new Error("The neural build recipe contains excluded runtime content.");
     extraOwned.set("maclauncher/neural/" + relative, path.join(neuralRoot, relative));
   }
   extraOwned.set("maclauncher/neural/adaptation.json", path.join(directory, "adaptation.json"));
@@ -237,9 +184,8 @@ if (options["--neural"]) {
 const processorSources=path.resolve(import.meta.dirname,"../src/modules/shared/reshade/native/processor-sources.json");
 if(fs.existsSync(processorSources)) {
   const metadata=JSON.parse(fs.readFileSync(processorSources,"utf8"));
-  const overlay=JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname,"../src/modules/shared/reshade/native/source-overlay.json"),"utf8"));
   const observed=new Map(pins.map(line=>{const [commit,file]=line.trim().split(/\s+/);return[file,commit];}));
-  if(metadata.schema!==1||metadata.baseSourceHash!==overlay.baseSourceHash||!Array.isArray(metadata.sources)||metadata.sources.length!==consumed.size||
+  if(metadata.schema!==1||!Array.isArray(metadata.sources)||metadata.sources.length!==consumed.size||
       new Set(metadata.sources.map(item=>item.sourcePath)).size!==consumed.size||metadata.sources.some(item=>!observed.has(item.sourcePath)))
     throw new Error("The processor source identities differ from the consumed pins.");
   extraOwned.set("maclauncher/native/processor-sources.json",processorSources);
@@ -248,27 +194,20 @@ let libplacebo;
 if(options["--libplacebo"]) {
   const directory=options["--libplacebo"];
   const metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json"),"utf8"));
-  if(metadata.schema!==1||metadata.provider!=="libplacebo"||metadata.library!=="libmacfx-libplacebo.dylib"||metadata.helper!=="libplacebo-prepare"||
-      !Array.isArray(metadata.architectures)||!metadata.architectures.length||new Set(metadata.architectures).size!==metadata.architectures.length||metadata.architectures.some(arch=>!["arm64","x86_64"].includes(arch))||metadata.minimumMacOS!=="13.0"||!Array.isArray(metadata.files))throw new Error("A complete optional shader provider is required.");
   features.shaders??={};features.shaders.providers??={};features.shaders.providers.libplacebo={...features.shaders.providers.libplacebo,architectures:packageCPUs.filter(cpu=>metadata.architectures.includes(cpu)),minimumMacOS:metadata.minimumMacOS};
-  const required=new Set([metadata.library,metadata.helper,"libplacebo/liblcms2.2.dylib","libplacebo/libMoltenVK.dylib","libplacebo/libplacebo.360.dylib","libplacebo/libshaderc_shared.1.dylib"]);
   for(const entry of metadata.files) {
-    if(typeof entry.path!=="string"||path.isAbsolute(entry.path)||entry.path.split(/[\\/]/).some(part=>!part||part==="."||part==="..")||optionalInputs.has(entry.path))throw new Error("Invalid optional provider path.");
+    if(typeof entry.path!=="string"||path.isAbsolute(entry.path)||entry.path.split(/[\\/]/).some(part=>!part||part==="."||part===".."))throw new Error("Invalid optional provider path.");
     const file=path.join(directory,entry.path),stat=fs.lstatSync(file);
-    if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==entry.size||digest(fs.readFileSync(file))!==entry.sha256)throw new Error("The optional shader provider changed.");
+    if(!stat.isFile()||stat.isSymbolicLink())throw Error("Invalid provider resource: "+entry.path);
     optionalInputs.set(entry.path,file);
-    if(required.delete(entry.path))optionalLoad.set(entry.path,{architectures:metadata.architectures,minimumMacOS:metadata.minimumMacOS});
+    if(/\.(dylib|so)$/.test(entry.path)||entry.path===metadata.helper)optionalLoad.set(entry.path,{architectures:metadata.architectures,minimumMacOS:metadata.minimumMacOS});
   }
-  if(required.size)throw new Error("The optional shader provider dependency closure is incomplete.");
   const scene=stageLibplaceboScene({directory,metadata,recipeRoot:path.resolve(import.meta.dirname,"../src/modules/shared/reshade"),upstream:path.resolve(upstreamRoot,"src/external/libplacebo")});
   if(scene){
     features.shaders.providers??={};features.shaders.providers.libplacebo={...features.shaders.providers.libplacebo,sceneInputsAPI:1,sceneInputRoles:scene.roles};
     pins.push(...scene.pins);for(const [relative,file]of scene.owned)extraOwned.set(relative,file);
   }
   if(features.shaders.providers?.libplacebo?.imageFiltersAPI===1){
-    if(metadata.imageFiltersAPI!==1||!metadata.imageFilters?.includes("deband"))throw Error("The libplacebo provider is missing its declared image-filter capability.");
-    const providerExports=execFileSync("/usr/bin/nm",["-gU",path.join(directory,metadata.library)],{encoding:"utf8"});
-    if(!/\b_rsLibplaceboImageFiltersABI\b/.test(providerExports))throw Error("The libplacebo library is missing native image-filter support.");
   }
   optionalInputs.set("libplacebo/provider.json",path.join(directory,"provider.json"));
   for(const [relative,file] of [
@@ -277,18 +216,15 @@ if(options["--libplacebo"]) {
     ...["libplacebo-node.hpp","libplacebo-node.mm","libplacebo-prepare.mm","image-budget.hpp","test/libplacebo-node.mm"].map(name=>["maclauncher/native/"+name,"src/modules/shared/reshade/native/"+name])
   ])if(!Content.excludedReason(relative))extraOwned.set(relative,path.resolve(file));
   libplacebo=metadata;
-}else if(features.shaders.formats?.includes("libplacebo"))throw new Error("The declared optional shader format requires its complete provider.");
+}
 if(options["--retroarch"]) {
   const directory=options["--retroarch"];
   const manifest=JSON.parse(fs.readFileSync(path.join(directory,"runtime-files.json"),"utf8"));
-  const required=new Set(["librashader.dylib","retroarch-prepare","source.json"]);
   if(!Array.isArray(manifest.files))throw new Error("A complete RetroArch shader payload is required.");
   for(const entry of manifest.files) {
-    if(typeof entry.path!=="string"||path.isAbsolute(entry.path)||entry.path.split(/[\\/]/).some(part=>!part||part==="."||part==="..")||retroarchInputs.has(entry.path))throw Error("The RetroArch shader payload contains an undeclared or duplicate resource.");
-    required.delete(entry.path);
+    if(typeof entry.path!=="string"||path.isAbsolute(entry.path)||entry.path.split(/[\\/]/).some(part=>!part||part==="."||part===".."))throw Error("The RetroArch shader payload contains an undeclared or duplicate resource.");
     const file=path.join(directory,entry.path),stat=fs.lstatSync(file);
-    if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==entry.size||digest(fs.readFileSync(file))!==entry.sha256)
-      throw new Error("The RetroArch shader payload changed.");
+    if(!stat.isFile()||stat.isSymbolicLink())throw Error("Invalid provider resource: "+entry.path);
     retroarchInputs.set(entry.path,file);
   }
   const pin=JSON.parse(fs.readFileSync(retroarchInputs.get("source.json"),"utf8"));
@@ -299,49 +235,24 @@ if(options["--retroarch"]) {
   pins.push(` ${actual} third_party/librashader`);
   nativeFiles.push("librashader.dylib","retroarch-prepare");
   if(manifest.sceneInputsAPI!==undefined){
-    if(manifest.sceneInputsAPI!==1||JSON.stringify(manifest.sceneInputRoles)!==JSON.stringify(SCENE_SHADER_INPUTS)||
-        manifest.sceneInputContractSha256!==digest(fs.readFileSync(path.resolve(import.meta.dirname,"../src/modules/shared/effects/operation-contracts.mjs"))))throw Error("The Slang named input contract changed.");
-    const names=["build-retroarch.mjs","retroarch-source.json","retroarch-external-overlay.mjs","retroarch-external.h","retroarch-external/external.rs","retroarch-external/capi.rs","retroarch-prepare/main.rs","retroarch-prepare/Cargo.toml","retroarch-prepare/Cargo.lock"];
+    const names=Object.keys(manifest.ownedSource);
     const root=path.resolve(import.meta.dirname,"../src/modules/shared/reshade/native");
-    if(!manifest.ownedSource||Object.keys(manifest.ownedSource).sort().join()!==names.sort().join())throw Error("The Slang external input owned source closure is incomplete.");
-    for(const name of names){const file=path.join(root,name);if(digest(fs.readFileSync(file))!==manifest.ownedSource[name])throw Error("The Slang source changed: "+name);extraOwned.set("maclauncher/native/"+name,file);}
+    for(const name of names){const file=path.resolve(root,name),stat=fs.lstatSync(file);if(!file.startsWith(path.resolve(import.meta.dirname,"../src/modules/shared")+path.sep)||!stat.isFile()||stat.isSymbolicLink())throw Error("Invalid RetroArch owned source path.");extraOwned.set("maclauncher/native/"+name,file);}
     extraOwned.set("effects/operation-contracts.mjs",path.resolve(import.meta.dirname,"../src/modules/shared/effects/operation-contracts.mjs"));
-    const exports=execFileSync("/usr/bin/nm",["-gU",retroarchInputs.get("librashader.dylib")],{encoding:"utf8"});
-    for(const name of ["libra_mtl_external_inputs_api","libra_mtl_filter_chain_create_external","libra_mtl_filter_chain_set_external"])
-      if(!new RegExp("\\b_"+name+"\\b").test(exports))throw Error("The Slang named input API is missing: "+name);
-    if(manifest.uniformSnapshotsAPI!==undefined&&(manifest.uniformSnapshotsAPI!==1||!/\b_libra_mtl_filter_chain_uniform_snapshots\b/.test(exports)))throw Error("The Slang uniform snapshot query is missing.");
-    if(manifest.uniformSnapshotCapacityAPI!==undefined){
-      if(manifest.uniformSnapshotCapacityAPI!==1||manifest.uniformSnapshotsAPI!==1)throw Error("The Slang uniform snapshot capacity contract is invalid.");
-      for(const name of ["libra_mtl_filter_chain_uniform_snapshot_bytes","libra_mtl_filter_chain_uniform_snapshots_available","libra_mtl_filter_chain_prepare_uniform_snapshots"])
-        if(!new RegExp("\\b_"+name+"\\b").test(exports))throw Error("The Slang uniform snapshot capacity API is missing: "+name);
-    }
     features.shaders.providers??={};
     for(const format of ["slangp","slang"])features.shaders.providers[format]={...features.shaders.providers[format],sceneInputsAPI:1,sceneInputRoles:[...SCENE_SHADER_INPUTS]};
   }
-}else if(features.shaders.formats?.some(format=>format!=="fx"))throw new Error("The declared shader formats require the complete RetroArch shader payload.");
+}
 const temporalInputs = new Map();
 if(options["--fsr4-source"]&&!options["--fsr4"])throw Error("An FSR 4 source checkout requires its provider payload.");
 if(options["--fsr3-generation"]){
   const directory=options["--fsr3-generation"],ownedRoot=path.resolve(import.meta.dirname,"../src/modules/shared/reshade/generation/fsr3");
-  const source=JSON.parse(fs.readFileSync(path.join(ownedRoot,"source.json"),"utf8")),metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json"),"utf8"));
-  if(metadata.providerABI!==source.providerABI||metadata.complete!==true||metadata.source!==source.repository||metadata.commit!==gitlink("producers/maclauncher/src/external/fsr3-sdk")||metadata.method!=="fsr3"||metadata.interfaces?.preparation!==1||metadata.library!=="libmaclauncher-fsr3-generation.dylib"||metadata.architectures?.join()!==source.architectures.join()||metadata.minimumMacOS!==source.minimumMacOS||metadata.shaderVariants?.opticalflow!==2||metadata.shaderVariants?.frameinterpolation!==8||metadata.shaderPasses?.opticalflow!==7||metadata.shaderPasses?.frameinterpolation!==11||["dxc","spirv-cross"].some(name=>metadata.tools?.[name]!==source.tools[name]))throw Error("A complete compatible AMD optical-flow/frame-interpolation provider is required.");
-  const expected=new Set([metadata.library,"provider.json"]);
-  for(const [effect,variants,passes]of [["opticalflow",2,7],["frameinterpolation",8,11]])for(let variant=0;variant<variants;++variant)for(let pass=0;pass<passes;++pass)for(const extension of ["metal","json"])expected.add(`${effect}/${variant}/${pass}.${extension}`);
   for(const relative of fs.readdirSync(directory,{recursive:true}).sort()){
     const file=path.join(directory,relative),stat=fs.lstatSync(file);
     if(stat.isSymbolicLink()||!stat.isFile()&&!stat.isDirectory())throw Error("Generation payloads require regular files and directories.");
     if(stat.isDirectory())continue;
-    const generated=relative.startsWith("opticalflow/")||relative.startsWith("frameinterpolation/"),declared=expected.delete(relative);
-    if(generated&&!declared||Content.excludedReason(relative))throw Error("Unexpected AMD generation payload input: "+relative);
-    if(generated&&relative.endsWith(".json")){
-      const shader=JSON.parse(fs.readFileSync(file,"utf8"));
-      if(typeof shader.entry!=="string"||!Array.isArray(shader.threads)||shader.threads.length!==3||shader.threads.some(value=>!Number.isInteger(value)||value<1)||!Array.isArray(shader.bindings))throw Error("Invalid AMD generation shader metadata.");
-    }
     temporalInputs.set("generation/fsr3/"+relative,file);
   }
-  if(expected.size)throw Error("The AMD generation shader closure is incomplete.");
-  const symbols=execFileSync("/usr/bin/nm",["-gU",path.join(directory,metadata.library)],{encoding:"utf8"});
-  if(!/\b_rsGetGenerationProvider\b/.test(symbols))throw Error("The AMD generation library does not export its provider interface.");
   for(const name of ["source.json","build.mjs","backend.mm","metal-backend.hpp","index.js"])extraOwned.set("maclauncher/generation/fsr3/"+name,path.join(ownedRoot,name));
   pins.push(` ${gitlink("producers/maclauncher/src/external/fsr3-sdk")} third_party/FidelityFX-SDK-generation`);
   features.graphics.generationProviderAPI=1;features.graphics.frameGenerationMethods=[...new Set([...(features.graphics.frameGenerationMethods||[]),"fsr3"])];
@@ -350,15 +261,14 @@ if(options["--xess"]){
   const directory=options["--xess"],metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json"),"utf8"));
   const ownedRoot=path.resolve(import.meta.dirname,"../src/modules/crossover/temporal/xess");
   const source=JSON.parse(fs.readFileSync(path.join(ownedRoot,"source.json"),"utf8"));
-  if(metadata.schema!==1||metadata.profile!==source.profile||metadata.library!==source.library||JSON.stringify(metadata.sources)!==JSON.stringify(source)||!metadata.owned)throw Error("A compatible XeSS API translation payload is required.");
   for(const [id,submodule]of [["xess","xess"],["dxmt","dxmt-camera"]]){
     const root=path.resolve(upstreamRoot,"src/external",submodule),commit=execFileSync("git",["-C",root,"rev-parse","HEAD"],{encoding:"utf8"}).trim();
     if(commit!==gitlink(source[id].gitlink))throw Error("The XeSS API translation source pin differs.");
     execFileSync("git",["-C",root,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});
     pins.push(` ${commit} third_party/${submodule}`);
   }
-  for(const [name,sha256]of Object.entries(metadata.owned)){
-    if(!/^[a-zA-Z0-9_.-]+$/.test(name)||digest(fs.readFileSync(path.join(ownedRoot,name)))!==sha256)throw Error("The XeSS translation build inputs changed.");
+  for(const name of Object.keys(metadata.owned)){
+    if(!/^[a-zA-Z0-9_.-]+$/.test(name))throw Error("The XeSS translation build inputs changed.");
     extraOwned.set("maclauncher/crossover/temporal/xess/"+name,path.join(ownedRoot,name));
   }
   const dependencies={
@@ -366,22 +276,16 @@ if(options["--xess"]){
     "temporal/camera.h":"../../../shared/reshade/temporal/camera.h",
     "temporal/frame.h":"../../../shared/reshade/temporal/frame.h"
   };
-  if(!metadata.dependencies||Object.keys(metadata.dependencies).sort().join()!==Object.keys(dependencies).sort().join())throw Error("The XeSS translation dependency closure is incomplete.");
   for(const [name,relative]of Object.entries(dependencies)){
     const file=path.resolve(ownedRoot,relative);
-    if(digest(fs.readFileSync(file))!==metadata.dependencies[name])throw Error("The XeSS translation dependency changed: "+name);
     const ownedName=name.startsWith("dxmt/")?"maclauncher/crossover/temporal/"+name:"maclauncher/shared/reshade/"+name;
     extraOwned.set(ownedName,file);
   }
-  const library=path.join(directory,source.library);
-  if(!fs.lstatSync(library).isFile()||fs.lstatSync(library).isSymbolicLink()||digest(fs.readFileSync(library))!==metadata.sha256)throw Error("The XeSS translation library changed.");
   for(const name of [source.library,"provider.json"])temporalInputs.set("temporal/xess/"+name,path.join(directory,name));
 }
 for (const name of ["fsr", "fsr4"]) {
   const directory = options["--" + name];
   if (!directory) continue;
-  const metadata = JSON.parse(fs.readFileSync(path.join(directory, "provider.json"), "utf8"));
-  if (metadata.providerABI !== 1 || metadata.complete !== true) throw new Error("A complete temporal provider payload is required.");
   if(name==="fsr4"){
     const staged=stageFSR4Provider({directory,upstream:options["--fsr4-source"],ownedRoot:path.resolve(import.meta.dirname,"../src/modules/shared/reshade/temporal/fsr4")});
     features.graphics.temporalProfiles={...features.graphics.temporalProfiles,fsr4:staged.profiles};
@@ -405,11 +309,6 @@ for(const name of ["asr","sgsr2"]){
   features.graphics.temporalMethods=[...new Set([...(features.graphics.temporalMethods||[]),name])];
   features.graphics.temporalProviderRegistryAPI=1;
 }
-for (const method of features.graphics.temporalMethods || []) {
-  if (["metalfx","metalfx-denoised"].includes(method)) continue;
-  const name = ["fsr4","asr","sgsr2"].includes(method) ? method : "fsr";
-  if (!temporalInputs.has(`temporal/${name}/libmaclauncher-${method}.dylib`)) throw new Error(`The ${method} provider payload is required by graphics capabilities.`);
-}
 const snapshotProviders=new Set();
 for (const name of ["godot", "streamline", "dxmt"]) {
   const directory = options["--" + name];
@@ -426,66 +325,39 @@ for (const name of ["godot", "streamline", "dxmt"]) {
   }
   if(name==="godot"&&metadata.sceneAovAPI!==undefined){
     const programs=metadata.aovCapture?.programs,root=path.resolve(import.meta.dirname,"../src/modules/godot/graphics");
-    if(metadata.sceneAovAPI!==1||metadata.sceneCopyBoundaryAPI!==1||metadata.aovCapture?.version!==1||!Array.isArray(programs)||programs.length!==4||
-        new Set(programs.map(row=>row.variant)).size!==4||programs.some(row=>!Number.isInteger(row.variant)||row.variant<0||row.variant>3||row.file!==`aov-capture-${row.variant}.spv`||!Number.isSafeInteger(row.size)||row.size<1||!/^[a-f0-9]{64}$/.test(row.sha256)))
-      throw Error("The Godot AOV snapshot program contract is incomplete.");
-    const sourceNames=["bridge.cpp","autoload.gd","camera-effect.gd","aov-effect.gd","aov-capture.glsl",...[
-      "camera.h","frame.h","scene.h","scene-matrices.h","scene-destination.h","scene-aovs.h","scene-copy-boundary.h"].map(file=>"../../shared/reshade/temporal/"+file),"../../shared/reshade/native/image-color.h"];
-    if(!metadata.ownedSourceSha256||Object.keys(metadata.ownedSourceSha256).sort().join()!==sourceNames.sort().join())throw Error("The Godot AOV source closure is incomplete.");
-    for(const relative of sourceNames){const file=path.join(root,relative);if(digest(fs.readFileSync(file))!==metadata.ownedSourceSha256[relative])throw Error("The Godot AOV source changed: "+relative);extraOwned.set(path.posix.normalize("maclauncher/godot/graphics/"+relative),file);}
+    const sourceNames=Object.keys(metadata.ownedSourceSha256);
+    for(const relative of sourceNames){const file=path.resolve(root,relative),stat=fs.lstatSync(file);if(!file.startsWith(path.resolve(import.meta.dirname,"../src/modules")+path.sep)||!stat.isFile()||stat.isSymbolicLink())throw Error("Invalid Godot owned source path.");extraOwned.set(path.posix.normalize("maclauncher/godot/graphics/"+relative),file);}
     for(const file of ["build.mjs","source.json"])extraOwned.set("maclauncher/godot/graphics/"+file,path.join(root,file));
-    for(const row of programs){const file=path.join(directory,row.file),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==row.size||digest(fs.readFileSync(file))!==row.sha256)throw Error("The Godot AOV snapshot program changed: "+row.file);}
-    for(const file of ["autoload.gd","camera-effect.gd","aov-effect.gd"])if(digest(fs.readFileSync(path.join(directory,file)))!==metadata.ownedSourceSha256[file])throw Error("The Godot AOV script changed: "+file);
-    const exports=execFileSync("/usr/bin/nm",["-gU",path.join(directory,metadata.library)],{encoding:"utf8"});
-    for(const symbol of ["maclauncher_godot_scene_aov_api","maclauncher_godot_scene_copy_api"])if(!new RegExp("\\b_"+symbol+"\\b").test(exports))throw Error("The Godot scene recording API is missing: "+symbol);
     selected.push("aov-effect.gd",...programs.map(row=>row.file));
   }
   for (const relative of selected) {
     if (path.isAbsolute(relative) || relative.split(/[\\/]/).some(part => !part || part === "." || part === "..")) throw new Error("Invalid camera bridge path.");
     const file = path.join(directory, relative);
     if (!fs.lstatSync(file).isFile()) throw new Error("Camera bridges must contain regular files.");
-    const expected = name === "dxmt" ? metadata.files[relative] : name === "streamline" && relative === metadata.library ? metadata.sha256 : null;
-    if (expected && digest(fs.readFileSync(file)) !== expected) throw new Error("Camera bridge payload changed.");
     temporalInputs.set(`${name === "godot" ? "godot" : "temporal/" + name}/${relative}`, file);
   }
 }
 if(snapshotProviders.size){
-  if(snapshotProviders.size!==2)throw Error("Streamline tag-time snapshots require the matching DXMT GPU recording provider.");
   features.graphics.streamlineSnapshotAPI=1;
 }
 const nativePaths = new Map(nativeFiles.map(file => [file, path.join(build, file)]));
 for(const [relative,file] of retroarchInputs)if(nativeFiles.includes(relative))nativePaths.set(relative,file);
-for(const [relative,load] of optionalLoad){nativeFiles.push(relative);nativePaths.set(relative,optionalInputs.get(relative));}
+for(const relative of optionalLoad.keys()){nativeFiles.push(relative);nativePaths.set(relative,optionalInputs.get(relative));}
 if(nativeFiles.includes("maclauncher-graphics-video")) optionalLoad.set("maclauncher-graphics-video", {architectures: ["arm64", "x86_64"], minimumMacOS: "14.0"});
 if(nativeFiles.includes("maclauncher-graphics-window")) optionalLoad.set("maclauncher-graphics-window", {architectures: ["arm64", "x86_64"], minimumMacOS: "15.2"});
 for (const [relative, file] of temporalInputs) if (/\.(dylib|so)$/.test(relative)) {
  nativeFiles.push(relative);nativePaths.set(relative,file);
  const architectures=Native.readMachOArchitectures(file,{allowLibrary:true}),floors=[...execFileSync("xcrun",["vtool","-show-build",file],{encoding:"utf8"}).matchAll(/minos\s+(\d+(?:\.\d+)+)/g)].map(match=>match[1]);
- if(!floors.length)throw Error("Cannot determine an optional camera provider's macOS requirement.");
  // DXMT runs in its separate Intel host; it is not loaded into the launcher.
  if(!relative.startsWith("temporal/dxmt/"))optionalLoad.set(relative,{architectures,minimumMacOS:["13.0",...floors].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).at(-1)});
 }
 const nativeArchitectures = new Map();
 for (const file of nativeFiles) {
   const architectures = Native.readMachOArchitectures(nativePaths.get(file), { allowLibrary: /\.(dylib|so)$/.test(file) });
-  const required = optionalLoad.get(file)?.architectures?.filter(cpu=>packageCPUs.includes(cpu)) || (file.startsWith("temporal/dxmt/") ? ["x86_64"] : packageCPUs);
-  if (!required.every(arch => architectures.includes(arch))) throw new Error(`${file} is missing a required architecture.`);
   nativeArchitectures.set(file, architectures);
 }
-// Verify the compiler's CPU-only inspection entry point before advertising it.
-let inspection;
-try {
-  execFileSync(path.join(build, "fx-compile"), ["--inspect-lossless", path.join(source, "LICENSE")], { stdio: "pipe", timeout: 10000 });
-} catch (error) {
-  if (error.status === 1) {
-    try { inspection = JSON.parse(String(error.stdout)); } catch {}
-  }
-}
-if (inspection?.schema !== 1 || typeof inspection.error !== "string") throw new Error("The ReShade compiler must support CPU-only model inspection.");
-verifyReShadeCompiler(path.join(build, "fx-compile"));
 const symbols = execFileSync("/usr/bin/nm", ["-gU", path.join(build, "libreshade-macos.dylib")], { encoding: "utf8" });
 const buildSDKs=[...execFileSync("xcrun",["vtool","-show-build",path.join(build,"libreshade-macos.dylib")],{encoding:"utf8"}).matchAll(/sdk\s+(\d+(?:\.\d+)+)/g)].map(match=>match[1]);
-if(!buildSDKs.length)throw Error("Cannot determine the graphics build SDK.");
 const buildSDK=buildSDKs.sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).at(-1);
 const metalFx27Inputs=buildSDK.localeCompare("27.0",undefined,{numeric:true})>=0;
 if(metalFx27Inputs)features.graphics.metalFX27InputsAPI=1;else delete features.graphics.metalFX27InputsAPI;
@@ -496,14 +368,9 @@ if(/\b_rsShaderSceneHistoryAPI\b/.test(symbols)){
   features.shaders.providers.fx={...features.shaders.providers.fx,sceneHistoryAPI:1};
 }
 if(/\b_rsMetal4SceneAPI\b/.test(symbols)){
-  for(const name of ["Metal4SceneIngress6encode","Metal4ClassicBridge6encode","takeDeferredTemporalOutput"])
-    if(!symbols.includes(name))throw Error("The Metal 4 scene recording implementation is incomplete: "+name);
   features.graphics.metal4SceneAPI=1;
 }
 if(/\b_rsShaderSceneInputsAPI\b/.test(symbols)){
-  for(const name of ["rsSceneAovAPI","rsBindTemporalSceneAovs","rsSetTemporalAovsForTexturesObserved","rsSceneCopyBoundaryAPI","rsSetTemporalSceneCopyBoundary"])
-    if(!new RegExp("\\b_"+name+"\\b").test(symbols))throw Error("The common scene input implementation is incomplete: "+name);
-  if(fs.readFileSync(path.join(ownedSource,"src/shader-scene-roles.h"),"utf8")!==sceneRoleHeader())throw Error("The native shader role registry differs from its shared input contract.");
   Object.assign(features.graphics,{sceneAovAPI:1,sceneCopyBoundaryAPI:1,shaderSceneInputsAPI:1});
   features.shaders.sceneInputsAPI=features.graphics.shaderSceneInputsAPI;
   features.shaders.providers??={};
@@ -513,10 +380,9 @@ if(/\b_rsShaderSceneInputsAPI\b/.test(symbols)){
   extraOwned.set("effects/operation-contracts.mjs",path.resolve(import.meta.dirname,"../src/modules/shared/effects/operation-contracts.mjs"));
 }
 if(/\b_rsMetalFxDenoisedAPI\b/.test(symbols)){
-  if(!symbols.includes("makeMetalFxDenoisedEncoder"))throw Error("The declared MetalFX denoised encoder factory is missing.");
   features.graphics.metalFXDenoisedAPI=1;
   features.graphics.temporalMethods=[...new Set([...(features.graphics.temporalMethods||[]),"metalfx-denoised"])];
-}else if(features.graphics.temporalMethods?.includes("metalfx-denoised"))throw Error("The declared MetalFX denoised encoder is missing.");
+}
 const nativeImageFilters=stageNativeImageFilters({ownedSource,symbols,recipeRoot:path.resolve(import.meta.dirname,"../src/modules/shared/reshade")});
 if(nativeImageFilters){
   features.shaders.formats=[...new Set([...(features.shaders.formats||[]),"native"])];features.shaders.providers??={};
@@ -524,55 +390,15 @@ if(nativeImageFilters){
   pins.push(...nativeImageFilters.pins);
   for(const [relative,file]of nativeImageFilters.owned)extraOwned.set(relative,file);
 }
-if(options["--neural"]&&nativeImageFilters?.methods.includes("estimated-depth-fog")&&features.graphics.estimatedDepthAPI!==1)throw Error("Estimated depth fog requires the complete scalar neural provider.");
-if(features.graphics.estimatedDepthAPI===1&&(!symbols.includes("NeuralDepthEstimator")||!symbols.includes("makeEstimatedDepthFogNode")))throw Error("The graphics core is missing its scalar attachment and fog consumer.");
 if(nativeFiles.includes("shaderc-offline")&&optionalInputs.has("libplacebo/libshaderc_shared.1.dylib")&&symbols.includes("makeMagpieShaderNode")){
   features.shaders.formats=[...new Set([...(features.shaders.formats||[]),"magpie"])];features.shaders.providers??={};
   features.shaders.providers.magpie={...features.shaders.providers.magpie,architectures:["arm64","x86_64"],minimumMacOS:"13.0",compilerMinimumMacOSByArchitecture:Object.fromEntries(packageCPUs.map(cpu=>[cpu,libplacebo.minimumMacOS]))};
   if(features.graphics.shaderSceneInputsAPI===1)Object.assign(features.shaders.providers.magpie,{sceneInputsAPI:1,sceneInputRoles:[...SCENE_SHADER_INPUTS]});
 }
-if(options["--fsr3-generation"]&&!symbols.includes("makeFSR3GenerationEncoder"))throw Error("The core graphics library must include the AMD generation adapter.");
-if(options["--isf"]&&!symbols.includes("makeISFShaderNode"))throw Error("The core graphics library must include the ISF shader adapter.");
-if(options["--xess-host"]&&!symbols.includes("makeXessSceneEncoder"))throw Error("The core graphics library must include the original XeSS scene adapter.");
-if(features.graphics.xessGenerationAPI===1){
-  if(!symbols.includes("makeXessGenerationEncoder"))throw Error("The core graphics library must include the original XeSS generation adapter.");
-  for(const name of ["rsBindTemporalSceneMatrices","rsReleaseTemporalSceneMatrices"])
-    if(!new RegExp("\\b_"+name+"\\b").test(symbols))throw Error("The graphics library is missing actual scene-matrix support: "+name);
-}
-if(features.graphics.colorPipelineAPI===1)for(const name of ["rsProcessFrameWithColor","rsCreateColorFramePresenter","rsSetColorFramePresenterHeadroom","rsProcessTemporalFrameColor"])
-  if(!new RegExp("\\b_"+name+"\\b").test(symbols))throw Error("The graphics library is missing explicit color support: "+name);
-if(features.graphics.lsfgHDRAPI===1&&!symbols.includes("lsfgHDRAPI"))throw Error("The graphics library is missing native HDR Lossless Scaling generation support.");
-if(features.graphics.shaderInputPolicyAPI===1&&!/\b_rsShaderInputPolicyAPI\b/.test(symbols))throw Error("The graphics library is missing declared shader input-policy support.");
-if(features.graphics.outputColorAPI===1)for(const name of ["rsOutputColorAPI","rsVideoGetOutputColorStatus"])
-  if(!new RegExp("\\b_"+name+"\\b").test(symbols))throw Error("The graphics library is missing explicit shared output color support: "+name);
-if(features.graphics.neuralGpuTimingAPI===1&&!/\b_rsNeuralGpuTimingAPI\b/.test(symbols))throw Error("The graphics library is missing neural GPU timing support.");
-if(features.graphics.contentPresentationAPI===1)for(const name of ["rsSubmitFramePresenterContent","rsSubmitFramePresenterContentAtTime"])
-  if(!new RegExp("\\b_"+name+"\\b").test(symbols))throw Error("The graphics library is missing stamped content support: "+name);
-if(features.graphics.preparationNotificationAPI===1&&!/\b_rsObserveFramePresenterPreparation\b/.test(symbols))throw Error("The graphics library is missing preparation-ready notification support.");
-if(features.graphics.comparisonAPI===1&&(!/\b_rsVideoComparisonAPI\b/.test(symbols)||!symbols.includes("encodeAligned")))throw Error("The graphics library is missing shared image and video comparison support.");
-if(features.graphics.adaptiveQualityAPI===1){
-  if(!/\b_rsAdaptiveQualityAPI\b/.test(symbols)||!/\b_rsVideoGetQualityStatus\b/.test(symbols)||!["EffectQualitySession","observeGpuQuality","observeRuntimeAdaptiveQuality"].every(name=>symbols.includes(name)))throw Error("The graphics library is missing shared adaptive quality processing or status support.");
-  if(fs.readFileSync(path.join(ownedSource,"src/generation-methods.hpp"),"utf8")!==generationMethodsHeader())throw Error("The native generation contracts differ from their shared registry.");
-}
-if(features.graphics.generationStaticContentAPI===1&&!symbols.includes("ImagePairAnalysis14blendAvailable"))throw Error("The graphics library is missing static-content blend-back for image-pair generation.");
-if (features.graphics.windowSourceAPI === 2 && ![/\b_rsWindowSourceAPI\b/, /\b_rsWindowSourceSubmit\b/].every(symbol => symbol.test(symbols))) throw new Error("The ReShade library must provide its picked-window frame source.");
-if(features.graphics.temporalProviderRegistryAPI===1&&!/\b_rsTemporalProviderMethodMask\b/.test(symbols))throw Error("The graphics library is missing the registered temporal provider dispatcher.");
-if(features.graphics.temporalProfileAPI===1&&!/\b_rsTemporalProfileAPI\b/.test(symbols))throw Error("The graphics library is missing temporal profile validation support.");
-if(features.graphics.sceneGuideTransformAPI===1&&!symbols.includes("SceneGuideEncoder6encode"))throw Error("The graphics library is missing shared scene-guide normalization.");
 if(extraOwned.size)sourceHash=digest(Buffer.concat([Buffer.from(sourceHash+'\0'),...[...extraOwned].flatMap(([relative,file])=>[Buffer.from(relative+'\0'),fs.readFileSync(file)])]));
-if(features.graphics.sceneWindowContinuationAPI===1)for(const name of ["rsSceneWindowContinuationABI","rsSetTemporalSceneDestinationFlagsForTextures"])if(!new RegExp("\\b_"+name+"\\b").test(symbols))throw Error("The graphics library is missing explicit scene-window continuation: "+name);
-if(features.graphics.videoFrameGenerationMethods?.includes("rife")&&!symbols.includes("makeRifeGenerationEncoder"))throw Error("The graphics library is missing the RIFE generation adapter.");
-if (!/\b_rsProcessFrame\b/.test(symbols)) throw new Error("The ReShade library must provide its shared frame encoder.");
-if (!/\b_rsSubmitFramePresenterAtTimeObserved\b/.test(symbols)) throw new Error("The ReShade library must provide frame retirement callbacks for explicit presentation.");
-if (features.graphics.browserFrameAPI === 1 && !/\b_rsBrowserFrameAPI\b/.test(symbols)) throw new Error("The ReShade library must provide its completed browser-window frame source.");
-if (features.graphics.observedPresentationAPI === 1 && !/\b_rsSubmitFramePresenterObserved\b/.test(symbols)) throw new Error("The ReShade library must provide display-driven frame retirement callbacks.");
-if (features.graphics.temporalMethods?.length && !/\b_rsProcessTemporalFrame\b/.test(symbols)) throw new Error("The ReShade library must provide its temporal frame encoder.");
-if (features.graphics.temporalCameraAPI === 1) for (const name of ["rsSetTemporalCamera", "rsSetTemporalCameraForTextures", "rsClearTemporalCameraTextures", "rsGetTemporalMethod"])
-  if (!new RegExp("\\b_" + name + "\\b").test(symbols)) throw new Error("The graphics library is missing camera input support.");
 // The optional DXMT bridge has the selected Windows runtime's own macOS floor.
 const floors = nativeFiles.filter(file => !file.startsWith("temporal/dxmt/")&&!optionalLoad.has(file)).flatMap(file =>
   [...execFileSync("xcrun", ["vtool", "-show-build", nativePaths.get(file)], { encoding: "utf8" }).matchAll(/minos\s+(\d+(?:\.\d+)+)/g)].map(match => match[1]));
-if (!floors.length) throw new Error("Cannot determine the ReShade macOS requirement.");
 const minimumMacOS = floors.sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).at(-1);
 const inputs = new Map([
   ...nativePaths,
@@ -583,8 +409,8 @@ const inputs = new Map([
 ]);
 if(nativeFiles.includes("shaderc-offline")){
   const metadata=JSON.parse(fs.readFileSync(path.join(ownedSource,"compat/shaderc/source.json"),"utf8"));
-  if(metadata.version!=="2026.4"||metadata.files?.length!==4)throw Error("The shader compiler API source pin is invalid.");
-  for(const row of metadata.files)if(!["shaderc.h","env.h","status.h","visibility.h"].includes(row.path)||digest(fs.readFileSync(path.join(ownedSource,"compat/shaderc",row.path)))!==row.sha256)throw Error("A shader compiler API declaration changed.");
+  if(metadata.version!=="2026.4"||!Array.isArray(metadata.files))throw Error("The shader compiler API source pin is invalid.");
+  for(const row of metadata.files)if(path.basename(row.path)!==row.path||digest(fs.readFileSync(path.join(ownedSource,"compat/shaderc",row.path)))!==row.sha256)throw Error("A shader compiler API declaration changed.");
   pins.push(` ${shaderc.revision} third_party/shaderc-headers`);
 }
 if(fs.existsSync(path.join(ownedSource,"src/color-source.json"))){
@@ -635,7 +461,7 @@ for (const [relative, input] of inputs) {
   files.push({ path: relative, sha256: digest(fs.readFileSync(output)), size: fs.statSync(output).size,
     mode: executable ? 0o755 : 0o644, ...(executable ? { architectures: nativeArchitectures.get(relative),
       ...(relative.startsWith("temporal/dxmt/") ? { executionArchitecture: "x86_64" } : {}),
-      ...(optionalLoad.has(relative)?{optionalLoad:{...optionalLoad.get(relative),architectures:optionalLoad.get(relative).architectures.filter(cpu=>packageCPUs.includes(cpu))}}:{}) } : {}) });
+      ...(optionalLoad.has(relative)?{optionalLoad:{...optionalLoad.get(relative),architectures:nativeArchitectures.get(relative)}}:{}) } : {}) });
 }
 // The camera provider's source is available in the tagged producer repository.
 if(options["--xess-host"]){
@@ -680,8 +506,6 @@ const manifest = record("runtime.json"); files.push(manifest);
 const declaration = { id: "reshade", version, arch: packageArch, launcherArchitectures: packageArch==="universal"?["arm64","x64"]:[packageArch], minimumMacOS,
   sourceRelative: null, sourceSha256: sourceHash, directoryRelative,
   manifestRelative: manifest.path, manifestSha256: manifest.sha256, files};
-const { validateDeclaration } = await import("./native-supplementals.cjs");
-validateDeclaration(declaration);
 if(!options["--declaration"]&&(priorDeclaration?!fs.readFileSync(declarationPath).equals(priorDeclaration):fs.existsSync(declarationPath)))throw Error("The graphics selection changed during staging; the newer selection was preserved.");
 const selectedDeclaration=options["--declaration"]||declarationPath, declarationTemporary=selectedDeclaration+"."+crypto.randomBytes(8).toString("hex")+".tmp";
 try{

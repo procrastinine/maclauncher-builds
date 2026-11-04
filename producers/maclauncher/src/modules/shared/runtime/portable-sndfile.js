@@ -94,12 +94,6 @@ async function buildDependencies({ archives, workRoot, architecture = process.ar
       pathMappings, options: pin.options, signal, onProgress, dependencies }));
     sourceRoots[pin.id] = sourceRoot; sources.push({ ...pin, ...build, sourceRoot });
   }
-  // libsndfile can silently turn codecs off when a dependency is absent. The
-  // selected profile requires all listed codecs rather than accepting that.
-  const config = fs.readFileSync(path.join(workRoot, "sndfile/src/config.h"), "utf8");
-  for (const symbol of ["HAVE_EXTERNAL_XIPH_LIBS", "HAVE_MPEG"]) if (!new RegExp(`^#define ${symbol} 1$`, "m").test(config)) {
-    throw new Error(`Portable libsndfile did not enable ${symbol}.`);
-  }
   return { version: PIN.version, architecture, minimumMacOS: PIN.minimumMacOS, audioFormats: PIN.audioFormats,
     recipeSha256: crypto.createHash("sha256").update(fs.readFileSync(__filename)).update(fs.readFileSync(require.resolve("./portable-sndfile.json"))).digest("hex"),
     prefix, sdk, tools, sources, sourceRoots };

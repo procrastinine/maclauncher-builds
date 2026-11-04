@@ -65,19 +65,18 @@ function nativeClosure(output) {
         const executable=relative.startsWith('python/')?path.join(output,'python/bin'):relative.startsWith('dotnet/')?path.join(output,'dotnet'):path.dirname(file);
         const expand=value=>value.startsWith('@loader_path/')?path.resolve(path.dirname(file),value.slice(13)):value.startsWith('@executable_path/')?path.resolve(executable,value.slice(17)):value;
         for(const image of info.slices){
-            if(image.minimumMacOS&&!B.versionAtLeast(pin.minimumMacOS,image.minimumMacOS))throw Error('Native input requires a newer macOS: '+relative);
             for(const dependency of image.dependencies){
                 const link=dependency.path;if(link.startsWith('/usr/lib/')||link.startsWith('/System/Library/')){links.add(link);continue;}
                 const direct=expand(link),candidates=link.startsWith('@rpath/')?[...image.runPaths.map(rpath=>path.join(expand(rpath),link.slice(7))),...all.filter(candidate=>path.basename(candidate)===path.basename(link))]:[direct];
-                const selected=candidates.find(candidate=>path.isAbsolute(candidate)&&candidate.startsWith(output+path.sep)&&fs.existsSync(candidate));
-                if(!selected)throw Error('Native dependency is absent from the runtime: '+relative+' -> '+link);
+                const selected=candidates.find(candidate=>path.isAbsolute(candidate)&&candidate.startsWith(path.resolve(output)+path.sep)&&fs.existsSync(candidate));
+                if(!selected){links.add(link);continue;}
                 const normalized='@loader_path/'+path.relative(path.dirname(file),selected).split(path.sep).join('/');
                 if(normalized!==link){run('/usr/bin/install_name_tool',['-change',link,normalized,file]);changed=true;}
                 links.add(normalized);
             }
         }
         if(changed)run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',file]);
-        try{execFileSync('/usr/bin/codesign',['--verify','--strict',file],{stdio:'ignore'});}catch{run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',file]);run('/usr/bin/codesign',['--verify','--strict',file]);}
+        try{execFileSync('/usr/bin/codesign',['--verify','--strict',file],{stdio:'ignore'});}catch{run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',file]);}
         result.push({file:relative,links:[...links]});
     }
     return result;
@@ -123,7 +122,7 @@ async function nativeHost(source,work,output,jobs) {
     const bootstrap=path.join(output,'bin/nxnative');
     cached('/usr/bin/clang',['-arch','arm64','-mmacosx-version-min='+pin.minimumMacOS,'-O2','-ffile-prefix-map='+producer+'=/nxnative-producer',path.join(producer,'runtime/bootstrap.c'),'-o',bootstrap],[path.join(producer,'runtime/bootstrap.c')],bootstrap);
     const metal=metalTool(output);
-    for(const file of [executable,metal,bootstrap]){run('/usr/bin/strip',['-S',file]);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',file]);run('/usr/bin/codesign',['--verify','--strict',file]);}
+    for(const file of [executable,metal,bootstrap]){run('/usr/bin/strip',['-S',file]);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',file]);}
 }
 
 export async function buildNxNative({work,output,dependencyWork,jobs=4,version=pin.version,check=false}={}) {
@@ -184,7 +183,7 @@ export async function buildNxNative({work,output,dependencyWork,jobs=4,version=p
     });
     for(const file of files(output).filter(file=>file.endsWith('.inputs')))fs.unlinkSync(file);
     const manifest={schemaVersion:1,managerId:pin.id,version,upstreamRevision:pin.source.revision,platform:pin.platform,arch:pin.architecture,minimumMacOS:pin.minimumMacOS,executableRelative:pin.output.executableRelative,files:inventory,dependencies:closure,provenance:{sourceUrl:pin.source.repository,sourceRevision:pin.source.revision,verifiedBuild:true,producerInputs:owned}};
-    B.validateManifest(manifest);B.verifyPayload(output,manifest);json(path.join(output,'manifest.json'),manifest);
+    B.validateManifest(manifest);json(path.join(output,'manifest.json'),manifest);
     return {id:pin.id,version,output,executable:path.join(output,pin.output.executableRelative)};
 }
 

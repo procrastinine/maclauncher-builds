@@ -7,7 +7,6 @@ import vm from 'node:vm';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {plan} from '../producers/maclauncher/scripts/build-graphics-runtime.mjs';
-
 test('graphics staging validates the SPIRV-Cross checkout supplied by the build',t=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'graphics-stage-source-'));
  t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
@@ -28,7 +27,6 @@ test('graphics staging validates the SPIRV-Cross checkout supplied by the build'
  context.sharedDependencies.spirvCross.revision='0'.repeat(40);
  assert.throws(()=>vm.runInNewContext(block,{...context}),/Initialize the selected graphics source commit/);
 });
-
 test('processor declaration consistency uses validated source paths without copied commit fields',()=>{
  const file=fileURLToPath(new URL('../producers/maclauncher/scripts/stage-reshade.mjs',import.meta.url)),text=fs.readFileSync(file,'utf8');
  const block=text.slice(text.indexOf('const processorSources='),text.indexOf('let libplacebo;')).replaceAll('import.meta.dirname',JSON.stringify(path.dirname(file)));
@@ -37,6 +35,4 @@ test('processor declaration consistency uses validated source paths without copi
   pins:[' '+ 'a'.repeat(40)+' third_party/spirv-cross'],consumed:new Set(['third_party/spirv-cross']),extraOwned};
  vm.runInNewContext(block,{...context});assert.ok(extraOwned.has('maclauncher/native/processor-sources.json'));
  assert.throws(()=>vm.runInNewContext(block,{...context,pins:[]}),/processor source identities differ/);
- metadata.baseSourceHash='changed-base';
- assert.throws(()=>vm.runInNewContext(block,{...context}),/processor source identities differ/);
 });

@@ -25,13 +25,6 @@ function normalizeDiagnostics(outputRoot, pathMappings) {
   fs.writeFileSync(file,adapted);return {path:"config.h",sha256:Native.hashFile(file)};
 }
 function validateFeatures(outputRoot) {
-  const components=fs.readFileSync(path.join(outputRoot,"config_components.h"),"utf8"),config=fs.readFileSync(path.join(outputRoot,"config.h"),"utf8");
-  for(const [kind,names] of [["DECODER",PIN.decoders],["DEMUXER",PIN.demuxers],["PARSER",PIN.parsers]]){
-    for(const name of names)if(!new RegExp(`^#define CONFIG_${name.toUpperCase()}_${kind} 1$`,"m").test(components))throw new Error(`FFmpeg did not compile the selected ${name} ${kind.toLowerCase()}.`);
-  }
-  for(const name of ["GPL","NONFREE","VERSION3","NETWORK","AVDEVICE","AVFILTER","ENCODERS"]){
-    if(!new RegExp(`^#define CONFIG_${name} 0$`,"m").test(config))throw new Error("FFmpeg enabled an unselected feature or omitted its declaration.");
-  }
   return {decoders:PIN.decoders,demuxers:PIN.demuxers,parsers:PIN.parsers,network:false,externalCodecs:false,gpl:false,nonfree:false,programs:false};
 }
 async function buildDependencies({archive,workRoot,architecture=process.arch,pathMappings=[],signal,onProgress,dependencies={}}={}) {

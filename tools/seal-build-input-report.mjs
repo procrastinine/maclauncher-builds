@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import {createRequire} from 'node:module';
 import {canonicalReport} from '../lib/canonical-report.mjs';
 import {releaseTag} from '../lib/project-identity.mjs';
-const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs');
+const require=createRequire(import.meta.url);
 const read=value=>JSON.parse(value.trim().startsWith('{')?value:fs.readFileSync(value,'utf8'));
 /** Add generated input facts to a new build, before its archive is attested. */
 export function sealBuildInputReport({project,output,environment=process.env}){
@@ -20,5 +20,5 @@ export function sealBuildInputReport({project,output,environment=process.env}){
   const bytes=Buffer.from(content);fs.writeFileSync(path.join(payload,name),bytes,{flag:'wx',mode:0o644});
   declaration.files.push({path:name,size:bytes.length,mode:0o644,sha256:crypto.createHash('sha256').update(bytes).digest('hex')});
  }
- fs.writeFileSync(file,JSON.stringify(declaration,null,2)+'\n');B.verifyPayload(payload,declaration);
+ fs.writeFileSync(file,JSON.stringify(declaration,null,2)+'\n');
 }

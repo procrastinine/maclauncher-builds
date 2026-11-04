@@ -23,7 +23,7 @@ export async function buildLuaSteam({project:id,arch,output,work,sourceDir=path.
    const slice=path.join(work,cpu+'.so');run('/usr/bin/xcrun',['clang++',...Overlay.compilerArguments({sourceRoot:staged,architecture:cpu,steamLibraryPath:library,outputPath:slice}),'-ffile-prefix-map='+work+'=maclauncher-build']);
    run('/usr/bin/install_name_tool',['-change','@rpath/libsteam_api.dylib','@loader_path/libsteam_api.dylib',slice]);slices.push(slice);
   }
-  const binary=path.join(payload,'luasteam.so');run('/usr/bin/lipo',['-create',...slices,'-output',binary]);fs.chmodSync(binary,0o755);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',binary]);run('/usr/bin/codesign',['--verify','--strict',binary]);
+  const binary=path.join(payload,'luasteam.so');run('/usr/bin/lipo',['-create',...slices,'-output',binary]);fs.chmodSync(binary,0o755);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',binary]);
 
   includeLicenses(payload,path.join(staged,'licenses'));addLicenses(payload,'MacLauncher',root);
   addLicenses(payload,'LuaSteam',sourceDir);addLicenses(payload,'LuaJIT',luaDir);

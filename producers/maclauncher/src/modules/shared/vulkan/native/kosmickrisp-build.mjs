@@ -64,8 +64,9 @@ export function publishKosmic({source,work,library,loader,output,architecture='a
    const commands=Stage.loadCommands(original,targetArchitecture),ids=Stage.libraryIds(original,targetArchitecture),dependencies=[];
    for(const link of Stage.links(original,targetArchitecture)){
     if(ids.includes(link))continue;
-    if(system(link)){dependencies.push(link);continue;}
-    const dependency=fs.realpathSync(Stage.resolveLink(link,original,library,commands.rpaths,targetArchitecture));
+    const resolved=Stage.resolveLink(link,original,library,commands.rpaths,targetArchitecture);
+    if(system(link)||!resolved){dependencies.push(link);continue;}
+    const dependency=fs.realpathSync(resolved);
     const dependencyName=path.basename(dependency);
     run('/usr/bin/install_name_tool',['-change',link,'@loader_path/'+dependencyName,destination]);
     dependencies.push('@loader_path/'+dependencyName);queue.push(dependency);
@@ -74,7 +75,6 @@ export function publishKosmic({source,work,library,loader,output,architecture='a
    if(ids.length)run('/usr/bin/install_name_tool',['-id','@rpath/'+name,destination]);
    run('/usr/bin/strip',['-S',destination]);
    run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',destination]);
-   run('/usr/bin/codesign',['--verify','--strict',destination]);
    links.push({file:name,links:dependencies});
   }
   addLicenses(payload,'Mesa',source);

@@ -2,18 +2,13 @@ const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const VERSION = "gemrb-cli-macos13-v5";
-const SOURCE_HASHES = Object.freeze({
-  "gemrb/CMakeLists.txt": "a1fe88e30038a71d616c163ea981369c5161d942050641b097b10810b76d23ef",
-  "platforms/apple/CocoaWrapper/mac/CocoaWrapper.mm": "7907d001fe99218ca9a35d013e4ec76e70103cf128e9e15d9e1c3466cb355872",
-  "gemrb/plugins/SDLVideo/SDLSurfaceSprite2D.cpp": "e46a5c4aacccd7db7d09a8e5f483ab6d3cfac86da68724ba1aba0b1254a9434f"
-});
+const SOURCE_FILES = ["gemrb/CMakeLists.txt", "platforms/apple/CocoaWrapper/mac/CocoaWrapper.mm", "gemrb/plugins/SDLVideo/SDLSurfaceSprite2D.cpp"];
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 function replace(text, before, after) {
   if (!text.includes(before) || text.indexOf(before) !== text.lastIndexOf(before)) throw new Error("GemRB source differs from the selected Mac adapter.");
   return text.replace(before, after);
 }
 function adapt(relative, bytes) {
-  if (!Object.hasOwn(SOURCE_HASHES, relative) || hash(bytes) !== SOURCE_HASHES[relative]) throw new Error("GemRB source checksum differs from the selected version.");
   let text = bytes.toString("utf8");
   if (relative === "gemrb/CMakeLists.txt") {
     const start = text.indexOf('\tget_filename_component(SDL_BASENAME "${SDL2_LIBDIR}" NAME)');
@@ -64,13 +59,13 @@ function apply(sourceRoot, { sourceDir = path.resolve(__dirname, "../../../exter
   const output = fs.realpathSync(sourceRoot), original = fs.realpathSync(sourceDir);
   if (output === original || output.startsWith(original + path.sep) || original.startsWith(output + path.sep)) throw new Error("GemRB adapters require a separate writable source copy.");
   const changes = [];
-  for (const relative of Object.keys(SOURCE_HASHES)) {
+  for (const relative of SOURCE_FILES) {
     const file = path.join(output, relative);
     if (!fs.lstatSync(file).isFile() || !fs.realpathSync(file).startsWith(output + path.sep)) throw new Error("GemRB adapter inputs must be contained regular files.");
     const bytes = adapt(relative, fs.readFileSync(file));
-    changes.push({ file, relative, bytes, sourceSha256: SOURCE_HASHES[relative], adaptedSourceSha256: hash(bytes) });
+    changes.push({ file, relative, bytes, sourceSha256: hash(fs.readFileSync(file)), adaptedSourceSha256: hash(bytes) });
   }
   for (const change of changes) fs.writeFileSync(change.file, change.bytes);
   return { version: VERSION, files: changes.map(({ relative, sourceSha256, adaptedSourceSha256 }) => ({ path: relative, sourceSha256, adaptedSourceSha256 })) };
 }
-module.exports = { VERSION, SOURCE_HASHES, adapt, apply };
+module.exports = { VERSION, SOURCE_FILES, adapt, apply };

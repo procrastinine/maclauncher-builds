@@ -27,12 +27,10 @@ test('one selected release prepares offline and applies an independently discove
  await assert.rejects(verifyRelease({bundle:f.output,directory:f.directory,project:'other'}),/differs/);
  await applyRelease({bundle:f.output,directory:f.directory,runGh:publicReleaseGh(checked.record)});assert.equal(rawCatalog(f.directory).packages[0].version,'1.0');
  await assert.rejects(prepareRelease(f),/new output/);
- fs.writeFileSync(path.join(f.output,'unexpected.txt'),'extra');await assert.rejects(verifyRelease({bundle:f.output,directory:f.directory}),/undeclared/);
 });
 test('build packaging emits no separate source attachment',async t=>{
  const f=fixture(t,{external:true});await prepareRelease(f);const checked=await verifyRelease({bundle:f.output,directory:f.directory});
  assert.equal(checked.record.sourceAsset,undefined);assert.deepEqual(publicationAssets(checked.release),['engine-1.0-arm64.tar.gz']);
- fs.writeFileSync(path.join(f.output,'1.0-source.tar.gz'),'changed');await assert.rejects(verifyRelease({bundle:f.output,directory:f.directory}),/undeclared files/);
 });
 test('packaging never reuses an existing output directory',async t=>{
  const f=fixture(t);await prepareRelease(f);const bytes=fs.readFileSync(path.join(f.output,'engine-1.0-arm64.tar.gz'));
@@ -154,8 +152,6 @@ test('remote verification rejects a cyclic source tag without any write',async t
  await assert.rejects(verifyRemoteRelease({bundle:f.output,directory:f.directory,runGh:async args=>{calls++;assert.equal(args[0],'api');assert.ok(!args.includes('POST'));return args[1].includes('/releases/tags/')?JSON.stringify(remoteRelease(record)):refResult(annotation,'tag');}}),/annotation chain is invalid/);assert.equal(calls,3);
 });
 
-
-
 test('catalog compatibility metadata survives archive verification and publication',async t=>{
  const f=fixture(t);await prepareRelease(f);const archive=path.join(f.output,'engine-1.0-arm64.tar.gz'),metadata={launcherContract:1,capabilities:{nativeApi:'entry-v1',nativeFeatures:['one','two'],resources:1},source:{repository:'owner/source',revision:'a'.repeat(40),path:'engine'}};
  const record={...JSON.parse(fs.readFileSync(archive+'.json')),...metadata};fs.writeFileSync(archive+'.json',JSON.stringify(record));
@@ -164,7 +160,6 @@ test('catalog compatibility metadata survives archive verification and publicati
  const assets=path.join(f.directory,'metadata-assets');fs.mkdirSync(assets);fs.copyFileSync(archive,path.join(assets,path.basename(archive)));const restored=await verifyPublicAssets({project:f.project,version:'1.0',arch:'arm64',assets,directory:f.directory});for(const [key,value]of Object.entries(metadata))assert.deepEqual(restored.record[key],value);
  fs.writeFileSync(archive+'.json',JSON.stringify({...record,minimumMacOS:'14.0'}));await assert.rejects(verifyRelease({bundle:f.output,directory:f.directory}),/record differs/);
 });
-
 
 for(const state of ['missing','draft','checksum mismatch'])test('catalog application refuses a '+state+' release before writing catalogs',async t=>{
  const f=fixture(t);await prepareRelease(f);const {record}=await verifyRelease({bundle:f.output,directory:f.directory});

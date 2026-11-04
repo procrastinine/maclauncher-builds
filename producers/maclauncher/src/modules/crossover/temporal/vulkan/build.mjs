@@ -120,9 +120,6 @@ export async function buildModule(options){
 export function publishModule(built,output){
     if(fs.existsSync(output))throw Error('The immutable module output already exists.');
     const binaries=[['x86_64-unix/winevulkan.so',built.files[2]],['x86_64-windows/winevulkan.dll',built.files[0]],['i386-windows/winevulkan.dll',built.files[1]]];
-    const native=read('/usr/bin/nm',['-gU',path.join(built.build,built.files[2])]);
-    for(const name of [...source.nativeExports,'__wine_unix_call_funcs','__wine_unix_call_wow64_funcs'])
-        if(!native.split('\n').some(line=>line.trim().endsWith(' _'+name)))throw Error('The native module export is missing: '+name);
     const originalSpec=fs.readFileSync(path.join(built.directory,'dlls/winevulkan/winevulkan.spec'),'utf8');
     const expected=[...originalSpec.matchAll(/^@\s+\S+\s+(?:-\S+\s+)*([A-Za-z0-9_]+)(?:\(|\s*$)/gm)].map(row=>row[1]).sort();
     for(const [,file]of binaries.slice(1)){

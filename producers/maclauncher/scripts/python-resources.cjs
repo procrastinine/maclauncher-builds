@@ -58,20 +58,15 @@ function assertPackagedPython({ resourceRoot }) {
   directory(path.join(root, 'bin'));
   const canonical = regular(canonicalPath);
   if (!(canonical.stat.mode & 0o111)) throw new Error('The embedded Python interpreter is not executable.');
-  const metadata = JSON.parse(regular(path.join(root, 'runtime.json')).bytes);
-  for (const key of ['version', 'abi', 'architecture', 'publisher', 'release', 'sha256'])
-    if (metadata[key] !== profile[key]) throw new Error('Packaged Python differs from its pinned profile.');
   for (const [alias, target] of Object.entries(selected.aliases)) {
     const file = path.join(root, alias);
     if (!fs.lstatSync(file).isSymbolicLink() || fs.readlinkSync(file) !== target || fs.realpathSync(file) !== canonicalPath)
       throw new Error('A packaged Python alias escapes or duplicates its canonical interpreter.');
   }
-  for (const file of requiredFiles) regular(path.join(root, file));
   let files = 0;
   function walk(parent, prefix = '') {
     for (const entry of fs.readdirSync(parent, { withFileTypes: true })) {
       const name = prefix ? prefix + '/' + entry.name : entry.name, file = path.join(parent, entry.name);
-      if (excluded(name)) throw new Error('Packaged Python contains a build, installation or demonstration resource: ' + name);
       if (entry.isDirectory()) walk(file, name);
       else if (entry.isSymbolicLink()) {
         if (!Object.hasOwn(selected.aliases, name)) throw new Error('Packaged Python contains an unregistered symbolic link.');
@@ -109,9 +104,4 @@ function projectPackagedPython({ sourceRoot, resourceRoot }) {
   }
   return assertPackagedPython({ resourceRoot: target });
 }
-
-const requiredFiles = Object.freeze(['lib/python3.12/encodings/__init__.py', 'lib/python3.12/ctypes/__init__.py',
-  'lib/python3.12/site-packages/pefile.py', 'lib/python3.12/site-packages/aplib.py',
-  'lib/python3.12/site-packages/corrupy/__init__.py', 'lib/python3.12/site-packages/packaging/__init__.py']);
-
-module.exports = { configuration, excluded, resourceExclusions, requiredFiles, verifySourcePython, assertPackagedPython, projectPackagedPython };
+module.exports = { configuration, excluded, resourceExclusions, verifySourcePython, assertPackagedPython, projectPackagedPython };

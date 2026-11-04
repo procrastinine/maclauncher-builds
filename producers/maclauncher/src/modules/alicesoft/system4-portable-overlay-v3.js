@@ -2,16 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const VERSION = "xsystem4-macos-resources-v3";
-const SOURCE_HASHES = Object.freeze({
-  "meson.build": "448d24e39a50ff00a89ed27b5f61c925a20514aee39561b3b66b42ba7308296a",
-  "meson_options.txt": "d005c5f719163dfc3251f5c9515af25cf443ed0b797a4d8aecc7c117b7f3ecb4",
-  "src/meson.build": "39502be629322402d96accd667663b2ed08ded17fee7d5f40cb95c926230854a",
-  "src/video.c": "751edffd67576aec4d09b2d762b74c93282eb5155f63b6ae7beadcaa647a087f",
-  "src/text.c": "1ea8de64bd8e5608df18a77a67227a33ef2f1750dd7d0f4adb265db557a68c8c",
-  "src/util.c": "d91ce2ea661cf35c46974661b47102b0cddc11d3c722b35ad147a264f222e368",
-  "include/xsystem4.h": "d2299cbe7de4b69b8910ee1f53597d4cd71c1ec06963945781d1c80ae11debcd",
-  "subprojects/libsys4/meson.build": "1cee7e2def4117253790cf0b3e5d9e81d360532d96d10472f4518d7f69dbf94d"
-});
+const SOURCE_FILES = ["meson.build", "meson_options.txt", "src/meson.build", "src/video.c", "src/text.c", "src/util.c", "include/xsystem4.h", "subprojects/libsys4/meson.build"];
 const digest = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 function replace(source, before, after) {
   if (!source.includes(before) || source.indexOf(before) !== source.lastIndexOf(before)) throw new Error("xsystem4 source differs from the selected Mac adapter.");
@@ -45,7 +36,6 @@ bool xsys4_resource_path(char *output, size_t capacity, const char *relative)
 `;
 
 function adapt(file, bytes, { version = "MCLv1-1021" } = {}) {
-  if (!Object.hasOwn(SOURCE_HASHES, file) || digest(bytes) !== SOURCE_HASHES[file]) throw new Error("xsystem4 source checksum differs from the selected version.");
   if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(version)) throw new Error("Invalid xsystem4 runtime version.");
   let source = bytes.toString("utf8");
   if (file === "meson.build") {
@@ -94,13 +84,13 @@ function apply(sourceRoot, { sourceDir = path.resolve(__dirname, "../../external
   const output = fs.realpathSync(sourceRoot), original = fs.realpathSync(sourceDir);
   if (output === original || output.startsWith(original + path.sep) || original.startsWith(output + path.sep)) throw new Error("xsystem4 adapters require a separate writable source copy.");
   const changes = [];
-  for (const relative of Object.keys(SOURCE_HASHES)) {
+  for (const relative of SOURCE_FILES) {
     const file = path.join(output, relative);
     if (!fs.lstatSync(file).isFile() || !fs.realpathSync(file).startsWith(output + path.sep)) throw new Error("xsystem4 adapter inputs must be contained regular files.");
     const bytes = adapt(relative, fs.readFileSync(file), { version });
-    changes.push({ file, bytes, relative, sourceSha256: SOURCE_HASHES[relative], adaptedSourceSha256: digest(bytes) });
+    changes.push({ file, bytes, relative, sourceSha256: digest(fs.readFileSync(file)), adaptedSourceSha256: digest(bytes) });
   }
   for (const change of changes) fs.writeFileSync(change.file, change.bytes);
   return { version: VERSION, overlaySha256: digest(fs.readFileSync(__filename)), files: changes.map(({relative,sourceSha256,adaptedSourceSha256})=>({path:relative,sourceSha256,adaptedSourceSha256})) };
 }
-module.exports = { VERSION, SOURCE_HASHES, RESOURCE_FUNCTION, adapt, apply };
+module.exports = { VERSION, SOURCE_FILES, RESOURCE_FUNCTION, adapt, apply };

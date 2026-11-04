@@ -14,26 +14,26 @@ function temporary(t) {
 function inputs(t) {
   if(!fs.existsSync(path.join(Portable.sourcePath,"src/util.c"))){t.skip("xsystem4 source submodule is not initialized");return null;}
   const root=temporary(t),source=path.join(root,"source");
-  for(const relative of Object.keys(Overlay.SOURCE_HASHES)){fs.mkdirSync(path.dirname(path.join(source,relative)),{recursive:true});fs.copyFileSync(path.join(Portable.sourcePath,relative),path.join(source,relative));}
+  for(const relative of Overlay.SOURCE_FILES){fs.mkdirSync(path.dirname(path.join(source,relative)),{recursive:true});fs.copyFileSync(path.join(Portable.sourcePath,relative),path.join(source,relative));}
   return{root,source};
 }
 test("System4 portable overlay preserves upstream and declares exact dependency choices",t=>{
   const fixture=inputs(t);if(!fixture)return;
-  const originals=Object.keys(Overlay.SOURCE_HASHES).map(r=>fs.readFileSync(path.join(Portable.sourcePath,r)));
+  const originals=Overlay.SOURCE_FILES.map(r=>fs.readFileSync(path.join(Portable.sourcePath,r)));
   const result=Overlay.apply(fixture.source);assert.equal(result.files.length,8);
   const meson=fs.readFileSync(path.join(fixture.source,"meson.build"),"utf8");
   assert.match(meson,/appleframeworks.*OpenGL/);assert.match(meson,/required : get_option\('scheme'\)/);assert.match(meson,/required: get_option\('ffmpeg'\)/);assert.doesNotMatch(meson,/fallback : \['cglm'/);
   const video=fs.readFileSync(path.join(fixture.source,"src/video.c"),"utf8");assert.match(video,/#version 150/);assert.match(video,/xsys4_resource_path/);
   const font=fs.readFileSync(path.join(fixture.source,"src/text.c"),"utf8");assert.ok(font.indexOf("// user specified font")<font.indexOf("xsys4_resource_path(runtime_font"));
   assert.ok(fs.readFileSync(path.join(fixture.source,"src/meson.build"),"utf8").includes("fallback : '"+Portable.VERSION+"'"));
-  Object.keys(Overlay.SOURCE_HASHES).forEach((r,i)=>assert.deepEqual(fs.readFileSync(path.join(Portable.sourcePath,r)),originals[i]));
+  Overlay.SOURCE_FILES.forEach((r,i)=>assert.deepEqual(fs.readFileSync(path.join(Portable.sourcePath,r)),originals[i]));
   assert.throws(()=>Overlay.apply(Portable.sourcePath),/separate writable/);
 });
 test("all System4 overlay inputs are validated before mutation and external links are refused",t=>{
   const f=inputs(t);if(!f)return;const first=fs.readFileSync(path.join(f.source,"meson.build"));
-  fs.writeFileSync(path.join(f.source,"src/util.c"),"changed");assert.throws(()=>Overlay.apply(f.source),/checksum/);assert.deepEqual(fs.readFileSync(path.join(f.source,"meson.build")),first);
+  fs.writeFileSync(path.join(f.source,"src/util.c"),"changed");assert.throws(()=>Overlay.apply(f.source),/selected Mac adapter|no longer matches/);assert.deepEqual(fs.readFileSync(path.join(f.source,"meson.build")),first);
   fs.unlinkSync(path.join(f.source,"src/util.c"));fs.symlinkSync(path.join(Portable.sourcePath,"src/util.c"),path.join(f.source,"src/util.c"));assert.throws(()=>Overlay.apply(f.source),/contained regular/);
-  assert.throws(()=>Overlay.adapt("src/util.c",Buffer.from("wrong")),/checksum/);
+  assert.throws(()=>Overlay.adapt("src/util.c",Buffer.from("wrong")),/selected Mac adapter|no longer matches/);
   assert.throws(()=>Overlay.adapt("meson.build",first,{version:"bad'version"}),/Invalid.*version/);
 });
 test("native System4 resources follow a relocated executable, confine names and handle short buffers",{skip:process.platform!=="darwin"||process.arch!=="arm64"},t=>{

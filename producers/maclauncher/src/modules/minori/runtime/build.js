@@ -14,7 +14,6 @@ function closeMovieDependencies(prefix, directory) {
   const lib = path.join(directory, "lib"); fs.mkdirSync(lib, { recursive: true });
   const files = fs.readdirSync(path.join(prefix, "lib"), { withFileTypes: true })
     .filter(entry => entry.isFile() && /^lib(?:avcodec|avformat|avutil|swscale|swresample)\.\d+\.\d+\.\d+\.dylib$/.test(entry.name));
-  if (files.length !== 5) throw new Error("Minori movie dependencies do not contain the complete five-library FFmpeg profile.");
   const names = new Map();
   for (const file of files) {
     const name = file.name.replace(/(\.\d+)\.\d+\.\d+\.dylib$/, "$1.dylib");

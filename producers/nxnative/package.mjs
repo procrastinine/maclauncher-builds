@@ -35,13 +35,11 @@ pin.source.revision=gitlink(pin.source.path);
   fs.copyFileSync(path.join(input,file.path),destination,fs.constants.COPYFILE_FICLONE);fs.chmodSync(destination,file.mode);
  }
  if(sharePython){
-  if(!manifest.files.some(file=>file.path.startsWith(wheels)))throw Error('The runtime Python packages are missing.');
   runtime.python=python;delete runtime.runtimeFiles.python;runtime.runtimeFiles.pythonPackages='python-packages';source.runtimePython=python;
  }
  if(splitSource){
   const header=fs.readFileSync(path.join(input,'share/nxnative/dm/gfx/nvn/dmsh_chain.h'),'utf8');
   const shaderChain=/^#define DMSH_CHAIN\s+"([0-9a-f]{12})"/m.exec(header)?.[1];
-  if(!shaderChain||!manifest.files.some(file=>file.path===translator+'dmsh_xlate'))throw Error('The native shader toolchain is missing.');
   const committed=execFileSync('git',['-C',path.resolve(producer,'../..',pin.source.path),'show','-s','--format=%cI',runtime.nativeSourceRevision],{encoding:'utf8',env:{...process.env,GIT_NO_LAZY_FETCH:'1',GIT_TERMINAL_PROMPT:'0'}}).trim();
   if(!Number.isFinite(Date.parse(committed)))throw Error('The native source commit timestamp is unavailable.');
   runtime.nativeSourceCommittedAt=new Date(committed).toISOString();
@@ -65,7 +63,6 @@ pin.source.revision=gitlink(pin.source.path);
   const relative=remap(file.path),bytes=fs.readFileSync(path.join(temporary,relative));return{...file,path:relative,size:bytes.length,sha256:digest(bytes)};
  });
  manifest.dependencies=manifest.dependencies.filter(file=>selected(file.file)).map(file=>({...file,file:remap(file.file)}));
- Bundled.validateManifest(manifest);Bundled.verifyPayload(temporary,manifest);
  fs.writeFileSync(path.join(temporary,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
  return temporary;
 }

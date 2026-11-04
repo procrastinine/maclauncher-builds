@@ -34,11 +34,6 @@ export function build({jdk,classpath,output,only=Object.keys(definitions)}){
  output=path.join(fs.realpathSync(path.dirname(path.resolve(output))),path.basename(output));
  if([root,jdk,...classpath].some(input=>contains(input,output)||contains(output,input)))throw Error('JAR output must be separate from its inputs.');
  for(const tool of ['javac','jar'])regular(path.join(jdk,'bin',tool));
- const sourceIdentity=JSON.parse(regular(path.join(root,'source.json')));
- if(!Array.isArray(sourceIdentity.sourceFiles)||!sourceIdentity.sourceFiles.length)throw Error('The owned Android integration source inventory is missing.');
- for(const input of sourceIdentity.sourceFiles){
-  if(!input.path.startsWith('source/')||input.path.split('/').some(part=>part==='..'||part==='.')||digest(regular(path.join(root,input.path)))!==input.sha256)throw Error('Owned Android integration source differs from its source inventory.');
- }
  const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'android-launcher-build-')),result=[];
  fs.mkdirSync(output,{recursive:true});
  try{

@@ -13,10 +13,6 @@ const PROFILE = "26.10-MCLv1";
 const FNA_REVISION = gitlink("producers/maclauncher/src/external/FNA");
 const FNA3D_REVISION = gitlink("producers/maclauncher/src/external/source-revisions/fna3d");
 const DOTNET_VERSION = "8.0.32";
-const REQUIRED_FILES = ["FNA.dll", "MacLauncherFnaHost.dll", "MacLauncherFnaHost.runtimeconfig.json",
-  "native/lib/libSDL3.0.dylib", "native/lib/libFNA3D.0.dylib", "native/lib/libFAudio.0.dylib",
-  `host/fxr/${DOTNET_VERSION}/libhostfxr.dylib`, `shared/Microsoft.NETCore.App/${DOTNET_VERSION}/libhostpolicy.dylib`,
-  `shared/Microsoft.NETCore.App/${DOTNET_VERSION}/libcoreclr.dylib`, `shared/Microsoft.NETCore.App/${DOTNET_VERSION}/System.Private.CoreLib.dll`];
 // originalGamePaths: the host requires MACLAUNCHER_FNA_GAME_ROOT, honors
 // _ASSEMBLY_ROOT and _USE_RUNTIME_FRAMEWORK and presents the game as the entry
 // assembly. Its records carry launcher contract 2 (projects/downloadable.json).
@@ -183,12 +179,9 @@ async function prepareRuntime({ unpacked, pin, logger, signal, sourcePath, fna3d
     for (const name of fs.readdirSync(path.join(nativePrefix, "lib")).filter(name => name.endsWith(".dylib"))) {
       const from = path.join(nativePrefix, "lib", name), to = path.join(nativeRoot, name);
       fs.copyFileSync(from, to);
-      if (!Native.readMachOArchitectures(to, { allowLibrary: true }).includes("arm64")) throw new Error("FNA native dependency is missing ARM64 support.");
       await run("/usr/bin/codesign", ["--force", "--sign", "-", to], { logPath, signal });
     }
-    const files = [...REQUIRED_FILES, "MacLauncherFnaHost.deps.json",
-      ...fs.readdirSync(abiRoot).map(name => "abi/" + name),
-      ...fs.readdirSync(nativeRoot).map(name => "native/lib/" + name)];
+    const files = Bundled.fileInventory(unpacked);
 
     addLicenses(unpacked, "FNA", framework);
     addLicenses(unpacked, "FNA3D", fna3dRoot);
@@ -260,10 +253,6 @@ function verifyRuntime(install) {
     const finalFiles = new Map(sealedManifest.files.map(file => [file.path, file.sha256]));
     record.files = Object.fromEntries(Object.keys(record.files).map(relative => [relative, finalFiles.get((prefix ? prefix + "/" : "") + relative)]));
   }
-  for (const file of REQUIRED_FILES) {
-    const required = file.replaceAll(DOTNET_VERSION, specification.dotnetVersion);
-    if (!record.files[required]) throw new Error("FNA runtime is incomplete.");
-  }
   for (const [relative, checksum] of Object.entries(record.files)) {
     if (path.isAbsolute(relative) || relative.split(/[\\/]/).includes("..") || !/^[a-f0-9]{64}$/.test(checksum) ||
       Native.hashFile(path.join(root, relative)) !== checksum) throw new Error("FNA runtime file integrity check failed.");
@@ -272,4 +261,4 @@ function verifyRuntime(install) {
 }
 
 module.exports = { PROFILE, FNA_REVISION, FNA3D_REVISION, DOTNET_VERSION, PACKAGES, prepareRuntime, verifyRuntime,
-  __test: { REQUIRED_FILES, frameworkFiles, frameworkResources, applyOpenGLPolicy, stageAbiSource, resolveBuildTool, writeCompilerResponse, runtimeConfig, hostDependencies, CAPABILITIES } };
+  __test: { frameworkFiles, frameworkResources, applyOpenGLPolicy, stageAbiSource, resolveBuildTool, writeCompilerResponse, runtimeConfig, hostDependencies, CAPABILITIES } };

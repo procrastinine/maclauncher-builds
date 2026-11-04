@@ -12,8 +12,9 @@ test('included ART supplier retains the canonical acquisition metadata and sourc
  const relative='runtime/src/modules/android/art/supplier.json',file=path.join(root,'producers/android-launcher/supplied',relative),canonical=path.join(root,androidSource().directory,'src/modules/android/art/supplier.json');
  assert.deepEqual(fs.readFileSync(file),fs.readFileSync(canonical));
  const supplier=JSON.parse(fs.readFileSync(file));assert.ok(supplier.imageAcquisition);assert.ok(supplier.sources);
- const source=json('producers/android-launcher/source.json').files.find(row=>row.path==='supplied/'+relative),profile=json('producers/included-helpers/profiles/android-launcher.json').inputs.find(row=>row.path===relative);
- assert.equal(source.sha256,sha(file));assert.equal(profile.sha256,sha(file));assert.equal(profile.size,fs.statSync(file).size);
+ const profile=json('producers/included-helpers/profiles/android-launcher.json').inputs.find(row=>row.path===relative);
+ assert.equal(profile.output,'files/'+relative);
+ assert.equal(profile.kind,'file');
 });
 
 test('sealed ART FFI requires its archive and both API headers even when omitted from the inventory',()=>{

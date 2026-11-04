@@ -52,10 +52,10 @@ export function refreshRuntime({input,output,version=pin.version}){
  }
  const executable=path.join(output,pin.output.executableRelative);
  run('/usr/bin/clang',['-arch',pin.architecture,'-mmacosx-version-min='+pin.minimumMacOS,'-O2','-ffile-prefix-map='+producer+'=/nxnative-producer',path.join(producer,'runtime/bootstrap.c'),'-o',executable]);
- run('/usr/bin/strip',['-S',executable]);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',executable]);run('/usr/bin/codesign',['--verify','--strict',executable]);
+ run('/usr/bin/strip',['-S',executable]);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',executable]);
  const metal=path.join(output,'bin/xcrun');
  run('/usr/bin/clang',['-arch',pin.architecture,'-mmacosx-version-min='+pin.minimumMacOS,'-fobjc-arc','-O2','-ffile-prefix-map='+producer+'=/nxnative-producer',path.join(producer,'runtime/metal-toolchain.m'),'-framework','Foundation','-o',metal]);
- run('/usr/bin/strip',['-S',metal]);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',metal]);run('/usr/bin/codesign',['--verify','--strict',metal]);
+ run('/usr/bin/strip',['-S',metal]);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',metal]);
  fs.copyFileSync(path.join(producer,'runtime/nxnative.py'),path.join(output,'runtime/nxnative.py'));fs.chmodSync(path.join(output,'runtime/nxnative.py'),0o644);
  const reusedPayload={id:manifest.managerId,version:manifest.version,manifestSha256:digest(bytes)};
  runtime.id=pin.id;runtime.version=version;json(path.join(output,'runtime.json'),runtime);

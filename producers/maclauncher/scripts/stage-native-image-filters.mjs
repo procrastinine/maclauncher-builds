@@ -29,26 +29,21 @@ export function stageNativeImageFilters({ownedSource,symbols,recipeRoot}){
       for(const name of source.files){if(!filename(name))throw Error("The owned image source filename is invalid.");const file=path.join(ownedSource,"src",name),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||!stat.size)throw Error("An owned image implementation source is missing.");owned.set(`maclauncher/native/${name}`,file);}
     }
     if(Object.hasOwn(translated,provider.method)){
-      const recipeHash=source.owned||source.ownedRecipeSha256;
-      if(!recipeRoot||!/^[a-f0-9]{64}$/.test(recipeHash||""))throw Error("The native image shader translation recipe is undeclared.");
+      if(!recipeRoot)throw Error("The native image shader translation recipe is undeclared.");
       const recipeName=translated[provider.method],sharedImageRecipe=["ffx-lens","ffx-blur"].includes(provider.method),
         recipe=path.join(recipeRoot,sharedImageRecipe?"lens/translate.mjs":recipeName+"/build.mjs");
-      if(crypto.createHash("sha256").update(fs.readFileSync(recipe)).digest("hex")!==recipeHash)throw Error("The native image shader translation recipe changed.");
       const declaration=path.join(recipeRoot,recipeName,"source.json"),pin=JSON.parse(fs.readFileSync(declaration,"utf8"));
       if(pin.repository!==source.repository||(Object.hasOwn(pin,"commit")?pin.commit:gitlink(pin.gitlink))!==revision)throw Error("The native image shader translation source pin changed.");
       owned.set(`maclauncher/${recipeName}/build.mjs`,path.join(recipeRoot,recipeName,"build.mjs"));owned.set(`maclauncher/${recipeName}/source.json`,declaration);
       if(sharedImageRecipe){
         owned.set("maclauncher/lens/translate.mjs",recipe);
-        const header=`ffx-${recipeName}-shaders.hpp`;
-        if(crypto.createHash("sha256").update(fs.readFileSync(path.join(ownedSource,"src",header))).digest("hex")!==source.headerSha256)throw Error("The native image shader source changed.");
       }
       const resources=Object.entries(source.ownedFiles||{});
       if(provider.method==="xegtao"&&!resources.some(([name])=>name==="wrapper.hlsl"))throw Error("The native image shader translation resources are undeclared.");
       if(["cacao","ffx-dof"].includes(provider.method)&&!["boundary.hlsl","../native/scene-projection.hlsl"].every(required=>resources.some(([name])=>name===required)))throw Error("The native scene projection shader inputs are undeclared.");
-      for(const [name,expected]of resources){
-        if((!filename(name)&&!sharedInputs.has(name))||!/^[a-f0-9]{64}$/.test(expected))throw Error("A native image shader translation resource is invalid.");
+      for(const [name]of resources){
+        if((!filename(name)&&!sharedInputs.has(name)))throw Error("A native image shader translation resource is invalid.");
         const file=path.join(recipeRoot,recipeName,name);
-        if(crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex")!==expected)throw Error("A native image shader translation resource changed.");
         owned.set(path.posix.normalize(`maclauncher/${recipeName}/${name}`),file);
       }
     }

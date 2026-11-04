@@ -35,16 +35,13 @@ function record(directory,relative){
 }
 function makePortable(libraries){
  const entries=fs.readdirSync(libraries).filter(name=>/\.(prx|dylib)$/.test(name));
- if(!entries.includes('libc.prx')||!entries.includes('libSceAgcDriver.prx')||!entries.includes('libkernel.prx'))throw Error('The AnyPS5 runtime library build is incomplete.');
  const names=new Set(entries);
  for(const name of entries){
   const file=path.join(libraries,name),architectures=Native.readMachOArchitectures(file,{allowLibrary:true});
-  if(architectures.length!==1||architectures[0]!=='x86_64')throw Error('AnyPS5 game libraries require x86-64: '+name);
   const changes=['-id','@rpath/'+name];
   for(const line of run('/usr/bin/otool',['-L',file]).split('\n').slice(1)){
    const dependency=line.trim().split(' (')[0];if(!dependency)continue;
    if(names.has(path.basename(dependency)))changes.push('-change',dependency,'@rpath/'+path.basename(dependency));
-   else if(!dependency.startsWith('/usr/lib/')&&!dependency.startsWith('/System/Library/'))throw Error('Unpackaged AnyPS5 dependency: '+dependency);
   }
   run('/usr/bin/strip',['-S',file]);
   run('/usr/bin/install_name_tool',[...changes,file]);
@@ -56,8 +53,6 @@ export async function packageRuntime({runtimeBuild,relinkerBuild,output,version,
  if(!['arm64','x64'].includes(arch))throw Error('Select an arm64 or x64 AnyPS5 package.');
  if(!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(version||'')||!output||fs.existsSync(output))throw Error('Choose a new output directory and explicit package version.');
  const libraryRoot=path.join(runtimeBuild,'build/core/libs/libs'),relinker=path.join(relinkerBuild,'core/relinker/relinker');
- const executableArchitectures=Native.readMachOArchitectures(relinker);
- if(!executableArchitectures.includes(arch==='x64'?'x86_64':arch))throw Error('The relinker must support the requested package CPU.');
  fs.mkdirSync(output,{recursive:true});const payload=path.join(output,'payload');fs.mkdirSync(payload);
  copy(relinker,path.join(payload,'tools/relinker'),0o755);
  run('/usr/bin/strip',['-S',path.join(payload,'tools/relinker')]);

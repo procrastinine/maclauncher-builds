@@ -26,7 +26,7 @@ test("AI5 portable version preserves original-data and save adapters with a sepa
   const root = temporary(t); if (!fixture(root, t)) return;
   const original = fs.readFileSync(path.join(Previous.sourcePath, "src/asset.c"));
   const overlay = Portable.adaptSource(root);
-  assert.equal(overlay.upstreamRevision, Previous.REVISION);
+  assert.equal(overlay.upstreamRevision, Portable.REVISION);
   assert.equal(Object.keys(overlay.files).length, 12);
   assert.deepEqual(fs.readFileSync(path.join(Previous.sourcePath, "src/asset.c")), original);
   const assets = fs.readFileSync(path.join(root, "src/asset.c"), "utf8");

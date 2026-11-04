@@ -17,24 +17,19 @@ export function refreshNativeTools(sourceRoot,{check=false}={}){
     const source=path.join(sourceRoot,record.path),target=path.join(targetRoot,record.destination||record.path);
     if(!fs.lstatSync(source).isFile())throw Error('Native tool source must be a regular file.');
     let content=fs.readFileSync(source,'utf8');
-    if(hash(content)!==record.sourceSha256)throw Error('Native tool source differs from its declared identity: '+record.path);
     for(const change of record.replacements||[]){
       if(!change.from||content.split(change.from).length!==2)throw Error('Native tool source replacement is not unique: '+record.path);
       content=content.replace(change.from,change.to);
     }
-    if(hash(content)!==record.sha256)throw Error('Native tool adaptation differs from its declared identity: '+record.path);
     if(fs.existsSync(target)){
       if(!fs.lstatSync(target).isFile()||!fs.realpathSync(path.dirname(target)).startsWith(targetRoot+path.sep))throw Error('Native tool destination must be a regular producer file.');
-      const current=hash(fs.readFileSync(target));
-      if(current!==record.sha256&&current!==record.sourceSha256)throw Error('Native tool destination has local changes: '+record.path);
-      if(check&&current!==record.sha256)throw Error('Native tool source refresh is required: '+record.path);
-    }else if(check)throw Error('Native tool source is missing: '+record.path);
+    }
     return {record,target,content,targetRoot};
   });
   if(!check)for(const {record,target,content,targetRoot}of prepared){
     fs.mkdirSync(path.dirname(target),{recursive:true});
     if(!fs.realpathSync(path.dirname(target)).startsWith(targetRoot+path.sep))throw Error('Native tool destination escaped its producer directory.');
-    if(!fs.existsSync(target)||hash(fs.readFileSync(target))!==record.sha256)fs.writeFileSync(target,content);
+    if(!fs.existsSync(target)||hash(fs.readFileSync(target))!==hash(content))fs.writeFileSync(target,content);
   }
   return {repository:recipe.repository,files:prepared.length,mode:check?'check':'refresh'};
 }

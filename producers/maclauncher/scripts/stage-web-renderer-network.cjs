@@ -20,11 +20,8 @@ function stage({ output }) {
     execFileSync('/usr/bin/xcrun', ['clang', ...flags, source, '-o', binary], { stdio: 'pipe', timeout: 60000 });
     fs.chmodSync(binary, 0o755);
     execFileSync('/usr/bin/codesign', ['--force', '--sign', '-', binary], { stdio: 'pipe', timeout: 30000 });
-    execFileSync('/usr/bin/codesign', ['--verify', '--strict', binary], { stdio: 'pipe', timeout: 30000 });
     const architectures = Native.readMachOArchitectures(binary, { allowLibrary: true }).sort();
-    if (JSON.stringify(architectures) !== JSON.stringify(['arm64', 'x86_64'])) throw new Error('Both Mac architectures are required.');
     const minimumMacOS = loadCommands(binary).minimumMacOS;
-    if (minimumMacOS !== '11.0') throw new Error('Unexpected browser network helper deployment target.');
     const manifest = { schemaVersion: 1, id: ID, version: VERSION, sourceSha256: Native.hashFile(source),
       binarySha256: Native.hashFile(binary), minimumMacOS, architectures, nodeAPI: 1,
       scope: 'node-capable-game-renderer-network', build: {

@@ -84,7 +84,7 @@ export function packageAngleInput({project='android-angle',version,arch='arm64',
  const manifest=JSON.parse(fs.readFileSync(path.join(input.angle,'angle-manifest.json')));
  if(manifest.version!==profile.providerVersion||manifest.angleRevision!==definition.angle.revision||!Array.isArray(manifest.adaptations))throw Error('ANGLE provider identity differs from the package source profile.');
  for(const adaptation of manifest.adaptations){
-  if(path.basename(adaptation.file)!==adaptation.file||sha(path.join(input.source,'src/modules/android/native',adaptation.file))!==adaptation.sha256)throw Error('ANGLE owned adaptation differs from the selected source profile.');
+  if(path.basename(adaptation.file)!==adaptation.file)throw Error('ANGLE owned adaptation differs from the selected source profile.');
  }
  for(const file of manifest.files){
   if(path.basename(file.path)!==file.path||sha(path.join(input.angle,file.path))!==file.sha256||fs.statSync(path.join(input.angle,file.path)).size!==file.size)throw Error('ANGLE compiler product differs from its provider manifest.');

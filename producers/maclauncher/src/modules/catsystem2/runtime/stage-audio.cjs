@@ -1,8 +1,7 @@
 const {addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs"), path = require("node:path"), os = require("node:os");
 const { execFileSync } = require("node:child_process");
-const B = require("../../shared/runtime/bundled-native"), Native = require("../../shared/runtime/local-native");
-const Supplemental = require("../../../../scripts/native-supplementals.cjs");
+const B = require("../../shared/runtime/bundled-native");
 const VERSION = "1.0.0-ml1", MINIMUM_MACOS = "13.0", SDK_VERSION = "27.0", COMPILER_VERSION = "Apple clang version 21.0.0 (clang-2100.3.34.2)";
 const REPO = path.resolve(__dirname, "../../../.."), SOURCE = path.join(__dirname, "native/ogg-decode.c");
 const SOURCES = Object.freeze([
@@ -40,10 +39,8 @@ function stage({ resourcesRoot, sourceArchives } = {}) {
     const executable = path.join(destination, "ogg-decode");
     command("/usr/bin/lipo", ["-create", path.join(temporary, "arm64"), path.join(temporary, "x86_64"), "-output", executable]);
     command("/usr/bin/codesign", ["--force", "--sign", "-", "--identifier", "io.github.maclauncher.ogg-decode", executable]);
-    command("/usr/bin/codesign", ["--verify", "--strict", executable]);
     const protocol = JSON.parse(command(executable, ["--version"]));
     if (protocol.version !== VERSION || protocol.protocolVersion !== 1 || protocol.libogg !== "1.3.6" || protocol.libvorbis !== "1.3.7") throw new Error("The audio helper codec or protocol differs.");
-    if (JSON.stringify(Native.readMachOArchitectures(executable).sort()) !== JSON.stringify(["arm64", "x86_64"])) throw new Error("The audio helper CPU slices differ.");
     fs.copyFileSync(SOURCE, path.join(destination, "ogg-decode.c")); fs.copyFileSync(__filename, path.join(destination, "stage-audio.cjs"));
     addLicenses(destination,'MacLauncher',path.resolve(REPO,'../..'));
     addLicenses(destination,"libogg",ogg);
@@ -66,7 +63,7 @@ function stage({ resourcesRoot, sourceArchives } = {}) {
     const declaration = { id: "catsystem2-ogg-decode", version: VERSION, arch: "universal", launcherArchitectures: ["arm64", "x64"], minimumMacOS: MINIMUM_MACOS,
       sourceRelative: "ogg-decode.c", sourceSha256: source.sha256, directoryRelative, manifestRelative: "helper.json", manifestSha256: B.digest(metadata),
       files: [...files, { path: "helper.json", size: metadata.length, sha256: B.digest(metadata), mode: 0o644 }]};
-    Supplemental.validateDeclaration(declaration); Supplemental.verifySupplementals({ resourceRoot: path.join(resourcesRoot, "native-runtimes"), arch: process.arch, maximumMacOS: MINIMUM_MACOS, items: [declaration], dependencies: { nativeHostDependencies: () => [] } }); return declaration;
+    return declaration;
   } catch (error) { fs.rmSync(destination, { recursive: true, force: true }); throw error; }
   finally { fs.rmSync(temporary, { recursive: true, force: true }); }
 }

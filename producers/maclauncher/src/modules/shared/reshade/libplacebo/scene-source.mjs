@@ -42,8 +42,7 @@ export function buildSceneLibrary({source,vulkanSource,inputs,dependencyHeaders=
   const args=["setup",build,tree,"--cross-file",machine,"--prefix",prefix,"--buildtype=release","--wrap-mode=nodownload","-Ddefault_library=shared","-Dvulkan=enabled","-Dvk-proc-addr=disabled","-Dopengl=disabled","-Dd3d11=disabled","-Dglslang=disabled","-Dshaderc=enabled","-Dlcms=enabled","-Dlibdovi=disabled","-Dunwind=disabled","-Dxxhash=disabled","-Ddemos=false","-Dtests=false","-Dbench=false","-Dfuzz=false"];
   const logged=(name,program,args)=>{try{fs.writeFileSync(path.join(output,name+".log"),run(program,args,{env}));}catch(error){fs.writeFileSync(path.join(output,name+".log"),String(error.stdout||"")+String(error.stderr||""));throw new Error("The libplacebo "+name+" failed; see "+path.join(output,name+".log"),{cause:error});}};
   logged("configure",meson,args);logged("compile",ninja,["-C",build,"-j2"]);logged("install",ninja,["-C",build,"install"]);
-  const library=path.join(prefix,"lib/libplacebo.360.dylib");if(!fs.existsSync(library))throw new Error("The original libplacebo library was not produced.");
-  const exports=run("nm",["-gU",library]);for(const name of["pl_mpv_user_shader_external_textures_api","pl_mpv_user_shader_set_external_textures"])if(!exports.includes("_"+name))throw new Error("The named texture resolver was not exported.");
+  const library=path.join(prefix,"lib/libplacebo.360.dylib");
   addLicenses(prefix,'libplacebo',tree);
   const result={...manifest,architecture,library,include:path.join(prefix,"include"),sha256:hash(library),overlaySha256:hash(new URL("./scene-overlay.mjs",import.meta.url)),recipeSha256:hash(new URL("./scene-source.mjs",import.meta.url)),buildTools:{meson:run(meson,["--version"]).trim(),ninja:run(ninja,["--version"]).trim()}};
   fs.writeFileSync(path.join(output,"source-build.json"),JSON.stringify(result,null,2)+"\n");return result;

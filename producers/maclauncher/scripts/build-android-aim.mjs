@@ -13,7 +13,6 @@ import {prepareAimSources,source} from '../src/modules/android/providers/aim/sou
 const require = createRequire(import.meta.url);
 const B = require('../src/modules/shared/runtime/bundled-native');
 const Native = require('../src/modules/shared/runtime/local-native');
-const Supplemental = require('./native-supplementals.cjs');
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const minimumMacOS = '26.0';
 const binaries = ['aimctl','maclauncher-aim','aim-apps','aim-display','aim-binderd','aim-lock-holder','aim-pty-holder','guest-init','linux-run','linux-translate','android-image-extract','android-runtime-prepare'];
@@ -92,7 +91,6 @@ export function stageAim({build,angle,output,writeDistribution=true,environment=
       const full=path.join(payload,file.path),lines=run('/usr/bin/otool',['-L',full],{encoding:'utf8',stdio:['ignore','pipe','inherit']}).split('\n').slice(1).filter(Boolean);
       const links=lines.map(line=>line.trim().split(' (compatibility')[0]);
       if(file.path.endsWith('.dylib')) links.shift();
-      for(const link of links) if(!link.startsWith('/usr/lib/')&&!link.startsWith('/System/Library/')&&!link.startsWith('@loader_path/')) throw new Error('Unresolved native dependency '+file.path+': '+link);
       dependencies.push({file:file.path,links});
     }
     // The supplier derives these transactions from pinned AIDL and verifies
@@ -108,7 +106,6 @@ export function stageAim({build,angle,output,writeDistribution=true,environment=
     const declaration={id:'android-aim',version:version,arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS,directoryRelative:`android-aim/${version}/arm64`,
       manifestRelative:'manifest.json',manifestSha256:sha(path.join(temporary,'manifest.json')),sourceRelative:null,sourceSha256:sha(path.join(temporary,'manifest.json')),
       files:inventory(temporary),redistribution:'bundle'};
-    Supplemental.validateDeclaration(declaration);
     fs.mkdirSync(path.dirname(output),{recursive:true});
     fs.renameSync(temporary,output);
     if(writeDistribution)fs.writeFileSync(path.join(repo,'src/modules/android/aim-distribution.json'),JSON.stringify([declaration],null,2)+'\n');

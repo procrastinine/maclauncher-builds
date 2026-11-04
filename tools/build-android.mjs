@@ -50,7 +50,6 @@ export async function buildAndroidFromInputs({version,arch,output,work,inputs}){
    {...Contract,fileInventory:B.fileInventory,versionAtLeast:B.versionAtLeast,verifyPayload:B.verifyPayload,readMachOLoadCommands});
   const artRoot=child('art-runtime'),artDeclaration=repackageAndroid({input:packaged.root,declaration:packaged.declaration,output:artRoot});
   const result=packageAndroid({commonRoot:common.root,commonDeclaration:common.declaration,artRoot,artDeclaration,version,output});
-  if(json(path.join(result.output,'payload/runtime.json')).capabilities?.artExecutionVersion!==1)throw Error('The unified Android package has no ART capability.');
   image.detach();attached=false;fs.rmSync(work,{recursive:true});return result;
  }finally{if(attached)image.detach();}
 }

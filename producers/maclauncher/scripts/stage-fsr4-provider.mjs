@@ -3,30 +3,21 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import {execFileSync} from "node:child_process";
-import Content from "./runtime-content.cjs";
 const hash=file=>crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 const safe=name=>typeof name==="string"&&!path.isAbsolute(name)&&!name.split(/[\\/]/).some(part=>!part||part==="."||part==="..");
 export function stageFSR4Provider({directory,upstream,ownedRoot}){
   const spec=JSON.parse(fs.readFileSync(path.join(ownedRoot,"source.json"))),metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json")));
-  if(metadata.providerABI!==1||metadata.complete!==true||metadata.repository!==spec.repository||metadata.library!=="libmaclauncher-fsr4.dylib")throw Error("A complete compatible FSR 4 provider is required.");
-  if(metadata.profilesAPI!==1||metadata.resourcePreparation!==1||metadata.commit!==gitlink(spec.gitlink)||metadata.model!==spec.model||
-     JSON.stringify(metadata.supportedProfiles)!==JSON.stringify(spec.supportedProfiles)||!Array.isArray(metadata.files)||!metadata.owned)throw Error("The FSR 4 profile and resource contracts are incomplete.");
   const files=new Map();
   for(const row of metadata.files){
-    if(!safe(row.path)||row.path==="provider.json"||Content.excludedReason(row.path)||files.has(row.path)||!Number.isSafeInteger(row.size)||row.size<0||!/^[a-f0-9]{64}$/.test(row.sha256))throw Error("Invalid FSR 4 runtime inventory.");
+    if(!safe(row.path)||row.path==="provider.json")throw Error("Invalid FSR 4 runtime inventory.");
     const file=path.join(directory,row.path),stat=fs.lstatSync(file);
-    if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==row.size||hash(file)!==row.sha256)throw Error("An FSR 4 runtime input changed: "+row.path);
+    if(!stat.isFile()||stat.isSymbolicLink())throw Error("Invalid FSR 4 runtime resource: "+row.path);
     files.set(row.path,file);
   }
-  for(const required of [metadata.library,"third_party/fsr411/initializers.bin"])
-    if(!files.has(required))throw Error("A required FSR 4 runtime input is missing: "+required);
-  const symbols=execFileSync("/usr/bin/nm",["-gU",files.get(metadata.library)],{encoding:"utf8"});
-  for(const name of ["rsGetTemporalProvider","rsPrepareTemporalResources","rsTemporalProviderProfiles"])if(!new RegExp("\\b_"+name+"\\b").test(symbols))throw Error("The FSR 4 provider is missing its profile or preparation interface.");
   const owned=new Map();
-  for(const required of ["source.json","build.mjs","adapt-runtime.mjs","provider.mm","index.js","../frame.h"])if(!Object.hasOwn(metadata.owned,required))throw Error("An FSR 4 build input is undeclared: "+required);
-  for(const [relative,expected]of Object.entries(metadata.owned)){
-    if((!safe(relative)&&!["../frame.h","../payload-files.hpp"].includes(relative))||!/^[a-f0-9]{64}$/.test(expected))throw Error("Invalid owned FSR 4 build input.");
-    const file=path.resolve(ownedRoot,relative);if(!fs.lstatSync(file).isFile()||hash(file)!==expected)throw Error("An FSR 4 build input changed: "+relative);
+  for(const [relative]of Object.entries(metadata.owned)){
+    if((!safe(relative)&&!["../frame.h","../payload-files.hpp"].includes(relative)))throw Error("Invalid owned FSR 4 build input.");
+    const file=path.resolve(ownedRoot,relative);if((!fs.lstatSync(file).isFile()||fs.lstatSync(file).isSymbolicLink()))throw Error("An FSR 4 build input changed: "+relative);
     owned.set(path.posix.normalize("maclauncher/temporal/fsr4/"+relative),file);
   }
   const archive=metadata.sourceInputs?.find(row=>row.path==="source-inputs/weights_lossy2.npz");

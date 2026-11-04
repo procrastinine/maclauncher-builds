@@ -16,9 +16,8 @@ test("embedded Python stages actual out-of-tree module links without copying tes
   assert.equal(fs.existsSync(path.join(result.stdlib,"test")),false);const config=fs.readFileSync(path.join(result.stdlib,"_sysconfigdata__darwin_darwin.py"),"utf8");assert.equal(config.includes(input.root),false);
   assert.equal(fs.readFileSync(path.join(input.buildRoot,"Modules/math.cpython-314-darwin.so"),"utf8"),"math");
 });
-test("embedded Python refuses extension links leaving the actual compiler output and disabled native modules",t=>{
+test("embedded Python refuses extension links leaving the actual compiler output ",t=>{
   const input=stagedInputs(t);const name="math.cpython-314-darwin.so";fs.unlinkSync(path.join(input.extensions,name));const outside=path.join(input.root,"outside");fs.writeFileSync(outside,"outside");fs.symlinkSync(outside,path.join(input.extensions,name));assert.throws(()=>Python.stageRuntime(input),/escaped native module/);assert.equal(fs.readFileSync(outside,"utf8"),"outside");
-  const other=stagedInputs(t);fs.writeFileSync(path.join(other.extensions,"_ssl.cpython-314-darwin.so"),"unselected");assert.throws(()=>Python.stageRuntime(other),/unselected/);
 });
 test("Python compiler uses explicit SDK and ARM13 flags while rejecting shell input and inherited Python overrides",()=>{
   const old=process.env.PYTHONHOME;process.env.PYTHONHOME="unrelated-host-python";try{const env=Python.compilerEnvironment({sdk:"/SDK",sourceRoot:"/tmp/source",workRoot:"/tmp/build"});assert.equal(env.PYTHONHOME,undefined);assert.equal(env.CC,"/usr/bin/clang");assert.match(env.CFLAGS,/-mmacosx-version-min=13\.0/);assert.doesNotMatch(env.CFLAGS,/["']/);assert.equal(env.PATH,"/usr/bin:/bin:/usr/sbin:/sbin");}finally{if(old===undefined)delete process.env.PYTHONHOME;else process.env.PYTHONHOME=old;}

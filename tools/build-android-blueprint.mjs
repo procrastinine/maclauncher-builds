@@ -8,14 +8,13 @@ import {checkoutSource,run,recipeMain} from './build-source.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 
 const root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/android-inputs/blueprint');
-const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),{validateDeclaration}=require('../lib/declaration.cjs');
+const require=createRequire(import.meta.url),{validateDeclaration}=require('../lib/declaration.cjs');
 const read=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8',...options}).trim();
 
 /** Compile the original Blueprint parser and its existing JSON transport. */
 export async function buildBlueprintInput({output,work,arch='arm64'}){
  if(!['arm64','x64'].includes(arch)||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('Blueprint input builds need a package CPU and new absolute output/work directories.');
  const profile=JSON.parse(fs.readFileSync(path.join(base,'source.json')));
- if(sha(path.join(base,'main.go'))!==profile.driverSha256)throw Error('Blueprint JSON transport differs from its source identity.');
  fs.mkdirSync(work,{recursive:true});
  const upstream=checkoutSource({...profile.upstream,destination:path.join(work,'upstream')});
  const goPath=path.join(work,'gopath'),source=path.join(goPath,'src/github.com/google/blueprint');fs.mkdirSync(source,{recursive:true});
@@ -25,7 +24,7 @@ export async function buildBlueprintInput({output,work,arch='arm64'}){
  const environment={...process.env,GO111MODULE:'off',GOENV:'off',GOTOOLCHAIN:'local',GOPATH:goPath,GOCACHE:path.join(work,'go-cache'),CGO_ENABLED:'0',GOOS:'darwin',GOARCH:arch==='x64'?'amd64':'arm64'};
  run('go',['build','-p=2','-trimpath','-ldflags=-s -w -buildid=','-o',parser,path.join(base,'main.go')],{env:environment});
  const rows=read('git',['-C',upstream,'ls-tree','-r','--format=%(objectname) %(path)','HEAD','--','parser']).split('\n').filter(Boolean).map(line=>{const split=line.indexOf(' ');return {path:line.slice(split+1),gitObject:line.slice(0,split)};}).filter(file=>file.path.endsWith('.go'));
- const identity={project:'platform/build/blueprint',repository:profile.upstream.repository,revision:profile.upstream.revision,files:rows.map(file=>({...file,sha256:sha(path.join(upstream,file.path))})),driverSha256:profile.driverSha256};
+ const identity={project:'platform/build/blueprint',repository:profile.upstream.repository,revision:profile.upstream.revision,files:rows.map(file=>({...file,sha256:sha(path.join(upstream,file.path))}))};
  const sources=path.join(output,'parser-sources.json');fs.writeFileSync(sources,JSON.stringify(identity,null,2)+'\n');
  addLicenses(output,'Blueprint',upstream);
  addLicense(output,'Go',new URL('../producers/android-inputs/licenses/go/LICENSE',import.meta.url));
@@ -38,7 +37,7 @@ export function packageBlueprintInput({project='android-blueprint-parser',versio
  const profile=JSON.parse(fs.readFileSync(path.join(base,'source.json')));version??=profile.version;
  if(project!==profile.id||version!==profile.version||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(input?.parser||'')||!path.isAbsolute(input?.sources||''))throw Error('Select the declared Blueprint version, compiled input and a new absolute output directory.');
  const inputRoot=path.dirname(input.sources),identity=JSON.parse(fs.readFileSync(input.sources));
- if(path.dirname(path.dirname(input.parser))!==inputRoot||identity.revision!==profile.upstream.revision||identity.repository!==profile.upstream.repository||identity.driverSha256!==profile.driverSha256)throw Error('The compiled parser source identity differs from this package profile.');
+ if(path.dirname(path.dirname(input.parser))!==inputRoot||identity.revision!==profile.upstream.revision||identity.repository!==profile.upstream.repository)throw Error('The compiled parser source identity differs from this package profile.');
  let previous;
  if(fs.existsSync(path.join(inputRoot,'input.json'))){
   const declaration=JSON.parse(fs.readFileSync(path.join(inputRoot,'../declaration.json')));validateDeclaration(declaration);

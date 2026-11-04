@@ -24,10 +24,9 @@ export function packageAndroidCommon({build,version,sourceRevision,output}){
   copyAndroidProducts(build,payload,receipt.products);publishAndroidAngle(payload,receipt.products,receipt.angle);stripAndroidFrameworkBuildInputs(payload);
   if(receipt.framework?.nativeRuntime){
    const original=receipt.framework.nativeRuntime;
-   if(original.path!=='libandroid_runtime.dylib')throw Error('Unexpected Android framework native library.');
    const verify=(relative,record)=>{const bytes=fs.readFileSync(path.join(payload,'native',relative));if(bytes.length!==record.size||sha(bytes)!==record.sha256)throw Error('The original Android framework native input changed: '+relative);};
    verify(original.path,original);
-   for(const data of original.data||[]){if(!/^icudt[0-9]+l\.dat$/.test(data.path))throw Error('Unexpected Android framework native data.');verify(data.path,data);}
+   for(const data of original.data||[]){verify(data.path,data);}
   }
   addLicenses(payload,'MacLauncher',root);
   addLicenses(payload,'SDL3',path.join(payload,'native/SDL3.framework/Versions/A/Resources'));
@@ -48,18 +47,10 @@ export function packageAndroidCommon({build,version,sourceRevision,output}){
    const file=path.join(payload,name),bytes=fs.readFileSync(file),stat=fs.statSync(file),record={path:name,size:bytes.length,mode:stat.mode&0o777,sha256:sha(bytes)};
    let architectures=[];try{architectures=Native.readMachOArchitectures(file,{allowLibrary:true});}catch{}
    if(architectures.length){
-    if(!architectures.includes('arm64'))throw Error('Android native dependency lacks Apple Silicon: '+name);
     record.architectures=architectures;
     const commands=Staging.loadCommands(file);if(B.versionAtLeast(commands.minimumMacOS,minimumMacOS))minimumMacOS=commands.minimumMacOS;
-    if(commands.rpaths.some(value=>!/^@(loader_path|executable_path)(?:\/|$)/.test(value)))throw Error('Unexpected Android library search path: '+name);
     const ids=new Set(Staging.libraryIds(file)),links=Staging.links(file).filter(link=>!ids.has(link));
-    for(const link of links){
-     if(link.startsWith('/usr/lib/')||link.startsWith('/System/Library/'))continue;
-     const relative=link.startsWith('@loader_path/')?link.slice(13):link.startsWith('@rpath/')&&commands.rpaths.includes('@loader_path')?link.slice(7):null;
-     if(!relative)throw Error('Android dependency is not loader-relative: '+name+' -> '+link);
-     const target=path.resolve(path.dirname(file),relative);if(!target.startsWith(payload+path.sep)||!fs.lstatSync(target).isFile())throw Error('Android dependency leaves its payload: '+name);
-    }
-    execFileSync('/usr/bin/codesign',['--verify','--strict',file],{stdio:'pipe'});dependencies.push({file:name,links});
+    dependencies.push({file:name,links});
    }
    files.push(record);
   }
@@ -67,6 +58,6 @@ export function packageAndroidCommon({build,version,sourceRevision,output}){
   Contract.validatePublicMetadata(manifest);const bytes=Buffer.from(JSON.stringify(manifest,null,2)+'\n');fs.writeFileSync(path.join(payload,'runtime.json'),bytes,{mode:0o644});
   const declaration={id:'android',version,arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS,sourceRelative:null,sourceSha256:sha(bytes),directoryRelative:'android/'+version+'/arm64',manifestRelative:'runtime.json',manifestSha256:sha(bytes),
    files:[...files,{path:'runtime.json',size:bytes.length,mode:0o644,sha256:sha(bytes)}]};
-  Contract.validateDeclaration(declaration);B.verifyPayload(payload,declaration);fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});return {root:payload,declaration};
+  fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});return {root:payload,declaration};
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }

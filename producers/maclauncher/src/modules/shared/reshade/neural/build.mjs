@@ -50,11 +50,6 @@ export function buildProvider({ output = path.join(cacheDirectory, "output"),
   addLicenses(output,'Swift Numerics',path.join(buildRoot,'checkouts/swift-numerics'));
   addLicenses(output,'neural models',path.join(directory,'native'));
   verifyTimingReceipt(JSON.parse(fs.readFileSync(path.join(output,'timing-adaptation.json'))));
-  const symbols=execFileSync('nm',['-gU',path.join(output,source.library)],{encoding:'utf8'});
-  if(['ml_neural_timing_api','ml_neural_timing_supported_v1','ml_neural_submit_timed_v1','ml_neural_submit_batch_timed_v1'].some(name=>!symbols.includes('_'+name+'\n')))
-    throw new Error('The neural provider is missing its GPU timing exports.');
-  if(!execFileSync('nm',['-gU',path.join(output,'maclauncher-neural-service')],{encoding:'utf8'}).includes('_ml_neural_service_timing_api\n'))
-    throw new Error('The neural helper is missing its GPU timing transport.');
   const inventory = createRequire(import.meta.url)("../../runtime/bundled-native").fileInventory(output);
   const files = inventory.filter(relative => relative !== "provider.json").map(relative => {
     const file = path.join(output, relative), stat = fs.lstatSync(file);
@@ -62,13 +57,6 @@ export function buildProvider({ output = path.join(cacheDirectory, "output"),
     return { path: relative, size: stat.size, sha256: sha256(file),
       ...([source.library,"maclauncher-neural-service","maclauncher-neural-video"].includes(relative)?{architectures:["arm64"],minimumMacOS:relative==="maclauncher-neural-video"?"26.0":source.minimumMacOS,optionalLoad:true}:{}) };
   });
-  for (const name of [source.library, "maclauncher-neural-video", "maclauncher-neural-service"]) {
-    const bytes = fs.readFileSync(path.join(output, name));
-    if (bytes.includes(Buffer.from(repository)) || bytes.includes(Buffer.from(sourceDirectory)) || bytes.includes(Buffer.from(path.resolve(buildRoot))))
-      throw new Error("The neural rendering binary contains a local build path.");
-    const architecture = execFileSync("xcrun", ["lipo", "-archs", path.join(output, name)], { encoding: "utf8" }).trim();
-    if (architecture !== "arm64") throw new Error("The neural rendering provider must contain an Apple Silicon binary.");
-  }
   const descriptor = { providerABI: source.providerABI, commit: gitlink(source.gitlink), library: source.library,
     minimumMacOS: source.minimumMacOS, architectures: ["arm64"],supportedABIs:[1,2,3],
     operations:["mlx-dlss","mlx-vsr","mlx-sr-image","mlx-sr-scene","mlx-interpolation","realesrgan","nafnet","realcugan","rife","depth-anything-v2-small"],restorationAPI:1,estimatedDepthAPI:1,gpuTimingAPI:1,

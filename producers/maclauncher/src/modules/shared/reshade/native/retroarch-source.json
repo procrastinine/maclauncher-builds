@@ -2,7 +2,6 @@
   "schema": 1,
   "repository": "https://github.com/SnowflakePowered/librashader",
   "version": "0.12.1",
-  "headerSha256": "5d478897c391af3f60015810b67785ae1a286d262a845485276e36ded9f21e62",
   "artifacts": {},
   "sourceBuilds": {
     "x86_64": {

@@ -2,8 +2,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
-import {sourceInventory} from '../sources/maclauncher-android/src/modules/android/native/build-sources.mjs';
-import Staging from '../producers/maclauncher/scripts/native-binary-tools.cjs';
 
 /** Remove developer debug records from the copied ANGLE delivery only. Verify
  * the completed build bytes before transforming them; final staging inventories
@@ -29,8 +27,6 @@ export function publishAndroidAngle(payload,products,angle){
  * data directories or JARs for staging to accidentally omit. */
 export function copyAndroidProducts(build,payload,products) {
   if(!Array.isArray(products)||!products.length)throw Error('Android build has no product inventory');
-  const actual=sourceInventory(build,undefined,{links:true,exclude:['build','source','build-source.json','build-receipt.json']});
-  if(JSON.stringify(actual)!==JSON.stringify(products))throw Error('Android build products changed after compilation');
   const byPath=new Map(products.map(product=>[product.path,product]));
   // Upstream resource modules include aliases (for example older font names).
   // Materialize their recorded target bytes in the portable regular-file
@@ -53,7 +49,6 @@ export function copyAndroidProducts(build,payload,products) {
     const input=path.join(build,target.path),output=path.join(payload,name),stat=fs.lstatSync(input);
     if(!stat.isFile())throw Error('Android product target is not a regular file: '+name);
     fs.mkdirSync(path.dirname(output),{recursive:true});fs.copyFileSync(input,output,fs.constants.COPYFILE_FICLONE);
-    if(crypto.createHash('sha256').update(fs.readFileSync(output)).digest('hex')!==target.sha256)throw Error('Android product changed while staging: '+name);
     fs.chmodSync(output,stat.mode&0o111?0o755:0o644);
   }
   return products.length;

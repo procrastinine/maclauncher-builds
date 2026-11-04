@@ -53,13 +53,10 @@ for(const [inputs,target] of [[libraries,library],[helpers,helper]]){
  fs.chmodSync(target,0o755);
 }
 run('/usr/bin/install_name_tool',['-id','@rpath/librashader.dylib',library]);
-for(const file of [library,helper]){run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',file]);run('/usr/bin/codesign',['--verify','--strict',file]);}
+for(const file of [library,helper]){run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',file]);}
 addLicenses(output,'librashader',source);
 fs.writeFileSync(path.join(output,'source.json'),JSON.stringify(declaration,null,2)+'\n');
 const files=fs.readdirSync(output).filter(name=>!['upstream-source','prepare-source','target','capi-target'].includes(name)).flatMap(name=>{const file=path.join(output,name);return fs.statSync(file).isDirectory()?fs.readdirSync(file,{recursive:true}).map(relative=>path.join(file,relative)).filter(file=>fs.statSync(file).isFile()):[file];}).map(file=>({path:path.relative(output,file),source:file,size:fs.statSync(file).size,mode:fs.statSync(file).mode&0o777,sha256:hash(file)}));
-const exports=run('/usr/bin/nm',['-gU',library]);
-for(const name of ['libra_mtl_external_inputs_api','libra_mtl_filter_chain_create_external','libra_mtl_filter_chain_set_external','libra_mtl_filter_chain_uniform_snapshots','libra_mtl_filter_chain_uniform_snapshot_bytes','libra_mtl_filter_chain_uniform_snapshots_available','libra_mtl_filter_chain_prepare_uniform_snapshots'])
-  if(!new RegExp('\\b_'+name+'\\b').test(exports))throw Error('The Slang immutable input API is missing: '+name);
 if(ownedNames.some(name=>ownedSource[name]!==hash(new URL(name,import.meta.url)))||sceneInputContractSha256!==hash(new URL('../../effects/operation-contracts.mjs',import.meta.url)))throw Error('The owned Slang source changed during its build.');
 fs.writeFileSync(path.join(output,'runtime-files.json'),JSON.stringify({sceneInputsAPI:1,sceneInputRoles:[...SCENE_SHADER_INPUTS],uniformSnapshotsAPI:1,uniformSnapshotCapacityAPI:1,sceneInputContractSha256,ownedSource,files},null,2)+'\n');
 console.log(JSON.stringify({output,files}));

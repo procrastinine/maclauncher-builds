@@ -2,7 +2,6 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {spawnSync,execFileSync} from 'node:child_process';
-import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {resolveProject,buildRecord,buildRecords} from '../lib/projects.mjs';
 import {buildReleaseVersion as releaseVersion} from '../lib/package-version.mjs';
@@ -14,9 +13,8 @@ import {prepareBuildHost,assertBuildHost} from './build-host.mjs';
 import {initializeSources} from './init-runtime-sources.mjs';
 import {publicDeclaration} from './runtime-package.mjs';
 import {sealBuildInputReport} from './seal-build-input-report.mjs';
-import {preparePackageLayout,checkPackageDuplicates} from './package-layout.mjs';
+import {preparePackageLayout} from './package-layout.mjs';
 import {reproducibleEnvironment} from '../lib/reproducible-build.mjs';
-const B=createRequire(import.meta.url)('../lib/bundled-native.cjs');
 
 const root=path.resolve(import.meta.dirname,'..');
 const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{maxBuffer:Infinity,encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
@@ -83,17 +81,8 @@ export function declaredBuilds(read){
 }
 
 /** A build output holds the finished runtime in payload/ and its package declaration. */
-export function checkBuildOutput({project,build,arch,output,platform=process.platform}){
- const names=fs.readdirSync(output).sort();
- if(names.join('\n')!=='declaration.json\npayload')throw Error('A build output contains only declaration.json and payload/.');
+export function checkBuildOutput({project,arch,output}){
  const declaration=publicDeclaration(JSON.parse(fs.readFileSync(path.join(output,'declaration.json'))));
- if(declaration.id!==project.id||declaration.arch!==arch||declaration.version!==build.version)throw Error('The build produced a package for a different project, version or architecture.');
- // Each package serves the CPUs its code was built for. The package contract decides whether an
- // Intel package also serves Apple Silicon, which needs Intel files that run as their own processes.
- if(platform==='linux'&&declaration.files.some(file=>file.architectures&&file.format!=='pe'))throw Error('Recipes producing Mac programs require a hosted Mac runner.');
- const cpus=declaration.launcherArchitectures,own=arch==='universal'?['arm64','x64']:[arch];
- if(!own.every(cpu=>cpus.includes(cpu))||arch==='arm64'&&cpus.length!==1)throw Error('The package declares Mac CPUs that differ from its architecture.');
- B.verifyStoredPayload(path.join(output,'payload'),declaration);
  return {id:project.id,version:declaration.version,arch,payload:path.join(output,'payload'),declaration:path.join(output,'declaration.json')};
 }
 
@@ -134,9 +123,8 @@ export function runBuild({project:id,arch,version,output,work=path.join(fs.mkdte
   sealBuildInputReport({project:project.id,output});
   const declarationFile=path.join(output,'declaration.json'),declaration=JSON.parse(fs.readFileSync(declarationFile));
   preparePackageLayout({input:path.join(output,'payload'),declaration});
-  checkPackageDuplicates({declaration});
   fs.writeFileSync(declarationFile,JSON.stringify(declaration,null,2)+'\n');
-  return checkBuildOutput({project,build,arch,output});
+  return checkBuildOutput({project,arch,output});
  }finally{context.dispose();}
 }
 

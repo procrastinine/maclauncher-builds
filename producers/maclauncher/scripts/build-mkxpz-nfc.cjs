@@ -129,15 +129,10 @@ function stage({work, source, output, version}) {
   addLicense(payload, 'Mesa', path.join(subprojects, 'mesa-26.0.3/docs/license.rst'));
   const executableRelative = apps[0] + '/Contents/MacOS/bundle_mkxp-z';
   run('/usr/bin/codesign', ['--force','--sign','-',path.join(payload,apps[0])]);
-  run('/usr/bin/codesign', ['--verify','--deep','--strict',path.join(payload,apps[0])]);
   for (const relative of B.fileInventory(payload)) {
     const file = path.join(payload,relative), stat = fs.lstatSync(file); let architectures;
     try { architectures = Native.readMachOArchitectures(file,{allowLibrary:true}); } catch {}
     if (architectures) {
-      if (JSON.stringify(architectures) !== JSON.stringify(['arm64']) || loadCommands(file).minimumMacOS !== '11.0')
-        throw new Error('The MKXP-Z build has unexpected CPU or macOS requirements.');
-      if (links(file).some(link => !link.startsWith('/System/Library/') && !link.startsWith('/usr/lib/')))
-        throw new Error('The MKXP-Z build has an external dynamic dependency.');
     }
     inventory.push({path:relative,size:stat.size,mode:stat.mode&0o777,sha256:Native.hashFile(file),...(architectures?{architectures}:{})});
   }

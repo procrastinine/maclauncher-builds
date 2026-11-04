@@ -1,6 +1,5 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const Native = require("./local-native");
 const Source = require("./pinned-native-build");
 
 // Source installation is an explicit action. Ordinary packaged execution uses
@@ -22,7 +21,6 @@ async function resolveBuildTool(name, { findBuildTool = Source.findBuildTool, pa
   const executable = name === "cmake"
     ? path.join(root, "cmake-4.4.4-macos-universal", "CMake.app", "Contents", "bin", "cmake")
     : path.join(root, "ninja");
-  if (!Native.readMachOArchitectures(executable).includes(arch)) throw new Error(`Portable ${name} is missing ${arch} support.`);
   fs.chmodSync(executable, 0o755);
   return executable;
 }

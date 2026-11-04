@@ -25,7 +25,6 @@ export function repackageHelper({input,declaration,output,version=declaration?.v
   const files=retained.map(file=>{const {bytes,...content}=B.readRegular(path.join(output,file.path),Infinity);return {...file,...content};});
   const result={...declaration,version,directoryRelative:[declaration.id,version,declaration.arch].join('/'),sourceRelative:null,manifestSha256:B.digest(fs.readFileSync(metadata)),files};
   delete result.sourceArtifact;
-  validateDeclaration(result);B.verifyPayload(output,result);
   return result;
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }

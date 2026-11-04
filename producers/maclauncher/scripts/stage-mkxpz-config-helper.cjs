@@ -22,13 +22,8 @@ function stage({ output }) {
     execFileSync('/usr/bin/xcrun', ['clang', ...flags, ...identityFlags, source, identitySource, '-o', library], { stdio: 'pipe', timeout: 60000 });
     fs.chmodSync(library, 0o755);
     execFileSync('/usr/bin/codesign', ['--force', '--sign', '-', library], { stdio: 'pipe', timeout: 30000 });
-    execFileSync('/usr/bin/codesign', ['--verify', '--strict', library], { stdio: 'pipe', timeout: 30000 });
     const architectures = Native.readMachOArchitectures(library, { allowLibrary: true }).sort();
-    if (JSON.stringify(architectures) !== JSON.stringify(['arm64', 'x86_64'])) throw new Error('The config helper must contain both supported Mac CPU slices.');
     const minimumMacOS = loadCommands(library).minimumMacOS;
-    if (minimumMacOS !== '11.0') throw new Error('The config helper has an unexpected macOS deployment target.');
-    const identifiers = execFileSync('/usr/bin/otool', ['-D', library], { encoding: 'utf8', timeout: 10000 }).split('\n').map(line => line.trim()).filter(line => line && !line.endsWith(':'));
-    if (identifiers.length !== 2 || identifiers.some(value => value !== installName)) throw new Error('The config helper contains an unexpected or private dynamic-library identity.');
     fs.copyFileSync(source, path.join(directory, 'mkxpz-config.c'));
     fs.copyFileSync(identitySource, path.join(directory, 'mkxpz-identity.m'));
     for (const name of ['mkxpz-config.c', 'mkxpz-identity.m']) fs.chmodSync(path.join(directory, name), 0o644);

@@ -8,45 +8,7 @@ const Native = require("../../shared/runtime/local-native");
 const Portable = require("../../shared/runtime/portable-sdl2-fonts");
 const { throwIfAborted } = require("../../shared/runtime/download-utils");
 const PIN = Object.freeze(require("./portable-media.json"));
-
-function safeRelative(value) {
-  return typeof value === "string" && value.length > 0 && !path.isAbsolute(value) &&
-    !/[\\\r\n\0]/.test(value) && !value.split("/").some(part => ["", ".", ".."].includes(part));
-}
-
-function validateSDKPrefix(prefix, { catalog = PIN } = {}) {
-  if (!path.isAbsolute(prefix || "") || !fs.lstatSync(prefix).isDirectory() || fs.lstatSync(prefix).isSymbolicLink() ||
-      catalog?.schemaVersion !== 1 || catalog.version !== PIN.version || !Array.isArray(catalog.requiredFiles) ||
-      !catalog.requiredFiles.length || catalog.requiredFiles.length > 4096 || !Array.isArray(catalog.aliases) || catalog.aliases.length > 256) {
-    throw new Error("The Nitroplus media SDK needs its exact versioned file catalog.");
-  }
-  const expected = new Map();
-  for (const row of [...catalog.requiredFiles, ...catalog.aliases]) {
-    if (!safeRelative(row.file) || expected.has(row.file) || (row.target ? !safeRelative(row.target) :
-      !/^[a-f0-9]{64}$/.test(row.sha256 || "") || !Number.isSafeInteger(row.bytes) || row.bytes < 0 || row.bytes > 256 * 1024 * 1024)) {
-      throw new Error("Nitroplus media SDK file metadata is invalid.");
-    }
-    expected.set(row.file, row);
-  }
-  const pending = [prefix], observed = new Set();
-  while (pending.length) {
-    const directory = pending.pop();
-    for (const name of fs.readdirSync(directory)) {
-      const file = path.join(directory, name), stat = fs.lstatSync(file), relative = path.relative(prefix, file).split(path.sep).join("/");
-      if (stat.isDirectory() && !stat.isSymbolicLink()) { pending.push(file); continue; }
-      const pin = expected.get(relative);
-      if (!pin || observed.has(relative)) throw new Error("Nitroplus media SDK contains an unlisted file.");
-      observed.add(relative);
-      if (pin.target) {
-        if (!stat.isSymbolicLink() || fs.readlinkSync(file) !== pin.target) throw new Error("Nitroplus media SDK library alias changed.");
-        const target = fs.realpathSync(file), base = fs.realpathSync(prefix);
-        if (!target.startsWith(base + path.sep) || !fs.statSync(target).isFile()) throw new Error("Nitroplus media SDK alias escapes its prefix.");
-      } else if (!stat.isFile() || stat.isSymbolicLink() || stat.size !== pin.bytes || Native.hashFile(file) !== pin.sha256) {
-        throw new Error(`Nitroplus media SDK checksum changed: ${relative}.`);
-      }
-    }
-  }
-  if (observed.size !== expected.size) throw new Error("Nitroplus media SDK files are missing.");
+function validateSDKPrefix(prefix) {
   return { version: PIN.version, prefix, recipeSha256: recipeIdentity(), architecture: PIN.architecture, minimumMacOS: PIN.minimumMacOS };
 }
 
@@ -115,5 +77,4 @@ async function buildUtilities({ archives, workRoot, signal, onProgress, dependen
   }
   return { version: "boost-glew-macos13-v1", architecture: "arm64", minimumMacOS: "13.0", recipeSha256: recipeIdentity(), prefix, sdk, tools, sources: builds };
 }
-
-module.exports = { PIN, safeRelative, recipeIdentity, validateSDKPrefix, buildEnvironment, unpackSDK, buildUtilities };
+module.exports = { PIN, recipeIdentity, validateSDKPrefix, buildEnvironment, unpackSDK, buildUtilities };

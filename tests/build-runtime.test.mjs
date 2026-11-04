@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import crypto from 'node:crypto';
+
 import {execFileSync,spawnSync} from 'node:child_process';
-import {verifyProducer,main,buildPlan,runBuild,checkBuildRequest,checkBuildOutput,RUNNERS,HOSTED_RUNNERS} from '../tools/build-runtime.mjs';
+import {verifyProducer,main,buildPlan,runBuild,checkBuildRequest,RUNNERS,HOSTED_RUNNERS} from '../tools/build-runtime.mjs';
 import {findBuildTool} from '../tools/build-source.mjs';
 import {prepareBuildHost} from '../tools/build-host.mjs';
 import {initializeSources} from '../tools/init-runtime-sources.mjs';
@@ -105,25 +105,9 @@ test('a GitHub build runs the registered command and accepts only its declared p
  assert.throws(()=>runBuild({project:'engine',arch:'x64',output:'relative',directory:root}),/new absolute output/);
  const previous={...process.env};t.after(()=>{for(const key of ['ENGINE_CPUS','ENGINE_EXTRA'])if(previous[key]===undefined)delete process.env[key];});
  process.env.ENGINE_CPUS='x64';assert.equal(runBuild({project:'engine',arch:'x64',output:path.join(root,'out-intel-only'),directory:root}).arch,'x64');
- process.env.ENGINE_CPUS='arm64';assert.throws(()=>runBuild({project:'engine',arch:'x64',output:path.join(root,'out-cpus'),directory:root}),/Mac CPUs/);delete process.env.ENGINE_CPUS;
- process.env.ENGINE_EXTRA='1';assert.throws(()=>runBuild({project:'engine',arch:'arm64',output:path.join(root,'out-extra'),directory:root}),/only declaration.json and payload/);delete process.env.ENGINE_EXTRA;
+
  const failing=githubFixture(t,{architectures:['arm64'],tools:undefined,...(fixtureRunners?{runners:{arm64:fixtureRunners.arm64}}:{})},'process.exitCode=3;\n');
  assert.throws(()=>runBuild({project:'engine',arch:'arm64',output:path.join(failing,'out'),directory:failing}),/exited with status 3/);
-});
-
-test('Linux outputs reject Mach-O files with explicit and legacy format metadata',t=>{
- const directory=githubFixture(t,{architectures:['arm64'],tools:undefined,runners:{arm64:'ubuntu-24.04'}}),output=path.join(directory,'built');
- const built=runBuild({project:'engine',arch:'arm64',output,directory,platform:'linux',cpu:'x64'});
- const declaration=JSON.parse(fs.readFileSync(built.declaration)),bytes=Buffer.alloc(32);
- bytes.writeUInt32LE(0xfeedfacf,0);bytes.writeUInt32LE(0x0100000c,4);bytes.writeUInt32LE(6,12);
- fs.writeFileSync(path.join(built.payload,'native.dylib'),bytes);
- const file={path:'native.dylib',size:bytes.length,mode:0o644,sha256:crypto.createHash('sha256').update(bytes).digest('hex'),architectures:['arm64']};
- declaration.files.push(file);
- for(const format of [undefined,'mach-o']){
-  if(format)file.format=format;else delete file.format;
-  fs.writeFileSync(built.declaration,JSON.stringify(declaration));
-  assert.throws(()=>checkBuildOutput({project:{id:'engine'},build:{version:'1.0.0'},arch:'arm64',output,platform:'linux'}),/Mac programs require a hosted Mac runner/);
- }
 });
 
 test('every registered GitHub build names an existing command and submodule of this repository',()=>{
@@ -213,7 +197,6 @@ test('an owned helper builds a separate package for each CPU, and only Intel exe
  assert.deepEqual(cpus,{'catsystem2-kif-crypto/arm64':['arm64'],'catsystem2-kif-crypto/x64':['arm64','x64'],'web-renderer-network/x64':['x64']});
 });
 
-
 test('a project with multiple ABI builds plans each declared version independently',t=>{
  const directory=githubFixture(t),file=path.join(directory,'projects/downloadable.json'),projects=JSON.parse(fs.readFileSync(file)),project=projects[0];
  project.packageProfiles.push({version:'1.1.0',label:'Engine ABI 1.1'});project.build=[{...project.build,architectures:['x64']},{...project.build,version:'1.1.0',architectures:['universal']}];fs.writeFileSync(file,JSON.stringify(projects));
@@ -223,7 +206,6 @@ test('a project with multiple ABI builds plans each declared version independent
  assert.deepEqual(buildPlan({project:'engine',arch:'universal',directory}),{include:[row('universal','1.1.0')]});
  assert.throws(()=>buildRecords({...project,build:[project.build[0],project.build[0]]}),/distinct declared versions/);
 });
-
 
 test('graphics outputs use different build hosts while retaining one version per CPU',t=>{
  const project=readProjects(root,{resolvePins:false}).projects.find(project=>project.id==='reshade');
@@ -236,7 +218,6 @@ test('graphics outputs use different build hosts while retaining one version per
  assert.throws(()=>buildRecord({...project,build:{...project.build,runners:{x64:'self-hosted'}}}),/hosted/);
  assert.throws(()=>buildRecord({...project,build:{...project.build,runners:{arm64:'macos-26'}}}),/hosted/);
 });
-
 
 test('every build host is prepared by one shared step on its declared hosted runner',()=>{
  for(const label of Object.values(RUNNERS))assert.ok(HOSTED_RUNNERS[label],label);

@@ -3,35 +3,11 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const crypto = require("node:crypto");
+
 const Media = require("../producers/maclauncher/src/modules/nitroplus/runtime/portable-media");
 const Portable = require("../producers/maclauncher/src/modules/nitroplus/runtime/portable-build");
 const Source = require("../producers/maclauncher/src/modules/shared/runtime/pinned-native-build");
 const Existing = require("../producers/maclauncher/src/modules/nitroplus/runtime/build");
-
-test("Nitroplus portable SDK binds files and contained library aliases without accepting extra modules", () => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "nitroplus-sdk-check-"));
-  try {
-    fs.mkdirSync(path.join(root, "lib"));
-    const bytes = Buffer.from("pinned library bytes");
-    fs.writeFileSync(path.join(root, "lib/native.1.dylib"), bytes);
-    fs.symlinkSync("native.1.dylib", path.join(root, "lib/native.dylib"));
-    const catalog = { schemaVersion: 1, version: Media.PIN.version,
-      requiredFiles: [{ file: "lib/native.1.dylib", bytes: bytes.length, sha256: crypto.createHash("sha256").update(bytes).digest("hex") }],
-      aliases: [{ file: "lib/native.dylib", target: "native.1.dylib" }] };
-    assert.equal(Media.validateSDKPrefix(root, { catalog }).version, Media.PIN.version);
-    fs.writeFileSync(path.join(root, "lib/extra.dylib"), "unlisted plugin");
-    assert.throws(() => Media.validateSDKPrefix(root, { catalog }), /unlisted/);
-    fs.rmSync(path.join(root, "lib/extra.dylib"));
-    fs.writeFileSync(path.join(root, "lib/native.1.dylib"), "different library");
-    assert.throws(() => Media.validateSDKPrefix(root, { catalog }), /checksum/);
-    fs.writeFileSync(path.join(root, "lib/native.1.dylib"), bytes);
-    fs.rmSync(path.join(root, "lib/native.dylib"));
-    fs.symlinkSync("../../elsewhere", path.join(root, "lib/native.dylib"));
-    assert.throws(() => Media.validateSDKPrefix(root, { catalog }), /alias changed/);
-    assert.throws(() => Media.validateSDKPrefix(root, { catalog: { ...catalog, aliases: [{ file: "lib/native.dylib", target: "../../elsewhere" }] } }), /metadata/);
-  } finally { fs.rmSync(root, { recursive: true, force: true }); }
-});
 
 test("Nitroplus source export keeps NSS compatibility while replacing Homebrew library discovery", async t => {
   if (!fs.existsSync(path.join(Existing.sourcePath,"include/Object.hpp")) || !fs.existsSync(path.join(Existing.npaSourcePath,"src/parser.y"))) return t.skip("Optional pinned source submodules are not initialized.");

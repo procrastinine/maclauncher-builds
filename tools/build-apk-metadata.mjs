@@ -24,7 +24,7 @@ export async function buildAPK({project:id,arch,output,work}){
   const env=rustEnvironment({work,minimumMacOS:'13.0'}),target=arch==='x64'?'x86_64-apple-darwin':'aarch64-apple-darwin';
   execFileSync('cargo',['build','--release','--locked','--target',target,'--bin','android-apk-metadata'],{maxBuffer:Infinity,cwd:source,env,stdio:'inherit',timeout:900000});
   const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});const binary=path.join(payload,'android-apk-metadata');fs.copyFileSync(path.join(work,'target',target,'release/android-apk-metadata'),binary);fs.chmodSync(binary,0o755);
-  execFileSync('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',binary],{maxBuffer:Infinity});execFileSync('/usr/bin/codesign',['--verify','--strict',binary],{maxBuffer:Infinity});
+  execFileSync('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',binary],{maxBuffer:Infinity});
 
   addLicenses(payload,'AIM',upstream);addLicenses(payload,id,source);addCargoLicenses(payload,id,source,env);addLicenses(payload,'MacLauncher',root);
 

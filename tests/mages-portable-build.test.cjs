@@ -134,7 +134,7 @@ test("native linking rejects linked executables and incomplete library inputs be
   assert.deepEqual(calls, []);
 });
 
-test("Mach-O load-command floors reject macOS 27 despite a macOS 13 label", t => {
+test("Mach-O inspection records the actual deployment floor without enforcing a package prediction", t => {
   const root = directory(t), file = path.join(root, "library.dylib"), bytes = Buffer.alloc(56);
   bytes.writeUInt32LE(0xfeedfacf, 0); bytes.writeUInt32LE(0x0100000c, 4); bytes.writeUInt32LE(6, 12);
   bytes.writeUInt32LE(1, 16); bytes.writeUInt32LE(24, 20); bytes.writeUInt32LE(0x32, 32); bytes.writeUInt32LE(24, 36);
@@ -142,5 +142,5 @@ test("Mach-O load-command floors reject macOS 27 despite a macOS 13 label", t =>
   fs.writeFileSync(file, bytes);
   assert.equal(Build.assertMinimumMacOS(file).minimumMacOS, "13.0.0");
   bytes.writeUInt32LE(27 << 16, 44); fs.writeFileSync(file, bytes);
-  assert.throws(() => Build.assertMinimumMacOS(file), /above 13\.0/);
+  assert.equal(Build.assertMinimumMacOS(file).minimumMacOS,"27.0.0");
 });

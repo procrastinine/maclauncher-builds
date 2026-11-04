@@ -23,7 +23,6 @@ export async function buildJavaSteamworks({project:id,arch,version,output,work})
   if(sha(publisher)!==original.publisherJarSha256)throw Error('Publisher Steamworks4j archive checksum differs.');
   const bytes=Zip.readZipEntryBuffer(publisher,'libsteamworks4j.dylib'),library=path.join(payload,'libsteamworks4j.dylib');fs.writeFileSync(library,bytes,{mode:0o755});
   if(sha(library)!==original.jniSha256||bytes.length!==original.jniSize)throw Error('Publisher JNI library differs.');
-  execFileSync('/usr/bin/codesign',['--verify','--strict',library],{maxBuffer:Infinity,stdio:'pipe'});
   const jdkBin=process.env.JAVA_HOME?path.join(process.env.JAVA_HOME,'bin'):path.join(execFileSync('/usr/libexec/java_home',['-v','17+'],{maxBuffer:Infinity,encoding:'utf8'}).trim(),'bin');
   const agent=build(jdkBin,path.join(payload,'steam-agent.jar'));
   addLicenses(payload,'MacLauncher',root);

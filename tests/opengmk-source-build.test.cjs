@@ -5,13 +5,13 @@ const os = require("node:os");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 const test = require("node:test");
-const { prepareSourceBuild, DECOMPILER_SOURCE_HASHES } = require("../producers/maclauncher/src/modules/gamemaker/overlays/opengmk-macos/source-build");
+const { prepareSourceBuild, DECOMPILER_SOURCE_FILES } = require("../producers/maclauncher/src/modules/gamemaker/overlays/opengmk-macos/source-build");
 
 function fixture(t) {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "opengmk-offline-recipe-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const packageRoot = path.join(root, "package"), outputRoot = path.join(root, "build");
-  for (const file of Object.keys(DECOMPILER_SOURCE_HASHES)) {
+  for (const file of DECOMPILER_SOURCE_FILES) {
     const destination = path.join(packageRoot, "OpenGMK", file);
     fs.mkdirSync(path.dirname(destination), { recursive: true });
     fs.copyFileSync(path.join(__dirname, "../producers/maclauncher/src/external/OpenGMK", file), destination);
@@ -44,13 +44,13 @@ test("the decompiler recipe isolates its workspace and preserves upstream Rust w
   assert.equal(fs.existsSync(path.join(f.packageRoot, "OpenGMK/maclauncher-overlay.json")), false);
 });
 
-test("unlisted targets, changed pinned source and source-relative outputs fail before preparing a build", requirements({ sourceTree: 'producers/maclauncher/src/external/OpenGMK' }), t => {
+test("unlisted targets and source-relative outputs fail; source comments do not become a second pin", requirements({ sourceTree: 'producers/maclauncher/src/external/OpenGMK' }), t => {
   const f = fixture(t);
   assert.throws(() => prepareSourceBuild({ ...f, target: "unknown" }), /gm8emulator or gm8decompiler/);
   assert.equal(fs.existsSync(f.outputRoot), false);
   assert.throws(() => prepareSourceBuild({ ...f, outputRoot: path.join(f.packageRoot, "owned"), target: "gm8decompiler" }), /outside/);
   assert.equal(fs.existsSync(path.join(f.packageRoot, "owned")), false);
   fs.appendFileSync(path.join(f.packageRoot, "OpenGMK/gm8decompiler/Cargo.toml"), "# changed upstream input\n");
-  assert.throws(() => prepareSourceBuild({ ...f, target: "gm8decompiler" }), /source identity differs/);
-  assert.equal(fs.existsSync(f.outputRoot), false);
+  const prepared = prepareSourceBuild({ ...f, target: "gm8decompiler" });
+  assert.match(fs.readFileSync(path.join(prepared.sourceDir,"gm8decompiler/Cargo.toml"),"utf8"),/# changed upstream input/);
 });

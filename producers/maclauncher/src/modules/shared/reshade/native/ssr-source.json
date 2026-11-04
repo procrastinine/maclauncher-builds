@@ -11,7 +11,6 @@
     "servers/rendering/renderer_rd/shaders/effects/screen_space_reflection_inc.glsl": "8167dd11d8f8b604e258c25bcc751e487372328e2b712859e56d11ad8264a00d",
     "servers/rendering/renderer_rd/shaders/effects/specular_merge.glsl": "8f0ad1e522214fdd9498219ec4ed8c9f0b588ea6c768435c9c78b2ab9b5a4e8c"
   },
-  "ownedRecipeSha256": "71afd141da42b3527cab54c53da81ecce9e55c11913a8a43f4876e96d7329203",
   "shaders": [
     {
       "name": "scale",

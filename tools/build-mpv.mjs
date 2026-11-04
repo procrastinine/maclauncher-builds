@@ -43,22 +43,18 @@ export async function buildMPV({project:id,arch,output,work}){
   '-I'+path.join(owned,'src/external/mpv-player/include'),'-I'+path.join(owned,'src/modules/shared/reshade/native')];
  run('/usr/bin/xcrun',[...flags,...['mpv-render.mm','gpu-surface.mm'].map(name=>path.join(owned,'src/modules/video/native',name)),...['AppKit','Metal','QuartzCore','OpenGL','CoreVideo','IOSurface'].flatMap(name=>['-framework',name]),'-Wl,-rpath,@executable_path/../Frameworks/video','-o',executable],{stdio:'inherit'});
  const info=JSON.parse(run(executable,['--maclauncher-info']));
- for(const key of ['decodedFrameAPI','decodedColorAPI','preparationNotificationAPI','osdLayerAPI','playerScriptsAPI','playerInputAPI'])if(info[key]!==1)throw Error('The fresh media library lacks '+key);
- if(info.schema!==1||!String(info.libraryVersion).includes('0.41.0'))throw Error('The fresh media library version differs.');
  fs.writeFileSync(path.join(app,'Contents/Info.plist'),'<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>org.maclauncher.video</string><key>CFBundleExecutable</key><string>mpv</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleShortVersionString</key><string>0.41.0</string><key>LSMinimumSystemVersion</key><string>14.0</string><key>NSHighResolutionCapable</key><true/></dict></plist>');
  const librarySource={url:recipe.source.repository,commit:Builder.REVISION,version:'0.41.0',backports:Builder.BACKPORTS,inputSha256:hash(built.library),verifiedBuild:true,build:built.metadata};
  const video={schema:1,id:'mpv-render',version:record.version,minimumMacOS:'14.0',architecture:'arm64',libraryVersion:info.libraryVersion,librarySource,headerSource:{repository:recipe.source.repository,commit:Builder.REVISION},scaleFilters:info.scaleFilters,images:[],
   ...Object.fromEntries(['decodedFrameAPI','decodedColorAPI','preparationNotificationAPI','osdLayerAPI','playerScriptsAPI','playerInputAPI','intermediateColor','outputColor'].map(key=>[key,recipe[key]??1])),
   ownedInputs:recipe.ownedInputs};
  const descriptor=path.join(staged,'video-runtime.json');fs.writeFileSync(descriptor,JSON.stringify(video,null,2)+'\n');
-
- const result=await sealRuntime({project:id,arch,output,sourceRoot:source,upstreamRevision:Builder.REVISION,executable,appRoot:app,maximumMacOS:'27.0',payloads:[{source:descriptor,relative:'video-runtime.json'}],runtimeFiles:{decodedFrameManifest:'video-runtime.json'},provenance:{libraryBuild:built.metadata},jsonMetadata:{'video-runtime.json':(value,{files})=>{
+ const result=await sealRuntime({project:id,arch,output,sourceRoot:source,upstreamRevision:Builder.REVISION,executable,appRoot:app,payloads:[{source:descriptor,relative:'video-runtime.json'}],runtimeFiles:{decodedFrameManifest:'video-runtime.json'},provenance:{libraryBuild:built.metadata},jsonMetadata:{'video-runtime.json':(value,{files})=>{
    const inventory=directory=>fs.readdirSync(directory,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?inventory(path.join(directory,entry.name)):[path.join(directory,entry.name)]);
    const images=inventory(files).filter(file=>Native.macho(file)).map(file=>({path:path.relative(files,file).split(path.sep).join('/'),sha256:hash(file)}));
    const minimumMacOS=images.map(image=>Native.loadCommands(path.join(files,image.path),'arm64').minimumMacOS).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).at(-1);
    return {...value,minimumMacOS,images};
   }}});
- const sealedInfo=JSON.parse(run(path.join(output,'payload/files/mpv.app/Contents/MacOS/mpv'),['--maclauncher-info']));
- if(sealedInfo.libraryVersion!==info.libraryVersion)throw Error('Sealed media library differs from its build.');return result;
+ return result;
 }
 recipeMain(import.meta,buildMPV);

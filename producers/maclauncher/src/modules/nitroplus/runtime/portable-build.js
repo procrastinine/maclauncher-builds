@@ -102,8 +102,6 @@ async function buildPortableNPengine({ sourceDir = Previous.sourcePath, npaSourc
     `-DPKG_CONFIG_EXECUTABLE=${tools.pkg}`, `-DFLEX_EXECUTABLE=${tools.flex}`, `-DBISON_EXECUTABLE=${tools.bison}`,
     `-DBOOST_INCLUDE_DIR=${utilityPrefix}/include`, `-DBOOST_LOCALE_LIBRARY=${utilityPrefix}/lib/libboost_locale.dylib`,
     `-DZLIB_INCLUDE_DIR=${sdk}/usr/include`, `-DZLIB_LIBRARY=${sdk}/usr/lib/libz.tbd`,
-    `-DJPEG_INCLUDE_DIR=${media.prefix}/include`, `-DJPEG_LIBRARY=${media.prefix}/lib/libjpeg.8.3.2.dylib`,
-    `-DPNG_PNG_INCLUDE_DIR=${media.prefix}/include/libpng16`, `-DPNG_LIBRARY=${media.prefix}/lib/libpng16.16.56.0.dylib`,
     `-DMACLAUNCHER_NATIVE_RPATHS=${prefixes.map(value => value + "/lib").join(";")}`);
   const logPath = path.join(workRoot, "build.log"), run = dependencies.runBuildCommand || Source.runBuildCommand;
   fs.writeFileSync(logPath, `libnpengine ${VERSION}\nEngine ${REVISION}\nlibnpa ${NPA_REVISION}\nOverlay ${overlaySha256}\n`);

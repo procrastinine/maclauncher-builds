@@ -8,11 +8,8 @@
   },
   "architecture": "arm64",
   "minimumMacOS": "27.0",
-  "libraryInputSha256": "b355a957a8fc4435099ad5ca43a8405d042fc268315dea29ae19fa69cea95254",
   "artifact": {
-    "kind": "owned-source-build",
-    "sha256": "b355a957a8fc4435099ad5ca43a8405d042fc268315dea29ae19fa69cea95254",
-    "bytes": 4239488
+    "kind": "owned-source-build"
   },
   "backports": [
     "75b2ccfeb1ce4ed5a40ac9860fa74f3d1265e13f",
@@ -20,88 +17,67 @@
   ],
   "ownedInputs": [
     {
-      "path": "producers/mpv-render/v7/maclauncher/package.json",
-      "sha256": "0ed97b28e7d33d371ba351669602cf554166e8b55ed00702fd320c5d5a844a27"
+      "path": "producers/mpv-render/v7/maclauncher/package.json"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/scripts/build-mpv-library.cjs",
-      "sha256": "ed75a082db1a5e4537c23cade73a4f0fc9a906f0f5f2fbf76df929bca34c6719"
+      "path": "producers/mpv-render/v7/maclauncher/scripts/build-mpv-library.cjs"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/scripts/stage-mpv-render.cjs",
-      "sha256": "6b80c03b5a618c71fe1b65c2c90d40de7ef3ff3b5c063e309cdaad3ba462e06f"
+      "path": "producers/mpv-render/v7/maclauncher/scripts/stage-mpv-render.cjs"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/frame.h",
-      "sha256": "4fb8fcc8df79f75a784afce8c4a15d122be8ab811f139cbc9ca93b99daf4b51a"
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/frame.h"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/image-color.h",
-      "sha256": "1608d90688bcb8e8560a4a06e7b810134a3c2d8287812b3cb09de5933a4bceea"
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/image-color.h"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/presentation-content.h",
-      "sha256": "0f8993eb3345bcbb3978180229fd2f54cf6486a4ad1b7f1ff44a2ff1bc7b997f"
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/presentation-content.h"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/presentation-observed.h",
-      "sha256": "b74f3740304e395cfc24ae55aa7cd00ffd75085d07e51ef137f5c3df4aeaf2e0"
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/presentation-observed.h"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/presentation-source.h",
-      "sha256": "107a70534fd1e96c3f9e3b1ac37f2078a6d5ad5cbe6bdfab55d93af70a52a814"
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/presentation-source.h"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/presentation.h",
-      "sha256": "e06dcd4664169c4fd4e707789c4315b4f3a081e624bc98c686f85841b996e01c"
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/presentation.h"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/target-time.h",
-      "sha256": "d8e8f6b487e03fa85dacccf4e60c464b8e647abbd5259559396f7da46449a271"
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/target-time.h"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/app-bundle.js",
-      "sha256": "fe273deaeaf2cbc8d31ef4fdc7aab78a638f1609902e290eb056551b46e67c13"
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/app-bundle.js"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/bundled-native.js",
-      "sha256": "653e909b9769b63bd32b5efa210fbf953554f888bbc0ab880c2ea6439af49b3e"
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/bundled-native.js"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/local-native.js",
-      "sha256": "7bcbc75f773bea4bd7456ec36b9f38dc53df639f2b7be1b78cf699a79d4d90ef"
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/local-native.js"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/native-focus.js",
-      "sha256": "2950d836eb39dc2e0a873b8f2bf2b5988dcf98ae000f0c0301cadb643ae5bdca"
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/native-focus.js"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/gpu-surface.hpp",
-      "sha256": "e122bbf3cc8685287a8bbcdf22a6349e0ea048a79a40434932e95aef37fd7194"
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/gpu-surface.hpp"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/gpu-surface.mm",
-      "sha256": "08518dcbadb2847b9b0594a2810ff9bdaae442320ea54d29f20709a3899d4140"
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/gpu-surface.mm"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/mpv-frame-metadata.h",
-      "sha256": "5ddbe4cd4e130b4ef53965c5429f8f9822ce8464b6d7537dba73aca16c644c89"
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/mpv-frame-metadata.h"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/mpv-frame-metadata.patch",
-      "sha256": "0ad025b167501139f55cfce513431c1b76df22546b775413b3021f0871696f48"
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/mpv-frame-metadata.patch"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/mpv-render-layers.patch",
-      "sha256": "33ab29d1c56c13fb186f0534455b856a4e28a15d8df06bf21ffdbf9580b4664b"
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/mpv-render-layers.patch"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/mpv-render.mm",
-      "sha256": "173ff3b68dc8d675f0603947fa71683303c810a0a56bc588e877d2374c06250b"
+      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/mpv-render.mm"
     },
     {
-      "path": "producers/maclauncher/scripts/native-binary-tools.cjs",
-      "sha256": "dac3aed56175a869abae84775ea825acafce09466f92a26640e69cb88c46cbd2"
+      "path": "producers/maclauncher/scripts/native-binary-tools.cjs"
     }
   ],
   "buildEntry": "producers/mpv-render/v7/build.mjs",

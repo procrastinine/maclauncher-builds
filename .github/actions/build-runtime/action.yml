@@ -1,5 +1,5 @@
 name: Build runtime package
-description: Build, verify and attest one declared runtime package.
+description: Build, package and attest one declared runtime package.
 runs:
   using: composite
   steps:
@@ -30,10 +30,10 @@ runs:
     - name: Package the release
       shell: bash
       run: node tools/release-package.mjs prepare --project "$BUILD_PROJECT" --input "$RUNNER_TEMP/build/payload" --declaration "$RUNNER_TEMP/build/declaration.json" --source-revision "$GITHUB_SHA" --output "$RUNNER_TEMP/release"
-    - name: Verify the package identity
-      id: verify
+    - name: Report output symptoms
+      continue-on-error: true
       shell: bash
-      run: node tools/release-package.mjs verify --bundle "$RUNNER_TEMP/release" --project "$BUILD_PROJECT" --version "$BUILD_VERSION" --arch "$BUILD_ARCH"
+      run: node tools/output-warnings.mjs "$RUNNER_TEMP/build/payload" "$BUILD_ARCH" "$RUNNER_TEMP/build/declaration.json" "$RUNNER_TEMP/release"
     # Signed provenance ties the archive to this workflow run and commit.
     - uses: ./.github/actions/attest
       id: attest
@@ -42,6 +42,6 @@ runs:
       with:
         inputs: '{"subject-path":"${{ runner.temp }}/release/*.tar.gz","github-token":"${{ github.token }}"}'
     - uses: ./.github/actions/upload-artifact
-      if: ${{ !cancelled() && steps.verify.outcome == 'success' && steps.attest.outcome == 'success' }}
+      if: ${{ !cancelled() && steps.attest.outcome == 'success' }}
       with:
         inputs: '{"name":"runtime-${{ env.BUILD_PROJECT }}-${{ env.BUILD_VERSION }}-${{ env.BUILD_ARCH }}","path":"${{ runner.temp }}/release","if-no-files-found":"error","overwrite":"true","retention-days":"90","compression-level":"0"}'

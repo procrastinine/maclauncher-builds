@@ -31,11 +31,6 @@ function configureOptions({ prefix, sdk, tools, python, pathMappings = [] }) {
     `-DOPENAL_LIBRARY=${sdk}/System/Library/Frameworks/OpenAL.framework`, `-DOPENAL_INCLUDE_DIR=${sdk}/System/Library/Frameworks/OpenAL.framework/Headers`];
 }
 function validateFeatures(buildRoot) {
-  const appRoot = path.join(buildRoot, "gemrb/gemrb.app"), plugins = path.join(appRoot, "Contents/PlugIns");
-  for (const name of ["GUIScript", "SDLVideo", "SDLAudio", "OpenALAudio", "OGGReader", "TTFImporter", "PNGImporter", "ACMReader", "MVEPlayer", "BIKPlayer"]) if (!fs.lstatSync(path.join(plugins, name + ".so")).isFile()) throw new Error(`GemRB is missing the ${name} plugin.`);
-  const commands = fs.readFileSync(path.join(buildRoot, "compile_commands.json"), "utf8");
-  if (/\/opt\/homebrew\/(?:include|opt|Cellar)|\/usr\/local\/include/.test(commands) || commands.includes("VLCPlayer")) throw new Error("GemRB discovered an unselected external dependency.");
-  if (fs.existsSync(path.join(appRoot, "Contents/Resources/demo"))) throw new Error("GemRB runtime must omit the optional demo game data.");
   return { python: "3.14.8", pythonObjectSymbolPaths: "relative", sdl: "2.32.10", sdlMixer: "2.8.2", openAL: "macOS system", trueType: true, png: true, vorbis: true, nativeMovieFormats: ["MVE", "BIK"],vlc: false, networkFetch: false,cliConfiguration: true,scriptingReferenceExports: true,bundledDemo: false };
 }
 

@@ -103,11 +103,6 @@
       "sdk/include/FidelityFX/gpu/ffx_core_gpu_common_half.h": "d10466cbf027c8c23858a25f8e8cbbbf521d29f373db663c9354221651e9a498"
     }
   },
-  "owned": "48f221ee44d4a4b7fd9aabc596491fd930bbc9fa0132e5a3cd7df96b4994d08d",
-  "ownedFiles": {
-    "boundary.hlsl": "e80f0198b1f2c568abed50922656897c4806e5a41869aa35a9b725a55fcfffb6",
-    "../native/scene-projection.hlsl": "292d888ad8ec2cbc8d8351f6597d9558932433b66a54dbc4b7baac7f171f884c"
-  },
   "adaptations": {
     "callbacks": {
       "sourceSha256": "86d37106e9d63a4b9a7796d5f4f7bbf8e3891ee3858aea924652240b6a339073",

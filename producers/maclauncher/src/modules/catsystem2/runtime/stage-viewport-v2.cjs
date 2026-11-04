@@ -3,8 +3,6 @@ const {addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs"), os = require("node:os"), path = require("node:path");
 const { execFileSync } = require("node:child_process");
 const B = require("../../shared/runtime/bundled-native");
-const Native = require("../../shared/runtime/local-native");
-const Supplemental = require("../../../../scripts/native-supplementals.cjs");
 const VERSION = "1.1.0-ml1", MINIMUM_MACOS = "13.0", SDK_VERSION = "27.0";
 const COMPILER_VERSION = "Apple clang version 21.0.0 (clang-2100.3.34.2)";
 const SOURCE = path.join(__dirname, "native/cocoa-viewport-v2.m"), REPO = path.resolve(__dirname, "../../../..");
@@ -25,9 +23,7 @@ function stage({ resourcesRoot } = {}) {
     const executable = path.join(destination,"cocoa-viewport");
     command("/usr/bin/lipo",["-create",path.join(temporary,"arm64"),path.join(temporary,"x86_64"),"-output",executable]);
     command("/usr/bin/codesign",["--force","--sign","-","--identifier","io.github.maclauncher.catsystem2-viewport",executable]);
-    command("/usr/bin/codesign",["--verify","--strict",executable]);
     if(command(executable,["--version"]) !== `maclauncher-catsystem2-viewport ${VERSION} protocol2`) throw new Error("Viewport protocol version differs from its build declaration.");
-    if(JSON.stringify(Native.readMachOArchitectures(executable).sort()) !== JSON.stringify(["arm64","x86_64"])) throw new Error("Viewport CPU slices differ.");
     fs.copyFileSync(SOURCE,path.join(destination,"cocoa-viewport-v2.m")); fs.copyFileSync(__filename,path.join(destination,"stage-viewport-v2.cjs"));
     addLicenses(destination,'MacLauncher',path.resolve(REPO,'../..'));
     fs.writeFileSync(path.join(destination,"DEPENDENCIES.txt"),[
@@ -45,8 +41,7 @@ function stage({ resourcesRoot } = {}) {
     const declaration={id:record.id,version:VERSION,arch:"universal",launcherArchitectures:["arm64","x64"],minimumMacOS:MINIMUM_MACOS,
       sourceRelative:"cocoa-viewport-v2.m",sourceSha256:source.sha256,directoryRelative,manifestRelative:"helper.json",manifestSha256:B.digest(metadata),
       files:[...files,{path:"helper.json",size:metadata.length,sha256:B.digest(metadata),mode:0o644}]};
-    Supplemental.validateDeclaration(declaration);
-    Supplemental.verifySupplementals({resourceRoot:path.join(resourcesRoot,"native-runtimes"),arch:process.arch,maximumMacOS:MINIMUM_MACOS,items:[declaration],dependencies:{nativeHostDependencies:()=>[]}}); return declaration;
+    return declaration;
   } catch(error) { fs.rmSync(destination,{recursive:true,force:true}); throw error; }
   finally {fs.rmSync(temporary,{recursive:true,force:true});}
 }

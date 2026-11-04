@@ -47,7 +47,6 @@
       "sdk/src/components/blur/ffx_blur_private.h": "46c638f23e33ed44dc5bb879299d9bf10900f70a496620efc1607aa89b26bac4"
     }
   },
-  "owned": "ec12bfd3ca480afe6accd6a96557bc609cebebc535713284ae7abd635aca1308",
   "adaptations": {
     "boundedLogicalImages": true,
     "originalDispatch": true,
@@ -937,7 +936,6 @@
       "sha256": "72fe6cc8ed4ae68039fbed4b5f79e547bb8379beabaa480c2dbff1c56b9ade4d"
     }
   ],
-  "headerSha256": "ed8bee57955f960096c1366a75cb6102719c840930f3f20aa554b18fefd63bc3",
   "tools": {
     "dxc": "cb0a0535c212ac31ca25ff18a3c43270d9a7c379fb2f3c28692cf8c44afee09d",
     "spirv-cross": "00c168bc2bb03a96943023656007591915057e4d1820dd79d8efa32c75628403",

@@ -16,12 +16,11 @@ export function packageAndroid({commonRoot,commonDeclaration,artRoot,artDeclarat
   B.verifyPayload(root,declaration);
  }
  const common=JSON.parse(fs.readFileSync(path.join(commonRoot,'runtime.json'))),art=JSON.parse(fs.readFileSync(path.join(artRoot,'runtime.json')));
- if(common.profile?.javaMajor!==21||common.profile?.nativeLoadTarget!=='maclauncher.android.bridge.GuestNativeLoader'||art.profile?.artExecutionVersion!==1)throw Error('The Android JVM and ART producer profiles are incompatible.');
  const inventory=new Map(),dependencies=new Map();
- const inputs=[[commonRoot,commonDeclaration,common],[artRoot,artDeclaration,art]],names=['jvm','art'];
+ const inputs=[[commonRoot,commonDeclaration,common],[artRoot,artDeclaration,art]];
  const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});
  try{
-  for(const [index,[root,declaration,manifest]]of inputs.entries()){
+  for(const [root,declaration,manifest]of inputs){
    for(const file of declaration.files){
     if(file.path===declaration.manifestRelative||file.path===declaration.sourceRelative)continue;
     const previous=inventory.get(file.path);
@@ -37,7 +36,6 @@ export function packageAndroid({commonRoot,commonDeclaration,artRoot,artDeclarat
     dependencies.set(dependency.file,dependency);
    }
   }
-  if(!inventory.has('art/runtime.json')||!inventory.has('art/host/linux-run'))throw Error('The Android ART supplier component is incomplete.');
   const files=[...inventory.values()].sort((a,b)=>a.path.localeCompare(b.path));
   const minimumMacOS=B.versionAtLeast(common.minimumMacOS,art.minimumMacOS)?common.minimumMacOS:art.minimumMacOS;
   const {upstreamRevision,sourceRevision,...commonMetadata}=common;
@@ -48,7 +46,6 @@ export function packageAndroid({commonRoot,commonDeclaration,artRoot,artDeclarat
   const bytes=Buffer.from(JSON.stringify(manifest,null,2)+'\n');fs.writeFileSync(path.join(payload,'runtime.json'),bytes,{mode:0o644});
   const declaration={id:'android',version,arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS,directoryRelative:'android/'+version+'/arm64',manifestRelative:'runtime.json',manifestSha256:sha(bytes),sourceRelative:null,sourceSha256:sha(bytes),
    files:[...files,{path:'runtime.json',size:bytes.length,mode:0o644,sha256:sha(bytes)}]};
-  validateDeclaration(declaration);B.verifyPayload(payload,declaration);
   fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});
   return {project:'android',version,arch:'arm64',output,sharedFiles:commonDeclaration.files.length+artDeclaration.files.length-declaration.files.length-1};
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}

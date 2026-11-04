@@ -189,11 +189,6 @@
       "sdk/src/backends/dx12/shaders/cacao"
     ]
   },
-  "owned": "89922a6f4a043c593bc5cb773412fe6455058ce7f156ef74514aaca94e1112a3",
-  "ownedFiles": {
-    "boundary.hlsl": "27cb30c154d2ea0ed55cb7567b04c8e6956dc33795b1da6394165afdd8051409",
-    "../native/scene-projection.hlsl": "292d888ad8ec2cbc8d8351f6597d9558932433b66a54dbc4b7baac7f171f884c"
-  },
   "adaptations": {
     "callbacks": {
       "sourceSha256": "2df23637cd9460e3456224987aba80156789c3f2a1cae234b1f418c0a51abd65",
@@ -219,7 +214,6 @@
     "canonicalDepthROI": true
   },
   "hostHeaderSha256": "42f7b80d9e8f6fa55a9556b18a43ed78364142d85e7417ad9c1aff1fd5a562a5",
-  "headerSha256": "81af98e2c2236451e1713fab5c5bee04c597387b575396963ea821d5b0617e7e",
   "shaders": [
     {
       "name": "prepare-native-depths",

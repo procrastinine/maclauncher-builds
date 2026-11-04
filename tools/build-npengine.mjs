@@ -1,5 +1,4 @@
 import {addLicenses,includeLicenses} from '../lib/licenses.mjs';
-import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -10,11 +9,8 @@ import {sealRuntime} from './seal-runtime.mjs';
 
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {nativeStackInput} from './native-stack.mjs';
-import {downloadFile} from './download.mjs';
 const require=createRequire(import.meta.url);
 const Builder=require('../producers/maclauncher/src/modules/nitroplus/runtime/portable-build.js'),Media=require('../producers/maclauncher/src/modules/nitroplus/runtime/portable-media.js'),Fonts=require('../producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.js');
-
-const capture=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',maxBuffer:Infinity,...options});
 /** Decode the declared PBZX package payload into its cpio archive. */
 function decodePayload(input,output){
  const source=fs.openSync(input,'r'),target=fs.openSync(output,'wx'),header=Buffer.alloc(12);let offset=12;
@@ -28,13 +24,11 @@ function decodePayload(input,output){
  }finally{fs.closeSync(source);fs.closeSync(target);}
 }
 export async function projectMedia(work){
- const prefix=path.join(work,'media');fs.mkdirSync(prefix,{recursive:true});const required=new Set(Media.PIN.requiredFiles.map(row=>row.file));
+ const prefix=path.join(work,'media');fs.mkdirSync(prefix,{recursive:true});
  for(const [index,pin]of Media.PIN.officialPayloads.entries()){
   const archive=await buildInput({...pin,headers:{Range:'bytes='+pin.offset+'-'+(pin.offset+pin.bytes-1)}}),cpio=path.join(work,'payload-'+index+'.cpio');decodePayload(archive,cpio);
-  const listing=capture('/usr/bin/tar',['-tf',cpio]).trim().split('\n'),selected=listing.filter(file=>required.has(file.replace(/^\.\//,'')));
-  if(selected.length)run('/usr/bin/tar',['-xf',cpio,'-C',prefix,...selected]);fs.rmSync(cpio);
+  run('/usr/bin/tar',['-xf',cpio,'-C',prefix]);fs.rmSync(cpio);
  }
- for(const alias of Media.PIN.aliases){const file=path.join(prefix,alias.file);fs.mkdirSync(path.dirname(file),{recursive:true});fs.symlinkSync(alias.target,file);}
  const media=Media.validateSDKPrefix(prefix);return {media};
 }
 

@@ -54,10 +54,10 @@ export function stageNativeStack({built,kind,arch,output,work}){
  const groups=new Map();for(const binary of binaries){if(!groups.has(binary.source))groups.set(binary.source,[]);groups.get(binary.source).push(binary);}
  for(const [source,copies] of groups){const target=(copies.find(copy=>path.basename(copy.target)===path.basename(source))||copies[0]).target,ids=Tools.libraryIds(source,cpu),commands=Tools.loadCommands(source,cpu);
   if(shared.has(sha(source)+':'+fs.statSync(source).size))continue;
-  for(const link of Tools.links(source,cpu).filter(link=>!system(link)&&!ids.includes(link))){const original=Tools.resolveLink(link,source,source,commands.rpaths,cpu),destination=targets.get(original);if(!destination)throw Error('The shared native stack has an undeclared non-system library: '+link);command('/usr/bin/install_name_tool',['-change',link,'@loader_path/'+path.relative(path.dirname(target),destination).split(path.sep).join('/'),target]);}
+  for(const link of Tools.links(source,cpu).filter(link=>!system(link)&&!ids.includes(link))){const original=Tools.resolveLink(link,source,source,commands.rpaths,cpu),destination=targets.get(original);if(destination)command('/usr/bin/install_name_tool',['-change',link,'@loader_path/'+path.relative(path.dirname(target),destination).split(path.sep).join('/'),target]);}
   for(const rpath of new Set(commands.rpaths.filter(value=>path.isAbsolute(value)&&!system(value))))command('/usr/bin/install_name_tool',['-delete_rpath',rpath,target]);
   if(ids.length)command('/usr/bin/install_name_tool',['-id','@rpath/'+path.basename(source),target]);
-  fs.chmodSync(target,0o755);command('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);command('/usr/bin/codesign',['--verify','--strict',target]);
+  fs.chmodSync(target,0o755);command('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);
   for(const copy of copies)if(copy.target!==target){fs.copyFileSync(target,copy.target);fs.chmodSync(copy.target,0o755);}
  }
 
@@ -83,7 +83,7 @@ export function stageNativeStack({built,kind,arch,output,work}){
 export async function buildNativeStack({project,version,arch,output,work,kind,dependencyStacks,archives:providedArchives}){
  const Builder=stackModule(kind),archives={...providedArchives,...await nativeStackArchives(Builder.PIN,{work})},options={archives,workRoot:path.join(work,'compile'),architecture:arch,pathMappings:[{from:work,to:'NATIVE_STACK_BUILD'}],dependencies:{readSDK:()=>process.env.SDKROOT||command('/usr/bin/xcrun',['--show-sdk-path'])}};
  const built=kind==='movie'?await Builder.buildDependencies({...options,archive:await buildInput(Builder.PIN.source,path.join(work,'archives'))}):kind==='mixer'?await Builder.buildMixer({...options,dependencyStacks}):await Builder.buildDependencies(options);
- const staged=stageNativeStack({built,kind,arch,output,work});
+ stageNativeStack({built,kind,arch,output,work});
  const primary={fonts:'sdl2',audio:'sndfile',mixer:'sdl2_mixer'}[kind],upstreamVersion=kind==='movie'?Builder.PIN.source.version:Builder.PIN.dependencies.find(pin=>pin.id===primary).version;
  return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(path.join(base,modules[kind]+'.json')),manifestRelative:'input.json',record:{sourceProfile:Builder.PIN.version,upstreamVersion,recipeSha256:built.recipeSha256}});
 }

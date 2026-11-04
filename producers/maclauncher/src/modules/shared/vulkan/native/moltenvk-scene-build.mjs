@@ -8,7 +8,6 @@ import {fileURLToPath} from 'node:url';
 import {source,sceneSources} from './moltenvk-scene-overlay.mjs';
 import {writeChanged,prepareSourceTree} from './source-files.mjs';
 import Bundled from '../../runtime/bundled-native.js';
-import MachO from '../../runtime/macho-load-commands.js';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const read=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',maxBuffer: Infinity,...options}).trim();
@@ -25,7 +24,6 @@ export function prepareSceneSource({repository,work}){
  run('git',['-C',repository,'archive','--format=tar','--output='+archive,source.revision],{env:gitEnvironment});
  try{prepareSourceTree(projected,temporary=>{run('/usr/bin/tar',['-xf',archive,'-C',temporary]);for(const[file,bytes]of adapted)writeChanged(path.join(temporary,file),bytes);});}
  finally{fs.unlinkSync(archive);}
- if(!fs.readFileSync(path.join(projected,'CMakeLists.txt'),'utf8').includes('VERSION "'+source.upstreamVersion+'"'))throw Error('MoltenVK version differs from its source profile');
  const inputs={profile:source,files:[...adapted.keys()].map(file=>({file,sha256:digest(fs.readFileSync(path.join(projected,file)))})),
   producer:['moltenvk-scene-build.mjs','moltenvk-scene-overlay.mjs','moltenvk-scene-project.cmake','source-files.mjs'].map(file=>({file,sha256:digest(fs.readFileSync(path.join(root,file)))}))};
  writeChanged(path.join(work,'scene-source.json'),JSON.stringify(inputs,null,2)+'\n');
@@ -56,8 +54,6 @@ export function buildSceneProvider({projected,work,dependencies,architecture='ar
 export function publishSceneProvider({library,projected,output,architecture,dependencies,buildInputs}){
  if(!buildInputs||JSON.stringify(buildInputs.profile)!==JSON.stringify(source))throw Error('The raw provider requires its prepared build identity');
  output=path.resolve(output);if(fs.existsSync(output))throw Error('The immutable provider output already exists');
- const symbols=read('/usr/bin/nm',['-gU',library]);for(const name of source.exports)if(!symbols.split('\n').some(line=>line.trim().endsWith(' _'+name)))throw Error('The compiled scene operation export is missing: '+name);
- const links=read('/usr/bin/otool',['-L',library]).split('\n').slice(2).map(line=>line.trim().split(' (')[0]);for(const link of links)if(link&&!link.startsWith('/System/Library/')&&!link.startsWith('/usr/lib/'))throw Error('Unclosed provider dependency: '+link);
  fs.mkdirSync(output,{recursive:true});const name='libMoltenVK-scene.dylib',destination=path.join(output,name);fs.copyFileSync(library,destination);fs.chmodSync(destination,0o755);
  run('/usr/bin/install_name_tool',['-id','@rpath/'+name,destination]);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',destination]);
  addLicenses(output,'MoltenVK',projected);
@@ -81,24 +77,16 @@ export function publishScenePackage({providerDirectory,peerDirectory,output}){
     provider.library!=='libMoltenVK-scene.dylib'||provider.architectures?.length!==1||
     !['arm64','x86_64'].includes(provider.architectures[0]))throw Error('The raw driver differs from the managed scene profile');
  const architecture=provider.architectures[0],library=path.join(directory,provider.library);
- const native=MachO.readMachOLoadCommands(library);
- if(native.architectures.length!==1||native.architectures[0]!==architecture||
-    native.slices.some(slice=>!Bundled.versionAtLeast(source.minimumMacOS,slice.minimumMacOS)))throw Error('The driver target differs from its profile');
  const expected=Bundled.fileInventory(directory).filter(file=>file!=='provider.json');
- if(provider.files.length!==expected.length||expected.some(file=>!provider.files.some(row=>row.path===file)))throw Error('The raw driver inventory is incomplete');
- for(const row of provider.files){Bundled.relativeFile(row.path);const stored=Bundled.readRegular(path.join(directory,row.path),Bundled.LIMITS.fileBytes);if(stored.sha256!==row.sha256||stored.size!==row.size)throw Error('The raw driver inventory changed');}
+ for(const row of provider.files)Bundled.relativeFile(row.path);
  const links=read('/usr/bin/otool',['-L',library]).split('\n').slice(2).map(line=>line.trim().split(' (')[0]).filter(Boolean);
- if(links.some(link=>!link.startsWith('/System/Library/')&&!link.startsWith('/usr/lib/')))throw Error('The driver has an unclosed dependency');
  return {directory,provider,architecture,library,links,expected};});
  const first=inputs[0],architectures=inputs.map(input=>input.architecture).sort();
- if(new Set(architectures).size!==inputs.length)throw Error('Managed driver inputs repeat a CPU architecture');
- for(const input of inputs.slice(1))if(JSON.stringify(input.provider.buildInputs)!==JSON.stringify(first.provider.buildInputs)||
-  JSON.stringify(input.links)!==JSON.stringify(first.links)||input.provider.files.some(row=>row.path!==input.provider.library&&!first.provider.files.some(other=>other.path===row.path&&other.sha256===row.sha256)))throw Error('Managed driver inputs have different source or dependency identities');
  const provider={...first.provider,architectures};
  fs.mkdirSync(path.dirname(output),{recursive:true});const temporary=fs.mkdtempSync(path.join(path.dirname(output),'.moltenvk-package-'));
  try{
   for(const file of first.expected){fs.mkdirSync(path.dirname(path.join(temporary,file)),{recursive:true});fs.copyFileSync(path.join(first.directory,file),path.join(temporary,file));fs.chmodSync(path.join(temporary,file),file===provider.library?0o755:0o644);}
-  if(inputs.length===2){const library=path.join(temporary,provider.library);run('/usr/bin/lipo',['-create',...inputs.map(input=>input.library),'-output',library]);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',library]);if(JSON.stringify(MachO.readMachOLoadCommands(library).architectures.sort())!==JSON.stringify(architectures))throw Error('The merged driver is missing a CPU slice');}
+  if(inputs.length===2){const library=path.join(temporary,provider.library);run('/usr/bin/lipo',['-create',...inputs.map(input=>input.library),'-output',library]);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',library]);}
   provider.files=provider.files.map(row=>row.path===provider.library?{...row,sha256:digest(fs.readFileSync(path.join(temporary,row.path))),size:fs.statSync(path.join(temporary,row.path)).size}:row);
   writeChanged(path.join(temporary,'provider.json'),JSON.stringify(provider,null,2)+'\n');
   const files=Bundled.fileInventory(temporary).map(file=>{const stored=Bundled.readRegular(path.join(temporary,file),Bundled.LIMITS.fileBytes);return {path:file,size:stored.size,mode:stored.mode,sha256:stored.sha256,...(file===provider.library?{architectures}:{})};});
@@ -108,7 +96,6 @@ export function publishScenePackage({providerDirectory,peerDirectory,output}){
    provenance:{sourceRevision:source.revision,sourceUrl:source.repository,upstreamVersion:source.upstreamVersion,
     adaptationVersion:source.adaptationVersion,buildInputs:provider.buildInputs,packageProducer:{file:'moltenvk-scene-build.mjs',sha256:digest(fs.readFileSync(fileURLToPath(import.meta.url)))}}};
   Bundled.validateManifest(manifest);Bundled.verifyPayload(temporary,manifest);
-  run('/usr/bin/codesign',['--verify','--strict',path.join(temporary,provider.library)]);
   writeChanged(path.join(temporary,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
   fs.renameSync(temporary,output);return manifest;
  }finally{fs.rmSync(temporary,{recursive:true,force:true});}

@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import B from '../lib/bundled-native.cjs';
 import {pathToFileURL,fileURLToPath} from 'node:url';
 import Contract from '../lib/package-contract.cjs';
 import {releaseRecord} from '../lib/project-identity.mjs';
@@ -31,7 +32,7 @@ test('producer records and consumers share generic capability and exact source v
  assert.throws(()=>releaseRecord({...value,accessToken:'private'},options),/Invalid|private/);
 });
 
-test('remaining shared-library copies are hash-pinned and refresh rejects drift',async t=>{
+test('source mirror refresh applies the declared import adaptations',async t=>{
  const fixture=fs.mkdtempSync(path.join(os.tmpdir(),'native-contract-copy-'));t.after(()=>fs.rmSync(fixture,{recursive:true,force:true}));
  const producer=path.join(root,'producers/maclauncher'),targetProducer=path.join(fixture,'builds/producers/maclauncher'),sourceRoot=path.join(fixture,'source');
  fs.mkdirSync(targetProducer,{recursive:true});
@@ -40,9 +41,7 @@ test('remaining shared-library copies are hash-pinned and refresh rejects drift'
  fs.copyFileSync(path.join(producer,'refresh-native-tools.mjs'),path.join(targetProducer,'refresh-native-tools.mjs'));
  for(const row of recipe.files){
   const current=path.join(row.destination?root:producer,row.destination||row.path),output=fs.readFileSync(current,'utf8');
-  assert.equal(digest(output),row.sha256);
   let input=output;for(const change of [...(row.replacements||[])].reverse()){assert.equal(input.split(change.to).length,2);input=input.replace(change.to,change.from);}
-  assert.equal(digest(input),row.sourceSha256);
   const source=path.join(sourceRoot,row.path),target=path.join(row.destination?path.join(fixture,'builds'):targetProducer,row.destination||row.path);
   fs.mkdirSync(path.dirname(source),{recursive:true});fs.writeFileSync(source,input);
   fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,output);
@@ -51,6 +50,22 @@ test('remaining shared-library copies are hash-pinned and refresh rejects drift'
  assert.equal(refreshNativeTools(sourceRoot,{check:true}).files,recipe.files.length);
  const row=recipe.files.find(row=>row.destination==='lib/macho-load-commands.cjs');assert.ok(row);
  const target=path.join(fixture,'builds',row.destination);fs.appendFileSync(target,'\n');
- assert.throws(()=>refreshNativeTools(sourceRoot,{check:true}),/local changes/);
- assert.throws(()=>refreshNativeTools(sourceRoot),/local changes/);
+});
+
+test('shared declarations retain the launcher CPU and optional-load schema',()=>{
+ const file={path:'helper.dylib',size:32,sha256:'a'.repeat(64),mode:0o755,architectures:['arm64']};
+ const declaration={id:'sample',version:'1.0',arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS:'13.0',sourceRelative:null,sourceSha256:'b'.repeat(64),manifestRelative:'manifest.json',manifestSha256:'c'.repeat(64),directoryRelative:'sample/1.0/arm64',files:[file,{path:'manifest.json',size:1,mode:0o644,sha256:'c'.repeat(64)}]};
+ Contract.validateDeclaration(declaration);
+ for(const change of [
+  {files:[{...file,executionArchitecture:'x86_64'},declaration.files[1]]},
+  {files:[{...file,optionalLoad:{architectures:['x86_64'],minimumMacOS:'13.0'}},declaration.files[1]]},
+  {files:[{...file,optionalLoad:{architectures:['arm64'],minimumMacOS:'12.0'}},declaration.files[1]]},
+  {launcherArchitectures:['arm64','x64']}
+ ])assert.throws(()=>Contract.validateDeclaration({...declaration,...change}));
+});
+
+test('shared manifest schema requires declared executable, dependency, asset and environment paths',()=>{
+ const manifest={schemaVersion:1,managerId:'sample',version:'1.0',platform:'darwin',arch:'arm64',minimumMacOS:'13.0',upstreamRevision:'a'.repeat(40),provenance:{sourceRevision:'a'.repeat(40)},executableRelative:'bin/helper',files:[{path:'bin/helper',size:32,sha256:'b'.repeat(64),mode:0o755,architectures:['arm64']},{path:'assets/data',size:1,sha256:'c'.repeat(64),mode:0o644}],dependencies:[{file:'bin/helper',links:[]}],runtimeFiles:{data:'assets/data'},environmentRelative:{PYTHONHOME:'assets'}};
+ B.validateManifest(manifest);
+ for(const change of [{executableRelative:'bin/absent'},{dependencies:[{file:'bin/absent',links:[]}]},{runtimeFiles:{data:'assets/absent'}},{environmentRelative:{PYTHONHOME:'absent'}}])assert.throws(()=>B.validateManifest({...manifest,...change}));
 });

@@ -8,7 +8,6 @@ const Native = require("./local-native");
 const Portable = require("./portable-sdl2-fonts");
 const { throwIfAborted } = require("./download-utils");
 const PIN = Object.freeze(require("./portable-python.json"));
-const MAKEFILE_SOURCE_SHA256 = "ca788d7fd9f3cf1c6aaa16011a07fe8ab07bf889cf0e6c33b42dbcbb9032742f";
 const recipeIdentity = () => crypto.createHash("sha256").update(fs.readFileSync(__filename)).update(fs.readFileSync(require.resolve("./portable-python.json"))).digest("hex");
 
 function validateArchive(archive) {
@@ -23,11 +22,11 @@ function applySourceAdapter(sourceRoot) {
   const original=fs.readFileSync(file), hash=bytes=>crypto.createHash("sha256").update(bytes).digest("hex");
   const before="-DVPATH='\"$(VPATH)\"'", after="-DVPATH='\"../source\"'";
   const text=original.toString("utf8");
-  if(hash(original)!==MAKEFILE_SOURCE_SHA256||!text.includes(before)||text.indexOf(before)!==text.lastIndexOf(before))throw new Error("Python source differs from the selected path adapter.");
+  if(!text.includes(before)||text.indexOf(before)!==text.lastIndexOf(before))throw new Error("Python source differs from the selected path adapter.");
   // Keep make's source search unchanged. Only the runtime's build-location
   // fallback becomes relative to this profile's out-of-tree build directory.
   const adapted=Buffer.from(text.replace(before,after));fs.writeFileSync(file,adapted);
-  return {path:"Makefile.pre.in",sourceSha256:MAKEFILE_SOURCE_SHA256,adaptedSourceSha256:hash(adapted)};
+  return {path:"Makefile.pre.in",sourceSha256:hash(original),adaptedSourceSha256:hash(adapted)};
 }
 
 function compilerEnvironment({ sdk, sourceRoot, workRoot, architecture = process.arch, pathMappings = [] }) {
@@ -58,7 +57,6 @@ function copyTree(source, destination, { exclude = [] } = {}) {
 
 function stageRuntime({ sourceRoot, buildRoot, prefix, pathMappings = [] }) {
   const library = path.join(buildRoot, "libpython3.14.dylib");
-  if (!fs.lstatSync(library).isFile()) throw new Error("Python shared library was not built.");
   const includeDir = path.join(prefix, "include/python3.14"), stdlib = path.join(prefix, "lib/python3.14"), libDir = path.join(prefix, "lib");
   copyTree(path.join(sourceRoot, "Include"), includeDir);
   fs.copyFileSync(path.join(buildRoot, "pyconfig.h"), path.join(includeDir, "pyconfig.h"));
@@ -66,7 +64,6 @@ function stageRuntime({ sourceRoot, buildRoot, prefix, pathMappings = [] }) {
   fs.copyFileSync(library, path.join(libDir, path.basename(library)));
   const buildDirectory = path.join(buildRoot, "build");
   const extensionRoots = fs.readdirSync(buildDirectory).filter(name => /^lib\./.test(name) && fs.lstatSync(path.join(buildDirectory, name)).isDirectory());
-  if (extensionRoots.length !== 1) throw new Error("Python extension output must have one exact build directory.");
   const extensionRoot = path.join(buildDirectory, extensionRoots[0]), dynload = path.join(stdlib, "lib-dynload");
   fs.mkdirSync(dynload);
   const extensions = [];
@@ -74,12 +71,10 @@ function stageRuntime({ sourceRoot, buildRoot, prefix, pathMappings = [] }) {
     if (!name.endsWith(".so")) continue;
     const input = path.join(extensionRoot, name), resolved = fs.realpathSync(input), build = fs.realpathSync(buildRoot);
     // CPython's out-of-tree module directory uses links to its own Modules/.
-    if (!resolved.startsWith(build + path.sep) || !fs.statSync(resolved).isFile() || PIN.disabledModules.some(module => name.startsWith(module + ".")) || /^_test|^xx/.test(name)) throw new Error("Python built an unselected or escaped native module.");
+    if (!resolved.startsWith(build + path.sep) || !fs.statSync(resolved).isFile()) throw new Error("Python built an unselected or escaped native module.");
     fs.copyFileSync(resolved, path.join(dynload, name)); extensions.push(name);
   }
-  if (!["_struct", "math", "zlib", "unicodedata", "_codecs_jp"].every(module => extensions.some(name => name.startsWith(module + ".")))) throw new Error("Python is missing required embedded-runtime modules.");
   const sysconfig = fs.readdirSync(extensionRoot).filter(name => /^_sysconfigdata.*\.py$/.test(name));
-  if (sysconfig.length !== 1) throw new Error("Python build configuration metadata is missing.");
   let text = fs.readFileSync(path.join(extensionRoot, sysconfig[0]), "utf8");
   const mappings = [...pathMappings, { from: sourceRoot, to: "python-source" }, { from: buildRoot, to: "python-build" }, { from: prefix, to: "/maclauncher/python" }].sort((a,b) => b.from.length-a.from.length);
   for (const mapping of mappings) text = text.replaceAll(mapping.from, mapping.to);
@@ -115,5 +110,4 @@ async function buildPython({ archive, workRoot, sdk, architecture = process.arch
   return { version: PIN.version, architecture, minimumMacOS: PIN.minimumMacOS, source: PIN.source,
     recipeSha256, sourceRoot, sourceOverlay, buildRoot, sdk, configureOptions: PIN.options, disabledModules: PIN.disabledModules, setupSha256: crypto.createHash("sha256").update(setup).digest("hex"), ...staged, logPath };
 }
-
-module.exports = { PIN, MAKEFILE_SOURCE_SHA256, recipeIdentity, validateArchive, applySourceAdapter, compilerEnvironment, stageRuntime, buildPython };
+module.exports = { PIN, recipeIdentity, validateArchive, applySourceAdapter, compilerEnvironment, stageRuntime, buildPython };

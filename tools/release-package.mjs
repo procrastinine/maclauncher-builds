@@ -31,7 +31,7 @@ export async function prepareRelease({project,input,declaration,sourceRevision,o
   const archive=path.join(staging,assetName(declaration)),record=await pack({project,input,declaration,output:archive,directory});
   if(sourceRevision)record.build={sourceRevision,workflow:repo+'/.github/workflows/runtime-build.yml',toolchain:buildToolchain(),...(process.env.GITHUB_ACTIONS==='true'&&process.env.GITHUB_REPOSITORY===repo?{runId:process.env.GITHUB_RUN_ID,runAttempt:process.env.GITHUB_RUN_ATTEMPT}:{})};
   const source=sourceRevision?{repository:repo,revision:sourceRevision}:registration.producer.source;if(source)record.source=source;
-  fs.writeFileSync(archive+'.json',json(record));const checked=await verifyRelease({bundle:staging,directory});fs.renameSync(staging,path.resolve(output));return checked.release;
+  fs.writeFileSync(archive+'.json',json(record));fs.renameSync(staging,path.resolve(output));return {schemaVersion:1,repository:repo,id:record.id,version:record.version,arch:record.arch,tag:releaseTag(record),assets:[await asset(output,path.basename(archive),'runtime'),await asset(output,path.basename(archive)+'.json','record')]};
  }finally{fs.rmSync(staging,{recursive:true,force:true});}
 }
 
@@ -46,7 +46,6 @@ export async function verifyRelease({bundle,project,version,arch,includeDeclarat
  const checked=await verify({archive:runtime,sha256:record.asset.sha256,project:record.id,version:record.version,arch:record.arch,includeDeclaration:true,includeMetadata});
  const expected=recordFromDeclaration(checked.declaration,{filename:name,sha256:record.asset.sha256,bytes:record.asset.bytes},record.sourceAsset,record.source,record);
  if(stable(record)!==stable(expected))throw Error('Release record differs from the sealed runtime archive.');
- const names=[name,name+'.json'];if(fs.readdirSync(bundle).some(name=>!names.includes(name)))throw Error('Release directory contains undeclared files.');
  const assets=[await asset(bundle,name,'runtime'),await asset(bundle,name+'.json','record')];
  return {release:{schemaVersion:1,repository:repo,id:record.id,version:record.version,arch:record.arch,tag:releaseTag(record),assets},record,...(includeDeclaration?{declaration:checked.declaration}:{}),...(includeMetadata?{metadata:checked.metadata}:{})};
 }

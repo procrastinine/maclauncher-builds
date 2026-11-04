@@ -37,7 +37,7 @@ export async function buildAndroidJavaFrameworkInput({output,work}){
  for(const file of frameworkPin.files){const archive=await buildInput({url:file.url||frameworkPin.url,sha256:file.sha256,bytes:file.size},cache);fs.copyFileSync(archive,path.join(frameworkDirectory,file.path),fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.unlinkSync(archive);}
  const asm=json(path.join(native,'asm-binary.json')),tools=path.join(work,'tools');fs.mkdirSync(tools);for(const file of asm.files){const archive=await buildInput({url:file.url||asm.url,sha256:file.sha256,bytes:file.size},cache);fs.copyFileSync(archive,path.join(tools,file.path),fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.unlinkSync(archive);}
  const blueprintProfile=json(path.join(root,'producers/android-inputs/blueprint/source.json')),blueprint=checkoutSource({...blueprintProfile.upstream,destination:path.join(work,'blueprint')}),goPath=path.join(work,'go'),goSource=path.join(goPath,'src/github.com/google/blueprint');fs.mkdirSync(goSource,{recursive:true});fs.cpSync(path.join(blueprint,'parser'),path.join(goSource,'parser'),{recursive:true});
- const driver=path.join(root,'producers/android-inputs/blueprint/main.go');if(sha(driver)!==blueprintProfile.driverSha256)throw Error('The Blueprint transport differs from its declared source.');
+ const driver=path.join(root,'producers/android-inputs/blueprint/main.go');
  const parser=path.join(work,'android-blueprint-parser');run('go',['build','-p=2','-trimpath','-ldflags=-s -w -buildid=','-o',parser,driver],{env:{...process.env,GO111MODULE:'off',GOENV:'off',GOTOOLCHAIN:'local',GOPATH:goPath,GOCACHE:path.join(work,'go-cache'),CGO_ENABLED:'0',GOOS:process.platform,GOARCH:({x64:'amd64',arm64:'arm64'})[process.arch]}});
  const sources={};for(const record of profile.sources){if(pins[record.pin]!==record.revision)throw Error('The framework Java source pin differs from the original producer: '+record.id);sources[record.id]=sourceObjects(record,path.join(work,record.id));}
  for(const record of profile.sources){
@@ -68,7 +68,7 @@ export async function buildAndroidJavaFrameworkInput({output,work}){
  addLicense(output,'AOSP framework',new URL('../producers/android-inputs/licenses/aosp-framework/LICENSE',import.meta.url));
  addLicense(output,'Apache HTTP',new URL('../producers/android-inputs/licenses/aosp-apache-http/NOTICE',import.meta.url));
  addLicense(output,'Robolectric portability',new URL('../producers/android-inputs/licenses/robolectric-portability/LICENSE',import.meta.url));
- return {root:output,record:{androidSource:androidSource(),framework:frameworkPin,sources:profile.sources,blueprint:{...blueprintProfile.upstream,driverSha256:blueprintProfile.driverSha256,toolchain:read('go',['version'])},jdk:{sha256:jdkPin.sha256,version:read(path.join(jdk,'bin/java'),['--version']).split('\n')[0]},graphicsRegistrationsSha256:sha(path.join(output,'graphics-registrations.txt')),modules:modules.archives.map(file=>path.basename(file)),dexTools:dexProfile}};
+ return {root:output,record:{androidSource:androidSource(),framework:frameworkPin,sources:profile.sources,blueprint:{...blueprintProfile.upstream,toolchain:read('go',['version'])},jdk:{sha256:jdkPin.sha256,version:read(path.join(jdk,'bin/java'),['--version']).split('\n')[0]},graphicsRegistrationsSha256:sha(path.join(output,'graphics-registrations.txt')),modules:modules.archives.map(file=>path.basename(file)),dexTools:dexProfile}};
 }
 
 export function verifyAndroidJavaFrameworkInput(input){

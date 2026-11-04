@@ -45,7 +45,6 @@
       "sdk/src/components/lens/ffx_lens_private.h": "0332eac529bd2f6d612539cb61d6a19b2722dd4d4f8cd47bb91972e2b9a58dcb"
     }
   },
-  "owned": "ec12bfd3ca480afe6accd6a96557bc609cebebc535713284ae7abd635aca1308",
   "adaptations": {
     "boundedLogicalImages": true,
     "originalDispatch": true,
@@ -92,7 +91,6 @@
       "sha256": "70f235391383bd2e75efee2e71bc2a09f246bd1fcf282150870698df7f05c98d"
     }
   ],
-  "headerSha256": "d6e5debfb8905db0948dd86329833f2ccc9e77fee88bb28ca4d56d012b07dfa4",
   "tools": {
     "dxc": "cb0a0535c212ac31ca25ff18a3c43270d9a7c379fb2f3c28692cf8c44afee09d",
     "spirv-cross": "00c168bc2bb03a96943023656007591915057e4d1820dd79d8efa32c75628403",

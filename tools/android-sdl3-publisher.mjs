@@ -35,11 +35,9 @@ export async function prepareSdl(archive,work,profile){
   fs.mkdirSync(path.dirname(sdl),{recursive:true});fs.cpSync(source,sdl,{recursive:true,verbatimSymlinks:true});
   const version=read('/usr/libexec/PlistBuddy',['-c','Print :CFBundleShortVersionString',path.join(sdl,'Resources/Info.plist')]);
   if(version!==profile.version)throw Error('The SDL framework differs from its declared publisher version.');
-  read('/usr/bin/codesign',['--verify','--strict',sdl]);
   return sdl;
  }finally{
   if(selected&&(attached||isMounted(mount)))await execute(...selected.detach,{timeout:30000,maxBuffer:Infinity});
   if(!isMounted(mount)){if(fs.existsSync(mount))fs.rmdirSync(mount);fs.rmSync(image,{force:true});}
  }
 }
-

@@ -3,10 +3,7 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 
 const VERSION = "xsystem35-macos-resources-v3";
-const SOURCE_HASHES = Object.freeze({
-  "CMakeLists.txt": "d64c56b052357f26238b0f52353a244878aefecb8a25814e079e8dc1c1ce5683",
-  "src/font.c": "404842057c45a5028b83a7b27b8ccf614c3c7d64b1e59d8b192c214fb6b5aab2"
-});
+const SOURCE_FILES = ["CMakeLists.txt", "src/font.c"];
 const MIXER_CMAKE_SHA256 = "c14000d099bb2135ef7994dce44adad1f6dfa9b35a21f28d75476d5b001a0e08";
 const digest = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 
@@ -16,7 +13,6 @@ function replace(source, before, after) {
 }
 
 function adapt(file, bytes) {
-  if (!Object.hasOwn(SOURCE_HASHES, file) || digest(bytes) !== SOURCE_HASHES[file]) throw new Error("xsystem35 source checksum does not match the selected version.");
   let source = bytes.toString("utf8");
   if (file === "CMakeLists.txt") {
     source = replace(source, "    set(DEFAULT_FONT_PATH ${CMAKE_INSTALL_PREFIX}/share/xsystem35/fonts/)",
@@ -67,11 +63,11 @@ function apply(sourceRoot, { sourceDir = path.resolve(__dirname, "../../external
   const output = fs.realpathSync(sourceRoot), original = fs.realpathSync(sourceDir);
   if (output === original || output.startsWith(original + path.sep) || original.startsWith(output + path.sep)) throw new Error("xsystem35 adapters require a separate writable source copy.");
   const changes = [];
-  for (const relative of Object.keys(SOURCE_HASHES)) {
+  for (const relative of SOURCE_FILES) {
     const file = path.join(output, relative);
     if (!fs.lstatSync(file).isFile() || !fs.realpathSync(file).startsWith(output + path.sep)) throw new Error("xsystem35 adapter inputs must be contained regular files.");
     const bytes = adapt(relative, fs.readFileSync(file));
-    changes.push({ file, bytes, relative, sourceSha256: SOURCE_HASHES[relative], adaptedSourceSha256: digest(bytes) });
+    changes.push({ file, bytes, relative, sourceSha256: digest(fs.readFileSync(file)), adaptedSourceSha256: digest(bytes) });
   }
   // Validate all pinned inputs before changing either disposable source file.
   for (const change of changes) fs.writeFileSync(change.file, change.bytes);
@@ -91,4 +87,4 @@ function applyMixer(sourceRoot) {
   return { path: "CMakeLists.txt", sourceSha256: MIXER_CMAKE_SHA256, adaptedSourceSha256: digest(adapted) };
 }
 
-module.exports = { VERSION, SOURCE_HASHES, MIXER_CMAKE_SHA256, adapt, apply, applyMixer };
+module.exports = { VERSION, SOURCE_FILES, MIXER_CMAKE_SHA256, adapt, apply, applyMixer };

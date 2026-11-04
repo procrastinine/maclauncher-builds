@@ -6,7 +6,6 @@ import {checkoutSource,run,recipeMain} from './build-source.mjs';
 import {buildInput} from './build-input.mjs';
 import {rustEnvironment} from "./rust-build.mjs";
 import {sealRuntime} from './seal-runtime.mjs';
-import {downloadFile} from './download.mjs';
 const descriptor=new URL('../producers/android-inputs/aconfig/source.json',import.meta.url);
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 
@@ -43,6 +42,6 @@ export async function packageAndroidAconfig({project='android-aconfig',version,a
 
  const env=rustEnvironment({work,minimumMacOS:profile.minimumMacOS,env:process.env});
  addLicenses(crate,project,path.resolve(import.meta.dirname,'../producers/android-inputs/aconfig'));
- return sealRuntime({cargoRoot:crate,env,project,version,arch,output,sourceRoot:source,upstreamRevision:profile.revision,executable:path.join(env.CARGO_TARGET_DIR,'release/aconfig'),maximumMacOS:profile.minimumMacOS,provenance:{sdk:{repository:profile.sdk.repository,revision:profile.sdk.revision,files:profile.sdk.files.map(({path,contentSha256})=>({path,sha256:contentSha256}))},rustLockSha256:sha(fs.readFileSync(path.join(crate,'Cargo.lock')))}});
+ return sealRuntime({cargoRoot:crate,env,project,version,arch,output,sourceRoot:source,upstreamRevision:profile.revision,executable:path.join(env.CARGO_TARGET_DIR,'release/aconfig'),provenance:{sdk:{repository:profile.sdk.repository,revision:profile.sdk.revision,files:profile.sdk.files.map(({path,contentSha256})=>({path,sha256:contentSha256}))},rustLockSha256:sha(fs.readFileSync(path.join(crate,'Cargo.lock')))}});
 }
 recipeMain(import.meta,buildAndroidAconfig);

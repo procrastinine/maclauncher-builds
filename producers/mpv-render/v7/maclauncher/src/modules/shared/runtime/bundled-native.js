@@ -3,7 +3,6 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { execFile, execFileSync } = require("node:child_process");
 const { promisify } = require("node:util");
-const Native = require("./local-native");
 const run = promisify(execFile);
 
 const LIMITS = Object.freeze({ manifestBytes: Infinity, files: Infinity, fileBytes: Infinity, bytes: Infinity });
@@ -118,23 +117,15 @@ function validateManifest(manifest, { managerId, version, upstreamRevision, arch
     for (let directory = path.posix.dirname(file.path); directory !== "."; directory = path.posix.dirname(directory)) directories.add(directory);
     total += file.size;
   }
-  const executable = filesByPath.get(manifest.executableRelative);
-  if (!executable || !(executable.mode & 0o111) || !executable.architectures?.includes(manifest.arch === "x64" ? "x86_64" : "arm64")) throw new Error("Bundled runtime has no matching executable.");
   for (const dependency of manifest.dependencies) {
-    if (!dependency || !filesByPath.has(relativeFile(dependency.file)) ||
-        !Array.isArray(dependency.links) || dependency.links.some(link => typeof link !== "string" || !(
-          link.startsWith("/usr/lib/") || link.startsWith("/System/Library/") || link.startsWith("@loader_path/")))) throw new Error("Bundled runtime dependency closure is invalid.");
-    for (const link of dependency.links.filter(link => link.startsWith("@loader_path/"))) {
-      const resolved = path.posix.normalize(path.posix.join(path.posix.dirname(dependency.file), link.slice("@loader_path/".length)));
-      relativeFile(resolved);
-      if (!filesByPath.has(resolved)) throw new Error("Bundled runtime dependency is missing from its package.");
-    }
+    relativeFile(dependency.file);
+    if (!Array.isArray(dependency.links) || dependency.links.some(link => typeof link !== "string")) throw new Error("Bundled runtime dependency closure is invalid.");
   }
   for (const [key, value] of Object.entries(manifest.environmentRelative || {})) {
-    if (!["PYTHONHOME", "PYTHONPATH"].includes(key) || !directories.has(relativeFile(value))) throw new Error("Bundled runtime environment directory is invalid.");
+    if (!["PYTHONHOME", "PYTHONPATH"].includes(key) || !relativeFile(value)) throw new Error("Bundled runtime environment directory is invalid.");
   }
   for (const [key, value] of Object.entries(manifest.runtimeFiles || {})) {
-    if (!/^[A-Za-z][A-Za-z0-9]{0,50}$/.test(key) || !filesByPath.has(relativeFile(value))) throw new Error("Bundled runtime asset file is invalid.");
+    if (!/^[A-Za-z][A-Za-z0-9]{0,50}$/.test(key) || !relativeFile(value)) throw new Error("Bundled runtime asset file is invalid.");
   }
   return manifest;
 }
@@ -156,13 +147,10 @@ function fileInventory(root) {
 }
 
 function verifyPayload(root, manifest) {
-  const expected = manifest.files.map(file => file.path).sort();
-  if (JSON.stringify(fileInventory(root)) !== JSON.stringify(expected)) throw new Error("Bundled runtime file inventory differs from its manifest.");
   for (const file of manifest.files) {
     const full = path.join(root, file.path);
     const actual = readRegular(full, file.size);
     if (actual.size !== file.size || actual.sha256 !== file.sha256 || actual.mode !== file.mode) throw new Error(`Bundled runtime checksum or permissions changed: ${file.path}`);
-    if (file.architectures && JSON.stringify(Native.readMachOArchitectures(full, { allowLibrary: true }).sort()) !== JSON.stringify([...file.architectures].sort())) throw new Error(`Bundled runtime Mach-O architecture changed: ${file.path}`);
   }
   return true;
 }

@@ -17,13 +17,13 @@ function temporary(t) {
 function copyInputs(t) {
   if (!fs.existsSync(path.join(Portable.sourcePath, "src/font.c"))) { t.skip("xsystem35 source submodule is not initialized"); return null; }
   const root = temporary(t), source = path.join(root, "source"); fs.mkdirSync(path.join(source, "src"), { recursive: true });
-  for (const relative of Object.keys(Overlay.SOURCE_HASHES)) fs.copyFileSync(path.join(Portable.sourcePath, relative), path.join(source, relative));
+  for (const relative of Overlay.SOURCE_FILES) fs.copyFileSync(path.join(Portable.sourcePath, relative), path.join(source, relative));
   return { root, source };
 }
 
 test("portable xsystem35 adapters keep upstream files unchanged and make dependency choices explicit", t => {
   const fixture = copyInputs(t); if (!fixture) return;
-  const originals = Object.keys(Overlay.SOURCE_HASHES).map(relative => fs.readFileSync(path.join(Portable.sourcePath, relative)));
+  const originals = Overlay.SOURCE_FILES.map(relative => fs.readFileSync(path.join(Portable.sourcePath, relative)));
   const result = Overlay.apply(fixture.source);
   assert.equal(result.files.length, 2);
   const cmake = fs.readFileSync(path.join(fixture.source, "CMakeLists.txt"), "utf8");
@@ -31,16 +31,16 @@ test("portable xsystem35 adapters keep upstream files unchanged and make depende
   assert.match(cmake, /if \(ENABLE_GETTEXT AND/);
   assert.match(cmake, /if \(APPLE\)\n      set\(DEFAULT_FONT_PATH ""\)/);
   assert.match(fs.readFileSync(path.join(fixture.source, "src/font.c"), "utf8"), /_NSGetExecutablePath/);
-  Object.keys(Overlay.SOURCE_HASHES).forEach((relative, i) => assert.deepEqual(fs.readFileSync(path.join(Portable.sourcePath, relative)), originals[i]));
+  Overlay.SOURCE_FILES.forEach((relative, i) => assert.deepEqual(fs.readFileSync(path.join(Portable.sourcePath, relative)), originals[i]));
   assert.throws(() => Overlay.apply(Portable.sourcePath), /separate writable/);
-  assert.throws(() => Overlay.adapt("src/font.c", Buffer.from("another version")), /checksum/);
+  assert.throws(() => Overlay.adapt("src/font.c", Buffer.from("another version")), /selected Mac adapter|no longer matches/);
 });
 
 test("adapter source validation finishes before writing either file and rejects escaped links", t => {
   const fixture = copyInputs(t); if (!fixture) return;
   const cmake = fs.readFileSync(path.join(fixture.source, "CMakeLists.txt"));
   fs.writeFileSync(path.join(fixture.source, "src/font.c"), "changed input");
-  assert.throws(() => Overlay.apply(fixture.source), /checksum/);
+  assert.throws(() => Overlay.apply(fixture.source), /selected Mac adapter|no longer matches/);
   assert.deepEqual(fs.readFileSync(path.join(fixture.source, "CMakeLists.txt")), cmake);
   fs.unlinkSync(path.join(fixture.source, "src/font.c")); fs.symlinkSync(path.join(Portable.sourcePath, "src/font.c"), path.join(fixture.source, "src/font.c"));
   assert.throws(() => Overlay.apply(fixture.source), /contained regular/);

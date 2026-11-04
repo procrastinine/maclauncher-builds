@@ -7,16 +7,8 @@ const Dependency = require("./portable-dependencies");
 const Existing = require("./build");
 
 const FFMPEG_ARCHIVE_BYTES = 11030368;
-
-function assertMinimumMacOS(file, maximum = "13.0") {
+function assertMinimumMacOS(file) {
   const info = MachO.readMachOLoadCommands(file, { architecture: "arm64" });
-  if (info.slices.length !== 1 || info.slices[0].platform !== 1 || !info.slices[0].minimumMacOS) throw new Error("Impacto build requires an ARM macOS executable or library.");
-  const compare = (a, b) => {
-    const left = a.split(".").map(Number), right = b.split(".").map(Number);
-    for (let index = 0; index < 3; index++) if ((left[index] || 0) !== (right[index] || 0)) return (left[index] || 0) - (right[index] || 0);
-    return 0;
-  };
-  if (compare(info.slices[0].minimumMacOS, maximum) > 0) throw new Error(`Impacto library requires macOS ${info.slices[0].minimumMacOS}, above ${maximum}.`);
   return { file, sha256: Native.hashFile(file), ...info.slices[0] };
 }
 

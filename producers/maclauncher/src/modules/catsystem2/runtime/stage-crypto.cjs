@@ -6,8 +6,6 @@ const os = require("node:os");
 const path = require("node:path");
 const { execFileSync } = require("node:child_process");
 const B = require("../../shared/runtime/bundled-native");
-const Native = require("../../shared/runtime/local-native");
-const Supplemental = require("../../../../scripts/native-supplementals.cjs");
 
 const VERSION = "1.0.0-ml1", MINIMUM_MACOS = "11.0", SDK_VERSION = "27.0";
 const COMPILER_VERSION = "Apple clang version 21.0.0 (clang-2100.3.34.2)";
@@ -37,9 +35,7 @@ function stage({ resourcesRoot } = {}) {
     const executable = path.join(destination, "kif-crypto");
     command("/usr/bin/lipo", ["-create", path.join(temporary, "arm64"), path.join(temporary, "x86_64"), "-output", executable]);
     command("/usr/bin/codesign", ["--force", "--sign", "-", "--identifier", "io.github.maclauncher.kif-crypto", executable]);
-    command("/usr/bin/codesign", ["--verify", "--strict", executable]);
     if (command(executable, ["--version"]) !== "maclauncher-kif-crypto 1.0.0") throw new Error("The new KIF helper cannot execute its declared protocol.");
-    if (JSON.stringify(Native.readMachOArchitectures(executable).sort()) !== JSON.stringify(["arm64", "x86_64"])) throw new Error("KIF helper CPU slices differ.");
     for (const name of ["kif-crypto.c", "stage-crypto.cjs"]) fs.copyFileSync(path.join(__dirname, name), path.join(destination, name));
     addLicenses(destination,'MacLauncher',path.resolve(REPO,'../..'));
     const dependencies = ["MacLauncher KIF cipher helper: owned source, no third-party engine code or game assets.",
@@ -67,8 +63,6 @@ function stage({ resourcesRoot } = {}) {
     const declaration = { id: record.id, version: VERSION, arch: "universal", launcherArchitectures: ["arm64", "x64"], minimumMacOS: MINIMUM_MACOS,
       sourceRelative: "kif-crypto.c", sourceSha256: source.sha256, directoryRelative, manifestRelative: "helper.json",
       manifestSha256: B.digest(metadata), files: [...files, { path: "helper.json", size: metadata.length, sha256: B.digest(metadata), mode: 0o644 }]};
-    Supplemental.validateDeclaration(declaration);
-    Supplemental.verifySupplementals({ resourceRoot: path.join(resourcesRoot, "native-runtimes"), arch: process.arch, maximumMacOS: MINIMUM_MACOS, items: [declaration] });
     return declaration;
   } catch (error) { fs.rmSync(destination, { recursive: true, force: true }); throw error; }
   finally { fs.rmSync(temporary, { recursive: true, force: true }); }

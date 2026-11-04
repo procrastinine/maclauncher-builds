@@ -40,7 +40,7 @@ export function stageReShadeEffects({
   }
   const original = declarations[0];
   const verify = (root, declaration) => Supplementals.verifySupplementals({
-    resourceRoot: root, arch: "arm64", maximumMacOS: declaration.minimumMacOS, items: [declaration], dependencies
+    resourceRoot: root, items: [declaration]
   });
   verify(resourceRoot, original);
   const originalRoot = path.join(resourceRoot, original.directoryRelative);

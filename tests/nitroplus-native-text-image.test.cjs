@@ -193,7 +193,7 @@ int main() { checkJpeg(); checkText(); std::cout << "native JPEG and text pixels
   execFileSync(compiler, ["-std=c++17", "-mmacosx-version-min=13.0",
     ...[stage, path.join(stage, "libnpengine/include"), path.join(stage, "libnpa/include"), path.join(prefix, "include")].map(root => "-I" + root),
     source, path.join(stage, "libnpengine/src/Image.cpp"), path.join(stage, "libnpengine/src/Text.cpp"), path.join(stage, "text-markup.cpp"),
-    ...flags, "-framework", "OpenGL", "-o", binary], { timeout: 60000, stdio: "pipe" });
+    ...flags, ...flags.filter(flag => flag.startsWith("-L")).map(flag => "-Wl,-rpath," + flag.slice(2)), "-framework", "OpenGL", "-o", binary], { timeout: 60000, stdio: "pipe" });
   assert.equal(execFileSync(binary, [], { timeout: 10000, encoding: "utf8", env: { ...process.env, XDG_CACHE_HOME: path.join(root, "cache") } }), "native JPEG and text pixels passed");
   for (const [source, revision] of [[Build.sourcePath, Build.REVISION], [Build.npaSourcePath, Build.NPA_REVISION]])
     await Pinned.validatePinnedSource(source, revision);

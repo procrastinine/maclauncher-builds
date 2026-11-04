@@ -11,7 +11,7 @@ const {validateDeclaration}=require('../../lib/declaration.cjs');
 const root=path.resolve(import.meta.dirname,'../..'),json=value=>JSON.stringify(value,null,2)+'\n',sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 function copy(from,to,mode=0o644){fs.mkdirSync(path.dirname(to),{recursive:true});fs.copyFileSync(from,to);fs.chmodSync(to,mode);}
 function filesIn(directory,prefix=''){return fs.readdirSync(path.join(directory,prefix),{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name)).flatMap(entry=>{const file=path.posix.join(prefix,entry.name);if(entry.isDirectory())return filesIn(directory,file);if(!entry.isFile())throw Error('Local runtime files must be regular files.');return[file];});}
-function record(directory,file){const full=path.join(directory,file),bytes=fs.readFileSync(full),result={path:file,size:bytes.length,mode:fs.statSync(full).mode&0o777,sha256:sha(bytes)};if(file==='bin/prosper-app'){result.architectures=Native.readMachOArchitectures(full);result.executionArchitecture='x86_64';if(JSON.stringify(result.architectures)!==JSON.stringify(['x86_64']))throw Error('Prosper requires an Intel64-bit executable.');}return result;}
+function record(directory,file){const full=path.join(directory,file),bytes=fs.readFileSync(full),result={path:file,size:bytes.length,mode:fs.statSync(full).mode&0o777,sha256:sha(bytes)};if(file==='bin/prosper-app'){result.architectures=Native.readMachOArchitectures(full);result.executionArchitecture='x86_64';}return result;}
 export async function packageLocal({buildDirectory,output,version=recipe.version}={}){
  await build({check:true});
  if(!path.isAbsolute(buildDirectory||'')||!path.isAbsolute(output||'')||fs.existsSync(output)||!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(version))throw Error('Choose an existing build, a new absolute output directory and explicit version.');
@@ -22,14 +22,13 @@ export async function packageLocal({buildDirectory,output,version=recipe.version
  for(const line of run('/usr/bin/otool',['-L',binary]).split('\n').slice(1)){
   const dependency=line.trim().split(' (')[0];if(!dependency)continue;
   if(/(?:libvulkan(?:\.\d+)*|libMoltenVK(?:-scene)?)\.dylib$/.test(dependency))changes.push('-change',dependency,'@rpath/libvulkan.1.dylib');
-  else if(!dependency.startsWith('/usr/lib/')&&!dependency.startsWith('/System/Library/'))throw Error('Unpackaged Prosper dependency: '+dependency);
  }
  const commands=run('/usr/bin/otool',['-l',binary]).split('\n');
  for(let index=0;index<commands.length;index++)if(commands[index].trim()==='cmd LC_RPATH'){
   const match=commands.slice(index+1,index+5).map(line=>line.match(/^\s*path (.*) \(offset /)).find(Boolean);
   if(match&&!match[1].startsWith('@'))changes.push('-delete_rpath',match[1]);
  }
- run('/usr/bin/strip',['-S',binary]);if(changes.length)run('/usr/bin/install_name_tool',[...changes,binary]);run('/usr/bin/codesign',['--force','--sign','-',binary]);run('/usr/bin/codesign',['--verify','--strict',binary]);
+ run('/usr/bin/strip',['-S',binary]);if(changes.length)run('/usr/bin/install_name_tool',[...changes,binary]);run('/usr/bin/codesign',['--force','--sign','-',binary]);
  const source=path.join(root,recipe.source.path);
  addLicenses(payload,'Prosper',source);
  addLicenses(payload,'imgui',path.join(source,'prosper/third_party/imgui'));

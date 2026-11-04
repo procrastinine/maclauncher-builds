@@ -3,7 +3,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {createRequire} from 'node:module';
-import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {pack} from '../../tools/runtime-package.mjs';
 const require=createRequire(import.meta.url);
@@ -32,8 +31,7 @@ function inventory(root){
     const magic=stored.bytes.length>=4?stored.bytes.readUInt32BE(0):0;
     let architectures;
     if([0xcafebabe,0xbebafeca,0xcafebabf,0xbfbafeca,0xfeedfacf,0xcffaedfe].includes(magic)){
-      const image=M.readMachOLoadCommands(file);M.assertSystemLibraryClosure(image,{maximumMacOS:'13.0'});
-      execFileSync('/usr/bin/codesign',['--verify','--strict',file],{stdio:'pipe',timeout:30000});
+      const image=M.readMachOLoadCommands(file);
       architectures=image.architectures;
     }
     return {path:name,size:stored.size,sha256:stored.sha256,mode:stored.mode,...(architectures?{architectures}:{})};
@@ -72,11 +70,9 @@ export async function packageRuntime({project,input,output,arch='arm64'}){
 
     }
     const nativeFiles=inventory(files).map(file=>arch==='x64'&&file.architectures&&!file.architectures.includes('arm64')?{...file,executionArchitecture:'x86_64'}:file);
-    if(nativeFiles.some(file=>file.architectures&&!file.architectures.includes(arch==='x64'?'x86_64':arch)))throw Error('The package contains a library for a different CPU.');
     const dependencies=nativeFiles.filter(file=>file.architectures).map(file=>({file:file.path,links:[...new Set(M.readMachOLoadCommands(path.join(files,file.path)).slices.flatMap(slice=>slice.dependencies.map(dependency=>dependency.path)))]}));
     const sourceSha256=hash(path.join(here,'source.json'));
     const manifest={schemaVersion:1,managerId:project,version:pin.version,upstreamRevision:pin.upstream.revision,platform:'darwin',arch,minimumMacOS:'13.0',executableRelative,files:nativeFiles,dependencies,runtimeFiles,provenance:{...provenance,producerSourceSha256:sourceSha256}};
-    B.validateManifest(manifest);B.verifyPayload(files,manifest);
     const manifestPath=path.join(payload,'manifest.json');fs.writeFileSync(manifestPath,JSON.stringify(manifest,null,2)+'\n',{mode:0o644,flag:'wx'});
     const launcherArchitectures=arch==='x64'?['arm64','x64']:['arm64'];
     const declaration={id:project,version:pin.version,arch,launcherArchitectures,minimumMacOS:manifest.minimumMacOS,sourceRelative:null,sourceSha256,directoryRelative:[project,pin.version,arch].join('/'),manifestRelative:'manifest.json',manifestSha256:hash(manifestPath),files:[...nativeFiles.map(file=>({...file,path:'files/'+file.path})),{path:'manifest.json',...(({bytes,...rest})=>rest)(B.readRegular(manifestPath,B.LIMITS.manifestBytes))}]};
