@@ -63,3 +63,11 @@ test('SDL3 seals only its canonical Mach-O directory and restores the compile-ti
  assert.deepEqual(fs.readFileSync(path.join(view,'SDL3')),image,'Publisher Mach-O bytes remain unchanged');
  assert.ok(!fs.existsSync(path.join(payload,'native/SDL3.framework/SDL3')),'Compile-time links never enter the sealed dependency');
 });
+
+
+test('AIM source follows its sole gitlink and shared original image declaration',async()=>{
+ const {source}=await import('../producers/maclauncher/src/modules/android/providers/aim/source.mjs');
+ const {aimSource}=await import('../lib/android-source.mjs');
+ const image=JSON.parse(fs.readFileSync(new URL('../producers/android-image-data/source.json',import.meta.url))).archive;
+ assert.equal(source.commit,aimSource().revision);assert.equal(source.androidImage.url,image.url);assert.equal(source.androidImage.sha256,image.sha256);assert.equal(source.androidImage.size,image.bytes);
+});

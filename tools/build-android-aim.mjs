@@ -59,12 +59,11 @@ export async function buildAndroidAim({project,version,arch,output,work}){
  if(ownedWork===ownedOutput||ownedOutput.startsWith(ownedWork+path.sep)||ownedWork.startsWith(ownedOutput+path.sep))throw Error('AIM output and build directories must be separate.');
  const selected=resolveProject(project,root),record=buildRecord(selected,version);
  version=record.version;
- const source=JSON.parse(fs.readFileSync(path.join(producer,'src/modules/android/providers/aim/source.json')));
+ const {source,prepareAimSources}=await import(pathToFileURL(path.join(producer,'src/modules/android/providers/aim/source.mjs')));
  const upstream=path.join(work,'upstream');
  const checkout=path.join(producer,'src/external/aim');
  if(read('git',['-C',checkout,'rev-parse','HEAD'])!==source.commit||read('git',['-C',checkout,'status','--porcelain','--untracked-files=no']))throw Error('AIM sources differ from their declared clean revision.');
  fs.mkdirSync(work,{recursive:true});
- const {prepareAimSources}=await import(pathToFileURL(path.join(producer,'src/modules/android/providers/aim/source.mjs')));
  prepareAimSources({checkout,output:upstream,controllerSource:path.join(root,'producers/android-aim-controller/keeper.rs'),buildJobs:2});
  const {sdk,python,cache}=await prepareAndroidBuildInputs({source:upstream,work:path.join(work,'inputs'),image:source.androidImage});
  const env=aimBuildEnvironment({work,upstream,sdk,python,minimumMacOS:source.minimumMacOS||'26.0'});

@@ -8,6 +8,7 @@ import {helperPackage,sha} from './helper-package.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
 const descriptor=path.join(root,'producers/android-inputs/angle.json');
+export function angleDefinition(){const definition=JSON.parse(fs.readFileSync(descriptor));return {...definition,angle:androidSourceJson(definition.angleSource),pythonVersion:JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/aim.json'))).pythonVersion};}
 const read=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8',...options}).trim();
 
 function selectedProfile(value,kind='id'){

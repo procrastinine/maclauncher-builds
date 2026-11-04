@@ -1,4 +1,4 @@
-import {androidSource} from '../lib/android-source.mjs';
+import {androidSource,androidUpstream} from '../lib/android-source.mjs';
 import {addLicenses} from '../lib/licenses.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
@@ -27,7 +27,7 @@ function sourceObjects({repository,revision},destination){
 /** Compile complete platform Java implementations and native declarations without Mac programs. */
 export async function buildAndroidJavaFrameworkInput({output,work}){
  if([output,work].some(file=>!path.isAbsolute(file||'')||fs.existsSync(file)))throw Error('Framework Java inputs require new absolute output/work directories.');
- const profile=json(descriptor),javaProfile=json(path.join(root,'producers/android-inputs/java-converter.json')),jdkPin=javaProfile.jdk[process.platform+'-'+process.arch];
+ const profile=json(descriptor);profile.sources=profile.sources.map(source=>({...source,revision:androidUpstream(source.repository).revision}));const javaProfile=json(path.join(root,'producers/android-inputs/java-converter.json')),jdkPin=javaProfile.jdk[process.platform+'-'+process.arch];
  if(!jdkPin)throw Error('The framework Java stage has no declared JDK for this build host.');
  fs.mkdirSync(work,{recursive:true});fs.mkdirSync(output,{recursive:true});
  const android=checkoutSource({...androidSource(),destination:path.join(work,'android')}),native=path.join(android,'src/modules/android/native'),pins=json(path.join(native,'source-pins.json'));
