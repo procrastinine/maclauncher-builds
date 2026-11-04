@@ -16,6 +16,6 @@ test('package version rewrite changes only consumed metadata and preserves every
  const result=await reversionPackage({archive,record,version:'0.7.7-MCLv1',output,directory});assert.equal(hash(fs.readFileSync(archive)),before);assert.equal(result.manifest.version,'0.7.7-MCLv1');assert.equal(result.manifest.upstreamVersion,'0.7.7');assert.equal(result.declaration.sourceRelative,null);assert.equal(result.record.sourceSha256,declaration.sourceSha256);
  const checked=await verify({archive:output,sha256:result.record.asset.sha256,project:'engine',version:'0.7.7-MCLv1',arch:'arm64',includeDeclaration:true,includeManifest:true});assert.equal(checked.manifest.version,checked.declaration.version);assert.notEqual(checked.declaration.manifestSha256,declaration.manifestSha256);
  ;
- for(const file of files.filter(f=>f.path!=='manifest.json'&&f.path!=='LICENSE'))assert.deepEqual(checked.declaration.files.find(f=>f.path===file.path),file);
+ for(const file of files.filter(f=>f.path!=='manifest.json'))assert.deepEqual(checked.declaration.files.find(f=>f.path===file.path),file);
  await assert.rejects(reversionPackage({archive,record,version:'0.7.7-MCLv1',output,directory}),/new archive path/);
 });

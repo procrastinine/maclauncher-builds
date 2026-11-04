@@ -27,7 +27,7 @@ test('sealed data/runtime packages round trip and produce a manually updated cat
   assert.throws(()=>catalog([{...record,...changed}],{project:f.project,repository:'owner/builds'}),/Invalid|private/);
 });
 test('package creation rejects modified bytes, extra files and aliases',async t=>{
- for(const change of ['bytes','extra','alias']){const f=fixture(t);if(change==='bytes')fs.writeFileSync(path.join(f.input,'library.dat'),'changed');else if(change==='extra')fs.writeFileSync(path.join(f.input,'unexpected'),'extra');else{fs.unlinkSync(path.join(f.input,'library.dat'));fs.symlinkSync('LICENSE',path.join(f.input,'library.dat'));}await assert.rejects(pack(f),/checksum|inventory|symlinks/);}
+ for(const change of ['bytes','extra','alias']){const f=fixture(t);if(change==='bytes')fs.writeFileSync(path.join(f.input,'library.dat'),'changed');else if(change==='extra')fs.writeFileSync(path.join(f.input,'unexpected'),'extra');else{fs.unlinkSync(path.join(f.input,'library.dat'));fs.symlinkSync('resource.txt',path.join(f.input,'library.dat'));}await assert.rejects(pack(f),/checksum|inventory|symlinks/);}
 });
 test('local-only packages and unsafe metadata cannot enter the release catalog',async t=>{
  const f=fixture(t);f.declaration.redistribution='local-only';await assert.rejects(pack(f),/restricted/);
@@ -39,7 +39,7 @@ test('download verification rejects link and traversal headers even with a match
  const offset=512+Math.ceil(metadataSize/512)*512;
  for(const kind of ['link','traversal']){
   const bytes=Buffer.from(original),header=bytes.subarray(offset,offset+512);
-  if(kind==='link'){header[156]=50;header.write('LICENSE',157);}
+  if(kind==='link'){header[156]=50;header.write('resource.txt',157);}
   else{header.fill(0,0,100);header.write('../outside',0);}
   header.fill(32,148,156);header.write(header.reduce((sum,byte)=>sum+byte,0).toString(8).padStart(6,'0')+'\0 ',148,8);
   const compressed=zlib.gzipSync(bytes),file=path.join(f.root,kind+'.tar.gz');fs.writeFileSync(file,compressed);
