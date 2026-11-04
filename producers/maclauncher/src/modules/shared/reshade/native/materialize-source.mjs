@@ -19,7 +19,7 @@ export function materializeSource({output,sources={},baseOnly=false}){
  for(const entry of processor.sources){
   const directory=path.resolve(sources[entry.id]||path.join(repository,entry.submodulePath));
   const head=execFileSync('git',['-C',directory,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
-  if(head!==(entry.commit||gitlink('producers/maclauncher/'+entry.submodulePath)))throw Error('Initialize the selected graphics source commit: '+entry.submodulePath);
+  if(head!==(entry.commit||(entry.id==='macfx-spirv-headers'?execFileSync('git',['-C',path.join(repository,'src/external/macfx-reshade'),'rev-parse',gitlink('producers/maclauncher/src/external/macfx-reshade')+':deps/spirv'],{encoding:'utf8'}).trim():gitlink('producers/maclauncher/'+entry.submodulePath))))throw Error('Initialize the selected graphics source commit: '+entry.submodulePath);
   directories[entry.sourcePath]=directory;
  }
  fs.mkdirSync(output,{recursive:true});
@@ -36,7 +36,7 @@ export function materializeSource({output,sources={},baseOnly=false}){
   if(execFileSync('git',['-C',libraRoot,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==libra.commit||
     digest(fs.readFileSync(path.join(libraRoot,'include/librashader.h')))!==libra.headerSha256)throw Error('Initialize the selected librashader source commit.');
   for(const name of ['include/librashader.h','LICENSE.md']){const file=path.join(output,'third_party/librashader',name);fs.mkdirSync(path.dirname(file),{recursive:true});fs.copyFileSync(path.join(libraRoot,name),file);}
-  return {output,sourceSha256:overlay.baseSourceHash,upstreams:processor.sources.map(({id,commit,submodulePath})=>({id,commit:commit||gitlink('producers/maclauncher/'+submodulePath)}))};
+  return {output,sourceSha256:overlay.baseSourceHash,upstreams:processor.sources.map(({id,commit,submodulePath})=>({id,commit:commit||(id==='macfx-spirv-headers'?execFileSync('git',['-C',path.join(repository,'src/external/macfx-reshade'),'rev-parse',gitlink('producers/maclauncher/src/external/macfx-reshade')+':deps/spirv'],{encoding:'utf8'}).trim():gitlink('producers/maclauncher/'+submodulePath))}))};
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){
