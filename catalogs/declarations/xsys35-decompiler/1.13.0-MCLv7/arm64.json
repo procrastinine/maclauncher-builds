@@ -1,0 +1,56 @@
+{
+  "id": "xsys35-decompiler",
+  "version": "1.13.0-MCLv7",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "xsys35-decompiler/1.13.0-MCLv7/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "22ba3aeed47162dd1aa19f557ff994e9dddfa65748ae0e98beb8e0ac4f255626",
+  "sourceSha256": "22ba3aeed47162dd1aa19f557ff994e9dddfa65748ae0e98beb8e0ac4f255626",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 16997,
+      "mode": 420,
+      "sha256": "771b234f1ac6b2a9cdf77685ab06d7bfbeba30a2e3ed92fd481f9d6862368e3e"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "d9476f1a7c4ea45632881805f270e1e2d9ac546ae9b96d4c83a62f43bd6ac4da"
+    },
+    {
+      "path": "files/bin/xsys35dc",
+      "size": 140544,
+      "sha256": "d7e0645a882cb3b7469376b62f5f67190db3beccffc99ce43aa0745d0a005add",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 21,
+      "sha256": "1071d5463b4852f552398fef8c724669abaf0ff703f000a58af5badd02bcc931",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/xsys35c.txt",
+      "size": 18092,
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 2917,
+      "mode": 420,
+      "sha256": "22ba3aeed47162dd1aa19f557ff994e9dddfa65748ae0e98beb8e0ac4f255626"
+    }
+  ],
+  "redistribution": "bundle"
+}
