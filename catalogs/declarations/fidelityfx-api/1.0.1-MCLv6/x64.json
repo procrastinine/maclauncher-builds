@@ -1,0 +1,79 @@
+{
+  "id": "fidelityfx-api",
+  "version": "1.0.1-MCLv6",
+  "arch": "x64",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "10.15",
+  "sourceRelative": null,
+  "sourceSha256": "85ff3d91c194bf4134fd37cccc4f8ac7805e0e94ee34012a85aabf141815ca08",
+  "directoryRelative": "fidelityfx-api/1.0.1-MCLv6/x64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "e915a47d12c157a5b37597149aeebbfa981389997663e5253d2c4a09bea6169c",
+  "files": [
+    {
+      "path": "amd_fidelityfx_vk.dll",
+      "size": 772608,
+      "mode": 493,
+      "sha256": "d5006ef8b59ee0687f952f9f232c487a0bcf09e416d53e0a1b21d0a2d1ae8b61",
+      "format": "pe",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "build-definition.json",
+      "size": 20364,
+      "mode": 420,
+      "sha256": "70e006c2152b838ba4a004f5df8b048aff5dd94e0113747a1646c3f7ff13f6f7"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "6c24fd39469633b130c4d316730a2b514ff4d38794ac9c8cbc6d275115508838"
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 70,
+      "mode": 420,
+      "sha256": "1a740f898d7e2c402807164063d3a282b4f9f56adc7a389994f4667e9193c207"
+    },
+    {
+      "path": "licenses/FidelityFX-SDK.txt",
+      "size": 1115,
+      "mode": 420,
+      "sha256": "82cf74fc23885107c7f69249ac3f1dac55898ff68320eb2c753984cae6b2d78a"
+    },
+    {
+      "path": "licenses/Vulkan-Headers.txt",
+      "size": 11357,
+      "mode": 420,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "maclauncher_fidelityfx_vk_original.dll",
+      "size": 9332432,
+      "mode": 493,
+      "sha256": "a1624cc4238fef046f30c4d80ce3f47be63fc5f5373f49e3ee9edb9960f54c78",
+      "format": "pe",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "manifest.json",
+      "size": 3015,
+      "mode": 420,
+      "sha256": "e915a47d12c157a5b37597149aeebbfa981389997663e5253d2c4a09bea6169c"
+    },
+    {
+      "path": "provider.json",
+      "size": 1407,
+      "mode": 420,
+      "sha256": "6107751f16638dbe624353c419d542303b3b3d3aaa1e63ada0098441794c200c"
+    }
+  ]
+}
