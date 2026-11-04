@@ -1,4 +1,4 @@
-import {addLicense} from '../../../../../../../lib/licenses.mjs';
+import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -55,7 +55,7 @@ for(const [inputs,target] of [[libraries,library],[helpers,helper]]){
 run('/usr/bin/install_name_tool',['-id','@rpath/librashader.dylib',library]);
 for(const file of [library,helper]){run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',file]);run('/usr/bin/codesign',['--verify','--strict',file]);}
 const notice=output;
-addLicense(output,'librashader',path.join(source,'LICENSE.md'));
+addLicenses(output,'librashader',source);
 fs.writeFileSync(path.join(notice,'source.json'),JSON.stringify(declaration,null,2)+'\n');
 const files=[library,helper,path.join(output,'source.json'),...(fs.existsSync(path.join(output,'licenses'))?fs.readdirSync(path.join(output,'licenses')):[]).map(file=>path.join(output,'licenses',file))].map(file=>({path:path.relative(output,file),source:file,size:fs.statSync(file).size,mode:fs.statSync(file).mode&0o777,sha256:hash(file)}));
 const exports=run('/usr/bin/nm',['-gU',library]);

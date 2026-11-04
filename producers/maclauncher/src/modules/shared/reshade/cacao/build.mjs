@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {addLicense} from '../../../../../../../lib/licenses.mjs';
+import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 // Original FidelityFX CACAO kernels and constant/scheduling contract.
 import fs from 'node:fs';
@@ -279,7 +279,7 @@ shaders.forEach(
         i},sizeof(bindings${i})/sizeof(Binding),${s.threads.join(',')}},`);
 header += '};\n}\n';
 fs.writeFileSync(path.join(out, 'cacao-shaders.hpp'), header);
-addLicense(out,'FidelityFX-CACAO',path.join(source,'LICENSE.txt'),'MIT');
+addLicenses(out,'FidelityFX-CACAO',source);
 fs.writeFileSync(path.join(out, 'translation.json'), JSON.stringify({
   schema : 1,
   repository : spec.repository,

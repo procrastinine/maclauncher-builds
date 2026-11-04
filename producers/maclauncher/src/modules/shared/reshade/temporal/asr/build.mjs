@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {addLicense} from '../../../../../../../../lib/licenses.mjs';
+import {addLicenses} from '../../../../../../../../lib/licenses.mjs';
 // Offline translation of the original Arm ASR mixed fragment/compute graph.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -76,7 +76,7 @@ for(const arch of ['arm64','x86_64']){
  run('xcrun',['clang++',...args,'-arch',arch,'-fobjc-arc','-dynamiclib',path.join(here,'backend.mm'),...objects,'-framework','Metal','-framework','Foundation','-install_name','@rpath/libmaclauncher-asr.dylib','-o',path.join(out,'libmaclauncher-asr-'+arch+'.dylib')]);
 }
 run('lipo',['-create',...['arm64','x86_64'].map(a=>path.join(out,'libmaclauncher-asr-'+a+'.dylib')),'-output',path.join(out,'libmaclauncher-asr.dylib')]);run('codesign',['--force','--sign','-',path.join(out,'libmaclauncher-asr.dylib')]);
-addLicense(out,'Arm-ASR',path.join(source,'LICENSES/MIT.txt'));
+addLicenses(out,'Arm-ASR',source);
 const ownedNames=['source.json','build.mjs','backend.mm','descriptor.js','host-compat.hpp','../frame.h','../command-order.hpp','../payload-files.hpp'],owned=Object.fromEntries(ownedNames.map(n=>[n,hash(path.join(here,n))]));
 function inventory(dir,prefix=''){return fs.readdirSync(path.join(dir,prefix),{withFileTypes:true}).flatMap(e=>{const r=path.posix.join(prefix,e.name);return e.isDirectory()?inventory(dir,r):[{path:r,size:fs.statSync(path.join(dir,r)).size,sha256:hash(path.join(dir,r))}];});}
 const files=[{path:'libmaclauncher-asr.dylib',size:fs.statSync(path.join(out,'libmaclauncher-asr.dylib')).size,sha256:hash(path.join(out,'libmaclauncher-asr.dylib'))},{path:'ASR-MIT.txt',size:fs.statSync(path.join(out,'ASR-MIT.txt')).size,sha256:hash(path.join(out,'ASR-MIT.txt'))},...inventory(out,'asr')];
