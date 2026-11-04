@@ -1,0 +1,55 @@
+{
+  "id": "web-renderer-network",
+  "version": "1.1.5",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "11.0",
+  "sourceRelative": null,
+  "sourceSha256": "9d1a5fb91b8ea207ec117aaabb62a1b7925637cec958bd0b443b03f9eaa0631c",
+  "directoryRelative": "web-renderer-network/1.1.5/arm64",
+  "manifestRelative": "helper.json",
+  "manifestSha256": "a8e0457bb683ffb318df3ba2ed74f91fe4618b6225b04c7720844ce3e0d68a94",
+  "files": [
+    {
+      "path": "build-definition.json",
+      "size": 16385,
+      "mode": 420,
+      "sha256": "a03879734cfdf97b3db386a41a9072fd2a26415e2f8f0260205ea9233220c235"
+    },
+    {
+      "path": "build-inputs.json",
+      "size": 117,
+      "mode": 420,
+      "sha256": "a0cd3f4615100da459301489294e95b4edd160b440d398341abfe80579e8f160"
+    },
+    {
+      "path": "helper.json",
+      "size": 769,
+      "sha256": "a8e0457bb683ffb318df3ba2ed74f91fe4618b6225b04c7720844ce3e0d68a94",
+      "mode": 420
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 29,
+      "sha256": "5fae4a022fb97d8e3d41dc31e83fd092c1a87e5a48656a7f4b95b25659699d66",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MacLauncher.txt",
+      "size": 1081,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+      "mode": 420
+    },
+    {
+      "path": "renderer-network.node",
+      "size": 50912,
+      "sha256": "87c33bf5154db50d97ceeefec650c102d85695f641e919a5b49acfdf83a57602",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    }
+  ]
+}
