@@ -1,17 +1,1 @@
-{
-  "schemaVersion": 1,
-  "id": "android-art-16",
-  "android": {
-    "api": 36,
-    "release": "16",
-    "buildId": "BE2A.250530.026.F3",
-    "architectures": [
-      "arm64-v8a"
-    ],
-    "imageArchive": "arm64-v8a-playstore-ps16k-36_r07.zip",
-    "imageSha256": "182f51ad2b04bbb9cd9464d3e0396a81201db6d9659e1fde5951b6efc1e0a00e"
-  },
-  "hostcallVersion": 1,
-  "applicationEntry": "maclauncher.android.Art",
-  "guestEntry": "/system/bin/app_process64"
-}
+../../../../../../../../sources/maclauncher-android/src/modules/android/art/supplier.json
