@@ -393,7 +393,6 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/gemrb/runtime/portable-build-v4.js",
         "producers/maclauncher/src/modules/gemrb/runtime/portable-build-v5.js",
         "producers/maclauncher/src/modules/shared/runtime",
         "producers/maclauncher/src/modules/gemrb/runtime/portable-overlay-v5.js"
