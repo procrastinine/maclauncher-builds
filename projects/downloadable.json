@@ -43,8 +43,9 @@
         "url": "https://github.com/hahnlee/aim",
         "repository": "hahnlee/aim",
         "pin": {
-          "file": "sources/maclauncher-android/src/modules/android/native/source-pins.json",
-          "pointer": "/aim"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects/0/revision",
+          "repositoryPointer": "/projects/0/repository"
         }
       },
       {
@@ -147,9 +148,9 @@
         "url": "https://github.com/hahnlee/aim",
         "repository": "hahnlee/aim",
         "pin": {
-          "file": "sources/maclauncher-android/src/modules/android/art/supplier.json",
-          "pointer": "/sources/aim/commit",
-          "repositoryPointer": "/sources/aim/url"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects/0/revision",
+          "repositoryPointer": "/projects/0/repository"
         }
       },
       {
@@ -202,7 +203,9 @@
         "url": "https://github.com/hahnlee/aim",
         "repository": "hahnlee/aim",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/aim"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects/0/revision",
+          "repositoryPointer": "/projects/0/repository"
         }
       }
     ],
@@ -2367,7 +2370,7 @@
   {
     "id": "vnds-love",
     "name": "VNDS-LOVE",
-    "purpose": "Adapted VNDS interpreter for the managed LÖVE host.",
+    "purpose": "Adapted VNDS interpreter for the managed L\u00d6VE host.",
     "producer": {
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",

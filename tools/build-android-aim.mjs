@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
-import {recipeMain,run} from './build-source.mjs';
+import {recipeMain,run,checkoutSource} from './build-source.mjs';
 import {prepareAndroidBuildInputs,releaseAndroidImageArchive} from './android-build-inputs.mjs';
 import {buildAngleInput,angleDefinition} from './build-android-angle.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
@@ -61,7 +61,7 @@ export async function buildAndroidAim({project,version,arch,output,work}){
  version=record.version;
  const {source,prepareAimSources}=await import(pathToFileURL(path.join(producer,'src/modules/android/providers/aim/source.mjs')));
  const upstream=path.join(work,'upstream');
- const checkout=path.join(producer,'src/external/aim');
+ const checkout=checkoutSource({repository:source.repository,revision:source.commit,destination:path.join(work,'aim-source')});
  if(read('git',['-C',checkout,'rev-parse','HEAD'])!==source.commit||read('git',['-C',checkout,'status','--porcelain','--untracked-files=no']))throw Error('AIM sources differ from their declared clean revision.');
  fs.mkdirSync(work,{recursive:true});
  prepareAimSources({checkout,output:upstream,controllerSource:path.join(root,'producers/android-aim-controller/keeper.rs'),buildJobs:2});

@@ -4,8 +4,8 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import definition from './source.json' with {type:'json'};
 import image from '../../../../../../../producers/android-image-data/source.json' with {type:'json'};
-import {gitlink} from '../../../../../../../lib/pins.mjs';
-const source={...definition,commit:gitlink('producers/maclauncher/src/external/aim'),androidImage:{...image.archive,...definition.androidImage,size:image.archive.bytes}};
+import {aimSource} from '../../../../../../../lib/android-source.mjs';
+const source={...definition,commit:aimSource().revision,androidImage:{...image.archive,...definition.androidImage,size:image.archive.bytes}};
 
 export {source};
 

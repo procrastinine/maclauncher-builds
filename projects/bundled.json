@@ -125,7 +125,7 @@
   },
   {
     "id": "love-luasteam",
-    "name": "LÖVE LuaSteam bridge",
+    "name": "L\u00d6VE LuaSteam bridge",
     "purpose": "LuaSteam 4 binding against the selected host Lua VM.",
     "producer": {
       "kind": "maclauncher",
@@ -830,9 +830,9 @@
         "url": "https://github.com/hahnlee/aim",
         "repository": "hahnlee/aim",
         "pin": {
-          "file": "producers/maclauncher/src/modules/android/native/apk-metadata/sources.json",
-          "pointer": "/aim/revision",
-          "repositoryPointer": "/aim/repository"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects/0/revision",
+          "repositoryPointer": "/projects/0/repository"
         }
       }
     ],
@@ -992,9 +992,9 @@
         "url": "https://github.com/hahnlee/aim",
         "repository": "hahnlee/aim",
         "pin": {
-          "file": "sources/maclauncher-android/src/modules/android/art/supplier.json",
-          "pointer": "/sources/aim/commit",
-          "repositoryPointer": "/sources/aim/url"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects/0/revision",
+          "repositoryPointer": "/projects/0/repository"
         }
       }
     ],
@@ -1329,9 +1329,9 @@
         "url": "https://github.com/hahnlee/aim",
         "repository": "hahnlee/aim",
         "pin": {
-          "file": "sources/maclauncher-android/src/modules/android/art/supplier.json",
-          "pointer": "/sources/aim/commit",
-          "repositoryPointer": "/sources/aim/url"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects/0/revision",
+          "repositoryPointer": "/projects/0/repository"
         }
       }
     ],
@@ -1679,7 +1679,9 @@
         "repository": "hahnlee/aim",
         "url": "https://github.com/hahnlee/aim",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/aim"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects/0/revision",
+          "repositoryPointer": "/projects/0/repository"
         }
       }
     ],
@@ -1746,7 +1748,9 @@
         "repository": "hahnlee/aim",
         "url": "https://github.com/hahnlee/aim",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/aim"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects/0/revision",
+          "repositoryPointer": "/projects/0/repository"
         }
       }
     ],
@@ -1813,7 +1817,9 @@
         "repository": "hahnlee/aim",
         "url": "https://github.com/hahnlee/aim",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/aim"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects/0/revision",
+          "repositoryPointer": "/projects/0/repository"
         }
       }
     ],
@@ -1880,7 +1886,9 @@
         "repository": "hahnlee/aim",
         "url": "https://github.com/hahnlee/aim",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/aim"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects/0/revision",
+          "repositoryPointer": "/projects/0/repository"
         }
       }
     ],
@@ -1947,7 +1955,9 @@
         "repository": "hahnlee/aim",
         "url": "https://github.com/hahnlee/aim",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/aim"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects/0/revision",
+          "repositoryPointer": "/projects/0/repository"
         }
       }
     ],
@@ -2031,7 +2041,9 @@
         "url": "https://github.com/hahnlee/aim",
         "repository": "hahnlee/aim",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/aim"
+          "file": "sources/maclauncher-android/upstreams.json",
+          "pointer": "/projects/0/revision",
+          "repositoryPointer": "/projects/0/repository"
         }
       }
     ],

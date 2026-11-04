@@ -6,10 +6,6 @@
 	path = producers/maclauncher/src/external/ai5-sdl2
 	url = https://github.com/nunuhara/ai5-sdl2
 
-[submodule "producers/maclauncher/src/external/aim"]
-	path = producers/maclauncher/src/external/aim
-	url = https://github.com/hahnlee/aim
-
 [submodule "producers/maclauncher/src/external/asr"]
 	path = producers/maclauncher/src/external/asr
 	url = https://github.com/arm/accuracy-super-resolution-generic-library

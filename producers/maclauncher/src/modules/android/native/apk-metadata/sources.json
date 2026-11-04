@@ -1,13 +1,11 @@
 {
   "schemaVersion": 1,
   "aim": {
-    "repository": "https://github.com/hahnlee/aim",
     "paths": [
       "crates/aim-apps",
       "crates/aim-android-xml",
       "tools/android-image-extract"
-    ],
-    "revision": "934009283f69c251f57ed95ef1dff296546bb6ad"
+    ]
   },
   "registryDependencies": [
     "libc",
