@@ -53,7 +53,7 @@ export function packageBlueprintInput({project='android-blueprint-parser',versio
  for(const relative of ['bin/android-blueprint-parser','parser-sources.json']){
   const target=path.join(payload,relative);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(inputRoot,relative),target);
  }
- 
+
  run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',path.join(payload,'bin/android-blueprint-parser')]);
  includeLicenses(payload,path.join(inputRoot,'licenses'));
  return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(path.join(base,'source.json')),manifestRelative:'input.json',record:{upstreamRevision:profile.upstream.revision,toolchain}});

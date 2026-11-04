@@ -76,8 +76,6 @@ export function stageAim({build,angle,output,writeDistribution=true,environment=
     if(architecture(molten).length>1) run('/usr/bin/lipo',[molten,'-thin','arm64','-output',molten]);
     addLicenses(payload,'AIM',build);
     addLicense(payload,'AIM',path.join(build,'THIRD_PARTY_NOTICES.md'));
-    addLicense(payload,'AIM',path.join(build,'LICENSING.md'));
-    addLicense(payload,'AIM OpenJDK',path.join(build,'licensing/OPENJDK.md'));
     addLicenses(payload,'MoltenVK',path.join(build,'target/aim/moltenvk'));
     addLicenses(payload,'BoringSSL',path.join(build,'_build/aosp/external/boringssl/src'));
     addCargoLicenses(payload,'AIM',build,environment);

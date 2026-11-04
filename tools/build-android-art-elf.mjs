@@ -61,8 +61,6 @@ export async function buildArtElfsInput({output,work}){
 
  addLicenses(output,'AIM',checkout);
     addLicense(output,'AIM',path.join(checkout,'THIRD_PARTY_NOTICES.md'));
-    addLicense(output,'AIM',path.join(checkout,'LICENSING.md'));
-    addLicense(output,'AIM OpenJDK',path.join(checkout,'licensing/OPENJDK.md'));
  addLicenses(output,'ART OpenJDK',path.join(fetched,'aosp/art/openjdkjvm'));
  addLicenses(output,'ART JVMTI',path.join(fetched,'aosp/art/openjdkjvmti'));
  addLicenses(output,'nativehelper',path.join(fetched,'aosp/libnativehelper'));
