@@ -10,7 +10,7 @@ import {build} from '../producers/android-launcher/build.mjs';
 import {recipeMain} from './build-source.mjs';
 const root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/android-launcher');
 export async function buildAndroidLauncher({project:id,arch,output,work}){
- const project=resolveProject(id,root,{resolvePins:false}),profile=JSON.parse(fs.readFileSync(path.join(root,'producers/included-helpers/profiles/android-launcher.json'))),input=JSON.parse(fs.readFileSync(path.join(base,'build-inputs.json')));
+ const project=resolveProject(id,root,{resolvePins:false}),profile=JSON.parse(fs.readFileSync(path.join(root,'producers/included-helpers/profiles/android-launcher.json'))),input=JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/java-converter.json')));
  fs.mkdirSync(work,{recursive:true});const cache=path.join(work,'archives');
  try {
   // Android's android-host.jar classes and android-framework.jar are this build stage's products, unchanged.

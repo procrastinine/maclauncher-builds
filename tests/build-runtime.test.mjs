@@ -28,10 +28,11 @@ test('runtime builds require the exact clean source commit recorded by the hub',
  git(source,'add','tools');git(source,'commit','-qm','Runtime source');const revision=git(source,'rev-parse','HEAD');
  git(root,'init','-q');git(root,'config','user.name','Build test');git(root,'config','user.email','test@example.invalid');
  git(root,'update-index','--add','--cacheinfo',`160000,${revision},sources/android`);git(root,'commit','-qm','Pin producer');
- const recipe={schemaVersion:1,id:'android',revision,path:'sources/android',buildEntry:'tools/build.mjs',checkEntry:'tools/check-sources.mjs'};
+ const recipe={schemaVersion:1,id:'android',path:'sources/android',buildEntry:'tools/build.mjs',checkEntry:'tools/check-sources.mjs'};
  assert.equal(verifyProducer(root,recipe),source);
- assert.throws(()=>verifyProducer(root,{...recipe,revision:'0'.repeat(40)}),/pinned/);
+ assert.equal(recipe.revision,revision);
  fs.appendFileSync(path.join(source,'tools/build.mjs'),'// changed\n');assert.throws(()=>verifyProducer(root,recipe),/local changes/);
+ git(source,'add','tools');git(source,'commit','-qm','Changed producer');assert.throws(()=>verifyProducer(root,recipe),/selected revision/);
 });
 
 // A registry with one GitHub-built project and a command that writes a data-only package.

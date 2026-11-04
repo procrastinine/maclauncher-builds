@@ -1136,8 +1136,7 @@
         "producers/included-helpers/prepare.mjs",
         "producers/included-helpers/profiles/android-launcher.json",
         "producers/android-launcher/build.mjs",
-        "producers/android-launcher/source.json",
-        "producers/android-launcher/build-inputs.json"
+        "producers/android-launcher/source.json"
       ]
     },
     "upstreams": [

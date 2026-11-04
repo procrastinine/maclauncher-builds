@@ -36,7 +36,7 @@ export async function prepareAndroidCommonPublisherInputs({work}){
  fs.mkdirSync(work,{recursive:true});
  const archiveCache=path.join(work,'archives');
  const retireArchive=archive=>{if(path.dirname(archive)!==archiveCache)throw Error('Publisher archive is outside its owned cache.');fs.rmSync(archive);};
- const jdkArchive=await buildInput(profile.jdk,archiveCache),jdkOutput=path.join(work,'jdk');fs.mkdirSync(jdkOutput);
+ const jdkArchive=await buildInput(JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/java-converter.json'))).jdk['darwin-arm64'],archiveCache),jdkOutput=path.join(work,'jdk');fs.mkdirSync(jdkOutput);
  const jdkNames=archiveNames(jdkArchive,true),java=unique(jdkNames.filter(name=>name.endsWith('/Contents/Home/bin/java')),'JDK home');
  const home=java.slice(0,-'/bin/java'.length);
  read('/usr/bin/tar',['-xzf',jdkArchive,'-C',jdkOutput,home]);

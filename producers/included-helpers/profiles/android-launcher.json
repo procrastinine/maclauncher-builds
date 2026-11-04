@@ -119,8 +119,8 @@
       "path": "runtime/src/modules/android/art/supplier.json",
       "output": "files/runtime/src/modules/android/art/supplier.json",
       "kind": "file",
-      "size": 957,
-      "sha256": "33fc77a44af6049b1a9d7b62df333ad6b8565a0ba1ef6390d6d82e9028a4d2e0",
+      "size": 456,
+      "sha256": "49addb07dd91652703929dab8ed4f23236a3d6898cffe3fe791ede0008526d39",
       "mode": 420
     },
     {

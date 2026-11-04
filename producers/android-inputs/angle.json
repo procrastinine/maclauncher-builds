@@ -22,6 +22,5 @@
     "repository": "https://gn.googlesource.com/gn",
     "revision": "3a4f5cea73eca32e9586e8145f97b04cbd4a1aee",
     "commitPosition": 2265
-  },
-  "pythonVersion": "3.13.11"
+  }
 }
