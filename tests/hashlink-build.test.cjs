@@ -70,4 +70,3 @@ test("HashLink 1.9 source adaptation uses its pinned headers without changing SD
   assert.equal(fs.readFileSync(path.join(sdl, "include/SDL.h"), "utf8"), "pinned SDL2 header");
   assert.throws(() => Legacy.adaptSource(source, sdl), /source files do not match/);
 });
-
