@@ -55,9 +55,7 @@ export async function buildArtElfsInput({output,work}){
  const {buildArtElfs}=await import(pathToFileURL(path.join(android,profile.buildEntry)));
  const built=buildArtElfs({aim:source,fetched,sdk,work:target,jdk:homes[0],python,jobs:2,env});
  fs.mkdirSync(output,{recursive:true});
- for(const relative of profile.outputs){
-  const file=path.join(built.art,relative),destination=path.join(output,relative);fs.mkdirSync(path.dirname(destination),{recursive:true});fs.copyFileSync(file,destination);fs.chmodSync(destination,fs.statSync(file).mode&0o111?0o755:0o644);
- }
+ fs.cpSync(built.art,output,{recursive:true,mode:fs.constants.COPYFILE_FICLONE});
 
  addLicenses(output,'AIM',checkout);
     addLicense(output,'AIM',path.join(checkout,'THIRD_PARTY_NOTICES.md'));
@@ -72,7 +70,7 @@ export async function buildArtElfsInput({output,work}){
  addLicenses(output,'libcap',path.join(fetched,'aosp/external/libcap'));
  addLicenses(output,'BoringSSL',path.join(fetched,'aosp/external/boringssl/src'));
  addLicenses(output,'fiat-crypto',path.join(fetched,'aosp/external/boringssl/src/third_party/fiat'));
- return {art:output,build:{source,checkout,fetched,sdk,jdk:homes[0],python,target,env},record:{androidSource:androidSource(),aimRevision:supplier.sources.aim.commit,sourceTreeSha256:staged.treeSha256,sourceLockSha256:sha(path.join(android,profile.sourceLock))}};
+ return {art:output,build:{source,checkout,fetched,sdk,jdk:homes[0],python,target,env},record:{androidSource:androidSource(),aimRevision:supplier.sources.aim.commit,sourceTreeSha256:staged.treeSha256,sourceLockSha256:sha(path.join(checkout,profile.sourceLock))}};
  }finally{const mount=path.join(fetched,'android16-image');if(fs.existsSync(path.join(mount,'root.identity')))run('hdiutil',['detach',mount]);}
 }
 
