@@ -2,7 +2,6 @@
   "schema": 1,
   "implementation": "owned",
   "repository": "https://github.com/procrastinine/maclauncher",
-  "license": "MIT",
   "files": [
     "histogram-exposure.mm",
     "histogram-exposure.hpp"

@@ -2,12 +2,11 @@
   "schema": 1,
   "source": {
     "repository": "https://github.com/iamwavecut/MLX-DLSS",
-    "commit": "7870371e8bf6c03967213f1a5d40db6c5a3bee38",
-    "license": "Apache-2.0",
     "files": {
       "python/mlxdlss/tools/extract_dlssg_weights.py": "d4ded5e7bac46ec3ed7438f1a89581324a29c9c2612bb0ad7f1994e974b82dc5",
       "python/mlxdlss/tools/extract_vsr_weights.py": "bf46d194f82a2b41f1312fa4e447cf277417fcabdd0f6687db339ea52af79637"
-    }
+    },
+    "gitlink": "producers/maclauncher/src/external/MLX-DLSS"
   },
   "interpolation": {
     "architecture": "mlxdlss.video-frame-generation.v1",

@@ -1,4 +1,4 @@
-import {addLicense} from '../../../../../../../lib/licenses.mjs';
+import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -135,9 +135,7 @@ export function publishModule(built,output){
         if(name.endsWith('.dll'))run(built.strip,['--strip-debug',target]);
         else run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);
     }
-    for(const file of source.licenses)addLicense(output,'Wine',path.join(built.directory,file));
-    addLicense(output,'Wine',path.resolve(here,'../../../../../LICENSE'));
-    addLicense(output,'Wine',path.resolve(here,'../../../../../LICENSE'));
+    addLicenses(output,'Wine',built.directory);
     const files=[...binaries.map(([name])=>name),...(fs.existsSync(path.join(output,'licenses'))?fs.readdirSync(path.join(output,'licenses')).map(name=>'licenses/'+name):[])].map(file=>{
         const binary=binaries.some(([name])=>name===file),native=file.endsWith('.so'),target=path.join(output,file);
         fs.chmodSync(target,binary?0o755:0o644);

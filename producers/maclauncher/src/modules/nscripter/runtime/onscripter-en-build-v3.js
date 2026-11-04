@@ -1,4 +1,4 @@
-const {addLicense} = require('../../../../../../lib/licenses.mjs');
+const {addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -8,26 +8,13 @@ const Source = require("../../shared/runtime/pinned-native-build");
 const BuildTools = require("../../shared/runtime/native-build-tools");
 const { downloadToFile, throwIfAborted } = require("../../shared/runtime/download-utils");
 
+const { SNAPSHOT_REVISION } = require("./onscripter-en-manager");
 const PACKAGES = Object.freeze({
-  source: { filename: "onscripter-en-2026-01-26-3854ae86.tar.gz", url: "https://github.com/Galladite27/ONScripter-EN/archive/3854ae86c19337991722059d2bed07cbcc847f6f.tar.gz", sha256: "ef79365a2c9fd432d1b13bc113b73a0b175a6e3cb94e43709211402a8f7b867c", folder: "ONScripter-EN-3854ae86c19337991722059d2bed07cbcc847f6f" },
+  source: { filename: `onscripter-en-${SNAPSHOT_REVISION}.tar.gz`, url: `https://github.com/Galladite27/ONScripter-EN/archive/${SNAPSHOT_REVISION}.tar.gz`, sha256: "ef79365a2c9fd432d1b13bc113b73a0b175a6e3cb94e43709211402a8f7b867c", folder: `ONScripter-EN-${SNAPSHOT_REVISION}` },
   sdl12: { filename: "sdl12-compat-1.2.76.tar.gz", url: "https://github.com/libsdl-org/sdl12-compat/archive/refs/tags/release-1.2.76.tar.gz", sha256: "e889ac9c7e8a6bdfc31972bf1f1254b84882cb52931608bada62e8febbf0270b", folder: "sdl12-compat-release-1.2.76" },
   sdl2: { filename: "SDL2-2.32.10.tar.gz", url: "https://github.com/libsdl-org/SDL/releases/download/release-2.32.10/SDL2-2.32.10.tar.gz", sha256: "5f5993c530f084535c65a6879e9b26ad441169b3e25d789d83287040a9ca5165", folder: "SDL2-2.32.10" },
   ...BuildTools.PACKAGES
 });
-const CODECS = [
-  ["SDL_image", "1.2.12", "SDL_image-1.2.12/COPYING", "Zlib"],
-  ["SDL_mixer", "1.2.12", "SDL_mixer-1.2.12/COPYING", "Zlib"],
-  ["SDL_ttf", "2.0.11", "SDL_ttf-2.0.11/COPYING", "Zlib"],
-  ["FreeType", "2.13.0", "freetype-2.13.0/LICENSE.TXT", "FTL"],
-  ["libogg", "1.3.5", "libogg-1.3.5/COPYING", "BSD-3-Clause"],
-  ["libvorbis", "1.3.7", "libvorbis-1.3.7/COPYING", "BSD-3-Clause"],
-  ["libpng", "1.6.39", "libpng-1.6.39/LICENSE", "libpng-2.0"],
-  ["IJG JPEG", "9f", "jpeg-9f/README", "IJG"],
-  ["bzip2", "1.0.8", "bzip2-1.0.8/LICENSE", "bzip2-1.0.6"],
-  ["SMPEG", "0.4.5", "smpeg/COPYING", "LGPL-2.0-or-later"],
-  ["SMPEG audio", "0.4.5", "smpeg/audio/COPYING.LIB", "LGPL-2.0-or-later"],
-  ["SMPEG video", "0.4.5", "smpeg/video/COPYRIGHT", "See included copyright notice"]
-];
 const SOURCE_SCOPE = Object.freeze({ kind: "primary-tree", omittedSubmodules: ["test/googletest"] });
 const building = new Set();
 
@@ -70,22 +57,10 @@ function sourceFiles(root, depth = 0, prefix = "", output = []) {
   return output;
 }
 
-function stageNotices({ source, sdl12, sdl2, destination, revision }) {
-  const notices = [
-    ["ONScripter-EN", "2026-01-26-3854ae86", path.join(source, "COPYING"), "GPL-2.0-or-later", `https://github.com/Galladite27/ONScripter-EN/tree/${revision}`],
-    ["SDL12-compat", "1.2.76", path.join(sdl12, "LICENSE.txt"), "Zlib", "https://github.com/libsdl-org/sdl12-compat/tree/release-1.2.76"],
-    ["SDL2", "2.32.10", path.join(sdl2, "LICENSE.txt"), "Zlib", "https://github.com/libsdl-org/SDL/tree/release-2.32.10"],
-    ["FreeType license", "2.13.0", path.resolve(__dirname, "../resources/onscripter-en/FreeType-2.13.0-FTL.txt"), "FTL",
-      "https://github.com/freetype/freetype/blob/VER-2-13-0/docs/FTL.TXT"],
-    ...CODECS.map(([name, version, file, license]) => [name, version, path.join(source, "extlib", "src", file), license,
-      `https://github.com/Galladite27/ONScripter-EN/tree/${revision}/extlib/src`])
-  ];
-  return notices.map(([name, version, from, license, sourceUrl], index) => {
-    const relative = `licenses/${index}-${name.replace(/[^A-Za-z0-9_-]/g, "_")}-${version}.txt`;
-    fs.mkdirSync(path.dirname(path.join(destination, relative)), { recursive: true });
-    addLicense(destination,name,from);
-    return { name: `${name} ${version}`, license, sourceUrl, path: relative };
-  });
+function stageNotices({ source, sdl12, sdl2, destination }) {
+  addLicenses(destination, "ONScripter-EN", source);
+  addLicenses(destination, "sdl12-compat", sdl12);
+  addLicenses(destination, "SDL2", sdl2);
 }
 
 async function buildRuntime({ manager: suppliedManager, userDataDir, version, packageVersion, sourceDir, architecture = process.arch, retainBuildDirectory = false, logger, signal, onProgress, dependencies = {} } = {}) {
@@ -171,11 +146,11 @@ async function buildRuntime({ manager: suppliedManager, userDataDir, version, pa
     }
     const executable = path.join(payload, "bin", "onscripter-en");
     await run("/usr/bin/codesign", ["--force", "--sign", "-", executable], { logPath, signal });
-    const notices = stageNotices({ source, sdl12: packageRoots.sdl12, sdl2: packageRoots.sdl2, destination: payload, revision: REVISION });
+    stageNotices({ source, sdl12: packageRoots.sdl12, sdl2: packageRoots.sdl2, destination: payload, revision: REVISION });
     const verifiedBuild = { sourceRevision: REVISION, sourceTreeSha256, sourceArchiveSha256, sourceScope: SOURCE_SCOPE,
       adapterProfile: "mac-sdl12-v3", overlaySha256, overlayFiles, architecture, minimumMacOS: "13.0",
       compilerPrefixMaps: prefixMaps, compilerFlags, buildDirectory: work,
-      nativeVersions: { sdl12Compat: "1.2.76", sdl2: "2.32.10" }, packages: Object.fromEntries(Object.entries(PACKAGES).map(([key, pin]) => [key, pin.sha256])), notices };
+      nativeVersions: { sdl12Compat: "1.2.76", sdl2: "2.32.10" }, packages: Object.fromEntries(Object.entries(PACKAGES).map(([key, pin]) => [key, pin.sha256])) };
     // The shipped profile contains logical source identities only. Complete
     // machine-local compiler inputs remain in the private runtime receipt.
     const publicBuild = { ...verifiedBuild, compilerPrefixMaps: prefixMaps.map(({ to }) => ({ logicalRoot: to })) };
@@ -191,4 +166,4 @@ async function buildRuntime({ manager: suppliedManager, userDataDir, version, pa
   } finally { if (!retainBuildDirectory) fs.rmSync(work, { recursive: true, force: true }); building.delete(destination); }
 }
 
-module.exports = { SOURCE_SCOPE, PACKAGES, CODECS, buildRuntime, stageNotices, sourceFiles, compilerPrefixMaps, compilerPathFlags };
+module.exports = { SOURCE_SCOPE, PACKAGES, buildRuntime, stageNotices, sourceFiles, compilerPrefixMaps, compilerPathFlags };

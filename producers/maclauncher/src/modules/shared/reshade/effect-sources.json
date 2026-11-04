@@ -1,7 +1,6 @@
 [
   {
     "name": "AMD FidelityFX CAS (SweetFX port)",
-    "license": "MIT",
     "path": "effects/cas.fx",
     "sourceUrl": "https://github.com/CeeJayDK/SweetFX/blob/93ddf39b357f5da534ed6d34ba4ec8cc7dcfa361/Shaders/SweetFX/CAS.fx",
     "revision": "93ddf39b357f5da534ed6d34ba4ec8cc7dcfa361",

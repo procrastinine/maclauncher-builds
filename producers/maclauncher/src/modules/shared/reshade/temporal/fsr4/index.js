@@ -21,18 +21,6 @@ function resolve(root, {platform = process.platform, macOSVersion} = {}) {
         metadata.library !== 'libmaclauncher-fsr4.dylib' ||
         metadata.model !== SOURCE.model)
       return null;
-    const legacy =
-        SOURCE.legacyPayloads.find(value => value.commit === metadata.commit &&
-                                            value.model === metadata.model);
-    if (metadata.commit !== SOURCE.commit && !legacy)
-      return null;
-    let profiles;
-    if (legacy) {
-      if (major < Number(legacy.minimumMacOS.split('.')[0]) ||
-          metadata.profile !== 'exact-fast')
-        return null;
-      profiles = [ 'exact-fast' ];
-    } else {
       if (metadata.profilesAPI !== 1 || metadata.resourcePreparation !== 1 ||
           !Array.isArray(metadata.supportedProfiles) ||
           metadata.supportedProfiles.length !==
@@ -41,14 +29,9 @@ function resolve(root, {platform = process.platform, macOSVersion} = {}) {
               (name, index) => name !== SOURCE.supportedProfiles[index]) ||
           JSON.stringify(metadata.profiles) !== JSON.stringify(SOURCE.profiles))
         return null;
-      profiles = [...metadata.supportedProfiles ];
-      if (metadata.lite2?.sha256 !== SOURCE.lite2.sha256 ||
-          metadata.lite2?.commit !== SOURCE.lite2.commit ||
-          !fs.statSync(
-                 path.join(directory, 'third_party/fsr411/LICENSE.Lite2.txt'))
-               .isFile())
+    const profiles = [...metadata.supportedProfiles ];
+      if (metadata.lite2?.sha256 !== SOURCE.lite2.sha256)
         return null;
-    }
     const library = path.join(directory, metadata.library),
           build = path.join(directory, 'build');
     if (!fs.statSync(library).isFile() || !fs.statSync(build).isDirectory() ||
@@ -62,12 +45,10 @@ function resolve(root, {platform = process.platform, macOSVersion} = {}) {
       build,
       version : metadata.model,
       source : metadata.commit,
-      minimumMacOS : legacy ? legacy.minimumMacOS : SOURCE.minimumMacOS,
+      minimumMacOS : SOURCE.minimumMacOS,
       profiles,
       supportedProfiles : profiles,
-      profileContracts :
-          legacy ? SOURCE.profiles.filter(p => p.id === 'exact-fast')
-                 : metadata.profiles
+      profileContracts : metadata.profiles
     };
   } catch {
     return null;

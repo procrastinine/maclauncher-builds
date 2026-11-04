@@ -1,3 +1,4 @@
+import {gitlink} from "../../../lib/pins.mjs";
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -5,14 +6,14 @@ const factories=Object.freeze({"histogram-exposure":"makeHistogramExposureNode",
 const translated=Object.freeze({cmaa2:"cmaa2",xegtao:"xegtao",cacao:"cacao","ffx-dof":"dof","screen-space-reflections":"ssr","ffx-lens":"lens","ffx-blur":"blur"}),sharedInputs=new Set(["../native/scene-projection.hlsl"]);
 const filename=value=>typeof value==="string"&&/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value);
 
-// Feature declaration and notices come from the same frozen production source
+// Feature declarations come from the same production source
 // as the compiled dispatcher. No shader files or compiler processes are added.
 export function stageNativeImageFilters({ownedSource,symbols,recipeRoot}){
   const manifest=path.join(ownedSource,"src/native-filter-sources.json"),dispatcher=symbols.includes("makeNativeImageShaderNode");
   if(!fs.existsSync(manifest)){if(dispatcher)throw Error("The native image filter source declaration is missing.");return null;}
   const metadata=JSON.parse(fs.readFileSync(manifest,"utf8"));
   if(metadata.schema!==1||!Array.isArray(metadata.providers))throw Error("The native image filter source declaration is invalid.");
-  const methods=[],inputs=new Map(),owned=new Map(),notices=[],pins=[],seen=new Set();
+  const methods=[],owned=new Map(),pins=[],seen=new Set();
   for(const provider of metadata.providers){
     if(!Object.hasOwn(factories,provider.method)||seen.has(provider.method)||!filename(provider.sourceManifest))throw Error("A native image filter source contract is invalid.");
     seen.add(provider.method);
@@ -31,7 +32,7 @@ export function stageNativeImageFilters({ownedSource,symbols,recipeRoot}){
         recipe=path.join(recipeRoot,sharedImageRecipe?"lens/translate.mjs":recipeName+"/build.mjs");
       if(crypto.createHash("sha256").update(fs.readFileSync(recipe)).digest("hex")!==recipeHash)throw Error("The native image shader translation recipe changed.");
       const declaration=path.join(recipeRoot,recipeName,"source.json"),pin=JSON.parse(fs.readFileSync(declaration,"utf8"));
-      if(pin.repository!==source.repository||pin.commit!==source.commit)throw Error("The native image shader translation source pin changed.");
+      if(pin.repository!==source.repository||(Object.hasOwn(pin,"commit")?pin.commit:gitlink(pin.gitlink))!==source.commit)throw Error("The native image shader translation source pin changed.");
       owned.set(`maclauncher/${recipeName}/build.mjs`,path.join(recipeRoot,recipeName,"build.mjs"));owned.set(`maclauncher/${recipeName}/source.json`,declaration);
       if(sharedImageRecipe){
         owned.set("maclauncher/lens/translate.mjs",recipe);
@@ -49,12 +50,7 @@ export function stageNativeImageFilters({ownedSource,symbols,recipeRoot}){
       }
     }
     for(const file of provider.embeddedResources||[])if(!filename(file)||!fs.statSync(path.join(ownedSource,"src",file)).isFile())throw Error("An embedded image filter resource is missing.");
-    for(const notice of Array.isArray(provider.notices)?provider.notices:[]){
-      if(!notice||typeof notice.path!=='string')continue;
-      const file=path.join(ownedSource,'src',notice.path),target='licenses/native-filters/'+path.basename(notice.path);
-      inputs.set(target,file);notices.push({...notice,path:target});
-    }
     methods.push(provider.method);if(!ownedImplementation)pins.push(` ${source.commit} third_party/native-filter/${provider.method}`);
   }
-  return methods.length?{methods,inputs,owned,notices,pins}:null;
+  return methods.length?{methods,owned,pins}:null;
 }

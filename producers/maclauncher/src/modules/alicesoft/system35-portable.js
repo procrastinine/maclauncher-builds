@@ -1,27 +1,8 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const Source = require("../shared/runtime/pinned-native-build");
 const Native = require("../shared/runtime/local-native");
-const Fonts = require("../shared/runtime/portable-sdl2-fonts");
 const Audio = require("../shared/runtime/portable-sndfile");
-const Overlay = require("./system35-overlay");
-const { throwIfAborted } = require("../shared/runtime/download-utils");
-const PIN = Object.freeze(require("./system35-portable.json"));
-
-const VERSION = "2.20.0-macos-v2";
-const REVISION = "82c8b76a58a19ff1f87b4bdadbaef169c4b37f46";
-const SOURCE_SHA256 = "0f9ed54898badb68428e0dcafc1b69044b5ecb5e2f86ff6cc261a8a2ca558c1d";
-const sourcePath = path.resolve(__dirname, "../../external/xsystem35-sdl2");
-const recipeFiles = [__filename, require.resolve("./system35-overlay"), require.resolve("./system35-portable.json"),
-  require.resolve("../shared/runtime/portable-sdl2-fonts"), require.resolve("../shared/runtime/portable-sdl2-fonts.json"),
-  require.resolve("../shared/runtime/portable-sndfile"), require.resolve("../shared/runtime/portable-sndfile.json")];
-
-function overlayIdentity() {
-  const hash = crypto.createHash("sha256");
-  for (const file of recipeFiles) hash.update(fs.readFileSync(file));
-  return hash.digest("hex");
-}
 
 function linkPrefix(inputPrefix, outputPrefix) {
   const original = fs.realpathSync(inputPrefix), output = fs.realpathSync(outputPrefix);
@@ -58,66 +39,4 @@ function adaptDependencyMetadata(prefix) {
     sourceSha256: crypto.createHash("sha256").update(bytes).digest("hex"), adaptedSha256: Native.hashFile(file) };
 }
 
-function validateFeatures(workRoot) {
-  const config = fs.readFileSync(path.join(workRoot, "xsystem35/config.h"), "utf8");
-  for (const name of ["ENABLE_DEBUGGER", "ENABLE_MIDI_SDLMIXER", "HAVE_WEBP"]) if (!new RegExp(`^#define ${name} (?:1|ON)$`, "m").test(config)) throw new Error(`xsystem35 did not enable ${name}.`);
-  for (const name of ["HAVE_LIBINTL", "ENABLE_MIDI_PORTMIDI"]) if (new RegExp(`^#define ${name} `, "m").test(config)) throw new Error("xsystem35 enabled an unselected external dependency.");
-  const commands = fs.readFileSync(path.join(workRoot, "sdl2_mixer/compile_commands.json"), "utf8");
-  for (const name of ["MUSIC_MID_NATIVE", "MUSIC_FLAC_LIBFLAC", "MUSIC_MP3_MPG123", "MUSIC_OPUS", "MUSIC_OGG"]) {
-    if (!commands.includes(name)) throw new Error(`SDL2_mixer did not enable ${name}.`);
-  }
-  if (/(?:FLAC|MPG123|OPUS|OGG)_DYNAMIC|MUSIC_MID_FLUIDSYNTH|MUSIC_MID_TIMIDITY/.test(commands)) throw new Error("SDL2_mixer enabled an unselected dynamic codec or MIDI backend.");
-  return { debugger: true, webp: true, midi: "macOS AudioToolbox", portMidi: false, rtMidi: false,
-    dynamicCodecLoading: false, audioFormats: ["WAV", "AIFF", "FLAC", "Ogg Vorbis", "Ogg Opus", "MP3", "MIDI"] };
-}
-
-async function buildPortableSystem35({ sourceDir = sourcePath, archives, workRoot, dependencyStacks, pathMappings = [], signal, onProgress, dependencies = {} }) {
-  throwIfAborted(signal);
-  if (process.platform !== "darwin" || process.arch !== "arm64") throw new Error("This portable xsystem35 build requires an Apple Silicon Mac.");
-  workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, ...Object.values(dependencyStacks || {}).map(stack => stack.prefix)] });
-  Fonts.validateArchives(archives); Audio.validateArchives(archives); Audio.validateArchives(archives, { catalog: PIN });
-  const source = await Source.validatePinnedSource(sourceDir, REVISION, { signal });
-  if (Source.hashPinnedFiles(sourceDir, source.files) !== SOURCE_SHA256) throw new Error("xsystem35 source tree checksum does not match the selected version.");
-  const overlaySha256 = overlayIdentity();
-  let fonts, audio;
-  if (dependencyStacks) {
-    if (Object.keys(dependencyStacks).length !== 2 || !dependencyStacks.fonts || !dependencyStacks.audio) throw new Error("Portable dependency reuse needs both font and audio profiles.");
-    fonts = dependencyStacks.fonts; audio = dependencyStacks.audio;
-  }
-  fs.mkdirSync(workRoot, { recursive: true });
-  if (!fonts) {
-    fonts = await Fonts.buildDependencies({ archives, workRoot: path.join(workRoot, "font-dependencies"), pathMappings, signal, onProgress, dependencies });
-    audio = await Audio.buildDependencies({ archives, workRoot: path.join(workRoot, "audio-dependencies"), pathMappings, signal, onProgress, dependencies });
-  }
-  if (fonts.sdk !== audio.sdk) throw new Error("Portable dependency profiles must use the same macOS SDK.");
-  const prefix = path.join(workRoot, "prefix"), sourceRoots = {}, sources = [];
-  fs.mkdirSync(prefix); linkPrefix(fonts.prefix, prefix); linkPrefix(audio.prefix, prefix);
-  const dependencyMetadata = adaptDependencyMetadata(prefix);
-  const run = dependencies.runBuildCommand || Source.runBuildCommand;
-  for (const pin of PIN.dependencies) {
-    throwIfAborted(signal);
-    const sourceRoot = path.join(workRoot, "source", pin.id); fs.mkdirSync(sourceRoot, { recursive: true });
-    await run("/usr/bin/tar", ["-xf", archives[pin.id], "--strip-components", "1", "-C", sourceRoot],
-      { cwd: workRoot, logPath: path.join(workRoot, "extraction.log"), env: Fonts.buildEnvironment(prefix, fonts.sdk), signal });
-
-    const sourceOverlay = pin.id === "sdl2_mixer" ? Overlay.applyMixer(sourceRoot) : undefined;
-    onProgress?.({ phase: "build", project: pin.id });
-    const common = { sourceRoot, outputRoot: path.join(workRoot, pin.id), prefix, sdk: fonts.sdk, pathMappings, options: pin.options, signal, dependencies };
-    const build = await (pin.buildSystem === "autotools" ? Audio.buildAutotools(common) : Fonts.buildProject({ ...common, tools: fonts.tools, onProgress }));
-    sourceRoots[pin.id] = sourceRoot; sources.push({ ...pin, ...build, ...(sourceOverlay ? { sourceOverlay } : {}) });
-  }
-  const sourceRoot = path.join(workRoot, "xsystem35-source"), sourceTreeSha256 = Source.stagePinnedFiles(sourceDir, source.files, sourceRoot);
-  const sourceOverlay = Overlay.apply(sourceRoot, { sourceDir });
-  const build = await Fonts.buildProject({ sourceRoot, outputRoot: path.join(workRoot, "xsystem35"), prefix, sdk: fonts.sdk, tools: fonts.tools,
-    pathMappings, options: ["-DENABLE_DEBUGGER=ON", "-DENABLE_WEBP=ON", "-DENABLE_PORTMIDI=OFF", "-DENABLE_GETTEXT=OFF"], signal, onProgress, dependencies });
-  throwIfAborted(signal);
-  const features = validateFeatures(workRoot);
-  await Source.validatePinnedSource(sourceDir, REVISION, { signal });
-  if (Source.hashPinnedFiles(sourceDir, source.files) !== sourceTreeSha256 || overlayIdentity() !== overlaySha256) throw new Error("xsystem35 source or build adapter changed during compilation.");
-  const executable = path.join(prefix, "bin/xsystem35");
-  return { managerId: "xsystem35", version: VERSION, sourceRevision: REVISION, sourceTreeSha256, overlaySha256, sourceOverlay,
-    architecture: "arm64", minimumMacOS: "13.0", executable, executableSha256: Native.hashFile(executable), resources: path.join(prefix, "share/xsystem35"), features,
-    ...build, dependencyClosure: { version: PIN.version, prefix, fonts, audio, sources, sourceRoots, dependencyMetadata } };
-}
-
-module.exports = { VERSION, REVISION, SOURCE_SHA256, PIN, sourcePath, overlayIdentity, linkPrefix, adaptDependencyMetadata, validateFeatures, buildPortableSystem35 };
+module.exports = { linkPrefix, adaptDependencyMetadata };

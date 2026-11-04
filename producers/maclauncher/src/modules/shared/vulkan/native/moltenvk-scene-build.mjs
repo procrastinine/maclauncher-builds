@@ -1,4 +1,4 @@
-import {addLicense} from '../../../../../../../lib/licenses.mjs';
+import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -60,8 +60,8 @@ export function publishSceneProvider({library,projected,output,architecture,depe
  const links=read('/usr/bin/otool',['-L',library]).split('\n').slice(2).map(line=>line.trim().split(' (')[0]);for(const link of links)if(link&&!link.startsWith('/System/Library/')&&!link.startsWith('/usr/lib/'))throw Error('Unclosed provider dependency: '+link);
  fs.mkdirSync(output,{recursive:true});const name='libMoltenVK-scene.dylib',destination=path.join(output,name);fs.copyFileSync(library,destination);fs.chmodSync(destination,0o755);
  run('/usr/bin/install_name_tool',['-id','@rpath/'+name,destination]);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',destination]);
- addLicense(output,'MoltenVK',path.join(projected,'LICENSE'));
- const notices=['MoltenVK-LICENSE'];for(const item of source.dependencies){const input=dependencies?.[item.id];if(!input)throw Error('Dependency source is missing at publication: '+item.id);const candidates=item.licenseFiles||['LICENSE','LICENSE.txt','LICENSE.md'];for(const [index,file] of candidates.entries()){const destination=item.id+'-'+index+'-LICENSE';addLicense(output,item.id,path.join(input,file));}}
+ addLicenses(output,'MoltenVK',projected);
+ for(const item of source.dependencies){const input=dependencies[item.id];addLicenses(output,item.id,input);}
 
  const files=[name,...(fs.existsSync(path.join(output,'licenses'))?fs.readdirSync(path.join(output,'licenses')):[]).map(file=>'licenses/'+file)].map(file=>({path:file,sha256:digest(fs.readFileSync(path.join(output,file))),size:fs.statSync(path.join(output,file)).size}));
  const provider={schema:1,provider:'moltenvk',sceneOperationAPI:1,sceneStagingAPI:1,sceneOperationResources:'prepared-tracked-boundary',originalOutputRetained:true,
@@ -95,8 +95,6 @@ export function publishScenePackage({providerDirectory,peerDirectory,output}){
  for(const input of inputs.slice(1))if(JSON.stringify(input.provider.buildInputs)!==JSON.stringify(first.provider.buildInputs)||
   JSON.stringify(input.links)!==JSON.stringify(first.links)||input.provider.files.some(row=>row.path!==input.provider.library&&!first.provider.files.some(other=>other.path===row.path&&other.sha256===row.sha256)))throw Error('Managed driver inputs have different source or dependency identities');
  const provider={...first.provider,architectures};
- const notices=[{name:'MoltenVK',license:source.license,sourceUrl:source.repository,path:'MoltenVK-LICENSE'},
-  ...source.dependencies.map(item=>({name:item.id,license:item.license,sourceUrl:item.repository,path:item.id+'-LICENSE'}))];
  fs.mkdirSync(path.dirname(output),{recursive:true});const temporary=fs.mkdtempSync(path.join(path.dirname(output),'.moltenvk-package-'));
  try{
   for(const file of first.expected){fs.copyFileSync(path.join(first.directory,file),path.join(temporary,file));fs.chmodSync(path.join(temporary,file),file===provider.library?0o755:0o644);}

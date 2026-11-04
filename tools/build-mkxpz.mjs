@@ -3,6 +3,7 @@ import path from 'node:path';
 import {createRequire} from 'node:module';
 import {execFileSync} from 'node:child_process';
 import {buildInput} from './build-input.mjs';
+import {gitlink} from '../lib/pins.mjs';
 import {recipeMain} from './build-source.mjs';
 import {managerDeclaration} from './manager-declaration.mjs';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
@@ -12,7 +13,7 @@ export async function buildMKXPZ({project,version,arch,output,work}){
  version=buildRecord(resolveProject(project,root,{resolvePins:false}),version).version;
  fs.mkdirSync(work,{recursive:true});
  const pin=JSON.parse(fs.readFileSync(path.join(root,'runtimes/mkxpz/baseline.json'))).upstream;
- const archive=await buildInput({url:pin.sourceUrl,sha256:pin.sourceSha256,bytes:pin.sourceBytes},path.join(work,'downloads'));
+ const archive=await buildInput({url:pin.repository.replace('https://github.com/','https://codeload.github.com/')+'/tar.gz/'+gitlink('producers/maclauncher/src/external/mkxp-z'),sha256:pin.sourceSha256,bytes:pin.sourceBytes},path.join(work,'downloads'));
  const environment=path.join(work,'tools');run('uv',['venv','--python','3.13',environment]);
  run('uv',['pip','install','--python',path.join(environment,'bin/python'),'--no-deps','--requirement',path.join(root,'producers/maclauncher/scripts/graphics-build-requirements.txt')]);
  const producer=require('../producers/maclauncher/scripts/build-mkxpz-nfc.cjs'),buildWork=path.join(work,'mkxpz'),staged=path.join(work,'staged');

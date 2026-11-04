@@ -1,8 +1,6 @@
 {
   "repository": "https://github.com/UzenUPoZiTiV4ik/fsr4-native-macos",
-  "commit": "329d1d7367b6b948a53486505198a5d254f02809",
   "model": "4.1.1.2740",
-  "license": "MIT",
   "minimumMacOS": "15.0",
   "architectures": [
     "arm64",
@@ -21,8 +19,8 @@
     },
     {
       "repository": "https://github.com/int3rrobang/fsr4-int8-reverse-engineering",
-      "commit": "f508ddecd46fb407d1be41c3102b54dddf57d220",
-      "use": "MIT FSR 4.1.1 shader reimplementation"
+      "use": "MIT FSR 4.1.1 shader reimplementation",
+      "gitlink": "producers/maclauncher/src/external/fsr4-int8"
     }
   ],
   "release": {
@@ -35,30 +33,18 @@
     "lite",
     "lite2"
   ],
-  "legacyPayloads": [
-    {
-      "commit": "3e76f27ff4ea87fb5f22bcc54508d8d9349654b7",
-      "model": "4.1.1.2740",
-      "supportedProfiles": [
-        "exact-fast"
-      ],
-      "minimumMacOS": "26.0"
-    }
-  ],
   "profiles": [
     {
       "id": "exact-fast",
       "upstreamProfile": "exact-fast",
       "nativeProfile": "exact",
-      "model": "4.1.1.2740",
-      "license": "MIT"
+      "model": "4.1.1.2740"
     },
     {
       "id": "lite",
       "upstreamProfile": "lossy",
       "nativeProfile": "lossy",
       "model": "4.1.1.2740",
-      "license": "MIT",
       "inferenceReuse": true
     },
     {
@@ -66,7 +52,6 @@
       "upstreamProfile": "lossy2",
       "nativeProfile": "lossy2",
       "model": "4.1.1.2740",
-      "license": "GPL-2.0-or-later",
       "trainedLayers": [
         1,
         2,
@@ -84,7 +69,7 @@
     "commit": "69cc9b9979a8fe90b97b1ed2f20e94487df261e2",
     "path": "research/lossy2/weights_lossy2.npz",
     "url": "https://raw.githubusercontent.com/zgauthier2000/fsr4-shader-performance-overrides/69cc9b9979a8fe90b97b1ed2f20e94487df261e2/research/lossy2/weights_lossy2.npz",
-    "sha256": "9a458f65812848b273dace03edcbd346d66364d5d41a99d0963adaa601a3c93c",
-    "license": "GPL-2.0-or-later"
-  }
+    "sha256": "9a458f65812848b273dace03edcbd346d66364d5d41a99d0963adaa601a3c93c"
+  },
+  "gitlink": "producers/maclauncher/src/external/fsr4-metal"
 }

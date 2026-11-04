@@ -92,7 +92,7 @@ const methods=Object.freeze({
 // The included collection lists each method once, from this table; its pointer
 // file (<method>.mclfilter) names the method.
 const collection=Object.freeze(Object.entries(methods).map(([id,spec])=>Object.freeze({id,label:spec.label,...(spec.purpose?{purpose:spec.purpose}:{}),file:id+".mclfilter",
- requires:[...(spec.sceneInputs||[])],nativeMethod:id,...(spec.modelOperation?{modelOperation:spec.modelOperation}:{}),license:spec.license,sourceUrl:spec.sourceUrl,...(spec.revision?{revision:spec.revision}:{})})));
+ requires:[...(spec.sceneInputs||[])],nativeMethod:id,...(spec.modelOperation?{modelOperation:spec.modelOperation}:{}),sourceUrl:spec.sourceUrl,...(spec.revision?{revision:spec.revision}:{})})));
 const hash=bytes=>crypto.createHash("sha256").update(bytes).digest("hex");
 function input(file){if(!path.isAbsolute(file||"")||!/\.mclfilter$/i.test(file)||/[\x00-\x1f]/.test(file))throw Error("Choose a .mclfilter image-effect descriptor.");const canonical=fs.realpathSync(file),stat=fs.statSync(canonical);if(!stat.isFile()||stat.size>maximum)throw Error("The image-effect descriptor must be a file of at most 64 KiB.");return canonical;}
 function parse(text){

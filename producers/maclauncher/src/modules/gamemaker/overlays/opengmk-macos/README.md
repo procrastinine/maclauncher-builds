@@ -1,7 +1,7 @@
 # OpenGMK macOS native overlay
 
 The `ramen/` files add an AppKit platform backend to [ramen](https://github.com/viriuwu/ramen) **0.0.3**, pinned to
-`ef715f65981f6c96f7f889258ff43b63cb472626`. They extend [OpenGMK](https://github.com/OpenGMK/OpenGMK)'s existing window
+the `ramen` source gitlink. They extend [OpenGMK](https://github.com/OpenGMK/OpenGMK)'s existing window
 and event API; the vendored repository and Cargo cache stay unchanged.
 
 `applyRamenOverlay({ sourceDir, destination })` verifies nine upstream source hashes,
@@ -95,7 +95,7 @@ runtime storage. Play needs no compiler, source checkout or per-game runtime cop
 ## Native decompiler workspace
 
 `decompiler-workspace.patch` applies only to a private source copy of OpenGMK
-`9ccc47a9cab4681a889866f7233a6b016d36a15e`. It selects the `gm8decompiler`,
+the `OpenGMK` source gitlink. It selects the `gm8decompiler`,
 `gm8exe` and `gml-parser` crates, leaving the emulator out of the tool build,
 and removes the inactive Windows `winres` build dependency from that Mac-only
 workspace. Rust sources and `build.rs` remain the pinned upstream bytes.

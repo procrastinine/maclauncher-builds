@@ -1,4 +1,5 @@
-import {addLicense} from '../../../../../../../lib/licenses.mjs';
+import {gitlink} from '../../../../../../../lib/pins.mjs';
+import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -17,15 +18,15 @@ const ownedNames=['build-retroarch.mjs','retroarch-source.json','retroarch-exter
 const ownedSource=Object.fromEntries(ownedNames.map(name=>[name,hash(new URL(name,import.meta.url))]));
 const sceneInputContractSha256=hash(new URL('../../effects/operation-contracts.mjs',import.meta.url));
 const run=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',stdio:'pipe',timeout:180000,...options});
-if(run('git',['-C',originalSource,'rev-parse','HEAD']).trim()!==declaration.commit)throw new Error('The original librashader source pin differs.');
+if(run('git',['-C',originalSource,'rev-parse','HEAD']).trim()!==gitlink(declaration.gitlink))throw new Error('The original librashader source pin differs.');
 run('git',['-C',originalSource,'diff','--exit-code','HEAD','--']);
 if(hash(path.join(originalSource,'include/librashader.h'))!==declaration.headerSha256)throw new Error('The original librashader C API header differs.');
 if(archive&&hash(archive)!==declaration.artifacts.arm64?.sha256)throw new Error('The official librashader archive checksum differs.');
-if(!archive&&declaration.sourceBuilds?.arm64?.commit!==declaration.commit)throw new Error('The selected librashader version needs a pinned ARM64 source build.');
+if(!archive&&declaration.sourceBuilds?.arm64?.commit!==gitlink(declaration.gitlink))throw new Error('The selected librashader version needs a pinned ARM64 source build.');
 if(fs.existsSync(output))throw new Error('Use a new RetroArch shader output directory.');
 fs.mkdirSync(output,{recursive:true});
 const source=path.join(output,'upstream-source'),sourceArchive=path.join(output,'upstream.tar');
-run('git',['-C',originalSource,'archive','--format=tar','--output',sourceArchive,declaration.commit]);
+run('git',['-C',originalSource,'archive','--format=tar','--output',sourceArchive,gitlink(declaration.gitlink)]);
 fs.mkdirSync(source);run('/usr/bin/tar',['-xf',sourceArchive,'-C',source]);fs.unlinkSync(sourceArchive);
 applyRetroarchExternalOverlay(source);
 const library=path.join(output,'librashader.dylib');
@@ -55,7 +56,7 @@ for(const [inputs,target] of [[libraries,library],[helpers,helper]]){
 run('/usr/bin/install_name_tool',['-id','@rpath/librashader.dylib',library]);
 for(const file of [library,helper]){run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',file]);run('/usr/bin/codesign',['--verify','--strict',file]);}
 const notice=output;
-addLicense(output,'librashader',path.join(source,'LICENSE.md'));
+addLicenses(output,'librashader',source);
 fs.writeFileSync(path.join(notice,'source.json'),JSON.stringify(declaration,null,2)+'\n');
 const files=[library,helper,path.join(output,'source.json'),...(fs.existsSync(path.join(output,'licenses'))?fs.readdirSync(path.join(output,'licenses')):[]).map(file=>path.join(output,'licenses',file))].map(file=>({path:path.relative(output,file),source:file,size:fs.statSync(file).size,mode:fs.statSync(file).mode&0o777,sha256:hash(file)}));
 const exports=run('/usr/bin/nm',['-gU',library]);

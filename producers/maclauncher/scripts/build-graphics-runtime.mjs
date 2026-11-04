@@ -9,6 +9,7 @@ import {pathToFileURL} from "node:url";
 import {createRequire} from "node:module";
 import {buildInput} from "../../../tools/build-input.mjs";
 import {downloadFile} from "../../../tools/download.mjs";
+import {gitlink} from "../../../lib/pins.mjs";
 
 const repository = path.resolve(import.meta.dirname, "..");
 export const recipe = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, "graphics-runtime.json"), "utf8"));
@@ -70,7 +71,7 @@ function registration(relative, root = repository) {
 export function resolveSource(id, override) {
   const entry = recipe.sources[id];
   if (!entry) throw Error("Unknown graphics source: " + id);
-  const commit = pinned({file: entry.pin.file, pointer: entry.pin.commit}), origin = pinned({file: entry.pin.file, pointer: entry.pin.repository});
+  const commit = entry.pin.gitlink ? gitlink(pinned({file: entry.pin.file, pointer: entry.pin.gitlink})) : pinned({file: entry.pin.file, pointer: entry.pin.commit}), origin = pinned({file: entry.pin.file, pointer: entry.pin.repository});
   const directory = override ? path.resolve(override) : path.join(repository, entry.path);
   const result = {id, path: directory, commit, repository: canonical(origin)};
   if (!override) {
