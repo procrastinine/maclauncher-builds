@@ -678,10 +678,14 @@
       {
         "version": "0.10.8.903-MCLv8",
         "label": "impacto Windows-game profile 0.10.8.903-MCLv8"
+      },
+      {
+        "version": "0.10.8.937-MCLv1",
+        "label": "impacto Windows-game profile 0.10.8.937-MCLv1"
       }
     ],
     "build": {
-      "version": "0.10.8.903-MCLv8",
+      "version": "0.10.8.937-MCLv1",
       "command": "tools/build-impacto.mjs",
       "architectures": [
         "arm64"

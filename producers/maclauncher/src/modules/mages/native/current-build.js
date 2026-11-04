@@ -12,9 +12,9 @@ const Adapter = require("./adapter");
 const overlay = require("./current-windows-overlay.json");
 const { throwIfAborted } = require("../../shared/runtime/download-utils");
 
-const VERSION = "0.10.8.903-MCLv1";
+const VERSION = "0.10.8.937-MCLv1";
 const REVISION = Adapter.SOURCES.impacto.revision;
-const SOURCE_SHA256 = "db00099b846a948287c3b77329834eb68e46307b1180fb3dfdedef4adb0ba2c1";
+const SOURCE_SHA256 = "09d76f27f572aade7d48c8242976bdb44caa705d480df61413be8a0752efca57";
 const PROFILE = "windows-mpk2-sc3-sfx-macos13-v9";
 const PROFILE_SHA256 = SoundEffectSession.PROFILE_SHA256;
 const PATCH = path.join(__dirname, "current-windows.patch");
