@@ -1,4 +1,4 @@
-const {addLicense} = require('../../../lib/licenses.mjs');
+const {addLicenses} = require('../../../lib/licenses.mjs');
 // Shared native binary inspection, copying and dependency notices.
 const fs = require("node:fs"), path = require("node:path"), crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
@@ -142,7 +142,6 @@ function addDependencyNotices(source, payload, seen) {
   const formula = formulaRoot(source);
   if (!formula || seen.has(formula.root)) return;
   seen.add(formula.root);
-  const candidates=fs.readdirSync(formula.root).filter(name=>/^(?:(?:licen[sc]e|copying|copyright|notice)(?:[._-].*)?|(?:AGPL|GPL|LGPL|MPL|Apache|MIT|BSD|ISC|Zlib)(?:[-_.].*)?)$/i.test(name));
-  for(const name of candidates)addLicense(payload,`${formula.name} ${formula.version}`,path.join(formula.root,name));
+  addLicenses(payload,`${formula.name} ${formula.version}`,formula.root);
 }
 module.exports = { macho, loadCommands, parseLinkedLibraries, links, libraryIds, thinStagedMachO, resolveLink, copyTree, formulaRoot, assertPublicMetadata, publicProvenance, addDependencyNotices };
