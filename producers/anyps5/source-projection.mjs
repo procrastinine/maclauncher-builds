@@ -58,7 +58,7 @@ function exportSources(source,repositories,destination){
  const content=fs.readFileSync(ffmpeg,'utf8');
  const start=content.indexOf('execute_process('),end=content.indexOf('\n\n# An existing package',start);
  if(start<0||end<0)throw Error('Unexpected FFmpeg source revision.');
- writeChanged(ffmpeg,content.slice(0,start)+'set(FFMPEG_GIT_SHA "'+inputs.artifacts[0].revision.slice(0,12)+'")'+content.slice(end));
+ writeChanged(ffmpeg,content.slice(0,start)+'set(FFMPEG_GIT_SHA "'+repositories.find(entry=>entry.path==='3rdparty/ffmpeg-core').revision.slice(0,12)+'")'+content.slice(end));
 }
 function syncProjection(from,to){
  fs.mkdirSync(to,{recursive:true});
