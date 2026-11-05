@@ -31,6 +31,11 @@ int wmain(int argc, WCHAR **argv)
     set_client_dll_paths();
     set_install_paths();
 
+#ifdef STEAM_BRIDGE_UPSTREAM_HANDSHAKE
+    HANDLE master = CreateEventA(NULL, FALSE, FALSE, "Steam3Master_SharedMemLock");
+    HANDLE ipc = CreateEventA(NULL, FALSE, FALSE, "Global\\Valve_SteamIPC_Class");
+    HANDLE handshake_thread = NULL;
+#endif
     HANDLE ready = CreateEventW(NULL, TRUE, FALSE, NULL);
     DWORD window_thread_id = 0;
     HANDLE window_thread = ready ? CreateThread(NULL, 0, create_steam_window, ready, 0, &window_thread_id) : NULL;
@@ -65,10 +70,18 @@ int wmain(int argc, WCHAR **argv)
         fprintf(stderr, "Steam helper pid=%lu child=%lu; real-client initialization succeeded\n",
                 GetCurrentProcessId(), child.dwProcessId);
         fflush(stderr);
+#ifdef STEAM_BRIDGE_UPSTREAM_HANDSHAKE
+        handshake_thread = CreateThread(NULL, 0, steam_drm_thread, child.hProcess, 0, NULL);
+#endif
         if (WaitForSingleObject(child.hProcess, INFINITE) == WAIT_OBJECT_0)
             GetExitCodeProcess(child.hProcess, &result);
     }
 cleanup:
+#ifdef STEAM_BRIDGE_UPSTREAM_HANDSHAKE
+    if (handshake_thread) CloseHandle(handshake_thread);
+    if (master) CloseHandle(master);
+    if (ipc) CloseHandle(ipc);
+#endif
     steam_client_shutdown();
     if (child.hThread) CloseHandle(child.hThread);
     if (child.hProcess) CloseHandle(child.hProcess);
