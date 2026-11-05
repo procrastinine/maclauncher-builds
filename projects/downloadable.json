@@ -1886,10 +1886,14 @@
       {
         "version": "MCLv9",
         "label": "AnyPS5 MCLv9"
+      },
+      {
+        "version": "MCLv10",
+        "label": "AnyPS5 MCLv10"
       }
     ],
     "build": {
-      "version": "MCLv9",
+      "version": "MCLv10",
       "architectures": [
         "arm64",
         "x64"

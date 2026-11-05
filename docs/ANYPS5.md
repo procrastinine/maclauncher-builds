@@ -24,7 +24,7 @@ Both tool builds produce x86-64 game executables: `--macos` selects Mach-O outpu
 
 ## macOS runtime
 
-The [runtime recipe](../producers/anyps5/build-runtime.mjs) exports the upstream source and its nested dependencies, at their recorded commits, to its build directory, applies this repository's Darwin startup, TLS, filesystem and Vulkan adapters, and builds the x86-64 PRX libraries, leaving the upstream checkouts unchanged. The runtime requires macOS 26 or later because the upstream code uses the floating-point character conversion APIs in Apple libc++.
+The [runtime recipe](../producers/anyps5/build-runtime.mjs) exports the upstream source and its nested dependencies, at their recorded commits, to its build directory, applies this repository's Darwin startup, TLS, filesystem and Vulkan adapters, and builds the x86-64 PRX libraries, leaving the upstream checkouts unchanged. Darwin startup retains the initial stack mapping for native launch data while execution moves to separate host and guest stacks. The runtime requires macOS 26 or later because the upstream code uses the floating-point character conversion APIs in Apple libc++.
 
 ```sh
 git submodule update --init --recursive sources/anyps5
