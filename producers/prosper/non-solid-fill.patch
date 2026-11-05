@@ -1,0 +1,72 @@
+diff --git a/prosper/tests/fixtures/render_runner.h b/prosper/tests/fixtures/render_runner.h
+index 2499a59..f8540e1 100644
+--- a/prosper/tests/fixtures/render_runner.h
++++ b/prosper/tests/fixtures/render_runner.h
+@@ -1154,6 +1154,7 @@ inline const RenderVkCtx& render_vk_ctx() {
+         VkPhysicalDeviceFeatures feats{}; feats.robustBufferAccess = VK_TRUE; dci.pEnabledFeatures = &feats;
+         // samplerAnisotropy (#275): enable only if advertised; maxSamplerAnisotropy is the clamp ceiling.
+         VkPhysicalDeviceFeatures supported{}; vkGetPhysicalDeviceFeatures(r.phys, &supported);
++        feats.fillModeNonSolid = supported.fillModeNonSolid;
+         // #2396: the recompiler emits SPIR-V declaring the Int64 capability (24 modules per GTA V run)
+         // and we build PER-ATTACHMENT blend states for MRT -- both REQUIRE a device feature we never
+         // requested. VUID-...pCode-08740 (24) and VUID-...pAttachments-00605 (20), both -> 0 when
+@@ -1450,16 +1451,20 @@ inline const RenderVkCtx& render_vk_ctx() {
+               // Spec-mandated: must be enabled when advertised (MoltenVK always advertises it).
+               if (!strcmp(de[i].extensionName, "VK_KHR_portability_subset")) {
+                   dev_exts.push_back("VK_KHR_portability_subset");
++                  r.point_polygons_enabled = false;
+ #ifdef VK_ENABLE_BETA_EXTENSIONS
+                   VkPhysicalDeviceFeatures2 features2{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2};
+                   features2.pNext = &portability_features;
+                   vkGetPhysicalDeviceFeatures2(r.phys, &features2);
+                   r.image_view_2d_on_3d =
+                       portability_features.imageView2DOn3DImage == VK_TRUE;
+-                  if (r.image_view_2d_on_3d) {
++                  r.point_polygons_enabled =
++                      feats.fillModeNonSolid && portability_features.pointPolygons;
++                  if (r.image_view_2d_on_3d || r.point_polygons_enabled) {
+                       portability_features = {
+                           VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PORTABILITY_SUBSET_FEATURES_KHR};
+-                      portability_features.imageView2DOn3DImage = VK_TRUE;
++                      portability_features.imageView2DOn3DImage = r.image_view_2d_on_3d;
++                      portability_features.pointPolygons = r.point_polygons_enabled;
+                       portability_features.pNext = const_cast<void*>(dci.pNext);
+                       dci.pNext = &portability_features;
+                   }
+@@ -1475,6 +1480,7 @@ inline const RenderVkCtx& render_vk_ctx() {
+         dci.enabledExtensionCount = (uint32_t)dev_exts.size();
+         dci.ppEnabledExtensionNames = dev_exts.empty() ? nullptr : dev_exts.data();
+         if (vkCreateDevice(r.phys, &dci, nullptr, &r.dev) != VK_SUCCESS || !r.dev) return r;
++        r.fill_mode_non_solid_enabled = feats.fillModeNonSolid;
+         r.fragment_reconvergence = reconvergence_enabled;
+         r.shader_int64_enabled = feats.shaderInt64;
+         if (prosper::gpu::breadcrumbs_requested())
+@@ -10837,6 +10843,15 @@ inline std::vector<uint8_t> render_draw_pass_rgba(std::span<const BackendDraw> d
+                                                                    : VK_FRONT_FACE_CLOCKWISE)
+                       : (VkFrontFace)ps->front_face;
+                   rs.polygonMode = (VkPolygonMode)ps->polygon_mode; }
++        if (rs.polygonMode != VK_POLYGON_MODE_FILL &&
++            (!ctx.fill_mode_non_solid_enabled ||
++             (rs.polygonMode == VK_POLYGON_MODE_POINT && !ctx.point_polygons_enabled))) {
++            static std::once_flag logged;
++            std::call_once(logged, [] {
++                fprintf(stderr, "[gpu] Requested polygon mode is unavailable -> FILL fallback\n");
++            });
++            rs.polygonMode = VK_POLYGON_MODE_FILL;
++        }
+         // Depth bias (#1349): the guest's PA_SU_POLY_OFFSET_* — shadow-map passes need it against
+         // acne. Clamp requires the depthBiasClamp device feature; without it a non-zero clamp is
+         // dropped to 0 (bias still applies, unclamped — the safe direction). PROSPER_NO_DEPTH_BIAS
+diff --git a/prosper/tests/fixtures/render_vk_context.h b/prosper/tests/fixtures/render_vk_context.h
+index 7db81ef..6d1185c 100644
+--- a/prosper/tests/fixtures/render_vk_context.h
++++ b/prosper/tests/fixtures/render_vk_context.h
+@@ -55,6 +55,8 @@ struct RenderVkCtx {
+     uint32_t timestamp_valid_bits = 0;
+     bool aniso_enabled = false;
+     float max_aniso_limit = 1.0f;
++    bool fill_mode_non_solid_enabled = false;
++    bool point_polygons_enabled = true;
+     bool depth_bias_clamp_enabled = false;   // VkPhysicalDeviceFeatures::depthBiasClamp (#1349)
+     bool logic_op_enabled = false;
+     // VkPhysicalDeviceFeatures::depthBounds: the guest's DB_DEPTH_CONTROL.DEPTH_BOUNDS_ENABLE test.

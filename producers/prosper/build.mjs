@@ -73,6 +73,7 @@ export async function build({buildDirectory=path.join(root,'out/prosper'),vulkan
   // Keep framework name/flag pairs together when CMake deduplicates imported link options.
   const cmakeFile=path.join(staged,'prosper/CMakeLists.txt'),cmake=fs.readFileSync(cmakeFile,'utf8');
   write(cmakeFile,cmake.replace('  if(PROSPER_AJM_FFMPEG_FOUND)\n    add_library(prosper_ajm_ffmpeg STATIC',"  if(PROSPER_AJM_FFMPEG_FOUND)\n    string(REGEX REPLACE \"-framework;([^;]+)\" \"SHELL:-framework \\\\1\" PROSPER_AJM_FFMPEG_LDFLAGS_OTHER \"${PROSPER_AJM_FFMPEG_LDFLAGS_OTHER}\")\n    set_property(TARGET PkgConfig::PROSPER_AJM_FFMPEG PROPERTY INTERFACE_LINK_OPTIONS \"${PROSPER_AJM_FFMPEG_LDFLAGS_OTHER}\")\n    add_library(prosper_ajm_ffmpeg STATIC"));
+  run('git',['apply',path.join(import.meta.dirname,'non-solid-fill.patch')],{cwd:staged});
   sync(staged,projection);
  }finally{fs.rmSync(staged,{recursive:true,force:true});}
  if(!python){try{python=execFileSync('uv',['python','find'],{encoding:'utf8'}).trim();}catch{throw Error('A Python interpreter from uv or --python is required for upstream build metadata.');}}

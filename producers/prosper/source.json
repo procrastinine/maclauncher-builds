@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "prosper",
-  "version": "MCLv7",
+  "version": "MCLv8",
   "source": {
     "path": "sources/prosper",
     "repository": "https://github.com/mattias800/prosper.git"
