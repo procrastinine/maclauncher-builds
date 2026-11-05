@@ -1,0 +1,2242 @@
+{
+  "id": "android-aim",
+  "version": "0.1.0-MCLv9",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "26.0",
+  "directoryRelative": "android-aim/0.1.0-MCLv9/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "1b96059fed85775d3308b8f3fd2c6b07f74b1017534b27a627dc08a4604fad85",
+  "sourceRelative": null,
+  "sourceSha256": "1b96059fed85775d3308b8f3fd2c6b07f74b1017534b27a627dc08a4604fad85",
+  "files": [
+    {
+      "path": "files/_build/angle-source/out/AimRelease/libEGL.dylib",
+      "size": 81808,
+      "mode": 493,
+      "sha256": "fea590e693199e9281928e64ff607c282bac2c287850843899664d20a8d11987",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/_build/angle-source/out/AimRelease/libGLESv2.dylib",
+      "size": 8046416,
+      "mode": 493,
+      "sha256": "af1d1de0af1c53476ef5b4d48cbe929570bac6c570cd7b4d8c02f4a2cf2471c6",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/angle-manifest.json",
+      "size": 8624,
+      "mode": 420,
+      "sha256": "bbd6f9eebf14cce51aa835ca122070ee26efd921bafcc8ff4fa8c2d6c5309761"
+    },
+    {
+      "path": "files/bin/aim-apps",
+      "size": 944704,
+      "mode": 493,
+      "sha256": "f41287fd6c911d77edaa1cce40c079f352d16133f343debdac60734b60ccfd5b",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/bin/aim-binderd",
+      "size": 1126160,
+      "mode": 493,
+      "sha256": "4327e5cfafe4cc997d80b11e7eb659f2074c903a5059e721ae464535565f3f0a",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/bin/aim-display",
+      "size": 1590688,
+      "mode": 493,
+      "sha256": "b144272833e340d39542674ae04899ee915cce44351af97774164a2b4e81acda",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/bin/aim-lock-holder",
+      "size": 538800,
+      "mode": 493,
+      "sha256": "3060fce20f0cbdace91405e46713ee969d42705f7d15dcfb56be09bce7f7f801",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/bin/aim-pty-holder",
+      "size": 693808,
+      "mode": 493,
+      "sha256": "10ea0cfcf626c548c96a84896725784a629f94ae98e9764f069bb9d2b81d731c",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/bin/aimctl",
+      "size": 1170176,
+      "mode": 493,
+      "sha256": "80dee549ba10c981530d4c26a7e4de5a4d4da0c8c59e86e0f8bdc757de152184",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/bin/android-image-extract",
+      "size": 968944,
+      "mode": 493,
+      "sha256": "6d0fc4af5d4099aded69c8f0145ef3d75ad5ae2f3cf3102b08db3e66781e474f",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/bin/android-runtime-prepare",
+      "size": 1019136,
+      "mode": 493,
+      "sha256": "dabb62ca2aca16cf8fde4c7d7381162c398817b697282cbb423087a1957755e1",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/bin/guest-init",
+      "size": 41840512,
+      "mode": 493,
+      "sha256": "dbb934250eedb4c9bee51d00ea4b0b2fab5862c8e6762ee0f68724ccdee019a3",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/bin/linux-run",
+      "size": 6441792,
+      "mode": 493,
+      "sha256": "644b4aba2f54c3e5d3cbabd44023d6aba37884e29d516d82672c0b334faa3bd8",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/bin/linux-translate",
+      "size": 710800,
+      "mode": 493,
+      "sha256": "9f95d753fc31a9088204559e0576c2ed544070b83e6db6322d3f944b7e061d93",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/bin/maclauncher-aim",
+      "size": 716288,
+      "mode": 493,
+      "sha256": "aa314d639e0482bc769861ca8aa9cf6654c515b16ecba2e821100d7f212e9839",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/hal/audio/android.hardware.audio.service-aidl.aim.rc",
+      "size": 450,
+      "mode": 420,
+      "sha256": "33f4e83483d3550495b7b326dcf6a01026bcfc8ec69581e5a197d1eb9967584d"
+    },
+    {
+      "path": "files/hal/audio/android.hardware.audio.service-aidl.aim.xml",
+      "size": 516,
+      "mode": 420,
+      "sha256": "56754a569505daa6ddd193bd445e412463f71da97c465f07e89e2c347c334e9f"
+    },
+    {
+      "path": "files/hal/bluetooth/android.hardware.bluetooth-service.aim.rc",
+      "size": 136,
+      "mode": 420,
+      "sha256": "e76e0ae9a4353bf668266f76c28c16c8e9d932fd2dac123e52a8663cce057384"
+    },
+    {
+      "path": "files/hal/bluetooth/android.hardware.bluetooth-service.aim.xml",
+      "size": 181,
+      "mode": 420,
+      "sha256": "ced6110f335fb2182c3756b80bd02a40390b0388f5c79bd827131884bedfc691"
+    },
+    {
+      "path": "files/hal/camera/android.hardware.camera.provider-service.aim.rc",
+      "size": 248,
+      "mode": 420,
+      "sha256": "5b0d45b669b04775c1f61a666829e9000e842c4558411566c9fe81cbe518577b"
+    },
+    {
+      "path": "files/hal/camera/android.hardware.camera.provider-service.aim.xml",
+      "size": 221,
+      "mode": 420,
+      "sha256": "7e85692b950169bd108a295976bc55243f07f5a6e7eaceb2a7924daa823995c7"
+    },
+    {
+      "path": "files/hal/gnss/android.hardware.gnss-service.aim.rc",
+      "size": 121,
+      "mode": 420,
+      "sha256": "658765479723d822231bd290f1eba5aa169b7a605b6fde13bc1b92d49317c3b9"
+    },
+    {
+      "path": "files/hal/gnss/android.hardware.gnss-service.aim.xml",
+      "size": 197,
+      "mode": 420,
+      "sha256": "eda8af5b18c4acefa1fd0815a3793090380bb76a66b13f434c96123cdb7afa57"
+    },
+    {
+      "path": "files/hal/graphics/allocator/android.hardware.graphics.allocator-service.aim.rc",
+      "size": 263,
+      "mode": 420,
+      "sha256": "1164159bd735b352eee8e0b1f7569d8425196c6d05ea3c539552b825754e1e57"
+    },
+    {
+      "path": "files/hal/graphics/allocator/android.hardware.graphics.allocator-service.aim.xml",
+      "size": 390,
+      "mode": 420,
+      "sha256": "1dcf5cb47f0d618395683ebe8d260cb488c80d6f2f7139db91e588a71df52f8a"
+    },
+    {
+      "path": "files/hal/graphics/composer/android.hardware.graphics.composer3-service.aim.rc",
+      "size": 257,
+      "mode": 420,
+      "sha256": "a3b32b7edf479e81fc6b1392f7eb0fb242a0ea1d7ed83132b18dd04dfa7250e7"
+    },
+    {
+      "path": "files/hal/graphics/composer/android.hardware.graphics.composer3-service.aim.xml",
+      "size": 215,
+      "mode": 420,
+      "sha256": "edfc3b220e52548df342677d9e4451bfdeba6a2114c2acfa9217907d4eaca317"
+    },
+    {
+      "path": "files/hal/health/android.hardware.health-service.aim.rc",
+      "size": 124,
+      "mode": 420,
+      "sha256": "001d46508a5b4b6f15a7e3328192f5ad52f6c23c707a0990610ae33c58e2dac5"
+    },
+    {
+      "path": "files/hal/health/android.hardware.health-service.aim.xml",
+      "size": 201,
+      "mode": 420,
+      "sha256": "7c8deba409556aa9926636d97ee5a5d8c9b0d672fa1438432b4ad9ef841d2254"
+    },
+    {
+      "path": "files/hal/sensors/android.hardware.sensors-service.aim.rc",
+      "size": 126,
+      "mode": 420,
+      "sha256": "dbb970da7eb0fc2804a2acb45c399ab51aada7530b572d9a788505d9cdc0d294"
+    },
+    {
+      "path": "files/hal/sensors/android.hardware.sensors-service.aim.xml",
+      "size": 203,
+      "mode": 420,
+      "sha256": "5145200d14fc3a8e5701d06ab3a1db85a55300e77ea4397b987935236de4846d"
+    },
+    {
+      "path": "files/image/app-host/aim-app-host-agent.rc",
+      "size": 962,
+      "mode": 420,
+      "sha256": "5a9cf59b348c57bb29cac11b05bff6413e39c9ed2311b43783695c1abb70d743"
+    },
+    {
+      "path": "files/image/app-host/aim-system",
+      "size": 618,
+      "mode": 420,
+      "sha256": "753a4b9b3befc097d7248704a6f91f7e9f8374a6da1e3bb8e325b8d4e82b0345"
+    },
+    {
+      "path": "files/image/app-host/aim-system.rc",
+      "size": 772,
+      "mode": 420,
+      "sha256": "b781766c5bb5c20a522deaf78ee85fc2f9c448f4f996301939f93c60161a1c76"
+    },
+    {
+      "path": "files/image/app-host/services",
+      "size": 2245,
+      "mode": 420,
+      "sha256": "08ee6050d0fd2c57b56cb0bd44175eb7f57102406f46ff9ec7108e7489d2c803"
+    },
+    {
+      "path": "files/image/native-services",
+      "size": 654,
+      "mode": 420,
+      "sha256": "76e7a8839e914f55c5d08ce3b4c02c7e9ff12f130438069f168961c2990464af"
+    },
+    {
+      "path": "files/image/overlay.toml",
+      "size": 55150,
+      "mode": 420,
+      "sha256": "31468c38c0e2e22a663505bfbfe5a01883709e7856715345745c40d266fe495d"
+    },
+    {
+      "path": "files/image/system_ext/etc/init/aim-windows.rc",
+      "size": 594,
+      "mode": 420,
+      "sha256": "7df8ecc6f62fc6f57a07a0be47311a1031694f92427fc5e5b348d1a1ad9f4aa6"
+    },
+    {
+      "path": "files/image/system_ext/etc/permissions/privapp-permissions-aim-wallpaper.xml",
+      "size": 360,
+      "mode": 420,
+      "sha256": "c47b6735b1ab37aee39ef0368b12044ea6ab9d23cd7e52cddd297d4516c07a94"
+    },
+    {
+      "path": "files/image/vendor/build.prop",
+      "size": 3722,
+      "mode": 420,
+      "sha256": "9917d59fa42f52fef39f21c713301d6b3d5ddc974ed45a9d37512a9ae89b6b4f"
+    },
+    {
+      "path": "files/image/vendor/etc/aim/init-mount-namespace-policy.conf",
+      "size": 359,
+      "mode": 420,
+      "sha256": "331eaa1f1b6bf000f4b46778084ffc0aa52a958b99a717e319a0c1b46def10db"
+    },
+    {
+      "path": "files/image/vendor/etc/fstab.aim",
+      "size": 367,
+      "mode": 420,
+      "sha256": "ab2ef93fbe46b02dc9c1dfce138a5ff78f43fef1804041c41535eb489e43f863"
+    },
+    {
+      "path": "files/image/vendor/etc/init/hw/init.aim.rc",
+      "size": 5273,
+      "mode": 420,
+      "sha256": "70d7bec0583fe0c6a06365556428ee5fa2f8ed35ef1ef96767c58711243dfce4"
+    },
+    {
+      "path": "files/image/vendor/etc/permissions/android.hardware.camera.front.xml",
+      "size": 465,
+      "mode": 420,
+      "sha256": "54203867eec93516fae18f2a21caf7090d0ceded60c18c327d8041b31a324346"
+    },
+    {
+      "path": "files/image/vendor/etc/permissions/android.hardware.ethernet.xml",
+      "size": 288,
+      "mode": 420,
+      "sha256": "b395d0d287dd93a3943a81aa755cdd948d31ab0607cb29912fcb4f4a7bff3e49"
+    },
+    {
+      "path": "files/image/vendor/etc/permissions/android.hardware.sensor.hinge_angle.xml",
+      "size": 317,
+      "mode": 420,
+      "sha256": "ea38e489471191cf7114ff6b7b0684355e6e58921e5b04843c57d2f30fec901d"
+    },
+    {
+      "path": "files/image/vendor/etc/permissions/android.hardware.sensor.light.xml",
+      "size": 316,
+      "mode": 420,
+      "sha256": "d5d3eb75edc36fba2956706c33519ed3beef67a194ec66626c5ada4141bdc3bf"
+    },
+    {
+      "path": "files/image/vendor/etc/permissions/android.hardware.usb.host.xml",
+      "size": 455,
+      "mode": 420,
+      "sha256": "863c844b022601dc40777397a129785e8ddb4c431e48864a4188b0c4d23035c3"
+    },
+    {
+      "path": "files/image/vendor/etc/permissions/android.hardware.vulkan.level.xml",
+      "size": 330,
+      "mode": 420,
+      "sha256": "22b14a973a6c1f2731fdf84a5dfe300ee5c516753988a5f91fd344e91b45c258"
+    },
+    {
+      "path": "files/image/vendor/etc/permissions/android.software.freeform_window_management.xml",
+      "size": 353,
+      "mode": 420,
+      "sha256": "fc177b0441d4d8cc19fcfb9fe45a4303dffc60610bb3b30a7ac05f14445a65dc"
+    },
+    {
+      "path": "files/image/vendor/etc/permissions/handheld_core_hardware.xml",
+      "size": 4702,
+      "mode": 420,
+      "sha256": "4ee23385e9d5de208a5b11d5231bc33c3d1c762739070f126915d5836edaa88e"
+    },
+    {
+      "path": "files/image/vendor/etc/vintf/manifest.xml",
+      "size": 381,
+      "mode": 420,
+      "sha256": "9597a4bd5c670c8c60c6f2f33932cdd2de0f09e3a91382a37ae5a3efb128a66d"
+    },
+    {
+      "path": "files/image/vendor/usr/idc/aim-keyboard.idc",
+      "size": 222,
+      "mode": 420,
+      "sha256": "6923fe27d49ace601d733eeb744f775b9b2370b942415ffc9bfea98e9a5e603d"
+    },
+    {
+      "path": "files/image/vendor/usr/idc/aim-mouse.idc",
+      "size": 447,
+      "mode": 420,
+      "sha256": "80797745c0e3cbfd5622035bb1527c454e48b205584e0d1ccb4906752fd30474"
+    },
+    {
+      "path": "files/image/vendor/usr/idc/aim-touchscreen.idc",
+      "size": 248,
+      "mode": 420,
+      "sha256": "b7eff39c4d450690a6c5d7772033425ed67d4b345074366d3bf244768566ac38"
+    },
+    {
+      "path": "files/licenses/adler2-2.0.1-2.txt",
+      "size": 10860,
+      "mode": 420,
+      "sha256": "8ada45cd9f843acf64e4722ae262c622a2b3b3007c7310ef36ac1061a30f6adb"
+    },
+    {
+      "path": "files/licenses/adler2-2.0.1-3.txt",
+      "size": 1023,
+      "mode": 420,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+    },
+    {
+      "path": "files/licenses/adler2-2.0.1.txt",
+      "size": 665,
+      "mode": 420,
+      "sha256": "861399f8c21c042b110517e76dc6b63a2b334276c8cf17412fc3c8908ca8dc17"
+    },
+    {
+      "path": "files/licenses/aho-corasick-1.1.5-2.txt",
+      "size": 1081,
+      "mode": 420,
+      "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f"
+    },
+    {
+      "path": "files/licenses/aho-corasick-1.1.5-3.txt",
+      "size": 1211,
+      "mode": 420,
+      "sha256": "7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c"
+    },
+    {
+      "path": "files/licenses/aho-corasick-1.1.5.txt",
+      "size": 126,
+      "mode": 420,
+      "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f"
+    },
+    {
+      "path": "files/licenses/AIM-10.txt",
+      "size": 1389,
+      "mode": 420,
+      "sha256": "6ffedbc0f7878612d2b23589f1ff2ab15633e1df7963a5d9fc750ec5500c7e7a"
+    },
+    {
+      "path": "files/licenses/AIM-11.txt",
+      "size": 1451,
+      "mode": 420,
+      "sha256": "b2fdb88151f747b40f4a8b17ceba930136c8c1be873611972b413bce2c2eb587"
+    },
+    {
+      "path": "files/licenses/AIM-12.txt",
+      "size": 10139,
+      "mode": 420,
+      "sha256": "494accc32e50eb523a0e384d0ae6d4b702db867a89d6971216760e92b240ee12"
+    },
+    {
+      "path": "files/licenses/AIM-13.txt",
+      "size": 12534,
+      "mode": 420,
+      "sha256": "756a61a8300d105ae68e7f2993e27d41a765c946f3400422e2403b01e7ded527"
+    },
+    {
+      "path": "files/licenses/AIM-14.txt",
+      "size": 1542,
+      "mode": 420,
+      "sha256": "58604a126af6a671ea390ee3d5b3e42228aa59b2858fb7af1d5b20b31739ccbb"
+    },
+    {
+      "path": "files/licenses/AIM-15.txt",
+      "size": 1002,
+      "mode": 420,
+      "sha256": "e32ff4e00d9d94930537635291da39e7e612703334bf6fde8c7f1686fe8a45a2"
+    },
+    {
+      "path": "files/licenses/AIM-16.txt",
+      "size": 36620,
+      "mode": 420,
+      "sha256": "ea75d2e79a97f8dfc1e1ca04beedc432a47af4993e0cd659cef062050a57d3f9"
+    },
+    {
+      "path": "files/licenses/AIM-17.txt",
+      "size": 19263,
+      "mode": 420,
+      "sha256": "067d8f7f645efe1131a9df13aa80ec2910d4ff898f9b14d337443a4202d56ab6"
+    },
+    {
+      "path": "files/licenses/AIM-18.txt",
+      "size": 5788,
+      "mode": 420,
+      "sha256": "ded3eab76e881c8c18ab9e4ed9e888b1afcac41435913930f88f8188cecb2e8f"
+    },
+    {
+      "path": "files/licenses/AIM-19.txt",
+      "size": 407542,
+      "mode": 420,
+      "sha256": "46d411827d56eda34df30f901bfa4ea020119b2e38b6b7efb6a32e91461457a2"
+    },
+    {
+      "path": "files/licenses/AIM-2.txt",
+      "size": 3544,
+      "mode": 420,
+      "sha256": "75d9526cb80680518a22a07587156dd52d58890c5e60dc6efee712e46d88c067"
+    },
+    {
+      "path": "files/licenses/AIM-20.txt",
+      "size": 13928,
+      "mode": 420,
+      "sha256": "4e1144ff2b1369e7b9e8a1a3fb94ea3deee99d5b327cd94b423d148dfa34d25f"
+    },
+    {
+      "path": "files/licenses/AIM-21.txt",
+      "size": 16703,
+      "mode": 420,
+      "sha256": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b"
+    },
+    {
+      "path": "files/licenses/AIM-22.txt",
+      "size": 16706,
+      "mode": 420,
+      "sha256": "e2b35be49f7284a45b7baca8fc7b3ab7440e7902392b2528a457816b5bb2a15c"
+    },
+    {
+      "path": "files/licenses/AIM-23.txt",
+      "size": 14990,
+      "mode": 420,
+      "sha256": "9a682a56cffc9524dfa9b0b1c0dca9cb81a19e96d5bd0793aaf02c08a95ee7ca"
+    },
+    {
+      "path": "files/licenses/AIM-24.txt",
+      "size": 1491,
+      "mode": 420,
+      "sha256": "68834f116f8ff545f05d14753357b620748156d60ee36b26beab4cb3f317efe4"
+    },
+    {
+      "path": "files/licenses/AIM-25.txt",
+      "size": 23503,
+      "mode": 420,
+      "sha256": "ea43b1de38a6f90c488800d66dec1ed671e68cda530266bc96951fb5b6307613"
+    },
+    {
+      "path": "files/licenses/AIM-26.txt",
+      "size": 1522,
+      "mode": 420,
+      "sha256": "a44eb7b5caf5534c6ef536b21edb40b4d6babf91bf97d9d45596868618b2c6fb"
+    },
+    {
+      "path": "files/licenses/AIM-27.txt",
+      "size": 19274,
+      "mode": 420,
+      "sha256": "4b9abebc4338048a7c2dc184e9f800deb349366bdf28eb23c2677a77b4c87726"
+    },
+    {
+      "path": "files/licenses/AIM-28.txt",
+      "size": 495,
+      "mode": 420,
+      "sha256": "95ad366d23fadf701d355bc45fb8b82ae2d700239471d35d41286ac3b08ff903"
+    },
+    {
+      "path": "files/licenses/AIM-29.txt",
+      "size": 1084,
+      "mode": 420,
+      "sha256": "1ca3502222d967f3be5751c55f6b7ee735b5383909c3b501495f54b216dbf227"
+    },
+    {
+      "path": "files/licenses/AIM-3.txt",
+      "size": 802,
+      "mode": 420,
+      "sha256": "8937b0397fdaea5ecb52945c9d2da894d338ed49397ef7824be365e60049d264"
+    },
+    {
+      "path": "files/licenses/AIM-30.txt",
+      "size": 12809,
+      "mode": 420,
+      "sha256": "e8f66a474a1c1a0c1da2e85b5e84a50bf5e3161c96d2a3b92b76a32d05ae9ae8"
+    },
+    {
+      "path": "files/licenses/AIM-31.txt",
+      "size": 1499465,
+      "mode": 420,
+      "sha256": "5647be074c8edf7339fd863055923a8fc80bc5610a8d4661ec3b767b9d392c27"
+    },
+    {
+      "path": "files/licenses/AIM-32.txt",
+      "size": 14423589,
+      "mode": 420,
+      "sha256": "d518ae2d76bc7a1f0cbf0069b8deafb56efc39c2614cab74a859ef0b467f8373"
+    },
+    {
+      "path": "files/licenses/AIM-33.txt",
+      "size": 1267,
+      "mode": 420,
+      "sha256": "f32fb3b417a194167cfad068223fc975ba96c5960513a10f66a3c28720aec1df"
+    },
+    {
+      "path": "files/licenses/AIM-34.txt",
+      "size": 20137,
+      "mode": 420,
+      "sha256": "23ee78c8bae49cf08ea2f0c84945c66b987ebe4520881fb51b3dad4fb43d07c2"
+    },
+    {
+      "path": "files/licenses/AIM-35.txt",
+      "size": 3320,
+      "mode": 420,
+      "sha256": "a3966c9410ef94a1efbfa9ec04e9c1994026a70623fbf0885ce36737bfba3b54"
+    },
+    {
+      "path": "files/licenses/AIM-36.txt",
+      "size": 17642,
+      "mode": 420,
+      "sha256": "54b212ba1f97f6948fa5486239ab505dd820b02e50cbfd296b4062c8609a70af"
+    },
+    {
+      "path": "files/licenses/AIM-37.txt",
+      "size": 34795,
+      "mode": 420,
+      "sha256": "05315fce6c35f79b8a35454828995fa26336f235895ac64557abc028f4ffcea2"
+    },
+    {
+      "path": "files/licenses/AIM-38.txt",
+      "size": 730,
+      "mode": 420,
+      "sha256": "0ff61769b238634e042ab759dddfd104a8e69d091e3600ae3410e401a6164381"
+    },
+    {
+      "path": "files/licenses/AIM-39.txt",
+      "size": 919,
+      "mode": 420,
+      "sha256": "e34c58338bd89d43e709e226610d8f32b3e3c47f4ad9a99a8dc1d4ac7842488e"
+    },
+    {
+      "path": "files/licenses/AIM-4.txt",
+      "size": 11369,
+      "mode": 420,
+      "sha256": "a41c63d0b40a94fc5dae93d63c788b12385b98517e149b912be7d5913ad28e0f"
+    },
+    {
+      "path": "files/licenses/AIM-40.txt",
+      "size": 1078,
+      "mode": 420,
+      "sha256": "b85dcd3e453d05982552c52b5fc9e0bdd6d23c6f8e844b984a88af32570b0cc0"
+    },
+    {
+      "path": "files/licenses/AIM-41.txt",
+      "size": 1676,
+      "mode": 420,
+      "sha256": "39cb0234065c92b9e6cee3830cbb52b1aa289aa8fe9ba2e66730fec5cf05c630"
+    },
+    {
+      "path": "files/licenses/AIM-42.txt",
+      "size": 4016,
+      "mode": 420,
+      "sha256": "8eea8287e5876b539670cadb82e99f9a7afddec6f6730811be1daf25d2e9bcfd"
+    },
+    {
+      "path": "files/licenses/AIM-43.txt",
+      "size": 1995,
+      "mode": 420,
+      "sha256": "f5062c9a188d81dfe66b56db4182dcf9e4b17c0d9b0d311a8e20b3a1b075c443"
+    },
+    {
+      "path": "files/licenses/AIM-5.txt",
+      "size": 3573,
+      "mode": 420,
+      "sha256": "6b716ac364d4b775726e7eb883ecdfa3a752202794b4f6129eabbe27d3edfb48"
+    },
+    {
+      "path": "files/licenses/AIM-6.txt",
+      "size": 1332367,
+      "mode": 420,
+      "sha256": "9bb0658881dd657ba79396e8e440d69289d9fcf333b818e809f34a04d2df904c"
+    },
+    {
+      "path": "files/licenses/AIM-7.txt",
+      "size": 11361,
+      "mode": 420,
+      "sha256": "c79a7fea0e3cac04cd43f20e7b648e5a0ff8fa5344e644b0ee09ca1162b62747"
+    },
+    {
+      "path": "files/licenses/AIM-8.txt",
+      "size": 16962,
+      "mode": 420,
+      "sha256": "1f8729233617b193fd619213792ae16a41b95d2bbbf525dfe66998252ba68b16"
+    },
+    {
+      "path": "files/licenses/AIM-9.txt",
+      "size": 1643,
+      "mode": 420,
+      "sha256": "bf4da21bd20bcfb5b60b7ecc67fa864a79be049e21d6178076887f178dd6c71a"
+    },
+    {
+      "path": "files/licenses/AIM.txt",
+      "size": 11358,
+      "mode": 420,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "files/licenses/anyhow-1.0.104.txt",
+      "size": 9723,
+      "mode": 420,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+    },
+    {
+      "path": "files/licenses/autocfg-1.5.1.txt",
+      "size": 1054,
+      "mode": 420,
+      "sha256": "27995d58ad5c1145c1a8cd86244ce844886958a35eb2b78c6b772748669999ac"
+    },
+    {
+      "path": "files/licenses/base16ct-0.2.0.txt",
+      "size": 1143,
+      "mode": 420,
+      "sha256": "0aa8963e105e8b6e02f634484145d4e5b0f42d0a6dd05c16f8148f033383adef"
+    },
+    {
+      "path": "files/licenses/base64ct-1.8.3.txt",
+      "size": 1148,
+      "mode": 420,
+      "sha256": "2d1c57bff28344b9e698f51063bc8509799cc4c99a4e0cf2aa3f7e7c3e1f9a9d"
+    },
+    {
+      "path": "files/licenses/bindgen-0.70.1.txt",
+      "size": 1512,
+      "mode": 420,
+      "sha256": "c23953d9deb0a3312dbeaf6c128a657f3591acee45067612fa68405eaa4525db"
+    },
+    {
+      "path": "files/licenses/bitflags-1.3.2.txt",
+      "size": 1071,
+      "mode": 420,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb"
+    },
+    {
+      "path": "files/licenses/block-buffer-0.10.4.txt",
+      "size": 1082,
+      "mode": 420,
+      "sha256": "d5c22aa3118d240e877ad41c5d9fa232f9c77d757d4aac0c2f943afc0a95e0ef"
+    },
+    {
+      "path": "files/licenses/buildtools.txt",
+      "size": 1537,
+      "mode": 420,
+      "sha256": "ff11d445fb41a1087c7630e120ab15f1a2cb67c1b707173cb494141805fca35e"
+    },
+    {
+      "path": "files/licenses/cc-1.8.0.txt",
+      "size": 1057,
+      "mode": 420,
+      "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397"
+    },
+    {
+      "path": "files/licenses/cexpr-0.6.0.txt",
+      "size": 1061,
+      "mode": 420,
+      "sha256": "d9771b8c6cf4426d3846de54c1febe20907f1eeadf7adfb5ade89a83bd9ea77f"
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 10634,
+      "mode": 420,
+      "sha256": "bcfe3078cca1510cb1de61b89ee229ccc36a5a9e195737f98a3d4a51f4e6d08a"
+    },
+    {
+      "path": "files/licenses/const-oid-0.9.6.txt",
+      "size": 1082,
+      "mode": 420,
+      "sha256": "bada9e7ed8dc00d63502053c455d7c8d7575dfb7e8277a2a832531844d900682"
+    },
+    {
+      "path": "files/licenses/cpufeatures-0.2.17.txt",
+      "size": 1082,
+      "mode": 420,
+      "sha256": "ae9baa7beea910273c2f384c2a6b721fb7bd02bda3436074a1072e4ee689f985"
+    },
+    {
+      "path": "files/licenses/crc32fast-1.5.1-2.txt",
+      "size": 1097,
+      "mode": 420,
+      "sha256": "61d383b05b87d78f94d2937e2580cce47226d17823c0430fbcad09596537efcf"
+    },
+    {
+      "path": "files/licenses/crc32fast-1.5.1.txt",
+      "size": 11358,
+      "mode": 420,
+      "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08"
+    },
+    {
+      "path": "files/licenses/crypto-bigint-0.5.5.txt",
+      "size": 1077,
+      "mode": 420,
+      "sha256": "90c503b61dee04e1449c323ec34c229dfb68d7adcb96c7e140ee55f70fce2d8e"
+    },
+    {
+      "path": "files/licenses/crypto-common-0.1.7.txt",
+      "size": 1065,
+      "mode": 420,
+      "sha256": "3521672491a3479422d5fe1aca6645dd2984090f85da6e5205abfb18fb7a6897"
+    },
+    {
+      "path": "files/licenses/der-0.7.10.txt",
+      "size": 1082,
+      "mode": 420,
+      "sha256": "ad64fcb9589f162720f3cc5010ad76ca6ad3764e11861f9192c489df176bb71d"
+    },
+    {
+      "path": "files/licenses/digest-0.10.7.txt",
+      "size": 1057,
+      "mode": 420,
+      "sha256": "9e0dfd2dd4173a530e238cb6adb37aa78c34c6bc7444e0e10c1ab5d8881f63ba"
+    },
+    {
+      "path": "files/licenses/downcast-rs-1.2.1.txt",
+      "size": 1073,
+      "mode": 420,
+      "sha256": "fb252fecf98d9af8f1d9201c5860319a514f5a8a24700dc84fc6ea287a7a4958"
+    },
+    {
+      "path": "files/licenses/dsa-0.6.3-2.txt",
+      "size": 1070,
+      "mode": 420,
+      "sha256": "b3470648aff02beb36d7a53240fc9260ed80ed93bd43bace6b67d7ef7336ee33"
+    },
+    {
+      "path": "files/licenses/dsa-0.6.3.txt",
+      "size": 10846,
+      "mode": 420,
+      "sha256": "78779d420019e6b4630376af8e86b6b335ee8a2f89ede6e0411e0469a326aaa4"
+    },
+    {
+      "path": "files/licenses/ecdsa-0.16.9.txt",
+      "size": 1070,
+      "mode": 420,
+      "sha256": "bdebaf9156a298f8fdab56dd26cb5144673de522d80f4c0d88e0039145f147f9"
+    },
+    {
+      "path": "files/licenses/either-1.18.0.txt",
+      "size": 1043,
+      "mode": 420,
+      "sha256": "7576269ea71f767b99297934c0b2367532690f8c4badc695edf8e04ab6a1e545"
+    },
+    {
+      "path": "files/licenses/elliptic-curve-0.13.8.txt",
+      "size": 1070,
+      "mode": 420,
+      "sha256": "d27687b51f2874822c1530976b7e837eac4f308d94bf3dd42047011b7d437b47"
+    },
+    {
+      "path": "files/licenses/fallible-iterator-0.3.0.txt",
+      "size": 1078,
+      "mode": 420,
+      "sha256": "0816e154b159ba255c563f7c8c7df5bbb8cc5fc96f5ab8cf9f4743b4f41fe7eb"
+    },
+    {
+      "path": "files/licenses/fallible-streaming-iterator-0.1.9.txt",
+      "size": 1086,
+      "mode": 420,
+      "sha256": "8dcec5569a9be5b0e086c80faed6f1aefa670af0ec29cecc2f714303096887e0"
+    },
+    {
+      "path": "files/licenses/fdeflate-0.3.7.txt",
+      "size": 1036,
+      "mode": 420,
+      "sha256": "c77a4cf9da729987d0fe7ccd811e3bd27393914ddf3d23467c18cc22954513b3"
+    },
+    {
+      "path": "files/licenses/ff-0.13.1.txt",
+      "size": 1076,
+      "mode": 420,
+      "sha256": "8d0c1d1d4b2bebf5b9211f0e883d5a482b7808f3ed31320da14ddee95811f4ef"
+    },
+    {
+      "path": "files/licenses/flate2-1.1.10.txt",
+      "size": 1062,
+      "mode": 420,
+      "sha256": "025436edff4cfcdde17a5811fdea78892d8482efd1abdec5a17872d07a4f2112"
+    },
+    {
+      "path": "files/licenses/foldhash-0.1.5.txt",
+      "size": 856,
+      "mode": 420,
+      "sha256": "b1181a40b2a7b25cf66fd01481713bc1005df082c53ef73e851e55071b102744"
+    },
+    {
+      "path": "files/licenses/generic-array-0.14.7.txt",
+      "size": 1107,
+      "mode": 420,
+      "sha256": "c09aae9d3c77b531f56351a9947bc7446511d6b025b3255312d3e3442a9a7583"
+    },
+    {
+      "path": "files/licenses/getrandom-0.2.17.txt",
+      "size": 1130,
+      "mode": 420,
+      "sha256": "42fa16951ce7f24b5a467a40e5b449a1d41e662f97ca779864f053f39e097737"
+    },
+    {
+      "path": "files/licenses/group-0.13.0.txt",
+      "size": 615,
+      "mode": 420,
+      "sha256": "7429802d3e67e3308471b91fbea341e484c4e0a23d0fb230a8636c38184cec79"
+    },
+    {
+      "path": "files/licenses/hashbrown-0.15.5.txt",
+      "size": 1060,
+      "mode": 420,
+      "sha256": "ff8f68cb076caf8cefe7a6430d4ac086ce6af2ca8ce2c4e5a2004d4552ef52a2"
+    },
+    {
+      "path": "files/licenses/hashlink-0.10.0.txt",
+      "size": 1133,
+      "mode": 420,
+      "sha256": "e915669a595b11a200873df8286561881b0e04932f6412a585db6297ba0bc97c"
+    },
+    {
+      "path": "files/licenses/Khronos-headers.txt",
+      "size": 1147,
+      "mode": 420,
+      "sha256": "438187dca092de4032c1a16524aa4c34c71a0f985a71251a675aad54e77ed561"
+    },
+    {
+      "path": "files/licenses/lexopt-0.3.2.txt",
+      "size": 1055,
+      "mode": 420,
+      "sha256": "8d43b7fa3b2f928cd4ea6346853b95f1ca5d883f4eaad3a40f8af202bfb45d6f"
+    },
+    {
+      "path": "files/licenses/libc-0.2.189.txt",
+      "size": 1066,
+      "mode": 420,
+      "sha256": "123a331b5dbf04c30097fa43b8f858bc85df671fe776de498d01f3d6b7c1f69e"
+    },
+    {
+      "path": "files/licenses/libloading-0.8.9.txt",
+      "size": 736,
+      "mode": 420,
+      "sha256": "b29f8b01452350c20dd1af16ef83b598fea3053578ccc1c7a0ef40e57be2620f"
+    },
+    {
+      "path": "files/licenses/libm-0.2.16.txt",
+      "size": 14088,
+      "mode": 420,
+      "sha256": "3823dda7cf046602f4b4e77ec8e227863dc4736037cc85bb33d9f19febe16bb7"
+    },
+    {
+      "path": "files/licenses/libsqlite3-sys-0.35.0.txt",
+      "size": 1067,
+      "mode": 420,
+      "sha256": "c10c1f27337546471e5f7e4e97fdd398b35b9d4e126115dcd22de8d8e65abf6f"
+    },
+    {
+      "path": "files/licenses/md-5-0.10.6.txt",
+      "size": 1138,
+      "mode": 420,
+      "sha256": "b4eb00df6e2a4d22518fcaa6a2b4646f249b3a3c9814509b22bd2091f1392ff1"
+    },
+    {
+      "path": "files/licenses/minimal-lexical-0.2.1.txt",
+      "size": 2003,
+      "mode": 420,
+      "sha256": "dbe1fff0fb1314b6af94f161511406275cf01c5a32441fbf24528a57a051d599"
+    },
+    {
+      "path": "files/licenses/miniz_oxide-0.8.9-2.txt",
+      "size": 984,
+      "mode": 420,
+      "sha256": "0a54e647fe54104658b5e563c04c6f9edf251710e47bce692e0bd990a4ddaa39"
+    },
+    {
+      "path": "files/licenses/miniz_oxide-0.8.9.txt",
+      "size": 1213,
+      "mode": 420,
+      "sha256": "4108245a1f2df9d4e94df8abed5b4ba0759bb2f9b40a6b939f1be141077ae50b"
+    },
+    {
+      "path": "files/licenses/nom-7.1.3.txt",
+      "size": 1065,
+      "mode": 420,
+      "sha256": "4dbda04344456f09a7a588140455413a9ac59b6b26a1ef7cdf9c800c012d87f0"
+    },
+    {
+      "path": "files/licenses/p256-0.13.2.txt",
+      "size": 1070,
+      "mode": 420,
+      "sha256": "233b95ccbf90dc67e32f3e8995c489f6312d9191ebd141a931c3b684f1e3be6d"
+    },
+    {
+      "path": "files/licenses/p384-0.13.1.txt",
+      "size": 1070,
+      "mode": 420,
+      "sha256": "02168781a5b59970e3da1784d2eb69f432598a3757f283dbffdafd9d483a9113"
+    },
+    {
+      "path": "files/licenses/pkcs1-0.7.5.txt",
+      "size": 1082,
+      "mode": 420,
+      "sha256": "c995204cc6bad2ed67dd41f7d89bb9f1a9d48e0edd745732b30640d7912089a4"
+    },
+    {
+      "path": "files/licenses/png-0.17.16.txt",
+      "size": 1048,
+      "mode": 420,
+      "sha256": "eaf40297c75da471f7cda1f3458e8d91b4b2ec866e609527a13acfa93b638652"
+    },
+    {
+      "path": "files/licenses/ppv-lite86-0.2.21-2.txt",
+      "size": 1076,
+      "mode": 420,
+      "sha256": "4cada0bd02ea3692eee6f16400d86c6508bbd3bafb2b65fed0419f36d4f83e8f"
+    },
+    {
+      "path": "files/licenses/ppv-lite86-0.2.21.txt",
+      "size": 10854,
+      "mode": 420,
+      "sha256": "0218327e7a480793ffdd4eb792379a9709e5c135c7ba267f709d6f6d4d70af0a"
+    },
+    {
+      "path": "files/licenses/rand_core-0.6.4.txt",
+      "size": 10282,
+      "mode": 420,
+      "sha256": "6df43f6f4b5d4587f3d8d71e45532c688fd168afa5fe89d571cb32fa09c4ef51"
+    },
+    {
+      "path": "files/licenses/rand-0.8.8-2.txt",
+      "size": 9724,
+      "mode": 420,
+      "sha256": "35242e7a83f69875e6edeff02291e688c97caafe2f8902e4e19b49d3e78b4cab"
+    },
+    {
+      "path": "files/licenses/rand-0.8.8-3.txt",
+      "size": 1117,
+      "mode": 420,
+      "sha256": "209fbbe0ad52d9235e37badf9cadfe4dbdc87203179c0899e738b39ade42177b"
+    },
+    {
+      "path": "files/licenses/rand-0.8.8.txt",
+      "size": 569,
+      "mode": 420,
+      "sha256": "90eb64f0279b0d9432accfa6023ff803bc4965212383697eee27a0f426d5f8d5"
+    },
+    {
+      "path": "files/licenses/sec1-0.7.3.txt",
+      "size": 1082,
+      "mode": 420,
+      "sha256": "4a883ecc3bb1010faed542bf63d53e530fea5e5e12cf676aed588784298ba929"
+    },
+    {
+      "path": "files/licenses/sha2-asm-0.6.4.txt",
+      "size": 1114,
+      "mode": 420,
+      "sha256": "85010e75aef5bdcd10b9ce39e8865dfab508f620f9ddb6ca6e54833fe97f36fa"
+    },
+    {
+      "path": "files/licenses/shlex-1.3.0-2.txt",
+      "size": 1092,
+      "mode": 420,
+      "sha256": "4455bf75a91154108304cb283e0fea9948c14f13e20d60887cf2552449dea3b1"
+    },
+    {
+      "path": "files/licenses/shlex-1.3.0.txt",
+      "size": 566,
+      "mode": 420,
+      "sha256": "553fffcd9b1cb158bc3e9edc35da85ca5c3b3d7d2e61c883ebcfa8a65814b583"
+    },
+    {
+      "path": "files/licenses/simd-adler32-0.3.10.txt",
+      "size": 1078,
+      "mode": 420,
+      "sha256": "42a35170233e83e18856792e748de4c1ce4a63b2afce9a370c89ef3fe23f9f2d"
+    },
+    {
+      "path": "files/licenses/smallvec-1.16.2.txt",
+      "size": 1072,
+      "mode": 420,
+      "sha256": "0b28172679e0009b655da42797c03fd163a3379d5cfa67ba1f1655e974a2a1a9"
+    },
+    {
+      "path": "files/licenses/spin-0.9.9.txt",
+      "size": 1084,
+      "mode": 420,
+      "sha256": "6ac8711fb340c62ce0a4ecd463342d3fa0e8e70de697c863a2e1c0c53006003c"
+    },
+    {
+      "path": "files/licenses/static_assertions-1.1.0.txt",
+      "size": 1072,
+      "mode": 420,
+      "sha256": "ea084a2373ebc1f0902c09266e7bf25a05ab3814c1805bb017ffa7308f90c061"
+    },
+    {
+      "path": "files/licenses/subtle-2.6.1.txt",
+      "size": 1582,
+      "mode": 420,
+      "sha256": "d1fc1bc0d155df60b2e7705b6b2ae02a05c96f948e1cec6e2fb86360b09f346b"
+    },
+    {
+      "path": "files/licenses/third_party-glslang-src-2.txt",
+      "size": 1733,
+      "mode": 420,
+      "sha256": "10986bda93996d06b781a5f44d2fb5b37c527a7893e2478683ac89793a4a3caf"
+    },
+    {
+      "path": "files/licenses/third_party-glslang-src.txt",
+      "size": 54705,
+      "mode": 420,
+      "sha256": "adb783e734e906d1f46db5df29991dbde84bdb0ceab502ac2febb44fe3c2b5f4"
+    },
+    {
+      "path": "files/licenses/third_party-jsoncpp-source.txt",
+      "size": 2714,
+      "mode": 420,
+      "sha256": "cec0db5f6d7ed6b3a72647bd50aed02e13c3377fd44382b96dc2915534c042ad"
+    },
+    {
+      "path": "files/licenses/third_party-jsoncpp.txt",
+      "size": 2665,
+      "mode": 420,
+      "sha256": "76c45ece83a26117f86f4e349e7df118708e061e87225328fb478ce1e8b3eb86"
+    },
+    {
+      "path": "files/licenses/third_party-rapidjson-src.txt",
+      "size": 5152,
+      "mode": 420,
+      "sha256": "a140e5d46fe734a1c78f1a3c3ef207871dd75648be71fdda8e309b23ab8b1f32"
+    },
+    {
+      "path": "files/licenses/third_party-spirv-cross-src-2.txt",
+      "size": 1305,
+      "mode": 420,
+      "sha256": "fbeaca472f4f70e276dd1106ca5097435967a22ad6c1d8200aef7ad9f70aaf3f"
+    },
+    {
+      "path": "files/licenses/third_party-spirv-cross-src-3.txt",
+      "size": 1108,
+      "mode": 420,
+      "sha256": "8f25018489d6fe0dec34a352314c38dc146247b7de65735790f4398a92afa84b"
+    },
+    {
+      "path": "files/licenses/third_party-spirv-cross-src.txt",
+      "size": 16814,
+      "mode": 420,
+      "sha256": "b89aeb7c2a164a0576786dd2a8b57f2fb628b23981f0a06bd77e2f99a9befa0f"
+    },
+    {
+      "path": "files/licenses/third_party-spirv-headers-src-2.txt",
+      "size": 17023,
+      "mode": 420,
+      "sha256": "d557539df68e771cc1eedcc91d13f70fca930e508d11eedcafa4b15db49e3744"
+    },
+    {
+      "path": "files/licenses/third_party-vulkan_memory_allocator.txt",
+      "size": 1099,
+      "mode": 420,
+      "sha256": "cdb520614db3ec62e667ece01e64e6afa21948fa51e85e748b1494597a7be907"
+    },
+    {
+      "path": "files/licenses/third_party-vulkan-headers-src.txt",
+      "size": 458,
+      "mode": 420,
+      "sha256": "ac24e5ea920e4318e4d02c4086ae51f53cfb03feed06c18df1019e7ada1ec7bc"
+    },
+    {
+      "path": "files/licenses/third_party-vulkan-loader-src.txt",
+      "size": 11661,
+      "mode": 420,
+      "sha256": "43c0a37e6a0fa7ff3c843b3ec5a4fac84b712558ddac103fbd4c1649662a9ece"
+    },
+    {
+      "path": "files/licenses/third_party-zlib-2.txt",
+      "size": 4476,
+      "mode": 420,
+      "sha256": "5aadb3f129c4c7e29f28bb6c5954dea061df3046d0fe3e134aff2ef4a217b1d6"
+    },
+    {
+      "path": "files/licenses/third_party-zlib-3.txt",
+      "size": 97454,
+      "mode": 420,
+      "sha256": "71e0dcf4cacb6b1674550a3d9407344746d27cdce739e6e25189d0b620b005ed"
+    },
+    {
+      "path": "files/licenses/third_party-zlib-4.txt",
+      "size": 1453,
+      "mode": 420,
+      "sha256": "e83d883a3f7bb93b3dcfab28f5300a569bc7586ded2e067c0639d0697d13fe1e"
+    },
+    {
+      "path": "files/licenses/third_party-zlib-5.txt",
+      "size": 294,
+      "mode": 420,
+      "sha256": "2f1d0b18ce37c2af415a469857f02aee2c41a58877aff21d29e9c6db32b55cb7"
+    },
+    {
+      "path": "files/licenses/third_party-zlib.txt",
+      "size": 910,
+      "mode": 420,
+      "sha256": "e1cfcc55c325b3f78cf55df9664abaa066e2271dffe8213347d9fccdfbac8f2c"
+    },
+    {
+      "path": "files/licenses/typenum-1.20.1-2.txt",
+      "size": 10835,
+      "mode": 420,
+      "sha256": "516b24e051bf5630880ebbd55c40a25ce9552ebaf8970a53e8976eb70e522406"
+    },
+    {
+      "path": "files/licenses/typenum-1.20.1-3.txt",
+      "size": 1083,
+      "mode": 420,
+      "sha256": "a825bd853ab71619a4923d7b4311221427848070ff44d990da39b0b274c1683f"
+    },
+    {
+      "path": "files/licenses/typenum-1.20.1.txt",
+      "size": 17,
+      "mode": 420,
+      "sha256": "db11fec9946737df39ca3898d9cd8c10ec6f6c3a884a6802b0ad0b81b4e8f23a"
+    },
+    {
+      "path": "files/licenses/unicode-ident-1.0.26.txt",
+      "size": 1995,
+      "mode": 420,
+      "sha256": "f7db81051789b729fea528a63ec4c938fdcb93d9d61d97dc8cc2e9df6d47f2a1"
+    },
+    {
+      "path": "files/licenses/vcpkg-0.2.15.txt",
+      "size": 1082,
+      "mode": 420,
+      "sha256": "016d20f335060a70e79d9fcf8dfaa6201114d65d592211f4bdfb8ae9ca2bc1dc"
+    },
+    {
+      "path": "files/licenses/version_check-0.9.5.txt",
+      "size": 1085,
+      "mode": 420,
+      "sha256": "b7e650f3fce5c53249d1cdc608b54df156a97edd636cf9d23498d0cfe7aec63e"
+    },
+    {
+      "path": "files/licenses/wasi-0.11.1+wasi-snapshot-preview1.txt",
+      "size": 12243,
+      "mode": 420,
+      "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+    },
+    {
+      "path": "files/licenses/windows-link-0.2.1-2.txt",
+      "size": 1141,
+      "mode": 420,
+      "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
+    },
+    {
+      "path": "files/licenses/windows-link-0.2.1.txt",
+      "size": 11351,
+      "mode": 420,
+      "sha256": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b"
+    },
+    {
+      "path": "files/licenses/zerocopy-0.8.59-2.txt",
+      "size": 1275,
+      "mode": 420,
+      "sha256": "83c1763356e822adde0a2cae748d938a73fdc263849ccff6b27776dff213bd32"
+    },
+    {
+      "path": "files/licenses/zerocopy-0.8.59-3.txt",
+      "size": 1060,
+      "mode": 420,
+      "sha256": "1a2f5c12ddc934d58956aa5dbdd3255fe55fd957633ab7d0d39e4f0daa73f7df"
+    },
+    {
+      "path": "files/licenses/zerocopy-0.8.59.txt",
+      "size": 11350,
+      "mode": 420,
+      "sha256": "9d185ac6703c4b0453974c0d85e9eee43e6941009296bb1f5eb0b54e2329e9f3"
+    },
+    {
+      "path": "files/licenses/zeroize-1.9.0.txt",
+      "size": 1082,
+      "mode": 420,
+      "sha256": "8c7516d4b27b1e495be5e38b612298b63de48d05f49cdac94f70f3cd70f8864b"
+    },
+    {
+      "path": "files/licenses/zlib-rs-0.6.8.txt",
+      "size": 856,
+      "mode": 420,
+      "sha256": "e72111c52b7d96ebe25348dee19f0744f444d3c95ae6b1ecb6ccaecc5bce05ba"
+    },
+    {
+      "path": "files/target/aim/art/stripped/bin/dex2oat64",
+      "size": 1910000,
+      "mode": 493,
+      "sha256": "c76fb2672a1167dc9570a0d4eddcb67c36211532a3bbc1de50ddd0e581371c5a"
+    },
+    {
+      "path": "files/target/aim/art/stripped/lib64/libadbconnection.so",
+      "size": 122200,
+      "mode": 493,
+      "sha256": "81ef10ed8fe2ddb5c79f80aaaf459e3725870f2f6b122ac0d74c48c4bbf69e8d"
+    },
+    {
+      "path": "files/target/aim/art/stripped/lib64/libart.so",
+      "size": 18100232,
+      "mode": 493,
+      "sha256": "30bcff64edcb24b91a75e70b00ec54fe223adb807e76d717566be9b3adb84b6e"
+    },
+    {
+      "path": "files/target/aim/art/stripped/lib64/libartbase.so",
+      "size": 642432,
+      "mode": 493,
+      "sha256": "0f10f16efefda86199322d2d9129493101cec1e122af9a560df6d164b0f3b97f"
+    },
+    {
+      "path": "files/target/aim/art/stripped/lib64/libdexfile.so",
+      "size": 435304,
+      "mode": 493,
+      "sha256": "6aa17aa0178822fb91c00973e5fa63b6a7dc005e874d819292be6779dda041a8"
+    },
+    {
+      "path": "files/target/aim/art/stripped/lib64/libopenjdkjvm.so",
+      "size": 46088,
+      "mode": 493,
+      "sha256": "a61ed17fc103fde31971025f168e75dcaca435771fe73f93e4a028042669eb8c"
+    },
+    {
+      "path": "files/target/aim/art/stripped/lib64/libopenjdkjvmti.so",
+      "size": 1294640,
+      "mode": 493,
+      "sha256": "23052008090aed46dc0584cce4310ec4203029ce0ba3d941f61171d83784b52a"
+    },
+    {
+      "path": "files/target/aim/art/stripped/lib64/libperfetto_hprof.so",
+      "size": 1368168,
+      "mode": 493,
+      "sha256": "8f69b9848591aba90eefff9df1406f3ef21e05e3e26a3350e479f89d1b52a671"
+    },
+    {
+      "path": "files/target/aim/art/stripped/lib64/libprofile.so",
+      "size": 306136,
+      "mode": 493,
+      "sha256": "b45146c9dae6944d4b58ae374523eaba1d4db9433dc34a659c5e34902519a7a8"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-apache-xml.art",
+      "size": 16432,
+      "mode": 420,
+      "sha256": "dc4596e941fc194fecd45427e19482808ebc625b2945373e63ad0e75433a5e91"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-apache-xml.oat",
+      "size": 17328,
+      "mode": 420,
+      "sha256": "f0b3e29d94ed50beadb895a1ac199c812b10082c21e08053a61792ab94ddebf1"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-bouncycastle.art",
+      "size": 117360,
+      "mode": 420,
+      "sha256": "f4da4df1dbf78cc2ead02ab508b9f283949332fef44ce88208b800bbd5dcad79"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-bouncycastle.oat",
+      "size": 148312,
+      "mode": 420,
+      "sha256": "3b0f119beac937c15fb04b249f650f7264cae22d7b3291aa6819a81f67d28474"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-core-icu4j.art",
+      "size": 602016,
+      "mode": 420,
+      "sha256": "f541778857e4a3a3268ef191f52a30cfc19416dd5d234f60f89adc4ef2f84596"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-core-icu4j.oat",
+      "size": 1814288,
+      "mode": 420,
+      "sha256": "f77d538e45209bbff49f70df22fa7c5b86a8a04b9aeb10f1000e7c5047b77148"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-core-libart.art",
+      "size": 116672,
+      "mode": 420,
+      "sha256": "2597ac3ee47b25c43e5a619c8a26bff6372d5258ef39017ccf57014641e9e219"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-core-libart.oat",
+      "size": 584448,
+      "mode": 420,
+      "sha256": "0480d90de52cc7d2df5da88f45a22590e80a8a4c22dafdef696d383b08a67d2d"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-ext.art",
+      "size": 83664,
+      "mode": 420,
+      "sha256": "a60e8748a5eee2c895dc7ee281a5f4b81e8fd289a16d31fbfa37d885d049d315"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-ext.oat",
+      "size": 225648,
+      "mode": 420,
+      "sha256": "6851364940dddfac5901e9234a1df7c4991325d8f7b5536225f8d495d3b5ebcb"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-framework-adservices.art",
+      "size": 2968816,
+      "mode": 420,
+      "sha256": "86152d7f68e508a02369d6b6f592a9727bc9daae7ded5358ec806951335a4a38"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-framework-adservices.oat",
+      "size": 115632,
+      "mode": 420,
+      "sha256": "55d6caac9a0affe26a049ffa6b8c984fc04d996a1b0b6d236a7f8e66c35e0ac5"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-framework-graphics.art",
+      "size": 16400,
+      "mode": 420,
+      "sha256": "787a4f96097129abbffd645471bac59c63e1fa3299f59ed994ba7fe28f96e259"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-framework-graphics.oat",
+      "size": 17328,
+      "mode": 420,
+      "sha256": "d0b1ede3a24063788685024a395fefffa71a23ae5f419071678fdba481f68c46"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-framework-location.art",
+      "size": 16496,
+      "mode": 420,
+      "sha256": "7e7c0a775809677923b59f9a15a045610e7338a0f6ba1f0b893747c601bdfb6e"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-framework-location.oat",
+      "size": 19384,
+      "mode": 420,
+      "sha256": "2ebe93ab379a57b938cbe46c05913e7610549add4db72fc5a635bb7636091a1f"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-framework-ondeviceintelligence-platform.art",
+      "size": 16400,
+      "mode": 420,
+      "sha256": "6d760293982a064716fbfe4578fd38534d2ee9afeef726545bd7655eb8ded8bb"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-framework-ondeviceintelligence-platform.oat",
+      "size": 17328,
+      "mode": 420,
+      "sha256": "d2d0db64b2b65bd7d369e7bcc19e6104553350689581b6312d5ff4099091e9b6"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-framework.art",
+      "size": 5227952,
+      "mode": 420,
+      "sha256": "8b675f568403af179be2c5311f7d193ecacea0747dbfdc6a82a946208f777ad5"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-framework.oat",
+      "size": 15668928,
+      "mode": 420,
+      "sha256": "5dea75ac37dbd24fd8d684d71903b5e7c262be3c6aca1ba3a8de466a119baa7c"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-ims-common.art",
+      "size": 83552,
+      "mode": 420,
+      "sha256": "46e3fc9c7591773c62cd04806d211221984373bba159e222cf7f7f5461f81f1e"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-ims-common.oat",
+      "size": 17328,
+      "mode": 420,
+      "sha256": "055037c75d362ef1b9c73601c3072a7f7d40159a4a09ccf17cf5e9e63f6974c9"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-okhttp.art",
+      "size": 83056,
+      "mode": 420,
+      "sha256": "16003ccd7c7b5c051d06cc46c15cd0ba4bafbd0d974e41ff22a8aa04e545dc99"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-okhttp.oat",
+      "size": 455880,
+      "mode": 420,
+      "sha256": "19d446f91820e35ec88e12247eee474cdee68924954345d2344af7594e6f5e5a"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-telephony-common.art",
+      "size": 467376,
+      "mode": 420,
+      "sha256": "2014eeebabd996bbe69b399ccfc7e3b2727bed8f3422c47064842ae86a6eff7c"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-telephony-common.oat",
+      "size": 33712,
+      "mode": 420,
+      "sha256": "c7dbb8a1a58522a97d3b55972d758cdb668a0e25849ab6e8aba09540fc639178"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-voip-common.art",
+      "size": 184560,
+      "mode": 420,
+      "sha256": "59fb6828e1298827801e96c6d4d4081f727438b15c49507bdaf8d9e9889edfcc"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot-voip-common.oat",
+      "size": 18600,
+      "mode": 420,
+      "sha256": "e79078f36bbc11ff8dcecf122ba270a78360e433e6cf83d09e38825a50611ef5"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot.art",
+      "size": 1135056,
+      "mode": 420,
+      "sha256": "a74850c44bb3ea8d5538bebc01f1cd68c03cefeadddbec4eb3f3e5bd346a26b3"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/arm64/boot.oat",
+      "size": 4992544,
+      "mode": 420,
+      "sha256": "61323dd8735b7388e1320d153fcc3d68120345bffaf4c4a4f068b12b7b4aba93"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/boot-apache-xml.vdex",
+      "size": 17684,
+      "mode": 420,
+      "sha256": "70711a1618bf2b0a5feb73cad38964ec5dd82ad5c8e394317ed01f2343056b88"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/boot-bouncycastle.vdex",
+      "size": 21228,
+      "mode": 420,
+      "sha256": "5ad4f7c219fa22b0987efb605fe633291fb3dd4bea480e38c9b792dcbaa7c4c3"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/boot-core-icu4j.vdex",
+      "size": 34388,
+      "mode": 420,
+      "sha256": "a0fc21bc6fcc01a9364f1dc37e7953349921335a3d4f11b500e7ed9fd8b1f491"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/boot-core-libart.vdex",
+      "size": 12944,
+      "mode": 420,
+      "sha256": "73a525a28a7327e975168d05c5c0e0dc43e9e261f3cd8d5cf7c3ea156196ac65"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/boot-ext.vdex",
+      "size": 2172,
+      "mode": 420,
+      "sha256": "203d15f6909c5b209c3a12e5d059d9d2d577daf53a0c27f2c8bdc4f4d222edcb"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/boot-framework-adservices.vdex",
+      "size": 212332,
+      "mode": 420,
+      "sha256": "94c82d8053cf0741382119c94580b9af5a8112b078118d2ff5112e2036ec7374"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/boot-framework-graphics.vdex",
+      "size": 124,
+      "mode": 420,
+      "sha256": "61b1c6b4042704dba4255f3192e167ee5233f894acc73a7f9a075c1df68abf9b"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/boot-framework-location.vdex",
+      "size": 6760,
+      "mode": 420,
+      "sha256": "c1e6812bf7c4db6cf14496be64aa48a920bc97f5dd2b32bb6a9d3d76d12a30a9"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/boot-framework-ondeviceintelligence-platform.vdex",
+      "size": 3380,
+      "mode": 420,
+      "sha256": "e7697519d62a1b6046a24a6ea013eb200f83a2abec34cb0cce749eda832df37c"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/boot-framework.vdex",
+      "size": 704016,
+      "mode": 420,
+      "sha256": "e8682619f2cba0f952b05d48f825aff9a47b5dc001cfb90e3cbaf410bc7901cc"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/boot-ims-common.vdex",
+      "size": 6664,
+      "mode": 420,
+      "sha256": "5eb6eca0f61c441717e4058721d63abdb96e561182bd3dc2956a06a6dae0d082"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/boot-okhttp.vdex",
+      "size": 4876,
+      "mode": 420,
+      "sha256": "64c0760c7da34983d7d8cb426aa851264d9a7f870531d7b5b28460e8082a9b51"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/boot-telephony-common.vdex",
+      "size": 58048,
+      "mode": 420,
+      "sha256": "9fb4af80d06813879e0c98ede456734c1bb34e43e667dafccd06c06fd2b4e3a4"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/boot-voip-common.vdex",
+      "size": 18072,
+      "mode": 420,
+      "sha256": "695a726e42b8dd1987e5e8cae282e7d3298bf209c697e76ef7d8b8576e5dce5d"
+    },
+    {
+      "path": "files/target/aim/boot-image/framework/boot.vdex",
+      "size": 111604,
+      "mode": 420,
+      "sha256": "4e1ee9f5c4dcd2df77998e0c60c32e7566c6b1a0fbad9b3ff3920807280eb4d9"
+    },
+    {
+      "path": "files/target/aim/daemons/bin/aim-app-host-agent",
+      "size": 1247592,
+      "mode": 493,
+      "sha256": "be05d2bccfb8991a2c4dfff69931f00d91529d84532d2ad25af3c67116b210aa"
+    },
+    {
+      "path": "files/target/aim/daemons/bin/aim-keyboard",
+      "size": 425320,
+      "mode": 493,
+      "sha256": "83641a57b17b5e710b8ca5e18916ae82489b1da067418e551c3759edc8728f90"
+    },
+    {
+      "path": "files/target/aim/daemons/bin/aim-windows",
+      "size": 578984,
+      "mode": 493,
+      "sha256": "de3e4bc070894660ea49da2c6ae71c18ea18582a420e65deeae88bb6e6d9554e"
+    },
+    {
+      "path": "files/target/aim/daemons/bin/apexd",
+      "size": 470136,
+      "mode": 493,
+      "sha256": "0d1d0b2c81cb6ced17550919bb7318f352a6e573c05fa3cc7f6b6bd9a3da5f89"
+    },
+    {
+      "path": "files/target/aim/daemons/bin/lmkd",
+      "size": 457352,
+      "mode": 493,
+      "sha256": "ff2ac78ce9103bc080e0271e579461b421f6af46f84a07d46c74837f316e9862"
+    },
+    {
+      "path": "files/target/aim/daemons/bin/netd",
+      "size": 672856,
+      "mode": 493,
+      "sha256": "632784c1e89000c7f6ee5b6479797c0b1613366c69897ef8194a370dbfaa1418"
+    },
+    {
+      "path": "files/target/aim/daemons/bin/vold",
+      "size": 698496,
+      "mode": 493,
+      "sha256": "ec9a36c58ac26eb7466916e3c9d2d41185e6b4937a7dddee59c1eed0f098ed2b"
+    },
+    {
+      "path": "files/target/aim/device-services/aim-nearby.jar",
+      "size": 28775,
+      "mode": 420,
+      "sha256": "1d4dc9ae0bc3d8846af930d33ef7036c47b49720dad28cbcc37bba637c07ac9c"
+    },
+    {
+      "path": "files/target/aim/device-services/aim-services.jar",
+      "size": 1219339,
+      "mode": 420,
+      "sha256": "04b138b9047861bbc40ab3e9b4355c8dc543bcf15ddbc305e865091cc656a137"
+    },
+    {
+      "path": "files/target/aim/device-services/framework-overlay.apk",
+      "size": 8536,
+      "mode": 420,
+      "sha256": "437df7d45b6d420c762b941fb26f55e3a99f1e921cda97e7a533d78c0252e543"
+    },
+    {
+      "path": "files/target/aim/device-services/image-wallpaper.apk",
+      "size": 455061,
+      "mode": 420,
+      "sha256": "26704d8b0f4351ffd427e3fa2a2a06ef123beaa3ac496eeb0dfd1490fd187b0c"
+    },
+    {
+      "path": "files/target/aim/device-services/lightweight-home.apk",
+      "size": 455061,
+      "mode": 420,
+      "sha256": "fcac3e2dd14a9126c660535d61a4294aeb98e8c413dd6636d12a9289c667f91b"
+    },
+    {
+      "path": "files/target/aim/device-services/lightweight-shell-overlay.apk",
+      "size": 8536,
+      "mode": 420,
+      "sha256": "4e734d4164ec2b69b53f30f91aa675b1a42e9d2af94a56f815493e1374331293"
+    },
+    {
+      "path": "files/target/aim/device-services/media-projection.apk",
+      "size": 459159,
+      "mode": 420,
+      "sha256": "95d6fdcdb468ccffb921dd7b2f230fe6586c980344f3e4ee960c79ac1f2e9fe0"
+    },
+    {
+      "path": "files/target/aim/device-services/notification-permission.apk",
+      "size": 455063,
+      "mode": 420,
+      "sha256": "ab8e357ef8801690867c1061988b2b63de1c6bb06e640d44a4d0406c35f763ac"
+    },
+    {
+      "path": "files/target/aim/device-services/settings-overlay.apk",
+      "size": 8602,
+      "mode": 420,
+      "sha256": "9cde8627df70279798c27b2b708a00b47ebc8f2aa2859c4aeabc03c4c561402c"
+    },
+    {
+      "path": "files/target/aim/device-services/shell-res.apk",
+      "size": 41920846,
+      "mode": 420,
+      "sha256": "2ab8fcebb3b8b231632ecab5a1959495c19e4d8e8ff5d83861c15c4d1057d36e"
+    },
+    {
+      "path": "files/target/aim/device-services/systemserverclasspath.pb",
+      "size": 133,
+      "mode": 420,
+      "sha256": "321a78d9d2023d5f1daaa512a6bd45c5ca278de6dffb51e100b6added7925a26"
+    },
+    {
+      "path": "files/target/aim/hal/bin/android.hardware.audio.service-aidl.aim",
+      "size": 1249216,
+      "mode": 493,
+      "sha256": "8e8982674b90fb1d09d9505638e61cfcf76c0b314ddfe229a023bf12e2f96c04"
+    },
+    {
+      "path": "files/target/aim/hal/bin/android.hardware.bluetooth-service.aim",
+      "size": 504184,
+      "mode": 493,
+      "sha256": "ad2f4507463cac5df36ab4cd2459e1c4e67b6404bb6d533751abab15dc0b670d"
+    },
+    {
+      "path": "files/target/aim/hal/bin/android.hardware.camera.provider-service.aim",
+      "size": 797768,
+      "mode": 493,
+      "sha256": "c39b2ecdd7adc58cf8ce7e0096094bc2e460afff66fb7e08e5e72b401014777e"
+    },
+    {
+      "path": "files/target/aim/hal/bin/android.hardware.gnss-service.aim",
+      "size": 578448,
+      "mode": 493,
+      "sha256": "0c5327c5aab40970ec0c1bf6be2e9dfa75f812c456c47a4c8bf97f2da52f3176"
+    },
+    {
+      "path": "files/target/aim/hal/bin/android.hardware.graphics.allocator-service.aim",
+      "size": 447720,
+      "mode": 493,
+      "sha256": "09611bb96be25606412705075a085865e28b9a52c0c8724b1545002f71c0f6ad"
+    },
+    {
+      "path": "files/target/aim/hal/bin/android.hardware.graphics.composer3-service.aim",
+      "size": 718896,
+      "mode": 493,
+      "sha256": "b2aa8371dcb2316c1fca4d84d013a7819fe5bf3d9183ea59eef48ced4eaa557c"
+    },
+    {
+      "path": "files/target/aim/hal/bin/android.hardware.health-service.aim",
+      "size": 530040,
+      "mode": 493,
+      "sha256": "c30a33d558adea937f66c391abd2af0a6e44938de3dce48d98b63091125bd5f8"
+    },
+    {
+      "path": "files/target/aim/hal/bin/android.hardware.sensors-service.aim",
+      "size": 569592,
+      "mode": 493,
+      "sha256": "e48ff0f49b7e90bf982f1f53c2243e1ea72abf038b608158f8310c9f5811c7ae"
+    },
+    {
+      "path": "files/target/aim/hal/lib/libGLES_aim.so",
+      "size": 841080,
+      "mode": 493,
+      "sha256": "14136e3e7e54a2d71182abf84418691ad1a077fe00115daf88e4fa306ae03c35"
+    },
+    {
+      "path": "files/target/aim/hal/lib/mapper.aim.so",
+      "size": 424152,
+      "mode": 493,
+      "sha256": "8dc1479d03a9c9c5b8bfe284c9808ac3d7435c870b72d01e5ab82cd497a7d08e"
+    },
+    {
+      "path": "files/target/aim/hal/lib/vulkan.aim.so",
+      "size": 567496,
+      "mode": 493,
+      "sha256": "0bf25b11fce0d63a96305ebee83760eeec3b918d45228eb1a814564268897458"
+    },
+    {
+      "path": "files/target/aim/moltenvk/libMoltenVK.dylib",
+      "size": 5287840,
+      "mode": 493,
+      "sha256": "c1db7de14b7498655cace3fee243d34635a622d7fe33de51e35f567255e337fc",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/target/aim/oat/apps/AimHome.toml",
+      "size": 486,
+      "mode": 420,
+      "sha256": "eac639981c8f66136e996b3f348c932f47534bcd2c058ce243a783505b2d3725"
+    },
+    {
+      "path": "files/target/aim/oat/apps/AimImageWallpaper.toml",
+      "size": 586,
+      "mode": 420,
+      "sha256": "3dae1c9cfd009b51e7acf079da9c044c7b6ceeb535261eab064520c4c70179aa"
+    },
+    {
+      "path": "files/target/aim/oat/apps/AimMediaProjection.toml",
+      "size": 558,
+      "mode": 420,
+      "sha256": "f333bde065ff2756f0f92a6f5bda74962fa6c687f5575a0857273ae743d92aa6"
+    },
+    {
+      "path": "files/target/aim/oat/apps/AimNotificationPermission.toml",
+      "size": 614,
+      "mode": 420,
+      "sha256": "1136041f72fcceaea558a2fee34c04ebd63f9439c5f4dac854c7c042306da934"
+    },
+    {
+      "path": "files/target/aim/oat/overlay.toml",
+      "size": 22989,
+      "mode": 420,
+      "sha256": "69c0be5eca61e4f3dfbf041f296b1c31f185ecc396cb457a321373799dfa5903"
+    },
+    {
+      "path": "files/target/aim/oat/root/system_ext/app/AimHome/oat/arm64/AimHome.odex",
+      "size": 17328,
+      "mode": 420,
+      "sha256": "9772a60ad411aef8e4dec67871e4c8664a5b80d1ea191ab0112c852f9cb95996"
+    },
+    {
+      "path": "files/target/aim/oat/root/system_ext/app/AimHome/oat/arm64/AimHome.vdex",
+      "size": 60,
+      "mode": 420,
+      "sha256": "66f23aac5bdc2726cb6b1343bd8cc2944ea892010c5273a794dbd8273ceb87f9"
+    },
+    {
+      "path": "files/target/aim/oat/root/system_ext/priv-app/AimImageWallpaper/oat/arm64/AimImageWallpaper.odex",
+      "size": 17328,
+      "mode": 420,
+      "sha256": "3f54d6f167097534e7fb3b6abf55a26a0858e17c434423f1e80cb86aff224c63"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/app/AimMediaProjection/oat/arm64/AimMediaProjection.odex",
+      "size": 17328,
+      "mode": 420,
+      "sha256": "0eb67b3da03ae09e3498fe453bf97a8e3d3f193f9dc94f8a492dcb52e964078d"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/app/AimNotificationPermission/oat/arm64/AimNotificationPermission.odex",
+      "size": 17328,
+      "mode": 420,
+      "sha256": "05e2ae999bb8ff43f83bdac5427f812bfe8221a186d7ba36e152904f55b83785"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/app/KeyChain/oat/arm64/KeyChain.odex",
+      "size": 8621296,
+      "mode": 420,
+      "sha256": "4e78831c86dbc12cd486a02d70952e7c741418e044feef6bd32b57cc3d76f1fa"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/app/KeyChain/oat/arm64/KeyChain.vdex",
+      "size": 54316,
+      "mode": 420,
+      "sha256": "44ee8fe1180ab82d8927f7f6ba18bf863040caa7a14b40c169d1b9337fa2ebec"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/app/WallpaperBackup/oat/arm64/WallpaperBackup.odex",
+      "size": 118696,
+      "mode": 420,
+      "sha256": "11580bce952639f810cbe8c21d6e48bd2bc22ed3142e0612bfee166d5cb5594d"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/app/WallpaperBackup/oat/arm64/WallpaperBackup.vdex",
+      "size": 188,
+      "mode": 420,
+      "sha256": "f36e31b9f5265d7fca2d3f242e938b619fb60102432f7baff1613cfda0f73c7d"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/aim-services.odex",
+      "size": 5268344,
+      "mode": 420,
+      "sha256": "b859cfa22541fb97fa28c7ab2ba4366997c3e52f59452d0ab4e63544db938a1d"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/aim-services.vdex",
+      "size": 26308,
+      "mode": 420,
+      "sha256": "98439f253ba6cfd7d4082ec963d35e80d82137d75b607fea08d837ab8779a8c5"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.adservices@javalib@service-adservices.jar@classes.odex",
+      "size": 472976,
+      "mode": 420,
+      "sha256": "0ee07ddfe345f865da2713108bc5ddf10f952242065fc61d61df3d40e049ea1f"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.adservices@javalib@service-adservices.jar@classes.vdex",
+      "size": 1812,
+      "mode": 420,
+      "sha256": "7ddd3eea57df57df459eb814cfabb912b144e6607e384df1f6e9a281561784a1"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.adservices@javalib@service-sdksandbox.jar@classes.odex",
+      "size": 1011072,
+      "mode": 420,
+      "sha256": "1467b618b49c2dd9b75104d4b7fa26a11e0ede109a869dc7605e0643cae63c08"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.adservices@javalib@service-sdksandbox.jar@classes.vdex",
+      "size": 4420,
+      "mode": 420,
+      "sha256": "7aa76dfe101658c0232f46ec0f8aac0a5b960518f39ffe682b36799913926bbe"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.appsearch@javalib@service-appsearch.jar@classes.odex",
+      "size": 4658408,
+      "mode": 420,
+      "sha256": "145fd32c7e713a63bbc84d4687ad38aa18df6250b731006f707f7432f2ab1a0a"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.appsearch@javalib@service-appsearch.jar@classes.vdex",
+      "size": 17524,
+      "mode": 420,
+      "sha256": "776209b65e425232c2fa73d9945d23dde5b1a1706a5546c5fe1fa879fc16488c"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.art@javalib@service-art.jar@classes.art",
+      "size": 16416,
+      "mode": 420,
+      "sha256": "0a43491f6db452e48cae474ea6c358a8916a3bd67592a99ecdb1c129c83f547b"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.art@javalib@service-art.jar@classes.odex",
+      "size": 17328,
+      "mode": 420,
+      "sha256": "293b576491df6dcf980bfaa1f7195eee0ebfd6edb64357dce9f7ba5df4b56e6c"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.art@javalib@service-art.jar@classes.vdex",
+      "size": 12928,
+      "mode": 420,
+      "sha256": "9d885256ab32599ed5408382a00e7d4cb77b6b49d3f75e99c90fd2daa7ad6d8e"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.bt@javalib@service-bluetooth.jar@classes.odex",
+      "size": 1617176,
+      "mode": 420,
+      "sha256": "91d0a2733e9ef1e4f5c8157939174513eb689ec6c9840e60b053cff9676bcd71"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.bt@javalib@service-bluetooth.jar@classes.vdex",
+      "size": 12596,
+      "mode": 420,
+      "sha256": "37e63222b9bef5a6ccc757e154a835c26e931455422482550cee45f6780082a4"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.configinfrastructure@javalib@service-configinfrastructure.jar@classes.odex",
+      "size": 1101784,
+      "mode": 420,
+      "sha256": "c45faafcf7b77c919af8f95ca5e0889d81fc853f67f8efa8ce97254ca61f203a"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.configinfrastructure@javalib@service-configinfrastructure.jar@classes.vdex",
+      "size": 7464,
+      "mode": 420,
+      "sha256": "7be242de4b1dacddc6e50de5ff110dcc0a85e692c2ff3fa89bc2df69e90f5bde"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.crashrecovery@javalib@service-crashrecovery.jar@classes.odex",
+      "size": 645000,
+      "mode": 420,
+      "sha256": "83694d631ec8265e8d6bc8a9fc74eb93f17308b515c3f939b1f9cce0d5e21c4c"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.crashrecovery@javalib@service-crashrecovery.jar@classes.vdex",
+      "size": 3488,
+      "mode": 420,
+      "sha256": "856248a35965944913010b67d6879fc7097933eb88e8d27ce751eb8040be68f2"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.devicelock@javalib@service-devicelock.jar@classes.odex",
+      "size": 304752,
+      "mode": 420,
+      "sha256": "7bd1b2bc3f18aaa484cf104a19bae674efe9c4aeb13e29a93c04ffc07e53e9d7"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.devicelock@javalib@service-devicelock.jar@classes.vdex",
+      "size": 1828,
+      "mode": 420,
+      "sha256": "d857068cd5e0bdefc31f0da68fc7e4bd0a382babe909ccaf54daa3cc7bcf37f5"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.healthfitness@javalib@service-healthfitness.jar@classes.odex",
+      "size": 3488816,
+      "mode": 420,
+      "sha256": "8942ab91ca9829f6c02f9b9f8d97afab6c28ecfebe02cb2ed455718c1b4a4ea7"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.healthfitness@javalib@service-healthfitness.jar@classes.vdex",
+      "size": 13408,
+      "mode": 420,
+      "sha256": "4336cc72946fc9b744203c3baf4f4792d324ae88e32a98b73ff10e5ea4bd9ea4"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.media@javalib@service-media-s.jar@classes.odex",
+      "size": 102304,
+      "mode": 420,
+      "sha256": "ed39a1e4b81e4137a93ebbc3fc374031125e08930a2e1144465892d026f4b3da"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.media@javalib@service-media-s.jar@classes.vdex",
+      "size": 312,
+      "mode": 420,
+      "sha256": "c020d76161678a078c089a74cb277a09791236840862a7b58f7e42c24f8b63b4"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.ondevicepersonalization@javalib@service-ondevicepersonalization.jar@classes.odex",
+      "size": 34504,
+      "mode": 420,
+      "sha256": "a7af35901071cf3c86d6be0571427968b2e7359b2ddfaf5e5da9ed69ce064293"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.ondevicepersonalization@javalib@service-ondevicepersonalization.jar@classes.vdex",
+      "size": 112,
+      "mode": 420,
+      "sha256": "84d205b9b36f9628ef488aa29add0afe2008be0aee3587fed4a3f1cee34653f6"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.os.statsd@javalib@service-statsd.jar@classes.odex",
+      "size": 169488,
+      "mode": 420,
+      "sha256": "902e6d1c76aa0cdbf813591f73d9abbf99ccf1fc0e35acf284cd082c8fbb9329"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.os.statsd@javalib@service-statsd.jar@classes.vdex",
+      "size": 796,
+      "mode": 420,
+      "sha256": "1202cf6a158e0d18525655b6e4ff74741cbc5cf4f73c524d6a6cedfbe1b36ccc"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.permission@javalib@service-permission.jar@classes.odex",
+      "size": 3011360,
+      "mode": 420,
+      "sha256": "0e0b55266087ee66baed7b62979367d9ff73d27d36f06332c8addc7edce3a4d3"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.permission@javalib@service-permission.jar@classes.vdex",
+      "size": 8020,
+      "mode": 420,
+      "sha256": "7a8fb7266ceeaf8520862d2993bc56ce6145642e294b49f1f09a07fd35299437"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.profiling@javalib@service-profiling.jar@classes.odex",
+      "size": 1755808,
+      "mode": 420,
+      "sha256": "9857c5b6b294e239a68e09fee7d7954eaf949041cceebb1d0edd5a73db9f4d14"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.profiling@javalib@service-profiling.jar@classes.vdex",
+      "size": 13648,
+      "mode": 420,
+      "sha256": "a2c94c4f150c5ff8b7eefd4499630ebc518816690bf467860699d54ee0cd5f39"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.rkpd@javalib@service-rkp.jar@classes.odex",
+      "size": 102624,
+      "mode": 420,
+      "sha256": "fe5edd6ed432405af208e1ead6d12b9a9f46e207d8537e3a3bdce024babaa8ca"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.rkpd@javalib@service-rkp.jar@classes.vdex",
+      "size": 932,
+      "mode": 420,
+      "sha256": "a8cd2712b839e7684a095418ca8083af379442d11c305e1f19cad88705231e71"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.scheduling@javalib@service-scheduling.jar@classes.odex",
+      "size": 153320,
+      "mode": 420,
+      "sha256": "e58d53793de1b7874948296655a5fcff9e4f0f0baf48f751cc6b6151b7ddca8f"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.scheduling@javalib@service-scheduling.jar@classes.vdex",
+      "size": 544,
+      "mode": 420,
+      "sha256": "d367f75a825f537eeec743e9b7052d299c885b3c3f00fe2a27260384875464ca"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.tethering@javalib@service-connectivity.jar@classes.odex",
+      "size": 7840552,
+      "mode": 420,
+      "sha256": "80ef38dae2e449c37be16ab94a147c5fab3e374f64a2d009403cea1e59af0635"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.tethering@javalib@service-connectivity.jar@classes.vdex",
+      "size": 32088,
+      "mode": 420,
+      "sha256": "e2cc77d1e221259ce976e43798cb64406d34dae57eebe733009abc1b9867053c"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.uwb@javalib@service-ranging.jar@classes.odex",
+      "size": 2228272,
+      "mode": 420,
+      "sha256": "d3073bf66022e006b3b41e56f91289c0cd63b852fdd7b3a42203f227d676bc94"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.uwb@javalib@service-ranging.jar@classes.vdex",
+      "size": 15404,
+      "mode": 420,
+      "sha256": "ae37a295c4e97aeaaa9326c8b5ae2b04ebcaa456d4a1dc544dcc5afc205dbbd5"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.uwb@javalib@service-uwb.jar@classes.odex",
+      "size": 4044448,
+      "mode": 420,
+      "sha256": "c17ba69cc8f691ed2dd217242b5290c5d7722222c6d8b45e50b9ac0378af9efc"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.uwb@javalib@service-uwb.jar@classes.vdex",
+      "size": 16904,
+      "mode": 420,
+      "sha256": "2b97de4de175cdc2e26082bc02e75a46fc544917188005624cf39905ac5807eb"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.virt@javalib@service-virtualization.jar@classes.odex",
+      "size": 102072,
+      "mode": 420,
+      "sha256": "31a90baa093e0fc5e341af22ca5ea7a6871ad6804adf933111b09ce92c28d50e"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.virt@javalib@service-virtualization.jar@classes.vdex",
+      "size": 512,
+      "mode": 420,
+      "sha256": "7034aa4f61afb69b419a12e8b25adb060e206fe63b59c2ca208417fe3b64d303"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.wifi@javalib@service-wifi.jar@classes.odex",
+      "size": 20319008,
+      "mode": 420,
+      "sha256": "20265777f884e24d6e377a633655587a714a68c5a0f5275e665b86ccf31684df"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/apex@com.android.wifi@javalib@service-wifi.jar@classes.vdex",
+      "size": 63540,
+      "mode": 420,
+      "sha256": "1b761735e5c093cb7d887d18378e7c688f84c5cccdb942994f738472d27a38fc"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/com.android.location.provider.odex",
+      "size": 86360,
+      "mode": 420,
+      "sha256": "43bc6e7a38d1ea3c2552495b80671b07359c77b1f8ca7a10fd3e6d89ce583acb"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/com.android.location.provider.vdex",
+      "size": 584,
+      "mode": 420,
+      "sha256": "69ab3390a9b18afed68781391ee742b0d0c650314e62fad0ded02d77507a8eb3"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/org.apache.http.legacy.odex",
+      "size": 507240,
+      "mode": 420,
+      "sha256": "588e943f88256a4f6206c3617b00f47841f959ea44cf7e2d9233272b973779fe"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/org.apache.http.legacy.vdex",
+      "size": 9300,
+      "mode": 420,
+      "sha256": "2a2c569d89ceec1b777f43ab914fbe40b3e028a7256a2b005a7f095e762ff7ce"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/services.art",
+      "size": 148768,
+      "mode": 420,
+      "sha256": "9fd525369f3fed7b58c0f36aafa9c1a5f50cfd339bd7dfb67ee1438ebf01e8a2"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/services.odex",
+      "size": 10501384,
+      "mode": 420,
+      "sha256": "ff52ede2157e1b3f32f4262889d949474d9c5c3cfcb75c4c398e9c2e452ff8ba"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/framework/oat/arm64/services.vdex",
+      "size": 300600,
+      "mode": 420,
+      "sha256": "4c2cea706d7281d44db44a9e8ffd0f573d791109df5ed1e6edd05fd11530b800"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/priv-app/FusedLocation/oat/arm64/FusedLocation.odex",
+      "size": 52024,
+      "mode": 420,
+      "sha256": "cab83766d1da3ac984adeebbb53cc0813a4e52e11fd5e8786c925d56ef19c629"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/priv-app/FusedLocation/oat/arm64/FusedLocation.vdex",
+      "size": 268,
+      "mode": 420,
+      "sha256": "a37a03bc9c3a9702991b54ac7066835390da60499227863f0e3e05a1e8f832ba"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/priv-app/InputDevices/oat/arm64/InputDevices.odex",
+      "size": 17480,
+      "mode": 420,
+      "sha256": "e462c31d80e9ae05ff9033dd1135f80c7928fd056e4fce54e403194a713a2347"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/priv-app/InputDevices/oat/arm64/InputDevices.vdex",
+      "size": 132,
+      "mode": 420,
+      "sha256": "20c517a1fbb689273a49fd1f46fd585db98105e503df7e04cf8711ea4d4d1e38"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/priv-app/SettingsProvider/oat/arm64/SettingsProvider.odex",
+      "size": 1462032,
+      "mode": 420,
+      "sha256": "06a520f8294296462f2269cc60952ae6e68c32db1a4399aa150964369bae7b9b"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/priv-app/SettingsProvider/oat/arm64/SettingsProvider.vdex",
+      "size": 4748,
+      "mode": 420,
+      "sha256": "d7e5c6ae84a2da9e7d9c27180c6cf8c646136b13f70d61e426d330d0e3c340f5"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/priv-app/Telecom/oat/arm64/Telecom.odex",
+      "size": 5090528,
+      "mode": 420,
+      "sha256": "b201a315c40c4b137eb827e316e3c25d16cd8550d90d549f30d8aa07316a85c6"
+    },
+    {
+      "path": "files/target/aim/oat/root/system/priv-app/Telecom/oat/arm64/Telecom.vdex",
+      "size": 15944,
+      "mode": 420,
+      "sha256": "0024c918a12c781b52f1f7195fcd59b2f46d8a8b2146b8fd9ac191459dd64894"
+    },
+    {
+      "path": "files/target/aim/product-properties/build.prop",
+      "size": 3222,
+      "mode": 420,
+      "sha256": "0f67c7928e8ebb598c2d54b22e8a533e14a6a8e50127ad3d5b07dbacd7a44e50"
+    },
+    {
+      "path": "files/target/aim/system-server/services.jar",
+      "size": 22166900,
+      "mode": 420,
+      "sha256": "1071f1fe13c0bd6606fe5ae1e21b12352b683a2666e9535fd096859d23f1cee1"
+    },
+    {
+      "path": "manifest.json",
+      "size": 82281,
+      "mode": 420,
+      "sha256": "1b96059fed85775d3308b8f3fd2c6b07f74b1017534b27a627dc08a4604fad85"
+    }
+  ],
+  "redistribution": "bundle",
+  "aliases": {
+    "schema": 1,
+    "files": {
+      "files/target/aim/oat/root/system_ext/priv-app/AimImageWallpaper/oat/arm64/AimImageWallpaper.vdex": "files/target/aim/oat/root/system_ext/app/AimHome/oat/arm64/AimHome.vdex",
+      "files/target/aim/oat/root/system/app/AimMediaProjection/oat/arm64/AimMediaProjection.vdex": "files/target/aim/oat/root/system_ext/app/AimHome/oat/arm64/AimHome.vdex",
+      "files/target/aim/oat/root/system/app/AimNotificationPermission/oat/arm64/AimNotificationPermission.vdex": "files/target/aim/oat/root/system_ext/app/AimHome/oat/arm64/AimHome.vdex"
+    }
+  }
+}
