@@ -122,6 +122,7 @@ export const RUNTIME_OVERLAYS=[
  ["macos-host-libraries","applyHostLibrariesOverlay"],
  ["macos-host-kernel","applyHostKernelOverlay"],
  ["generated-shaders","applyGeneratedShadersOverlay"],
+ ["macos-shader-loops","applyShaderLoopsOverlay"],
  ["pipeline-state","applyPipelineStateOverlay"],
  ["resource-preparation","applyResourcePreparationOverlay"],
  ["validation-cache","applyValidationCacheOverlay"],
