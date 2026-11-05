@@ -296,3 +296,6 @@
 [submodule "sources/maclauncher-kosmickrisp"]
 	path = sources/maclauncher-kosmickrisp
 	url = https://github.com/procrastinine/maclauncher-kosmickrisp
+[submodule "dxvk"]
+	path = producers/dxvk/source
+	url = https://github.com/doitsujin/dxvk.git
