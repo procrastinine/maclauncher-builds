@@ -16,9 +16,9 @@ test('FUSE transport uses private directory scope and explicit registered descri
  assert.throws(()=>adaptFuseTransport(after),/no longer matches/);
  const broker=fs.readFileSync(path.join(source,'crates/aim-linux-abi/src/sys/fuse/broker.rs'),'utf8'),adapted=adaptFuseBroker(broker);
  assert.ok(adapted.includes('key: SessionKey(path.to_owned())'));
- assert.ok(adapted.includes('libc::poll(&mut event, 1, 2)'));
+ assert.equal(adapted.slice(adapted.indexOf('    let started = std::time::Instant::now();')),broker.slice(broker.indexOf('    let started = std::time::Instant::now();')),'Upstream readiness polling and its tests remain unchanged');
  assert.ok(!adapted.includes('std::thread::sleep(Duration::from_millis(2));'));
- assert.throws(()=>adaptFuseBroker(adapted),/no longer matches/);
+ assert.throws(()=>adaptFuseBroker(broker.replace('let local = socket_path(stream.as_raw_fd(), true)?;', 'let local = changed_socket_path();')),/no longer matches/);
  const vfs=fs.readFileSync(path.join(source,'crates/aim-linux-abi/src/vfs.rs'),'utf8'),bound=adaptFuseMountBindings(vfs);
  assert.ok(bound.includes('if let Some(id) = mount_namespace_id() { namespace_mount_points(&id)?; }'));
  assert.ok(bound.includes('Some(child.guest),'));
