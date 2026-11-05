@@ -62,16 +62,15 @@ export async function packageRuntime({runtimeBuild,relinkerBuild,output,version,
  makePortable(path.join(payload,'libs'));
  const source=path.join(root,recipe.source.path);
  addLicenses(payload,'anyps5',source);
- for(const entry of recipe.attributions)addLicense(payload,entry.name,path.join(import.meta.dirname,entry.licenseFile));
+ addLicense(payload,'AnyPS5-ARM',path.join(import.meta.dirname,'licenses/AnyPS5-ARM.txt'));
  for(const entry of dependencies.dependencies)addLicenses(payload,entry.path,path.join(source,entry.path));
  addLicense(payload,'FreeType',path.join(source,'3rdparty/freetype/docs/FTL.TXT'));
  addLicense(payload,'FreeType',path.join(source,'3rdparty/freetype/docs/GPLv2.TXT'));
  addLicense(payload,'libjpeg-turbo',path.join(source,'3rdparty/libjpeg-turbo/README.ijg'));
  const overlays=filesIn(path.join(import.meta.dirname,'overlays')).map(relative=>({path:'overlays/'+relative,sha256:sha(fs.readFileSync(path.join(import.meta.dirname,'overlays',relative)))}));
  const tools=[{path:'tools/unwrap-self.cjs',sha256:sha(fs.readFileSync(path.join(import.meta.dirname,'tools/unwrap-self.cjs')))}];
- const licenses=filesIn(path.join(import.meta.dirname,'licenses')).map(relative=>({path:'licenses/'+relative,sha256:sha(fs.readFileSync(path.join(import.meta.dirname,'licenses',relative)))}));
  const producerInputs=[...['build-relinker.mjs','build-runtime.mjs','source-projection.mjs','package-runtime.mjs','source.json','dependencies.json']
-  .map(relative=>({path:relative,sha256:sha(fs.readFileSync(path.join(import.meta.dirname,relative)))})),...overlays,...tools,...licenses].sort((a,b)=>a.path.localeCompare(b.path));
+  .map(relative=>({path:relative,sha256:sha(fs.readFileSync(path.join(import.meta.dirname,relative)))})),...overlays,...tools].sort((a,b)=>a.path.localeCompare(b.path));
  fs.writeFileSync(path.join(payload,'source.json'),json({schemaVersion:1,source:recipe.source,attributions:recipe.attributions,dependencies:dependencies.dependencies,artifacts:dependencies.artifacts,overlays,tools,producerInputs}));
  const files=filesIn(payload).map(relative=>record(payload,relative));
  const manifest={schemaVersion:1,managerId:'anyps5',version,platform:'darwin',arch,minimumMacOS:'26.0',upstreamRevision:recipe.source.revision,
