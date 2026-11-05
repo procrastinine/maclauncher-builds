@@ -2399,7 +2399,7 @@
   {
     "id": "vnds-love",
     "name": "VNDS-LOVE",
-    "purpose": "Adapted VNDS interpreter for the managed L\u00d6VE host.",
+    "purpose": "Adapted VNDS interpreter for the managed LÖVE host.",
     "producer": {
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
@@ -2702,5 +2702,71 @@
         "pkgconf"
       ]
     }
+  },
+  {
+    "id": "maclauncher-steam-bridge",
+    "name": "Steam client bridge",
+    "purpose": "Connect Windows Steam APIs to the running native Mac Steam client.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "producers/steam-bridge/build.mjs",
+        "producers/steam-bridge/source.json",
+        "producers/steam-bridge/helper-compat.h",
+        "producers/steam-bridge/licenses/JsonCpp.txt",
+        "producers/steam-bridge/forwarder.c"
+      ],
+      "sourceDirectory": "producers/steam-bridge",
+      "sourceRepository": "https://github.com/ValveSoftware/Proton"
+    },
+    "upstreams": [
+      {
+        "id": "proton",
+        "provider": "github",
+        "repository": "ValveSoftware/Proton",
+        "url": "https://github.com/ValveSoftware/Proton",
+        "pin": {
+          "file": "producers/steam-bridge/source.json",
+          "pointer": "/proton"
+        }
+      },
+      {
+        "id": "notproton",
+        "provider": "github",
+        "repository": "NotProtonNot/NotProton",
+        "url": "https://github.com/NotProtonNot/NotProton",
+        "pin": {
+          "file": "producers/steam-bridge/source.json",
+          "pointer": "/notproton"
+        }
+      },
+      {
+        "id": "openvr",
+        "provider": "github",
+        "repository": "ValveSoftware/openvr",
+        "url": "https://github.com/ValveSoftware/openvr",
+        "pin": {
+          "file": "producers/steam-bridge/source.json",
+          "pointer": "/headers/0"
+        }
+      },
+      {
+        "id": "wine-helper-headers",
+        "provider": "github",
+        "repository": "ValveSoftware/wine",
+        "url": "https://github.com/ValveSoftware/wine",
+        "pin": {
+          "file": "producers/steam-bridge/source.json",
+          "pointer": "/headers/1"
+        }
+      }
+    ],
+    "versionBindings": [
+      {
+        "file": "producers/steam-bridge/source.json",
+        "pointer": "/version"
+      }
+    ]
   }
 ]
