@@ -1,5 +1,3 @@
-nxnative-tools=MCLv8
-impacto=0.10.8.937-MCLv1
-prosper=MCLv7
-vulkan-kosmickrisp-gles32=27.0.0-devel-MCLv9
-vulkan-moltenvk-scene=1.4.2-MCLv9
+android-aim=0.1.0-MCLv9
+prosper=MCLv8
+reshade=0.3.7
