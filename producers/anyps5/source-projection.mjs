@@ -106,7 +106,7 @@ function applyExportedSourceMetadata(destination,repositories){
   '    set(shaderCacheSubmoduleStamps "${PROJECT_SOURCE_DIR}/'+file+'")');
 }
 
-export const RELINKER_OVERLAYS=[['macos-loader','applyLoaderOverlay']];
+export const RELINKER_OVERLAYS=[['macos-loader','applyLoaderOverlay'],['macos-library-compatibility','applyLibraryCompatibilityOverlay'],['macos-module-ordering','applyModuleOrderingOverlay']];
 export const RUNTIME_OVERLAYS=[
  ["macos-startup","applyStartupOverlay"],
  ["vulkan","applyVulkanOverlay"],
@@ -130,6 +130,15 @@ export const RUNTIME_OVERLAYS=[
  ["macos-aborts","applyAbortsOverlay"],
  ["macos-work-submission","applyWorkSubmissionOverlay"],
  ["macos-graphics-compatibility","applyGraphicsCompatibilityOverlay"],
+ ["macos-library-compatibility","applyLibraryCompatibilityOverlay"],
+ ["macos-addons","applyAddonsOverlay"],
+ ["macos-write-watch/fault-ahead.mjs","applyFaultAheadOverlay"],
+ ["macos-write-watch/coverage-leases.mjs","applyCoverageLeasesOverlay"],
+ ["macos-draw-performance/pool-buffers.mjs","applyPooledBuffersOverlay"],
+ ["macos-draw-performance/import-spans.mjs","applyImportSpansOverlay"],
+ ["macos-draw-performance/descriptor-reuse.mjs","applyDescriptorReuseOverlay"],
+ ["macos-ngs2","applyNgs2Overlay"],
+ ["macos-module-ordering","applyModuleOrderingOverlay"],
 ];
 
 export async function prepareSourceProjection({source,repositories},projection,{overlays=RUNTIME_OVERLAYS}={}){
@@ -138,7 +147,7 @@ export async function prepareSourceProjection({source,repositories},projection,{
  try{
   exportSources(source,repositories,staged);
   for(const [directory,method]of overlays){
-   const file=path.join(import.meta.dirname,'overlays',directory,'apply.mjs');
+   const file=path.join(import.meta.dirname,'overlays',directory.endsWith('.mjs')?directory:path.join(directory,'apply.mjs'));
    await(await import(pathToFileURL(file).href))[method](staged);
   }
   applyExportedSourceMetadata(staged,repositories);
