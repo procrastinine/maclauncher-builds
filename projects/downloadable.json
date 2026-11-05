@@ -2926,5 +2926,60 @@
         "x64": "xcode-27"
       }
     }
+  },
+  {
+    "id": "dxvk",
+    "name": "DXVK",
+    "purpose": "Direct3D Vulkan translation with HWND composition swapchains.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/dxvk",
+      "entries": [
+        "producers/dxvk/build.mjs",
+        "producers/dxvk/package.mjs",
+        "producers/dxvk/patch.mjs",
+        "producers/dxvk/composition-interface.h",
+        "producers/dxvk/dxgi-composition.h",
+        "producers/dxvk/dxgi-composition.cpp",
+        "producers/dxvk/dcomp.cpp",
+        "producers/dxvk/dcomp.def",
+        "producers/dxvk/inputs.json"
+      ],
+      "buildEntry": "producers/dxvk/build.mjs"
+    },
+    "upstreams": [
+      {
+        "id": "dxvk",
+        "provider": "github",
+        "url": "https://github.com/doitsujin/dxvk",
+        "repository": "doitsujin/dxvk",
+        "pin": {
+          "gitlink": "producers/dxvk/source"
+        }
+      }
+    ],
+    "compatibility": "Windows x86 and x64 PE libraries for a compatible Wine host and Vulkan driver.",
+    "packageProfiles": [
+      {
+        "version": "3.1.1-MCLv1",
+        "label": "DXVK 3.1.1 with HWND composition"
+      }
+    ],
+    "build": {
+      "version": "3.1.1-MCLv1",
+      "command": "tools/build-dxvk.mjs",
+      "architectures": [
+        "universal"
+      ],
+      "submodules": [
+        "producers/dxvk/source"
+      ],
+      "recursiveSubmodules": true,
+      "tools": [
+        "uv",
+        "glslang"
+      ]
+    }
   }
 ]
