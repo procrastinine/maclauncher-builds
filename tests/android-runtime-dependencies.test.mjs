@@ -4,6 +4,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createRequire} from 'node:module';
+import {execFileSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 import {anglePackageProfile} from '../tools/build-android-angle.mjs';
 import {aimAngleInput} from '../tools/build-android-aim.mjs';
 import {packageSdl3Framework} from '../tools/build-android-sdl3.mjs';
@@ -13,6 +15,14 @@ import {pack,verify} from '../tools/runtime-package.mjs';
 const Native=createRequire(import.meta.url)('../producers/maclauncher/scripts/native-binary-tools.cjs');
 const profiles=JSON.parse(fs.readFileSync(new URL('../producers/android-inputs/angle.json',import.meta.url))).profiles,commonVersion=profiles.find(row=>row.id==='common').version;
 const temp=t=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'android-runtime-deps-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;};
+test('AIM packaging builds generated product properties without booting a guest',t=>{
+ const root=temp(t),bin=path.join(root,'bin'),work=path.join(root,'build'),capture=path.join(root,'command.json');fs.mkdirSync(bin);fs.mkdirSync(work);
+ fs.writeFileSync(path.join(bin,'cargo'),'#!'+process.execPath+'\nrequire("node:fs").writeFileSync(process.env.AIM_COMMAND_OUTPUT,JSON.stringify(process.argv.slice(2)));\n',{mode:0o755});
+ const script=fileURLToPath(new URL('../producers/maclauncher/scripts/build-android-aim.mjs',import.meta.url)),env={...process.env,PATH:bin+path.delimiter+process.env.PATH,AIM_COMMAND_OUTPUT:capture};
+ execFileSync(process.execPath,[script,'--build','--jobs','2','--work',work],{env});const args=JSON.parse(fs.readFileSync(capture));
+ assert.deepEqual(args.slice(0,4),['aim','build','-j','2']);assert.ok(args.includes('product-properties'),'the original overlay consumes target/aim/product-properties/build.prop');assert.ok(!args.includes('userdata/template'));assert.ok(!args.includes('derived-image'));
+ execFileSync(process.execPath,[script,'--build','--image-only','--jobs','2','--work',work],{env});assert.deepEqual(JSON.parse(fs.readFileSync(capture)),['aim','build','-j','2','image']);
+});
 test('Android and AIM share the one published ANGLE input',()=>{
  const common=anglePackageProfile('android-angle',commonVersion).profile;
  assert.equal(common.id,'common');assert.equal(Object.hasOwn(common,'androidSource'),false);
