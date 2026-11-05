@@ -6,6 +6,44 @@
     {
       "schemaVersion": 2,
       "id": "android-art-elf",
+      "version": "16.0.0-MCLv8",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "input.json",
+      "manifestSha256": "49ea997883081d65e4768aa1f4b36ea3bfe6703e23c645d016c6a3fa86496302",
+      "sourceSha256": "a3f60c0c00d1d939e9b73d6914ffc0656ef65b7efa225ba4b2626a41f675cd0f",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "android-art-elf-16.0.0-MCLv8-arm64.tar.gz",
+        "sha256": "b77dd05455886a71d231d8c8ae01283c79e46a22317e815885f4a8375d583ad2",
+        "bytes": 7968294,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/android-art-elf%2Fv16.0.0-MCLv8%2Farm64/android-art-elf-16.0.0-MCLv8-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "cc11f6302350fa5e50c2f4ca9685b37682798642",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41955434193",
+        "runAttempt": "1"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "cc11f6302350fa5e50c2f4ca9685b37682798642"
+      },
+      "tag": "android-art-elf/v16.0.0-MCLv8/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "android-art-elf",
       "version": "16.0.0-MCLv7",
       "arch": "arm64",
       "launcherArchitectures": [
