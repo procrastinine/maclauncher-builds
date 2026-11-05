@@ -12,3 +12,5 @@ android-image-data-4=16.0.0-MCLv8
 android-image-data-5=16.0.0-MCLv8
 android-java-converter=MCLv8
 android=0.2.7
+
+anyps5=MCLv10
