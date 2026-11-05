@@ -45,6 +45,31 @@ BarycentricTessellationShaders BuildBarycentricTessellationShaders(const Recompi
 }
 ` + source.slice(end);
   });
+  edit('core/libs/prx/libSceAgcDriver/Graphics/src/ShaderInputState.cpp', (source, file) => {
+    source = replace(source,
+      '    if (address < headerAddress) throw std::runtime_error("AGC graphics: AGC header pointer precedes the shader header");', `#ifdef __APPLE__
+    if (address < headerAddress || address - headerAddress > header.size() || bytes > header.size() - (address - headerAddress)) {
+        T value{};
+        AgcDriver::GuestMemory::Read(address, std::as_writable_bytes(std::span(&value, 1)).first(bytes), 1);
+        return value;
+    }
+#endif
+    if (address < headerAddress) throw std::runtime_error("AGC graphics: AGC header pointer precedes the shader header");`, file);
+    source = replace(source,
+      '    if (address < headerAddress) throw std::runtime_error("AGC graphics: AGC header array pointer precedes the shader header");', `#ifdef __APPLE__
+    const auto guestBytes = static_cast<std::uint64_t>(count) * sizeof(T);
+    if (address < headerAddress || address - headerAddress > header.size() || guestBytes > header.size() - (address - headerAddress)) {
+        AgcDriver::GuestMemory::Read(address, std::as_writable_bytes(std::span(destination, count)), 1);
+        return;
+    }
+#endif
+    if (address < headerAddress) throw std::runtime_error("AGC graphics: AGC header array pointer precedes the shader header");`, file);
+    return replace(source,
+      '    if (shader.user_data == nullptr) throw std::runtime_error("AGC graphics: missing AGC user-data header");', `#ifdef __APPLE__
+    if (shader.user_data == nullptr) return info;
+#endif
+    if (shader.user_data == nullptr) throw std::runtime_error("AGC graphics: missing AGC user-data header");`, file);
+  });
   edit('core/libs/prx/libSceAgcDriver/Execution/src/Driver/Shaders/ShaderRegistry.cpp', (source, file) => {
     source = replace(source, 'bool AsyncRegistrationPrepare() {', `bool RegistrationPrepareEnabled() {
 #ifdef __APPLE__

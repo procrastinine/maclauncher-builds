@@ -10,8 +10,31 @@ function replace(source, before, after) {
 export async function applyValidationCacheOverlay(root) {
     const base = path.join(root, 'core/libs/prx/libSceAgcDriver/Graphics');
     await fs.copyFile(new URL('./ShaderValidationKey.hpp', import.meta.url), path.join(base, 'include/ShaderValidationKey.hpp'));
+    const vertexFile = path.join(base, 'include/VertexInput.hpp');
+    let vertex = await fs.readFile(vertexFile, 'utf8');
+    vertex = replace(vertex, '    return fields[0] == 0 && fields[1] == 0 && fields[2] == 0 && fields[3] == 0;', `#ifdef __APPLE__
+    if (((fields[3] >> 12u) & 0x7fu) == 0x7fu) return true;
+#endif
+    return fields[0] == 0 && fields[1] == 0 && fields[2] == 0 && fields[3] == 0;`);
+    await fs.writeFile(vertexFile, vertex);
     const file = path.join(base, 'src/Draw.cpp');
     let source = await fs.readFile(file, 'utf8');
+    source = replace(source, '            expand(readIndex);', `            expand(readIndex);
+#ifdef __APPLE__
+            if (const auto zeroFrom = ZeroFetchVertex(shaders.front().program->vertexAttributes)) {
+                const auto limit = *zeroFrom > draw.firstVertex ? *zeroFrom - draw.firstVertex : 0u;
+                if (maxIdx > limit) {
+                    maxIdx = ClampDrawIndices(indexCopy->Bytes().first(expandedIndexBytes), sizeof(std::uint32_t), false, limit).value_or(0u);
+                }
+            }
+#endif`);
+    const clamp = 'if (*highest >= limit && *highest - limit >= ZeroFetchSlack)';
+    if (source.split(clamp).length !== 3) throw Error('AnyPS5 index zero-fetch boundaries changed');
+    source = source.replaceAll(clamp, `if (*highest > limit
+#ifndef __APPLE__
+                && *highest - limit >= ZeroFetchSlack
+#endif
+            )`);
     const start = source.indexOf('// ValidateShaders decodes every SPIR-V instruction');
     const end = source.indexOf('// The resource cache key of a recorded draw:', start);
     if (start < 0 || end < 0) throw Error('AnyPS5 validation cache boundaries changed');

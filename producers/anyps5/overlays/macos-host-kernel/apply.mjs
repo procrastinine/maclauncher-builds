@@ -114,6 +114,18 @@ export function applyHostKernelOverlay(root){
   'bool GuestWriteWatchAvailable_nid_postfix();',
   'bool GuestWriteWatchAvailable_nid_postfix();\n#ifdef __APPLE__\nbool GuestWriteWatchChainSignal_nid_no_patch(int signal, void (*handler)(int));\n#endif',file));
  edit('prx/libc/src/GuestWriteWatch.cpp',(source,file)=>{
+  source=replace(source,'        erase(begin, end);\n        _ranges.emplace(begin, Range{end, std::move(pages)});',`        if (auto host = _ranges.upper_bound(begin); host != _ranges.begin() && std::prev(host)->second.end >= end) {
+            --host;
+            auto& range = host->second;
+            for (auto page = begin; page < end; page += _page) {
+                auto& state = range.pages[(page - host->first) / _page];
+                if ((state & Protected) != 0) ::mprotect(reinterpret_cast<void*>(page), _page, state & ProtectionMask);
+                state = pages[(page - begin) / _page];
+            }
+            return;
+        }
+        erase(begin, end);
+        _ranges.emplace(begin, Range{end, std::move(pages)});`,file);
   const apple=source.indexOf('#elif defined(__APPLE__)\nclass Watch {');
   const method=source.indexOf('    void Register(std::uintptr_t begin, std::uintptr_t end) {',apple);
   if(method<apple)throw Error('AnyPS5 Darwin write-watch class changed');

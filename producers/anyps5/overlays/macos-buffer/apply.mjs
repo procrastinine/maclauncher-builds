@@ -9,6 +9,14 @@ function replace(source, before, after) {
 export async function applyBufferOverlay(root) {
   const location = path.join(root, 'core/libs/prx/libSceAgcDriver/Graphics/src/GuestBufferMemory.cpp');
   let source = await fs.readFile(location, 'utf8');
+  source = replace(source,
+    '            const HostImport* entry = region.direct != nullptr && state.epoch == importsEpoch ? region.direct : nullptr;', `#ifdef __APPLE__
+            const auto* previous = region.direct;
+            const bool covers = previous != nullptr && region.begin >= previous->base && region.end <= previous->base + previous->bytes;
+            const HostImport* entry = covers && state.epoch == importsEpoch ? previous : nullptr;
+#else
+            const HostImport* entry = region.direct != nullptr && state.epoch == importsEpoch ? region.direct : nullptr;
+#endif`);
   source = replace(source, '#include <linux/udmabuf.h>', '#ifdef __linux__\n#include <linux/udmabuf.h>\n#endif');
   for (const boundary of ['struct ImportFamilies {', '    ImportFamilies families;', 'int udmabufDevice() {', 'constexpr std::uint64_t ImportChunkBytes', 'struct BackingFile {', '    BackingFile backing;', '    if (BackingFile backing;']) {
     source = replace(source, '#ifndef _WIN32\n' + boundary, '#ifdef __linux__\n' + boundary);
