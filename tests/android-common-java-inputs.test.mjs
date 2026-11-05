@@ -6,17 +6,19 @@ import path from 'node:path';
 import os from 'node:os';
 import {execFileSync} from 'node:child_process';
 import {prepareAndroidCommonJavaProducer} from '../tools/android-common-java-inputs.mjs';
+import {verifyAndroidJavaConverterInput} from '../tools/build-android-java-converter.mjs';
+import {verifyAndroidJavaFrameworkInput} from '../tools/build-android-java-framework.mjs';
 import {helperPackage,sha} from '../tools/helper-package.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 
-export async function javaFixture(directory,kind){
+export async function javaFixture(directory,kind,source=androidSource()){
  const file=path.join(root,'producers/android-inputs/java-'+kind+'.json');
  const profile=JSON.parse(fs.readFileSync(file)),sourceSha256=sha(file);
  const output=path.join(directory,kind),payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});
  const files=kind==='converter'?['dex2jvm.jar','converter-overlay.jar','android-api-headers.jar']:['products/android-framework.jar','build/classes/Fixture.class','build/framework-tool/Fixture.class','build/jni/fixture.h','build/host-callbacks.h','build/host-callbacks.c'];
  for(const name of files){fs.mkdirSync(path.dirname(path.join(payload,name)),{recursive:true});fs.writeFileSync(path.join(payload,name),'sealed fixture');}
  fs.writeFileSync(path.join(payload,'NOTICE'),'Fixture notice');
- await helperPackage({id:profile.id,version:profile.version,arch:'arm64',output,minimumMacOS:'13.0',sourceSha256,manifestRelative:'input.json',record:{androidSource:androidSource(),...(profile.converter?{converter:{...profile.converter,revision:androidUpstream(profile.converter.repository).revision}}:{})}});
+ await helperPackage({id:profile.id,version:profile.version,arch:'arm64',output,minimumMacOS:'13.0',sourceSha256,manifestRelative:'input.json',record:{androidSource:source,...(profile.converter?{converter:{...profile.converter,revision:androidUpstream(profile.converter.repository).revision}}:{})}});
  return {profile,payload};
 }
 
@@ -32,4 +34,17 @@ test('Java transport preserves the clean selected native producer independently 
  const native='src/modules/android/native/process-ids.c';
  assert.equal(sha(path.join(output,native)),sha(path.join(android,native)));
  assert.throws(()=>prepareAndroidCommonJavaProducer({android,input,framework,output}),/new export directory/);
+});
+
+
+test('sealed Java inputs retain their own producer revision and reject altered bytes',async t=>{
+ const directory=fs.mkdtempSync(path.join(os.tmpdir(),'android-java-revisions-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
+ const source={...androidSource(),revision:'1'.repeat(40)};
+ assert.notEqual(source.revision,androidSource().revision);
+ for(const [kind,verify,target]of [['converter',verifyAndroidJavaConverterInput,'converter-overlay.jar'],['framework',verifyAndroidJavaFrameworkInput,'products/android-framework.jar']]){
+  const {payload}=await javaFixture(directory,kind,source);
+  assert.equal(verify(payload).manifest.androidSource.revision,source.revision);
+  fs.appendFileSync(path.join(payload,target),'corrupted bytes');
+  assert.throws(()=>verify(payload),/checksum|permissions|size|hash|changed|match/i);
+ }
 });
