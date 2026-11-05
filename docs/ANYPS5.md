@@ -108,7 +108,7 @@ The package's SELF helper, `tools/unwrap-self.cjs`, is a Node version of AnyPS5'
 
 ## License
 
-The upstream source and this repository's adapters are licensed GPL-2.0-only, with the license text in the upstream [`LICENSE`](../sources/anyps5/LICENSE). Dependencies keep their own licenses.
+The upstream source and this repository's adapters are licensed GPL-2.0-only, with the license text in the upstream [`LICENSE`](../sources/anyps5/LICENSE). Portions of the overlays are adapted from [AnyPS5-ARM](https://github.com/AnyTogether/AnyPS5-ARM). The [source record](../producers/anyps5/source.json) identifies its exact source snapshot and GPL-2.0-only license; the derived overlay files identify the source commits for their adapted portions. Packages retain this attribution in `source.json` and the license component index. Dependencies keep their own licenses.
 
 ## GitHub build
 

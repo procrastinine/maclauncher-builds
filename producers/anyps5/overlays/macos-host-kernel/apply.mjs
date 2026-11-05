@@ -171,3 +171,15 @@ export function applyHostKernelOverlay(root){
 
  return changes;
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * guest fault handlers chained behind write-watch:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/c589601fdf3b7149a65f40da7005e2e5e65d3a81
+ * historical source snapshot for that signal-chain boundary:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/61c1c59a4ba7add23da7234b3b482a6d4405a741
+ * in-place contained write-watch registration:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/3d464c88fb249aa743be907c2bf0947d27328ef3
+ * alarm-thread QoS:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/c611231587420e141cd6060cd800df73326b8621
+ */

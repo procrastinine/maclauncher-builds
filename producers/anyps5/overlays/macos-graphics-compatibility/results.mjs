@@ -61,3 +61,11 @@ bool HostSubgroupSingleLane(const SpirvEmitterState& state);`));
 ` + marker);
     });
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * subgroup storage, NaN classification and half-float ldexp:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/ab9abe095f4bb1eace87b1c53903b613800343e2
+ * image-atomic memory ordering:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/92c2fb9ca7b1a1547136c32f63cfdc4417fc8197
+ */

@@ -89,3 +89,11 @@ export async function applyValidationCacheOverlay(root) {
     source = '#include "prx/libSceAgcDriver/Graphics/include/ShaderValidationKey.hpp"\n' + source.slice(0, start) + block + source.slice(end);
     await fs.writeFile(file, source);
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * null vertex format:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/85b1b9cd960784fb646b8631dd8ccc8ccce7230d
+ * adapted oversized-index zero-fetch handling:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/ce4de94c1b11bf5ae07aa705c8f31d0e5c14be7a
+ */

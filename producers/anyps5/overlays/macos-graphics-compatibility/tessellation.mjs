@@ -36,3 +36,12 @@ ${levels.replaceAll(', floatOne);', ', level);')}
         return replace(source, before, apple(before, after));
     });
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * zero-area rectangle handling:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/140bdd3d4b99f353bd47808fa533876a0b3e20ce
+ * Portions adapted from AnyPS5 (GPL-2.0-only).
+ * tessellation subgroup capability lowering:
+ * https://github.com/boykopovar/AnyPS5/commit/53e4e8e7961030f0cee59e992b0b0cc1421f5cec
+ */

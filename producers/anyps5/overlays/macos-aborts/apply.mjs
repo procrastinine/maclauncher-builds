@@ -765,3 +765,26 @@ int MaxPacketSize(`]
   ]);
   return ["core/libs/prx/libkernel/Equeue/Equeue.cpp","core/libs/prx/libkernel/Equeue/src/Kqueue.cpp","core/libs/prx/libSceSysmodule/Export.cpp","core/libs/prx/libkernel/DirectMemory/Jit.cpp","core/libs/prx/libSceNet/Export.cpp","core/libs/prx/libScePad/Export.cpp","core/libs/prx/libSceUsbd/Export.cpp"];
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * file/device readiness and low-water repoll:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/08f55bff3ed9cfe03a74bf4de239ba102affa336
+ * Sysmodule unwind delegation:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/de9ccf921a1ff124310bd15fc68021d8f9d5b63e
+ * shared Mach JIT mappings:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/5151ee2320b01cecd2bd5559d58ea0d93a36cb6e
+ * kernel-socket information lookup:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/c6d92141663ea682da14f9b41d151752b445c9ac
+ * standard extended-pad open and absent-device results:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/2d0c051852e841b04fe0c885319337d7ac87636c
+ * standard extended-pad reads:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/43ab8eded0570d967ff9301ae414d9ddfed80610
+ * Portions adapted from AnyPS5 (GPL-2.0-only).
+ * unsupported pad probes:
+ * https://github.com/boykopovar/AnyPS5/commit/e11a4735a23240d3a954d9d5461371b8f18c0674
+ * USB event ownership and waiters:
+ * https://github.com/boykopovar/AnyPS5/commit/dbb27b9ef1f93c6a21fe035aeb4753e6120ce0c1
+ * USB waiter wakeups:
+ * https://github.com/boykopovar/AnyPS5/commit/9f3799cfaadcedffae53b0dea63ddb7ee57fe768
+ */

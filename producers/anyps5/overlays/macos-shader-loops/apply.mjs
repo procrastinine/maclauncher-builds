@@ -18,3 +18,9 @@ export async function applyShaderLoopsOverlay(root) {
     await fs.writeFile(file, source);
     return [relative];
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * SPIR-V loop continue-body splitting:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/1ed3666b7ec7dadebab5e9814d783f9f72fdd56b
+ */

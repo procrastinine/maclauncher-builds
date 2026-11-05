@@ -77,3 +77,9 @@ const HostImport* findImport(HostImports& state, std::uint64_t begin, std::uint6
             }`);
   await fs.writeFile(file, source);
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * adjacent-import copy spans:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/e10f59a483e247a3f6da67de16e1711e9554b17e
+ */

@@ -68,3 +68,9 @@ std::uint64_t TextureCacheBudget(const VkPhysicalDeviceMemoryProperties& memory)
     nextImageRecord = 0;`);
  await fs.writeFile(file,source);
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * unified-memory texture-cache budget:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/743f29c63c748cc6f6b89df0db740702d622d4f1
+ */

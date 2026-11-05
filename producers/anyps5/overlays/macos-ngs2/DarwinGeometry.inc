@@ -101,3 +101,9 @@ void ValidateSource(const Ngs2GeomSourceParam& source) {
 }
 
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * spatial geometry, attenuation and Doppler handling:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/3be3db502258db1c28850a192b51b28ecd9d8a1b
+ */

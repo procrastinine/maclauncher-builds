@@ -1859,6 +1859,16 @@
         "pin": {
           "gitlink": "sources/anyps5"
         }
+      },
+      {
+        "id": "anyps5-arm",
+        "provider": "github",
+        "url": "https://github.com/AnyTogether/AnyPS5-ARM",
+        "repository": "AnyTogether/AnyPS5-ARM",
+        "pin": {
+          "file": "producers/anyps5/source.json",
+          "pointer": "/attributions/0"
+        }
       }
     ],
     "compatibility": "The converter matches the package CPU. Game code and PRX libraries are x86-64, native on Intel and run through Rosetta on Apple Silicon.",

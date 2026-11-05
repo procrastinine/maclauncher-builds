@@ -211,3 +211,11 @@ RecompileResult BuildMeshPassthroughVertexShader(const RecompileResult& mesh, co
 }
 
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * compute mesh route and passthrough shader:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/92bb89e6698eade9df44f437a3e72fe8f6675ec5
+ * descriptor-backed mesh records and draw arguments:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/324e649e71cf7ec445387739a7edf4826702803d
+ */

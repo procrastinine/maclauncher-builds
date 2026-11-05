@@ -219,3 +219,13 @@ const link_map* MainProgramMap()`);
   changes.push(...await applyBindingsOverlay(root));
   return [...new Set(changes)];
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * kernel-read host-write flush hook:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/ebb364010a68d94c0be645b543779eed953b0c0d
+ * GPU mutex held across that flush:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/4e3bae9ba527da89a7d74163e0002c76f9ae2971
+ * write-watch brackets around host stores:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/c589601fdf3b7149a65f40da7005e2e5e65d3a81
+ */

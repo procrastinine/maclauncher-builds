@@ -33,3 +33,11 @@ export async function applyStorageCompatibility(edit) {
         return replace(source, condition, apple(condition, '    if (!storageImageMultisample && (shape.usage & VK_IMAGE_USAGE_STORAGE_BIT) != 0) shape.samples = VK_SAMPLE_COUNT_1_BIT;'));
     });
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * single-sample storage-image lowering:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/e5fa0bc8fa19a881de32f116d412fc43af8c4096
+ * multisampled target-merge preservation:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/fe1b7462771324b380083d7dcb5a563aa2eef461
+ */

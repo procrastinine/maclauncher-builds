@@ -256,3 +256,28 @@ int APS5_VABI sceAgcAcquireMemSetEngine(std::uint32_t* packet, std::uint8_t engi
   ]);
   return ["core/relinker/elfpatcher/src/macos/MacOsImage.cpp","core/libs/prx/libc/src/GuestAllocations.cpp","core/libs/prx/libkernel/Time/Time.cpp","core/libs/prx/libSceFontFt/Export.cpp","core/libs/prx/libSceVoice/Export.cpp","core/libs/prx/libc/Export.cpp","core/libs/prx/libc/include/Api.hpp","core/libs/prx/libc/src/exception/TypeInfo.cpp","core/libs/prx/libkernel/Socket/src/Udp.cpp","core/libs/prx/libkernel/Time/TimedWait.cpp","core/libs/prx/libSceAgc/Unimplemented.cpp","core/shader/recompiler/RdnaDecoder/src/RdnaMemoryOpDecoder.cpp"];
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * __ELF maxprot and padding registration:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/8bc1dd19dcec1fe67d7e14184e2def07015905fc
+ * Mach thread CPU clock:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/badae20dcda5b86ca1c14338968c9b8c641d70c4
+ * system font modules:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/06668165a2a8161b6c744a6268d37714c30f4ab4
+ * _Atomic_assert:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/0666b5a7e99958cd2902ec6fc89bbeedc5a4279c
+ * function/pointer RTTI shape:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/cad9217fbf1a9cfb6a4f0a00d8af60c17cd8033a
+ * connected UDP sendto fallback:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/25b128d615f0d35c96388436009a6adcb270da15
+ * errno preservation during nanosleep:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/93c711786ec94d3bcad28e7016c5feac604d15a4
+ * AGC acquire-memory engine selection:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/c1d06dd1c6853923dc631f537b80e66fd73074a5
+ * equal-offset ds_wrxchg2:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/51f930b813e37171a3b6dd9b81134df9c0d1f512
+ * Portions adapted from AnyPS5 (GPL-2.0-only).
+ * adapted voice input-port validation:
+ * https://github.com/boykopovar/AnyPS5/commit/648fba4f71b54f86418c3dbaae60b91e7ef6dffa
+ */

@@ -306,3 +306,9 @@ std::filesystem::path HostPath(`],
   ]);
   return [header, ...["core/libs/prx/libSceAppContent/Export.cpp","core/libs/prx/libSceNpEntitlementAccess/Export.cpp","core/libs/prx/libc/src/General.cpp"]];
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * inserted add-on, entitlement, mount and update handling:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/56337393fc044d82b17b4ecb029da8a438372838
+ */

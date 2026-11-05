@@ -107,3 +107,11 @@ bool StorageTexture::anyLayerPending() const {`);
   optimizer = replace(optimizer, '            pthread_attr_destroy(&attributes);', '            pthread_attr_destroy(&attributes);\n#endif');
   await fs.writeFile(optimizerFile, optimizer);
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * draw-committer priority:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/22b652177619befe067c9834ca7e06760465d7c6
+ * unwatched storage-image write-back:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/9e163d751c11e6e98e6dbdc5672461d9ab12021e
+ */

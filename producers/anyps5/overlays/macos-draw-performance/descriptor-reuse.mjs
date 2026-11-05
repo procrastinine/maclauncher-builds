@@ -43,3 +43,9 @@ export async function applyDescriptorReuseOverlay(root) {
 }`);
   await fs.writeFile(file, original.slice(0, begin) + source + original.slice(end));
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * unchanged draw-descriptor reuse:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/3023832ab76e41aa2596647e18c2fb3cec07660e
+ */

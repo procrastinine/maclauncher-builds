@@ -194,3 +194,14 @@ static std::atomic<thread_dtors_func_t> threadDtors{nullptr};`);
   await fs.copyFile(path.join(directory, 'DarwinMemory.hpp'), path.join(kernelRoot, 'DirectMemory/DarwinMemory.hpp'));
   await fs.copyFile(path.join(directory, 'DarwinThread.hpp'), path.join(kernelRoot, 'Pthread/include/DarwinThread.hpp'));
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * Apple guest-arena placement:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/90352825c5e49a8d84eeace9a2dd670da5ea81ab
+ * host fault signals remain unblocked:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/7187342733914dbc45c7d4de5d692bb1cc41306e
+ * Portions adapted from AnyPS5 (GPL-2.0-only).
+ * full host-fault signal-mask implementation:
+ * https://github.com/boykopovar/AnyPS5/commit/f22b57083c3f54bf6dd0a04d92447c50266b908b
+ */

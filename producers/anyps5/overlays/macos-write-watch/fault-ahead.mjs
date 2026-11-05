@@ -42,3 +42,13 @@ export async function applyFaultAheadOverlay(root) {
     '    const std::uintptr_t _page = static_cast<std::uintptr_t>(::getpagesize());\n    std::size_t _faultAhead = FaultAheadBlock / _page;');
   await fs.writeFile(file, original.slice(0, begin) + source);
 }
+
+/*
+ * Portions adapted from AnyPS5 (GPL-2.0-only).
+ * sequential fault-ahead:
+ * https://github.com/boykopovar/AnyPS5/commit/54080056ff07088c09b13a4c297ae895af5d60c1
+ * protection-block boundary:
+ * https://github.com/boykopovar/AnyPS5/commit/2c15fa59b430fc04a949877a01e8bd27cd307606
+ * adapted writable-page restriction:
+ * https://github.com/boykopovar/AnyPS5/commit/21e65cc7b3e3312f4b690af726e0dc577d5a3da4
+ */

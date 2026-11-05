@@ -42,3 +42,13 @@ export async function applyPooledBuffersOverlay(root) {
     '        case 0x15: return orderedFills();',
     '#ifdef __APPLE__\n        case 0x3f: return true;\n#endif\n        case 0x15: return orderedFills();'));
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * pool-class Vulkan buffers:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/fedacc2cbc7e4c16013930ad757fcf01104efa4d
+ * pooled draw-data consumers:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/e2d6c4749b0ab802cef7c7c7bad49b0898763f83
+ * pipeline retention across indirect buffers:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/111e19dc8deccca823033cd19a18ad9511eb16bd
+ */

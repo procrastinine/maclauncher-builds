@@ -164,3 +164,15 @@ std::optional<std::array<std::uint32_t, 4>> SingleLevelSamplerWords`);
         '    set(shaderCacheReviewedNames\n            UnsupportedResourceBinding'));
     return changes;
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * scoped unrenderable draws:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/1e20f7ed49367daf273f2f44fad7c2d2713b6b50
+ * unsupported bindings and one-time reporting:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/4c068b498ffe2b1099f94396395465da47bb4032
+ * sampler refusals, dispatch handling and LOD limits:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/d9660e737773ef94f05732f534444a82fee62e98
+ * typed sampler and descriptor failures:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/82dec53d861a2fc5377f3dde3b9454d233277910
+ */

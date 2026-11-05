@@ -63,3 +63,11 @@ export function applyModuleOrderingOverlay(root) {
   ]);
   return [relative, helper];
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * guest-provider dependency ordering:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/8361b62606bd5a3f5487ab07b86d9eaa8d03033f
+ * placeholder-export selection:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/f08313197d777eebdbd46137cbe61b7ecb8c340c
+ */

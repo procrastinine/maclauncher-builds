@@ -127,3 +127,11 @@ inline const Addon* Find(const char (&label)[17]) {
 }
 
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * disk add-on discovery:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/56337393fc044d82b17b4ecb029da8a438372838
+ * UTF-8 filenames:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/f0a92a2dc3a65264e905a80bee509401c4dba50c
+ */

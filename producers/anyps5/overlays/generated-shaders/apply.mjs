@@ -123,3 +123,11 @@ bool AsyncRegistrationPrepare() {`, file);
   });
   return changed;
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * copied shader-input headers:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/471ac2f53aabd9989cf99cc31388c0d1b672c7d9
+ * deferred registration preparation:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/ae9b457257672af16198743d9a4c397f85bd7666
+ */

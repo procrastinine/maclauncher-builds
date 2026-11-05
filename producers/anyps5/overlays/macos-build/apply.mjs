@@ -58,3 +58,9 @@ export function applyBuildOverlay(projectionRoot){
  edit('core/libs/prx/libSceLibreSsl/CMakeLists.txt',(text)=>text+'\nif(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")\n    target_compile_options(libSceLibreSsl PRIVATE -fconstexpr-steps=10000000)\nendif()\n');
  return changes;
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * heap lifetime through late exit allocation:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/0861f8dac1bd2c6e28aea52b29cfac81f6e5e2f9
+ */

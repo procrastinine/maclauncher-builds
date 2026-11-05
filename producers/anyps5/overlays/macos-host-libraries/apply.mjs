@@ -153,3 +153,9 @@ void windowDrawableSize(void* context, std::uint32_t* width, std::uint32_t* heig
   });
   return changes;
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * occluded-window drawable-size handling:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/aa00d1399302b7efc94cfbcde94768e44dba3c5b
+ */

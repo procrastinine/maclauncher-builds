@@ -40,3 +40,9 @@ export async function applyBufferOverlay(root) {
   source = replace(source, 'ImportProbe ProbeDmaBufImportWriteProtection(const Context& context) {\n    ImportProbe probe;\n#ifdef _WIN32\n    static_cast<void>(context);\n    probe.failure = "the Linux write watch";', 'ImportProbe ProbeDmaBufImportWriteProtection(const Context& context) {\n    ImportProbe probe;\n#ifndef __linux__\n    static_cast<void>(context);\n    probe.failure = "DMA-BUF import requires Linux";');
   await fs.writeFile(location, source);
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * direct-import coverage validation:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/cb2727da290a76400f8a20534def4076cd362a5e
+ */

@@ -81,3 +81,11 @@ std::uint64_t freshBacking() {`);
   source = replace(source, '    registry().readableLease = ranges;', '    setReadableLease(ranges);');
   await fs.writeFile(file, source);
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * published write-watch coverage:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/252aa9e609e84c863bc0444756bb640d975ea75b
+ * readable lease acquisition:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/36c55cd1865d8d20d07c8a2d229a0ac038da1a6d
+ */

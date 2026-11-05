@@ -5,6 +5,16 @@
     "path": "sources/anyps5",
     "repository": "https://github.com/boykopovar/AnyPS5.git"
   },
+  "attributions": [
+    {
+      "id": "anyps5-arm",
+      "name": "AnyPS5-ARM",
+      "repository": "https://github.com/AnyTogether/AnyPS5-ARM",
+      "revision": "39b5662d380b2e41da3caac53c795ee47bd3dc6d",
+      "license": "GPL-2.0-only",
+      "licenseFile": "licenses/AnyPS5-ARM.txt"
+    }
+  ],
   "buildEntry": "producers/anyps5/build-relinker.mjs",
   "configure": {
     "ANYPS5_RELINKER_ONLY": "ON",

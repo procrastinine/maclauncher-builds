@@ -37,3 +37,9 @@ inline std::vector<std::uint32_t> LastVertexFirstList(VkPrimitiveTopology topolo
     }
     return list;
 }
+
+/*
+ * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
+ * last-provoking-vertex index reordering:
+ * https://github.com/AnyTogether/AnyPS5-ARM/commit/8ebc654e624ba82ae5378dc83439e75452d872b1
+ */
