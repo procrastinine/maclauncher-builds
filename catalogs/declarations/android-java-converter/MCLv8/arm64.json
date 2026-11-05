@@ -1,0 +1,70 @@
+{
+  "id": "android-java-converter",
+  "version": "MCLv8",
+  "arch": "arm64",
+  "minimumMacOS": "13.0",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "84987bf185268f88e7a7fc48d8f3bf9d01575409e0b830239a865cff1e84266a",
+  "directoryRelative": "android-java-converter/MCLv8/arm64",
+  "manifestRelative": "input.json",
+  "manifestSha256": "da71532fd0673689f1a148a7283d26cda6f1a3b56760cfae158606f8dfe31159",
+  "files": [
+    {
+      "path": "android-api-headers.jar",
+      "size": 1504476,
+      "sha256": "f3e8f6a56341b7ae5806175f2b232ea159c2cc29355017a8457e511d8a924e0c",
+      "mode": 420
+    },
+    {
+      "path": "converter-overlay.jar",
+      "size": 410441,
+      "sha256": "daf42ca11ba050d67703c4d0679880b01b7e96174d304649d415383fb0215148",
+      "mode": 420
+    },
+    {
+      "path": "dex2jvm.jar",
+      "size": 401535,
+      "sha256": "5312423e46f9a13e7f57f0868819b38a5f6d575b2f4be74080bc5d0963f43bde",
+      "mode": 420
+    },
+    {
+      "path": "input.json",
+      "size": 4039,
+      "sha256": "da71532fd0673689f1a148a7283d26cda6f1a3b56760cfae158606f8dfe31159",
+      "mode": 420
+    },
+    {
+      "path": "licenses/android-java-converter.txt",
+      "size": 1081,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+      "mode": 420
+    },
+    {
+      "path": "licenses/ASM.txt",
+      "size": 1651,
+      "sha256": "34b8dd2e1b4b5f822ba633602676297fa82328d9438ba4d7336ec7393d212e06",
+      "mode": 420
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 108,
+      "sha256": "e283eb7c82f42b16be1861165459e36e4be28e8b03b324fa85cad40b4da00e5a",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dex2jvm-2.txt",
+      "size": 968,
+      "sha256": "55c94a158002be1acec8e0743afaee31901fc03a80ff3ee0dca10b50230fac53",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dex2jvm.txt",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    }
+  ]
+}
