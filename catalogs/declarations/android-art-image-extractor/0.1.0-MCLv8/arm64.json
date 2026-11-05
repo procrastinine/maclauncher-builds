@@ -1,0 +1,296 @@
+{
+  "id": "android-art-image-extractor",
+  "version": "0.1.0-MCLv8",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "android-art-image-extractor/0.1.0-MCLv8/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "66b0843212e1c31f9d0307d75f0f5259f6316b826da5653fe64dc799bc647829",
+  "sourceSha256": "66b0843212e1c31f9d0307d75f0f5259f6316b826da5653fe64dc799bc647829",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "files/bin/android-image-extract",
+      "size": 951312,
+      "sha256": "d2a16527ae8b061098c39f986f84d33cc608445a762327595d42dbc883bc8fa9",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-10.txt",
+      "size": 1389,
+      "sha256": "6ffedbc0f7878612d2b23589f1ff2ab15633e1df7963a5d9fc750ec5500c7e7a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-11.txt",
+      "size": 1451,
+      "sha256": "b2fdb88151f747b40f4a8b17ceba930136c8c1be873611972b413bce2c2eb587",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-12.txt",
+      "size": 10139,
+      "sha256": "494accc32e50eb523a0e384d0ae6d4b702db867a89d6971216760e92b240ee12",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-13.txt",
+      "size": 12534,
+      "sha256": "756a61a8300d105ae68e7f2993e27d41a765c946f3400422e2403b01e7ded527",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-14.txt",
+      "size": 1542,
+      "sha256": "58604a126af6a671ea390ee3d5b3e42228aa59b2858fb7af1d5b20b31739ccbb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-15.txt",
+      "size": 1002,
+      "sha256": "e32ff4e00d9d94930537635291da39e7e612703334bf6fde8c7f1686fe8a45a2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-16.txt",
+      "size": 36620,
+      "sha256": "ea75d2e79a97f8dfc1e1ca04beedc432a47af4993e0cd659cef062050a57d3f9",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-17.txt",
+      "size": 19263,
+      "sha256": "067d8f7f645efe1131a9df13aa80ec2910d4ff898f9b14d337443a4202d56ab6",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-18.txt",
+      "size": 5788,
+      "sha256": "ded3eab76e881c8c18ab9e4ed9e888b1afcac41435913930f88f8188cecb2e8f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-19.txt",
+      "size": 407542,
+      "sha256": "46d411827d56eda34df30f901bfa4ea020119b2e38b6b7efb6a32e91461457a2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-2.txt",
+      "size": 3544,
+      "sha256": "75d9526cb80680518a22a07587156dd52d58890c5e60dc6efee712e46d88c067",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-20.txt",
+      "size": 13928,
+      "sha256": "4e1144ff2b1369e7b9e8a1a3fb94ea3deee99d5b327cd94b423d148dfa34d25f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-21.txt",
+      "size": 16703,
+      "sha256": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-22.txt",
+      "size": 16706,
+      "sha256": "e2b35be49f7284a45b7baca8fc7b3ab7440e7902392b2528a457816b5bb2a15c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-23.txt",
+      "size": 14990,
+      "sha256": "9a682a56cffc9524dfa9b0b1c0dca9cb81a19e96d5bd0793aaf02c08a95ee7ca",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-24.txt",
+      "size": 1491,
+      "sha256": "68834f116f8ff545f05d14753357b620748156d60ee36b26beab4cb3f317efe4",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-25.txt",
+      "size": 23503,
+      "sha256": "ea43b1de38a6f90c488800d66dec1ed671e68cda530266bc96951fb5b6307613",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-26.txt",
+      "size": 1522,
+      "sha256": "a44eb7b5caf5534c6ef536b21edb40b4d6babf91bf97d9d45596868618b2c6fb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-27.txt",
+      "size": 19274,
+      "sha256": "4b9abebc4338048a7c2dc184e9f800deb349366bdf28eb23c2677a77b4c87726",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-28.txt",
+      "size": 495,
+      "sha256": "95ad366d23fadf701d355bc45fb8b82ae2d700239471d35d41286ac3b08ff903",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-29.txt",
+      "size": 1084,
+      "sha256": "1ca3502222d967f3be5751c55f6b7ee735b5383909c3b501495f54b216dbf227",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-3.txt",
+      "size": 802,
+      "sha256": "8937b0397fdaea5ecb52945c9d2da894d338ed49397ef7824be365e60049d264",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-30.txt",
+      "size": 12809,
+      "sha256": "e8f66a474a1c1a0c1da2e85b5e84a50bf5e3161c96d2a3b92b76a32d05ae9ae8",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-31.txt",
+      "size": 1499465,
+      "sha256": "5647be074c8edf7339fd863055923a8fc80bc5610a8d4661ec3b767b9d392c27",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-32.txt",
+      "size": 14423589,
+      "sha256": "d518ae2d76bc7a1f0cbf0069b8deafb56efc39c2614cab74a859ef0b467f8373",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-33.txt",
+      "size": 1267,
+      "sha256": "f32fb3b417a194167cfad068223fc975ba96c5960513a10f66a3c28720aec1df",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-34.txt",
+      "size": 20137,
+      "sha256": "23ee78c8bae49cf08ea2f0c84945c66b987ebe4520881fb51b3dad4fb43d07c2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-35.txt",
+      "size": 3320,
+      "sha256": "a3966c9410ef94a1efbfa9ec04e9c1994026a70623fbf0885ce36737bfba3b54",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-36.txt",
+      "size": 17642,
+      "sha256": "54b212ba1f97f6948fa5486239ab505dd820b02e50cbfd296b4062c8609a70af",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-37.txt",
+      "size": 34795,
+      "sha256": "05315fce6c35f79b8a35454828995fa26336f235895ac64557abc028f4ffcea2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-38.txt",
+      "size": 730,
+      "sha256": "0ff61769b238634e042ab759dddfd104a8e69d091e3600ae3410e401a6164381",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-39.txt",
+      "size": 919,
+      "sha256": "e34c58338bd89d43e709e226610d8f32b3e3c47f4ad9a99a8dc1d4ac7842488e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-4.txt",
+      "size": 11369,
+      "sha256": "a41c63d0b40a94fc5dae93d63c788b12385b98517e149b912be7d5913ad28e0f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-40.txt",
+      "size": 1078,
+      "sha256": "b85dcd3e453d05982552c52b5fc9e0bdd6d23c6f8e844b984a88af32570b0cc0",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-41.txt",
+      "size": 1676,
+      "sha256": "39cb0234065c92b9e6cee3830cbb52b1aa289aa8fe9ba2e66730fec5cf05c630",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-42.txt",
+      "size": 4016,
+      "sha256": "8eea8287e5876b539670cadb82e99f9a7afddec6f6730811be1daf25d2e9bcfd",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-43.txt",
+      "size": 1995,
+      "sha256": "f5062c9a188d81dfe66b56db4182dcf9e4b17c0d9b0d311a8e20b3a1b075c443",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-5.txt",
+      "size": 3573,
+      "sha256": "6b716ac364d4b775726e7eb883ecdfa3a752202794b4f6129eabbe27d3edfb48",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-6.txt",
+      "size": 1332367,
+      "sha256": "9bb0658881dd657ba79396e8e440d69289d9fcf333b818e809f34a04d2df904c",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-7.txt",
+      "size": 11361,
+      "sha256": "c79a7fea0e3cac04cd43f20e7b648e5a0ff8fa5344e644b0ee09ca1162b62747",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-8.txt",
+      "size": 16962,
+      "sha256": "1f8729233617b193fd619213792ae16a41b95d2bbbf525dfe66998252ba68b16",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor-9.txt",
+      "size": 1643,
+      "sha256": "bf4da21bd20bcfb5b60b7ecc67fa864a79be049e21d6178076887f178dd6c71a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/android-art-image-extractor.txt",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 2927,
+      "sha256": "426755d2e7ec8f700cc2186a65ba669124836e1909ef069d03933828d45f9abc",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 9873,
+      "mode": 420,
+      "sha256": "66b0843212e1c31f9d0307d75f0f5259f6316b826da5653fe64dc799bc647829"
+    }
+  ],
+  "redistribution": "bundle"
+}
