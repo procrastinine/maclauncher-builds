@@ -48,12 +48,15 @@ export function sceneSources(repository){
  }
  edit('MoltenVK/MoltenVK/GPUObjects/MVKDevice.mm',[
   ['#include "MVKDevice.h"','#include "MVKDevice.h"\n#include "scene-interop.h"'],
+  ['void MVKDevice::encodeGPUAddressableBuffers(MVKUseResourceHelper& resources, MVKResourceUsageStages stage) {',
+   'void MVKDevice::encodeGPUAddressableBuffers(MVKUseResourceHelper& resources, MVKResourceUsageStages stage) {\n    // Residency sets already cover device-address allocations (AnyPS5-ARM 199bca7c07).\n    if (hasResidencySet()) return;'],
   ['PFN_vkVoidFunction MVKDevice::getProcAddr(const char* pName) {','PFN_vkVoidFunction MVKDevice::getProcAddr(const char* pName) {\n    if (pName && !strcmp(pName, "rsMoltenVKSceneOperationAPI")) return (PFN_vkVoidFunction)rsMoltenVKSceneOperationAPI;\n    if (pName && !strcmp(pName, "rsMoltenVKSceneStagingAPI")) return (PFN_vkVoidFunction)rsMoltenVKSceneStagingAPI;\n    if (pName && !strcmp(pName, "rsMoltenVKRecordSceneOperation")) return (PFN_vkVoidFunction)rsMoltenVKRecordSceneOperation;']
  ]);
  edit('MoltenVK/MoltenVK/GPUObjects/MVKDevice.h',[
   ['class MVKDevice : public MVKDispatchableVulkanAPIObject {\n\npublic:', 'class MVKDevice : public MVKDispatchableVulkanAPIObject {\n\npublic:\n    std::atomic<uint32_t> _macfxSceneRecordingCount{0};']
  ]);
  edit('MoltenVK/MoltenVK/GPUObjects/MVKQueue.mm',[
+  ['if ( !getMVKConfig().synchronousQueueSubmits ) {','if ( !getMVKConfig().synchronousQueueSubmits && _device->hasResidencySet() ) {'],
   ['mtlCmdBuffDesc.retainedReferences = retainRefs;', 'mtlCmdBuffDesc.retainedReferences = retainRefs || _device->_macfxSceneRecordingCount.load(std::memory_order_acquire) != 0;']
  ]);
  edit('MoltenVK/CMakeLists.txt',[['COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD','COMMAND ${CMAKE_COMMAND} -E echo db66022459ff']]);

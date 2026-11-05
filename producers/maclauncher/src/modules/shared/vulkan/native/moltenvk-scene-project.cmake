@@ -37,3 +37,6 @@ set(MVK_EXCLUDE_SPIRV_TOOLS ON CACHE BOOL "" FORCE)
 set(MVK_EXCLUDE_CEREAL OFF CACHE BOOL "" FORCE)
 set(MVK_BUILD_SHADER_CONVERTER_TOOL OFF CACHE BOOL "" FORCE)
 add_subdirectory("${MACFX_MOLTENVK_SOURCE}" upstream)
+
+# Async encoding uses the residency-backed path; the overlay keeps the legacy path synchronous.
+target_compile_definitions(MoltenVK PRIVATE MVK_CONFIG_SYNCHRONOUS_QUEUE_SUBMITS=0)
