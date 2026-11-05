@@ -1743,7 +1743,10 @@
       "rustComponents": [
         "rustfmt"
       ],
-      "cleanupRunner": true
+      "cleanupRunner": true,
+      "submodules": [
+        "sources/maclauncher-android"
+      ]
     },
     "versionBindings": [
       {
@@ -1816,7 +1819,10 @@
       "rustComponents": [
         "rustfmt"
       ],
-      "cleanupRunner": true
+      "cleanupRunner": true,
+      "submodules": [
+        "sources/maclauncher-android"
+      ]
     },
     "versionBindings": [
       {
@@ -1889,7 +1895,10 @@
       "rustComponents": [
         "rustfmt"
       ],
-      "cleanupRunner": true
+      "cleanupRunner": true,
+      "submodules": [
+        "sources/maclauncher-android"
+      ]
     },
     "versionBindings": [
       {
@@ -1962,7 +1971,10 @@
       "rustComponents": [
         "rustfmt"
       ],
-      "cleanupRunner": true
+      "cleanupRunner": true,
+      "submodules": [
+        "sources/maclauncher-android"
+      ]
     },
     "versionBindings": [
       {
@@ -2035,7 +2047,10 @@
       "rustComponents": [
         "rustfmt"
       ],
-      "cleanupRunner": true
+      "cleanupRunner": true,
+      "submodules": [
+        "sources/maclauncher-android"
+      ]
     },
     "versionBindings": [
       {
@@ -2125,7 +2140,10 @@
       "rustComponents": [
         "rustfmt"
       ],
-      "cleanupRunner": true
+      "cleanupRunner": true,
+      "submodules": [
+        "sources/maclauncher-android"
+      ]
     },
     "versionBindings": [
       {
