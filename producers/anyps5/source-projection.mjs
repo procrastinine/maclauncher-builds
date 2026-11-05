@@ -129,6 +129,7 @@ export const RUNTIME_OVERLAYS=[
  ["mouse-routing","applyMouseRoutingOverlay"],
  ["macos-aborts","applyAbortsOverlay"],
  ["macos-work-submission","applyWorkSubmissionOverlay"],
+ ["macos-graphics-compatibility","applyGraphicsCompatibilityOverlay"],
 ];
 
 export async function prepareSourceProjection({source,repositories},projection,{overlays=RUNTIME_OVERLAYS}={}){
