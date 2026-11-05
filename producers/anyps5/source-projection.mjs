@@ -139,6 +139,7 @@ export const RUNTIME_OVERLAYS=[
  ["macos-draw-performance/descriptor-reuse.mjs","applyDescriptorReuseOverlay"],
  ["macos-ngs2","applyNgs2Overlay"],
  ["macos-module-ordering","applyModuleOrderingOverlay"],
+ ["macos-mesh-compute","applyMeshComputeOverlay"],
 ];
 
 export async function prepareSourceProjection({source,repositories},projection,{overlays=RUNTIME_OVERLAYS}={}){

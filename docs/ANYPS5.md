@@ -8,7 +8,7 @@ Each build copies the tracked files into a disposable working copy, called the s
 
 ## Conversion tool
 
-The [relinker recipe](../producers/anyps5/source.json) builds the conversion tool with CMake and an Apple C++20 toolchain. It shares the [projection script](../producers/anyps5/source-projection.mjs) with the runtime recipe described below, and its projection adds an adapter for Darwin image metadata.
+The [relinker recipe](../producers/anyps5/source.json) builds the conversion tool with CMake and an Apple C++20 toolchain. It shares the [projection script](../producers/anyps5/source-projection.mjs) with the runtime recipe described below. Its adapters preserve Darwin image metadata, allow guest protection changes on generated image segments, register padding segments and order guest module initialization after resolved import providers. Placeholder libraries whose exported functions are all zero-return stubs defer to the host implementation; functional guest libraries retain their exports and two-level import ordinals.
 
 ```sh
 git submodule update --init sources/anyps5
@@ -44,17 +44,27 @@ The host adapters use native macOS interfaces for:
 - directory streams
 - network interface and DNS configuration
 
-Guest image metadata keeps its initialization, finalization and unwind information, and the upstream kernel startup, TLS allocation, main-thread dispatch and Darwin thread scheduling are used unchanged. Adapters for the image lifecycle preserve guest call state and run each finalizer once. A native TLS key stays allocated while a loaded image or a live thread allocation still uses it, and is released after the image finalizers and the last live thread allocation.
+Guest image metadata keeps its initialization, finalization and unwind information. Darwin adapters cover kernel startup, TLS allocation, main-thread dispatch and thread scheduling. Adapters for the image lifecycle preserve guest call state and run each finalizer once. A native TLS key stays allocated while a loaded image or a live thread allocation still uses it, and is released after the image finalizers and the last live thread allocation.
 
 AnyPS5's Mach-O link-edit writer keeps its import and export logic; a small adapter only enlarges its tables, without changing their order relative to the file data that follows them.
 
 Optional import-call tracing uses a native JIT mapping and preserves call arguments and return values. Host CPU-mask pinning and per-sensor hardware temperature readings report an explicit unsupported result.
+
+Kernel file reads flush pending GPU writes under the GPU memory mutex before writing guest memory. Unwatched storage-image results are written back when their saved guest state permits it. Write-watch registrations reset contained ranges in place, sequential faults share the existing protection block, and allocation and coverage snapshots retain their owners during concurrent reads.
+
+File and device event filters support low-water marks, Sysmodule unwind queries use kernel image metadata, and socket information accepts kernel socket descriptors. JIT memory uses shared Mach mappings. USB event handling preserves waiter ownership. Thread CPU clocks use Mach thread accounting, and spatial audio applies listener transforms, distance and cone attenuation, and Doppler adjustment.
+
+### Add-ons and updates
+
+`ANYPS5_ADDCONT_DIRS` supplies colon-separated add-on directories. Enumeration, entitlement status and mounts follow the content actually present in those directories. `ANYPS5_UPDATE_DIR` supplies an update directory whose non-module files override matching base-game files; a missing update file falls back to the base path. Updated executables and modules require conversion into the prepared game directory before launch.
 
 ### Window and input
 
 SDL window, event and mouse-mode changes run on the Cocoa main thread. The macOS cursor starts visible and uncaptured. F7 captures or releases it, and a release made this way stays in effect when window focus changes.
 
 Mouse input takes one of two routes: exclusively to the controller, or to the native mouse API. On the controller route, the configured button bindings apply even when a game opens the native mouse API. The runtime manifest declares the mouse routing and touchpad binding capabilities.
+
+Four controller slots keep separate input and motion state. Standard extended-pad reads use the standard controller records; invalid or unavailable controller ports return the corresponding controller error.
 
 ### Renderer optimizations
 
@@ -65,6 +75,16 @@ These renderer changes are general and independent of the Darwin host adapters:
 - Rectangle preparation resolves the requested shader pair and keeps pairs that were prepared separately.
 - Resource preparation reserves storage according to descriptor metadata.
 - Shader validation results are cached per exact module contents, binding metadata, draw state and device capabilities.
+- Copied shader headers use safe guest-memory reads. Null vertex descriptors and indices beyond every applicable vertex record fetch zeros without allocating padding up to the original index.
+- Buffer pools retain allocation capacity for explicitly ranged resources, adjacent host imports support GPU copies, and unchanged descriptor bindings reuse their allocations.
+
+### Renderer compatibility
+
+Capabilities select the rendering route. Storage images use sample zero when storage-image multisampling is unavailable, while sampled multisample images retain their native representation. Degenerate rectangles are culled. Tessellation-evaluation stages without subgroup support use single-lane lowering. Devices without last-vertex provoking reorder observable direct primitives while preserving winding and primitive restart.
+
+On macOS, geometry-path draws on devices without mesh shaders can use a compute pass followed by a vertex draw when push descriptors are available. This fallback supports triangle output with position, parameter and layer records. Clip and cull distances, custom interpolation and mesh barycentric outputs retain the unsupported-work result. Devices with mesh shaders keep their existing mesh route, and other graphics draws retain their existing paths.
+
+Unbindable draws and dispatches are skipped independently, with each reason logged once. Shader loop continue blocks retain their phi values through SPIR-V translation, image atomics preserve store ordering, and subgroup results use explicit storage across Metal expression lowering. Sampler LOD bias follows the device limit.
 
 ## Package
 
