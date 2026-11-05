@@ -53,5 +53,9 @@
         "include/wine/heap.h": "e51df7c87744e3cbea4cd03d1e08573205252eb275166c0d01f87340991550e7"
       }
     }
-  ]
+  ],
+  "forwarderArena": {
+    "headroomFactor": 2,
+    "pageBytes": 4096
+  }
 }

@@ -72,8 +72,26 @@ export function build({work,mingw,output}){
  }
  return packageOutput({work,mingw,output});
 }
+
+export function forwarderArena(source) {
+ const lsc=path.join(source,'dlls/lsteamclient');
+ const main=fs.readFileSync(path.join(lsc,'steamclient_main.c'),'utf8');
+ const slots=Number(main.match(/allocated\[(\d+)\]/)?.[1]);
+ const counts=walk(lsc).filter(p=>p.endsWith('.c')).flatMap(p=>[...fs.readFileSync(path.join(lsc,p),'utf8').matchAll(/alloc_vtable\([^;]*?,\s*(\d+),/g)].map(m=>Number(m[1])));
+ if(!slots||!counts.length)throw Error('The pinned allocation bounds are unavailable');
+ // Both supported PE ABIs use a UINT64 interface handle; the widest vtable
+ // pointer is eight bytes. All allocations share the upstream slot table.
+ const pointerBytes=8,interfaceBytes=pointerBytes+8,maximumVtableMethods=Math.max(...counts);
+ const maximumAllocationBytes=Math.max(interfaceBytes,maximumVtableMethods*pointerBytes);
+ const minimumBytes=4+slots*maximumAllocationBytes,headroomFactor=pins.forwarderArena.headroomFactor,pageBytes=pins.forwarderArena.pageBytes;
+ const bytes=Math.ceil(minimumBytes*headroomFactor/pageBytes)*pageBytes;
+ return {slots,maximumVtableMethods,pointerBytes,interfaceBytes,maximumAllocationBytes,minimumBytes,headroomFactor,pageBytes,bytes};
+}
+
 export function packageOutput({work,mingw,output}) {
  const source=path.join(work,'wine');
+ const arena=forwarderArena(source);put(path.join(work,'forwarder-arena.json'),JSON.stringify(arena,null,2)+'\n');
+ put(path.join(work,'forwarder-arena.h'),'#define STEAM_BRIDGE_ARENA_BYTES '+arena.bytes+'\n#define STEAM_BRIDGE_ALLOCATION_SLOTS '+arena.slots+'\n#define STEAM_BRIDGE_MAX_ALLOCATION '+arena.maximumAllocationBytes+'\n');
  const shim=path.join(source,'programs/steam.exe'),pe=path.join(work,'build-x86_64');
  run(path.join(mingw,'x86_64-w64-mingw32-clang++'),['-std=c++17','-D__WINESRC__','-DWINE_NO_LONG_TYPES','-DPATH_MAX=4096','-include',path.join(here,'helper-compat.h'),'-I'+shim,'-I'+path.join(shim,'proton-headers/steamworks_sdk_142'),'-I'+path.join(shim,'proton-headers/openvr/headers'),'-I'+path.join(shim,'proton-headers/wine/include'),'-idirafter',path.join(source,'include'),path.join(shim,'steam.cpp'),path.join(shim,'jsoncpp.cpp'),'-static','-Wl,--no-insert-timestamp','-ladvapi32','-lshlwapi','-lshell32','-lmsi','-luser32',path.join(pe,'dlls/ntdll/x86_64-windows/libntdll.a'),path.join(pe,'dlls/kernel32/x86_64-windows/libkernel32.a'),'-o',path.join(work,'steam.exe')]);
  for(const arch of ['x86_64','arm64']){const unresolved=capture('nm',['-u',path.join(work,'build-'+arch,'dlls/lsteamclient/lsteamclient.so')]);if(/^_(?:wow64_|ISteam|steamclient_)/m.test(unresolved))throw Error('Unresolved bridge implementation symbols');}
@@ -85,7 +103,7 @@ export function packageOutput({work,mingw,output}) {
   const exports=[...table.matchAll(/Ordinal: (\d+)\s+Name: (\w+)/g)];
   if(!exports.some(m=>m[2]==='CreateInterface'))throw Error('Missing bridge exports');
   const name=arch==='i386'?'steamclient':'steamclient64',def=path.join(work,name+'.def');put(def,'LIBRARY '+name+'\nEXPORTS\n'+exports.map(m=>m[2]+'=lsteamclient.'+m[2]+' @'+m[1]).join('\n')+'\n');
-  run(path.join(mingw,(arch==='i386'?'i686':'x86_64')+'-w64-mingw32-clang'),['-shared','-nostdlib','-Wl,--entry,'+(arch==='i386'?'_DllMain@12':'DllMain'),'-Wl,--no-insert-timestamp','-Wl,--out-implib,'+path.join(work,name+'.lib'),path.join(here,'forwarder.c'),def,'-o',path.join(output,arch+'-windows',name+'.dll')]);
+  run(path.join(mingw,(arch==='i386'?'i686':'x86_64')+'-w64-mingw32-clang'),['-shared','-nostdlib','-Wl,--entry,'+(arch==='i386'?'_DllMain@12':'DllMain'),'-Wl,--no-insert-timestamp','-Wl,--out-implib,'+path.join(work,name+'.lib'),'-I'+work,path.join(here,'forwarder.c'),def,'-o',path.join(output,arch+'-windows',name+'.dll')]);
  }
  copy(path.join(work,'steam.exe'),path.join(output,'steam.exe'));
  addLicense(output,'lsteamclient and Steamworks SDK',path.join(source,'dlls/lsteamclient/LICENSE'),'Steamworks-SDK');
