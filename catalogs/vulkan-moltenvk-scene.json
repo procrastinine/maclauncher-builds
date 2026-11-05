@@ -6,6 +6,45 @@
     {
       "schemaVersion": 2,
       "id": "vulkan-moltenvk-scene",
+      "version": "1.4.2-MCLv9",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "de5f0bb0d5c8f577b0f855b373cb3a88e4187c0f8ca02d1208f22afd541db1b6",
+      "sourceSha256": "95bd202b4020d7b7b986e0a2a6f52d3e193be46da7d0e8b65c22f0d0bf14ffab",
+      "updatePolicy": "manual",
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "bf940acd48f899d1c7fa771a1e6e8bb6e1760fbf"
+      },
+      "asset": {
+        "filename": "vulkan-moltenvk-scene-1.4.2-MCLv9-universal.tar.gz",
+        "sha256": "2dc5d48f76037cb952812c4b174f4b60e91caf74539db398f6b43b4f47dbadff",
+        "bytes": 3393103,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vulkan-moltenvk-scene%2Fv1.4.2-MCLv9%2Funiversal/vulkan-moltenvk-scene-1.4.2-MCLv9-universal.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "bf940acd48f899d1c7fa771a1e6e8bb6e1760fbf",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.1",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "41946867633",
+        "runAttempt": "1"
+      },
+      "tag": "vulkan-moltenvk-scene/v1.4.2-MCLv9/universal"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "vulkan-moltenvk-scene",
       "version": "1.4.2-MCLv7",
       "arch": "universal",
       "launcherArchitectures": [
