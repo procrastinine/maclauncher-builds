@@ -63,6 +63,7 @@ export function prepare(work){
  put(path.join(work,'inputs.json'),JSON.stringify({sources:[pins.proton,pins.notproton,...pins.headers].map(input=>({...input,revision:gitlink(input.path)})),wine:winePin.archive,toolchain},null,2)+'\n');
  return source;
 }
+export const compilerPath=(mingw,search=process.env.PATH)=>[mingw,search].filter(Boolean).join(path.delimiter);
 export function build({work,mingw,output}){
  const source=path.join(work,'wine');if(!fs.existsSync(path.join(work,'inputs.json')))prepare(work);
  const unixDir=path.join(source,'dlls/lsteamclient');
@@ -73,7 +74,7 @@ export function build({work,mingw,output}){
  put(unixFile,unixText);
  const unixSources=JSON.parse(fs.readFileSync(path.join(work,'unix-sources.json')));if(!unixSources.includes('bridge-paths.cpp'))unixSources.push('bridge-paths.cpp');put(path.join(work,'unix-sources.json'),JSON.stringify(unixSources));
  const nativeCC=capture('xcrun',['--find','clang']),nativeCXX=capture('xcrun',['--find','clang++']);
- const environment={...process.env,SDKROOT:capture('xcrun',['--sdk','macosx','--show-sdk-path']),CFLAGS:'-O2',CPPFLAGS:'',LDFLAGS:'',PATH:mingw+':/opt/homebrew/opt/bison/bin:/opt/homebrew/bin:'+process.env.PATH,MACOSX_DEPLOYMENT_TARGET:pins.minimumMacOS};
+ const environment={...process.env,SDKROOT:capture('xcrun',['--sdk','macosx','--show-sdk-path']),CFLAGS:'-O2',CPPFLAGS:'',LDFLAGS:'',PATH:compilerPath(mingw),MACOSX_DEPLOYMENT_TARGET:pins.minimumMacOS};
  for(const arch of ['x86_64','arm64']){
   const dir=path.join(work,'build-'+arch);mkdir(dir);
   if(!fs.existsSync(path.join(dir,'Makefile')))run('/bin/sh',[path.join(source,'configure'),'--host='+(arch==='arm64'?'aarch64':arch)+'-apple-darwin','--enable-archs=i386,x86_64','--disable-tests','--without-x','--without-freetype','CC='+nativeCC+' -arch '+arch,'CXX='+nativeCXX+' -arch '+arch],{cwd:dir,env:environment});
