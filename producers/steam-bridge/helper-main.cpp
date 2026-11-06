@@ -1,6 +1,7 @@
 /* Copyright (c) MacLauncher contributors. MIT license. */
 #include <string>
 #include "helper-client.inc"
+bool bridge_bootstrap_child(PROCESS_INFORMATION &child);
 
 /* Quote each argument according to the Windows command-line convention. */
 static std::wstring quote_argument(const WCHAR *arg)
@@ -27,6 +28,9 @@ int wmain(int argc, WCHAR **argv)
     DWORD attributes = GetFileAttributesW(argv[1]);
     if (attributes == INVALID_FILE_ATTRIBUTES || (attributes & FILE_ATTRIBUTE_DIRECTORY)) return 2;
 
+    WCHAR bootstrap[32768];
+    DWORD bootstrap_length = GetEnvironmentVariableW(L"MACLAUNCHER_STEAM_BOOTSTRAP", bootstrap, 32768);
+    if (!bootstrap_length || bootstrap_length >= 32768 || !LoadLibraryW(bootstrap)) return 125;
     set_active_process_pid();
     set_client_dll_paths();
     set_install_paths();
@@ -62,9 +66,16 @@ int wmain(int argc, WCHAR **argv)
             command += quote_argument(argv[i]);
         }
         STARTUPINFOW startup = { sizeof(startup) };
-        if (!CreateProcessW(argv[1], command.data(), NULL, NULL, FALSE, 0, NULL, NULL, &startup, &child))
+        if (!CreateProcessW(argv[1], command.data(), NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &startup, &child))
         {
             WINE_ERR("Child creation failed, error %lu.\n", GetLastError());
+            goto cleanup;
+        }
+        if (!bridge_bootstrap_child(child))
+        {
+            TerminateProcess(child.hProcess, 125);
+            WaitForSingleObject(child.hProcess, 5000);
+            result = 125;
             goto cleanup;
         }
         fprintf(stderr, "Steam helper pid=%lu child=%lu; real-client initialization succeeded\n",

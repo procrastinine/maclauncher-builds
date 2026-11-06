@@ -5,6 +5,7 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {addLicense,addLicenses} from '../../lib/licenses.mjs';
 import {helperClientSource} from './helper-subset.mjs';
+import {buildHelpers} from './helper-build.mjs';
 const here=import.meta.dirname,pins=JSON.parse(fs.readFileSync(path.join(here,'source.json')));
 const winePin=JSON.parse(fs.readFileSync(path.resolve(here,pins.winePin))),toolchain=JSON.parse(fs.readFileSync(path.resolve(here,pins.toolchainPin))).toolchain;
 const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
@@ -59,6 +60,13 @@ export function prepare(work){
 }
 export function build({work,mingw,output}){
  const source=path.join(work,'wine');if(!fs.existsSync(path.join(work,'inputs.json')))prepare(work);
+ const unixDir=path.join(source,'dlls/lsteamclient');
+ copy(path.join(here,'bridge-paths.cpp'),path.join(unixDir,'bridge-paths.cpp'));
+ const unixFile=path.join(unixDir,'unixlib.cpp');let unixText=fs.readFileSync(unixFile,'utf8');
+ unixText=unixText.replaceAll('ntdll_get_dos_file_name(', 'bridge_get_dos_file_name(').replaceAll('ntdll_get_unix_file_name(', 'bridge_get_unix_file_name(');
+ if(!unixText.includes('extern "C" NTSTATUS bridge_get_dos_file_name'))unixText=unixText.replace('#include "unix_private.h"','#include "unix_private.h"\nextern "C" NTSTATUS bridge_get_dos_file_name(const char *, WCHAR **, UINT);\nextern "C" NTSTATUS bridge_get_unix_file_name(const WCHAR *, char **, UINT);');
+ put(unixFile,unixText);
+ const unixSources=JSON.parse(fs.readFileSync(path.join(work,'unix-sources.json')));if(!unixSources.includes('bridge-paths.cpp'))unixSources.push('bridge-paths.cpp');put(path.join(work,'unix-sources.json'),JSON.stringify(unixSources));
  const nativeCC=capture('xcrun',['--find','clang']),nativeCXX=capture('xcrun',['--find','clang++']);
  const environment={...process.env,SDKROOT:capture('xcrun',['--sdk','macosx','--show-sdk-path']),CFLAGS:'-O2',CPPFLAGS:'',LDFLAGS:'',PATH:mingw+':/opt/homebrew/opt/bison/bin:/opt/homebrew/bin:'+process.env.PATH,MACOSX_DEPLOYMENT_TARGET:pins.minimumMacOS};
  for(const arch of ['x86_64','arm64']){
@@ -96,26 +104,24 @@ export function packageOutput({work,mingw,output}) {
  const shim=path.join(source,'programs/steam.exe'),pe=path.join(work,'build-x86_64');
  const helper=path.join(work,'notproton/steam-shim/steam.cpp');verify(helper,pins.notproton.files['steam-shim/steam.cpp']);
  put(path.join(work,'helper-client.inc'),helperClientSource(fs.readFileSync(helper,'utf8'),{upstreamHandshake:pins.helperLaunchHandshake===true}));
- run(path.join(mingw,'x86_64-w64-mingw32-clang++'),['-std=c++17','-O2',...(pins.helperLaunchHandshake?['-DSTEAM_BRIDGE_UPSTREAM_HANDSHAKE']:[]),'-municode','-D__WINESRC__','-DWINE_NO_LONG_TYPES','-DPATH_MAX=4096','-include',path.join(here,'helper-compat.h'),'-I'+work,'-I'+shim,'-I'+path.join(shim,'proton-headers/steamworks_sdk_142'),'-I'+path.join(shim,'proton-headers/openvr/headers'),'-I'+path.join(shim,'proton-headers/wine/include'),'-idirafter',path.join(source,'include'),path.join(here,'helper-main.cpp'),'-static','-Wl,--no-insert-timestamp','-ladvapi32','-lshlwapi','-lshell32','-lmsi','-luser32',path.join(pe,'dlls/ntdll/x86_64-windows/libntdll.a'),path.join(pe,'dlls/kernel32/x86_64-windows/libkernel32.a'),'-o',path.join(work,'steam.exe')]);
+ buildHelpers({work,mingw,source,pins});
  for(const arch of ['x86_64','arm64']){const unresolved=capture('nm',['-u',path.join(work,'build-'+arch,'dlls/lsteamclient/lsteamclient.so')]);if(/^_(?:wow64_|ISteam|steamclient_)/m.test(unresolved))throw Error('Unresolved bridge implementation symbols');}
  if(fs.existsSync(output))throw Error('Package output already exists');mkdir(output);
  for(const arch of ['x86_64','arm64']){const file=path.join(work,'build-'+arch,'dlls/lsteamclient/lsteamclient.so');if(capture('lipo',['-archs',file])!==arch)throw Error('Unix architecture mismatch');copy(file,path.join(output,arch==='arm64'?'aarch64-unix':'x86_64-unix','lsteamclient.so'));}
  for(const arch of ['i386','x86_64']){
   copy(path.join(work,'build-x86_64/dlls/lsteamclient',arch+'-windows/lsteamclient.dll'),path.join(output,arch+'-windows/lsteamclient.dll'));
-  const table=capture(path.join(mingw,'llvm-readobj'),['--coff-exports',path.join(output,arch+'-windows/lsteamclient.dll')]);
-  const exports=[...table.matchAll(/Ordinal: (\d+)\s+Name: (\w+)/g)];
-  if(!exports.some(m=>m[2]==='CreateInterface'))throw Error('Missing bridge exports');
-  const name=arch==='i386'?'steamclient':'steamclient64',def=path.join(work,name+'.def');put(def,'LIBRARY '+name+'\nEXPORTS\n'+exports.map(m=>m[2]+'=lsteamclient.'+m[2]+' @'+m[1]).join('\n')+'\n');
-  run(path.join(mingw,(arch==='i386'?'i686':'x86_64')+'-w64-mingw32-clang'),['-shared','-nostdlib','-Wl,--entry,'+(arch==='i386'?'_DllMain@12':'DllMain'),'-Wl,--no-insert-timestamp','-Wl,--out-implib,'+path.join(work,name+'.lib'),'-I'+work,path.join(here,'forwarder.c'),def,'-o',path.join(output,arch+'-windows',name+'.dll')]);
+  copy(path.join(work,'helper-'+arch,'mlsteam-bootstrap.dll'),path.join(output,arch+'-windows/mlsteam-bootstrap.dll'));
  }
- copy(path.join(work,'steam.exe'),path.join(output,'steam.exe'));
+ copy(path.join(work,'helper-x86_64/steam.exe'),path.join(output,'steam.exe'));
+ copy(path.join(work,'helper-i386/steam.exe'),path.join(output,'i386-windows/steam.exe'));
  addLicense(output,'lsteamclient and Steamworks SDK',path.join(source,'dlls/lsteamclient/LICENSE'),'Steamworks-SDK');
  addLicense(output,'steam_helper',path.join(work,'notproton/steam-shim/LICENSE'),'BSD-3-Clause');
  addLicense(output,'Wine headers',path.join(source,'COPYING.LIB'),'LGPL-2.1');
  addLicense(output,'OpenVR',path.join(work,'headers/openvr/LICENSE'),'BSD-3-Clause');
  addLicense(output,'JsonCpp',path.join(here,'licenses/JsonCpp.txt'),'JsonCpp');
  const files=walk(output).map(p=>({path:p,mode:fs.statSync(path.join(output,p)).mode & 0o777,size:fs.statSync(path.join(output,p)).size,sha256:hash(fs.readFileSync(path.join(output,p)))}));
- const manifest={schemaVersion:1,managerId:pins.id,version:pins.version,platform:'darwin',arch:'universal',minimumMacOS:pins.minimumMacOS,executableRelative:'steam.exe',files,dependencies:[]};
+ const steamBridge={abi:1,role:'native-steam-client-bridge',native:{x86_64:'x86_64-unix/lsteamclient.so',aarch64:'aarch64-unix/lsteamclient.so'},windows:Object.fromEntries(['i386','x86_64'].map(arch=>[arch,{builtin:arch+'-windows/lsteamclient.dll',bootstrap:arch+'-windows/mlsteam-bootstrap.dll',helper:arch==='i386'?'i386-windows/steam.exe':'steam.exe'}]))};
+ const manifest={steamBridge,schemaVersion:1,managerId:pins.id,version:pins.version,platform:'darwin',arch:'universal',minimumMacOS:pins.minimumMacOS,executableRelative:'steam.exe',files,dependencies:[]};
  put(path.join(output,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
  const mf=path.join(output,'manifest.json');
  const declaration={id:pins.id,version:pins.version,arch:'universal',launcherArchitectures:['arm64','x64'],minimumMacOS:pins.minimumMacOS,sourceRelative:null,sourceSha256:hash(fs.readFileSync(path.join(here,'source.json'))),directoryRelative:[pins.id,pins.version,'universal'].join('/'),manifestRelative:'manifest.json',manifestSha256:hash(fs.readFileSync(mf)),files:[...files,{path:'manifest.json',mode:0o644,size:fs.statSync(mf).size,sha256:hash(fs.readFileSync(mf))}]};

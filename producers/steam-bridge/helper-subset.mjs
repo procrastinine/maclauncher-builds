@@ -16,5 +16,6 @@ export function helperClientSource(source, {upstreamHandshake=false}={}) {
   if(compare<0||compareEnd<compare)throw Error('Pinned wide-string comparison boundary changed');
   selected+='\n'+source.slice(compare,compareEnd)+source.slice(start,end);
  }
+ selected=selected.replace('steamclient_module = LoadLibraryA("steamclient64.dll");','#ifdef _WIN64\n    steamclient_module = LoadLibraryA("steamclient64.dll");\n#else\n    steamclient_module = LoadLibraryA("steamclient.dll");\n#endif');
  return selected;
 }
