@@ -1929,16 +1929,7 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/nxnative",
       "entries": [
-        "producers/nxnative/build.mjs",
-        "producers/nxnative/source.json",
-        "producers/nxnative/dependencies.mjs",
-        "producers/nxnative/dependencies.json",
-        "producers/nxnative/nx-extract.lock.json",
-        "producers/nxnative/overlays/apply.mjs",
-        "producers/nxnative/runtime/nxnative.py",
-        "producers/nxnative/package.mjs",
-        "producers/nxnative/runtime/metal-toolchain.m",
-        "producers/nxnative/runtime/keyless_input.py"
+        "producers/nxnative"
       ],
       "buildEntry": "producers/nxnative/build.mjs"
     },
