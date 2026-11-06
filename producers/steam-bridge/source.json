@@ -4,54 +4,25 @@
   "version": "1.0.0",
   "minimumMacOS": "13.0",
   "notproton": {
-    "repository": "https://github.com/NotProtonNot/NotProton",
-    "commit": "557980d894de5f97e01e11c22afd3dd8cbb76ec0",
-    "files": {
-      "lsteamclient/LICENSE": "80fda9147f8ee707cd18d1d6d71b307063fa3a02057a7c789de47f7c003510f1",
-      "lsteamclient/build.sh": "16ee0b80fe644573eea5bc3c63b3f6b640abec910e374e7bd3f0dba2a96d4492",
-      "lsteamclient/fetch.sh": "d97169a90eed01538a9335e88919079b0afb01b75d9b69613f75b73d666be2ab",
-      "lsteamclient/serialized005.patch": "16c63abe0c96d2292c6050d28195f56068cc5c241444ac89b3d4be2f6c08ef65",
-      "lsteamclient/steamclient_main.c": "9c0762a90c3d32abf1a1f953da913913618acb138cabf1f4bca8628a0d3d4ab0",
-      "lsteamclient/steamworks_sdk_165x/isteamnetworkingsocketsserialized.h": "71f2ed5be9cac309e4b7ad6b8dee3864f520768098eb69dab9f9eec78f6cacd8",
-      "lsteamclient/unix_steam_input_manual.cpp": "3f9e3390a9c4b060a367a312d61f84fc3690141ef34811484b3c21481d7583a7",
-      "lsteamclient/unixlib.cpp": "b88b4b90b2473931310f79172631aa3ddfb129befbe933b03c53fd1611fb506b",
-      "steam-shim/LICENSE": "3df3b1723e04307176b7ffe1f424514d5f871d03d2c2f668652bc8b6dfcd72af",
-      "steam-shim/Makefile.in": "774966ac41adc8b08006259aa51785f5d6b72798118a5bdae7060064afdd64cf",
-      "steam-shim/dlfcn.h": "5daddded577499a9359b93d2caf8b43387a83629d47d1d0f6fa04dfe9ebd8d68",
-      "steam-shim/json/json-forwards.h": "74a06407028e0d79735d4199f194f4b83df123153610e521a0305ce25a84e664",
-      "steam-shim/json/json.h": "dc678ddb2f21936f7e778a90b4579150dfb198a7d9adff5da0de789297757c71",
-      "steam-shim/jsoncpp.cpp": "bd8df7509444c8ac9bcc0559e1ae28dfb20f614a14155cdd3807987be224f091",
-      "steam-shim/posix_compat.h": "4b4f9de42aa53651ce969293c8cd5181f458d39284a1c5f21e63886d5d59b9b3",
-      "steam-shim/steam.cpp": "dcfdec96155696d91bdadeee091f3a1f588da4451aac83240bd5cbcc210ebc15"
-    }
+    "path": "sources/steam-bridge-notproton",
+    "repository": "https://github.com/NotProtonNot/NotProton"
   },
   "proton": {
-    "repository": "https://github.com/ValveSoftware/Proton",
-    "commit": "164e0ccd2ea2b1ec2e5d08dc97f65b184c2539ca",
-    "lsteamclientDigest": "b286df1df46a70d9e2cc674676afcc6e08b1a56ce472e5add0932b86940657bf",
-    "steamHelperFiles": {
-      "Makefile.in": "68db082a9be8c943ee5873d6bb4d94af1318c1f108a435b09aa84560276cc2e9",
-      "steam.c": "fad4b25198827b58c4e2d143a5cade4372bef918947789fa8b51ed6230e2d23d"
-    }
+    "path": "sources/steam-bridge-proton",
+    "repository": "https://github.com/ValveSoftware/Proton"
   },
   "winePin": "../maclauncher/src/modules/crossover/temporal/vulkan/source.json",
   "toolchainPin": "../maclauncher/src/modules/crossover/temporal/xess/source.json",
   "headers": [
     {
-      "repository": "https://github.com/ValveSoftware/openvr",
-      "commit": "f51d87ecf8f7903e859b0aa4d617ff1e5f33db5a",
-      "files": {
-        "headers/openvr.h": "4f1242febb91d23e1a8317b988dbecec63476603f67458872d3b916cd347df32",
-        "src/ivrclientcore.h": "07c8ce981a59fb7cd1dc30572f0c9972d98e6275e95527f0f7a74a18bc0cf846",
-        "LICENSE": "f56ff606104d4ef18e617921a75c73ad73b5a1a1d70c69590c29de16919e04ad"
-      }
+      "project": "openvr",
+      "path": "sources/steam-bridge-openvr",
+      "repository": "https://github.com/ValveSoftware/openvr"
     },
     {
-      "repository": "https://github.com/ValveSoftware/wine",
-      "commit": "015230dc0f78a543032dea0907f6c97304b25ca3",
-      "files": {
-        "include/wine/heap.h": "e51df7c87744e3cbea4cd03d1e08573205252eb275166c0d01f87340991550e7"
-      }
+      "project": "wine-headers",
+      "path": "sources/steam-bridge-wine-headers",
+      "repository": "https://github.com/ValveSoftware/wine"
     }
   ],
   "forwarderArena": {

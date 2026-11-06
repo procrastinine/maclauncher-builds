@@ -3,32 +3,31 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
-import {addLicense,addLicenses} from '../../lib/licenses.mjs';
+import {addLicense} from '../../lib/licenses.mjs';
+import {gitlink} from '../../lib/pins.mjs';
 import {helperClientSource} from './helper-subset.mjs';
 import {buildHelpers} from './helper-build.mjs';
-const here=import.meta.dirname,pins=JSON.parse(fs.readFileSync(path.join(here,'source.json')));
+const here=import.meta.dirname,root=path.resolve(here,'../..'),pins=JSON.parse(fs.readFileSync(path.join(here,'source.json')));
 const winePin=JSON.parse(fs.readFileSync(path.resolve(here,pins.winePin))),toolchain=JSON.parse(fs.readFileSync(path.resolve(here,pins.toolchainPin))).toolchain;
 const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
 const run=(c,a,o={})=>execFileSync(c,a,{stdio:'inherit',...o});
 const capture=(c,a,o={})=>execFileSync(c,a,{encoding:'utf8',...o}).trim();
 const mkdir=p=>fs.mkdirSync(p,{recursive:true});
 const put=(p,b)=>{mkdir(path.dirname(p));fs.writeFileSync(p,b);};
-const copy=(a,b)=>{mkdir(path.dirname(b));fs.cpSync(a,b,{recursive:true});};
+const copy=(a,b)=>{mkdir(path.dirname(b));fs.cpSync(a,b,{recursive:true,filter:file=>path.basename(file)!=='.git'});};
 const walk=d=>fs.readdirSync(d,{recursive:true}).filter(p=>fs.statSync(path.join(d,p)).isFile()).sort();
-function verify(file,want){if(hash(fs.readFileSync(file))!==want)throw Error('Source digest mismatch: '+file);}
-function treeDigest(dir){const h=crypto.createHash('sha256');for(const p of walk(dir)){h.update(Buffer.from(hash(Buffer.from(p)),'hex'));h.update(Buffer.from(hash(fs.readFileSync(path.join(dir,p))),'hex'));}return h.digest('hex');}
+function verifyArchive(file,want){if(hash(fs.readFileSync(file))!==want)throw Error('Archive integrity mismatch: '+file);}
 function fetch(url,file){if(!fs.existsSync(file)){mkdir(path.dirname(file));run('curl',['-fLsS',url,'-o',file+'.part']);fs.renameSync(file+'.part',file);}return file;}
-function archive(repo,commit,name,work){const file=fetch(repo.replace('https://github.com/','https://codeload.github.com/')+'/tar.gz/'+commit,path.join(work,name+'.tar.gz'));const dir=path.join(work,name);if(!fs.existsSync(dir)){mkdir(dir);run('tar',['xzf',file,'--strip-components=1','-C',dir]);}return dir;}
+export function gitSource(input, revision=gitlink(input.path), directory=path.join(root,input.path)) {
+ if(capture('git',['-C',directory,'rev-parse','HEAD'])!==revision)throw Error('Git source differs from its declared commit: '+input.path);
+ return directory;
+}
 export function prepare(work){
  mkdir(work);
- const proton=archive(pins.proton.repository,pins.proton.commit,'proton',work);
- if(treeDigest(path.join(proton,'lsteamclient'))!==pins.proton.lsteamclientDigest)throw Error('Proton extracted lsteamclient digest differs');
- for(const [p,h]of Object.entries(pins.proton.steamHelperFiles))verify(path.join(proton,'steam_helper',p),h);
- const np=archive(pins.notproton.repository,pins.notproton.commit,'notproton',work);
- for(const [p,h]of Object.entries(pins.notproton.files))verify(path.join(np,p),h);
- const wineArchive=fetch(winePin.archive.url,path.join(work,'crossover.tar.gz'));verify(wineArchive,winePin.archive.sha256);
+ const proton=gitSource(pins.proton);
+ const np=gitSource(pins.notproton);
+ const wineArchive=fetch(winePin.archive.url,path.join(work,'crossover.tar.gz'));verifyArchive(wineArchive,winePin.archive.sha256);
  const base=path.join(work,'wine-original');if(!fs.existsSync(base)){mkdir(base);run('tar',['xzf',wineArchive,'--strip-components=2','-C',base,winePin.archive.directory]);}
- for(const p of ['include/wine/unixlib.h','configure.ac'])verify(path.join(base,p),winePin.originalFiles[p]);
  const source=path.join(work,'wine');if(fs.existsSync(source))throw Error('Use a fresh work directory; source assembly is immutable');
  copy(base,source);
  const lsc=path.join(source,'dlls/lsteamclient');copy(path.join(proton,'lsteamclient'),lsc);
@@ -42,10 +41,13 @@ export function prepare(work){
  copy(path.join(np,'lsteamclient/steamworks_sdk_165x/isteamnetworkingsocketsserialized.h'),path.join(lsc,'steamworks_sdk_165x/isteamnetworkingsocketsserialized.h'));
  run('patch',['-p1','--forward','-i',path.join(np,'lsteamclient/serialized005.patch')],{cwd:lsc});
  const shim=path.join(source,'programs/steam.exe');mkdir(shim);
- for(const p of Object.keys(pins.notproton.files).filter(p=>p.startsWith('steam-shim/')))copy(path.join(np,p),path.join(shim,p.slice(11)));
+ copy(path.join(np,'steam-shim'),shim);
  copy(path.join(lsc,'steamworks_sdk_142'),path.join(shim,'proton-headers/steamworks_sdk_142'));
- for(const h of pins.headers)for(const [p,digest]of Object.entries(h.files)){
-  const project=h.repository.split('/').pop(),file=fetch(h.repository.replace('github.com','raw.githubusercontent.com')+'/'+h.commit+'/'+p,path.join(work,'headers',project,p));verify(file,digest);copy(file,path.join(shim,'proton-headers',project,p));
+ for(const input of pins.headers){
+  const checkout=gitSource(input),headers=path.join(work,'headers',input.project==='wine-headers'?'wine':input.project);
+  if(input.project==='openvr'){copy(path.join(checkout,'headers'),path.join(headers,'headers'));copy(path.join(checkout,'src/ivrclientcore.h'),path.join(headers,'src/ivrclientcore.h'));}
+  else copy(path.join(checkout,'include/wine/heap.h'),path.join(headers,'include/wine/heap.h'));
+  copy(headers,path.join(shim,'proton-headers',input.project==='wine-headers'?'wine':input.project));
  }
  // Wine 11.0 makedep does not classify .cpp unix-only sources. Build them explicitly.
  const mf=path.join(lsc,'Makefile.in');put(path.join(work,'unix-sources.json'),JSON.stringify([...fs.readFileSync(mf,'utf8').matchAll(/^\s*([A-Za-z0-9_]+\.cpp)\s*\\?\s*$/gm)].map(m=>m[1])));put(mf,fs.readFileSync(mf,'utf8').replace(/^\s*[A-Za-z0-9_]+\.cpp\s*\\?\s*$/gm,''));
@@ -55,7 +57,7 @@ export function prepare(work){
  ac=ac.replace(/\nWINE_CONFIG_MAKEFILE\(dlls\/lsteamclient\)[\s\S]*$/,'');
  ac=ac.replace('AC_OUTPUT','WINE_CONFIG_MAKEFILE(dlls/lsteamclient)\nWINE_CONFIG_MAKEFILE(programs/steam.exe)\nAC_OUTPUT');put(path.join(source,'configure.ac'),ac);
  run('autoconf',[],{cwd:source});
- put(path.join(work,'inputs.json'),JSON.stringify({pins,wine: winePin.archive,toolchain,extracted:{lsteamclient:treeDigest(path.join(proton,'lsteamclient')),steamHelper:treeDigest(path.join(proton,'steam_helper')),overlay: Object.fromEntries(Object.keys(pins.notproton.files).map(p=>[p,hash(fs.readFileSync(path.join(np,p)))]))}},null,2)+'\n');
+ put(path.join(work,'inputs.json'),JSON.stringify({sources:[pins.proton,pins.notproton,...pins.headers].map(input=>({...input,revision:gitlink(input.path)})),wine:winePin.archive,toolchain},null,2)+'\n');
  return source;
 }
 export function build({work,mingw,output}){
@@ -102,7 +104,7 @@ export function packageOutput({work,mingw,output}) {
  const arena=forwarderArena(source);put(path.join(work,'forwarder-arena.json'),JSON.stringify(arena,null,2)+'\n');
  put(path.join(work,'forwarder-arena.h'),'#define STEAM_BRIDGE_ARENA_BYTES '+arena.bytes+'\n#define STEAM_BRIDGE_ALLOCATION_SLOTS '+arena.slots+'\n#define STEAM_BRIDGE_MAX_ALLOCATION '+arena.maximumAllocationBytes+'\n');
  const shim=path.join(source,'programs/steam.exe'),pe=path.join(work,'build-x86_64');
- const helper=path.join(work,'notproton/steam-shim/steam.cpp');verify(helper,pins.notproton.files['steam-shim/steam.cpp']);
+ const helper=path.join(source,'programs/steam.exe/steam.cpp');
  put(path.join(work,'helper-client.inc'),helperClientSource(fs.readFileSync(helper,'utf8'),{upstreamHandshake:pins.helperLaunchHandshake===true}));
  buildHelpers({work,mingw,source,pins});
  for(const arch of ['x86_64','arm64']){const unresolved=capture('nm',['-u',path.join(work,'build-'+arch,'dlls/lsteamclient/lsteamclient.so')]);if(/^_(?:wow64_|ISteam|steamclient_)/m.test(unresolved))throw Error('Unresolved bridge implementation symbols');}
@@ -115,9 +117,9 @@ export function packageOutput({work,mingw,output}) {
  copy(path.join(work,'helper-x86_64/steam.exe'),path.join(output,'steam.exe'));
  copy(path.join(work,'helper-i386/steam.exe'),path.join(output,'i386-windows/steam.exe'));
  addLicense(output,'lsteamclient and Steamworks SDK',path.join(source,'dlls/lsteamclient/LICENSE'),'Steamworks-SDK');
- addLicense(output,'steam_helper',path.join(work,'notproton/steam-shim/LICENSE'),'BSD-3-Clause');
+ addLicense(output,'steam_helper',path.join(source,'programs/steam.exe/LICENSE'),'BSD-3-Clause');
  addLicense(output,'Wine headers',path.join(source,'COPYING.LIB'),'LGPL-2.1');
- addLicense(output,'OpenVR',path.join(work,'headers/openvr/LICENSE'),'BSD-3-Clause');
+ addLicense(output,'OpenVR',path.join(root,pins.headers.find(input=>input.project==='openvr').path,'LICENSE'),'BSD-3-Clause');
  addLicense(output,'JsonCpp',path.join(here,'licenses/JsonCpp.txt'),'JsonCpp');
  const files=walk(output).map(p=>({path:p,mode:fs.statSync(path.join(output,p)).mode & 0o777,size:fs.statSync(path.join(output,p)).size,sha256:hash(fs.readFileSync(path.join(output,p)))}));
  const steamBridge={abi:1,role:'native-steam-client-bridge',native:{x86_64:'x86_64-unix/lsteamclient.so',aarch64:'aarch64-unix/lsteamclient.so'},windows:Object.fromEntries(['i386','x86_64'].map(arch=>[arch,{builtin:arch+'-windows/lsteamclient.dll',bootstrap:arch+'-windows/mlsteam-bootstrap.dll',helper:arch==='i386'?'i386-windows/steam.exe':'steam.exe'}]))};

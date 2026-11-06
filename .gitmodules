@@ -270,3 +270,15 @@
 [submodule "producers/vn-adaptations/upstreams/kag3"]
 	path = producers/vn-adaptations/upstreams/kag3
 	url = https://github.com/krkrsdl2/kag3.git
+[submodule "sources/steam-bridge-proton"]
+	path = sources/steam-bridge-proton
+	url = https://github.com/ValveSoftware/Proton
+[submodule "sources/steam-bridge-notproton"]
+	path = sources/steam-bridge-notproton
+	url = https://github.com/NotProtonNot/NotProton
+[submodule "sources/steam-bridge-openvr"]
+	path = sources/steam-bridge-openvr
+	url = https://github.com/ValveSoftware/openvr
+[submodule "sources/steam-bridge-wine-headers"]
+	path = sources/steam-bridge-wine-headers
+	url = https://github.com/ValveSoftware/wine

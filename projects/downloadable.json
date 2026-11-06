@@ -2727,8 +2727,7 @@
         "repository": "ValveSoftware/Proton",
         "url": "https://github.com/ValveSoftware/Proton",
         "pin": {
-          "file": "producers/steam-bridge/source.json",
-          "pointer": "/proton"
+          "gitlink": "sources/steam-bridge-proton"
         }
       },
       {
@@ -2737,8 +2736,7 @@
         "repository": "NotProtonNot/NotProton",
         "url": "https://github.com/NotProtonNot/NotProton",
         "pin": {
-          "file": "producers/steam-bridge/source.json",
-          "pointer": "/notproton"
+          "gitlink": "sources/steam-bridge-notproton"
         }
       },
       {
@@ -2747,8 +2745,7 @@
         "repository": "ValveSoftware/openvr",
         "url": "https://github.com/ValveSoftware/openvr",
         "pin": {
-          "file": "producers/steam-bridge/source.json",
-          "pointer": "/headers/0"
+          "gitlink": "sources/steam-bridge-openvr"
         }
       },
       {
@@ -2757,8 +2754,7 @@
         "repository": "ValveSoftware/wine",
         "url": "https://github.com/ValveSoftware/wine",
         "pin": {
-          "file": "producers/steam-bridge/source.json",
-          "pointer": "/headers/1"
+          "gitlink": "sources/steam-bridge-wine-headers"
         }
       }
     ],
