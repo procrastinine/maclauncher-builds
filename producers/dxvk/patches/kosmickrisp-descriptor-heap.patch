@@ -1,0 +1,12 @@
+--- a/src/dxvk/dxvk_device_info.cpp
++++ b/src/dxvk/dxvk_device_info.cpp
+@@ -494,7 +494,8 @@
+       // have known performance regressions currently.
+       // Keep this disabled on Turnip for now to give the driver as much information
+       // about resources used as possible; CPU overhead should not matter there.
+-      bool enableDescriptorHeap = m_properties.vk12.driverID == VK_DRIVER_ID_MESA_RADV
++      bool enableDescriptorHeap = m_properties.vk12.driverID == VK_DRIVER_ID_MESA_KOSMICKRISP
++                               || m_properties.vk12.driverID == VK_DRIVER_ID_MESA_RADV
+                                || m_properties.vk12.driverID == VK_DRIVER_ID_MESA_NVK
+                                || m_properties.vk12.driverID == VK_DRIVER_ID_MESA_LLVMPIPE
+                                || m_properties.vk12.driverID == VK_DRIVER_ID_INTEL_OPEN_SOURCE_MESA
