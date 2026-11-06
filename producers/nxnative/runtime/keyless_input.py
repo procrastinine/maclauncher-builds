@@ -13,9 +13,11 @@ def inspect_keyless(source, upstream):
     scripts = upstream / 'scripts'
     sys.path.insert(0, str(scripts))
     try:
-        dump = runpy.run_path(str(scripts / 'pack_dump.py'))
         nups = [source] if source.is_file() else sorted(p for p in source.iterdir() if p.is_file() and p.suffix.lower() == '.nup')
         containers = [] if source.is_file() else [p for p in source.iterdir() if p.is_file() and p.suffix.lower() in {'.nsp', '.xci', '.nsz', '.xcz'}]
+        if not nups and (source.is_file() or not any((source / p).exists() for p in ('base/exefs/main.npdm', 'exefs/main.npdm', 'updates'))): return None
+        if not (scripts / 'pack_dump.py').is_file(): raise ValueError('Select an nxnative source with decrypted dump support.')
+        dump = runpy.run_path(str(scripts / 'pack_dump.py'))
         is_dump = source.is_dir() and dump['is_dump'](source)
         if containers and (nups or is_dump) or is_dump and nups or len(nups) > 1:
             raise ValueError('Choose one NUP or a decrypted dump without other game inputs beside it.')
@@ -30,10 +32,14 @@ def inspect_keyless(source, upstream):
             module = runpy.run_path(str(scripts / 'pack_nup.py'))
             with module['Nup'](file) as n:
                 if n.ndirs + len(n.files) > 100000: raise ValueError('Too many NUP records.')
+                for package in n.packages:
+                    if package.meta_size > MAX_TABLE: raise ValueError('NUP control metadata exceeds its limit.')
+                for name, size, *_ in n.files:
+                    if name == b'main.npdm' and (size < 128 or size > 1024 * 1024): raise ValueError('Invalid NUP NPDM size.')
                 for name, _, _ in n.dirs:
-                    if name in (b'.', b'..') or b'/' in name or b'\\' in name or b'\0' in name: raise ValueError('Unsafe NUP directory.')
+                    if len(name) > 4096 or name in (b'.', b'..') or b'/' in name or b'\\' in name or b'\0' in name: raise ValueError('Unsafe NUP directory.')
                 for name, *_ in n.files:
-                    if not name or name in (b'.', b'..') or b'/' in name or b'\\' in name or b'\0' in name: raise ValueError('Unsafe NUP file.')
+                    if len(name) > 4096 or not name or name in (b'.', b'..') or b'/' in name or b'\\' in name or b'\0' in name: raise ValueError('Unsafe NUP file.')
                 visiting, done = set(), set()
                 def visit(index, depth):
                     if depth > 64 or index in visiting: raise ValueError('NUP directory cycle or depth limit.')
