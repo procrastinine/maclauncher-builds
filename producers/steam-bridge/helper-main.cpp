@@ -1,6 +1,7 @@
 /* Copyright (c) MacLauncher contributors. MIT license. */
 #include <string>
 #include "helper-client.inc"
+#include "helper-registry.h"
 bool bridge_bootstrap_child(PROCESS_INFORMATION &child);
 
 /* Quote each argument according to the Windows command-line convention. */
@@ -31,9 +32,7 @@ int wmain(int argc, WCHAR **argv)
     WCHAR bootstrap[32768];
     DWORD bootstrap_length = GetEnvironmentVariableW(L"MACLAUNCHER_STEAM_BOOTSTRAP", bootstrap, 32768);
     if (!bootstrap_length || bootstrap_length >= 32768 || !LoadLibraryW(bootstrap)) return 125;
-    set_active_process_pid();
-    set_client_dll_paths();
-    set_install_paths();
+    if (!bridge_registry()) return 125;
 
 #ifdef STEAM_BRIDGE_UPSTREAM_HANDSHAKE
     HANDLE master = CreateEventA(NULL, FALSE, FALSE, "Steam3Master_SharedMemLock");

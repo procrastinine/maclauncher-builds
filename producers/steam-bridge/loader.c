@@ -23,25 +23,25 @@ static int executable(IMAGE_NT_HEADERS *nt, DWORD rva, SIZE_T size)
             size <= section[i].Misc.VirtualSize - (rva - section[i].VirtualAddress)) return 1;
     return 0;
 }
-static int prepare(HMODULE self)
+static int prepare(void)
 {
     WCHAR filename[32768];
-    DWORD length = GetModuleFileNameW(self, filename, 32768);
-    if (!length || length >= 32768) return 0;
-    WCHAR *last = wcsrchr(filename, L'\\');
-    if (!last) return 0;
+    WCHAR builtin[32768];
 #ifdef _WIN64
     const WCHAR name[] = L"steamclient64.dll";
+    const WCHAR variable[] = L"MACLAUNCHER_STEAM_CLIENT64";
 #else
     const WCHAR name[] = L"steamclient.dll";
+    const WCHAR variable[] = L"MACLAUNCHER_STEAM_CLIENT32";
 #endif
-    if ((last - filename) + 1 + (sizeof(name) / sizeof(WCHAR)) >= 32768) return 0;
-    wcscpy(last + 1, name);
+    DWORD length = GetEnvironmentVariableW(variable, filename, 32768);
+    DWORD builtin_length = GetEnvironmentVariableW(L"MACLAUNCHER_STEAM_BUILTIN", builtin, 32768);
+    if (!length || length >= 32768 || !builtin_length || builtin_length >= 32768) return 0;
     // Windows Steam initialization is never run. This is the exported loader
     // equivalent of the fork's LDR_DONT_RESOLVE_REFS internal loader flag.
     if (GetModuleHandleW(name)) return 0;
     HMODULE genuine = LoadLibraryExW(filename, NULL, DONT_RESOLVE_DLL_REFERENCES);
-    HMODULE bridge = genuine ? LoadLibraryW(L"lsteamclient.dll") : NULL;
+    HMODULE bridge = genuine ? LoadLibraryW(builtin) : NULL;
     if (!genuine || !bridge) return 0;
     BYTE *base = (BYTE *)genuine;
     IMAGE_DOS_HEADER *dos = (IMAGE_DOS_HEADER *)base;
@@ -104,7 +104,7 @@ BOOL WINAPI DllMain(HINSTANCE module, DWORD reason, void *reserved)
     if (reason == DLL_PROCESS_ATTACH)
     {
         DisableThreadLibraryCalls(module);
-        if (!prepare(module))
+        if (!prepare())
         {
             fputs("Steam bridge: owned loader preparation failed; stopping before native Windows Steam initialization\n", stderr);
             fflush(stderr);

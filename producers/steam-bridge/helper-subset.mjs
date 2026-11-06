@@ -5,6 +5,12 @@ export function helperClientSource(source, {upstreamHandshake=false}={}) {
  const end=source.indexOf(marker);
  if(end<0||source.indexOf(marker,end+1)>=0)throw Error('Pinned helper boundary changed');
  let selected=source.slice(0,end);
+ // The launcher supplies absolute managed paths; the upstream prefix-copy
+ // registry writers are not part of this helper.
+ const registryStart=selected.indexOf('static void set_active_process_pid(void)');
+ const registryEnd=selected.indexOf('static DWORD WINAPI create_steam_window',registryStart);
+ if(registryStart<0||registryEnd<registryStart)throw Error('Pinned registry boundary changed');
+ selected=selected.slice(0,registryStart)+selected.slice(registryEnd);
  const create='    CreateWindowW(class_nameW, steamW, WS_POPUP, 40, 40,\n                  400, 300, NULL, NULL, NULL, NULL);';
  if(!selected.includes(create))throw Error('Pinned discovery window boundary changed');
  // Readiness is local and unnamed; the window itself is the upstream window.
