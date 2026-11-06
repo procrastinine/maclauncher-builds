@@ -2795,6 +2795,7 @@
       "entries": [
         "producers/vkd3d-proton/build.mjs",
         "producers/vkd3d-proton/metalfx.patch",
+        "producers/vkd3d-proton/ngx.patch",
         "producers/vkd3d-proton/metalfx.c",
         "producers/vkd3d-proton/vkd3d_metalfx.h",
         "producers/vkd3d-proton/inputs.json"

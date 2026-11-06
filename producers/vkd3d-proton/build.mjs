@@ -35,11 +35,14 @@ export function buildProvider({work,output,mingw,glslang,source=path.join(here,'
     run(ninja,['-C',build,'-j'+String(jobs)],{env});
     built.push({architecture,build});
   }
-  // The NGX core is used unchanged; it finds the interface through vkd3d_metalfx.h.
-  const nvngx=path.join(work,'nvngx.dll');
+  // The NGX core finds the interface through vkd3d_metalfx.h. ngx.patch offers Frame Generation only where the
+  // device's command lists interpolate frames.
+  const nvngx=path.join(work,'nvngx.dll'),core=path.join(work,'ngx');
+  fs.cpSync(path.join(ngx,'ngx'),path.join(core,'ngx'),{recursive:true});
+  run('git',['apply','--unsafe-paths','--directory='+core,path.join(here,'ngx.patch')],{cwd:path.resolve(here,'../..')});
   run(path.join(mingw,'x86_64-w64-mingw32-clang++'),['-std=c++20','-O2','-shared','-static','-static-libgcc','-static-libstdc++',
-    '-ffile-prefix-map='+ngx+'=VKD3D-Proton-MacOS','-Wl,--enable-stdcall-fixup','-Wl,--no-insert-timestamp','-I'+here,
-    path.join(ngx,'ngx/nvngx/nvngx.cpp'),'-o',nvngx]);
+    '-ffile-prefix-map='+core+'=VKD3D-Proton-MacOS','-Wl,--enable-stdcall-fixup','-Wl,--no-insert-timestamp','-I'+here,
+    path.join(core,'ngx/nvngx/nvngx.cpp'),'-o',nvngx]);
   fs.mkdirSync(output,{recursive:true});
   for(const {architecture,build}of built){
     const folder=path.join(output,architecture);fs.mkdirSync(folder,{recursive:true});
