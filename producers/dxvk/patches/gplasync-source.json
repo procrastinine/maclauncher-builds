@@ -1,0 +1,6 @@
+{
+  "repository": "https://gitlab.com/Ph42oN/dxvk-gplasync",
+  "revision": "04e50ed2c4dee43e64d30119b2c5b26a23e2b6a4",
+  "path": "patches/dxvk-gplasync-3.1.1-1.patch",
+  "changes": "Original source patch retained for attribution and comparison only. The executable async-opt-in.patch is rebased to the exact DXVK pin, defaults off, preserves the fast-link path, tracks every draw, locks shared attachment history, and bounds pending work per state."
+}
