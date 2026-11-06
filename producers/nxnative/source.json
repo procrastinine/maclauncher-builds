@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "nxnative-tools",
-  "version": "MCLv11",
+  "version": "MCLv12",
   "source": {
     "path": "sources/nxnative",
     "repository": "https://github.com/seedds/nxnative.git",
