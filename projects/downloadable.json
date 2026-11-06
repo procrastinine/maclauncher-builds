@@ -2783,5 +2783,66 @@
         "bison"
       ]
     }
+  },
+  {
+    "id": "vkd3d-proton",
+    "name": "VKD3D-Proton",
+    "purpose": "Direct3D 12 Vulkan translation with MetalFX upscaling for DLSS Super Resolution and Ray Reconstruction.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/vkd3d-proton",
+      "entries": [
+        "producers/vkd3d-proton/build.mjs",
+        "producers/vkd3d-proton/metalfx.patch",
+        "producers/vkd3d-proton/metalfx.c",
+        "producers/vkd3d-proton/vkd3d_metalfx.h",
+        "producers/vkd3d-proton/inputs.json"
+      ],
+      "buildEntry": "producers/vkd3d-proton/build.mjs"
+    },
+    "upstreams": [
+      {
+        "id": "vkd3d-proton",
+        "provider": "github",
+        "url": "https://github.com/HansKristian-Work/vkd3d-proton",
+        "repository": "HansKristian-Work/vkd3d-proton",
+        "pin": {
+          "gitlink": "producers/vkd3d-proton/source"
+        }
+      },
+      {
+        "id": "vkd3d-proton-macos-ngx",
+        "provider": "github",
+        "url": "https://github.com/metalsharp/VKD3D-Proton-MacOS",
+        "repository": "metalsharp/VKD3D-Proton-MacOS",
+        "pin": {
+          "gitlink": "producers/vkd3d-proton/ngx"
+        }
+      }
+    ],
+    "compatibility": "Windows x86 and x64 PE libraries for a compatible Wine host and Vulkan driver; the NGX core is x64.",
+    "packageProfiles": [
+      {
+        "version": "3.1-MCLv1",
+        "label": "VKD3D-Proton 3.1 with MetalFX upscaling"
+      }
+    ],
+    "build": {
+      "version": "3.1-MCLv1",
+      "command": "tools/build-vkd3d-proton.mjs",
+      "architectures": [
+        "universal"
+      ],
+      "submodules": [
+        "producers/vkd3d-proton/source",
+        "producers/vkd3d-proton/ngx"
+      ],
+      "recursiveSubmodules": true,
+      "tools": [
+        "uv",
+        "glslang"
+      ]
+    }
   }
 ]

@@ -1,0 +1,103 @@
+diff --git a/libs/vkd3d/command.c b/libs/vkd3d/command.c
+index c6f6ee8..4cf8400 100644
+--- a/libs/vkd3d/command.c
++++ b/libs/vkd3d/command.c
+@@ -24,6 +24,7 @@
+ #include "vkd3d_swapchain_factory.h"
+ #include "vkd3d_descriptor_debug.h"
+ #include "vkd3d_timestamp_profiler.h"
++#include "vkd3d_metalfx.h"
+ #ifdef VKD3D_ENABLE_RENDERDOC
+ #include "vkd3d_renderdoc.h"
+ #endif
+@@ -6572,6 +6573,13 @@ HRESULT STDMETHODCALLTYPE d3d12_command_list_QueryInterface(d3d12_command_list_i
+         return S_OK;
+     }
+ 
++    if (IsEqualGUID(iid, &IID_ID3D12GraphicsCommandListMetalFX))
++    {
++        ID3D12GraphicsCommandList10_AddRef(iface);
++        *object = &command_list->ID3D12GraphicsCommandListMetalFX_vtbl;
++        return S_OK;
++    }
++
+     if (IsEqualGUID(iid, &IID_ID3DDestructionNotifier))
+     {
+         ID3DDestructionNotifier_AddRef(&command_list->destruction_notifier.ID3DDestructionNotifier_iface);
+@@ -9432,6 +9440,35 @@ static void STDMETHODCALLTYPE d3d12_command_list_Dispatch(d3d12_command_list_ifa
+     d3d12_command_list_check_compute_barrier(list);
+ }
+ 
++/* One MetalFX scale (metalfx.c), chained to a barrier after the work recorded before it. A second barrier orders
++ * the work recorded after it. */
++void d3d12_command_list_metalfx_record(struct d3d12_command_list *list, const void *scale,
++        struct d3d12_resource **resources, unsigned int count)
++{
++    const struct vkd3d_vk_device_procs *vk_procs = &list->device->vk_procs;
++    VkMemoryBarrier2 barrier = { VK_STRUCTURE_TYPE_MEMORY_BARRIER_2 };
++    VkDependencyInfo dependency = { VK_STRUCTURE_TYPE_DEPENDENCY_INFO };
++    unsigned int i;
++
++    d3d12_command_list_flush_dgc_batch(list);
++    d3d12_command_list_end_current_render_pass(list, false);
++    d3d12_command_list_end_transfer_batch(list, false);
++    for (i = 0; i < count; i++)
++    {
++        if (resources[i])
++            d3d12_command_list_track_resource_usage(list, resources[i], true);
++    }
++
++    barrier.srcStageMask = barrier.dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
++    barrier.srcAccessMask = barrier.dstAccessMask = VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT;
++    dependency.pNext = scale;
++    dependency.memoryBarrierCount = 1;
++    dependency.pMemoryBarriers = &barrier;
++    VK_CALL(vkCmdPipelineBarrier2(list->cmd.vk_command_buffer, &dependency));
++    dependency.pNext = NULL;
++    VK_CALL(vkCmdPipelineBarrier2(list->cmd.vk_command_buffer, &dependency));
++}
++
+ static void STDMETHODCALLTYPE d3d12_command_list_CopyBufferRegion(d3d12_command_list_iface *iface,
+         ID3D12Resource *dst, UINT64 dst_offset, ID3D12Resource *src, UINT64 src_offset, UINT64 byte_count)
+ {
+@@ -23037,6 +23074,7 @@ static struct d3d12_command_list *unsafe_impl_from_ID3D12CommandList(ID3D12Comma
+ }
+ 
+ extern CONST_VTBL struct ID3D12GraphicsCommandListExt2Vtbl d3d12_command_list_vkd3d_ext_vtbl;
++extern CONST_VTBL struct ID3D12GraphicsCommandListMetalFXVtbl d3d12_command_list_metalfx_vtbl;
+ 
+ static void d3d12_command_list_init_attachment_info(VkRenderingAttachmentInfo *attachment_info)
+ {
+@@ -23138,6 +23176,7 @@ static HRESULT d3d12_command_list_init(struct d3d12_command_list *list, struct d
+     list->type = type;
+ 
+     list->ID3D12GraphicsCommandListExt_iface.lpVtbl = &d3d12_command_list_vkd3d_ext_vtbl;
++    list->ID3D12GraphicsCommandListMetalFX_vtbl = &d3d12_command_list_metalfx_vtbl;
+ 
+     hash_map_init(&list->query_resolve_lut,
+             vkd3d_query_lookup_entry_hash,
+diff --git a/libs/vkd3d/meson.build b/libs/vkd3d/meson.build
+index 873a89f..74e6110 100644
+--- a/libs/vkd3d/meson.build
++++ b/libs/vkd3d/meson.build
+@@ -71,6 +71,7 @@ vkd3d_src = [
+   'cache.c',
+   'command.c',
+   'command_list_vkd3d_ext.c',
++  'metalfx.c',
+   'command_queue_vkd3d_ext.c',
+   'd3dkmt.c',
+   'device.c',
+diff --git a/libs/vkd3d/vkd3d_private.h b/libs/vkd3d/vkd3d_private.h
+index 8024485..a5155c8 100644
+--- a/libs/vkd3d/vkd3d_private.h
++++ b/libs/vkd3d/vkd3d_private.h
+@@ -3412,6 +3412,8 @@ struct d3d12_command_list
+ {
+     d3d12_command_list_iface ID3D12GraphicsCommandList_iface;
+     d3d12_command_list_vkd3d_ext_iface ID3D12GraphicsCommandListExt_iface;
++    /* ID3D12GraphicsCommandListMetalFX (metalfx.c, vkd3d_metalfx.h): this member is its vtable pointer */
++    const void *ID3D12GraphicsCommandListMetalFX_vtbl;
+     LONG refcount;
+ 
+     D3D12_COMMAND_LIST_TYPE type;

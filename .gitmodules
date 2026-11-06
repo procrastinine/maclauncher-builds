@@ -282,3 +282,9 @@
 [submodule "sources/steam-bridge-wine-headers"]
 	path = sources/steam-bridge-wine-headers
 	url = https://github.com/ValveSoftware/wine
+[submodule "vkd3d-proton"]
+	path = producers/vkd3d-proton/source
+	url = https://github.com/HansKristian-Work/vkd3d-proton.git
+[submodule "vkd3d-proton-macos-ngx"]
+	path = producers/vkd3d-proton/ngx
+	url = https://github.com/metalsharp/VKD3D-Proton-MacOS.git
