@@ -3,6 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
+import {recipeMain} from '../../tools/build-source.mjs';
+import {mingw as prepareMingw} from '../../tools/scene-runtime.mjs';
 import {addLicense} from '../../lib/licenses.mjs';
 import {gitlink} from '../../lib/pins.mjs';
 import {helperClientSource} from './helper-subset.mjs';
@@ -113,4 +115,12 @@ export function packageOutput({work,mingw,output}) {
  put(path.join(path.dirname(output),path.basename(output)+'-runtime-package.json'),JSON.stringify(declaration,null,2)+'\n');
  return declaration;
 }
-const args=process.argv.slice(2);if(args.length){const [mode,work,mingw,output]=args;if(mode==='prepare')prepare(path.resolve(work));else if(mode==='package')packageOutput({work:path.resolve(work),mingw:path.resolve(mingw),output:path.resolve(output)});else if(mode==='build')build({work:path.resolve(work),mingw:path.resolve(mingw),output:path.resolve(output)});else throw Error('Usage: build.mjs prepare WORK | build WORK MINGW_BIN OUTPUT');}
+export async function buildSteamBridge({work,output}) {
+ mkdir(work);
+ const mingw=await prepareMingw(work);
+ mkdir(output);
+ const declaration=build({work,mingw,output:path.join(output,'payload')});
+ fs.renameSync(path.join(output,'payload-runtime-package.json'),path.join(output,'declaration.json'));
+ return {project:pins.id,version:declaration.version,arch:declaration.arch,output};
+}
+recipeMain(import.meta,buildSteamBridge);
