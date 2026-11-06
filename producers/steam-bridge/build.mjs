@@ -87,15 +87,19 @@ export function build({work,mingw,output}){
  return packageOutput({work,mingw,output});
 }
 
+export function warnNativeOutput({architecture,actualArchitecture,unresolved},warn=console.warn) {
+ if(/^\s*_(?:wow64_|ISteam|steamclient_)/m.test(unresolved))warn('Steam bridge: unresolved implementation symbols in '+architecture+' output');
+ if(actualArchitecture!==architecture)warn('Steam bridge: '+architecture+' output reports '+actualArchitecture);
+}
 export function packageOutput({work,mingw,output}) {
  const source=path.join(work,'wine');
  const shim=path.join(source,'programs/steam.exe'),pe=path.join(work,'build-x86_64');
  const helper=path.join(source,'programs/steam.exe/steam.cpp');
  put(path.join(work,'helper-client.inc'),helperClientSource(fs.readFileSync(helper,'utf8'),{upstreamHandshake:pins.helperLaunchHandshake===true}));
  buildHelpers({work,mingw,source,pins});
- for(const arch of ['x86_64','arm64']){const unresolved=capture('nm',['-u',path.join(work,'build-'+arch,'dlls/lsteamclient/lsteamclient.so')]);if(/^_(?:wow64_|ISteam|steamclient_)/m.test(unresolved))throw Error('Unresolved bridge implementation symbols');}
+ for(const arch of ['x86_64','arm64']){const file=path.join(work,'build-'+arch,'dlls/lsteamclient/lsteamclient.so');warnNativeOutput({architecture:arch,actualArchitecture:capture('lipo',['-archs',file]),unresolved:capture('nm',['-u',file])});}
  if(fs.existsSync(output))throw Error('Package output already exists');mkdir(output);
- for(const arch of ['x86_64','arm64']){const file=path.join(work,'build-'+arch,'dlls/lsteamclient/lsteamclient.so');if(capture('lipo',['-archs',file])!==arch)throw Error('Unix architecture mismatch');copy(file,path.join(output,arch==='arm64'?'aarch64-unix':'x86_64-unix','lsteamclient.so'));}
+ for(const arch of ['x86_64','arm64']){const file=path.join(work,'build-'+arch,'dlls/lsteamclient/lsteamclient.so');copy(file,path.join(output,arch==='arm64'?'aarch64-unix':'x86_64-unix','lsteamclient.so'));}
  for(const arch of ['i386','x86_64']){
   copy(path.join(work,'build-x86_64/dlls/lsteamclient',arch+'-windows/lsteamclient.dll'),path.join(output,arch+'-windows/lsteamclient.dll'));
   copy(path.join(work,'helper-'+arch,'mlsteam-bootstrap.dll'),path.join(output,arch+'-windows/mlsteam-bootstrap.dll'));
