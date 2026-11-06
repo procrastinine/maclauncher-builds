@@ -1,0 +1,10 @@
+--- a/src/dxvk/dxvk_device.cpp
++++ b/src/dxvk/dxvk_device.cpp
+@@ -118,6 +118,7 @@
+     // interpoation qualifiers in vertex shaders.
+     return m_features.extGraphicsPipelineLibrary.graphicsPipelineLibrary
+         && m_properties.extGraphicsPipelineLibrary.graphicsPipelineLibraryIndependentInterpolationDecoration
++        && m_properties.extGraphicsPipelineLibrary.graphicsPipelineLibraryFastLinking
+         && m_options.enableGraphicsPipelineLibrary != Tristate::False;
+   }
+ 
