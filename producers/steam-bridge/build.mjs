@@ -113,7 +113,7 @@ export function packageOutput({work,mingw,output}) {
  addLicense(output,'OpenVR',path.join(root,pins.headers.find(input=>input.project==='openvr').path,'LICENSE'),'BSD-3-Clause');
  addLicense(output,'JsonCpp',path.join(here,'licenses/JsonCpp.txt'),'JsonCpp');
  const files=walk(output).map(p=>({path:p,mode:fs.statSync(path.join(output,p)).mode & 0o777,size:fs.statSync(path.join(output,p)).size,sha256:hash(fs.readFileSync(path.join(output,p)))}));
- const steamBridge={abi:1,role:'native-steam-client-bridge',native:{x86_64:'x86_64-unix/lsteamclient.so',aarch64:'aarch64-unix/lsteamclient.so'},windows:Object.fromEntries(['i386','x86_64'].map(arch=>[arch,{builtin:arch+'-windows/lsteamclient.dll',bootstrap:arch+'-windows/mlsteam-bootstrap.dll',helper:arch==='i386'?'i386-windows/steam.exe':'steam.exe'}]))};
+ const steamBridge={native:{x86_64:'x86_64-unix/lsteamclient.so',aarch64:'aarch64-unix/lsteamclient.so'},windows:Object.fromEntries(['i386','x86_64'].map(arch=>[arch,{builtin:arch+'-windows/lsteamclient.dll',bootstrap:arch+'-windows/mlsteam-bootstrap.dll',helper:arch==='i386'?'i386-windows/steam.exe':'steam.exe'}]))};
  const manifest={steamBridge,schemaVersion:1,managerId:pins.id,version:pins.version,platform:'darwin',arch:'universal',minimumMacOS:pins.minimumMacOS,executableRelative:'steam.exe',files,dependencies:[]};
  put(path.join(output,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
  const mf=path.join(output,'manifest.json');
