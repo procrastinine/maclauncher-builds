@@ -163,8 +163,8 @@
       "kind": "archive",
       "description": "LLVM-MinGW universal macOS toolchain",
       "pin": {
-        "file": "src/modules/crossover/temporal/xess/source.json",
-        "pointer": "/toolchain"
+        "file": "../dependencies.json",
+        "pointer": "/llvmMingw"
       },
       "url": "{repository}/releases/download/{version}/{asset}",
       "sha256": "{sha256}",

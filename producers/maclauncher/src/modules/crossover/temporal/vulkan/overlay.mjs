@@ -1,8 +1,10 @@
 // Copyright (c) MacLauncher contributors. MIT license.
+import sharedDependencies from '../../../../../../dependencies.json' with {type:'json'};
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 export const source = JSON.parse(fs.readFileSync(new URL('./source.json', import.meta.url)));
+source.archive = sharedDependencies[source.archiveDependency];
 const here = import.meta.dirname;
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const modulePath = 'dlls/winevulkan/';

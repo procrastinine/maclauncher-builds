@@ -1,3 +1,4 @@
+import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
 import fs from 'node:fs';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
@@ -8,7 +9,7 @@ export async function buildWineVulkanScene({output,work}){
  fs.mkdirSync(work,{recursive:true});
  const producer=path.join(base,'src/modules/crossover/temporal/vulkan'),source=read(path.join(producer,'source.json'));
  const [archive,bisonArchive,moltenvkArchive,compiler]=await Promise.all([
-  buildInput(source.archive,path.join(work,'downloads')),buildInput(source.buildTools.bison,path.join(work,'downloads')),
+  buildInput(sharedDependencies[source.archiveDependency],path.join(work,'downloads')),buildInput(source.buildTools.bison,path.join(work,'downloads')),
   buildInput(source.vulkanLinkInput.archive,path.join(work,'downloads')),mingw(work)]);
  const module=await import(pathToFileURL(path.join(producer,'build.mjs'))),staged=path.join(work,'staged');
  await module.buildModule({archive,bisonArchive,moltenvkArchive,mingw:compiler,work:path.join(work,'wine'),output:staged,jobs:2});

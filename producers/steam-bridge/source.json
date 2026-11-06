@@ -11,8 +11,6 @@
     "path": "sources/steam-bridge-proton",
     "repository": "https://github.com/ValveSoftware/Proton"
   },
-  "winePin": "../maclauncher/src/modules/crossover/temporal/vulkan/source.json",
-  "toolchainPin": "../maclauncher/src/modules/crossover/temporal/xess/source.json",
   "headers": [
     {
       "project": "openvr",
@@ -25,5 +23,7 @@
       "repository": "https://github.com/ValveSoftware/wine"
     }
   ],
-  "helperLaunchHandshake": true
+  "helperLaunchHandshake": true,
+  "wineDependency": "crossoverWine",
+  "toolchainDependency": "llvmMingw"
 }

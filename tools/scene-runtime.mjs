@@ -1,3 +1,4 @@
+import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -9,7 +10,7 @@ export const read=file=>JSON.parse(fs.readFileSync(file));
 export const run=(command,args)=>execFileSync(command,args,{maxBuffer:Infinity,stdio:'inherit'});
 /** The declared llvm-mingw toolchain for Windows-side adapter libraries. */
 export async function mingw(work){
- const pin=read(path.join(base,'src/modules/crossover/temporal/xess/source.json')).toolchain;
+ const pin=sharedDependencies.llvmMingw;
  const archive=await buildInput({url:pin.repository+'/releases/download/'+pin.version+'/'+pin.asset,sha256:pin.sha256},path.join(work,'downloads'));
  const directory=path.join(work,'toolchain');fs.mkdirSync(directory);run('/usr/bin/tar',['-xf',archive,'-C',directory]);
  return path.join(directory,'llvm-mingw-'+pin.version+'-ucrt-macos-universal/bin');

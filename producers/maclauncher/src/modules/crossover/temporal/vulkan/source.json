@@ -4,13 +4,6 @@
   "version": "26.3.0-MCLv6",
   "profile": "crossover-26.3.0-winevulkan-scene-v1",
   "sourcePage": "https://www.codeweavers.com/crossover/source",
-  "archive": {
-    "url": "https://media.codeweavers.com/pub/crossover/source/crossover-sources-26.3.0.tar.gz",
-    "sha256": "ac99c8ca4b3848f3e81784135f023df266b61c2345726ea55a50b3e030dd6872",
-    "bytes": 149054023,
-    "format": "tar.gz",
-    "directory": "sources/wine"
-  },
   "wineVersion": "Wine version 11.0",
   "wineVulkanDriverVersion": 47,
   "unixCallCount": 674,
@@ -149,5 +142,6 @@
         "sha256": "2c60ee6b00dd13b7f6cb11017778a041ba6a321eaea194f1fa0dca7eab8403e2"
       }
     ]
-  }
+  },
+  "archiveDependency": "crossoverWine"
 }

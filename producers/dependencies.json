@@ -152,5 +152,18 @@
   "sdl3Prosper": {
     "repository": "https://github.com/libsdl-org/SDL",
     "revision": "f5e5f6588921eed3d7d048ce43d9eb1ff0da0ffc"
+  },
+  "crossoverWine": {
+    "url": "https://media.codeweavers.com/pub/crossover/source/crossover-sources-26.3.0.tar.gz",
+    "sha256": "ac99c8ca4b3848f3e81784135f023df266b61c2345726ea55a50b3e030dd6872",
+    "bytes": 149054023,
+    "format": "tar.gz",
+    "directory": "sources/wine"
+  },
+  "llvmMingw": {
+    "repository": "https://github.com/mstorsjo/llvm-mingw",
+    "version": "20261006",
+    "asset": "llvm-mingw-20261006-ucrt-macos-universal.tar.xz",
+    "sha256": "a7a19b11048e89372637d26279cdb7c430ed3cf8c1e224310421312bf986ebf6"
   }
 }
