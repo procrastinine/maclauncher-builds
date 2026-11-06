@@ -25,9 +25,5 @@
       "repository": "https://github.com/ValveSoftware/wine"
     }
   ],
-  "forwarderArena": {
-    "headroomFactor": 2,
-    "pageBytes": 4096
-  },
   "helperLaunchHandshake": true
 }

@@ -84,25 +84,8 @@ export function build({work,mingw,output}){
  return packageOutput({work,mingw,output});
 }
 
-export function forwarderArena(source) {
- const lsc=path.join(source,'dlls/lsteamclient');
- const main=fs.readFileSync(path.join(lsc,'steamclient_main.c'),'utf8');
- const slots=Number(main.match(/allocated\[(\d+)\]/)?.[1]);
- const counts=walk(lsc).filter(p=>p.endsWith('.c')).flatMap(p=>[...fs.readFileSync(path.join(lsc,p),'utf8').matchAll(/alloc_vtable\([^;]*?,\s*(\d+),/g)].map(m=>Number(m[1])));
- if(!slots||!counts.length)throw Error('The pinned allocation bounds are unavailable');
- // Both supported PE ABIs use a UINT64 interface handle; the widest vtable
- // pointer is eight bytes. All allocations share the upstream slot table.
- const pointerBytes=8,interfaceBytes=pointerBytes+8,maximumVtableMethods=Math.max(...counts);
- const maximumAllocationBytes=Math.max(interfaceBytes,maximumVtableMethods*pointerBytes);
- const minimumBytes=4+slots*maximumAllocationBytes,headroomFactor=pins.forwarderArena.headroomFactor,pageBytes=pins.forwarderArena.pageBytes;
- const bytes=Math.ceil(minimumBytes*headroomFactor/pageBytes)*pageBytes;
- return {slots,maximumVtableMethods,pointerBytes,interfaceBytes,maximumAllocationBytes,minimumBytes,headroomFactor,pageBytes,bytes};
-}
-
 export function packageOutput({work,mingw,output}) {
  const source=path.join(work,'wine');
- const arena=forwarderArena(source);put(path.join(work,'forwarder-arena.json'),JSON.stringify(arena,null,2)+'\n');
- put(path.join(work,'forwarder-arena.h'),'#define STEAM_BRIDGE_ARENA_BYTES '+arena.bytes+'\n#define STEAM_BRIDGE_ALLOCATION_SLOTS '+arena.slots+'\n#define STEAM_BRIDGE_MAX_ALLOCATION '+arena.maximumAllocationBytes+'\n');
  const shim=path.join(source,'programs/steam.exe'),pe=path.join(work,'build-x86_64');
  const helper=path.join(source,'programs/steam.exe/steam.cpp');
  put(path.join(work,'helper-client.inc'),helperClientSource(fs.readFileSync(helper,'utf8'),{upstreamHandshake:pins.helperLaunchHandshake===true}));
