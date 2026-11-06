@@ -1937,7 +1937,9 @@
         "producers/nxnative/overlays/apply.mjs",
         "producers/nxnative/runtime/nxnative.py",
         "producers/nxnative/package.mjs",
-        "producers/nxnative/runtime/metal-toolchain.m"
+        "producers/nxnative/runtime/metal-toolchain.m",
+        "producers/nxnative/runtime/keyless_input.py",
+        "producers/nxnative/runtime/platforms.json"
       ],
       "buildEntry": "producers/nxnative/build.mjs"
     },
@@ -1973,10 +1975,14 @@
       {
         "version": "MCLv8",
         "label": "nxnative native tools MCLv8"
+      },
+      {
+        "version": "MCLv9",
+        "label": "nxnative native tools MCLv9"
       }
     ],
     "build": {
-      "version": "MCLv8",
+      "version": "MCLv9",
       "architectures": [
         "arm64"
       ],

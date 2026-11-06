@@ -1,5 +1,4 @@
 """Offline metadata for nxnative's decrypted input routes. No content is acquired."""
-import hashlib
 import json
 from pathlib import Path
 import runpy
@@ -72,6 +71,8 @@ def inspect_keyless(source, upstream):
             if not dump['is_version'](version) or dump['program_id'](version / 'exefs/main.npdm') != title:
                 raise ValueError('Update needs matching ExeFS and full RomFS.')
         return facts('dump', title, versions)
+    except Exception as error:
+        raise ValueError(str(error)) from error
     finally:
         sys.path.remove(str(scripts))
 

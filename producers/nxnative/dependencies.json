@@ -152,6 +152,15 @@
       "sha256": "913cbd31a400febff93b564a23e17c3ed2d56c064006f54efec210d586171c00",
       "bytes": 640436,
       "repository": "https://github.com/indygreg/python-zstandard"
+    },
+    {
+      "name": "zbic",
+      "version": "1.0.1.post1",
+      "filename": "zbic-1.0.1.post1-cp312-cp312-macosx_11_0_arm64.whl",
+      "url": "https://files.pythonhosted.org/packages/48/29/0eeb0eccb8f278751aff75bc89528a0af2e07016ad06f2c351575797c57c/zbic-1.0.1.post1-cp312-cp312-macosx_11_0_arm64.whl",
+      "sha256": "0032f525191ab247d3f31e1205601ac15c358dd1df0805aab545be79a54779a6",
+      "bytes": 273836,
+      "repository": "https://github.com/kinnay/zbic"
     }
   ],
   "tools": [

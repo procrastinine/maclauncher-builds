@@ -201,7 +201,7 @@ export async function prepareDependencies({ work, output, jobs = 4 }) {
   await extractTar(dotnetArchive, dotnetRoot);
   addLicenses(output,'dotnet',dotnetRoot);
   addLicense(output,'dotnet',path.join(dotnetRoot,'ThirdPartyNotices.txt'));
-  await run(python, ['-B', '-I', '-c', 'import sys,lz4.block,capstone,fontTools,backports.zstd,nsz,zstandard; from Crypto.Cipher import AES; assert sys.version_info[:3] == (3,12,15)']);
+  await run(python, ['-B', '-I', '-c', 'import sys,lz4.block,capstone,fontTools,backports.zstd,nsz,zstandard,zbic; from Crypto.Cipher import AES; assert sys.version_info[:3] == (3,12,15)']);
   const dotnet = await run(path.join(dotnetRoot, 'dotnet'), ['--list-runtimes'], {
     env: { ...process.env, DOTNET_ROOT: dotnetRoot, DOTNET_ROOT_ARM64: dotnetRoot, DOTNET_MULTILEVEL_LOOKUP: '0', DOTNET_CLI_TELEMETRY_OPTOUT: '1', DOTNET_SKIP_FIRST_TIME_EXPERIENCE: '1' }
   });

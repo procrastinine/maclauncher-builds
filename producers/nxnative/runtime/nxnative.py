@@ -142,7 +142,8 @@ def pfs_metadata(file):
 
 def inspect_input(value):
     file = Path(value).expanduser().resolve()
-    if file.is_dir() or file.suffix.lower() == '.nup':
+    with file.open('rb') if file.is_file() else open(os.devnull, 'rb') as stream: is_nup = stream.read(4) == b'NUP\x01'
+    if file.is_dir() or is_nup or file.suffix.lower() == '.nup':
         keyless = inspect_keyless(file, source_snapshot()['root'])
         if keyless:
             keyless['generation'] = generation(keyless['titleId'], ROOT)
@@ -210,7 +211,7 @@ def prepare(args):
     if not args.keys and metadata.get('encrypted'):
         event(ev='error',code='keys-required',message='This package requires a prod.keys file.'); return 78
     if metadata['format'] in ('nso', 'nro', 'hfs0', 'prepared', 'extracted'): raise ValueError('Preparation requires an NSP, XCI, NSZ or XCZ application container.')
-    package = getattr(args, 'package', None)
+    package = getattr(args, 'package', None) or metadata.get('selectedUpdate')
     if package and package not in metadata.get('versions', []): raise ValueError('The selected game update is unavailable.')
     keyless = metadata.get('keyRequirement') == 'none'
     tools = json.loads((ROOT / 'runtime.json').read_text())
@@ -245,7 +246,7 @@ def prepare(args):
     pipeline.apple_silicon = lambda: platform.machine() == 'arm64'
     def check_prereqs(_env, xlate, mac=False):
         if not mac: raise ValueError('This runtime prepares macOS applications.')
-        for name in ('lz4.block', 'capstone', 'fontTools', 'backports.zstd'): __import__(name)
+        for name in ('lz4.block', 'capstone', 'fontTools', 'backports.zstd', 'zbic'): __import__(name)
         for name in ('xcrun', 'spirv-cross', 'zstd', 'dotnet'):
             if not shutil.which(name, path=_env['PATH']): raise ValueError('The runtime tool is unavailable: ' + name)
         if not xlate.is_file(): raise ValueError('The runtime shader translator is unavailable.')
