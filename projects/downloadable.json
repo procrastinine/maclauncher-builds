@@ -1541,7 +1541,7 @@
         "label": "xsystem4 MCLv8"
       },
       {
-        "version": "MCLv10",
+        "version": "MCLv9",
         "label": "xsystem4 MCLv9"
       }
     ],
@@ -1977,12 +1977,12 @@
         "label": "nxnative native tools MCLv8"
       },
       {
-        "version": "MCLv9",
-        "label": "nxnative native tools MCLv10"
+        "version": "MCLv11",
+        "label": "nxnative native tools MCLv11"
       }
     ],
     "build": {
-      "version": "MCLv9",
+      "version": "MCLv11",
       "architectures": [
         "arm64"
       ],
@@ -2416,7 +2416,7 @@
   {
     "id": "vnds-love",
     "name": "VNDS-LOVE",
-    "purpose": "Adapted VNDS interpreter for the managed LÖVE host.",
+    "purpose": "Adapted VNDS interpreter for the managed L\u00d6VE host.",
     "producer": {
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",

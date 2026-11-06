@@ -291,6 +291,7 @@ def prepare(args):
         import game as gamemod
         values.update(NXNATIVE_PROFILE=str(profile.table('game.tsv')), NXNATIVE_UPSCALER_KEYS=','.join(gamemod.upscaler_keys(profile)), DM_SAVE=str(run / 'save'), DM_TEMP=str(run / 'temp'))
         facts = {key: metadata.get(key) for key in ('format', 'titleId', 'versions', 'selectedUpdate', 'keyRequirement', 'generation')}
+        facts['keyRequirement'] = 'none' if keyless else 'encrypted' if metadata.get('encrypted') else 'unknown'
         facts['titleId'] = profile.id
         facts['generation'] = generation(profile.id.upper(), ROOT)
         facts['selectedUpdate'] = package or metadata.get('selectedUpdate')

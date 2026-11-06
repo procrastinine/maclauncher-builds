@@ -31,7 +31,7 @@ def inspect_keyless(source, upstream):
                     raise ValueError('NUP table exceeds its metadata limit.')
             module = runpy.run_path(str(scripts / 'pack_nup.py'))
             with module['Nup'](file) as n:
-                if n.ndirs + len(n.files) > 100000: raise ValueError('Too many NUP records.')
+                if len(n.packages) > 4096 or n.ndirs + len(n.files) > 100000: raise ValueError('Too many NUP records.')
                 for package in n.packages:
                     if package.meta_size > MAX_TABLE: raise ValueError('NUP control metadata exceeds its limit.')
                 for name, size, *_ in n.files:
@@ -67,6 +67,7 @@ def inspect_keyless(source, upstream):
                 count += 1
                 if count > 500000: raise ValueError('Too many dump files.')
                 if not item.resolve().is_relative_to(root): raise ValueError('Switch dump path escapes its folder.')
+                if item.name == 'main.npdm' and item.parent.name == 'exefs' and not 128 <= item.stat().st_size <= 1024 * 1024: raise ValueError('Invalid dump NPDM size.')
                 if item.is_dir(): walk(item, depth + 1, ancestors | {actual})
                 elif not item.is_file(): raise ValueError('Switch dump contains a special file.')
         walk(source, 0, set())
