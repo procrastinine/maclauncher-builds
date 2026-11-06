@@ -16,6 +16,8 @@ import shutil
 import struct
 import subprocess
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from keyless_input import inspect_keyless, generation
 ROOT = Path(__file__).resolve().parents[1]
 SHARE = ROOT / 'share/nxnative'
 CONTAINERS = {'.nsp', '.nsz', '.xci', '.xcz'}
@@ -140,6 +142,11 @@ def pfs_metadata(file):
 
 def inspect_input(value):
     file = Path(value).expanduser().resolve()
+    if file.is_dir() or file.suffix.lower() == '.nup':
+        keyless = inspect_keyless(file, source_snapshot()['root'])
+        if keyless:
+            keyless['generation'] = generation(keyless['titleId'], ROOT)
+            return {'schemaVersion': 1, **keyless}
     if file.is_dir():
         launch = file / 'launch.json'
         if launch.is_file():
@@ -203,6 +210,9 @@ def prepare(args):
     if not args.keys and metadata.get('encrypted'):
         event(ev='error',code='keys-required',message='This package requires a prod.keys file.'); return 78
     if metadata['format'] in ('nso', 'nro', 'hfs0', 'prepared', 'extracted'): raise ValueError('Preparation requires an NSP, XCI, NSZ or XCZ application container.')
+    package = getattr(args, 'package', None)
+    if package and package not in metadata.get('versions', []): raise ValueError('The selected game update is unavailable.')
+    keyless = metadata.get('keyRequirement') == 'none'
     tools = json.loads((ROOT / 'runtime.json').read_text())
     if tools.get('requirements', {}).get('metalCompiler', {}).get('required'):
         compiler = subprocess.run([str(ROOT / 'bin/xcrun'), '--check-native-metal'], capture_output=True, text=True)
@@ -210,7 +220,7 @@ def prepare(args):
             raise ValueError((compiler.stderr or compiler.stdout).strip() or 'The Apple Metal compiler required by the selected source is unavailable.')
     output.mkdir(parents=True, exist_ok=True)
     inputs = output / 'inputs'; inputs.mkdir(exist_ok=True)
-    originals = [source] if source.is_file() else sorted(p for p in source.iterdir() if p.is_file() and p.suffix.lower() in CONTAINERS)
+    originals = [] if keyless else [source] if source.is_file() else sorted(p for p in source.iterdir() if p.is_file() and p.suffix.lower() in CONTAINERS)
     for original in originals:
         target = inputs / (original.stem + original.suffix.lower())
         if target.is_symlink():
@@ -218,10 +228,10 @@ def prepare(args):
             target.unlink()
         if target.exists(): raise ValueError('A preparation input already uses this filename.')
         target.symlink_to(original)
-    keys = Path(args.keys).expanduser().resolve() if args.keys else output / 'empty.keys'
-    if not args.keys:
-        keys.write_text(''); keys.chmod(0o600)
-    if not keys.is_file(): raise ValueError('The selected keys file is unavailable.')
+    keys = None if keyless else Path(args.keys).expanduser().resolve() if args.keys else output / 'empty.keys'
+    if not keyless:
+        if not args.keys: keys.write_text(''); keys.chmod(0o600)
+        if not keys.is_file(): raise ValueError('The selected keys file is unavailable.')
     identity = tools['version']
     snapshot = source_snapshot()
     repo = output / 'pipeline' / identity / snapshot['revision']
@@ -279,11 +289,17 @@ def prepare(args):
         run = output / 'run'; (run / 'save').mkdir(parents=True, exist_ok=True); (run / 'temp').mkdir(exist_ok=True)
         import game as gamemod
         values.update(NXNATIVE_PROFILE=str(profile.table('game.tsv')), NXNATIVE_UPSCALER_KEYS=','.join(gamemod.upscaler_keys(profile)), DM_SAVE=str(run / 'save'), DM_TEMP=str(run / 'temp'))
-        launched.update(schemaVersion=1,titleId=profile.id,sourceRevision=snapshot['revision'],sourceKind=snapshot['kind'],sourceCommittedAt=snapshot.get('committedAt'),nativeToolsVersion=identity,nativeSourceRevision=tools.get('nativeSourceRevision'),nativeSourceCommittedAt=tools.get('nativeSourceCommittedAt'),command=str(host),args=words[index + 1:],cwd=str(run),env=values)
+        facts = {key: metadata.get(key) for key in ('format', 'titleId', 'versions', 'selectedUpdate', 'keyRequirement', 'generation')}
+        facts['titleId'] = profile.id
+        facts['generation'] = generation(profile.id.upper(), ROOT)
+        facts['selectedUpdate'] = package or metadata.get('selectedUpdate')
+        launched.update(inputFacts=facts,schemaVersion=1,titleId=profile.id,sourceRevision=snapshot['revision'],sourceKind=snapshot['kind'],sourceCommittedAt=snapshot.get('committedAt'),nativeToolsVersion=identity,nativeSourceRevision=tools.get('nativeSourceRevision'),nativeSourceCommittedAt=tools.get('nativeSourceCommittedAt'),command=str(host),args=words[index + 1:],cwd=str(run),env=values)
         (output / 'launch.json').write_text(json.dumps(launched,ensure_ascii=False,indent=2)+'\n')
         return command
     pipeline.mac_run = mac_run
-    argv = [str(inputs), '--keys', str(keys), '--platform', 'mac', '--progress', args.progress]
+    argv = [str(source if keyless else inputs), '--platform', 'mac', '--progress', args.progress, '--work-dir', str(output / 'work')]
+    if keys: argv += ['--keys', str(keys)]
+    if package: argv += ['--package', package]
     if args.language: argv += ['--language', args.language]
     status = pipeline.cli(argv)
     if status: return status
@@ -297,7 +313,7 @@ def main():
     parser.add_argument('--version',action='store_true')
     actions = parser.add_subparsers(dest='action')
     inspect = actions.add_parser('inspect'); inspect.add_argument('--input',required=True); inspect.add_argument('--export-elf')
-    prep = actions.add_parser('prepare'); prep.add_argument('--input',required=True); prep.add_argument('--output',required=True); prep.add_argument('--keys'); prep.add_argument('--language'); prep.add_argument('--progress',choices=('json','lines','off'),default='json')
+    prep = actions.add_parser('prepare'); prep.add_argument('--input',required=True); prep.add_argument('--output',required=True); prep.add_argument('--keys'); prep.add_argument('--language'); prep.add_argument('--package'); prep.add_argument('--progress',choices=('json','lines','off'),default='json')
     run = actions.add_parser('run'); run.add_argument('--prepared',required=True)
     args = parser.parse_args()
     if args.version:

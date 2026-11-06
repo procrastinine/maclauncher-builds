@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "id": "nxnative-tools",
-  "version": "MCLv8",
+  "version": "MCLv9",
   "source": {
     "path": "sources/nxnative",
     "repository": "https://github.com/seedds/nxnative.git",
-    "committedAt": "2026-11-05T01:29:01+08:00"
+    "committedAt": "2026-11-06T10:29:58+08:00"
   },
   "platform": "darwin",
   "architecture": "arm64",
