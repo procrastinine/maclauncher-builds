@@ -1938,8 +1938,7 @@
         "producers/nxnative/runtime/nxnative.py",
         "producers/nxnative/package.mjs",
         "producers/nxnative/runtime/metal-toolchain.m",
-        "producers/nxnative/runtime/keyless_input.py",
-        "producers/nxnative/runtime/platforms.json"
+        "producers/nxnative/runtime/keyless_input.py"
       ],
       "buildEntry": "producers/nxnative/build.mjs"
     },

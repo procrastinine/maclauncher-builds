@@ -132,7 +132,7 @@ export async function buildNxNative({work,output,dependencyWork,jobs=4,version=p
         });
     }
     copyFile(path.join(producer,'runtime/nxnative.py'),path.join(output,'runtime/nxnative.py'));
-    for (const name of ['keyless_input.py', 'platforms.json']) copyFile(path.join(producer,'runtime',name),path.join(output,'runtime',name));
+    for (const name of ['keyless_input.py']) copyFile(path.join(producer,'runtime',name),path.join(output,'runtime',name));
     const runtime={schemaVersion:1,id:pin.id,version,sourceRevision:pin.source.revision,nativeSourceRevision:pin.source.revision,architecture:pin.architecture,minimumMacOS:pin.minimumMacOS,executableRelative:pin.output.executableRelative,runtimeFiles:{cli:'runtime/nxnative.py',host:'bin/nxnative-host',profileRoot:'share/nxnative/dm/games',extractor:'tools/nx_extract/nx_extract',python:'python/bin/python3',dotnet:'dotnet/dotnet'}};
     runtime.capabilities={metalSourceObjects:true,nativeMetalObjects:true,keylessInputs:["nup","dump"],packageSelection:true};
     runtime.requirements={metalCompiler:{delivery:'system',required:true,command:'/usr/bin/xcrun',sdk:'macosx',tools:['metal','metallib'],options:['-O1','-fpreserve-invariance'],version:read('/usr/bin/xcrun',['-sdk','macosx','metal','--version']).split('\n')[0],managedAcquisition:false}};

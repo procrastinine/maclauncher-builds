@@ -13,7 +13,7 @@ pin.source.revision=gitlink(pin.source.path);
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const json=(file,value)=>fs.writeFileSync(file,JSON.stringify(value,null,2)+'\n');
 const run=(tool,args)=>execFileSync(tool,args,{stdio:'inherit'});
-const mutableInputs=new Set(['source.json','runtime/bootstrap.c','runtime/nxnative.py','runtime/keyless_input.py','runtime/platforms.json','runtime/metal-toolchain.m','package.mjs','refresh-runtime.mjs']);
+const mutableInputs=new Set(['source.json','runtime/bootstrap.c','runtime/nxnative.py','runtime/keyless_input.py','runtime/metal-toolchain.m','package.mjs','refresh-runtime.mjs']);
 
 function producerInputs(root=producer,prefix=''){
  return fs.readdirSync(root,{withFileTypes:true}).flatMap(entry=>{
@@ -56,7 +56,7 @@ export function refreshRuntime({input,output,version=pin.version}){
  const metal=path.join(output,'bin/xcrun');
  run('/usr/bin/clang',['-arch',pin.architecture,'-mmacosx-version-min='+pin.minimumMacOS,'-fobjc-arc','-O2','-ffile-prefix-map='+producer+'=/nxnative-producer',path.join(producer,'runtime/metal-toolchain.m'),'-framework','Foundation','-o',metal]);
  run('/usr/bin/strip',['-S',metal]);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',metal]);
- for(const name of ['nxnative.py','keyless_input.py','platforms.json']) { fs.copyFileSync(path.join(producer,'runtime',name),path.join(output,'runtime',name));fs.chmodSync(path.join(output,'runtime',name),0o644); }
+ for(const name of ['nxnative.py','keyless_input.py']) { fs.copyFileSync(path.join(producer,'runtime',name),path.join(output,'runtime',name));fs.chmodSync(path.join(output,'runtime',name),0o644); }
  const reusedPayload={id:manifest.managerId,version:manifest.version,manifestSha256:digest(bytes)};
  runtime.id=pin.id;runtime.version=version;json(path.join(output,'runtime.json'),runtime);
  origins.id=pin.id;origins.version=version;origins.producerInputs=owned;origins.reusedPayload=reusedPayload;json(path.join(output,'source.json'),origins);

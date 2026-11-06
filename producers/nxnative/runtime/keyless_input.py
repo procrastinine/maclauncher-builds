@@ -1,5 +1,4 @@
 """Offline metadata for nxnative's decrypted input routes. No content is acquired."""
-import json
 from pathlib import Path
 import runpy
 import struct
@@ -89,6 +88,10 @@ def facts(format, title, versions):
             'selectedUpdate': f'v{max(versions)}', 'keyRequirement': 'none', 'generation': None, 'encrypted': False}
 
 
-def generation(title, root):
-    file = Path(root) / 'runtime/platforms.json'
-    return json.loads(file.read_text()).get(title) if file.is_file() else None
+def generation(extracted, profile_guess):
+    """Use the selected upstream's SDK facts, independent of game profiles."""
+    try:
+        facts = profile_guess.facts_of(Path(extracted) / 'ExeFS', Path(extracted) / 'romfs_manifest.tsv')
+        return 2 if facts.get('ounce') is True else None
+    except Exception:
+        return None  # Metadata is unknown when the selected source cannot inspect the SDK.

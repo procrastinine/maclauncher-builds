@@ -146,7 +146,6 @@ def inspect_input(value):
     if file.is_dir() or is_nup or file.suffix.lower() == '.nup':
         keyless = inspect_keyless(file, source_snapshot()['root'])
         if keyless:
-            keyless['generation'] = generation(keyless['titleId'], ROOT)
             return {'schemaVersion': 1, **keyless}
     if file.is_dir():
         launch = file / 'launch.json'
@@ -293,7 +292,7 @@ def prepare(args):
         facts = {key: metadata.get(key) for key in ('format', 'titleId', 'versions', 'selectedUpdate', 'keyRequirement', 'generation')}
         facts['keyRequirement'] = 'none' if keyless else 'encrypted' if metadata.get('encrypted') else 'unknown'
         facts['titleId'] = profile.id
-        facts['generation'] = generation(profile.id.upper(), ROOT)
+        facts['generation'] = generation(bound.arguments['game'], getattr(pipeline, 'pg', None))
         facts['selectedUpdate'] = package or metadata.get('selectedUpdate')
         launched.update(inputFacts=facts,schemaVersion=1,titleId=profile.id,sourceRevision=snapshot['revision'],sourceKind=snapshot['kind'],sourceCommittedAt=snapshot.get('committedAt'),nativeToolsVersion=identity,nativeSourceRevision=tools.get('nativeSourceRevision'),nativeSourceCommittedAt=tools.get('nativeSourceCommittedAt'),command=str(host),args=words[index + 1:],cwd=str(run),env=values)
         (output / 'launch.json').write_text(json.dumps(launched,ensure_ascii=False,indent=2)+'\n')
