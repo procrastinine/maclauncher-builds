@@ -14,3 +14,5 @@ android-java-converter=MCLv8
 android=0.2.7
 
 anyps5=MCLv10
+maclauncher-steam-bridge=1.0.0
+vkd3d-proton=3.1-MCLv1
