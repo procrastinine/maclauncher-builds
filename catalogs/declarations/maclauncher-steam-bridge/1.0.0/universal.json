@@ -1,0 +1,107 @@
+{
+  "id": "maclauncher-steam-bridge",
+  "version": "1.0.0",
+  "arch": "universal",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "sourceRelative": null,
+  "sourceSha256": "c4d6b50cdb956e56814972dc297ee2a2cf0869f6d1adc8d3d290bd2cb6d93c9f",
+  "directoryRelative": "maclauncher-steam-bridge/1.0.0/universal",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "31c46384ec5c5b44f436bee6d55002e960eeb664d68497812f597e9a066e0847",
+  "files": [
+    {
+      "path": "aarch64-unix/lsteamclient.so",
+      "mode": 493,
+      "size": 2587840,
+      "sha256": "f53fdc00ef437428007dc6175402d0209bac81e05012d184eeedd71a8c96cda0"
+    },
+    {
+      "path": "i386-windows/lsteamclient.dll",
+      "mode": 493,
+      "size": 27844608,
+      "sha256": "7817543144dc834b265b678bade94e80bdfa4740904e0766927dfb05ff92843a"
+    },
+    {
+      "path": "i386-windows/mlsteam-bootstrap.dll",
+      "mode": 493,
+      "size": 38400,
+      "sha256": "e52500bcdd5a95be39c1dad73a4c014c92905df88b0b0870490f6ab8b779ec0c"
+    },
+    {
+      "path": "i386-windows/steam.exe",
+      "mode": 493,
+      "size": 560128,
+      "sha256": "310ee86c68aa20f2838f08136b936575d1714154beb3388953821f203e0e2dd2"
+    },
+    {
+      "path": "licenses/BSD-3-Clause-2.txt",
+      "mode": 420,
+      "size": 1488,
+      "sha256": "f56ff606104d4ef18e617921a75c73ad73b5a1a1d70c69590c29de16919e04ad"
+    },
+    {
+      "path": "licenses/BSD-3-Clause.txt",
+      "mode": 420,
+      "size": 1511,
+      "sha256": "3df3b1723e04307176b7ffe1f424514d5f871d03d2c2f668652bc8b6dfcd72af"
+    },
+    {
+      "path": "licenses/components.txt",
+      "mode": 420,
+      "size": 158,
+      "sha256": "e12f66d50e67ec9ed90619dbe00e173078960af8f50a9cacbc96dd11532a7fb4"
+    },
+    {
+      "path": "licenses/JsonCpp.txt",
+      "mode": 420,
+      "size": 2294,
+      "sha256": "fa63cd425bb44c087ee0d40892db64f90a2871c3832f70a6b7b59fa82b0c78e0"
+    },
+    {
+      "path": "licenses/LGPL-2.1.txt",
+      "mode": 420,
+      "size": 26434,
+      "sha256": "e237fa56668030e928551ddd60f05df5fe957f75eab874bbd017e085ed722e7c"
+    },
+    {
+      "path": "licenses/Steamworks-SDK.txt",
+      "mode": 420,
+      "size": 7435,
+      "sha256": "80fda9147f8ee707cd18d1d6d71b307063fa3a02057a7c789de47f7c003510f1"
+    },
+    {
+      "path": "manifest.json",
+      "mode": 420,
+      "size": 3398,
+      "sha256": "31c46384ec5c5b44f436bee6d55002e960eeb664d68497812f597e9a066e0847"
+    },
+    {
+      "path": "steam.exe",
+      "mode": 493,
+      "size": 540160,
+      "sha256": "7098ad2de9c937eb45f3b5ab1a7daafad988e967d541aa98c735d93ac899e820"
+    },
+    {
+      "path": "x86_64-unix/lsteamclient.so",
+      "mode": 493,
+      "size": 2426672,
+      "sha256": "c7d28affd998643b35d93514cf1ffead12e2dc4b12e1fe6db45d91560a5c4608"
+    },
+    {
+      "path": "x86_64-windows/lsteamclient.dll",
+      "mode": 493,
+      "size": 29609984,
+      "sha256": "57050b22c9f84b4c1fd2be1de177d38a624a1dfda59b76b02cbc44f3f7f8776a"
+    },
+    {
+      "path": "x86_64-windows/mlsteam-bootstrap.dll",
+      "mode": 493,
+      "size": 45056,
+      "sha256": "c354ad0d4cc1ef659efabaec603fc899ce209145ec20f62f856b4845f667789c"
+    }
+  ]
+}
