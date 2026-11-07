@@ -44,6 +44,8 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup-node
       - run: npm ci --ignore-scripts
+      - name: Initialize source pin metadata
+        run: node --input-type=module -e "import {retryNetwork} from './tools/download.mjs'; import {execFileSync} from 'node:child_process'; retryNetwork(()=>execFileSync('git',['submodule','update','--init','--depth','1','--','sources/maclauncher'],{stdio:['inherit','inherit','pipe']}));"
       - name: Select the requested projects and names
         id: plan
         run: node tools/plan-build-release.mjs --output "$RUNNER_TEMP/release-plan"
