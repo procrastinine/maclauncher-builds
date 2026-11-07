@@ -1,3 +1,4 @@
+import {appSourceRoot} from './app-source.mjs';
 import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
 import {checkoutSource} from './build-source.mjs';
 import fs from 'node:fs';
@@ -7,6 +8,7 @@ import {plan,build,fetchInput} from '../producers/maclauncher/scripts/build-grap
 const root=path.resolve(import.meta.dirname,'..');
 /** Build one graphics package; SDK and deployment requirements stay separate. */
 export async function buildGraphicsSource({version,arch,output,work,sdkPath,sources={},sourceRoot,reuse={},tools={},inputs={}}){
+ appSourceRoot();
  if(!version)throw Error('An exact registered graphics source-stage version is required.');
  if(tools.meson&&!tools.python){const candidate=path.join(path.dirname(tools.meson),"python");if(fs.existsSync(candidate))tools.python=candidate;}
  const cross=path.join(work,'spirv-cross-source');

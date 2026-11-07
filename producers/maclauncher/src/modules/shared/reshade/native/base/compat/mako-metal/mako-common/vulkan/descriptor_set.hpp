@@ -1,2 +1,1 @@
-#pragma once
-#include "metal-vk.hpp"
+../../../../../../../../../../../../sources/maclauncher/src/modules/shared/reshade/native/base/compat/mako-metal/mako-common/vulkan/descriptor_set.hpp

@@ -1,3 +1,1 @@
-#pragma once
-#include <stdlib.h>
-#include <alloca.h>
+../../../../../../../../../sources/maclauncher/src/modules/shared/reshade/native/base/compat/malloc.h

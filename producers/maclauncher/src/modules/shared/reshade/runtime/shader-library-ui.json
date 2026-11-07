@@ -1,7 +1,1 @@
-{
-  "id": "graphics-shader-library",
-  "ui": {
-    "groupId": "graphics", "tabLabel": "Graphics", "memberLabel": "Shaders", "sectionLabel": "Shaders",
-    "library": "shaders", "order": 0, "memberOrder": 10, "management": "managed"
-  }
-}
+../../../../../../../sources/maclauncher/src/modules/shared/reshade/runtime/shader-library-ui.json

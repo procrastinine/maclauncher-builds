@@ -1,3 +1,4 @@
+import {appSourceRoot} from '../../../../../../../tools/app-source.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
@@ -15,6 +16,7 @@ const read=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8'
 const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
 const gitEnvironment={...process.env,GIT_NO_LAZY_FETCH:'1'};
 export function prepareSceneSource({repository,work}){
+ const app=appSourceRoot();
  repository=fs.realpathSync(repository);work=path.resolve(work);
  if(work===repository||work.startsWith(repository+path.sep)||repository.startsWith(work+path.sep))throw Error('MoltenVK source and owned build directories must be disjoint');
  if(read('git',['-C',repository,'rev-parse','HEAD'])!==source.revision)throw Error('MoltenVK source revision differs from its pin');
@@ -27,7 +29,7 @@ export function prepareSceneSource({repository,work}){
  finally{fs.unlinkSync(archive);}
  const temporalRoot=path.resolve(root,'../../../../../../../producers/moltenvk');
  const temporalFiles=['build.mjs','temporal.patch','temporal-command.hpp','temporal-command.inc','temporal-map.hpp','temporal-scene.hpp'];
- const inputs={profile:source,temporalCarrier:temporalFiles.map(file=>({file:'producers/moltenvk/'+file,sha256:digest(fs.readFileSync(path.join(temporalRoot,file)))})),files:[...adapted.keys()].map(file=>({file,sha256:digest(fs.readFileSync(path.join(projected,file)))})),
+ const inputs={profile:source,appRevision:app.revision,temporalCarrier:temporalFiles.map(file=>({file:'producers/moltenvk/'+file,sha256:digest(fs.readFileSync(path.join(temporalRoot,file)))})),files:[...adapted.keys()].map(file=>({file,sha256:digest(fs.readFileSync(path.join(projected,file)))})),
   producer:['moltenvk-scene-build.mjs','moltenvk-scene-overlay.mjs','moltenvk-scene-project.cmake','source-files.mjs'].map(file=>({file,sha256:digest(fs.readFileSync(path.join(root,file)))}))};
  writeChanged(path.join(work,'scene-source.json'),JSON.stringify(inputs,null,2)+'\n');
  return projected;

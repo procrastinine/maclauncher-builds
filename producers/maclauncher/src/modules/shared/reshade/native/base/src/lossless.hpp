@@ -1,3 +1,1 @@
-#pragma once
-#include <iosfwd>
-namespace macfx { int inspectLossless(const char *path, std::ostream &output); }
+../../../../../../../../../sources/maclauncher/src/modules/shared/reshade/native/base/src/lossless.hpp

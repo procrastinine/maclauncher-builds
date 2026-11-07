@@ -288,3 +288,7 @@
 [submodule "vkd3d-proton-macos-ngx"]
 	path = producers/vkd3d-proton/ngx
 	url = https://github.com/metalsharp/VKD3D-Proton-MacOS.git
+
+[submodule "sources/maclauncher"]
+	path = sources/maclauncher
+	url = https://github.com/procrastinine/maclauncher

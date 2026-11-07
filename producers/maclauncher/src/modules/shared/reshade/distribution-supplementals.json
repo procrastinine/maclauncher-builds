@@ -1,10 +1,1 @@
-[
-  {
-    "id": "reshade",
-    "arch": "universal"
-  },
-  {
-    "id": "reshade",
-    "arch": "x64"
-  }
-]
+../../../../../../sources/maclauncher/src/modules/shared/reshade/distribution-supplementals.json

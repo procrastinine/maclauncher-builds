@@ -1,3 +1,5 @@
+import {materializeAppModule} from '../../../../../../../tools/app-source.mjs';
+import os from 'node:os';
 import {checkoutSource} from '../../../../../../../tools/build-source.mjs';
 import sharedDependencies from '../../../../../../dependencies.json' with {type:'json'};
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
@@ -14,7 +16,10 @@ const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 /** Create a complete production CMake source tree from owned files and pinned Git inputs. */
 export function materializeSource({output,sources={},baseOnly=false}){
  if(!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Choose a new absolute graphics source directory.');
- const base=path.join(root,'base'),overlay=JSON.parse(fs.readFileSync(path.join(root,'source-overlay.json')));
+ const snapshot=fs.mkdtempSync(path.join(os.tmpdir(),'maclauncher-graphics-source-'));
+ const app=materializeAppModule({module:'src/modules/shared/reshade',output:path.join(snapshot,'reshade')});
+ const appNative=path.join(app.output,'native');
+ const base=path.join(appNative,'base'),overlay=JSON.parse(fs.readFileSync(path.join(root,'source-overlay.json')));
  const processor=JSON.parse(fs.readFileSync(path.join(root,'processor-sources.json')));
  const inputs=['CMakeLists.txt','README.md',...['src','compat'].flatMap(dir=>fs.readdirSync(path.join(base,dir),{recursive:true}).map(name=>path.join(dir,name)).filter(name=>fs.statSync(path.join(base,name)).isFile()))].sort();
  fs.mkdirSync(output,{recursive:true});
@@ -23,13 +28,13 @@ export function materializeSource({output,sources={},baseOnly=false}){
  for(const entry of processor.sources){
   const directory=path.resolve(sources[entry.id]||(entry.id==='macfx-spirv-cross'?checkoutSource({...sharedDependencies.spirvCross,destination:path.join(output,'.source-inputs/spirv-cross')}):path.join(repository,entry.submodulePath)));
   const head=execFileSync('git',['-C',directory,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
-  if(head!==(entry.id==='macfx-spirv-cross'?sharedDependencies.spirvCross.revision:(entry.id==='macfx-spirv-headers'?execFileSync('git',['-C',path.join(repository,'src/external/macfx-reshade'),'rev-parse',gitlink('producers/maclauncher/src/external/macfx-reshade')+':deps/spirv'],{encoding:'utf8'}).trim():gitlink('producers/maclauncher/'+entry.submodulePath))))throw Error('Initialize the selected graphics source commit: '+entry.submodulePath);
+  if(head!==(entry.id==='macfx-spirv-cross'?sharedDependencies.spirvCross.revision:(entry.id==='macfx-spirv-headers'?execFileSync('git',['-C',sources['macfx-reshade']||path.join(repository,'src/external/macfx-reshade'),'rev-parse',gitlink('producers/maclauncher/src/external/macfx-reshade')+':deps/spirv'],{encoding:'utf8'}).trim():gitlink('producers/maclauncher/'+entry.submodulePath))))throw Error('Initialize the selected graphics source commit: '+entry.submodulePath);
   directories[entry.sourcePath]=directory;
  }
   addLicenses(output,"ReShade",base);
   for(const name of [...inputs,'.gitmodules']){const file=path.join(output,name);fs.mkdirSync(path.dirname(file),{recursive:true});fs.copyFileSync(path.join(base,name),file);}
   if(!baseOnly)for(const entry of overlay.files){
-   const file=path.join(output,entry.path);fs.mkdirSync(path.dirname(file),{recursive:true});fs.copyFileSync(path.join(root,entry.source),file);
+   const file=path.join(output,entry.path);fs.mkdirSync(path.dirname(file),{recursive:true});const appFile=path.join(appNative,entry.source);fs.copyFileSync(fs.existsSync(appFile)?appFile:path.join(root,entry.source),file);
   }
   copyPinnedReShadeSources('',output,new Set(processor.sources.map(entry=>entry.sourcePath)),directories);
   const libra=JSON.parse(fs.readFileSync(path.join(root,'retroarch-source.json')));
@@ -38,8 +43,8 @@ export function materializeSource({output,sources={},baseOnly=false}){
   for(const name of ['include/librashader.h']){const file=path.join(output,'third_party/librashader',name);fs.mkdirSync(path.dirname(file),{recursive:true});fs.copyFileSync(path.join(libraRoot,name),file);}
   addLicenses(output,'librashader',libraRoot);
   fs.rmSync(path.join(output,'.source-inputs'),{recursive:true,force:true});
-  return {output,sourceSha256:digest(Buffer.concat(inputs.map(name=>Buffer.concat([Buffer.from(name+'\0'),fs.readFileSync(path.join(base,name))])))),upstreams:processor.sources.map(entry=>({id:entry.id,commit:entry.id==='macfx-spirv-cross'?sharedDependencies.spirvCross.revision:(entry.id==='macfx-spirv-headers'?execFileSync('git',['-C',path.join(repository,'src/external/macfx-reshade'),'rev-parse',gitlink('producers/maclauncher/src/external/macfx-reshade')+':deps/spirv'],{encoding:'utf8'}).trim():gitlink('producers/maclauncher/'+entry.submodulePath))}))};
- }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
+  return {output,appRevision:app.revision,sourceSha256:digest(Buffer.concat(inputs.map(name=>Buffer.concat([Buffer.from(name+'\0'),fs.readFileSync(path.join(base,name))])))),upstreams:processor.sources.map(entry=>({id:entry.id,commit:entry.id==='macfx-spirv-cross'?sharedDependencies.spirvCross.revision:(entry.id==='macfx-spirv-headers'?execFileSync('git',['-C',sources['macfx-reshade']||path.join(repository,'src/external/macfx-reshade'),'rev-parse',gitlink('producers/maclauncher/src/external/macfx-reshade')+':deps/spirv'],{encoding:'utf8'}).trim():gitlink('producers/maclauncher/'+entry.submodulePath))}))};
+ }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}finally{fs.rmSync(snapshot,{recursive:true,force:true});}
 }
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){
  const args=process.argv.slice(2),baseOnly=args[1]==='--base-only';

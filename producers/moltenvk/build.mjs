@@ -1,3 +1,4 @@
+import {appSourceRoot} from '../../tools/app-source.mjs';
 // SPDX-License-Identifier: MIT
 import fs from 'node:fs';
 import path from 'node:path';
@@ -17,6 +18,7 @@ export function carrierHeader(producer=path.resolve(here,'../vkd3d-proton/vk_tem
 }
 // Compose the carrier in an owned source projection; the upstream checkout stays read-only.
 export function applyTemporalSource(work){
+    appSourceRoot();
     run('git',['apply','--unsafe-paths','--directory='+work,path.join(here,'temporal.patch')]);
     const commands=path.join(work,'MoltenVK/MoltenVK/Commands');
     for(const name of ['temporal-command.hpp','temporal-command.inc','temporal-map.hpp','temporal-scene.hpp'])fs.copyFileSync(path.join(here,name),path.join(commands,name));

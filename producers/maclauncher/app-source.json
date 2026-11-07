@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "repository": "https://github.com/procrastinine/maclauncher",
+  "revision": "4dd46a218869aad6d7b97c41d231a6d5c5e3dcd1",
+  "gitlink": "sources/maclauncher",
+  "modules": [
+    "src/modules/shared/reshade",
+    "src/modules/shared/vulkan/native"
+  ]
+}

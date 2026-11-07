@@ -597,6 +597,7 @@
         "x64": "macos-26-intel"
       },
       "submodules": [
+        "sources/maclauncher",
         "producers/maclauncher/src/external/ISFMSLKit",
         "producers/maclauncher/src/external/ISFMSLKit/submodules/ISFGLSLGenerator",
         "producers/maclauncher/src/external/ISFMSLKit/submodules/PINCache",

@@ -2293,6 +2293,9 @@
       ],
       "tools": [
         "cmake"
+      ],
+      "submodules": [
+        "sources/maclauncher"
       ]
     },
     "versionBindings": [
