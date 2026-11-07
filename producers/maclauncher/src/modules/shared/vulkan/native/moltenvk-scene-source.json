@@ -1,6 +1,6 @@
 {
   "projectId": "vulkan-moltenvk-scene",
-  "version": "1.4.2-MCLv9",
+  "version": "1.4.2-MCLv10",
   "upstreamVersion": "1.4.2",
   "repository": "https://github.com/KhronosGroup/MoltenVK.git",
   "submodule": "src/external/graphics-moltenvk",
@@ -34,5 +34,6 @@
       "repository": "https://github.com/USCiLab/cereal.git",
       "revision": "a56bad8bbb770ee266e930c95d37fff2a5be7fea"
     }
-  ]
+  ],
+  "temporalCarrier": "VkTemporalFrameInfoMVK"
 }

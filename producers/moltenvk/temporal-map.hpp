@@ -9,7 +9,7 @@
 inline bool mvkTemporalMap(const VkTemporalFrameInfoMVK& i, uint32_t cw, uint32_t ch,
                           uint32_t dw, uint32_t dh, uint32_t mw, uint32_t mh,
                           uint32_t ow, uint32_t oh, RSTemporalFrame& f) {
-    if (!i.frameId || !i.featureId || i.featureType != TEMPORAL_SUPER_RESOLUTION ||
+    if (!i.frameId || !i.featureId || (i.featureType != TEMPORAL_SUPER_RESOLUTION && i.featureType != TEMPORAL_RAY_RECONSTRUCTION) ||
         i.colorX >= cw || i.colorY >= ch || i.depthX >= dw || i.depthY >= dh ||
         i.motionX >= mw || i.motionY >= mh || i.outputX >= ow || i.outputY >= oh) return false;
     f.size=sizeof(f); f.version=1; f.frameId=i.frameId;

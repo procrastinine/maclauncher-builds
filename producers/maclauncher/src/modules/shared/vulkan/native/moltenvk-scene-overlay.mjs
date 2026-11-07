@@ -15,9 +15,9 @@ export const commonHeaders={
 };
 function original(repository,file){return execFileSync('git',['-C',repository,'show',source.revision+':'+file],{encoding:'utf8',env:{...process.env,GIT_NO_LAZY_FETCH:'1'},maxBuffer: Infinity});}
 function replace(text,from,to,file){if(text.split(from).length!==2)throw Error('MoltenVK source anchor changed: '+file);return text.replace(from,to);}
-export function sceneSources(repository){
+export function sceneSources(repository,readSource=file=>original(repository,file)){
  const files=new Map();
- const edit=(file,changes)=>{let text=original(repository,file);for(const[from,to]of changes)text=replace(text,from,to,file);files.set(file,text);};
+ const edit=(file,changes)=>{let text=readSource(file);for(const[from,to]of changes)text=replace(text,from,to,file);files.set(file,text);};
  const commands='MoltenVK/MoltenVK/Commands/';
  edit(commands+'MVKCommandPool.h',[
   ['#include "MVKCmdDebug.h"','#include "MVKCmdDebug.h"\n#include "scene-command.hpp"'],
@@ -53,7 +53,7 @@ export function sceneSources(repository){
   ['PFN_vkVoidFunction MVKDevice::getProcAddr(const char* pName) {','PFN_vkVoidFunction MVKDevice::getProcAddr(const char* pName) {\n    if (pName && !strcmp(pName, "rsMoltenVKSceneOperationAPI")) return (PFN_vkVoidFunction)rsMoltenVKSceneOperationAPI;\n    if (pName && !strcmp(pName, "rsMoltenVKSceneStagingAPI")) return (PFN_vkVoidFunction)rsMoltenVKSceneStagingAPI;\n    if (pName && !strcmp(pName, "rsMoltenVKRecordSceneOperation")) return (PFN_vkVoidFunction)rsMoltenVKRecordSceneOperation;']
  ]);
  edit('MoltenVK/MoltenVK/GPUObjects/MVKDevice.h',[
-  ['class MVKDevice : public MVKDispatchableVulkanAPIObject {\n\npublic:', 'class MVKDevice : public MVKDispatchableVulkanAPIObject {\n\npublic:\n    std::atomic<uint32_t> _macfxSceneRecordingCount{0};']
+  ['class MVKDevice : public MVKDispatchableVulkanAPIObject {', 'class MVKDevice : public MVKDispatchableVulkanAPIObject {\npublic:\n    std::atomic<uint32_t> _macfxSceneRecordingCount{0};']
  ]);
  edit('MoltenVK/MoltenVK/GPUObjects/MVKQueue.mm',[
   ['if ( !getMVKConfig().synchronousQueueSubmits ) {','if ( !getMVKConfig().synchronousQueueSubmits && _device->hasResidencySet() ) {'],

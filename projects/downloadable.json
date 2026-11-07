@@ -2247,7 +2247,8 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/shared/vulkan/native/moltenvk-scene-build.mjs"
+        "producers/maclauncher/src/modules/shared/vulkan/native/moltenvk-scene-build.mjs",
+        "producers/moltenvk/build.mjs"
       ],
       "sourceDirectory": "producers/maclauncher"
     },
@@ -2279,10 +2280,14 @@
       {
         "version": "1.4.2-MCLv9",
         "label": "MoltenVK 1.4.2 scene recording 1.4.2-MCLv9"
+      },
+      {
+        "version": "1.4.2-MCLv10",
+        "label": "MoltenVK 1.4.2 temporal scene input"
       }
     ],
     "build": {
-      "version": "1.4.2-MCLv9",
+      "version": "1.4.2-MCLv10",
       "command": "tools/build-vulkan-moltenvk-scene.mjs",
       "architectures": [
         "universal"

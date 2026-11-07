@@ -6,6 +6,7 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {source,sceneSources} from './moltenvk-scene-overlay.mjs';
+import {applyTemporalSource} from '../../../../../../../producers/moltenvk/build.mjs';
 import {writeChanged,prepareSourceTree} from './source-files.mjs';
 import Bundled from '../../runtime/bundled-native.js';
 const root=path.dirname(fileURLToPath(import.meta.url));
@@ -18,13 +19,15 @@ export function prepareSceneSource({repository,work}){
  if(work===repository||work.startsWith(repository+path.sep)||repository.startsWith(work+path.sep))throw Error('MoltenVK source and owned build directories must be disjoint');
  if(read('git',['-C',repository,'rev-parse','HEAD'])!==source.revision)throw Error('MoltenVK source revision differs from its pin');
  const projected=path.join(work,'source');fs.mkdirSync(work,{recursive:true});
- const adapted=sceneSources(repository);
+ let adapted;
  // Offline archive is the original public source, never a modified checkout.
  const archive=path.join(work,'upstream-source.tar');
  run('git',['-C',repository,'archive','--format=tar','--output='+archive,source.revision],{env:gitEnvironment});
- try{prepareSourceTree(projected,temporary=>{run('/usr/bin/tar',['-xf',archive,'-C',temporary]);for(const[file,bytes]of adapted)writeChanged(path.join(temporary,file),bytes);});}
+ try{prepareSourceTree(projected,temporary=>{run('/usr/bin/tar',['-xf',archive,'-C',temporary]);const temporal=applyTemporalSource(temporary);adapted=sceneSources(repository,file=>fs.readFileSync(path.join(temporary,file),'utf8'));for(const file of temporal)if(!adapted.has(file))adapted.set(file,fs.readFileSync(path.join(temporary,file)));for(const[file,bytes]of adapted)writeChanged(path.join(temporary,file),bytes);});}
  finally{fs.unlinkSync(archive);}
- const inputs={profile:source,files:[...adapted.keys()].map(file=>({file,sha256:digest(fs.readFileSync(path.join(projected,file)))})),
+ const temporalRoot=path.resolve(root,'../../../../../../../producers/moltenvk');
+ const temporalFiles=['build.mjs','temporal.patch','temporal-command.hpp','temporal-command.inc','temporal-map.hpp','temporal-scene.hpp'];
+ const inputs={profile:source,temporalCarrier:temporalFiles.map(file=>({file:'producers/moltenvk/'+file,sha256:digest(fs.readFileSync(path.join(temporalRoot,file)))})),files:[...adapted.keys()].map(file=>({file,sha256:digest(fs.readFileSync(path.join(projected,file)))})),
   producer:['moltenvk-scene-build.mjs','moltenvk-scene-overlay.mjs','moltenvk-scene-project.cmake','source-files.mjs'].map(file=>({file,sha256:digest(fs.readFileSync(path.join(root,file)))}))};
  writeChanged(path.join(work,'scene-source.json'),JSON.stringify(inputs,null,2)+'\n');
  return projected;
@@ -48,7 +51,7 @@ export function buildSceneProvider({projected,work,dependencies,architecture='ar
  run('cmake',['-S',wrapper,'-B',build,'-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_ARCHITECTURES='+architecture,
   '-DCMAKE_OSX_DEPLOYMENT_TARGET='+source.minimumMacOS,'-DMACFX_MOLTENVK_SOURCE='+path.resolve(projected),
   '-DMACFX_SPIRV_CROSS_SOURCE='+actual['SPIRV-Cross'],'-DMACFX_VULKAN_HEADERS_SOURCE='+actual['Vulkan-Headers'],'-DMACFX_CEREAL_SOURCE='+actual.cereal]);
- run('/usr/bin/nice',['-n','10','cmake','--build',build,'--target','MoltenVK','--parallel',String(jobs)]);
+ run('/usr/bin/nice',['-n','19','cmake','--build',build,'--target','MoltenVK','--parallel',String(jobs)]);
  const library=path.join(build,'upstream/MoltenVK/libMoltenVK.dylib');if(!fs.existsSync(library))throw Error('The original MoltenVK target did not produce its library');return {library,dependencies:actual,buildInputs};
 }
 export function publishSceneProvider({library,projected,output,architecture,dependencies,buildInputs}){
@@ -57,6 +60,8 @@ export function publishSceneProvider({library,projected,output,architecture,depe
  fs.mkdirSync(output,{recursive:true});const name='libMoltenVK-scene.dylib',destination=path.join(output,name);fs.copyFileSync(library,destination);fs.chmodSync(destination,0o755);
  run('/usr/bin/install_name_tool',['-id','@rpath/'+name,destination]);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',destination]);
  addLicenses(output,'MoltenVK',projected);
+ addLicenses(output,'VKD3D-Proton temporal carrier',path.resolve(root,'../../../../../../../producers/vkd3d-proton/source'));
+ addLicenses(output,'MacLauncher',path.resolve(root,'../../../../../../..'));
  for(const item of source.dependencies){const input=dependencies[item.id];addLicenses(output,item.id,input);}
 
  const files=Bundled.fileInventory(output).filter(file=>file!=='provider.json').map(file=>({path:file,sha256:digest(fs.readFileSync(path.join(output,file))),size:fs.statSync(path.join(output,file)).size}));

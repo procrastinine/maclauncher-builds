@@ -211,8 +211,10 @@ static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_DenoisedUpscale(ID3D
     memset(&info, 0, sizeof(info));
     info.sType = VK_STRUCTURE_TYPE_TEMPORAL_FRAME_INFO_MVK;
     info.featureType = TEMPORAL_RAY_RECONSTRUCTION;
+    /* Streamline DLSS-RR guide4.1.4/4.3: preserve the explicitly selected packed channel. */
     info.flags = (desc->AutoExposure ? TEMPORAL_AUTO_EXPOSURE : 0) | (desc->InReset ? TEMPORAL_RESET : 0)
-            | (desc->DepthReversed ? TEMPORAL_DEPTH_REVERSED : 0);
+            | (desc->DepthReversed ? TEMPORAL_DEPTH_REVERSED : 0)
+            | (desc->RoughnessInNormalAlpha ? TEMPORAL_ROUGHNESS_NORMAL_ALPHA : 0) | TEMPORAL_HDR;
     images[TEMPORAL_COLOR] = desc->Color;
     images[TEMPORAL_DEPTH] = desc->Depth;
     images[TEMPORAL_MOTION] = desc->MotionVector;

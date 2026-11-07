@@ -15,6 +15,20 @@ export function carrierHeader(producer=path.resolve(here,'../vkd3d-proton/vk_tem
     if(first<0||last<0)throw Error('Missing shared temporal carrier declaration');
     return '// Generated from the shared LGPL-2.1-or-later temporal carrier.\n#pragma once\n#include <vulkan/vulkan.h>\n'+text.slice(first,last+'} VkTemporalFrameInfoMVK;'.length)+'\n';
 }
+// Compose the carrier in an owned source projection; the upstream checkout stays read-only.
+export function applyTemporalSource(work){
+    run('git',['apply','--unsafe-paths','--directory='+work,path.join(here,'temporal.patch')]);
+    const commands=path.join(work,'MoltenVK/MoltenVK/Commands');
+    for(const name of ['temporal-command.hpp','temporal-command.inc','temporal-map.hpp','temporal-scene.hpp'])fs.copyFileSync(path.join(here,name),path.join(commands,name));
+    fs.writeFileSync(path.join(commands,'temporal-carrier.h'),carrierHeader());
+    fs.copyFileSync(path.resolve(here,'../maclauncher/src/modules/shared/reshade/temporal/frame.h'),path.join(commands,'frame.h'));
+    const scene=path.resolve(here,'../maclauncher/src/modules/shared/reshade');
+    for(const name of ['scene-aovs.h','scene-matrices.h'])fs.copyFileSync(path.join(scene,'temporal',name),path.join(commands,name));
+    fs.copyFileSync(path.join(scene,'native/image-color.h'),path.join(commands,'image-color.h'));
+    const commandPath='MoltenVK/MoltenVK/Commands/';
+    return [...fs.readFileSync(path.join(here,'temporal.patch'),'utf8').matchAll(/^\+\+\+ b\/(.+)$/gm)].map(m=>m[1]).concat(
+        ['temporal-command.hpp','temporal-command.inc','temporal-map.hpp','temporal-scene.hpp','temporal-carrier.h','frame.h','scene-aovs.h','scene-matrices.h','image-color.h'].map(file=>commandPath+file));
+}
 export function prepareSource({source,work}){
     if(read('git',['-C',source,'rev-parse',revision+'^{commit}'])!==revision)throw Error('Missing pinned MoltenVK source');
     source=fs.realpathSync(source);work=path.resolve(work);
@@ -23,11 +37,7 @@ export function prepareSource({source,work}){
     fs.mkdirSync(work,{recursive:true});
     const archive=path.join(work,'source.tar');run('git',['-C',source,'archive',revision,'-o',archive]);
     run('tar',['-xf',archive,'-C',work]);fs.unlinkSync(archive);
-    run('git',['apply','--unsafe-paths','--directory='+work,path.join(here,'temporal.patch')]);
-    const commands=path.join(work,'MoltenVK/MoltenVK/Commands');
-    for(const name of ['temporal-command.hpp','temporal-command.inc','temporal-map.hpp'])fs.copyFileSync(path.join(here,name),path.join(commands,name));
-    fs.writeFileSync(path.join(commands,'temporal-carrier.h'),carrierHeader());
-    fs.copyFileSync(path.resolve(here,'../maclauncher/src/modules/shared/reshade/temporal/frame.h'),path.join(commands,'frame.h'));
+    applyTemporalSource(work);
     return work;
 }
 export function buildProvider({source,work,output,spirvCross,vulkanHeaders,cereal,architecture='x86_64',jobs=2}){

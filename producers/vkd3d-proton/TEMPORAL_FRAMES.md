@@ -13,10 +13,18 @@ A temporal frame is one DLSS Super Resolution or Ray Reconstruction evaluation, 
 | `featureType` | 1 for Super Resolution, 2 for Ray Reconstruction. |
 | `images`, `formats` | Slots: color, depth, motion, output, exposure, diffuse albedo, specular albedo, normals, roughness, specular hit distance, HUD-less color and UI. Color, depth, motion and output are required. A format other than `VK_FORMAT_UNDEFINED` is the view to read: integer-typed images are read as the float format of their bits. |
 | Offsets and extents | Color, depth and motion are read at their offsets over the render extent, or over the output extent when motion is at display resolution. Output is written at its offset over the output extent. An extent of 0 means the image's extent less the offset. |
-| `flags` | Auto exposure 0x1, reset 0x2, reversed depth 0x4, display-resolution motion 0x8, jittered motion 0x10, HDR (linear) color 0x20, valid camera 0x40, infinite far plane 0x80. |
+| `flags` | Auto exposure 0x1, reset 0x2, reversed depth 0x4, display-resolution motion 0x8, jittered motion 0x10, HDR (linear) color 0x20, valid camera 0x40, infinite far plane 0x80, roughness in normal alpha 0x100. |
 | Values | Motion vector scale, jitter offset, pre-exposure (0 means none), sharpness and frame time in milliseconds (0 means unknown). |
 | Camera | With the valid-camera flag: positive near and far plane distances (far 0 with an infinite far plane) and the vertical field of view in radians. Ray Reconstruction also has the world-to-view and view-to-clip matrices, row-major, of row vectors. |
 | `pReleaseFeatureIds` | Features destroyed since the previous frame. |
+
+## Scene attachments
+
+Drivers bind supplied matrices and AOVs with `rsBindTemporalSceneMatrices` and `rsBindTemporalSceneAovs` before processing the same classic command buffer. Both matrix contracts use row-major row vectors, so supplied finite, nonzero arrays are copied unchanged. Zero or nonfinite matrices remain absent. No clip-range flag is inferred.
+
+The fixed guide conventions follow Streamline `b998246a3d499c08765c5681b229c9e6b4513348`, `docs/ProgrammingGuideDLSS_RR.md` sections 4.1.1–4.1.5 and 4.1.9, and `docs/ProgrammingGuideDLSS_G.md`, “Buffer requirements”. Diffuse and specular albedo are linear material reflectance. Roughness is the material roughness scalar in R, or normal alpha when explicitly flagged. Specular hit distance is a world-space distance; consumers requiring view units decline it without a declared conversion. Normal encoding and view/world space remain unknown because the carrier does not declare them.
+
+HUD-less color follows the backbuffer color space and postprocessing. UI RGB is premultiplied by alpha, with zero alpha outside the UI. The carrier does not declare the backbuffer color domain or the matching composition pass, so those fields remain unknown independently of the SR color contract. Resources are retained with this metadata; consumers requiring an unknown convention decline the attachment. No texture or identity matrix substitutes for absent data.
 
 ## Producers
 

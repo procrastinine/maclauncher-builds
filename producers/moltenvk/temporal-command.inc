@@ -3,6 +3,7 @@
 // the loaded graphics pipeline owns provider selection, history and encoding.
 #include "MVKImage.h"
 #include "temporal-map.hpp"
+#include "temporal-scene.hpp"
 #include <dlfcn.h>
 #include <mutex>
 #include <unordered_map>
@@ -12,6 +13,8 @@
 #import <MetalFX/MetalFX.h>
 struct MVKTemporalPipeline {
     int (*process)(const RSTemporalFrame*,RSTemporalResult*)=nullptr;
+    int (*matrices)(const RSTemporalFrame*,const RSSceneMatrices*)=nullptr;
+    int (*aovs)(const RSTemporalFrame*,const RSSceneAovs*)=nullptr;
     uint32_t (*method)()=nullptr;
     void (*release)(void*)=nullptr;
     MVKTemporalPipeline() {
@@ -21,6 +24,8 @@ struct MVKTemporalPipeline {
         void* library=dlopen(info.dli_fname,RTLD_NOW|RTLD_LOCAL|RTLD_NODELETE|RTLD_NOLOAD);
         if(!library)return;
         process=(decltype(process))dlsym(library,"rsProcessTemporalFrame");
+        matrices=(decltype(matrices))dlsym(library,"rsBindTemporalSceneMatrices");
+        aovs=(decltype(aovs))dlsym(library,"rsBindTemporalSceneAovs");
         method=(decltype(method))dlsym(library,"rsGetTemporalMethod");
         release=(decltype(release))dlsym(library,"rsReleaseTemporalOwner");
         if(!process||!method||!release)process=nullptr;
@@ -38,6 +43,7 @@ struct MVKTemporalOwner {
     std::mutex mutex;
     id<MTLTexture> output=nil;
     bool hasOutput=false;
+    bool metadataReported=false;
     double previousTime=0;
     ~MVKTemporalOwner(){mvkTemporalPipeline().release(this);[output release];}
 };
@@ -49,18 +55,25 @@ static std::mutex mvkTemporalStateMutex;
 void mvkTemporalFinish(MVKDevice* device){delete device->_temporal;device->_temporal=nullptr;}
 struct MVKTemporalRecord {
     RSTemporalFrame frame{};
+    RSSceneMatrices matrices{};
+    uint64_t featureId=0;
+    uint32_t featureType=0,sceneFlags=0;
+    bool roughnessAlias=false;
     std::array<id<MTLTexture>,TEMPORAL_IMAGES> textures{};
     std::shared_ptr<MVKTemporalOwner> owner;
     ~MVKTemporalRecord(){for(auto texture:textures)[texture release];}
 };
 VkResult MVKCmdTemporalFrame::setContent(MVKCommandBuffer* commands,const VkTemporalFrameInfoMVK* info){
     _frame.reset();
-    if(!mvkTemporalPipeline().process||info->featureType!=TEMPORAL_SUPER_RESOLUTION)
+    if(!mvkTemporalPipeline().process||(info->featureType!=TEMPORAL_SUPER_RESOLUTION&&info->featureType!=TEMPORAL_RAY_RECONSTRUCTION))
         return VK_ERROR_FEATURE_NOT_PRESENT;
     if(!info->images[TEMPORAL_OUTPUT] || info->images[TEMPORAL_OUTPUT]==info->images[TEMPORAL_COLOR] ||
        info->images[TEMPORAL_OUTPUT]==info->images[TEMPORAL_DEPTH] ||
        info->images[TEMPORAL_OUTPUT]==info->images[TEMPORAL_MOTION])return VK_ERROR_INITIALIZATION_FAILED;
     auto record=std::make_shared<MVKTemporalRecord>();
+    record->matrices=mvkTemporalScene_matrices(info);record->featureId=info->featureId;
+    record->featureType=info->featureType;record->sceneFlags=info->flags;
+    record->roughnessAlias=info->images[TEMPORAL_NORMALS]&&info->images[TEMPORAL_NORMALS]==info->images[TEMPORAL_ROUGHNESS];
     auto device=commands->getDevice();
     for(unsigned n=0;n<TEMPORAL_IMAGES;n++){
         if(!info->images[n])continue;
@@ -126,7 +139,13 @@ void MVKCmdTemporalFrame::encode(MVKCommandEncoder* encoder){
     if(!(f.frameTimeMs>0))f.frameTimeMs=(float)std::clamp(owner.previousTime>0?(now-owner.previousTime)*1000.:1000./60.,.001,1000.);
     owner.previousTime=now;
     const auto& pipeline=mvkTemporalPipeline();const auto selected=pipeline.method();
-    f.method=selected?selected:RS_TEMPORAL_METALFX;
+    f.method=selected?selected:(_frame->featureType==TEMPORAL_RAY_RECONSTRUCTION?RS_TEMPORAL_METALFX_DENOISED:RS_TEMPORAL_METALFX);
+    void* textures[TEMPORAL_IMAGES];uint32_t widths[TEMPORAL_IMAGES],heights[TEMPORAL_IMAGES];
+    for(unsigned i=0;i<TEMPORAL_IMAGES;i++){textures[i]=_frame->textures[i];widths[i]=_frame->textures[i].width;heights[i]=_frame->textures[i].height;}
+    RSSceneAovs aovs;const bool hasAovs=mvkTemporalScene_aovs(&f,_frame->featureId,_frame->featureType,_frame->sceneFlags,_frame->roughnessAlias,textures,widths,heights,&aovs);
+    const int matricesStatus=!_frame->matrices.flags?RS_TEMPORAL_OK:pipeline.matrices?pipeline.matrices(&f,&_frame->matrices):RS_TEMPORAL_UNAVAILABLE;
+    const int aovsStatus=!hasAovs?RS_TEMPORAL_OK:pipeline.aovs?pipeline.aovs(&f,&aovs):RS_TEMPORAL_UNAVAILABLE;
+    if(!owner.metadataReported&&(matricesStatus||aovsStatus)){MVKLogWarning("Temporal scene bindings: matrices %d, AOVs %d",matricesStatus,aovsStatus);owner.metadataReported=true;}
     RSTemporalResult result{};result.size=sizeof(result);result.version=1;
     const auto status=pipeline.process(&f,&result);
     if(!_frame->owner->reported.load(std::memory_order_relaxed)){
