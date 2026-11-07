@@ -1,6 +1,6 @@
 android-aim=0.1.0-MCLv9
 prosper=MCLv8
-reshade=0.3.7
+reshade=0.3.8
 android-art-elf=16.0.0-MCLv8
 android-art-image-extractor=0.1.0-MCLv8
 android-java-framework=16.0.0-MCLv8

@@ -583,20 +583,18 @@
       {
         "version": "0.3.8",
         "label": "MacLauncher graphics 0.3.8"
-      },
-      {
-        "version": "0.3.8-local-66fc9f43",
-        "label": "MacLauncher graphics local ordered temporal test"
       }
     ],
     "build": {
-      "version": "0.3.8-local-66fc9f43",
+      "version": "0.3.8",
       "command": "tools/build-graphics.mjs",
       "architectures": [
-        "universal"
+        "universal",
+        "x64"
       ],
       "runners": {
-        "universal": "xcode-27"
+        "universal": "xcode-27",
+        "x64": "macos-26-intel"
       },
       "submodules": [
         "sources/maclauncher",
