@@ -10,6 +10,9 @@ const run=(program,args,options={})=>execFileSync(program,args,{stdio:'inherit',
 const quote=value=>"'"+String(value).replaceAll('\\','/').replaceAll("'","\\'")+"'";
 export const sourceRevision=()=>gitlink('producers/vkd3d-proton/source');
 export const ngxRevision=()=>gitlink('producers/vkd3d-proton/ngx');
+/** Search path for meson and ninja: meson setup finds the given ninja, as the compile step runs it. */
+export const providerPath=({glslang,ninja,mingw},search=process.env.PATH)=>[glslang?path.dirname(path.resolve(glslang)):null,
+  ninja&&path.isAbsolute(ninja)?path.dirname(ninja):null,mingw,search].filter(Boolean).join(path.delimiter);
 
 /** Build VKD3D-Proton with ID3D12GraphicsCommandListMetalFX, and the NGX core (x64) that records DLSS through it. */
 export function buildProvider({work,output,mingw,glslang,source=path.join(here,'source'),ngx=path.join(here,'ngx'),
@@ -30,7 +33,7 @@ export function buildProvider({work,output,mingw,glslang,source=path.join(here,'
     for(const name of ['vkd3d_metalfx.h','vk_temporal_frame.h'])fs.copyFileSync(path.join(here,name),path.join(exported,'include/private',name));
     const cross=path.join(root,'cross.ini'),tool=name=>quote(path.join(mingw,name));
     fs.writeFileSync(cross,`[binaries]\nc = ${tool(prefix+'-clang')}\ncpp = ${tool(prefix+'-clang++')}\nar = ${tool('llvm-ar')}\nstrip = ${tool('llvm-strip')}\nwidl-mingw-tools-fallback = ${tool(prefix+'-widl')}\n[properties]\nneeds_exe_wrapper = true\n[host_machine]\nsystem = 'windows'\ncpu_family = '${architecture==='x64'?'x86_64':'x86'}'\ncpu = '${architecture==='x64'?'x86_64':'i686'}'\nendian = 'little'\n`);
-    const env={...process.env,CFLAGS:'',CXXFLAGS:'',CPPFLAGS:'',LDFLAGS:'',GIT_CEILING_DIRECTORIES:root,PATH:[glslang?path.dirname(path.resolve(glslang)):null,mingw,process.env.PATH].filter(Boolean).join(path.delimiter)};
+    const env={...process.env,CFLAGS:'',CXXFLAGS:'',CPPFLAGS:'',LDFLAGS:'',GIT_CEILING_DIRECTORIES:root,PATH:providerPath({glslang,ninja,mingw})};
     run(meson,['setup',build,exported,'--cross-file',cross,'--buildtype','release'],{env});
     run(ninja,['-C',build,'-j'+String(jobs)],{env});
     built.push({architecture,build});

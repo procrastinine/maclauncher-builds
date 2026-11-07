@@ -52,7 +52,10 @@ export function runtimeBuildEnvironment(build,{environment=process.env,platform=
   }
   for(const name of ['PKG_CONFIG_PATH','PKG_CONFIG_LIBDIR','PKG_CONFIG_SYSROOT_DIR','CMAKE_PREFIX_PATH','CMAKE_FRAMEWORK_PATH','CMAKE_LIBRARY_PATH','CMAKE_INCLUDE_PATH','CMAKE_TOOLCHAIN_FILE','CPATH','C_INCLUDE_PATH','CPLUS_INCLUDE_PATH','LIBRARY_PATH','DYLD_LIBRARY_PATH','DYLD_FRAMEWORK_PATH','PYTHONPATH','PYTHONHOME','PYTHONUSERBASE','PERL5LIB','RUBYLIB','NODE_PATH','CC','CXX','CPP','CFLAGS','CXXFLAGS','CPPFLAGS','LDFLAGS','RUSTC','RUSTFLAGS','CARGO_ENCODED_RUSTFLAGS','JAVA_TOOL_OPTIONS','JDK_JAVA_OPTIONS'])delete env[name];
   const configs=prefixes.flatMap(prefix=>['lib/pkgconfig','share/pkgconfig'].map(name=>path.join(prefix,name))).filter(file=>fs.existsSync(file));
-  env.PATH=[compilerDirectory,...binaries,aliases,...systemDirectories].filter(Boolean).join(path.delimiter);
+  // Xcode 27's toolchain directory also holds Bison 2.3, Flex and M4, so declared formulae come ahead of it. A formula
+  // with its own clang (llvm) stays behind it, so commands still reach Xcode's compiler.
+  const compilerFormulae=binaries.filter(directory=>fs.existsSync(path.join(directory,'clang')));
+  env.PATH=[...binaries.filter(directory=>!compilerFormulae.includes(directory)),compilerDirectory,...compilerFormulae,aliases,...systemDirectories].filter(Boolean).join(path.delimiter);
   env.PKG_CONFIG_PATH=configs.join(path.delimiter);
   env.PKG_CONFIG_LIBDIR=env.PKG_CONFIG_PATH;
   env.CMAKE_PREFIX_PATH=prefixes.join(path.delimiter);
