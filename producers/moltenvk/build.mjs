@@ -10,12 +10,10 @@ export const revision=sourceProfile.revision;
 const run=(program,args,options={})=>execFileSync(program,args,{stdio:'inherit',...options});
 const read=(program,args)=>execFileSync(program,args,{encoding:'utf8'}).trim();
 // The producer's declaration is authoritative. Do not maintain a second wire layout.
-export function carrierHeader(producer=path.resolve(here,'../vkd3d-proton/metalfx.c')){
-    const source=fs.readFileSync(producer,'utf8');
-    const first=source.indexOf('#define VK_STRUCTURE_TYPE_TEMPORAL_FRAME_INFO_MVK');
-    const last=source.indexOf('} VkTemporalFrameInfoMVK;',first);
-    if(first<0||last<0)throw Error('Missing producer temporal carrier');
-    return '// Generated from the LGPL-2.1-or-later VKD3D-Proton temporal producer.\n#pragma once\n#include <vulkan/vulkan.h>\n'+source.slice(first,last+'} VkTemporalFrameInfoMVK;'.length)+'\n';
+export function carrierHeader(producer=path.resolve(here,'../vkd3d-proton/vk_temporal_frame.h')){
+    const text=fs.readFileSync(producer,'utf8'),first=text.indexOf('#define VK_STRUCTURE_TYPE_TEMPORAL_FRAME_INFO_MVK'),last=text.indexOf('} VkTemporalFrameInfoMVK;',first);
+    if(first<0||last<0)throw Error('Missing shared temporal carrier declaration');
+    return '// Generated from the shared LGPL-2.1-or-later temporal carrier.\n#pragma once\n#include <vulkan/vulkan.h>\n'+text.slice(first,last+'} VkTemporalFrameInfoMVK;'.length)+'\n';
 }
 export function prepareSource({source,work}){
     if(read('git',['-C',source,'rev-parse',revision+'^{commit}'])!==revision)throw Error('Missing pinned MoltenVK source');

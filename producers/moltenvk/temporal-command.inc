@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <array>
 #include <atomic>
+#include <chrono>
 #import <MetalFX/MetalFX.h>
 struct MVKTemporalPipeline {
     int (*process)(const RSTemporalFrame*,RSTemporalResult*)=nullptr;
@@ -34,7 +35,11 @@ const char* mvkTemporalDriverInfo(id<MTLDevice> device){
 }
 struct MVKTemporalOwner {
     std::atomic<bool> reported{false};
-    ~MVKTemporalOwner(){mvkTemporalPipeline().release(this);}
+    std::mutex mutex;
+    id<MTLTexture> output=nil;
+    bool hasOutput=false;
+    double previousTime=0;
+    ~MVKTemporalOwner(){mvkTemporalPipeline().release(this);[output release];}
 };
 struct MVKTemporalState {
     std::mutex mutex;
@@ -102,7 +107,24 @@ void MVKCmdTemporalFrame::encode(MVKCommandEncoder* encoder){
         encoder->_cmdBuffer->setConfigurationResult(VK_ERROR_INITIALIZATION_FAILED);return;
     }
     encoder->endCurrentMetalEncoding();
+    std::lock_guard<std::mutex> lock(_frame->owner->mutex);
+    auto& owner=*_frame->owner;
     auto f=_frame->frame;f.commandBuffer=commands;f.commandBufferKind=0;
+    id<MTLTexture> requested=_frame->textures[TEMPORAL_OUTPUT];
+    if(!owner.output||owner.output.width!=f.outputWidth||owner.output.height!=f.outputHeight||owner.output.pixelFormat!=requested.pixelFormat){
+        auto descriptor=[MTLTextureDescriptor texture2DDescriptorWithPixelFormat:requested.pixelFormat width:f.outputWidth height:f.outputHeight mipmapped:NO];
+        descriptor.storageMode=MTLStorageModePrivate;descriptor.hazardTrackingMode=MTLHazardTrackingModeTracked;
+        descriptor.usage=MTLTextureUsageShaderRead|MTLTextureUsageShaderWrite|MTLTextureUsageRenderTarget;
+        id<MTLTexture> made=[requested.device newTextureWithDescriptor:descriptor];
+        if(!made){encoder->_cmdBuffer->setConfigurationResult(VK_ERROR_OUT_OF_DEVICE_MEMORY);return;}
+        [owner.output release];owner.output=made;owner.hasOutput=false;
+    }
+    f.output=owner.output;f.outputX=f.outputY=0;
+    const double now=std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
+    // Match the existing driver/pipeline observation fallback only when the
+    // producer supplies no timing. The first frame has no prior real pair.
+    if(!(f.frameTimeMs>0))f.frameTimeMs=(float)std::clamp(owner.previousTime>0?(now-owner.previousTime)*1000.:1000./60.,.001,1000.);
+    owner.previousTime=now;
     const auto& pipeline=mvkTemporalPipeline();const auto selected=pipeline.method();
     f.method=selected?selected:RS_TEMPORAL_METALFX;
     RSTemporalResult result{};result.size=sizeof(result);result.version=1;
@@ -113,10 +135,18 @@ void MVKCmdTemporalFrame::encode(MVKCommandEncoder* encoder){
             status,result.encoded,result.reason);
         _frame->owner->reported.store(status==RS_TEMPORAL_OK&&result.encoded,std::memory_order_relaxed);
     }
-    if(status!=RS_TEMPORAL_OK||!result.encoded){
-        // Failed/preparing output is never treated as a completed upscale.
-        encoder->_cmdBuffer->setConfigurationResult(VK_ERROR_INITIALIZATION_FAILED);
+    if(status==RS_TEMPORAL_OK&&result.encoded)owner.hasOutput=true;
+    else if(status!=RS_TEMPORAL_BUSY||!owner.hasOutput){
+        // Without a previous complete image, BUSY cannot produce an output.
+        encoder->_cmdBuffer->setConfigurationResult(VK_ERROR_INITIALIZATION_FAILED);return;
     }
+    // The pipeline sees one complete tracked image. Preserve the actual SDK
+    // target/subregion with a copy on this same MoltenVK command buffer.
+    auto blit=encoder->getMTLBlitEncoder(kMVKCommandUseCopyImage);
+    [blit copyFromTexture:owner.output sourceSlice:0 sourceLevel:0 sourceOrigin:MTLOriginMake(0,0,0)
+              sourceSize:MTLSizeMake(f.outputWidth,f.outputHeight,1) toTexture:requested destinationSlice:0
+        destinationLevel:0 destinationOrigin:MTLOriginMake(_frame->frame.outputX,_frame->frame.outputY,0)];
+    encoder->endCurrentMetalEncoding();
 }
 MVKCommandTypePool<MVKCommand>* MVKCmdTemporalFrame::getTypePool(MVKCommandPool* pool){
     _frame.reset();return (MVKCommandTypePool<MVKCommand>*)&pool->_cmdTemporalFramePool;
