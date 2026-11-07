@@ -292,3 +292,7 @@
 [submodule "sources/maclauncher"]
 	path = sources/maclauncher
 	url = https://github.com/procrastinine/maclauncher
+
+[submodule "sources/maclauncher-kosmickrisp"]
+	path = sources/maclauncher-kosmickrisp
+	url = https://github.com/procrastinine/maclauncher-kosmickrisp

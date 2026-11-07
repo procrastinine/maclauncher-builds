@@ -2856,5 +2856,71 @@
         "glslang"
       ]
     }
+  },
+  {
+    "id": "maclauncher-kosmickrisp",
+    "name": "MacLauncher KosmicKrisp",
+    "purpose": "Mesa KosmicKrisp Vulkan driver with additional Vulkan features implemented on Metal.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "producers/kosmickrisp/build-runtime.mjs"
+      ],
+      "sourceDirectory": "producers/kosmickrisp"
+    },
+    "upstreams": [
+      {
+        "id": "maclauncher-kosmickrisp",
+        "provider": "github",
+        "url": "https://github.com/procrastinine/maclauncher-kosmickrisp",
+        "repository": "procrastinine/maclauncher-kosmickrisp",
+        "pin": {
+          "gitlink": "sources/maclauncher-kosmickrisp"
+        }
+      },
+      {
+        "id": "shaderc",
+        "provider": "github",
+        "url": "https://github.com/google/shaderc",
+        "repository": "google/shaderc",
+        "pin": {
+          "file": "producers/dependencies.json",
+          "pointer": "/shaderc/revision",
+          "repositoryPointer": "/shaderc/repository"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "27.0.0-devel-MCLv10",
+        "label": "MacLauncher KosmicKrisp 27.0.0-devel-MCLv10"
+      }
+    ],
+    "build": {
+      "version": "27.0.0-devel-MCLv10",
+      "command": "producers/kosmickrisp/build-runtime.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "submodules": [
+        "sources/maclauncher-kosmickrisp/sources/mesa",
+        "sources/vulkan-loader"
+      ],
+      "tools": [
+        "uv",
+        "pkgconf",
+        "cmake",
+        "llvm",
+        "spirv-tools",
+        "zstd",
+        "spirv-llvm-translator",
+        "glslang"
+      ],
+      "runners": {
+        "x64": "xcode-27"
+      }
+    }
   }
 ]
