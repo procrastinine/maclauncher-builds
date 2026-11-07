@@ -8,6 +8,8 @@ import {recipeMain} from '../../tools/build-source.mjs';
 import {mingw as prepareMingw} from '../../tools/scene-runtime.mjs';
 import {addLicense} from '../../lib/licenses.mjs';
 import {gitlink} from '../../lib/pins.mjs';
+import Bundled from '../../lib/bundled-native.cjs';
+import {publicDeclaration} from '../../tools/runtime-package.mjs';
 import {helperClientSource} from './helper-subset.mjs';
 import {buildHelpers} from './helper-build.mjs';
 const here=import.meta.dirname,root=path.resolve(here,'../..'),pins=JSON.parse(fs.readFileSync(path.join(here,'source.json')));
@@ -92,12 +94,30 @@ export function warnNativeOutput({architecture,actualArchitecture,unresolved},wa
  if(/^\s*_(?:wow64_|ISteam|steamclient_)/m.test(unresolved))warn('Steam bridge: unresolved implementation symbols in '+architecture+' output');
  if(actualArchitecture!==architecture)warn('Steam bridge: '+architecture+' output reports '+actualArchitecture);
 }
-export function packageOutput({work,mingw,output}) {
+export function packageOutput({work,mingw,output,retainedHelpers}) {
  const source=path.join(work,'wine');
  const shim=path.join(source,'programs/steam.exe'),pe=path.join(work,'build-x86_64');
- const helper=path.join(source,'programs/steam.exe/steam.cpp');
- put(path.join(work,'helper-client.inc'),helperClientSource(fs.readFileSync(helper,'utf8'),{upstreamHandshake:pins.helperLaunchHandshake===true}));
- buildHelpers({work,mingw,source,pins});
+ let retainedPath;
+ if(retainedHelpers!==undefined){
+  const retainedRoot=fs.realpathSync(retainedHelpers.payload),destination=path.resolve(output);
+  if(destination===retainedRoot||destination.startsWith(retainedRoot+path.sep))throw Error('Repackage output must be outside the retained payload');
+  const declaration=publicDeclaration(JSON.parse(Bundled.readRegular(retainedHelpers.declaration).bytes));
+  if(declaration.id!==pins.id)throw Error('Retained helpers belong to a different project');
+  Bundled.verifyPayload(retainedHelpers.payload,declaration);
+  const stored=Bundled.readRegular(path.join(retainedHelpers.payload,Bundled.relativeFile(declaration.manifestRelative)));
+  if(stored.sha256!==declaration.manifestSha256)throw Error('Retained helper manifest differs from its declaration');
+  const manifest=JSON.parse(stored.bytes);
+  retainedPath=(arch,kind)=>{
+   const relative=Bundled.relativeFile(manifest.steamBridge.windows[arch][kind]);
+   if(!declaration.files.some(file=>file.path===relative))throw Error('Retained helper is absent from its declaration');
+   return path.join(retainedHelpers.payload,relative);
+  };
+  for(const arch of ['i386','x86_64'])for(const kind of ['helper','bootstrap'])retainedPath(arch,kind);
+ }else{
+  const helper=path.join(source,'programs/steam.exe/steam.cpp');
+  put(path.join(work,'helper-client.inc'),helperClientSource(fs.readFileSync(helper,'utf8'),{upstreamHandshake:pins.helperLaunchHandshake===true}));
+  buildHelpers({work,mingw,source,pins});
+ }
  for(const arch of ['x86_64','arm64']){const file=path.join(work,'build-'+arch,'dlls/lsteamclient/lsteamclient.so');warnNativeOutput({architecture:arch,actualArchitecture:capture('lipo',['-archs',file]),unresolved:capture('nm',['-u',file])});}
  if(fs.existsSync(output))throw Error('Package output already exists');mkdir(output);
  for(const arch of ['x86_64','arm64']){
@@ -109,10 +129,10 @@ export function packageOutput({work,mingw,output}) {
  }
  for(const arch of ['i386','x86_64']){
   copy(path.join(work,'build-x86_64/dlls/lsteamclient',arch+'-windows/lsteamclient.dll'),path.join(output,arch+'-windows/lsteamclient.dll'));
-  copy(path.join(work,'helper-'+arch,'mlsteam-bootstrap.dll'),path.join(output,arch+'-windows/mlsteam-bootstrap.dll'));
+  copy(retainedPath?retainedPath(arch,'bootstrap'):path.join(work,'helper-'+arch,'mlsteam-bootstrap.dll'),path.join(output,arch+'-windows/mlsteam-bootstrap.dll'));
  }
- copy(path.join(work,'helper-x86_64/steam.exe'),path.join(output,'steam.exe'));
- copy(path.join(work,'helper-i386/steam.exe'),path.join(output,'i386-windows/steam.exe'));
+ copy(retainedPath?retainedPath('x86_64','helper'):path.join(work,'helper-x86_64/steam.exe'),path.join(output,'steam.exe'));
+ copy(retainedPath?retainedPath('i386','helper'):path.join(work,'helper-i386/steam.exe'),path.join(output,'i386-windows/steam.exe'));
  addLicense(output,'lsteamclient and Steamworks SDK',path.join(source,'dlls/lsteamclient/LICENSE'),'Steamworks-SDK');
  addLicense(output,'steam_helper',path.join(source,'programs/steam.exe/LICENSE'),'BSD-3-Clause');
  addLicense(output,'Wine headers',path.join(source,'COPYING.LIB'),'LGPL-2.1');
