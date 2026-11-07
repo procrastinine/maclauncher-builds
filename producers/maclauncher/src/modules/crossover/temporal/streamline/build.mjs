@@ -1,3 +1,4 @@
+import {buildCameraBridge} from '../camera-bridge/build.mjs';
 import {gitlink} from '../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from "node:fs";
@@ -62,11 +63,13 @@ fs.writeFileSync(path.join(output, "thunks.S"), thunks);
 execFileSync(path.resolve(args.compiler), ["-std=c++17", "-O2", "-shared", "-static", "-Wl,--exclude-all-symbols", "-Wl,--no-insert-timestamp", "-I" + path.join(source, "include"), "-I" + output,
   "-I"+path.resolve(here,"../../../shared/reshade/temporal"),"-I"+path.resolve(here,"../../../shared/reshade/native"),
   path.join(here, "proxy.cpp"), path.join(output, "thunks.S"), path.join(output, "exports.def"), "-o", path.join(output, "sl.interposer.dll")], { stdio: "inherit" });
+const cameraBridge=buildCameraBridge({compiler:path.join(path.dirname(path.resolve(args.compiler)),'x86_64-w64-mingw32-clang'),output});
 const hash = file => crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 const metadata = { schema: 1, version: "3", resourceSnapshotAPI:1,resourceSnapshotProfiles:["d3d11-v2"],resourceTagProfiles: ["slSetD3DDevice","slSetTag","slSetTagForFrame"].every(name=>exports.some(row=>row.name===name))?["d3d11-v1"]:[], source: { url: "https://github.com/NVIDIA-RTX/Streamline", revision, version: "2.9.0" },
+  cameraBridge:{...cameraBridge,files:Object.fromEntries([cameraBridge.windows,cameraBridge.unix].map(file=>[file,hash(path.join(output,file))]))},
   library: "sl.interposer.dll", sha256: hash(path.join(output, "sl.interposer.dll")), referenceSha256: hash(reference), exports,
   compiler: execFileSync(path.resolve(args.compiler), ["--version"], { encoding: "utf8" }).split("\n")[0],
-  sources: Object.fromEntries(["build.mjs", "source.json", "proxy.cpp", "camera.hpp", "resources.hpp", "snapshots.hpp", "snapshot-budget.hpp", "../dxmt/camera-transport.hpp", "../dxmt/streamline-transport.hpp", "../dxmt/streamline-snapshot.hpp", "pe-exports.js", "../../../shared/reshade/temporal/camera.h", "../../../shared/reshade/temporal/frame.h", "../../../shared/reshade/native/image-color.h", "../../../shared/reshade/native/image-budget.hpp"].map(file => [file, hash(path.resolve(here, file))])) };
+  sources: Object.fromEntries(["build.mjs", "source.json", "proxy.cpp", "../camera-bridge/build.mjs", "../camera-bridge/bridge.c", "../camera-bridge/bridge-unix.c", "../camera-bridge/protocol.h", "camera.hpp", "resources.hpp", "snapshots.hpp", "snapshot-budget.hpp", "../dxmt/camera-transport.hpp", "../dxmt/streamline-transport.hpp", "../dxmt/streamline-snapshot.hpp", "pe-exports.js", "../../../shared/reshade/temporal/camera.h", "../../../shared/reshade/temporal/frame.h", "../../../shared/reshade/native/image-color.h", "../../../shared/reshade/native/image-budget.hpp"].map(file => [file, hash(path.resolve(here, file))])) };
 addLicenses(output,'Streamline',source);
 fs.writeFileSync(path.join(output, "provider.json"), JSON.stringify(metadata, null, 2) + "\n");
 console.log(JSON.stringify({ library: path.join(output, metadata.library), exports: exports.length, sha256: metadata.sha256 }));

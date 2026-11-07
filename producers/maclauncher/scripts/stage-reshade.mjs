@@ -244,6 +244,7 @@ if(options["--retroarch"]) {
   }
 }
 const temporalInputs = new Map();
+const temporalExecutionArchitectures = new Map();
 if(options["--fsr4-source"]&&!options["--fsr4"])throw Error("An FSR 4 source checkout requires its provider payload.");
 if(options["--fsr3-generation"]){
   const directory=options["--fsr3-generation"],ownedRoot=path.resolve(import.meta.dirname,"../src/modules/shared/reshade/generation/fsr3");
@@ -314,8 +315,12 @@ for (const name of ["godot", "streamline", "dxmt"]) {
   const directory = options["--" + name];
   if (!directory) continue;
   const metadata = JSON.parse(fs.readFileSync(path.join(directory, name === "dxmt" ? "camera-bridge.json" : "provider.json")));
+  if(name === "streamline" && metadata.cameraBridge){
+    if(metadata.cameraBridge.architecture!=="x86_64")throw Error("Unsupported temporal camera host architecture");
+    temporalExecutionArchitectures.set("temporal/streamline/"+metadata.cameraBridge.unix,metadata.cameraBridge.architecture);
+  }
   const selected = name === "godot" ? ["libmaclauncher-godot-camera.dylib", "provider.json", "autoload.gd", "camera-effect.gd"]
-    : name === "streamline" ? ["sl.interposer.dll", "provider.json"]
+    : name === "streamline" ? ["sl.interposer.dll", "provider.json", ...(metadata.cameraBridge?[metadata.cameraBridge.windows,metadata.cameraBridge.unix]:[])]
     : [...Object.keys(metadata.files).filter(name=>name!=="source.tar.gz"), "camera-bridge.json"];
   if (name === "godot" ? metadata.abi !== 1 || metadata.complete !== true : metadata.schema !== 1)
     throw new Error("Unsupported camera bridge metadata.");
@@ -462,7 +467,7 @@ for (const [relative, input] of inputs) {
   if (executable) execFileSync("/usr/bin/codesign", ["--force", "--sign", "-", "--timestamp=none", output], { stdio: "pipe" });
   files.push({ path: relative, sha256: digest(fs.readFileSync(output)), size: fs.statSync(output).size,
     mode: executable ? 0o755 : 0o644, ...(executable ? { architectures: nativeArchitectures.get(relative),
-      ...(relative.startsWith("temporal/dxmt/") ? { executionArchitecture: "x86_64" } : {}),
+      ...(relative.startsWith("temporal/dxmt/") ? { executionArchitecture: "x86_64" } : temporalExecutionArchitectures.has(relative) ? { executionArchitecture: temporalExecutionArchitectures.get(relative) } : {}),
       ...(optionalLoad.has(relative)?{optionalLoad:{...optionalLoad.get(relative),architectures:nativeArchitectures.get(relative)}}:{}) } : {}) });
 }
 // The camera provider's source is available in the tagged producer repository.
