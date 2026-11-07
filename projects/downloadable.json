@@ -2283,10 +2283,14 @@
       {
         "version": "1.4.2-MCLv10",
         "label": "MoltenVK 1.4.2 temporal scene input"
+      },
+      {
+        "version": "1.4.2-MCLv11",
+        "label": "MoltenVK 1.4.2 temporal frame masks"
       }
     ],
     "build": {
-      "version": "1.4.2-MCLv10",
+      "version": "1.4.2-MCLv11",
       "command": "tools/build-vulkan-moltenvk-scene.mjs",
       "architectures": [
         "universal"

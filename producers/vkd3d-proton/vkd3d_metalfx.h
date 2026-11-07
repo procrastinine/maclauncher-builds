@@ -54,6 +54,11 @@ typedef struct VKD3D_METALFX_TEMPORAL_DESC
     FLOAT VerticalFov;         /* radians */
     FLOAT FrameTimeMs;         /* 0: unknown */
     FLOAT Sharpness;
+    /* Optional masks at their offsets over the render extent: reactive (DLSS's bias-current-color mask) and
+     * transparency and composition. */
+    ID3D12Resource *ReactiveMask;
+    ID3D12Resource *TransparencyMask;
+    UINT ReactiveX, ReactiveY, TransparencyX, TransparencyY;
 } VKD3D_METALFX_TEMPORAL_DESC;
 
 typedef struct VKD3D_METALFX_DENOISED_DESC

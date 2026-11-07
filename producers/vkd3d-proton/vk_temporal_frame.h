@@ -51,6 +51,22 @@ typedef struct VkTemporalFrameInfoMVK
     const uint64_t *pReleaseFeatureIds;
 } VkTemporalFrameInfoMVK;
 
+#define VK_STRUCTURE_TYPE_TEMPORAL_FRAME_MASKS_INFO_MVK ((VkStructureType)1000999103) /* 1000999102 is KosmicKrisp's kk_temporal_frame_info version 2 */
+
+/* In VkTemporalFrameInfoMVK's pNext chain: the frame's reactive mask (DLSS's bias-current-color mask, FSR's reactive
+ * mask) and its transparency and composition mask. Each is read at its offset over the render extent;
+ * VK_NULL_HANDLE means none, and VK_FORMAT_UNDEFINED the image's own format. */
+typedef struct VkTemporalFrameMasksInfoMVK
+{
+    VkStructureType sType;
+    const void *pNext;
+    VkImage reactive;
+    VkImage transparency;
+    VkFormat reactiveFormat;
+    VkFormat transparencyFormat;
+    uint32_t reactiveX, reactiveY, transparencyX, transparencyY;
+} VkTemporalFrameMasksInfoMVK;
+
 /* An integer-typed image (typeless depth, exposure or motion vectors) is read as the float format of its bits;
  * VK_FORMAT_UNDEFINED keeps the image's own. */
 static inline VkFormat vk_temporal_read_format(VkFormat format)

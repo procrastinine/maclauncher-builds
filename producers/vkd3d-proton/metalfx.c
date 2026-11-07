@@ -132,24 +132,48 @@ static BOOL STDMETHODCALLTYPE d3d12_command_list_metalfx_SupportsDenoisedUpscale
 }
 
 /* Fills in the images and the feature's identity, and records the frame with the ids released since the last one.
- * Every image is a texture. */
+ * Every image is a texture. The masks, when either is present, follow the frame in its pNext chain. */
 static HRESULT vkd3d_metalfx_record(struct d3d12_command_list *list, VkTemporalFrameInfoMVK *info,
-        ID3D12Resource *const *images, ID3D12MetalFXScaler **iface)
+        ID3D12Resource *const *images, VkTemporalFrameMasksInfoMVK *masks, ID3D12Resource *const *mask_images,
+        ID3D12MetalFXScaler **iface)
 {
-    struct d3d12_resource *resources[TEMPORAL_IMAGES] = {0};
+    struct d3d12_resource *resources[TEMPORAL_IMAGES + 2] = {0};
     uint64_t released[ARRAY_SIZE(vkd3d_metalfx_released)];
     struct vkd3d_metalfx_scaler *scaler;
     unsigned int i;
 
-    for (i = 0; i < TEMPORAL_IMAGES; i++)
+    for (i = 0; i < TEMPORAL_IMAGES + 2; i++)
     {
-        if (!images[i])
+        ID3D12Resource *image = i < TEMPORAL_IMAGES ? images[i] : mask_images ? mask_images[i - TEMPORAL_IMAGES] : NULL;
+        VkFormat format;
+
+        if (!image)
             continue;
-        resources[i] = impl_from_ID3D12Resource(images[i]);
+        resources[i] = impl_from_ID3D12Resource(image);
         if (d3d12_resource_is_buffer(resources[i]))
             return E_INVALIDARG;
-        info->images[i] = resources[i]->res.vk_image;
-        info->formats[i] = vk_temporal_read_format(resources[i]->format->vk_format);
+        format = vk_temporal_read_format(resources[i]->format->vk_format);
+        if (i < TEMPORAL_IMAGES)
+        {
+            info->images[i] = resources[i]->res.vk_image;
+            info->formats[i] = format;
+        }
+        else if (i == TEMPORAL_IMAGES)
+        {
+            masks->reactive = resources[i]->res.vk_image;
+            masks->reactiveFormat = format;
+        }
+        else
+        {
+            masks->transparency = resources[i]->res.vk_image;
+            masks->transparencyFormat = format;
+        }
+    }
+    if (masks && (masks->reactive || masks->transparency))
+    {
+        masks->sType = VK_STRUCTURE_TYPE_TEMPORAL_FRAME_MASKS_INFO_MVK;
+        masks->pNext = info->pNext;
+        info->pNext = masks;
     }
     if (!(scaler = vkd3d_metalfx_scaler(iface)))
         return *iface ? E_INVALIDARG : E_OUTOFMEMORY;
@@ -163,7 +187,7 @@ static HRESULT vkd3d_metalfx_record(struct d3d12_command_list *list, VkTemporalF
     spinlock_release(&vkd3d_metalfx_lock);
     info->pReleaseFeatureIds = released;
 
-    d3d12_command_list_metalfx_record(list, info, resources, TEMPORAL_IMAGES);
+    d3d12_command_list_metalfx_record(list, info, resources, ARRAY_SIZE(resources));
     return S_OK;
 }
 
@@ -171,7 +195,8 @@ static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_TemporalUpscale(ID3D
         const VKD3D_METALFX_TEMPORAL_DESC *desc, ID3D12MetalFXScaler **scaler)
 {
     struct d3d12_command_list *list = impl_from_ID3D12GraphicsCommandListMetalFX(iface);
-    ID3D12Resource *images[TEMPORAL_IMAGES] = {0};
+    ID3D12Resource *images[TEMPORAL_IMAGES] = {0}, *mask_images[2];
+    VkTemporalFrameMasksInfoMVK masks;
     VkTemporalFrameInfoMVK info;
 
     TRACE("iface %p, desc %p, scaler %p.\n", iface, desc, scaler);
@@ -182,13 +207,20 @@ static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_TemporalUpscale(ID3D
         return E_NOTIMPL;
 
     memset(&info, 0, sizeof(info));
+    memset(&masks, 0, sizeof(masks));
     vk_temporal_super_resolution(&info, desc);
     images[TEMPORAL_COLOR] = desc->Color;
     images[TEMPORAL_DEPTH] = desc->Depth;
     images[TEMPORAL_MOTION] = desc->MotionVector;
     images[TEMPORAL_OUTPUT] = desc->Output;
     images[TEMPORAL_EXPOSURE] = desc->ExposureTexture;
-    return vkd3d_metalfx_record(list, &info, images, scaler);
+    mask_images[0] = desc->ReactiveMask;
+    mask_images[1] = desc->TransparencyMask;
+    masks.reactiveX = desc->ReactiveX;
+    masks.reactiveY = desc->ReactiveY;
+    masks.transparencyX = desc->TransparencyX;
+    masks.transparencyY = desc->TransparencyY;
+    return vkd3d_metalfx_record(list, &info, images, &masks, mask_images, scaler);
 }
 
 static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_DenoisedUpscale(ID3D12GraphicsCommandListMetalFX *iface,
@@ -232,7 +264,7 @@ static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_DenoisedUpscale(ID3D
     info.jitterOffsetX = desc->JitterOffsetX;
     info.jitterOffsetY = desc->JitterOffsetY;
     info.preExposure = desc->PreExposure;
-    return vkd3d_metalfx_record(list, &info, images, scaler);
+    return vkd3d_metalfx_record(list, &info, images, NULL, NULL, scaler);
 }
 
 /* Frame Generation is not offered: the NGX core then reports it unsupported. */

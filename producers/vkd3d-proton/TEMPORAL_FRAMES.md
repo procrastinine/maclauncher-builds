@@ -18,6 +18,15 @@ A temporal frame is one DLSS Super Resolution or Ray Reconstruction evaluation, 
 | Camera | With the valid-camera flag: positive near and far plane distances (far 0 with an infinite far plane) and the vertical field of view in radians. Ray Reconstruction also has the world-to-view and view-to-clip matrices, row-major, of row vectors. |
 | `pReleaseFeatureIds` | Features destroyed since the previous frame. |
 
+`VkTemporalFrameMasksInfoMVK`, with `sType` 1000999103, can follow in the frame's `pNext` chain. It carries two optional masks, each with its own format and offset, read over the render extent:
+
+| Field | Meaning |
+| --- | --- |
+| `reactive`, `reactiveFormat`, `reactiveX`, `reactiveY` | The reactive mask: higher values give the current color more weight than the history. DLSS supplies its bias-current-color mask here. |
+| `transparency`, `transparencyFormat`, `transparencyX`, `transparencyY` | The transparency and composition mask: pixels whose color comes from transparent or composited content without matching depth and motion. |
+
+A format of `VK_FORMAT_UNDEFINED` is the image's own. A frame without the structure, or with `VK_NULL_HANDLE` in a slot, has no such mask.
+
 ## Scene attachments
 
 Drivers bind supplied matrices and AOVs with `rsBindTemporalSceneMatrices` and `rsBindTemporalSceneAovs` before processing the same classic command buffer. Both matrix contracts use row-major row vectors, so supplied finite, nonzero arrays are copied unchanged. Zero or nonfinite matrices remain absent. No clip-range flag is inferred.
@@ -31,11 +40,14 @@ HUD-less color follows the backbuffer color space and postprocessing. UI RGB is 
 - D3D12: VKD3D-Proton's `ID3D12GraphicsCommandListMetalFX` records the frame in the game's command list, followed by a barrier without the structure.
 - D3D11: the NGX core records the frame and the same following barrier in a command buffer of its own. It submits that command buffer on DXVK's queue, after the immediate context's flushed commands, through DXVK's interop interfaces (`IDXGIVkInteropDevice`, `IDXGIVkInteropSurface`).
 
+In both APIs the NGX core passes `DLSS.Input.Bias.Current.Color.Mask` and its subrect base as the reactive mask. DLSS reserves its transparency mask, so NGX frames carry none.
+
 The NGX core takes the camera from MacLauncher's Streamline proxy, which passes the camera of the game's Streamline constants through the core's `MacLauncherSetTemporalCamera` export as the graphics pipeline's 64-byte `RSTemporalCamera`. An evaluation without Streamline constants has no camera.
 
 ## Driver
 
 - **Forwarding.** The driver forwards the frame with `rsProcessTemporalFrame` (graphics `frame.h`). It does this in command order: after every earlier command on the queue has completed, and before any later command starts. The method is `rsGetTemporalMethod`, or MetalFX when none is selected. The driver creates and encodes no MetalFX scaler, interpolator or other upscaler of its own.
+- **Masks.** The graphics pipeline reads `RSTemporalFrame.reactive` and `.transparency` at the color offset over the render extent. A driver passes a mask when its offset equals the color offset and its image covers that region; it leaves a mask at any other offset absent.
 - **Command buffer.** The frame goes to a classic `MTLCommandBuffer` (`commandBufferKind` 0) with retained references, before it is committed. Ordered effects and frame generation run only on such a command buffer.
 - **Tracked output.** The pipeline writes a tracked texture that the driver keeps for each feature. It has the output extent, private storage and shader-read, shader-write and render-target usage. It is passed with output offsets of 0 and its full extent. After the call, the driver copies it into the frame's output image at the frame's output offset. Frame resources carry no fence, and ordered effects need the complete output texture. A busy frame leaves the previous image in the tracked texture, so the copy always writes a complete image.
 - **Owners.** Each `featureId` has one pipeline owner on the device. A released feature ends with `rsReleaseTemporalOwner`, after its last frame has completed.

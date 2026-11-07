@@ -12,9 +12,10 @@ const run=(program,args,options={})=>execFileSync(program,args,{stdio:'inherit',
 const read=(program,args)=>execFileSync(program,args,{encoding:'utf8'}).trim();
 // The producer's declaration is authoritative. Do not maintain a second wire layout.
 export function carrierHeader(producer=path.resolve(here,'../vkd3d-proton/vk_temporal_frame.h')){
-    const text=fs.readFileSync(producer,'utf8'),first=text.indexOf('#define VK_STRUCTURE_TYPE_TEMPORAL_FRAME_INFO_MVK'),last=text.indexOf('} VkTemporalFrameInfoMVK;',first);
+    // The frame and its chained masks, through the last carrier structure.
+    const end='} VkTemporalFrameMasksInfoMVK;',text=fs.readFileSync(producer,'utf8'),first=text.indexOf('#define VK_STRUCTURE_TYPE_TEMPORAL_FRAME_INFO_MVK'),last=text.indexOf(end,first);
     if(first<0||last<0)throw Error('Missing shared temporal carrier declaration');
-    return '// Generated from the shared LGPL-2.1-or-later temporal carrier.\n#pragma once\n#include <vulkan/vulkan.h>\n'+text.slice(first,last+'} VkTemporalFrameInfoMVK;'.length)+'\n';
+    return '// Generated from the shared LGPL-2.1-or-later temporal carrier.\n#pragma once\n#include <vulkan/vulkan.h>\n'+text.slice(first,last+end.length)+'\n';
 }
 // Compose the carrier in an owned source projection; the upstream checkout stays read-only.
 export function applyTemporalSource(work){
