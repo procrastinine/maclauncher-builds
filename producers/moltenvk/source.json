@@ -1,0 +1,26 @@
+{
+  "repository": "https://github.com/KhronosGroup/MoltenVK.git",
+  "revision": "db66022459ffb663aa2b50f6b018bc2e124f5edf",
+  "version": "1.4.2",
+  "dependencies": [
+    {
+      "id": "SPIRV-Cross",
+      "repository": "https://github.com/KhronosGroup/SPIRV-Cross.git"
+    },
+    {
+      "id": "Vulkan-Headers",
+      "repository": "https://github.com/KhronosGroup/Vulkan-Headers.git"
+    },
+    {
+      "id": "cereal",
+      "repository": "https://github.com/USCiLab/cereal.git",
+      "revision": "a56bad8bbb770ee266e930c95d37fff2a5be7fea"
+    }
+  ],
+  "reference": {
+    "repository": "https://github.com/metalsharp/VKD3D-Proton-MacOS",
+    "revision": "4e89065e359f9c6c2a78170b045835d6382113d9",
+    "file": "patches/moltenvk/metalsharp-vkmt.diff",
+    "use": "Command-order and image-resolution prior art; scaler implementation not included"
+  }
+}
