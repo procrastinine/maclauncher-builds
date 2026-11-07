@@ -321,7 +321,7 @@ for (const name of ["godot", "streamline", "dxmt"]) {
     temporalExecutionArchitectures.set("temporal/streamline/"+metadata.cameraBridge.unix,metadata.cameraBridge.architecture);
   }
   const selected = name === "godot" ? ["libmaclauncher-godot-camera.dylib", "provider.json", "autoload.gd", "camera-effect.gd"]
-    : name === "streamline" ? ["sl.interposer.dll", "provider.json", ...(metadata.cameraBridge?[metadata.cameraBridge.windows,metadata.cameraBridge.unix]:[])]
+    : name === "streamline" ? ["sl.interposer.dll", "provider.json", ...(metadata.profiles||[]).map(row=>path.posix.join(row.directory,row.library)), ...(metadata.cameraBridge?[metadata.cameraBridge.windows,metadata.cameraBridge.unix]:[])]
     : [...Object.keys(metadata.files).filter(name=>name!=="source.tar.gz"), "camera-bridge.json"];
   if (name === "godot" ? metadata.abi !== 1 || metadata.complete !== true : metadata.schema !== 1)
     throw new Error("Unsupported camera bridge metadata.");
