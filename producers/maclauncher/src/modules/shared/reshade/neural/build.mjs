@@ -1,5 +1,5 @@
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
-import {gitlink} from '../../../../../../../lib/pins.mjs';
+import {sourceRevision} from '../../../../../scripts/graphics-source-revision.mjs';
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -25,7 +25,7 @@ export function buildProvider({ output = path.join(cacheDirectory, "output"),
     throw new Error("The neural rendering provider build requires Apple Silicon macOS.");
   sourceDirectory = fs.realpathSync(sourceDirectory);
   const revision = execFileSync("git", ["-C", sourceDirectory, "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-  if (revision !== gitlink(source.gitlink)) throw new Error("The neural rendering source does not match its registered revision.");
+  if (revision !== sourceRevision(source)) throw new Error("The neural rendering source does not match its registered revision.");
   output = path.resolve(output);
   fs.mkdirSync(output, { recursive: true });
   // SwiftPM writes dependency edits and lock fingerprints beside Package.swift.
@@ -57,7 +57,7 @@ export function buildProvider({ output = path.join(cacheDirectory, "output"),
     return { path: relative, size: stat.size, sha256: sha256(file),
       ...([source.library,"maclauncher-neural-service","maclauncher-neural-video"].includes(relative)?{architectures:["arm64"],minimumMacOS:relative==="maclauncher-neural-video"?"26.0":source.minimumMacOS,optionalLoad:true}:{}) };
   });
-  const descriptor = { providerABI: source.providerABI, commit: gitlink(source.gitlink), library: source.library,
+  const descriptor = { providerABI: source.providerABI, commit: sourceRevision(source), library: source.library,
     minimumMacOS: source.minimumMacOS, architectures: ["arm64"],supportedABIs:[1,2,3],
     operations:["mlx-dlss","mlx-vsr","mlx-sr-image","mlx-sr-scene","mlx-interpolation","realesrgan","nafnet","realcugan","rife","depth-anything-v2-small"],restorationAPI:1,estimatedDepthAPI:1,gpuTimingAPI:1,
     modelArchitectures:Object.fromEntries([...new Set(Object.values(restorationArchitectures).map(row=>row.method))].map(method=>[method,Object.keys(restorationArchitectures).filter(id=>restorationArchitectures[id].method===method)])),
