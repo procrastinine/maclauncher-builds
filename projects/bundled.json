@@ -583,18 +583,20 @@
       {
         "version": "0.3.8",
         "label": "MacLauncher graphics 0.3.8"
+      },
+      {
+        "version": "0.3.10-local-be68fca1",
+        "label": "MacLauncher graphics local D3DMetal processor test"
       }
     ],
     "build": {
-      "version": "0.3.8",
+      "version": "0.3.10-local-be68fca1",
       "command": "tools/build-graphics.mjs",
       "architectures": [
-        "universal",
-        "x64"
+        "universal"
       ],
       "runners": {
-        "universal": "xcode-27",
-        "x64": "macos-26-intel"
+        "universal": "xcode-27"
       },
       "submodules": [
         "sources/maclauncher",
