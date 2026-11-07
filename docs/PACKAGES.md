@@ -19,6 +19,8 @@ Some producers have their own reference page:
 - [ReMinori](REMINORI.md): engine, movie bridge and dependency notices.
 - [siglus_rs](SIGLUS.md): the source-built library and native host.
 - [Scene adapters](SCENE_ADAPTERS.md): WineVulkan, FidelityFX and MoltenVK packages.
+- [Steam client bridge](STEAM_BRIDGE.md): the Wine builtin Steam client library, launch helpers and bootstrap modules.
+- [VKD3D-Proton temporal frames](../producers/vkd3d-proton/TEMPORAL_FRAMES.md): the DLSS evaluation record that VKD3D-Proton and the NGX core pass to the Vulkan driver.
 
 [Upstream commit references](SOURCE_PINS.md) describes how a project record points to the file in which its producer records the exact upstream commit.
 
@@ -94,6 +96,7 @@ The internal `android-art-image-extractor` input package compiles AIM’s origin
 | [ReMinori](https://github.com/luoyily/ReMinori) | `reminori` | Fonts, movies, menus, saves and PAZ/PE profiles |
 | MacLauncher RLVM adapter | `rlvm-adapter` | Cocoa integration library for the unmodified upstream RLVM app |
 | [siglus_rs](SIGLUS.md) | `siglus` | Source-built siglus_rs library and native host calling its C API |
+| [Steam client bridge](STEAM_BRIDGE.md) | `maclauncher-steam-bridge` | Wine builtin `lsteamclient` and launch helpers that connect Windows Steam APIs to the native Mac Steam client |
 | [System3 SDL2](https://github.com/kichikuou/system3-sdl2) | `system3` | Executable-relative resources and native libraries |
 | [VNDS-LOVE](https://github.com/ajusa/VNDS-LOVE) | `vnds-love` | VNDS interpreter compiled from MoonScript to Lua, with wrappers for MacLauncher's LÖVE runtime |
 | [xsystem35 SDL2](https://github.com/kichikuou/xsystem35-sdl2) | `xsystem35` | Executable-relative fonts/resources and native libraries |
@@ -124,7 +127,8 @@ RPGMakerDecrypter builds from its exact upstream source commit with separate `os
 | Project | Package ID | Build contents |
 | --- | --- | --- |
 | [KosmicKrisp](https://gitlab.freedesktop.org/mesa/mesa) geometry/transform-feedback adaptation | `vulkan-kosmickrisp-gles32` | MacLauncher geometry-shader and transform-feedback implementation |
-| [MoltenVK](https://github.com/KhronosGroup/MoltenVK) scene recording adaptation | `vulkan-moltenvk-scene` | MoltenVK 1.4.2 that records scene operations on the original Metal command buffer |
+| [MoltenVK](https://github.com/KhronosGroup/MoltenVK) scene recording adaptation | `vulkan-moltenvk-scene` | MoltenVK 1.4.2 that records scene operations on the original Metal command buffer and forwards temporal frames to MacLauncher graphics |
+| [VKD3D-Proton](https://github.com/HansKristian-Work/vkd3d-proton) | `vkd3d-proton` | VKD3D-Proton 3.1 with MetalFX upscaling for DLSS Super Resolution and Ray Reconstruction, and an NGX core that records each evaluation as a temporal frame |
 | WineVulkan scene adapter | `winevulkan-scene` | Scene recording in the Wine Vulkan layer of CrossOver 26.3, forwarding to the original native and WOW64 code |
 | [FidelityFX](https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK) API adapter | `fidelityfx-api` | Proxy for the FidelityFX API DLL that keeps the original exports and behavior and adds a native Vulkan scene producer |
 | GameMaker OpenGL helper | `gamemaker-opengl-helper` | Software OpenGL integration for selected official GameMaker runners |
