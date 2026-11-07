@@ -1,4 +1,3 @@
-const {gitlink}=require('../../../../../../../../lib/pins.mjs');
 const fs = require('node:fs');
 const path = require('node:path');
 const Host = require('../../../runtime/host-capabilities');
@@ -15,7 +14,7 @@ function inspect(root) {
       try {
         const metadata = JSON.parse(fs.readFileSync(path.join(directory, `${method}-build.json`), 'utf8'));
         const library = path.join(directory, `libmaclauncher-${method}.dylib`);
-        if (metadata.commit !== (method==='fsr3'?gitlink('producers/maclauncher/src/external/fsr3-sdk'):source[method].commit) || metadata.providerABI !== 1 || metadata.shaderVariants !== 16 || !fs.statSync(library).isFile()) continue;
+        if (metadata.commit !== source[method].commit || metadata.providerABI !== 1 || metadata.shaderVariants !== 16 || !fs.statSync(library).isFile()) continue;
         if (!Payload.exists(directory, method)) continue;
         methods.push(method); libraries[method] = library;
         minimumMacOSByMethod[method] = metadata.minimumMacOS && Requirements.versionAtLeast(metadata.minimumMacOS, source.minimumMacOS)

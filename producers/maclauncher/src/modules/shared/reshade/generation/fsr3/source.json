@@ -1,16 +1,12 @@
 {
   "providerABI": 1,
   "repository": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
+  "commit": "c6efa6bf7f2027b3ec94f28578bb5965eabb9e55",
   "version": "1.1.4",
-  "effects": [
-    "opticalflow",
-    "frameinterpolation"
-  ],
+  "effects": ["opticalflow", "frameinterpolation"],
+  "license": "MIT",
   "minimumMacOS": "13.0",
-  "architectures": [
-    "arm64",
-    "x86_64"
-  ],
+  "architectures": ["arm64", "x86_64"],
   "tools": {
     "source": "https://vulkan.lunarg.com/sdk/home",
     "version": "1.4.357.0",

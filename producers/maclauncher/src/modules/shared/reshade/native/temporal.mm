@@ -51,6 +51,137 @@ bool validCamera(const RSTemporalCamera *c){
         std::isfinite(c->frameTimeMs)&&c->frameTimeMs>=0&&c->frameTimeMs<=1000&&
         (c->flags&RS_TEMPORAL_DEPTH_INFINITE?c->farPlane==0:(std::isfinite(c->farPlane)&&c->farPlane>c->nearPlane));
 }
+// Temporal intake trace (RESHADE_DIAGNOSTICS). rsProcessTemporalFrame and the
+// MetalFX scaler hook write one line per frame for the first frames of the
+// process and for a few frames after each capture trigger. The first frame that
+// sees a pending trigger also writes its depth and motion texels beside the
+// capture prefix. The trace only reads: the capture request stays with its
+// ordinary consumer.
+constexpr unsigned intakeTraceFrames=120,intakeTriggerFrames=8,cameraTraceCalls=120;
+struct IntakeTrace {std::mutex mutex;unsigned remaining=intakeTraceFrames;bool triggerSeen=false;};
+IntakeTrace&intakeTrace(){static IntakeTrace value;return value;}
+std::atomic<unsigned> cameraTraceRemaining{cameraTraceCalls};
+bool intakeFrameTraced(bool&dump){
+    dump=false;const auto&config=macfx::nativeConfig();if(!config.diagnostics.enabled)return false;
+    const bool pending=config.capture.configured()&&config.capture.trigger&&macfx::captureTriggerPending();
+    auto&trace=intakeTrace();std::lock_guard lock(trace.mutex);
+    if(pending&&!trace.triggerSeen){trace.triggerSeen=true;trace.remaining=std::max(trace.remaining,intakeTriggerFrames);dump=true;}
+    else if(!pending)trace.triggerSeen=false;
+    if(!trace.remaining)return false;
+    --trace.remaining;return true;
+}
+std::string intakeTexture(id<MTLTexture> t,uint32_t x=0,uint32_t y=0){
+    if(!t)return "none";
+    char text[96];snprintf(text,sizeof(text),"%lux%lu@%u,%u:%lu",(unsigned long)t.width,(unsigned long)t.height,x,y,(unsigned long)t.pixelFormat);return text;
+}
+std::string intakeFlags(uint32_t flags){
+    static const char *names[]={"reset","reversed","infinite","hdr","autoexposure","jittered","outputmotion","camera"};
+    std::string text;for(unsigned bit=0;bit<8;++bit)if(flags&(1u<<bit)){if(!text.empty())text+=',';text+=names[bit];}
+    return text.empty()?"none":text;
+}
+// Raw texels of a 4-byte format (the depth plane of Depth32Float_Stencil8), as a
+// capture file whose header flags are zero; the trace line names the format.
+bool intakeDumpFormat(MTLPixelFormat format,MTLBlitOption&option){
+    option=MTLBlitOptionNone;
+    switch(format){
+        case MTLPixelFormatDepth32Float:case MTLPixelFormatR32Float:case MTLPixelFormatR32Uint:case MTLPixelFormatR32Sint:
+        case MTLPixelFormatRG16Float:case MTLPixelFormatRG16Unorm:case MTLPixelFormatRG16Snorm:case MTLPixelFormatRG16Uint:case MTLPixelFormatRG16Sint:
+        case MTLPixelFormatRGBA8Unorm:case MTLPixelFormatRGBA8Unorm_sRGB:case MTLPixelFormatBGRA8Unorm:case MTLPixelFormatBGRA8Unorm_sRGB:
+        case MTLPixelFormatRGB10A2Unorm:case MTLPixelFormatBGR10A2Unorm:case MTLPixelFormatRG11B10Float:case MTLPixelFormatRGB9E5Float:return true;
+        case MTLPixelFormatDepth32Float_Stencil8:option=MTLBlitOptionDepthFromDepthStencil;return true;
+        default:return false;
+    }
+}
+void intakeDump(id<MTLCommandBuffer> commands,id<MTLTexture> texture,id<MTLFence> fence,const std::string&file){
+    MTLBlitOption option;
+    if(!commands||!texture||commands.status>=MTLCommandBufferStatusCommitted||texture.device!=commands.device||texture.textureType!=MTLTextureType2D||texture.sampleCount!=1||!intakeDumpFormat(texture.pixelFormat,option)){
+        macfx::nativeLog("Temporal intake dump skipped: "+file+" "+intakeTexture(texture));return;
+    }
+    const unsigned width=unsigned(texture.width),height=unsigned(texture.height),stride=(width*4+255)&~255u;
+    if(!macfx::captureLayout(width,height,stride))return;
+    id<MTLBuffer> bytes=[commands.device newBufferWithLength:size_t(stride)*height options:MTLResourceStorageModeShared];if(!bytes)return;
+    auto copy=[commands blitCommandEncoder];if(!copy)return;
+    @try{if(fence)[copy waitForFence:fence];[copy copyFromTexture:texture sourceSlice:0 sourceLevel:0 sourceOrigin:MTLOriginMake(0,0,0) sourceSize:MTLSizeMake(width,height,1)
+        toBuffer:bytes destinationOffset:0 destinationBytesPerRow:stride destinationBytesPerImage:size_t(stride)*height options:option];}
+    @finally{[copy endEncoding];}
+    const std::string name=file;
+    [commands addCompletedHandler:^(id<MTLCommandBuffer> done){
+        if(done.status!=MTLCommandBufferStatusCompleted){macfx::nativeLog("Temporal intake dump not completed: "+name);return;}
+        dispatch_async(macfx::captureWriterQueue(),^{@autoreleasepool{try{
+            const auto temporary=name+".partial";unlink(temporary.c_str());
+            macfx::writeCaptureFile(temporary,bytes.contents,width,height,false,false,stride);
+            if(std::rename(temporary.c_str(),name.c_str()))throw std::runtime_error("Cannot publish "+name);
+            macfx::nativeLog("Temporal intake dump saved: "+name);
+        }catch(const std::exception&error){macfx::nativeLog(error.what());}}});
+    }];
+}
+// Inputs observed before the frame is processed: scene attachments are read
+// without taking the producer's registration.
+struct IntakeObservation {bool traced=false;std::string hudless="none",ui="none";};
+IntakeObservation observeIntake(const RSTemporalFrame*f,id<MTLCommandBuffer> commands,id<MTLFence> fence=nil){
+    IntakeObservation observed;bool dump=false;
+    if(!f||f->size<sizeof(*f)||f->version!=1||!intakeFrameTraced(dump))return observed;
+    observed.traced=true;
+    std::shared_ptr<const macfx::SceneAovLease> aovs;void *registered=nullptr;
+    if(macfx::peekTemporalAovsForTextures(*f,aovs,registered)==RS_TEMPORAL_OK&&aovs){
+        const auto image=[&](unsigned index){
+            const auto&value=aovs->value.images[index];if(!value.texture)return std::string("none");
+            id<MTLTexture> texture=aovs->textures[index];if(!texture)texture=(__bridge id<MTLTexture>)value.texture;
+            return intakeTexture(texture,value.x,value.y)+"/"+std::to_string(value.width)+"x"+std::to_string(value.height);
+        };
+        observed.hudless=image(RS_SCENE_AOV_HUDLESS_COLOR);observed.ui=image(RS_SCENE_AOV_UI_COLOR_ALPHA);
+    }
+    if(dump&&commands&&!f->commandBufferKind){
+        const auto prefix=macfx::nativeConfig().capture.prefix+"-intake-"+std::to_string(f->frameId);
+        intakeDump(commands,(__bridge id<MTLTexture>)f->depth,fence,prefix+"-depth.rgba");
+        intakeDump(commands,(__bridge id<MTLTexture>)f->motion,fence,prefix+"-motion.rgba");
+    }
+    return observed;
+}
+void reportIntake(const char*route,const RSTemporalFrame&f,const IntakeObservation&observed,const RSTemporalResult*r,int code,const char*camera){
+    if(!observed.traced)return;
+    char text[2048];
+    snprintf(text,sizeof(text),"Temporal intake %s frame=%llu method=%u/%u cb=%u owner=%p render=%ux%u max=%ux%u out=%ux%u@%u,%u "
+        "color=%s depth=%s motion=%s output=%s exposure=%s reactive=%s transparency=%s hudless=%s ui=%s "
+        "jitter=%.4f,%.4f mvscale=%.4f,%.4f flags=0x%x(%s) preexposure=%.4f sharpness=%.3f dt=%.3fms near=%g far=%g fov=%.4f camera=%s status=%d encoded=%u reason=%s",
+        route,(unsigned long long)f.frameId,f.method,f.reserved,f.commandBufferKind,f.owner,f.renderWidth,f.renderHeight,f.maxRenderWidth,f.maxRenderHeight,f.outputWidth,f.outputHeight,f.outputX,f.outputY,
+        intakeTexture((__bridge id<MTLTexture>)f.color,f.colorX,f.colorY).c_str(),intakeTexture((__bridge id<MTLTexture>)f.depth,f.depthX,f.depthY).c_str(),
+        intakeTexture((__bridge id<MTLTexture>)f.motion,f.motionX,f.motionY).c_str(),intakeTexture((__bridge id<MTLTexture>)f.output,f.outputX,f.outputY).c_str(),
+        intakeTexture((__bridge id<MTLTexture>)f.exposure).c_str(),intakeTexture((__bridge id<MTLTexture>)f.reactive).c_str(),intakeTexture((__bridge id<MTLTexture>)f.transparency).c_str(),
+        observed.hudless.c_str(),observed.ui.c_str(),f.jitterX,f.jitterY,f.motionScaleX,f.motionScaleY,f.flags,intakeFlags(f.flags).c_str(),f.preExposure,f.sharpness,f.frameTimeMs,
+        f.nearPlane,f.farPlane,f.verticalFov,camera,code,r?r->encoded:0u,r?r->reason:"");
+    macfx::nativeLog(text);
+}
+// Every status or method change of one feature (owner), at any frame, so a
+// provider that starts failing after the traced frames still shows. Bounded
+// per feature; a released feature starts again.
+constexpr unsigned intakeStatusChanges=256;
+struct IntakeStatus {int code=-2;uint32_t method=0;unsigned changes=0;};
+std::mutex intakeStatusMutex;
+std::unordered_map<const void*,IntakeStatus> intakeStatuses;
+void reportIntakeStatus(const RSTemporalFrame&f,const RSTemporalResult*r,int code){
+    if(!macfx::nativeConfig().diagnostics.enabled||!f.owner)return;
+    IntakeStatus previous;bool last=false;
+    {std::lock_guard lock(intakeStatusMutex);auto&state=intakeStatuses[f.owner];
+        if(state.code==code&&state.method==f.method)return;
+        if(state.changes>=intakeStatusChanges){state.code=code;state.method=f.method;return;}
+        previous=state;state.code=code;state.method=f.method;last=++state.changes==intakeStatusChanges;}
+    char text[1024];
+    snprintf(text,sizeof(text),"Temporal intake status owner=%p frame=%llu method=%u/%u status=%d encoded=%u reason=%s (was method %u status %d)%s",
+        f.owner,(unsigned long long)f.frameId,f.method,f.reserved,code,r?r->encoded:0u,r?r->reason:"",previous.method,previous.code,last?"; further changes of this feature are not logged":"");
+    macfx::nativeLog(text);
+}
+void forgetIntakeStatus(const void*owner){if(!owner)return;std::lock_guard lock(intakeStatusMutex);intakeStatuses.erase(owner);}
+void reportNextScaleCamera(const RSTemporalCamera*c,int status){
+    if(!macfx::nativeConfig().diagnostics.enabled)return;
+    unsigned remaining=cameraTraceRemaining.load(std::memory_order_relaxed);
+    do{if(!remaining)return;}while(!cameraTraceRemaining.compare_exchange_weak(remaining,remaining-1,std::memory_order_relaxed));
+    if(!c||c->size!=sizeof(*c)){macfx::nativeLog("Temporal camera next-scale invalid record status="+std::to_string(status));return;}
+    char text[256];
+    snprintf(text,sizeof(text),"Temporal camera next-scale frame=%llu viewport=%llu flags=0x%x(%s) near=%g far=%g fov=%.4f dt=%.3fms status=%d",
+        (unsigned long long)c->frameId,(unsigned long long)c->viewportId,c->flags,intakeFlags(c->flags).c_str(),c->nearPlane,c->farPlane,c->verticalFov,c->frameTimeMs,status);
+    macfx::nativeLog(text);
+}
 // A last-resort process-scoped camera for a renderer without native resource interop.
 // State 2 prevents a later registration/viewport from replacing a consumed or
 // ambiguous camera before the producer's next presentation boundary.
@@ -68,7 +199,7 @@ extern "C" __attribute__((visibility("hidden"))) void rsTemporalCameraFrameBound
     std::lock_guard<std::mutex> lock(pendingCameraMutex);
     pendingCamera={};pendingCameraState.store(0,std::memory_order_release);
 }
-extern "C" int rsSetTemporalCameraForNextScale(const RSTemporalCamera* camera){
+int setNextScaleCamera(const RSTemporalCamera* camera){
     if(!validCamera(camera)){rsClearTemporalCameraForNextScale();return RS_TEMPORAL_INVALID;}
     std::lock_guard<std::mutex> lock(pendingCameraMutex);
     if(camera->frameId<=lastPendingCameraFrame){pendingCamera={};pendingCameraState.store(2,std::memory_order_release);return RS_TEMPORAL_INVALID;}
@@ -76,6 +207,9 @@ extern "C" int rsSetTemporalCameraForNextScale(const RSTemporalCamera* camera){
         pendingCamera={};pendingCameraState.store(2,std::memory_order_release);return RS_TEMPORAL_BUSY;
     }
     pendingCamera=*camera;pendingCameraState.store(1,std::memory_order_release);return RS_TEMPORAL_OK;
+}
+extern "C" int rsSetTemporalCameraForNextScale(const RSTemporalCamera* camera){
+    const int status=setNextScaleCamera(camera);reportNextScaleCamera(camera,status);return status;
 }
 bool takePendingCamera(RSTemporalCamera& camera){
     if(pendingCameraState.load(std::memory_order_acquire)!=1)return false;
@@ -168,7 +302,7 @@ const RSTemporalProvider *provider(unsigned method){const auto value=providerDes
 struct Scaler {
     id<MTLDevice> device;id<MTLFXTemporalScaler> scaler;
     std::array<uint64_t,10> key{};std::mutex mutex;
-    std::atomic<unsigned> pending{0};std::atomic<bool> reset{true};uint64_t frame=0;
+    std::atomic<unsigned> pending{0},reportedFallbacks{0};std::atomic<bool> reset{true};uint64_t frame=0;
     __weak id<MTLCommandBuffer> tail;
     std::optional<macfx::ImageColorDescription>color;
 };
@@ -352,7 +486,7 @@ bool macfx::prepareTemporalProvider(const RSTemporalFrame*f,RSTemporalResult*r,c
     if(f&&f->method!=RS_TEMPORAL_METALFX&&f->method!=RS_TEMPORAL_XESS&&f->method!=RS_TEMPORAL_METALFX_DENOISED){const auto loaded=providerDescriptor(f->method);if(loaded&&loaded->api&&!loaded->prepare)return false;}
     const auto value=writeImageColor(color);processTemporalProviderFrame(f,&value,r,true);return true;
 }
-static int processTemporalFrame(const RSTemporalFrame*f,const RSImageColorDescription*explicitColor,RSTemporalResult*r,bool originalRetained=false){
+static int processSelectedTemporalFrame(const RSTemporalFrame*f,const RSImageColorDescription*explicitColor,RSTemporalResult*r,bool originalRetained=false){
     if(!r||r->size<sizeof(*r)||r->version!=1)return RS_TEMPORAL_INVALID;
     if(!macfx::effectPlanRequested()){if(originalRetained){r->encoded=0;return answer(r,RS_TEMPORAL_UNAVAILABLE,"The complete original renderer output is retained; no ordered scene work is requested");}return processTemporalProviderFrame(f,explicitColor,r);}
     r->encoded=r->reset=0;r->method=f?f->method:0;r->reason[0]=0;
@@ -397,7 +531,43 @@ static int processTemporalFrame(const RSTemporalFrame*f,const RSImageColorDescri
         acceptEncodedScene(statusContext,*selected.execution,f->frameId);owner->statusReported.store(true,std::memory_order_release);r->encoded=1;r->reset=bool(f->flags&RS_TEMPORAL_RESET);return answer(r,RS_TEMPORAL_OK,"");
     }catch(const std::exception&e){return answer(r,RS_TEMPORAL_FAILED,e.what());}}@catch(NSException*e){return answer(r,RS_TEMPORAL_FAILED,e.reason.UTF8String?:"Ordered scene encoding failed");}}
 }
-extern "C" int rsProcessTemporalFrame(const RSTemporalFrame*f,RSTemporalResult*r){return processTemporalFrame(f,nullptr,r);}
+// Frame-local fallback is a pipeline policy, not a provider capability or a
+// successful result for a provider that did not encode. Direct provider and
+// preparation APIs retain their genuine status; original-output observers do
+// not replace the renderer's completed image.
+template<class Selected,class Default,class Report>
+static int temporalFrameWithFallback(const RSTemporalFrame*f,const RSImageColorDescription*color,RSTemporalResult*r,bool originalRetained,Selected selected,Default fallback,Report report){
+ const int status=selected(f,color,r,originalRetained);
+ if(!f||f->size<sizeof(*f)||f->version!=1||!f->owner||!r||r->size<sizeof(*r)||r->version!=1||originalRetained||f->method<=RS_TEMPORAL_METALFX||f->method>RS_TEMPORAL_METALFX_DENOISED||(status==RS_TEMPORAL_OK&&r->status==RS_TEMPORAL_OK&&r->encoded))return status;
+ auto failed=*r;failed.reason[sizeof(failed.reason)-1]=0;auto actual=*f;actual.method=RS_TEMPORAL_METALFX;actual.reserved=0;
+ const int returned=fallback(&actual,color,r);const int code=returned==RS_TEMPORAL_OK&&(r->status!=RS_TEMPORAL_OK||!r->encoded)?(r->status==RS_TEMPORAL_OK?RS_TEMPORAL_FAILED:int(r->status)):returned;if(code!=RS_TEMPORAL_OK){r->status=code;r->encoded=0;}char fallbackReason[sizeof(r->reason)];std::snprintf(fallbackReason,sizeof(fallbackReason),"%s",r->reason);
+ if(code==RS_TEMPORAL_OK&&r->encoded)std::snprintf(r->reason,sizeof(r->reason),"Temporal method %u returned %d: %.160s; MetalFX fallback active",f->method,status,failed.reason);
+ else std::snprintf(r->reason,sizeof(r->reason),"Temporal method %u returned %d: %.88s; MetalFX fallback failed: %.88s",f->method,status,failed.reason,fallbackReason);
+ report(*f,failed,*r,code);return code;
+}
+static void reportTemporalFallback(const RSTemporalFrame&frame,const RSTemporalResult&,const RSTemporalResult&result,int status)noexcept{try{
+ auto context=owner(frame.owner);const uint32_t bit=1u<<frame.method;if(context->reportedFallbacks.fetch_or(bit,std::memory_order_relaxed)&bit)return;
+ macfx::nativeLog(result.reason);macfx::RuntimeStatusEvent event;event.context=reinterpret_cast<uintptr_t>(frame.owner);event.processing=true;
+ event.phase=status==RS_TEMPORAL_OK&&result.encoded?macfx::RuntimeStatusPhase::Encoded:macfx::RuntimeStatusPhase::Failed;event.frameId=frame.frameId;
+ event.inputWidth=frame.renderWidth;event.inputHeight=frame.renderHeight;event.outputWidth=frame.outputWidth;event.outputHeight=frame.outputHeight;
+ static const char*methods[]={"off","metalfx","fsr2","fsr3","fsr4","xess","asr","sgsr2","metalfx-denoised"};
+ event.stageId="temporal-provider";event.requestedMethod=methods[frame.method];event.activeMethod=status==RS_TEMPORAL_OK&&result.encoded?"metalfx":"";event.reason=result.reason;macfx::observeRuntimeStatus(event);
+ }catch(...) {}}
+static int processTemporalFrame(const RSTemporalFrame*f,const RSImageColorDescription*color,RSTemporalResult*r,bool originalRetained=false){
+ return temporalFrameWithFallback(f,color,r,originalRetained,processSelectedTemporalFrame,
+  [](const RSTemporalFrame*actual,const RSImageColorDescription*metadata,RSTemporalResult*result){const int code=processTemporalProviderFrame(actual,metadata,result);
+   // A failed ordered candidate may have published a preparation marker. A
+   // fresh default image must not remain behind that stale hold marker.
+   if(code==RS_TEMPORAL_OK&&result->encoded&&macfx::effectPlanRequested())macfx::publishTemporalOutput((__bridge id<MTLCommandBuffer>)actual->commandBuffer,(__bridge id<MTLTexture>)actual->output,actual->frameId,{});return code;},reportTemporalFallback);
+}
+extern "C" int rsProcessTemporalFrame(const RSTemporalFrame*f,RSTemporalResult*r){
+    const auto observed=observeIntake(f,f&&f->size>=sizeof(*f)&&!f->commandBufferKind?(__bridge id<MTLCommandBuffer>)f->commandBuffer:nil);
+    const int code=processTemporalFrame(f,nullptr,r);
+    const auto result=r&&r->size>=sizeof(*r)?r:nullptr;
+    if(observed.traced)reportIntake("frame",*f,observed,result,code,f->flags&RS_TEMPORAL_CAMERA_VALID?"frame":"none");
+    if(f&&f->size>=sizeof(*f)&&f->version==1)reportIntakeStatus(*f,result,code);
+    return code;
+}
 extern "C" uint32_t rsTemporalProviderMethodMask(void){return (1u<<RS_TEMPORAL_METALFX)|(1u<<RS_TEMPORAL_FSR2)|(1u<<RS_TEMPORAL_FSR3)|(1u<<RS_TEMPORAL_FSR4)|(1u<<RS_TEMPORAL_XESS)|(1u<<RS_TEMPORAL_ASR)|(1u<<RS_TEMPORAL_SGSR2)|(1u<<RS_TEMPORAL_METALFX_DENOISED);}
 extern "C" uint32_t rsMetalFxDenoisedAPI(void){return 1;}
 extern "C" uint32_t rsMetal4SceneAPI(void){return 1;}
@@ -439,9 +609,11 @@ extern "C" __attribute__((visibility("default"))) int rsCreateRecordedSceneConsu
 }
 extern "C" void rsReleaseTemporalOwner(void *key){
     if(key)rsClearTemporalCameraForNextScale();
+    forgetIntakeStatus(key);
     rsReleaseTemporalSceneMatrices(key);rsReleaseTemporalSceneAovs(key);
     macfx::releaseTemporalSceneContinuations(key);
-    std::shared_ptr<SceneOwner>retired;std::shared_ptr<OrderedSceneOwner>ordered;{std::lock_guard<std::mutex> lock(ownersMutex);owners.erase(key);auto found=sceneOwners.find(key);if(found!=sceneOwners.end()){retired=std::move(found->second);sceneOwners.erase(found);}const auto plan=orderedSceneOwners.find(key);if(plan!=orderedSceneOwners.end()){ordered=std::move(plan->second);orderedSceneOwners.erase(plan);}}
+    std::shared_ptr<Scaler>fallback;std::shared_ptr<SceneOwner>retired;std::shared_ptr<OrderedSceneOwner>ordered;{std::lock_guard<std::mutex> lock(ownersMutex);const auto scaler=owners.find(key);if(scaler!=owners.end()){fallback=std::move(scaler->second);owners.erase(scaler);}auto found=sceneOwners.find(key);if(found!=sceneOwners.end()){retired=std::move(found->second);sceneOwners.erase(found);}const auto plan=orderedSceneOwners.find(key);if(plan!=orderedSceneOwners.end()){ordered=std::move(plan->second);orderedSceneOwners.erase(plan);}}
+    if(fallback&&fallback->reportedFallbacks.load(std::memory_order_relaxed))macfx::retireRuntimeStatus(reinterpret_cast<uintptr_t>(key));
     if(ordered)stopEncoderStatus(reinterpret_cast<uintptr_t>(ordered.get()),ordered->statusReported);
     for(auto &slot:loadedProviders)if(const auto p=slot.load(std::memory_order_acquire))p->release(key);
 }
@@ -546,11 +718,12 @@ void encodeTemporal(id scaler,SEL selector,id commands){
         if(hasCamera)camera=state->camera;
         state->cameraPending=false;state->cameraCommands=nil;
     }
+    const char *cameraOrigin=hasCamera?"scaler":"none";
     id<MTLFXTemporalScalerBase>s=scaler;
     RSTemporalCamera textureCamera{};
     const bool hasTextureCamera=textureCameraCount.load(std::memory_order_acquire)&&takeTextureCamera(s.colorTexture,s.depthTexture,s.motionTexture,textureCamera);
-    if(!hasCamera&&hasTextureCamera){camera=textureCamera;hasCamera=true;}
-    if(!hasCamera&&hasPending){camera=pending;hasCamera=true;}
+    if(!hasCamera&&hasTextureCamera){camera=textureCamera;hasCamera=true;cameraOrigin="textures";}
+    if(!hasCamera&&hasPending){camera=pending;hasCamera=true;cameraOrigin="next-scale";}
     if(method!=state->lastMethod){rsReleaseTemporalOwner((__bridge void*)state);state->reset=state->originalReset=true;state->failedShape=0;state->reported=false;state->lastMethod=method;}
     ++state->frame;const double now=CACurrentMediaTime(),delta=state->previousTime?now-state->previousTime:1./60;state->previousTime=now;
     RSTemporalFrame f{};f.size=sizeof(f);f.version=1;f.owner=(__bridge void*)state;f.commandBuffer=(__bridge void*)commands;
@@ -574,6 +747,11 @@ void encodeTemporal(id scaler,SEL selector,id commands){
 #if __MAC_OS_X_VERSION_MAX_ALLOWED >= 270000
     if(@available(macOS 27.0,*)){f.colorX=uint32_t(s.colorContentOffsetX);f.colorY=uint32_t(s.colorContentOffsetY);f.depthX=uint32_t(s.depthContentOffsetX);f.depthY=uint32_t(s.depthContentOffsetY);f.motionX=uint32_t(s.motionContentOffsetX);f.motionY=uint32_t(s.motionContentOffsetY);f.outputX=uint32_t(s.outputOffsetX);f.outputY=uint32_t(s.outputOffsetY);}
 #endif
+    // The scaler's own inputs, before any route below consumes them.
+    if(const auto observed=observeIntake(&f,state->kind?nil:(id<MTLCommandBuffer>)commands,s.fence);observed.traced){
+        const std::string origin=std::string(cameraOrigin)+(hasCamera&&!(f.flags&RS_TEMPORAL_CAMERA_VALID)?"-ignored":"");
+        reportIntake("scaler",f,observed,nullptr,-1,origin.c_str());
+    }
     auto destinationFrame=f;if(!(f.flags&RS_TEMPORAL_CAMERA_VALID))destinationFrame.frameId=0;
     const auto sceneDestination=macfx::effectPlanRequested()?macfx::takeTemporalSceneDestination(destinationFrame):std::optional<macfx::TemporalSceneDestination>{};
     if(sceneDestination){if(!(f.flags&RS_TEMPORAL_CAMERA_VALID))f.frameId=sceneDestination->frameId;f.flags|=sceneDestination->flags;
@@ -647,11 +825,11 @@ void encodeTemporal(id scaler,SEL selector,id commands){
     const bool unsupportedFence=s.fence&&state->kind;
     if(!unsupportedFence&&shape!=state->failedShape){
         if(s.fence){auto wait=[(id<MTLCommandBuffer>)commands computeCommandEncoder];[wait waitForFence:s.fence];[wait endEncoding];}
-        macfx::encodeTemporalProvider(&f,&result);
+        macfx::encodeTemporalProvider(&f,&result);reportIntakeStatus(f,&result,int(result.status));
     }
     if(!unsupportedFence&&shape!=state->failedShape&&result.status==RS_TEMPORAL_OK&&result.encoded){
         if(s.fence){auto update=[(id<MTLCommandBuffer>)commands computeCommandEncoder];[update updateFence:s.fence];[update endEncoding];}
-        state->reset=false;state->originalReset=true;if(!state->reported){macfx::nativeLog("Temporal provider active method="+std::to_string(method));state->reported=true;}return;
+        state->reset=false;state->originalReset=true;if(!state->reported){macfx::nativeLog("Temporal provider active method="+std::to_string(result.method));state->reported=true;}return;
     }
     if(result.status!=RS_TEMPORAL_BUSY&&shape!=state->failedShape){state->failedShape=shape;rsReleaseTemporalOwner((__bridge void*)state);
         macfx::nativeLog(std::string("Original temporal scaler retained: ")+(unsupportedFence?"the Metal 4 scaler supplies a temporal fence":result.reason));}

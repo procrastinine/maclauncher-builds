@@ -1,11 +1,14 @@
 {
   "schema": 1,
   "repository": "https://github.com/arm/accuracy-super-resolution-generic-library",
+  "commit": "0501f490bd9946a2e1806b5363d7ab8a9a6a5e0a",
   "version": "25.06",
   "minimumMacOS": "13.0",
+  "license": "MIT",
   "sourceScope": [
     "include",
-    "src"
+    "src",
+    "LICENSES"
   ],
   "shaders": {
     "ffxm_fsr2_accumulate_pass_fs.hlsl": "707443fe8b9e394bf36bdbd9e214be1518980d20d84b55fb711fcc8b86d6965b",
@@ -24,6 +27,5 @@
   "sdrHistory": {
     "file": "include/gpu/fsr2/ffxm_fsr2_accumulate.h",
     "sha256": "6be0a684d77301c9b7b1ee2daf053bd27a6f9f56830c3c8ac9df822eba9a7ab9"
-  },
-  "gitlink": "producers/maclauncher/src/external/asr"
+  }
 }

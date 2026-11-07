@@ -1,7 +1,5 @@
-const {gitlink}=require('../../../../../../../lib/pins.mjs');
-const upstream=require('./source.json');
 // Packed NR resource decoding derived from MLX-DLSS (Apache-2.0),
-// The registered upstream supplies the source identity. Vendor code is never executed.
+// commit 7870371e8bf6c03967213f1a5d40db6c5a3bee38. Vendor code is never executed.
 const fs = require('node:fs'), path = require('node:path'), crypto = require('node:crypto');
 const {setImmediate: yieldTurn} = require('node:timers/promises');
 const NR = require('./nr-models');
@@ -229,7 +227,7 @@ async function convert(source, directory, {signal} = {}) {
     signal?.throwIfAborted();await fs.promises.writeFile(file, output, {flag: 'wx'});
     outputs.push({file, name: model.name, topology: model.spec, architecture: NR.ARCHITECTURE, operation: 'mlx-dlss', sha256: digest(output),
       sourceFiles: [{file: path.basename(source.file), sha256: sourceHash, resource, resourceSHA256: digest(payload), adapter: source.adapter,
-        extractorRepository: upstream.repository, extractorCommit: gitlink(upstream.gitlink)}]});
+        extractorRepository: 'https://github.com/iamwavecut/MLX-DLSS', extractorCommit: '7870371e8bf6c03967213f1a5d40db6c5a3bee38'}]});
   }
   if (!unchanged(source.stat, await fs.promises.lstat(source.file))) throw new Error('The NR library changed during conversion.');
   return outputs;

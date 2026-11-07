@@ -1,4 +1,3 @@
-const {addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs"), path = require("node:path"), crypto = require("node:crypto");
 const { cloneOrCopySync } = require("../copy-file");
 const Catalog = require("./managed-shader-packs.json"), Traits = require("./shader-traits"), Providers = require("./shader-providers");
@@ -257,7 +256,7 @@ function selectTree(pack, tree, recipe) {
   if (tree?.truncated || !Array.isArray(tree?.tree) || tree.tree.length > 20000) return { reason: "The shader source listing is too large." };
   const blobs = tree.tree.filter(item => item?.type === "blob" && safe(item.path)), inputs = new Set(recipe?.sourceFiles || []);
   const files = pack.delivery !== "tree" ? blobs.filter(item => keep(item.path)) : blobs.filter(item => inputs.has(item.path) || keep(item.path) &&
-    (pack.prefixes.some(prefix => item.path.startsWith(prefix)) || /^README/i.test(item.path)));
+    (pack.prefixes.some(prefix => item.path.startsWith(prefix)) || item.path === pack.licenseFile || /^README/i.test(item.path)));
   const missing = [...inputs].find(file => !blobs.some(item => item.path === file));
   if (missing) return { reason: `This revision does not contain ${missing}.` };
   if (!recipe && !files.some(item => formats[path.extname(item.path).toLowerCase()])) return { reason: "This revision contains no supported shader files." };
@@ -311,7 +310,7 @@ async function refreshCatalog(context = {}) {
 }
 function keep(relative) {
   return Boolean(formats[path.extname(relative).toLowerCase()]) || /\.(?:vs|fxh|h|hlsl|hlsli|inc|glslinc|png|jpg|jpeg|bmp|tga|dds|webp|cube|lut|txt|md|json|ini)$/i.test(relative) ||
-    /^(licen[cs]e|copying|notice|copyright)/i.test(path.posix.basename(relative));
+    /^(?:LICENSE|NOTICE|COPYING|AUTHORS)(?:[._-].*)?$/i.test(path.posix.basename(relative));
 }
 function extract(archive, destination) {
   const info = Zip.readZipEntries(archive)?.info;
@@ -349,7 +348,7 @@ async function download(listed, file, context, maxBytes = LIMITS.archive) {
   } catch (error) { if (limit.signal.aborted && !context.signal?.aborted) throw new Error("The shader download is too large."); throw error; }
 }
 // Zip archives are read entry by entry; other formats are unpacked by the
-// shared extractor first. Both retain shader sources, resources and publisher text files
+// shared extractor first. Both keep only shader, resource and notice files
 // below a single top folder.
 async function unpack(archive, destination, signal) {
   if (Release.archiveFormat(archive) === ".zip") return extract(archive, destination);
@@ -439,7 +438,7 @@ async function installRuntime(context = {}) {
   let rows = available(context.userDataDir, pack.id), selected = context.version ? version(context.version) : rows.find(row => !row.reason)?.version;
   const current = selected && installed(context.userDataDir, pack.id, selected, true); if (current) return current;
   await confirmToolInstall(context, { managerId: ID, label: pack.label, version: selected || null, requiresDownload: true,
-    installOptions: { sectionId: pack.id }, detail: "Downloads the selected shader source collection." });
+    installOptions: { sectionId: pack.id }, detail: "Downloads the selected shader source collection and its license notices." });
   if (!rows.some(row => row.version === selected)) {
     await module.exports.refreshCatalog({ ...context, sectionId: pack.id });
     rows = available(context.userDataDir, pack.id);
@@ -485,14 +484,24 @@ async function installRuntime(context = {}) {
           const archive = path.join(temporary, listed.name);
           await download(listed, archive, downloadContext);
           await unpack(archive, files, signal); fs.rmSync(archive);
+          if (!fs.existsSync(path.join(files, pack.licenseFile))) {
+            try { await download(raw(pack, row.commit || row.tag, pack.licenseFile), path.join(files, pack.licenseFile), downloadContext, LIMITS.file); }
+            catch(error) { Downloads.throwIfAborted(signal);console.warn("Shader notice acquisition skipped:",error.message); }
+          }
         }
-        addLicenses(files,pack.id,files);
+        for(const relative of pack.bundledNotices||[]){
+          if(!safe(relative)){console.warn("Shader notice copy skipped: unusable source path.");continue;}
+          const moduleRoot=require("./shader-packs").physicalModuleRoot(),source=path.join(moduleRoot,relative);
+          if(!fs.existsSync(source)){console.warn("Shader notice copy skipped: missing candidate",relative);continue;}
+          const target=path.join(files,"licenses",path.basename(relative));fs.mkdirSync(path.dirname(target),{recursive:true});
+          if(!fs.existsSync(target))cloneOrCopySync(source,target);
+        }
         let sourceOverlay;
         if(sourceRecipe){
           sourceOverlay=sourceRecipe.apply(files,row);
           if(sourceOverlay?.version!==row.adaptationVersion)throw Error("The shader collection source recipe version changed.");
         }
-        const record = { schema: 1, packId: pack.id, version: selected, source: row,
+        const record = { schema: 1, packId: pack.id, version: selected, source: row, license: pack.license,
           ...(sourceOverlay?{sourceOverlay}:{}),installedAt: new Date().toISOString(), ...discover(files, pack) };
         for (const relative of Object.keys(record.files)) fs.chmodSync(path.join(files, relative), 0o444);
         fs.writeFileSync(path.join(temporary, "pack.json"), JSON.stringify(record, null, 2) + "\n");

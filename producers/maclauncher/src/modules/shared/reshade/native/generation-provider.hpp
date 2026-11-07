@@ -9,7 +9,6 @@
 #include <string_view>
 namespace macfx {
 struct GenerationResult:LsfgResult {
- bool preparing=false; // Replacement preparation is not evidence of overload.
  std::function<ShaderResult()> completion;
  std::function<uint64_t()> gpuTiming;
  GenerationResult()=default;

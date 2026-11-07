@@ -18,7 +18,7 @@ Image atomics use SPIRV-Cross's atomic buffer alias for buffer-backed `R32Uint` 
 
 ## Build and payload
 
-`build.mjs <source> <compiler-bin-directory> <output>` builds FSR2. Add `--fsr3` with a FidelityFX SDK source checkout to build FSR3. The compiler directory contains `dxc` and `spirv-cross`. Registered Gitlinks select the source revisions, and the build requires those revisions. Both calls may use the same output directory. `--native-only` rebuilds native code using previously generated shader resources and checks their presence before writing metadata.
+`build.mjs <source> <compiler-bin-directory> <output>` builds FSR2. Add `--fsr3` with a FidelityFX SDK source checkout to build FSR3. The compiler directory contains `dxc` and `spirv-cross`. Source revisions and MIT license identities are recorded in `source.json`; the build requires those revisions. Both calls may use the same output directory. `--native-only` rebuilds native code using previously generated shader resources and checks their presence before writing metadata.
 
 The build emits signed universal `arm64`/`x86_64` providers for macOS 13 or later. `payload/` contains the provider libraries, Metal shaders, binding metadata and AMD license notices. Runtime staging places that directory at `temporal/fsr`. `index.js` resolves available algorithms without network access and supplies `RESHADE_FSR2_LIBRARY`, `RESHADE_FSR3_LIBRARY` and `RESHADE_FSR_SHADER_DIRECTORY`.
 

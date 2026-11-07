@@ -28,5 +28,7 @@ let package = Package(
         .linkedFramework("Metal")]),
     .executableTarget(name: "MacLauncherNeuralVideo", dependencies: [
       .product(name: "DLSSMedia", package: "MLXDLSS")]),
+    .testTarget(name: "MacLauncherNeuralTests", dependencies: ["CNeural", "MacLauncherNeural",
+      .product(name: "DLSSMLX", package: "MLXDLSS")]),
   ]
 )

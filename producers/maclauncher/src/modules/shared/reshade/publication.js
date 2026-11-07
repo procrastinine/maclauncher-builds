@@ -63,8 +63,9 @@ function createReader(file = path.join(__dirname, "distribution-supplementals.js
       stamp = identity();
       if (accepted?.identity === stamp) return accepted.manifest;
       const rows = JSON.parse(fs.readFileSync(file, "utf8"));
-      const manifest = Array.isArray(rows) && (rows.length === 1 && !rows[0]?.launcherArchitectures
+      const selected = Array.isArray(rows) && (rows.length === 1 && !rows[0]?.launcherArchitectures && rows[0]?.version
         ? rows[0] : Included.declared(rows, {id: "reshade", arch}));
+      const manifest = selected && !selected.files ? Included.requireIncluded(rows, {id:"reshade",arch}).item : selected;
       if (!Array.isArray(rows) || manifest?.id !== "reshade" ||
           typeof manifest.version !== "string" || !manifest.version ||
           !/^[a-f0-9]{64}$/.test(manifest.manifestSha256 || "") ||
@@ -147,6 +148,9 @@ function createReader(file = path.join(__dirname, "distribution-supplementals.js
     const relative = path.relative(path.join(base, "native-runtimes"), key).split(path.sep).join("/");
     const parts = relative.split("/");
     if (parts.length !== 3 || parts[0] !== "reshade") throw new Error("The mapped graphics payload has an invalid location.");
+    let selected;
+    try { selected = current(); } catch {}
+    if (selected?.directoryRelative === relative) return restore(key, selected);
     const file = path.join(key, "runtime.json"), bytes = Native.readRegular(file, 2 * 1024 * 1024), record = JSON.parse(bytes.bytes.toString("utf8"));
     if (record.schema !== 1 || record.version !== parts[1] || !Array.isArray(record.files)) throw new Error("The mapped graphics payload is not sealed.");
     return restore(key, {id: "reshade", version: record.version, directoryRelative: relative, manifestRelative: "runtime.json",
