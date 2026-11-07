@@ -36,7 +36,8 @@ export function buildProvider({work,output,mingw,glslang,source=path.join(here,'
     built.push({architecture,build});
   }
   // The NGX core finds the interface through vkd3d_metalfx.h. ngx.patch offers Frame Generation only where the
-  // device's command lists interpolate frames.
+  // device's command lists interpolate frames, takes the game's camera from MacLauncher's Streamline proxy
+  // (MacLauncherSetTemporalCamera) and passes region offsets, conventions and frame time to the frame.
   const nvngx=path.join(work,'nvngx.dll'),core=path.join(work,'ngx');
   fs.cpSync(path.join(ngx,'ngx'),path.join(core,'ngx'),{recursive:true});
   run('git',['apply','--unsafe-paths','--directory='+core,path.join(here,'ngx.patch')],{cwd:path.resolve(here,'../..')});

@@ -1,5 +1,5 @@
 diff --git a/ngx/nvngx/nvngx.cpp b/ngx/nvngx/nvngx.cpp
-index 4563930..ad2daac 100644
+index 4563930..a7cad19 100644
 --- a/ngx/nvngx/nvngx.cpp
 +++ b/ngx/nvngx/nvngx.cpp
 @@ -13,6 +13,7 @@
@@ -37,7 +37,46 @@ index 4563930..ad2daac 100644
  static ID3D12Resource *GetResource(const ParametersImpl *params, const char *name, const char *alternative = nullptr) {
    ID3D12Resource *resource = nullptr;
    if (NVNGX_FAILED(params->Get(name, &resource)) && alternative)
-@@ -298,7 +319,7 @@ static ParametersImpl *CapabilityParameters(bool d3d12) {
+@@ -176,6 +197,38 @@ static NVNGX_RESULT ReadCreate(const ParametersImpl *params, DLSSFeature &dlss)
+   return NVNGX_RESULT_OK;
+ }
+ 
++// MacLauncher's Streamline proxy hands the game's camera to the evaluation on this thread through
++// MacLauncherSetTemporalCamera: the 64-byte RSTemporalCamera of MacLauncher's graphics pipeline.
++struct RSTemporalCamera {
++  uint32_t size, version, flags, reserved;
++  uint64_t frameId, viewportId;
++  float nearPlane, farPlane, verticalFov, frameTimeMs; // positive view distances; radians
++  uint32_t reserved2[4];
++};
++static_assert(sizeof(RSTemporalCamera) == 64, "RSTemporalCamera is 64 bytes");
++enum : uint32_t { RS_TEMPORAL_CAMERA_FLAGS = 0x6f, RS_TEMPORAL_DEPTH_INFINITE = 4 };
++static thread_local RSTemporalCamera temporal_camera;
++
++static bool ValidCamera(const RSTemporalCamera *c) {
++  if (!c || c->size != sizeof(*c) || c->version != 1 || c->reserved || (c->flags & ~RS_TEMPORAL_CAMERA_FLAGS) ||
++      !c->frameId || !std::isfinite(c->nearPlane) || c->nearPlane <= 0 || !std::isfinite(c->verticalFov) ||
++      c->verticalFov <= 0 || c->verticalFov >= 3.14159265358979323846f || !std::isfinite(c->frameTimeMs) ||
++      c->frameTimeMs < 0)
++    return false;
++  for (auto reserved : c->reserved2)
++    if (reserved)
++      return false;
++  return c->flags & RS_TEMPORAL_DEPTH_INFINITE ? c->farPlane == 0
++                                               : std::isfinite(c->farPlane) && c->farPlane > c->nearPlane;
++}
++
++extern "C" __declspec(dllexport) int __cdecl MacLauncherSetTemporalCamera(const RSTemporalCamera *camera) {
++  temporal_camera = ValidCamera(camera) ? *camera : RSTemporalCamera{};
++  return temporal_camera.size != 0;
++}
++
++extern "C" __declspec(dllexport) void __cdecl MacLauncherClearTemporalCamera() { temporal_camera = {}; }
++
+ static void ReadCommon(const ParametersImpl *params, float &mv_x, float &mv_y, float &jitter_x, float &jitter_y,
+                        float &pre_exposure, BOOL &reset) {
+   mv_x = GetOr(params, NVNGX_Parameter_MV_Scale_X, 1.0f);
+@@ -298,7 +351,7 @@ static ParametersImpl *CapabilityParameters(bool d3d12) {
    params->Set("DLSS.Enable.Output.Subrects", 1);
    params->Set("RTXValue", 0);
    // Frame Generation, as the game's Streamline (sl.dlss_g) reads it: one frame between two, no Reflex frame warp
@@ -46,7 +85,7 @@ index 4563930..ad2daac 100644
    params->Set("FrameGeneration.Available", frame_generation);
    params->Set("FrameInterpolation.Available", frame_generation);
    params->Set("FrameGeneration.NeedsUpdatedDriver", 0);
-@@ -320,7 +341,7 @@ static NVNGX_RESULT FeatureRequirements(const NVNGX_FeatureDiscoveryInfo *discov
+@@ -320,7 +373,7 @@ static NVNGX_RESULT FeatureRequirements(const NVNGX_FeatureDiscoveryInfo *discov
        (d3d12 && discovery->FeatureID == NVNGX_FEATURE_RAYRECONSTRUCTION &&
         HasFeatureLibrary(L"nvngx_dlssd.dll", discovery->FeatureInfo)) ||
        (d3d12 && discovery->FeatureID == NVNGX_FEATURE_FRAMEGENERATION &&
@@ -55,7 +94,7 @@ index 4563930..ad2daac 100644
      requirement->FeatureSupported = NVNGX_FEATURE_SUPPORT_RESULT_SUPPORTED;
      requirement->MinHWArchitecture = 0;
      strcpy(requirement->MinOSVersion, "10.0.16299.0");
-@@ -345,11 +366,13 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_UpdateFeature(const void *app_id, const unsi
+@@ -345,11 +398,13 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_UpdateFeature(const void *app_id, const unsi
  NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_Init(unsigned long long id, const wchar_t *path, ID3D12Device *device,
                                                 const void *feature_info, unsigned int sdk_version) {
    RememberLibraryPaths(feature_info);
@@ -69,7 +108,7 @@ index 4563930..ad2daac 100644
    return NVNGX_RESULT_OK;
  }
  
-@@ -358,6 +381,7 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_Init_ProjectID(const char *project, un
+@@ -358,6 +413,7 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_Init_ProjectID(const char *project, un
                                                           ID3D12Device *device, unsigned int sdk_version,
                                                           const void *feature_info) {
    RememberLibraryPaths(feature_info);
@@ -77,7 +116,7 @@ index 4563930..ad2daac 100644
    return NVNGX_RESULT_OK;
  }
  
-@@ -366,6 +390,7 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_Init_with_ProjectID(const char *projec
+@@ -366,6 +422,7 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_Init_with_ProjectID(const char *projec
                                                                ID3D12Device *device, const void *feature_info,
                                                                unsigned int sdk_version) {
    RememberLibraryPaths(feature_info);
@@ -85,3 +124,34 @@ index 4563930..ad2daac 100644
    return NVNGX_RESULT_OK;
  }
  
+@@ -574,6 +631,30 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_EvaluateFeature(ID3D12GraphicsCommandL
+     desc.MotionVectorInDisplayRes = !bool(dlss->flag & NVNGX_DLSS_FLAG_MV_LOWRES);
+     ReadCommon(parameters, desc.MotionVectorScaleX, desc.MotionVectorScaleY, desc.JitterOffsetX, desc.JitterOffsetY,
+                desc.PreExposure, desc.InReset);
++    desc.ColorX = GetOr(parameters, "DLSS.Input.Color.Subrect.Base.X", 0u);
++    desc.ColorY = GetOr(parameters, "DLSS.Input.Color.Subrect.Base.Y", 0u);
++    desc.DepthX = GetOr(parameters, "DLSS.Input.Depth.Subrect.Base.X", 0u);
++    desc.DepthY = GetOr(parameters, "DLSS.Input.Depth.Subrect.Base.Y", 0u);
++    desc.MotionX = GetOr(parameters, "DLSS.Input.MV.Subrect.Base.X", 0u);
++    desc.MotionY = GetOr(parameters, "DLSS.Input.MV.Subrect.Base.Y", 0u);
++    if (dlss->enable_output_subrects) {
++      desc.OutputX = GetOr(parameters, "DLSS.Output.Subrect.Base.X", 0u);
++      desc.OutputY = GetOr(parameters, "DLSS.Output.Subrect.Base.Y", 0u);
++    }
++    desc.Hdr = bool(dlss->flag & 1); // NVSDK_NGX_DLSS_Feature_Flags_IsHDR
++    desc.MotionVectorJittered = bool(dlss->flag & NVNGX_DLSS_FLAG_MV_JITTERED);
++    desc.Sharpness = GetOr(parameters, NVNGX_Parameter_Sharpness, 0.0f);
++    float frame_time = GetOr(parameters, "FrameTimeDeltaInMsec", 0.0f);
++    if (temporal_camera.size) {
++      desc.CameraValid = TRUE;
++      desc.DepthInfinite = bool(temporal_camera.flags & RS_TEMPORAL_DEPTH_INFINITE);
++      desc.NearPlane = temporal_camera.nearPlane;
++      desc.FarPlane = temporal_camera.farPlane;
++      desc.VerticalFov = temporal_camera.verticalFov;
++      if (!(frame_time > 0.0f))
++        frame_time = temporal_camera.frameTimeMs;
++    }
++    desc.FrameTimeMs = std::isfinite(frame_time) && frame_time > 0.0f ? frame_time : 0.0f;
+     return FAILED(metalfx.iface->lpVtbl->TemporalUpscale(metalfx.iface, &desc, &dlss->scaler)) ? NVNGX_RESULT_FAIL
+                                                                                                  : NVNGX_RESULT_OK;
+   }

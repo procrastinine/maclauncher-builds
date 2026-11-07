@@ -1,9 +1,9 @@
 /*
  * ID3D12GraphicsCommandListMetalFX (vkd3d_metalfx.h) on VKD3D-Proton command lists. The NGX core of
  * VKD3D-Proton-MacOS (ngx/nvngx, from Mullion) records DLSS Super Resolution and Ray Reconstruction through it.
- * Each upscale is one VkMetalFXScaleInfoMVK in the pNext chain of a vkCmdPipelineBarrier2. Wine's 64-bit Vulkan
- * thunk hands that chain to the driver unchanged, and KosmicKrisp encodes MetalFX's temporal or denoised scaler
- * after the barrier, on the same Metal command buffer.
+ * Each evaluation is one VkTemporalFrameInfoMVK in the pNext chain of a vkCmdPipelineBarrier2: the frame's
+ * images and values. Wine's 64-bit Vulkan thunk hands that chain to the driver unchanged, and KosmicKrisp
+ * forwards the frame in command order to MacLauncher's graphics pipeline, which runs the selected upscaler.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,37 +25,43 @@
 #include "vkd3d_private.h"
 #include "vkd3d_metalfx.h"
 
-/* The driver's private structure, the same layout as KosmicKrisp's kk_metalfx.h. A driver that encodes it names
- * the words "metalfx" (temporal scaler) and "metalfx-denoised" (denoised scaler) in its driverInfo. */
-#define VK_STRUCTURE_TYPE_METALFX_SCALE_INFO_MVK ((VkStructureType)1000999100)
+/* The driver's private structure, the same layout as KosmicKrisp's kk_temporal.h. A driver that forwards it names
+ * the word "temporal-sr" (Super Resolution) or "temporal-rr" (Ray Reconstruction) in its driverInfo. */
+#define VK_STRUCTURE_TYPE_TEMPORAL_FRAME_INFO_MVK ((VkStructureType)1000999101)
 
-enum { METALFX_TEMPORAL = 1, METALFX_DENOISED = 2 };
-enum { METALFX_COLOR, METALFX_DEPTH, METALFX_MOTION, METALFX_OUTPUT, METALFX_EXPOSURE, METALFX_DIFFUSE_ALBEDO,
-        METALFX_SPECULAR_ALBEDO, METALFX_NORMALS, METALFX_ROUGHNESS, METALFX_SPECULAR_HIT_DISTANCE, METALFX_IMAGES };
-enum { METALFX_AUTO_EXPOSURE = 0x1, METALFX_RESET = 0x2, METALFX_DEPTH_REVERSED = 0x4,
-        METALFX_MOTION_DISPLAY_RES = 0x8 };
+enum { TEMPORAL_SUPER_RESOLUTION = 1, TEMPORAL_RAY_RECONSTRUCTION = 2 };
+enum { TEMPORAL_COLOR, TEMPORAL_DEPTH, TEMPORAL_MOTION, TEMPORAL_OUTPUT, TEMPORAL_EXPOSURE, TEMPORAL_DIFFUSE_ALBEDO,
+        TEMPORAL_SPECULAR_ALBEDO, TEMPORAL_NORMALS, TEMPORAL_ROUGHNESS, TEMPORAL_SPECULAR_HIT_DISTANCE,
+        TEMPORAL_HUDLESS, TEMPORAL_UI, TEMPORAL_IMAGES };
+enum { TEMPORAL_AUTO_EXPOSURE = 0x1, TEMPORAL_RESET = 0x2, TEMPORAL_DEPTH_REVERSED = 0x4,
+        TEMPORAL_MOTION_DISPLAY_RES = 0x8, TEMPORAL_MOTION_JITTERED = 0x10, TEMPORAL_HDR = 0x20,
+        TEMPORAL_CAMERA_VALID = 0x40, TEMPORAL_DEPTH_INFINITE = 0x80 };
 
-typedef struct VkMetalFXScaleInfoMVK
+typedef struct VkTemporalFrameInfoMVK
 {
     VkStructureType sType;
     const void *pNext;
-    uint64_t scalerId;
-    uint32_t scalerType;
+    uint64_t featureId;
+    uint64_t frameId;
+    uint32_t featureType;
     uint32_t flags;
-    VkImage images[METALFX_IMAGES];
-    VkFormat formats[METALFX_IMAGES]; /* VK_FORMAT_UNDEFINED: the image's own */
-    uint32_t inputContentWidth;       /* 0: the color image's width */
-    uint32_t inputContentHeight;
+    VkImage images[TEMPORAL_IMAGES];
+    VkFormat formats[TEMPORAL_IMAGES]; /* VK_FORMAT_UNDEFINED: the image's own */
+    uint32_t colorX, colorY, depthX, depthY, motionX, motionY, outputX, outputY;
+    uint32_t renderWidth, renderHeight, outputWidth, outputHeight; /* 0: the image's extent */
     float motionVectorScaleX;
     float motionVectorScaleY;
     float jitterOffsetX;
     float jitterOffsetY;
     float preExposure;
-    float worldToViewMatrix[16];      /* row-major, of row vectors (D3D's) */
+    float sharpness;
+    float frameTimeMs;                 /* 0: unknown */
+    float nearPlane, farPlane, verticalFov; /* with TEMPORAL_CAMERA_VALID; radians */
+    float worldToViewMatrix[16];       /* row-major, of row vectors (D3D's) */
     float viewToClipMatrix[16];
-    uint32_t releaseScalerIdCount;
-    const uint64_t *pReleaseScalerIds;
-} VkMetalFXScaleInfoMVK;
+    uint32_t releaseFeatureIdCount;
+    const uint64_t *pReleaseFeatureIds;
+} VkTemporalFrameInfoMVK;
 
 void d3d12_command_list_metalfx_record(struct d3d12_command_list *list, const void *scale,
         struct d3d12_resource **resources, unsigned int count);
@@ -64,12 +70,13 @@ extern HRESULT STDMETHODCALLTYPE d3d12_command_list_QueryInterface(d3d12_command
 extern ULONG STDMETHODCALLTYPE d3d12_command_list_AddRef(d3d12_command_list_iface *iface);
 extern ULONG STDMETHODCALLTYPE d3d12_command_list_Release(d3d12_command_list_iface *iface);
 
-/* A feature's scaler is the driver's, under an id of ours. Destroy() can come after the device is gone, so the ids
- * it releases wait here for the next scale, of any device, to pass them on. */
+/* A feature's temporal history is the driver's, under an id of ours. Destroy() can come after the device is gone,
+ * so the ids it releases wait here for the next frame, of any device, to pass them on. */
 struct vkd3d_metalfx_scaler
 {
     ID3D12MetalFXScaler ID3D12MetalFXScaler_iface;
     uint64_t id;
+    uint64_t frames;
 };
 
 static spinlock_t vkd3d_metalfx_lock;
@@ -93,22 +100,23 @@ static const ID3D12MetalFXScalerVtbl vkd3d_metalfx_scaler_vtbl =
     vkd3d_metalfx_scaler_Destroy,
 };
 
-/* The id of the feature's scaler, made at its first scale. */
-static uint64_t vkd3d_metalfx_scaler_id(ID3D12MetalFXScaler **iface)
+/* The feature's history, made at its first frame; NULL for another implementation's or without memory. */
+static struct vkd3d_metalfx_scaler *vkd3d_metalfx_scaler(ID3D12MetalFXScaler **iface)
 {
     struct vkd3d_metalfx_scaler *scaler;
 
     if (*iface)
         return (*iface)->lpVtbl == &vkd3d_metalfx_scaler_vtbl
-                ? CONTAINING_RECORD(*iface, struct vkd3d_metalfx_scaler, ID3D12MetalFXScaler_iface)->id : 0;
+                ? CONTAINING_RECORD(*iface, struct vkd3d_metalfx_scaler, ID3D12MetalFXScaler_iface) : NULL;
     if (!(scaler = vkd3d_malloc(sizeof(*scaler))))
-        return 0;
+        return NULL;
     scaler->ID3D12MetalFXScaler_iface.lpVtbl = &vkd3d_metalfx_scaler_vtbl;
+    scaler->frames = 0;
     spinlock_acquire(&vkd3d_metalfx_lock);
     scaler->id = ++vkd3d_metalfx_next_id;
     spinlock_release(&vkd3d_metalfx_lock);
     *iface = &scaler->ID3D12MetalFXScaler_iface;
-    return scaler->id;
+    return scaler;
 }
 
 /* Whether the driver's driverInfo names the word. */
@@ -125,7 +133,7 @@ static bool vkd3d_metalfx_driver_has(const struct d3d12_device *device, const ch
     return false;
 }
 
-/* MetalFX reads an integer-typed image (typeless depth, exposure or motion vectors) as the float format of its bits;
+/* An integer-typed image (typeless depth, exposure or motion vectors) is read as the float format of its bits;
  * VK_FORMAT_UNDEFINED keeps the image's own. */
 static VkFormat vkd3d_metalfx_read_format(const struct d3d12_resource *resource)
 {
@@ -166,24 +174,25 @@ static ULONG STDMETHODCALLTYPE d3d12_command_list_metalfx_Release(ID3D12Graphics
 
 static BOOL STDMETHODCALLTYPE d3d12_command_list_metalfx_SupportsTemporalUpscale(ID3D12GraphicsCommandListMetalFX *iface)
 {
-    return vkd3d_metalfx_driver_has(impl_from_ID3D12GraphicsCommandListMetalFX(iface)->device, "metalfx");
+    return vkd3d_metalfx_driver_has(impl_from_ID3D12GraphicsCommandListMetalFX(iface)->device, "temporal-sr");
 }
 
 static BOOL STDMETHODCALLTYPE d3d12_command_list_metalfx_SupportsDenoisedUpscale(ID3D12GraphicsCommandListMetalFX *iface)
 {
-    return vkd3d_metalfx_driver_has(impl_from_ID3D12GraphicsCommandListMetalFX(iface)->device, "metalfx-denoised");
+    return vkd3d_metalfx_driver_has(impl_from_ID3D12GraphicsCommandListMetalFX(iface)->device, "temporal-rr");
 }
 
-/* Fills in the images and what all scales share, and records the scale with the ids released since the last one.
+/* Fills in the images and what all frames share, and records the frame with the ids released since the last one.
  * Every image is a texture. */
-static HRESULT vkd3d_metalfx_record(struct d3d12_command_list *list, VkMetalFXScaleInfoMVK *info,
-        ID3D12Resource *const *images, ID3D12MetalFXScaler **scaler, uint32_t type, uint32_t flags)
+static HRESULT vkd3d_metalfx_record(struct d3d12_command_list *list, VkTemporalFrameInfoMVK *info,
+        ID3D12Resource *const *images, ID3D12MetalFXScaler **iface, uint32_t type, uint32_t flags)
 {
-    struct d3d12_resource *resources[METALFX_IMAGES] = {0};
+    struct d3d12_resource *resources[TEMPORAL_IMAGES] = {0};
     uint64_t released[ARRAY_SIZE(vkd3d_metalfx_released)];
+    struct vkd3d_metalfx_scaler *scaler;
     unsigned int i;
 
-    for (i = 0; i < METALFX_IMAGES; i++)
+    for (i = 0; i < TEMPORAL_IMAGES; i++)
     {
         if (!images[i])
             continue;
@@ -193,20 +202,22 @@ static HRESULT vkd3d_metalfx_record(struct d3d12_command_list *list, VkMetalFXSc
         info->images[i] = resources[i]->res.vk_image;
         info->formats[i] = vkd3d_metalfx_read_format(resources[i]);
     }
-    if (!(info->scalerId = vkd3d_metalfx_scaler_id(scaler)))
-        return E_OUTOFMEMORY;
-    info->sType = VK_STRUCTURE_TYPE_METALFX_SCALE_INFO_MVK;
-    info->scalerType = type;
+    if (!(scaler = vkd3d_metalfx_scaler(iface)))
+        return *iface ? E_INVALIDARG : E_OUTOFMEMORY;
+    info->sType = VK_STRUCTURE_TYPE_TEMPORAL_FRAME_INFO_MVK;
+    info->featureId = scaler->id;
+    info->frameId = ++scaler->frames;
+    info->featureType = type;
     info->flags = flags;
 
     spinlock_acquire(&vkd3d_metalfx_lock);
     memcpy(released, vkd3d_metalfx_released, vkd3d_metalfx_released_count * sizeof(*released));
-    info->releaseScalerIdCount = vkd3d_metalfx_released_count;
+    info->releaseFeatureIdCount = vkd3d_metalfx_released_count;
     vkd3d_metalfx_released_count = 0;
     spinlock_release(&vkd3d_metalfx_lock);
-    info->pReleaseScalerIds = released;
+    info->pReleaseFeatureIds = released;
 
-    d3d12_command_list_metalfx_record(list, info, resources, METALFX_IMAGES);
+    d3d12_command_list_metalfx_record(list, info, resources, TEMPORAL_IMAGES);
     return S_OK;
 }
 
@@ -214,41 +225,59 @@ static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_TemporalUpscale(ID3D
         const VKD3D_METALFX_TEMPORAL_DESC *desc, ID3D12MetalFXScaler **scaler)
 {
     struct d3d12_command_list *list = impl_from_ID3D12GraphicsCommandListMetalFX(iface);
-    ID3D12Resource *images[METALFX_IMAGES] = {0};
-    VkMetalFXScaleInfoMVK info;
+    ID3D12Resource *images[TEMPORAL_IMAGES] = {0};
+    VkTemporalFrameInfoMVK info;
 
     TRACE("iface %p, desc %p, scaler %p.\n", iface, desc, scaler);
 
     if (!desc || !scaler || !desc->Color || !desc->Depth || !desc->MotionVector || !desc->Output)
         return E_INVALIDARG;
-    if (!vkd3d_metalfx_driver_has(list->device, "metalfx"))
+    if (!vkd3d_metalfx_driver_has(list->device, "temporal-sr"))
         return E_NOTIMPL;
 
     memset(&info, 0, sizeof(info));
-    images[METALFX_COLOR] = desc->Color;
-    images[METALFX_DEPTH] = desc->Depth;
-    images[METALFX_MOTION] = desc->MotionVector;
-    images[METALFX_OUTPUT] = desc->Output;
-    images[METALFX_EXPOSURE] = desc->ExposureTexture;
-    info.inputContentWidth = desc->InputContentWidth;
-    info.inputContentHeight = desc->InputContentHeight;
+    images[TEMPORAL_COLOR] = desc->Color;
+    images[TEMPORAL_DEPTH] = desc->Depth;
+    images[TEMPORAL_MOTION] = desc->MotionVector;
+    images[TEMPORAL_OUTPUT] = desc->Output;
+    images[TEMPORAL_EXPOSURE] = desc->ExposureTexture;
+    info.colorX = desc->ColorX;
+    info.colorY = desc->ColorY;
+    info.depthX = desc->DepthX;
+    info.depthY = desc->DepthY;
+    info.motionX = desc->MotionX;
+    info.motionY = desc->MotionY;
+    info.outputX = desc->OutputX;
+    info.outputY = desc->OutputY;
+    info.renderWidth = desc->InputContentWidth;
+    info.renderHeight = desc->InputContentHeight;
     info.motionVectorScaleX = desc->MotionVectorScaleX;
     info.motionVectorScaleY = desc->MotionVectorScaleY;
     info.jitterOffsetX = desc->JitterOffsetX;
     info.jitterOffsetY = desc->JitterOffsetY;
     info.preExposure = desc->PreExposure;
-    return vkd3d_metalfx_record(list, &info, images, scaler, METALFX_TEMPORAL,
-            (desc->AutoExposure ? METALFX_AUTO_EXPOSURE : 0) | (desc->InReset ? METALFX_RESET : 0)
-            | (desc->DepthReversed ? METALFX_DEPTH_REVERSED : 0)
-            | (desc->MotionVectorInDisplayRes ? METALFX_MOTION_DISPLAY_RES : 0));
+    info.sharpness = desc->Sharpness;
+    info.frameTimeMs = desc->FrameTimeMs;
+    if (desc->CameraValid)
+    {
+        info.nearPlane = desc->NearPlane;
+        info.farPlane = desc->FarPlane;
+        info.verticalFov = desc->VerticalFov;
+    }
+    return vkd3d_metalfx_record(list, &info, images, scaler, TEMPORAL_SUPER_RESOLUTION,
+            (desc->AutoExposure ? TEMPORAL_AUTO_EXPOSURE : 0) | (desc->InReset ? TEMPORAL_RESET : 0)
+            | (desc->DepthReversed ? TEMPORAL_DEPTH_REVERSED : 0)
+            | (desc->MotionVectorInDisplayRes ? TEMPORAL_MOTION_DISPLAY_RES : 0)
+            | (desc->MotionVectorJittered ? TEMPORAL_MOTION_JITTERED : 0) | (desc->Hdr ? TEMPORAL_HDR : 0)
+            | (desc->CameraValid ? TEMPORAL_CAMERA_VALID : 0) | (desc->DepthInfinite ? TEMPORAL_DEPTH_INFINITE : 0));
 }
 
 static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_DenoisedUpscale(ID3D12GraphicsCommandListMetalFX *iface,
         const VKD3D_METALFX_DENOISED_DESC *desc, ID3D12MetalFXScaler **scaler)
 {
     struct d3d12_command_list *list = impl_from_ID3D12GraphicsCommandListMetalFX(iface);
-    ID3D12Resource *images[METALFX_IMAGES] = {0};
-    VkMetalFXScaleInfoMVK info;
+    ID3D12Resource *images[TEMPORAL_IMAGES] = {0};
+    VkTemporalFrameInfoMVK info;
     ID3D12Resource *roughness;
 
     TRACE("iface %p, desc %p, scaler %p.\n", iface, desc, scaler);
@@ -257,20 +286,20 @@ static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_DenoisedUpscale(ID3D
     if (!desc || !scaler || !desc->Color || !desc->Depth || !desc->MotionVector || !desc->Output
             || !desc->DiffuseAlbedo || !desc->SpecularAlbedo || !desc->Normals || !roughness)
         return E_INVALIDARG;
-    if (!vkd3d_metalfx_driver_has(list->device, "metalfx-denoised"))
+    if (!vkd3d_metalfx_driver_has(list->device, "temporal-rr"))
         return E_NOTIMPL;
 
     memset(&info, 0, sizeof(info));
-    images[METALFX_COLOR] = desc->Color;
-    images[METALFX_DEPTH] = desc->Depth;
-    images[METALFX_MOTION] = desc->MotionVector;
-    images[METALFX_OUTPUT] = desc->Output;
-    images[METALFX_EXPOSURE] = desc->ExposureTexture;
-    images[METALFX_DIFFUSE_ALBEDO] = desc->DiffuseAlbedo;
-    images[METALFX_SPECULAR_ALBEDO] = desc->SpecularAlbedo;
-    images[METALFX_NORMALS] = desc->Normals;
-    images[METALFX_ROUGHNESS] = roughness;
-    images[METALFX_SPECULAR_HIT_DISTANCE] = desc->SpecularHitDistance;
+    images[TEMPORAL_COLOR] = desc->Color;
+    images[TEMPORAL_DEPTH] = desc->Depth;
+    images[TEMPORAL_MOTION] = desc->MotionVector;
+    images[TEMPORAL_OUTPUT] = desc->Output;
+    images[TEMPORAL_EXPOSURE] = desc->ExposureTexture;
+    images[TEMPORAL_DIFFUSE_ALBEDO] = desc->DiffuseAlbedo;
+    images[TEMPORAL_SPECULAR_ALBEDO] = desc->SpecularAlbedo;
+    images[TEMPORAL_NORMALS] = desc->Normals;
+    images[TEMPORAL_ROUGHNESS] = roughness;
+    images[TEMPORAL_SPECULAR_HIT_DISTANCE] = desc->SpecularHitDistance;
     memcpy(info.worldToViewMatrix, desc->WorldToView, sizeof(info.worldToViewMatrix));
     memcpy(info.viewToClipMatrix, desc->ViewToClip, sizeof(info.viewToClipMatrix));
     info.motionVectorScaleX = desc->MotionVectorScaleX;
@@ -278,9 +307,9 @@ static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_DenoisedUpscale(ID3D
     info.jitterOffsetX = desc->JitterOffsetX;
     info.jitterOffsetY = desc->JitterOffsetY;
     info.preExposure = desc->PreExposure;
-    return vkd3d_metalfx_record(list, &info, images, scaler, METALFX_DENOISED,
-            (desc->AutoExposure ? METALFX_AUTO_EXPOSURE : 0) | (desc->InReset ? METALFX_RESET : 0)
-            | (desc->DepthReversed ? METALFX_DEPTH_REVERSED : 0));
+    return vkd3d_metalfx_record(list, &info, images, scaler, TEMPORAL_RAY_RECONSTRUCTION,
+            (desc->AutoExposure ? TEMPORAL_AUTO_EXPOSURE : 0) | (desc->InReset ? TEMPORAL_RESET : 0)
+            | (desc->DepthReversed ? TEMPORAL_DEPTH_REVERSED : 0));
 }
 
 /* Frame Generation is not offered: the NGX core then reports it unsupported. */

@@ -42,6 +42,18 @@ typedef struct VKD3D_METALFX_TEMPORAL_DESC
     FLOAT PreExposure;
     FLOAT JitterOffsetX;
     FLOAT JitterOffsetY;
+    /* MacLauncher additions for its graphics pipeline: the offsets of the color, depth, motion vector and output
+     * regions; the game's camera (Streamline constants through MacLauncherSetTemporalCamera); the frame time. */
+    UINT ColorX, ColorY, DepthX, DepthY, MotionX, MotionY, OutputX, OutputY;
+    BOOL Hdr;                  /* linear color */
+    BOOL MotionVectorJittered; /* motion vectors include the sample jitter */
+    BOOL CameraValid;
+    BOOL DepthInfinite;        /* infinite far plane; FarPlane is 0 */
+    FLOAT NearPlane;
+    FLOAT FarPlane;
+    FLOAT VerticalFov;         /* radians */
+    FLOAT FrameTimeMs;         /* 0: unknown */
+    FLOAT Sharpness;
 } VKD3D_METALFX_TEMPORAL_DESC;
 
 typedef struct VKD3D_METALFX_DENOISED_DESC
