@@ -22,7 +22,7 @@ export function copyPinnedReShadeSources(source, destination, consumed, sourceDi
     // Include the consumed model, spatial shader and adaptive cadence sources.
     // Separate website and plugin assets are not consumed.
     const scope = relative === "third_party/mako" ? ["engine/mako-backend", "engine/mako-common", "engine/mako-render/src/adaptive_scheduler.cpp", "engine/mako-render/src/adaptive_scheduler.hpp", "engine/mako-render/src/adaptive_policy_limits.hpp", "engine/mako-render/src/generated_frame_delivery.hpp", "engine/mako-render/src/generated_frame_plan.hpp", "engine/mako-render/src/shaders/spatial_scaling.comp", "engine/mako-render/src/shaders/spatial_scaling_spirv.hpp", "engine/mako-render/src/shaders/spatial_scaling_spirv.hashes", "README.md"]
-      : relative === "third_party/fsr" ? ["ffx-fsr", "readme.md"]
+      : relative === "third_party/fsr" ? ["ffx-fsr", "readme.md", "license.txt"]
       : relative === "third_party/reshade" ? ["source", "include", "README.md"]
       : relative === "third_party/reshade/deps/spirv" ? ["include", "README.md"]
       : relative === "third_party/spirv-cross" ? ["*.cpp", "*.hpp", "*.h", "include", "CMakeLists.txt", "cmake", "pkg-config", "README.md"]
