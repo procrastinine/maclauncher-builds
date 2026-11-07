@@ -2772,10 +2772,14 @@
       {
         "version": "1.0.2",
         "label": "Steam client bridge 1.0.2"
+      },
+      {
+        "version": "1.0.3",
+        "label": "Steam client bridge 1.0.3"
       }
     ],
     "build": {
-      "version": "1.0.2",
+      "version": "1.0.3",
       "command": "producers/steam-bridge/build.mjs",
       "architectures": [
         "universal"
