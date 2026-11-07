@@ -6,8 +6,8 @@ import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
 import { spawn, execFileSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
-import { applyCameraOverlay } from './patch.mjs';
+import { fileURLToPath,pathToFileURL } from 'node:url';
+import {appSourceRoot,materializeAppModule} from '../../../../../../../tools/app-source.mjs';
 import Production from '../../../shared/runtime/production-source.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -15,6 +15,10 @@ const [upstreamArg, vendorArg, compilerArg, outputArg] = process.argv.slice(2);
 const nativeOnly = process.argv.includes('--native-only');
 if (!outputArg) throw new Error('Usage: build.mjs DXMT_SOURCE DXMT_WINE_DIRECTORY LLVM_MINGW_BIN OUTPUT [--native-only]');
 const [upstream, vendor, toolchain, output] = [upstreamArg, vendorArg, compilerArg, outputArg].map(p => path.resolve(p));
+const appSource=appSourceRoot(),owned=path.join(output,'app-dxmt');
+materializeAppModule({module:'src/modules/crossover/temporal/dxmt',output:owned});
+const {applyCameraOverlay}=await import(pathToFileURL(path.join(owned,'patch.mjs')));
+const {applyTemporalD3D12}=await import(pathToFileURL(path.join(owned,'d3d12-overlay.mjs')));
 const revision = gitlink(JSON.parse(fs.readFileSync(path.join(here, 'source.json'), 'utf8')).gitlink);
 let sourceRevision;
 try { sourceRevision = JSON.parse(fs.readFileSync(path.join(upstream, '.maclauncher-upstream.json'), 'utf8')).revision; }
@@ -26,17 +30,18 @@ fs.mkdirSync(output, { recursive: true });
 fs.cpSync(upstream, source, { recursive: true, filter: p => !p.split(path.sep).includes('.git') });
 fs.mkdirSync(objects, { recursive: true });
 for (const arch of ['x86_64-windows', 'x86_64-unix']) fs.mkdirSync(path.join(payload, arch), { recursive: true });
-const shared = path.resolve(here, '../../../shared/reshade/temporal');
+const shared = path.join(appSource.directory,'src/modules/shared/reshade/temporal');
 for (const file of ['camera.h', 'frame.h']) fs.copyFileSync(path.join(shared, file), path.join(source, 'include', file));
-for(const file of ['camera-transport.hpp','streamline-transport.hpp','streamline-native.h','streamline-snapshot.hpp'])fs.copyFileSync(path.join(here,file),path.join(source,'include',file));
+for(const file of ['camera-transport.hpp','streamline-transport.hpp','streamline-native.h','streamline-snapshot.hpp'])fs.copyFileSync(path.join(owned,file),path.join(source,'include',file));
 for(const [name,file]of [['scene-aovs.h',path.join(shared,'scene-aovs.h')],['image-color.h',path.resolve(shared,'../native/image-color.h')]])fs.copyFileSync(file,path.join(source,'include',name));
 applyCameraOverlay(source);
+applyTemporalD3D12(source);
 fs.writeFileSync(path.join(source, 'include/version.h'), `#pragma once\n#define DXMT_VERSION "v0.80-244-g7c8dee1-maclauncher-camera1"\n`);
 
 const sha = p => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
 if (nativeOnly) {
   const previous = JSON.parse(fs.readFileSync(path.join(payload, 'camera-bridge.json'), 'utf8'));
-  if (previous.source?.revision !== revision || ['d3d11', 'dxgi', 'nvngx'].some(name => {
+  if (previous.source?.revision !== revision || previous.temporalD3D12API!==1 || ['d3d11', 'd3d12', 'dxgi', 'nvngx'].some(name => {
     const file = 'x86_64-windows/' + name + '.dll';return sha(path.join(payload, file)) !== previous.files?.[file];
   })) throw new Error('Native-only builds require the unchanged PE libraries from an existing complete build.');
 }
@@ -64,7 +69,7 @@ fs.writeFileSync(def, `LIBRARY winemetal.dll\nEXPORTS\n${exportNames.join('\n')}
 const wineImport = path.join(objects, 'libwinemetal.a');
 execFileSync(path.join(toolchain, 'x86_64-w64-mingw32-dlltool'), ['-d', def, '-l', wineImport]);
 
-const include = ['include', 'libs', 'src/util', 'src/airconv', 'src/winemetal', 'src/dxmt', 'src/dxgi', 'src/d3d11'].map(p => '-I' + path.join(source, p));
+const include = ['include', 'libs', 'src/util', 'src/airconv', 'src/winemetal', 'src/dxmt', 'src/dxgi', 'src/d3d11','src/d3d12'].map(p => '-I' + path.join(source, p));
 const common = ['-O2', '-DNDEBUG', '-DNOMINMAX', '-D_WIN32_WINNT=0xa00', '-DDXMT_PAGE_SIZE=4096',
   '-fblocks', '-Wno-unused-parameter', '-Wno-unused-private-field', '-Wno-missing-field-initializers',
   '-Wno-microsoft-exception-spec', '-Wno-extern-c-compat', '-Wno-missing-braces',
@@ -90,6 +95,7 @@ const groups = {
   dxgi: list('src/dxgi', 'dxgi_src'),
   d3d11: [...list('src/d3d11', 'd3d11_src'), ...list('src/d3d11', 'd3d10_src')],
   nvngx: list('src/nvngx', 'nvngx_src'),
+  d3d12:list('src/d3d12','d3d12_src'),
 };
 const all = [...new Set(Object.values(groups).flat())];
 const objectFor = file => path.join(objects, file.replaceAll('/', '_') + '.o');
@@ -104,7 +110,7 @@ await Promise.all(Array.from({ length: Math.min(2, os.availableParallelism()) },
 const archive = name => path.join(objects, 'lib' + name + '.a');
 for (const name of ['util', 'dxbc', 'dxmt']) execFileSync(ar, ['rcs', archive(name), ...groups[name].map(objectFor)]);
 const outPE = path.join(payload, 'x86_64-windows');
-for (const name of ['dxgi', 'd3d11', 'nvngx']) {
+for (const name of ['dxgi', 'd3d11', 'd3d12', 'nvngx']) {
   const dll = path.join(outPE, name + '.dll');
   const args = ['-shared', '-static', '-Wl,--file-alignment=4096', '-Wl,--no-insert-timestamp', '-Wl,--out-implib,' + archive(name), '-o', dll,
     ...groups[name].map(objectFor)];
@@ -121,17 +127,23 @@ for (const name of ['dxgi', 'd3d11', 'nvngx']) {
 }
 }
 
+if(!nativeOnly){
+ const exported=name=>execFileSync(readobj,['--coff-exports',path.join(payload,'x86_64-windows',name+'.dll')],{encoding:'utf8'});
+ for(const [dll,names]of [['d3d12',['MacLauncherDXMTTemporalUpscale12','MacLauncherDXMTReleaseTemporal12','MacLauncherDXMTTemporal12Supported']],['nvngx',['NVSDK_NGX_D3D12_CreateFeature','NVSDK_NGX_D3D12_EvaluateFeature','NVSDK_NGX_D3D12_ReleaseFeature']]]){
+  const text=exported(dll);for(const name of names)if(!text.includes('Name: '+name+'\n'))throw Error('Missing D3D12 temporal producer export: '+name);
+ }
+}
 const unixSource = fs.readFileSync(path.join(source, 'src/winemetal/unix/winemetal_unix.c'), 'utf8');
 const table = unixSource.match(/const void \*__wine_unix_call_funcs\[\] = \{([\s\S]+?)\};/)[1];
 const count = table.split(',').filter(s => s.trim()).length;
 const unixOut = path.join(payload, 'x86_64-unix/winemetal.so');
 await run('xcrun', ['clang', '-x','objective-c','-fblocks','-arch', 'x86_64', '-mmacosx-version-min=13.0', '-std=c2x', '-dynamiclib', '-O2',
   '-DML_UNIX_CALL_COUNT=' + count, ...include, '-Wl,-install_name,@rpath/winemetal.so',
-  path.join(here, 'unix-forwarder.c'),'-framework','Foundation','-framework','Metal','-framework','MetalFX', '-o', unixOut]);
+  path.join(owned, 'unix-forwarder.c'),'-framework','Foundation','-framework','Metal','-framework','MetalFX', '-o', unixOut]);
 execFileSync('codesign', ['--force', '--sign', '-', unixOut], { stdio: 'pipe' });
 addLicenses(payload,'DXMT',upstream);
 const files = {};
-for (const name of ['d3d11', 'dxgi', 'nvngx']) files['x86_64-windows/' + name + '.dll'] = sha(path.join(payload, 'x86_64-windows', name + '.dll'));
+for (const file of fs.readdirSync(path.join(payload,'x86_64-windows')).filter(name=>name.endsWith('.dll'))) files['x86_64-windows/'+file]=sha(path.join(payload,'x86_64-windows',file));
 files['x86_64-unix/winemetal.so'] = sha(unixOut);
 const archiveRoot = path.join(output, 'corresponding-source');
 fs.rmSync(archiveRoot, { recursive: true, force: true }); fs.mkdirSync(archiveRoot, { recursive: true });
@@ -147,7 +159,8 @@ if (fs.existsSync(path.join(upstream, '.maclauncher-upstream.json'))) {
 }
 fs.writeFileSync(path.join(archivedSource, '.maclauncher-upstream.json'), JSON.stringify({ revision }) + '\n');
 const ownedArchive = path.join(archiveRoot, 'maclauncher/src/modules/crossover/temporal/dxmt');
-fs.cpSync(here, ownedArchive, { recursive: true });
+fs.cpSync(owned, ownedArchive, { recursive: true });
+for(const name of ['build.mjs','source.json'])fs.copyFileSync(path.join(here,name),path.join(ownedArchive,name));
 const sharedArchive = path.join(archiveRoot, 'maclauncher/src/modules/shared/reshade/temporal');
 fs.mkdirSync(sharedArchive, { recursive: true });
 for (const name of ['camera.h', 'frame.h','scene-aovs.h']) fs.copyFileSync(path.join(shared, name), path.join(sharedArchive, name));
@@ -161,8 +174,8 @@ fs.writeFileSync(path.join(archiveRoot, 'BUILD.md'), `# DXMT camera adaptation s
 execFileSync('tar', ['-czf', path.join(payload, 'source.tar.gz'), '-C', archiveRoot, '.']);
 files['source.tar.gz'] = sha(path.join(payload, 'source.tar.gz'));
 fs.writeFileSync(path.join(payload, 'camera-bridge.json'), JSON.stringify({
-  schema: 1, id: 'dxmt-camera1', resourceTagAPI:1,resourceSnapshotAPI:1,source: { url: 'https://github.com/3Shain/dxmt', revision },
-  sources:Object.fromEntries(['build.mjs','source.json','patch.mjs','snapshot-overlay.mjs','camera-transport.hpp','streamline-transport.hpp','streamline-snapshot.hpp','streamline-native.h','unix-forwarder.c'].map(file=>[file,sha(path.join(here,file))])),
+  schema: 1, id: 'dxmt-camera1', resourceTagAPI:1,resourceSnapshotAPI:1,temporalD3D12API:1,source: { url: 'https://github.com/3Shain/dxmt', revision }, appSource:{repository:'https://github.com/procrastinine/maclauncher',revision:appSource.revision},
+  sources:Object.fromEntries(['build.mjs','source.json','patch.mjs','d3d12-overlay.mjs','temporal-d3d12.h','temporal-d3d12-pass.hpp','temporal-d3d12-record.inc','temporal-d3d12-exports.inc','temporal-d3d12-encode.inc','ngx-d3d12.inc','snapshot-overlay.mjs','camera-transport.hpp','streamline-transport.hpp','streamline-snapshot.hpp','streamline-native.h','unix-forwarder.c'].map(file=>[file,sha(path.join(['build.mjs','source.json'].includes(file)?here:owned,file))])),
   architecture: 'x86_64', minimumMacOS: '14.0.0', tableCount: count,
   base: { nativeSha256: sha(vendorUnix), thunkSha256: sha(path.join(vendorPE, 'winemetal.dll')),
     commandLibrarySha256: crypto.createHash('sha256').update(libs[0]).digest('hex') }, files,

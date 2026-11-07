@@ -1,10 +1,12 @@
 {
   "schema": 1,
   "repository": "https://github.com/procrastinine/maclauncher",
-  "revision": "4dd46a218869aad6d7b97c41d231a6d5c5e3dcd1",
+  "revision": "e09d13a30ea9ca5354183e13a8ddc557717012b1",
   "gitlink": "sources/maclauncher",
   "modules": [
     "src/modules/shared/reshade",
-    "src/modules/shared/vulkan/native"
+    "src/modules/shared/vulkan/native",
+    "src/modules/crossover/temporal/dxmt",
+    "src/modules/crossover/temporal/dxmt"
   ]
 }
