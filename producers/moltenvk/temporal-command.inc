@@ -145,7 +145,7 @@ void MVKCmdTemporalFrame::encode(MVKCommandEncoder* encoder){
     RSSceneAovs aovs;const bool hasAovs=mvkTemporalScene_aovs(&f,_frame->featureId,_frame->featureType,_frame->sceneFlags,_frame->roughnessAlias,textures,widths,heights,&aovs);
     const int matricesStatus=!_frame->matrices.flags?RS_TEMPORAL_OK:pipeline.matrices?pipeline.matrices(&f,&_frame->matrices):RS_TEMPORAL_UNAVAILABLE;
     const int aovsStatus=!hasAovs?RS_TEMPORAL_OK:pipeline.aovs?pipeline.aovs(&f,&aovs):RS_TEMPORAL_UNAVAILABLE;
-    if(!owner.metadataReported&&(matricesStatus||aovsStatus)){MVKLogWarning("Temporal scene bindings: matrices %d, AOVs %d",matricesStatus,aovsStatus);owner.metadataReported=true;}
+    if(!owner.metadataReported&&(matricesStatus||aovsStatus)){MVKLogWarn("Temporal scene bindings: matrices %d, AOVs %d",matricesStatus,aovsStatus);owner.metadataReported=true;}
     RSTemporalResult result{};result.size=sizeof(result);result.version=1;
     const auto status=pipeline.process(&f,&result);
     if(!_frame->owner->reported.load(std::memory_order_relaxed)){
