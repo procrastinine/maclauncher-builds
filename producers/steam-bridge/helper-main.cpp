@@ -1,26 +1,10 @@
 /* Copyright (c) MacLauncher contributors. MIT license. */
 #include <string>
+#include "helper-command-line.h"
 #include "helper-client.inc"
 #include "helper-registry.h"
 bool bridge_bootstrap_child(PROCESS_INFORMATION &child);
 
-/* Quote each argument according to the Windows command-line convention. */
-static std::wstring quote_argument(const WCHAR *arg)
-{
-    std::wstring result = L"\"";
-    size_t slashes = 0;
-    for (; *arg; ++arg)
-    {
-        if (*arg == L'\\') { ++slashes; continue; }
-        result.append(slashes * (*arg == L'"' ? 2 : 1), L'\\');
-        if (*arg == L'"') result += L'\\';
-        result += *arg;
-        slashes = 0;
-    }
-    result.append(slashes * 2, L'\\');
-    result += L'"';
-    return result;
-}
 
 int wmain(int argc, WCHAR **argv)
 {
@@ -58,12 +42,7 @@ int wmain(int argc, WCHAR **argv)
     // Match the upstream helper: release its setup connection before the child.
     steam_client_shutdown();
     {
-        std::wstring command;
-        for (int i = 1; i < argc; ++i)
-        {
-            if (i > 1) command += L' ';
-            command += quote_argument(argv[i]);
-        }
+        std::wstring command = bridge_child_command_line(GetCommandLineW());
         STARTUPINFOW startup = { sizeof(startup) };
         if (!CreateProcessW(argv[1], command.data(), NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &startup, &child))
         {
