@@ -21,7 +21,7 @@ export function stageLibplaceboScene({directory,metadata,recipeRoot,upstream}){
     if(!input||!samePin(input,SOURCE)||input.overlaySha256!==receipt.overlaySha256||input.recipeSha256!==receipt.recipeSha256||
         JSON.stringify(input.headerInputs)!==JSON.stringify(receipt.headerInputs))throw Error('The libplacebo provider source inputs differ: '+architecture);
     const dependencies=[vulkanHeaders,...(receipt.fastFloat?[receipt.fastFloat]:[])];
-    if(JSON.stringify(input.dependencies)!==JSON.stringify(dependencies))throw Error('The libplacebo nested dependencies differ from its source recipe.');
+    if(!Array.isArray(input.dependencies)||input.dependencies.length!==dependencies.length||input.dependencies.some((pin,index)=>!samePin(pin,dependencies[index])))throw Error('The libplacebo nested dependencies differ from its source recipe.');
     for(const [pin,relative]of [[SOURCE,'libplacebo-scene'],[vulkanHeaders,'libplacebo-vulkan-headers'],...(receipt.fastFloat?[[receipt.fastFloat,'libplacebo-fast-float']]:[])]){
       declarations.set(pin.origin,pin);pins.add(`${pin.commit} third_party/${relative}`);
     }
