@@ -2249,8 +2249,7 @@
       "entries": [
         "producers/maclauncher/src/modules/shared/vulkan/native/moltenvk-scene-build.mjs",
         "producers/moltenvk/build.mjs"
-      ],
-      "sourceDirectory": "producers/maclauncher"
+      ]
     },
     "upstreams": [
       {
@@ -2404,7 +2403,7 @@
   {
     "id": "vnds-love",
     "name": "VNDS-LOVE",
-    "purpose": "Adapted VNDS interpreter for the managed L\u00d6VE host.",
+    "purpose": "Adapted VNDS interpreter for the managed LÖVE host.",
     "producer": {
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
