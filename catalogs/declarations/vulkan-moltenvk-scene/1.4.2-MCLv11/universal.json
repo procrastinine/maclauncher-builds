@@ -1,0 +1,93 @@
+{
+  "id": "vulkan-moltenvk-scene",
+  "version": "1.4.2-MCLv11",
+  "arch": "universal",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "sourceRelative": null,
+  "sourceSha256": "b3df9b7aba866ec3a89da832d266781f0c5e4c206487b312596649b75f24ec21",
+  "directoryRelative": "vulkan-moltenvk-scene/1.4.2-MCLv11/universal",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "f4ea770982f765989e5a13d16979b5311b4ed3e39b98c2755b012fd940cc9767",
+  "files": [
+    {
+      "path": "libMoltenVK-scene.dylib",
+      "size": 10827520,
+      "mode": 493,
+      "sha256": "bfddb5bdbae14d9393789fd8248786074fb992a6c921fb5dbf3e97d2e1c9e62a",
+      "architectures": [
+        "arm64",
+        "x86_64"
+      ]
+    },
+    {
+      "path": "licenses/cereal.txt",
+      "size": 1542,
+      "mode": 420,
+      "sha256": "58604a126af6a671ea390ee3d5b3e42228aa59b2858fb7af1d5b20b31739ccbb"
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 315,
+      "mode": 420,
+      "sha256": "5a7d58e8acaa57762dd9cc06e81898e97a51687d06f2943bf4ba2ac6a430c163"
+    },
+    {
+      "path": "licenses/MacLauncher.txt",
+      "size": 1081,
+      "mode": 420,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7"
+    },
+    {
+      "path": "licenses/MoltenVK.txt",
+      "size": 11358,
+      "mode": 420,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "licenses/SPIRV-Cross-2.txt",
+      "size": 1305,
+      "mode": 420,
+      "sha256": "fbeaca472f4f70e276dd1106ca5097435967a22ad6c1d8200aef7ad9f70aaf3f"
+    },
+    {
+      "path": "licenses/SPIRV-Cross-3.txt",
+      "size": 1108,
+      "mode": 420,
+      "sha256": "8f25018489d6fe0dec34a352314c38dc146247b7de65735790f4398a92afa84b"
+    },
+    {
+      "path": "licenses/SPIRV-Cross.txt",
+      "size": 16814,
+      "mode": 420,
+      "sha256": "b89aeb7c2a164a0576786dd2a8b57f2fb628b23981f0a06bd77e2f99a9befa0f"
+    },
+    {
+      "path": "licenses/Vulkan-Headers-2.txt",
+      "size": 1084,
+      "mode": 420,
+      "sha256": "1ca3502222d967f3be5751c55f6b7ee735b5383909c3b501495f54b216dbf227"
+    },
+    {
+      "path": "licenses/Vulkan-Headers.txt",
+      "size": 495,
+      "mode": 420,
+      "sha256": "95ad366d23fadf701d355bc45fb8b82ae2d700239471d35d41286ac3b08ff903"
+    },
+    {
+      "path": "manifest.json",
+      "size": 21878,
+      "mode": 420,
+      "sha256": "f4ea770982f765989e5a13d16979b5311b4ed3e39b98c2755b012fd940cc9767"
+    },
+    {
+      "path": "provider.json",
+      "size": 9659,
+      "mode": 420,
+      "sha256": "ad36271c75a4e0d0edd62653a1c2e632a9424a50d7770eed21cedeb8645b3654"
+    }
+  ]
+}
