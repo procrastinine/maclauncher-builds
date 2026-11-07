@@ -1,6 +1,6 @@
 {
   "projectId": "vulkan-moltenvk-scene",
-  "version": "1.4.2-MCLv10",
+  "version": "1.4.2-MCLv11",
   "upstreamVersion": "1.4.2",
   "repository": "https://github.com/KhronosGroup/MoltenVK.git",
   "submodule": "src/external/graphics-moltenvk",
