@@ -13,7 +13,7 @@ const run=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infini
 const read=(command,args)=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8'}).trim();
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 export async function buildSpirvTools({work,ninja,python,architecture='arm64',jobs=2}){
- if(architecture!=='arm64'||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(ninja||'')||!path.isAbsolute(python||''))throw Error('SPIRV-Tools needs Apple Silicon, explicit tools and a new absolute work directory.');
+ if(!['arm64','x64'].includes(architecture)||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(ninja||'')||!path.isAbsolute(python||''))throw Error('SPIRV-Tools needs a declared CPU, explicit tools and a new absolute work directory.');
  fs.mkdirSync(work,{recursive:true});
  const compiler=await prepareSources({work:path.join(work,'compiler-inputs')}),sources={'spirv-tools':path.join(compiler.source,'spirv-tools')};
  const headersRevision=/'spirv_headers_revision':\s*'([^']+)'/.exec(fs.readFileSync(path.join(sources['spirv-tools'],'DEPS'),'utf8'))[1],headers=spirvToolsProfile.sources.find(row=>row.id==='spirv-headers');
@@ -21,7 +21,7 @@ export async function buildSpirvTools({work,ninja,python,architecture='arm64',jo
  const build=path.join(work,'build'),prefix=path.join(work,'install'),floor=spirvToolsProfile.minimumMacOS;
  const flags=['-Werror=unguarded-availability-new','-ffile-prefix-map='+work+'=spirv-tools'];
  const env={...process.env,MACOSX_DEPLOYMENT_TARGET:floor,CFLAGS:'',CXXFLAGS:'',CPPFLAGS:'',LDFLAGS:'',CPATH:'',C_INCLUDE_PATH:'',CPLUS_INCLUDE_PATH:''};
- run('cmake',['-S',sources['spirv-tools'],'-B',build,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_ARCHITECTURES=arm64','-DCMAKE_OSX_DEPLOYMENT_TARGET='+floor,'-DCMAKE_OSX_SYSROOT='+read('xcrun',['--sdk','macosx','--show-sdk-path']),'-DCMAKE_MAKE_PROGRAM='+ninja,'-DPython3_EXECUTABLE='+python,
+ run('cmake',['-S',sources['spirv-tools'],'-B',build,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_ARCHITECTURES='+(architecture==='x64'?'x86_64':architecture),'-DCMAKE_OSX_DEPLOYMENT_TARGET='+floor,'-DCMAKE_OSX_SYSROOT='+read('xcrun',['--sdk','macosx','--show-sdk-path']),'-DCMAKE_MAKE_PROGRAM='+ninja,'-DPython3_EXECUTABLE='+python,
   '-DCMAKE_C_FLAGS='+flags.join(' '),'-DCMAKE_CXX_FLAGS='+flags.join(' '),'-DCMAKE_INSTALL_PREFIX='+prefix,'-DCMAKE_INSTALL_LIBDIR=lib','-DCMAKE_INSTALL_INCLUDEDIR=include','-DBUILD_SHARED_LIBS=ON','-DSPIRV_SKIP_TESTS=ON','-DSPIRV_SKIP_EXECUTABLES=ON','-DSPIRV_TOOLS_BUILD_STATIC=OFF','-DSPIRV-Headers_SOURCE_DIR='+sources['spirv-headers']],{env});
  run('cmake',['--build',build,'--target','SPIRV-Tools','SPIRV-Tools-opt','SPIRV-Tools-link','spirv-tools-pkg-config','-j',String(jobs)],{env});
  const lib=path.join(prefix,'lib'),pc=path.join(lib,'pkgconfig');fs.mkdirSync(pc,{recursive:true});
