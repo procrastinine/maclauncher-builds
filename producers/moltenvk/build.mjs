@@ -21,13 +21,17 @@ export function applyTemporalSource(work){
     const commands=path.join(work,'MoltenVK/MoltenVK/Commands');
     for(const name of ['temporal-command.hpp','temporal-command.inc','temporal-map.hpp','temporal-scene.hpp'])fs.copyFileSync(path.join(here,name),path.join(commands,name));
     fs.writeFileSync(path.join(commands,'temporal-carrier.h'),carrierHeader());
-    fs.copyFileSync(path.resolve(here,'../maclauncher/src/modules/shared/reshade/temporal/frame.h'),path.join(commands,'frame.h'));
     const scene=path.resolve(here,'../maclauncher/src/modules/shared/reshade');
-    for(const name of ['scene-aovs.h','scene-matrices.h'])fs.copyFileSync(path.join(scene,'temporal',name),path.join(commands,name));
-    fs.copyFileSync(path.join(scene,'native/image-color.h'),path.join(commands,'image-color.h'));
+    const common=path.join(work,'MoltenVK/include/macfx-temporal');
+    fs.mkdirSync(common,{recursive:true});
+    for(const [name,directory]of [['frame.h','temporal'],['scene-aovs.h','temporal'],['scene-matrices.h','temporal'],['image-color.h','native']]){
+        fs.copyFileSync(path.join(scene,directory,name),path.join(common,name));
+        fs.writeFileSync(path.join(commands,name),'#pragma once\n#include "../../include/macfx-temporal/'+name+'"\n');
+    }
     const commandPath='MoltenVK/MoltenVK/Commands/';
     return [...fs.readFileSync(path.join(here,'temporal.patch'),'utf8').matchAll(/^\+\+\+ b\/(.+)$/gm)].map(m=>m[1]).concat(
-        ['temporal-command.hpp','temporal-command.inc','temporal-map.hpp','temporal-scene.hpp','temporal-carrier.h','frame.h','scene-aovs.h','scene-matrices.h','image-color.h'].map(file=>commandPath+file));
+        ['temporal-command.hpp','temporal-command.inc','temporal-map.hpp','temporal-scene.hpp','temporal-carrier.h','frame.h','scene-aovs.h','scene-matrices.h','image-color.h'].map(file=>commandPath+file),
+        ['frame.h','scene-aovs.h','scene-matrices.h','image-color.h'].map(file=>'MoltenVK/include/macfx-temporal/'+file));
 }
 export function prepareSource({source,work}){
     if(read('git',['-C',source,'rev-parse',revision+'^{commit}'])!==revision)throw Error('Missing pinned MoltenVK source');
