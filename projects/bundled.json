@@ -585,12 +585,12 @@
         "label": "MacLauncher graphics 0.3.8"
       },
       {
-        "version": "0.3.10-local-be68fca1",
+        "version": "0.3.8-local-be68fca1",
         "label": "MacLauncher graphics local D3DMetal processor test"
       }
     ],
     "build": {
-      "version": "0.3.10-local-be68fca1",
+      "version": "0.3.8-local-be68fca1",
       "command": "tools/build-graphics.mjs",
       "architectures": [
         "universal"
