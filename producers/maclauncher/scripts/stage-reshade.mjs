@@ -355,7 +355,7 @@ for (const [relative, file] of temporalInputs) if (/\.(dylib|so)$/.test(relative
  nativeFiles.push(relative);nativePaths.set(relative,file);
  const architectures=Native.readMachOArchitectures(file,{allowLibrary:true}),floors=[...execFileSync("xcrun",["vtool","-show-build",file],{encoding:"utf8"}).matchAll(/minos\s+(\d+(?:\.\d+)+)/g)].map(match=>match[1]);
  // DXMT runs in its separate Intel host; it is not loaded into the launcher.
- if(!relative.startsWith("temporal/dxmt/"))optionalLoad.set(relative,{architectures,minimumMacOS:["13.0",...floors].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).at(-1)});
+ if(!relative.startsWith("temporal/dxmt/")&&!temporalExecutionArchitectures.has(relative))optionalLoad.set(relative,{architectures,minimumMacOS:["13.0",...floors].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).at(-1)});
 }
 const nativeArchitectures = new Map();
 for (const file of nativeFiles) {
