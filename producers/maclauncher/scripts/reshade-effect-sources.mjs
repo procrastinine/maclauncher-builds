@@ -9,7 +9,7 @@ export function validateEffectSources(sources, files) {
   const keys = ["name", "path", "sourceUrl", "revision", "sourceSha256", "sha256", "adaptation"];
   for (const source of sources) {
     if(source.gitlink){source.revision=gitlink(source.gitlink);source.sourceUrl+="/blob/"+source.revision+"/"+source.sourcePath;delete source.gitlink;delete source.sourcePath;}
-    if (!source || Object.keys(source).length !== keys.length || Object.keys(source).some(key => !keys.includes(key)) ||
+    if (!source || Object.keys(source).some(key => !keys.includes(key) && key !== "license") ||
         keys.some(key => typeof source[key] !== "string" || !source[key].trim() || source[key].length > 1024) ||
         !/^effects\/[A-Za-z0-9_-]+\.fxh?$/.test(source.path) || paths.has(source.path) ||
         !/^https:\/\//.test(source.sourceUrl) || !/^[a-f0-9]{40}$/.test(source.revision) ||
