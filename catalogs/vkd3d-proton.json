@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 2,
+  "projectId": "vkd3d-proton",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "vkd3d-proton",
+      "version": "3.1-MCLv1",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "b3d6ca51ecb446e86602249e1a7f740f9a7829bad68edb6a838f3b8ddd8d571e",
+      "sourceSha256": "aface0d13b679db93b27492e61ace61d2b1990a5533b40ccfd4226dffeb6ecee",
+      "updatePolicy": "manual",
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "f1939cbceefb077167708e859c04839eb256afc0"
+      },
+      "asset": {
+        "filename": "vkd3d-proton-3.1-MCLv1-universal.tar.gz",
+        "sha256": "f2582aebb9de1effda188d9378fab628b71e60159465305d047159c11c2dc12a",
+        "bytes": 4838442,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/vkd3d-proton%2Fv3.1-MCLv1%2Funiversal/vkd3d-proton-3.1-MCLv1-universal.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "f1939cbceefb077167708e859c04839eb256afc0",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.2",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "42424266186",
+        "runAttempt": "1"
+      },
+      "tag": "vkd3d-proton/v3.1-MCLv1/universal"
+    }
+  ]
+}
