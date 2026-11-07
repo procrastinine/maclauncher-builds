@@ -1,3 +1,4 @@
+import {sourceRevision} from './graphics-source-revision.mjs';
 import {gitlink} from "../../../lib/pins.mjs";
 import fs from "node:fs";
 import path from "node:path";
@@ -27,10 +28,10 @@ export function stageFSR4Provider({directory,upstream,ownedRoot}){
   owned.set("maclauncher/temporal/fsr4/inputs/weights_lossy2.npz",archiveFile);
   if(!upstream)throw Error("Supply the exact FSR 4 source checkout for this provider.");
   const git=args=>execFileSync("git",["-C",upstream,...args],{encoding:"utf8"}).trim(),canonical=url=>url.replace(/\.git$/,"").replace(/\/$/,"");
-  if(git(["rev-parse","HEAD"])!==gitlink(spec.gitlink)||canonical(git(["remote","get-url","origin"]))!==canonical(spec.repository))throw Error("The FSR 4 checkout differs from its declared public origin or commit.");
+  if(git(["rev-parse","HEAD"])!==sourceRevision(spec)||canonical(git(["remote","get-url","origin"]))!==canonical(spec.repository))throw Error("The FSR 4 checkout differs from its declared public origin or commit.");
   git(["diff","--exit-code","--ignore-submodules=all","HEAD","--"]);
   files.set("provider.json",path.join(directory,"provider.json"));
   return {files:new Map([...files].map(([name,file])=>["temporal/fsr4/"+name,file])),owned,profiles:[...metadata.supportedProfiles],
-    source:{directory:upstream,relative:"third_party/fsr4-native-macos",commit:gitlink(spec.gitlink)},
-    pins:[` ${gitlink(spec.gitlink)} third_party/fsr4-native-macos`,` ${spec.lite2.commit} third_party/fsr4-lite2-weights`,...(spec.sources||[]).map((row,index)=>{const revision=index<2?gitlink('producers/maclauncher/src/external/'+(index===0?'fsr4-sdk-headers':'fsr4-sdk-model')):gitlink(row.gitlink);if(!/^https:\/\//.test(row.repository||" ")||!/^[a-f0-9]{40}$/.test(revision||" "))throw Error("An FSR 4 consumed source pin is incomplete.");return ` ${revision} third_party/fsr4-input-${index+1}`;})]};
+    source:{directory:upstream,relative:"third_party/fsr4-native-macos",commit:sourceRevision(spec)},
+    pins:[` ${sourceRevision(spec)} third_party/fsr4-native-macos`,` ${spec.lite2.commit} third_party/fsr4-lite2-weights`,...(spec.sources||[]).map((row,index)=>{const revision=index<2?gitlink('producers/maclauncher/src/external/'+(index===0?'fsr4-sdk-headers':'fsr4-sdk-model')):sourceRevision(row);if(!/^https:\/\//.test(row.repository||" ")||!/^[a-f0-9]{40}$/.test(revision||" "))throw Error("An FSR 4 consumed source pin is incomplete.");return ` ${revision} third_party/fsr4-input-${index+1}`;})]};
 }

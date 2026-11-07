@@ -1,3 +1,4 @@
+import {sourceRevision} from './graphics-source-revision.mjs';
 import sharedDependencies from '../../dependencies.json' with {type:'json'};
 import dependencies from '../../../producers/dependencies.json' with {type:'json'};
 const {shaderc}=dependencies;
@@ -87,7 +88,7 @@ if(options["--xess-host"]){
   const generation=metadata.generation;
   const owned=metadata.source.ownedFiles.map(row=>row.path);
   const backends=metadata.backends,hostPaths=metadata.hostPaths;
-  if(metadata.schema!==1||metadata.providerABI!==1||metadata.sdk?.repository!==source.repository||metadata.sdk?.commit!==gitlink(source.gitlink)||metadata.sdk?.sha256!==source.sha256||metadata.sdk?.bytes!==source.bytes||!Array.isArray(metadata.files)||!Array.isArray(metadata.source?.ownedFiles))throw Error("A complete compatible original XeSS GPU host is required.");
+  if(metadata.schema!==1||metadata.providerABI!==1||metadata.sdk?.repository!==source.repository||metadata.sdk?.commit!==sourceRevision(source)||metadata.sdk?.sha256!==source.sha256||metadata.sdk?.bytes!==source.bytes||!Array.isArray(metadata.files)||!Array.isArray(metadata.source?.ownedFiles))throw Error("A complete compatible original XeSS GPU host is required.");
   const nativeSource=options["--xess-host-source"]||path.join(ownedRoot,"native");
   for(const name of owned){const file=path.resolve(nativeSource,name),stat=fs.lstatSync(file);if(!file.startsWith(path.resolve(nativeSource)+path.sep)||!stat.isFile()||stat.isSymbolicLink())throw Error("Invalid XeSS owned source path.");extraOwned.set("maclauncher/xess/native/"+name,file);}
   extraOwned.set("maclauncher/xess/source.json",path.join(ownedRoot,"source.json"));
@@ -95,11 +96,11 @@ if(options["--xess-host"]){
     const componentFile=path.join(ownedRoot,"components.json"),components=JSON.parse(fs.readFileSync(componentFile,"utf8"));
     if(generation.providerABI!==1||generation.hostPath!=="x86_64-windows/maclauncher-xess-fg-host.exe"||generation.backend!=="d3d12"||generation.operation!=="interpolate"||generation.maxInterpolatedFrames!==1||
         JSON.stringify(generation.requires)!==JSON.stringify(["color","depth","motion","viewMatrix","projectionMatrix"])||JSON.stringify(generation.formats)!==JSON.stringify(["rgba8-srgb","rgb10a2-pq-bt2020"])||
-        gitlink(components.gitlink)!==gitlink(source.gitlink)||
+        sourceRevision(components)!==sourceRevision(source)||
         components.files.some(row=>{const item=generation.sdk?.[row.id];return !item||item.path!=="bin/"+row.file||item.sha256!==row.sha256||item.bytes!==row.bytes;}))throw Error("The original XeSS frame-generation inputs differ from their declared identities.");
     extraOwned.set("maclauncher/xess/components.json",componentFile);
   }
-  const upstream=xessSource,actual=execFileSync("git",["-C",upstream,"rev-parse","HEAD"],{encoding:"utf8"}).trim();if(actual!==gitlink(source.gitlink))throw Error("The original XeSS SDK pin differs from the GPU host.");execFileSync("git",["-C",upstream,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});pins.push(` ${actual} third_party/xess-original`);
+  const upstream=xessSource,actual=execFileSync("git",["-C",upstream,"rev-parse","HEAD"],{encoding:"utf8"}).trim();if(actual!==sourceRevision(source))throw Error("The original XeSS SDK pin differs from the GPU host.");execFileSync("git",["-C",upstream,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});pins.push(` ${actual} third_party/xess-original`);
   if(backends.includes("vulkan")){
     const headers=JSON.parse(fs.readFileSync(path.join(ownedRoot,"native/vulkan-source.json")));
     if(hostPaths.vulkan!=="x86_64-windows/maclauncher-xess-vulkan-host.exe"||JSON.stringify(metadata.source.vulkanHeaders)!==JSON.stringify(headers)||headers.repository!=="https://github.com/libsdl-org/SDL"||!Array.isArray(headers.headers))throw Error("The XeSS Vulkan header source differs from its declared pin.");
@@ -169,7 +170,7 @@ if (options["--neural"]) {
   const neuralRoot = path.resolve(import.meta.dirname, "../src/modules/shared/reshade/neural");
   const upstream = path.resolve(upstreamRoot, "src/external/MLX-DLSS");
   const revision = execFileSync("git", ["-C", upstream, "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-  if (revision !== gitlink(source.gitlink)) throw new Error("The neural source revision differs from its provider.");
+  if (revision !== sourceRevision(source)) throw new Error("The neural source revision differs from its provider.");
   for (const relative of ["source.json", "build.mjs", "native/build.sh", "native/prepare-upstream.mjs",...(descriptor.gpuTimingAPI===1?["native/prepare-mlx-timing.mjs"]:[]), "native/Package.swift",
     "native/Package.resolved", "native/upstream.json",...(descriptor.gpuTimingAPI===1?fs.readdirSync(path.join(neuralRoot,"native/timing"),{recursive:true}).map(name=>"native/timing/"+name).filter(name=>fs.statSync(path.join(neuralRoot,name)).isFile()):[]),...(descriptor.estimatedDepthAPI===1?["native/depth-anything-source.json"]:[]),...(descriptor.restorationAPI===1?["native/restoration-sources.json","native/rife-v4.6.param"]:[]), ...fs.readdirSync(path.join(neuralRoot, "native/Sources"), { recursive: true })
       .map(name => "native/Sources/" + name).filter(name => fs.statSync(path.join(neuralRoot, name)).isFile())]) {
@@ -230,7 +231,7 @@ if(options["--retroarch"]) {
   const pin=JSON.parse(fs.readFileSync(retroarchInputs.get("source.json"),"utf8"));
   const original=path.resolve(upstreamRoot,"src/external/librashader");
   const actual=execFileSync("git",["-C",original,"rev-parse","HEAD"],{encoding:"utf8"}).trim();
-  if(actual!==gitlink(pin.gitlink))throw new Error("The original librashader source pin differs from its payload.");
+  if(actual!==sourceRevision(pin))throw new Error("The original librashader source pin differs from its payload.");
   extraSources.push({directory:original,relative:"third_party/librashader",commit:actual});
   pins.push(` ${actual} third_party/librashader`);
   nativeFiles.push("librashader.dylib","retroarch-prepare");
@@ -264,7 +265,7 @@ if(options["--xess"]){
   const source=JSON.parse(fs.readFileSync(path.join(ownedRoot,"source.json"),"utf8"));
   for(const [id,submodule]of [["xess","xess"],["dxmt","dxmt-camera"]]){
     const root=path.resolve(upstreamRoot,"src/external",submodule),commit=execFileSync("git",["-C",root,"rev-parse","HEAD"],{encoding:"utf8"}).trim();
-    if(commit!==gitlink(source[id].gitlink))throw Error("The XeSS API translation source pin differs.");
+    if(commit!==sourceRevision(source[id]))throw Error("The XeSS API translation source pin differs.");
     execFileSync("git",["-C",root,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});
     pins.push(` ${commit} third_party/${submodule}`);
   }
