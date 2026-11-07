@@ -27,7 +27,7 @@ export function buildProvider({work,output,mingw,glslang,source=path.join(here,'
     fs.cpSync(source,exported,{recursive:true,filter:file=>!path.basename(file).startsWith('.git')});
     run('git',['apply','--unsafe-paths','--directory='+exported,path.join(here,'metalfx.patch')],{cwd:path.resolve(here,'../..')});
     fs.copyFileSync(path.join(here,'metalfx.c'),path.join(exported,'libs/vkd3d/metalfx.c'));
-    fs.copyFileSync(path.join(here,'vkd3d_metalfx.h'),path.join(exported,'include/private/vkd3d_metalfx.h'));
+    for(const name of ['vkd3d_metalfx.h','vk_temporal_frame.h'])fs.copyFileSync(path.join(here,name),path.join(exported,'include/private',name));
     const cross=path.join(root,'cross.ini'),tool=name=>quote(path.join(mingw,name));
     fs.writeFileSync(cross,`[binaries]\nc = ${tool(prefix+'-clang')}\ncpp = ${tool(prefix+'-clang++')}\nar = ${tool('llvm-ar')}\nstrip = ${tool('llvm-strip')}\nwidl-mingw-tools-fallback = ${tool(prefix+'-widl')}\n[properties]\nneeds_exe_wrapper = true\n[host_machine]\nsystem = 'windows'\ncpu_family = '${architecture==='x64'?'x86_64':'x86'}'\ncpu = '${architecture==='x64'?'x86_64':'i686'}'\nendian = 'little'\n`);
     const env={...process.env,CFLAGS:'',CXXFLAGS:'',CPPFLAGS:'',LDFLAGS:'',GIT_CEILING_DIRECTORIES:root,PATH:[glslang?path.dirname(path.resolve(glslang)):null,mingw,process.env.PATH].filter(Boolean).join(path.delimiter)};
@@ -35,15 +35,16 @@ export function buildProvider({work,output,mingw,glslang,source=path.join(here,'
     run(ninja,['-C',build,'-j'+String(jobs)],{env});
     built.push({architecture,build});
   }
-  // The NGX core finds the interface through vkd3d_metalfx.h. ngx.patch offers Frame Generation only where the
-  // device's command lists interpolate frames, takes the game's camera from MacLauncher's Streamline proxy
-  // (MacLauncherSetTemporalCamera) and passes region offsets, conventions and frame time to the frame.
+  // The NGX core finds the interface through vkd3d_metalfx.h and the frame through vk_temporal_frame.h. ngx.patch
+  // offers each feature only where the device records it, takes the game's camera from MacLauncher's Streamline proxy
+  // (MacLauncherSetTemporalCamera), passes region offsets, conventions and frame time to the frame, and submits D3D11
+  // frames on DXVK's queue through DXVK's interop interfaces.
   const nvngx=path.join(work,'nvngx.dll'),core=path.join(work,'ngx');
   fs.cpSync(path.join(ngx,'ngx'),path.join(core,'ngx'),{recursive:true});
   run('git',['apply','--unsafe-paths','--directory='+core,path.join(here,'ngx.patch')],{cwd:path.resolve(here,'../..')});
   run(path.join(mingw,'x86_64-w64-mingw32-clang++'),['-std=c++20','-O2','-shared','-static','-static-libgcc','-static-libstdc++',
     '-ffile-prefix-map='+core+'=VKD3D-Proton-MacOS','-Wl,--enable-stdcall-fixup','-Wl,--no-insert-timestamp','-I'+here,
-    path.join(core,'ngx/nvngx/nvngx.cpp'),'-o',nvngx]);
+    '-I'+path.join(source,'khronos/Vulkan-Headers/include'),path.join(core,'ngx/nvngx/nvngx.cpp'),'-o',nvngx]);
   fs.mkdirSync(output,{recursive:true});
   for(const {architecture,build}of built){
     const folder=path.join(output,architecture);fs.mkdirSync(folder,{recursive:true});

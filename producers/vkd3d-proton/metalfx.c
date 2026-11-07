@@ -24,44 +24,7 @@
 
 #include "vkd3d_private.h"
 #include "vkd3d_metalfx.h"
-
-/* The driver's private structure, the same layout as KosmicKrisp's kk_temporal.h. A driver that forwards it names
- * the word "temporal-sr" (Super Resolution) or "temporal-rr" (Ray Reconstruction) in its driverInfo. */
-#define VK_STRUCTURE_TYPE_TEMPORAL_FRAME_INFO_MVK ((VkStructureType)1000999101)
-
-enum { TEMPORAL_SUPER_RESOLUTION = 1, TEMPORAL_RAY_RECONSTRUCTION = 2 };
-enum { TEMPORAL_COLOR, TEMPORAL_DEPTH, TEMPORAL_MOTION, TEMPORAL_OUTPUT, TEMPORAL_EXPOSURE, TEMPORAL_DIFFUSE_ALBEDO,
-        TEMPORAL_SPECULAR_ALBEDO, TEMPORAL_NORMALS, TEMPORAL_ROUGHNESS, TEMPORAL_SPECULAR_HIT_DISTANCE,
-        TEMPORAL_HUDLESS, TEMPORAL_UI, TEMPORAL_IMAGES };
-enum { TEMPORAL_AUTO_EXPOSURE = 0x1, TEMPORAL_RESET = 0x2, TEMPORAL_DEPTH_REVERSED = 0x4,
-        TEMPORAL_MOTION_DISPLAY_RES = 0x8, TEMPORAL_MOTION_JITTERED = 0x10, TEMPORAL_HDR = 0x20,
-        TEMPORAL_CAMERA_VALID = 0x40, TEMPORAL_DEPTH_INFINITE = 0x80 };
-
-typedef struct VkTemporalFrameInfoMVK
-{
-    VkStructureType sType;
-    const void *pNext;
-    uint64_t featureId;
-    uint64_t frameId;
-    uint32_t featureType;
-    uint32_t flags;
-    VkImage images[TEMPORAL_IMAGES];
-    VkFormat formats[TEMPORAL_IMAGES]; /* VK_FORMAT_UNDEFINED: the image's own */
-    uint32_t colorX, colorY, depthX, depthY, motionX, motionY, outputX, outputY;
-    uint32_t renderWidth, renderHeight, outputWidth, outputHeight; /* 0: the image's extent */
-    float motionVectorScaleX;
-    float motionVectorScaleY;
-    float jitterOffsetX;
-    float jitterOffsetY;
-    float preExposure;
-    float sharpness;
-    float frameTimeMs;                 /* 0: unknown */
-    float nearPlane, farPlane, verticalFov; /* with TEMPORAL_CAMERA_VALID; radians */
-    float worldToViewMatrix[16];       /* row-major, of row vectors (D3D's) */
-    float viewToClipMatrix[16];
-    uint32_t releaseFeatureIdCount;
-    const uint64_t *pReleaseFeatureIds;
-} VkTemporalFrameInfoMVK;
+#include "vk_temporal_frame.h"
 
 void d3d12_command_list_metalfx_record(struct d3d12_command_list *list, const void *scale,
         struct d3d12_resource **resources, unsigned int count);
@@ -133,20 +96,6 @@ static bool vkd3d_metalfx_driver_has(const struct d3d12_device *device, const ch
     return false;
 }
 
-/* An integer-typed image (typeless depth, exposure or motion vectors) is read as the float format of its bits;
- * VK_FORMAT_UNDEFINED keeps the image's own. */
-static VkFormat vkd3d_metalfx_read_format(const struct d3d12_resource *resource)
-{
-    switch (resource->format->vk_format)
-    {
-        case VK_FORMAT_R32_UINT: case VK_FORMAT_R32_SINT: return VK_FORMAT_R32_SFLOAT;
-        case VK_FORMAT_R16_UINT: case VK_FORMAT_R16_SINT: return VK_FORMAT_R16_SFLOAT;
-        case VK_FORMAT_R32G32_UINT: case VK_FORMAT_R32G32_SINT: return VK_FORMAT_R32G32_SFLOAT;
-        case VK_FORMAT_R16G16_UINT: case VK_FORMAT_R16G16_SINT: return VK_FORMAT_R16G16_SFLOAT;
-        default: return VK_FORMAT_UNDEFINED;
-    }
-}
-
 static inline struct d3d12_command_list *impl_from_ID3D12GraphicsCommandListMetalFX(
         ID3D12GraphicsCommandListMetalFX *iface)
 {
@@ -182,10 +131,10 @@ static BOOL STDMETHODCALLTYPE d3d12_command_list_metalfx_SupportsDenoisedUpscale
     return vkd3d_metalfx_driver_has(impl_from_ID3D12GraphicsCommandListMetalFX(iface)->device, "temporal-rr");
 }
 
-/* Fills in the images and what all frames share, and records the frame with the ids released since the last one.
+/* Fills in the images and the feature's identity, and records the frame with the ids released since the last one.
  * Every image is a texture. */
 static HRESULT vkd3d_metalfx_record(struct d3d12_command_list *list, VkTemporalFrameInfoMVK *info,
-        ID3D12Resource *const *images, ID3D12MetalFXScaler **iface, uint32_t type, uint32_t flags)
+        ID3D12Resource *const *images, ID3D12MetalFXScaler **iface)
 {
     struct d3d12_resource *resources[TEMPORAL_IMAGES] = {0};
     uint64_t released[ARRAY_SIZE(vkd3d_metalfx_released)];
@@ -200,15 +149,12 @@ static HRESULT vkd3d_metalfx_record(struct d3d12_command_list *list, VkTemporalF
         if (d3d12_resource_is_buffer(resources[i]))
             return E_INVALIDARG;
         info->images[i] = resources[i]->res.vk_image;
-        info->formats[i] = vkd3d_metalfx_read_format(resources[i]);
+        info->formats[i] = vk_temporal_read_format(resources[i]->format->vk_format);
     }
     if (!(scaler = vkd3d_metalfx_scaler(iface)))
         return *iface ? E_INVALIDARG : E_OUTOFMEMORY;
-    info->sType = VK_STRUCTURE_TYPE_TEMPORAL_FRAME_INFO_MVK;
     info->featureId = scaler->id;
     info->frameId = ++scaler->frames;
-    info->featureType = type;
-    info->flags = flags;
 
     spinlock_acquire(&vkd3d_metalfx_lock);
     memcpy(released, vkd3d_metalfx_released, vkd3d_metalfx_released_count * sizeof(*released));
@@ -236,40 +182,13 @@ static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_TemporalUpscale(ID3D
         return E_NOTIMPL;
 
     memset(&info, 0, sizeof(info));
+    vk_temporal_super_resolution(&info, desc);
     images[TEMPORAL_COLOR] = desc->Color;
     images[TEMPORAL_DEPTH] = desc->Depth;
     images[TEMPORAL_MOTION] = desc->MotionVector;
     images[TEMPORAL_OUTPUT] = desc->Output;
     images[TEMPORAL_EXPOSURE] = desc->ExposureTexture;
-    info.colorX = desc->ColorX;
-    info.colorY = desc->ColorY;
-    info.depthX = desc->DepthX;
-    info.depthY = desc->DepthY;
-    info.motionX = desc->MotionX;
-    info.motionY = desc->MotionY;
-    info.outputX = desc->OutputX;
-    info.outputY = desc->OutputY;
-    info.renderWidth = desc->InputContentWidth;
-    info.renderHeight = desc->InputContentHeight;
-    info.motionVectorScaleX = desc->MotionVectorScaleX;
-    info.motionVectorScaleY = desc->MotionVectorScaleY;
-    info.jitterOffsetX = desc->JitterOffsetX;
-    info.jitterOffsetY = desc->JitterOffsetY;
-    info.preExposure = desc->PreExposure;
-    info.sharpness = desc->Sharpness;
-    info.frameTimeMs = desc->FrameTimeMs;
-    if (desc->CameraValid)
-    {
-        info.nearPlane = desc->NearPlane;
-        info.farPlane = desc->FarPlane;
-        info.verticalFov = desc->VerticalFov;
-    }
-    return vkd3d_metalfx_record(list, &info, images, scaler, TEMPORAL_SUPER_RESOLUTION,
-            (desc->AutoExposure ? TEMPORAL_AUTO_EXPOSURE : 0) | (desc->InReset ? TEMPORAL_RESET : 0)
-            | (desc->DepthReversed ? TEMPORAL_DEPTH_REVERSED : 0)
-            | (desc->MotionVectorInDisplayRes ? TEMPORAL_MOTION_DISPLAY_RES : 0)
-            | (desc->MotionVectorJittered ? TEMPORAL_MOTION_JITTERED : 0) | (desc->Hdr ? TEMPORAL_HDR : 0)
-            | (desc->CameraValid ? TEMPORAL_CAMERA_VALID : 0) | (desc->DepthInfinite ? TEMPORAL_DEPTH_INFINITE : 0));
+    return vkd3d_metalfx_record(list, &info, images, scaler);
 }
 
 static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_DenoisedUpscale(ID3D12GraphicsCommandListMetalFX *iface,
@@ -290,6 +209,10 @@ static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_DenoisedUpscale(ID3D
         return E_NOTIMPL;
 
     memset(&info, 0, sizeof(info));
+    info.sType = VK_STRUCTURE_TYPE_TEMPORAL_FRAME_INFO_MVK;
+    info.featureType = TEMPORAL_RAY_RECONSTRUCTION;
+    info.flags = (desc->AutoExposure ? TEMPORAL_AUTO_EXPOSURE : 0) | (desc->InReset ? TEMPORAL_RESET : 0)
+            | (desc->DepthReversed ? TEMPORAL_DEPTH_REVERSED : 0);
     images[TEMPORAL_COLOR] = desc->Color;
     images[TEMPORAL_DEPTH] = desc->Depth;
     images[TEMPORAL_MOTION] = desc->MotionVector;
@@ -307,9 +230,7 @@ static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_DenoisedUpscale(ID3D
     info.jitterOffsetX = desc->JitterOffsetX;
     info.jitterOffsetY = desc->JitterOffsetY;
     info.preExposure = desc->PreExposure;
-    return vkd3d_metalfx_record(list, &info, images, scaler, TEMPORAL_RAY_RECONSTRUCTION,
-            (desc->AutoExposure ? TEMPORAL_AUTO_EXPOSURE : 0) | (desc->InReset ? TEMPORAL_RESET : 0)
-            | (desc->DepthReversed ? TEMPORAL_DEPTH_REVERSED : 0));
+    return vkd3d_metalfx_record(list, &info, images, scaler);
 }
 
 /* Frame Generation is not offered: the NGX core then reports it unsupported. */

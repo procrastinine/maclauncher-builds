@@ -1,8 +1,21 @@
 diff --git a/ngx/nvngx/nvngx.cpp b/ngx/nvngx/nvngx.cpp
-index 4563930..a7cad19 100644
+index 4563930..7d647a5 100644
 --- a/ngx/nvngx/nvngx.cpp
 +++ b/ngx/nvngx/nvngx.cpp
-@@ -13,6 +13,7 @@
+@@ -1,7 +1,8 @@
+-// VKD3D-Proton-MacOS's NGX core: DLSS Super Resolution on MetalFX's temporal scaler, DLSS Ray Reconstruction on its
+-// denoised scaler and DLSS Frame Generation on its frame interpolator, recorded in VKD3D-Proton's command lists
+-// (ID3D12GraphicsCommandListMetalFX) and, for
+-// Super Resolution in D3D11, DXVK's contexts (ID3D11VkMetalFXContext), which MoltenVK runs. NVIDIA's NGX library loads it as its core (nvngx.dll) where the NVIDIA driver's registry values name it.
++// VKD3D-Proton-MacOS's NGX core: each DLSS Super Resolution or Ray Reconstruction evaluation becomes a temporal frame
++// (vk_temporal_frame.h) that the Vulkan driver forwards to MacLauncher's graphics pipeline, recorded in VKD3D-Proton's
++// command lists (ID3D12GraphicsCommandListMetalFX) or, for Super Resolution in D3D11, submitted on DXVK's queue
++// through DXVK's interop interfaces. DLSS Frame Generation is offered where the command lists interpolate frames.
++// NVIDIA's NGX library loads it as its core (nvngx.dll) where the NVIDIA driver's registry values name it.
+ //
+ // From Mullion's NGX core (src/nvngx, LGPL-2.1), with VKD3D-Proton's interface in place of Mullion's.
+ //
+@@ -13,6 +14,7 @@
  #include <dxgi.h>
  
  #include <algorithm>
@@ -10,34 +23,71 @@ index 4563930..a7cad19 100644
  #include <cmath>
  #include <cstring>
  #include <memory>
-@@ -152,6 +153,26 @@ struct MetalFXRef {
+@@ -24,10 +26,12 @@
+ #include "parameters.hpp"
+ #include "../common/lane.hpp"
+ 
++#include <vulkan/vulkan_core.h>
++
+ extern "C" {
+ #include "vkd3d_metalfx.h"
++#include "vk_temporal_frame.h"
+ }
+-#include "d3d11_metalfx_interface.h"
+ 
+ namespace ngx {
+ 
+@@ -58,12 +62,13 @@ struct DLSSFeature : CommonFeature {
+   int quality;
+   int flag;
+   int enable_output_subrects;
+-  // the MetalFX scaler the command list (D3D12) or context (D3D11) made for it
++  // its history in VKD3D-Proton (D3D12), or its identity and frame count on DXVK's queue (D3D11)
+   ID3D12MetalFXScaler *scaler = nullptr;
+-  ID3D11VkMetalFXScaler *scaler11 = nullptr;
++  struct Queue11 *queue11 = nullptr;
++  uint64_t id11 = 0, frames11 = 0;
+ };
+ 
+-// DLSS Ray Reconstruction, on MetalFX's denoised scaler
++// DLSS Ray Reconstruction
+ struct DLSSDFeature : DLSSFeature {
+   unsigned int roughness_mode; // 1: roughness in the normals' alpha
+   unsigned int hw_depth;       // 0: linear depth, which MetalFX does not take
+@@ -152,6 +157,32 @@ struct MetalFXRef {
    }
  };
  
-+// whether the initialized device's command lists interpolate frames; Frame Generation is offered only then
-+static std::atomic<bool> frame_interpolation;
++// what the initialized device records: Super Resolution, Ray Reconstruction and Frame Generation are offered only then
++static std::atomic<bool> super_resolution, ray_reconstruction, frame_interpolation;
 +
-+static void RememberFrameInterpolation(ID3D12Device *device) {
++static void RememberFeatures(ID3D12Device *device) {
 +  ID3D12CommandAllocator *allocator = nullptr;
 +  ID3D12GraphicsCommandList *list = nullptr;
-+  bool supported = false;
++  bool sr = false, rr = false, fg = false;
 +  if (device &&
 +      SUCCEEDED(device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&allocator))) &&
 +      SUCCEEDED(device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, allocator, nullptr, IID_PPV_ARGS(&list)))) {
 +    MetalFXRef metalfx(list);
-+    supported = metalfx.iface && metalfx.iface->lpVtbl->SupportsFrameInterpolation(metalfx.iface);
++    if (auto m = metalfx.iface) {
++      sr = m->lpVtbl->SupportsTemporalUpscale(m);
++      rr = m->lpVtbl->SupportsDenoisedUpscale(m);
++      fg = m->lpVtbl->SupportsFrameInterpolation(m);
++    }
 +  }
 +  if (list)
 +    list->Release();
 +  if (allocator)
 +    allocator->Release();
-+  frame_interpolation = supported;
++  super_resolution = sr;
++  ray_reconstruction = rr;
++  frame_interpolation = fg;
 +}
 +
  static ID3D12Resource *GetResource(const ParametersImpl *params, const char *name, const char *alternative = nullptr) {
    ID3D12Resource *resource = nullptr;
    if (NVNGX_FAILED(params->Get(name, &resource)) && alternative)
-@@ -176,6 +197,38 @@ static NVNGX_RESULT ReadCreate(const ParametersImpl *params, DLSSFeature &dlss)
+@@ -176,6 +207,38 @@ static NVNGX_RESULT ReadCreate(const ParametersImpl *params, DLSSFeature &dlss)
    return NVNGX_RESULT_OK;
  }
  
@@ -76,7 +126,67 @@ index 4563930..a7cad19 100644
  static void ReadCommon(const ParametersImpl *params, float &mv_x, float &mv_y, float &jitter_x, float &jitter_y,
                         float &pre_exposure, BOOL &reset) {
    mv_x = GetOr(params, NVNGX_Parameter_MV_Scale_X, 1.0f);
-@@ -298,7 +351,7 @@ static ParametersImpl *CapabilityParameters(bool d3d12) {
+@@ -189,6 +252,42 @@ static void ReadCommon(const ParametersImpl *params, float &mv_x, float &mv_y, f
+   reset = GetOr(params, NVNGX_Parameter_Reset, 0) != 0;
+ }
+ 
++// a Super Resolution evaluation's values, without its images
++static void ReadSuperResolution(const ParametersImpl *parameters, const DLSSFeature &dlss,
++                                VKD3D_METALFX_TEMPORAL_DESC &desc) {
++  desc.InputContentWidth = GetOr(parameters, NVNGX_Parameter_DLSS_Render_Subrect_Dimensions_Width, 0u);
++  desc.InputContentHeight = GetOr(parameters, NVNGX_Parameter_DLSS_Render_Subrect_Dimensions_Height, 0u);
++  desc.DepthReversed = bool(dlss.flag & NVNGX_DLSS_FLAG_DEPTH_INVERTED);
++  desc.AutoExposure = bool(dlss.flag & NVNGX_DLSS_FLAG_AUTO_EXPOSURE);
++  desc.MotionVectorInDisplayRes = !bool(dlss.flag & NVNGX_DLSS_FLAG_MV_LOWRES);
++  ReadCommon(parameters, desc.MotionVectorScaleX, desc.MotionVectorScaleY, desc.JitterOffsetX, desc.JitterOffsetY,
++             desc.PreExposure, desc.InReset);
++  desc.ColorX = GetOr(parameters, "DLSS.Input.Color.Subrect.Base.X", 0u);
++  desc.ColorY = GetOr(parameters, "DLSS.Input.Color.Subrect.Base.Y", 0u);
++  desc.DepthX = GetOr(parameters, "DLSS.Input.Depth.Subrect.Base.X", 0u);
++  desc.DepthY = GetOr(parameters, "DLSS.Input.Depth.Subrect.Base.Y", 0u);
++  desc.MotionX = GetOr(parameters, "DLSS.Input.MV.Subrect.Base.X", 0u);
++  desc.MotionY = GetOr(parameters, "DLSS.Input.MV.Subrect.Base.Y", 0u);
++  if (dlss.enable_output_subrects) {
++    desc.OutputX = GetOr(parameters, "DLSS.Output.Subrect.Base.X", 0u);
++    desc.OutputY = GetOr(parameters, "DLSS.Output.Subrect.Base.Y", 0u);
++  }
++  desc.Hdr = bool(dlss.flag & 1); // NVSDK_NGX_DLSS_Feature_Flags_IsHDR
++  desc.MotionVectorJittered = bool(dlss.flag & NVNGX_DLSS_FLAG_MV_JITTERED);
++  desc.Sharpness = GetOr(parameters, NVNGX_Parameter_Sharpness, 0.0f);
++  float frame_time = GetOr(parameters, "FrameTimeDeltaInMsec", 0.0f);
++  if (temporal_camera.size) {
++    desc.CameraValid = TRUE;
++    desc.DepthInfinite = bool(temporal_camera.flags & RS_TEMPORAL_DEPTH_INFINITE);
++    desc.NearPlane = temporal_camera.nearPlane;
++    desc.FarPlane = temporal_camera.farPlane;
++    desc.VerticalFov = temporal_camera.verticalFov;
++    if (!(frame_time > 0.0f))
++      frame_time = temporal_camera.frameTimeMs;
++  }
++  desc.FrameTimeMs = std::isfinite(frame_time) && frame_time > 0.0f ? frame_time : 0.0f;
++}
++
+ static NVNGX_RESULT GetOptimalSettingsCallback(NVNGXParameter *params) {
+   unsigned int width, height, out_width, out_height;
+   float scale;
+@@ -269,13 +368,13 @@ static NVNGX_RESULT DLSSG_EstimateVRAM(unsigned int width, unsigned int height,
+ // application ships its library, and, in D3D12, Frame Generation where it ships its library
+ static ParametersImpl *CapabilityParameters(bool d3d12) {
+   auto params = new ParametersImpl();
+-  params->Set("SuperSampling.Available", 1u);
+-  params->Set(NVSDK_NGX_EParameter_SuperSampling_Available, 1u);
++  params->Set("SuperSampling.Available", unsigned(super_resolution));
++  params->Set(NVSDK_NGX_EParameter_SuperSampling_Available, unsigned(super_resolution));
+   params->Set("SuperSampling.MinDriverVersionMajor", 0);
+   params->Set("SuperSampling.MinDriverVersionMinor", 0);
+   params->Set("SuperSampling.NeedsUpdatedDriver", 0);
+   params->Set("SuperSampling.FeatureInitResult", 1u);
+-  params->Set("SuperSamplingDenoising.Available", unsigned(HasFeatureLibrary(L"nvngx_dlssd.dll")));
++  params->Set("SuperSamplingDenoising.Available", unsigned(ray_reconstruction && HasFeatureLibrary(L"nvngx_dlssd.dll")));
+   params->Set("SuperSamplingDenoising.NeedsUpdatedDriver", 0);
+   params->Set("SuperSamplingDenoising.MinDriverVersionMajor", 0);
+   params->Set("SuperSamplingDenoising.MinDriverVersionMinor", 0);
+@@ -298,7 +397,7 @@ static ParametersImpl *CapabilityParameters(bool d3d12) {
    params->Set("DLSS.Enable.Output.Subrects", 1);
    params->Set("RTXValue", 0);
    // Frame Generation, as the game's Streamline (sl.dlss_g) reads it: one frame between two, no Reflex frame warp
@@ -85,7 +195,7 @@ index 4563930..a7cad19 100644
    params->Set("FrameGeneration.Available", frame_generation);
    params->Set("FrameInterpolation.Available", frame_generation);
    params->Set("FrameGeneration.NeedsUpdatedDriver", 0);
-@@ -320,7 +373,7 @@ static NVNGX_RESULT FeatureRequirements(const NVNGX_FeatureDiscoveryInfo *discov
+@@ -320,7 +419,7 @@ static NVNGX_RESULT FeatureRequirements(const NVNGX_FeatureDiscoveryInfo *discov
        (d3d12 && discovery->FeatureID == NVNGX_FEATURE_RAYRECONSTRUCTION &&
         HasFeatureLibrary(L"nvngx_dlssd.dll", discovery->FeatureInfo)) ||
        (d3d12 && discovery->FeatureID == NVNGX_FEATURE_FRAMEGENERATION &&
@@ -94,64 +204,483 @@ index 4563930..a7cad19 100644
      requirement->FeatureSupported = NVNGX_FEATURE_SUPPORT_RESULT_SUPPORTED;
      requirement->MinHWArchitecture = 0;
      strcpy(requirement->MinOSVersion, "10.0.16299.0");
-@@ -345,11 +398,13 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_UpdateFeature(const void *app_id, const unsi
+@@ -345,11 +444,13 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_UpdateFeature(const void *app_id, const unsi
  NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_Init(unsigned long long id, const wchar_t *path, ID3D12Device *device,
                                                 const void *feature_info, unsigned int sdk_version) {
    RememberLibraryPaths(feature_info);
-+  RememberFrameInterpolation(device);
++  RememberFeatures(device);
    return NVNGX_RESULT_OK;
  }
  
  NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_Init_Ext(unsigned long long id, const wchar_t *path, ID3D12Device *device,
                                                     unsigned int sdk_version, const void *parameters) {
-+  RememberFrameInterpolation(device);
++  RememberFeatures(device);
    return NVNGX_RESULT_OK;
  }
  
-@@ -358,6 +413,7 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_Init_ProjectID(const char *project, un
+@@ -358,6 +459,7 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_Init_ProjectID(const char *project, un
                                                           ID3D12Device *device, unsigned int sdk_version,
                                                           const void *feature_info) {
    RememberLibraryPaths(feature_info);
-+  RememberFrameInterpolation(device);
++  RememberFeatures(device);
    return NVNGX_RESULT_OK;
  }
  
-@@ -366,6 +422,7 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_Init_with_ProjectID(const char *projec
+@@ -366,6 +468,7 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_Init_with_ProjectID(const char *projec
                                                                ID3D12Device *device, const void *feature_info,
                                                                unsigned int sdk_version) {
    RememberLibraryPaths(feature_info);
-+  RememberFrameInterpolation(device);
++  RememberFeatures(device);
    return NVNGX_RESULT_OK;
  }
  
-@@ -574,6 +631,30 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_EvaluateFeature(ID3D12GraphicsCommandL
-     desc.MotionVectorInDisplayRes = !bool(dlss->flag & NVNGX_DLSS_FLAG_MV_LOWRES);
-     ReadCommon(parameters, desc.MotionVectorScaleX, desc.MotionVectorScaleY, desc.JitterOffsetX, desc.JitterOffsetY,
-                desc.PreExposure, desc.InReset);
-+    desc.ColorX = GetOr(parameters, "DLSS.Input.Color.Subrect.Base.X", 0u);
-+    desc.ColorY = GetOr(parameters, "DLSS.Input.Color.Subrect.Base.Y", 0u);
-+    desc.DepthX = GetOr(parameters, "DLSS.Input.Depth.Subrect.Base.X", 0u);
-+    desc.DepthY = GetOr(parameters, "DLSS.Input.Depth.Subrect.Base.Y", 0u);
-+    desc.MotionX = GetOr(parameters, "DLSS.Input.MV.Subrect.Base.X", 0u);
-+    desc.MotionY = GetOr(parameters, "DLSS.Input.MV.Subrect.Base.Y", 0u);
-+    if (dlss->enable_output_subrects) {
-+      desc.OutputX = GetOr(parameters, "DLSS.Output.Subrect.Base.X", 0u);
-+      desc.OutputY = GetOr(parameters, "DLSS.Output.Subrect.Base.Y", 0u);
-+    }
-+    desc.Hdr = bool(dlss->flag & 1); // NVSDK_NGX_DLSS_Feature_Flags_IsHDR
-+    desc.MotionVectorJittered = bool(dlss->flag & NVNGX_DLSS_FLAG_MV_JITTERED);
-+    desc.Sharpness = GetOr(parameters, NVNGX_Parameter_Sharpness, 0.0f);
-+    float frame_time = GetOr(parameters, "FrameTimeDeltaInMsec", 0.0f);
-+    if (temporal_camera.size) {
-+      desc.CameraValid = TRUE;
-+      desc.DepthInfinite = bool(temporal_camera.flags & RS_TEMPORAL_DEPTH_INFINITE);
-+      desc.NearPlane = temporal_camera.nearPlane;
-+      desc.FarPlane = temporal_camera.farPlane;
-+      desc.VerticalFov = temporal_camera.verticalFov;
-+      if (!(frame_time > 0.0f))
-+        frame_time = temporal_camera.frameTimeMs;
-+    }
-+    desc.FrameTimeMs = std::isfinite(frame_time) && frame_time > 0.0f ? frame_time : 0.0f;
+@@ -422,7 +525,7 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_CreateFeature(ID3D12GraphicsCommandLis
+     dlss->feature = NVNGX_FEATURE_SUPERSAMPLING;
+     if (NVNGX_FAILED(ReadCreate(parameters, *dlss)))
+       return NVNGX_RESULT_INVALID_PARAMETER;
+-    lane::log("info", "Super Resolution %ux%u to %ux%u on MetalFX's temporal scaler", dlss->width, dlss->height,
++    lane::log("info", "Super Resolution %ux%u to %ux%u, forwarded as temporal frames", dlss->width, dlss->height,
+               dlss->target_width, dlss->target_height);
+     *out_handle = &dlss.release()->handle;
+     return NVNGX_RESULT_OK;
+@@ -438,7 +541,7 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_CreateFeature(ID3D12GraphicsCommandLis
+     dlssd->hw_depth = GetOr(parameters, NVNGX_Parameter_Use_HW_Depth, 1u);
+     if (!dlssd->hw_depth)
+       lane::log("warn", "Ray Reconstruction with linear depth, which MetalFX reads as device depth");
+-    lane::log("info", "Ray Reconstruction %ux%u to %ux%u on MetalFX's denoised scaler", dlssd->width, dlssd->height,
++    lane::log("info", "Ray Reconstruction %ux%u to %ux%u, forwarded as temporal frames", dlssd->width, dlssd->height,
+               dlssd->target_width, dlssd->target_height);
+     *out_handle = &dlssd.release()->handle;
+     return NVNGX_RESULT_OK;
+@@ -567,13 +670,7 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_EvaluateFeature(ID3D12GraphicsCommandL
+       lane::log("err", "EvaluateFeature: Super Resolution without its color, output, depth or motion vectors");
+       return NVNGX_RESULT_INVALID_PARAMETER;
+     }
+-    desc.InputContentWidth = GetOr(parameters, NVNGX_Parameter_DLSS_Render_Subrect_Dimensions_Width, 0u);
+-    desc.InputContentHeight = GetOr(parameters, NVNGX_Parameter_DLSS_Render_Subrect_Dimensions_Height, 0u);
+-    desc.DepthReversed = bool(dlss->flag & NVNGX_DLSS_FLAG_DEPTH_INVERTED);
+-    desc.AutoExposure = bool(dlss->flag & NVNGX_DLSS_FLAG_AUTO_EXPOSURE);
+-    desc.MotionVectorInDisplayRes = !bool(dlss->flag & NVNGX_DLSS_FLAG_MV_LOWRES);
+-    ReadCommon(parameters, desc.MotionVectorScaleX, desc.MotionVectorScaleY, desc.JitterOffsetX, desc.JitterOffsetY,
+-               desc.PreExposure, desc.InReset);
++    ReadSuperResolution(parameters, *dlss, desc);
      return FAILED(metalfx.iface->lpVtbl->TemporalUpscale(metalfx.iface, &desc, &dlss->scaler)) ? NVNGX_RESULT_FAIL
                                                                                                   : NVNGX_RESULT_OK;
    }
+@@ -647,22 +744,247 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_ReleaseFeature(unsigned int *handle) {
+   return NVNGX_RESULT_OK;
+ }
+ 
+-// D3D11 (DXVK's): Super Resolution
++// D3D11 (DXVK's): Super Resolution, each evaluation a temporal frame in a command buffer of its own, submitted on
++// DXVK's queue after the context's commands through DXVK's interop interfaces (DXVK's dxgi_interfaces.h)
++
++MIDL_INTERFACE("5546cf8c-77e7-4341-b05d-8d4d5000e77d")
++IDXGIVkInteropSurface : public IUnknown {
++  virtual HRESULT STDMETHODCALLTYPE GetDevice(IUnknown **device) = 0;
++  virtual HRESULT STDMETHODCALLTYPE GetVulkanImageInfo(VkImage *image, VkImageLayout *layout,
++                                                       VkImageCreateInfo *info) = 0;
++};
++
++MIDL_INTERFACE("e2ef5fa5-dc21-4af7-90c4-f67ef6a09323")
++IDXGIVkInteropDevice : public IUnknown {
++  virtual void STDMETHODCALLTYPE GetVulkanHandles(VkInstance *instance, VkPhysicalDevice *physical,
++                                                  VkDevice *device) = 0;
++  virtual void STDMETHODCALLTYPE GetSubmissionQueue(VkQueue *queue, uint32_t *family) = 0;
++  virtual void STDMETHODCALLTYPE TransitionSurfaceLayout(IDXGIVkInteropSurface *surface,
++                                                         const VkImageSubresourceRange *range, VkImageLayout from,
++                                                         VkImageLayout to) = 0;
++  virtual void STDMETHODCALLTYPE FlushRenderingCommands() = 0;
++  virtual void STDMETHODCALLTYPE LockSubmissionQueue() = 0;
++  virtual void STDMETHODCALLTYPE ReleaseSubmissionQueue() = 0;
++};
++
++#ifndef _MSC_VER
++__CRT_UUID_DECL(IDXGIVkInteropSurface, 0x5546cf8c, 0x77e7, 0x4341, 0xb0, 0x5d, 0x8d, 0x4d, 0x50, 0x00, 0xe7, 0x7d);
++__CRT_UUID_DECL(IDXGIVkInteropDevice, 0xe2ef5fa5, 0xdc21, 0x4af7, 0x90, 0xc4, 0xf6, 0x7e, 0xf6, 0xa0, 0x93, 0x23);
++#endif
++
++namespace ngx {
++
++// a device's queue as DXVK's interop shows it; where its driver names "temporal-sr", the command buffers and fences
++// that carry the frames, used in turn
++struct Queue11 {
++  static constexpr unsigned SLOTS = 4;
++  VkDevice device = VK_NULL_HANDLE;
++  VkQueue queue = VK_NULL_HANDLE;
++  bool temporal_sr = false;
++  std::mutex mutex;
++  VkCommandPool pool = VK_NULL_HANDLE;
++  VkCommandBuffer commands[SLOTS] = {};
++  VkFence fences[SLOTS] = {};
++  bool pending[SLOTS] = {};
++  unsigned next = 0;
++  PFN_vkDestroyCommandPool DestroyCommandPool = nullptr;
++  PFN_vkResetCommandBuffer ResetCommandBuffer = nullptr;
++  PFN_vkBeginCommandBuffer BeginCommandBuffer = nullptr;
++  PFN_vkEndCommandBuffer EndCommandBuffer = nullptr;
++  PFN_vkCmdPipelineBarrier2 CmdPipelineBarrier2 = nullptr;
++  PFN_vkQueueSubmit QueueSubmit = nullptr;
++  PFN_vkDestroyFence DestroyFence = nullptr;
++  PFN_vkWaitForFences WaitForFences = nullptr;
++  PFN_vkResetFences ResetFences = nullptr;
++
++  ~Queue11() {
++    for (unsigned i = 0; i < SLOTS; i++) {
++      if (pending[i])
++        WaitForFences(device, 1, &fences[i], VK_TRUE, UINT64_MAX);
++      if (fences[i])
++        DestroyFence(device, fences[i], nullptr);
++    }
++    if (pool)
++      DestroyCommandPool(device, pool, nullptr); // and its command buffers
++  }
++};
+ 
+-static ID3D11VkMetalFXContext *GetMetalFX11(ID3D11DeviceContext *context) {
+-  ID3D11VkMetalFXContext *metalfx = nullptr;
+-  if (!context || FAILED(context->QueryInterface(__uuidof(ID3D11VkMetalFXContext), (void **)&metalfx)))
++static std::mutex queues11_mutex;
++static std::vector<std::unique_ptr<Queue11>> queues11;
++// D3D11 features' identities, and those released since the last frame, which the next frame passes on
++static uint64_t last_id11;
++static std::vector<uint64_t> released11;
++
++static IDXGIVkInteropDevice *Interop11(ID3D11Device *device) {
++  IDXGIVkInteropDevice *interop = nullptr;
++  if (!device || FAILED(device->QueryInterface(__uuidof(IDXGIVkInteropDevice), (void **)&interop)))
+     return nullptr;
+-  return metalfx;
++  return interop;
+ }
+ 
++// whether the word is one of the driverInfo's
++static bool NamesWord(const char *info, const char *word) {
++  size_t length = strlen(word);
++  for (const char *found = strstr(info, word); found; found = strstr(found + 1, word))
++    if ((found == info || found[-1] == ' ') && (!found[length] || found[length] == ' '))
++      return true;
++  return false;
++}
++
++template <typename T> static bool Load(PFN_vkGetDeviceProcAddr proc, VkDevice device, const char *name, T &function) {
++  function = reinterpret_cast<T>(proc(device, name));
++  return function != nullptr;
++}
++
++static bool CreateCommands11(Queue11 &q, PFN_vkGetDeviceProcAddr proc, uint32_t family) {
++  PFN_vkCreateCommandPool CreateCommandPool;
++  PFN_vkAllocateCommandBuffers AllocateCommandBuffers;
++  PFN_vkCreateFence CreateFence;
++  VkDevice d = q.device;
++  if (!Load(proc, d, "vkCreateCommandPool", CreateCommandPool) ||
++      !Load(proc, d, "vkAllocateCommandBuffers", AllocateCommandBuffers) || !Load(proc, d, "vkCreateFence", CreateFence) ||
++      !Load(proc, d, "vkDestroyCommandPool", q.DestroyCommandPool) ||
++      !Load(proc, d, "vkResetCommandBuffer", q.ResetCommandBuffer) ||
++      !Load(proc, d, "vkBeginCommandBuffer", q.BeginCommandBuffer) ||
++      !Load(proc, d, "vkEndCommandBuffer", q.EndCommandBuffer) ||
++      !Load(proc, d, "vkCmdPipelineBarrier2", q.CmdPipelineBarrier2) ||
++      !Load(proc, d, "vkQueueSubmit", q.QueueSubmit) || !Load(proc, d, "vkDestroyFence", q.DestroyFence) ||
++      !Load(proc, d, "vkWaitForFences", q.WaitForFences) || !Load(proc, d, "vkResetFences", q.ResetFences))
++    return false;
++  VkCommandPoolCreateInfo pool = {VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO, nullptr,
++                                  VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, family};
++  if (CreateCommandPool(d, &pool, nullptr, &q.pool) != VK_SUCCESS) {
++    q.pool = VK_NULL_HANDLE;
++    return false;
++  }
++  VkCommandBufferAllocateInfo allocate = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO, nullptr, q.pool,
++                                          VK_COMMAND_BUFFER_LEVEL_PRIMARY, Queue11::SLOTS};
++  if (AllocateCommandBuffers(d, &allocate, q.commands) != VK_SUCCESS)
++    return false;
++  VkFenceCreateInfo fence = {VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
++  for (auto &f : q.fences)
++    if (CreateFence(d, &fence, nullptr, &f) != VK_SUCCESS) {
++      f = VK_NULL_HANDLE;
++      return false;
++    }
++  return true;
++}
++
++// the device's queue, found or made; nullptr without DXVK's interop
++static Queue11 *GetQueue11(ID3D11Device *device) {
++  IDXGIVkInteropDevice *interop = Interop11(device);
++  if (!interop)
++    return nullptr;
++  VkInstance instance;
++  VkPhysicalDevice physical;
++  VkDevice handle;
++  interop->GetVulkanHandles(&instance, &physical, &handle);
++  std::lock_guard<std::mutex> lock(queues11_mutex);
++  for (auto &q : queues11)
++    if (q->device == handle) {
++      interop->Release();
++      return q.get();
++    }
++  auto q = std::make_unique<Queue11>();
++  q->device = handle;
++  uint32_t family = 0;
++  interop->GetSubmissionQueue(&q->queue, &family);
++  interop->Release();
++  // the Vulkan loader DXVK uses
++  HMODULE vulkan = GetModuleHandleW(L"winevulkan.dll");
++  if (!vulkan)
++    vulkan = GetModuleHandleW(L"vulkan-1.dll");
++  auto instance_proc =
++      vulkan ? reinterpret_cast<PFN_vkGetInstanceProcAddr>(GetProcAddress(vulkan, "vkGetInstanceProcAddr")) : nullptr;
++  auto device_proc =
++      instance_proc ? reinterpret_cast<PFN_vkGetDeviceProcAddr>(instance_proc(instance, "vkGetDeviceProcAddr")) : nullptr;
++  auto properties2 = instance_proc ? reinterpret_cast<PFN_vkGetPhysicalDeviceProperties2>(
++                                         instance_proc(instance, "vkGetPhysicalDeviceProperties2"))
++                                   : nullptr;
++  if (device_proc && properties2) {
++    VkPhysicalDeviceDriverProperties driver = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES};
++    VkPhysicalDeviceProperties2 properties = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2, &driver};
++    properties2(physical, &properties);
++    q->temporal_sr = NamesWord(driver.driverInfo, "temporal-sr") && CreateCommands11(*q, device_proc, family);
++  }
++  queues11.push_back(std::move(q));
++  return queues11.back().get();
++}
++
++static void RememberFeatures(ID3D11Device *device) {
++  Queue11 *queue = GetQueue11(device);
++  super_resolution = queue && queue->temporal_sr;
++}
++
++// the Vulkan image of a DXVK texture, and the format it is read as
++static bool Image11(ID3D11Resource *resource, VkImage &image, VkFormat &format) {
++  IDXGIVkInteropSurface *surface = nullptr;
++  if (FAILED(resource->QueryInterface(__uuidof(IDXGIVkInteropSurface), (void **)&surface)))
++    return false;
++  VkImageCreateInfo info = {VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
++  HRESULT hr = surface->GetVulkanImageInfo(&image, nullptr, &info);
++  surface->Release();
++  format = vk_temporal_read_format(info.format);
++  return SUCCEEDED(hr) && image != VK_NULL_HANDLE;
++}
++
++// records the frame, with the identities released since the last one, in the queue's next command buffer, and
++// submits it after the context's commands
++static bool Submit11(Queue11 &q, IDXGIVkInteropDevice *interop, VkTemporalFrameInfoMVK &info) {
++  std::lock_guard<std::mutex> lock(q.mutex);
++  unsigned slot = q.next;
++  q.next = (slot + 1) % Queue11::SLOTS;
++  if (q.pending[slot]) {
++    q.WaitForFences(q.device, 1, &q.fences[slot], VK_TRUE, UINT64_MAX);
++    q.ResetFences(q.device, 1, &q.fences[slot]);
++    q.pending[slot] = false;
++  }
++  std::vector<uint64_t> released;
++  {
++    std::lock_guard<std::mutex> lock(queues11_mutex);
++    released.swap(released11);
++  }
++  info.releaseFeatureIdCount = uint32_t(released.size());
++  info.pReleaseFeatureIds = released.data();
++  // the frame, then a barrier that orders what the driver writes before the commands after it
++  VkMemoryBarrier2 barrier = {VK_STRUCTURE_TYPE_MEMORY_BARRIER_2};
++  barrier.srcStageMask = barrier.dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
++  barrier.srcAccessMask = barrier.dstAccessMask = VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT;
++  VkDependencyInfo dependency = {VK_STRUCTURE_TYPE_DEPENDENCY_INFO, &info};
++  dependency.memoryBarrierCount = 1;
++  dependency.pMemoryBarriers = &barrier;
++  VkCommandBuffer command = q.commands[slot];
++  VkCommandBufferBeginInfo begin = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO, nullptr,
++                                    VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT};
++  if (q.ResetCommandBuffer(command, 0) != VK_SUCCESS || q.BeginCommandBuffer(command, &begin) != VK_SUCCESS)
++    return false;
++  q.CmdPipelineBarrier2(command, &dependency);
++  dependency.pNext = nullptr;
++  q.CmdPipelineBarrier2(command, &dependency);
++  if (q.EndCommandBuffer(command) != VK_SUCCESS)
++    return false;
++  VkSubmitInfo submit = {VK_STRUCTURE_TYPE_SUBMIT_INFO};
++  submit.commandBufferCount = 1;
++  submit.pCommandBuffers = &command;
++  interop->FlushRenderingCommands();
++  interop->LockSubmissionQueue();
++  VkResult result = q.QueueSubmit(q.queue, 1, &submit, q.fences[slot]);
++  interop->ReleaseSubmissionQueue();
++  q.pending[slot] = result == VK_SUCCESS;
++  return result == VK_SUCCESS;
++}
++
++} // namespace ngx
++
+ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_Init(unsigned long long id, const wchar_t *path, ID3D11Device *device,
+                                                const void *feature_info, unsigned int sdk_version) {
++  RememberFeatures(device);
+   return NVNGX_RESULT_OK;
+ }
+ 
+ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_Init_Ext(unsigned long long id, const wchar_t *path, ID3D11Device *device,
+                                                    unsigned int sdk_version, const void *feature_info) {
++  RememberFeatures(device);
+   return NVNGX_RESULT_OK;
+ }
+ 
+@@ -670,6 +992,7 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_Init_ProjectID(const char *project, un
+                                                          const char *engine_version, const wchar_t *path,
+                                                          ID3D11Device *device, unsigned int sdk_version,
+                                                          const void *feature_info) {
++  RememberFeatures(device);
+   return NVNGX_RESULT_OK;
+ }
+ 
+@@ -677,14 +1000,26 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_Init_with_ProjectID(const char *projec
+                                                               const char *engine_version, const wchar_t *path,
+                                                               ID3D11Device *device, const void *feature_info,
+                                                               unsigned int sdk_version) {
++  RememberFeatures(device);
+   return NVNGX_RESULT_OK;
+ }
+ 
+ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_Shutdown() {
++  std::lock_guard<std::mutex> lock(queues11_mutex);
++  queues11.clear();
+   return NVNGX_RESULT_OK;
+ }
+ 
+ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_Shutdown1(ID3D11Device *device) {
++  IDXGIVkInteropDevice *interop = Interop11(device);
++  if (!interop)
++    return NVNGX_RESULT_OK;
++  VkDevice handle;
++  interop->GetVulkanHandles(nullptr, nullptr, &handle);
++  interop->Release();
++  std::lock_guard<std::mutex> lock(queues11_mutex);
++  queues11.erase(std::remove_if(queues11.begin(), queues11.end(), [&](auto &q) { return q->device == handle; }),
++                 queues11.end());
+   return NVNGX_RESULT_OK;
+ }
+ 
+@@ -723,15 +1058,14 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_GetFeatureRequirements(IDXGIAdapter *a
+ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_CreateFeature(ID3D11DeviceContext *context, unsigned int feature,
+                                                         NVNGXParameter *params, unsigned int **out_handle) {
+   auto parameters = static_cast<ParametersImpl *>(params);
+-  auto metalfx = GetMetalFX11(context);
+-  if (!metalfx || !out_handle || !parameters) {
+-    if (metalfx)
+-      metalfx->Release();
++  if (!context || !out_handle || !parameters)
+     return NVNGX_RESULT_INVALID_PARAMETER;
+-  }
+-  bool supported = feature == NVNGX_FEATURE_SUPERSAMPLING && metalfx->SupportsTemporalUpscale();
+-  metalfx->Release();
+-  if (!supported) {
++  ID3D11Device *device = nullptr;
++  context->GetDevice(&device);
++  Queue11 *queue = GetQueue11(device);
++  if (device)
++    device->Release();
++  if (feature != NVNGX_FEATURE_SUPERSAMPLING || !queue || !queue->temporal_sr) {
+     lane::log("err", "D3D11 CreateFeature: feature %u is not supported", feature);
+     return NVNGX_RESULT_FEATURE_NOT_SUPPORTED;
+   }
+@@ -739,7 +1073,12 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_CreateFeature(ID3D11DeviceContext *con
+   dlss->feature = NVNGX_FEATURE_SUPERSAMPLING;
+   if (NVNGX_FAILED(ReadCreate(parameters, *dlss)))
+     return NVNGX_RESULT_INVALID_PARAMETER;
+-  lane::log("info", "D3D11 Super Resolution %ux%u to %ux%u on MetalFX's temporal scaler", dlss->width, dlss->height,
++  dlss->queue11 = queue;
++  {
++    std::lock_guard<std::mutex> lock(queues11_mutex);
++    dlss->id11 = ++last_id11;
++  }
++  lane::log("info", "D3D11 Super Resolution %ux%u to %ux%u, forwarded as temporal frames", dlss->width, dlss->height,
+             dlss->target_width, dlss->target_height);
+   *out_handle = &dlss.release()->handle;
+   return NVNGX_RESULT_OK;
+@@ -749,45 +1088,46 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_EvaluateFeature(ID3D11DeviceContext *c
+                                                           NVNGXParameter *params, void *callback) {
+   auto parameters = static_cast<ParametersImpl *>(params);
+   auto common = static_cast<CommonFeature *>((void *)handle);
+-  if (!handle || !parameters || common->feature != NVNGX_FEATURE_SUPERSAMPLING)
++  if (!context || !handle || !parameters || common->feature != NVNGX_FEATURE_SUPERSAMPLING)
+     return NVNGX_RESULT_INVALID_PARAMETER;
+   auto dlss = static_cast<DLSSFeature *>(common);
+-  auto metalfx = GetMetalFX11(context);
+-  if (!metalfx) {
+-    lane::log("err", "D3D11 EvaluateFeature: a context without MetalFX");
++  // the frame follows the immediate context's commands; a deferred context's run later
++  if (context->GetType() != D3D11_DEVICE_CONTEXT_IMMEDIATE) {
++    lane::log("err", "D3D11 EvaluateFeature: a deferred context");
+     return NVNGX_RESULT_INVALID_PARAMETER;
+   }
+-  D3D11_VK_METALFX_TEMPORAL_DESC desc = {};
+-  ID3D11Resource *resource = nullptr;
+-  if (NVNGX_SUCCEED(parameters->Get(NVNGX_Parameter_Color, &resource)))
+-    desc.Color = resource;
+-  resource = nullptr;
+-  if (NVNGX_SUCCEED(parameters->Get(NVNGX_Parameter_Output, &resource)))
+-    desc.Output = resource;
+-  resource = nullptr;
+-  if (NVNGX_SUCCEED(parameters->Get(NVNGX_Parameter_Depth, &resource)))
+-    desc.Depth = resource;
+-  resource = nullptr;
+-  if (NVNGX_SUCCEED(parameters->Get(NVNGX_Parameter_MotionVectors, &resource)))
+-    desc.MotionVector = resource;
+-  resource = nullptr;
+-  if (NVNGX_SUCCEED(parameters->Get(NVNGX_Parameter_ExposureTexture, &resource)))
+-    desc.ExposureTexture = resource;
+-  if (!desc.Color || !desc.Output || !desc.Depth || !desc.MotionVector) {
+-    metalfx->Release();
++  static const char *const names[] = {NVNGX_Parameter_Color, NVNGX_Parameter_Depth, NVNGX_Parameter_MotionVectors,
++                                      NVNGX_Parameter_Output, NVNGX_Parameter_ExposureTexture};
++  static_assert(TEMPORAL_COLOR == 0 && TEMPORAL_DEPTH == 1 && TEMPORAL_MOTION == 2 && TEMPORAL_OUTPUT == 3 &&
++                TEMPORAL_EXPOSURE == 4);
++  VKD3D_METALFX_TEMPORAL_DESC desc = {};
++  ReadSuperResolution(parameters, *dlss, desc);
++  VkTemporalFrameInfoMVK info = {};
++  vk_temporal_super_resolution(&info, &desc);
++  for (unsigned i = 0; i < 5; i++) {
++    ID3D11Resource *resource = nullptr;
++    if (NVNGX_SUCCEED(parameters->Get(names[i], &resource)) && resource &&
++        !Image11(resource, info.images[i], info.formats[i])) {
++      lane::log("err", "D3D11 EvaluateFeature: %s is not a DXVK texture", names[i]);
++      return NVNGX_RESULT_INVALID_PARAMETER;
++    }
++  }
++  if (!info.images[TEMPORAL_COLOR] || !info.images[TEMPORAL_DEPTH] || !info.images[TEMPORAL_MOTION] ||
++      !info.images[TEMPORAL_OUTPUT]) {
+     lane::log("err", "D3D11 EvaluateFeature: Super Resolution without its color, output, depth or motion vectors");
+     return NVNGX_RESULT_INVALID_PARAMETER;
+   }
+-  desc.InputContentWidth = GetOr(parameters, NVNGX_Parameter_DLSS_Render_Subrect_Dimensions_Width, 0u);
+-  desc.InputContentHeight = GetOr(parameters, NVNGX_Parameter_DLSS_Render_Subrect_Dimensions_Height, 0u);
+-  desc.DepthReversed = bool(dlss->flag & NVNGX_DLSS_FLAG_DEPTH_INVERTED);
+-  desc.AutoExposure = bool(dlss->flag & NVNGX_DLSS_FLAG_AUTO_EXPOSURE);
+-  desc.MotionVectorInDisplayRes = !bool(dlss->flag & NVNGX_DLSS_FLAG_MV_LOWRES);
+-  ReadCommon(parameters, desc.MotionVectorScaleX, desc.MotionVectorScaleY, desc.JitterOffsetX, desc.JitterOffsetY,
+-             desc.PreExposure, desc.InReset);
+-  HRESULT hr = metalfx->TemporalUpscale(&desc, &dlss->scaler11);
+-  metalfx->Release();
+-  return FAILED(hr) ? NVNGX_RESULT_FAIL : NVNGX_RESULT_OK;
++  info.featureId = dlss->id11;
++  info.frameId = ++dlss->frames11;
++  ID3D11Device *device = nullptr;
++  context->GetDevice(&device);
++  IDXGIVkInteropDevice *interop = Interop11(device);
++  if (device)
++    device->Release();
++  bool submitted = interop && Submit11(*dlss->queue11, interop, info);
++  if (interop)
++    interop->Release();
++  return submitted ? NVNGX_RESULT_OK : NVNGX_RESULT_FAIL;
+ }
+ 
+ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_ReleaseFeature(unsigned int *handle) {
+@@ -796,8 +1136,10 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_ReleaseFeature(unsigned int *handle) {
+   auto common = static_cast<CommonFeature *>((void *)handle);
+   if (common->feature == NVNGX_FEATURE_SUPERSAMPLING) {
+     auto dlss = static_cast<DLSSFeature *>(common);
+-    if (dlss->scaler11)
+-      dlss->scaler11->Destroy();
++    {
++      std::lock_guard<std::mutex> lock(queues11_mutex);
++      released11.push_back(dlss->id11);
++    }
+     delete dlss;
+   }
+   return NVNGX_RESULT_OK;

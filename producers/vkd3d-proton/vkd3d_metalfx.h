@@ -1,8 +1,8 @@
 /*
- * MetalSharp: MetalFX upscaling recorded in a D3D12 command list (ID3D12GraphicsCommandListMetalFX), for
- * VKD3D-Proton-MacOS's NGX core (ngx/nvngx), which runs DLSS Super Resolution on MetalFX's temporal scaler, Ray
- * Reconstruction on its denoised scaler and Frame Generation on its frame interpolator. MoltenVK runs them
- * (mvk_metalfx.h).
+ * DLSS evaluations recorded in a D3D12 command list (ID3D12GraphicsCommandListMetalFX), for VKD3D-Proton-MacOS's
+ * NGX core (ngx/nvngx). Each Super Resolution or Ray Reconstruction evaluation is a temporal frame
+ * (vk_temporal_frame.h) that the Vulkan driver forwards to MacLauncher's graphics pipeline. Frame Generation is
+ * offered where the command lists interpolate frames.
  *
  * This header is C, and the NGX core (C++) includes it as it is.
  *
