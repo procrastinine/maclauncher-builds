@@ -2399,7 +2399,7 @@
   {
     "id": "vnds-love",
     "name": "VNDS-LOVE",
-    "purpose": "Adapted VNDS interpreter for the managed LÖVE host.",
+    "purpose": "Adapted VNDS interpreter for the managed L\u00d6VE host.",
     "producer": {
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
@@ -2764,22 +2764,10 @@
       {
         "version": "1.0.0",
         "label": "Steam client bridge 1.0.0"
-      },
-      {
-        "version": "1.0.1",
-        "label": "Steam client bridge 1.0.1"
-      },
-      {
-        "version": "1.0.2",
-        "label": "Steam client bridge 1.0.2"
-      },
-      {
-        "version": "1.0.3",
-        "label": "Steam client bridge 1.0.3"
       }
     ],
     "build": {
-      "version": "1.0.3",
+      "version": "1.0.0",
       "command": "producers/steam-bridge/build.mjs",
       "architectures": [
         "universal"
