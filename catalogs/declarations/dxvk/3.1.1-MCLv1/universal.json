@@ -1,0 +1,258 @@
+{
+  "id": "dxvk",
+  "version": "3.1.1-MCLv1",
+  "arch": "universal",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "dxvk/3.1.1-MCLv1/universal",
+  "sourceRelative": "source.json",
+  "sourceSha256": "ebcf25f5940dbdccc4685b76bc64502604f7c9d40d4c85236b7517052342293b",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "d794d5da162743c9076039059e18e839c5488190672702ffe64af5ab27269b3d",
+  "files": [
+    {
+      "path": "licenses/components.txt",
+      "size": 693,
+      "sha256": "a334375037fd35b91523b74813ef23a853cbde6026c99f0a263d50ddc8a90350",
+      "mode": 420
+    },
+    {
+      "path": "licenses/DXBC-SPIRV.txt",
+      "size": 1071,
+      "sha256": "0f8a5e687bea942a30a8e39b9915294fbe44eca866e71307a9b7083ee0e69ad8",
+      "mode": 420
+    },
+    {
+      "path": "licenses/DXVK.txt",
+      "size": 1074,
+      "sha256": "a5cb1a6ded7d2d7e92d550ba28edd21be2d1d4044662b399887351023e30ce64",
+      "mode": 420
+    },
+    {
+      "path": "licenses/libdisplay-info.txt",
+      "size": 1089,
+      "sha256": "15b396244e58830c5614b9394f4deccfe684970cd507f299383ab57ad339eedd",
+      "mode": 420
+    },
+    {
+      "path": "licenses/LLVM-MinGW.txt",
+      "size": 15141,
+      "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MacLauncher.txt",
+      "size": 1081,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MinGW-w64-x64-2.txt",
+      "size": 12155,
+      "sha256": "1db8da07b436c68833c0673ffee3d9fcb2526047f3820b81661865dfedc79a1f",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MinGW-w64-x64-3.txt",
+      "size": 5905,
+      "sha256": "f38e6194bd3bfa1b654f118e5acefe0aead437bbe669eee43957ccc65a7127f1",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MinGW-w64-x64-4.txt",
+      "size": 2883,
+      "sha256": "63263614cdd29f2f93cba85e992f041b31f9fc7b4033692f31269489a8a1b177",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MinGW-w64-x64-5.txt",
+      "size": 1099,
+      "sha256": "fa7368d1f93d890c173177475d8ec7aff265a7d08f1f364d66f74d138978ce36",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MinGW-w64-x64.txt",
+      "size": 2326,
+      "sha256": "99a69660981156c21336fdb5661f89341b013c94e4bf9e1c7467b4745718397f",
+      "mode": 420
+    },
+    {
+      "path": "licenses/SPIRV-Headers-2.txt",
+      "size": 17023,
+      "sha256": "d557539df68e771cc1eedcc91d13f70fca930e508d11eedcafa4b15db49e3744",
+      "mode": 420
+    },
+    {
+      "path": "licenses/SPIRV-Headers-3.txt",
+      "size": 1087,
+      "sha256": "6d7c9e9d7d12c8d3753bdb24417b84819ba4d6c2f025c37948113d86dc81eef9",
+      "mode": 420
+    },
+    {
+      "path": "licenses/SPIRV-Headers.txt",
+      "size": 23503,
+      "sha256": "ea43b1de38a6f90c488800d66dec1ed671e68cda530266bc96951fb5b6307613",
+      "mode": 420
+    },
+    {
+      "path": "licenses/Vulkan-Headers-2.txt",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "licenses/Vulkan-Headers-3.txt",
+      "size": 1084,
+      "sha256": "1ca3502222d967f3be5751c55f6b7ee735b5383909c3b501495f54b216dbf227",
+      "mode": 420
+    },
+    {
+      "path": "licenses/Vulkan-Headers.txt",
+      "size": 458,
+      "sha256": "ac24e5ea920e4318e4d02c4086ae51f53cfb03feed06c18df1019e7ada1ec7bc",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 326,
+      "sha256": "d794d5da162743c9076039059e18e839c5488190672702ffe64af5ab27269b3d",
+      "mode": 420
+    },
+    {
+      "path": "source.json",
+      "size": 267,
+      "sha256": "ebcf25f5940dbdccc4685b76bc64502604f7c9d40d4c85236b7517052342293b",
+      "mode": 420
+    },
+    {
+      "path": "version",
+      "size": 6,
+      "sha256": "6dc3b2dc3139b7d421b6fc26a7f853389a9b035ea4f2e9047b9516050dd6ac73",
+      "mode": 420
+    },
+    {
+      "path": "x32/d3d10core.dll",
+      "size": 438272,
+      "sha256": "d5189d16037eb7ade34009a3a3862ea08cba20dec741897289766861843c360a",
+      "mode": 493,
+      "format": "pe",
+      "architectures": [
+        "x86"
+      ]
+    },
+    {
+      "path": "x32/d3d11.dll",
+      "size": 8257536,
+      "sha256": "5be35e4693627360163429a693bcafa55b33939f58738e911a82b8b50743389b",
+      "mode": 493,
+      "format": "pe",
+      "architectures": [
+        "x86"
+      ]
+    },
+    {
+      "path": "x32/d3d8.dll",
+      "size": 1843200,
+      "sha256": "dfccd1953bc584c7e5ac56bbb7ffb029b1c9ab510b50fa80f2519e1cc4010fa5",
+      "mode": 493,
+      "format": "pe",
+      "architectures": [
+        "x86"
+      ]
+    },
+    {
+      "path": "x32/d3d9.dll",
+      "size": 7458816,
+      "sha256": "331df1068e51a71b57caee36a3820a226976adc89ae4187e651133a7dc97b5c2",
+      "mode": 493,
+      "format": "pe",
+      "architectures": [
+        "x86"
+      ]
+    },
+    {
+      "path": "x32/dcomp.dll",
+      "size": 563712,
+      "sha256": "eaa0bd03ee68d9b6d53b37ee1fbe8a92c2774e77ae5ac672000fcf9a2d208e91",
+      "mode": 493,
+      "format": "pe",
+      "architectures": [
+        "x86"
+      ]
+    },
+    {
+      "path": "x32/dxgi.dll",
+      "size": 5586944,
+      "sha256": "4d4a8ec2ec6d61409eb3733d42aa991d6094b29221ffbbe27b913471d05ea2e6",
+      "mode": 493,
+      "format": "pe",
+      "architectures": [
+        "x86"
+      ]
+    },
+    {
+      "path": "x64/d3d10core.dll",
+      "size": 401408,
+      "sha256": "acac4aec3611bac63d4dae2671d1d7ae242433e26c37c85798f6d4d27c710a43",
+      "mode": 493,
+      "format": "pe",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "x64/d3d11.dll",
+      "size": 7843840,
+      "sha256": "8582afa300f4dd23aa6ce5dd428969ba647de45aa128560c37620b851b72163b",
+      "mode": 493,
+      "format": "pe",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "x64/d3d8.dll",
+      "size": 1716224,
+      "sha256": "e33a2536abf57df9fe6e564606be6f54a4c3734f40114c4805375f57a472819e",
+      "mode": 493,
+      "format": "pe",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "x64/d3d9.dll",
+      "size": 7073792,
+      "sha256": "16bf975759614573e6373d02be3a36743183cf14add73f093c320036307654a5",
+      "mode": 493,
+      "format": "pe",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "x64/dcomp.dll",
+      "size": 522752,
+      "sha256": "d3d6b34078e368a87252ddb451e9dd4b841f10d5ad7ae0ae5fc18e09e0a6fd72",
+      "mode": 493,
+      "format": "pe",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "x64/dxgi.dll",
+      "size": 5292032,
+      "sha256": "a51789c06d56fa5f65a5a0fcfa7ebdbe305d7775591823d802ce220e06e7b36d",
+      "mode": 493,
+      "format": "pe",
+      "architectures": [
+        "x86_64"
+      ]
+    }
+  ],
+  "redistribution": "bundle"
+}

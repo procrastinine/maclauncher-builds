@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 2,
+  "projectId": "dxvk",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "dxvk",
+      "version": "3.1.1-MCLv1",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "d794d5da162743c9076039059e18e839c5488190672702ffe64af5ab27269b3d",
+      "sourceSha256": "ebcf25f5940dbdccc4685b76bc64502604f7c9d40d4c85236b7517052342293b",
+      "updatePolicy": "manual",
+      "capabilities": {
+        "opaqueComposition": true
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "7597f32eabbe542ab205cce0c2613d36bab97113"
+      },
+      "asset": {
+        "filename": "dxvk-3.1.1-MCLv1-universal.tar.gz",
+        "sha256": "be9e1cb1b7520c7dab69b6f2370fe52febd8c16a0c5f06d941c7905a1b475c43",
+        "bytes": 16482182,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/dxvk%2Fv3.1.1-MCLv1%2Funiversal/dxvk-3.1.1-MCLv1-universal.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "7597f32eabbe542ab205cce0c2613d36bab97113",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.2",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "42445972498",
+        "runAttempt": "1"
+      },
+      "tag": "dxvk/v3.1.1-MCLv1/universal"
+    }
+  ]
+}
