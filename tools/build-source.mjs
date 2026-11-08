@@ -33,7 +33,7 @@ export async function stageSource(source,revision,destination){
 /** A Python 3.13 environment in the work directory holding the exact tools of a requirements file. */
 export function pythonBuildTools(work,requirements){
  const environment=path.join(work,'tools'),python=path.join(environment,'bin/python');
- run('uv',['venv','--python','3.13',environment]);
+ if(!fs.existsSync(python))run('uv',['venv','--python','3.13',environment]);
  run('uv',['pip','install','--python',python,'--no-deps','--requirement',requirements]);
  return {python,bin:path.join(environment,'bin')};
 }
