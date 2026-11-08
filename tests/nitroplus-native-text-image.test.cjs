@@ -54,7 +54,7 @@ int main() {
   std::cout << "native NSS text regression passed";
 }
 `);
-  execFileSync(compiler, ["-std=c++17", "-I" + path.join(Build.sourcePath, "include"), "-I" + path.join(__dirname, "../sources/maclauncher/src/modules/nitroplus/runtime/native"),
+  execFileSync(compiler, ["-std=c++17", "-I" + path.join(Build.sourcePath, "include"), "-I" + path.join(__dirname, "../producers/package-support/src/modules/nitroplus/runtime/native"),
     source, path.join(__dirname, "../producers/package-support/src/modules/nitroplus/runtime/native/text-markup.cpp"), "-o", binary], { timeout: 30000, stdio: "pipe" });
   assert.equal(execFileSync(binary, [], { timeout: 5000, encoding: "utf8" }), "native NSS text regression passed");
 });

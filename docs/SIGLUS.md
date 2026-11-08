@@ -1,6 +1,6 @@
 # siglus_rs
 
-[siglus_rs](https://github.com/xmoezzz/siglus_rs) provides the native interpreter library used by MacLauncher for Siglus games. This repository compiles its `game_launcher` library from the commit selected in [source.json](../producers/vn-adaptations/source.json), using the upstream Cargo lockfile. An [Objective-C host](../sources/maclauncher/src/modules/siglus/resources/native-host/host.m) calls the library's `game_run_entry` interface and owns the native application lifecycle.
+[siglus_rs](https://github.com/xmoezzz/siglus_rs) provides the native interpreter library used by MacLauncher for Siglus games. This repository compiles its `game_launcher` library from the commit selected in [source.json](../producers/vn-adaptations/source.json), using the upstream Cargo lockfile. An [Objective-C host](../producers/package-support/src/modules/siglus/resources/native-host/host.m) calls the library's `game_run_entry` interface and owns the native application lifecycle.
 
 The shared [Runtime build workflow](../.github/workflows/runtime-build.yml) runs [build-siglus.mjs](../tools/build-siglus.mjs). It fetches the exact public source commit, exports the source to a separate work directory and compiles the library and host for ARM64 with a macOS 13 deployment target. The original checkout stays unchanged. Rust, CMake, Ninja and pkg-config are declared build tools.
 

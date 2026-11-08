@@ -8,7 +8,7 @@ import {rustEnvironment} from "./rust-build.mjs";
 import {sealRuntime} from './seal-runtime.mjs';
 
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
-const overlays=path.join(root,'sources/maclauncher/src/modules/gamemaker/overlays/opengmk-macos');
+const overlays=path.join(root,'producers/package-support/src/modules/gamemaker/overlays/opengmk-macos');
 const Emulator=require(path.join(overlays,'apply-emulator.js')),Ramen=require(path.join(overlays,'apply-ramen.js')),Audio=require(path.join(overlays,'apply-audio.js'));
 export async function buildOpenGMK({project,arch,output,work}){
  fs.mkdirSync(work,{recursive:true});

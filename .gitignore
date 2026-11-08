@@ -7,7 +7,7 @@ src/modules/android/native/tools/*.jar
 AGENTS.md
 dist/
 /sources/maclauncher/build/managed-runtimes/
-/sources/maclauncher/src/modules/shared/reshade/native/*-test.*
+/producers/package-support/src/modules/shared/reshade/native/*-test.*
 !/sources/maclauncher/src/modules/shared/reshade/native/depth-opengl-test.fx
 !/sources/maclauncher/src/modules/shared/reshade/native/depth-opengl-test.mm
 !/sources/maclauncher/src/modules/shared/reshade/native/metal-presentation-test.mm
