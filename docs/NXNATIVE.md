@@ -12,6 +12,8 @@ Earlier self-contained packages, which included source snapshots, were published
 
 When a game is first played, the tools prepare it from its NSP, XCI, NSZ or XCZ application container. Encrypted content needs a local keys file, which is selected separately, and rewritten modules, shader data, generated fonts, logs and saves go in a separate working directory for each application.
 
+A decrypted NUP file or a decrypted dump folder is prepared without a keys file when the selected source provides the upstream `pack_nup.py` and `pack_dump.py` scripts. Each game input is one NUP or one dump, with no other containers beside it. Inspection reads only bounded NUP and dump metadata and reports the title ID, the available update versions and the key requirement; `prepare --package VERSION` selects one of those updates. The package's `runtime.json` declares these routes as the capabilities `keylessInputs` (`nup`, `dump`) and `packageSelection`. The launch record lists the input format, title ID, versions, selected update, key requirement and the Switch generation derived from the source's SDK facts.
+
 MacLauncher passes the selected interpreter and source to the tools in environment variables:
 
 | Variable | Value |

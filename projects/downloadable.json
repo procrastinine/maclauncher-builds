@@ -1967,12 +1967,12 @@
         "label": "nxnative native tools MCLv8"
       },
       {
-        "version": "MCLv12",
-        "label": "nxnative native tools MCLv12"
+        "version": "MCLv9",
+        "label": "nxnative native tools MCLv9"
       }
     ],
     "build": {
-      "version": "MCLv12",
+      "version": "MCLv9",
       "architectures": [
         "arm64"
       ],
