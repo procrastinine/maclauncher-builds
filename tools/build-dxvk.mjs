@@ -15,7 +15,7 @@ export async function buildDxvk({project,arch,output,work}){
   const toolchain=path.join(work,'llvm-mingw');fs.mkdirSync(toolchain,{recursive:true});
   execFileSync('/usr/bin/tar',['-xf',archive,'--strip-components','1','-C',toolchain],{stdio:'inherit'});
   const tools=pythonBuildTools(path.join(work,'build-tools'),path.join(root,'tools/sdk27-build-requirements.txt'));
-  const built=buildProvider({work:path.join(work,'renderer'),output:path.join(work,'renderer-payload'),mingw:path.join(toolchain,'bin'),
+  const built=buildProvider({jobs:6,work:path.join(work,'renderer'),output:path.join(work,'renderer-payload'),mingw:path.join(toolchain,'bin'),
     meson:path.join(tools.bin,'meson'),ninja:path.join(tools.bin,'ninja')});
   return packageProvider({input:built.output,output,project,version:record.version,arch});
 }
