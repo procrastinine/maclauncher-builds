@@ -37,7 +37,7 @@ export function buildProvider({work,output,mingw,glslang,source=path.join(here,'
       path.join(here,'dcomp.cpp'),path.join(here,'dcomp.def'),'-luser32','-ldxguid','-lole32','-o',dcomp]);
     const cross=path.join(root,'cross.ini');
     fs.writeFileSync(cross,`[binaries]\nc = ${quote(cc)}\ncpp = ${quote(cpp)}\nar = ${quote(path.join(mingw,'llvm-ar'))}\nstrip = ${quote(path.join(mingw,'llvm-strip'))}\nwindres = ${quote(path.join(mingw,prefix+'-windres'))}\n[properties]\nneeds_exe_wrapper = true\n[host_machine]\nsystem = 'windows'\ncpu_family = '${architecture==='x64'?'x86_64':'x86'}'\ncpu = '${architecture==='x64'?'x86_64':'i686'}'\nendian = 'little'\n`);
-    const env={...process.env,CFLAGS:'',CXXFLAGS:'',CPPFLAGS:'',LDFLAGS:'',GIT_CEILING_DIRECTORIES:root,PATH:[glslang?path.dirname(path.resolve(glslang)):null,mingw,process.env.PATH].filter(Boolean).join(path.delimiter)};
+    const env={...process.env,NINJA:ninja,CFLAGS:'',CXXFLAGS:'',CPPFLAGS:'',LDFLAGS:'',GIT_CEILING_DIRECTORIES:root,PATH:[glslang?path.dirname(path.resolve(glslang)):null,mingw,process.env.PATH].filter(Boolean).join(path.delimiter)};
     run(meson,['setup',build,exported,'--cross-file',cross,'--buildtype','release'],{env});
     run(ninja,['-C',build,'-j'+String(jobs)],{env});
     targets.push({architecture,build,dcomp});
