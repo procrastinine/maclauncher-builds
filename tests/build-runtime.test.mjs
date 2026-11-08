@@ -18,10 +18,12 @@ test('Android recipes initialize the producer whose metadata they read from a co
  for(const project of ['android-java-framework','android-java-converter','android-angle','android-art-image-extractor','android-launcher','android-art-java','android-image-data-1','android-image-data-2','android-image-data-3','android-image-data-4','android-image-data-5']){
   const commands=[],result=initializeSources({project,directory:root,run:(args,cwd)=>{
    commands.push({args,cwd});
-   if(args[0]==='ls-files')return ['sources/maclauncher','sources/maclauncher-android'].map(path=>'160000 '+'a'.repeat(40)+' 0\t'+path).join('\n')+'\n';
+   if(args[0]==='ls-files'){const links=cwd===root?['sources/maclauncher','sources/maclauncher-android','sources/maclauncher-kosmickrisp']:cwd===path.join(root,'sources/maclauncher')?['src/external/maclauncher-android','src/external/maclauncher-kosmickrisp']:['sources/maclauncher'];return links.map(path=>'160000 '+'a'.repeat(40)+' 0\t'+path).join('\n')+'\n';}
    return '';
   }});
-  assert.deepEqual(result.initialized,[{path:'sources/maclauncher',recursive:false},{path:'sources/maclauncher-android',recursive:false}],project);
+  const declared=JSON.parse(fs.readFileSync(path.join(root,'producers/package-support/app-source.json'))).sourceSubmodules;
+  assert.deepEqual(result.initialized,declared.map(path=>({path,recursive:false})),project);
+  assert.ok(commands.every(({args})=>!args.includes('--recursive')),'Shared source owners do not initialize unrelated upstream trees');
   assert.ok(commands.some(({args})=>args[0]==='submodule'&&args.includes('--init')&&args.at(-1)==='sources/maclauncher-android'),project);
  }
 });
