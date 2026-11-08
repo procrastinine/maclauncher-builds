@@ -6,6 +6,44 @@
     {
       "schemaVersion": 2,
       "id": "nxnative-tools",
+      "version": "MCLv9",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "26.6",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "95a56ed1de4bb158784f35a787f7c21d9d41f3ee44d545387afa8c81fe73b49e",
+      "sourceSha256": "582e76e9dc2f97c8b1c80f3a8ad0ab5a2643e51599e176ff68bb15a5adc07b92",
+      "updatePolicy": "manual",
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "7597f32eabbe542ab205cce0c2613d36bab97113"
+      },
+      "asset": {
+        "filename": "nxnative-tools-MCLv9-arm64.tar.gz",
+        "sha256": "c60e29a6de07c0467e39fe0ca40a0dd88950b4edd17be85a7593774b1778963c",
+        "bytes": 48971372,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/nxnative-tools%2FvMCLv9%2Farm64/nxnative-tools-MCLv9-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "7597f32eabbe542ab205cce0c2613d36bab97113",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.2",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "42445970702",
+        "runAttempt": "1"
+      },
+      "tag": "nxnative-tools/vMCLv9/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "nxnative-tools",
       "version": "MCLv8",
       "arch": "arm64",
       "launcherArchitectures": [
