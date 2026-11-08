@@ -13,6 +13,8 @@ const run=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infini
 const read=(command,args)=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8'}).trim();
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 export async function buildSpirvTools({work,ninja,python,architecture='arm64',jobs=2}){
+ const receipt=path.join(work,'source-build.json'),cachedPrefix=path.join(work,'install'),cachedLibrary=path.join(cachedPrefix,'lib/libSPIRV-Tools.dylib');
+ if(fs.existsSync(receipt)){const provenance=JSON.parse(fs.readFileSync(receipt));if(provenance.architecture!==architecture||Object.entries(spirvToolsProfile).some(([key,value])=>JSON.stringify(provenance[key])!==JSON.stringify(value))||hash(cachedLibrary)!==provenance.librarySha256)throw Error('Completed SPIRV-Tools input changed.');return {prefix:cachedPrefix,pkgConfigPath:path.join(cachedPrefix,'lib/pkgconfig'),library:cachedLibrary,provenance};}
  if(!['arm64','x64'].includes(architecture)||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(ninja||'')||!path.isAbsolute(python||''))throw Error('SPIRV-Tools needs a declared CPU, explicit tools and a new absolute work directory.');
  fs.mkdirSync(work,{recursive:true});
  const compiler=await prepareSources({work:path.join(work,'compiler-inputs')}),sources={'spirv-tools':path.join(compiler.source,'spirv-tools')};
