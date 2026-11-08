@@ -5,7 +5,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 const test = require("node:test");
-const { prepareSourceBuild, DECOMPILER_SOURCE_FILES } = require("../producers/maclauncher/src/modules/gamemaker/overlays/opengmk-macos/source-build");
+const { prepareSourceBuild, DECOMPILER_SOURCE_FILES } = require("../producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/source-build");
 
 function fixture(t) {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "opengmk-offline-recipe-"));
@@ -14,14 +14,14 @@ function fixture(t) {
   for (const file of DECOMPILER_SOURCE_FILES) {
     const destination = path.join(packageRoot, "OpenGMK", file);
     fs.mkdirSync(path.dirname(destination), { recursive: true });
-    fs.copyFileSync(path.join(__dirname, "../producers/maclauncher/src/external/OpenGMK", file), destination);
+    fs.copyFileSync(path.join(__dirname, "../producers/package-support/src/external/OpenGMK", file), destination);
   }
   fs.writeFileSync(path.join(packageRoot, "Cargo.lock"), "# immutable source package lock\n");
   fs.mkdirSync(path.join(packageRoot, "registry"));
   return { root, packageRoot, outputRoot };
 }
 
-test("the decompiler recipe isolates its workspace and preserves upstream Rust while reporting its actual source revision", requirements({ sourceTree: 'producers/maclauncher/src/external/OpenGMK' }), t => {
+test("the decompiler recipe isolates its workspace and preserves upstream Rust while reporting its actual source revision", requirements({ sourceTree: 'producers/package-support/src/external/OpenGMK' }), t => {
   const f = fixture(t), originalBuild = fs.readFileSync(path.join(f.packageRoot, "OpenGMK/gm8decompiler/build.rs"));
   // Real development builds often live below the launcher's Git worktree.
   // git apply must not silently skip paths relative to that parent repository.
@@ -44,7 +44,7 @@ test("the decompiler recipe isolates its workspace and preserves upstream Rust w
   assert.equal(fs.existsSync(path.join(f.packageRoot, "OpenGMK/maclauncher-overlay.json")), false);
 });
 
-test("unlisted targets and source-relative outputs fail; source comments do not become a second pin", requirements({ sourceTree: 'producers/maclauncher/src/external/OpenGMK' }), t => {
+test("unlisted targets and source-relative outputs fail; source comments do not become a second pin", requirements({ sourceTree: 'producers/package-support/src/external/OpenGMK' }), t => {
   const f = fixture(t);
   assert.throws(() => prepareSourceBuild({ ...f, target: "unknown" }), /gm8emulator or gm8decompiler/);
   assert.equal(fs.existsSync(f.outputRoot), false);

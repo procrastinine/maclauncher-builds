@@ -1,0 +1,1 @@
+../../../../../../sources/maclauncher/src/modules/hashlink/runtime/primitive-signatures.js

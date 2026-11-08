@@ -5,9 +5,9 @@ const path = require("node:path");
 const os = require("node:os");
 const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
-const Fonts = require("../producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts");
-const Resources = require("../producers/maclauncher/src/modules/alicesoft/system3-resource-overlay");
-const System3 = require("../producers/maclauncher/src/modules/alicesoft/system3-portable");
+const Fonts = require("../producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts");
+const Resources = require("../producers/package-support/src/modules/alicesoft/system3-resource-overlay");
+const System3 = require("../producers/package-support/src/modules/alicesoft/system3-portable");
 
 function temporary(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "maclauncher-portable-native-"));

@@ -10,9 +10,9 @@ import {applyOverlays} from './overlays/apply.mjs';
 import {prepareDependencies} from './dependencies.mjs';
 
 const require = createRequire(import.meta.url);
-const B = require('../../lib/bundled-native.cjs');
-const Native = require('../../lib/local-native.cjs');
-const MachO = require('../maclauncher/src/modules/shared/runtime/macho-load-commands.js');
+const B = require('../../sources/maclauncher/src/modules/shared/runtime/bundled-native.js');
+const Native = require('../../sources/maclauncher/src/modules/shared/runtime/local-native.js');
+const MachO = require('../../sources/maclauncher/src/modules/shared/runtime/macho-load-commands.js');
 const producer = import.meta.dirname, repository = path.resolve(producer, '../..');
 const pin = JSON.parse(fs.readFileSync(path.join(producer, 'source.json')));
 pin.source.revision=gitlink(pin.source.path);

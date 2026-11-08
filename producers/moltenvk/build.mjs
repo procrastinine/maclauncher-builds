@@ -24,7 +24,7 @@ export function applyTemporalSource(work){
     const commands=path.join(work,'MoltenVK/MoltenVK/Commands');
     for(const name of ['temporal-command.hpp','temporal-command.inc','temporal-map.hpp','temporal-scene.hpp'])fs.copyFileSync(path.join(here,name),path.join(commands,name));
     fs.writeFileSync(path.join(commands,'temporal-carrier.h'),carrierHeader());
-    const scene=path.resolve(here,'../maclauncher/src/modules/shared/reshade');
+    const scene=path.resolve(here,'../../sources/maclauncher/src/modules/shared/reshade');
     const common=path.join(work,'MoltenVK/include/macfx-temporal');
     fs.mkdirSync(common,{recursive:true});
     for(const [name,directory]of [['frame.h','temporal'],['scene-aovs.h','temporal'],['scene-matrices.h','temporal'],['image-color.h','native']]){

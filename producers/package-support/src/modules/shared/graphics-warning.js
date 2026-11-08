@@ -1,0 +1,1 @@
+../../../../../sources/maclauncher/src/modules/shared/graphics-warning.js

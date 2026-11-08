@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {addLicenses} from '../lib/licenses.mjs';
 import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
 import fs from 'node:fs';
@@ -9,9 +10,9 @@ import {sealRuntime} from './seal-runtime.mjs';
 import {resolveProject} from '../lib/projects.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {nativeStackInput} from './native-stack.mjs';
-const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),moduleRoot=path.join(root,'producers/maclauncher/src/modules/hashlink/runtime');
+const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),moduleRoot=path.join(root,'sources/maclauncher/src/modules/hashlink/runtime');
 const Paths=require(path.join(moduleRoot,'compiler-paths.js'));
-const Binary=require('../producers/maclauncher/scripts/native-binary-tools.cjs');
+const Binary=require('../sources/maclauncher/scripts/native-binary-tools.cjs');
 export function hashLinkProfile(version,project=resolveProject('hashlink',root,{resolvePins:false})){
  const profile=project.packageProfiles.find(profile=>profile.version===version),labels=profile?.anchor?project.packageProfiles.filter(row=>row.anchor===profile.anchor).map(row=>row.version):[version],sources=new Set(labels.map(label=>/^(1\.(?:9|12))-MCLv[1-9]\d*$/.exec(label||'')?.[1]).filter(Boolean));
  if(sources.size!==1)throw Error('The HashLink catalog has no ABI release for '+version+'.');return [...sources][0];
@@ -26,9 +27,9 @@ function bytecodeFacts(source){
 }
 export async function buildHashLink({project,arch,version,output,work,sourceRoot:cachedSourceRoot}){
  fs.mkdirSync(work,{recursive:true});const legacy=hashLinkProfile(version,resolveProject(project,root,{resolvePins:false}))==='1.9',Builder=require(path.join(moduleRoot,legacy?'legacy-build.js':'dynamic-legacy-build.js'));
- let sourceRoot=path.join(root,'producers/maclauncher/src/external/source-revisions/hashlink-1-9');
+ let sourceRoot=path.join(root,'producers/package-support/src/external/source-revisions/hashlink-1-9');
  if(!legacy)sourceRoot=cachedSourceRoot||checkoutSource({repository:'https://github.com/HaxeFoundation/hashlink',revision:Builder.REVISION,destination:path.join(work,'upstream')});
- const sdlRoot=checkoutSource({...sharedDependencies.sdlHeaders,destination:path.join(work,'sdl-upstream')}),openalRoot=path.join(root,'producers/maclauncher/src/external/openal-soft');
+ const sdlRoot=checkoutSource({...sharedDependencies.sdlHeaders,destination:path.join(work,'sdl-upstream')}),openalRoot=path.join(root,'producers/package-support/src/external/openal-soft');
  const source=path.join(work,'source'),sdl=path.join(work,'sdl'),openal=path.join(work,'openal');
  const staged=await stageSource(sourceRoot,Builder.REVISION,source),sdlStage=await stageSource(sdlRoot,Builder.SDL_REVISION,sdl),openalStack=nativeStackInput(preparedBuildInput('native-openal'),{arch,work:path.join(work,'openal-prefix')}),openalStage={treeSha256:openalStack.sourceTreeSha256};
  const overlaySha256=Builder.adaptSource(source,sdl),flags=Paths.compilerFlags(Paths.compilerPathMappings({source,sdlSource:sdl,openalSource:openal,build:work,runtime:output})),overlay=path.join(work,'compiler-paths.cmake');

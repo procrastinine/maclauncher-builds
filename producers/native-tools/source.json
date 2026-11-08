@@ -12,7 +12,7 @@
       "version": "2.9.0",
       "dependencies": [
         {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sndfile.json",
+          "file": "producers/package-support/src/modules/shared/runtime/portable-sndfile.json",
           "ids": [
             "ogg",
             "flac",
@@ -20,7 +20,7 @@
           ]
         },
         {
-          "file": "producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.json",
+          "file": "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
           "ids": [
             "libpng"
           ]

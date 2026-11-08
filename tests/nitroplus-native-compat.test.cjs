@@ -4,8 +4,8 @@ const os = require("node:os");
 const path = require("node:path");
 const { execFileSync, spawnSync } = require("node:child_process");
 const test = require("node:test");
-const Build = require("../producers/maclauncher/src/modules/nitroplus/runtime/build");
-const Pinned = require("../producers/maclauncher/src/modules/shared/runtime/pinned-native-build");
+const Build = require("../producers/package-support/src/modules/nitroplus/runtime/build");
+const Pinned = require("../sources/maclauncher/src/modules/shared/runtime/pinned-native-build");
 
 const prefix = ["/opt/homebrew", "/usr/local"].find(root => fs.existsSync(path.join(root, "include/boost/locale.hpp")));
 const flex = prefix && path.join(prefix, "opt/flex/bin/flex");

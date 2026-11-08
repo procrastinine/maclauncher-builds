@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const shared = require('../producers/dependencies.json');
-const base = '../producers/maclauncher/src/modules/';
+const base = '../sources/maclauncher/src/modules';
 const modulePin = file => require(base + file).PIN;
 
 test('portable runtimes share source records while retaining each build options', () => {

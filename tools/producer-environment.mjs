@@ -1,0 +1,1 @@
+process.env.MACLAUNCHER_PACKAGE_PRODUCER = '1';

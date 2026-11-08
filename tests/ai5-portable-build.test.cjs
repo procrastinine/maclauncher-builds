@@ -4,9 +4,9 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const Audio = require("../producers/maclauncher/src/modules/shared/runtime/portable-sndfile");
-const Portable = require("../producers/maclauncher/src/modules/ai5/runtime/portable-build-v4");
-const Previous = require("../producers/maclauncher/src/modules/ai5/runtime/build");
+const Audio = require("../producers/package-support/src/modules/shared/runtime/portable-sndfile");
+const Portable = require("../producers/package-support/src/modules/ai5/runtime/portable-build-v4");
+const Previous = require("../producers/package-support/src/modules/ai5/runtime/build");
 
 function temporary(t) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ai5-portable-test-"));

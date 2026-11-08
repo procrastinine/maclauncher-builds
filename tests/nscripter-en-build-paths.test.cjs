@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { execFileSync } = require("node:child_process");
-const Build = require("../producers/maclauncher/src/modules/nscripter/runtime/onscripter-en-build-v3");
+const Build = require("../producers/package-support/src/modules/nscripter/runtime/onscripter-en-build-v3");
 const PROFILE = "fixture-profile";
 
 test("ONScripter compiler paths map owned sources, generated files, home, workspace, temp and cache roots", { skip: process.platform !== "darwin" }, t => {

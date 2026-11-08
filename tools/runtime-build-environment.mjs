@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -7,7 +8,7 @@ const systemDirectories=process.platform==='win32'?[]:['/usr/bin','/bin','/usr/s
 const locate=(name,env)=>{try{return execFileSync('/usr/bin/which',[name],{maxBuffer:Infinity,encoding:'utf8',env,stdio:['ignore','pipe','ignore']}).trim();}catch{return undefined;}};
 /** Limit additional executable and library discovery to declared build tools. */
 export function runtimeBuildEnvironment(build,{environment=process.env,platform=process.platform}={}){
- const env={...environment},aliases=fs.mkdtempSync(path.join(os.tmpdir(),'runtime-build-tools-'));
+ const env={...environment,MACLAUNCHER_PACKAGE_PRODUCER:'1'},aliases=fs.mkdtempSync(path.join(os.tmpdir(),'runtime-build-tools-'));
  try{
   const names=new Set(build.tools||[]),brew=platform==='darwin'?locate('brew',environment):undefined,prefixes=[];
   if(!['darwin','linux'].includes(platform))throw Error('Runtime builds support macOS and Linux.');

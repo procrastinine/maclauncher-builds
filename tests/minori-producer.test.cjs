@@ -2,8 +2,8 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const temporary=t=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'producer-test-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;};
 const directory=temporary;
 test("Minori source overlay validates every pinned input before changing an owned export", t => {
-  const Build = require("../producers/maclauncher/src/modules/minori/runtime/build");
-  const root = directory(t), source = path.resolve(__dirname,"../producers/maclauncher/src/external/ReMinori");
+  const Build = require("../producers/package-support/src/modules/minori/runtime/build");
+  const root = directory(t), source = path.resolve(__dirname,"../producers/package-support/src/external/ReMinori");
   if (!fs.existsSync(path.join(source, "crates/engine/src/font.rs"))) return t.skip("Optional source submodule is not initialized.");
   for (const file of Object.keys(Build.ORIGINALS)) { fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true }); fs.copyFileSync(path.join(source, file), path.join(root, file)); }
   const original = fs.readFileSync(path.join(root, "crates/engine/src/font.rs"));
@@ -18,7 +18,7 @@ test("Minori source overlay validates every pinned input before changing an owne
 });
 
 test("movie profile enables a finite native decoder set without networking or unreviewed system codec autodetection", () => {
-  const Movies = require("../producers/maclauncher/src/modules/minori/runtime/movie-build");
+  const Movies = require("../producers/package-support/src/modules/minori/runtime/movie-build");
   assert.ok(Movies.DECODERS.includes("wmv3")); assert.ok(Movies.DEMUXERS.includes("asf"));
   assert.ok(Movies.OPTIONS.includes("--disable-network")); assert.ok(Movies.OPTIONS.includes("--disable-gpl"));
   assert.ok(Movies.OPTIONS.includes("--disable-nonfree")); assert.ok(Movies.OPTIONS.includes("--disable-autodetect"));

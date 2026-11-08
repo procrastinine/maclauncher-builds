@@ -3,10 +3,10 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const Legacy = require("../producers/maclauncher/src/modules/hashlink/runtime/legacy-build");
-const CompilerPaths = require("../producers/maclauncher/src/modules/hashlink/runtime/compiler-paths");
+const Legacy = require("../producers/package-support/src/modules/hashlink/runtime/legacy-build");
+const CompilerPaths = require("../producers/package-support/src/modules/hashlink/runtime/compiler-paths");
 const { spawnSync } = require("node:child_process");
-const { findBuildTool } = require("../producers/maclauncher/src/modules/shared/runtime/pinned-native-build");
+const { findBuildTool } = require("../sources/maclauncher/src/modules/shared/runtime/pinned-native-build");
 
 test("HashLink graphics compiler maps cover physical aliases and preserve paths with spaces", { skip: process.platform !== "darwin" }, t => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "hashlink-private-compiler-"));

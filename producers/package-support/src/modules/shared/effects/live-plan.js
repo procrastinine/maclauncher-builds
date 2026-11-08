@@ -1,0 +1,1 @@
+../../../../../../sources/maclauncher/src/modules/shared/effects/live-plan.js

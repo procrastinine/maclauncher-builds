@@ -14,16 +14,16 @@ test('MKXP-Z uses its owned source recipe and one Gitlink source identity',()=>{
  const project=resolveProject('mkxpz',root);
  assert.equal(project.producer.kind,'maclauncher');
  assert.equal(project.producer.repository,'https://github.com/procrastinine/maclauncher-builds');
- assert.deepEqual(project.producer.entries,['producers/maclauncher/scripts/build-mkxpz-nfc.cjs','producers/maclauncher/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json','producers/maclauncher/helper-builds/mkxpz.json']);
- assert.equal(project.upstreams.find(row=>row.id==='sdl2-image').revision,JSON.parse(fs.readFileSync(path.join(root,'producers/maclauncher/helper-builds/mkxpz.json'))).sdlImage.revision);
+ assert.deepEqual(project.producer.entries,['producers/package-support/scripts/build-mkxpz-nfc.cjs','producers/package-support/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json','producers/package-support/helper-builds/mkxpz.json']);
+ assert.equal(project.upstreams.find(row=>row.id==='sdl2-image').revision,JSON.parse(fs.readFileSync(path.join(root,'producers/package-support/helper-builds/mkxpz.json'))).sdlImage.revision);
  assert.ok(project.packageProfiles.some(row=>row.version===project.build.version));assert.equal(project.build.command,'tools/build-mkxpz.mjs');
  assert.deepEqual(project.build.architectures,['arm64']);
  for(const version of ['MCLv1-1003','MCLv2-1003'])assert.ok(project.packageProfiles.some(row=>row.version===version));
- assert.equal(project.upstreams[0].revision,gitlink('producers/maclauncher/src/external/mkxp-z'));
+ assert.equal(project.upstreams[0].revision,gitlink('producers/package-support/src/external/mkxp-z'));
  assert.equal(Object.hasOwn(baseline.upstream,'revision'),false);
  assert.match(baseline.upstream.sourceSha256,/^[a-f0-9]{64}$/);
  assert.ok(baseline.upstream.sourceBytes>0);
- assert.equal(build(['--project','mkxpz','--check']).sourceDirectory,'producers/maclauncher');
+ assert.equal(build(['--project','mkxpz','--check']).sourceDirectory,'sources/maclauncher');
 });
 test('MKXP-Z catalog validates an immutable Apple Silicon package',t=>{
  const project=resolveProject('mkxpz',root),{repository,value}=catalogFixture(t,'mkxpz',[packageRecord('mkxpz',{version:project.build.version,minimumMacOS:'11.0'})]);

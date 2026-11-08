@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {addLicenses,includeLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10,7 +11,7 @@ import {sealRuntime} from './seal-runtime.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {nativeStackInput} from './native-stack.mjs';
 const require=createRequire(import.meta.url);
-const Builder=require('../producers/maclauncher/src/modules/nitroplus/runtime/portable-build.js'),Media=require('../producers/maclauncher/src/modules/nitroplus/runtime/portable-media.js'),Fonts=require('../producers/maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.js');
+const Builder=require('../producers/package-support/src/modules/nitroplus/runtime/portable-build.js'),Media=require('../producers/package-support/src/modules/nitroplus/runtime/portable-media.js'),Fonts=require('../producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js');
 /** Decode the declared PBZX package payload into its cpio archive. */
 function decodePayload(input,output){
  const source=fs.openSync(input,'r'),target=fs.openSync(output,'wx'),header=Buffer.alloc(12);let offset=12;
@@ -45,7 +46,7 @@ export async function finishNPengine({project,arch,output,work,source,npa,reposi
 }
 export async function sealNPengine({project,arch,output,work,source,npa,repository,npaRepository,media,built}){
  addLicenses(built.prefix,'libnpa',npa);
- addLicenses(built.prefix,'GStreamer media',path.resolve(import.meta.dirname,'../producers/maclauncher/src/modules/nitroplus/runtime'));
+ addLicenses(built.prefix,'GStreamer media',path.resolve(import.meta.dirname,'../sources/maclauncher/src/modules/nitroplus/runtime'));
  includeLicenses(built.prefix,`${built.dependencyClosure?.utilities?.prefix}/licenses`);
  const payloads=fs.readdirSync(built.prefix).filter(name=>name!=='bin').map(name=>({source:path.join(built.prefix,name),relative:'npengine/'+name}));
  return sealRuntime({project,arch,output,executable:built.executable,executableRelative:'npengine/bin/npengine-runner',sourceRoot:source,upstreamRevision:Builder.REVISION,payloads,runtimeFiles:{profile:'npengine/profile.json'},provenance:{mediaInputs:Media.PIN.officialPayloads.map(({url,member,sha256})=>({url,member,sha256})),dependencySources:Media.PIN.correspondingSources.map(({id,version,archiveUrl,archiveSha256})=>({id,version,archiveUrl,archiveSha256}))}});

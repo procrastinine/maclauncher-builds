@@ -4,8 +4,8 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { execFileSync, spawnSync } = require("node:child_process");
-const Build = require("../producers/maclauncher/src/modules/nitroplus/runtime/build");
-const Pinned = require("../producers/maclauncher/src/modules/shared/runtime/pinned-native-build");
+const Build = require("../producers/package-support/src/modules/nitroplus/runtime/build");
+const Pinned = require("../sources/maclauncher/src/modules/shared/runtime/pinned-native-build");
 
 const compiler = "/usr/bin/clang++";
 const available = fs.existsSync(compiler) && fs.existsSync(path.join(Build.sourcePath, "include/TextParser.hpp"));
@@ -54,8 +54,8 @@ int main() {
   std::cout << "native NSS text regression passed";
 }
 `);
-  execFileSync(compiler, ["-std=c++17", "-I" + path.join(Build.sourcePath, "include"), "-I" + path.join(__dirname, "../producers/maclauncher/src/modules/nitroplus/runtime/native"),
-    source, path.join(__dirname, "../producers/maclauncher/src/modules/nitroplus/runtime/native/text-markup.cpp"), "-o", binary], { timeout: 30000, stdio: "pipe" });
+  execFileSync(compiler, ["-std=c++17", "-I" + path.join(Build.sourcePath, "include"), "-I" + path.join(__dirname, "../sources/maclauncher/src/modules/nitroplus/runtime/native"),
+    source, path.join(__dirname, "../producers/package-support/src/modules/nitroplus/runtime/native/text-markup.cpp"), "-o", binary], { timeout: 30000, stdio: "pipe" });
   assert.equal(execFileSync(binary, [], { timeout: 5000, encoding: "utf8" }), "native NSS text regression passed");
 });
 

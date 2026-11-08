@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {angleDefinition} from './build-android-angle.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -14,8 +15,8 @@ import {buildAndroidArtSupplier} from './build-android-art-supplier.mjs';
 import {repackageAndroid} from './repackage-android.mjs';
 import {packageAndroid} from './package-android.mjs';
 const root=path.resolve(import.meta.dirname,'..');
-const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),Contract=require('../lib/package-contract.cjs');
-const {readMachOLoadCommands}=require('../producers/maclauncher/src/modules/shared/runtime/macho-load-commands.js');
+const require=createRequire(import.meta.url),B=require('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js'),Contract=require('../sources/maclauncher/src/modules/shared/runtime/package-contract.cjs');
+const {readMachOLoadCommands}=require('../sources/maclauncher/src/modules/shared/runtime/macho-load-commands.js');
 const json=file=>JSON.parse(fs.readFileSync(file));
 function product(root,relative){const file=path.join(root,relative);if(!fs.statSync(file,{throwIfNoEntry:false})?.isFile())throw Error('The sealed Android input is missing '+relative);return file;}
 

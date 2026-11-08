@@ -1,7 +1,7 @@
 const requirements = require('./support/requirements.cjs');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const temporary=t=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'producer-test-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;};
-const Build=require('../producers/maclauncher/src/modules/fna/runtime/build'),Native=require('../producers/maclauncher/src/modules/shared/runtime/local-native');
+const Build=require('../producers/package-support/src/modules/fna/runtime/build'),Native=require('../sources/maclauncher/src/modules/shared/runtime/local-native');
 const fixture=temporary;
 test("FNA build overlays affect only private inputs and retain default accelerated graphics", t => {
   const root = fixture(t), source = path.join(root, "upstream.cs"), destination = path.join(root, "staged.cs");
@@ -44,7 +44,7 @@ test("FNA host declares the original-path contract it reads and alone selects th
   const dependencies = Build.__test.hostDependencies(), target = dependencies.targets[dependencies.runtimeTarget.name];
   assert.deepEqual(Object.values(target).map(item => Object.keys(item.runtime)), [["MacLauncherFnaHost.dll"]]);
   assert.deepEqual(Build.__test.CAPABILITIES, { originalGamePaths: true });
-  const fna = path.join(__dirname, "../producers/maclauncher/src/modules/fna");
+  const fna = path.join(__dirname, "../sources/maclauncher/src/modules/fna");
   const host = fs.readFileSync(path.join(fna, "overlays/ManagedHost.cs"), "utf8");
   for (const name of ["MACLAUNCHER_FNA_GAME_ROOT", "MACLAUNCHER_FNA_ASSEMBLY_ROOT", "MACLAUNCHER_FNA_USE_RUNTIME_FRAMEWORK"])
     assert.ok(host.includes('GetEnvironmentVariable("' + name + '")'), name);

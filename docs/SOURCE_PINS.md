@@ -19,7 +19,7 @@ The value at the pointer is either a 40-character commit string or a source obje
 
 ## Build constants in CommonJS producers
 
-A reference can also point at a constant that a CommonJS producer in this repository already exports: `{"file":"producers/maclauncher/src/modules/ai5/runtime/portable-build-v4.js","pointer":"/REVISION"}`. Resolving it loads the same module that the producer uses and reads the export without calling any build function. New producers record their commits in JSON files instead; references to exports let existing recipes and packages stay unchanged.
+A reference can also point at a constant that a CommonJS producer in this repository already exports: `{"file":"producers/package-support/src/modules/ai5/runtime/portable-build-v4.js","pointer":"/REVISION"}`. Resolving it loads the same module that the producer uses and reads the export without calling any build function. New producers record their commits in JSON files instead; references to exports let existing recipes and packages stay unchanged.
 
 ## Entries in arrays
 
@@ -27,7 +27,7 @@ When the commit is inside an array, `match` selects the entry by its fields rath
 
 ```json
 {
-  "file": "producers/maclauncher/src/modules/hashlink/runtime/manager.js",
+  "file": "sources/maclauncher/src/modules/hashlink/runtime/manager.js",
   "pointer": "/core/catalog",
   "match": {"version": "1.16"},
   "field": "/upstreamRevision"

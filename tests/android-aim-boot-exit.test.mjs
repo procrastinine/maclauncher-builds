@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
-import {adaptGuestInitExitReport} from '../producers/maclauncher/src/modules/android/providers/aim/source.mjs';
+import {adaptGuestInitExitReport} from '../producers/package-support/src/modules/android/providers/aim/source.mjs';
 
 test('native init reports its first stop reason before authenticated namespace retirement', t => {
   const source = process.env.ANDROID_AIM_BOOT_EXIT_SOURCE;

@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {addLicense,addLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -8,7 +9,7 @@ import {sealRuntime} from './seal-runtime.mjs';
 
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {nativeStackInput} from './native-stack.mjs';
-const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),modules=path.join(root,'producers/maclauncher/src/modules'),native=path.join(modules,'mages/native');
+const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),modules=path.join(root,'sources/maclauncher/src/modules'),native=path.join(modules,'mages/native');
 const Builder=require(path.join(native,'current-build.js')),Dependency=require(path.join(native,'portable-dependencies.js')),Portable=require(path.join(native,'portable-build.js')),Adapter=require(path.join(native,'adapter.js')),Patches=require(path.join(native,'source-patches.js')),DependencyOverlays=require(path.join(native,'dependency-overlays.json'));
 const Fonts=require(path.join(modules,'shared/runtime/portable-sdl2-fonts.js')),Audio=require(path.join(modules,'shared/runtime/portable-sndfile.js'));
 const Source=require(path.join(modules,'shared/runtime/pinned-native-build.js')),AVCPP_SOURCE_SCOPE=Object.freeze({kind:'primary-tree',omittedSubmodules:['catch2']});

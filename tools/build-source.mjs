@@ -1,10 +1,11 @@
+import './producer-environment.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import {retryNetwork} from './download.mjs';
-const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Source=require('../producers/maclauncher/src/modules/shared/runtime/pinned-native-build.js');
+const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Source=require('../sources/maclauncher/src/modules/shared/runtime/pinned-native-build.js');
 /** A build tool from the declared Homebrew formulae, then from PATH. */
 export const findBuildTool=Source.findBuildTool;
 export const run=(command,args,options={})=>{

@@ -1,0 +1,1 @@
+../../../../../../sources/maclauncher/src/modules/catsystem2/runtime/stage-viewport.cjs

@@ -4,10 +4,10 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 
-const Media = require("../producers/maclauncher/src/modules/nitroplus/runtime/portable-media");
-const Portable = require("../producers/maclauncher/src/modules/nitroplus/runtime/portable-build");
-const Source = require("../producers/maclauncher/src/modules/shared/runtime/pinned-native-build");
-const Existing = require("../producers/maclauncher/src/modules/nitroplus/runtime/build");
+const Media = require("../producers/package-support/src/modules/nitroplus/runtime/portable-media");
+const Portable = require("../producers/package-support/src/modules/nitroplus/runtime/portable-build");
+const Source = require("../sources/maclauncher/src/modules/shared/runtime/pinned-native-build");
+const Existing = require("../producers/package-support/src/modules/nitroplus/runtime/build");
 
 test("Nitroplus source export keeps NSS compatibility while replacing Homebrew library discovery", async t => {
   if (!fs.existsSync(path.join(Existing.sourcePath,"include/Object.hpp")) || !fs.existsSync(path.join(Existing.npaSourcePath,"src/parser.y"))) return t.skip("Optional pinned source submodules are not initialized.");

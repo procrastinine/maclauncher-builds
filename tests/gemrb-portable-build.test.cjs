@@ -1,5 +1,5 @@
 const test=require("node:test"),assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path"),os=require("node:os");
-const GemRB=require("../producers/maclauncher/src/modules/gemrb/runtime/portable-build-v5"),Overlay=require("../producers/maclauncher/src/modules/gemrb/runtime/portable-overlay-v5");
+const GemRB=require("../producers/package-support/src/modules/gemrb/runtime/portable-build-v5"),Overlay=require("../producers/package-support/src/modules/gemrb/runtime/portable-overlay-v5");
 function temporary(t){const root=fs.mkdtempSync(path.join(os.tmpdir(),"maclauncher-gemrb-portable-test-"));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;}
 function inputs(t){if(!fs.existsSync(path.join(GemRB.sourcePath,"gemrb/CMakeLists.txt"))){t.skip("GemRB source submodule is not initialized");return;}const root=temporary(t),source=path.join(root,"source");for(const f of Overlay.SOURCE_FILES){fs.mkdirSync(path.dirname(path.join(source,f)),{recursive:true});fs.copyFileSync(path.join(GemRB.sourcePath,f),path.join(source,f));}return{root,source};}
 test("GemRB CLI overlay preserves upstream inputs and guards true-color sprites without source SDL mutation",t=>{

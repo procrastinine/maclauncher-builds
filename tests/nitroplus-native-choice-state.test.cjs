@@ -5,8 +5,8 @@ const path = require('node:path');
 const os = require('node:os');
 const crypto = require('node:crypto');
 const { execFileSync } = require('node:child_process');
-const Build = require('../producers/maclauncher/src/modules/nitroplus/runtime/build');
-const Overlay = require('../producers/maclauncher/src/modules/nitroplus/runtime/choice-overlay');
+const Build = require('../producers/package-support/src/modules/nitroplus/runtime/build');
+const Overlay = require('../producers/package-support/src/modules/nitroplus/runtime/choice-overlay');
 
 const boost = ['/opt/homebrew/include', '/usr/local/include'].find(root => fs.existsSync(path.join(root, 'boost/locale.hpp')));
 const initialized = fs.existsSync(path.join(Build.sourcePath, 'src/Choice.cpp')) && fs.existsSync(path.join(Build.npaSourcePath, 'include/inpafile.hpp'));

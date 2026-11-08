@@ -5,10 +5,10 @@ const fs = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
 const { spawnSync } = require("node:child_process");
-const Base = require("../producers/maclauncher/src/modules/shared/onsyuri/runtime/portable-build");
-const Page = require("../producers/maclauncher/src/modules/shared/onsyuri/runtime/portable-page-reset");
-const Build = require("../producers/maclauncher/src/modules/shared/onsyuri/runtime/portable-build-v3");
-const ORIGINAL = path.resolve(__dirname, "../producers/maclauncher/src/external/onscripter-yuri/src/onsyuri/ONScripter.cpp");
+const Base = require("../producers/package-support/src/modules/shared/onsyuri/runtime/portable-build");
+const Page = require("../producers/package-support/src/modules/shared/onsyuri/runtime/portable-page-reset");
+const Build = require("../producers/package-support/src/modules/shared/onsyuri/runtime/portable-build-v3");
+const ORIGINAL = path.resolve(__dirname, "../producers/package-support/src/external/onscripter-yuri/src/onsyuri/ONScripter.cpp");
 
 function temporary(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "maclauncher-yuri-page-reset-"));
@@ -16,7 +16,7 @@ function temporary(t) {
   return root;
 }
 
-test("Yuri V3 applies only the pinned page reset to a disposable source tree", requirements({ sourceTree: 'producers/maclauncher/src/external/onscripter-yuri' }), t => {
+test("Yuri V3 applies only the pinned page reset to a disposable source tree", requirements({ sourceTree: 'producers/package-support/src/external/onscripter-yuri' }), t => {
   const original = fs.readFileSync(ORIGINAL), root = temporary(t), staged = path.join(root, Page.FILE);
   fs.mkdirSync(path.dirname(staged), { recursive: true }); fs.writeFileSync(staged, original);
   const result = Page.apply(root, path.dirname(ORIGINAL));

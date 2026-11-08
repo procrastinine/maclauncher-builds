@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { execFileSync } = require("node:child_process");
-const { sourcePathFlags, VERSION } = require("../producers/maclauncher/src/modules/nitroplus/runtime/build");
+const { sourcePathFlags, VERSION } = require("../producers/package-support/src/modules/nitroplus/runtime/build");
 
 test("Nitroplus compiler paths retain exact logical roots without leaking quoted private build paths", { skip: process.platform !== "darwin" }, t => {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "nitro path's fixture-"));

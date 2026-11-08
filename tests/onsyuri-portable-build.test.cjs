@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
-const Build = require("../producers/maclauncher/src/modules/shared/onsyuri/runtime/portable-build");
+const Build = require("../producers/package-support/src/modules/shared/onsyuri/runtime/portable-build");
 
 function temporary(t) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "maclauncher-yuri-build-test-"));

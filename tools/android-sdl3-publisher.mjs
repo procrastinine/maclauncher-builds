@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync,execFile} from 'node:child_process';

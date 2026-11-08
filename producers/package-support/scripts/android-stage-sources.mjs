@@ -1,0 +1,1 @@
+../../../sources/maclauncher/scripts/android-stage-sources.mjs

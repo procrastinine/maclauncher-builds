@@ -1,8 +1,8 @@
 const test=require('node:test'),assert=require('node:assert/strict');
-const Build=require('../producers/maclauncher/src/modules/nscripter/runtime/onscripter-en-build-v3');
+const Build=require('../producers/package-support/src/modules/nscripter/runtime/onscripter-en-build-v3');
 const {gitlink}=require('../lib/pins.mjs');
 test("ONScripter-EN source and portable SDL archive inputs resolve offline", () => {
-  const revision=gitlink('producers/maclauncher/src/external/onscripter-en');
+  const revision=gitlink('producers/package-support/src/external/onscripter-en');
   assert.equal(Build.PACKAGES.source.url, `https://github.com/Galladite27/ONScripter-EN/archive/${revision}.tar.gz`);
   assert.equal(Build.PACKAGES.source.folder, `ONScripter-EN-${revision}`);
   for (const name of ['source','sdl12','sdl2']) {

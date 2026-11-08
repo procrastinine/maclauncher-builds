@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';import {spawnSync} from 'node:child_process';
-import {adaptFuseTransport,adaptFuseTransportLifetime,adaptFuseBroker,adaptFuseMountBindings,adaptFuseMountRecords,adaptFuseMountRootTraversal,adaptAimFsTrace,adaptAimFuseTrace} from '../producers/maclauncher/src/modules/android/providers/aim/source.mjs';
+import {adaptFuseTransport,adaptFuseTransportLifetime,adaptFuseBroker,adaptFuseMountBindings,adaptFuseMountRecords,adaptFuseMountRootTraversal,adaptAimFsTrace,adaptAimFuseTrace} from '../producers/package-support/src/modules/android/providers/aim/source.mjs';
 
 test('FUSE transport uses private directory scope and explicit registered descriptor identity',t=>{
  const source=process.env.ANDROID_AIM_FUSE_SOURCE;if(!source)return t.skip('Requires the pinned AIM source');

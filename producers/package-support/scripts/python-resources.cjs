@@ -1,0 +1,1 @@
+../../../sources/maclauncher/scripts/python-resources.cjs

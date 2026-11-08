@@ -1,10 +1,11 @@
+import './producer-environment.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {createRequire} from 'node:module';
-const require=createRequire(import.meta.url),Tools=require('../producers/maclauncher/scripts/native-binary-tools.cjs'),B=require('../lib/bundled-native.cjs');
-const {excludedReason}=require('../producers/maclauncher/src/modules/shared/runtime/runtime-content.js');
+const require=createRequire(import.meta.url),Tools=require('../sources/maclauncher/scripts/native-binary-tools.cjs'),B=require('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js');
+const {excludedReason}=require('../sources/maclauncher/src/modules/shared/runtime/runtime-content.js');
 const warn=message=>console.log('::warning::'+message);
 process.on('uncaughtException',error=>{warn(error.message);process.exitCode=0;});
 const root=path.resolve(process.argv[2]),cpu=process.argv[3],declaration=process.argv[4]?JSON.parse(fs.readFileSync(process.argv[4])):null;

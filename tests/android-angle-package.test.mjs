@@ -7,7 +7,7 @@ import {createRequire} from 'node:module';
 import {androidSource} from '../lib/android-source.mjs';
 import {angleDefinition,packageAngleInput} from '../tools/build-android-angle.mjs';
 import {sha} from '../tools/helper-package.mjs';
-const Native=createRequire(import.meta.url)('../producers/maclauncher/scripts/native-binary-tools.cjs');
+const Native=createRequire(import.meta.url)('../sources/maclauncher/scripts/native-binary-tools.cjs');
 
 test('ANGLE seals its generated binary token without a second source declaration',t=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'angle-package-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));

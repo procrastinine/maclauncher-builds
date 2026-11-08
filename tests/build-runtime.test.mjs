@@ -27,7 +27,7 @@ test('Android recipes initialize the producer whose metadata they read from a co
 });
 
 test('producer routing never substitutes Android for a different project',()=>{
- const selected=main(['--project','fna','--check']);assert.equal(selected.id,'fna');assert.equal(selected.sourceDirectory,'producers/maclauncher');assert.ok(selected.entries.every(entry=>entry.startsWith('producers/maclauncher/')));
+ const selected=main(['--project','fna','--check']);assert.equal(selected.id,'fna');assert.equal(selected.sourceDirectory,'sources/maclauncher');assert.ok(selected.entries.every(entry=>entry.startsWith('sources/maclauncher/')));
  assert.throws(()=>main(['--project','flash-projector','--check']),/retains its supplied binary/);
  assert.throws(()=>main(['--project','not-registered','--check']),/Unknown build project/);
  assert.throws(()=>main(['--project','android','--runtime','fna','--check']),/Select one project/);
@@ -152,7 +152,7 @@ test('registered GitHub build commands reject architectures their projects do no
  assert.throws(()=>checkBuildRequest(request('rlvm-adapter','x64')),/builds universal packages/);
  assert.throws(()=>checkBuildRequest({...request('sys3-decompiler','universal'),version:selected('sys3-decompiler','arm64').version}),/builds .*packages/);
  assert.throws(()=>checkBuildRequest(request('web-renderer-network','ppc')),/builds arm64 and x64 packages/);
- const {buildDecompiler}=await import('../producers/maclauncher/scripts/build-decompiler.mjs');
+ const {buildDecompiler}=await import('../producers/package-support/scripts/build-decompiler.mjs');
  await assert.rejects(buildDecompiler({project:'gemrb',arch:'arm64',output:path.join(work,'gemrb'),work:path.join(work,'gemrb-work')}),/decompiler profiles have no release/);
  assert.throws(()=>checkBuildRequest({...request('sys3-decompiler','arm64'),version:'0.5.0'}),/builds version|declared|version/);
  for(const [id,architectures] of [['sys3-decompiler',['arm64','x64']],['xsys35-decompiler',['arm64','x64']],['gm8-decompiler',['arm64','x64']],['catsystem2-kif-crypto',['arm64','x64']],['web-renderer-network',['arm64','x64']]])assert.deepEqual(buildRecords(registry.projects.find(project=>project.id===id)).flatMap(build=>build.architectures).sort(),architectures);

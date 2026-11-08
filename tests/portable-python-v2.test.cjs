@@ -4,8 +4,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
 const { execFileSync } = require("node:child_process");
-const Python = require("../producers/maclauncher/src/modules/shared/runtime/portable-python-v2");
-const Base = require("../producers/maclauncher/src/modules/shared/runtime/portable-python");
+const Python = require("../producers/package-support/src/modules/shared/runtime/portable-python-v2");
+const Base = require("../producers/package-support/src/modules/shared/runtime/portable-python");
 const hash = file => require("node:crypto").createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 function temporary(t) { const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "maclauncher-python-linker-"))); t.after(() => fs.rmSync(root, { recursive: true, force: true })); return root; }
 

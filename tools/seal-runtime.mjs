@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 // Package a freshly built executable and its non-system dependency closure.
 // Recipes supply public sources and build products; no launcher registry or
 // previously reviewed local executable checksum is required.
@@ -9,9 +10,9 @@ import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {managerDeclaration} from './manager-declaration.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {addLicenses,addCargoLicenses,includeLicenses} from '../lib/licenses.mjs';
-const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),Native=require('../producers/maclauncher/src/modules/shared/runtime/local-native.js');
-const Source=require('../producers/maclauncher/src/modules/shared/runtime/pinned-native-build.js');
-const Tools=require('../producers/maclauncher/scripts/native-binary-tools.cjs');
+const require=createRequire(import.meta.url),B=require('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js'),Native=require('../sources/maclauncher/src/modules/shared/runtime/local-native.js');
+const Source=require('../sources/maclauncher/src/modules/shared/runtime/pinned-native-build.js');
+const Tools=require('../sources/maclauncher/scripts/native-binary-tools.cjs');
 const system=value=>value.startsWith('/usr/lib/')||value.startsWith('/System/Library/');
 function preparedNativeFiles(){
  const value=process.env.MACLAUNCHER_BUILD_INPUTS;if(!value)return new Set();

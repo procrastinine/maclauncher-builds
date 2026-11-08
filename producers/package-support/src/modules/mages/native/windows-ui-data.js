@@ -1,0 +1,1 @@
+../../../../../../sources/maclauncher/src/modules/mages/native/windows-ui-data.js

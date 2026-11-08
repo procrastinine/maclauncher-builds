@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
-const Build = require("../producers/maclauncher/src/modules/hashlink/runtime/dynamic-legacy-build");
+const Build = require("../producers/package-support/src/modules/hashlink/runtime/dynamic-legacy-build");
 
 function sourceFixture(t, { jpeg = "#\tdefine WITH_SIMD", png = "#if defined(THINK_C) || defined(TARGET_OS_MAC)" } = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "hashlink-dynamic-source-"));

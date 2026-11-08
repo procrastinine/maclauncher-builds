@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {aimSource} from '../lib/android-source.mjs';
 import {addLicenses,addCargoLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
@@ -7,9 +8,9 @@ import {rustEnvironment} from "./rust-build.mjs";
 import {buildInput} from './build-input.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 import {resolveProject} from '../lib/projects.mjs';
-import {adapt} from '../producers/maclauncher/src/modules/android/native/apk-metadata/adapt.mjs';
+import {adapt} from '../sources/maclauncher/src/modules/android/native/apk-metadata/adapt.mjs';
 import {recipeMain,checkoutSource} from './build-source.mjs';
-const root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/maclauncher/src/modules/android/native/apk-metadata');
+const root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'sources/maclauncher/src/modules/android/native/apk-metadata');
 export async function buildAPK({project:id,arch,output,work}){
  const project=resolveProject(id,root),definition=JSON.parse(fs.readFileSync(path.join(base,'sources.json'))),spec={...definition,aim:{...definition.aim,...aimSource()}};
  fs.mkdirSync(work,{recursive:true});

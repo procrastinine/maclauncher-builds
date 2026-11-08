@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {addLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';

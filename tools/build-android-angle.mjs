@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {androidSource,androidSourceJson} from '../lib/android-source.mjs';
 import {includeLicenses,addLicenses,addLicense} from '../lib/licenses.mjs';
 import fs from 'node:fs';

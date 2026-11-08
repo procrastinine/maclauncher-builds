@@ -1,7 +1,0 @@
-{
-  "repository": "https://github.com/godotengine/godot",
-  "tag": "4.4-stable",
-  "header": "core/extension/gdextension_interface.h",
-  "headerSha256": "355ff4c6254fdd434ea16d9a8ef0f18e3f95aeb3e3f00d98db10769ece3c7fe5",
-  "gitlink": "producers/maclauncher/src/external/godot-camera"
-}

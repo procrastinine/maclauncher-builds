@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {buildNativeStack,nativeStackInput,stackModule,nativeStackArchives} from './native-stack.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {recipeMain} from './build-source.mjs';

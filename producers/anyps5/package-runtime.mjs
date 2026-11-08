@@ -10,7 +10,7 @@ import {pack} from '../../tools/runtime-package.mjs';
 import {assetName} from '../../lib/project-identity.mjs';
 import {buildRuntime} from './build-runtime.mjs';
 
-const require=createRequire(import.meta.url),Native=require('../../lib/local-native.cjs');
+const require=createRequire(import.meta.url),Native=require('../../sources/maclauncher/src/modules/shared/runtime/local-native.js');
 const root=path.resolve(import.meta.dirname,'../..');
 const recipe=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'source.json')));
 recipe.source.revision=gitlink(recipe.source.path);

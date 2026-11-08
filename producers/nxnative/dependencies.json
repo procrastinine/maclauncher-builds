@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "architecture": "arm64",
   "minimumMacOS": "14.0",
-  "payloadPolicy": "producers/maclauncher/src/modules/shared/runtime/runtime-content.js",
+  "payloadPolicy": "sources/maclauncher/src/modules/shared/runtime/runtime-content.js",
   "python": {
     "version": "3.12.15",
     "publisher": "astral-sh/python-build-standalone",

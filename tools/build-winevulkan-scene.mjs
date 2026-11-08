@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
 import fs from 'node:fs';
 import path from 'node:path';

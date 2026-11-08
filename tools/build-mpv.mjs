@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -8,7 +9,7 @@ import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 import {pythonBuildTools,recipeMain} from './build-source.mjs';
 import {retryNetwork} from './download.mjs';
-const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Native=require('../producers/maclauncher/scripts/native-binary-tools.cjs');
+const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Native=require('../sources/maclauncher/scripts/native-binary-tools.cjs');
 const run=(command,args,options={})=>String(execFileSync(command,args,{encoding:'utf8',maxBuffer:Infinity,...options})||'').trim();
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 /** pkgconf follows private cflags requirements even for dynamic linking. The
@@ -27,15 +28,15 @@ export async function buildMPV({project:id,arch,output,work}){
  const record=buildRecord(resolveProject(id,root));
  fs.mkdirSync(work,{recursive:true});
  const tools=pythonBuildTools(work,path.join(root,'tools/sdk27-build-requirements.txt'));
- const producer=path.join(root,'producers/mpv-render/v7'),source=path.join(root,'producers/maclauncher/src/external/mpv-player');
- const Builder=require(path.join(producer,'maclauncher/scripts/build-mpv-library.cjs'));
+ const producer=path.join(root,'producers/mpv-render/v7'),source=path.join(root,'producers/package-support/src/external/mpv-player');
+ const Builder=require(path.join(producer,'scripts/build-mpv-library.cjs'));
  (await import(pathToFileURL(path.join(producer,'package.mjs')))).checkSources();
  retryNetwork(()=>run('git',['-C',source,'fetch','--depth','2','origin',Builder.REVISION,...Builder.BACKPORTS],{stdio:'inherit'}));
  const sdk=process.env.SDKROOT||run('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path']);
  const sdkPackages=sdkCompressionPkgConfig({sdk,directory:path.join(work,'sdk-pkgconfig')});
  const pkgConfigPath=[sdkPackages,process.env.PKG_CONFIG_PATH,run('pkgconf',['--variable','pc_path','pkg-config'])].filter(Boolean).join(path.delimiter);
  const built=Builder.build({sourceCheckout:source,workDirectory:path.join(work,'library'),toolsDirectory:tools.bin,pkgConfigPath,minimumMacOS:'14.0',jobs:4});
- const recipe=JSON.parse(fs.readFileSync(path.join(producer,'source.json'))),owned=path.join(producer,'maclauncher'),staged=path.join(work,'staged'),app=path.join(staged,'mpv.app'),executable=path.join(app,'Contents/MacOS/mpv');
+ const recipe=JSON.parse(fs.readFileSync(path.join(producer,'source.json'))),owned=path.join(root,'sources/maclauncher'),staged=path.join(work,'staged'),app=path.join(staged,'mpv.app'),executable=path.join(app,'Contents/MacOS/mpv');
  fs.mkdirSync(path.dirname(executable),{recursive:true});fs.mkdirSync(path.join(app,'Contents/Frameworks/video'),{recursive:true});
  fs.copyFileSync(built.library,path.join(app,'Contents/Frameworks/video/libmpv.2.dylib'));
  const flags=['clang++','-std=c++17','-O2','-fobjc-arc','-Wno-deprecated-declarations','-arch','arm64','-mmacosx-version-min=14.0','-ffile-prefix-map='+owned+'=.',

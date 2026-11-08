@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const test = require("node:test");
-const { applyRamenOverlay } = require("../producers/maclauncher/src/modules/gamemaker/overlays/opengmk-macos/apply-ramen");
+const { applyRamenOverlay } = require("../producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/apply-ramen");
 
 function fixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "ramen-source-identity-"));

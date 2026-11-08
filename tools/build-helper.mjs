@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {addLicenses} from '../lib/licenses.mjs';
 // GitHub build of an owned-source native helper from its build profile. One profile
 // per helper names the sources, compiler flags, output and identity fields; this
@@ -13,7 +14,7 @@ import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {recipeMain} from './build-source.mjs';
 import {macosSDKVersion} from '../lib/reproducible-build.mjs';
 const require=createRequire(import.meta.url);
-const B=require('../lib/bundled-native.cjs'),Native=require('../lib/local-native.cjs');
+const B=require('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js'),Native=require('../sources/maclauncher/src/modules/shared/runtime/local-native.js');
 const root=path.resolve(import.meta.dirname,'..');
 const CPUS={arm64:['arm64'],x64:['x86_64'],universal:['arm64','x86_64']};
 const KINDS={executable:[],dylib:['-dynamiclib'],bundle:['-bundle']};

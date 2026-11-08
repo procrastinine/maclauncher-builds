@@ -30,7 +30,7 @@ Component licence texts use the shared [licence intake](SOURCE_PINS.md#licences)
 
 ## OpenGMK
 
-The recipe keeps the upstream checkouts unchanged and applies the Mac adaptations to owned copies. The ramen window backend uses AppKit, the renderer uses OpenGL and the udon audio dependency uses CoreAudio. Cargo uses [the declared lock](../producers/maclauncher/helper-builds/opengmk.lock) with `--locked`.
+The recipe keeps the upstream checkouts unchanged and applies the Mac adaptations to owned copies. The ramen window backend uses AppKit, the renderer uses OpenGL and the udon audio dependency uses CoreAudio. Cargo uses [the declared lock](../producers/package-support/helper-builds/opengmk.lock) with `--locked`.
 
 The shared licence intake reads available Cargo source directories. Missing or unreadable texts produce a warning and do not stop packaging.
 

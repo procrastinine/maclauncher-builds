@@ -1,10 +1,11 @@
+import './producer-environment.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
-const root=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),{validateDeclaration}=require('../lib/declaration.cjs');
+const root=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url),B=require('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js'),{validateDeclaration}=require('../lib/declaration.cjs');
 const json=file=>JSON.parse(fs.readFileSync(path.join(root,file)));
 
 /** Existing package identities required before the unified producer starts. */

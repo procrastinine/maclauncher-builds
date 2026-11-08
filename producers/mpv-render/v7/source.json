@@ -3,7 +3,7 @@
   "id": "mpv",
   "version": "0.41.0-MCLv7",
   "source": {
-    "path": "producers/maclauncher/src/external/mpv-player",
+    "path": "producers/package-support/src/external/mpv-player",
     "repository": "https://github.com/mpv-player/mpv.git"
   },
   "architecture": "arm64",
@@ -17,67 +17,67 @@
   ],
   "ownedInputs": [
     {
-      "path": "producers/mpv-render/v7/maclauncher/package.json"
+      "path": "producers/mpv-render/v7/package.json"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/scripts/build-mpv-library.cjs"
+      "path": "producers/mpv-render/v7/scripts/build-mpv-library.cjs"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/scripts/stage-mpv-render.cjs"
+      "path": "producers/mpv-render/v7/scripts/stage-mpv-render.cjs"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/frame.h"
+      "path": "sources/maclauncher/src/modules/shared/reshade/native/frame.h"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/image-color.h"
+      "path": "sources/maclauncher/src/modules/shared/reshade/native/image-color.h"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/presentation-content.h"
+      "path": "sources/maclauncher/src/modules/shared/reshade/native/presentation-content.h"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/presentation-observed.h"
+      "path": "sources/maclauncher/src/modules/shared/reshade/native/presentation-observed.h"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/presentation-source.h"
+      "path": "sources/maclauncher/src/modules/shared/reshade/native/presentation-source.h"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/presentation.h"
+      "path": "sources/maclauncher/src/modules/shared/reshade/native/presentation.h"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/reshade/native/target-time.h"
+      "path": "sources/maclauncher/src/modules/shared/reshade/native/target-time.h"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/app-bundle.js"
+      "path": "sources/maclauncher/src/modules/shared/runtime/app-bundle.js"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/bundled-native.js"
+      "path": "sources/maclauncher/src/modules/shared/runtime/bundled-native.js"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/local-native.js"
+      "path": "sources/maclauncher/src/modules/shared/runtime/local-native.js"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/shared/runtime/native-focus.js"
+      "path": "sources/maclauncher/src/modules/shared/runtime/native-focus.js"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/gpu-surface.hpp"
+      "path": "sources/maclauncher/src/modules/video/native/gpu-surface.hpp"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/gpu-surface.mm"
+      "path": "sources/maclauncher/src/modules/video/native/gpu-surface.mm"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/mpv-frame-metadata.h"
+      "path": "sources/maclauncher/src/modules/video/native/mpv-frame-metadata.h"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/mpv-frame-metadata.patch"
+      "path": "sources/maclauncher/src/modules/video/native/mpv-frame-metadata.patch"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/mpv-render-layers.patch"
+      "path": "sources/maclauncher/src/modules/video/native/mpv-render-layers.patch"
     },
     {
-      "path": "producers/mpv-render/v7/maclauncher/src/modules/video/native/mpv-render.mm"
+      "path": "sources/maclauncher/src/modules/video/native/mpv-render.mm"
     },
     {
-      "path": "producers/maclauncher/scripts/native-binary-tools.cjs"
+      "path": "sources/maclauncher/scripts/native-binary-tools.cjs"
     }
   ],
   "buildEntry": "producers/mpv-render/v7/build.mjs",

@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import path from 'node:path';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {buildGraphicsSource} from './graphics-producer.mjs';

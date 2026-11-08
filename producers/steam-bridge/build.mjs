@@ -8,7 +8,7 @@ import {recipeMain} from '../../tools/build-source.mjs';
 import {mingw as prepareMingw} from '../../tools/scene-runtime.mjs';
 import {addLicense} from '../../lib/licenses.mjs';
 import {gitlink} from '../../lib/pins.mjs';
-import Bundled from '../../lib/bundled-native.cjs';
+import Bundled from '../../sources/maclauncher/src/modules/shared/runtime/bundled-native.js';
 import {publicDeclaration} from '../../tools/runtime-package.mjs';
 import {helperClientSource} from './helper-subset.mjs';
 import {buildHelpers} from './helper-build.mjs';

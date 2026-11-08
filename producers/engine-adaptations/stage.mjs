@@ -5,7 +5,7 @@ import path from 'node:path';
 import {createRequire} from 'node:module';
 import {recipeMain} from '../../tools/build-source.mjs';
 import {resolveProject,buildRecord} from '../../lib/projects.mjs';
-const require=createRequire(import.meta.url),B=require('../../lib/bundled-native.cjs');
+const require=createRequire(import.meta.url),B=require('../../sources/maclauncher/src/modules/shared/runtime/bundled-native.js');
 const {validateDeclaration}=require('../../lib/declaration.cjs');
 const root=import.meta.dirname;
 const profiles={

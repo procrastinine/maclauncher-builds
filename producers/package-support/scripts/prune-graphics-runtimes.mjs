@@ -1,0 +1,1 @@
+../../../sources/maclauncher/scripts/prune-graphics-runtimes.mjs

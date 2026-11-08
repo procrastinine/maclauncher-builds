@@ -1,0 +1,1 @@
+../../../../../../sources/maclauncher/src/modules/shared/runtime/project-native-package.js

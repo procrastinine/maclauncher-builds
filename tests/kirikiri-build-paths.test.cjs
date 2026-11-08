@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
-const { sourcePathFlags } = require('../producers/maclauncher/src/modules/kirikiri/build');
+const { sourcePathFlags } = require('../producers/package-support/src/modules/kirikiri/build');
 
 test('Kiri compiler path maps remove private __FILE__ paths and preserve quoted build directories', { skip: process.platform !== 'darwin' }, t => {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "kiri path's fixture-"));

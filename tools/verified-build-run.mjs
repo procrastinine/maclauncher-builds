@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {identity} from '../lib/project-identity.mjs';
 
 /** A package is selected only from its successful job in the current build workflow. */

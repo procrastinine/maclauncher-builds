@@ -1,0 +1,1 @@
+../../../../../sources/maclauncher/src/core/backcompat/settings-conversions.js

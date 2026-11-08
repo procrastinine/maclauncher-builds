@@ -1,0 +1,1 @@
+../../../../../../sources/maclauncher/src/modules/mages/native/windows-game-v6.lua

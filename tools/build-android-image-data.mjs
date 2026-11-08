@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {aimSource} from '../lib/android-source.mjs';
 import {addLicense,addLicenses,addCargoLicenses} from '../lib/licenses.mjs';
 import {downloadFile} from './download.mjs';

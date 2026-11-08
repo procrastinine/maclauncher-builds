@@ -1,0 +1,1 @@
+../../../../../../../../../../sources/maclauncher/src/modules/shared/runtime/steamworks/native/offline-0.5.0/source/offline.cpp

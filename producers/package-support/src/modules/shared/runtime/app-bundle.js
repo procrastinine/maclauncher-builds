@@ -1,0 +1,1 @@
+../../../../../../sources/maclauncher/src/modules/shared/runtime/app-bundle.js

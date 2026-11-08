@@ -1,0 +1,1 @@
+../../../sources/maclauncher/scripts/payload-aliases.mjs

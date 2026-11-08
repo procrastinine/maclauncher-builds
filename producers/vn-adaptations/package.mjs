@@ -6,8 +6,8 @@ import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {pack} from '../../tools/runtime-package.mjs';
 const require=createRequire(import.meta.url);
-const B=require('../../lib/bundled-native.cjs');
-const M=require('../maclauncher/src/modules/shared/runtime/macho-load-commands.js');
+const B=require('../../sources/maclauncher/src/modules/shared/runtime/bundled-native.js');
+const M=require('../../sources/maclauncher/src/modules/shared/runtime/macho-load-commands.js');
 const here=import.meta.dirname;
 const source=JSON.parse(fs.readFileSync(path.join(here,'source.json')));
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -42,7 +42,7 @@ function inventory(root){
 export async function packageRuntime({project,input,output,arch='arm64'}){
   verifyInputs();
   const pin=source.projects[project];
-  if(project==='krkrsdl2'){pin.upstream.revision=gitlink('producers/maclauncher/src/external/krkrsdl2');pin.polyfill.revision=gitlink('producers/vn-adaptations/upstreams/kag3');}
+  if(project==='krkrsdl2'){pin.upstream.revision=gitlink('producers/package-support/src/external/krkrsdl2');pin.polyfill.revision=gitlink('producers/vn-adaptations/upstreams/kag3');}
   if(!pin||!['arm64','x64'].includes(arch)||!path.isAbsolute(input||'')||!path.isAbsolute(output||''))throw Error('Select a supported project, CPU and absolute input/output paths.');
   input=fs.realpathSync(input);
   if(fs.existsSync(output)||output===input||output.startsWith(input+path.sep))throw Error('Choose a new immutable output outside the input tree.');

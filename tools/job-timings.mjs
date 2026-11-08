@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {retryNetworkAsync} from './download.mjs';
 import fs from 'node:fs';
 import {fileURLToPath} from 'node:url';

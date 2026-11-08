@@ -1,0 +1,1 @@
+../../../../../../sources/maclauncher/src/modules/shared/runtime/host-settings.js

@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 /** Inputs are verified by the shared dependency graph before a recipe starts. */
 export async function githubBuildInput({pin,environment=process.env}){

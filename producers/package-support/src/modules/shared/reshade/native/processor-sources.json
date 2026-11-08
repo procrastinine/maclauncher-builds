@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "baseSourceHash": "10266c6b10f2197f27a8598166373f5aeaf05e42c99d7e0c74723628c6c6ca06",
+  "sources": [
+    {
+      "id": "macfx-reshade",
+      "sourcePath": "third_party/reshade",
+      "submodulePath": "src/external/macfx-reshade",
+      "repository": "https://github.com/crosire/reshade.git",
+      "gitlink": "producers/package-support/src/external/macfx-reshade"
+    },
+    {
+      "id": "macfx-spirv-headers",
+      "sourcePath": "third_party/reshade/deps/spirv",
+      "submodulePath": "src/external/macfx-reshade/deps/spirv",
+      "repository": "https://github.com/KhronosGroup/SPIRV-Headers.git"
+    },
+    {
+      "id": "macfx-spirv-cross",
+      "sourcePath": "third_party/spirv-cross",
+      "submodulePath": "src/external/macfx-spirv-cross",
+      "repository": "https://github.com/KhronosGroup/SPIRV-Cross.git"
+    },
+    {
+      "id": "macfx-reshade-shaders",
+      "sourcePath": "third_party/reshade-shaders",
+      "submodulePath": "src/external/macfx-reshade-shaders",
+      "repository": "https://github.com/crosire/reshade-shaders.git",
+      "gitlink": "producers/package-support/src/external/macfx-reshade-shaders"
+    },
+    {
+      "id": "macfx-mako",
+      "sourcePath": "third_party/mako",
+      "submodulePath": "src/external/macfx-mako",
+      "repository": "https://github.com/eugeniosegala/MAKO.git",
+      "gitlink": "producers/package-support/src/external/macfx-mako"
+    },
+    {
+      "id": "macfx-vkd3d",
+      "sourcePath": "third_party/vkd3d",
+      "submodulePath": "src/external/macfx-vkd3d",
+      "repository": "https://codeberg.org/vkd3d/vkd3d.git",
+      "gitlink": "producers/package-support/src/external/macfx-vkd3d"
+    },
+    {
+      "id": "macfx-fsr1",
+      "sourcePath": "third_party/fsr",
+      "submodulePath": "src/external/macfx-fsr1",
+      "repository": "https://github.com/GPUOpen-Effects/FidelityFX-FSR.git",
+      "gitlink": "producers/package-support/src/external/macfx-fsr1"
+    }
+  ]
+}

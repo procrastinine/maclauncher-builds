@@ -1,6 +1,6 @@
 const requirements = require('./support/requirements.cjs');
 const test=require("node:test"),assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path"),os=require("node:os");
-const Movie=require("../producers/maclauncher/src/modules/shared/runtime/portable-ffmpeg");
+const Movie=require("../producers/package-support/src/modules/shared/runtime/portable-ffmpeg");
 function temporary(t){const root=fs.mkdtempSync(path.join(os.tmpdir(),"maclauncher-portable-movies-"));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;}
 function features(root){
   fs.writeFileSync(path.join(root,"config_components.h"),[["DECODER",Movie.PIN.decoders],["DEMUXER",Movie.PIN.demuxers],["PARSER",Movie.PIN.parsers]].flatMap(([kind,names])=>names.map(n=>`#define CONFIG_${n.toUpperCase()}_${kind} 1`)).join("\n")+"\n");

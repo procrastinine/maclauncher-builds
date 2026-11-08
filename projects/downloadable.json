@@ -196,9 +196,9 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/scripts/build-android-aim.mjs"
+        "producers/package-support/scripts/build-android-aim.mjs"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -273,10 +273,10 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/ai5/runtime/portable-build.js",
-        "producers/maclauncher/src/modules/ai5/runtime/portable-build-v4.js"
+        "producers/package-support/src/modules/ai5/runtime/portable-build.js",
+        "producers/package-support/src/modules/ai5/runtime/portable-build-v4.js"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -285,7 +285,7 @@
         "url": "https://github.com/nunuhara/ai5-sdl2",
         "repository": "nunuhara/ai5-sdl2",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/ai5-sdl2"
+          "gitlink": "producers/package-support/src/external/ai5-sdl2"
         }
       }
     ],
@@ -315,7 +315,7 @@
         "arm64"
       ],
       "submodules": [
-        "producers/maclauncher/src/external/ai5-sdl2"
+        "producers/package-support/src/external/ai5-sdl2"
       ],
       "recursiveSubmodules": true,
       "tools": [
@@ -335,9 +335,9 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/fna/runtime"
+        "producers/package-support/src/modules/fna/runtime"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -346,7 +346,7 @@
         "url": "https://github.com/FNA-XNA/FNA",
         "repository": "FNA-XNA/FNA",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/FNA"
+          "gitlink": "producers/package-support/src/external/FNA"
         }
       },
       {
@@ -355,7 +355,7 @@
         "url": "https://github.com/FNA-XNA/FNA3D",
         "repository": "FNA-XNA/FNA3D",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/source-revisions/fna3d"
+          "gitlink": "producers/package-support/src/external/source-revisions/fna3d"
         }
       }
     ],
@@ -402,11 +402,11 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/gemrb/runtime/portable-build-v5.js",
-        "producers/maclauncher/src/modules/shared/runtime",
-        "producers/maclauncher/src/modules/gemrb/runtime/portable-overlay-v5.js"
+        "producers/package-support/src/modules/gemrb/runtime/portable-build-v5.js",
+        "producers/package-support/src/modules/shared/runtime",
+        "producers/package-support/src/modules/gemrb/runtime/portable-overlay-v5.js"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -415,7 +415,7 @@
         "url": "https://github.com/gemrb/gemrb",
         "repository": "gemrb/gemrb",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/gemrb"
+          "gitlink": "producers/package-support/src/external/gemrb"
         }
       }
     ],
@@ -449,7 +449,7 @@
         "arm64"
       ],
       "submodules": [
-        "producers/maclauncher/src/external/gemrb"
+        "producers/package-support/src/external/gemrb"
       ],
       "tools": [
         "cmake",
@@ -466,9 +466,9 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/gamemaker/overlays/opengmk-macos/source-build.js"
+        "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/source-build.js"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -477,7 +477,7 @@
         "url": "https://github.com/OpenGMK/OpenGMK",
         "repository": "OpenGMK/OpenGMK",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/OpenGMK"
+          "gitlink": "producers/package-support/src/external/OpenGMK"
         }
       }
     ],
@@ -507,7 +507,7 @@
         "arm64"
       ],
       "submodules": [
-        "producers/maclauncher/src/external/OpenGMK"
+        "producers/package-support/src/external/OpenGMK"
       ],
       "tools": [
         "cmake"
@@ -525,10 +525,10 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/hashlink/runtime/legacy-build.js",
-        "producers/maclauncher/src/modules/hashlink/runtime/dynamic-legacy-build.js"
+        "producers/package-support/src/modules/hashlink/runtime/legacy-build.js",
+        "producers/package-support/src/modules/hashlink/runtime/dynamic-legacy-build.js"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -537,7 +537,7 @@
         "url": "https://github.com/HaxeFoundation/hashlink",
         "repository": "HaxeFoundation/hashlink",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/source-revisions/hashlink-1-9"
+          "gitlink": "producers/package-support/src/external/source-revisions/hashlink-1-9"
         }
       },
       {
@@ -546,7 +546,7 @@
         "url": "https://github.com/HaxeFoundation/hashlink",
         "repository": "HaxeFoundation/hashlink",
         "pin": {
-          "file": "producers/maclauncher/src/modules/hashlink/runtime/source-1.12.json",
+          "file": "producers/package-support/src/modules/hashlink/runtime/source-1.12.json",
           "pointer": ""
         }
       }
@@ -621,8 +621,8 @@
           "x64"
         ],
         "submodules": [
-          "producers/maclauncher/src/external/source-revisions/hashlink-1-9",
-          "producers/maclauncher/src/external/openal-soft"
+          "producers/package-support/src/external/source-revisions/hashlink-1-9",
+          "producers/package-support/src/external/openal-soft"
         ],
         "tools": [
           "cmake",
@@ -637,8 +637,8 @@
           "x64"
         ],
         "submodules": [
-          "producers/maclauncher/src/external/source-revisions/hashlink-1-9",
-          "producers/maclauncher/src/external/openal-soft"
+          "producers/package-support/src/external/source-revisions/hashlink-1-9",
+          "producers/package-support/src/external/openal-soft"
         ],
         "tools": [
           "cmake",
@@ -656,10 +656,10 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/mages/native/current-build.js",
-        "producers/maclauncher/src/modules/mages/native/dependency-overlays.json"
+        "producers/package-support/src/modules/mages/native/current-build.js",
+        "producers/package-support/src/modules/mages/native/dependency-overlays.json"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -668,7 +668,7 @@
         "url": "https://github.com/CommitteeOfZero/impacto",
         "repository": "CommitteeOfZero/impacto",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/impacto"
+          "gitlink": "producers/package-support/src/external/impacto"
         }
       }
     ],
@@ -718,11 +718,11 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/shared/installers/runtime/innoextract-build.js",
-        "producers/maclauncher/src/modules/shared/installers/native/inno-inspect.cpp",
-        "producers/maclauncher/src/modules/shared/installers/native/static-dependencies.cmake"
+        "producers/package-support/src/modules/shared/installers/runtime/innoextract-build.js",
+        "producers/package-support/src/modules/shared/installers/native/inno-inspect.cpp",
+        "producers/package-support/src/modules/shared/installers/native/static-dependencies.cmake"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -731,7 +731,7 @@
         "url": "https://github.com/dscharrer/innoextract",
         "repository": "dscharrer/innoextract",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/innoextract"
+          "gitlink": "producers/package-support/src/external/innoextract"
         }
       },
       {
@@ -740,7 +740,7 @@
         "url": "https://github.com/boostorg/filesystem",
         "repository": "boostorg/filesystem",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/boost-filesystem"
+          "gitlink": "producers/package-support/src/external/boost-filesystem"
         }
       },
       {
@@ -749,7 +749,7 @@
         "url": "https://github.com/boostorg/program_options",
         "repository": "boostorg/program_options",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/boost-program-options"
+          "gitlink": "producers/package-support/src/external/boost-program-options"
         }
       },
       {
@@ -758,7 +758,7 @@
         "url": "https://github.com/boostorg/iostreams",
         "repository": "boostorg/iostreams",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/boost-iostreams"
+          "gitlink": "producers/package-support/src/external/boost-iostreams"
         }
       }
     ],
@@ -788,10 +788,10 @@
         "arm64"
       ],
       "submodules": [
-        "producers/maclauncher/src/external/innoextract",
-        "producers/maclauncher/src/external/boost-filesystem",
-        "producers/maclauncher/src/external/boost-program-options",
-        "producers/maclauncher/src/external/boost-iostreams"
+        "producers/package-support/src/external/innoextract",
+        "producers/package-support/src/external/boost-filesystem",
+        "producers/package-support/src/external/boost-program-options",
+        "producers/package-support/src/external/boost-iostreams"
       ],
       "tools": [
         "cmake",
@@ -819,7 +819,7 @@
         "url": "https://github.com/krkrsdl2/krkrsdl2",
         "repository": "krkrsdl2/krkrsdl2",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/krkrsdl2"
+          "gitlink": "producers/package-support/src/external/krkrsdl2"
         }
       },
       {
@@ -873,7 +873,7 @@
         "x64"
       ],
       "submodules": [
-        "producers/maclauncher/src/external/krkrsdl2"
+        "producers/package-support/src/external/krkrsdl2"
       ],
       "recursiveSubmodules": true,
       "tools": [
@@ -891,9 +891,9 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/nitroplus/runtime"
+        "producers/package-support/src/modules/nitroplus/runtime"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -902,7 +902,7 @@
         "url": "https://github.com/FGRE/libnpengine",
         "repository": "FGRE/libnpengine",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/libnpengine"
+          "gitlink": "producers/package-support/src/external/libnpengine"
         }
       }
     ],
@@ -948,9 +948,9 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/nscripter/runtime/onscripter-en-build-v3.js"
+        "producers/package-support/src/modules/nscripter/runtime/onscripter-en-build-v3.js"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -959,7 +959,7 @@
         "url": "https://github.com/Galladite27/ONScripter-EN",
         "repository": "Galladite27/ONScripter-EN",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/onscripter-en"
+          "gitlink": "producers/package-support/src/external/onscripter-en"
         }
       }
     ],
@@ -989,7 +989,7 @@
         "arm64"
       ],
       "submodules": [
-        "producers/maclauncher/src/external/onscripter-en"
+        "producers/package-support/src/external/onscripter-en"
       ],
       "tools": [
         "cmake",
@@ -1005,9 +1005,9 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/shared/onsyuri/runtime/portable-build-v3.js"
+        "producers/package-support/src/modules/shared/onsyuri/runtime/portable-build-v3.js"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -1016,7 +1016,7 @@
         "url": "https://github.com/YuriSizuku/OnscripterYuri",
         "repository": "YuriSizuku/OnscripterYuri",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/onscripter-yuri"
+          "gitlink": "producers/package-support/src/external/onscripter-yuri"
         }
       }
     ],
@@ -1046,7 +1046,7 @@
         "x64"
       ],
       "submodules": [
-        "producers/maclauncher/src/external/onscripter-yuri"
+        "producers/package-support/src/external/onscripter-yuri"
       ],
       "tools": [
         "cmake",
@@ -1063,9 +1063,9 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/gamemaker/overlays/opengmk-macos/source-build.js"
+        "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/source-build.js"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -1074,7 +1074,7 @@
         "url": "https://github.com/OpenGMK/OpenGMK",
         "repository": "OpenGMK/OpenGMK",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/OpenGMK"
+          "gitlink": "producers/package-support/src/external/OpenGMK"
         }
       }
     ],
@@ -1119,9 +1119,9 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/minori/runtime"
+        "producers/package-support/src/modules/minori/runtime"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -1130,7 +1130,7 @@
         "url": "https://github.com/luoyily/ReMinori",
         "repository": "luoyily/ReMinori",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/ReMinori"
+          "gitlink": "producers/package-support/src/external/ReMinori"
         }
       }
     ],
@@ -1160,7 +1160,7 @@
         "x64"
       ],
       "submodules": [
-        "producers/maclauncher/src/external/ReMinori"
+        "producers/package-support/src/external/ReMinori"
       ],
       "tools": [
         "pkgconf",
@@ -1183,10 +1183,10 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/alicesoft/decompiler-build.js",
-        "producers/maclauncher/scripts/build-decompiler.mjs"
+        "producers/package-support/src/modules/alicesoft/decompiler-build.js",
+        "producers/package-support/scripts/build-decompiler.mjs"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -1195,7 +1195,7 @@
         "url": "https://github.com/kichikuou/sys3c",
         "repository": "kichikuou/sys3c",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/sys3c"
+          "gitlink": "producers/package-support/src/external/sys3c"
         }
       }
     ],
@@ -1219,13 +1219,13 @@
     ],
     "build": {
       "version": "0.5.0-MCLv7",
-      "command": "producers/maclauncher/scripts/build-decompiler.mjs",
+      "command": "producers/package-support/scripts/build-decompiler.mjs",
       "architectures": [
         "x64",
         "arm64"
       ],
       "submodules": [
-        "producers/maclauncher/src/external/sys3c"
+        "producers/package-support/src/external/sys3c"
       ],
       "tools": [
         "cmake",
@@ -1234,7 +1234,7 @@
     },
     "versionBindings": [
       {
-        "file": "producers/maclauncher/src/modules/alicesoft/decompiler-profiles.json",
+        "file": "producers/package-support/src/modules/alicesoft/decompiler-profiles.json",
         "pointer": "/0/releases",
         "select": {
           "version": "$version"
@@ -1250,9 +1250,9 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/alicesoft/system3-portable.js"
+        "producers/package-support/src/modules/alicesoft/system3-portable.js"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -1261,7 +1261,7 @@
         "url": "https://github.com/kichikuou/system3-sdl2",
         "repository": "kichikuou/system3-sdl2",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/system3-sdl2"
+          "gitlink": "producers/package-support/src/external/system3-sdl2"
         }
       },
       {
@@ -1356,7 +1356,7 @@
         "arm64"
       ],
       "submodules": [
-        "producers/maclauncher/src/external/system3-sdl2"
+        "producers/package-support/src/external/system3-sdl2"
       ],
       "tools": [
         "cmake",
@@ -1374,10 +1374,10 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/alicesoft/decompiler-build.js",
-        "producers/maclauncher/scripts/build-decompiler.mjs"
+        "producers/package-support/src/modules/alicesoft/decompiler-build.js",
+        "producers/package-support/scripts/build-decompiler.mjs"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -1386,7 +1386,7 @@
         "url": "https://github.com/kichikuou/xsys35c",
         "repository": "kichikuou/xsys35c",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/xsys35c"
+          "gitlink": "producers/package-support/src/external/xsys35c"
         }
       }
     ],
@@ -1410,13 +1410,13 @@
     ],
     "build": {
       "version": "1.13.0-MCLv7",
-      "command": "producers/maclauncher/scripts/build-decompiler.mjs",
+      "command": "producers/package-support/scripts/build-decompiler.mjs",
       "architectures": [
         "x64",
         "arm64"
       ],
       "submodules": [
-        "producers/maclauncher/src/external/xsys35c"
+        "producers/package-support/src/external/xsys35c"
       ],
       "tools": [
         "cmake",
@@ -1425,7 +1425,7 @@
     },
     "versionBindings": [
       {
-        "file": "producers/maclauncher/src/modules/alicesoft/decompiler-profiles.json",
+        "file": "producers/package-support/src/modules/alicesoft/decompiler-profiles.json",
         "pointer": "/1/releases",
         "select": {
           "version": "$version"
@@ -1441,10 +1441,10 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/alicesoft/system35-portable.js",
-        "producers/maclauncher/src/modules/alicesoft/system35-portable-v3.js"
+        "producers/package-support/src/modules/alicesoft/system35-portable.js",
+        "producers/package-support/src/modules/alicesoft/system35-portable-v3.js"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -1453,7 +1453,7 @@
         "url": "https://github.com/kichikuou/xsystem35-sdl2",
         "repository": "kichikuou/xsystem35-sdl2",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/xsystem35-sdl2"
+          "gitlink": "producers/package-support/src/external/xsystem35-sdl2"
         }
       }
     ],
@@ -1488,7 +1488,7 @@
         "arm64"
       ],
       "submodules": [
-        "producers/maclauncher/src/external/xsystem35-sdl2"
+        "producers/package-support/src/external/xsystem35-sdl2"
       ],
       "recursiveSubmodules": false,
       "tools": [
@@ -1507,10 +1507,10 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/alicesoft/system4-portable-v3.js",
-        "producers/maclauncher/src/modules/alicesoft/system4-portable-overlay-v3.js"
+        "producers/package-support/src/modules/alicesoft/system4-portable-v3.js",
+        "producers/package-support/src/modules/alicesoft/system4-portable-overlay-v3.js"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -1519,7 +1519,7 @@
         "url": "https://github.com/nunuhara/xsystem4",
         "repository": "nunuhara/xsystem4",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/xsystem4"
+          "gitlink": "producers/package-support/src/external/xsystem4"
         }
       }
     ],
@@ -1553,7 +1553,7 @@
         "arm64"
       ],
       "submodules": [
-        "producers/maclauncher/src/external/xsystem4"
+        "producers/package-support/src/external/xsystem4"
       ],
       "recursiveSubmodules": true,
       "tools": [
@@ -1575,11 +1575,11 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/shared/vulkan/native/kosmickrisp-build.mjs",
-        "producers/maclauncher/scripts/repackage-graphics-runtime.mjs",
-        "producers/maclauncher/src/modules/shared/vulkan/native/spirv-tools-source.json"
+        "producers/package-support/src/modules/shared/vulkan/native/kosmickrisp-build.mjs",
+        "producers/package-support/scripts/repackage-graphics-runtime.mjs",
+        "producers/package-support/src/modules/shared/vulkan/native/spirv-tools-source.json"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -1587,7 +1587,7 @@
         "provider": "git",
         "url": "https://gitlab.freedesktop.org/mesa/mesa",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/mesa"
+          "gitlink": "producers/package-support/src/external/mesa"
         }
       },
       {
@@ -1635,7 +1635,7 @@
         "arm64"
       ],
       "submodules": [
-        "producers/maclauncher/src/external/mesa",
+        "producers/package-support/src/external/mesa",
         "sources/vulkan-loader"
       ],
       "tools": [
@@ -1685,11 +1685,11 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/scripts/build-mkxpz-nfc.cjs",
-        "producers/maclauncher/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json",
-        "producers/maclauncher/helper-builds/mkxpz.json"
+        "producers/package-support/scripts/build-mkxpz-nfc.cjs",
+        "producers/package-support/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json",
+        "producers/package-support/helper-builds/mkxpz.json"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -1698,7 +1698,7 @@
         "url": "https://github.com/mkxp-z/mkxp-z",
         "repository": "mkxp-z/mkxp-z",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/mkxp-z"
+          "gitlink": "producers/package-support/src/external/mkxp-z"
         }
       },
       {
@@ -1707,7 +1707,7 @@
         "url": "https://github.com/libsdl-org/SDL_image",
         "repository": "libsdl-org/SDL_image",
         "pin": {
-          "file": "producers/maclauncher/helper-builds/mkxpz.json",
+          "file": "producers/package-support/helper-builds/mkxpz.json",
           "pointer": "/sdlImage"
         }
       }
@@ -1762,10 +1762,10 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/gamemaker/runtime",
-        "producers/maclauncher/src/modules/gamemaker/overlays/butterscotch-game-arguments.js"
+        "producers/package-support/src/modules/gamemaker/runtime",
+        "producers/package-support/src/modules/gamemaker/overlays/butterscotch-game-arguments.js"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -1774,7 +1774,7 @@
         "url": "https://github.com/ButterscotchRunner/Butterscotch",
         "repository": "ButterscotchRunner/Butterscotch",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/Butterscotch"
+          "gitlink": "producers/package-support/src/external/Butterscotch"
         }
       }
     ],
@@ -1826,7 +1826,7 @@
         "arm64"
       ],
       "submodules": [
-        "producers/maclauncher/src/external/Butterscotch"
+        "producers/package-support/src/external/Butterscotch"
       ],
       "tools": [
         "cmake",
@@ -2008,7 +2008,7 @@
         "url": "https://github.com/mpv-player/mpv",
         "repository": "mpv-player/mpv",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/mpv-player"
+          "gitlink": "producers/package-support/src/external/mpv-player"
         }
       }
     ],
@@ -2048,7 +2048,7 @@
         "arm64"
       ],
       "submodules": [
-        "producers/maclauncher/src/external/mpv-player"
+        "producers/package-support/src/external/mpv-player"
       ],
       "tools": [
         "uv",
@@ -2142,9 +2142,9 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/crossover/temporal/vulkan"
+        "producers/package-support/src/modules/crossover/temporal/vulkan"
       ],
-      "sourceDirectory": "producers/maclauncher",
+      "sourceDirectory": "producers/package-support",
       "sourceRepository": "https://github.com/wine-mirror/wine"
     },
     "upstreams": [],
@@ -2178,7 +2178,7 @@
     },
     "versionBindings": [
       {
-        "file": "producers/maclauncher/src/modules/crossover/temporal/vulkan/source.json",
+        "file": "producers/package-support/src/modules/crossover/temporal/vulkan/source.json",
         "pointer": "/version"
       }
     ]
@@ -2191,10 +2191,10 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/crossover/temporal/fidelityfx/build.mjs",
-        "producers/maclauncher/src/modules/crossover/temporal/fidelityfx/README.md"
+        "producers/package-support/src/modules/crossover/temporal/fidelityfx/build.mjs",
+        "producers/package-support/src/modules/crossover/temporal/fidelityfx/README.md"
       ],
-      "sourceDirectory": "producers/maclauncher"
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -2203,7 +2203,7 @@
         "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
         "pin": {
-          "gitlink": "producers/maclauncher/src/external/fsr3-sdk"
+          "gitlink": "producers/package-support/src/external/fsr3-sdk"
         }
       }
     ],
@@ -2230,7 +2230,7 @@
     },
     "versionBindings": [
       {
-        "file": "producers/maclauncher/src/modules/crossover/temporal/fidelityfx/source.json",
+        "file": "producers/package-support/src/modules/crossover/temporal/fidelityfx/source.json",
         "pointer": "/version"
       }
     ]
@@ -2243,7 +2243,7 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/maclauncher/src/modules/shared/vulkan/native/moltenvk-scene-build.mjs",
+        "producers/package-support/src/modules/shared/vulkan/native/moltenvk-scene-build.mjs",
         "producers/moltenvk/build.mjs"
       ]
     },
@@ -2254,7 +2254,7 @@
         "url": "https://github.com/KhronosGroup/MoltenVK",
         "repository": "KhronosGroup/MoltenVK",
         "pin": {
-          "file": "producers/maclauncher/src/modules/shared/vulkan/native/moltenvk-scene-source.json",
+          "file": "producers/package-support/src/modules/shared/vulkan/native/moltenvk-scene-source.json",
           "pointer": ""
         }
       }
@@ -2300,7 +2300,7 @@
     },
     "versionBindings": [
       {
-        "file": "producers/maclauncher/src/modules/shared/vulkan/native/moltenvk-scene-source.json",
+        "file": "producers/package-support/src/modules/shared/vulkan/native/moltenvk-scene-source.json",
         "pointer": "/version"
       }
     ]
@@ -2406,7 +2406,7 @@
   {
     "id": "vnds-love",
     "name": "VNDS-LOVE",
-    "purpose": "Adapted VNDS interpreter for the managed L\u00d6VE host.",
+    "purpose": "Adapted VNDS interpreter for the managed LÖVE host.",
     "producer": {
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",

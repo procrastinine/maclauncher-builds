@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {addLicenses,includeLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -7,8 +8,8 @@ import {helperPackage,sha} from './helper-package.mjs';
 import {buildHelper} from './build-helper.mjs';
 import {resolveProject} from '../lib/projects.mjs';
 import {recipeMain} from './build-source.mjs';
-const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/maclauncher');
-const Overlay=require('../producers/maclauncher/src/modules/love/runtime/luasteam-source-overlay.js'),Source=require('../producers/maclauncher/src/modules/shared/runtime/pinned-native-build.js');
+const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'sources/maclauncher');
+const Overlay=require('../sources/maclauncher/src/modules/love/runtime/luasteam-source-overlay.js'),Source=require('../sources/maclauncher/src/modules/shared/runtime/pinned-native-build.js');
 const run=(tool,args)=>execFileSync(tool,args,{maxBuffer:Infinity,stdio:'pipe',timeout:120000});
 export async function buildLuaSteam({project:id,arch,output,work,sourceDir=path.join(base,'src/external/luasteam'),sdkDir=path.join(base,'src/external/SteamworksSDK')}){
  const project=resolveProject(id,root,{resolvePins:false});

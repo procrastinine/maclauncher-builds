@@ -8,9 +8,9 @@ const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
-const Current=require('../producers/maclauncher/src/modules/mages/native/current-build');
-const descriptor=require('../producers/maclauncher/src/modules/mages/native/current-windows-overlay.json');
-const upstream=path.resolve(__dirname,'../producers/maclauncher/src/external/impacto');
+const Current=require('../producers/package-support/src/modules/mages/native/current-build');
+const descriptor=require('../sources/maclauncher/src/modules/mages/native/current-windows-overlay.json');
+const upstream=path.resolve(__dirname,'../producers/package-support/src/external/impacto');
 const relative='src/ui/backlogmenu.cpp';
 function sourceFixture(t){
  const root=fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()),'mages-current-backlog-'));
@@ -21,7 +21,7 @@ function sourceFixture(t){
 }
 
 
-test("the current backlog patch verifies all pinned input hashes before any write",requirements({ sourceTree: 'producers/maclauncher/src/external/impacto' }),async t=>{
+test("the current backlog patch verifies all pinned input hashes before any write",requirements({ sourceTree: 'producers/package-support/src/external/impacto' }),async t=>{
  const f=sourceFixture(t),first=path.join(f.source,descriptor.files.find(item=>item.originalSha256!==null).path),bytes=fs.readFileSync(first),before=fs.readFileSync(f.target);
  fs.appendFileSync(first,'\nchanged source\n');
  await assert.rejects(Current.applyCurrentOverlay(f.source,{logPath:f.logPath}),/Pinned dependency source differs/);
@@ -33,7 +33,7 @@ test("the current backlog patch verifies all pinned input hashes before any writ
 });
 
 test("compiled backlog guard skips zero-capacity storage and preserves enabled append and eviction behavior",
-  requirements({ sourceTree: 'producers/maclauncher/src/external/impacto', appleSiliconMacOS: true }), async t => {
+  requirements({ sourceTree: 'producers/package-support/src/external/impacto', appleSiliconMacOS: true }), async t => {
     const {root,source,target,logPath}=sourceFixture(t);
     const original=fs.readFileSync(target,'utf8');
     await Current.applyCurrentOverlay(source,{logPath});

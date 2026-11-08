@@ -1,0 +1,1 @@
+../../../../sources/maclauncher/src/core/runtime-state-snapshot.mjs

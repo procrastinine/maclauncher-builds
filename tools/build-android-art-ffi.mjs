@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import dependencies from '../producers/dependencies.json' with {type:'json'};
 const {libffi}=dependencies;
 import {androidSource,ndkSource} from '../lib/android-source.mjs';

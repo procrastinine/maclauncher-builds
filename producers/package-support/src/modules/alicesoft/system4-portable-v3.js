@@ -1,0 +1,102 @@
+const sharedDependencies=require('../../../../dependencies.json');
+const {gitlink} = require("../../../../../lib/pins.mjs");
+const fs = require("node:fs");
+const path = require("node:path");
+const crypto = require("node:crypto");
+const Source = require("../shared/runtime/pinned-native-build");
+const Native = require("../shared/runtime/local-native");
+const Fonts = require("../shared/runtime/portable-sdl2-fonts");
+const Audio = require("../shared/runtime/portable-sndfile");
+const Movie = require("../shared/runtime/portable-ffmpeg");
+const Prefix = require("../shared/runtime/portable-dependency-prefix");
+const Overlay = require("./system4-portable-overlay-v3");
+const { throwIfAborted } = require("../shared/runtime/download-utils");
+// Portable libffi uses its configured release archive; the Git snapshot does not contain configure.
+const PIN = Object.freeze({...require("./system4-portable.json"),dependencies:require("./system4-portable.json").dependencies.map(row=>{if(row.id==='webp')row={...require('./system35-portable.json').dependencies.find(pin=>pin.id==='webp'),...row};const pin=sharedDependencies[row.id==='libffi'?'libffiPortable':row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};})});
+const VERSION = "MCLv9";
+const REVISION = gitlink("producers/package-support/src/external/xsystem4");
+const SOURCE_SHA256 = "4573e25bd5958bb6b7d8b28b6e1c0036af5c752e304d30c8afa270c7818ba0c0";
+const sourcePath = path.resolve(__dirname, "../../external/xsystem4");
+const recipeFiles = [__filename, require.resolve("./system4-portable-overlay-v3"), require.resolve("./system4-portable.json"),
+  require.resolve("./system35-portable"), require.resolve("./system35-portable.json"),
+  require.resolve("../shared/runtime/portable-sdl2-fonts"), require.resolve("../shared/runtime/portable-sdl2-fonts.json"),
+  require.resolve("../shared/runtime/portable-sndfile"), require.resolve("../shared/runtime/portable-sndfile.json"),
+  require.resolve("../shared/runtime/portable-ffmpeg"), require.resolve("../shared/runtime/portable-ffmpeg.json")];
+function overlayIdentity() {
+  const hash=crypto.createHash("sha256");for(const file of recipeFiles)hash.update(fs.readFileSync(file));return hash.digest("hex");
+}
+function nativeFile({ prefix, sdk, pathMappings, tools, architecture = process.arch }) {
+  for(const value of [prefix,sdk,...Object.values(tools)]) if(!path.isAbsolute(value||"")||/[\r\n\0]/.test(value))throw new Error("Portable Meson build paths must be absolute.");
+  const flags=Audio.compilerFlags(sdk,pathMappings,architecture).split(" ");
+  const quote=value=>"'"+value.replaceAll("\\","\\\\").replaceAll("'","\\'")+"'";
+  const list=values=>"["+values.map(quote).join(", ")+"]";
+  return "[binaries]\n"+Object.entries({c:"/usr/bin/clang",cpp:"/usr/bin/clang++",ar:"/usr/bin/ar",strip:"/usr/bin/strip",'pkg-config':tools.pkgconfig,bison:tools.bison,flex:tools.flex}).map(([key,value])=>key+" = "+quote(value)).join("\n")+
+    "\n[built-in options]\nc_args = "+list(flags)+"\nc_link_args = "+list(["-arch",architecture==="x64"?"x86_64":"arm64","-mmacosx-version-min=13.0","-isysroot",sdk,"-Wl,-headerpad_max_install_names","-Wl,-rpath,"+path.join(prefix,"lib")])+"\ncmake_prefix_path = []\npkg_config_path = []\n";
+}
+
+function validateFeatures(outputRoot) {
+  const commands=JSON.parse(fs.readFileSync(path.join(outputRoot,"compile_commands.json"),"utf8"));
+  if(!Array.isArray(commands)||commands.length>2000)throw new Error("Invalid xsystem4 compilation inventory.");
+  const files=commands.map(row=>path.basename(row.file));
+  for(const name of ["debug.c","debugger_dap.c","movie_ffmpeg.c"])if(!files.includes(name))throw new Error("xsystem4 did not compile its selected debugger/movie profile.");
+  if(files.some(name=>["movie_plmpeg.c","debugger_scm.c"].includes(name))||commands.some(row=>/HAVE_SCHEME|HAVE_READLINE|(?:-I|-L)\s?\/(?:opt\/homebrew|usr\/local)/.test(row.command||"")))throw new Error("xsystem4 enabled an unselected dependency.");
+  return {debugger:true,debugAdapter:true,schemeDebugger:false,readline:false,appleOpenGL:"3.2 core",glsl:"150",webp:true,jpeg:true,
+    audioFormats:Audio.PIN.audioFormats,movieVersion:Movie.PIN.source.version,movieDecoders:Movie.PIN.decoders,movieDemuxers:Movie.PIN.demuxers,movieNetwork:false,movieExternalCodecs:false};
+}
+
+async function buildPortableSystem4({ sourceDir=sourcePath,archives,workRoot,dependencyStacks,architecture=process.arch,pathMappings=[],signal,onProgress,dependencies={} }) {
+  throwIfAborted(signal);
+  if(process.platform!=="darwin"||!["arm64","x64"].includes(architecture))throw new Error("xsystem4 builds require macOS and an arm64 or x64 target.");
+  workRoot=Fonts.assertFreshBuildRoot(workRoot,{readOnlyRoots:[sourceDir,...Object.values(dependencyStacks||{}).map(stack=>stack.prefix)]});
+  Fonts.validateArchives(archives);Audio.validateArchives(archives);Audio.validateArchives(archives,{catalog:PIN});
+  if(!path.isAbsolute(archives?.ffmpeg||"")||Native.hashFile(archives.ffmpeg)!==Movie.PIN.source.sha256)throw new Error("Portable movies require the exact FFmpeg source archive.");
+  const source=await Source.validatePinnedSource(sourceDir,REVISION,{signal});
+  const libsys4Revision = require("node:child_process").execFileSync("git", ["-C", sourceDir, "rev-parse", "HEAD:subprojects/libsys4"], { encoding: "utf8" }).trim();
+  if(Source.hashPinnedFiles(sourceDir,source.files)!==SOURCE_SHA256)throw new Error("xsystem4 and libsys4 source checksum differs from the selected version.");
+  const overlaySha256=overlayIdentity();
+  let fonts,audio,movie;
+  if(dependencyStacks){
+    if(Object.keys(dependencyStacks).length!==3||!dependencyStacks.fonts||!dependencyStacks.audio||!dependencyStacks.movie)throw new Error("Portable dependency reuse needs font, audio and movie profiles.");
+    ({fonts,audio,movie}=dependencyStacks);
+  }
+  fs.mkdirSync(workRoot,{recursive:true});
+  if(!fonts){
+    fonts=await Fonts.buildDependencies({archives,workRoot:path.join(workRoot,"font-dependencies"),architecture,pathMappings,signal,onProgress,dependencies});
+    audio=await Audio.buildDependencies({archives,workRoot:path.join(workRoot,"audio-dependencies"),architecture,pathMappings,signal,onProgress,dependencies});
+    movie=await Movie.buildDependencies({archive:archives.ffmpeg,workRoot:path.join(workRoot,"movie-dependencies"),architecture,pathMappings,signal,onProgress,dependencies});
+  }
+  if(fonts.sdk!==audio.sdk||fonts.sdk!==movie.sdk)throw new Error("Portable dependency profiles must use the same macOS SDK.");
+  const prefix=path.join(workRoot,"prefix"),sourceRoots={},sources=[];fs.mkdirSync(prefix);
+  Prefix.linkPrefix(fonts.prefix,prefix);Prefix.linkPrefix(audio.prefix,prefix);Prefix.linkPrefix(movie.prefix,prefix);
+  const find=dependencies.findBuildTool||Source.findBuildTool;
+  const tools={...fonts.tools,meson:find("meson"),pkgconfig:find("pkg-config"),bison:find("bison"),flex:find("flex")};
+  const run=dependencies.runBuildCommand||Source.runBuildCommand,env=Fonts.buildEnvironment(prefix,fonts.sdk);
+  for(const pin of PIN.dependencies){
+    throwIfAborted(signal);const sourceRoot=path.join(workRoot,"source",pin.id);fs.mkdirSync(sourceRoot,{recursive:true});
+    await run("/usr/bin/tar",["-xf",archives[pin.id],"--strip-components","1","-C",sourceRoot],{cwd:workRoot,logPath:path.join(workRoot,"extraction.log"),env,signal});
+
+    onProgress?.({phase:"build",project:pin.id});
+    const common={sourceRoot:path.join(sourceRoot,pin.sourceSubdirectory||""),outputRoot:path.join(workRoot,pin.id),prefix,sdk:fonts.sdk,architecture,pathMappings,options:pin.options,signal,dependencies};
+    const build=await(pin.buildSystem==="autotools"?Audio.buildAutotools(common):Fonts.buildProject({...common,tools,onProgress}));
+    sources.push({...pin,...build,sourceRoot});sourceRoots[pin.id]=sourceRoot;
+  }
+  const sourceRoot=path.join(workRoot,"xsystem4-source"),sourceTreeSha256=Source.stagePinnedFiles(sourceDir,source.files,sourceRoot);
+  const sourceOverlay=Overlay.apply(sourceRoot,{sourceDir,version:VERSION});
+  const buildFile=path.join(workRoot,"native.ini");fs.writeFileSync(buildFile,nativeFile({prefix,sdk:fonts.sdk,architecture,pathMappings,tools}));
+  const outputRoot=path.join(workRoot,"xsystem4"),logPath=path.join(workRoot,"xsystem4.log"),startedAt=new Date().toISOString();
+  env.GIT_CEILING_DIRECTORIES=workRoot;env.NINJA=tools.ninja;
+  const configureOptions=["setup",outputRoot,sourceRoot,"--native-file",buildFile,"--wrap-mode=nodownload","--buildtype=release","--prefix",prefix,
+    "-Dopengles=disabled","-Ddebugger=enabled","-Dscheme=disabled","-Dreadline=disabled","-Dffmpeg=enabled"];
+  await run(tools.meson,configureOptions,{cwd:workRoot,logPath,env,signal});
+  await run(tools.ninja,["-C",outputRoot,"-j2"],{cwd:workRoot,logPath,env,signal});
+  await run(tools.meson,["install","-C",outputRoot,"--no-rebuild"],{cwd:workRoot,logPath,env,signal});
+  throwIfAborted(signal);const features=validateFeatures(outputRoot);
+  await Source.validatePinnedSource(sourceDir,REVISION,{signal});
+  if(Source.hashPinnedFiles(sourceDir,source.files)!==sourceTreeSha256||overlayIdentity()!==overlaySha256)throw new Error("xsystem4 source or build adapter changed during compilation.");
+  const executable=path.join(prefix,"bin/xsystem4");
+  return {managerId:"xsystem4",version:VERSION,sourceRevision:REVISION,libsys4Revision,sourceTreeSha256,overlaySha256,sourceOverlay,
+    architecture,minimumMacOS:"13.0",executable,executableSha256:Native.hashFile(executable),resources:path.join(prefix,"share/xsystem4"),features,
+    sourceRoot,outputRoot,prefix,sdk:fonts.sdk,tools,configureOptions,startedAt,completedAt:new Date().toISOString(),logPath,
+    dependencyClosure:{version:PIN.version,prefix,fonts,audio,movie,sources,sourceRoots}};
+}
+module.exports={VERSION,REVISION,SOURCE_SHA256,PIN,sourcePath,recipeFiles,overlayIdentity,nativeFile,validateFeatures,buildPortableSystem4};

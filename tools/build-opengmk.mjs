@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {addLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -7,7 +8,7 @@ import {rustEnvironment} from "./rust-build.mjs";
 import {sealRuntime} from './seal-runtime.mjs';
 
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
-const overlays=path.join(root,'producers/maclauncher/src/modules/gamemaker/overlays/opengmk-macos');
+const overlays=path.join(root,'sources/maclauncher/src/modules/gamemaker/overlays/opengmk-macos');
 const Emulator=require(path.join(overlays,'apply-emulator.js')),Ramen=require(path.join(overlays,'apply-ramen.js')),Audio=require(path.join(overlays,'apply-audio.js'));
 export async function buildOpenGMK({project,arch,output,work}){
  fs.mkdirSync(work,{recursive:true});
@@ -21,7 +22,7 @@ export async function buildOpenGMK({project,arch,output,work}){
  const manifest=path.join(udon,'Cargo.toml'),text=fs.readFileSync(manifest,'utf8'),before='libsoundio-sys = { path = "./libsoundio-sys" }';
  if(text.split(before).length!==2)throw Error('Pinned udon manifest changed.');
  fs.writeFileSync(manifest,text.replace(before,'libsoundio-sys = { path = '+JSON.stringify(audio)+' }'));fs.appendFileSync(path.join(source,'Cargo.toml'),'udon = { path = '+JSON.stringify(udon)+' }\n');
- fs.copyFileSync(path.join(root,'producers/maclauncher/helper-builds/opengmk.lock'),path.join(source,'Cargo.lock'));
+ fs.copyFileSync(path.join(root,'producers/package-support/helper-builds/opengmk.lock'),path.join(source,'Cargo.lock'));
  const target=arch==='x64'?'x86_64-apple-darwin':'aarch64-apple-darwin',env=rustEnvironment({work,minimumMacOS:'13.0'});
  run('cargo',['build','--release','--locked','--target',target,'--package','gm8emulator'],{cwd:source,env});
  addLicenses(source,'ramen',sources[1].source);addLicenses(source,'libsoundio',path.join(sources[2].source,'libsoundio-sys/libsoundio'));

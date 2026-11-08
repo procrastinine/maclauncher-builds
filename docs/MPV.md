@@ -8,10 +8,10 @@ In version `0.41.0-MCLv7`, decoded PQ/BT.2020 frames reach the presenter as RGBA
 
 ## Source and build
 
-`producers/mpv-render/v7/source.json` records the original library artifact, the upstream commit, the backported changes and the exact producer inputs, and the upstream headers come from the submodule `producers/maclauncher/src/external/mpv-player`. The runtime includes the original library and its third-party notices. Building requires Node.js 24 or later and Apple's command-line tools.
+`producers/mpv-render/v7/source.json` records the original library artifact, the upstream commit, the backported changes and the exact producer inputs, and the upstream headers come from the submodule `producers/package-support/src/external/mpv-player`. The runtime includes the original library and its third-party notices. Building requires Node.js 24 or later and Apple's command-line tools.
 
 ```sh
-git submodule update --init producers/maclauncher/src/external/mpv-player
+git submodule update --init producers/package-support/src/external/mpv-player
 node producers/mpv-render/v7/build.mjs --check
 node producers/mpv-render/v7/build.mjs --config /absolute/path/to/media-inputs.json
 node producers/mpv-render/v7/package.mjs \

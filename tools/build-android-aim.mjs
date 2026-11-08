@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -8,10 +9,10 @@ import {buildAngleInput,angleDefinition} from './build-android-angle.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {rustEnvironment} from './rust-build.mjs';
-import {stageAim} from '../producers/maclauncher/scripts/build-android-aim.mjs';
+import {stageAim} from '../producers/package-support/scripts/build-android-aim.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
-const producer=path.join(root,'producers/maclauncher');
+const producer=path.join(root,'sources/maclauncher');
 const read=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8',...options}).trim();
 /** Use the shared Rust toolchain maps while retaining this producer's paths and profile. */
 export function aimBuildEnvironment({work,upstream,sdk,python,minimumMacOS='26.0',env=process.env}){

@@ -1,8 +1,9 @@
+import './producer-environment.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
 import {dependencyResolver} from './prepared-build-inputs.mjs';
-const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs');
+const require=createRequire(import.meta.url),B=require('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js');
 const json=file=>JSON.parse(fs.readFileSync(file,'utf8'));
 const readMap=env=>env.MACLAUNCHER_BUILD_INPUTS?JSON.parse(env.MACLAUNCHER_BUILD_INPUTS.trim().startsWith('{')?env.MACLAUNCHER_BUILD_INPUTS:fs.readFileSync(env.MACLAUNCHER_BUILD_INPUTS,'utf8')):{};
 const relative=value=>{B.relativeFile(value);return value;};

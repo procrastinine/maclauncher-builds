@@ -1,0 +1,1 @@
+../../../sources/maclauncher/scripts/native-binary-tools.cjs

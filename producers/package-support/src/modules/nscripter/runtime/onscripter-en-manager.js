@@ -1,0 +1,1 @@
+../../../../../../sources/maclauncher/src/modules/nscripter/runtime/onscripter-en-manager.js

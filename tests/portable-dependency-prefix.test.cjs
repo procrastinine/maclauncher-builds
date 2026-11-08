@@ -1,5 +1,5 @@
 const test=require("node:test"),assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path"),os=require("node:os");
-const Prefix=require("../producers/maclauncher/src/modules/shared/runtime/portable-dependency-prefix"),Mixer=require("../producers/maclauncher/src/modules/shared/runtime/portable-sdl2-mixer");
+const Prefix=require("../producers/package-support/src/modules/shared/runtime/portable-dependency-prefix"),Mixer=require("../producers/package-support/src/modules/shared/runtime/portable-sdl2-mixer");
 function temporary(t){const root=fs.mkdtempSync(path.join(os.tmpdir(),"maclauncher-prefix-test-"));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;}
 test("dependency linking preserves original libraries and requires explicit confined read roots",t=>{
   const root=temporary(t),original=path.join(root,"original"),prefix=path.join(root,"prefix"),output=path.join(root,"output"),outside=path.join(root,"outside");for(const p of [original,prefix,output,outside])fs.mkdirSync(path.join(p,"lib"),{recursive:true});

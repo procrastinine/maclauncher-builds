@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import fs from 'node:fs';
 import os from 'node:os';
 import crypto from 'node:crypto';

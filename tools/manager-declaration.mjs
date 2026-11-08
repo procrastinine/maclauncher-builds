@@ -1,9 +1,10 @@
+import './producer-environment.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {createRequire} from 'node:module';
 import {publicDeclaration} from './runtime-package.mjs';
-const require=createRequire(import.meta.url),A=require('../lib/archive.cjs'),B=require('../lib/bundled-native.cjs');
+const require=createRequire(import.meta.url),A=require('../lib/archive.cjs'),B=require('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js');
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 function regular(file){const stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink())throw Error('Manager inputs must be regular files.');return stat;}
 /** Adapt an existing sealed manager output without changing its files or manifest. */

@@ -1,8 +1,9 @@
+import './producer-environment.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {createRequire} from 'node:module';
-const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs'),{validateDeclaration,validatePublicMetadata}=require('../lib/package-contract.cjs');
+const require=createRequire(import.meta.url),B=require('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js'),{validateDeclaration,validatePublicMetadata}=require('../sources/maclauncher/src/modules/shared/runtime/package-contract.cjs');
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 
 /** Compose both execution engines into one package, retaining their exact files. */

@@ -6,18 +6,18 @@ const path = require("node:path");
 const os = require("node:os");
 const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
-const Current = require("../producers/maclauncher/src/modules/mages/native/current-build");
-const descriptor = require("../producers/maclauncher/src/modules/mages/native/current-windows-overlay.json");
-const Session = require("../producers/maclauncher/src/modules/mages/native/windows-checkpoint-session");
+const Current = require("../producers/package-support/src/modules/mages/native/current-build");
+const descriptor = require("../sources/maclauncher/src/modules/mages/native/current-windows-overlay.json");
+const Session = require("../sources/maclauncher/src/modules/mages/native/windows-checkpoint-session");
 
-const nativeRoot = path.resolve(__dirname, "../producers/maclauncher/src/modules/mages/native");
+const nativeRoot = path.resolve(__dirname, "../sources/maclauncher/src/modules/mages/native");
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 
 test("the current Windows checkpoint patch validates inputs before writes and supplies the compiled implementation",
-  requirements({ sourceTree: 'producers/maclauncher/src/external/impacto' }), async t => {
+  requirements({ sourceTree: 'producers/package-support/src/external/impacto' }), async t => {
     const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "mages-current-checkpoint-"));
     t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-    const source = path.join(root, "source"), upstream = path.resolve(__dirname, "../producers/maclauncher/src/external/impacto");
+    const source = path.join(root, "source"), upstream = path.resolve(__dirname, "../producers/package-support/src/external/impacto");
     fs.mkdirSync(source);
     for (const item of descriptor.files) {
       if (item.originalSha256 === null) continue;
@@ -38,7 +38,7 @@ test("the current Windows checkpoint patch validates inputs before writes and su
   });
 
 test("compiled Windows checkpoint instructions consume LEu16 atomically and preserve legacy type widths",
-  requirements({ sourceTree: 'producers/maclauncher/src/external/impacto', appleSiliconMacOS: true }), t => {
+  requirements({ sourceTree: 'producers/package-support/src/external/impacto', appleSiliconMacOS: true }), t => {
     const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "mages-checkpoint-native-"));
     t.after(() => fs.rmSync(root, { recursive: true, force: true }));
     const vm = path.join(root, "vm"), data = path.join(root, "data"), profile = path.join(root, "profile");
@@ -100,7 +100,7 @@ inline void SetQSavedOnCurrentLine(bool) {}
 }
 namespace Impacto::SaveIconDisplay { inline void ShowFor(float) {} }
 `);
-    const originalPath = path.resolve(__dirname, "../producers/maclauncher/src/external/impacto/src/vm/inst_system.cpp");
+    const originalPath = path.resolve(__dirname, "../producers/package-support/src/external/impacto/src/vm/inst_system.cpp");
     const original = fs.existsSync(originalPath) && fs.readFileSync(originalPath, "utf8")
       .match(/VmInstruction\(InstAutoSaveOld\) \{\n[\s\S]*?\n\}/)?.[0];
     assert.ok(original, "the pinned upstream save instruction is required for the legacy comparison");

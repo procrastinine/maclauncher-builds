@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
@@ -7,13 +8,13 @@ const root=path.resolve(import.meta.dirname,'..');
 /** Initialize only declared Gitlink paths, including nested production sources. */
 export function initializeSources({project:id,version,directory=root,run=(args,cwd)=>execFileSync('git',args,{cwd,encoding:'utf8',stdio:['ignore','pipe','pipe'],maxBuffer:Infinity})}){
  const project=resolveProject(id,directory,{resolvePins:false}),build=buildRecord(project,version),initialized=[],done=new Set();
- for(const selected of build.submodules||[]){
+ for(const selected of ['sources/maclauncher',...(build.submodules||[])]){
   let current=directory,remaining=selected;
   while(remaining){
    const links=String(run(['ls-files','--stage'],current)).split('\n').flatMap(line=>{const match=line.match(/^160000 [a-f0-9]{40} 0\t(.+)$/);return match?[match[1]]:[];});
    const link=links.find(name=>remaining===name||remaining.startsWith(name+'/'));
    if(!link)throw Error('Declared source is not a registered Gitlink: '+selected);
-   const recursive=build.recursiveSubmodules===true&&remaining===link,key=path.join(current,link)+'/'+recursive;
+   const recursive=build.recursiveSubmodules===true&&remaining===link&&link!=='sources/maclauncher',key=path.join(current,link)+'/'+recursive;
    if(!done.has(key)){
     const args=['submodule','update','--init'];
     retryNetwork(()=>{

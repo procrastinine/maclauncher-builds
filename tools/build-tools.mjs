@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {retryNetwork} from './download.mjs';
 import fs from 'node:fs';
 import os from 'node:os';

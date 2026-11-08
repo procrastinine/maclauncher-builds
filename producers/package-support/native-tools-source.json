@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/procrastinine/maclauncher",
+  "files": [
+    {
+      "path": "src/modules/shared/runtime/macho-load-commands.js",
+      "destination": "lib/macho-load-commands.cjs",
+      "replacements": [
+        {
+          "from": "const CPU_NAMES = new Map([...CPUS].map(([cpu, name]) => [name, cpu]));\nCPU_NAMES.set(\"x64\", 0x01000007); CPU_NAMES.set(\"ia32\", 7);\nconst LIMITS = Object.freeze({ slices: 32, commands: 8192, commandBytes: 4 * 1024 * 1024,\n  readBytes: 16 * 1024 * 1024, pathBytes: 4096, buildTools: 128 });\nconst utf8 = new TextDecoder(\"utf-8\", { fatal: true });\nconst DYLIBS = new Map([[0xc, \"load\"], [0x80000018, \"weak\"], [0x8000001f, \"reexport\"],\n",
+          "to": "const CPU_NAMES = new Map([...CPUS].map(([cpu, name]) => [name, cpu]));\nCPU_NAMES.set(\"x64\", 0x01000007); CPU_NAMES.set(\"ia32\", 7);\nconst utf8 = new TextDecoder(\"utf-8\", { fatal: true });\nconst DYLIBS = new Map([[0xc, \"load\"], [0x80000018, \"weak\"], [0x8000001f, \"reexport\"],\n"
+        },
+        {
+          "from": "    fail(`Invalid ${label} range.`);\n}\nfunction bound(value, maximum, label) {\n  if (!Number.isSafeInteger(value) || value < 0 || value > maximum) fail(`${label} exceeds its inspection limit.`, \"MACHO_LIMIT\");\n  return value;\n}\n",
+          "to": "    fail(`Invalid ${label} range.`);\n}\nfunction bound(value, label) {\n  if (!Number.isSafeInteger(value) || value < 0) fail(`${label} exceeds its inspection limit.`, \"MACHO_LIMIT\");\n  return value;\n}\n"
+        },
+        {
+          "from": "  const read = (offset, count) => {\n    abort(signal); range(offset, count, size, \"file\");\n    bytesRead = bound(bytesRead + count, LIMITS.readBytes, \"Total bytes read\");\n    const result = readRange(offset, count);\n    if (!Buffer.isBuffer(result) || result.length !== count) fail(\"Truncated file range.\");\n",
+          "to": "  const read = (offset, count) => {\n    abort(signal); range(offset, count, size, \"file\");\n    bytesRead += count;\n    const result = readRange(offset, count);\n    if (!Buffer.isBuffer(result) || result.length !== count) fail(\"Truncated file range.\");\n"
+        },
+        {
+          "from": "  if (fat32 || fat64) {\n    const little = magic === 0xbebafeca || magic === 0xbfbafeca;\n    const count = bound(little ? read(0, 8).readUInt32LE(4) : read(0, 8).readUInt32BE(4), LIMITS.slices, \"Universal slice count\");\n    if (!count) fail(\"Empty universal header.\");\n    const stride = fat64 ? 32 : 20, tableEnd = 8 + count * stride;\n",
+          "to": "  if (fat32 || fat64) {\n    const little = magic === 0xbebafeca || magic === 0xbfbafeca;\n    const count = bound(little ? read(0, 8).readUInt32LE(4) : read(0, 8).readUInt32BE(4), \"Universal slice count\");\n    if (!count) fail(\"Empty universal header.\");\n    const stride = fat64 ? 32 : 20, tableEnd = 8 + count * stride;\n"
+        },
+        {
+          "from": "    const headerSize = wide ? 32 : 28;\n    range(0, headerSize, slice.size, \"Mach-O header\");\n    const count = bound(u32(initial, 16), LIMITS.commands, \"Load command count\");\n    const length = bound(u32(initial, 20), LIMITS.commandBytes, \"Load command bytes\");\n    range(headerSize, length, slice.size, \"load commands\");\n    if (length < count * 8) fail(\"Load command count exceeds its byte range.\");\n",
+          "to": "    const headerSize = wide ? 32 : 28;\n    range(0, headerSize, slice.size, \"Mach-O header\");\n    const count = bound(u32(initial, 16), \"Load command count\");\n    const length = bound(u32(initial, 20), \"Load command bytes\");\n    range(headerSize, length, slice.size, \"load commands\");\n    if (length < count * 8) fail(\"Load command count exceeds its byte range.\");\n"
+        },
+        {
+          "from": "      const end = command.indexOf(0, offset);\n      if (end === -1) fail(\"Unterminated load-command path.\");\n      bound(end - offset, LIMITS.pathBytes, \"Load-command path\");\n      if (end === offset || command.subarray(end + 1).some(byte => byte !== 0)) fail(\"Empty path or nonzero string padding.\");\n      let value; try { value = utf8.decode(command.subarray(offset, end)); } catch { fail(\"Invalid UTF-8 load-command path.\"); }\n",
+          "to": "      const end = command.indexOf(0, offset);\n      if (end === -1) fail(\"Unterminated load-command path.\");\n      bound(end - offset, \"Load-command path\");\n      if (end === offset || command.subarray(end + 1).some(byte => byte !== 0)) fail(\"Empty path or nonzero string padding.\");\n      let value; try { value = utf8.decode(command.subarray(offset, end)); } catch { fail(\"Invalid UTF-8 load-command path.\"); }\n"
+        },
+        {
+          "from": "      } else if (kind === 0x32) {\n        if (commandSize < 24) fail(\"Truncated build-version command.\");\n        const tools = bound(u32(command, 20), LIMITS.buildTools, \"Build tool count\");\n        if (commandSize !== 24 + tools * 8) fail(\"Build tool count does not match its command size.\");\n        builds.push({ platform: u32(command, 8), minimumOS: version(u32(command, 12)), sdkVersion: version(u32(command, 16)) });\n",
+          "to": "      } else if (kind === 0x32) {\n        if (commandSize < 24) fail(\"Truncated build-version command.\");\n        const tools = bound(u32(command, 20), \"Build tool count\");\n        if (commandSize !== 24 + tools * 8) fail(\"Build tool count does not match its command size.\");\n        builds.push({ platform: u32(command, 8), minimumOS: version(u32(command, 12)), sdkVersion: version(u32(command, 16)) });\n"
+        },
+        {
+          "from": "}\n\nmodule.exports = { LIMITS, readMachOLoadCommands, parseMachOLoadCommands, assertSystemLibraryClosure };\n",
+          "to": "}\n\nmodule.exports = { readMachOLoadCommands, parseMachOLoadCommands, assertSystemLibraryClosure };\n"
+        }
+      ],
+      "comment": "Literal upstream source in replacements is required patch context, not a second source declaration."
+    },
+    {
+      "path": "src/modules/shared/file-time.js",
+      "destination": "lib/file-time.cjs",
+      "replacements": [],
+      "comment": "Literal upstream source in replacements is required patch context, not a second source declaration."
+    },
+    {
+      "path": "src/modules/shared/runtime/host-capabilities.js",
+      "destination": "lib/host-capabilities.cjs",
+      "replacements": [
+        {
+          "from": "const fs = require(\"node:fs\");\nconst { execFileSync } = require(\"node:child_process\");\nconst {METAL4, requirementSupport, versionAtLeast, normalizeArchitecture} = require(\"./feature-requirements\");\n\nconst SYSTEM_VERSION = \"/System/Library/CoreServices/SystemVersion.plist\";\n",
+          "to": "const fs = require(\"node:fs\");\nconst { execFileSync } = require(\"node:child_process\");\nconst {METAL4, requirementSupport, versionAtLeast, normalizeArchitecture} = require(\"../producers/package-support/src/modules/shared/runtime/feature-requirements.js\");\n\nconst SYSTEM_VERSION = \"/System/Library/CoreServices/SystemVersion.plist\";\n"
+        },
+        {
+          "from": "  try {\n    const bytes = fileSystem.readFileSync(SYSTEM_VERSION);\n    if (bytes.length <= 65536) {\n      const version = bytes.toString(\"utf8\").match(/<key>ProductVersion<\\/key>\\s*<string>([^<]+)<\\/string>/)?.[1];\n      if (version) return version.trim();\n",
+          "to": "  try {\n    const bytes = fileSystem.readFileSync(SYSTEM_VERSION);\n    {\n      const version = bytes.toString(\"utf8\").match(/<key>ProductVersion<\\/key>\\s*<string>([^<]+)<\\/string>/)?.[1];\n      if (version) return version.trim();\n"
+        },
+        {
+          "from": "    if (!rosettaAvailable && platform === \"darwin\" && hardwareArch === \"arm64\") {\n      // The Rosetta service owns its runtime location, prompt and installation.\n      try { rosettaAvailable = fileSystem.statSync(require(\"./rosetta\").RUNTIME_PATH).isFile(); } catch {}\n    }\n  }\n",
+          "to": "    if (!rosettaAvailable && platform === \"darwin\" && hardwareArch === \"arm64\") {\n      // The Rosetta service owns its runtime location, prompt and installation.\n      try { rosettaAvailable = fileSystem.statSync(require(\"../producers/package-support/src/modules/shared/runtime/rosetta.js\").RUNTIME_PATH).isFile(); } catch {}\n    }\n  }\n"
+        }
+      ],
+      "comment": "Literal upstream source in replacements is required patch context, not a second source declaration."
+    },
+    {
+      "path": "src/modules/shared/runtime/architecture.js",
+      "destination": "lib/architecture.cjs",
+      "replacements": [
+        {
+          "from": "const { AsyncLocalStorage } = require(\"node:async_hooks\");\nconst { architectureSupport, getHostCapabilities, defaultArchitecture } = require(\"./host-capabilities\");\nconst Requirements = require(\"./feature-requirements\");\nconst context = new AsyncLocalStorage();\n// A CPU this launcher installs builds for, or null.\n",
+          "to": "const { AsyncLocalStorage } = require(\"node:async_hooks\");\nconst { architectureSupport, getHostCapabilities, defaultArchitecture } = require(\"./host-capabilities.cjs\");\nconst Requirements = require(\"../producers/package-support/src/modules/shared/runtime/feature-requirements.js\");\nconst context = new AsyncLocalStorage();\n// A CPU this launcher installs builds for, or null.\n"
+        },
+        {
+          "from": "  const support = architectureSupport(normalizeArchitecture(architecture), options.host || getHostCapabilities());\n  if (!support.supported) throw new Error(support.reason);\n  if (support.installRosetta) await require(\"./rosetta\").ensure(options);\n  return support;\n}\n",
+          "to": "  const support = architectureSupport(normalizeArchitecture(architecture), options.host || getHostCapabilities());\n  if (!support.supported) throw new Error(support.reason);\n  if (support.installRosetta) await require(\"../producers/package-support/src/modules/shared/runtime/rosetta.js\").ensure(options);\n  return support;\n}\n"
+        }
+      ],
+      "comment": "Literal upstream source in replacements is required patch context, not a second source declaration."
+    },
+    {
+      "path": "src/modules/shared/runtime/included-package-dependencies.js",
+      "destination": "lib/included-package-dependencies.cjs",
+      "replacements": [
+        {
+          "from": "const fs=require('node:fs'),path=require('node:path');\nconst B=require('./bundled-native'),C=require('./package-contract.cjs'),P=require('./package-dependencies');\nfunction read(file){return JSON.parse(B.readRegular(file,B.LIMITS.manifestBytes).bytes);}\nfunction context(resourcesRoot,{lock,verification='full'}={}){\n",
+          "to": "const fs=require('node:fs'),path=require('node:path');\nconst B=require(\"./bundled-native.cjs\"),C=require(\"./package-contract.cjs\"),P=require(\"./package-dependencies.cjs\");\nfunction read(file){return JSON.parse(B.readRegular(file,B.LIMITS.manifestBytes).bytes);}\nfunction context(resourcesRoot,{lock,verification='full'}={}){\n"
+        }
+      ],
+      "comment": "Literal upstream source in replacements is required patch context, not a second source declaration."
+    },
+    {
+      "path": "src/modules/shared/runtime/package-dependencies.js",
+      "destination": "lib/package-dependencies.cjs",
+      "replacements": [
+        {
+          "from": "const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');\nconst B=require('./bundled-native'),C=require('./package-contract.cjs'),Catalog=require('./maclauncher-builds');\nconst {acquireFileLock}=require('../file-lock');\nconst {cloneOnlySync}=require('../copy-file');\nconst rootFor=userDataDir=>path.join(userDataDir,'runtimes','.dependencies');\nfunction directory(userDataDir,dep){C.packageDependencies([dep]);return path.join(rootFor(userDataDir),dep.project,dep.release,dep.sha256);}\n",
+          "to": "const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');\nconst B=require(\"./bundled-native.cjs\"),C=require(\"./package-contract.cjs\"),Catalog=require(\"../producers/package-support/src/modules/shared/runtime/maclauncher-builds.js\");\nconst {acquireFileLock}=require(\"../producers/package-support/src/modules/shared/file-lock.js\");\nconst {cloneOnlySync}=require(\"../producers/package-support/src/modules/shared/copy-file.js\");\nconst rootFor=userDataDir=>path.join(userDataDir,'runtimes','.dependencies');\nfunction directory(userDataDir,dep){C.packageDependencies([dep]);return path.join(rootFor(userDataDir),dep.project,dep.release,dep.sha256);}\n"
+        },
+        {
+          "from": "async function installOne(dep,options,seen){\n const key=dep.project+'/'+dep.release+'/'+dep.sha256;\n if(seen.has(key)||seen.size>128)throw new Error('Cyclic or excessive package dependencies.');\n const next=new Set(seen);next.add(key);\n const target=directory(options.userDataDir,dep);B.realDirectory(path.dirname(target),{create:true});\n",
+          "to": "async function installOne(dep,options,seen){\n const key=dep.project+'/'+dep.release+'/'+dep.sha256;\n if(seen.has(key))throw new Error('Cyclic package dependencies.');\n const next=new Set(seen);next.add(key);\n const target=directory(options.userDataDir,dep);B.realDirectory(path.dirname(target),{create:true});\n"
+        },
+        {
+          "from": " try{\n  options.signal?.throwIfAborted();const archive=staging+'.tar.gz',unpacked=staging;\n  const download=options.download||((url,file,settings)=>{const U=require('./upstream');return U.download(U.listedFile({...record.asset,url}),file,settings);});\n  await download(record.asset.url,archive,{signal:options.signal,onProgress:options.onProgress});\n  if(fs.statSync(archive).size!==record.asset.bytes||hash(archive)!==dep.sha256)throw new Error('Dependency archive digest or size differs from its exact release.');\n  await(options.extract||require('./project-native-package').extractArchive)(archive,unpacked,options.signal);\n  if(JSON.stringify(fs.readdirSync(unpacked).sort())!==JSON.stringify(['files','runtime-package.json']))throw new Error('Invalid dependency archive layout.');\n  const declaration=read(path.join(unpacked,'runtime-package.json'));assertDeclaration(declaration,record);\n",
+          "to": " try{\n  options.signal?.throwIfAborted();const archive=staging+'.tar.gz',unpacked=staging;\n  const download=options.download||((url,file,settings)=>{const U=require(\"../producers/package-support/src/modules/shared/runtime/upstream.js\");return U.download(U.listedFile({...record.asset,url}),file,settings);});\n  await download(record.asset.url,archive,{signal:options.signal,onProgress:options.onProgress});\n  if(fs.statSync(archive).size!==record.asset.bytes||hash(archive)!==dep.sha256)throw new Error('Dependency archive digest or size differs from its exact release.');\n  await(options.extract||require(\"../producers/package-support/src/modules/shared/runtime/project-native-package.js\").extractArchive)(archive,unpacked,options.signal);\n  if(JSON.stringify(fs.readdirSync(unpacked).sort())!==JSON.stringify(['files','runtime-package.json']))throw new Error('Invalid dependency archive layout.');\n  const declaration=read(path.join(unpacked,'runtime-package.json'));assertDeclaration(declaration,record);\n"
+        },
+        {
+          "from": "  fs.writeFileSync(path.join(unpacked,'runtime.json'),JSON.stringify({version:record.version,archiveSha256:dep.sha256,repository:options.repository,catalogEntry:{projectPackage:record}})+'\\n',{flag:'wx',mode:0o644});\n  options.signal?.throwIfAborted();\n  const storage=require('../../../core/storage-maintenance');\n  const previous=fs.existsSync(target)?storage.moveToTrash(target):null;\n  try{fs.renameSync(unpacked,target);}\n",
+          "to": "  fs.writeFileSync(path.join(unpacked,'runtime.json'),JSON.stringify({version:record.version,archiveSha256:dep.sha256,repository:options.repository,catalogEntry:{projectPackage:record}})+'\\n',{flag:'wx',mode:0o644});\n  options.signal?.throwIfAborted();\n  const storage=require(\"../producers/package-support/src/core/storage-maintenance.js\");\n  const previous=fs.existsSync(target)?storage.moveToTrash(target):null;\n  try{fs.renameSync(unpacked,target);}\n"
+        },
+        {
+          "from": " return roots;\n}\nasync function collect(userDataDir,{acquireLock=acquireFileLock,removeTrash=require('../../../core/storage-maintenance').removeTrash}={}){\n const store=rootFor(userDataDir);if(!fs.existsSync(store))return;\n const release=await acquireLock(path.join(store,'.lock'),{wait:false});\n",
+          "to": " return roots;\n}\nasync function collect(userDataDir,{acquireLock=acquireFileLock,removeTrash=require(\"../producers/package-support/src/core/storage-maintenance.js\").removeTrash}={}){\n const store=rootFor(userDataDir);if(!fs.existsSync(store))return;\n const release=await acquireLock(path.join(store,'.lock'),{wait:false});\n"
+        },
+        {
+          "from": "  for(const project of fs.readdirSync(store,{withFileTypes:true}))if(project.isDirectory()&&!project.name.startsWith('.')){\n   const projectRoot=path.join(store,project.name);for(const version of fs.readdirSync(projectRoot,{withFileTypes:true}))if(version.isDirectory()){\n    const versionRoot=path.join(projectRoot,version.name);for(const item of fs.readdirSync(versionRoot,{withFileTypes:true}))if((item.isDirectory()||item.isFile())&&(/^[a-f0-9]{64}$/.test(item.name)||/^\\.install-[A-Za-z0-9]{6}(?:\\.tar\\.gz)?$/.test(item.name)||require('../../../core/storage-maintenance').TRASH.test(item.name))){\n     const dir=path.join(versionRoot,item.name);if(keep.has(dir))continue;\n     if(require('../../../core/storage-maintenance').TRASH.test(item.name)){await removeTrash(dir);continue;}\n     if(/^\\.install-[A-Za-z0-9]{6}(?:\\.tar\\.gz)?$/.test(item.name)){await removeTrash(require('../../../core/storage-maintenance').moveToTrash(dir));continue;}\n     let receipt;try{receipt=read(path.join(dir,'runtime.json'));}catch{continue;}const dep={project:project.name,release:version.name,sha256:receipt.archiveSha256};\n     if(!/^[a-f0-9]{64}$/.test(dep.sha256||'') || item.name!==dep.sha256 || fs.statSync(dir).dev!==fs.statSync(versionRoot).dev)continue;\n     if(receipt.archiveSha256!==dep.sha256||receipt.catalogEntry?.projectPackage?.id!==dep.project||receipt.version!==dep.release)continue;\n     const trash=require('../../../core/storage-maintenance').moveToTrash(dir);await removeTrash(trash);\n    }\n   }\n",
+          "to": "  for(const project of fs.readdirSync(store,{withFileTypes:true}))if(project.isDirectory()&&!project.name.startsWith('.')){\n   const projectRoot=path.join(store,project.name);for(const version of fs.readdirSync(projectRoot,{withFileTypes:true}))if(version.isDirectory()){\n    const versionRoot=path.join(projectRoot,version.name);for(const item of fs.readdirSync(versionRoot,{withFileTypes:true}))if((item.isDirectory()||item.isFile())&&(/^[a-f0-9]{64}$/.test(item.name)||/^\\.install-[A-Za-z0-9]{6}(?:\\.tar\\.gz)?$/.test(item.name)||require(\"../producers/package-support/src/core/storage-maintenance.js\").TRASH.test(item.name))){\n     const dir=path.join(versionRoot,item.name);if(keep.has(dir))continue;\n     if(require(\"../producers/package-support/src/core/storage-maintenance.js\").TRASH.test(item.name)){await removeTrash(dir);continue;}\n     if(/^\\.install-[A-Za-z0-9]{6}(?:\\.tar\\.gz)?$/.test(item.name)){await removeTrash(require(\"../producers/package-support/src/core/storage-maintenance.js\").moveToTrash(dir));continue;}\n     let receipt;try{receipt=read(path.join(dir,'runtime.json'));}catch{continue;}const dep={project:project.name,release:version.name,sha256:receipt.archiveSha256};\n     if(!/^[a-f0-9]{64}$/.test(dep.sha256||'') || item.name!==dep.sha256 || fs.statSync(dir).dev!==fs.statSync(versionRoot).dev)continue;\n     if(receipt.archiveSha256!==dep.sha256||receipt.catalogEntry?.projectPackage?.id!==dep.project||receipt.version!==dep.release)continue;\n     const trash=require(\"../producers/package-support/src/core/storage-maintenance.js\").moveToTrash(dir);await removeTrash(trash);\n    }\n   }\n"
+        },
+        {
+          "from": "  if(nativeAlias)B.validateLocalAlias(root,name,target,declaration,resolveDependency);\n  const fact=typeof target==='string'?{...stored.get(target),path:path.join(root,target)}:resolveDependency(target,declaration.dependencies.find(dep=>dep.project===target.project));\n",
+          "to": "  const fact=typeof target==='string'?{...stored.get(target),path:path.join(root,target)}:resolveDependency(target,declaration.dependencies.find(dep=>dep.project===target.project));\n"
+        }
+      ],
+      "comment": "Literal upstream source in replacements is required patch context, not a second source declaration."
+    },
+    {
+      "path": "src/modules/shared/runtime/package-contract.cjs",
+      "destination": "lib/package-contract.cjs",
+      "replacements": [
+        {
+          "from": "// Shared public contracts for the launcher and native package producer.\nconst B = require(\"./bundled-native\");\nconst SHA256 = /^[a-f0-9]{64}$/;\nconst SHA = SHA256, FLOOR = /^\\d{1,2}\\.\\d{1,2}(?:\\.\\d{1,2})?$/;\nconst ARCHITECTURES = new Set([\"arm64\", \"x64\", \"universal\"]);\nconst LAUNCHER_ARCHITECTURES = new Set([\"arm64\", \"x64\"]);\nconst MAX_ARCHIVE_BYTES = 4 * 1024 * 1024 * 1024;\nconst RECORD_KEYS = [\"schemaVersion\",\"id\",\"version\",\"arch\",\"launcherArchitectures\",\"minimumMacOS\",\"manifestRelative\",\"manifestSha256\",\"sourceSha256\",\"updatePolicy\",\"tag\",\"asset\",\"sourceAsset\",\"source\",\"launcherContract\",\"capabilities\",\"dependencies\"];\nconst ARCHITECTURE_NAME = /^[a-z][a-z0-9_]{0,31}$/, CAPABILITY_NAME = /^[A-Za-z][A-Za-z0-9_]{0,63}$/;\n\nfunction object(value) {\n",
+          "to": "// Shared public contracts for the launcher and native package producer.\nconst B = require(\"./bundled-native.cjs\");\nconst SHA256 = /^[a-f0-9]{64}$/;\nconst SHA = SHA256, FLOOR = /^\\d{1,2}\\.\\d{1,2}(?:\\.\\d{1,2})?$/;\nconst ARCHITECTURES = new Set([\"arm64\", \"x64\", \"universal\"]);\nconst LAUNCHER_ARCHITECTURES = new Set([\"arm64\", \"x64\"]);\nconst RECORD_KEYS = [\"schemaVersion\",\"id\",\"version\",\"arch\",\"launcherArchitectures\",\"minimumMacOS\",\"manifestRelative\",\"manifestSha256\",\"sourceSha256\",\"updatePolicy\",\"tag\",\"asset\",\"sourceAsset\",\"source\",\"launcherContract\",\"capabilities\",\"dependencies\",\"build\",\"rebuild\"];\nconst ARCHITECTURE_NAME = /^[a-z][a-z0-9_]*$/, CAPABILITY_NAME = /^[A-Za-z][A-Za-z0-9_]*$/;\n\nfunction object(value) {\n"
+        },
+        {
+          "from": "\nfunction identity({ projectId, repository } = {}) {\n  if (typeof projectId !== \"string\" || projectId.length > 80 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(projectId))\n    throw new Error(\"A runtime catalog requires a valid project ID.\");\n  if (typeof repository !== \"string\" || !/^[A-Za-z0-9][A-Za-z0-9_.-]{0,99}\\/[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$/.test(repository) ||\n      repository.includes(\"..\") || repository.split(\"/\").some(part => part.endsWith(\".\")))\n    throw new Error(\"A runtime catalog requires an explicit GitHub owner/repository.\");\n",
+          "to": "\nfunction identity({ projectId, repository } = {}) {\n  if (typeof projectId !== \"string\" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(projectId))\n    throw new Error(\"A runtime catalog requires a valid project ID.\");\n  if (typeof repository !== \"string\" || !/^[A-Za-z0-9][A-Za-z0-9_.-]*\\/[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(repository) ||\n      repository.includes(\"..\") || repository.split(\"/\").some(part => part.endsWith(\".\")))\n    throw new Error(\"A runtime catalog requires an explicit GitHub owner/repository.\");\n"
+        },
+        {
+          "from": "\nfunction version(value) {\n  return typeof value === \"string\" && value.length <= 128 && /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value) &&\n    !value.includes(\"..\") && !value.endsWith(\".\") && !value.endsWith(\".lock\");\n}\n\nfunction relativeFile(value) {\n  return typeof value === \"string\" && value.length <= 1024 && value.split(\"/\").every(part =>\n    part !== \".\" && part !== \"..\" && /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(part));\n}\n",
+          "to": "\nfunction version(value) {\n  return typeof value === \"string\" && /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value) &&\n    !value.includes(\"..\") && !value.endsWith(\".\") && !value.endsWith(\".lock\");\n}\n\nfunction relativeFile(value) {\n  return typeof value === \"string\" && value.split(\"/\").every(part =>\n    part !== \".\" && part !== \"..\" && /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(part));\n}\n"
+        },
+        {
+          "from": "function packageDependencies(value) {\n  if (value === undefined) return [];\n  if (!Array.isArray(value) || value.length > 128) throw new Error(\"Invalid package dependencies.\");\n  const projects = new Set();\n  return value.map(item => {\n",
+          "to": "function packageDependencies(value) {\n  if (value === undefined) return [];\n  if (!Array.isArray(value)) throw new Error(\"Invalid package dependencies.\");\n  const projects = new Set();\n  return value.map(item => {\n"
+        },
+        {
+          "from": "function packageAliases(value, files, dependencies) {\n  if (value === undefined) return undefined;\n  if (!object(value) || value.schema !== 1 || Object.keys(value).sort().join(',') !== 'files,schema' || !object(value.files) ||\n      Object.keys(value.files).length > B.LIMITS.files) throw new Error(\"Invalid package alias index.\");\n  const stored = new Set(files.map(file => B.relativeFile(file.path))), projects = new Set(packageDependencies(dependencies).map(item => item.project));\n  const names = new Set([...stored].map(name=>name.normalize('NFC').toLowerCase()));\n",
+          "to": "function packageAliases(value, files, dependencies) {\n  if (value === undefined) return undefined;\n  if (!object(value) || value.schema !== 1 || Object.keys(value).sort().join(',') !== 'files,schema' || !object(value.files)) throw new Error(\"Invalid package alias index.\");\n  const stored = new Set(files.map(file => B.relativeFile(file.path))), projects = new Set(packageDependencies(dependencies).map(item => item.project));\n  const names = new Set([...stored].map(name=>name.normalize('NFC').toLowerCase()));\n"
+        },
+        {
+          "from": "  // manifest describes its protocol and need not repeat that inventory.\n  const sealed = Array.isArray(record.files), inventory = sealed ? logicalFiles(record, resolveDependency).filter(file => file.path !== record.manifestRelative) : manifest.files;\n  if (!Array.isArray(inventory) || !inventory.length || inventory.length > B.LIMITS.files)\n    throw new Error(\"The runtime package differs from its selected catalog entry.\");\n  const names = new Set(), files = inventory.map(file => {\n    const name = B.relativeFile((sealed ? \"\" : prefix) + B.relativeFile(file.path));\n    if (names.has(name) || !Number.isSafeInteger(file.size) || file.size < 0 || file.size > B.LIMITS.fileBytes ||\n        !Number.isInteger(file.mode) || file.mode < 0 || file.mode > 0o777 || !SHA256.test(file.sha256 || \"\") ||\n        file.format !== undefined && ![\"mach-o\", \"pe\"].includes(file.format) || file.format === \"pe\" && !file.architectures?.length ||\n",
+          "to": "  // manifest describes its protocol and need not repeat that inventory.\n  const sealed = Array.isArray(record.files), inventory = sealed ? logicalFiles(record, resolveDependency).filter(file => file.path !== record.manifestRelative) : manifest.files;\n  if (!Array.isArray(inventory) || !inventory.length)\n    throw new Error(\"The runtime package differs from its selected catalog entry.\");\n  const names = new Set(), files = inventory.map(file => {\n    const name = B.relativeFile((sealed ? \"\" : prefix) + B.relativeFile(file.path));\n    if (names.has(name) || !Number.isSafeInteger(file.size) || file.size < 0 ||\n        !Number.isInteger(file.mode) || file.mode < 0 || file.mode > 0o777 || !SHA256.test(file.sha256 || \"\") ||\n        file.format !== undefined && ![\"mach-o\", \"pe\"].includes(file.format) || file.format === \"pe\" && !file.architectures?.length ||\n"
+        },
+        {
+          "from": "// values it reads; this contract only bounds the shape and size.\nfunction capabilities(value) {\n  const plain = (item, depth) => item === null || [\"string\", \"number\", \"boolean\"].includes(typeof item) || depth < 3 &&\n    (Array.isArray(item) ? item.every(entry => plain(entry, depth + 1)) : object(item) && Object.values(item).every(entry => plain(entry, depth + 1)));\n  if (!object(value) || Object.keys(value).length > 64 || Object.keys(value).some(key => !CAPABILITY_NAME.test(key)) ||\n      !plain(value, 0) || JSON.stringify(value).length > 8192)\n    throw new Error(\"The runtime catalog contains invalid capabilities.\");\n  return Object.freeze(JSON.parse(JSON.stringify(value)));\n",
+          "to": "// values it reads; this contract only bounds the shape and size.\nfunction capabilities(value) {\n  const plain = item => item === null || [\"string\", \"number\", \"boolean\"].includes(typeof item) || (Array.isArray(item) ? item.every(entry => plain(entry)) : object(item) && Object.values(item).every(entry => plain(entry)));\n  if (!object(value) || Object.keys(value).some(key => !CAPABILITY_NAME.test(key)) ||\n      !plain(value))\n    throw new Error(\"The runtime catalog contains invalid capabilities.\");\n  return Object.freeze(JSON.parse(JSON.stringify(value)));\n"
+        },
+        {
+          "from": "  if (!object(item) || Object.keys(item).some(key => ![\"managerId\", \"version\", \"directoryRelative\", \"sha256\", \"bytes\"].includes(key)) ||\n      !/^[a-z0-9-]+$/.test(item.managerId || \"\") || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(item.version || \"\") ||\n      !SHA.test(item.sha256 || \"\") || !Number.isSafeInteger(item.bytes) || item.bytes < 1 || item.bytes > B.LIMITS.fileBytes ||\n      B.relativeFile(item.directoryRelative) !== item.directoryRelative || item.directoryRelative !== item.managerId + \"/\" + item.version + \"-source.tar.gz\")\n    throw new Error(\"Invalid corresponding-source archive identity.\");\n",
+          "to": "  if (!object(item) || Object.keys(item).some(key => ![\"managerId\", \"version\", \"directoryRelative\", \"sha256\", \"bytes\"].includes(key)) ||\n      !/^[a-z0-9-]+$/.test(item.managerId || \"\") || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(item.version || \"\") ||\n      !SHA.test(item.sha256 || \"\") || !Number.isSafeInteger(item.bytes) || item.bytes < 1 ||\n      B.relativeFile(item.directoryRelative) !== item.directoryRelative || item.directoryRelative !== item.managerId + \"/\" + item.version + \"-source.tar.gz\")\n    throw new Error(\"Invalid corresponding-source archive identity.\");\n"
+        },
+        {
+          "from": "      throw new Error(\"Invalid runtime release record.\");\n    validatePublicMetadata(record);\n  }\n  if (record.schemaVersion !== 2 || record.id !== projectId || record.updatePolicy !== \"manual\" ||\n",
+          "to": "      throw new Error(\"Invalid runtime release record.\");\n    validatePublicMetadata(record);\n    const evidence = require(\"./build-verification.cjs\");\n    evidence.buildMetadata(record.build, repository); evidence.rebuildMetadata(record.rebuild, record);\n  }\n  if (record.schemaVersion !== 2 || record.id !== projectId || record.updatePolicy !== \"manual\" ||\n"
+        },
+        {
+          "from": "  if (record.asset.filename !== filename ||\n      !checksum(record.asset.sha256) || !Number.isSafeInteger(record.asset.bytes) ||\n      record.asset.bytes < 1 || record.asset.bytes > MAX_ARCHIVE_BYTES)\n    throw new Error(\"The runtime download does not match its project, version, architecture or repository.\");\n\n",
+          "to": "  if (record.asset.filename !== filename ||\n      !checksum(record.asset.sha256) || !Number.isSafeInteger(record.asset.bytes) ||\n      record.asset.bytes < 1)\n    throw new Error(\"The runtime download does not match its project, version, architecture or repository.\");\n\n"
+        },
+        {
+          "from": "    if (!object(source) || source.filename !== `${record.version}-source.tar.gz` ||\n        !source.filename.endsWith(\"-source.tar.gz\") || !checksum(source.sha256) ||\n        !Number.isSafeInteger(source.bytes) || source.bytes < 1 || source.bytes > MAX_ARCHIVE_BYTES ||\n        source.url !== `https://github.com/${repository}/releases/download/${encodeURIComponent(tag)}/${source.filename}`)\n      throw new Error(\"The runtime source download does not match its release.\");\n",
+          "to": "    if (!object(source) || source.filename !== `${record.version}-source.tar.gz` ||\n        !source.filename.endsWith(\"-source.tar.gz\") || !checksum(source.sha256) ||\n        !Number.isSafeInteger(source.bytes) || source.bytes < 1 ||\n        source.url !== `https://github.com/${repository}/releases/download/${encodeURIComponent(tag)}/${source.filename}`)\n      throw new Error(\"The runtime source download does not match its release.\");\n"
+        },
+        {
+          "from": "    ...(sourceAsset ? { sourceAsset } : {}), ...(source ? { source } : {}),\n    ...(record.launcherContract === undefined ? {} : { launcherContract: record.launcherContract }),\n    ...(record.dependencies === undefined ? {} : { dependencies: Object.freeze(dependencies) }), ...compatibility });\n}\n\nfunction validateDeclaration(item) {\n  const keys = ['id', 'version', 'arch', 'launcherArchitectures', 'minimumMacOS', 'sourceRelative', 'sourceSha256', 'sourceArtifact', 'directoryRelative', 'manifestRelative', 'manifestSha256', 'files', 'notices', 'redistribution', 'aliases', 'dependencies'];\n  if (!item || Object.keys(item).some(key => !keys.includes(key)) || !/^[a-z0-9-]+$/.test(item.id || '') ||\n",
+          "to": "    ...(sourceAsset ? { sourceAsset } : {}), ...(source ? { source } : {}),\n    ...(record.launcherContract === undefined ? {} : { launcherContract: record.launcherContract }),\n    ...(record.dependencies === undefined ? {} : { dependencies: Object.freeze(dependencies) }), ...compatibility,\n    ...(publication && record.build !== undefined ? { build: require(\"./build-verification.cjs\").buildMetadata(record.build, repository) } : {}),\n    ...(publication && record.rebuild !== undefined ? { rebuild: require(\"./build-verification.cjs\").rebuildMetadata(record.rebuild, record) } : {}) });\n}\n\nfunction validateDeclaration(item) {\n  // Opaque metadata in the frozen supplied-publisher declaration is accepted without being read.\n  const keys = ['id', 'version', 'arch', 'launcherArchitectures', 'minimumMacOS', 'sourceRelative', 'sourceSha256', 'sourceArtifact', 'directoryRelative', 'manifestRelative', 'manifestSha256', 'files', 'notices', 'redistribution', 'aliases', 'dependencies'];\n  if (!item || Object.keys(item).some(key => !keys.includes(key)) || !/^[a-z0-9-]+$/.test(item.id || '') ||\n"
+        },
+        {
+          "from": "    !Array.isArray(item.launcherArchitectures) || !item.launcherArchitectures.length || new Set(item.launcherArchitectures).size !== item.launcherArchitectures.length ||\n    item.launcherArchitectures.some(arch => !['arm64', 'x64'].includes(arch)) ||\n    item.directoryRelative !== `${item.id}/${item.version}/${item.arch}` || !Array.isArray(item.files) || !item.files.length || item.files.length > B.LIMITS.files ||\n      item.redistribution !== undefined && !['bundle', 'local-only'].includes(item.redistribution)) throw new Error('Invalid supplemental native declaration.');\n  const names = new Set(); let bytes = 0;\n  for (const file of item.files) {\n    if (!file || Object.keys(file).some(key => !['path', 'size', 'mode', 'sha256', 'architectures', 'format', 'executionArchitecture', 'optionalLoad'].includes(key)) ||\n      B.relativeFile(file.path) !== file.path || names.has(file.path) || !Number.isSafeInteger(file.size) || file.size < 0 || file.size > B.LIMITS.fileBytes ||\n      ![0o640, 0o644, 0o755].includes(file.mode) || !SHA.test(file.sha256 || '')) throw new Error('Invalid sealed supplemental native file.');\n    if (file.format !== undefined && (!['mach-o', 'pe'].includes(file.format) || !file.architectures)) throw new Error('Invalid supplemental file format.');\n",
+          "to": "    !Array.isArray(item.launcherArchitectures) || !item.launcherArchitectures.length || new Set(item.launcherArchitectures).size !== item.launcherArchitectures.length ||\n    item.launcherArchitectures.some(arch => !['arm64', 'x64'].includes(arch)) ||\n    item.directoryRelative !== `${item.id}/${item.version}/${item.arch}` || !Array.isArray(item.files) || !item.files.length ||\n      item.redistribution !== undefined && !['bundle', 'local-only'].includes(item.redistribution)) throw new Error('Invalid supplemental native declaration.');\n  const names = new Set();\n  for (const file of item.files) {\n    if (!file || Object.keys(file).some(key => !['path', 'size', 'mode', 'sha256', 'architectures', 'format', 'executionArchitecture', 'optionalLoad'].includes(key)) ||\n      B.relativeFile(file.path) !== file.path || names.has(file.path) || !Number.isSafeInteger(file.size) || file.size < 0 ||\n      ![0o640, 0o644, 0o755].includes(file.mode) || !SHA.test(file.sha256 || '')) throw new Error('Invalid sealed supplemental native file.');\n    if (file.format !== undefined && (!['mach-o', 'pe'].includes(file.format) || !file.architectures)) throw new Error('Invalid supplemental file format.');\n"
+        },
+        {
+          "from": "    if (source.managerId !== item.id || source.version !== item.version) throw new Error('Supplemental corresponding source must match its package identity.');\n  }\n  if (bytes > B.LIMITS.bytes || (item.files.some(file => file.optionalLoad) && !item.files.some(file => file.architectures && !file.optionalLoad)) ||\n    (!item.sourceArtifact && item.sourceRelative === undefined) ||\n    item.sourceRelative != null && !item.files.some(file => file.path === item.sourceRelative && file.sha256 === item.sourceSha256) ||\n",
+          "to": "    if (source.managerId !== item.id || source.version !== item.version) throw new Error('Supplemental corresponding source must match its package identity.');\n  }\n  if ((item.files.some(file => file.optionalLoad) && !item.files.some(file => file.architectures && !file.optionalLoad)) ||\n    (!item.sourceArtifact && item.sourceRelative === undefined) ||\n    item.sourceRelative != null && !item.files.some(file => file.path === item.sourceRelative && file.sha256 === item.sourceSha256) ||\n"
+        },
+        {
+          "from": "    names.add(file.path); bytes += file.size;",
+          "to": "    names.add(file.path);"
+        }
+      ],
+      "comment": "Builds uses the shared launcher contract with its local import, uncapped build inputs and publication-evidence fields."
+    }
+  ]
+}

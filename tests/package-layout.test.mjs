@@ -9,7 +9,7 @@ import {createRequire} from 'node:module';
 import {preparePackageLayout,materializePackageAliases} from '../tools/package-layout.mjs';
 import {recordFromDeclaration} from '../tools/release-runtime.mjs';
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
-const B=createRequire(import.meta.url)('../lib/bundled-native.cjs');
+const B=createRequire(import.meta.url)('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js');
 function fixture(t){
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'package-layout-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  const payload=path.join(root,'payload');fs.mkdirSync(payload);

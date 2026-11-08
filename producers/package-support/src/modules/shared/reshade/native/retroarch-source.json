@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "repository": "https://github.com/SnowflakePowered/librashader",
+  "version": "0.12.1",
+  "artifacts": {},
+  "sourceBuilds": {
+    "x86_64": {
+      "package": "librashader-capi",
+      "target": "x86_64-apple-darwin",
+      "defaultFeatures": false,
+      "features": [
+        "runtime-metal"
+      ],
+      "minimumMacOS": "13.0"
+    },
+    "arm64": {
+      "package": "librashader-capi",
+      "target": "aarch64-apple-darwin",
+      "defaultFeatures": false,
+      "features": [
+        "runtime-metal"
+      ],
+      "minimumMacOS": "13.0"
+    }
+  },
+  "gitlink": "producers/package-support/src/external/librashader"
+}

@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {includeLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';import path from 'node:path';import{resolveProject,buildRecord}from'../lib/projects.mjs';import{build}from'../producers/included-helpers/gamemaker-opengl-helper/build.mjs';import{helperPackage}from'./helper-package.mjs';
 import {recipeMain} from './build-source.mjs';

@@ -10,8 +10,8 @@ import {nativeStackInput} from '../../tools/native-stack.mjs';
 import {sealRuntime} from '../../tools/seal-runtime.mjs';
 import {addLicense} from '../../lib/licenses.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'../..');
-const Source=require('../maclauncher/src/modules/shared/runtime/pinned-native-build.js');
-const Portable=require('../maclauncher/src/modules/shared/runtime/portable-sdl2-fonts.js'),Prefix=require('../maclauncher/src/modules/shared/runtime/portable-dependency-prefix.js');
+const Source=require('../../sources/maclauncher/src/modules/shared/runtime/pinned-native-build.js');
+const Portable=require('../package-support/src/modules/shared/runtime/portable-sdl2-fonts.js'),Prefix=require('../package-support/src/modules/shared/runtime/portable-dependency-prefix.js');
 const profiles=JSON.parse(fs.readFileSync(new URL('./source.json',import.meta.url))).projects;
 const run=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',stdio:['ignore','pipe','pipe'],timeout:600000,maxBuffer: Infinity,...options});
 

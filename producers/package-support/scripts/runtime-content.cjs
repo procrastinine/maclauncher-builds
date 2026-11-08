@@ -1,0 +1,1 @@
+../../../sources/maclauncher/scripts/runtime-content.cjs

@@ -6,7 +6,7 @@ import {createRequire} from 'node:module';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {pack,catalog} from '../../tools/runtime-package.mjs';
-const require=createRequire(import.meta.url),Bundled=require('../../lib/bundled-native.cjs');
+const require=createRequire(import.meta.url),Bundled=require('../../sources/maclauncher/src/modules/shared/runtime/bundled-native.js');
 const producer=import.meta.dirname;
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 

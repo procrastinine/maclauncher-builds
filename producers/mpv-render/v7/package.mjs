@@ -6,7 +6,7 @@ import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {pack,catalog} from '../../../tools/runtime-package.mjs';
-const require=createRequire(import.meta.url),B=require('../../../lib/bundled-native.cjs'),Native=require('../../../lib/local-native.cjs');
+const require=createRequire(import.meta.url),B=require('../../../sources/maclauncher/src/modules/shared/runtime/bundled-native.js'),Native=require('../../../sources/maclauncher/src/modules/shared/runtime/local-native.js');
 const recipe=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'source.json')));
 recipe.source.revision=gitlink(recipe.source.path);
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');

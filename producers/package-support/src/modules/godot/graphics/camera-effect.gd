@@ -1,0 +1,1 @@
+../../../../../../sources/maclauncher/src/modules/godot/graphics/camera-effect.gd

@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {includeLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -7,7 +8,7 @@ import {helperPackage,sha} from './helper-package.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {nativeStackInput} from './native-stack.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
-const Audio=require('../producers/maclauncher/src/modules/shared/runtime/portable-sndfile.js');
+const Audio=require('../producers/package-support/src/modules/shared/runtime/portable-sndfile.js');
 const descriptor=path.join(root,'producers/android-inputs/codecs.json');
 
 /** Keep Android's codec layout while using the one sealed native audio stack. */

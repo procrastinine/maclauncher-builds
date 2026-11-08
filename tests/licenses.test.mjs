@@ -6,7 +6,7 @@ import os from 'node:os';
 import crypto from 'node:crypto';
 import {createRequire} from 'node:module';
 import {preparePackageLayout,materializePackageAliases} from '../tools/package-layout.mjs';
-const Native=createRequire(import.meta.url)('../producers/maclauncher/scripts/native-binary-tools.cjs');
+const Native=createRequire(import.meta.url)('../sources/maclauncher/scripts/native-binary-tools.cjs');
 import {addLicense,addLicenses,includeLicenses,addCargoLicenses} from '../lib/licenses.mjs';
 const fixture=t=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'licence-intake-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;};
 test('the shared licence functions never throw for unavailable inputs or failed logging',t=>{

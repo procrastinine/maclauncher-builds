@@ -6,7 +6,7 @@ import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 
-const build=fileURLToPath(new URL('../producers/maclauncher/src/modules/shared/reshade/neural/native/build.sh',import.meta.url));
+const build=fileURLToPath(new URL('../producers/package-support/src/modules/shared/reshade/neural/native/build.sh',import.meta.url));
 function fixture(t){
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'neural-projection-'));
  t.after(()=>fs.rmSync(root,{recursive:true,force:true}));

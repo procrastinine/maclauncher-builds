@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {aimSource} from '../lib/android-source.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
@@ -5,7 +6,7 @@ import path from 'node:path';
 import {createRequire} from 'node:module';
 import {sha} from './helper-package.mjs';
 import {imageDataContentIdentity} from './build-android-image-data.mjs';
-const require=createRequire(import.meta.url),{validateDeclaration,logicalFiles}=require('../lib/package-contract.cjs');
+const require=createRequire(import.meta.url),{validateDeclaration,logicalFiles}=require('../sources/maclauncher/src/modules/shared/runtime/package-contract.cjs');
 const descriptor=new URL('../producers/android-image-data/source.json',import.meta.url);
 
 /** Read the complete ordinary sealed input group before restoring its Mac image. */

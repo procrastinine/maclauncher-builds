@@ -1,0 +1,1 @@
+../../../../../../sources/maclauncher/src/modules/shared/effects/stored-plan.js

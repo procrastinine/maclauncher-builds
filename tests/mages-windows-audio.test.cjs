@@ -6,18 +6,18 @@ const path = require("node:path");
 const os = require("node:os");
 const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
-const Current = require("../producers/maclauncher/src/modules/mages/native/current-build");
-const descriptor = require("../producers/maclauncher/src/modules/mages/native/current-windows-overlay.json");
-const Session = require("../producers/maclauncher/src/modules/mages/native/windows-audio-session");
+const Current = require("../producers/package-support/src/modules/mages/native/current-build");
+const descriptor = require("../sources/maclauncher/src/modules/mages/native/current-windows-overlay.json");
+const Session = require("../sources/maclauncher/src/modules/mages/native/windows-audio-session");
 
-const nativeRoot = path.resolve(__dirname, "../producers/maclauncher/src/modules/mages/native");
+const nativeRoot = path.resolve(__dirname, "../sources/maclauncher/src/modules/mages/native");
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 
 test("the current Windows voice patch validates inputs before writes and supplies the compiled implementation",
-  requirements({ sourceTree: 'producers/maclauncher/src/external/impacto' }), async t => {
+  requirements({ sourceTree: 'producers/package-support/src/external/impacto' }), async t => {
     const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "mages-current-voice-"));
     t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-    const source = path.join(root, "source"), upstream = path.resolve(__dirname, "../producers/maclauncher/src/external/impacto");
+    const source = path.join(root, "source"), upstream = path.resolve(__dirname, "../producers/package-support/src/external/impacto");
     fs.mkdirSync(source);
     for (const item of descriptor.files) {
       if (item.originalSha256 === null) continue;
@@ -113,7 +113,7 @@ inline constexpr unsigned AC_VOICE0 = 2;
 inline std::array<std::unique_ptr<AudioChannel>, 8> Channels;
 }
 `);
-    const inheritedSource = path.resolve(__dirname, "../producers/maclauncher/src/external/impacto/src/vm/inst_sound.cpp");
+    const inheritedSource = path.resolve(__dirname, "../producers/package-support/src/external/impacto/src/vm/inst_sound.cpp");
     let inherited = "";
     if (fs.existsSync(inheritedSource)) {
       const text = fs.readFileSync(inheritedSource, "utf8");

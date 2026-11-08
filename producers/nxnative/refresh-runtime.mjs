@@ -6,8 +6,8 @@ import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 
-const require=createRequire(import.meta.url),B=require('../../lib/bundled-native.cjs');
-const Native=require('../../lib/local-native.cjs');
+const require=createRequire(import.meta.url),B=require('../../sources/maclauncher/src/modules/shared/runtime/bundled-native.js');
+const Native=require('../../sources/maclauncher/src/modules/shared/runtime/local-native.js');
 const producer=import.meta.dirname,pin=JSON.parse(fs.readFileSync(path.join(producer,'source.json')));
 pin.source.revision=gitlink(pin.source.path);
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');

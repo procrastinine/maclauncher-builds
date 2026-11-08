@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {addLicenses,addLicense,includeLicenses} from '../lib/licenses.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';

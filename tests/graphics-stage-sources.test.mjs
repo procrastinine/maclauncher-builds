@@ -6,7 +6,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {plan} from '../producers/maclauncher/scripts/build-graphics-runtime.mjs';
+import {plan} from '../producers/package-support/scripts/build-graphics-runtime.mjs';
 test('graphics staging validates the SPIRV-Cross checkout supplied by the build',t=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'graphics-stage-source-'));
  t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
@@ -18,7 +18,7 @@ test('graphics staging validates the SPIRV-Cross checkout supplied by the build'
  const revision=git(['rev-parse','HEAD']);
  const planned=plan({work:root,only:['core'],sdkPath:sdk,sources:{'macfx-spirv-cross':checkout}});
  assert.equal(planned.stage[planned.stage.indexOf('--spirv-cross-source')+1],checkout);
- const file=fileURLToPath(new URL('../producers/maclauncher/scripts/stage-reshade.mjs',import.meta.url)),text=fs.readFileSync(file,'utf8');
+ const file=fileURLToPath(new URL('../producers/package-support/scripts/stage-reshade.mjs',import.meta.url)),text=fs.readFileSync(file,'utf8');
  const block=text.slice(text.indexOf('const pins = registeredSources.sources.map'),text.indexOf('const nativeFiles ='))+'\npins;';
  const context={path,execFileSync,upstreamRoot:root,options:{'--spirv-cross-source':checkout},
   registeredSources:{sources:[{id:'macfx-spirv-cross',sourcePath:'third_party/spirv-cross',submodulePath:'removed-checkout'}]},
@@ -28,7 +28,7 @@ test('graphics staging validates the SPIRV-Cross checkout supplied by the build'
  assert.throws(()=>vm.runInNewContext(block,{...context}),/Initialize the selected graphics source commit/);
 });
 test('processor declaration consistency uses validated source paths without copied commit fields',()=>{
- const file=fileURLToPath(new URL('../producers/maclauncher/scripts/stage-reshade.mjs',import.meta.url)),text=fs.readFileSync(file,'utf8');
+ const file=fileURLToPath(new URL('../producers/package-support/scripts/stage-reshade.mjs',import.meta.url)),text=fs.readFileSync(file,'utf8');
  const block=text.slice(text.indexOf('const processorSources='),text.indexOf('let libplacebo;')).replaceAll('import.meta.dirname',JSON.stringify(path.dirname(file)));
  const metadata={schema:1,baseSourceHash:'fixture-base',sources:[{sourcePath:'third_party/spirv-cross'}]},extraOwned=new Map();
  const context={path,fs:{existsSync:()=>true,readFileSync:name=>JSON.stringify(name.endsWith('processor-sources.json')?metadata:{baseSourceHash:'fixture-base'})},

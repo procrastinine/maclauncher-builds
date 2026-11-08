@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {androidSource} from '../lib/android-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';

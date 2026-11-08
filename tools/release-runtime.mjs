@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -12,7 +13,7 @@ import {releaseVersion,buildReleaseVersion} from '../lib/package-version.mjs';
 import {buildCoverage,assertBuildCoverage} from './build-coverage.mjs';
 import {readPublisherInput,assertPublisherSource} from './publisher-files.mjs';
 import {assetName,releaseTag,releaseRecord,validateCatalog,identity} from '../lib/project-identity.mjs';
-const require=createRequire(import.meta.url),A=require('../lib/archive.cjs'),B=require('../lib/bundled-native.cjs');
+const require=createRequire(import.meta.url),A=require('../lib/archive.cjs'),B=require('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js');
 const root=path.resolve(import.meta.dirname,'..');
 const json=value=>JSON.stringify(value,null,2)+'\n';
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');

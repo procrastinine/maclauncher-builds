@@ -1,5 +1,5 @@
 import test from'node:test';import assert from'node:assert/strict';import fs from'node:fs';import os from'node:os';import path from'node:path';import{createRequire}from'node:module';import{repackageHelper}from'../tools/repackage-helpers.mjs';
-const require=createRequire(import.meta.url),B=require('../lib/bundled-native.cjs');
+const require=createRequire(import.meta.url),B=require('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js');
 test('helper publication preserves native bytes and data while excluding source-only files',t=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'helper-publication-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  const input=path.join(root,'original'),output=path.join(root,'published');fs.mkdirSync(input);

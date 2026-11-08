@@ -1,0 +1,1 @@
+../../../../../../../sources/maclauncher/src/modules/android/native/apk-metadata/adapt.mjs

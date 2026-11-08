@@ -1,0 +1,1 @@
+../../../../../../../sources/maclauncher/src/modules/java/runtime/steamworks/steamworks4j-1.9.0-MIT.txt

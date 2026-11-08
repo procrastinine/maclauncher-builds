@@ -1,5 +1,6 @@
+import './producer-environment.mjs';
 import {addLicenses} from '../lib/licenses.mjs';
-import {prepareSources} from '../producers/maclauncher/src/modules/shared/reshade/libplacebo/dependencies-build.mjs';
+import {prepareSources} from '../producers/package-support/src/modules/shared/reshade/libplacebo/dependencies-build.mjs';
 // Build the original SPIR-V compiler library at the driver's macOS floor.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -8,7 +9,7 @@ import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {buildInput} from './build-input.mjs';
 const root=path.resolve(import.meta.dirname,'..');
-export const spirvToolsProfile=JSON.parse(fs.readFileSync(path.join(root,'producers/maclauncher/src/modules/shared/vulkan/native/spirv-tools-source.json')));
+export const spirvToolsProfile=JSON.parse(fs.readFileSync(path.join(root,'producers/package-support/src/modules/shared/vulkan/native/spirv-tools-source.json')));
 const run=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infinity,stdio:'inherit',...options});
 const read=(command,args)=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8'}).trim();
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');

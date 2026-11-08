@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
 import {addLicenses} from '../lib/licenses.mjs';
 // Build the original Zstandard runtime at the declared macOS floor.
@@ -7,7 +8,7 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {buildInput} from './build-input.mjs';
 const root=path.resolve(import.meta.dirname,'..');
-export const zstdProfile=JSON.parse(fs.readFileSync(path.join(root,'producers/maclauncher/src/modules/shared/vulkan/native/zstd-source.json')));
+export const zstdProfile=JSON.parse(fs.readFileSync(path.join(root,'producers/package-support/src/modules/shared/vulkan/native/zstd-source.json')));
 const run=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infinity,stdio:'inherit',...options});
 const read=(command,args)=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8'}).trim();
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');

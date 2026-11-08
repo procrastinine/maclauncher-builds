@@ -6,7 +6,7 @@ const crypto = require("node:crypto");
 const { spawnSync } = require("node:child_process");
 const test = require("node:test");
 
-const recipe = path.resolve(__dirname, "../producers/maclauncher/src/modules/gamemaker/overlays/opengmk-macos/source-archive.py");
+const recipe = path.resolve(__dirname, "../producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/source-archive.py");
 const digest = file => crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 
 function fixture(t, kind = "regular") {

@@ -1,5 +1,5 @@
 const test=require("node:test"),assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path"),os=require("node:os");
-const Python=require("../producers/maclauncher/src/modules/shared/runtime/portable-python");
+const Python=require("../producers/package-support/src/modules/shared/runtime/portable-python");
 function temporary(t){const root=fs.mkdtempSync(path.join(os.tmpdir(),"maclauncher-python-test-"));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;}
 function stagedInputs(t){
   const root=temporary(t),sourceRoot=path.join(root,"source"),buildRoot=path.join(root,"build"),prefix=path.join(root,"prefix");

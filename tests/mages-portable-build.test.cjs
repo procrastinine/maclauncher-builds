@@ -4,10 +4,10 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const Dependency = require("../producers/maclauncher/src/modules/mages/native/portable-dependencies");
-const Prefix = require("../producers/maclauncher/src/modules/mages/native/portable-prefix");
-const Build = require("../producers/maclauncher/src/modules/mages/native/portable-build");
-const { image } = require("./fixtures/macho-image.cjs");
+const Dependency = require("../producers/package-support/src/modules/mages/native/portable-dependencies");
+const Prefix = require("../producers/package-support/src/modules/mages/native/portable-prefix");
+const Build = require("../producers/package-support/src/modules/mages/native/portable-build");
+const { image } = require("../sources/maclauncher/tests/fixtures/macho-image.js");
 
 function directory(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "mages-portable-"));

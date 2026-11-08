@@ -1,3 +1,4 @@
+import './producer-environment.mjs';
 import {reportDigest} from './recipe-build-report.mjs';
 
 /** Resolve recipe-reported inputs before their consumers. The callbacks provide

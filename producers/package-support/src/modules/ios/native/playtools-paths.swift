@@ -1,0 +1,1 @@
+../../../../../../sources/maclauncher/src/modules/ios/native/playtools-paths.swift

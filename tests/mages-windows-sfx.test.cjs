@@ -6,18 +6,18 @@ const path = require("node:path");
 const os = require("node:os");
 const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
-const Current = require("../producers/maclauncher/src/modules/mages/native/current-build");
-const descriptor = require("../producers/maclauncher/src/modules/mages/native/current-windows-overlay.json");
-const Session = require("../producers/maclauncher/src/modules/mages/native/windows-sfx-session");
+const Current = require("../producers/package-support/src/modules/mages/native/current-build");
+const descriptor = require("../sources/maclauncher/src/modules/mages/native/current-windows-overlay.json");
+const Session = require("../sources/maclauncher/src/modules/mages/native/windows-sfx-session");
 
-const nativeRoot = path.resolve(__dirname, "../producers/maclauncher/src/modules/mages/native");
+const nativeRoot = path.resolve(__dirname, "../sources/maclauncher/src/modules/mages/native");
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 
 test("the current Windows sound-effect patch validates inputs before writes and supplies the compiled implementation",
-  requirements({ sourceTree: 'producers/maclauncher/src/external/impacto' }), async t => {
+  requirements({ sourceTree: 'producers/package-support/src/external/impacto' }), async t => {
     const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "mages-current-sound-effect-"));
     t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-    const source = path.join(root, "source"), upstream = path.resolve(__dirname, "../producers/maclauncher/src/external/impacto");
+    const source = path.join(root, "source"), upstream = path.resolve(__dirname, "../producers/package-support/src/external/impacto");
     fs.mkdirSync(source);
     for (const item of descriptor.files) {
       if (item.originalSha256 === null) continue;
@@ -38,7 +38,7 @@ test("the current Windows sound-effect patch validates inputs before writes and 
   });
 
 test("compiled Windows sound effects preserve instruction boundaries, preload/resume and legacy widths",
-  requirements({ sourceTree: 'producers/maclauncher/src/external/impacto', appleSiliconMacOS: true }), t => {
+  requirements({ sourceTree: 'producers/package-support/src/external/impacto', appleSiliconMacOS: true }), t => {
     const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "mages-sfx-native-"));
     t.after(() => fs.rmSync(root, { recursive: true, force: true }));
     const vm = path.join(root, "vm"), audio = path.join(root, "audio"), profile = path.join(root, "profile");
@@ -123,7 +123,7 @@ inline constexpr unsigned AC_SE0 = 6;
 inline std::array<std::unique_ptr<AudioChannel>, 9> Channels;
 }
 `);
-    const oldSource = fs.readFileSync(path.join(__dirname, "../producers/maclauncher/src/external/impacto/src/vm/inst_sound.cpp"), "utf8");
+    const oldSource = fs.readFileSync(path.join(__dirname, "../producers/package-support/src/external/impacto/src/vm/inst_sound.cpp"), "utf8");
     const legacy = oldSource.match(/VmInstruction\(InstSEplayMO6\) \{\n[\s\S]*?\n\}/)?.[0];
     assert.ok(legacy, "the pinned older sound operand layout is required for comparison");
     const fixture = path.join(root, "fixture.cpp"), executable = path.join(root, "fixture");
