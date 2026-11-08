@@ -11,7 +11,7 @@ const root=import.meta.dirname;
 const profiles={
  'vnds-love':{source:'vnds-love',version:'0.0.13-838e47b-MCLv1',entry:'engine/main.lua',minimumMacOS:'11.0'}
 };
-const metadata=file=>{const {bytes,...record}=B.readRegular(file,B.LIMITS.fileBytes);return record;};
+const metadata=file=>{const {bytes,...record}=B.readRegular(fs.realpathSync(file),B.LIMITS.fileBytes);return record;};
 function inventory(directory,prefix=''){
  const files=[];
  for(const entry of fs.readdirSync(path.join(directory,prefix),{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))){

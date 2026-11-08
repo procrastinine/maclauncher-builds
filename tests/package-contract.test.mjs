@@ -4,9 +4,9 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import B from '../sources/maclauncher/src/modules/shared/runtime/bundled-native.js';
+import B from '../producers/package-support/src/modules/shared/runtime/bundled-native.js';
 import {pathToFileURL,fileURLToPath} from 'node:url';
-import Contract from '../sources/maclauncher/src/modules/shared/runtime/package-contract.cjs';
+import Contract from '../producers/package-support/src/modules/shared/runtime/package-contract.cjs';
 import {releaseRecord} from '../lib/project-identity.mjs';
 const digest=value=>crypto.createHash('sha256').update(value).digest('hex');
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -34,7 +34,7 @@ test('producer records and consumers share generic capability and exact source v
 
 test('source mirror refresh applies the declared import adaptations',async t=>{
  const fixture=fs.mkdtempSync(path.join(os.tmpdir(),'native-contract-copy-'));t.after(()=>fs.rmSync(fixture,{recursive:true,force:true}));
- const producer=path.join(root,'sources/maclauncher'),targetProducer=path.join(fixture,'builds/sources/maclauncher'),sourceRoot=path.join(fixture,'source');
+ const producer=path.join(root,'producers/package-support'),targetProducer=path.join(fixture,'builds/producers/package-support'),sourceRoot=path.join(fixture,'source');
  fs.mkdirSync(targetProducer,{recursive:true});
  const recipe=JSON.parse(fs.readFileSync(path.join(producer,'native-tools-source.json')));
  fs.copyFileSync(path.join(producer,'native-tools-source.json'),path.join(targetProducer,'native-tools-source.json'));
@@ -48,7 +48,7 @@ test('source mirror refresh applies the declared import adaptations',async t=>{
  }
  const {refreshNativeTools}=await import(pathToFileURL(path.join(targetProducer,'refresh-native-tools.mjs')));
  assert.equal(refreshNativeTools(sourceRoot,{check:true}).files,recipe.files.length);
- const row=recipe.files.find(row=>row.destination==='sources/maclauncher/src/modules/shared/runtime/macho-load-commands.js');assert.ok(row);
+ const row=recipe.files.find(row=>row.destination==='producers/package-support/src/modules/shared/runtime/macho-load-commands.js');assert.ok(row);
  const target=path.join(fixture,'builds',row.destination);fs.appendFileSync(target,'\n');
 });
 

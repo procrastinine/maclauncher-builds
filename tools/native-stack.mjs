@@ -7,8 +7,8 @@ import {createRequire} from 'node:module';
 import {buildInput} from './build-input.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 
-const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'sources/maclauncher/src/modules/shared/runtime');
-const Source=require(path.join(base,'pinned-native-build.js')),Tools=require('../sources/maclauncher/scripts/native-binary-tools.cjs');
+const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/package-support/src/modules/shared/runtime');
+const Source=require(path.join(base,'pinned-native-build.js')),Tools=require('../producers/package-support/scripts/native-binary-tools.cjs');
 const system=value=>value.startsWith('/usr/lib/')||value.startsWith('/System/Library/');
 const command=(tool,args)=>execFileSync(tool,args,{encoding:'utf8',maxBuffer:Infinity}).trim();
 const metadataFile=file=>/\.(?:pc|cmake|la)$/.test(file)||/-config$/.test(file);

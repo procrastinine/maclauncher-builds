@@ -4,7 +4,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {createRequire} from 'node:module';
-const require=createRequire(import.meta.url),Tools=require('../sources/maclauncher/scripts/native-binary-tools.cjs'),B=require('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js');
+const require=createRequire(import.meta.url),Tools=require('../producers/package-support/scripts/native-binary-tools.cjs'),B=require('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js');
 const {excludedReason}=require('../sources/maclauncher/src/modules/shared/runtime/runtime-content.js');
 const warn=message=>console.log('::warning::'+message);
 process.on('uncaughtException',error=>{warn(error.message);process.exitCode=0;});

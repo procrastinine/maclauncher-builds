@@ -9,7 +9,7 @@ import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 import {pythonBuildTools,recipeMain} from './build-source.mjs';
 import {retryNetwork} from './download.mjs';
-const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Native=require('../sources/maclauncher/scripts/native-binary-tools.cjs');
+const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Native=require('../producers/package-support/scripts/native-binary-tools.cjs');
 const run=(command,args,options={})=>String(execFileSync(command,args,{encoding:'utf8',maxBuffer:Infinity,...options})||'').trim();
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 /** pkgconf follows private cflags requirements even for dynamic linking. The

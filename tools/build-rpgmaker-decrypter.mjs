@@ -2,7 +2,7 @@ import './producer-environment.mjs';
 import {includeLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import {execFileSync}from'node:child_process';import{createRequire}from'node:module';import{resolveProject,buildRecord}from'../lib/projects.mjs';import{buildInput}from'./build-input.mjs';import{helperPackage}from'./helper-package.mjs';
 import {recipeMain} from './build-source.mjs';
-const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Builder=require('../producers/included-helpers/rpgmaker-decrypter/decrypter-build.js'),Tools=require('../sources/maclauncher/scripts/native-binary-tools.cjs');
+const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Builder=require('../producers/included-helpers/rpgmaker-decrypter/decrypter-build.js'),Tools=require('../producers/package-support/scripts/native-binary-tools.cjs');
 export async function buildDecrypter({project:id,arch,output,work}){
  const project=resolveProject(id,root,{resolvePins:false}),registered=buildRecord(project);
  fs.mkdirSync(work,{recursive:true});

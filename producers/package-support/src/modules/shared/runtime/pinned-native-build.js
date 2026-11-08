@@ -1,1 +1,3 @@
-../../../../../../sources/maclauncher/src/modules/shared/runtime/pinned-native-build.js
+const fs=require('node:fs'),path=require('node:path');
+const Source=require('../../../../../../sources/maclauncher/src/modules/shared/runtime/pinned-native-build.js');
+module.exports={...Source,findBuildTool(name,env=process.env){for(const directory of String(env.CMAKE_PREFIX_PATH||'').split(path.delimiter).filter(Boolean).flatMap(prefix=>['bin','sbin'].map(part=>path.join(prefix,part))).concat(String(env.PATH||'').split(path.delimiter))){const file=path.join(directory,name);try{fs.accessSync(file,fs.constants.X_OK);if(fs.statSync(file).isFile())return file;}catch{}}throw Error('Declare the Homebrew formula for '+name);}};

@@ -9,7 +9,7 @@ import {sealRuntime} from './seal-runtime.mjs';
 import {resolveProject} from '../lib/projects.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {nativeStackInput} from './native-stack.mjs';
-const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),modules=path.join(root,'sources/maclauncher/src/modules');
+const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),modules=path.join(root,'producers/package-support/src/modules');
 const Fonts=require(path.join(modules,'shared/runtime/portable-sdl2-fonts.js')),Audio=require(path.join(modules,'shared/runtime/portable-sndfile.js')),Movie=require(path.join(modules,'shared/runtime/portable-ffmpeg.js')),Mixer=require(path.join(modules,'shared/runtime/portable-sdl2-mixer.js'));
 /** Each portable runtime names its producer recipe and entry, its upstream source, its
  * shared resource directory, the source catalogs it reads besides fonts and audio, its
@@ -31,7 +31,7 @@ export function recipeInputs({project}){
 }
 export async function buildPortableRuntime({project,arch,version,output,work}){
  const recipe=RECIPES[project];if(!recipe)throw Error('No portable runtime recipe is declared for '+project+'.');
- const Builder=require(path.join(modules,recipe.recipe)),sourceDir=path.join(root,'sources/maclauncher/src/external',recipe.source),archives={};
+ const Builder=require(path.join(modules,recipe.recipe)),sourceDir=path.join(root,'producers/package-support/src/external',recipe.source),archives={};
  for(const catalog of [Fonts.PIN,Audio.PIN,...(recipe.catalogs||[]).map(name=>CATALOGS[name](Builder))])for(const pin of catalog.dependencies)if(!archives[pin.id])archives[pin.id]=await buildInput(archiveInput(pin));
  for(const [key,name] of Object.entries(recipe.archives||{}))archives[key]=await buildInput(archiveInput(ARCHIVES[name](Builder)));
  const pathMappings=[{from:work,to:project+'-build'}],options={sourceDir,archives,workRoot:work,architecture:arch,pathMappings};

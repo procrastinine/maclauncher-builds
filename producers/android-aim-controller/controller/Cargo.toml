@@ -1,15 +1,1 @@
-[package]
-name = "maclauncher-aim-controller"
-version = "0.1.0"
-edition = "2024"
-
-[[bin]]
-name = "maclauncher-aim"
-path = "../keeper.rs"
-
-[dependencies]
-libc = "=0.2.189"
-serde_json = "=1.0.151"
-
-[profile.release]
-strip = "symbols"
+../../../sources/maclauncher/src/modules/android/providers/aim/controller/Cargo.toml

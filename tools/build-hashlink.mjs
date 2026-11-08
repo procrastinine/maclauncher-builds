@@ -12,7 +12,7 @@ import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {nativeStackInput} from './native-stack.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),moduleRoot=path.join(root,'sources/maclauncher/src/modules/hashlink/runtime');
 const Paths=require(path.join(moduleRoot,'compiler-paths.js'));
-const Binary=require('../sources/maclauncher/scripts/native-binary-tools.cjs');
+const Binary=require('../producers/package-support/scripts/native-binary-tools.cjs');
 export function hashLinkProfile(version,project=resolveProject('hashlink',root,{resolvePins:false})){
  const profile=project.packageProfiles.find(profile=>profile.version===version),labels=profile?.anchor?project.packageProfiles.filter(row=>row.anchor===profile.anchor).map(row=>row.version):[version],sources=new Set(labels.map(label=>/^(1\.(?:9|12))-MCLv[1-9]\d*$/.exec(label||'')?.[1]).filter(Boolean));
  if(sources.size!==1)throw Error('The HashLink catalog has no ABI release for '+version+'.');return [...sources][0];

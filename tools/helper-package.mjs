@@ -4,7 +4,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url),B=require('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js'),{validateDeclaration}=require('../lib/declaration.cjs');
-const Tools=require('../sources/maclauncher/scripts/native-binary-tools.cjs');
+const Tools=require('../producers/package-support/scripts/native-binary-tools.cjs');
 export const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 
 /** Finish a helper built in payload/, recording its actual files and native CPUs. */

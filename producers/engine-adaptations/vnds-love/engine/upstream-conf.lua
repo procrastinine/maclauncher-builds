@@ -1,4 +1,1 @@
-love.conf = function(t)
-  t.externalstorage = true
-  t.identity = "VNDS-LOVE"
-end
+../../../../sources/maclauncher/src/modules/vnds/resources/0.0.13-838e47b-mac-v1/upstream-conf.lua

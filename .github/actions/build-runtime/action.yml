@@ -4,6 +4,9 @@ runs:
   using: composite
   steps:
     - uses: ./.github/actions/setup-node
+    - name: Initialize shared app source
+      shell: bash
+      run: git submodule update --init --depth 1 -- sources/maclauncher
     - name: Register the selected names for this build
       shell: bash
       run: |
