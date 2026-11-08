@@ -17,6 +17,9 @@ on:
         type: choice
         options: [arm64, x64, universal]
 
+env:
+  MACLAUNCHER_PACKAGE_PRODUCER: '1'
+
 permissions:
   contents: read
   attestations: read

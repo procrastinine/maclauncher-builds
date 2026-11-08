@@ -10,6 +10,9 @@ on:
         type: string
 
 
+env:
+  MACLAUNCHER_PACKAGE_PRODUCER: '1'
+
 permissions:
   contents: read
 
