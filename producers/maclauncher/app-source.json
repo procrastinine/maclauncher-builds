@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "repository": "https://github.com/procrastinine/maclauncher",
-  "revision": "5c1138de0c1738b269bc14027b926f785c471b6f",
+  "revision": "ad48b1def42fe1ab09c165e4a80cbb9b785ec0c5",
   "gitlink": "sources/maclauncher",
   "modules": [
     "src/modules/shared/reshade",
