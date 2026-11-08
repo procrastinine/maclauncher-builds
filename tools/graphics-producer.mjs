@@ -1,14 +1,16 @@
-import {appSourceRoot} from './app-source.mjs';
+import {appSourceRoot,materializeProducerSourceLinks} from './app-source.mjs';
 import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
 import {checkoutSource} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
-import {plan,build,fetchInput} from '../producers/maclauncher/scripts/build-graphics-runtime.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 /** Build one graphics package; SDK and deployment requirements stay separate. */
 export async function buildGraphicsSource({version,arch,output,work,sdkPath,sources={},sourceRoot,reuse={},tools={},inputs={}}){
  appSourceRoot();
+ const restore=materializeProducerSourceLinks();
+ try{
+ const {plan,build,fetchInput}=await import('../producers/maclauncher/scripts/build-graphics-runtime.mjs');
  if(!version)throw Error('An exact registered graphics source-stage version is required.');
  if(tools.meson&&!tools.python){const candidate=path.join(path.dirname(tools.meson),"python");if(fs.existsSync(candidate))tools.python=candidate;}
  const cross=path.join(work,'spirv-cross-source');
@@ -35,5 +37,5 @@ export async function buildGraphicsSource({version,arch,output,work,sdkPath,sour
    {maxBuffer:Infinity,cwd:path.join(root,'producers/maclauncher'),stdio:'inherit',timeout:600000});
   return {project:'reshade',version,arch,output,resolved,tools};
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
+ }finally{restore();}
 }
-

@@ -1,6 +1,9 @@
+import {materializeProducerSourceLinks} from '../../../tools/app-source.mjs';
 import {sourceRevision} from './graphics-source-revision.mjs';
 import sharedDependencies from '../../dependencies.json' with {type:'json'};
 import dependencies from '../../../producers/dependencies.json' with {type:'json'};
+const restoreAppReferences=materializeProducerSourceLinks();
+process.once('exit',()=>restoreAppReferences());
 const {shaderc}=dependencies;
 import {gitlink} from "../../../lib/pins.mjs";
 import {addLicense,addLicenses,includeLicenses} from '../../../lib/licenses.mjs';
