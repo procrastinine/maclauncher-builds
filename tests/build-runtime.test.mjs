@@ -18,16 +18,16 @@ test('Android recipes initialize the producer whose metadata they read from a co
  for(const project of ['android-java-framework','android-java-converter','android-angle','android-art-image-extractor','android-launcher','android-art-java','android-image-data-1','android-image-data-2','android-image-data-3','android-image-data-4','android-image-data-5']){
   const commands=[],result=initializeSources({project,directory:root,run:(args,cwd)=>{
    commands.push({args,cwd});
-   if(args[0]==='ls-files')return '160000 '+ 'a'.repeat(40)+' 0\tsources/maclauncher-android\n';
+   if(args[0]==='ls-files')return ['sources/maclauncher','sources/maclauncher-android'].map(path=>'160000 '+'a'.repeat(40)+' 0\t'+path).join('\n')+'\n';
    return '';
   }});
-  assert.deepEqual(result.initialized,[{path:'sources/maclauncher-android',recursive:false}],project);
+  assert.deepEqual(result.initialized,[{path:'sources/maclauncher',recursive:false},{path:'sources/maclauncher-android',recursive:false}],project);
   assert.ok(commands.some(({args})=>args[0]==='submodule'&&args.includes('--init')&&args.at(-1)==='sources/maclauncher-android'),project);
  }
 });
 
 test('producer routing never substitutes Android for a different project',()=>{
- const selected=main(['--project','fna','--check']);assert.equal(selected.id,'fna');assert.equal(selected.sourceDirectory,'sources/maclauncher');assert.ok(selected.entries.every(entry=>entry.startsWith('sources/maclauncher/')));
+ const selected=main(['--project','fna','--check']);assert.equal(selected.id,'fna');assert.equal(selected.sourceDirectory,'producers/package-support');assert.ok(selected.entries.every(entry=>entry.startsWith('producers/package-support/')));
  assert.throws(()=>main(['--project','flash-projector','--check']),/retains its supplied binary/);
  assert.throws(()=>main(['--project','not-registered','--check']),/Unknown build project/);
  assert.throws(()=>main(['--project','android','--runtime','fna','--check']),/Select one project/);

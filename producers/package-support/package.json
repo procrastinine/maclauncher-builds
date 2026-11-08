@@ -1,1 +1,8 @@
-../../sources/maclauncher/package.json
+{
+  "name": "maclauncher-runtime-producers",
+  "private": true,
+  "type": "commonjs",
+  "engines": {
+    "node": ">=24"
+  }
+}

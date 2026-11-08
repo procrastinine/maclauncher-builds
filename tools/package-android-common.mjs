@@ -8,7 +8,7 @@ import {execFileSync} from 'node:child_process';
 import {copyAndroidProducts,publishAndroidAngle} from './android-common-products.mjs';
 import {stripAndroidFrameworkBuildInputs} from './repackage-android.mjs';
 import {verifyAndroidSourceSnapshot} from '../sources/maclauncher/scripts/android-stage-sources.mjs';
-const require=createRequire(import.meta.url),B=require('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js'),Native=require('../sources/maclauncher/src/modules/shared/runtime/local-native.js'),Contract=require('../sources/maclauncher/src/modules/shared/runtime/package-contract.cjs'),Staging=require('../producers/package-support/scripts/native-binary-tools.cjs');
+const require=createRequire(import.meta.url),B=require('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js'),Native=require('../sources/maclauncher/src/modules/shared/runtime/local-native.js'),Contract=require('../lib/package-contract.cjs'),Staging=require('../producers/package-support/scripts/native-binary-tools.cjs');
 const root=path.resolve(import.meta.dirname,'..'),sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 
 /** Seal the complete JVM producer output without changing launcher selections. */

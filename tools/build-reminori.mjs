@@ -22,7 +22,7 @@ export async function buildMinori({project,arch,output,work}) {
  const env=rustEnvironment({work,minimumMacOS:'13.0'});
  const sdk=process.env.SDKROOT||execFileSync('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path'],{maxBuffer:Infinity,encoding:'utf8'}).trim();
  const built=await Builder.buildCandidate({sourceDir,destination:path.join(work,'compiled'),decoderPrefix:prefix,architecture:arch,dependencies:{prepareCargo:({sourceRoot,env:buildEnv,target})=>retryNetwork(()=>execFileSync('cargo',['fetch','--locked','--target',target],{maxBuffer:Infinity,cwd:sourceRoot,env:rustEnvironment({work,minimumMacOS:'13.0',env:buildEnv}),stdio:['inherit','inherit','pipe'],timeout:900000})),runBuildCommand:async(command,args,options)=>{
-  const Build=require('../sources/maclauncher/src/modules/shared/runtime/pinned-native-build.js');
+  const Build=require('../producers/package-support/src/modules/shared/runtime/pinned-native-build.js');
   const mapped=rustEnvironment({work,minimumMacOS:'13.0',env:{...env,...options.env}});
   return Build.runBuildCommand(command,['clang','clang++'].includes(path.basename(command))?['-isysroot',sdk,...args]:args,{...options,env:{...mapped,CARGO_TARGET_DIR:options.env?.CARGO_TARGET_DIR}});
  }}});

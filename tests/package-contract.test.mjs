@@ -32,24 +32,10 @@ test('producer records and consumers share generic capability and exact source v
  assert.throws(()=>releaseRecord({...value,accessToken:'private'},options),/Invalid|private/);
 });
 
-test('source mirror refresh applies the declared import adaptations',async t=>{
- const fixture=fs.mkdtempSync(path.join(os.tmpdir(),'native-contract-copy-'));t.after(()=>fs.rmSync(fixture,{recursive:true,force:true}));
- const producer=path.join(root,'producers/package-support'),targetProducer=path.join(fixture,'builds/producers/package-support'),sourceRoot=path.join(fixture,'source');
- fs.mkdirSync(targetProducer,{recursive:true});
- const recipe=JSON.parse(fs.readFileSync(path.join(producer,'native-tools-source.json')));
- fs.copyFileSync(path.join(producer,'native-tools-source.json'),path.join(targetProducer,'native-tools-source.json'));
- fs.copyFileSync(path.join(producer,'refresh-native-tools.mjs'),path.join(targetProducer,'refresh-native-tools.mjs'));
- for(const row of recipe.files){
-  const current=path.join(row.destination?root:producer,row.destination||row.path),output=fs.readFileSync(current,'utf8');
-  let input=output;for(const change of [...(row.replacements||[])].reverse()){assert.equal(input.split(change.to).length,2);input=input.replace(change.to,change.from);}
-  const source=path.join(sourceRoot,row.path),target=path.join(row.destination?path.join(fixture,'builds'):targetProducer,row.destination||row.path);
-  fs.mkdirSync(path.dirname(source),{recursive:true});fs.writeFileSync(source,input);
-  fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,output);
- }
- const {refreshNativeTools}=await import(pathToFileURL(path.join(targetProducer,'refresh-native-tools.mjs')));
- assert.equal(refreshNativeTools(sourceRoot,{check:true}).files,recipe.files.length);
- const row=recipe.files.find(row=>row.destination==='producers/package-support/src/modules/shared/runtime/macho-load-commands.js');assert.ok(row);
- const target=path.join(fixture,'builds',row.destination);fs.appendFileSync(target,'\n');
+test('shared contracts are imported from the app pin',async()=>{
+ const {default:App}=await import('../sources/maclauncher/src/modules/shared/runtime/package-contract.cjs');
+ assert.equal(Contract.validateDeclaration,App.validateDeclaration);
+ assert.equal(fs.existsSync(path.join(root,'producers/maclauncher')),false);
 });
 
 test('shared declarations retain the launcher CPU and optional-load schema',()=>{
