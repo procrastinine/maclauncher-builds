@@ -4,8 +4,11 @@ import os from 'node:os';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath,pathToFileURL} from 'node:url';
+import {androidSource} from '../../lib/android-source.mjs';
 
 const root=path.dirname(fileURLToPath(import.meta.url));
+// Account control and text input are the Android framework's own classes at the pinned revision.
+const framework=()=>path.join(root,'../..',androidSource().directory,'src/modules/android/native/java');
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const options={stdio:'inherit',timeout:120000};
 const definitions={
@@ -13,9 +16,9 @@ const definitions={
   level:17,date:'2026-10-21T00:00:00Z',output:'resources/launch-arguments.jar',premain:'com.maclauncher.android.arguments.ArgumentsAgent'},
  privacy:{sources:['PrivacyAgent.java','PrivacyBridge.java','AuthBridge.java','JsonRpc.java','IconPreparation.java','AccountControl.java','Capabilities.java'].map(name=>'providers/macapk/java/'+name),
   level:17,date:'2026-10-19T00:00:00Z',output:'providers/macapk/resources/privacy.jar',premain:'com.maclauncher.android.macapk.PrivacyAgent'},
- 'text-input':{sources:['text-input/java/maclauncher/android/framework/HostTextInput.java'],
+ 'text-input':{framework:true,sources:['maclauncher/android/framework/HostTextInput.java'],
   level:21,date:'2026-10-21T00:00:00Z',output:'resources/text-input.jar',metadata:'resources/text-input.json'},
- 'account-control':{sources:['store/java/maclauncher/android/AccountControl.java','store/java/maclauncher/android/framework/HostAccountAccess.java'],
+ 'account-control':{framework:true,sources:['maclauncher/android/AccountControl.java','maclauncher/android/framework/HostAccountAccess.java'],
   level:21,date:'2026-10-21T00:00:00Z',output:'store/resources/account-control.jar',metadata:'store/resources/account-control.json'}
 };
 function regular(file){const stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink())throw Error('Build inputs must be regular files.');return fs.readFileSync(file);}
@@ -32,14 +35,14 @@ export function build({jdk,classpath,output,only=Object.keys(definitions)}){
  jdk=directory(jdk,'JDK');classpath=classpathEntries(classpath);
  if(!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Choose a new absolute output directory.');
  output=path.join(fs.realpathSync(path.dirname(path.resolve(output))),path.basename(output));
- if([root,jdk,...classpath].some(input=>contains(input,output)||contains(output,input)))throw Error('JAR output must be separate from its inputs.');
+ if([root,framework(),jdk,...classpath].some(input=>contains(input,output)||contains(output,input)))throw Error('JAR output must be separate from its inputs.');
  for(const tool of ['javac','jar'])regular(path.join(jdk,'bin',tool));
  const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'android-launcher-build-')),result=[];
  fs.mkdirSync(output,{recursive:true});
  try{
   for(const name of only){
    const definition=definitions[name],classes=path.join(temporary,name);fs.mkdirSync(classes);
-   const sources=definition.sources.map(file=>path.join(root,'source',file));sources.forEach(regular);
+   const sources=definition.sources.map(file=>path.join(definition.framework?framework():path.join(root,'source'),file));sources.forEach(regular);
    const flags=definition.level===17?['-source','17','-target','17','--add-exports','java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED']:
     ['--release','21','-classpath',classpath.join(path.delimiter)];
    execFileSync(path.join(jdk,'bin/javac'),[...flags,'-proc:none','-encoding','UTF-8','-d',classes,...sources],options);
