@@ -41,9 +41,9 @@ const cargo=process.env.CARGO||'cargo';
 for(const manifest of [path.join(source,'Cargo.toml'),path.join(project,'Cargo.toml')])run(cargo,['fetch','--locked','--manifest-path',manifest],{env,timeout:900000});
 const libraries=[],helpers=[];
 for(const target of targets){
- run(cargo,['build','--release','--locked','--offline','--target',target,'--no-default-features','--features','runtime-metal','--package','librashader-capi','--manifest-path',path.join(source,'Cargo.toml'),'--target-dir',capiTarget,'--jobs','2'],{env,timeout:900000});
+ run(cargo,['build','--release','--locked','--offline','--target',target,'--no-default-features','--features','runtime-metal','--package','librashader-capi','--manifest-path',path.join(source,'Cargo.toml'),'--target-dir',capiTarget,'--jobs','6'],{env,timeout:900000});
  libraries.push(path.join(capiTarget,target,'release/liblibrashader_capi.dylib'));
- run(cargo,['build','--release','--locked','--offline','--target',target,'--manifest-path',path.join(project,'Cargo.toml'),'--target-dir',helperTarget,'--jobs','2'],{env,timeout:900000});
+ run(cargo,['build','--release','--locked','--offline','--target',target,'--manifest-path',path.join(project,'Cargo.toml'),'--target-dir',helperTarget,'--jobs','6'],{env,timeout:900000});
  helpers.push(path.join(helperTarget,target,'release/retroarch-prepare'));
 }
 const helper=path.join(output,'retroarch-prepare');

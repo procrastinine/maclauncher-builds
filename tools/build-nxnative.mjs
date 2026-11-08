@@ -16,7 +16,7 @@ export async function buildNxnative({project,arch,output,work}){
  const environment={...process.env,PATH:sdk+path.delimiter+process.env.PATH,DOTNET_ROOT:sdk,DOTNET_CLI_HOME:path.join(work,'sdk-home'),DOTNET_CLI_TELEMETRY_OPTOUT:'1',DOTNET_SKIP_FIRST_TIME_EXPERIENCE:'1',DOTNET_GENERATE_ASPNET_CERTIFICATE:'false',DOTNET_ADD_GLOBAL_TOOLS_TO_PATH:'false',DOTNET_NOLOGO:'1',DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE:'true'};
  if(execFileSync(path.join(sdk,'dotnet'),['--version'],{maxBuffer:Infinity,env:environment,encoding:'utf8'}).trim()!==sdkPin.version)throw Error('The downloaded .NET SDK has a different version.');
  const previous={...process.env};Object.assign(process.env,environment);
- try{await buildNxNative({work:path.join(work,'build'),output:native,jobs:4,version:record.version});}
+ try{await buildNxNative({work:path.join(work,'build'),output:native,jobs:6,version:record.version});}
  finally{for(const key of Object.keys(process.env))if(!(key in previous))delete process.env[key];Object.assign(process.env,previous);}
  return packageNxNative({input:native,outputDirectory:path.join(work,'package'),buildOutput:output});
 }

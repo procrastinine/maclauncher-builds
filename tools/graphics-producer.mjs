@@ -17,7 +17,7 @@ export async function buildGraphicsSource({version,arch,output,work,sdkPath,sour
  if(!fs.existsSync(path.join(cross,'.git')))checkoutSource({...sharedDependencies.spirvCross,destination:cross});
  sources['macfx-spirv-cross']=cross;
  if(!sources['sdl-vulkan']){fs.mkdirSync(work,{recursive:true});sources['sdl-vulkan']=checkoutSource({...sharedDependencies.sdlHeaders,destination:path.join(work,'sdl-headers-source')});}
- const options={work,arch,sdkPath,sources,reuse,tools,inputs},initial=plan(options);
+ const options={jobs:6,work,arch,sdkPath,sources,reuse,tools,inputs},initial=plan(options);
  const blocked=initial.unresolved.filter(value=>(!value.startsWith('input ')||!value.endsWith(': fetchable'))&&!['tool meson: missing','tool ninja: missing'].includes(value));
  if(blocked.length)throw Error('Unresolved graphics build inputs:\n  '+blocked.join('\n  '));
  fs.mkdirSync(work,{recursive:true});
