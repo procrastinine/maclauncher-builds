@@ -1,12 +1,23 @@
 {
   "schema": 1,
   "repository": "https://github.com/procrastinine/maclauncher",
-  "revision": "21345930fd762c2f210486727d1337b8be047a59",
+  "revision": "c051421e768024bd46da88d0158d614c50638321",
   "gitlink": "sources/maclauncher",
   "modules": [
     "src/modules/shared/reshade",
     "src/modules/shared/vulkan/native",
     "src/modules/crossover/temporal/dxmt",
     "src/modules/crossover/temporal/streamline"
+  ],
+  "sourceSubmodules": [
+    "sources/maclauncher",
+    "sources/maclauncher-android",
+    "sources/maclauncher-kosmickrisp",
+    "sources/maclauncher/src/external/maclauncher-android",
+    "sources/maclauncher/src/external/maclauncher-kosmickrisp",
+    "sources/maclauncher/src/external/maclauncher-android/sources/maclauncher",
+    "sources/maclauncher/src/external/maclauncher-kosmickrisp/sources/maclauncher",
+    "sources/maclauncher-android/sources/maclauncher",
+    "sources/maclauncher-kosmickrisp/sources/maclauncher"
   ]
 }
