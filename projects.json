@@ -24,6 +24,7 @@
     "lib/source-pins.mjs",
     "package.json",
     "producers/package-support/app-source.json",
+    "producers/package-support/package.json",
     "producers/package-support/scripts/native-binary-tools.cjs",
     "tools/app-source.mjs",
     "tools/build-host.mjs",

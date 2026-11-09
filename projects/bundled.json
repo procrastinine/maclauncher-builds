@@ -286,6 +286,7 @@
       "sourceDirectory": "producers/package-support",
       "sourceRepository": "https://github.com/procrastinine/maclauncher",
       "appEntries": [
+        "package.json",
         "scripts/license-files.mjs",
         "scripts/native-supplementals.cjs",
         "scripts/reshade-effect-sources.mjs",

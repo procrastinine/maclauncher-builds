@@ -2720,6 +2720,7 @@
       ],
       "sourceDirectory": "producers/package-support",
       "appEntries": [
+        "package.json",
         "src/modules/crossover/temporal/fidelityfx",
         "src/modules/crossover/temporal/streamline/pe-exports.js",
         "src/modules/crossover/temporal/vulkan/scene-request.h",
@@ -2801,6 +2802,7 @@
         "tools/scene-runtime.mjs"
       ],
       "appEntries": [
+        "package.json",
         "src/modules/shared/copy-file.js",
         "src/modules/shared/effects/operation-contracts.mjs",
         "src/modules/shared/file-time.js",
