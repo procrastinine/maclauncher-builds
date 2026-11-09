@@ -10,7 +10,8 @@ const args=Object.fromEntries(process.argv.slice(2).reduce((rows,value,index,all
 if(!['xess-source','dxmt-source','compiler','out'].every(key=>args[key]))throw Error('Use --xess-source SDK --dxmt-source DXMT --compiler CLANG++ --out DIRECTORY');
 const xess=fs.realpathSync(args['xess-source']),dxmt=fs.realpathSync(args['dxmt-source']),output=path.resolve(args.out),compiler=path.resolve(args.compiler);
 fs.accessSync(compiler,fs.constants.X_OK);
-for(const [directory,pin] of [[xess,reference],[dxmt,source.dxmt]])if(execFileSync('git',['-C',directory,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==sourceRevision(pin))throw Error('Initialize the exact XeSS adapter source commit: '+pin.repository);
+if(execFileSync('git',['-C',xess,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==sourceRevision(reference))throw Error('Initialize the exact XeSS adapter source commit: '+reference.repository);
+const dxmtRevision=execFileSync('git',['-C',dxmt,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
 fs.mkdirSync(output,{recursive:true});
 const headers=['inc/xess/xess.h','inc/xess/xess_d3d11.h'];
 const hooks=new Set(headers.flatMap(file=>[...fs.readFileSync(path.join(xess,file),'utf8').matchAll(/XESS_API\s+xess_result_t\s+(xess\w+)\s*\(/g)].map(row=>row[1])));
@@ -75,7 +76,7 @@ if(JSON.stringify(actual)!==JSON.stringify([...exports].sort((a,b)=>a.name.local
 addLicenses(output,'Intel-XeSS',xess);
 addLicenses(output,'DXMT',dxmt);
 const metadata={schema:1,profile:source.profile,version:'1',library:source.library,sha256:hash(library),exports:actual,
-  sources:{...source,xess:{repository:reference.repository,revision:sourceRevision(reference),...source.xess}},compiler:execFileSync(compiler,['--version'],{encoding:'utf8'}).split('\n')[0],
+  sources:{...source,xess:{repository:reference.repository,revision:sourceRevision(reference),...source.xess},dxmt:{...source.dxmt,revision:dxmtRevision}},compiler:execFileSync(compiler,['--version'],{encoding:'utf8'}).split('\n')[0],
   owned:Object.fromEntries(['source.json','proxy.cpp','build.mjs','reference-exports.json','export-profile.js'].map(file=>[file,hash(path.join(['build.mjs','reference-exports.json'].includes(file)?here:app,file))])),
   dependencies:{'dxmt/camera-transport.hpp':hash(path.join(app,'../dxmt/camera-transport.hpp')),
     'temporal/camera.h':hash(path.resolve(app,'../../../shared/reshade/temporal/camera.h')),
