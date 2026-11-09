@@ -43,8 +43,7 @@
       "path": "src/external/fsr2",
       "pin": {
         "file": "app:src/modules/shared/reshade/temporal/fsr/source.json",
-        "repository": "/fsr2/repository",
-        "pointer": "/fsr2"
+        "repository": "/fsr2/repository"
       }
     },
     "fsr3-sdk": {
@@ -58,56 +57,49 @@
       "path": "src/external/fsr4-metal",
       "pin": {
         "file": "app:src/modules/shared/reshade/temporal/fsr4/source.json",
-        "repository": "/repository",
-        "pointer": ""
+        "repository": "/repository"
       }
     },
     "asr": {
       "path": "src/external/asr",
       "pin": {
         "file": "app:src/modules/shared/reshade/temporal/asr/source.json",
-        "repository": "/repository",
-        "pointer": ""
+        "repository": "/repository"
       }
     },
     "sgsr2": {
       "path": "src/external/sgsr2",
       "pin": {
         "file": "app:src/modules/shared/reshade/temporal/sgsr2/source.json",
-        "repository": "/repository",
-        "pointer": ""
+        "repository": "/repository"
       }
     },
     "godot": {
       "path": "src/external/godot-camera",
       "pin": {
         "file": "app:src/modules/godot/graphics/source.json",
-        "repository": "/repository",
-        "pointer": ""
+        "repository": "/repository"
       }
     },
     "streamline": {
       "path": "src/external/streamline-camera",
       "pin": {
         "file": "src/modules/crossover/temporal/streamline/source.json",
-        "repository": "/repository",
-        "pointer": ""
+        "repository": "/repository"
       }
     },
     "dxmt": {
       "path": "src/external/dxmt-camera",
       "pin": {
         "file": "src/modules/crossover/temporal/dxmt/source.json",
-        "repository": "/repository",
-        "pointer": ""
+        "repository": "/repository"
       }
     },
     "xess": {
       "path": "src/external/xess",
       "pin": {
         "file": "app:src/modules/shared/reshade/xess/source.json",
-        "repository": "/repository",
-        "pointer": ""
+        "repository": "/repository"
       }
     },
     "sdl-vulkan": {
@@ -121,24 +113,21 @@
       "path": "src/external/librashader",
       "pin": {
         "file": "src/modules/shared/reshade/native/retroarch-source.json",
-        "repository": "/repository",
-        "pointer": ""
+        "repository": "/repository"
       }
     },
     "mlx-dlss": {
       "path": "src/external/MLX-DLSS",
       "pin": {
         "file": "app:src/modules/shared/reshade/neural/source.json",
-        "repository": "/repository",
-        "pointer": ""
+        "repository": "/repository"
       }
     },
     "isfmslkit": {
       "path": "src/external/ISFMSLKit",
       "pin": {
         "file": "src/modules/shared/reshade/isf/source.json",
-        "repository": "/sources/0/repository",
-        "pointer": "/sources/0"
+        "repository": "/sources/0/repository"
       }
     },
     "libplacebo": {
@@ -146,8 +135,7 @@
       "match": "object",
       "pin": {
         "file": "src/modules/shared/reshade/libplacebo/scene-profile.json",
-        "repository": "/SOURCE/origin",
-        "pointer": "/SOURCE"
+        "repository": "/SOURCE/origin"
       }
     },
     "libplacebo-vulkan-headers": {

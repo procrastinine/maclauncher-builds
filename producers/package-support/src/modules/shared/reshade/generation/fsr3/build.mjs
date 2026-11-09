@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import {sourceRevision} from '../../../../../../../../lib/pins.mjs';
+const revision=sourceRevision({gitlink:'producers/package-support/src/external/fsr3-sdk'});
 import {addLicense} from '../../../../../../../../lib/licenses.mjs';
 import {appPath} from '../../../../../../../../tools/app-source.mjs';
 import fs from 'node:fs';
@@ -21,7 +22,7 @@ function compile(){
  for(const name of ['dxc','spirv-cross'])if(hash(fs.readFileSync(path.join(tools,name)))!==pin.tools[name])throw Error('The shader compiler differs from the declared build input: '+name);
  fs.mkdirSync(output,{recursive:true});
  const exported=path.join(output,'source'),archive=path.join(output,'source.tar');fs.mkdirSync(exported,{recursive:true});
- run('git',['-C',source,'archive','--format=tar','--output='+archive,sourceRevision(pin),'sdk/include','sdk/src/components/opticalflow','sdk/src/components/frameinterpolation','sdk/src/shared','sdk/src/backends/shared','sdk/src/backends/dx12/shaders/opticalflow','sdk/src/backends/dx12/shaders/frameinterpolation']);
+ run('git',['-C',source,'archive','--format=tar','--output='+archive,revision,'sdk/include','sdk/src/components/opticalflow','sdk/src/components/frameinterpolation','sdk/src/shared','sdk/src/backends/shared','sdk/src/backends/dx12/shaders/opticalflow','sdk/src/backends/dx12/shaders/frameinterpolation']);
  run('tar',['-xf',archive,'-C',exported]);fs.rmSync(archive);
  // The SDK's alpha channel is an internal inpainting mask. The final pass has
  // consumed that mask; an opaque presentation image requires alpha one even
@@ -71,7 +72,7 @@ function compile(){
 function assemble(){
  addLicense(payload,'fsr3',path.join(source,'LICENSE.txt'));
  if(shadersOnly){console.log('Translated FidelityFX optical flow and frame interpolation shaders: '+payload);return;}
- fs.writeFileSync(path.join(payload,'provider.json'),JSON.stringify({providerABI:1,interfaces:{generation:1,preparation:1},shaderVariants:{opticalflow:2,frameinterpolation:8},shaderPasses:{opticalflow:7,frameinterpolation:11},complete:true,method:'fsr3',source:pin.repository,commit:sourceRevision(pin),effects:pin.effects,resolvedPaths:pin.effects.map(effect=>effect+'/'),architectures:pin.architectures,minimumMacOS:pin.minimumMacOS,tools:pin.tools,adaptations:['opaque-presentation-alpha','darwin-wchar-context-size','inactive-SPD-UAV-bindings'],library:path.basename(library)},null,2)+'\n');
+ fs.writeFileSync(path.join(payload,'provider.json'),JSON.stringify({providerABI:1,interfaces:{generation:1,preparation:1},shaderVariants:{opticalflow:2,frameinterpolation:8},shaderPasses:{opticalflow:7,frameinterpolation:11},complete:true,method:'fsr3',source:pin.repository,commit:revision,effects:pin.effects,resolvedPaths:pin.effects.map(effect=>effect+'/'),architectures:pin.architectures,minimumMacOS:pin.minimumMacOS,tools:pin.tools,adaptations:['opaque-presentation-alpha','darwin-wchar-context-size','inactive-SPD-UAV-bindings'],library:path.basename(library)},null,2)+'\n');
  console.log('Built FidelityFX optical flow and frame interpolation provider: '+payload);
 }
 if(phase!=='assemble')compile();

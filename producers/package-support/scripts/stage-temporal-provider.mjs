@@ -1,5 +1,5 @@
 import {moduleFile} from '../../../tools/app-source.mjs';
-import {gitlink,sourceRevision} from '../../../lib/pins.mjs';
+import {sourceRevision} from '../../../lib/pins.mjs';
 import fs from "node:fs";
 import path from "node:path";
 const safe=name=>typeof name==="string"&&!path.isAbsolute(name)&&!name.split(/[\\/]/).some(part=>!part||part==="."||part==="..");
@@ -17,5 +17,5 @@ export function stageTemporalProvider({name,directory,upstream}){
   for(const relative of Object.keys(metadata.owned))owned.set(path.posix.normalize(`maclauncher/temporal/${name}/${relative}`),moduleFile(path.posix.join(module,relative)));
   if(!upstream)throw Error("Supply the declared source checkout for the optional "+name+" provider.");
   return {files:new Map([...files].map(([relative,file])=>[`temporal/${name}/${relative}`,file]).concat([[`temporal/${name}/provider.json`,path.join(directory,"provider.json")]])),owned,
-    source:{directory:upstream,relative:"third_party/"+name,commit:sourceRevision(spec),scope:spec.sourceScope},pin:` ${sourceRevision(spec)} third_party/${name}`};
+    source:{directory:upstream,relative:"third_party/"+name,commit:sourceRevision({gitlink:"producers/package-support/src/external/"+name}),scope:spec.sourceScope},pin:` ${sourceRevision({gitlink:"producers/package-support/src/external/"+name})} third_party/${name}`};
 }

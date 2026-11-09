@@ -31,6 +31,6 @@ for(let variant=0;variant<4;++variant){
 }
 const ownedFiles = ['bridge.cpp','autoload.gd','camera-effect.gd','aov-effect.gd','aov-capture.glsl','../../shared/reshade/temporal/camera.h','../../shared/reshade/temporal/frame.h','../../shared/reshade/temporal/scene.h','../../shared/reshade/temporal/scene-matrices.h','../../shared/reshade/temporal/scene-destination.h','../../shared/reshade/temporal/scene-aovs.h','../../shared/reshade/temporal/scene-copy-boundary.h','../../shared/reshade/native/image-color.h'];
 const ownedSourceSha256 = Object.fromEntries(ownedFiles.map(file => [file, crypto.createHash('sha256').update(fs.readFileSync(owner(file))).digest('hex')]));
-fs.writeFileSync(path.join(output,'provider.json'),JSON.stringify({abi:1,complete:true,sourceResolutionAPI:1,sourceResolutionLiveAPI:1,sceneDemandAPI:1,sceneDestinationAPI:1,sceneAovAPI:1,sceneCopyBoundaryAPI:1,aovCapture:{version:1,programs:capturePrograms},sourceCommit:sourceRevision(specification),
+fs.writeFileSync(path.join(output,'provider.json'),JSON.stringify({abi:1,complete:true,sourceResolutionAPI:1,sourceResolutionLiveAPI:1,sceneDemandAPI:1,sceneDestinationAPI:1,sceneAovAPI:1,sceneCopyBoundaryAPI:1,aovCapture:{version:1,programs:capturePrograms},sourceCommit:sourceRevision({gitlink:'producers/package-support/src/external/godot-camera'}),
   sourceHeaderSha256:specification.headerSha256,ownedSourceSha256,
   minimumGodot:'4.4',minimumMacOS:'13.0',architectures:['arm64','x86_64'],library:path.basename(library)},null,2)+'\n');

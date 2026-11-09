@@ -1,4 +1,5 @@
 import {sourceRevision} from '../../../../../../../../lib/pins.mjs';
+const revision=sourceRevision({gitlink:'producers/package-support/src/external/fsr4-metal'});
 import {addLicenses} from '../../../../../../../../lib/licenses.mjs';
 import {appPath} from '../../../../../../../../tools/app-source.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
@@ -127,7 +128,7 @@ const python = (script, args) => run(
     });
 if (repackage) {
   if (previous.providerABI !== 1 || previous.complete !== true ||
-      previous.commit !== sourceRevision(pin) || previous.model !== pin.model ||
+      previous.commit !== revision || previous.model !== pin.model ||
       JSON.stringify(previous.profiles) !== JSON.stringify(pin.profiles) ||
       previous.owned?.['adapt-runtime.mjs'] !==
           hash(ownedSnapshot.get('adapt-runtime.mjs')) ||
@@ -290,8 +291,19 @@ for (const relative of (await fs.readdir(payload, {recursive : true})).sort()) {
     });
 }
 await fs.writeFile(path.join(payload, 'provider.json'), JSON.stringify({
-  ...pin,
-  commit : sourceRevision(pin),
+  repository : pin.repository,
+  commit : revision,
+  model : pin.model,
+  license : pin.license,
+  minimumMacOS : pin.minimumMacOS,
+  architectures : pin.architectures,
+  sources : pin.sources.map((row, index) => ({
+    ...row,
+    commit : sourceRevision({gitlink : 'producers/package-support/src/external/' +
+                                       [ 'fsr4-sdk-headers', 'fsr4-sdk-model', 'fsr4-int8' ][index]})
+  })),
+  supportedProfiles : pin.supportedProfiles,
+  profiles : pin.profiles,
   providerABI : 1,
   complete : !quick,
   resourcePreparation : 1,

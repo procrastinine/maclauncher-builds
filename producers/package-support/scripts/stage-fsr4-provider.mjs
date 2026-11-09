@@ -1,10 +1,11 @@
 import {moduleFile} from '../../../tools/app-source.mjs';
-import {gitlink,sourceRevision} from '../../../lib/pins.mjs';
+import {sourceRevision} from '../../../lib/pins.mjs';
 import fs from "node:fs";
 import path from "node:path";
 const safe=name=>typeof name==="string"&&!path.isAbsolute(name)&&!name.split(/[\\/]/).some(part=>!part||part==="."||part==="..");
 const module="src/modules/shared/reshade/temporal/fsr4";
 export function stageFSR4Provider({directory,upstream}){
+  const revision=sourceRevision({gitlink:'producers/package-support/src/external/fsr4-metal'});
   const spec=JSON.parse(fs.readFileSync(moduleFile(module+"/source.json"))),metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json")));
   const files=new Map();
   for(const row of metadata.files){
@@ -20,6 +21,6 @@ export function stageFSR4Provider({directory,upstream}){
   if(!upstream)throw Error("Supply the exact FSR 4 source checkout for this provider.");
   files.set("provider.json",path.join(directory,"provider.json"));
   return {files:new Map([...files].map(([name,file])=>["temporal/fsr4/"+name,file])),owned,profiles:[...metadata.supportedProfiles],
-    source:{directory:upstream,relative:"third_party/fsr4-native-macos",commit:sourceRevision(spec)},
-    pins:[` ${sourceRevision(spec)} third_party/fsr4-native-macos`,` ${sourceRevision(spec.lite2)} third_party/fsr4-lite2-weights`,...(spec.sources||[]).map((row,index)=>{const revision=index<2?gitlink('producers/package-support/src/external/'+(index===0?'fsr4-sdk-headers':'fsr4-sdk-model')):sourceRevision(row);return ` ${revision} third_party/fsr4-input-${index+1}`;})]};
+    source:{directory:upstream,relative:"third_party/fsr4-native-macos",commit:revision},
+    pins:[` ${revision} third_party/fsr4-native-macos`,` ${sourceRevision(spec.lite2)} third_party/fsr4-lite2-weights`,...['fsr4-sdk-headers','fsr4-sdk-model','fsr4-int8'].map((name,index)=>` ${sourceRevision({gitlink:'producers/package-support/src/external/'+name})} third_party/fsr4-input-${index+1}`)]};
 }
