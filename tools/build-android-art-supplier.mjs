@@ -13,6 +13,8 @@ import {rustEnvironment} from './rust-build.mjs';
 import {readArtFfiInput} from './android-art-ffi-input.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 const profile=JSON.parse(fs.readFileSync(new URL('../producers/android-art-inputs/supplier.json',import.meta.url)));
+// The original image identity is the Android image record's archive and content.
+const imageData=JSON.parse(fs.readFileSync(new URL('../producers/android-image-data/source.json',import.meta.url))),originalImage={archiveSha256:imageData.archive.sha256,content:imageData.content};
 const original=async(producer,file)=>import(pathToFileURL(path.join(producer,'src/modules/android',file)));
 function file(value,label){if(!path.isAbsolute(value||'')||!fs.statSync(value,{throwIfNoEntry:false})?.isFile())throw Error('Missing source-built ART input: '+label);return value;}
 function directory(value,label){if(!path.isAbsolute(value||'')||!fs.statSync(value,{throwIfNoEntry:false})?.isDirectory())throw Error('Missing source-built ART input: '+label);return value;}
@@ -71,9 +73,9 @@ export async function buildAndroidArtSupplier({common,elf,ffiInput,artJava,outpu
  try{
  run('cargo',['fetch','--locked'],{cwd:aim,env});
  graph('image');
- const image={root:directory(path.join(mount,'root'),'original Android image'),contentSha256:profile.originalImage.content.sha256};
+ const image={root:directory(path.join(mount,'root'),'original Android image'),contentSha256:originalImage.content.sha256};
  const {imageContentIdentity}=await original(android,'art/build.mjs'),identity=imageContentIdentity(image.root);
- if(JSON.stringify(identity)!==JSON.stringify(profile.originalImage.content))throw Error('The original Android image content identity differs from its selected ABI.');
+ if(JSON.stringify(identity)!==JSON.stringify(originalImage.content))throw Error('The original Android image content identity differs from its selected ABI.');
  graph(...profile.halTargets);
  const halRoot=path.join(work,'hal'),halManifests=path.join(work,'hal-manifests');fs.mkdirSync(halRoot);fs.mkdirSync(halManifests);
  for(const name of profile.halFiles)fs.copyFileSync(file(path.join(target,'aarch64-linux-android/android',name),'original HAL '+name),path.join(halRoot,name));
@@ -97,11 +99,11 @@ export async function buildAndroidArtSupplier({common,elf,ffiInput,artJava,outpu
   runner:{aim,unicorn,jobs:2,env},guest:{...guest,libraryDirectories},sensors:rustGuest,composer:rustGuest,graphics:rustGuest,
   nativeBridge:{ndk,ffi,imports,ninja:common.tools.ninja,python:common.tools.python,bionicSource:common.sources['bionic-source'],artSource:common.sources['art-source'],image:image.root,arm32},java,
   inputs:{image:image.root,art:elf.art,linuxTranslate:file(path.join(elf.build.target,'release/linux-translate'),'original source-built image translator'),halRoot,halManifests,vendorManifest:file(path.join(aim,'image/vendor/etc/vintf/manifest.xml'),'original derived vendor manifest'),hwuiLibrary:hwui.path},
-  bootClasspath:profile.bootClasspath,includeImage:false,originalImage:profile.originalImage});
+  bootClasspath:profile.bootClasspath,includeImage:false,originalImage});
  const sourceArchiveInputs={sources:{source:elf.build.checkout,klepton:common.sources.klepton,glesHeaders,aosp:path.join(elf.build.fetched,'aosp'),xsdc:path.join(elf.build.fetched,'xsdc')},unicorn,
   sourceCheckouts:{'aosp-native':common.sources['native-source'],'aosp-bionic':common.sources['bionic-source'],'aosp-art':common.sources['art-source'],libffi,dynarmic:common.sources['dynarmic-source']},
   nativeBridgeSources:{ndkHeaders:arm32Inputs.ndkHeaders,arm32Sources:arm32.sources},hwuiSources:{sources:hwui.sources,registry:path.join(hwui.sourceRecords,'SOURCES.json'),registryCache:path.join(hwui.tools.cargoHome,'registry/cache')}};
- return {root:path.join(output,'runtime'),manifest,originalImage:profile.originalImage,sourceArchiveInputs,build:{producer,aim,hwui,guest,libffi,unicorn,java,halRoot,halManifests},record:{androidSource:androidSource(),aimRevision:sourceRevision(sourceProfile.sources.aim),unicornRevision:sourceRevision(unicornProfile),libffiRevision:sourceRevision(sourceProfile.sources.libffi)}};
+ return {root:path.join(output,'runtime'),manifest,originalImage,sourceArchiveInputs,build:{producer,aim,hwui,guest,libffi,unicorn,java,halRoot,halManifests},record:{androidSource:androidSource(),aimRevision:sourceRevision(sourceProfile.sources.aim),unicornRevision:sourceRevision(unicornProfile),libffiRevision:sourceRevision(sourceProfile.sources.libffi)}};
  }finally{if(!wasMounted&&fs.existsSync(path.join(mount,'root.identity')))run('hdiutil',['detach',mount]);}
 }
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){

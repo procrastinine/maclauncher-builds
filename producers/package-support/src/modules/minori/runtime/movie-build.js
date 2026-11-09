@@ -4,8 +4,8 @@ const os = require("node:os");
 const path = require("node:path");
 const Build = require("../../shared/runtime/pinned-native-build");
 const Native = require('../../../../../../lib/package-format.cjs');
-const SOURCE = Object.freeze({ version: "7.1.2", url: "https://ffmpeg.org/releases/ffmpeg-7.1.2.tar.xz",
-  sha256: "089bc60fb59d6aecc5d994ff530fd0dcb3ee39aa55867849a2bbc4e555f9c304" });
+const { version, url, sha256 } = require("../../shared/runtime/portable-ffmpeg.json").source;
+const SOURCE = Object.freeze({ version, url, sha256 });
 const DECODERS = Object.freeze(["mpeg1video", "mpeg2video", "mpeg4", "msmpeg4v1", "msmpeg4v2", "msmpeg4v3",
   "wmv1", "wmv2", "wmv3", "vc1", "h264", "mjpeg", "png", "rawvideo", "cinepak", "indeo3", "indeo5",
   "aac", "mp3", "wmav1", "wmav2", "wmapro", "wmalossless", "wmavoice", "vorbis",

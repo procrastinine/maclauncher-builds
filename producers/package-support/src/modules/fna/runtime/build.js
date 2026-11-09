@@ -6,6 +6,8 @@ const path = require("node:path");
 const Native = require('../../../../../../lib/package-format.cjs');
 const Source = require("../../shared/runtime/pinned-native-build");
 const BuildTools = require("../../shared/runtime/native-build-tools");
+// SDL3 is the shared release archive declared once for every Builds recipe.
+const Dependencies = require("../../../../../dependencies.json");
 const { throwIfAborted } = require('../../../../../../lib/abort.cjs');
 
 const PROFILE = "26.10-MCLv1";
@@ -19,7 +21,7 @@ const CAPABILITIES = Object.freeze({ originalGamePaths: true });
 const PACKAGES = Object.freeze({
   compiler: { filename: "roslyn-4.8.0.zip", url: "https://api.nuget.org/v3-flatcontainer/microsoft.net.compilers.toolset/4.8.0/microsoft.net.compilers.toolset.4.8.0.nupkg", sha256: "37333f4f1e2ce55e621355d6da651dc23d4cb5f94a8f76b9478816e87f110ad9" },
   references: { filename: "net8-reference-pack.zip", url: "https://api.nuget.org/v3-flatcontainer/microsoft.netcore.app.ref/8.0.32/microsoft.netcore.app.ref.8.0.32.nupkg", sha256: "6088b3ebfe5af44511eaf8d592e029e1ef870da01b1fcb80aa790a6536bc14db" },
-  sdl: { filename: "SDL3-3.4.18.tar.gz", url: "https://github.com/libsdl-org/SDL/releases/download/release-3.4.18/SDL3-3.4.18.tar.gz", sha256: "9c75cf16330322c217dedd2e0609f1124f1b54b8633e763467b4684d0f4334a3" },
+  sdl: { filename: path.basename(Dependencies.sdl3.url), url: Dependencies.sdl3.url, sha256: Dependencies.sdl3.sha256 },
   ...BuildTools.PACKAGES
 });
 

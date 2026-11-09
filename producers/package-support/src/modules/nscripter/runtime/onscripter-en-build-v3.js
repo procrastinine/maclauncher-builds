@@ -1,4 +1,3 @@
-const {appRequire}=require('../../../../../../tools/app-source.mjs');
 const {addLicense,addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const os = require("node:os");
@@ -7,13 +6,15 @@ const crypto = require("node:crypto");
 const Native = require('../../../../../../lib/package-format.cjs');
 const Source = require("../../shared/runtime/pinned-native-build");
 const BuildTools = require("../../shared/runtime/native-build-tools");
+// SDL2 is the shared release archive declared once for every Builds recipe.
+const Dependencies = require("../../../../../dependencies.json");
 const { throwIfAborted } = require('../../../../../../lib/abort.cjs');
 
 const SNAPSHOT_REVISION = require('../../../../../../lib/pins.mjs').gitlink('producers/package-support/src/external/onscripter-en');
 const PACKAGES = Object.freeze({
   source: { filename: `onscripter-en-${SNAPSHOT_REVISION}.tar.gz`, url: `https://github.com/Galladite27/ONScripter-EN/archive/${SNAPSHOT_REVISION}.tar.gz`, sha256: "ef79365a2c9fd432d1b13bc113b73a0b175a6e3cb94e43709211402a8f7b867c", folder: `ONScripter-EN-${SNAPSHOT_REVISION}` },
   sdl12: { filename: "sdl12-compat-1.2.76.tar.gz", url: "https://github.com/libsdl-org/sdl12-compat/archive/refs/tags/release-1.2.76.tar.gz", sha256: "e889ac9c7e8a6bdfc31972bf1f1254b84882cb52931608bada62e8febbf0270b", folder: "sdl12-compat-release-1.2.76" },
-  sdl2: { filename: "SDL2-2.32.10.tar.gz", url: "https://github.com/libsdl-org/SDL/releases/download/release-2.32.10/SDL2-2.32.10.tar.gz", sha256: "5f5993c530f084535c65a6879e9b26ad441169b3e25d789d83287040a9ca5165", folder: "SDL2-2.32.10" },
+  sdl2: { filename: path.basename(Dependencies.sdl2.url), url: Dependencies.sdl2.url, sha256: Dependencies.sdl2.sha256, folder: path.basename(Dependencies.sdl2.url, ".tar.gz") },
   ...BuildTools.PACKAGES
 });
 const SOURCE_SCOPE = Object.freeze({ kind: "primary-tree", omittedSubmodules: ["test/googletest"] });
@@ -58,9 +59,8 @@ function sourceFiles(root, depth = 0, prefix = "", output = []) {
   return output;
 }
 
-async function buildRuntime({ manager: suppliedManager, userDataDir, version, packageVersion, sourceDir, architecture = process.arch, retainBuildDirectory = false, logger, signal, onProgress, dependencies = {} } = {}) {
-  const manager = suppliedManager || appRequire('src/modules/nscripter/runtime/onscripter-en-manager.js');
-  const { SNAPSHOT: PROFILE, SNAPSHOT_REVISION: REVISION } = appRequire('src/modules/nscripter/runtime/onscripter-en-manager.js');
+async function buildRuntime({ manager, userDataDir, version, packageVersion, sourceDir, architecture = process.arch, retainBuildDirectory = false, logger, signal, onProgress, dependencies = {} } = {}) {
+  const PROFILE = "MCLv1-0126", REVISION = SNAPSHOT_REVISION;
   const selected = version || PROFILE, outputVersion = packageVersion === undefined ? selected : packageVersion;
   if (selected !== PROFILE || typeof outputVersion !== "string" || !outputVersion.trim() || process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) {
     throw new Error("The reviewed ONScripter-EN source adapter supports the selected Mac source snapshot.");
