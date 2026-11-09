@@ -5,11 +5,10 @@ import {execFileSync} from 'node:child_process';
 import {stageSource,run,recipeMain} from './build-source.mjs';
 import {stageNativeStack} from './native-stack.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
-import {resolveProject} from '../lib/projects.mjs';
-import {sourceRevision} from '../lib/pins.mjs';
+import {upstreamRevision} from '../lib/projects.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 /** The OpenAL Soft commit this project's upstream pin names. */
-const revision=project=>sourceRevision(resolveProject(project,root,{resolvePins:false}).upstreams.find(upstream=>upstream.id==='openal-soft').pin);
+const revision=project=>upstreamRevision(project,'openal-soft');
 /** Compile OpenAL Soft from its staged source with the function-effects patch. */
 export async function compile({project,arch,work}){
  fs.mkdirSync(work,{recursive:true});const original=path.join(root,'producers/package-support/src/external/openal-soft'),source=path.join(work,'source');

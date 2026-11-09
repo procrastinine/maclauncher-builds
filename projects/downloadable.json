@@ -816,8 +816,7 @@
           "x64"
         ],
         "submodules": [
-          "producers/package-support/src/external/source-revisions/hashlink-1-9",
-          "producers/package-support/src/external/openal-soft"
+          "producers/package-support/src/external/source-revisions/hashlink-1-9"
         ],
         "tools": [
           "cmake",
@@ -835,8 +834,7 @@
           "x64"
         ],
         "submodules": [
-          "producers/package-support/src/external/source-revisions/hashlink-1-9",
-          "producers/package-support/src/external/openal-soft"
+          "producers/package-support/src/external/source-revisions/hashlink-1-9"
         ],
         "tools": [
           "cmake",
