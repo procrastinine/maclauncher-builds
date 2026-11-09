@@ -15,9 +15,12 @@ export function appSourceRoot(){
  if(origin!==profile.repository)throw Error('The app source origin differs from its public declaration.');
  return {directory,revision:profile.revision};
 }
-/** An owned build input is a regular file inside this checkout, which holds the
- * pinned app source and its submodules, reached directly or through a link. */
+/** An owned build input is a regular file, or a link whose real path is a
+ * regular file inside this checkout, which holds the pinned app source and its
+ * submodules. Staged copies outside the checkout are regular files. */
 export function isOwnedFile(file){
+ let stat;try{stat=fs.lstatSync(file);}catch{return false;}
+ if(!stat.isSymbolicLink())return stat.isFile();
  let real;try{real=fs.realpathSync(file);}catch{return false;}
  return real.startsWith(root+path.sep)&&fs.statSync(real).isFile();
 }
