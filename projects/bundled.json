@@ -101,6 +101,7 @@
       "entries": [
         "lib/abort.cjs",
         "lib/licenses.mjs",
+        "producers/package-support/src/modules/ios/native",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "tools/build-source.mjs",
         "tools/helper-package.mjs"
