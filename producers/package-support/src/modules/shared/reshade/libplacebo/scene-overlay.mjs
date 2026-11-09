@@ -4,12 +4,19 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import {execFileSync} from "node:child_process";
 import {sourceRevision} from "../../../../../../../lib/pins.mjs";
 const PROFILE=JSON.parse(fs.readFileSync(new URL('./scene-profile.json',import.meta.url),'utf8'));
 // The libplacebo revision is its Builds gitlink; records written from SOURCE name it as revision.
 export const SOURCE=Object.freeze(Object.fromEntries(Object.entries(PROFILE.SOURCE).map(([key,value])=>key==="gitlink"?["revision",sourceRevision(PROFILE.SOURCE)]:[key,value])));
 export const VULKAN_HEADERS=Object.freeze(PROFILE.VULKAN_HEADERS);
-export const FAST_FLOAT=Object.freeze(PROFILE.FAST_FLOAT);
+// Vulkan-Headers and fast_float are libplacebo's own submodules: their revisions are the gitlinks in its
+// pinned tree, and fast_float's origin is that tree's .gitmodules entry.
+export function sceneDependencies(checkout){
+  const git=args=>execFileSync("git",["-C",checkout,...args],{encoding:"utf8"}).trim(),tree=sourceRevision(SOURCE);
+  return {vulkanHeaders:{...VULKAN_HEADERS,revision:git(["rev-parse",tree+":3rdparty/Vulkan-Headers"])},
+    fastFloat:{origin:git(["config","--blob",tree+":.gitmodules","--get","submodule.3rdparty/fast_float.url"]),revision:git(["rev-parse",tree+":3rdparty/fast_float"])}};
+}
 const originals={"src/shaders/custom_mpv.c":"0091602f4d94a5e23de05b560a43658c1cffcc50455012a323f23c814ef5a984","src/include/libplacebo/shaders/custom.h":"eb7c317f6c93ce76a67f5e622d5c784e702545752a88535a4eb577fdcc74e50e"};
 const sha=value=>crypto.createHash("sha256").update(value).digest("hex");
 function replaceOnce(source,before,after){if(source.split(before).length!==2)throw new Error("The pinned libplacebo overlay seam changed.");return source.replace(before,after);}

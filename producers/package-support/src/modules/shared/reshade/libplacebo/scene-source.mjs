@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import {execFileSync} from "node:child_process";
-import {SOURCE,VULKAN_HEADERS,applySceneOverlay} from "./scene-overlay.mjs";
+import {SOURCE,sceneDependencies,applySceneOverlay} from "./scene-overlay.mjs";
 const hash=file=>crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 const run=(program,args,options={})=>execFileSync(program,args,{encoding:"utf8",stdio:"pipe",maxBuffer: Infinity,...options});
 function archive(repository,dependency,output){
@@ -16,13 +16,12 @@ export function buildSceneLibrary({source,vulkanSource,inputs,dependencyHeaders=
   if(!["arm64","x86_64"].includes(architecture))throw new Error("Unsupported library architecture.");
   if(fs.existsSync(output))throw new Error("Choose an unused libplacebo source-build directory.");
   const tree=path.join(output,"source"),build=path.join(output,"build"),prefix=path.join(output,"install"),pc=path.join(output,"pkgconfig");
-  const vulkanHeaders={...VULKAN_HEADERS,revision:run('git',['-C',source,'rev-parse',sourceRevision(SOURCE)+':3rdparty/Vulkan-Headers']).trim()};
+  const {vulkanHeaders,fastFloat}=sceneDependencies(source);
   archive(source,SOURCE,tree);archive(vulkanSource,vulkanHeaders,path.join(tree,"3rdparty/Vulkan-Headers"));
   const manifest=applySceneOverlay(tree);
   manifest.vulkanHeaders=vulkanHeaders;
   const fastFloatSource=path.join(source,"3rdparty/fast_float");
-  const dependency={origin:run("git",["-C",source,"config","--blob",sourceRevision(SOURCE)+":.gitmodules","--get","submodule.3rdparty/fast_float.url"]).trim(),revision:run("git",["-C",source,"rev-parse",sourceRevision(SOURCE)+":3rdparty/fast_float"]).trim()};
-  archive(fastFloatSource,dependency,path.join(tree,"3rdparty/fast_float"));manifest.fastFloat=dependency;
+  archive(fastFloatSource,fastFloat,path.join(tree,"3rdparty/fast_float"));manifest.fastFloat=fastFloat;
   fs.mkdirSync(pc,{recursive:true});
   const shaderc=path.join(inputs,"shaderc/shaderc/2026.4"),lcms=path.join(inputs,"little-cms2/little-cms2/2.19.1");
   // These C headers are architecture independent. Binary-only Intel caches

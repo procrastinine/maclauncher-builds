@@ -155,7 +155,7 @@ if(options["--libplacebo"]) {
     optionalInputs.set(entry.path,file);
     if(/\.(dylib|so)$/.test(entry.path)||entry.path===metadata.helper)optionalLoad.set(entry.path,{architectures:metadata.architectures,minimumMacOS:metadata.minimumMacOS});
   }
-  const scene=stageLibplaceboScene({directory,metadata,recipeRoot:path.resolve(import.meta.dirname,"../src/modules/shared/reshade"),upstream:path.resolve(upstreamRoot,"src/external/libplacebo")});
+  const scene=stageLibplaceboScene({metadata,recipeRoot:path.resolve(import.meta.dirname,"../src/modules/shared/reshade"),upstream:path.resolve(upstreamRoot,"src/external/libplacebo")});
   if(scene){
     features.shaders.providers??={};features.shaders.providers.libplacebo={...features.shaders.providers.libplacebo,sceneInputsAPI:1,sceneInputRoles:scene.roles};
     pins.push(...scene.pins);for(const [relative,file]of scene.owned)extraOwned.set(relative,file);
