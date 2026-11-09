@@ -3,9 +3,10 @@ import path from 'node:path';
 import fs from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
-import {resolveProject,buildRecord} from '../lib/projects.mjs';
+import {createRequire} from 'node:module';
 import {retryNetwork} from './download.mjs';
-const root=path.resolve(import.meta.dirname,'..');
+const root=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url);
+// This tool runs before any source exists, so it loads the project registry, which reads the app source, only after preparing it.
 /** Initialize only declared Gitlink paths, including nested production sources. */
 const runGit=(args,cwd)=>execFileSync('git',args,{cwd,encoding:'utf8',stdio:['ignore','pipe','pipe'],maxBuffer:Infinity});
 const appSource=directory=>JSON.parse(fs.readFileSync(path.join(directory,'producers/package-support/app-source.json'),'utf8'));
@@ -46,7 +47,8 @@ export function initializeToolSources({directory=root,run=runGit}={}){return ini
 export function initializeMetadataSources({directory=root,run=runGit}={}){return initializeGitlinks({paths:metadataPaths(directory),directory,run});}
 export function initializeCheckSources({directory=root,run=runGit}={}){return initializeGitlinks({paths:checkPaths(directory,run),directory,run});}
 export function initializeSources({project:id,version,directory=root,run=runGit}){
- const project=resolveProject(id,directory,{resolvePins:false}),build=buildRecord(project,version);
+ initializeGitlinks({paths:toolPaths(directory),directory,run});
+ const {resolveProject,buildRecord}=require('../lib/projects.mjs'),project=resolveProject(id,directory,{resolvePins:false}),build=buildRecord(project,version);
  return {project:id,version:build.version,initialized:initializeGitlinks({paths:[...metadataPaths(directory),...(build.submodules||[])],directory,run,allowRecursive:build.recursiveSubmodules===true})};
 }
 /** The one source preparation entry for every job: no arguments for the tool
