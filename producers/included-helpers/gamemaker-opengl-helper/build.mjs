@@ -8,8 +8,9 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 const require=createRequire(import.meta.url);
 const root=path.dirname(fileURLToPath(import.meta.url)),pins=JSON.parse(fs.readFileSync(path.join(root,'sources.json')));
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
-const runners=['2026.0.0.23','2024.13.1.242','2.3.7.476','1.4.9999','2.2.5.378'];
-const vendor='d63b5d5152d427b333b64883c26edc6701214d0a5ad027fa6f09e579fa31c1b0';
+// The package profile records each supported runner checksum; the first is the vendor build.
+const {runnerChecksums}=JSON.parse(fs.readFileSync(path.join(root,'../profiles/gamemaker-opengl-helper.json'))).managedManifest;
+const runners=Object.keys(runnerChecksums),vendor=runnerChecksums[runners[0]];
 export function source(version=pins[0].version){
  const pin=pins.find(pin=>pin.version===version);if(!pin)throw Error('Select a listed software OpenGL source profile.');
  const file=path.join(root,pin.sourceFile),stat=fs.lstatSync(file);

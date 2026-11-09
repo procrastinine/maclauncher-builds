@@ -5,7 +5,16 @@ import {createRequire} from 'node:module';
 import {stageSource,run,recipeMain} from "./build-source.mjs";
 import {sealRuntime} from './seal-runtime.mjs';
 import {addLicense,addLicenses} from '../lib/licenses.mjs';
+import {gitlink} from '../lib/pins.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Compat=require('../producers/package-support/src/modules/kirikiri/native-compat.js');
+// The packaged KAG3 manifest names the kag3 revision its files come from, read from the kag3 gitlink.
+export function stageKag3Resources(work){
+ const resources=path.join(root,'producers/vn-adaptations/kag3-polyfill'),staged=path.join(work,'kag3-polyfill'),revision=gitlink('producers/vn-adaptations/upstreams/kag3');
+ fs.cpSync(resources,staged,{recursive:true});
+ const {schema,id,sourceUrl,...rest}=JSON.parse(fs.readFileSync(path.join(resources,'manifest.json'),'utf8'));
+ fs.writeFileSync(path.join(staged,'manifest.json'),JSON.stringify({schema,id,upstreamRevision:revision,sourceUrl:sourceUrl+'/tree/'+revision,...rest},null,2)+'\n');
+ return staged;
+}
 export async function buildKirikiri({project,arch,output,work}){
  fs.mkdirSync(work,{recursive:true});const sourceRoot=path.join(root,'producers/package-support/src/external/krkrsdl2'),source=path.join(work,'source'),build=path.join(work,'build');
  const staged=await stageSource(sourceRoot,Compat.REVISION,source),overlay=Compat.prepareSource({sourceRoot:source,revision:Compat.REVISION});
@@ -34,6 +43,6 @@ export async function buildKirikiri({project,arch,output,work}){
  addLicenses(work,'Opus',path.join(source,'external/krkrz/external/opus'));
  addLicenses(work,'opusfile',path.join(source,'external/krkrz/external/opusfile'));
  addLicenses(work,'SIMDe',path.join(source,'external/simde'));
- return sealRuntime({project,arch,output,executable:path.join(build,'krkrsdl2'),sourceRoot,upstreamRevision:Compat.REVISION,payloads:[{source:resources,relative:'share/kag3-polyfill'}],runtimeFiles:{kag3Manifest:'share/kag3-polyfill/manifest.json'},provenance:{sourceTreeSha256:staged.treeSha256,gitDependencies:staged.dependencies,sourceOverlay:overlay,features:{storageDirlist:true,systemAddFont:true,monitorAdjust:true,fullFramePresentation:true,kag3Resources:1}}});
+ return sealRuntime({project,arch,output,executable:path.join(build,'krkrsdl2'),sourceRoot,upstreamRevision:Compat.REVISION,payloads:[{source:stageKag3Resources(work),relative:'share/kag3-polyfill'}],runtimeFiles:{kag3Manifest:'share/kag3-polyfill/manifest.json'},provenance:{sourceTreeSha256:staged.treeSha256,gitDependencies:staged.dependencies,sourceOverlay:overlay,features:{storageDirlist:true,systemAddFont:true,monitorAdjust:true,fullFramePresentation:true,kag3Resources:1}}});
 }
 recipeMain(import.meta,buildKirikiri);

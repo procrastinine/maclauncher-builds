@@ -1,13 +1,5 @@
 {
   "schemaVersion": 1,
-  "originalImage": {
-    "archiveSha256": "182f51ad2b04bbb9cd9464d3e0396a81201db6d9659e1fde5951b6efc1e0a00e",
-    "content": {
-      "sha256": "cc3e94ea29cb3c7ee6c9bd2805610efbf16a20a27335c18cc80a503ee61cb8ab",
-      "records": 5920,
-      "bytes": 4110736819
-    }
-  },
   "bootClasspath": [
     "/apex/com.android.art/javalib/core-oj.jar",
     "/apex/com.android.art/javalib/core-libart.jar",

@@ -121,6 +121,11 @@
     "sha256": "601a0e687ff4b67a285d10e74c6aeff12be9accb9a38e1aecd2dc999c3536021",
     "bytes": 707260
   },
+  "boost": {
+    "url": "https://github.com/boostorg/boost/releases/download/boost-1.92.0/boost-1.92.0-b2-nodocs.tar.xz",
+    "sha256": "ea7b982002cc9dfbe59b0b217b206f470dc75f3de0bb2973d844118934d82411",
+    "bytes": 52633196
+  },
   "glew": {
     "repository": "https://github.com/nigels-com/glew",
     "revision": "285c35d395979771f9409710b2d401db8026e15a",
@@ -148,6 +153,11 @@
   "spirvCross": {
     "repository": "https://github.com/KhronosGroup/SPIRV-Cross",
     "revision": "300681bbcb8365a8d1eacdacdbdd0249bbf1d6b1"
+  },
+  "sdl3": {
+    "url": "https://github.com/libsdl-org/SDL/releases/download/release-3.4.18/SDL3-3.4.18.tar.gz",
+    "sha256": "9c75cf16330322c217dedd2e0609f1124f1b54b8633e763467b4684d0f4334a3",
+    "bytes": 15651004
   },
   "sdl3Prosper": {
     "repository": "https://github.com/libsdl-org/SDL",
