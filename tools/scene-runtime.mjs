@@ -16,7 +16,10 @@ export async function mingw(work){
  const directory=path.join(work,'toolchain');fs.mkdirSync(directory);run('/usr/bin/tar',['-xf',archive,'-C',directory]);
  return path.join(directory,'llvm-mingw-'+pin.version+'-ucrt-macos-universal/bin');
 }
-export function finish({directory,declaration,output}){
+/** A producer's compile output: its payload directory and the declaration it wrote beside it. */
+export const producerOutput=directory=>({directory:path.join(directory,'payload'),declaration:read(path.join(directory,'runtime-package.json'))});
+/** Package a compiled scene adapter: its payload and declaration in the GitHub build layout. */
+export function assemble({output,compiled:{directory,declaration}}){
  publicDeclaration(declaration);fs.mkdirSync(output,{recursive:true});
  fs.cpSync(directory,path.join(output,'payload'),{recursive:true});
  fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});

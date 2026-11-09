@@ -38,23 +38,40 @@ function seal(project,version,arch,minimumMacOS,output,manifest,sourceSha256){
   manifestRelative:'manifest.json',manifestSha256:metadata(file).sha256,files:inventory(output)};
  validateDeclaration(declaration);B.verifyPayload(output,declaration);return declaration;
 }
+/** Copy the declared engine sources and their licenses into a new directory. */
+function gather(profile,project,directory){
+ const source=copySources(profile,directory);
+ addLicenses(directory,project,path.join(root,profile.source,'engine'));
+ return {sourceUrl:source.repository,sourceRevision:gitlink('producers/engine-adaptations/sources/VNDS-LOVE')};
+}
+/** Inventory gathered engine data, write its manifest and seal it. */
+function describe(profile,project,version,directory,{sourceUrl,sourceRevision}){
+ const files=inventory(directory);
+ const manifest={schemaVersion:1,kind:'data',managerId:project,version,arch:'universal',minimumMacOS:profile.minimumMacOS,
+  sourceRevision,sourceUrl,entryRelative:profile.entry,files,loveVersion:'11.5'};
+ const declaration=seal(project,version,'universal',profile.minimumMacOS,directory,manifest);
+ declaration.sourceRelative='manifest.json';validateDeclaration(declaration);return declaration;
+}
+const selected=project=>{const profile=profiles[project];if(!profile)throw Error('Select an engine-data project.');return profile;};
 export function stageData({project,output,version=profiles[project]?.version}){
  const profile=profiles[project];if(!profile||!path.isAbsolute(output||'')||fs.existsSync(output)||!version||/[\\/]/.test(version))throw Error('Select an engine-data project and a new absolute output directory.');
  fs.mkdirSync(output,{recursive:true});
- try{
-  const source=copySources(profile,output);
-  addLicenses(output,project,path.join(root,profile.source,'engine'));
-  const files=inventory(output);
-  const manifest={schemaVersion:1,kind:'data',managerId:project,version,arch:'universal',minimumMacOS:profile.minimumMacOS,
-   sourceRevision:gitlink('producers/engine-adaptations/sources/VNDS-LOVE'),sourceUrl:source.repository,entryRelative:profile.entry,files,loveVersion:'11.5'};
-  const declaration=seal(project,version,'universal',profile.minimumMacOS,output,manifest);
-  declaration.sourceRelative='manifest.json';validateDeclaration(declaration);return declaration;
- }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
-}
-/** GitHub build layout: the data package in payload/ and its declaration beside it. Engine data has no CPU, so it builds as universal and has no compile step. */
-export function assemble({project,arch,version:selectedVersion,output}){
- fs.mkdirSync(output,{recursive:true});
- try{const version=buildRecord(resolveProject(project,path.resolve(root,'../..'),{resolvePins:false}),selectedVersion).version;const declaration=stageData({project,version,output:path.join(output,'payload')});fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});return declaration;}
+ try{return describe(profile,project,version,output,gather(profile,project,output));}
  catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }
-recipeMain(import.meta,{assemble});
+/** Gather the engine data. Engine data has no CPU, so it builds as universal and compiles nothing. */
+export function compile({project,work}){
+ const directory=path.join(work,'data');if(fs.existsSync(directory))throw Error('The engine data directory already exists.');
+ fs.mkdirSync(directory,{recursive:true});return {directory,source:gather(selected(project),project,directory)};
+}
+/** GitHub build layout: the data package in payload/ and its declaration beside it. */
+export function assemble({project,version:selectedVersion,output,compiled:{directory,source}}){
+ fs.mkdirSync(output,{recursive:true});
+ try{
+  const version=buildRecord(resolveProject(project,path.resolve(root,'../..'),{resolvePins:false}),selectedVersion).version,payload=path.join(output,'payload');
+  fs.cpSync(directory,payload,{recursive:true,errorOnExist:true,force:false});
+  const declaration=describe(selected(project),project,version,payload,source);
+  fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});return declaration;
+ }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
+}
+recipeMain(import.meta,{compile,assemble});

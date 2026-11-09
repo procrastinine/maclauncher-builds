@@ -159,8 +159,8 @@ test('every registered GitHub build names an existing command and submodule of t
 
 test('a VNDS-LOVE package revision preserves engine files and historical packaging',async t=>{
  const work=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'vnds-love-build-')));t.after(()=>fs.rmSync(work,{recursive:true,force:true}));
- const {assemble}=await import('../producers/engine-adaptations/stage.mjs'),output=path.join(work,'build');
- const staged=assemble({project:'vnds-love',arch:'universal',output});
+ const {compile,assemble}=await import('../producers/engine-adaptations/stage.mjs'),output=path.join(work,'build');
+ const staged=assemble({project:'vnds-love',arch:'universal',output,compiled:compile({project:'vnds-love',work:path.join(work,'compile')})});
  const built={version:staged.version,declaration:path.join(output,'declaration.json'),payload:path.join(output,'payload')};
  assert.equal(built.version,buildRecord(readProjects(root,{resolvePins:false}).projects.find(row=>row.id==='vnds-love')).version);
  const {stageData}=await import('../producers/engine-adaptations/stage.mjs'),input=path.join(work,'historical');
