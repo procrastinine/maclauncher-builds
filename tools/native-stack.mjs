@@ -91,5 +91,5 @@ export function assembleNativeStack({project,version,arch,output,work,kind,compi
  const Builder=stackModule(kind);
  stageNativeStack({built,kind,arch,output,work});
  const primary={fonts:'sdl2',audio:'sndfile',mixer:'sdl2_mixer'}[kind],upstreamVersion=kind==='movie'?Builder.PIN.source.version:Builder.PIN.dependencies.find(pin=>pin.id===primary).version;
- return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(path.join(base,modules[kind]+'.json')),manifestRelative:'input.json',record:{sourceProfile:Builder.PIN.version,upstreamVersion,recipeSha256:built.recipeSha256}});
+ return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(path.join(base,modules[kind]+'.json')),manifestRelative:'input.json',record:{sourceProfile:Builder.PIN.version,upstreamVersion}});
 }

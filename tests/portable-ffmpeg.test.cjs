@@ -7,7 +7,7 @@ function features(root){
   fs.writeFileSync(path.join(root,"config.h"),["GPL","NONFREE","VERSION3","NETWORK","AVDEVICE","AVFILTER","ENCODERS"].map(n=>`#define CONFIG_${n} 0`).join("\n")+"\n");
 }
 test("portable movie profile retains MPEG video/audio plus raw MPEG demuxers without network or encoding",()=>{
-  assert.ok(Movie.PIN.decoders.includes("mp2"));assert.ok(Movie.PIN.demuxers.includes("mpegvideo"));assert.ok(Movie.PIN.demuxers.includes("mpegtsraw"));assert.ok(Movie.OPTIONS.includes("--disable-network"));assert.ok(Movie.OPTIONS.includes("--disable-autodetect"));assert.ok(Movie.OPTIONS.includes("--disable-gpl"));assert.ok(Movie.OPTIONS.includes("--disable-programs"));assert.match(Movie.recipeIdentity(),/^[a-f0-9]{64}$/);
+  assert.ok(Movie.PIN.decoders.includes("mp2"));assert.ok(Movie.PIN.demuxers.includes("mpegvideo"));assert.ok(Movie.PIN.demuxers.includes("mpegtsraw"));assert.ok(Movie.OPTIONS.includes("--disable-network"));assert.ok(Movie.OPTIONS.includes("--disable-autodetect"));assert.ok(Movie.OPTIONS.includes("--disable-gpl"));assert.ok(Movie.OPTIONS.includes("--disable-programs"));
 });
 test("movie diagnostic normalization maps complete prefixes and rejects unmapped private arguments",t=>{
   const root=temporary(t),file=path.join(root,"config.h");fs.writeFileSync(file,'#define FFMPEG_CONFIGURATION "--prefix=/build/nested/prefix -ffile-prefix-map=/build/nested=source"\n');

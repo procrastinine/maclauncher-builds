@@ -30,8 +30,8 @@ export async function assemble({project,arch,output,compiled:{profile,version,bu
 
  includeLicenses(payload,path.join(built.prefix,'licenses'));
  fs.cpSync(path.join(built.prefix,'include'),path.join(payload,'include'),{recursive:true,dereference:true});
- const sourceIdentity={profile:Audio.PIN.version,architecture:arch,recipeSha256:built.recipeSha256,audioFormats:built.audioFormats,dependencies:Audio.PIN.dependencies};
+ const sourceIdentity={profile:Audio.PIN.version,architecture:arch,audioFormats:built.audioFormats,dependencies:Audio.PIN.dependencies};
  fs.writeFileSync(path.join(payload,'sources.json'),JSON.stringify(sourceIdentity,null,2)+'\n');
- return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{sourceProfile:profile.sourceProfile,audioFormats:built.audioFormats,recipeSha256:built.recipeSha256}});
+ return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{sourceProfile:profile.sourceProfile,audioFormats:built.audioFormats}});
 }
 recipeMain(import.meta,{compile,assemble});

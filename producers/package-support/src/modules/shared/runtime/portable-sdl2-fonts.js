@@ -2,7 +2,6 @@
 const sharedDependency=id=>require('../../../../../dependencies/'+id+'.json');
 const fs = require("node:fs");
 const path = require("node:path");
-const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const Source = require("./pinned-native-build");
 const Native = require('../../../../../../lib/package-format.cjs');
@@ -61,7 +60,7 @@ function cmakeOptions({ prefix, sdk, ninja, architecture = process.arch, pathMap
 }
 
 function sdkCompressionMetadata(sdk, prefix) {
-  const zlibHeader = path.join(sdk, "usr/include/zlib.h"), bzipHeader = path.join(sdk, "usr/include/bzlib.h");
+  const zlibHeader = path.join(sdk, "usr/include/zlib.h");
   const zlibVersion = /^#define\s+ZLIB_VERSION\s+"([\d.]+)"/m.exec(fs.readFileSync(zlibHeader, "utf8"))?.[1];
   if (!zlibVersion || !fs.statSync(path.join(sdk, "usr/lib/libz.tbd")).isFile() || !fs.statSync(path.join(sdk, "usr/lib/libbz2.tbd")).isFile()) {
     throw new Error("The macOS SDK is missing its compression headers or link stubs.");
@@ -69,8 +68,7 @@ function sdkCompressionMetadata(sdk, prefix) {
   const directory = path.join(prefix, "lib/pkgconfig"); fs.mkdirSync(directory, { recursive: true });
   // This build-only descriptor links macOS's zlib; no system library is copied.
   fs.writeFileSync(path.join(directory, "zlib.pc"), `Name: zlib\nDescription: macOS system zlib\nVersion: ${zlibVersion}\nLibs: -lz\nCflags:\n`);
-  return { zlib: { headerVersion: zlibVersion, headerSha256: Native.hashFile(zlibHeader), library: "/usr/lib/libz.1.dylib" },
-    bzip2: { headerSha256: Native.hashFile(bzipHeader), library: "/usr/lib/libbz2.1.0.dylib" } };
+  return { zlib: { headerVersion: zlibVersion, library: "/usr/lib/libz.1.dylib" }, bzip2: { library: "/usr/lib/libbz2.1.0.dylib" } };
 }
 
 async function buildProject({ sourceRoot, outputRoot, prefix, sdk, tools, architecture = process.arch, pathMappings, options, signal, onProgress, dependencies = {} }) {
@@ -126,8 +124,7 @@ async function buildDependencies({ archives, workRoot, architecture = process.ar
     const build = await buildProject({ sourceRoot, outputRoot: path.join(workRoot, pin.id), prefix, sdk, tools, architecture, pathMappings, options, signal, onProgress, dependencies });
     sourceRoots[pin.id] = sourceRoot; sources.push({ ...pin, ...build });
   }
-  const recipeSha256 = crypto.createHash("sha256").update(fs.readFileSync(__filename)).update(fs.readFileSync(path.join(__dirname, "portable-sdl2-fonts.json"))).digest("hex");
-  return { version: PIN.version, architecture, minimumMacOS: PIN.minimumMacOS, recipeSha256, prefix, sdk, tools, sdkPackages, sources, sourceRoots };
+  return { version: PIN.version, architecture, minimumMacOS: PIN.minimumMacOS, prefix, sdk, tools, sdkPackages, sources, sourceRoots };
 }
 
 module.exports = { PIN, validateArchives, buildEnvironment, cmakeOptions, sdkCompressionMetadata, buildProject, assertFreshBuildRoot, buildDependencies };

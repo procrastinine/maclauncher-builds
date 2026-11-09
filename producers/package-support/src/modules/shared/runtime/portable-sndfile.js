@@ -2,7 +2,6 @@
 const sharedDependency=id=>require('../../../../../dependencies/'+id+'.json');
 const fs = require("node:fs");
 const path = require("node:path");
-const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const Source = require("./pinned-native-build");
 const Native = require('../../../../../../lib/package-format.cjs');
@@ -96,7 +95,6 @@ async function buildDependencies({ archives, workRoot, architecture = process.ar
     sourceRoots[pin.id] = sourceRoot; sources.push({ ...pin, ...build, sourceRoot });
   }
   return { version: PIN.version, architecture, minimumMacOS: PIN.minimumMacOS, audioFormats: PIN.audioFormats,
-    recipeSha256: crypto.createHash("sha256").update(fs.readFileSync(__filename)).update(fs.readFileSync(require.resolve("./portable-sndfile.json"))).digest("hex"),
     prefix, sdk, tools, sources, sourceRoots };
 }
 

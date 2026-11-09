@@ -10,7 +10,6 @@ const Prefix = require("./portable-dependency-prefix");
 const { throwIfAborted } = require('../../../../../../lib/abort.cjs');
 const PIN = Object.freeze({...require("./portable-sdl2-mixer.json"),dependencies:require("./portable-sdl2-mixer.json").dependencies.map(row=>{const pin=row.archiveSha256?undefined:sharedDependency(row.id);return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};})});
 const digest = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
-const recipeIdentity = () => digest(Buffer.concat([fs.readFileSync(__filename),fs.readFileSync(require.resolve("./portable-sdl2-mixer.json")),fs.readFileSync(require.resolve("./portable-dependency-prefix"))]));
 
 function adaptMixer(sourceRoot) {
   const file = path.join(sourceRoot, "CMakeLists.txt");
@@ -28,7 +27,7 @@ function adaptOpusDescriptor(prefix) {
   if (!["0",pin.version].includes(/^Version:\s*([^\r\n]+)$/m.exec(text)?.[1])) throw new Error("Opus metadata differs from the selected source version.");
   const adapted=Buffer.from(text.replace(/^Version:[^\r\n]+/m,`Version: ${pin.version}`)), temporary=file+".new";
   fs.writeFileSync(temporary,adapted,{flag:"wx"});try{fs.renameSync(temporary,file);}finally{fs.rmSync(temporary,{force:true});}
-  return { path:"lib/pkgconfig/opus.pc", sourceRevision:pin.revision, version:pin.version, sourceSha256:digest(original), adaptedSha256:digest(adapted) };
+  return { path:"lib/pkgconfig/opus.pc", sourceRevision:pin.revision, version:pin.version, sourceSha256:digest(original) };
 }
 
 function validateFeatures(outputRoot) {
@@ -44,7 +43,7 @@ async function buildMixer({archives,workRoot,dependencyStacks,architecture=proce
     if(Object.keys(dependencyStacks).length!==2||!dependencyStacks.fonts||!dependencyStacks.audio)throw new Error("SDL2_mixer reuse needs exact font and audio profiles.");
     fonts=dependencyStacks.fonts;audio=dependencyStacks.audio;
   }
-  const recipeSha256=recipeIdentity();fs.mkdirSync(workRoot,{recursive:true});
+  fs.mkdirSync(workRoot,{recursive:true});
   if(!fonts){fonts=await Fonts.buildDependencies({archives,workRoot:path.join(workRoot,"fonts"),architecture,pathMappings,signal,onProgress,dependencies});audio=await Audio.buildDependencies({archives,workRoot:path.join(workRoot,"audio"),architecture,pathMappings,signal,onProgress,dependencies});}
   if(fonts.sdk!==audio.sdk)throw new Error("SDL2_mixer dependencies must use the same macOS SDK.");
   const prefix=path.join(workRoot,"prefix");fs.mkdirSync(prefix);Prefix.linkPrefix(fonts.prefix,prefix);Prefix.linkPrefix(audio.prefix,prefix);
@@ -60,7 +59,7 @@ async function buildMixer({archives,workRoot,dependencyStacks,architecture=proce
   }
   const features=validateFeatures(workRoot);
   const readRoots=[fonts.prefix,audio.prefix];
-  return {version:PIN.version,architecture,minimumMacOS:PIN.minimumMacOS,recipeSha256,prefix,readRoots,sdk:fonts.sdk,tools:fonts.tools,sources,sourceRoots,fonts,audio,descriptor,features};
+  return {version:PIN.version,architecture,minimumMacOS:PIN.minimumMacOS,prefix,readRoots,sdk:fonts.sdk,tools:fonts.tools,sources,sourceRoots,fonts,audio,descriptor,features};
 }
 
-module.exports={PIN,recipeIdentity,adaptMixer,adaptOpusDescriptor,validateFeatures,buildMixer};
+module.exports={PIN,adaptMixer,adaptOpusDescriptor,validateFeatures,buildMixer};

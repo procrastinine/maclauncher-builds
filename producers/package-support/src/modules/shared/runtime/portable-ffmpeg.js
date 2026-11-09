@@ -1,6 +1,5 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const Source = require("./pinned-native-build");
 const Native = require('../../../../../../lib/package-format.cjs');
@@ -11,9 +10,6 @@ const PIN = Object.freeze(require("./portable-ffmpeg.json"));
 const OPTIONS = Object.freeze(["--enable-shared", "--disable-static", "--enable-pic", "--disable-doc", "--disable-debug", "--disable-autodetect",
   "--disable-gpl", "--disable-nonfree", "--disable-version3", "--disable-everything", "--disable-programs", "--disable-network", "--disable-avdevice", "--disable-avfilter",
   "--enable-zlib", "--enable-decoder=" + PIN.decoders.join(","), "--enable-demuxer=" + PIN.demuxers.join(","), "--enable-parser=" + PIN.parsers.join(","), "--enable-protocol=file"]);
-function recipeIdentity() {
-  return crypto.createHash("sha256").update(fs.readFileSync(__filename)).update(fs.readFileSync(require.resolve("./portable-ffmpeg.json"))).digest("hex");
-}
 function normalizeDiagnostics(outputRoot, pathMappings) {
   const file=path.join(outputRoot,"config.h"), original=fs.readFileSync(file,"utf8");let found=false;
   const adapted=original.replace(/^#define FFMPEG_CONFIGURATION (.*)$/m,(_line,value)=>{
@@ -33,7 +29,7 @@ async function buildDependencies({archive,workRoot,architecture=process.arch,pat
   if(!path.isAbsolute(archive||"")||!fs.lstatSync(archive).isFile())throw new Error("Portable movie builds require the FFmpeg source archive.");
   workRoot=Portable.assertFreshBuildRoot(workRoot,{readOnlyRoots:[path.dirname(archive)]});
   const sdk=(dependencies.readSDK||(()=>execFileSync("/usr/bin/xcrun",["--show-sdk-path"],{encoding:"utf8"}).trim()))();
-  const mappings=[...pathMappings,{from:workRoot,to:"portable-movies"}],flags=Audio.compilerFlags(sdk,mappings,architecture),overlaySha256=recipeIdentity();
+  const mappings=[...pathMappings,{from:workRoot,to:"portable-movies"}],flags=Audio.compilerFlags(sdk,mappings,architecture);
   fs.mkdirSync(workRoot,{recursive:true});const sourceRoot=path.join(workRoot,"source"),outputRoot=path.join(workRoot,"output"),prefix=path.join(workRoot,"prefix");
   fs.mkdirSync(sourceRoot);fs.mkdirSync(outputRoot);fs.mkdirSync(prefix);
   const run=dependencies.runBuildCommand||Source.runBuildCommand,env=Portable.buildEnvironment(prefix,sdk),logPath=path.join(workRoot,"build.log");
@@ -48,7 +44,7 @@ async function buildDependencies({archive,workRoot,architecture=process.arch,pat
   await run("/usr/bin/make",["-j2"],{cwd:outputRoot,env,logPath,signal,timeout:20*60*1000});
   await run("/usr/bin/make",["install"],{cwd:outputRoot,env,logPath,signal});throwIfAborted(signal);
   const features=validateFeatures(outputRoot);
-  return {version:PIN.version,source:PIN.source,architecture,minimumMacOS:PIN.minimumMacOS,recipeSha256:overlaySha256,prefix,sdk,sourceRoot,outputRoot,options,diagnostics,
+  return {version:PIN.version,source:PIN.source,architecture,minimumMacOS:PIN.minimumMacOS,prefix,sdk,sourceRoot,outputRoot,options,diagnostics,
     startedAt,completedAt:new Date().toISOString(),logPath,...features};
 }
-module.exports={PIN,OPTIONS,recipeIdentity,normalizeDiagnostics,validateFeatures,buildDependencies};
+module.exports={PIN,OPTIONS,normalizeDiagnostics,validateFeatures,buildDependencies};
