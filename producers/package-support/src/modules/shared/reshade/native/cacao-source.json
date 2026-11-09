@@ -3,19 +3,15 @@
   "repository": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
   "adaptations": {
     "callbacks": {
-      "sourceSha256": "2df23637cd9460e3456224987aba80156789c3f2a1cae234b1f418c0a51abd65",
       "appliedSha256": "4d6cc78c7b3aed9bdd6cb6a9216831d96f675857f9b92561c488ac2ec0322eab"
     },
     "upscaleBoundary": {
-      "sourceSha256": "96226c508234b02434ee6fc0d6d188382e4a2f5b41dff45dbb196db9d85c9565",
       "appliedSha256": "46c486b9bc8f8c9046699ea76bc5ed4001a4a174ad0e9b40a47c28852546595c"
     },
     "geometry": {
-      "sourceSha256": "cf2c5fbc3fa424715495c91f5aedc24321ad3d9bd5ca4aaf21bc5869c3e21268",
       "appliedSha256": "776866041f141e3d975a458fefeeb9409becf214042fba1bfc9c921e3121fbf4"
     },
     "generation": {
-      "sourceSha256": "81b891eb9e383ebcb159467afdbff6c8a444400c64c8afbf83d3778ff6932bb0",
       "appliedSha256": "2042281bf1c1239c69e55de8982e1dd44dcd89aa3eb583338bd7da7672f68251"
     }
   },

@@ -8,11 +8,9 @@
     "float32Arithmetic": true,
     "exactSourceAlphaBoundary": true,
     "callbacks": {
-      "sourceSha256": "dd56ced77a4f70bc5d69d227cabe58994716c17149d9a26432f08ce2433fb7e8",
       "appliedSha256": "4d36c2984c67c963d2d2db79e98731883c84aa7d7a2986abe3aca97bff5e7a6c"
     },
     "algorithm": {
-      "sourceSha256": "3f0d4d60344547bdd757f98b7b548ec23feca7bfb5202cf1bca9dbc8df42964f",
       "appliedSha256": "fccd795e0b76fa400425ab6e97ed43fa60e131e01ad51db23b62d9ae10bda6d1",
       "unpackedFloat32Cache": true,
       "smallImageSignedLoopBounds": true,

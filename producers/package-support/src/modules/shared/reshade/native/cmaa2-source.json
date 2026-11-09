@@ -8,7 +8,6 @@
     "dynamicTextureOffsetCoordinates": true,
     "deferredAppendCapacityGuard": true,
     "deferredColorStorage": "signed-float32-rgb",
-    "sourceSha256": "ca88dd447c1055436d2e35e0d9bb4d9bdb29dd2487da6c01d4a913b292294c8c",
     "appliedSha256": "94e519801d2d857d8f03c47d4803e9c5aaf6eb8616c6039abbcf6347d81346d2"
   },
   "shaders": [

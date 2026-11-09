@@ -12,7 +12,6 @@
     "depthGeneratedNormals": true,
     "stationaryHilbertNoise": true,
     "linearColorComposition": true,
-    "sourceSha256": "30faf4f5013916c14694db20fe9ec7f0c786f2edac7610968f9391987115064e",
     "appliedSha256": "94350644902fbc7515db1c097f12db7adb5eccec1a84adc304c6383a2aa01c57"
   },
   "shaders": [

@@ -8,7 +8,6 @@
     "float32Arithmetic": true,
     "exactSourceAlphaBoundary": true,
     "callbacks": {
-      "sourceSha256": "d6b617bcff102c0c4f67f4827c0c22d8df7a5bc5d0c57e57a9dce17dcea478bc",
       "appliedSha256": "bceaa9ada0b9c8fa50a2a18f6973784651635268934e45f71873f7f3fbd84748"
     }
   },
