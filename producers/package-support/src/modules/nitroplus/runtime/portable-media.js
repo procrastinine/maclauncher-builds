@@ -8,7 +8,10 @@ const Source = require("../../shared/runtime/pinned-native-build");
 const Native = appRequire('src/modules/shared/runtime/local-native.js');
 const Portable = require("../../shared/runtime/portable-sdl2-fonts");
 const { throwIfAborted } = appRequire('src/modules/shared/runtime/download-utils.js');
-const PIN = Object.freeze(require("./portable-media.json"));
+// A utility without its own archive record uses the shared declaration of that library.
+const shared = require("../../../../../dependencies.json"), media = require("./portable-media.json");
+const PIN = Object.freeze({ ...media, utilitySources: media.utilitySources.map(row => row.archiveSha256 ? row :
+  { ...row, archiveUrl: shared[row.id].url, archiveSha256: shared[row.id].sha256, archiveBytes: shared[row.id].bytes }) });
 function validateSDKPrefix(prefix) {
   return { version: PIN.version, prefix, recipeSha256: recipeIdentity(), architecture: PIN.architecture, minimumMacOS: PIN.minimumMacOS };
 }
