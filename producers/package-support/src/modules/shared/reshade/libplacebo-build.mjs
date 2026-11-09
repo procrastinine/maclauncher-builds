@@ -42,23 +42,22 @@ async function compileUniversal(options){
  const stages=[];for(const arch of['arm64','x64']){const stage=path.join(work,arch+'-provider');await compileArchitecture({...options,arch,work:path.join(work,arch+'-work'),output:stage});stages.push(stage);}
  combineStages(stages,output);
 }
-/** Build the provider for the selected CPUs and record the filter catalog its helper reports. */
+/** Build the provider for the selected CPUs. */
 async function compile(options,universal){
  await (universal?compileUniversal(options):compileArchitecture(options));
- fs.writeFileSync(path.join(options.work,'libplacebo-filters.json'),run(path.join(options.output,'libplacebo-prepare'),['--filters']));
 }
 function combineStages(stages,output){
  fs.mkdirSync(output,{recursive:true});fs.cpSync(stages[0],output,{recursive:true});
  for(const row of inventory(stages[0])){const destination=path.join(output,row.path);if((row.path.endsWith('.dylib')||row.path==='libplacebo-prepare')&&hash(path.join(stages[0],row.path))!==hash(path.join(stages[1],row.path))){run('lipo',['-create',...stages.map(stage=>path.join(stage,row.path)),'-output',destination+'.fat']);fs.renameSync(destination+'.fat',destination);run('codesign',['--force','-s','-',destination]);}}
  fs.copyFileSync(path.join(stages[1],sceneName('x86_64')),path.join(output,sceneName('x86_64')));
 }
-/** Add the notices and describe the compiled provider from its scene descriptions and declared inputs. */
+/** Add the notices and describe the compiled provider from its helper's filter catalog, its scene descriptions and declared inputs. */
 function describe({moltenvk,source,dependencySources,work,output,architectures}){
  addLicenses(output,'MoltenVK',moltenvk);
  addLicenses(output,'libplacebo',source);
  const dependencyLicenses=path.join(work,'dependency-licenses');for(const row of profile.sources)addLicenses(dependencyLicenses,row.id,path.join(dependencySources,row.id));
  addLicenses(output,'compiler-dependencies',dependencyLicenses);
- const catalog=JSON.parse(fs.readFileSync(path.join(work,'libplacebo-filters.json'),'utf8'));
+ const catalog=JSON.parse(run(path.join(output,'libplacebo-prepare'),['--filters']));
  const inputs=architectures.flatMap(architecture=>{const scene=JSON.parse(fs.readFileSync(path.join(output,sceneName(architecture)),'utf8'));
   return [{name:'libplacebo',...scene.source,architecture,sha256:scene.sha256,headerInputs:scene.headerInputs,source:scene.source.origin,dependencies:[scene.vulkanHeaders,...(scene.fastFloat?[scene.fastFloat]:[])]},...dependencyRecords(dependencySources).map(row=>({...row,name:row.id,architecture})),{name:'MoltenVK',...MOLTENVK}];});
  const metadata={schema:1,provider:'libplacebo',version:'7.360.1',derivedPlanes:true,imageFiltersAPI:catalog.imageFiltersAPI,imageFilters:catalog.imageFilters,sceneInputsAPI:catalog.sceneInputsAPI||0,sceneInputRoles:catalog.sceneInputRoles||[],architectures,minimumMacOS:profile.minimumMacOS,library:'libmacfx-libplacebo.dylib',helper:'libplacebo-prepare',filters:catalog.filters,files:inventory(output),inputs};fs.writeFileSync(path.join(output,'provider.json'),JSON.stringify(metadata,null,2)+'\n');return metadata;
