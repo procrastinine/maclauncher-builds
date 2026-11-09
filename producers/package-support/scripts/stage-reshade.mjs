@@ -2,7 +2,7 @@ import {appPath,appRequire,moduleFile,moduleFiles} from '../../../tools/app-sour
 import sharedDependencies from '../../dependencies.json' with {type:'json'};
 import dependencies from '../../../producers/dependencies.json' with {type:'json'};
 const {shaderc}=dependencies;
-import {sourceRevision} from '../../../lib/pins.mjs';
+import {gitlink,sourceRevision} from '../../../lib/pins.mjs';
 import {upstreamRevision} from '../../../lib/projects.mjs';
 import {addLicense,addLicenses,includeLicenses} from '../../../lib/licenses.mjs';
 import fs from "node:fs";
@@ -87,12 +87,15 @@ if(options["--xess-host"]){
 }
 if(options["--isf"]){
   const directory=options["--isf"],module="src/modules/shared/reshade/isf",source=JSON.parse(fs.readFileSync(moduleFile(module+"/source.json"))),metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json")));
-  if(!Array.isArray(metadata.files)||!metadata.owned)throw Error("A complete compatible ISF provider is required.");
-  const ownedNames=Object.keys(metadata.owned);
+  if(!Array.isArray(metadata.files))throw Error("A complete compatible ISF provider is required.");
+  // The ISF module's files, Builds' own and the app's, are its owned sources.
+  const ownedNames=moduleFiles(module);
   const isfFile=name=>moduleFile(path.posix.join(module,name));
+  // The ISFMSLKit gitlink pins the checkout; its submodules are the commits that pinned tree records.
+  const parent=source.sources.find(entry=>entry.gitlink);
   for(const entry of source.sources){
-    const upstream=path.resolve(upstreamRoot,entry.path),actual=execFileSync("git",["-C",upstream,"rev-parse","HEAD"],{encoding:"utf8"}).trim();
-    pins.push(` ${actual} third_party/isf/${path.basename(entry.path)}`);
+    const revision=entry.gitlink?sourceRevision(entry):gitlink(path.posix.relative(parent.path,entry.path),path.resolve(upstreamRoot,parent.path));
+    pins.push(` ${revision} third_party/isf/${path.basename(entry.path)}`);
   }
   for(const row of metadata.files){
     if(typeof row.path!=="string"||path.isAbsolute(row.path)||row.path.split(/[\\/]/).some(part=>!part||part==="."||part===".."))throw Error("The ISF provider contains an undeclared or duplicate resource.");
