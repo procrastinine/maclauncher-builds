@@ -1,4 +1,3 @@
-import {appRequire} from '../../tools/app-source.mjs';
 // SPDX-License-Identifier: MIT
 import fs from 'node:fs';
 import path from 'node:path';
@@ -7,7 +6,7 @@ import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {sourceRevision} from './build.mjs';
 import {publicDeclaration} from '../../tools/runtime-package.mjs';
-const require=createRequire(import.meta.url),B=require('../../lib/package-format.cjs'),{readPeExports}=appRequire('src/modules/shared/runtime/pe-exports.js');
+const require=createRequire(import.meta.url),B=require('../../lib/package-format.cjs'),{readPeExports}=require('../../lib/pe-exports.cjs');
 // Launcher floor: app package.json build.mac.minimumSystemVersion.
 // The Builds producer snapshot does not include that packaging property.
 const launcherMinimumMacOS='13.0';

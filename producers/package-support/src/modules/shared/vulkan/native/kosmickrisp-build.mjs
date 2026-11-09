@@ -10,7 +10,7 @@ import {adaptedKosmicSources} from './kosmickrisp-source.mjs';
 import {buildKosmicTargets,buildKosmicLoader,describeNativeTools} from './kosmickrisp-targets.mjs';
 import {prepareSourceTree,writeChanged} from './source-files.mjs';
 import Bundled from '../../../../../../../lib/package-format.cjs';
-const MachO=appRequire('src/modules/shared/runtime/macho-load-commands.js');
+import MachO from '../../../../../../../lib/macho-load-commands.cjs';
 import Stage from '../../../../../scripts/native-binary-tools.cjs';
 const Supplementals=appRequire('scripts/native-supplementals.cjs');
 const JsonFiles=appRequire('src/core/json-files.js');

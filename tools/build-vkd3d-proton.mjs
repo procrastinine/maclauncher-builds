@@ -1,5 +1,4 @@
 import './producer-environment.mjs';
-import {appRequire} from './app-source.mjs';
 // SPDX-License-Identifier: MIT
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10,7 +9,7 @@ import {buildInput,llvmMingwInput} from './build-input.mjs';
 import {recipeMain,pythonBuildTools} from './build-source.mjs';
 import {publicDeclaration} from './runtime-package.mjs';
 import {buildProvider} from '../producers/vkd3d-proton/build.mjs';
-const require=createRequire(import.meta.url),B=require('../lib/package-format.cjs'),{readPeExports}=appRequire('src/modules/shared/runtime/pe-exports.js');
+const require=createRequire(import.meta.url),B=require('../lib/package-format.cjs'),{readPeExports}=require('../lib/pe-exports.cjs');
 const root=path.resolve(import.meta.dirname,'..'),sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 // Launcher floor: app package.json build.mac.minimumSystemVersion.
 const minimumMacOS='13.0';

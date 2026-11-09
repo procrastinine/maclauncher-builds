@@ -1,4 +1,3 @@
-import {appRequire} from '../../tools/app-source.mjs';
 import {gitlink,sourceCheckout,sourceProvenance,sourceRevision} from '../../lib/pins.mjs';
 import {addLicense,addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
@@ -13,7 +12,7 @@ import {prepareDependencies} from './dependencies.mjs';
 const require = createRequire(import.meta.url);
 const B = require('../../lib/package-format.cjs');
 const Native = require('../../lib/package-format.cjs');
-const MachO = appRequire('src/modules/shared/runtime/macho-load-commands.js');
+const MachO = require('../../lib/macho-load-commands.cjs');
 const producer = import.meta.dirname, repository = path.resolve(producer, '../..');
 const pin = JSON.parse(fs.readFileSync(path.join(producer, 'source.json')));
 const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');

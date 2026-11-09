@@ -8,7 +8,7 @@ import {pathToFileURL} from 'node:url';
 import {pack} from '../../tools/runtime-package.mjs';
 const require=createRequire(import.meta.url);
 const B=require('../../lib/package-format.cjs');
-const M=appRequire('src/modules/shared/runtime/macho-load-commands.js');
+const M=require('../../lib/macho-load-commands.cjs');
 const here=import.meta.dirname;
 const source=JSON.parse(fs.readFileSync(path.join(here,'source.json')));
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
