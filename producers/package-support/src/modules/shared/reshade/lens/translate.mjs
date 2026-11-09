@@ -9,13 +9,20 @@ import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 const directory=path.dirname(fileURLToPath(import.meta.url));
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
+// A FidelityFX record names its gitlink and source scope; the file digests are
+// derived from the bytes at that revision, so the record declares neither twice.
+export function fidelityFXSource(file,read){
+ const {gitlink:link,...declared}=JSON.parse(fs.readFileSync(file,'utf8'));
+ return {...declared,files:Object.fromEntries(declared.sourceScope.map(name=>[name,hash(read(name))])),gitlink:link};
+}
 const run=(program,args)=>execFileSync(program,args,{encoding:'utf8',maxBuffer: Infinity,env:{...process.env,GIT_NO_LAZY_FETCH:'1'}});
 function replace(source,before,after,count=1){if(source.split(before).length!==count+1)throw Error('The FidelityFX image adaptation seam changed: '+before);return source.split(before).join(after);}
 export function translate(effect,args){
  const options={};for(let i=0;i<args.length;i+=2){const key=args[i];if(!['--source','--tools','--output'].includes(key)||!args[i+1]||options[key])throw Error('Expected unique --source, --tools and --output paths.');options[key]=path.resolve(args[i+1]);}
  for(const key of ['--source','--tools','--output'])if(!options[key])throw Error('Missing '+key);
- const here=path.resolve(directory,'../'+effect),spec=JSON.parse(fs.readFileSync(path.join(here,'source.json'))),source=options['--source'],tools=options['--tools'],out=options['--output'];
+ const here=path.resolve(directory,'../'+effect),source=options['--source'],tools=options['--tools'],out=options['--output'];
  const read=file=>fs.existsSync(path.join(source,file))?fs.readFileSync(path.join(source,file),'utf8'):run('git',['-C',source,'show',gitlink('producers/package-support/src/external/fsr3-sdk')+':'+file]);
+ const spec=fidelityFXSource(path.join(here,'source.json'),read);
  fs.mkdirSync(out,{recursive:true});const overlay=path.join(out,'overlay'),gpu=path.join(source,'sdk/include/FidelityFX/gpu');fs.mkdirSync(path.join(overlay,effect),{recursive:true});
  // Only the owned build copy changes. All algorithm and host files keep their
  // original bytes in the SDK Git store and in the source hash manifest.

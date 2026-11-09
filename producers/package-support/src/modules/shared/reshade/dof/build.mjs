@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import {gitlink} from '../../../../../../../lib/pins.mjs';
+import {fidelityFXSource} from '../lens/translate.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import {appPath,exportAppFile} from '../../../../../../../tools/app-source.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
@@ -8,12 +9,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
-const here=import.meta.dirname,spec=JSON.parse(fs.readFileSync(path.join(here,'source.json'))),options={};
+const here=import.meta.dirname,options={};
 for(let i=2;i<process.argv.length;i+=2){const key=process.argv[i];if(!['--source','--tools','--output'].includes(key)||!process.argv[i+1]||options[key])throw Error('Expected unique --source, --tools and --output paths.');options[key]=path.resolve(process.argv[i+1]);}
 for(const key of ['--source','--tools','--output'])if(!options[key])throw Error('Missing '+key);
 const source=options['--source'],tools=options['--tools'],out=options['--output'];
 const hash=b=>crypto.createHash('sha256').update(b).digest('hex'),run=(exe,args)=>execFileSync(exe,args,{encoding:'utf8',maxBuffer:64*1024*1024});
 const read=file=>fs.existsSync(path.join(source,file))?fs.readFileSync(path.join(source,file),'utf8'):run('git',['-C',source,'show',gitlink('producers/package-support/src/external/fsr3-sdk')+':'+file]);
+const spec=fidelityFXSource(path.join(here,'source.json'),read);
 fs.mkdirSync(out,{recursive:true});const overlay=path.join(out,'overlay'),gpu=path.join(source,'sdk/include/FidelityFX/gpu');fs.mkdirSync(path.join(overlay,'dof'),{recursive:true});
 for(const file of Object.keys(spec.files))if(file.startsWith('sdk/include/FidelityFX/gpu/dof/'))fs.writeFileSync(path.join(overlay,'dof',path.basename(file)),read(file));
 exportAppFile('src/modules/shared/reshade/native/scene-projection.hlsl',path.join(overlay,'scene-projection.hlsl'));
