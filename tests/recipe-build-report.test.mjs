@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createRecipeBuildReporter} from '../tools/recipe-build-report.mjs';
+import {prepareBuildInputs} from '../tools/build-run-inputs.mjs';
 
 const project=(id,command)=>({id,name:id,delivery:'downloadable',producer:{kind:'maclauncher',repository:'https://github.com/owner/builds',entries:[command]},upstreams:[],packageProfiles:[{version:'1.0.0',label:id}],build:{version:'1.0.0',architectures:['arm64'],command}});
 
@@ -76,6 +77,18 @@ test('declared records and pins are validated once, by the resolver',t=>{
   ['record','A source record names its exact commit as revision.']]);
 });
 
+test('a source record with an archive digest is a source archive that the input step fetches',async t=>{
+ const recipe=project('recipe','tools/recipe.cjs');recipe.producer.entries.push('tools/sources.json');
+ const f=fixture(t,{'tools/recipe.cjs':'module.exports = {};\n','tools/sources.json':{sources:[
+  {id:'tool',repository:'https://github.com/owner/tool',revision:'1'.repeat(40),archive:{sha256:'a'.repeat(64)}},
+  {id:'elsewhere',repository:'https://example.com/tool',revision:'2'.repeat(40),archive:{sha256:'b'.repeat(64)}}]}},[recipe]);
+ const describe=createRecipeBuildReporter({directory:f.directory}),report=describe('recipe');
+ assert.deepEqual(report.definition.archives,[{url:'https://github.com/owner/tool/archive/'+'1'.repeat(40)+'.tar.gz',sha256:'a'.repeat(64)}]);
+ assert.deepEqual(describe.unresolved('recipe').map(row=>[row.reason,row.problem]),[['record','A source archive names a GitHub repository, its exact revision and the archive SHA-256.']]);
+ const fetched=[];
+ await prepareBuildInputs({project:'recipe',output:path.join(f.directory,'prepared'),directory:f.directory,environment:{RELEASE_SELECTION:'recipe=1.0.0',BUILD_REPORTS:JSON.stringify({recipe:report})},fetchArchive:async archive=>{fetched.push(archive);}});
+ assert.deepEqual(fetched,report.definition.archives);
+});
 test('a directory entry declares every tracked file below it',t=>{
  const recipe=project('recipe','tools/recipe.cjs');recipe.producer.entries.push('native/base');
  const f=fixture(t,{'tools/recipe.cjs':'module.exports = {};\n','native/base/src/compile.cpp':'int main() {}\n','native/base/THIRD_PARTY.md':'notices\n','native/other.cpp':'int other;\n'},[recipe]);

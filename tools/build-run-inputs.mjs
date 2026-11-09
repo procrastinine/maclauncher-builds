@@ -12,6 +12,7 @@ import {retryNetwork,downloadFile} from './download.mjs';
 import {verify} from './runtime-package.mjs';
 import {parseSelection} from './release-selection.mjs';
 import {materializePackageAliases} from './package-layout.mjs';
+import {buildInput} from './build-input.mjs';
 const root=path.resolve(import.meta.dirname,'..'),exec=promisify(execFile),json=file=>JSON.parse(fs.readFileSync(file,'utf8'));
 const reportMap=value=>!value?{}:JSON.parse(value.trim().startsWith('{')?value:fs.readFileSync(value,'utf8'));
 /** A published input is fetched by its catalog URL and accepted only with its recorded size and SHA-256. */
@@ -22,8 +23,8 @@ async function publishedInput({url,sha256,bytes},directory){
  if(bytes&&fs.statSync(file).size!==bytes||hash.digest('hex')!==sha256)throw Error('Published input checksum or size differs: '+url);
  return file;
 }
-/** Materialize only declared direct dependencies from this run or exact verified releases. */
-export async function prepareBuildInputs({project,output,directory=root,environment=process.env,runGh,download=publishedInput,verifyBundle=verifyRelease,verifyArchive=verify,extract=async(archive,destination)=>{await exec('tar',['-xzf',archive,'-C',destination],{maxBuffer:Infinity});}}={}){
+/** Materialize only declared direct dependencies from this run or exact verified releases, and fetch the definition's source archives. */
+export async function prepareBuildInputs({project,output,directory=root,environment=process.env,runGh,download=publishedInput,verifyBundle=verifyRelease,verifyArchive=verify,fetchArchive=buildInput,extract=async(archive,destination)=>{await exec('tar',['-xzf',archive,'-C',destination],{maxBuffer:Infinity});}}={}){
  projectId(project);if(!path.isAbsolute(output||'')||fs.existsSync(output)||/[\r\n]/.test(output))throw Error('Build inputs require a new absolute output directory.');
  const graph=JSON.parse(environment.RELEASE_GRAPH||'{}'),reports=reportMap(environment.BUILD_REPORTS),reuse=JSON.parse(environment.RELEASE_REUSE||'{}'),selection=parseSelection(environment.RELEASE_SELECTION||'[]'),repository=readProjects(directory,{resolvePins:false}).repository;
  const direct=graph[project]||[],deps=[],seen=new Set();if(!Array.isArray(direct))throw Error('Invalid release dependency graph.');
@@ -61,6 +62,9 @@ export async function prepareBuildInputs({project,output,directory=root,environm
   result[dep]={root:staged,declaration,record:{...record,asset:{...record.asset,url:assetUrl(record,repository)}},evidence,archive};
   materializePackageAliases({root:staged,declaration,inputs:result});
  }
+ // The definition's source archives are fetched here, before compilation; the recipe reads the
+ // verified bytes from buildInput's cache.
+ for(const archive of reports[project]?.definition?.archives||[])await fetchArchive(archive);
  const file=path.join(output,'inputs.json');fs.writeFileSync(file,JSON.stringify(result,null,2)+'\n',{flag:'wx'});
  if(environment.GITHUB_ENV)fs.appendFileSync(environment.GITHUB_ENV,'MACLAUNCHER_BUILD_INPUTS='+file+'\n');return result;
 }

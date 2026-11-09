@@ -5,7 +5,7 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {readProjects,buildRecords} from '../lib/projects.mjs';
 import {resolveUpstream,validatePinReference} from "../lib/source-pins.mjs";
-import {sourceRecordProblem} from '../lib/pins.mjs';
+import {sourceRecordProblem,sourceArchive} from '../lib/pins.mjs';
 import {APP_REFERENCE,appSourceRoot,appNestedFiles} from './app-source.mjs';
 import {canonicalReport,reportDigest} from '../lib/canonical-report.mjs';
 export {canonicalReport,reportDigest};
@@ -52,7 +52,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
  function describe(id){
   if(cache.has(id))return cache.get(id);
   const project=projects.get(id);if(!project)throw Error('Unknown recipe project: '+id);
-  const builds=project.build?buildRecords(project):[],files=new Map(),appFiles=new Map(),usedLinks=new Map(),inputs=new Set(),unresolved=[],records=[];
+  const builds=project.build?buildRecords(project):[],files=new Map(),appFiles=new Map(),usedLinks=new Map(),inputs=new Set(),archives=new Map(),unresolved=[],records=[];
   const submodules=new Set(builds.flatMap(build=>build.submodules||[])),initialized=[...submodules],readsApp=appProfile&&(project.producer.entries||[]).includes(APP_SOURCE);
   // A declared app file that is a symlink into one of the app's gitlinks is that gitlink's file at the commit the app records; the build initializes that gitlink.
   const nested=new Map(readsApp&&project.producer.appEntries?.length?appNestedFiles(project.producer.appEntries,root).map(row=>[row.file,row]):[]);
@@ -119,7 +119,8 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    if(selected&&typeof selected==="object"&&["commit","revision","gitlink"].some(key=>Object.hasOwn(selected,key))){const detail=sourceRecordProblem(selected);if(detail)problem(from,expression,'record',detail);}
   }
   // Declared records: source records are validated once here, pins add the
-  // records they name, and {project} names a package input.
+  // records they name, {project} names a package input, and a source record with
+  // an archive digest names a source archive the input step fetches.
   function walk(value,from,pointer=''){
    if(Array.isArray(value)){value.forEach((child,index)=>walk(child,from,pointer+'/'+index));return;}
    if(!value||typeof value!=='object')return;
@@ -127,6 +128,10 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
     const detail=sourceRecordProblem(value);
     if(detail)problem(from,pointer||'/',  'record',detail);
     else if(value.gitlink&&!from.startsWith(APP_REFERENCE)){if(!gitlinks.some(link=>link.path===value.gitlink))problem(from,pointer||'/','record','The gitlink names no submodule of this repository.');else useLink(value.gitlink,from);}
+    else if(value.archive!==undefined&&typeof value.revision==='string'){
+     if(!/^https:\/\/github\.com\/[^/]+\/[^/]+$/.test(String(value.repository).replace(/\.git$/,''))||!/^[a-f0-9]{64}$/.test(value.archive?.sha256||''))problem(from,pointer||'/','record','A source archive names a GitHub repository, its exact revision and the archive SHA-256.');
+     else{const archive=sourceArchive(value);archives.set(archive.url,archive);}
+    }
    }
    if(typeof value.file==='string'&&typeof value.pointer==='string')checkPin(value,from);
    if(value.project&&Object.keys(value).length===1&&projects.has(value.project)&&value.project!==id)inputs.add(value.project);
@@ -147,7 +152,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    if(upstream.pin&&(bindings.get(upstream.pin.file)||[]).some(binding=>!binding.select&&binding.pointer===upstream.pin.pointer+'/version')&&resolved.version!==undefined)resolved.version='$packageVersion';
    return resolved;
   });
-  const definition={schemaVersion:1,id,build:normalizedBuilds(builds),files:[...files,...[...appFiles].map(([name,digest])=>[APP_REFERENCE+name,digest])].sort(([a],[b])=>ordinal(a,b)).map(([path,sha256])=>({path,sha256})),sources,gitlinks:[...usedLinks.values()].sort((a,b)=>ordinal(a.path,b.path))};
+  const definition={schemaVersion:1,id,build:normalizedBuilds(builds),files:[...files,...[...appFiles].map(([name,digest])=>[APP_REFERENCE+name,digest])].sort(([a],[b])=>ordinal(a,b)).map(([path,sha256])=>({path,sha256})),sources,gitlinks:[...usedLinks.values()].sort((a,b)=>ordinal(a.path,b.path)),...(archives.size?{archives:[...archives.values()].sort((a,b)=>ordinal(a.url,b.url))}:{})};
   const result={definition,definitionDigest:reportDigest(definition),inputs:[...inputs].sort().map(id=>({id}))};
   cache.set(id,result);problems.set(id,unresolved);
   return result;
