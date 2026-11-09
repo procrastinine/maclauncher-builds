@@ -430,6 +430,7 @@
       "steps": [
         {
           "recipe": "src/modules/shared/reshade/temporal/asr/build.mjs",
+          "phased": true,
           "args": [
             "--source",
             "{source:asr}",
@@ -451,6 +452,7 @@
       "steps": [
         {
           "recipe": "src/modules/shared/reshade/temporal/sgsr2/build.mjs",
+          "phased": true,
           "args": [
             "--source",
             "{source:sgsr2}",

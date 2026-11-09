@@ -8,31 +8,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
-const here=import.meta.dirname,app=appPath('src/modules/shared/reshade/temporal/asr'),owner=name=>path.join(name==='build.mjs'?here:app,name),spec=JSON.parse(fs.readFileSync(path.join(app,'source.json'))),options={};
-for(let i=2;i<process.argv.length;i+=2){const key=process.argv[i];if(key==='--native-only'){options[key]=true;i--;continue;}if(!['--source','--tools','--output'].includes(key)||!process.argv[i+1]||options[key])throw Error('Expected unique source, tools and output paths.');options[key]=path.resolve(process.argv[i+1]);}
+const app=appPath('src/modules/shared/reshade/temporal/asr'),spec=JSON.parse(fs.readFileSync(path.join(app,'source.json'))),options={};
+for(let i=2;i<process.argv.length;i+=2){const key=process.argv[i];if(key==='--phase'&&!options[key]&&['compile','assemble'].includes(process.argv[i+1])){options[key]=process.argv[i+1];continue;}if(!['--source','--tools','--output'].includes(key)||!process.argv[i+1]||options[key])throw Error('Expected unique source, tools and output paths.');options[key]=path.resolve(process.argv[i+1]);}
 for(const key of ['--source','--tools','--output'])if(!options[key])throw Error('Missing '+key);
 const source=options['--source'],tools=options['--tools'],out=options['--output'];
 const run=(exe,args)=>execFileSync(exe,args,{encoding:'utf8',maxBuffer: Infinity}),hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-if(fs.existsSync(out)&&!options['--native-only'])throw Error('Choose a new ASR output directory.');fs.mkdirSync(out,{recursive:true});
+const phase=options['--phase'];
 const shaderRoot=path.join(source,'src/backends/vk/shaders/fsr2/hlsl'),gpu=path.join(source,'include/gpu');
 const shaderOverlay=path.join(out,'shader-overlay'),rgbOriginal=path.join(source,spec.rgbBoundary.file),rgbOverlay=path.join(shaderOverlay,'fsr2/ffxm_fsr2_callbacks_hlsl.h');
-let rgbHeader=fs.readFileSync(rgbOriginal,'utf8');for(const [texture,component]of [['r_input_color_jittered','rgb'],['r_prepared_input_color','xyz']]){
- const anchor='return '+texture+'[iPxPos].'+component+';';if(rgbHeader.split(anchor).length!==2)throw Error('ASR RGB load callback changed.');
- rgbHeader=rgbHeader.replace(anchor,'return '+texture+'[FfxUInt32x2(clamp(FfxInt32x2(iPxPos), FfxInt32x2(0, 0), RenderSize() - FfxInt32x2(1, 1)))].'+component+';');
-}
-// The SDK allocates this texture at maxRenderSize, while these gather UVs are
-// normalized to the current RenderSize. Resolve the same four point taps in
-// logical scene coordinates so dynamic resolution cannot read an older region.
-const gather=/void GatherPreparedInputColorRGBQuad\([\s\S]*?\n}\n/.exec(rgbHeader);
-if(!gather||!gather[0].includes('r_prepared_input_color.GatherRed(s_PointClamp, fUV)'))throw Error('ASR prepared RGB gather contract changed.');
-const signature=gather[0].slice(0,gather[0].indexOf('\n{'));
-rgbHeader=rgbHeader.replace(gather[0],signature+'\n{\n    FfxInt32x2 base = FfxInt32x2(floor(fUV * FfxFloat32x2(RenderSize()) - FfxFloat32x2(0.5f, 0.5f)));\n    col00 = LoadPreparedInputColor(base);\n    col10 = LoadPreparedInputColor(base + FfxInt32x2(1, 0));\n    col01 = LoadPreparedInputColor(base + FfxInt32x2(0, 1));\n    col11 = LoadPreparedInputColor(base + FfxInt32x2(1, 1));\n}\n');
-fs.mkdirSync(path.dirname(rgbOverlay),{recursive:true});fs.writeFileSync(rgbOverlay,rgbHeader);
-const historyOriginal=path.join(source,spec.sdrHistory.file),historyOverlay=path.join(shaderOverlay,'fsr2/ffxm_fsr2_accumulate.h');
-let historyHeader=fs.readFileSync(historyOriginal,'utf8');const accumulate=/void Accumulate\([\s\S]*?\n}\n/.exec(historyHeader);
-if(!accumulate||accumulate[0].split('#if FFXM_FSR2_OPTION_HDR_COLOR_INPUT').length!==3)throw Error('ASR accumulation color-domain contract changed.');
-historyHeader=historyHeader.replace(accumulate[0],accumulate[0].replaceAll('#if FFXM_FSR2_OPTION_HDR_COLOR_INPUT','#if FFXM_FSR2_OPTION_HDR_COLOR_INPUT || FFXM_SHADER_QUALITY_OPT_TONEMAPPED_RGB_PREPARED_INPUT_COLOR'));
-fs.writeFileSync(historyOverlay,historyHeader);
 const passFiles=['depth_clip_pass_fs','reconstruct_previous_depth_pass_fs','lock_pass','accumulate_pass_fs','accumulate_pass_fs','rcas_pass_fs','compute_luminance_pyramid_pass','autogen_reactive_pass_fs'];
 function targets(profile,pass){
  const ultra=profile===4,balanced=profile===2||profile===3;
@@ -60,23 +43,48 @@ function translate(file,base,stage,defines,rt=[]){
  if(stage==='ps'&&(reflected.outputs?.length!==rt.length||reflected.outputs.some((r,i)=>r.location!==i)))throw Error('ASR fragment output contract changed.');
  fs.writeFileSync(base+'.json',JSON.stringify({entry:entry[1],stage,threads:reflected.entryPoints[0].workgroup_size||[1,1,1],bindings,targets:rt.map((name,index)=>({name,index}))},null,2)+'\n');fs.rmSync(spv);
 }
-if(!options['--native-only'])translate(path.join(shaderRoot,'ffxm_fsr2_vs.hlsl'),path.join(out,'asr/vertex'),'vs',{FFXM_GPU:1,FFXM_HLSL:1,FFXM_HLSL_6_2:1});
-for(let profile=1;!options['--native-only']&&profile<=4;profile++)for(let flags=0;flags<16;flags++)for(let pass=0;pass<8;pass++){
- const d={FFXM_GPU:1,FFXM_HLSL:1,FFXM_HLSL_6_2:1,FFXM_HALF:1,FFXM_FSR2_OPTION_HDR_COLOR_INPUT:flags&1?1:0,FFXM_FSR2_OPTION_INVERTED_DEPTH:flags&2?1:0,FFXM_FSR2_OPTION_LOW_RESOLUTION_MOTION_VECTORS:flags&4?0:1,FFXM_FSR2_OPTION_JITTERED_MOTION_VECTORS:flags&8?1:0,FFXM_FSR2_OPTION_APPLY_SHARPENING:pass===4?1:0,FFXM_FSR2_OPTION_SHADER_OPT_BALANCED:profile===2||profile===3?1:0,FFXM_FSR2_OPTION_SHADER_OPT_PERFORMANCE:profile===3?1:0,FFXM_FSR2_OPTION_SHADER_OPT_ULTRA_PERFORMANCE:profile===4?1:0};
- translate(path.join(shaderRoot,'ffxm_fsr2_'+passFiles[pass]+'.hlsl'),path.join(out,'asr',String(profile),String(flags),String(pass)),pass===2||pass===6?'cs':'ps',d,targets(profile,pass));
+/** Translate the shaders and build the universal provider library. */
+function compile(){
+ if(fs.existsSync(out))throw Error('Choose a new ASR output directory.');fs.mkdirSync(out,{recursive:true});
+ let rgbHeader=fs.readFileSync(rgbOriginal,'utf8');for(const [texture,component]of [['r_input_color_jittered','rgb'],['r_prepared_input_color','xyz']]){
+  const anchor='return '+texture+'[iPxPos].'+component+';';if(rgbHeader.split(anchor).length!==2)throw Error('ASR RGB load callback changed.');
+  rgbHeader=rgbHeader.replace(anchor,'return '+texture+'[FfxUInt32x2(clamp(FfxInt32x2(iPxPos), FfxInt32x2(0, 0), RenderSize() - FfxInt32x2(1, 1)))].'+component+';');
+ }
+ // The SDK allocates this texture at maxRenderSize, while these gather UVs are
+ // normalized to the current RenderSize. Resolve the same four point taps in
+ // logical scene coordinates so dynamic resolution cannot read an older region.
+ const gather=/void GatherPreparedInputColorRGBQuad\([\s\S]*?\n}\n/.exec(rgbHeader);
+ if(!gather||!gather[0].includes('r_prepared_input_color.GatherRed(s_PointClamp, fUV)'))throw Error('ASR prepared RGB gather contract changed.');
+ const signature=gather[0].slice(0,gather[0].indexOf('\n{'));
+ rgbHeader=rgbHeader.replace(gather[0],signature+'\n{\n    FfxInt32x2 base = FfxInt32x2(floor(fUV * FfxFloat32x2(RenderSize()) - FfxFloat32x2(0.5f, 0.5f)));\n    col00 = LoadPreparedInputColor(base);\n    col10 = LoadPreparedInputColor(base + FfxInt32x2(1, 0));\n    col01 = LoadPreparedInputColor(base + FfxInt32x2(0, 1));\n    col11 = LoadPreparedInputColor(base + FfxInt32x2(1, 1));\n}\n');
+ fs.mkdirSync(path.dirname(rgbOverlay),{recursive:true});fs.writeFileSync(rgbOverlay,rgbHeader);
+ const historyOriginal=path.join(source,spec.sdrHistory.file),historyOverlay=path.join(shaderOverlay,'fsr2/ffxm_fsr2_accumulate.h');
+ let historyHeader=fs.readFileSync(historyOriginal,'utf8');const accumulate=/void Accumulate\([\s\S]*?\n}\n/.exec(historyHeader);
+ if(!accumulate||accumulate[0].split('#if FFXM_FSR2_OPTION_HDR_COLOR_INPUT').length!==3)throw Error('ASR accumulation color-domain contract changed.');
+ historyHeader=historyHeader.replace(accumulate[0],accumulate[0].replaceAll('#if FFXM_FSR2_OPTION_HDR_COLOR_INPUT','#if FFXM_FSR2_OPTION_HDR_COLOR_INPUT || FFXM_SHADER_QUALITY_OPT_TONEMAPPED_RGB_PREPARED_INPUT_COLOR'));
+ fs.writeFileSync(historyOverlay,historyHeader);
+ translate(path.join(shaderRoot,'ffxm_fsr2_vs.hlsl'),path.join(out,'asr/vertex'),'vs',{FFXM_GPU:1,FFXM_HLSL:1,FFXM_HLSL_6_2:1});
+ for(let profile=1;profile<=4;profile++)for(let flags=0;flags<16;flags++)for(let pass=0;pass<8;pass++){
+  const d={FFXM_GPU:1,FFXM_HLSL:1,FFXM_HLSL_6_2:1,FFXM_HALF:1,FFXM_FSR2_OPTION_HDR_COLOR_INPUT:flags&1?1:0,FFXM_FSR2_OPTION_INVERTED_DEPTH:flags&2?1:0,FFXM_FSR2_OPTION_LOW_RESOLUTION_MOTION_VECTORS:flags&4?0:1,FFXM_FSR2_OPTION_JITTERED_MOTION_VECTORS:flags&8?1:0,FFXM_FSR2_OPTION_APPLY_SHARPENING:pass===4?1:0,FFXM_FSR2_OPTION_SHADER_OPT_BALANCED:profile===2||profile===3?1:0,FFXM_FSR2_OPTION_SHADER_OPT_PERFORMANCE:profile===3?1:0,FFXM_FSR2_OPTION_SHADER_OPT_ULTRA_PERFORMANCE:profile===4?1:0};
+  translate(path.join(shaderRoot,'ffxm_fsr2_'+passFiles[pass]+'.hlsl'),path.join(out,'asr',String(profile),String(flags),String(pass)),pass===2||pass===6?'cs':'ps',d,targets(profile,pass));
+ }
+ const overlay=path.join(out,'host-overlay');fs.mkdirSync(overlay,{recursive:true});
+ const original=path.join(source,'include/host/ffxm_fsr2.h'),header=fs.readFileSync(original,'utf8'),anchor='#define FFXM_FSR2_CONTEXT_SIZE (24576)';if(header.split(anchor).length!==2)throw Error('ASR context capacity changed.');
+ fs.writeFileSync(path.join(overlay,'ffxm_fsr2.h'),header.replace(anchor,'#define FFXM_FSR2_CONTEXT_SIZE (24576 * (sizeof(wchar_t) / 2))'));
+ const args=['-std=c++17','-O2','-DNDEBUG','-DFFXM_GCC','-mmacosx-version-min=13.0','-I',overlay,'-I',path.join(source,'include/host'),'-I',gpu,'-I',source,'-include',path.join(app,'host-compat.hpp'),'-ffile-prefix-map='+source+'=ArmASR','-ffile-prefix-map='+appSourceRoot().directory+'=MacLauncher','-ffile-prefix-map='+out+'=ASRBuild'];
+ for(const arch of ['arm64','x86_64']){
+  const objects=[];for(const file of ['src/components/fsr2/ffxm_fsr2.cpp','src/shared/ffxm_assert.cpp','src/shared/ffxm_object_management.cpp']){const object=path.join(out,arch+'-'+path.basename(file)+'.o');run('xcrun',['clang++',...args,'-arch',arch,'-c',path.join(source,file),'-o',object]);objects.push(object);}
+  run('xcrun',['clang++',...args,'-arch',arch,'-fobjc-arc','-dynamiclib',path.join(app,'backend.mm'),...objects,'-framework','Metal','-framework','Foundation','-install_name','@rpath/libmaclauncher-asr.dylib','-o',path.join(out,'libmaclauncher-asr-'+arch+'.dylib')]);
+ }
+ run('lipo',['-create',...['arm64','x86_64'].map(a=>path.join(out,'libmaclauncher-asr-'+a+'.dylib')),'-output',path.join(out,'libmaclauncher-asr.dylib')]);run('codesign',['--force','--sign','-',path.join(out,'libmaclauncher-asr.dylib')]);
 }
-const overlay=path.join(out,'host-overlay');fs.mkdirSync(overlay,{recursive:true});
-const original=path.join(source,'include/host/ffxm_fsr2.h'),header=fs.readFileSync(original,'utf8'),anchor='#define FFXM_FSR2_CONTEXT_SIZE (24576)';if(header.split(anchor).length!==2)throw Error('ASR context capacity changed.');
-fs.writeFileSync(path.join(overlay,'ffxm_fsr2.h'),header.replace(anchor,'#define FFXM_FSR2_CONTEXT_SIZE (24576 * (sizeof(wchar_t) / 2))'));
-const args=['-std=c++17','-O2','-DNDEBUG','-DFFXM_GCC','-mmacosx-version-min=13.0','-I',overlay,'-I',path.join(source,'include/host'),'-I',gpu,'-I',source,'-include',path.join(app,'host-compat.hpp'),'-ffile-prefix-map='+source+'=ArmASR','-ffile-prefix-map='+appSourceRoot().directory+'=MacLauncher','-ffile-prefix-map='+out+'=ASRBuild'];
-for(const arch of ['arm64','x86_64']){
- const objects=[];for(const file of ['src/components/fsr2/ffxm_fsr2.cpp','src/shared/ffxm_assert.cpp','src/shared/ffxm_object_management.cpp']){const object=path.join(out,arch+'-'+path.basename(file)+'.o');run('xcrun',['clang++',...args,'-arch',arch,'-c',path.join(source,file),'-o',object]);objects.push(object);}
- run('xcrun',['clang++',...args,'-arch',arch,'-fobjc-arc','-dynamiclib',path.join(app,'backend.mm'),...objects,'-framework','Metal','-framework','Foundation','-install_name','@rpath/libmaclauncher-asr.dylib','-o',path.join(out,'libmaclauncher-asr-'+arch+'.dylib')]);
+/** Add the notices and describe the compiled provider. */
+function assemble(){
+ addLicenses(out,'Arm-ASR',source);
+ function inventory(dir,prefix=''){return fs.readdirSync(path.join(dir,prefix),{withFileTypes:true}).flatMap(e=>{const r=path.posix.join(prefix,e.name);return e.isDirectory()?inventory(dir,r):[{path:r,size:fs.statSync(path.join(dir,r)).size,sha256:hash(path.join(dir,r))}];});}
+ const files=inventory(out).filter(row=>!['shader-overlay','host-overlay'].includes(row.path.split('/')[0])&&!row.path.endsWith('.o')&&!['provider.json','libmaclauncher-asr-arm64.dylib','libmaclauncher-asr-x86_64.dylib'].includes(row.path));
+ fs.writeFileSync(path.join(out,'provider.json'),JSON.stringify({providerABI:1,complete:true,methods:['asr'],minimumMacOS:spec.minimumMacOS,architectures:['arm64','x86_64'],libraries:['libmaclauncher-asr.dylib'],shaders:['asr'],resolvedPaths:['asr/'],resourcePreparation:1,shaderProfiles:['quality','balanced','performance','ultra-performance'],files,source:{repository:spec.repository,commit:revision},buildInputs:Object.fromEntries(['dxc','spirv-cross','spirv-val'].map(n=>[n,hash(path.join(tools,n))]))},null,2)+'\n');
+ console.log('Built Arm ASR Metal provider: '+out);
 }
-run('lipo',['-create',...['arm64','x86_64'].map(a=>path.join(out,'libmaclauncher-asr-'+a+'.dylib')),'-output',path.join(out,'libmaclauncher-asr.dylib')]);run('codesign',['--force','--sign','-',path.join(out,'libmaclauncher-asr.dylib')]);
-addLicenses(out,'Arm-ASR',source);
-const ownedNames=['source.json','build.mjs','backend.mm','descriptor.js','host-compat.hpp','../frame.h','../command-order.hpp','../payload-files.hpp'],owned=Object.fromEntries(ownedNames.map(n=>[n,hash(owner(n))]));
-function inventory(dir,prefix=''){return fs.readdirSync(path.join(dir,prefix),{withFileTypes:true}).flatMap(e=>{const r=path.posix.join(prefix,e.name);return e.isDirectory()?inventory(dir,r):[{path:r,size:fs.statSync(path.join(dir,r)).size,sha256:hash(path.join(dir,r))}];});}
-const files=inventory(out).filter(row=>!['shader-overlay','host-overlay'].includes(row.path.split('/')[0])&&!row.path.endsWith('.o')&&!['provider.json','libmaclauncher-asr-arm64.dylib','libmaclauncher-asr-x86_64.dylib'].includes(row.path));
-fs.writeFileSync(path.join(out,'provider.json'),JSON.stringify({providerABI:1,complete:true,methods:['asr'],minimumMacOS:spec.minimumMacOS,architectures:['arm64','x86_64'],libraries:['libmaclauncher-asr.dylib'],shaders:['asr'],resolvedPaths:['asr/'],resourcePreparation:1,shaderProfiles:['quality','balanced','performance','ultra-performance'],files,owned,source:{repository:spec.repository,commit:revision},adaptations:[{file:'include/host/ffxm_fsr2.h',sourceSha256:hash(original),appliedSha256:hash(path.join(overlay,'ffxm_fsr2.h')),changes:['Darwin-wchar-context-capacity']},{file:spec.rgbBoundary.file,sourceSha256:hash(rgbOriginal),appliedSha256:hash(rgbOverlay),changes:['Clamp-integer-RGB-loads-to-logical-render-region']},{file:spec.sdrHistory.file,sourceSha256:hash(historyOriginal),appliedSha256:hash(historyOverlay),changes:['Match-SDR-Performance-history-to-tonemapped-prepared-color']}],buildInputs:Object.fromEntries(['dxc','spirv-cross','spirv-val'].map(n=>[n,hash(path.join(tools,n))]))},null,2)+'\n');
-console.log('Built Arm ASR Metal provider: '+out);
+if(phase!=='assemble')compile();
+if(phase!=='compile')assemble();

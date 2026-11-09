@@ -13,9 +13,7 @@ export function stageTemporalProvider({name,directory,upstream}){
     if(!stat.isFile()||stat.isSymbolicLink())throw Error("Invalid temporal runtime resource: "+row.path);
     files.set(row.path,file);
   }
-  const owned=new Map();
-  for(const relative of Object.keys(metadata.owned))owned.set(path.posix.normalize(`maclauncher/temporal/${name}/${relative}`),moduleFile(path.posix.join(module,relative)));
   if(!upstream)throw Error("Supply the declared source checkout for the optional "+name+" provider.");
-  return {files:new Map([...files].map(([relative,file])=>[`temporal/${name}/${relative}`,file]).concat([[`temporal/${name}/provider.json`,path.join(directory,"provider.json")]])),owned,
+  return {files:new Map([...files].map(([relative,file])=>[`temporal/${name}/${relative}`,file]).concat([[`temporal/${name}/provider.json`,path.join(directory,"provider.json")]])),
     source:{directory:upstream,relative:"third_party/"+name,commit:sourceRevision({gitlink:"producers/package-support/src/external/"+name}),scope:spec.sourceScope},pin:` ${sourceRevision({gitlink:"producers/package-support/src/external/"+name})} third_party/${name}`};
 }

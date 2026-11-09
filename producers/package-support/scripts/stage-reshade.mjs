@@ -250,7 +250,6 @@ for(const name of ["asr","sgsr2"]){
   const directory=options["--"+name];if(!directory){if(options["--"+name+"-source"])throw Error("A temporal source checkout requires its provider payload.");continue;}
   const staged=stageTemporalProvider({name,directory,upstream:options["--"+name+"-source"]});
   for(const [relative,file] of staged.files)temporalInputs.set(relative,file);
-  for(const [relative,file] of staged.owned)extraOwned.set(relative,file);
   extraSources.push(staged.source);pins.push(staged.pin);
   features.graphics.temporalMethods=[...new Set([...(features.graphics.temporalMethods||[]),name])];
   features.graphics.temporalProviderRegistryAPI=1;
