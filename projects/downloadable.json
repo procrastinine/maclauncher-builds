@@ -2651,7 +2651,14 @@
       "sourceDirectory": "producers/package-support",
       "sourceRepository": "https://github.com/wine-mirror/wine",
       "appEntries": [
-        "src/modules/crossover/temporal/vulkan"
+        "src/modules/crossover/temporal/vulkan",
+        "src/modules/shared/reshade/native/image-color.h",
+        "src/modules/shared/reshade/native/recorded-scene.h",
+        "src/modules/shared/reshade/native/vulkan-scene.h",
+        "src/modules/shared/reshade/temporal/frame.h",
+        "src/modules/shared/reshade/temporal/scene-aovs.h",
+        "src/modules/shared/reshade/temporal/scene-matrices.h",
+        "src/modules/shared/vulkan/native/scene-interop.h"
       ]
     },
     "upstreams": [],
