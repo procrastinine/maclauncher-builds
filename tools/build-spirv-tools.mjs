@@ -1,3 +1,4 @@
+import {sourceRevision} from '../lib/pins.mjs';
 import './producer-environment.mjs';
 import {addLicenses} from '../lib/licenses.mjs';
 import {prepareSources} from '../producers/package-support/src/modules/shared/reshade/libplacebo/dependencies-build.mjs';
@@ -33,7 +34,7 @@ export async function buildSpirvTools({work,ninja,python,architecture='arm64',jo
  fs.copyFileSync(path.join(build,'SPIRV-Tools.pc'),path.join(pc,'SPIRV-Tools.pc'));
 
  addLicenses(prefix,'SPIRV-Tools',sources['spirv-tools']);addLicenses(prefix,'SPIRV-Headers',sources['spirv-headers']);
- const provenance={...spirvToolsProfile,sourceRevisions:{tools:compiler.inputs.find(row=>row.id==='spirv-tools').commit,headers:headersRevision},architecture,librarySha256:hash(path.join(lib,'libSPIRV-Tools.dylib'))};
+ const provenance={...spirvToolsProfile,sourceRevisions:{tools:sourceRevision(compiler.inputs.find(row=>row.id==='spirv-tools')),headers:headersRevision},architecture,librarySha256:hash(path.join(lib,'libSPIRV-Tools.dylib'))};
  fs.writeFileSync(path.join(work,'source-build.json'),JSON.stringify(provenance,null,2)+'\n');
  return {prefix,pkgConfigPath:pc,library:path.join(lib,'libSPIRV-Tools.dylib'),provenance};
 }

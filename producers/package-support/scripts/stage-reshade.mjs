@@ -140,7 +140,7 @@ if (options["--neural"]) {
   if(descriptor.estimatedDepthAPI===1){
     const depth=JSON.parse(fs.readFileSync(neuralFile("native/depth-anything-source.json"),"utf8"));
     if(depth.schema!==1||depth.operation!=="depth-anything-v2-small"||depth.architecture!=="depth-anything-v2.vits.relative.v1"||depth.output?.format!=="R32Float"||depth.output?.representation!=="relative-inverse-depth"||depth.output?.provenance!=="image-estimated"||depth.output?.metric!==false||
-      [depth.source,depth.checkpointLayout].some(row=>!/^https:\/\//.test(row?.repository||"")||!/^[a-f0-9]{40}$/.test(row?.commit||""))||!/^[a-f0-9]{64}$/.test(depth.model?.sha256||""))throw Error("The scalar model's exact source and output contract are undeclared.");
+      [depth.source,depth.checkpointLayout].some(row=>!/^https:\/\//.test(row?.repository||"")||!sourceRevision(row))||!/^[a-f0-9]{64}$/.test(depth.model?.sha256||""))throw Error("The scalar model's exact source and output contract are undeclared.");
     features.graphics.estimatedDepthAPI=1;
   }
   if(descriptor.gpuTimingAPI===1)features.graphics.neuralGpuTimingAPI=1;
@@ -405,8 +405,8 @@ if(nativeFiles.includes("shaderc-offline")){
 }
 if(fs.existsSync(path.join(ownedSource,"src/color-source.json"))){
   const colorSource=JSON.parse(fs.readFileSync(path.join(ownedSource,"src/color-source.json"),"utf8"));
-  if(colorSource.repository!=="https://github.com/KhronosGroup/ToneMapping"||!/^\w{40}$/.test(colorSource.commit))throw Error("Invalid color implementation source metadata.");
-  pins.push(` ${colorSource.commit} third_party/Khronos-ToneMapping`);
+  if(colorSource.repository!=="https://github.com/KhronosGroup/ToneMapping")throw Error("Invalid color implementation source metadata.");
+  pins.push(` ${sourceRevision(colorSource)} third_party/Khronos-ToneMapping`);
 }
 for (const name of ["ReShade.fxh", "ReShadeUI.fxh"]) inputs.set("include/" + name, path.join(source, "third_party/reshade-shaders/Shaders", name));
 const effects = path.resolve(import.meta.dirname, "../src/modules/shared/reshade/effects");

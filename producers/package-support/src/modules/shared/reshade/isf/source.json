@@ -37,13 +37,13 @@
     {
       "id": "glslang",
       "repository": "https://github.com/mrRay/glslang",
-      "commit": "278eba154ac4006f662fa7eefed5d5797fd33d75",
+      "revision": "278eba154ac4006f662fa7eefed5d5797fd33d75",
       "sha256": "c4fe4931e9f8d04179ecdccd01df3ef20e4a4e8b9dfb34f75a65e7d00ecdc758"
     },
     {
       "id": "spirv-cross",
       "repository": "https://github.com/mrRay/SPIRV-Cross",
-      "commit": "774b272260baef494a79fa90c655d248bf02b00b",
+      "revision": "774b272260baef494a79fa90c655d248bf02b00b",
       "sha256": "ce7f77bb5074d21170cba11a6bfd88a44f131c2b69f2f51fbec303fa29f6fdca"
     },
     {

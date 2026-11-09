@@ -2,19 +2,19 @@
   "schema": 1,
   "source": {
     "repository": "https://github.com/ml-explore/mlx-swift",
-    "commit": "0bb916c67f4b9e5c682cbe02a42c701c93ab5021",
+    "revision": "0bb916c67f4b9e5c682cbe02a42c701c93ab5021",
     "version": "0.31.6"
   },
   "nested": [
     {
       "path": "Source/Cmlx/mlx",
       "repository": "https://github.com/ml-explore/mlx",
-      "commit": "ce45c52505c8158ea48d2a54e8caae05efd86bfe"
+      "revision": "ce45c52505c8158ea48d2a54e8caae05efd86bfe"
     },
     {
       "path": "Source/Cmlx/mlx-c",
       "repository": "https://github.com/ml-explore/mlx-c",
-      "commit": "0726ca922fc902c4c61ef9c27d94132be418e945"
+      "revision": "0726ca922fc902c4c61ef9c27d94132be418e945"
     }
   ],
   "files": {

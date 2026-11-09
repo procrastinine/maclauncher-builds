@@ -1,3 +1,4 @@
+import {sourceRevision} from '../../../../../../../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -46,8 +47,8 @@ extern "C" int maclauncher_mlx_array_eval_gpu_job(mlx_array output,uint64_t toke
 
 export function prepareMLXTiming(sourceDirectory,buildRoot){
   sourceDirectory=fs.realpathSync(sourceDirectory);
-  if(revision(sourceDirectory)!==declaration.source.commit)throw new Error('The MLX Swift timing source does not match its exact revision.');
-  for(const row of declaration.nested)if(revision(path.join(sourceDirectory,row.path))!==row.commit)
+  if(revision(sourceDirectory)!==sourceRevision(declaration.source))throw new Error('The MLX Swift timing source does not match its exact revision.');
+  for(const row of declaration.nested)if(revision(path.join(sourceDirectory,row.path))!==sourceRevision(row))
     throw new Error('A nested MLX timing source does not match its registered revision.');
   for(const [file,sha256]of Object.entries(declaration.files))if(digest(fs.readFileSync(path.join(sourceDirectory,file)))!==sha256)
     throw new Error('An upstream MLX timing input changed.');

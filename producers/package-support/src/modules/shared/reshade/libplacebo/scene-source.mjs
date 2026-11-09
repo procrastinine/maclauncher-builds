@@ -1,3 +1,4 @@
+import {sourceRevision} from '../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from "node:fs";
@@ -8,10 +9,10 @@ import {SOURCE,VULKAN_HEADERS,applySceneOverlay} from "./scene-overlay.mjs";
 const hash=file=>crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 const run=(program,args,options={})=>execFileSync(program,args,{encoding:"utf8",stdio:"pipe",maxBuffer: Infinity,...options});
 function archive(repository,dependency,output){
-  if(run("git",["-C",repository,"rev-parse",dependency.commit+"^{commit}"]).trim()!==dependency.commit)throw new Error("A required source commit is unavailable.");
+  if(run("git",["-C",repository,"rev-parse",sourceRevision(dependency)+"^{commit}"]).trim()!==sourceRevision(dependency))throw new Error("A required source commit is unavailable.");
   const origin=run("git",["-C",repository,"remote","get-url","origin"]).trim();
   if(origin.replace(/\.git$/,"")!==dependency.origin.replace(/\.git$/,""))throw new Error("The declared source origin changed.");
-  fs.mkdirSync(output,{recursive:true});const content=run("git",["-C",repository,"archive",dependency.commit],{encoding:null,env:{...process.env,GIT_NO_LAZY_FETCH:"1"}});run("tar",["-xf","-","-C",output],{input:content});
+  fs.mkdirSync(output,{recursive:true});const content=run("git",["-C",repository,"archive",sourceRevision(dependency)],{encoding:null,env:{...process.env,GIT_NO_LAZY_FETCH:"1"}});run("tar",["-xf","-","-C",output],{input:content});
 }
 // Each architecture has an isolated source/build directory. No network or
 // package installation occurs here; dependencies and tools are explicit inputs.
@@ -19,12 +20,12 @@ export function buildSceneLibrary({source,vulkanSource,inputs,dependencyHeaders=
   if(!["arm64","x86_64"].includes(architecture))throw new Error("Unsupported library architecture.");
   if(fs.existsSync(output))throw new Error("Choose an unused libplacebo source-build directory.");
   const tree=path.join(output,"source"),build=path.join(output,"build"),prefix=path.join(output,"install"),pc=path.join(output,"pkgconfig");
-  const vulkanHeaders={...VULKAN_HEADERS,commit:run('git',['-C',source,'rev-parse',SOURCE.commit+':3rdparty/Vulkan-Headers']).trim()};
+  const vulkanHeaders={...VULKAN_HEADERS,revision:run('git',['-C',source,'rev-parse',sourceRevision(SOURCE)+':3rdparty/Vulkan-Headers']).trim()};
   archive(source,SOURCE,tree);archive(vulkanSource,vulkanHeaders,path.join(tree,"3rdparty/Vulkan-Headers"));
   const manifest=applySceneOverlay(tree);
   manifest.vulkanHeaders=vulkanHeaders;
   const fastFloatSource=path.join(source,"3rdparty/fast_float");
-  const dependency={origin:run("git",["-C",source,"config","--blob",SOURCE.commit+":.gitmodules","--get","submodule.3rdparty/fast_float.url"]).trim(),commit:run("git",["-C",source,"rev-parse",SOURCE.commit+":3rdparty/fast_float"]).trim()};
+  const dependency={origin:run("git",["-C",source,"config","--blob",sourceRevision(SOURCE)+":.gitmodules","--get","submodule.3rdparty/fast_float.url"]).trim(),revision:run("git",["-C",source,"rev-parse",sourceRevision(SOURCE)+":3rdparty/fast_float"]).trim()};
   archive(fastFloatSource,dependency,path.join(tree,"3rdparty/fast_float"));manifest.fastFloat=dependency;
   fs.mkdirSync(pc,{recursive:true});
   const shaderc=path.join(inputs,"shaderc/shaderc/2026.4"),lcms=path.join(inputs,"little-cms2/little-cms2/2.19.1");

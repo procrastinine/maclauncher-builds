@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "repository": "https://github.com/halide/Halide",
-  "commit": "d62903bbf5166e05841e1346837c8367e2296a83",
+  "revision": "d62903bbf5166e05841e1346837c8367e2296a83",
   "sources": {
     "apps/local_laplacian/local_laplacian_generator.cpp": "36481ce3d3a0bf2e5346303e85857f265d98bc0816cf903f6610bf6339fdea74"
   },

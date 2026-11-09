@@ -1,3 +1,4 @@
+import {sourceRevision} from '../../../../../../../lib/pins.mjs';
 import shared from '../../../../../../../producers/dependencies.json' with {type:'json'};
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
@@ -12,9 +13,9 @@ const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',
 export async function prepareSources({work}) {
  const source=path.join(work,'source'),inputs=[];fs.mkdirSync(source,{recursive:true});
  for(const row of profile.sources){
-  const revision=row.id==='shaderc'?shared.shaderc.revision:['glslang','spirv-tools','spirv-headers'].includes(row.id)?new RegExp("'"+row.id.replaceAll('-','_')+"_revision':\\s*'([^']+)'").exec(fs.readFileSync(path.join(source,'shaderc/DEPS'),'utf8'))[1]:row.commit;
+  const revision=row.id==='shaderc'?shared.shaderc.revision:['glslang','spirv-tools','spirv-headers'].includes(row.id)?new RegExp("'"+row.id.replaceAll('-','_')+"_revision':\\s*'([^']+)'").exec(fs.readFileSync(path.join(source,'shaderc/DEPS'),'utf8'))[1]:sourceRevision(row);
   const repository=row.id==='shaderc'?shared.shaderc.repository:row.repository,sha256=row.id==='shaderc'?shared.shaderc.sha256:row.sha256;
-  const target=path.join(source,row.id);inputs.push({...row,commit:revision,repository});if(fs.existsSync(target))continue;
+  const target=path.join(source,row.id);inputs.push({...row,revision,repository});if(fs.existsSync(target))continue;
   const archive=await buildInput({url:repository+'/archive/'+revision+'.tar.gz',sha256});fs.mkdirSync(target);run('tar',['-xf',archive,'--strip-components=1','-C',target]);
  }
  return {source,inputs};

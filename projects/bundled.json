@@ -516,7 +516,7 @@
         "repository": "mm2/Little-CMS",
         "pin": {
           "file": "producers/package-support/src/modules/shared/reshade/libplacebo/dependencies.json",
-          "pointer": "/sources/4/commit",
+          "pointer": "/sources/4/revision",
           "repositoryPointer": "/sources/4/repository"
         }
       },
@@ -527,7 +527,7 @@
         "repository": "mrRay/glslang",
         "pin": {
           "file": "producers/package-support/src/modules/shared/reshade/isf/source.json",
-          "pointer": "/compilerSources/0/commit",
+          "pointer": "/compilerSources/0/revision",
           "repositoryPointer": "/compilerSources/0/repository"
         }
       },
@@ -538,7 +538,7 @@
         "repository": "mrRay/SPIRV-Cross",
         "pin": {
           "file": "producers/package-support/src/modules/shared/reshade/isf/source.json",
-          "pointer": "/compilerSources/1/commit",
+          "pointer": "/compilerSources/1/revision",
           "repositoryPointer": "/compilerSources/1/repository"
         }
       }
