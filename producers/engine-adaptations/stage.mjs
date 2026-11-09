@@ -1,4 +1,3 @@
-import {appRequire} from '../../tools/app-source.mjs';
 import {gitlink} from '../../lib/pins.mjs';
 import {addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
@@ -6,7 +5,7 @@ import path from 'node:path';
 import {createRequire} from 'node:module';
 import {recipeMain} from '../../tools/build-source.mjs';
 import {resolveProject,buildRecord} from '../../lib/projects.mjs';
-const require=createRequire(import.meta.url),B=appRequire('src/modules/shared/runtime/bundled-native.js');
+const require=createRequire(import.meta.url),B=require('../../lib/package-format.cjs');
 const {validateDeclaration}=require('../../lib/declaration.cjs');
 const root=import.meta.dirname;
 const profiles={

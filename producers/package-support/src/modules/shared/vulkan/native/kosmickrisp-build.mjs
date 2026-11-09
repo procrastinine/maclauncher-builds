@@ -1,4 +1,3 @@
-import {appRequire} from '../../../../../../../tools/app-source.mjs';
 import {gitlink,sourceRevision} from '../../../../../../../lib/pins.mjs';
 import {addLicense,addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from 'node:fs';
@@ -9,13 +8,21 @@ import {fileURLToPath} from 'node:url';
 import {adaptedKosmicSources} from './kosmickrisp-source.mjs';
 import {buildKosmicTargets,buildKosmicLoader,describeNativeTools} from './kosmickrisp-targets.mjs';
 import {prepareSourceTree,writeChanged} from './source-files.mjs';
-const Bundled=appRequire('src/modules/shared/runtime/bundled-native.js');
-const MachO=appRequire('src/modules/shared/runtime/macho-load-commands.js');
+import Bundled from '../../../../../../../lib/package-format.cjs';
+import MachO from '../../../../../../../lib/macho-load-commands.cjs';
 import Stage from '../../../../../scripts/native-binary-tools.cjs';
-const Supplementals=appRequire('scripts/native-supplementals.cjs');
-const JsonFiles=appRequire('src/core/json-files.js');
+import Contract from '../../../../../../../lib/package-contract.cjs';
 
 const root=path.dirname(fileURLToPath(import.meta.url));
+// Replaces a JSON file whole; a new file is readable by its owner only.
+function writeJsonAtomic(file,value){
+ let mode=0o600;
+ try{mode=fs.lstatSync(file).mode&0o777;}catch(error){if(error.code!=='ENOENT')throw error;}
+ fs.mkdirSync(path.dirname(file),{recursive:true});
+ const temporary=path.join(path.dirname(file),'.'+path.basename(file)+'.'+process.pid+'.tmp');
+ fs.writeFileSync(temporary,JSON.stringify(value,null,2),{mode,flag:'wx'});
+ fs.renameSync(temporary,file);
+}
 const pin=JSON.parse(fs.readFileSync(path.join(root,'kosmickrisp-source.json')));
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
@@ -120,10 +127,10 @@ export function stageKosmic({output,resourceRoot,declarationFile=path.join(root,
   minimumMacOS:manifest.minimumMacOS,directoryRelative,sourceRelative:null,
   sourceSha256:sha(JSON.stringify(manifest.provenance.adaptations)),manifestRelative:'manifest.json',
   manifestSha256:files.find(file=>file.path==='manifest.json').sha256,files};
- Supplementals.validateDeclaration(declaration);
+ Contract.validateDeclaration(declaration);
  prepareSourceTree(path.join(resourceRoot,directoryRelative),temporary=>fs.cpSync(output,temporary,{recursive:true}));
  const previous=fs.existsSync(declarationFile)?JSON.parse(fs.readFileSync(declarationFile)):[];
- JsonFiles.writeJsonAtomic(declarationFile,[...previous.filter(item=>item.id!==declaration.id||item.arch!==declaration.arch),declaration]);
+ writeJsonAtomic(declarationFile,[...previous.filter(item=>item.id!==declaration.id||item.arch!==declaration.arch),declaration]);
  return declaration;
 }
 

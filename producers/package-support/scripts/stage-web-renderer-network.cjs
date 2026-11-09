@@ -5,7 +5,7 @@ const {appPath,appRequire}=require('../../../tools/app-source.mjs');
 const fs = require('node:fs');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
-const Native = appRequire('src/modules/shared/runtime/local-native.js');
+const Native = require('../../../lib/package-format.cjs');
 const { loadCommands } = require('./native-binary-tools.cjs');
 const ID = 'web-renderer-network', VERSION = '1.0.1';
 function stage({ output }) {

@@ -1,9 +1,8 @@
-import {appRequire} from '../../../tools/app-source.mjs';
 import fs from "node:fs";
 import path from "node:path";
 import {execFileSync} from "node:child_process";
 import {sourceInventory, sourceIdentity} from "../../../sources/maclauncher-android/src/modules/android/native/build-sources.mjs";
-const Content=appRequire('scripts/runtime-content.cjs');
+import Content from '../../../lib/runtime-content.cjs';
 
 /** Staging consumes the completed build snapshot, including recorded shared
  * ART adapters, independently of later changes in the source checkout. */

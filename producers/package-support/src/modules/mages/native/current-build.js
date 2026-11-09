@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const Source = require("../../shared/runtime/pinned-native-build");
-const Native = appRequire('src/modules/shared/runtime/local-native.js');
+const Native = require('../../../../../../lib/package-format.cjs');
 const Fonts = require("../../shared/runtime/portable-sdl2-fonts");
 const Dependency = require("./portable-dependencies");
 const Portable = require("./portable-build");
@@ -11,7 +11,7 @@ const Patches = appRequire('src/modules/mages/native/source-patches.js');
 const SoundEffectSession = appRequire('src/modules/mages/native/windows-sfx-session.js');
 const Adapter = appRequire('src/modules/mages/native/adapter.js');
 const overlay = appRequire('src/modules/mages/native/current-windows-overlay.json');
-const { throwIfAborted } = appRequire('src/modules/shared/runtime/download-utils.js');
+const { throwIfAborted } = require('../../../../../../lib/abort.cjs');
 
 const VERSION = "0.10.8.937-MCLv1";
 const REVISION = Adapter.SOURCES.impacto.revision;

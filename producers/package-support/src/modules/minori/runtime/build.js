@@ -1,13 +1,12 @@
-const {appRequire}=require('../../../../../../tools/app-source.mjs');
 const {addLicenses,includeLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const Build = require("../../shared/runtime/pinned-native-build");
-const Native = appRequire('src/modules/shared/runtime/local-native.js');
+const Native = require('../../../../../../lib/package-format.cjs');
 const Overlay = require("./overlay");
 const Movies = require("./movie-build");
-const { downloadToFile, throwIfAborted } = appRequire('src/modules/shared/runtime/download-utils.js');
+const { throwIfAborted } = require('../../../../../../lib/abort.cjs');
 const sourcePath = path.resolve(__dirname, "../../../external/ReMinori");
 const building = new Set();
 function closeMovieDependencies(prefix, directory) {
@@ -132,7 +131,7 @@ async function buildRuntime({ manager, version = Overlay.VERSION, sourceDir = so
     (dependencies?.findBuildTool || Build.findBuildTool)("cargo");
     fs.mkdirSync(installDir, { recursive: true });
     const archive = path.join(installDir, "ffmpeg-7.1.2.tar.xz");
-    if (!fs.existsSync(archive)) await (dependencies?.downloadToFile || downloadToFile)(Movies.SOURCE.url, archive, { signal });
+    if (!fs.existsSync(archive)) await dependencies.downloadToFile(Movies.SOURCE.url, archive, { signal });
     if (Native.hashFile(archive) !== Movies.SOURCE.sha256) throw new Error("The Minori movie source archive differs from its pin.");
     const decoderPrefix = path.join(installDir, "movie-dependencies");
     await Movies.buildMovieDependencies({ archive, destination: decoderPrefix, signal, dependencies });

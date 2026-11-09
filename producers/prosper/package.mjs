@@ -1,4 +1,3 @@
-import {appRequire} from '../../tools/app-source.mjs';
 import {sourceCheckout,sourceProvenance} from '../../lib/pins.mjs';
 import {addLicense,addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
@@ -8,7 +7,7 @@ import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {recipe,inputs,build} from './build.mjs';
-const require=createRequire(import.meta.url),Native=appRequire('src/modules/shared/runtime/local-native.js');
+const require=createRequire(import.meta.url),Native=require('../../lib/package-format.cjs');
 const {validateDeclaration}=require('../../lib/declaration.cjs');
 const root=path.resolve(import.meta.dirname,'../..'),json=value=>JSON.stringify(value,null,2)+'\n',sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 function copy(from,to,mode=0o644){fs.mkdirSync(path.dirname(to),{recursive:true});fs.copyFileSync(from,to);fs.chmodSync(to,mode);}

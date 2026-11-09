@@ -7,7 +7,7 @@ import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {pack,catalog} from '../../../tools/runtime-package.mjs';
-const require=createRequire(import.meta.url),B=appRequire('src/modules/shared/runtime/bundled-native.js'),Native=appRequire('src/modules/shared/runtime/local-native.js');
+const require=createRequire(import.meta.url),B=require('../../../lib/package-format.cjs'),Native=require('../../../lib/package-format.cjs');
 const recipe=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'source.json')));
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const json=value=>JSON.stringify(value,null,2)+'\n';

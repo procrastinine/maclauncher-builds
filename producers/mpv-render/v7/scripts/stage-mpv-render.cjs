@@ -2,9 +2,9 @@ const {appRequire,appSourceRoot}=require('../../../../tools/app-source.mjs');
 // Build an owned GPU render host around an explicit, unchanged libmpv input.
 // The result is a managed media runtime, separate from launcher resources.
 const fs = require('node:fs'), path = require('node:path'), {execFileSync} = require('node:child_process');
-const Native = appRequire('src/modules/shared/runtime/local-native');
-const Stage = appRequire('scripts/native-binary-tools.cjs');
-const {versionAtLeast} = appRequire('src/modules/shared/runtime/bundled-native');
+const Native = require('../../../../lib/package-format.cjs');
+const Stage = require('../../../package-support/scripts/native-binary-tools.cjs');
+const {versionAtLeast} = require('../../../../lib/package-format.cjs');
 const root = appSourceRoot().directory, producers = path.resolve(__dirname, '../../../package-support');
 const sourceFiles = ['mpv-render.mm', 'gpu-surface.mm', 'gpu-surface.hpp', 'mpv-frame-metadata.h'];
 const headerFiles = ['frame.h','presentation.h','presentation-content.h','presentation-observed.h','presentation-source.h','target-time.h','image-color.h'].map(file=>'src/modules/shared/reshade/native/'+file);

@@ -1,11 +1,10 @@
-const {appRequire}=require('../../../../../../tools/app-source.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const Base = require("./portable-python");
 const Source = require("./pinned-native-build");
 const Portable = require("./portable-sdl2-fonts");
-const { throwIfAborted } = appRequire('src/modules/shared/runtime/download-utils.js');
+const { throwIfAborted } = require('../../../../../../lib/abort.cjs');
 const PROFILE = Object.freeze(require("./portable-python-v2.json"));
 const PIN = Object.freeze({ ...Base.PIN, ...PROFILE });
 const recipeIdentity = () => {

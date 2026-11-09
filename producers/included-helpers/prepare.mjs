@@ -1,4 +1,3 @@
-import {appRequire} from '../../tools/app-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -6,8 +5,8 @@ import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 
-const require=createRequire(import.meta.url),B=appRequire('src/modules/shared/runtime/bundled-native.js');
-const Native=appRequire('scripts/native-binary-tools.cjs');
+const require=createRequire(import.meta.url),B=require('../../lib/package-format.cjs');
+const Native=require('../package-support/scripts/native-binary-tools.cjs');
 const root=path.dirname(fileURLToPath(import.meta.url));
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const json=value=>Buffer.from(JSON.stringify(value,null,2)+'\n');

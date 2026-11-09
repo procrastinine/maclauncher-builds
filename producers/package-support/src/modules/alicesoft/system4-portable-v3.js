@@ -1,17 +1,16 @@
-const {appRequire}=require('../../../../../tools/app-source.mjs');
 const sharedDependencies=require('../../../../dependencies.json');
 const {gitlink} = require("../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const Source = require("../shared/runtime/pinned-native-build");
-const Native = appRequire('src/modules/shared/runtime/local-native.js');
+const Native = require('../../../../../lib/package-format.cjs');
 const Fonts = require("../shared/runtime/portable-sdl2-fonts");
 const Audio = require("../shared/runtime/portable-sndfile");
 const Movie = require("../shared/runtime/portable-ffmpeg");
 const Prefix = require("../shared/runtime/portable-dependency-prefix");
 const Overlay = require("./system4-portable-overlay-v3");
-const { throwIfAborted } = appRequire('src/modules/shared/runtime/download-utils.js');
+const { throwIfAborted } = require('../../../../../lib/abort.cjs');
 // Portable libffi uses its configured release archive; the Git snapshot does not contain configure.
 const PIN = Object.freeze({...require("./system4-portable.json"),dependencies:require("./system4-portable.json").dependencies.map(row=>{if(row.id==='webp')row={...require('./system35-portable.json').dependencies.find(pin=>pin.id==='webp'),...row};const pin=sharedDependencies[row.id==='libffi'?'libffiPortable':row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};})});
 const VERSION = "MCLv9";

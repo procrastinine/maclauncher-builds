@@ -1,11 +1,10 @@
 import './producer-environment.mjs';
-import {appRequire} from './app-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
-const require=createRequire(import.meta.url),B=appRequire('src/modules/shared/runtime/bundled-native.js');
+const require=createRequire(import.meta.url),B=require('../lib/package-format.cjs');
 const {validateDeclaration}=require('../lib/declaration.cjs');
 
 const frameworkBuildDirectories=['native/SDL3.framework/Versions/A/Headers','native/SDL3.framework/Versions/A/Resources/CMake'];

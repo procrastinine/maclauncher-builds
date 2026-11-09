@@ -1,9 +1,8 @@
-const {appRequire}=require('../../../../../tools/app-source.mjs');
 const {gitlink} = require("../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const { buildPinnedRuntime } = require("../shared/runtime/pinned-native-build");
-const Native = appRequire('src/modules/shared/runtime/local-native.js');
+const Native = require('../../../../../lib/package-format.cjs');
 const profiles = require("./decompiler-profiles.json");
 
 const OVERLAY_REVISION = "alicesoft-decompiler-cmake-v1";

@@ -1,4 +1,3 @@
-const {appRequire}=require('../../../../../../tools/app-source.mjs');
 const sharedDependencies=require('../../../../../dependencies.json');
 const fs = require("node:fs");
 const path = require("node:path");
@@ -7,7 +6,7 @@ const Source = require("./pinned-native-build");
 const Fonts = require("./portable-sdl2-fonts");
 const Audio = require("./portable-sndfile");
 const Prefix = require("./portable-dependency-prefix");
-const { throwIfAborted } = appRequire('src/modules/shared/runtime/download-utils.js');
+const { throwIfAborted } = require('../../../../../../lib/abort.cjs');
 const PIN = Object.freeze({...require("./portable-sdl2-mixer.json"),dependencies:require("./portable-sdl2-mixer.json").dependencies.map(row=>{const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};})});
 const digest = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 const recipeIdentity = () => digest(Buffer.concat([fs.readFileSync(__filename),fs.readFileSync(require.resolve("./portable-sdl2-mixer.json")),fs.readFileSync(require.resolve("./portable-dependency-prefix"))]));

@@ -14,7 +14,7 @@ import {recipeMain} from './build-source.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
 const Builder=require('../producers/package-support/src/modules/minori/runtime/build.js');
 const Movies=require('../producers/package-support/src/modules/minori/runtime/movie-build.js');
-const Native=appRequire('src/modules/shared/runtime/local-native.js');
+const Native=require('../lib/package-format.cjs');
 export async function buildMinori({project,arch,output,work}) {
  fs.mkdirSync(work,{recursive:true});
  const sourceDir=path.join(root,'producers/package-support/src/external/ReMinori'),prefix=path.join(work,'movies');
