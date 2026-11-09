@@ -6,7 +6,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {gitSource} from '../producers/steam-bridge/build.mjs';
 
-test('Steam bridge Git inputs depend on their commit, not a licence file or digest map', t => {
+test('Steam bridge Git inputs are read from their checkout without a licence file or digest map', t => {
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'bridge-git-input-'));
  t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
  const git=args=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();

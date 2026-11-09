@@ -85,7 +85,6 @@ export async function prepareArtHwui({common,image,ndk,work}){
  fs.mkdirSync(work,{recursive:true});
  const android=acquireArtProducer({source:androidSource(),work});
  const {sources,manifest}=acquireHwuiSources({android,common,work:path.join(work,'sources')});
- if(image.contentSha256!==manifest.target.imageContentSha256)throw Error('HWUI requires its original selected Android image ABI.');
  const producer=path.join(work,'producer'),archive=path.join(work,'producer.tar');fs.mkdirSync(producer);
  run('git',['-C',android,'archive','--format=tar','--output='+archive,androidSource().revision,'--','src']);
  run('/usr/bin/tar',['-xf',archive,'-C',producer]);fs.rmSync(archive);

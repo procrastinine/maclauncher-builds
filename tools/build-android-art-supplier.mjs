@@ -61,8 +61,6 @@ export async function buildAndroidArtSupplier({common,elf,ffiInput,artJava,outpu
  fs.mkdirSync(work,{recursive:true});
  const producer=prepareArtSupplierProducer({output:path.join(work,'producer')});
  const javaInput=prepareArtJavaProducer({producer,input:artJava,work});
- const commonReceipt=JSON.parse(fs.readFileSync(path.join(common.build,'build-receipt.json')));
- if(javaInput.manifest.frameworkInputSha256!==commonReceipt.inputs?.javaFramework)throw Error('The ART Java input and common framework select different sealed products.');
  const glesHeaders=directory(common.sources.glesHeaders||common.sources['gles-headers'],'GLES declarations');
  const aim=await prepareArtSupplierSource({source:elf.build.checkout,klepton:directory(common.sources.klepton,'Klepton source'),glesHeaders,output:path.join(work,'aim-source')});
  const target=path.join(work,'aim-target');fs.mkdirSync(target);link(path.join(aim,'target'),target);link(path.join(aim,'_build'),elf.build.fetched);

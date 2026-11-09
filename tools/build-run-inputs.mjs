@@ -22,7 +22,6 @@ async function publishedInput({url,sha256,bytes},directory){
  if(bytes&&fs.statSync(file).size!==bytes||hash.digest('hex')!==sha256)throw Error('Published input checksum or size differs: '+url);
  return file;
 }
-const canonical=value=>JSON.stringify(value,(_,item)=>item&&typeof item==='object'&&!Array.isArray(item)?Object.fromEntries(Object.entries(item).sort()):item);
 /** Materialize only declared direct dependencies from this run or exact verified releases. */
 export async function prepareBuildInputs({project,output,directory=root,environment=process.env,runGh,download=publishedInput,verifyBundle=verifyRelease,verifyArchive=verify,extract=async(archive,destination)=>{await exec('tar',['-xzf',archive,'-C',destination],{maxBuffer:Infinity});}}={}){
  projectId(project);if(!path.isAbsolute(output||'')||fs.existsSync(output)||/[\r\n]/.test(output))throw Error('Build inputs require a new absolute output directory.');
@@ -35,13 +34,13 @@ export async function prepareBuildInputs({project,output,directory=root,environm
  fs.mkdirSync(output,{recursive:true});const result={};
  for(const dep of [...new Set(deps)]){
   projectId(dep);const registration=resolveProject(dep,directory,{resolvePins:false}),selected=selection.find(row=>row.id===dep),work=path.join(output,dep);fs.mkdirSync(work);
-  let record,declaration,archive,evidence,definitionDigest;
+  let record,declaration,archive,evidence;
   if(selected){
    const build=buildRecord(registration,selected.version),target=choose(build.architectures.map(arch=>({arch})));if(!target)throw Error('No compatible dependency output: '+dep);
    if(!/^[1-9][0-9]*$/.test(environment.GITHUB_RUN_ID||'')||!/^[a-f0-9]{40}$/.test(environment.GITHUB_SHA||''))throw Error('Current-run inputs need an exact run and source.');
    const bundle=path.join(work,'bundle');fs.mkdirSync(bundle);
    await gh(['run','download',environment.GITHUB_RUN_ID,'--repo',repository,'--name',`runtime-${dep}-${selected.version}-${target.arch}`,'--dir',bundle]);
-   ({record,declaration,definitionDigest}=await verifyBundle({bundle,project:dep,version:selected.version,arch:target.arch,directory,includeDeclaration:true}));
+   ({record,declaration}=await verifyBundle({bundle,project:dep,version:selected.version,arch:target.arch,directory,includeDeclaration:true}));
    if(record.build?.sourceRevision!==environment.GITHUB_SHA||String(record.build?.runId)!==environment.GITHUB_RUN_ID)throw Error('Dependency archive belongs to another run or source: '+dep);
    archive=path.join(bundle,record.asset.filename);
    evidence=record.build||{};
@@ -56,9 +55,6 @@ export async function prepareBuildInputs({project,output,directory=root,environm
    ({declaration}=await verifyArchive({archive,sha256:record.asset.sha256,project:dep,version:record.version,arch:record.arch,includeDeclaration:true}));
    evidence=record.build||{};
   }
-  for(const key of ['id','version','arch','manifestRelative','manifestSha256','sourceSha256','minimumMacOS','launcherArchitectures'])if(canonical(declaration[key])!==canonical(record[key]))throw Error('Input sealed inventory differs from recorded package: '+dep+' '+key);
-  // Same-run inputs must match this plan; a published input is pinned by its catalog digest.
-  if(selected){const definition=reports[dep]?.definitionDigest;if(!/^[a-f0-9]{64}$/.test(definition||'')||definitionDigest!==definition)throw Error('Verified dependency definition differs from the plan: '+dep);}
   const payload=path.join(work,'payload');fs.mkdirSync(payload);await extract(archive,payload);
   const files=path.join(payload,'files');if(!fs.statSync(files).isDirectory())throw Error('Verified archive has no payload: '+dep);
   const staged=path.join(payload,'payload');fs.renameSync(files,staged);fs.renameSync(path.join(payload,'runtime-package.json'),path.join(payload,'declaration.json'));

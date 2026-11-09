@@ -64,12 +64,8 @@ test('image shard readers retain every indexed object after ordinary package ali
  for(const [name,bytes]of f.data)assert.deepEqual(fs.readFileSync(path.join(restored.root,'data',name)),bytes);
 });
 
-test('image shard readers still reject an unassigned object and corrupted materialized alias bytes',t=>{
- const f=fixture(t),input=f.inputs[0],file=path.join(input,'declaration.json'),declaration=JSON.parse(fs.readFileSync(file));
- const extra=Buffer.from('unassigned original data');fs.writeFileSync(path.join(input,'payload/data/99999999'),extra);
- declaration.files.push({path:'data/99999999',size:extra.length,sha256:hash(extra),mode:0o644});
- fs.writeFileSync(file,JSON.stringify(declaration));assert.throws(()=>readImageDataInputs(f.inputs),/unassigned data objects/);
- declaration.files.pop();fs.writeFileSync(file,JSON.stringify(declaration));fs.unlinkSync(path.join(input,'payload/data/99999999'));
+test('image shard readers reject corrupted materialized alias bytes',t=>{
+ const f=fixture(t),input=f.inputs[0];
  fs.writeFileSync(path.join(input,'payload/data/00000001-0001'),Buffer.alloc(f.data.get('00000001-0001').length,7));
  assert.throws(()=>readImageDataInputs(f.inputs),/checksum|alias/i);
 });

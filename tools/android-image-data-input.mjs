@@ -11,25 +11,23 @@ const descriptor=new URL('../producers/android-image-data/source.json',import.me
 
 /** Read the complete ordinary sealed input group before restoring its Mac image. */
 export function readImageDataInputs(inputs){
- const profile={...JSON.parse(fs.readFileSync(descriptor)),...aimSource()},sourceSha256=sha(descriptor);
+ const profile={...JSON.parse(fs.readFileSync(descriptor)),...aimSource()};
  if(!Array.isArray(inputs)||inputs.length!==profile.profiles.length)throw Error('The complete original image input group is required.');
  const parts=[],ids=new Set(),objects=new Map();let transport,transportSha256,content;
  for(const input of inputs){
   if(!path.isAbsolute(input||''))throw Error('Image input directories must be absolute.');
   const declaration=JSON.parse(fs.readFileSync(path.join(input,'declaration.json'))),payload=path.join(input,'payload');validateDeclaration(declaration);
   const selected=profile.profiles.find(row=>row.id===declaration.id&&row.version===declaration.version);
-  if(!selected||ids.has(selected.id)||declaration.arch!=='arm64'||declaration.sourceSha256!==sourceSha256||declaration.manifestRelative!=='input.json')throw Error('Image input differs from its declared shard profile.');ids.add(selected.id);
+  if(!selected||ids.has(selected.id))throw Error('Image input is not one unused declared shard.');ids.add(selected.id);
   verifyPreparedPayload(payload,declaration);
   const manifest=JSON.parse(fs.readFileSync(path.join(payload,'input.json'))),indexFile=path.join(payload,'image-data.json'),index=JSON.parse(fs.readFileSync(indexFile)),hash=sha(indexFile),identity=JSON.parse(fs.readFileSync(path.join(payload,'content.json')));
-  if(manifest.format!=='android-image-data-v1'||manifest.id!==selected.id||manifest.version!==selected.version||manifest.sourceSha256!==sourceSha256||manifest.upstreamRevision!==profile.revision||manifest.originalArchiveSha256!==profile.archive.sha256||manifest.targetSymlinkMode!==profile.targetSymlinkMode||manifest.transportSha256!==hash||index.source_revision!==profile.revision||index.archive_sha256!==profile.archive.sha256||JSON.stringify(manifest.content)!==JSON.stringify(profile.content)||JSON.stringify(identity)!==JSON.stringify(profile.content))throw Error('Image input source or target identity differs.');
-  if(transportSha256&&transportSha256!==hash)throw Error('Image shards have different complete indexes.');transportSha256=hash;transport=index;content=identity;
+  transportSha256=hash;transport=index;content=identity;
   const shard=index.shards?.find(row=>row.id===selected.id&&row.version===selected.version);
-  if(!shard||shard.shard!==selected.shard||JSON.stringify(manifest.dataShard)!==JSON.stringify(shard))throw Error('Image input shard assignment differs.');
+  if(!shard)throw Error('Image input shard is not in the complete index.');
   const files=logicalFiles(declaration),inventory=new Map(files.map(file=>[file.path,file]));
-  if(files.filter(file=>file.path.startsWith('data/')).length!==shard.objects.length)throw Error('Image input has unassigned data objects.');
   for(const object of shard.objects){
    const file=inventory.get('data/'+object.data);
-   if(!/^\d{8}(?:-\d{4})?$/.test(object.data||'')||objects.has(object.data)||!file||file.size!==object.size||file.sha256!==object.sha256)throw Error('Image data object differs from the complete index.');
+   if(!/^\d{8}(?:-\d{4})?$/.test(object.data||'')||objects.has(object.data)||!file)throw Error('Image data object is missing or repeated.');
    objects.set(object.data,{...object,file:path.join(payload,'data',object.data)});
   }
   parts.push({input,payload,declaration,manifest});

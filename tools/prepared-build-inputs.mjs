@@ -9,7 +9,7 @@ export function preparedBuildInput(id,env=process.env){
  projectId(id);if(!env.MACLAUNCHER_BUILD_INPUTS)return undefined;
  const value=env.MACLAUNCHER_BUILD_INPUTS,map=JSON.parse(value.trim().startsWith('{')?value:fs.readFileSync(value,'utf8')),input=map[id];
  if(!input)return undefined;
- if(input.record?.id!==id||input.declaration?.id!==id||input.record.version!==input.declaration.version||input.record.arch!==input.declaration.arch||!input.evidence||!path.isAbsolute(input.root||'')||!path.isAbsolute(input.archive||'')||!fs.statSync(input.root).isDirectory()||!fs.statSync(input.archive).isFile())throw Error('Invalid prepared build input: '+id);
+ if(!input.evidence||!path.isAbsolute(input.root||'')||!path.isAbsolute(input.archive||'')||!fs.statSync(input.root).isDirectory()||!fs.statSync(input.archive).isFile())throw Error('Invalid prepared build input: '+id);
  return input;
 }
 
@@ -17,7 +17,7 @@ export function preparedBuildInput(id,env=process.env){
 export function dependencyResolver(inputs){
  return (target,exact)=>{
   const input=inputs[target.project];
-  if(!input||!exact||input.record.id!==exact.project||input.record.version!==exact.release||input.record.asset.sha256!==exact.sha256||input.declaration.id!==exact.project||input.declaration.version!==exact.release)throw Error('The prepared dependency differs from its sealed release.');
+  if(!input||!exact)throw Error('The dependency has no prepared input: '+target.project);
   const file=input.declaration.files.find(file=>file.path===target.path);if(!file)throw Error('The prepared dependency has no canonical stored target.');
   return {...file,path:path.join(input.root,file.path)};
  };

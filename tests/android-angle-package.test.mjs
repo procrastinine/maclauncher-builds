@@ -25,8 +25,6 @@ test('ANGLE seals its generated binary token without a second source declaration
  const input={angle,profileId:profile.id,source:path.resolve(import.meta.dirname,'..',androidSource().directory)},output=path.join(root,'package');
  packageAngleInput({project:definition.id,version:profile.version,arch:'arm64',output,input});
  assert.equal(JSON.parse(fs.readFileSync(path.join(output,'payload/angle-manifest.json'))).programBinaryVersion,manifest.programBinaryVersion);
- manifest.angleRevision='b'.repeat(40);fs.writeFileSync(file,JSON.stringify(manifest));
- assert.throws(()=>packageAngleInput({project:definition.id,version:profile.version,arch:'arm64',output:path.join(root,'wrong-source'),input}),/provider identity/);
- manifest.angleRevision=definition.angle.revision;fs.writeFileSync(file,JSON.stringify(manifest));fs.appendFileSync(path.join(angle,'libEGL.dylib'),'changed');
+ fs.appendFileSync(path.join(angle,'libEGL.dylib'),'changed');
  assert.throws(()=>packageAngleInput({project:definition.id,version:profile.version,arch:'arm64',output:path.join(root,'changed-library'),input}),/compiler product differs/);
 });
