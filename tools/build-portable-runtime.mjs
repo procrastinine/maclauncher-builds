@@ -29,7 +29,8 @@ export function recipeInputs({project}){
  const recipe=RECIPES[project];if(!recipe)throw Error('No portable runtime recipe is declared for '+project+'.');
  return ['native-sdl2-fonts','native-sndfile',...(recipe.stacks?.includes('movie')||recipe.reuse==='av-dependencies'?['native-ffmpeg']:[]),...(recipe.reuse?.startsWith('mixer-')?['native-sdl2-mixer']:[])];
 }
-export async function buildPortableRuntime({project,arch,version,output,work}){
+/** Compile one portable engine with its shared native stacks. */
+export async function compile({project,arch,work}){
  const recipe=RECIPES[project];if(!recipe)throw Error('No portable runtime recipe is declared for '+project+'.');
  const Builder=require(path.join(modules,recipe.recipe)),sourceDir=path.join(root,'producers/package-support/src/external',recipe.source),archives={};
  for(const catalog of [Fonts.PIN,Audio.PIN,...(recipe.catalogs||[]).map(name=>CATALOGS[name](Builder))])for(const pin of catalog.dependencies)if(!archives[pin.id])archives[pin.id]=await buildInput(archiveInput(pin));
@@ -45,6 +46,10 @@ export async function buildPortableRuntime({project,arch,version,output,work}){
  if(recipe.reuse==='mixer-stack')options.mixerStack=mixer;
  if(recipe.reuse==='mixer-python'){const Python=require(path.join(modules,'shared/runtime/portable-python-v2.js'));options.dependencyStacks={mixer,python:await Python.buildPython({archive:archives.python,workRoot:work+'-python',sdk:mixer.sdk,architecture:arch,pathMappings})};}
  const built=await Builder[recipe.entry](options);
+ return {built,recipe,sourceDir,Builder};
+}
+/** Add dependency notices, stage resources and seal the compiled engine. */
+export async function assemble({project,arch,version,output,compiled:{built,recipe,sourceDir,Builder}}){
  for(const [name,directory] of Object.entries(built.dependencyClosure?.sourceRoots||{})){
   addLicenses(built.dependencyClosure.prefix,name,directory);
   if(name==='turbojpeg')addLicense(built.dependencyClosure.prefix,name,`${directory}/README.ijg`);
@@ -56,4 +61,4 @@ export async function buildPortableRuntime({project,arch,version,output,work}){
  if(recipe.python){payloads.push({source:built.dependencyClosure.python.stdlib,relative:recipe.python.library});environmentRelative.PYTHONHOME=recipe.python.home;}
  return sealRuntime({project,arch,version,output,executable:built.executable,appRoot:built.appRoot,sourceRoot:sourceDir,sourceScope:built.sourceScope,upstreamRevision:Builder.REVISION,payloads,environmentRelative,provenance:{features:built.features||{},sourceTreeSha256:built.sourceTreeSha256,overlaySha256:built.overlaySha256}});
 }
-recipeMain(import.meta,buildPortableRuntime);
+recipeMain(import.meta,{compile,assemble});

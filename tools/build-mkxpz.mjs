@@ -10,7 +10,8 @@ import {managerDeclaration} from './manager-declaration.mjs';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
 const run=(command,args)=>execFileSync(command,args,{maxBuffer:Infinity,stdio:'inherit',env:{...process.env,SDKROOT:process.env.SDKROOT||execFileSync('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path'],{maxBuffer:Infinity,encoding:'utf8'}).trim()}});
-export async function buildMKXPZ({project,version,arch,output,work}){
+/** Compile and stage mkxp-z with its NFC filename overlay. */
+export async function compile({project,version,work}){
  version=buildRecord(resolveProject(project,root,{resolvePins:false}),version).version;
  fs.mkdirSync(work,{recursive:true});
  const pin=JSON.parse(fs.readFileSync(path.join(root,'runtimes/mkxpz/baseline.json'))).upstream;
@@ -27,6 +28,10 @@ export async function buildMKXPZ({project,version,arch,output,work}){
  const imageBuild=path.join(source,'src/meson.build');
  fs.writeFileSync(imageBuild,fs.readFileSync(imageBuild,'utf8').replaceAll(".dependency('brotlicommon-static')",".dependency('brotlicommon')").replaceAll(".dependency('brotlidec-static')",".dependency('brotlidec')"));
  run(process.execPath,[path.join(root,'producers/package-support/scripts/build-mkxpz-nfc.cjs'),'--version',version,'--archive',archive,'--work',buildWork,'--meson',path.join(environment,'bin/meson'),'--ninja',path.join(environment,'bin/ninja'),'--output',staged]);
+ return {buildWork,source,sdlImagePin};
+}
+/** Record the SDL_image dependencies and write the package declaration. */
+export async function assemble({project,arch,output,compiled:{buildWork,source,sdlImagePin}}){
  const result=JSON.parse(fs.readFileSync(path.join(buildWork,'STAGED.json'))),sdlImage=path.join(source,'subprojects/sdl2_image');
  const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{maxBuffer:Infinity,encoding:'utf8',env:{...process.env,GIT_NO_LAZY_FETCH:'1'}}).trim();
  if(git(sdlImage,['rev-parse','HEAD'])!==sdlImagePin.revision)throw Error('SDL_image differs from its declared commit.');
@@ -48,4 +53,4 @@ export async function buildMKXPZ({project,version,arch,output,work}){
  fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});
  return {project,version:declaration.version,arch,output};
 }
-recipeMain(import.meta,buildMKXPZ);
+recipeMain(import.meta,{compile,assemble});

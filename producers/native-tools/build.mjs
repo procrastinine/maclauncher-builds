@@ -60,7 +60,8 @@ export function recipeInputs({project}){
  return BUILDS[project].inputs;
 }
 
-export async function buildNativeTool({project,version,arch,output,work,sources={}}){
+/** Compile one native tool from its pinned source. */
+export async function compile({project,arch,work,sources={}}){
  if(!BUILDS[project])throw Error('No native tool build is declared for '+project+'.');
  const pin=profiles[project];
 
@@ -73,6 +74,10 @@ export async function buildNativeTool({project,version,arch,output,work,sources=
  await Source.validatePinnedSource(source,pin.revision);
  const result=await BUILDS[project].build({pin,arch,source,work});
  await Source.validatePinnedSource(source,pin.revision);
+ return {source,pin,result};
+}
+/** Seal the compiled tool. */
+export async function assemble({project,version,arch,output,compiled:{source,pin,result}}){
  return sealRuntime({project,version,arch,output,sourceRoot:source,upstreamRevision:pin.revision,...result});
 }
-recipeMain(import.meta,buildNativeTool);
+recipeMain(import.meta,{compile,assemble});

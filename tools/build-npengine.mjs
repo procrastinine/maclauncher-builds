@@ -40,10 +40,10 @@ export async function compile({arch,work}){
  const archives={};for(const pin of [...Fonts.PIN.dependencies,...Media.PIN.utilitySources])archives[pin.id]??=await buildInput({url:pin.archiveUrl,sha256:pin.archiveSha256,bytes:pin.archiveBytes});
  const sdl=nativeStackInput(preparedBuildInput('native-sdl2-fonts'),{arch,work:path.join(work,'sdl')}),utilities=await Media.buildUtilities({archives,workRoot:path.join(work,'utilities')});
  const built=await Builder.buildPortableNPengine({sourceDir:source,npaSourceDir:npa,workRoot:path.join(work,'engine'),mediaStack:media,utilityStack:utilities,sdlStack:sdl});
- return {source,npa,repository,npaRepository,media,built};
+ return {source,npa,built};
 }
 /** Describe and seal the compiled engine with its profile, media and notices. */
-export async function assemble({project,arch,output,compiled:{source,npa,repository,npaRepository,media,built}}){
+export async function assemble({project,arch,output,compiled:{source,npa,built}}){
  Builder.describeRuntime(built);
  addLicenses(built.prefix,'libnpa',npa);
  addLicenses(built.prefix,'GStreamer media',path.join(import.meta.dirname,'../producers/package-support/src/modules/nitroplus/runtime'));
