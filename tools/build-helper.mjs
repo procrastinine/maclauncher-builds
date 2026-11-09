@@ -1,5 +1,5 @@
 import './producer-environment.mjs';
-import {appRequire,recipePath,APP_REFERENCE} from './app-source.mjs';
+import {recipePath,APP_REFERENCE} from './app-source.mjs';
 import {addLicenses} from '../lib/licenses.mjs';
 // GitHub build of an owned-source native helper from its build profile. One profile
 // per helper names the sources, compiler flags, output and identity fields; this
