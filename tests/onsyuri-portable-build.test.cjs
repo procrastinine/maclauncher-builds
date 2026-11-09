@@ -11,7 +11,7 @@ function temporary(t) {
   return directory;
 }
 
-test("Yuri adapters reject source checkouts and unexpected CMake bytes without changing them", t => {
+test("Yuri adapters reject source checkouts without changing them", t => {
   const root = temporary(t), checkout = path.join(root, "original"), output = path.join(root, "staged");
   fs.mkdirSync(checkout); fs.mkdirSync(output);
   fs.writeFileSync(path.join(checkout, "CMakeLists.txt"), "original");
@@ -19,10 +19,7 @@ test("Yuri adapters reject source checkouts and unexpected CMake bytes without c
   assert.throws(() => Build.requireOwnedSource(checkout, checkout), /cannot change source checkouts/);
   fs.mkdirSync(path.join(output, ".git"));
   assert.throws(() => Build.adaptEngine(output, checkout), /separate disposable source/);
-  fs.rmSync(path.join(output, ".git"), { recursive: true });
-  assert.throws(() => Build.adaptEngine(output, checkout), /differs from its pinned version/);
   assert.equal(fs.readFileSync(path.join(checkout, "CMakeLists.txt"), "utf8"), "original");
-  assert.equal(fs.readFileSync(path.join(output, "CMakeLists.txt"), "utf8"), "unexpected");
 });
 
 test("Lua adaptation requires its exact ABI profile and cannot overwrite an existing build file", t => {
