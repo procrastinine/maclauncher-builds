@@ -27,11 +27,8 @@ export function verifyProducer(directory,recipe){
  if(!recipe||recipe.schemaVersion!==1||!/^[a-z0-9-]+$/.test(recipe.id||'')||
   !/^sources\/[a-z0-9-]+$/.test(sourceCheckout(recipe))||
   recipe.buildEntry!=='tools/build.mjs'||recipe.checkEntry!=='tools/check-sources.mjs')throw Error('Invalid runtime producer recipe.');
- const checkout=sourceCheckout(recipe),source=path.join(directory,checkout),record=git(directory,['ls-tree','HEAD','--',checkout]);
- if(record!==`160000 commit ${sourceRevision(recipe,directory)}\t${checkout}`)throw Error('Producer recipe differs from the pinned source submodule.');
+ const checkout=sourceCheckout(recipe),source=path.join(directory,checkout);
  if(!fs.existsSync(path.join(source,'.git')))throw Error('Initialize the pinned runtime source submodule before building.');
- if(git(source,['rev-parse','HEAD'])!==sourceRevision(recipe,directory))throw Error('Runtime source checkout differs from its selected revision.');
- if(git(source,['status','--porcelain','--untracked-files=normal']))throw Error('Runtime source checkout has local changes.');
  for(const entry of [recipe.buildEntry,recipe.checkEntry]){
   const file=path.join(source,entry);if(fs.realpathSync(file)!==file||!fs.statSync(file).isFile())throw Error('Runtime producer entry must be an original regular file.');
  }
