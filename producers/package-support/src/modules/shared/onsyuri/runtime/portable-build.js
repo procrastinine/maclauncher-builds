@@ -13,14 +13,7 @@ const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map
 const VERSION = PIN.engine.version;
 const REVISION = PIN.engine.revision;
 const SOURCE_SHA256 = PIN.engine.sourceTreeSha256;
-const OWNED_FILES = [__filename, require.resolve("./portable-build.json"),
-  require.resolve("../../../alicesoft/system35-portable.json"), require.resolve("../../../alicesoft/system4-portable.json"),
-  path.join(__dirname, "portable-native/CMakeLists.txt"), path.join(__dirname, "portable-native/lua.CMakeLists.txt"),
-  require.resolve("../../runtime/pinned-native-build"), require.resolve("../../runtime/portable-sdl2-fonts"), require.resolve("../../runtime/portable-sdl2-fonts.json"),
-  require.resolve("../../runtime/portable-sndfile"), require.resolve("../../runtime/portable-sndfile.json"),
-  require.resolve("../../runtime/portable-sdl2-mixer"), require.resolve("../../runtime/portable-sdl2-mixer.json"), require.resolve("../../runtime/portable-dependency-prefix")];
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
-const overlayIdentity = () => hash(Buffer.concat(OWNED_FILES.map(file => fs.readFileSync(file))));
 
 function validateEngineArchive(archives) {
   const file = archives?.onsyuri;
@@ -42,7 +35,7 @@ function adaptEngine(sourceRoot, sourceDir) {
   requireOwnedSource(sourceRoot, sourceDir);
   const file = path.join(sourceRoot, "CMakeLists.txt"), original = fs.readFileSync(file);
   fs.copyFileSync(path.join(__dirname, "portable-native/CMakeLists.txt"), file);
-  return { files: [{ path: "CMakeLists.txt", sourceSha256: hash(original), adaptedSourceSha256: Native.hashFile(file) }] };
+  return { files: [{ path: "CMakeLists.txt", sourceSha256: hash(original) }] };
 }
 
 function adaptLua(sourceRoot) {
@@ -52,7 +45,7 @@ function adaptLua(sourceRoot) {
     throw new Error("Lua source differs from the selected 5.4.9 profile.");
   }
   fs.copyFileSync(path.join(__dirname, "portable-native/lua.CMakeLists.txt"), file);
-  return { files: [{ path: "CMakeLists.txt", sourceSha256: null, adaptedSourceSha256: Native.hashFile(file) }] };
+  return { files: [{ path: "CMakeLists.txt", sourceSha256: null }] };
 }
 
 function validateFeatures(outputRoot) {
@@ -67,5 +60,5 @@ function validateFeatures(outputRoot) {
     moviePlayback: false, externalWindowsPlugins: false, glesSharpness: false };
 }
 
-module.exports = { PIN, VERSION, REVISION, SOURCE_SHA256, OWNED_FILES, overlayIdentity, validateEngineArchive,
+module.exports = { PIN, VERSION, REVISION, SOURCE_SHA256, validateEngineArchive,
   requireOwnedSource, adaptEngine, adaptLua, validateFeatures };

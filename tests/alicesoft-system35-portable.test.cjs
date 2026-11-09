@@ -3,7 +3,6 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
-const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const Portable = require("../producers/package-support/src/modules/alicesoft/system35-portable-v3");
 const Overlay = require("../producers/package-support/src/modules/alicesoft/system35-overlay-v3");
@@ -81,6 +80,4 @@ test("cancelled portable builds make no output or source changes", async t => {
   const workRoot = path.join(root, "output");
   await assert.rejects(Portable.buildPortableSystem35({ workRoot, signal: controller.signal }), { name: "AbortError" });
   assert.equal(fs.existsSync(workRoot), false);
-  assert.match(Portable.overlayIdentity(), /^[a-f0-9]{64}$/);
-  assert.equal(crypto.createHash("sha256").update(fs.readFileSync(require.resolve("../producers/package-support/src/modules/alicesoft/system35-overlay-v3"))).digest("hex").length, 64);
 });

@@ -19,7 +19,7 @@ function adaptMixer(sourceRoot) {
   const original = fs.readFileSync(file), text = original.toString("utf8"), target = "        find_package(FLAC REQUIRED)";
   if (text.indexOf(target) !== text.lastIndexOf(target) || !text.includes(target)) throw new Error("SDL2_mixer source differs from the selected adapter.");
   const adapted = Buffer.from(text.replace(target, "        find_package(Threads REQUIRED)\n" + target)); fs.writeFileSync(file, adapted);
-  return { path: "CMakeLists.txt", sourceSha256: digest(original), adaptedSourceSha256: digest(adapted) };
+  return { path: "CMakeLists.txt", sourceSha256: digest(original) };
 }
 
 function adaptOpusDescriptor(prefix) {

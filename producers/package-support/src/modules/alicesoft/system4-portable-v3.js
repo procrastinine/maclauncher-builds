@@ -3,7 +3,6 @@ const sharedDependency=id=>require('../../../../dependencies/'+id+'.json');
 const {upstreamRevision} = require("../../../../../lib/projects.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
-const crypto = require("node:crypto");
 const Source = require("../shared/runtime/pinned-native-build");
 const Native = require('../../../../../lib/package-format.cjs');
 const Fonts = require("../shared/runtime/portable-sdl2-fonts");
@@ -18,14 +17,6 @@ const VERSION = "MCLv9";
 const REVISION = upstreamRevision("xsystem4", "xsystem4");
 const SOURCE_SHA256 = "4573e25bd5958bb6b7d8b28b6e1c0036af5c752e304d30c8afa270c7818ba0c0";
 const sourcePath = path.resolve(__dirname, "../../external/xsystem4");
-const recipeFiles = [__filename, require.resolve("./system4-portable-overlay-v3"), require.resolve("./system4-portable.json"),
-  require.resolve("./system35-portable"), require.resolve("./system35-portable.json"),
-  require.resolve("../shared/runtime/portable-sdl2-fonts"), require.resolve("../shared/runtime/portable-sdl2-fonts.json"),
-  require.resolve("../shared/runtime/portable-sndfile"), require.resolve("../shared/runtime/portable-sndfile.json"),
-  require.resolve("../shared/runtime/portable-ffmpeg"), require.resolve("../shared/runtime/portable-ffmpeg.json")];
-function overlayIdentity() {
-  const hash=crypto.createHash("sha256");for(const file of recipeFiles)hash.update(fs.readFileSync(file));return hash.digest("hex");
-}
 function nativeFile({ prefix, sdk, pathMappings, tools, architecture = process.arch }) {
   for(const value of [prefix,sdk,...Object.values(tools)]) if(!path.isAbsolute(value||"")||/[\r\n\0]/.test(value))throw new Error("Portable Meson build paths must be absolute.");
   const flags=Audio.compilerFlags(sdk,pathMappings,architecture).split(" ");
@@ -53,7 +44,6 @@ async function buildPortableSystem4({ sourceDir=sourcePath,archives,workRoot,dep
   if(!path.isAbsolute(archives?.ffmpeg||""))throw new Error("Portable movies require the FFmpeg source archive.");
   const source=await Source.pinnedFiles(sourceDir,REVISION,{signal});
   const libsys4Revision = require("node:child_process").execFileSync("git", ["-C", sourceDir, "rev-parse", "HEAD:subprojects/libsys4"], { encoding: "utf8" }).trim();
-  const overlaySha256=overlayIdentity();
   let fonts,audio,movie;
   if(dependencyStacks){
     if(Object.keys(dependencyStacks).length!==3||!dependencyStacks.fonts||!dependencyStacks.audio||!dependencyStacks.movie)throw new Error("Portable dependency reuse needs font, audio and movie profiles.");
@@ -80,7 +70,7 @@ async function buildPortableSystem4({ sourceDir=sourcePath,archives,workRoot,dep
     const build=await(pin.buildSystem==="autotools"?Audio.buildAutotools(common):Fonts.buildProject({...common,tools,onProgress}));
     sources.push({...pin,...build,sourceRoot});sourceRoots[pin.id]=sourceRoot;
   }
-  const sourceRoot=path.join(workRoot,"xsystem4-source"),sourceTreeSha256=Source.stagePinnedFiles(sourceDir,source.files,sourceRoot);
+  const sourceRoot=path.join(workRoot,"xsystem4-source");Source.stagePinnedFiles(sourceDir,source.files,sourceRoot);
   const sourceOverlay=Overlay.apply(sourceRoot,{sourceDir,version:VERSION});
   const buildFile=path.join(workRoot,"native.ini");fs.writeFileSync(buildFile,nativeFile({prefix,sdk:fonts.sdk,architecture,pathMappings,tools}));
   const outputRoot=path.join(workRoot,"xsystem4"),logPath=path.join(workRoot,"xsystem4.log"),startedAt=new Date().toISOString();
@@ -92,9 +82,9 @@ async function buildPortableSystem4({ sourceDir=sourcePath,archives,workRoot,dep
   await run(tools.meson,["install","-C",outputRoot,"--no-rebuild"],{cwd:workRoot,logPath,env,signal});
   throwIfAborted(signal);const features=validateFeatures(outputRoot);
   const executable=path.join(prefix,"bin/xsystem4");
-  return {managerId:"xsystem4",version:VERSION,sourceRevision:REVISION,libsys4Revision,sourceTreeSha256,overlaySha256,sourceOverlay,
+  return {managerId:"xsystem4",version:VERSION,sourceRevision:REVISION,libsys4Revision,sourceOverlay,
     architecture,minimumMacOS:"13.0",executable,executableSha256:Native.hashFile(executable),resources:path.join(prefix,"share/xsystem4"),features,
     sourceRoot,outputRoot,prefix,sdk:fonts.sdk,tools,configureOptions,startedAt,completedAt:new Date().toISOString(),logPath,
     dependencyClosure:{version:PIN.version,prefix,fonts,audio,movie,sources,sourceRoots}};
 }
-module.exports={VERSION,REVISION,SOURCE_SHA256,PIN,sourcePath,recipeFiles,overlayIdentity,nativeFile,validateFeatures,buildPortableSystem4};
+module.exports={VERSION,REVISION,SOURCE_SHA256,PIN,sourcePath,nativeFile,validateFeatures,buildPortableSystem4};

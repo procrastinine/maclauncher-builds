@@ -63,9 +63,9 @@ function apply(sourceRoot, { sourceDir = path.resolve(__dirname, "../../../exter
     const file = path.join(output, relative);
     if (!fs.lstatSync(file).isFile() || !fs.realpathSync(file).startsWith(output + path.sep)) throw new Error("GemRB adapter inputs must be contained regular files.");
     const bytes = adapt(relative, fs.readFileSync(file));
-    changes.push({ file, relative, bytes, sourceSha256: hash(fs.readFileSync(file)), adaptedSourceSha256: hash(bytes) });
+    changes.push({ file, relative, bytes, sourceSha256: hash(fs.readFileSync(file)) });
   }
   for (const change of changes) fs.writeFileSync(change.file, change.bytes);
-  return { version: VERSION, files: changes.map(({ relative, sourceSha256, adaptedSourceSha256 }) => ({ path: relative, sourceSha256, adaptedSourceSha256 })) };
+  return { version: VERSION, files: changes.map(({ relative, sourceSha256 }) => ({ path: relative, sourceSha256 })) };
 }
 module.exports = { VERSION, SOURCE_FILES, adapt, apply };

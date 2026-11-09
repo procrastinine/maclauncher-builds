@@ -39,9 +39,10 @@ test("real Apple linker makes object records relative without changing native co
   const code = file => execFileSync("/usr/bin/otool", ["-s", "__TEXT", "__text", file], options).split("\n").slice(2).join("\n");
   assert.equal(code(current), code(old));
 });
-test("cancelled Python v2 creates no output and retains the old helper identity", async t => {
-  const root = temporary(t), output = path.join(root, "output"), before = Base.recipeIdentity();
+test("cancelled Python v2 creates no output and leaves the old helper unchanged", async t => {
+  const helper = () => ["portable-python.js", "portable-python.json"].map(name => hash(path.join(path.dirname(require.resolve("../producers/package-support/src/modules/shared/runtime/portable-python")), name))).join();
+  const root = temporary(t), output = path.join(root, "output"), before = helper();
   await assert.rejects(Python.buildPython({ workRoot: output, signal: AbortSignal.abort() }), { name: "AbortError" });
   assert.equal(fs.existsSync(output), false);
-  assert.equal(Base.recipeIdentity(), before);
+  assert.equal(helper(), before);
 });

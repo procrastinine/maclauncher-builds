@@ -66,11 +66,11 @@ function apply(sourceRoot, { sourceDir = path.resolve(__dirname, "../../external
     const file = path.join(output, relative);
     if (!fs.lstatSync(file).isFile() || !fs.realpathSync(file).startsWith(output + path.sep)) throw new Error("xsystem35 adapter inputs must be contained regular files.");
     const bytes = adapt(relative, fs.readFileSync(file));
-    changes.push({ file, bytes, relative, sourceSha256: digest(fs.readFileSync(file)), adaptedSourceSha256: digest(bytes) });
+    changes.push({ file, bytes, relative, sourceSha256: digest(fs.readFileSync(file)) });
   }
   // Validate all pinned inputs before changing either disposable source file.
   for (const change of changes) fs.writeFileSync(change.file, change.bytes);
-  return { version: VERSION, overlaySha256: digest(fs.readFileSync(__filename)), files: changes.map(({ relative, sourceSha256, adaptedSourceSha256 }) => ({ path: relative, sourceSha256, adaptedSourceSha256 })) };
+  return { version: VERSION, files: changes.map(({ relative, sourceSha256 }) => ({ path: relative, sourceSha256 })) };
 }
 
 function applyMixer(sourceRoot) {
@@ -82,7 +82,7 @@ function applyMixer(sourceRoot) {
   const bytes = fs.readFileSync(file);
   const adapted = Buffer.from(replace(bytes.toString("utf8"), "        find_package(FLAC REQUIRED)", "        find_package(Threads REQUIRED)\n        find_package(FLAC REQUIRED)"));
   fs.writeFileSync(file, adapted);
-  return { path: "CMakeLists.txt", sourceSha256: digest(bytes), adaptedSourceSha256: digest(adapted) };
+  return { path: "CMakeLists.txt", sourceSha256: digest(bytes) };
 }
 
 module.exports = { VERSION, SOURCE_FILES,  adapt, apply, applyMixer };

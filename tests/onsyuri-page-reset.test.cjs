@@ -22,7 +22,7 @@ test("Yuri V3 applies only the pinned page reset to a disposable source tree", r
   fs.mkdirSync(path.dirname(staged), { recursive: true }); fs.writeFileSync(staged, original);
   const result = Page.apply(root, path.dirname(ORIGINAL));
   assert.equal(result.files[0].sourceSha256, crypto.createHash("sha256").update(original).digest("hex"));
-  assert.notEqual(result.files[0].sourceSha256, result.files[0].adaptedSourceSha256);
+  assert.notDeepEqual(Page.adaptSource(original), original);
   assert.deepEqual(fs.readFileSync(ORIGINAL), original);
   assert.deepEqual(fs.readFileSync(staged), Page.adaptSource(original));
   assert.throws(() => Page.apply(path.dirname(ORIGINAL)), /cannot change source checkouts/);
@@ -81,7 +81,8 @@ test("Yuri V3 keeps the base version and source revision", () => {
 });
 
 test("cancelled V3 builds produce no output and preserve old source recipe bytes", async t => {
-  const root = temporary(t), output = path.join(root, "build"), before = Base.overlayIdentity();
+  const recipe = () => ["portable-build.js", "portable-build.json"].map(name => fs.readFileSync(path.join(path.dirname(require.resolve("../producers/package-support/src/modules/shared/onsyuri/runtime/portable-build")), name)).toString("base64")).join();
+  const root = temporary(t), output = path.join(root, "build"), before = recipe();
   await assert.rejects(Build.buildPortableYuri({ workRoot: output, signal: AbortSignal.abort() }), { name: "AbortError" });
-  assert.equal(fs.existsSync(output), false); assert.equal(Base.overlayIdentity(), before);
+  assert.equal(fs.existsSync(output), false); assert.equal(recipe(), before);
 });

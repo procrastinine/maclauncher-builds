@@ -1,7 +1,6 @@
 const {includeLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
-const crypto = require("node:crypto");
 const Source = require("../../shared/runtime/pinned-native-build");
 const Native = require('../../../../../../lib/package-format.cjs');
 const Fonts = require("../../shared/runtime/portable-sdl2-fonts");
@@ -17,9 +16,6 @@ const {upstreamRevision} = require("../../../../../../lib/projects.mjs");
 const REVISION = upstreamRevision("gemrb", "gemrb");
 const SOURCE_SHA256 = "8fa74bb83dd85ead39ab73068055414c1eaad58c8a05ada31c7d212ed59eef48";
 const sourcePath = path.resolve(__dirname, "../../../external/gemrb");
-const recipeFiles = [__filename, require.resolve("./portable-overlay-v5"), require.resolve("./payload-content"), require.resolve("../../shared/runtime/portable-dependency-prefix"),
-  ...["portable-sdl2-fonts", "portable-sndfile", "portable-sdl2-mixer", "portable-python", "portable-python-v2"].flatMap(name => [require.resolve("../../shared/runtime/" + name), require.resolve("../../shared/runtime/" + name + ".json")])];
-const overlayIdentity = () => { const h = crypto.createHash("sha256"); for (const file of recipeFiles) h.update(fs.readFileSync(file)); return h.digest("hex"); };
 
 function configureOptions({ prefix, sdk, tools, python, architecture = process.arch, pathMappings = [] }) {
   const maps = [...pathMappings].flatMap(({ from, to }) => ["file", "macro", "debug"].map(kind => `-f${kind}-prefix-map=${from}=${to}`));
@@ -42,7 +38,6 @@ async function buildPortableGemRB({ sourceDir = sourcePath, archives, workRoot, 
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, ...Object.values(dependencyStacks || {}).map(stack => stack.prefix)] });
   Fonts.validateArchives(archives); Audio.validateArchives(archives); Audio.validateArchives(archives, { catalog: Mixer.PIN }); Python.validateArchive(archives?.python);
   const source = await Source.pinnedFiles(sourceDir, REVISION, { signal });
-  const recipeSha256 = overlayIdentity();
   let mixer, python;
   if (dependencyStacks) {
     if (Object.keys(dependencyStacks).length !== 2 || !dependencyStacks.mixer || !dependencyStacks.python) throw new Error("GemRB dependency reuse needs exact mixer and Python profiles.");
@@ -61,10 +56,9 @@ async function buildPortableGemRB({ sourceDir = sourcePath, archives, workRoot, 
   const pythonLibrary = path.join(prefix, "lib/libpython3.14.dylib");
   fs.copyFileSync(python.library, pythonLibrary, fs.constants.COPYFILE_EXCL);
   includeLicenses(prefix, path.join(python.prefix, 'licenses'));
-  const pythonSourceSha256 = Native.hashFile(pythonLibrary);
   await run("/usr/bin/install_name_tool", ["-id", pythonLibrary, pythonLibrary], { cwd: workRoot, logPath, env, signal });
-  const pythonLibraryAdapter = { originalSha256: pythonSourceSha256, adaptedSha256: Native.hashFile(pythonLibrary), library: pythonLibrary };
-  const sourceTreeSha256 = Source.stagePinnedFiles(sourceDir, source.files, sourceRoot), sourceOverlay = Overlay.apply(sourceRoot, { sourceDir });
+  Source.stagePinnedFiles(sourceDir, source.files, sourceRoot);
+  const sourceOverlay = Overlay.apply(sourceRoot, { sourceDir });
   const tools = mixer.tools || { cmake: Source.findBuildTool("cmake"), ninja: Source.findBuildTool("ninja") };
   const compilerMappings = [...pathMappings, { from: sourceRoot, to: "gemrb-source" }, { from: workRoot, to: "gemrb-build" }];
   const options = configureOptions({ prefix, sdk: mixer.sdk, tools, architecture, python: { ...python, library: pythonLibrary }, pathMappings: compilerMappings });
@@ -77,8 +71,8 @@ async function buildPortableGemRB({ sourceDir = sourcePath, archives, workRoot, 
   const appRoot = path.join(outputRoot, "gemrb/gemrb.app"), executable = path.join(appRoot, "Contents/MacOS/gemrb"), features = validateFeatures(outputRoot);
   PayloadContent.omitOptionalTests(appRoot);
   await run("/usr/libexec/PlistBuddy", ["-c", "Add :LSMinimumSystemVersion string 13.0", path.join(appRoot, "Contents/Info.plist")], { cwd: workRoot, logPath, env, signal });
-  return { managerId: "gemrb", version: VERSION, sourceRevision: REVISION, sourceTreeSha256, overlaySha256: recipeSha256, sourceOverlay,
+  return { managerId: "gemrb", version: VERSION, sourceRevision: REVISION, sourceOverlay,
     architecture, minimumMacOS: "13.0", appRoot, executable, executableSha256: Native.hashFile(executable), sourceRoot, outputRoot, configureOptions: options, features,
-    logPath, dependencyClosure: { mixer, python, pythonLibraryAdapter, prefix }, resources: path.join(appRoot, "Contents/Resources"), plugins: path.join(appRoot, "Contents/PlugIns") };
+    logPath, dependencyClosure: { mixer, python, prefix }, resources: path.join(appRoot, "Contents/Resources"), plugins: path.join(appRoot, "Contents/PlugIns") };
 }
-module.exports = { VERSION, REVISION, SOURCE_SHA256, sourcePath, overlayIdentity, configureOptions, validateFeatures, buildPortableGemRB };
+module.exports = { VERSION, REVISION, SOURCE_SHA256, sourcePath, configureOptions, validateFeatures, buildPortableGemRB };

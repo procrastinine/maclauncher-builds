@@ -59,6 +59,6 @@ export async function assemble({project,arch,version,output,compiled:{built,reci
  const payloads=!built.appRoot&&built.resources&&fs.existsSync(built.resources)?[{source:built.resources,relative:'share/'+recipe.share}]:[];
  const environmentRelative={};
  if(recipe.python){payloads.push({source:built.dependencyClosure.python.stdlib,relative:recipe.python.library});environmentRelative.PYTHONHOME=recipe.python.home;}
- return sealRuntime({project,arch,version,output,executable:built.executable,appRoot:built.appRoot,sourceRoot:sourceDir,sourceScope:built.sourceScope,upstreamRevision:Builder.REVISION,payloads,environmentRelative,provenance:{features:built.features||{},sourceTreeSha256:built.sourceTreeSha256,overlaySha256:built.overlaySha256}});
+ return sealRuntime({project,arch,version,output,executable:built.executable,appRoot:built.appRoot,sourceRoot:sourceDir,sourceScope:built.sourceScope,upstreamRevision:Builder.REVISION,payloads,environmentRelative,provenance:{features:built.features||{}}});
 }
 recipeMain(import.meta,{compile,assemble});

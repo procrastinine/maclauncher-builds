@@ -30,7 +30,7 @@ function apply(sourceRoot, sourceDir) {
   Base.requireOwnedSource(sourceRoot, sourceDir);
   const file = path.join(sourceRoot, FILE), original = fs.readFileSync(file), adapted = adaptSource(original);
   fs.writeFileSync(file, adapted);
-  return { files: [{ path: FILE, sourceSha256: hash(original), adaptedSourceSha256: hash(adapted) }] };
+  return { files: [{ path: FILE, sourceSha256: hash(original) }] };
 }
 
 module.exports = { FILE, ORIGINAL, ADAPTED, adaptSource, apply };

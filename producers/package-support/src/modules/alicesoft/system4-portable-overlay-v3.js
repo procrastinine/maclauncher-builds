@@ -88,9 +88,9 @@ function apply(sourceRoot, { sourceDir = path.resolve(__dirname, "../../external
     const file = path.join(output, relative);
     if (!fs.lstatSync(file).isFile() || !fs.realpathSync(file).startsWith(output + path.sep)) throw new Error("xsystem4 adapter inputs must be contained regular files.");
     const bytes = adapt(relative, fs.readFileSync(file), { version });
-    changes.push({ file, bytes, relative, sourceSha256: digest(fs.readFileSync(file)), adaptedSourceSha256: digest(bytes) });
+    changes.push({ file, bytes, relative, sourceSha256: digest(fs.readFileSync(file)) });
   }
   for (const change of changes) fs.writeFileSync(change.file, change.bytes);
-  return { version: VERSION, overlaySha256: digest(fs.readFileSync(__filename)), files: changes.map(({relative,sourceSha256,adaptedSourceSha256})=>({path:relative,sourceSha256,adaptedSourceSha256})) };
+  return { version: VERSION, files: changes.map(({relative,sourceSha256})=>({path:relative,sourceSha256})) };
 }
 module.exports = { VERSION, SOURCE_FILES, RESOURCE_FUNCTION, adapt, apply };

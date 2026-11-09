@@ -1,6 +1,5 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const crypto = require("node:crypto");
 const Base = require("./portable-build");
 const Page = require("./portable-page-reset");
 const Source = require("../../runtime/pinned-native-build");
@@ -13,8 +12,6 @@ const { throwIfAborted } = require('../../../../../../../lib/abort.cjs');
 const VERSION_PIN = require("./portable-build-v3.json");
 const PIN = Object.freeze({ ...Base.PIN, ...VERSION_PIN, engine: { ...Base.PIN.engine, ...VERSION_PIN.engine } });
 const VERSION = PIN.engine.version, REVISION = PIN.engine.revision, SOURCE_SHA256 = PIN.engine.sourceTreeSha256;
-const OWNED_FILES = [...Base.OWNED_FILES, __filename, require.resolve("./portable-build-v3.json"), require.resolve("./portable-page-reset")];
-const overlayIdentity = () => crypto.createHash("sha256").update(Buffer.concat(OWNED_FILES.map(file => fs.readFileSync(file)))).digest("hex");
 
 function validateBase() {
 }
@@ -34,7 +31,7 @@ async function buildPortableYuri({ sourceDir, archives, workRoot, mixerStack, ar
   const original = await Source.pinnedFiles(sourceDir, REVISION, { signal, sourceScope: scope });
   Base.validateEngineArchive(archives); Fonts.validateArchives(archives); Audio.validateArchives(archives); Audio.validateArchives(archives, { catalog: Mixer.PIN }); Fonts.validateArchives(archives, { catalog: Base.PIN });
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir] });
-  const overlaySha256 = overlayIdentity(); fs.mkdirSync(workRoot, { recursive: true });
+  fs.mkdirSync(workRoot, { recursive: true });
   const mixer = mixerStack || await Mixer.buildMixer({ archives, workRoot: path.join(workRoot, "mixer-dependencies"), architecture, pathMappings, signal, onProgress, dependencies });
   const prefix = path.join(workRoot, "prefix"); fs.mkdirSync(prefix);
   Prefix.linkPrefix(mixer.prefix, prefix, { readRoots: mixer.readRoots });
@@ -51,7 +48,8 @@ async function buildPortableYuri({ sourceDir, archives, workRoot, mixerStack, ar
       pathMappings, options: pin.options, signal, onProgress, dependencies });
     sources.push({ ...pin, ...build, ...(sourceOverlay ? { sourceOverlay } : {}) }); sourceRoots[pin.id] = sourceRoot;
   }
-  const sourceRoot = path.join(workRoot, "onsyuri-source"), sourceTreeSha256 = Source.stagePinnedFiles(sourceDir, original.files, sourceRoot);
+  const sourceRoot = path.join(workRoot, "onsyuri-source");
+  Source.stagePinnedFiles(sourceDir, original.files, sourceRoot);
   const cmake = Base.adaptEngine(sourceRoot, sourceDir), page = Page.apply(sourceRoot, sourceDir);
   const sourceOverlay = { files: [...cmake.files, ...page.files] };
   const outputRoot = path.join(workRoot, "onsyuri");
@@ -59,16 +57,16 @@ async function buildPortableYuri({ sourceDir, archives, workRoot, mixerStack, ar
     pathMappings, options: [], signal, onProgress, dependencies });
   validateEngineFeatures(outputRoot);
   const features = { ...mixer.features, ...Base.validateFeatures(workRoot), emptyPageReset: true };
-  const profile = { schemaVersion: 1, version: VERSION, upstreamVersion: PIN.engine.upstreamVersion, upstreamRevision: REVISION, sourceTreeSha256,
-    sourceScope: original.sourceScope, omittedSubmodules: original.omittedSubmodules, overlaySha256, architecture, minimumMacOS: "13.0", features };
+  const profile = { schemaVersion: 1, version: VERSION, upstreamVersion: PIN.engine.upstreamVersion, upstreamRevision: REVISION,
+    sourceScope: original.sourceScope, omittedSubmodules: original.omittedSubmodules, architecture, minimumMacOS: "13.0", features };
   fs.writeFileSync(path.join(prefix, "profile.json"), JSON.stringify(profile, null, 2) + "\n", { flag: "wx" });
   throwIfAborted(signal);
   const executable = path.join(prefix, "bin/onsyuri");
-  return { managerId: "onsyuri", version: VERSION, sourceRevision: REVISION, sourceTreeSha256, sourceScope: original.sourceScope,
-    omittedSubmodules: original.omittedSubmodules, sourceOverlay, overlaySha256, architecture, minimumMacOS: "13.0", executable,
+  return { managerId: "onsyuri", version: VERSION, sourceRevision: REVISION, sourceScope: original.sourceScope,
+    omittedSubmodules: original.omittedSubmodules, sourceOverlay, architecture, minimumMacOS: "13.0", executable,
     executableSha256: Native.hashFile(executable), profile, features, ...build,
     dependencyClosure: { version: PIN.version, prefix, sdk: mixer.sdk, tools: mixer.tools, mixer, sources, sourceRoots } };
 }
 
-module.exports = { PIN, VERSION, REVISION, SOURCE_SHA256, OWNED_FILES, overlayIdentity, validateBase,
+module.exports = { PIN, VERSION, REVISION, SOURCE_SHA256, validateBase,
   validateEngineFeatures, buildPortableYuri };

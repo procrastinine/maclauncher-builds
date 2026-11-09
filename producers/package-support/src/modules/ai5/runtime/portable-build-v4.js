@@ -1,6 +1,5 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const crypto = require("node:crypto");
 const Source = require("../../shared/runtime/pinned-native-build");
 const Native = require('../../../../../../lib/package-format.cjs');
 const Fonts = require("../../shared/runtime/portable-sdl2-fonts");
@@ -24,16 +23,6 @@ const ORIGINALS = Object.freeze({
   "subprojects/libai5/src/arc/open.c": "bd6be4fe5eae3a8df3a74e45bc42c4db90db4158ddf16e2ba326a106a2291151"
 });
 const OUTPUTS = ["maclauncher-disc.h", "maclauncher-paths.h"];
-const OWNED_FILES = [__filename, require.resolve("./build"), path.join(__dirname, "macos-disc.h"), path.join(__dirname, "macos-paths.h"),
-  require.resolve("../../shared/runtime/portable-sdl2-fonts"), require.resolve("../../shared/runtime/portable-sdl2-fonts.json"),
-  require.resolve("../../shared/runtime/portable-sndfile"), require.resolve("../../shared/runtime/portable-sndfile.json"),
-  require.resolve("../../shared/runtime/portable-ffmpeg"), require.resolve("../../shared/runtime/portable-ffmpeg.json")];
-
-function overlayIdentity() {
-  const hash = crypto.createHash("sha256");
-  for (const file of OWNED_FILES) hash.update(path.relative(path.resolve(__dirname, "../../../.."), file) + "\0").update(fs.readFileSync(file));
-  return hash.digest("hex");
-}
 
 function replace(root, file, before, after) {
   const target = path.join(root, file), text = fs.readFileSync(target, "utf8");
@@ -101,9 +90,10 @@ async function buildPortableAI5({ sourceDir = Previous.sourcePath, workRoot, fon
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, fontStack?.prefix, audioStack?.prefix].filter(Boolean) });
   const prefixes = dependencyPrefixes({ fontStack, audioStack, movieStack });
   const source = await Source.pinnedFiles(sourceDir, REVISION, { signal });
-  const overlaySha256 = overlayIdentity(); fs.mkdirSync(workRoot, { recursive: true });
+  fs.mkdirSync(workRoot, { recursive: true });
   const sourceRoot = path.join(workRoot, "source"), outputRoot = path.join(workRoot, "output"), prefix = path.join(workRoot, "prefix");
-  const sourceTreeSha256 = Source.stagePinnedFiles(sourceDir, source.files, sourceRoot), sourceOverlay = adaptSource(sourceRoot);
+  Source.stagePinnedFiles(sourceDir, source.files, sourceRoot);
+  const sourceOverlay = adaptSource(sourceRoot);
   const tool = dependencies.findBuildTool || Source.findBuildTool;
   const tools = { meson: tool("meson"), ninja: tool("ninja"), pkgConfig: tool("pkg-config") };
   const sdk = fontStack.sdk, file = path.join(workRoot, "native.ini");
@@ -116,17 +106,17 @@ async function buildPortableAI5({ sourceDir = Previous.sourcePath, workRoot, fon
   env.NINJA = tools.ninja;
   for (const key of ["PKG_CONFIG_SYSROOT_DIR", "PKG_CONFIG_ALLOW_SYSTEM_CFLAGS", "PKG_CONFIG_ALLOW_SYSTEM_LIBS"]) delete env[key];
   const run = dependencies.runBuildCommand || Source.runBuildCommand, logPath = path.join(workRoot, "build.log"), startedAt = new Date().toISOString();
-  fs.writeFileSync(logPath, `AI5 ${VERSION}\nSource ${REVISION}\nSource tree ${sourceTreeSha256}\nOverlay ${overlaySha256}\n`);
+  fs.writeFileSync(logPath, `AI5 ${VERSION}\nSource ${REVISION}\n`);
   onProgress?.({ phase: "configure", project: "ai5" });
   await run(tools.meson, configureOptions, { cwd: workRoot, env, logPath, signal });
   onProgress?.({ phase: "build", project: "ai5" });
   await run(tools.ninja, ["-C", outputRoot, "-j2"], { cwd: workRoot, env, logPath, signal });
   await run(tools.meson, ["install", "-C", outputRoot, "--no-rebuild"], { cwd: workRoot, env, logPath, signal });
   const executable = path.join(prefix, "bin/ai5");
-  return { managerId: "ai5", version: VERSION, profile: PROFILE, sourceRevision: REVISION, sourceTreeSha256, overlaySha256, sourceOverlay,
+  return { managerId: "ai5", version: VERSION, profile: PROFILE, sourceRevision: REVISION, sourceOverlay,
     architecture, minimumMacOS: "13.0", executable, executableSha256: Native.hashFile(executable), resources: path.join(prefix, "share/ai5-sdl2"),
-    sourceRoot, outputRoot, prefix, tools, configureOptions, nativeFileSha256: Native.hashFile(file), startedAt, completedAt: new Date().toISOString(), logPath,
+    sourceRoot, outputRoot, prefix, tools, configureOptions, startedAt, completedAt: new Date().toISOString(), logPath,
     dependencyClosure: { fonts: fontStack, audio: audioStack, movie: movieStack } };
 }
 
-module.exports = { VERSION, REVISION, SOURCE_SHA256, PROFILE, ORIGINALS, OWNED_FILES, overlayIdentity, adaptSource, dependencyPrefixes, nativeFile, buildPortableAI5 };
+module.exports = { VERSION, REVISION, SOURCE_SHA256, PROFILE, ORIGINALS, adaptSource, dependencyPrefixes, nativeFile, buildPortableAI5 };

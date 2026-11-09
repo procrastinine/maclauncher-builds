@@ -8,7 +8,6 @@ const Native = require('../../../../../../lib/package-format.cjs');
 const Portable = require("./portable-sdl2-fonts");
 const { throwIfAborted } = require('../../../../../../lib/abort.cjs');
 const PIN = Object.freeze(require("./portable-python.json"));
-const recipeIdentity = () => crypto.createHash("sha256").update(fs.readFileSync(__filename)).update(fs.readFileSync(require.resolve("./portable-python.json"))).digest("hex");
 
 function validateArchive(archive) {
   if (!path.isAbsolute(archive || "") || !fs.lstatSync(archive).isFile() || fs.statSync(archive).size !== PIN.source.archiveBytes || Native.hashFile(archive) !== PIN.source.archiveSha256) {
@@ -26,7 +25,7 @@ function applySourceAdapter(sourceRoot) {
   // Keep make's source search unchanged. Only the runtime's build-location
   // fallback becomes relative to this profile's out-of-tree build directory.
   const adapted=Buffer.from(text.replace(before,after));fs.writeFileSync(file,adapted);
-  return {path:"Makefile.pre.in",sourceSha256:hash(original),adaptedSourceSha256:hash(adapted)};
+  return {path:"Makefile.pre.in",sourceSha256:hash(original)};
 }
 
 function compilerEnvironment({ sdk, sourceRoot, workRoot, architecture = process.arch, pathMappings = [] }) {
@@ -91,7 +90,7 @@ async function buildPython({ archive, workRoot, sdk, architecture = process.arch
   validateArchive(archive);
   workRoot = Portable.assertFreshBuildRoot(workRoot, { readOnlyRoots: [archive] });
   sdk ||= (dependencies.readSDK || (() => execFileSync("/usr/bin/xcrun", ["--show-sdk-path"], { encoding: "utf8" }).trim()))();
-  const recipeSha256 = recipeIdentity(), sourceRoot = path.join(workRoot, "source"), buildRoot = path.join(workRoot, "build"), prefix = path.join(workRoot, "prefix");
+  const sourceRoot = path.join(workRoot, "source"), buildRoot = path.join(workRoot, "build"), prefix = path.join(workRoot, "prefix");
   fs.mkdirSync(sourceRoot, { recursive: true }); fs.mkdirSync(buildRoot); fs.mkdirSync(prefix);
   const env = compilerEnvironment({ sdk, sourceRoot, workRoot, architecture, pathMappings }), run = dependencies.runBuildCommand || Source.runBuildCommand, logPath = path.join(workRoot, "python.log");
   const options = { cwd: buildRoot, logPath, env, signal, timeout: 20 * 60 * 1000 };
@@ -107,6 +106,6 @@ async function buildPython({ archive, workRoot, sdk, architecture = process.arch
   throwIfAborted(signal);
   const staged = stageRuntime({ sourceRoot, buildRoot, prefix, pathMappings });
   return { version: PIN.version, architecture, minimumMacOS: PIN.minimumMacOS, source: PIN.source,
-    recipeSha256, sourceRoot, sourceOverlay, buildRoot, sdk, configureOptions: PIN.options, disabledModules: PIN.disabledModules, setupSha256: crypto.createHash("sha256").update(setup).digest("hex"), ...staged, logPath };
+    sourceRoot, sourceOverlay, buildRoot, sdk, configureOptions: PIN.options, disabledModules: PIN.disabledModules, ...staged, logPath };
 }
-module.exports = { PIN, recipeIdentity, validateArchive, applySourceAdapter, compilerEnvironment, stageRuntime, buildPython };
+module.exports = { PIN, validateArchive, applySourceAdapter, compilerEnvironment, stageRuntime, buildPython };

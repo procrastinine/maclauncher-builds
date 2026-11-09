@@ -61,7 +61,7 @@ test("System4 feature validation refuses missing movies/debugger and unselected 
 test("cancelled portable System4 build has no output side effects and retains explicit source identities",async t=>{
   const root=temporary(t),workRoot=path.join(root,"output"),signal=AbortSignal.abort();
   await assert.rejects(Portable.buildPortableSystem4({workRoot,signal}),{name:"AbortError"});assert.equal(fs.existsSync(workRoot),false);
-  assert.equal(Portable.REVISION,require("../lib/pins.mjs").gitlink("producers/package-support/src/external/xsystem4"));assert.match(Portable.overlayIdentity(),/^[a-f0-9]{64}$/);assert.equal(Portable.PIN.dependencies.length,5);
+  assert.equal(Portable.REVISION,require("../lib/pins.mjs").gitlink("producers/package-support/src/external/xsystem4"));assert.equal(Portable.PIN.dependencies.length,5);
   const ffi=Portable.PIN.dependencies.find(p=>p.id==="libffi");assert.equal(ffi.version,"3.8.0");assert.equal(ffi.archiveSha256.length,64);
 });
 
