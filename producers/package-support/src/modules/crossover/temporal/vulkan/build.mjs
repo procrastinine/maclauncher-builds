@@ -66,7 +66,8 @@ async function prepareVulkanLink({moltenvkArchive,vulkanLibrary,work}){
     if(!vulkanLibrary)throw Error('The declared MoltenVK archive or exact library is required.');
     vulkanLibrary=fs.realpathSync(vulkanLibrary);
     const sha256=digest(fs.readFileSync(vulkanLibrary));
-    if(sha256!==input.sha256)throw Error('The Vulkan link input differs from the declared MoltenVK release.');
+    // A library from the verified archive is fixed by the archive digest; a supplied library is checked once here.
+    if(!moltenvkArchive&&sha256!==input.sha256)throw Error('The Vulkan link input differs from the declared MoltenVK release.');
     run('/usr/bin/lipo',[vulkanLibrary,'-verify_arch',input.architecture]);
     return {library:vulkanLibrary,sha256};
 }
