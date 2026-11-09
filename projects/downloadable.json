@@ -1222,6 +1222,7 @@
         "lib/abort.cjs",
         "lib/licenses.mjs",
         "producers/dependencies.json",
+        "producers/package-support/src/modules/nscripter/overlays/onscripter-en-v3",
         "producers/package-support/src/modules/nscripter/runtime/onscripter-en-build-v3.js",
         "producers/package-support/src/modules/shared/runtime/native-build-tools.js",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
