@@ -8,8 +8,8 @@ import {execFileSync} from 'node:child_process';
 const [source, destination, ...arguments_] = process.argv.slice(2), options={};
 for(let i=0;i<arguments_.length;i+=2){const key=arguments_[i];if(!['--shaderc','--shaderc-library'].includes(key)||!arguments_[i+1]||options[key])throw Error('Choose explicit shader compiler inputs.');options[key]=path.resolve(arguments_[i+1]);}
 if (!source || !destination || !options['--shaderc'] || !options['--shaderc-library']) throw Error('Usage: node build.mjs <pinned Godot source> <output directory> --shaderc <compiler> --shaderc-library <library>');
-const here = import.meta.dirname, app = appPath('src/modules/godot/graphics'), scripts = ['autoload.gd','camera-effect.gd','aov-effect.gd'];
-const owner = file => path.join(scripts.includes(file) ? here : app, file);
+const app = appPath('src/modules/godot/graphics'), scripts = ['autoload.gd','camera-effect.gd','aov-effect.gd'];
+const owner = file => path.join(app, file);
 const specification = JSON.parse(fs.readFileSync(path.join(app, 'source.json')));
 const header = path.resolve(source, specification.header), output = path.resolve(destination);
 if (crypto.createHash('sha256').update(fs.readFileSync(header)).digest('hex') !== specification.headerSha256) throw Error('Godot extension header differs from the supported version.');
@@ -21,7 +21,7 @@ execFileSync('/usr/bin/c++', ['-std=c++17','-O2','-arch','arm64','-arch','x86_64
   '-I'+path.dirname(header),path.join(app,'bridge.cpp'),'-o',library], {stdio:'inherit'});
 execFileSync('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',library],{stdio:'inherit'});
 addLicenses(output,'Godot',source);
-for (const script of scripts) fs.copyFileSync(path.join(here,script),path.join(output,script));
+for (const script of scripts) fs.copyFileSync(path.join(app,script),path.join(output,script));
 const capturePrograms=[];
 for(let variant=0;variant<4;++variant){
   const file=`aov-capture-${variant}.spv`,args=['--library',options['--shaderc-library'],'--input','aov-capture.glsl','--output',path.join(output,file),'--language','glsl','--stage','compute'];

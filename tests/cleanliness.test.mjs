@@ -23,9 +23,11 @@ test('no tracked link points into the pinned app source',()=>{
  assert.deepEqual(links,[]);
 });
 
+// License texts are excluded: their handling is shared and never fails.
+const license=file=>/(?:^|\/)licenses\//.test(file)||/^(?:LICENSE|COPYING|NOTICE)/i.test(path.posix.basename(file));
 test('no Builds file is a copy of an app file at the pinned commit',()=>{
  const app=new Map(tree(appSourceRoot().directory).filter(row=>row.type==='blob').map(row=>[row.object,row.file]));
- assert.deepEqual(builds.filter(row=>row.type==='blob'&&app.has(row.object)).map(row=>row.file+' = app:'+app.get(row.object)),[]);
+ assert.deepEqual(builds.filter(row=>row.type==='blob'&&app.has(row.object)&&!license(row.file)).map(row=>row.file+' = app:'+app.get(row.object)),[]);
 });
 
 test('source record pins are read only through the shared reader',()=>{

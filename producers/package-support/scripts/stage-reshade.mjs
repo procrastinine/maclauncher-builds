@@ -20,7 +20,7 @@ import {stageLibplaceboScene} from "./stage-libplacebo-scene.mjs";
 import {stageStreamlineSnapshots} from "./stage-streamline-snapshots.mjs";
 import {ALIAS_INDEX,aliasIndex,deduplicate,resolvedPrefixes} from "./payload-aliases.mjs";
 const features = JSON.parse(fs.readFileSync(appPath("src/modules/shared/reshade/features.json"), "utf8"));
-const effectSources = JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, "../src/modules/shared/reshade/effect-sources.json"), "utf8"));
+const effectSources = JSON.parse(fs.readFileSync(appPath("src/modules/shared/reshade/effect-sources.json"), "utf8"));
 
 const args = process.argv.slice(2), source = args.shift();
 if (!source) throw new Error("A ReShade macOS source directory is required.");
@@ -409,7 +409,7 @@ if(fs.existsSync(path.join(ownedSource,"src/color-source.json"))){
   pins.push(` ${sourceRevision(colorSource)} third_party/Khronos-ToneMapping`);
 }
 for (const name of ["ReShade.fxh", "ReShadeUI.fxh"]) inputs.set("include/" + name, path.join(source, "third_party/reshade-shaders/Shaders", name));
-const effects = path.resolve(import.meta.dirname, "../src/modules/shared/reshade/effects");
+const effects = appPath("src/modules/shared/reshade/effects");
 for (const name of fs.readdirSync(effects)) inputs.set("effects/" + name, path.join(effects, name));
 validateEffectSources(effectSources, [...inputs].map(([relative, input]) => ({ path: relative, sha256: digest(fs.readFileSync(input)) })));
 // Identical files under the paths providers open through the shared payload

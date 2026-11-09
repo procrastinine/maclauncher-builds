@@ -6,11 +6,11 @@ import {spawn} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-
-import {adaptHelpers, adaptRuntime} from './adapt-runtime.mjs';
+import {pathToFileURL} from 'node:url';
 
 const here = import.meta.dirname, app = appPath('src/modules/shared/reshade/temporal/fsr4'),
-      owner = name => path.join(['build.mjs', 'adapt-runtime.mjs'].includes(name) ? here : app, name),
+      owner = name => path.join(name === 'build.mjs' ? here : app, name),
+      {adaptHelpers, adaptRuntime} = await import(pathToFileURL(path.join(app, 'adapt-runtime.mjs')).href),
       pin = JSON.parse(await fs.readFile(path.join(app, 'source.json'))),
       [ sourceArg, destinationArg, ...flags ] = process.argv.slice(2);
 if (!sourceArg || !destinationArg)
