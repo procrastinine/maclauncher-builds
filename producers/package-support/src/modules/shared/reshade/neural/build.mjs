@@ -29,12 +29,13 @@ export function buildProvider({ output = path.join(cacheDirectory, "output"),
   output = path.resolve(output);
   fs.mkdirSync(output, { recursive: true });
   // SwiftPM writes dependency edits and lock fingerprints beside Package.swift.
-  // Keep the public producer immutable by building an owned source projection.
+  // Keep the public producer and the pinned app source immutable by building an
+  // owned source projection of copied files, never links back to either.
   const recipeRoot=path.resolve(buildRoot+"-recipe"),shared=path.resolve(directory,"../.."),stagedShared=path.join(recipeRoot,"src/modules/shared");
   if(recipeRoot.startsWith(repository+path.sep)||repository.startsWith(recipeRoot+path.sep))throw Error("Neural work must be separate from the producer checkout.");
   const Content=createRequire(import.meta.url)("../../runtime/runtime-content.js");
   fs.mkdirSync(stagedShared,{recursive:true});
-  fs.cpSync(path.join(shared,"reshade"),path.join(stagedShared,"reshade"),{recursive:true,filter:file=>{const relative=path.relative(shared,file);return !relative.split(path.sep).includes("Packages")&&!Content.excludedReason(relative);}});
+  fs.cpSync(path.join(shared,"reshade"),path.join(stagedShared,"reshade"),{recursive:true,dereference:true,filter:file=>{const relative=path.relative(shared,file);return !relative.split(path.sep).includes("Packages")&&!Content.excludedReason(relative);}});
   execFileSync("/bin/bash", [path.join(stagedShared,"reshade/neural/native/build.sh"), output], {
     cwd: repository, stdio: "inherit", env: { ...process.env,
       MACLAUNCHER_BUILD_DOWNLOAD: path.resolve(repository, "../../tools/download.mjs"),
