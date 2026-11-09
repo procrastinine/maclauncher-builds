@@ -10,6 +10,9 @@ runs:
     - uses: ./.github/actions/setup-node
     - shell: bash
       run: npm ci --ignore-scripts
+    - name: Initialize shared app source
+      shell: bash
+      run: node --input-type=module -e "import {retryNetwork} from './tools/download.mjs'; import {execFileSync} from 'node:child_process'; retryNetwork(()=>execFileSync('git',['submodule','update','--init','--depth','1','--','sources/maclauncher'],{stdio:['inherit','inherit','pipe']}));"
     - name: Read the generated package definitions
       uses: ./.github/actions/download-artifact
       with:

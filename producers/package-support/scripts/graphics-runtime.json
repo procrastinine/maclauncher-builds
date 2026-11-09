@@ -68,7 +68,7 @@
       "pin": {
         "file": "src/modules/godot/graphics/source.json",
         "repository": "/repository",
-        "gitlink": "/gitlink"
+        "commit": "/commit"
       }
     },
     "streamline": {
