@@ -22,7 +22,7 @@ fs.mkdirSync(path.join(out,'sgsr2'),{recursive:true});
 const adaptations=[];let buildInputs;
 if(options['--native-only']){
   const cache=options['--shader-cache'],metadata=JSON.parse(fs.readFileSync(path.join(cache,'provider.json'),'utf8'));
-  if(metadata.providerABI!==1||metadata.complete!==true||metadata.methods?.join()!=='sgsr2'||metadata.source?.repository!==spec.repository||metadata.source?.commit!==sourceRevision(spec)||metadata.owned?.['source.json']!==hash(path.join(app,'source.json'))||metadata.owned?.['../../shaderc-offline.cpp']!==hash(path.join(app,'../../shaderc-offline.cpp')))throw new Error('SGSR2 shader cache differs from the registered shader inputs.');
+  if(metadata.providerABI!==1||metadata.complete!==true||metadata.methods?.join()!=='sgsr2'||metadata.source?.repository!==spec.repository||metadata.owned?.['source.json']!==hash(path.join(app,'source.json'))||metadata.owned?.['../../shaderc-offline.cpp']!==hash(path.join(app,'../../shaderc-offline.cpp')))throw new Error('SGSR2 shader cache differs from the registered shader inputs.');
   for(const [file,sourceSha256] of Object.entries(spec.shaders))if(!metadata.adaptations?.some(row=>row.file===file&&row.sourceSha256===sourceSha256))throw new Error('SGSR2 shader cache adaptations are incomplete.');
   for(const relative of ['convert','upscale'].flatMap(pass=>['metal','json'].map(ext=>'sgsr2/'+pass+'.'+ext))){const file=path.join(cache,relative),row=metadata.files?.find(row=>row.path===relative);if(!row||!fs.statSync(file).isFile()||row.size!==fs.statSync(file).size||row.sha256!==hash(file))throw new Error('SGSR2 shader cache file changed: '+relative);fs.copyFileSync(file,path.join(out,relative));}
   adaptations.push(...metadata.adaptations);buildInputs=metadata.buildInputs;

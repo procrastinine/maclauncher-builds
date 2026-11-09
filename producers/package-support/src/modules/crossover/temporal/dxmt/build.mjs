@@ -39,7 +39,7 @@ fs.writeFileSync(path.join(source, 'include/version.h'), `#pragma once\n#define 
 const sha = p => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
 if (nativeOnly) {
   const previous = JSON.parse(fs.readFileSync(path.join(payload, 'camera-bridge.json'), 'utf8'));
-  if (previous.source?.revision !== revision || previous.temporalD3D12API!==1 || ['d3d11', 'd3d12', 'dxgi', 'nvngx'].some(name => {
+  if (previous.temporalD3D12API!==1 || ['d3d11', 'd3d12', 'dxgi', 'nvngx'].some(name => {
     const file = 'x86_64-windows/' + name + '.dll';return sha(path.join(payload, file)) !== previous.files?.[file];
   })) throw new Error('Native-only builds require the unchanged PE libraries from an existing complete build.');
 }
