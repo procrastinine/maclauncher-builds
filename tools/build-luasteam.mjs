@@ -24,11 +24,11 @@ export async function compile({work,sourceDir=path.join(base,'src/external/luast
    run('/usr/bin/install_name_tool',['-change','@rpath/libsteam_api.dylib','@loader_path/libsteam_api.dylib',slice]);slices.push(slice);
   }
   const binary=path.join(work,'luasteam.so');run('/usr/bin/lipo',['-create',...slices,'-output',binary]);fs.chmodSync(binary,0o755);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',binary]);
-  return {sourceDir,sdkDir,luaDir,luaHeadersRevision,staged,source,binary};
+  return {sourceDir,sdkDir,luaDir,luaHeadersRevision,staged,source,binary,steam,library};
  }catch(error){fs.rmSync(work,{recursive:true,force:true});throw error;}
 }
 /** Add the notices and package the compiled LuaSteam module. */
-export async function assemble({project:id,arch,output,work,compiled:{sourceDir,sdkDir,luaDir,luaHeadersRevision,staged,source,binary}}){
+export async function assemble({project:id,arch,output,work,compiled:{sourceDir,sdkDir,luaDir,luaHeadersRevision,staged,source,binary,steam,library}}){
  const project=resolveProject(id,root,{resolvePins:false}),payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});
  try{
   fs.copyFileSync(binary,path.join(payload,'luasteam.so'));fs.chmodSync(path.join(payload,'luasteam.so'),0o755);

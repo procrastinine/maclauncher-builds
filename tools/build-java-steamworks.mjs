@@ -26,11 +26,11 @@ export async function compile({project:id,version,output,work}){
   const library=path.join(payload,'libsteamworks4j.dylib');fs.writeFileSync(library,execFileSync('/usr/bin/unzip',['-p',publisher,'libsteamworks4j.dylib'],{maxBuffer:Infinity}),{mode:0o755});
   const jdkBin=process.env.JAVA_HOME?path.join(process.env.JAVA_HOME,'bin'):path.join(execFileSync('/usr/libexec/java_home',['-v','17+'],{maxBuffer:Infinity,encoding:'utf8'}).trim(),'bin');
   const agent=build(jdkBin,path.join(payload,'steam-agent.jar'));
-  return {original,project,agent,jdkBin};
+  return {original,project,agent,jdkBin,library};
  }catch(error){fs.rmSync(output,{recursive:true,force:true});fs.rmSync(work,{recursive:true,force:true});throw error;}
 }
 /** Add the notices and describe the payload. */
-export async function assemble({arch,version,output,work,compiled:{original,project,agent,jdkBin}}){
+export async function assemble({arch,version,output,work,compiled:{original,project,agent,jdkBin,library}}){
  const payload=path.join(output,'payload');
  try {
   addLicenses(payload,'MacLauncher',root);

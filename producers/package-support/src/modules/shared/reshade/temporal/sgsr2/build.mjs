@@ -61,7 +61,7 @@ for(const filename of Object.keys(spec.shaders)){
   const ubo=reflection.ubos.find(value=>value.name==='Params');
   if(!ubo||ubo.block_size!==136)throw new Error('SGSR uniform layout changed.');
   fs.writeFileSync(base+'.json',JSON.stringify({entry:entry[1],threads:reflection.entryPoints[0].workgroup_size,bindings,uniformBytes:ubo.block_size},null,2)+'\n');
-  adaptations.push({file:filename,sourceSha256:expected,appliedSha256:hash(input),changes:['descriptor-namespaces','bounded-dispatch',...(convert?['native-signed-motion']:['clamped-edge-load'])]});
+  adaptations.push({file:filename,sourceSha256:hash(original),appliedSha256:hash(input),changes:['descriptor-namespaces','bounded-dispatch',...(convert?['native-signed-motion']:['clamped-edge-load'])]});
   fs.rmSync(input);fs.rmSync(spv);
 }
 buildInputs={shadercLibrary:hash(options['--shaderc-library']),shadercHeader:hash(path.join(options['--shaderc-headers'],'shaderc/shaderc.h')),spirvCross:hash(path.join(tools,'spirv-cross')),spirvVal:hash(path.join(tools,'spirv-val'))};

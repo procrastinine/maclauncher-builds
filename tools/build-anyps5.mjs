@@ -10,7 +10,7 @@ import {buildRuntime} from '../producers/anyps5/build-runtime.mjs';
 import {packageRuntime} from '../producers/anyps5/package-runtime.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 /** Compile the anyps5 relinker and runtime with the declared Python interpreter. */
-export async function compile({arch,work}){
+export async function compile({project,version,arch,work}){
  const record=buildRecord(resolveProject(project,root),version);
  const relinkerBuild=path.join(work,'relinker'),runtimeBuild=path.join(work,'runtime');
  fs.mkdirSync(work,{recursive:true});

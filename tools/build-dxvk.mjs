@@ -10,7 +10,7 @@ import {buildProvider} from '../producers/dxvk/build.mjs';
 import {packageProvider} from '../producers/dxvk/package.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 /** Compile the DXVK provider with the llvm-mingw toolchain. */
-export async function compile({work}){
+export async function compile({project,work}){
   const record=buildRecord(resolveProject(project,root,{resolvePins:false}));
   const archive=await buildInput(llvmMingwInput(),path.join(work,'downloads'));
   const toolchain=path.join(work,'llvm-mingw');fs.mkdirSync(toolchain,{recursive:true});
