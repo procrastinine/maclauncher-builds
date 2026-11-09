@@ -1,4 +1,5 @@
-import sharedDependencies from '../dependencies.json' with {type:'json'};
+import sdl3Prosper from '../dependencies/sdl3Prosper.json' with {type:'json'};
+import vulkanHeaders from '../dependencies/vulkanHeaders.json' with {type:'json'};
 import {gitlink,sourceCheckout,sourceProvenance,sourceRevision} from '../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10,7 +11,7 @@ import {downloadBytes,retryNetwork} from '../../tools/download.mjs';
 const root=path.resolve(import.meta.dirname,'../..');
 export const recipe=JSON.parse(fs.readFileSync(new URL('./source.json',import.meta.url)));
 export const inputs=JSON.parse(fs.readFileSync(new URL('./dependencies.json',import.meta.url)));
-for(const entry of inputs.dependencies)Object.assign(entry,sharedDependencies[entry.id==='sdl3'?'sdl3Prosper':'vulkanHeaders']);
+for(const entry of inputs.dependencies)Object.assign(entry,entry.id==='sdl3'?sdl3Prosper:vulkanHeaders);
 inputs.artifacts=JSON.parse(fs.readFileSync(new URL('../anyps5/dependencies.json',import.meta.url))).artifacts.filter(entry=>entry.id==='ffmpeg-macos-x64');
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});

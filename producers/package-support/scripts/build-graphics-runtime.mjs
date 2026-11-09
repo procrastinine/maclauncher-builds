@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import sharedDependencies from '../../dependencies.json' with {type:'json'};
+import sdlHeaders from '../../dependencies/sdlHeaders.json' with {type:'json'};
 import {prepareSources} from '../src/modules/shared/reshade/libplacebo/dependencies-build.mjs';
 // Builds the shared graphics runtime from owned sources, exact Git pins and
 // declared binary inputs, then optionally stages it with stage-reshade.mjs.
@@ -75,7 +75,7 @@ function registration(relative, root = repository) {
 export function resolveSource(id, override) {
   const entry = recipe.sources[id];
   if (!entry) throw Error("Unknown graphics source: " + id);
-  const commit = id==='sdl-vulkan' ? sourceRevision(sharedDependencies.sdlHeaders) :
+  const commit = id==='sdl-vulkan' ? sourceRevision(sdlHeaders) :
     id==='libplacebo-vulkan-headers' ? git(path.join(repository,'src/external/libplacebo'),['rev-parse',upstreamRevision('reshade','libplacebo-scene')+':3rdparty/Vulkan-Headers']) :
     sourceRevision({gitlink: 'producers/package-support/' + entry.path}), origin = pinned({file: entry.pin.file, pointer: entry.pin.repository});
   const directory = override ? path.resolve(override) : path.join(repository, entry.path);

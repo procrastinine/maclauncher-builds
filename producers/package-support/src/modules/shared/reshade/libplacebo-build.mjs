@@ -1,5 +1,5 @@
 import {appPath,appSourceRoot} from '../../../../../../tools/app-source.mjs';
-import sharedDependencies from '../../../../../dependencies.json' with {type:'json'};
+import moltenvkRecord from '../../../../../dependencies/moltenvk.json' with {type:'json'};
 import {addLicenses} from '../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
@@ -13,7 +13,7 @@ import {buildDependencies,dependencyRecords,profile} from './libplacebo/dependen
 const directory=path.dirname(fileURLToPath(import.meta.url)),repository=path.resolve(directory,'../../../..');
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const run=(program,args)=>execFileSync(program,args,{stdio:'pipe',encoding:'utf8'});
-export const MOLTENVK=Object.freeze(sharedDependencies.moltenvk);
+export const MOLTENVK=Object.freeze(moltenvkRecord);
 function inventory(output){const files=[];function visit(relative=''){for(const row of fs.readdirSync(path.join(output,relative),{withFileTypes:true})){const file=relative?relative+'/'+row.name:row.name;if(row.isDirectory())visit(file);else if(file!=='provider.json')files.push({path:file,size:fs.statSync(path.join(output,file)).size,sha256:hash(path.join(output,file))});}}visit();return files.sort((a,b)=>a.path.localeCompare(b.path));}
 const sceneName=architecture=>architecture==='arm64'?'scene-source.json':'scene-source.x86_64.json';
 /** Build one CPU's libraries, provider and helper, and describe its scene library. */

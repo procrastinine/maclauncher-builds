@@ -1,6 +1,5 @@
 import './producer-environment.mjs';
-import dependencies from '../producers/dependencies.json' with {type:'json'};
-const {libffi}=dependencies;
+import libffi from '../producers/dependencies/libffi.json' with {type:'json'};
 import {androidSource,ndkSource} from '../lib/android-source.mjs';
 import {addLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
@@ -16,7 +15,7 @@ const read=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infin
 
 /** Compile the ARM64 Android libffi with the pinned NDK and the original ART recipe. */
 export async function compile({project,version,output,work}){
- const profile={...JSON.parse(fs.readFileSync(descriptor)),libffi:JSON.parse(fs.readFileSync(new URL('../producers/dependencies.json',import.meta.url))).libffi};version??=profile.version;
+ const profile={...JSON.parse(fs.readFileSync(descriptor)),libffi:JSON.parse(fs.readFileSync(new URL('../producers/dependencies/libffi.json',import.meta.url)))};version??=profile.version;
  if(project!==profile.id||version!==profile.version||[output,work].some(value=>!path.isAbsolute(value||'')||fs.existsSync(value)))throw Error('Select the declared ARM64 Android libffi input on Linux x64 with new absolute output/work directories.');
  fs.mkdirSync(work,{recursive:true});
  const android=checkoutSource({...androidSource(),destination:path.join(work,'android-source')}),source=checkoutSource({...libffi,destination:path.join(work,'libffi-source')});

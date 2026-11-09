@@ -1,5 +1,5 @@
 import {appRequire} from '../../../../../../../tools/app-source.mjs';
-import sharedDependencies from '../../../../../../dependencies.json' with {type:'json'};
+import vulkanHeaders from '../../../../../../dependencies/vulkanHeaders.json' with {type:'json'};
 import {gitlink,sourceRevision} from '../../../../../../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -98,7 +98,7 @@ objc_link_args = ['-arch', '${cpu}']
 
 export function buildKosmicLoader({source, headersSource, work, architecture = 'universal', jobs = 2}) {
     verifySource(source, sourceRevision(targets.vulkanLoader));
-    verifySource(headersSource, sourceRevision(sharedDependencies.vulkanHeaders));
+    verifySource(headersSource, sourceRevision(vulkanHeaders));
     const headersBuild = path.join(work, 'headers-build'), headers = path.join(work, 'headers');
     run('cmake', ['-S', headersSource, '-B', headersBuild, '-DCMAKE_INSTALL_PREFIX=' + headers,
         '-DVULKAN_HEADERS_ENABLE_TESTS=OFF', '-DVULKAN_HEADERS_ENABLE_MODULE=OFF']);

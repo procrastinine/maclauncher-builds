@@ -1,5 +1,4 @@
 // Copyright (c) MacLauncher contributors. MIT license.
-import sharedDependencies from '../dependencies.json' with {type:'json'};
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -11,7 +10,8 @@ import {gitlink} from '../../lib/pins.mjs';
 import {helperClientSource} from './helper-subset.mjs';
 import {buildHelpers} from './helper-build.mjs';
 const here=import.meta.dirname,root=path.resolve(here,'../..'),pins=JSON.parse(fs.readFileSync(path.join(here,'source.json')));
-const winePin={archive:sharedDependencies[pins.wineDependency]},toolchain=sharedDependencies[pins.toolchainDependency];
+const dependency=id=>JSON.parse(fs.readFileSync(path.join(root,'producers/dependencies',id+'.json')));
+const winePin={archive:dependency(pins.wineDependency)},toolchain=dependency(pins.toolchainDependency);
 const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
 const run=(c,a,o={})=>execFileSync(c,a,{stdio:'inherit',...o});
 const capture=(c,a,o={})=>execFileSync(c,a,{encoding:'utf8',...o}).trim();

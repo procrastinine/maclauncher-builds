@@ -1,6 +1,7 @@
 import './producer-environment.mjs';
 import {appSourceRoot} from './app-source.mjs';
-import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
+import sdlHeaders from '../producers/dependencies/sdlHeaders.json' with {type:'json'};
+import spirvCross from '../producers/dependencies/spirvCross.json' with {type:'json'};
 import {checkoutSource} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -13,9 +14,9 @@ export async function buildGraphicsSource({version,arch,output,work,sdkPath,sour
  if(!version)throw Error('An exact registered graphics source-stage version is required.');
  if(tools.meson&&!tools.python){const candidate=path.join(path.dirname(tools.meson),"python");if(fs.existsSync(candidate))tools.python=candidate;}
  const cross=path.join(work,'spirv-cross-source');
- if(!fs.existsSync(path.join(cross,'.git')))checkoutSource({...sharedDependencies.spirvCross,destination:cross});
+ if(!fs.existsSync(path.join(cross,'.git')))checkoutSource({...spirvCross,destination:cross});
  sources['macfx-spirv-cross']=cross;
- if(!sources['sdl-vulkan']){fs.mkdirSync(work,{recursive:true});const destination=path.join(work,'sdl-headers-source');if(!fs.existsSync(path.join(destination,'.git')))checkoutSource({...sharedDependencies.sdlHeaders,destination});sources['sdl-vulkan']=destination;}
+ if(!sources['sdl-vulkan']){fs.mkdirSync(work,{recursive:true});const destination=path.join(work,'sdl-headers-source');if(!fs.existsSync(path.join(destination,'.git')))checkoutSource({...sdlHeaders,destination});sources['sdl-vulkan']=destination;}
  const options={jobs:6,work,arch,sdkPath,sources,reuse,tools,inputs},initial=plan(options);
  const blocked=initial.unresolved.filter(value=>(!value.startsWith('input ')||!value.endsWith(': fetchable'))&&!['tool meson: missing','tool ninja: missing'].includes(value));
  if(blocked.length)throw Error('Unresolved graphics build inputs:\n  '+blocked.join('\n  '));

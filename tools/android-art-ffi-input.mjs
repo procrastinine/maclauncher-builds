@@ -1,6 +1,5 @@
 import './producer-environment.mjs';
-import dependencies from '../producers/dependencies.json' with {type:'json'};
-const {libffi}=dependencies;
+import libffi from '../producers/dependencies/libffi.json' with {type:'json'};
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';

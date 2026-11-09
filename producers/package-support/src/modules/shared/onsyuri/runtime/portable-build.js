@@ -1,12 +1,13 @@
 const {upstreamRevision}=require('../../../../../../../lib/projects.mjs');
-const sharedDependencies=require('../../../../../../dependencies.json');
+// A row without its own archive digest uses the shared record of its library.
+const sharedDependency=id=>require('../../../../../../dependencies/'+id+'.json');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const Native = require('../../../../../../../lib/package-format.cjs');
 const metadata = require("./portable-build.json");
 const revision = upstreamRevision("onsyuri", "onscripter-yuri");
-const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map(row=>{if(row.id==='webp')row={...require('../../../alicesoft/system35-portable.json').dependencies.find(pin=>pin.id==='webp'),...row};if(row.id==='turbojpeg')row={...require('../../../alicesoft/system4-portable.json').dependencies.find(pin=>pin.id==='turbojpeg'),...row};const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};}), engine: { ...metadata.engine, revision,
+const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map(row=>{if(row.id==='webp')row={...require('../../../alicesoft/system35-portable.json').dependencies.find(pin=>pin.id==='webp'),...row};if(row.id==='turbojpeg')row={...require('../../../alicesoft/system4-portable.json').dependencies.find(pin=>pin.id==='turbojpeg'),...row};const pin=row.archiveSha256?undefined:sharedDependency(row.id);return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};}), engine: { ...metadata.engine, revision,
   sourceUrl: `https://github.com/YuriSizuku/OnscripterYuri/tree/${revision}`,
   archiveUrl: `https://codeload.github.com/YuriSizuku/OnscripterYuri/tar.gz/${revision}` } });
 const VERSION = PIN.engine.version;

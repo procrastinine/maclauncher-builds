@@ -23,7 +23,7 @@ test('graphics staging validates the SPIRV-Cross checkout supplied by the build'
  const block=text.slice(text.indexOf('const pins = registeredSources.sources.map'),text.indexOf('const nativeFiles ='))+'\npins;';
  const context={path,execFileSync,upstreamRoot:root,options:{'--spirv-cross-source':checkout},
   registeredSources:{sources:[{id:'macfx-spirv-cross',sourcePath:'third_party/spirv-cross',submodulePath:'removed-checkout'}]},
-  sharedDependencies:{spirvCross:{revision}},sourceRevision};
+  sourceRevision};
  assert.deepEqual([...vm.runInNewContext(block,{...context})],[` ${revision} third_party/spirv-cross`]);
 });
 test('processor declaration consistency uses validated source paths without copied commit fields',()=>{

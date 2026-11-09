@@ -1,5 +1,5 @@
 import {sourceRevision} from '../../../../../../../lib/pins.mjs';
-import shared from '../../../../../../../producers/dependencies.json' with {type:'json'};
+import shaderc from '../../../../../../dependencies/shaderc.json' with {type:'json'};
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -12,8 +12,8 @@ const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',
 // shaderc and Little CMS are declared here; glslang, SPIRV-Tools and SPIRV-Headers
 // take the revisions shaderc's DEPS pins, so each record follows the shaderc source.
 const record=(row,source)=>({...row,
- revision:row.id==='shaderc'?sourceRevision(shared.shaderc):['glslang','spirv-tools','spirv-headers'].includes(row.id)?new RegExp("'"+row.id.replaceAll('-','_')+"_revision':\\s*'([^']+)'").exec(fs.readFileSync(path.join(source,'shaderc/DEPS'),'utf8'))[1]:sourceRevision(row),
- repository:row.id==='shaderc'?shared.shaderc.repository:row.repository});
+ revision:row.id==='shaderc'?sourceRevision(shaderc):['glslang','spirv-tools','spirv-headers'].includes(row.id)?new RegExp("'"+row.id.replaceAll('-','_')+"_revision':\\s*'([^']+)'").exec(fs.readFileSync(path.join(source,'shaderc/DEPS'),'utf8'))[1]:sourceRevision(row),
+ repository:row.id==='shaderc'?shaderc.repository:row.repository});
 /** The dependency source records for a prepared source directory. */
 export const dependencyRecords=source=>profile.sources.map(row=>record(row,source));
 /** Fetch the declared dependency sources: the graphics build's compiler-sources input. */
@@ -21,7 +21,7 @@ export async function prepareSources({work}) {
  const source=path.join(work,'source'),inputs=[];fs.mkdirSync(source,{recursive:true});
  for(const row of profile.sources){
   const value=record(row,source),target=path.join(source,row.id);inputs.push(value);if(fs.existsSync(target))continue;
-  const archive=await buildInput({url:value.repository+'/archive/'+value.revision+'.tar.gz',sha256:row.id==='shaderc'?shared.shaderc.sha256:row.sha256});fs.mkdirSync(target);run('tar',['-xf',archive,'--strip-components=1','-C',target]);
+  const archive=await buildInput({url:value.repository+'/archive/'+value.revision+'.tar.gz',sha256:row.id==='shaderc'?shaderc.sha256:row.sha256});fs.mkdirSync(target);run('tar',['-xf',archive,'--strip-components=1','-C',target]);
  }
  return {source,inputs};
 }

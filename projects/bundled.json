@@ -262,7 +262,10 @@
       "entries": [
         "lib/abort.cjs",
         "lib/licenses.mjs",
-        "producers/dependencies.json",
+        "producers/dependencies/moltenvk.json",
+        "producers/dependencies/sdlHeaders.json",
+        "producers/dependencies/shaderc.json",
+        "producers/dependencies/spirvCross.json",
         "producers/package-support/app-source.json",
         "producers/package-support/scripts/build-graphics-runtime.mjs",
         "producers/package-support/scripts/graphics-build-requirements.txt",
@@ -333,9 +336,9 @@
         "url": "https://github.com/KhronosGroup/SPIRV-Cross",
         "repository": "KhronosGroup/SPIRV-Cross",
         "pin": {
-          "file": "producers/dependencies.json",
-          "pointer": "/spirvCross/revision",
-          "repositoryPointer": "/spirvCross/repository"
+          "file": "producers/dependencies/spirvCross.json",
+          "pointer": "/revision",
+          "repositoryPointer": "/repository"
         }
       },
       {
@@ -552,9 +555,9 @@
         "url": "https://github.com/google/shaderc",
         "repository": "google/shaderc",
         "pin": {
-          "file": "producers/dependencies.json",
-          "pointer": "/shaderc/revision",
-          "repositoryPointer": "/shaderc/repository"
+          "file": "producers/dependencies/shaderc.json",
+          "pointer": "/revision",
+          "repositoryPointer": "/repository"
         }
       },
       {
@@ -878,7 +881,6 @@
         "lib/android-source.mjs",
         "lib/licenses.mjs",
         "producers/android-inputs/aim.json",
-        "producers/dependencies.json",
         "producers/package-support/src/modules/android/native/apk-metadata/Cargo.lock",
         "producers/package-support/src/modules/android/native/apk-metadata/Cargo.toml",
         "producers/package-support/src/modules/android/native/apk-metadata/adapt.mjs",
@@ -1007,7 +1009,6 @@
         "producers/android-inputs/java-converter.json",
         "producers/android-launcher/build.mjs",
         "producers/android-launcher/source.json",
-        "producers/dependencies.json",
         "producers/included-helpers/prepare.mjs",
         "producers/included-helpers/profiles/android-launcher.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
@@ -1214,7 +1215,6 @@
         "lib/abort.cjs",
         "lib/licenses.mjs",
         "producers/android-inputs/aconfig",
-        "producers/dependencies.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "tools/build-android-aconfig.mjs",
         "tools/build-input.mjs",
@@ -1290,7 +1290,17 @@
         "lib/abort.cjs",
         "lib/licenses.mjs",
         "producers/android-inputs/codecs.json",
-        "producers/dependencies.json",
+        "producers/dependencies/flac.json",
+        "producers/dependencies/freetype.json",
+        "producers/dependencies/graphite2.json",
+        "producers/dependencies/harfbuzz.json",
+        "producers/dependencies/libpng.json",
+        "producers/dependencies/ogg.json",
+        "producers/dependencies/opus.json",
+        "producers/dependencies/sdl2.json",
+        "producers/dependencies/sdl2_ttf.json",
+        "producers/dependencies/sndfile.json",
+        "producers/dependencies/vorbis.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
@@ -1310,9 +1320,9 @@
         "url": "https://github.com/libsndfile/libsndfile",
         "repository": "libsndfile/libsndfile",
         "pin": {
-          "file": "producers/dependencies.json",
-          "pointer": "/sndfile/revision",
-          "repositoryPointer": "/sndfile/repository"
+          "file": "producers/dependencies/sndfile.json",
+          "pointer": "/revision",
+          "repositoryPointer": "/repository"
         }
       }
     ],
@@ -1464,7 +1474,6 @@
         "lib/licenses.mjs",
         "producers/android-art-inputs/art-source.json",
         "producers/android-inputs/aim.json",
-        "producers/dependencies.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
         "tools/android-art-producer.mjs",
@@ -1548,7 +1557,6 @@
         "producers/android-inputs/aim.json",
         "producers/android-inputs/java-converter.json",
         "producers/android-inputs/licenses/asm",
-        "producers/dependencies.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
         "tools/build-android-java-converter.mjs",
@@ -1638,7 +1646,7 @@
         "producers/android-art-inputs/ffi-build.patch",
         "producers/android-art-inputs/ffi.json",
         "producers/android-inputs/aim.json",
-        "producers/dependencies.json",
+        "producers/dependencies/libffi.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
         "tools/build-android-art-ffi.mjs",
@@ -1663,9 +1671,9 @@
         "url": "https://github.com/libffi/libffi",
         "repository": "libffi/libffi",
         "pin": {
-          "file": "producers/dependencies.json",
-          "pointer": "/libffi/revision",
-          "repositoryPointer": "/libffi/repository"
+          "file": "producers/dependencies/libffi.json",
+          "pointer": "/revision",
+          "repositoryPointer": "/repository"
         }
       }
     ],
@@ -1731,7 +1739,6 @@
         "producers/android-inputs/licenses/aosp-apache-http",
         "producers/android-inputs/licenses/aosp-framework",
         "producers/android-inputs/licenses/robolectric-portability",
-        "producers/dependencies.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
         "tools/build-android-java-framework.mjs",
@@ -1871,7 +1878,6 @@
         "lib/licenses.mjs",
         "producers/android-image-data",
         "producers/android-inputs/aim.json",
-        "producers/dependencies.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
         "tools/build-input.mjs",
@@ -1955,7 +1961,6 @@
         "lib/licenses.mjs",
         "producers/android-image-data",
         "producers/android-inputs/aim.json",
-        "producers/dependencies.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
         "tools/build-input.mjs",
@@ -2039,7 +2044,6 @@
         "lib/licenses.mjs",
         "producers/android-image-data",
         "producers/android-inputs/aim.json",
-        "producers/dependencies.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
         "tools/build-input.mjs",
@@ -2123,7 +2127,6 @@
         "lib/licenses.mjs",
         "producers/android-image-data",
         "producers/android-inputs/aim.json",
-        "producers/dependencies.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
         "tools/build-input.mjs",
@@ -2207,7 +2210,6 @@
         "lib/licenses.mjs",
         "producers/android-image-data",
         "producers/android-inputs/aim.json",
-        "producers/dependencies.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
         "tools/build-input.mjs",
@@ -2299,7 +2301,6 @@
         "producers/android-inputs/licenses/aosp-apache-http",
         "producers/android-inputs/licenses/aosp-framework",
         "producers/android-inputs/licenses/robolectric-portability",
-        "producers/dependencies.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
         "tools/android-art-java-stage.mjs",
@@ -2392,7 +2393,12 @@
       "entries": [
         "lib/abort.cjs",
         "lib/licenses.mjs",
-        "producers/dependencies.json",
+        "producers/dependencies/freetype.json",
+        "producers/dependencies/graphite2.json",
+        "producers/dependencies/harfbuzz.json",
+        "producers/dependencies/libpng.json",
+        "producers/dependencies/sdl2.json",
+        "producers/dependencies/sdl2_ttf.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
@@ -2410,9 +2416,9 @@
         "url": "https://github.com/libsdl-org/SDL",
         "repository": "libsdl-org/SDL",
         "pin": {
-          "file": "producers/dependencies.json",
-          "pointer": "/sdl2/revision",
-          "repositoryPointer": "/sdl2/repository"
+          "file": "producers/dependencies/sdl2.json",
+          "pointer": "/revision",
+          "repositoryPointer": "/repository"
         }
       }
     ],
@@ -2456,7 +2462,17 @@
       "entries": [
         "lib/abort.cjs",
         "lib/licenses.mjs",
-        "producers/dependencies.json",
+        "producers/dependencies/flac.json",
+        "producers/dependencies/freetype.json",
+        "producers/dependencies/graphite2.json",
+        "producers/dependencies/harfbuzz.json",
+        "producers/dependencies/libpng.json",
+        "producers/dependencies/ogg.json",
+        "producers/dependencies/opus.json",
+        "producers/dependencies/sdl2.json",
+        "producers/dependencies/sdl2_ttf.json",
+        "producers/dependencies/sndfile.json",
+        "producers/dependencies/vorbis.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
@@ -2476,9 +2492,9 @@
         "url": "https://github.com/libsndfile/libsndfile",
         "repository": "libsndfile/libsndfile",
         "pin": {
-          "file": "producers/dependencies.json",
-          "pointer": "/sndfile/revision",
-          "repositoryPointer": "/sndfile/repository"
+          "file": "producers/dependencies/sndfile.json",
+          "pointer": "/revision",
+          "repositoryPointer": "/repository"
         }
       }
     ],
@@ -2522,7 +2538,17 @@
       "entries": [
         "lib/abort.cjs",
         "lib/licenses.mjs",
-        "producers/dependencies.json",
+        "producers/dependencies/flac.json",
+        "producers/dependencies/freetype.json",
+        "producers/dependencies/graphite2.json",
+        "producers/dependencies/harfbuzz.json",
+        "producers/dependencies/libpng.json",
+        "producers/dependencies/ogg.json",
+        "producers/dependencies/opus.json",
+        "producers/dependencies/sdl2.json",
+        "producers/dependencies/sdl2_ttf.json",
+        "producers/dependencies/sndfile.json",
+        "producers/dependencies/vorbis.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "producers/package-support/src/modules/shared/runtime/portable-ffmpeg.js",
         "producers/package-support/src/modules/shared/runtime/portable-ffmpeg.json",
@@ -2579,7 +2605,19 @@
       "entries": [
         "lib/abort.cjs",
         "lib/licenses.mjs",
-        "producers/dependencies.json",
+        "producers/dependencies/flac.json",
+        "producers/dependencies/freetype.json",
+        "producers/dependencies/graphite2.json",
+        "producers/dependencies/harfbuzz.json",
+        "producers/dependencies/libpng.json",
+        "producers/dependencies/ogg.json",
+        "producers/dependencies/opus.json",
+        "producers/dependencies/opusfile.json",
+        "producers/dependencies/sdl2.json",
+        "producers/dependencies/sdl2_mixer.json",
+        "producers/dependencies/sdl2_ttf.json",
+        "producers/dependencies/sndfile.json",
+        "producers/dependencies/vorbis.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "producers/package-support/src/modules/shared/runtime/portable-dependency-prefix.js",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
@@ -2602,9 +2640,9 @@
         "url": "https://github.com/libsdl-org/SDL_mixer",
         "repository": "libsdl-org/SDL_mixer",
         "pin": {
-          "file": "producers/dependencies.json",
-          "pointer": "/sdl2_mixer/revision",
-          "repositoryPointer": "/sdl2_mixer/repository"
+          "file": "producers/dependencies/sdl2_mixer.json",
+          "pointer": "/revision",
+          "repositoryPointer": "/repository"
         }
       }
     ],
@@ -2652,7 +2690,6 @@
       "entries": [
         "lib/abort.cjs",
         "lib/licenses.mjs",
-        "producers/dependencies.json",
         "producers/native-openal",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "tools/build-input.mjs",
@@ -2719,7 +2756,6 @@
         "lib/abort.cjs",
         "lib/licenses.mjs",
         "producers/android-inputs/common-publishers.json",
-        "producers/dependencies.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
         "tools/android-sdl3-publisher.mjs",

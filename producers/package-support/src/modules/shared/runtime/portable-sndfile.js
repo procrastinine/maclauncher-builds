@@ -1,4 +1,5 @@
-const sharedDependencies=require('../../../../../dependencies.json');
+// A row without its own archive digest uses the shared record of its library.
+const sharedDependency=id=>require('../../../../../dependencies/'+id+'.json');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -7,7 +8,7 @@ const Source = require("./pinned-native-build");
 const Native = require('../../../../../../lib/package-format.cjs');
 const Portable = require("./portable-sdl2-fonts");
 const { throwIfAborted } = require('../../../../../../lib/abort.cjs');
-const PIN = Object.freeze({...require("./portable-sndfile.json"),dependencies:require("./portable-sndfile.json").dependencies.map(row=>{const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};})});
+const PIN = Object.freeze({...require("./portable-sndfile.json"),dependencies:require("./portable-sndfile.json").dependencies.map(row=>{const pin=row.archiveSha256?undefined:sharedDependency(row.id);return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};})});
 
 function relative(value) {
   return typeof value === "string" && value.length > 0 && !path.isAbsolute(value) &&

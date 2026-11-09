@@ -1,7 +1,6 @@
 import {appPath,appRequire,moduleFile,moduleFiles} from '../../../tools/app-source.mjs';
-import sharedDependencies from '../../dependencies.json' with {type:'json'};
-import dependencies from '../../../producers/dependencies.json' with {type:'json'};
-const {shaderc}=dependencies;
+import sdlHeaders from '../../dependencies/sdlHeaders.json' with {type:'json'};
+import shaderc from '../../dependencies/shaderc.json' with {type:'json'};
 import {gitlink,sourceRevision} from '../../../lib/pins.mjs';
 import {upstreamRevision} from '../../../lib/projects.mjs';
 import {addLicense,addLicenses,includeLicenses} from '../../../lib/licenses.mjs';
@@ -80,7 +79,7 @@ if(options["--xess-host"]){
       const file=path.join(directory,"source/vulkan",row.path);
       extraOwned.set("maclauncher/xess/native/vulkan/"+row.path,file);
     }
-    pins.push(` ${sourceRevision(sharedDependencies.sdlHeaders)} third_party/xess-vulkan-headers`);
+    pins.push(` ${sourceRevision(sdlHeaders)} third_party/xess-vulkan-headers`);
   }else if(metadata.source.vulkanHeaders)throw Error("The XeSS Vulkan source is declared without its GPU host.");
   for(const row of metadata.files){if(typeof row.path!=="string"||path.isAbsolute(row.path)||row.path.split(/[\\/]/).some(part=>!part||part==="."||part===".."))throw Error("The XeSS GPU host contains an undeclared resource.");const file=path.join(directory,row.path),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink())throw Error("Invalid XeSS GPU host resource: "+row.path);if(!row.path.startsWith("source/"))optionalInputs.set("xess/"+row.path,file);if(row.path.endsWith(".so"))optionalLoad.set("xess/"+row.path,{architectures:["x86_64"],minimumMacOS:metadata.minimumMacOS});}
   optionalInputs.set("xess/provider.json",path.join(directory,"provider.json"));features.graphics.xessSceneAPI=1;

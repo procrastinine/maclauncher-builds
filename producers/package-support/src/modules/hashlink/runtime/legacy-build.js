@@ -1,4 +1,4 @@
-const sharedDependencies=require('../../../../../dependencies.json');
+const sdlHeaders=require('../../../../../dependencies/sdlHeaders.json');
 const { sourceRevision } = require("../../../../../../lib/pins.mjs");
 const { upstreamRevision } = require("../../../../../../lib/projects.mjs");
 const fs = require("node:fs");
@@ -9,7 +9,7 @@ const Native = require('../../../../../../lib/package-format.cjs');
 const UPSTREAM_VERSION = "1.9";
 const VERSION = "1.9-MCLv1";
 const REVISION = upstreamRevision("hashlink", "hashlink-1-9");
-const SDL_REVISION = sourceRevision(sharedDependencies.sdlHeaders);
+const SDL_REVISION = sourceRevision(sdlHeaders);
 const OPENAL_REVISION = upstreamRevision("native-openal", "openal-soft");
 
 function adaptSource(source, sdlSource) {

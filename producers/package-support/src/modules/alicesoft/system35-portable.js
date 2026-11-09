@@ -1,4 +1,3 @@
-const sharedDependencies=require('../../../../dependencies.json');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");

@@ -1,0 +1,7 @@
+{
+  "repository": "https://github.com/libffi/libffi",
+  "revision": "12ffd1f9dc56fcea79d2f742f424301ae668d663",
+  "sha256": "7da3e2d9a171eb0a038f592ecad3ff2bb2550f3496d87b3b29ad0cf4430c0db4",
+  "bytes": 1581626,
+  "url": "https://github.com/libffi/libffi/releases/download/v3.8.0/libffi-3.8.0.tar.gz"
+}

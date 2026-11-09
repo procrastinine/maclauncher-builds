@@ -1,5 +1,5 @@
 import {appPath,appRequire,appSourceRoot} from '../../../../../../../tools/app-source.mjs';
-import sharedDependencies from '../../../../../../dependencies.json' with {type:'json'};
+import sdlHeaders from '../../../../../../dependencies/sdlHeaders.json' with {type:'json'};
 import {sourceRevision} from '../../../../../../../lib/pins.mjs';
 import {upstreamRevision} from '../../../../../../../lib/projects.mjs';
 import {addLicense,addLicenses} from '../../../../../../../lib/licenses.mjs';
@@ -15,7 +15,7 @@ const sdk=fs.realpathSync(args['sdk-source']),vulkan=fs.realpathSync(args['vulka
 fs.accessSync(compiler,fs.constants.X_OK);
 if(!source.libraries[backend])throw Error('Choose vk or dx12.');
 const git=(directory,...parameters)=>execFileSync('git',['-C',directory,...parameters],{env:{...process.env,GIT_NO_LAZY_FETCH:'1'},maxBuffer: Infinity});
-const vulkanRevision=sourceRevision(sharedDependencies.sdlHeaders);
+const vulkanRevision=sourceRevision(sdlHeaders);
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 fs.mkdirSync(out,{recursive:true});const inputs=path.join(out,'inputs');fs.mkdirSync(inputs,{recursive:true});
 const originalInputs={};

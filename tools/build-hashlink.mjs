@@ -1,6 +1,6 @@
 import './producer-environment.mjs';
 import {addLicenses} from '../lib/licenses.mjs';
-import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
+import sdlHeaders from '../producers/dependencies/sdlHeaders.json' with {type:'json'};
 import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
@@ -30,7 +30,7 @@ export async function compile({project,arch,version,output,work,sourceRoot:cache
  fs.mkdirSync(work,{recursive:true});const legacy=hashLinkProfile(version,resolveProject(project,root,{resolvePins:false}))==='1.9',Builder=hashlink(legacy?'legacy-build.js':'dynamic-legacy-build.js');
  let sourceRoot=path.join(root,'producers/package-support/src/external/source-revisions/hashlink-1-9');
  if(!legacy)sourceRoot=cachedSourceRoot||checkoutSource({repository:'https://github.com/HaxeFoundation/hashlink',revision:Builder.REVISION,destination:path.join(work,'upstream')});
- const sdlRoot=checkoutSource({...sharedDependencies.sdlHeaders,destination:path.join(work,'sdl-upstream')});
+ const sdlRoot=checkoutSource({...sdlHeaders,destination:path.join(work,'sdl-upstream')});
  const source=path.join(work,'source'),sdl=path.join(work,'sdl'),openal=path.join(work,'openal');
  const staged=await stageSource(sourceRoot,Builder.REVISION,source),sdlStage=await stageSource(sdlRoot,Builder.SDL_REVISION,sdl),openalStack=nativeStackInput(preparedBuildInput('native-openal'),{arch,work:path.join(work,'openal-prefix')}),openalStage={treeSha256:openalStack.sourceTreeSha256};
  const overlaySha256=Builder.adaptSource(source,sdl),flags=Paths.compilerFlags(Paths.compilerPathMappings({source,sdlSource:sdl,openalSource:openal,build:work,runtime:output})),overlay=path.join(work,'compiler-paths.cmake');

@@ -1,15 +1,15 @@
 // Copyright (c) MacLauncher contributors. MIT license.
-import sharedDependencies from '../../../../../../dependencies.json' with {type:'json'};
+import moltenvkRecord from '../../../../../../dependencies/moltenvk.json' with {type:'json'};
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {appPath} from '../../../../../../../tools/app-source.mjs';
 const declared = JSON.parse(fs.readFileSync(new URL('./source.json', import.meta.url)));
 // The MoltenVK release is declared once in the shared dependencies.
-const {archiveFormat, ...link} = declared.vulkanLinkInput, moltenvk = sharedDependencies.moltenvk;
+const {archiveFormat, ...link} = declared.vulkanLinkInput, moltenvk = moltenvkRecord;
 export const source = {...declared, vulkanLinkInput: {version: moltenvk.version, library: link.library, file: link.file, sha256: moltenvk.sha256,
   architecture: link.architecture, source: moltenvk.source, archive: {...moltenvk.archive, format: archiveFormat}, usage: link.usage}};
-source.archive = sharedDependencies[source.archiveDependency];
+source.archive = JSON.parse(fs.readFileSync(new URL('../../../../../../dependencies/' + source.archiveDependency + '.json', import.meta.url)));
 const here = import.meta.dirname, app = appPath('src/modules/crossover/temporal/vulkan');
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const modulePath = 'dlls/winevulkan/';

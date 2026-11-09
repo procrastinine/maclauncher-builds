@@ -1,5 +1,5 @@
 import './producer-environment.mjs';
-import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
+import moltenvk from '../producers/dependencies/moltenvk.json' with {type:'json'};
 import fs from 'node:fs';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
@@ -14,8 +14,8 @@ export async function prepare({work}){
  fs.mkdirSync(work,{recursive:true});
  const source=read(path.join(directory,'source.json')),downloads=path.join(work,'downloads');
  const [archive,bisonArchive,moltenvkArchive,compiler]=await Promise.all([
-  buildInput(sharedDependencies[source.archiveDependency],downloads),buildInput(source.buildTools.bison,downloads),
-  buildInput(sharedDependencies.moltenvk.archive,downloads),mingw(work)]);
+  buildInput(read(path.join(import.meta.dirname,'../producers/dependencies',source.archiveDependency+'.json')),downloads),buildInput(source.buildTools.bison,downloads),
+  buildInput(moltenvk.archive,downloads),mingw(work)]);
  const wine=path.join(work,'wine');
  return {bisonArchive,moltenvkArchive,mingw:compiler,wine,source:await (await producer()).prepareSource({archive,work:wine})};
 }

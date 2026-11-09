@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import sharedDependencies from '../../../../../../../dependencies.json' with {type:'json'};
 import {sourceRevision} from '../../../../../../../../lib/pins.mjs';
 const revision=sourceRevision({gitlink:'producers/package-support/src/external/xess'});
 import {addLicenses} from '../../../../../../../../lib/licenses.mjs';

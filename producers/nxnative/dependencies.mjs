@@ -1,5 +1,7 @@
 import {checkoutSource} from '../../tools/build-source.mjs';
-import sharedDependencies from '../dependencies.json' with {type:'json'};
+import glslangNx from '../dependencies/glslangNx.json' with {type:'json'};
+import spirvCross from '../dependencies/spirvCross.json' with {type:'json'};
+import zstd from '../dependencies/zstd.json' with {type:'json'};
 import {addLicense,addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs/promises';
 import { constants as fsConstants } from 'node:fs';
@@ -61,7 +63,7 @@ async function extractTar(archive, destination, selected) {
 
 
 async function buildTool(tool, { work, output, jobs }) {
-  const pin=sharedDependencies[{glslangValidator:'glslangNx','spirv-cross':'spirvCross',zstd:'zstd'}[tool.name]];
+  const pin={glslangValidator:glslangNx,'spirv-cross':spirvCross,zstd}[tool.name];
   const source=checkoutSource({...pin,destination:path.join(work,'source',tool.name)});
   tool.source={...tool.source,...pin};
   const build = path.join(work, 'build', tool.name);

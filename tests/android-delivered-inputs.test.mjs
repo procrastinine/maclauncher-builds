@@ -18,7 +18,7 @@ test('included ART supplier retains the canonical acquisition metadata and sourc
 
 test('sealed ART FFI requires its archive and both API headers even when omitted from the inventory',()=>{
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'art-ffi-input-'));try{
- const descriptor='producers/android-art-inputs/ffi.json',profile=json(descriptor),libffi=json('producers/dependencies.json').libffi,files=['lib/libffi.a','include/ffi.h','include/ffitarget.h'];
+ const descriptor='producers/android-art-inputs/ffi.json',profile=json(descriptor),libffi=json('producers/dependencies/libffi.json'),files=['lib/libffi.a','include/ffi.h','include/ffitarget.h'];
  for(const [index,missing]of [undefined,...files].entries()){
   const output=path.join(directory,String(index)),payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});
   for(const file of files.filter(file=>file!==missing)){const destination=path.join(payload,file);fs.mkdirSync(path.dirname(destination),{recursive:true});fs.writeFileSync(destination,'temporary archive/header fixture '+file);}

@@ -170,8 +170,8 @@
       "kind": "archive",
       "description": "LLVM-MinGW universal macOS toolchain",
       "pin": {
-        "file": "../dependencies.json",
-        "pointer": "/llvmMingw"
+        "file": "../dependencies/llvmMingw.json",
+        "pointer": ""
       },
       "url": "{repository}/releases/download/{version}/{asset}",
       "sha256": "{sha256}",

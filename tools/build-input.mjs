@@ -6,9 +6,8 @@ import path from 'node:path';
 import {downloadFile} from './download.mjs';
 import {sha} from './helper-package.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
-import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
 /** The declared llvm-mingw release archive for Windows-side libraries. */
-export function llvmMingwInput(){const pin=sharedDependencies.llvmMingw;return {url:pin.repository+'/releases/download/'+pin.version+'/'+pin.asset,sha256:pin.sha256};}
+export function llvmMingwInput(){const pin=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'../producers/dependencies/llvmMingw.json')));return {url:pin.repository+'/releases/download/'+pin.version+'/'+pin.asset,sha256:pin.sha256};}
 /** Fetch a declared public build input once; cached bytes always need its checksum. */
 export async function buildInput({url,sha256,bytes,headers={}},cache=path.join(os.tmpdir(),'maclauncher-build-inputs')){
  if(!/^https:\/\//.test(url||'')||!(/^[a-f0-9]{64}$/).test(sha256||'')||bytes!==undefined&&(!Number.isSafeInteger(bytes)||bytes<=0))throw Error('A public build input needs an HTTPS URL and SHA-256.');

@@ -1,4 +1,5 @@
-const sharedDependencies=require('../../../../../dependencies.json');
+// A row without its own archive digest uses the shared record of its library.
+const sharedDependency=id=>require('../../../../../dependencies/'+id+'.json');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -7,7 +8,7 @@ const Fonts = require("./portable-sdl2-fonts");
 const Audio = require("./portable-sndfile");
 const Prefix = require("./portable-dependency-prefix");
 const { throwIfAborted } = require('../../../../../../lib/abort.cjs');
-const PIN = Object.freeze({...require("./portable-sdl2-mixer.json"),dependencies:require("./portable-sdl2-mixer.json").dependencies.map(row=>{const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};})});
+const PIN = Object.freeze({...require("./portable-sdl2-mixer.json"),dependencies:require("./portable-sdl2-mixer.json").dependencies.map(row=>{const pin=row.archiveSha256?undefined:sharedDependency(row.id);return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};})});
 const digest = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 const recipeIdentity = () => digest(Buffer.concat([fs.readFileSync(__filename),fs.readFileSync(require.resolve("./portable-sdl2-mixer.json")),fs.readFileSync(require.resolve("./portable-dependency-prefix"))]));
 
