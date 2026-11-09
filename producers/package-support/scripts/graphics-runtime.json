@@ -616,6 +616,7 @@
       "steps": [
         {
           "recipe": "src/modules/shared/reshade/isf/build.mjs",
+          "phased": true,
           "args": [
             "{work}",
             "--payload",
