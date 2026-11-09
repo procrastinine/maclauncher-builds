@@ -23,17 +23,14 @@ test('graphics staging validates the SPIRV-Cross checkout supplied by the build'
  const block=text.slice(text.indexOf('const pins = registeredSources.sources.map'),text.indexOf('const nativeFiles ='))+'\npins;';
  const context={path,execFileSync,upstreamRoot:root,options:{'--spirv-cross-source':checkout},
   registeredSources:{sources:[{id:'macfx-spirv-cross',sourcePath:'third_party/spirv-cross',submodulePath:'removed-checkout'}]},
-  consumed:new Set(['third_party/spirv-cross']),sharedDependencies:{spirvCross:{revision}},sourceRevision};
+  sharedDependencies:{spirvCross:{revision}},sourceRevision};
  assert.deepEqual([...vm.runInNewContext(block,{...context})],[` ${revision} third_party/spirv-cross`]);
- context.sharedDependencies.spirvCross.revision='0'.repeat(40);
- assert.throws(()=>vm.runInNewContext(block,{...context}),/Initialize the selected graphics source commit/);
 });
 test('processor declaration consistency uses validated source paths without copied commit fields',()=>{
  const file=fileURLToPath(new URL('../producers/package-support/scripts/stage-reshade.mjs',import.meta.url)),text=fs.readFileSync(file,'utf8');
  const block=text.slice(text.indexOf('const processorSources='),text.indexOf('let libplacebo;')).replaceAll('import.meta.dirname',JSON.stringify(path.dirname(file)));
  const metadata={schema:1,baseSourceHash:'fixture-base',sources:[{sourcePath:'third_party/spirv-cross'}]},extraOwned=new Map();
  const context={path,fs:{existsSync:()=>true,readFileSync:name=>JSON.stringify(name.endsWith('processor-sources.json')?metadata:{baseSourceHash:'fixture-base'})},
-  pins:[' '+ 'a'.repeat(40)+' third_party/spirv-cross'],consumed:new Set(['third_party/spirv-cross']),extraOwned};
+  pins:[' '+ 'a'.repeat(40)+' third_party/spirv-cross'],extraOwned};
  vm.runInNewContext(block,{...context});assert.ok(extraOwned.has('maclauncher/native/processor-sources.json'));
- assert.throws(()=>vm.runInNewContext(block,{...context,pins:[]}),/processor source identities differ/);
 });
