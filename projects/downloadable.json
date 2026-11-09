@@ -1379,6 +1379,8 @@
         "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/apply-ramen.js",
         "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/apply-window.js",
         "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/decompiler-workspace.patch",
+        "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/ramen",
+        "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/renderer",
         "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/source-build.js",
         "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/sources.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
