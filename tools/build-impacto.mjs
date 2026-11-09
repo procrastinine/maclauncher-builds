@@ -3,7 +3,6 @@ import {addLicense,addLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
-import {createHash} from 'node:crypto';
 import {buildInput} from './build-input.mjs';
 import {run,recipeMain} from "./build-source.mjs";
 import {sealRuntime} from './seal-runtime.mjs';
@@ -15,7 +14,7 @@ const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirna
 const Builder=mages('current-build.js'),Dependency=mages('portable-dependencies.js'),Portable=mages('portable-build.js'),Patches=mages('source-patches.js'),Bink2=mages('sources.json').bink2;
 const FFmpeg=require('../producers/package-support/src/modules/shared/runtime/portable-ffmpeg.json').source;
 /** The Bink2 decoder source record a package states, with the digest of the patch it applies. */
-const bink2Source=()=>({repository:Bink2.repository,revision:sourceRevision(Bink2),patchPath:Bink2.patchPath,upstreamPatchSha256:Bink2.upstreamPatchSha256,patchSha256:createHash('sha256').update(fs.readFileSync(native('bink2.patch'))).digest('hex'),adaptations:Bink2.adaptations,license:Bink2.license});
+const bink2Source=()=>({repository:Bink2.repository,revision:sourceRevision(Bink2),patchPath:Bink2.patchPath,adaptations:Bink2.adaptations,license:Bink2.license});
 const Fonts=require('../producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js'),Audio=require('../producers/package-support/src/modules/shared/runtime/portable-sndfile.js');
 const Source=require('../producers/package-support/src/modules/shared/runtime/pinned-native-build.js'),AVCPP_SOURCE_SCOPE=Object.freeze({kind:'primary-tree',omittedSubmodules:['catch2']});
 const dependencies={runBuildCommand:(command,args,options)=>Source.runBuildCommand(command,args.map((value,index)=>index>0&&args[index-1]==='--parallel'?'2':value),options)};

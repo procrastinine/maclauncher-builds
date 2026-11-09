@@ -2,7 +2,6 @@
 const sharedDependency=id=>require('../../../../../dependencies/'+id+'.json');
 const fs = require("node:fs");
 const path = require("node:path");
-const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const Source = require("../../shared/runtime/pinned-native-build");
 const Native = require('../../../../../../lib/package-format.cjs');
@@ -10,15 +9,6 @@ const Fonts = require("../../shared/runtime/portable-sdl2-fonts");
 const Prefix = require("./portable-prefix");
 const { throwIfAborted } = require('../../../../../../lib/abort.cjs');
 const PIN = Object.freeze({...require("./portable-dependencies.json"),dependencies:require("./portable-dependencies.json").dependencies.map(row=>{if(row.id==='webp')row={...require('../../alicesoft/system35-portable.json').dependencies.find(pin=>pin.id==='webp'),...row};const pin=row.archiveSha256?undefined:sharedDependency(row.id);return pin?.url&&!pin.revision?{...row,archiveUrl:pin.url,archiveSha256:pin.sha256,archiveBytes:pin.bytes,sourceUrl:row.repository||row.sourceUrl}:pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};})});
-const RECIPE_FILES = [__filename, require.resolve("./portable-dependencies.json"), require.resolve("./portable-prefix"),
-  require.resolve("../../shared/runtime/portable-sdl2-fonts"), require.resolve("../../shared/runtime/portable-sdl2-fonts.json"),
-  require.resolve("../../shared/runtime/portable-sndfile"), require.resolve("../../shared/runtime/portable-sndfile.json")];
-
-function recipeHash(files = RECIPE_FILES) {
-  const hash = crypto.createHash("sha256");
-  for (const file of files) hash.update(fs.readFileSync(file));
-  return hash.digest("hex");
-}
 
 function relative(value) {
   return typeof value === "string" && value.length > 0 && !path.isAbsolute(value) &&
@@ -93,7 +83,7 @@ function boostHeaders(sourceRoot, prefix, version) {
   // Only the header interface used by Impacto is installed. No Boost library is compiled.
   const text = `set(Boost_FOUND TRUE)\nset(Boost_VERSION_STRING "${version}")\nif(NOT TARGET Boost::headers)\n  add_library(Boost::headers INTERFACE IMPORTED)\n  set_target_properties(Boost::headers PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${sourceRoot}")\nendif()\n`;
   fs.writeFileSync(path.join(directory, "BoostConfig.cmake"), text);
-  return { sourceRoot, outputRoot: directory, configureOptions: [], headerVersion: version, headerSha256: Native.hashFile(path.join(sourceRoot, "boost/version.hpp")) };
+  return { sourceRoot, outputRoot: directory, configureOptions: [], headerVersion: version };
 }
 
 async function buildCmake({ sourceRoot, outputRoot, prefix, sdk, tools, pathMappings, prefixes = [prefix], options, signal, dependencies = {} }) {
@@ -128,7 +118,7 @@ async function buildDependencies({ archives, workRoot, reusedStacks, pathMapping
   const sdk = reusedStacks.fonts.sdk;
   compilerFlags(sdk, pathMappings);
   const tools = Object.fromEntries(["cmake", "ninja", "meson"].map(name => [name, (dependencies.findBuildTool || Source.findBuildTool)(name)]));
-  const overlaySha256 = recipeHash(), prefix = path.join(workRoot, "prefix"), sourceDirectory = path.join(workRoot, "source");
+  const prefix = path.join(workRoot, "prefix"), sourceDirectory = path.join(workRoot, "source");
   fs.mkdirSync(prefix, { recursive: true }); fs.mkdirSync(sourceDirectory);
   for (const stack of retained) Prefix.linkPrefix(stack.prefix, prefix);
   const sources = [], sourceRoots = {}, run = dependencies.runBuildCommand || Source.runBuildCommand;
@@ -145,9 +135,9 @@ async function buildDependencies({ archives, workRoot, reusedStacks, pathMapping
     sourceRoots[pin.id] = sourceRoot; sources.push({ ...pin, ...build, sourceRoot });
     fs.writeFileSync(path.join(workRoot, "dependency-progress.json"), JSON.stringify({ sources, sourceRoots }, null, 2));
   }
-  return { version: PIN.version, architecture: "arm64", minimumMacOS: "13.0", recipeSha256: overlaySha256,
+  return { version: PIN.version, architecture: "arm64", minimumMacOS: "13.0",
     prefix, sdk, tools, sources, sourceRoots, reusedStacks };
 }
 
-module.exports = { PIN, RECIPE_FILES, recipeHash, relative, validateArchives, dependencyStacks, environment, cmakeOptions,
+module.exports = { PIN, relative, validateArchives, dependencyStacks, environment, cmakeOptions,
   compilerFlags, boostHeaders, buildCmake, buildMeson, buildDependencies };

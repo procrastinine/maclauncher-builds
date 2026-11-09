@@ -3,11 +3,9 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const Patches = require("../producers/package-support/src/modules/mages/native/source-patches");
 
-const hash = value => crypto.createHash("sha256").update(value).digest("hex");
 
 test("dependency patches inside a surrounding Git checkout change the copied source and preserve the outer checkout", async t => {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "mages-dependency-patch-"));
@@ -24,7 +22,7 @@ test("dependency patches inside a surrounding Git checkout change the copied sou
   const result = await Patches.applyPinnedPatch(source, patchFile, { logPath: path.join(root, "build.log") });
   assert.equal(fs.readFileSync(path.join(source, "codec.txt"), "utf8"), "patched decoder\n");
   assert.equal(fs.readFileSync(path.join(root, "codec.txt"), "utf8"), "outer checkout remains intact\n");
-  assert.deepEqual(result, { patchSha256: hash(patch), files: [{ path: "codec.txt", originalSha256: hash("unpatched decoder\n"), adaptedSha256: hash("patched decoder\n") }] });
+  assert.deepEqual(result, { files: [{ path: "codec.txt" }] });
   await assert.rejects(Patches.applyPinnedPatch(source, patchFile, { logPath: path.join(root, "build.log") }), /Native build command failed/);
 });
 

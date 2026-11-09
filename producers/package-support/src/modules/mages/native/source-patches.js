@@ -40,7 +40,7 @@ async function applyPinnedPatch(sourceDir, patchFile, { logPath, signal, env } =
   await Build.runBuildCommand(git, ["apply", patchFile], options);
   const adapted = files.map(digest);
   files.forEach((file, index) => { if (adapted[index] === original[index]) throw new Error(`Native dependency patch was not applied: ${file}.`); });
-  return { patchSha256: hash(patchFile), files: files.map((file, index) => ({ path: file, originalSha256: original[index], adaptedSha256: adapted[index] })) };
+  return { files: files.map(file => ({ path: file })) };
 }
 
 module.exports = { patchEnvironment, patchFiles, applyPinnedPatch };

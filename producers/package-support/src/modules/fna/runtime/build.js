@@ -59,7 +59,6 @@ function applyOpenGLPolicy(root) {
   if (original.split(needle).length !== 2) throw new Error("Pinned FNA3D software OpenGL overlay no longer matches its source.");
   fs.writeFileSync(file, original.replace(needle,
     'SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, SDL_getenv("MACLAUNCHER_ALLOW_SOFTWARE_OPENGL") && SDL_strcmp(SDL_getenv("MACLAUNCHER_ALLOW_SOFTWARE_OPENGL"), "1") == 0 ? 0 : 1);'));
-  return Native.hashFile(file);
 }
 function writeCompilerResponse(file, { sources, references, resources = [], output, target = "library", unsafe = false, define = "" }) {
   // Roslyn response files have their own quote syntax; never pass shell commands.
@@ -123,11 +122,11 @@ async function compileRuntime({ unpacked, pin, logger, signal, sourcePath, fna3d
     const framework = path.join(temporary, "framework");
     const checkout = sourcePath || path.resolve(__dirname, "../../../external/FNA");
     const source = await Source.pinnedFiles(checkout, FNA_REVISION, { signal });
-    const sourceTreeSha256 = Source.stagePinnedFiles(checkout, source.files, framework);
+    Source.stagePinnedFiles(checkout, source.files, framework);
     const fna3dCheckout = fna3dSourcePath || path.resolve(__dirname, "../../../external/source-revisions/fna3d");
     const fna3d = await Source.pinnedFiles(fna3dCheckout, FNA3D_REVISION, { signal });
     fs.rmSync(path.join(framework, "lib/FNA3D"), { recursive: true, force: true });
-    const fna3dSourceSha256 = Source.stagePinnedFiles(fna3dCheckout, fna3d.files, path.join(framework, "lib/FNA3D"));
+    Source.stagePinnedFiles(fna3dCheckout, fna3d.files, path.join(framework, "lib/FNA3D"));
     const compiler = path.join(temporary, "compiler"), referencePack = path.join(temporary, "reference-pack"), sdlSource = path.join(temporary, "sdl-source");
     await packageArchive("compiler", compiler);
     await packageArchive("references", referencePack);
@@ -160,7 +159,7 @@ async function compileRuntime({ unpacked, pin, logger, signal, sourcePath, fna3d
       writeCompilerResponse(file, { sources: [stagedSource], references: [...references, path.join(unpacked, "FNA.dll")], output });
       await run(dotnet, ["exec", "--runtimeconfig", configPath, csc, "@" + file], { logPath, signal });
     }
-    const overlaySha256 = applyOpenGLPolicy(framework);
+    applyOpenGLPolicy(framework);
     const nativePrefix = path.join(temporary, "native");
     const env = { ...process.env, PATH: [path.dirname(cmake), path.dirname(ninja), process.env.PATH || ""].join(path.delimiter) };
     async function cmakeLibrary(source, name, extra = []) {
@@ -183,12 +182,12 @@ async function compileRuntime({ unpacked, pin, logger, signal, sourcePath, fna3d
       fs.copyFileSync(from, to);
       await run("/usr/bin/codesign", ["--force", "--sign", "-", to], { logPath, signal });
     }
-    return { unpacked, temporary, framework, fna3dRoot, faudioRoot, sdlRoot, sourceTreeSha256, fna3dSourceSha256, stagedHost, overlaySha256, embeddedResources };
+    return { unpacked, temporary, framework, fna3dRoot, faudioRoot, sdlRoot, embeddedResources };
   } catch (error) { fs.rmSync(temporary, { recursive: true, force: true }); throw error; }
 }
 
 /** Add the notices and the fna-runtime.json profile the app reads to a compiled runtime. */
-function describeRuntime({ unpacked, temporary, framework, fna3dRoot, faudioRoot, sdlRoot, sourceTreeSha256, fna3dSourceSha256, stagedHost, overlaySha256, embeddedResources }) {
+function describeRuntime({ unpacked, temporary, framework, fna3dRoot, faudioRoot, sdlRoot, embeddedResources }) {
   try {
     const files = Native.fileInventory(unpacked);
 
@@ -215,11 +214,10 @@ function describeRuntime({ unpacked, temporary, framework, fna3dRoot, faudioRoot
     addLicense(unpacked, "FAudio stb", path.join(__dirname, "licenses/LICENSE-FAudio-stb.txt"));
     addLicense(unpacked, "FAudio stb_vorbis", path.join(__dirname, "licenses/LICENSE-FAudio-stb-vorbis.txt"));
     fs.writeFileSync(path.join(unpacked, "fna-runtime.json"), JSON.stringify({ profile: PROFILE, frameworkVersion: "26.10.0.0",
-      dotnetVersion: DOTNET_VERSION, upstreamRevision: FNA_REVISION, architecture: "arm64", sourceTreeSha256,
-      hostSourceSha256: Native.hashFile(stagedHost),
-      capabilities: CAPABILITIES, overlaySha256,
+      dotnetVersion: DOTNET_VERSION, upstreamRevision: FNA_REVISION, architecture: "arm64",
+      capabilities: CAPABILITIES,
       nativeVersions: { sdl: "3.4.18", fna3d: "26.10", faudio: "26.10" },
-      nativeSources: { fna3d: { revision: FNA3D_REVISION, sourceTreeSha256: fna3dSourceSha256 } },
+      nativeSources: { fna3d: { revision: FNA3D_REVISION } },
       embeddedResources: embeddedResources.map(resource => ({ name: resource.name, sha256: Native.hashFile(resource.file) })),
       videoSupport: false, files: Object.fromEntries([...new Set(files)].map(file => [file, Native.hashFile(path.join(unpacked, file))])) }, null, 2));
   } finally { fs.rmSync(temporary, { recursive: true, force: true }); }

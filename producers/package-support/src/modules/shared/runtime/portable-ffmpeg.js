@@ -2,7 +2,6 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { execFileSync } = require("node:child_process");
 const Source = require("./pinned-native-build");
-const Native = require('../../../../../../lib/package-format.cjs');
 const Portable = require("./portable-sdl2-fonts");
 const Audio = require("./portable-sndfile");
 const { throwIfAborted } = require('../../../../../../lib/abort.cjs');
@@ -18,7 +17,7 @@ function normalizeDiagnostics(outputRoot, pathMappings) {
     return "#define FFMPEG_CONFIGURATION "+value;
   });
   if(!found)throw new Error("FFmpeg configuration diagnostic is missing.");
-  fs.writeFileSync(file,adapted);return {path:"config.h",sha256:Native.hashFile(file)};
+  fs.writeFileSync(file,adapted);return {path:"config.h"};
 }
 function validateFeatures(outputRoot) {
   return {decoders:PIN.decoders,demuxers:PIN.demuxers,parsers:PIN.parsers,network:false,externalCodecs:false,gpl:false,nonfree:false,programs:false};

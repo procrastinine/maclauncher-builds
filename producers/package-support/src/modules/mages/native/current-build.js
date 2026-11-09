@@ -1,7 +1,6 @@
 const {sourceRevision}=require('../../../../../../lib/pins.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
-const crypto = require("node:crypto");
 const Source = require("../../shared/runtime/pinned-native-build");
 const Native = require('../../../../../../lib/package-format.cjs');
 const Fonts = require("../../shared/runtime/portable-sdl2-fonts");
@@ -16,22 +15,12 @@ const VERSION = "0.10.8.937-MCLv1";
 const SOURCES = Object.freeze(Object.fromEntries(["impacto", "avcpp", "atrac9", "magicEnum"]
   .map(id => [id, Object.freeze({ repository: Pins[id].repository, revision: sourceRevision(Pins[id]) })])));
 const REVISION = SOURCES.impacto.revision;
-const SOURCE_SHA256 = "09d76f27f572aade7d48c8242976bdb44caa705d480df61413be8a0752efca57";
 const PROFILE = "windows-mpk2-sc3-sfx-macos13-v9";
 const PATCH = path.join(__dirname, "current-windows.patch");
 const ABI_PROFILE = Object.freeze({ input: "windows-sc3-input-v1", audio: "windows-sc3-voice-v1",
   checkpoint: "windows-sc3-checkpoint-u16-v1", backlog: "backlog-zero-capacity-v1", soundEffect: "windows-sc3-sfx-v1" });
-const recipeFiles = [...new Set([__filename, PATCH,
-  path.join(__dirname, "ffmpeg-probe.c"), ...Dependency.RECIPE_FILES])];
-
-function overlayIdentity() {
-  const hash = crypto.createHash("sha256");
-  for (const file of recipeFiles) hash.update(fs.readFileSync(file));
-  return hash.digest("hex");
-}
-
 async function applyCurrentOverlay(directory, { logPath, signal } = {}) {
-  return { upstreamRevision: REVISION, overlaySha256: overlayIdentity(),
+  return { upstreamRevision: REVISION,
     ...await Patches.applyPinnedPatch(directory, PATCH, { logPath, signal }) };
 }
 
@@ -46,7 +35,7 @@ async function buildCurrentImpacto({ sourceDir, workRoot, dependencyStack, ffmpe
   if (inputs.some(value => !path.isAbsolute(value || "") || !fs.statSync(value).isDirectory()))
     throw new Error("Impacto requires explicit codec, avcpp and native dependency source directories.");
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, dependencyStack.prefix, ...inputs] });
-  const identity = overlayIdentity(), sdk = dependencyStack.sdk;
+  const sdk = dependencyStack.sdk;
   const findTool = dependencies.findBuildTool || Source.findBuildTool;
   const tools = { cmake: findTool("cmake"), ninja: findTool("ninja") };
   const projected = path.join(workRoot, "source"), output = path.join(workRoot, "build"), prefix = path.join(workRoot, "prefix");
@@ -79,12 +68,12 @@ async function buildCurrentImpacto({ sourceDir, workRoot, dependencyStack, ffmpe
   const executable = path.join(prefix, "Impacto.app/Contents/MacOS/Impacto");
   await Portable.linkDependencyPaths(executable, [dependencyStack.prefix, ffmpegPrefix], { logPath, env, signal, dependencies });
   Portable.assertMinimumMacOS(executable);
-  return { version: VERSION, profile: PROFILE, sourceRevision: REVISION, sourceTreeSha256: SOURCE_SHA256,
-    overlaySha256: identity, sourceOverlay, currentWindowsAbiProfile: ABI_PROFILE,
+  return { version: VERSION, profile: PROFILE, sourceRevision: REVISION,
+    sourceOverlay, currentWindowsAbiProfile: ABI_PROFILE,
     executable, runtimeRoot: prefix, executableSha256: Native.hashFile(executable),
     codecProbe: { sourceSha256: Native.hashFile(codecSource), bink2Decoder: true, headerLibraryVersionsMatch: true },
     dependencyStack, configureOptions, logPath };
 }
 
-module.exports = { VERSION, SOURCES, REVISION, SOURCE_SHA256, PROFILE, ABI_PROFILE,
-  overlayIdentity, applyCurrentOverlay, buildCurrentImpacto };
+module.exports = { VERSION, SOURCES, REVISION, PROFILE, ABI_PROFILE,
+  applyCurrentOverlay, buildCurrentImpacto };

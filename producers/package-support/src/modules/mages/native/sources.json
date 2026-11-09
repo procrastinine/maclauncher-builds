@@ -19,7 +19,6 @@
     "repository": "https://github.com/sharpemu/ffmpeg-core",
     "gitlink": "producers/package-support/src/external/ffmpeg-core-bink2",
     "patchPath": "bink2.patch",
-    "upstreamPatchSha256": "2c1b70354bb32471a5b1bb46ca3479e641fdd9d971c3eb4317c935040dd28fdc",
     "adaptations": [
       "Normalize the alpha flag to a Boolean before plane iteration"
     ],

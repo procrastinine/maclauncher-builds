@@ -1,7 +1,6 @@
 const {addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
-const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const Source = require("../../shared/runtime/pinned-native-build");
 const Native = require('../../../../../../lib/package-format.cjs');
@@ -12,11 +11,7 @@ const shared = id => require("../../../../../dependencies/" + id + ".json"), med
 const PIN = Object.freeze({ ...media, utilitySources: media.utilitySources.map(row => row.archiveSha256 ? row :
   { ...row, archiveUrl: shared(row.id).url, archiveSha256: shared(row.id).sha256, archiveBytes: shared(row.id).bytes }) });
 function validateSDKPrefix(prefix) {
-  return { version: PIN.version, prefix, recipeSha256: recipeIdentity(), architecture: PIN.architecture, minimumMacOS: PIN.minimumMacOS };
-}
-
-function recipeIdentity() {
-  return crypto.createHash("sha256").update(fs.readFileSync(__filename)).update(fs.readFileSync(require.resolve("./portable-media.json"))).digest("hex");
+  return { version: PIN.version, prefix, architecture: PIN.architecture, minimumMacOS: PIN.minimumMacOS };
 }
 
 function buildEnvironment(prefix, sdk) {
@@ -78,6 +73,6 @@ async function buildUtilities({ archives, workRoot, signal, onProgress, dependen
     addLicenses(prefix,pin.id,sourceRoot);
     builds.push({ ...pin, sourceRoot, ...build });
   }
-  return { version: "boost-glew-macos13-v1", architecture: "arm64", minimumMacOS: "13.0", recipeSha256: recipeIdentity(), prefix, sdk, tools, sources: builds };
+  return { version: "boost-glew-macos13-v1", architecture: "arm64", minimumMacOS: "13.0", prefix, sdk, tools, sources: builds };
 }
-module.exports = { PIN, recipeIdentity, validateSDKPrefix, buildEnvironment, unpackSDK, buildUtilities };
+module.exports = { PIN, validateSDKPrefix, buildEnvironment, unpackSDK, buildUtilities };

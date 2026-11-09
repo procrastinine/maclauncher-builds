@@ -27,7 +27,7 @@ function adaptOpusDescriptor(prefix) {
   if (!["0",pin.version].includes(/^Version:\s*([^\r\n]+)$/m.exec(text)?.[1])) throw new Error("Opus metadata differs from the selected source version.");
   const adapted=Buffer.from(text.replace(/^Version:[^\r\n]+/m,`Version: ${pin.version}`)), temporary=file+".new";
   fs.writeFileSync(temporary,adapted,{flag:"wx"});try{fs.renameSync(temporary,file);}finally{fs.rmSync(temporary,{force:true});}
-  return { path:"lib/pkgconfig/opus.pc", sourceRevision:pin.revision, version:pin.version, sourceSha256:digest(original) };
+  return { path:"lib/pkgconfig/opus.pc", sourceRevision:pin.revision, version:pin.version };
 }
 
 function validateFeatures(outputRoot) {

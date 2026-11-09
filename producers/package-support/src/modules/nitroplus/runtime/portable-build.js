@@ -15,7 +15,6 @@ const REVISION = Previous.REVISION;
 const NPA_REVISION = Previous.NPA_REVISION;
 const ENGINE_TREE_SHA256 = "bea6a70135300539c8036d52888546712ce1c99a33f9812cc037dc9ec53a2833";
 const NPA_TREE_SHA256 = "1db16289f3c1061207f69dc09cd20657963348d957061d48146c7eaafe8514df";
-const COMBINED_TREE_SHA256 = "ec50f32f364301818ff1cf986049a3d84dde52ab162ac4162e16b2319275845b";
 const OWNED_FILES = [__filename, require.resolve("./portable-media"), require.resolve("./portable-media.json"), require.resolve("./build"),
   ...["CMakeLists.txt", "main.cpp", "private-files.cpp", "text-markup.cpp", "text-markup.hpp", "fontconfig.conf", "choice-state.hpp"].map(file => path.join(__dirname, "native", file)),
   require.resolve("./choice-overlay"), require.resolve("../../shared/runtime/portable-sdl2-fonts"), require.resolve("../../shared/runtime/portable-sdl2-fonts.json")];
@@ -111,7 +110,7 @@ async function buildPortableNPengine({ sourceDir = Previous.sourcePath, npaSourc
   Media.validateSDKPrefix(media.prefix);
   const executable = path.join(prefix, "bin/npengine-runner");
   return { managerId: "npengine", version: VERSION, architecture: "arm64", minimumMacOS: "13.0", sourceRevision: REVISION,
-    sourceTreeSha256: ENGINE_TREE_SHA256, additionalSources: ADDITIONAL_SOURCES, combinedSourceTreeSha256: COMBINED_TREE_SHA256,
+    sourceTreeSha256: ENGINE_TREE_SHA256, additionalSources: ADDITIONAL_SOURCES,
     overlaySha256, sourceOverlay, sourceRoot, prefix, executable, executableSha256: Native.hashFile(executable),
     versions, configureOptions: options, dependencyClosure: { media, utilities: utilityStack, sdl: sdlStack }, logPath };
 }
@@ -120,7 +119,7 @@ const ADDITIONAL_SOURCES = [{ id: "libnpa", upstreamRevision: NPA_REVISION, sour
 /** Write the profile.json the app reads, and the font configuration, into a compiled engine prefix. */
 function describeRuntime({ prefix, overlaySha256, versions }) {
   const profile = { schemaVersion: 1, version: VERSION, profileRevision: PROFILE_REVISION, upstreamRevision: REVISION, npaRevision: NPA_REVISION,
-    sourceTreeSha256: ENGINE_TREE_SHA256, additionalSources: ADDITIONAL_SOURCES, combinedSourceTreeSha256: COMBINED_TREE_SHA256, overlaySha256,
+    sourceTreeSha256: ENGINE_TREE_SHA256, additionalSources: ADDITIONAL_SOURCES, overlaySha256,
     architecture: "arm64", minimumMacOS: "13.0", supportLevel: "beta", mediaVersion: Media.PIN.version,
     dependencyVersions: versions, plugins: Previous.PLUGINS, formats: ["NPA v1 unencrypted", "NSS source"] };
   fs.writeFileSync(path.join(prefix, "profile.json"), JSON.stringify(profile, null, 2) + "\n");
@@ -128,5 +127,5 @@ function describeRuntime({ prefix, overlaySha256, versions }) {
   return profile;
 }
 
-module.exports = { VERSION, describeRuntime, PROFILE_REVISION, REVISION, NPA_REVISION, ENGINE_TREE_SHA256, NPA_TREE_SHA256, COMBINED_TREE_SHA256,
+module.exports = { VERSION, describeRuntime, PROFILE_REVISION, REVISION, NPA_REVISION, ENGINE_TREE_SHA256, NPA_TREE_SHA256,
   OWNED_FILES, overlayIdentity, inventory, adaptSource, requirePrefix, buildPortableNPengine };
