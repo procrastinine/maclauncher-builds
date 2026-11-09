@@ -25,8 +25,9 @@ try{
  git(work,['init','--quiet','--bare','--initial-branch=main',origin]);fs.mkdirSync(builds);
  execFileSync('sh',['-c','git -C "$1" archive HEAD | tar -x -C "$2" --exclude=.gitmodules','sh',root,builds]);
  const catalog=path.join(builds,'catalogs',project+'.json'),entries=JSON.parse(fs.readFileSync(catalog,'utf8'));
- entries.packages=entries.packages.filter(row=>!(row.version===declaration.version&&row.arch===declaration.arch));fs.writeFileSync(catalog,JSON.stringify(entries,null,2)+'\n');
- fs.rmSync(path.join(builds,'catalogs/declarations',project,declaration.version,declaration.arch+'.json'),{force:true});
+ // The whole version is unpublished, every architecture, as before its first publish.
+ entries.packages=entries.packages.filter(row=>row.version!==declaration.version);fs.writeFileSync(catalog,JSON.stringify(entries,null,2)+'\n');
+ fs.rmSync(path.join(builds,'catalogs/declarations',project,declaration.version),{recursive:true,force:true});
  git(builds,['init','--quiet','--initial-branch=main']);git(builds,['add','.']);git(builds,['commit','--quiet','-m','Builds stand-in']);git(builds,['remote','add','origin',origin]);git(builds,['push','--quiet','origin','main']);
  // Repository tools read the pinned app source; serve it from this tree, untracked.
  fs.rmSync(path.join(builds,'sources/maclauncher'),{recursive:true,force:true});fs.symlinkSync(path.join(root,'sources/maclauncher'),path.join(builds,'sources/maclauncher'));
