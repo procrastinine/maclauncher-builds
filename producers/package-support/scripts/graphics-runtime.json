@@ -571,7 +571,6 @@
           "phased": true,
           "args": [
             "{source:librashader}",
-            "-",
             "{output}",
             "--arch",
             "{arch}"

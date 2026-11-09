@@ -2,7 +2,6 @@
   "schema": 1,
   "repository": "https://github.com/SnowflakePowered/librashader",
   "version": "0.12.1",
-  "artifacts": {},
   "sourceBuilds": {
     "x86_64": {
       "package": "librashader-capi",

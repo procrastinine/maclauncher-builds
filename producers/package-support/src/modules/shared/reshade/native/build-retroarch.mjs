@@ -8,12 +8,12 @@ import os from 'node:os';
 import {execFileSync} from 'node:child_process';
 import {applyRetroarchExternalOverlay} from './retroarch-external-overlay.mjs';
 const {SCENE_SHADER_INPUTS}=appRequire('src/modules/shared/effects/operation-contracts.mjs');
-const [sourceArg,archiveArg,outputArg,...flags]=process.argv.slice(2),phaseAt=flags.indexOf('--phase'),phase=phaseAt<0?null:flags[phaseAt+1],options=phaseAt<0?flags:[...flags.slice(0,phaseAt),...flags.slice(phaseAt+2)];
+const [sourceArg,outputArg,...flags]=process.argv.slice(2),phaseAt=flags.indexOf('--phase'),phase=phaseAt<0?null:flags[phaseAt+1],options=phaseAt<0?flags:[...flags.slice(0,phaseAt),...flags.slice(phaseAt+2)];
 const arch=options.length===1&&options[0]==='--universal'?'universal':options.length===2&&options[0]==='--arch'?options[1]:'arm64';
-if(!sourceArg||!archiveArg||!outputArg||!['arm64','x64','universal'].includes(arch)||options.length&&!((options.length===1&&options[0]==='--universal')||(options.length===2&&options[0]==='--arch')))
-  throw new Error('Usage: node build-retroarch.mjs <original librashader source> <official arm64 archive or -> <new output> [--universal] [--phase compile|assemble]');
+if(!sourceArg||!outputArg||!['arm64','x64','universal'].includes(arch)||options.length&&!((options.length===1&&options[0]==='--universal')||(options.length===2&&options[0]==='--arch')))
+  throw new Error('Usage: node build-retroarch.mjs <original librashader source> <new output> [--universal] [--phase compile|assemble]');
 if(phaseAt>=0&&!['compile','assemble'].includes(phase))throw new Error('Choose the compile or assemble phase.');
-const originalSource=path.resolve(sourceArg),archive=archiveArg==='-'?null:path.resolve(archiveArg),output=path.resolve(outputArg);
+const originalSource=path.resolve(sourceArg),output=path.resolve(outputArg);
 const native='src/modules/shared/reshade/native';
 const declaration=JSON.parse(fs.readFileSync(new URL('./retroarch-source.json',import.meta.url)));
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -21,7 +21,6 @@ const run=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',
 const source=path.join(output,'upstream-source');
 /** Build librashader and the preparation helper from the overlaid upstream source. */
 function compile(){
- if(archive&&hash(archive)!==declaration.artifacts.arm64?.sha256)throw new Error('The official librashader archive checksum differs.');
  if(fs.existsSync(output))throw new Error('Use a new RetroArch shader output directory.');
  fs.mkdirSync(output,{recursive:true});
  const sourceArchive=path.join(output,'upstream.tar');
