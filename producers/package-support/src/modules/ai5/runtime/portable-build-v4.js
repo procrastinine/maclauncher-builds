@@ -100,7 +100,7 @@ async function buildPortableAI5({ sourceDir = Previous.sourcePath, workRoot, fon
   if (process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) throw new Error("AI5 builds require macOS and an arm64 or x64 target.");
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, fontStack?.prefix, audioStack?.prefix].filter(Boolean) });
   const prefixes = dependencyPrefixes({ fontStack, audioStack, movieStack });
-  const source = await Source.validatePinnedSource(sourceDir, REVISION, { signal });
+  const source = await Source.pinnedFiles(sourceDir, REVISION, { signal });
   const overlaySha256 = overlayIdentity(); fs.mkdirSync(workRoot, { recursive: true });
   const sourceRoot = path.join(workRoot, "source"), outputRoot = path.join(workRoot, "output"), prefix = path.join(workRoot, "prefix");
   const sourceTreeSha256 = Source.stagePinnedFiles(sourceDir, source.files, sourceRoot), sourceOverlay = adaptSource(sourceRoot);

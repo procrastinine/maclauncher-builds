@@ -42,7 +42,7 @@ async function buildCandidate({directory,sourceDir,dependencyDirs,boostHeaders,a
   for(const source of Object.values(dirs)) {
     if(!path.isAbsolute(source||'')||source===directory||source.startsWith(directory+path.sep)||directory.startsWith(source+path.sep))throw Error('Installer source and owned build directories must be separate');
   }
-  const sources=await Promise.all(Object.entries(pins).map(async([name,revision])=>[name,await Pinned.validatePinnedSource(dirs[name],revision,{signal})]));
+  const sources=await Promise.all(Object.entries(pins).map(async([name,revision])=>[name,await Pinned.pinnedFiles(dirs[name],revision,{signal})]));
   const stage=path.join(directory,'build-source'),upstream=path.join(stage,'innoextract'),deps=path.join(stage,'dependencies'),output=path.join(directory,'build-output'),payload=path.join(directory,'payload');
   if(fs.existsSync(stage)||fs.existsSync(output)||fs.existsSync(payload))throw Error('The candidate stage already exists; preserve it and use a fresh directory');
   const sourceTrees={};

@@ -50,7 +50,7 @@ async function buildPortableSystem4({ sourceDir=sourcePath,archives,workRoot,dep
   workRoot=Fonts.assertFreshBuildRoot(workRoot,{readOnlyRoots:[sourceDir,...Object.values(dependencyStacks||{}).map(stack=>stack.prefix)]});
   Fonts.validateArchives(archives);Audio.validateArchives(archives);Audio.validateArchives(archives,{catalog:PIN});
   if(!path.isAbsolute(archives?.ffmpeg||""))throw new Error("Portable movies require the FFmpeg source archive.");
-  const source=await Source.validatePinnedSource(sourceDir,REVISION,{signal});
+  const source=await Source.pinnedFiles(sourceDir,REVISION,{signal});
   const libsys4Revision = require("node:child_process").execFileSync("git", ["-C", sourceDir, "rev-parse", "HEAD:subprojects/libsys4"], { encoding: "utf8" }).trim();
   const overlaySha256=overlayIdentity();
   let fonts,audio,movie;

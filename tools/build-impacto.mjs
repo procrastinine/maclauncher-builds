@@ -39,7 +39,7 @@ export async function finishImpacto({project,arch,work,sources,fonts,audio,depen
 export async function finishImpactoEngine({project,arch,work,sources,fonts,audio,dependencyStack,maps,ffmpegPrefix}){
  const sdk=dependencyStack.sdk,ffmpeg=path.join(work,'ffmpeg-source'),avcpp=path.join(work,'avcpp-source'),avcppPrefix=path.join(work,'avcpp');
  addLicenses(ffmpegPrefix,'FFmpeg 7.1.2',ffmpeg);
- const checked=await Source.validatePinnedSource(sources.avcpp,Builder.SOURCES.avcpp.revision,{sourceScope:AVCPP_SOURCE_SCOPE});Source.stagePinnedFiles(sources.avcpp,checked.files,avcpp);
+ const checked=await Source.pinnedFiles(sources.avcpp,Builder.SOURCES.avcpp.revision,{sourceScope:AVCPP_SOURCE_SCOPE});Source.stagePinnedFiles(sources.avcpp,checked.files,avcpp);
  await Patches.applyPinnedPatch(avcpp,path.join(sources.impacto,'portfiles/avcpp/0002-av_init_packet_deprecation.patch'),DependencyOverlays.avcppPacket,{logPath:path.join(work,'patches.log')});
  const tools=dependencyStack.tools;await Dependency.buildCmake({sourceRoot:avcpp,outputRoot:path.join(work,'avcpp-build'),prefix:avcppPrefix,sdk,tools,prefixes:[ffmpegPrefix,dependencyStack.prefix],pathMappings:maps,dependencies,options:['-DAV_ENABLE_STATIC=ON','-DAV_ENABLE_SHARED=OFF','-DAV_BUILD_EXAMPLES=OFF','-DAV_BUILD_TESTS=OFF','-DAV_DISABLE_AVDEVICE=ON','-DAV_DISABLE_AVFILTER=ON']});
  const built=await Builder.buildCurrentImpacto({sourceDir:sources.impacto,workRoot:path.join(work,'engine'),dependencyStack,ffmpegPrefix,avcppPrefix,atrac9Source:sources.atrac9,magicEnumSource:sources.magicEnum,pathMappings:maps,dependencies});

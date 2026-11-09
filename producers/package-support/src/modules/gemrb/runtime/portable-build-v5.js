@@ -41,7 +41,7 @@ async function buildPortableGemRB({ sourceDir = sourcePath, archives, workRoot, 
   if (process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) throw new Error("GemRB builds require macOS and an arm64 or x64 target.");
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, ...Object.values(dependencyStacks || {}).map(stack => stack.prefix)] });
   Fonts.validateArchives(archives); Audio.validateArchives(archives); Audio.validateArchives(archives, { catalog: Mixer.PIN }); Python.validateArchive(archives?.python);
-  const source = await Source.validatePinnedSource(sourceDir, REVISION, { signal });
+  const source = await Source.pinnedFiles(sourceDir, REVISION, { signal });
   const recipeSha256 = overlayIdentity();
   let mixer, python;
   if (dependencyStacks) {

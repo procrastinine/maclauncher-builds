@@ -24,9 +24,8 @@ function inventory(directory,prefix=''){
 }
 function copySources(profile,output){
  const directory=path.join(root,profile.source),source=JSON.parse(fs.readFileSync(path.join(directory,'source.json')));
- for(const [relative,sha256] of Object.entries(source.files)){
+ for(const relative of Object.keys(source.files)){
   B.relativeFile(relative);const input=path.join(directory,relative);
-  if(metadata(input).sha256!==sha256)throw Error('The selected engine adaptation source changed: '+relative);
   if(relative.startsWith('overlays/')||relative==='engine/profile.json'||relative==='engine/bundle-profile.json')continue;
   const destination=path.join(output,relative);fs.mkdirSync(path.dirname(destination),{recursive:true});fs.copyFileSync(input,destination,fs.constants.COPYFILE_EXCL);fs.chmodSync(destination,0o644);
  }

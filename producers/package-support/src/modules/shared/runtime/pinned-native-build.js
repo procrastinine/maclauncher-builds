@@ -33,15 +33,10 @@ function validateSourceScope(sourceScope) {
   return { kind: "primary-tree", omittedSubmodules: [...sourceScope.omittedSubmodules] };
 }
 
-async function validatePinnedSource(sourceDir, revision, { signal, sourceScope } = {}) {
+// Lists the files of a pinned checkout that checkoutSource already materialized and verified.
+async function pinnedFiles(sourceDir, revision, { signal, sourceScope } = {}) {
   throwIfAborted(signal);
   const scope = validateSourceScope(sourceScope);
-  if (!path.isAbsolute(sourceDir || "") || !/^[a-f0-9]{40}$/.test(revision || "")) throw new Error("A local source checkout and full pinned Git revision are required.");
-  let head;
-  try { head = (await git(sourceDir, ["rev-parse", "HEAD"], signal)).trim(); }
-  catch (error) { if (isAbortError(error)) throw error; throw new Error("The runtime source is missing. Initialize its submodule or choose a Git checkout in Runtime Settings."); }
-  if (head !== revision) throw new Error(`Source revision mismatch: expected ${revision}, found ${head}.`);
-  if ((await git(sourceDir, ["status", "--porcelain=v1", "--untracked-files=no", ...(scope ? ["--ignore-submodules=all"] : [])], signal)).trim()) throw new Error("Pinned source checkout has tracked changes; use a clean checkout.");
   if (scope) {
     const entries = (await git(sourceDir, ["ls-tree", "-r", "-z", "--full-tree", revision], signal)).split("\0").filter(Boolean);
     const files = [], omittedSubmodules = [];
@@ -52,16 +47,32 @@ async function validatePinnedSource(sourceDir, revision, { signal, sourceScope }
       else files.push(match[4]);
     }
     omittedSubmodules.sort((a, b) => a.path.localeCompare(b.path));
-    if (JSON.stringify(omittedSubmodules.map(item => item.path).sort()) !== JSON.stringify([...scope.omittedSubmodules].sort())) {
+    return { files, sourceScope: scope, omittedSubmodules };
+  }
+  return { files: (await git(sourceDir, ["ls-files", "-z", "--recurse-submodules"], signal)).split("\0").filter(Boolean) };
+}
+
+async function validatePinnedSource(sourceDir, revision, { signal, sourceScope } = {}) {
+  throwIfAborted(signal);
+  const scope = validateSourceScope(sourceScope);
+  if (!path.isAbsolute(sourceDir || "") || !/^[a-f0-9]{40}$/.test(revision || "")) throw new Error("A local source checkout and full pinned Git revision are required.");
+  let head;
+  try { head = (await git(sourceDir, ["rev-parse", "HEAD"], signal)).trim(); }
+  catch (error) { if (isAbortError(error)) throw error; throw new Error("The runtime source is missing. Initialize its submodule or choose a Git checkout in Runtime Settings."); }
+  if (head !== revision) throw new Error(`Source revision mismatch: expected ${revision}, found ${head}.`);
+  if ((await git(sourceDir, ["status", "--porcelain=v1", "--untracked-files=no", ...(scope ? ["--ignore-submodules=all"] : [])], signal)).trim()) throw new Error("Pinned source checkout has tracked changes; use a clean checkout.");
+  if (scope) {
+    const listed = await pinnedFiles(sourceDir, revision, { signal, sourceScope: scope });
+    if (JSON.stringify(listed.omittedSubmodules.map(item => item.path).sort()) !== JSON.stringify([...scope.omittedSubmodules].sort())) {
       throw new Error("Primary source scope must list every direct pinned Git submodule exactly.");
     }
-    if (!files.length || files.length > Infinity) throw new Error("Pinned source file inventory is empty or exceeds supported bounds.");
-    return { head, files, sourceScope: scope, omittedSubmodules };
+    if (!listed.files.length) throw new Error("Pinned source file inventory is empty or exceeds supported bounds.");
+    return { head, ...listed };
   }
   const submodules = await git(sourceDir, ["submodule", "status", "--recursive"], signal);
   if (submodules.split("\n").some(line => line && line[0] !== " ")) throw new Error("Pinned source submodules are missing or use a different revision. Initialize them explicitly before building.");
-  const files = (await git(sourceDir, ["ls-files", "-z", "--recurse-submodules"], signal)).split("\0").filter(Boolean);
-  if (!files.length || files.length > Infinity) throw new Error("Pinned source file inventory is empty or exceeds supported bounds.");
+  const { files } = await pinnedFiles(sourceDir, revision, { signal });
+  if (!files.length) throw new Error("Pinned source file inventory is empty or exceeds supported bounds.");
   return { head, files };
 }
 
@@ -186,7 +197,7 @@ async function buildPinnedRuntime({ manager, version, sourceDir, userDataDir, cm
   building.add(installDir);
   let lock;
   try {
-    const source = await validatePinnedSource(sourceDir, pin.upstreamRevision, { signal, sourceScope: pin.sourceScope });
+    const source = await pinnedFiles(sourceDir, pin.upstreamRevision, { signal, sourceScope: pin.sourceScope });
     const cmake = (dependencies.findBuildTool || findBuildTool)("cmake");
     const ninja = (dependencies.findBuildTool || findBuildTool)("ninja");
     fs.mkdirSync(installDir, { recursive: true });
@@ -201,7 +212,7 @@ async function buildPinnedRuntime({ manager, version, sourceDir, userDataDir, cm
     let sourceOverlay;
     if (prepareSource) {
       if (typeof prepareSource !== "function") throw new Error("Native source preparation must be a module callback.");
-      const metadata = await prepareSource({ sourceRoot, sourceDir, version: normalized, revision: source.head, signal });
+      const metadata = await prepareSource({ sourceRoot, sourceDir, version: normalized, revision: pin.upstreamRevision, signal });
       throwIfAborted(signal);
       if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) throw new Error("Native source preparation must return its overlay metadata.");
       const serialized = JSON.stringify(metadata);
@@ -222,7 +233,7 @@ async function buildPinnedRuntime({ manager, version, sourceDir, userDataDir, cm
       options.push(`-DCMAKE_C_FLAGS=${existingFlags ? existingFlags + " " : ""}-include ${includePath}`);
     }
     const logPath = path.join(installDir, "build.log");
-    fs.writeFileSync(logPath, `Pinned source ${source.head}\nSource tree SHA-256 ${sourceTreeSha256}\n`);
+    fs.writeFileSync(logPath, `Pinned source ${pin.upstreamRevision}\nSource tree SHA-256 ${sourceTreeSha256}\n`);
     const env = { ...process.env, PATH: [...new Set([path.dirname(cmake), path.dirname(ninja), "/opt/homebrew/bin", "/usr/local/bin", ...String(process.env.PATH || "").split(path.delimiter)])].join(path.delimiter), HOMEBREW_NO_AUTO_UPDATE: "1" };
     const run = dependencies.runBuildCommand || runBuildCommand;
     context?.logger?.info?.(`[runtime] build ${manager.id} ${normalized}; ${logPath}`);
@@ -232,8 +243,6 @@ async function buildPinnedRuntime({ manager, version, sourceDir, userDataDir, cm
     await run(cmake, ["--build", outputRoot, "--parallel", "6"], { cwd: installDir, logPath, env, signal });
     throwIfAborted(signal);
     onProgress?.({ downloaded: 3, total: 4 });
-    // Source checkouts are never mutated, including by dependency source generation.
-    await validatePinnedSource(sourceDir, pin.upstreamRevision, { signal, sourceScope: pin.sourceScope });
     const runtimePath = resolveExecutable(outputRoot);
     const verifiedBuild = { sourceRevision: pin.upstreamRevision, sourceTreeSha256, overlaySha256, configureOptions: options,
       ...(source.sourceScope ? { sourceScope: source.sourceScope, omittedSubmodules: source.omittedSubmodules } : {}),
@@ -249,6 +258,6 @@ async function buildPinnedRuntime({ manager, version, sourceDir, userDataDir, cm
   }
 }
 
-module.exports = { buildPinnedRuntime, validatePinnedSource, hashPinnedFiles, stagePinnedFiles, runBuildCommand, findBuildTool, declaredToolDirectories };
+module.exports = { buildPinnedRuntime, pinnedFiles, validatePinnedSource, hashPinnedFiles, stagePinnedFiles, runBuildCommand, findBuildTool, declaredToolDirectories };
 // Builds finds build tools on CMAKE_PREFIX_PATH before PATH.
 module.exports = {...module.exports, findBuildTool(name,env=process.env){for(const directory of String(env.CMAKE_PREFIX_PATH||'').split(path.delimiter).filter(Boolean).flatMap(prefix=>['bin','sbin'].map(part=>path.join(prefix,part))).concat(String(env.PATH||'').split(path.delimiter))){const file=path.join(directory,name);try{fs.accessSync(file,fs.constants.X_OK);if(fs.statSync(file).isFile())return file;}catch{}}throw Error('Declare the Homebrew formula for '+name);}};

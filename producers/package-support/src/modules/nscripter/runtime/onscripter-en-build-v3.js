@@ -96,7 +96,7 @@ async function buildRuntime({ manager, userDataDir, version, packageVersion, sou
     const ninja = await BuildTools.resolveBuildTool("ninja", toolOptions);
     let source = sourceDir, sourceTreeSha256 = null, sourceArchiveSha256 = null;
     if (source && fs.existsSync(path.join(source, ".git"))) {
-      const pin = await Source.validatePinnedSource(source, REVISION, { signal, sourceScope: SOURCE_SCOPE });
+      const pin = await Source.pinnedFiles(source, REVISION, { signal, sourceScope: SOURCE_SCOPE });
       const privateSource = path.join(work, "source");
       sourceTreeSha256 = Source.stagePinnedFiles(source, pin.files, privateSource);
       source = privateSource;

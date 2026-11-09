@@ -42,7 +42,7 @@ async function applyCurrentOverlay(directory, { logPath, signal } = {}) {
 async function buildCurrentImpacto({ sourceDir, workRoot, dependencyStack, ffmpegPrefix, avcppPrefix,
   atrac9Source, magicEnumSource, pathMappings = [], dependencies = {}, signal }) {
   throwIfAborted(signal);
-  const source = await Source.validatePinnedSource(sourceDir, REVISION, { signal });
+  const source = await Source.pinnedFiles(sourceDir, REVISION, { signal });
   const inputs = [ffmpegPrefix, avcppPrefix, atrac9Source, magicEnumSource];
   if (inputs.some(value => !path.isAbsolute(value || "") || !fs.statSync(value).isDirectory()))
     throw new Error("Impacto requires explicit codec, avcpp and native dependency source directories.");

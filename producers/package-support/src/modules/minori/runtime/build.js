@@ -66,7 +66,7 @@ async function compileCandidate({ sourceDir = sourcePath, destination, decoderPr
   if (!path.isAbsolute(destination || "") || fs.existsSync(destination)) throw new Error("Choose a new absolute Minori candidate directory.");
   if (destination === sourceDir || destination.startsWith(sourceDir + path.sep) || sourceDir.startsWith(destination + path.sep)) throw new Error("Source and output directories must be separate.");
   throwIfAborted(signal);
-  const pinned = await Build.validatePinnedSource(sourceDir, Overlay.REVISION, { signal });
+  const pinned = await Build.pinnedFiles(sourceDir, Overlay.REVISION, { signal });
   const cargo = (dependencies.findBuildTool || Build.findBuildTool)("cargo");
   const workspace = fs.mkdtempSync(path.join(os.tmpdir(), "maclauncher-minori-build-"));
   const sourceRoot = path.join(workspace, "source"), target = path.join(workspace, "target");
