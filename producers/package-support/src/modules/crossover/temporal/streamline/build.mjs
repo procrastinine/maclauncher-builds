@@ -1,4 +1,4 @@
-import {appSourceRoot,materializeAppModule} from '../../../../../../../tools/app-source.mjs';
+import {appSourceRoot} from '../../../../../../../tools/app-source.mjs';
 import {buildCameraBridge} from '../camera-bridge/build.mjs';
 import {gitlink} from '../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
@@ -14,14 +14,9 @@ if (!["source", "out", "compiler", "reference"].every(key => args[key])) throw E
 const source = path.resolve(args.source), output = path.resolve(args.out), reference = path.resolve(args.reference);
 const declaration = JSON.parse(fs.readFileSync(path.join(here, "source.json"), "utf8"));
 const revision = gitlink(declaration.gitlink);
-const app = appSourceRoot(), owned = path.join(output, "app/crossover/temporal/streamline");
-materializeAppModule({module:"src/modules/crossover/temporal/streamline",output:owned});
-materializeAppModule({module:"src/modules/crossover/temporal/dxmt",output:path.join(output,"app/crossover/temporal/dxmt")});
-materializeAppModule({module:"src/modules/shared/reshade",output:path.join(output,"app/shared/reshade")});
+const app = appSourceRoot(), owned = path.join(app.directory, "src/modules/crossover/temporal/streamline");
 if (execFileSync("git", ["-C", source, "rev-parse", "HEAD"], { encoding: "utf8" }).trim() !== revision) throw Error("Streamline headers must match the pinned source revision");
 execFileSync("git",["-C",source,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});
-// Preserve the App CommonJS boundary inside the recipe's ESM checkout.
-fs.writeFileSync(path.join(output,"app/package.json"),JSON.stringify({type:"commonjs"})+"\n");
 const inspect = require(path.join(owned,"pe-exports.js")).inspect;
 const hash = file => crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 const core = [...fs.readFileSync(path.join(source, "include/sl_core_api.h"), "utf8").matchAll(/^sl::Result (sl\w+)\(|^SL_API sl::Result (sl\w+)\(/gm)].map(match => match[1] || match[2]);
