@@ -72,7 +72,7 @@ jobs:
       contents: read
       actions: read
     with:
-      targets: ${{ toJSON(matrix.level) }}
+      targets: ${{ toJSON(matrix.level.include) }}
       selection: ${{ needs.plan.outputs.selection }}
       graph: ${{ needs.plan.outputs.graph }}
       reuse: ${{ needs.plan.outputs.reuse }}
