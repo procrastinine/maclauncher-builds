@@ -469,6 +469,7 @@
       "steps": [
         {
           "recipe": "src/modules/shared/reshade/generation/fsr3/build.mjs",
+          "phased": true,
           "args": [
             "{source:fsr3-sdk}",
             "{input:shader-tools}",
