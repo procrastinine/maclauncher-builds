@@ -121,10 +121,10 @@ async function prepareRuntime({ unpacked, pin, logger, signal, sourcePath, fna3d
     const ninja = await resolveBuildTool("ninja", toolOptions);
     const framework = path.join(temporary, "framework");
     const checkout = sourcePath || path.resolve(__dirname, "../../../external/FNA");
-    const source = await Source.validatePinnedSource(checkout, FNA_REVISION, { signal });
+    const source = await Source.pinnedFiles(checkout, FNA_REVISION, { signal });
     const sourceTreeSha256 = Source.stagePinnedFiles(checkout, source.files, framework);
     const fna3dCheckout = fna3dSourcePath || path.resolve(__dirname, "../../../external/source-revisions/fna3d");
-    const fna3d = await Source.validatePinnedSource(fna3dCheckout, FNA3D_REVISION, { signal });
+    const fna3d = await Source.pinnedFiles(fna3dCheckout, FNA3D_REVISION, { signal });
     fs.rmSync(path.join(framework, "lib/FNA3D"), { recursive: true, force: true });
     const fna3dSourceSha256 = Source.stagePinnedFiles(fna3dCheckout, fna3d.files, path.join(framework, "lib/FNA3D"));
     const compiler = path.join(temporary, "compiler"), referencePack = path.join(temporary, "reference-pack"), sdlSource = path.join(temporary, "sdl-source");

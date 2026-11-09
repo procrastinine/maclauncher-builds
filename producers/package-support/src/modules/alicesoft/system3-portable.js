@@ -20,7 +20,7 @@ function overlayIdentity() {
 
 async function buildPortableSystem3({ sourceDir = sourcePath, archives, workRoot, fontStack, architecture = process.arch, pathMappings = [], signal, onProgress, dependencies = {} }) {
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir] });
-  const source = await Source.validatePinnedSource(sourceDir, REVISION, { signal });
+  const source = await Source.pinnedFiles(sourceDir, REVISION, { signal });
   const overlaySha256 = overlayIdentity();
   let stack;
   if(fontStack){

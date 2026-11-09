@@ -31,7 +31,7 @@ async function buildPortableYuri({ sourceDir, archives, workRoot, mixerStack, ar
   validateBase();
   if (!path.isAbsolute(sourceDir || "")) throw new Error("Choose an absolute clean checkout of the pinned Yuri source.");
   const scope = Base.PIN.engine.sourceScope;
-  const original = await Source.validatePinnedSource(sourceDir, REVISION, { signal, sourceScope: scope });
+  const original = await Source.pinnedFiles(sourceDir, REVISION, { signal, sourceScope: scope });
   Base.validateEngineArchive(archives); Fonts.validateArchives(archives); Audio.validateArchives(archives); Audio.validateArchives(archives, { catalog: Mixer.PIN }); Fonts.validateArchives(archives, { catalog: Base.PIN });
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir] });
   const overlaySha256 = overlayIdentity(); fs.mkdirSync(workRoot, { recursive: true });

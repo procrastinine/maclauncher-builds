@@ -80,7 +80,7 @@ async function buildPortableNPengine({ sourceDir = Previous.sourcePath, npaSourc
   const media = Media.validateSDKPrefix(requirePrefix(mediaStack?.prefix));
   const utilityPrefix = requirePrefix(utilityStack?.prefix), sdlPrefix = requirePrefix(sdlStack?.prefix);
   workRoot = Portable.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, npaSourceDir, media.prefix, utilityPrefix, sdlPrefix] });
-  const [engine, npa] = await Promise.all([Source.validatePinnedSource(sourceDir, REVISION, { signal }), Source.validatePinnedSource(npaSourceDir, NPA_REVISION, { signal })]);
+  const [engine, npa] = await Promise.all([Source.pinnedFiles(sourceDir, REVISION, { signal }), Source.pinnedFiles(npaSourceDir, NPA_REVISION, { signal })]);
   const overlaySha256 = overlayIdentity(); fs.mkdirSync(workRoot, { recursive: true });
   const sourceRoot = path.join(workRoot, "source"), outputRoot = path.join(workRoot, "build"), prefix = path.join(workRoot, "prefix");
   Source.stagePinnedFiles(sourceDir, engine.files, path.join(sourceRoot, "libnpengine"));

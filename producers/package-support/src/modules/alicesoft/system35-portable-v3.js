@@ -27,7 +27,7 @@ async function buildPortableSystem35({ sourceDir = sourcePath, archives, workRoo
   if (process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) throw new Error("xsystem35 builds require macOS and an arm64 or x64 target.");
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, ...Object.values(dependencyStacks || {}).map(stack => stack.prefix)] });
   Fonts.validateArchives(archives); Audio.validateArchives(archives); Audio.validateArchives(archives, { catalog: PIN });
-  const source = await Source.validatePinnedSource(sourceDir, REVISION, { signal });
+  const source = await Source.pinnedFiles(sourceDir, REVISION, { signal });
   const overlaySha256 = overlayIdentity();
   if (dependencyStacks && (Object.keys(dependencyStacks).length !== 1 || !dependencyStacks.mixer)) throw new Error("xsystem35 dependency reuse needs the exact mixer profile.");
   const mixer = dependencyStacks?.mixer || await Mixer.buildMixer({ archives, workRoot: path.join(workRoot, "mixer"), architecture, pathMappings, signal, onProgress, dependencies });
