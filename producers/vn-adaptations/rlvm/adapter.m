@@ -1,1 +1,0 @@
-../../../sources/maclauncher/src/modules/siglus/resources/rlvm-adapter/adapter.m

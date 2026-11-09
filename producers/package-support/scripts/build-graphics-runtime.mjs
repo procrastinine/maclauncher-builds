@@ -10,7 +10,8 @@ import {execFileSync, spawnSync} from "node:child_process";
 import {pathToFileURL} from "node:url";
 import {createRequire} from "node:module";
 import {buildInput} from "../../../tools/build-input.mjs";
-import {gitlink} from "../../../lib/pins.mjs";
+import {gitlink,sourceRevision} from "../../../lib/pins.mjs";
+import {APP_REFERENCE,appPath,recipePath} from "../../../tools/app-source.mjs";
 
 const repository = path.resolve(import.meta.dirname, "..");
 export const recipe = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, "graphics-runtime.json"), "utf8"));
@@ -32,10 +33,11 @@ function pointer(value, location) {
   }
   return value;
 }
-// Pins come from owned JSON records or the existing exports of owned build modules.
+// Pins come from source records ("app:<path>" names an app record) or the
+// existing exports of owned build modules.
 const loadModule = createRequire(import.meta.url);
 function pinned({file, pointer: location = "", match, field}) {
-  const target = path.join(repository, file);
+  const target = recipePath(repository, file);
   let value = pointer(/\.(?:c?js|mjs)$/.test(file) ? loadModule(target) : JSON.parse(fs.readFileSync(target, "utf8")), location);
   if (!match) return value;
   const rows = Array.isArray(value) ? value.filter(row => row && Object.entries(match).every(([key, expected]) => row[key] === expected)) : [];
@@ -75,7 +77,7 @@ export function resolveSource(id, override) {
   const commit = id==='fsr3-sdk' ? gitlink('producers/package-support/src/external/fsr3-sdk') :
     id==='sdl-vulkan' ? sharedDependencies.sdlHeaders.revision :
     id==='libplacebo-vulkan-headers' ? git(path.join(repository,'src/external/libplacebo'),['rev-parse',gitlink('producers/package-support/src/external/libplacebo')+':3rdparty/Vulkan-Headers']) :
-    entry.pin.gitlink ? gitlink(pinned({file: entry.pin.file, pointer: entry.pin.gitlink})) : pinned({file: entry.pin.file, pointer: entry.pin.commit}), origin = pinned({file: entry.pin.file, pointer: entry.pin.repository});
+    sourceRevision(pinned({file: entry.pin.file, pointer: entry.pin.pointer})), origin = pinned({file: entry.pin.file, pointer: entry.pin.repository});
   const directory = override ? path.resolve(override) : path.join(repository, entry.path);
   const result = {id, path: directory, commit, repository: canonical(origin)};
   if (!override) {
@@ -218,8 +220,8 @@ export function plan({work, arch="universal", sdkPath, only, skip = [], reuse = 
     const root = work && path.join(work, "providers", name), values = {work: root && path.join(root, "work"), output: root && path.join(root, "output")};
     payloads[name] = root && path.join(root, provider.payload);
     for (const step of provider.steps) steps.push({provider: name, marker: path.join(payloads[name] || "", provider.marker || "provider.json"),
-      argv: [path.join(repository, step.recipe), ...step.args.map(argument => argument.replaceAll("{arch}",arch).replace(/\{(work|output)\}|\{(source|input|tool|repo):([^}]+)\}/g, (_, local, kind, id) =>
-        local ? values[local] ?? `<${local}>` : kind === "repo" ? path.join(repository, id) : (kind === "source" ? sources : kind === "input" ? inputs : tools)[id].path ?? `<${kind}:${id}>`))]});
+      argv: [path.join(repository, step.recipe), ...step.args.map(argument => argument.startsWith(APP_REFERENCE) ? recipePath(repository, argument) : argument.replaceAll("{arch}",arch).replace(/\{(work|output)\}|\{(source|input|tool):([^}]+)\}/g, (_, local, kind, id) =>
+        local ? values[local] ?? `<${local}>` : (kind === "source" ? sources : kind === "input" ? inputs : tools)[id].path ?? `<${kind}:${id}>`))]});
   }
   for (const [kind, rows] of Object.entries({source: sources, input: inputs, tool: tools}))
     for (const row of Object.values(rows)) if (!["ready", "built-during-run"].includes(row.state)) unresolved.push(`${kind} ${row.id}: ${row.state}`);
@@ -263,7 +265,7 @@ export async function buildCore({work, arch="universal",sdkPath="macosx",sources
   const python=tools.python?.path||tools.python||resolveTool("python",{}).path;
   if(!python)throw Error("The core shader generator requires its declared Python tool.");
   const env = buildEnvironment(), run = args => execFileSync("cmake", args, {stdio: "inherit", env});
-  const configure = {...recipe.core.configure,CMAKE_OSX_ARCHITECTURES:arch==="universal"?"arm64;x86_64":arch==="x64"?"x86_64":"arm64",CMAKE_OSX_DEPLOYMENT_TARGET:recipe.core.minimumMacOS||"13.0",CMAKE_OSX_SYSROOT:sdkPath,FETCHCONTENT_FULLY_DISCONNECTED:"ON",FETCHCONTENT_SOURCE_DIR_FSR_GLSLANG:fsrCompilerSource,Python3_EXECUTABLE:python, ...(tests ? {BUILD_TESTING: "ON", MACLAUNCHER_FIXTURE_DIR: path.join(repository, path.dirname(recipe.core.materialize), "test")} : {})};
+  const configure = {...recipe.core.configure,CMAKE_OSX_ARCHITECTURES:arch==="universal"?"arm64;x86_64":arch==="x64"?"x86_64":"arm64",CMAKE_OSX_DEPLOYMENT_TARGET:recipe.core.minimumMacOS||"13.0",CMAKE_OSX_SYSROOT:sdkPath,FETCHCONTENT_FULLY_DISCONNECTED:"ON",FETCHCONTENT_SOURCE_DIR_FSR_GLSLANG:fsrCompilerSource,Python3_EXECUTABLE:python, ...(tests ? {BUILD_TESTING: "ON", MACLAUNCHER_FIXTURE_DIR: appPath("src/modules/shared/reshade/native/test")} : {})};
   run(["-S", source, "-B", build, ...Object.entries(configure).map(([name, value]) => `-D${name}=${value}`)]);
   run(["--build", build, "--target", ...recipe.core.targets, ...(tests ? ["native-fixtures"] : []), "-j", String(jobs)]);
   return {source, build};

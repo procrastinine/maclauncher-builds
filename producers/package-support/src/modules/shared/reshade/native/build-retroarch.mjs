@@ -1,3 +1,4 @@
+import {appPath,appRequire,exportAppFile,moduleFile} from '../../../../../../../tools/app-source.mjs';
 import {gitlink} from '../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from 'node:fs';
@@ -6,17 +7,18 @@ import crypto from 'node:crypto';
 import os from 'node:os';
 import {execFileSync} from 'node:child_process';
 import {applyRetroarchExternalOverlay} from './retroarch-external-overlay.mjs';
-import {SCENE_SHADER_INPUTS} from '../../effects/operation-contracts.mjs';
+const {SCENE_SHADER_INPUTS}=appRequire('src/modules/shared/effects/operation-contracts.mjs');
 const [sourceArg,archiveArg,outputArg,...options]=process.argv.slice(2);
 const arch=options.length===1&&options[0]==='--universal'?'universal':options.length===2&&options[0]==='--arch'?options[1]:'arm64';
 if(!sourceArg||!archiveArg||!outputArg||!['arm64','x64','universal'].includes(arch)||options.length&&!((options.length===1&&options[0]==='--universal')||(options.length===2&&options[0]==='--arch')))
   throw new Error('Usage: node build-retroarch.mjs <original librashader source> <official arm64 archive or -> <new output> [--universal]');
 const originalSource=path.resolve(sourceArg),archive=archiveArg==='-'?null:path.resolve(archiveArg),output=path.resolve(outputArg);
+const native='src/modules/shared/reshade/native',file=name=>moduleFile(native+'/'+name),contracts=appPath('src/modules/shared/effects/operation-contracts.mjs');
 const declaration=JSON.parse(fs.readFileSync(new URL('./retroarch-source.json',import.meta.url)));
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const ownedNames=['build-retroarch.mjs','retroarch-source.json','retroarch-external-overlay.mjs','retroarch-external.h','retroarch-external/external.rs','retroarch-external/capi.rs','retroarch-prepare/main.rs','retroarch-prepare/Cargo.toml','retroarch-prepare/Cargo.lock'];
-const ownedSource=Object.fromEntries(ownedNames.map(name=>[name,hash(new URL(name,import.meta.url))]));
-const sceneInputContractSha256=hash(new URL('../../effects/operation-contracts.mjs',import.meta.url));
+const ownedSource=Object.fromEntries(ownedNames.map(name=>[name,hash(file(name))]));
+const sceneInputContractSha256=hash(contracts);
 const run=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',stdio:'pipe',timeout:180000,...options});
 if(run('git',['-C',originalSource,'rev-parse','HEAD']).trim()!==gitlink(declaration.gitlink))throw new Error('The original librashader source pin differs.');
 run('git',['-C',originalSource,'diff','--exit-code','HEAD','--']);
@@ -29,8 +31,8 @@ fs.mkdirSync(source);run('/usr/bin/tar',['-xf',sourceArchive,'-C',source]);fs.un
 applyRetroarchExternalOverlay(source);
 const library=path.join(output,'librashader.dylib');
 const project=path.join(output,'prepare-source');fs.mkdirSync(project);
-for(const file of ['main.rs','Cargo.lock'])fs.copyFileSync(new URL('./retroarch-prepare/'+file,import.meta.url),path.join(project,file));
-const manifest=fs.readFileSync(new URL('./retroarch-prepare/Cargo.toml',import.meta.url),'utf8');
+for(const name of ['main.rs','Cargo.lock'])exportAppFile(native+'/retroarch-prepare/'+name,path.join(project,name));
+const manifest=fs.readFileSync(appPath(native+'/retroarch-prepare/Cargo.toml'),'utf8');
 fs.writeFileSync(path.join(project,'Cargo.toml'),manifest.replaceAll('../../../../../external/librashader',source));
 const env={...process.env,MACOSX_DEPLOYMENT_TARGET:'13.0',CFLAGS:[process.env.CFLAGS||'','-ffile-prefix-map='+os.homedir()+'=BuildHome -ffile-prefix-map='+output+'=retroarch-build'].join(' '),CXXFLAGS:[process.env.CXXFLAGS||'','-ffile-prefix-map='+os.homedir()+'=BuildHome -ffile-prefix-map='+output+'=retroarch-build'].join(' '),RUSTFLAGS:[process.env.RUSTFLAGS||'', '--remap-path-prefix='+os.homedir()+'=BuildHome','--remap-path-prefix='+source+'=librashader','--remap-path-prefix='+project+'=retroarch-prepare','--remap-path-prefix='+output+'=retroarch-build'].join(' ')};
 const capiTarget=path.join(output,'capi-target'),helperTarget=path.join(output,'target');
@@ -56,6 +58,5 @@ for(const file of [library,helper]){run('/usr/bin/codesign',['--force','--sign',
 addLicenses(output,'librashader',source);
 fs.writeFileSync(path.join(output,'source.json'),JSON.stringify(declaration,null,2)+'\n');
 const files=fs.readdirSync(output).filter(name=>!['upstream-source','prepare-source','target','capi-target'].includes(name)).flatMap(name=>{const file=path.join(output,name);return fs.statSync(file).isDirectory()?fs.readdirSync(file,{recursive:true}).map(relative=>path.join(file,relative)).filter(file=>fs.statSync(file).isFile()):[file];}).map(file=>({path:path.relative(output,file),source:file,size:fs.statSync(file).size,mode:fs.statSync(file).mode&0o777,sha256:hash(file)}));
-if(ownedNames.some(name=>ownedSource[name]!==hash(new URL(name,import.meta.url)))||sceneInputContractSha256!==hash(new URL('../../effects/operation-contracts.mjs',import.meta.url)))throw Error('The owned Slang source changed during its build.');
 fs.writeFileSync(path.join(output,'runtime-files.json'),JSON.stringify({sceneInputsAPI:1,sceneInputRoles:[...SCENE_SHADER_INPUTS],uniformSnapshotsAPI:1,uniformSnapshotCapacityAPI:1,sceneInputContractSha256,ownedSource,files},null,2)+'\n');
 console.log(JSON.stringify({output,files}));

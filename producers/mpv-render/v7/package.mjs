@@ -1,3 +1,4 @@
+import {APP_REFERENCE,appRequire} from '../../../tools/app-source.mjs';
 import {gitlink} from '../../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -6,7 +7,7 @@ import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {pack,catalog} from '../../../tools/runtime-package.mjs';
-const require=createRequire(import.meta.url),B=require('../../../sources/maclauncher/src/modules/shared/runtime/bundled-native.js'),Native=require('../../../sources/maclauncher/src/modules/shared/runtime/local-native.js');
+const require=createRequire(import.meta.url),B=appRequire('src/modules/shared/runtime/bundled-native.js'),Native=appRequire('src/modules/shared/runtime/local-native.js');
 const recipe=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'source.json')));
 recipe.source.revision=gitlink(recipe.source.path);
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
@@ -20,7 +21,7 @@ function filesIn(root,prefix=''){
 function record(root,relative){const file=path.join(root,relative),content=B.readRegular(file,B.LIMITS.fileBytes),{bytes,...value}=content;
  const magic=bytes.length>=4?bytes.readUInt32BE(0):0;const image=[0xfeedface,0xcefaedfe,0xfeedfacf,0xcffaedfe,0xcafebabe,0xbebafeca,0xcafebabf,0xbfbafeca].includes(magic)?Native.readMachOArchitectures(file,{allowLibrary:true}):[];return {path:relative,...value,...(image.length?{architectures:image}:{})};}
 export function checkSources(){
- for(const input of recipe.ownedInputs)B.relativeFile(input.path);
+ for(const input of recipe.ownedInputs)B.relativeFile(input.path.startsWith(APP_REFERENCE)?input.path.slice(APP_REFERENCE.length):input.path);
  return {id:recipe.id,revision:recipe.source.revision,inputs:recipe.ownedInputs.length};
 }
 export async function packageRuntime({input,output,version=recipe.version,catalogFile}){

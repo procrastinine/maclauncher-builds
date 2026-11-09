@@ -1,1 +1,0 @@
-../../../../../../../sources/maclauncher/src/modules/android/native/apk-metadata/README.md

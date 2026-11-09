@@ -1,10 +1,11 @@
+const {appRequire,appSourceRoot}=require('../../../../tools/app-source.mjs');
 // Build an owned GPU render host around an explicit, unchanged libmpv input.
 // The result is a managed media runtime, separate from launcher resources.
 const fs = require('node:fs'), path = require('node:path'), {execFileSync} = require('node:child_process');
-const Native = require('../../../../sources/maclauncher/src/modules/shared/runtime/local-native');
-const Stage = require('../../../../sources/maclauncher/scripts/native-binary-tools.cjs');
-const {versionAtLeast} = require('../../../../sources/maclauncher/src/modules/shared/runtime/bundled-native');
-const root = path.resolve(__dirname, '../../../../sources/maclauncher');
+const Native = appRequire('src/modules/shared/runtime/local-native');
+const Stage = appRequire('scripts/native-binary-tools.cjs');
+const {versionAtLeast} = appRequire('src/modules/shared/runtime/bundled-native');
+const root = appSourceRoot().directory, producers = path.resolve(__dirname, '../../../package-support');
 const sourceFiles = ['mpv-render.mm', 'gpu-surface.mm', 'gpu-surface.hpp', 'mpv-frame-metadata.h'];
 const headerFiles = ['frame.h','presentation.h','presentation-content.h','presentation-observed.h','presentation-source.h','target-time.h','image-color.h'].map(file=>'src/modules/shared/reshade/native/'+file);
 const run = (command, args) => execFileSync(command, args, {encoding:'utf8',stdio:'pipe',timeout:120000});
@@ -49,7 +50,7 @@ function stage({library,referenceExecutable,dependencyRoots=[],output,version,so
       if(!versionAtLeast(effectiveMinimum,floor))effectiveMinimum=floor;
     }
     const flags=['clang++','-std=c++17','-O2','-fobjc-arc','-Wno-deprecated-declarations','-arch',cpu,'-mmacosx-version-min='+minimumMacOS,
-      '-ffile-prefix-map='+root+'=.','-I'+path.join(root,'src/external/mpv-player/include'),
+      '-ffile-prefix-map='+root+'=.','-ffile-prefix-map='+producers+'=.','-I'+path.join(producers,'src/external/mpv-player/include'),
       '-I'+path.join(root,'src/modules/shared/reshade/native')];
     run('/usr/bin/xcrun',[...flags,...['mpv-render.mm','gpu-surface.mm'].map(file=>path.join(root,'src/modules/video/native',file)),
       ...['AppKit','Metal','QuartzCore','OpenGL','CoreVideo','IOSurface'].flatMap(name=>['-framework',name]),

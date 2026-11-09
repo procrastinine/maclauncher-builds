@@ -1,4 +1,5 @@
 import './producer-environment.mjs';
+import {moduleFile} from './app-source.mjs';
 import {addLicense,addLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -9,10 +10,10 @@ import {sealRuntime} from './seal-runtime.mjs';
 
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {nativeStackInput} from './native-stack.mjs';
-const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),modules=path.join(root,'sources/maclauncher/src/modules'),native=path.join(modules,'mages/native');
-const Builder=require(path.join(native,'current-build.js')),Dependency=require(path.join(native,'portable-dependencies.js')),Portable=require(path.join(native,'portable-build.js')),Adapter=require(path.join(native,'adapter.js')),Patches=require(path.join(native,'source-patches.js')),DependencyOverlays=require(path.join(native,'dependency-overlays.json'));
-const Fonts=require(path.join(modules,'shared/runtime/portable-sdl2-fonts.js')),Audio=require(path.join(modules,'shared/runtime/portable-sndfile.js'));
-const Source=require(path.join(modules,'shared/runtime/pinned-native-build.js')),AVCPP_SOURCE_SCOPE=Object.freeze({kind:'primary-tree',omittedSubmodules:['catch2']});
+const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),native=name=>moduleFile('src/modules/mages/native/'+name),mages=name=>require(native(name));
+const Builder=mages('current-build.js'),Dependency=mages('portable-dependencies.js'),Portable=mages('portable-build.js'),Adapter=mages('adapter.js'),Patches=mages('source-patches.js'),DependencyOverlays=mages('dependency-overlays.json');
+const Fonts=require('../producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js'),Audio=require('../producers/package-support/src/modules/shared/runtime/portable-sndfile.js');
+const Source=require('../producers/package-support/src/modules/shared/runtime/pinned-native-build.js'),AVCPP_SOURCE_SCOPE=Object.freeze({kind:'primary-tree',omittedSubmodules:['catch2']});
 const dependencies={runBuildCommand:(command,args,options)=>Source.runBuildCommand(command,args.map((value,index)=>index>0&&args[index-1]==='--parallel'?'2':value),options)};
 export async function buildImpacto({project,arch,output,work}){
  fs.mkdirSync(work,{recursive:true});const sources={};for(const id of ['impacto','avcpp','atrac9','magicEnum']){const pin=id==='impacto'?{...Adapter.SOURCES.impacto,revision:Builder.REVISION}:Adapter.SOURCES[id];sources[id]=checkoutSource({...pin,destination:path.join(work,'upstream-'+id)});}
@@ -25,10 +26,10 @@ export async function buildImpacto({project,arch,output,work}){
 export async function finishImpacto({project,arch,output,work,sources,fonts,audio,dependencyStack,maps}){
  const sdk=dependencyStack.sdk,ffmpeg=path.join(work,'ffmpeg-source'),ffmpegOutput=path.join(work,'ffmpeg-build'),ffmpegPrefix=path.join(work,'ffmpeg');
  fs.mkdirSync(ffmpeg);run('/usr/bin/tar',['-xf',await buildInput({url:Adapter.SOURCES.ffmpeg.archive,sha256:Adapter.SOURCES.ffmpeg.sha256,bytes:Portable.FFMPEG_ARCHIVE_BYTES}),'--strip-components','1','-C',ffmpeg]);
- await Patches.applyPinnedPatch(ffmpeg,path.join(native,'bink2.patch'),DependencyOverlays.ffmpegBink2,{logPath:path.join(work,'patches.log')});
+ await Patches.applyPinnedPatch(ffmpeg,native('bink2.patch'),DependencyOverlays.ffmpegBink2,{logPath:path.join(work,'patches.log')});
  fs.mkdirSync(ffmpegOutput);const env=Dependency.environment(ffmpegPrefix,sdk,[ffmpegPrefix,dependencyStack.prefix]);
  run(path.join(ffmpeg,'configure'),Portable.ffmpegOptions({prefix:ffmpegPrefix,sdk,pathMappings:maps}),{cwd:ffmpegOutput,env});
- require(path.join(native,'build.js')).normalizeGeneratedFfmpegConfiguration(ffmpegOutput,maps);run('/usr/bin/make',['-j2'],{cwd:ffmpegOutput,env});run('/usr/bin/make',['install'],{cwd:ffmpegOutput,env});
+ mages('build.js').normalizeGeneratedFfmpegConfiguration(ffmpegOutput,maps);run('/usr/bin/make',['-j2'],{cwd:ffmpegOutput,env});run('/usr/bin/make',['install'],{cwd:ffmpegOutput,env});
  return finishImpactoEngine({project,arch,output,work,sources,fonts,audio,dependencyStack,maps,ffmpegPrefix});
 }
 export async function finishImpactoEngine({project,arch,output,work,sources,fonts,audio,dependencyStack,maps,ffmpegPrefix}){

@@ -1,5 +1,6 @@
+import {appPath,appRequire,exportModuleTree} from '../../../../../../../tools/app-source.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
-import {sourceRevision} from '../../../../../scripts/graphics-source-revision.mjs';
+import {sourceRevision} from '../../../../../../../lib/pins.mjs';
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -11,9 +12,9 @@ import {verifyTimingReceipt} from './native/prepare-mlx-timing.mjs';
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
 const repository = path.resolve(directory, "../../../../..");
-const source = JSON.parse(fs.readFileSync(path.join(directory, "source.json"), "utf8"));
+const source = JSON.parse(fs.readFileSync(appPath("src/modules/shared/reshade/neural/source.json"), "utf8"));
 const sha256 = file => crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
-const restorationArchitectures=createRequire(import.meta.url)('./restoration-models.js').ARCHITECTURES;
+const restorationArchitectures=appRequire('src/modules/shared/reshade/neural/restoration-models.js').ARCHITECTURES;
 
 const cacheDirectory = path.join(os.homedir(), "Library", "Caches", "maclauncher", "neural-provider");
 
@@ -31,12 +32,11 @@ export function buildProvider({ output = path.join(cacheDirectory, "output"),
   // SwiftPM writes dependency edits and lock fingerprints beside Package.swift.
   // Keep the public producer and the pinned app source immutable by building an
   // owned source projection of copied files, never links back to either.
-  const recipeRoot=path.resolve(buildRoot+"-recipe"),shared=path.resolve(directory,"../.."),stagedShared=path.join(recipeRoot,"src/modules/shared");
+  const recipeRoot=path.resolve(buildRoot+"-recipe"),stagedShared=path.join(recipeRoot,"src/modules/shared"),projection=path.join(stagedShared,"reshade/neural/native");
   if(recipeRoot.startsWith(repository+path.sep)||repository.startsWith(recipeRoot+path.sep))throw Error("Neural work must be separate from the producer checkout.");
-  const Content=createRequire(import.meta.url)("../../runtime/runtime-content.js");
-  fs.mkdirSync(stagedShared,{recursive:true});
-  fs.cpSync(path.join(shared,"reshade"),path.join(stagedShared,"reshade"),{recursive:true,dereference:true,filter:file=>{const relative=path.relative(shared,file);return !relative.split(path.sep).includes("Packages")&&!Content.excludedReason(relative);}});
-  execFileSync("/bin/bash", [path.join(stagedShared,"reshade/neural/native/build.sh"), output], {
+  const Content=appRequire('src/modules/shared/runtime/runtime-content.js');
+  exportModuleTree("src/modules/shared/reshade",path.join(stagedShared,"reshade"),name=>!name.split("/").includes("Packages")&&!Content.excludedReason("reshade/"+name));
+  execFileSync("/bin/bash", [path.join(projection,"build.sh"), output], {
     cwd: repository, stdio: "inherit", env: { ...process.env,
       MACLAUNCHER_BUILD_DOWNLOAD: path.resolve(repository, "../../tools/download.mjs"),
       MACLAUNCHER_NEURAL_PREPARE_UPSTREAM: path.join(directory, "native/prepare-upstream.mjs"),
@@ -50,8 +50,8 @@ export function buildProvider({ output = path.join(cacheDirectory, "output"),
   addLicenses(output,'Swift Argument Parser',path.join(buildRoot,'checkouts/swift-argument-parser'));
   addLicenses(output,'Swift Numerics',path.join(buildRoot,'checkouts/swift-numerics'));
   addLicenses(output,'neural models',path.join(directory,'native'));
-  verifyTimingReceipt(JSON.parse(fs.readFileSync(path.join(output,'timing-adaptation.json'))));
-  const inventory = createRequire(import.meta.url)("../../runtime/bundled-native").fileInventory(output);
+  verifyTimingReceipt(JSON.parse(fs.readFileSync(path.join(output,'timing-adaptation.json'))),projection);
+  const inventory = appRequire('src/modules/shared/runtime/bundled-native.js').fileInventory(output);
   const files = inventory.filter(relative => relative !== "provider.json").map(relative => {
     const file = path.join(output, relative), stat = fs.lstatSync(file);
     if (!stat.isFile() || stat.isSymbolicLink()) throw new Error("The neural provider requires regular installed files.");

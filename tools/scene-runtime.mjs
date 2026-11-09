@@ -1,4 +1,5 @@
 import './producer-environment.mjs';
+import {appSourceRoot} from './app-source.mjs';
 import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
 import fs from 'node:fs';
 import path from 'node:path';
@@ -6,7 +7,7 @@ import {execFileSync} from 'node:child_process';
 import {buildInput} from './build-input.mjs';
 import {publicDeclaration} from './runtime-package.mjs';
 /** Shared steps of the scene adapter recipes. */
-export const root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'sources/maclauncher');
+export const root=path.resolve(import.meta.dirname,'..'),base=appSourceRoot().directory;
 export const read=file=>JSON.parse(fs.readFileSync(file));
 export const run=(command,args)=>execFileSync(command,args,{maxBuffer:Infinity,stdio:'inherit'});
 /** The declared llvm-mingw toolchain for Windows-side adapter libraries. */

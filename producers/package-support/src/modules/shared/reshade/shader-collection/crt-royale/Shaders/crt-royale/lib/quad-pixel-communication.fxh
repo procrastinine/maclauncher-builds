@@ -1,1 +1,0 @@
-../../../../../../../../../../../sources/maclauncher/src/modules/shared/reshade/shader-collection/crt-royale/Shaders/crt-royale/lib/quad-pixel-communication.fxh

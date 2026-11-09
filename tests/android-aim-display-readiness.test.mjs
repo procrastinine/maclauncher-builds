@@ -41,7 +41,7 @@ test('actual startup block accepts a Unix handshake while the first render is bl
   const text=original(t);if(!text)return;
   const root=fs.mkdtempSync(path.join(os.tmpdir(),'aim-display-readiness-'));
   t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
-  const fixture=fs.readFileSync(fileURLToPath(new URL('../sources/maclauncher/sources/maclauncher/tests/fixtures/android-aim-display/readiness.rs',import.meta.url)),'utf8');
+  const fixture=fs.readFileSync(fileURLToPath(new URL('fixtures/android-aim-display/readiness.rs',import.meta.url)),'utf8');
   const compiler=process.env.ANDROID_AIM_RUSTC||'rustc';
   for(const [name,source]of [['original',text],['fixed',adaptDisplayReadiness(text)]]) {
     const sourceFile=path.join(root,name+'.rs'),executable=path.join(root,name);
@@ -61,7 +61,7 @@ test('actual display argument parser uses its bundle title, falls back, and hono
   assert.throws(()=>adaptDisplayTitle(fixed),/no longer matches/);
   const root=fs.mkdtempSync(path.join(os.tmpdir(),'aim-display-title-'));
   t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
-  const fixture=fs.readFileSync(fileURLToPath(new URL('../sources/maclauncher/sources/maclauncher/tests/fixtures/android-aim-display/title.rs',import.meta.url)),'utf8');
+  const fixture=fs.readFileSync(fileURLToPath(new URL('fixtures/android-aim-display/title.rs',import.meta.url)),'utf8');
   const source=path.join(root,'title.rs'),executable=path.join(root,'title');
   fs.writeFileSync(source,fixture.replace('/* ORIGINAL_ARGUMENT_PARSER */',fixed.slice(start,end)));
   run(process.env.ANDROID_AIM_RUSTC||'rustc',['--edition=2024',source,'-o',executable]);

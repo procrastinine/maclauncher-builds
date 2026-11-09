@@ -1,1 +1,0 @@
-../../../../../../../sources/maclauncher/src/modules/shared/reshade/native/source-frame-cap.hpp

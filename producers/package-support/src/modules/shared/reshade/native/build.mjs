@@ -1,4 +1,5 @@
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
+import {moduleFile,recipePath} from '../../../../../../../tools/app-source.mjs';
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -32,12 +33,12 @@ for (const name of [...owned, ".gitmodules"]) {
 }
 for (const entry of overlay.files) {
   fs.mkdirSync(path.dirname(path.join(applied, entry.path)), { recursive: true });
-  fs.copyFileSync(path.join(root, entry.source), path.join(applied, entry.path));
+  fs.copyFileSync(recipePath(root, entry.source), path.join(applied, entry.path));
 }
 const companions=["retroarch-source.json","build-retroarch.mjs","retroarch-prepare/Cargo.toml","retroarch-prepare/Cargo.lock","retroarch-prepare/main.rs"];
 for(const relative of companions) {
   const target=path.join(applied,"src",relative);fs.mkdirSync(path.dirname(target),{recursive:true});
-  fs.copyFileSync(path.join(root,relative),target);
+  fs.copyFileSync(moduleFile("src/modules/shared/reshade/native/"+relative),target);
 }
 
 const env = { ...process.env };

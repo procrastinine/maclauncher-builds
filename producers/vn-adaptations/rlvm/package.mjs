@@ -1,3 +1,4 @@
+import {appPath,appRequire} from '../../../tools/app-source.mjs';
 import {addLicenses} from '../../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -7,8 +8,8 @@ import {createRequire} from 'node:module';
 import {recipeMain} from '../../../tools/build-source.mjs';
 import {pack} from '../../../tools/runtime-package.mjs';
 import {resolveProject,buildRecord} from '../../../lib/projects.mjs';
-const require=createRequire(import.meta.url),B=require('../../../sources/maclauncher/src/modules/shared/runtime/bundled-native.js');
-const M=require('../../../sources/maclauncher/src/modules/shared/runtime/macho-load-commands.js');
+const require=createRequire(import.meta.url),B=appRequire('src/modules/shared/runtime/bundled-native.js');
+const M=appRequire('src/modules/shared/runtime/macho-load-commands.js');
 const here=import.meta.dirname,root=path.resolve(here,'../../..'),sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 export async function packageAdapter({output,binary,archive:packed=true,version}){
  const sourceFile=path.join(here,'source.json'),source=JSON.parse(fs.readFileSync(sourceFile));
@@ -38,7 +39,7 @@ export async function packageAdapter({output,binary,archive:packed=true,version}
 /** GitHub build: compile the owned source with its recorded universal arguments, then package it. */
 export async function build({output,work,version}){
  const profile=JSON.parse(fs.readFileSync(path.join(here,'adapter.json')));
- fs.mkdirSync(work,{recursive:true});fs.copyFileSync(path.join(here,'adapter.m'),path.join(work,'adapter.m'));
+ fs.mkdirSync(work,{recursive:true});fs.copyFileSync(appPath('src/modules/siglus/resources/rlvm-adapter/adapter.m'),path.join(work,'adapter.m'));
  execFileSync(profile.build.command,profile.build.args,{cwd:work,stdio:'inherit',timeout:120000});
  if(profile.signature!=='ad-hoc')throw Error('The adapter profile selects an unsupported signature.');
  execFileSync('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',path.join(work,profile.path)],{stdio:'pipe',timeout:30000});

@@ -1,9 +1,10 @@
+const {appRequire}=require('../../../../../../../tools/app-source.mjs');
 const {gitlink}=require('../../../../../../../lib/pins.mjs');
 const sharedDependencies=require('../../../../../../dependencies.json');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const Native = require("../../runtime/local-native");
+const Native = appRequire('src/modules/shared/runtime/local-native.js');
 const metadata = require("./portable-build.json");
 const revision = gitlink("producers/package-support/src/external/onscripter-yuri");
 const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map(row=>{if(row.id==='webp')row={...require('../../../alicesoft/system35-portable.json').dependencies.find(pin=>pin.id==='webp'),...row};if(row.id==='turbojpeg')row={...require('../../../alicesoft/system4-portable.json').dependencies.find(pin=>pin.id==='turbojpeg'),...row};const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};}), engine: { ...metadata.engine, revision,

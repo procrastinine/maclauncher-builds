@@ -1,5 +1,5 @@
 import './producer-environment.mjs';
-import {appSourceRoot,materializeProducerSourceLinks} from './app-source.mjs';
+import {appSourceRoot} from './app-source.mjs';
 import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
 import {checkoutSource} from './build-source.mjs';
 import fs from 'node:fs';
@@ -9,8 +9,6 @@ const root=path.resolve(import.meta.dirname,'..');
 /** Build one graphics package; SDK and deployment requirements stay separate. */
 export async function buildGraphicsSource({version,arch,output,work,sdkPath,sources={},sourceRoot,reuse={},tools={},inputs={}}){
  appSourceRoot();
- const restore=materializeProducerSourceLinks();
- try{
  const {plan,build,fetchInput}=await import('../producers/package-support/scripts/build-graphics-runtime.mjs');
  if(!version)throw Error('An exact registered graphics source-stage version is required.');
  if(tools.meson&&!tools.python){const candidate=path.join(path.dirname(tools.meson),"python");if(fs.existsSync(candidate))tools.python=candidate;}
@@ -35,8 +33,7 @@ export async function buildGraphicsSource({version,arch,output,work,sdkPath,sour
  const resolved=await build(options);fs.mkdirSync(output,{recursive:true});
  try {
   execFileSync(process.execPath,[...resolved.stage,'--version',version,'--output',path.join(output,'payload'),'--declaration',path.join(output,'declaration.json'),...(sourceRoot?['--source-root',sourceRoot]:[])],
-   {maxBuffer:Infinity,cwd:path.join(root,'sources/maclauncher'),stdio:'inherit',timeout:600000});
+   {maxBuffer:Infinity,cwd:root,stdio:'inherit',timeout:600000});
   return {project:'reshade',version,arch,output,resolved,tools};
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
- }finally{restore();}
 }

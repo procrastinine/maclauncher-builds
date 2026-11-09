@@ -1,12 +1,13 @@
+const {appRequire}=require('../../../../../../tools/app-source.mjs');
 const {addLicenses,includeLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const Build = require("../../shared/runtime/pinned-native-build");
-const Native = require("../../shared/runtime/local-native");
+const Native = appRequire('src/modules/shared/runtime/local-native.js');
 const Overlay = require("./overlay");
 const Movies = require("./movie-build");
-const { downloadToFile, throwIfAborted } = require("../../shared/runtime/download-utils");
+const { downloadToFile, throwIfAborted } = appRequire('src/modules/shared/runtime/download-utils.js');
 const sourcePath = path.resolve(__dirname, "../../../external/ReMinori");
 const building = new Set();
 function closeMovieDependencies(prefix, directory) {

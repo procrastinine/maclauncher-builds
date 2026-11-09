@@ -6,7 +6,7 @@
   "kind": "executable",
   "output": "kif-crypto",
   "sources": [
-    "src/modules/catsystem2/runtime/kif-crypto.c"
+    "app:src/modules/catsystem2/runtime/kif-crypto.c"
   ],
   "flags": [
     "-O2",

@@ -17,7 +17,7 @@ const prefix=name=>run('brew',['--prefix',name]);
 export async function buildKosmicKrisp({project:id,arch,output,work}){
  fs.mkdirSync(work,{recursive:true});
  const tools=pythonBuildTools(work,path.join(root,'tools/sdk27-build-requirements.txt')),meson=path.join(tools.bin,'meson'),ninja=path.join(tools.bin,'ninja');
- const native=path.join(root,'sources/maclauncher/src/modules/shared/vulkan/native'),pin=JSON.parse(fs.readFileSync(path.join(native,'kosmickrisp-source.json'))),inputs=JSON.parse(fs.readFileSync(path.join(native,'kosmickrisp-targets.json'))),source=path.join(root,inputs.sourcePath);
+ const native=path.join(root,'producers/package-support/src/modules/shared/vulkan/native'),pin=JSON.parse(fs.readFileSync(path.join(native,'kosmickrisp-source.json'))),inputs=JSON.parse(fs.readFileSync(path.join(native,'kosmickrisp-targets.json'))),source=path.join(root,inputs.sourcePath);
  const llvm=prefix('llvm'),observedInputs={...inputs,tools:{...inputs.tools,llvm:run(path.join(llvm,'bin/llvm-config'),['--version']),spirvLLVMTranslator:run('pkg-config',['--modversion','LLVMSPIRVLib'])}};
  const spirv=await buildSpirvTools({work:path.join(work,'spirv-tools'),ninja,python:tools.python,architecture:arch,jobs:2});
  const zstd=await buildZstd({work:path.join(work,'zstd'),architecture:arch,jobs:2,ninja});

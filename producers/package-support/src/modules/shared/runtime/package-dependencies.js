@@ -1,1 +1,0 @@
-../../../../../../sources/maclauncher/src/modules/shared/runtime/package-dependencies.js

@@ -5,6 +5,7 @@ import {execFileSync} from 'node:child_process';
 import definition from './source.json' with {type:'json'};
 import image from '../../../../../../../producers/android-image-data/source.json' with {type:'json'};
 import {aimSource} from '../../../../../../../lib/android-source.mjs';
+import {appPath} from '../../../../../../../tools/app-source.mjs';
 const source={...definition,commit:aimSource().revision,androidImage:{...image.archive,...definition.androidImage,size:image.archive.bytes}};
 
 export {source};
@@ -595,7 +596,7 @@ export function prepareAimSources({checkout, output, controllerSource, buildJobs
 }
 
 export function adaptAimSources(root, {controllerSource, buildJobs} = {}) {
-  const controllerBytes = fs.readFileSync(controllerSource ?? new URL('./keeper.rs', import.meta.url));
+  const controllerBytes = fs.readFileSync(controllerSource ?? new URL('../../../../../../android-aim-controller/keeper.rs', import.meta.url));
   const controllerSha256 = crypto.createHash('sha256').update(controllerBytes).digest('hex');
   function edit(file, change) {
     const target = path.join(root, file);
@@ -629,7 +630,7 @@ export function adaptAimSources(root, {controllerSource, buildJobs} = {}) {
   edit('tools/art-android/gen_build.py', text => replace(text,
     '        target = f"--target=aarch64-linux-android{self.args.api}"',
     '        source_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))\n        maps = " ".join(shlex.quote(f"-{flag}={source_root}=/aim") for flag in ("ffile-prefix-map", "fdebug-prefix-map"))\n        target = f"--target=aarch64-linux-android{self.args.api} {maps}"', 'portable ART source paths'));
-  fs.copyFileSync(new URL('./socket_path.rs', import.meta.url), path.join(root, 'crates/aim-storage/src/socket_path.rs'));
+  fs.copyFileSync(appPath('src/modules/android/providers/aim/socket_path.rs'), path.join(root, 'crates/aim-storage/src/socket_path.rs'));
   edit('crates/aim-storage/src/lib.rs', text => text + '\npub mod socket_path;\n');
   edit('crates/aim-storage/src/verity_control.rs', text => {
     text = replace(text, '        let mut template = b"/tmp/av-XXXXXX\\0".to_vec();',
@@ -773,9 +774,9 @@ export function adaptAimSources(root, {controllerSource, buildJobs} = {}) {
     text = replace(text, '                        .and_then(Self::clip_of);', '                        .and_then(Self::clip_of); }', 'private clipboard fallback');
     return text;
   });
-  fs.copyFileSync(new URL('./clipboard_bridge.rs', import.meta.url), path.join(root, 'crates/aim-services/src/clipboard_bridge.rs'));
+  fs.copyFileSync(appPath('src/modules/android/providers/aim/clipboard_bridge.rs'), path.join(root, 'crates/aim-services/src/clipboard_bridge.rs'));
   edit('crates/aim-services/src/lib.rs', text => text + '\nmod clipboard_bridge;\n');
-  fs.copyFileSync(new URL('./runtime_prepare.rs', import.meta.url), path.join(root, 'crates/aim-android-image/src/bin/prepare-runtime.rs'));
+  fs.copyFileSync(appPath('src/modules/android/providers/aim/runtime_prepare.rs'), path.join(root, 'crates/aim-android-image/src/bin/prepare-runtime.rs'));
   fs.mkdirSync(path.join(root, 'crates/aimctl/src/bin'), {recursive:true});
   fs.writeFileSync(path.join(root, 'crates/aimctl/src/bin/maclauncher-aim.rs'), controllerBytes);
   edit('crates/aimctl/Cargo.toml', text => replace(text, '[dependencies]', '[dependencies]\nserde_json = "1.0"', 'native controller JSON'));

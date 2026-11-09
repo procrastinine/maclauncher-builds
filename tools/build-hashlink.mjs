@@ -10,8 +10,8 @@ import {sealRuntime} from './seal-runtime.mjs';
 import {resolveProject} from '../lib/projects.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {nativeStackInput} from './native-stack.mjs';
-const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),moduleRoot=path.join(root,'sources/maclauncher/src/modules/hashlink/runtime');
-const Paths=require(path.join(moduleRoot,'compiler-paths.js'));
+const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),hashlink=name=>require('../producers/package-support/src/modules/hashlink/runtime/'+name);
+const Paths=hashlink('compiler-paths.js');
 const Binary=require('../producers/package-support/scripts/native-binary-tools.cjs');
 export function hashLinkProfile(version,project=resolveProject('hashlink',root,{resolvePins:false})){
  const profile=project.packageProfiles.find(profile=>profile.version===version),labels=profile?.anchor?project.packageProfiles.filter(row=>row.anchor===profile.anchor).map(row=>row.version):[version],sources=new Set(labels.map(label=>/^(1\.(?:9|12))-MCLv[1-9]\d*$/.exec(label||'')?.[1]).filter(Boolean));
@@ -26,7 +26,7 @@ function bytecodeFacts(source){
  return {supportedBytecodeVersions:Array.from({length:maximum-minimum},(_,i)=>minimum+i+1),nativeAbi:{sdlEventLoop:loop==='_DYN'?'dynamic':'typed-event'}};
 }
 export async function buildHashLink({project,arch,version,output,work,sourceRoot:cachedSourceRoot}){
- fs.mkdirSync(work,{recursive:true});const legacy=hashLinkProfile(version,resolveProject(project,root,{resolvePins:false}))==='1.9',Builder=require(path.join(moduleRoot,legacy?'legacy-build.js':'dynamic-legacy-build.js'));
+ fs.mkdirSync(work,{recursive:true});const legacy=hashLinkProfile(version,resolveProject(project,root,{resolvePins:false}))==='1.9',Builder=hashlink(legacy?'legacy-build.js':'dynamic-legacy-build.js');
  let sourceRoot=path.join(root,'producers/package-support/src/external/source-revisions/hashlink-1-9');
  if(!legacy)sourceRoot=cachedSourceRoot||checkoutSource({repository:'https://github.com/HaxeFoundation/hashlink',revision:Builder.REVISION,destination:path.join(work,'upstream')});
  const sdlRoot=checkoutSource({...sharedDependencies.sdlHeaders,destination:path.join(work,'sdl-upstream')}),openalRoot=path.join(root,'producers/package-support/src/external/openal-soft');
@@ -49,7 +49,7 @@ export function compileHashLinkVM({work,flags,common,openalPrefix}){
 }
 /** Relocate and seal completed build products without changing upstream checkouts. */
 export function sealHashLink({project='hashlink',version,arch='x64',output,work,sourceRoot,staged,sdlStage,openalStage,overlaySha256,openalStack}){
- const legacy=hashLinkProfile(version,resolveProject(project,root,{resolvePins:false}))==='1.9',Builder=require(path.join(moduleRoot,legacy?'legacy-build.js':'dynamic-legacy-build.js'));
+ const legacy=hashLinkProfile(version,resolveProject(project,root,{resolvePins:false}))==='1.9',Builder=hashlink(legacy?'legacy-build.js':'dynamic-legacy-build.js');
  const source=path.join(work,'source'),sdl=path.join(work,'sdl'),openal=path.join(work,'openal'),openalBuild=path.join(work,'openal-build');
  addLicenses(work,'SDL2',sdl);
  addLicenses(work,'SDL2 HIDAPI',`${sdl}/src/hidapi`);

@@ -1,12 +1,13 @@
+const {appRequire}=require('../../../../../../tools/app-source.mjs');
 const {addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const Source = require("../../shared/runtime/pinned-native-build");
-const Native = require("../../shared/runtime/local-native");
+const Native = appRequire('src/modules/shared/runtime/local-native.js');
 const Portable = require("../../shared/runtime/portable-sdl2-fonts");
-const { throwIfAborted } = require("../../shared/runtime/download-utils");
+const { throwIfAborted } = appRequire('src/modules/shared/runtime/download-utils.js');
 const PIN = Object.freeze(require("./portable-media.json"));
 function validateSDKPrefix(prefix) {
   return { version: PIN.version, prefix, recipeSha256: recipeIdentity(), architecture: PIN.architecture, minimumMacOS: PIN.minimumMacOS };

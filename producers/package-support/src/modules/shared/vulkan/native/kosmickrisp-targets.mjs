@@ -1,3 +1,4 @@
+import {appRequire} from '../../../../../../../tools/app-source.mjs';
 import sharedDependencies from '../../../../../../dependencies.json' with {type:'json'};
 import {gitlink} from '../../../../../../../lib/pins.mjs';
 import fs from 'node:fs';

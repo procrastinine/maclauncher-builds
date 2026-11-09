@@ -1,13 +1,15 @@
+import {appPath,appRequire,moduleFile} from '../../../../../../../tools/app-source.mjs';
 import {gitlink} from '../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import {execFileSync} from "node:child_process";
-import {isolateCompiler} from "./isolate-compiler.mjs";
+import {isolateCompiler} from './isolate-compiler.mjs';
 import {buildCompilers} from "./build-compilers.mjs";
-import {SCENE_SHADER_INPUTS} from "../../effects/operation-contracts.mjs";
+const {SCENE_SHADER_INPUTS}=appRequire('src/modules/shared/effects/operation-contracts.mjs');
 const owned=import.meta.dirname,workspace=path.resolve(owned,"../../../../.."),source=JSON.parse(fs.readFileSync(path.join(owned,"source.json")));
+const module="src/modules/shared/reshade/isf",app=appPath(module),nativeRoot=appPath("src/modules/shared/reshade/native");
 const output=path.resolve(process.argv[2]||""),options={};
 for(let i=3;i<process.argv.length;i+=2){const key=process.argv[i];if(!["--payload","--source","--arch","--glslang","--spirv-cross","--spirv-tools","--spirv-headers"].includes(key)||!process.argv[i+1]||Object.hasOwn(options,key))throw Error("Choose an ISF build directory, --payload, --source and --arch.");options[key]=process.argv[i+1];}
 const arch=options["--arch"]||"universal",architectures=arch==="universal"?["arm64","x86_64"]:[arch==="x64"?"x86_64":arch];
@@ -43,7 +45,7 @@ for(const entry of compilers){
   write(path.join(input,path.basename(entry.header)),fs.readFileSync(entry.header));
 }
 for(const entry of source.compilerSources)addLicenses(payload,entry.id,compilerSources[entry.id]);
-run("cmake",["-S",owned,"-B",path.join(output,"cmake"),"-DISF_INPUT="+input,"-DMACFX_INPUT="+path.resolve(owned,"../native"),"-DCMAKE_BUILD_TYPE=Release","-DCMAKE_OSX_ARCHITECTURES="+architectures.join(";")]);
+run("cmake",["-S",app,"-B",path.join(output,"cmake"),"-DISF_INPUT="+input,"-DMACFX_INPUT="+nativeRoot,"-DCMAKE_BUILD_TYPE=Release","-DCMAKE_OSX_ARCHITECTURES="+architectures.join(";")]);
 run("cmake",["--build",path.join(output,"cmake"),"--parallel","2"]);
 fs.copyFileSync(path.join(output,"cmake/libmacfx-isf.dylib"),path.join(payload,source.library));
 for(const file of source.compilerLibraries){const filename=path.basename(file);fs.copyFileSync(path.join(input,filename),path.join(payload,filename));}
@@ -55,8 +57,8 @@ addLicenses(payload,'VVMetalKit',path.join(upstream,'submodules/VVMetalKit'));
 for(const [name,root]of Object.entries(roots))addLicenses(payload,name,root);
 for(const name of [source.library,...source.compilerLibraries.map(file=>path.basename(file))])run("codesign",["--force","--sign","-",path.join(payload,name)]);
 const files=fs.readdirSync(payload,{recursive:true}).filter(name=>name!=="provider.json"&&fs.statSync(path.join(payload,name)).isFile()).sort().map(name=>{const bytes=fs.readFileSync(path.join(payload,name));return {path:name,size:bytes.length,sha256:crypto.createHash("sha256").update(bytes).digest("hex")};});
-const ownedInputs=Object.fromEntries(["source.json","build.mjs","build-compilers.mjs","compiler-CMakeLists.txt","isolate-compiler.mjs","../compiler-isolation.mjs","../../effects/operation-contracts.mjs","CMakeLists.txt","provider.mm","index.js"].map(name=>[name,crypto.createHash("sha256").update(fs.readFileSync(path.join(owned,name))).digest("hex")]));
-const nativeRoot=path.resolve(owned,"../native"),dependencyText=fs.readFileSync(path.join(output,"cmake/CMakeFiles/macfx-isf.dir/provider.mm.o.d"),"utf8").replace(/\\\r?\n/g," ");
+const ownedInputs=Object.fromEntries(["source.json","build.mjs","build-compilers.mjs","compiler-CMakeLists.txt","isolate-compiler.mjs","../compiler-isolation.mjs","../../effects/operation-contracts.mjs","CMakeLists.txt","provider.mm","index.js"].map(name=>[name,crypto.createHash("sha256").update(fs.readFileSync(moduleFile(path.posix.join(module,name)))).digest("hex")]));
+const dependencyText=fs.readFileSync(path.join(output,"cmake/CMakeFiles/macfx-isf.dir/provider.mm.o.d"),"utf8").replace(/\\\r?\n/g," ");
 const dependencies=[...dependencyText.matchAll(/(?:\\.|[^\s])+/g)].map(match=>match[0].replace(/\\(.)/g,"$1")).filter(file=>file.startsWith(nativeRoot+path.sep)&&/\.(?:h|hpp)$/.test(file));
 const headerInputs=Object.fromEntries([...new Set(dependencies)].sort().map(file=>[path.relative(nativeRoot,file),crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex")]));
 fs.writeFileSync(path.join(payload,"provider.json"),JSON.stringify({...source,architectures,sceneInputsAPI:1,sceneInputRoles:SCENE_SHADER_INPUTS.filter(role=>!["viewMatrix","projectionMatrix"].includes(role)),inputs,owned:ownedInputs,headerInputs,files},null,2)+"\n");console.log(JSON.stringify({payload,files:files.length}));

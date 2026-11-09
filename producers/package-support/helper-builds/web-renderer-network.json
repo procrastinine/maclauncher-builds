@@ -6,7 +6,7 @@
   "kind": "bundle",
   "output": "renderer-network.node",
   "sources": [
-    "src/modules/shared/web/native/renderer-network.c"
+    "app:src/modules/shared/web/native/renderer-network.c"
   ],
   "flags": [
     "-undefined",

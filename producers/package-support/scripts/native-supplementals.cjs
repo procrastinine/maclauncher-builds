@@ -1,1 +1,0 @@
-../../../sources/maclauncher/scripts/native-supplementals.cjs

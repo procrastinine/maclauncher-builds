@@ -12,7 +12,6 @@ import {rustEnvironment} from './rust-build.mjs';
 import {stageAim} from '../producers/package-support/scripts/build-android-aim.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
-const producer=path.join(root,'sources/maclauncher');
 const read=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8',...options}).trim();
 /** Use the shared Rust toolchain maps while retaining this producer's paths and profile. */
 export function aimBuildEnvironment({work,upstream,sdk,python,minimumMacOS='26.0',env=process.env}){
@@ -60,7 +59,7 @@ export async function buildAndroidAim({project,version,arch,output,work}){
  if(ownedWork===ownedOutput||ownedOutput.startsWith(ownedWork+path.sep)||ownedWork.startsWith(ownedOutput+path.sep))throw Error('AIM output and build directories must be separate.');
  const selected=resolveProject(project,root),record=buildRecord(selected,version);
  version=record.version;
- const {source,prepareAimSources}=await import(pathToFileURL(path.join(producer,'src/modules/android/providers/aim/source.mjs')));
+ const {source,prepareAimSources}=await import(pathToFileURL(path.join(root,'producers/package-support/src/modules/android/providers/aim/source.mjs')));
  const upstream=path.join(work,'upstream');
  const checkout=checkoutSource({repository:source.repository,revision:source.commit,destination:path.join(work,'aim-source')});
  if(read('git',['-C',checkout,'rev-parse','HEAD'])!==source.commit||read('git',['-C',checkout,'status','--porcelain','--untracked-files=no']))throw Error('AIM sources differ from their declared clean revision.');
@@ -69,9 +68,9 @@ export async function buildAndroidAim({project,version,arch,output,work}){
  const {sdk,python,cache}=await prepareAndroidBuildInputs({source:upstream,work:path.join(work,'inputs'),image:source.androidImage});
  const env=aimBuildEnvironment({work,upstream,sdk,python,minimumMacOS:source.minimumMacOS||'26.0'});
  try{
- run(process.execPath,[path.join(producer,'scripts/build-android-aim.mjs'),'--build','--image-only','--jobs','2','--work',upstream],{env});
+ run(process.execPath,[path.join(root,'producers/package-support/scripts/build-android-aim.mjs'),'--build','--image-only','--jobs','2','--work',upstream],{env});
  await releaseAndroidImageArchive({source:upstream,work,cache,image:source.androidImage});
- run(process.execPath,[path.join(producer,'scripts/build-android-aim.mjs'),'--build','--jobs','2','--work',upstream],{env});
+ run(process.execPath,[path.join(root,'producers/package-support/scripts/build-android-aim.mjs'),'--build','--jobs','2','--work',upstream],{env});
  }finally{detachAimImage(work,upstream);}
  // Compilation is complete. Staging reads detached runtime products, metadata and notices.
  cleanupAimBuild({work});

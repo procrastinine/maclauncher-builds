@@ -1,3 +1,4 @@
+import {appSourceRoot} from '../tools/app-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -18,7 +19,7 @@ test('Android recipes initialize the producer whose metadata they read from a co
  for(const project of ['android-java-framework','android-java-converter','android-angle','android-art-image-extractor','android-launcher','android-art-java','android-image-data-1','android-image-data-2','android-image-data-3','android-image-data-4','android-image-data-5']){
   const commands=[],result=initializeSources({project,directory:root,run:(args,cwd)=>{
    commands.push({args,cwd});
-   if(args[0]==='ls-files'){const links=cwd===root?['sources/maclauncher','sources/maclauncher-android','sources/maclauncher-kosmickrisp']:cwd===path.join(root,'sources/maclauncher')?['src/external/maclauncher-android','src/external/maclauncher-kosmickrisp']:['sources/maclauncher'];return links.map(path=>'160000 '+'a'.repeat(40)+' 0\t'+path).join('\n')+'\n';}
+   if(args[0]==='ls-files'){const links=cwd===root?['sources/maclauncher','sources/maclauncher-android','sources/maclauncher-kosmickrisp']:cwd===appSourceRoot().directory?['src/external/maclauncher-android','src/external/maclauncher-kosmickrisp']:['sources/maclauncher'];return links.map(path=>'160000 '+'a'.repeat(40)+' 0\t'+path).join('\n')+'\n';}
    return '';
   }});
   const declared=JSON.parse(fs.readFileSync(path.join(root,'producers/package-support/app-source.json'))).sourceSubmodules;

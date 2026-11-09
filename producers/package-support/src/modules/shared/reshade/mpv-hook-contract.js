@@ -1,1 +1,0 @@
-../../../../../../sources/maclauncher/src/modules/shared/reshade/mpv-hook-contract.js

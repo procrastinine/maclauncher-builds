@@ -1,14 +1,14 @@
-import {isOwnedFile} from '../../../tools/app-source.mjs';
-import {sourceRevision} from './graphics-source-revision.mjs';
-import {gitlink} from "../../../lib/pins.mjs";
+import {moduleFile} from '../../../tools/app-source.mjs';
+import {gitlink,sourceRevision} from '../../../lib/pins.mjs';
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import {execFileSync} from "node:child_process";
 const hash=file=>crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 const safe=name=>typeof name==="string"&&!path.isAbsolute(name)&&!name.split(/[\\/]/).some(part=>!part||part==="."||part==="..");
-export function stageFSR4Provider({directory,upstream,ownedRoot}){
-  const spec=JSON.parse(fs.readFileSync(path.join(ownedRoot,"source.json"))),metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json")));
+const module="src/modules/shared/reshade/temporal/fsr4";
+export function stageFSR4Provider({directory,upstream}){
+  const spec=JSON.parse(fs.readFileSync(moduleFile(module+"/source.json"))),metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json")));
   const files=new Map();
   for(const row of metadata.files){
     if(!safe(row.path)||row.path==="provider.json")throw Error("Invalid FSR 4 runtime inventory.");
@@ -17,11 +17,7 @@ export function stageFSR4Provider({directory,upstream,ownedRoot}){
     files.set(row.path,file);
   }
   const owned=new Map();
-  for(const [relative]of Object.entries(metadata.owned)){
-    if((!safe(relative)&&!["../frame.h","../payload-files.hpp"].includes(relative)))throw Error("Invalid owned FSR 4 build input.");
-    const file=path.resolve(ownedRoot,relative);if(!isOwnedFile(file))throw Error("An FSR 4 build input changed: "+relative);
-    owned.set(path.posix.normalize("maclauncher/temporal/fsr4/"+relative),file);
-  }
+  for(const relative of Object.keys(metadata.owned))owned.set(path.posix.normalize("maclauncher/temporal/fsr4/"+relative),moduleFile(path.posix.join(module,relative)));
   const archive=metadata.sourceInputs?.find(row=>row.path==="source-inputs/weights_lossy2.npz");
   if(!archive||metadata.sourceInputs.length!==1||archive.sha256!==spec.lite2.sha256||archive.repository!==spec.lite2.repository||archive.commit!==spec.lite2.commit||![spec.lite2.url,spec.lite2.repository+"/tree/"+spec.lite2.commit].includes(archive.sourceUrl))throw Error("The Lite 2 source archive identity is incomplete.");
   const archiveFile=path.join(path.dirname(directory),archive.path),archiveStat=fs.lstatSync(archiveFile);

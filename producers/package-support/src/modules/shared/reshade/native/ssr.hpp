@@ -1,1 +1,0 @@
-../../../../../../../sources/maclauncher/src/modules/shared/reshade/native/ssr.hpp

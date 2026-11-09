@@ -1,3 +1,4 @@
+import {appRequire} from '../../tools/app-source.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import sharedDependencies from '../dependencies.json' with {type:'json'};
 import fs from 'node:fs';
@@ -8,7 +9,7 @@ import {recipeMain} from '../../tools/build-source.mjs';
 import {mingw as prepareMingw} from '../../tools/scene-runtime.mjs';
 import {addLicense} from '../../lib/licenses.mjs';
 import {gitlink} from '../../lib/pins.mjs';
-import Bundled from '../../sources/maclauncher/src/modules/shared/runtime/bundled-native.js';
+const Bundled=appRequire('src/modules/shared/runtime/bundled-native.js');
 import {publicDeclaration} from '../../tools/runtime-package.mjs';
 import {helperClientSource} from './helper-subset.mjs';
 import {buildHelpers} from './helper-build.mjs';

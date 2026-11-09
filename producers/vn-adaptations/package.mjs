@@ -1,3 +1,4 @@
+import {appRequire,recipePath,APP_REFERENCE} from '../../tools/app-source.mjs';
 import {gitlink} from '../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -6,8 +7,8 @@ import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {pack} from '../../tools/runtime-package.mjs';
 const require=createRequire(import.meta.url);
-const B=require('../../sources/maclauncher/src/modules/shared/runtime/bundled-native.js');
-const M=require('../../sources/maclauncher/src/modules/shared/runtime/macho-load-commands.js');
+const B=appRequire('src/modules/shared/runtime/bundled-native.js');
+const M=appRequire('src/modules/shared/runtime/macho-load-commands.js');
 const here=import.meta.dirname;
 const source=JSON.parse(fs.readFileSync(path.join(here,'source.json')));
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -15,9 +16,9 @@ const read=file=>JSON.parse(fs.readFileSync(file));
 
 function verifyInputs(){
   for(const [name,expected] of Object.entries(source.ownedFiles)){
-    B.relativeFile(name);
-    const file=path.join(here,name);
-    if(!fs.lstatSync(file).isFile()||fs.lstatSync(file).isSymbolicLink()||hash(file)!==expected)throw Error('The producer input has changed: '+name);
+    if(!name.startsWith(APP_REFERENCE))B.relativeFile(name);
+    const file=recipePath(here,name);
+    if(hash(file)!==expected)throw Error('The producer input has changed: '+name);
   }
 }
 function copy(from,to){

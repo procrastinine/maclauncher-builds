@@ -1,1 +1,0 @@
-../../../../../../../sources/maclauncher/src/modules/crossover/temporal/fidelityfx/README.md

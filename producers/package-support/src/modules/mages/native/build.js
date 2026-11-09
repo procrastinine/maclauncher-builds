@@ -1,6 +1,7 @@
+const {appRequire}=require('../../../../../../tools/app-source.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
-const Adapter = require("./adapter");
+const Adapter = appRequire('src/modules/mages/native/adapter.js');
 
 const FFMPEG_OPTIONS = Object.freeze(["--cc=clang", "--target-os=darwin", "--enable-shared", "--disable-static",
   "--enable-pic", "--disable-doc", "--disable-debug", "--disable-autodetect", "--disable-gpl", "--disable-nonfree",

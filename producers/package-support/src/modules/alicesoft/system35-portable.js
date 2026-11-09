@@ -1,8 +1,9 @@
+const {appRequire}=require('../../../../../tools/app-source.mjs');
 const sharedDependencies=require('../../../../dependencies.json');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const Native = require("../shared/runtime/local-native");
+const Native = appRequire('src/modules/shared/runtime/local-native.js');
 const Audio = require("../shared/runtime/portable-sndfile");
 
 function linkPrefix(inputPrefix, outputPrefix) {

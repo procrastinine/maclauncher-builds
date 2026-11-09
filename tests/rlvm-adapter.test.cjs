@@ -1,6 +1,7 @@
+const {appRequire}=require('../tools/app-source.mjs');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const temporary=t=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'producer-test-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;};
-const Native=require('../sources/maclauncher/src/modules/shared/runtime/local-native'),MachO=require('../sources/maclauncher/src/modules/shared/runtime/macho-load-commands');
+const Native=appRequire('src/modules/shared/runtime/local-native'),MachO=appRequire('src/modules/shared/runtime/macho-load-commands');
 test('RLVM accepts the Runtime selected version before checking the requested CPU', async t=>{
  const root=temporary(t),command=path.resolve(__dirname,'../producers/vn-adaptations/rlvm/package.mjs');
  const {resolveProject,buildRecord}=await import('../lib/projects.mjs'),version=buildRecord(resolveProject('rlvm-adapter',path.resolve(__dirname,'..'),{resolvePins:false})).version;

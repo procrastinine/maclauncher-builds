@@ -7,10 +7,11 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { pathToFileURL } from "node:url";
+import { appPath } from "../../../../../../../../tools/app-source.mjs";
 
 // Mode arguments and environment values may name {library} (the core library), {build}, {fixtures}
-// (this directory), {temporary} (an empty directory per mode, with the
+// (the app's native fixture sources), {temporary} (an empty directory per mode, with the
 // fixture's generated files) and the user-supplied inputs below.
 const LIBRARY = "{library}", TEMPORARY = "{temporary}";
 const cpu = (...modes) => ({ metal: false, modes: modes.length ? modes : [[]] });
@@ -40,7 +41,7 @@ const identityPreset = {
   "identity.slang": historyPreset["history.slang"].replaceAll("OriginalHistory1", "Source"),
 };
 // Live effect directories: {temporary}/plan lists immutable revisions, each
-// with its prepared effect. File values of {fixture} copy a file from here.
+// with its prepared effect. File values of {fixture} copy a fixture source file.
 const [A, D, C] = ["1", "2", "3"].map(digit => digit.repeat(64));
 const live = (...effects) => ({
   env: { RESHADE_LIVE_EFFECTS: TEMPORARY, RESHADE_CONTROL_FILE: TEMPORARY + "/controls.bin", RESHADE_EFFECT_KEY: "a".repeat(64) },
@@ -53,7 +54,7 @@ const virtualWindowModes = [[], ["--active"], ["--diagnostics"], ["--unchanged-d
   ["--publisher-contract"], ["--live-source"], ["--fullscreen"], ["--live-source", "--fullscreen"]];
 
 /** Fixtures by name: executable in build/test (the name unless given) or a
- * node script here, the arguments of each mode, Metal and other requirements,
+ * node script beside this harness, the arguments of each mode, Metal and other requirements,
  * extra environment and files generated into {temporary}. An optional
  * executable that was not built is skipped with its reason. */
 export const fixtures = {
@@ -157,11 +158,11 @@ export function runFixtures(build, { only = [], timeout = 120000, log = () => {}
   build = path.resolve(build);
   for (const name of only) if (!fixtures[name]) throw new Error("Unknown native fixture: " + name);
   const device = metalDevice(build), results = [];
-  const values = { "{library}": path.join(build, "libreshade-macos.dylib"), "{build}": build, "{fixtures}": path.dirname(fileURLToPath(import.meta.url)) };
+  const values = { "{library}": path.join(build, "libreshade-macos.dylib"), "{build}": build, "{fixtures}": appPath("src/modules/shared/reshade/native/test") };
   for (const { variable, argument } of Object.values(requirements)) if (argument && process.env[variable]) values[argument] = path.resolve(process.env[variable]);
   for (const [name, { metal, modes, executable: file = name, script, optional, needs = [], env = {}, files = {} }] of Object.entries(fixtures)) {
     if (only.length && !only.includes(name)) continue;
-    const executable = script ? path.join(values["{fixtures}"], script) : path.join(build, "test", file);
+    const executable = script ? path.join(import.meta.dirname, script) : path.join(build, "test", file);
     const missing = needs.filter(key => !process.env[requirements[key].variable]);
     for (const mode of modes) {
       const label = [name, ...mode.filter(value => !value.includes("{") && !name.split(" ").includes(value))].join(" ");

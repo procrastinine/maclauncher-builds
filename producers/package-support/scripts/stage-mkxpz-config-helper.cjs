@@ -1,16 +1,17 @@
+const {appPath,appRequire}=require('../../../tools/app-source.mjs');
 // Developer staging only. Play reads the reviewed supplemental directly.
 const fs = require('node:fs');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
-const Native = require('../src/modules/shared/runtime/local-native');
+const Native = appRequire('src/modules/shared/runtime/local-native.js');
 const { loadCommands } = require('./native-binary-tools.cjs');
 
 const VERSION = 'config-identity-v7-universal';
 const ID = 'mkxpz-config-helper';
 function stage({ output }) {
   if (process.platform !== 'darwin') throw new Error('Build the shared config helper on macOS with Apple Command Line Tools.');
-  const source = path.resolve(__dirname, '../src/modules/rgss/overlays/mkxpz-config.c');
-  const identitySource = path.resolve(__dirname, '../src/modules/rgss/overlays/mkxpz-identity.m');
+  const source = appPath('src/modules/rgss/overlays/mkxpz-config.c');
+  const identitySource = appPath('src/modules/rgss/overlays/mkxpz-identity.m');
   const directory = path.join(path.resolve(output), ID, VERSION, 'universal');
   if (fs.existsSync(directory)) throw new Error('Choose an empty staging output; reviewed helpers are never overwritten.');
   fs.mkdirSync(directory, { recursive: true });

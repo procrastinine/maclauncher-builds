@@ -1,8 +1,9 @@
+const {appRequire}=require('../../../../../tools/app-source.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const Native = require("../shared/runtime/local-native");
-const { throwIfAborted } = require("../shared/runtime/download-utils");
+const Native = appRequire('src/modules/shared/runtime/local-native.js');
+const { throwIfAborted } = appRequire('src/modules/shared/runtime/download-utils.js');
 
 const REVISION = "124bdf841f09e7ce02aa99b7b55791a0f7a900ff";
 const OVERLAY_REVISION = "macos-storage-font-monitor-v1";

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 #include <stdint.h>
-#include "../../../shared/reshade/temporal/camera.h"
+#include "camera.h"
 typedef struct MLTemporalCameraCall {
     uint32_t size,version;
     RSTemporalCamera camera;

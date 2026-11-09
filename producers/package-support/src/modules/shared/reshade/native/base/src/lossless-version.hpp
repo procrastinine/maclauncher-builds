@@ -1,1 +1,0 @@
-../../../../../../../../../sources/maclauncher/src/modules/shared/reshade/native/base/src/lossless-version.hpp

@@ -1,4 +1,6 @@
 import './producer-environment.mjs';
+import {appPath,exportAppFile} from './app-source.mjs';
+import {adapt} from '../producers/package-support/src/modules/android/native/apk-metadata/adapt.mjs';
 import {aimSource} from '../lib/android-source.mjs';
 import {addLicenses,addCargoLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
@@ -8,9 +10,8 @@ import {rustEnvironment} from "./rust-build.mjs";
 import {buildInput} from './build-input.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 import {resolveProject} from '../lib/projects.mjs';
-import {adapt} from '../sources/maclauncher/src/modules/android/native/apk-metadata/adapt.mjs';
 import {recipeMain,checkoutSource} from './build-source.mjs';
-const root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'sources/maclauncher/src/modules/android/native/apk-metadata');
+const root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/package-support/src/modules/android/native/apk-metadata'),program='src/modules/android/native/apk-metadata/main.rs';
 export async function buildAPK({project:id,arch,output,work}){
  const project=resolveProject(id,root),definition=JSON.parse(fs.readFileSync(path.join(base,'sources.json'))),spec={...definition,aim:{...definition.aim,...aimSource()}};
  fs.mkdirSync(work,{recursive:true});
@@ -21,7 +22,7 @@ export async function buildAPK({project:id,arch,output,work}){
   execFileSync('/usr/bin/tar',['-xzf',archive,'-C',source,...paths.map(file=>prefix+'/'+file)],{maxBuffer:Infinity});
 
   fs.renameSync(path.join(source,prefix),path.join(source,'upstream'));
-  for(const file of ['main.rs','Cargo.toml','Cargo.lock'])fs.copyFileSync(path.join(base,file),path.join(source,file));
+  exportAppFile(program,path.join(source,'main.rs'));for(const file of ['Cargo.toml','Cargo.lock'])fs.copyFileSync(path.join(base,file),path.join(source,file));
   adapt(path.join(source,'upstream/crates/aim-apps/src'));
   const env=rustEnvironment({work,minimumMacOS:'13.0'}),target=arch==='x64'?'x86_64-apple-darwin':'aarch64-apple-darwin';
   execFileSync('cargo',['build','--release','--locked','--target',target,'--bin','android-apk-metadata'],{maxBuffer:Infinity,cwd:source,env,stdio:'inherit',timeout:900000});
@@ -30,7 +31,7 @@ export async function buildAPK({project:id,arch,output,work}){
 
   addLicenses(payload,'AIM',upstream);addLicenses(payload,id,source);addCargoLicenses(payload,id,source,env);addLicenses(payload,'MacLauncher',root);
 
-  return helperPackage({id,version:project.build.version,arch,output,minimumMacOS:'13.0',rosettaFiles:arch==='x64'?['android-apk-metadata']:[],sourceSha256:sha(path.join(base,'main.rs')),record:{executable:'android-apk-metadata',upstreamRevision:spec.aim.revision,binarySha256:sha(binary),cargoLockSha256:sha(path.join(base,'Cargo.lock'))}});
+  return helperPackage({id,version:project.build.version,arch,output,minimumMacOS:'13.0',rosettaFiles:arch==='x64'?['android-apk-metadata']:[],sourceSha256:sha(appPath(program)),record:{executable:'android-apk-metadata',upstreamRevision:spec.aim.revision,binarySha256:sha(binary),cargoLockSha256:sha(path.join(base,'Cargo.lock'))}});
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}finally{fs.rmSync(work,{recursive:true,force:true});}
 }
 recipeMain(import.meta,buildAPK);

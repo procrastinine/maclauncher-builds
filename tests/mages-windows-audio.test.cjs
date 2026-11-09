@@ -1,3 +1,4 @@
+const {appPath,appRequire}=require('../tools/app-source.mjs');
 const requirements = require("./support/requirements.cjs");
 const test = require("node:test");
 const assert = require("node:assert/strict");
@@ -7,10 +8,10 @@ const os = require("node:os");
 const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const Current = require("../producers/package-support/src/modules/mages/native/current-build");
-const descriptor = require("../sources/maclauncher/src/modules/mages/native/current-windows-overlay.json");
-const Session = require("../sources/maclauncher/src/modules/mages/native/windows-audio-session");
+const descriptor = appRequire('src/modules/mages/native/current-windows-overlay.json');
+const Session = appRequire('src/modules/mages/native/windows-audio-session');
 
-const nativeRoot = path.resolve(__dirname, "../sources/maclauncher/src/modules/mages/native");
+const nativeRoot = appPath('src/modules/mages/native');
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 
 test("the current Windows voice patch validates inputs before writes and supplies the compiled implementation",

@@ -1,4 +1,4 @@
-import {appSourceRoot} from '../../tools/app-source.mjs';
+import {appPath} from '../../tools/app-source.mjs';
 // SPDX-License-Identifier: MIT
 import fs from 'node:fs';
 import path from 'node:path';
@@ -19,12 +19,12 @@ export function carrierHeader(producer=path.resolve(here,'../vkd3d-proton/vk_tem
 }
 // Compose the carrier in an owned source projection; the upstream checkout stays read-only.
 export function applyTemporalSource(work){
-    appSourceRoot();
-    run('git',['apply','--unsafe-paths','--directory='+work,path.join(here,'temporal.patch')]);
+    const vulkan=appPath('src/modules/shared/vulkan/native');
+    run('git',['apply','--unsafe-paths','--directory='+work,path.join(vulkan,'temporal.patch')]);
     const commands=path.join(work,'MoltenVK/MoltenVK/Commands');
-    for(const name of ['temporal-command.hpp','temporal-command.inc','temporal-map.hpp','temporal-scene.hpp'])fs.copyFileSync(path.join(here,name),path.join(commands,name));
+    for(const name of ['temporal-command.hpp','temporal-command.inc','temporal-map.hpp','temporal-scene.hpp'])fs.copyFileSync(path.join(vulkan,name),path.join(commands,name));
     fs.writeFileSync(path.join(commands,'temporal-carrier.h'),carrierHeader());
-    const scene=path.resolve(here,'../../sources/maclauncher/src/modules/shared/reshade');
+    const scene=appPath('src/modules/shared/reshade');
     const common=path.join(work,'MoltenVK/include/macfx-temporal');
     fs.mkdirSync(common,{recursive:true});
     for(const [name,directory]of [['frame.h','temporal'],['scene-aovs.h','temporal'],['scene-matrices.h','temporal'],['image-color.h','native']]){
@@ -32,7 +32,7 @@ export function applyTemporalSource(work){
         fs.writeFileSync(path.join(commands,name),'#pragma once\n#include "../../include/macfx-temporal/'+name+'"\n');
     }
     const commandPath='MoltenVK/MoltenVK/Commands/';
-    return [...fs.readFileSync(path.join(here,'temporal.patch'),'utf8').matchAll(/^\+\+\+ b\/(.+)$/gm)].map(m=>m[1]).concat(
+    return [...fs.readFileSync(appPath('src/modules/shared/vulkan/native/temporal.patch'),'utf8').matchAll(/^\+\+\+ b\/(.+)$/gm)].map(m=>m[1]).concat(
         ['temporal-command.hpp','temporal-command.inc','temporal-map.hpp','temporal-scene.hpp','temporal-carrier.h','frame.h','scene-aovs.h','scene-matrices.h','image-color.h'].map(file=>commandPath+file),
         ['frame.h','scene-aovs.h','scene-matrices.h','image-color.h'].map(file=>'MoltenVK/include/macfx-temporal/'+file));
 }

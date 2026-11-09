@@ -1,1 +1,0 @@
-../../../../../../../../../sources/maclauncher/src/modules/shared/reshade/shader-collection/retroarch/Shaders/CRTLottes.fx

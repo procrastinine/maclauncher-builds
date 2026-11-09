@@ -1,4 +1,5 @@
 import './producer-environment.mjs';
+import {appPath,appRequire} from './app-source.mjs';
 import {addLicenses} from '../lib/licenses.mjs';
 import {retryNetwork} from './download.mjs';
 import fs from 'node:fs';
@@ -13,7 +14,7 @@ import {recipeMain} from './build-source.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
 const Builder=require('../producers/package-support/src/modules/minori/runtime/build.js');
 const Movies=require('../producers/package-support/src/modules/minori/runtime/movie-build.js');
-const Native=require('../sources/maclauncher/src/modules/shared/runtime/local-native.js');
+const Native=appRequire('src/modules/shared/runtime/local-native.js');
 export async function buildMinori({project,arch,output,work}) {
  fs.mkdirSync(work,{recursive:true});
  const sourceDir=path.join(root,'producers/package-support/src/external/ReMinori'),prefix=path.join(work,'movies');
@@ -27,7 +28,7 @@ export async function buildMinori({project,arch,output,work}) {
   return Build.runBuildCommand(command,['clang','clang++'].includes(path.basename(command))?['-isysroot',sdk,...args]:args,{...options,env:{...mapped,CARGO_TARGET_DIR:options.env?.CARGO_TARGET_DIR}});
  }}});
 
- addLicenses(built.sourceRoot,project,path.join(root,'sources/maclauncher/src/modules/minori/runtime'));
+ addLicenses(built.sourceRoot,project,appPath('src/modules/minori/runtime'));
  const raw=built.directory,payloads=['profile.json','lib','bin/maclauncher-minori-probe','bin/maclauncher-minori-movie'].map(relative=>({source:path.join(raw,relative),relative}));
  return sealRuntime({cargoRoot:built.sourceRoot,env,project,arch,output,executable:built.executablePath,sourceRoot:sourceDir,upstreamRevision:Builder.REVISION,payloads,provenance:{},runtimeFiles:{profile:'profile.json',probe:'bin/maclauncher-minori-probe',movieDecoder:'bin/maclauncher-minori-movie'},jsonMetadata:{'profile.json':(profile,{files})=>({...profile,executables:Object.fromEntries(Object.keys(profile.executables).map(name=>[name,Native.hashFile(path.join(files,'bin',name))])),movieDecoder:{...profile.movieDecoder,sha256:Native.hashFile(path.join(files,'bin/maclauncher-minori-movie')),files:profile.movieDecoder.files.map(row=>({...row,sha256:Native.hashFile(path.join(files,row.path))}))}})}});
 }

@@ -1,13 +1,14 @@
+const {appRequire}=require('../../../../../../tools/app-source.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const Source = require("../../shared/runtime/pinned-native-build");
-const Native = require("../../shared/runtime/local-native");
+const Native = appRequire('src/modules/shared/runtime/local-native.js');
 const Portable = require("../../shared/runtime/portable-sdl2-fonts");
 const Media = require("./portable-media");
 const Previous = require("./build");
-const { throwIfAborted } = require("../../shared/runtime/download-utils");
+const { throwIfAborted } = appRequire('src/modules/shared/runtime/download-utils.js');
 
 const VERSION = "0.5.3-MCLv1";
 const PROFILE_REVISION = "macos-npa-nss-private-v8";

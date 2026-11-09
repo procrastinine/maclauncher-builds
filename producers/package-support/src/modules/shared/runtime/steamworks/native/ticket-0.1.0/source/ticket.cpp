@@ -1,1 +1,0 @@
-../../../../../../../../../../sources/maclauncher/src/modules/shared/runtime/steamworks/native/ticket-0.1.0/source/ticket.cpp

@@ -1,14 +1,15 @@
+const {appRequire}=require('../../../tools/app-source.mjs');
 const {gitlink} = require('../../../lib/pins.mjs');
 const REVISION = gitlink('producers/package-support/src/external/mkxp-z');
 const {addLicense,addLicenses} = require('../../../lib/licenses.mjs');
 // Maintainer source build. Ordinary Play uses the sealed Included artifact.
 const fs = require('node:fs'), path = require('node:path'), os = require('node:os');
 const {execFileSync} = require('node:child_process');
-const Native = require('../src/modules/shared/runtime/local-native');
-const B = require('../src/modules/shared/runtime/bundled-native');
+const Native = appRequire('src/modules/shared/runtime/local-native.js');
+const B = appRequire('src/modules/shared/runtime/bundled-native.js');
 const Overlay = require('../src/modules/rgss/overlays/mkxpz-filename-nfc/source.json');
 const {loadCommands, links} = require('./native-binary-tools.cjs');
-const Content = require('./runtime-content.cjs');
+const Content = appRequire('scripts/runtime-content.cjs');
 const SOURCE_SHA256 = require('../../../runtimes/mkxpz/baseline.json').upstream.sourceSha256;
 function packageVersion(value) {
   if (typeof value !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._+-]{0,159}$/.test(value))

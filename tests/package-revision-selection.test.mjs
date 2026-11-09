@@ -1,10 +1,11 @@
+import {appPath} from '../tools/app-source.mjs';
 import test from'node:test';
 import assert from'node:assert/strict';
 import fs from'node:fs';
 import{createRequire}from'node:module';
 import{javaSteamworksProfile}from'../tools/build-java-steamworks.mjs';
 const require=createRequire(import.meta.url),producer=require('../producers/package-support/scripts/build-mkxpz-nfc.cjs');
-const originals=JSON.parse(fs.readFileSync(new URL('../sources/maclauncher/src/modules/java/runtime/steamworks/versions.json',import.meta.url)));
+const originals=JSON.parse(fs.readFileSync(appPath('src/modules/java/runtime/steamworks/versions.json')));
 test('new Steamworks package revisions retain the exact original ABI source and publisher pins',()=>{
  for(const base of ['1.9.0','1.10.0'])for(const revision of [1,3,42]){
   const selected=javaSteamworksProfile(base+'-MCLv'+revision),original=originals.find(row=>row.version===base);

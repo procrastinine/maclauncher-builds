@@ -1,3 +1,4 @@
+const {appRequire}=require('../tools/app-source.mjs');
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -7,7 +8,7 @@ const crypto = require("node:crypto");
 const Dependency = require("../producers/package-support/src/modules/mages/native/portable-dependencies");
 const Prefix = require("../producers/package-support/src/modules/mages/native/portable-prefix");
 const Build = require("../producers/package-support/src/modules/mages/native/portable-build");
-const { image } = require("../sources/maclauncher/tests/fixtures/macho-image.js");
+const { image } = appRequire('tests/fixtures/macho-image.js');
 
 function directory(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "mages-portable-"));

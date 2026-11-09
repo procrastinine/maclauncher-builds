@@ -1,25 +1,23 @@
 #!/usr/bin/env node
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
-import {gitlink} from '../../../../../../../lib/pins.mjs';
+import {sourceRevision as recordRevision} from '../../../../../../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
 import { spawn, execFileSync } from 'node:child_process';
 import { fileURLToPath,pathToFileURL } from 'node:url';
-import {appSourceRoot,materializeAppModule} from '../../../../../../../tools/app-source.mjs';
-import Production from '../../../shared/runtime/production-source.js';
+import {appPath,appSourceRoot} from '../../../../../../../tools/app-source.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const [upstreamArg, vendorArg, compilerArg, outputArg] = process.argv.slice(2);
 const nativeOnly = process.argv.includes('--native-only');
 if (!outputArg) throw new Error('Usage: build.mjs DXMT_SOURCE DXMT_WINE_DIRECTORY LLVM_MINGW_BIN OUTPUT [--native-only]');
 const [upstream, vendor, toolchain, output] = [upstreamArg, vendorArg, compilerArg, outputArg].map(p => path.resolve(p));
-const appSource=appSourceRoot(),owned=path.join(output,'app-dxmt');
-materializeAppModule({module:'src/modules/crossover/temporal/dxmt',output:owned});
+const owned=appPath('src/modules/crossover/temporal/dxmt');
 const {applyCameraOverlay}=await import(pathToFileURL(path.join(owned,'patch.mjs')));
 const {applyTemporalD3D12}=await import(pathToFileURL(path.join(owned,'d3d12-overlay.mjs')));
-const revision = gitlink(JSON.parse(fs.readFileSync(path.join(here, 'source.json'), 'utf8')).gitlink);
+const revision = recordRevision(JSON.parse(fs.readFileSync(path.join(here, 'source.json'), 'utf8')));
 let sourceRevision;
 try { sourceRevision = JSON.parse(fs.readFileSync(path.join(upstream, '.maclauncher-upstream.json'), 'utf8')).revision; }
 catch { sourceRevision = execFileSync('git', ['-C', upstream, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(); }
@@ -30,7 +28,7 @@ fs.mkdirSync(output, { recursive: true });
 fs.cpSync(upstream, source, { recursive: true, filter: p => !p.split(path.sep).includes('.git') });
 fs.mkdirSync(objects, { recursive: true });
 for (const arch of ['x86_64-windows', 'x86_64-unix']) fs.mkdirSync(path.join(payload, arch), { recursive: true });
-const shared = path.join(appSource.directory,'src/modules/shared/reshade/temporal');
+const shared = appPath('src/modules/shared/reshade/temporal');
 for (const file of ['camera.h', 'frame.h']) fs.copyFileSync(path.join(shared, file), path.join(source, 'include', file));
 for(const file of ['camera-transport.hpp','streamline-transport.hpp','streamline-native.h','streamline-snapshot.hpp'])fs.copyFileSync(path.join(owned,file),path.join(source,'include',file));
 for(const [name,file]of [['scene-aovs.h',path.join(shared,'scene-aovs.h')],['image-color.h',path.resolve(shared,'../native/image-color.h')]])fs.copyFileSync(file,path.join(source,'include',name));
@@ -145,36 +143,8 @@ addLicenses(payload,'DXMT',upstream);
 const files = {};
 for (const file of fs.readdirSync(path.join(payload,'x86_64-windows')).filter(name=>name.endsWith('.dll'))) files['x86_64-windows/'+file]=sha(path.join(payload,'x86_64-windows',file));
 files['x86_64-unix/winemetal.so'] = sha(unixOut);
-const archiveRoot = path.join(output, 'corresponding-source');
-fs.rmSync(archiveRoot, { recursive: true, force: true }); fs.mkdirSync(archiveRoot, { recursive: true });
-const archivedSource = path.join(archiveRoot, 'dxmt-source'); fs.mkdirSync(archivedSource);
-if (fs.existsSync(path.join(upstream, '.maclauncher-upstream.json'))) {
-  fs.cpSync(upstream, archivedSource, { recursive: true, filter: p => !p.split(path.sep).includes('.git') });
-} else {
-  const tar = path.join(output, 'dxmt-source.tar');
-  const fd = fs.openSync(tar, 'w');
-  try { execFileSync('git', ['-C', upstream, 'archive', '--format=tar', revision], { stdio: ['ignore', fd, 'pipe'] }); }
-  finally { fs.closeSync(fd); }
-  execFileSync('tar', ['-xf', tar, '-C', archivedSource]); fs.unlinkSync(tar);
-}
-fs.writeFileSync(path.join(archivedSource, '.maclauncher-upstream.json'), JSON.stringify({ revision }) + '\n');
-const ownedArchive = path.join(archiveRoot, 'maclauncher/src/modules/crossover/temporal/dxmt');
-fs.cpSync(owned, ownedArchive, { recursive: true });
-for(const name of ['build.mjs','source.json'])fs.copyFileSync(path.join(here,name),path.join(ownedArchive,name));
-const sharedArchive = path.join(archiveRoot, 'maclauncher/src/modules/shared/reshade/temporal');
-fs.mkdirSync(sharedArchive, { recursive: true });
-for (const name of ['camera.h', 'frame.h','scene-aovs.h']) fs.copyFileSync(path.join(shared, name), path.join(sharedArchive, name));
-const colorArchive=path.join(archiveRoot,'maclauncher/src/modules/shared/reshade/native');fs.mkdirSync(colorArchive,{recursive:true});fs.copyFileSync(path.resolve(shared,'../native/image-color.h'),path.join(colorArchive,'image-color.h'));
-const runtimeArchive = path.join(archiveRoot, 'maclauncher/src/modules/shared/runtime');
-fs.mkdirSync(runtimeArchive, { recursive: true });
-for (const name of ['production-source.js', 'runtime-content.js'])
-  fs.copyFileSync(path.resolve(here, '../../../shared/runtime', name), path.join(runtimeArchive, name));
-fs.writeFileSync(path.join(archiveRoot, 'PRODUCTION_SOURCE_PROFILE.json'), JSON.stringify(Production.prune(archiveRoot), null, 2) + '\n');
-fs.writeFileSync(path.join(archiveRoot, 'BUILD.md'), `# DXMT camera adaptation source\n\nThe dxmt-source directory contains DXMT ${revision}. The maclauncher directory contains the owned build and camera overlay and shared ABI headers.\n\nOn macOS 14 or later, install the macOS command-line developer tools, Node.js, and LLVM-MinGW 20261006 (universal macOS UCRT). Obtain the matching managed DXMT renderer identified by the base digests in camera-bridge.json. Its unchanged winemetal.dll, winemetal.so and portable command library remain the binary dependencies; no proprietary component is included in this source archive.\n\nRun from this directory:\n\n    node maclauncher/src/modules/crossover/temporal/dxmt/build.mjs dxmt-source /path/to/dxmt/wine /path/to/llvm-mingw/bin /path/to/output\n\nThe output payload can replace the corresponding adapted libraries. Camera metadata transport changes are in patch.mjs, camera-transport.hpp and unix-forwarder.c. DXMT source changes can be made in dxmt-source before building; upstream checkout files are copied before the owned overlay is applied.\n`);
-execFileSync('tar', ['-czf', path.join(payload, 'source.tar.gz'), '-C', archiveRoot, '.']);
-files['source.tar.gz'] = sha(path.join(payload, 'source.tar.gz'));
 fs.writeFileSync(path.join(payload, 'camera-bridge.json'), JSON.stringify({
-  schema: 1, id: 'dxmt-camera1', resourceTagAPI:1,resourceSnapshotAPI:1,temporalD3D12API:1,source: { url: 'https://github.com/3Shain/dxmt', revision }, appSource:{repository:'https://github.com/procrastinine/maclauncher',revision:appSource.revision},
+  schema: 1, id: 'dxmt-camera1', resourceTagAPI:1,resourceSnapshotAPI:1,temporalD3D12API:1,source: { url: 'https://github.com/3Shain/dxmt', revision }, appSource:{repository:'https://github.com/procrastinine/maclauncher',revision:appSourceRoot().revision},
   sources:Object.fromEntries(['build.mjs','source.json','patch.mjs','d3d12-overlay.mjs','temporal-d3d12.h','temporal-d3d12-pass.hpp','temporal-d3d12-record.inc','temporal-d3d12-exports.inc','temporal-d3d12-encode.inc','ngx-d3d12.inc','snapshot-overlay.mjs','camera-transport.hpp','streamline-transport.hpp','streamline-snapshot.hpp','streamline-native.h','unix-forwarder.c'].map(file=>[file,sha(path.join(['build.mjs','source.json'].includes(file)?here:owned,file))])),
   architecture: 'x86_64', minimumMacOS: '14.0.0', tableCount: count,
   base: { nativeSha256: sha(vendorUnix), thunkSha256: sha(path.join(vendorPE, 'winemetal.dll')),

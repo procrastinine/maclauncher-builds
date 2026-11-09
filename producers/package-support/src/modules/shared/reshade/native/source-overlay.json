@@ -2,84 +2,84 @@
   "schema": 1,
   "files": [
     {
-      "source": "../temporal/command-order.hpp",
+      "source": "app:src/modules/shared/reshade/temporal/command-order.hpp",
       "path": "src/temporal-command-order.hpp"
     },
     {
-      "source": "gpu-completion.hpp",
+      "source": "app:src/modules/shared/reshade/native/gpu-completion.hpp",
       "path": "src/gpu-completion.hpp"
     },
     {
-      "source": "xess-scene-matrices.hpp",
+      "source": "app:src/modules/shared/reshade/native/xess-scene-matrices.hpp",
       "path": "src/xess-scene-matrices.hpp"
     },
     {
-      "source": "image-pair-analysis.hpp",
+      "source": "app:src/modules/shared/reshade/native/image-pair-analysis.hpp",
       "path": "src/image-pair-analysis.hpp"
     },
     {
-      "source": "image-pair-analysis.mm",
+      "source": "app:src/modules/shared/reshade/native/image-pair-analysis.mm",
       "path": "src/image-pair-analysis.mm",
       "nativeLink": true
     },
     {
-      "source": "scene-compute.hpp",
+      "source": "app:src/modules/shared/reshade/native/scene-compute.hpp",
       "path": "src/scene-compute.hpp"
     },
     {
-      "source": "xess-node.hpp",
+      "source": "app:src/modules/shared/reshade/native/xess-node.hpp",
       "path": "src/xess-node.hpp"
     },
     {
-      "source": "xess-node.mm",
+      "source": "app:src/modules/shared/reshade/native/xess-node.mm",
       "path": "src/xess-node.mm",
       "nativeLink": true
     },
     {
-      "source": "../xess/native/xess-wire.hpp",
+      "source": "app:src/modules/shared/reshade/xess/native/xess-wire.hpp",
       "path": "src/xess-wire.hpp"
     },
     {
-      "source": "../xess/native/xess-protocol.h",
+      "source": "app:src/modules/shared/reshade/xess/native/xess-protocol.h",
       "path": "src/xess-protocol.h"
     },
     {
-      "source": "color-formats.hpp",
+      "source": "app:src/modules/shared/reshade/native/color-formats.hpp",
       "path": "src/color-formats.hpp"
     },
     {
       "path": "src/presentation.h",
-      "source": "presentation.h"
+      "source": "app:src/modules/shared/reshade/native/presentation.h"
     },
     {
       "path": "src/presentation-source.h",
-      "source": "presentation-source.h"
+      "source": "app:src/modules/shared/reshade/native/presentation-source.h"
     },
     {
-      "source": "image-color.hpp",
+      "source": "app:src/modules/shared/reshade/native/image-color.hpp",
       "path": "src/image-color.hpp"
     },
     {
-      "source": "image-color.h",
+      "source": "app:src/modules/shared/reshade/native/image-color.h",
       "path": "src/image-color.h"
     },
     {
       "path": "src/isf-node.mm",
-      "source": "isf-node.mm",
+      "source": "app:src/modules/shared/reshade/native/isf-node.mm",
       "nativeLink": true
     },
     {
       "path": "src/isf-node.hpp",
-      "source": "isf-node.hpp"
+      "source": "app:src/modules/shared/reshade/native/isf-node.hpp"
     },
     {
       "path": "src/color-island.mm",
-      "source": "color-island.mm",
+      "source": "app:src/modules/shared/reshade/native/color-island.mm",
       "nativeLink": true
     },
     {
       "path": "src/color-island.hpp",
-      "source": "color-island.hpp"
+      "source": "app:src/modules/shared/reshade/native/color-island.hpp"
     },
     {
       "path": "src/color-source.json",
@@ -87,614 +87,614 @@
     },
     {
       "path": "src/color-conversion.mm",
-      "source": "color-conversion.mm",
+      "source": "app:src/modules/shared/reshade/native/color-conversion.mm",
       "nativeLink": true
     },
     {
       "path": "src/color-conversion.hpp",
-      "source": "color-conversion.hpp"
+      "source": "app:src/modules/shared/reshade/native/color-conversion.hpp"
     },
     {
       "path": "src/depth-resample.hpp",
-      "source": "depth-resample.hpp"
+      "source": "app:src/modules/shared/reshade/native/depth-resample.hpp"
     },
     {
       "path": "src/depth-resample.mm",
-      "source": "depth-resample.mm",
+      "source": "app:src/modules/shared/reshade/native/depth-resample.mm",
       "nativeLink": true
     },
     {
       "path": "src/output-policy.hpp",
-      "source": "output-policy.hpp"
+      "source": "app:src/modules/shared/reshade/native/output-policy.hpp"
     },
     {
       "path": "src/generation-provider.hpp",
-      "source": "generation-provider.hpp"
+      "source": "app:src/modules/shared/reshade/native/generation-provider.hpp"
     },
     {
       "path": "src/generation-provider.mm",
-      "source": "generation-provider.mm",
+      "source": "app:src/modules/shared/reshade/native/generation-provider.mm",
       "nativeLink": true
     },
     {
       "path": "src/neural-service.hpp",
-      "source": "neural-service.hpp"
+      "source": "app:src/modules/shared/reshade/native/neural-service.hpp"
     },
     {
       "path": "src/neural-service.mm",
-      "source": "neural-service.mm",
+      "source": "app:src/modules/shared/reshade/native/neural-service.mm",
       "nativeLink": true
     },
     {
       "path": "src/command-deadline.hpp",
-      "source": "command-deadline.hpp"
+      "source": "app:src/modules/shared/reshade/native/command-deadline.hpp"
     },
     {
       "path": "src/opengl-interop.hpp",
-      "source": "opengl-interop.hpp"
+      "source": "app:src/modules/shared/reshade/native/opengl-interop.hpp"
     },
     {
       "path": "src/ls1.mm",
-      "source": "ls1.mm"
+      "source": "app:src/modules/shared/reshade/native/ls1.mm"
     },
     {
       "path": "src/ls1.hpp",
-      "source": "ls1.hpp"
+      "source": "app:src/modules/shared/reshade/native/ls1.hpp"
     },
     {
       "path": "src/image-budget.hpp",
-      "source": "image-budget.hpp"
+      "source": "app:src/modules/shared/reshade/native/image-budget.hpp"
     },
     {
       "path": "src/image-admission.hpp",
-      "source": "image-admission.hpp"
+      "source": "app:src/modules/shared/reshade/native/image-admission.hpp"
     },
     {
       "path": "src/path-watch.hpp",
-      "source": "path-watch.hpp"
+      "source": "app:src/modules/shared/reshade/native/path-watch.hpp"
     },
     {
       "path": "src/contents-geometry.hpp",
-      "source": "contents-geometry.hpp"
+      "source": "app:src/modules/shared/reshade/native/contents-geometry.hpp"
     },
     {
       "path": "src/image-admission.mm",
-      "source": "image-admission.mm",
+      "source": "app:src/modules/shared/reshade/native/image-admission.mm",
       "nativeLink": true
     },
     {
       "path": "src/color-contract.hpp",
-      "source": "color-contract.hpp"
+      "source": "app:src/modules/shared/reshade/native/color-contract.hpp"
     },
     {
       "path": "src/depth-demand.hpp",
-      "source": "depth-demand.hpp"
+      "source": "app:src/modules/shared/reshade/native/depth-demand.hpp"
     },
     {
-      "source": "hook-originals.hpp",
+      "source": "app:src/modules/shared/reshade/native/hook-originals.hpp",
       "path": "src/hook-originals.hpp"
     },
     {
       "path": "src/generation-budget.hpp",
-      "source": "generation-budget.hpp"
+      "source": "app:src/modules/shared/reshade/native/generation-budget.hpp"
     },
     {
       "path": "src/runtime-status.hpp",
-      "source": "runtime-status.hpp"
+      "source": "app:src/modules/shared/reshade/native/runtime-status.hpp"
     },
     {
       "path": "src/runtime-status.cpp",
-      "source": "runtime-status.cpp",
+      "source": "app:src/modules/shared/reshade/native/runtime-status.cpp",
       "nativeLink": true
     },
     {
       "path": "src/diagnostics.hpp",
-      "source": "diagnostics.hpp"
+      "source": "app:src/modules/shared/reshade/native/diagnostics.hpp"
     },
     {
       "path": "src/diagnostics.cpp",
-      "source": "diagnostics.cpp"
+      "source": "app:src/modules/shared/reshade/native/diagnostics.cpp"
     },
     {
       "path": "src/presentation-ticket.hpp",
-      "source": "presentation-ticket.hpp"
+      "source": "app:src/modules/shared/reshade/native/presentation-ticket.hpp"
     },
     {
       "path": "src/overlay-drawables.hpp",
-      "source": "overlay-drawables.hpp"
+      "source": "app:src/modules/shared/reshade/native/overlay-drawables.hpp"
     },
     {
       "path": "src/live-control-diagnostics.hpp",
-      "source": "live-control-diagnostics.hpp"
+      "source": "app:src/modules/shared/reshade/native/live-control-diagnostics.hpp"
     },
     {
       "path": "src/remote-ingress-diagnostics.hpp",
-      "source": "remote-ingress-diagnostics.hpp"
+      "source": "app:src/modules/shared/reshade/native/remote-ingress-diagnostics.hpp"
     },
     {
       "path": "src/presentation-hold.hpp",
-      "source": "presentation-hold.hpp"
+      "source": "app:src/modules/shared/reshade/native/presentation-hold.hpp"
     },
     {
       "path": "src/presentation-hold.mm",
-      "source": "presentation-hold.mm",
+      "source": "app:src/modules/shared/reshade/native/presentation-hold.mm",
       "nativeLink": true
     },
     {
       "path": "src/metal-library-cache.hpp",
-      "source": "metal-library-cache.hpp"
+      "source": "app:src/modules/shared/reshade/native/metal-library-cache.hpp"
     },
     {
       "path": "src/metal-frame-failure.hpp",
-      "source": "metal-frame-failure.hpp"
+      "source": "app:src/modules/shared/reshade/native/metal-frame-failure.hpp"
     },
     {
       "path": "src/video-frame.h",
-      "source": "video-frame.h"
+      "source": "app:src/modules/shared/reshade/native/video-frame.h"
     },
     {
       "path": "src/video-frame.mm",
-      "source": "video-frame.mm",
+      "source": "app:src/modules/shared/reshade/native/video-frame.mm",
       "nativeLink": true
     },
     {
       "path": "src/graphics-video.mm",
-      "source": "graphics-video.mm"
+      "source": "app:src/modules/shared/reshade/native/graphics-video.mm"
     },
     {
       "path": "src/virtual-window.hpp",
-      "source": "virtual-window.hpp"
+      "source": "app:src/modules/shared/reshade/native/virtual-window.hpp"
     },
     {
       "path": "src/virtual-window.mm",
-      "source": "virtual-window.mm",
+      "source": "app:src/modules/shared/reshade/native/virtual-window.mm",
       "nativeLink": true
     },
     {
       "path": "src/source-control.hpp",
-      "source": "source-control.hpp"
+      "source": "app:src/modules/shared/reshade/native/source-control.hpp"
     },
     {
       "path": "src/presentation.hpp",
-      "source": "presentation.hpp"
+      "source": "app:src/modules/shared/reshade/native/presentation.hpp"
     },
     {
       "path": "src/presentation.mm",
-      "source": "presentation.mm"
+      "source": "app:src/modules/shared/reshade/native/presentation.mm"
     },
     {
       "path": "src/presentation-api.mm",
-      "source": "presentation-api.mm"
+      "source": "app:src/modules/shared/reshade/native/presentation-api.mm"
     },
     {
       "path": "src/target-time.h",
-      "source": "target-time.h"
+      "source": "app:src/modules/shared/reshade/native/target-time.h"
     },
     {
       "path": "src/presentation-observed.h",
-      "source": "presentation-observed.h"
+      "source": "app:src/modules/shared/reshade/native/presentation-observed.h"
     },
     {
       "path": "src/target-policy.hpp",
-      "source": "target-policy.hpp"
+      "source": "app:src/modules/shared/reshade/native/target-policy.hpp"
     },
     {
       "path": "src/window.mm",
-      "source": "window.mm"
+      "source": "app:src/modules/shared/reshade/native/window.mm"
     },
     {
       "path": "src/window-binding.hpp",
-      "source": "window-binding.hpp"
+      "source": "app:src/modules/shared/reshade/native/window-binding.hpp"
     },
     {
       "path": "src/opengl.mm",
-      "source": "opengl.mm"
+      "source": "app:src/modules/shared/reshade/native/opengl.mm"
     },
     {
       "path": "src/metal.mm",
-      "source": "metal.mm"
+      "source": "app:src/modules/shared/reshade/native/metal.mm"
     },
     {
       "path": "src/source-texture.hpp",
-      "source": "source-texture.hpp"
+      "source": "app:src/modules/shared/reshade/native/source-texture.hpp"
     },
     {
       "path": "src/frame-depth.h",
-      "source": "frame-depth.h"
+      "source": "app:src/modules/shared/reshade/native/frame-depth.h"
     },
     {
       "path": "src/frame-depth.hpp",
-      "source": "frame-depth.hpp"
+      "source": "app:src/modules/shared/reshade/native/frame-depth.hpp"
     },
     {
       "path": "src/view-presentation.hpp",
-      "source": "view-presentation.hpp"
+      "source": "app:src/modules/shared/reshade/native/view-presentation.hpp"
     },
     {
       "path": "src/view-presentation.mm",
-      "source": "view-presentation.mm"
+      "source": "app:src/modules/shared/reshade/native/view-presentation.mm"
     },
     {
       "path": "src/effect.cpp",
-      "source": "effect.cpp"
+      "source": "app:src/modules/shared/reshade/native/effect.cpp"
     },
     {
       "path": "CMakeLists.txt",
-      "source": "CMakeLists.txt"
+      "source": "app:src/modules/shared/reshade/native/CMakeLists.txt"
     },
     {
       "path": "compat/effect_preprocessor.cpp",
-      "source": "effect_preprocessor.cpp",
+      "source": "app:src/modules/shared/reshade/native/effect_preprocessor.cpp",
       "upstreamPath": "third_party/reshade/source/effect_preprocessor.cpp",
       "upstreamSha256": "9137b441bd7b111fa6067f0a2eef510193d2f45441e2588965ea09596565a863"
     },
     {
       "path": "src/opengl-interop.mm",
-      "source": "opengl-interop.mm"
+      "source": "app:src/modules/shared/reshade/native/opengl-interop.mm"
     },
     {
       "path": "src/opengl-depth.hpp",
-      "source": "opengl-depth.hpp"
+      "source": "app:src/modules/shared/reshade/native/opengl-depth.hpp"
     },
     {
       "path": "src/uniform-sources.hpp",
-      "source": "uniform-sources.hpp"
+      "source": "app:src/modules/shared/reshade/native/uniform-sources.hpp"
     },
     {
       "path": "src/effect.hpp",
-      "source": "effect.hpp"
+      "source": "app:src/modules/shared/reshade/native/effect.hpp"
     },
     {
       "path": "src/spirv-compat.hpp",
-      "source": "spirv-compat.hpp"
+      "source": "app:src/modules/shared/reshade/native/spirv-compat.hpp"
     },
     {
       "path": "src/resolution-scale.hpp",
-      "source": "resolution-scale.hpp"
+      "source": "app:src/modules/shared/reshade/native/resolution-scale.hpp"
     },
     {
       "path": "src/framebuffer-access.hpp",
-      "source": "framebuffer-access.hpp"
+      "source": "app:src/modules/shared/reshade/native/framebuffer-access.hpp"
     },
     {
       "path": "src/delivery-plan.hpp",
-      "source": "delivery-plan.hpp"
+      "source": "app:src/modules/shared/reshade/native/delivery-plan.hpp"
     },
     {
       "path": "src/graphics.mm",
-      "source": "graphics.mm"
+      "source": "app:src/modules/shared/reshade/native/graphics.mm"
     },
     {
       "path": "src/live-controls.hpp",
-      "source": "live-controls.hpp"
+      "source": "app:src/modules/shared/reshade/native/live-controls.hpp"
     },
     {
       "path": "src/compile.cpp",
-      "source": "compile.cpp"
+      "source": "app:src/modules/shared/reshade/native/compile.cpp"
     },
     {
       "path": "src/spatial.mm",
-      "source": "spatial.mm"
+      "source": "app:src/modules/shared/reshade/native/spatial.mm"
     },
     {
       "path": "src/fsr1.mm",
-      "source": "fsr1.mm"
+      "source": "app:src/modules/shared/reshade/native/fsr1.mm"
     },
     {
       "path": "src/fsr1.hpp",
-      "source": "fsr1.hpp"
+      "source": "app:src/modules/shared/reshade/native/fsr1.hpp"
     },
     {
       "path": "src/graphics.hpp",
-      "source": "graphics.hpp"
+      "source": "app:src/modules/shared/reshade/native/graphics.hpp"
     },
     {
       "path": "src/temporal.mm",
-      "source": "temporal.mm"
+      "source": "app:src/modules/shared/reshade/native/temporal.mm"
     },
     {
       "path": "src/temporal-controls.hpp",
-      "source": "temporal-controls.hpp"
+      "source": "app:src/modules/shared/reshade/native/temporal-controls.hpp"
     },
     {
       "path": "src/temporal-frame.h",
-      "source": "../temporal/frame.h"
+      "source": "app:src/modules/shared/reshade/temporal/frame.h"
     },
     {
-      "source": "../temporal/payload-files.hpp",
+      "source": "app:src/modules/shared/reshade/temporal/payload-files.hpp",
       "path": "src/temporal-payload-files.hpp"
     },
     {
       "path": "src/temporal-camera.h",
-      "source": "../temporal/camera.h"
+      "source": "app:src/modules/shared/reshade/temporal/camera.h"
     },
     {
       "path": "src/native-layer.h",
-      "source": "native-layer.h"
+      "source": "app:src/modules/shared/reshade/native/native-layer.h"
     },
     {
       "path": "src/retroarch.hpp",
-      "source": "retroarch.hpp"
+      "source": "app:src/modules/shared/reshade/native/retroarch.hpp"
     },
     {
       "path": "src/effect-node.hpp",
-      "source": "effect-node.hpp"
+      "source": "app:src/modules/shared/reshade/native/effect-node.hpp"
     },
     {
       "path": "src/bitmap-surface.hpp",
-      "source": "bitmap-surface.hpp"
+      "source": "app:src/modules/shared/reshade/native/bitmap-surface.hpp"
     },
     {
       "path": "src/effects-plan.hpp",
-      "source": "effects-plan.hpp"
+      "source": "app:src/modules/shared/reshade/native/effects-plan.hpp"
     },
     {
       "path": "src/effects-plan.mm",
-      "source": "effects-plan.mm",
+      "source": "app:src/modules/shared/reshade/native/effects-plan.mm",
       "nativeLink": true
     },
     {
       "path": "src/effects-execution.hpp",
-      "source": "effects-execution.hpp"
+      "source": "app:src/modules/shared/reshade/native/effects-execution.hpp"
     },
     {
       "path": "src/effects-execution.mm",
-      "source": "effects-execution.mm",
+      "source": "app:src/modules/shared/reshade/native/effects-execution.mm",
       "nativeLink": true
     },
     {
       "path": "src/neural-node.hpp",
-      "source": "neural-node.hpp"
+      "source": "app:src/modules/shared/reshade/native/neural-node.hpp"
     },
     {
       "path": "src/neural-node.mm",
-      "source": "neural-node.mm",
+      "source": "app:src/modules/shared/reshade/native/neural-node.mm",
       "nativeLink": true
     },
     {
       "path": "src/neural-provider.h",
-      "source": "../neural/native/Sources/CNeural/include/maclauncher-neural.h"
+      "source": "app:src/modules/shared/reshade/neural/native/Sources/CNeural/include/maclauncher-neural.h"
     },
     {
       "path": "src/spatial.hpp",
-      "source": "spatial.hpp"
+      "source": "app:src/modules/shared/reshade/native/spatial.hpp"
     },
     {
       "path": "src/frame.h",
-      "source": "frame.h"
+      "source": "app:src/modules/shared/reshade/native/frame.h"
     },
     {
       "path": "src/layer-presentation.hpp",
-      "source": "layer-presentation.hpp"
+      "source": "app:src/modules/shared/reshade/native/layer-presentation.hpp"
     },
     {
       "path": "src/layer-presentation.mm",
-      "source": "layer-presentation.mm"
+      "source": "app:src/modules/shared/reshade/native/layer-presentation.mm"
     },
     {
       "path": "src/quartz-frame.hpp",
-      "source": "quartz-frame.hpp"
+      "source": "app:src/modules/shared/reshade/native/quartz-frame.hpp"
     },
     {
       "path": "src/temporal-plan.hpp",
-      "source": "temporal-plan.hpp"
+      "source": "app:src/modules/shared/reshade/native/temporal-plan.hpp"
     },
     {
       "path": "src/temporal-plan.mm",
-      "source": "temporal-plan.mm",
+      "source": "app:src/modules/shared/reshade/native/temporal-plan.mm",
       "nativeLink": true
     },
     {
       "path": "src/frame-capture.hpp",
-      "source": "frame-capture.hpp"
+      "source": "app:src/modules/shared/reshade/native/frame-capture.hpp"
     },
     {
       "path": "src/capture-file.hpp",
-      "source": "capture-file.hpp"
+      "source": "app:src/modules/shared/reshade/native/capture-file.hpp"
     },
     {
       "path": "src/browser-frame.hpp",
-      "source": "browser-frame.hpp"
+      "source": "app:src/modules/shared/reshade/native/browser-frame.hpp"
     },
     {
       "path": "src/browser-frame.mm",
-      "source": "browser-frame.mm",
+      "source": "app:src/modules/shared/reshade/native/browser-frame.mm",
       "nativeLink": true
     },
     {
       "path": "src/browser-frame-policy.hpp",
-      "source": "browser-frame-policy.hpp"
+      "source": "app:src/modules/shared/reshade/native/browser-frame-policy.hpp"
     },
     {
       "path": "src/window-stream.hpp",
-      "source": "window-stream.hpp"
+      "source": "app:src/modules/shared/reshade/native/window-stream.hpp"
     },
     {
       "path": "src/window-stream.mm",
-      "source": "window-stream.mm",
+      "source": "app:src/modules/shared/reshade/native/window-stream.mm",
       "nativeLink": true
     },
     {
       "path": "src/window-overlay-policy.hpp",
-      "source": "window-overlay-policy.hpp"
+      "source": "app:src/modules/shared/reshade/native/window-overlay-policy.hpp"
     },
     {
       "path": "src/window-source.h",
-      "source": "window-source.h"
+      "source": "app:src/modules/shared/reshade/native/window-source.h"
     },
     {
       "path": "src/window-source.mm",
-      "source": "window-source.mm",
+      "source": "app:src/modules/shared/reshade/native/window-source.mm",
       "nativeLink": true
     },
     {
       "path": "src/graphics-window.mm",
-      "source": "graphics-window.mm"
+      "source": "app:src/modules/shared/reshade/native/graphics-window.mm"
     },
     {
       "path": "src/graphics-window-catalog.hpp",
-      "source": "graphics-window-catalog.hpp"
+      "source": "app:src/modules/shared/reshade/native/graphics-window-catalog.hpp"
     },
     {
       "path": "src/graphics-window-catalog.mm",
-      "source": "graphics-window-catalog.mm"
+      "source": "app:src/modules/shared/reshade/native/graphics-window-catalog.mm"
     },
     {
       "path": "src/graphics-window-Info.plist",
-      "source": "graphics-window-Info.plist"
+      "source": "app:src/modules/shared/reshade/native/graphics-window-Info.plist"
     },
     {
       "path": "src/source-timing.hpp",
-      "source": "source-timing.hpp"
+      "source": "app:src/modules/shared/reshade/native/source-timing.hpp"
     },
     {
       "path": "src/publisher-pixels.hpp",
-      "source": "publisher-pixels.hpp"
+      "source": "app:src/modules/shared/reshade/native/publisher-pixels.hpp"
     },
     {
       "path": "src/automatic-resolution.hpp",
-      "source": "automatic-resolution.hpp"
+      "source": "app:src/modules/shared/reshade/native/automatic-resolution.hpp"
     },
     {
       "path": "src/virtual-visibility.hpp",
-      "source": "virtual-visibility.hpp"
+      "source": "app:src/modules/shared/reshade/native/virtual-visibility.hpp"
     },
     {
       "path": "src/diagnostic-file.hpp",
-      "source": "diagnostic-file.hpp"
+      "source": "app:src/modules/shared/reshade/native/diagnostic-file.hpp"
     },
     {
       "path": "src/log.hpp",
-      "source": "log.hpp"
+      "source": "app:src/modules/shared/reshade/native/log.hpp"
     },
     {
       "path": "src/in-place-history.hpp",
-      "source": "in-place-history.hpp"
+      "source": "app:src/modules/shared/reshade/native/in-place-history.hpp"
     },
     {
       "path": "compat/mako-ls1.cmake",
-      "source": "mako-ls1.cmake"
+      "source": "app:src/modules/shared/reshade/native/mako-ls1.cmake"
     },
     {
       "path": "compat/mako-metal/metal-vk.hpp",
-      "source": "mako-metal-vk.hpp"
+      "source": "app:src/modules/shared/reshade/native/mako-metal-vk.hpp"
     },
     {
       "path": "compat/mako-metal/vulkan/vulkan_core.h",
-      "source": "mako-vulkan-core.h"
+      "source": "app:src/modules/shared/reshade/native/mako-vulkan-core.h"
     },
     {
       "path": "src/lsfg.mm",
-      "source": "lsfg.mm",
+      "source": "app:src/modules/shared/reshade/native/lsfg.mm",
       "nativeLink": true
     },
     {
       "path": "src/generation-timeline.hpp",
-      "source": "generation-timeline.hpp"
+      "source": "app:src/modules/shared/reshade/native/generation-timeline.hpp"
     },
     {
-      "source": "generation-schedule.hpp",
+      "source": "app:src/modules/shared/reshade/native/generation-schedule.hpp",
       "path": "src/generation-schedule.hpp"
     },
     {
       "path": "src/generation-provider.h",
-      "source": "generation-provider.h"
+      "source": "app:src/modules/shared/reshade/native/generation-provider.h"
     },
     {
       "path": "src/fsr3-generation.mm",
-      "source": "fsr3-generation.mm",
+      "source": "app:src/modules/shared/reshade/native/fsr3-generation.mm",
       "nativeLink": true
     },
     {
       "path": "src/presentation-content.h",
-      "source": "presentation-content.h"
+      "source": "app:src/modules/shared/reshade/native/presentation-content.h"
     },
     {
-      "source": "metal4-diagnostics.hpp",
+      "source": "app:src/modules/shared/reshade/native/metal4-diagnostics.hpp",
       "path": "src/metal4-diagnostics.hpp"
     },
     {
-      "source": "generation-execution.hpp",
+      "source": "app:src/modules/shared/reshade/native/generation-execution.hpp",
       "path": "src/generation-execution.hpp"
     },
     {
-      "source": "generation-execution.mm",
+      "source": "app:src/modules/shared/reshade/native/generation-execution.mm",
       "path": "src/generation-execution.mm",
       "nativeLink": true
     },
     {
-      "source": "../temporal/scene.h",
+      "source": "app:src/modules/shared/reshade/temporal/scene.h",
       "path": "src/scene-frame.h"
     },
     {
-      "source": "temporal-provider.hpp",
+      "source": "app:src/modules/shared/reshade/native/temporal-provider.hpp",
       "path": "src/temporal-provider.hpp"
     },
     {
-      "source": "../temporal/scene-matrices.h",
+      "source": "app:src/modules/shared/reshade/temporal/scene-matrices.h",
       "path": "src/temporal-scene-matrices.h"
     },
     {
-      "source": "scene-matrices.hpp",
+      "source": "app:src/modules/shared/reshade/native/scene-matrices.hpp",
       "path": "src/scene-matrices.hpp"
     },
     {
-      "source": "scene-matrices.mm",
+      "source": "app:src/modules/shared/reshade/native/scene-matrices.mm",
       "path": "src/scene-matrices.mm",
       "nativeLink": true
     },
     {
-      "source": "../xess/native/xess-fg-protocol.h",
+      "source": "app:src/modules/shared/reshade/xess/native/xess-fg-protocol.h",
       "path": "src/xess-fg-protocol.h"
     },
     {
-      "source": "generation-methods.hpp",
+      "source": "app:src/modules/shared/reshade/native/generation-methods.hpp",
       "path": "src/generation-methods.hpp"
     },
     {
-      "source": "../temporal/scene-destination.h",
+      "source": "app:src/modules/shared/reshade/temporal/scene-destination.h",
       "path": "src/temporal-scene-destination.h"
     },
     {
-      "source": "scene-destination.hpp",
+      "source": "app:src/modules/shared/reshade/native/scene-destination.hpp",
       "path": "src/scene-destination.hpp"
     },
     {
-      "source": "scene-destination.mm",
+      "source": "app:src/modules/shared/reshade/native/scene-destination.mm",
       "path": "src/scene-destination.mm",
       "nativeLink": true
     },
     {
       "path": "src/lsfg.hpp",
-      "source": "lsfg.hpp"
+      "source": "app:src/modules/shared/reshade/native/lsfg.hpp"
     },
     {
-      "source": "scene-guides.hpp",
+      "source": "app:src/modules/shared/reshade/native/scene-guides.hpp",
       "path": "src/scene-guides.hpp"
     },
     {
-      "source": "scene-guides.mm",
+      "source": "app:src/modules/shared/reshade/native/scene-guides.mm",
       "path": "src/scene-guides.mm",
       "nativeLink": true
     },
     {
-      "source": "../shaderc-offline.cpp",
+      "source": "app:src/modules/shared/reshade/shaderc-offline.cpp",
       "path": "src/shaderc-offline.cpp"
     },
     {
-      "source": "shaderc/shaderc.h",
+      "source": "app:src/modules/shared/reshade/native/shaderc/shaderc.h",
       "path": "compat/shaderc/shaderc.h"
     },
     {
-      "source": "shaderc/env.h",
+      "source": "app:src/modules/shared/reshade/native/shaderc/env.h",
       "path": "compat/shaderc/env.h"
     },
     {
-      "source": "shaderc/status.h",
+      "source": "app:src/modules/shared/reshade/native/shaderc/status.h",
       "path": "compat/shaderc/status.h"
     },
     {
-      "source": "shaderc/visibility.h",
+      "source": "app:src/modules/shared/reshade/native/shaderc/visibility.h",
       "path": "compat/shaderc/visibility.h"
     },
     {
@@ -702,38 +702,38 @@
       "path": "compat/shaderc/source.json"
     },
     {
-      "source": "magpie-node.hpp",
+      "source": "app:src/modules/shared/reshade/native/magpie-node.hpp",
       "path": "src/magpie-node.hpp"
     },
     {
-      "source": "magpie-node.mm",
+      "source": "app:src/modules/shared/reshade/native/magpie-node.mm",
       "path": "src/magpie-node.mm",
       "nativeLink": true
     },
     {
-      "source": "comparison.hpp",
+      "source": "app:src/modules/shared/reshade/native/comparison.hpp",
       "path": "src/comparison.hpp"
     },
     {
-      "source": "comparison.mm",
+      "source": "app:src/modules/shared/reshade/native/comparison.mm",
       "path": "src/comparison.mm",
       "nativeLink": true
     },
     {
-      "source": "native-image.hpp",
+      "source": "app:src/modules/shared/reshade/native/native-image.hpp",
       "path": "src/native-image.hpp"
     },
     {
-      "source": "native-image.mm",
+      "source": "app:src/modules/shared/reshade/native/native-image.mm",
       "path": "src/native-image.mm",
       "nativeLink": true
     },
     {
-      "source": "local-laplacian.hpp",
+      "source": "app:src/modules/shared/reshade/native/local-laplacian.hpp",
       "path": "src/local-laplacian.hpp"
     },
     {
-      "source": "local-laplacian.mm",
+      "source": "app:src/modules/shared/reshade/native/local-laplacian.mm",
       "path": "src/local-laplacian.mm",
       "nativeLink": true
     },
@@ -742,16 +742,16 @@
       "path": "src/local-laplacian-source.json"
     },
     {
-      "source": "cmaa2.hpp",
+      "source": "app:src/modules/shared/reshade/native/cmaa2.hpp",
       "path": "src/cmaa2.hpp"
     },
     {
-      "source": "cmaa2.mm",
+      "source": "app:src/modules/shared/reshade/native/cmaa2.mm",
       "path": "src/cmaa2.mm",
       "nativeLink": true
     },
     {
-      "source": "cmaa2-shaders.hpp",
+      "source": "app:src/modules/shared/reshade/native/cmaa2-shaders.hpp",
       "path": "src/cmaa2-shaders.hpp"
     },
     {
@@ -763,24 +763,24 @@
       "path": "src/native-filter-sources.json"
     },
     {
-      "source": "native-scene.hpp",
+      "source": "app:src/modules/shared/reshade/native/native-scene.hpp",
       "path": "src/native-scene.hpp"
     },
     {
-      "source": "xegtao.hpp",
+      "source": "app:src/modules/shared/reshade/native/xegtao.hpp",
       "path": "src/xegtao.hpp"
     },
     {
-      "source": "xegtao.mm",
+      "source": "app:src/modules/shared/reshade/native/xegtao.mm",
       "path": "src/xegtao.mm",
       "nativeLink": true
     },
     {
-      "source": "xegtao-shaders.hpp",
+      "source": "app:src/modules/shared/reshade/native/xegtao-shaders.hpp",
       "path": "src/xegtao-shaders.hpp"
     },
     {
-      "source": "xegtao-upstream.h",
+      "source": "app:src/modules/shared/reshade/native/xegtao-upstream.h",
       "path": "src/xegtao-upstream.h"
     },
     {
@@ -788,46 +788,46 @@
       "path": "src/xegtao-source.json"
     },
     {
-      "source": "adaptive-quality.hpp",
+      "source": "app:src/modules/shared/reshade/native/adaptive-quality.hpp",
       "path": "src/adaptive-quality.hpp"
     },
     {
-      "source": "adaptive-quality.cpp",
+      "source": "app:src/modules/shared/reshade/native/adaptive-quality.cpp",
       "path": "src/adaptive-quality.cpp",
       "nativeLink": true
     },
     {
-      "source": "effect-quality.hpp",
+      "source": "app:src/modules/shared/reshade/native/effect-quality.hpp",
       "path": "src/effect-quality.hpp"
     },
     {
-      "source": "effect-quality.mm",
+      "source": "app:src/modules/shared/reshade/native/effect-quality.mm",
       "path": "src/effect-quality.mm",
       "nativeLink": true
     },
     {
-      "source": "cacao.hpp",
+      "source": "app:src/modules/shared/reshade/native/cacao.hpp",
       "path": "src/cacao.hpp"
     },
     {
-      "source": "cacao.mm",
+      "source": "app:src/modules/shared/reshade/native/cacao.mm",
       "path": "src/cacao.mm",
       "nativeLink": true
     },
     {
-      "source": "native-scene-projection.hpp",
+      "source": "app:src/modules/shared/reshade/native/native-scene-projection.hpp",
       "path": "src/native-scene-projection.hpp"
     },
     {
-      "source": "scene-projection.hlsl",
+      "source": "app:src/modules/shared/reshade/native/scene-projection.hlsl",
       "path": "src/scene-projection.hlsl"
     },
     {
-      "source": "cacao-shaders.hpp",
+      "source": "app:src/modules/shared/reshade/native/cacao-shaders.hpp",
       "path": "src/cacao-shaders.hpp"
     },
     {
-      "source": "cacao-upstream.hpp",
+      "source": "app:src/modules/shared/reshade/native/cacao-upstream.hpp",
       "path": "src/cacao-upstream.hpp"
     },
     {
@@ -835,15 +835,15 @@
       "path": "src/cacao-source.json"
     },
     {
-      "source": "libplacebo-node.hpp",
+      "source": "app:src/modules/shared/reshade/native/libplacebo-node.hpp",
       "path": "src/libplacebo-node.hpp"
     },
     {
-      "source": "depth-effects.hpp",
+      "source": "app:src/modules/shared/reshade/native/depth-effects.hpp",
       "path": "src/depth-effects.hpp"
     },
     {
-      "source": "depth-effects.mm",
+      "source": "app:src/modules/shared/reshade/native/depth-effects.mm",
       "path": "src/depth-effects.mm",
       "nativeLink": true
     },
@@ -856,20 +856,20 @@
       "path": "src/depth-outlines-source.json"
     },
     {
-      "source": "estimated-depth-fog.hpp",
+      "source": "app:src/modules/shared/reshade/native/estimated-depth-fog.hpp",
       "path": "src/estimated-depth-fog.hpp"
     },
     {
-      "source": "estimated-depth-fog.mm",
+      "source": "app:src/modules/shared/reshade/native/estimated-depth-fog.mm",
       "path": "src/estimated-depth-fog.mm",
       "nativeLink": true
     },
     {
-      "source": "depth-fog-shading.hpp",
+      "source": "app:src/modules/shared/reshade/native/depth-fog-shading.hpp",
       "path": "src/depth-fog-shading.hpp"
     },
     {
-      "source": "neural-depth.hpp",
+      "source": "app:src/modules/shared/reshade/native/neural-depth.hpp",
       "path": "src/neural-depth.hpp"
     },
     {
@@ -877,20 +877,20 @@
       "path": "src/estimated-depth-fog-source.json"
     },
     {
-      "source": "dof.hpp",
+      "source": "app:src/modules/shared/reshade/native/dof.hpp",
       "path": "src/dof.hpp"
     },
     {
-      "source": "dof.mm",
+      "source": "app:src/modules/shared/reshade/native/dof.mm",
       "path": "src/dof.mm",
       "nativeLink": true
     },
     {
-      "source": "../dof/generated/dof-shaders.hpp",
+      "source": "app:src/modules/shared/reshade/dof/generated/dof-shaders.hpp",
       "path": "src/dof-shaders.hpp"
     },
     {
-      "source": "../dof/generated/dof-upstream.hpp",
+      "source": "app:src/modules/shared/reshade/dof/generated/dof-upstream.hpp",
       "path": "src/dof-upstream.hpp"
     },
     {
@@ -898,72 +898,72 @@
       "path": "src/dof-source.json"
     },
     {
-      "source": "histogram-exposure.hpp",
+      "source": "app:src/modules/shared/reshade/native/histogram-exposure.hpp",
       "path": "src/histogram-exposure.hpp"
     },
     {
-      "source": "histogram-exposure.mm",
+      "source": "app:src/modules/shared/reshade/native/histogram-exposure.mm",
       "path": "src/histogram-exposure.mm",
       "nativeLink": true
     },
     {
-      "source": "histogram-exposure-source.json",
+      "source": "app:src/modules/shared/reshade/native/histogram-exposure-source.json",
       "path": "src/histogram-exposure-source.json"
     },
     {
-      "source": "output-color.hpp",
+      "source": "app:src/modules/shared/reshade/native/output-color.hpp",
       "path": "src/output-color.hpp"
     },
     {
-      "source": "scene-aovs.hpp",
+      "source": "app:src/modules/shared/reshade/native/scene-aovs.hpp",
       "path": "src/scene-aovs.hpp"
     },
     {
-      "source": "scene-aovs.mm",
+      "source": "app:src/modules/shared/reshade/native/scene-aovs.mm",
       "path": "src/scene-aovs.mm",
       "nativeLink": true
     },
     {
-      "source": "../temporal/scene-aovs.h",
+      "source": "app:src/modules/shared/reshade/temporal/scene-aovs.h",
       "path": "src/temporal-scene-aovs.h"
     },
     {
-      "source": "../temporal/scene-copy-boundary.h",
+      "source": "app:src/modules/shared/reshade/temporal/scene-copy-boundary.h",
       "path": "src/temporal-scene-copy-boundary.h"
     },
     {
-      "source": "denoised-ingress.hpp",
+      "source": "app:src/modules/shared/reshade/native/denoised-ingress.hpp",
       "path": "src/denoised-ingress.hpp"
     },
     {
-      "source": "denoised-ingress.mm",
+      "source": "app:src/modules/shared/reshade/native/denoised-ingress.mm",
       "path": "src/denoised-ingress.mm",
       "nativeLink": true
     },
     {
-      "source": "scene-copy-boundary.hpp",
+      "source": "app:src/modules/shared/reshade/native/scene-copy-boundary.hpp",
       "path": "src/scene-copy-boundary.hpp"
     },
     {
-      "source": "scene-copy-boundary.mm",
+      "source": "app:src/modules/shared/reshade/native/scene-copy-boundary.mm",
       "path": "src/scene-copy-boundary.mm",
       "nativeLink": true
     },
     {
-      "source": "scene-aov-normalize.hpp",
+      "source": "app:src/modules/shared/reshade/native/scene-aov-normalize.hpp",
       "path": "src/scene-aov-normalize.hpp"
     },
     {
-      "source": "scene-aov-normalize.mm",
+      "source": "app:src/modules/shared/reshade/native/scene-aov-normalize.mm",
       "path": "src/scene-aov-normalize.mm",
       "nativeLink": true
     },
     {
-      "source": "ssr-shaders.hpp",
+      "source": "app:src/modules/shared/reshade/native/ssr-shaders.hpp",
       "path": "src/ssr-shaders.hpp"
     },
     {
-      "source": "ssr-upstream.hpp",
+      "source": "app:src/modules/shared/reshade/native/ssr-upstream.hpp",
       "path": "src/ssr-upstream.hpp"
     },
     {
@@ -971,76 +971,76 @@
       "path": "src/ssr-source.json"
     },
     {
-      "source": "shader-scene-roles.h",
+      "source": "app:src/modules/shared/reshade/native/shader-scene-roles.h",
       "path": "src/shader-scene-roles.h"
     },
     {
-      "source": "shader-scene-inputs.h",
+      "source": "app:src/modules/shared/reshade/native/shader-scene-inputs.h",
       "path": "src/shader-scene-inputs.h"
     },
     {
-      "source": "shader-scene-inputs.hpp",
+      "source": "app:src/modules/shared/reshade/native/shader-scene-inputs.hpp",
       "path": "src/shader-scene-inputs.hpp"
     },
     {
-      "source": "shader-scene-inputs.mm",
+      "source": "app:src/modules/shared/reshade/native/shader-scene-inputs.mm",
       "path": "src/shader-scene-inputs.mm",
       "nativeLink": true
     },
     {
-      "source": "scene-shader-inputs.hpp",
+      "source": "app:src/modules/shared/reshade/native/scene-shader-inputs.hpp",
       "path": "src/scene-shader-inputs.hpp"
     },
     {
-      "source": "scene-shader-inputs.mm",
+      "source": "app:src/modules/shared/reshade/native/scene-shader-inputs.mm",
       "path": "src/scene-shader-inputs.mm",
       "nativeLink": true
     },
     {
-      "source": "ssr.hpp",
+      "source": "app:src/modules/shared/reshade/native/ssr.hpp",
       "path": "src/ssr.hpp"
     },
     {
-      "source": "ssr.mm",
+      "source": "app:src/modules/shared/reshade/native/ssr.mm",
       "path": "src/ssr.mm",
       "nativeLink": true
     },
     {
-      "source": "metalfx-denoised.hpp",
+      "source": "app:src/modules/shared/reshade/native/metalfx-denoised.hpp",
       "path": "src/metalfx-denoised.hpp"
     },
     {
-      "source": "metalfx-denoised.mm",
+      "source": "app:src/modules/shared/reshade/native/metalfx-denoised.mm",
       "path": "src/metalfx-denoised.mm",
       "nativeLink": true
     },
     {
-      "source": "graphics-hardware.mm",
+      "source": "app:src/modules/shared/reshade/native/graphics-hardware.mm",
       "path": "src/graphics-hardware.mm"
     },
     {
-      "source": "retroarch-external.h",
+      "source": "app:src/modules/shared/reshade/native/retroarch-external.h",
       "path": "src/retroarch-external.h"
     },
     {
-      "source": "ffx-image-filter.hpp",
+      "source": "app:src/modules/shared/reshade/native/ffx-image-filter.hpp",
       "path": "src/ffx-image-filter.hpp"
     },
     {
-      "source": "ffx-lens.hpp",
+      "source": "app:src/modules/shared/reshade/native/ffx-lens.hpp",
       "path": "src/ffx-lens.hpp"
     },
     {
-      "source": "ffx-lens.mm",
+      "source": "app:src/modules/shared/reshade/native/ffx-lens.mm",
       "path": "src/ffx-lens.mm",
       "nativeLink": true
     },
     {
-      "source": "ffx-lens-shaders.hpp",
+      "source": "app:src/modules/shared/reshade/native/ffx-lens-shaders.hpp",
       "path": "src/ffx-lens-shaders.hpp"
     },
     {
-      "source": "ffx-lens-upstream.hpp",
+      "source": "app:src/modules/shared/reshade/native/ffx-lens-upstream.hpp",
       "path": "src/ffx-lens-upstream.hpp"
     },
     {
@@ -1048,20 +1048,20 @@
       "path": "src/ffx-lens-source.json"
     },
     {
-      "source": "ffx-blur.hpp",
+      "source": "app:src/modules/shared/reshade/native/ffx-blur.hpp",
       "path": "src/ffx-blur.hpp"
     },
     {
-      "source": "ffx-blur.mm",
+      "source": "app:src/modules/shared/reshade/native/ffx-blur.mm",
       "path": "src/ffx-blur.mm",
       "nativeLink": true
     },
     {
-      "source": "ffx-blur-shaders.hpp",
+      "source": "app:src/modules/shared/reshade/native/ffx-blur-shaders.hpp",
       "path": "src/ffx-blur-shaders.hpp"
     },
     {
-      "source": "ffx-blur-upstream.hpp",
+      "source": "app:src/modules/shared/reshade/native/ffx-blur-upstream.hpp",
       "path": "src/ffx-blur-upstream.hpp"
     },
     {
@@ -1069,184 +1069,184 @@
       "path": "src/ffx-blur-source.json"
     },
     {
-      "source": "metal4-classic-bridge.hpp",
+      "source": "app:src/modules/shared/reshade/native/metal4-classic-bridge.hpp",
       "path": "src/metal4-classic-bridge.hpp"
     },
     {
-      "source": "metal4-classic-bridge.mm",
+      "source": "app:src/modules/shared/reshade/native/metal4-classic-bridge.mm",
       "path": "src/metal4-classic-bridge.mm",
       "nativeLink": true
     },
     {
-      "source": "metal4-scene-ingress.hpp",
+      "source": "app:src/modules/shared/reshade/native/metal4-scene-ingress.hpp",
       "path": "src/metal4-scene-ingress.hpp"
     },
     {
-      "source": "metal4-scene-ingress.mm",
+      "source": "app:src/modules/shared/reshade/native/metal4-scene-ingress.mm",
       "path": "src/metal4-scene-ingress.mm",
       "nativeLink": true
     },
     {
-      "source": "metalfx-image-ingress.hpp",
+      "source": "app:src/modules/shared/reshade/native/metalfx-image-ingress.hpp",
       "path": "src/metalfx-image-ingress.hpp"
     },
     {
-      "source": "metalfx-image-ingress.mm",
+      "source": "app:src/modules/shared/reshade/native/metalfx-image-ingress.mm",
       "path": "src/metalfx-image-ingress.mm",
       "nativeLink": true
     },
     {
-      "source": "shader-history.hpp",
+      "source": "app:src/modules/shared/reshade/native/shader-history.hpp",
       "path": "src/shader-history.hpp"
     },
     {
-      "source": "metal4-sdk-history.hpp",
+      "source": "app:src/modules/shared/reshade/native/metal4-sdk-history.hpp",
       "path": "src/metal4-sdk-history.hpp"
     },
     {
-      "source": "scene-color-normalize.hpp",
+      "source": "app:src/modules/shared/reshade/native/scene-color-normalize.hpp",
       "path": "src/scene-color-normalize.hpp"
     },
     {
-      "source": "scene-color-normalize.mm",
+      "source": "app:src/modules/shared/reshade/native/scene-color-normalize.mm",
       "path": "src/scene-color-normalize.mm",
       "nativeLink": true
     },
     {
-      "source": "metalfx-generation-resources.hpp",
+      "source": "app:src/modules/shared/reshade/native/metalfx-generation-resources.hpp",
       "path": "src/metalfx-generation-resources.hpp"
     },
     {
-      "source": "metalfx-generation-resources.mm",
+      "source": "app:src/modules/shared/reshade/native/metalfx-generation-resources.mm",
       "path": "src/metalfx-generation-resources.mm",
       "nativeLink": true
     },
     {
-      "source": "native-config.hpp",
+      "source": "app:src/modules/shared/reshade/native/native-config.hpp",
       "path": "src/native-config.hpp"
     },
     {
-      "source": "native-config.mm",
+      "source": "app:src/modules/shared/reshade/native/native-config.mm",
       "path": "src/native-config.mm",
       "nativeLink": true
     },
     {
-      "source": "vulkan-scene.h",
+      "source": "app:src/modules/shared/reshade/native/vulkan-scene.h",
       "path": "src/vulkan-scene.h"
     },
     {
-      "source": "recorded-scene.h",
+      "source": "app:src/modules/shared/reshade/native/recorded-scene.h",
       "path": "src/recorded-scene.h"
     },
     {
-      "source": "vulkan-scene.mm",
+      "source": "app:src/modules/shared/reshade/native/vulkan-scene.mm",
       "path": "src/vulkan-scene.mm",
       "nativeLink": true
     },
     {
-      "source": "hud-counters.hpp",
+      "source": "app:src/modules/shared/reshade/native/hud-counters.hpp",
       "path": "src/hud-counters.hpp"
     },
     {
-      "source": "hud-overlay.hpp",
+      "source": "app:src/modules/shared/reshade/native/hud-overlay.hpp",
       "path": "src/hud-overlay.hpp"
     },
     {
-      "source": "source-frame-cap.hpp",
+      "source": "app:src/modules/shared/reshade/native/source-frame-cap.hpp",
       "path": "src/source-frame-cap.hpp"
     },
     {
-      "source": "source-frame-pacing.hpp",
+      "source": "app:src/modules/shared/reshade/native/source-frame-pacing.hpp",
       "path": "src/source-frame-pacing.hpp"
     },
     {
-      "source": "screenshot-color.hpp",
+      "source": "app:src/modules/shared/reshade/native/screenshot-color.hpp",
       "path": "src/screenshot-color.hpp"
     },
     {
-      "source": "screenshot-image.hpp",
+      "source": "app:src/modules/shared/reshade/native/screenshot-image.hpp",
       "path": "src/screenshot-image.hpp"
     },
     {
-      "source": "image-pair-generation.mm",
+      "source": "app:src/modules/shared/reshade/native/image-pair-generation.mm",
       "path": "src/image-pair-generation.mm",
       "nativeLink": true
     },
     {
-      "source": "image-pair-kernels.hpp",
+      "source": "app:src/modules/shared/reshade/native/image-pair-kernels.hpp",
       "path": "src/image-pair-kernels.hpp"
     },
     {
-      "source": "image-pair-motion.hpp",
+      "source": "app:src/modules/shared/reshade/native/image-pair-motion.hpp",
       "path": "src/image-pair-motion.hpp"
     },
     {
-      "source": "generation-automatic.hpp",
+      "source": "app:src/modules/shared/reshade/native/generation-automatic.hpp",
       "path": "src/generation-automatic.hpp"
     },
     {
-      "source": "window-capture-wire.hpp",
+      "source": "app:src/modules/shared/reshade/native/window-capture-wire.hpp",
       "path": "src/window-capture-wire.hpp"
     },
     {
-      "source": "window-capture-client.hpp",
+      "source": "app:src/modules/shared/reshade/native/window-capture-client.hpp",
       "path": "src/window-capture-client.hpp"
     },
     {
-      "source": "window-capture-client.mm",
+      "source": "app:src/modules/shared/reshade/native/window-capture-client.mm",
       "path": "src/window-capture-client.mm"
     },
     {
-      "source": "graphics-capture-service.hpp",
+      "source": "app:src/modules/shared/reshade/native/graphics-capture-service.hpp",
       "path": "src/graphics-capture-service.hpp"
     },
     {
-      "source": "graphics-capture-service.mm",
+      "source": "app:src/modules/shared/reshade/native/graphics-capture-service.mm",
       "path": "src/graphics-capture-service.mm"
     },
     {
-      "source": "window-forwarded.hpp",
+      "source": "app:src/modules/shared/reshade/native/window-forwarded.hpp",
       "path": "src/window-forwarded.hpp"
     },
     {
-      "source": "window-forwarded.mm",
+      "source": "app:src/modules/shared/reshade/native/window-forwarded.mm",
       "path": "src/window-forwarded.mm"
     },
     {
-      "source": "window-output-policy.hpp",
+      "source": "app:src/modules/shared/reshade/native/window-output-policy.hpp",
       "path": "src/window-output-policy.hpp"
     },
     {
-      "source": "graphics-window-pointer.hpp",
+      "source": "app:src/modules/shared/reshade/native/graphics-window-pointer.hpp",
       "path": "src/graphics-window-pointer.hpp"
     },
     {
-      "source": "graphics-window-pointer.mm",
+      "source": "app:src/modules/shared/reshade/native/graphics-window-pointer.mm",
       "path": "src/graphics-window-pointer.mm"
     },
     {
       "path": "src/opengl-flip.hpp",
-      "source": "opengl-flip.hpp"
+      "source": "app:src/modules/shared/reshade/native/opengl-flip.hpp"
     },
     {
-      "source": "presentation-display-link.hpp",
+      "source": "app:src/modules/shared/reshade/native/presentation-display-link.hpp",
       "path": "src/presentation-display-link.hpp"
     },
     {
-      "source": "presentation-display-link.mm",
+      "source": "app:src/modules/shared/reshade/native/presentation-display-link.mm",
       "path": "src/presentation-display-link.mm",
       "nativeLink": true
     },
     {
-      "source": "presentation-refresh.hpp",
+      "source": "app:src/modules/shared/reshade/native/presentation-refresh.hpp",
       "path": "src/presentation-refresh.hpp"
     },
     {
-      "source": "capture-frame-geometry.hpp",
+      "source": "app:src/modules/shared/reshade/native/capture-frame-geometry.hpp",
       "path": "src/capture-frame-geometry.hpp"
     },
     {
-      "source": "iosurface-texture.hpp",
+      "source": "app:src/modules/shared/reshade/native/iosurface-texture.hpp",
       "path": "src/iosurface-texture.hpp"
     }
   ]

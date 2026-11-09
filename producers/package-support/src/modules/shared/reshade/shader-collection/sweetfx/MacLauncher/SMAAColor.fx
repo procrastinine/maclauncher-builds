@@ -1,1 +1,0 @@
-../../../../../../../../../sources/maclauncher/src/modules/shared/reshade/shader-collection/sweetfx/MacLauncher/SMAAColor.fx

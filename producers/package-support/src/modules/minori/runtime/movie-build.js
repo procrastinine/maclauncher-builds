@@ -1,9 +1,10 @@
+const {appRequire}=require('../../../../../../tools/app-source.mjs');
 const {addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const Build = require("../../shared/runtime/pinned-native-build");
-const Native = require("../../shared/runtime/local-native");
+const Native = appRequire('src/modules/shared/runtime/local-native.js');
 const SOURCE = Object.freeze({ version: "7.1.2", url: "https://ffmpeg.org/releases/ffmpeg-7.1.2.tar.xz",
   sha256: "089bc60fb59d6aecc5d994ff530fd0dcb3ee39aa55867849a2bbc4e555f9c304" });
 const DECODERS = Object.freeze(["mpeg1video", "mpeg2video", "mpeg4", "msmpeg4v1", "msmpeg4v2", "msmpeg4v3",

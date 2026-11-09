@@ -1,14 +1,7 @@
 {
   "schema": 1,
   "repository": "https://github.com/procrastinine/maclauncher",
-  "revision": "c2bb6be849c8493ecb4b16197f4e7b62725aa2f1",
   "gitlink": "sources/maclauncher",
-  "modules": [
-    "src/modules/shared/reshade",
-    "src/modules/shared/vulkan/native",
-    "src/modules/crossover/temporal/dxmt",
-    "src/modules/crossover/temporal/streamline"
-  ],
   "sourceSubmodules": [
     "sources/maclauncher",
     "sources/maclauncher-android",

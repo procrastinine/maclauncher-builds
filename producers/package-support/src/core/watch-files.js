@@ -1,1 +1,0 @@
-../../../../sources/maclauncher/src/core/watch-files.js

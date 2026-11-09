@@ -1,3 +1,4 @@
+import {appPath,appRequire} from '../../../../../../../tools/app-source.mjs';
 import {addLicense,addLicenses} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
@@ -7,7 +8,7 @@ import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {source,applyProfile} from './overlay.mjs';
 import {prepareSourceTree,writeChanged} from '../../../shared/vulkan/native/source-files.mjs';
-const here=import.meta.dirname;
+const here=import.meta.dirname,app=appPath('src/modules/crossover/temporal/vulkan');
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const quote=value=>"'"+String(value).replaceAll("'","'\\''")+"'";
 const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
@@ -20,8 +21,8 @@ async function verifyArchive(file,description){
     return file;
 }
 export function checkSources(){
-    const owned=Object.fromEntries(source.ownedFiles.map(file=>[file,digest(fs.readFileSync(path.join(here,file)))]));
-    const shared=Object.fromEntries(source.sharedHeaders.map(file=>[file,digest(fs.readFileSync(path.resolve(here,'../../../shared',file)))]));
+    const owned=Object.fromEntries(source.ownedFiles.map(file=>[file,digest(fs.readFileSync(path.join(['source.json','overlay.mjs','build.mjs'].includes(file)?here:app,file)))]));
+    const shared=Object.fromEntries(source.sharedHeaders.map(file=>[file,digest(fs.readFileSync(path.resolve(app,'../../../shared',file)))]));
     return {profile:source.profile,version:source.version,source:source.archive,owned,shared};
 }
 export async function prepareSource({archive,work}){

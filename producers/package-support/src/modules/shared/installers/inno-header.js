@@ -1,1 +1,0 @@
-../../../../../../sources/maclauncher/src/modules/shared/installers/inno-header.js

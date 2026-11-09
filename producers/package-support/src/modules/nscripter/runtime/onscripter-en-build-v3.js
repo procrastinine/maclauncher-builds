@@ -1,12 +1,13 @@
+const {appRequire}=require('../../../../../../tools/app-source.mjs');
 const {addLicense,addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const Native = require("../../shared/runtime/local-native");
+const Native = appRequire('src/modules/shared/runtime/local-native.js');
 const Source = require("../../shared/runtime/pinned-native-build");
 const BuildTools = require("../../shared/runtime/native-build-tools");
-const { downloadToFile, throwIfAborted } = require("../../shared/runtime/download-utils");
+const { downloadToFile, throwIfAborted } = appRequire('src/modules/shared/runtime/download-utils.js');
 
 const SNAPSHOT_REVISION = require('../../../../../../lib/pins.mjs').gitlink('producers/package-support/src/external/onscripter-en');
 const PACKAGES = Object.freeze({
@@ -58,8 +59,8 @@ function sourceFiles(root, depth = 0, prefix = "", output = []) {
 }
 
 async function buildRuntime({ manager: suppliedManager, userDataDir, version, packageVersion, sourceDir, architecture = process.arch, retainBuildDirectory = false, logger, signal, onProgress, dependencies = {} } = {}) {
-  const manager = suppliedManager || require("./onscripter-en-manager");
-  const { SNAPSHOT: PROFILE, SNAPSHOT_REVISION: REVISION } = require("./onscripter-en-manager");
+  const manager = suppliedManager || appRequire('src/modules/nscripter/runtime/onscripter-en-manager.js');
+  const { SNAPSHOT: PROFILE, SNAPSHOT_REVISION: REVISION } = appRequire('src/modules/nscripter/runtime/onscripter-en-manager.js');
   const selected = version || PROFILE, outputVersion = packageVersion === undefined ? selected : packageVersion;
   if (selected !== PROFILE || typeof outputVersion !== "string" || !outputVersion.trim() || process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) {
     throw new Error("The reviewed ONScripter-EN source adapter supports the selected Mac source snapshot.");

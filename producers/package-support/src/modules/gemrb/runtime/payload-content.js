@@ -1,6 +1,7 @@
+const {appRequire}=require('../../../../../../tools/app-source.mjs');
 const fs = require('node:fs');
 const path = require('node:path');
-const B = require('../../shared/runtime/bundled-native');
+const B = appRequire('src/modules/shared/runtime/bundled-native.js');
 
 const OPTIONAL_TESTS = Object.freeze([
   'Contents/Resources/GUIScripts/test/Start.py',

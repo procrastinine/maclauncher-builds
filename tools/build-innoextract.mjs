@@ -11,7 +11,7 @@ const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirna
 const Builder=require('../producers/package-support/src/modules/shared/installers/runtime/innoextract-build.js');
 export async function buildInnoextract({project,version,arch,output,work,sources={},sdkPath,lzmaHeaders}){
 
- const names=['innoextract',...Object.keys(Builder.DEPENDENCIES)],directories=Object.fromEntries(names.map(name=>[name,sources[name]||path.join(root,'sources/maclauncher/src/external',name)]));
+ const names=['innoextract',...Object.keys(Builder.DEPENDENCIES)],directories=Object.fromEntries(names.map(name=>[name,sources[name]||path.join(root,'producers/package-support/src/external',name)]));
  fs.mkdirSync(work,{recursive:true});const headers=path.join(work,'boost-headers');fs.mkdirSync(headers);
  const archive=await buildInput(JSON.parse(fs.readFileSync(path.join(root,'producers/package-support/helper-builds/innoextract.json'))).boost);
  execFileSync('/usr/bin/tar',['-xf',archive,'--strip-components','1','-C',headers],{maxBuffer:Infinity,stdio:'inherit'});

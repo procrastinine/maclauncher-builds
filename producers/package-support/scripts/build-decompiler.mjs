@@ -1,3 +1,4 @@
+import {appRequire} from '../../../tools/app-source.mjs';
 import {gitlink} from '../../../lib/pins.mjs';
 import {addLicenses} from '../../../lib/licenses.mjs';
 // GitHub build of an AliceSoft decompiler for one Mac CPU, sealed as a runtime
@@ -11,8 +12,8 @@ import {resolveProject,buildRecord} from '../../../lib/projects.mjs';
 import {managerDeclaration} from '../../../tools/manager-declaration.mjs';
 import {recipeMain} from '../../../tools/build-source.mjs';
 const require=createRequire(import.meta.url);
-const Native=require('../src/modules/shared/runtime/local-native.js');
-const B=require('../src/modules/shared/runtime/bundled-native.js');
+const Native=appRequire('src/modules/shared/runtime/local-native.js');
+const B=appRequire('src/modules/shared/runtime/bundled-native.js');
 const {macho,loadCommands,links,libraryIds}=require('./native-binary-tools.cjs');
 const {buildManagedDecompiler}=require('../src/modules/alicesoft/decompiler-build.js');
 const profiles=require('../src/modules/alicesoft/decompiler-profiles.json');

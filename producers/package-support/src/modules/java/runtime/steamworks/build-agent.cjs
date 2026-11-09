@@ -1,1 +1,0 @@
-../../../../../../../sources/maclauncher/src/modules/java/runtime/steamworks/build-agent.cjs

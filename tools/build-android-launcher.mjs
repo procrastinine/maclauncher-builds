@@ -29,7 +29,9 @@ export async function buildAndroidLauncher({project:id,arch,output,work}){
   const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});
   for(const entry of profile.inputs){
    const generated=path.join(built,entry.path);
-   const file=fs.existsSync(generated)?generated:path.join(base,'supplied',entry.path);
+   // Runtime files are the pinned Android source's own files, read in place.
+   const file=fs.existsSync(generated)?generated:entry.path.startsWith('runtime/')?path.join(root,androidSource().directory,entry.path.slice('runtime/'.length)):null;
+   if(!file)throw Error('The Android launcher input has no source: '+entry.path);
    const target=path.join(payload,entry.output);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(file,target);fs.chmodSync(target,entry.mode);
   }
   return helperPackage({id:project.id,version:project.build.version,arch,output,minimumMacOS:profile.minimumMacOS,sourceSha256:sha(path.join(base,'source.json')),manifestRelative:'manifest.json',record:{source:profile.source}});

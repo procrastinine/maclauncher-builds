@@ -1,4 +1,5 @@
 import './producer-environment.mjs';
+import {appPath,appRequire} from './app-source.mjs';
 import {addLicenses,addLicense} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -8,8 +9,8 @@ import {helperPackage,sha} from './helper-package.mjs';
 import {resolveProject} from '../lib/projects.mjs';
 import {recipeMain} from './build-source.mjs';
 import {downloadBytes} from './download.mjs';
-const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'sources/maclauncher/src/modules/java/runtime/steamworks');
-const {build}=require(path.join(base,'build-agent.cjs')),Zip=require('../sources/maclauncher/src/modules/shared/runtime/zip.js'),catalog=require(path.join(base,'versions.json'));
+const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),base=appPath('src/modules/java/runtime/steamworks');
+const {build}=require(path.join(base,'build-agent.cjs')),Zip=appRequire('src/modules/shared/runtime/zip.js'),catalog=require(path.join(base,'versions.json'));
 /** Select the original ABI source independently of the Builds package revision. */
 export function javaSteamworksProfile(version){
  const upstream=/^(.+)-MCLv[1-9]\d*$/.exec(version||'')?.[1],matches=catalog.filter(row=>row.version===upstream);

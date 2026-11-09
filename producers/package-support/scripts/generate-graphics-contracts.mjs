@@ -1,1 +1,0 @@
-../../../sources/maclauncher/scripts/generate-graphics-contracts.mjs

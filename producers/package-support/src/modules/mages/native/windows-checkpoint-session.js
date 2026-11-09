@@ -1,1 +1,0 @@
-../../../../../../sources/maclauncher/src/modules/mages/native/windows-checkpoint-session.js

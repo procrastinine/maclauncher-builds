@@ -1,12 +1,13 @@
+const {appRequire}=require('../../../../../../tools/app-source.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const Source = require("./pinned-native-build");
-const Native = require("./local-native");
+const Native = appRequire('src/modules/shared/runtime/local-native.js');
 const Portable = require("./portable-sdl2-fonts");
 const Audio = require("./portable-sndfile");
-const { throwIfAborted } = require("./download-utils");
+const { throwIfAborted } = appRequire('src/modules/shared/runtime/download-utils.js');
 const PIN = Object.freeze(require("./portable-ffmpeg.json"));
 const OPTIONS = Object.freeze(["--enable-shared", "--disable-static", "--enable-pic", "--disable-doc", "--disable-debug", "--disable-autodetect",
   "--disable-gpl", "--disable-nonfree", "--disable-version3", "--disable-everything", "--disable-programs", "--disable-network", "--disable-avdevice", "--disable-avfilter",

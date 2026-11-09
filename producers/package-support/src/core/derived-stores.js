@@ -1,1 +1,0 @@
-../../../../sources/maclauncher/src/core/derived-stores.js

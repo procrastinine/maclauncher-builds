@@ -1,11 +1,11 @@
+import {appPath,appRequire,appSourceRoot} from '../../../../../../../tools/app-source.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import {gitlink} from '../../../../../../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
-import {createRequire} from 'node:module';
-const require=createRequire(import.meta.url),here=import.meta.dirname,source=JSON.parse(fs.readFileSync(path.join(here,'source.json')));
+const here=import.meta.dirname,app=appPath('src/modules/crossover/temporal/xess'),source=JSON.parse(fs.readFileSync(path.join(app,'source.json')));
 const args=Object.fromEntries(process.argv.slice(2).reduce((rows,value,index,all)=>index%2?rows:[...rows,[value.replace(/^--/,''),all[index+1]]],[]));
 if(!['xess-source','dxmt-source','compiler','out'].every(key=>args[key]))throw Error('Use --xess-source SDK --dxmt-source DXMT --compiler CLANG++ --out DIRECTORY');
 const xess=fs.realpathSync(args['xess-source']),dxmt=fs.realpathSync(args['dxmt-source']),output=path.resolve(args.out),compiler=path.resolve(args.compiler);
@@ -14,7 +14,7 @@ for(const [directory,pin] of [[xess,source.xess],[dxmt,source.dxmt]])if(execFile
 fs.mkdirSync(output,{recursive:true});
 const headers=['inc/xess/xess.h','inc/xess/xess_d3d11.h'];
 const hooks=new Set(headers.flatMap(file=>[...fs.readFileSync(path.join(xess,file),'utf8').matchAll(/XESS_API\s+xess_result_t\s+(xess\w+)\s*\(/g)].map(row=>row[1])));
-const owned=fs.readFileSync(path.join(here,'proxy.cpp'),'utf8');
+const owned=fs.readFileSync(path.join(app,'proxy.cpp'),'utf8');
 for(const hook of hooks)if(!new RegExp('XESS_API\\s+xess_result_t\\s+'+hook+'\\s*\\(').test(owned))throw Error('The selected public XeSS API is not implemented: '+hook);
 const reference=JSON.parse(fs.readFileSync(path.join(here,'reference-exports.json'))),original=reference.exports;
 if(gitlink(reference.gitlink)!==source.xess.revision||reference.repository!==source.xess.repository)throw Error('The reference XeSS export profile does not match the declared SDK');
@@ -63,13 +63,13 @@ ${name}:
     jmp *%rax
 .seh_endproc
 `]).join('\n'));
-const library=path.join(output,source.library),repository=path.resolve(here,'../../../../..');
+const library=path.join(output,source.library),repository=appSourceRoot().directory;
 execFileSync(compiler,['-std=c++17','-O2','-shared','-static','-Wl,--file-alignment=4096','-Wl,--exclude-all-symbols','-Wl,--no-insert-timestamp',
   '-ffile-prefix-map='+repository+'=MacLauncher','-ffile-prefix-map='+output+'=XeSSBuild',
-  '-I'+path.join(xess,'inc'),'-I'+path.join(dxmt,'src/d3d11'),'-I'+path.join(dxmt,'src/util'),'-I'+path.join(here,'../dxmt'),'-I'+path.resolve(here,'../../../shared/reshade/temporal'),'-I'+output,
-  path.join(here,'proxy.cpp'),path.join(output,'forwarders.S'),path.join(output,'exports.def'),'-ldxguid','-ld3d11','-ld3dcompiler','-o',library],{stdio:'inherit'});
+  '-I'+path.join(xess,'inc'),'-I'+path.join(dxmt,'src/d3d11'),'-I'+path.join(dxmt,'src/util'),'-I'+path.join(app,'../dxmt'),'-I'+path.resolve(app,'../../../shared/reshade/temporal'),'-I'+output,
+  path.join(app,'proxy.cpp'),path.join(output,'forwarders.S'),path.join(output,'exports.def'),'-ldxguid','-ld3d11','-ld3dcompiler','-o',library],{stdio:'inherit'});
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-const actual=require('../streamline/pe-exports').inspect(library);
+const actual=appRequire('src/modules/crossover/temporal/streamline/pe-exports.js').inspect(library);
 if(JSON.stringify(actual)!==JSON.stringify([...exports].sort((a,b)=>a.name.localeCompare(b.name,'en',{sensitivity:'variant'})))){
   const supplied=new Map(actual.map(row=>[row.name,row.ordinal]));if(exports.some(row=>supplied.get(row.name)!==row.ordinal)||actual.length!==exports.length)throw Error('The XeSS export names or ordinals changed');
 }
@@ -77,10 +77,10 @@ addLicenses(output,'Intel-XeSS',xess);
 addLicenses(output,'DXMT',dxmt);
 const metadata={schema:1,profile:source.profile,version:'1',library:source.library,sha256:hash(library),exports:actual,
   sources:source,compiler:execFileSync(compiler,['--version'],{encoding:'utf8'}).split('\n')[0],
-  owned:Object.fromEntries(['source.json','proxy.cpp','build.mjs','reference-exports.json','export-profile.js'].map(file=>[file,hash(path.join(here,file))])),
-  dependencies:{'dxmt/camera-transport.hpp':hash(path.join(here,'../dxmt/camera-transport.hpp')),
-    'temporal/camera.h':hash(path.resolve(here,'../../../shared/reshade/temporal/camera.h')),
-    'temporal/frame.h':hash(path.resolve(here,'../../../shared/reshade/temporal/frame.h'))},
+  owned:Object.fromEntries(['source.json','proxy.cpp','build.mjs','reference-exports.json','export-profile.js'].map(file=>[file,hash(path.join(['build.mjs','reference-exports.json'].includes(file)?here:app,file))])),
+  dependencies:{'dxmt/camera-transport.hpp':hash(path.join(app,'../dxmt/camera-transport.hpp')),
+    'temporal/camera.h':hash(path.resolve(app,'../../../shared/reshade/temporal/camera.h')),
+    'temporal/frame.h':hash(path.resolve(app,'../../../shared/reshade/temporal/frame.h'))},
   inputs:{color:true,depth:true,motion:true,jitter:true,exposure:true,cameraProjection:false},
   execution:{renderer:'dxmt',api:'d3d11',algorithm:'selected-native-provider',offsets:'gpu-copy',history:'per-context',readback:false},
   unavailable:['external-descriptor-heap'],

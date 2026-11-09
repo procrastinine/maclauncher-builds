@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import {gitlink} from '../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
+import {appPath,exportAppFile} from '../../../../../../../tools/app-source.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 // Original FidelityFX CACAO kernels and constant/scheduling contract.
 import fs from 'node:fs';
@@ -42,8 +43,8 @@ for (const name of fs.readdirSync(path.join(gpu, 'cacao')))
   if (name.endsWith('.h'))
     fs.copyFileSync(path.join(gpu, 'cacao', name),
                     path.join(overlay, 'cacao', name));
-fs.copyFileSync(path.join(here, '../native/scene-projection.hlsl'),
-                path.join(overlay, 'scene-projection.hlsl'));
+exportAppFile('src/modules/shared/reshade/native/scene-projection.hlsl',
+              path.join(overlay, 'scene-projection.hlsl'));
 function patched(file, transform) {
   const original = read('sdk/include/FidelityFX/gpu/cacao/' + file);
   let text = original;
@@ -202,7 +203,7 @@ for (const role of spec.roles) {
     input = base + '.hlsl';
     fs.writeFileSync(input, text);
   } else {
-    input = path.join(here, 'boundary.hlsl');
+    input = appPath('src/modules/shared/reshade/cacao/boundary.hlsl');
     entry = role.entry;
   }
   const d = {

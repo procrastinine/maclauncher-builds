@@ -1,4 +1,5 @@
 import './producer-environment.mjs';
+import {appRequire} from './app-source.mjs';
 import dependencies from '../producers/dependencies.json' with {type:'json'};
 const {libffi}=dependencies;
 import {androidSource,ndkSource} from '../lib/android-source.mjs';
@@ -7,7 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
 import {sha} from './helper-package.mjs';
-const require=createRequire(import.meta.url),B=require('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js'),{validateDeclaration}=require('../lib/declaration.cjs');
+const require=createRequire(import.meta.url),B=appRequire('src/modules/shared/runtime/bundled-native.js'),{validateDeclaration}=require('../lib/declaration.cjs');
 const descriptor=new URL('../producers/android-art-inputs/ffi.json',import.meta.url);
 
 /** Read the sealed Linux-built Android libffi input through its ordinary inventory. */

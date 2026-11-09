@@ -6,8 +6,8 @@
   "kind": "dylib",
   "output": "mkxpz-config.dylib",
   "sources": [
-    "src/modules/rgss/overlays/mkxpz-config.c",
-    "src/modules/rgss/overlays/mkxpz-identity.m"
+    "app:src/modules/rgss/overlays/mkxpz-config.c",
+    "app:src/modules/rgss/overlays/mkxpz-identity.m"
   ],
   "flags": [
     "-O2",

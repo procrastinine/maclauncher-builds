@@ -1,1 +1,114 @@
-../../../sources/maclauncher/scripts/android-stage-sources.mjs
+import {appRequire} from '../../../tools/app-source.mjs';
+import fs from "node:fs";
+import path from "node:path";
+import {execFileSync} from "node:child_process";
+import {sourceInventory, sourceIdentity} from "../../../sources/maclauncher-android/src/modules/android/native/build-sources.mjs";
+const Content=appRequire('scripts/runtime-content.cjs');
+
+/** Staging consumes the completed build snapshot, including recorded shared
+ * ART adapters, independently of later changes in the source checkout. */
+export function verifyAndroidSourceSnapshot(buildSource, receipt) {
+  const buildTools = path.join(buildSource, "build-tools");
+  if (receipt.artSources !== undefined && !Array.isArray(receipt.artSources))
+    throw new Error("Android build source identity is invalid.");
+  // Earlier receipts did not consume a separate ART source closure.
+  const artSources = receipt.artSources === undefined ? [] : sourceInventory(path.join(buildSource, "art"));
+  const identity = sourceIdentity(sourceInventory(path.join(buildSource, "native")),
+    fs.readFileSync(path.join(buildSource, "profile.js")),
+    fs.existsSync(buildTools) ? sourceInventory(buildTools) : [], artSources);
+  if (identity.sourceHash !== receipt.sourceHash ||
+      ["ownedSources", "buildToolsSources", "artSources"].some(name =>
+        JSON.stringify(identity[name]) !== JSON.stringify(receipt[name])))
+    throw new Error("Android build source identity is invalid.");
+  return identity;
+}
+
+/** Keep the producer's original relative imports in the corresponding source. */
+export function copyAndroidSourceSnapshot(buildSource, identity, sources, copy) {
+  for (const [name, input, output] of [
+    ["ownedSources", "native", "src/modules/android/native"],
+    ["buildToolsSources", "build-tools", ""],
+    ["artSources", "art", "src/modules/android/art"]
+  ]) for (const item of identity[name] || [])
+    if (!Content.excludedReason(item.path))
+      copy(path.join(buildSource, input, item.path), path.join(sources, output, item.path));
+  copy(path.join(buildSource, "profile.js"), path.join(sources, "src/modules/android/profile.js"));
+}
+
+/** Export pinned sources and licenses, retaining explicitly consumed upstream
+ * helpers even when their original directory also contains unused tests. */
+export function archiveAndroidUpstreamSource(checkout, revision, archive, {productionInputs = [], sourceRoots = ["."]} = {}) {
+  if (!Array.isArray(productionInputs) || productionInputs.some(member =>
+    typeof member !== "string" || !member || member !== path.posix.normalize(member) ||
+    member.startsWith("/") || member.split("/").some(part => part === ".." || part === ".") || member.endsWith("/")))
+    throw new Error("Android production source inputs must name exact relative files.");
+  if (!Array.isArray(sourceRoots) || !sourceRoots.length || sourceRoots.some(member =>
+    typeof member !== "string" || !member || member !== path.posix.normalize(member) ||
+    member.startsWith("/") || member.split("/").includes("..") || member.endsWith("/")))
+    throw new Error("Android source roots must name relative files or directories.");
+  const required = new Set(productionInputs);
+  const roots = [...new Set(sourceRoots)], selected = roots.map(member => member === "." ? member : ":(literal)" + member);
+  const members = execFileSync("git", ["-C", checkout, "ls-tree", "-r", "--name-only", "-z", revision, "--", ...selected],
+    {encoding:"utf8", maxBuffer: Infinity}).split("\0").filter(Boolean);
+  const available = new Set(members);
+  for (const root of roots) if (root !== "." && !members.some(member => member === root || member.startsWith(root + "/")))
+    throw new Error("Android source root is unavailable at its recorded revision: " + root);
+  for (const member of required) if (!available.has(member))
+    throw new Error("Android production source is unavailable at its recorded revision: " + member);
+  const excluded = new Set();
+  for (const member of members) {
+    if (required.has(member)) continue;
+    const parts = member.split("/");
+    for (let index = 1; index <= parts.length; index++) {
+      const prefix = parts.slice(0, index).join("/");
+      if (!Content.excludedReason(prefix)) continue;
+      // Excluding a parent would also remove its consumed helper. Continue
+      // down to each unused sibling instead; no runtime policy is widened.
+      if ([...required].some(input => input.startsWith(prefix + "/"))) continue;
+      excluded.add(prefix);
+      break;
+    }
+  }
+  execFileSync("git", ["-C", checkout, "archive", "--format=tar", "--output=" + archive, revision,
+    "--", ...selected, ...[...excluded].sort().map(member => ":(exclude,literal)" + member)], {timeout:60000});
+  return {sourceMembers:members.length, excludedMembers:[...excluded].sort(), productionInputs:[...required].sort(), sourceRoots:roots};
+}
+
+/** Archive an owned publication tree with stable owner and timestamp metadata. */
+export function archiveAndroidSourceTree(sources, archive) {
+  const normalize = directory => {
+    for (const entry of fs.readdirSync(directory, {withFileTypes:true})) {
+      const file = path.join(directory, entry.name);
+      if (entry.isDirectory()) normalize(file);
+      else if (entry.isSymbolicLink()) fs.lutimesSync(file, 0, 0);
+      else fs.utimesSync(file, 0, 0);
+    }
+    fs.utimesSync(directory, 0, 0);
+  };
+  normalize(sources);
+  execFileSync("/usr/bin/tar", ["--uid", "0", "--gid", "0", "--uname", "root", "--gname", "wheel",
+    "--options", "gzip:!timestamp", "-czf", archive, "-C", sources, ...fs.readdirSync(sources).sort()],
+    {timeout:60000, maxBuffer: Infinity});
+}
+
+/** Corresponding source can arrive as a pinned release archive as well as Git.
+ * Repack only when unused test/generated entries are present; the authenticated
+ * original stays unchanged and production helpers keep their original bytes. */
+export function filterAndroidSourceArchive(input, output) {
+  if (path.resolve(input) === path.resolve(output)) throw new Error("Source publication requires a new archive.");
+  const members = execFileSync("/usr/bin/tar", ["-tf", input],
+    {encoding:"utf8", maxBuffer: Infinity}).split("\n").filter(Boolean);
+  const excluded = members.filter(member => Content.excludedReason(member));
+  if (!excluded.length) fs.copyFileSync(input, output);
+  else {
+    const escape = member => member.replace(/[\\*?\[\]]/g, value => "\\" + value);
+    const format = output.endsWith(".gz") ? "-czf" : output.endsWith(".bz2") ? "-cjf" : output.endsWith(".xz") ? "-cJf" : "-cf";
+    execFileSync("/usr/bin/tar", [format, output, ...(format === "-czf" ? ["--options", "gzip:!timestamp"] : []),
+      ...excluded.flatMap(member => ["--exclude", escape(member)]), "@" + input],
+      {timeout:60000, maxBuffer: Infinity});
+  }
+  const published = execFileSync("/usr/bin/tar", ["-tf", output],
+    {encoding:"utf8", maxBuffer: Infinity}).split("\n").filter(Boolean);
+  if (published.some(member => Content.excludedReason(member))) throw new Error("Source archive contains test or generated inputs.");
+  return {sourceMembers:members.length, publishedMembers:published.length, excludedMembers:excluded};
+}

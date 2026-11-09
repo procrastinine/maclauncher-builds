@@ -1,8 +1,9 @@
+const {appRequire}=require('../../../../../../tools/app-source.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
 const Source = require("../../shared/runtime/pinned-native-build");
-const Native = require("../../shared/runtime/local-native");
-const MachO = require("../../shared/runtime/macho-load-commands");
+const Native = appRequire('src/modules/shared/runtime/local-native.js');
+const MachO = appRequire('src/modules/shared/runtime/macho-load-commands.js');
 const Dependency = require("./portable-dependencies");
 const Existing = require("./build");
 

@@ -1,3 +1,4 @@
+import {appPath,appSourceRoot} from '../../../../../../tools/app-source.mjs';
 import {addLicenses,includeLicenses} from '../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
@@ -26,7 +27,7 @@ export function build({moltenvk,headers,output,sceneLibrary,dependencies,archite
  addLicenses(output,'MoltenVK',moltenvk);
  includeLicenses(output,`${sceneLibrary.include}/../licenses`);
  addLicenses(output,'compiler-dependencies',dependencies.inputs);
- const native=path.join(directory,'native'),common=['clang++','-std=c++17','-O2','-fobjc-arc','-Wno-deprecated-declarations','-Werror=unguarded-availability-new','-DVK_USE_PLATFORM_METAL_EXT','-DMACFX_LIBPLACEBO_SCENE_INPUTS=1','-arch',architecture,'-mmacosx-version-min='+profile.minimumMacOS,'-ffile-prefix-map='+repository+'=.','-ffile-prefix-map='+headers+'=upstream','-I'+native,'-I'+headers,'-I'+sceneLibrary.include,'-I'+path.join(moltenvk,'MoltenVK/MoltenVK/include')];
+ const native=appPath('src/modules/shared/reshade/native'),common=['clang++','-std=c++17','-O2','-fobjc-arc','-Wno-deprecated-declarations','-Werror=unguarded-availability-new','-DVK_USE_PLATFORM_METAL_EXT','-DMACFX_LIBPLACEBO_SCENE_INPUTS=1','-arch',architecture,'-mmacosx-version-min='+profile.minimumMacOS,'-ffile-prefix-map='+repository+'=.','-ffile-prefix-map='+appSourceRoot().directory+'=.','-ffile-prefix-map='+headers+'=upstream','-I'+native,'-I'+headers,'-I'+sceneLibrary.include,'-I'+path.join(moltenvk,'MoltenVK/MoltenVK/include')];
  const provider=path.join(output,'libmacfx-libplacebo.dylib');run('xcrun',[...common,'-dynamiclib',path.join(native,'libplacebo-node.mm'),'-L'+lib,'-lplacebo.360','-lMoltenVK','-Wl,-rpath,@loader_path/libplacebo','-Wl,-rpath,@loader_path','-Wl,-install_name,@rpath/libmacfx-libplacebo.dylib','-framework','Foundation','-framework','Metal','-o',provider]);
  const helper=path.join(output,'libplacebo-prepare');run('xcrun',[...common,path.join(native,'libplacebo-prepare.mm'),'-L'+output,'-lmacfx-libplacebo','-Wl,-rpath,@executable_path','-framework','Foundation','-framework','Metal','-o',helper]);for(const file of[provider,helper]){run('strip',['-x',file]);run('codesign',['--force','-s','-',file]);}
  const catalog=JSON.parse(run(helper,['--filters']));

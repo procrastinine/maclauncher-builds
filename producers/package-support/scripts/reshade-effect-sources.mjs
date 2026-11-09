@@ -1,1 +1,0 @@
-../../../sources/maclauncher/scripts/reshade-effect-sources.mjs

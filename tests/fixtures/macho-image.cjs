@@ -1,1 +1,0 @@
-../../sources/maclauncher/tests/fixtures/macho-image.js

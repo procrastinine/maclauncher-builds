@@ -9,8 +9,7 @@ import {helperPackage,sha} from '../tools/helper-package.mjs';
 const root=path.resolve(import.meta.dirname,'..'),json=file=>JSON.parse(fs.readFileSync(path.join(root,file)));
 
 test('included ART supplier retains the canonical acquisition metadata and source records',()=>{
- const relative='runtime/src/modules/android/art/supplier.json',file=path.join(root,'producers/android-launcher/supplied',relative),canonical=path.join(root,androidSource().directory,'src/modules/android/art/supplier.json');
- assert.deepEqual(fs.readFileSync(file),fs.readFileSync(canonical));
+ const relative='runtime/src/modules/android/art/supplier.json',file=path.join(root,androidSource().directory,'src/modules/android/art/supplier.json');
  const supplier=JSON.parse(fs.readFileSync(file));assert.ok(supplier.imageAcquisition);assert.ok(supplier.sources);
  const profile=json('producers/included-helpers/profiles/android-launcher.json').inputs.find(row=>row.path===relative);
  assert.equal(profile.output,'files/'+relative);

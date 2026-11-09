@@ -1,4 +1,4 @@
-import {appSourceRoot} from '../../../../../../../tools/app-source.mjs';
+import {appRequire,appSourceRoot} from '../../../../../../../tools/app-source.mjs';
 import {buildCameraBridge} from '../camera-bridge/build.mjs';
 import {gitlink} from '../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
@@ -6,9 +6,8 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
-const require = createRequire(import.meta.url), here = path.dirname(fileURLToPath(import.meta.url));
+const here = path.dirname(fileURLToPath(import.meta.url));
 const args = Object.fromEntries(process.argv.slice(2).reduce((items, value, index, all) => index % 2 ? items : [...items, [value.replace(/^--/, ""), all[index + 1]]], []));
 if (!["source", "out", "compiler", "reference"].every(key => args[key])) throw Error("Use --source Streamline --out directory --compiler clang++ --reference sl.interposer.dll");
 const source = path.resolve(args.source), output = path.resolve(args.out), reference = path.resolve(args.reference);
@@ -17,7 +16,7 @@ const revision = gitlink(declaration.gitlink);
 const app = appSourceRoot(), owned = path.join(app.directory, "src/modules/crossover/temporal/streamline");
 if (execFileSync("git", ["-C", source, "rev-parse", "HEAD"], { encoding: "utf8" }).trim() !== revision) throw Error("Streamline headers must match the pinned source revision");
 execFileSync("git",["-C",source,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});
-const inspect = require(path.join(owned,"pe-exports.js")).inspect;
+const inspect = appRequire("src/modules/crossover/temporal/streamline/pe-exports.js").inspect;
 const hash = file => crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 const core = [...fs.readFileSync(path.join(source, "include/sl_core_api.h"), "utf8").matchAll(/^sl::Result (sl\w+)\(|^SL_API sl::Result (sl\w+)\(/gm)].map(match => match[1] || match[2]);
 const known = new Set([...fs.readFileSync(path.join(source, "source/core/sl.interposer/exports.def"), "utf8").split(/\r?\n/).map(line => line.trim()).filter(line => /^[A-Za-z_]\w*$/.test(line) && line !== "EXPORTS"), ...core, "slSetVulkanInfo"]);
@@ -76,7 +75,7 @@ return {schema:1,library:"sl.interposer.dll",sha256:hash(path.join(output,"sl.in
 const metadata = buildAdapter(reference,output);
 metadata.version="3";metadata.resourceSnapshotAPI=1;metadata.resourceSnapshotProfiles=["d3d11-v2"];
 metadata.resourceTagProfiles=["slSetD3DDevice","slSetTag","slSetTagForFrame"].every(name=>metadata.exports.some(row=>row.name===name))?["d3d11-v1"]:[];
-metadata.source={url:declaration.repository,revision,version:"2.9.0"};metadata.appSource={repository:app.repository||"https://github.com/procrastinine/maclauncher",revision:app.revision};
+metadata.source={url:declaration.repository,revision,version:"2.9.0"};metadata.appSource={repository:"https://github.com/procrastinine/maclauncher",revision:app.revision};
 metadata.profiles=[];
 for(const profile of declaration.referenceProfiles||[]){
  const referenceFile=args["compat-reference"]?path.resolve(args["compat-reference"]):path.join(output,"references",profile.version,"sl.interposer.dll");

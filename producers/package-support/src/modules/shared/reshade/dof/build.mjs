@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import {gitlink} from '../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
+import {appPath,exportAppFile} from '../../../../../../../tools/app-source.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 // Original FidelityFX DoF kernels, constants and dispatch schedule.
 import fs from 'node:fs';
@@ -17,7 +18,7 @@ run('git',['-C',source,'diff','--exit-code','HEAD','--']);
 const read=file=>fs.existsSync(path.join(source,file))?fs.readFileSync(path.join(source,file),'utf8'):run('git',['-C',source,'show',gitlink('producers/package-support/src/external/fsr3-sdk')+':'+file]);
 fs.mkdirSync(out,{recursive:true});const overlay=path.join(out,'overlay'),gpu=path.join(source,'sdk/include/FidelityFX/gpu');fs.mkdirSync(path.join(overlay,'dof'),{recursive:true});
 for(const file of Object.keys(spec.files))if(file.startsWith('sdk/include/FidelityFX/gpu/dof/'))fs.writeFileSync(path.join(overlay,'dof',path.basename(file)),read(file));
-fs.copyFileSync(path.join(here,'../native/scene-projection.hlsl'),path.join(overlay,'scene-projection.hlsl'));
+exportAppFile('src/modules/shared/reshade/native/scene-projection.hlsl',path.join(overlay,'scene-projection.hlsl'));
 const original=read('sdk/include/FidelityFX/gpu/dof/ffx_dof_callbacks_hlsl.h');let callbacks=original;
 const replace=(before,after,count=1)=>{if(callbacks.split(before).length!==count+1)throw Error('DoF callback adaptation changed: '+before);callbacks=callbacks.split(before).join(after);};
 replace('RWTexture2D<FfxHalfOpt4>  rw_internal_bilat_color[4]    : FFX_DOF_DECLARE_UAV(FFX_DOF_BIND_UAV_INTERNAL_BILAT_COLOR);',Array.from({length:4},(_,i)=>`RWTexture2D<FfxHalfOpt4> rw_internal_bilat_color_mip${i}:register(u${12+i});`).join('\n'));
@@ -51,7 +52,7 @@ const dispatches=[];for(const line of schedule.trim().split('\n')){const m=/sche
 fs.writeFileSync(path.join(out,'dof-upstream.hpp'),'// Copyright (C) 2024 Advanced Micro Devices, Inc. MIT; see dof-MIT.txt.\n#pragma once\n#include <array>\n#include <cstdint>\nnamespace macfx::dof_host {\n'+constants+'\nstruct Dispatch{const char*name;uint32_t x,y;};\ninline std::array<Dispatch,5> schedule(uint32_t width,uint32_t height){\n'+sizes+'\nreturn {{'+dispatches.join(',')+'}};\n}\n}\n');
 const shaders=[];for(const role of [...spec.roles,{name:'depth',entry:'CSDepth'},{name:'orient',entry:'CSOrient'}]){
  const base=path.join(out,role.name),spv=base+'.spv',metal=base+'.metal';let input,entry=role.entry||'CS';
- if(role.file){input=base+'.hlsl';fs.writeFileSync(input,read(role.file));}else input=path.join(here,'boundary.hlsl');
+ if(role.file){input=base+'.hlsl';fs.writeFileSync(input,read(role.file));}else input=appPath('src/modules/shared/reshade/dof/boundary.hlsl');
  const defines={FFX_GPU:1,FFX_HLSL:1,FFX_HLSL_6_2:1,FFX_HALF:0,FFX_DOF_OPTION_REVERSE_DEPTH:1,FFX_DOF_OPTION_COMBINE_IN_PLACE:0,FFX_DOF_OPTION_MAX_RING_MERGE_LOG:role.merge===false?0:1};
  run(path.join(tools,'dxc'),['-spirv','-fspv-target-env=vulkan1.1spirv1.4','-T','cs_6_2','-E',entry,'-O3','-fvk-t-shift','32','0','-fvk-u-shift','64','0','-I',overlay,'-I',gpu,...Object.entries(defines).flatMap(([k,v])=>['-D',k+'='+v]),input,'-Fo',spv]);
  run(path.join(tools,'spirv-val'),['--target-env','vulkan1.1spv1.4',spv]);run(path.join(tools,'spirv-cross'),[spv,'--msl','--msl-version','23000','--output',metal]);

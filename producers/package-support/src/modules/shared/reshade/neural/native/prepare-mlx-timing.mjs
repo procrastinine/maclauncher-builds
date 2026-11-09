@@ -12,9 +12,10 @@ const ownedFiles=['prepare-mlx-timing.mjs','timing/source.json','timing/metal-jo
 const appliedFiles=['Source/Cmlx/mlx/mlx/backend/metal/device.cpp','Source/Cmlx/include/maclauncher-metal-job.h',
   'Source/Cmlx/include/mlx.h','Source/Cmlx/mlx-c/mlx/c/transforms.cpp','Source/MLX/Transforms+Eval.swift',
   'Source/MLX/MLXArray.swift','Source/MLX/MLXGPUJob.swift'];
-const currentOwned=()=>Object.fromEntries(ownedFiles.map(file=>[file,digest(fs.readFileSync(path.join(directory,file)))]));
-export function verifyTimingReceipt(receipt){
-  const owned=currentOwned();
+const currentOwned=(root=directory)=>Object.fromEntries(ownedFiles.map(file=>[file,digest(fs.readFileSync(path.join(root,file)))]));
+/** Verify a timing receipt against the owned files of the source tree it was prepared from. */
+export function verifyTimingReceipt(receipt,root=directory){
+  const owned=currentOwned(root);
   if(!receipt||receipt.schema!==1||JSON.stringify(receipt.source)!==JSON.stringify(declaration.source)
     ||JSON.stringify(receipt.nested)!==JSON.stringify(declaration.nested)||JSON.stringify(receipt.files)!==JSON.stringify(declaration.files)
     ||JSON.stringify(receipt.owned)!==JSON.stringify(owned)

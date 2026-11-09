@@ -1,1 +1,0 @@
-../../../../sources/maclauncher/src/core/external-store-downloads.js

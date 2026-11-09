@@ -6,7 +6,7 @@
   "kind": "dylib",
   "output": "libsteam_api.dylib",
   "sources": [
-    "src/modules/shared/runtime/steamworks/native/offline-0.5.0/source/offline.cpp"
+    "app:src/modules/shared/runtime/steamworks/native/offline-0.5.0/source/offline.cpp"
   ],
   "flags": [
     "-std=c++17",

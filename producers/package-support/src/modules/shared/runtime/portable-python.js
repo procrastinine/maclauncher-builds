@@ -1,12 +1,13 @@
+const {appRequire}=require('../../../../../../tools/app-source.mjs');
 const {addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const Source = require("./pinned-native-build");
-const Native = require("./local-native");
+const Native = appRequire('src/modules/shared/runtime/local-native.js');
 const Portable = require("./portable-sdl2-fonts");
-const { throwIfAborted } = require("./download-utils");
+const { throwIfAborted } = appRequire('src/modules/shared/runtime/download-utils.js');
 const PIN = Object.freeze(require("./portable-python.json"));
 const recipeIdentity = () => crypto.createHash("sha256").update(fs.readFileSync(__filename)).update(fs.readFileSync(require.resolve("./portable-python.json"))).digest("hex");
 

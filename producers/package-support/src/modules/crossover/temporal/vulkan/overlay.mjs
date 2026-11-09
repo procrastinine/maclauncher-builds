@@ -3,9 +3,10 @@ import sharedDependencies from '../../../../../../dependencies.json' with {type:
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import {appPath} from '../../../../../../../tools/app-source.mjs';
 export const source = JSON.parse(fs.readFileSync(new URL('./source.json', import.meta.url)));
 source.archive = sharedDependencies[source.archiveDependency];
-const here = import.meta.dirname;
+const here = import.meta.dirname, app = appPath('src/modules/crossover/temporal/vulkan');
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const modulePath = 'dlls/winevulkan/';
 function replaceOnce(text, before, after) {
@@ -49,13 +50,13 @@ export function profileSources(directory) {
     files.set(modulePath+'winevulkan.spec',original('winevulkan.spec')+'\n@ stdcall MacLauncherWineVulkanSceneAPI1()\n@ stdcall MacLauncherWineVulkanRecordScene1(ptr)\n@ stdcall MacLauncherWineVulkanSceneContext1(ptr)\n');
     for (const name of ['scene-request.h','scene-pe.c','scene-unix.c']) {
         if (fs.existsSync(path.join(directory,modulePath,name))) throw Error('The original source already contains an owned WineVulkan entry.');
-        files.set(modulePath+name,fs.readFileSync(path.join(here,name)));
+        files.set(modulePath+name,fs.readFileSync(path.join(app,name)));
     }
     // The matched Wine header already declares the exact Vulkan C types.
     if (fs.existsSync(path.join(directory,'include/vulkan/vulkan.h'))) throw Error('The Vulkan header layout changed.');
     files.set('include/vulkan/vulkan.h','#pragma once\n#include "wine/vulkan.h"\n');
     for (const file of source.sharedHeaders) {
-        let bytes=fs.readFileSync(path.resolve(here,'../../../shared',file));
+        let bytes=fs.readFileSync(path.resolve(app,'../../../shared',file));
         // Wine's dependency scanner reads every include branch. Use the
         // existing canonical layout rather than its optional flat aliases.
         let text=bytes.toString();

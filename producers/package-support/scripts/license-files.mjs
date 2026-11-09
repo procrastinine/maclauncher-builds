@@ -1,1 +1,0 @@
-../../../sources/maclauncher/scripts/license-files.mjs

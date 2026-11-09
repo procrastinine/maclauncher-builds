@@ -42,48 +42,48 @@
     "fsr2": {
       "path": "src/external/fsr2",
       "pin": {
-        "file": "src/modules/shared/reshade/temporal/fsr/source.json",
+        "file": "app:src/modules/shared/reshade/temporal/fsr/source.json",
         "repository": "/fsr2/repository",
-        "commit": "/fsr2/commit"
+        "pointer": "/fsr2"
       }
     },
     "fsr3-sdk": {
       "path": "src/external/fsr3-sdk",
       "pin": {
-        "file": "src/modules/shared/reshade/generation/fsr3/source.json",
+        "file": "app:src/modules/shared/reshade/generation/fsr3/source.json",
         "repository": "/repository"
       }
     },
     "fsr4": {
       "path": "src/external/fsr4-metal",
       "pin": {
-        "file": "src/modules/shared/reshade/temporal/fsr4/source.json",
+        "file": "app:src/modules/shared/reshade/temporal/fsr4/source.json",
         "repository": "/repository",
-        "commit": "/commit"
+        "pointer": ""
       }
     },
     "asr": {
       "path": "src/external/asr",
       "pin": {
-        "file": "src/modules/shared/reshade/temporal/asr/source.json",
+        "file": "app:src/modules/shared/reshade/temporal/asr/source.json",
         "repository": "/repository",
-        "commit": "/commit"
+        "pointer": ""
       }
     },
     "sgsr2": {
       "path": "src/external/sgsr2",
       "pin": {
-        "file": "src/modules/shared/reshade/temporal/sgsr2/source.json",
+        "file": "app:src/modules/shared/reshade/temporal/sgsr2/source.json",
         "repository": "/repository",
-        "commit": "/commit"
+        "pointer": ""
       }
     },
     "godot": {
       "path": "src/external/godot-camera",
       "pin": {
-        "file": "src/modules/godot/graphics/source.json",
+        "file": "app:src/modules/godot/graphics/source.json",
         "repository": "/repository",
-        "commit": "/commit"
+        "pointer": ""
       }
     },
     "streamline": {
@@ -91,7 +91,7 @@
       "pin": {
         "file": "src/modules/crossover/temporal/streamline/source.json",
         "repository": "/repository",
-        "gitlink": "/gitlink"
+        "pointer": ""
       }
     },
     "dxmt": {
@@ -99,15 +99,15 @@
       "pin": {
         "file": "src/modules/crossover/temporal/dxmt/source.json",
         "repository": "/repository",
-        "gitlink": "/gitlink"
+        "pointer": ""
       }
     },
     "xess": {
       "path": "src/external/xess",
       "pin": {
-        "file": "src/modules/shared/reshade/xess/source.json",
+        "file": "app:src/modules/shared/reshade/xess/source.json",
         "repository": "/repository",
-        "commit": "/commit"
+        "pointer": ""
       }
     },
     "sdl-vulkan": {
@@ -122,15 +122,15 @@
       "pin": {
         "file": "src/modules/shared/reshade/native/retroarch-source.json",
         "repository": "/repository",
-        "gitlink": "/gitlink"
+        "pointer": ""
       }
     },
     "mlx-dlss": {
       "path": "src/external/MLX-DLSS",
       "pin": {
-        "file": "src/modules/shared/reshade/neural/source.json",
+        "file": "app:src/modules/shared/reshade/neural/source.json",
         "repository": "/repository",
-        "commit": "/commit"
+        "pointer": ""
       }
     },
     "isfmslkit": {
@@ -138,7 +138,7 @@
       "pin": {
         "file": "src/modules/shared/reshade/isf/source.json",
         "repository": "/sources/0/repository",
-        "gitlink": "/sources/0/gitlink"
+        "pointer": "/sources/0"
       }
     },
     "libplacebo": {
@@ -147,7 +147,7 @@
       "pin": {
         "file": "src/modules/shared/reshade/libplacebo/scene-profile.json",
         "repository": "/SOURCE/origin",
-        "commit": "/SOURCE/commit"
+        "pointer": "/SOURCE"
       }
     },
     "libplacebo-vulkan-headers": {
@@ -193,7 +193,7 @@
       "kind": "file",
       "description": "FSR 4 Lite 2 trained weights",
       "pin": {
-        "file": "src/modules/shared/reshade/temporal/fsr4/source.json",
+        "file": "app:src/modules/shared/reshade/temporal/fsr4/source.json",
         "pointer": "/lite2"
       },
       "url": "{repository}/raw/{commit}/{path}",
@@ -454,7 +454,7 @@
             "--shaderc-library",
             "{input:shaderc-library}",
             "--shaderc-headers",
-            "{repo:src/modules/shared/reshade/native}",
+            "app:src/modules/shared/reshade/native",
             "--output",
             "{output}"
           ]

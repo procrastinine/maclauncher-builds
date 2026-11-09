@@ -1,4 +1,4 @@
-import {appSourceRoot} from '../../../../../../../tools/app-source.mjs';
+import {appRequire,appSourceRoot} from '../../../../../../../tools/app-source.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
@@ -9,7 +9,7 @@ import {fileURLToPath} from 'node:url';
 import {source,sceneSources} from './moltenvk-scene-overlay.mjs';
 import {applyTemporalSource} from '../../../../../../../producers/moltenvk/build.mjs';
 import {writeChanged,prepareSourceTree} from './source-files.mjs';
-import Bundled from '../../runtime/bundled-native.js';
+const Bundled=appRequire('src/modules/shared/runtime/bundled-native.js');
 const root=path.dirname(fileURLToPath(import.meta.url));
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const read=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',maxBuffer: Infinity,...options}).trim();

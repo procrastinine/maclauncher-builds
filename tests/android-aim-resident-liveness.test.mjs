@@ -45,7 +45,7 @@ test('actual resident code recognizes a real unreaped zombie as ended',{timeout:
  fs.cpSync(path.join(source,'crates/aimctl/src'),directory,{recursive:true});
  const resident=path.join(directory,'resident.rs');
  const original=fs.readFileSync(resident,'utf8');
- fs.writeFileSync(resident,adaptResidentWorkerDrain(adaptResidentProcessLiveness(original))+'\n#[cfg(test)]\n#[path='+JSON.stringify(fileURLToPath(new URL('../sources/maclauncher/sources/maclauncher/tests/fixtures/android-aim-resident/liveness.rs',import.meta.url)))+']\nmod liveness_regression_fixture;\n');
+ fs.writeFileSync(resident,adaptResidentWorkerDrain(adaptResidentProcessLiveness(original))+'\n#[cfg(test)]\n#[path='+JSON.stringify(fileURLToPath(new URL('fixtures/android-aim-resident/liveness.rs',import.meta.url)))+']\nmod liveness_regression_fixture;\n');
  const executable=path.join(temporary,'resident-liveness');
  const args=['--edition=2024','--crate-name','aimctl','--test',path.join(directory,'main.rs'),'-C','opt-level=1','-C','debuginfo=0','-o',executable];
  for(const directory of native.dependencyDirectories)args.push('-L','dependency='+directory);

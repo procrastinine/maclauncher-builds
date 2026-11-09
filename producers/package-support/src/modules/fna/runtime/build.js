@@ -1,13 +1,14 @@
+const {appRequire}=require('../../../../../../tools/app-source.mjs');
 const { gitlink } = require("../../../../../../lib/pins.mjs");
 const {addLicense,addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const Native = require("../../shared/runtime/local-native");
+const Native = appRequire('src/modules/shared/runtime/local-native.js');
 const Source = require("../../shared/runtime/pinned-native-build");
 const BuildTools = require("../../shared/runtime/native-build-tools");
-const Bundled = require("../../shared/runtime/bundled-native");
-const { downloadToFile, throwIfAborted } = require("../../shared/runtime/download-utils");
+const Bundled = appRequire('src/modules/shared/runtime/bundled-native.js');
+const { downloadToFile, throwIfAborted } = appRequire('src/modules/shared/runtime/download-utils.js');
 
 const PROFILE = "26.10-MCLv1";
 const FNA_REVISION = gitlink("producers/package-support/src/external/FNA");

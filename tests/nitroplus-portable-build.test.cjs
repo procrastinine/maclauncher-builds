@@ -1,3 +1,4 @@
+const {appRequire}=require('../tools/app-source.mjs');
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -6,7 +7,7 @@ const path = require("node:path");
 
 const Media = require("../producers/package-support/src/modules/nitroplus/runtime/portable-media");
 const Portable = require("../producers/package-support/src/modules/nitroplus/runtime/portable-build");
-const Source = require("../sources/maclauncher/src/modules/shared/runtime/pinned-native-build");
+const Source = appRequire('src/modules/shared/runtime/pinned-native-build');
 const Existing = require("../producers/package-support/src/modules/nitroplus/runtime/build");
 
 test("Nitroplus source export keeps NSS compatibility while replacing Homebrew library discovery", async t => {

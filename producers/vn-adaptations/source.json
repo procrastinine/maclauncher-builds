@@ -26,9 +26,9 @@
     }
   },
   "ownedFiles": {
-    "siglus/host.m": "c762ad8e34167b10d3efd0389b91a353cd404d694fb8d09e2d717cdda69e9137",
-    "siglus/host.json": "a31f44d554668e7aa05746a99f1e1e6cd0cb9b710d32ccbe56ecb2109497e110",
-    "rlvm/adapter.m": "77ab945b9d8e62ef4b78649f093fe2dfe7ed710105ae14fe42f53586036f89ba",
+    "app:src/modules/siglus/resources/native-host/host.m": "c762ad8e34167b10d3efd0389b91a353cd404d694fb8d09e2d717cdda69e9137",
+    "app:src/modules/siglus/resources/native-host/manifest.json": "a31f44d554668e7aa05746a99f1e1e6cd0cb9b710d32ccbe56ecb2109497e110",
+    "app:src/modules/siglus/resources/rlvm-adapter/adapter.m": "77ab945b9d8e62ef4b78649f093fe2dfe7ed710105ae14fe42f53586036f89ba",
     "rlvm/adapter.json": "7af757859832bed219951a16158d40ce5ca2e88f4afdb48b2dd01d25d340bcfa",
     "kag3-polyfill/KAGParser.tjs": "6b9c55ae37c6453715fdff72b97751e87803fa807781e34c1a028afb708b393b",
     "kag3-polyfill/MenuItem_stub.tjs": "5d2561cb6f8d1cd30dd2623de993798fa89b407d149ddc9074d72e14fed61d8a",

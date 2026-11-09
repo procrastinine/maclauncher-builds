@@ -1,3 +1,4 @@
+import {appPath,appRequire,appSourceRoot} from '../../../../../../../tools/app-source.mjs';
 import sharedDependencies from '../../../../../../dependencies.json' with {type:'json'};
 import {gitlink} from '../../../../../../../lib/pins.mjs';
 import {addLicense,addLicenses} from '../../../../../../../lib/licenses.mjs';
@@ -6,8 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
-import {createRequire} from 'node:module';
-const require=createRequire(import.meta.url),here=import.meta.dirname,source=JSON.parse(fs.readFileSync(path.join(here,'source.json')));
+const here=import.meta.dirname,app=appPath('src/modules/crossover/temporal/fidelityfx'),source=JSON.parse(fs.readFileSync(path.join(here,'source.json')));
 const args=Object.fromEntries(process.argv.slice(2).reduce((rows,value,index,all)=>index%2?rows:[...rows,[value.replace(/^--/,''),all[index+1]]],[]));
 if(!['sdk-source','vulkan-source','compiler','out'].every(key=>args[key]))throw Error('Use --sdk-source SDK --vulkan-source SDL --compiler MINGW_CLANG++ --out DIRECTORY [--reference ORIGINAL_DLL]');
 const sdk=fs.realpathSync(args['sdk-source']),vulkan=fs.realpathSync(args['vulkan-source']),out=path.resolve(args.out),compiler=path.resolve(args.compiler),backend=args.backend||'vk';
@@ -30,11 +30,11 @@ else{
  fs.writeFileSync(originalLibrary,sdkReference);reference=originalLibrary;
 }
 if(hash(reference)===declaredReference.sha256)referenceSource={repository:source.sdk.repository,revision:gitlink('producers/package-support/src/external/fsr3-sdk'),path:declaredReference.path,sha256:declaredReference.sha256};
-const expected=new Set(source.exports),exports=require('../streamline/pe-exports').inspect(reference);
+const expected=new Set(source.exports),exports=appRequire('src/modules/crossover/temporal/streamline/pe-exports.js').inspect(reference);
 if(!Array.isArray(exports)||exports.length!==expected.size||exports.some(row=>!expected.has(row.name)))throw Error('The original library does not match the exact five-export FidelityFX API profile. Preserve its original route.');
 if(path.resolve(reference)!==originalLibrary)fs.copyFileSync(reference,originalLibrary);
 if(hash(originalLibrary)!==hash(reference))throw Error('The original library copy differs from its reference.');
-const referenceVersion=require('../../../shared/runtime/pe-version').readPeVersion(originalLibrary);
+const referenceVersion=appRequire('src/modules/shared/runtime/pe-version.js').readPeVersion(originalLibrary);
 if(referenceSource&&referenceVersion?.fileVersion!==source.sdk.referenceFileVersion)throw Error('The pinned original library version differs from its source profile.');
 if(!source.version.startsWith(source.sdk.apiVersion+'-')||!referenceVersion)throw Error('The adapter needs an authoritative package and original DLL version.');
 const hooks=fs.readFileSync(path.join(inputs,'ffx_api/ffx_api.h'),'utf8');
@@ -42,21 +42,21 @@ for(const name of expected)if(!new RegExp('FFX_API_ENTRY\\s+ffxReturnCode_t\\s+'
 fs.writeFileSync(path.join(out,'profile.hpp'),'#pragma once\nconstexpr const wchar_t*maclauncherOriginalLibrary=L'+JSON.stringify(source.original[backend])+';\n');
 const compiledExports=[...exports,{name:'MacLauncherFFXObservationAPI1',ordinal:Math.max(...exports.map(row=>row.ordinal))+1}];
 fs.writeFileSync(path.join(out,'exports.def'),'LIBRARY '+source.libraries[backend].replace(/\.dll$/,'')+'\nEXPORTS\n'+compiledExports.map(row=>row.name+' @'+row.ordinal).join('\n')+'\n');
-const library=path.join(out,source.libraries[backend]),repository=path.resolve(here,'../../../../..');
+const library=path.join(out,source.libraries[backend]),repository=appSourceRoot().directory;
 execFileSync(compiler,['-std=c++17','-O2','-shared','-static','-Wl,--exclude-all-symbols','-Wl,--no-insert-timestamp',
- '-ffile-prefix-map='+repository+'=MacLauncher','-ffile-prefix-map='+out+'=FidelityFXBuild','-I'+inputs,'-I'+out,path.join(here,'proxy.cpp'),path.join(here,'wine-observer.cpp'),path.join(out,'exports.def'),'-lbcrypt','-o',library],{stdio:'inherit'});
-const actual=require('../streamline/pe-exports').inspect(library),ordinals=new Map(compiledExports.map(row=>[row.name,row.ordinal]));
+ '-ffile-prefix-map='+repository+'=MacLauncher','-ffile-prefix-map='+out+'=FidelityFXBuild','-I'+inputs,'-I'+out,path.join(app,'proxy.cpp'),path.join(app,'wine-observer.cpp'),path.join(out,'exports.def'),'-lbcrypt','-o',library],{stdio:'inherit'});
+const actual=appRequire('src/modules/crossover/temporal/streamline/pe-exports.js').inspect(library),ordinals=new Map(compiledExports.map(row=>[row.name,row.ordinal]));
 if(actual?.length!==compiledExports.length||actual.some(row=>ordinals.get(row.name)!==row.ordinal))throw Error('The compiled FidelityFX exports changed.');
 const clang=execFileSync('xcrun',['--find','clang++'],{encoding:'utf8'}).trim(),macSDK=process.env.SDKROOT||execFileSync('xcrun',['--sdk','macosx','--show-sdk-path'],{encoding:'utf8'}).trim(),objects=[];
 for(const architecture of ['arm64','x86_64']){const object=path.join(out,'recorded-source-'+architecture+'.o');execFileSync(clang,['-std=c++17','-O2','-arch',architecture,'-isysroot',macSDK,'-mmacosx-version-min=13.0','-fdeclspec','-Wno-ignored-attributes',
- '-ffile-prefix-map='+repository+'=MacLauncher','-ffile-prefix-map='+out+'=FidelityFXBuild','-I'+inputs,'-I'+path.resolve(here,'../../../shared/vulkan/native'),'-c',path.join(here,'recorded-source.cpp'),'-o',object],{stdio:'inherit'});objects.push(object);}
+ '-ffile-prefix-map='+repository+'=MacLauncher','-ffile-prefix-map='+out+'=FidelityFXBuild','-I'+inputs,'-I'+path.resolve(app,'../../../shared/vulkan/native'),'-c',path.join(app,'recorded-source.cpp'),'-o',object],{stdio:'inherit'});objects.push(object);}
 const producer=path.join(out,'libffx-vulkan-scene-source.a');execFileSync('libtool',['-static','-o',producer,...objects],{stdio:'inherit'});
 // The Vulkan headers also retain their original copyright notices in inputs/.
 const owned=['source.json','capture.hpp','observation.h','proxy.cpp','wine-observer.hpp','wine-observer.cpp','scalar-mapping.hpp','native-source.h','recorded-source.hpp','recorded-source.cpp','index.js','build.mjs'];
 const metadata={schema:1,version:source.version,profile:source.profile,backend,library:source.libraries[backend],sha256:hash(library),exports:actual,
- sources:source,originalInputs,sourceExports:exports,observationAPI:1,owned:Object.fromEntries(owned.map(file=>[file,hash(path.join(here,file))])),
- dependencies:{...Object.fromEntries(['vulkan/native/scene-interop.h','reshade/native/vulkan-scene.h','reshade/temporal/frame.h','reshade/temporal/scene-aovs.h','reshade/temporal/scene-matrices.h','reshade/native/image-color.h'].map(file=>[file,hash(path.resolve(here,'../../../shared',file))])),
-  'crossover/temporal/vulkan/scene-request.h':hash(path.resolve(here,'../vulkan/scene-request.h'))},
+ sources:source,originalInputs,sourceExports:exports,observationAPI:1,owned:Object.fromEntries(owned.map(file=>[file,hash(path.join(['source.json','build.mjs'].includes(file)?here:app,file))])),
+ dependencies:{...Object.fromEntries(['vulkan/native/scene-interop.h','reshade/native/vulkan-scene.h','reshade/temporal/frame.h','reshade/temporal/scene-aovs.h','reshade/temporal/scene-matrices.h','reshade/native/image-color.h'].map(file=>[file,hash(path.resolve(app,'../../../shared',file))])),
+  'crossover/temporal/vulkan/scene-request.h':hash(path.resolve(app,'../vulkan/scene-request.h'))},
  referenceSha256:hash(reference),referenceFileVersion:referenceVersion.fileVersion,...(referenceSource?{referenceSource}:{}),originalLibrary:source.original[backend],
  nativeProducer:{library:path.basename(producer),sha256:hash(producer),recordedSceneAPI:1,originalOutputRetained:true},
  execution:{originalApiForwarding:true,originalGpuWorkRetained:true,nativeVulkanSource:1,wineVulkanObserver:1,wineVulkanContext:1,wineVulkanInterop:false},

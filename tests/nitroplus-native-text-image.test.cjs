@@ -1,3 +1,4 @@
+const {appRequire}=require('../tools/app-source.mjs');
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -5,7 +6,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { execFileSync, spawnSync } = require("node:child_process");
 const Build = require("../producers/package-support/src/modules/nitroplus/runtime/build");
-const Pinned = require("../sources/maclauncher/src/modules/shared/runtime/pinned-native-build");
+const Pinned = appRequire('src/modules/shared/runtime/pinned-native-build');
 
 const compiler = "/usr/bin/clang++";
 const available = fs.existsSync(compiler) && fs.existsSync(path.join(Build.sourcePath, "include/TextParser.hpp"));

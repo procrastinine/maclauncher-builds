@@ -33,7 +33,7 @@ test('actual original POSIX controller preserves lock ownership across group TER
   assert.equal(fs.readFileSync(path.join(native.source,relative),'utf8'),adaptPosixHolderProcessGroup(original),'The tested library uses the exact owned adaptation');
   const root=fs.mkdtempSync(path.join(os.tmpdir(),'aim-posix-lifetime-'));
   t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
-  const fixture=fileURLToPath(new URL('../sources/maclauncher/sources/maclauncher/tests/fixtures/android-aim-posix/lifetime.rs',import.meta.url));
+  const fixture=fileURLToPath(new URL('fixtures/android-aim-posix/lifetime.rs',import.meta.url));
   const env={...process.env};delete env.DYLD_INSERT_LIBRARIES;delete env.MACLAUNCHER_AIM_IPC_PREFIX;
   for(const[kind,library]of [['original',native.originalStorageLibrary],['adapted',native.storageLibrary]]) {
     const executable=path.join(root,kind),output=path.join(root,kind+'-children');fs.mkdirSync(output);

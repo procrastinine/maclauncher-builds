@@ -1,15 +1,16 @@
+const {appPath,appRequire}=require('../../../tools/app-source.mjs');
 // Build the invisible Node-API network boundary included with the launcher.
 // The payload holds the binary and its build record. The source stays in the
 // producer repository and is identified by its checksum.
 const fs = require('node:fs');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
-const Native = require('../src/modules/shared/runtime/local-native');
+const Native = appRequire('src/modules/shared/runtime/local-native.js');
 const { loadCommands } = require('./native-binary-tools.cjs');
 const ID = 'web-renderer-network', VERSION = '1.0.1';
 function stage({ output }) {
   if (process.platform !== 'darwin') throw new Error('Build the browser network helper on macOS.');
-  const source = path.resolve(__dirname, '../src/modules/shared/web/native/renderer-network.c');
+  const source = appPath('src/modules/shared/web/native/renderer-network.c');
   const directory = path.join(path.resolve(output), ID, VERSION, 'universal');
   if (fs.existsSync(directory)) throw new Error('Choose an empty staging output; sealed helpers are never overwritten.');
   fs.mkdirSync(directory, { recursive: true });

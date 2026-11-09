@@ -1,7 +1,8 @@
+import {appRequire} from '../../../tools/app-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
-import {SCENE_SHADER_INPUTS} from '../src/modules/shared/effects/operation-contracts.mjs';
+const {SCENE_SHADER_INPUTS}=appRequire('src/modules/shared/effects/operation-contracts.mjs');
 import {SOURCE,VULKAN_HEADERS} from '../src/modules/shared/reshade/libplacebo/scene-overlay.mjs';
 const samePin=(value,pin)=>value?.origin===pin.origin&&value?.commit===pin.commit;
 export function stageLibplaceboScene({directory,metadata,recipeRoot,upstream}){

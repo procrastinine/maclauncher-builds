@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
+import {appPath,exportAppFile} from '../../../../../../../tools/app-source.mjs';
 // SPDX-License-Identifier: MIT
 import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import {execFileSync}from'node:child_process';
 const here=import.meta.dirname,spec=JSON.parse(fs.readFileSync(path.join(here,'source.json'))),options={};
@@ -16,7 +17,7 @@ replace('    return depthLinearizeMul / (depthLinearizeAdd - screenDepth);','   
 replace('const lpfloat3 viewVec      = (lpfloat3)normalize(-pixCenterPos);','const lpfloat3 viewVec = normalize(mlPosition(normalizedScreenPos,viewspaceZ*.5)-mlPosition(normalizedScreenPos,viewspaceZ*1.5));\n    if(dot(viewspaceNormal,viewVec)<0)viewspaceNormal=-viewspaceNormal;');
 replace('const float2 pixelDirRBViewspaceSizeAtCenterZ = viewspaceZ.xx * consts.NDCToViewMul_x_PixelSize;','const float2 pixelDirRBViewspaceSizeAtCenterZ = float2(length(mlPosition(normalizedScreenPos+float2(consts.ViewportPixelSize.x,0),viewspaceZ)-pixCenterPos),length(mlPosition(normalizedScreenPos+float2(0,consts.ViewportPixelSize.y),viewspaceZ)-pixCenterPos));');
 replace('const lpfloat3 directionVec = lpfloat3(cosPhi, sinPhi, 0);','const lpfloat3 directionVec = normalize(mlPosition(normalizedScreenPos+float2(cosPhi,-sinPhi)*consts.ViewportPixelSize,viewspaceZ)-pixCenterPos);');
-const applied=path.join(out,'XeGTAO-metal.hlsli');fs.writeFileSync(applied,hlsl);const input=path.join(out,'wrapper.hlsl');fs.copyFileSync(path.join(here,'wrapper.hlsl'),input);
+const applied=path.join(out,'XeGTAO-metal.hlsli');fs.writeFileSync(applied,hlsl);const wrapper='src/modules/shared/reshade/xegtao/wrapper.hlsl',input=exportAppFile(wrapper,path.join(out,'wrapper.hlsl'));
 const shaders=[];
 for(let pass=0;pass<spec.entries.length;pass++){
  const base=path.join(out,String(pass)),spv=base+'.spv',metal=base+'.metal';
@@ -30,4 +31,4 @@ let header='// Copyright (c) 2016-2021 Intel Corporation. MIT; see xegtao-MIT.tx
 for(let i=0;i<shaders.length;i++){const s=shaders[i];header+=`inline constexpr Binding bindings${i}[]={${s.bindings.map(b=>'{'+JSON.stringify(b.name)+','+JSON.stringify(b.kind)+','+b.index+'}').join(',')}};\ninline constexpr const char*source${i}=R"GTAO_SHADER(${s.source})GTAO_SHADER";\n`;}
 header+='inline constexpr Shader shaders[]={';shaders.forEach((s,i)=>{header+=`{${JSON.stringify(s.entry)},source${i},bindings${i},sizeof(bindings${i})/sizeof(Binding),${s.threads.join(',')}},`;});header+='};\n}\n';
 fs.writeFileSync(path.join(out,'xegtao-shaders.hpp'),header);addLicenses(out,'XeGTAO',source);
-fs.writeFileSync(path.join(out,'translation.json'),JSON.stringify({schema:1,repository:spec.repository,commit:spec.commit,source:spec,owned:hash(fs.readFileSync(import.meta.filename)),ownedFiles:{'wrapper.hlsl':hash(fs.readFileSync(path.join(here,'wrapper.hlsl')))},adaptation:{actualProjectionUnprojection:true,perspectiveAndOrthographic:true,explicitDepthClipRange:true,canonicalTopLeftDepth:true,depthGeneratedNormals:true,stationaryHilbertNoise:true,linearColorComposition:true,sourceSha256:spec.files.find(x=>x.path.endsWith('.hlsli')).sha256,appliedSha256:hash(hlsl)},shaders:shaders.map(({source,...s})=>s),headerSha256:hash(header),tools:Object.fromEntries(['dxc','spirv-cross','spirv-val'].map(name=>[name,hash(fs.readFileSync(path.join(tools,name)))]))},null,2)+'\n');console.log('Translated original XeGTAO pipeline: '+out);
+fs.writeFileSync(path.join(out,'translation.json'),JSON.stringify({schema:1,repository:spec.repository,commit:spec.commit,source:spec,owned:hash(fs.readFileSync(import.meta.filename)),ownedFiles:{'wrapper.hlsl':hash(fs.readFileSync(appPath(wrapper)))},adaptation:{actualProjectionUnprojection:true,perspectiveAndOrthographic:true,explicitDepthClipRange:true,canonicalTopLeftDepth:true,depthGeneratedNormals:true,stationaryHilbertNoise:true,linearColorComposition:true,sourceSha256:spec.files.find(x=>x.path.endsWith('.hlsli')).sha256,appliedSha256:hash(hlsl)},shaders:shaders.map(({source,...s})=>s),headerSha256:hash(header),tools:Object.fromEntries(['dxc','spirv-cross','spirv-val'].map(name=>[name,hash(fs.readFileSync(path.join(tools,name)))]))},null,2)+'\n');console.log('Translated original XeGTAO pipeline: '+out);

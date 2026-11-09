@@ -1,3 +1,4 @@
+const {appRequire}=require('../tools/app-source.mjs');
 const requirements = require('./support/requirements.cjs');
 const test = require("node:test");
 const assert = require("node:assert/strict");
@@ -9,7 +10,7 @@ const { execFileSync } = require("node:child_process");
 
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 const Current=require('../producers/package-support/src/modules/mages/native/current-build');
-const descriptor=require('../sources/maclauncher/src/modules/mages/native/current-windows-overlay.json');
+const descriptor=appRequire('src/modules/mages/native/current-windows-overlay.json');
 const upstream=path.resolve(__dirname,'../producers/package-support/src/external/impacto');
 const relative='src/ui/backlogmenu.cpp';
 function sourceFixture(t){

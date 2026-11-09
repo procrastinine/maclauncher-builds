@@ -1,4 +1,5 @@
 import './producer-environment.mjs';
+import {appRequire,recipePath,APP_REFERENCE} from './app-source.mjs';
 import {addLicenses} from '../lib/licenses.mjs';
 // GitHub build of an owned-source native helper from its build profile. One profile
 // per helper names the sources, compiler flags, output and identity fields; this
@@ -14,7 +15,7 @@ import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {recipeMain} from './build-source.mjs';
 import {macosSDKVersion} from '../lib/reproducible-build.mjs';
 const require=createRequire(import.meta.url);
-const B=require('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js'),Native=require('../sources/maclauncher/src/modules/shared/runtime/local-native.js');
+const B=appRequire('src/modules/shared/runtime/bundled-native.js'),Native=appRequire('src/modules/shared/runtime/local-native.js');
 const root=path.resolve(import.meta.dirname,'..');
 const CPUS={arm64:['arm64'],x64:['x86_64'],universal:['arm64','x86_64']};
 const KINDS={executable:[],dylib:['-dynamiclib'],bundle:['-bundle']};
@@ -30,7 +31,7 @@ export function helperProfile(id,directory=root){
  const base=profile.sourceDirectory?path.join(directory,profile.sourceDirectory):producer;
  const keys=['schemaVersion','id','version','compiler','kind','output','sources','flags','frameworks','minimumMacOS','record','binaryField','sourceDirectory'];
  if(!profile||profile.schemaVersion!==1||profile.id!==id||Object.keys(profile).some(key=>!keys.includes(key))||!['clang','clang++'].includes(profile.compiler)||!Object.hasOwn(KINDS,profile.kind)||
-  !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(profile.output||'')||!Array.isArray(profile.sources)||!profile.sources.length||!profile.sources.every(source=>contained(source,base))||
+  !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(profile.output||'')||!Array.isArray(profile.sources)||!profile.sources.length||!profile.sources.every(source=>source.startsWith(APP_REFERENCE)||contained(source,base))||
   !Array.isArray(profile.flags)||profile.flags.some(flag=>typeof flag!=='string'||/^-(?:arch|isysroot|mmacosx-version-min|o$)/.test(flag))||
   profile.frameworks!==undefined&&(!Array.isArray(profile.frameworks)||!profile.frameworks.every(name=>/^[A-Za-z0-9]+$/.test(name)))||
   !/^\d+\.\d+$/.test(profile.minimumMacOS||'')||
@@ -48,7 +49,7 @@ export function selectedHelperProfile({project:id,version,directory=root}){
 
 export function buildHelper({project:id,version,arch,output,work=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'helper-build-')),'work'),directory=root}){
  const {profile,base}=selectedHelperProfile({project:id,version,directory});
- const payload=path.join(output,'payload'),binary=path.join(payload,profile.output),sources=profile.sources.map(source=>path.join(base,source));
+ const payload=path.join(output,'payload'),binary=path.join(payload,profile.output),sources=profile.sources.map(source=>recipePath(base,source));
  const sdk=fs.realpathSync(process.env.SDKROOT||run('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path'])),compiler=run('/usr/bin/xcrun',[profile.compiler,'--version']).split('\n')[0];
  const flags=[...KINDS[profile.kind],'-mmacosx-version-min='+profile.minimumMacOS,...profile.flags,...(profile.frameworks||[]).flatMap(name=>['-framework',name])];
  fs.mkdirSync(work,{recursive:true});fs.mkdirSync(payload,{recursive:true});

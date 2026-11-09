@@ -1,6 +1,7 @@
+const {appRequire}=require('../tools/app-source.mjs');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const {execFileSync}=require('node:child_process');
-const Native=require('../sources/maclauncher/src/modules/shared/runtime/local-native');
+const Native=appRequire('src/modules/shared/runtime/local-native');
 const Producer=require('./helpers/gamemaker-opengl.cjs');
 function temporary(t){const root=fs.mkdtempSync(path.join(os.tmpdir(),'opengl-native-contract-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;}
 test('V4 retains software context selection across unrelated formats and native view/context lifecycles', { skip: process.platform !== 'darwin' }, t => {

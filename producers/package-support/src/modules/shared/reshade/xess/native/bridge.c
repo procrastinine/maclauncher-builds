@@ -1,1 +1,0 @@
-../../../../../../../../sources/maclauncher/src/modules/shared/reshade/xess/native/bridge.c

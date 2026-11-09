@@ -1,4 +1,5 @@
 import './producer-environment.mjs';
+import {appRequire} from './app-source.mjs';
 import {androidSource,aimSource} from '../lib/android-source.mjs';
 import {includeLicenses,addLicenses,addLicense} from '../lib/licenses.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
@@ -12,7 +13,7 @@ import {checkoutSource,run} from './build-source.mjs';
 import {buildInput} from './build-input.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 import {verifyAndroidJavaFrameworkInput} from './build-android-java-framework.mjs';
-const root=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url),B=require('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js'),{validateDeclaration}=require('../lib/declaration.cjs');
+const root=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url),B=appRequire('src/modules/shared/runtime/bundled-native.js'),{validateDeclaration}=require('../lib/declaration.cjs');
 const descriptor=path.join(root,'producers/android-art-inputs/java-stage.json');
 const json=file=>JSON.parse(fs.readFileSync(file));
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');

@@ -1,1 +1,0 @@
-../../../../../../../../sources/maclauncher/src/modules/shared/reshade/temporal/fsr4/README.md

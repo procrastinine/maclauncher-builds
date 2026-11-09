@@ -1,3 +1,4 @@
+import {appRequire} from '../../../../../../../tools/app-source.mjs';
 import {gitlink} from '../../../../../../../lib/pins.mjs';
 import {addLicense,addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from 'node:fs';
@@ -8,11 +9,11 @@ import {fileURLToPath} from 'node:url';
 import {adaptedKosmicSources} from './kosmickrisp-source.mjs';
 import {buildKosmicTargets,buildKosmicLoader,describeNativeTools} from './kosmickrisp-targets.mjs';
 import {prepareSourceTree,writeChanged} from './source-files.mjs';
-import Bundled from '../../runtime/bundled-native.js';
-import MachO from '../../runtime/macho-load-commands.js';
+const Bundled=appRequire('src/modules/shared/runtime/bundled-native.js');
+const MachO=appRequire('src/modules/shared/runtime/macho-load-commands.js');
 import Stage from '../../../../../scripts/native-binary-tools.cjs';
-import Supplementals from '../../../../../scripts/native-supplementals.cjs';
-import JsonFiles from '../../../../core/json-files.js';
+const Supplementals=appRequire('scripts/native-supplementals.cjs');
+const JsonFiles=appRequire('src/core/json-files.js');
 
 const root=path.dirname(fileURLToPath(import.meta.url));
 const pin=JSON.parse(fs.readFileSync(path.join(root,'kosmickrisp-source.json')));

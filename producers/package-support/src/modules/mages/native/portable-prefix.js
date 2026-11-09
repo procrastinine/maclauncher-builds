@@ -1,6 +1,7 @@
+const {appRequire}=require('../../../../../../tools/app-source.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
-const Native = require("../../shared/runtime/local-native");
+const Native = appRequire('src/modules/shared/runtime/local-native.js');
 
 function linkPrefix(inputPrefix, outputPrefix) {
   const original = fs.realpathSync(inputPrefix), output = fs.realpathSync(outputPrefix);

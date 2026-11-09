@@ -1,4 +1,5 @@
 import './producer-environment.mjs';
+import {appRequire} from './app-source.mjs';
 import {addLicense,addLicenses} from '../lib/licenses.mjs';
 import {recipeMain} from './build-source.mjs';
 import fs from 'node:fs';
@@ -9,7 +10,7 @@ import {buildInput} from './build-input.mjs';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
-const Builder=require('../sources/maclauncher/src/modules/gamemaker/runtime/butterscotch.js');
+const Builder=appRequire('src/modules/gamemaker/runtime/butterscotch.js');
 const Catalog=require('../producers/package-support/src/modules/gamemaker/runtime/catalog.js');
 
 export async function buildButterscotch({project:id,version,arch,work,output}) {

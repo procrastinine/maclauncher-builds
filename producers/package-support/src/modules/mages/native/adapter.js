@@ -1,1 +1,0 @@
-../../../../../../sources/maclauncher/src/modules/mages/native/adapter.js

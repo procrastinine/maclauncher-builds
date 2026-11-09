@@ -1,4 +1,5 @@
 import './producer-environment.mjs';
+import {appRequire} from './app-source.mjs';
 import {androidSource,androidUpstream} from '../lib/android-source.mjs';
 import {addLicenses,addLicense} from '../lib/licenses.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
@@ -13,7 +14,7 @@ import {retryNetwork} from './download.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 
 const root=path.resolve(import.meta.dirname,'..'),descriptor=path.join(root,'producers/android-inputs/java-framework.json');
-const require=createRequire(import.meta.url),B=require('../sources/maclauncher/src/modules/shared/runtime/bundled-native.js'),{validateDeclaration}=require('../lib/declaration.cjs');
+const require=createRequire(import.meta.url),B=appRequire('src/modules/shared/runtime/bundled-native.js'),{validateDeclaration}=require('../lib/declaration.cjs');
 const json=file=>JSON.parse(fs.readFileSync(file));
 const read=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',maxBuffer:Infinity,...options}).trim();
 
@@ -38,7 +39,7 @@ export async function buildAndroidJavaFrameworkInput({output,work}){
  for(const file of frameworkPin.files){const archive=await buildInput({url:file.url||frameworkPin.url,sha256:file.sha256,bytes:file.size},cache);fs.copyFileSync(archive,path.join(frameworkDirectory,file.path),fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.unlinkSync(archive);}
  const asm=json(path.join(native,'asm-binary.json')),tools=path.join(work,'tools');fs.mkdirSync(tools);for(const file of asm.files){const archive=await buildInput({url:file.url||asm.url,sha256:file.sha256,bytes:file.size},cache);fs.copyFileSync(archive,path.join(tools,file.path),fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.unlinkSync(archive);}
  const blueprintProfile=json(path.join(root,'producers/android-inputs/blueprint/source.json')),blueprint=checkoutSource({...blueprintProfile.upstream,destination:path.join(work,'blueprint')}),goPath=path.join(work,'go'),goSource=path.join(goPath,'src/github.com/google/blueprint');fs.mkdirSync(goSource,{recursive:true});fs.cpSync(path.join(blueprint,'parser'),path.join(goSource,'parser'),{recursive:true});
- const driver=path.join(root,'sources/maclauncher/scripts/android-blueprint/main.go');
+ const driver=path.join(root,'producers/android-inputs/blueprint/main.go');
  const parser=path.join(work,'android-blueprint-parser');run('go',['build','-p=2','-trimpath','-ldflags=-s -w -buildid=','-o',parser,driver],{env:{...process.env,GO111MODULE:'off',GOENV:'off',GOTOOLCHAIN:'local',GOPATH:goPath,GOCACHE:path.join(work,'go-cache'),CGO_ENABLED:'0',GOOS:process.platform,GOARCH:({x64:'amd64',arm64:'arm64'})[process.arch]}});
  const sources={};for(const record of profile.sources){if(pins[record.pin]!==record.revision)throw Error('The framework Java source pin differs from the original producer: '+record.id);sources[record.id]=sourceObjects(record,path.join(work,record.id));}
  for(const record of profile.sources){

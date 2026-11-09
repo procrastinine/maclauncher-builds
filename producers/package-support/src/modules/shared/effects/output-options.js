@@ -1,1 +1,0 @@
-../../../../../../sources/maclauncher/src/modules/shared/effects/output-options.js

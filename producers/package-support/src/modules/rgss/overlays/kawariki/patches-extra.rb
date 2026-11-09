@@ -1,1 +1,0 @@
-../../../../../../../sources/maclauncher/src/modules/rgss/overlays/kawariki/patches-extra.rb

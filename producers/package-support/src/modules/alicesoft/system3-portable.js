@@ -1,9 +1,10 @@
+const {appRequire}=require('../../../../../tools/app-source.mjs');
 const {gitlink} = require("../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const Source = require("../shared/runtime/pinned-native-build");
-const Native = require("../shared/runtime/local-native");
+const Native = appRequire('src/modules/shared/runtime/local-native.js');
 const Fonts = require("../shared/runtime/portable-sdl2-fonts");
 const Resources = require("./system3-resource-overlay");
 const Prefix = require("../shared/runtime/portable-dependency-prefix");
