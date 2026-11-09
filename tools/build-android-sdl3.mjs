@@ -27,10 +27,15 @@ export function packageSdl3Framework({project,version,output,sdl,profile}){
  addLicenses(payload,'SDL3',path.join(source,'Resources'));
  return helperPackage({id:project,version,arch:'universal',output,minimumMacOS:'13.0',sourceSha256:profile.sha256,record:{publisherVersion:profile.version,publisherArchive:profile}});
 }
-export async function buildAndroidSdl3({project,version,arch,output,work}){
+/** Compile the universal SDL3 framework from its declared archive. */
+export async function compile({project,arch,work}){
  if(project!=='native-sdl3'||arch!=='universal')throw Error('Select the universal SDL3 framework package.');
  const profile=JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/common-publishers.json'))).sdl;
  fs.mkdirSync(work,{recursive:true});const archive=await buildInput(profile,path.join(work,'archives')),sdl=await prepareSdl(archive,work,profile);
+ return {sdl,profile};
+}
+/** Package the compiled framework. */
+export async function assemble({project,version,output,compiled:{sdl,profile}}){
  return packageSdl3Framework({project,version,output,sdl,profile});
 }
-recipeMain(import.meta,buildAndroidSdl3);
+recipeMain(import.meta,{compile,assemble});
