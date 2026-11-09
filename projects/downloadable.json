@@ -2563,11 +2563,7 @@
         "producers/dependencies.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "producers/prosper",
-        "tools/build-input.mjs",
-        "tools/build-source.mjs",
-        "tools/build-vulkan-moltenvk-scene.mjs",
-        "tools/helper-package.mjs",
-        "tools/scene-runtime.mjs"
+        "tools/build-source.mjs"
       ],
       "buildEntry": "producers/prosper/build.mjs"
     },
@@ -2619,6 +2615,9 @@
         "ninja",
         "pkgconf",
         "uv"
+      ],
+      "inputs": [
+        "vulkan-moltenvk-scene"
       ]
     },
     "versionBindings": [
