@@ -448,7 +448,7 @@
         "url": "https://github.com/zgauthier2000/fsr4-shader-performance-overrides",
         "repository": "zgauthier2000/fsr4-shader-performance-overrides",
         "pin": {
-          "file": "sources/maclauncher/src/modules/shared/reshade/temporal/fsr4/source.json",
+          "file": "app:src/modules/shared/reshade/temporal/fsr4/source.json",
           "pointer": "/lite2/commit",
           "repositoryPointer": "/lite2/repository"
         }
@@ -734,7 +734,7 @@
         "url": "https://github.com/code-disaster/steamworks4j",
         "repository": "code-disaster/steamworks4j",
         "pin": {
-          "file": "sources/maclauncher/src/modules/java/runtime/steamworks/versions.json",
+          "file": "app:src/modules/java/runtime/steamworks/versions.json",
           "pointer": "/0/sourceRevision"
         }
       },
@@ -744,7 +744,7 @@
         "url": "https://github.com/code-disaster/steamworks4j",
         "repository": "code-disaster/steamworks4j",
         "pin": {
-          "file": "sources/maclauncher/src/modules/java/runtime/steamworks/versions.json",
+          "file": "app:src/modules/java/runtime/steamworks/versions.json",
           "pointer": "/1/sourceRevision"
         }
       }
@@ -1041,7 +1041,7 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
         "tools/build-android-blueprint.mjs",
-        "sources/maclauncher/scripts/android-blueprint/main.go",
+        "producers/android-inputs/blueprint/main.go",
         "producers/android-inputs/blueprint/source.json"
       ]
     },
@@ -1552,7 +1552,7 @@
         "producers/android-inputs/java-framework.json",
         "producers/android-inputs/java-converter.json",
         "producers/android-inputs/blueprint/source.json",
-        "sources/maclauncher/scripts/android-blueprint/main.go"
+        "producers/android-inputs/blueprint/main.go"
       ]
     },
     "upstreams": [

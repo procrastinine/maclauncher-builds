@@ -23,7 +23,7 @@ function fixture(t,{projects=[project()],source={source:{repository:'https://git
 
 test('canonical JSON pins supply object and scalar revisions through RFC 6901 pointers',t=>{
  const entries=[upstream('revision','/source'),upstream('commit','/commit-source'),upstream('escaped','/profiles/a~1b~0c/revision'),{...upstream('scalar','/scalar'),pin:{file:pinFile,pointer:'/scalar',repositoryPointer:'/origin'}}];
- const f=fixture(t,{projects:[project(entries)],source:{source:{repository:'https://github.com/owner/source.git',revision:current,version:'1.0',committedAt:'2026-10-26T04:38:52.000Z'},'commit-source':{url:'https://github.com/owner/source',commit:held},profiles:{'a/b~c':{revision:next}},scalar:current,origin:'https://github.com/owner/source.git'}});
+ const f=fixture(t,{projects:[project(entries)],source:{source:{repository:'https://github.com/owner/source.git',revision:current,version:'1.0',committedAt:'2026-10-26T04:38:52.000Z'},'commit-source':{url:'https://github.com/owner/source',revision:held},profiles:{'a/b~c':{revision:next}},scalar:current,origin:'https://github.com/owner/source.git'}});
  const selected=resolveProject('engine',f.root);assert.deepEqual(selected.upstreams.map(row=>row.revision),[current,held,next,current]);
  assert.equal(selected.upstreams[0].version,'1.0');assert.equal(selected.upstreams[0].committedAt,'2026-10-26T04:38:52.000Z');
  assert.ok(selected.upstreams.every(row=>!Object.hasOwn(row,'pin')));
