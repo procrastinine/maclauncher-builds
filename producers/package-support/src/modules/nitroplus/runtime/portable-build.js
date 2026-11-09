@@ -112,13 +112,6 @@ async function buildPortableNPengine({ sourceDir = Previous.sourcePath, npaSourc
   }
   const plugins = path.join(prefix, "lib/gstreamer-1.0"); fs.mkdirSync(plugins, { recursive: true });
   for (const plugin of Previous.PLUGINS) fs.copyFileSync(path.join(media.prefix, "lib/gstreamer-1.0", `libgst${plugin}.dylib`), path.join(plugins, `libgst${plugin}.dylib`));
-  const additionalSources = [{ id: "libnpa", upstreamRevision: NPA_REVISION, sourceTreeSha256: NPA_TREE_SHA256 }];
-  const profile = { schemaVersion: 1, version: VERSION, profileRevision: PROFILE_REVISION, upstreamRevision: REVISION, npaRevision: NPA_REVISION,
-    sourceTreeSha256: ENGINE_TREE_SHA256, additionalSources, combinedSourceTreeSha256: COMBINED_TREE_SHA256, overlaySha256,
-    architecture: "arm64", minimumMacOS: "13.0", supportLevel: "beta", mediaVersion: Media.PIN.version,
-    dependencyVersions: versions, plugins: Previous.PLUGINS, formats: ["NPA v1 unencrypted", "NSS source"] };
-  fs.writeFileSync(path.join(prefix, "profile.json"), JSON.stringify(profile, null, 2) + "\n");
-  fs.copyFileSync(path.join(__dirname, "native/fontconfig.conf"), path.join(prefix, "fontconfig.conf"));
   Media.validateSDKPrefix(media.prefix);
   await Promise.all([Source.validatePinnedSource(sourceDir, REVISION, { signal }), Source.validatePinnedSource(npaSourceDir, NPA_REVISION, { signal })]);
   if (overlayIdentity() !== overlaySha256 || Source.hashPinnedFiles(sourceDir, engine.files) !== ENGINE_TREE_SHA256 || Source.hashPinnedFiles(npaSourceDir, npa.files) !== NPA_TREE_SHA256) {
@@ -126,10 +119,22 @@ async function buildPortableNPengine({ sourceDir = Previous.sourcePath, npaSourc
   }
   const executable = path.join(prefix, "bin/npengine-runner");
   return { managerId: "npengine", version: VERSION, architecture: "arm64", minimumMacOS: "13.0", sourceRevision: REVISION,
-    sourceTreeSha256: ENGINE_TREE_SHA256, additionalSources, combinedSourceTreeSha256: COMBINED_TREE_SHA256,
+    sourceTreeSha256: ENGINE_TREE_SHA256, additionalSources: ADDITIONAL_SOURCES, combinedSourceTreeSha256: COMBINED_TREE_SHA256,
     overlaySha256, sourceOverlay, sourceRoot, prefix, executable, executableSha256: Native.hashFile(executable),
-    profile, configureOptions: options, dependencyClosure: { media, utilities: utilityStack, sdl: sdlStack }, logPath };
+    versions, configureOptions: options, dependencyClosure: { media, utilities: utilityStack, sdl: sdlStack }, logPath };
 }
 
-module.exports = { VERSION, PROFILE_REVISION, REVISION, NPA_REVISION, ENGINE_TREE_SHA256, NPA_TREE_SHA256, COMBINED_TREE_SHA256,
+const ADDITIONAL_SOURCES = [{ id: "libnpa", upstreamRevision: NPA_REVISION, sourceTreeSha256: NPA_TREE_SHA256 }];
+/** Write the profile.json the app reads, and the font configuration, into a compiled engine prefix. */
+function describeRuntime({ prefix, overlaySha256, versions }) {
+  const profile = { schemaVersion: 1, version: VERSION, profileRevision: PROFILE_REVISION, upstreamRevision: REVISION, npaRevision: NPA_REVISION,
+    sourceTreeSha256: ENGINE_TREE_SHA256, additionalSources: ADDITIONAL_SOURCES, combinedSourceTreeSha256: COMBINED_TREE_SHA256, overlaySha256,
+    architecture: "arm64", minimumMacOS: "13.0", supportLevel: "beta", mediaVersion: Media.PIN.version,
+    dependencyVersions: versions, plugins: Previous.PLUGINS, formats: ["NPA v1 unencrypted", "NSS source"] };
+  fs.writeFileSync(path.join(prefix, "profile.json"), JSON.stringify(profile, null, 2) + "\n");
+  fs.copyFileSync(path.join(__dirname, "native/fontconfig.conf"), path.join(prefix, "fontconfig.conf"));
+  return profile;
+}
+
+module.exports = { VERSION, describeRuntime, PROFILE_REVISION, REVISION, NPA_REVISION, ENGINE_TREE_SHA256, NPA_TREE_SHA256, COMBINED_TREE_SHA256,
   OWNED_FILES, overlayIdentity, inventory, adaptSource, requirePrefix, buildPortableNPengine };

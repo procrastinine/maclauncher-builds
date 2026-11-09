@@ -25,8 +25,8 @@ export function sdkCompressionPkgConfig({sdk,directory}){
  }
  return directory;
 }
-export async function buildMPV({project:id,arch,output,work}){
- const record=buildRecord(resolveProject(id,root));
+/** Compile libmpv and the render host that loads it. */
+export async function compile({work}){
  fs.mkdirSync(work,{recursive:true});
  const tools=pythonBuildTools(work,path.join(root,'tools/sdk27-build-requirements.txt'));
  const producer=path.join(root,'producers/mpv-render/v7'),source=path.join(root,'producers/package-support/src/external/mpv-player');
@@ -37,13 +37,18 @@ export async function buildMPV({project:id,arch,output,work}){
  const sdkPackages=sdkCompressionPkgConfig({sdk,directory:path.join(work,'sdk-pkgconfig')});
  const pkgConfigPath=[sdkPackages,process.env.PKG_CONFIG_PATH,run('pkgconf',['--variable','pc_path','pkg-config'])].filter(Boolean).join(path.delimiter);
  const built=Builder.build({sourceCheckout:source,workDirectory:path.join(work,'library'),toolsDirectory:tools.bin,pkgConfigPath,minimumMacOS:'14.0',jobs:4});
- const recipe=JSON.parse(fs.readFileSync(path.join(producer,'source.json'))),appRoot=appSourceRoot().directory,staged=path.join(work,'staged'),app=path.join(staged,'mpv.app'),executable=path.join(app,'Contents/MacOS/mpv');
+ const appRoot=appSourceRoot().directory,staged=path.join(work,'staged'),app=path.join(staged,'mpv.app'),executable=path.join(app,'Contents/MacOS/mpv');
  fs.mkdirSync(path.dirname(executable),{recursive:true});fs.mkdirSync(path.join(app,'Contents/Frameworks/video'),{recursive:true});
  fs.copyFileSync(built.library,path.join(app,'Contents/Frameworks/video/libmpv.2.dylib'));
  const flags=['clang++','-std=c++17','-O2','-fobjc-arc','-Wno-deprecated-declarations','-arch','arm64','-mmacosx-version-min=14.0','-ffile-prefix-map='+appRoot+'=.','-ffile-prefix-map='+path.join(root,'producers/package-support')+'=.',
   '-I'+path.join(source,'include'),'-I'+path.join(appRoot,'src/modules/shared/reshade/native')];
  run('/usr/bin/xcrun',[...flags,...['mpv-render.mm','gpu-surface.mm'].map(name=>path.join(appRoot,'src/modules/video/native',name)),...['AppKit','Metal','QuartzCore','OpenGL','CoreVideo','IOSurface'].flatMap(name=>['-framework',name]),'-Wl,-rpath,@executable_path/../Frameworks/video','-o',executable],{stdio:'inherit'});
  const info=JSON.parse(run(executable,['--maclauncher-info']));
+ return {source,built,app,executable,info,staged};
+}
+/** Describe and seal the compiled render host with the video-runtime.json the app reads. */
+export async function assemble({project:id,arch,output,compiled:{source,built,app,executable,info,staged}}){
+ const record=buildRecord(resolveProject(id,root)),producer=path.join(root,'producers/mpv-render/v7'),Builder=require(path.join(producer,'scripts/build-mpv-library.cjs')),recipe=JSON.parse(fs.readFileSync(path.join(producer,'source.json')));
  fs.writeFileSync(path.join(app,'Contents/Info.plist'),'<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>org.maclauncher.video</string><key>CFBundleExecutable</key><string>mpv</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleShortVersionString</key><string>0.41.0</string><key>LSMinimumSystemVersion</key><string>14.0</string><key>NSHighResolutionCapable</key><true/></dict></plist>');
  const librarySource={url:recipe.source.repository,commit:Builder.REVISION,version:'0.41.0',backports:Builder.BACKPORTS,inputSha256:hash(built.library),verifiedBuild:true,build:built.metadata};
  const video={schema:1,id:'mpv-render',version:record.version,minimumMacOS:'14.0',architecture:'arm64',libraryVersion:info.libraryVersion,librarySource,headerSource:{repository:recipe.source.repository,commit:Builder.REVISION},scaleFilters:info.scaleFilters,images:[],
@@ -58,4 +63,4 @@ export async function buildMPV({project:id,arch,output,work}){
   }}});
  return result;
 }
-recipeMain(import.meta,buildMPV);
+recipeMain(import.meta,{compile,assemble});

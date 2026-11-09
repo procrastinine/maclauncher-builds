@@ -40,7 +40,10 @@ export function pythonBuildTools(work,requirements){
 }
 /** Run a recipe file as its project's build command. The request is checked against the
  * registered build record, its command and its runner before the recipe starts; the result is printed. */
-export function recipeMain(meta,build){
+// A recipe is one build function, or {compile, assemble}: compile runs the compilers and returns its
+// outputs; assemble stages, describes and seals them without compiling.
+export function recipeMain(meta,recipe){
+ const build=typeof recipe==='function'?recipe:async options=>recipe.assemble({...options,compiled:await recipe.compile(options)});
  const file=fileURLToPath(meta.url);
  if(!process.argv[1]||path.resolve(process.argv[1])!==file)return;
  (async()=>{
