@@ -1,0 +1,83 @@
+name: Build level
+
+on:
+  workflow_call:
+    inputs:
+      targets:
+        description: 'This level: {"index":N,"include":[build rows]}'
+        required: true
+        type: string
+      selection:
+        required: true
+        type: string
+      graph:
+        required: true
+        type: string
+      reuse:
+        required: true
+        type: string
+      publish:
+        required: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(inputs.targets) }}
+    name: build (${{ matrix.project }} ${{ matrix.version }} ${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 240
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+    env:
+      MACLAUNCHER_PACKAGE_PRODUCER: '1'
+      GH_TOKEN: ${{ github.token }}
+      BUILD_PROJECT: ${{ matrix.project }}
+      BUILD_VERSION: ${{ matrix.version }}
+      BUILD_ARCH: ${{ matrix.arch }}
+      RELEASE_GRAPH: ${{ inputs.graph }}
+      RELEASE_SELECTION: ${{ inputs.selection }}
+      RELEASE_REUSE: ${{ inputs.reuse }}
+    steps:
+      - name: Report initial disk space
+        run: df -h
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Bootstrap requires a literal before local actions exist.
+        with:
+          submodules: false
+          persist-credentials: false
+      - uses: ./.github/actions/build-runtime
+
+  # A package version publishes only when every one of its architectures built.
+  publish:
+    needs: [build]
+    if: ${{ always() && !cancelled() && inputs.publish }}
+    concurrency:
+      group: build-and-release-publication
+      cancel-in-progress: false
+      queue: max
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      actions: read
+      attestations: read
+    env:
+      MACLAUNCHER_PACKAGE_PRODUCER: '1'
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_SELECTION: ${{ inputs.selection }}
+      PUBLICATION_TARGETS: ${{ inputs.targets }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Bootstrap requires a literal before local actions exist.
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/publish-runtime
+        with:
+          level: ${{ fromJSON(inputs.targets).index }}

@@ -44,7 +44,8 @@ test('one connected selection produces one ordinary dispatch with the exact same
  const directory=fixture(t),releases='input=1.0.0,left=2.0.0,right=3.0.0',plan=await planReleaseDispatch({selection:releases,directory});
  const calls=[];await dispatchReleaseComponents(plan,{runGh:args=>calls.push(args)});
  assert.deepEqual(calls,[['workflow','run','runtime-build.yml','--repo','owner/builds','--ref','main','--raw-field','releases='+releases]]);
- const built=await planBuildRelease({selection:releases,directory}),outputs=[...built.independent.include,...built.matrices.flatMap(matrix=>matrix.include)];
+ const built=await planBuildRelease({selection:releases,directory}),outputs=built.levels.flatMap(level=>level.include);
+ assert.deepEqual(built.levels.map(level=>level.index),[0,1]);
  assert.equal(outputs.length,6);for(const id of ['input','left','right'])assert.deepEqual(outputs.filter(row=>row.project===id).map(row=>row.arch).sort(),['arm64','x64']);
 });
 test('duplicate pairs, overlapping component plans and conflicting ABI revisions reject before any dispatch',async t=>{

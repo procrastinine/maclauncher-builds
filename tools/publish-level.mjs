@@ -7,7 +7,7 @@ import {promisify} from 'node:util';
 import {pathToFileURL} from 'node:url';
 import {readProjects} from '../lib/projects.mjs';
 import {parseSelection} from './release-selection.mjs';
-import {publishPackage,appendPackageCatalog} from './publish-package.mjs';
+import {publishPackage,appendPackageCatalog,sealedBundle} from './publish-package.mjs';
 const root=path.resolve(import.meta.dirname,'..'),exec=promisify(execFile);
 const github=async(args)=>retryNetworkAsync(async()=>(await exec('gh',args,{encoding:'utf8',maxBuffer:Infinity})).stdout);
 async function downloadArtifact({artifact,bundle,repository,env}){
@@ -21,7 +21,7 @@ async function downloadArtifact({artifact,bundle,repository,env}){
 }
 /** A clean publisher handles only its completed build level. Other levels and
  * components neither grant upstream code write access nor gate these releases. */
-export async function publishLevel({targets,output,directory=root,env=process.env,runGh=github,publish=publishPackage,append=appendPackageCatalog,download=downloadArtifact}={}){
+export async function publishLevel({targets,output,directory=root,env=process.env,runGh=github,publish=publishPackage,append=appendPackageCatalog,download=downloadArtifact,verify=sealedBundle}={}){
  const repository=readProjects(directory,{resolvePins:false}).repository;
  if(env.GITHUB_ACTIONS!=='true'||env.GITHUB_REPOSITORY!==repository||env.GITHUB_WORKFLOW!=='Build and release'||env.GITHUB_WORKFLOW_REF!==repository+'/.github/workflows/runtime-build.yml@refs/heads/main'||!/^[a-f0-9]{40}$/.test(env.GITHUB_SHA||'')||!/^[1-9][0-9]*$/.test(env.GITHUB_RUN_ID||''))throw Error('Publication requires the current hosted Build and release run.');
  if(!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Publication needs a new absolute work directory.');
@@ -33,14 +33,20 @@ export async function publishLevel({targets,output,directory=root,env=process.en
  const pages=JSON.parse(await runGh(['api','--paginate','--slurp','repos/'+repository+'/actions/runs/'+runId+'/artifacts?per_page=100']));
  const artifacts=pages.flatMap(page=>page.artifacts).filter(artifact=>!artifact.expired);
  fs.mkdirSync(output,{recursive:true});const results=[],errors=[],skipped=[];
- for(const target of targets){try{
-  const name='runtime-'+[target.project,target.version,target.arch].join('-');
-  const artifact=artifacts.filter(row=>row.name===name||row.name.startsWith(name+'-')&&/^\d+$/.test(row.name.slice(name.length+1))).sort((a,b)=>b.id-a.id)[0];
-  if(!artifact){const notice='build of '+[target.project,target.version,target.arch].join(' ')+' in this run produced no package; see its build job';console.log('::notice::'+notice);skipped.push({...target,notice});continue;}
-  const bundle=path.join(output,target.project,target.version,target.arch);fs.mkdirSync(bundle,{recursive:true});
-  await download({artifact,bundle,repository,env});
-  const result=await publish({bundle,directory,env:{...env,BUILD_PROJECT:target.project,BUILD_VERSION:target.version,BUILD_ARCH:target.arch},runGh,append});(result.skipped?skipped:results).push({...target,...result});
- }catch(error){errors.push({...target,error:error.message});}}
+ const artifactFor=target=>{const name='runtime-'+[target.project,target.version,target.arch].join('-');return artifacts.filter(row=>row.name===name||row.name.startsWith(name+'-')&&/^\d+$/.test(row.name.slice(name.length+1))).sort((a,b)=>b.id-a.id)[0];};
+ // A package version publishes only when every one of its architectures built and verified;
+ // otherwise none of its tags, releases or catalog entries is written.
+ const groups=new Map();for(const target of targets){const key=target.project+'\0'+target.version;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(target);}
+ for(const group of groups.values()){
+  const missing=group.filter(target=>!artifactFor(target));
+  if(missing.length){for(const target of group){const notice=missing.includes(target)?'build of '+[target.project,target.version,target.arch].join(' ')+' in this run produced no package; see its build job':'not published because '+missing.map(row=>row.arch).join(', ')+' of '+target.project+' '+target.version+' did not build';console.log('::notice::'+notice);skipped.push({...target,notice});}continue;}
+  const bundles=[];
+  try{for(const target of group){const bundle=path.join(output,target.project,target.version,target.arch);fs.mkdirSync(bundle,{recursive:true});await download({artifact:artifactFor(target),bundle,repository,env});await verify({bundle,directory});bundles.push({target,bundle});}}
+  catch(error){for(const target of group)errors.push({...target,error:error.message});continue;}
+  for(const {target,bundle} of bundles){try{
+   const result=await publish({bundle,directory,env:{...env,BUILD_PROJECT:target.project,BUILD_VERSION:target.version,BUILD_ARCH:target.arch},runGh,append});(result.skipped?skipped:results).push({...target,...result});
+  }catch(error){errors.push({...target,error:error.message});}}
+ }
  const result={selected:targets.length,published:results.length,failed:errors.length,skipped:skipped.length,results,errors,notices:skipped};fs.writeFileSync(path.join(output,'publication-result.json'),JSON.stringify(result,null,2)+'\n');
  if(env.GITHUB_STEP_SUMMARY)fs.appendFileSync(env.GITHUB_STEP_SUMMARY,'\nPublication outcomes\n'+[
   ...results.map(row=>'- '+[row.project,row.version,row.arch].join(' ')+': published https://github.com/'+repository+'/releases/tag/'+encodeURIComponent(row.project+'/v'+row.version+'/'+row.arch)),

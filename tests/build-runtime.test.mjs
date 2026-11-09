@@ -139,8 +139,8 @@ test('a VNDS-LOVE package revision preserves engine files and historical packagi
 });
 
 test('build jobs cannot mutate repository contents',()=>{
- const pipeline=fs.readFileSync(path.join(root,'.github/workflows/runtime-build.yml'),'utf8');
- for(const name of ['independent','build0','build1','build2','build3']){
+ const pipeline=fs.readFileSync(path.join(root,'.github/workflows/runtime-level.yml'),'utf8');
+ for(const name of ['build']){
   const body=pipeline.slice(pipeline.indexOf('  '+name+':')).split(/\n  [A-Za-z][A-Za-z0-9]*:/)[0];
   assert.match(body,/^\s+contents: read\s*$/m);assert.doesNotMatch(body,/^\s+contents: write\s*$/m);
  }

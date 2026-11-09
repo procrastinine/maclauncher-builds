@@ -4,9 +4,9 @@ runs:
   using: composite
   steps:
     - uses: ./.github/actions/setup-node
-    - name: Initialize shared app source
+    - name: Prepare the sources the build tools read
       shell: bash
-      run: git submodule update --init --depth 1 -- sources/maclauncher
+      run: node tools/init-runtime-sources.mjs
     - name: Register the selected names for this build
       shell: bash
       run: |
