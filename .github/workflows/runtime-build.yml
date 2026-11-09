@@ -33,6 +33,7 @@ jobs:
       graph: ${{ steps.plan.outputs.graph }}
       reuse: ${{ steps.plan.outputs.reuse }}
       levels: ${{ steps.plan.outputs.levels }}
+      targets: ${{ steps.plan.outputs.targets }}
       empty: ${{ steps.plan.outputs.empty }}
     env:
       GH_TOKEN: ${{ github.token }}
@@ -55,8 +56,8 @@ jobs:
         with:
           inputs: '{"name":"release-plan","path":"${{ runner.temp }}/release-plan/reports.json","if-no-files-found":"error","overwrite":"true","retention-days":"30"}'
 
-  # Each level builds every architecture of its packages, then publishes the
-  # complete packages. Levels run in order; their count is plan data.
+  # Levels run in order and their count is plan data. A level's builds read
+  # earlier levels' artifacts from this run.
   level:
     needs: [plan]
     if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty == 'false' }}
@@ -68,19 +69,73 @@ jobs:
     name: level ${{ matrix.level.index }}
     uses: ./.github/workflows/runtime-level.yml
     permissions:
-      contents: write
+      contents: read
       actions: read
-      id-token: write
-      attestations: write
     with:
       targets: ${{ toJSON(matrix.level) }}
       selection: ${{ needs.plan.outputs.selection }}
       graph: ${{ needs.plan.outputs.graph }}
       reuse: ${{ needs.plan.outputs.reuse }}
-      publish: ${{ inputs.publish }}
+
+  # Signed provenance ties every built file to this workflow, run and commit.
+  attest:
+    needs: [plan, level]
+    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty == 'false' && inputs.publish }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Bootstrap requires a literal before local actions exist.
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-node
+      - name: Read the built packages
+        uses: ./.github/actions/download-artifact
+        with:
+          inputs: '{"pattern":"runtime-*","path":"${{ runner.temp }}/runtime"}'
+      - name: Count the built files
+        id: built
+        run: echo "files=$(find "$RUNNER_TEMP/runtime" -type f 2>/dev/null | wc -l | tr -d ' ')" >> "$GITHUB_OUTPUT"
+      - uses: ./.github/actions/attest
+        if: ${{ steps.built.outputs.files != '0' }}
+        env:
+          NODE_OPTIONS: --max-http-header-size=32768
+        with:
+          inputs: '{"subject-path":"${{ runner.temp }}/runtime/*/*","github-token":"${{ github.token }}"}'
+
+  # A package version publishes only when every one of its architectures built.
+  # Packages publish in level order, so inputs are public before their consumers.
+  publish:
+    needs: [plan, attest]
+    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.attest.result == 'success' }}
+    concurrency:
+      group: build-and-release-publication
+      cancel-in-progress: false
+      queue: max
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      actions: read
+      attestations: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
+      PUBLICATION_TARGETS: ${{ needs.plan.outputs.targets }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Bootstrap requires a literal before local actions exist.
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/publish-runtime
+        with:
+          level: all
 
   index:
-    needs: [plan, level]
+    needs: [plan, publish]
     if: ${{ always() && !cancelled() && needs.plan.result == 'success' && inputs.publish }}
     uses: ./.github/workflows/pages.yml
     permissions:
@@ -91,7 +146,7 @@ jobs:
       source-revision: main
 
   timings:
-    needs: [plan, level, index]
+    needs: [plan, level, attest, publish, index]
     if: always()
     runs-on: ubuntu-24.04
     permissions:

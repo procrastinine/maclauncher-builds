@@ -143,9 +143,9 @@ test('the plan checks Pages, the environment, catalogs and token grants read-onl
  fs.writeFileSync(path.join(f.directory,'catalogs/engine.json'),'{"not":"a catalog"}');
  await assert.rejects(checkPublication({targets:f.targets,selection:[{id:'engine',version:'1.0.0'}],directory:f.directory,repository,runGh:hub.runGh}),/catalog engine:/);
  fs.rmSync(path.join(f.directory,'catalogs/engine.json'));
- const level=path.join(f.directory,'.github/workflows/runtime-level.yml');fs.writeFileSync(level,fs.readFileSync(level,'utf8').replace(/(\n  publish:[\s\S]*?)contents: write/,'$1contents: read'));
- await assert.rejects(checkPublication({targets:f.targets,selection:[{id:'engine',version:'1.0.0'}],directory:f.directory,repository,runGh:hub.runGh}),/runtime-level\.yml job publish needs contents: write/);
- fs.copyFileSync(new URL('../.github/workflows/runtime-level.yml',import.meta.url),level);
+ const level=path.join(f.directory,'.github/workflows/runtime-build.yml');fs.writeFileSync(level,fs.readFileSync(level,'utf8').replace(/(\n  publish:[\s\S]*?)contents: write/,'$1contents: read'));
+ await assert.rejects(checkPublication({targets:f.targets,selection:[{id:'engine',version:'1.0.0'}],directory:f.directory,repository,runGh:hub.runGh}),/runtime-build\.yml job publish needs contents: write/);
+ fs.copyFileSync(new URL('../.github/workflows/runtime-build.yml',import.meta.url),level);
  assert.equal((await checkPublication({targets:f.targets,selection:[{id:'engine',version:'1.0.0'}],directory:f.directory,repository,runGh:hub.runGh})).tags,2);
  assert.ok(hub.state.calls.every(args=>!args.includes('--method')),'the preflight only reads');
 });

@@ -21,8 +21,8 @@ test('P2 regression: Timeout reached, aborting! A Pages deploy reruns alone afte
  assert.match(job(pages,'deploy'),/needs: build/);
  // A rerun of the failed deploy keeps its build job and reuses that job's artifact name, not the new attempt number.
  assert.doesNotMatch(job(pages,'deploy'),/github\.run_attempt/);
- assert.match(job(build,'level'),/needs: \[plan\]/,'publication never waits for the index');
- assert.doesNotMatch(job(build,'level'),/needs: \[[^\]]*index/);
+ assert.match(job(build,'publish'),/needs: \[plan, attest\]/,'publication never waits for the index');
+ assert.match(job(build,'index'),/needs: \[plan, publish\]/);
 });
 
 test('release recovery retains only the original reports for thirty days',()=>{
@@ -30,15 +30,17 @@ test('release recovery retains only the original reports for thirty days',()=>{
  assert.match(workflow,/releases:[\s\S]*required: true/);
  assert.doesNotMatch(workflow+level,/publish_run|publishOnly|PUBLICATION_RUN_ID|PUBLICATION_SOURCE_SHA/);
  assert.match(workflow,/release-plan\/reports.json.*retention-days.*30/);
- assert.match(job(level,'publish'),/group: build-and-release-publication\n      cancel-in-progress: false\n      queue: max/);
+ assert.match(job(workflow,'publish'),/group: build-and-release-publication\n      cancel-in-progress: false\n      queue: max/);
 });
 
 test('builds run without publishing from the same workflow',()=>{
  const workflow=read('workflows/runtime-build.yml'),level=read('workflows/runtime-level.yml');
  assert.match(workflow,/      publish:\n        description: [^\n]+\n        required: false\n        default: true\n        type: boolean/);
- assert.match(job(level,'publish'),/if: \$\{\{ always\(\) && !cancelled\(\) && inputs\.publish \}\}/);
+ assert.match(job(workflow,'attest'),/inputs\.publish/);
+ assert.match(job(workflow,'publish'),/needs\.attest\.result == 'success'/);
  assert.match(job(workflow,'index'),/inputs\.publish/);
- assert.match(job(level,'publish'),/needs: \[build\]/,'a level publishes after all its architectures finished');
+ assert.match(job(workflow,'attest'),/needs: \[plan, level\]/,'publication starts after every level and architecture finished');
+ assert.doesNotMatch(level,/contents: write|id-token|attestations/,'build jobs hold no write or signing grant');
 });
 
 test('levels run in plan order with no fixed depth',()=>{
@@ -47,10 +49,12 @@ test('levels run in plan order with no fixed depth',()=>{
  assert.match(job(workflow,'level'),/uses: \.\/\.github\/workflows\/runtime-level\.yml/);
 });
 
-test('built archives are attested with the required write capabilities',()=>{
- const level=read('workflows/runtime-level.yml'),action=read('actions/build-runtime/action.yml');
- assert.match(action,/steps\.attest\.outcome == 'success'/);assert.doesNotMatch(action,/attestRetry/);
- assert.match(action,/uses: \.\/\.github\/actions\/attest[\s\S]*subject-path.*\$\{\{ runner.temp \}\}\/release\/\*/);
+test('built files are attested by Build and release itself with the required write capabilities',()=>{
+ // The signer workflow stays runtime-build.yml, which publication and users verify.
+ const workflow=read('workflows/runtime-build.yml'),action=read('actions/build-runtime/action.yml'),attest=job(workflow,'attest');
+ assert.doesNotMatch(action,/actions\/attest/);
+ assert.match(attest,/uses: \.\/\.github\/actions\/attest[\s\S]*subject-path.*\$\{\{ runner.temp \}\}\/runtime\/\*\/\*/);
+ assert.match(attest,/"pattern":"runtime-\*"/);
  assert.match(read('actions/attest/action.yml'),/uses: actions\/attest@[a-f0-9]{40}/);
- for(const body of [job(level,'build'),job(read('workflows/runtime-build.yml'),'level')]){assert.match(body,/attestations: write/);assert.match(body,/id-token: write/);}
+ assert.match(attest,/attestations: write/);assert.match(attest,/id-token: write/);
 });

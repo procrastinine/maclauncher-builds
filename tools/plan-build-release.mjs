@@ -57,7 +57,7 @@ export async function main(args,{directory=root,env=process.env}={}){
  const requested=new Set(parseSelection(env.RELEASES).map(row=>row.id)),rebuilt=plan.selection.filter(row=>!requested.has(row.id));
  if(env.GITHUB_STEP_SUMMARY&&rebuilt.length)fs.appendFileSync(env.GITHUB_STEP_SUMMARY,rebuilt.map(({id,version})=>id+' -> '+version+' (unpublished input)').join('\n\n')+'\n');
  fs.writeFileSync(path.join(args[1],'reports.json'),canonicalReport(plan.reports));
- const output={selection:JSON.stringify(plan.selection),graph:JSON.stringify(plan.graph),reuse:JSON.stringify(plan.reuse),levels:JSON.stringify(plan.levels),empty:String(!plan.levels.length)};
+ const output={selection:JSON.stringify(plan.selection),graph:JSON.stringify(plan.graph),reuse:JSON.stringify(plan.reuse),levels:JSON.stringify(plan.levels),targets:JSON.stringify({include:plan.levels.flatMap(level=>level.include)}),empty:String(!plan.levels.length)};
  if(env.GITHUB_OUTPUT)fs.appendFileSync(env.GITHUB_OUTPUT,Object.entries(output).map(([key,value])=>key+'='+value+'\n').join(''));
  return output;
 }

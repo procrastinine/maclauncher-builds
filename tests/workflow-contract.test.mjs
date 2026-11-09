@@ -40,7 +40,7 @@ test('dependency depth is data, not numbered jobs',()=>{
  }
 });
 
-test('every job that runs repository tools prepares its sources through the one tool first',()=>{
+test('P1 regression: ERR_MODULE_NOT_FOUND package-contract.cjs; every job that runs repository tools prepares its sources through the one tool first',()=>{
  // Run 42531180192 failed because publish and index jobs lacked a source the plan used.
  for(const file of files.filter(file=>file.startsWith('.github/workflows/'))){
   const text=read(file),jobs=text.split(/\n  (?=[A-Za-z][A-Za-z0-9_-]*:\n)/).slice(1);

@@ -15,8 +15,8 @@ const permissions=body=>Object.fromEntries([...(body.match(/\n    permissions:\n
 
 /** The token grants each publishing job needs, as GitHub grants declared job permissions. */
 export const requiredPermissions=[
- {file:'runtime-build.yml',job:'level',grants:{contents:'write',actions:'read','id-token':'write',attestations:'write'}},
- {file:'runtime-level.yml',job:'publish',grants:{contents:'write',actions:'read',attestations:'read'}},
+ {file:'runtime-build.yml',job:'attest',grants:{actions:'read','id-token':'write',attestations:'write'}},
+ {file:'runtime-build.yml',job:'publish',grants:{contents:'write',actions:'read',attestations:'read'}},
  {file:'runtime-build.yml',job:'index',grants:{pages:'write','id-token':'write'}},
  {file:'pages.yml',job:'deploy',grants:{pages:'write','id-token':'write'}}
 ];

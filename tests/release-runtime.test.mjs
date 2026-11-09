@@ -66,7 +66,7 @@ test('release source verification retains the current publication controller and
  const tagged=git(upstream,['rev-parse','HEAD']),tag='engine/v1.0/arm64';git(upstream,['tag',tag]);
  fs.writeFileSync(path.join(upstream,'projects.json'),'different dispatch branch source');git(upstream,['add','projects.json']);git(upstream,['commit','-m','Later branch source']);
  execFileSync('git',['clone','--quiet','--no-hardlinks',upstream,checkout],{env,stdio:'pipe'});assert.notEqual(git(checkout,['rev-parse','HEAD']),tagged);
- const workflow=fs.readFileSync(new URL('../.github/workflows/runtime-level.yml',import.meta.url),'utf8');
+ const workflow=fs.readFileSync(new URL('../.github/workflows/runtime-build.yml',import.meta.url),'utf8');
  assert.match(workflow,/ref: main/,'Publication uses the current main controller.');
  const controller=git(checkout,['rev-parse','HEAD']);
  const selected=verifiedBuildSource({workflowName:'Build and release',status:'completed',headBranch:'main',headSha:tagged,jobs:[{name:'build (engine 1.0 arm64)',status:'completed',conclusion:'success'}]},{project:'engine',version:'1.0',arch:'arm64'});
