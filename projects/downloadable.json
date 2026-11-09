@@ -5,7 +5,48 @@
     "purpose": "Complete Android framework, JVM/ART and native host adaptations.",
     "producer": {
       "kind": "pinned-source",
-      "recipe": "runtimes/android/source.json"
+      "recipe": "runtimes/android/source.json",
+      "entries": [
+        "producers/android-art-inputs",
+        "producers/android-image-data",
+        "producers/android-inputs/aconfig/source.json",
+        "producers/android-inputs/aim.json",
+        "producers/android-inputs/angle.json",
+        "producers/android-inputs/blueprint",
+        "producers/android-inputs/codecs.json",
+        "producers/android-inputs/common-publishers.json",
+        "producers/android-inputs/java-converter-consumer.patch",
+        "producers/android-inputs/java-converter.json",
+        "producers/android-inputs/java-framework-consumer.mjs",
+        "producers/android-inputs/java-framework-consumer.patch",
+        "producers/android-inputs/java-framework.json",
+        "producers/android-inputs/licenses/GLES-SGI-B-2.0.txt",
+        "producers/android-inputs/licenses/angle",
+        "producers/android-inputs/licenses/aosp-apache-http",
+        "producers/android-inputs/licenses/aosp-fmt",
+        "producers/android-inputs/licenses/aosp-framework",
+        "producers/android-inputs/licenses/aosp-libbase",
+        "producers/android-inputs/licenses/aosp-native",
+        "producers/android-inputs/licenses/asm",
+        "producers/android-inputs/licenses/platform-packages",
+        "producers/android-inputs/licenses/robolectric-portability",
+        "producers/android-inputs/licenses/xmlpull",
+        "producers/android-inputs/verified-builds.json",
+        "producers/package-support/scripts/android-stage-sources.mjs",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.json",
+        "tools/build-android-angle.mjs",
+        "tools/build-android-art-elf.mjs",
+        "tools/build-android-image-data.mjs",
+        "tools/build-android-java-converter.mjs",
+        "tools/build-android-java-framework.mjs"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "scripts/runtime-content.cjs"
+      ]
     },
     "upstreams": [
       {
@@ -214,9 +255,20 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/scripts/build-android-aim.mjs"
+        "producers/android-aim-controller",
+        "producers/android-image-data/source.json",
+        "producers/android-inputs/aim.json",
+        "producers/android-inputs/angle.json",
+        "producers/android-inputs/licenses/angle",
+        "producers/package-support/scripts/build-android-aim.mjs",
+        "producers/package-support/src/modules/android/providers",
+        "runtimes/android",
+        "tools/build-android-angle.mjs"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -294,9 +346,35 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/ai5/runtime/portable-build-v4.js"
+        "producers/package-support/src/modules/ai5",
+        "producers/package-support/src/modules/alicesoft/system35-overlay-v3.js",
+        "producers/package-support/src/modules/alicesoft/system35-portable-v3.js",
+        "producers/package-support/src/modules/alicesoft/system35-portable.js",
+        "producers/package-support/src/modules/alicesoft/system35-portable.json",
+        "producers/package-support/src/modules/alicesoft/system4-portable-overlay-v3.js",
+        "producers/package-support/src/modules/alicesoft/system4-portable-v3.js",
+        "producers/package-support/src/modules/alicesoft/system4-portable.json",
+        "producers/package-support/src/modules/gemrb",
+        "producers/package-support/src/modules/minori/runtime/movie-build.js",
+        "producers/package-support/src/modules/shared/onsyuri",
+        "producers/package-support/src/modules/shared/runtime/portable-dependency-prefix.js",
+        "producers/package-support/src/modules/shared/runtime/portable-ffmpeg.js",
+        "producers/package-support/src/modules/shared/runtime/portable-ffmpeg.json",
+        "producers/package-support/src/modules/shared/runtime/portable-python-v2.js",
+        "producers/package-support/src/modules/shared/runtime/portable-python-v2.json",
+        "producers/package-support/src/modules/shared/runtime/portable-python.js",
+        "producers/package-support/src/modules/shared/runtime/portable-python.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-mixer.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-mixer.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.json"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -360,9 +438,13 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/fna/runtime"
+        "producers/package-support/src/modules/fna",
+        "producers/package-support/src/modules/shared/runtime/native-build-tools.js"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -427,11 +509,25 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/gemrb/runtime/portable-build-v5.js",
-        "producers/package-support/src/modules/shared/runtime",
-        "producers/package-support/src/modules/gemrb/runtime/portable-overlay-v5.js"
+        "producers/package-support/src/modules/ai5/runtime/build.js",
+        "producers/package-support/src/modules/ai5/runtime/macos-disc.h",
+        "producers/package-support/src/modules/ai5/runtime/macos-paths.h",
+        "producers/package-support/src/modules/ai5/runtime/portable-build-v4.js",
+        "producers/package-support/src/modules/alicesoft/system35-overlay-v3.js",
+        "producers/package-support/src/modules/alicesoft/system35-portable-v3.js",
+        "producers/package-support/src/modules/alicesoft/system35-portable.js",
+        "producers/package-support/src/modules/alicesoft/system35-portable.json",
+        "producers/package-support/src/modules/alicesoft/system4-portable-overlay-v3.js",
+        "producers/package-support/src/modules/alicesoft/system4-portable-v3.js",
+        "producers/package-support/src/modules/alicesoft/system4-portable.json",
+        "producers/package-support/src/modules/gemrb",
+        "producers/package-support/src/modules/shared/onsyuri",
+        "producers/package-support/src/modules/shared/runtime"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -496,9 +592,20 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "producers/package-support/helper-builds/gm8-decompiler.lock",
+        "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/apply-audio.js",
+        "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/apply-emulator.js",
+        "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/apply-highscore.js",
+        "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/apply-paths.js",
+        "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/apply-ramen.js",
+        "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/apply-window.js",
+        "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/decompiler-workspace.patch",
         "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/source-build.js"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -555,10 +662,14 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/hashlink/runtime/legacy-build.js",
-        "producers/package-support/src/modules/hashlink/runtime/dynamic-legacy-build.js"
+        "producers/package-support/src/modules/hashlink/overlays",
+        "producers/package-support/src/modules/hashlink/runtime/dynamic-legacy-build.js",
+        "producers/package-support/src/modules/hashlink/runtime/legacy-build.js"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -692,9 +803,27 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/mages/native/current-build.js"
+        "producers/package-support/src/modules/alicesoft/system35-portable.json",
+        "producers/package-support/src/modules/mages/native/build.js",
+        "producers/package-support/src/modules/mages/native/current-build.js",
+        "producers/package-support/src/modules/mages/native/portable-build.js",
+        "producers/package-support/src/modules/mages/native/portable-dependencies.js",
+        "producers/package-support/src/modules/mages/native/portable-dependencies.json",
+        "producers/package-support/src/modules/mages/native/portable-prefix.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.json"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "src/modules/mages/archive.js",
+        "src/modules/mages/inspect.js",
+        "src/modules/mages/manifest.json",
+        "src/modules/mages/native",
+        "src/modules/shared/file-signature.js"
+      ]
     },
     "upstreams": [
       {
@@ -757,11 +886,15 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/shared/installers/runtime/innoextract-build.js",
+        "producers/dependencies.json",
         "producers/package-support/src/modules/shared/installers/native/inno-inspect.cpp",
-        "producers/package-support/src/modules/shared/installers/native/static-dependencies.cmake"
+        "producers/package-support/src/modules/shared/installers/native/static-dependencies.cmake",
+        "producers/package-support/src/modules/shared/installers/runtime/innoextract-build.js"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -848,7 +981,14 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/vn-adaptations",
       "entries": [
-        "producers/vn-adaptations/kag3-polyfill"
+        "producers/package-support/src/modules/kirikiri/native-compat.js",
+        "producers/package-support/src/modules/kirikiri/overlays/macos-compat.h",
+        "producers/vn-adaptations/kag3-polyfill/FONT_LICENSE.txt",
+        "producers/vn-adaptations/kag3-polyfill/manifest.json",
+        "producers/vn-adaptations/source.json"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -934,9 +1074,15 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/nitroplus/runtime"
+        "producers/package-support/src/modules/nitroplus/runtime",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "src/modules/nitroplus/runtime"
+      ]
     },
     "upstreams": [
       {
@@ -994,9 +1140,14 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/nscripter/runtime/onscripter-en-build-v3.js"
+        "producers/package-support/src/modules/nscripter/runtime/onscripter-en-build-v3.js",
+        "producers/package-support/src/modules/shared/runtime/native-build-tools.js"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "src/modules/nscripter/runtime"
+      ]
     },
     "upstreams": [
       {
@@ -1051,9 +1202,37 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/shared/onsyuri/runtime/portable-build-v3.js"
+        "producers/package-support/src/modules/ai5/runtime/build.js",
+        "producers/package-support/src/modules/ai5/runtime/macos-disc.h",
+        "producers/package-support/src/modules/ai5/runtime/macos-paths.h",
+        "producers/package-support/src/modules/ai5/runtime/portable-build-v4.js",
+        "producers/package-support/src/modules/alicesoft/system35-overlay-v3.js",
+        "producers/package-support/src/modules/alicesoft/system35-portable-v3.js",
+        "producers/package-support/src/modules/alicesoft/system35-portable.js",
+        "producers/package-support/src/modules/alicesoft/system35-portable.json",
+        "producers/package-support/src/modules/alicesoft/system4-portable-overlay-v3.js",
+        "producers/package-support/src/modules/alicesoft/system4-portable-v3.js",
+        "producers/package-support/src/modules/alicesoft/system4-portable.json",
+        "producers/package-support/src/modules/gemrb",
+        "producers/package-support/src/modules/shared/onsyuri",
+        "producers/package-support/src/modules/shared/runtime/portable-dependency-prefix.js",
+        "producers/package-support/src/modules/shared/runtime/portable-ffmpeg.js",
+        "producers/package-support/src/modules/shared/runtime/portable-ffmpeg.json",
+        "producers/package-support/src/modules/shared/runtime/portable-python-v2.js",
+        "producers/package-support/src/modules/shared/runtime/portable-python-v2.json",
+        "producers/package-support/src/modules/shared/runtime/portable-python.js",
+        "producers/package-support/src/modules/shared/runtime/portable-python.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-mixer.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-mixer.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.json"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -1114,9 +1293,20 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "producers/package-support/helper-builds/opengmk.lock",
+        "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/apply-audio.js",
+        "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/apply-emulator.js",
+        "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/apply-highscore.js",
+        "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/apply-paths.js",
+        "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/apply-ramen.js",
+        "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/apply-window.js",
+        "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/decompiler-workspace.patch",
         "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/source-build.js"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -1172,7 +1362,11 @@
       "entries": [
         "producers/package-support/src/modules/minori/runtime"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "src/modules/minori/runtime"
+      ]
     },
     "upstreams": [
       {
@@ -1234,10 +1428,15 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "producers/package-support/scripts/build-decompiler.mjs",
         "producers/package-support/src/modules/alicesoft/decompiler-build.js",
-        "producers/package-support/scripts/build-decompiler.mjs"
+        "producers/package-support/src/modules/alicesoft/decompiler-profiles.json",
+        "producers/package-support/src/modules/alicesoft/overlays/decompiler-cmake-v1.cmake"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -1301,9 +1500,16 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/alicesoft/system3-portable.js"
+        "producers/package-support/src/modules/alicesoft/system3-portable.js",
+        "producers/package-support/src/modules/alicesoft/system3-resource-overlay.js",
+        "producers/package-support/src/modules/shared/runtime/portable-dependency-prefix.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -1428,10 +1634,15 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "producers/package-support/scripts/build-decompiler.mjs",
         "producers/package-support/src/modules/alicesoft/decompiler-build.js",
-        "producers/package-support/scripts/build-decompiler.mjs"
+        "producers/package-support/src/modules/alicesoft/decompiler-profiles.json",
+        "producers/package-support/src/modules/alicesoft/overlays/decompiler-cmake-v1.cmake"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -1495,10 +1706,37 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "producers/package-support/src/modules/ai5/runtime/build.js",
+        "producers/package-support/src/modules/ai5/runtime/macos-disc.h",
+        "producers/package-support/src/modules/ai5/runtime/macos-paths.h",
+        "producers/package-support/src/modules/ai5/runtime/portable-build-v4.js",
+        "producers/package-support/src/modules/alicesoft/system35-overlay-v3.js",
+        "producers/package-support/src/modules/alicesoft/system35-portable-v3.js",
         "producers/package-support/src/modules/alicesoft/system35-portable.js",
-        "producers/package-support/src/modules/alicesoft/system35-portable-v3.js"
+        "producers/package-support/src/modules/alicesoft/system35-portable.json",
+        "producers/package-support/src/modules/alicesoft/system4-portable-overlay-v3.js",
+        "producers/package-support/src/modules/alicesoft/system4-portable-v3.js",
+        "producers/package-support/src/modules/alicesoft/system4-portable.json",
+        "producers/package-support/src/modules/gemrb",
+        "producers/package-support/src/modules/shared/onsyuri",
+        "producers/package-support/src/modules/shared/runtime/portable-dependency-prefix.js",
+        "producers/package-support/src/modules/shared/runtime/portable-ffmpeg.js",
+        "producers/package-support/src/modules/shared/runtime/portable-ffmpeg.json",
+        "producers/package-support/src/modules/shared/runtime/portable-python-v2.js",
+        "producers/package-support/src/modules/shared/runtime/portable-python-v2.json",
+        "producers/package-support/src/modules/shared/runtime/portable-python.js",
+        "producers/package-support/src/modules/shared/runtime/portable-python.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-mixer.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-mixer.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.json"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -1566,10 +1804,37 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "producers/package-support/src/modules/ai5/runtime/build.js",
+        "producers/package-support/src/modules/ai5/runtime/macos-disc.h",
+        "producers/package-support/src/modules/ai5/runtime/macos-paths.h",
+        "producers/package-support/src/modules/ai5/runtime/portable-build-v4.js",
+        "producers/package-support/src/modules/alicesoft/system35-overlay-v3.js",
+        "producers/package-support/src/modules/alicesoft/system35-portable-v3.js",
+        "producers/package-support/src/modules/alicesoft/system35-portable.js",
+        "producers/package-support/src/modules/alicesoft/system35-portable.json",
+        "producers/package-support/src/modules/alicesoft/system4-portable-overlay-v3.js",
         "producers/package-support/src/modules/alicesoft/system4-portable-v3.js",
-        "producers/package-support/src/modules/alicesoft/system4-portable-overlay-v3.js"
+        "producers/package-support/src/modules/alicesoft/system4-portable.json",
+        "producers/package-support/src/modules/gemrb",
+        "producers/package-support/src/modules/shared/onsyuri",
+        "producers/package-support/src/modules/shared/runtime/portable-dependency-prefix.js",
+        "producers/package-support/src/modules/shared/runtime/portable-ffmpeg.js",
+        "producers/package-support/src/modules/shared/runtime/portable-ffmpeg.json",
+        "producers/package-support/src/modules/shared/runtime/portable-python-v2.js",
+        "producers/package-support/src/modules/shared/runtime/portable-python-v2.json",
+        "producers/package-support/src/modules/shared/runtime/portable-python.js",
+        "producers/package-support/src/modules/shared/runtime/portable-python.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-mixer.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-mixer.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.json"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -1639,10 +1904,24 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "producers/package-support/scripts/repackage-graphics-runtime.mjs",
+        "producers/package-support/src/modules/shared/reshade/libplacebo/dependencies-CMakeLists.txt",
+        "producers/package-support/src/modules/shared/reshade/libplacebo/dependencies-build.mjs",
+        "producers/package-support/src/modules/shared/reshade/libplacebo/dependencies.json",
         "producers/package-support/src/modules/shared/vulkan/native/kosmickrisp-build.mjs",
-        "producers/package-support/src/modules/shared/vulkan/native/spirv-tools-source.json"
+        "producers/package-support/src/modules/shared/vulkan/native/kosmickrisp-source.json",
+        "producers/package-support/src/modules/shared/vulkan/native/kosmickrisp-source.mjs",
+        "producers/package-support/src/modules/shared/vulkan/native/kosmickrisp-targets.json",
+        "producers/package-support/src/modules/shared/vulkan/native/kosmickrisp-targets.mjs",
+        "producers/package-support/src/modules/shared/vulkan/native/source-files.mjs",
+        "producers/package-support/src/modules/shared/vulkan/native/spirv-tools-source.json",
+        "producers/package-support/src/modules/shared/vulkan/native/zstd-source.json"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "scripts/native-supplementals.cjs"
+      ]
     },
     "upstreams": [
       {
@@ -1748,11 +2027,17 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "producers/package-support/helper-builds/mkxpz.json",
         "producers/package-support/scripts/build-mkxpz-nfc.cjs",
-        "producers/package-support/src/modules/rgss/overlays/mkxpz-filename-nfc/source.json",
-        "producers/package-support/helper-builds/mkxpz.json"
+        "producers/package-support/scripts/graphics-build-requirements.txt",
+        "producers/package-support/src/modules/rgss",
+        "runtimes/mkxpz"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "scripts/runtime-content.cjs"
+      ]
     },
     "upstreams": [
       {
@@ -1828,7 +2113,12 @@
         "producers/package-support/src/modules/gamemaker/runtime",
         "producers/package-support/src/modules/gamemaker/overlays/butterscotch-game-arguments.js"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "src/modules/gamemaker/runtime/butterscotch-downloads.js",
+        "src/modules/gamemaker/runtime/butterscotch.js"
+      ]
     },
     "upstreams": [
       {
@@ -1908,10 +2198,17 @@
       "entries": [
         "producers/anyps5/build-relinker.mjs",
         "producers/anyps5/build-runtime.mjs",
+        "producers/anyps5/dependencies.json",
+        "producers/anyps5/licenses",
         "producers/anyps5/package-runtime.mjs",
-        "producers/anyps5/tools/unwrap-self.cjs"
+        "producers/anyps5/source-projection.mjs",
+        "producers/anyps5/tools/unwrap-self.cjs",
+        "producers/nxnative/dependencies.json"
       ],
-      "buildEntry": "producers/anyps5/package-runtime.mjs"
+      "buildEntry": "producers/anyps5/package-runtime.mjs",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -1994,7 +2291,10 @@
       "entries": [
         "producers/nxnative"
       ],
-      "buildEntry": "producers/nxnative/build.mjs"
+      "buildEntry": "producers/nxnative/build.mjs",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -2059,7 +2359,11 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/mpv-render/v7",
       "entries": [
-        "producers/mpv-render/v7"
+        "producers/mpv-render"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "src/modules/shared/reshade/native"
       ]
     },
     "upstreams": [
@@ -2132,12 +2436,14 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/prosper",
       "entries": [
-        "producers/prosper/build.mjs",
-        "producers/prosper/package.mjs",
-        "producers/prosper/source.json",
-        "producers/prosper/dependencies.json"
+        "producers/anyps5/dependencies.json",
+        "producers/prosper",
+        "tools/build-vulkan-moltenvk-scene.mjs"
       ],
-      "buildEntry": "producers/prosper/build.mjs"
+      "buildEntry": "producers/prosper/build.mjs",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -2408,8 +2714,13 @@
       "entries": [
         "producers/included-helpers/prepare.mjs",
         "producers/included-helpers/rpgmaker-decrypter/decrypter-build.js",
-        "producers/included-helpers/rpgmaker-decrypter/package.json",
-        "producers/included-helpers/rpgmaker-decrypter/decrypter-platforms.json"
+        "producers/included-helpers/rpgmaker-decrypter/decrypter-build.props",
+        "producers/included-helpers/rpgmaker-decrypter/decrypter-build.targets",
+        "producers/included-helpers/rpgmaker-decrypter/decrypter-platforms.json",
+        "producers/included-helpers/rpgmaker-decrypter/package.json"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -2460,11 +2771,12 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/included-helpers",
       "entries": [
+        "producers/included-helpers/gamemaker-opengl-helper",
         "producers/included-helpers/prepare.mjs",
-        "producers/included-helpers/profiles/gamemaker-opengl-helper.json",
-        "producers/included-helpers/gamemaker-opengl-helper/software-opengl-v3.m",
-        "producers/included-helpers/gamemaker-opengl-helper/build.mjs",
-        "producers/included-helpers/gamemaker-opengl-helper/sources.json"
+        "producers/included-helpers/profiles/gamemaker-opengl-helper.json"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [],
@@ -2505,6 +2817,9 @@
       "entries": [
         "producers/engine-adaptations/stage.mjs",
         "producers/engine-adaptations/vnds-love/source.json"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -2556,9 +2871,13 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/vn-adaptations",
       "entries": [
-        "producers/vn-adaptations/rlvm/package.mjs",
         "producers/vn-adaptations/rlvm/adapter.json",
+        "producers/vn-adaptations/rlvm/adapter.m",
+        "producers/vn-adaptations/rlvm/package.mjs",
         "producers/vn-adaptations/rlvm/source.json"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [],
@@ -2597,7 +2916,11 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/vn-adaptations",
       "entries": [
+        "producers/vn-adaptations/kag3-polyfill/manifest.json",
         "producers/vn-adaptations/siglus"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -2660,8 +2983,14 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/native-tools",
       "entries": [
-        "producers/native-tools/build.mjs",
-        "producers/native-tools/source.json"
+        "producers/native-tools",
+        "producers/package-support/src/modules/shared/runtime/portable-dependency-prefix.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.json"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -2711,8 +3040,14 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/native-tools",
       "entries": [
-        "producers/native-tools/build.mjs",
-        "producers/native-tools/source.json"
+        "producers/native-tools",
+        "producers/package-support/src/modules/shared/runtime/portable-dependency-prefix.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.json"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -2814,7 +3149,10 @@
         "producers/steam-bridge"
       ],
       "sourceDirectory": "producers/steam-bridge",
-      "sourceRepository": "https://github.com/ValveSoftware/Proton"
+      "sourceRepository": "https://github.com/ValveSoftware/Proton",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -2894,12 +3232,16 @@
       "sourceDirectory": "producers/vkd3d-proton",
       "entries": [
         "producers/vkd3d-proton/build.mjs",
+        "producers/vkd3d-proton/metalfx.c",
         "producers/vkd3d-proton/metalfx.patch",
         "producers/vkd3d-proton/ngx.patch",
-        "producers/vkd3d-proton/metalfx.c",
+        "producers/vkd3d-proton/vk_temporal_frame.h",
         "producers/vkd3d-proton/vkd3d_metalfx.h"
       ],
-      "buildEntry": "producers/vkd3d-proton/build.mjs"
+      "buildEntry": "producers/vkd3d-proton/build.mjs",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -2953,9 +3295,17 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/kosmickrisp/build-runtime.mjs"
+        "producers/kosmickrisp/build-runtime.mjs",
+        "producers/package-support/src/modules/shared/reshade/libplacebo/dependencies-CMakeLists.txt",
+        "producers/package-support/src/modules/shared/reshade/libplacebo/dependencies-build.mjs",
+        "producers/package-support/src/modules/shared/reshade/libplacebo/dependencies.json",
+        "producers/package-support/src/modules/shared/vulkan/native/spirv-tools-source.json",
+        "producers/package-support/src/modules/shared/vulkan/native/zstd-source.json"
       ],
-      "sourceDirectory": "producers/kosmickrisp"
+      "sourceDirectory": "producers/kosmickrisp",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -3028,16 +3378,20 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/dxvk",
       "entries": [
+        "producers/dxvk/adapt.mjs",
         "producers/dxvk/build.mjs",
-        "producers/dxvk/package.mjs",
-        "producers/dxvk/patch.mjs",
         "producers/dxvk/composition-interface.h",
-        "producers/dxvk/dxgi-composition.h",
-        "producers/dxvk/dxgi-composition.cpp",
         "producers/dxvk/dcomp.cpp",
-        "producers/dxvk/dcomp.def"
+        "producers/dxvk/dcomp.def",
+        "producers/dxvk/dxgi-composition.cpp",
+        "producers/dxvk/dxgi-composition.h",
+        "producers/dxvk/package.mjs",
+        "producers/dxvk/patch.mjs"
       ],
-      "buildEntry": "producers/dxvk/build.mjs"
+      "buildEntry": "producers/dxvk/build.mjs",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {

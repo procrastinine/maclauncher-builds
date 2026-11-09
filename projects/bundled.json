@@ -9,7 +9,11 @@
       "entries": [
         "producers/package-support/helper-builds/catsystem2-kif-crypto.json"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "src/modules/catsystem2/runtime/kif-crypto.c"
+      ]
     },
     "upstreams": [],
     "packageProfiles": [
@@ -47,10 +51,15 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/scripts/build-android-privacy.mjs",
-        "producers/package-support/helper-builds/android-privacy.json"
+        "LICENSE",
+        "producers/package-support/helper-builds/android-privacy.json",
+        "producers/package-support/scripts/build-android-privacy.mjs"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "src/modules/android/native/clipboard-helper.mm"
+      ]
     },
     "upstreams": [],
     "packageProfiles": [
@@ -89,9 +98,11 @@
     "producer": {
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
-      "entries": [
-      ],
-      "sourceDirectory": "producers/package-support"
+      "entries": [],
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [],
     "packageProfiles": [
@@ -128,8 +139,14 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "tools/build-helper.mjs"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "src/modules/love/runtime/luasteam-source-inputs.json",
+        "src/modules/love/runtime/luasteam-source-overlay.js"
+      ]
     },
     "upstreams": [
       {
@@ -192,7 +209,12 @@
       "entries": [
         "producers/package-support/helper-builds/mkxpz-config-helper.json"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "src/modules/rgss/overlays/mkxpz-config.c",
+        "src/modules/rgss/overlays/mkxpz-identity.m"
+      ]
     },
     "upstreams": [],
     "packageProfiles": [
@@ -641,7 +663,10 @@
       "entries": [
         "producers/package-support/helper-builds/steam-api-helper.json"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [],
     "packageProfiles": [
@@ -680,7 +705,10 @@
       "entries": [
         "producers/package-support/helper-builds/steam-ticket-loader.json"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [],
     "packageProfiles": [
@@ -716,9 +744,12 @@
     "producer": {
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
-      "entries": [
-      ],
-      "sourceDirectory": "producers/package-support"
+      "entries": [],
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "src/modules/java/runtime/steamworks"
+      ]
     },
     "upstreams": [
       {
@@ -803,12 +834,19 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/android/native/apk-metadata/sources.json",
+        "producers/android-inputs/aim.json",
+        "producers/package-support/src/modules/android/native/apk-metadata/Cargo.lock",
         "producers/package-support/src/modules/android/native/apk-metadata/Cargo.toml",
-        "producers/package-support/src/modules/android/native/apk-metadata/Cargo.lock"
+        "producers/package-support/src/modules/android/native/apk-metadata/adapt.mjs",
+        "producers/package-support/src/modules/android/native/apk-metadata/sources.json",
+        "runtimes/android"
       ],
       "sourceDirectory": "producers/package-support",
-      "sourceRepository": "https://github.com/procrastinine/maclauncher"
+      "sourceRepository": "https://github.com/procrastinine/maclauncher",
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "src/modules/android/native/apk-metadata/main.rs"
+      ]
     },
     "upstreams": [
       {
@@ -871,7 +909,11 @@
       "entries": [
         "producers/package-support/helper-builds/web-renderer-network.json"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "src/modules/shared/web/native"
+      ]
     },
     "upstreams": [],
     "packageProfiles": [
@@ -910,10 +952,16 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers",
       "entries": [
+        "producers/android-inputs/aim.json",
+        "producers/android-inputs/java-converter.json",
+        "producers/android-launcher/build.mjs",
+        "producers/android-launcher/source.json",
         "producers/included-helpers/prepare.mjs",
         "producers/included-helpers/profiles/android-launcher.json",
-        "producers/android-launcher/build.mjs",
-        "producers/android-launcher/source.json"
+        "runtimes/android"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -975,7 +1023,12 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
         "producers/android-art-inputs/source.json",
+        "producers/android-inputs/aim.json",
+        "runtimes/android",
         "tools/build-android-art-input.mjs"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -1035,9 +1088,13 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "tools/build-android-blueprint.mjs",
         "producers/android-inputs/blueprint/main.go",
-        "producers/android-inputs/blueprint/source.json"
+        "producers/android-inputs/blueprint/source.json",
+        "producers/android-inputs/licenses/go",
+        "tools/build-android-blueprint.mjs"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -1097,6 +1154,9 @@
       "entries": [
         "tools/build-android-aconfig.mjs",
         "producers/android-inputs/aconfig"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -1162,10 +1222,15 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "tools/build-android-codecs.mjs",
         "producers/android-inputs/codecs.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.js",
-        "producers/package-support/src/modules/shared/runtime/portable-sndfile.json"
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.json",
+        "tools/build-android-codecs.mjs"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -1229,8 +1294,14 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "tools/build-android-angle.mjs",
-        "producers/android-inputs/angle.json"
+        "producers/android-inputs/aim.json",
+        "producers/android-inputs/angle.json",
+        "producers/android-inputs/licenses/angle",
+        "runtimes/android",
+        "tools/build-android-angle.mjs"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -1315,11 +1386,15 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "tools/build-android-art-elf.mjs",
         "producers/android-art-inputs/art-source.json",
+        "producers/android-inputs/aim.json",
+        "runtimes/android",
         "tools/android-art-producer.mjs",
         "tools/android-build-inputs.mjs",
-        "producers/android-inputs/aim.json"
+        "tools/build-android-art-elf.mjs"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -1389,8 +1464,14 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "tools/build-android-java-converter.mjs",
-        "producers/android-inputs/java-converter.json"
+        "producers/android-inputs/aim.json",
+        "producers/android-inputs/java-converter.json",
+        "producers/android-inputs/licenses/asm",
+        "runtimes/android",
+        "tools/build-android-java-converter.mjs"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -1468,9 +1549,14 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "tools/build-android-art-ffi.mjs",
+        "producers/android-art-inputs/ffi-build.patch",
         "producers/android-art-inputs/ffi.json",
-        "producers/android-art-inputs/ffi-build.patch"
+        "producers/android-inputs/aim.json",
+        "runtimes/android",
+        "tools/build-android-art-ffi.mjs"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -1546,11 +1632,19 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "tools/build-android-java-framework.mjs",
-        "producers/android-inputs/java-framework.json",
-        "producers/android-inputs/java-converter.json",
+        "producers/android-inputs/aim.json",
+        "producers/android-inputs/blueprint/main.go",
         "producers/android-inputs/blueprint/source.json",
-        "producers/android-inputs/blueprint/main.go"
+        "producers/android-inputs/java-converter.json",
+        "producers/android-inputs/java-framework.json",
+        "producers/android-inputs/licenses/aosp-apache-http",
+        "producers/android-inputs/licenses/aosp-framework",
+        "producers/android-inputs/licenses/robolectric-portability",
+        "runtimes/android",
+        "tools/build-android-java-framework.mjs"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -1679,9 +1773,12 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/android-image-data",
       "entries": [
-        "producers/android-image-data/main.rs",
-        "producers/android-image-data/tree.rs",
-        "producers/android-image-data/source.json"
+        "producers/android-image-data",
+        "producers/android-inputs/aim.json",
+        "runtimes/android"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -1755,9 +1852,12 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/android-image-data",
       "entries": [
-        "producers/android-image-data/main.rs",
-        "producers/android-image-data/tree.rs",
-        "producers/android-image-data/source.json"
+        "producers/android-image-data",
+        "producers/android-inputs/aim.json",
+        "runtimes/android"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -1831,9 +1931,12 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/android-image-data",
       "entries": [
-        "producers/android-image-data/main.rs",
-        "producers/android-image-data/tree.rs",
-        "producers/android-image-data/source.json"
+        "producers/android-image-data",
+        "producers/android-inputs/aim.json",
+        "runtimes/android"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -1907,9 +2010,12 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/android-image-data",
       "entries": [
-        "producers/android-image-data/main.rs",
-        "producers/android-image-data/tree.rs",
-        "producers/android-image-data/source.json"
+        "producers/android-image-data",
+        "producers/android-inputs/aim.json",
+        "runtimes/android"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -1983,9 +2089,12 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/android-image-data",
       "entries": [
-        "producers/android-image-data/main.rs",
-        "producers/android-image-data/tree.rs",
-        "producers/android-image-data/source.json"
+        "producers/android-image-data",
+        "producers/android-inputs/aim.json",
+        "runtimes/android"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -2058,19 +2167,27 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "tools/build-android-art-java.mjs",
-        "tools/android-art-java-stage.mjs",
-        "producers/android-art-inputs/java-stage.json",
         "producers/android-art-inputs/java-consumer.patch",
+        "producers/android-art-inputs/java-stage.json",
         "producers/android-art-inputs/java.json",
+        "producers/android-image-data",
+        "producers/android-inputs/aim.json",
+        "producers/android-inputs/blueprint",
         "producers/android-inputs/java-converter.json",
-        "producers/android-image-data/source.json",
-        "producers/android-image-data/Cargo.toml",
-        "producers/android-image-data/main.rs",
-        "producers/android-image-data/tree.rs",
-        "tools/build-android-image-data.mjs"
+        "producers/android-inputs/java-framework.json",
+        "producers/android-inputs/licenses/aosp-apache-http",
+        "producers/android-inputs/licenses/aosp-framework",
+        "producers/android-inputs/licenses/robolectric-portability",
+        "runtimes/android",
+        "tools/android-art-java-stage.mjs",
+        "tools/build-android-art-java.mjs",
+        "tools/build-android-image-data.mjs",
+        "tools/build-android-java-framework.mjs"
       ],
-      "sourceRepository": "https://github.com/procrastinine/maclauncher-android"
+      "sourceRepository": "https://github.com/procrastinine/maclauncher-android",
+      "appEntries": [
+        "scripts/license-files.mjs"
+      ]
     },
     "upstreams": [
       {
@@ -2153,6 +2270,9 @@
         "tools/native-stack.mjs",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -2206,10 +2326,15 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceRepository": "https://github.com/libsndfile/libsndfile",
       "entries": [
-        "tools/build-native-sndfile.mjs",
-        "tools/native-stack.mjs",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.js",
-        "producers/package-support/src/modules/shared/runtime/portable-sndfile.json"
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.json",
+        "tools/build-native-sndfile.mjs",
+        "tools/native-stack.mjs"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -2263,10 +2388,17 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceRepository": "https://github.com/FFmpeg/FFmpeg",
       "entries": [
-        "tools/build-native-ffmpeg.mjs",
-        "tools/native-stack.mjs",
         "producers/package-support/src/modules/shared/runtime/portable-ffmpeg.js",
-        "producers/package-support/src/modules/shared/runtime/portable-ffmpeg.json"
+        "producers/package-support/src/modules/shared/runtime/portable-ffmpeg.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.json",
+        "tools/build-native-ffmpeg.mjs",
+        "tools/native-stack.mjs"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [],
@@ -2309,10 +2441,18 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceRepository": "https://github.com/libsdl-org/SDL_mixer",
       "entries": [
-        "tools/build-native-sdl2-mixer.mjs",
-        "tools/native-stack.mjs",
+        "producers/package-support/src/modules/shared/runtime/portable-dependency-prefix.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-mixer.js",
-        "producers/package-support/src/modules/shared/runtime/portable-sdl2-mixer.json"
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-mixer.json",
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.js",
+        "producers/package-support/src/modules/shared/runtime/portable-sndfile.json",
+        "tools/build-native-sdl2-mixer.mjs",
+        "tools/native-stack.mjs"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -2370,9 +2510,14 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceRepository": "https://github.com/kcat/openal-soft",
       "entries": [
+        "producers/native-openal",
+        "producers/package-support/src/modules/hashlink/overlays/native-1.9.cmake",
+        "producers/package-support/src/modules/hashlink/runtime/legacy-build.js",
         "tools/build-native-openal.mjs",
-        "tools/native-stack.mjs",
-        "producers/package-support/src/modules/hashlink/runtime/legacy-build.js"
+        "tools/native-stack.mjs"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -2429,9 +2574,13 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceRepository": "https://github.com/libsdl-org/SDL",
       "entries": [
-        "tools/build-android-sdl3.mjs",
+        "producers/android-inputs/common-publishers.json",
+        "runtimes/android",
         "tools/android-sdl3-publisher.mjs",
-        "producers/android-inputs/common-publishers.json"
+        "tools/build-android-sdl3.mjs"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [],
