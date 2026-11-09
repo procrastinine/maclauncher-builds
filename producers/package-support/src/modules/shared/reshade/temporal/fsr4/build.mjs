@@ -10,32 +10,20 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 
 const here = import.meta.dirname, app = appPath('src/modules/shared/reshade/temporal/fsr4'),
-      owner = name => path.join(name === 'build.mjs' ? here : app, name),
       {adaptHelpers, adaptRuntime} = await import(pathToFileURL(path.join(app, 'adapt-runtime.mjs')).href),
       pin = JSON.parse(await fs.readFile(path.join(app, 'source.json'))),
       lite2 = JSON.parse(await fs.readFile(path.join(here, 'lite2.json'))),
       [ sourceArg, destinationArg, ...flags ] = process.argv.slice(2);
 if (!sourceArg || !destinationArg)
   throw Error(
-      'Usage: build.mjs SOURCE OUTPUT --tools DIR --lite2-weights FILE [--quick]');
+      'Usage: build.mjs SOURCE OUTPUT --tools DIR --lite2-weights FILE [--phase compile|assemble]');
 const source = path.resolve(sourceArg),
       destination = path.resolve(destinationArg), options = {};
-const ownedNames =
-          [
-            'source.json', 'build.mjs', 'adapt-runtime.mjs', 'provider.mm',
-            'index.js', 'README.md', '../frame.h',
-            '../payload-files.hpp'
-          ],
-      ownedSnapshot = new Map(await Promise.all(ownedNames.map(
-          async name => [name, await fs.readFile(owner(name))])));
-let quick = false, repackage = false;
+let phase = null;
 for (let i = 0; i < flags.length; i++) {
-  if (flags[i] === '--repackage') {
-    repackage = true;
-    continue;
-  }
-  if (flags[i] === '--quick') {
-    quick = true;
+  if (flags[i] === '--phase' && !phase &&
+      [ 'compile', 'assemble' ].includes(flags[i + 1])) {
+    phase = flags[++i];
     continue;
   }
   if (!['--tools', '--lite2-weights']
@@ -44,8 +32,6 @@ for (let i = 0; i < flags.length; i++) {
     throw Error('Unknown or repeated build option.');
   options[flags[i]] = path.resolve(flags[++i]);
 }
-if (quick && repackage)
-  throw Error('Repackaging requires an existing complete payload.');
 for (const name of ['--tools', '--lite2-weights'])
   if (!options[name])
     throw Error('Missing ' + name);
@@ -58,95 +44,72 @@ const hash = b => createHash('sha256').update(b).digest('hex'),
                              ? resolve()
                              : reject(Error(command + ' exited ' + code)));
       });
-for (const [option, digest] of [[ '--lite2-weights', lite2.sha256 ]])
-  if (hash(await fs.readFile(options[option])) !== digest)
-    throw Error('The pinned Lite2 input changed: ' + option);
 const work = path.join(destination, 'source'),
       payload = path.join(destination, 'payload');
-await fs.mkdir(work, {recursive : true});
-await fs.mkdir(payload, {recursive : true});
-const previous =
-    repackage
-        ? JSON.parse(await fs.readFile(path.join(payload, 'provider.json')))
-        : null;
 
-await fs.mkdir(path.join(work, 'owned'), {recursive : true});
-for (const [name, bytes] of ownedSnapshot)
-  await fs.writeFile(path.join(work, 'owned', name), bytes);
+/** Translate the shaders and models and build the universal provider library. */
+async function compile() {
+  await fs.mkdir(work, {recursive : true});
+  await fs.mkdir(payload, {recursive : true});
 
-for (const name of ['src', 'tools', 'third_party'])
-  await fs.cp(path.join(source, name), path.join(work, name),
-              {recursive : true});
-const tools = {};
-for (const name of ['dxc', 'spirv-cross', 'spirv-val']) {
-  const bytes = await fs.readFile(path.join(options['--tools'], name));
-  tools[name] = hash(bytes);
-  await fs.mkdir(path.join(work, 'tools/bin'), {recursive : true});
-  await fs.writeFile(path.join(work, 'tools/bin', name), bytes, {mode : 0o755});
-}
-const replace = (value, before, after) => {
-  if (value.split(before).length !== 2)
-    throw Error('FSR4 compiler adaptation changed.');
-  return value.replace(before, after);
-};
-let compiler =
-    await fs.readFile(path.join(work, 'tools/compile_fsr411.py'), 'utf8');
-compiler =
-    replace(compiler, 'digest.update(run(["xcrun", "metal", "--version"]))',
-            'digest.update(b"maclauncher-msl-source-v1")');
-compiler = replace(
-    compiler,
-    '        run(["xcrun", "metal", "-std=macos-metal2.3", optimization, *stage_math,\n             "-c", metal, "-o", air], output / f"{name}.metal.log")\n        run(["xcrun", "metallib", air, "-o", lib_path])',
-    '        # Portable MSL is compiled by Metal during resource preparation.');
-compiler = compiler.replaceAll('.metallib', '.metal');
-await fs.writeFile(path.join(work, 'tools/compile_fsr411.py'), compiler);
-const runtime = adaptRuntime(
-    await fs.readFile(path.join(work, 'src/fsr411_runtime.h'), 'utf8'));
-await fs.writeFile(path.join(work, 'src/fsr411_runtime.h'), runtime.source);
-await fs.writeFile(path.join(work, 'src/fsr411_helpers.metal'),
-                   adaptHelpers(await fs.readFile(
-                       path.join(source, 'src/fsr411_helpers.metal'), 'utf8')));
-await fs.writeFile(
-    path.join(work, 'src/fsr4_log.h'),
-    '#pragma once\nstatic inline void fsr4_logf(const char*,...){}\n');
-const build = path.join(work, 'build'),
-      tiers = quick ? [ 1080 ] : [ 1080, 2160, 4320 ];
-await fs.mkdir(build, {recursive : true});
-// The translation tools use only the standard library; a cache inside the
-// output directory keeps uv from writing outside the build.
-const python = (script, args) => run(
-    'uv',
-    [
-      'run', '--offline', '--python', process.env.MACLAUNCHER_GRAPHICS_PYTHON || '3.12', '--no-project',
-      path.join(work, script), ...args
-    ],
-    {
-      env : {
-        ...process.env,
-        UV_CACHE_DIR : path.join(destination, 'uv-cache'),
-        FSR4_LOSSY2_WEIGHTS : options['--lite2-weights']
-      }
-    });
-if (repackage) {
-  if (previous.providerABI !== 1 || previous.complete !== true ||
-      previous.commit !== revision || previous.model !== pin.model ||
-      JSON.stringify(previous.profiles) !== JSON.stringify(pin.profiles) ||
-      previous.owned?.['adapt-runtime.mjs'] !==
-          hash(ownedSnapshot.get('adapt-runtime.mjs')) ||
-      previous.adaptations?.runtime !== hash(runtime.source) ||
-      previous.adaptations?.compiler !== hash(compiler) ||
-      JSON.stringify(previous.tools) !== JSON.stringify(tools))
-    throw Error('Repackaging cannot change compiled shader/model inputs.');
-  for (const entry of previous.files) {
-    const file = path.join(payload, entry.path);
-    if ((await fs.stat(file)).size !== entry.size ||
-        hash(await fs.readFile(file)) !== entry.sha256)
-      throw Error('A runtime input changed before repackaging: ' + entry.path);
+  // The provider and the headers it includes compile from one owned directory.
+  await fs.mkdir(path.join(work, 'owned'), {recursive : true});
+  for (const name of ['provider.mm', '../frame.h', '../payload-files.hpp'])
+    await fs.writeFile(path.join(work, 'owned', name),
+                       await fs.readFile(path.join(app, name)));
+
+  for (const name of ['src', 'tools', 'third_party'])
+    await fs.cp(path.join(source, name), path.join(work, name),
+                {recursive : true});
+  for (const name of ['dxc', 'spirv-cross', 'spirv-val']) {
+    const bytes = await fs.readFile(path.join(options['--tools'], name));
+    await fs.mkdir(path.join(work, 'tools/bin'), {recursive : true});
+    await fs.writeFile(path.join(work, 'tools/bin', name), bytes, {mode : 0o755});
   }
-}
-if (!repackage)
-  for (const tier of tiers)
-    for (const ultra of quick ? [ 0 ] : [ 0, 1 ])
+  const replace = (value, before, after) => {
+    if (value.split(before).length !== 2)
+      throw Error('FSR4 compiler adaptation changed.');
+    return value.replace(before, after);
+  };
+  let compiler =
+      await fs.readFile(path.join(work, 'tools/compile_fsr411.py'), 'utf8');
+  compiler =
+      replace(compiler, 'digest.update(run(["xcrun", "metal", "--version"]))',
+              'digest.update(b"maclauncher-msl-source-v1")');
+  compiler = replace(
+      compiler,
+      '        run(["xcrun", "metal", "-std=macos-metal2.3", optimization, *stage_math,\n             "-c", metal, "-o", air], output / f"{name}.metal.log")\n        run(["xcrun", "metallib", air, "-o", lib_path])',
+      '        # Portable MSL is compiled by Metal during resource preparation.');
+  compiler = compiler.replaceAll('.metallib', '.metal');
+  await fs.writeFile(path.join(work, 'tools/compile_fsr411.py'), compiler);
+  const runtime = adaptRuntime(
+      await fs.readFile(path.join(work, 'src/fsr411_runtime.h'), 'utf8'));
+  await fs.writeFile(path.join(work, 'src/fsr411_runtime.h'), runtime.source);
+  await fs.writeFile(path.join(work, 'src/fsr411_helpers.metal'),
+                     adaptHelpers(await fs.readFile(
+                         path.join(source, 'src/fsr411_helpers.metal'), 'utf8')));
+  await fs.writeFile(
+      path.join(work, 'src/fsr4_log.h'),
+      '#pragma once\nstatic inline void fsr4_logf(const char*,...){}\n');
+  const build = path.join(work, 'build');
+  await fs.mkdir(build, {recursive : true});
+  // The translation tools use only the standard library; a cache inside the
+  // output directory keeps uv from writing outside the build.
+  const python = (script, args) => run(
+      'uv',
+      [
+        'run', '--offline', '--python', process.env.MACLAUNCHER_GRAPHICS_PYTHON || '3.12', '--no-project',
+        path.join(work, script), ...args
+      ],
+      {
+        env : {
+          ...process.env,
+          UV_CACHE_DIR : path.join(destination, 'uv-cache'),
+          FSR4_LOSSY2_WEIGHTS : options['--lite2-weights']
+        }
+      });
+  for (const tier of [ 1080, 2160, 4320 ])
+    for (const ultra of [ 0, 1 ])
       for (const profile of pin.profiles) {
         const suffix = ultra ? '_ultraperformance' : '',
               profileSuffix = profile.id === 'exact-fast'
@@ -159,12 +122,10 @@ if (!repackage)
           '--preset', ultra ? 'ultraperformance' : 'normal', '--lossy2-weights',
           options['--lite2-weights'], '--outdir', native
         ]);
-        for (const depth of quick ? [ 0 ] : [ 0, 1 ])
-          for (const low of quick ? [ 1 ] : [ 0, 1 ])
-            for (const jitter of quick ? [ 0 ] : [ 0, 1 ])
-              for (const exposure of quick ? [ 0 ] : [ 0, 1 ]) {
-                if (options['--base-payload'] && profile.id === 'exact-fast')
-                  continue;
+        for (const depth of [ 0, 1 ])
+          for (const low of [ 0, 1 ])
+            for (const jitter of [ 0, 1 ])
+              for (const exposure of [ 0, 1 ])
                 await python('tools/compile_fsr411.py', [
                   '--root',
                   work,
@@ -191,9 +152,7 @@ if (!repackage)
                   '--ultra-performance',
                   String(ultra)
                 ]);
-              }
       }
-if (!repackage) {
   await fs.mkdir(path.join(payload, 'build/libraries'), {recursive : true});
   const copied = new Set();
   for (const dir of await fs.readdir(build)) {
@@ -237,98 +196,103 @@ if (!repackage) {
   for (const file of ['initializers.bin', 'initializers-ultraperformance.bin'])
     await fs.copyFile(path.join(work, 'third_party/fsr411', file),
                       path.join(payload, 'third_party/fsr411', file));
-}
-await fs.mkdir(path.join(destination, 'source-inputs'), {recursive : true});
-await fs.copyFile(options['--lite2-weights'],
-                  path.join(destination, 'source-inputs/weights_lossy2.npz'));
-for (const arch of ['arm64', 'x86_64'])
+  await fs.mkdir(path.join(destination, 'source-inputs'), {recursive : true});
+  await fs.copyFile(options['--lite2-weights'],
+                    path.join(destination, 'source-inputs/weights_lossy2.npz'));
+  for (const arch of ['arm64', 'x86_64'])
+    await run('xcrun', [
+      'clang++',
+      '-std=c++17',
+      '-O2',
+      '-fobjc-arc',
+      '-fvisibility=hidden',
+      '-dynamiclib',
+      '-arch',
+      arch,
+      '-mmacosx-version-min=13.0',
+      '-Werror=unguarded-availability',
+      '-I',
+      path.join(work, 'src'),
+      path.join(work, 'owned/provider.mm'),
+      '-framework',
+      'Foundation',
+      '-framework',
+      'Metal',
+      '-install_name',
+      '@rpath/libmaclauncher-fsr4.dylib',
+      '-o',
+      path.join(destination, `fsr4-${arch}.dylib`)
+    ]);
   await run('xcrun', [
-    'clang++',
-    '-std=c++17',
-    '-O2',
-    '-fobjc-arc',
-    '-fvisibility=hidden',
-    '-dynamiclib',
-    '-arch',
-    arch,
-    '-mmacosx-version-min=13.0',
-    '-Werror=unguarded-availability',
-    '-I',
-    path.join(work, 'src'),
-    path.join(work, 'owned/provider.mm'),
-    '-framework',
-    'Foundation',
-    '-framework',
-    'Metal',
-    '-install_name',
-    '@rpath/libmaclauncher-fsr4.dylib',
-    '-o',
-    path.join(destination, `fsr4-${arch}.dylib`)
+    'lipo', '-create', path.join(destination, 'fsr4-arm64.dylib'),
+    path.join(destination, 'fsr4-x86_64.dylib'), '-output',
+    path.join(payload, 'libmaclauncher-fsr4.dylib')
   ]);
-await run('xcrun', [
-  'lipo', '-create', path.join(destination, 'fsr4-arm64.dylib'),
-  path.join(destination, 'fsr4-x86_64.dylib'), '-output',
-  path.join(payload, 'libmaclauncher-fsr4.dylib')
-]);
-await run('codesign', [
-  '--force', '--sign', '-', path.join(payload, 'libmaclauncher-fsr4.dylib')
-]);
-addLicenses(payload,'FSR4',path.join(source,'third_party/fsr411'));
-addLicenses(payload,'FSR4 provider',here);
-const owned = {};
-for (const [name, bytes] of ownedSnapshot) {
-  owned[name] = hash(bytes);
+  await run('codesign', [
+    '--force', '--sign', '-', path.join(payload, 'libmaclauncher-fsr4.dylib')
+  ]);
 }
-const files = [];
-for (const relative of (await fs.readdir(payload, {recursive : true})).sort()) {
-  if (relative === 'provider.json')
-    continue;
-  const file = path.join(payload, relative), stat = await fs.stat(file);
-  if (stat.isFile())
-    files.push({
-      path : relative,
-      size : stat.size,
-      sha256 : hash(await fs.readFile(file))
-    });
+
+/** Add the notices and describe the compiled payload. */
+async function assemble() {
+  addLicenses(payload,'FSR4',path.join(source,'third_party/fsr411'));
+  addLicenses(payload,'FSR4 provider',here);
+  const tools = {};
+  for (const name of ['dxc', 'spirv-cross', 'spirv-val'])
+    tools[name] = hash(await fs.readFile(path.join(options['--tools'], name)));
+  const files = [];
+  for (const relative of (await fs.readdir(payload, {recursive : true})).sort()) {
+    if (relative === 'provider.json')
+      continue;
+    const file = path.join(payload, relative), stat = await fs.stat(file);
+    if (stat.isFile())
+      files.push({
+        path : relative,
+        size : stat.size,
+        sha256 : hash(await fs.readFile(file))
+      });
+  }
+  await fs.writeFile(path.join(payload, 'provider.json'), JSON.stringify({
+    repository : pin.repository,
+    commit : revision,
+    model : pin.model,
+    license : pin.license,
+    minimumMacOS : pin.minimumMacOS,
+    architectures : pin.architectures,
+    sources : pin.sources.map((row, index) => ({
+      ...row,
+      commit : sourceRevision({gitlink : 'producers/package-support/src/external/' +
+                                         [ 'fsr4-sdk-headers', 'fsr4-sdk-model', 'fsr4-int8' ][index]})
+    })),
+    supportedProfiles : pin.supportedProfiles,
+    profiles : pin.profiles,
+    providerABI : 1,
+    complete : true,
+    resourcePreparation : 1,
+    profilesAPI : 1,
+    loadMinimumMacOS : '13.0',
+    profile : 'exact-fast',
+    colorSpace : 'linear',
+    maximumOutput : [ 7680, 4320 ],
+    library : 'libmaclauncher-fsr4.dylib',
+    resolvedPaths : [ 'build/fsr411_native_' ],
+    sourceInputs : [ {
+      path : 'source-inputs/weights_lossy2.npz',
+      size : (await fs.stat(options['--lite2-weights'])).size,
+      sha256 : lite2.sha256,
+      repository : lite2.repository,
+      commit : sourceRevision(lite2),
+      sourceUrl : lite2.repository + '/tree/' + sourceRevision(lite2)
+    } ],
+    tools,
+    files
+  },
+                                                                         null,
+                                                                         2) +
+                                                              '\n');
+  console.log(payload);
 }
-await fs.writeFile(path.join(payload, 'provider.json'), JSON.stringify({
-  repository : pin.repository,
-  commit : revision,
-  model : pin.model,
-  license : pin.license,
-  minimumMacOS : pin.minimumMacOS,
-  architectures : pin.architectures,
-  sources : pin.sources.map((row, index) => ({
-    ...row,
-    commit : sourceRevision({gitlink : 'producers/package-support/src/external/' +
-                                       [ 'fsr4-sdk-headers', 'fsr4-sdk-model', 'fsr4-int8' ][index]})
-  })),
-  supportedProfiles : pin.supportedProfiles,
-  profiles : pin.profiles,
-  providerABI : 1,
-  complete : !quick,
-  resourcePreparation : 1,
-  profilesAPI : 1,
-  loadMinimumMacOS : '13.0',
-  profile : 'exact-fast',
-  colorSpace : 'linear',
-  maximumOutput : [ 7680, 4320 ],
-  library : 'libmaclauncher-fsr4.dylib',
-  resolvedPaths : [ 'build/fsr411_native_' ],
-  sourceInputs : [ {
-    path : 'source-inputs/weights_lossy2.npz',
-    size : (await fs.stat(options['--lite2-weights'])).size,
-    sha256 : lite2.sha256,
-    repository : lite2.repository,
-    commit : sourceRevision(lite2),
-    sourceUrl : lite2.repository + '/tree/' + sourceRevision(lite2)
-  } ],
-  owned,
-  tools,
-  adaptations : {runtime : hash(runtime.source), compiler : hash(compiler)},
-  files
-},
-                                                                       null,
-                                                                       2) +
-                                                            '\n');
-console.log(payload);
+if (phase !== 'assemble')
+  await compile();
+if (phase !== 'compile')
+  await assemble();

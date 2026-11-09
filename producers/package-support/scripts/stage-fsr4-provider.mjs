@@ -1,9 +1,7 @@
-import {moduleFile} from '../../../tools/app-source.mjs';
 import {sourceRevision} from '../../../lib/pins.mjs';
 import fs from "node:fs";
 import path from "node:path";
 const safe=name=>typeof name==="string"&&!path.isAbsolute(name)&&!name.split(/[\\/]/).some(part=>!part||part==="."||part==="..");
-const module="src/modules/shared/reshade/temporal/fsr4";
 export function stageFSR4Provider({directory,upstream}){
   const lite2=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,"../src/modules/shared/reshade/temporal/fsr4/lite2.json"),"utf8"));
   const revision=sourceRevision({gitlink:'producers/package-support/src/external/fsr4-metal'});
@@ -16,7 +14,6 @@ export function stageFSR4Provider({directory,upstream}){
     files.set(row.path,file);
   }
   const owned=new Map();
-  for(const relative of Object.keys(metadata.owned))owned.set(path.posix.normalize("maclauncher/temporal/fsr4/"+relative),moduleFile(path.posix.join(module,relative)));
   const archive=metadata.sourceInputs?.find(row=>row.path==="source-inputs/weights_lossy2.npz");
   owned.set("maclauncher/temporal/fsr4/inputs/weights_lossy2.npz",path.join(path.dirname(directory),archive.path));
   if(!upstream)throw Error("Supply the exact FSR 4 source checkout for this provider.");

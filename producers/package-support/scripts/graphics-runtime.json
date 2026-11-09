@@ -408,6 +408,7 @@
       "steps": [
         {
           "recipe": "src/modules/shared/reshade/temporal/fsr4/build.mjs",
+          "phased": true,
           "args": [
             "{source:fsr4}",
             "{output}",
