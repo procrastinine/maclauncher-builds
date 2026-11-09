@@ -532,6 +532,7 @@
       "steps": [
         {
           "recipe": "src/modules/crossover/temporal/dxmt/build.mjs",
+          "phased": true,
           "args": [
             "{source:dxmt}",
             "{input:dxmt-wine}",
