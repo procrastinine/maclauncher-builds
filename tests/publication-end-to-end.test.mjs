@@ -40,7 +40,9 @@ async function fixture(t,{arches=['arm64','x64'],built=arches}={}){
   const input=path.join(work,'input-'+arch);fs.mkdirSync(input);const data={'manifest.json':JSON.stringify({version:'1.0.0',arch}),'LICENSE':'MIT'};
   const files=Object.entries(data).map(([name,bytes])=>{fs.writeFileSync(path.join(input,name),bytes,{mode:0o644});return {path:name,size:Buffer.byteLength(bytes),mode:0o644,sha256:sha(bytes)};});
   const declaration={id:'engine',version:'1.0.0',arch,launcherArchitectures:[arch],minimumMacOS:'13.0',directoryRelative:'engine/1.0.0/'+arch,manifestRelative:'manifest.json',manifestSha256:files[0].sha256,sourceSha256:files[0].sha256,sourceRelative:'manifest.json',files,redistribution:'bundle'};
-  const bundle=path.join(work,'artifact-'+arch);await prepareRelease({project:'engine',input,declaration,sourceRevision:source,output:bundle,directory});
+  const reports=path.join(work,'reports-'+arch),definition=JSON.stringify({recipe:{id:'engine',arch}});fs.mkdirSync(reports);
+  fs.writeFileSync(path.join(reports,'build-definition.json'),definition);fs.writeFileSync(path.join(reports,'build-inputs.json'),JSON.stringify({schemaVersion:1,definitionDigest:sha(definition),inputs:[]}));
+  const bundle=path.join(work,'artifact-'+arch);await prepareRelease({project:'engine',input,declaration,sourceRevision:source,output:bundle,reports,directory});
   artifacts.push({id:index+1,name:'runtime-engine-1.0.0-'+arch,files:fs.readdirSync(bundle).map(name=>path.join(bundle,name))});
  }
  const download=async({artifact,bundle})=>{for(const file of artifacts.find(row=>row.id===artifact.id).files)fs.copyFileSync(file,path.join(bundle,path.basename(file)));};
@@ -58,6 +60,8 @@ test('a sealed package publishes end to end: preflight, releases, tags, catalog 
  assert.ok(hub.state.releases.every(release=>release.draft===false&&release.assets.length===1));
  git(f.directory,['fetch','--quiet','origin','main']);
  assert.deepEqual(catalogAt(f).packages.map(row=>row.arch).sort(),['arm64','x64']);
+ // Each catalog entry records the build definition its bundle sealed.
+ for(const row of catalogAt(f).packages)assert.equal(row.build.definitionDigest,sha(JSON.stringify({recipe:{id:'engine',arch:row.arch}})));
  // The Pages job builds the index from published main: one artifact, containing the new packages.
  const checkout=path.join(f.work,'pages');git(f.work,['clone','--quiet',f.origin,checkout]);
  const output=path.join(f.work,'site'),index=await buildIndex({directory:checkout,output});

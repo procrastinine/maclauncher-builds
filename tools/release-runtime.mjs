@@ -51,7 +51,9 @@ export function catalogIndex(directory=root,{coverage=buildCoverage(directory)}=
 
 /** Apply only a public, digest-verified release. A published version is never removed or replaced. */
 export async function applyRelease({bundle,directory=root,runGh=runGitHub,publication,checked}){
- const {release,record,declaration}=await verifyRemoteRelease({bundle,directory,runGh,publication,requirePublic:true,includeDeclaration:true,checked});
+ const {release,record:sealed,declaration}=await verifyRemoteRelease({bundle,directory,runGh,publication,requirePublic:true,includeDeclaration:true,checked});
+ // The catalog entry records the digest of the build definition the bundle sealed.
+ const record=checked?.definitionDigest?{...sealed,build:{...sealed.build,definitionDigest:checked.definitionDigest}}:sealed;
  const declarationFile=path.join(directory,'catalogs','declarations',release.id,release.version,release.arch+'.json');
  if(fs.existsSync(declarationFile)){
   regular(declarationFile);if(stable(read(declarationFile))!==stable(declaration))throw Error('An existing sealed declaration differs from this immutable package.');
