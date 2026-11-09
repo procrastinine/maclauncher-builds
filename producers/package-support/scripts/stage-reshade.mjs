@@ -132,7 +132,7 @@ if (options["--neural"]) {
   const upstream = path.resolve(upstreamRoot, "src/external/MLX-DLSS");
   const revision = execFileSync("git", ["-C", upstream, "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
   for (const relative of ["source.json", "build.mjs", "native/build.sh", "native/prepare-upstream.mjs",...(descriptor.gpuTimingAPI===1?["native/prepare-mlx-timing.mjs"]:[]), "native/Package.swift",
-    "native/Package.resolved", "native/upstream.json",...(descriptor.gpuTimingAPI===1?moduleFiles(neuralModule+"/native/timing").map(name=>"native/timing/"+name):[]),...(descriptor.estimatedDepthAPI===1?["native/depth-anything-source.json"]:[]),...(descriptor.restorationAPI===1?["native/restoration-sources.json","native/rife-v4.6.param"]:[]), ...moduleFiles(neuralModule + "/native/Sources").map(name => "native/Sources/" + name)]) {
+    "native/Package.resolved", "native/upstream.json",...(descriptor.gpuTimingAPI===1?moduleFiles(neuralModule+"/native/timing").map(name=>"native/timing/"+name):[]),...(descriptor.estimatedDepthAPI===1||descriptor.restorationAPI===1?["model-source.json"]:[]),...(descriptor.restorationAPI===1?["native/rife-v4.6.param"]:[]), ...moduleFiles(neuralModule + "/native/Sources").map(name => "native/Sources/" + name)]) {
     extraOwned.set("maclauncher/neural/" + relative, neuralFile(relative));
   }
   extraOwned.set("maclauncher/neural/adaptation.json", path.join(directory, "adaptation.json"));
