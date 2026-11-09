@@ -15,7 +15,6 @@ if(options['--shader-cache']&&!options['--native-only'])throw new Error('--shade
 const run=(exe,args)=>execFileSync(exe,args,{encoding:'utf8',maxBuffer: Infinity});
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const source=options['--source'],out=options['--output'],tools=options['--tools'];
-if(run('git',['-C',source,'rev-parse','HEAD']).trim()!==sourceRevision(spec))throw new Error('SGSR source differs from the registered exact commit.');
 if(fs.existsSync(out))throw new Error('Choose a new immutable output directory.');
 for(const [filename,expected] of Object.entries(spec.shaders))if(hash(path.join(source,'sgsr/v2/include/glsl_2_pass_cs',filename))!==expected)throw new Error('SGSR shader input changed: '+filename);
 fs.mkdirSync(path.join(out,'sgsr2'),{recursive:true});

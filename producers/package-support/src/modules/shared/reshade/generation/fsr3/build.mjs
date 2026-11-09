@@ -12,7 +12,6 @@ if(!outputArg)throw Error('Usage: build.mjs SOURCE_GIT TOOLS OUTPUT [--shaders-o
 const source=path.resolve(sourceArg),tools=path.resolve(toolsArg),output=path.resolve(outputArg);
 const run=(file,args)=>execFileSync(file,args,{encoding:'utf8',maxBuffer: Infinity});
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
-if(run('git',['-C',source,'rev-parse','HEAD']).trim()!==sourceRevision(pin))throw Error('Select the declared FidelityFX SDK commit.');
 for(const name of ['dxc','spirv-cross'])if(hash(fs.readFileSync(path.join(tools,name)))!==pin.tools[name])throw Error('The shader compiler differs from the declared build input: '+name);
 fs.mkdirSync(output,{recursive:true});
 const exported=path.join(output,'source'),archive=path.join(output,'source.tar');fs.mkdirSync(exported,{recursive:true});

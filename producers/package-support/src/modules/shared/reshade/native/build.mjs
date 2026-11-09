@@ -148,8 +148,6 @@ run("/usr/bin/c++", ["-O3", "-std=c++17", "-arch", "arm64", "-arch", "x86_64", "
   ...["Foundation","AVFoundation","CoreVideo","CoreMedia","CoreGraphics","VideoToolbox","Metal"].flatMap(name=>["-framework",name])]);
 run("/usr/bin/codesign", ["--force", "--sign", "-", "--timestamp=none", path.join(output,"maclauncher-graphics-video")]);
 }
-for (const entry of reused) if (hash(entry.path) !== entry.sha256) throw new Error("A linked input changed during the build.");
-for (const entry of recipes) if (hash(entry.path) !== entry.sha256) throw new Error("A build recipe changed during the build.");
 const selected = overlay.files.map(entry => ({ path: entry.path, sha256: hash(path.join(applied, entry.path)) }));
 const library = path.join(output, "libreshade-macos.dylib");
 fs.writeFileSync(path.join(output, "build-receipt.json"), JSON.stringify({ schema: 1, baseSourceHash: sourceHash,

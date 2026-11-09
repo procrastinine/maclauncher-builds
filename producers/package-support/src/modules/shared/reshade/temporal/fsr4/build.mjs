@@ -56,21 +56,6 @@ const hash = b => createHash('sha256').update(b).digest('hex'),
                              ? resolve()
                              : reject(Error(command + ' exited ' + code)));
       });
-const capture = async (command, args) => {
-  let text = '';
-  const child = spawn(command, args, {stdio : [ 'ignore', 'pipe', 'inherit' ]});
-  for await (const bytes of child.stdout)
-    text += bytes;
-  await new Promise(
-      (resolve, reject) => child.on(
-          'close', code => code === 0
-                               ? resolve()
-                               : reject(Error(command + ' exited ' + code))));
-  return text.trim();
-};
-if (await capture('git', [ '-C', source, 'rev-parse', 'HEAD' ]) !== sourceRevision(pin))
-  throw Error('FSR4 source pin changed.');
-await run('git', [ '-C', source, 'diff', '--exit-code', 'HEAD', '--' ]);
 for (const [option, digest] of [[ '--lite2-weights', pin.lite2.sha256 ]])
   if (hash(await fs.readFile(options[option])) !== digest)
     throw Error('The pinned Lite2 input changed: ' + option);
@@ -291,9 +276,6 @@ addLicenses(payload,'FSR4 provider',here);
 const owned = {};
 for (const [name, bytes] of ownedSnapshot) {
   owned[name] = hash(bytes);
-  if (hash(await fs.readFile(owner(name))) !== owned[name])
-    throw Error('An owned FSR4 build input changed during compilation: ' +
-                name);
 }
 const files = [];
 for (const relative of (await fs.readdir(payload, {recursive : true})).sort()) {

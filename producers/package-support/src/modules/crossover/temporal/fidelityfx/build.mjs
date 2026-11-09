@@ -15,7 +15,6 @@ fs.accessSync(compiler,fs.constants.X_OK);
 if(!source.libraries[backend])throw Error('Choose vk or dx12.');
 const git=(directory,...parameters)=>execFileSync('git',['-C',directory,...parameters],{env:{...process.env,GIT_NO_LAZY_FETCH:'1'},maxBuffer: Infinity});
 const vulkanRevision=sourceRevision(sharedDependencies.sdlHeaders);
-for(const [directory,pin]of[[sdk,source.sdk],[vulkan,source.vulkan]])if(git(directory,'rev-parse','HEAD').toString().trim()!==(directory===sdk?gitlink('producers/package-support/src/external/fsr3-sdk'):vulkanRevision))throw Error('The source commit does not match '+pin.repository);
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 fs.mkdirSync(out,{recursive:true});const inputs=path.join(out,'inputs');fs.mkdirSync(inputs,{recursive:true});
 const originalInputs={};

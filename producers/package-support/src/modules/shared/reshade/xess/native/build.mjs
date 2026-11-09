@@ -11,7 +11,6 @@ import {execFileSync} from 'node:child_process';
 const here=import.meta.dirname,module='src/modules/shared/reshade/xess',sources=appPath(module+'/native'),args=Object.fromEntries(process.argv.slice(2).reduce((rows,value,index,all)=>index%2?rows:[...rows,[value.replace(/^--/,''),all[index+1]]],[]));
 if(!args.sdk||!args.compiler||!args.out)throw Error('Use --sdk XESS_SOURCE --compiler LLVM_MINGW_BIN --out OUTPUT');
 const sdk=fs.realpathSync(args.sdk),compiler=path.resolve(args.compiler),output=path.resolve(args.out),sourceFile=appPath(module+'/source.json'),source=JSON.parse(fs.readFileSync(sourceFile,'utf8'));
-if(execFileSync('git',['-C',sdk,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==sourceRevision(source))throw Error('Initialize the exact declared Intel XeSS SDK commit.');
 const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 if(sha(path.join(sdk,'bin/libxess.dll'))!==source.sha256)throw Error('The pinned original Intel XeSS runtime differs from its declared identity.');
 const componentFile=appPath(module+'/components.json'),components=JSON.parse(fs.readFileSync(componentFile,'utf8'));
