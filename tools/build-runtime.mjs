@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {spawnSync,execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
+import {createRequire} from 'node:module';
 import {resolveProject,buildRecord,buildRecords} from '../lib/projects.mjs';
 import {buildReleaseVersion as releaseVersion} from '../lib/package-version.mjs';
 import {linuxToolSelection} from './build-tools.mjs';
@@ -108,14 +109,19 @@ export function checkBuildRequest({project:id,arch,version,output,work,directory
  const runner=runnerFor(build,arch),host=hostedRunner(runner);assertBuildHost(runner,host,{platform,cpu});return {project,build,runner,host};
 }
 
-/** Run the project's registered GitHub build command for one architecture. */
-export function runBuild({project:id,arch,version,output,work=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'runtime-build-')),'work'),directory=root,spawn=spawnSync,platform,cpu}){
+/** Run the project's registered GitHub build command for one architecture. With materialize,
+ * the command runs in <work>/tree, which holds only the project's build definition, and
+ * receives <work>/build as its work directory. */
+export function runBuild({project:id,arch,version,output,work=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'runtime-build-')),'work'),directory=root,spawn=spawnSync,platform,cpu,materialize=false}){
  const {project,build}=checkBuildRequest({project:id,arch,version,output,work,directory,platform,cpu});
- const command=path.join(directory,build.command),actual=fs.realpathSync(command);
+ if(materialize)fs.mkdirSync(work,{recursive:true});
+ // Loaded only here: a build's own definition holds this file, not the materializer.
+ const source=materialize?createRequire(import.meta.url)('./materialize-build.mjs').materializeBuild({project:project.id,directory,tree:path.join(fs.realpathSync(work),'tree')}).tree:directory,recipeWork=materialize?path.join(work,'build'):work;
+ const command=path.join(source,build.command),actual=fs.realpathSync(command);
  if(actual!==command||!fs.statSync(actual).isFile())throw Error('The GitHub build command must be a regular file in this repository.');
  const context=runtimeBuildEnvironment(build);
  try{
-  const result=spawn(process.execPath,[command,'--project',project.id,'--arch',arch,'--version',build.version,'--output',output,'--work',work],{cwd:directory,stdio:'inherit',env:reproducibleEnvironment(context.env)});
+  const result=spawn(process.execPath,[command,'--project',project.id,'--arch',arch,'--version',build.version,'--output',output,'--work',recipeWork],{cwd:source,stdio:'inherit',env:reproducibleEnvironment(context.env)});
   if(result.error)throw result.error;
   if(result.status!==0)throw Error(project.name+' build exited with status '+result.status);
   sealBuildInputReport({project:project.id,output});
@@ -128,11 +134,12 @@ export function runBuild({project:id,arch,version,output,work=path.join(fs.mkdte
 
 export function main(args,directory=root){
  const options={};for(let i=0;i<args.length;i++){
-  if(['--check','--plan','--prepare'].includes(args[i])){const key=args[i].slice(2);if(options[key])throw Error('Duplicate '+args[i]+'.');options[key]=true;continue;}
+  if(['--check','--plan','--prepare','--materialize'].includes(args[i])){const key=args[i].slice(2);if(options[key])throw Error('Duplicate '+args[i]+'.');options[key]=true;continue;}
   const key=args[i]?.slice(2);if(!args[i]?.startsWith('--')||!['project','runtime','inputs','arch','output','work','version'].includes(key)||!args[i+1]||Object.hasOwn(options,key))throw Error('Use --project android with --check or --inputs /absolute/path.json.');
   options[key]=args[++i];
  }
  if(options.project&&options.runtime)throw Error('Select one project.');options.project??=options.runtime;
+ if(options.materialize&&!options.output)throw Error('Use --materialize with --project, --arch and --output.');
  if(options.prepare){
   if(options.check||options.plan||options.inputs||options.output||options.work||!options.project||!options.arch)throw Error('Use --prepare with --project, --arch and an optional --version.');
   return prepareBuild({project:options.project,arch:options.arch,version:options.version,directory});
