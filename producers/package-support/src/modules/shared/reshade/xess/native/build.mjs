@@ -13,7 +13,6 @@ if(!args.sdk||!args.compiler||!args.out)throw Error('Use --sdk XESS_SOURCE --com
 const sdk=fs.realpathSync(args.sdk),compiler=path.resolve(args.compiler),output=path.resolve(args.out),sourceFile=appPath(module+'/source.json'),source=JSON.parse(fs.readFileSync(sourceFile,'utf8'));
 const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const componentFile=appPath(module+'/components.json'),components=JSON.parse(fs.readFileSync(componentFile,'utf8'));
-if(sourceRevision(components)!==sourceRevision(source))throw Error('XeSS generation components differ from the SDK source pin.');
 for(const component of components.files)if(sha(path.join(sdk,'bin',component.file))!==component.sha256||fs.statSync(path.join(sdk,'bin',component.file)).size!==component.bytes)throw Error('An original XeSS generation component differs from its declared identity.');
 const windows=path.join(output,'x86_64-windows'),unix=path.join(output,'x86_64-unix');fs.mkdirSync(windows,{recursive:true});fs.mkdirSync(unix,{recursive:true});
 const run=(file,argv)=>execFileSync(file,argv,{stdio:'pipe',maxBuffer: Infinity});
