@@ -1,20 +1,6 @@
 {
   "schema": 1,
   "repository": "https://github.com/GameTechDev/CMAA2",
-  "source": {
-    "schema": 1,
-    "repository": "https://github.com/GameTechDev/CMAA2",
-    "shader": {
-      "path": "Projects/CMAA2/CMAA2/CMAA2.hlsl",
-      "sha256": "ca88dd447c1055436d2e35e0d9bb4d9bdb29dd2487da6c01d4a913b292294c8c"
-    },
-    "entries": [
-      "EdgesColor2x2CS",
-      "ComputeDispatchArgsCS",
-      "ProcessCandidatesCS",
-      "DeferredColorApply2x2CS"
-    ]
-  },
   "adaptation": {
     "qualityThresholdUniform": true,
     "logicalColorLoadClamp": true,
