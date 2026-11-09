@@ -1,4 +1,5 @@
 import {sourceRevision} from '../../../../../../../lib/pins.mjs';
+import {appPath} from '../../../../../../../tools/app-source.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -61,8 +62,10 @@ export function sceneSources(repository,readSource=file=>original(repository,fil
   ['mtlCmdBuffDesc.retainedReferences = retainRefs;', 'mtlCmdBuffDesc.retainedReferences = retainRefs || _device->_macfxSceneRecordingCount.load(std::memory_order_acquire) != 0;']
  ]);
  edit('MoltenVK/CMakeLists.txt',[['COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD','COMMAND ${CMAKE_COMMAND} -E echo db66022459ff']]);
- for(const file of ownedFiles)files.set(commands+file,fs.readFileSync(path.join(root,file)));
- files.set('MoltenVK/include/MoltenVK/scene-interop.h',fs.readFileSync(path.join(root,'scene-interop.h')));
- for(const[name,file]of Object.entries(commonHeaders))files.set('MoltenVK/include/macfx-temporal/'+name,fs.readFileSync(path.resolve(root,file)));
+ // The scene headers are app source: they are read from the pinned app checkout.
+ const shared=appPath('src/modules/shared/vulkan/native');
+ for(const file of ownedFiles)files.set(commands+file,fs.readFileSync(path.join(shared,file)));
+ files.set('MoltenVK/include/MoltenVK/scene-interop.h',fs.readFileSync(path.join(shared,'scene-interop.h')));
+ for(const[name,file]of Object.entries(commonHeaders))files.set('MoltenVK/include/macfx-temporal/'+name,fs.readFileSync(path.resolve(shared,file)));
  return files;
 }
