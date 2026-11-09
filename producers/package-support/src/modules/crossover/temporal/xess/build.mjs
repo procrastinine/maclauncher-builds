@@ -76,10 +76,6 @@ addLicenses(output,'Intel-XeSS',xess);
 addLicenses(output,'DXMT',dxmt);
 const metadata={schema:1,profile:source.profile,version:'1',library:source.library,sha256:hash(library),exports:actual,
   sources:{...source,xess:{repository:reference.repository,revision:sourceRevision(reference),...source.xess},dxmt:{...source.dxmt,revision:dxmtRevision}},compiler:execFileSync(compiler,['--version'],{encoding:'utf8'}).split('\n')[0],
-  owned:Object.fromEntries(['source.json','proxy.cpp','build.mjs','reference-exports.json','export-profile.js'].map(file=>[file,hash(path.join(['build.mjs','reference-exports.json'].includes(file)?here:app,file))])),
-  dependencies:{'dxmt/camera-transport.hpp':hash(path.join(app,'../dxmt/camera-transport.hpp')),
-    'temporal/camera.h':hash(path.resolve(app,'../../../shared/reshade/temporal/camera.h')),
-    'temporal/frame.h':hash(path.resolve(app,'../../../shared/reshade/temporal/frame.h'))},
   inputs:{color:true,depth:true,motion:true,jitter:true,exposure:true,cameraProjection:false},
   execution:{renderer:'dxmt',api:'d3d11',algorithm:'selected-native-provider',offsets:'gpu-copy',history:'per-context',readback:false},
   unavailable:['external-descriptor-heap'],

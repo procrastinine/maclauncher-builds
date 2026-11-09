@@ -28,8 +28,8 @@ const build = path.resolve(source, args[0] && !args[0].startsWith("--") ? args.s
 const options = {};
 while (args.length) {
   const key = args.shift(), value = args.shift();
-  if (!["--version", "--arch", "--output", "--declaration", "--source-root", "--owned-source", "--spirv-cross-source", "--isf", "--xess-host", "--xess-host-source", "--fsr", "--fsr4", "--fsr4-source", "--asr", "--asr-source", "--sgsr2", "--sgsr2-source", "--fsr3-generation", "--godot", "--streamline", "--dxmt", "--xess", "--retroarch", "--libplacebo", "--neural"].includes(key) || !value || value.startsWith("--") || options[key])
-    throw new Error("Usage: node scripts/stage-reshade.mjs <source> [build] [--owned-source <source>] [--spirv-cross-source <checkout>] [--isf <payload>] [--xess-host <payload>] [--xess-host-source <source>] [--fsr <payload>] [--fsr4 <payload>] [--fsr4-source <checkout>] [--asr <payload>] [--asr-source <checkout>] [--sgsr2 <payload>] [--sgsr2-source <checkout>] [--fsr3-generation <payload>] [--godot <payload>] [--streamline <payload>] [--dxmt <payload>] [--xess <payload>] [--retroarch <payload>] [--libplacebo <payload>] [--neural <payload>]");
+  if (!["--version", "--arch", "--output", "--declaration", "--source-root", "--owned-source", "--spirv-cross-source", "--isf", "--xess-host", "--fsr", "--fsr4", "--fsr4-source", "--asr", "--asr-source", "--sgsr2", "--sgsr2-source", "--fsr3-generation", "--godot", "--streamline", "--dxmt", "--xess", "--retroarch", "--libplacebo", "--neural"].includes(key) || !value || value.startsWith("--") || options[key])
+    throw new Error("Usage: node scripts/stage-reshade.mjs <source> [build] [--owned-source <source>] [--spirv-cross-source <checkout>] [--isf <payload>] [--xess-host <payload>] [--fsr <payload>] [--fsr4 <payload>] [--fsr4-source <checkout>] [--asr <payload>] [--asr-source <checkout>] [--sgsr2 <payload>] [--sgsr2-source <checkout>] [--fsr3-generation <payload>] [--godot <payload>] [--streamline <payload>] [--dxmt <payload>] [--xess <payload>] [--retroarch <payload>] [--libplacebo <payload>] [--neural <payload>]");
   options[key] = ["--version","--arch"].includes(key) ? value : path.resolve(value);
 }
 const upstreamRoot=options["--source-root"]||path.resolve(import.meta.dirname,"..");
@@ -38,7 +38,6 @@ const packageArch=options["--arch"]||"universal";
 if(!["arm64","x64","universal"].includes(packageArch))throw Error("Choose arm64, x64 or universal graphics.");
 const packageCPUs=packageArch==="universal"?["arm64","x86_64"]:[packageArch==="x64"?"x86_64":"arm64"];
 if(!options["--version"]||!options["--output"]||!options["--declaration"])throw Error("Staging requires --version, --output and --declaration.");
-if(options["--xess-host-source"]&&!options["--xess-host"])throw Error("An owned XeSS source snapshot requires its exact GPU host payload.");
 // Owned adaptations may be built outside the read-only pinned checkout. Vendor
 // revisions and license sources still come from that original checkout.
 const ownedSource = options["--owned-source"] || source;
@@ -70,11 +69,8 @@ const optionalInputs=new Map(),optionalLoad=new Map(),extraOwned=new Map();
 if(options["--xess-host"]){
   const directory=options["--xess-host"],module="src/modules/shared/reshade/xess",metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json")));
   const generation=metadata.generation;
-  const owned=metadata.source.ownedFiles.map(row=>row.path);
   const backends=metadata.backends,hostPaths=metadata.hostPaths;
-  if(metadata.schema!==1||metadata.providerABI!==1||!Array.isArray(metadata.files)||!Array.isArray(metadata.source?.ownedFiles))throw Error("A complete compatible original XeSS GPU host is required.");
-  const nativeSource=options["--xess-host-source"];
-  for(const name of owned){const file=nativeSource?path.resolve(nativeSource,name):moduleFile(path.posix.join(module,"native",name));extraOwned.set("maclauncher/xess/native/"+name,file);}
+  if(metadata.schema!==1||metadata.providerABI!==1||!Array.isArray(metadata.files))throw Error("A complete compatible original XeSS GPU host is required.");
   extraOwned.set("maclauncher/xess/source.json",moduleFile(module+"/source.json"));
   if(generation)extraOwned.set("maclauncher/xess/components.json",moduleFile(module+"/components.json"));
   const actual=execFileSync("git",["-C",xessSource,"rev-parse","HEAD"],{encoding:"utf8"}).trim();pins.push(` ${actual} third_party/xess-original`);
@@ -215,7 +211,6 @@ if(options["--xess"]){
     const root=path.resolve(upstreamRoot,"src/external",submodule),commit=execFileSync("git",["-C",root,"rev-parse","HEAD"],{encoding:"utf8"}).trim();
     pins.push(` ${commit} third_party/${submodule}`);
   }
-  for(const name of Object.keys(metadata.owned))extraOwned.set("maclauncher/crossover/temporal/xess/"+name,xessFile(name));
   const dependencies={
     "dxmt/camera-transport.hpp":"../dxmt/camera-transport.hpp",
     "temporal/camera.h":"../../../shared/reshade/temporal/camera.h",
