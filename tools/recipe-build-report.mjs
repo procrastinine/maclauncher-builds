@@ -78,6 +78,11 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   if(!appDigests.has(relative)){let value=null;try{const file=path.join(appSource.directory,relative);value=fs.statSync(file).isDirectory()?'directory':sha256(fs.readFileSync(file));}catch{}appDigests.set(relative,value);}
   return appDigests.get(relative);
  };
+ const belowApp=new Map(),appBelow=relative=>{if(!belowApp.has(relative))belowApp.set(relative,[...appTracked].filter(name=>name.startsWith(relative+'/')));return belowApp.get(relative);};
+ const NONE=[],referencePlans=new Map(),appPlans=new Map();
+ const stats=new Map(),statOf=file=>{if(!stats.has(file))stats.set(file,fs.statSync(file,{throwIfNoEntry:false})??null);return stats.get(file);};
+ const links=new Map(),linkOf=file=>{if(!links.has(file))links.set(file,gitlinks.find(link=>file===link.path||file.startsWith(link.path+'/'))??null);return links.get(file);};
+ const facts=new Map(),fileFacts=absolute=>{if(!facts.has(absolute)){const stat=statOf(absolute);facts.set(absolute,stat?.isFile()?{bytes:fs.readFileSync(absolute)}:null);}return facts.get(absolute);};
  const unresolvedReferences=new Map(),commandProjects=new Map();
  for(const project of projects.values())for(const build of project.build?buildRecords(project):[]){if(!commandProjects.has(build.command))commandProjects.set(build.command,new Set());commandProjects.get(build.command).add(project.id);}
  function normalizedJson(file,value){
@@ -93,7 +98,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   const project=projects.get(id);if(!project)throw Error('Unknown recipe project: '+id);
   const builds=project.build?buildRecords(project):[],files=new Map(),inputs=new Set(),usedLinks=new Map(),queue=[],queued=new Set(),unresolved=[],computed=[];
   const enqueue=file=>{file=path.normalize(file).split(path.sep).join('/');if(file.startsWith('tools/publication/')||registryFiles.has(file)||file.startsWith('catalogs/')||queued.has(file)||path.isAbsolute(file)||file.startsWith('../'))return;queued.add(file);queue.push(file);};
-  const rememberLink=file=>{const link=gitlinks.find(link=>file===link.path||file.startsWith(link.path+'/'));if(link)usedLinks.set(link.path,link);return link;};
+  const rememberLink=file=>{const link=linkOf(file);if(link)usedLinks.set(link.path,link);return link;};
   const artifactId=value=>value?.project&&Object.keys(value).length===1&&projects.has(value.project)?value.project:null;
   const appFiles=new Map(),checkedRecords=new Set();
   // App files are named by their path in the app repository: a file, a module
@@ -103,7 +108,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    if(!appSource||!relative||relative==='.'||relative.startsWith('../')||relative.startsWith('/')){unresolved.push({file:from,expression,reason:'missing'});return;}
    const file=[relative,...['.js','.cjs','.mjs','.json'].map(extension=>relative+extension)].find(candidate=>appTracked.has(candidate));
    if(file){addApp(file,from,expression,follow);return;}
-   const below=[...appTracked].filter(name=>name.startsWith(relative+'/'));
+   const below=appBelow(relative);
    if(below.length)for(const name of below)addApp(name,from,expression,false);
    else unresolved.push({file:from,expression,reason:'missing'});
   }
@@ -114,22 +119,25 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    if(digest==='directory')return;
    appFiles.set(relative,digest);
    const absolute=path.join(appSource.directory,relative);
-   if(relative.endsWith('.json'))checkRecords(JSON.parse(fs.readFileSync(absolute)),APP_REFERENCE+relative);
-   if(follow&&/\.[mc]?js$/.test(relative))for(const match of fs.readFileSync(absolute,'utf8').matchAll(IMPORTS))appReference(path.posix.join(path.posix.dirname(relative),match[2]??match[4]),APP_REFERENCE+relative,match[0],true);
+   const facts=fileFacts(absolute);
+   if(relative.endsWith('.json'))checkRecords(JSON.parse(facts.bytes),APP_REFERENCE+relative);
+   if(follow&&/\.[mc]?js$/.test(relative))for(const match of (facts.text??=facts.bytes.toString('utf8')).matchAll(IMPORTS))appReference(path.posix.join(path.posix.dirname(relative),match[2]??match[4]),APP_REFERENCE+relative,match[0],true);
   }
   // A module directory is shared by layout: Builds keeps producers/package-support/<path>,
   // the app keeps <path>; moduleFile prefers the Builds file.
-  const appExists=relative=>{relative=path.posix.normalize(relative).replace(/\/+$/,'');return [relative,...['.js','.cjs','.mjs','.json'].map(extension=>relative+extension)].some(candidate=>appTracked.has(candidate))||[...appTracked].some(name=>name.startsWith(relative+'/'));};
+  const appExists=relative=>{relative=path.posix.normalize(relative).replace(/\/+$/,'');return [relative,...['.js','.cjs','.mjs','.json'].map(extension=>relative+extension)].some(candidate=>appTracked.has(candidate))||appBelow(relative).length>0;};
   const moduleExists=relative=>fs.existsSync(path.join(root,'producers/package-support',relative))||appExists(relative);
   function moduleReference(target,from,expression,file){
-   const owned='producers/package-support/'+target,stat=fs.statSync(path.join(root,owned),{throwIfNoEntry:false});
+   const owned='producers/package-support/'+target,stat=statOf(path.join(root,owned));
    if(stat?.isFile()){enqueue(owned);if(file)return;}
    else if(stat?.isDirectory())for(const name of directoryFiles(owned))enqueue(name);
-   if(appTracked.has(target)||[...appTracked].some(name=>name.startsWith(target+'/')))appReference(target,from,expression,file);
+   if(appTracked.has(target)||appBelow(target).length)appReference(target,from,expression,file);
    else if(!stat)unresolved.push({file:from,expression,reason:'missing'});
   }
   function appCalls(text,from){
    if(!/app-source\.mjs['"]/.test(text))return;
+   let plan=appPlans.get(from);
+   if(!plan){
    // A constant is a name every binding of which is a static path expression.
    const names=new Set([...text.matchAll(/(?<![\w$.])([A-Za-z_$][\w$]*)\s*=(?![=>])/g)].map(match=>match[1]));
    const bindings=new Map();
@@ -151,6 +159,8 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    const bases=new Map();
    for(const match of text.matchAll(/\b([A-Za-z_$][\w$]*)\s*=\s*appPath\(/g)){const value=argument(text,match.index+match[0].length),targets=value===null?[]:staticPaths(value,constants).filter(target=>target.exact);if(targets.length)bases.set(match[1],[...new Set([...(bases.get(match[1])||[]),...targets.map(target=>path.posix.normalize(target.value))])]);}
    for(const match of text.matchAll(/\b([A-Za-z_$][\w$]*)\s*=\s*appSourceRoot\(\)(\.directory\b)?/g))bases.set(match[2]?match[1]:match[1]+'.directory',['.']);
+   plan={constants,bases};appPlans.set(from,plan);}
+   const {constants,bases}=plan;
    for(const match of text.matchAll(APP_HELPERS)){
     const value=argument(text,match.index+match[0].length);if(value===null)continue;
     const expression=match[0]+value+')',targets=staticPaths(value,constants);
@@ -176,7 +186,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   function checkPin(pin,from){
    const expression=JSON.stringify(pin);let file;
    if(pin.file.startsWith(APP_REFERENCE)){const relative=pin.file.slice(APP_REFERENCE.length);appReference(relative,from,expression);if(!appTracked.has(relative))return;file=path.join(appSource.directory,relative);}
-   else{file=jsonCandidates(from,pin.file).find(candidate=>fs.statSync(candidate,{throwIfNoEntry:false})?.isFile());if(!file){unresolved.push({file:from,expression,reason:'missing'});return;}enqueue(path.relative(root,file));}
+   else{file=jsonCandidates(from,pin.file).find(candidate=>statOf(candidate)?.isFile());if(!file){unresolved.push({file:from,expression,reason:'missing'});return;}enqueue(path.relative(root,file));}
    if(!file.endsWith('.json')||pin.match)return;
    let target=JSON.parse(fs.readFileSync(file));
    for(const key of pin.pointer?parsePointer(pin.pointer):[]){if(!target||typeof target!=='object'||!Object.hasOwn(target,key)){unresolved.push({file:from,expression,reason:'pin'});return;}target=target[key];}
@@ -192,18 +202,22 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    const input=artifactId(value);if(input&&projects.has(input)&&input!==id){inputs.add(input);return {buildInput:input};}
    return Object.fromEntries(Object.entries(value).map(([key,child])=>[key,walkJson(child,from)]));
   };
-  function reference(literal,from,directories=[]){
+  function reference(literal,from,directories=NONE){
    if(typeof literal==='string'&&/^app:[-A-Za-z0-9_./@+]+$/.test(literal)){appReference(literal.slice(APP_REFERENCE.length),from,literal);return;}
    if(typeof literal!=='string'||!/^[-A-Za-z0-9_./@+]+$/.test(literal))return;
-   const candidates=[path.resolve(root,path.dirname(from),literal),path.resolve(root,literal),...(from.endsWith('.json')?jsonCandidates(from,literal):[]),...directories.map(directory=>path.resolve(directory,literal))];
-   for(const absolute of candidates){if(!inside(root,absolute))continue;const relative=path.relative(root,absolute).split(path.sep).join('/');rememberLink(relative);if(!fs.statSync(absolute,{throwIfNoEntry:false})?.isFile())continue;if(/\.(?:json|[mc]?js|[ch](?:pp|xx)?|cc|mm|m|rs|go|toml|lock|patch|metal|glsl|swift|cmake|txt)$/.test(relative)||path.basename(relative)==='CMakeLists.txt'){enqueue(relative);return;}}
+   let plans=referencePlans.get(directories);if(!plans)referencePlans.set(directories,plans=new Map());
+   const key=from+'\0'+literal;let plan=plans.get(key);
+   if(!plan){plan={links:[],file:null};plans.set(key,plan);
+    const candidates=[path.resolve(root,path.dirname(from),literal),path.resolve(root,literal),...(from.endsWith('.json')?jsonCandidates(from,literal):[]),...directories.map(directory=>path.resolve(directory,literal))];
+    for(const absolute of candidates){if(!inside(root,absolute))continue;const relative=path.relative(root,absolute).split(path.sep).join('/');plan.links.push(relative);if(!statOf(absolute)?.isFile())continue;if(/\.(?:json|[mc]?js|[ch](?:pp|xx)?|cc|mm|m|rs|go|toml|lock|patch|metal|glsl|swift|cmake|txt)$/.test(relative)||path.basename(relative)==='CMakeLists.txt'){plan.file=relative;break;}}}
+   for(const relative of plan.links)rememberLink(relative);if(plan.file)enqueue(plan.file);
   }
   // Local modules and files are followed the way Node resolves them. Paths
   // computed from other variables are reported, never evaluated.
-  const moduleFile=base=>[base,...['.js','.cjs','.mjs','.json'].map(extension=>base+extension),path.join(base,'index.js')].find(candidate=>fs.statSync(candidate,{throwIfNoEntry:false})?.isFile());
+  const moduleFile=base=>[base,...['.js','.cjs','.mjs','.json'].map(extension=>base+extension),path.join(base,'index.js')].find(candidate=>statOf(candidate)?.isFile());
   function local(absolute,from,expression){
    if(absolute!==root&&!inside(root,absolute)){unresolved.push({file:from,expression,reason:'outside'});return;}
-   const relative=path.relative(root,absolute).split(path.sep).join('/'),stat=fs.statSync(absolute,{throwIfNoEntry:false});
+   const relative=path.relative(root,absolute).split(path.sep).join('/'),stat=statOf(absolute);
    if(rememberLink(relative))return;
    if(stat?.isFile())enqueue(relative);else if(!stat?.isDirectory())unresolved.push({file:from,expression,reason:'missing'});
   }
@@ -221,12 +235,12 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   // A directory entry declares every tracked file below it.
   const directoryFiles=directory=>trackedFiles.length?trackedFiles.filter(file=>file.startsWith(directory+'/')):fs.readdirSync(path.join(root,directory),{recursive:true}).map(name=>path.posix.join(directory,name.split(path.sep).join('/'))).filter(file=>fs.statSync(path.join(root,file)).isFile());
   if(fs.existsSync(path.join(root,'.github/actions/build-runtime/action.yml')))enqueue('.github/actions/build-runtime/action.yml');
-  for(const entry of project.producer.entries||[]){const stat=fs.statSync(path.join(root,entry),{throwIfNoEntry:false});if(stat?.isDirectory())for(const file of directoryFiles(entry))enqueue(file);else if(stat)enqueue(entry);else unresolved.push({file:'projects',expression:entry,reason:'missing'});}
+  for(const entry of project.producer.entries||[]){const stat=statOf(path.join(root,entry));if(stat?.isDirectory())for(const file of directoryFiles(entry))enqueue(file);else if(stat)enqueue(entry);else unresolved.push({file:'projects',expression:entry,reason:'missing'});}
   if(project.producer.recipe)enqueue(project.producer.recipe);
   for(const upstream of project.upstreams)if(upstream.pin){if(upstream.pin.gitlink)rememberLink(upstream.pin.gitlink);else{enqueue(upstream.pin.file);rememberLink(upstream.pin.file);}}
   while(queue.length){const file=queue.shift(),absolute=path.join(root,file);if(rememberLink(file))continue;
-   if(!fs.statSync(absolute,{throwIfNoEntry:false})?.isFile())continue;
-   const bytes=fs.readFileSync(absolute);
+   const cached=fileFacts(absolute);if(!cached)continue;
+   const bytes=cached.bytes;
    if(file.endsWith('.yml')){
     const text=bytes.toString('utf8');
     for(const match of text.matchAll(/\bnode (tools\/[A-Za-z0-9_./-]+\.mjs)\b/g))enqueue(match[1]);
@@ -238,9 +252,9 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
     if(raw.path&&raw.buildEntry){rememberLink(raw.path);reference(path.posix.join(raw.path,raw.buildEntry),file);}
     if(raw.sourceDirectory&&Array.isArray(raw.sources))for(const source of raw.sources)reference(path.posix.join(raw.sourceDirectory,source),file);
    }else{
-    files.set(file,crypto.createHash('sha256').update(bytes).digest('hex'));
+    files.set(file,cached.digest??=crypto.createHash('sha256').update(bytes).digest('hex'));
     if(/\.(?:[mc]?js|[cm]?[ch](?:pp|xx)?|cc|rs|cmake|txt)$/.test(file)){
-     const text=bytes.toString('utf8'),literals=[...text.matchAll(/(['"])([^'"\r\n]+)\1/g)].map(match=>match[2]).filter(literal=>/^[-A-Za-z0-9_./@+]+$/.test(literal)),directories=literals.map(literal=>path.resolve(root,literal)).filter(directory=>inside(root,directory)&&fs.statSync(directory,{throwIfNoEntry:false})?.isDirectory());
+     cached.text??=bytes.toString('utf8');const text=cached.text;cached.literals??=[...text.matchAll(/(['"])([^'"\r\n]+)\1/g)].map(match=>match[2]).filter(literal=>/^[-A-Za-z0-9_./@+]+$/.test(literal));const literals=cached.literals;cached.directories??=literals.map(literal=>path.resolve(root,literal)).filter(directory=>inside(root,directory)&&statOf(directory)?.isDirectory());const directories=cached.directories;
      for(const match of text.matchAll(/\bpreparedBuildInput\(\s*['"]([a-z0-9-]+)['"]/g))if(projects.has(match[1])&&match[1]!==id)inputs.add(match[1]);
      for(const literal of literals)reference(literal,file,directories);
      for(const match of text.matchAll(/(['"])app:([-A-Za-z0-9_./@+]+)\1/g))appReference(match[2],file,match[0]);
