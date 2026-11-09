@@ -6,7 +6,7 @@
   "kind": "dylib",
   "output": "libsdkencryptedappticket.dylib",
   "sources": [
-    "app:src/modules/shared/runtime/steamworks/native/ticket-0.1.0/source/ticket.cpp"
+    "src/modules/shared/runtime/steamworks/native/ticket-0.1.0/source/ticket.cpp"
   ],
   "flags": [
     "-std=c++17",

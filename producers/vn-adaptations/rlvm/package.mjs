@@ -1,4 +1,4 @@
-import {appPath,appRequire} from '../../../tools/app-source.mjs';
+import {appRequire} from '../../../tools/app-source.mjs';
 import {addLicenses} from '../../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -39,7 +39,7 @@ export async function packageAdapter({output,binary,archive:packed=true,version}
 /** GitHub build: compile the owned source with its recorded universal arguments, then package it. */
 export async function build({output,work,version}){
  const profile=JSON.parse(fs.readFileSync(path.join(here,'adapter.json')));
- fs.mkdirSync(work,{recursive:true});fs.copyFileSync(appPath('src/modules/siglus/resources/rlvm-adapter/adapter.m'),path.join(work,'adapter.m'));
+ fs.mkdirSync(work,{recursive:true});fs.copyFileSync(path.join(here,'adapter.m'),path.join(work,'adapter.m'));
  execFileSync(profile.build.command,profile.build.args,{cwd:work,stdio:'inherit',timeout:120000});
  if(profile.signature!=='ad-hoc')throw Error('The adapter profile selects an unsupported signature.');
  execFileSync('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',path.join(work,profile.path)],{stdio:'pipe',timeout:30000});

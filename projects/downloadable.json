@@ -808,7 +808,7 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/vn-adaptations",
       "entries": [
-        "producers/vn-adaptations/package.mjs"
+        "producers/vn-adaptations/kag3-polyfill"
       ]
     },
     "upstreams": [
@@ -2510,7 +2510,6 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/vn-adaptations",
       "entries": [
-        "producers/vn-adaptations/package.mjs",
         "producers/vn-adaptations/siglus"
       ]
     },

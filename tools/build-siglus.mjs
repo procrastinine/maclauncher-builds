@@ -1,6 +1,5 @@
 import {sourceRevision} from '../lib/pins.mjs';
 import './producer-environment.mjs';
-import {appPath} from './app-source.mjs';
 import {addLicense,addLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -12,7 +11,7 @@ import {sealRuntime} from './seal-runtime.mjs';
 
 const root=path.resolve(import.meta.dirname,'..'),hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 export async function buildSiglus({project,arch,output,work}){
- const record=buildRecord(resolveProject(project,root)),owned=path.join(root,'producers/vn-adaptations/siglus'),hostSource=appPath('src/modules/siglus/resources/native-host/host.m'),pin=JSON.parse(fs.readFileSync(path.join(root,'producers/vn-adaptations/source.json'))).projects.siglus;
+ const record=buildRecord(resolveProject(project,root)),owned=path.join(root,'producers/vn-adaptations/siglus'),hostSource=path.join(owned,'host.m'),pin=JSON.parse(fs.readFileSync(path.join(root,'producers/vn-adaptations/source.json'))).projects.siglus;
  fs.mkdirSync(work,{recursive:true});
  const sourceRoot=checkoutSource({repository:pin.upstream.url,revision:sourceRevision(pin.upstream),destination:path.join(work,'upstream')}),source=path.join(work,'source');
  const staged=await stageSource(sourceRoot,sourceRevision(pin.upstream),source),target=arch==='arm64'?'aarch64-apple-darwin':'x86_64-apple-darwin',env=rustEnvironment({work,minimumMacOS:'13.0'});
@@ -26,7 +25,7 @@ export async function buildSiglus({project,arch,output,work}){
 }
 /** Seal compiled Siglus products and the matching source and license inputs. */
 export async function packageSiglus({project,arch,output,work,sourceRoot,source,env,target,staged}){
- const record=buildRecord(resolveProject(project,root)),owned=path.join(root,'producers/vn-adaptations/siglus'),hostSource=appPath('src/modules/siglus/resources/native-host/host.m'),pin=JSON.parse(fs.readFileSync(path.join(root,'producers/vn-adaptations/source.json'))).projects.siglus;
+ const record=buildRecord(resolveProject(project,root)),owned=path.join(root,'producers/vn-adaptations/siglus'),hostSource=path.join(owned,'host.m'),pin=JSON.parse(fs.readFileSync(path.join(root,'producers/vn-adaptations/source.json'))).projects.siglus;
 
  const host=path.join(work,'siglus-host'),library=path.join(work,'libsiglus.dylib');
  run('/usr/bin/xcrun',['clang','-arch',arch==='x64'?'x86_64':arch,'-mmacosx-version-min=13.0','-O2','-fobjc-arc','-ffile-prefix-map='+path.dirname(hostSource)+'=siglus-host',hostSource,'-framework','AppKit','-framework','Foundation','-o',host]);

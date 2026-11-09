@@ -190,7 +190,6 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/scripts/stage-mkxpz-config-helper.cjs",
         "producers/package-support/helper-builds/mkxpz-config-helper.json"
       ],
       "sourceDirectory": "producers/package-support"
@@ -876,7 +875,6 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/scripts/stage-web-renderer-network.cjs",
         "producers/package-support/helper-builds/web-renderer-network.json"
       ],
       "sourceDirectory": "producers/package-support"
