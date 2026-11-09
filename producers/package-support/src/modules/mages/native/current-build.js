@@ -8,7 +8,6 @@ const Fonts = require("../../shared/runtime/portable-sdl2-fonts");
 const Dependency = require("./portable-dependencies");
 const Portable = require("./portable-build");
 const Patches = require("./source-patches");
-const overlay = require("./current-windows-overlay.json");
 const Pins = require("./sources.json");
 const { throwIfAborted } = require('../../../../../../lib/abort.cjs');
 
@@ -22,7 +21,7 @@ const PROFILE = "windows-mpk2-sc3-sfx-macos13-v9";
 const PATCH = path.join(__dirname, "current-windows.patch");
 const ABI_PROFILE = Object.freeze({ input: "windows-sc3-input-v1", audio: "windows-sc3-voice-v1",
   checkpoint: "windows-sc3-checkpoint-u16-v1", backlog: "backlog-zero-capacity-v1", soundEffect: "windows-sc3-sfx-v1" });
-const recipeFiles = [...new Set([__filename, PATCH, path.join(__dirname, "current-windows-overlay.json"),
+const recipeFiles = [...new Set([__filename, PATCH,
   path.join(__dirname, "ffmpeg-probe.c"), ...Dependency.RECIPE_FILES])];
 
 function overlayIdentity() {
@@ -33,7 +32,7 @@ function overlayIdentity() {
 
 async function applyCurrentOverlay(directory, { logPath, signal } = {}) {
   return { upstreamRevision: REVISION, overlaySha256: overlayIdentity(),
-    ...await Patches.applyPinnedPatch(directory, PATCH, overlay, { logPath, signal }) };
+    ...await Patches.applyPinnedPatch(directory, PATCH, { logPath, signal }) };
 }
 
 // SDK prefixes are ordinary outputs of the portable dependency, codec and

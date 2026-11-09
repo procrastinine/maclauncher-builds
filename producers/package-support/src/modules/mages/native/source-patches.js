@@ -11,26 +11,36 @@ function patchEnvironment(sourceDir, inherited = process.env) {
   return env;
 }
 
-async function applyPinnedPatch(sourceDir, patchFile, pin, { logPath, signal, env } = {}) {
-  if (fs.existsSync(path.join(sourceDir, ".git"))) throw new Error("Apply native dependency patches only to an owned source copy.");
-  if (hash(patchFile) !== pin.patchSha256) throw new Error("Native dependency patch differs from its pinned SHA-256.");
-  for (const file of pin.files) {
-    if (path.isAbsolute(file.path) || file.path.split(/[\\/]/).some(part => part === ".." || part === ".git")) throw new Error("Unsafe native dependency patch path.");
-    const target = path.join(sourceDir, file.path);
-    if (file.originalSha256 === null ? fs.existsSync(target) : hash(target) !== file.originalSha256) {
-      throw new Error(`Pinned dependency source differs: ${file.path}.`);
-    }
+// The files a unified patch writes, in code point order.
+function patchFiles(patchFile) {
+  const files = new Set();
+  let removed = null;
+  for (const line of fs.readFileSync(patchFile, "utf8").split("\n")) {
+    const header = line.match(/^(---|\+\+\+) (\S+)/);
+    if (!header) continue;
+    if (header[1] === "---") { removed = header[2]; continue; }
+    const name = header[2] === "/dev/null" ? removed : header[2];
+    files.add(name.replace(/^[ab]\//, ""));
   }
+  return [...files].sort();
+}
+
+async function applyPinnedPatch(sourceDir, patchFile, { logPath, signal, env } = {}) {
+  if (fs.existsSync(path.join(sourceDir, ".git"))) throw new Error("Apply native dependency patches only to an owned source copy.");
+  const files = patchFiles(patchFile);
+  for (const file of files)
+    if (path.isAbsolute(file) || file.split(/[\\/]/).some(part => part === ".." || part === ".git")) throw new Error("Unsafe native dependency patch path.");
+  const digest = file => fs.existsSync(path.join(sourceDir, file)) ? hash(path.join(sourceDir, file)) : null;
+  const original = files.map(digest);
   // A copied source tree can sit inside the launcher's Git checkout. Without
   // this boundary git apply can silently skip every hunk and still exit zero.
   const options = { cwd: sourceDir, logPath, signal, env: patchEnvironment(sourceDir, env) };
   const git = Build.findBuildTool("git");
   await Build.runBuildCommand(git, ["apply", "--check", patchFile], options);
   await Build.runBuildCommand(git, ["apply", patchFile], options);
-  for (const file of pin.files) {
-    if (hash(path.join(sourceDir, file.path)) !== file.adaptedSha256) throw new Error(`Native dependency patch was not applied: ${file.path}.`);
-  }
-  return { patchSha256: pin.patchSha256, files: pin.files };
+  const adapted = files.map(digest);
+  files.forEach((file, index) => { if (adapted[index] === original[index]) throw new Error(`Native dependency patch was not applied: ${file}.`); });
+  return { patchSha256: hash(patchFile), files: files.map((file, index) => ({ path: file, originalSha256: original[index], adaptedSha256: adapted[index] })) };
 }
 
-module.exports = { patchEnvironment, applyPinnedPatch };
+module.exports = { patchEnvironment, patchFiles, applyPinnedPatch };

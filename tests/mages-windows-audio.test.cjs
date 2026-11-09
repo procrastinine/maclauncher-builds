@@ -8,7 +8,8 @@ const os = require("node:os");
 const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const Current = require("../producers/package-support/src/modules/mages/native/current-build");
-const descriptor = require('../producers/package-support/src/modules/mages/native/current-windows-overlay.json');
+const patchFiles = require('../producers/package-support/src/modules/mages/native/source-patches').patchFiles(
+  path.join(__dirname, '../producers/package-support/src/modules/mages/native/current-windows.patch'));
 const Session = appRequire('src/modules/mages/native/windows-audio-session');
 
 const nativeRoot = appPath('src/modules/mages/native');
@@ -20,16 +21,15 @@ test("the current Windows voice patch validates inputs before writes and supplie
     t.after(() => fs.rmSync(root, { recursive: true, force: true }));
     const source = path.join(root, "source"), upstream = path.resolve(__dirname, "../producers/package-support/src/external/impacto");
     fs.mkdirSync(source);
-    for (const item of descriptor.files) {
-      if (item.originalSha256 === null) continue;
-      const original = path.join(upstream, item.path), target = path.join(source, item.path);
-      assert.equal(hash(fs.readFileSync(original)), item.originalSha256);
+    for (const file of patchFiles) {
+      const original = path.join(upstream, file), target = path.join(source, file);
+      if (!fs.existsSync(original)) continue;
       fs.mkdirSync(path.dirname(target), { recursive: true });
       fs.copyFileSync(original, target);
     }
     const first = path.join(source, "CMakeLists.txt"), original = fs.readFileSync(first);
-    fs.appendFileSync(first, "\nchanged source\n");
-    await assert.rejects(Current.applyCurrentOverlay(source, { logPath: path.join(root, "overlay.log") }), /Pinned dependency source differs/);
+    fs.writeFileSync(first, "changed source\n");
+    await assert.rejects(Current.applyCurrentOverlay(source, { logPath: path.join(root, "overlay.log") }), /Native build command failed/);
     assert.equal(fs.existsSync(path.join(source, "src/vm/windows-audio.cpp")), false);
     fs.writeFileSync(first, original);
     await Current.applyCurrentOverlay(source, { logPath: path.join(root, "overlay.log") });

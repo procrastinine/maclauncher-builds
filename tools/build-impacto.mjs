@@ -3,6 +3,7 @@ import {addLicense,addLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
+import {createHash} from 'node:crypto';
 import {buildInput} from './build-input.mjs';
 import {checkoutSource,run,recipeMain} from "./build-source.mjs";
 import {sealRuntime} from './seal-runtime.mjs';
@@ -11,10 +12,10 @@ import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {nativeStackInput} from './native-stack.mjs';
 import {sourceRevision} from '../lib/pins.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),native=name=>path.join(root,'producers/package-support/src/modules/mages/native',name),mages=name=>require(native(name));
-const Builder=mages('current-build.js'),Dependency=mages('portable-dependencies.js'),Portable=mages('portable-build.js'),Patches=mages('source-patches.js'),DependencyOverlays=mages('dependency-overlays.json'),Bink2=mages('sources.json').bink2;
+const Builder=mages('current-build.js'),Dependency=mages('portable-dependencies.js'),Portable=mages('portable-build.js'),Patches=mages('source-patches.js'),Bink2=mages('sources.json').bink2;
 const FFmpeg=require('../producers/package-support/src/modules/shared/runtime/portable-ffmpeg.json').source;
-/** The Bink2 decoder source record a package states, with the patch digest its overlay checks. */
-const bink2Source=()=>({repository:Bink2.repository,revision:sourceRevision(Bink2),patchPath:Bink2.patchPath,upstreamPatchSha256:Bink2.upstreamPatchSha256,patchSha256:DependencyOverlays.ffmpegBink2.patchSha256,adaptations:Bink2.adaptations,license:Bink2.license});
+/** The Bink2 decoder source record a package states, with the digest of the patch it applies. */
+const bink2Source=()=>({repository:Bink2.repository,revision:sourceRevision(Bink2),patchPath:Bink2.patchPath,upstreamPatchSha256:Bink2.upstreamPatchSha256,patchSha256:createHash('sha256').update(fs.readFileSync(native('bink2.patch'))).digest('hex'),adaptations:Bink2.adaptations,license:Bink2.license});
 const Fonts=require('../producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js'),Audio=require('../producers/package-support/src/modules/shared/runtime/portable-sndfile.js');
 const Source=require('../producers/package-support/src/modules/shared/runtime/pinned-native-build.js'),AVCPP_SOURCE_SCOPE=Object.freeze({kind:'primary-tree',omittedSubmodules:['catch2']});
 const dependencies={runBuildCommand:(command,args,options)=>Source.runBuildCommand(command,args.map((value,index)=>index>0&&args[index-1]==='--parallel'?'2':value),options)};
@@ -30,7 +31,7 @@ export async function compile({project,arch,work}){
 export async function finishImpacto({project,arch,work,sources,fonts,audio,dependencyStack,maps}){
  const sdk=dependencyStack.sdk,ffmpeg=path.join(work,'ffmpeg-source'),ffmpegOutput=path.join(work,'ffmpeg-build'),ffmpegPrefix=path.join(work,'ffmpeg');
  fs.mkdirSync(ffmpeg);run('/usr/bin/tar',['-xf',await buildInput({url:FFmpeg.url,sha256:FFmpeg.sha256,bytes:FFmpeg.bytes}),'--strip-components','1','-C',ffmpeg]);
- await Patches.applyPinnedPatch(ffmpeg,native('bink2.patch'),DependencyOverlays.ffmpegBink2,{logPath:path.join(work,'patches.log')});
+ await Patches.applyPinnedPatch(ffmpeg,native('bink2.patch'),{logPath:path.join(work,'patches.log')});
  fs.mkdirSync(ffmpegOutput);const env=Dependency.environment(ffmpegPrefix,sdk,[ffmpegPrefix,dependencyStack.prefix]);
  run(path.join(ffmpeg,'configure'),Portable.ffmpegOptions({prefix:ffmpegPrefix,sdk,pathMappings:maps}),{cwd:ffmpegOutput,env});
  mages('build.js').normalizeGeneratedFfmpegConfiguration(ffmpegOutput,maps);run('/usr/bin/make',['-j2'],{cwd:ffmpegOutput,env});run('/usr/bin/make',['install'],{cwd:ffmpegOutput,env});
@@ -40,7 +41,7 @@ export async function finishImpactoEngine({project,arch,work,sources,fonts,audio
  const sdk=dependencyStack.sdk,ffmpeg=path.join(work,'ffmpeg-source'),avcpp=path.join(work,'avcpp-source'),avcppPrefix=path.join(work,'avcpp');
  addLicenses(ffmpegPrefix,'FFmpeg 7.1.2',ffmpeg);
  const checked=await Source.pinnedFiles(sources.avcpp,Builder.SOURCES.avcpp.revision,{sourceScope:AVCPP_SOURCE_SCOPE});Source.stagePinnedFiles(sources.avcpp,checked.files,avcpp);
- await Patches.applyPinnedPatch(avcpp,path.join(sources.impacto,'portfiles/avcpp/0002-av_init_packet_deprecation.patch'),DependencyOverlays.avcppPacket,{logPath:path.join(work,'patches.log')});
+ await Patches.applyPinnedPatch(avcpp,path.join(sources.impacto,'portfiles/avcpp/0002-av_init_packet_deprecation.patch'),{logPath:path.join(work,'patches.log')});
  const tools=dependencyStack.tools;await Dependency.buildCmake({sourceRoot:avcpp,outputRoot:path.join(work,'avcpp-build'),prefix:avcppPrefix,sdk,tools,prefixes:[ffmpegPrefix,dependencyStack.prefix],pathMappings:maps,dependencies,options:['-DAV_ENABLE_STATIC=ON','-DAV_ENABLE_SHARED=OFF','-DAV_BUILD_EXAMPLES=OFF','-DAV_BUILD_TESTS=OFF','-DAV_DISABLE_AVDEVICE=ON','-DAV_DISABLE_AVFILTER=ON']});
  const built=await Builder.buildCurrentImpacto({sourceDir:sources.impacto,workRoot:path.join(work,'engine'),dependencyStack,ffmpegPrefix,avcppPrefix,atrac9Source:sources.atrac9,magicEnumSource:sources.magicEnum,pathMappings:maps,dependencies});
 

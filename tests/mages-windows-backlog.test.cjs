@@ -9,27 +9,28 @@ const { execFileSync } = require("node:child_process");
 
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 const Current=require('../producers/package-support/src/modules/mages/native/current-build');
-const descriptor=require('../producers/package-support/src/modules/mages/native/current-windows-overlay.json');
+const patch=path.resolve(__dirname,'../producers/package-support/src/modules/mages/native/current-windows.patch');
+const patchFiles=require('../producers/package-support/src/modules/mages/native/source-patches').patchFiles(patch);
 const upstream=path.resolve(__dirname,'../producers/package-support/src/external/impacto');
 const relative='src/ui/backlogmenu.cpp';
 function sourceFixture(t){
  const root=fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()),'mages-current-backlog-'));
  t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  const source=path.join(root,'source');fs.mkdirSync(source);
- for(const item of descriptor.files){if(item.originalSha256===null)continue;const file=path.join(upstream,item.path),target=path.join(source,item.path);assert.equal(hash(fs.readFileSync(file)),item.originalSha256);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(file,target);}
+ for(const name of patchFiles){const file=path.join(upstream,name),target=path.join(source,name);if(!fs.existsSync(file))continue;fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(file,target);}
  return{root,source,target:path.join(source,relative),logPath:path.join(root,'overlay.log')};
 }
 
 
-test("the current backlog patch verifies all pinned input hashes before any write",requirements({ sourceTree: 'producers/package-support/src/external/impacto' }),async t=>{
- const f=sourceFixture(t),first=path.join(f.source,descriptor.files.find(item=>item.originalSha256!==null).path),bytes=fs.readFileSync(first),before=fs.readFileSync(f.target);
- fs.appendFileSync(first,'\nchanged source\n');
- await assert.rejects(Current.applyCurrentOverlay(f.source,{logPath:f.logPath}),/Pinned dependency source differs/);
+test("the current backlog patch refuses a changed input before any write and records its digests",requirements({ sourceTree: 'producers/package-support/src/external/impacto' }),async t=>{
+ const f=sourceFixture(t),first=path.join(f.source,'CMakeLists.txt'),bytes=fs.readFileSync(first),before=fs.readFileSync(f.target);
+ fs.writeFileSync(first,'changed source\n');
+ await assert.rejects(Current.applyCurrentOverlay(f.source,{logPath:f.logPath}),/Native build command failed/);
  assert.deepEqual(fs.readFileSync(f.target),before);
  fs.writeFileSync(first,bytes);const result=await Current.applyCurrentOverlay(f.source,{logPath:f.logPath});
- assert.equal(result.upstreamRevision,Current.REVISION);assert.equal(result.patchSha256,descriptor.patchSha256);
- assert.equal(hash(fs.readFileSync(f.target)),descriptor.files.find(item=>item.path===relative).adaptedSha256);
- await assert.rejects(Current.applyCurrentOverlay(f.source,{logPath:f.logPath}),/Pinned dependency source differs/);
+ assert.equal(result.upstreamRevision,Current.REVISION);assert.equal(result.patchSha256,hash(fs.readFileSync(patch)));
+ const row=result.files.find(item=>item.path===relative);assert.equal(row.originalSha256,hash(before));assert.equal(row.adaptedSha256,hash(fs.readFileSync(f.target)));
+ await assert.rejects(Current.applyCurrentOverlay(f.source,{logPath:f.logPath}),/Native build command failed/);
 });
 
 test("compiled backlog guard skips zero-capacity storage and preserves enabled append and eviction behavior",

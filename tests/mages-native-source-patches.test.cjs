@@ -19,14 +19,13 @@ test("dependency patches inside a surrounding Git checkout change the copied sou
   fs.writeFileSync(path.join(source, "codec.txt"), "unpatched decoder\n");
   const patch = "--- a/codec.txt\n+++ b/codec.txt\n@@ -1 +1 @@\n-unpatched decoder\n+patched decoder\n";
   const patchFile = path.join(root, "decoder.patch"); fs.writeFileSync(patchFile, patch);
-  const pin = { patchSha256: hash(patch), files: [{ path: "codec.txt", originalSha256: hash("unpatched decoder\n"), adaptedSha256: hash("patched decoder\n") }] };
   const before = execFileSync("git", ["-C", source, "apply", "--check", "--verbose", patchFile], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
   assert.equal(before, ""); // Git exits successfully even though no hunk is applied in this surrounding checkout.
-  const result = await Patches.applyPinnedPatch(source, patchFile, pin, { logPath: path.join(root, "build.log") });
+  const result = await Patches.applyPinnedPatch(source, patchFile, { logPath: path.join(root, "build.log") });
   assert.equal(fs.readFileSync(path.join(source, "codec.txt"), "utf8"), "patched decoder\n");
   assert.equal(fs.readFileSync(path.join(root, "codec.txt"), "utf8"), "outer checkout remains intact\n");
-  assert.equal(result.patchSha256, pin.patchSha256);
-  await assert.rejects(Patches.applyPinnedPatch(source, patchFile, pin, { logPath: path.join(root, "build.log") }), /Pinned dependency source differs/);
+  assert.deepEqual(result, { patchSha256: hash(patch), files: [{ path: "codec.txt", originalSha256: hash("unpatched decoder\n"), adaptedSha256: hash("patched decoder\n") }] });
+  await assert.rejects(Patches.applyPinnedPatch(source, patchFile, { logPath: path.join(root, "build.log") }), /Native build command failed/);
 });
 
 test("dependency patch execution cannot inherit a caller's Git directory or worktree", t => {
