@@ -36,13 +36,17 @@ export async function packageAdapter({output,binary,archive:packed=true,version}
   return {archive,record:await pack({project:source.id,input:payload,declaration,output:archive})};
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }
-/** GitHub build: compile the owned source with its recorded universal arguments, then package it. */
-export async function build({output,work,version}){
+/** GitHub build: compile the owned source with its recorded universal arguments. */
+export async function compile({work}){
  const profile=JSON.parse(fs.readFileSync(path.join(here,'adapter.json')));
  fs.mkdirSync(work,{recursive:true});fs.copyFileSync(path.join(here,'adapter.m'),path.join(work,'adapter.m'));
  execFileSync(profile.build.command,profile.build.args,{cwd:work,stdio:'inherit',timeout:120000});
- if(profile.signature!=='ad-hoc')throw Error('The adapter profile selects an unsupported signature.');
- execFileSync('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',path.join(work,profile.path)],{stdio:'pipe',timeout:30000});
- return packageAdapter({output,binary:path.join(work,profile.path),archive:false,version});
+ return {profile,binary:path.join(work,profile.path)};
 }
-recipeMain(import.meta,build);
+/** Sign and package the compiled adapter. */
+export async function assemble({output,version,compiled:{profile,binary}}){
+ if(profile.signature!=='ad-hoc')throw Error('The adapter profile selects an unsupported signature.');
+ execFileSync('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',binary],{stdio:'pipe',timeout:30000});
+ return packageAdapter({output,binary,archive:false,version});
+}
+recipeMain(import.meta,{compile,assemble});

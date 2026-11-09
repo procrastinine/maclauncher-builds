@@ -43,7 +43,7 @@ export function pythonBuildTools(work,requirements){
 // A recipe is one build function, or {compile, assemble}: compile runs the compilers and returns its
 // outputs; assemble stages, describes and seals them without compiling.
 export function recipeMain(meta,recipe){
- const build=typeof recipe==='function'?recipe:async options=>recipe.assemble({...options,compiled:await recipe.compile(options)});
+ const build=typeof recipe==='function'?recipe:async options=>recipe.assemble({...options,compiled:await recipe.compile?.(options)});
  const file=fileURLToPath(meta.url);
  if(!process.argv[1]||path.resolve(process.argv[1])!==file)return;
  (async()=>{
