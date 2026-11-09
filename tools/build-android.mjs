@@ -34,17 +34,25 @@ export function androidBuildInputViews(inputs){
   imageInputs:androidBuildInputRequirements().filter(requirement=>requirement.key.startsWith('image')).map(requirement=>path.dirname(checked[requirement.key].root))};
 }
 
-/** Assemble validated producer inputs; local wiring checks use the same sealed products. */
-export async function buildAndroidFromInputs({version,arch,output,work,inputs}){
+/** Compile the common and ART producers from validated sealed inputs. The original image stays attached for assembly. */
+async function compileFromInputs({version,work,inputs}){
  const views=androidBuildInputViews(inputs),recipe=json(path.join(root,'runtimes/android/source.json')),android=verifyProducer(root,recipe),child=name=>path.join(work,name);
  const elf=await prepareArtMacBuildContext({elfInput:views.checked.elf,work:child('art-context')});
- const image=await prepareArtOriginalImage({inputs:views.imageInputs,elf,work:child('original-image')});let attached=true;
+ const image=await prepareArtOriginalImage({inputs:views.imageInputs,elf,work:child('original-image')});
  try{
   const platform=json(path.join(android,'src/modules/android/native/platform-packages-binary.json')),platformPackages=child('platform-packages');fs.mkdirSync(platformPackages);
   if(platform.files.length!==1)throw Error('The original image package profile changed.');
   fs.copyFileSync(path.join(image.root,platform.suppliedImage.component),path.join(platformPackages,platform.files[0].path),fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);
   const common=await buildAndroidCommonInput({version,output:child('common-output'),work:child('common-work'),angle:views.angle,codecs:views.codecs,blueprint:views.blueprint,aconfig:views.aconfig,platformPackages,java:views.java,javaFramework:views.javaFramework});
   const supplier=await buildAndroidArtSupplier({common,elf,ffiInput:views.ffiInput,artJava:views.artJava,output:child('supplier-output'),work:child('supplier-work')});
+  return {android,views,common,supplier,image};
+ }catch(error){image.detach();throw error;}
+}
+
+/** Package both compiled engines, then detach the original image. */
+export async function assemble({output,work,compiled:{version,android,views,common,supplier,image}}){
+ const child=name=>path.join(work,name);let attached=true;
+ try{
   const {exportArtSourceArchive}=await import(pathToFileURL(path.join(android,'src/modules/android/art/source-archive.mjs')));
   const sourceArchive=exportArtSourceArchive({...supplier.sourceArchiveInputs,output:child('art-source.tar.gz')});
   const {packageArtAdapter}=await import(pathToFileURL(path.join(android,'src/modules/android/art/package.mjs')));
@@ -56,8 +64,8 @@ export async function buildAndroidFromInputs({version,arch,output,work,inputs}){
  }finally{if(attached)image.detach();}
 }
 
-/** Build both engines once, consuming exact signed inputs before any compiler runs. */
-export async function buildAndroid({project,version,arch,output,work}){
+/** Compile both engines once, consuming exact signed inputs before any compiler runs. */
+export async function compile({project,version,arch,output,work}){
  if(project!=='android')throw Error('Select the Android project.');
  const declared=buildRecord(resolveProject(project,root),version);version=declared.version;
  if(!declared.architectures.includes(arch)||[output,work].some(file=>!path.isAbsolute(file||'')||fs.existsSync(file)))throw Error('Select the declared Android CPU and new absolute output/work directories.');
@@ -65,6 +73,6 @@ export async function buildAndroid({project,version,arch,output,work}){
  if(target===workspace||target.startsWith(workspace+path.sep)||workspace.startsWith(target+path.sep))throw Error('Android output and compiler work must be separate directories.');
  verifyProducer(root,json(path.join(root,'runtimes/android/source.json')));fs.mkdirSync(work,{recursive:true});
  const inputs=await resolveAndroidSignedInputs({work:path.join(work,'inputs')});
- return buildAndroidFromInputs({version,arch,output,work,inputs});
+ return {version,...await compileFromInputs({version,work,inputs})};
 }
-recipeMain(import.meta,buildAndroid);
+recipeMain(import.meta,{compile,assemble});

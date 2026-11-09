@@ -15,24 +15,25 @@ const Builder=mages('current-build.js'),Dependency=mages('portable-dependencies.
 const Fonts=require('../producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js'),Audio=require('../producers/package-support/src/modules/shared/runtime/portable-sndfile.js');
 const Source=require('../producers/package-support/src/modules/shared/runtime/pinned-native-build.js'),AVCPP_SOURCE_SCOPE=Object.freeze({kind:'primary-tree',omittedSubmodules:['catch2']});
 const dependencies={runBuildCommand:(command,args,options)=>Source.runBuildCommand(command,args.map((value,index)=>index>0&&args[index-1]==='--parallel'?'2':value),options)};
-export async function buildImpacto({project,arch,output,work}){
+/** Compile Impacto with its FFmpeg, avcpp and shared native stacks. */
+export async function compile({project,arch,work}){
  fs.mkdirSync(work,{recursive:true});const sources={};for(const id of ['impacto','avcpp','atrac9','magicEnum']){const pin=id==='impacto'?{...Adapter.SOURCES.impacto,revision:Builder.REVISION}:Adapter.SOURCES[id];sources[id]=checkoutSource({...pin,destination:path.join(work,'upstream-'+id)});}
  const archives={};for(const pin of [...Fonts.PIN.dependencies,...Audio.PIN.dependencies,...Dependency.PIN.dependencies])archives[pin.id]??=await buildInput({url:pin.archiveUrl,sha256:pin.archiveSha256,bytes:pin.archiveBytes});
  const maps=[...new Set([work,fs.realpathSync(work)])].map(from=>({from,to:'IMPACTO_BUILD'}));
  const fonts=nativeStackInput(preparedBuildInput('native-sdl2-fonts'),{arch,work:path.join(work,'fonts')}),audio=nativeStackInput(preparedBuildInput('native-sndfile'),{arch,work:path.join(work,'audio')});
  const dependencyStack=await Dependency.buildDependencies({archives,workRoot:path.join(work,'dependencies'),reusedStacks:{fonts,audio},pathMappings:maps,dependencies});
- return finishImpacto({project,arch,output,work,sources,fonts,audio,dependencyStack,maps});
+ return finishImpacto({project,arch,work,sources,fonts,audio,dependencyStack,maps});
 }
-export async function finishImpacto({project,arch,output,work,sources,fonts,audio,dependencyStack,maps}){
+export async function finishImpacto({project,arch,work,sources,fonts,audio,dependencyStack,maps}){
  const sdk=dependencyStack.sdk,ffmpeg=path.join(work,'ffmpeg-source'),ffmpegOutput=path.join(work,'ffmpeg-build'),ffmpegPrefix=path.join(work,'ffmpeg');
  fs.mkdirSync(ffmpeg);run('/usr/bin/tar',['-xf',await buildInput({url:Adapter.SOURCES.ffmpeg.archive,sha256:Adapter.SOURCES.ffmpeg.sha256,bytes:Portable.FFMPEG_ARCHIVE_BYTES}),'--strip-components','1','-C',ffmpeg]);
  await Patches.applyPinnedPatch(ffmpeg,native('bink2.patch'),DependencyOverlays.ffmpegBink2,{logPath:path.join(work,'patches.log')});
  fs.mkdirSync(ffmpegOutput);const env=Dependency.environment(ffmpegPrefix,sdk,[ffmpegPrefix,dependencyStack.prefix]);
  run(path.join(ffmpeg,'configure'),Portable.ffmpegOptions({prefix:ffmpegPrefix,sdk,pathMappings:maps}),{cwd:ffmpegOutput,env});
  mages('build.js').normalizeGeneratedFfmpegConfiguration(ffmpegOutput,maps);run('/usr/bin/make',['-j2'],{cwd:ffmpegOutput,env});run('/usr/bin/make',['install'],{cwd:ffmpegOutput,env});
- return finishImpactoEngine({project,arch,output,work,sources,fonts,audio,dependencyStack,maps,ffmpegPrefix});
+ return finishImpactoEngine({project,arch,work,sources,fonts,audio,dependencyStack,maps,ffmpegPrefix});
 }
-export async function finishImpactoEngine({project,arch,output,work,sources,fonts,audio,dependencyStack,maps,ffmpegPrefix}){
+export async function finishImpactoEngine({project,arch,work,sources,fonts,audio,dependencyStack,maps,ffmpegPrefix}){
  const sdk=dependencyStack.sdk,ffmpeg=path.join(work,'ffmpeg-source'),avcpp=path.join(work,'avcpp-source'),avcppPrefix=path.join(work,'avcpp');
  addLicenses(ffmpegPrefix,'FFmpeg 7.1.2',ffmpeg);
  const checked=await Source.validatePinnedSource(sources.avcpp,Adapter.SOURCES.avcpp.revision,{sourceScope:AVCPP_SOURCE_SCOPE});Source.stagePinnedFiles(sources.avcpp,checked.files,avcpp);
@@ -40,10 +41,10 @@ export async function finishImpactoEngine({project,arch,output,work,sources,font
  const tools=dependencyStack.tools;await Dependency.buildCmake({sourceRoot:avcpp,outputRoot:path.join(work,'avcpp-build'),prefix:avcppPrefix,sdk,tools,prefixes:[ffmpegPrefix,dependencyStack.prefix],pathMappings:maps,dependencies,options:['-DAV_ENABLE_STATIC=ON','-DAV_ENABLE_SHARED=OFF','-DAV_BUILD_EXAMPLES=OFF','-DAV_BUILD_TESTS=OFF','-DAV_DISABLE_AVDEVICE=ON','-DAV_DISABLE_AVFILTER=ON']});
  const built=await Builder.buildCurrentImpacto({sourceDir:sources.impacto,workRoot:path.join(work,'engine'),dependencyStack,ffmpegPrefix,avcppPrefix,atrac9Source:sources.atrac9,magicEnumSource:sources.magicEnum,pathMappings:maps,dependencies});
 
- const pin=Dependency.PIN.dependencies.find(row=>row.id==='sdl3');;
- return sealImpacto({project,arch,output,built,sources});
+ return {built,sources};
 }
-export function sealImpacto({project,arch,output,built,sources}){
+/** Add the notices and seal the compiled engine. */
+export function assemble({project,arch,output,compiled:{built,sources}}){
  for(const id of ['avcpp','atrac9','magicEnum'])addLicenses(built.runtimeRoot,id,sources[id]);
  for(const [id,directory] of Object.entries(built.dependencyStack?.sourceRoots||{})){
   addLicenses(built.runtimeRoot,id,directory);
@@ -56,4 +57,4 @@ export function sealImpacto({project,arch,output,built,sources}){
  }
  return sealRuntime({project,arch,output,executable:built.executable,appRoot:path.dirname(path.dirname(path.dirname(built.executable))),payloads:fs.readdirSync(built.runtimeRoot).filter(name=>name!=='Impacto.app').map(name=>({source:path.join(built.runtimeRoot,name),relative:name})),sourceRoot:sources.impacto,upstreamRevision:Builder.REVISION,provenance:{profile:Builder.PROFILE,upstreamRevision:Builder.REVISION,avcppSourceScope:AVCPP_SOURCE_SCOPE,codecSource:{version:Adapter.SOURCES.ffmpeg.version,archiveSha256:Adapter.SOURCES.ffmpeg.sha256,bink2:Adapter.SOURCES.bink2},additionalSources:Object.fromEntries(Object.entries(Adapter.SOURCES).filter(([id])=>['avcpp','atrac9','magicEnum'].includes(id)))}});
 }
-recipeMain(import.meta,buildImpacto);
+recipeMain(import.meta,{compile,assemble});
