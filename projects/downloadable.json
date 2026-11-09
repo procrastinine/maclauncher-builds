@@ -2318,7 +2318,6 @@
       "sourceDirectory": "producers/included-helpers",
       "entries": [
         "producers/included-helpers/prepare.mjs",
-        "producers/included-helpers/profiles/rpgmaker-decrypter.json",
         "producers/included-helpers/rpgmaker-decrypter/decrypter-build.js",
         "producers/included-helpers/rpgmaker-decrypter/package.json",
         "producers/included-helpers/rpgmaker-decrypter/decrypter-platforms.json"
