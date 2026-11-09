@@ -59,3 +59,20 @@ test('P1 regression: ERR_MODULE_NOT_FOUND package-contract.cjs; every job that r
   assert.ok(prepared>=0&&prepared<first,action+' runs repository tools before preparing sources');
  }
 });
+
+test('the one source tool prepares exactly the declared sources for each job kind',async()=>{
+ const {initializeToolSources,initializeMetadataSources,initializeCheckSources}=await import('../tools/init-runtime-sources.mjs');
+ const record=JSON.parse(read('producers/package-support/app-source.json')),checks=JSON.parse(read('tests/sources.json')).sources;
+ // Every path is a registered Gitlink, or lies inside one whose nested links resolve the rest.
+ const run=(args,cwd)=>{
+  if(args[0]!=='ls-files')return '';
+  const prefix=path.relative(root,cwd).split(path.sep).join('/'),all=[...links,...record.sourceSubmodules,...checks];
+  const nested=all.filter(name=>prefix&&name.startsWith(prefix+'/')).map(name=>name.slice(prefix.length+1));
+  return [...new Set(prefix?nested:links)].map(name=>'160000 '+'a'.repeat(40)+' 0\t'+name).join('\n')+'\n';
+ };
+ const paths=result=>result.map(row=>row.path);
+ assert.deepEqual(paths(initializeToolSources({directory:root,run})),[record.gitlink]);
+ assert.deepEqual(paths(initializeMetadataSources({directory:root,run})),record.sourceSubmodules);
+ assert.deepEqual(paths(initializeCheckSources({directory:root,run})),[...new Set([...record.sourceSubmodules,...checks])]);
+ for(const name of checks)assert.ok(links.includes(name),'tests/sources.json names a registered Gitlink: '+name);
+});
