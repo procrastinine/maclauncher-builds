@@ -1,5 +1,4 @@
 import './producer-environment.mjs';
-import {appRequire} from './app-source.mjs';
 import {addLicenses,addLicense} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -9,7 +8,7 @@ import {execFileSync} from 'node:child_process';
 import {copyAndroidProducts,publishAndroidAngle} from './android-common-products.mjs';
 import {stripAndroidFrameworkBuildInputs} from './repackage-android.mjs';
 import {verifyAndroidSourceSnapshot} from '../producers/package-support/scripts/android-stage-sources.mjs';
-const require=createRequire(import.meta.url),B=appRequire('src/modules/shared/runtime/bundled-native.js'),Native=appRequire('src/modules/shared/runtime/local-native.js'),Contract=require('../lib/package-contract.cjs'),Staging=require('../producers/package-support/scripts/native-binary-tools.cjs');
+const require=createRequire(import.meta.url),B=require('../lib/package-format.cjs'),Native=require('../lib/package-format.cjs'),Contract=require('../lib/package-contract.cjs'),Staging=require('../producers/package-support/scripts/native-binary-tools.cjs');
 const root=path.resolve(import.meta.dirname,'..'),sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 
 /** Seal the complete JVM producer output without changing launcher selections. */

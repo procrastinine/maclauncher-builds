@@ -1,16 +1,15 @@
-const {appRequire}=require('../../../../../../../tools/app-source.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const Base = require("./portable-build");
 const Page = require("./portable-page-reset");
 const Source = require("../../runtime/pinned-native-build");
-const Native = appRequire('src/modules/shared/runtime/local-native.js');
+const Native = require('../../../../../../../lib/package-format.cjs');
 const Fonts = require("../../runtime/portable-sdl2-fonts");
 const Audio = require("../../runtime/portable-sndfile");
 const Mixer = require("../../runtime/portable-sdl2-mixer");
 const Prefix = require("../../runtime/portable-dependency-prefix");
-const { throwIfAborted } = appRequire('src/modules/shared/runtime/download-utils.js');
+const { throwIfAborted } = require('../../../../../../../lib/abort.cjs');
 const VERSION_PIN = require("./portable-build-v3.json");
 const PIN = Object.freeze({ ...Base.PIN, ...VERSION_PIN, engine: { ...Base.PIN.engine, ...VERSION_PIN.engine } });
 const VERSION = PIN.engine.version, REVISION = PIN.engine.revision, SOURCE_SHA256 = PIN.engine.sourceTreeSha256;

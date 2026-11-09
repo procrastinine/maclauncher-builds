@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import {appRequire} from '../../../tools/app-source.mjs';
 import {checkoutSource} from '../../../tools/build-source.mjs';
 import {addLicenses,addLicense,includeLicenses,addCargoLicenses} from '../../../lib/licenses.mjs';
 // Developer build and publication of the fixed AIM adaptation. Play uses only
@@ -13,8 +12,8 @@ import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import {prepareAimSources,source} from '../src/modules/android/providers/aim/source.mjs';
 const require = createRequire(import.meta.url);
-const B = appRequire('src/modules/shared/runtime/bundled-native.js');
-const Native = appRequire('src/modules/shared/runtime/local-native.js');
+const B = require('../../../lib/package-format.cjs');
+const Native = require('../../../lib/package-format.cjs');
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const minimumMacOS = '26.0';
 const binaries = ['aimctl','maclauncher-aim','aim-apps','aim-display','aim-binderd','aim-lock-holder','aim-pty-holder','guest-init','linux-run','linux-translate','android-image-extract','android-runtime-prepare'];

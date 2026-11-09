@@ -1575,7 +1575,6 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
         "producers/package-support/src/modules/shared/vulkan/native/kosmickrisp-build.mjs",
-        "producers/package-support/scripts/repackage-graphics-runtime.mjs",
         "producers/package-support/src/modules/shared/vulkan/native/spirv-tools-source.json"
       ],
       "sourceDirectory": "producers/package-support"

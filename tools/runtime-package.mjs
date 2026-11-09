@@ -1,5 +1,4 @@
 import './producer-environment.mjs';
-import {appRequire} from './app-source.mjs';
 import {preparePackageLayout} from './package-layout.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,7 +10,7 @@ import {resolveProject} from '../lib/projects.mjs';
 import {outputVersion} from '../lib/package-version.mjs';
 import {recordMetadata} from '../lib/record-metadata.mjs';
 import {SOURCE_DATE_EPOCH} from '../lib/reproducible-build.mjs';
-const require=createRequire(import.meta.url),B=appRequire('src/modules/shared/runtime/bundled-native.js');
+const require=createRequire(import.meta.url),B=require('../lib/package-format.cjs');
 const {validateDeclaration}=require('../lib/declaration.cjs');
 const A=require('../lib/archive.cjs'),SHA=/^[a-f0-9]{64}$/;
 const root=path.resolve(import.meta.dirname,'..');

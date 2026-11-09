@@ -1,12 +1,11 @@
-const {appRequire}=require('../../../../../../tools/app-source.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const Source = require("../../shared/runtime/pinned-native-build");
-const Native = appRequire('src/modules/shared/runtime/local-native.js');
+const Native = require('../../../../../../lib/package-format.cjs');
 const Fonts = require("../../shared/runtime/portable-sdl2-fonts");
 const Previous = require("./build");
-const { throwIfAborted } = appRequire('src/modules/shared/runtime/download-utils.js');
+const { throwIfAborted } = require('../../../../../../lib/abort.cjs');
 
 const VERSION = "1.5.0-macos-v3";
 const REVISION = Previous.REVISION;
