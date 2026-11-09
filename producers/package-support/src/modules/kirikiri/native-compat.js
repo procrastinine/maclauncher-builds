@@ -1,6 +1,5 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const crypto = require("node:crypto");
 const Native = require('../../../../../lib/package-format.cjs');
 const { throwIfAborted } = require('../../../../../lib/abort.cjs');
 
@@ -15,7 +14,7 @@ function prepareSource({ sourceRoot, revision, signal }) {
     { relative: "external/krkrz/base/SystemIntf.cpp", include: '#include "FontSystem.h"\n#include "tjsDictionary.h"\n#include "SDL.h"\n#include <algorithm>\n#include <climits>\nextern FontSystem* TVPFontSystem;\n',
       anchor: "TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/terminate)", resource: "system-addfont.inc" }
   ];
-  const files = [], digest = crypto.createHash("sha256");
+  const files = [];
   for (const patch of patches) {
     throwIfAborted(signal);
     const file = path.join(sourceRoot, patch.relative), stat = fs.lstatSync(file);
@@ -24,12 +23,9 @@ function prepareSource({ sourceRoot, revision, signal }) {
     if (source.indexOf(patch.anchor) < 0 || source.indexOf(patch.anchor) !== source.lastIndexOf(patch.anchor)) throw new Error("KiriKiri bridge source anchor differs from the reviewed layout.");
     const implementation = fs.readFileSync(path.join(__dirname, "overlays", patch.resource), "utf8");
     fs.writeFileSync(file, patch.include + source.replace(patch.anchor, implementation + "\n" + patch.anchor));
-    const afterSha256 = Native.hashFile(file);
-    files.push({ file: patch.relative, beforeSha256, afterSha256, resource: patch.resource,
-      implementationSha256: crypto.createHash("sha256").update(implementation).digest("hex") });
-    digest.update(patch.relative + "\0" + patch.include + implementation + "\0");
+    files.push({ file: patch.relative, beforeSha256, resource: patch.resource });
   }
-  return { revision: OVERLAY_REVISION, upstreamRevision: REVISION, sha256: digest.digest("hex"), files,
+  return { revision: OVERLAY_REVISION, upstreamRevision: REVISION, files,
     operations: ["actual local/archive directory listing", "process-local native FreeType font loading", "dialog rectangle positioning against actual SDL monitor work areas"] };
 }
 

@@ -78,7 +78,7 @@ test("System3 resource adaptation preserves the upstream input and rejects sourc
   const root = temporary(t), bytes = fs.readFileSync(originalFile), before = crypto.createHash("sha256").update(bytes).digest("hex");
   const source = path.join(root, "source"); fs.mkdirSync(path.join(source, "src"), { recursive: true }); fs.writeFileSync(path.join(source, "src/resource.cpp"), bytes);
   const overlay = Resources.apply(source);
-  assert.equal(overlay.sourceSha256, before); assert.notEqual(overlay.adaptedSourceSha256, before);
+  assert.equal(overlay.sourceSha256, before); assert.notEqual(crypto.createHash("sha256").update(fs.readFileSync(path.join(source, "src/resource.cpp"))).digest("hex"), before);
   assert.deepEqual(fs.readFileSync(originalFile), bytes);
   assert.throws(() => Resources.apply(System3.sourcePath), /separate writable/);
   assert.throws(() => Resources.adaptedResource(Buffer.from("wrong version")), /does not match the Mac adapter/);

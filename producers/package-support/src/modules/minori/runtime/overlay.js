@@ -1,6 +1,5 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const crypto = require("node:crypto");
 
 const REVISION = require("../../../../../../lib/projects.mjs").upstreamRevision("reminori", "reminori");
 const VERSION = "0.1.0-MCLv1";
@@ -16,7 +15,6 @@ const ORIGINALS = Object.freeze([
   "crates/engine/src/vfs.rs",
   "crates/game/src/main.rs"
 ]);
-const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 function replace(text, before, after, file) {
   if (!text.includes(before) || text.indexOf(before) !== text.lastIndexOf(before)) throw new Error(`Pinned Minori source differs in ${file}.`);
   return text.replace(before, () => after);
@@ -91,6 +89,6 @@ function adaptSource(root) {
   fs.mkdirSync(path.join(root, "crates/formats/src/bin"), { recursive: true });
   fs.copyFileSync(path.join(__dirname, "native/probe.rs"), path.join(root, "crates/formats/src/bin/maclauncher-minori-probe.rs"));
   return { version: VERSION, upstreamRevision: REVISION, profile: PROFILE,
-    files: Object.fromEntries([...changes.keys(), ...outputs].sort().map(file => [file, hash(fs.readFileSync(path.join(root, file)))])) };
+    files: [...changes.keys(), ...outputs].sort() };
 }
 module.exports = { REVISION, VERSION, PROFILE, ORIGINALS, adaptSource };

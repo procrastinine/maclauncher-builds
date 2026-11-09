@@ -48,6 +48,6 @@ export async function assemble({project,arch,output,work,compiled:{source,build,
  addLicenses(work,'Opus',path.join(source,'external/krkrz/external/opus'));
  addLicenses(work,'opusfile',path.join(source,'external/krkrz/external/opusfile'));
  addLicenses(work,'SIMDe',path.join(source,'external/simde'));
- return sealRuntime({project,arch,output,executable:path.join(build,'krkrsdl2'),sourceRoot,upstreamRevision:Compat.REVISION,payloads:[{source:stageKag3Resources(work),relative:'share/kag3-polyfill'}],runtimeFiles:{kag3Manifest:'share/kag3-polyfill/manifest.json'},provenance:{sourceTreeSha256:staged.treeSha256,gitDependencies:staged.dependencies,sourceOverlay:overlay,features:{storageDirlist:true,systemAddFont:true,monitorAdjust:true,fullFramePresentation:true,kag3Resources:1}}});
+ return sealRuntime({project,arch,output,executable:path.join(build,'krkrsdl2'),sourceRoot,upstreamRevision:Compat.REVISION,payloads:[{source:stageKag3Resources(work),relative:'share/kag3-polyfill'}],runtimeFiles:{kag3Manifest:'share/kag3-polyfill/manifest.json'},provenance:{gitDependencies:staged.dependencies,sourceOverlay:overlay,features:{storageDirlist:true,systemAddFont:true,monitorAdjust:true,fullFramePresentation:true,kag3Resources:1}}});
 }
 recipeMain(import.meta,{compile,assemble});

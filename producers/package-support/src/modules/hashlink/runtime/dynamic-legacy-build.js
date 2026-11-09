@@ -3,8 +3,6 @@ const { sourceRevision } = require("../../../../../../lib/pins.mjs");
 const { upstreamRevision } = require("../../../../../../lib/projects.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
-const crypto = require("node:crypto");
-const Native = require('../../../../../../lib/package-format.cjs');
 
 const UPSTREAM_VERSION = "1.12";
 const VERSION = "1.12-MCLv1";
@@ -25,8 +23,6 @@ function adaptSource(source, sdlSource) {
   for (const name of fs.readdirSync(path.join(sdlSource, "include"))) {
     if (name.endsWith(".h")) fs.copyFileSync(path.join(sdlSource, "include", name), path.join(headers, name));
   }
-  return crypto.createHash("sha256").update(Native.hashFile(jpeg)).update(Native.hashFile(png))
-    .update(Native.hashFile(path.join(source, "CMakeLists.txt"))).digest("hex");
 }
 
 module.exports = { adaptSource, VERSION, UPSTREAM_VERSION, REVISION, SDL_REVISION, OPENAL_REVISION };

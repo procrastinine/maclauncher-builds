@@ -23,8 +23,7 @@ function sourceFixture(t, { jpeg = "#\tdefine WITH_SIMD", png = "#if defined(THI
 test("legacy dynamic build retains original primitive ABIs and limits adapters to build inputs", t => {
   const { source, sdl } = sourceFixture(t);
   const before = new Map(["libs/sdl/sdl.c", "libs/fmt/fmt.c"].map(file => [file, fs.readFileSync(path.join(source, file))]));
-  const digest = Build.adaptSource(source, sdl);
-  assert.match(digest, /^[a-f0-9]{64}$/);
+  Build.adaptSource(source, sdl);
   for (const [file, bytes] of before) assert.deepEqual(fs.readFileSync(path.join(source, file)), bytes);
   assert.equal(fs.readFileSync(path.join(sdl, "include/SDL.h"), "utf8"), "pinned SDL2 header\n");
   assert.equal(fs.readFileSync(path.join(source, "include/SDL2/SDL.h"), "utf8"), "pinned SDL2 header\n");

@@ -2,7 +2,6 @@ const {addLicense,addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const crypto = require("node:crypto");
 const Native = require('../../../../../../lib/package-format.cjs');
 const Source = require("../../shared/runtime/pinned-native-build");
 const BuildTools = require("../../shared/runtime/native-build-tools");
@@ -94,17 +93,17 @@ async function buildRuntime({ manager, userDataDir, version, packageVersion, sou
     const toolOptions = { temporary: work, packageArchive, findBuildTool: dependencies.findBuildTool || Source.findBuildTool };
     const cmake = await BuildTools.resolveBuildTool("cmake", toolOptions);
     const ninja = await BuildTools.resolveBuildTool("ninja", toolOptions);
-    let source = sourceDir, sourceTreeSha256 = null, sourceArchiveSha256 = null;
+    let source = sourceDir, sourceArchiveSha256 = null;
     if (source && fs.existsSync(path.join(source, ".git"))) {
       const pin = await Source.pinnedFiles(source, REVISION, { signal, sourceScope: SOURCE_SCOPE });
       const privateSource = path.join(work, "source");
-      sourceTreeSha256 = Source.stagePinnedFiles(source, pin.files, privateSource);
+      Source.stagePinnedFiles(source, pin.files, privateSource);
       source = privateSource;
     } else {
       await packageArchive("source", path.join(work, "source-package"));
       sourceArchiveSha256 = PACKAGES.source.sha256;
       source = path.join(work, "source");
-      sourceTreeSha256 = Source.stagePinnedFiles(packageRoots.source, sourceFiles(packageRoots.source), source);
+      Source.stagePinnedFiles(packageRoots.source, sourceFiles(packageRoots.source), source);
     }
     await packageArchive("sdl12", path.join(work, "sdl12-package"));
     await packageArchive("sdl2", path.join(work, "sdl2-package"));
@@ -129,9 +128,6 @@ async function buildRuntime({ manager, userDataDir, version, packageVersion, sou
     onProgress?.({ downloaded: 2, total: 5 });
     await build(packageRoots.sdl12, "sdl12", ["-DSDL12TESTS=OFF", "-DSDL12DEVEL=ON", `-DSDL2_INCLUDE_DIR=${prefix}/include/SDL2`]);
     onProgress?.({ downloaded: 3, total: 5 });
-    const overlayFiles = Object.fromEntries(fs.readdirSync(overlay).sort().filter(name => fs.statSync(path.join(overlay, name)).isFile())
-      .map(name => [name, Native.hashFile(path.join(overlay, name))]));
-    const overlaySha256 = crypto.createHash("sha256").update(fs.readFileSync(__filename)).update(JSON.stringify(overlayFiles)).digest("hex");
     await build(overlay, "engine", [`-DONS_SOURCE=${source}`, `-DSDL12_PREFIX=${prefix}`]);
     fs.mkdirSync(path.join(payload, "lib"), { recursive: true });
     for (const name of ["libSDL-1.2.0.dylib", "libSDL2-2.0.0.dylib"]) {
@@ -158,8 +154,8 @@ async function buildRuntime({ manager, userDataDir, version, packageVersion, sou
     addLicenses(payload, "SMPEG audio", path.join(extlib, "smpeg/audio"));
     addLicenses(payload, "SMPEG video", path.join(extlib, "smpeg/video"));
     addLicense(payload, "IJG JPEG", path.join(extlib, "jpeg-9f/README"));
-    const verifiedBuild = { sourceRevision: REVISION, sourceTreeSha256, sourceArchiveSha256, sourceScope: SOURCE_SCOPE,
-      adapterProfile: "mac-sdl12-v3", overlaySha256, overlayFiles, architecture, minimumMacOS: "13.0",
+    const verifiedBuild = { sourceRevision: REVISION, sourceArchiveSha256, sourceScope: SOURCE_SCOPE,
+      adapterProfile: "mac-sdl12-v3", architecture, minimumMacOS: "13.0",
       compilerPrefixMaps: prefixMaps, compilerFlags, buildDirectory: work,
       nativeVersions: { sdl12Compat: "1.2.76", sdl2: "2.32.10" }, packages: Object.fromEntries(Object.entries(PACKAGES).map(([key, pin]) => [key, pin.sha256])) };
     // The shipped profile contains logical source identities only. Complete

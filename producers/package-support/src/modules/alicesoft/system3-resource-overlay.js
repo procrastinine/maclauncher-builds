@@ -43,7 +43,7 @@ function apply(sourceRoot, { sourceDir = path.resolve(__dirname, "../../external
   if (!fs.lstatSync(file).isFile() || !fs.realpathSync(file).startsWith(output + path.sep)) throw new Error("System3 resource source must be a contained regular file.");
   const inputBytes = fs.readFileSync(file), adapted = adaptedResource(inputBytes);
   fs.writeFileSync(file, adapted);
-  return { version: VERSION, sourceSha256: digest(inputBytes), adaptedSourceSha256: digest(adapted), overlaySha256: digest(fs.readFileSync(__filename)) };
+  return { version: VERSION, sourceSha256: digest(inputBytes) };
 }
 
 module.exports = { VERSION, adaptedResource, apply };

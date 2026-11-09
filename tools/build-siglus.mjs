@@ -36,6 +36,6 @@ export async function assemble({project,arch,output,work,compiled:{sourceRoot,so
  return sealRuntime({cargoRoot:source,env,project,arch,output,sourceRoot,upstreamRevision:sourceRevision(pin.upstream),executable:host,executableRelative:'bin/siglus-host',payloads:[{source:library,relative:'lib/libsiglus.dylib'},{source:profile,relative:'siglus-profile.json'}],runtimeFiles:{siglusLibrary:'lib/libsiglus.dylib',siglusProfile:'siglus-profile.json'},jsonMetadata:{'siglus-profile.json':(value,{files})=>{
   const compatibility=addLicense(files,'siglus_rs',path.join(sourceRoot,'LICENSE-MPL-2.0'),'siglus_rs','LICENSE-siglus_rs.txt');
   return {...value,files:{...Object.fromEntries(['bin/siglus-host','lib/libsiglus.dylib'].map(name=>[name,hash(path.join(files,name))])),...(compatibility?{'LICENSE-siglus_rs.txt':compatibility.sha256}:{})}};
- }},provenance:{sourceTreeSha256:staged.treeSha256,gitDependencies:staged.dependencies,hostSourceSha256:hash(hostSource),resourceLookup:'executable-relative',nativeApi:'game_run_entry-v1'}});
+ }},provenance:{gitDependencies:staged.dependencies,hostSourceSha256:hash(hostSource),resourceLookup:'executable-relative',nativeApi:'game_run_entry-v1'}});
 }
 recipeMain(import.meta,{compile,assemble});

@@ -62,8 +62,7 @@ test("HashLink 1.9 source adaptation uses its pinned headers without changing SD
   fs.writeFileSync(path.join(source, "include/png/pngpriv.h"), "#if defined(THINK_C) || defined(TARGET_OS_MAC)\n#include <fp.h>\n#endif\n");
   fs.writeFileSync(path.join(source, "libs/sdl/sdl.c"), "DEFINE_PRIM(_BOOL, event_loop, _OBJ(_I32 _BOOL));\n");
   fs.writeFileSync(path.join(sdl, "include/SDL.h"), "pinned SDL2 header");
-  const digest = Legacy.adaptSource(source, sdl);
-  assert.match(digest, /^[a-f0-9]{64}$/);
+  Legacy.adaptSource(source, sdl);
   assert.equal(fs.readFileSync(path.join(source, "libs/sdl/sdl.c"), "utf8"), "DEFINE_PRIM(_BOOL, event_loop, _OBJ(_I32 _BOOL));\n");
   assert.equal(fs.readFileSync(path.join(source, "include/SDL2/SDL.h"), "utf8"), "pinned SDL2 header");
   assert.match(fs.readFileSync(path.join(source, "CMakeLists.txt"), "utf8"), /HASHLINK_SDL_LIBRARY/);

@@ -113,7 +113,7 @@ function describeCandidate({ destination, decoderPrefix, decoder, architecture, 
     }
     const profile = { schemaVersion: 1, version: Overlay.VERSION, upstreamRevision: Overlay.REVISION,
       profileRevision: Overlay.PROFILE, dataProfiles: ["paz-bf-slot0-rc4-v1", "paz-pe-keytables-rc4-v1"], minimumMacOS: "13.0",
-      architecture, sourceTreeSha256, sourceOverlay, cargoLockSha256: Native.hashFile(path.join(sourceRoot, "Cargo.lock")),
+      architecture, sourceTreeSha256, sourceOverlay,
       nativeFeatures: ["wgpu-metal", "coretext-fonts", "appkit-game-menu", "appkit-save-comments", "cpal-audio", "private-saves", "private-movie-cache", "original-pe-profile",
         ...(movieDecoder ? ["ffmpeg-movie-bridge"] : [])], movieDecoder,
       supportLevel: "beta", executables: Object.fromEntries(["eden", "maclauncher-minori-probe"].map(name => [name, Native.hashFile(path.join(candidate, "bin", name))])) };
@@ -148,7 +148,7 @@ async function buildRuntime({ manager, version = Overlay.VERSION, sourceDir = so
     const output = await buildCandidate({ sourceDir, destination: path.join(installDir, "native"), decoderPrefix, signal, onProgress, dependencies });
     const installed = manager.core.registerLocal({ userDataDir, version, runtimePath: output.executablePath,
       verifiedBuild: { sourceRevision: Overlay.REVISION, sourceTreeSha256: output.profile.sourceTreeSha256,
-        sourceOverlay: output.profile.sourceOverlay, cargoLockSha256: output.profile.cargoLockSha256,
+        sourceOverlay: output.profile.sourceOverlay,
         hostPlatform: process.platform, hostArch: process.arch } });
     context?.onRuntimeStateChange?.(); return installed;
   } finally { building.delete(installDir); }
