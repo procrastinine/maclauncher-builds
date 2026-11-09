@@ -23,21 +23,26 @@ export function appSourceRoot(repository=root){
  verified.set(repository,result);
  return result;
 }
-/** The declared app files that are symlinks into one of the app's own gitlinks. Each names that
- * gitlink's file at the commit the app records, so the gitlink (as a Builds path) is a source of
- * whoever declares the file. entries are app paths: files, or directories naming every file below. */
-export function appNestedFiles(entries,repository=root){
- const app=appSourceRoot(repository),checkout=path.relative(repository,app.directory).split(path.sep).join('/');
- const stage=git(app.directory,['ls-files','-s','-z']).split('\0').filter(Boolean).map(line=>{const match=/^(\d+) ([a-f0-9]{40}) \d\t(.+)$/s.exec(line);return {mode:match[1],object:match[2],path:match[3]};});
- const links=stage.filter(row=>row.mode==='160000'),declared=entries.map(entry=>entry.replace(/\/$/,''));
- const symlinks=stage.filter(row=>row.mode==='120000'&&declared.some(entry=>row.path===entry||row.path.startsWith(entry+'/')));
- if(!symlinks.length)return [];
- const output=execFileSync('git',['-C',app.directory,'cat-file','--batch'],{input:symlinks.map(row=>row.object).join('\n')+'\n',encoding:'utf8',maxBuffer:Infinity}),targets=[];
+/** The tracked symlinks of a checkout that point into one of its own gitlinks, among entries
+ * (files, or directories naming every file below; every symlink when omitted). A reader of such a
+ * symlink reads that gitlink's file at the commit the checkout records. */
+export function checkoutGitlinkFiles(directory,entries){
+ const stage=git(directory,['ls-files','-s','-z']).split('\0').filter(Boolean).map(line=>{const match=/^(\d+) ([a-f0-9]{40}) \d\t(.+)$/s.exec(line);return {mode:match[1],object:match[2],path:match[3]};});
+ const links=stage.filter(row=>row.mode==='160000'),declared=entries?.map(entry=>entry.replace(/\/$/,''));
+ const symlinks=stage.filter(row=>row.mode==='120000'&&(!declared||declared.some(entry=>row.path===entry||row.path.startsWith(entry+'/'))));
+ if(!symlinks.length||!links.length)return [];
+ const output=execFileSync('git',['-C',directory,'cat-file','--batch'],{input:symlinks.map(row=>row.object).join('\n')+'\n',encoding:'utf8',maxBuffer:Infinity}),targets=[];
  for(let offset=0;offset<output.length;){const end=output.indexOf('\n',offset),size=Number(output.slice(offset,end).split(' ')[2]);targets.push(output.slice(end+1,end+1+size));offset=end+1+size+1;}
  return symlinks.flatMap((row,index)=>{
   const resolved=path.posix.normalize(path.posix.join(path.posix.dirname(row.path),targets[index])),link=links.find(link=>resolved.startsWith(link.path+'/'));
-  return link?[{file:row.path,gitlink:checkout+'/'+link.path,revision:link.object,inner:resolved.slice(link.path.length+1)}]:[];
+  return link?[{file:row.path,gitlink:link.path,revision:link.object,inner:resolved.slice(link.path.length+1)}]:[];
  });
+}
+/** The declared app files that are symlinks into one of the app's own gitlinks, each with that
+ * gitlink as a Builds path: the gitlink is a source of whoever declares the file. */
+export function appNestedFiles(entries,repository=root){
+ const app=appSourceRoot(repository),checkout=path.relative(repository,app.directory).split(path.sep).join('/');
+ return checkoutGitlinkFiles(app.directory,entries).map(row=>({...row,gitlink:checkout+'/'+row.gitlink}));
 }
 /** The absolute path of a file or directory inside the verified app checkout. */
 export function appPath(relative){

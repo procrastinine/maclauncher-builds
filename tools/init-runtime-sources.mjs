@@ -5,7 +5,7 @@ import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {createRequire} from 'node:module';
 import {retryNetwork} from './download.mjs';
-import {appNestedFiles} from './app-source.mjs';
+import {appNestedFiles,checkoutGitlinkFiles} from './app-source.mjs';
 const root=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url);
 // This tool runs before any source exists; the project registry it reads names no file inside a source.
 /** Initialize only declared Gitlink paths, including nested production sources. */
@@ -58,10 +58,13 @@ export function initializeMetadataSources({directory=root,run=runGit,done=new Se
  const initialized=initializeGitlinks({paths:[...(appProjects.length?toolPaths(directory):[]),...holding],directory,run,done});
  return [...initialized,...initializeGitlinks({paths:nestedAppPaths(appProjects,directory),directory,run,done})];
 }
-/** Sources npm test reads: the planner's sources and every pinned source repository. */
+/** Sources npm test reads: the planner's sources, every pinned source repository and the
+ * gitlinks each of those repositories' own symlinks point into. */
 export function initializeCheckSources({directory=root,run=runGit}={}){
- const done=new Set();
- return [...initializeMetadataSources({directory,run,done}),...initializeGitlinks({paths:gitlinks(directory,run).filter(link=>/^sources\/[^/]+$/.test(link)),directory,run,done})];
+ const done=new Set(),repositories=gitlinks(directory,run).filter(link=>/^sources\/[^/]+$/.test(link));
+ const initialized=[...initializeMetadataSources({directory,run,done}),...initializeGitlinks({paths:repositories,directory,run,done})];
+ const linked=repositories.flatMap(repository=>fs.existsSync(path.join(directory,repository,'.git'))?checkoutGitlinkFiles(path.join(directory,repository)).map(row=>repository+'/'+row.gitlink):[]);
+ return [...initialized,...initializeGitlinks({paths:[...new Set(linked)],directory,run,done})];
 }
 /** One build initializes only its declared sources: its build submodules and, when it declares
  * app-source.json, the app and the app gitlinks its declared app files lie in. */
