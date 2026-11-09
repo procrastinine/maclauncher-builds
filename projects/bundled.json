@@ -734,7 +734,7 @@
         "url": "https://github.com/code-disaster/steamworks4j",
         "repository": "code-disaster/steamworks4j",
         "pin": {
-          "file": "app:src/modules/java/runtime/steamworks/versions.json",
+          "file": "producers/package-support/src/modules/java/runtime/steamworks/publisher-releases.json",
           "pointer": "/0/sourceRevision"
         }
       },
@@ -744,7 +744,7 @@
         "url": "https://github.com/code-disaster/steamworks4j",
         "repository": "code-disaster/steamworks4j",
         "pin": {
-          "file": "app:src/modules/java/runtime/steamworks/versions.json",
+          "file": "producers/package-support/src/modules/java/runtime/steamworks/publisher-releases.json",
           "pointer": "/1/sourceRevision"
         }
       }
