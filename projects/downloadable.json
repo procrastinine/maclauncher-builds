@@ -711,6 +711,7 @@
         "lib/licenses.mjs",
         "producers/dependencies.json",
         "producers/package-support/src/modules/hashlink/overlays",
+        "producers/package-support/src/modules/hashlink/runtime/compiler-paths.js",
         "producers/package-support/src/modules/hashlink/runtime/dynamic-legacy-build.js",
         "producers/package-support/src/modules/hashlink/runtime/legacy-build.js",
         "producers/package-support/src/modules/hashlink/runtime/source-1.12.json",
