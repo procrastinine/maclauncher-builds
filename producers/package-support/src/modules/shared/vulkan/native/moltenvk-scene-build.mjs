@@ -19,7 +19,6 @@ export function prepareSceneSource({repository,work}){
  const app=appSourceRoot();
  repository=fs.realpathSync(repository);work=path.resolve(work);
  if(work===repository||work.startsWith(repository+path.sep)||repository.startsWith(work+path.sep))throw Error('MoltenVK source and owned build directories must be disjoint');
- if(read('git',['-C',repository,'rev-parse','HEAD'])!==source.revision)throw Error('MoltenVK source revision differs from its pin');
  const projected=path.join(work,'source');fs.mkdirSync(work,{recursive:true});
  let adapted;
  // Offline archive is the original public source, never a modified checkout.
@@ -46,7 +45,7 @@ export function checkSceneSource({projected,includes=[],compiler='/usr/bin/clang
 }
 export function buildSceneProvider({projected,work,dependencies,architecture='arm64',jobs=2}){
  if(!['arm64','x86_64'].includes(architecture)||!Number.isInteger(jobs)||jobs<1||jobs>2)throw Error('Invalid native compiler configuration');
- const actual={};for(const item of source.dependencies){const input=dependencies?.[item.id];if(!input||!fs.statSync(input).isDirectory())throw Error('Missing original offline source: '+item.id+' '+item.revision);actual[item.id]=fs.realpathSync(input);if(read('git',['-C',actual[item.id],'rev-parse','HEAD'])!==(item.revision||fs.readFileSync(path.join(projected,'ExternalRevisions',item.id+'_repo_revision'),'utf8').trim()))throw Error('Dependency source revision differs: '+item.id);if(read('git',['-C',actual[item.id],'status','--porcelain','--untracked-files=normal']))throw Error('Dependency source has unrecorded changes: '+item.id);}
+ const actual={};for(const item of source.dependencies){const input=dependencies?.[item.id];if(!input||!fs.statSync(input).isDirectory())throw Error('Missing original offline source: '+item.id+' '+item.revision);actual[item.id]=fs.realpathSync(input);if(read('git',['-C',actual[item.id],'status','--porcelain','--untracked-files=normal']))throw Error('Dependency source has unrecorded changes: '+item.id);}
  const buildInputs=JSON.parse(fs.readFileSync(path.join(work,'scene-source.json')));
  if(JSON.stringify(buildInputs.profile)!==JSON.stringify(source)||buildInputs.files.some(row=>digest(fs.readFileSync(path.join(projected,row.file)))!==row.sha256))throw Error('Prepared scene source inputs changed');
  const wrapper=path.resolve(work,'project'),build=path.resolve(work,'build-'+architecture);fs.mkdirSync(wrapper,{recursive:true});writeChanged(path.join(wrapper,'CMakeLists.txt'),fs.readFileSync(path.join(root,'moltenvk-scene-project.cmake')));

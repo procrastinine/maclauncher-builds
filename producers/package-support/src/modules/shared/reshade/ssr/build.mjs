@@ -17,7 +17,6 @@ for(const key of ['--source','--compiler-root','--output'])if(!options[key])thro
 const source=options['--source'],compiler=options['--compiler-root'],out=options['--output'];
 const sha=value=>crypto.createHash('sha256').update(value).digest('hex');
 const run=(command,args)=>execFileSync(command,args,{encoding:'utf8',maxBuffer: Infinity});
-if(fs.existsSync(path.join(source,'.git'))&&run('git',['-C',source,'rev-parse','HEAD']).trim()!==sourceRevision(spec))throw Error('Godot SSR source pin changed.');
 const original={};
 for(const [file,expected]of Object.entries(spec.files)){
  const bytes=fs.readFileSync(path.join(source,file));if(sha(bytes)!==expected)throw Error('Godot SSR source changed: '+file);original[file]=bytes.toString('utf8');

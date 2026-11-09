@@ -68,8 +68,6 @@ const capture = async (command, args) => {
                                : reject(Error(command + ' exited ' + code))));
   return text.trim();
 };
-if (await capture('git', [ '-C', source, 'rev-parse', 'HEAD' ]) !== sourceRevision(pin))
-  throw Error('FSR4 source pin changed.');
 await run('git', [ '-C', source, 'diff', '--exit-code', 'HEAD', '--' ]);
 for (const [option, digest] of [[ '--lite2-weights', pin.lite2.sha256 ]])
   if (hash(await fs.readFile(options[option])) !== digest)

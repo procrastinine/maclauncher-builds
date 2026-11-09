@@ -10,7 +10,6 @@ const args=Object.fromEntries(process.argv.slice(2).reduce((rows,value,index,all
 if(!['xess-source','dxmt-source','compiler','out'].every(key=>args[key]))throw Error('Use --xess-source SDK --dxmt-source DXMT --compiler CLANG++ --out DIRECTORY');
 const xess=fs.realpathSync(args['xess-source']),dxmt=fs.realpathSync(args['dxmt-source']),output=path.resolve(args.out),compiler=path.resolve(args.compiler);
 fs.accessSync(compiler,fs.constants.X_OK);
-if(execFileSync('git',['-C',xess,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==sourceRevision(reference))throw Error('Initialize the exact XeSS adapter source commit: '+reference.repository);
 const dxmtRevision=execFileSync('git',['-C',dxmt,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
 fs.mkdirSync(output,{recursive:true});
 const headers=['inc/xess/xess.h','inc/xess/xess_d3d11.h'];

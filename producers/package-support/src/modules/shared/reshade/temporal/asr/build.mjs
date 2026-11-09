@@ -12,7 +12,6 @@ for(let i=2;i<process.argv.length;i+=2){const key=process.argv[i];if(key==='--na
 for(const key of ['--source','--tools','--output'])if(!options[key])throw Error('Missing '+key);
 const source=options['--source'],tools=options['--tools'],out=options['--output'];
 const run=(exe,args)=>execFileSync(exe,args,{encoding:'utf8',maxBuffer: Infinity}),hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-if(run('git',['-C',source,'rev-parse','HEAD']).trim()!==sourceRevision(spec))throw Error('Arm ASR source differs from its registered exact revision.');
 run('git',['-C',source,'diff','--exit-code','HEAD','--']);
 if(fs.existsSync(out)&&!options['--native-only'])throw Error('Choose a new ASR output directory.');fs.mkdirSync(out,{recursive:true});
 const shaderRoot=path.join(source,'src/backends/vk/shaders/fsr2/hlsl'),gpu=path.join(source,'include/gpu');

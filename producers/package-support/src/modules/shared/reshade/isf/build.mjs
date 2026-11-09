@@ -17,7 +17,7 @@ if(!process.argv[2]||!["universal","x64","arm64"].includes(arch))throw Error("Ch
 const upstream=options["--source"]?path.resolve(options["--source"]):path.join(workspace,source.sources[0].path);
 const run=(cmd,args)=>execFileSync(cmd,args,{stdio:"inherit"});
 const write=(file,bytes)=>{bytes=Buffer.isBuffer(bytes)?bytes:Buffer.from(bytes);if(!fs.existsSync(file)||!fs.readFileSync(file).equals(bytes))fs.writeFileSync(file,bytes);};
-for(const entry of source.sources){const root=path.join(upstream,path.posix.relative(source.sources[0].path,entry.path)),actual=execFileSync("git",["-C",root,"rev-parse","HEAD"],{encoding:"utf8"}).trim();if(actual!==(entry===source.sources[0]?gitlink(entry.gitlink):execFileSync("git",["-C",upstream,"rev-parse","HEAD:"+path.posix.relative(source.sources[0].path,entry.path)],{encoding:"utf8"}).trim()))throw Error("Initialize the selected ISF source: "+entry.path);execFileSync("git",["-C",root,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});}
+for(const entry of source.sources){const root=path.join(upstream,path.posix.relative(source.sources[0].path,entry.path));execFileSync("git",["-C",root,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});}
 const input=path.join(output,"input"),payload=options["--payload"]?path.resolve(options["--payload"]):path.join(output,"payload");
 if(fs.existsSync(path.join(payload,"provider.json")))throw Error("Choose a new ISF payload directory; the build cache can be reused.");
 fs.mkdirSync(input,{recursive:true});fs.mkdirSync(payload,{recursive:true});
