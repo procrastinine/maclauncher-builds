@@ -5,13 +5,13 @@ import {recipeBuildReport} from './recipe-build-report.mjs';
 import {appSourceRoot,APP_REFERENCE} from './app-source.mjs';
 
 const git=(cwd,args)=>execFileSync('git',args,{cwd,encoding:'utf8',stdio:['ignore','pipe','pipe'],maxBuffer:Infinity}).trim();
-const copy=(source,destination)=>{fs.mkdirSync(path.dirname(destination),{recursive:true});fs.cpSync(source,destination,{recursive:true,verbatimSymlinks:true,mode:fs.constants.COPYFILE_FICLONE});};
 
 /** Materialize one project's build definition into a new tree, so its recipe runs with exactly
  * what the definition provides: a sparse checkout of the current commit holding the declared
- * files and the project registry, plus copies of the initialized checkouts of the declared
- * Gitlinks, and of the pinned app source when the definition names app files, each with its
- * own Git data. A Gitlink that is not initialized stays a commit in the tree's index. */
+ * files and the project registry, plus checkouts of the recorded commits of the declared
+ * Gitlinks, and of the pinned app source when the definition names app files, each in its own
+ * repository (materializeCheckout). A Gitlink that is not initialized stays a commit in the
+ * tree's index. */
 export function materializeBuild({project,directory,tree}){
  if(!path.isAbsolute(tree||'')||fs.existsSync(tree))throw Error('Choose a new absolute build tree.');
  const root=fs.realpathSync(directory),{definition}=recipeBuildReport({id:project,directory:root});
@@ -30,25 +30,37 @@ export function materializeBuild({project,directory,tree}){
  fs.writeFileSync(path.join(tree,'.git/info/sparse-checkout'),files.map(file=>'/'+file.replace(/([*?[\\!#])/g,'\\$1')).join('\n')+'\n');
  git(tree,['checkout','--quiet','--detach',git(root,['rev-parse','HEAD'])]);
 
- // A copied checkout's .git file names its Git directory relative to the original; each Git
- // directory is copied once into the tree and every .git file below the copy points at its copy.
- const copies=new Map(),copied=[];
- const absorb=(destination,source)=>{
-  const pointers=execFileSync('find',[destination,'-name','.git','-type','f'],{encoding:'utf8',maxBuffer:Infinity}).split('\n').filter(Boolean).sort((a,b)=>a.length-b.length);
-  for(const file of pointers){
-   const checkout=path.dirname(file),from=path.resolve(path.join(source,path.relative(destination,checkout)),/^gitdir: (.+)$/m.exec(fs.readFileSync(file,'utf8'))[1].trim());
-   const parent=[...copies.keys()].find(key=>from===key||from.startsWith(key+path.sep));
-   const target=parent?copies.get(parent)+from.slice(parent.length):path.join(tree,'.git/materialized',String(copies.size));
-   if(!parent){copy(from,target);copies.set(from,target);}
-   const common=path.join(target,'commondir');if(fs.existsSync(common))fs.writeFileSync(common,path.resolve(from,fs.readFileSync(common,'utf8').trim())+'\n');
-   git(tree,['config','-f',path.join(target,'config'),'core.worktree',checkout]);fs.writeFileSync(file,'gitdir: '+target+'\n');
-  }
- };
+ const copied=[];
  for(const link of links){
-  if(links.some(parent=>parent!==link&&link.startsWith(parent+'/')))continue;// copied with its parent
-  const source=path.join(root,link),destination=path.join(tree,link);
+  if(links.some(parent=>parent!==link&&link.startsWith(parent+'/')))continue;// placed with its parent
+  const source=path.join(root,link);
   if(!fs.existsSync(path.join(source,'.git')))continue;
-  fs.rmSync(destination,{recursive:true,force:true});copy(source,destination);absorb(destination,source);copied.push(link);
+  materializeCheckout({source,destination:path.join(tree,link),revision:git(root,['rev-parse','HEAD:'+link])});copied.push(link);
  }
  return {tree,files:files.length,gitlinks:copied};
+}
+
+/** Check out `revision` at `destination` in a repository of its own. Its objects are read from
+ * the repository of the initialized checkout `source` through alternates, which nothing here
+ * writes; its shallow list, refs and configuration are its own copies, so Git commands run in
+ * the checkout (a depth fetch included) never change the source repository. Each initialized
+ * checkout below `source` that `revision` records as a Gitlink is placed the same way, unless
+ * `recursive` is false. */
+export function materializeCheckout({source,destination,revision,recursive=true}){
+ const common=git(source,['rev-parse','--path-format=absolute','--git-common-dir']);
+ fs.rmSync(destination,{recursive:true,force:true});fs.mkdirSync(destination,{recursive:true});
+ git(destination,['init','--quiet']);
+ fs.writeFileSync(path.join(destination,'.git/objects/info/alternates'),path.join(common,'objects')+'\n');
+ if(fs.existsSync(path.join(common,'shallow')))fs.copyFileSync(path.join(common,'shallow'),path.join(destination,'.git/shallow'));
+ // The origin and the initialized submodules keep their configured URLs.
+ const settings=(()=>{try{return git(source,['config','--null','--get-regexp','^(remote\\.origin\\.url|submodule\\..*)$']).split('\0').filter(Boolean);}catch{return [];}})();
+ for(const entry of settings){const split=entry.indexOf('\n');git(destination,['config','--add',entry.slice(0,split),entry.slice(split+1)]);}
+ try{git(destination,['checkout','--quiet','--detach',revision]);}
+ catch{throw Error(`Initialize ${source} with commit ${revision} before a materialized build.`);}
+ if(!recursive)return destination;
+ for(const line of git(destination,['ls-tree','-r','--full-tree',revision]).split('\n')){
+  const [,commit,place]=/^160000 commit ([0-9a-f]{40})\t(.+)$/.exec(line)||[];
+  if(commit&&fs.existsSync(path.join(source,place,'.git')))materializeCheckout({source:path.join(source,place),destination:path.join(destination,place),revision:commit});
+ }
+ return destination;
 }

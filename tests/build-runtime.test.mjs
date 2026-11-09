@@ -158,19 +158,37 @@ test('GitHub build records name a contained command, exclusive universal builds 
 
 test('a materialized GitHub build runs the command in a tree holding only its build definition',t=>{
  const fixtureRunners=process.platform==='linux'?{arm64:'ubuntu-24.04',x64:'ubuntu-24.04'}:undefined;
- const root=githubFixture(t,{architectures:['arm64','x64'],tools:undefined,...(fixtureRunners?{runners:fixtureRunners}:{})}),command=path.join(root,'producers/engine/build.mjs');
+ const root=githubFixture(t,{architectures:['arm64','x64'],tools:undefined,submodules:['producers/engine/upstream','producers/engine/linked'],...(fixtureRunners?{runners:fixtureRunners}:{})}),command=path.join(root,'producers/engine/build.mjs');
  fs.appendFileSync(command,"const tree=path.resolve(import.meta.dirname,'../..');if(tree!==path.join(path.dirname(o.work),'tree')||fs.existsSync(path.join(tree,'undeclared.txt')))process.exitCode=4;\n");
  fs.writeFileSync(path.join(root,'undeclared.txt'),'not part of the definition');
  const git=(cwd,...args)=>execFileSync('git',['-c','user.name=Build test','-c','user.email=test@example.invalid','-c','protocol.file.allow=always',...args],{cwd,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim();
  const upstream=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'runtime-github-upstream-')));t.after(()=>fs.rmSync(upstream,{recursive:true,force:true}));
  fs.writeFileSync(path.join(upstream,'source.c'),'int main(void){return 0;}\n');git(upstream,'init','-q');git(upstream,'add','.');git(upstream,'commit','-qm','upstream');
- git(root,'init','-q');git(root,'submodule','add','-q',upstream,'producers/engine/upstream');git(root,'add','.');git(root,'commit','-qm','fixture');
+ git(root,'init','-q');git(root,'submodule','add','-q',upstream,'producers/engine/upstream');
+ // A Gitlink whose checkout is a linked worktree of another clone, as the app pin's is.
+ const shared=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'runtime-github-shared-')));t.after(()=>fs.rmSync(shared,{recursive:true,force:true}));
+ fs.writeFileSync(path.join(shared,'shared.c'),'int shared;\n');git(shared,'init','-q');git(shared,'add','.');git(shared,'commit','-qm','shared');
+ const sharedCommit=git(shared,'rev-parse','HEAD');git(shared,'worktree','add','-q','--detach',path.join(root,'producers/engine/linked'),sharedCommit);
+ git(root,'config','-f','.gitmodules','submodule.linked.path','producers/engine/linked');git(root,'config','-f','.gitmodules','submodule.linked.url',shared);
+ git(root,'update-index','--add','--cacheinfo','160000,'+sharedCommit+',producers/engine/linked');git(root,'add','.');git(root,'commit','-qm','fixture');
  const work=path.join(root,'work'),built=runBuild({project:'engine',arch:'x64',output:path.join(root,'out-x64'),work,directory:root,materialize:true});
  assert.equal(built.arch,'x64');
  assert.ok(fs.existsSync(path.join(work,'tree/producers/engine/build.mjs'))&&fs.existsSync(path.join(work,'tree/projects/downloadable.json')));
  assert.equal(fs.existsSync(path.join(work,'tree/undeclared.txt')),false);
  assert.equal(git(path.join(work,'tree/producers/engine/upstream'),'rev-parse','HEAD'),git(upstream,'rev-parse','HEAD'));
  assert.ok(fs.existsSync(path.join(work,'tree/producers/engine/upstream/source.c')));
+ assert.ok(fs.existsSync(path.join(work,'tree/producers/engine/linked/shared.c')));
+ // Each materialized checkout is a repository of its own: a depth fetch in it leaves the shallow
+ // list, refs and configuration of the submodule store and of the linked checkout's clone unchanged.
+ const store=dir=>git(dir,'rev-parse','--path-format=absolute','--git-common-dir');
+ const state=dir=>[git(dir,'for-each-ref'),fs.readFileSync(path.join(store(dir),'config'),'utf8'),fs.existsSync(path.join(store(dir),'shallow'))];
+ const sources=['upstream','linked'].map(link=>path.join(root,'producers/engine',link)),before=sources.map(state);
+ for(const [link,origin] of [['upstream',upstream],['linked',shared]]){
+  const checkout=path.join(work,'tree/producers/engine',link);
+  assert.ok(store(checkout).startsWith(path.join(work,'tree')+path.sep),link);
+  git(checkout,'fetch','-q','--depth','1','file://'+origin,'HEAD');
+ }
+ assert.deepEqual(sources.map(state),before);
  assert.throws(()=>runBuild({project:'engine',arch:'x64',output:path.join(root,'out-in-place'),directory:root}),/exited with status 4/);
  fs.appendFileSync(command,'\n');
  assert.throws(()=>runBuild({project:'engine',arch:'x64',output:path.join(root,'out-changed'),work:path.join(root,'work-changed'),directory:root,materialize:true}),/Commit the declared build files/);
