@@ -1,9 +1,0 @@
-{
-  "sources": [
-    "sources/maclauncher",
-    "sources/maclauncher-android",
-    "sources/anyps5",
-    "sources/steam-bridge-notproton",
-    "sources/steam-bridge-wine-headers"
-  ]
-}

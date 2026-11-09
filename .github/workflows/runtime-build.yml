@@ -159,5 +159,6 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup-node
+      - run: node tools/init-runtime-sources.mjs
       - name: Summarize package job durations
         run: node tools/job-timings.mjs --repo "${{ github.repository }}" --run "${{ github.run_id }}"

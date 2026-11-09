@@ -13,8 +13,9 @@ const appSource=directory=>JSON.parse(fs.readFileSync(path.join(directory,'produ
 const toolPaths=directory=>[appSource(directory).gitlink];
 /** Sources the planner reads for pin metadata. */
 const metadataPaths=directory=>appSource(directory).sourceSubmodules;
-/** Sources the npm test checks read, declared beside the tests. */
-const checkPaths=directory=>[...metadataPaths(directory),...JSON.parse(fs.readFileSync(path.join(directory,'tests/sources.json'),'utf8')).sources];
+const gitlinks=(directory,run)=>String(run(['ls-files','--stage'],directory)).split('\n').flatMap(line=>{const match=line.match(/^160000 [a-f0-9]{40} 0\t(.+)$/);return match?[match[1]]:[];});
+/** Sources npm test reads: the planner's sources and every pinned source repository. */
+const checkPaths=(directory,run)=>[...metadataPaths(directory),...gitlinks(directory,run).filter(link=>/^sources\/[^/]+$/.test(link))];
 function initializeGitlinks({paths,directory,run,allowRecursive=false}){
  const initialized=[],done=new Set();
  for(const selected of paths){
@@ -43,7 +44,7 @@ function initializeGitlinks({paths,directory,run,allowRecursive=false}){
 }
 export function initializeToolSources({directory=root,run=runGit}={}){return initializeGitlinks({paths:toolPaths(directory),directory,run});}
 export function initializeMetadataSources({directory=root,run=runGit}={}){return initializeGitlinks({paths:metadataPaths(directory),directory,run});}
-export function initializeCheckSources({directory=root,run=runGit}={}){return initializeGitlinks({paths:checkPaths(directory),directory,run});}
+export function initializeCheckSources({directory=root,run=runGit}={}){return initializeGitlinks({paths:checkPaths(directory,run),directory,run});}
 export function initializeSources({project:id,version,directory=root,run=runGit}){
  const project=resolveProject(id,directory,{resolvePins:false}),build=buildRecord(project,version);
  return {project:id,version:build.version,initialized:initializeGitlinks({paths:[...metadataPaths(directory),...(build.submodules||[])],directory,run,allowRecursive:build.recursiveSubmodules===true})};
