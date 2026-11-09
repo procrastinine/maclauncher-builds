@@ -45,14 +45,16 @@ test('source record pins are read only through the shared reader',()=>{
  assert.deepEqual(reads,[]);
 });
 
-// A revision or digest is declared once among the files packages read, so a
-// change to it is one edit in one file.
-test('no pin or digest is declared in two package input files',()=>{
+// A revision or digest is declared once among the gitlinks and the files
+// packages read, so a change to it is one edit in one place.
+test('no pin or digest is declared in two places',()=>{
  const describe=createRecipeBuildReporter({directory:root}),inputs=new Set(),declared=new Map(),app=appSourceRoot().directory;
  for(const project of readProjects(root,{resolvePins:false}).projects.filter(project=>project.build))for(const file of describe(project.id).definition.files)inputs.add(file.path);
  for(const file of [...inputs].filter(file=>/\.(?:json|[mc]?js)$/.test(file))){
   const text=fs.readFileSync(file.startsWith(APP_REFERENCE)?path.join(app,file.slice(APP_REFERENCE.length)):path.join(root,file),'utf8');
   for(const [value] of text.matchAll(/(?<![0-9a-f])(?:[0-9a-f]{64}|[0-9a-f]{40})(?![0-9a-f])/g))if(!/^(.)\1+$/.test(value))declared.set(value,new Set([...(declared.get(value)||[]),file]));
  }
+ // A submodule gitlink is a declaration too.
+ for(const row of tree(root).filter(row=>row.mode==='160000'))declared.get(row.object)?.add('gitlink:'+row.file);
  assert.deepEqual([...declared].filter(([,files])=>files.size>1).map(([value,files])=>value+': '+[...files].sort().join(', ')),[]);
 });
