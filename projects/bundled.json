@@ -7,12 +7,12 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/helper-builds/catsystem2-kif-crypto.json"
+        "producers/package-support/helper-builds/catsystem2-kif-crypto.json",
+        "producers/package-support/src/modules/catsystem2/runtime/kif-crypto.c"
       ],
       "sourceDirectory": "producers/package-support",
       "appEntries": [
-        "scripts/license-files.mjs",
-        "src/modules/catsystem2/runtime/kif-crypto.c"
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [],
@@ -207,13 +207,13 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/helper-builds/mkxpz-config-helper.json"
+        "producers/package-support/helper-builds/mkxpz-config-helper.json",
+        "producers/package-support/src/modules/rgss/overlays/mkxpz-config.c",
+        "producers/package-support/src/modules/rgss/overlays/mkxpz-identity.m"
       ],
       "sourceDirectory": "producers/package-support",
       "appEntries": [
-        "scripts/license-files.mjs",
-        "src/modules/rgss/overlays/mkxpz-config.c",
-        "src/modules/rgss/overlays/mkxpz-identity.m"
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [],
@@ -838,14 +838,14 @@
         "producers/package-support/src/modules/android/native/apk-metadata/Cargo.lock",
         "producers/package-support/src/modules/android/native/apk-metadata/Cargo.toml",
         "producers/package-support/src/modules/android/native/apk-metadata/adapt.mjs",
+        "producers/package-support/src/modules/android/native/apk-metadata/main.rs",
         "producers/package-support/src/modules/android/native/apk-metadata/sources.json",
         "runtimes/android"
       ],
       "sourceDirectory": "producers/package-support",
       "sourceRepository": "https://github.com/procrastinine/maclauncher",
       "appEntries": [
-        "scripts/license-files.mjs",
-        "src/modules/android/native/apk-metadata/main.rs"
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -907,12 +907,12 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/helper-builds/web-renderer-network.json"
+        "producers/package-support/helper-builds/web-renderer-network.json",
+        "producers/package-support/src/modules/shared/web/native"
       ],
       "sourceDirectory": "producers/package-support",
       "appEntries": [
-        "scripts/license-files.mjs",
-        "src/modules/shared/web/native"
+        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [],
