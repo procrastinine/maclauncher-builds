@@ -5,17 +5,17 @@ const crypto = require("node:crypto");
 const REVISION = require("../../../../../../lib/projects.mjs").upstreamRevision("reminori", "reminori");
 const VERSION = "0.1.0-MCLv1";
 const PROFILE = "paz-pe-keytables-native-macos-v2";
-const ORIGINALS = Object.freeze({
-  "crates/engine/src/video.rs": "8b1c2bdc1dc93a5d7eed5536434a4fbf2610ebe97c70ce37f79112a92b803d4e",
-  "crates/game/src/platform_dispatcher.rs": "026026f12f4c7a6ad71013e11f2aa24c659a36dddfa466c0a6755996cf399d6e",
-  "crates/game/src/input_adapter.rs": "14b256d85ab37015aa373ba092144c5883ce9a594674a70f280b8ca3eaf73a20",
-  "crates/formats/src/paz.rs": "69ba981dc76005030a37b34d02ec32cd025f9ce75435d0415f18e90730ae07ef",
-  "crates/formats/src/resource.rs": "35765620a5a1bb9734654d4a0964d6086ddd335a86db02813108e2ab7583f729",
-  "crates/engine/src/font.rs": "284bc0a969c38ba14db2caf8848beb2d18b64d2306b72e358ff940b50d4de2f4",
-  "crates/engine/src/engine.rs": "da35d60e5d77f9f14a9bdc0f31835eba52afbe2c5717621480dadea6de6481e3",
-  "crates/engine/src/vfs.rs": "f16f563d360057d5a1fc1dd2cea45301079325e9f227ff576360d7d02085e7d7",
-  "crates/game/src/main.rs": "b4321039a43819abe77093696d949e51b129f25e964e1c669dc9cfaf13c05341"
-});
+const ORIGINALS = Object.freeze([
+  "crates/engine/src/video.rs",
+  "crates/game/src/platform_dispatcher.rs",
+  "crates/game/src/input_adapter.rs",
+  "crates/formats/src/paz.rs",
+  "crates/formats/src/resource.rs",
+  "crates/engine/src/font.rs",
+  "crates/engine/src/engine.rs",
+  "crates/engine/src/vfs.rs",
+  "crates/game/src/main.rs"
+]);
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 function replace(text, before, after, file) {
   if (!text.includes(before) || text.indexOf(before) !== text.lastIndexOf(before)) throw new Error(`Pinned Minori source differs in ${file}.`);
@@ -26,7 +26,7 @@ function adaptSource(root) {
       fs.realpathSync(root).split(path.sep).includes("external") || fs.existsSync(path.join(root, ".git"))) throw new Error("Minori overlays require a separate owned source export.");
   const outputs = ["crates/engine/src/maclauncher-font.rs", "crates/engine/src/maclauncher-video.rs",
     "crates/game/src/maclauncher-dispatcher.rs", "maclauncher-platform.m", "crates/formats/src/maclauncher-archive-path.rs", "crates/formats/src/maclauncher-pe-profile.rs", "crates/formats/src/bin/maclauncher-minori-probe.rs"];
-  for (const file of [...Object.keys(ORIGINALS), ...outputs]) {
+  for (const file of [...ORIGINALS, ...outputs]) {
     const target = path.join(root, file);
     let current = path.dirname(target);
     while (current !== root) {

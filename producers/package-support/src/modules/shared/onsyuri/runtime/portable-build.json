@@ -19,8 +19,7 @@
       ]
     },
     "archiveSha256": "7d0b640ba4be57fe46f962fd50ebe1c2ad0d51f954ac8042c556ad51c9764449",
-    "archiveBytes": 8742469,
-    "cmakeSha256": "07abd3b56b396202b9c8b60f56200786eefbcf2b6bf66978d196f744c0e46a13"
+    "archiveBytes": 8742469
   },
   "dependencies": [
     {

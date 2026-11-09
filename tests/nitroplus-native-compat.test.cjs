@@ -1,4 +1,3 @@
-const {appRequire}=require('../tools/app-source.mjs');
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
@@ -6,7 +5,7 @@ const path = require("node:path");
 const { execFileSync, spawnSync } = require("node:child_process");
 const test = require("node:test");
 const Build = require("../producers/package-support/src/modules/nitroplus/runtime/build");
-const Pinned = appRequire('src/modules/shared/runtime/pinned-native-build');
+const Pinned = require("../producers/package-support/src/modules/shared/runtime/pinned-native-build");
 
 const prefix = ["/opt/homebrew", "/usr/local"].find(root => fs.existsSync(path.join(root, "include/boost/locale.hpp")));
 const flex = prefix && path.join(prefix, "opt/flex/bin/flex");

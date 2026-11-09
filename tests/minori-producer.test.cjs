@@ -1,20 +1,15 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const temporary=t=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'producer-test-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;};
 const directory=temporary;
-test("Minori source overlay validates every pinned input before changing an owned export", t => {
+test("Minori source overlay adapts an owned export once and refuses one it already changed", t => {
   const Build = require("../producers/package-support/src/modules/minori/runtime/build");
   const root = directory(t), source = path.resolve(__dirname,"../producers/package-support/src/external/ReMinori");
   if (!fs.existsSync(path.join(source, "crates/engine/src/font.rs"))) return t.skip("Optional source submodule is not initialized.");
-  for (const file of Object.keys(Build.ORIGINALS)) { fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true }); fs.copyFileSync(path.join(source, file), path.join(root, file)); }
-  const original = fs.readFileSync(path.join(root, "crates/engine/src/font.rs"));
-  fs.appendFileSync(path.join(root, "crates/game/src/input_adapter.rs"), "\n// changed upstream\n");
-  assert.throws(() => Build.adaptSource(root), /hash differs/);
-  assert.deepEqual(fs.readFileSync(path.join(root, "crates/engine/src/font.rs")), original);
-  fs.copyFileSync(path.join(source, "crates/game/src/input_adapter.rs"), path.join(root, "crates/game/src/input_adapter.rs"));
+  for (const file of Build.ORIGINALS) { fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true }); fs.copyFileSync(path.join(source, file), path.join(root, file)); }
   const adapted = Build.adaptSource(root); assert.equal(adapted.upstreamRevision, Build.REVISION);
   assert.ok(fs.readFileSync(path.join(root, "crates/engine/src/engine.rs"), "utf8").includes("MACLAUNCHER_MINORI_SAVE_DIR"));
   assert.ok(fs.readFileSync(path.join(root, "crates/engine/src/vfs.rs"), "utf8").includes("MACLAUNCHER_MINORI_CACHE_DIR"));
-  assert.throws(() => Build.adaptSource(root), /hash differs/);
+  assert.throws(() => Build.adaptSource(root), /Pinned Minori source differs in /);
 });
 
 test("movie profile enables a finite native decoder set without networking or unreviewed system codec autodetection", () => {

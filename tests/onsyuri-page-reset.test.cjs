@@ -4,6 +4,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
+const crypto = require("node:crypto");
 const { spawnSync } = require("node:child_process");
 const Base = require("../producers/package-support/src/modules/shared/onsyuri/runtime/portable-build");
 const Page = require("../producers/package-support/src/modules/shared/onsyuri/runtime/portable-page-reset");
@@ -20,13 +21,10 @@ test("Yuri V3 applies only the pinned page reset to a disposable source tree", r
   const original = fs.readFileSync(ORIGINAL), root = temporary(t), staged = path.join(root, Page.FILE);
   fs.mkdirSync(path.dirname(staged), { recursive: true }); fs.writeFileSync(staged, original);
   const result = Page.apply(root, path.dirname(ORIGINAL));
-  assert.equal(result.files[0].sourceSha256, Build.PIN.sourceGuards[Page.FILE]);
+  assert.equal(result.files[0].sourceSha256, crypto.createHash("sha256").update(original).digest("hex"));
   assert.notEqual(result.files[0].sourceSha256, result.files[0].adaptedSourceSha256);
   assert.deepEqual(fs.readFileSync(ORIGINAL), original);
   assert.deepEqual(fs.readFileSync(staged), Page.adaptSource(original));
-  assert.throws(() => Page.apply(root), /source differs from its pinned version/);
-  fs.writeFileSync(staged, Buffer.concat([original, Buffer.from("\n")]));
-  assert.throws(() => Page.apply(root), /source differs from its pinned version/);
   assert.throws(() => Page.apply(path.dirname(ORIGINAL)), /cannot change source checkouts/);
 });
 

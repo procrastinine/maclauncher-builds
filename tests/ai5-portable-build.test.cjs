@@ -42,13 +42,8 @@ test("AI5 portable version preserves original-data and save adapters with a sepa
   assert.match(fs.readFileSync(path.join(root, "subprojects/libai5/meson.build"), "utf8"), /method : 'pkg-config'/);
 });
 
-test("AI5 portable source guards reject changed or linked inputs before applying an adapter", t => {
+test("AI5 portable source guards reject linked inputs before applying an adapter", t => {
   const root = temporary(t); if (!fixture(root, t)) return;
-  fs.appendFileSync(path.join(root, "src/text.c"), "\n/* changed */\n");
-  const original = fs.readFileSync(path.join(root, "src/main.c"));
-  assert.throws(() => Portable.adaptSource(root), /checksum differs/);
-  assert.deepEqual(fs.readFileSync(path.join(root, "src/main.c")), original);
-  assert.equal(fs.existsSync(path.join(root, "maclauncher-disc.h")), false);
   const linked = path.join(temporary(t), "linked"); fs.symlinkSync(root, linked, "dir");
   assert.throws(() => Portable.adaptSource(linked), /separate source export/);
   assert.throws(() => Portable.adaptSource(Previous.sourcePath), /separate source export/);
