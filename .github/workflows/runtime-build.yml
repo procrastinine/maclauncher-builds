@@ -27,7 +27,6 @@ jobs:
     permissions:
       contents: read
       actions: read
-      pages: read
     outputs:
       selection: ${{ steps.plan.outputs.selection }}
       graph: ${{ steps.plan.outputs.graph }}
@@ -48,7 +47,7 @@ jobs:
       - run: npm ci --ignore-scripts
       - name: Prepare the sources the plan reads
         run: node tools/init-runtime-sources.mjs --metadata
-      - name: Select the requested projects and names and check publication conditions
+      - name: Select the requested projects and names
         id: plan
         run: node tools/plan-build-release.mjs --output "$RUNNER_TEMP/release-plan"
       - name: Retain the generated package definitions

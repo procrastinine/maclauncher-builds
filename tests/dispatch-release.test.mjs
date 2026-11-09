@@ -81,16 +81,10 @@ test('a changed release line already public is skipped without a dispatch',async
  assert.deepEqual(result.dispatched,[]);assert.deepEqual(result.skipped,[{id:'left',version:'2.0.0'}]);assert.equal(calls.length,1);assert.equal(calls[0][0],'api');
 });
 
-test('the plan proves publication before any build, and a build-only run rebuilds a published name without it',async t=>{
- const directory=fixture(t),releases='input=1.0.0,left=2.0.0,right=3.0.0',checks=[];
- const env={GITHUB_ACTIONS:'true',RELEASES:releases};
- const output=await planMain([path.join(directory,'plan')],{directory,env,releasesOf:()=>[],check:async options=>checks.push(options)}).catch(error=>error);
- assert.match(String(output),/--output/);
- const planned=await planMain(['--output',path.join(directory,'plan')],{directory,env,releasesOf:()=>[],check:async options=>checks.push(options)});
- assert.equal(checks.length,1);assert.equal(checks[0].targets.length,6);
+test('a build-only plan rebuilds a published name and a publishing plan refuses it',async t=>{
+ const directory=fixture(t),env={GITHUB_ACTIONS:'true',RELEASES:'input=1.0.0,left=2.0.0,right=3.0.0'},published=[{tag_name:'left/v2.0.0/arm64',draft:false}];
+ await assert.rejects(planMain(['--output',path.join(directory,'plan')],{directory,env,releasesOf:()=>published}),/already published/);
+ const planned=await planMain(['--output',path.join(directory,'plan-build')],{directory,env:{...env,RELEASE_PUBLISH:'false'},releasesOf:()=>published});
  assert.deepEqual(JSON.parse(planned.targets).include.map(row=>row.project),JSON.parse(planned.levels).flatMap(level=>level.include.map(row=>row.project)));
- const published=[{tag_name:'left/v2.0.0/arm64',draft:false}];
- await assert.rejects(planMain(['--output',path.join(directory,'plan-2')],{directory,env,releasesOf:()=>published,check:async()=>{}}),/already published/);
- const gate=await planMain(['--output',path.join(directory,'plan-3')],{directory,env:{...env,RELEASE_PUBLISH:'false'},releasesOf:()=>published,check:async()=>assert.fail('a build-only run checks no publication')});
- assert.equal(JSON.parse(gate.targets).include.length,6);
+ assert.equal(JSON.parse(planned.targets).include.length,6);
 });

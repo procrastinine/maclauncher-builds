@@ -25,15 +25,13 @@ system3=1.8.0-MCLv3
 android-launcher=1.0.1
 ```
 
-The `publish` input, on by default, can be turned off to build and seal the selected packages without attesting or publishing them; such a run may rebuild a name that is already published, and it skips the publication checks, attest job, publisher and index.
+The `publish` input, on by default, can be turned off to build and seal the selected packages without attesting or publishing them; such a run may rebuild a name that is already published, and it skips the attest job, publisher and index.
 
 Names are used as supplied. A name already published for the project cannot be reused. The workflow registers the selected names itself; source changes do not require hand-written version registrations. A matching ABI version line retains its declared inputs and CPUs. Other names use the project's default build profile.
 
 One matrix builds the selected packages on their declared GitHub-hosted Mac or Linux runners. Each package is sealed and packed with the shared build and packaging commands. Independent components run in parallel. The plan orders the selected builds into dependency levels, as many as the recipes need, and [runtime-level.yml](../.github/workflows/runtime-level.yml) runs the builds of each level in turn; a level's builds read earlier levels' artifacts from the same run. Packages without unpublished inputs form the first level. After the last level, the attest job signs every built file and the publisher publishes complete packages in level order, so each input is public before its consumers. A failed package does not discard another package's published output.
 
-Workflows and composite actions name no project, source or path. Every job prepares the sources its tools read through `tools/init-runtime-sources.mjs`: without arguments for the pinned app source, with `--metadata` for planning, with `--checks` for npm test (the planning sources and every source repository pinned directly under `sources/`), and with `--project` and `--version` for one build.
-
-Before any build starts, the plan checks what publication needs, read-only: each target's identity, tag, asset name and declared release version; that each selected project's catalog parses; that the package index builds from the current catalogs; that no target tag or release name exists; that Pages builds from a workflow and its `github-pages` environment exists; and that the publishing, index and deploy jobs declare the token grants they need. Any failed condition stops the run with a list of every failure.
+Workflows and composite actions name no project, source or path. Every job prepares the sources its tools read through `tools/init-runtime-sources.mjs`: without arguments for the pinned app source, with `--metadata` for planning, with `--checks` for the source workflow's npm test (the planning sources and every source repository pinned directly under `sources/`), and with `--project` and `--version` for one build.
 
 On macOS, a build command's search path holds the project's declared Homebrew formulae, Xcode's toolchain directory and the system directories. Declared formulae come ahead of the toolchain directory, so a declared Bison, Flex or M4 replaces the older copies there. A formula with its own `clang` comes after it, so builds keep Xcode's compiler.
 
