@@ -154,6 +154,11 @@
     "repository": "https://github.com/KhronosGroup/SPIRV-Cross",
     "revision": "300681bbcb8365a8d1eacdacdbdd0249bbf1d6b1"
   },
+  "sdl3": {
+    "url": "https://github.com/libsdl-org/SDL/releases/download/release-3.4.18/SDL3-3.4.18.tar.gz",
+    "sha256": "9c75cf16330322c217dedd2e0609f1124f1b54b8633e763467b4684d0f4334a3",
+    "bytes": 15651004
+  },
   "sdl3Prosper": {
     "repository": "https://github.com/libsdl-org/SDL",
     "revision": "f5e5f6588921eed3d7d048ce43d9eb1ff0da0ffc"
