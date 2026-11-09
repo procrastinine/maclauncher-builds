@@ -123,15 +123,19 @@ export async function packageImageData({project,version,arch,output,work,tool,in
  return result;
 }
 /** Decode the complete original image into portable data and exact inode metadata. */
-export async function buildAndroidImageData(options){
- const {output,work}=options,profile={...JSON.parse(fs.readFileSync(descriptor)),...aimSource()};
+export async function compile({work}){
+ const profile={...JSON.parse(fs.readFileSync(descriptor)),...aimSource()};
  fs.mkdirSync(work,{recursive:true});
  const archive=await buildInput(profile.archive,path.join(work,'archive-cache')),tool=buildImageDataTool({work});
  const input=path.join(work,'decoded');
  run(tool.executable,['export',archive,path.join(work,'root'),input],{env:tool.env});
- const result=await packageImageData({...options,tool,input});
+ return {tool,input};
+}
+/** Seal the selected shard of the decoded image and release the decode. */
+export async function assemble({compiled:{tool,input},...options}){
+ const {work}=options,result=await packageImageData({...options,tool,input});
 
  for(const relative of ['archive-cache','target','cargo','decoded'])fs.rmSync(path.join(work,relative),{recursive:true,force:true});
  return result;
 }
-recipeMain(import.meta,buildAndroidImageData);
+recipeMain(import.meta,{compile,assemble});

@@ -57,13 +57,18 @@ export async function buildAngleInput({output,work,profile:profileId='common'}){
  const clang=path.dirname(path.dirname(read('xcrun',['--find','clang'])));
  const toolEnv={...compilerEnv,PATH:path.dirname(python)+path.delimiter+process.env.PATH};
  run(process.execPath,[entry,'--source',upstream,'--dependencies',dependencies,'--output',output,'--gn',path.join(gnBuild,'gn'),'--ninja',read('which',['ninja']),'--clang',clang,'--python',python,'--backend',definition.backend,'--jobs','2'],{env:toolEnv});
- addLicenses(output,'ANGLE',upstream);
- for(const dependency of pins.dependencies.filter(item=>!item.backends||item.backends.includes(definition.backend)))addLicenses(output,dependency.name,path.join(dependencies,path.basename(dependency.directory)));
- addLicense(output,'Khronos headers',path.join(root,'producers/android-inputs/licenses/angle/Khronos-Headers.txt'));
- addLicense(output,'libc++',path.join(root,'producers/android-inputs/licenses/angle/libcxx.txt'));
  const manifest=JSON.parse(fs.readFileSync(path.join(output,'angle-manifest.json')));
  if(manifest.version!==profile.providerVersion||manifest.angleRevision!==pins.revision)throw Error('Generated ANGLE profile differs from its declared identity.');
- return {angle:output,manifest,source:android,profileId};
+ return {angle:output,manifest,source:android,profileId,upstream,dependencies};
+}
+
+/** Add the ANGLE and dependency notices to a compiled provider. */
+export function addAngleLicenses({angle,upstream,dependencies}){
+ const definition=angleDefinition(),pins=definition.angle;
+ addLicenses(angle,'ANGLE',upstream);
+ for(const dependency of pins.dependencies.filter(item=>!item.backends||item.backends.includes(definition.backend)))addLicenses(angle,dependency.name,path.join(dependencies,path.basename(dependency.directory)));
+ addLicense(angle,'Khronos headers',path.join(root,'producers/android-inputs/licenses/angle/Khronos-Headers.txt'));
+ addLicense(angle,'libc++',path.join(root,'producers/android-inputs/licenses/angle/libcxx.txt'));
 }
 
 /** Package unchanged compiler products with the selected normal package version. */
@@ -86,11 +91,16 @@ export function packageAngleInput({project='android-angle',version,arch='arm64',
  return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{source:androidSource(),sourceProfile:profile.id,providerVersion:manifest.version,angleRevision:manifest.angleRevision}});
 }
 
-/** Use the one Runtime build path for each declared source profile. */
-export async function buildAndroidAngle({project,version,arch,output,work}){
+/** Compile the declared source profile on the one Runtime build path. */
+export async function compile({project,version,output,work}){
  const {definition,profile}=anglePackageProfile(project,version??JSON.parse(fs.readFileSync(descriptor)).profiles[0].version);
  if(!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Select an Android ANGLE version, arm64 and new absolute output/work directories.');
  const input=await buildAngleInput({output:path.join(work,'provider'),work:path.join(work,'compile'),profile:profile.id});
- return packageAngleInput({project,version:version??profile.packageVersion??profile.version,arch,output,input});
+ return {version:version??profile.packageVersion??profile.version,input};
 }
-recipeMain(import.meta,buildAndroidAngle);
+/** Add the notices and package the compiled provider. */
+export function assemble({project,arch,output,compiled:{version,input}}){
+ addAngleLicenses(input);
+ return packageAngleInput({project,version,arch,output,input});
+}
+recipeMain(import.meta,{compile,assemble});

@@ -5,7 +5,7 @@ import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {recipeMain,run,checkoutSource} from './build-source.mjs';
 import {prepareAndroidBuildInputs,releaseAndroidImageArchive} from './android-build-inputs.mjs';
-import {buildAngleInput,angleDefinition} from './build-android-angle.mjs';
+import {buildAngleInput,addAngleLicenses,angleDefinition} from './build-android-angle.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {rustEnvironment} from './rust-build.mjs';
@@ -53,8 +53,8 @@ export function aimAngleInput(input){
  if(input.record?.id!==definition.id||input.record.version!==profile.version||manifest.version!==profile.providerVersion||manifest.angleRevision!==definition.angle.revision)throw Error('The shared AIM ANGLE input differs from its original profile.');
  return {angle:input.root,manifest,profileId:'common'};
 }
-/** Build the existing AIM adaptation and seal it without changing app declarations. */
-export async function buildAndroidAim({project,version,arch,output,work}){
+/** Compile the existing AIM adaptation and the ANGLE provider it needs. */
+export async function compile({project,version,output,work}){
  const ownedWork=path.resolve(work),ownedOutput=path.resolve(output);
  if(ownedWork===ownedOutput||ownedOutput.startsWith(ownedWork+path.sep)||ownedWork.startsWith(ownedOutput+path.sep))throw Error('AIM output and build directories must be separate.');
  const selected=resolveProject(project,root),record=buildRecord(selected,version);
@@ -76,6 +76,12 @@ export async function buildAndroidAim({project,version,arch,output,work}){
  cleanupAimBuild({work});
  const preparedAngle=preparedBuildInput('android-angle');
  const angle=preparedAngle?aimAngleInput(preparedAngle):await buildAngleInput({output:path.join(work,'angle'),work:path.join(work,'angle-build'),profile:'common'});
+ return {version,upstream,env,angle};
+}
+/** Stage and seal the compiled AIM adaptation without changing app declarations. */
+export async function assemble({project,arch,output,work,compiled:{version,upstream,env,angle:{upstream:angleSource,dependencies,...angle}}}){
+ // A provider compiled here gets its notices; a prepared input already has them.
+ if(dependencies)addAngleLicenses({angle:angle.angle,upstream:angleSource,dependencies});
  fs.mkdirSync(output,{recursive:true});
  try{
   // stageAim owns this runtime's existing overlay, service-ABI and native metadata.
@@ -85,4 +91,4 @@ export async function buildAndroidAim({project,version,arch,output,work}){
   return {project,version,arch,output};
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }
-recipeMain(import.meta,buildAndroidAim);
+recipeMain(import.meta,{compile,assemble});
