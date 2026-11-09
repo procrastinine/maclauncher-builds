@@ -1,7 +1,7 @@
 {
   "SOURCE": {
     "origin": "https://github.com/haasn/libplacebo.git",
-    "revision": "cee9b076f2c63104ccfd497fa79c39a867293ec4",
+    "gitlink": "producers/package-support/src/external/libplacebo",
     "version": "7.360.1",
     "license": "LGPL-2.1-or-later"
   },

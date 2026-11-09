@@ -8,6 +8,9 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 const app=appPath('src/modules/shared/reshade/generation/fsr3'),pin=JSON.parse(fs.readFileSync(path.join(app,'source.json')));
+// The shader compilers are the graphics build's declared shader-tools input.
+const shaderTools=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'../../../../../../scripts/graphics-runtime.json'),'utf8')).inputs['shader-tools'];
+const toolIdentity={...shaderTools.sdk,dxc:shaderTools.files.dxc,'spirv-cross':shaderTools.files['spirv-cross']};
 const [sourceArg,toolsArg,outputArg,...options]=process.argv.slice(2);
 if(!outputArg)throw Error('Usage: build.mjs SOURCE_GIT TOOLS OUTPUT [--shaders-only] [--native-only]');
 const source=path.resolve(sourceArg),tools=path.resolve(toolsArg),output=path.resolve(outputArg);
@@ -19,7 +22,7 @@ const phase=process.argv.includes('--phase')?process.argv[process.argv.indexOf('
 const payload=path.join(output,'payload'),library=path.join(payload,'libmaclauncher-fsr3-generation.dylib');
 /** Translate the shaders and compile the host library into the payload. */
 function compile(){
- for(const name of ['dxc','spirv-cross'])if(hash(fs.readFileSync(path.join(tools,name)))!==pin.tools[name])throw Error('The shader compiler differs from the declared build input: '+name);
+ for(const name of ['dxc','spirv-cross'])if(hash(fs.readFileSync(path.join(tools,name)))!==toolIdentity[name])throw Error('The shader compiler differs from the declared build input: '+name);
  fs.mkdirSync(output,{recursive:true});
  const exported=path.join(output,'source'),archive=path.join(output,'source.tar');fs.mkdirSync(exported,{recursive:true});
  run('git',['-C',source,'archive','--format=tar','--output='+archive,revision,'sdk/include','sdk/src/components/opticalflow','sdk/src/components/frameinterpolation','sdk/src/shared','sdk/src/backends/shared','sdk/src/backends/dx12/shaders/opticalflow','sdk/src/backends/dx12/shaders/frameinterpolation']);
@@ -72,7 +75,7 @@ function compile(){
 function assemble(){
  addLicense(payload,'fsr3',path.join(source,'LICENSE.txt'));
  if(shadersOnly){console.log('Translated FidelityFX optical flow and frame interpolation shaders: '+payload);return;}
- fs.writeFileSync(path.join(payload,'provider.json'),JSON.stringify({providerABI:1,interfaces:{generation:1,preparation:1},shaderVariants:{opticalflow:2,frameinterpolation:8},shaderPasses:{opticalflow:7,frameinterpolation:11},complete:true,method:'fsr3',source:pin.repository,commit:revision,effects:pin.effects,resolvedPaths:pin.effects.map(effect=>effect+'/'),architectures:pin.architectures,minimumMacOS:pin.minimumMacOS,tools:pin.tools,adaptations:['opaque-presentation-alpha','darwin-wchar-context-size','inactive-SPD-UAV-bindings'],library:path.basename(library)},null,2)+'\n');
+ fs.writeFileSync(path.join(payload,'provider.json'),JSON.stringify({providerABI:1,interfaces:{generation:1,preparation:1},shaderVariants:{opticalflow:2,frameinterpolation:8},shaderPasses:{opticalflow:7,frameinterpolation:11},complete:true,method:'fsr3',source:pin.repository,commit:revision,effects:pin.effects,resolvedPaths:pin.effects.map(effect=>effect+'/'),architectures:pin.architectures,minimumMacOS:pin.minimumMacOS,tools:toolIdentity,adaptations:['opaque-presentation-alpha','darwin-wchar-context-size','inactive-SPD-UAV-bindings'],library:path.basename(library)},null,2)+'\n');
  console.log('Built FidelityFX optical flow and frame interpolation provider: '+payload);
 }
 if(phase!=='assemble')compile();

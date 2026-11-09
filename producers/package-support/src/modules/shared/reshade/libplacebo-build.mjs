@@ -1,4 +1,5 @@
 import {appPath,appSourceRoot} from '../../../../../../tools/app-source.mjs';
+import sharedDependencies from '../../../../../dependencies.json' with {type:'json'};
 import {addLicenses,includeLicenses} from '../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
@@ -12,7 +13,7 @@ import {buildDependencies,profile} from './libplacebo/dependencies-build.mjs';
 const directory=path.dirname(fileURLToPath(import.meta.url)),repository=path.resolve(directory,'../../../..');
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const run=(program,args)=>execFileSync(program,args,{stdio:'pipe',encoding:'utf8'});
-export const MOLTENVK=Object.freeze({version:'1.4.2',sha256:'aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f',source:'https://github.com/KhronosGroup/MoltenVK/releases/tag/v1.4.2',archive:Object.freeze({url:'https://github.com/KhronosGroup/MoltenVK/releases/download/v1.4.2/MoltenVK-macos.tar',sha256:'f95765a6229cb7b915990a2890ce12ebe36a730b021545d3d52ae69ce4c4024e'})});
+export const MOLTENVK=Object.freeze(sharedDependencies.moltenvk);
 function inventory(output){const files=[];function visit(relative=''){for(const row of fs.readdirSync(path.join(output,relative),{withFileTypes:true})){const file=relative?relative+'/'+row.name:row.name;if(row.isDirectory())visit(file);else if(file!=='provider.json')files.push({path:file,size:fs.statSync(path.join(output,file)).size,sha256:hash(path.join(output,file))});}}visit();return files.sort((a,b)=>a.path.localeCompare(b.path));}
 export function build({moltenvk,headers,output,sceneLibrary,dependencies,architecture}){
  if(fs.existsSync(output))throw Error('Choose a new libplacebo output directory.');

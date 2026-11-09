@@ -151,6 +151,10 @@
     "shader-tools": {
       "kind": "directory",
       "description": "DXC, SPIRV-Cross and SPIRV-Tools validator binaries vendored by the pinned FSR 4 source",
+      "sdk": {
+        "source": "https://vulkan.lunarg.com/sdk/home",
+        "version": "1.4.357.0"
+      },
       "from": {
         "source": "fsr4",
         "path": "tools/bin"

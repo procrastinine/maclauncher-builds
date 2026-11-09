@@ -4,7 +4,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {appPath} from '../../../../../../../tools/app-source.mjs';
-export const source = JSON.parse(fs.readFileSync(new URL('./source.json', import.meta.url)));
+const declared = JSON.parse(fs.readFileSync(new URL('./source.json', import.meta.url)));
+// The MoltenVK release is declared once in the shared dependencies.
+const {archiveFormat, ...link} = declared.vulkanLinkInput, moltenvk = sharedDependencies.moltenvk;
+export const source = {...declared, vulkanLinkInput: {version: moltenvk.version, library: link.library, file: link.file, sha256: moltenvk.sha256,
+  architecture: link.architecture, source: moltenvk.source, archive: {...moltenvk.archive, format: archiveFormat}, usage: link.usage}};
 source.archive = sharedDependencies[source.archiveDependency];
 const here = import.meta.dirname, app = appPath('src/modules/crossover/temporal/vulkan');
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');

@@ -11,7 +11,7 @@ export async function buildWineVulkanScene({output,work}){
  const producer=path.join(base,'src/modules/crossover/temporal/vulkan'),source=read(path.join(producer,'source.json'));
  const [archive,bisonArchive,moltenvkArchive,compiler]=await Promise.all([
   buildInput(sharedDependencies[source.archiveDependency],path.join(work,'downloads')),buildInput(source.buildTools.bison,path.join(work,'downloads')),
-  buildInput(source.vulkanLinkInput.archive,path.join(work,'downloads')),mingw(work)]);
+  buildInput(sharedDependencies.moltenvk.archive,path.join(work,'downloads')),mingw(work)]);
  const module=await import(pathToFileURL(path.join(producer,'build.mjs'))),staged=path.join(work,'staged');
  await module.buildModule({archive,bisonArchive,moltenvkArchive,mingw:compiler,work:path.join(work,'wine'),output:staged,jobs:2});
  return finish({directory:path.join(staged,'payload'),declaration:read(path.join(staged,'runtime-package.json')),output});

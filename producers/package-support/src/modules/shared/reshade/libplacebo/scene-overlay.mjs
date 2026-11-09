@@ -4,8 +4,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import {sourceRevision} from "../../../../../../../lib/pins.mjs";
 const PROFILE=JSON.parse(fs.readFileSync(new URL('./scene-profile.json',import.meta.url),'utf8'));
-export const SOURCE=Object.freeze(PROFILE.SOURCE);
+// The libplacebo revision is its Builds gitlink; records written from SOURCE name it as revision.
+export const SOURCE=Object.freeze(Object.fromEntries(Object.entries(PROFILE.SOURCE).map(([key,value])=>key==="gitlink"?["revision",sourceRevision(PROFILE.SOURCE)]:[key,value])));
 export const VULKAN_HEADERS=Object.freeze(PROFILE.VULKAN_HEADERS);
 export const FAST_FLOAT=Object.freeze(PROFILE.FAST_FLOAT);
 const originals={"src/shaders/custom_mpv.c":"0091602f4d94a5e23de05b560a43658c1cffcc50455012a323f23c814ef5a984","src/include/libplacebo/shaders/custom.h":"eb7c317f6c93ce76a67f5e622d5c784e702545752a88535a4eb577fdcc74e50e"};

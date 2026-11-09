@@ -1,4 +1,13 @@
 {
+  "moltenvk": {
+    "version": "1.4.2",
+    "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+    "source": "https://github.com/KhronosGroup/MoltenVK/releases/tag/v1.4.2",
+    "archive": {
+      "url": "https://github.com/KhronosGroup/MoltenVK/releases/download/v1.4.2/MoltenVK-macos.tar",
+      "sha256": "f95765a6229cb7b915990a2890ce12ebe36a730b021545d3d52ae69ce4c4024e"
+    }
+  },
   "shaderc": {
     "repository": "https://github.com/google/shaderc",
     "revision": "b64fd42c4a2a9d501c47aca5d3571f7673a5e9cc",
