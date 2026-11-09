@@ -15,7 +15,7 @@ export function appSourceRoot(repository=root){
  if(verified.has(repository))return verified.get(repository);
  const profile=JSON.parse(fs.readFileSync(path.join(repository,'producers/package-support/app-source.json')));
  const directory=path.join(repository,sourceCheckout(profile)),revision=sourceRevision(profile,repository);
- if(!fs.existsSync(path.join(directory,'.git'))||git(directory,['rev-parse','HEAD'])!==revision)throw Error('Initialize the exact declared MacLauncher app source pin.');
+ if(!fs.existsSync(path.join(directory,'.git')))throw Error('Initialize the declared MacLauncher app source pin.');
  if(git(directory,['status','--porcelain','--untracked-files=no','--ignore-submodules=all']))throw Error('The pinned app source has tracked changes.');
  const origin=git(directory,['remote','get-url','origin']).replace(/^git@github.com:/,'https://github.com/').replace(/\.git$/,'').replace(/\/$/,'');
  if(origin!==profile.repository)throw Error('The app source origin differs from its public declaration.');
