@@ -662,7 +662,6 @@
         "producers/package-support/src/external/streamline-camera",
         "producers/package-support/src/external/xess"
       ],
-      "recursiveSubmodules": false,
       "rustComponents": [
         "rust-docs"
       ],

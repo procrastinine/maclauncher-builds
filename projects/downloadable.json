@@ -1910,7 +1910,6 @@
       "submodules": [
         "producers/package-support/src/external/xsystem35-sdl2"
       ],
-      "recursiveSubmodules": false,
       "tools": [
         "cmake",
         "ninja",
