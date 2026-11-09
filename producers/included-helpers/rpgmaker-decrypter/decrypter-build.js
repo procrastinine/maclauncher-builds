@@ -1,3 +1,4 @@
+const {sourceRevision}=require('../../../lib/pins.mjs');
 const {addLicense,addLicenses} = require('../../../lib/licenses.mjs');
 // Source recipe for the hosted RPGMakerDecrypter packages.
 const fs = require("node:fs");
@@ -6,8 +7,8 @@ const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 
 const inputPin=require('./decrypter-source.json');
-inputPin.source.url='https://codeload.github.com/uuksu/RPGMakerDecrypter/tar.gz/'+inputPin.source.revision;
-inputPin.informationalVersion='3.0.0-dev.'+inputPin.source.revision.slice(0,8)+'+'+inputPin.source.revision;
+inputPin.source.url='https://codeload.github.com/uuksu/RPGMakerDecrypter/tar.gz/'+sourceRevision(inputPin.source);
+inputPin.informationalVersion='3.0.0-dev.'+sourceRevision(inputPin.source).slice(0,8)+'+'+sourceRevision(inputPin.source);
 const PIN=Object.freeze(inputPin);
 function platformPin(architecture) {
   const target=require("./decrypter-platforms.json").architectures[architecture];

@@ -1,3 +1,4 @@
+import {sourceRevision} from '../lib/pins.mjs';
 import './producer-environment.mjs';
 import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
 import {addLicenses} from '../lib/licenses.mjs';
@@ -14,7 +15,7 @@ const read=(command,args)=>execFileSync(command,args,{maxBuffer:Infinity,encodin
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 export async function buildZstd({work,architecture='arm64',jobs=2,ninja='ninja'}){
  if(!['arm64','x64'].includes(architecture)||!path.isAbsolute(work||'')||fs.existsSync(work)||!Number.isSafeInteger(jobs)||jobs<1||jobs>6)throw Error('Zstandard needs a declared CPU, one to six jobs and a new absolute work directory.');
- const revision=sharedDependencies.zstd.revision;
+ const revision=sourceRevision(sharedDependencies.zstd);
  fs.mkdirSync(work,{recursive:true});const archive=await buildInput({sha256:sharedDependencies.zstd.sha256,url:sharedDependencies.zstd.repository+'/archive/'+revision+'.tar.gz'}),source=path.join(work,'source'),build=path.join(work,'build'),prefix=path.join(work,'install'),floor=zstdProfile.minimumMacOS;
  fs.mkdirSync(source);run('tar',['-xf',archive,'--strip-components=1','-C',source]);
  const sdk=process.env.SDKROOT||read('xcrun',['--sdk','macosx','--show-sdk-path']),flags=['-ffile-prefix-map='+work+'=zstd-build','-fdebug-prefix-map='+work+'=zstd-build','-Werror=unguarded-availability-new'];

@@ -1,3 +1,4 @@
+import {sourceRevision} from '../lib/pins.mjs';
 import './producer-environment.mjs';
 import {appSourceRoot} from './app-source.mjs';
 import fs from 'node:fs';
@@ -28,9 +29,9 @@ export function verifyProducer(directory,recipe){
   recipe.buildEntry!=='tools/build.mjs'||recipe.checkEntry!=='tools/check-sources.mjs')throw Error('Invalid runtime producer recipe.');
  recipe.revision=git(directory,['rev-parse','HEAD:'+recipe.path]);
  const source=path.join(directory,recipe.path),record=git(directory,['ls-tree','HEAD','--',recipe.path]);
- if(record!==`160000 commit ${recipe.revision}\t${recipe.path}`)throw Error('Producer recipe differs from the pinned source submodule.');
+ if(record!==`160000 commit ${sourceRevision(recipe)}\t${recipe.path}`)throw Error('Producer recipe differs from the pinned source submodule.');
  if(!fs.existsSync(path.join(source,'.git')))throw Error('Initialize the pinned runtime source submodule before building.');
- if(git(source,['rev-parse','HEAD'])!==recipe.revision)throw Error('Runtime source checkout differs from its selected revision.');
+ if(git(source,['rev-parse','HEAD'])!==sourceRevision(recipe))throw Error('Runtime source checkout differs from its selected revision.');
  if(git(source,['status','--porcelain','--untracked-files=normal']))throw Error('Runtime source checkout has local changes.');
  for(const entry of [recipe.buildEntry,recipe.checkEntry]){
   const file=path.join(source,entry);if(fs.realpathSync(file)!==file||!fs.statSync(file).isFile())throw Error('Runtime producer entry must be an original regular file.');
@@ -172,7 +173,7 @@ export function main(args,directory=root){
  const command=adapter?[path.join(directory,adapter),'--source',source,...(options.check?['--check']:['--inputs',options.inputs])]:options.check?[path.join(source,recipe.checkEntry)]:[path.join(source,recipe.buildEntry),'--inputs',options.inputs];
  const result=spawnSync(process.execPath,command,{cwd:source,stdio:'inherit'});if(result.error)throw result.error;
  if(result.status!==0)throw Error('Runtime producer exited with status '+result.status);
- return {id:project.id,revision:recipe.revision,action:options.check?'check':'build'};
+ return {id:project.id,revision:sourceRevision(recipe),action:options.check?'check':'build'};
 }
 
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){

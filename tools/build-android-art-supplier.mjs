@@ -1,3 +1,4 @@
+import {sourceRevision} from '../lib/pins.mjs';
 import './producer-environment.mjs';
 import {androidSource} from '../lib/android-source.mjs';
 import fs from 'node:fs';
@@ -93,7 +94,7 @@ export async function buildAndroidArtSupplier({common,elf,ffiInput,artJava,outpu
  if(fs.statSync(graphicsRegistry).size!==graphicsProfile.size||sha(graphicsRegistry)!==graphicsProfile.sha256)throw Error('The original GLES XML registry differs from its declared source.');
  const imports={directory:directory(arm32Inputs.importsDirectory,'ARM32 declarations'),syscalls:directory(arm32Inputs.syscalls,'ARM32 syscalls'),format:directory(arm32Inputs.format,'ARM32 format'),graphicsRegistry};
  const unicornProfile=JSON.parse(fs.readFileSync(path.join(android,'src/modules/android/native/arm64/unicorn-source.json')));
- const unicorn=checkoutSource({repository:unicornProfile.url,revision:unicornProfile.revision,destination:path.join(work,'unicorn')});
+ const unicorn=checkoutSource({repository:unicornProfile.url,revision:sourceRevision(unicornProfile),destination:path.join(work,'unicorn')});
  const libraryDirectories=[path.join(image.root,'system/lib64'),...fs.readdirSync(path.join(image.root,'apex')).map(name=>path.join(image.root,'apex',name,'lib64')).filter(file=>fs.statSync(file,{throwIfNoEntry:false})?.isDirectory())];
  const rustGuest={aim,env,linker:path.join(bin,'aarch64-linux-android35-clang'),libraryDirectories,aidl:common.tools.aidl,python:common.tools.python};
  const java={prebuilt:artJava};
@@ -106,7 +107,7 @@ export async function buildAndroidArtSupplier({common,elf,ffiInput,artJava,outpu
  const sourceArchiveInputs={sources:{source:elf.build.checkout,klepton:common.sources.klepton,glesHeaders,aosp:path.join(elf.build.fetched,'aosp'),xsdc:path.join(elf.build.fetched,'xsdc')},unicorn,
   sourceCheckouts:{'aosp-native':common.sources['native-source'],'aosp-bionic':common.sources['bionic-source'],'aosp-art':common.sources['art-source'],libffi,dynarmic:common.sources['dynarmic-source']},
   nativeBridgeSources:{ndkHeaders:arm32Inputs.ndkHeaders,arm32Sources:arm32.sources},hwuiSources:{sources:hwui.sources,registry:path.join(hwui.sourceRecords,'SOURCES.json'),registryCache:path.join(hwui.tools.cargoHome,'registry/cache')}};
- return {root:path.join(output,'runtime'),manifest,originalImage:profile.originalImage,sourceArchiveInputs,build:{producer,aim,hwui,guest,libffi,unicorn,java,halRoot,halManifests},record:{androidSource:androidSource(),aimRevision:sourceProfile.sources.aim.commit,unicornRevision:unicornProfile.revision,libffiRevision:sourceProfile.sources.libffi.commit}};
+ return {root:path.join(output,'runtime'),manifest,originalImage:profile.originalImage,sourceArchiveInputs,build:{producer,aim,hwui,guest,libffi,unicorn,java,halRoot,halManifests},record:{androidSource:androidSource(),aimRevision:sourceProfile.sources.aim.commit,unicornRevision:sourceRevision(unicornProfile),libffiRevision:sourceProfile.sources.libffi.commit}};
  }finally{if(!wasMounted&&fs.existsSync(path.join(mount,'root.identity')))run('hdiutil',['detach',mount]);}
 }
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){

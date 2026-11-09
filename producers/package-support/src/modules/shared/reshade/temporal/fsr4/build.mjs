@@ -1,3 +1,4 @@
+import {sourceRevision} from '../../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../../lib/licenses.mjs';
 import {appPath} from '../../../../../../../../tools/app-source.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
@@ -67,7 +68,7 @@ const capture = async (command, args) => {
                                : reject(Error(command + ' exited ' + code))));
   return text.trim();
 };
-if (await capture('git', [ '-C', source, 'rev-parse', 'HEAD' ]) !== pin.commit)
+if (await capture('git', [ '-C', source, 'rev-parse', 'HEAD' ]) !== sourceRevision(pin))
   throw Error('FSR4 source pin changed.');
 await run('git', [ '-C', source, 'diff', '--exit-code', 'HEAD', '--' ]);
 for (const [option, digest] of [[ '--lite2-weights', pin.lite2.sha256 ]])
@@ -141,7 +142,7 @@ const python = (script, args) => run(
     });
 if (repackage) {
   if (previous.providerABI !== 1 || previous.complete !== true ||
-      previous.commit !== pin.commit || previous.model !== pin.model ||
+      previous.commit !== sourceRevision(pin) || previous.model !== pin.model ||
       JSON.stringify(previous.profiles) !== JSON.stringify(pin.profiles) ||
       previous.owned?.['adapt-runtime.mjs'] !==
           hash(ownedSnapshot.get('adapt-runtime.mjs')) ||
@@ -308,7 +309,7 @@ for (const relative of (await fs.readdir(payload, {recursive : true})).sort()) {
 }
 await fs.writeFile(path.join(payload, 'provider.json'), JSON.stringify({
   ...pin,
-  commit : pin.commit,
+  commit : sourceRevision(pin),
   providerABI : 1,
   complete : !quick,
   resourcePreparation : 1,
@@ -324,8 +325,8 @@ await fs.writeFile(path.join(payload, 'provider.json'), JSON.stringify({
     size : (await fs.stat(options['--lite2-weights'])).size,
     sha256 : pin.lite2.sha256,
     repository : pin.lite2.repository,
-    commit : pin.lite2.commit,
-    sourceUrl : pin.lite2.repository + '/tree/' + pin.lite2.commit
+    commit : sourceRevision(pin.lite2),
+    sourceUrl : pin.lite2.repository + '/tree/' + sourceRevision(pin.lite2)
   } ],
   owned,
   tools,

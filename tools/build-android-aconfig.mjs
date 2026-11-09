@@ -1,3 +1,4 @@
+import {sourceRevision} from '../lib/pins.mjs';
 import './producer-environment.mjs';
 import {addLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
@@ -15,7 +16,7 @@ export async function buildAndroidAconfig({project,version,arch,output,work}){
  const profile=JSON.parse(fs.readFileSync(descriptor));version??=profile.version;
  if(project!==profile.id||version!==profile.version||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('Select the Android flag generator, its declared version, arm64 and new absolute output/work paths.');
  fs.mkdirSync(work,{recursive:true});
- const source=checkoutSource({repository:profile.repository,revision:profile.revision,destination:path.join(work,'upstream')});
+ const source=checkoutSource({repository:profile.repository,revision:sourceRevision(profile),destination:path.join(work,'upstream')});
  const crate=path.join(work,'build/make/tools/aconfig');fs.mkdirSync(crate,{recursive:true});
  for(const member of profile.members)fs.cpSync(path.join(source,profile.crate,member),path.join(crate,member),{recursive:true});
  // The four original packages are the complete generator closure. Other Android
@@ -43,6 +44,6 @@ export async function packageAndroidAconfig({project='android-aconfig',version,a
 
  const env=rustEnvironment({work,minimumMacOS:profile.minimumMacOS,env:process.env});
  addLicenses(crate,project,path.resolve(import.meta.dirname,'../producers/android-inputs/aconfig'));
- return sealRuntime({cargoRoot:crate,env,project,version,arch,output,sourceRoot:source,upstreamRevision:profile.revision,executable:path.join(env.CARGO_TARGET_DIR,'release/aconfig'),provenance:{sdk:{repository:profile.sdk.repository,revision:profile.sdk.revision,files:profile.sdk.files.map(({path,contentSha256})=>({path,sha256:contentSha256}))},rustLockSha256:sha(fs.readFileSync(path.join(crate,'Cargo.lock')))}});
+ return sealRuntime({cargoRoot:crate,env,project,version,arch,output,sourceRoot:source,upstreamRevision:sourceRevision(profile),executable:path.join(env.CARGO_TARGET_DIR,'release/aconfig'),provenance:{sdk:{repository:profile.sdk.repository,revision:sourceRevision(profile.sdk),files:profile.sdk.files.map(({path,contentSha256})=>({path,sha256:contentSha256}))},rustLockSha256:sha(fs.readFileSync(path.join(crate,'Cargo.lock')))}});
 }
 recipeMain(import.meta,buildAndroidAconfig);

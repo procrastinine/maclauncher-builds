@@ -2,7 +2,7 @@ import {appFiles,appPath,appSourceRoot,exportAppFile,recipePath} from '../../../
 import {checkoutSource} from '../../../../../../../tools/build-source.mjs';
 import sharedDependencies from '../../../../../../dependencies.json' with {type:'json'};
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
-import {gitlink} from '../../../../../../../lib/pins.mjs';
+import {gitlink,sourceRevision} from '../../../../../../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -24,7 +24,7 @@ export function materializeSource({output,sources={},baseOnly=false}){
  for(const entry of processor.sources){
   const directory=path.resolve(sources[entry.id]||(entry.id==='macfx-spirv-cross'?checkoutSource({...sharedDependencies.spirvCross,destination:path.join(output,'.source-inputs/spirv-cross')}):path.join(repository,entry.submodulePath)));
   const head=execFileSync('git',['-C',directory,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
-  if(head!==(entry.id==='macfx-spirv-cross'?sharedDependencies.spirvCross.revision:(entry.id==='macfx-spirv-headers'?execFileSync('git',['-C',sources['macfx-reshade']||path.join(repository,'src/external/macfx-reshade'),'rev-parse',gitlink('producers/package-support/src/external/macfx-reshade')+':deps/spirv'],{encoding:'utf8'}).trim():gitlink('producers/package-support/'+entry.submodulePath))))throw Error('Initialize the selected graphics source commit: '+entry.submodulePath);
+  if(head!==(entry.id==='macfx-spirv-cross'?sourceRevision(sharedDependencies.spirvCross):(entry.id==='macfx-spirv-headers'?execFileSync('git',['-C',sources['macfx-reshade']||path.join(repository,'src/external/macfx-reshade'),'rev-parse',gitlink('producers/package-support/src/external/macfx-reshade')+':deps/spirv'],{encoding:'utf8'}).trim():gitlink('producers/package-support/'+entry.submodulePath))))throw Error('Initialize the selected graphics source commit: '+entry.submodulePath);
   directories[entry.sourcePath]=directory;
  }
   addLicenses(output,"ReShade",base);
@@ -35,11 +35,11 @@ export function materializeSource({output,sources={},baseOnly=false}){
   copyPinnedReShadeSources('',output,new Set(processor.sources.map(entry=>entry.sourcePath)),directories);
   const libra=JSON.parse(fs.readFileSync(path.join(root,'retroarch-source.json')));
   const libraRoot=path.resolve(sources.librashader||path.join(repository,'src/external/librashader'));
-  if(execFileSync('git',['-C',libraRoot,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==gitlink(libra.gitlink))throw Error('Initialize the selected librashader source commit.');
+  if(execFileSync('git',['-C',libraRoot,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==sourceRevision(libra))throw Error('Initialize the selected librashader source commit.');
   for(const name of ['include/librashader.h']){const file=path.join(output,'third_party/librashader',name);fs.mkdirSync(path.dirname(file),{recursive:true});fs.copyFileSync(path.join(libraRoot,name),file);}
   addLicenses(output,'librashader',libraRoot);
   fs.rmSync(path.join(output,'.source-inputs'),{recursive:true,force:true});
-  return {output,appRevision:appSourceRoot().revision,sourceSha256:digest(Buffer.concat(inputs.map(name=>Buffer.concat([Buffer.from(name+'\0'),fs.readFileSync(path.join(base,name))])))),upstreams:processor.sources.map(entry=>({id:entry.id,commit:entry.id==='macfx-spirv-cross'?sharedDependencies.spirvCross.revision:(entry.id==='macfx-spirv-headers'?execFileSync('git',['-C',sources['macfx-reshade']||path.join(repository,'src/external/macfx-reshade'),'rev-parse',gitlink('producers/package-support/src/external/macfx-reshade')+':deps/spirv'],{encoding:'utf8'}).trim():gitlink('producers/package-support/'+entry.submodulePath))}))};
+  return {output,appRevision:appSourceRoot().revision,sourceSha256:digest(Buffer.concat(inputs.map(name=>Buffer.concat([Buffer.from(name+'\0'),fs.readFileSync(path.join(base,name))])))),upstreams:processor.sources.map(entry=>({id:entry.id,commit:entry.id==='macfx-spirv-cross'?sourceRevision(sharedDependencies.spirvCross):(entry.id==='macfx-spirv-headers'?execFileSync('git',['-C',sources['macfx-reshade']||path.join(repository,'src/external/macfx-reshade'),'rev-parse',gitlink('producers/package-support/src/external/macfx-reshade')+':deps/spirv'],{encoding:'utf8'}).trim():gitlink('producers/package-support/'+entry.submodulePath))}))};
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){

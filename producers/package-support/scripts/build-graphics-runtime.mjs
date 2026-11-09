@@ -75,7 +75,7 @@ export function resolveSource(id, override) {
   const entry = recipe.sources[id];
   if (!entry) throw Error("Unknown graphics source: " + id);
   const commit = id==='fsr3-sdk' ? gitlink('producers/package-support/src/external/fsr3-sdk') :
-    id==='sdl-vulkan' ? sharedDependencies.sdlHeaders.revision :
+    id==='sdl-vulkan' ? sourceRevision(sharedDependencies.sdlHeaders) :
     id==='libplacebo-vulkan-headers' ? git(path.join(repository,'src/external/libplacebo'),['rev-parse',gitlink('producers/package-support/src/external/libplacebo')+':3rdparty/Vulkan-Headers']) :
     sourceRevision(pinned({file: entry.pin.file, pointer: entry.pin.pointer})), origin = pinned({file: entry.pin.file, pointer: entry.pin.repository});
   const directory = override ? path.resolve(override) : path.join(repository, entry.path);

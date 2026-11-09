@@ -1,5 +1,5 @@
 import {appRequire} from '../../tools/app-source.mjs';
-import {gitlink} from '../../lib/pins.mjs';
+import {gitlink,sourceRevision} from '../../lib/pins.mjs';
 import {addLicense,addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -74,8 +74,8 @@ export async function packageRuntime({runtimeBuild,relinkerBuild,output,version,
   .map(relative=>({path:relative,sha256:sha(fs.readFileSync(path.join(import.meta.dirname,relative)))})),...overlays,...tools].sort((a,b)=>a.path.localeCompare(b.path));
  fs.writeFileSync(path.join(payload,'source.json'),json({schemaVersion:1,source:recipe.source,attributions:recipe.attributions,dependencies:dependencies.dependencies,artifacts:dependencies.artifacts,overlays,tools,producerInputs}));
  const files=filesIn(payload).map(relative=>record(payload,relative));
- const manifest={schemaVersion:1,managerId:'anyps5',version,platform:'darwin',arch,minimumMacOS:'26.0',upstreamRevision:recipe.source.revision,
-  gameArchitecture:'x86_64',capabilities:{mouseRouting:true,touchPadBinding:true},provenance:{sourceUrl:recipe.source.repository,sourceRevision:recipe.source.revision,producerInputs},executableRelative:'tools/relinker',runtimeFiles:{libraries:'libs',unwrap:'tools/unwrap-self.cjs'},files};
+ const manifest={schemaVersion:1,managerId:'anyps5',version,platform:'darwin',arch,minimumMacOS:'26.0',upstreamRevision:sourceRevision(recipe.source),
+  gameArchitecture:'x86_64',capabilities:{mouseRouting:true,touchPadBinding:true},provenance:{sourceUrl:recipe.source.repository,sourceRevision:sourceRevision(recipe.source),producerInputs},executableRelative:'tools/relinker',runtimeFiles:{libraries:'libs',unwrap:'tools/unwrap-self.cjs'},files};
  fs.writeFileSync(path.join(payload,'runtime.json'),json(manifest));
  const manifestFile=record(payload,'runtime.json'),sourceFile=files.find(file=>file.path==='source.json');
  const declaration={id:'anyps5',version,arch,launcherArchitectures:[arch],minimumMacOS:manifest.minimumMacOS,directoryRelative:'anyps5/'+version+'/'+arch,

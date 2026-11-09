@@ -1,3 +1,4 @@
+import {sourceRevision} from '../../../../../../../lib/pins.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -13,7 +14,7 @@ export const commonHeaders={
  'image-color.h':'../../reshade/native/image-color.h',
  'vulkan-scene.h':'../../reshade/native/vulkan-scene.h'
 };
-function original(repository,file){return execFileSync('git',['-C',repository,'show',source.revision+':'+file],{encoding:'utf8',env:{...process.env,GIT_NO_LAZY_FETCH:'1'},maxBuffer: Infinity});}
+function original(repository,file){return execFileSync('git',['-C',repository,'show',sourceRevision(source)+':'+file],{encoding:'utf8',env:{...process.env,GIT_NO_LAZY_FETCH:'1'},maxBuffer: Infinity});}
 function replace(text,from,to,file){if(text.split(from).length!==2)throw Error('MoltenVK source anchor changed: '+file);return text.replace(from,to);}
 export function sceneSources(repository,readSource=file=>original(repository,file)){
  const files=new Map();

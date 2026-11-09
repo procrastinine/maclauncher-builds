@@ -1,6 +1,6 @@
 const {appRequire}=require('../../../../../../tools/app-source.mjs');
 const sharedDependencies=require('../../../../../dependencies.json');
-const { gitlink } = require("../../../../../../lib/pins.mjs");
+const { gitlink, sourceRevision } = require("../../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -9,7 +9,7 @@ const Native = appRequire('src/modules/shared/runtime/local-native.js');
 const UPSTREAM_VERSION = "1.12";
 const VERSION = "1.12-MCLv1";
 const REVISION = require("./source-1.12.json").revision;
-const SDL_REVISION = sharedDependencies.sdlHeaders.revision;
+const SDL_REVISION = sourceRevision(sharedDependencies.sdlHeaders);
 const OPENAL_REVISION = gitlink("producers/package-support/src/external/openal-soft");
 
 function adaptSource(source, sdlSource) {

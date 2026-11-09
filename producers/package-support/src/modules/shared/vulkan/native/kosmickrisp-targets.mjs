@@ -1,6 +1,6 @@
 import {appRequire} from '../../../../../../../tools/app-source.mjs';
 import sharedDependencies from '../../../../../../dependencies.json' with {type:'json'};
-import {gitlink} from '../../../../../../../lib/pins.mjs';
+import {gitlink,sourceRevision} from '../../../../../../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -10,8 +10,6 @@ import {prepareSourceTree, writeChanged} from './source-files.mjs';
 
 const pin = JSON.parse(fs.readFileSync(new URL('./kosmickrisp-source.json', import.meta.url)));
 const targets = JSON.parse(fs.readFileSync(new URL('./kosmickrisp-targets.json', import.meta.url)));
-targets.vulkanLoader.revision=gitlink(targets.vulkanLoader.gitlink);
-pin.revision=gitlink(pin.gitlink);
 const sha = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const read = (tool, args, options = {}) => execFileSync(tool, args, {encoding: 'utf8', ...options}).trim();
 const run = (tool, args, options = {}) => execFileSync(tool, args, {stdio: 'inherit', ...options});
@@ -21,8 +19,8 @@ const toolFiles = {
     kk_clc: 'src/kosmickrisp/clc/kk_clc',
 };
 
-function verifySource(source, input) {
-    if (read('git', ['-C', source, 'rev-parse', 'HEAD']) !== (input.revision || sharedDependencies.vulkanHeaders.revision)) throw Error('Vulkan source revision differs from its pin');
+function verifySource(source, revision) {
+    if (read('git', ['-C', source, 'rev-parse', 'HEAD']) !== revision) throw Error('Vulkan source revision differs from its pin');
 }
 
 export function describeNativeTools({source, build}) {
@@ -30,7 +28,7 @@ export function describeNativeTools({source, build}) {
     const files = Object.fromEntries(Object.entries(toolFiles).map(([name, relative]) => [name, {
         path: relative, sha256: sha(path.join(build, relative)),
     }]));
-    const record = {schemaVersion: 1, repository: pin.repository, revision: gitlink(pin.gitlink), files};
+    const record = {schemaVersion: 1, repository: pin.repository, revision: sourceRevision(pin), files};
     writeChanged(path.join(build, 'native-tools.json'), JSON.stringify(record, null, 2) + '\n');
     return build;
 }
@@ -46,7 +44,7 @@ export function buildKosmicTargets(options, buildNative) {
         nativeBuild = native.nativeBuild;
     }
     const native = JSON.parse(fs.readFileSync(path.join(nativeBuild, 'native-tools.json')));
-    if (native.revision !== gitlink(pin.gitlink) || native.repository !== pin.repository) throw Error('Kosmic native compilers differ from their source pin');
+    if (sourceRevision(native) !== sourceRevision(pin) || native.repository !== pin.repository) throw Error('Kosmic native compilers differ from their source pin');
     if (JSON.stringify(Object.keys(native.files).sort()) !== JSON.stringify(Object.keys(toolFiles).sort())) throw Error('Kosmic native compilers are incomplete');
     for (const [name, file] of Object.entries(native.files)) {
         if (file.path !== toolFiles[name] || file.sha256 !== sha(path.join(nativeBuild, file.path))) throw Error('Kosmic native compiler differs from its metadata');
@@ -57,7 +55,7 @@ export function buildKosmicTargets(options, buildNative) {
         for (const [file, content] of Object.entries(adaptedKosmicSources(source))) writeChanged(path.join(temporary, file), content);
     });
     const environment = {...process.env, MACOSX_DEPLOYMENT_TARGET: pin.minimumMacOS,
-        MESA_GIT_SHA1_OVERRIDE: gitlink(pin.gitlink),
+        MESA_GIT_SHA1_OVERRIDE: sourceRevision(pin),
         PATH: [path.dirname(meson), ...Object.values(toolFiles).map(file => path.dirname(path.join(nativeBuild, file))), process.env.PATH].join(path.delimiter)};
     const outputs = [];
     const jobs = Number(options.jobs || 2);
@@ -102,8 +100,8 @@ objc_link_args = ['-arch', '${cpu}']
 }
 
 export function buildKosmicLoader({source, headersSource, work, architecture = 'universal', jobs = 2}) {
-    verifySource(source, targets.vulkanLoader);
-    verifySource(headersSource, targets.vulkanHeaders);
+    verifySource(source, sourceRevision(targets.vulkanLoader));
+    verifySource(headersSource, sourceRevision(sharedDependencies.vulkanHeaders));
     const headersBuild = path.join(work, 'headers-build'), headers = path.join(work, 'headers');
     run('cmake', ['-S', headersSource, '-B', headersBuild, '-DCMAKE_INSTALL_PREFIX=' + headers,
         '-DVULKAN_HEADERS_ENABLE_TESTS=OFF', '-DVULKAN_HEADERS_ENABLE_MODULE=OFF']);

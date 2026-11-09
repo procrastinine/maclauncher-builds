@@ -1,5 +1,5 @@
 import {appPath,appRequire,exportAppFile,moduleFile} from '../../../../../../../tools/app-source.mjs';
-import {gitlink} from '../../../../../../../lib/pins.mjs';
+import {gitlink,sourceRevision} from '../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -20,13 +20,13 @@ const ownedNames=['build-retroarch.mjs','retroarch-source.json','retroarch-exter
 const ownedSource=Object.fromEntries(ownedNames.map(name=>[name,hash(file(name))]));
 const sceneInputContractSha256=hash(contracts);
 const run=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',stdio:'pipe',timeout:180000,...options});
-if(run('git',['-C',originalSource,'rev-parse','HEAD']).trim()!==gitlink(declaration.gitlink))throw new Error('The original librashader source pin differs.');
+if(run('git',['-C',originalSource,'rev-parse','HEAD']).trim()!==sourceRevision(declaration))throw new Error('The original librashader source pin differs.');
 run('git',['-C',originalSource,'diff','--exit-code','HEAD','--']);
 if(archive&&hash(archive)!==declaration.artifacts.arm64?.sha256)throw new Error('The official librashader archive checksum differs.');
 if(fs.existsSync(output))throw new Error('Use a new RetroArch shader output directory.');
 fs.mkdirSync(output,{recursive:true});
 const source=path.join(output,'upstream-source'),sourceArchive=path.join(output,'upstream.tar');
-run('git',['-C',originalSource,'archive','--format=tar','--output',sourceArchive,gitlink(declaration.gitlink)]);
+run('git',['-C',originalSource,'archive','--format=tar','--output',sourceArchive,sourceRevision(declaration)]);
 fs.mkdirSync(source);run('/usr/bin/tar',['-xf',sourceArchive,'-C',source]);fs.unlinkSync(sourceArchive);
 applyRetroarchExternalOverlay(source);
 const library=path.join(output,'librashader.dylib');

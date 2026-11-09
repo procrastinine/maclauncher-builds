@@ -27,7 +27,7 @@ const vulkanSource=JSON.parse(fs.readFileSync(path.join(here,'vulkan-source.json
 let vulkanHeaders=null;
 if(args['vulkan-source']){
   const root=fs.realpathSync(args['vulkan-source']);
-  if(execFileSync('git',['-C',root,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==sharedDependencies.sdlHeaders.revision||
+  if(execFileSync('git',['-C',root,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==sourceRevision(sharedDependencies.sdlHeaders)||
       execFileSync('git',['-C',root,'remote','get-url','origin'],{encoding:'utf8'}).trim().replace(/\.git$/,'')!==vulkanSource.repository)
     throw Error('Initialize the exact declared Vulkan header source commit.');
   vulkanHeaders=path.join(root,vulkanSource.headerDirectory);

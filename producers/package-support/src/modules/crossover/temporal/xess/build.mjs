@@ -1,6 +1,6 @@
 import {appPath,appRequire,appSourceRoot} from '../../../../../../../tools/app-source.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
-import {gitlink} from '../../../../../../../lib/pins.mjs';
+import {gitlink,sourceRevision} from '../../../../../../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -17,7 +17,7 @@ const hooks=new Set(headers.flatMap(file=>[...fs.readFileSync(path.join(xess,fil
 const owned=fs.readFileSync(path.join(app,'proxy.cpp'),'utf8');
 for(const hook of hooks)if(!new RegExp('XESS_API\\s+xess_result_t\\s+'+hook+'\\s*\\(').test(owned))throw Error('The selected public XeSS API is not implemented: '+hook);
 const reference=JSON.parse(fs.readFileSync(path.join(here,'reference-exports.json'))),original=reference.exports;
-if(gitlink(reference.gitlink)!==source.xess.revision||reference.repository!==source.xess.repository)throw Error('The reference XeSS export profile does not match the declared SDK');
+if(sourceRevision(reference)!==sourceRevision(source.xess)||reference.repository!==source.xess.repository)throw Error('The reference XeSS export profile does not match the declared SDK');
 if(!original?.length)throw Error('The pinned XeSS D3D11 export profile is unavailable');
 const exports=[...original];let ordinal=Math.max(...exports.map(row=>row.ordinal));
 for(const name of hooks)if(!exports.some(row=>row.name===name))exports.push({name,ordinal:++ordinal});

@@ -1,5 +1,5 @@
 import sharedDependencies from '../dependencies.json' with {type:'json'};
-import {gitlink} from '../../lib/pins.mjs';
+import {gitlink,sourceRevision} from '../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -57,7 +57,7 @@ async function ffmpeg(buildDirectory,downloads){
 }
 export async function build({buildDirectory=path.join(root,'out/prosper'),vulkanLibrary,downloads,python,jobs=4,check=false,configureOnly=false}={}){
  const source=path.join(root,recipe.source.path);verify(recipe.source,source);
- if(check)return{id:recipe.id,revision:recipe.source.revision,redistribution:recipe.redistribution,dependencies:inputs.dependencies};
+ if(check)return{id:recipe.id,revision:sourceRevision(recipe.source),redistribution:recipe.redistribution,dependencies:inputs.dependencies};
  if(process.platform!=='darwin'||!path.isAbsolute(buildDirectory)||!Number.isSafeInteger(jobs)||jobs<1||jobs>128)throw Error('Use macOS, an absolute build directory and1–128 jobs.');
  if(!path.isAbsolute(vulkanLibrary||'')||!fs.statSync(vulkanLibrary).isFile())throw Error('Choose the existing managed Intel Vulkan library with --vulkan-library.');
  const relative=path.relative(source,buildDirectory);if(!relative||relative!=='..'&&!relative.startsWith('..'+path.sep)&&!path.isAbsolute(relative))throw Error('Build outside the upstream checkout.');
@@ -65,8 +65,8 @@ export async function build({buildDirectory=path.join(root,'out/prosper'),vulkan
  const dependencies={};for(const entry of inputs.dependencies)dependencies[entry.id]=await dependency(entry,buildDirectory);
  const linkedVulkan=vulkanInput(vulkanLibrary),codecs=await ffmpeg(buildDirectory,downloads),projection=path.join(buildDirectory,'source'),binary=path.join(buildDirectory,'build'),staged=fs.mkdtempSync(path.join(buildDirectory,'.source-'));
  try{
-  const archive=path.join(buildDirectory,'source.tar');run('git',['-C',source,'archive','--format=tar','--output='+archive,recipe.source.revision,'prosper']);run('/usr/bin/tar',['-xf',archive,'-C',staged]);fs.unlinkSync(archive);
-  const revisionFile=path.join(staged,'prosper/cmake/GenerateBuildRevision.cmake');let revision=fs.readFileSync(revisionFile,'utf8');const anchor='set(PROSPER_GENERATED_REVISION "unknown")';if(!revision.includes(anchor))throw Error('Prosper exported revision boundary changed.');write(revisionFile,revision.replace(anchor,'set(PROSPER_GENERATED_REVISION "'+recipe.source.revision+'")'));
+  const archive=path.join(buildDirectory,'source.tar');run('git',['-C',source,'archive','--format=tar','--output='+archive,sourceRevision(recipe.source),'prosper']);run('/usr/bin/tar',['-xf',archive,'-C',staged]);fs.unlinkSync(archive);
+  const revisionFile=path.join(staged,'prosper/cmake/GenerateBuildRevision.cmake');let revision=fs.readFileSync(revisionFile,'utf8');const anchor='set(PROSPER_GENERATED_REVISION "unknown")';if(!revision.includes(anchor))throw Error('Prosper exported revision boundary changed.');write(revisionFile,revision.replace(anchor,'set(PROSPER_GENERATED_REVISION "'+sourceRevision(recipe.source)+'")'));
   const nidFile=path.join(staged,'prosper/src/hle/dispatch/nid.cpp'),nid=fs.readFileSync(nidFile,'utf8'),sourcePath='load_names_file(PROSPER_SOURCE_DIR "/data/known_names.txt");';
   if(nid.split(sourcePath).length!==2)throw Error('Prosper optional NID database boundary changed.');
   write(nidFile,nid.replace(sourcePath,'load_names_file("/prosper/data/known_names.txt");'));
@@ -84,7 +84,7 @@ export async function build({buildDirectory=path.join(root,'out/prosper'),vulkan
   '-DFETCHCONTENT_SOURCE_DIR_SDL3='+dependencies.sdl3,'-DPython3_EXECUTABLE='+python,'-DCMAKE_C_FLAGS='+maps,'-DCMAKE_CXX_FLAGS='+maps],
   {env:{...process.env,PKG_CONFIG_LIBDIR:path.join(codecs,'lib/pkgconfig'),PKG_CONFIG_PATH:''}});
  if(!configureOnly)run('cmake',['--build',binary,'--target','prosper-app','--parallel',String(jobs)]);
- const result={schemaVersion:1,id:recipe.id,revision:recipe.source.revision,redistribution:recipe.redistribution,architecture:'x86_64',
+ const result={schemaVersion:1,id:recipe.id,revision:sourceRevision(recipe.source),redistribution:recipe.redistribution,architecture:'x86_64',
   executable:path.join(binary,'prosper-app'),source:recipe.source,dependencies:inputs.dependencies,artifacts:inputs.artifacts,vulkanLinkInput:linkedVulkan};
  write(path.join(buildDirectory,'build.json'),JSON.stringify(result,null,2)+'\n');return result;
 }

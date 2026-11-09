@@ -1,5 +1,5 @@
 import {APP_REFERENCE,appRequire} from '../../../tools/app-source.mjs';
-import {gitlink} from '../../../lib/pins.mjs';
+import {gitlink,sourceRevision} from '../../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -22,7 +22,7 @@ function record(root,relative){const file=path.join(root,relative),content=B.rea
  const magic=bytes.length>=4?bytes.readUInt32BE(0):0;const image=[0xfeedface,0xcefaedfe,0xfeedfacf,0xcffaedfe,0xcafebabe,0xbebafeca,0xcafebabf,0xbfbafeca].includes(magic)?Native.readMachOArchitectures(file,{allowLibrary:true}):[];return {path:relative,...value,...(image.length?{architectures:image}:{})};}
 export function checkSources(){
  for(const input of recipe.ownedInputs)B.relativeFile(input.path.startsWith(APP_REFERENCE)?input.path.slice(APP_REFERENCE.length):input.path);
- return {id:recipe.id,revision:recipe.source.revision,inputs:recipe.ownedInputs.length};
+ return {id:recipe.id,revision:sourceRevision(recipe.source),inputs:recipe.ownedInputs.length};
 }
 export async function packageRuntime({input,output,version=recipe.version,catalogFile}){
  checkSources();input=fs.realpathSync(input);output=path.resolve(output);
@@ -45,9 +45,9 @@ export async function packageRuntime({input,output,version=recipe.version,catalo
    const links=lines.map(line=>line.trim().split(' (')[0]).filter(Boolean).filter(link=>link!=='@rpath/'+path.basename(file.path));
    dependencies.push({file:file.path,links});
   }
-  const manifest=B.validateManifest({schemaVersion:1,managerId:'mpv',version,platform:'darwin',arch:'arm64',minimumMacOS:recipe.minimumMacOS,upstreamRevision:recipe.source.revision,
+  const manifest=B.validateManifest({schemaVersion:1,managerId:'mpv',version,platform:'darwin',arch:'arm64',minimumMacOS:recipe.minimumMacOS,upstreamRevision:sourceRevision(recipe.source),
    executableRelative:'mpv.app/Contents/MacOS/mpv',runtimeFiles:{decodedFrameManifest:'video-runtime.json'},
-   provenance:{sourceRevision:recipe.source.revision,sourceKind:'official-release',verifiedBuild:false},files,dependencies});
+   provenance:{sourceRevision:sourceRevision(recipe.source),sourceKind:'official-release',verifiedBuild:false},files,dependencies});
   fs.writeFileSync(path.join(payload,'manifest.json'),json(manifest));
   const manifestFile=record(payload,'manifest.json'),sourceFile=files.find(file=>file.path==='source.json');
   const declaration={id:'mpv',version,arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS:recipe.minimumMacOS,directoryRelative:'mpv/'+version+'/arm64',sourceRelative:null,sourceSha256:sourceFile.sha256,manifestRelative:'manifest.json',manifestSha256:manifestFile.sha256,

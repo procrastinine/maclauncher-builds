@@ -55,7 +55,7 @@ const pins = registeredSources.sources.map(entry => {
   if (!consumed.has(entry.sourcePath)) throw new Error("The graphics source profile contains an undeclared dependency.");
   const directory = entry.id === "macfx-spirv-cross" && options["--spirv-cross-source"] || path.resolve(upstreamRoot, entry.submodulePath);
   const actual = execFileSync("git", ["-C", directory, "rev-parse", "HEAD"], {encoding: "utf8"}).trim();
-  if (actual !== (entry.commit||(entry.id==='macfx-spirv-cross'?sharedDependencies.spirvCross.revision:entry.id==='macfx-spirv-headers'?execFileSync('git',['-C',path.resolve(directory,'../..'),'rev-parse',gitlink('producers/package-support/src/external/macfx-reshade')+':deps/spirv'],{encoding:'utf8'}).trim():gitlink('producers/package-support/'+entry.submodulePath)))) throw new Error("Initialize the selected graphics source commit: " + entry.submodulePath);
+  if (actual !== ((entry.id==='macfx-spirv-cross'?sourceRevision(sharedDependencies.spirvCross):entry.id==='macfx-spirv-headers'?execFileSync('git',['-C',path.resolve(directory,'../..'),'rev-parse',gitlink('producers/package-support/src/external/macfx-reshade')+':deps/spirv'],{encoding:'utf8'}).trim():gitlink('producers/package-support/'+entry.submodulePath)))) throw new Error("Initialize the selected graphics source commit: " + entry.submodulePath);
   execFileSync("git", ["-C", directory, "diff", "--exit-code", "HEAD", "--"], {stdio: "pipe"});
   return ` ${actual} ${entry.sourcePath}`;
 });
@@ -100,7 +100,7 @@ if(options["--xess-host"]){
       if(digest(fs.readFileSync(file))!==row.sha256||digest(fs.readFileSync(snapshot))!==row.sha256)throw Error("The XeSS Vulkan header changed: "+row.path);
       extraOwned.set("maclauncher/xess/native/vulkan/"+row.path,file);
     }
-    pins.push(` ${sharedDependencies.sdlHeaders.revision} third_party/xess-vulkan-headers`);
+    pins.push(` ${sourceRevision(sharedDependencies.sdlHeaders)} third_party/xess-vulkan-headers`);
   }else if(metadata.source.vulkanHeaders)throw Error("The XeSS Vulkan source is declared without its GPU host.");
   for(const row of metadata.files){if(typeof row.path!=="string"||path.isAbsolute(row.path)||row.path.split(/[\\/]/).some(part=>!part||part==="."||part===".."))throw Error("The XeSS GPU host contains an undeclared resource.");const file=path.join(directory,row.path),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink())throw Error("Invalid XeSS GPU host resource: "+row.path);if(!row.path.startsWith("source/"))optionalInputs.set("xess/"+row.path,file);if(row.path.endsWith(".so"))optionalLoad.set("xess/"+row.path,{architectures:["x86_64"],minimumMacOS:metadata.minimumMacOS});}
   optionalInputs.set("xess/provider.json",path.join(directory,"provider.json"));features.graphics.xessSceneAPI=1;

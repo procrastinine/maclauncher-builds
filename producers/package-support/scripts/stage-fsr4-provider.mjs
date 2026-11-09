@@ -19,7 +19,7 @@ export function stageFSR4Provider({directory,upstream}){
   const owned=new Map();
   for(const relative of Object.keys(metadata.owned))owned.set(path.posix.normalize("maclauncher/temporal/fsr4/"+relative),moduleFile(path.posix.join(module,relative)));
   const archive=metadata.sourceInputs?.find(row=>row.path==="source-inputs/weights_lossy2.npz");
-  if(!archive||metadata.sourceInputs.length!==1||archive.sha256!==spec.lite2.sha256||archive.repository!==spec.lite2.repository||archive.commit!==spec.lite2.commit||![spec.lite2.url,spec.lite2.repository+"/tree/"+spec.lite2.commit].includes(archive.sourceUrl))throw Error("The Lite 2 source archive identity is incomplete.");
+  if(!archive||metadata.sourceInputs.length!==1||archive.sha256!==spec.lite2.sha256||archive.repository!==spec.lite2.repository||archive.commit!==sourceRevision(spec.lite2)||![spec.lite2.url,spec.lite2.repository+"/tree/"+sourceRevision(spec.lite2)].includes(archive.sourceUrl))throw Error("The Lite 2 source archive identity is incomplete.");
   const archiveFile=path.join(path.dirname(directory),archive.path),archiveStat=fs.lstatSync(archiveFile);
   if(!archiveStat.isFile()||archiveStat.isSymbolicLink()||archiveStat.size!==archive.size||hash(archiveFile)!==archive.sha256)throw Error("A Lite 2 source input changed.");
   owned.set("maclauncher/temporal/fsr4/inputs/weights_lossy2.npz",archiveFile);
@@ -30,5 +30,5 @@ export function stageFSR4Provider({directory,upstream}){
   files.set("provider.json",path.join(directory,"provider.json"));
   return {files:new Map([...files].map(([name,file])=>["temporal/fsr4/"+name,file])),owned,profiles:[...metadata.supportedProfiles],
     source:{directory:upstream,relative:"third_party/fsr4-native-macos",commit:sourceRevision(spec)},
-    pins:[` ${sourceRevision(spec)} third_party/fsr4-native-macos`,` ${spec.lite2.commit} third_party/fsr4-lite2-weights`,...(spec.sources||[]).map((row,index)=>{const revision=index<2?gitlink('producers/package-support/src/external/'+(index===0?'fsr4-sdk-headers':'fsr4-sdk-model')):sourceRevision(row);if(!/^https:\/\//.test(row.repository||" ")||!/^[a-f0-9]{40}$/.test(revision||" "))throw Error("An FSR 4 consumed source pin is incomplete.");return ` ${revision} third_party/fsr4-input-${index+1}`;})]};
+    pins:[` ${sourceRevision(spec)} third_party/fsr4-native-macos`,` ${sourceRevision(spec.lite2)} third_party/fsr4-lite2-weights`,...(spec.sources||[]).map((row,index)=>{const revision=index<2?gitlink('producers/package-support/src/external/'+(index===0?'fsr4-sdk-headers':'fsr4-sdk-model')):sourceRevision(row);if(!/^https:\/\//.test(row.repository||" ")||!/^[a-f0-9]{40}$/.test(revision||" "))throw Error("An FSR 4 consumed source pin is incomplete.");return ` ${revision} third_party/fsr4-input-${index+1}`;})]};
 }

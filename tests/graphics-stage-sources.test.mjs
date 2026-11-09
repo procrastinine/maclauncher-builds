@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {sourceRevision} from '../lib/pins.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -22,7 +23,7 @@ test('graphics staging validates the SPIRV-Cross checkout supplied by the build'
  const block=text.slice(text.indexOf('const pins = registeredSources.sources.map'),text.indexOf('const nativeFiles ='))+'\npins;';
  const context={path,execFileSync,upstreamRoot:root,options:{'--spirv-cross-source':checkout},
   registeredSources:{sources:[{id:'macfx-spirv-cross',sourcePath:'third_party/spirv-cross',submodulePath:'removed-checkout'}]},
-  consumed:new Set(['third_party/spirv-cross']),sharedDependencies:{spirvCross:{revision}}};
+  consumed:new Set(['third_party/spirv-cross']),sharedDependencies:{spirvCross:{revision}},sourceRevision};
  assert.deepEqual([...vm.runInNewContext(block,{...context})],[` ${revision} third_party/spirv-cross`]);
  context.sharedDependencies.spirvCross.revision='0'.repeat(40);
  assert.throws(()=>vm.runInNewContext(block,{...context}),/Initialize the selected graphics source commit/);

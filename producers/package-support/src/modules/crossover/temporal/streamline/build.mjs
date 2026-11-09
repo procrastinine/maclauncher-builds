@@ -1,6 +1,6 @@
 import {appRequire,appSourceRoot} from '../../../../../../../tools/app-source.mjs';
 import {buildCameraBridge} from '../camera-bridge/build.mjs';
-import {gitlink} from '../../../../../../../lib/pins.mjs';
+import {gitlink,sourceRevision} from '../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from "node:fs";
 import path from "node:path";
@@ -12,7 +12,7 @@ const args = Object.fromEntries(process.argv.slice(2).reduce((items, value, inde
 if (!["source", "out", "compiler", "reference"].every(key => args[key])) throw Error("Use --source Streamline --out directory --compiler clang++ --reference sl.interposer.dll");
 const source = path.resolve(args.source), output = path.resolve(args.out), reference = path.resolve(args.reference);
 const declaration = JSON.parse(fs.readFileSync(path.join(here, "source.json"), "utf8"));
-const revision = gitlink(declaration.gitlink);
+const revision = sourceRevision(declaration);
 const app = appSourceRoot(), owned = path.join(app.directory, "src/modules/crossover/temporal/streamline");
 if (execFileSync("git", ["-C", source, "rev-parse", "HEAD"], { encoding: "utf8" }).trim() !== revision) throw Error("Streamline headers must match the pinned source revision");
 execFileSync("git",["-C",source,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});

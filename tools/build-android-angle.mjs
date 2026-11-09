@@ -1,3 +1,4 @@
+import {sourceRevision} from '../lib/pins.mjs';
 import './producer-environment.mjs';
 import {androidSource,androidSourceJson} from '../lib/android-source.mjs';
 import {includeLicenses,addLicenses,addLicense} from '../lib/licenses.mjs';
@@ -49,7 +50,7 @@ export async function buildAngleInput({output,work,profile:profileId='common'}){
  const gnBuild=path.join(work,'gn-build');fs.mkdirSync(gnBuild);
  // GN's source build accepts an externally supplied version header. The position
  // and revision are from the exact ANGLE DEPS GN pin, independently of clone depth.
- fs.writeFileSync(path.join(gnBuild,'last_commit_position.h'),`#define LAST_COMMIT_POSITION_NUM ${definition.gn.commitPosition}\n#define LAST_COMMIT_POSITION "${definition.gn.commitPosition} (${definition.gn.revision.slice(0,12)})"\n`);
+ fs.writeFileSync(path.join(gnBuild,'last_commit_position.h'),`#define LAST_COMMIT_POSITION_NUM ${definition.gn.commitPosition}\n#define LAST_COMMIT_POSITION "${definition.gn.commitPosition} (${sourceRevision(definition.gn).slice(0,12)})"\n`);
  const compilerEnv={...process.env,SDKROOT:process.env.SDKROOT||read('xcrun',['--sdk','macosx','--show-sdk-path'])};
  run(python,[path.join(gnSource,'build/gen.py'),'--no-last-commit-position','--allow-warnings','--out-path='+gnBuild],{env:compilerEnv});
  run('ninja',['-C',gnBuild,'-j2','gn'],{env:compilerEnv});
@@ -71,7 +72,7 @@ export function packageAngleInput({project='android-angle',version,arch='arm64',
  if(arch!=='arm64'||!path.isAbsolute(output||'')||fs.existsSync(output)||input?.profileId!==profile.id)throw Error('Select the declared ANGLE package version, matching source profile and a new absolute output directory.');
  verifyProducerSource(input.source,profile);
  const manifest=JSON.parse(fs.readFileSync(path.join(input.angle,'angle-manifest.json')));
- if(manifest.version!==profile.providerVersion||manifest.angleRevision!==definition.angle.revision||!Array.isArray(manifest.adaptations))throw Error('ANGLE provider identity differs from the package source profile.');
+ if(manifest.version!==profile.providerVersion||manifest.angleRevision!==sourceRevision(definition.angle)||!Array.isArray(manifest.adaptations))throw Error('ANGLE provider identity differs from the package source profile.');
  for(const adaptation of manifest.adaptations){
   if(path.basename(adaptation.file)!==adaptation.file)throw Error('ANGLE owned adaptation differs from the selected source profile.');
  }

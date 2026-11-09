@@ -1,3 +1,4 @@
+import {sourceRevision} from '../../lib/pins.mjs';
 import {appPath} from '../../tools/app-source.mjs';
 // SPDX-License-Identifier: MIT
 import fs from 'node:fs';
@@ -7,7 +8,7 @@ import {pathToFileURL} from 'node:url';
 import {addLicenses} from '../../lib/licenses.mjs';
 const here=import.meta.dirname;
 export const sourceProfile=JSON.parse(fs.readFileSync(path.join(here,'source.json')));
-export const revision=sourceProfile.revision;
+export const revision=sourceRevision(sourceProfile);
 const run=(program,args,options={})=>execFileSync(program,args,{stdio:'inherit',...options});
 const read=(program,args)=>execFileSync(program,args,{encoding:'utf8'}).trim();
 // The producer's declaration is authoritative. Do not maintain a second wire layout.

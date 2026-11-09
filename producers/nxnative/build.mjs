@@ -1,5 +1,5 @@
 import {appRequire} from '../../tools/app-source.mjs';
-import {gitlink} from '../../lib/pins.mjs';
+import {gitlink,sourceRevision} from '../../lib/pins.mjs';
 import {addLicense,addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -78,7 +78,7 @@ function exportSource(source, work, identity) {
     const projected=path.join(work,'source'),record=path.join(work,'projection.json');
     if(fs.existsSync(record)&&JSON.parse(fs.readFileSync(record)).identity===identity&&fs.existsSync(projected))return projected;
     fs.rmSync(projected,{recursive:true,force:true});fs.mkdirSync(projected,{recursive:true});
-    const archive=path.join(work,'source.tar');run('git',['-C',source,'archive','--format=tar','--output',archive,pin.source.revision]);
+    const archive=path.join(work,'source.tar');run('git',['-C',source,'archive','--format=tar','--output',archive,sourceRevision(pin.source)]);
     run('/usr/bin/tar',['-xf',archive,'-C',projected]);fs.unlinkSync(archive);applyOverlays(projected);json(record,{identity});return projected;
 }
 
@@ -102,8 +102,8 @@ async function nativeHost(source,work,output,jobs) {
 
 export async function buildNxNative({work,output,dependencyWork,jobs=4,version=pin.version,check=false}={}) {
     const source=fs.realpathSync(path.join(repository,pin.source.path));
-    if(read('git',['-C',source,'rev-parse','HEAD'])!==pin.source.revision||read('git',['-C',source,'status','--porcelain','--untracked-files=no']))throw Error('nxnative source differs from its pin.');
-    if(check)return {id:pin.id,revision:pin.source.revision,architecture:pin.architecture};
+    if(read('git',['-C',source,'rev-parse','HEAD'])!==sourceRevision(pin.source)||read('git',['-C',source,'status','--porcelain','--untracked-files=no']))throw Error('nxnative source differs from its pin.');
+    if(check)return {id:pin.id,revision:sourceRevision(pin.source),architecture:pin.architecture};
     if(process.platform!=='darwin'||process.arch!=='arm64')throw Error('nxnative builds require Apple Silicon macOS.');
     if(!path.isAbsolute(work||'')||!path.isAbsolute(output||'')||!Number.isInteger(jobs)||jobs<1||jobs>8)throw Error('Use absolute work/output paths and one to eight jobs.');
     if(work===source||output===source||work.startsWith(source+path.sep)||output.startsWith(source+path.sep))throw Error('Build paths must be outside the upstream checkout.');
@@ -134,7 +134,7 @@ export async function buildNxNative({work,output,dependencyWork,jobs=4,version=p
     }
     copyFile(path.join(producer,'runtime/nxnative.py'),path.join(output,'runtime/nxnative.py'));
     for (const name of ['keyless_input.py']) copyFile(path.join(producer,'runtime',name),path.join(output,'runtime',name));
-    const runtime={schemaVersion:1,id:pin.id,version,sourceRevision:pin.source.revision,nativeSourceRevision:pin.source.revision,architecture:pin.architecture,minimumMacOS:pin.minimumMacOS,executableRelative:pin.output.executableRelative,runtimeFiles:{cli:'runtime/nxnative.py',host:'bin/nxnative-host',profileRoot:'share/nxnative/dm/games',extractor:'tools/nx_extract/nx_extract',python:'python/bin/python3',dotnet:'dotnet/dotnet'}};
+    const runtime={schemaVersion:1,id:pin.id,version,sourceRevision:sourceRevision(pin.source),nativeSourceRevision:sourceRevision(pin.source),architecture:pin.architecture,minimumMacOS:pin.minimumMacOS,executableRelative:pin.output.executableRelative,runtimeFiles:{cli:'runtime/nxnative.py',host:'bin/nxnative-host',profileRoot:'share/nxnative/dm/games',extractor:'tools/nx_extract/nx_extract',python:'python/bin/python3',dotnet:'dotnet/dotnet'}};
     runtime.capabilities={metalSourceObjects:true,nativeMetalObjects:true,keylessInputs:["nup","dump"],packageSelection:true};
     runtime.requirements={metalCompiler:{delivery:'system',required:true,command:'/usr/bin/xcrun',sdk:'macosx',tools:['metal','metallib'],options:['-O1','-fpreserve-invariance'],version:read('/usr/bin/xcrun',['-sdk','macosx','metal','--version']).split('\n')[0],managedAcquisition:false}};
     json(path.join(output,'runtime.json'),runtime);
@@ -159,7 +159,7 @@ export async function buildNxNative({work,output,dependencyWork,jobs=4,version=p
         return {path:relative,size:stat.size,mode:stat.mode&0o777,sha256:sha(fs.readFileSync(file)),...(architectures?{architectures}:{})};
     });
     for(const file of files(output).filter(file=>file.endsWith('.inputs')))fs.unlinkSync(file);
-    const manifest={schemaVersion:1,managerId:pin.id,version,upstreamRevision:pin.source.revision,platform:pin.platform,arch:pin.architecture,minimumMacOS:pin.minimumMacOS,executableRelative:pin.output.executableRelative,files:inventory,dependencies:closure,provenance:{sourceUrl:pin.source.repository,sourceRevision:pin.source.revision,verifiedBuild:true,producerInputs:owned}};
+    const manifest={schemaVersion:1,managerId:pin.id,version,upstreamRevision:sourceRevision(pin.source),platform:pin.platform,arch:pin.architecture,minimumMacOS:pin.minimumMacOS,executableRelative:pin.output.executableRelative,files:inventory,dependencies:closure,provenance:{sourceUrl:pin.source.repository,sourceRevision:sourceRevision(pin.source),verifiedBuild:true,producerInputs:owned}};
     B.validateManifest(manifest);json(path.join(output,'manifest.json'),manifest);
     return {id:pin.id,version,output,executable:path.join(output,pin.output.executableRelative)};
 }
