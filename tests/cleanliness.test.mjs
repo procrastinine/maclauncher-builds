@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
-import {appSourceRoot} from '../tools/app-source.mjs';
+import {APP_REFERENCE,appSourceRoot} from '../tools/app-source.mjs';
+import {readProjects} from '../lib/projects.mjs';
+import {createRecipeBuildReporter} from '../tools/recipe-build-report.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
 const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',maxBuffer:Infinity});
@@ -41,4 +43,16 @@ test('source record pins are read only through the shared reader',()=>{
   for(const name of names)for(const match of text.matchAll(new RegExp('(?<![\\w$.])'+name.replace(/\$/g,'\\$')+'(?:\\??\\.[A-Za-z_$][\\w$]*|\\[[^\\]]+\\])*\\??\\.(?:revision|gitlink|commit)\\b','g')))reads.push(file+': '+match[0]);
  }
  assert.deepEqual(reads,[]);
+});
+
+// A revision or digest is declared once among the files packages read, so a
+// change to it is one edit in one file.
+test('no pin or digest is declared in two package input files',()=>{
+ const describe=createRecipeBuildReporter({directory:root}),inputs=new Set(),declared=new Map(),app=appSourceRoot().directory;
+ for(const project of readProjects(root,{resolvePins:false}).projects.filter(project=>project.build))for(const file of describe(project.id).definition.files)inputs.add(file.path);
+ for(const file of [...inputs].filter(file=>/\.(?:json|[mc]?js)$/.test(file))){
+  const text=fs.readFileSync(file.startsWith(APP_REFERENCE)?path.join(app,file.slice(APP_REFERENCE.length)):path.join(root,file),'utf8');
+  for(const [value] of text.matchAll(/(?<![0-9a-f])(?:[0-9a-f]{64}|[0-9a-f]{40})(?![0-9a-f])/g))if(!/^(.)\1+$/.test(value))declared.set(value,new Set([...(declared.get(value)||[]),file]));
+ }
+ assert.deepEqual([...declared].filter(([,files])=>files.size>1).map(([value,files])=>value+': '+[...files].sort().join(', ')),[]);
 });
