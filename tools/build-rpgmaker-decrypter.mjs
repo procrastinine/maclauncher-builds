@@ -3,13 +3,18 @@ import {includeLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import {execFileSync}from'node:child_process';import{createRequire}from'node:module';import{resolveProject,buildRecord}from'../lib/projects.mjs';import{buildInput}from'./build-input.mjs';import{helperPackage}from'./helper-package.mjs';
 import {recipeMain} from './build-source.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Builder=require('../producers/included-helpers/rpgmaker-decrypter/decrypter-build.js'),Tools=require('../producers/package-support/scripts/native-binary-tools.cjs');
-export async function buildDecrypter({project:id,arch,output,work}){
- const project=resolveProject(id,root,{resolvePins:false}),registered=buildRecord(project);
+/** Compile the RPG Maker decrypter CLI from its official source and SDK archives. */
+export async function compile({arch,work}){
  fs.mkdirSync(work,{recursive:true});
  const pin=Builder.platformPin(arch),sourceArchive=await buildInput(pin.source),sdkArchive=await buildInput(pin.sdk);
  if(crypto.createHash('sha512').update(fs.readFileSync(sdkArchive)).digest('hex')!==pin.sdk.sha512)throw Error('SDK SHA-512 differs from its official release metadata.');
  const feed=path.join(work,'feed');fs.mkdirSync(feed);for(const dependency of pin.packages){const archive=await buildInput(dependency);fs.copyFileSync(archive,path.join(feed,dependency.name+'.'+dependency.version+'.nupkg'));}
  const built=Builder.buildTool({sourceArchive,sdkArchive,architecture:arch,outputDir:path.join(work,'build'),packageRoot:feed,offline:true,logPath:path.join(work,'dotnet.log')});
+ return {built,pin,feed};
+}
+/** Stage, sign and describe the compiled decrypter with its native runtime libraries. */
+export async function assemble({project:id,arch,output,work,compiled:{built,pin,feed}}){
+ const registered=buildRecord(resolveProject(id,root,{resolvePins:false}));
  const payload=path.join(output,'payload'),bin=path.join(payload,'files/bin');fs.mkdirSync(bin,{recursive:true});
  const executable=path.join(bin,'RPGMakerDecrypter-cli');fs.copyFileSync(built.executable,executable);fs.chmodSync(executable,0o755);execFileSync('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',executable],{maxBuffer:Infinity,stdio:'pipe'});
  const cpu=arch==='x64'?'x86_64':'arm64',requirements=[{path:'RPGMakerDecrypter-cli',architectures:Tools.macho(executable),minimumMacOS:Tools.loadCommands(executable,cpu).minimumMacOS}];
@@ -20,4 +25,4 @@ export async function buildDecrypter({project:id,arch,output,work}){
  includeLicenses(payload,path.join(built.publishRoot,'licenses'));
  return helperPackage({id,version:registered.version,arch,output,minimumMacOS,sourceSha256:pin.source.sha256,rosettaFiles:arch==='x64'?['files/bin/RPGMakerDecrypter-cli']:[],manifestRelative:'manifest.json',record:{managerId:id,toolABI:1,executableRelative:'files/bin/RPGMakerDecrypter-cli',source:built.record,runtimeNativeRequirements:requirements}});
 }
-recipeMain(import.meta,buildDecrypter);
+recipeMain(import.meta,{compile,assemble});

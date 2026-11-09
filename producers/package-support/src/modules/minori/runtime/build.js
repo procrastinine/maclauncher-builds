@@ -58,7 +58,8 @@ async function buildMovieDecoder({ prefix, directory, architecture = process.arc
     sourceSha256: Native.hashFile(path.join(__dirname, "native/movie-decoder.c")), dependencyPrefix: prefix };
 }
 
-async function buildCandidate({ sourceDir = sourcePath, destination, decoderPrefix, architecture = process.arch, signal, onProgress, dependencies = {} } = {}) {
+/** Compile the ReMinori executables and the optional movie decoder into a candidate directory. */
+async function compileCandidate({ sourceDir = sourcePath, destination, decoderPrefix, architecture = process.arch, signal, onProgress, dependencies = {} } = {}) {
   if (!["arm64", "x64"].includes(architecture)) throw new Error("Select an arm64 or x64 Minori build.");
   const targetTriple = architecture === "x64" ? "x86_64-apple-darwin" : "aarch64-apple-darwin";
   if (process.platform !== "darwin") throw new Error("The Minori native build requires macOS.");
@@ -94,13 +95,20 @@ async function buildCandidate({ sourceDir = sourcePath, destination, decoderPref
       const source = path.join(target, targetTriple, "release", name);
       fs.copyFileSync(source, path.join(candidate, "bin", name)); fs.chmodSync(path.join(candidate, "bin", name), 0o755);
     }
+    const decoder = decoderPrefix ? await buildMovieDecoder({ prefix: decoderPrefix, directory: path.join(candidate, "bin"), architecture, signal, dependencies }) : null;
+    return { destination, decoderPrefix, decoder, architecture, candidate, sourceRoot, sourceTreeSha256, sourceOverlay, workspace, target, logPath, onProgress };
+  } catch (error) { error.buildLogPath = logPath; throw error; }
+}
+
+/** Add the notices, the movie decoder closure and the profile.json the app reads, then place the candidate. */
+function describeCandidate({ destination, decoderPrefix, decoder, architecture, candidate, sourceRoot, sourceTreeSha256, sourceOverlay, workspace, target, logPath, onProgress }) {
+  try {
     addLicenses(candidate,'ReMinori',sourceRoot);
     let movieDecoder = null;
-    if (decoderPrefix) {
-      const built = await buildMovieDecoder({ prefix: decoderPrefix, directory: path.join(candidate, "bin"), architecture, signal, dependencies });
+    if (decoder) {
       const files = closeMovieDependencies(decoderPrefix, candidate);
-      movieDecoder = { version: built.version, bridgeVersion: "maclauncher-minori-movie-v1",
-        sha256: Native.hashFile(built.executable), sourceSha256: built.sourceSha256, files };
+      movieDecoder = { version: decoder.version, bridgeVersion: "maclauncher-minori-movie-v1",
+        sha256: Native.hashFile(decoder.executable), sourceSha256: decoder.sourceSha256, files };
       includeLicenses(candidate,path.join(decoderPrefix,'licenses'));
     }
     const profile = { schemaVersion: 1, version: Overlay.VERSION, upstreamRevision: Overlay.REVISION,
@@ -119,6 +127,8 @@ async function buildCandidate({ sourceDir = sourcePath, destination, decoderPref
   // Retain the owned compiler workspace for developer tests and source review.
   // It is private build material; released apps only use sealed native files.
 }
+
+async function buildCandidate(options = {}) { return describeCandidate(await compileCandidate(options)); }
 
 async function buildRuntime({ manager, version = Overlay.VERSION, sourceDir = sourcePath, userDataDir, signal, onProgress, context, dependencies } = {}) {
   if (version !== Overlay.VERSION) throw new Error("Only the pinned Minori Mac profile can be built by this overlay.");
@@ -143,4 +153,4 @@ async function buildRuntime({ manager, version = Overlay.VERSION, sourceDir = so
     context?.onRuntimeStateChange?.(); return installed;
   } finally { building.delete(installDir); }
 }
-module.exports = { ...Overlay, sourcePath, closeMovieDependencies, buildMovieDecoder, buildCandidate, buildRuntime };
+module.exports = { ...Overlay, sourcePath, closeMovieDependencies, buildMovieDecoder, compileCandidate, describeCandidate, buildCandidate, buildRuntime };

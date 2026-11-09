@@ -14,7 +14,8 @@ import {buildKosmicLoader} from '../producers/package-support/src/modules/shared
 const root=path.resolve(import.meta.dirname,'..');
 const run=(command,args,options={})=>String(execFileSync(command,args,{encoding:'utf8',maxBuffer:Infinity,...options})||'').trim();
 const prefix=name=>run('brew',['--prefix',name]);
-export async function buildKosmicKrisp({project:id,arch,output,work}){
+/** Compile the KosmicKrisp driver, its SPIR-V tools, zstd and the Vulkan loader. */
+export async function compile({arch,work}){
  fs.mkdirSync(work,{recursive:true});
  const tools=pythonBuildTools(work,path.join(root,'tools/sdk27-build-requirements.txt')),meson=path.join(tools.bin,'meson'),ninja=path.join(tools.bin,'ninja');
  const native=path.join(root,'producers/package-support/src/modules/shared/vulkan/native'),pin=JSON.parse(fs.readFileSync(path.join(native,'kosmickrisp-source.json'))),inputs=JSON.parse(fs.readFileSync(path.join(native,'kosmickrisp-targets.json'))),source=path.join(root,inputs.sourcePath);
@@ -23,6 +24,10 @@ export async function buildKosmicKrisp({project:id,arch,output,work}){
  const zstd=await buildZstd({work:path.join(work,'zstd'),architecture:arch,jobs:2,ninja});
  const built=buildKosmic({source,work:path.join(work,'mesa'),meson,ninja,llvm,architecture:arch,jobs:2,pkgConfigPath:[zstd.pkgConfigPath,spirv.pkgConfigPath,process.env.PKG_CONFIG_PATH].filter(Boolean).join(path.delimiter)});
  const loader=buildKosmicLoader({source:path.join(root,inputs.vulkanLoader.path),headersSource:checkoutSource({...sharedDependencies.vulkanHeaders,destination:path.join(work,'vulkan-headers')}),work:path.join(work,'loader'),architecture:arch,jobs:2});
+ return {source,pin,built,loader,observedInputs,spirv,zstd};
+}
+/** Seal the compiled driver with its loader and recorded inputs. */
+export async function assemble({project:id,arch,output,compiled:{source,pin,built,loader,observedInputs,spirv,zstd}}){
  return sealRuntime({project:id,arch,output,sourceRoot:source,upstreamRevision:sourceRevision(pin),executable:built.library,executableRelative:pin.library,payloads:[{source:loader.loader,relative:'libvulkan.1.dylib'}],runtimeFiles:{loader:'libvulkan.1.dylib'},provenance:{targetInputs:observedInputs,spirvToolsSource:spirv.provenance,zstdSource:zstd.provenance,capabilities:{openglES:'3.2',geometry:'Mesa Poly',transformFeedback:'Mesa Poly'}}});
 }
-recipeMain(import.meta,buildKosmicKrisp);
+recipeMain(import.meta,{compile,assemble});

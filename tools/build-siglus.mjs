@@ -10,8 +10,9 @@ import {rustEnvironment} from "./rust-build.mjs";
 import {sealRuntime} from './seal-runtime.mjs';
 
 const root=path.resolve(import.meta.dirname,'..'),hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-export async function buildSiglus({project,arch,output,work}){
- const record=buildRecord(resolveProject(project,root)),owned=path.join(root,'producers/vn-adaptations/siglus'),hostSource=path.join(owned,'host.m'),pin=JSON.parse(fs.readFileSync(path.join(root,'producers/vn-adaptations/source.json'))).projects.siglus;
+/** Compile the Siglus library and host from the pinned source. */
+export async function compile({project,arch,work}){
+ const owned=path.join(root,'producers/vn-adaptations/siglus'),hostSource=path.join(owned,'host.m'),pin=JSON.parse(fs.readFileSync(path.join(root,'producers/vn-adaptations/source.json'))).projects.siglus;
  fs.mkdirSync(work,{recursive:true});
  const sourceRoot=checkoutSource({repository:pin.upstream.url,revision:sourceRevision(pin.upstream),destination:path.join(work,'upstream')}),source=path.join(work,'source');
  const staged=await stageSource(sourceRoot,sourceRevision(pin.upstream),source),target=arch==='arm64'?'aarch64-apple-darwin':'x86_64-apple-darwin',env=rustEnvironment({work,minimumMacOS:'13.0'});
@@ -21,15 +22,14 @@ export async function buildSiglus({project,arch,output,work}){
   fs.writeFileSync(file,original.replace(before,'let manifest_dir = std::env::current_exe().ok().and_then(|file| file.parent().map(PathBuf::from)).unwrap_or_else(|| PathBuf::from("."));'));
  }
  run('cargo',['build','--locked','--release','--lib','--package','game_launcher','--target',target],{cwd:source,env});
- return packageSiglus({project,arch,output,work,sourceRoot,source,env,target,staged});
-}
-/** Seal compiled Siglus products and the matching source and license inputs. */
-export async function packageSiglus({project,arch,output,work,sourceRoot,source,env,target,staged}){
- const record=buildRecord(resolveProject(project,root)),owned=path.join(root,'producers/vn-adaptations/siglus'),hostSource=path.join(owned,'host.m'),pin=JSON.parse(fs.readFileSync(path.join(root,'producers/vn-adaptations/source.json'))).projects.siglus;
-
  const host=path.join(work,'siglus-host'),library=path.join(work,'libsiglus.dylib');
  run('/usr/bin/xcrun',['clang','-arch',arch==='x64'?'x86_64':arch,'-mmacosx-version-min=13.0','-O2','-fobjc-arc','-ffile-prefix-map='+path.dirname(hostSource)+'=siglus-host',hostSource,'-framework','AppKit','-framework','Foundation','-o',host]);
  fs.copyFileSync(path.join(env.CARGO_TARGET_DIR,target,'release/libgame_launcher.dylib'),library);
+ return {sourceRoot,source,env,staged,host,library};
+}
+/** Seal the compiled Siglus products with their profile and the matching source and license inputs. */
+export async function assemble({project,arch,output,work,compiled:{sourceRoot,source,env,staged,host,library}}){
+ const record=buildRecord(resolveProject(project,root)),owned=path.join(root,'producers/vn-adaptations/siglus'),hostSource=path.join(owned,'host.m'),pin=JSON.parse(fs.readFileSync(path.join(root,'producers/vn-adaptations/source.json'))).projects.siglus;
  addLicenses(source,project,owned);
  const profile=path.join(work,'siglus-profile.json');
  fs.writeFileSync(profile,JSON.stringify({schema:1,profile:'siglus-rs-published-library-direct-host-v1',version:record.version,upstreamRevision:sourceRevision(pin.upstream),hostSourceSha256:hash(hostSource),files:{}},null,2)+'\n');
@@ -38,4 +38,4 @@ export async function packageSiglus({project,arch,output,work,sourceRoot,source,
   return {...value,files:{...Object.fromEntries(['bin/siglus-host','lib/libsiglus.dylib'].map(name=>[name,hash(path.join(files,name))])),...(compatibility?{'LICENSE-siglus_rs.txt':compatibility.sha256}:{})}};
  }},provenance:{sourceTreeSha256:staged.treeSha256,gitDependencies:staged.dependencies,hostSourceSha256:hash(hostSource),resourceLookup:'executable-relative',nativeApi:'game_run_entry-v1'}});
 }
-recipeMain(import.meta,buildSiglus);
+recipeMain(import.meta,{compile,assemble});

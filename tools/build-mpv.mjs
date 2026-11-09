@@ -24,8 +24,8 @@ export function sdkCompressionPkgConfig({sdk,directory}){
  }
  return directory;
 }
-export async function buildMPV({project:id,arch,output,work}){
- const record=buildRecord(resolveProject(id,root));
+/** Compile libmpv and the render host that loads it. */
+export async function compile({work}){
  fs.mkdirSync(work,{recursive:true});
  const tools=pythonBuildTools(work,path.join(root,'tools/sdk27-build-requirements.txt'));
  const producer=path.join(root,'producers/mpv-render/v7'),source=path.join(root,'producers/package-support/src/external/mpv-player');
@@ -42,6 +42,11 @@ export async function buildMPV({project:id,arch,output,work}){
   '-I'+path.join(source,'include'),'-I'+path.join(appRoot,'src/modules/shared/reshade/native')];
  run('/usr/bin/xcrun',[...flags,...['mpv-render.mm','gpu-surface.mm'].map(name=>path.join(native,name)),...['AppKit','Metal','QuartzCore','OpenGL','CoreVideo','IOSurface'].flatMap(name=>['-framework',name]),'-Wl,-rpath,@executable_path/../Frameworks/video','-o',executable],{stdio:'inherit'});
  const info=JSON.parse(run(executable,['--maclauncher-info']));
+ return {source,built,app,executable,info,staged};
+}
+/** Describe and seal the compiled render host with the video-runtime.json the app reads. */
+export async function assemble({project:id,arch,output,compiled:{source,built,app,executable,info,staged}}){
+ const record=buildRecord(resolveProject(id,root)),producer=path.join(root,'producers/mpv-render/v7'),Builder=require(path.join(producer,'scripts/build-mpv-library.cjs')),recipe=JSON.parse(fs.readFileSync(path.join(producer,'source.json')));
  fs.writeFileSync(path.join(app,'Contents/Info.plist'),'<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>org.maclauncher.video</string><key>CFBundleExecutable</key><string>mpv</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleShortVersionString</key><string>0.41.0</string><key>LSMinimumSystemVersion</key><string>14.0</string><key>NSHighResolutionCapable</key><true/></dict></plist>');
  const librarySource={url:recipe.source.repository,commit:Builder.REVISION,version:'0.41.0',backports:Builder.BACKPORTS,inputSha256:hash(built.library),verifiedBuild:true,build:built.metadata};
  const video={schema:1,id:'mpv-render',version:record.version,minimumMacOS:'14.0',architecture:'arm64',libraryVersion:info.libraryVersion,librarySource,headerSource:{repository:recipe.source.repository,commit:Builder.REVISION},scaleFilters:info.scaleFilters,images:[],
@@ -55,4 +60,4 @@ export async function buildMPV({project:id,arch,output,work}){
   }}});
  return result;
 }
-recipeMain(import.meta,buildMPV);
+recipeMain(import.meta,{compile,assemble});

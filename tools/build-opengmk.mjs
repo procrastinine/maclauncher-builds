@@ -10,7 +10,8 @@ import {sealRuntime} from './seal-runtime.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
 const overlays=path.join(root,'producers/package-support/src/modules/gamemaker/overlays/opengmk-macos');
 const Emulator=require(path.join(overlays,'apply-emulator.js')),Ramen=require(path.join(overlays,'apply-ramen.js')),Audio=require(path.join(overlays,'apply-audio.js'));
-export async function buildOpenGMK({project,arch,output,work}){
+/** Compile the OpenGMK emulator with its ramen and libsoundio overlays. */
+export async function compile({arch,work}){
  fs.mkdirSync(work,{recursive:true});
  const inputs=[['OpenGMK','https://github.com/OpenGMK/OpenGMK',Emulator.REVISION],['ramen','https://github.com/viriuwu/ramen',Ramen.REVISION],['udon','https://github.com/Adamcake/udon',Audio.REVISION]];
  const sources=inputs.map(([name,repository,revision])=>({name,repository,revision,source:checkoutSource({repository,revision,destination:path.join(work,'upstream-'+name)})}));
@@ -25,9 +26,13 @@ export async function buildOpenGMK({project,arch,output,work}){
  fs.copyFileSync(path.join(root,'producers/package-support/helper-builds/opengmk.lock'),path.join(source,'Cargo.lock'));
  const target=arch==='x64'?'x86_64-apple-darwin':'aarch64-apple-darwin',env=rustEnvironment({work,minimumMacOS:'13.0'});
  run('cargo',['build','--release','--locked','--target',target,'--package','gm8emulator'],{cwd:source,env});
- addLicenses(source,'ramen',sources[1].source);addLicenses(source,'libsoundio',path.join(sources[2].source,'libsoundio-sys/libsoundio'));
  const executable=path.join(work,'target',target,'release/gm8emulator');run(executable,['--version']);
+ return {source,sources,env,executable};
+}
+/** Add the overlay notices and seal the compiled emulator. */
+export async function assemble({project,arch,output,compiled:{source,sources,env,executable}}){
+ addLicenses(source,'ramen',sources[1].source);addLicenses(source,'libsoundio',path.join(sources[2].source,'libsoundio-sys/libsoundio'));
 
  return sealRuntime({cargoRoot:source,env,project,arch,output,executable,sourceRoot:sources[0].source,upstreamRevision:Emulator.REVISION,provenance:{...provenance,dependencies:sources.slice(1).map(({name,repository,revision})=>({name,repository,revision})),overlay:Emulator.OVERLAY_VERSION}});
 }
-recipeMain(import.meta,buildOpenGMK);
+recipeMain(import.meta,{compile,assemble});

@@ -81,9 +81,14 @@ export function stageNativeStack({built,kind,arch,output,work}){
  return {payload};
 }
 
-export async function buildNativeStack({project,version,arch,output,work,kind,dependencyStacks,archives:providedArchives}){
+/** Compile one native library stack from its declared archives. */
+export async function compileNativeStack({arch,work,kind,dependencyStacks,archives:providedArchives}){
  const Builder=stackModule(kind),archives={...providedArchives,...await nativeStackArchives(Builder.PIN,{work})},options={archives,workRoot:path.join(work,'compile'),architecture:arch,pathMappings:[{from:work,to:'NATIVE_STACK_BUILD'}],dependencies:{readSDK:()=>process.env.SDKROOT||command('/usr/bin/xcrun',['--show-sdk-path'])}};
- const built=kind==='movie'?await Builder.buildDependencies({...options,archive:await buildInput(Builder.PIN.source,path.join(work,'archives'))}):kind==='mixer'?await Builder.buildMixer({...options,dependencyStacks}):await Builder.buildDependencies(options);
+ return kind==='movie'?await Builder.buildDependencies({...options,archive:await buildInput(Builder.PIN.source,path.join(work,'archives'))}):kind==='mixer'?await Builder.buildMixer({...options,dependencyStacks}):await Builder.buildDependencies(options);
+}
+/** Stage and describe a compiled native stack as its build-input package. */
+export function assembleNativeStack({project,version,arch,output,work,kind,compiled:built}){
+ const Builder=stackModule(kind);
  stageNativeStack({built,kind,arch,output,work});
  const primary={fonts:'sdl2',audio:'sndfile',mixer:'sdl2_mixer'}[kind],upstreamVersion=kind==='movie'?Builder.PIN.source.version:Builder.PIN.dependencies.find(pin=>pin.id===primary).version;
  return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(path.join(base,modules[kind]+'.json')),manifestRelative:'input.json',record:{sourceProfile:Builder.PIN.version,upstreamVersion,recipeSha256:built.recipeSha256}});

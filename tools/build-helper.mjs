@@ -47,16 +47,25 @@ export function selectedHelperProfile({project:id,version,directory=root}){
  return {...selected,profile:{...selected.profile,version:build.version}};
 }
 
-export function buildHelper({project:id,version,arch,output,work=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'helper-build-')),'work'),directory=root}){
+/** Compile one helper slice per CPU from its build profile. */
+export function compile({project:id,version,arch,work=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'helper-build-')),'work'),directory=root}){
  const {profile,base}=selectedHelperProfile({project:id,version,directory});
- const payload=path.join(output,'payload'),binary=path.join(payload,profile.output),sources=profile.sources.map(source=>recipePath(base,source));
+ const sources=profile.sources.map(source=>recipePath(base,source));
  const sdk=fs.realpathSync(process.env.SDKROOT||run('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path'])),compiler=run('/usr/bin/xcrun',[profile.compiler,'--version']).split('\n')[0];
  const flags=[...KINDS[profile.kind],'-mmacosx-version-min='+profile.minimumMacOS,...profile.flags,...(profile.frameworks||[]).flatMap(name=>['-framework',name])];
- fs.mkdirSync(work,{recursive:true});fs.mkdirSync(payload,{recursive:true});
+ fs.mkdirSync(work,{recursive:true});
  try{
   // Each CPU compiles separately; a universal helper joins the slices.
   const slices=CPUS[arch].map(cpu=>{const file=path.join(work,cpu);
    run('/usr/bin/xcrun',['--sdk','macosx',profile.compiler,'-arch',cpu,'-isysroot',sdk,...flags,'-ffile-prefix-map='+directory+'=maclauncher-builds',...sources,'-o',file],{env:{PATH:'/usr/bin:/bin:/usr/sbin:/sbin',...(process.env.DEVELOPER_DIR?{DEVELOPER_DIR:process.env.DEVELOPER_DIR}:{}),SDKROOT:sdk,MACOSX_DEPLOYMENT_TARGET:profile.minimumMacOS,TMPDIR:work,...Object.fromEntries(['SOURCE_DATE_EPOCH','ZERO_AR_DATE','TZ','LC_ALL','PYTHONHASHSEED'].filter(key=>process.env[key]!==undefined).map(key=>[key,process.env[key]]))}});return file;});
+  return {profile,base,sources,sdk,compiler,flags,slices,work};
+ }catch(error){fs.rmSync(work,{recursive:true,force:true});throw error;}
+}
+/** Join, sign and describe the compiled helper with its notices. */
+export function assemble({project:id,arch,output,compiled:{profile,base,sources,sdk,compiler,flags,slices,work}}){
+ const payload=path.join(output,'payload'),binary=path.join(payload,profile.output);
+ fs.mkdirSync(payload,{recursive:true});
+ try{
   if(slices.length>1)run('/usr/bin/lipo',['-create',...slices,'-output',binary]);else fs.copyFileSync(slices[0],binary);
   fs.chmodSync(binary,0o755);
   run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',binary]);
@@ -82,4 +91,4 @@ export function buildHelper({project:id,version,arch,output,work=path.join(fs.mk
  finally{fs.rmSync(work,{recursive:true,force:true});}
 }
 
-recipeMain(import.meta,buildHelper);
+recipeMain(import.meta,{compile,assemble});

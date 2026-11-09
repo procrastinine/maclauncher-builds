@@ -33,22 +33,22 @@ export async function projectMedia(work){
  const media=Media.validateSDKPrefix(prefix);return {media};
 }
 
-export async function buildNPengine({project,arch,output,work}){
+/** Compile libnpengine with its media, font and utility stacks. */
+export async function compile({arch,work}){
  fs.mkdirSync(work,{recursive:true});const repository='https://github.com/FGRE/libnpengine',source=checkoutSource({repository,revision:Builder.REVISION,destination:path.join(work,'upstream-engine')}),npaRepository='https://github.com/FGRE/libnpa',npa=checkoutSource({repository:npaRepository,revision:Builder.NPA_REVISION,destination:path.join(work,'upstream-npa')});
- const {media}=await projectMedia(work);return finishNPengine({project,arch,output,work,source,npa,repository,npaRepository,media});
-}
-export async function finishNPengine({project,arch,output,work,source,npa,repository,npaRepository,media}){
+ const {media}=await projectMedia(work);
  const archives={};for(const pin of [...Fonts.PIN.dependencies,...Media.PIN.utilitySources])archives[pin.id]??=await buildInput({url:pin.archiveUrl,sha256:pin.archiveSha256,bytes:pin.archiveBytes});
  const sdl=nativeStackInput(preparedBuildInput('native-sdl2-fonts'),{arch,work:path.join(work,'sdl')}),utilities=await Media.buildUtilities({archives,workRoot:path.join(work,'utilities')});
  const built=await Builder.buildPortableNPengine({sourceDir:source,npaSourceDir:npa,workRoot:path.join(work,'engine'),mediaStack:media,utilityStack:utilities,sdlStack:sdl});
-
- return sealNPengine({project,arch,output,work,source,npa,repository,npaRepository,media,built});
+ return {source,npa,built};
 }
-export async function sealNPengine({project,arch,output,work,source,npa,repository,npaRepository,media,built}){
+/** Describe and seal the compiled engine with its profile, media and notices. */
+export async function assemble({project,arch,output,compiled:{source,npa,built}}){
+ Builder.describeRuntime(built);
  addLicenses(built.prefix,'libnpa',npa);
  addLicenses(built.prefix,'GStreamer media',path.join(import.meta.dirname,'../producers/package-support/src/modules/nitroplus/runtime'));
  includeLicenses(built.prefix,`${built.dependencyClosure?.utilities?.prefix}/licenses`);
  const payloads=fs.readdirSync(built.prefix).filter(name=>name!=='bin').map(name=>({source:path.join(built.prefix,name),relative:'npengine/'+name}));
  return sealRuntime({project,arch,output,executable:built.executable,executableRelative:'npengine/bin/npengine-runner',sourceRoot:source,upstreamRevision:Builder.REVISION,payloads,runtimeFiles:{profile:'npengine/profile.json'},provenance:{mediaInputs:Media.PIN.officialPayloads.map(({url,member,sha256})=>({url,member,sha256})),dependencySources:Media.PIN.correspondingSources.map(({id,version,archiveUrl,archiveSha256})=>({id,version,archiveUrl,archiveSha256}))}});
 }
-recipeMain(import.meta,buildNPengine);
+recipeMain(import.meta,{compile,assemble});

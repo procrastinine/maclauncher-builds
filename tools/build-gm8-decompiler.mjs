@@ -8,7 +8,8 @@ import {sealRuntime} from './seal-runtime.mjs';
 import {resolveProject} from '../lib/projects.mjs';
 import {recipeMain} from './build-source.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
-export async function buildGM8Decompiler({project:id,version,arch,output,work}){
+/** Compile the GameMaker 8 decompiler from its owned source copy. */
+export async function compile({project:id,arch,work}){
  const source=path.join(root,'producers/package-support/src/external/OpenGMK'),project=resolveProject(id),revision=project.upstreams[0].revision;
  const {prepareDecompiler}=require('../producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/source-build.js');
  fs.mkdirSync(work,{recursive:true});
@@ -18,7 +19,13 @@ export async function buildGM8Decompiler({project:id,version,arch,output,work}){
   fs.copyFileSync(path.join(root,'producers/package-support/helper-builds/gm8-decompiler.lock'),path.join(owned,'Cargo.lock'));
   const env=rustEnvironment({work,minimumMacOS:'11.0',env:{...process.env,PATH:[tools,path.dirname(process.execPath),process.env.PATH].join(path.delimiter)}});
   execFileSync('cargo',['build','--release','--locked','--target',target,'--package','gm8decompiler'],{maxBuffer:Infinity,cwd:owned,stdio:'inherit',timeout:900000,env});
+  return {owned,env,target,source,revision};
+ }catch(error){fs.rmSync(work,{recursive:true,force:true});throw error;}
+}
+/** Seal the compiled decompiler, then remove the work tree. */
+export async function assemble({project:id,version,arch,output,work,compiled:{owned,env,target,source,revision}}){
+ try{
   return await sealRuntime({cargoRoot:owned,env,project:id,version,arch,executable:path.join(work,'target',target,'release/gm8decompiler'),sourceRoot:source,upstreamRevision:revision,output});
  }finally{fs.rmSync(work,{recursive:true,force:true});}
 }
-recipeMain(import.meta,buildGM8Decompiler);
+recipeMain(import.meta,{compile,assemble});

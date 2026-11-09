@@ -92,7 +92,8 @@ function stageAbiSource(source, destination) {
 }
 const { resolveBuildTool } = BuildTools;
 
-async function prepareRuntime({ unpacked, pin, logger, signal, sourcePath, fna3dSourcePath, dependencies = {} }) {
+/** Compile FNA, its managed host and native libraries into the unpacked runtime. */
+async function compileRuntime({ unpacked, pin, logger, signal, sourcePath, fna3dSourcePath, dependencies = {} }) {
   if (pin.version !== PROFILE || process.arch !== "arm64" || process.platform !== "darwin") throw new Error("This FNA runtime requires an Apple Silicon Mac.");
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "maclauncher-fna-build-"));
   const logRoot = path.join(path.dirname(path.dirname(unpacked)), "build-logs");
@@ -182,6 +183,13 @@ async function prepareRuntime({ unpacked, pin, logger, signal, sourcePath, fna3d
       fs.copyFileSync(from, to);
       await run("/usr/bin/codesign", ["--force", "--sign", "-", to], { logPath, signal });
     }
+    return { unpacked, temporary, framework, fna3dRoot, faudioRoot, sdlRoot, sourceTreeSha256, fna3dSourceSha256, stagedHost, overlaySha256, embeddedResources };
+  } catch (error) { fs.rmSync(temporary, { recursive: true, force: true }); throw error; }
+}
+
+/** Add the notices and the fna-runtime.json profile the app reads to a compiled runtime. */
+function describeRuntime({ unpacked, temporary, framework, fna3dRoot, faudioRoot, sdlRoot, sourceTreeSha256, fna3dSourceSha256, stagedHost, overlaySha256, embeddedResources }) {
+  try {
     const files = Native.fileInventory(unpacked);
 
     addLicenses(unpacked, "FNA", framework);
@@ -216,6 +224,8 @@ async function prepareRuntime({ unpacked, pin, logger, signal, sourcePath, fna3d
       videoSupport: false, files: Object.fromEntries([...new Set(files)].map(file => [file, Native.hashFile(path.join(unpacked, file))])) }, null, 2));
   } finally { fs.rmSync(temporary, { recursive: true, force: true }); }
 }
+
+async function prepareRuntime(options) { return describeRuntime(await compileRuntime(options)); }
 
 module.exports = { PROFILE, FNA_REVISION, FNA3D_REVISION, DOTNET_VERSION, PACKAGES, prepareRuntime,
   __test: { frameworkFiles, frameworkResources, applyOpenGLPolicy, stageAbiSource, resolveBuildTool, writeCompilerResponse, runtimeConfig, hostDependencies, CAPABILITIES } };

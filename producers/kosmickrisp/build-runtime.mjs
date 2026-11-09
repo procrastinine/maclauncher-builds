@@ -15,7 +15,8 @@ const root=path.resolve(import.meta.dirname,'../..');
 const adaptation=path.join(root,'sources/maclauncher-kosmickrisp');
 const run=(command,args,options={})=>String(execFileSync(command,args,{encoding:'utf8',maxBuffer:Infinity,...options})||'').trim();
 const prefix=name=>run('brew',['--prefix',name]);
-export async function buildMacLauncherKosmicKrisp({project:id,arch,output,work}){
+/** Compile the KosmicKrisp driver over its Mesa pin, its host tools and the Vulkan loader. */
+export async function compile({arch,work}){
  fs.mkdirSync(work,{recursive:true});
  const {buildKosmic}=await import(pathToFileURL(path.join(adaptation,'kosmickrisp-build.mjs')));
  const {buildKosmicLoader}=await import(pathToFileURL(path.join(adaptation,'kosmickrisp-targets.mjs')));
@@ -33,9 +34,13 @@ export async function buildMacLauncherKosmicKrisp({project:id,arch,output,work})
  const built=buildKosmic({source,work:path.join(work,'mesa'),meson,ninja,llvm,architecture:arch,jobs:6,
   pkgConfigPath:[zstd.pkgConfigPath,spirv.pkgConfigPath,process.env.PKG_CONFIG_PATH].filter(Boolean).join(path.delimiter),
   targetPkgConfigPath:[targetZstd.pkgConfigPath,targetSpirv.pkgConfigPath].join(path.delimiter)});
+ const loader=buildKosmicLoader({source:path.join(root,'sources/vulkan-loader'),loaderRevision:gitlink('sources/vulkan-loader'),headersRevision:sourceRevision(sharedDependencies.vulkanHeaders),headersSource:checkoutSource({...sharedDependencies.vulkanHeaders,destination:path.join(work,'vulkan-headers')}),work:path.join(work,'loader'),jobs:6});
+ return {built,source,pin,loader,observedInputs,targetSpirv,targetZstd};
+}
+/** Add the Mesa notices and seal the compiled driver with its loader. */
+export async function assemble({project:id,arch,output,compiled:{built,source,pin,loader,observedInputs,targetSpirv,targetZstd}}){
  // Mesa's own licence folder joins the driver's licence texts.
  addLicenses(path.dirname(path.dirname(built.library)),'Mesa',source);
- const loader=buildKosmicLoader({source:path.join(root,'sources/vulkan-loader'),loaderRevision:gitlink('sources/vulkan-loader'),headersRevision:sourceRevision(sharedDependencies.vulkanHeaders),headersSource:checkoutSource({...sharedDependencies.vulkanHeaders,destination:path.join(work,'vulkan-headers')}),work:path.join(work,'loader'),jobs:6});
  return sealRuntime({project:id,arch,output,sourceRoot:adaptation,upstreamRevision:gitlink('sources/maclauncher-kosmickrisp'),executable:built.library,executableRelative:pin.library,payloads:[{source:loader.loader,relative:'libvulkan.1.dylib'}],runtimeFiles:{loader:'libvulkan.1.dylib'},provenance:{targetInputs:observedInputs,spirvToolsSource:targetSpirv.provenance,zstdSource:targetZstd.provenance,capabilities:{openglES:'3.2',geometry:'Mesa Poly',transformFeedback:'Mesa Poly'}}});
 }
-recipeMain(import.meta,buildMacLauncherKosmicKrisp);
+recipeMain(import.meta,{compile,assemble});

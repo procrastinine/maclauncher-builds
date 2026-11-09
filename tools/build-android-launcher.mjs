@@ -10,7 +10,8 @@ import {resolveProject} from '../lib/projects.mjs';
 import {build} from '../producers/android-launcher/build.mjs';
 import {recipeMain} from './build-source.mjs';
 const root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/android-launcher');
-export async function buildAndroidLauncher({project:id,arch,output,work}){
+/** Compile the launcher classes against the Android framework input. */
+export async function compile({project:id,work}){
  const project=resolveProject(id,root,{resolvePins:false}),profile=JSON.parse(fs.readFileSync(path.join(root,'producers/included-helpers/profiles/android-launcher.json'))),input=JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/java-converter.json')));
  fs.mkdirSync(work,{recursive:true});const cache=path.join(work,'archives');
  try {
@@ -26,6 +27,12 @@ export async function buildAndroidLauncher({project:id,arch,output,work}){
    if(homes.length!==1)throw Error('The pinned JDK must contain one Java compiler.');jdk=homes[0];
   }else jdk=process.env.JAVA_HOME||execFileSync('/usr/libexec/java_home',['-v','21'],{maxBuffer:Infinity,encoding:'utf8'}).trim();
   const built=path.join(work,'compiled');build({jdk,classpath,output:built});
+  return {profile,built,project};
+ }catch(error){fs.rmSync(work,{recursive:true,force:true});throw error;}
+}
+/** Package the compiled classes and the pinned runtime files. */
+export async function assemble({arch,output,work,compiled:{profile,built,project}}){
+ try{
   const payload=path.join(output,'payload');fs.mkdirSync(payload,{recursive:true});
   for(const entry of profile.inputs){
    const generated=path.join(built,entry.path);
@@ -37,4 +44,4 @@ export async function buildAndroidLauncher({project:id,arch,output,work}){
   return helperPackage({id:project.id,version:project.build.version,arch,output,minimumMacOS:profile.minimumMacOS,sourceSha256:sha(path.join(base,'source.json')),manifestRelative:'manifest.json',record:{source:profile.source}});
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}finally{fs.rmSync(work,{recursive:true,force:true});}
 }
-recipeMain(import.meta,buildAndroidLauncher);
+recipeMain(import.meta,{compile,assemble});

@@ -9,7 +9,8 @@ import {buildRelinker} from '../producers/anyps5/build-relinker.mjs';
 import {buildRuntime} from '../producers/anyps5/build-runtime.mjs';
 import {packageRuntime} from '../producers/anyps5/package-runtime.mjs';
 const root=path.resolve(import.meta.dirname,'..');
-export async function buildAnyPS5({project,version,arch,output,work}){
+/** Compile the anyps5 relinker and runtime with the declared Python interpreter. */
+export async function compile({arch,work}){
  const record=buildRecord(resolveProject(project,root),version);
  const relinkerBuild=path.join(work,'relinker'),runtimeBuild=path.join(work,'runtime');
  fs.mkdirSync(work,{recursive:true});
@@ -22,6 +23,10 @@ export async function buildAnyPS5({project,version,arch,output,work}){
  if(execFileSync(python,['--version'],{maxBuffer:Infinity,encoding:'utf8'}).trim()!=='Python '+pythonPin.version)throw Error('The declared Python build interpreter has a different version.');
  await buildRelinker({buildDirectory:relinkerBuild,jobs:4,architecture:arch});
  await buildRuntime({buildDirectory:runtimeBuild,jobs:4,python});
+ return {runtimeBuild,relinkerBuild,record};
+}
+/** Package the compiled runtime. */
+export async function assemble({project,version,arch,output,compiled:{runtimeBuild,relinkerBuild,record}}){
  return packageRuntime({runtimeBuild,relinkerBuild,output,version:record.version,arch,buildOutput:true});
 }
-recipeMain(import.meta,buildAnyPS5);
+recipeMain(import.meta,{compile,assemble});

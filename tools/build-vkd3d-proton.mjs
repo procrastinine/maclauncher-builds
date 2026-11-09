@@ -13,13 +13,18 @@ const require=createRequire(import.meta.url),B=require('../lib/package-format.cj
 const root=path.resolve(import.meta.dirname,'..'),sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 // Launcher floor: app package.json build.mac.minimumSystemVersion.
 const minimumMacOS='13.0';
-export async function buildVkd3dProton({project,version,arch,output,work}){
+/** Compile the vkd3d-proton translator with the llvm-mingw toolchain. */
+export async function compile({work}){
   const archive=await buildInput(llvmMingwInput(),path.join(work,'downloads'));
   const toolchain=path.join(work,'llvm-mingw');fs.mkdirSync(toolchain,{recursive:true});
   execFileSync('/usr/bin/tar',['-xf',archive,'--strip-components','1','-C',toolchain],{stdio:'inherit'});
   const tools=pythonBuildTools(path.join(work,'build-tools'),path.join(root,'tools/sdk27-build-requirements.txt'));
   const built=buildProvider({work:path.join(work,'translator'),output:path.join(work,'payload'),mingw:path.join(toolchain,'bin'),
     meson:path.join(tools.bin,'meson'),ninja:path.join(tools.bin,'ninja')});
+ return {built};
+}
+/** Stage, describe and declare the compiled translator. */
+export async function assemble({project,version,arch,output,compiled:{built}}){
   if(fs.existsSync(output))throw Error('The immutable translator package output already exists.');
   const payload=path.join(output,'payload');fs.mkdirSync(output,{recursive:true});
   fs.cpSync(built.output,payload,{recursive:true});
@@ -40,4 +45,4 @@ export async function buildVkd3dProton({project,version,arch,output,work}){
   fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n');
   return {project,version,arch,output};
 }
-recipeMain(import.meta,buildVkd3dProton);
+recipeMain(import.meta,{compile,assemble});
