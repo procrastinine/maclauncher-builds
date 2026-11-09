@@ -187,8 +187,6 @@ if(options["--retroarch"]) {
   pins.push(` ${actual} third_party/librashader`);
   nativeFiles.push("librashader.dylib","retroarch-prepare");
   if(manifest.sceneInputsAPI!==undefined){
-    const names=Object.keys(manifest.ownedSource);
-    for(const name of names)extraOwned.set("maclauncher/native/"+name,moduleFile(path.posix.join("src/modules/shared/reshade/native",name)));
     extraOwned.set("effects/operation-contracts.mjs",appPath("src/modules/shared/effects/operation-contracts.mjs"));
     features.shaders.providers??={};
     for(const format of ["slangp","slang"])features.shaders.providers[format]={...features.shaders.providers[format],sceneInputsAPI:1,sceneInputRoles:[...SCENE_SHADER_INPUTS]};

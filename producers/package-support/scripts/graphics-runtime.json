@@ -568,6 +568,7 @@
       "steps": [
         {
           "recipe": "src/modules/shared/reshade/native/build-retroarch.mjs",
+          "phased": true,
           "args": [
             "{source:librashader}",
             "-",
