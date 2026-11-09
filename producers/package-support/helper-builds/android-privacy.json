@@ -7,7 +7,7 @@
   "output": "clipboard-helper",
   "sourceDirectory": "sources/maclauncher-android",
   "sources": [
-    "app:src/modules/android/native/clipboard-helper.mm"
+    "src/modules/android/native/clipboard-helper.mm"
   ],
   "flags": [
     "-std=c++20",

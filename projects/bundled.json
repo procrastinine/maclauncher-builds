@@ -56,14 +56,10 @@
         "lib/abort.cjs",
         "lib/licenses.mjs",
         "producers/package-support/helper-builds/android-privacy.json",
-        "producers/package-support/scripts/build-android-privacy.mjs",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "tools/build-source.mjs"
       ],
-      "sourceDirectory": "producers/package-support",
-      "appEntries": [
-        "src/modules/android/native/clipboard-helper.mm"
-      ]
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [],
     "packageProfiles": [
