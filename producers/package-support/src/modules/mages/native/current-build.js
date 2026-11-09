@@ -1,4 +1,4 @@
-const {appPath,appRequire}=require('../../../../../../tools/app-source.mjs');
+const {sourceRevision}=require('../../../../../../lib/pins.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -7,22 +7,23 @@ const Native = require('../../../../../../lib/package-format.cjs');
 const Fonts = require("../../shared/runtime/portable-sdl2-fonts");
 const Dependency = require("./portable-dependencies");
 const Portable = require("./portable-build");
-const Patches = appRequire('src/modules/mages/native/source-patches.js');
-const SoundEffectSession = appRequire('src/modules/mages/native/windows-sfx-session.js');
-const Adapter = appRequire('src/modules/mages/native/adapter.js');
-const overlay = appRequire('src/modules/mages/native/current-windows-overlay.json');
+const Patches = require("./source-patches");
+const overlay = require("./current-windows-overlay.json");
+const Pins = require("./sources.json");
 const { throwIfAborted } = require('../../../../../../lib/abort.cjs');
 
 const VERSION = "0.10.8.937-MCLv1";
-const REVISION = Adapter.SOURCES.impacto.revision;
+// Exact upstream sources of this build: { repository, revision } each.
+const SOURCES = Object.freeze(Object.fromEntries(["impacto", "avcpp", "atrac9", "magicEnum"]
+  .map(id => [id, Object.freeze({ repository: Pins[id].repository, revision: sourceRevision(Pins[id]) })])));
+const REVISION = SOURCES.impacto.revision;
 const SOURCE_SHA256 = "09d76f27f572aade7d48c8242976bdb44caa705d480df61413be8a0752efca57";
 const PROFILE = "windows-mpk2-sc3-sfx-macos13-v9";
-const PROFILE_SHA256 = SoundEffectSession.PROFILE_SHA256;
-const APP = appPath("src/modules/mages/native"), PATCH = path.join(APP, "current-windows.patch");
+const PATCH = path.join(__dirname, "current-windows.patch");
 const ABI_PROFILE = Object.freeze({ input: "windows-sc3-input-v1", audio: "windows-sc3-voice-v1",
   checkpoint: "windows-sc3-checkpoint-u16-v1", backlog: "backlog-zero-capacity-v1", soundEffect: "windows-sc3-sfx-v1" });
-const recipeFiles = [...new Set([__filename, PATCH, path.join(APP, "current-windows-overlay.json"),
-  path.join(APP, "windows-game-v9.lua"), path.join(APP, "ffmpeg-probe.c"), ...Dependency.RECIPE_FILES])];
+const recipeFiles = [...new Set([__filename, PATCH, path.join(__dirname, "current-windows-overlay.json"),
+  path.join(__dirname, "ffmpeg-probe.c"), ...Dependency.RECIPE_FILES])];
 
 function overlayIdentity() {
   const hash = crypto.createHash("sha256");
@@ -68,7 +69,7 @@ async function buildCurrentImpacto({ sourceDir, workRoot, dependencyStack, ffmpe
     "-DFETCHCONTENT_SOURCE_DIR_LIBATRAC9=" + atrac9, "-DFETCHCONTENT_SOURCE_DIR_MAGIC_ENUM=" + magicEnumSource,
     "-Dharfbuzz_DIR=" + harfbuzz.directory, "-DZLIB_LIBRARY=" + sdk + "/usr/lib/libz.tbd", "-DZLIB_INCLUDE_DIR=" + sdk + "/usr/include"];
   const run = dependencies.runBuildCommand || Source.runBuildCommand;
-  const codecSource = path.join(APP, "ffmpeg-probe.c"), codecProbe = path.join(workRoot, "codec-probe");
+  const codecSource = path.join(__dirname, "ffmpeg-probe.c"), codecProbe = path.join(workRoot, "codec-probe");
   await run("/usr/bin/clang", ["-std=c11", ...Dependency.compilerFlags(sdk, pathMappings).split(" "),
     "-I" + path.join(ffmpegPrefix, "include"), codecSource, "-L" + path.join(ffmpegPrefix, "lib"),
     "-lavformat", "-lavcodec", "-lavutil", "-Wl,-rpath," + path.join(ffmpegPrefix, "lib"), "-o", codecProbe],
@@ -81,10 +82,10 @@ async function buildCurrentImpacto({ sourceDir, workRoot, dependencyStack, ffmpe
   Portable.assertMinimumMacOS(executable);
   return { version: VERSION, profile: PROFILE, sourceRevision: REVISION, sourceTreeSha256: SOURCE_SHA256,
     overlaySha256: identity, sourceOverlay, currentWindowsAbiProfile: ABI_PROFILE,
-    profileSha256: PROFILE_SHA256, executable, runtimeRoot: prefix, executableSha256: Native.hashFile(executable),
+    executable, runtimeRoot: prefix, executableSha256: Native.hashFile(executable),
     codecProbe: { sourceSha256: Native.hashFile(codecSource), bink2Decoder: true, headerLibraryVersionsMatch: true },
     dependencyStack, configureOptions, logPath };
 }
 
-module.exports = { VERSION, REVISION, SOURCE_SHA256, PROFILE, PROFILE_SHA256, ABI_PROFILE,
+module.exports = { VERSION, SOURCES, REVISION, SOURCE_SHA256, PROFILE, ABI_PROFILE,
   overlayIdentity, applyCurrentOverlay, buildCurrentImpacto };

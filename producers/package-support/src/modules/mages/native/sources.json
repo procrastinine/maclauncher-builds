@@ -1,0 +1,28 @@
+{
+  "impacto": {
+    "repository": "https://github.com/CommitteeOfZero/impacto",
+    "gitlink": "producers/package-support/src/external/impacto"
+  },
+  "avcpp": {
+    "repository": "https://github.com/h4tr3d/avcpp",
+    "gitlink": "producers/package-support/src/external/avcpp"
+  },
+  "atrac9": {
+    "repository": "https://github.com/Thealexbarney/LibAtrac9",
+    "gitlink": "producers/package-support/src/external/atrac9"
+  },
+  "magicEnum": {
+    "repository": "https://github.com/Neargye/magic_enum",
+    "gitlink": "producers/package-support/src/external/magic-enum"
+  },
+  "bink2": {
+    "repository": "https://github.com/sharpemu/ffmpeg-core",
+    "gitlink": "producers/package-support/src/external/ffmpeg-core-bink2",
+    "patchPath": "bink2.patch",
+    "upstreamPatchSha256": "2c1b70354bb32471a5b1bb46ca3479e641fdd9d971c3eb4317c935040dd28fdc",
+    "adaptations": [
+      "Normalize the alpha flag to a Boolean before plane iteration"
+    ],
+    "license": "LGPL-2.1-or-later"
+  }
+}

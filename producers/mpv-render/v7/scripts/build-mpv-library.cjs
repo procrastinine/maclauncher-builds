@@ -1,4 +1,3 @@
-const {appSourceRoot}=require('../../../../tools/app-source.mjs');
 // Build the managed libmpv adapter from an exact upstream export and owned overlays.
 const fs = require("node:fs"), path = require("node:path"), crypto = require("node:crypto");
 const { execFileSync, spawnSync } = require("node:child_process");
@@ -16,7 +15,7 @@ function build({ sourceCheckout, workDirectory, pkgConfigPath, toolsDirectory, m
   if (![sourceCheckout, workDirectory, toolsDirectory].every(value => typeof value === "string" && path.isAbsolute(value)) || !/^\d+\.\d+$/.test(minimumMacOS))
     throw new Error("Choose absolute source, build and isolated build-tool folders, and a macOS deployment target.");
   const run = (command, args, options = {}) => execFileSync(command, args, { encoding: "utf8", maxBuffer: Infinity, ...options });
-  const root = appSourceRoot().directory, patches = PATCHES.map(file => ({ file: path.join(root, "src/modules/video/native", file), name: file }));
+  const patches = PATCHES.map(file => ({ file: path.join(__dirname, "../native", file), name: file }));
   const source = path.join(workDirectory, "source"), output = path.join(workDirectory, "build");
   const sourceInputs = { revision: REVISION, backports: BACKPORTS, patches: patches.map(patch => ({ path: patch.name, sha256: hash(patch.file) })) };
   const sourceRecord = path.join(workDirectory, "source-inputs.json");

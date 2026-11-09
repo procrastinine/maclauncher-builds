@@ -2056,9 +2056,7 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/mpv-render/v7",
       "entries": [
-        "producers/mpv-render/v7/build.mjs",
-        "producers/mpv-render/v7/package.mjs",
-        "producers/mpv-render/v7/source.json"
+        "producers/mpv-render/v7"
       ]
     },
     "upstreams": [
@@ -2108,7 +2106,8 @@
         "arm64"
       ],
       "submodules": [
-        "producers/package-support/src/external/mpv-player"
+        "producers/package-support/src/external/mpv-player",
+        "sources/maclauncher"
       ],
       "tools": [
         "uv",
