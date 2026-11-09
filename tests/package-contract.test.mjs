@@ -1,13 +1,12 @@
-import {appRequire} from '../tools/app-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
-const B=appRequire('src/modules/shared/runtime/bundled-native.js');
 import {pathToFileURL,fileURLToPath} from 'node:url';
-const Contract=appRequire('src/modules/shared/runtime/package-contract.cjs');
+import Contract from '../lib/package-contract.cjs';
+import B from '../lib/package-format.cjs';
 import {releaseRecord} from '../lib/project-identity.mjs';
 const digest=value=>crypto.createHash('sha256').update(value).digest('hex');
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -33,9 +32,8 @@ test('producer records and consumers share generic capability and exact source v
  assert.throws(()=>releaseRecord({...value,accessToken:'private'},options),/Invalid|private/);
 });
 
-test('shared contracts are imported from the app pin',async()=>{
- const App=appRequire('src/modules/shared/runtime/package-contract.cjs');
- assert.equal(Contract.validateDeclaration,App.validateDeclaration);
+test('the package contract is Builds-owned and reads no app file',()=>{
+ for(const file of ['lib/package-contract.cjs','lib/package-format.cjs'])assert.doesNotMatch(fs.readFileSync(path.join(root,file),'utf8'),/app-source|sources\/maclauncher/);
  assert.equal(fs.existsSync(path.join(root,'producers/maclauncher')),false);
 });
 
