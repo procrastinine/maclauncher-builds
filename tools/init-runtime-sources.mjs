@@ -17,8 +17,8 @@ const metadataPaths=directory=>appSource(directory).sourceSubmodules;
 const gitlinks=(directory,run)=>String(run(['ls-files','--stage'],directory)).split('\n').flatMap(line=>{const match=line.match(/^160000 [a-f0-9]{40} 0\t(.+)$/);return match?[match[1]]:[];});
 /** Sources npm test reads: the planner's sources and every pinned source repository. */
 const checkPaths=(directory,run)=>[...metadataPaths(directory),...gitlinks(directory,run).filter(link=>/^sources\/[^/]+$/.test(link))];
-function initializeGitlinks({paths,directory,run,allowRecursive=false}){
- const initialized=[],done=new Set();
+function initializeGitlinks({paths,directory,run,allowRecursive=false,done=new Set()}){
+ const initialized=[];
  for(const selected of paths){
   let current=directory,remaining=selected;
   while(remaining){
@@ -49,7 +49,9 @@ export function initializeCheckSources({directory=root,run=runGit}={}){return in
 export function initializeSources({project:id,version,directory=root,run=runGit}){
  initializeGitlinks({paths:toolPaths(directory),directory,run});
  const {resolveProject,buildRecord}=require('../lib/projects.mjs'),project=resolveProject(id,directory,{resolvePins:false}),build=buildRecord(project,version);
- return {project:id,version:build.version,initialized:initializeGitlinks({paths:[...metadataPaths(directory),...(build.submodules||[])],directory,run,allowRecursive:build.recursiveSubmodules===true})};
+ // Recursion applies only to the build's own sources; the shared source owners are never recursive.
+ const done=new Set();
+ return {project:id,version:build.version,initialized:[...initializeGitlinks({paths:metadataPaths(directory),directory,run,done}),...initializeGitlinks({paths:build.submodules||[],directory,run,allowRecursive:build.recursiveSubmodules===true,done})]};
 }
 /** The one source preparation entry for every job: no arguments for the tool
  * sources, --metadata for planning, --checks for npm test, or one build. */

@@ -30,6 +30,18 @@ test('Android recipes initialize the producer whose metadata they read from a co
  }
 });
 
+test('a recursive build recurses into its own sources and never into the shared source owners',()=>{
+ const build=buildRecord(readProjects(root,{resolvePins:false}).projects.find(project=>project.id==='ai5'));
+ assert.equal(build.recursiveSubmodules,true);
+ const commands=[];
+ initializeSources({project:'ai5',version:build.version,directory:root,run:(args,cwd)=>{
+  commands.push(args);
+  if(args[0]==='ls-files'){const links=cwd===root?['sources/maclauncher','sources/maclauncher-android','sources/maclauncher-kosmickrisp',...build.submodules]:cwd===appSourceRoot().directory?['src/external/maclauncher-android','src/external/maclauncher-kosmickrisp']:['sources/maclauncher'];return links.map(path=>'160000 '+'a'.repeat(40)+' 0\t'+path).join('\n')+'\n';}
+  return '';
+ }});
+ assert.deepEqual(commands.filter(args=>args.includes('--recursive')).map(args=>args.at(-1)),build.submodules);
+});
+
 test('producer routing never substitutes Android for a different project',()=>{
  const selected=main(['--project','fna','--check']);assert.equal(selected.id,'fna');assert.equal(selected.sourceDirectory,'producers/package-support');assert.ok(!selected.entries.some(entry=>/^(producers\/android|sources\/maclauncher-android)/.test(entry)));
  assert.throws(()=>main(['--project','flash-projector','--check']),/retains its supplied binary/);
