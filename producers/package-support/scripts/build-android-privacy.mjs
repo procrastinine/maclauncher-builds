@@ -1,11 +1,10 @@
-import {appRequire} from '../../../tools/app-source.mjs';
 import {addLicense} from '../../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
-const require=createRequire(import.meta.url),B=appRequire('src/modules/shared/runtime/bundled-native.js');
+const require=createRequire(import.meta.url),B=require('../../../lib/package-format.cjs');
 const source=path.resolve('src/modules/android/native'),id='android-privacy';
 const names=['clipboard-helper.mm','clipboard-gesture.h'];
 const hash=crypto.createHash('sha256');for(const name of names)hash.update(fs.readFileSync(path.join(source,name)));

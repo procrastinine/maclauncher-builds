@@ -9,7 +9,7 @@ import {fileURLToPath} from 'node:url';
 import {adaptedKosmicSources} from './kosmickrisp-source.mjs';
 import {buildKosmicTargets,buildKosmicLoader,describeNativeTools} from './kosmickrisp-targets.mjs';
 import {prepareSourceTree,writeChanged} from './source-files.mjs';
-const Bundled=appRequire('src/modules/shared/runtime/bundled-native.js');
+import Bundled from '../../../../../../../lib/package-format.cjs';
 const MachO=appRequire('src/modules/shared/runtime/macho-load-commands.js');
 import Stage from '../../../../../scripts/native-binary-tools.cjs';
 const Supplementals=appRequire('scripts/native-supplementals.cjs');

@@ -1,9 +1,8 @@
 import './producer-environment.mjs';
-import {appRequire} from './app-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
-const require=createRequire(import.meta.url),B=appRequire('src/modules/shared/runtime/bundled-native.js');
+const require=createRequire(import.meta.url),B=require('../lib/package-format.cjs');
 import {projectId} from '../lib/project-identity.mjs';
 /** Verified inputs materialized by this build run, without network access. */
 export function preparedBuildInput(id,env=process.env){

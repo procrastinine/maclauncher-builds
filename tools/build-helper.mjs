@@ -15,7 +15,7 @@ import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {recipeMain} from './build-source.mjs';
 import {macosSDKVersion} from '../lib/reproducible-build.mjs';
 const require=createRequire(import.meta.url);
-const B=appRequire('src/modules/shared/runtime/bundled-native.js'),Native=appRequire('src/modules/shared/runtime/local-native.js');
+const B=require('../lib/package-format.cjs'),Native=require('../lib/package-format.cjs');
 const root=path.resolve(import.meta.dirname,'..');
 const CPUS={arm64:['arm64'],x64:['x86_64'],universal:['arm64','x86_64']};
 const KINDS={executable:[],dylib:['-dynamiclib'],bundle:['-bundle']};

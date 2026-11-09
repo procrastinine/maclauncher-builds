@@ -11,8 +11,8 @@ import {applyOverlays} from './overlays/apply.mjs';
 import {prepareDependencies} from './dependencies.mjs';
 
 const require = createRequire(import.meta.url);
-const B = appRequire('src/modules/shared/runtime/bundled-native.js');
-const Native = appRequire('src/modules/shared/runtime/local-native.js');
+const B = require('../../lib/package-format.cjs');
+const Native = require('../../lib/package-format.cjs');
 const MachO = appRequire('src/modules/shared/runtime/macho-load-commands.js');
 const producer = import.meta.dirname, repository = path.resolve(producer, '../..');
 const pin = JSON.parse(fs.readFileSync(path.join(producer, 'source.json')));

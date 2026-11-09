@@ -8,7 +8,7 @@ import {createRequire} from 'node:module';
 import {recipeMain} from '../../../tools/build-source.mjs';
 import {pack} from '../../../tools/runtime-package.mjs';
 import {resolveProject,buildRecord} from '../../../lib/projects.mjs';
-const require=createRequire(import.meta.url),B=appRequire('src/modules/shared/runtime/bundled-native.js');
+const require=createRequire(import.meta.url),B=require('../../../lib/package-format.cjs');
 const M=appRequire('src/modules/shared/runtime/macho-load-commands.js');
 const here=import.meta.dirname,root=path.resolve(here,'../../..'),sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 export async function packageAdapter({output,binary,archive:packed=true,version}){

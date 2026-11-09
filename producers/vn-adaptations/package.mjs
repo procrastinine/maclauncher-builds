@@ -7,7 +7,7 @@ import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {pack} from '../../tools/runtime-package.mjs';
 const require=createRequire(import.meta.url);
-const B=appRequire('src/modules/shared/runtime/bundled-native.js');
+const B=require('../../lib/package-format.cjs');
 const M=appRequire('src/modules/shared/runtime/macho-load-commands.js');
 const here=import.meta.dirname;
 const source=JSON.parse(fs.readFileSync(path.join(here,'source.json')));

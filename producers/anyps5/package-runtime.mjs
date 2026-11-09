@@ -1,4 +1,3 @@
-import {appRequire} from '../../tools/app-source.mjs';
 import {gitlink,sourceCheckout,sourceProvenance,sourceRevision} from '../../lib/pins.mjs';
 import {addLicense,addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
@@ -11,7 +10,7 @@ import {pack} from '../../tools/runtime-package.mjs';
 import {assetName} from '../../lib/project-identity.mjs';
 import {buildRuntime} from './build-runtime.mjs';
 
-const require=createRequire(import.meta.url),Native=appRequire('src/modules/shared/runtime/local-native.js');
+const require=createRequire(import.meta.url),Native=require('../../lib/package-format.cjs');
 const root=path.resolve(import.meta.dirname,'../..');
 const recipe=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'source.json')));
 const {inputs:dependencies}=await import('./source-projection.mjs');

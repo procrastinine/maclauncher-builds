@@ -5,8 +5,8 @@ const {addLicense,addLicenses} = require('../../../lib/licenses.mjs');
 // Maintainer source build. Ordinary Play uses the sealed Included artifact.
 const fs = require('node:fs'), path = require('node:path'), os = require('node:os');
 const {execFileSync} = require('node:child_process');
-const Native = appRequire('src/modules/shared/runtime/local-native.js');
-const B = appRequire('src/modules/shared/runtime/bundled-native.js');
+const Native = require('../../../lib/package-format.cjs');
+const B = require('../../../lib/package-format.cjs');
 const Overlay = require('../src/modules/rgss/overlays/mkxpz-filename-nfc/source.json');
 const {loadCommands, links} = require('./native-binary-tools.cjs');
 const Content = appRequire('scripts/runtime-content.cjs');
