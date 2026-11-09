@@ -134,7 +134,8 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   for(const relative of [...files.keys()])if(relative.endsWith('.js')){const found=nearestPackage(relative,isFile);if(found)addFile(found,'node');}
   for(const relative of [...appFiles.keys()])if(relative.endsWith('.js')){const found=nearestPackage(relative,name=>appSet.has(name));if(found)addApp(found,'node');}
   const sources=project.upstreams.map(upstream=>{
-   const link=upstream.pin&&linkOf(upstream.pin.gitlink||upstream.pin.file);
+   // A gitlink pin is the upstream's own commit; a record inside a checkout is read through its pointer.
+   const link=upstream.pin?.gitlink&&linkOf(upstream.pin.gitlink);
    if(link)return {...upstream,gitlink:link.revision};
    // A pin the resolver already reported is not read.
    if(upstream.pin&&unresolved.some(row=>row.expression===JSON.stringify(upstream.pin)))return {...upstream};

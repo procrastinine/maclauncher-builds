@@ -48,6 +48,18 @@ test('each project declares its own package inputs, also when projects share a c
  assert.deepEqual(describe.unresolved('unknown'),[{file:'projects',expression:'absent',reason:'input',problem:'A package input names another registered project.'}]);
 });
 
+test('an upstream pinned by a record inside a checkout takes the record commit, not the checkout commit',t=>{
+ const recipe=project('recipe','tools/recipe.cjs');recipe.build.submodules=['sources/supplier'];
+ recipe.upstreams=[{id:'engine',provider:'github',url:'https://github.com/owner/engine',repository:'owner/engine',pin:{file:'sources/supplier/upstreams.json',pointer:'/engine/revision',repositoryPointer:'/engine/repository'}}];
+ const f=fixture(t,{'tools/recipe.cjs':'module.exports = {};\n','sources/supplier/upstreams.json':{engine:{repository:'https://github.com/owner/engine',revision:'3'.repeat(40)}}},[recipe]);
+ const supplier=path.join(f.directory,'sources/supplier'),git=(cwd,...args)=>execFileSync('git',['-c','user.name=fixture','-c','user.email=fixture@example.invalid',...args],{cwd,stdio:'ignore'});
+ execFileSync('git',['rm','-r','-q','--cached','sources/supplier'],{cwd:f.directory});
+ git(supplier,'init','-q');git(supplier,'add','-A');git(supplier,'commit','-q','-m','supplier');git(f.directory,'add','sources/supplier');
+ const checkout=execFileSync('git',['rev-parse','HEAD'],{cwd:supplier,encoding:'utf8'}).trim();
+ const [source]=createRecipeBuildReporter({directory:f.directory})('recipe').definition.sources;
+ assert.equal(source.revision,'3'.repeat(40));assert.notEqual(source.gitlink,checkout);
+});
+
 test('declared records and pins are validated once, by the resolver',t=>{
  const recipe=project('recipe','tools/recipe.cjs');recipe.producer.entries.push('tools/source.json');
  recipe.upstreams=[{id:'engine',provider:'github',url:'https://github.com/owner/engine',repository:'owner/engine',revision:'1'.repeat(40),pin:{file:'tools/source.json',pointer:'/engine'}}];
