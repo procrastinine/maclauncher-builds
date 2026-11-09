@@ -27,8 +27,8 @@ export function artElfBuildEnvironment({work,target,sdk,jdk,python,env=process.e
  result.CARGO_ENCODED_RUSTFLAGS=[result.CARGO_ENCODED_RUSTFLAGS,'--remap-path-prefix='+work+'=/android-art-build','--remap-path-prefix='+root+'=/maclauncher-builds'].join(String.fromCharCode(31));
  return {...result,PATH:path.dirname(python)+path.delimiter+(env.PATH||''),CARGO_BUILD_JOBS:'2',CARGO_TARGET_DIR:target,ANDROID_SDK_ROOT:sdk,JAVA_HOME:jdk};
 }
-/** Build ART's original ELF group independently of host, HWUI and Java adapters. */
-export async function buildArtElfsInput({output,work}){
+/** Compile ART's original ELF group independently of host, HWUI and Java adapters. */
+export async function compileArtElfsInput({output,work}){
  if(!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('ART ELF builds require Apple Silicon macOS and new absolute output/work paths.');
  const profile=JSON.parse(fs.readFileSync(descriptor));fs.mkdirSync(work,{recursive:true});
  const android=acquireArtProducer({source:androidSource(),work});
@@ -56,31 +56,34 @@ export async function buildArtElfsInput({output,work}){
  await releaseAndroidImageArchive({source,work,cache,image:supplier.imageAcquisition});
  const {buildArtElfs}=await import(pathToFileURL(path.join(android,profile.buildEntry)));
  const built=buildArtElfs({aim:source,fetched,sdk,work:target,jdk:homes[0],python,jobs:2,env});
- fs.mkdirSync(output,{recursive:true});
- fs.cpSync(built.art,output,{recursive:true,mode:fs.constants.COPYFILE_FICLONE});
-
- addLicenses(output,'AIM',checkout);
-    addLicense(output,'AIM',path.join(checkout,'THIRD_PARTY_NOTICES.md'));
- addLicenses(output,'ART OpenJDK',path.join(fetched,'aosp/art/openjdkjvm'));
- addLicenses(output,'ART JVMTI',path.join(fetched,'aosp/art/openjdkjvmti'));
- addLicenses(output,'nativehelper',path.join(fetched,'aosp/libnativehelper'));
- addLicenses(output,'dlmalloc',path.join(fetched,'aosp/external/dlmalloc'));
- addLicenses(output,'tinyxml2',path.join(fetched,'aosp/external/tinyxml2'));
- addLicenses(output,'zlib',path.join(fetched,'aosp/external/zlib'));
- addLicenses(output,'cpu_features',path.join(fetched,'aosp/external/cpu_features'));
- addLicenses(output,'LZ4',path.join(fetched,'aosp/external/lz4/lib'));
- addLicenses(output,'libcap',path.join(fetched,'aosp/external/libcap'));
- addLicenses(output,'BoringSSL',path.join(fetched,'aosp/external/boringssl/src'));
- addLicenses(output,'fiat-crypto',path.join(fetched,'aosp/external/boringssl/src/third_party/fiat'));
- return {art:output,build:{source,checkout,fetched,sdk,jdk:homes[0],python,target,env},record:{androidSource:androidSource(),aimRevision:sourceRevision(supplier.sources.aim),sourceTreeSha256:staged.treeSha256,sourceLockSha256:sha(path.join(checkout,profile.sourceLock))}};
+ return {art:built.art,checkout,fetched,record:{androidSource:androidSource(),aimRevision:sourceRevision(supplier.sources.aim),sourceTreeSha256:staged.treeSha256,sourceLockSha256:sha(path.join(checkout,profile.sourceLock))}};
  }finally{const mount=path.join(fetched,'android16-image');if(fs.existsSync(path.join(mount,'root.identity')))run('hdiutil',['detach',mount]);}
 }
 
-/** Seal the ELF group through the ordinary Runtime build output contract. */
-export async function buildAndroidArtElf({project,version,arch,output,work}){
+/** Compile the ELF group for the ordinary Runtime build output contract. */
+export async function compile({project,version,output,work}){
  const profile=JSON.parse(fs.readFileSync(descriptor));version??=profile.version;
  if(project!==profile.id||version!==profile.version||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('Select the declared ART ELF input version and arm64 with new absolute output/work paths.');
- const built=await buildArtElfsInput({output:path.join(output,'payload'),work});
- return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:built.record});
+ return {version,...await compileArtElfsInput({output:path.join(output,'payload'),work})};
 }
-recipeMain(import.meta,buildAndroidArtElf);
+/** Stage the compiled ELF group with its notices and seal it. */
+export async function assemble({project,arch,output,compiled:{version,art,checkout,fetched,record}}){
+ const payload=path.join(output,'payload');
+ fs.mkdirSync(payload,{recursive:true});
+ fs.cpSync(art,payload,{recursive:true,mode:fs.constants.COPYFILE_FICLONE});
+ addLicenses(payload,'AIM',checkout);
+    addLicense(payload,'AIM',path.join(checkout,'THIRD_PARTY_NOTICES.md'));
+ addLicenses(payload,'ART OpenJDK',path.join(fetched,'aosp/art/openjdkjvm'));
+ addLicenses(payload,'ART JVMTI',path.join(fetched,'aosp/art/openjdkjvmti'));
+ addLicenses(payload,'nativehelper',path.join(fetched,'aosp/libnativehelper'));
+ addLicenses(payload,'dlmalloc',path.join(fetched,'aosp/external/dlmalloc'));
+ addLicenses(payload,'tinyxml2',path.join(fetched,'aosp/external/tinyxml2'));
+ addLicenses(payload,'zlib',path.join(fetched,'aosp/external/zlib'));
+ addLicenses(payload,'cpu_features',path.join(fetched,'aosp/external/cpu_features'));
+ addLicenses(payload,'LZ4',path.join(fetched,'aosp/external/lz4/lib'));
+ addLicenses(payload,'libcap',path.join(fetched,'aosp/external/libcap'));
+ addLicenses(payload,'BoringSSL',path.join(fetched,'aosp/external/boringssl/src'));
+ addLicenses(payload,'fiat-crypto',path.join(fetched,'aosp/external/boringssl/src/third_party/fiat'));
+ return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record});
+}
+recipeMain(import.meta,{compile,assemble});

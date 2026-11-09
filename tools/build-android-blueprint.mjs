@@ -25,6 +25,11 @@ export async function buildBlueprintInput({output,work,arch='arm64'}){
  const parser=path.join(output,'bin/android-blueprint-parser');
  const environment={...process.env,GO111MODULE:'off',GOENV:'off',GOTOOLCHAIN:'local',GOPATH:goPath,GOCACHE:path.join(work,'go-cache'),CGO_ENABLED:'0',GOOS:'darwin',GOARCH:arch==='x64'?'amd64':'arm64'};
  run('go',['build','-p=2','-trimpath','-ldflags=-s -w -buildid=','-o',parser,path.join(base,'main.go')],{env:environment});
+ return {output,upstream,parser,profile};
+}
+
+/** Describe a compiled parser: its source identity, notices and Go toolchain. */
+export function describeBlueprintInput({output,upstream,parser,profile}){
  const rows=read('git',['-C',upstream,'ls-tree','-r','--format=%(objectname) %(path)','HEAD','--','parser']).split('\n').filter(Boolean).map(line=>{const split=line.indexOf(' ');return {path:line.slice(split+1),gitObject:line.slice(0,split)};}).filter(file=>file.path.endsWith('.go'));
  const identity={project:'platform/build/blueprint',repository:profile.upstream.repository,revision:sourceRevision(profile.upstream),files:rows.map(file=>({...file,sha256:sha(path.join(upstream,file.path))}))};
  const sources=path.join(output,'parser-sources.json');fs.writeFileSync(sources,JSON.stringify(identity,null,2)+'\n');
@@ -58,11 +63,14 @@ export function packageBlueprintInput({project='android-blueprint-parser',versio
  return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(path.join(base,'source.json')),manifestRelative:'input.json',record:{upstreamRevision:sourceRevision(profile.upstream),toolchain}});
 }
 
-/** Produce a normal Runtime package for downstream Android build jobs. */
-export async function buildAndroidBlueprint({project,version,arch,output,work}){
+/** Compile the parser for downstream Android build jobs. */
+export async function compile({project,version,output,work,arch}){
  const profile=JSON.parse(fs.readFileSync(path.join(base,'source.json')));version??=profile.version;
  if(project!==profile.id||version!==profile.version||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('Select the declared Blueprint input version and new absolute output/work directories.');
- const input=await buildBlueprintInput({output:path.join(work,'compiled'),work:path.join(work,'compile'),arch});
- return packageBlueprintInput({project,version,arch,output,input});
+ return {version,compiled:await buildBlueprintInput({output:path.join(work,'compiled'),work:path.join(work,'compile'),arch})};
 }
-recipeMain(import.meta,buildAndroidBlueprint);
+/** Package the described parser as a normal Runtime package. */
+export function assemble({project,arch,output,compiled:{version,compiled}}){
+ return packageBlueprintInput({project,version,arch,output,input:describeBlueprintInput(compiled)});
+}
+recipeMain(import.meta,{compile,assemble});

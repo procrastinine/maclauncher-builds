@@ -26,7 +26,7 @@ function sourceObjects({repository,revision},destination){
 }
 
 /** Compile complete platform Java implementations and native declarations without Mac programs. */
-export async function buildAndroidJavaFrameworkInput({output,work}){
+export async function compileAndroidJavaFrameworkInput({output,work}){
  if([output,work].some(file=>!path.isAbsolute(file||'')||fs.existsSync(file)))throw Error('Framework Java inputs require new absolute output/work directories.');
  const profile=json(descriptor);profile.sources=profile.sources.map(source=>({...source,revision:androidUpstream(source.repository).revision}));const javaProfile=json(path.join(root,'producers/android-inputs/java-converter.json')),jdkPin=javaProfile.jdk[process.platform+'-'+process.arch];
  if(!jdkPin)throw Error('The framework Java stage has no declared JDK for this build host.');
@@ -55,21 +55,12 @@ export async function buildAndroidJavaFrameworkInput({output,work}){
   const {prepareFrameworkGles}=await import(pathToFileURL(path.join(native,'gles-framework-sources.mjs')));prepareFrameworkGles(sources.framework,pins.aospFramework,build,native,sources.native,pins.aospNative);
   const {buildFramework}=await import(pathToFileURL(path.join(native,'framework-build.mjs')));built=await buildFramework({root:native,build,output:products,jdk,framework,frameworkArchives:modules.archives,asmClasspath:asm.files.map(file=>path.join(tools,file.path)).join(path.delimiter),graphicsRegistrations:path.join(build,'framework-gles/registrations.txt')});
  }finally{if(previousParser===undefined)delete process.env.ANDROID_BLUEPRINT_PARSER;else process.env.ANDROID_BLUEPRINT_PARSER=previousParser;}
- for(const name of ['framework-tool','classes','framework-declarations','jni'])fs.cpSync(path.join(build,name),path.join(output,'build',name),{recursive:true});
- for(const name of ['host-callbacks.h','host-callbacks.c'])fs.copyFileSync(path.join(build,name),path.join(output,'build',name));
- fs.copyFileSync(path.join(build,'framework-gles/registrations.txt'),path.join(output,'graphics-registrations.txt'));
  const dexProfile=json(path.join(android,'src/modules/android/art/dex-tools.json')),dexDependencies={};
  for(const [name,filename]of Object.entries({dexlib2:'smali-dexlib2-3.0.10.jar',guava:'guava-31.1-android.jar',annotations:'jsr305-3.0.2.jar'})){
   const pin=dexProfile.artifacts.find(file=>file.file===filename);if(!pin)throw Error('The original DEX tool profile is incomplete.');const archive=await buildInput({...pin,bytes:pin.size},cache),destination=path.join(tools,filename);fs.copyFileSync(archive,destination,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.unlinkSync(archive);dexDependencies[name]=destination;
  }
- const {buildDexBodies}=await import(pathToFileURL(path.join(android,'src/modules/android/art/dex-bodies.mjs'))),dexBuild=path.join(work,'dex-tool');await buildDexBodies({output:dexBuild,jdk,dependencies:dexDependencies});fs.cpSync(path.join(dexBuild,'classes'),path.join(output,'dex-tool/classes'),{recursive:true});
- for(const archive of modules.archives){const name=path.basename(archive);fs.mkdirSync(path.join(output,'modules'),{recursive:true});fs.copyFileSync(archive,path.join(output,'modules',name));}
-
- addLicenses(output,profile.id,android);
- addLicense(output,'AOSP framework',new URL('../producers/android-inputs/licenses/aosp-framework/LICENSE',import.meta.url));
- addLicense(output,'Apache HTTP',new URL('../producers/android-inputs/licenses/aosp-apache-http/NOTICE',import.meta.url));
- addLicense(output,'Robolectric portability',new URL('../producers/android-inputs/licenses/robolectric-portability/LICENSE',import.meta.url));
- return {root:output,record:{androidSource:androidSource(),framework:frameworkPin,sources:profile.sources,blueprint:{...blueprintProfile.upstream,toolchain:read('go',['version'])},jdk:{sha256:jdkPin.sha256,version:read(path.join(jdk,'bin/java'),['--version']).split('\n')[0]},graphicsRegistrationsSha256:sha(path.join(output,'graphics-registrations.txt')),modules:modules.archives.map(file=>path.basename(file)),dexTools:dexProfile}};
+ const {buildDexBodies}=await import(pathToFileURL(path.join(android,'src/modules/android/art/dex-bodies.mjs'))),dexBuild=path.join(work,'dex-tool');await buildDexBodies({output:dexBuild,jdk,dependencies:dexDependencies});
+ return {build,dexBuild,modules,android,profile,frameworkPin,blueprintProfile,jdk,jdkPin,dexProfile};
 }
 
 export function verifyAndroidJavaFrameworkInput(input){
@@ -78,8 +69,25 @@ export function verifyAndroidJavaFrameworkInput(input){
  for(const name of ['products/android-framework.jar','build/classes','build/framework-tool','build/jni','build/host-callbacks.h','build/host-callbacks.c'])if(!fs.existsSync(path.join(input,name)))throw Error('Framework Java input is incomplete: '+name);
  return {root:input,declaration,manifest};
 }
-export async function buildAndroidJavaFramework({project,version,arch,output,work}){
+/** Compile the framework products into the package payload. */
+export async function compile({project,version,output,work}){
  const profile=json(descriptor);version??=profile.version;if(project!==profile.id||version!==profile.version)throw Error('Select the declared framework Java profile.');
- const built=await buildAndroidJavaFrameworkInput({output:path.join(output,'payload'),work});return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:built.record});
+ return {version,...await compileAndroidJavaFrameworkInput({output:path.join(output,'payload'),work})};
 }
-recipeMain(import.meta,buildAndroidJavaFramework);
+/** Stage the compiled build trees, DEX tool and modules with their notices, and seal them. */
+export async function assemble({project,arch,output,compiled:{version,build,dexBuild,modules,android,profile,frameworkPin,blueprintProfile,jdk,jdkPin,dexProfile}}){
+ const payload=path.join(output,'payload');
+ for(const name of ['framework-tool','classes','framework-declarations','jni'])fs.cpSync(path.join(build,name),path.join(payload,'build',name),{recursive:true});
+ for(const name of ['host-callbacks.h','host-callbacks.c'])fs.copyFileSync(path.join(build,name),path.join(payload,'build',name));
+ fs.copyFileSync(path.join(build,'framework-gles/registrations.txt'),path.join(payload,'graphics-registrations.txt'));
+ fs.cpSync(path.join(dexBuild,'classes'),path.join(payload,'dex-tool/classes'),{recursive:true});
+ for(const archive of modules.archives){const name=path.basename(archive);fs.mkdirSync(path.join(payload,'modules'),{recursive:true});fs.copyFileSync(archive,path.join(payload,'modules',name));}
+
+ addLicenses(payload,profile.id,android);
+ addLicense(payload,'AOSP framework',new URL('../producers/android-inputs/licenses/aosp-framework/LICENSE',import.meta.url));
+ addLicense(payload,'Apache HTTP',new URL('../producers/android-inputs/licenses/aosp-apache-http/NOTICE',import.meta.url));
+ addLicense(payload,'Robolectric portability',new URL('../producers/android-inputs/licenses/robolectric-portability/LICENSE',import.meta.url));
+ const record={androidSource:androidSource(),framework:frameworkPin,sources:profile.sources,blueprint:{...blueprintProfile.upstream,toolchain:read('go',['version'])},jdk:{sha256:jdkPin.sha256,version:read(path.join(jdk,'bin/java'),['--version']).split('\n')[0]},graphicsRegistrationsSha256:sha(path.join(payload,'graphics-registrations.txt')),modules:modules.archives.map(file=>path.basename(file)),dexTools:dexProfile};
+ return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record});
+}
+recipeMain(import.meta,{compile,assemble});
