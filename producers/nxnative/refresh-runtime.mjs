@@ -1,5 +1,6 @@
 import {gitlink,sourceProvenance} from '../../lib/pins.mjs';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
@@ -24,7 +25,17 @@ function producerInputs(root=producer,prefix=''){
  });
 }
 
-export function refreshRuntime({input,output,version=pin.version}){
+/** The full build, for a base this refresh cannot reuse. */
+async function fullBuild({output,version,work,jobs,reason}){
+ const {buildNxNative}=await import('./build.mjs');
+ console.error('nxnative refresh: '+reason+'; running a full build.');
+ const built=await buildNxNative({work:work||fs.mkdtempSync(path.join(os.tmpdir(),'nxnative-build-')),output,version,...(jobs?{jobs}:{})});
+ return {...built,fullBuild:reason};
+}
+
+/** Reuse a compatible base runtime for adapter changes. A base whose source pin, platform or
+ * native producer inputs differ from the current ones is not reused: the full build runs. */
+export async function refreshRuntime({input,output,version=pin.version,work,jobs,build=fullBuild}){
  if(process.platform!=='darwin'||process.arch!=='arm64')throw Error('Runtime refresh requires Apple Silicon macOS.');
  if(!path.isAbsolute(input||'')||!path.isAbsolute(output||''))throw Error('Use absolute input/output directories.');
  input=fs.realpathSync(input);
@@ -35,14 +46,15 @@ export function refreshRuntime({input,output,version=pin.version}){
  B.verifyPayload(input,{files:[...manifest.files,{path:'manifest.json',size:bytes.length,mode:0o644,sha256:digest(bytes)}]});
  const origins=JSON.parse(fs.readFileSync(path.join(input,'source.json')));
  const runtime=JSON.parse(fs.readFileSync(path.join(input,'runtime.json')));
+ const full=reason=>build({output,version,work,jobs,reason});
  if(JSON.stringify(origins.source)!==JSON.stringify(sourceProvenance(pin.source))||manifest.arch!==pin.architecture||manifest.minimumMacOS!==pin.minimumMacOS||manifest.executableRelative!==pin.output.executableRelative||runtime.runtimeFiles.host!==pin.output.hostRelative)
-  throw Error('The base runtime is incompatible with the current source pin or platform.');
+  return full('the base runtime differs from the current source pin or platform');
  const owned=producerInputs(),previous=new Map(origins.producerInputs.map(file=>[file.path,file.sha256]));
- for(const file of owned){
-  if(!mutableInputs.has(file.path)&&previous.get(file.path)!==file.sha256)throw Error('A full build is required for the changed producer input: '+file.path);
-  previous.delete(file.path);
- }
- if([...previous.keys()].some(file=>!mutableInputs.has(file)))throw Error('A full build is required for removed producer inputs.');
+ const changed=owned.find(file=>!mutableInputs.has(file.path)&&previous.get(file.path)!==file.sha256);
+ if(changed)return full('the native producer input '+changed.path+' changed');
+ for(const file of owned)previous.delete(file.path);
+ const removed=[...previous.keys()].find(file=>!mutableInputs.has(file));
+ if(removed)return full('the native producer input '+removed+' was removed');
  if(version===manifest.version)throw Error('Runtime refresh requires a new version.');
  fs.mkdirSync(output,{recursive:true});
  for(const file of manifest.files){
@@ -69,6 +81,6 @@ export function refreshRuntime({input,output,version=pin.version}){
 }
 
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){
- const options={};for(let index=2;index<process.argv.length;index+=2){const key=process.argv[index]?.slice(2),value=process.argv[index+1];if(!['input','output','version'].includes(key)||!value)throw Error('Use --input, --output and optional --version.');options[key]=value;}
- try{console.log(JSON.stringify(refreshRuntime(options)));}catch(error){console.error(error.message);process.exitCode=1;}
+ const options={};for(let index=2;index<process.argv.length;index+=2){const key=process.argv[index]?.slice(2),value=process.argv[index+1];if(!['input','output','version','work','jobs'].includes(key)||!value)throw Error('Use --input, --output and optional --version, --work and --jobs.');options[key]=key==='jobs'?Number(value):value;}
+ refreshRuntime(options).then(value=>console.log(JSON.stringify(value))).catch(error=>{console.error(error.message);process.exitCode=1;});
 }

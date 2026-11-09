@@ -53,7 +53,7 @@ Building requires Node 24 or later, the .NET SDK and the macOS SDK declared in `
 | `package.mjs` | Selects the native runtime files, without the build's Python interpreter or the upstream source tree |
 | `refresh-runtime.mjs` | Reuses a verified, compatible native output for adapter changes |
 
-A refresh requires unchanged native inputs and a new version, and leaves earlier packages unchanged.
+A refresh requires a new version and leaves earlier packages unchanged. It reuses the base runtime only when the base matches the current source pin, platform and native producer inputs; otherwise it runs the full build into the same output.
 
 ## GitHub build
 
