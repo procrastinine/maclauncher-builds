@@ -6,7 +6,7 @@ import {execFileSync} from 'node:child_process';
 import {readProjects,buildRecords} from '../lib/projects.mjs';
 import {resolveUpstream,validatePinReference} from "../lib/source-pins.mjs";
 import {sourceRecordProblem} from '../lib/pins.mjs';
-import {APP_REFERENCE,appSourceRoot} from './app-source.mjs';
+import {APP_REFERENCE,appSourceRoot,appNestedFiles} from './app-source.mjs';
 import {canonicalReport,reportDigest} from '../lib/canonical-report.mjs';
 export {canonicalReport,reportDigest};
 const sha256=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
@@ -36,11 +36,10 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
  const isFile=relative=>tracked?tracked.has(relative):fs.statSync(path.join(root,relative),{throwIfNoEntry:false})?.isFile()===true;
  const filesBelow=relative=>trackedFiles?trackedFiles.filter(file=>file.startsWith(relative+'/')):fs.statSync(path.join(root,relative),{throwIfNoEntry:false})?.isDirectory()?fs.readdirSync(path.join(root,relative),{recursive:true}).map(name=>path.posix.join(relative,name.split(path.sep).join('/'))).filter(file=>fs.statSync(path.join(root,file)).isFile()):[];
  const linkOf=relative=>gitlinks.find(link=>relative===link.path||relative.startsWith(link.path+'/'))??null;
- // The pinned app checkout is read in place, as tools/app-source.mjs reads it.
- const appSource=fs.existsSync(path.join(root,'producers/package-support/app-source.json'))?appSourceRoot(root):null;
- // Every build initializes the declared source metadata checkouts as well as its own submodules.
- const metadata=appSource?JSON.parse(fs.readFileSync(path.join(root,"producers/package-support/app-source.json"))).sourceSubmodules||[]:[];
- const appTracked=appSource?execFileSync('git',['-C',appSource.directory,'ls-files','-z'],{encoding:'utf8',maxBuffer:Infinity}).split('\0').filter(Boolean):[],appSet=new Set(appTracked);
+ // The pinned app checkout is read in place, as tools/app-source.mjs reads it, and only for a
+ // project that declares app-source.json: no other build initializes the app.
+ const APP_SOURCE='producers/package-support/app-source.json',appProfile=fs.existsSync(path.join(root,APP_SOURCE));let appState=null;
+ const app=()=>{if(!appState){const source=appSourceRoot(root),tracked=execFileSync('git',['-C',source.directory,'ls-files','-z'],{encoding:'utf8',maxBuffer:Infinity}).split('\0').filter(Boolean);appState={directory:source.directory,tracked,set:new Set(tracked)};}return appState;};
  const bytesOf=new Map(),read=absolute=>{if(!bytesOf.has(absolute))bytesOf.set(absolute,fs.readFileSync(absolute));return bytesOf.get(absolute);};
  function normalizedJson(file,value){
   value=structuredClone(value);
@@ -54,7 +53,9 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   if(cache.has(id))return cache.get(id);
   const project=projects.get(id);if(!project)throw Error('Unknown recipe project: '+id);
   const builds=project.build?buildRecords(project):[],files=new Map(),appFiles=new Map(),usedLinks=new Map(),inputs=new Set(),unresolved=[],records=[];
-  const submodules=new Set(builds.flatMap(build=>build.submodules||[])),initialized=[...submodules,...metadata];
+  const submodules=new Set(builds.flatMap(build=>build.submodules||[])),initialized=[...submodules],readsApp=appProfile&&(project.producer.entries||[]).includes(APP_SOURCE);
+  // A declared app file that is a symlink into one of the app's gitlinks is that gitlink's file at the commit the app records; the build initializes that gitlink.
+  const nested=new Map(readsApp&&project.producer.appEntries?.length?appNestedFiles(project.producer.appEntries,root).map(row=>[row.file,row]):[]);
   const problem=(file,expression,reason,detail)=>unresolved.push({file,expression,reason,...(detail?{problem:detail}:{})});
   // A pin reads only the commit a Gitlink records; a file inside a Gitlink needs its checkout, which the build initializes only when declared.
   const useLink=(relative,from,checkout=false)=>{const link=linkOf(relative);if(!link)return null;usedLinks.set(link.path,link);if(checkout&&!initialized.some(name=>name===relative||relative.startsWith(name+"/")||name.startsWith(relative+"/")))problem(from,relative,"submodule","The build reads files of a Gitlink checkout its build record does not declare.");return link;};
@@ -64,7 +65,9 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    if(relative.endsWith('.json')){const raw=JSON.parse(bytes);files.set(relative,reportDigest(normalizedJson(relative,raw)));records.push([relative,raw]);}
    else files.set(relative,sha256(bytes));
   };
-  const addApp=(relative,from)=>{if(appFiles.has(relative))return;const bytes=read(path.join(appSource.directory,relative));appFiles.set(relative,sha256(bytes));if(relative.endsWith('.json'))records.push([APP_REFERENCE+relative,JSON.parse(bytes)]);};
+  const addApp=(relative,from)=>{if(appFiles.has(relative))return;
+   const inside=nested.get(relative);if(inside){usedLinks.set(inside.gitlink,{path:inside.gitlink,revision:inside.revision});if(!fs.existsSync(path.join(root,inside.gitlink,inside.inner))){problem(from,APP_REFERENCE+relative,'submodule','The app file lies in the app gitlink '+inside.gitlink+', which is not initialized.');return;}}
+   const bytes=read(path.join(app().directory,relative));appFiles.set(relative,sha256(bytes));if(relative.endsWith('.json'))records.push([APP_REFERENCE+relative,JSON.parse(bytes)]);};
   // A declared entry is a tracked file, or a directory declaring every tracked file below it.
   function entry(name,from){
    if(typeof name!=='string'||!name){problem(from,String(name),'missing');return;}
@@ -78,9 +81,10 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   }
   function appEntry(name,from){
    const relative=posix(name);
-   if(!appSource||!relative||relative==='.'||relative.startsWith('../')||relative.startsWith('/')){problem(from,APP_REFERENCE+name,'missing');return;}
-   if(appSet.has(relative)){addApp(relative,from);return;}
-   const below=appTracked.filter(file=>file.startsWith(relative+'/'));
+   if(!appProfile||!relative||relative==='.'||relative.startsWith('../')||relative.startsWith('/')){problem(from,APP_REFERENCE+name,'missing');return;}
+   if(!readsApp){problem(from,APP_REFERENCE+name,'app','A project that reads app files declares '+APP_SOURCE+'.');return;}
+   if(app().set.has(relative)){addApp(relative,from);return;}
+   const below=app().tracked.filter(file=>file.startsWith(relative+'/'));
    if(below.length)for(const file of below)addApp(file,from);
    else problem(from,APP_REFERENCE+name,'missing');
   }
@@ -100,7 +104,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   // from the declaring JSON file's directory or one of its parents.
   function checkPin(pin,from){
    const expression=JSON.stringify(pin);let selected;
-   if(pin.file.startsWith(APP_REFERENCE)){const relative=pin.file.slice(APP_REFERENCE.length);if(!appSet.has(relative)){problem(from,expression,'missing');return;}addApp(relative,from);selected=JSON.parse(read(path.join(appSource.directory,relative)));}
+   if(pin.file.startsWith(APP_REFERENCE)){const relative=pin.file.slice(APP_REFERENCE.length);if(!readsApp){problem(from,expression,'app','A project that reads app files declares '+APP_SOURCE+'.');return;}if(!app().set.has(relative)){problem(from,expression,'missing');return;}addApp(relative,from);selected=JSON.parse(read(path.join(app().directory,relative)));}
    else{
     const candidates=[];if(from.startsWith(APP_REFERENCE)||from==='projects.json')candidates.push(posix(pin.file));else for(let directory=path.posix.dirname(from);;directory=path.posix.dirname(directory)){candidates.push(posix(path.posix.join(directory,pin.file)));if(directory==='.')break;}
     // A record inside a Gitlink checkout is pinned by that Gitlink and read from the initialized checkout.
@@ -132,7 +136,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   // Node loads a .js file by the "type" of its nearest package.json, so that file is an input too.
   const nearestPackage=(relative,has)=>{for(let directory=path.posix.dirname(relative);;directory=path.posix.dirname(directory)){const candidate=directory==='.'?'package.json':directory+'/package.json';if(has(candidate))return candidate;if(directory==='.')return null;}};
   for(const relative of [...files.keys()])if(relative.endsWith('.js')){const found=nearestPackage(relative,isFile);if(found)addFile(found,'node');}
-  for(const relative of [...appFiles.keys()])if(relative.endsWith('.js')){const found=nearestPackage(relative,name=>appSet.has(name));if(found)addApp(found,'node');}
+  for(const relative of [...appFiles.keys()])if(relative.endsWith('.js')){const found=nearestPackage(relative,name=>app().set.has(name));if(found)addApp(found,'node');}
   const sources=project.upstreams.map(upstream=>{
    // A gitlink pin is the upstream's own commit; a record inside a checkout is read through its pointer.
    const link=upstream.pin?.gitlink&&linkOf(upstream.pin.gitlink);

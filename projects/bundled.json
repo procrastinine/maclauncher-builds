@@ -262,6 +262,7 @@
         "lib/abort.cjs",
         "lib/licenses.mjs",
         "producers/dependencies.json",
+        "producers/package-support/app-source.json",
         "producers/package-support/scripts/build-graphics-runtime.mjs",
         "producers/package-support/scripts/graphics-build-requirements.txt",
         "producers/package-support/scripts/graphics-runtime.json",
@@ -932,6 +933,9 @@
       "architectures": [
         "arm64",
         "x64"
+      ],
+      "submodules": [
+        "sources/maclauncher-android"
       ],
       "rustComponents": [
         "rust-docs"

@@ -1,16 +1,5 @@
 {
   "schema": 1,
   "repository": "https://github.com/procrastinine/maclauncher",
-  "gitlink": "sources/maclauncher",
-  "sourceSubmodules": [
-    "sources/maclauncher",
-    "sources/maclauncher-android",
-    "sources/maclauncher-kosmickrisp",
-    "sources/maclauncher/src/external/maclauncher-android",
-    "sources/maclauncher/src/external/maclauncher-kosmickrisp",
-    "sources/maclauncher/src/external/maclauncher-android/sources/maclauncher",
-    "sources/maclauncher/src/external/maclauncher-kosmickrisp/sources/maclauncher",
-    "sources/maclauncher-android/sources/maclauncher",
-    "sources/maclauncher-kosmickrisp/sources/maclauncher"
-  ]
+  "gitlink": "sources/maclauncher"
 }

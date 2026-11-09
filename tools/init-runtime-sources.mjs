@@ -5,18 +5,22 @@ import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {createRequire} from 'node:module';
 import {retryNetwork} from './download.mjs';
+import {appNestedFiles} from './app-source.mjs';
 const root=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url);
-// This tool runs before any source exists, so it loads the project registry, which reads the app source, only after preparing it.
+// This tool runs before any source exists; the project registry it reads names no file inside a source.
 /** Initialize only declared Gitlink paths, including nested production sources. */
 const runGit=(args,cwd)=>execFileSync('git',args,{cwd,encoding:'utf8',stdio:['ignore','pipe','pipe'],maxBuffer:Infinity});
 const appSource=directory=>JSON.parse(fs.readFileSync(path.join(directory,'producers/package-support/app-source.json'),'utf8'));
-/** Sources every repository tool reads: the pinned app source. */
+/** Sources the publication and index tools read: the pinned app source. */
 const toolPaths=directory=>[appSource(directory).gitlink];
-/** Sources the planner reads for pin metadata. */
-const metadataPaths=directory=>appSource(directory).sourceSubmodules;
+const APP_SOURCE='producers/package-support/app-source.json';
+/** Only a project that declares app-source.json reads the app. */
+const readsApp=project=>(project.producer?.entries||[]).includes(APP_SOURCE);
+/** A declared app file that is a symlink into one of the app's own gitlinks is that gitlink's
+ * file at the commit the app records, so the gitlink is a source of the project declaring it. */
+const nestedAppPaths=(projects,directory)=>{const entries=projects.flatMap(project=>project.producer?.appEntries||[]);return entries.length?[...new Set(appNestedFiles(entries,directory).map(row=>row.gitlink))]:[];};
 const gitlinks=(directory,run)=>String(run(['ls-files','--stage'],directory)).split('\n').flatMap(line=>{const match=line.match(/^160000 [a-f0-9]{40} 0\t(.+)$/);return match?[match[1]]:[];});
-/** Sources npm test reads: the planner's sources and every pinned source repository. */
-const checkPaths=(directory,run)=>[...metadataPaths(directory),...gitlinks(directory,run).filter(link=>/^sources\/[^/]+$/.test(link))];
+const registry=directory=>require('../lib/projects.mjs').readProjects(directory,{resolvePins:false}).projects;
 function initializeGitlinks({paths,directory,run,allowRecursive=false,done=new Set()}){
  const initialized=[];
  for(const selected of paths){
@@ -44,16 +48,32 @@ function initializeGitlinks({paths,directory,run,allowRecursive=false,done=new S
  return initialized;
 }
 export function initializeToolSources({directory=root,run=runGit}={}){return initializeGitlinks({paths:toolPaths(directory),directory,run});}
-export function initializeMetadataSources({directory=root,run=runGit}={}){return initializeGitlinks({paths:metadataPaths(directory),directory,run});}
-export function initializeCheckSources({directory=root,run=runGit}={}){return initializeGitlinks({paths:checkPaths(directory,run),directory,run});}
-export function initializeSources({project:id,version,directory=root,run=runGit}){
- initializeGitlinks({paths:toolPaths(directory),directory,run});
- const {resolveProject,buildRecord}=require('../lib/projects.mjs'),project=resolveProject(id,directory,{resolvePins:false}),build=buildRecord(project,version);
- // Recursion applies only to the build's own sources; the shared source owners are never recursive.
- const done=new Set();
- return {project:id,version:build.version,initialized:[...initializeGitlinks({paths:metadataPaths(directory),directory,run,done}),...initializeGitlinks({paths:build.submodules||[],directory,run,allowRecursive:build.recursiveSubmodules===true,done})]};
+/** Sources the planner reads to describe every package: each gitlink holding a file a project
+ * names by path (an entry or a source record file), and the app with its declared nested gitlinks
+ * when any project reads the app. */
+export function initializeMetadataSources({directory=root,run=runGit,done=new Set()}={}){
+ const projects=registry(directory),links=gitlinks(directory,run),appProjects=projects.filter(readsApp);
+ const named=projects.flatMap(project=>[...(project.producer?.entries||[]),...(project.upstreams||[]).flatMap(upstream=>typeof upstream.pin?.file==='string'?[upstream.pin.file]:[])]);
+ const holding=links.filter(link=>named.some(name=>name.startsWith(link+'/')));
+ const initialized=initializeGitlinks({paths:[...(appProjects.length?toolPaths(directory):[]),...holding],directory,run,done});
+ return [...initialized,...initializeGitlinks({paths:nestedAppPaths(appProjects,directory),directory,run,done})];
 }
-/** The one source preparation entry for every job: no arguments for the tool
- * sources, --metadata for planning, --checks for npm test, or one build. */
+/** Sources npm test reads: the planner's sources and every pinned source repository. */
+export function initializeCheckSources({directory=root,run=runGit}={}){
+ const done=new Set();
+ return [...initializeMetadataSources({directory,run,done}),...initializeGitlinks({paths:gitlinks(directory,run).filter(link=>/^sources\/[^/]+$/.test(link)),directory,run,done})];
+}
+/** One build initializes only its declared sources: its build submodules and, when it declares
+ * app-source.json, the app and the app gitlinks its declared app files lie in. */
+export function initializeSources({project:id,version,directory=root,run=runGit}){
+ const {resolveProject,buildRecord}=require('../lib/projects.mjs'),project=resolveProject(id,directory,{resolvePins:false}),build=buildRecord(project,version);
+ // Recursion applies only to the build's own sources; the app and its gitlinks are never recursive.
+ const done=new Set(),app=readsApp(project)?[...initializeGitlinks({paths:toolPaths(directory),directory,run,done})]:[];
+ if(readsApp(project))app.push(...initializeGitlinks({paths:nestedAppPaths([project],directory),directory,run,done}));
+ return {project:id,version:build.version,initialized:[...app,...initializeGitlinks({paths:build.submodules||[],directory,run,allowRecursive:build.recursiveSubmodules===true,done})]};
+}
+/** The one source preparation entry for every job: no arguments for the
+ * publication and index tools, --metadata for planning, --checks for npm test,
+ * or --project (and --version) for one build. */
 export function main(args){if(!args.length)return initializeToolSources();if(args.length===1&&args[0]==='--metadata')return initializeMetadataSources();if(args.length===1&&args[0]==='--checks')return initializeCheckSources();const options={};for(let i=0;i<args.length;i+=2){const key=args[i]?.slice(2);if(!['project','version'].includes(key)||!args[i+1]||Object.hasOwn(options,key))throw Error('Use --project and --version.');options[key]=args[i+1];}return initializeSources(options);}
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url)try{console.log(JSON.stringify(main(process.argv.slice(2))));}catch(error){console.error(error.message);process.exitCode=1;}

@@ -23,11 +23,26 @@ test('Android recipes initialize the producer whose metadata they read from a co
    if(args[0]==='ls-files'){const links=cwd===root?['sources/maclauncher','sources/maclauncher-android','sources/maclauncher-kosmickrisp']:cwd===appSourceRoot().directory?['src/external/maclauncher-android','src/external/maclauncher-kosmickrisp']:['sources/maclauncher'];return links.map(path=>'160000 '+'a'.repeat(40)+' 0\t'+path).join('\n')+'\n';}
    return '';
   }});
-  const declared=JSON.parse(fs.readFileSync(path.join(root,'producers/package-support/app-source.json'))).sourceSubmodules;
-  assert.deepEqual(result.initialized,declared.map(path=>({path,recursive:false})),project);
+  const build=buildRecord(readProjects(root,{resolvePins:false}).projects.find(row=>row.id===project));
+  assert.deepEqual(result.initialized,build.submodules.map(path=>({path,recursive:false})),project);
+  assert.ok(!commands.some(({args})=>args.at(-1)==='sources/maclauncher'),'A build that declares no app file never initializes the app');
   assert.ok(commands.every(({args})=>!args.includes('--recursive')),'Shared source owners do not initialize unrelated upstream trees');
   assert.ok(commands.some(({args})=>args[0]==='submodule'&&args.includes('--init')&&args.at(-1)==='sources/maclauncher-android'),project);
  }
+});
+
+test('only a build that declares app-source.json initializes the app, with the app gitlinks its app files lie in',()=>{
+ const fake=(cwd,links)=>links.map(path=>'160000 '+'a'.repeat(40)+' 0\t'+path).join('\n');
+ const initialize=project=>initializeSources({project,directory:root,run:(args,cwd)=>{
+  if(args[0]!=='ls-files')return '';
+  if(cwd===root)return fake(cwd,['sources/maclauncher','sources/maclauncher-android',...readProjects(root,{resolvePins:false}).projects.flatMap(row=>[].concat(row.build||[]).flatMap(build=>build.submodules||[]))]);
+  return cwd===appSourceRoot().directory?fake(cwd,['src/external/maclauncher-android','src/external/maclauncher-kosmickrisp']):'';
+ }}).initialized.map(row=>row.path);
+ const mpv=initialize('mpv');
+ assert.ok(mpv.includes('sources/maclauncher'));
+ assert.ok(mpv.includes('sources/maclauncher/src/external/maclauncher-kosmickrisp'),'image-color.h is a symlink into the app KosmicKrisp gitlink');
+ assert.ok(!mpv.includes('sources/maclauncher/src/external/maclauncher-android'));
+ assert.ok(!initialize('innoextract').some(path=>path==='sources/maclauncher'||path.startsWith('sources/maclauncher/')));
 });
 
 test('a recursive build recurses into its own sources and never into the shared source owners',()=>{

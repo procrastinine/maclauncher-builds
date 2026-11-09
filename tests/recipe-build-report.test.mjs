@@ -60,6 +60,12 @@ test('an upstream pinned by a record inside a checkout takes the record commit, 
  assert.equal(source.revision,'3'.repeat(40));assert.notEqual(source.gitlink,checkout);
 });
 
+test('an app entry without the app source profile is unresolved',t=>{
+ const recipe=project('recipe','tools/recipe.cjs');recipe.producer.appEntries=['src/app.js'];
+ const f=fixture(t,{'tools/recipe.cjs':'module.exports = {};\n'},[recipe]);
+ assert.deepEqual(createRecipeBuildReporter({directory:f.directory}).unresolved('recipe').map(row=>row.expression),['app:src/app.js']);
+});
+
 test('declared records and pins are validated once, by the resolver',t=>{
  const recipe=project('recipe','tools/recipe.cjs');recipe.producer.entries.push('tools/source.json');
  recipe.upstreams=[{id:'engine',provider:'github',url:'https://github.com/owner/engine',repository:'owner/engine',revision:'1'.repeat(40),pin:{file:'tools/source.json',pointer:'/engine'}}];
@@ -89,6 +95,15 @@ test('the shared build action and the tools it runs are declared build code',t=>
  const report=()=>createRecipeBuildReporter({directory:f.directory})('recipe');const before=report();
  assert.deepEqual(paths(before),['.github/actions/build-runtime/action.yml','.github/actions/network/action.yml','tools/download.mjs','tools/network-action.cjs','tools/package.mjs','tools/recipe.cjs']);
  f.write('tools/package.mjs','export const pack = 2;');assert.notEqual(report().definitionDigest,before.definitionDigest);
+});
+
+test('only a definition that declares app-source.json carries the app pin and its declared app gitlinks',async()=>{
+ const directory=path.resolve(import.meta.dirname,'..'),{readProjects}=await import('../lib/projects.mjs'),describe=createRecipeBuildReporter({directory});
+ for(const project of readProjects(directory,{resolvePins:false}).projects.filter(project=>project.build)){
+  const links=describe(project.id).definition.gitlinks.map(link=>link.path),declares=(project.producer.entries||[]).includes('producers/package-support/app-source.json');
+  assert.equal(links.includes('sources/maclauncher'),declares,project.id);
+  if(!declares)assert.ok(!links.some(link=>link.startsWith('sources/maclauncher/')),project.id);
+ }
 });
 
 test('every production definition excludes publication, catalog and planning files',async()=>{
