@@ -44,7 +44,6 @@
         "tools/build-android-java-framework.mjs"
       ],
       "appEntries": [
-        "scripts/license-files.mjs",
         "scripts/runtime-content.cjs"
       ]
     },
@@ -265,10 +264,7 @@
         "runtimes/android",
         "tools/build-android-angle.mjs"
       ],
-      "sourceDirectory": "producers/package-support",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -371,10 +367,7 @@
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.js",
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.json"
       ],
-      "sourceDirectory": "producers/package-support",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -441,10 +434,7 @@
         "producers/package-support/src/modules/fna",
         "producers/package-support/src/modules/shared/runtime/native-build-tools.js"
       ],
-      "sourceDirectory": "producers/package-support",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -524,10 +514,7 @@
         "producers/package-support/src/modules/shared/onsyuri",
         "producers/package-support/src/modules/shared/runtime"
       ],
-      "sourceDirectory": "producers/package-support",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -602,10 +589,7 @@
         "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/decompiler-workspace.patch",
         "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/source-build.js"
       ],
-      "sourceDirectory": "producers/package-support",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -666,10 +650,7 @@
         "producers/package-support/src/modules/hashlink/runtime/dynamic-legacy-build.js",
         "producers/package-support/src/modules/hashlink/runtime/legacy-build.js"
       ],
-      "sourceDirectory": "producers/package-support",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -817,7 +798,6 @@
       ],
       "sourceDirectory": "producers/package-support",
       "appEntries": [
-        "scripts/license-files.mjs",
         "src/modules/mages/archive.js",
         "src/modules/mages/inspect.js",
         "src/modules/mages/manifest.json",
@@ -891,10 +871,7 @@
         "producers/package-support/src/modules/shared/installers/native/static-dependencies.cmake",
         "producers/package-support/src/modules/shared/installers/runtime/innoextract-build.js"
       ],
-      "sourceDirectory": "producers/package-support",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -986,9 +963,6 @@
         "producers/vn-adaptations/kag3-polyfill/FONT_LICENSE.txt",
         "producers/vn-adaptations/kag3-polyfill/manifest.json",
         "producers/vn-adaptations/source.json"
-      ],
-      "appEntries": [
-        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -1080,7 +1054,6 @@
       ],
       "sourceDirectory": "producers/package-support",
       "appEntries": [
-        "scripts/license-files.mjs",
         "src/modules/nitroplus/runtime"
       ]
     },
@@ -1145,7 +1118,6 @@
       ],
       "sourceDirectory": "producers/package-support",
       "appEntries": [
-        "scripts/license-files.mjs",
         "src/modules/nscripter/runtime"
       ]
     },
@@ -1229,10 +1201,7 @@
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.js",
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.json"
       ],
-      "sourceDirectory": "producers/package-support",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -1303,10 +1272,7 @@
         "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/decompiler-workspace.patch",
         "producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/source-build.js"
       ],
-      "sourceDirectory": "producers/package-support",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -1364,7 +1330,6 @@
       ],
       "sourceDirectory": "producers/package-support",
       "appEntries": [
-        "scripts/license-files.mjs",
         "src/modules/minori/runtime"
       ]
     },
@@ -1433,10 +1398,7 @@
         "producers/package-support/src/modules/alicesoft/decompiler-profiles.json",
         "producers/package-support/src/modules/alicesoft/overlays/decompiler-cmake-v1.cmake"
       ],
-      "sourceDirectory": "producers/package-support",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -1506,10 +1468,7 @@
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json"
       ],
-      "sourceDirectory": "producers/package-support",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -1639,10 +1598,7 @@
         "producers/package-support/src/modules/alicesoft/decompiler-profiles.json",
         "producers/package-support/src/modules/alicesoft/overlays/decompiler-cmake-v1.cmake"
       ],
-      "sourceDirectory": "producers/package-support",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -1733,10 +1689,7 @@
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.js",
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.json"
       ],
-      "sourceDirectory": "producers/package-support",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -1831,10 +1784,7 @@
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.js",
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.json"
       ],
-      "sourceDirectory": "producers/package-support",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -1919,7 +1869,6 @@
       ],
       "sourceDirectory": "producers/package-support",
       "appEntries": [
-        "scripts/license-files.mjs",
         "scripts/native-supplementals.cjs"
       ]
     },
@@ -2035,7 +1984,6 @@
       ],
       "sourceDirectory": "producers/package-support",
       "appEntries": [
-        "scripts/license-files.mjs",
         "scripts/runtime-content.cjs"
       ]
     },
@@ -2115,7 +2063,6 @@
       ],
       "sourceDirectory": "producers/package-support",
       "appEntries": [
-        "scripts/license-files.mjs",
         "src/modules/gamemaker/runtime/butterscotch-downloads.js",
         "src/modules/gamemaker/runtime/butterscotch.js"
       ]
@@ -2205,10 +2152,7 @@
         "producers/anyps5/tools/unwrap-self.cjs",
         "producers/nxnative/dependencies.json"
       ],
-      "buildEntry": "producers/anyps5/package-runtime.mjs",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "buildEntry": "producers/anyps5/package-runtime.mjs"
     },
     "upstreams": [
       {
@@ -2291,10 +2235,7 @@
       "entries": [
         "producers/nxnative"
       ],
-      "buildEntry": "producers/nxnative/build.mjs",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "buildEntry": "producers/nxnative/build.mjs"
     },
     "upstreams": [
       {
@@ -2362,7 +2303,6 @@
         "producers/mpv-render"
       ],
       "appEntries": [
-        "scripts/license-files.mjs",
         "src/modules/shared/reshade/native"
       ]
     },
@@ -2440,10 +2380,7 @@
         "producers/prosper",
         "tools/build-vulkan-moltenvk-scene.mjs"
       ],
-      "buildEntry": "producers/prosper/build.mjs",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "buildEntry": "producers/prosper/build.mjs"
     },
     "upstreams": [
       {
@@ -2718,9 +2655,6 @@
         "producers/included-helpers/rpgmaker-decrypter/decrypter-build.targets",
         "producers/included-helpers/rpgmaker-decrypter/decrypter-platforms.json",
         "producers/included-helpers/rpgmaker-decrypter/package.json"
-      ],
-      "appEntries": [
-        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -2774,9 +2708,6 @@
         "producers/included-helpers/gamemaker-opengl-helper",
         "producers/included-helpers/prepare.mjs",
         "producers/included-helpers/profiles/gamemaker-opengl-helper.json"
-      ],
-      "appEntries": [
-        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [],
@@ -2817,9 +2748,6 @@
       "entries": [
         "producers/engine-adaptations/stage.mjs",
         "producers/engine-adaptations/vnds-love/source.json"
-      ],
-      "appEntries": [
-        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -2875,9 +2803,6 @@
         "producers/vn-adaptations/rlvm/adapter.m",
         "producers/vn-adaptations/rlvm/package.mjs",
         "producers/vn-adaptations/rlvm/source.json"
-      ],
-      "appEntries": [
-        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [],
@@ -2918,9 +2843,6 @@
       "entries": [
         "producers/vn-adaptations/kag3-polyfill/manifest.json",
         "producers/vn-adaptations/siglus"
-      ],
-      "appEntries": [
-        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -2988,9 +2910,6 @@
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.json"
-      ],
-      "appEntries": [
-        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -3045,9 +2964,6 @@
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.json"
-      ],
-      "appEntries": [
-        "scripts/license-files.mjs"
       ]
     },
     "upstreams": [
@@ -3149,10 +3065,7 @@
         "producers/steam-bridge"
       ],
       "sourceDirectory": "producers/steam-bridge",
-      "sourceRepository": "https://github.com/ValveSoftware/Proton",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "sourceRepository": "https://github.com/ValveSoftware/Proton"
     },
     "upstreams": [
       {
@@ -3238,10 +3151,7 @@
         "producers/vkd3d-proton/vk_temporal_frame.h",
         "producers/vkd3d-proton/vkd3d_metalfx.h"
       ],
-      "buildEntry": "producers/vkd3d-proton/build.mjs",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "buildEntry": "producers/vkd3d-proton/build.mjs"
     },
     "upstreams": [
       {
@@ -3302,10 +3212,7 @@
         "producers/package-support/src/modules/shared/vulkan/native/spirv-tools-source.json",
         "producers/package-support/src/modules/shared/vulkan/native/zstd-source.json"
       ],
-      "sourceDirectory": "producers/kosmickrisp",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "sourceDirectory": "producers/kosmickrisp"
     },
     "upstreams": [
       {
@@ -3388,10 +3295,7 @@
         "producers/dxvk/package.mjs",
         "producers/dxvk/patch.mjs"
       ],
-      "buildEntry": "producers/dxvk/build.mjs",
-      "appEntries": [
-        "scripts/license-files.mjs"
-      ]
+      "buildEntry": "producers/dxvk/build.mjs"
     },
     "upstreams": [
       {
