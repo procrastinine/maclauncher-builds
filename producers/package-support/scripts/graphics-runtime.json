@@ -196,7 +196,7 @@
         "file": "app:src/modules/shared/reshade/temporal/fsr4/source.json",
         "pointer": "/lite2"
       },
-      "url": "{repository}/raw/{commit}/{path}",
+      "url": "{repository}/raw/{revision}/{path}",
       "sha256": "{sha256}"
     },
     "streamline-reference": {
@@ -273,9 +273,9 @@
         "file": "src/modules/shared/reshade/isf/source.json",
         "pointer": "/compilerSources/0"
       },
-      "url": "{repository}/archive/{commit}.tar.gz",
+      "url": "{repository}/archive/{revision}.tar.gz",
       "sha256": "{sha256}",
-      "entry": "glslang-{commit}"
+      "entry": "glslang-{revision}"
     },
     "isf-spirv-cross": {
       "kind": "archive",
@@ -284,9 +284,9 @@
         "file": "src/modules/shared/reshade/isf/source.json",
         "pointer": "/compilerSources/1"
       },
-      "url": "{repository}/archive/{commit}.tar.gz",
+      "url": "{repository}/archive/{revision}.tar.gz",
       "sha256": "{sha256}",
-      "entry": "SPIRV-Cross-{commit}"
+      "entry": "SPIRV-Cross-{revision}"
     },
     "isf-spirv-tools": {
       "kind": "archive",
