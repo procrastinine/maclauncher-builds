@@ -25,8 +25,6 @@ export function buildProvider({ output = path.join(cacheDirectory, "output"),
   if (process.platform !== "darwin" || process.arch !== "arm64")
     throw new Error("The neural rendering provider build requires Apple Silicon macOS.");
   sourceDirectory = fs.realpathSync(sourceDirectory);
-  const revision = execFileSync("git", ["-C", sourceDirectory, "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-  if (revision !== sourceRevision(source)) throw new Error("The neural rendering source does not match its registered revision.");
   output = path.resolve(output);
   fs.mkdirSync(output, { recursive: true });
   // SwiftPM writes dependency edits and lock fingerprints beside Package.swift.

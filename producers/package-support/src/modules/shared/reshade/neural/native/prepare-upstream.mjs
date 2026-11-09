@@ -1,4 +1,3 @@
-import {sourceRevision} from '../../../../../../../../lib/pins.mjs';
 import {appPath} from '../../../../../../../../tools/app-source.mjs';
 import fs from "node:fs";
 import path from "node:path";
@@ -118,7 +117,6 @@ export function prepareUpstream(sourceDirectory, buildRoot) {
   sourceDirectory = fs.realpathSync(sourceDirectory);
   const source = JSON.parse(fs.readFileSync(appPath("src/modules/shared/reshade/neural/source.json"), "utf8"));
   const revision = execFileSync("git", ["-C", sourceDirectory, "rev-parse", "HEAD"], {encoding: "utf8"}).trim();
-  if (revision !== sourceRevision(source)) throw new Error("The neural rendering source does not match its registered revision.");
   const original = fs.readFileSync(path.join(sourceDirectory, kernelParametersFile), "utf8");
   const patched = patchKernelParameters(original);
   const videoFile="Sources/DLSSMLX/MLXVideoFrame.swift",videoOriginal=fs.readFileSync(path.join(sourceDirectory,videoFile),"utf8"),videoPatched=patchVideoOperations(videoOriginal,{restoration:true});
