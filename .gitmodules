@@ -173,18 +173,6 @@
 	path = producers/package-support/src/external/ReMinori
 	url = https://github.com/luoyily/ReMinori
 
-[submodule "producers/package-support/src/external/reshade-crt-royale"]
-	path = producers/package-support/src/external/reshade-crt-royale
-	url = https://github.com/akgunter/crt-royale-reshade.git
-
-[submodule "producers/package-support/src/external/reshade-retroarch"]
-	path = producers/package-support/src/external/reshade-retroarch
-	url = https://github.com/Matsilagi/RSRetroArch
-
-[submodule "producers/package-support/src/external/reshade-sweetfx"]
-	path = producers/package-support/src/external/reshade-sweetfx
-	url = https://github.com/CeeJayDK/SweetFX
-
 
 [submodule "producers/package-support/src/external/sgsr2"]
 	path = producers/package-support/src/external/sgsr2

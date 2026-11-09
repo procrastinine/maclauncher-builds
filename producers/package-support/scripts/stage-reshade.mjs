@@ -19,7 +19,7 @@ import {stageLibplaceboScene} from "./stage-libplacebo-scene.mjs";
 import {stageStreamlineSnapshots} from "./stage-streamline-snapshots.mjs";
 import {ALIAS_INDEX,aliasIndex,deduplicate,resolvedPrefixes} from "./payload-aliases.mjs";
 const features = JSON.parse(fs.readFileSync(appPath("src/modules/shared/reshade/features.json"), "utf8"));
-const effectSources = JSON.parse(fs.readFileSync(appPath("src/modules/shared/reshade/effect-sources.json"), "utf8"));
+const effectSources = appRequire("scripts/reshade-effect-sources.mjs").resolveEffectSources();
 
 const args = process.argv.slice(2), source = args.shift();
 if (!source) throw new Error("A ReShade macOS source directory is required.");

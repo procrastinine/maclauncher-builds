@@ -181,8 +181,8 @@
       "kind": "file",
       "description": "FSR 4 Lite 2 trained weights",
       "pin": {
-        "file": "app:src/modules/shared/reshade/temporal/fsr4/source.json",
-        "pointer": "/lite2"
+        "file": "src/modules/shared/reshade/temporal/fsr4/lite2.json",
+        "pointer": ""
       },
       "url": "{repository}/raw/{revision}/{path}",
       "sha256": "{sha256}"

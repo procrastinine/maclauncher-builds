@@ -5,8 +5,9 @@ import path from "node:path";
 const safe=name=>typeof name==="string"&&!path.isAbsolute(name)&&!name.split(/[\\/]/).some(part=>!part||part==="."||part==="..");
 const module="src/modules/shared/reshade/temporal/fsr4";
 export function stageFSR4Provider({directory,upstream}){
+  const lite2=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,"../src/modules/shared/reshade/temporal/fsr4/lite2.json"),"utf8"));
   const revision=sourceRevision({gitlink:'producers/package-support/src/external/fsr4-metal'});
-  const spec=JSON.parse(fs.readFileSync(moduleFile(module+"/source.json"))),metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json")));
+  const metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json")));
   const files=new Map();
   for(const row of metadata.files){
     if(!safe(row.path)||row.path==="provider.json")throw Error("Invalid FSR 4 runtime inventory.");
@@ -22,5 +23,5 @@ export function stageFSR4Provider({directory,upstream}){
   files.set("provider.json",path.join(directory,"provider.json"));
   return {files:new Map([...files].map(([name,file])=>["temporal/fsr4/"+name,file])),owned,profiles:[...metadata.supportedProfiles],
     source:{directory:upstream,relative:"third_party/fsr4-native-macos",commit:revision},
-    pins:[` ${revision} third_party/fsr4-native-macos`,` ${sourceRevision(spec.lite2)} third_party/fsr4-lite2-weights`,...['fsr4-sdk-headers','fsr4-sdk-model','fsr4-int8'].map((name,index)=>` ${sourceRevision({gitlink:'producers/package-support/src/external/'+name})} third_party/fsr4-input-${index+1}`)]};
+    pins:[` ${revision} third_party/fsr4-native-macos`,` ${sourceRevision(lite2)} third_party/fsr4-lite2-weights`,...['fsr4-sdk-headers','fsr4-sdk-model','fsr4-int8'].map((name,index)=>` ${sourceRevision({gitlink:'producers/package-support/src/external/'+name})} third_party/fsr4-input-${index+1}`)]};
 }

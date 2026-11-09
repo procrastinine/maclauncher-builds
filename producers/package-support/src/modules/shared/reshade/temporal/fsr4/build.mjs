@@ -13,6 +13,7 @@ const here = import.meta.dirname, app = appPath('src/modules/shared/reshade/temp
       owner = name => path.join(name === 'build.mjs' ? here : app, name),
       {adaptHelpers, adaptRuntime} = await import(pathToFileURL(path.join(app, 'adapt-runtime.mjs')).href),
       pin = JSON.parse(await fs.readFile(path.join(app, 'source.json'))),
+      lite2 = JSON.parse(await fs.readFile(path.join(here, 'lite2.json'))),
       [ sourceArg, destinationArg, ...flags ] = process.argv.slice(2);
 if (!sourceArg || !destinationArg)
   throw Error(
@@ -57,7 +58,7 @@ const hash = b => createHash('sha256').update(b).digest('hex'),
                              ? resolve()
                              : reject(Error(command + ' exited ' + code)));
       });
-for (const [option, digest] of [[ '--lite2-weights', pin.lite2.sha256 ]])
+for (const [option, digest] of [[ '--lite2-weights', lite2.sha256 ]])
   if (hash(await fs.readFile(options[option])) !== digest)
     throw Error('The pinned Lite2 input changed: ' + option);
 const work = path.join(destination, 'source'),
@@ -317,10 +318,10 @@ await fs.writeFile(path.join(payload, 'provider.json'), JSON.stringify({
   sourceInputs : [ {
     path : 'source-inputs/weights_lossy2.npz',
     size : (await fs.stat(options['--lite2-weights'])).size,
-    sha256 : pin.lite2.sha256,
-    repository : pin.lite2.repository,
-    commit : sourceRevision(pin.lite2),
-    sourceUrl : pin.lite2.repository + '/tree/' + sourceRevision(pin.lite2)
+    sha256 : lite2.sha256,
+    repository : lite2.repository,
+    commit : sourceRevision(lite2),
+    sourceUrl : lite2.repository + '/tree/' + sourceRevision(lite2)
   } ],
   owned,
   tools,
