@@ -56,7 +56,7 @@ export function buildProvider({ output = path.join(cacheDirectory, "output"),
     return { path: relative, size: stat.size, sha256: sha256(file),
       ...([source.library,"maclauncher-neural-service","maclauncher-neural-video"].includes(relative)?{architectures:["arm64"],minimumMacOS:relative==="maclauncher-neural-video"?"26.0":source.minimumMacOS,optionalLoad:true}:{}) };
   });
-  const descriptor = { providerABI: source.providerABI, commit: sourceRevision(source), library: source.library,
+  const descriptor = { providerABI: source.providerABI, commit: sourceRevision({gitlink:'producers/package-support/src/external/MLX-DLSS'}), library: source.library,
     minimumMacOS: source.minimumMacOS, architectures: ["arm64"],supportedABIs:[1,2,3],
     operations:["mlx-dlss","mlx-vsr","mlx-sr-image","mlx-sr-scene","mlx-interpolation","realesrgan","nafnet","realcugan","rife","depth-anything-v2-small"],restorationAPI:1,estimatedDepthAPI:1,gpuTimingAPI:1,
     modelArchitectures:Object.fromEntries([...new Set(Object.values(restorationArchitectures).map(row=>row.method))].map(method=>[method,Object.keys(restorationArchitectures).filter(id=>restorationArchitectures[id].method===method)])),
