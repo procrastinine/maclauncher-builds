@@ -1052,7 +1052,7 @@
         "lib/abort.cjs",
         "lib/licenses.mjs",
         "producers/package-support/src/modules/kirikiri/native-compat.js",
-        "producers/package-support/src/modules/kirikiri/overlays/macos-compat.h",
+        "producers/package-support/src/modules/kirikiri/overlays",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "producers/vn-adaptations/kag3-polyfill/FONT_LICENSE.txt",
         "producers/vn-adaptations/kag3-polyfill/manifest.json",
