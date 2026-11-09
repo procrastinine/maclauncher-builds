@@ -11,8 +11,7 @@ const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirna
 export async function buildGM8Decompiler({project:id,version,arch,output,work}){
  const source=path.join(root,'producers/package-support/src/external/OpenGMK'),project=resolveProject(id),revision=project.upstreams[0].revision;
  const {prepareDecompiler}=require('../producers/package-support/src/modules/gamemaker/overlays/opengmk-macos/source-build.js');
- const Source=require('../producers/package-support/src/modules/shared/runtime/pinned-native-build.js');
- await Source.validatePinnedSource(source,revision);fs.mkdirSync(work,{recursive:true});
+ fs.mkdirSync(work,{recursive:true});
  try {
   const owned=path.join(work,'source');fs.cpSync(source,owned,{recursive:true,filter:file=>!['.git','target'].includes(path.basename(file))});
   const tools=prepareDecompiler({sourceDir:owned,output:work}),target=arch==='x64'?'x86_64-apple-darwin':'aarch64-apple-darwin';

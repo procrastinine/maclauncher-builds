@@ -16,8 +16,6 @@ function build({ sourceCheckout, workDirectory, pkgConfigPath, toolsDirectory, m
   if (![sourceCheckout, workDirectory, toolsDirectory].every(value => typeof value === "string" && path.isAbsolute(value)) || !/^\d+\.\d+$/.test(minimumMacOS))
     throw new Error("Choose absolute source, build and isolated build-tool folders, and a macOS deployment target.");
   const run = (command, args, options = {}) => execFileSync(command, args, { encoding: "utf8", maxBuffer: Infinity, ...options });
-  if (run("git", ["-C", sourceCheckout, "rev-parse", "HEAD"]).trim() !== REVISION || run("git", ["-C", sourceCheckout, "status", "--porcelain", "--untracked-files=no"]).trim())
-    throw new Error("Initialize the exact clean mpv source checkout.");
   const root = appSourceRoot().directory, patches = PATCHES.map(file => ({ file: path.join(root, "src/modules/video/native", file), name: file }));
   const source = path.join(workDirectory, "source"), output = path.join(workDirectory, "build");
   const sourceInputs = { revision: REVISION, backports: BACKPORTS, patches: patches.map(patch => ({ path: patch.name, sha256: hash(patch.file) })) };

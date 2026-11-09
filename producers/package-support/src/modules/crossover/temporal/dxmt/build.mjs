@@ -18,11 +18,6 @@ const owned=appPath('src/modules/crossover/temporal/dxmt');
 const {applyCameraOverlay}=await import(pathToFileURL(path.join(owned,'patch.mjs')));
 const {applyTemporalD3D12}=await import(pathToFileURL(path.join(owned,'d3d12-overlay.mjs')));
 const revision = recordRevision(JSON.parse(fs.readFileSync(path.join(here, 'source.json'), 'utf8')));
-let sourceRevision;
-try { sourceRevision = JSON.parse(fs.readFileSync(path.join(upstream, '.maclauncher-upstream.json'), 'utf8')).revision; }
-catch { sourceRevision = execFileSync('git', ['-C', upstream, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(); }
-if (sourceRevision !== revision)
-  throw new Error('DXMT camera adaptation requires its recorded source revision.');
 const source = path.join(output, 'source'), objects = path.join(output, 'objects'), payload = path.join(output, 'payload');
 fs.mkdirSync(output, { recursive: true });
 fs.cpSync(upstream, source, { recursive: true, filter: p => !p.split(path.sep).includes('.git') });

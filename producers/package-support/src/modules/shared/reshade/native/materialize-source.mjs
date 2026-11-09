@@ -31,7 +31,6 @@ export function materializeSource({output,sources={},baseOnly=false}){
    const file=path.join(output,entry.path);fs.mkdirSync(path.dirname(file),{recursive:true});fs.copyFileSync(recipePath(root,entry.source),file);
   }
   copyPinnedReShadeSources('',output,new Set(processor.sources.map(entry=>entry.sourcePath)),directories);
-  const libra=JSON.parse(fs.readFileSync(path.join(root,'retroarch-source.json')));
   const libraRoot=path.resolve(sources.librashader||path.join(repository,'src/external/librashader'));
   for(const name of ['include/librashader.h']){const file=path.join(output,'third_party/librashader',name);fs.mkdirSync(path.dirname(file),{recursive:true});fs.copyFileSync(path.join(libraRoot,name),file);}
   addLicenses(output,'librashader',libraRoot);

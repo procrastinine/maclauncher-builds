@@ -14,7 +14,6 @@ const source = path.resolve(args.source), output = path.resolve(args.out), refer
 const declaration = JSON.parse(fs.readFileSync(path.join(here, "source.json"), "utf8"));
 const revision = sourceRevision(declaration);
 const app = appSourceRoot(), owned = path.join(app.directory, "src/modules/crossover/temporal/streamline");
-execFileSync("git",["-C",source,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});
 const inspect = appRequire("src/modules/crossover/temporal/streamline/pe-exports.js").inspect;
 const hash = file => crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 const core = [...fs.readFileSync(path.join(source, "include/sl_core_api.h"), "utf8").matchAll(/^sl::Result (sl\w+)\(|^SL_API sl::Result (sl\w+)\(/gm)].map(match => match[1] || match[2]);

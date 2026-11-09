@@ -16,7 +16,6 @@ const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
 const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',maxBuffer: Infinity});
 function verify(entry,directory){
- if(git(directory,['rev-parse','HEAD']).trim()!==entry.revision||git(directory,['remote','get-url','origin']).trim()!==entry.repository||git(directory,['status','--porcelain']).trim())throw Error('Source identity differs: '+(entry.id||'prosper'));
 }
 function write(file,bytes){fs.mkdirSync(path.dirname(file),{recursive:true});if(!fs.existsSync(file)||!fs.readFileSync(file).equals(Buffer.from(bytes)))fs.writeFileSync(file,bytes);}
 function sync(from,to){

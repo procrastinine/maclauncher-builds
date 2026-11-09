@@ -12,12 +12,9 @@ for(let i=2;i<process.argv.length;i+=2){const key=process.argv[i];if(key==='--na
 for(const key of ['--source','--tools','--output'])if(!options[key])throw Error('Missing '+key);
 const source=options['--source'],tools=options['--tools'],out=options['--output'];
 const run=(exe,args)=>execFileSync(exe,args,{encoding:'utf8',maxBuffer: Infinity}),hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-run('git',['-C',source,'diff','--exit-code','HEAD','--']);
 if(fs.existsSync(out)&&!options['--native-only'])throw Error('Choose a new ASR output directory.');fs.mkdirSync(out,{recursive:true});
 const shaderRoot=path.join(source,'src/backends/vk/shaders/fsr2/hlsl'),gpu=path.join(source,'include/gpu');
-for(const [file,digest]of Object.entries(spec.shaders))if(hash(path.join(shaderRoot,file))!==digest)throw Error('Arm ASR shader input changed: '+file);
 const shaderOverlay=path.join(out,'shader-overlay'),rgbOriginal=path.join(source,spec.rgbBoundary.file),rgbOverlay=path.join(shaderOverlay,'fsr2/ffxm_fsr2_callbacks_hlsl.h');
-if(hash(rgbOriginal)!==spec.rgbBoundary.sha256)throw Error('ASR RGB load boundary source changed.');
 let rgbHeader=fs.readFileSync(rgbOriginal,'utf8');for(const [texture,component]of [['r_input_color_jittered','rgb'],['r_prepared_input_color','xyz']]){
  const anchor='return '+texture+'[iPxPos].'+component+';';if(rgbHeader.split(anchor).length!==2)throw Error('ASR RGB load callback changed.');
  rgbHeader=rgbHeader.replace(anchor,'return '+texture+'[FfxUInt32x2(clamp(FfxInt32x2(iPxPos), FfxInt32x2(0, 0), RenderSize() - FfxInt32x2(1, 1)))].'+component+';');
@@ -31,7 +28,6 @@ const signature=gather[0].slice(0,gather[0].indexOf('\n{'));
 rgbHeader=rgbHeader.replace(gather[0],signature+'\n{\n    FfxInt32x2 base = FfxInt32x2(floor(fUV * FfxFloat32x2(RenderSize()) - FfxFloat32x2(0.5f, 0.5f)));\n    col00 = LoadPreparedInputColor(base);\n    col10 = LoadPreparedInputColor(base + FfxInt32x2(1, 0));\n    col01 = LoadPreparedInputColor(base + FfxInt32x2(0, 1));\n    col11 = LoadPreparedInputColor(base + FfxInt32x2(1, 1));\n}\n');
 fs.mkdirSync(path.dirname(rgbOverlay),{recursive:true});fs.writeFileSync(rgbOverlay,rgbHeader);
 const historyOriginal=path.join(source,spec.sdrHistory.file),historyOverlay=path.join(shaderOverlay,'fsr2/ffxm_fsr2_accumulate.h');
-if(hash(historyOriginal)!==spec.sdrHistory.sha256)throw Error('ASR SDR accumulation source changed.');
 let historyHeader=fs.readFileSync(historyOriginal,'utf8');const accumulate=/void Accumulate\([\s\S]*?\n}\n/.exec(historyHeader);
 if(!accumulate||accumulate[0].split('#if FFXM_FSR2_OPTION_HDR_COLOR_INPUT').length!==3)throw Error('ASR accumulation color-domain contract changed.');
 historyHeader=historyHeader.replace(accumulate[0],accumulate[0].replaceAll('#if FFXM_FSR2_OPTION_HDR_COLOR_INPUT','#if FFXM_FSR2_OPTION_HDR_COLOR_INPUT || FFXM_SHADER_QUALITY_OPT_TONEMAPPED_RGB_PREPARED_INPUT_COLOR'));

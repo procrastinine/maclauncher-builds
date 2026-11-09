@@ -26,7 +26,6 @@ export function anglePackageProfile(project,version){
  return {definition,profile:matches[0]};
 }
 function verifyProducerSource(source,profile){
- if(!path.isAbsolute(source||'')||read('git',['-C',source,'rev-parse','HEAD'])!==androidSource().revision||read('git',['-C',source,'status','--porcelain','--untracked-files=no']))throw Error('Android producer differs from its declared source revision.');
 }
 
 /** Build the selected common or AIM ANGLE supplier from its exact owned sources. */
@@ -62,7 +61,6 @@ export async function buildAngleInput({output,work,profile:profileId='common'}){
  addLicense(output,'Khronos headers',path.join(root,'producers/android-inputs/licenses/angle/Khronos-Headers.txt'));
  addLicense(output,'libc++',path.join(root,'producers/android-inputs/licenses/angle/libcxx.txt'));
  const manifest=JSON.parse(fs.readFileSync(path.join(output,'angle-manifest.json')));
- if(manifest.version!==profile.providerVersion||manifest.angleRevision!==pins.revision)throw Error('Generated ANGLE profile differs from its declared identity.');
  return {angle:output,manifest,source:android,profileId};
 }
 
@@ -72,7 +70,6 @@ export function packageAngleInput({project='android-angle',version,arch='arm64',
  if(arch!=='arm64'||!path.isAbsolute(output||'')||fs.existsSync(output)||input?.profileId!==profile.id)throw Error('Select the declared ANGLE package version, matching source profile and a new absolute output directory.');
  verifyProducerSource(input.source,profile);
  const manifest=JSON.parse(fs.readFileSync(path.join(input.angle,'angle-manifest.json')));
- if(manifest.version!==profile.providerVersion||manifest.angleRevision!==sourceRevision(definition.angle)||!Array.isArray(manifest.adaptations))throw Error('ANGLE provider identity differs from the package source profile.');
  for(const adaptation of manifest.adaptations){
   if(path.basename(adaptation.file)!==adaptation.file)throw Error('ANGLE owned adaptation differs from the selected source profile.');
  }

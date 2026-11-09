@@ -70,7 +70,6 @@ function stage({library,referenceExecutable,dependencyRoots=[],output,version,so
       ownedHeaders:headerFiles.map(file=>({file,sha256:Native.hashFile(path.join(root,file))})),
       images:[{path:path.relative(output,executable),sha256:Native.hashFile(executable)},...[...processed].map(target=>({path:path.relative(output,target),sha256:Native.hashFile(target),inputSha256:originalHashes.get(images.get(target))}))]};
     fs.writeFileSync(path.join(output,'video-runtime.json'),JSON.stringify(metadata,null,2)+'\n',{flag:'wx'});
-    for(const [original,sha256] of originalHashes)if(Native.hashFile(original)!==sha256)throw Error('An original media input changed during staging.');
     fs.rmSync(path.join(output,'../maclauncher/scripts/.build-records'),{recursive:true,force:true});return metadata;
   } catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }

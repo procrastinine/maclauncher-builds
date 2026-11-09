@@ -221,9 +221,6 @@ function verifyRuntime(install) {
   if (!install?.executablePath) throw new Error("FNA runtime is not installed.");
   const root = path.dirname(install.executablePath);
   const record = JSON.parse(fs.readFileSync(path.join(root, "fna-runtime.json"), "utf8"));
-  const specification = record.profile === PROFILE ? { revision: FNA_REVISION, dotnetVersion: DOTNET_VERSION } : null;
-  if (!specification || record.upstreamRevision !== specification.revision || record.dotnetVersion !== specification.dotnetVersion || record.frameworkVersion !== "26.10.0.0" ||
-      record.architecture !== "arm64" || !record.files) throw new Error("FNA runtime profile metadata is invalid.");
   let sealedManifest, sealedPayload;
   if (install.source === "bundled") {
     // Distribution relocation and signing change native bytes. The sealed

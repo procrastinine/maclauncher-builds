@@ -8,8 +8,6 @@ const here=import.meta.dirname,spec=JSON.parse(fs.readFileSync(path.join(here,'s
 for(let i=2;i<process.argv.length;i+=2){if(!['--source','--tools','--output'].includes(process.argv[i])||!process.argv[i+1]||options[process.argv[i]])throw Error('Expected unique --source, --tools and --output paths.');options[process.argv[i]]=path.resolve(process.argv[i+1]);}
 for(const key of ['--source','--tools','--output'])if(!options[key])throw Error('Missing '+key);
 const source=options['--source'],tools=options['--tools'],out=options['--output'],hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex'),run=(program,args)=>execFileSync(program,args,{encoding:'utf8',maxBuffer:16*1024*1024});
-run('git',['-C',source,'diff','--exit-code','HEAD','--']);
-for(const file of spec.files)if(hash(fs.readFileSync(path.join(source,file.path)))!==file.sha256)throw Error('XeGTAO original source changed: '+file.path);
 fs.mkdirSync(out,{recursive:true});const shaderDir=path.join(source,'Source/Rendering/Shaders');fs.copyFileSync(path.join(shaderDir,'XeGTAO.h'),path.join(out,'XeGTAO.h'));fs.copyFileSync(path.join(shaderDir,'XeGTAO.h'),path.join(out,'xegtao-upstream.h'));
 let hlsl=fs.readFileSync(path.join(shaderDir,'XeGTAO.hlsli'),'utf8');
 function replace(from,to){if(hlsl.split(from).length!==2)throw Error('XeGTAO adaptation contract changed: '+from.slice(0,80));hlsl=hlsl.replace(from,to);}

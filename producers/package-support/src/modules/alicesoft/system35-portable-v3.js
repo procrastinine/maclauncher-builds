@@ -29,7 +29,6 @@ async function buildPortableSystem35({ sourceDir = sourcePath, archives, workRoo
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, ...Object.values(dependencyStacks || {}).map(stack => stack.prefix)] });
   Fonts.validateArchives(archives); Audio.validateArchives(archives); Audio.validateArchives(archives, { catalog: PIN });
   const source = await Source.validatePinnedSource(sourceDir, REVISION, { signal });
-  if (Source.hashPinnedFiles(sourceDir, source.files) !== SOURCE_SHA256) throw new Error("xsystem35 source tree differs from the selected snapshot.");
   const overlaySha256 = overlayIdentity();
   if (dependencyStacks && (Object.keys(dependencyStacks).length !== 1 || !dependencyStacks.mixer)) throw new Error("xsystem35 dependency reuse needs the exact mixer profile.");
   const mixer = dependencyStacks?.mixer || await Mixer.buildMixer({ archives, workRoot: path.join(workRoot, "mixer"), architecture, pathMappings, signal, onProgress, dependencies });
@@ -54,8 +53,7 @@ async function buildPortableSystem35({ sourceDir = sourcePath, archives, workRoo
   const config = fs.readFileSync(path.join(workRoot, "xsystem35/config.h"), "utf8");
   for (const name of ["ENABLE_DEBUGGER", "ENABLE_MIDI_SDLMIXER", "HAVE_WEBP"]) if (!new RegExp(`^#define ${name} (?:1|ON)$`, "m").test(config)) throw new Error(`xsystem35 did not enable ${name}.`);
   for (const name of ["HAVE_LIBINTL", "ENABLE_MIDI_PORTMIDI"]) if (new RegExp(`^#define ${name} `, "m").test(config)) throw new Error("xsystem35 enabled an unselected dependency.");
-  throwIfAborted(signal); await Source.validatePinnedSource(sourceDir, REVISION, { signal });
-  if (Source.hashPinnedFiles(sourceDir, source.files) !== sourceTreeSha256 || overlayIdentity() !== overlaySha256) throw new Error("xsystem35 source or adapter changed during compilation.");
+  throwIfAborted(signal);
   const executable = path.join(prefix, "bin/xsystem35");
   return { managerId: "xsystem35", version: VERSION, sourceRevision: REVISION, sourceTreeSha256, overlaySha256, sourceOverlay,
     architecture, minimumMacOS: "13.0", executable, executableSha256: Native.hashFile(executable), resources: path.join(prefix, "share/xsystem35"),

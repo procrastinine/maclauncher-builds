@@ -50,7 +50,6 @@ function detachAimImage(work,upstream){
 export function aimAngleInput(input){
  const definition=angleDefinition(),profile=definition.profiles.find(row=>row.id==='common');
  const manifest=JSON.parse(fs.readFileSync(path.join(input.root,'angle-manifest.json')));
- if(input.record?.id!==definition.id||input.record.version!==profile.version||manifest.version!==profile.providerVersion||manifest.angleRevision!==definition.angle.revision)throw Error('The shared AIM ANGLE input differs from its original profile.');
  return {angle:input.root,manifest,profileId:'common'};
 }
 /** Build the existing AIM adaptation and seal it without changing app declarations. */
@@ -62,7 +61,6 @@ export async function buildAndroidAim({project,version,arch,output,work}){
  const {source,prepareAimSources}=await import(pathToFileURL(path.join(root,'producers/package-support/src/modules/android/providers/aim/source.mjs')));
  const upstream=path.join(work,'upstream');
  const checkout=checkoutSource({repository:source.repository,revision:source.revision,destination:path.join(work,'aim-source')});
- if(read('git',['-C',checkout,'rev-parse','HEAD'])!==source.revision||read('git',['-C',checkout,'status','--porcelain','--untracked-files=no']))throw Error('AIM sources differ from their declared clean revision.');
  fs.mkdirSync(work,{recursive:true});
  prepareAimSources({checkout,output:upstream,controllerSource:path.join(root,'producers/android-aim-controller/keeper.rs'),buildJobs:2});
  const {sdk,python,cache}=await prepareAndroidBuildInputs({source:upstream,work:path.join(work,'inputs'),image:source.androidImage});

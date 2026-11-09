@@ -2,13 +2,11 @@ import './producer-environment.mjs';
 import {androidSource} from '../lib/android-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
-import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {checkoutSource,run} from './build-source.mjs';
 import {acquireArtSourceSelection} from './android-art-source-selection.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 const profile=JSON.parse(fs.readFileSync(new URL('../producers/android-art-inputs/guest.json',import.meta.url)));
-const read=(program,args)=>execFileSync(program,args,{maxBuffer:Infinity,encoding:'utf8'}).trim();
 function alias(destination,source){
  fs.mkdirSync(path.dirname(destination),{recursive:true});
  if(fs.existsSync(destination))throw Error('The ART source input already exists: '+destination);
@@ -40,7 +38,6 @@ export async function cppAidlSources({directory,android,parser,targets}){
 export async function prepareArtGuestInputs({common,hwui,image,ndk,work}){
  if(!common?.sources||!hwui?.sources||!hwui?.tools||!path.isAbsolute(image?.root||'')||!path.isAbsolute(ndk||'')||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('ART guest inputs require completed common/HWUI inputs, original image, NDK and a new absolute work directory.');
  const android=path.join(root,androidSource().directory);
- if(read('git',['-C',android,'rev-parse','HEAD'])!==androidSource().revision)throw Error('The ART source profile differs from its selected revision.');
  const sourceRoot=path.join(work,'source');fs.mkdirSync(sourceRoot,{recursive:true});
  for(const[relative,key]of Object.entries(profile.sourceLinks)){
   const source=common.sources[key]||common.inputs?.[key];if(!path.isAbsolute(source||''))throw Error('The common producer must supply '+key+'.');

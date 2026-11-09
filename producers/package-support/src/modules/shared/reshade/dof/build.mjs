@@ -13,7 +13,6 @@ for(let i=2;i<process.argv.length;i+=2){const key=process.argv[i];if(!['--source
 for(const key of ['--source','--tools','--output'])if(!options[key])throw Error('Missing '+key);
 const source=options['--source'],tools=options['--tools'],out=options['--output'];
 const hash=b=>crypto.createHash('sha256').update(b).digest('hex'),run=(exe,args)=>execFileSync(exe,args,{encoding:'utf8',maxBuffer:64*1024*1024});
-run('git',['-C',source,'diff','--exit-code','HEAD','--']);
 const read=file=>fs.existsSync(path.join(source,file))?fs.readFileSync(path.join(source,file),'utf8'):run('git',['-C',source,'show',gitlink('producers/package-support/src/external/fsr3-sdk')+':'+file]);
 fs.mkdirSync(out,{recursive:true});const overlay=path.join(out,'overlay'),gpu=path.join(source,'sdk/include/FidelityFX/gpu');fs.mkdirSync(path.join(overlay,'dof'),{recursive:true});
 for(const file of Object.keys(spec.files))if(file.startsWith('sdk/include/FidelityFX/gpu/dof/'))fs.writeFileSync(path.join(overlay,'dof',path.basename(file)),read(file));

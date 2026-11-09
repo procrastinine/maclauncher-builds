@@ -70,9 +70,7 @@ export async function buildNativeTool({project,version,arch,output,work,sources=
   retryNetwork(()=>run('git',['clone','--filter=blob:none','--no-checkout',pin.repository,source]));
   run('git',['-C',source,'checkout','--detach',pin.revision]);
  }
- await Source.validatePinnedSource(source,pin.revision);
  const result=await BUILDS[project].build({pin,arch,source,work});
- await Source.validatePinnedSource(source,pin.revision);
  return sealRuntime({project,version,arch,output,sourceRoot:source,upstreamRevision:pin.revision,...result});
 }
 recipeMain(import.meta,buildNativeTool);

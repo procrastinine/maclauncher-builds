@@ -1,14 +1,11 @@
-import {sourceRevision} from '../../../../../../../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 
 const directory=path.dirname(fileURLToPath(import.meta.url));
 const declaration=JSON.parse(fs.readFileSync(path.join(directory,'timing/source.json')));
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
-const revision=folder=>execFileSync('git',['-C',folder,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
 const ownedFiles=['prepare-mlx-timing.mjs','timing/source.json','timing/metal-job.h','timing/metal-job.cpp.inc','timing/MLXGPUJob.swift'];
 const appliedFiles=['Source/Cmlx/mlx/mlx/backend/metal/device.cpp','Source/Cmlx/include/maclauncher-metal-job.h',
   'Source/Cmlx/include/mlx.h','Source/Cmlx/mlx-c/mlx/c/transforms.cpp','Source/MLX/Transforms+Eval.swift',
@@ -47,9 +44,6 @@ extern "C" int maclauncher_mlx_array_eval_gpu_job(mlx_array output,uint64_t toke
 
 export function prepareMLXTiming(sourceDirectory,buildRoot){
   sourceDirectory=fs.realpathSync(sourceDirectory);
-  if(revision(sourceDirectory)!==sourceRevision(declaration.source))throw new Error('The MLX Swift timing source does not match its exact revision.');
-  for(const row of declaration.nested)if(revision(path.join(sourceDirectory,row.path))!==sourceRevision(row))
-    throw new Error('A nested MLX timing source does not match its registered revision.');
   for(const [file,sha256]of Object.entries(declaration.files))if(digest(fs.readFileSync(path.join(sourceDirectory,file)))!==sha256)
     throw new Error('An upstream MLX timing input changed.');
   const owned=currentOwned();

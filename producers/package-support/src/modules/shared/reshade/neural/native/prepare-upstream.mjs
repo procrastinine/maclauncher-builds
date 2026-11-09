@@ -1,4 +1,3 @@
-import {sourceRevision} from '../../../../../../../../lib/pins.mjs';
 import {appPath} from '../../../../../../../../tools/app-source.mjs';
 import fs from "node:fs";
 import path from "node:path";

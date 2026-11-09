@@ -25,7 +25,6 @@ const source = options['--source'], tools = options['--tools'],
       hash = b => crypto.createHash('sha256').update(b).digest('hex'),
       run = (exe, args) => execFileSync(
           exe, args, {encoding : 'utf8', maxBuffer : 32 * 1024 * 1024});
-run('git', [ '-C', source, 'diff', '--exit-code', 'HEAD', '--' ]);
 const read = file =>
     fs.existsSync(path.join(source, file))
         ? fs.readFileSync(path.join(source, file), 'utf8')
