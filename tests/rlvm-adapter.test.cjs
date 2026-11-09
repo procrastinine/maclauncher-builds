@@ -1,7 +1,6 @@
-const {appRequire}=require('../tools/app-source.mjs');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const temporary=t=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'producer-test-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;};
-const Native=appRequire('src/modules/shared/runtime/local-native'),MachO=appRequire('src/modules/shared/runtime/macho-load-commands');
+const Native=require('../lib/package-format.cjs'),MachO=require('../lib/macho-load-commands.cjs');
 test('RLVM accepts the Runtime selected version before checking the requested CPU', async t=>{
  const root=temporary(t),command=path.resolve(__dirname,'../producers/vn-adaptations/rlvm/package.mjs');
  const {resolveProject,buildRecord}=await import('../lib/projects.mjs'),version=buildRecord(resolveProject('rlvm-adapter',path.resolve(__dirname,'..'),{resolvePins:false})).version;
@@ -25,5 +24,12 @@ test('Runtime RLVM builds use owned source and record the generated binary', {sk
  assert.equal(profile.sha256,require('node:crypto').createHash('sha256').update(read(binary)).digest('hex'));
  const {resolveProject,buildRecord}=await import('../lib/projects.mjs');assert.equal(result.declaration.version,buildRecord(resolveProject('rlvm-adapter',path.resolve(__dirname,'..'),{resolvePins:false})).version);
  assert.deepEqual(new Set(Native.readMachOArchitectures(binary,{allowLibrary:true})),new Set(['arm64','x86_64']));
- MachO.assertSystemLibraryClosure(MachO.readMachOLoadCommands(binary),{fileType:6,installName:'@rpath/rlvm-adapter.dylib',maximumMacOS:'13.0'});
+ const system=value=>/^\/(?:usr\/lib|System\/Library)\//.test(value);
+ for(const image of MachO.readMachOLoadCommands(binary).slices){
+  assert.equal(image.fileType,6);assert.equal(image.installName?.path,'@rpath/rlvm-adapter.dylib');
+  assert.equal(image.platform,1);assert.ok(Native.versionAtLeast('13.0',image.minimumMacOS),image.minimumMacOS);
+  assert.ok(image.dependencies.every(library=>system(library.path)),'The adapter links only system libraries');
+  assert.ok(!image.dynamicLinker&&!image.dyldEnvironment.length);
+  assert.ok(image.runPaths.every(value=>system(value)||/^@(?:loader|executable)_path(?:\/|$)/.test(value)),'The adapter has no external search path');
+ }
 });

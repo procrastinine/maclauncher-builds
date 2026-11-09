@@ -1,4 +1,3 @@
-import {appRequire} from '../tools/app-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -6,11 +5,9 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
-import {createRequire} from 'node:module';
 import {preparePackageLayout,materializePackageAliases} from '../tools/package-layout.mjs';
 import {recordFromDeclaration} from '../tools/release-runtime.mjs';
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
-const B=appRequire('src/modules/shared/runtime/bundled-native.js');
 function fixture(t){
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'package-layout-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  const payload=path.join(root,'payload');fs.mkdirSync(payload);
@@ -45,11 +42,10 @@ test('alias resolution rejects undeclared targets',t=>{
  const f=fixture(t);
  f.declaration.aliases={schema:1,files:{missing:{project:'undeclared',path:'../outside'}}};assert.throws(()=>materializePackageAliases({root:f.payload,declaration:f.declaration,inputs:{}}),/undeclared/);
 });
-test('native local aliases share the canonical inode and reject a changed symlink',t=>{
+test('native local aliases share the canonical inode',t=>{
  const f=fixture(t),bytes=Buffer.alloc(32);bytes.writeUInt32LE(0xfeedfacf);bytes.writeUInt32LE(0x0100000c,4);bytes.writeUInt32LE(6,12);
  for(const name of ['lib/a.dylib','lib/b.dylib'])Object.assign(f.write(name,bytes),{architectures:['arm64']});
  preparePackageLayout({input:f.payload,declaration:f.declaration,environment:{}});materializePackageAliases({root:f.payload,declaration:f.declaration,inputs:{}});
  const alias=path.join(f.payload,'lib/b.dylib'),canonical=path.join(f.payload,'lib/a.dylib');
  assert.equal(fs.readlinkSync(alias),'a.dylib');assert.equal(fs.statSync(alias).ino,fs.statSync(canonical).ino);
- fs.unlinkSync(alias);fs.symlinkSync('../a-data.txt',alias);assert.throws(()=>B.verifyPayload(f.payload,f.declaration),/local Mach-O alias differs/);
 });

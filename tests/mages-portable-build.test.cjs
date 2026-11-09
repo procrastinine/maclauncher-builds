@@ -1,4 +1,3 @@
-const {appRequire}=require('../tools/app-source.mjs');
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -8,7 +7,24 @@ const crypto = require("node:crypto");
 const Dependency = require("../producers/package-support/src/modules/mages/native/portable-dependencies");
 const Prefix = require("../producers/package-support/src/modules/mages/native/portable-prefix");
 const Build = require("../producers/package-support/src/modules/mages/native/portable-build");
-const { image } = appRequire('tests/fixtures/macho-image.js');
+
+// An arm64 executable image with a macOS 13 build version, libSystem and the given runpaths.
+function executableImage(runPaths = []) {
+  const commands = [], command = (kind, size) => {
+    const bytes = Buffer.alloc(size); bytes.writeUInt32LE(kind, 0); bytes.writeUInt32LE(size, 4); commands.push(bytes); return bytes;
+  };
+  const text = (kind, value, offset) => {
+    const name = Buffer.from(value + "\0"), bytes = command(kind, Math.ceil((offset + name.length) / 8) * 8);
+    bytes.writeUInt32LE(offset, 8); name.copy(bytes, offset);
+  };
+  const build = command(0x32, 24); build.writeUInt32LE(1, 8); build.writeUInt32LE(0x000d0000, 12); build.writeUInt32LE(0x001b0001, 16);
+  text(0xc, "/usr/lib/libSystem.B.dylib", 24);
+  for (const value of runPaths) text(0x8000001c, value, 12);
+  const body = Buffer.concat(commands), header = Buffer.alloc(32);
+  header.writeUInt32LE(0xfeedfacf, 0); header.writeUInt32LE(0x0100000c, 4); header.writeUInt32LE(2, 12);
+  header.writeUInt32LE(commands.length, 16); header.writeUInt32LE(body.length, 20);
+  return Buffer.concat([header, body]);
+}
 
 function directory(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "mages-portable-"));
@@ -108,7 +124,7 @@ test("HarfBuzz build metadata selects the same exact library through pkg-config"
 test("native linking adds only missing explicit dependency paths without a shell", async t => {
   const root = directory(t), executable = path.join(root, "Impacto"), selected = path.join(root, "selected"), codec = path.join(root, "codec");
   fs.mkdirSync(path.join(selected, "lib"), { recursive: true }); fs.mkdirSync(path.join(codec, "lib"), { recursive: true });
-  fs.writeFileSync(executable, image({ fileType: 2, installName: null, runPaths: [path.join(selected, "lib")] }));
+  fs.writeFileSync(executable, executableImage([path.join(selected, "lib")]));
   const before = crypto.createHash("sha256").update(fs.readFileSync(executable)).digest("hex"), calls = [];
   const env = { MACOSX_DEPLOYMENT_TARGET: "13.0" }, controller = new AbortController();
   const result = await Build.linkDependencyPaths(executable, [selected, codec, codec], {
@@ -124,7 +140,7 @@ test("native linking adds only missing explicit dependency paths without a shell
 
 test("native linking rejects linked executables and incomplete library inputs before mutation", async t => {
   const root = directory(t), executable = path.join(root, "Impacto"), alias = path.join(root, "alias"), prefix = path.join(root, "prefix");
-  fs.writeFileSync(executable, image({ fileType: 2, installName: null })); fs.symlinkSync(executable, alias);
+  fs.writeFileSync(executable, executableImage()); fs.symlinkSync(executable, alias);
   const calls = [], options = { dependencies: { runBuildCommand: async (...args) => calls.push(args) } };
   await assert.rejects(Build.linkDependencyPaths(alias, [prefix], options), /owned executable/);
   await assert.rejects(Build.linkDependencyPaths(executable, ["relative"], options), /explicit library prefixes/);

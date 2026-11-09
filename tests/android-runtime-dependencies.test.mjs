@@ -1,4 +1,3 @@
-import {appRequire} from '../tools/app-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -13,7 +12,7 @@ import {packageSdl3Framework} from '../tools/build-android-sdl3.mjs';
 import {prepareSharedSdlFramework} from '../tools/android-common-publisher-inputs.mjs';
 import {preparePackageLayout,materializePackageAliases} from '../tools/package-layout.mjs';
 import {pack,verify} from '../tools/runtime-package.mjs';
-const Native=appRequire('scripts/native-binary-tools.cjs');
+const Native=createRequire(import.meta.url)('../producers/package-support/scripts/native-binary-tools.cjs');
 const profiles=JSON.parse(fs.readFileSync(new URL('../producers/android-inputs/angle.json',import.meta.url))).profiles,commonVersion=profiles.find(row=>row.id==='common').version;
 const temp=t=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'android-runtime-deps-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;};
 test('AIM packaging builds generated product properties without booting a guest',t=>{

@@ -1,6 +1,5 @@
-import {appSourceRoot} from '../tools/app-source.mjs';
 import test from 'node:test';
-import {sourceRevision} from '../lib/pins.mjs';
+import {sourceRevision,sourceCheckout} from '../lib/pins.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -14,13 +13,15 @@ import {initializeSources} from '../tools/init-runtime-sources.mjs';
 import {prepareRelease} from '../tools/release-runtime.mjs';
 import {readProjects,buildRecord,buildRecords} from '../lib/projects.mjs';
 const root=path.resolve(import.meta.dirname,'..');
+// The app checkout is the gitlink that app-source.json declares.
+const appCheckout=path.join(root,sourceCheckout(JSON.parse(fs.readFileSync(path.join(root,'producers/package-support/app-source.json')))));
 
 test('Android recipes initialize the producer whose metadata they read from a cold checkout',()=>{
  assert.equal(readProjects(root,{resolvePins:false}).projects.find(project=>project.id==='android-angle-aim').build,undefined,'The historical AIM ANGLE project has no independent producer');
  for(const project of ['android-java-framework','android-java-converter','android-angle','android-art-image-extractor','android-launcher','android-art-java','android-image-data-1','android-image-data-2','android-image-data-3','android-image-data-4','android-image-data-5']){
   const commands=[],result=initializeSources({project,directory:root,run:(args,cwd)=>{
    commands.push({args,cwd});
-   if(args[0]==='ls-files'){const links=cwd===root?['sources/maclauncher','sources/maclauncher-android','sources/maclauncher-kosmickrisp']:cwd===appSourceRoot().directory?['src/external/maclauncher-android','src/external/maclauncher-kosmickrisp']:['sources/maclauncher'];return links.map(path=>'160000 '+'a'.repeat(40)+' 0\t'+path).join('\n')+'\n';}
+   if(args[0]==='ls-files'){const links=cwd===root?['sources/maclauncher','sources/maclauncher-android','sources/maclauncher-kosmickrisp']:cwd===appCheckout?['src/external/maclauncher-android','src/external/maclauncher-kosmickrisp']:['sources/maclauncher'];return links.map(path=>'160000 '+'a'.repeat(40)+' 0\t'+path).join('\n')+'\n';}
    return '';
   }});
   const build=buildRecord(readProjects(root,{resolvePins:false}).projects.find(row=>row.id===project));
@@ -31,12 +32,13 @@ test('Android recipes initialize the producer whose metadata they read from a co
  }
 });
 
+// Reads the app checkout: mpv declares app files, and initializeSources lists the app gitlinks they lie in from the app's own index.
 test('only a build that declares app-source.json initializes the app, with the app gitlinks its app files lie in',()=>{
  const fake=(cwd,links)=>links.map(path=>'160000 '+'a'.repeat(40)+' 0\t'+path).join('\n');
  const initialize=project=>initializeSources({project,directory:root,run:(args,cwd)=>{
   if(args[0]!=='ls-files')return '';
   if(cwd===root)return fake(cwd,['sources/maclauncher','sources/maclauncher-android',...readProjects(root,{resolvePins:false}).projects.flatMap(row=>[].concat(row.build||[]).flatMap(build=>build.submodules||[]))]);
-  return cwd===appSourceRoot().directory?fake(cwd,['src/external/maclauncher-android','src/external/maclauncher-kosmickrisp']):'';
+  return cwd===appCheckout?fake(cwd,['src/external/maclauncher-android','src/external/maclauncher-kosmickrisp']):'';
  }}).initialized.map(row=>row.path);
  const mpv=initialize('mpv');
  assert.ok(mpv.includes('sources/maclauncher'));
@@ -51,7 +53,7 @@ test('a recursive build recurses into its own sources and never into the shared 
  const commands=[];
  initializeSources({project:'ai5',version:build.version,directory:root,run:(args,cwd)=>{
   commands.push(args);
-  if(args[0]==='ls-files'){const links=cwd===root?['sources/maclauncher','sources/maclauncher-android','sources/maclauncher-kosmickrisp',...build.submodules]:cwd===appSourceRoot().directory?['src/external/maclauncher-android','src/external/maclauncher-kosmickrisp']:['sources/maclauncher'];return links.map(path=>'160000 '+'a'.repeat(40)+' 0\t'+path).join('\n')+'\n';}
+  if(args[0]==='ls-files'){const links=cwd===root?['sources/maclauncher','sources/maclauncher-android','sources/maclauncher-kosmickrisp',...build.submodules]:cwd===appCheckout?['src/external/maclauncher-android','src/external/maclauncher-kosmickrisp']:['sources/maclauncher'];return links.map(path=>'160000 '+'a'.repeat(40)+' 0\t'+path).join('\n')+'\n';}
   return '';
  }});
  assert.deepEqual(commands.filter(args=>args.includes('--recursive')).map(args=>args.at(-1)),build.submodules);

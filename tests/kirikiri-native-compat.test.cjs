@@ -1,11 +1,10 @@
-const {appRequire}=require('../tools/app-source.mjs');
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
 const Compat = require("../producers/package-support/src/modules/kirikiri/native-compat");
-const Native = appRequire('src/modules/shared/runtime/local-native');
+const Native = require("../lib/package-format.cjs");
 
 test("KiriKiri native bridges record every staged source/resource digest", t => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "kiri-native-compat-")); t.after(() => fs.rmSync(root, { recursive: true, force: true }));

@@ -1,4 +1,3 @@
-const {appPath,appRequire}=require('../tools/app-source.mjs');
 const requirements = require('./support/requirements.cjs');
 const test = require("node:test");
 const assert = require("node:assert/strict");
@@ -10,9 +9,10 @@ const { execFileSync } = require("node:child_process");
 const Current = require("../producers/package-support/src/modules/mages/native/current-build");
 const patchFiles = require('../producers/package-support/src/modules/mages/native/source-patches').patchFiles(
   path.join(__dirname, '../producers/package-support/src/modules/mages/native/current-windows.patch'));
-const Session = appRequire('src/modules/mages/native/windows-sfx-session');
 
-const nativeRoot = appPath('src/modules/mages/native');
+// The session sources are the files current-windows.patch creates in src/vm.
+const sessionFiles = require("./helpers/patch-new-files.cjs").patchNewFiles(
+  path.join(__dirname, "../producers/package-support/src/modules/mages/native/current-windows.patch"));
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 
 test("the current Windows sound-effect patch validates inputs before writes and supplies the compiled implementation",
@@ -35,7 +35,7 @@ test("the current Windows sound-effect patch validates inputs before writes and 
     await Current.applyCurrentOverlay(source, { logPath: path.join(root, "overlay.log") });
     for (const extension of ["cpp", "h"])
       assert.deepEqual(fs.readFileSync(path.join(source, "src/vm/windows-sfx." + extension)),
-        fs.readFileSync(path.join(nativeRoot, "windows-sfx." + extension)));
+        Buffer.from(sessionFiles["src/vm/windows-sfx." + extension]));
   });
 
 test("compiled Windows sound effects preserve instruction boundaries, preload/resume and legacy widths",
@@ -211,7 +211,9 @@ int main() {
   std::cout << "Windows sound-effect operands and playback semantics pass\\n";
 }
 `);
+    const native = path.join(root, "native"); fs.mkdirSync(native);
+    for (const extension of ["cpp", "h"]) fs.writeFileSync(path.join(native, "windows-sfx." + extension), sessionFiles["src/vm/windows-sfx." + extension]);
     execFileSync("/usr/bin/clang++", ["-std=c++20", "-arch", "arm64", "-mmacosx-version-min=13.0",
-      "-I", nativeRoot, "-I", vm, path.join(nativeRoot, "windows-sfx.cpp"), fixture, "-o", executable], { stdio: "pipe" });
+      "-I", native, "-I", vm, path.join(native, "windows-sfx.cpp"), fixture, "-o", executable], { stdio: "pipe" });
     assert.equal(execFileSync(executable, [], { encoding: "utf8" }), "Windows sound-effect operands and playback semantics pass\n");
   });

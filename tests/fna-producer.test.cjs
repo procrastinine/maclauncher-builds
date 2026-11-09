@@ -1,8 +1,7 @@
-const {appRequire}=require('../tools/app-source.mjs');
 const requirements = require('./support/requirements.cjs');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const temporary=t=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'producer-test-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;};
-const Build=require('../producers/package-support/src/modules/fna/runtime/build'),Native=appRequire('src/modules/shared/runtime/local-native.js');
+const Build=require('../producers/package-support/src/modules/fna/runtime/build'),Native=require('../lib/package-format.cjs');
 const fixture=temporary;
 test("FNA build overlays affect only private inputs and retain default accelerated graphics", t => {
   const root = fixture(t), source = path.join(root, "upstream.cs"), destination = path.join(root, "staged.cs");
