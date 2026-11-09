@@ -2299,6 +2299,7 @@
         "producers/anyps5/build-runtime.mjs",
         "producers/anyps5/dependencies.json",
         "producers/anyps5/licenses",
+        "producers/anyps5/overlays",
         "producers/anyps5/package-runtime.mjs",
         "producers/anyps5/source-projection.mjs",
         "producers/anyps5/tools/unwrap-self.cjs",
