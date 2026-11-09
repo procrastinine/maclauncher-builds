@@ -12,7 +12,8 @@ const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirna
 const Builder=require('../producers/package-support/src/modules/gamemaker/runtime/butterscotch.js');
 const Catalog=require('../producers/package-support/src/modules/gamemaker/runtime/catalog.js');
 
-export async function buildButterscotch({project:id,version,arch,work,output}) {
+/** Compile Butterscotch from its pinned source recipe. */
+export async function compile({project:id,version,arch,work}){
 
   const project=resolveProject(id,root),build=buildRecord(project,version),pin=Catalog.BUTTERSCOTCH_BUILDS.find(row=>row.version===Catalog.BUTTERSCOTCH_ARGUMENTS_VERSION);
   if(!pin)throw Error('The registered version has no source recipe.');
@@ -21,6 +22,10 @@ export async function buildButterscotch({project:id,version,arch,work,output}) {
   const manager={core:{catalog:[pin],resolveRegistered:()=>null,normalizeVersion:value=>value,getInstallDir:()=>raw,registerLocal:options=>{fs.writeFileSync(path.join(raw,'runtime.json'),JSON.stringify({version:build.version}));return options;}}};
   const built=await Builder.buildRuntime({userDataDir:work,version:pin.version,sourceDir,architecture:arch,runtimeManager:manager});
 
+ return {sourceDir,build,built,pin};
+}
+/** Add the notices and seal the compiled runtime. */
+export async function assemble({project:id,version,arch,output,work,compiled:{sourceDir,build,built,pin}}){
   addLicenses(work,'box2d',path.join(sourceDir,'vendor/box2d'));
   addLicense(work,'FMOD Vorbis setup',path.join(sourceDir,'src/fmod/VORBIS_SETUP_LICENSE.txt'));
   addLicense(work,'JetBrains Mono',path.join(root,'producers/package-support/src/modules/gamemaker/runtime/licenses/butterscotch/LICENSE-JetBrainsMono.txt'));
@@ -43,4 +48,4 @@ export async function buildButterscotch({project:id,version,arch,work,output}) {
   addLicense(work,"Khronos platform",path.join(root,'producers/package-support/src/modules/gamemaker/runtime/licenses/butterscotch/LICENSE-khrplatform.txt'));
   return sealRuntime({project:id,version:build.version,arch,output,executable:built.runtimePath,sourceRoot:sourceDir,upstreamRevision:pin.upstreamRevision,provenance:{backend:'appkit',renderer:'legacy-opengl',videoBackend:'none',gameArguments:pin.gameArguments}});
 }
-recipeMain(import.meta,buildButterscotch);
+recipeMain(import.meta,{compile,assemble});
