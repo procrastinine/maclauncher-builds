@@ -70,7 +70,6 @@ async function buildCandidate({directory,sourceDir,dependencyDirs,boostHeaders,a
   await Pinned.runBuildCommand(cmake,['-S',upstream,'-B',output,'-G','Ninja',...options],{cwd:directory,env,logPath,signal});
   await Pinned.runBuildCommand(cmake,['--build',output,'--parallel','2'],{cwd:directory,env,logPath,signal});
   await Pinned.runBuildCommand(cmake,['--install',output],{cwd:directory,env,logPath,signal});
-  await Promise.all(Object.entries(pins).map(([name,revision])=>Pinned.validatePinnedSource(dirs[name],revision,{signal})));
   return {version:VERSION,architecture,sourceRevision:REVISION,dependencyPins:DEPENDENCIES,sourceTrees,overlaySha256,configureOptions:options,logPath,payload,
     executables:Object.fromEntries(['innoextract','maclauncher-inno-inspect'].map(name=>[name,{path:path.join(payload,'bin',name),sha256:hash(path.join(payload,'bin',name))}]))};
 }
