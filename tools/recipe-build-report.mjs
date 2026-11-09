@@ -58,9 +58,11 @@ function staticPaths(expression,constants){
 const staticTarget=({value,exact})=>exact?path.posix.normalize(value):value.endsWith('/')?path.posix.normalize(value):path.posix.dirname(value+'_');
 const parsePointer=pointer=>pointer.slice(1).split('/').map(key=>key.replaceAll('~1','/').replaceAll('~0','~'));
 function slot(value,pointer){const keys=parsePointer(pointer),key=keys.pop();for(const part of keys){if(!value||!Object.hasOwn(value,part))return null;value=value[part];}return value&&Object.hasOwn(value,key)?{value,key}:null;}
+/** Locale-independent string order, so the build definition and its digest match on every runner. */
+const ordinal=(a,b)=>a<b?-1:a>b?1:0;
 function normalizedBuilds(builds){
  const commands=new Map();for(const {version,...build} of builds){let combined=commands.get(build.command);if(!combined){combined={command:build.command};commands.set(build.command,combined);}for(const [key,value] of Object.entries(build)){if(key==='command')continue;if(Array.isArray(value))combined[key]=[...new Set([...(combined[key]||[]),...value])].sort();else if(value&&typeof value==='object')combined[key]={...combined[key],...value};else if(typeof value==='boolean')combined[key]=!!(combined[key]||value);else combined[key]=value;}}
- return [...commands.values()].sort((a,b)=>a.command.localeCompare(b.command));
+ return [...commands.values()].sort((a,b)=>ordinal(a.command,b.command));
 }
 
 /** Read production recipes without executing them. Inputs are discovered from
@@ -275,7 +277,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    if(upstream.pin&&(bindings.get(upstream.pin.file)||[]).some(binding=>!binding.select&&binding.pointer===upstream.pin.pointer+'/version')&&resolved.version!==undefined)resolved.version='$packageVersion';
    return resolved;
   });
-  const definition={schemaVersion:1,id,build:normalizedBuilds(builds),files:[...files,...[...appFiles].map(([name,digest])=>[APP_REFERENCE+name,digest])].sort(([a],[b])=>a.localeCompare(b)).map(([path,sha256])=>({path,sha256})),sources,gitlinks:[...usedLinks.values()].sort((a,b)=>a.path.localeCompare(b.path))};
+  const definition={schemaVersion:1,id,build:normalizedBuilds(builds),files:[...files,...[...appFiles].map(([name,digest])=>[APP_REFERENCE+name,digest])].sort(([a],[b])=>ordinal(a,b)).map(([path,sha256])=>({path,sha256})),sources,gitlinks:[...usedLinks.values()].sort((a,b)=>ordinal(a.path,b.path))};
   const result={definition,definitionDigest:reportDigest(definition),inputs:[...inputs].sort().map(id=>({id}))};cache.set(id,result);
   // A computed path is reported when it names repository files and none of them is part of the definition.
   unresolvedReferences.set(id,[...unresolved,...computed.flatMap(({tail,...row})=>{const matches=(tracked.get(path.posix.basename(tail))||[]).filter(file=>file===tail||file.endsWith('/'+tail));const named=matches.filter(file=>!registryFiles.has(file)&&!file.startsWith('catalogs/'));return !named.length||matches.some(file=>files.has(file))?[]:[{...row,reason:'computed',matches:named}];})]);
