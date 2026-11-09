@@ -925,6 +925,12 @@
       "architectures": [
         "arm64"
       ],
+      "submodules": [
+        "producers/package-support/src/external/atrac9",
+        "producers/package-support/src/external/avcpp",
+        "producers/package-support/src/external/impacto",
+        "producers/package-support/src/external/magic-enum"
+      ],
       "tools": [
         "cmake",
         "ninja",

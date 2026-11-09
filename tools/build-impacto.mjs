@@ -5,7 +5,7 @@ import path from 'node:path';
 import {createRequire} from 'node:module';
 import {createHash} from 'node:crypto';
 import {buildInput} from './build-input.mjs';
-import {checkoutSource,run,recipeMain} from "./build-source.mjs";
+import {run,recipeMain} from "./build-source.mjs";
 import {sealRuntime} from './seal-runtime.mjs';
 
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
@@ -21,7 +21,9 @@ const Source=require('../producers/package-support/src/modules/shared/runtime/pi
 const dependencies={runBuildCommand:(command,args,options)=>Source.runBuildCommand(command,args.map((value,index)=>index>0&&args[index-1]==='--parallel'?'2':value),options)};
 /** Compile Impacto with its FFmpeg, avcpp and shared native stacks. */
 export async function compile({project,arch,work}){
- fs.mkdirSync(work,{recursive:true});const sources={};for(const [id,pin] of Object.entries(Builder.SOURCES))sources[id]=checkoutSource({...pin,destination:path.join(work,'upstream-'+id)});
+ fs.mkdirSync(work,{recursive:true});const pins=mages('sources.json'),sources=Object.fromEntries(Object.keys(Builder.SOURCES).map(id=>[id,path.join(root,pins[id].gitlink)]));
+ // CMake reads magic_enum in place, so its pinned files are staged inside the work directory, whose path the build maps.
+ const magicEnum=path.join(work,'upstream-magicEnum');Source.stagePinnedFiles(sources.magicEnum,(await Source.pinnedFiles(sources.magicEnum,Builder.SOURCES.magicEnum.revision)).files,magicEnum);sources.magicEnum=magicEnum;
  const archives={};for(const pin of [...Fonts.PIN.dependencies,...Audio.PIN.dependencies,...Dependency.PIN.dependencies])archives[pin.id]??=await buildInput({url:pin.archiveUrl,sha256:pin.archiveSha256,bytes:pin.archiveBytes});
  const maps=[...new Set([work,fs.realpathSync(work)])].map(from=>({from,to:'IMPACTO_BUILD'}));
  const fonts=nativeStackInput(preparedBuildInput('native-sdl2-fonts'),{arch,work:path.join(work,'fonts')}),audio=nativeStackInput(preparedBuildInput('native-sndfile'),{arch,work:path.join(work,'audio')});
