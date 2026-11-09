@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {execFileSync} from "node:child_process";
 import {sourceInventory, sourceIdentity} from "../../../sources/maclauncher-android/src/modules/android/native/build-sources.mjs";
-const Content=appRequire('scripts/runtime-content.cjs');
+const Content=appRequire('src/modules/shared/runtime/runtime-content.js');
 
 /** Staging consumes the completed build snapshot, including recorded shared
  * ART adapters, independently of later changes in the source checkout. */

@@ -9,7 +9,7 @@ const Native = appRequire('src/modules/shared/runtime/local-native.js');
 const B = appRequire('src/modules/shared/runtime/bundled-native.js');
 const Overlay = require('../src/modules/rgss/overlays/mkxpz-filename-nfc/source.json');
 const {loadCommands, links} = require('./native-binary-tools.cjs');
-const Content = appRequire('scripts/runtime-content.cjs');
+const Content = appRequire('src/modules/shared/runtime/runtime-content.js');
 const SOURCE_SHA256 = require('../../../runtimes/mkxpz/baseline.json').upstream.sourceSha256;
 function packageVersion(value) {
   if (typeof value !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._+-]{0,159}$/.test(value))
