@@ -1,9 +1,0 @@
-{
-  "llvmMingw": {
-    "repository": "https://github.com/mstorsjo/llvm-mingw",
-    "version": "20261006",
-    "url": "https://github.com/mstorsjo/llvm-mingw/releases/download/20261006/llvm-mingw-20261006-ucrt-macos-universal.tar.xz",
-    "sha256": "a7a19b11048e89372637d26279cdb7c430ed3cf8c1e224310421312bf986ebf6",
-    "bytes": 124399776
-  }
-}

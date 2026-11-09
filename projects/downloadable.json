@@ -2801,8 +2801,7 @@
         "producers/vkd3d-proton/metalfx.patch",
         "producers/vkd3d-proton/ngx.patch",
         "producers/vkd3d-proton/metalfx.c",
-        "producers/vkd3d-proton/vkd3d_metalfx.h",
-        "producers/vkd3d-proton/inputs.json"
+        "producers/vkd3d-proton/vkd3d_metalfx.h"
       ],
       "buildEntry": "producers/vkd3d-proton/build.mjs"
     },
@@ -2940,8 +2939,7 @@
         "producers/dxvk/dxgi-composition.h",
         "producers/dxvk/dxgi-composition.cpp",
         "producers/dxvk/dcomp.cpp",
-        "producers/dxvk/dcomp.def",
-        "producers/dxvk/inputs.json"
+        "producers/dxvk/dcomp.def"
       ],
       "buildEntry": "producers/dxvk/build.mjs"
     },

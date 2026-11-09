@@ -3,16 +3,15 @@ import './producer-environment.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
-import {buildInput} from './build-input.mjs';
+import {buildInput,llvmMingwInput} from './build-input.mjs';
 import {recipeMain,pythonBuildTools} from './build-source.mjs';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {buildProvider} from '../producers/dxvk/build.mjs';
 import {packageProvider} from '../producers/dxvk/package.mjs';
-import inputs from '../producers/dxvk/inputs.json' with {type:'json'};
 const root=path.resolve(import.meta.dirname,'..');
 export async function buildDxvk({project,arch,output,work}){
   const record=buildRecord(resolveProject(project,root,{resolvePins:false}));
-  const archive=await buildInput(inputs.llvmMingw,path.join(work,'downloads'));
+  const archive=await buildInput(llvmMingwInput(),path.join(work,'downloads'));
   const toolchain=path.join(work,'llvm-mingw');fs.mkdirSync(toolchain,{recursive:true});
   execFileSync('/usr/bin/tar',['-xf',archive,'--strip-components','1','-C',toolchain],{stdio:'inherit'});
   const tools=pythonBuildTools(path.join(work,'build-tools'),path.join(root,'tools/sdk27-build-requirements.txt'));

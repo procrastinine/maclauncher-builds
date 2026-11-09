@@ -6,17 +6,16 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
-import {buildInput} from './build-input.mjs';
+import {buildInput,llvmMingwInput} from './build-input.mjs';
 import {recipeMain,pythonBuildTools} from './build-source.mjs';
 import {publicDeclaration} from './runtime-package.mjs';
 import {buildProvider} from '../producers/vkd3d-proton/build.mjs';
-import inputs from '../producers/vkd3d-proton/inputs.json' with {type:'json'};
 const require=createRequire(import.meta.url),B=appRequire('src/modules/shared/runtime/bundled-native.js'),{readPeExports}=appRequire('src/modules/shared/runtime/pe-exports.js');
 const root=path.resolve(import.meta.dirname,'..'),sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 // Launcher floor: app package.json build.mac.minimumSystemVersion.
 const minimumMacOS='13.0';
 export async function buildVkd3dProton({project,version,arch,output,work}){
-  const archive=await buildInput(inputs.llvmMingw,path.join(work,'downloads'));
+  const archive=await buildInput(llvmMingwInput(),path.join(work,'downloads'));
   const toolchain=path.join(work,'llvm-mingw');fs.mkdirSync(toolchain,{recursive:true});
   execFileSync('/usr/bin/tar',['-xf',archive,'--strip-components','1','-C',toolchain],{stdio:'inherit'});
   const tools=pythonBuildTools(path.join(work,'build-tools'),path.join(root,'tools/sdk27-build-requirements.txt'));

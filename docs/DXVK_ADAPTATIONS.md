@@ -36,4 +36,4 @@ DXVK 3.1.1 writes a 16-digit executable-path hash followed by .dxvk.bin (shader 
 | glslang (host compiler) | https://github.com/KhronosGroup/glslang | ba1640446f3826a518721d1f083f3a8cca1120c3 |
 | Async patch | https://gitlab.com/Ph42oN/dxvk-gplasync | 04e50ed2c4dee43e64d30119b2c5b26a23e2b6a4 |
 
-LLVM-MinGW 20261006 uses the checksum-pinned archive declared in producers/dxvk/inputs.json. The producer builds Windows x64 and x86. The renderer and its companion retain their source notices.
+LLVM-MinGW 20261006 uses the checksum-pinned archive declared in producers/dependencies.json. The producer builds Windows x64 and x86. The renderer and its companion retain their source notices.
