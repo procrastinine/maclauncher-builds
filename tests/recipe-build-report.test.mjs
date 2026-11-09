@@ -29,6 +29,16 @@ test('a definition holds exactly the declared inputs, never files discovered fro
  f.write('tools/helpers/index.js','module.exports = 4;\n');assert.notEqual(createRecipeBuildReporter({directory:f.directory})('recipe').definitionDigest,report.definitionDigest);
 });
 
+test('a declared .js file brings the package.json whose type Node loads it by',t=>{
+ const recipe=project('recipe','tools/recipe.mjs');recipe.producer.entries.push('producers/support/module.js','producers/support/data.cjs');
+ const f=fixture(t,{'tools/recipe.mjs':'export {};\n','producers/support/module.js':'module.exports = 1;\n','producers/support/data.cjs':'module.exports = 2;\n',
+  'producers/package.json':{type:'commonjs'},'producers/other/package.json':{type:'module'}},[recipe]);
+ const report=createRecipeBuildReporter({directory:f.directory})('recipe');
+ assert.deepEqual(paths(report),['producers/package.json','producers/support/data.cjs','producers/support/module.js','tools/recipe.mjs']);
+ f.write('producers/package.json',{type:'module'});
+ assert.notEqual(createRecipeBuildReporter({directory:f.directory})('recipe').definitionDigest,report.definitionDigest);
+});
+
 test('each project declares its own package inputs, also when projects share a command',t=>{
  const first=project('first','tools/shared.mjs'),second=project('second','tools/shared.mjs'),unknown=project('unknown','tools/shared.mjs');
  first.build.inputs=['input'];unknown.build.inputs=['absent'];

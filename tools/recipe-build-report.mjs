@@ -129,6 +129,10 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    for(const [key,child] of Object.entries(value))walk(child,from,pointer+'/'+key.replaceAll('~','~0').replaceAll('/','~1'));
   }
   for(let index=0;index<records.length;index++)walk(records[index][1],records[index][0]);
+  // Node loads a .js file by the "type" of its nearest package.json, so that file is an input too.
+  const nearestPackage=(relative,has)=>{for(let directory=path.posix.dirname(relative);;directory=path.posix.dirname(directory)){const candidate=directory==='.'?'package.json':directory+'/package.json';if(has(candidate))return candidate;if(directory==='.')return null;}};
+  for(const relative of [...files.keys()])if(relative.endsWith('.js')){const found=nearestPackage(relative,isFile);if(found)addFile(found,'node');}
+  for(const relative of [...appFiles.keys()])if(relative.endsWith('.js')){const found=nearestPackage(relative,name=>appSet.has(name));if(found)addApp(found,'node');}
   const sources=project.upstreams.map(upstream=>{
    const link=upstream.pin&&linkOf(upstream.pin.gitlink||upstream.pin.file);
    if(link)return {...upstream,gitlink:link.revision};
