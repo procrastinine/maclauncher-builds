@@ -8,42 +8,44 @@ import {createRecipeBuildReporter} from '../tools/recipe-build-report.mjs';
 
 const project=(id,command)=>({id,name:id,delivery:'downloadable',producer:{kind:'maclauncher',repository:'https://github.com/owner/builds',entries:[command]},upstreams:[],packageProfiles:[{version:'1.0.0',label:id}],build:{version:'1.0.0',architectures:['arm64'],command}});
 
-function fixture(t,files,projects=[project('recipe','tools/recipe.cjs')]){
+function fixture(t,files,projects=[project('recipe','tools/recipe.cjs')],buildCode){
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'recipe-modules-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
  const write=(file,value)=>{fs.mkdirSync(path.dirname(path.join(directory,file)),{recursive:true});fs.writeFileSync(path.join(directory,file),typeof value==='string'?value:JSON.stringify(value));};
- write('projects.json',{schemaVersion:1,repository:'owner/builds',updatePolicy:'manual',projects});
+ write('projects.json',{schemaVersion:1,repository:'owner/builds',updatePolicy:'manual',projects,...(buildCode?{buildCode}:{})});
  for(const [file,value] of Object.entries(files))write(file,value);
- // Tracked files let the report name computed paths that match repository files.
  execFileSync('git',['init','-q'],{cwd:directory});execFileSync('git',['add','-A'],{cwd:directory});
  return {directory,write};
 }
+const paths=report=>report.definition.files.map(file=>file.path).sort();
 
-test('recipe definitions follow local modules and files the way Node resolves them',t=>{
- const f=fixture(t,{
-  'tools/recipe.cjs':['const path = require("node:path");','const helper = require("./helper");','const index = require("./helpers");','const pin = require("./pin.json");',
-   'const resolved = '+['require','resolve'].join('.')+'('+JSON.stringify('../lib/resolved')+');','const overlay = path.join(__dirname, "overlays", "fix.lua");','const output = path.join(__dirname, "generated.bin");',
-   'const named = path.join(variable, "named.cjs");',''].join('\n'),
-  'tools/helper.js':'module.exports = require("./nested");\n','tools/nested.cjs':'module.exports = 1;\n','tools/helpers/index.js':'module.exports = 2;\n',
-  'tools/pin.json':{version:'1.0.0'},'tools/overlays/fix.lua':'return 1\n','lib/named.cjs':'module.exports = 4;\n',
-  'lib/resolved.mjs':'export const data = new URL("./data.bin", import.meta.url);\n','lib/data.bin':'data'});
+test('a definition holds exactly the declared inputs, never files discovered from code',t=>{
+ const recipe=project('recipe','tools/recipe.cjs');recipe.producer.entries.push('tools/helpers','tools/missing.cjs');
+ const f=fixture(t,{'tools/recipe.cjs':'require("./helpers"); require("./undeclared.cjs"); require("../lib/shared.mjs");\n','tools/helpers/index.js':'module.exports = 1;\n','tools/helpers/data.json':{version:'1.0.0'},
+  'tools/undeclared.cjs':'module.exports = 2;\n','lib/shared.mjs':'export const shared = 1;\n'},[recipe],['lib/shared.mjs']);
  const describe=createRecipeBuildReporter({directory:f.directory}),report=describe('recipe');
- // Extensionless and .cjs probing, a directory index, require.resolve, a JSON require, __dirname joins and URL references.
- assert.deepEqual(report.definition.files.map(file=>file.path).sort(),['lib/data.bin','lib/resolved.mjs','tools/helper.js','tools/helpers/index.js','tools/nested.cjs','tools/overlays/fix.lua','tools/pin.json','tools/recipe.cjs']);
- assert.deepEqual(describe.unresolved('recipe'),[
-  {file:'tools/recipe.cjs',expression:'path.join(__dirname, "generated.bin")',reason:'missing'},
-  {file:'tools/recipe.cjs',expression:'path.join(variable, "named.cjs")',reason:'computed',matches:['lib/named.cjs']}]);
- f.write('tools/nested.cjs','module.exports = 5;\n');
- assert.notEqual(createRecipeBuildReporter({directory:f.directory})('recipe').definitionDigest,report.definitionDigest);
+ assert.deepEqual(paths(report),['lib/shared.mjs','tools/helpers/data.json','tools/helpers/index.js','tools/recipe.cjs']);
+ assert.deepEqual(describe.unresolved('recipe'),[{file:'projects',expression:'tools/missing.cjs',reason:'missing'}]);
+ f.write('tools/undeclared.cjs','module.exports = 3;\n');assert.equal(createRecipeBuildReporter({directory:f.directory})('recipe').definitionDigest,report.definitionDigest);
+ f.write('tools/helpers/index.js','module.exports = 4;\n');assert.notEqual(createRecipeBuildReporter({directory:f.directory})('recipe').definitionDigest,report.definitionDigest);
 });
 
-test('a build command shared by several projects reports each project its own inputs',t=>{
- const files={'tools/input.mjs':'export const input = true;\n','tools/shared.mjs':"function audio(){return preparedBuildInput('input');}\n"};
- const projects=[project('first','tools/shared.mjs'),project('second','tools/shared.mjs'),project('input','tools/input.mjs')];
- const f=fixture(t,files,projects);
- assert.throws(()=>createRecipeBuildReporter({directory:f.directory})('second'),/shared build command tools\/shared\.mjs must report the inputs of second/);
- f.write('tools/shared.mjs',files['tools/shared.mjs']+"export function recipeInputs({project}){return project==='first'?['input']:[];}\n");
+test('each project declares its own package inputs, also when projects share a command',t=>{
+ const first=project('first','tools/shared.mjs'),second=project('second','tools/shared.mjs'),unknown=project('unknown','tools/shared.mjs');
+ first.build.inputs=['input'];unknown.build.inputs=['absent'];
+ const f=fixture(t,{'tools/input.mjs':'export const input = true;\n','tools/shared.mjs':'export const shared = true;\n'},[first,second,unknown,project('input','tools/input.mjs')]);
  const describe=createRecipeBuildReporter({directory:f.directory});
  assert.deepEqual(describe('first').inputs,[{id:'input'}]);assert.deepEqual(describe('second').inputs,[]);
+ assert.deepEqual(describe.unresolved('unknown'),[{file:'projects',expression:'absent',reason:'input',problem:'A package input names another registered project.'}]);
+});
+
+test('declared records and pins are validated once, by the resolver',t=>{
+ const recipe=project('recipe','tools/recipe.cjs');recipe.producer.entries.push('tools/source.json');
+ recipe.upstreams=[{id:'engine',provider:'github',url:'https://github.com/owner/engine',repository:'owner/engine',revision:'1'.repeat(40),pin:{file:'tools/source.json',pointer:'/engine'}}];
+ const f=fixture(t,{'tools/recipe.cjs':'module.exports = {};\n','tools/source.json':{engine:{repository:'https://github.com/owner/engine',commit:'2'.repeat(40)}}},[recipe]);
+ assert.deepEqual(createRecipeBuildReporter({directory:f.directory}).unresolved('recipe').map(row=>[row.reason,row.problem]),[
+  ['pin','A referenced source pin cannot also declare a revision, version or timestamp override.'],
+  ['record','A source record names its exact commit as revision.'],
+  ['record','A source record names its exact commit as revision.']]);
 });
 
 test('a directory entry declares every tracked file below it',t=>{
@@ -53,19 +55,17 @@ test('a directory entry declares every tracked file below it',t=>{
 });
 
 test('publication changes leave every package definition unchanged',t=>{
- const f=fixture(t,{'tools/first.cjs':'require("./pack");','tools/second.cjs':'require("./pack");','tools/pack.js':'exports.pack = () => 1; exports.catalog = () => import("./publication/catalog.mjs");','tools/publication/catalog.mjs':'export const publish = 1;'},[project('first','tools/first.cjs'),project('second','tools/second.cjs')]);
+ const f=fixture(t,{'tools/first.cjs':'require("./pack");','tools/second.cjs':'require("./pack");','tools/pack.js':'exports.pack = () => 1; exports.catalog = () => import("./publication/catalog.mjs");','tools/publication/catalog.mjs':'export const publish = 1;'},[project('first','tools/first.cjs'),project('second','tools/second.cjs')],['tools/pack.js']);
  const digests=()=>{const describe=createRecipeBuildReporter({directory:f.directory});return ['first','second'].map(id=>describe(id).definitionDigest);};
  const before=digests();f.write('tools/publication/catalog.mjs','export const publish = 2;');assert.deepEqual(digests(),before);
  f.write('tools/first.cjs','require("./pack"); exports.changed = true;');const recipe=digests();assert.notEqual(recipe[0],before[0]);assert.equal(recipe[1],before[1]);
  f.write('tools/pack.js','exports.pack = () => 2; exports.catalog = () => import("./publication/catalog.mjs");');const packed=digests();assert.notEqual(packed[0],recipe[0]);assert.notEqual(packed[1],recipe[1]);
 });
 
-test('the shared build action and the package commands it runs are sealed build inputs',t=>{
- const f=fixture(t,{'tools/recipe.cjs':'module.exports = {};','.github/actions/build-runtime/action.yml':'runs:\n  steps:\n    - run: node tools/package.mjs prepare\n    - uses: ./.github/actions/network\n','.github/actions/network/action.yml':'runs:\n  using: node24\n  main: ../../../tools/network-action.cjs\n','tools/network-action.cjs':'require("./download.mjs");','tools/download.mjs':'export const retryNetwork = true;','tools/package.mjs':'export const pack = 1;'});
+test('the shared build action and the tools it runs are declared build code',t=>{
+ const f=fixture(t,{'tools/recipe.cjs':'module.exports = {};','.github/actions/build-runtime/action.yml':'runs:\n  steps:\n    - run: node tools/package.mjs prepare\n    - uses: ./.github/actions/network\n','.github/actions/network/action.yml':'runs:\n  using: node24\n  main: ../../../tools/network-action.cjs\n','tools/network-action.cjs':'require("./download.mjs");','tools/download.mjs':'export const retryNetwork = true;','tools/package.mjs':'export const pack = 1;'},undefined,['.github/actions','tools/download.mjs','tools/network-action.cjs','tools/package.mjs']);
  const report=()=>createRecipeBuildReporter({directory:f.directory})('recipe');const before=report();
- assert.ok(before.definition.files.some(file=>file.path==='.github/actions/build-runtime/action.yml'));
- assert.ok(before.definition.files.some(file=>file.path==='tools/package.mjs'));
- for(const file of ['.github/actions/network/action.yml','tools/network-action.cjs','tools/download.mjs'])assert.ok(before.definition.files.some(row=>row.path===file),file);
+ assert.deepEqual(paths(before),['.github/actions/build-runtime/action.yml','.github/actions/network/action.yml','tools/download.mjs','tools/network-action.cjs','tools/package.mjs','tools/recipe.cjs']);
  f.write('tools/package.mjs','export const pack = 2;');assert.notEqual(report().definitionDigest,before.definitionDigest);
 });
 

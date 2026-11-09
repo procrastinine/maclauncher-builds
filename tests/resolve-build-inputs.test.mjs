@@ -18,16 +18,16 @@ function fixture(t){
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'recipe-report-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
  const write=(file,value)=>{fs.mkdirSync(path.dirname(path.join(directory,file)),{recursive:true});fs.writeFileSync(path.join(directory,file),typeof value==='string'?value:JSON.stringify(value));};
  const entry=id=>({id,name:id,delivery:'downloadable',producer:{kind:'maclauncher',repository:'https://github.com/owner/builds',entries:['tools/'+id+'.mjs']},upstreams:[],packageProfiles:[{version:'1.0.0',label:id}],build:{version:'1.0.0',architectures:['arm64'],command:'tools/'+id+'.mjs'}});
- const consumer=entry('consumer'),input=entry('input');input.versionBindings=[{file:'producers/input.json',pointer:'/version'}];
+ const consumer=entry('consumer'),input=entry('input');consumer.producer.entries.push('tools/shared.mjs','producers/consumer.json');input.producer.entries.push('producers/input.json');input.versionBindings=[{file:'producers/input.json',pointer:'/version'}];
  write('projects.json',{schemaVersion:1,repository:'owner/builds',updatePolicy:'manual',projects:[consumer,input]});
  write('tools/consumer.mjs',"import './shared.mjs'; const definition='producers/consumer.json';\n");
  write('tools/shared.mjs','export const shared = true;\n');write('tools/input.mjs',"const definition='producers/input.json';\n");
- write('producers/input.json',{version:'1.0.0',source:{revision:'original-source'},flags:['complete']});
- write('producers/consumer.json',{dependency:{project:'input'},upstream:{revision:'consumer-source'}});
+ write('producers/input.json',{version:'1.0.0',source:{revision:'1'.repeat(40)},flags:['complete']});
+ write('producers/consumer.json',{dependency:{project:'input'},upstream:{revision:'2'.repeat(40)}});
  return {directory,write};
 }
 
-test('existing recipe references discover the consumed graph and build unpublished inputs at their releases.txt versions first',async t=>{
+test('declared package inputs form the consumed graph and build unpublished inputs at their releases.txt versions first',async t=>{
  const f=fixture(t),describe=createRecipeBuildReporter({directory:f.directory});
  await assert.rejects(resolveBuildInputs({selection:[{id:'consumer',version:'keep-this-name'}],describe,published:()=>null}),/input has no public release and no line in releases.txt/);
  const result=await resolveBuildInputs({selection:[{id:'consumer',version:'keep-this-name'}],describe,published:()=>null,listed:new Map([['input',['new-input-name']]])});
@@ -66,11 +66,11 @@ test('existing recipe references discover the consumed graph and build unpublish
 
 test('a published input is reused as published until its own line is requested',async t=>{
  const f=fixture(t);
- f.write('producers/input.json',{version:'9.9.9-custom',source:{revision:'original-source'},flags:['complete']});
+ f.write('producers/input.json',{version:'9.9.9-custom',source:{revision:'1'.repeat(40)},flags:['complete']});
  const describe=createRecipeBuildReporter({directory:f.directory}),published=()=>({version:'1.0.0',digests:{arm64:'exact-verified-archive-digest'}});
  const reused=await resolveBuildInputs({selection:[{id:'consumer',version:'custom-consumer'}],describe,published});
  assert.deepEqual(reused.orderedSelection,[{id:'consumer',version:'custom-consumer'}]);assert.deepEqual(reused.reuseBindings,[{id:'input',version:'1.0.0',digests:{arm64:'exact-verified-archive-digest'}}]);
- f.write('producers/input.json',{version:'9.9.9-custom',source:{revision:'changed-real-source'},flags:['complete']});
+ f.write('producers/input.json',{version:'9.9.9-custom',source:{revision:'3'.repeat(40)},flags:['complete']});
  const unchanged=await resolveBuildInputs({selection:[{id:'consumer',version:'custom-consumer'}],describe:createRecipeBuildReporter({directory:f.directory}),published});
  assert.deepEqual(unchanged.orderedSelection,[{id:'consumer',version:'custom-consumer'}]);assert.deepEqual(unchanged.reuseBindings,reused.reuseBindings);
  const requested=await resolveBuildInputs({selection:[{id:'input',version:'1.0.1'},{id:'consumer',version:'custom-consumer'}],describe:createRecipeBuildReporter({directory:f.directory}),published});

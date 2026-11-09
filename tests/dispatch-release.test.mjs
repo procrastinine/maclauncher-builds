@@ -11,7 +11,8 @@ function fixture(t){
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'release-dispatch-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
  const write=(name,value)=>{fs.mkdirSync(path.dirname(path.join(directory,name)),{recursive:true});fs.writeFileSync(path.join(directory,name),typeof value==='string'?value:JSON.stringify(value));};
  const project=id=>({id,name:id,delivery:'downloadable',producer:{kind:'maclauncher',repository:'https://github.com/owner/builds',entries:['tools/'+id+'.mjs']},upstreams:[],packageProfiles:[{version:'1.0.0',label:id}],build:{version:'1.0.0',architectures:['arm64','x64'],command:'tools/'+id+'.mjs'}});
- write('projects.json',{schemaVersion:1,repository:'owner/builds',updatePolicy:'manual',projects:['input','left','right','solo'].map(project)});
+ const projects=['input','left','right','solo'].map(project);for(const consumer of projects.slice(1,3))consumer.build.inputs=['input'];
+ write('projects.json',{schemaVersion:1,repository:'owner/builds',updatePolicy:'manual',projects});
  write('releases.txt','input=1.0.0\nleft=1.0.0\nright=1.0.0\nsolo=1.0.0\n');
  for(const id of ['input','solo'])write('tools/'+id+'.mjs','export const source=true;');
  for(const id of ['left','right'])write('tools/'+id+'.mjs',"export function build(){return preparedBuildInput('input');}");

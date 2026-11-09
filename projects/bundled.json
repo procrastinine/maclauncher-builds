@@ -230,44 +230,38 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/shared/reshade/native/materialize-source.mjs",
-        "producers/package-support/src/modules/shared/reshade/native/build.mjs",
-        "producers/package-support/src/modules/shared/reshade/native/build-retroarch.mjs",
-        "producers/package-support/src/modules/shared/reshade/libplacebo-build.mjs",
-        "producers/package-support/scripts/stage-reshade.mjs",
-        "producers/package-support/scripts/repackage-graphics-runtime.mjs",
-        "producers/package-support/src/modules/godot/graphics/build.mjs",
-        "producers/package-support/src/modules/shared/reshade/neural",
-        "producers/package-support/src/modules/shared/reshade/native/build-vkd3d.mjs",
-        "producers/package-support/src/modules/shared/reshade/neural/build.mjs",
-        "producers/package-support/src/modules/shared/reshade/temporal/fsr/build.mjs",
-        "producers/package-support/src/modules/shared/reshade/temporal/fsr4",
-        "producers/package-support/src/modules/crossover/temporal/dxmt/build.mjs",
-        "producers/package-support/src/modules/crossover/temporal/streamline/build.mjs",
-        "producers/package-support/src/modules/shared/reshade/native/retroarch-external-overlay.mjs",
-        "producers/package-support/src/modules/shared/reshade/native/scene-role-header.mjs",
-        "producers/package-support/src/modules/shared/reshade/libplacebo/scene-source.mjs",
-        "producers/package-support/src/modules/shared/reshade/libplacebo/scene-overlay.mjs",
-        "producers/package-support/src/modules/shared/reshade/ssr/build.mjs",
-        "producers/package-support/src/modules/shared/reshade/lens/build.mjs",
-        "producers/package-support/src/modules/shared/reshade/blur/build.mjs",
-        "producers/package-support/scripts/stage-libplacebo-scene.mjs",
         "producers/package-support/scripts/build-graphics-runtime.mjs",
-        "producers/package-support/src/modules/shared/reshade/temporal/asr/build.mjs",
-        "producers/package-support/src/modules/shared/reshade/temporal/sgsr2/build.mjs",
-        "producers/package-support/src/modules/shared/reshade/generation/fsr3/build.mjs",
-        "producers/package-support/src/modules/shared/reshade/isf/build.mjs",
-        "producers/package-support/src/modules/shared/reshade/xess/native/build.mjs",
-        "producers/package-support/src/modules/crossover/temporal/xess/build.mjs",
-        "producers/package-support/src/modules/shared/reshade/libplacebo/dependencies-build.mjs",
-        "producers/package-support/src/modules/shared/reshade/libplacebo/dependencies.json",
-        "producers/package-support/src/modules/shared/reshade/libplacebo/dependencies-CMakeLists.txt",
-        "producers/package-support/src/modules/shared/reshade/isf/build-compilers.mjs",
-        "producers/package-support/src/modules/shared/reshade/isf/compiler-CMakeLists.txt",
-        "producers/package-support/src/modules/shared/reshade/native"
+        "producers/package-support/scripts/graphics-build-requirements.txt",
+        "producers/package-support/scripts/graphics-runtime.json",
+        "producers/package-support/scripts/payload-aliases.mjs",
+        "producers/package-support/scripts/repackage-graphics-runtime.mjs",
+        "producers/package-support/scripts/stage-fsr4-provider.mjs",
+        "producers/package-support/scripts/stage-libplacebo-scene.mjs",
+        "producers/package-support/scripts/stage-native-image-filters.mjs",
+        "producers/package-support/scripts/stage-reshade-source.mjs",
+        "producers/package-support/scripts/stage-reshade.mjs",
+        "producers/package-support/scripts/stage-streamline-snapshots.mjs",
+        "producers/package-support/scripts/stage-temporal-provider.mjs",
+        "producers/package-support/src/modules/crossover/temporal/camera-bridge",
+        "producers/package-support/src/modules/crossover/temporal/dxmt",
+        "producers/package-support/src/modules/crossover/temporal/streamline",
+        "producers/package-support/src/modules/crossover/temporal/xess",
+        "producers/package-support/src/modules/godot/graphics/build.mjs",
+        "producers/package-support/src/modules/shared/reshade"
       ],
       "sourceDirectory": "producers/package-support",
-      "sourceRepository": "https://github.com/procrastinine/maclauncher"
+      "sourceRepository": "https://github.com/procrastinine/maclauncher",
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "scripts/native-supplementals.cjs",
+        "scripts/reshade-effect-sources.mjs",
+        "scripts/runtime-content.cjs",
+        "src/modules/crossover/temporal/dxmt",
+        "src/modules/crossover/temporal/streamline",
+        "src/modules/crossover/temporal/xess",
+        "src/modules/godot/graphics",
+        "src/modules/shared/reshade"
+      ]
     },
     "upstreams": [
       {
@@ -968,6 +962,9 @@
       },
       "submodules": [
         "sources/maclauncher-android"
+      ],
+      "inputs": [
+        "android-java-framework"
       ]
     }
   },
@@ -1214,6 +1211,9 @@
         "cmake",
         "ninja",
         "pkgconf"
+      ],
+      "inputs": [
+        "native-sndfile"
       ]
     },
     "versionBindings": [
@@ -2356,6 +2356,10 @@
         "ninja",
         "pkgconf",
         "python@3.14"
+      ],
+      "inputs": [
+        "native-sdl2-fonts",
+        "native-sndfile"
       ]
     }
   },

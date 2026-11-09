@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {readProjects,resolveProject} from '../lib/projects.mjs';
+import {validatePinReference} from '../lib/source-pins.mjs';
 import {checkProjects} from '../tools/check-updates.mjs';
 import {prepareRelease,verifyRelease,catalogIndex,releaseNotes,stageRelease} from '../tools/release-runtime.mjs';
 
@@ -67,28 +68,17 @@ test('metadata-only CommonJS references do not execute modules or require their 
  assert.deepEqual(readProjects(f.root,{resolvePins:false}),f.registry);assert.deepEqual(resolveProject('engine',f.root,{resolvePins:false}).upstreams,f.registry.projects[0].upstreams);assert.deepEqual(catalogIndex(f.root).projects,[]);
  assert.throws(()=>resolveProject('engine',f.root));
  for(const outside of ['sources/engine/source.cjs','projects/source.js']){
-  f.registry.projects[0].upstreams=[{...upstream(),pin:{file:outside,pointer:'/REVISION'}}];f.save();assert.throws(()=>readProjects(f.root,{resolvePins:false}),undefined,outside);
+  assert.throws(()=>validatePinReference({file:outside,pointer:'/REVISION'}),undefined,outside);
  }
 });
 
-test('pin references reject inline identity overrides and unknown reference fields before file access',t=>{
- const f=fixture(t,{source:null});
- for(const extra of [{revision:current},{version:'1.0'},{committedAt:'2026-10-26T04:38:52.000Z'}]){
-  f.registry.projects[0].upstreams=[{...upstream(),...extra}];f.save();assert.throws(()=>readProjects(f.root,{resolvePins:false}),undefined,JSON.stringify(extra));
- }
- for(const pin of [{file:pinFile,pointer:'/source',revision:current},{file:pinFile,pointer:'/source',fallback:current},{file:pinFile,pointer:'/source',repositoryPointer:4},{file:pinFile},{pointer:'/source'},null]){
-  f.registry.projects[0].upstreams=[{...upstream(),pin}];f.save();assert.throws(()=>readProjects(f.root,{resolvePins:false}),undefined,JSON.stringify(pin));
- }
+test('the pin validator rejects inline identity fields and unknown reference fields before file access',()=>{
+ for(const pin of [{file:pinFile,pointer:'/source',revision:current},{file:pinFile,pointer:'/source',fallback:current},{file:pinFile,pointer:'/source',repositoryPointer:4},{file:pinFile},{pointer:'/source'},null])assert.throws(()=>validatePinReference(pin),undefined,JSON.stringify(pin));
 });
 
-test('unsafe reference paths and malformed pointers fail even in metadata-only mode',t=>{
- const f=fixture(t,{source:null});
- for(const file of ['../source.json','/tmp/source.json','producers/../source.json','producers\\source.json','producers//source.json']){
-  f.registry.projects[0].upstreams=[{...upstream(),pin:{file,pointer:'/source'}}];f.save();assert.throws(()=>readProjects(f.root,{resolvePins:false}),undefined,file);
- }
- for(const pointer of ['source','/source/~2','/source/~',7,null]){
-  f.registry.projects[0].upstreams=[{...upstream(),pin:{file:pinFile,pointer}}];f.save();assert.throws(()=>readProjects(f.root,{resolvePins:false}),undefined,String(pointer));
- }
+test('the pin validator rejects unsafe reference paths and malformed pointers',()=>{
+ for(const file of ['../source.json','/tmp/source.json','producers/../source.json','producers\\source.json','producers//source.json'])assert.throws(()=>validatePinReference({file,pointer:'/source'}),undefined,file);
+ for(const pointer of ['source','/source/~2','/source/~',7,null])assert.throws(()=>validatePinReference({file:pinFile,pointer}),undefined,String(pointer));
 });
 
 test('missing, invalid and escaped canonical files never acquire a replacement pin',t=>{
@@ -113,7 +103,8 @@ test('object and separately selected origins must match the declared repository'
 
 test('derived commit, version and timestamp validation is identical for selected and complete reads',t=>{
  const f=fixture(t);
- for(const source of [null,[],{repository:'https://github.com/owner/source',revision:current,commit:held},{repository:'https://github.com/owner/source',revision:current,version:[]},{repository:'https://github.com/owner/source',revision:current,committedAt:'yesterday'}]){
+ // A record naming both commit and revision is the resolver's record validation.
+ for(const source of [null,[],{repository:'https://github.com/owner/source',revision:current,version:[]},{repository:'https://github.com/owner/source',revision:current,committedAt:'yesterday'}]){
   f.source({source});assert.throws(()=>readProjects(f.root),undefined,JSON.stringify(source));assert.throws(()=>resolveProject('engine',f.root),undefined,JSON.stringify(source));
  }
 });

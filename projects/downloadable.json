@@ -123,7 +123,25 @@
         "aarch64-apple-darwin",
         "aarch64-linux-android"
       ],
-      "cleanupRunner": true
+      "cleanupRunner": true,
+      "inputs": [
+        "android-aconfig",
+        "android-angle",
+        "android-art-elf",
+        "android-art-ffi",
+        "android-art-image-extractor",
+        "android-art-java",
+        "android-blueprint-parser",
+        "android-codecs",
+        "android-image-data-1",
+        "android-image-data-2",
+        "android-image-data-3",
+        "android-image-data-4",
+        "android-image-data-5",
+        "android-java-converter",
+        "android-java-framework",
+        "native-sdl3"
+      ]
     }
   },
   {
@@ -262,7 +280,10 @@
       "rustTargets": [
         "aarch64-linux-android"
       ],
-      "cleanupRunner": true
+      "cleanupRunner": true,
+      "inputs": [
+        "android-angle"
+      ]
     }
   },
   {
@@ -324,6 +345,11 @@
         "meson",
         "pkgconf",
         "nasm"
+      ],
+      "inputs": [
+        "native-ffmpeg",
+        "native-sdl2-fonts",
+        "native-sndfile"
       ]
     }
   },
@@ -455,6 +481,11 @@
         "cmake",
         "ninja",
         "pkgconf"
+      ],
+      "inputs": [
+        "native-sdl2-fonts",
+        "native-sdl2-mixer",
+        "native-sndfile"
       ]
     }
   },
@@ -628,6 +659,9 @@
           "cmake",
           "ninja",
           "pkgconf"
+        ],
+        "inputs": [
+          "native-openal"
         ]
       },
       {
@@ -644,6 +678,9 @@
           "cmake",
           "ninja",
           "pkgconf"
+        ],
+        "inputs": [
+          "native-openal"
         ]
       }
     ]
@@ -706,6 +743,10 @@
         "pkgconf",
         "nasm",
         "git"
+      ],
+      "inputs": [
+        "native-sdl2-fonts",
+        "native-sndfile"
       ]
     }
   },
@@ -936,6 +977,9 @@
         "flex",
         "bison",
         "xz"
+      ],
+      "inputs": [
+        "native-sdl2-fonts"
       ]
     }
   },
@@ -1051,6 +1095,11 @@
         "cmake",
         "ninja",
         "pkgconf"
+      ],
+      "inputs": [
+        "native-sdl2-fonts",
+        "native-sdl2-mixer",
+        "native-sndfile"
       ]
     }
   },
@@ -1362,7 +1411,10 @@
         "ninja",
         "pkgconf"
       ],
-      "recursiveSubmodules": true
+      "recursiveSubmodules": true,
+      "inputs": [
+        "native-sdl2-fonts"
+      ]
     }
   },
   {
@@ -1495,6 +1547,11 @@
         "ninja",
         "meson",
         "pkgconf"
+      ],
+      "inputs": [
+        "native-sdl2-fonts",
+        "native-sdl2-mixer",
+        "native-sndfile"
       ]
     }
   },
@@ -1563,6 +1620,11 @@
         "nasm",
         "bison",
         "flex"
+      ],
+      "inputs": [
+        "native-ffmpeg",
+        "native-sdl2-fonts",
+        "native-sndfile"
       ]
     }
   },
@@ -2141,10 +2203,15 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/crossover/temporal/vulkan"
+        "producers/package-support/src/modules/crossover/temporal/vulkan",
+        "producers/package-support/src/modules/shared/vulkan/native/source-files.mjs"
       ],
       "sourceDirectory": "producers/package-support",
-      "sourceRepository": "https://github.com/wine-mirror/wine"
+      "sourceRepository": "https://github.com/wine-mirror/wine",
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "src/modules/crossover/temporal/vulkan"
+      ]
     },
     "upstreams": [],
     "packageProfiles": [
@@ -2193,9 +2260,16 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/crossover/temporal/fidelityfx/build.mjs"
+        "producers/package-support/src/modules/crossover/temporal/fidelityfx"
       ],
-      "sourceDirectory": "producers/package-support"
+      "sourceDirectory": "producers/package-support",
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "src/modules/crossover/temporal/fidelityfx",
+        "src/modules/crossover/temporal/streamline/pe-exports.js",
+        "src/modules/crossover/temporal/vulkan/scene-request.h",
+        "src/modules/shared/vulkan/native"
+      ]
     },
     "upstreams": [
       {
@@ -2247,8 +2321,21 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "producers/moltenvk/build.mjs",
         "producers/package-support/src/modules/shared/vulkan/native/moltenvk-scene-build.mjs",
-        "producers/moltenvk/build.mjs"
+        "producers/package-support/src/modules/shared/vulkan/native/moltenvk-scene-overlay.mjs",
+        "producers/package-support/src/modules/shared/vulkan/native/moltenvk-scene-project.cmake",
+        "producers/package-support/src/modules/shared/vulkan/native/source-files.mjs",
+        "producers/vkd3d-proton/vk_temporal_frame.h"
+      ],
+      "appEntries": [
+        "scripts/license-files.mjs",
+        "src/modules/shared/reshade",
+        "src/modules/shared/vulkan/native/temporal-command.hpp",
+        "src/modules/shared/vulkan/native/temporal-command.inc",
+        "src/modules/shared/vulkan/native/temporal-map.hpp",
+        "src/modules/shared/vulkan/native/temporal-scene.hpp",
+        "src/modules/shared/vulkan/native/temporal.patch"
       ]
     },
     "upstreams": [
@@ -2710,6 +2797,10 @@
         "cmake",
         "ninja",
         "pkgconf"
+      ],
+      "inputs": [
+        "native-sdl2-fonts",
+        "native-sndfile"
       ]
     }
   },

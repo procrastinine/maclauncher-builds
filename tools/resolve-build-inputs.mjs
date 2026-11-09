@@ -22,7 +22,9 @@ export async function resolveBuildInputs({selection,describe,published,listed=ne
   if(resolved.has(id))return resolved.get(id);
   if(visiting.has(id))throw Error('Build input cycle: '+[...visiting,id].join(' -> '));
   visiting.add(id);
-  const report=await describe(id);if(!report||report.definition===undefined)throw Error('Recipe report has no normalized definition: '+id);
+  const report=await describe(id);if(!report||report.definition===undefined)throw Error("Recipe report has no normalized definition: "+id);
+  // The resolver is the one validation of declared inputs, records and pins; a problem stops the plan before any build.
+  const problems=describe.unresolved?.(id)||[];if(problems.length)throw Error(id+" has unresolved build inputs: "+problems.map(row=>row.file+" "+row.expression+": "+(row.problem||row.reason)).join("; "));
   const inputIds=[...new Set((report.inputs||[]).map(input=>typeof input==='string'?input:input.id||input.project))].sort();
   const children=[];for(const input of inputIds)children.push(await visit(input));
   const definition={recipe:report.definition,toolchain:toolchain(report.definition),inputs:inputIds.map(input=>({id:input,definitionDigest:reports[input].definitionDigest}))},definitionDigest=reportDigest(definition);
