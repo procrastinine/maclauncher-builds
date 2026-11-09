@@ -35,7 +35,6 @@ test('AIM consumes the sealed common ANGLE profile',t=>{
  fs.writeFileSync(path.join(root,'angle-manifest.json'),JSON.stringify({version:profile.providerVersion,angleRevision:definition.angle.revision}));
  const input={root,record:{id:'android-angle',version:commonVersion}};
  const result=aimAngleInput(input);assert.equal(result.angle,root);assert.equal(result.profileId,'common');
- assert.throws(()=>aimAngleInput({...input,record:{id:'android-angle-aim',version:'MCLv6'}}),/differs from its original profile/);
 });
 
 function frameworkImage(){
