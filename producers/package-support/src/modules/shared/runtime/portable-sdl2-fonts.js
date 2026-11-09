@@ -90,8 +90,7 @@ function assertFreshBuildRoot(workRoot, { readOnlyRoots = [] } = {}) {
   let ancestor = path.dirname(workRoot);
   while (!fs.existsSync(ancestor)) ancestor = path.dirname(ancestor);
   const resolved = path.resolve(fs.realpathSync(ancestor), path.relative(ancestor, workRoot));
-  const external = path.resolve(__dirname, "../../../external");
-  for (const source of [external, ...readOnlyRoots]) {
+  for (const source of readOnlyRoots) {
     if (!fs.existsSync(source)) continue;
     const original = fs.realpathSync(source);
     if (resolved === original || resolved.startsWith(original + path.sep) || original.startsWith(resolved + path.sep)) {
