@@ -144,9 +144,11 @@
       "entries": [
         "lib/abort.cjs",
         "lib/licenses.mjs",
+        "producers/package-support/helper-builds/steam-api-helper.json",
         "producers/package-support/src/modules/love/runtime/luasteam-source-inputs.json",
         "producers/package-support/src/modules/love/runtime/luasteam-source-overlay.js",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "producers/package-support/src/modules/shared/runtime/steamworks/native/offline-0.5.0/source/offline.cpp",
         "tools/build-helper.mjs",
         "tools/build-source.mjs",
         "tools/helper-package.mjs"
