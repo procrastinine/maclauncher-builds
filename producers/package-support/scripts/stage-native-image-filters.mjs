@@ -1,3 +1,4 @@
+import {isOwnedFile} from '../../../tools/app-source.mjs';
 import {gitlink} from "../../../lib/pins.mjs";
 import fs from "node:fs";
 import path from "node:path";
@@ -26,7 +27,7 @@ export function stageNativeImageFilters({ownedSource,symbols,recipeRoot}){
     if(source.schema!==1||!/^https:\/\//.test(source.repository||"")||!ownedImplementation&&!/^[a-f0-9]{40}$/.test(revision||""))throw Error("A native image filter source pin is missing.");
     if(ownedImplementation){
       if(provider.method!=="histogram-exposure"||source.repository!=="https://github.com/procrastinine/maclauncher"||!Array.isArray(source.files)||!source.files.length)throw Error("The owned image implementation declaration is invalid.");
-      for(const name of source.files){if(!filename(name))throw Error("The owned image source filename is invalid.");const file=path.join(ownedSource,"src",name),stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||!stat.size)throw Error("An owned image implementation source is missing.");owned.set(`maclauncher/native/${name}`,file);}
+      for(const name of source.files){if(!filename(name))throw Error("The owned image source filename is invalid.");const file=path.join(ownedSource,"src",name);if(!isOwnedFile(file)||!fs.statSync(file).size)throw Error("An owned image implementation source is missing.");owned.set(`maclauncher/native/${name}`,file);}
     }
     if(Object.hasOwn(translated,provider.method)){
       if(!recipeRoot)throw Error("The native image shader translation recipe is undeclared.");

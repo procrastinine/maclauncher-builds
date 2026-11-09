@@ -15,6 +15,12 @@ export function appSourceRoot(){
  if(origin!==profile.repository)throw Error('The app source origin differs from its public declaration.');
  return {directory,revision:profile.revision};
 }
+/** An owned build input is a regular file inside this checkout, which holds the
+ * pinned app source and its submodules, reached directly or through a link. */
+export function isOwnedFile(file){
+ let real;try{real=fs.realpathSync(file);}catch{return false;}
+ return real.startsWith(root+path.sep)&&fs.statSync(real).isFile();
+}
 /** Export committed module bytes; ignored local files never enter the build. */
 export function materializeAppModule({module,output}){
  if(!profile.modules.includes(module)||!path.isAbsolute(output)||fs.existsSync(output))throw Error('Choose a declared app module and a new absolute source directory.');

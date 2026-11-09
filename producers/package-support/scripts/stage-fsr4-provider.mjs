@@ -1,3 +1,4 @@
+import {isOwnedFile} from '../../../tools/app-source.mjs';
 import {sourceRevision} from './graphics-source-revision.mjs';
 import {gitlink} from "../../../lib/pins.mjs";
 import fs from "node:fs";
@@ -18,7 +19,7 @@ export function stageFSR4Provider({directory,upstream,ownedRoot}){
   const owned=new Map();
   for(const [relative]of Object.entries(metadata.owned)){
     if((!safe(relative)&&!["../frame.h","../payload-files.hpp"].includes(relative)))throw Error("Invalid owned FSR 4 build input.");
-    const file=path.resolve(ownedRoot,relative);if((!fs.lstatSync(file).isFile()||fs.lstatSync(file).isSymbolicLink()))throw Error("An FSR 4 build input changed: "+relative);
+    const file=path.resolve(ownedRoot,relative);if(!isOwnedFile(file))throw Error("An FSR 4 build input changed: "+relative);
     owned.set(path.posix.normalize("maclauncher/temporal/fsr4/"+relative),file);
   }
   const archive=metadata.sourceInputs?.find(row=>row.path==="source-inputs/weights_lossy2.npz");

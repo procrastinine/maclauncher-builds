@@ -1,4 +1,4 @@
-import {appSourceRoot} from '../../../tools/app-source.mjs';
+import {appSourceRoot,isOwnedFile} from '../../../tools/app-source.mjs';
 import fs from "node:fs";
 import path from "node:path";
 const origins=Object.freeze({streamline:"https://github.com/NVIDIA-RTX/Streamline",dxmt:"https://github.com/3Shain/dxmt"});
@@ -13,8 +13,8 @@ export function stageStreamlineSnapshots({name,directory,metadata,recipeRoot}){
     const fromStreamline=name==="streamline"&&relative!=="build.mjs"&&relative!=="source.json"&&!relative.startsWith("../camera-bridge/")&&!fromDxmt;
     if(fromDxmt||fromStreamline)app??=appSourceRoot();
     const appRoot=fromDxmt?path.join(app.directory,'src/modules/crossover/temporal/dxmt'):fromStreamline?path.join(app.directory,'src/modules/crossover/temporal/streamline'):null;
-    const file=appRoot?path.resolve(appRoot,fromDxmt?dxmtRelative:relative):requested,stat=fs.lstatSync(file),boundary=appRoot?path.resolve(appRoot,'../../..'):path.resolve(recipeRoot,'../..');
-    if(!file.startsWith(boundary+path.sep)||!stat.isFile()||stat.isSymbolicLink())throw Error("The tagged GPU snapshot build input changed: "+relative);
+    const file=appRoot?path.resolve(appRoot,fromDxmt?dxmtRelative:relative):requested,boundary=appRoot?path.resolve(appRoot,'../../..'):path.resolve(recipeRoot,'../..');
+    if(!file.startsWith(boundary+path.sep)||!isOwnedFile(file))throw Error("The tagged GPU snapshot build input changed: "+relative);
     owned.set(path.posix.normalize(`maclauncher/crossover/temporal/${name}/${relative}`),file);
   }
   return {owned,pin:` ${metadata.source.revision} third_party/${name}-snapshot`};

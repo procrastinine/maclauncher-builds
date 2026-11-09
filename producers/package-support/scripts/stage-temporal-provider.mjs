@@ -1,3 +1,4 @@
+import {isOwnedFile} from '../../../tools/app-source.mjs';
 import {sourceRevision} from './graphics-source-revision.mjs';
 import {gitlink} from "../../../lib/pins.mjs";
 import fs from "node:fs";
@@ -18,7 +19,7 @@ export function stageTemporalProvider({name,directory,upstream,ownedRoot}){
   for(const [relative] of Object.entries(metadata.owned)){
     if(!safe(relative)&&!['../frame.h','../command-order.hpp','../payload-files.hpp','../../shaderc-offline.cpp'].includes(relative))throw Error("Invalid owned temporal build input.");
     const file=path.resolve(ownedRoot,relative),target=path.posix.normalize(`maclauncher/temporal/${name}/${relative}`);
-    if(!target.startsWith("maclauncher/")||(!fs.lstatSync(file).isFile()||fs.lstatSync(file).isSymbolicLink()))throw Error("Temporal provider source changed: "+relative);
+    if(!target.startsWith("maclauncher/")||!isOwnedFile(file))throw Error("Temporal provider source changed: "+relative);
     owned.set(target,file);
   }
   if(!upstream)throw Error("Supply the declared source checkout for the optional "+name+" provider.");

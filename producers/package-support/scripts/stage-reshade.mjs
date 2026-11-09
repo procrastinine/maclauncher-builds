@@ -1,4 +1,4 @@
-import {materializeProducerSourceLinks} from '../../../tools/app-source.mjs';
+import {materializeProducerSourceLinks,isOwnedFile} from '../../../tools/app-source.mjs';
 import {sourceRevision} from './graphics-source-revision.mjs';
 import sharedDependencies from '../../dependencies.json' with {type:'json'};
 import dependencies from '../../../producers/dependencies.json' with {type:'json'};
@@ -93,7 +93,7 @@ if(options["--xess-host"]){
   const backends=metadata.backends,hostPaths=metadata.hostPaths;
   if(metadata.schema!==1||metadata.providerABI!==1||metadata.sdk?.repository!==source.repository||metadata.sdk?.commit!==sourceRevision(source)||metadata.sdk?.sha256!==source.sha256||metadata.sdk?.bytes!==source.bytes||!Array.isArray(metadata.files)||!Array.isArray(metadata.source?.ownedFiles))throw Error("A complete compatible original XeSS GPU host is required.");
   const nativeSource=options["--xess-host-source"]||path.join(ownedRoot,"native");
-  for(const name of owned){const file=path.resolve(nativeSource,name),stat=fs.lstatSync(file);if(!file.startsWith(path.resolve(nativeSource)+path.sep)||!stat.isFile()||stat.isSymbolicLink())throw Error("Invalid XeSS owned source path.");extraOwned.set("maclauncher/xess/native/"+name,file);}
+  for(const name of owned){const file=path.resolve(nativeSource,name);if(!file.startsWith(path.resolve(nativeSource)+path.sep)||!isOwnedFile(file))throw Error("Invalid XeSS owned source path.");extraOwned.set("maclauncher/xess/native/"+name,file);}
   extraOwned.set("maclauncher/xess/source.json",path.join(ownedRoot,"source.json"));
   if(generation){
     const componentFile=path.join(ownedRoot,"components.json"),components=JSON.parse(fs.readFileSync(componentFile,"utf8"));
@@ -122,7 +122,7 @@ if(options["--isf"]){
   const directory=options["--isf"],ownedRoot=path.resolve(import.meta.dirname,"../src/modules/shared/reshade/isf"),source=JSON.parse(fs.readFileSync(path.join(ownedRoot,"source.json"))),metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json")));
   if(!Array.isArray(metadata.files)||!metadata.owned)throw Error("A complete compatible ISF provider is required.");
   const ownedNames=Object.keys(metadata.owned);
-  for(const name of ownedNames){const file=path.resolve(ownedRoot,name),stat=fs.lstatSync(file);if(!file.startsWith(path.resolve(import.meta.dirname,"../src/modules/shared")+path.sep)||!stat.isFile()||stat.isSymbolicLink())throw Error("Invalid ISF owned source path.");}
+  for(const name of ownedNames){const file=path.resolve(ownedRoot,name);if(!file.startsWith(path.resolve(import.meta.dirname,"../src/modules/shared")+path.sep)||!isOwnedFile(file))throw Error("Invalid ISF owned source path.");}
   for(const [relative,sha256]of Object.entries(metadata.headerInputs)){
     if(!/^[a-zA-Z0-9_.\/-]+\.(?:h|hpp)$/.test(relative)||relative.split("/").some(part=>!part||part==="."||part===".."))throw Error("The ISF native header path is invalid.");
   }
@@ -241,7 +241,7 @@ if(options["--retroarch"]) {
   if(manifest.sceneInputsAPI!==undefined){
     const names=Object.keys(manifest.ownedSource);
     const root=path.resolve(import.meta.dirname,"../src/modules/shared/reshade/native");
-    for(const name of names){const file=path.resolve(root,name),stat=fs.lstatSync(file);if(!file.startsWith(path.resolve(import.meta.dirname,"../src/modules/shared")+path.sep)||!stat.isFile()||stat.isSymbolicLink())throw Error("Invalid RetroArch owned source path.");extraOwned.set("maclauncher/native/"+name,file);}
+    for(const name of names){const file=path.resolve(root,name);if(!file.startsWith(path.resolve(import.meta.dirname,"../src/modules/shared")+path.sep)||!isOwnedFile(file))throw Error("Invalid RetroArch owned source path.");extraOwned.set("maclauncher/native/"+name,file);}
     extraOwned.set("effects/operation-contracts.mjs",path.resolve(import.meta.dirname,"../src/modules/shared/effects/operation-contracts.mjs"));
     features.shaders.providers??={};
     for(const format of ["slangp","slang"])features.shaders.providers[format]={...features.shaders.providers[format],sceneInputsAPI:1,sceneInputRoles:[...SCENE_SHADER_INPUTS]};
@@ -335,7 +335,7 @@ for (const name of ["godot", "streamline", "dxmt"]) {
   if(name==="godot"&&metadata.sceneAovAPI!==undefined){
     const programs=metadata.aovCapture?.programs,root=path.resolve(import.meta.dirname,"../src/modules/godot/graphics");
     const sourceNames=Object.keys(metadata.ownedSourceSha256);
-    for(const relative of sourceNames){const file=path.resolve(root,relative),stat=fs.lstatSync(file);if(!file.startsWith(path.resolve(import.meta.dirname,"../src/modules")+path.sep)||!stat.isFile()||stat.isSymbolicLink())throw Error("Invalid Godot owned source path.");extraOwned.set(path.posix.normalize("maclauncher/godot/graphics/"+relative),file);}
+    for(const relative of sourceNames){const file=path.resolve(root,relative);if(!file.startsWith(path.resolve(import.meta.dirname,"../src/modules")+path.sep)||!isOwnedFile(file))throw Error("Invalid Godot owned source path.");extraOwned.set(path.posix.normalize("maclauncher/godot/graphics/"+relative),file);}
     for(const file of ["build.mjs","source.json"])extraOwned.set("maclauncher/godot/graphics/"+file,path.join(root,file));
     selected.push("aov-effect.gd",...programs.map(row=>row.file));
   }
