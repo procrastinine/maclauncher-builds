@@ -9,7 +9,7 @@ import {buildInput} from '../tools/build-input.mjs';
 test('download and portable producer modules remain synchronously require-able',()=>{
  const require=createRequire(import.meta.url);
  assert.equal(typeof require('../tools/download.mjs').downloadFile,'function');
- assert.equal(typeof require('../tools/build-portable-runtime.mjs').buildPortableRuntime,'function');
+ assert.equal(typeof require('../tools/build-portable-runtime.mjs').compile,'function');assert.equal(typeof require('../tools/build-portable-runtime.mjs').assemble,'function');
 });
 function temporary(t){const root=fs.mkdtempSync(path.join(os.tmpdir(),'download-test-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;}
 function runner(reply){return (_command,args,options,callback)=>{

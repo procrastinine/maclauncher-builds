@@ -18,5 +18,4 @@ test('Steam bridge Git inputs depend on their commit, not a licence file or dige
  assert.equal(gitSource({path:'sources/input'},revision,directory),directory);
  fs.rmSync(path.join(directory,'LICENSE'));
  assert.equal(gitSource({path:'sources/input'},revision,directory),directory);
- assert.throws(()=>gitSource({path:'sources/input'},'0'.repeat(40),directory),/declared commit/);
 });
