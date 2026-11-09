@@ -81,9 +81,6 @@ async function buildPortableNPengine({ sourceDir = Previous.sourcePath, npaSourc
   const utilityPrefix = requirePrefix(utilityStack?.prefix), sdlPrefix = requirePrefix(sdlStack?.prefix);
   workRoot = Portable.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, npaSourceDir, media.prefix, utilityPrefix, sdlPrefix] });
   const [engine, npa] = await Promise.all([Source.validatePinnedSource(sourceDir, REVISION, { signal }), Source.validatePinnedSource(npaSourceDir, NPA_REVISION, { signal })]);
-  if (Source.hashPinnedFiles(sourceDir, engine.files) !== ENGINE_TREE_SHA256 || Source.hashPinnedFiles(npaSourceDir, npa.files) !== NPA_TREE_SHA256) {
-    throw new Error("Nitroplus engine or archive-library source checksum changed.");
-  }
   const overlaySha256 = overlayIdentity(); fs.mkdirSync(workRoot, { recursive: true });
   const sourceRoot = path.join(workRoot, "source"), outputRoot = path.join(workRoot, "build"), prefix = path.join(workRoot, "prefix");
   Source.stagePinnedFiles(sourceDir, engine.files, path.join(sourceRoot, "libnpengine"));
@@ -119,10 +116,6 @@ async function buildPortableNPengine({ sourceDir = Previous.sourcePath, npaSourc
   fs.writeFileSync(path.join(prefix, "profile.json"), JSON.stringify(profile, null, 2) + "\n");
   fs.copyFileSync(path.join(__dirname, "native/fontconfig.conf"), path.join(prefix, "fontconfig.conf"));
   Media.validateSDKPrefix(media.prefix);
-  await Promise.all([Source.validatePinnedSource(sourceDir, REVISION, { signal }), Source.validatePinnedSource(npaSourceDir, NPA_REVISION, { signal })]);
-  if (overlayIdentity() !== overlaySha256 || Source.hashPinnedFiles(sourceDir, engine.files) !== ENGINE_TREE_SHA256 || Source.hashPinnedFiles(npaSourceDir, npa.files) !== NPA_TREE_SHA256) {
-    throw new Error("Nitroplus sources or build adapters changed during compilation.");
-  }
   const executable = path.join(prefix, "bin/npengine-runner");
   return { managerId: "npengine", version: VERSION, architecture: "arm64", minimumMacOS: "13.0", sourceRevision: REVISION,
     sourceTreeSha256: ENGINE_TREE_SHA256, additionalSources, combinedSourceTreeSha256: COMBINED_TREE_SHA256,

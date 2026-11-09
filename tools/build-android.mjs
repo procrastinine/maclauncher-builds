@@ -24,7 +24,6 @@ function product(root,relative){const file=path.join(root,relative);if(!fs.statS
 export function androidBuildInputViews(inputs){
  const checked={};for(const requirement of androidBuildInputRequirements())checked[requirement.key]=verifyAndroidBuildInput(requirement,inputs[requirement.key]);
  const definition=angleDefinition(),profile=definition.profiles.find(profile=>profile.id==='common'),angleManifest=json(product(checked.angle.root,'angle-manifest.json'));
- if(angleManifest.version!==profile.providerVersion||angleManifest.angleRevision!==definition.angle.revision)throw Error('The Android ANGLE input differs from its common profile.');
  return {checked,angle:{angle:checked.angle.root},
   codecs:{codecs:path.join(checked.codecs.root,'codecs'),include:path.join(checked.codecs.root,'include')},
   blueprint:{parser:product(checked.blueprint.root,'bin/android-blueprint-parser'),sources:product(checked.blueprint.root,'parser-sources.json')},

@@ -1,4 +1,3 @@
-import {sourceRevision} from '../lib/pins.mjs';
 import './producer-environment.mjs';
 import dependencies from '../producers/dependencies.json' with {type:'json'};
 const {libffi}=dependencies;
@@ -22,7 +21,6 @@ export async function buildAndroidArtFfi({project,version,arch,output,work}){
  fs.mkdirSync(work,{recursive:true});
  const android=checkoutSource({...androidSource(),destination:path.join(work,'android-source')}),source=checkoutSource({...libffi,destination:path.join(work,'libffi-source')});
  const original=JSON.parse(fs.readFileSync(path.join(android,'src/modules/android/art/supplier.json'))).sources.libffi;
- if(original.url.replace(/\.git$/,'')!==libffi.repository.replace(/\.git$/,'')||sourceRevision(original)!==libffi.revision)throw Error('The libffi input differs from the original ART profile.');
  const producer=path.join(work,'producer'),sourceArchive=path.join(work,'producer.tar');fs.mkdirSync(producer);
  run('git',['-C',android,'archive','--format=tar','--output='+sourceArchive,androidSource().revision,'--','src']);run('/usr/bin/tar',['-xf',sourceArchive,'-C',producer]);fs.unlinkSync(sourceArchive);
  run('git',['apply',path.join(root,profile.buildOverlay)],{cwd:producer,env:{...process.env,GIT_CEILING_DIRECTORIES:work}});

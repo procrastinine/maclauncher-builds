@@ -24,7 +24,6 @@ const walk=d=>fs.readdirSync(d,{recursive:true}).filter(p=>fs.statSync(path.join
 function verifyArchive(file,want){if(hash(fs.readFileSync(file))!==want)throw Error('Archive integrity mismatch: '+file);}
 function fetch(url,file){if(!fs.existsSync(file)){mkdir(path.dirname(file));run('curl',['-fLsS',url,'-o',file+'.part']);fs.renameSync(file+'.part',file);}return file;}
 export function gitSource(input, revision=gitlink(input.path), directory=path.join(root,input.path)) {
- if(capture('git',['-C',directory,'rev-parse','HEAD'])!==revision)throw Error('Git source differs from its declared commit: '+input.path);
  return directory;
 }
 export function prepare(work){

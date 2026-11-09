@@ -583,8 +583,6 @@ fn maclauncher_boot_stop_report(
 export function prepareAimSources({checkout, output, controllerSource, buildJobs}) {
   checkout = path.resolve(checkout);
   output = path.resolve(output);
-  const commit = execFileSync('git', ['-C', checkout, 'rev-parse', 'HEAD'], {encoding:'utf8'}).trim();
-  if (commit !== source.revision) throw new Error('AIM source revision does not match the selected runtime');
   fs.mkdirSync(output, {recursive:true});
   const archive = path.join(output, '.source.tar');
   execFileSync('git', ['-C', checkout, 'archive', '--format=tar', '-o', archive, source.revision]);

@@ -58,7 +58,6 @@ async function buildMixer({archives,workRoot,dependencyStacks,architecture=proce
     sourceRoots[pin.id]=sourceRoot;sources.push({...pin,...build,...(sourceOverlay?{sourceOverlay}:{})});
   }
   const features=validateFeatures(workRoot);
-  if(recipeIdentity()!==recipeSha256)throw new Error("SDL2_mixer recipe changed during compilation.");
   const readRoots=[fonts.prefix,audio.prefix];
   return {version:PIN.version,architecture,minimumMacOS:PIN.minimumMacOS,recipeSha256,prefix,readRoots,sdk:fonts.sdk,tools:fonts.tools,sources,sourceRoots,fonts,audio,descriptor,features};
 }

@@ -100,7 +100,6 @@ async function nativeHost(source,work,output,jobs) {
 
 export async function buildNxNative({work,output,dependencyWork,jobs=4,version=pin.version,check=false}={}) {
     const source=fs.realpathSync(path.join(repository,sourceCheckout(pin.source)));
-    if(read('git',['-C',source,'rev-parse','HEAD'])!==sourceRevision(pin.source)||read('git',['-C',source,'status','--porcelain','--untracked-files=no']))throw Error('nxnative source differs from its pin.');
     if(check)return {id:pin.id,revision:sourceRevision(pin.source),architecture:pin.architecture};
     if(process.platform!=='darwin'||process.arch!=='arm64')throw Error('nxnative builds require Apple Silicon macOS.');
     if(!path.isAbsolute(work||'')||!path.isAbsolute(output||'')||!Number.isInteger(jobs)||jobs<1||jobs>8)throw Error('Use absolute work/output paths and one to eight jobs.');

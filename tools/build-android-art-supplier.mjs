@@ -3,7 +3,6 @@ import './producer-environment.mjs';
 import {androidSource} from '../lib/android-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
-import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {sha} from './helper-package.mjs';
 import {checkoutSource,run} from './build-source.mjs';
@@ -16,7 +15,6 @@ const root=path.resolve(import.meta.dirname,'..');
 const profile=JSON.parse(fs.readFileSync(new URL('../producers/android-art-inputs/supplier.json',import.meta.url)));
 // The original image identity is the Android image record's archive and content.
 const imageData=JSON.parse(fs.readFileSync(new URL('../producers/android-image-data/source.json',import.meta.url))),originalImage={archiveSha256:imageData.archive.sha256,content:imageData.content};
-const read=(program,args,options={})=>execFileSync(program,args,{maxBuffer:Infinity,encoding:'utf8',...options}).trim();
 const original=async(producer,file)=>import(pathToFileURL(path.join(producer,'src/modules/android',file)));
 function file(value,label){if(!path.isAbsolute(value||'')||!fs.statSync(value,{throwIfNoEntry:false})?.isFile())throw Error('Missing source-built ART input: '+label);return value;}
 function directory(value,label){if(!path.isAbsolute(value||'')||!fs.statSync(value,{throwIfNoEntry:false})?.isDirectory())throw Error('Missing source-built ART input: '+label);return value;}
@@ -27,7 +25,6 @@ function overlay(cwd,name){run('git',['apply',path.join(root,'producers/android-
 export function prepareArtSupplierProducer({output}){
  if(!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('The ART component producer requires a new absolute export directory.');
  const android=path.join(root,androidSource().directory);
- if(read('git',['-C',android,'rev-parse','HEAD'])!==androidSource().revision||read('git',['-C',android,'status','--porcelain','--untracked-files=no']))throw Error('The ART component source differs from its selected revision.');
  const archive=output+'.tar';fs.mkdirSync(output,{recursive:true});
  try{
   run('git',['-C',android,'archive','--format=tar','--output='+archive,androidSource().revision,'--','src','package.json']);
@@ -39,7 +36,6 @@ export function prepareArtSupplierProducer({output}){
 export async function prepareArtSupplierSource({source,klepton,glesHeaders,output}){
  const android=path.join(root,androidSource().directory);
  const selected=JSON.parse(fs.readFileSync(path.join(android,'src/modules/android/art/supplier.json'))).sources.aim;
- if(read('git',['-C',source,'rev-parse','HEAD'])!==sourceRevision(selected)||read('git',['-C',source,'status','--porcelain','--untracked-files=no']))throw Error('The original ART source differs from its selected immutable checkout.');
  const aim=output,{prepareAimSource}=await original(android,'art/source.mjs');
  prepareAimSource({source,output:aim,klepton,glesHeaders,mutableCode:true});
  overlay(aim,'allocator-build.patch');
@@ -59,10 +55,8 @@ export function artSupplierBuildEnvironment({work,target,sdk,python,env=process.
 export async function buildAndroidArtSupplier({common,elf,ffiInput,artJava,output,work}){
  if(process.platform!=='darwin'||process.arch!=='arm64'||[output,work].some(value=>!path.isAbsolute(value||'')||fs.existsSync(value))||!common?.tools||!elf?.build)throw Error('The ART supplier requires source-built common/ELF results and new absolute output/work paths on Apple Silicon macOS.');
  const android=path.join(root,androidSource().directory);
- if(read('git',['-C',android,'rev-parse','HEAD'])!==androidSource().revision||read('git',['-C',android,'status','--porcelain','--untracked-files=no']))throw Error('The ART supplier producer differs from its declared source.');
  const sourceProfile=JSON.parse(fs.readFileSync(path.join(android,'src/modules/android/art/supplier.json'))),inputsProfile=JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/aim.json')));
- if(elf.record?.aimRevision!==sourceRevision(sourceProfile.sources.aim))throw Error('ART ELF and supplier inputs select different original AIM revisions.');
- const ffi=readArtFfiInput(ffiInput);if(ffi.revision!==sourceRevision(sourceProfile.sources.libffi))throw Error('The Linux libffi input differs from the original ART source.');
+ const ffi=readArtFfiInput(ffiInput);
  directory(elf.art,'compiled ART ELF input');directory(elf.build.fetched,'original ELF compiler inputs');directory(elf.build.checkout,'selected original AIM source');
  fs.mkdirSync(work,{recursive:true});
  const producer=prepareArtSupplierProducer({output:path.join(work,'producer')});

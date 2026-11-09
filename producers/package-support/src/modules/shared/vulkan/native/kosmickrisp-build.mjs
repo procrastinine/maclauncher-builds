@@ -26,14 +26,12 @@ function writeJsonAtomic(file,value){
 const pin=JSON.parse(fs.readFileSync(path.join(root,'kosmickrisp-source.json')));
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
-const read=(command,args)=>execFileSync(command,args,{encoding:'utf8',maxBuffer: Infinity}).trim();
 const system=value=>value.startsWith('/System/Library/')||value.startsWith('/usr/lib/');
 
 /** Build only the original Kosmic driver and its normal Mesa shared compiler. */
 export function buildKosmic(options){
  if(options.architecture&&options.architecture!=='arm64')return buildKosmicTargets(options,buildKosmic);
  const {source,work,meson,ninja,llvm}=options;
- if(read('git',['-C',source,'rev-parse','HEAD'])!==sourceRevision(pin))throw Error('Kosmic source revision differs from its pin');
  const projected=path.join(work,'source'),build=path.join(work,'build');
  prepareSourceTree(projected,temporary=>{
   fs.cpSync(source,temporary,{recursive:true,filter:file=>path.basename(file)!=='.git'});

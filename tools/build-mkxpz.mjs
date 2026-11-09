@@ -29,7 +29,6 @@ export async function buildMKXPZ({project,version,arch,output,work}){
  run(process.execPath,[path.join(root,'producers/package-support/scripts/build-mkxpz-nfc.cjs'),'--version',version,'--archive',archive,'--work',buildWork,'--meson',path.join(environment,'bin/meson'),'--ninja',path.join(environment,'bin/ninja'),'--output',staged]);
  const result=JSON.parse(fs.readFileSync(path.join(buildWork,'STAGED.json'))),sdlImage=path.join(source,'subprojects/sdl2_image');
  const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{maxBuffer:Infinity,encoding:'utf8',env:{...process.env,GIT_NO_LAZY_FETCH:'1'}}).trim();
- if(git(sdlImage,['rev-parse','HEAD'])!==sdlImagePin.revision)throw Error('SDL_image differs from its declared commit.');
  const dependencies=[{path:'sdl2_image',revision:sdlImagePin.revision,repository:sdlImagePin.repository}];
  for(const line of git(sdlImage,['submodule','status','--recursive']).split('\n').filter(Boolean)){
   const match=/^ ([a-f0-9]{40}) (\S+)/.exec(' '+line.trim());

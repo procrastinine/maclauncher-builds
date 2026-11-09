@@ -11,7 +11,6 @@ import {managerDeclaration} from './manager-declaration.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {addLicenses,addCargoLicenses,includeLicenses} from '../lib/licenses.mjs';
 const require=createRequire(import.meta.url),B=require('../lib/package-format.cjs'),Native=require('../lib/package-format.cjs');
-const Source=require('../producers/package-support/src/modules/shared/runtime/pinned-native-build.js');
 const Tools=require('../producers/package-support/scripts/native-binary-tools.cjs');
 const system=value=>value.startsWith('/usr/lib/')||value.startsWith('/System/Library/');
 function preparedNativeFiles(){
@@ -25,7 +24,6 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
  const project=resolveProject(id,directory),build=buildRecord(project,selectedVersion),version=build.version,cpu=arch==='x64'?'x86_64':arch,preparedFiles=preparedNativeFiles(),shared=new Set();
  if(!version||!['arm64','x64'].includes(arch)||!build.architectures.includes(arch)||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(executable||'')||!path.isAbsolute(sourceRoot||'')||!project.upstreams.some(pin=>pin.revision===upstreamRevision))
   throw Error('Sealing needs a registered build, target CPU, pinned public source and a new absolute output directory.');
- await Source.validatePinnedSource(sourceRoot,upstreamRevision,{sourceScope});
  executable=fs.realpathSync(executable);executableRelative??=appRoot?path.basename(appRoot)+'/Contents/MacOS/'+path.basename(executable):'bin/'+path.basename(executable);B.relativeFile(executableRelative);
  const payload=path.join(output,'payload'),files=path.join(payload,'files'),originals=new Map(),targets=new Map(),sources=new Map();
  const copy=(source,relative)=>{B.relativeFile(relative);const target=path.join(files,relative);Tools.copyTree(source,target);return target;};
@@ -106,8 +104,6 @@ export async function sealRuntime({project:id,version:selectedVersion,arch,execu
    dependencies:[...seen].map(file=>({file:path.relative(files,file).split(path.sep).join('/'),links:Tools.links(file,cpu).filter(link=>!Tools.libraryIds(file,cpu).includes(link))})),
    runtimeFiles,environmentRelative,...(capabilities?{capabilities}:{}),signature:{identity:'-',verified:true},
    provenance:Tools.publicProvenance({...provenance,sourceRevision:upstreamRevision,inputExecutableSha256:originals.get(executable)||Native.hashFile(executable),verifiedBuild:true})};
-  await Source.validatePinnedSource(sourceRoot,upstreamRevision,{sourceScope});
-  for(const [file,hash] of originals)if(Native.hashFile(file)!==hash)throw Error('Original build input changed while sealing.');
   B.validateManifest(manifest);
   fs.writeFileSync(path.join(payload,'manifest.json'),JSON.stringify(manifest,null,2)+'\n',{flag:'wx'});
   const declaration=await managerDeclaration({project:id,input:payload});

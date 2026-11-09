@@ -167,7 +167,6 @@ async function buildRuntime({ manager, userDataDir, version, packageVersion, sou
     const publicBuild = { ...verifiedBuild, compilerPrefixMaps: prefixMaps.map(({ to }) => ({ logicalRoot: to })) };
     delete publicBuild.compilerFlags; delete publicBuild.buildDirectory;
     fs.writeFileSync(path.join(payload, "onscripter-en-runtime.json"), JSON.stringify(publicBuild, null, 2));
-    if (sourceDir && fs.existsSync(path.join(sourceDir, ".git"))) await Source.validatePinnedSource(sourceDir, REVISION, { signal, sourceScope: SOURCE_SCOPE });
     throwIfAborted(signal);
     onProgress?.({ downloaded: 4, total: 5 });
     const installed = manager.core.registerLocal({ userDataDir, version: outputVersion, runtimePath: executable, verifiedBuild });

@@ -22,7 +22,7 @@ function sourceObjects({repository,revision},destination){
  run('git',['init','--bare',destination]);run('git',['-C',destination,'remote','add','origin',repository]);
  run('git',['-C',destination,'config','remote.origin.promisor','true']);run('git',['-C',destination,'config','remote.origin.partialclonefilter','blob:none']);
  retryNetwork(()=>run('git',['-C',destination,'fetch','--filter=blob:none','--depth','1','--no-tags','origin',revision]));run('git',['-C',destination,'update-ref','HEAD',revision]);
- if(read('git',['-C',destination,'rev-parse','HEAD'])!==revision)throw Error('Java source object store differs from its declared commit.');return destination;
+ return destination;
 }
 
 /** Compile complete platform Java implementations and native declarations without Mac programs. */

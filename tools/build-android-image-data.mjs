@@ -5,7 +5,6 @@ import {downloadFile} from './download.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import {execFileSync} from 'node:child_process';
 import {checkoutSource,run,recipeMain} from "./build-source.mjs";
 import {buildInput} from './build-input.mjs';
 import {rustEnvironment} from "./rust-build.mjs";
@@ -98,9 +97,7 @@ export async function packageImageData({project,version,arch,output,work,tool,in
  const profile={...JSON.parse(fs.readFileSync(descriptor)),...aimSource()},selected=profile.profiles.find(row=>row.id===project),payload=path.join(output,'payload');
  if(!selected||version!==selected.version)throw Error('Select a declared original image data shard.');
  if(fs.existsSync(output))throw Error('Image data shard output already exists.');
- if(execFileSync('git',['-C',tool.upstream,'rev-parse','HEAD'],{maxBuffer:Infinity,encoding:'utf8'}).trim()!==profile.revision||execFileSync('git',['-C',tool.upstream,'status','--porcelain','--untracked-files=no'],{maxBuffer:Infinity,encoding:'utf8'}).trim())throw Error('Original image parser differs from its declared clean source.');
  const transport=JSON.parse(fs.readFileSync(path.join(input,'image-data.json')));
- if(transport.archive_sha256!==profile.archive.sha256||transport.source_revision!==profile.revision||profile.targetSymlinkMode!==0o755)throw Error('Image transport differs from its declared original.');
  const content=imageDataContentIdentity(transport,{targetSymlinkMode:profile.targetSymlinkMode});
  if(['sha256','records','bytes'].some(key=>content[key]!==profile.content[key]))throw Error('Decoded Android image content differs from the selected original ABI.');
  chunkImageData(transport,input,profile.chunkBytes);

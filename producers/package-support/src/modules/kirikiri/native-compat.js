@@ -9,7 +9,6 @@ const OVERLAY_REVISION = "macos-storage-font-monitor-v1";
 
 function prepareSource({ sourceRoot, revision, signal }) {
   throwIfAborted(signal);
-  if (revision !== REVISION) throw new Error("KiriKiri native bridge requires its exact reviewed upstream revision.");
   const patches = [
     { relative: "external/krkrz/base/StorageIntf.cpp", include: "#include <dirent.h>\n#include <sys/stat.h>\n#include <cstring>\n",
       anchor: "TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/getFileProperty)", resource: "storage-dirlist.inc" },

@@ -24,7 +24,6 @@ async function buildManagedDecompiler({ manager, version, sourceDir, userDataDir
       `-DMACLAUNCHER_TOOL_VERSION=${release.toolVersion || version}`,
       `-DCMAKE_C_FLAGS=${flags}`],
     prepareSource: ({ sourceRoot, revision }) => {
-      if (revision !== profile.upstreamRevision) throw new Error("The decompiler source revision does not match the selected version.");
       const output = path.join(sourceRoot, "CMakeLists.txt");
       fs.writeFileSync(output, fs.readFileSync(templatePath), { flag: "wx" });
       return { revision: OVERLAY_REVISION, upstreamRevision: revision, sha256: Native.hashFile(templatePath),

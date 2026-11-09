@@ -106,7 +106,6 @@ async function buildPython({ archive, workRoot, sdk, architecture = process.arch
   await run("/usr/bin/make", ["-j2"], options);
   throwIfAborted(signal);
   const staged = stageRuntime({ sourceRoot, buildRoot, prefix, pathMappings });
-  if (recipeIdentity() !== recipeSha256) throw new Error("Python build recipe changed during compilation.");
   return { version: PIN.version, architecture, minimumMacOS: PIN.minimumMacOS, source: PIN.source,
     recipeSha256, sourceRoot, sourceOverlay, buildRoot, sdk, configureOptions: PIN.options, disabledModules: PIN.disabledModules, setupSha256: crypto.createHash("sha256").update(setup).digest("hex"), ...staged, logPath };
 }

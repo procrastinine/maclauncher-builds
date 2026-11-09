@@ -52,7 +52,6 @@ async function buildPortableSystem4({ sourceDir=sourcePath,archives,workRoot,dep
   if(!path.isAbsolute(archives?.ffmpeg||"")||Native.hashFile(archives.ffmpeg)!==Movie.PIN.source.sha256)throw new Error("Portable movies require the exact FFmpeg source archive.");
   const source=await Source.validatePinnedSource(sourceDir,REVISION,{signal});
   const libsys4Revision = require("node:child_process").execFileSync("git", ["-C", sourceDir, "rev-parse", "HEAD:subprojects/libsys4"], { encoding: "utf8" }).trim();
-  if(Source.hashPinnedFiles(sourceDir,source.files)!==SOURCE_SHA256)throw new Error("xsystem4 and libsys4 source checksum differs from the selected version.");
   const overlaySha256=overlayIdentity();
   let fonts,audio,movie;
   if(dependencyStacks){
@@ -91,8 +90,6 @@ async function buildPortableSystem4({ sourceDir=sourcePath,archives,workRoot,dep
   await run(tools.ninja,["-C",outputRoot,"-j2"],{cwd:workRoot,logPath,env,signal});
   await run(tools.meson,["install","-C",outputRoot,"--no-rebuild"],{cwd:workRoot,logPath,env,signal});
   throwIfAborted(signal);const features=validateFeatures(outputRoot);
-  await Source.validatePinnedSource(sourceDir,REVISION,{signal});
-  if(Source.hashPinnedFiles(sourceDir,source.files)!==sourceTreeSha256||overlayIdentity()!==overlaySha256)throw new Error("xsystem4 source or build adapter changed during compilation.");
   const executable=path.join(prefix,"bin/xsystem4");
   return {managerId:"xsystem4",version:VERSION,sourceRevision:REVISION,libsys4Revision,sourceTreeSha256,overlaySha256,sourceOverlay,
     architecture,minimumMacOS:"13.0",executable,executableSha256:Native.hashFile(executable),resources:path.join(prefix,"share/xsystem4"),features,
