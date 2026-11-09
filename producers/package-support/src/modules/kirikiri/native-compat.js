@@ -4,7 +4,7 @@ const crypto = require("node:crypto");
 const Native = require('../../../../../lib/package-format.cjs');
 const { throwIfAborted } = require('../../../../../lib/abort.cjs');
 
-const REVISION = require("../../../../../lib/pins.mjs").gitlink("producers/package-support/src/external/krkrsdl2");
+const REVISION = require("../../../../../lib/projects.mjs").upstreamRevision("krkrsdl2", "krkrsdl2");
 const OVERLAY_REVISION = "macos-storage-font-monitor-v1";
 
 function prepareSource({ sourceRoot, revision, signal }) {

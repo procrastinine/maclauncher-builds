@@ -1,4 +1,4 @@
-const {gitlink} = require("../../../../../lib/pins.mjs");
+const {upstreamRevision} = require("../../../../../lib/projects.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const { buildPinnedRuntime } = require("../shared/runtime/pinned-native-build");
@@ -10,7 +10,7 @@ const templatePath = path.join(__dirname, "overlays/decompiler-cmake-v1.cmake");
 
 async function buildManagedDecompiler({ manager, version, sourceDir, userDataDir, logger, signal, onProgress, dependencies }) {
   const metadata = profiles.find(row => row.managerId === manager.id);
-  const profile = metadata && { ...metadata, upstreamRevision: gitlink("producers/package-support/src/external/" + metadata.repo) };
+  const profile = metadata && { ...metadata, upstreamRevision: upstreamRevision(manager.id, metadata.repo) };
   // Each package revision of the pinned source has its own release row.
   const release = profile?.releases.find(row => row.version === version);
   if (!release) throw new Error("No Mac build is available for this decompiler source version.");

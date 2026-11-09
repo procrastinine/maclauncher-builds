@@ -1,4 +1,4 @@
-const {gitlink} = require("../../../../../../../lib/pins.mjs");
+const {upstreamRevision} = require("../../../../../../../lib/projects.mjs");
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
@@ -6,12 +6,12 @@ const cp = require('node:child_process');
 const Pinned = require('../../runtime/pinned-native-build');
 
 const VERSION = 'MCLv1-0206';
-const REVISION = gitlink("producers/package-support/src/external/innoextract");
+const REVISION = upstreamRevision("innoextract", "innoextract");
 const BOOST_VERSION = '1.92.0';
 const DEPENDENCIES = Object.freeze({
-  'boost-filesystem': gitlink('producers/package-support/src/external/boost-filesystem'),
-  'boost-program-options': gitlink('producers/package-support/src/external/boost-program-options'),
-  'boost-iostreams': gitlink('producers/package-support/src/external/boost-iostreams')
+  'boost-filesystem': upstreamRevision('innoextract', 'boost-filesystem'),
+  'boost-program-options': upstreamRevision('innoextract', 'boost-program-options'),
+  'boost-iostreams': upstreamRevision('innoextract', 'boost-iostreams')
 });
 const NATIVE = path.join(__dirname, '../native');
 const hash = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');

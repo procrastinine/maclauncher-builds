@@ -3,14 +3,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
-import {gitlink} from '../../lib/pins.mjs';
+import {upstreamRevision} from '../../lib/projects.mjs';
 import {addLicenses} from '../../lib/licenses.mjs';
 import {applyComposition} from './patch.mjs';
 import {applyAdaptations} from './adapt.mjs';
 const here=import.meta.dirname;
 const run=(program,args,options={})=>execFileSync(program,args,{stdio:'inherit',...options});
 const quote=value=>"'"+String(value).replaceAll('\\','/').replaceAll("'","\\'")+"'";
-export const sourceRevision=()=>gitlink('producers/dxvk/source');
+export const sourceRevision=()=>upstreamRevision('dxvk','dxvk');
 
 /** Build the ordinary upstream renderer with its paired HWND composition DLL. */
 export function buildProvider({work,output,mingw,glslang,source=path.join(here,'source'),

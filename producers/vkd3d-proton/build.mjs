@@ -3,13 +3,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
-import {gitlink} from '../../lib/pins.mjs';
+import {upstreamRevision} from '../../lib/projects.mjs';
 import {addLicense,addLicenses} from '../../lib/licenses.mjs';
 const here=import.meta.dirname;
 const run=(program,args,options={})=>execFileSync(program,args,{stdio:'inherit',...options});
 const quote=value=>"'"+String(value).replaceAll('\\','/').replaceAll("'","\\'")+"'";
-export const sourceRevision=()=>gitlink('producers/vkd3d-proton/source');
-export const ngxRevision=()=>gitlink('producers/vkd3d-proton/ngx');
+export const sourceRevision=()=>upstreamRevision('vkd3d-proton','vkd3d-proton');
+export const ngxRevision=()=>upstreamRevision('vkd3d-proton','vkd3d-proton-macos-ngx');
 /** Search path for meson and ninja: meson setup finds the given ninja, as the compile step runs it. */
 export const providerPath=({glslang,ninja,mingw},search=process.env.PATH)=>[glslang?path.dirname(path.resolve(glslang)):null,
   ninja&&path.isAbsolute(ninja)?path.dirname(ninja):null,mingw,search].filter(Boolean).join(path.delimiter);

@@ -1,4 +1,3 @@
-import {gitlink} from '../../../lib/pins.mjs';
 import {addLicenses} from '../../../lib/licenses.mjs';
 // GitHub build of an AliceSoft decompiler for one Mac CPU, sealed as a runtime
 // manager output with the package declaration that release preparation reads.
@@ -7,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
-import {resolveProject,buildRecord} from '../../../lib/projects.mjs';
+import {resolveProject,buildRecord,upstreamRevision} from '../../../lib/projects.mjs';
 import {managerDeclaration} from '../../../tools/manager-declaration.mjs';
 import {recipeMain} from '../../../tools/build-source.mjs';
 const require=createRequire(import.meta.url);
@@ -22,7 +21,7 @@ const run=(command,args)=>execFileSync(command,args,{encoding:'utf8',timeout:600
 /** Compile the selected decompiler release through its managed source build. */
 export async function compile({project,version:selectedVersion,arch,work=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'decompiler-')),'work'),dependencies}){
  const version=buildRecord(resolveProject(project,path.resolve(import.meta.dirname,'../../..'),{resolvePins:false}),selectedVersion).version;
- const metadata=profiles.find(row=>row.managerId===project),profile=metadata&&{...metadata,upstreamRevision:gitlink("producers/package-support/src/external/"+metadata.repo)},release=profile?.releases.find(row=>row.version===version);
+ const metadata=profiles.find(row=>row.managerId===project),profile=metadata&&{...metadata,upstreamRevision:upstreamRevision(project,metadata.repo)},release=profile?.releases.find(row=>row.version===version);
  if(!release)throw Error('The decompiler profiles have no release for '+project+'.');
  const cpu=arch==='x64'?'x86_64':'arm64',sourceDir=path.join(external,profile.repo),userDataDir=path.join(work,'user-data');
  // CMake reads its target CPU from this variable; a runner of the same CPU builds natively.

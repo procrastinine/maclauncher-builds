@@ -1,10 +1,11 @@
-const { gitlink, sourceRevision } = require("../../../../../../lib/pins.mjs");
+const { sourceRevision } = require("../../../../../../lib/pins.mjs");
+const { upstreamRevision } = require("../../../../../../lib/projects.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 
 const VERSION = "0.5.3-macos-v7";
 const PROFILE_REVISION = "macos-npa-nss-private-v7";
-const REVISION = gitlink("producers/package-support/src/external/libnpengine");
+const REVISION = upstreamRevision("npengine", "libnpengine");
 const NPA_REVISION = sourceRevision(require("./sources.json").libnpa);
 const sourcePath = path.resolve(__dirname, "../../../external/libnpengine");
 const npaSourcePath = path.resolve(__dirname, "../../../external/libnpa");

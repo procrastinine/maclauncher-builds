@@ -1,5 +1,6 @@
 const sharedDependencies=require('../../../../../dependencies.json');
-const { gitlink, sourceRevision } = require("../../../../../../lib/pins.mjs");
+const { sourceRevision } = require("../../../../../../lib/pins.mjs");
+const { upstreamRevision } = require("../../../../../../lib/projects.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -9,7 +10,7 @@ const UPSTREAM_VERSION = "1.12";
 const VERSION = "1.12-MCLv1";
 const REVISION = require("./source-1.12.json").revision;
 const SDL_REVISION = sourceRevision(sharedDependencies.sdlHeaders);
-const OPENAL_REVISION = gitlink("producers/package-support/src/external/openal-soft");
+const OPENAL_REVISION = upstreamRevision("native-openal", "openal-soft");
 
 function adaptSource(source, sdlSource) {
   const jpeg = path.join(source, "include/turbojpeg/jconfig.h"), png = path.join(source, "include/png/pngpriv.h");

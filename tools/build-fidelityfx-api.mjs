@@ -1,16 +1,17 @@
 import './producer-environment.mjs';
 import sharedDependencies from '../producers/dependencies.json' with {type:'json'};
-import {gitlink,sourceRevision} from '../lib/pins.mjs';
+import {sourceRevision} from '../lib/pins.mjs';
+import {upstreamRevision} from '../lib/projects.mjs';
 import {execFileSync} from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import {checkoutSource,recipeMain} from './build-source.mjs';
 import {base,read,run,mingw,producerOutput,assemble} from './scene-runtime.mjs';
 /** Compile the FidelityFX API adapter with the llvm-mingw toolchain. */
-export async function compile({work}){
+export async function compile({project,work}){
  fs.mkdirSync(work,{recursive:true});
  const producer=path.join(base,'src/modules/crossover/temporal/fidelityfx'),source=read(path.join(producer,'source.json'));
- source.sdk.revision=gitlink('producers/package-support/src/external/fsr3-sdk');
+ source.sdk.revision=upstreamRevision(project,'fidelityfx-sdk');
  source.vulkan.revision=sourceRevision(sharedDependencies.sdlHeaders);
  const sdk=checkoutSource({...source.sdk,destination:path.join(work,'sdk')}),vulkan=checkoutSource({...source.vulkan,destination:path.join(work,'vulkan')});
  const compiler=await mingw(work),staged=path.join(work,'staged');

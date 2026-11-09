@@ -1,9 +1,9 @@
-const { gitlink } = require("../../../../../../../lib/pins.mjs");
+const { upstreamRevision } = require("../../../../../../../lib/projects.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 
-const REVISION = gitlink("producers/package-support/src/external/OpenGMK");
+const REVISION = upstreamRevision("opengmk", "opengmk");
 const OVERLAY_VERSION = "maclauncher-appkit-gl-6";
 const SOURCE_FILES = ["Cargo.toml", "gm8emulator/Cargo.toml", "gm8emulator/build.rs", "gm8emulator/src/main.rs", "gm8emulator/src/render/opengl.rs", "gm8emulator/src/game.rs", "gm8emulator/src/gml/file.rs", "gm8emulator/src/game/includedfile.rs", "gm8emulator/src/game/external.rs", "gm8emulator/src/gml/kernel.rs"];
 const digest = bytes => crypto.createHash("sha256").update(bytes).digest("hex");

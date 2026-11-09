@@ -1,4 +1,4 @@
-const {gitlink} = require("../../../../../lib/pins.mjs");
+const {upstreamRevision} = require("../../../../../lib/projects.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -9,7 +9,7 @@ const Resources = require("./system3-resource-overlay");
 const Prefix = require("../shared/runtime/portable-dependency-prefix");
 
 const VERSION = "1.8.0-MCLv1";
-const REVISION = gitlink("producers/package-support/src/external/system3-sdl2");
+const REVISION = upstreamRevision("system3", "system3-sdl2");
 const SOURCE_SHA256 = "7d5074ef5cce68c9f0f4246fb91f17ba8482f7ae798ddda9dd6208d8530f695c";
 const sourcePath = path.resolve(__dirname, "../../external/system3-sdl2");
 

@@ -10,7 +10,8 @@ import {execFileSync, spawnSync} from "node:child_process";
 import {pathToFileURL} from "node:url";
 import {createRequire} from "node:module";
 import {buildInput} from "../../../tools/build-input.mjs";
-import {gitlink,sourceRevision} from "../../../lib/pins.mjs";
+import {sourceRevision} from "../../../lib/pins.mjs";
+import {upstreamRevision} from "../../../lib/projects.mjs";
 import {APP_REFERENCE,appPath,recipePath} from "../../../tools/app-source.mjs";
 
 const repository = path.resolve(import.meta.dirname, "..");
@@ -75,7 +76,7 @@ export function resolveSource(id, override) {
   const entry = recipe.sources[id];
   if (!entry) throw Error("Unknown graphics source: " + id);
   const commit = id==='sdl-vulkan' ? sourceRevision(sharedDependencies.sdlHeaders) :
-    id==='libplacebo-vulkan-headers' ? git(path.join(repository,'src/external/libplacebo'),['rev-parse',gitlink('producers/package-support/src/external/libplacebo')+':3rdparty/Vulkan-Headers']) :
+    id==='libplacebo-vulkan-headers' ? git(path.join(repository,'src/external/libplacebo'),['rev-parse',upstreamRevision('reshade','libplacebo-scene')+':3rdparty/Vulkan-Headers']) :
     sourceRevision({gitlink: 'producers/package-support/' + entry.path}), origin = pinned({file: entry.pin.file, pointer: entry.pin.repository});
   const directory = override ? path.resolve(override) : path.join(repository, entry.path);
   const result = {id, path: directory, commit, repository: canonical(origin)};

@@ -1,5 +1,5 @@
 const sharedDependencies=require('../../../../dependencies.json');
-const {gitlink} = require("../../../../../lib/pins.mjs");
+const {upstreamRevision} = require("../../../../../lib/projects.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -14,7 +14,7 @@ const { throwIfAborted } = require('../../../../../lib/abort.cjs');
 // Portable libffi uses its configured release archive; the Git snapshot does not contain configure.
 const PIN = Object.freeze({...require("./system4-portable.json"),dependencies:require("./system4-portable.json").dependencies.map(row=>{if(row.id==='webp')row={...require('./system35-portable.json').dependencies.find(pin=>pin.id==='webp'),...row};const pin=sharedDependencies[row.id==='libffi'?'libffiPortable':row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};})});
 const VERSION = "MCLv9";
-const REVISION = gitlink("producers/package-support/src/external/xsystem4");
+const REVISION = upstreamRevision("xsystem4", "xsystem4");
 const SOURCE_SHA256 = "4573e25bd5958bb6b7d8b28b6e1c0036af5c752e304d30c8afa270c7818ba0c0";
 const sourcePath = path.resolve(__dirname, "../../external/xsystem4");
 const recipeFiles = [__filename, require.resolve("./system4-portable-overlay-v3"), require.resolve("./system4-portable.json"),

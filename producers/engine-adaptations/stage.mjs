@@ -1,10 +1,9 @@
-import {gitlink} from '../../lib/pins.mjs';
 import {addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
 import {recipeMain} from '../../tools/build-source.mjs';
-import {resolveProject,buildRecord} from '../../lib/projects.mjs';
+import {resolveProject,buildRecord,upstreamRevision} from '../../lib/projects.mjs';
 const require=createRequire(import.meta.url),B=require('../../lib/package-format.cjs');
 const {validateDeclaration}=require('../../lib/package-contract.cjs');
 const root=import.meta.dirname;
@@ -42,7 +41,7 @@ function seal(project,version,arch,minimumMacOS,output,manifest,sourceSha256){
 function gather(profile,project,directory){
  const source=copySources(profile,directory);
  addLicenses(directory,project,path.join(root,profile.source,'engine'));
- return {sourceUrl:source.repository,sourceRevision:gitlink('producers/engine-adaptations/sources/VNDS-LOVE')};
+ return {sourceUrl:source.repository,sourceRevision:upstreamRevision(project,'vnds-love')};
 }
 /** Inventory gathered engine data, write its manifest and seal it. */
 function describe(profile,project,version,directory,{sourceUrl,sourceRevision}){

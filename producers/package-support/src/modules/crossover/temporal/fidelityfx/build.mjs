@@ -1,6 +1,7 @@
 import {appPath,appRequire,appSourceRoot} from '../../../../../../../tools/app-source.mjs';
 import sharedDependencies from '../../../../../../dependencies.json' with {type:'json'};
-import {gitlink,sourceRevision} from '../../../../../../../lib/pins.mjs';
+import {sourceRevision} from '../../../../../../../lib/pins.mjs';
+import {upstreamRevision} from '../../../../../../../lib/projects.mjs';
 import {addLicense,addLicenses} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
@@ -18,17 +19,17 @@ const vulkanRevision=sourceRevision(sharedDependencies.sdlHeaders);
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 fs.mkdirSync(out,{recursive:true});const inputs=path.join(out,'inputs');fs.mkdirSync(inputs,{recursive:true});
 const originalInputs={};
-for(const relative of source.sdk.headers){const target=path.join(inputs,relative.slice('ffx-api/include/'.length));fs.mkdirSync(path.dirname(target),{recursive:true});const bytes=git(sdk,'show',gitlink('producers/package-support/src/external/fsr3-sdk')+':'+relative);fs.writeFileSync(target,bytes);originalInputs[relative]=hash(target);}
+for(const relative of source.sdk.headers){const target=path.join(inputs,relative.slice('ffx-api/include/'.length));fs.mkdirSync(path.dirname(target),{recursive:true});const bytes=git(sdk,'show',upstreamRevision('fidelityfx-api','fidelityfx-sdk')+':'+relative);fs.writeFileSync(target,bytes);originalInputs[relative]=hash(target);}
 for(const relative of source.vulkan.headers){const target=path.join(inputs,'vulkan',relative);fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,git(vulkan,'show',vulkanRevision+':'+source.vulkan.directory+'/'+relative));originalInputs['vulkan/'+relative]=hash(target);}
 const originalLibrary=path.join(out,source.original[backend]);
-const declaredReference=source.sdk.referenceLibraries[backend],sdkReference=git(sdk,'show',gitlink('producers/package-support/src/external/fsr3-sdk')+':'+declaredReference.path);
+const declaredReference=source.sdk.referenceLibraries[backend],sdkReference=git(sdk,'show',upstreamRevision('fidelityfx-api','fidelityfx-sdk')+':'+declaredReference.path);
 if(crypto.createHash('sha256').update(sdkReference).digest('hex')!==declaredReference.sha256)throw Error('The pinned SDK original library differs from its declared digest.');
 let reference,referenceSource;
 if(args.reference)reference=fs.realpathSync(args.reference);
 else{
  fs.writeFileSync(originalLibrary,sdkReference);reference=originalLibrary;
 }
-if(hash(reference)===declaredReference.sha256)referenceSource={repository:source.sdk.repository,revision:gitlink('producers/package-support/src/external/fsr3-sdk'),path:declaredReference.path,sha256:declaredReference.sha256};
+if(hash(reference)===declaredReference.sha256)referenceSource={repository:source.sdk.repository,revision:upstreamRevision('fidelityfx-api','fidelityfx-sdk'),path:declaredReference.path,sha256:declaredReference.sha256};
 const expected=new Set(source.exports),exports=appRequire('src/modules/crossover/temporal/streamline/pe-exports.js').inspect(reference);
 if(!Array.isArray(exports)||exports.length!==expected.size||exports.some(row=>!expected.has(row.name)))throw Error('The original library does not match the exact five-export FidelityFX API profile. Preserve its original route.');
 if(path.resolve(reference)!==originalLibrary)fs.copyFileSync(reference,originalLibrary);

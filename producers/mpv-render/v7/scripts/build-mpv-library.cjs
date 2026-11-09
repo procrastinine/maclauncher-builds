@@ -1,8 +1,8 @@
 // Build the managed libmpv adapter from an exact upstream export and owned overlays.
 const fs = require("node:fs"), path = require("node:path"), crypto = require("node:crypto");
 const { execFileSync, spawnSync } = require("node:child_process");
-const {gitlink}=require('../../../../lib/pins.mjs');
-const REVISION = gitlink('producers/package-support/src/external/mpv-player');
+const {upstreamRevision}=require('../../../../lib/projects.mjs');
+const REVISION = upstreamRevision('mpv','mpv');
 const BACKPORTS = require('../source.json').backports;
 const PATCHES = ["mpv-frame-metadata.patch", "mpv-render-layers.patch"];
 const OPTIONS = ["--buildtype=release", "--wrap-mode=nofallback", "-Dlibmpv=true", "-Dcplayer=false",

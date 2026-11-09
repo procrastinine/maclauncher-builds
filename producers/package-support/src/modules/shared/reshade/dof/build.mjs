@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {gitlink} from '../../../../../../../lib/pins.mjs';
+import {upstreamRevision} from '../../../../../../../lib/projects.mjs';
 import {fidelityFXSource} from '../lens/translate.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import {appPath,exportAppFile} from '../../../../../../../tools/app-source.mjs';
@@ -14,7 +14,7 @@ for(let i=2;i<process.argv.length;i+=2){const key=process.argv[i];if(!['--source
 for(const key of ['--source','--tools','--output'])if(!options[key])throw Error('Missing '+key);
 const source=options['--source'],tools=options['--tools'],out=options['--output'];
 const hash=b=>crypto.createHash('sha256').update(b).digest('hex'),run=(exe,args)=>execFileSync(exe,args,{encoding:'utf8',maxBuffer:64*1024*1024});
-const read=file=>fs.existsSync(path.join(source,file))?fs.readFileSync(path.join(source,file),'utf8'):run('git',['-C',source,'show',gitlink('producers/package-support/src/external/fsr3-sdk')+':'+file]);
+const read=file=>fs.existsSync(path.join(source,file))?fs.readFileSync(path.join(source,file),'utf8'):run('git',['-C',source,'show',upstreamRevision('reshade','fidelityfx-image-filters')+':'+file]);
 const spec=fidelityFXSource(path.join(here,'source.json'),read);
 fs.mkdirSync(out,{recursive:true});const overlay=path.join(out,'overlay'),gpu=path.join(source,'sdk/include/FidelityFX/gpu');fs.mkdirSync(path.join(overlay,'dof'),{recursive:true});
 for(const file of Object.keys(spec.files))if(file.startsWith('sdk/include/FidelityFX/gpu/dof/'))fs.writeFileSync(path.join(overlay,'dof',path.basename(file)),read(file));
@@ -62,5 +62,5 @@ const shaders=[];for(const role of [...spec.roles,{name:'depth',entry:'CSDepth'}
 let header='// Copyright (C) 2024 Advanced Micro Devices, Inc. MIT; see dof-MIT.txt.\n// Generated original FidelityFX DoF compute kernels.\n#pragma once\n#include <cstddef>\nnamespace macfx::dof_shaders {\nstruct Binding{const char*name;const char*kind;unsigned index;};\nstruct Shader{const char*name;const char*entry;const char*source;const Binding*bindings;size_t count;unsigned x,y,z;};\n';
 shaders.forEach((s,i)=>{header+=`inline constexpr Binding bindings${i}[]={${s.bindings.map(b=>'{'+JSON.stringify(b.name)+','+JSON.stringify(b.kind)+','+b.index+'}').join(',')}};\ninline constexpr const char*source${i}=R"DOF_GPU(${s.source})DOF_GPU";\n`;});header+='inline constexpr Shader shaders[]={'+shaders.map((s,i)=>`{${JSON.stringify(s.name)},${JSON.stringify(s.entry)},source${i},bindings${i},sizeof(bindings${i})/sizeof(Binding),${s.threads.join(',')}}`).join(',')+'};\n}\n';
 fs.writeFileSync(path.join(out,'dof-shaders.hpp'),header);addLicenses(out,'FidelityFX-DoF',source);
-fs.writeFileSync(path.join(out,'translation.json'),JSON.stringify({schema:1,repository:spec.repository,commit:gitlink('producers/package-support/src/external/fsr3-sdk'),source:spec,adaptations:{callbacks:{sourceSha256:hash(original),appliedSha256:hash(callbacks)},inverseDepthDomain:{sourceSha256:hash(originalDepth),appliedSha256:hash(depth)}},shaders:shaders.map(({source,...s})=>s)},null,2)+'\n');
+fs.writeFileSync(path.join(out,'translation.json'),JSON.stringify({schema:1,repository:spec.repository,commit:upstreamRevision('reshade','fidelityfx-image-filters'),source:spec,adaptations:{callbacks:{sourceSha256:hash(original),appliedSha256:hash(callbacks)},inverseDepthDomain:{sourceSha256:hash(originalDepth),appliedSha256:hash(depth)}},shaders:shaders.map(({source,...s})=>s)},null,2)+'\n');
 console.log(JSON.stringify({output:out,kernels:shaders.length}));

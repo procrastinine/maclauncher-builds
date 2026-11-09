@@ -2,7 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 
-const REVISION = require("../../../../../../lib/pins.mjs").gitlink("producers/package-support/src/external/ReMinori");
+const REVISION = require("../../../../../../lib/projects.mjs").upstreamRevision("reminori", "reminori");
 const VERSION = "0.1.0-MCLv1";
 const PROFILE = "paz-pe-keytables-native-macos-v2";
 const ORIGINALS = Object.freeze({

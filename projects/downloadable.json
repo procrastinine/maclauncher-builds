@@ -3566,6 +3566,14 @@
           "pointer": "/shaderc/revision",
           "repositoryPointer": "/shaderc/repository"
         }
+      },
+      {
+        "id": "vulkan-loader",
+        "provider": "gitiles",
+        "url": "https://chromium.googlesource.com/external/github.com/KhronosGroup/Vulkan-Loader",
+        "pin": {
+          "gitlink": "sources/vulkan-loader"
+        }
       }
     ],
     "packageProfiles": [

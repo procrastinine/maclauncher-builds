@@ -2,7 +2,8 @@ import {appPath,appRequire,moduleFile,moduleFiles} from '../../../tools/app-sour
 import sharedDependencies from '../../dependencies.json' with {type:'json'};
 import dependencies from '../../../producers/dependencies.json' with {type:'json'};
 const {shaderc}=dependencies;
-import {gitlink,sourceRevision} from '../../../lib/pins.mjs';
+import {sourceRevision} from '../../../lib/pins.mjs';
+import {upstreamRevision} from '../../../lib/projects.mjs';
 import {addLicense,addLicenses,includeLicenses} from '../../../lib/licenses.mjs';
 import fs from "node:fs";
 import path from "node:path";
@@ -205,7 +206,7 @@ if(options["--fsr3-generation"]){
     temporalInputs.set("generation/fsr3/"+relative,file);
   }
   for(const name of ["source.json","build.mjs","backend.mm","metal-backend.hpp","index.js"])extraOwned.set("maclauncher/generation/fsr3/"+name,moduleFile("src/modules/shared/reshade/generation/fsr3/"+name));
-  pins.push(` ${gitlink("producers/package-support/src/external/fsr3-sdk")} third_party/FidelityFX-SDK-generation`);
+  pins.push(` ${upstreamRevision('reshade','fsr3-generation')} third_party/FidelityFX-SDK-generation`);
   features.graphics.generationProviderAPI=1;features.graphics.frameGenerationMethods=[...new Set([...(features.graphics.frameGenerationMethods||[]),"fsr3"])];
 }
 if(options["--xess"]){

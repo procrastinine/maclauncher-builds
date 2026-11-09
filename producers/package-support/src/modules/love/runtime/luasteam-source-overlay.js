@@ -1,12 +1,12 @@
-const {gitlink} = require("../../../../../../lib/pins.mjs");
+const {upstreamRevision} = require("../../../../../../lib/projects.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const INPUTS = require("./luasteam-source-inputs.json");
 
 const VERSION = "4.0.2-MCLv1";
-const SOURCE_REVISION = gitlink("producers/package-support/src/external/luasteam");
-const SDK_HEADERS_REVISION = gitlink("producers/package-support/src/external/SteamworksSDK");
+const SOURCE_REVISION = upstreamRevision("love-luasteam", "luasteam");
+const SDK_HEADERS_REVISION = upstreamRevision("love-luasteam", "steamworks-sdk");
 const SDK_VERSION = "1.63";
 const HOST_LUA_ABI = "Lua 5.1 C API";
 

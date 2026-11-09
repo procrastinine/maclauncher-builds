@@ -1,5 +1,5 @@
 const sharedDependencies=require('../../../../dependencies.json');
-const {gitlink} = require("../../../../../lib/pins.mjs");
+const {upstreamRevision} = require("../../../../../lib/projects.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -13,7 +13,7 @@ const Overlay = require("./system35-overlay-v3");
 const { throwIfAborted } = require('../../../../../lib/abort.cjs');
 const PIN = Object.freeze({...require("./system35-portable.json"),dependencies:require("./system35-portable.json").dependencies.map(row=>{const pin=sharedDependencies[row.id];return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};})});
 const VERSION = "MCLv1-1019";
-const REVISION = gitlink("producers/package-support/src/external/xsystem35-sdl2");
+const REVISION = upstreamRevision("xsystem35", "xsystem35-sdl2");
 const SOURCE_SHA256 = "73e633b7b9f3ecbbc760179347b542e4fe69fd18023981ff50224d099f2275a8";
 const sourcePath = path.resolve(__dirname, "../../external/xsystem35-sdl2");
 const recipeFiles = [__filename, require.resolve("./system35-overlay-v3"), require.resolve("./system35-portable.json"),

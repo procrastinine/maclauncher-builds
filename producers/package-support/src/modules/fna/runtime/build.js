@@ -1,4 +1,4 @@
-const { gitlink } = require("../../../../../../lib/pins.mjs");
+const { upstreamRevision } = require("../../../../../../lib/projects.mjs");
 const {addLicense,addLicenses} = require('../../../../../../lib/licenses.mjs');
 const fs = require("node:fs");
 const os = require("node:os");
@@ -11,8 +11,8 @@ const Dependencies = require("../../../../../dependencies.json");
 const { throwIfAborted } = require('../../../../../../lib/abort.cjs');
 
 const PROFILE = "26.10-MCLv1";
-const FNA_REVISION = gitlink("producers/package-support/src/external/FNA");
-const FNA3D_REVISION = gitlink("producers/package-support/src/external/source-revisions/fna3d");
+const FNA_REVISION = upstreamRevision("fna", "fna");
+const FNA3D_REVISION = upstreamRevision("fna", "fna3d");
 const DOTNET_VERSION = "8.0.32";
 // originalGamePaths: the host requires MACLAUNCHER_FNA_GAME_ROOT, honors
 // _ASSEMBLY_ROOT and _USE_RUNTIME_FRAMEWORK and presents the game as the entry

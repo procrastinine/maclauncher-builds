@@ -1,5 +1,5 @@
-const {gitlink} = require('../../../lib/pins.mjs');
-const REVISION = gitlink('producers/package-support/src/external/mkxp-z');
+const {upstreamRevision} = require('../../../lib/projects.mjs');
+const REVISION = upstreamRevision('mkxpz','mkxp-z');
 const {addLicense,addLicenses} = require('../../../lib/licenses.mjs');
 // Maintainer source build. Ordinary Play uses the sealed Included artifact.
 const fs = require('node:fs'), path = require('node:path'), os = require('node:os');

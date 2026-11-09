@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {gitlink} from '../../../../../../../lib/pins.mjs';
+import {upstreamRevision} from '../../../../../../../lib/projects.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import {appPath,exportAppFile} from '../../../../../../../tools/app-source.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
@@ -28,7 +28,7 @@ const source = options['--source'], tools = options['--tools'],
 const read = file =>
     fs.existsSync(path.join(source, file))
         ? fs.readFileSync(path.join(source, file), 'utf8')
-        : run('git', [ '-C', source, 'show', gitlink('producers/package-support/src/external/fsr3-sdk') + ':' + file ]);
+        : run('git', [ '-C', source, 'show', upstreamRevision('reshade','fidelityfx-image-filters') + ':' + file ]);
 for (const [file, digest] of Object.entries(spec.files))
   if (hash(read(file)) !== digest)
     throw Error('CACAO source changed: ' + file);
@@ -282,7 +282,7 @@ addLicenses(out,'FidelityFX-CACAO',source);
 fs.writeFileSync(path.join(out, 'translation.json'), JSON.stringify({
   schema : 1,
   repository : spec.repository,
-  commit : gitlink('producers/package-support/src/external/fsr3-sdk'),
+  commit : upstreamRevision('reshade','fidelityfx-image-filters'),
   source : spec,
   adaptations,
   geometry : {

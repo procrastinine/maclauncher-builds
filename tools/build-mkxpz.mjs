@@ -4,10 +4,9 @@ import path from 'node:path';
 import {createRequire} from 'node:module';
 import {execFileSync} from 'node:child_process';
 import {buildInput} from './build-input.mjs';
-import {gitlink} from '../lib/pins.mjs';
 import {recipeMain} from './build-source.mjs';
 import {managerDeclaration} from './manager-declaration.mjs';
-import {resolveProject,buildRecord} from '../lib/projects.mjs';
+import {resolveProject,buildRecord,upstreamRevision} from '../lib/projects.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
 const run=(command,args)=>execFileSync(command,args,{maxBuffer:Infinity,stdio:'inherit',env:{...process.env,SDKROOT:process.env.SDKROOT||execFileSync('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path'],{maxBuffer:Infinity,encoding:'utf8'}).trim()}});
 /** Compile and stage mkxp-z with its NFC filename overlay. */
@@ -15,7 +14,7 @@ export async function compile({project,version,work}){
  version=buildRecord(resolveProject(project,root,{resolvePins:false}),version).version;
  fs.mkdirSync(work,{recursive:true});
  const pin=JSON.parse(fs.readFileSync(path.join(root,'runtimes/mkxpz/baseline.json'))).upstream;
- const archive=await buildInput({url:pin.repository.replace('https://github.com/','https://codeload.github.com/')+'/tar.gz/'+gitlink('producers/package-support/src/external/mkxp-z'),sha256:pin.sourceSha256,bytes:pin.sourceBytes},path.join(work,'downloads'));
+ const archive=await buildInput({url:pin.repository.replace('https://github.com/','https://codeload.github.com/')+'/tar.gz/'+upstreamRevision(project,'mkxp-z'),sha256:pin.sourceSha256,bytes:pin.sourceBytes},path.join(work,'downloads'));
  const environment=path.join(work,'tools');run('uv',['venv','--python','3.13',environment]);
  run('uv',['pip','install','--python',path.join(environment,'bin/python'),'--no-deps','--requirement',path.join(root,'producers/package-support/scripts/graphics-build-requirements.txt')]);
  const producer=require('../producers/package-support/scripts/build-mkxpz-nfc.cjs'),buildWork=path.join(work,'mkxpz'),staged=path.join(work,'staged');

@@ -5,11 +5,11 @@ import {createRequire} from 'node:module';
 import {stageSource,run,recipeMain} from "./build-source.mjs";
 import {sealRuntime} from './seal-runtime.mjs';
 import {addLicense,addLicenses} from '../lib/licenses.mjs';
-import {gitlink} from '../lib/pins.mjs';
+import {upstreamRevision} from '../lib/projects.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Compat=require('../producers/package-support/src/modules/kirikiri/native-compat.js');
 // The packaged KAG3 manifest names the kag3 revision its files come from, read from the kag3 gitlink.
 export function stageKag3Resources(work){
- const resources=path.join(root,'producers/vn-adaptations/kag3-polyfill'),staged=path.join(work,'kag3-polyfill'),revision=gitlink('producers/vn-adaptations/upstreams/kag3');
+ const resources=path.join(root,'producers/vn-adaptations/kag3-polyfill'),staged=path.join(work,'kag3-polyfill'),revision=upstreamRevision('krkrsdl2','kag3');
  fs.cpSync(resources,staged,{recursive:true});
  const {schema,id,sourceUrl,...rest}=JSON.parse(fs.readFileSync(path.join(resources,'manifest.json'),'utf8'));
  fs.writeFileSync(path.join(staged,'manifest.json'),JSON.stringify({schema,id,upstreamRevision:revision,sourceUrl:sourceUrl+'/tree/'+revision,...rest},null,2)+'\n');

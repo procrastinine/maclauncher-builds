@@ -1,5 +1,5 @@
-const { gitlink } = require("../../../../../../lib/pins.mjs");
-const BUTTERSCOTCH_REVISION = gitlink("producers/package-support/src/external/Butterscotch");
+const { upstreamRevision } = require("../../../../../../lib/projects.mjs");
+const BUTTERSCOTCH_REVISION = upstreamRevision("butterscotch", "butterscotch");
 const BUTTERSCOTCH_ARGUMENTS_VERSION = "MCLv1-1007";
 
 const BUTTERSCOTCH_BUILDS = Object.freeze([
