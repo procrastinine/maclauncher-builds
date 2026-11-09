@@ -1,4 +1,4 @@
-import {appPath,appRequire,moduleFile} from '../../../../../../../tools/app-source.mjs';
+import {appPath,appRequire} from '../../../../../../../tools/app-source.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from "node:fs";
 import path from "node:path";
@@ -70,11 +70,10 @@ addLicenses(payload,'VVMetalKit',path.join(upstream,'submodules/VVMetalKit'));
 for(const [name,root]of Object.entries(roots))addLicenses(payload,name,root);
 const {inputs}=scanInputs(false);
 const files=fs.readdirSync(payload,{recursive:true}).filter(name=>name!=="provider.json"&&fs.statSync(path.join(payload,name)).isFile()).sort().map(name=>{const bytes=fs.readFileSync(path.join(payload,name));return {path:name,size:bytes.length,sha256:crypto.createHash("sha256").update(bytes).digest("hex")};});
-const ownedInputs=Object.fromEntries(["source.json","build.mjs","build-compilers.mjs","compiler-CMakeLists.txt","isolate-compiler.mjs","../compiler-isolation.mjs","../../effects/operation-contracts.mjs","CMakeLists.txt","provider.mm","index.js"].map(name=>[name,crypto.createHash("sha256").update(fs.readFileSync(moduleFile(path.posix.join(module,name)))).digest("hex")]));
 const dependencyText=fs.readFileSync(path.join(output,"cmake/CMakeFiles/macfx-isf.dir/provider.mm.o.d"),"utf8").replace(/\\\r?\n/g," ");
 const dependencies=[...dependencyText.matchAll(/(?:\\.|[^\s])+/g)].map(match=>match[0].replace(/\\(.)/g,"$1")).filter(file=>file.startsWith(nativeRoot+path.sep)&&/\.(?:h|hpp)$/.test(file));
 const headerInputs=Object.fromEntries([...new Set(dependencies)].sort().map(file=>[path.relative(nativeRoot,file),crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex")]));
-fs.writeFileSync(path.join(payload,"provider.json"),JSON.stringify({...source,architectures,sceneInputsAPI:1,sceneInputRoles:SCENE_SHADER_INPUTS.filter(role=>!["viewMatrix","projectionMatrix"].includes(role)),inputs,owned:ownedInputs,headerInputs,files},null,2)+"\n");console.log(JSON.stringify({payload,files:files.length}));
+fs.writeFileSync(path.join(payload,"provider.json"),JSON.stringify({...source,architectures,sceneInputsAPI:1,sceneInputRoles:SCENE_SHADER_INPUTS.filter(role=>!["viewMatrix","projectionMatrix"].includes(role)),inputs,headerInputs,files},null,2)+"\n");console.log(JSON.stringify({payload,files:files.length}));
 }
 if(phase!=="assemble")compile();
 if(phase!=="compile")assemble();

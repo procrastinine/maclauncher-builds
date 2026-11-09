@@ -7,7 +7,7 @@ import os from 'node:os';
 import crypto from 'node:crypto';
 import { spawn, execFileSync } from 'node:child_process';
 import { fileURLToPath,pathToFileURL } from 'node:url';
-import {appPath,appSourceRoot} from '../../../../../../../tools/app-source.mjs';
+import {appPath} from '../../../../../../../tools/app-source.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const [upstreamArg, vendorArg, compilerArg, outputArg] = process.argv.slice(2);
@@ -154,8 +154,7 @@ const files = {};
 for (const file of fs.readdirSync(path.join(payload,'x86_64-windows')).filter(name=>name.endsWith('.dll'))) files['x86_64-windows/'+file]=sha(path.join(payload,'x86_64-windows',file));
 files['x86_64-unix/winemetal.so'] = sha(unixOut);
 fs.writeFileSync(path.join(payload, 'camera-bridge.json'), JSON.stringify({
-  schema: 1, id: 'dxmt-camera1', resourceTagAPI:1,resourceSnapshotAPI:1,temporalD3D12API:1,source: { url: 'https://github.com/3Shain/dxmt', revision }, appSource:{repository:'https://github.com/procrastinine/maclauncher',revision:appSourceRoot().revision},
-  sources:Object.fromEntries(['build.mjs','source.json','patch.mjs','d3d12-overlay.mjs','temporal-d3d12.h','temporal-d3d12-pass.hpp','temporal-d3d12-record.inc','temporal-d3d12-exports.inc','temporal-d3d12-encode.inc','ngx-d3d12.inc','snapshot-overlay.mjs','camera-transport.hpp','streamline-transport.hpp','streamline-snapshot.hpp','streamline-native.h','unix-forwarder.c'].map(file=>[file,sha(path.join(['build.mjs','source.json'].includes(file)?here:owned,file))])),
+  schema: 1, id: 'dxmt-camera1', resourceTagAPI:1,resourceSnapshotAPI:1,temporalD3D12API:1,source: { url: 'https://github.com/3Shain/dxmt', revision },
   architecture: 'x86_64', minimumMacOS: '14.0.0', tableCount: tableCount(),
   base: { nativeSha256: sha(vendorUnix), thunkSha256: sha(path.join(vendorPE, 'winemetal.dll')),
     commandLibrarySha256: crypto.createHash('sha256').update(commandLibraries()[0]).digest('hex') }, files,

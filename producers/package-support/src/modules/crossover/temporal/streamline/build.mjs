@@ -95,12 +95,11 @@ function assemble() {
 const metadata = adapterRecord(reference,output);
 metadata.version="3";metadata.resourceSnapshotAPI=1;metadata.resourceSnapshotProfiles=["d3d11-v2"];
 metadata.resourceTagProfiles=["slSetD3DDevice","slSetTag","slSetTagForFrame"].every(name=>metadata.exports.some(row=>row.name===name))?["d3d11-v1"]:[];
-metadata.source={url:declaration.repository,revision,version:"2.9.0"};metadata.appSource={repository:"https://github.com/procrastinine/maclauncher",revision:app.revision};
+metadata.source={url:declaration.repository,revision,version:"2.9.0"};
 metadata.profiles=[];
 for (const row of compatProfiles) metadata.profiles.push({...adapterRecord(row.referenceFile, path.join(output, row.directory)),directory:row.directory,referenceSource:{url:declaration.repository,revision:row.profile.revision,version:row.profile.version}});
 metadata.cameraBridge={...CAMERA_BRIDGE,files:Object.fromEntries([CAMERA_BRIDGE.windows,CAMERA_BRIDGE.unix].map(file=>[file,hash(path.join(output,file))]))};
 metadata.compiler=execFileSync(compiler,["--version"],{encoding:"utf8"}).split("\n")[0];
-metadata.sources=Object.fromEntries(["build.mjs","source.json","proxy.cpp","../camera-bridge/build.mjs","../camera-bridge/bridge.c","../camera-bridge/bridge-unix.c","../camera-bridge/protocol.h","camera.hpp","resources.hpp","snapshots.hpp","snapshot-budget.hpp","../dxmt/camera-transport.hpp","../dxmt/streamline-transport.hpp","../dxmt/streamline-snapshot.hpp","pe-exports.js","../../../shared/reshade/temporal/camera.h","../../../shared/reshade/temporal/frame.h","../../../shared/reshade/native/image-color.h","../../../shared/reshade/native/image-budget.hpp"].map(file=>[file,hash(path.resolve(file==="build.mjs"||file==="source.json"||file.startsWith("../camera-bridge/")?here:owned,file))]));
 addLicenses(output,"Streamline",source);
 fs.writeFileSync(path.join(output,"provider.json"),JSON.stringify(metadata,null,2)+"\n");
 console.log(JSON.stringify({library:path.join(output,metadata.library),exports:metadata.exports.length,profiles:metadata.profiles.map(row=>({directory:row.directory,exports:row.exports.length})),sha256:metadata.sha256}));
