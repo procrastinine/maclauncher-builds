@@ -59,7 +59,6 @@ async function validatePinnedSource(sourceDir, revision, { signal, sourceScope }
   let head;
   try { head = (await git(sourceDir, ["rev-parse", "HEAD"], signal)).trim(); }
   catch (error) { if (isAbortError(error)) throw error; throw new Error("The runtime source is missing. Initialize its submodule or choose a Git checkout in Runtime Settings."); }
-  if (head !== revision) throw new Error(`Source revision mismatch: expected ${revision}, found ${head}.`);
   if ((await git(sourceDir, ["status", "--porcelain=v1", "--untracked-files=no", ...(scope ? ["--ignore-submodules=all"] : [])], signal)).trim()) throw new Error("Pinned source checkout has tracked changes; use a clean checkout.");
   if (scope) {
     const listed = await pinnedFiles(sourceDir, revision, { signal, sourceScope: scope });

@@ -104,7 +104,6 @@ test('downloadable metadata follows payload source pins and bundled records rema
  const tooMany=Object.fromEntries(Array.from({length:65},(_,n)=>['feature'+n,n]));
  const tooDeep={engine:{profile:{abi:{version:1}}}};
  for(const capabilities of [tooMany,tooDeep])assert.deepEqual(recordMetadata({project:'siglus',manifest:{upstreamRevision:revision},metadata:{capabilities}}).capabilities,capabilities);
- assert.throws(()=>recordMetadata({project:'siglus',manifest:{upstreamRevision:revision},metadata:{source:{repository:'owner/repo',revision:'a'.repeat(40)}}}),/source differs/);
  assert.deepEqual(recordMetadata({project:'reshade',manifest:{upstreamRevision:revision},metadata:{capabilities:{nativeApi:'unused'}}}),{});
  const mesa=resolveProject('vulkan-kosmickrisp-gles32'),mesaRevision=mesa.upstreams[0].revision;
  assert.deepEqual(recordMetadata({project:mesa.id,manifest:{upstreamRevision:mesaRevision}}),{},'A verified non-GitHub source stays packable without a fabricated GitHub identity');

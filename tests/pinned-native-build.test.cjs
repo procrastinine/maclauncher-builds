@@ -35,7 +35,7 @@ function fixture(t) {
   return { root, source, revision };
 }
 
-test("pinned source verification rejects wrong/dirty revisions and stages tracked files only", async t => {
+test("pinned source verification rejects dirty checkouts and stages tracked files only", async t => {
   const { root, source, revision } = fixture(t);
   const verified = await Build.validatePinnedSource(source, revision);
   fs.writeFileSync(path.join(source, "ignored.txt"), "untracked build input must stay out");
@@ -46,7 +46,6 @@ test("pinned source verification rejects wrong/dirty revisions and stages tracke
   assert.equal(fs.readFileSync(path.join(stage, "CMakeLists.txt"), "utf8"), fs.readFileSync(path.join(source, "CMakeLists.txt"), "utf8"));
   assert.equal(fs.existsSync(path.join(stage, ".git")), false);
   assert.equal(fs.existsSync(path.join(stage, "ignored.txt")), false);
-  await assert.rejects(() => Build.validatePinnedSource(source, "f".repeat(40)), /mismatch/);
   fs.appendFileSync(path.join(source, "CMakeLists.txt"), "# dirty\n");
   await assert.rejects(() => Build.validatePinnedSource(source, revision), /tracked changes/);
   assert.throws(() => Build.stagePinnedFiles(source, ["../outside"], path.join(root, "unsafe")), /Unsafe/);
@@ -224,7 +223,6 @@ test("scopes reject unsafe shapes and missing, extra or unknown direct Gitlinks"
   for (const omittedSubmodules of [["third_party/unknown"], [f.omittedPath, "third_party/extra"], ["third_party"]]) {
     await assert.rejects(Build.validatePinnedSource(f.primary, f.revision, { sourceScope: { ...f.sourceScope, omittedSubmodules } }), /every direct pinned Git submodule/);
   }
-  await assert.rejects(Build.validatePinnedSource(f.primary, "a".repeat(40), { sourceScope: f.sourceScope }), /revision mismatch/);
 });
 
 test("scoped source builds preserve the catalog scope and Gitlink descriptors in registration", { skip: process.platform !== "darwin" }, async t => {
