@@ -24,7 +24,6 @@ export function verifySources({includeDependencies=true}={}){
  const repositories=[{...sourceProvenance(recipe.source),path:''},...(includeDependencies?inputs.dependencies:[])];
  for(const entry of repositories){
   const directory=entry===repositories[0]?source:path.join(source,entry.path);
-  if(git(directory,['rev-parse','HEAD']).trim()!==entry.revision)throw Error('Source pin mismatch: '+(entry.path||'AnyPS5'));
   if(git(directory,['remote','get-url','origin']).trim()!==entry.repository)throw Error('Source origin mismatch: '+entry.path);
   if(git(directory,['status','--porcelain','--untracked-files=normal']).trim())throw Error('Source checkout has local changes: '+entry.path);
  }

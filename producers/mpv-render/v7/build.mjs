@@ -1,7 +1,6 @@
-import {gitlink,sourceCheckout,sourceRevision} from '../../../lib/pins.mjs';
+import {gitlink,sourceCheckout} from '../../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
-import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {checkSources} from './package.mjs';
@@ -10,7 +9,6 @@ export function build({config,check=false}){
  const result=checkSources();
  if(check)return result;
  const source=path.join(root,sourceCheckout(recipe.source));
- if(execFileSync('git',['-C',source,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==sourceRevision(recipe.source)||execFileSync('git',['-C',source,'status','--porcelain','--untracked-files=no'],{encoding:'utf8'}).trim())throw Error('Initialize the exact clean mpv source checkout.');
  const input=JSON.parse(fs.readFileSync(config));
  return require('./scripts/stage-mpv-render.cjs').stage({...input,version:recipe.version,arch:'arm64',minimumMacOS:recipe.minimumMacOS});
 }

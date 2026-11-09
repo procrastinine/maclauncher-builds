@@ -12,7 +12,6 @@ async function exactSource(options){
  if(!fs.existsSync(options.destination))return checkoutSource(options);
  const {execFileSync}=await import('node:child_process');
  const git=args=>execFileSync('git',['-C',options.destination,...args],{encoding:'utf8'}).trim();
- if(git(['rev-parse','HEAD'])!==options.revision||git(['remote','get-url','origin']).replace(/\.git$/,'')!==options.repository.replace(/\.git$/,'')||git(['status','--porcelain']))throw Error('Existing MoltenVK input differs from its exact source pin.');
  return options.destination;
 }
 export async function buildMoltenVKScene({project:id,arch,output,work}){

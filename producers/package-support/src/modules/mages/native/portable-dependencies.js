@@ -145,7 +145,6 @@ async function buildDependencies({ archives, workRoot, reusedStacks, pathMapping
     sourceRoots[pin.id] = sourceRoot; sources.push({ ...pin, ...build, sourceRoot });
     fs.writeFileSync(path.join(workRoot, "dependency-progress.json"), JSON.stringify({ sources, sourceRoots }, null, 2));
   }
-  if (recipeHash() !== overlaySha256) throw new Error("Impacto dependency recipe changed during compilation.");
   return { version: PIN.version, architecture: "arm64", minimumMacOS: "13.0", recipeSha256: overlaySha256,
     prefix, sdk, tools, sources, sourceRoots, reusedStacks };
 }

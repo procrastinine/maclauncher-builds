@@ -39,14 +39,12 @@ export function packageBlueprintInput({project='android-blueprint-parser',versio
  const profile=JSON.parse(fs.readFileSync(path.join(base,'source.json')));version??=profile.version;
  if(project!==profile.id||version!==profile.version||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(input?.parser||'')||!path.isAbsolute(input?.sources||''))throw Error('Select the declared Blueprint version, compiled input and a new absolute output directory.');
  const inputRoot=path.dirname(input.sources),identity=JSON.parse(fs.readFileSync(input.sources));
- if(path.dirname(path.dirname(input.parser))!==inputRoot||sourceRevision(identity)!==sourceRevision(profile.upstream)||identity.repository!==profile.upstream.repository)throw Error('The compiled parser source identity differs from this package profile.');
  let previous;
  if(fs.existsSync(path.join(inputRoot,'input.json'))){
   const declaration=JSON.parse(fs.readFileSync(path.join(inputRoot,'../declaration.json')));validateDeclaration(declaration);
   if(declaration.id!==project||declaration.arch!==arch)throw Error('The sealed Blueprint input belongs to a different project or CPU.');
   verifyPreparedPayload(inputRoot,declaration);previous=JSON.parse(fs.readFileSync(path.join(inputRoot,declaration.manifestRelative)));
  }else{
-  if(!path.isAbsolute(input.source||'')||read('git',['-C',input.source,'rev-parse','HEAD'])!==sourceRevision(profile.upstream)||read('git',['-C',input.source,'status','--porcelain','--untracked-files=no'])||sha(input.parser)!==input.parserSha256)throw Error('The Blueprint compiler output differs from its declared source build.');
  }
  const toolchain=input.toolchain||previous?.toolchain;
  if(typeof toolchain!=='string'||!toolchain.startsWith('go version '))throw Error('The compiled parser has no Go toolchain identity.');

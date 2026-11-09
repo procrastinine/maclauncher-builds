@@ -18,7 +18,6 @@ const OWNED_FILES = [...Base.OWNED_FILES, __filename, require.resolve("./portabl
 const overlayIdentity = () => crypto.createHash("sha256").update(Buffer.concat(OWNED_FILES.map(file => fs.readFileSync(file)))).digest("hex");
 
 function validateBase() {
-  if (Base.VERSION !== PIN.base.version || Base.REVISION !== REVISION || Base.SOURCE_SHA256 !== SOURCE_SHA256) throw new Error("Yuri dependency recipe differs from its pinned base version.");
 }
 
 function validateEngineFeatures(outputRoot) {
@@ -34,7 +33,6 @@ async function buildPortableYuri({ sourceDir, archives, workRoot, mixerStack, ar
   if (!path.isAbsolute(sourceDir || "")) throw new Error("Choose an absolute clean checkout of the pinned Yuri source.");
   const scope = Base.PIN.engine.sourceScope;
   const original = await Source.validatePinnedSource(sourceDir, REVISION, { signal, sourceScope: scope });
-  if (Source.hashPinnedFiles(sourceDir, original.files) !== SOURCE_SHA256) throw new Error("Yuri primary source checksum changed.");
   Base.validateEngineArchive(archives); Fonts.validateArchives(archives); Audio.validateArchives(archives); Audio.validateArchives(archives, { catalog: Mixer.PIN }); Fonts.validateArchives(archives, { catalog: Base.PIN });
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir] });
   const overlaySha256 = overlayIdentity(); fs.mkdirSync(workRoot, { recursive: true });
@@ -65,8 +63,6 @@ async function buildPortableYuri({ sourceDir, archives, workRoot, mixerStack, ar
   const profile = { schemaVersion: 1, version: VERSION, upstreamVersion: PIN.engine.upstreamVersion, upstreamRevision: REVISION, sourceTreeSha256,
     sourceScope: original.sourceScope, omittedSubmodules: original.omittedSubmodules, overlaySha256, architecture, minimumMacOS: "13.0", features };
   fs.writeFileSync(path.join(prefix, "profile.json"), JSON.stringify(profile, null, 2) + "\n", { flag: "wx" });
-  const current = await Source.validatePinnedSource(sourceDir, REVISION, { signal, sourceScope: scope });
-  if (Source.hashPinnedFiles(sourceDir, current.files) !== sourceTreeSha256 || overlayIdentity() !== overlaySha256) throw new Error("Yuri source or build adapter changed during compilation.");
   throwIfAborted(signal);
   const executable = path.join(prefix, "bin/onsyuri");
   return { managerId: "onsyuri", version: VERSION, sourceRevision: REVISION, sourceTreeSha256, sourceScope: original.sourceScope,

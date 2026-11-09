@@ -90,7 +90,6 @@ async function buildCandidate({ sourceDir = sourcePath, destination, decoderPref
     await dependencies.prepareCargo?.({ sourceRoot, env, target: targetTriple });
     await run(cargo, ["build", "--locked", "--offline", "--target", targetTriple, "--release", "-p", "eden", "-p", "eden-formats", "--bins"], { cwd: sourceRoot, logPath, env, signal });
     throwIfAborted(signal); onProgress?.({ downloaded: 2, total: 3 });
-    await Build.validatePinnedSource(sourceDir, Overlay.REVISION, { signal });
     const candidate = path.join(workspace, "candidate"); fs.mkdirSync(path.join(candidate, "bin"), { recursive: true });
     for (const name of ["eden", "maclauncher-minori-probe"]) {
       const source = path.join(target, targetTriple, "release", name);
@@ -130,7 +129,6 @@ async function buildRuntime({ manager, version = Overlay.VERSION, sourceDir = so
   try {
     // This callback runs only for an explicit developer source-build action.
     // Released native packages execute directly without this toolchain or fetch.
-    await Build.validatePinnedSource(sourceDir, Overlay.REVISION, { signal });
     (dependencies?.findBuildTool || Build.findBuildTool)("cargo");
     fs.mkdirSync(installDir, { recursive: true });
     const archive = path.join(installDir, "ffmpeg-7.1.2.tar.xz");

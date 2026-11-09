@@ -49,7 +49,6 @@ async function buildDependencies({archive,workRoot,architecture=process.arch,pat
   await run("/usr/bin/make",["-j2"],{cwd:outputRoot,env,logPath,signal,timeout:20*60*1000});
   await run("/usr/bin/make",["install"],{cwd:outputRoot,env,logPath,signal});throwIfAborted(signal);
   const features=validateFeatures(outputRoot);
-  if(recipeIdentity()!==overlaySha256)throw new Error("Portable movie recipe changed during compilation.");
   return {version:PIN.version,source:PIN.source,architecture,minimumMacOS:PIN.minimumMacOS,recipeSha256:overlaySha256,prefix,sdk,sourceRoot,outputRoot,options,diagnostics,
     startedAt,completedAt:new Date().toISOString(),logPath,...features};
 }

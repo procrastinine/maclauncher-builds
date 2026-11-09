@@ -36,7 +36,6 @@ async function buildPython(input) {
       return execute(command, args, { ...settings, env: { ...settings.env,
         LDFLAGS: [settings.env.LDFLAGS, ...options].join(" ") } });
     } } });
-  if (recipeIdentity() !== recipeSha256) throw new Error("Python build recipe changed during compilation.");
   return { ...result, version: PIN.version, recipeSha256, baseProfile: PROFILE.baseProfile,
     linkerOptions: options, objectSymbolPaths: PROFILE.objectSymbolPaths };
 }

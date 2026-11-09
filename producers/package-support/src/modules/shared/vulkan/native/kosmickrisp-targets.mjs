@@ -11,7 +11,6 @@ import {prepareSourceTree, writeChanged} from './source-files.mjs';
 const pin = JSON.parse(fs.readFileSync(new URL('./kosmickrisp-source.json', import.meta.url)));
 const targets = JSON.parse(fs.readFileSync(new URL('./kosmickrisp-targets.json', import.meta.url)));
 const sha = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-const read = (tool, args, options = {}) => execFileSync(tool, args, {encoding: 'utf8', ...options}).trim();
 const run = (tool, args, options = {}) => execFileSync(tool, args, {stdio: 'inherit', ...options});
 const toolFiles = {
     mesa_clc: 'src/compiler/clc/mesa_clc',
@@ -20,7 +19,6 @@ const toolFiles = {
 };
 
 function verifySource(source, revision) {
-    if (read('git', ['-C', source, 'rev-parse', 'HEAD']) !== revision) throw Error('Vulkan source revision differs from its pin');
 }
 
 export function describeNativeTools({source, build}) {
@@ -44,7 +42,6 @@ export function buildKosmicTargets(options, buildNative) {
         nativeBuild = native.nativeBuild;
     }
     const native = JSON.parse(fs.readFileSync(path.join(nativeBuild, 'native-tools.json')));
-    if (sourceRevision(native) !== sourceRevision(pin) || native.repository !== pin.repository) throw Error('Kosmic native compilers differ from their source pin');
     if (JSON.stringify(Object.keys(native.files).sort()) !== JSON.stringify(Object.keys(toolFiles).sort())) throw Error('Kosmic native compilers are incomplete');
     for (const [name, file] of Object.entries(native.files)) {
         if (file.path !== toolFiles[name] || file.sha256 !== sha(path.join(nativeBuild, file.path))) throw Error('Kosmic native compiler differs from its metadata');

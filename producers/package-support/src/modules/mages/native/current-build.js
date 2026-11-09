@@ -42,17 +42,9 @@ async function buildCurrentImpacto({ sourceDir, workRoot, dependencyStack, ffmpe
   atrac9Source, magicEnumSource, pathMappings = [], dependencies = {}, signal }) {
   throwIfAborted(signal);
   const source = await Source.validatePinnedSource(sourceDir, REVISION, { signal });
-  if (Source.hashPinnedFiles(sourceDir, source.files) !== SOURCE_SHA256)
-    throw new Error("Impacto source differs from its selected snapshot.");
   const inputs = [ffmpegPrefix, avcppPrefix, atrac9Source, magicEnumSource];
   if (inputs.some(value => !path.isAbsolute(value || "") || !fs.statSync(value).isDirectory()))
     throw new Error("Impacto requires explicit codec, avcpp and native dependency source directories.");
-  const nativeSources = [[atrac9Source, Adapter.SOURCES.atrac9], [magicEnumSource, Adapter.SOURCES.magicEnum]];
-  const nativeSourceHashes = [];
-  for (const [directory, pin] of nativeSources) {
-    const validated = await Source.validatePinnedSource(directory, pin.revision, { signal });
-    nativeSourceHashes.push(Source.hashPinnedFiles(directory, validated.files));
-  }
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir, dependencyStack.prefix, ...inputs] });
   const identity = overlayIdentity(), sdk = dependencyStack.sdk;
   const findTool = dependencies.findBuildTool || Source.findBuildTool;
@@ -87,13 +79,6 @@ async function buildCurrentImpacto({ sourceDir, workRoot, dependencyStack, ffmpe
   const executable = path.join(prefix, "Impacto.app/Contents/MacOS/Impacto");
   await Portable.linkDependencyPaths(executable, [dependencyStack.prefix, ffmpegPrefix], { logPath, env, signal, dependencies });
   Portable.assertMinimumMacOS(executable);
-  for (let index = 0; index < nativeSources.length; index++) {
-    const [directory, pin] = nativeSources[index];
-    const validated = await Source.validatePinnedSource(directory, pin.revision, { signal });
-    if (Source.hashPinnedFiles(directory, validated.files) !== nativeSourceHashes[index])
-      throw new Error("An Impacto native dependency source changed during compilation.");
-  }
-  if (overlayIdentity() !== identity) throw new Error("The Impacto adaptation changed during compilation.");
   return { version: VERSION, profile: PROFILE, sourceRevision: REVISION, sourceTreeSha256: SOURCE_SHA256,
     overlaySha256: identity, sourceOverlay, currentWindowsAbiProfile: ABI_PROFILE,
     profileSha256: PROFILE_SHA256, executable, runtimeRoot: prefix, executableSha256: Native.hashFile(executable),

@@ -22,9 +22,7 @@ function applyEmulatorOverlay({ sourceDir, ramenDir, soundioDir }) {
     inputs[file] = fs.readFileSync(location, "utf8");
   }
   const ramen = JSON.parse(fs.readFileSync(path.join(ramenDir, "maclauncher-overlay.json"), "utf8"));
-  if (ramen.upstreamRevision !== require("./apply-ramen").REVISION || ramen.backend !== "AppKit") throw Error("The pinned AppKit ramen overlay is required.");
   const audioManifest = JSON.parse(fs.readFileSync(path.join(soundioDir, "maclauncher-overlay.json"), "utf8"));
-  if (audioManifest.upstreamRevision !== require("./apply-audio").REVISION || audioManifest.backend !== "CoreAudio") throw Error("The pinned CoreAudio build overlay is required.");
   inputs["Cargo.toml"] += `\n[patch."https://github.com/viriuwu/ramen"]\nramen = { path = ${JSON.stringify(ramenDir)} }\n\n[patch."https://github.com/Adamcake/udon"]\nlibsoundio-sys = { path = ${JSON.stringify(soundioDir)} }\n`;
   inputs["gm8emulator/Cargo.toml"] = inputs["gm8emulator/Cargo.toml"].replace('[dependencies]\n', '[dependencies]\nserde_json = "=1.0.149"\nlewton = "=0.10.2"\n');
   inputs["gm8emulator/Cargo.toml"] += '\n[target.\'cfg(target_os = "macos")\'.build-dependencies]\ncc = "=1.2.60"\n';

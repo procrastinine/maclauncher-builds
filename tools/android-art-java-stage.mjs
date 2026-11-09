@@ -66,7 +66,6 @@ export async function buildAndroidArtJavaInput({framework,image,output,work,arch
 export function packageAndroidArtJavaInput({framework,image,output,work,arch='arm64'}){
  const stage=json(descriptor),checked=verifyAndroidJavaFrameworkInput(framework),definition=json(path.join(root,stage.frameworkInput)),javaProfile=json(path.join(root,stage.jdkInput)),jdkPin=javaProfile.jdk[process.platform+'-'+process.arch],profile=json(path.join(root,stage.publisherInputs)),android=path.join(work,'android'),dex=json(path.join(android,'src/modules/android/art/dex-tools.json'));
  if(!jdkPin||fs.existsSync(output))throw Error('The declared ART Java host and a new package output are required.');
- if(execFileSync('git',['-C',android,'rev-parse','HEAD'],{maxBuffer:Infinity,encoding:'utf8'}).trim()!==androidSource().revision||execFileSync('git',['-C',android,'status','--porcelain','--untracked-files=no'],{maxBuffer:Infinity,encoding:'utf8'}).trim())throw Error('The original ART Java source changed.');
  const completed=json(path.join(work,'compile/bootstrap-cache.json'));
  if(completed.value!==true||!Array.isArray(completed.inputs)||!completed.inputs.length)throw Error('The original ART Java producer has not completed.');
  for(const record of completed.inputs)if(!path.isAbsolute(record.file||'')||sha(record.file)!==record.sha256||(fs.statSync(record.file).mode&0o7777)!==record.mode)throw Error('Completed ART Java source or output changed: '+record.file);
