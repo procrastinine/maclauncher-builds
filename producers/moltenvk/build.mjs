@@ -1,5 +1,5 @@
 import {sourceRevision} from '../../lib/pins.mjs';
-import {appPath} from '../../tools/app-source.mjs';
+import {appPath,recipePath} from '../../tools/app-source.mjs';
 // SPDX-License-Identifier: MIT
 import fs from 'node:fs';
 import path from 'node:path';
@@ -19,11 +19,13 @@ export function carrierHeader(producer=path.resolve(here,'../vkd3d-proton/vk_tem
     return '// Generated from the shared LGPL-2.1-or-later temporal carrier.\n#pragma once\n#include <vulkan/vulkan.h>\n'+text.slice(first,last+end.length)+'\n';
 }
 // Compose the carrier in an owned source projection; the upstream checkout stays read-only.
+// The temporal carrier sources the projection applies: the patch, then the command headers.
+export const temporalSources=['app:src/modules/shared/vulkan/native/temporal.patch','app:src/modules/shared/vulkan/native/temporal-command.hpp','app:src/modules/shared/vulkan/native/temporal-command.inc','app:src/modules/shared/vulkan/native/temporal-map.hpp','app:src/modules/shared/vulkan/native/temporal-scene.hpp'];
 export function applyTemporalSource(work){
-    const vulkan=appPath('src/modules/shared/vulkan/native');
-    run('git',['apply','--unsafe-paths','--directory='+work,path.join(vulkan,'temporal.patch')]);
+    const [patch,...headers]=temporalSources.map(file=>recipePath(here,file));
+    run('git',['apply','--unsafe-paths','--directory='+work,patch]);
     const commands=path.join(work,'MoltenVK/MoltenVK/Commands');
-    for(const name of ['temporal-command.hpp','temporal-command.inc','temporal-map.hpp','temporal-scene.hpp'])fs.copyFileSync(path.join(vulkan,name),path.join(commands,name));
+    for(const header of headers)fs.copyFileSync(header,path.join(commands,path.basename(header)));
     fs.writeFileSync(path.join(commands,'temporal-carrier.h'),carrierHeader());
     const scene=appPath('src/modules/shared/reshade');
     const common=path.join(work,'MoltenVK/include/macfx-temporal');
@@ -33,7 +35,7 @@ export function applyTemporalSource(work){
         fs.writeFileSync(path.join(commands,name),'#pragma once\n#include "../../include/macfx-temporal/'+name+'"\n');
     }
     const commandPath='MoltenVK/MoltenVK/Commands/';
-    return [...fs.readFileSync(appPath('src/modules/shared/vulkan/native/temporal.patch'),'utf8').matchAll(/^\+\+\+ b\/(.+)$/gm)].map(m=>m[1]).concat(
+    return [...fs.readFileSync(patch,'utf8').matchAll(/^\+\+\+ b\/(.+)$/gm)].map(m=>m[1]).concat(
         ['temporal-command.hpp','temporal-command.inc','temporal-map.hpp','temporal-scene.hpp','temporal-carrier.h','frame.h','scene-aovs.h','scene-matrices.h','image-color.h'].map(file=>commandPath+file),
         ['frame.h','scene-aovs.h','scene-matrices.h','image-color.h'].map(file=>'MoltenVK/include/macfx-temporal/'+file));
 }

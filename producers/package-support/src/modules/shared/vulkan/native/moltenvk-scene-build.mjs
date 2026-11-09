@@ -1,4 +1,4 @@
-import {appRequire,appSourceRoot} from '../../../../../../../tools/app-source.mjs';
+import {appRequire,appSourceRoot,recipePath} from '../../../../../../../tools/app-source.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
@@ -7,7 +7,7 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {source,sceneSources} from './moltenvk-scene-overlay.mjs';
-import {applyTemporalSource} from '../../../../../../../producers/moltenvk/build.mjs';
+import {applyTemporalSource,temporalSources} from '../../../../../../../producers/moltenvk/build.mjs';
 import {writeChanged,prepareSourceTree} from './source-files.mjs';
 const Bundled=appRequire('src/modules/shared/runtime/bundled-native.js');
 const root=path.dirname(fileURLToPath(import.meta.url));
@@ -28,8 +28,8 @@ export function prepareSceneSource({repository,work}){
  try{prepareSourceTree(projected,temporary=>{run('/usr/bin/tar',['-xf',archive,'-C',temporary]);const temporal=applyTemporalSource(temporary);adapted=sceneSources(repository,file=>fs.readFileSync(path.join(temporary,file),'utf8'));for(const file of temporal)if(!adapted.has(file))adapted.set(file,fs.readFileSync(path.join(temporary,file)));for(const[file,bytes]of adapted)writeChanged(path.join(temporary,file),bytes);});}
  finally{fs.unlinkSync(archive);}
  const temporalRoot=path.resolve(root,'../../../../../../../producers/moltenvk');
- const temporalFiles=['build.mjs','temporal.patch','temporal-command.hpp','temporal-command.inc','temporal-map.hpp','temporal-scene.hpp'];
- const inputs={profile:source,appRevision:app.revision,temporalCarrier:temporalFiles.map(file=>({file:'producers/moltenvk/'+file,sha256:digest(fs.readFileSync(path.join(temporalRoot,file)))})),files:[...adapted.keys()].map(file=>({file,sha256:digest(fs.readFileSync(path.join(projected,file)))})),
+ const temporalCarrier=[['producers/moltenvk/build.mjs',path.join(temporalRoot,'build.mjs')],...temporalSources.map(file=>[file,recipePath(temporalRoot,file)])].map(([file,location])=>({file,sha256:digest(fs.readFileSync(location))}));
+ const inputs={profile:source,appRevision:app.revision,temporalCarrier,files:[...adapted.keys()].map(file=>({file,sha256:digest(fs.readFileSync(path.join(projected,file)))})),
   producer:['moltenvk-scene-build.mjs','moltenvk-scene-overlay.mjs','moltenvk-scene-project.cmake','source-files.mjs'].map(file=>({file,sha256:digest(fs.readFileSync(path.join(root,file)))}))};
  writeChanged(path.join(work,'scene-source.json'),JSON.stringify(inputs,null,2)+'\n');
  return projected;
