@@ -53,7 +53,7 @@ test('regression: Build job did not succeed: build (innoextract 1.10-dev-MCLv3 x
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'publication-job-copy-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
  fs.writeFileSync(path.join(directory,'projects.json'),JSON.stringify({schemaVersion:1,repository,updatePolicy:'manual',projects:[{id:'innoextract',name:'Inno',delivery:'downloadable',producer:{kind:'prebuilt',version:'1.10-dev-MCLv3',architectures:['x64']},upstreams:[]}]}));
  const env={GITHUB_ACTIONS:'true',GITHUB_REPOSITORY:repository,GITHUB_WORKFLOW:'Build and release',GITHUB_WORKFLOW_REF:repository+'/.github/workflows/runtime-build.yml@refs/heads/main',GITHUB_SHA:source,GITHUB_RUN_ID:'123',RELEASE_SELECTION:'innoextract=1.10-dev-MCLv3'};
- const result=await publishLevel({directory,env,targets:[{project:'innoextract',version:'1.10-dev-MCLv3',arch:'x64'}],output:path.join(directory,'publication'),runGh:async()=>JSON.stringify([{artifacts:[{id:1,name:'runtime-innoextract-1.10-dev-MCLv3-x64'}]}]),download:async()=>{},publish:async()=>({commit:source})});
+ const result=await publishLevel({verify:async()=>{},directory,env,targets:[{project:'innoextract',version:'1.10-dev-MCLv3',arch:'x64'}],output:path.join(directory,'publication'),runGh:async()=>JSON.stringify([{artifacts:[{id:1,name:'runtime-innoextract-1.10-dev-MCLv3-x64'}]}]),download:async()=>{},publish:async()=>({commit:source})});
  assert.equal(result.failed,0,result.errors[0]?.error);assert.equal(result.published,1);
 });
 test("regression: ! [remote rejected] HEAD -> main (cannot lock ref 'refs/heads/main': is at 15acfcd but expected 48eaae2)",async t=>{

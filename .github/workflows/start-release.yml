@@ -18,14 +18,11 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/setup-node
       - run: npm ci --ignore-scripts
+      - name: Prepare the sources the planner reads
+        run: node tools/init-runtime-sources.mjs --metadata
       - id: changes
         env:
           BEFORE: ${{ github.event.before }}
         run: node tools/changed-releases.mjs "$BEFORE" "$RUNNER_TEMP/releases-changed.txt"
-      - name: Initialize source pin metadata
-        if: steps.changes.outputs.changed == 'true'
-        run: |
-          node --input-type=module -e "import {retryNetwork} from './tools/download.mjs'; import {execFileSync} from 'node:child_process'; retryNetwork(()=>execFileSync('git',['submodule','update','--init','--depth','1','--','sources/maclauncher'],{stdio:['inherit','inherit','pipe']}));"
-          node tools/init-runtime-sources.mjs --metadata
       - if: steps.changes.outputs.changed == 'true'
         run: node tools/dispatch-release.mjs dispatch --file "$RUNNER_TEMP/releases-changed.txt"

@@ -4,9 +4,9 @@ runs:
   using: composite
   steps:
     - uses: ./.github/actions/setup-node
-    - name: Initialize shared app source
+    - name: Prepare the sources the build tools read
       shell: bash
-      run: git submodule update --init --depth 1 -- sources/maclauncher
+      run: node tools/init-runtime-sources.mjs
     - name: Register the selected names for this build
       shell: bash
       run: |
@@ -37,14 +37,8 @@ runs:
       continue-on-error: true
       shell: bash
       run: node tools/output-warnings.mjs "$RUNNER_TEMP/build/payload" "$BUILD_ARCH" "$RUNNER_TEMP/build/declaration.json" "$RUNNER_TEMP/release"
-    # Signed provenance ties the archive to this workflow run and commit.
-    - uses: ./.github/actions/attest
-      id: attest
-      env:
-        NODE_OPTIONS: --max-http-header-size=32768
-      with:
-        inputs: '{"subject-path":"${{ runner.temp }}/release/*","github-token":"${{ github.token }}"}'
+    # The Build and release attest job signs these files once every level built.
     - uses: ./.github/actions/upload-artifact
-      if: ${{ !cancelled() && steps.attest.outcome == 'success' }}
+      if: ${{ success() }}
       with:
         inputs: '{"name":"runtime-${{ env.BUILD_PROJECT }}-${{ env.BUILD_VERSION }}-${{ env.BUILD_ARCH }}","path":"${{ runner.temp }}/release","if-no-files-found":"error","overwrite":"true","retention-days":"90","compression-level":"0"}'

@@ -40,7 +40,7 @@ test('package publication carries the staged REST identity through release and c
 test('a level lists artifacts once, publishes the newest attempt and skips absent packages',async t=>{
  const f=fixture(t),published=[],downloads=[],selection=[{id:'engine',version:'1.0.0'},{id:'failed',version:'1.0.0'}];let lists=0;
  const artifacts=[{id:1,name:'runtime-engine-1.0.0-arm64-1'},{id:2,name:'runtime-engine-1.0.0-arm64-2'}];
- const result=await publishLevel({...f,output:path.join(f.directory,'publication'),targets:selection.map(row=>({project:row.id,version:row.version,arch:'arm64'})),env:{...f.env,RELEASE_SELECTION:JSON.stringify(selection)},runGh:async args=>{lists++;assert.equal(args[0],'api');assert.ok(args.at(-1).endsWith('/runs/123/artifacts?per_page=100'));return JSON.stringify([{artifacts}]);},download:async({artifact})=>downloads.push(artifact.id),publish:async options=>{published.push(options.env.BUILD_PROJECT);return {commit:'c'.repeat(40)};}});
+ const result=await publishLevel({verify:async()=>{},...f,output:path.join(f.directory,'publication'),targets:selection.map(row=>({project:row.id,version:row.version,arch:'arm64'})),env:{...f.env,RELEASE_SELECTION:JSON.stringify(selection)},runGh:async args=>{lists++;assert.equal(args[0],'api');assert.ok(args.at(-1).endsWith('/runs/123/artifacts?per_page=100'));return JSON.stringify([{artifacts}]);},download:async({artifact})=>downloads.push(artifact.id),publish:async options=>{published.push(options.env.BUILD_PROJECT);return {commit:'c'.repeat(40)};}});
  assert.equal(lists,1);assert.deepEqual(downloads,[2]);assert.deepEqual(published,['engine']);assert.equal(result.failed,0);assert.equal(result.skipped,1);;
 });
 function catalogFixture(t){
@@ -77,7 +77,7 @@ test('level publication verifies retained artifacts without consulting rerun job
  const metadata={databaseId:123,workflowName:'Build and release',headSha:f.env.GITHUB_SHA,headBranch:'main',status:'in_progress',conclusion:null};
  const env={...f.env,RELEASE_SELECTION:JSON.stringify([{id:'engine',version:'1.0.0'}])};
  const targets=['arm64','x64'].map(arch=>({project:'engine',version:'1.0.0',arch}));
- const result=await publishLevel({...f,env,output:path.join(f.directory,'publication'),targets,runGh:async()=>JSON.stringify([{artifacts:targets.map((t,i)=>({id:i+1,name:'runtime-engine-1.0.0-'+t.arch}))}]),download:async options=>downloads.push(options.artifact),publish:async options=>{assert.equal(active++,0);order.push(options.env.BUILD_ARCH);await Promise.resolve();active--;return {commit:'c'.repeat(40)};}});
+ const result=await publishLevel({verify:async()=>{},...f,env,output:path.join(f.directory,'publication'),targets,runGh:async()=>JSON.stringify([{artifacts:targets.map((t,i)=>({id:i+1,name:'runtime-engine-1.0.0-'+t.arch}))}]),download:async options=>downloads.push(options.artifact),publish:async options=>{assert.equal(active++,0);order.push(options.env.BUILD_ARCH);await Promise.resolve();active--;return {commit:'c'.repeat(40)};}});
  assert.equal(result.published,2);assert.equal(result.failed,0);assert.equal(downloads.length,2);assert.deepEqual(order,['arm64','x64']);
 });
 
@@ -86,7 +86,7 @@ test('the current publisher uses exactly the environment supplied by the origina
  fs.writeFileSync(reports,JSON.stringify({engine:{definitionDigest:definition}}));
  const env={GITHUB_ACTIONS:'true',GITHUB_REPOSITORY:'owner/builds',GITHUB_WORKFLOW:'Build and release',GITHUB_WORKFLOW_REF:'owner/builds/.github/workflows/runtime-build.yml@refs/heads/main',GITHUB_SHA:f.record.build.sourceRevision,GITHUB_RUN_ID:f.record.build.runId,
   RELEASE_SELECTION:JSON.stringify([{id:'engine',version:'1.0.0'}]),RELEASE_GRAPH:JSON.stringify({engine:[]}),RELEASE_REUSE:'[]',PUBLICATION_TARGETS:JSON.stringify({include:[{project:'engine',version:'1.0.0',arch:'arm64'}]}),BUILD_REPORTS:reports};
- const result=await publishLevel({directory:f.directory,env,output:path.join(f.directory,'publication'),runGh:async()=>JSON.stringify([{artifacts:[{id:1,name:'runtime-engine-1.0.0-arm64'}]}]),download:async options=>downloaded.push(options),publish:options=>publishPackage({...options,
+ const result=await publishLevel({verify:async()=>{},directory:f.directory,env,output:path.join(f.directory,'publication'),runGh:async()=>JSON.stringify([{artifacts:[{id:1,name:'runtime-engine-1.0.0-arm64'}]}]),download:async options=>downloaded.push(options),publish:options=>publishPackage({...options,
   verifyBundle:async()=>({record:f.record,definitionDigest:definition,declaration:{files:[]}}),
   stageBundle:async options=>{assert.equal(options.target,env.GITHUB_SHA);return {id:17};},publishBundle:async()=>({id:17,draft:false}),append:async()=>({commit:'c'.repeat(40)})})});
  assert.equal(result.failed,0,result.errors[0]?.error);assert.equal(result.published,1);assert.equal(downloaded[0].artifact.name,'runtime-engine-1.0.0-arm64');
@@ -94,7 +94,7 @@ test('the current publisher uses exactly the environment supplied by the origina
 
 test('artifact transport errors remain publication failures',async t=>{
  const f=fixture(t),target={project:'engine',version:'1.0.0',arch:'arm64'};
- const result=await publishLevel({...f,env:{...f.env,RELEASE_SELECTION:'engine=1.0.0'},targets:[target],output:path.join(f.directory,'publication'),runGh:async()=>JSON.stringify([{artifacts:[{id:1,name:'runtime-engine-1.0.0-arm64'}]}]),download:async()=>{throw Error('HTTP 403: Resource not accessible by integration');},publish:()=>assert.fail('No publication after a transport failure')});
+ const result=await publishLevel({verify:async()=>{},...f,env:{...f.env,RELEASE_SELECTION:'engine=1.0.0'},targets:[target],output:path.join(f.directory,'publication'),runGh:async()=>JSON.stringify([{artifacts:[{id:1,name:'runtime-engine-1.0.0-arm64'}]}]),download:async()=>{throw Error('HTTP 403: Resource not accessible by integration');},publish:()=>assert.fail('No publication after a transport failure')});
  assert.equal(result.failed,1);assert.equal(result.skipped,0);assert.match(result.errors[0].error,/HTTP 403/);
 });
 

@@ -1,0 +1,51 @@
+name: Build level
+
+on:
+  workflow_call:
+    inputs:
+      targets:
+        description: 'The build rows of this level, as a JSON array'
+        required: true
+        type: string
+      selection:
+        required: true
+        type: string
+      graph:
+        required: true
+        type: string
+      reuse:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(inputs.targets) }}
+    name: build (${{ matrix.project }} ${{ matrix.version }} ${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 240
+    permissions:
+      contents: read
+      actions: read
+    env:
+      MACLAUNCHER_PACKAGE_PRODUCER: '1'
+      GH_TOKEN: ${{ github.token }}
+      BUILD_PROJECT: ${{ matrix.project }}
+      BUILD_VERSION: ${{ matrix.version }}
+      BUILD_ARCH: ${{ matrix.arch }}
+      RELEASE_GRAPH: ${{ inputs.graph }}
+      RELEASE_SELECTION: ${{ inputs.selection }}
+      RELEASE_REUSE: ${{ inputs.reuse }}
+    steps:
+      - name: Report initial disk space
+        run: df -h
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Bootstrap requires a literal before local actions exist.
+        with:
+          submodules: false
+          persist-credentials: false
+      - uses: ./.github/actions/build-runtime

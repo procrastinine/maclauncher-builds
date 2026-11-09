@@ -1,5 +1,5 @@
 name: Build and release
-run-name: Build and release — ${{ inputs.releases }}
+run-name: ${{ inputs.publish && 'Build and release' || 'Build without publishing' }} — ${{ inputs.releases }}
 
 on:
   workflow_dispatch:
@@ -8,6 +8,11 @@ on:
         description: 'Project=release-name pairs, separated by commas or newlines'
         required: true
         type: string
+      publish:
+        description: 'Publish packages whose architectures all built'
+        required: false
+        default: true
+        type: boolean
 
 
 env:
@@ -24,22 +29,15 @@ jobs:
       actions: read
     outputs:
       selection: ${{ steps.plan.outputs.selection }}
-      empty: ${{ steps.plan.outputs.empty }}
       graph: ${{ steps.plan.outputs.graph }}
       reuse: ${{ steps.plan.outputs.reuse }}
-      matrixIndependent: ${{ steps.plan.outputs.matrixIndependent }}
-      emptyIndependent: ${{ steps.plan.outputs.emptyIndependent }}
-      matrix0: ${{ steps.plan.outputs.matrix0 }}
-      empty0: ${{ steps.plan.outputs.empty0 }}
-      matrix1: ${{ steps.plan.outputs.matrix1 }}
-      empty1: ${{ steps.plan.outputs.empty1 }}
-      matrix2: ${{ steps.plan.outputs.matrix2 }}
-      empty2: ${{ steps.plan.outputs.empty2 }}
-      matrix3: ${{ steps.plan.outputs.matrix3 }}
-      empty3: ${{ steps.plan.outputs.empty3 }}
+      levels: ${{ steps.plan.outputs.levels }}
+      targets: ${{ steps.plan.outputs.targets }}
+      empty: ${{ steps.plan.outputs.empty }}
     env:
       GH_TOKEN: ${{ github.token }}
       RELEASES: ${{ inputs.releases }}
+      RELEASE_PUBLISH: ${{ inputs.publish }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Bootstrap requires a literal before local actions exist.
         with:
@@ -47,10 +45,8 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup-node
       - run: npm ci --ignore-scripts
-      - name: Initialize source pin metadata
-        run: |
-          node --input-type=module -e "import {retryNetwork} from './tools/download.mjs'; import {execFileSync} from 'node:child_process'; retryNetwork(()=>execFileSync('git',['submodule','update','--init','--depth','1','--','sources/maclauncher'],{stdio:['inherit','inherit','pipe']}));"
-          node tools/init-runtime-sources.mjs --metadata
+      - name: Prepare the sources the plan reads
+        run: node tools/init-runtime-sources.mjs --metadata
       - name: Select the requested projects and names
         id: plan
         run: node tools/plan-build-release.mjs --output "$RUNNER_TEMP/release-plan"
@@ -58,164 +54,62 @@ jobs:
         uses: ./.github/actions/upload-artifact
         with:
           inputs: '{"name":"release-plan","path":"${{ runner.temp }}/release-plan/reports.json","if-no-files-found":"error","overwrite":"true","retention-days":"30"}'
-  independent:
+
+  # Levels run in order and their count is plan data. A level's builds read
+  # earlier levels' artifacts from this run.
+  level:
     needs: [plan]
-    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.emptyIndependent == 'false' }}
+    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty == 'false' }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.plan.outputs.matrixIndependent) }}
-    name: build (${{ matrix.project }} ${{ matrix.version }} ${{ matrix.arch }})
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 240
+      max-parallel: 1
+      matrix:
+        level: ${{ fromJSON(needs.plan.outputs.levels) }}
+    name: level ${{ matrix.level.index }}
+    uses: ./.github/workflows/runtime-level.yml
+    permissions:
+      contents: read
+      actions: read
+    with:
+      targets: ${{ toJSON(matrix.level.include) }}
+      selection: ${{ needs.plan.outputs.selection }}
+      graph: ${{ needs.plan.outputs.graph }}
+      reuse: ${{ needs.plan.outputs.reuse }}
+
+  # Signed provenance ties every built file to this workflow, run and commit.
+  attest:
+    needs: [plan, level]
+    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty == 'false' && inputs.publish }}
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       actions: read
       id-token: write
       attestations: write
-    env:
-      GH_TOKEN: ${{ github.token }}
-      BUILD_PROJECT: ${{ matrix.project }}
-      BUILD_VERSION: ${{ matrix.version }}
-      BUILD_ARCH: ${{ matrix.arch }}
-      RELEASE_GRAPH: ${{ needs.plan.outputs.graph }}
-      RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
-      RELEASE_REUSE: ${{ needs.plan.outputs.reuse }}
     steps:
-      - name: Report initial disk space
-        run: df -h
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Bootstrap requires a literal before local actions exist.
         with:
-          submodules: false
           persist-credentials: false
-      - uses: ./.github/actions/build-runtime
-
-  build0:
-    needs: [plan]
-    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty0 == 'false' }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.plan.outputs.matrix0) }}
-    name: build (${{ matrix.project }} ${{ matrix.version }} ${{ matrix.arch }})
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 240
-    permissions:
-      contents: read
-      actions: read
-      id-token: write
-      attestations: write
-    env:
-      GH_TOKEN: ${{ github.token }}
-      BUILD_PROJECT: ${{ matrix.project }}
-      BUILD_VERSION: ${{ matrix.version }}
-      BUILD_ARCH: ${{ matrix.arch }}
-      RELEASE_GRAPH: ${{ needs.plan.outputs.graph }}
-      RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
-      RELEASE_REUSE: ${{ needs.plan.outputs.reuse }}
-    steps:
-      - name: Report initial disk space
-        run: df -h
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Bootstrap requires a literal before local actions exist.
+      - uses: ./.github/actions/setup-node
+      - name: Read the built packages
+        uses: ./.github/actions/download-artifact
         with:
-          submodules: false
-          persist-credentials: false
-      - uses: ./.github/actions/build-runtime
-
-  build1:
-    needs: [plan, build0]
-    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty1 == 'false' }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.plan.outputs.matrix1) }}
-    name: build (${{ matrix.project }} ${{ matrix.version }} ${{ matrix.arch }})
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 240
-    permissions:
-      contents: read
-      actions: read
-      id-token: write
-      attestations: write
-    env:
-      GH_TOKEN: ${{ github.token }}
-      BUILD_PROJECT: ${{ matrix.project }}
-      BUILD_VERSION: ${{ matrix.version }}
-      BUILD_ARCH: ${{ matrix.arch }}
-      RELEASE_GRAPH: ${{ needs.plan.outputs.graph }}
-      RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
-      RELEASE_REUSE: ${{ needs.plan.outputs.reuse }}
-    steps:
-      - name: Report initial disk space
-        run: df -h
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Bootstrap requires a literal before local actions exist.
+          inputs: '{"pattern":"runtime-*","path":"${{ runner.temp }}/runtime"}'
+      - name: Count the built files
+        id: built
+        run: echo "files=$(find "$RUNNER_TEMP/runtime" -type f 2>/dev/null | wc -l | tr -d ' ')" >> "$GITHUB_OUTPUT"
+      - uses: ./.github/actions/attest
+        if: ${{ steps.built.outputs.files != '0' }}
+        env:
+          NODE_OPTIONS: --max-http-header-size=32768
         with:
-          submodules: false
-          persist-credentials: false
-      - uses: ./.github/actions/build-runtime
+          inputs: '{"subject-path":"${{ runner.temp }}/runtime/*/*","github-token":"${{ github.token }}"}'
 
-  build2:
-    needs: [plan, build0, build1]
-    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty2 == 'false' }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.plan.outputs.matrix2) }}
-    name: build (${{ matrix.project }} ${{ matrix.version }} ${{ matrix.arch }})
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 240
-    permissions:
-      contents: read
-      actions: read
-      id-token: write
-      attestations: write
-    env:
-      GH_TOKEN: ${{ github.token }}
-      BUILD_PROJECT: ${{ matrix.project }}
-      BUILD_VERSION: ${{ matrix.version }}
-      BUILD_ARCH: ${{ matrix.arch }}
-      RELEASE_GRAPH: ${{ needs.plan.outputs.graph }}
-      RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
-      RELEASE_REUSE: ${{ needs.plan.outputs.reuse }}
-    steps:
-      - name: Report initial disk space
-        run: df -h
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Bootstrap requires a literal before local actions exist.
-        with:
-          submodules: false
-          persist-credentials: false
-      - uses: ./.github/actions/build-runtime
-
-  build3:
-    needs: [plan, build0, build1, build2]
-    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty3 == 'false' }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.plan.outputs.matrix3) }}
-    name: build (${{ matrix.project }} ${{ matrix.version }} ${{ matrix.arch }})
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 240
-    permissions:
-      contents: read
-      actions: read
-      id-token: write
-      attestations: write
-    env:
-      GH_TOKEN: ${{ github.token }}
-      BUILD_PROJECT: ${{ matrix.project }}
-      BUILD_VERSION: ${{ matrix.version }}
-      BUILD_ARCH: ${{ matrix.arch }}
-      RELEASE_GRAPH: ${{ needs.plan.outputs.graph }}
-      RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
-      RELEASE_REUSE: ${{ needs.plan.outputs.reuse }}
-    steps:
-      - name: Report initial disk space
-        run: df -h
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Bootstrap requires a literal before local actions exist.
-        with:
-          submodules: false
-          persist-credentials: false
-      - uses: ./.github/actions/build-runtime
-
-  publishIndependent:
-    needs: [plan, independent]
-    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.emptyIndependent == 'false' }}
+  # A package version publishes only when every one of its architectures built.
+  # Packages publish in level order, so inputs are public before their consumers.
+  publish:
+    needs: [plan, attest]
+    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.attest.result == 'success' }}
     concurrency:
       group: build-and-release-publication
       cancel-in-progress: false
@@ -228,7 +122,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
-      PUBLICATION_TARGETS: ${{ needs.plan.outputs.matrixIndependent }}
+      PUBLICATION_TARGETS: ${{ needs.plan.outputs.targets }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Bootstrap requires a literal before local actions exist.
         with:
@@ -237,115 +131,11 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/publish-runtime
         with:
-          level: 'Independent'
-
-  publish0:
-    needs: [plan, build0]
-    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty0 == 'false' }}
-    concurrency:
-      group: build-and-release-publication
-      cancel-in-progress: false
-      queue: max
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-      actions: read
-      attestations: read
-    env:
-      GH_TOKEN: ${{ github.token }}
-      RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
-      PUBLICATION_TARGETS: ${{ needs.plan.outputs.matrix0 }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Bootstrap requires a literal before local actions exist.
-        with:
-          ref: main
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: ./.github/actions/publish-runtime
-        with:
-          level: '0'
-
-  publish1:
-    needs: [plan, build1, publish0]
-    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty1 == 'false' }}
-    concurrency:
-      group: build-and-release-publication
-      cancel-in-progress: false
-      queue: max
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-      actions: read
-      attestations: read
-    env:
-      GH_TOKEN: ${{ github.token }}
-      RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
-      PUBLICATION_TARGETS: ${{ needs.plan.outputs.matrix1 }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Bootstrap requires a literal before local actions exist.
-        with:
-          ref: main
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: ./.github/actions/publish-runtime
-        with:
-          level: '1'
-
-  publish2:
-    needs: [plan, build2, publish1]
-    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty2 == 'false' }}
-    concurrency:
-      group: build-and-release-publication
-      cancel-in-progress: false
-      queue: max
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-      actions: read
-      attestations: read
-    env:
-      GH_TOKEN: ${{ github.token }}
-      RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
-      PUBLICATION_TARGETS: ${{ needs.plan.outputs.matrix2 }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Bootstrap requires a literal before local actions exist.
-        with:
-          ref: main
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: ./.github/actions/publish-runtime
-        with:
-          level: '2'
-
-  publish3:
-    needs: [plan, build3, publish2]
-    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.empty3 == 'false' }}
-    concurrency:
-      group: build-and-release-publication
-      cancel-in-progress: false
-      queue: max
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-      actions: read
-      attestations: read
-    env:
-      GH_TOKEN: ${{ github.token }}
-      RELEASE_SELECTION: ${{ needs.plan.outputs.selection }}
-      PUBLICATION_TARGETS: ${{ needs.plan.outputs.matrix3 }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Bootstrap requires a literal before local actions exist.
-        with:
-          ref: main
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: ./.github/actions/publish-runtime
-        with:
-          level: '3'
+          level: all
 
   index:
-    needs: [plan, publishIndependent, publish0, publish1, publish2, publish3]
-    if: ${{ always() && !cancelled() && needs.plan.result == 'success' }}
+    needs: [plan, publish]
+    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && inputs.publish }}
     uses: ./.github/workflows/pages.yml
     permissions:
       contents: read
@@ -355,7 +145,7 @@ jobs:
       source-revision: main
 
   timings:
-    needs: [plan, independent, build0, build1, build2, build3, publishIndependent, publish0, publish1, publish2, publish3]
+    needs: [plan, level, attest, publish, index]
     if: always()
     runs-on: ubuntu-24.04
     permissions:
@@ -368,5 +158,6 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup-node
+      - run: node tools/init-runtime-sources.mjs
       - name: Summarize package job durations
         run: node tools/job-timings.mjs --repo "${{ github.repository }}" --run "${{ github.run_id }}"
