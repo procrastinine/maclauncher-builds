@@ -1,5 +1,5 @@
 import {appRequire,appSourceRoot} from '../../../../../../../tools/app-source.mjs';
-import {buildCameraBridge} from '../camera-bridge/build.mjs';
+import {CAMERA_BRIDGE,buildCameraBridge} from '../camera-bridge/build.mjs';
 import {gitlink,sourceRevision} from '../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from "node:fs";
@@ -14,14 +14,23 @@ const source = path.resolve(args.source), output = path.resolve(args.out), refer
 const declaration = JSON.parse(fs.readFileSync(path.join(here, "source.json"), "utf8"));
 const revision = sourceRevision(declaration);
 const app = appSourceRoot(), owned = path.join(app.directory, "src/modules/crossover/temporal/streamline");
+// --phase compile builds the adapters and the camera bridge; --phase assemble writes the licenses and
+// provider.json from their outputs and the declared inputs alone. Without --phase both run.
+const phase = args.phase || null;
 const inspect = appRequire("src/modules/crossover/temporal/streamline/pe-exports.js").inspect;
 const hash = file => crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 const core = [...fs.readFileSync(path.join(source, "include/sl_core_api.h"), "utf8").matchAll(/^sl::Result (sl\w+)\(|^SL_API sl::Result (sl\w+)\(/gm)].map(match => match[1] || match[2]);
 const known = new Set([...fs.readFileSync(path.join(source, "source/core/sl.interposer/exports.def"), "utf8").split(/\r?\n/).map(line => line.trim()).filter(line => /^[A-Za-z_]\w*$/.test(line) && line !== "EXPORTS"), ...core, "slSetVulkanInfo"]);
-function buildAdapter(reference, output) {
+/** The reference export table, which must match the pinned Streamline API. */
+function referenceExports(reference) {
 const exports = inspect(reference);
 if (!exports) throw Error("A complete named x64 Streamline export table is required");
 if (exports.some(item => !known.has(item.name)) || ["slSetConstants", "slEvaluateFeature", "slShutdown"].some(name => !exports.some(item => item.name === name))) throw Error("The reference exports do not match the pinned Streamline API");
+return exports;
+}
+/** Compile the adapter for one reference into its output directory. */
+function compileAdapter(reference, output) {
+const exports = referenceExports(reference);
 fs.mkdirSync(output, { recursive: true });
 fs.writeFileSync(path.join(output, "exports.def"), "LIBRARY sl.interposer\nEXPORTS\n" + exports.map(item => `${item.name} @${item.ordinal}`).join("\n") + "\n");
 fs.writeFileSync(path.join(output, "exports.hpp"), `#pragma once\n#define MACLAUNCHER_HAS_SL_SET_TAG_FOR_FRAME ${exports.some(row=>row.name==="slSetTagForFrame")?1:0}\nconstexpr unsigned maclauncherExportCount = ${exports.length};\nstatic const char *maclauncherExportNames[] = {${exports.map(item => JSON.stringify(item.name)).join(",")}};\nextern "C" void *maclauncherTargets[maclauncherExportCount];\n`);
@@ -68,32 +77,33 @@ execFileSync(path.resolve(args.compiler), ["-std=c++17", "-O2", "-shared", "-sta
   path.join(owned, "proxy.cpp"), path.join(output, "thunks.S"), path.join(output, "exports.def"), "-o", path.join(output, "sl.interposer.dll")], { stdio: "inherit" });
 const actual = inspect(path.join(output,"sl.interposer.dll"));
 if (JSON.stringify(actual)!==JSON.stringify(exports)) throw Error("The camera adapter export table differs from its complete reference");
-return {schema:1,library:"sl.interposer.dll",sha256:hash(path.join(output,"sl.interposer.dll")),referenceSha256:hash(reference),exports};
 }
-const metadata = buildAdapter(reference,output);
+const adapterRecord = (reference, output) => ({schema:1,library:"sl.interposer.dll",sha256:hash(path.join(output,"sl.interposer.dll")),referenceSha256:hash(reference),exports:referenceExports(reference)});
+// A compatibility profile gets its own adapter when its reference export table differs.
+const compatProfiles = (declaration.referenceProfiles||[]).map(profile => {
+ const referenceFile = path.resolve(args["compat-reference-" + profile.version] || "");
+ const table = inspect(referenceFile); if (!table) throw Error("Invalid complete Streamline reference table");
+ return {profile, referenceFile, directory: "compat/" + profile.version, table};
+}).filter(row => JSON.stringify(row.table) !== JSON.stringify(referenceExports(reference)));
+const compiler = path.resolve(args.compiler);
+function compile() {
+compileAdapter(reference, output);
+for (const row of compatProfiles) compileAdapter(row.referenceFile, path.join(output, row.directory));
+buildCameraBridge({compiler:path.join(path.dirname(compiler),"x86_64-w64-mingw32-clang"),output});
+}
+function assemble() {
+const metadata = adapterRecord(reference,output);
 metadata.version="3";metadata.resourceSnapshotAPI=1;metadata.resourceSnapshotProfiles=["d3d11-v2"];
 metadata.resourceTagProfiles=["slSetD3DDevice","slSetTag","slSetTagForFrame"].every(name=>metadata.exports.some(row=>row.name===name))?["d3d11-v1"]:[];
 metadata.source={url:declaration.repository,revision,version:"2.9.0"};metadata.appSource={repository:"https://github.com/procrastinine/maclauncher",revision:app.revision};
 metadata.profiles=[];
-for(const profile of declaration.referenceProfiles||[]){
- const referenceFile=args["compat-reference"]?path.resolve(args["compat-reference"]):path.join(output,"references",profile.version,"sl.interposer.dll");
- if(!fs.existsSync(referenceFile)){
-  const response=await fetch(profile.reference.url);if(!response.ok)throw Error("Streamline reference download failed: "+response.status);
-  const bytes=Buffer.from(await response.arrayBuffer());
-  if(bytes.length!==profile.reference.bytes||crypto.createHash("sha256").update(bytes).digest("hex")!==profile.reference.sha256)throw Error("Streamline reference identity differs");
-  fs.mkdirSync(path.dirname(referenceFile),{recursive:true});fs.writeFileSync(referenceFile,bytes);
- }
- if(fs.statSync(referenceFile).size!==profile.reference.bytes||hash(referenceFile)!==profile.reference.sha256)throw Error("Streamline reference identity differs");
- const table=inspect(referenceFile);if(!table)throw Error("Invalid complete Streamline reference table");
- if(JSON.stringify(table)===JSON.stringify(metadata.exports))continue;
- const directory="compat/"+profile.version;
- const candidate=buildAdapter(referenceFile,path.join(output,directory));
- metadata.profiles.push({...candidate,directory,referenceSource:{url:declaration.repository,revision:profile.revision,version:profile.version}});
-}
-const cameraBridge=buildCameraBridge({compiler:path.join(path.dirname(path.resolve(args.compiler)),"x86_64-w64-mingw32-clang"),output});
-metadata.cameraBridge={...cameraBridge,files:Object.fromEntries([cameraBridge.windows,cameraBridge.unix].map(file=>[file,hash(path.join(output,file))]))};
-metadata.compiler=execFileSync(path.resolve(args.compiler),["--version"],{encoding:"utf8"}).split("\n")[0];
+for (const row of compatProfiles) metadata.profiles.push({...adapterRecord(row.referenceFile, path.join(output, row.directory)),directory:row.directory,referenceSource:{url:declaration.repository,revision:row.profile.revision,version:row.profile.version}});
+metadata.cameraBridge={...CAMERA_BRIDGE,files:Object.fromEntries([CAMERA_BRIDGE.windows,CAMERA_BRIDGE.unix].map(file=>[file,hash(path.join(output,file))]))};
+metadata.compiler=execFileSync(compiler,["--version"],{encoding:"utf8"}).split("\n")[0];
 metadata.sources=Object.fromEntries(["build.mjs","source.json","proxy.cpp","../camera-bridge/build.mjs","../camera-bridge/bridge.c","../camera-bridge/bridge-unix.c","../camera-bridge/protocol.h","camera.hpp","resources.hpp","snapshots.hpp","snapshot-budget.hpp","../dxmt/camera-transport.hpp","../dxmt/streamline-transport.hpp","../dxmt/streamline-snapshot.hpp","pe-exports.js","../../../shared/reshade/temporal/camera.h","../../../shared/reshade/temporal/frame.h","../../../shared/reshade/native/image-color.h","../../../shared/reshade/native/image-budget.hpp"].map(file=>[file,hash(path.resolve(file==="build.mjs"||file==="source.json"||file.startsWith("../camera-bridge/")?here:owned,file))]));
 addLicenses(output,"Streamline",source);
 fs.writeFileSync(path.join(output,"provider.json"),JSON.stringify(metadata,null,2)+"\n");
 console.log(JSON.stringify({library:path.join(output,metadata.library),exports:metadata.exports.length,profiles:metadata.profiles.map(row=>({directory:row.directory,exports:row.exports.length})),sha256:metadata.sha256}));
+}
+if (phase !== "assemble") compile();
+if (phase !== "compile") assemble();

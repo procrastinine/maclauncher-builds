@@ -200,6 +200,16 @@
       "extract": true,
       "fileSha256": "48f79bdd8eb35d6de0e54a70799a3340913990ef5e0e3a837a4f724008d5685b"
     },
+    "streamline-reference-2.2.1": {
+      "kind": "file",
+      "description": "Official 64-bit sl.interposer.dll from Streamline 2.2.1, the compatibility profile reference",
+      "pin": {
+        "file": "src/modules/crossover/temporal/streamline/source.json",
+        "pointer": "/referenceProfiles/0"
+      },
+      "url": "https://media.githubusercontent.com/media/NVIDIA-RTX/Streamline/{revision}/bin/x64/sl.interposer.dll",
+      "sha256": "{sha256}"
+    },
     "dxmt-wine": {
       "kind": "archive",
       "description": "Wine directory of the selected DXMT renderer, containing x86_64-windows and x86_64-unix libraries",
@@ -512,6 +522,7 @@
       "steps": [
         {
           "recipe": "src/modules/crossover/temporal/streamline/build.mjs",
+          "phased": true,
           "args": [
             "--source",
             "{source:streamline}",
@@ -520,7 +531,9 @@
             "--compiler",
             "{input:llvm-mingw}/x86_64-w64-mingw32-clang++",
             "--reference",
-            "{input:streamline-reference}"
+            "{input:streamline-reference}",
+            "--compat-reference-2.2.1",
+            "{input:streamline-reference-2.2.1}"
           ]
         }
       ]
