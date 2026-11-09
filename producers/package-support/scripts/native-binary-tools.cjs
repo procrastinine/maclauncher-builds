@@ -1,5 +1,4 @@
-const {addLicense} = require("../../../lib/licenses.mjs");
-// Shared native binary inspection, copying and dependency notices.
+// Shared native binary inspection and copying.
 const fs = require("node:fs"), path = require("node:path"), crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const B = require("../../../lib/package-format.cjs");
@@ -96,7 +95,7 @@ function copyTree(source, target, { excludes = [], rootExcludes = [], originalRo
 }
 
 function formulaRoot(file) {
-  const match = fs.realpathSync(file).match(/^(.*\/Cellar\/([^/]+)\/([^/]+))\//);
+  const match = file.match(/^(.*\/Cellar\/([^/]+)\/([^/]+))\//);
   return match ? { root: match[1], name: match[2], version: match[3] } : null;
 }
 
@@ -135,39 +134,4 @@ function publicProvenance(provenance, pathMappings = []) {
   return assertPublicMetadata(project(provenance));
 }
 
-function sanitizeHomebrewReceipt(receipt, formula) {
-  if (!receipt || typeof receipt !== "object" || Array.isArray(receipt) || !/^[A-Za-z0-9][A-Za-z0-9@+_.-]*$/.test(formula?.name || "") ||
-    !/^[A-Za-z0-9][A-Za-z0-9+_.-]*$/.test(formula?.version || "")) throw new Error("A Homebrew receipt requires a public formula identity.");
-  const sanitized = JSON.parse(JSON.stringify(receipt));
-  if (!sanitized.source || typeof sanitized.source !== "object" || Array.isArray(sanitized.source)) throw new Error("Homebrew receipt source identity is missing.");
-  delete sanitized.source.path;
-  // Installation bookkeeping varies with the host; dependency and build identities stay.
-  for (const key of ['time', 'source_modified_time', 'installed_on_request', 'installed_as_dependency', 'poured_from_bottle', 'loaded_from_api', 'loaded_from_internal_api', 'changed_files', 'homebrew_version']) delete sanitized[key];
-  const tap = sanitized.source.tap || "homebrew/core";
-  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(tap)) throw new Error("Homebrew receipt tap identity is invalid.");
-  sanitized.source.formula = `${tap}/${formula.name}`;
-  sanitized.source.pkg_version = formula.version;
-  return assertPublicMetadata(sanitized);
-}
-
-function addDependencyLicenses(source, payload, seen, receiptRoot) {
-  const formula = formulaRoot(source);
-  if (!formula || seen.has(formula.root)) return;
-  // The formula's notices are carried when its keg has any.
-  const candidates = fs.readdirSync(formula.root).filter(name => /^(?:(?:licen[sc]e|copying|copyright|notice)(?:[._-].*)?|(?:AGPL|GPL|LGPL|MPL|Apache|MIT|BSD|ISC|Zlib)(?:[-_.].*)?)$/i.test(name)).sort();
-  seen.add(formula.root);
-  for(const name of candidates)addLicense(payload,formula.name,path.join(formula.root,name),name);
-  const receipt = path.join(formula.root, "INSTALL_RECEIPT.json");
-  if (fs.existsSync(receipt)) {
-    const bytes = fs.readFileSync(receipt), directory = `${formula.name}-${formula.version}`;
-    const privateDirectory = path.join(receiptRoot, "dependencies", B.relativeFile(directory));
-    fs.mkdirSync(privateDirectory, { recursive: true, mode: 0o700 });
-    fs.writeFileSync(path.join(privateDirectory, "INSTALL_RECEIPT.json"), bytes, { flag: "wx", mode: 0o600 });
-    const sanitized = sanitizeHomebrewReceipt(JSON.parse(bytes), formula);
-    fs.mkdirSync(path.join(payload, `source/dependencies/${directory}`), { recursive: true });
-    fs.writeFileSync(path.join(payload, `source/dependencies/${directory}/INSTALL_RECEIPT.json`), JSON.stringify(sanitized, null, 2) + "\n", { flag: "wx", mode: 0o644 });
-  }
-}
-module.exports = { macho, loadCommands, parseLinkedLibraries, links, libraryIds, thinStagedMachO, resolveLink, copyTree, formulaRoot, assertPublicMetadata, publicProvenance, sanitizeHomebrewReceipt, addDependencyLicenses };
-// Builds also reads Homebrew formula roots.
-module.exports = {...module.exports, formulaRoot(file){const match=file.match(/^(.*\/Cellar\/([^/]+)\/([^/]+))\//);return match?{root:match[1],name:match[2],version:match[3]}:null;}};
+module.exports = { macho, loadCommands, links, libraryIds, thinStagedMachO, resolveLink, copyTree, formulaRoot, publicProvenance };
