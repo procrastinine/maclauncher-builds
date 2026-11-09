@@ -75,7 +75,7 @@ export async function buildModule(options){
     const work=path.resolve(options.work),jobs=Number(options.jobs||2);
     if(!Number.isInteger(jobs)||jobs<1||jobs>2)throw Error('Use one or two compiler jobs.');
     if(/\s/.test(work))throw Error('The Wine Makefile requires a build directory without whitespace.');
-    const prepared=await prepareSource({archive:options.archive,work});
+    const prepared=options.prepared||await prepareSource({archive:options.archive,work});
     if(options.prepareOnly)return prepared;
     const mingw=fs.realpathSync(options.mingw),build=path.join(work,'build'),vulkan=await prepareVulkanLink({...options,work});
     for(const name of ['x86_64-w64-mingw32-clang','i686-w64-mingw32-clang'])fs.accessSync(path.join(mingw,name),fs.constants.X_OK);
@@ -113,32 +113,41 @@ export async function buildModule(options){
         ...Object.entries(peLinkerFlags).map(([architecture,value])=>architecture+'_LDFLAGS='+value),'dlls/winevulkan/all'],{cwd:build,env:environment});
     writeChanged(flagFile,flags+'\n');
     writeChanged(linkerFile,linkerIdentity);
-    const files=['dlls/winevulkan/x86_64-windows/winevulkan.dll','dlls/winevulkan/i386-windows/winevulkan.dll','dlls/winevulkan/winevulkan.so'];
+    const files=MODULES.map(([,file])=>file);
     for(const file of files)if(!fs.statSync(path.join(build,file),{throwIfNoEntry:false})?.isFile())throw Error('The paired module output is missing: '+file);
     const result={...prepared,build,files,readobj:path.join(mingw,'llvm-readobj'),strip:path.join(mingw,'llvm-strip')};
     if(options.output)result.provider=publishModule(result,path.resolve(options.output));
     return result;
 }
-export function publishModule(built,output){
+// The shipped module libraries, each with its place in the Wine build.
+const MODULES=[['x86_64-unix/winevulkan.so','dlls/winevulkan/winevulkan.so'],['x86_64-windows/winevulkan.dll','dlls/winevulkan/x86_64-windows/winevulkan.dll'],['i386-windows/winevulkan.dll','dlls/winevulkan/i386-windows/winevulkan.dll']];
+/** The shipped module library paths. */
+export const MODULE_FILES=MODULES.map(([name])=>name);
+/** Check the complete PE export set of the built modules and stage them as shipped:
+ * the PE libraries without debug sections, the Unix library ad hoc signed. */
+export function finishModule(built,output){
     if(fs.existsSync(output))throw Error('The immutable module output already exists.');
-    const binaries=[['x86_64-unix/winevulkan.so',built.files[2]],['x86_64-windows/winevulkan.dll',built.files[0]],['i386-windows/winevulkan.dll',built.files[1]]];
     const originalSpec=fs.readFileSync(path.join(built.directory,'dlls/winevulkan/winevulkan.spec'),'utf8');
     const expected=[...originalSpec.matchAll(/^@\s+\S+\s+(?:-\S+\s+)*([A-Za-z0-9_]+)(?:\(|\s*$)/gm)].map(row=>row[1]).sort();
-    for(const [,file]of binaries.slice(1)){
+    for(const [,file]of MODULES.slice(1)){
         const actual=[...read(built.readobj,['--coff-exports',path.join(built.build,file)]).matchAll(/^\s+Name: ([A-Za-z0-9_]+)$/gm)].map(row=>row[1]).sort();
         if(JSON.stringify(actual)!==JSON.stringify(expected))throw Error('The complete PE Vulkan export set differs: '+file);
     }
     fs.mkdirSync(output,{recursive:true});
-    for(const [name,file]of binaries){
+    for(const [name,file]of MODULES){
         const target=path.join(output,name);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(built.build,file),target);fs.chmodSync(target,0o755);
         if(name.endsWith('.dll'))run(built.strip,['--strip-debug',target]);
         else run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);
     }
-    addLicenses(output,'Wine',built.directory);
-    addLicense(output,'Wine authors',path.join(built.directory,'AUTHORS'));
+    return output;
+}
+/** Describe staged module libraries from the projected Wine source: licenses, provider record, manifest, payload and declaration. */
+export function describeModule({directory,output}){
+    addLicenses(output,'Wine',directory);
+    addLicense(output,'Wine authors',path.join(directory,'AUTHORS'));
     addLicenses(output,'Khronos Vulkan',here);
     const files=fs.readdirSync(output,{recursive:true}).filter(name=>name!=='provider.json'&&fs.statSync(path.join(output,name)).isFile()).map(file=>{
-        const binary=binaries.some(([name])=>name===file),native=file.endsWith('.so'),target=path.join(output,file);
+        const binary=MODULES.some(([name])=>name===file),native=file.endsWith('.so'),target=path.join(output,file);
         fs.chmodSync(target,binary?0o755:0o644);
         return {path:file,size:fs.statSync(target).size,mode:binary?0o755:0o644,sha256:digest(fs.readFileSync(target)),
             ...(binary?{format:native?'mach-o':'pe',architectures:[file.startsWith('i386-windows/')?'x86':'x86_64'],
@@ -147,7 +156,7 @@ export function publishModule(built,output){
     const provider={schema:1,provider:source.id,version:source.version,profile:source.profile,
         sceneInteropAPI:1,sceneContextAPI:1,wineVulkanDriverVersion:source.wineVulkanDriverVersion,originalUnixCallCount:source.unixCallCount,runtimeProfile:source.runtimeProfile,
         minimumMacOS:source.minimumMacOS,architectures:source.architectures,originalGpuWorkRetained:true,
-        libraries:Object.fromEntries(binaries.map(([file])=>[file.split('/')[0],file])),files};
+        libraries:Object.fromEntries(MODULES.map(([file])=>[file.split('/')[0],file])),files};
     writeChanged(path.join(output,'provider.json'),JSON.stringify(provider,null,2)+'\n');
     const manifest={schemaVersion:1,managerId:source.id,version:source.version,platform:'darwin',arch:'x64',minimumMacOS:source.minimumMacOS,
         executableRelative:provider.libraries['x86_64-unix'],provider,files,dependencies:[]};
@@ -160,6 +169,7 @@ export function publishModule(built,output){
             size:fs.statSync(manifestFile).size,mode:0o644,sha256:digest(fs.readFileSync(manifestFile))}]};
     writeChanged(path.join(output,'runtime-package.json'),JSON.stringify(declaration,null,2)+'\n');return provider;
 }
+export function publishModule(built,output){return describeModule({directory:built.directory,output:finishModule(built,output)});}
 if(process.argv[1]&&fs.existsSync(process.argv[1])&&pathToFileURL(fs.realpathSync(process.argv[1])).href===import.meta.url){
     try{
         const options={};for(let i=2;i<process.argv.length;i++){

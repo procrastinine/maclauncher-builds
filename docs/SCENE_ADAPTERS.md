@@ -2,6 +2,8 @@
 
 The scene adapters record work alongside the original game graphics calls. Each has its own recipe, `tools/build-winevulkan-scene.mjs`, `tools/build-fidelityfx-api.mjs` or `tools/build-vulkan-moltenvk-scene.mjs`, and they share the llvm-mingw toolchain and packaging steps in `tools/scene-runtime.mjs`. All three use the shared Runtime build workflow. The registered version selects its source profile and compiler inputs.
 
+The WineVulkan and MoltenVK recipes run in three steps. Preparation downloads the declared archives and toolchain or fetches the declared sources and projects the adapted source without compiling. The compile step (`--phase compile`) builds the libraries, including Bison for WineVulkan, and stages them as shipped: the Windows modules without debug sections and the native module signed, or each MoltenVK CPU slice under its scene library name with its install name and signature. The assemble step (`--phase assemble`) writes the licenses, provider descriptor, manifest and declaration from those libraries and the prepared sources alone. Without `--phase` a recipe runs all three steps.
+
 | Package | Version | CPU | Minimum macOS | Inputs |
 | --- | --- | --- | --- | --- |
 | WineVulkan scene adapter | 26.3.0-MCLv1 | Intel; Rosetta on Apple Silicon | 10.15 | CrossOver 26.3 Wine source, Bison 3.8.2, LLVM-MinGW, MoltenVK 1.4.2 link input |

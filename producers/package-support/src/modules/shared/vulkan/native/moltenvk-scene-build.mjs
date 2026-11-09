@@ -55,11 +55,19 @@ export function buildSceneProvider({projected,work,dependencies,architecture='ar
  run('/usr/bin/nice',['-n','19','cmake','--build',build,'--target','MoltenVK','--parallel',String(jobs)]);
  const library=path.join(build,'upstream/MoltenVK/libMoltenVK.dylib');if(!fs.existsSync(library))throw Error('The original MoltenVK target did not produce its library');return {library,dependencies:actual,buildInputs};
 }
+const SCENE_LIBRARY='libMoltenVK-scene.dylib';
+/** Rename the compiled MoltenVK library as the scene provider library, with its install name and ad hoc signature. */
+export function nameSceneProvider({library,output}){
+ output=path.resolve(output);if(fs.existsSync(output))throw Error('The immutable provider library output already exists');
+ fs.mkdirSync(output,{recursive:true});const destination=path.join(output,SCENE_LIBRARY);fs.copyFileSync(library,destination);fs.chmodSync(destination,0o755);
+ run('/usr/bin/install_name_tool',['-id','@rpath/'+SCENE_LIBRARY,destination]);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',destination]);
+ return destination;
+}
+/** A raw provider: the named scene library with its licenses and provider record. */
 export function publishSceneProvider({library,projected,output,architecture,dependencies,buildInputs}){
  if(!buildInputs||JSON.stringify(buildInputs.profile)!==JSON.stringify(source))throw Error('The raw provider requires its prepared build identity');
  output=path.resolve(output);if(fs.existsSync(output))throw Error('The immutable provider output already exists');
- fs.mkdirSync(output,{recursive:true});const name='libMoltenVK-scene.dylib',destination=path.join(output,name);fs.copyFileSync(library,destination);fs.chmodSync(destination,0o755);
- run('/usr/bin/install_name_tool',['-id','@rpath/'+name,destination]);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',destination]);
+ fs.mkdirSync(output,{recursive:true});const name=SCENE_LIBRARY,destination=path.join(output,name);fs.copyFileSync(library,destination);fs.chmodSync(destination,0o755);
  addLicenses(output,'MoltenVK',projected);
  addLicenses(output,'VKD3D-Proton temporal carrier',path.resolve(root,'../../../../../../../producers/vkd3d-proton/source'));
  addLicenses(output,'MacLauncher',path.resolve(root,'../../../../../../..'));
@@ -100,7 +108,7 @@ export function publishScenePackage({providerDirectory,peerDirectory,output}){
    platform:'darwin',arch:inputs.length===2?'universal':architectures[0]==='x86_64'?'x64':'arm64',minimumMacOS:source.minimumMacOS,
    executableRelative:provider.library,files,dependencies:[{file:provider.library,links:first.links}],provider,
    provenance:{sourceRevision:source.revision,sourceUrl:source.repository,upstreamVersion:source.upstreamVersion,
-    adaptationVersion:source.adaptationVersion,buildInputs:provider.buildInputs,packageProducer:{file:'moltenvk-scene-build.mjs',sha256:digest(fs.readFileSync(fileURLToPath(import.meta.url)))}}};
+    adaptationVersion:source.adaptationVersion,buildInputs:provider.buildInputs,packageProducer:provider.buildInputs.producer.find(row=>row.file==='moltenvk-scene-build.mjs')}};
   Bundled.validateManifest(manifest);Bundled.verifyPayload(temporary,manifest);
   writeChanged(path.join(temporary,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
   fs.renameSync(temporary,output);return manifest;
@@ -113,5 +121,5 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
  if(values['--package-peer']&&!values['--package-output'])throw Error('A second architecture requires the managed package output');
  const projected=prepareSceneSource({repository:values['--source'],work:values['--work']});
  if(values['--check']!==undefined)checkSceneSource({projected,includes:values['--check'].split(path.delimiter).filter(Boolean),architecture:values['--architecture']||'arm64'});
- if(values['--output']){const architecture=values['--architecture']||'arm64';const built=buildSceneProvider({projected,work:values['--work'],dependencies:{'SPIRV-Cross':values['--spirv-cross'],'Vulkan-Headers':values['--vulkan-headers'],cereal:values['--cereal']},architecture});publishSceneProvider({...built,projected,output:values['--output'],architecture});if(values['--package-output'])publishScenePackage({providerDirectory:values['--output'],peerDirectory:values['--package-peer'],output:values['--package-output']});}
+ if(values['--output']){const architecture=values['--architecture']||'arm64';const built=buildSceneProvider({projected,work:values['--work'],dependencies:{'SPIRV-Cross':values['--spirv-cross'],'Vulkan-Headers':values['--vulkan-headers'],cereal:values['--cereal']},architecture});publishSceneProvider({...built,library:nameSceneProvider({library:built.library,output:path.join(values['--work'],'named-'+architecture)}),projected,output:values['--output'],architecture});if(values['--package-output'])publishScenePackage({providerDirectory:values['--output'],peerDirectory:values['--package-peer'],output:values['--package-output']});}
 }

@@ -41,18 +41,31 @@ export function pythonBuildTools(work,requirements){
 /** Run a recipe file as its project's build command. The request is checked against the
  * registered build record, its command and its runner before the recipe starts; the result is printed. */
 // A recipe is one build function, or {compile, assemble}: compile runs the compilers and returns its
-// outputs; assemble stages, describes and seals them without compiling.
+// outputs; assemble stages, describes and seals them without compiling. A recipe with a prepare step
+// runs in phases: prepare fetches and projects the declared inputs without compiling and returns where
+// they are (kept in the work directory as prepared.json); `--phase compile` writes its outputs into the
+// work directory; `--phase assemble` reads only those outputs and the prepared inputs. Without --phase
+// the recipe prepares, runs its compile phase as a process of its own, then assembles.
 export function recipeMain(meta,recipe){
- const build=typeof recipe==='function'?recipe:async options=>recipe.assemble({...options,compiled:await recipe.compile?.(options)});
  const file=fileURLToPath(meta.url);
  if(!process.argv[1]||path.resolve(process.argv[1])!==file)return;
  (async()=>{
-  const options=buildOptions(process.argv.slice(2)),{checkBuildRequest}=await import('./build-runtime.mjs');
+  const {phase,...options}=buildOptions(process.argv.slice(2)),{checkBuildRequest}=await import('./build-runtime.mjs');
   const {project,build:record}=checkBuildRequest(options);
   if(path.join(root,record.command)!==file)throw Error(project.name+' builds with '+record.command+'.');
-  return build({...options,version:record.version});
+  const request={...options,version:record.version},preparedFile=path.join(options.work,'prepared.json');
+  if(typeof recipe==='function'||!recipe.prepare){
+   if(phase)throw Error(project.name+' has no build phases.');
+   return typeof recipe==='function'?recipe(request):recipe.assemble({...request,compiled:await recipe.compile?.(request)});
+  }
+  if(phase)return recipe[phase]({...request,prepared:JSON.parse(fs.readFileSync(preparedFile,'utf8'))});
+  const prepared=await recipe.prepare(request);
+  fs.writeFileSync(preparedFile,JSON.stringify(prepared,null,1)+'\n');
+  execFileSync(process.execPath,[file,...process.argv.slice(2),'--phase','compile'],{stdio:'inherit'});
+  return recipe.assemble({...request,prepared});
  })().then(value=>console.log(JSON.stringify(value)),error=>{console.error(error);process.exitCode=1;});
 }
 export function buildOptions(args){
- const options={};for(let index=0;index<args.length;index+=2){const key=args[index]?.slice(2);if(!['project','version','arch','output','work'].includes(key)||!args[index+1]||Object.hasOwn(options,key))throw Error('Use --project, --version, --arch, --output and --work.');options[key]=args[index+1];}return options;
+ const options={};for(let index=0;index<args.length;index+=2){const key=args[index]?.slice(2);if(!['project','version','arch','output','work','phase'].includes(key)||!args[index+1]||Object.hasOwn(options,key))throw Error('Use --project, --version, --arch, --output and --work, and --phase compile or assemble.');options[key]=args[index+1];}
+ if(options.phase!==undefined&&!['compile','assemble'].includes(options.phase))throw Error('Use --phase compile or --phase assemble.');return options;
 }
