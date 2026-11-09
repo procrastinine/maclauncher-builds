@@ -6,7 +6,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {rustEnvironment} from "./rust-build.mjs";
-import {buildInput} from './build-input.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 import {resolveProject} from '../lib/projects.mjs';
 import {recipeMain,checkoutSource} from './build-source.mjs';
@@ -37,7 +36,7 @@ export async function assemble({project:id,arch,output,work,compiled:{target,ups
 
   addLicenses(payload,'AIM',upstream);addLicenses(payload,id,source);addCargoLicenses(payload,id,source,env);addLicenses(payload,'MacLauncher',root);
 
-  return helperPackage({id,version:project.build.version,arch,output,minimumMacOS:'13.0',rosettaFiles:arch==='x64'?['android-apk-metadata']:[],sourceSha256:sha(path.join(base,'main.rs')),record:{executable:'android-apk-metadata',upstreamRevision:spec.aim.revision,binarySha256:sha(binary),cargoLockSha256:sha(path.join(base,'Cargo.lock'))}});
+  return helperPackage({id,version:project.build.version,arch,output,minimumMacOS:'13.0',rosettaFiles:arch==='x64'?['android-apk-metadata']:[],sourceSha256:sha(path.join(base,'main.rs')),record:{executable:'android-apk-metadata',upstreamRevision:spec.aim.revision,binarySha256:sha(binary)}});
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}finally{fs.rmSync(work,{recursive:true,force:true});}
 }
 recipeMain(import.meta,{compile,assemble});

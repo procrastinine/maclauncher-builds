@@ -38,7 +38,7 @@ for(const [key,item] of [...dependencies].sort(([a],[b])=>a.localeCompare(b))){
   records.push({name:item.name,version:item.version,source:item.source,checksum:item.checksum});
 }
 const owned=fs.readdirSync(import.meta.dirname).sort().map(name=>({path:'maclauncher/apk-metadata/'+name,sha256:sha(path.join(import.meta.dirname,name))}));
-const provenance={schemaVersion:1,id:'android-apk-metadata',aim:specification.aim,minimumMacOS:'13.0',architecture:'arm64',compiler:build.compiler,originalParser:[...build.originals,...build.dependencies.originalSources||[]],owned,registryDependencySources:records,cargoLockSha256:sha(path.join(aim,'Cargo.lock')),binary:{sha256:build.binary.sha256,size:build.binary.bytes},dependencyArchives:Object.fromEntries(Object.entries(build.dependencies).filter(([,input])=>typeof input?.sha256==='string').map(([name,input])=>[name,{sha256:input.sha256}]))};
+const provenance={schemaVersion:1,id:'android-apk-metadata',aim:specification.aim,minimumMacOS:'13.0',architecture:'arm64',compiler:build.compiler,originalParser:[...build.originals,...build.dependencies.originalSources||[]],owned,registryDependencySources:records,binary:{sha256:build.binary.sha256,size:build.binary.bytes},dependencyArchives:Object.fromEntries(Object.entries(build.dependencies).filter(([,input])=>typeof input?.sha256==='string').map(([name,input])=>[name,{sha256:input.sha256}]))};
 fs.writeFileSync(path.join(temporary,'source.json'),JSON.stringify(provenance,null,2)+'\n');
 execFileSync('/usr/bin/tar',['-czf',path.join(output,'source.tar.gz'),'-C',temporary,'.'],{env:{...process.env,COPYFILE_DISABLE:'1'}});
 fs.writeFileSync(path.join(output,'source.json'),JSON.stringify(provenance,null,2)+'\n');

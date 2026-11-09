@@ -20,6 +20,6 @@ export async function compile({arch,work}){
 }
 /** Seal the compiled image reader with its source identity. */
 export async function assemble({project,arch,version,output,compiled:{crate,env,checkout,staged,source}}){
- return sealRuntime({cargoRoot:crate,env,project,version,arch,output,sourceRoot:checkout,upstreamRevision:descriptor.revision,executable:path.join(env.CARGO_TARGET_DIR,'release/android-image-extract'),provenance:{sourceTreeSha256:staged.treeSha256,gitDependencies:staged.dependencies,component:'android-image-extract',rustLockSha256:(await import('node:crypto')).createHash('sha256').update(fs.readFileSync(path.join(source,'Cargo.lock'))).digest('hex')}});
+ return sealRuntime({cargoRoot:crate,env,project,version,arch,output,sourceRoot:checkout,upstreamRevision:descriptor.revision,executable:path.join(env.CARGO_TARGET_DIR,'release/android-image-extract'),provenance:{gitDependencies:staged.dependencies,component:'android-image-extract'}});
 }
 recipeMain(import.meta,{compile,assemble});

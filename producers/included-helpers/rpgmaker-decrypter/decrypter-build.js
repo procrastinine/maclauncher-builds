@@ -64,7 +64,7 @@ function prepareSource({ sourcePath, outputDir, includeLocks = true, architectur
   if (includeLocks) for (const project of PROJECTS)
     fs.copyFileSync(path.join(architecture?path.join(LOCK_ROOT,architecture):LOCK_ROOT, project + ".json"), path.join(owned, project, "packages.lock.json"));
   return { sourcePath: owned, upstreamRevision: PIN.source.revision,
-    sourceArchiveSha256: PIN.source.sha256, propertiesSha256: sha256(PROPS) };
+    sourceArchiveSha256: PIN.source.sha256 };
 }
 function buildEnvironment(buildRoot, packageRoot) {
   return { ...process.env, DOTNET_CLI_HOME: path.join(buildRoot, "dotnet-user"),
@@ -117,10 +117,8 @@ function buildTool({ sourceArchive, sdkArchive, outputDir, packageRoot, offline 
   addLicenses(publishRoot,'dotnet',sdk);
   addLicense(publishRoot,'dotnet',path.join(sdk,'ThirdPartyNotices.txt'));
   for(const dependency of pin.packages)addLicenses(publishRoot,dependency.name,path.join(packages,dependency.name,dependency.version));
-  const lockSha256 = Object.fromEntries(PROJECTS.map(project => [project, sha256(path.join(architecture?path.join(LOCK_ROOT,architecture):LOCK_ROOT, project + ".json"))]));
   const record = { schemaVersion: 1, profile: pin.profile, version: pin.informationalVersion,
     source: pin.source, sdk: pin.sdk, runtimeIdentifier: pin.runtimeIdentifier,
-    propertiesSha256: source.propertiesSha256, targetsSha256: sha256(TARGETS), recipeSha256: sha256(__filename), lockSha256,
     packageArchiveSha256: Object.fromEntries(pin.packages.map(pin => [pin.name + "/" + pin.version, pin.sha256])),
     deterministic: true, debugSymbols: false, sourcePathMap: "/_/RPGMakerDecrypter",
     parentGitVersionIgnored: true, executableSha256: sha256(executable) };

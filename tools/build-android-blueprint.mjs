@@ -36,7 +36,7 @@ export function describeBlueprintInput({output,upstream,parser,profile}){
  addLicenses(output,'Blueprint',upstream);
  addLicense(output,'Go',new URL('../producers/android-inputs/licenses/go/LICENSE',import.meta.url));
  addLicense(output,'Go patents',new URL('../producers/android-inputs/licenses/go/PATENTS',import.meta.url));
- return {parser,sources,source:upstream,parserSha256:sha(parser),profile,toolchain:read('go',['version'])};
+ return {parser,sources,source:upstream,profile,toolchain:read('go',['version'])};
 }
 
 /** Package a compiled parser or a verified sealed input without compiling it again. */

@@ -52,7 +52,7 @@ export function build({jdk,classpath,output,only=Object.keys(definitions)}){
    jar.push('--date='+definition.date,'-C',classes,'.');execFileSync(path.join(jdk,'bin/jar'),jar,options);
    const sha256=digest(regular(target));
    if(definition.metadata){
-    const metadata={schema:1,sourceSha256:digest(regular(sources[0])),...(sources.length===2?{policySourceSha256:digest(regular(sources[1]))}:{}),sha256};
+    const metadata={schema:1,sourceSha256:digest(regular(sources[0])),sha256};
     fs.writeFileSync(path.join(output,definition.metadata),JSON.stringify(metadata,null,2)+'\n');
    }
    result.push({component:name,path:definition.output,sha256,bytes:fs.statSync(target).size,javaMajor:definition.level});

@@ -87,7 +87,7 @@ export async function assemble({project,arch,output,compiled:{version,build,dexB
  addLicense(payload,'AOSP framework',new URL('../producers/android-inputs/licenses/aosp-framework/LICENSE',import.meta.url));
  addLicense(payload,'Apache HTTP',new URL('../producers/android-inputs/licenses/aosp-apache-http/NOTICE',import.meta.url));
  addLicense(payload,'Robolectric portability',new URL('../producers/android-inputs/licenses/robolectric-portability/LICENSE',import.meta.url));
- const record={androidSource:androidSource(),framework:frameworkPin,sources:profile.sources,blueprint:{...blueprintProfile.upstream,toolchain:read('go',['version'])},jdk:{sha256:jdkPin.sha256,version:read(path.join(jdk,'bin/java'),['--version']).split('\n')[0]},graphicsRegistrationsSha256:sha(path.join(payload,'graphics-registrations.txt')),modules:modules.archives.map(file=>path.basename(file)),dexTools:dexProfile};
+ const record={androidSource:androidSource(),framework:frameworkPin,sources:profile.sources,blueprint:{...blueprintProfile.upstream,toolchain:read('go',['version'])},jdk:{sha256:jdkPin.sha256,version:read(path.join(jdk,'bin/java'),['--version']).split('\n')[0]},modules:modules.archives.map(file=>path.basename(file)),dexTools:dexProfile};
  return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record});
 }
 recipeMain(import.meta,{compile,assemble});

@@ -56,7 +56,7 @@ export async function compileArtElfsInput({output,work}){
  await releaseAndroidImageArchive({source,work,cache,image:supplier.imageAcquisition});
  const {buildArtElfs}=await import(pathToFileURL(path.join(android,profile.buildEntry)));
  const built=buildArtElfs({aim:source,fetched,sdk,work:target,jdk:homes[0],python,jobs:2,env});
- return {art:built.art,checkout,fetched,record:{androidSource:androidSource(),aimRevision:sourceRevision(supplier.sources.aim),sourceTreeSha256:staged.treeSha256,sourceLockSha256:sha(path.join(checkout,profile.sourceLock))}};
+ return {art:built.art,checkout,fetched,record:{androidSource:androidSource(),aimRevision:sourceRevision(supplier.sources.aim)}};
  }finally{const mount=path.join(fetched,'android16-image');if(fs.existsSync(path.join(mount,'root.identity')))run('hdiutil',['detach',mount]);}
 }
 

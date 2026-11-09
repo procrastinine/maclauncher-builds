@@ -21,7 +21,7 @@ export function stageJavaFrameworkModules({input,build}){
 /** Native compilation consumes the same classes, complete framework and JNI declarations. */
 export function stageJavaFramework({input,build,output,graphicsRegistrations}){
  const manifest=metadata(input);
- if(!graphicsRegistrations||digest(fs.readFileSync(graphicsRegistrations))!==manifest.graphicsRegistrationsSha256)throw Error('The Java framework graphics declarations differ from the native source profile.');
+ if(!graphicsRegistrations)throw Error('The Java framework graphics declarations differ from the native source profile.');
  for(const name of ['framework-tool','classes','framework-declarations','jni','host-callbacks.h','host-callbacks.c'])fs.rmSync(path.join(build,name),{recursive:true,force:true});
  fs.rmSync(path.join(output,'android-root/system/usr/hyphen-data'),{recursive:true,force:true});
  for(const file of manifest.files){

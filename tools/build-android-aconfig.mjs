@@ -48,6 +48,6 @@ export async function packageAndroidAconfig({project='android-aconfig',version,a
 
  const env=rustEnvironment({work,minimumMacOS:profile.minimumMacOS,env:process.env});
  addLicenses(crate,project,path.resolve(import.meta.dirname,'../producers/android-inputs/aconfig'));
- return sealRuntime({cargoRoot:crate,env,project,version,arch,output,sourceRoot:source,upstreamRevision:sourceRevision(profile),executable:path.join(env.CARGO_TARGET_DIR,'release/aconfig'),provenance:{sdk:{repository:profile.sdk.repository,revision:sourceRevision(profile.sdk),files:profile.sdk.files.map(({path,contentSha256})=>({path,sha256:contentSha256}))},rustLockSha256:sha(fs.readFileSync(path.join(crate,'Cargo.lock')))}});
+ return sealRuntime({cargoRoot:crate,env,project,version,arch,output,sourceRoot:source,upstreamRevision:sourceRevision(profile),executable:path.join(env.CARGO_TARGET_DIR,'release/aconfig'),provenance:{sdk:{repository:profile.sdk.repository,revision:sourceRevision(profile.sdk),files:profile.sdk.files.map(({path,contentSha256})=>({path,sha256:contentSha256}))}}});
 }
 recipeMain(import.meta,{compile,assemble});
