@@ -225,7 +225,6 @@ function describeRuntime({ unpacked, temporary, framework, fna3dRoot, faudioRoot
   } finally { fs.rmSync(temporary, { recursive: true, force: true }); }
 }
 
-async function prepareRuntime(options) { return describeRuntime(await compileRuntime(options)); }
 
-module.exports = { PROFILE, FNA_REVISION, FNA3D_REVISION, DOTNET_VERSION, PACKAGES, prepareRuntime,
+module.exports = { PROFILE, FNA_REVISION, FNA3D_REVISION, DOTNET_VERSION, PACKAGES, compileRuntime, describeRuntime,
   __test: { frameworkFiles, frameworkResources, applyOpenGLPolicy, stageAbiSource, resolveBuildTool, writeCompilerResponse, runtimeConfig, hostDependencies, CAPABILITIES } };
