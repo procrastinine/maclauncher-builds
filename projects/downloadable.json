@@ -656,8 +656,7 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/mages/native/current-build.js",
-        "producers/package-support/src/modules/mages/native/dependency-overlays.json"
+        "producers/package-support/src/modules/mages/native/current-build.js"
       ],
       "sourceDirectory": "producers/package-support"
     },
@@ -2191,8 +2190,7 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/crossover/temporal/fidelityfx/build.mjs",
-        "producers/package-support/src/modules/crossover/temporal/fidelityfx/README.md"
+        "producers/package-support/src/modules/crossover/temporal/fidelityfx/build.mjs"
       ],
       "sourceDirectory": "producers/package-support"
     },
@@ -2466,7 +2464,6 @@
       "sourceDirectory": "producers/vn-adaptations",
       "entries": [
         "producers/vn-adaptations/rlvm/package.mjs",
-        "producers/vn-adaptations/rlvm/adapter.m",
         "producers/vn-adaptations/rlvm/adapter.json",
         "producers/vn-adaptations/rlvm/source.json"
       ]

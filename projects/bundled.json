@@ -7,7 +7,6 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/catsystem2/runtime/stage-crypto.cjs",
         "producers/package-support/helper-builds/catsystem2-kif-crypto.json"
       ],
       "sourceDirectory": "producers/package-support"
@@ -91,8 +90,6 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/ios/native/build.mjs",
-        "producers/package-support/src/modules/ios/native/playtools-paths.swift"
       ],
       "sourceDirectory": "producers/package-support"
     },
@@ -131,7 +128,6 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/love/runtime/luasteam-source-overlay.js"
       ],
       "sourceDirectory": "producers/package-support"
     },
@@ -263,16 +259,12 @@
         "producers/package-support/src/modules/shared/reshade/isf/build.mjs",
         "producers/package-support/src/modules/shared/reshade/xess/native/build.mjs",
         "producers/package-support/src/modules/crossover/temporal/xess/build.mjs",
-        "producers/package-support/scripts/stage-reshade-effects.mjs",
         "producers/package-support/src/modules/shared/reshade/libplacebo/dependencies-build.mjs",
         "producers/package-support/src/modules/shared/reshade/libplacebo/dependencies.json",
         "producers/package-support/src/modules/shared/reshade/libplacebo/dependencies-CMakeLists.txt",
         "producers/package-support/src/modules/shared/reshade/isf/build-compilers.mjs",
         "producers/package-support/src/modules/shared/reshade/isf/compiler-CMakeLists.txt",
-        "producers/package-support/src/modules/shared/reshade/native",
-        "producers/package-support/src/modules/shared/reshade/native/libplacebo-node.mm",
-        "producers/package-support/src/modules/shared/reshade/native/libplacebo-prepare.mm",
-        "producers/package-support/src/modules/shared/reshade/neural/native/timing/metal-job.cpp.inc"
+        "producers/package-support/src/modules/shared/reshade/native"
       ],
       "sourceDirectory": "producers/package-support",
       "sourceRepository": "https://github.com/procrastinine/maclauncher"
@@ -654,7 +646,6 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/shared/runtime/steamworks/native/offline-0.5.0/build.cjs",
         "producers/package-support/helper-builds/steam-api-helper.json"
       ],
       "sourceDirectory": "producers/package-support"
@@ -694,7 +685,6 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/shared/runtime/steamworks/native/ticket-0.1.0/build.cjs",
         "producers/package-support/helper-builds/steam-ticket-loader.json"
       ],
       "sourceDirectory": "producers/package-support"
@@ -734,8 +724,6 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/java/runtime/steamworks/build-agent.cjs",
-        "producers/package-support/src/modules/java/runtime/steamworks/versions.json"
       ],
       "sourceDirectory": "producers/package-support"
     },
@@ -822,9 +810,6 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/android/native/apk-metadata/build.mjs",
-        "producers/package-support/src/modules/android/native/apk-metadata/adapt.mjs",
-        "producers/package-support/src/modules/android/native/apk-metadata/main.rs",
         "producers/package-support/src/modules/android/native/apk-metadata/sources.json",
         "producers/package-support/src/modules/android/native/apk-metadata/Cargo.toml",
         "producers/package-support/src/modules/android/native/apk-metadata/Cargo.lock"
