@@ -10,5 +10,5 @@ test('output symptoms warn without rejecting the package',t=>{
  fs.writeFileSync(path.join(root,'runtime.json'),JSON.stringify({version:'1.0'}));
  const declaration=path.join(root,'declaration.json');fs.writeFileSync(declaration,JSON.stringify({version:'2.0',manifestRelative:'runtime.json',files:[{path:'a.bin',sha256:'0'.repeat(64),size:4,mode:0o644},{path:'missing.bin',sha256:'0'.repeat(64),size:0,mode:0o644}]}));
  const result=spawnSync(process.execPath,['tools/output-warnings.mjs',root,'arm64',declaration],{encoding:'utf8'});
- assert.equal(result.status,0,result.stderr);assert.match(result.stdout,/::warning::.*duplicates/);assert.match(result.stdout,/differs from generated package inventory/);assert.match(result.stdout,/Built metadata version 1.0 differs from package version 2.0/);
+ assert.equal(result.status,0,result.stderr);assert.match(result.stdout,/::warning::.*duplicates/);assert.match(result.stdout,/::warning::.*test directory or fixture/);assert.match(result.stdout,/differs from generated package inventory/);assert.match(result.stdout,/Built metadata version 1.0 differs from package version 2.0/);
 });

@@ -4,7 +4,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {createRequire} from 'node:module';
-const require=createRequire(import.meta.url),Tools=require('../producers/package-support/scripts/native-binary-tools.cjs'),B=require('../lib/package-format.cjs');
+const require=createRequire(import.meta.url),Tools=require('../producers/package-support/scripts/native-binary-tools.cjs'),B=require('../lib/package-format.cjs'),{excludedReason}=require('../lib/runtime-content.cjs');
 const warn=message=>console.log('::warning::'+message);
 process.on('uncaughtException',error=>{warn(error.message);process.exitCode=0;});
 const root=path.resolve(process.argv[2]),cpu=process.argv[3],declaration=process.argv[4]?JSON.parse(fs.readFileSync(process.argv[4])):null;
@@ -13,8 +13,9 @@ const hashes=new Map(),facts=new Map(),images=new Map();
 async function sha(file){const hash=crypto.createHash('sha256');for await(const bytes of fs.createReadStream(file))hash.update(bytes);return hash.digest('hex');}
 function signature(file){const result=spawnSync('/usr/bin/codesign',['--verify','--strict',file],{encoding:'utf8'});if(result.status!==0)warn(path.relative(root,file)+': invalid or missing code signature: '+(result.error?.message||result.stderr).trim());}
 for(const file of files){
- const relative=path.relative(root,file),key=await sha(file),stat=fs.statSync(file);
+ const relative=path.relative(root,file),reason=excludedReason(relative),key=await sha(file),stat=fs.statSync(file);
  facts.set(relative,{sha256:key,size:stat.size,mode:stat.mode&0o777});
+ if(reason)warn(relative+': '+reason);
  if(hashes.has(key))warn(relative+' duplicates '+hashes.get(key));else hashes.set(key,relative);
  const architectures=Tools.macho(file);
  if(!architectures)continue;
