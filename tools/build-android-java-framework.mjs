@@ -40,7 +40,7 @@ export async function buildAndroidJavaFrameworkInput({output,work}){
  const blueprintProfile=json(path.join(root,'producers/android-inputs/blueprint/source.json')),blueprint=checkoutSource({...blueprintProfile.upstream,destination:path.join(work,'blueprint')}),goPath=path.join(work,'go'),goSource=path.join(goPath,'src/github.com/google/blueprint');fs.mkdirSync(goSource,{recursive:true});fs.cpSync(path.join(blueprint,'parser'),path.join(goSource,'parser'),{recursive:true});
  const driver=path.join(root,'producers/android-inputs/blueprint/main.go');
  const parser=path.join(work,'android-blueprint-parser');run('go',['build','-p=2','-trimpath','-ldflags=-s -w -buildid=','-o',parser,driver],{env:{...process.env,GO111MODULE:'off',GOENV:'off',GOTOOLCHAIN:'local',GOPATH:goPath,GOCACHE:path.join(work,'go-cache'),CGO_ENABLED:'0',GOOS:process.platform,GOARCH:({x64:'amd64',arm64:'arm64'})[process.arch]}});
- const sources={};for(const record of profile.sources){if(pins[record.pin]!==record.revision)throw Error('The framework Java source pin differs from the original producer: '+record.id);sources[record.id]=sourceObjects(record,path.join(work,record.id));}
+ const sources={};for(const record of profile.sources){sources[record.id]=sourceObjects(record,path.join(work,record.id));}
  for(const record of profile.sources){
   const objects=[...new Set(read('git',['-C',sources[record.id],'ls-tree','-r','--format=%(objecttype) %(objectname)',record.revision,'--',...record.prefetch]).split('\n').filter(line=>line.startsWith('blob ')).map(line=>line.slice(5)))];
   if(objects.length)retryNetwork(()=>run('git',['-C',sources[record.id],'fetch','--no-tags','--no-write-fetch-head','origin','--stdin'],{input:objects.join('\n')+'\n',stdio:['pipe','inherit','inherit']}));

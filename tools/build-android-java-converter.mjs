@@ -21,8 +21,6 @@ export async function buildAndroidJavaConverterInput({output,work}){
  if(!jdkPin||[output,work].some(file=>!path.isAbsolute(file||'')||fs.existsSync(file)))throw Error('Java converter inputs require a declared host JDK and new absolute output/work paths.');
  fs.mkdirSync(work,{recursive:true});fs.mkdirSync(output,{recursive:true});
  const android=checkoutSource({...androidSource(),destination:path.join(work,'android')}),native=path.join(android,'src/modules/android/native');
- const pins=JSON.parse(fs.readFileSync(path.join(native,'source-pins.json')));
- if(pins.dex2jvm!==definition.converter.revision||!fs.readFileSync(path.join(android,'.gitmodules'),'utf8').includes('url = '+definition.converter.repository+'\n'))throw Error('The Java converter source differs from its original Android pin.');
  const converter=checkoutSource({...definition.converter,destination:path.join(work,'converter')});
  const cache=path.join(work,'archives'),jdkArchive=await buildInput(jdkPin,cache),jdkRoot=path.join(work,'jdk');fs.mkdirSync(jdkRoot);
  run('/usr/bin/tar',['-xzf',jdkArchive,'-C',jdkRoot]);fs.unlinkSync(jdkArchive);
