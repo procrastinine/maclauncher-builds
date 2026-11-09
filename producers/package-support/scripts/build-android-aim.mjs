@@ -101,8 +101,8 @@ export function stageAim({build,angle,output,writeDistribution=true,environment=
     const unlockCodes=[...aidl.matchAll(/pub const IS_USER_UNLOCKING_OR_UNLOCKED: u32 = (\d+);/g)];
     if(unlockCodes.length!==1)throw new Error('AIM user-state transaction is unavailable.');
     const appHostUserUnlockTransaction=Number(unlockCodes[0][1]);
-    const manifest={schemaVersion:1,managerId:'android-aim',version:version,upstreamRevision:source.commit,platform:'darwin',arch:'arm64',minimumMacOS,capabilities:{appHost:true,appHostUserUnlockTransaction},
-      executableRelative:'bin/aimctl',runtimeFiles:{controller:'bin/maclauncher-aim'},files:records,dependencies,provenance:{sourceRevision:source.commit,verifiedBuild:true}};
+    const manifest={schemaVersion:1,managerId:'android-aim',version:version,upstreamRevision:source.revision,platform:'darwin',arch:'arm64',minimumMacOS,capabilities:{appHost:true,appHostUserUnlockTransaction},
+      executableRelative:'bin/aimctl',runtimeFiles:{controller:'bin/maclauncher-aim'},files:records,dependencies,provenance:{sourceRevision:source.revision,verifiedBuild:true}};
     B.validateManifest(manifest);B.verifyPayload(payload,manifest);
     fs.writeFileSync(path.join(temporary,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
     const declaration={id:'android-aim',version:version,arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS,directoryRelative:`android-aim/${version}/arm64`,
@@ -137,7 +137,7 @@ if(process.argv[1]===fileURLToPath(import.meta.url)) {
     const controllerSource=path.resolve(value('--controller-source',fileURLToPath(new URL('../../android-aim-controller/keeper.rs',import.meta.url))));
     if(!fs.existsSync(controllerSource)||!fs.lstatSync(controllerSource).isFile()||fs.lstatSync(controllerSource).isSymbolicLink())
       throw new Error('Select the Builds-owned controller with --controller-source <maclauncher-builds/producers/android-aim-controller/keeper.rs>.');
-    prepareAimSources({checkout:checkoutSource({repository:source.repository,revision:source.commit,destination:path.join(path.dirname(build),'aim-source')}),output:build,controllerSource,buildJobs:jobs});
+    prepareAimSources({checkout:checkoutSource({repository:source.repository,revision:source.revision,destination:path.join(path.dirname(build),'aim-source')}),output:build,controllerSource,buildJobs:jobs});
     const stagedController=path.join(build,'crates/aimctl/src/bin/maclauncher-aim.rs');
     if(sha(stagedController)!==sha(controllerSource))throw new Error('The generated AIM controller source differs from its Builds input.');
   }

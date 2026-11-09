@@ -1,3 +1,4 @@
+import {sourceRevision} from '../lib/pins.mjs';
 import './producer-environment.mjs';
 import {appRequire} from './app-source.mjs';
 import {androidSource} from '../lib/android-source.mjs';
@@ -25,8 +26,8 @@ export async function prepareArtMacBuildContext({elfInput,work}){
  if(declaration.id!==profile.id||declaration.version!==profile.version||declaration.arch!=='arm64'||declaration.sourceSha256!==sha(descriptor))throw Error('ART ELF input differs from its declared leaf profile.');
  const record=json(path.join(elfInput.root,declaration.manifestRelative)),android=verifyProducer(root,json(path.join(root,'runtimes/android/source.json'))),supplier=json(path.join(android,'src/modules/android/art/supplier.json'));
  fs.mkdirSync(work,{recursive:true});
- const checkout=checkoutSource({repository:supplier.sources.aim.url,revision:supplier.sources.aim.commit,destination:path.join(work,'upstream')}),source=path.join(work,'source');await stageSource(checkout,supplier.sources.aim.commit,source);
- if(record.aimRevision!==supplier.sources.aim.commit||record.androidSource?.repository!==androidSource().repository||record.androidSource?.revision!==androidSource().revision||record.sourceLockSha256!==sha(path.join(checkout,profile.sourceLock)))throw Error('ART ELF and host context select different original source profiles.');
+ const checkout=checkoutSource({repository:supplier.sources.aim.url,revision:sourceRevision(supplier.sources.aim),destination:path.join(work,'upstream')}),source=path.join(work,'source');await stageSource(checkout,sourceRevision(supplier.sources.aim),source);
+ if(record.aimRevision!==sourceRevision(supplier.sources.aim)||record.androidSource?.repository!==androidSource().repository||record.androidSource?.revision!==androidSource().revision||record.sourceLockSha256!==sha(path.join(checkout,profile.sourceLock)))throw Error('ART ELF and host context select different original source profiles.');
  const {prepareArtCompilerPaths}=await import(pathToFileURL(path.join(android,profile.compilerSource)));prepareArtCompilerPaths(source,{source:checkout});
  const {sdk,python}=await prepareAndroidBuildInputs({source,work:path.join(work,'inputs')});
  const javaLock=path.join(source,'upstream/java-toolchain.lock'),archive=await buildInput({url:lockValue(javaLock,'JDK_URL'),sha256:lockValue(javaLock,'JDK_SHA256')},path.join(work,'jdk-archives')),java=path.join(work,'jdk');fs.mkdirSync(java);run('/usr/bin/tar',['-xzf',archive,'-C',java]);fs.unlinkSync(archive);

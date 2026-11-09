@@ -40,7 +40,7 @@ export async function buildAngleInput({output,work,profile:profileId='common'}){
 
  const upstream=checkoutSource({repository:pins.repository,revision:pins.revision,destination:path.join(work,'angle')});
  const dependencies=path.join(work,'dependencies');fs.mkdirSync(dependencies);
- for(const dependency of pins.dependencies.filter(item=>!item.backends||item.backends.includes(definition.backend)))checkoutSource({repository:dependency.url,revision:dependency.commit,destination:path.join(dependencies,path.basename(dependency.directory))});
+ for(const dependency of pins.dependencies.filter(item=>!item.backends||item.backends.includes(definition.backend)))checkoutSource({repository:dependency.url,revision:sourceRevision(dependency),destination:path.join(dependencies,path.basename(dependency.directory))});
  const gnSource=checkoutSource({...definition.gn,destination:path.join(work,'gn-source')});
  const pythonRoot=path.join(work,'python');
  const pythonEnv={...process.env,UV_CACHE_DIR:path.join(work,'uv-cache'),UV_PYTHON_INSTALL_DIR:pythonRoot,UV_PYTHON_BIN_DIR:path.join(work,'python-bin')};

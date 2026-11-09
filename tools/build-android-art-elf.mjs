@@ -1,3 +1,4 @@
+import {sourceRevision} from '../lib/pins.mjs';
 import './producer-environment.mjs';
 import {androidSource} from '../lib/android-source.mjs';
 import {addLicenses,addLicense} from '../lib/licenses.mjs';
@@ -32,8 +33,8 @@ export async function buildArtElfsInput({output,work}){
  const profile=JSON.parse(fs.readFileSync(descriptor));fs.mkdirSync(work,{recursive:true});
  const android=acquireArtProducer({source:androidSource(),work});
  const supplier=JSON.parse(fs.readFileSync(path.join(android,profile.supplier)));
- const checkout=checkoutSource({repository:supplier.sources.aim.url,revision:supplier.sources.aim.commit,destination:path.join(work,'upstream')});
- const source=path.join(work,'source'),staged=await stageSource(checkout,supplier.sources.aim.commit,source);
+ const checkout=checkoutSource({repository:supplier.sources.aim.url,revision:sourceRevision(supplier.sources.aim),destination:path.join(work,'upstream')});
+ const source=path.join(work,'source'),staged=await stageSource(checkout,sourceRevision(supplier.sources.aim),source);
  const {prepareArtCompilerPaths}=await import(pathToFileURL(path.join(android,profile.compilerSource)));
  // This is the existing ART ELF adaptation from prepareAimSource. The remaining
  // AIM projection changes supply runtime execution, outside this compiler group.
@@ -71,7 +72,7 @@ export async function buildArtElfsInput({output,work}){
  addLicenses(output,'libcap',path.join(fetched,'aosp/external/libcap'));
  addLicenses(output,'BoringSSL',path.join(fetched,'aosp/external/boringssl/src'));
  addLicenses(output,'fiat-crypto',path.join(fetched,'aosp/external/boringssl/src/third_party/fiat'));
- return {art:output,build:{source,checkout,fetched,sdk,jdk:homes[0],python,target,env},record:{androidSource:androidSource(),aimRevision:supplier.sources.aim.commit,sourceTreeSha256:staged.treeSha256,sourceLockSha256:sha(path.join(checkout,profile.sourceLock))}};
+ return {art:output,build:{source,checkout,fetched,sdk,jdk:homes[0],python,target,env},record:{androidSource:androidSource(),aimRevision:sourceRevision(supplier.sources.aim),sourceTreeSha256:staged.treeSha256,sourceLockSha256:sha(path.join(checkout,profile.sourceLock))}};
  }finally{const mount=path.join(fetched,'android16-image');if(fs.existsSync(path.join(mount,'root.identity')))run('hdiutil',['detach',mount]);}
 }
 

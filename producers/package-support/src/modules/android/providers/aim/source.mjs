@@ -6,7 +6,7 @@ import definition from './source.json' with {type:'json'};
 import image from '../../../../../../../producers/android-image-data/source.json' with {type:'json'};
 import {aimSource} from '../../../../../../../lib/android-source.mjs';
 import {appPath} from '../../../../../../../tools/app-source.mjs';
-const source={...definition,commit:aimSource().revision,androidImage:{...image.archive,...definition.androidImage,size:image.archive.bytes}};
+const source={...definition,revision:aimSource().revision,androidImage:{...image.archive,...definition.androidImage,size:image.archive.bytes}};
 
 export {source};
 
@@ -585,10 +585,10 @@ export function prepareAimSources({checkout, output, controllerSource, buildJobs
   checkout = path.resolve(checkout);
   output = path.resolve(output);
   const commit = execFileSync('git', ['-C', checkout, 'rev-parse', 'HEAD'], {encoding:'utf8'}).trim();
-  if (commit !== source.commit) throw new Error('AIM source revision does not match the selected runtime');
+  if (commit !== source.revision) throw new Error('AIM source revision does not match the selected runtime');
   fs.mkdirSync(output, {recursive:true});
   const archive = path.join(output, '.source.tar');
-  execFileSync('git', ['-C', checkout, 'archive', '--format=tar', '-o', archive, source.commit]);
+  execFileSync('git', ['-C', checkout, 'archive', '--format=tar', '-o', archive, source.revision]);
   execFileSync('/usr/bin/tar', ['-xf', archive, '-C', output]);
   fs.unlinkSync(archive);
   adaptAimSources(output, {controllerSource, buildJobs});

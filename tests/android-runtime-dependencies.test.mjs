@@ -81,5 +81,5 @@ test("AIM source follows Android's upstream selection and shared original image 
  const {source}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
  const {aimSource}=await import('../lib/android-source.mjs');
  const image=JSON.parse(fs.readFileSync(new URL('../producers/android-image-data/source.json',import.meta.url))).archive;
- assert.equal(source.commit,aimSource().revision);assert.equal(source.androidImage.url,image.url);assert.equal(source.androidImage.sha256,image.sha256);assert.equal(source.androidImage.size,image.bytes);
+ assert.equal(source.revision,aimSource().revision);assert.equal(source.androidImage.url,image.url);assert.equal(source.androidImage.sha256,image.sha256);assert.equal(source.androidImage.size,image.bytes);
 });
