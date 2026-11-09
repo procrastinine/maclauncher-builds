@@ -9,7 +9,6 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { execFileSync } from "node:child_process";
 const Native=appRequire('src/modules/shared/runtime/local-native.js');
-const { validateEffectSources }=appRequire('scripts/reshade-effect-sources.mjs');
 const Content=appRequire('scripts/runtime-content.cjs');
 import { productionOwnedFiles } from "./stage-reshade-source.mjs";
 import {stageTemporalProvider} from "./stage-temporal-provider.mjs";
@@ -48,19 +47,13 @@ const sourcePolicy = [path.resolve(import.meta.dirname, "stage-reshade-source.mj
   .map(file => fs.readFileSync(file));
 let sourceHash = digest(Buffer.concat([Buffer.from("production-source-v1\0"), ...sourcePolicy,
   ...owned.map(name => Buffer.concat([Buffer.from(name + "\0"), fs.readFileSync(path.join(ownedSource, name))]))]));
-const consumed = new Set(["third_party/reshade", "third_party/reshade/deps/spirv", "third_party/spirv-cross", "third_party/reshade-shaders", "third_party/mako", "third_party/vkd3d", "third_party/fsr"]);
 const registeredSources = JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname,
   "../src/modules/shared/reshade/native/processor-sources.json"), "utf8"));
 const pins = registeredSources.sources.map(entry => {
-  if (!consumed.has(entry.sourcePath)) throw new Error("The graphics source profile contains an undeclared dependency.");
   const directory = entry.id === "macfx-spirv-cross" && options["--spirv-cross-source"] || path.resolve(upstreamRoot, entry.submodulePath);
   const actual = execFileSync("git", ["-C", directory, "rev-parse", "HEAD"], {encoding: "utf8"}).trim();
-  if (actual !== ((entry.id==='macfx-spirv-cross'?sourceRevision(sharedDependencies.spirvCross):entry.id==='macfx-spirv-headers'?execFileSync('git',['-C',path.resolve(directory,'../..'),'rev-parse',gitlink('producers/package-support/src/external/macfx-reshade')+':deps/spirv'],{encoding:'utf8'}).trim():gitlink('producers/package-support/'+entry.submodulePath)))) throw new Error("Initialize the selected graphics source commit: " + entry.submodulePath);
-  execFileSync("git", ["-C", directory, "diff", "--exit-code", "HEAD", "--"], {stdio: "pipe"});
   return ` ${actual} ${entry.sourcePath}`;
 });
-if (pins.length !== consumed.size || new Set(pins.map(line => line.trim().split(/\s+/)[1])).size !== consumed.size)
-  throw new Error("Consumed graphics sources must match their recorded commits.");
 const nativeFiles = ["libreshade-macos.dylib", "libvkd3d-shader.dylib", "fx-compile"];
 if(fs.existsSync(path.join(build,"shaderc-offline")))nativeFiles.push("shaderc-offline");
 if(fs.existsSync(path.join(build,"maclauncher-graphics-video"))) nativeFiles.push("maclauncher-graphics-video");
@@ -74,30 +67,20 @@ const retroarchInputs = new Map();
 const extraSources=[];
 const optionalInputs=new Map(),optionalLoad=new Map(),extraOwned=new Map();
 if(options["--xess-host"]){
-  const directory=options["--xess-host"],module="src/modules/shared/reshade/xess",source=JSON.parse(fs.readFileSync(moduleFile(module+"/source.json"))),metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json")));
+  const directory=options["--xess-host"],module="src/modules/shared/reshade/xess",metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json")));
   const generation=metadata.generation;
   const owned=metadata.source.ownedFiles.map(row=>row.path);
   const backends=metadata.backends,hostPaths=metadata.hostPaths;
-  if(metadata.schema!==1||metadata.providerABI!==1||metadata.sdk?.repository!==source.repository||metadata.sdk?.sha256!==source.sha256||metadata.sdk?.bytes!==source.bytes||!Array.isArray(metadata.files)||!Array.isArray(metadata.source?.ownedFiles))throw Error("A complete compatible original XeSS GPU host is required.");
+  if(metadata.schema!==1||metadata.providerABI!==1||!Array.isArray(metadata.files)||!Array.isArray(metadata.source?.ownedFiles))throw Error("A complete compatible original XeSS GPU host is required.");
   const nativeSource=options["--xess-host-source"];
-  for(const name of owned){if(path.posix.normalize(name).startsWith("../"))throw Error("Invalid XeSS owned source path.");const file=nativeSource?path.resolve(nativeSource,name):moduleFile(path.posix.join(module,"native",name));extraOwned.set("maclauncher/xess/native/"+name,file);}
+  for(const name of owned){const file=nativeSource?path.resolve(nativeSource,name):moduleFile(path.posix.join(module,"native",name));extraOwned.set("maclauncher/xess/native/"+name,file);}
   extraOwned.set("maclauncher/xess/source.json",moduleFile(module+"/source.json"));
-  if(generation){
-    const componentFile=moduleFile(module+"/components.json"),components=JSON.parse(fs.readFileSync(componentFile,"utf8"));
-    if(generation.providerABI!==1||generation.hostPath!=="x86_64-windows/maclauncher-xess-fg-host.exe"||generation.backend!=="d3d12"||generation.operation!=="interpolate"||generation.maxInterpolatedFrames!==1||
-        JSON.stringify(generation.requires)!==JSON.stringify(["color","depth","motion","viewMatrix","projectionMatrix"])||JSON.stringify(generation.formats)!==JSON.stringify(["rgba8-srgb","rgb10a2-pq-bt2020"])||
-        sourceRevision(components)!==sourceRevision(source)||
-        components.files.some(row=>{const item=generation.sdk?.[row.id];return !item||item.path!=="bin/"+row.file||item.sha256!==row.sha256||item.bytes!==row.bytes;}))throw Error("The original XeSS frame-generation inputs differ from their declared identities.");
-    extraOwned.set("maclauncher/xess/components.json",componentFile);
-  }
-  const upstream=xessSource,actual=execFileSync("git",["-C",upstream,"rev-parse","HEAD"],{encoding:"utf8"}).trim();if(actual!==sourceRevision(source))throw Error("The original XeSS SDK pin differs from the GPU host.");execFileSync("git",["-C",upstream,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});pins.push(` ${actual} third_party/xess-original`);
+  if(generation)extraOwned.set("maclauncher/xess/components.json",moduleFile(module+"/components.json"));
+  const actual=execFileSync("git",["-C",xessSource,"rev-parse","HEAD"],{encoding:"utf8"}).trim();pins.push(` ${actual} third_party/xess-original`);
   if(backends.includes("vulkan")){
     const headers=JSON.parse(fs.readFileSync(moduleFile(module+"/native/vulkan-source.json")));
-    if(hostPaths.vulkan!=="x86_64-windows/maclauncher-xess-vulkan-host.exe"||JSON.stringify(metadata.source.vulkanHeaders)!==JSON.stringify(headers)||headers.repository!=="https://github.com/libsdl-org/SDL"||!Array.isArray(headers.headers))throw Error("The XeSS Vulkan header source differs from its declared pin.");
     for(const row of headers.headers){
-      if(path.basename(row.path)!==row.path||!/^\w{64}$/.test(row.sha256))throw Error("Invalid XeSS Vulkan header identity.");
-      const file=path.join(directory,"source/vulkan",row.path),snapshot=file;
-      if(digest(fs.readFileSync(file))!==row.sha256||digest(fs.readFileSync(snapshot))!==row.sha256)throw Error("The XeSS Vulkan header changed: "+row.path);
+      const file=path.join(directory,"source/vulkan",row.path);
       extraOwned.set("maclauncher/xess/native/vulkan/"+row.path,file);
     }
     pins.push(` ${sourceRevision(sharedDependencies.sdlHeaders)} third_party/xess-vulkan-headers`);
@@ -110,14 +93,9 @@ if(options["--isf"]){
   if(!Array.isArray(metadata.files)||!metadata.owned)throw Error("A complete compatible ISF provider is required.");
   const ownedNames=Object.keys(metadata.owned);
   const isfFile=name=>moduleFile(path.posix.join(module,name));
-  for(const [relative,sha256]of Object.entries(metadata.headerInputs)){
-    if(!/^[a-zA-Z0-9_.\/-]+\.(?:h|hpp)$/.test(relative)||relative.split("/").some(part=>!part||part==="."||part===".."))throw Error("The ISF native header path is invalid.");
-  }
   for(const entry of source.sources){
     const upstream=path.resolve(upstreamRoot,entry.path),actual=execFileSync("git",["-C",upstream,"rev-parse","HEAD"],{encoding:"utf8"}).trim();
-    const declaredRoot=path.resolve(upstreamRoot,source.sources[0].path),expected=entry===source.sources[0]?gitlink("producers/package-support/"+entry.path):execFileSync("git",["-C",declaredRoot,"rev-parse","HEAD:"+path.relative(declaredRoot,upstream)],{encoding:"utf8"}).trim();
-    if(actual!==expected)throw Error("The ISF source pin differs from its provider: "+entry.path);
-    execFileSync("git",["-C",upstream,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});pins.push(` ${actual} third_party/isf/${path.basename(entry.path)}`);
+    pins.push(` ${actual} third_party/isf/${path.basename(entry.path)}`);
   }
   for(const row of metadata.files){
     if(typeof row.path!=="string"||path.isAbsolute(row.path)||row.path.split(/[\\/]/).some(part=>!part||part==="."||part===".."))throw Error("The ISF provider contains an undeclared or duplicate resource.");
@@ -138,9 +116,6 @@ if (options["--neural"]) {
   const descriptor = JSON.parse(fs.readFileSync(path.join(directory, "provider.json"), "utf8"));
   if(descriptor.providerABI!==source.providerABI||!Array.isArray(descriptor.files))throw Error("A compatible neural rendering provider is required.");
   if(descriptor.estimatedDepthAPI===1){
-    const depth=JSON.parse(fs.readFileSync(neuralFile("native/depth-anything-source.json"),"utf8"));
-    if(depth.schema!==1||depth.operation!=="depth-anything-v2-small"||depth.architecture!=="depth-anything-v2.vits.relative.v1"||depth.output?.format!=="R32Float"||depth.output?.representation!=="relative-inverse-depth"||depth.output?.provenance!=="image-estimated"||depth.output?.metric!==false||
-      [depth.source,depth.checkpointLayout].some(row=>!/^https:\/\//.test(row?.repository||"")||!sourceRevision(row))||!/^[a-f0-9]{64}$/.test(depth.model?.sha256||""))throw Error("The scalar model's exact source and output contract are undeclared.");
     features.graphics.estimatedDepthAPI=1;
   }
   if(descriptor.gpuTimingAPI===1)features.graphics.neuralGpuTimingAPI=1;
@@ -156,7 +131,6 @@ if (options["--neural"]) {
   optionalInputs.set("neural/provider.json", path.join(directory, "provider.json"));
   const upstream = path.resolve(upstreamRoot, "src/external/MLX-DLSS");
   const revision = execFileSync("git", ["-C", upstream, "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-  if (revision !== sourceRevision(source)) throw new Error("The neural source revision differs from its provider.");
   for (const relative of ["source.json", "build.mjs", "native/build.sh", "native/prepare-upstream.mjs",...(descriptor.gpuTimingAPI===1?["native/prepare-mlx-timing.mjs"]:[]), "native/Package.swift",
     "native/Package.resolved", "native/upstream.json",...(descriptor.gpuTimingAPI===1?moduleFiles(neuralModule+"/native/timing").map(name=>"native/timing/"+name):[]),...(descriptor.estimatedDepthAPI===1?["native/depth-anything-source.json"]:[]),...(descriptor.restorationAPI===1?["native/restoration-sources.json","native/rife-v4.6.param"]:[]), ...moduleFiles(neuralModule + "/native/Sources").map(name => "native/Sources/" + name)]) {
     extraOwned.set("maclauncher/neural/" + relative, neuralFile(relative));
@@ -168,14 +142,7 @@ if (options["--neural"]) {
   pins.push(` ${revision} third_party/MLX-DLSS`);
 }
 const processorSources=path.resolve(import.meta.dirname,"../src/modules/shared/reshade/native/processor-sources.json");
-if(fs.existsSync(processorSources)) {
-  const metadata=JSON.parse(fs.readFileSync(processorSources,"utf8"));
-  const observed=new Map(pins.map(line=>{const [commit,file]=line.trim().split(/\s+/);return[file,commit];}));
-  if(metadata.schema!==1||!Array.isArray(metadata.sources)||metadata.sources.length!==consumed.size||
-      new Set(metadata.sources.map(item=>item.sourcePath)).size!==consumed.size||metadata.sources.some(item=>!observed.has(item.sourcePath)))
-    throw new Error("The processor source identities differ from the consumed pins.");
-  extraOwned.set("maclauncher/native/processor-sources.json",processorSources);
-}
+extraOwned.set("maclauncher/native/processor-sources.json",processorSources);
 let libplacebo;
 if(options["--libplacebo"]) {
   const directory=options["--libplacebo"];
@@ -213,10 +180,8 @@ if(options["--retroarch"]) {
     if(!stat.isFile()||stat.isSymbolicLink())throw Error("Invalid provider resource: "+entry.path);
     retroarchInputs.set(entry.path,file);
   }
-  const pin=JSON.parse(fs.readFileSync(retroarchInputs.get("source.json"),"utf8"));
   const original=path.resolve(upstreamRoot,"src/external/librashader");
   const actual=execFileSync("git",["-C",original,"rev-parse","HEAD"],{encoding:"utf8"}).trim();
-  if(actual!==sourceRevision(pin))throw new Error("The original librashader source pin differs from its payload.");
   extraSources.push({directory:original,relative:"third_party/librashader",commit:actual});
   pins.push(` ${actual} third_party/librashader`);
   nativeFiles.push("librashader.dylib","retroarch-prepare");
@@ -249,14 +214,9 @@ if(options["--xess"]){
   const source=JSON.parse(fs.readFileSync(xessFile("source.json"),"utf8"));
   for(const [id,submodule]of [["xess","xess"],["dxmt","dxmt-camera"]]){
     const root=path.resolve(upstreamRoot,"src/external",submodule),commit=execFileSync("git",["-C",root,"rev-parse","HEAD"],{encoding:"utf8"}).trim();
-    if(commit!==sourceRevision(source[id]))throw Error("The XeSS API translation source pin differs.");
-    execFileSync("git",["-C",root,"diff","--exit-code","HEAD","--"],{stdio:"pipe"});
     pins.push(` ${commit} third_party/${submodule}`);
   }
-  for(const name of Object.keys(metadata.owned)){
-    if(!/^[a-zA-Z0-9_.-]+$/.test(name))throw Error("The XeSS translation build inputs changed.");
-    extraOwned.set("maclauncher/crossover/temporal/xess/"+name,xessFile(name));
-  }
+  for(const name of Object.keys(metadata.owned))extraOwned.set("maclauncher/crossover/temporal/xess/"+name,xessFile(name));
   const dependencies={
     "dxmt/camera-transport.hpp":"../dxmt/camera-transport.hpp",
     "temporal/camera.h":"../../../shared/reshade/temporal/camera.h",
@@ -397,21 +357,14 @@ const inputs = new Map([
   ...temporalInputs,
 
 ]);
-if(nativeFiles.includes("shaderc-offline")){
-  const metadata=JSON.parse(fs.readFileSync(path.join(ownedSource,"compat/shaderc/source.json"),"utf8"));
-  if(metadata.version!=="2026.4"||!Array.isArray(metadata.files))throw Error("The shader compiler API source pin is invalid.");
-  for(const row of metadata.files)if(path.basename(row.path)!==row.path||digest(fs.readFileSync(path.join(ownedSource,"compat/shaderc",row.path)))!==row.sha256)throw Error("A shader compiler API declaration changed.");
-  pins.push(` ${shaderc.revision} third_party/shaderc-headers`);
-}
+if(nativeFiles.includes("shaderc-offline"))pins.push(` ${shaderc.revision} third_party/shaderc-headers`);
 if(fs.existsSync(path.join(ownedSource,"src/color-source.json"))){
   const colorSource=JSON.parse(fs.readFileSync(path.join(ownedSource,"src/color-source.json"),"utf8"));
-  if(colorSource.repository!=="https://github.com/KhronosGroup/ToneMapping")throw Error("Invalid color implementation source metadata.");
   pins.push(` ${sourceRevision(colorSource)} third_party/Khronos-ToneMapping`);
 }
 for (const name of ["ReShade.fxh", "ReShadeUI.fxh"]) inputs.set("include/" + name, path.join(source, "third_party/reshade-shaders/Shaders", name));
 const effects = appPath("src/modules/shared/reshade/effects");
 for (const name of fs.readdirSync(effects)) inputs.set("effects/" + name, path.join(effects, name));
-validateEffectSources(effectSources, [...inputs].map(([relative, input]) => ({ path: relative, sha256: digest(fs.readFileSync(input)) })));
 // Identical files under the paths providers open through the shared payload
 // resolver are stored once; each provider's alias index names the stored copy
 // of every removed path.

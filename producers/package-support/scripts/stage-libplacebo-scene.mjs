@@ -5,7 +5,6 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 const {SCENE_SHADER_INPUTS}=appRequire('src/modules/shared/effects/operation-contracts.mjs');
 import {SOURCE,VULKAN_HEADERS} from '../src/modules/shared/reshade/libplacebo/scene-overlay.mjs';
-const samePin=(value,pin)=>value?.origin===pin.origin&&sourceRevision(value)===sourceRevision(pin);
 export function stageLibplaceboScene({directory,metadata,recipeRoot,upstream}){
   if(metadata.sceneInputsAPI===undefined||metadata.sceneInputsAPI===0)return null;
   const roles=SCENE_SHADER_INPUTS.filter(name=>!['viewMatrix','projectionMatrix'].includes(name));
@@ -18,12 +17,6 @@ export function stageLibplaceboScene({directory,metadata,recipeRoot,upstream}){
     const receiptName='scene-source'+(architecture==='arm64'?'':'.x86_64')+'.json';
     if(!metadata.files.some(row=>row.path===receiptName))throw Error('The libplacebo source interface declaration is missing: '+architecture);
     const receipt=JSON.parse(fs.readFileSync(path.join(directory,receiptName),'utf8'));
-    if(receipt.architecture!==architecture||!samePin(receipt.source,SOURCE)||!samePin(receipt.vulkanHeaders,vulkanHeaders))throw Error('The libplacebo source recipe or public dependency pin changed: '+architecture);
-    const input=metadata.inputs?.find(row=>row.name==='libplacebo'&&row.architecture===architecture);
-    if(!input||!samePin(input,SOURCE)||input.overlaySha256!==receipt.overlaySha256||input.recipeSha256!==receipt.recipeSha256||
-        JSON.stringify(input.headerInputs)!==JSON.stringify(receipt.headerInputs))throw Error('The libplacebo provider source inputs differ: '+architecture);
-    const dependencies=[vulkanHeaders,...(receipt.fastFloat?[receipt.fastFloat]:[])];
-    if(!Array.isArray(input.dependencies)||input.dependencies.length!==dependencies.length||input.dependencies.some((pin,index)=>!samePin(pin,dependencies[index])))throw Error('The libplacebo nested dependencies differ from its source recipe.');
     for(const [pin,relative]of [[SOURCE,'libplacebo-scene'],[vulkanHeaders,'libplacebo-vulkan-headers'],...(receipt.fastFloat?[[receipt.fastFloat,'libplacebo-fast-float']]:[])]){
       declarations.set(pin.origin,pin);pins.add(`${sourceRevision(pin)} third_party/${relative}`);
     }

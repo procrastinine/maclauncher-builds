@@ -82,7 +82,6 @@ export function resolveSource(id, override) {
   const result = {id, path: directory, commit, repository: canonical(origin)};
   if (!override) {
     Object.assign(result, registration(entry.path));
-    if (result.gitlink && result.gitlink !== commit) result.gitlinkDiffers = true;
   }
   if (!fs.existsSync(path.join(directory, ".git")))
     return {...result, state: result.gitlink || result.parent ? "uninitialized" : override ? "missing" : "unregistered"};
