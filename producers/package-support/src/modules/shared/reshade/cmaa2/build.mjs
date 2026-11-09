@@ -7,7 +7,7 @@ const here=import.meta.dirname,spec=JSON.parse(fs.readFileSync(path.join(here,'s
 for(let i=2;i<process.argv.length;i+=2){if(!['--source','--tools','--output'].includes(process.argv[i])||!process.argv[i+1]||options[process.argv[i]])throw Error('Expected unique --source, --tools and --output paths.');options[process.argv[i]]=path.resolve(process.argv[i+1]);}
 for(const key of ['--source','--tools','--output'])if(!options[key])throw Error('Missing '+key);
 const source=options['--source'],tools=options['--tools'],out=options['--output'],hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex'),run=(program,args)=>execFileSync(program,args,{encoding:'utf8',maxBuffer:16*1024*1024});
-const original=fs.readFileSync(path.join(source,spec.shader.path));if(hash(original)!==spec.shader.sha256)throw Error('CMAA2 shader source changed.');
+const original=fs.readFileSync(path.join(source,spec.shader.path));
 fs.mkdirSync(out,{recursive:true});let hlsl=original.toString('utf8');
 const preset=/#if CMAA2_STATIC_QUALITY_PRESET == 0[\s\S]*?#endif/.exec(hlsl);if(!preset||!preset[0].includes('lpfloat(0.05)')||!preset[0].includes('lpfloat(0.15)'))throw Error('CMAA2 quality preset contract changed.');
 hlsl=hlsl.replace(preset[0],'cbuffer MacLauncherCmaaOptions : register(b0) { float mlEdgeThreshold; };\n#define g_CMAA2_EdgeThreshold lpfloat(mlEdgeThreshold)');

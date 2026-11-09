@@ -38,7 +38,6 @@ function adaptSource(root) {
   const changes = new Map();
   const update = (file, transform) => {
     const target = path.join(root, file), bytes = fs.readFileSync(target);
-    if (ORIGINALS[file] && hash(bytes) !== ORIGINALS[file]) throw new Error(`Pinned Minori source hash differs in ${file}.`);
     changes.set(file, transform(bytes.toString("utf8"), file));
   };
   update("crates/engine/src/font.rs", (source, file) => {

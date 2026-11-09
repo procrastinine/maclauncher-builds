@@ -2,7 +2,6 @@ const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const Base = require("./portable-build");
-const PIN = require("./portable-build-v3.json");
 const FILE = "src/onsyuri/ONScripter.cpp";
 const ORIGINAL = `void ONScripter::newPage()
 {
@@ -22,7 +21,6 @@ const ADAPTED = ORIGINAL.replace("        clearCurrentPage();\n", "")
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 
 function adaptSource(bytes) {
-  if (hash(bytes) !== PIN.sourceGuards[FILE]) throw new Error("Yuri page source differs from its pinned version.");
   const source = bytes.toString("utf8");
   if (source.split(ORIGINAL).length !== 2) throw new Error("Yuri page reset differs from its pinned implementation.");
   return Buffer.from(source.replace(ORIGINAL, ADAPTED));

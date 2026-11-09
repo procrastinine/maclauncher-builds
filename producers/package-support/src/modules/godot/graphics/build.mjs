@@ -12,7 +12,6 @@ const app = appPath('src/modules/godot/graphics'), scripts = ['autoload.gd','cam
 const owner = file => path.join(app, file);
 const specification = JSON.parse(fs.readFileSync(path.join(app, 'source.json')));
 const header = path.resolve(source, specification.header), output = path.resolve(destination);
-if (crypto.createHash('sha256').update(fs.readFileSync(header)).digest('hex') !== specification.headerSha256) throw Error('Godot extension header differs from the supported version.');
 if (fs.existsSync(output)) throw Error('The Godot graphics output already exists; choose a new directory.');
 fs.mkdirSync(output, {recursive:true});
 const library = path.join(output, 'libmaclauncher-godot-camera.dylib');

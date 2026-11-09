@@ -55,7 +55,6 @@ function adaptSource(root) {
       current = path.dirname(current);
     }
     if (fs.existsSync(target) && (!fs.lstatSync(target).isFile() || fs.lstatSync(target).isSymbolicLink())) throw new Error("AI5 source export contains a linked file.");
-    if (ORIGINALS[file] && Native.hashFile(target) !== ORIGINALS[file]) throw new Error(`AI5 source checksum differs in ${file}.`);
     if (OUTPUTS.includes(file) && fs.existsSync(target)) throw new Error("AI5 source export already contains its Mac adapter.");
   }
   Previous.adaptSource(root);

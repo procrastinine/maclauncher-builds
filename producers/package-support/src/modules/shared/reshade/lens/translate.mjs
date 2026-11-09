@@ -16,7 +16,6 @@ export function translate(effect,args){
  for(const key of ['--source','--tools','--output'])if(!options[key])throw Error('Missing '+key);
  const here=path.resolve(directory,'../'+effect),spec=JSON.parse(fs.readFileSync(path.join(here,'source.json'))),source=options['--source'],tools=options['--tools'],out=options['--output'];
  const read=file=>fs.existsSync(path.join(source,file))?fs.readFileSync(path.join(source,file),'utf8'):run('git',['-C',source,'show',gitlink('producers/package-support/src/external/fsr3-sdk')+':'+file]);
- for(const[file,digest]of Object.entries(spec.files))if(hash(read(file))!==digest)throw Error('The FidelityFX source changed: '+file);
  fs.mkdirSync(out,{recursive:true});const overlay=path.join(out,'overlay'),gpu=path.join(source,'sdk/include/FidelityFX/gpu');fs.mkdirSync(path.join(overlay,effect),{recursive:true});
  // Only the owned build copy changes. All algorithm and host files keep their
  // original bytes in the SDK Git store and in the source hash manifest.

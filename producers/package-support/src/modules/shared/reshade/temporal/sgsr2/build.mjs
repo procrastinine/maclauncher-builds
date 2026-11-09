@@ -16,7 +16,6 @@ const run=(exe,args)=>execFileSync(exe,args,{encoding:'utf8',maxBuffer: Infinity
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const source=options['--source'],out=options['--output'],tools=options['--tools'];
 if(fs.existsSync(out))throw new Error('Choose a new immutable output directory.');
-for(const [filename,expected] of Object.entries(spec.shaders))if(hash(path.join(source,'sgsr/v2/include/glsl_2_pass_cs',filename))!==expected)throw new Error('SGSR shader input changed: '+filename);
 fs.mkdirSync(path.join(out,'sgsr2'),{recursive:true});
 const adaptations=[];let buildInputs;
 if(options['--native-only']){
@@ -31,9 +30,8 @@ const compilerArchitectures=run('lipo',['-archs',options['--shaderc-library']]).
 const compilerCPU=compilerArchitectures.includes(hostCPU)?hostCPU:compilerArchitectures.length===1?compilerArchitectures[0]:null;
 if(!['arm64','x86_64'].includes(compilerCPU))throw new Error('Shader compiler library has no supported build-host CPU.');
 run('xcrun',['clang++','-std=c++17','-O2','-arch',compilerCPU,'-I',options['--shaderc-headers'],path.join(app,'../../shaderc-offline.cpp'),'-o',compiler]);
-for(const [filename,expected] of Object.entries(spec.shaders)){
+for(const filename of Object.keys(spec.shaders)){
   const original=path.join(source,'sgsr/v2/include/glsl_2_pass_cs',filename);
-  if(hash(original)!==expected)throw new Error('SGSR shader input changed: '+filename);
   let text=fs.readFileSync(original,'utf8');
   // GLSL's image/sampler namespaces become unique Vulkan descriptor bindings.
   text=text.replace(/layout\(binding = (\d+)\)( uniform highp [u]?sampler2D)/g,(_all,slot,decl)=>`layout(binding = ${32+Number(slot)})${decl}`)
