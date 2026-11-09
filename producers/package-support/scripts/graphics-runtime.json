@@ -1,5 +1,20 @@
 {
   "schema": 1,
+  "pins": {
+    "dxmt-templates": [
+      {
+        "version": "1.0.21",
+        "asset": {
+          "url": "https://github.com/Sikarugir-App/Template/releases/download/v1.0/Template-1.0.21.tar.xz",
+          "sha256": "bbe996e4e4375318485953d0c7818b7b4b0a4dc1f13303bcc584f99f7602f78d"
+        },
+        "cameraBridge": {
+          "nativeSha256": "62dbce6c66f23308fcdf58fba7371271b0412a71074ad7add87a801516ce473a",
+          "thunkSha256": "e176504a3ee9d79d0f1b455141d79ed5f0355ce8ecf99317001ffd5d8e620367"
+        }
+      }
+    ]
+  },
   "core": {
     "materialize": "src/modules/shared/reshade/native/materialize-source.mjs",
     "macOSSDK": "27.0",
@@ -197,8 +212,8 @@
       "kind": "archive",
       "description": "Wine directory of the selected DXMT renderer, containing x86_64-windows and x86_64-unix libraries",
       "pin": {
-        "file": "src/modules/crossover/temporal/catalog.js",
-        "pointer": "/CATALOG",
+        "file": "scripts/graphics-runtime.json",
+        "pointer": "/pins/dxmt-templates",
         "match": {
           "version": "1.0.21"
         }
