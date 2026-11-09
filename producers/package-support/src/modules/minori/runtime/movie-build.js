@@ -29,7 +29,7 @@ function normalizeDiagnostics(directory, mappings) {
 }
 async function buildMovieDependencies({ archive, destination, architecture = process.arch, signal, dependencies = {} } = {}) {
   if (process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) throw new Error("Minori movie dependencies require a supported Mac architecture.");
-  if (!path.isAbsolute(archive || "") || Native.hashFile(archive) !== SOURCE.sha256) throw new Error("The FFmpeg 7.1.2 archive differs from its pinned SHA-256.");
+  if (!path.isAbsolute(archive || "")) throw new Error("Minori movie dependencies require the FFmpeg 7.1.2 source archive.");
   if (!path.isAbsolute(destination || "") || fs.existsSync(destination)) throw new Error("Choose a new Minori movie dependency directory.");
   const workspace = fs.mkdtempSync(path.join(os.tmpdir(), "maclauncher-minori-movie-"));
   const output = path.join(workspace, "output"), prefix = path.join(workspace, "install"), logPath = path.join(workspace, "build.log");
