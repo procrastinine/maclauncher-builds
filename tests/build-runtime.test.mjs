@@ -128,8 +128,8 @@ test('every registered GitHub build names an existing command and submodule of t
 
 test('a VNDS-LOVE package revision preserves engine files and historical packaging',async t=>{
  const work=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'vnds-love-build-')));t.after(()=>fs.rmSync(work,{recursive:true,force:true}));
- const {build}=await import('../producers/engine-adaptations/stage.mjs'),output=path.join(work,'build');
- const staged=build({project:'vnds-love',arch:'universal',output});
+ const {assemble}=await import('../producers/engine-adaptations/stage.mjs'),output=path.join(work,'build');
+ const staged=assemble({project:'vnds-love',arch:'universal',output});
  const built={version:staged.version,declaration:path.join(output,'declaration.json'),payload:path.join(output,'payload')};
  assert.equal(built.version,buildRecord(readProjects(root,{resolvePins:false}).projects.find(row=>row.id==='vnds-love')).version);
  const {stageData}=await import('../producers/engine-adaptations/stage.mjs'),input=path.join(work,'historical');
@@ -156,8 +156,8 @@ test('registered GitHub build commands reject architectures their projects do no
  assert.throws(()=>checkBuildRequest(request('rlvm-adapter','x64')),/builds universal packages/);
  assert.throws(()=>checkBuildRequest({...request('sys3-decompiler','universal'),version:selected('sys3-decompiler','arm64').version}),/builds .*packages/);
  assert.throws(()=>checkBuildRequest(request('web-renderer-network','ppc')),/builds arm64 and x64 packages/);
- const {buildDecompiler}=await import('../producers/package-support/scripts/build-decompiler.mjs');
- await assert.rejects(buildDecompiler({project:'gemrb',arch:'arm64',output:path.join(work,'gemrb'),work:path.join(work,'gemrb-work')}),/decompiler profiles have no release/);
+ const {compile:compileDecompiler}=await import('../producers/package-support/scripts/build-decompiler.mjs');
+ await assert.rejects(compileDecompiler({project:'gemrb',arch:'arm64',output:path.join(work,'gemrb'),work:path.join(work,'gemrb-work')}),/decompiler profiles have no release/);
  assert.throws(()=>checkBuildRequest({...request('sys3-decompiler','arm64'),version:'0.5.0'}),/builds version|declared|version/);
  for(const [id,architectures] of [['sys3-decompiler',['arm64','x64']],['xsys35-decompiler',['arm64','x64']],['gm8-decompiler',['arm64','x64']],['catsystem2-kif-crypto',['arm64','x64']],['web-renderer-network',['arm64','x64']]])assert.deepEqual(buildRecords(registry.projects.find(project=>project.id===id)).flatMap(build=>build.architectures).sort(),architectures);
  const java=buildRecords(registry.projects.find(project=>project.id==='java-steamworks'));

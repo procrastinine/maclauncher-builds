@@ -5,7 +5,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {helperPackage,sha} from './helper-package.mjs';
-import {buildHelper} from './build-helper.mjs';
+import * as Helper from './build-helper.mjs';
 import {resolveProject} from '../lib/projects.mjs';
 import {recipeMain} from './build-source.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/package-support');
@@ -19,7 +19,7 @@ export async function compile({work,sourceDir=path.join(base,'src/external/luast
  fs.mkdirSync(work,{recursive:true});
  try{
   const staged=path.join(work,'source'),source=Overlay.stageSource({roots:{luasteam:sourceDir,luajit:luaDir,steamSdk:sdkDir},destination:staged,luaHeadersRevision});
-  const steam=buildHelper({project:'steam-api-helper',arch:'universal',output:path.join(work,'steam'),work:path.join(work,'steam-work')}),library=path.join(steam.output,'payload/libsteam_api.dylib');
+  const helper={project:'steam-api-helper',arch:'universal',output:path.join(work,'steam'),work:path.join(work,'steam-work')},steam=Helper.assemble({...helper,compiled:Helper.compile(helper)}),library=path.join(steam.output,'payload/libsteam_api.dylib');
   const slices=[];for(const cpu of ['arm64','x86_64']){
    const slice=path.join(work,cpu+'.so');run('/usr/bin/xcrun',['clang++',...Overlay.compilerArguments({sourceRoot:staged,architecture:cpu,steamLibraryPath:library,outputPath:slice}),'-ffile-prefix-map='+work+'=maclauncher-build']);
    run('/usr/bin/install_name_tool',['-change','@rpath/libsteam_api.dylib','@loader_path/libsteam_api.dylib',slice]);slices.push(slice);

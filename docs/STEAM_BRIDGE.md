@@ -14,9 +14,9 @@ Genuine Windows client components are acquired separately from Valve during cons
 
 Build requirements are macOS 13 or later, the macOS developer tools, Node.js 24.15 or later, Autoconf, Bison, Flex, make, curl, patch and the pinned LLVM-MinGW toolchain. Compilation uses at most two make jobs.
 
-```
-node producers/steam-bridge/build.mjs prepare /absolute/build-directory
-node producers/steam-bridge/build.mjs build /absolute/build-directory /absolute/llvm-mingw/bin /absolute/new-payload
+```sh
+node tools/build-runtime.mjs --project maclauncher-steam-bridge --arch universal \
+  --output /absolute/path/to/package --work /absolute/path/to/build
 ```
 
-Preparation fetches source inputs into a new build directory. The payload directory must be absent. A sibling runtime-package declaration supports the normal packaging tools. The manifest declares the native modules, PE builtins, bootstrap modules and launch helpers by role for automatic preparation.
+Compilation fetches the source inputs and the LLVM-MinGW toolchain into the new work directory. Packaging writes the payload into the new output directory. The declaration beside the payload supports the normal packaging tools. The manifest declares the native modules, PE builtins, bootstrap modules and launch helpers by role for automatic preparation.

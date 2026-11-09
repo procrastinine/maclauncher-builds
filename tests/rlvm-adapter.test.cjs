@@ -18,8 +18,9 @@ test('RLVM packaging requires an explicit compiled source-build product', async 
 
 test('Runtime RLVM builds use owned source and record the generated binary', {skip:process.platform!=='darwin'}, async t=>{
  const root=temporary(t);
- const {build}=await import('../producers/vn-adaptations/rlvm/package.mjs'),read=fs.readFileSync;
- const result=await build({project:'rlvm-adapter',arch:'universal',output:path.join(root,'build'),work:path.join(root,'work')});
+ const {compile,assemble}=await import('../producers/vn-adaptations/rlvm/package.mjs'),read=fs.readFileSync;
+ const options={project:'rlvm-adapter',arch:'universal',output:path.join(root,'build'),work:path.join(root,'work')};
+ const result=await assemble({...options,compiled:await compile(options)});
  const binary=path.join(root,'build/payload/files/rlvm-adapter.dylib'),profile=JSON.parse(read(path.join(root,'build/payload/files/adapter.json')));
  assert.equal(profile.sha256,require('node:crypto').createHash('sha256').update(read(binary)).digest('hex'));
  const {resolveProject,buildRecord}=await import('../lib/projects.mjs');assert.equal(result.declaration.version,buildRecord(resolveProject('rlvm-adapter',path.resolve(__dirname,'..'),{resolvePins:false})).version);

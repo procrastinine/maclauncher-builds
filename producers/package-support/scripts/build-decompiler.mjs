@@ -20,7 +20,8 @@ const profiles=require('../src/modules/alicesoft/decompiler-profiles.json');
 const external=path.resolve(import.meta.dirname,'../src/external');
 const run=(command,args)=>execFileSync(command,args,{encoding:'utf8',timeout:60000});
 
-export async function buildDecompiler({project,version:selectedVersion,arch,output,work=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'decompiler-')),'work'),dependencies}){
+/** Compile the selected decompiler release through its managed source build. */
+export async function compile({project,version:selectedVersion,arch,work=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'decompiler-')),'work'),dependencies}){
  const version=buildRecord(resolveProject(project,path.resolve(import.meta.dirname,'../../..'),{resolvePins:false}),selectedVersion).version;
  const metadata=profiles.find(row=>row.managerId===project),profile=metadata&&{...metadata,upstreamRevision:gitlink("producers/package-support/src/external/"+metadata.repo)},release=profile?.releases.find(row=>row.version===version);
  if(!release)throw Error('The decompiler profiles have no release for '+project+'.');
@@ -33,6 +34,10 @@ export async function buildDecompiler({project,version:selectedVersion,arch,outp
    getInstallDir:({version})=>path.join(userDataDir,project,version),resolveInstalled:()=>null,registerLocal:({runtimePath,verifiedBuild})=>({runtimePath,verifiedBuild})}};
   built=await buildManagedDecompiler({manager,version:release.version,sourceDir,userDataDir,dependencies});
  }finally{if(previous===undefined)delete process.env.CMAKE_OSX_ARCHITECTURES;else process.env.CMAKE_OSX_ARCHITECTURES=previous;}
+ return {version,profile,release,sourceDir,built,work};
+}
+/** Sign, describe and declare the compiled decompiler with its notices. */
+export async function assemble({project,arch,output,compiled:{version,profile,release,sourceDir,built,work}}){
  const payload=path.join(output,'payload'),files=path.join(payload,'files'),executableRelative='bin/'+profile.executable;
  fs.mkdirSync(path.join(files,'bin'),{recursive:true});
  const executable=path.join(files,executableRelative);
@@ -55,4 +60,4 @@ export async function buildDecompiler({project,version:selectedVersion,arch,outp
  return {project,version,arch,output};
 }
 
-recipeMain(import.meta,buildDecompiler);
+recipeMain(import.meta,{compile,assemble});

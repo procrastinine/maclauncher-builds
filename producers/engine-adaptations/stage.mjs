@@ -53,10 +53,10 @@ export function stageData({project,output,version=profiles[project]?.version}){
   declaration.sourceRelative='manifest.json';validateDeclaration(declaration);return declaration;
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }
-/** GitHub build layout: the data package in payload/ and its declaration beside it. Engine data has no CPU, so it builds as universal. */
-export function build({project,arch,version:selectedVersion,output}){
+/** GitHub build layout: the data package in payload/ and its declaration beside it. Engine data has no CPU, so it builds as universal and has no compile step. */
+export function assemble({project,arch,version:selectedVersion,output}){
  fs.mkdirSync(output,{recursive:true});
  try{const version=buildRecord(resolveProject(project,path.resolve(root,'../..'),{resolvePins:false}),selectedVersion).version;const declaration=stageData({project,version,output:path.join(output,'payload')});fs.writeFileSync(path.join(output,'declaration.json'),JSON.stringify(declaration,null,2)+'\n',{flag:'wx'});return declaration;}
  catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }
-recipeMain(import.meta,build);
+recipeMain(import.meta,{assemble});
