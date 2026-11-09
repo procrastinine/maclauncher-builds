@@ -263,8 +263,8 @@ for (const name of ["godot", "streamline", "dxmt"]) {
   if (name === "godot" ? metadata.abi !== 1 || metadata.complete !== true : metadata.schema !== 1)
     throw new Error("Unsupported camera bridge metadata.");
   if(name!=="godot"){
-    const snapshots=stageStreamlineSnapshots({name,directory,metadata});
-    if(snapshots){snapshotProviders.add(name);pins.push(snapshots.pin);for(const [relative,file]of snapshots.owned)extraOwned.set(relative,file);}
+    const snapshots=stageStreamlineSnapshots({name,metadata});
+    if(snapshots){snapshotProviders.add(name);pins.push(snapshots.pin);}
   }
   if(name==="godot"&&metadata.sceneAovAPI!==undefined){
     const programs=metadata.aovCapture?.programs,godotFile=relative=>moduleFile(path.posix.join("src/modules/godot/graphics",relative));
