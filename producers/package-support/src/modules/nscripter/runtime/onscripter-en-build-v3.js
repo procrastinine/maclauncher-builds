@@ -7,7 +7,7 @@ const crypto = require("node:crypto");
 const Native = require('../../../../../../lib/package-format.cjs');
 const Source = require("../../shared/runtime/pinned-native-build");
 const BuildTools = require("../../shared/runtime/native-build-tools");
-const { downloadToFile, throwIfAborted } = appRequire('src/modules/shared/runtime/download-utils.js');
+const { throwIfAborted } = require('../../../../../../lib/abort.cjs');
 
 const SNAPSHOT_REVISION = require('../../../../../../lib/pins.mjs').gitlink('producers/package-support/src/external/onscripter-en');
 const PACKAGES = Object.freeze({
@@ -70,7 +70,7 @@ async function buildRuntime({ manager: suppliedManager, userDataDir, version, pa
   if (fs.existsSync(path.join(destination, "runtime.json"))) throw new Error("This runtime version is already installed.");
   const work = fs.mkdtempSync(path.join(os.tmpdir(), "maclauncher-onscripter-en-build-"));
   const run = dependencies.runBuildCommand || Source.runBuildCommand;
-  const download = dependencies.downloadToFile || downloadToFile;
+  const download = dependencies.downloadToFile;
   fs.mkdirSync(destination, { recursive: true });
   const logPath = path.join(destination, "build.log");
   const payload = path.join(destination, "files");
