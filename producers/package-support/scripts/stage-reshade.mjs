@@ -80,7 +80,7 @@ if(options["--xess-host"]){
   const backends=metadata.backends,hostPaths=metadata.hostPaths;
   if(metadata.schema!==1||metadata.providerABI!==1||metadata.sdk?.repository!==source.repository||metadata.sdk?.sha256!==source.sha256||metadata.sdk?.bytes!==source.bytes||!Array.isArray(metadata.files)||!Array.isArray(metadata.source?.ownedFiles))throw Error("A complete compatible original XeSS GPU host is required.");
   const nativeSource=options["--xess-host-source"];
-  for(const name of owned){if(path.posix.normalize(name).startsWith("../"))throw Error("Invalid XeSS owned source path.");const file=nativeSource?path.resolve(nativeSource,name):moduleFile(path.posix.join(module,"native",name));if(!isOwnedFile(file))throw Error("Invalid XeSS owned source path.");extraOwned.set("maclauncher/xess/native/"+name,file);}
+  for(const name of owned){if(path.posix.normalize(name).startsWith("../"))throw Error("Invalid XeSS owned source path.");const file=nativeSource?path.resolve(nativeSource,name):moduleFile(path.posix.join(module,"native",name));extraOwned.set("maclauncher/xess/native/"+name,file);}
   extraOwned.set("maclauncher/xess/source.json",moduleFile(module+"/source.json"));
   if(generation){
     const componentFile=moduleFile(module+"/components.json"),components=JSON.parse(fs.readFileSync(componentFile,"utf8"));

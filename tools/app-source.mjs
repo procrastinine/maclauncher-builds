@@ -23,15 +23,6 @@ export function appSourceRoot(repository=root){
  verified.set(repository,result);
  return result;
 }
-/** An owned build input is a regular file, or a link whose real path is a
- * regular file inside this checkout, which holds the pinned app source and its
- * submodules. Staged copies outside the checkout are regular files. */
-export function isOwnedFile(file){
- let stat;try{stat=fs.lstatSync(file);}catch{return false;}
- if(!stat.isSymbolicLink())return stat.isFile();
- let real;try{real=fs.realpathSync(file);}catch{return false;}
- return real.startsWith(root+path.sep)&&fs.statSync(real).isFile();
-}
 /** The absolute path of a file or directory inside the verified app checkout. */
 export function appPath(relative){
  if(typeof relative!=='string'||!relative||relative.startsWith('/')||relative.split('/').some(part=>!part||part==='.'||part==='..'))throw Error('Name an app file by its normalized path inside the app repository: '+relative);
