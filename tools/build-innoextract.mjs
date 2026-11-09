@@ -13,7 +13,7 @@ export async function buildInnoextract({project,version,arch,output,work,sources
 
  const names=['innoextract',...Object.keys(Builder.DEPENDENCIES)],directories=Object.fromEntries(names.map(name=>[name,sources[name]||path.join(root,'producers/package-support/src/external',name)]));
  fs.mkdirSync(work,{recursive:true});const headers=path.join(work,'boost-headers');fs.mkdirSync(headers);
- const archive=await buildInput(JSON.parse(fs.readFileSync(path.join(root,'producers/package-support/helper-builds/innoextract.json'))).boost);
+ const archive=await buildInput(JSON.parse(fs.readFileSync(path.join(root,'producers/dependencies.json'))).boost);
  execFileSync('/usr/bin/tar',['-xf',archive,'--strip-components','1','-C',headers],{maxBuffer:Infinity,stdio:'inherit'});
  const result=await Builder.buildCandidate({directory:path.join(work,'build'),sourceDir:directories.innoextract,dependencyDirs:directories,boostHeaders:headers,architecture:arch,sdkPath,lzmaHeaders});
  addLicenses(path.dirname(path.dirname(result.executables.innoextract.path)),'Boost',headers);
