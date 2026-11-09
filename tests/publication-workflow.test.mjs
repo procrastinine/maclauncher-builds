@@ -49,8 +49,8 @@ test('levels run in plan order with no fixed depth',()=>{
  assert.match(job(workflow,'level'),/uses: \.\/\.github\/workflows\/runtime-level\.yml/);
 });
 
-test('built files are attested by Build and release itself with the required write capabilities',()=>{
- // The signer workflow stays runtime-build.yml, which publication and users verify.
+test('P5 regression: No valid signed Runtime build evidence identifies this exact archive; Build and release itself attests every built file',()=>{
+ // Runs 41573494245 and 41573478534. The signer workflow stays runtime-build.yml, which publication and users verify.
  const workflow=read('workflows/runtime-build.yml'),action=read('actions/build-runtime/action.yml'),attest=job(workflow,'attest');
  assert.doesNotMatch(action,/actions\/attest/);
  assert.match(attest,/uses: \.\/\.github\/actions\/attest[\s\S]*subject-path.*\$\{\{ runner.temp \}\}\/runtime\/\*\/\*/);

@@ -45,14 +45,15 @@ export async function planBuildRelease({selection,directory=root,releases=[],pub
  const levels=[...new Set(all.map(row=>depth.get(row.project)))].sort((a,b)=>a-b).map((level,index)=>({index,include:all.filter(row=>depth.get(row.project)===level)}));
  return {selection:registration.selection,reports:resolved.reports,graph:resolved.dependencyGraph,reuse:resolved.reuseBindings,levels};
 }
-export async function main(args,{directory=root,env=process.env}={}){
+const listReleases=repository=>JSON.parse(retryNetwork(()=>execFileSync('gh',['api','--paginate','--slurp','repos/'+repository+'/releases?per_page=100'],{maxBuffer:Infinity,encoding:'utf8'}))).flat();
+export async function main(args,{directory=root,env=process.env,releasesOf=listReleases,check=checkPublication}={}){
  if(args.length!==2||args[0]!=='--output'||!path.isAbsolute(args[1]))throw Error('Use --output /absolute/plan-directory.');
  const repository=readProjects(directory,{resolvePins:false}).repository;
  if(env.GITHUB_ACTIONS!=='true')throw Error('Release planning with GitHub metadata runs inside Build and release.');
- const releases=JSON.parse(retryNetwork(()=>execFileSync('gh',['api','--paginate','--slurp','repos/'+repository+'/releases?per_page=100'],{maxBuffer:Infinity,encoding:'utf8'}))).flat().filter(release=>!release.draft);
+ const releases=releasesOf(repository).filter(release=>!release.draft);
  const publish=env.RELEASE_PUBLISH!=='false',plan=await planBuildRelease({selection:env.RELEASES,directory,releases,publish});
  // Publication is proven before any build starts; a build-only run needs none of it.
- if(publish)await checkPublication({targets:plan.levels.flatMap(level=>level.include),selection:plan.selection,directory,repository,releases});
+ if(publish)await check({targets:plan.levels.flatMap(level=>level.include),selection:plan.selection,directory,repository,releases});
  fs.mkdirSync(args[1],{recursive:true});
  const requested=new Set(parseSelection(env.RELEASES).map(row=>row.id)),rebuilt=plan.selection.filter(row=>!requested.has(row.id));
  if(env.GITHUB_STEP_SUMMARY&&rebuilt.length)fs.appendFileSync(env.GITHUB_STEP_SUMMARY,rebuilt.map(({id,version})=>id+' -> '+version+' (unpublished input)').join('\n\n')+'\n');

@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import {releaseComponents,orderReleaseComponents,planReleaseDispatch,dispatchReleaseComponents,main} from '../tools/dispatch-release.mjs';
-import {planBuildRelease} from '../tools/plan-build-release.mjs';
+import {planBuildRelease,main as planMain} from '../tools/plan-build-release.mjs';
 const hosted=JSON.parse(fs.readFileSync(new URL('./fixtures/release-components/graph.json',import.meta.url)));
 const strings=components=>components.map(rows=>rows.map(({id,version})=>id+'='+version));
 function fixture(t){
@@ -79,4 +79,18 @@ test('a changed release line already public is skipped without a dispatch',async
  const directory=fixture(t),calls=[];
  const result=await main(['dispatch','--releases','left=2.0.0'],{directory,runGh:async args=>{calls.push(args);return JSON.stringify([[{tag_name:'left/v2.0.0/arm64',draft:false}]]);}});
  assert.deepEqual(result.dispatched,[]);assert.deepEqual(result.skipped,[{id:'left',version:'2.0.0'}]);assert.equal(calls.length,1);assert.equal(calls[0][0],'api');
+});
+
+test('the plan proves publication before any build, and a build-only run rebuilds a published name without it',async t=>{
+ const directory=fixture(t),releases='input=1.0.0,left=2.0.0,right=3.0.0',checks=[];
+ const env={GITHUB_ACTIONS:'true',RELEASES:releases};
+ const output=await planMain([path.join(directory,'plan')],{directory,env,releasesOf:()=>[],check:async options=>checks.push(options)}).catch(error=>error);
+ assert.match(String(output),/--output/);
+ const planned=await planMain(['--output',path.join(directory,'plan')],{directory,env,releasesOf:()=>[],check:async options=>checks.push(options)});
+ assert.equal(checks.length,1);assert.equal(checks[0].targets.length,6);
+ assert.deepEqual(JSON.parse(planned.targets).include.map(row=>row.project),JSON.parse(planned.levels).flatMap(level=>level.include.map(row=>row.project)));
+ const published=[{tag_name:'left/v2.0.0/arm64',draft:false}];
+ await assert.rejects(planMain(['--output',path.join(directory,'plan-2')],{directory,env,releasesOf:()=>published,check:async()=>{}}),/already published/);
+ const gate=await planMain(['--output',path.join(directory,'plan-3')],{directory,env:{...env,RELEASE_PUBLISH:'false'},releasesOf:()=>published,check:async()=>assert.fail('a build-only run checks no publication')});
+ assert.equal(JSON.parse(gate.targets).include.length,6);
 });
