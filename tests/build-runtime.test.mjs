@@ -31,7 +31,7 @@ test('Android recipes initialize the producer whose metadata they read from a co
 });
 
 test('producer routing never substitutes Android for a different project',()=>{
- const selected=main(['--project','fna','--check']);assert.equal(selected.id,'fna');assert.equal(selected.sourceDirectory,'producers/package-support');assert.ok(selected.entries.every(entry=>entry.startsWith('producers/package-support/')));
+ const selected=main(['--project','fna','--check']);assert.equal(selected.id,'fna');assert.equal(selected.sourceDirectory,'producers/package-support');assert.ok(!selected.entries.some(entry=>/^(producers\/android|sources\/maclauncher-android)/.test(entry)));
  assert.throws(()=>main(['--project','flash-projector','--check']),/retains its supplied binary/);
  assert.throws(()=>main(['--project','not-registered','--check']),/Unknown build project/);
  assert.throws(()=>main(['--project','android','--runtime','fna','--check']),/Select one project/);

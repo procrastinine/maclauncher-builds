@@ -7,8 +7,12 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "lib/abort.cjs",
+        "lib/licenses.mjs",
         "producers/package-support/helper-builds/catsystem2-kif-crypto.json",
-        "producers/package-support/src/modules/catsystem2/runtime/kif-crypto.c"
+        "producers/package-support/src/modules/catsystem2/runtime/kif-crypto.c",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "tools/build-source.mjs"
       ],
       "sourceDirectory": "producers/package-support"
     },
@@ -49,8 +53,12 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
         "LICENSE",
+        "lib/abort.cjs",
+        "lib/licenses.mjs",
         "producers/package-support/helper-builds/android-privacy.json",
-        "producers/package-support/scripts/build-android-privacy.mjs"
+        "producers/package-support/scripts/build-android-privacy.mjs",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "tools/build-source.mjs"
       ],
       "sourceDirectory": "producers/package-support",
       "appEntries": [
@@ -94,7 +102,13 @@
     "producer": {
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
-      "entries": [],
+      "entries": [
+        "lib/abort.cjs",
+        "lib/licenses.mjs",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs"
+      ],
       "sourceDirectory": "producers/package-support"
     },
     "upstreams": [],
@@ -132,13 +146,16 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "tools/build-helper.mjs"
+        "lib/abort.cjs",
+        "lib/licenses.mjs",
+        "producers/package-support/src/modules/love/runtime/luasteam-source-inputs.json",
+        "producers/package-support/src/modules/love/runtime/luasteam-source-overlay.js",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "tools/build-helper.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs"
       ],
-      "sourceDirectory": "producers/package-support",
-      "appEntries": [
-        "src/modules/love/runtime/luasteam-source-inputs.json",
-        "src/modules/love/runtime/luasteam-source-overlay.js"
-      ]
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -199,9 +216,13 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "lib/abort.cjs",
+        "lib/licenses.mjs",
         "producers/package-support/helper-builds/mkxpz-config-helper.json",
         "producers/package-support/src/modules/rgss/overlays/mkxpz-config.c",
-        "producers/package-support/src/modules/rgss/overlays/mkxpz-identity.m"
+        "producers/package-support/src/modules/rgss/overlays/mkxpz-identity.m",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "tools/build-source.mjs"
       ],
       "sourceDirectory": "producers/package-support"
     },
@@ -240,11 +261,13 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "lib/abort.cjs",
+        "lib/licenses.mjs",
+        "producers/dependencies.json",
         "producers/package-support/scripts/build-graphics-runtime.mjs",
         "producers/package-support/scripts/graphics-build-requirements.txt",
         "producers/package-support/scripts/graphics-runtime.json",
         "producers/package-support/scripts/payload-aliases.mjs",
-        "producers/package-support/scripts/repackage-graphics-runtime.mjs",
         "producers/package-support/scripts/stage-fsr4-provider.mjs",
         "producers/package-support/scripts/stage-libplacebo-scene.mjs",
         "producers/package-support/scripts/stage-native-image-filters.mjs",
@@ -257,7 +280,12 @@
         "producers/package-support/src/modules/crossover/temporal/streamline",
         "producers/package-support/src/modules/crossover/temporal/xess",
         "producers/package-support/src/modules/godot/graphics/build.mjs",
-        "producers/package-support/src/modules/shared/reshade"
+        "producers/package-support/src/modules/shared/reshade",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "tools/build-input.mjs",
+        "tools/build-source.mjs",
+        "tools/graphics-producer.mjs",
+        "tools/helper-package.mjs"
       ],
       "sourceDirectory": "producers/package-support",
       "sourceRepository": "https://github.com/procrastinine/maclauncher",
@@ -270,7 +298,22 @@
         "src/modules/crossover/temporal/streamline",
         "src/modules/crossover/temporal/xess",
         "src/modules/godot/graphics",
-        "src/modules/shared/reshade"
+        "src/modules/shared/copy-file.js",
+        "src/modules/shared/effects/operation-contracts.mjs",
+        "src/modules/shared/file-time.js",
+        "src/modules/shared/reshade",
+        "src/modules/shared/runtime/app-bundle.js",
+        "src/modules/shared/runtime/bundled-native.js",
+        "src/modules/shared/runtime/feature-requirements.js",
+        "src/modules/shared/runtime/guards.js",
+        "src/modules/shared/runtime/host-capabilities.js",
+        "src/modules/shared/runtime/local-native.js",
+        "src/modules/shared/runtime/package-contract.cjs",
+        "src/modules/shared/runtime/payload-files.js",
+        "src/modules/shared/runtime/pe-exports.js",
+        "src/modules/shared/runtime/production-source.js",
+        "src/modules/shared/runtime/runtime-content.js",
+        "src/modules/shared/runtime/verified-identity.js"
       ]
     },
     "upstreams": [
@@ -650,7 +693,12 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/helper-builds/steam-api-helper.json"
+        "lib/abort.cjs",
+        "lib/licenses.mjs",
+        "producers/package-support/helper-builds/steam-api-helper.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "producers/package-support/src/modules/shared/runtime/steamworks/native/offline-0.5.0/source/offline.cpp",
+        "tools/build-source.mjs"
       ],
       "sourceDirectory": "producers/package-support"
     },
@@ -689,7 +737,12 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/helper-builds/steam-ticket-loader.json"
+        "lib/abort.cjs",
+        "lib/licenses.mjs",
+        "producers/package-support/helper-builds/steam-ticket-loader.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "producers/package-support/src/modules/shared/runtime/steamworks/native/ticket-0.1.0/source/ticket.cpp",
+        "tools/build-source.mjs"
       ],
       "sourceDirectory": "producers/package-support"
     },
@@ -727,11 +780,16 @@
     "producer": {
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
-      "entries": [],
-      "sourceDirectory": "producers/package-support",
-      "appEntries": [
-        "src/modules/java/runtime/steamworks"
-      ]
+      "entries": [
+        "lib/abort.cjs",
+        "lib/licenses.mjs",
+        "producers/package-support/src/modules/java/runtime/steamworks/MacLauncherSteamAgent.java",
+        "producers/package-support/src/modules/java/runtime/steamworks/build-agent.cjs",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs"
+      ],
+      "sourceDirectory": "producers/package-support"
     },
     "upstreams": [
       {
@@ -816,13 +874,21 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "lib/abort.cjs",
+        "lib/android-source.mjs",
+        "lib/licenses.mjs",
         "producers/android-inputs/aim.json",
+        "producers/dependencies.json",
         "producers/package-support/src/modules/android/native/apk-metadata/Cargo.lock",
         "producers/package-support/src/modules/android/native/apk-metadata/Cargo.toml",
         "producers/package-support/src/modules/android/native/apk-metadata/adapt.mjs",
         "producers/package-support/src/modules/android/native/apk-metadata/main.rs",
         "producers/package-support/src/modules/android/native/apk-metadata/sources.json",
-        "runtimes/android"
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "runtimes/android",
+        "tools/build-input.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs"
       ],
       "sourceDirectory": "producers/package-support",
       "sourceRepository": "https://github.com/procrastinine/maclauncher"
@@ -886,8 +952,12 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "lib/abort.cjs",
+        "lib/licenses.mjs",
         "producers/package-support/helper-builds/web-renderer-network.json",
-        "producers/package-support/src/modules/shared/web/native"
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "producers/package-support/src/modules/shared/web/native",
+        "tools/build-source.mjs"
       ],
       "sourceDirectory": "producers/package-support"
     },
@@ -928,13 +998,20 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers",
       "entries": [
+        "lib/abort.cjs",
+        "lib/android-source.mjs",
         "producers/android-inputs/aim.json",
         "producers/android-inputs/java-converter.json",
         "producers/android-launcher/build.mjs",
         "producers/android-launcher/source.json",
+        "producers/dependencies.json",
         "producers/included-helpers/prepare.mjs",
         "producers/included-helpers/profiles/android-launcher.json",
-        "runtimes/android"
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "runtimes/android",
+        "tools/build-input.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs"
       ]
     },
     "upstreams": [
@@ -995,10 +1072,17 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "lib/abort.cjs",
+        "lib/android-source.mjs",
+        "lib/licenses.mjs",
         "producers/android-art-inputs/source.json",
         "producers/android-inputs/aim.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
-        "tools/build-android-art-input.mjs"
+        "tools/build-android-art-input.mjs",
+        "tools/build-source.mjs",
+        "tools/manager-declaration.mjs",
+        "tools/seal-runtime.mjs"
       ]
     },
     "upstreams": [
@@ -1058,10 +1142,15 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "lib/abort.cjs",
+        "lib/licenses.mjs",
         "producers/android-inputs/blueprint/main.go",
         "producers/android-inputs/blueprint/source.json",
         "producers/android-inputs/licenses/go",
-        "tools/build-android-blueprint.mjs"
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "tools/build-android-blueprint.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs"
       ]
     },
     "upstreams": [
@@ -1119,8 +1208,17 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "lib/abort.cjs",
+        "lib/licenses.mjs",
+        "producers/android-inputs/aconfig",
+        "producers/dependencies.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "tools/build-android-aconfig.mjs",
-        "producers/android-inputs/aconfig"
+        "tools/build-input.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs",
+        "tools/manager-declaration.mjs",
+        "tools/seal-runtime.mjs"
       ]
     },
     "upstreams": [
@@ -1186,12 +1284,20 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "lib/abort.cjs",
+        "lib/licenses.mjs",
         "producers/android-inputs/codecs.json",
+        "producers/dependencies.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.js",
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.json",
-        "tools/build-android-codecs.mjs"
+        "tools/build-android-codecs.mjs",
+        "tools/build-input.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs",
+        "tools/native-stack.mjs"
       ]
     },
     "upstreams": [
@@ -1255,11 +1361,17 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "lib/abort.cjs",
+        "lib/android-source.mjs",
+        "lib/licenses.mjs",
         "producers/android-inputs/aim.json",
         "producers/android-inputs/angle.json",
         "producers/android-inputs/licenses/angle",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
-        "tools/build-android-angle.mjs"
+        "tools/build-android-angle.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs"
       ]
     },
     "upstreams": [
@@ -1344,12 +1456,20 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "lib/abort.cjs",
+        "lib/android-source.mjs",
+        "lib/licenses.mjs",
         "producers/android-art-inputs/art-source.json",
         "producers/android-inputs/aim.json",
+        "producers/dependencies.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
         "tools/android-art-producer.mjs",
         "tools/android-build-inputs.mjs",
-        "tools/build-android-art-elf.mjs"
+        "tools/build-android-art-elf.mjs",
+        "tools/build-input.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs"
       ]
     },
     "upstreams": [
@@ -1419,11 +1539,19 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "lib/abort.cjs",
+        "lib/android-source.mjs",
+        "lib/licenses.mjs",
         "producers/android-inputs/aim.json",
         "producers/android-inputs/java-converter.json",
         "producers/android-inputs/licenses/asm",
+        "producers/dependencies.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
-        "tools/build-android-java-converter.mjs"
+        "tools/build-android-java-converter.mjs",
+        "tools/build-input.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs"
       ]
     },
     "upstreams": [
@@ -1501,11 +1629,19 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "lib/abort.cjs",
+        "lib/android-source.mjs",
+        "lib/licenses.mjs",
         "producers/android-art-inputs/ffi-build.patch",
         "producers/android-art-inputs/ffi.json",
         "producers/android-inputs/aim.json",
+        "producers/dependencies.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
-        "tools/build-android-art-ffi.mjs"
+        "tools/build-android-art-ffi.mjs",
+        "tools/build-input.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs"
       ]
     },
     "upstreams": [
@@ -1581,6 +1717,9 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "lib/abort.cjs",
+        "lib/android-source.mjs",
+        "lib/licenses.mjs",
         "producers/android-inputs/aim.json",
         "producers/android-inputs/blueprint/main.go",
         "producers/android-inputs/blueprint/source.json",
@@ -1589,8 +1728,13 @@
         "producers/android-inputs/licenses/aosp-apache-http",
         "producers/android-inputs/licenses/aosp-framework",
         "producers/android-inputs/licenses/robolectric-portability",
+        "producers/dependencies.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
-        "tools/build-android-java-framework.mjs"
+        "tools/build-android-java-framework.mjs",
+        "tools/build-input.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs"
       ]
     },
     "upstreams": [
@@ -1719,9 +1863,17 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/android-image-data",
       "entries": [
+        "lib/abort.cjs",
+        "lib/android-source.mjs",
+        "lib/licenses.mjs",
         "producers/android-image-data",
         "producers/android-inputs/aim.json",
-        "runtimes/android"
+        "producers/dependencies.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "runtimes/android",
+        "tools/build-input.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs"
       ]
     },
     "upstreams": [
@@ -1795,9 +1947,17 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/android-image-data",
       "entries": [
+        "lib/abort.cjs",
+        "lib/android-source.mjs",
+        "lib/licenses.mjs",
         "producers/android-image-data",
         "producers/android-inputs/aim.json",
-        "runtimes/android"
+        "producers/dependencies.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "runtimes/android",
+        "tools/build-input.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs"
       ]
     },
     "upstreams": [
@@ -1871,9 +2031,17 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/android-image-data",
       "entries": [
+        "lib/abort.cjs",
+        "lib/android-source.mjs",
+        "lib/licenses.mjs",
         "producers/android-image-data",
         "producers/android-inputs/aim.json",
-        "runtimes/android"
+        "producers/dependencies.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "runtimes/android",
+        "tools/build-input.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs"
       ]
     },
     "upstreams": [
@@ -1947,9 +2115,17 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/android-image-data",
       "entries": [
+        "lib/abort.cjs",
+        "lib/android-source.mjs",
+        "lib/licenses.mjs",
         "producers/android-image-data",
         "producers/android-inputs/aim.json",
-        "runtimes/android"
+        "producers/dependencies.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "runtimes/android",
+        "tools/build-input.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs"
       ]
     },
     "upstreams": [
@@ -2023,9 +2199,17 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/android-image-data",
       "entries": [
+        "lib/abort.cjs",
+        "lib/android-source.mjs",
+        "lib/licenses.mjs",
         "producers/android-image-data",
         "producers/android-inputs/aim.json",
-        "runtimes/android"
+        "producers/dependencies.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "runtimes/android",
+        "tools/build-input.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs"
       ]
     },
     "upstreams": [
@@ -2098,6 +2282,9 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "lib/abort.cjs",
+        "lib/android-source.mjs",
+        "lib/licenses.mjs",
         "producers/android-art-inputs/java-consumer.patch",
         "producers/android-art-inputs/java-stage.json",
         "producers/android-art-inputs/java.json",
@@ -2109,11 +2296,17 @@
         "producers/android-inputs/licenses/aosp-apache-http",
         "producers/android-inputs/licenses/aosp-framework",
         "producers/android-inputs/licenses/robolectric-portability",
+        "producers/dependencies.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
         "tools/android-art-java-stage.mjs",
         "tools/build-android-art-java.mjs",
         "tools/build-android-image-data.mjs",
-        "tools/build-android-java-framework.mjs"
+        "tools/build-android-java-framework.mjs",
+        "tools/build-input.mjs",
+        "tools/build-source.mjs",
+        "tools/github-build-input.mjs",
+        "tools/helper-package.mjs"
       ],
       "sourceRepository": "https://github.com/procrastinine/maclauncher-android"
     },
@@ -2194,10 +2387,17 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceRepository": "https://github.com/libsdl-org/SDL",
       "entries": [
-        "tools/build-native-sdl2-fonts.mjs",
-        "tools/native-stack.mjs",
+        "lib/abort.cjs",
+        "lib/licenses.mjs",
+        "producers/dependencies.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
-        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json"
+        "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
+        "tools/build-input.mjs",
+        "tools/build-native-sdl2-fonts.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs",
+        "tools/native-stack.mjs"
       ]
     },
     "upstreams": [
@@ -2251,11 +2451,18 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceRepository": "https://github.com/libsndfile/libsndfile",
       "entries": [
+        "lib/abort.cjs",
+        "lib/licenses.mjs",
+        "producers/dependencies.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.js",
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.json",
+        "tools/build-input.mjs",
         "tools/build-native-sndfile.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs",
         "tools/native-stack.mjs"
       ]
     },
@@ -2310,13 +2517,20 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceRepository": "https://github.com/FFmpeg/FFmpeg",
       "entries": [
+        "lib/abort.cjs",
+        "lib/licenses.mjs",
+        "producers/dependencies.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "producers/package-support/src/modules/shared/runtime/portable-ffmpeg.js",
         "producers/package-support/src/modules/shared/runtime/portable-ffmpeg.json",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.js",
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.json",
+        "tools/build-input.mjs",
         "tools/build-native-ffmpeg.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs",
         "tools/native-stack.mjs"
       ]
     },
@@ -2360,6 +2574,10 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceRepository": "https://github.com/libsdl-org/SDL_mixer",
       "entries": [
+        "lib/abort.cjs",
+        "lib/licenses.mjs",
+        "producers/dependencies.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "producers/package-support/src/modules/shared/runtime/portable-dependency-prefix.js",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js",
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.json",
@@ -2367,7 +2585,10 @@
         "producers/package-support/src/modules/shared/runtime/portable-sdl2-mixer.json",
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.js",
         "producers/package-support/src/modules/shared/runtime/portable-sndfile.json",
+        "tools/build-input.mjs",
         "tools/build-native-sdl2-mixer.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs",
         "tools/native-stack.mjs"
       ]
     },
@@ -2426,10 +2647,17 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceRepository": "https://github.com/kcat/openal-soft",
       "entries": [
+        "lib/abort.cjs",
+        "lib/licenses.mjs",
+        "producers/dependencies.json",
         "producers/native-openal",
         "producers/package-support/src/modules/hashlink/overlays/native-1.9.cmake",
         "producers/package-support/src/modules/hashlink/runtime/legacy-build.js",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "tools/build-input.mjs",
         "tools/build-native-openal.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs",
         "tools/native-stack.mjs"
       ]
     },
@@ -2487,10 +2715,17 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceRepository": "https://github.com/libsdl-org/SDL",
       "entries": [
+        "lib/abort.cjs",
+        "lib/licenses.mjs",
         "producers/android-inputs/common-publishers.json",
+        "producers/dependencies.json",
+        "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
         "tools/android-sdl3-publisher.mjs",
-        "tools/build-android-sdl3.mjs"
+        "tools/build-android-sdl3.mjs",
+        "tools/build-input.mjs",
+        "tools/build-source.mjs",
+        "tools/helper-package.mjs"
       ]
     },
     "upstreams": [],
