@@ -449,7 +449,7 @@
         "repository": "zgauthier2000/fsr4-shader-performance-overrides",
         "pin": {
           "file": "app:src/modules/shared/reshade/temporal/fsr4/source.json",
-          "pointer": "/lite2/commit",
+          "pointer": "/lite2/revision",
           "repositoryPointer": "/lite2/repository"
         }
       },
