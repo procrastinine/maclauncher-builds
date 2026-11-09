@@ -2650,8 +2650,6 @@
         "lib/licenses.mjs",
         "producers/dependencies.json",
         "producers/native-openal",
-        "producers/package-support/src/modules/hashlink/overlays/native-1.9.cmake",
-        "producers/package-support/src/modules/hashlink/runtime/legacy-build.js",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "tools/build-input.mjs",
         "tools/build-native-openal.mjs",

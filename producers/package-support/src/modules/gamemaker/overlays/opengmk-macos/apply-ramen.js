@@ -1,9 +1,9 @@
-const { gitlink } = require("../../../../../../../lib/pins.mjs");
+const { sourceRevision } = require("../../../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 
-const REVISION = gitlink("producers/package-support/src/external/ramen");
+const REVISION = sourceRevision(require("./sources.json").ramen);
 const OVERLAY_VERSION = "maclauncher-appkit-4";
 const SOURCE_FILES = ["Cargo.toml", "src/platform.rs", "src/connection.rs", "src/window.rs", "src/input.rs", "src/event.rs", "src/window/builder.rs", "src/window/decoration.rs", "src/lib.rs"];
 function digest(bytes) { return crypto.createHash("sha256").update(bytes).digest("hex"); }

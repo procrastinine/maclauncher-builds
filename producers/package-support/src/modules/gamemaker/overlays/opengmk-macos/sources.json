@@ -1,0 +1,8 @@
+{
+  "ramen": {
+    "gitlink": "producers/package-support/src/external/ramen"
+  },
+  "udon": {
+    "gitlink": "producers/package-support/src/external/udon"
+  }
+}

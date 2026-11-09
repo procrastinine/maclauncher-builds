@@ -1,9 +1,9 @@
-const { gitlink } = require("../../../../../../../lib/pins.mjs");
+const { sourceRevision } = require("../../../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 
-const REVISION = gitlink("producers/package-support/src/external/udon");
+const REVISION = sourceRevision(require("./sources.json").udon);
 const OVERLAY_VERSION = "maclauncher-coreaudio-build-1";
 const digest = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 

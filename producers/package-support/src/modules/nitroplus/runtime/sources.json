@@ -1,0 +1,5 @@
+{
+  "libnpa": {
+    "gitlink": "producers/package-support/src/external/libnpa"
+  }
+}

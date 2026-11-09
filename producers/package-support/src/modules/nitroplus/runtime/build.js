@@ -1,11 +1,11 @@
-const { gitlink } = require("../../../../../../lib/pins.mjs");
+const { gitlink, sourceRevision } = require("../../../../../../lib/pins.mjs");
 const fs = require("node:fs");
 const path = require("node:path");
 
 const VERSION = "0.5.3-macos-v7";
 const PROFILE_REVISION = "macos-npa-nss-private-v7";
 const REVISION = gitlink("producers/package-support/src/external/libnpengine");
-const NPA_REVISION = gitlink("producers/package-support/src/external/libnpa");
+const NPA_REVISION = sourceRevision(require("./sources.json").libnpa);
 const sourcePath = path.resolve(__dirname, "../../../external/libnpengine");
 const npaSourcePath = path.resolve(__dirname, "../../../external/libnpa");
 const ChoiceOverlay = require("./choice-overlay");
