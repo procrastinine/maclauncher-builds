@@ -12,7 +12,7 @@ import {prepareSourceTree,writeChanged} from './source-files.mjs';
 const Bundled=appRequire('src/modules/shared/runtime/bundled-native.js');
 const MachO=appRequire('src/modules/shared/runtime/macho-load-commands.js');
 import Stage from '../../../../../scripts/native-binary-tools.cjs';
-const Supplementals=appRequire('scripts/native-supplementals.cjs');
+import Declaration from '../../../../../../../lib/declaration.cjs';
 const JsonFiles=appRequire('src/core/json-files.js');
 
 const root=path.dirname(fileURLToPath(import.meta.url));
@@ -122,7 +122,7 @@ export function stageKosmic({output,resourceRoot,declarationFile=path.join(root,
   minimumMacOS:manifest.minimumMacOS,directoryRelative,sourceRelative:null,
   sourceSha256:sha(JSON.stringify(manifest.provenance.adaptations)),manifestRelative:'manifest.json',
   manifestSha256:files.find(file=>file.path==='manifest.json').sha256,files};
- Supplementals.validateDeclaration(declaration);
+ Declaration.validateDeclaration(declaration);
  prepareSourceTree(path.join(resourceRoot,directoryRelative),temporary=>fs.cpSync(output,temporary,{recursive:true}));
  const previous=fs.existsSync(declarationFile)?JSON.parse(fs.readFileSync(declarationFile)):[];
  JsonFiles.writeJsonAtomic(declarationFile,[...previous.filter(item=>item.id!==declaration.id||item.arch!==declaration.arch),declaration]);
