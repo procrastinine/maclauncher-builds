@@ -1,9 +1,9 @@
 // Build an owned GPU render host around an explicit, unchanged libmpv input.
 // The result is a managed media runtime, separate from launcher resources.
 const fs = require('node:fs'), path = require('node:path'), {execFileSync} = require('node:child_process');
-const Native = require('../maclauncher/src/modules/shared/runtime/local-native');
+const Native = require('../../../../sources/maclauncher/src/modules/shared/runtime/local-native');
 const Stage = require('../../../../sources/maclauncher/scripts/native-binary-tools.cjs');
-const {versionAtLeast} = require('../maclauncher/src/modules/shared/runtime/bundled-native');
+const {versionAtLeast} = require('../../../../sources/maclauncher/src/modules/shared/runtime/bundled-native');
 const root = path.resolve(__dirname, '../../../../sources/maclauncher');
 const sourceFiles = ['mpv-render.mm', 'gpu-surface.mm', 'gpu-surface.hpp', 'mpv-frame-metadata.h'];
 const headerFiles = ['frame.h','presentation.h','presentation-content.h','presentation-observed.h','presentation-source.h','target-time.h','image-color.h'].map(file=>'src/modules/shared/reshade/native/'+file);

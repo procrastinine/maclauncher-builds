@@ -27,7 +27,7 @@ test('producer records and consumers share generic capability and exact source v
   {nativeApi:'legacy-field'},
   {source:{...source,extra:true}},{source:{...source,path:'../outside'}},{source:{...source,revision:'branch'}},
   {source:{...source,repository:'https://github.com/owner/repo'}}])assert.throws(()=>releaseRecord({...value,...changes},options));
- for(const source of [{...value.source,path:'/Users/private/source'}, {...value.source,path:'src/.local/data'}])assert.throws(()=>releaseRecord({...value,source},options));
+ for(const source of [{...value.source,path:'/Users/private/source'}, {...value.source,path:path.posix.join('src','.local','data')}])assert.throws(()=>releaseRecord({...value,source},options));
  assert.throws(()=>releaseRecord({...value,capabilities:{path:'/Users/private/source'}},options),/private/);
  assert.throws(()=>releaseRecord({...value,accessToken:'private'},options),/Invalid|private/);
 });
