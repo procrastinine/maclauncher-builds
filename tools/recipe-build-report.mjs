@@ -103,9 +103,12 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    if(pin.file.startsWith(APP_REFERENCE)){const relative=pin.file.slice(APP_REFERENCE.length);if(!appSet.has(relative)){problem(from,expression,'missing');return;}addApp(relative,from);selected=JSON.parse(read(path.join(appSource.directory,relative)));}
    else{
     const candidates=[];if(from.startsWith(APP_REFERENCE)||from==='projects.json')candidates.push(posix(pin.file));else for(let directory=path.posix.dirname(from);;directory=path.posix.dirname(directory)){candidates.push(posix(path.posix.join(directory,pin.file)));if(directory==='.')break;}
-    const file=candidates.find(candidate=>!candidate.startsWith('../')&&isFile(candidate));
-    if(!file){problem(from,expression,'missing');return;}
-    if(useLink(file,from))return;addFile(file,from);if(!file.endsWith(".json"))return;selected=JSON.parse(read(path.join(root,file)));
+    // A record inside a Gitlink checkout is pinned by that Gitlink and read from the initialized checkout.
+    const inCheckout=candidate=>linkOf(candidate)&&fs.statSync(path.join(root,candidate),{throwIfNoEntry:false})?.isFile();
+    const file=candidates.find(candidate=>!candidate.startsWith("../")&&(isFile(candidate)||inCheckout(candidate)));
+    if(!file){problem(from,expression,"missing");return;}
+    if(useLink(file,from,true)){if(!file.endsWith(".json"))return;}else{addFile(file,from);if(!file.endsWith(".json"))return;}
+    selected=JSON.parse(read(path.join(root,file)));
    }
    if(pin.match)return;
    for(const key of pin.pointer?parsePointer(pin.pointer):[]){if(!selected||typeof selected!=="object"||!Object.hasOwn(selected,key)){problem(from,expression,"pin");return;}selected=selected[key];}

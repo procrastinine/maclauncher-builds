@@ -1,6 +1,5 @@
 import {sourceCheckout,sourceRevision} from '../lib/pins.mjs';
 import './producer-environment.mjs';
-import {appSourceRoot} from './app-source.mjs';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -154,10 +153,10 @@ export function main(args,directory=root){
  const project=resolveProject(options.project,directory);
  const adapter=project.producer.kind==='maclauncher'&&project.producer.buildEntry;
  if(project.producer.kind==='maclauncher'&&!adapter&&project.producer.sourceDirectory){
-  const source=fs.realpathSync(path.join(directory,project.producer.sourceDirectory));
+  const repository=fs.realpathSync(directory);
   for(const entry of project.producer.entries){
    const file=path.join(directory,entry),actual=fs.realpathSync(file),stat=fs.statSync(actual);
-   if(actual!==source&&!actual.startsWith(source+path.sep)&&!actual.startsWith(appSourceRoot().directory+path.sep)||!(stat.isFile()||stat.isDirectory()))throw Error('Producer source entries must be contained regular files or directories.');
+   if(!actual.startsWith(repository+path.sep)||!(stat.isFile()||stat.isDirectory()))throw Error('Producer source entries must be contained regular files or directories.');
   }
   if(!options.check)throw Error('Use the selected producer entry with its documented build arguments: '+project.producer.entries.join(', '));
   return {id:project.id,action:'check',sourceDirectory:project.producer.sourceDirectory,entries:project.producer.entries};
