@@ -273,7 +273,6 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/ai5/runtime/portable-build.js",
         "producers/package-support/src/modules/ai5/runtime/portable-build-v4.js"
       ],
       "sourceDirectory": "producers/package-support"

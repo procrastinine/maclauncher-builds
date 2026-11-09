@@ -9,7 +9,7 @@ const Previous = require("./build");
 const { throwIfAborted } = appRequire('src/modules/shared/runtime/download-utils.js');
 
 const VERSION = "1.5.0-MCLv1";
-const REVISION = "ad7a703f1c9f56e127d23c10d54fec0dcd4eaef3";
+const REVISION = require("../../../../../../lib/pins.mjs").gitlink("producers/package-support/src/external/ai5-sdl2");
 const SOURCE_SHA256 = "f09b2d16b42d3a29f10b5299a9b8731279786c3f693eb6f84268134b7c2dfbf0";
 const PROFILE = "macos13-original-disc-v4";
 const ORIGINALS = Object.freeze({

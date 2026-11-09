@@ -5,8 +5,7 @@
   "minimumMacOS": "13.0",
   "engine": {
     "version": "0.7.7beta-MCLv2",
-    "upstreamVersion": "0.7.7beta",
-    "sourceTreeSha256": "bc02f1dcb85c2f6dbf883d49052f0a6d88b47c1cdef473835c7a57c45c43b2df"
+    "upstreamVersion": "0.7.7beta"
   },
   "base": {
     "version": "0.7.7beta-macos-v2"

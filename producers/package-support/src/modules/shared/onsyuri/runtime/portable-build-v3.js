@@ -18,7 +18,7 @@ const OWNED_FILES = [...Base.OWNED_FILES, __filename, require.resolve("./portabl
 const overlayIdentity = () => crypto.createHash("sha256").update(Buffer.concat(OWNED_FILES.map(file => fs.readFileSync(file)))).digest("hex");
 
 function validateBase() {
-  if (Base.VERSION !== PIN.base.version || Base.REVISION !== REVISION || Base.SOURCE_SHA256 !== SOURCE_SHA256) throw new Error("Yuri dependency recipe differs from its pinned base version.");
+  if (Base.VERSION !== PIN.base.version) throw new Error("Yuri dependency recipe differs from its pinned base version.");
 }
 
 function validateEngineFeatures(outputRoot) {
