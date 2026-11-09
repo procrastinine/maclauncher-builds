@@ -1,5 +1,4 @@
 import './producer-environment.mjs';
-import {appRequire} from './app-source.mjs';
 import {addLicenses} from '../lib/licenses.mjs';
 import {retryNetwork} from './download.mjs';
 import fs from 'node:fs';
