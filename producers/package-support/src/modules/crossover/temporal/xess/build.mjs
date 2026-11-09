@@ -10,14 +10,14 @@ const args=Object.fromEntries(process.argv.slice(2).reduce((rows,value,index,all
 if(!['xess-source','dxmt-source','compiler','out'].every(key=>args[key]))throw Error('Use --xess-source SDK --dxmt-source DXMT --compiler CLANG++ --out DIRECTORY');
 const xess=fs.realpathSync(args['xess-source']),dxmt=fs.realpathSync(args['dxmt-source']),output=path.resolve(args.out),compiler=path.resolve(args.compiler);
 fs.accessSync(compiler,fs.constants.X_OK);
-for(const [directory,pin] of [[xess,source.xess],[dxmt,source.dxmt]])if(execFileSync('git',['-C',directory,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==gitlink(pin.gitlink))throw Error('Initialize the exact XeSS adapter source commit: '+pin.repository);
+for(const [directory,pin] of [[xess,source.xess],[dxmt,source.dxmt]])if(execFileSync('git',['-C',directory,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==pin.revision)throw Error('Initialize the exact XeSS adapter source commit: '+pin.repository);
 fs.mkdirSync(output,{recursive:true});
 const headers=['inc/xess/xess.h','inc/xess/xess_d3d11.h'];
 const hooks=new Set(headers.flatMap(file=>[...fs.readFileSync(path.join(xess,file),'utf8').matchAll(/XESS_API\s+xess_result_t\s+(xess\w+)\s*\(/g)].map(row=>row[1])));
 const owned=fs.readFileSync(path.join(here,'proxy.cpp'),'utf8');
 for(const hook of hooks)if(!new RegExp('XESS_API\\s+xess_result_t\\s+'+hook+'\\s*\\(').test(owned))throw Error('The selected public XeSS API is not implemented: '+hook);
 const reference=JSON.parse(fs.readFileSync(path.join(here,'reference-exports.json'))),original=reference.exports;
-if(gitlink(reference.gitlink)!==gitlink(source.xess.gitlink)||reference.repository!==source.xess.repository)throw Error('The reference XeSS export profile does not match the declared SDK');
+if(gitlink(reference.gitlink)!==source.xess.revision||reference.repository!==source.xess.repository)throw Error('The reference XeSS export profile does not match the declared SDK');
 if(!original?.length)throw Error('The pinned XeSS D3D11 export profile is unavailable');
 const exports=[...original];let ordinal=Math.max(...exports.map(row=>row.ordinal));
 for(const name of hooks)if(!exports.some(row=>row.name===name))exports.push({name,ordinal:++ordinal});
