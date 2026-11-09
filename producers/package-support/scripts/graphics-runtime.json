@@ -300,13 +300,16 @@
       "description": "Original spirv-headers compiler source for ISF",
       "entry": "source/spirv-headers"
     },
-    "fsr-glslang": {
+    "compiler-sources": {
       "kind": "archive",
-      "description": "Source-built host compiler for the pinned FSR shader generator",
-      "entry": "source/glslang",
+      "description": "Original shaderc, glslang, SPIRV-Tools, SPIRV-Headers and Little CMS sources: shaderc and Little CMS at their declared revisions, the others at the revisions shaderc's DEPS pins",
+      "entry": "source",
       "files": {
-        "CMakeLists.txt": null,
-        "glslang/CMakeLists.txt": null
+        "shaderc/DEPS": null,
+        "glslang/CMakeLists.txt": null,
+        "spirv-tools/CMakeLists.txt": null,
+        "spirv-headers/CMakeLists.txt": null,
+        "lcms2/meson.build": null
       }
     }
   },
@@ -344,11 +347,14 @@
       "steps": [
         {
           "recipe": "src/modules/shared/reshade/libplacebo-build.mjs",
+          "phased": true,
           "args": [
             "--source",
             "{source:libplacebo}",
             "--vulkan-source",
             "{source:libplacebo-vulkan-headers}",
+            "--dependency-sources",
+            "{input:compiler-sources}",
             "--moltenvk",
             "{input:moltenvk}",
             "--headers",

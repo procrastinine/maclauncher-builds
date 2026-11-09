@@ -143,12 +143,12 @@ export function resolveInput(id, {overrides = {}, work, coreRoot = work && path.
     return file && fs.existsSync(file) ? {...declared, path: file, state: verifyInput(location, file, null)} : {...declared, state: "missing", producer: entry.product.provider};
   }
   if (fetched && fs.existsSync(fetched)) return {...declared, path: fetched, state: verifyInput(location, fetched, archiveSha256)};
-  return {...declared, state: url || archives?.every(row => row.url && row.sha256) || ["fsr-glslang","isf-spirv-tools","isf-spirv-headers"].includes(id) ? "fetchable" : "missing"};
+  return {...declared, state: url || archives?.every(row => row.url && row.sha256) || ["compiler-sources","isf-spirv-tools","isf-spirv-headers"].includes(id) ? "fetchable" : "missing"};
 }
 
 /** Download a pinned input into the work directory and verify its checksum. */
 export async function fetchInput(id, work) {
-  if(id==='fsr-glslang')return path.join((await prepareSources({work:path.join(work,'inputs',id)})).source,'glslang');
+  if(id==='compiler-sources')return (await prepareSources({work:path.join(work,'inputs',id)})).source;
   if(['isf-spirv-tools','isf-spirv-headers'].includes(id)){
     const name=id.slice(4),glslang=await fetchInput('isf-glslang',work);
     const upstream=JSON.parse(fs.readFileSync(path.join(glslang,'known_good.json'),'utf8')).commits.find(row=>row.name===(name==='spirv-tools'?'spirv-tools':'spirv-tools/external/spirv-headers'));
@@ -198,7 +198,7 @@ export function plan({work, arch="universal", sdkPath, only, skip = [], reuse = 
   const building = new Set(selected.filter(name => !reuse[name]));
   const needs = {source: new Set(), input: new Set(), tool: new Set()};
   for (const name of selected) {
-    if (name === "core") { if (building.has("core")) { needs.tool.add("cmake"); needs.tool.add("python"); needs.input.add("fsr-glslang"); } continue; }
+    if (name === "core") { if (building.has("core")) { needs.tool.add("cmake"); needs.tool.add("python"); needs.input.add("compiler-sources"); } continue; }
     const provider = recipe.providers[name], own = requirements(name);
     if (provider.sourceOption) needs.source.add(provider.sourceOption[1]);
     if (building.has(name)) for (const kind of Object.keys(needs)) for (const value of own[kind]) needs[kind].add(value);
@@ -260,7 +260,7 @@ async function materializeCore(work,sources={}) {
  * With tests, the same build also produces the native fixtures under build/test. */
 export async function buildCore({work, arch="universal",sdkPath="macosx",sources={},tools={}, jobs = 4, tests = false}) {
   const source = await materializeCore(work,sources), build = path.join(work, "core/build");
-  const fsrCompilerSource=await fetchInput("fsr-glslang",work);
+  const fsrCompilerSource=path.join(await fetchInput("compiler-sources",work),"glslang");
   const python=tools.python?.path||tools.python||resolveTool("python",{}).path;
   if(!python)throw Error("The core shader generator requires its declared Python tool.");
   const env = buildEnvironment(), run = args => execFileSync("cmake", args, {stdio: "inherit", env});

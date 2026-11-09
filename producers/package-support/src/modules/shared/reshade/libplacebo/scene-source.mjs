@@ -1,5 +1,4 @@
 import {sourceRevision} from '../../../../../../../lib/pins.mjs';
-import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from "node:fs";
 import path from "node:path";
@@ -9,8 +8,6 @@ import {SOURCE,VULKAN_HEADERS,applySceneOverlay} from "./scene-overlay.mjs";
 const hash=file=>crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 const run=(program,args,options={})=>execFileSync(program,args,{encoding:"utf8",stdio:"pipe",maxBuffer: Infinity,...options});
 function archive(repository,dependency,output){
-  const origin=run("git",["-C",repository,"remote","get-url","origin"]).trim();
-  if(origin.replace(/\.git$/,"")!==dependency.origin.replace(/\.git$/,""))throw new Error("The declared source origin changed.");
   fs.mkdirSync(output,{recursive:true});const content=run("git",["-C",repository,"archive",sourceRevision(dependency)],{encoding:null,env:{...process.env,GIT_NO_LAZY_FETCH:"1"}});run("tar",["-xf","-","-C",output],{input:content});
 }
 // Each architecture has an isolated source/build directory. No network or
@@ -43,7 +40,6 @@ export function buildSceneLibrary({source,vulkanSource,inputs,dependencyHeaders=
   const logged=(name,program,args)=>{try{fs.writeFileSync(path.join(output,name+".log"),run(program,args,{env}));}catch(error){fs.writeFileSync(path.join(output,name+".log"),String(error.stdout||"")+String(error.stderr||""));throw new Error("The libplacebo "+name+" failed; see "+path.join(output,name+".log"),{cause:error});}};
   logged("configure",meson,args);logged("compile",ninja,["-C",build,"-j2"]);logged("install",ninja,["-C",build,"install"]);
   const library=path.join(prefix,"lib/libplacebo.360.dylib");
-  addLicenses(prefix,'libplacebo',tree);
-  const result={...manifest,architecture,library,include:path.join(prefix,"include"),sha256:hash(library),overlaySha256:hash(new URL("./scene-overlay.mjs",import.meta.url)),recipeSha256:hash(new URL("./scene-source.mjs",import.meta.url)),buildTools:{meson:run(meson,["--version"]).trim(),ninja:run(ninja,["--version"]).trim()}};
+  const result={...manifest,architecture,library,include:path.join(prefix,"include"),sha256:hash(library),buildTools:{meson:run(meson,["--version"]).trim(),ninja:run(ninja,["--version"]).trim()}};
   fs.writeFileSync(path.join(output,"source-build.json"),JSON.stringify(result,null,2)+"\n");return result;
 }

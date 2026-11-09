@@ -1,6 +1,5 @@
 import {sourceRevision} from '../../../../../../../lib/pins.mjs';
 import shared from '../../../../../../../producers/dependencies.json' with {type:'json'};
-import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10,23 +9,27 @@ import {buildInput} from '../../../../../../../tools/build-input.mjs';
 export const profile=JSON.parse(fs.readFileSync(new URL('./dependencies.json',import.meta.url)));
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
+// shaderc and Little CMS are declared here; glslang, SPIRV-Tools and SPIRV-Headers
+// take the revisions shaderc's DEPS pins, so each record follows the shaderc source.
+const record=(row,source)=>({...row,
+ revision:row.id==='shaderc'?sourceRevision(shared.shaderc):['glslang','spirv-tools','spirv-headers'].includes(row.id)?new RegExp("'"+row.id.replaceAll('-','_')+"_revision':\\s*'([^']+)'").exec(fs.readFileSync(path.join(source,'shaderc/DEPS'),'utf8'))[1]:sourceRevision(row),
+ repository:row.id==='shaderc'?shared.shaderc.repository:row.repository});
+/** The dependency source records for a prepared source directory. */
+export const dependencyRecords=source=>profile.sources.map(row=>record(row,source));
+/** Fetch the declared dependency sources: the graphics build's compiler-sources input. */
 export async function prepareSources({work}) {
  const source=path.join(work,'source'),inputs=[];fs.mkdirSync(source,{recursive:true});
  for(const row of profile.sources){
-  const revision=row.id==='shaderc'?sourceRevision(shared.shaderc):['glslang','spirv-tools','spirv-headers'].includes(row.id)?new RegExp("'"+row.id.replaceAll('-','_')+"_revision':\\s*'([^']+)'").exec(fs.readFileSync(path.join(source,'shaderc/DEPS'),'utf8'))[1]:sourceRevision(row);
-  const repository=row.id==='shaderc'?shared.shaderc.repository:row.repository,sha256=row.id==='shaderc'?shared.shaderc.sha256:row.sha256;
-  const target=path.join(source,row.id);inputs.push({...row,revision,repository});if(fs.existsSync(target))continue;
-  const archive=await buildInput({url:repository+'/archive/'+revision+'.tar.gz',sha256});fs.mkdirSync(target);run('tar',['-xf',archive,'--strip-components=1','-C',target]);
+  const value=record(row,source),target=path.join(source,row.id);inputs.push(value);if(fs.existsSync(target))continue;
+  const archive=await buildInput({url:value.repository+'/archive/'+value.revision+'.tar.gz',sha256:row.id==='shaderc'?shared.shaderc.sha256:row.sha256});fs.mkdirSync(target);run('tar',['-xf',archive,'--strip-components=1','-C',target]);
  }
  return {source,inputs};
 }
 /** Original compiler and color-management libraries, with explicit sources and OS target. */
-export async function buildDependencies({work,architecture,meson,ninja,python}) {
+export function buildDependencies({work,architecture,meson,ninja,python,sources:source}) {
  if(!['arm64','x86_64'].includes(architecture)||!path.isAbsolute(work))throw Error('Choose a native CPU and absolute dependency work directory.');
- const source=path.join(work,'source'),build=path.join(work,'build'),prefix=path.join(work,'install');
- fs.mkdirSync(source,{recursive:true});fs.mkdirSync(build,{recursive:true});fs.mkdirSync(prefix,{recursive:true});
- const resolved=await prepareSources({work});
- for(const row of profile.sources)addLicenses(prefix,row.id,path.join(source,row.id));
+ const build=path.join(work,'build'),prefix=path.join(work,'install');
+ fs.mkdirSync(build,{recursive:true});fs.mkdirSync(prefix,{recursive:true});
  const sdk=execFileSync('xcrun',['--sdk','macosx','--show-sdk-path'],{encoding:'utf8'}).trim();
  const flags=['-arch',architecture,'-mmacosx-version-min='+profile.minimumMacOS,'-Werror=unguarded-availability-new','-ffile-prefix-map='+work+'=dependencies'];
  const env={...process.env,MACOSX_DEPLOYMENT_TARGET:profile.minimumMacOS,SDKROOT:sdk,
@@ -47,5 +50,5 @@ export async function buildDependencies({work,architecture,meson,ninja,python}) 
  run(ninja,['-C',lcmsBuild,'-j4'],{env});run(ninja,['-C',lcmsBuild,'install'],{env});
  const lcmsLib=path.join(lcmsRoot,'lib'),actual=fs.readdirSync(lcmsLib).find(name=>/^liblcms2\..*\.dylib$/.test(name)&&fs.lstatSync(path.join(lcmsLib,name)).isFile());
  if(!actual)throw Error('Little CMS did not produce a shared library.');if(actual!=='liblcms2.2.dylib')fs.copyFileSync(path.join(lcmsLib,actual),path.join(lcmsLib,'liblcms2.2.dylib'));
- return {inputs:prefix,source:resolved.inputs,shadercVersion:profile.shadercVersion,lcmsVersion:profile.lcmsVersion};
+ return {inputs:prefix,shadercVersion:profile.shadercVersion,lcmsVersion:profile.lcmsVersion};
 }
