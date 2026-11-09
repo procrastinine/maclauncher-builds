@@ -573,6 +573,7 @@
       "steps": [
         {
           "recipe": "src/modules/shared/reshade/neural/build.mjs",
+          "phased": true,
           "args": [
             "--work",
             "{work}",

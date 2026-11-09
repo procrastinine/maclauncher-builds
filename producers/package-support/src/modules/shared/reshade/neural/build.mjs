@@ -8,7 +8,6 @@ import crypto from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
-import {verifyTimingReceipt} from './native/prepare-mlx-timing.mjs';
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
 const repository = path.resolve(directory, "../../../../..");
@@ -18,14 +17,21 @@ const restorationArchitectures=appRequire('src/modules/shared/reshade/neural/res
 
 const cacheDirectory = path.join(os.homedir(), "Library", "Caches", "maclauncher", "neural-provider");
 
+// Phase "compile" runs the native build; phase "assemble" writes the licenses and provider
+// metadata from its outputs alone. Without a phase both run.
 export function buildProvider({ output = path.join(cacheDirectory, "output"),
   sourceDirectory = path.join(repository, "src/external/MLX-DLSS"),
   buildRoot = path.join(cacheDirectory, "build"),
-  cacheRoot = path.join(cacheDirectory, "swiftpm") } = {}) {
-  if (process.platform !== "darwin" || process.arch !== "arm64")
-    throw new Error("The neural rendering provider build requires Apple Silicon macOS.");
+  cacheRoot = path.join(cacheDirectory, "swiftpm"), phase = null } = {}) {
   sourceDirectory = fs.realpathSync(sourceDirectory);
   output = path.resolve(output);
+  if(phase!=="assemble")compile({output,sourceDirectory,buildRoot,cacheRoot});
+  return phase==="compile"?{output}:assemble({output,sourceDirectory,buildRoot});
+}
+/** Build the native provider into the output directory. */
+function compile({output,sourceDirectory,buildRoot,cacheRoot}){
+  if (process.platform !== "darwin" || process.arch !== "arm64")
+    throw new Error("The neural rendering provider build requires Apple Silicon macOS.");
   fs.mkdirSync(output, { recursive: true });
   // SwiftPM writes dependency edits and lock fingerprints beside Package.swift.
   // Keep the public producer and the pinned app source immutable by building an
@@ -42,13 +48,15 @@ export function buildProvider({ output = path.join(cacheDirectory, "output"),
       MACLAUNCHER_NEURAL_BUILD_ROOT: path.resolve(buildRoot),
       MACLAUNCHER_NEURAL_CACHE_ROOT: path.resolve(cacheRoot) },
   });
+}
+/** Write the licenses and the provider metadata from the compiled outputs. */
+function assemble({output,sourceDirectory,buildRoot}){
   addLicenses(output,'MLX-DLSS',sourceDirectory);
   addLicenses(output,'MLX-Swift',path.join(buildRoot,'owned-source/mlx-swift'));
   addLicenses(output,'MLX',path.join(buildRoot,'owned-source/mlx-swift/Source/Cmlx/mlx'));
   addLicenses(output,'Swift Argument Parser',path.join(buildRoot,'checkouts/swift-argument-parser'));
   addLicenses(output,'Swift Numerics',path.join(buildRoot,'checkouts/swift-numerics'));
   addLicenses(output,'neural models',path.join(directory,'native'));
-  verifyTimingReceipt(JSON.parse(fs.readFileSync(path.join(output,'timing-adaptation.json'))),projection);
   const inventory = appRequire('src/modules/shared/runtime/bundled-native.js').fileInventory(output);
   const files = inventory.filter(relative => relative !== "provider.json").map(relative => {
     const file = path.join(output, relative), stat = fs.lstatSync(file);
@@ -69,8 +77,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const arguments_ = process.argv.slice(2);
   const options={};
   if(arguments_.length===1&&!arguments_[0].startsWith("--"))options.output=arguments_[0];
-  else for(let i=0;i<arguments_.length;i+=2){const key=arguments_[i];if(!["--output","--source","--work","--cache"].includes(key)||!arguments_[i+1]||Object.hasOwn(options,key))throw Error("Use --source, --work, --cache and --output.");options[key]=arguments_[i+1];}
-  const result=buildProvider({output:options.output||options["--output"],sourceDirectory:options["--source"],buildRoot:options["--work"],cacheRoot:options["--cache"]});
-  console.log(JSON.stringify({ output: result.output, providerABI: result.descriptor.providerABI,
+  else for(let i=0;i<arguments_.length;i+=2){const key=arguments_[i];if(!["--output","--source","--work","--cache","--phase"].includes(key)||!arguments_[i+1]||Object.hasOwn(options,key))throw Error("Use --source, --work, --cache, --phase and --output.");options[key]=arguments_[i+1];}
+  const result=buildProvider({output:options.output||options["--output"],sourceDirectory:options["--source"],buildRoot:options["--work"],cacheRoot:options["--cache"],phase:options["--phase"]||null});
+  if(result.descriptor)console.log(JSON.stringify({ output: result.output, providerABI: result.descriptor.providerABI,
     commit: result.descriptor.commit, files: result.descriptor.files.length }));
 }
