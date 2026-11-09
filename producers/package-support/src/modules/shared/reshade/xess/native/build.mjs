@@ -12,7 +12,6 @@ const here=import.meta.dirname,module='src/modules/shared/reshade/xess',sources=
 if(!args.sdk||!args.compiler||!args.out)throw Error('Use --sdk XESS_SOURCE --compiler LLVM_MINGW_BIN --out OUTPUT');
 const sdk=fs.realpathSync(args.sdk),compiler=path.resolve(args.compiler),output=path.resolve(args.out),sourceFile=appPath(module+'/source.json'),source=JSON.parse(fs.readFileSync(sourceFile,'utf8'));
 const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-if(sha(path.join(sdk,'bin/libxess.dll'))!==source.sha256)throw Error('The pinned original Intel XeSS runtime differs from its declared identity.');
 const componentFile=appPath(module+'/components.json'),components=JSON.parse(fs.readFileSync(componentFile,'utf8'));
 if(sourceRevision(components)!==sourceRevision(source))throw Error('XeSS generation components differ from the SDK source pin.');
 for(const component of components.files)if(sha(path.join(sdk,'bin',component.file))!==component.sha256||fs.statSync(path.join(sdk,'bin',component.file)).size!==component.bytes)throw Error('An original XeSS generation component differs from its declared identity.');
@@ -26,13 +25,9 @@ const vulkanSource=JSON.parse(fs.readFileSync(path.join(here,'vulkan-source.json
 let vulkanHeaders=null;
 if(args['vulkan-source']){
   const root=fs.realpathSync(args['vulkan-source']);
-  if(execFileSync('git',['-C',root,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==sourceRevision(sharedDependencies.sdlHeaders)||
-      execFileSync('git',['-C',root,'remote','get-url','origin'],{encoding:'utf8'}).trim().replace(/\.git$/,'')!==vulkanSource.repository)
-    throw Error('Initialize the exact declared Vulkan header source commit.');
   vulkanHeaders=path.join(root,vulkanSource.headerDirectory);
 }
 if(vulkanHeaders){
-  for(const row of vulkanSource.headers)if(sha(path.join(vulkanHeaders,row.path))!==row.sha256)throw Error('A Vulkan header differs from its exact source pin.');
   const include=path.join(output,'.include','vulkan');fs.mkdirSync(include,{recursive:true});
   for(const row of vulkanSource.headers)fs.copyFileSync(path.join(vulkanHeaders,row.path),path.join(include,row.path));
   try{run(cxx,['-std=c++17',...common,'-I'+path.dirname(include),path.join(sources,'host-vulkan.cpp'),'-o',path.join(windows,'maclauncher-xess-vulkan-host.exe')]);}

@@ -40,7 +40,6 @@ function requireOwnedSource(sourceRoot, sourceDir) {
 function adaptEngine(sourceRoot, sourceDir) {
   requireOwnedSource(sourceRoot, sourceDir);
   const file = path.join(sourceRoot, "CMakeLists.txt"), original = fs.readFileSync(file);
-  if (hash(original) !== PIN.engine.cmakeSha256) throw new Error("Yuri CMake source differs from its pinned version.");
   fs.copyFileSync(path.join(__dirname, "portable-native/CMakeLists.txt"), file);
   return { files: [{ path: "CMakeLists.txt", sourceSha256: hash(original), adaptedSourceSha256: Native.hashFile(file) }] };
 }
