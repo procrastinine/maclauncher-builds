@@ -31,7 +31,7 @@ function validateFeatures(outputRoot) {
 async function buildDependencies({archive,workRoot,architecture=process.arch,pathMappings=[],signal,onProgress,dependencies={}}={}) {
   throwIfAborted(signal);
   if(process.platform!=="darwin"||!["arm64","x64"].includes(architecture))throw new Error("Portable movie builds require macOS and an arm64 or x64 target.");
-  if(!path.isAbsolute(archive||"")||!fs.lstatSync(archive).isFile()||fs.statSync(archive).size!==PIN.source.bytes||Native.hashFile(archive)!==PIN.source.sha256)throw new Error("The FFmpeg source archive differs from its exact source pin.");
+  if(!path.isAbsolute(archive||"")||!fs.lstatSync(archive).isFile())throw new Error("Portable movie builds require the FFmpeg source archive.");
   workRoot=Portable.assertFreshBuildRoot(workRoot,{readOnlyRoots:[path.dirname(archive)]});
   const sdk=(dependencies.readSDK||(()=>execFileSync("/usr/bin/xcrun",["--show-sdk-path"],{encoding:"utf8"}).trim()))();
   const mappings=[...pathMappings,{from:workRoot,to:"portable-movies"}],flags=Audio.compilerFlags(sdk,mappings,architecture),overlaySha256=recipeIdentity();

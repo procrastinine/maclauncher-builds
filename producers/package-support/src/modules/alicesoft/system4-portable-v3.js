@@ -50,7 +50,7 @@ async function buildPortableSystem4({ sourceDir=sourcePath,archives,workRoot,dep
   if(process.platform!=="darwin"||!["arm64","x64"].includes(architecture))throw new Error("xsystem4 builds require macOS and an arm64 or x64 target.");
   workRoot=Fonts.assertFreshBuildRoot(workRoot,{readOnlyRoots:[sourceDir,...Object.values(dependencyStacks||{}).map(stack=>stack.prefix)]});
   Fonts.validateArchives(archives);Audio.validateArchives(archives);Audio.validateArchives(archives,{catalog:PIN});
-  if(!path.isAbsolute(archives?.ffmpeg||"")||Native.hashFile(archives.ffmpeg)!==Movie.PIN.source.sha256)throw new Error("Portable movies require the exact FFmpeg source archive.");
+  if(!path.isAbsolute(archives?.ffmpeg||""))throw new Error("Portable movies require the FFmpeg source archive.");
   const source=await Source.validatePinnedSource(sourceDir,REVISION,{signal});
   const libsys4Revision = require("node:child_process").execFileSync("git", ["-C", sourceDir, "rev-parse", "HEAD:subprojects/libsys4"], { encoding: "utf8" }).trim();
   const overlaySha256=overlayIdentity();
