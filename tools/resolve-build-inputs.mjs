@@ -1,11 +1,17 @@
 import './producer-environment.mjs';
 import {reportDigest} from './recipe-build-report.mjs';
+import {HOSTED_RUNNERS} from '../lib/hosted-runners.mjs';
+import {runnerFor} from './build-runtime.mjs';
+
+/** The hosted runner image each architecture of each declared build runs on. */
+const toolchain=recipe=>recipe.build.map(build=>Object.fromEntries(build.architectures.map(arch=>{const runner=runnerFor(build,arch);return [arch,{runner,...HOSTED_RUNNERS[runner]}];})));
 
 /** Resolve recipe-reported inputs before their consumers. The callbacks provide
  * acquisition, verified publication lookup and naming; this planner performs no
  * filesystem, network, registration or build operations.
  *
- * describe(id): {definition, inputs: [id | {id}]}
+ * describe(id): {definition, inputs: [id | {id}]}; the definition's builds name
+ * their architectures and runners, whose hosted images join the digest.
  * published(id): {version, digests} | null
  * listed: Map of project id to the versions its releases.txt lines name
  */
@@ -19,7 +25,7 @@ export async function resolveBuildInputs({selection,describe,published,listed=ne
   const report=await describe(id);if(!report||report.definition===undefined)throw Error('Recipe report has no normalized definition: '+id);
   const inputIds=[...new Set((report.inputs||[]).map(input=>typeof input==='string'?input:input.id||input.project))].sort();
   const children=[];for(const input of inputIds)children.push(await visit(input));
-  const definition={recipe:report.definition,inputs:inputIds.map(input=>({id:input,definitionDigest:reports[input].definitionDigest}))},definitionDigest=reportDigest(definition);
+  const definition={recipe:report.definition,toolchain:toolchain(report.definition),inputs:inputIds.map(input=>({id:input,definitionDigest:reports[input].definitionDigest}))},definitionDigest=reportDigest(definition);
   reports[id]={definition,definitionDigest,inputs:inputIds.map(id=>({id}))};dependencyGraph[id]=inputIds;
   const level=children.length?Math.max(...children.map(child=>child.level))+1:0;(levels[level]??=[]).push(id);
   const previous=await published(id);
