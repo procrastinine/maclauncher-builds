@@ -1,5 +1,5 @@
 import {appRequire} from '../../tools/app-source.mjs';
-import {gitlink,sourceRevision} from '../../lib/pins.mjs';
+import {gitlink,sourceCheckout,sourceProvenance,sourceRevision} from '../../lib/pins.mjs';
 import {addLicense,addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -14,7 +14,6 @@ import {buildRuntime} from './build-runtime.mjs';
 const require=createRequire(import.meta.url),Native=appRequire('src/modules/shared/runtime/local-native.js');
 const root=path.resolve(import.meta.dirname,'../..');
 const recipe=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'source.json')));
-recipe.source.revision=gitlink(recipe.source.path);
 const {inputs:dependencies}=await import('./source-projection.mjs');
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const json=value=>JSON.stringify(value,null,2)+'\n';
@@ -61,7 +60,7 @@ export async function packageRuntime({runtimeBuild,relinkerBuild,output,version,
  copy(path.join(import.meta.dirname,'tools/unwrap-self.cjs'),path.join(payload,'tools/unwrap-self.cjs'));
  for(const name of fs.readdirSync(libraryRoot).filter(name=>/\.(prx|dylib)$/.test(name)&&fs.lstatSync(path.join(libraryRoot,name)).isFile()))copy(path.join(libraryRoot,name),path.join(payload,'libs',name),0o755);
  makePortable(path.join(payload,'libs'));
- const source=path.join(root,recipe.source.path);
+ const source=path.join(root,sourceCheckout(recipe.source));
  addLicenses(payload,'anyps5',source);
  addLicense(payload,'AnyPS5-ARM',path.join(import.meta.dirname,'licenses/AnyPS5-ARM.txt'));
  for(const entry of dependencies.dependencies)addLicenses(payload,entry.path,path.join(source,entry.path));
@@ -72,7 +71,7 @@ export async function packageRuntime({runtimeBuild,relinkerBuild,output,version,
  const tools=[{path:'tools/unwrap-self.cjs',sha256:sha(fs.readFileSync(path.join(import.meta.dirname,'tools/unwrap-self.cjs')))}];
  const producerInputs=[...['build-relinker.mjs','build-runtime.mjs','source-projection.mjs','package-runtime.mjs','source.json','dependencies.json']
   .map(relative=>({path:relative,sha256:sha(fs.readFileSync(path.join(import.meta.dirname,relative)))})),...overlays,...tools].sort((a,b)=>a.path.localeCompare(b.path));
- fs.writeFileSync(path.join(payload,'source.json'),json({schemaVersion:1,source:recipe.source,attributions:recipe.attributions,dependencies:dependencies.dependencies,artifacts:dependencies.artifacts,overlays,tools,producerInputs}));
+ fs.writeFileSync(path.join(payload,'source.json'),json({schemaVersion:1,source:sourceProvenance(recipe.source),attributions:recipe.attributions,dependencies:dependencies.dependencies,artifacts:dependencies.artifacts,overlays,tools,producerInputs}));
  const files=filesIn(payload).map(relative=>record(payload,relative));
  const manifest={schemaVersion:1,managerId:'anyps5',version,platform:'darwin',arch,minimumMacOS:'26.0',upstreamRevision:sourceRevision(recipe.source),
   gameArchitecture:'x86_64',capabilities:{mouseRouting:true,touchPadBinding:true},provenance:{sourceUrl:recipe.source.repository,sourceRevision:sourceRevision(recipe.source),producerInputs},executableRelative:'tools/relinker',runtimeFiles:{libraries:'libs',unwrap:'tools/unwrap-self.cjs'},files};

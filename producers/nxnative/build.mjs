@@ -1,5 +1,5 @@
 import {appRequire} from '../../tools/app-source.mjs';
-import {gitlink,sourceRevision} from '../../lib/pins.mjs';
+import {gitlink,sourceCheckout,sourceProvenance,sourceRevision} from '../../lib/pins.mjs';
 import {addLicense,addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -16,7 +16,6 @@ const Native = appRequire('src/modules/shared/runtime/local-native.js');
 const MachO = appRequire('src/modules/shared/runtime/macho-load-commands.js');
 const producer = import.meta.dirname, repository = path.resolve(producer, '../..');
 const pin = JSON.parse(fs.readFileSync(path.join(producer, 'source.json')));
-pin.source.revision=gitlink(pin.source.path);
 const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const json = (file, value) => fs.writeFileSync(file, JSON.stringify(value, null, 2) + '\n');
 const read = (tool, args, options = {}) => execFileSync(tool, args, {encoding:'utf8', ...options}).trim();
@@ -101,7 +100,7 @@ async function nativeHost(source,work,output,jobs) {
 }
 
 export async function buildNxNative({work,output,dependencyWork,jobs=4,version=pin.version,check=false}={}) {
-    const source=fs.realpathSync(path.join(repository,pin.source.path));
+    const source=fs.realpathSync(path.join(repository,sourceCheckout(pin.source)));
     if(read('git',['-C',source,'rev-parse','HEAD'])!==sourceRevision(pin.source)||read('git',['-C',source,'status','--porcelain','--untracked-files=no']))throw Error('nxnative source differs from its pin.');
     if(check)return {id:pin.id,revision:sourceRevision(pin.source),architecture:pin.architecture};
     if(process.platform!=='darwin'||process.arch!=='arm64')throw Error('nxnative builds require Apple Silicon macOS.');
@@ -109,7 +108,7 @@ export async function buildNxNative({work,output,dependencyWork,jobs=4,version=p
     if(work===source||output===source||work.startsWith(source+path.sep)||output.startsWith(source+path.sep))throw Error('Build paths must be outside the upstream checkout.');
     if(fs.existsSync(path.join(output,'manifest.json')))throw Error('The output already contains a sealed runtime. Select a new output directory.');
     fs.mkdirSync(work,{recursive:true});fs.mkdirSync(output,{recursive:true});
-    const owned=inputFiles(),identity=sha(JSON.stringify({source:pin.source,owned})),projected=exportSource(source,work,identity);
+    const owned=inputFiles(),identity=sha(JSON.stringify({source:sourceProvenance(pin.source),owned})),projected=exportSource(source,work,identity);
     const dependencies=await prepareDependencies({work:dependencyWork||path.join(work,'dependencies'),output,jobs});
     const env={...process.env,PATH:[path.join(output,'bin'),path.join(output,'python/bin'),path.join(output,'dotnet'),process.env.PATH].join(path.delimiter),SPIRV_CROSS:path.join(output,'bin/spirv-cross'),DOTNET_ROOT:path.join(output,'dotnet'),DOTNET_CLI_TELEMETRY_OPTOUT:'1',DOTNET_CLI_HOME:path.join(work,'dotnet-home'),NUGET_PACKAGES:path.join(work,'nuget'),PYTHONDONTWRITEBYTECODE:'1'};
     const sdk=read('/usr/bin/which',['dotnet']),sdkEnvironment={...env};delete sdkEnvironment.DOTNET_ROOT;
@@ -138,7 +137,7 @@ export async function buildNxNative({work,output,dependencyWork,jobs=4,version=p
     runtime.capabilities={metalSourceObjects:true,nativeMetalObjects:true,keylessInputs:["nup","dump"],packageSelection:true};
     runtime.requirements={metalCompiler:{delivery:'system',required:true,command:'/usr/bin/xcrun',sdk:'macosx',tools:['metal','metallib'],options:['-O1','-fpreserve-invariance'],version:read('/usr/bin/xcrun',['-sdk','macosx','metal','--version']).split('\n')[0],managedAcquisition:false}};
     json(path.join(output,'runtime.json'),runtime);
-    const origins={schemaVersion:1,id:pin.id,version,source:pin.source,producerInputs:owned,dependencies,nuget:JSON.parse(fs.readFileSync(lock))};json(path.join(output,'source.json'),origins);
+    const origins={schemaVersion:1,id:pin.id,version,source:sourceProvenance(pin.source),producerInputs:owned,dependencies,nuget:JSON.parse(fs.readFileSync(lock))};json(path.join(output,'source.json'),origins);
     addLicenses(output,pin.id,source);
     addLicenses(output,'libvpx',path.join(source,'dm/third_party/libvpx'));
     addLicense(output,'libvpx patent grant',path.join(source,'dm/third_party/libvpx/PATENTS'));

@@ -1,5 +1,5 @@
 import {appRequire} from '../../tools/app-source.mjs';
-import {gitlink} from '../../lib/pins.mjs';
+import {gitlink,sourceProvenance} from '../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -10,7 +10,6 @@ import {pathToFileURL} from 'node:url';
 const require=createRequire(import.meta.url),B=appRequire('src/modules/shared/runtime/bundled-native.js');
 const Native=appRequire('src/modules/shared/runtime/local-native.js');
 const producer=import.meta.dirname,pin=JSON.parse(fs.readFileSync(path.join(producer,'source.json')));
-pin.source.revision=gitlink(pin.source.path);
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const json=(file,value)=>fs.writeFileSync(file,JSON.stringify(value,null,2)+'\n');
 const run=(tool,args)=>execFileSync(tool,args,{stdio:'inherit'});
@@ -37,7 +36,7 @@ export function refreshRuntime({input,output,version=pin.version}){
  B.verifyPayload(input,{files:[...manifest.files,{path:'manifest.json',size:bytes.length,mode:0o644,sha256:digest(bytes)}]});
  const origins=JSON.parse(fs.readFileSync(path.join(input,'source.json')));
  const runtime=JSON.parse(fs.readFileSync(path.join(input,'runtime.json')));
- if(JSON.stringify(origins.source)!==JSON.stringify(pin.source)||manifest.arch!==pin.architecture||manifest.minimumMacOS!==pin.minimumMacOS||manifest.executableRelative!==pin.output.executableRelative||runtime.runtimeFiles.host!==pin.output.hostRelative)
+ if(JSON.stringify(origins.source)!==JSON.stringify(sourceProvenance(pin.source))||manifest.arch!==pin.architecture||manifest.minimumMacOS!==pin.minimumMacOS||manifest.executableRelative!==pin.output.executableRelative||runtime.runtimeFiles.host!==pin.output.hostRelative)
   throw Error('The base runtime is incompatible with the current source pin or platform.');
  const owned=producerInputs(),previous=new Map(origins.producerInputs.map(file=>[file.path,file.sha256]));
  for(const file of owned){

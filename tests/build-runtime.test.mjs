@@ -1,5 +1,6 @@
 import {appSourceRoot} from '../tools/app-source.mjs';
 import test from 'node:test';
+import {sourceRevision} from '../lib/pins.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -45,9 +46,9 @@ test('runtime builds require the exact clean source commit recorded by the hub',
  git(source,'add','tools');git(source,'commit','-qm','Runtime source');const revision=git(source,'rev-parse','HEAD');
  git(root,'init','-q');git(root,'config','user.name','Build test');git(root,'config','user.email','test@example.invalid');
  git(root,'update-index','--add','--cacheinfo',`160000,${revision},sources/android`);git(root,'commit','-qm','Pin producer');
- const recipe={schemaVersion:1,id:'android',path:'sources/android',buildEntry:'tools/build.mjs',checkEntry:'tools/check-sources.mjs'};
+ const recipe={schemaVersion:1,id:'android',gitlink:'sources/android',buildEntry:'tools/build.mjs',checkEntry:'tools/check-sources.mjs'};
  assert.equal(verifyProducer(root,recipe),source);
- assert.equal(recipe.revision,revision);
+ assert.equal(sourceRevision(recipe,root),revision);
  fs.appendFileSync(path.join(source,'tools/build.mjs'),'// changed\n');assert.throws(()=>verifyProducer(root,recipe),/local changes/);
  git(source,'add','tools');git(source,'commit','-qm','Changed producer');assert.throws(()=>verifyProducer(root,recipe),/selected revision/);
 });

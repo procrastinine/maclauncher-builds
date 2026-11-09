@@ -3,7 +3,7 @@
   "id": "mpv",
   "version": "0.41.0-MCLv7",
   "source": {
-    "path": "producers/package-support/src/external/mpv-player",
+    "gitlink": "producers/package-support/src/external/mpv-player",
     "repository": "https://github.com/mpv-player/mpv.git"
   },
   "architecture": "arm64",

@@ -1,5 +1,5 @@
 import {APP_REFERENCE,appRequire} from '../../../tools/app-source.mjs';
-import {gitlink,sourceRevision} from '../../../lib/pins.mjs';
+import {gitlink,sourceProvenance,sourceRevision} from '../../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -9,7 +9,6 @@ import {pathToFileURL} from 'node:url';
 import {pack,catalog} from '../../../tools/runtime-package.mjs';
 const require=createRequire(import.meta.url),B=appRequire('src/modules/shared/runtime/bundled-native.js'),Native=appRequire('src/modules/shared/runtime/local-native.js');
 const recipe=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'source.json')));
-recipe.source.revision=gitlink(recipe.source.path);
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const json=value=>JSON.stringify(value,null,2)+'\n';
 function filesIn(root,prefix=''){
@@ -36,7 +35,7 @@ export async function packageRuntime({input,output,version=recipe.version,catalo
  try{
   for(const name of filesIn(input)){const target=path.join(content,name);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(input,name),target,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.chmodSync(target,fs.statSync(path.join(input,name)).mode&0o777);}
   const producerInputs=['source.json','package.mjs','build.mjs'].map(name=>({path:'producers/mpv-render/v7/'+name,sha256:hash(fs.readFileSync(path.join(import.meta.dirname,name)))}));
-  const source={schemaVersion:1,id:recipe.id,version,source:recipe.source,artifact:recipe.artifact,backports:recipe.backports,ownedInputs:recipe.ownedInputs,producerInputs};
+  const source={schemaVersion:1,id:recipe.id,version,source:sourceProvenance(recipe.source),artifact:recipe.artifact,backports:recipe.backports,ownedInputs:recipe.ownedInputs,producerInputs};
   fs.writeFileSync(path.join(content,'source.json'),json(source));
   const files=filesIn(content).map(name=>record(content,name));
   const dependencies=[];

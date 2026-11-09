@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "android",
-  "path": "sources/maclauncher-android",
+  "gitlink": "sources/maclauncher-android",
   "repository": "https://github.com/procrastinine/maclauncher-android",
   "buildEntry": "tools/build.mjs",
   "checkEntry": "tools/check-sources.mjs"

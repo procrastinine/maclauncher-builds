@@ -1,4 +1,4 @@
-import {gitlink} from '../../lib/pins.mjs';
+import {gitlink,sourceCheckout,sourceProvenance,sourceRevision} from '../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -7,11 +7,10 @@ import {createHash} from 'node:crypto';
 
 const root=path.resolve(import.meta.dirname,'../..');
 export const recipe=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'source.json'),'utf8'));
-recipe.source.revision=gitlink(recipe.source.path);
 export const inputs=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'dependencies.json'),'utf8'));
 for(const entry of inputs.dependencies)Object.defineProperty(entry,'revision',{enumerable:true,get:()=>{
  const parent=inputs.dependencies.findLast(candidate=>entry.path.startsWith(candidate.path+'/'))?.path||'';
- return git(path.join(root,recipe.source.path,parent),['rev-parse','HEAD:'+entry.path.slice(parent?parent.length+1:0)]).trim();
+ return git(path.join(root,sourceCheckout(recipe.source),parent),['rev-parse','HEAD:'+entry.path.slice(parent?parent.length+1:0)]).trim();
 }});
 const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',maxBuffer: Infinity,stdio:['ignore','pipe','pipe']});
 
@@ -21,8 +20,8 @@ export function writeChanged(file,bytes,mode=0o644){
  fs.chmodSync(file,mode);
 }
 export function verifySources({includeDependencies=true}={}){
- const source=fs.realpathSync(path.join(root,recipe.source.path));
- const repositories=[{...recipe.source,path:''},...(includeDependencies?inputs.dependencies:[])];
+ const source=fs.realpathSync(path.join(root,sourceCheckout(recipe.source)));
+ const repositories=[{...sourceProvenance(recipe.source),path:''},...(includeDependencies?inputs.dependencies:[])];
  for(const entry of repositories){
   const directory=entry===repositories[0]?source:path.join(source,entry.path);
   if(git(directory,['rev-parse','HEAD']).trim()!==entry.revision)throw Error('Source pin mismatch: '+(entry.path||'AnyPS5'));

@@ -3,7 +3,7 @@
   "id": "prosper",
   "version": "MCLv8",
   "source": {
-    "path": "sources/prosper",
+    "gitlink": "sources/prosper",
     "repository": "https://github.com/mattias800/prosper.git"
   },
   "buildEntry": "producers/prosper/build.mjs",

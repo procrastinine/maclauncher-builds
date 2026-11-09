@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "anyps5-relinker",
   "source": {
-    "path": "sources/anyps5",
+    "gitlink": "sources/anyps5",
     "repository": "https://github.com/boykopovar/AnyPS5.git"
   },
   "attributions": [

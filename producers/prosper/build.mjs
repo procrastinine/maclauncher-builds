@@ -1,5 +1,5 @@
 import sharedDependencies from '../dependencies.json' with {type:'json'};
-import {gitlink,sourceRevision} from '../../lib/pins.mjs';
+import {gitlink,sourceCheckout,sourceProvenance,sourceRevision} from '../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -9,7 +9,6 @@ import {downloadBytes,retryNetwork} from '../../tools/download.mjs';
 
 const root=path.resolve(import.meta.dirname,'../..');
 export const recipe=JSON.parse(fs.readFileSync(new URL('./source.json',import.meta.url)));
-recipe.source.revision=gitlink(recipe.source.path);
 export const inputs=JSON.parse(fs.readFileSync(new URL('./dependencies.json',import.meta.url)));
 for(const entry of inputs.dependencies)Object.assign(entry,sharedDependencies[entry.id==='sdl3'?'sdl3Prosper':'vulkanHeaders']);
 inputs.artifacts=JSON.parse(fs.readFileSync(new URL('../anyps5/dependencies.json',import.meta.url))).artifacts.filter(entry=>entry.id==='ffmpeg-macos-x64');
@@ -56,7 +55,7 @@ async function ffmpeg(buildDirectory,downloads){
  return directory;
 }
 export async function build({buildDirectory=path.join(root,'out/prosper'),vulkanLibrary,downloads,python,jobs=4,check=false,configureOnly=false}={}){
- const source=path.join(root,recipe.source.path);verify(recipe.source,source);
+ const source=path.join(root,sourceCheckout(recipe.source));verify(sourceProvenance(recipe.source),source);
  if(check)return{id:recipe.id,revision:sourceRevision(recipe.source),redistribution:recipe.redistribution,dependencies:inputs.dependencies};
  if(process.platform!=='darwin'||!path.isAbsolute(buildDirectory)||!Number.isSafeInteger(jobs)||jobs<1||jobs>128)throw Error('Use macOS, an absolute build directory and1–128 jobs.');
  if(!path.isAbsolute(vulkanLibrary||'')||!fs.statSync(vulkanLibrary).isFile())throw Error('Choose the existing managed Intel Vulkan library with --vulkan-library.');
@@ -85,7 +84,7 @@ export async function build({buildDirectory=path.join(root,'out/prosper'),vulkan
   {env:{...process.env,PKG_CONFIG_LIBDIR:path.join(codecs,'lib/pkgconfig'),PKG_CONFIG_PATH:''}});
  if(!configureOnly)run('cmake',['--build',binary,'--target','prosper-app','--parallel',String(jobs)]);
  const result={schemaVersion:1,id:recipe.id,revision:sourceRevision(recipe.source),redistribution:recipe.redistribution,architecture:'x86_64',
-  executable:path.join(binary,'prosper-app'),source:recipe.source,dependencies:inputs.dependencies,artifacts:inputs.artifacts,vulkanLinkInput:linkedVulkan};
+  executable:path.join(binary,'prosper-app'),source:sourceProvenance(recipe.source),dependencies:inputs.dependencies,artifacts:inputs.artifacts,vulkanLinkInput:linkedVulkan};
  write(path.join(buildDirectory,'build.json'),JSON.stringify(result,null,2)+'\n');return result;
 }
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){

@@ -1,4 +1,5 @@
 import {appRequire} from '../../tools/app-source.mjs';
+import {sourceCheckout,sourceProvenance} from '../../lib/pins.mjs';
 import {addLicense,addLicenses} from '../../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -16,7 +17,7 @@ function record(directory,file){const full=path.join(directory,file),bytes=fs.re
 export async function packageLocal({buildDirectory,output,version=recipe.version}={}){
  await build({check:true});
  if(!path.isAbsolute(buildDirectory||'')||!path.isAbsolute(output||'')||fs.existsSync(output)||!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(version))throw Error('Choose an existing build, a new absolute output directory and explicit version.');
- const result=JSON.parse(fs.readFileSync(path.join(buildDirectory,'build.json')));if(result.revision!==recipe.source.revision)throw Error('The Prosper build identity differs.');
+ const result=JSON.parse(fs.readFileSync(path.join(buildDirectory,'build.json')));
  const payload=path.join(output,'payload'),binary=path.join(payload,'bin/prosper-app');copy(result.executable,binary,0o755);
  const run=(command,args)=>execFileSync(command,args,{encoding:'utf8'});
  const changes=[];
@@ -30,7 +31,7 @@ export async function packageLocal({buildDirectory,output,version=recipe.version
   if(match&&!match[1].startsWith('@'))changes.push('-delete_rpath',match[1]);
  }
  run('/usr/bin/strip',['-S',binary]);if(changes.length)run('/usr/bin/install_name_tool',[...changes,binary]);run('/usr/bin/codesign',['--force','--sign','-',binary]);
- const source=path.join(root,recipe.source.path);
+ const source=path.join(root,sourceCheckout(recipe.source));
  addLicenses(payload,'Prosper',source);
  addLicenses(payload,'imgui',path.join(source,'prosper/third_party/imgui'));
  addLicenses(payload,'libatrac9',path.join(source,'prosper/third_party/libatrac9'));
@@ -44,7 +45,7 @@ export async function packageLocal({buildDirectory,output,version=recipe.version
  addLicenses(payload,'FFmpeg',path.join(buildDirectory,'dependencies/ffmpeg-macos-x64/share/ffmpeg'));
  addLicense(payload,'ProggyClean',path.join(import.meta.dirname,'licenses/ProggyClean.txt'));
  const producerInputs=['build.mjs','package.mjs','source.json','dependencies.json'].map(file=>({path:file,sha256:sha(fs.readFileSync(path.join(import.meta.dirname,file)))}));
- fs.writeFileSync(path.join(payload,'source.json'),json({schemaVersion:1,source:recipe.source,dependencies:inputs.dependencies,artifacts:inputs.artifacts,vulkanLinkInput:result.vulkanLinkInput,producerInputs}));
+ fs.writeFileSync(path.join(payload,'source.json'),json({schemaVersion:1,source:sourceProvenance(recipe.source),dependencies:inputs.dependencies,artifacts:inputs.artifacts,vulkanLinkInput:result.vulkanLinkInput,producerInputs}));
  const files=filesIn(payload).map(file=>record(payload,file));
  const manifest={schemaVersion:1,managerId:'prosper',version,arch:'x64',platform:'darwin',minimumMacOS:recipe.output.minimumMacOS,upstreamRevision:recipe.source.revision,
   gameArchitecture:'x86_64',executableRelative:'bin/prosper-app',runtimeFiles:{vulkan:'managed'},files};
