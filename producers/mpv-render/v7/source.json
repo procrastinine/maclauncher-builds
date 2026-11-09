@@ -1,87 +1,14 @@
 {
   "schemaVersion": 1,
   "id": "mpv",
-  "version": "0.41.0-MCLv7",
   "source": {
     "gitlink": "producers/package-support/src/external/mpv-player",
     "repository": "https://github.com/mpv-player/mpv.git"
-  },
-  "architecture": "arm64",
-  "minimumMacOS": "27.0",
-  "artifact": {
-    "kind": "owned-source-build"
   },
   "backports": [
     "75b2ccfeb1ce4ed5a40ac9860fa74f3d1265e13f",
     "c5d391adba7bd024954d0df1e0405f5749f4d4ca"
   ],
-  "ownedInputs": [
-    {
-      "path": "producers/mpv-render/v7/package.json"
-    },
-    {
-      "path": "producers/mpv-render/v7/scripts/build-mpv-library.cjs"
-    },
-    {
-      "path": "producers/mpv-render/v7/scripts/stage-mpv-render.cjs"
-    },
-    {
-      "path": "app:src/modules/shared/reshade/native/frame.h"
-    },
-    {
-      "path": "app:src/modules/shared/reshade/native/image-color.h"
-    },
-    {
-      "path": "app:src/modules/shared/reshade/native/presentation-content.h"
-    },
-    {
-      "path": "app:src/modules/shared/reshade/native/presentation-observed.h"
-    },
-    {
-      "path": "app:src/modules/shared/reshade/native/presentation-source.h"
-    },
-    {
-      "path": "app:src/modules/shared/reshade/native/presentation.h"
-    },
-    {
-      "path": "app:src/modules/shared/reshade/native/target-time.h"
-    },
-    {
-      "path": "app:src/modules/shared/runtime/app-bundle.js"
-    },
-    {
-      "path": "app:src/modules/shared/runtime/bundled-native.js"
-    },
-    {
-      "path": "app:src/modules/shared/runtime/local-native.js"
-    },
-    {
-      "path": "app:src/modules/shared/runtime/native-focus.js"
-    },
-    {
-      "path": "app:src/modules/video/native/gpu-surface.hpp"
-    },
-    {
-      "path": "app:src/modules/video/native/gpu-surface.mm"
-    },
-    {
-      "path": "app:src/modules/video/native/mpv-frame-metadata.h"
-    },
-    {
-      "path": "app:src/modules/video/native/mpv-frame-metadata.patch"
-    },
-    {
-      "path": "app:src/modules/video/native/mpv-render-layers.patch"
-    },
-    {
-      "path": "app:src/modules/video/native/mpv-render.mm"
-    },
-    {
-      "path": "app:scripts/native-binary-tools.cjs"
-    }
-  ],
-  "buildEntry": "producers/mpv-render/v7/build.mjs",
-  "packageEntry": "producers/mpv-render/v7/package.mjs",
   "decodedColorAPI": 1,
   "intermediateColor": {
     "primaries": "bt2020",

@@ -5,7 +5,6 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
-import {pathToFileURL} from 'node:url';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 import {pythonBuildTools,recipeMain} from './build-source.mjs';
@@ -31,24 +30,22 @@ export async function buildMPV({project:id,arch,output,work}){
  const tools=pythonBuildTools(work,path.join(root,'tools/sdk27-build-requirements.txt'));
  const producer=path.join(root,'producers/mpv-render/v7'),source=path.join(root,'producers/package-support/src/external/mpv-player');
  const Builder=require(path.join(producer,'scripts/build-mpv-library.cjs'));
- (await import(pathToFileURL(path.join(producer,'package.mjs')))).checkSources();
  retryNetwork(()=>run('git',['-C',source,'fetch','--depth','2','origin',Builder.REVISION,...Builder.BACKPORTS],{stdio:'inherit'}));
  const sdk=process.env.SDKROOT||run('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path']);
  const sdkPackages=sdkCompressionPkgConfig({sdk,directory:path.join(work,'sdk-pkgconfig')});
  const pkgConfigPath=[sdkPackages,process.env.PKG_CONFIG_PATH,run('pkgconf',['--variable','pc_path','pkg-config'])].filter(Boolean).join(path.delimiter);
  const built=Builder.build({sourceCheckout:source,workDirectory:path.join(work,'library'),toolsDirectory:tools.bin,pkgConfigPath,minimumMacOS:'14.0',jobs:4});
- const recipe=JSON.parse(fs.readFileSync(path.join(producer,'source.json'))),appRoot=appSourceRoot().directory,staged=path.join(work,'staged'),app=path.join(staged,'mpv.app'),executable=path.join(app,'Contents/MacOS/mpv');
+ const recipe=JSON.parse(fs.readFileSync(path.join(producer,'source.json'))),native=path.join(producer,'native'),appRoot=appSourceRoot().directory,staged=path.join(work,'staged'),app=path.join(staged,'mpv.app'),executable=path.join(app,'Contents/MacOS/mpv');
  fs.mkdirSync(path.dirname(executable),{recursive:true});fs.mkdirSync(path.join(app,'Contents/Frameworks/video'),{recursive:true});
  fs.copyFileSync(built.library,path.join(app,'Contents/Frameworks/video/libmpv.2.dylib'));
- const flags=['clang++','-std=c++17','-O2','-fobjc-arc','-Wno-deprecated-declarations','-arch','arm64','-mmacosx-version-min=14.0','-ffile-prefix-map='+appRoot+'=.','-ffile-prefix-map='+path.join(root,'producers/package-support')+'=.',
+ const flags=['clang++','-std=c++17','-O2','-fobjc-arc','-Wno-deprecated-declarations','-arch','arm64','-mmacosx-version-min=14.0','-ffile-prefix-map='+appRoot+'=.','-ffile-prefix-map='+native+'=./src/modules/video/native','-ffile-prefix-map='+path.join(root,'producers/package-support')+'=.',
   '-I'+path.join(source,'include'),'-I'+path.join(appRoot,'src/modules/shared/reshade/native')];
- run('/usr/bin/xcrun',[...flags,...['mpv-render.mm','gpu-surface.mm'].map(name=>path.join(appRoot,'src/modules/video/native',name)),...['AppKit','Metal','QuartzCore','OpenGL','CoreVideo','IOSurface'].flatMap(name=>['-framework',name]),'-Wl,-rpath,@executable_path/../Frameworks/video','-o',executable],{stdio:'inherit'});
+ run('/usr/bin/xcrun',[...flags,...['mpv-render.mm','gpu-surface.mm'].map(name=>path.join(native,name)),...['AppKit','Metal','QuartzCore','OpenGL','CoreVideo','IOSurface'].flatMap(name=>['-framework',name]),'-Wl,-rpath,@executable_path/../Frameworks/video','-o',executable],{stdio:'inherit'});
  const info=JSON.parse(run(executable,['--maclauncher-info']));
  fs.writeFileSync(path.join(app,'Contents/Info.plist'),'<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>org.maclauncher.video</string><key>CFBundleExecutable</key><string>mpv</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleShortVersionString</key><string>0.41.0</string><key>LSMinimumSystemVersion</key><string>14.0</string><key>NSHighResolutionCapable</key><true/></dict></plist>');
  const librarySource={url:recipe.source.repository,commit:Builder.REVISION,version:'0.41.0',backports:Builder.BACKPORTS,inputSha256:hash(built.library),verifiedBuild:true,build:built.metadata};
  const video={schema:1,id:'mpv-render',version:record.version,minimumMacOS:'14.0',architecture:'arm64',libraryVersion:info.libraryVersion,librarySource,headerSource:{repository:recipe.source.repository,commit:Builder.REVISION},scaleFilters:info.scaleFilters,images:[],
-  ...Object.fromEntries(['decodedFrameAPI','decodedColorAPI','preparationNotificationAPI','osdLayerAPI','playerScriptsAPI','playerInputAPI','intermediateColor','outputColor'].map(key=>[key,recipe[key]??1])),
-  ownedInputs:recipe.ownedInputs};
+  ...Object.fromEntries(['decodedFrameAPI','decodedColorAPI','preparationNotificationAPI','osdLayerAPI','playerScriptsAPI','playerInputAPI','intermediateColor','outputColor'].map(key=>[key,recipe[key]??1]))};
  const descriptor=path.join(staged,'video-runtime.json');fs.writeFileSync(descriptor,JSON.stringify(video,null,2)+'\n');
  const result=await sealRuntime({project:id,arch,output,sourceRoot:source,upstreamRevision:Builder.REVISION,executable,appRoot:app,payloads:[{source:descriptor,relative:'video-runtime.json'}],runtimeFiles:{decodedFrameManifest:'video-runtime.json'},provenance:{libraryBuild:built.metadata},jsonMetadata:{'video-runtime.json':(value,{files})=>{
    const inventory=directory=>fs.readdirSync(directory,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?inventory(path.join(directory,entry.name)):[path.join(directory,entry.name)]);

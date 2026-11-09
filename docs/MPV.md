@@ -8,18 +8,7 @@ In version `0.41.0-MCLv7`, decoded PQ/BT.2020 frames reach the presenter as RGBA
 
 ## Source and build
 
-`producers/mpv-render/v7/source.json` records the original library artifact, the upstream commit, the backported changes and the exact producer inputs, and the upstream headers come from the submodule `producers/package-support/src/external/mpv-player`. The runtime includes the original library and its third-party notices. Building requires Node.js 24 or later and Apple's command-line tools.
-
-```sh
-git submodule update --init producers/package-support/src/external/mpv-player
-node producers/mpv-render/v7/build.mjs --check
-node producers/mpv-render/v7/build.mjs --config /absolute/path/to/media-inputs.json
-node producers/mpv-render/v7/package.mjs \
-  --input /absolute/path/to/prepared-media-runtime \
-  --output /absolute/path/to/new-package-directory
-```
-
-The JSON file passed with `--config` has the fields `library`, `referenceExecutable`, `dependencyRoots`, `output`, `source`. `source` identifies the original version, the commit and the SHA-256 of the library artifact. The producer verifies the selected library image, builds the native host, finds every library the host actually loads and records the hash of each, without downloading any dependencies.
+`tools/build-mpv.mjs` builds the package. `producers/mpv-render/v7/scripts/build-mpv-library.cjs` builds libmpv from the submodule `producers/package-support/src/external/mpv-player` at its pinned commit, with the backported changes listed in `producers/mpv-render/v7/source.json` and the two patches in `producers/mpv-render/v7/native`. The host is compiled from the sources in the same directory against the shared presenter interface headers, read from the pinned MacLauncher source because the host presents through the shared graphics presenter. Building requires Node.js 24 or later, Apple's command-line tools and the build tools named in the project record.
 
 ## Package layout
 
@@ -28,7 +17,6 @@ The package has an outer `manifest.json`, and the runtime files are under `files
 | Path | Contents |
 | --- | --- |
 | `files/video-runtime.json` | Decoded-frame interface and library list |
-| `files/source.json` | Exact source inputs |
 | `files/mpv.app/Contents/MacOS/mpv` | Executable |
 
 Binary archives contain the runtime and its notices, and the release tag identifies the producer, the source in this repository and the upstream commit used for the package.
