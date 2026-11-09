@@ -8,7 +8,8 @@ import {recipeMain} from './build-source.mjs';
 import {buildNxNative} from '../producers/nxnative/build.mjs';
 import {packageNxNative} from '../producers/nxnative/package.mjs';
 const root=path.resolve(import.meta.dirname,'..');
-export async function buildNxnative({project,arch,output,work}){
+/** Compile nxnative with the declared .NET SDK. */
+export async function compile({project,work}){
  const record=buildRecord(resolveProject(project,root)),native=path.join(work,'native');
  const pin=JSON.parse(fs.readFileSync(path.join(root,'producers/nxnative/source.json'))),sdkPin=JSON.parse(fs.readFileSync(path.join(root,'producers/nxnative/dotnet-sdk.json')));
  if(execFileSync('/usr/bin/xcrun',['--show-sdk-version'],{maxBuffer:Infinity,encoding:'utf8'}).trim()!==pin.tools.macOSSDK||sdkPin.version!==pin.tools.dotnetSDK)throw Error('The selected macOS or .NET SDK differs from the recipe.');
@@ -19,6 +20,10 @@ export async function buildNxnative({project,arch,output,work}){
  const previous={...process.env};Object.assign(process.env,environment);
  try{await buildNxNative({work:path.join(work,'build'),output:native,jobs:6,version:record.version});}
  finally{for(const key of Object.keys(process.env))if(!(key in previous))delete process.env[key];Object.assign(process.env,previous);}
+ return {native};
+}
+/** Package the compiled nxnative tools. */
+export async function assemble({project,arch,output,work,compiled:{native}}){
  return packageNxNative({input:native,outputDirectory:path.join(work,'package'),buildOutput:output});
 }
-recipeMain(import.meta,buildNxnative);
+recipeMain(import.meta,{compile,assemble});
