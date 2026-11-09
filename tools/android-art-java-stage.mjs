@@ -43,8 +43,8 @@ export function copyArtJavaImageMembers({input,output}){
  return result;
 }
 
-/** Produce the unchanged ART hooks DEX and original delegated platform bodies on Linux. */
-export async function buildAndroidArtJavaInput({framework,image,output,work,arch='arm64'}){
+/** Compile the unchanged ART hooks DEX and original delegated platform bodies on Linux into work. */
+export async function compileAndroidArtJavaInput({framework,image,output,work,arch='arm64'}){
  if([output,work].some(file=>!path.isAbsolute(file||'')||fs.existsSync(file)))throw Error('ART Java inputs require new absolute output/work directories.');
  const stage=json(descriptor),checked=verifyAndroidJavaFrameworkInput(framework),definition=json(path.join(root,stage.frameworkInput)),javaProfile=json(path.join(root,stage.jdkInput)),jdkPin=javaProfile.jdk[process.platform+'-'+process.arch];if(!jdkPin)throw Error('ART Java has no declared JDK for this host.');
  fs.mkdirSync(work,{recursive:true});const members=copyArtJavaImageMembers({input:image,output:path.join(work,'image')});
@@ -59,7 +59,6 @@ export async function buildAndroidArtJavaInput({framework,image,output,work,arch
  const producer=path.join(work,'producer'),sourceArchive=path.join(work,'producer.tar');fs.mkdirSync(producer);
  try{run('git',['-C',android,'archive','--format=tar','--output='+sourceArchive,'HEAD']);run('/usr/bin/tar',['-xf',sourceArchive,'-C',producer]);}finally{fs.rmSync(sourceArchive,{force:true});}
  const {buildArtJava}=await import(pathToFileURL(path.join(producer,'src/modules/android/art/build-java.mjs'))),built=await buildArtJava({output:path.join(work,'compile'),jdk,api:path.join(framework,'products/android-framework.jar'),coreSystemModules,sharedClasses:path.join(framework,'build/classes'),r8,...members,dexBodies});
- return packageAndroidArtJavaInput({framework,image,output,work,arch});
 }
 
 /** Seal the original producer's authenticated completed outputs without compiling them again. */

@@ -15,8 +15,8 @@ const root=path.resolve(import.meta.dirname,'..');
 const descriptor=new URL('../producers/android-art-inputs/ffi.json',import.meta.url);
 const read=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8',...options}).trim();
 
-/** Compile the original Android libffi target with matching Linux host tools. */
-export async function buildAndroidArtFfi({project,version,arch,output,work}){
+/** Compile the ARM64 Android libffi with the pinned NDK and the original ART recipe. */
+export async function compile({project,version,output,work}){
  const profile={...JSON.parse(fs.readFileSync(descriptor)),libffi:JSON.parse(fs.readFileSync(new URL('../producers/dependencies.json',import.meta.url))).libffi};version??=profile.version;
  if(project!==profile.id||version!==profile.version||[output,work].some(value=>!path.isAbsolute(value||'')||fs.existsSync(value)))throw Error('Select the declared ARM64 Android libffi input on Linux x64 with new absolute output/work directories.');
  fs.mkdirSync(work,{recursive:true});
@@ -32,10 +32,14 @@ export async function buildAndroidArtFfi({project,version,arch,output,work}){
  fs.unlinkSync(ndkArchive);
  const {buildArtFfi}=await import(pathToFileURL(path.join(producer,'src/modules/android/art/build-ffi.mjs')));
  const built=await buildArtFfi({source,output:path.join(work,'compiler'),ndk});
+ return {ndk,built,source,version,profile};
+}
+/** Package the compiled archive, headers and licences. */
+export async function assemble({project,arch,output,compiled:{ndk,built,source,version,profile}}){
  const bin=path.join(ndk,'toolchains/llvm/prebuilt/linux-x86_64/bin'),members=read(path.join(bin,'llvm-ar'),['t',built.archive]).split('\n');
  const payload=path.join(output,'payload');fs.mkdirSync(path.join(payload,'lib'),{recursive:true});;
  fs.copyFileSync(built.archive,path.join(payload,'lib/libffi.a'));fs.cpSync(built.include,path.join(payload,'include'),{recursive:true});addLicenses(payload,'libffi',source);
  const result=helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(descriptor),manifestRelative:'input.json',record:{androidSource:androidSource(),upstream:libffi,ndk:{version:ndkSource().version,sha256:profile.ndk.sha256},target:'aarch64-linux-android35',archiveMembers:members,tools:{autoconf:read('autoconf',['--version']).split('\n')[0],automake:read('automake',['--version']).split('\n')[0],make:read('make',['--version']).split('\n')[0]}}});
  return result;
 }
-recipeMain(import.meta,buildAndroidArtFfi);
+recipeMain(import.meta,{compile,assemble});
