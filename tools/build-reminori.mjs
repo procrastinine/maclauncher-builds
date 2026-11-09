@@ -19,7 +19,7 @@ export async function compile({arch,work}) {
  fs.mkdirSync(work,{recursive:true});
  const sourceDir=path.join(root,'producers/package-support/src/external/ReMinori'),prefix=path.join(work,'movies');
  const archive=await buildInput(Movies.SOURCE);
- await Movies.buildMovieDependencies({archive,destination:prefix,architecture:arch});
+ await Movies.buildMovieDependencies({archive,destination:prefix,workspace:path.join(work,'movie-build'),architecture:arch});
  const env=rustEnvironment({work,minimumMacOS:'13.0'});
  const sdk=process.env.SDKROOT||execFileSync('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path'],{maxBuffer:Infinity,encoding:'utf8'}).trim();
  const candidate=await Builder.compileCandidate({sourceDir,destination:path.join(work,'compiled'),decoderPrefix:prefix,architecture:arch,dependencies:{prepareCargo:({sourceRoot,env:buildEnv,target})=>retryNetwork(()=>execFileSync('cargo',['fetch','--locked','--target',target],{maxBuffer:Infinity,cwd:sourceRoot,env:rustEnvironment({work,minimumMacOS:'13.0',env:buildEnv}),stdio:['inherit','inherit','pipe'],timeout:900000})),runBuildCommand:async(command,args,options)=>{

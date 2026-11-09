@@ -27,11 +27,14 @@ function normalizeDiagnostics(directory, mappings) {
   if (!found) throw new Error("The FFmpeg configuration diagnostic is missing.");
   fs.writeFileSync(file, text); return { path: "config.h", sha256: Native.hashFile(file) };
 }
-async function buildMovieDependencies({ archive, destination, architecture = process.arch, signal, dependencies = {} } = {}) {
+async function buildMovieDependencies({ archive, destination, workspace, architecture = process.arch, signal, dependencies = {} } = {}) {
   if (process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) throw new Error("Minori movie dependencies require a supported Mac architecture.");
   if (!path.isAbsolute(archive || "")) throw new Error("Minori movie dependencies require the FFmpeg 7.1.2 source archive.");
   if (!path.isAbsolute(destination || "") || fs.existsSync(destination)) throw new Error("Choose a new Minori movie dependency directory.");
-  const workspace = fs.mkdtempSync(path.join(os.tmpdir(), "maclauncher-minori-movie-"));
+  // A recipe builds in a new directory inside its own work directory; other callers use a temporary one.
+  if (workspace === undefined) workspace = fs.mkdtempSync(path.join(os.tmpdir(), "maclauncher-minori-movie-"));
+  else if (!path.isAbsolute(workspace) || fs.existsSync(workspace)) throw new Error("Choose a new Minori movie build directory.");
+  else fs.mkdirSync(workspace, { recursive: true });
   const output = path.join(workspace, "output"), prefix = path.join(workspace, "install"), logPath = path.join(workspace, "build.log");
   fs.mkdirSync(output); fs.writeFileSync(logPath, `FFmpeg ${SOURCE.version} ${SOURCE.sha256}\n`);
   const mappings = [...new Set([workspace, fs.realpathSync(workspace)])];
