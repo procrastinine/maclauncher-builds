@@ -218,7 +218,7 @@ export function plan({work, arch="universal", sdkPath, only, skip = [], reuse = 
     if (reuse[name]) { payloads[name] = path.resolve(reuse[name]); continue; }
     const root = work && path.join(work, "providers", name), values = {work: root && path.join(root, "work"), output: root && path.join(root, "output")};
     payloads[name] = root && path.join(root, provider.payload);
-    for (const step of provider.steps) steps.push({provider: name, marker: path.join(payloads[name] || "", provider.marker || "provider.json"),
+    for (const step of provider.steps) steps.push({provider: name, phased: step.phased === true, marker: path.join(payloads[name] || "", provider.marker || "provider.json"),
       argv: [path.join(repository, step.recipe), ...step.args.map(argument => argument.startsWith(APP_REFERENCE) ? recipePath(repository, argument) : argument.replaceAll("{arch}",arch).replace(/\{(work|output)\}|\{(source|input|tool):([^}]+)\}/g, (_, local, kind, id) =>
         local ? values[local] ?? `<${local}>` : (kind === "source" ? sources : kind === "input" ? inputs : tools)[id].path ?? `<${kind}:${id}>`))]});
   }
@@ -282,10 +282,13 @@ export async function build(options) {
   const selectedSDK=path.isAbsolute(resolved.sdkPath)?resolved.sdkPath:execFileSync("xcrun",["--sdk",resolved.sdkPath,"--show-sdk-path"],{encoding:"utf8"}).trim();
   const env = {...buildEnvironment(),SDKROOT:selectedSDK,...(resolved.tools.cargo?{RUSTC:process.env.RUSTC||spawnSync("/usr/bin/which",["rustc"],{encoding:"utf8"}).stdout.trim()}:{}),...(resolved.tools.python?{MACLAUNCHER_GRAPHICS_PYTHON:resolved.tools.python.path}:{}),PATH:[...new Set(Object.values(resolved.tools).map(tool=>path.dirname(tool.path))) ,process.env.PATH].join(path.delimiter)}, completed = new Set(resolved.steps.filter(step => fs.existsSync(step.marker)).map(step => step.provider));
   for (const name of completed) console.log("Reusing completed graphics provider: " + name);
-  for (const step of resolved.steps.filter(step => !completed.has(step.provider))) {
+  // Compile every provider first; a phased provider then assembles its payload from its compiled outputs alone.
+  const pending = resolved.steps.filter(step => !completed.has(step.provider));
+  for (const step of pending) {
     fs.mkdirSync(path.join(resolved.work, "providers", step.provider), {recursive: true});
-    execFileSync(process.execPath, step.argv, {cwd: repository, stdio: "inherit", env});
+    execFileSync(process.execPath, [...step.argv, ...(step.phased ? ["--phase", "compile"] : [])], {cwd: repository, stdio: "inherit", env});
   }
+  for (const step of pending.filter(step => step.phased)) execFileSync(process.execPath, [...step.argv, "--phase", "assemble"], {cwd: repository, stdio: "inherit", env});
   if (options.stage) execFileSync(process.execPath, resolved.stage, {cwd: repository, stdio: "inherit"});
   return resolved;
 }

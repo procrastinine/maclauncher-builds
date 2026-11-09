@@ -373,6 +373,7 @@
       "steps": [
         {
           "recipe": "src/modules/shared/reshade/temporal/fsr/build.mjs",
+          "phased": true,
           "args": [
             "{source:fsr2}",
             "{input:shader-tools}",
@@ -381,6 +382,7 @@
         },
         {
           "recipe": "src/modules/shared/reshade/temporal/fsr/build.mjs",
+          "phased": true,
           "args": [
             "{source:fsr3-sdk}",
             "{input:shader-tools}",
