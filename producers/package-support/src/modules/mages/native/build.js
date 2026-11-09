@@ -1,7 +1,7 @@
-const {appRequire}=require('../../../../../../tools/app-source.mjs');
 const fs = require("node:fs");
 const path = require("node:path");
-const Adapter = appRequire('src/modules/mages/native/adapter.js');
+const crypto = require("node:crypto");
+const hash = file => crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 
 const FFMPEG_OPTIONS = Object.freeze(["--cc=clang", "--target-os=darwin", "--enable-shared", "--disable-static",
   "--enable-pic", "--disable-doc", "--disable-debug", "--disable-autodetect", "--disable-gpl", "--disable-nonfree",
@@ -30,9 +30,9 @@ function normalizeGeneratedFfmpegConfiguration(outputDir, mappings) {
     return "#define FFMPEG_CONFIGURATION " + projected;
   });
   if (!found) throw new Error("Generated FFmpeg configuration macro is unavailable.");
-  const originalSha256 = Adapter.hash(file);
+  const originalSha256 = hash(file);
   fs.writeFileSync(file, normalized);
-  return { generatedFile: "config.h", macro: "FFMPEG_CONFIGURATION", originalSha256, normalizedSha256: Adapter.hash(file),
+  return { generatedFile: "config.h", macro: "FFMPEG_CONFIGURATION", originalSha256, normalizedSha256: hash(file),
     mappings: mappings.map(mapping => ({ ...mapping })) };
 }
 
