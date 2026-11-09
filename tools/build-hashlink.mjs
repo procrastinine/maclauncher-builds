@@ -3,7 +3,6 @@ import {addLicenses} from '../lib/licenses.mjs';
 import sdlHeaders from '../producers/dependencies/sdlHeaders.json' with {type:'json'};
 import fs from 'node:fs';
 import path from 'node:path';
-import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 import {checkoutSource,stageSource,run,recipeMain} from "./build-source.mjs";
 import {sealRuntime} from './seal-runtime.mjs';
@@ -63,6 +62,6 @@ export function assemble({project,version,arch,output,work,compiled:{sourceRoot,
  const payloads=['libhl.dylib','fmt.hdll','ui.hdll','sdl.hdll','openal.hdll'].map(name=>({source:path.join(source,name),relative:'bin/'+name}));
  payloads.push({source:openalLibrary,relative:'bin/libopenal.1.dylib'});
  payloads.push({source:path.join(source,'src/hl.h'),relative:'bin/include/hl.h'});
- return sealRuntime({project,version,arch,output,executable:path.join(source,'hl'),executableRelative:'bin/hl',sourceRoot,upstreamRevision:Builder.REVISION,payloads,capabilities:{...bytecodeFacts(source),primitiveProfileId:legacy?'typed-1.9-macos-v2':'legacy-dynamic-1.12-macos-v1',primitiveProfileSha256:createHash('sha256').update(fs.readFileSync(path.join(root,'producers/package-support/src/modules/hashlink/runtime/profiles',legacy?'typed-1.9-macos-v2.json':'legacy-dynamic-1.12-macos-v1.json'))).digest('hex'),macPackageVersion:version,sourceKind:'commit'},provenance:{upstreamVersion:legacy?'1.9':'1.12',nativeProfile:legacy?'1.9-sdl2.0.22-openal-soft1.25.2-macos-v2':'1.12-sdl2.0.22-openal-soft1.25.2-macos-v1',dependencies:[{name:'SDL2',revision:Builder.SDL_REVISION},{name:'OpenAL-soft',revision:Builder.OPENAL_REVISION}]}});
+ return sealRuntime({project,version,arch,output,executable:path.join(source,'hl'),executableRelative:'bin/hl',sourceRoot,upstreamRevision:Builder.REVISION,payloads,capabilities:{...bytecodeFacts(source),primitiveProfileId:legacy?'typed-1.9-macos-v2':'legacy-dynamic-1.12-macos-v1',macPackageVersion:version,sourceKind:'commit'},provenance:{upstreamVersion:legacy?'1.9':'1.12',nativeProfile:legacy?'1.9-sdl2.0.22-openal-soft1.25.2-macos-v2':'1.12-sdl2.0.22-openal-soft1.25.2-macos-v1',dependencies:[{name:'SDL2',revision:Builder.SDL_REVISION},{name:'OpenAL-soft',revision:Builder.OPENAL_REVISION}]}});
 }
 recipeMain(import.meta,{compile,assemble});
