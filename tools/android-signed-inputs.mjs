@@ -5,7 +5,7 @@ import path from 'node:path';
 import {createRequire} from 'node:module';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
-const root=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url),B=require('../lib/package-format.cjs'),{validateDeclaration}=require('../lib/declaration.cjs');
+const root=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url),B=require('../lib/package-format.cjs'),{validateDeclaration}=require('../lib/package-contract.cjs');
 const json=file=>JSON.parse(fs.readFileSync(path.join(root,file)));
 
 /** Existing package identities required before the unified producer starts. */

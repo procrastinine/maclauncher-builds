@@ -5,7 +5,7 @@ import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 const require=createRequire(import.meta.url),B=require('../lib/package-format.cjs');
-const {validateDeclaration}=require('../lib/declaration.cjs');
+const {validateDeclaration}=require('../lib/package-contract.cjs');
 
 const frameworkBuildDirectories=['native/SDL3.framework/Versions/A/Headers','native/SDL3.framework/Versions/A/Resources/CMake'];
 export const androidFrameworkBuildInput=name=>frameworkBuildDirectories.some(directory=>name.startsWith(directory+'/'));

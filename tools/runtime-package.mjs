@@ -11,7 +11,7 @@ import {outputVersion} from '../lib/package-version.mjs';
 import {recordMetadata} from '../lib/record-metadata.mjs';
 import {SOURCE_DATE_EPOCH} from '../lib/reproducible-build.mjs';
 const require=createRequire(import.meta.url),B=require('../lib/package-format.cjs');
-const {validateDeclaration}=require('../lib/declaration.cjs');
+const {validateDeclaration}=require('../lib/package-contract.cjs');
 const A=require('../lib/archive.cjs'),SHA=/^[a-f0-9]{64}$/;
 const root=path.resolve(import.meta.dirname,'..');
 

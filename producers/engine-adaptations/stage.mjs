@@ -6,7 +6,7 @@ import {createRequire} from 'node:module';
 import {recipeMain} from '../../tools/build-source.mjs';
 import {resolveProject,buildRecord} from '../../lib/projects.mjs';
 const require=createRequire(import.meta.url),B=require('../../lib/package-format.cjs');
-const {validateDeclaration}=require('../../lib/declaration.cjs');
+const {validateDeclaration}=require('../../lib/package-contract.cjs');
 const root=import.meta.dirname;
 const profiles={
  'vnds-love':{source:'vnds-love',version:'0.0.13-838e47b-MCLv1',entry:'engine/main.lua',minimumMacOS:'11.0'}

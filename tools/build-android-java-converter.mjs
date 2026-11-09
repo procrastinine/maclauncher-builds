@@ -13,7 +13,7 @@ import {helperPackage,sha} from './helper-package.mjs';
 const root=path.resolve(import.meta.dirname,'..'),descriptor=path.join(root,'producers/android-inputs/java-converter.json');
 const profile=()=>{const value=JSON.parse(fs.readFileSync(descriptor));return {...value,converter:{...value.converter,revision:androidUpstream(value.converter.repository).revision}};};
 const read=(command,args)=>execFileSync(command,args,{encoding:'utf8',maxBuffer:Infinity}).trim();
-const require=createRequire(import.meta.url),B=require('../lib/package-format.cjs'),{validateDeclaration}=require('../lib/declaration.cjs');
+const require=createRequire(import.meta.url),B=require('../lib/package-format.cjs'),{validateDeclaration}=require('../lib/package-contract.cjs');
 
 /** Compile the unchanged Java converter and its complete production overlay on either build host. */
 export async function buildAndroidJavaConverterInput({output,work}){

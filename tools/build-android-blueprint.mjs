@@ -10,7 +10,7 @@ import {checkoutSource,run,recipeMain} from './build-source.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 
 const root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/android-inputs/blueprint');
-const require=createRequire(import.meta.url),{validateDeclaration}=require('../lib/declaration.cjs');
+const require=createRequire(import.meta.url),{validateDeclaration}=require('../lib/package-contract.cjs');
 const read=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8',...options}).trim();
 
 /** Compile the original Blueprint parser and its existing JSON transport. */

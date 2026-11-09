@@ -12,7 +12,7 @@ import {checkoutSource,run} from './build-source.mjs';
 import {buildInput} from './build-input.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
 import {verifyAndroidJavaFrameworkInput} from './build-android-java-framework.mjs';
-const root=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url),B=require('../lib/package-format.cjs'),{validateDeclaration}=require('../lib/declaration.cjs');
+const root=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url),B=require('../lib/package-format.cjs'),{validateDeclaration}=require('../lib/package-contract.cjs');
 const descriptor=path.join(root,'producers/android-art-inputs/java-stage.json');
 const json=file=>JSON.parse(fs.readFileSync(file));
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');

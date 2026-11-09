@@ -8,7 +8,7 @@ import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {recipe,inputs,build} from './build.mjs';
 const require=createRequire(import.meta.url),Native=require('../../lib/package-format.cjs');
-const {validateDeclaration}=require('../../lib/declaration.cjs');
+const {validateDeclaration}=require('../../lib/package-contract.cjs');
 const root=path.resolve(import.meta.dirname,'../..'),json=value=>JSON.stringify(value,null,2)+'\n',sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 function copy(from,to,mode=0o644){fs.mkdirSync(path.dirname(to),{recursive:true});fs.copyFileSync(from,to);fs.chmodSync(to,mode);}
 function filesIn(directory,prefix=''){return fs.readdirSync(path.join(directory,prefix),{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name)).flatMap(entry=>{const file=path.posix.join(prefix,entry.name);if(entry.isDirectory())return filesIn(directory,file);if(!entry.isFile())throw Error('Local runtime files must be regular files.');return[file];});}

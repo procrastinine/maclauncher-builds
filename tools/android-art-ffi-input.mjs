@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
 import {sha} from './helper-package.mjs';
-const require=createRequire(import.meta.url),B=require('../lib/package-format.cjs'),{validateDeclaration}=require('../lib/declaration.cjs');
+const require=createRequire(import.meta.url),B=require('../lib/package-format.cjs'),{validateDeclaration}=require('../lib/package-contract.cjs');
 const descriptor=new URL('../producers/android-art-inputs/ffi.json',import.meta.url);
 
 /** Read the sealed Linux-built Android libffi input through its ordinary inventory. */

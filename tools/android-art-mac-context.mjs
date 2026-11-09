@@ -13,7 +13,7 @@ import {prepareAndroidBuildInputs} from './android-build-inputs.mjs';
 import {artElfBuildEnvironment} from './build-android-art-elf.mjs';
 import {acquireLockedArtSources} from './android-art-locked-sources.mjs';
 import {verifyProducer} from './build-runtime.mjs';
-const root=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url),B=require('../lib/package-format.cjs'),{validateDeclaration}=require('../lib/declaration.cjs');
+const root=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url),B=require('../lib/package-format.cjs'),{validateDeclaration}=require('../lib/package-contract.cjs');
 const json=file=>JSON.parse(fs.readFileSync(file));
 function lockValue(file,key){const matches=[...fs.readFileSync(file,'utf8').matchAll(new RegExp('^'+key+'=([^\\r\\n]+)$','gm'))];if(matches.length!==1)throw Error('Missing original ART host input '+key);return matches[0][1];}
 

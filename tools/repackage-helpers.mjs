@@ -4,7 +4,7 @@ import path from 'node:path';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 const require=createRequire(import.meta.url),B=require('../lib/package-format.cjs');
-const {validateDeclaration}=require('../lib/declaration.cjs');
+const {validateDeclaration}=require('../lib/package-contract.cjs');
 const helpers=new Set(['android-apk-metadata','android-privacy','catsystem2-kif-crypto','ios-playtools-paths','mkxpz-config-helper']);
 
 /** Keep executable helpers, consumed identity metadata and license notices. */
