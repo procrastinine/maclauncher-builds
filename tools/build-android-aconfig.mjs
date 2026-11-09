@@ -12,7 +12,7 @@ const descriptor=new URL('../producers/android-inputs/aconfig/source.json',impor
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 
 /** Compile the original Android flag generator and its finalized SDK flag data. */
-export async function buildAndroidAconfig({project,version,arch,output,work}){
+export async function compile({project,version,output,work}){
  const profile=JSON.parse(fs.readFileSync(descriptor));version??=profile.version;
  if(project!==profile.id||version!==profile.version||!path.isAbsolute(output||'')||fs.existsSync(output)||!path.isAbsolute(work||'')||fs.existsSync(work))throw Error('Select the Android flag generator, its declared version, arm64 and new absolute output/work paths.');
  fs.mkdirSync(work,{recursive:true});
@@ -31,6 +31,10 @@ export async function buildAndroidAconfig({project,version,arch,output,work}){
  const env=rustEnvironment({work,minimumMacOS:profile.minimumMacOS,env:process.env});
  run('cargo',['fetch','--locked','--manifest-path',path.join(crate,'Cargo.toml')],{env});
  run('cargo',['build','--offline','--locked','--release','--package','aconfig','--manifest-path',path.join(crate,'Cargo.toml'),'--jobs','2'],{env});
+ return {version};
+}
+/** Package the compiled flag generator. */
+export async function assemble({project,arch,output,work,compiled:{version}}){
  return packageAndroidAconfig({project,version,arch,output,work});
 }
 
@@ -46,4 +50,4 @@ export async function packageAndroidAconfig({project='android-aconfig',version,a
  addLicenses(crate,project,path.resolve(import.meta.dirname,'../producers/android-inputs/aconfig'));
  return sealRuntime({cargoRoot:crate,env,project,version,arch,output,sourceRoot:source,upstreamRevision:sourceRevision(profile),executable:path.join(env.CARGO_TARGET_DIR,'release/aconfig'),provenance:{sdk:{repository:profile.sdk.repository,revision:sourceRevision(profile.sdk),files:profile.sdk.files.map(({path,contentSha256})=>({path,sha256:contentSha256}))},rustLockSha256:sha(fs.readFileSync(path.join(crate,'Cargo.lock')))}});
 }
-recipeMain(import.meta,buildAndroidAconfig);
+recipeMain(import.meta,{compile,assemble});
