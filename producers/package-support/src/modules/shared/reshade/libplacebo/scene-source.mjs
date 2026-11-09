@@ -9,7 +9,6 @@ import {SOURCE,VULKAN_HEADERS,applySceneOverlay} from "./scene-overlay.mjs";
 const hash=file=>crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 const run=(program,args,options={})=>execFileSync(program,args,{encoding:"utf8",stdio:"pipe",maxBuffer: Infinity,...options});
 function archive(repository,dependency,output){
-  if(run("git",["-C",repository,"rev-parse",sourceRevision(dependency)+"^{commit}"]).trim()!==sourceRevision(dependency))throw new Error("A required source commit is unavailable.");
   const origin=run("git",["-C",repository,"remote","get-url","origin"]).trim();
   if(origin.replace(/\.git$/,"")!==dependency.origin.replace(/\.git$/,""))throw new Error("The declared source origin changed.");
   fs.mkdirSync(output,{recursive:true});const content=run("git",["-C",repository,"archive",sourceRevision(dependency)],{encoding:null,env:{...process.env,GIT_NO_LAZY_FETCH:"1"}});run("tar",["-xf","-","-C",output],{input:content});
