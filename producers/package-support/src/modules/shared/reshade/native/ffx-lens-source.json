@@ -48,10 +48,5 @@
       "sha256": "70f235391383bd2e75efee2e71bc2a09f246bd1fcf282150870698df7f05c98d"
     }
   ],
-  "tools": {
-    "dxc": "cb0a0535c212ac31ca25ff18a3c43270d9a7c379fb2f3c28692cf8c44afee09d",
-    "spirv-cross": "00c168bc2bb03a96943023656007591915057e4d1820dd79d8efa32c75628403",
-    "spirv-val": "5e6ad0282e525bde7a764bfa3c0de5beca5cf65615fbc5def854c54d13bb9f67"
-  },
   "sourceFile": "lens/source.json"
 }
