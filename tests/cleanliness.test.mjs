@@ -5,6 +5,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {APP_REFERENCE,appSourceRoot} from '../tools/app-source.mjs';
 import {readProjects} from '../lib/projects.mjs';
+import {sourceCheckout} from '../lib/pins.mjs';
 import {createRecipeBuildReporter} from '../tools/recipe-build-report.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
@@ -49,9 +50,18 @@ test('source record pins are read only through the shared reader',()=>{
 
 // A revision or digest is declared once among the gitlinks and the files
 // packages read, so a change to it is one edit in one place.
+let described;
+const projectInputs=()=>{const describe=createRecipeBuildReporter({directory:root});return described??=readProjects(root,{resolvePins:false}).projects.filter(project=>project.build).map(project=>({project,files:describe(project.id).definition.files.map(file=>file.path)}));};
+
+// Only a package that declares the app checkout among its build submodules
+// pins the app and reads it.
+test('only packages that pin the app read app files',()=>{
+ const checkout=sourceCheckout(JSON.parse(fs.readFileSync(path.join(root,'producers/package-support/app-source.json'))));
+ assert.deepEqual(projectInputs().filter(({project})=>!(project.build.submodules||[]).includes(checkout)).flatMap(({project,files})=>files.filter(file=>file.startsWith(APP_REFERENCE)).map(file=>project.id+': '+file)),[]);
+});
+
 test('no pin or digest is declared in two places',()=>{
- const describe=createRecipeBuildReporter({directory:root}),inputs=new Set(),declared=new Map(),app=appSourceRoot().directory;
- for(const project of readProjects(root,{resolvePins:false}).projects.filter(project=>project.build))for(const file of describe(project.id).definition.files)inputs.add(file.path);
+ const inputs=new Set(projectInputs().flatMap(({files})=>files)),declared=new Map(),app=appSourceRoot().directory;
  for(const file of [...inputs].filter(file=>/\.(?:json|[mc]?js)$/.test(file))){
   const text=fs.readFileSync(file.startsWith(APP_REFERENCE)?path.join(app,file.slice(APP_REFERENCE.length)):path.join(root,file),'utf8');
   for(const [value] of text.matchAll(/(?<![0-9a-f])(?:[0-9a-f]{64}|[0-9a-f]{40})(?![0-9a-f])/g))if(!/^(.)\1+$/.test(value))declared.set(value,new Set([...(declared.get(value)||[]),file]));
