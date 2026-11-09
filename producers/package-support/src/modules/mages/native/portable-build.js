@@ -6,7 +6,6 @@ const MachO = require('../../../../../../lib/macho-load-commands.cjs');
 const Dependency = require("./portable-dependencies");
 const Existing = require("./build");
 
-const FFMPEG_ARCHIVE_BYTES = 11030368;
 function assertMinimumMacOS(file) {
   const info = MachO.readMachOLoadCommands(file, { architecture: "arm64" });
   return { file, sha256: Native.hashFile(file), ...info.slices[0] };
@@ -51,4 +50,4 @@ async function linkDependencyPaths(executable, prefixes, { logPath, env, signal,
   return { beforeSha256, sha256: Native.hashFile(executable), paths, commands };
 }
 
-module.exports = { FFMPEG_ARCHIVE_BYTES, assertMinimumMacOS, ffmpegOptions, writeHarfBuzzDescriptor, linkDependencyPaths };
+module.exports = { assertMinimumMacOS, ffmpegOptions, writeHarfBuzzDescriptor, linkDependencyPaths };

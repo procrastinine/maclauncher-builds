@@ -8,7 +8,7 @@ const os = require("node:os");
 const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const Current = require("../producers/package-support/src/modules/mages/native/current-build");
-const descriptor = appRequire('src/modules/mages/native/current-windows-overlay.json');
+const descriptor = require('../producers/package-support/src/modules/mages/native/current-windows-overlay.json');
 const Session = appRequire('src/modules/mages/native/windows-audio-session');
 
 const nativeRoot = appPath('src/modules/mages/native');

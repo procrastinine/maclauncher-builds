@@ -1,4 +1,3 @@
-const {appSourceRoot}=require('../../../../tools/app-source.mjs');
 // Build the managed libmpv adapter from an exact upstream export and owned overlays.
 const fs = require("node:fs"), path = require("node:path"), crypto = require("node:crypto");
 const { execFileSync, spawnSync } = require("node:child_process");
@@ -18,7 +17,7 @@ function build({ sourceCheckout, workDirectory, pkgConfigPath, toolsDirectory, m
   const run = (command, args, options = {}) => execFileSync(command, args, { encoding: "utf8", maxBuffer: Infinity, ...options });
   if (run("git", ["-C", sourceCheckout, "rev-parse", "HEAD"]).trim() !== REVISION || run("git", ["-C", sourceCheckout, "status", "--porcelain", "--untracked-files=no"]).trim())
     throw new Error("Initialize the exact clean mpv source checkout.");
-  const root = appSourceRoot().directory, patches = PATCHES.map(file => ({ file: path.join(root, "src/modules/video/native", file), name: file }));
+  const patches = PATCHES.map(file => ({ file: path.join(__dirname, "../native", file), name: file }));
   const source = path.join(workDirectory, "source"), output = path.join(workDirectory, "build");
   const sourceInputs = { revision: REVISION, backports: BACKPORTS, patches: patches.map(patch => ({ path: patch.name, sha256: hash(patch.file) })) };
   const sourceRecord = path.join(workDirectory, "source-inputs.json");
