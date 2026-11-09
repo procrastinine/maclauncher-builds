@@ -58,9 +58,8 @@ function sourceFiles(root, depth = 0, prefix = "", output = []) {
   return output;
 }
 
-async function buildRuntime({ manager: suppliedManager, userDataDir, version, packageVersion, sourceDir, architecture = process.arch, retainBuildDirectory = false, logger, signal, onProgress, dependencies = {} } = {}) {
-  const manager = suppliedManager || appRequire('src/modules/nscripter/runtime/onscripter-en-manager.js');
-  const { SNAPSHOT: PROFILE, SNAPSHOT_REVISION: REVISION } = appRequire('src/modules/nscripter/runtime/onscripter-en-manager.js');
+async function buildRuntime({ manager, userDataDir, version, packageVersion, sourceDir, architecture = process.arch, retainBuildDirectory = false, logger, signal, onProgress, dependencies = {} } = {}) {
+  const PROFILE = "MCLv1-0126", REVISION = SNAPSHOT_REVISION;
   const selected = version || PROFILE, outputVersion = packageVersion === undefined ? selected : packageVersion;
   if (selected !== PROFILE || typeof outputVersion !== "string" || !outputVersion.trim() || process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) {
     throw new Error("The reviewed ONScripter-EN source adapter supports the selected Mac source snapshot.");
