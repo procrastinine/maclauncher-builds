@@ -1895,6 +1895,12 @@
       "rustTargets": [
         "aarch64-apple-darwin",
         "x86_64-apple-darwin"
+      ],
+      "archives": [
+        {
+          "file": "producers/package-support/src/modules/shared/runtime/portable-ffmpeg.json",
+          "pointer": "/source"
+        }
       ]
     }
   },
@@ -4120,6 +4126,12 @@
       "tools": [
         "uv",
         "glslang"
+      ],
+      "archives": [
+        {
+          "file": "producers/dependencies/llvmMingw.json",
+          "pointer": ""
+        }
       ]
     }
   },
@@ -4283,6 +4295,12 @@
       "tools": [
         "uv",
         "glslang"
+      ],
+      "archives": [
+        {
+          "file": "producers/dependencies/llvmMingw.json",
+          "pointer": ""
+        }
       ]
     }
   }
