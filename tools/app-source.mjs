@@ -35,12 +35,14 @@ export function checkoutGitlinkFiles(directory,entries,run=runGit){
  const symlinks=stage.filter(row=>row.mode==='120000'&&(!declared||declared.some(entry=>row.path===entry||row.path.startsWith(entry+'/'))));
  if(!symlinks.length||!links.length)return [];
  // Each answer is `<object> <type> <size>` and the blob's bytes, or `<object> missing`.
- const output=Buffer.from(String(run(['cat-file','--batch'],directory,symlinks.map(row=>row.object).join('\n')+'\n'))),targets=new Map();
+ const output=Buffer.from(String(run(['cat-file','--batch'],directory,symlinks.map(row=>row.object).join('\n')+'\n'))),targets=new Map();let answered=0;
  for(let offset=0;offset<output.length;){
-  const end=output.indexOf(10,offset);if(end<0)break;const [object,type,size]=output.subarray(offset,end).toString().split(' ');
+  const end=output.indexOf(10,offset);if(end<0)break;const [object,type,size]=output.subarray(offset,end).toString().split(' ');answered++;
   if(type==='missing'||!/^\d+$/.test(size||'')){offset=end+1;continue;}
   targets.set(object,output.subarray(end+1,end+1+Number(size)).toString());offset=end+1+Number(size)+1;
  }
+ // A runner that does not pass the object names to git answers none of them.
+ if(answered<symlinks.length)throw Object.assign(Error('cat-file --batch answered '+answered+' of '+symlinks.length+' symlink objects in '+directory+'.'),{code:'INCOMPLETE_BATCH'});
  return symlinks.flatMap(row=>{
   if(!targets.has(row.object))return [];
   const resolved=path.posix.normalize(path.posix.join(path.posix.dirname(row.path),targets.get(row.object))),link=links.find(link=>resolved.startsWith(link.path+'/'));

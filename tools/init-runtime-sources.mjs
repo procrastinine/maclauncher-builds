@@ -25,8 +25,9 @@ const gitlinks=(directory,run,state=sourceState())=>{
  return state.listed.get(directory);
 };
 /** The gitlinks of a checkout that its own tracked symlinks point into, read through `run` by the
- * shared symlink reader. A checkout that is not initialized lists none. */
-const symlinkedGitlinks=(checkout,run)=>{let rows;try{rows=checkoutGitlinkFiles(checkout,undefined,run);}catch{return [];}return [...new Set(rows.map(row=>row.gitlink))];};
+ * shared symlink reader. A checkout that is not initialized lists none; an incomplete read of its
+ * symlinks is an error, never an empty list. */
+const symlinkedGitlinks=(checkout,run)=>{let rows;try{rows=checkoutGitlinkFiles(checkout,undefined,run);}catch(error){if(error.code==='INCOMPLETE_BATCH')throw error;return [];}return [...new Set(rows.map(row=>row.gitlink))];};
 const registry=directory=>require('../lib/projects.mjs').readProjects(directory,{resolvePins:false}).projects;
 // Parallel clones within one submodule update.
 const CLONE_JOBS='8';

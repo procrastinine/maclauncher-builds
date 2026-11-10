@@ -65,6 +65,17 @@ test('Android recipes initialize the producer whose metadata they read from a co
  }
 });
 
+test('a runner that answers none of the symlink objects fails the source step instead of linking nothing',()=>{
+ const gitlinkRows=links=>links.map(link=>'160000 '+'a'.repeat(40)+' 0\t'+link);
+ assert.throws(()=>initializeSources({project:'android-java-converter',directory:root,run:(args,cwd)=>{
+  if(args[0]==='ls-files'){
+   if(cwd===android)return [...gitlinkRows(androidGitlinks),...androidSymlinks.map(row=>'120000 '+row.object+' 0\t'+row.file)].map(row=>row+(args.includes('-z')?'\0':'\n')).join('');
+   return gitlinkRows(cwd===root?['sources/maclauncher','sources/maclauncher-android','sources/maclauncher-kosmickrisp']:[]).join('\n')+'\n';
+  }
+  return '';
+ }}),/answered 0 of 3 symlink objects/);
+});
+
 // Reads the app checkout: mpv declares app files, and initializeSources lists the app gitlinks they lie in from the app's own index.
 test('only a build that declares app-source.json initializes the app, with the app gitlinks its app files lie in',requirements({sourceTree:'sources/maclauncher'}),()=>{
  const fake=(cwd,links)=>links.map(path=>'160000 '+'a'.repeat(40)+' 0\t'+path).join('\n');
