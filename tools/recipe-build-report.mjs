@@ -91,12 +91,13 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   for(const name of manifest.buildCode||[])entry(name,'projects.json');
   for(const build of builds){entry(build.command,'projects');for(const name of submodules)if(!useLink(name,"projects"))problem('projects',name,'missing');
    for(const input of build.inputs||[])if(projects.has(input)&&input!==id)inputs.add(input);else problem('projects',input,'input','A package input names another registered project.');}
-  // A build's archive pins select the archive records it reads; each is listed for the input step.
+  // A build's archive pins select the archive records it reads; each is listed for the input step,
+  // with the pin's architecture when it has one.
   const listed=[];
   for(const build of builds)for(const pin of build.archives||[]){
    const selected=checkPin(pin,'projects.json'),found=[];if(selected===undefined)continue;
    const visit=value=>{if(!value||typeof value!=='object')return;const archive=Array.isArray(value)?undefined:archiveInput(value);if(archive)found.push(archive);else for(const child of Object.values(value))visit(child);};visit(selected);
-   if(found.length)listed.push(...found);else problem('projects',JSON.stringify(pin),'archive','The archive pin selects no archive record.');
+   if(found.length)listed.push(...found.map(archive=>pin.arch?{...archive,arch:pin.arch}:archive));else problem('projects',JSON.stringify(pin),'archive','The archive pin selects no archive record.');
   }
   for(const name of project.producer.entries||[])entry(name,'projects');
   for(const name of project.producer.appEntries||[])entry(APP_REFERENCE+name,'projects');
@@ -129,7 +130,8 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   // Declared records: source records are validated once here, pins add the
   // records they name, {project} names a package input, and a source record with
   // an archive digest names a source archive the input step fetches.
-  const addArchive=archive=>archives.set(archive.url+(archive.headers?' '+archive.headers.Range:''),archive);
+  // An archive that more than one architecture reads, or that is also listed without one, is read by every build.
+  const addArchive=archive=>{const key=archive.url+(archive.headers?' '+archive.headers.Range:''),known=archives.get(key);if(known&&known.arch!==archive.arch){const {arch,...shared}=archive;archives.set(key,shared);}else archives.set(key,archive);};
   function walk(value,from,pointer=''){
    if(Array.isArray(value)){value.forEach((child,index)=>walk(child,from,pointer+'/'+index));return;}
    if(!value||typeof value!=='object')return;

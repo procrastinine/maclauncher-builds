@@ -3580,6 +3580,31 @@
       "architectures": [
         "arm64",
         "x64"
+      ],
+      "archives": [
+        {
+          "file": "producers/included-helpers/rpgmaker-decrypter/decrypter-source.json",
+          "pointer": "/source"
+        },
+        {
+          "file": "producers/included-helpers/rpgmaker-decrypter/decrypter-source.json",
+          "pointer": "/packages"
+        },
+        {
+          "file": "producers/included-helpers/rpgmaker-decrypter/decrypter-source.json",
+          "pointer": "/sdk",
+          "arch": "arm64"
+        },
+        {
+          "file": "producers/included-helpers/rpgmaker-decrypter/decrypter-platforms.json",
+          "pointer": "/architectures/arm64",
+          "arch": "arm64"
+        },
+        {
+          "file": "producers/included-helpers/rpgmaker-decrypter/decrypter-platforms.json",
+          "pointer": "/architectures/x64",
+          "arch": "x64"
+        }
       ]
     }
   },

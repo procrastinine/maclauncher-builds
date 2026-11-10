@@ -91,6 +91,17 @@ test('a source record with an archive digest is a source archive that the input 
  await prepareBuildInputs({project:'recipe',output:path.join(f.directory,'prepared'),directory:f.directory,environment:{RELEASE_SELECTION:'recipe=1.0.0',BUILD_REPORTS:JSON.stringify({recipe:report})},fetchArchive:async archive=>{fetched.push(archive);}});
  assert.deepEqual(fetched,report.definition.archives);
 });
+test('archive pins list the archive records they select, each fetched only for the architectures that read it',async t=>{
+ const recipe=project('recipe','tools/recipe.cjs'),file='tools/inputs.json',row=(name,digit)=>({url:'https://example.com/'+name+'.tar.gz',sha256:digit.repeat(64)});
+ recipe.build.architectures=['arm64','x64'];recipe.build.archives=[{file,pointer:'/common'},{file,pointer:'/arm64',arch:'arm64'},{file,pointer:'/x64',arch:'x64'},{file,pointer:'/notes'}];
+ const f=fixture(t,{'tools/recipe.cjs':'module.exports = {};\n',[file]:{common:{tool:row('tool','a')},arm64:[row('sdk-arm64','b'),row('runtime','c')],x64:{sdk:row('sdk-x64','d'),runtime:row('runtime','c')},notes:{text:'none'}}},[recipe]);
+ const describe=createRecipeBuildReporter({directory:f.directory}),report=describe('recipe');
+ assert.deepEqual(report.definition.archives,[row('runtime','c'),{...row('sdk-arm64','b'),arch:'arm64'},{...row('sdk-x64','d'),arch:'x64'},row('tool','a')]);
+ assert.deepEqual(describe.unresolved('recipe').map(row=>[row.reason,row.problem]),[['archive','The archive pin selects no archive record.']]);
+ const fetched=[];
+ await prepareBuildInputs({project:'recipe',output:path.join(f.directory,'prepared'),directory:f.directory,environment:{RELEASE_SELECTION:'recipe=1.0.0',BUILD_ARCH:'x64',BUILD_REPORTS:JSON.stringify({recipe:report})},fetchArchive:async archive=>{fetched.push(archive.url);}});
+ assert.deepEqual(fetched,['https://example.com/runtime.tar.gz','https://example.com/sdk-x64.tar.gz','https://example.com/tool.tar.gz']);
+});
 test('a directory entry declares every tracked file below it',t=>{
  const recipe=project('recipe','tools/recipe.cjs');recipe.producer.entries.push('native/base');
  const f=fixture(t,{'tools/recipe.cjs':'module.exports = {};\n','native/base/src/compile.cpp':'int main() {}\n','native/base/THIRD_PARTY.md':'notices\n','native/other.cpp':'int other;\n'},[recipe]);
