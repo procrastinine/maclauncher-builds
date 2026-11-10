@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import {checkoutSource} from '../../../tools/build-source.mjs';
+import {placeDeclaredSource} from '../../../tools/build-source.mjs';
+import {aimRecord} from '../../../lib/android-source.mjs';
 import {addLicenses,addLicense,includeLicenses,addCargoLicenses} from '../../../lib/licenses.mjs';
 // Developer build and publication of the fixed AIM adaptation. Play uses only
 // this sealed payload and a separately acquired original Android image.
@@ -136,7 +137,7 @@ if(process.argv[1]===fileURLToPath(import.meta.url)) {
     const controllerSource=path.resolve(value('--controller-source',fileURLToPath(new URL('../../android-aim-controller/keeper.rs',import.meta.url))));
     if(!fs.existsSync(controllerSource)||!fs.lstatSync(controllerSource).isFile()||fs.lstatSync(controllerSource).isSymbolicLink())
       throw new Error('Select the Builds-owned controller with --controller-source <maclauncher-builds/producers/android-aim-controller/keeper.rs>.');
-    prepareAimSources({checkout:checkoutSource({repository:source.repository,revision:source.revision,destination:path.join(path.dirname(build),'aim-source')}),output:build,controllerSource,buildJobs:jobs});
+    prepareAimSources({checkout:placeDeclaredSource(aimRecord(),path.join(path.dirname(build),'aim-source')),output:build,controllerSource,buildJobs:jobs});
     const stagedController=path.join(build,'crates/aimctl/src/bin/maclauncher-aim.rs');
     if(sha(stagedController)!==sha(controllerSource))throw new Error('The generated AIM controller source differs from its Builds input.');
   }

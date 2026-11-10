@@ -184,7 +184,8 @@
         "arm64"
       ],
       "submodules": [
-        "sources/maclauncher-android"
+        "sources/maclauncher-android",
+        "sources/maclauncher-android/src/external/aim-custom"
       ],
       "tools": [
         "boost",
@@ -364,7 +365,8 @@
         "arm64"
       ],
       "submodules": [
-        "sources/maclauncher-android"
+        "sources/maclauncher-android",
+        "sources/maclauncher-android/src/external/aim-custom"
       ],
       "tools": [
         "ninja",

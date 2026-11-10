@@ -3,7 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
-import {recipeMain,run,checkoutSource} from './build-source.mjs';
+import {recipeMain,run,placeDeclaredSource} from './build-source.mjs';
+import {aimRecord} from '../lib/android-source.mjs';
 import {prepareAndroidBuildInputs,releaseAndroidImageArchive} from './android-build-inputs.mjs';
 import {buildAngleInput,addAngleLicenses,angleDefinition} from './build-android-angle.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
@@ -60,7 +61,7 @@ export async function compile({project,version,output,work}){
  version=record.version;
  const {source,prepareAimSources}=await import(pathToFileURL(path.join(root,'producers/package-support/src/modules/android/providers/aim/source.mjs')));
  const upstream=path.join(work,'upstream');
- const checkout=checkoutSource({repository:source.repository,revision:source.revision,destination:path.join(work,'aim-source')});
+ const checkout=placeDeclaredSource(aimRecord(),path.join(work,'aim-source'));
  fs.mkdirSync(work,{recursive:true});
  prepareAimSources({checkout,output:upstream,controllerSource:path.join(root,'producers/android-aim-controller/keeper.rs'),buildJobs:2});
  const {sdk,python,cache}=await prepareAndroidBuildInputs({source:upstream,work:path.join(work,'inputs'),image:source.androidImage});

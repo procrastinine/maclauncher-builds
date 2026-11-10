@@ -1,12 +1,12 @@
 import {sourceRevision} from '../lib/pins.mjs';
 import './producer-environment.mjs';
-import {androidSource} from '../lib/android-source.mjs';
+import {androidSource,aimRecord} from '../lib/android-source.mjs';
 import {addLicenses,addLicense} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
-import {checkoutSource,stageSource,run,recipeMain} from "./build-source.mjs";
+import {placeDeclaredSource,stageSource,run,recipeMain} from "./build-source.mjs";
 import {buildInput} from './build-input.mjs';
 import {acquireArtProducer} from './android-art-producer.mjs';
 import {prepareAndroidBuildInputs,releaseAndroidImageArchive} from './android-build-inputs.mjs';
@@ -33,8 +33,8 @@ export async function compileArtElfsInput({output,work}){
  const profile=JSON.parse(fs.readFileSync(descriptor));fs.mkdirSync(work,{recursive:true});
  const android=acquireArtProducer({source:androidSource(),work});
  const supplier=JSON.parse(fs.readFileSync(path.join(android,profile.supplier)));
- const checkout=checkoutSource({repository:supplier.sources.aim.url,revision:sourceRevision(supplier.sources.aim),destination:path.join(work,'upstream')});
- const source=path.join(work,'source'),staged=await stageSource(checkout,sourceRevision(supplier.sources.aim),source);
+ const aim=aimRecord(),checkout=placeDeclaredSource(aim,path.join(work,'upstream'));
+ const source=path.join(work,'source'),staged=await stageSource(checkout,sourceRevision(aim),source);
  const {prepareArtCompilerPaths}=await import(pathToFileURL(path.join(android,profile.compilerSource)));
  // This is the existing ART ELF adaptation from prepareAimSource. The remaining
  // AIM projection changes supply runtime execution, outside this compiler group.
@@ -56,7 +56,7 @@ export async function compileArtElfsInput({output,work}){
  await releaseAndroidImageArchive({source,work,cache,image:supplier.imageAcquisition});
  const {buildArtElfs}=await import(pathToFileURL(path.join(android,profile.buildEntry)));
  const built=buildArtElfs({aim:source,fetched,sdk,work:target,jdk:homes[0],python,jobs:2,env});
- return {art:built.art,checkout,fetched,record:{androidSource:androidSource(),aimRevision:sourceRevision(supplier.sources.aim)}};
+ return {art:built.art,checkout,fetched,record:{androidSource:androidSource(),aimRevision:sourceRevision(aim)}};
  }finally{const mount=path.join(fetched,'android16-image');if(fs.existsSync(path.join(mount,'root.identity')))run('hdiutil',['detach',mount]);}
 }
 

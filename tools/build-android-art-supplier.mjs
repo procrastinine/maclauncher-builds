@@ -35,7 +35,6 @@ export function prepareArtSupplierProducer({output}){
 /** Export the exact existing runtime projection and its retained allocator adapter without compiling. */
 export async function prepareArtSupplierSource({source,klepton,glesHeaders,output}){
  const android=path.join(root,androidSource().directory);
- const selected=JSON.parse(fs.readFileSync(path.join(android,'src/modules/android/art/supplier.json'))).sources.aim;
  const aim=output,{prepareAimSource}=await original(android,'art/source.mjs');
  prepareAimSource({source,output:aim,klepton,glesHeaders,mutableCode:true});
  overlay(aim,'allocator-build.patch');

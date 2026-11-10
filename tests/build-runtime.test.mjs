@@ -144,12 +144,15 @@ test('runtime builds read the source commit recorded by the hub',t=>{
  const git=(cwd,...args)=>execFileSync('git',['-C',cwd,...args],{encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
  git(source,'init','-q');git(source,'config','user.name','Build test');git(source,'config','user.email','test@example.invalid');
  for(const entry of ['build.mjs','check-sources.mjs'])fs.writeFileSync(path.join(source,'tools',entry),'export {};\n');
+ // The runtime source's own gitlink (AIM in the Android source) is read at the commit that source records.
+ const nested='4'.repeat(40);git(source,'update-index','--add','--cacheinfo',`160000,${nested},src/external/aim`);
  git(source,'add','tools');git(source,'commit','-qm','Runtime source');const revision=git(source,'rev-parse','HEAD');
  git(root,'init','-q');git(root,'config','user.name','Build test');git(root,'config','user.email','test@example.invalid');
  git(root,'update-index','--add','--cacheinfo',`160000,${revision},sources/android`);git(root,'commit','-qm','Pin producer');
  const recipe={schemaVersion:1,id:'android',gitlink:'sources/android',buildEntry:'tools/build.mjs',checkEntry:'tools/check-sources.mjs'};
  assert.equal(verifyProducer(root,recipe),source);
  assert.equal(sourceRevision(recipe,root),revision);
+ assert.equal(sourceRevision({gitlink:'sources/android/src/external/aim'},root),nested);
 });
 
 // A registry with one GitHub-built project and a command that writes a data-only package.

@@ -962,7 +962,8 @@
         "x64"
       ],
       "submodules": [
-        "sources/maclauncher-android"
+        "sources/maclauncher-android",
+        "sources/maclauncher-android/src/external/aim-custom"
       ],
       "rustComponents": [
         "rust-docs"
@@ -1563,7 +1564,8 @@
         "arm64"
       ],
       "submodules": [
-        "sources/maclauncher-android"
+        "sources/maclauncher-android",
+        "sources/maclauncher-android/src/external/aim-custom"
       ],
       "tools": [
         "uv"
