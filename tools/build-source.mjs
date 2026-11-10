@@ -5,7 +5,7 @@ import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import {retryNetwork} from './download.mjs';
-import {sourceCheckout,sourceRevision} from '../lib/pins.mjs';
+import {sourceCheckout} from '../lib/pins.mjs';
 import {readProjects} from '../lib/projects.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Source=require('../producers/package-support/src/modules/shared/runtime/pinned-native-build.js');
 /** A build tool from the declared Homebrew formulae, then from PATH. */
@@ -29,9 +29,7 @@ export function checkoutSource({repository,revision,destination}){
 export function declaredSource(record,upstream){
  if(typeof record==='string')record=readProjects(root,{resolvePins:false}).projects.find(project=>project.id===record)?.upstreams.find(row=>row.id===upstream)?.pin;
  const link=record&&sourceCheckout(record);if(typeof link!=='string')throw Error('A declared source names its Builds gitlink.');
- const directory=path.join(root,link);
- if(!fs.existsSync(path.join(directory,'.git'))||git(directory,['rev-parse','HEAD'])!==sourceRevision(record))throw Error('Initialize '+link+' at its pinned commit; the build declares it among its submodules.');
- return directory;
+ return path.join(root,link);
 }
 /** Export pinned source before applying owned adaptations or compiling. */
 export async function stageSource(source,revision,destination){
