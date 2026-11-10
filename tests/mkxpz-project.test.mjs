@@ -20,9 +20,9 @@ test('MKXP-Z uses its owned source recipe and one Gitlink source identity',()=>{
  assert.deepEqual(project.build.architectures,['arm64']);
  for(const version of ['MCLv1-1003','MCLv2-1003'])assert.ok(project.packageProfiles.some(row=>row.version===version));
  assert.equal(project.upstreams[0].revision,gitlink('producers/package-support/src/external/mkxp-z'));
- assert.equal(Object.hasOwn(baseline.upstream,'revision'),false);
- assert.match(baseline.upstream.sourceSha256,/^[a-f0-9]{64}$/);
- assert.ok(baseline.upstream.sourceBytes>0);
+ assert.equal(Object.hasOwn(baseline.upstream,'revision'),false);assert.equal(baseline.upstream.gitlink,'producers/package-support/src/external/mkxp-z');
+ assert.match(baseline.upstream.sha256,/^[a-f0-9]{64}$/);
+ assert.ok(baseline.upstream.bytes>0);
  assert.equal(build(['--project','mkxpz','--check']).sourceDirectory,'producers/package-support');
 });
 test('MKXP-Z catalog validates an immutable Apple Silicon package',t=>{

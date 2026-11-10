@@ -2772,6 +2772,12 @@
         "libtool",
         "m4",
         "nasm"
+      ],
+      "archives": [
+        {
+          "file": "runtimes/mkxpz/baseline.json",
+          "pointer": "/upstream"
+        }
       ]
     }
   },
