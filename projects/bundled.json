@@ -863,6 +863,12 @@
         "command": "tools/build-java-steamworks.mjs",
         "architectures": [
           "x64"
+        ],
+        "archives": [
+          {
+            "file": "producers/package-support/src/modules/java/runtime/steamworks/publisher-releases.json",
+            "pointer": ""
+          }
         ]
       },
       {
@@ -870,6 +876,12 @@
         "command": "tools/build-java-steamworks.mjs",
         "architectures": [
           "universal"
+        ],
+        "archives": [
+          {
+            "file": "producers/package-support/src/modules/java/runtime/steamworks/publisher-releases.json",
+            "pointer": ""
+          }
         ]
       }
     ]

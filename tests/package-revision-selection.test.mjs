@@ -8,7 +8,7 @@ const originals=JSON.parse(fs.readFileSync(new URL('../producers/package-support
 test('new Steamworks package revisions retain the exact original ABI source and publisher pins',()=>{
  for(const base of ['1.9.0','1.10.0'])for(const revision of [1,3,42]){
   const selected=javaSteamworksProfile(base+'-MCLv'+revision),original=originals.find(row=>row.version===base);
-  assert.deepEqual(selected,original);assert.equal(selected.sourceRevision,original.sourceRevision);assert.equal(selected.publisherJarSha256,original.publisherJarSha256);
+  assert.deepEqual(selected,original);assert.equal(selected.sourceRevision,original.sourceRevision);assert.equal(selected.archiveSha256,original.archiveSha256);
  }
 });
 test('Steamworks rejects unknown upstream profiles and malformed revisions before acquisition',()=>{
