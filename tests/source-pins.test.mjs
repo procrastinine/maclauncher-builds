@@ -158,7 +158,7 @@ test('gitlink references resolve the recorded commit and original submodule URL 
  assert.deepEqual(resolveUpstream(upstream,root,{resolvePins:false}),upstream);
 });
 
-test('archive records name one archive each, a shared record taking its revision from its own field or its gitlink',async()=>{
+test('archive records name one archive each, a shared record taking its revision from its own field or its gitlink, a Gitiles file its encoded response',async()=>{
  const {archiveInput}=await import('../lib/pins.mjs'),repository='https://github.com/owner/tool',sha256='c'.repeat(64),url=revision=>repository+'/archive/'+revision+'.tar.gz';
  assert.deepEqual(archiveInput({repository,revision:current,sha256}),{url:url(current),sha256});
  assert.deepEqual(archiveInput({repository,gitlink:'external/tool',sha256},new Map([['external/tool',next]])),{url:url(next),sha256});
@@ -166,4 +166,7 @@ test('archive records name one archive each, a shared record taking its revision
  assert.equal(archiveInput({repository,gitlink:'external/other',sha256},new Map([['external/tool',next]])),undefined);
  assert.equal(archiveInput({repository,revision:current,sha256,url:'https://example.com/tool.tar.gz'}).url,'https://example.com/tool.tar.gz');
  assert.deepEqual(archiveInput({archiveUrl:'https://example.com/{revision}.tar.gz',archiveSha256:sha256,archiveBytes:5,revision:held}),{url:'https://example.com/'+held+'.tar.gz',sha256,bytes:5});
+ const gitiles='https://android.googlesource.com/platform/tools';
+ assert.deepEqual(archiveInput({repository:gitiles,revision:current,path:'bin/tool',sha256:'d'.repeat(64),bytes:3,transport:{sha256,bytes:4}}),{url:gitiles+'/+/'+current+'/bin/tool?format=TEXT',sha256,bytes:4});
+ assert.equal(archiveInput({repository:gitiles,revision:current,path:'bin/tool',sha256}),undefined);
 });

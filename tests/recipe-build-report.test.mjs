@@ -107,6 +107,15 @@ test('a files row without its own url reads the url of the record that lists it'
  const f=fixture(t,{'tools/recipe.cjs':'module.exports = {};\n',[file]:{url:'https://example.com/main.jar',files:[{path:'main.jar',size:5,sha256:'a'.repeat(64)},{path:'extra.jar',url:'https://example.com/extra.jar',sha256:'b'.repeat(64)}],member:{path:'lib.dylib',size:3,sha256:'c'.repeat(64)}}},[recipe]);
  assert.deepEqual(createRecipeBuildReporter({directory:f.directory})('recipe').definition.archives,[{url:'https://example.com/extra.jar',sha256:'b'.repeat(64)},{url:'https://example.com/main.jar',sha256:'a'.repeat(64),bytes:5}]);
 });
+test('a lock-file archive pin reads the record fields from the shell-style variables it names',t=>{
+ const recipe=project('recipe','tools/recipe.cjs'),file='tools/toolchain.lock';
+ recipe.build.archives=[{file,keys:{url:'JDK_URL',sha256:'JDK_SHA256'}},{file,keys:{url:'TOOLS_URL',sha256:'TOOLS_SHA256'}}];
+ const f=fixture(t,{'tools/recipe.cjs':'module.exports = {};\n',[file]:'# Toolchain\nJDK_URL=https://example.com/jdk.tar.gz\nJDK_SHA256='+'a'.repeat(64)+'\nTOOLS_URL=https://example.com/tools.zip\n'},[recipe]);
+ const describe=createRecipeBuildReporter({directory:f.directory}),report=describe('recipe');
+ assert.deepEqual(report.definition.archives,[{url:'https://example.com/jdk.tar.gz',sha256:'a'.repeat(64)}]);
+ assert.ok(report.definition.files.some(row=>row.path===file));
+ assert.deepEqual(describe.unresolved('recipe').map(row=>[row.reason,row.problem]),[['pin','Missing or ambiguous lock value TOOLS_SHA256 in toolchain.lock.']]);
+});
 test('a directory entry declares every tracked file below it',t=>{
  const recipe=project('recipe','tools/recipe.cjs');recipe.producer.entries.push('native/base');
  const f=fixture(t,{'tools/recipe.cjs':'module.exports = {};\n','native/base/src/compile.cpp':'int main() {}\n','native/base/THIRD_PARTY.md':'notices\n','native/other.cpp':'int other;\n'},[recipe]);

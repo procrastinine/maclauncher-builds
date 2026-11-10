@@ -64,11 +64,11 @@ export async function compile({project,version,output,work}){
  const checkout=placeDeclaredSource(aimRecord(),path.join(work,'aim-source'));
  fs.mkdirSync(work,{recursive:true});
  prepareAimSources({checkout,output:upstream,controllerSource:path.join(root,'producers/android-aim-controller/keeper.rs'),buildJobs:2});
- const {sdk,python,cache}=await prepareAndroidBuildInputs({source:upstream,work:path.join(work,'inputs'),image:source.androidImage});
+ const {sdk,python}=await prepareAndroidBuildInputs({source:upstream,work:path.join(work,'inputs'),image:source.androidImage});
  const env=aimBuildEnvironment({work,upstream,sdk,python,minimumMacOS:source.minimumMacOS||'26.0'});
  try{
  run(process.execPath,[path.join(root,'producers/package-support/scripts/build-android-aim.mjs'),'--build','--image-only','--jobs','2','--work',upstream],{env});
- await releaseAndroidImageArchive({source:upstream,work,cache,image:source.androidImage});
+ await releaseAndroidImageArchive({source:upstream,work,image:source.androidImage});
  run(process.execPath,[path.join(root,'producers/package-support/scripts/build-android-aim.mjs'),'--build','--jobs','2','--work',upstream],{env});
  }finally{detachAimImage(work,upstream);}
  // Compilation is complete. Staging reads detached runtime products, metadata and notices.

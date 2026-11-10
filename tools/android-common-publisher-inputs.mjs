@@ -35,34 +35,30 @@ export async function prepareAndroidCommonPublisherInputs({work}){
  const android=verifyProducer(root,recipe),frameworkPin=JSON.parse(fs.readFileSync(path.join(android,profile.frameworkDefinition)));
  if(frameworkPin.files.length!==1)throw Error('The framework profile must supply one original Java artifact.');
  fs.mkdirSync(work,{recursive:true});
- const archiveCache=path.join(work,'archives');
- const retireArchive=archive=>{if(path.dirname(archive)!==archiveCache)throw Error('Publisher archive is outside its owned cache.');fs.rmSync(archive);};
- const jdkArchive=await buildInput(JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/java-converter.json'))).jdk['darwin-arm64'],archiveCache),jdkOutput=path.join(work,'jdk');fs.mkdirSync(jdkOutput);
+ // Each archive is a build input the input step fetched, read in place from the shared build-input cache.
+ const jdkArchive=await buildInput(JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/java-converter.json'))).jdk['darwin-arm64']),jdkOutput=path.join(work,'jdk');fs.mkdirSync(jdkOutput);
  const jdkNames=archiveNames(jdkArchive,true),java=unique(jdkNames.filter(name=>name.endsWith('/Contents/Home/bin/java')),'JDK home');
  const home=java.slice(0,-'/bin/java'.length);
  read('/usr/bin/tar',['-xzf',jdkArchive,'-C',jdkOutput,home]);
  const jdk=path.join(jdkOutput,home);
  if(!fs.statSync(path.join(jdk,'include/jni.h')).isFile())throw Error('The supplied JDK has no JNI headers.');
- retireArchive(jdkArchive);
  const sharedSdl=preparedBuildInput('native-sdl3');let sdl;
  if(sharedSdl)sdl=prepareSharedSdlFramework(sharedSdl,work);
- else{const sdlArchive=await buildInput(profile.sdl,archiveCache);sdl=await prepareSdl(sdlArchive,work,profile.sdl);retireArchive(sdlArchive);}
+ else{const sdlArchive=await buildInput(profile.sdl);sdl=await prepareSdl(sdlArchive,work,profile.sdl);}
  if(!fs.statSync(path.join(sdl,'SDL3')).isFile()||!fs.statSync(path.join(sdl,'Headers/SDL.h')).isFile())throw Error('The shared SDL3 package has no complete framework API.');
- const mvkArchive=await buildInput(profile.vulkanHeaders,archiveCache),mvkOutput=path.join(work,'vulkan');fs.mkdirSync(mvkOutput);
+ const mvkArchive=await buildInput(profile.vulkanHeaders),mvkOutput=path.join(work,'vulkan');fs.mkdirSync(mvkOutput);
  const mvkNames=archiveNames(mvkArchive),include=unique(mvkNames.filter(name=>name.endsWith(profile.vulkanHeaders.includeSuffix)),'Vulkan header directory');
 
  read('/usr/bin/tar',['-xf',mvkArchive,'-C',mvkOutput,include]);
  const vulkanHeaders=path.join(mvkOutput,include);
  if(!fs.statSync(path.join(vulkanHeaders,'vulkan/vulkan.h')).isFile())throw Error('The publisher SDK has no Vulkan headers.');
- retireArchive(mvkArchive);
  const file=frameworkPin.files[0],framework=path.join(work,'framework');fs.mkdirSync(framework);
- const frameworkArchive=await buildInput({url:frameworkPin.url,sha256:file.sha256,bytes:file.size},archiveCache);
- fs.copyFileSync(frameworkArchive,path.join(framework,file.path),fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);retireArchive(frameworkArchive);
- const sdkArchive=await buildInput(profile.buildTools,archiveCache),sdkOutput=path.join(work,'build-tools');fs.mkdirSync(sdkOutput);
+ const frameworkArchive=await buildInput({url:frameworkPin.url,sha256:file.sha256,bytes:file.size});
+ fs.copyFileSync(frameworkArchive,path.join(framework,file.path),fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);
+ const sdkArchive=await buildInput(profile.buildTools),sdkOutput=path.join(work,'build-tools');fs.mkdirSync(sdkOutput);
  const sdkNames=archiveNames(sdkArchive),sdkAidl=unique(sdkNames.filter(name=>name.endsWith('/aidl')),'Android AIDL executable');
  read('/usr/bin/unzip',['-q',sdkArchive,'-d',sdkOutput]);
  const aidl=path.join(sdkOutput,sdkAidl),buildTools=path.dirname(aidl);
  if(!fs.statSync(path.join(buildTools,'lib64/libc++.dylib')).isFile()||!fs.statSync(path.join(buildTools,'source.properties')).isFile())throw Error('The original Android build tools have no AIDL runtime closure.');
- retireArchive(sdkArchive);
  return {jdk,sdl,vulkanHeaders,framework,aidl,buildTools};
 }

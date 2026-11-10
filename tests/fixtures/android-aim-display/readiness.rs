@@ -41,7 +41,11 @@ impl Display {
         socket.write_all(b"ready").unwrap();
     }
 }
-mod vsync {pub fn create(_:Box<dyn Fn(())+Send>)->Result<u64,String>{Ok(16_666_667)}}
+mod vsync {
+    pub fn create(_:Box<dyn Fn(())+Send>)->Result<u64,String>{Ok(16_666_667)}
+    pub fn create_headless(_:Box<dyn Fn(())+Send>)->Result<u64,String>{Ok(16_666_667)}
+}
+mod mode {pub const DEVICE:u32=1;pub const WINDOWS:u32=2;pub const HEADLESS:u32=3;}
 mod input {
     pub fn start(_: &std::path::Path,_:&super::Window)->Result<(),String>{Ok(())}
     pub fn quit_on_signals(){}
@@ -59,7 +63,7 @@ mod aim_host_display {
 fn start(socket:PathBuf,state:Arc<State>) {
     let renderer=Renderer(state);
     let win=Window {layer:Some(1),number:Some(1),width:1280,height:800,dpi_x:320.0,dpi_y:320.0};
-    let display_mode=0;
+    let display_mode=mode::DEVICE;
     let capture=None;
 /* ORIGINAL_STARTUP */
 }

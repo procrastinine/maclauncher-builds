@@ -23,7 +23,7 @@ export async function compile({project,version,arch,output,work}){
  const archive=await buildInput(imageProfile.archive),tool=buildImageDataTool({work:imageWork}),decoded=path.join(imageWork,'decoded');
  run(tool.executable,['export',archive,path.join(imageWork,'root'),decoded],{env:tool.env});
  // The authenticated portable objects own all subsequent image reads.
- fs.rmSync(path.join(imageWork,'root'),{recursive:true,force:true});fs.unlinkSync(archive);
+ fs.rmSync(path.join(imageWork,'root'),{recursive:true,force:true});
  const image=[];
  for(const id of profile.imageProfiles){
   const selected=imageProfile.profiles.find(selected=>selected.id===id);if(!selected)throw Error('The required original image shard profile is unavailable.');

@@ -68,14 +68,20 @@ export function initializeGitlinks({paths,directory,run,allowRecursive=false,sta
  return initialized;
 }
 export function initializeToolSources({directory=root,run=runGit}={}){return initializeGitlinks({paths:toolPaths(directory),directory,run});}
-/** Sources the planner reads to describe every package: each gitlink holding a file a project
- * names by path (an entry or a source record file), and the app with its declared nested gitlinks
- * when any project reads the app. */
+/** Sources the planner reads to describe every package: each gitlink, at any depth, holding a file a
+ * project names by path (an entry, a source record file or an archive pin file), and the app with its
+ * declared nested gitlinks when any project reads the app. */
 export function initializeMetadataSources({directory=root,run=runGit,state=sourceState()}={}){
- const projects=registry(directory),links=gitlinks(directory,run,state),appProjects=projects.filter(readsApp);
- const named=projects.flatMap(project=>[...(project.producer?.entries||[]),...(project.upstreams||[]).flatMap(upstream=>typeof upstream.pin?.file==='string'?[upstream.pin.file]:[])]);
- const holding=links.filter(link=>named.some(name=>name.startsWith(link+'/')));
- const initialized=initializeGitlinks({paths:[...(appProjects.length?toolPaths(directory):[]),...holding],directory,run,state});
+ const projects=registry(directory),appProjects=projects.filter(readsApp);
+ const named=projects.flatMap(project=>[...(project.producer?.entries||[]),...(project.upstreams||[]).flatMap(upstream=>typeof upstream.pin?.file==='string'?[upstream.pin.file]:[]),
+  ...(project.build?require('../lib/projects.mjs').buildRecords(project):[]).flatMap(build=>(build.archives||[]).map(pin=>pin.file))]);
+ const holding=(superproject,prefix)=>gitlinks(superproject,run,state).map(link=>prefix+link).filter(link=>named.some(name=>name.startsWith(link+'/')));
+ const initialized=[];
+ // A gitlink inside an initialized gitlink is listed from that checkout, one level at a time.
+ for(let level=holding(directory,''),first=true;level.length||first;first=false){
+  initialized.push(...initializeGitlinks({paths:[...(first&&appProjects.length?toolPaths(directory):[]),...level],directory,run,state}));
+  level=level.flatMap(link=>holding(path.join(directory,link),link+'/'));
+ }
  return [...initialized,...initializeGitlinks({paths:nestedAppPaths(appProjects,directory),directory,run,state})];
 }
 /** Sources npm test reads: the planner's sources, every pinned source repository and the

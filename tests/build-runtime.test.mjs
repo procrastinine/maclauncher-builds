@@ -9,7 +9,7 @@ import {execFileSync,spawnSync} from 'node:child_process';
 import {verifyProducer,main,buildPlan,runBuild,checkBuildRequest,RUNNERS,HOSTED_RUNNERS} from '../tools/build-runtime.mjs';
 import {findBuildTool,checkoutSource} from '../tools/build-source.mjs';
 import {prepareBuildHost} from '../tools/build-host.mjs';
-import {initializeSources,initializeGitlinks} from '../tools/init-runtime-sources.mjs';
+import {initializeSources,initializeGitlinks,initializeMetadataSources} from '../tools/init-runtime-sources.mjs';
 import {prepareRelease} from '../tools/release-runtime.mjs';
 import {readProjects,buildRecord,buildRecords} from '../lib/projects.mjs';
 import {createRequire} from 'node:module';
@@ -33,6 +33,16 @@ const androidSymlinks=Object.entries({
 const symlinkTargets=[...new Set(androidSymlinks.map(row=>path.posix.normalize(path.posix.join(path.posix.dirname(row.file),row.target)))
  .flatMap(target=>androidGitlinks.filter(link=>target.startsWith(link+'/'))))];
 
+test('the metadata sources take each nested gitlink that holds a declared archive pin file, from a cold checkout',()=>{
+ // The fake git alone defines the checkouts: no source needs to be initialized or staged here.
+ const gitlinkRows=links=>links.map(link=>'160000 '+'a'.repeat(40)+' 0\t'+link+'\n').join('');
+ const result=initializeMetadataSources({directory:root,run:(args,cwd)=>args[0]==='ls-files'?gitlinkRows(cwd===root?['sources/maclauncher','sources/maclauncher-android','sources/maclauncher-kosmickrisp']:cwd===android?androidGitlinks:cwd===appCheckout?['src/external/maclauncher-android','src/external/maclauncher-kosmickrisp']:[]):''});
+ const pinned=readProjects(root,{resolvePins:false}).projects.flatMap(project=>project.build?buildRecords(project):[]).flatMap(build=>build.archives||[]).map(pin=>pin.file).filter(file=>file.startsWith('sources/maclauncher-android/src/external/aim-custom/'));
+ assert.ok(pinned.length,'An archive pin reads a file of the nested AIM gitlink');
+ const initialized=result.map(row=>row.path);
+ assert.ok(initialized.includes('sources/maclauncher-android/src/external/aim-custom'),'The gitlink holding the pinned AIM lock is initialized');
+ assert.ok(!initialized.includes('sources/maclauncher-android/src/external/android-angle'),'A nested gitlink holding no declared file is not initialized');
+});
 test('Android recipes initialize the producer whose metadata they read from a cold checkout',()=>{
  assert.equal(readProjects(root,{resolvePins:false}).projects.find(project=>project.id==='android-angle-aim').build,undefined,'The historical AIM ANGLE project has no independent producer');
  assert.deepEqual(symlinkTargets,['sources/maclauncher','src/external/aim-custom']);

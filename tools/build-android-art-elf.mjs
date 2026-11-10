@@ -1,4 +1,4 @@
-import {sourceRevision} from '../lib/pins.mjs';
+import {lockValue,sourceRevision} from '../lib/pins.mjs';
 import './producer-environment.mjs';
 import {androidSource,aimRecord} from '../lib/android-source.mjs';
 import {addLicenses,addLicense} from '../lib/licenses.mjs';
@@ -15,11 +15,6 @@ import {rustEnvironment} from './rust-build.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 const descriptor=path.join(root,'producers/android-art-inputs/art-source.json');
 const read=(program,args,options={})=>execFileSync(program,args,{maxBuffer:Infinity,encoding:'utf8',...options}).trim();
-function lockValue(file,key){
- const matches=[...fs.readFileSync(file,'utf8').matchAll(new RegExp('^'+key+'=([^\\r\\n]+)$','gm'))];
- if(matches.length!==1)throw Error('Missing or ambiguous ART build input '+key+'.');
- return matches[0][1];
-}
 
 /** Keep the ART output layout and profile on the shared Rust toolchain environment. */
 export function artElfBuildEnvironment({work,target,sdk,jdk,python,env=process.env}){
@@ -39,12 +34,11 @@ export async function compileArtElfsInput({output,work}){
  // This is the existing ART ELF adaptation from prepareAimSource. The remaining
  // AIM projection changes supply runtime execution, outside this compiler group.
  prepareArtCompilerPaths(source,{source:checkout});
- const {sdk,python,cache}=await prepareAndroidBuildInputs({source,work:path.join(work,'inputs'),image:supplier.imageAcquisition});
- const javaLock=path.join(source,'upstream/java-toolchain.lock'),jdkArchive=await buildInput({url:lockValue(javaLock,'JDK_URL'),sha256:lockValue(javaLock,'JDK_SHA256')},path.join(work,'inputs/downloads'));
+ const {sdk,python}=await prepareAndroidBuildInputs({source,work:path.join(work,'inputs'),image:supplier.imageAcquisition});
+ const javaLock=path.join(source,'upstream/java-toolchain.lock'),jdkArchive=await buildInput({url:lockValue(javaLock,'JDK_URL'),sha256:lockValue(javaLock,'JDK_SHA256')});
  const java=path.join(work,'jdk');fs.mkdirSync(java);run('/usr/bin/tar',['-xzf',jdkArchive,'-C',java]);
  const homes=fs.readdirSync(java).map(name=>path.join(java,name,'Contents/Home')).filter(home=>fs.existsSync(path.join(home,'bin/javac')));
  if(homes.length!==1)throw Error('The pinned JDK archive did not supply one JDK home.');
- fs.unlinkSync(jdkArchive);
  const target=path.join(work,'target'),fetched=path.join(work,'fetched');fs.mkdirSync(target);fs.renameSync(path.join(source,'_build'),fetched);
  fs.symlinkSync(target,path.join(source,'target'),'dir');fs.symlinkSync(fetched,path.join(source,'_build'),'dir');
  const env=artElfBuildEnvironment({work,target,sdk,jdk:homes[0],python});
@@ -53,7 +47,7 @@ export async function compileArtElfsInput({output,work}){
  // The image node compiles its original reader/translator and authenticates it.
  try{
  run('cargo',['run','--offline','--locked','--release','--quiet','--package','aim-build','--bin','cargo-aim','--','build','image'],{cwd:source,env});
- await releaseAndroidImageArchive({source,work,cache,image:supplier.imageAcquisition});
+ await releaseAndroidImageArchive({source,work,image:supplier.imageAcquisition});
  const {buildArtElfs}=await import(pathToFileURL(path.join(android,profile.buildEntry)));
  const built=buildArtElfs({aim:source,fetched,sdk,work:target,jdk:homes[0],python,jobs:2,env});
  return {art:built.art,checkout,fetched,record:{androidSource:androidSource(),aimRevision:sourceRevision(aim)}};

@@ -5,7 +5,7 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {readProjects,buildRecords} from '../lib/projects.mjs';
 import {resolveUpstream,validatePinReference} from "../lib/source-pins.mjs";
-import {sourceRecordProblem,sourceArchive,archiveInput} from '../lib/pins.mjs';
+import {sourceRecordProblem,sourceArchive,archiveInput,lockValue} from '../lib/pins.mjs';
 import {APP_REFERENCE,appSourceRoot,appNestedFiles} from './app-source.mjs';
 import {canonicalReport,reportDigest} from '../lib/canonical-report.mjs';
 export {canonicalReport,reportDigest};
@@ -120,7 +120,9 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
     const inCheckout=candidate=>linkOf(candidate)&&fs.statSync(path.join(root,candidate),{throwIfNoEntry:false})?.isFile();
     const file=candidates.find(candidate=>!candidate.startsWith("../")&&(isFile(candidate)||inCheckout(candidate)));
     if(!file){problem(from,expression,"missing");return;}
-    if(useLink(file,from,true)){if(!file.endsWith(".json"))return;}else{addFile(file,from);if(!file.endsWith(".json"))return;}
+    if(useLink(file,from,true)){if(!file.endsWith(".json")&&!pin.keys)return;}else{addFile(file,from);if(!file.endsWith(".json")&&!pin.keys)return;}
+    // A lock file of shell-style assignments gives the record each field from the variable the pin names.
+    if(pin.keys){try{return Object.fromEntries(Object.entries(pin.keys).map(([field,key])=>[field,lockValue(path.join(root,file),key)]));}catch(error){problem(from,expression,'pin',error.message);return;}}
     selected=JSON.parse(read(path.join(root,file)));
    }
    if(pin.match)return;

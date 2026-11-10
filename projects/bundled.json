@@ -1593,6 +1593,28 @@
         {
           "file": "tools/python-build-tools.json",
           "pointer": "/interpreters"
+        },
+        {
+          "file": "producers/android-inputs/aim.json",
+          "pointer": "/ndk"
+        },
+        {
+          "file": "sources/maclauncher-android/src/external/aim-custom/upstream/java-toolchain.lock",
+          "keys": {
+            "url": "BUILD_TOOLS_URL",
+            "sha256": "BUILD_TOOLS_SHA256"
+          }
+        },
+        {
+          "file": "sources/maclauncher-android/src/external/aim-custom/upstream/java-toolchain.lock",
+          "keys": {
+            "url": "JDK_URL",
+            "sha256": "JDK_SHA256"
+          }
+        },
+        {
+          "file": "sources/maclauncher-android/src/modules/android/art/supplier.json",
+          "pointer": ""
         }
       ]
     },

@@ -1,4 +1,4 @@
-import {sourceRevision} from '../lib/pins.mjs';
+import {lockValue,sourceRevision} from '../lib/pins.mjs';
 import './producer-environment.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
@@ -14,7 +14,6 @@ import {acquireLockedArtSources} from './android-art-locked-sources.mjs';
 import {verifyProducer} from './build-runtime.mjs';
 const root=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url),B=require('../lib/package-format.cjs'),{validateDeclaration}=require('../lib/package-contract.cjs');
 const json=file=>JSON.parse(fs.readFileSync(file));
-function lockValue(file,key){const matches=[...fs.readFileSync(file,'utf8').matchAll(new RegExp('^'+key+'=([^\\r\\n]+)$','gm'))];if(matches.length!==1)throw Error('Missing original ART host input '+key);return matches[0][1];}
 
 /** Reuse sealed ART ELFs; prepare only source inputs and original Mac host tools. */
 export async function prepareArtMacBuildContext({elfInput,work}){
@@ -27,7 +26,7 @@ export async function prepareArtMacBuildContext({elfInput,work}){
  const aim=aimRecord(),checkout=placeDeclaredSource(aim,path.join(work,'upstream')),source=path.join(work,'source');await stageSource(checkout,sourceRevision(aim),source);
  const {prepareArtCompilerPaths}=await import(pathToFileURL(path.join(android,profile.compilerSource)));prepareArtCompilerPaths(source,{source:checkout});
  const {sdk,python}=await prepareAndroidBuildInputs({source,work:path.join(work,'inputs')});
- const javaLock=path.join(source,'upstream/java-toolchain.lock'),archive=await buildInput({url:lockValue(javaLock,'JDK_URL'),sha256:lockValue(javaLock,'JDK_SHA256')},path.join(work,'jdk-archives')),java=path.join(work,'jdk');fs.mkdirSync(java);run('/usr/bin/tar',['-xzf',archive,'-C',java]);fs.unlinkSync(archive);
+ const javaLock=path.join(source,'upstream/java-toolchain.lock'),archive=await buildInput({url:lockValue(javaLock,'JDK_URL'),sha256:lockValue(javaLock,'JDK_SHA256')}),java=path.join(work,'jdk');fs.mkdirSync(java);run('/usr/bin/tar',['-xzf',archive,'-C',java]);
  const homes=fs.readdirSync(java).map(name=>path.join(java,name,'Contents/Home')).filter(home=>fs.existsSync(path.join(home,'bin/javac')));if(homes.length!==1)throw Error('The pinned ART JDK must supply one compiler.');
  const target=path.join(work,'target'),fetched=path.join(work,'fetched');fs.mkdirSync(target);fs.renameSync(path.join(source,'_build'),fetched);fs.symlinkSync(target,path.join(source,'target'),'dir');fs.symlinkSync(fetched,path.join(source,'_build'),'dir');
  const env=artElfBuildEnvironment({work,target,sdk,jdk:homes[0],python});run('cargo',['fetch','--locked'],{cwd:source,env});

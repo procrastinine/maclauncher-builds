@@ -26,7 +26,7 @@ export async function compile({project,version,output,work}){
  const ndkArchive=await buildInput(profile.ndk),sdk=path.join(work,'sdk');fs.mkdirSync(sdk);run('/usr/bin/unzip',['-q',ndkArchive,'-d',sdk]);
  const ndk=path.join(sdk,ndkSource().directory);
  if(!fs.readFileSync(path.join(ndk,'source.properties'),'utf8').includes('Pkg.Revision = '+ndkSource().version))throw Error('The NDK archive differs from its declared version.');
- fs.unlinkSync(ndkArchive);
+ 
  const {buildArtFfi}=await import(pathToFileURL(path.join(producer,'src/modules/android/art/build-ffi.mjs')));
  const built=await buildArtFfi({source,output:path.join(work,'compiler'),ndk});
  return {ndk,built,source,version,profile};

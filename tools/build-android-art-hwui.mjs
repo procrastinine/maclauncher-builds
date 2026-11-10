@@ -1,4 +1,4 @@
-import {sourceRevision} from '../lib/pins.mjs';
+import {archiveInput} from '../lib/pins.mjs';
 import './producer-environment.mjs';
 import {androidSource} from '../lib/android-source.mjs';
 import fs from 'node:fs';
@@ -21,12 +21,12 @@ const native='src/modules/android/native/hwui';
 export async function acquireHwuiTools(output){
  if(!path.isAbsolute(output||'')||fs.existsSync(output))throw Error('Choose a new absolute HWUI tool directory.');
  fs.mkdirSync(output,{recursive:true});
- const cache=path.join(output,'archives'),archive=await buildInput(profile.protoc,cache),protoc=path.join(output,'protoc');fs.mkdirSync(protoc);
- try{run('/usr/bin/unzip',['-q',archive,'-d',protoc]);fs.accessSync(path.join(protoc,'bin/protoc'),fs.constants.X_OK);fs.accessSync(path.join(protoc,'include/google/protobuf/descriptor.proto'));}finally{fs.rmSync(archive,{force:true});}
- const encoded=await buildInput({...profile.hidlGen.transport,url:profile.hidlGen.repository+'/+/'+sourceRevision(profile.hidlGen)+'/'+profile.hidlGen.path+'?format=TEXT'},cache),bytes=Buffer.from(fs.readFileSync(encoded,'utf8'),'base64');
+ const archive=await buildInput(profile.protoc),protoc=path.join(output,'protoc');fs.mkdirSync(protoc);
+ run('/usr/bin/unzip',['-q',archive,'-d',protoc]);fs.accessSync(path.join(protoc,'bin/protoc'),fs.constants.X_OK);fs.accessSync(path.join(protoc,'include/google/protobuf/descriptor.proto'));
+ const encoded=await buildInput(archiveInput(profile.hidlGen)),bytes=Buffer.from(fs.readFileSync(encoded,'utf8'),'base64');
  const gitBlob=crypto.createHash('sha1').update('blob '+bytes.length+'\0').update(bytes).digest('hex');
  if(bytes.length!==profile.hidlGen.bytes||sha(bytes)!==profile.hidlGen.sha256||gitBlob!==profile.hidlGen.gitBlob)throw Error('The original HIDL generator differs from its pinned Git object.');
- const hidlGen=path.join(output,'hidl-gen');fs.writeFileSync(hidlGen,bytes,{mode:0o755,flag:'wx'});fs.rmSync(encoded);fs.rmdirSync(cache);
+ const hidlGen=path.join(output,'hidl-gen');fs.writeFileSync(hidlGen,bytes,{mode:0o755,flag:'wx'});
  return {protoc:path.join(protoc,'bin/protoc'),protocInclude:path.join(protoc,'include'),hidlGen};
 }
 
