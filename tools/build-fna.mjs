@@ -4,8 +4,7 @@ import path from 'node:path';
 import {createRequire} from 'node:module';
 import {execFileSync} from 'node:child_process';
 import {buildInput} from './build-input.mjs';
-import {retryNetwork} from './download.mjs';
-import {checkoutSource,run,recipeMain} from "./build-source.mjs";
+import {declaredSource,run,recipeMain} from "./build-source.mjs";
 import {sealRuntime} from './seal-runtime.mjs';
 const require=createRequire(import.meta.url),Builder=require('../producers/package-support/src/modules/fna/runtime/build.js');
 export const RUNTIMES=Object.freeze({
@@ -15,9 +14,7 @@ export const RUNTIMES=Object.freeze({
 
 /** Compile the FNA runtime from its pinned sources and the .NET runtime archive. */
 export async function compile({arch,work}){
- fs.mkdirSync(work,{recursive:true});const repository='https://github.com/FNA-XNA/FNA',source=checkoutSource({repository,revision:Builder.FNA_REVISION,destination:path.join(work,'upstream-fna')});
- retryNetwork(()=>run('git',['-C',source,'submodule','update','--init','--recursive','--depth','1']));
- const fna3d=checkoutSource({repository:'https://github.com/FNA-XNA/FNA3D',revision:Builder.FNA3D_REVISION,destination:path.join(work,'upstream-fna3d')});retryNetwork(()=>run('git',['-C',fna3d,'submodule','update','--init','--recursive','--depth','1']));
+ fs.mkdirSync(work,{recursive:true});const source=declaredSource('fna','fna'),fna3d=declaredSource('fna','fna3d');
  const runtime=path.join(work,'runtime');fs.mkdirSync(runtime);const archive=await buildInput(RUNTIMES[arch]);run('/usr/bin/tar',['-xzf',archive,'-C',runtime]);
  const downloads=new Map(Object.values(Builder.PACKAGES).map(pin=>[pin.url,pin]));
  const runtimeContext=await Builder.compileRuntime({unpacked:runtime,pin:{version:Builder.PROFILE},sourcePath:source,fna3dSourcePath:fna3d,dependencies:{downloadToFile:async(url,destination)=>{const pin=downloads.get(url);if(!pin)throw Error('Undeclared FNA build download.');fs.copyFileSync(await buildInput(pin),destination);}}});

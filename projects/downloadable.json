@@ -545,6 +545,11 @@
       "architectures": [
         "arm64"
       ],
+      "submodules": [
+        "producers/package-support/src/external/FNA",
+        "producers/package-support/src/external/source-revisions/fna3d"
+      ],
+      "recursiveSubmodules": true,
       "tools": [
         "cmake",
         "ninja"
