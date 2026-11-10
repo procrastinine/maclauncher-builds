@@ -5,6 +5,7 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {recipeMain} from '../../tools/build-source.mjs';
 import {mingw as prepareMingw} from '../../tools/scene-runtime.mjs';
+import {buildInput} from '../../tools/build-input.mjs';
 import {addLicense} from '../../lib/licenses.mjs';
 import {gitlink} from '../../lib/pins.mjs';
 import {helperClientSource} from './helper-subset.mjs';
@@ -19,16 +20,14 @@ const mkdir=p=>fs.mkdirSync(p,{recursive:true});
 const put=(p,b)=>{mkdir(path.dirname(p));fs.writeFileSync(p,b);};
 const copy=(a,b)=>{mkdir(path.dirname(b));fs.cpSync(a,b,{recursive:true,filter:file=>path.basename(file)!=='.git'});};
 const walk=d=>fs.readdirSync(d,{recursive:true}).filter(p=>fs.statSync(path.join(d,p)).isFile()).sort();
-function verifyArchive(file,want){if(hash(fs.readFileSync(file))!==want)throw Error('Archive integrity mismatch: '+file);}
-function fetch(url,file){if(!fs.existsSync(file)){mkdir(path.dirname(file));run('curl',['-fLsS',url,'-o',file+'.part']);fs.renameSync(file+'.part',file);}return file;}
 export function gitSource(input, revision=gitlink(input.path), directory=path.join(root,input.path)) {
  return directory;
 }
-export function prepare(work){
+/** Assemble the bridge source from the pinned checkouts and the CrossOver source archive that the input step fetched. */
+export function prepare(work,wineArchive){
  mkdir(work);
  const proton=gitSource(pins.proton);
  const np=gitSource(pins.notproton);
- const wineArchive=fetch(winePin.archive.url,path.join(work,'crossover.tar.gz'));verifyArchive(wineArchive,winePin.archive.sha256);
  const base=path.join(work,'wine-original');if(!fs.existsSync(base)){mkdir(base);run('tar',['xzf',wineArchive,'--strip-components=2','-C',base,winePin.archive.directory]);}
  const source=path.join(work,'wine');if(fs.existsSync(source))throw Error('Use a fresh work directory; source assembly is immutable');
  copy(base,source);
@@ -64,8 +63,8 @@ export function prepare(work){
 }
 export const compilerPath=(mingw,search=process.env.PATH)=>[mingw,search].filter(Boolean).join(path.delimiter);
 /** Compile the native bridge for both CPUs and the Windows helpers from the assembled source. */
-export function build({work,mingw}){
- const source=path.join(work,'wine');if(!fs.existsSync(path.join(work,'inputs.json')))prepare(work);
+export function build({work,mingw,wineArchive}){
+ const source=path.join(work,'wine');if(!fs.existsSync(path.join(work,'inputs.json')))prepare(work,wineArchive);
  const unixDir=path.join(source,'dlls/lsteamclient');
  copy(path.join(here,'bridge-paths.cpp'),path.join(unixDir,'bridge-paths.cpp'));
  const unixFile=path.join(unixDir,'unixlib.cpp');let unixText=fs.readFileSync(unixFile,'utf8');
@@ -129,7 +128,7 @@ export function packageOutput({work,output}) {
 /** Prepare the pinned LLVM-MinGW toolchain and compile the bridge. */
 export async function compile({work}) {
  mkdir(work);
- build({work,mingw:await prepareMingw(work)});
+ build({work,mingw:await prepareMingw(work),wineArchive:await buildInput(winePin.archive)});
 }
 /** Package the compiled bridge with its declaration. */
 export function assemble({work,output}) {

@@ -5,7 +5,7 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {readProjects,buildRecords} from '../lib/projects.mjs';
 import {resolveUpstream,validatePinReference} from "../lib/source-pins.mjs";
-import {sourceRecordProblem,sourceArchive} from '../lib/pins.mjs';
+import {sourceRecordProblem,sourceArchive,archiveInput} from '../lib/pins.mjs';
 import {APP_REFERENCE,appSourceRoot,appNestedFiles} from './app-source.mjs';
 import {canonicalReport,reportDigest} from '../lib/canonical-report.mjs';
 export {canonicalReport,reportDigest};
@@ -91,6 +91,13 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   for(const name of manifest.buildCode||[])entry(name,'projects.json');
   for(const build of builds){entry(build.command,'projects');for(const name of submodules)if(!useLink(name,"projects"))problem('projects',name,'missing');
    for(const input of build.inputs||[])if(projects.has(input)&&input!==id)inputs.add(input);else problem('projects',input,'input','A package input names another registered project.');}
+  // A build's archive pins select the archive records it reads; each is listed for the input step.
+  const listed=[];
+  for(const build of builds)for(const pin of build.archives||[]){
+   const selected=checkPin(pin,'projects.json'),found=[];if(selected===undefined)continue;
+   const visit=value=>{if(!value||typeof value!=='object')return;const archive=Array.isArray(value)?undefined:archiveInput(value);if(archive)found.push(archive);else for(const child of Object.values(value))visit(child);};visit(selected);
+   if(found.length)listed.push(...found);else problem('projects',JSON.stringify(pin),'archive','The archive pin selects no archive record.');
+  }
   for(const name of project.producer.entries||[])entry(name,'projects');
   for(const name of project.producer.appEntries||[])entry(APP_REFERENCE+name,'projects');
   if(project.producer.recipe)entry(project.producer.recipe,'projects');
@@ -117,10 +124,12 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    if(pin.match)return;
    for(const key of pin.pointer?parsePointer(pin.pointer):[]){if(!selected||typeof selected!=="object"||!Object.hasOwn(selected,key)){problem(from,expression,"pin");return;}selected=selected[key];}
    if(selected&&typeof selected==="object"&&["commit","revision","gitlink"].some(key=>Object.hasOwn(selected,key))){const detail=sourceRecordProblem(selected);if(detail)problem(from,expression,'record',detail);}
+   return selected;
   }
   // Declared records: source records are validated once here, pins add the
   // records they name, {project} names a package input, and a source record with
   // an archive digest names a source archive the input step fetches.
+  const addArchive=archive=>archives.set(archive.url+(archive.headers?' '+archive.headers.Range:''),archive);
   function walk(value,from,pointer=''){
    if(Array.isArray(value)){value.forEach((child,index)=>walk(child,from,pointer+'/'+index));return;}
    if(!value||typeof value!=='object')return;
@@ -130,7 +139,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
     else if(value.gitlink&&!from.startsWith(APP_REFERENCE)){if(!gitlinks.some(link=>link.path===value.gitlink))problem(from,pointer||'/','record','The gitlink names no submodule of this repository.');else useLink(value.gitlink,from);}
     else if(value.archive!==undefined&&typeof value.revision==='string'){
      if(!/^https:\/\/github\.com\/[^/]+\/[^/]+$/.test(String(value.repository).replace(/\.git$/,''))||!/^[a-f0-9]{64}$/.test(value.archive?.sha256||''))problem(from,pointer||'/','record','A source archive names a GitHub repository, its exact revision and the archive SHA-256.');
-     else{const archive=sourceArchive(value);archives.set(archive.url,archive);}
+     else addArchive(sourceArchive(value));
     }
    }
    if(typeof value.file==='string'&&typeof value.pointer==='string')checkPin(value,from);
@@ -138,6 +147,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    for(const [key,child] of Object.entries(value))walk(child,from,pointer+'/'+key.replaceAll('~','~0').replaceAll('/','~1'));
   }
   for(let index=0;index<records.length;index++)walk(records[index][1],records[index][0]);
+  for(const archive of listed)addArchive(archive);
   // Node loads a .js file by the "type" of its nearest package.json, so that file is an input too.
   const nearestPackage=(relative,has)=>{for(let directory=path.posix.dirname(relative);;directory=path.posix.dirname(directory)){const candidate=directory==='.'?'package.json':directory+'/package.json';if(has(candidate))return candidate;if(directory==='.')return null;}};
   for(const relative of [...files.keys()])if(relative.endsWith('.js')){const found=nearestPackage(relative,isFile);if(found)addFile(found,'node');}
@@ -152,7 +162,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    if(upstream.pin&&(bindings.get(upstream.pin.file)||[]).some(binding=>!binding.select&&binding.pointer===upstream.pin.pointer+'/version')&&resolved.version!==undefined)resolved.version='$packageVersion';
    return resolved;
   });
-  const definition={schemaVersion:1,id,build:normalizedBuilds(builds),files:[...files,...[...appFiles].map(([name,digest])=>[APP_REFERENCE+name,digest])].sort(([a],[b])=>ordinal(a,b)).map(([path,sha256])=>({path,sha256})),sources,gitlinks:[...usedLinks.values()].sort((a,b)=>ordinal(a.path,b.path)),...(archives.size?{archives:[...archives.values()].sort((a,b)=>ordinal(a.url,b.url))}:{})};
+  const definition={schemaVersion:1,id,build:normalizedBuilds(builds),files:[...files,...[...appFiles].map(([name,digest])=>[APP_REFERENCE+name,digest])].sort(([a],[b])=>ordinal(a,b)).map(([path,sha256])=>({path,sha256})),sources,gitlinks:[...usedLinks.values()].sort((a,b)=>ordinal(a.path,b.path)),...(archives.size?{archives:[...archives].sort(([a],[b])=>ordinal(a,b)).map(([,archive])=>archive)}:{})};
   const result={definition,definitionDigest:reportDigest(definition),inputs:[...inputs].sort().map(id=>({id}))};
   cache.set(id,result);problems.set(id,unresolved);
   return result;

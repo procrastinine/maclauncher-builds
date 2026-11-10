@@ -1093,6 +1093,12 @@
         "cmake",
         "ninja",
         "xz"
+      ],
+      "archives": [
+        {
+          "file": "producers/dependencies/boost.json",
+          "pointer": ""
+        }
       ]
     }
   },
@@ -2577,6 +2583,12 @@
         "cmake",
         "ninja",
         "zstd"
+      ],
+      "archives": [
+        {
+          "file": "producers/nxnative/dotnet-sdk.json",
+          "pointer": ""
+        }
       ]
     }
   },
@@ -3585,6 +3597,16 @@
       "tools": [
         "autoconf",
         "bison"
+      ],
+      "archives": [
+        {
+          "file": "producers/dependencies/crossoverWine.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/llvmMingw.json",
+          "pointer": ""
+        }
       ]
     }
   },

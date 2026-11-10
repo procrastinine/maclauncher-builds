@@ -12,7 +12,7 @@ export const run=(command,args)=>execFileSync(command,args,{maxBuffer:Infinity,s
 /** The declared llvm-mingw toolchain for Windows-side adapter libraries. */
 export async function mingw(work){
  const pin=llvmMingw;
- const archive=await buildInput(llvmMingwInput(),path.join(work,'downloads'));
+ const archive=await buildInput(llvmMingwInput());
  const directory=path.join(work,'toolchain');fs.mkdirSync(directory);run('/usr/bin/tar',['-xf',archive,'-C',directory]);
  return path.join(directory,'llvm-mingw-'+pin.version+'-ucrt-macos-universal/bin');
 }

@@ -46,6 +46,8 @@ Commits written directly into an upstream entry are accepted only in resolved, s
 
 ## HTTP build inputs
 
+A build lists the archives it reads in its `archives` field. Each entry names a JSON file and a JSON pointer, and every archive record inside the selected value is a build input. An archive record is a source record with an archive digest (`repository`, `revision` and `archive.sha256`); a `url` with `sha256`, optional `bytes` or `size`, and `offset` for a byte range; `archiveUrl` with `archiveSha256` and optional `archiveBytes`; or a GitHub release asset (`repository`, `version`, `asset` and `sha256`). The build definition lists each archive. The input step downloads it once, before compilation, into the build-input cache, which names each file by its SHA-256, and the recipe reads it from that cache.
+
 Build-input downloads use one HTTP transport with up to six attempts and exponential backoff (5, 10, 20, 40 and 80 seconds). Connections have a 20-second timeout; transfers below 1 KB/s for 60 seconds are treated as stalled. Healthy transfers have no duration cap. Stalls, interrupted connections, HTTP 408/429 and server failures can retry. Other client errors, including HTTP 404, fail immediately. Source-object, archive-size and checksum verification follows the download and is never retried as a transport failure. HTTPS inputs remain on HTTPS across redirects.
 
 Git source fetches and submodule initialization use the same transient-only policy as attestation, artifact transfers and release API requests.
