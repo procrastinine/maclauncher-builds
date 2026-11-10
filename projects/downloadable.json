@@ -476,6 +476,60 @@
         "native-ffmpeg",
         "native-sdl2-fonts",
         "native-sndfile"
+      ],
+      "archives": [
+        {
+          "file": "producers/dependencies/flac.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/freetype.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/graphite2.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/harfbuzz.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/libpng.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/ogg.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/opus.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sdl2.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sdl2_ttf.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sndfile.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/vorbis.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/package-support/src/modules/shared/runtime/portable-ffmpeg.json",
+          "pointer": "/source"
+        },
+        {
+          "file": "producers/package-support/src/modules/shared/runtime/portable-sndfile.json",
+          "pointer": "/dependencies"
+        }
       ]
     }
   },
@@ -661,6 +715,68 @@
         "native-sdl2-fonts",
         "native-sdl2-mixer",
         "native-sndfile"
+      ],
+      "archives": [
+        {
+          "file": "producers/dependencies/flac.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/freetype.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/graphite2.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/harfbuzz.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/libpng.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/ogg.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/opus.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/opusfile.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sdl2.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sdl2_mixer.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sdl2_ttf.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sndfile.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/vorbis.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/package-support/src/modules/shared/runtime/portable-python.json",
+          "pointer": "/source"
+        },
+        {
+          "file": "producers/package-support/src/modules/shared/runtime/portable-sndfile.json",
+          "pointer": "/dependencies"
+        }
       ]
     }
   },
@@ -1445,6 +1561,80 @@
         "native-sdl2-fonts",
         "native-sdl2-mixer",
         "native-sndfile"
+      ],
+      "archives": [
+        {
+          "file": "producers/dependencies/flac.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/freetype.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/graphite2.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/harfbuzz.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/libpng.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/ogg.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/opus.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/opusfile.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sdl2.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sdl2_image.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sdl2_mixer.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sdl2_ttf.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sndfile.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/turbojpeg.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/vorbis.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/webp.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/package-support/src/modules/shared/onsyuri/runtime/portable-build.json",
+          "pointer": "/dependencies"
+        },
+        {
+          "file": "producers/package-support/src/modules/shared/runtime/portable-sndfile.json",
+          "pointer": "/dependencies"
+        }
       ]
     }
   },
@@ -1993,6 +2183,72 @@
         "native-sdl2-fonts",
         "native-sdl2-mixer",
         "native-sndfile"
+      ],
+      "archives": [
+        {
+          "file": "producers/dependencies/flac.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/freetype.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/graphite2.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/harfbuzz.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/libpng.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/ogg.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/opus.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/opusfile.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sdl2.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sdl2_mixer.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sdl2_ttf.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sndfile.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/vorbis.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/webp.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/package-support/src/modules/alicesoft/system35-portable.json",
+          "pointer": "/dependencies"
+        },
+        {
+          "file": "producers/package-support/src/modules/shared/runtime/portable-sndfile.json",
+          "pointer": "/dependencies"
+        }
       ]
     }
   },
@@ -2105,6 +2361,80 @@
         "native-ffmpeg",
         "native-sdl2-fonts",
         "native-sndfile"
+      ],
+      "archives": [
+        {
+          "file": "producers/dependencies/cglm.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/flac.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/freetype.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/glew.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/graphite2.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/harfbuzz.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/libffiPortable.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/libpng.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/ogg.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/opus.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sdl2.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sdl2_ttf.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sndfile.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/turbojpeg.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/vorbis.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/webp.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/package-support/src/modules/shared/runtime/portable-ffmpeg.json",
+          "pointer": "/source"
+        },
+        {
+          "file": "producers/package-support/src/modules/shared/runtime/portable-sndfile.json",
+          "pointer": "/dependencies"
+        }
       ]
     }
   },
