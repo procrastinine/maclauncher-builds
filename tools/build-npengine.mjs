@@ -5,7 +5,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {buildInput} from './build-input.mjs';
-import {checkoutSource,run,recipeMain} from "./build-source.mjs";
+import {declaredSource,run,recipeMain} from "./build-source.mjs";
 import {sealRuntime} from './seal-runtime.mjs';
 
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
@@ -35,7 +35,7 @@ export async function projectMedia(work){
 
 /** Compile libnpengine with its media, font and utility stacks. */
 export async function compile({arch,work}){
- fs.mkdirSync(work,{recursive:true});const repository='https://github.com/FGRE/libnpengine',source=checkoutSource({repository,revision:Builder.REVISION,destination:path.join(work,'upstream-engine')}),npaRepository='https://github.com/FGRE/libnpa',npa=checkoutSource({repository:npaRepository,revision:Builder.NPA_REVISION,destination:path.join(work,'upstream-npa')});
+ fs.mkdirSync(work,{recursive:true});const source=declaredSource('npengine','libnpengine'),npa=declaredSource(require('../producers/package-support/src/modules/nitroplus/runtime/sources.json').libnpa);
  const {media}=await projectMedia(work);
  const archives={};for(const pin of [...Fonts.PIN.dependencies,...Media.PIN.utilitySources])archives[pin.id]??=await buildInput({url:pin.archiveUrl,sha256:pin.archiveSha256,bytes:pin.archiveBytes});
  const sdl=nativeStackInput(preparedBuildInput('native-sdl2-fonts'),{arch,work:path.join(work,'sdl')}),utilities=await Media.buildUtilities({archives,workRoot:path.join(work,'utilities')});
