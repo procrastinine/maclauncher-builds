@@ -5,14 +5,15 @@ const path = require("node:path");
 const Native = require('../../../../../../lib/package-format.cjs');
 const Source = require("../../shared/runtime/pinned-native-build");
 const BuildTools = require("../../shared/runtime/native-build-tools");
-// SDL2 is the shared release archive declared once for every Builds recipe.
+// SDL2 is the shared release archive declared once for every Builds recipe; sdl12-compat is declared beside it.
 const sdl2 = require("../../../../../dependencies/sdl2.json");
+const sdl12 = require("../../../../../dependencies/sdl12Compat.json");
 const { throwIfAborted } = require('../../../../../../lib/abort.cjs');
 
 const SNAPSHOT_REVISION = require('../../../../../../lib/projects.mjs').upstreamRevision('onscripter-en', 'onscripter-en');
 const PACKAGES = Object.freeze({
   source: { filename: `onscripter-en-${SNAPSHOT_REVISION}.tar.gz`, url: `https://github.com/Galladite27/ONScripter-EN/archive/${SNAPSHOT_REVISION}.tar.gz`, sha256: "ef79365a2c9fd432d1b13bc113b73a0b175a6e3cb94e43709211402a8f7b867c", folder: `ONScripter-EN-${SNAPSHOT_REVISION}` },
-  sdl12: { filename: "sdl12-compat-1.2.76.tar.gz", url: "https://github.com/libsdl-org/sdl12-compat/archive/refs/tags/release-1.2.76.tar.gz", sha256: "e889ac9c7e8a6bdfc31972bf1f1254b84882cb52931608bada62e8febbf0270b", folder: "sdl12-compat-release-1.2.76" },
+  sdl12: { filename: "sdl12-compat-1.2.76.tar.gz", url: sdl12.url, sha256: sdl12.sha256, folder: "sdl12-compat-release-1.2.76" },
   sdl2: { filename: path.basename(sdl2.url), url: sdl2.url, sha256: sdl2.sha256, folder: path.basename(sdl2.url, ".tar.gz") },
   ...BuildTools.PACKAGES
 });

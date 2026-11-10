@@ -1516,6 +1516,7 @@
       "entries": [
         "lib/abort.cjs",
         "lib/licenses.mjs",
+        "producers/dependencies/sdl12Compat.json",
         "producers/dependencies/sdl2.json",
         "producers/package-support/src/modules/nscripter/overlays/onscripter-en-v3",
         "producers/package-support/src/modules/nscripter/runtime/onscripter-en-build-v3.js",
@@ -1571,6 +1572,16 @@
       "tools": [
         "cmake",
         "ninja"
+      ],
+      "archives": [
+        {
+          "file": "producers/dependencies/sdl12Compat.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sdl2.json",
+          "pointer": ""
+        }
       ]
     }
   },
