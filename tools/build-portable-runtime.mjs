@@ -15,14 +15,14 @@ const Fonts=require(path.join(modules,'shared/runtime/portable-sdl2-fonts.js')),
  * shared resource directory, the source catalogs it reads besides fonts and audio, its
  * single source archives and the dependency stacks built before it. */
 const RECIPES=Object.freeze({
- onsyuri:{reuse:'mixer-stack',recipe:'shared/onsyuri/runtime/portable-build-v3.js',entry:'buildPortableYuri',source:'onscripter-yuri',share:'onsyuri',catalogs:['mixer','producer'],archives:{onsyuri:'engine'}},
+ onsyuri:{reuse:'mixer-stack',recipe:'shared/onsyuri/runtime/portable-build-v3.js',entry:'buildPortableYuri',source:'onscripter-yuri',share:'onsyuri',catalogs:['mixer','producer']},
  gemrb:{reuse:'mixer-python',recipe:'gemrb/runtime/portable-build-v5.js',entry:'buildPortableGemRB',source:'gemrb',share:'gemrb',catalogs:['mixer'],archives:{python:'python'},python:{library:'python/lib/python3.14',home:'python'}},
  ai5:{recipe:'ai5/runtime/portable-build-v4.js',entry:'buildPortableAI5',source:'ai5-sdl2',share:'ai5-sdl2',archives:{ffmpeg:'movie'},stacks:['fonts','audio','movie']},
  xsystem35:{reuse:'mixer-dependencies',recipe:'alicesoft/system35-portable-v3.js',entry:'buildPortableSystem35',source:'xsystem35-sdl2',share:'xsystem35',catalogs:['mixer','producer']},
  xsystem4:{reuse:'av-dependencies',recipe:'alicesoft/system4-portable-v3.js',entry:'buildPortableSystem4',source:'xsystem4',share:'xsystem4',catalogs:['producer'],archives:{ffmpeg:'movie'}}
 });
 const CATALOGS={mixer:()=>Mixer.PIN,producer:Builder=>Builder.PIN};
-const ARCHIVES={movie:()=>Movie.PIN.source,python:()=>require(path.join(modules,'shared/runtime/portable-python-v2.js')).PIN.source,engine:Builder=>Builder.PIN.engine};
+const ARCHIVES={movie:()=>Movie.PIN.source,python:()=>require(path.join(modules,'shared/runtime/portable-python-v2.js')).PIN.source};
 const STACKS={fonts:{module:Fonts,option:'fontStack',suffix:'-fonts'},audio:{module:Audio,option:'audioStack',suffix:'-audio'},movie:{module:Movie,option:'movieStack',suffix:'-movies',archive:'ffmpeg'}};
 const archiveInput=pin=>pin.archiveUrl?{url:pin.archiveUrl,sha256:pin.archiveSha256,bytes:pin.archiveBytes}:pin;
 export function recipeInputs({project}){

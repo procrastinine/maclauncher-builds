@@ -4,7 +4,6 @@ const sharedDependency=id=>require('../../../../../../dependencies/'+id+'.json')
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const Native = require('../../../../../../../lib/package-format.cjs');
 const metadata = require("./portable-build.json");
 const revision = upstreamRevision("onsyuri", "onscripter-yuri");
 const PIN = Object.freeze({ ...metadata, dependencies: metadata.dependencies.map(row=>{if(row.id==='webp')row={...require('../../../alicesoft/system35-portable.json').dependencies.find(pin=>pin.id==='webp'),...row};if(row.id==='turbojpeg')row={...require('../../../alicesoft/system4-portable.json').dependencies.find(pin=>pin.id==='turbojpeg'),...row};const pin=row.archiveSha256?undefined:sharedDependency(row.id);return pin?{...row,revision:pin.revision,sourceUrl:pin.repository,archiveUrl:pin.url||pin.repository+'/archive/'+pin.revision+'.tar.gz',archiveSha256:pin.sha256,archiveBytes:pin.bytes}:{...row,sourceUrl:row.repository||row.sourceUrl,archiveUrl:row.archiveUrl?.replaceAll('{revision}',row.revision)};}), engine: { ...metadata.engine, revision,
@@ -14,12 +13,6 @@ const VERSION = PIN.engine.version;
 const REVISION = PIN.engine.revision;
 const SOURCE_SHA256 = PIN.engine.sourceTreeSha256;
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
-
-function validateEngineArchive(archives) {
-  const file = archives?.onsyuri;
-  if (!path.isAbsolute(file || "") || !fs.lstatSync(file).isFile() || fs.statSync(file).size !== PIN.engine.archiveBytes ||
-      Native.hashFile(file) !== PIN.engine.archiveSha256) throw new Error("Yuri primary source archive checksum or size differs from its pinned version.");
-}
 
 function requireOwnedSource(sourceRoot, sourceDir) {
   if (!path.isAbsolute(sourceRoot || "") || !fs.lstatSync(sourceRoot).isDirectory() || fs.existsSync(path.join(sourceRoot, ".git"))) {
@@ -60,5 +53,5 @@ function validateFeatures(outputRoot) {
     moviePlayback: false, externalWindowsPlugins: false, glesSharpness: false };
 }
 
-module.exports = { PIN, VERSION, REVISION, SOURCE_SHA256, validateEngineArchive,
+module.exports = { PIN, VERSION, REVISION, SOURCE_SHA256,
   requireOwnedSource, adaptEngine, adaptLua, validateFeatures };

@@ -53,9 +53,3 @@ test("Yuri rejects dynamically resolved codecs and the excluded optional GLES re
   }
 });
 
-test("invalid Yuri primary archives are rejected without being changed", t => {
-  const root = temporary(t), archive = path.join(root, "source.tar.gz");
-  fs.writeFileSync(archive, "wrong");
-  assert.throws(() => Build.validateEngineArchive({ onsyuri: archive }), /checksum or size/);
-  assert.equal(fs.readFileSync(archive, "utf8"), "wrong");
-});
