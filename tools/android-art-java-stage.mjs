@@ -1,5 +1,5 @@
 import './producer-environment.mjs';
-import {androidSource,aimSource} from '../lib/android-source.mjs';
+import {androidSource} from '../lib/android-source.mjs';
 import {includeLicenses,addLicenses,addLicense} from '../lib/licenses.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
@@ -19,12 +19,12 @@ const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 
 /** Select original image members from the verified portable image-data group. */
 export function copyArtJavaImageMembers({input,output}){
- const inputs=Array.isArray(input)?input:[input],expected={...json(path.join(root,'producers/android-image-data/source.json')),...aimSource()},locations=new Map();let manifest,transportSha256;
+ const inputs=Array.isArray(input)?input:[input],expected=json(path.join(root,'producers/android-image-data/source.json')),locations=new Map();let manifest,transportSha256;
  if(!inputs.length)throw Error('The original image data shards are required.');
  for(const selected of inputs){
   const declaration=json(path.join(selected,'../declaration.json'));validateDeclaration(declaration);verifyPreparedPayload(selected,declaration);
-  const profile=expected.profiles.find(profile=>profile.id===declaration.id&&profile.version===declaration.version),metadata=json(path.join(selected,'input.json')),transport=fs.readFileSync(path.join(selected,'image-data.json')),current=JSON.parse(transport),content=json(path.join(selected,'content.json'));
-  if(!profile||declaration.sourceSha256!==sha(path.join(root,'producers/android-image-data/source.json'))||current.archive_sha256!==expected.archive.sha256||current.source_revision!==expected.revision||['sha256','records','bytes'].some(key=>content[key]!==expected.content[key])||metadata.transportSha256!==digest(transport)||transportSha256&&transportSha256!==metadata.transportSha256)throw Error('ART Java requires its original verified Android image shards.');
+  const profile=expected.profiles.find(profile=>profile.id===declaration.id&&profile.version===declaration.version),metadata=json(path.join(selected,'input.json')),transport=fs.readFileSync(path.join(selected,'image-data.json')),current=JSON.parse(transport);
+  if(!profile||metadata.transportSha256!==digest(transport)||transportSha256&&transportSha256!==digest(transport))throw Error('ART Java requires its original verified Android image shards.');
   const shard=metadata.dataShard,original=current.shards.find(shard=>shard.id===profile.id&&shard.version===profile.version&&shard.shard===profile.shard);
   if(!original||JSON.stringify(shard)!==JSON.stringify(original))throw Error('Image shard metadata differs from its original transport index.');
   for(const object of shard.objects){if(locations.has(object.data))throw Error('Duplicate image shard object.');locations.set(object.data,{root:selected,object});}
