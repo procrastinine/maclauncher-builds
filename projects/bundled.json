@@ -262,6 +262,7 @@
       "entries": [
         "lib/abort.cjs",
         "lib/licenses.mjs",
+        "producers/dependencies/llvmMingw.json",
         "producers/dependencies/moltenvk.json",
         "producers/dependencies/sdlHeaders.json",
         "producers/dependencies/shaderc.json",
