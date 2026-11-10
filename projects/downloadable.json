@@ -3366,6 +3366,8 @@
         "x64"
       ],
       "submodules": [
+        "producers/package-support/src/external/fsr3-sdk",
+        "producers/package-support/src/external/sdl-headers",
         "sources/maclauncher"
       ]
     },
