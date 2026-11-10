@@ -20,10 +20,10 @@ export async function compile({project,version,arch,output,work}){
  fs.mkdirSync(work,{recursive:true});const {child,retire}=ownedWork(work);
  const framework=await githubBuildInput({pin:profile.frameworkArtifact,output:child('framework-input'),work:child('framework-download')});retire('framework-download');
  const imageProfile=json(path.join(root,profile.imageInput)),imageWork=child('image-work');fs.mkdirSync(imageWork);
- const archive=await buildInput(imageProfile.archive,path.join(imageWork,'archive-cache')),tool=buildImageDataTool({work:imageWork}),decoded=path.join(imageWork,'decoded');
+ const archive=await buildInput(imageProfile.archive),tool=buildImageDataTool({work:imageWork}),decoded=path.join(imageWork,'decoded');
  run(tool.executable,['export',archive,path.join(imageWork,'root'),decoded],{env:tool.env});
  // The authenticated portable objects own all subsequent image reads.
- for(const name of ['root','archive-cache'])fs.rmSync(path.join(imageWork,name),{recursive:true,force:true});
+ fs.rmSync(path.join(imageWork,'root'),{recursive:true,force:true});fs.unlinkSync(archive);
  const image=[];
  for(const id of profile.imageProfiles){
   const selected=imageProfile.profiles.find(selected=>selected.id===id);if(!selected)throw Error('The required original image shard profile is unavailable.');

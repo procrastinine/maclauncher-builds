@@ -2471,6 +2471,28 @@
       "cleanupRunner": true,
       "submodules": [
         "sources/maclauncher-android"
+      ],
+      "archives": [
+        {
+          "file": "producers/android-inputs/java-converter.json",
+          "pointer": "/jdk/linux-x64"
+        },
+        {
+          "file": "producers/android-art-inputs/java.json",
+          "pointer": "/r8"
+        },
+        {
+          "file": "producers/android-art-inputs/java.json",
+          "pointer": "/sdkPlatform"
+        },
+        {
+          "file": "sources/maclauncher-android/src/modules/android/art/dex-tools.json",
+          "pointer": "/artifacts"
+        },
+        {
+          "file": "producers/android-image-data/source.json",
+          "pointer": "/archive"
+        }
       ]
     },
     "versionBindings": [
