@@ -1288,6 +1288,12 @@
       ],
       "rustComponents": [
         "rustfmt"
+      ],
+      "archives": [
+        {
+          "file": "producers/android-inputs/aconfig/source.json",
+          "pointer": "/sdk/files"
+        }
       ]
     },
     "versionBindings": [
@@ -1729,6 +1735,12 @@
         "make",
         "gcc",
         "unzip"
+      ],
+      "archives": [
+        {
+          "file": "producers/android-art-inputs/ffi.json",
+          "pointer": "/ndk"
+        }
       ]
     },
     "versionBindings": [
@@ -2922,7 +2934,13 @@
       ],
       "runners": {
         "universal": "xcode-27"
-      }
+      },
+      "archives": [
+        {
+          "file": "producers/android-inputs/common-publishers.json",
+          "pointer": "/sdl"
+        }
+      ]
     }
   },
   {

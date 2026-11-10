@@ -31,7 +31,7 @@ export function packageSdl3Framework({project,version,output,sdl,profile}){
 export async function compile({project,arch,work}){
  if(project!=='native-sdl3'||arch!=='universal')throw Error('Select the universal SDL3 framework package.');
  const profile=JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/common-publishers.json'))).sdl;
- fs.mkdirSync(work,{recursive:true});const archive=await buildInput(profile,path.join(work,'archives')),sdl=await prepareSdl(archive,work,profile);
+ fs.mkdirSync(work,{recursive:true});const archive=await buildInput(profile),sdl=await prepareSdl(archive,work,profile);
  return {sdl,profile};
 }
 /** Package the compiled framework. */

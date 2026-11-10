@@ -23,7 +23,7 @@ export async function compile({project,version,output,work}){
  const producer=path.join(work,'producer'),sourceArchive=path.join(work,'producer.tar');fs.mkdirSync(producer);
  run('git',['-C',android,'archive','--format=tar','--output='+sourceArchive,androidSource().revision,'--','src']);run('/usr/bin/tar',['-xf',sourceArchive,'-C',producer]);fs.unlinkSync(sourceArchive);
  run('git',['apply',path.join(root,profile.buildOverlay)],{cwd:producer,env:{...process.env,GIT_CEILING_DIRECTORIES:work}});
- const ndkArchive=await buildInput(profile.ndk,path.join(work,'archives')),sdk=path.join(work,'sdk');fs.mkdirSync(sdk);run('/usr/bin/unzip',['-q',ndkArchive,'-d',sdk]);
+ const ndkArchive=await buildInput(profile.ndk),sdk=path.join(work,'sdk');fs.mkdirSync(sdk);run('/usr/bin/unzip',['-q',ndkArchive,'-d',sdk]);
  const ndk=path.join(sdk,ndkSource().directory);
  if(!fs.readFileSync(path.join(ndk,'source.properties'),'utf8').includes('Pkg.Revision = '+ndkSource().version))throw Error('The NDK archive differs from its declared version.');
  fs.unlinkSync(ndkArchive);
