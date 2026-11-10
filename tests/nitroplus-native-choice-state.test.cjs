@@ -136,3 +136,18 @@ test('NSS focus overlay resolves containing choice handles only in an owned sour
   assert.throws(() => Overlay.adaptChoiceFocus(root), /regular owned source/);
   assert.equal(hash(original), before);
 });
+
+test('NSS overlays accept an owned stage in a tree that holds no external sources', t => {
+  // A materialized build tree holds only the declared files, so src/external may be absent.
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'nitroplus-choice-tree-')));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const module = path.join(root, 'src/modules/nitroplus/runtime/choice-overlay.js');
+  fs.mkdirSync(path.dirname(module), { recursive: true });
+  fs.copyFileSync(require.resolve('../producers/package-support/src/modules/nitroplus/runtime/choice-overlay'), module);
+  fs.mkdirSync(path.join(root, 'stage/src'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'stage/src/NSBInterpreter.cpp'), 'int unrelated;\n');
+  assert.throws(() => require(module).adaptChoiceFocus(path.join(root, 'stage')), /Pinned NSS choice overlay differs/);
+  // The tree's own src/external, when present, stays read-only.
+  fs.mkdirSync(path.join(root, 'src/external/libnpengine'), { recursive: true });
+  assert.throws(() => require(module).adaptChoiceFocus(path.join(root, 'src/external/libnpengine')), /read-only/);
+});

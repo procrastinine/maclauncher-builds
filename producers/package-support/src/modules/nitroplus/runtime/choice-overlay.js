@@ -7,8 +7,9 @@ const externalRoot = path.resolve(__dirname, '../../../external');
 function ownedStage(engine) {
   if (typeof engine !== 'string' || !path.isAbsolute(engine)) throw new Error('An absolute owned Nitroplus source stage is required.');
   const directory = fs.realpathSync(engine);
-  const vendored = fs.realpathSync(externalRoot);
-  if (directory === vendored || directory.startsWith(vendored + path.sep)) throw new Error('External Nitroplus sources are read-only.');
+  // Compared by path, so a tree without external sources (a materialized build of this definition)
+  // needs none: Node loads this module from its real path, and src/external is a directory there.
+  if (directory === externalRoot || directory.startsWith(externalRoot + path.sep)) throw new Error('External Nitroplus sources are read-only.');
   return directory;
 }
 
