@@ -1013,6 +1013,7 @@
         "producers/android-inputs/aim.json",
         "producers/android-inputs/java-converter.json",
         "producers/android-launcher/build.mjs",
+        "producers/android-launcher/source",
         "producers/android-launcher/source.json",
         "producers/included-helpers/prepare.mjs",
         "producers/included-helpers/profiles/android-launcher.json",
