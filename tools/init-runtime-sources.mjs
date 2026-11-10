@@ -5,7 +5,7 @@ import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {createRequire} from 'node:module';
 import {retryNetwork} from './download.mjs';
-import {appNestedFiles,checkoutGitlinkFiles} from './app-source.mjs';
+import {appNestedFiles} from './app-source.mjs';
 const root=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url);
 // This tool runs before any source exists; the project registry it reads names no file inside a source.
 /** Initialize only declared Gitlink paths, including nested production sources. */
@@ -25,6 +25,17 @@ const sourceState=()=>({done:new Set(),listed:new Map()});
 const gitlinks=(directory,run,state=sourceState())=>{
  if(!state.listed.has(directory))state.listed.set(directory,String(run(['ls-files','--stage'],directory)).split('\n').flatMap(line=>{const match=line.match(/^160000 [a-f0-9]{40} 0\t(.+)$/);return match?[match[1]]:[];}));
  return state.listed.get(directory);
+};
+/** The gitlinks of a checkout that its own tracked symlinks point into, read through `run` from the
+ * checkout's index and the symlinks' blobs. A checkout that is not initialized lists none. */
+const symlinkedGitlinks=(checkout,run)=>{
+ let stage;try{stage=String(run(['ls-files','--stage'],checkout));}catch{return [];}
+ const rows=stage.split('\n').flatMap(line=>{const match=/^(120000|160000) ([a-f0-9]{40}) 0\t(.+)$/.exec(line);return match?[{mode:match[1],object:match[2],path:match[3]}]:[];});
+ const links=rows.filter(row=>row.mode==='160000').map(row=>row.path);
+ return [...new Set(rows.filter(row=>row.mode==='120000'&&links.length).flatMap(row=>{
+  const target=path.posix.normalize(path.posix.join(path.posix.dirname(row.path),String(run(['cat-file','-p',row.object],checkout)).replace(/\n$/,'')));
+  return links.filter(link=>target.startsWith(link+'/'));
+ }))];
 };
 const registry=directory=>require('../lib/projects.mjs').readProjects(directory,{resolvePins:false}).projects;
 // Parallel clones within one submodule update.
@@ -81,7 +92,7 @@ export function initializeMetadataSources({directory=root,run=runGit,state=sourc
 export function initializeCheckSources({directory=root,run=runGit}={}){
  const state=sourceState(),repositories=gitlinks(directory,run,state).filter(link=>/^sources\/[^/]+$/.test(link));
  const initialized=[...initializeMetadataSources({directory,run,state}),...initializeGitlinks({paths:repositories,directory,run,state})];
- const linked=repositories.flatMap(repository=>fs.existsSync(path.join(directory,repository,'.git'))?checkoutGitlinkFiles(path.join(directory,repository)).map(row=>repository+'/'+row.gitlink):[]);
+ const linked=repositories.flatMap(repository=>symlinkedGitlinks(path.join(directory,repository),run).map(link=>repository+'/'+link));
  return [...initialized,...initializeGitlinks({paths:[...new Set(linked)],directory,run,state})];
 }
 /** One build initializes only its declared sources: its build submodules with the gitlinks their
@@ -93,10 +104,9 @@ export function initializeSources({project:id,version,directory=root,run=runGit}
  const state=sourceState(),app=readsApp(project)?[...initializeGitlinks({paths:toolPaths(directory),directory,run,state})]:[];
  if(readsApp(project))app.push(...initializeGitlinks({paths:nestedAppPaths([project],directory),directory,run,state}));
  const declared=initializeGitlinks({paths:build.submodules||[],directory,run,allowRecursive:build.recursiveSubmodules===true,state});
- // A declared source's symlink into one of its own gitlinks (a helper it shares with a pinned
- // source) reads that gitlink's file, so the gitlink is a source of the build too.
- const linked=declared.filter(row=>!row.recursive&&fs.existsSync(path.join(directory,row.path,'.git')))
-  .flatMap(row=>checkoutGitlinkFiles(path.join(directory,row.path)).map(file=>row.path+'/'+file.gitlink));
+ // A declared source's symlink into one of its own gitlinks (a helper or pinned shared source)
+ // reads that gitlink's file, so the gitlink is a source of the build too.
+ const linked=declared.filter(row=>!row.recursive).flatMap(row=>symlinkedGitlinks(path.join(directory,row.path),run).map(link=>row.path+'/'+link));
  return {project:id,version:build.version,initialized:[...app,...declared,...initializeGitlinks({paths:[...new Set(linked)],directory,run,state})]};
 }
 /** The one source preparation entry for every job: no arguments for the
