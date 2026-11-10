@@ -1,0 +1,224 @@
+{
+  "id": "krkrsdl2",
+  "version": "MCLv8",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "krkrsdl2/MCLv8/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "c1d8d88fbe1d9740468a7608c0a6d90b0abec1ceadb0675e9e4d470aa9c058d9",
+  "sourceSha256": "c1d8d88fbe1d9740468a7608c0a6d90b0abec1ceadb0675e9e4d470aa9c058d9",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "files/bin/krkrsdl2",
+      "size": 6884496,
+      "sha256": "c59e2fc2e15b24ea63769aaa7e54dbae61bebfff2048830ab8add96900972216",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/licenses/ANGLE-headers.txt",
+      "size": 1643,
+      "sha256": "bf4da21bd20bcfb5b60b7ecc67fa864a79be049e21d6178076887f178dd6c71a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 586,
+      "sha256": "220a570ef15c20ad40e1866a0fdafbcf02b48e955596e97903fe9150eb0212b9",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/FAudio.txt",
+      "size": 1054,
+      "sha256": "1b06fa0d9c38360b3e08d78f01f439a05d2312c571648a5df2e0672c15c0c7a1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/FreeType-2.txt",
+      "size": 6741,
+      "sha256": "f4b133e25df1f86ad3ffea453aa0e613f0474f34778dbbb3e437e7b2724937d8",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/FreeType.txt",
+      "size": 1743,
+      "sha256": "fd056de4196903a676208ef58cfddafc7d583d1f28fa2e44c309cf84a59e62fb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/glm.txt",
+      "size": 2928,
+      "sha256": "696f75dafdedb1189db2980a0c5614689bec1c83fc06c7edfc698c119dcb4301",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/jxrlib.txt",
+      "size": 1313,
+      "sha256": "c5f651028d89cdc3b3825d6571deebb58b6081c2465a3d061d8a8e1263de8ca4",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/KAG3-polyfill-font.txt",
+      "size": 245,
+      "sha256": "789e16d3e930e9414bc137f9fa352ac9a8141e05ffac9da588f2c7f8b9b186c7",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/krkrsdl2.txt",
+      "size": 1063,
+      "sha256": "f887439b617e3342cd87af68636b75935f51cc0b8a8aba1fe400f99d08ad5ed8",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/krkrz.txt",
+      "size": 56424,
+      "sha256": "4ef7c0de0feaa9b15e2e20a9175dba6da99689a010faeb86f604f40fe1e7bd45",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/libjpeg-turbo-2.txt",
+      "size": 13668,
+      "sha256": "53a3e3c299e08856964f4c5986e242c3695837b73c64625092f70c774e8af5d2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/libjpeg-turbo.txt",
+      "size": 2939,
+      "sha256": "fffd497be5f4ae0a10b8258e191125fb58b90250ecbf3c79398d79604dd00b7d",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/libogg.txt",
+      "size": 1466,
+      "sha256": "d2ab5758336489da61c12cc5bb757da5339c4ae9001f9bb0562b4370249af814",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/libpng.txt",
+      "size": 4204,
+      "sha256": "a73f0ed13b0f13d4764f82c85f9725113b41ce0555f5ca52e14dc7aabbfae1b2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/Oniguruma.txt",
+      "size": 1415,
+      "sha256": "b7255f7a573bb9319aa04071de41a0f5daf33c3d545b9301c484841587730aec",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/Opus.txt",
+      "size": 1928,
+      "sha256": "8338ce8d922bb4416ce3dd1e5680173332435e3f0755007ac7801ccd674fe682",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/opusfile.txt",
+      "size": 1487,
+      "sha256": "0267ae795ab744c4e0f9c45e249440fdf2e75dac8c804f36066b28649bf74aaf",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL-HIDAPI-2.txt",
+      "size": 35147,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL-HIDAPI-3.txt",
+      "size": 264,
+      "sha256": "fb5436aa63d1b71a8dfbf74ecaf1a5b4e1ec4df7f80074d11fec99284f69ca5f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL-HIDAPI-4.txt",
+      "size": 530,
+      "sha256": "7d3b087c34f35d4d538e3bcddd1ff8f66e92f9ef336881999482800ddf840913",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL-HIDAPI-5.txt",
+      "size": 355,
+      "sha256": "b327a7b3a4597e5902556ec3e8407cbdd1e288abd4623b7b4b56d14d49e84ecb",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL-HIDAPI.txt",
+      "size": 1534,
+      "sha256": "30eb1bef29b46f8ba7ab8b416035dbd93cb034a45481dd97815b944284582cd2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL-yuv2rgb.txt",
+      "size": 1480,
+      "sha256": "f7d74004cc75778cae46c5f0139f244d67c07ef64cf51937e8272352197dcb18",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL.txt",
+      "size": 884,
+      "sha256": "fcb07e07ac6bc8b2fcf047b50431ef4ebe5b619d7ca7c82212018309a9067426",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SIMDe.txt",
+      "size": 1077,
+      "sha256": "75ce0a8c5a7bff42fbd6f8f3b469b518132132c4f4948fb8d02b1ccb5d0df9d8",
+      "mode": 420
+    },
+    {
+      "path": "files/share/kag3-polyfill/font.ttf",
+      "size": 4242092,
+      "sha256": "0bf901a96e9481c80e562d738d98ad66ee07eb4ac81007fca3e227ed8ad98a61",
+      "mode": 420
+    },
+    {
+      "path": "files/share/kag3-polyfill/KAGParser.tjs",
+      "size": 66807,
+      "sha256": "6b9c55ae37c6453715fdff72b97751e87803fa807781e34c1a028afb708b393b",
+      "mode": 420
+    },
+    {
+      "path": "files/share/kag3-polyfill/manifest.json",
+      "size": 908,
+      "sha256": "2c812655e62cbca3bfd80000d454363d7ddbe0713ae1c558b77f3a0e39630d34",
+      "mode": 420
+    },
+    {
+      "path": "files/share/kag3-polyfill/MenuItem_stub.tjs",
+      "size": 421,
+      "sha256": "5d2561cb6f8d1cd30dd2623de993798fa89b407d149ddc9074d72e14fed61d8a",
+      "mode": 420
+    },
+    {
+      "path": "files/share/kag3-polyfill/PolyfillInitialize.tjs",
+      "size": 2119,
+      "sha256": "817daa9af46cb8faf9041da5ee9dec86c5fb0d972d61e89e3c38c0608e5844fa",
+      "mode": 420
+    },
+    {
+      "path": "files/share/kag3-polyfill/UPSTREAM_README.md",
+      "size": 609,
+      "sha256": "c402285ad50b1846fd57b8e061dec5049696c2ca5a86b4f2cff74eb5ff20616c",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 13338,
+      "mode": 420,
+      "sha256": "c1d8d88fbe1d9740468a7608c0a6d90b0abec1ceadb0675e9e4d470aa9c058d9"
+    }
+  ],
+  "redistribution": "bundle",
+  "aliases": {
+    "schema": 1,
+    "files": {
+      "files/share/kag3-polyfill/FONT_LICENSE.txt": "files/licenses/KAG3-polyfill-font.txt"
+    }
+  }
+}
