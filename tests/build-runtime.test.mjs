@@ -39,13 +39,15 @@ test('Android recipes initialize the producer whose metadata they read from a co
  for(const project of ['android-java-framework','android-java-converter','android-angle','android-art-image-extractor','android-launcher','android-art-java','android-image-data-1','android-image-data-2','android-image-data-3','android-image-data-4','android-image-data-5']){
   // The fake git alone defines every checkout, whether or not this repository's Android source is initialized.
   const gitlinkRows=links=>links.map(link=>'160000 '+'a'.repeat(40)+' 0\t'+link);
-  const commands=[],result=initializeSources({project,directory:root,run:(args,cwd)=>{
+  const commands=[],result=initializeSources({project,directory:root,run:(args,cwd,input)=>{
    commands.push({args,cwd});
    if(args[0]==='ls-files'){
     if(cwd===android)return [...gitlinkRows(androidGitlinks),...androidSymlinks.map(row=>'120000 '+row.object+' 0\t'+row.file)].join('\n')+'\n';
     return gitlinkRows(cwd===root?['sources/maclauncher','sources/maclauncher-android','sources/maclauncher-kosmickrisp']:cwd===appCheckout?['src/external/maclauncher-android','src/external/maclauncher-kosmickrisp']:[]).join('\n')+'\n';
    }
-   if(args[0]==='cat-file')return androidSymlinks.find(row=>row.object===args.at(-1))?.target??'';
+   // `cat-file --batch` answers each object named on its input with its header and bytes.
+   if(args[0]==='cat-file')return String(input||'').split('\n').filter(Boolean).map(object=>{const target=androidSymlinks.find(row=>row.object===object)?.target;
+    return target===undefined?object+' missing\n':object+' blob '+Buffer.byteLength(target)+'\n'+target+'\n';}).join('');
    return '';
   }});
   const build=buildRecord(readProjects(root,{resolvePins:false}).projects.find(row=>row.id===project));
@@ -56,6 +58,8 @@ test('Android recipes initialize the producer whose metadata they read from a co
   for(const link of symlinkTargets)assert.ok(commands.some(({args,cwd})=>cwd===android&&args[0]==='submodule'&&args.includes('--init')&&args[args.indexOf('--depth')+1]==='1'&&named(args).includes(link)),project+': '+link);
   // (c) A nested gitlink no symlink points into is never initialized.
   assert.ok(!commands.some(({args})=>args[0]==='submodule'&&named(args).includes('src/external/android-angle')),project+': src/external/android-angle');
+  // One batch read of the symlink targets per checkout that has symlinks.
+  assert.deepEqual(commands.filter(({args})=>args[0]==='cat-file').map(({args,cwd})=>[cwd,...args]),[[android,'cat-file','--batch']],project);
   assert.ok(commands.every(({args})=>!args.includes('--recursive')),'Shared source owners do not initialize unrelated upstream trees');
   assert.ok(commands.some(({args})=>args[0]==='submodule'&&args.includes('--init')&&named(args).includes('sources/maclauncher-android')),project);
  }
@@ -193,7 +197,7 @@ test('a build initializes the gitlinks that its declared sources link files into
  fs.symlinkSync('helper/helper.mjs',path.join(upstream,'shared.mjs'));git(upstream,'add','.');git(upstream,'commit','-qm','links a helper');
  git(root,'init','-q');git(root,'submodule','add','-q',upstream,'producers/engine/upstream');git(root,'add','.');git(root,'commit','-qm','fixture');
  git(root,'submodule','deinit','-q','--all');
- const run=(args,cwd)=>execFileSync('git',['-c','protocol.file.allow=always',...args],{cwd,encoding:'utf8',stdio:['ignore','pipe','pipe']});
+ const run=(args,cwd,input)=>execFileSync('git',['-c','protocol.file.allow=always',...args],{cwd,encoding:'utf8',input,stdio:[input===undefined?'ignore':'pipe','pipe','pipe']});
  assert.deepEqual(initializeSources({project:'engine',directory:root,run}).initialized,
   [{path:'producers/engine/upstream',recursive:false},{path:'producers/engine/upstream/helper',recursive:false}]);
  assert.ok(fs.existsSync(path.join(root,'producers/engine/upstream/shared.mjs'))&&fs.readFileSync(path.join(root,'producers/engine/upstream/shared.mjs'),'utf8')==='export {};\n');

@@ -9,7 +9,7 @@ import {appNestedFiles} from './app-source.mjs';
 const root=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url);
 // This tool runs before any source exists; the project registry it reads names no file inside a source.
 /** Initialize only declared Gitlink paths, including nested production sources. */
-const runGit=(args,cwd)=>execFileSync('git',args,{cwd,encoding:'utf8',stdio:['ignore','pipe','pipe'],maxBuffer:Infinity});
+const runGit=(args,cwd,input)=>execFileSync('git',args,{cwd,encoding:'utf8',input,stdio:[input===undefined?'ignore':'pipe','pipe','pipe'],maxBuffer:Infinity});
 const appSource=directory=>JSON.parse(fs.readFileSync(path.join(directory,'producers/package-support/app-source.json'),'utf8'));
 /** Sources the publication and index tools read: the pinned app source. */
 const toolPaths=directory=>[appSource(directory).gitlink];
@@ -27,13 +27,23 @@ const gitlinks=(directory,run,state=sourceState())=>{
  return state.listed.get(directory);
 };
 /** The gitlinks of a checkout that its own tracked symlinks point into, read through `run` from the
- * checkout's index and the symlinks' blobs. A checkout that is not initialized lists none. */
+ * checkout's index and the symlinks' blobs (one `cat-file --batch`, the object names on its input).
+ * A checkout that is not initialized lists none. */
 const symlinkedGitlinks=(checkout,run)=>{
  let stage;try{stage=String(run(['ls-files','--stage'],checkout));}catch{return [];}
  const rows=stage.split('\n').flatMap(line=>{const match=/^(120000|160000) ([a-f0-9]{40}) 0\t(.+)$/.exec(line);return match?[{mode:match[1],object:match[2],path:match[3]}]:[];});
- const links=rows.filter(row=>row.mode==='160000').map(row=>row.path);
- return [...new Set(rows.filter(row=>row.mode==='120000'&&links.length).flatMap(row=>{
-  const target=path.posix.normalize(path.posix.join(path.posix.dirname(row.path),String(run(['cat-file','-p',row.object],checkout)).replace(/\n$/,'')));
+ const links=rows.filter(row=>row.mode==='160000').map(row=>row.path),symlinks=rows.filter(row=>row.mode==='120000');
+ if(!links.length||!symlinks.length)return [];
+ // Each answer is `<object> <type> <size>` and the blob's bytes, or `<object> missing`.
+ const output=Buffer.from(String(run(['cat-file','--batch'],checkout,symlinks.map(row=>row.object).join('\n')+'\n'))),targets=new Map();
+ for(let offset=0;offset<output.length;){
+  const end=output.indexOf(10,offset);if(end<0)break;const [object,type,size]=output.subarray(offset,end).toString().split(' ');
+  if(type==='missing'||!/^\d+$/.test(size||'')){offset=end+1;continue;}
+  targets.set(object,output.subarray(end+1,end+1+Number(size)).toString());offset=end+1+Number(size)+1;
+ }
+ return [...new Set(symlinks.flatMap(row=>{
+  if(!targets.has(row.object))return [];
+  const target=path.posix.normalize(path.posix.join(path.posix.dirname(row.path),targets.get(row.object)));
   return links.filter(link=>target.startsWith(link+'/'));
  }))];
 };
