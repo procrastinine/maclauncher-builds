@@ -6,6 +6,8 @@ import path from 'node:path';
 import {createRequire} from 'node:module';
 import {downloadFile,downloadFileSync,transientDownload,retryNetwork,retryNetworkAsync} from '../tools/download.mjs';
 import {buildInput} from '../tools/build-input.mjs';
+import {archiveInput} from '../lib/pins.mjs';
+import crypto from 'node:crypto';
 test('download and portable producer modules remain synchronously require-able',()=>{
  const require=createRequire(import.meta.url);
  assert.equal(typeof require('../tools/download.mjs').downloadFile,'function');
@@ -66,6 +68,19 @@ const fs=require('node:fs'),args=process.argv.slice(2);fs.appendFileSync(${JSON.
  process.env.PATH=directory+path.delimiter+previousPath;
  await assert.rejects(buildInput({url:'https://example.invalid/pinned',sha256:'a'.repeat(64),bytes:11},cache),/checksum or size differs/);
  assert.equal(fs.readFileSync(count,'utf8'),'attempt\n');assert.deepEqual(fs.readdirSync(cache),[]);
+});
+
+test('a build input with only a SHA-512 is cached by that digest and verified on every read',async t=>{
+ const directory=temporary(t),cache=path.join(directory,'cache'),bytes=Buffer.from('runtime bytes'),sha512=crypto.createHash('sha512').update(bytes).digest('hex');
+ fs.writeFileSync(path.join(directory,'curl'),`#!${process.execPath}
+const fs=require('node:fs'),args=process.argv.slice(2);fs.writeFileSync(args[args.indexOf('--output')+1],${JSON.stringify(bytes.toString())});process.stdout.write('200');\n`,{mode:0o755});
+ const previousPath=process.env.PATH;t.after(()=>{process.env.PATH=previousPath;});
+ process.env.PATH=directory+path.delimiter+previousPath;
+ const archive=await buildInput({url:'https://example.invalid/runtime.tar.gz',sha512,bytes:bytes.length},cache);
+ assert.equal(archive,path.join(cache,sha512));assert.deepEqual(fs.readFileSync(archive),bytes);
+ await assert.rejects(buildInput({url:'https://example.invalid/runtime.tar.gz',sha512:'a'.repeat(128)},cache),/checksum or size differs/);
+ await assert.rejects(buildInput({url:'https://example.invalid/runtime.tar.gz',sha512:'a'.repeat(64)},cache),/SHA-256 or SHA-512/);
+ assert.deepEqual(archiveInput({url:'https://example.invalid/runtime.tar.gz',sha512,bytes:bytes.length,version:'1'}),{url:'https://example.invalid/runtime.tar.gz',sha512,bytes:bytes.length});
 });
 
 test('the shared retry classifies service and DNS failures without retrying integrity or authorization errors',async()=>{

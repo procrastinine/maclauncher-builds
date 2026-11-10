@@ -3046,6 +3046,18 @@
         {
           "file": "producers/nxnative/dotnet-sdk.json",
           "pointer": ""
+        },
+        {
+          "file": "producers/nxnative/dependencies.json",
+          "pointer": "/python"
+        },
+        {
+          "file": "producers/nxnative/dependencies.json",
+          "pointer": "/dotnet"
+        },
+        {
+          "file": "producers/nxnative/dependencies.json",
+          "pointer": "/wheels"
         }
       ]
     }

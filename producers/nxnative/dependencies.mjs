@@ -13,7 +13,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 
-import { downloadBytes } from '../../tools/download.mjs';
+import { buildInput } from '../../tools/build-input.mjs';
 
 const execute = promisify(execFile);
 const directory = path.dirname(fileURLToPath(import.meta.url));
@@ -30,25 +30,14 @@ async function run(program, args, options = {}) {
   }
 }
 
-async function digest(file, algorithm = 'sha256') {
-  return crypto.createHash(algorithm).update(await fs.readFile(file)).digest('hex');
+async function digest(file) {
+  return crypto.createHash('sha256').update(await fs.readFile(file)).digest('hex');
 }
 
+// Each dependency archive is a declared build input; the build reads a copy under its own name.
 async function acquire(input, cache) {
   const target = path.join(cache, input.filename);
-  const algorithm = input.sha512 ? 'sha512' : 'sha256';
-  const expected = input[algorithm];
-  try {
-    if (await digest(target, algorithm) === expected) return target;
-  } catch (error) {
-    if (error.code !== 'ENOENT') throw error;
-  }
-  const bytes = await downloadBytes(input.url);
-  if (bytes.length !== input.bytes || crypto.createHash(algorithm).update(bytes).digest('hex') !== expected)
-    throw new Error(`Dependency checksum differs: ${input.filename}`);
-  const temporary = target + '.partial';
-  await fs.writeFile(temporary, bytes);
-  await fs.rename(temporary, target);
+  await fs.copyFile(await buildInput(input), target);
   return target;
 }
 
