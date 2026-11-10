@@ -12,6 +12,8 @@ import {prepareBuildHost} from '../tools/build-host.mjs';
 import {initializeSources,initializeGitlinks} from '../tools/init-runtime-sources.mjs';
 import {prepareRelease} from '../tools/release-runtime.mjs';
 import {readProjects,buildRecord,buildRecords} from '../lib/projects.mjs';
+import {createRequire} from 'node:module';
+const requirements=createRequire(import.meta.url)('./support/requirements.cjs');
 const root=path.resolve(import.meta.dirname,'..');
 // The paths one git command names after `--`.
 const named=args=>args.includes('--')?args.slice(args.indexOf('--')+1):[];
@@ -60,7 +62,7 @@ test('Android recipes initialize the producer whose metadata they read from a co
 });
 
 // Reads the app checkout: mpv declares app files, and initializeSources lists the app gitlinks they lie in from the app's own index.
-test('only a build that declares app-source.json initializes the app, with the app gitlinks its app files lie in',()=>{
+test('only a build that declares app-source.json initializes the app, with the app gitlinks its app files lie in',requirements({sourceTree:'sources/maclauncher'}),()=>{
  const fake=(cwd,links)=>links.map(path=>'160000 '+'a'.repeat(40)+' 0\t'+path).join('\n');
  const initialize=project=>initializeSources({project,directory:root,run:(args,cwd)=>{
   if(args[0]!=='ls-files')return '';

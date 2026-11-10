@@ -10,6 +10,8 @@ import {helperPackage} from '../tools/helper-package.mjs';
 import {imageDataContentIdentity} from '../tools/build-android-image-data.mjs';
 import {preparePackageLayout,materializePackageAliases} from '../tools/package-layout.mjs';
 import {readImageDataInputs,materializeImageDataInputs} from '../tools/android-image-data-input.mjs';
+import {createRequire} from 'node:module';
+const requirements=createRequire(import.meta.url)('./support/requirements.cjs');
 
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 function fixture(t){
@@ -54,7 +56,7 @@ function fixture(t){
  return {root,inputs,transport,data};
 }
 
-test('image shard readers retain every indexed object after ordinary package aliases are materialized',t=>{
+test('image shard readers retain every indexed object after ordinary package aliases are materialized',requirements({sourceTree:'sources/maclauncher-android'}),t=>{
  const f=fixture(t),declaration=JSON.parse(fs.readFileSync(path.join(f.inputs[0],'declaration.json')));
  assert.equal(declaration.files.filter(file=>file.path.startsWith('data/')).length,1);
  assert.equal(f.transport.shards[0].objects.length,2);
@@ -64,7 +66,7 @@ test('image shard readers retain every indexed object after ordinary package ali
  for(const [name,bytes]of f.data)assert.deepEqual(fs.readFileSync(path.join(restored.root,'data',name)),bytes);
 });
 
-test('image shard readers reject corrupted materialized alias bytes',t=>{
+test('image shard readers reject corrupted materialized alias bytes',requirements({sourceTree:'sources/maclauncher-android'}),t=>{
  const f=fixture(t),input=f.inputs[0];
  fs.writeFileSync(path.join(input,'payload/data/00000001-0001'),Buffer.alloc(f.data.get('00000001-0001').length,7));
  assert.throws(()=>readImageDataInputs(f.inputs),/checksum|alias/i);

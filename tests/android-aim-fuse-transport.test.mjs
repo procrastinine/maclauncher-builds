@@ -1,7 +1,8 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';import {spawnSync} from 'node:child_process';
-import {adaptFuseTransport,adaptFuseTransportLifetime,adaptFuseBroker,adaptFuseMountBindings,adaptFuseMountRecords,adaptFuseMountRootTraversal,adaptAimFsTrace,adaptAimFuseTrace} from '../producers/package-support/src/modules/android/providers/aim/source.mjs';
+import {createRequire} from 'node:module';
+const requirements=createRequire(import.meta.url)('./support/requirements.cjs');
 
-test('FUSE transport uses private directory scope and explicit registered descriptor identity',t=>{
+test('FUSE transport uses private directory scope and explicit registered descriptor identity',requirements({sourceTree:'sources/maclauncher-android'}),async t=>{const {adaptFuseTransport,adaptFuseTransportLifetime,adaptFuseBroker,adaptFuseMountBindings,adaptFuseMountRecords,adaptFuseMountRootTraversal,adaptAimFsTrace,adaptAimFuseTrace}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
  const source=process.env.ANDROID_AIM_FUSE_SOURCE;if(!source)return t.skip('Requires the pinned AIM source');
  const before=fs.readFileSync(path.join(source,'crates/aim-linux-abi/src/sys/fuse.rs'),'utf8'),after=adaptFuseTransport(before);
  assert.ok(after.includes('registered_transport_path(&socket_path(fd, true)?)'));

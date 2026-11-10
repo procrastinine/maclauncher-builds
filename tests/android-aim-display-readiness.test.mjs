@@ -5,7 +5,8 @@ import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawnSync} from 'node:child_process';
-import {adaptDisplayReadiness,adaptDisplayTitle} from '../producers/package-support/src/modules/android/providers/aim/source.mjs';
+import {createRequire} from 'node:module';
+const requirements=createRequire(import.meta.url)('./support/requirements.cjs');
 
 const relative='crates/aim-host-display/src/bin/aim-display/main.rs';
 const upstream=path.resolve(process.env.ANDROID_AIM_DISPLAY_SOURCE||fileURLToPath(new URL('../sources/maclauncher-android/src/external/aim-custom',import.meta.url)));
@@ -25,7 +26,7 @@ function run(command,args,options={}) {
   assert.equal(r.status,0,r.stdout+r.stderr);return r.stdout;
 }
 
-test('AIM display adaptation only moves the guarded initial draw after serving begins',t=>{
+test('AIM display adaptation only moves the guarded initial draw after serving begins',requirements({sourceTree:'sources/maclauncher-android'}),async t=>{const {adaptDisplayReadiness,adaptDisplayTitle}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
   const text=original(t);if(!text)return;
   const fixed=adaptDisplayReadiness(text);
   const old='    // The display is black until the first frame.\n    renderer.present(None, &targets, None);\n';
@@ -37,7 +38,7 @@ test('AIM display adaptation only moves the guarded initial draw after serving b
   assert.throws(()=>adaptDisplayReadiness(fixed),/no longer matches/);
 });
 
-test('actual startup block accepts a Unix handshake while the first render is blocked',{timeout:45000},t=>{
+test('actual startup block accepts a Unix handshake while the first render is blocked',{timeout:45000,...requirements({sourceTree:'sources/maclauncher-android'})},async t=>{const {adaptDisplayReadiness,adaptDisplayTitle}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
   const text=original(t);if(!text)return;
   const root=fs.mkdtempSync(path.join(os.tmpdir(),'aim-display-readiness-'));
   t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
@@ -52,7 +53,7 @@ test('actual startup block accepts a Unix handshake while the first render is bl
   }
 });
 
-test('actual display argument parser uses its bundle title, falls back, and honors explicit --title',t=>{
+test('actual display argument parser uses its bundle title, falls back, and honors explicit --title',requirements({sourceTree:'sources/maclauncher-android'}),async t=>{const {adaptDisplayReadiness,adaptDisplayTitle}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
   const text=original(t);if(!text)return;
   const fixed=adaptDisplayTitle(text),start=fixed.indexOf('    let mut args = std::env::args().skip(1);');
   const end=fixed.indexOf('    let Some(socket) = socket else {',start);

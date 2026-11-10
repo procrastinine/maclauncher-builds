@@ -7,8 +7,10 @@ import {readProjects,resolveProject} from '../lib/projects.mjs';
 import {validateCatalog,releaseTag} from '../lib/project-identity.mjs';
 import {checkProjects,main} from '../tools/check-updates.mjs';
 import {catalogFixture,packageRecord} from './helpers/catalog-fixture.mjs';
+import {createRequire} from 'node:module';
+const requirements=createRequire(import.meta.url)('./support/requirements.cjs');
 const root=path.resolve(import.meta.dirname,'..');
-test('project registry covers every selected package and excludes direct upstream binaries',()=>{
+test('project registry covers every selected package and excludes direct upstream binaries',requirements({sourceTree:'sources/maclauncher-android'}),()=>{
  const registry=readProjects(root),ids=new Set(registry.projects.map(value=>value.id));
  const catalogs=fs.readdirSync(path.join(root,'catalogs')).filter(name=>name.endsWith('.json')&&name!=='index.json');
  for(const file of catalogs)assert.ok(ids.has(file.slice(0,-5)),file+' has no registered producer');
@@ -34,7 +36,7 @@ test('upstream checks retain prerelease candidates and report incomplete metadat
  assert.equal(failed.projects[0].status,'incomplete');assert.equal(failed.projects[0].upstreams[0].releaseStatus,'unavailable');
 });
 
-test('delivery registries classify each project once and preserve a flat project API',t=>{
+test('delivery registries classify each project once and preserve a flat project API',requirements({sourceTree:'sources/maclauncher-android'}),t=>{
  const registry=readProjects(root),rawRegistry=readProjects(root,{resolvePins:false}),manifest=JSON.parse(fs.readFileSync(path.join(root,'projects.json')));
  assert.equal(registry.schemaVersion,1);assert.equal(manifest.schemaVersion,2);
  assert.equal(registry.projects.filter(project=>project.delivery==='downloadable').length,43);

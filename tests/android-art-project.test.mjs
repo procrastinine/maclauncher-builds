@@ -8,8 +8,10 @@ import {readProjects,resolveProject} from '../lib/projects.mjs';
 import {assetName,releaseTag,assetUrl,validateCatalog} from '../lib/project-identity.mjs';
 import {catalog} from '../tools/runtime-package.mjs';
 import {main as buildRuntime} from '../tools/build-runtime.mjs';
+import {createRequire} from 'node:module';
+const requirements=createRequire(import.meta.url)('./support/requirements.cjs');
 
-test('Android ART has its own producer, release identity and catalog without routing to the common JVM build',()=>{
+test('Android ART has its own producer, release identity and catalog without routing to the common JVM build',requirements({sourceTree:'sources/maclauncher-android'}),()=>{
  const common=resolveProject('android'),art=resolveProject('android-art');
  assert.equal(common.producer.kind,'pinned-source');
  assert.equal(common.producer.recipe,'runtimes/android/source.json');
@@ -30,7 +32,7 @@ test('Android ART has its own producer, release identity and catalog without rou
  assert.throws(()=>validateCatalog(selected,{project:common.id,repository:common.releaseRepository}),/different project/);
 });
 
-test('registered ART builds delegate unchanged inputs to the canonical ART entry',t=>{
+test('registered ART builds delegate unchanged inputs to the canonical ART entry',requirements({sourceTree:'sources/maclauncher-android'}),t=>{
  const directory=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'android-art-project-')));
  t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
  const producer=path.join(directory,'sources/maclauncher-android');

@@ -3,9 +3,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
-import {adaptGuestInitExitReport} from '../producers/package-support/src/modules/android/providers/aim/source.mjs';
+import {createRequire} from 'node:module';
+const requirements=createRequire(import.meta.url)('./support/requirements.cjs');
 
-test('native init reports its first stop reason before authenticated namespace retirement', t => {
+test('native init reports its first stop reason before authenticated namespace retirement', requirements({sourceTree: 'sources/maclauncher-android'}), async t => {const {adaptGuestInitExitReport}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
   const source = process.env.ANDROID_AIM_BOOT_EXIT_SOURCE;
   if (!source) return t.skip('Requires the pinned AIM source');
   const before = fs.readFileSync(path.join(source, 'crates/aim-guest-init/src/boot.rs'), 'utf8');

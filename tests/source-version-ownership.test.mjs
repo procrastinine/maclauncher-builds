@@ -10,6 +10,8 @@ import {androidBuildInputRequirements} from '../tools/android-signed-inputs.mjs'
 import {catalog} from '../tools/runtime-package.mjs';
 import {assetUrl} from '../lib/project-identity.mjs';
 import {catalogFixture,packageRecord,repository} from './helpers/catalog-fixture.mjs';
+import {createRequire} from 'node:module';
+const requirements=createRequire(import.meta.url)('./support/requirements.cjs');
 const root=path.resolve(import.meta.dirname,'..');
 
 test('package versions follow product source ownership, not ownership of a wrapper recipe',t=>{
@@ -38,7 +40,7 @@ test('owned version suggestions use semantic versions while explicit registered 
 
 });
 
-test('Android signed input versions are declared independently of publication history',t=>{
+test('Android signed input versions are declared independently of publication history',requirements({sourceTree:'sources/maclauncher-android'}),t=>{
  for(const input of androidBuildInputRequirements()){
   const project=resolveProject(input.id,root,{resolvePins:false});
   assert.ok(project.packageProfiles.some(profile=>profile.version===input.version),input.id+' declares its required input version');

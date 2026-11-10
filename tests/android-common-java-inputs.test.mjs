@@ -9,6 +9,8 @@ import {prepareAndroidCommonJavaProducer} from '../tools/android-common-java-inp
 import {verifyAndroidJavaConverterInput} from '../tools/build-android-java-converter.mjs';
 import {verifyAndroidJavaFrameworkInput} from '../tools/build-android-java-framework.mjs';
 import {helperPackage,sha} from '../tools/helper-package.mjs';
+import {createRequire} from 'node:module';
+const requirements=createRequire(import.meta.url)('./support/requirements.cjs');
 const root=path.resolve(import.meta.dirname,'..');
 
 export async function javaFixture(directory,kind,source=androidSource()){
@@ -22,7 +24,7 @@ export async function javaFixture(directory,kind,source=androidSource()){
  return {profile,payload};
 }
 
-test('Java transport preserves the clean selected native producer independently of Java source pins',async t=>{
+test('Java transport preserves the clean selected native producer independently of Java source pins',requirements({sourceTree:'sources/maclauncher-android'}),async t=>{
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'android-java-composition-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
  const original=path.join(root,'sources/maclauncher-android'),android=path.join(directory,'android');
  for(const file of ['build-options.mjs','compile.mjs','converter-build.mjs','framework-build.mjs','framework-modules.mjs','process-ids.c']){const relative='src/modules/android/native/'+file;fs.mkdirSync(path.dirname(path.join(android,relative)),{recursive:true});fs.copyFileSync(path.join(original,relative),path.join(android,relative));}
@@ -37,7 +39,7 @@ test('Java transport preserves the clean selected native producer independently 
 });
 
 
-test('sealed Java inputs retain their own producer revision and reject altered bytes',async t=>{
+test('sealed Java inputs retain their own producer revision and reject altered bytes',requirements({sourceTree:'sources/maclauncher-android'}),async t=>{
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'android-java-revisions-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
  const source={...androidSource(),revision:'1'.repeat(40)};
  assert.notEqual(source.revision,androidSource().revision);

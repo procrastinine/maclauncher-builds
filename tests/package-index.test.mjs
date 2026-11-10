@@ -10,6 +10,8 @@ import {buildCoverage,currentBuildOutputs} from '../tools/build-coverage.mjs';
 import {readProjects} from '../lib/projects.mjs';
 import {assetName,releaseTag} from '../lib/project-identity.mjs';
 import {catalogFixture,packageRecord,repository} from './helpers/catalog-fixture.mjs';
+import {createRequire} from 'node:module';
+const requirements=createRequire(import.meta.url)('./support/requirements.cjs');
 const root=path.resolve(import.meta.dirname,'..');
 function indexFixture(t){
  const {directory,value}=catalogFixture(t,'hashlink',[
@@ -100,7 +102,7 @@ test('package names and ABI labels are escaped before rendering public HTML',t=>
  const {index}=indexFixture(t);index.projects[0].name='<script>bad()</script>';index.projects[0].releases[0].profile='ABI <unsafe>';
  const html=renderIndex(index);assert.ok(html.includes('&lt;script&gt;bad()&lt;/script&gt;'));assert.ok(html.includes('ABI &lt;unsafe&gt;'));assert.equal(html.includes('<script>bad()'),false);
 });
-test('ABI profile metadata rejects duplicate versions and incomplete labels',t=>{
+test('ABI profile metadata rejects duplicate versions and incomplete labels',requirements({sourceTree:'sources/maclauncher-android'}),t=>{
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'package-profiles-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
  const registry=readProjects(root),project=registry.projects.find(p=>p.id==='hashlink');delete project.build;project.packageProfiles[1].version=project.packageProfiles[0].version;fs.writeFileSync(path.join(directory,'projects.json'),JSON.stringify(registry));assert.throws(()=>readProjects(directory),/ABI profiles/);
  project.packageProfiles=[{version:'1.9-macos-v2',label:''}];fs.writeFileSync(path.join(directory,'projects.json'),JSON.stringify(registry));assert.throws(()=>readProjects(directory),/ABI profiles/);

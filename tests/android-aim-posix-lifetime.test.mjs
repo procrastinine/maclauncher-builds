@@ -6,7 +6,8 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {spawnSync} from 'node:child_process';
-import {adaptPosixHolderProcessGroup} from '../producers/package-support/src/modules/android/providers/aim/source.mjs';
+import {createRequire} from 'node:module';
+const requirements=createRequire(import.meta.url)('./support/requirements.cjs');
 
 const relative='crates/aim-storage/src/posix_broker.rs';
 const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -16,7 +17,7 @@ function run(command,args,options={}) {
   assert.equal(r.status,0,r.stdout+r.stderr);return r.stdout;
 }
 
-test('AIM holder isolation changes only its spawn group and required import',t=>{
+test('AIM holder isolation changes only its spawn group and required import',requirements({sourceTree:'sources/maclauncher-android'}),async t=>{const {adaptPosixHolderProcessGroup}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
   const root=process.env.ANDROID_AIM_POSIX_SOURCE||fileURLToPath(new URL('../sources/maclauncher-android/src/external/aim-custom',import.meta.url));
   if(!fs.existsSync(path.join(root,relative)))return t.skip('Requires the pinned AIM source');
   const original=fs.readFileSync(path.join(root,relative),'utf8'),fixed=adaptPosixHolderProcessGroup(original);
@@ -24,7 +25,7 @@ test('AIM holder isolation changes only its spawn group and required import',t=>
   assert.throws(()=>adaptPosixHolderProcessGroup(fixed),/no longer matches/);
 });
 
-test('actual original POSIX controller preserves lock ownership across group TERM and retires after controller death',{timeout:45000},t=>{
+test('actual original POSIX controller preserves lock ownership across group TERM and retires after controller death',{timeout:45000,...requirements({sourceTree:'sources/maclauncher-android'})},async t=>{const {adaptPosixHolderProcessGroup}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
   const inputs=process.env.ANDROID_AIM_POSIX_NATIVE_INPUTS;
   if(process.platform!=='darwin'||process.arch!=='arm64'||!inputs)return t.skip('Requires cached AIM source libraries and the original lock holder');
   const native=JSON.parse(fs.readFileSync(inputs,'utf8'));

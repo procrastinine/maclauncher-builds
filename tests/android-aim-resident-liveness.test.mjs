@@ -5,7 +5,8 @@ import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawnSync} from 'node:child_process';
-import {adaptResidentProcessLiveness,adaptResidentWorkerDrain} from '../producers/package-support/src/modules/android/providers/aim/source.mjs';
+import {createRequire} from 'node:module';
+const requirements=createRequire(import.meta.url)('./support/requirements.cjs');
 
 const relative='crates/aimctl/src/resident.rs';
 const run=(command,args,options={})=>{
@@ -14,7 +15,7 @@ const run=(command,args,options={})=>{
  assert.equal(result.status,0,result.stdout+result.stderr);return result;
 };
 
-test('resident liveness changes only the kernel zombie condition',t=>{
+test('resident liveness changes only the kernel zombie condition',requirements({sourceTree:'sources/maclauncher-android'}),async t=>{const {adaptResidentProcessLiveness,adaptResidentWorkerDrain}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
  const source=process.env.ANDROID_AIM_RESIDENT_SOURCE;
  if(!source)return t.skip('Requires the existing AIM source projection');
  const original=fs.readFileSync(path.join(source,relative),'utf8');
@@ -26,7 +27,7 @@ test('resident liveness changes only the kernel zombie condition',t=>{
  assert.throws(()=>adaptResidentProcessLiveness(adapted),/no longer matches/);
 });
 
-test('registered worker drain uses the existing finish budget without changing signal authority',t=>{
+test('registered worker drain uses the existing finish budget without changing signal authority',requirements({sourceTree:'sources/maclauncher-android'}),async t=>{const {adaptResidentProcessLiveness,adaptResidentWorkerDrain}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
  const source=process.env.ANDROID_AIM_RESIDENT_SOURCE;if(!source)return t.skip('Requires the existing AIM source projection');
  const original=fs.readFileSync(path.join(source,relative),'utf8'),adapted=adaptResidentWorkerDrain(original);
  assert.ok(adapted.includes('let workers = wait_registered_workers_ended(files, deadline);'));
@@ -34,7 +35,7 @@ test('registered worker drain uses the existing finish budget without changing s
  assert.throws(()=>adaptResidentWorkerDrain(adapted),/no longer matches/);
 });
 
-test('actual resident code recognizes a real unreaped zombie as ended',{timeout:45000},t=>{
+test('actual resident code recognizes a real unreaped zombie as ended',{timeout:45000,...requirements({sourceTree:'sources/maclauncher-android'})},async t=>{const {adaptResidentProcessLiveness,adaptResidentWorkerDrain}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
  const source=process.env.ANDROID_AIM_RESIDENT_SOURCE,inputs=process.env.ANDROID_AIM_RESIDENT_NATIVE_INPUTS;
  if(process.platform!=='darwin'||process.arch!=='arm64'||!source||!inputs)
   return t.skip('Requires AIM source and cached native compiler inputs');

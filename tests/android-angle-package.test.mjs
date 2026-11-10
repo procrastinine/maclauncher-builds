@@ -7,9 +7,10 @@ import {createRequire} from 'node:module';
 import {androidSource} from '../lib/android-source.mjs';
 import {angleDefinition,packageAngleInput} from '../tools/build-android-angle.mjs';
 import {sha} from '../tools/helper-package.mjs';
+const requirements=createRequire(import.meta.url)('./support/requirements.cjs');
 const Native=createRequire(import.meta.url)('../producers/package-support/scripts/native-binary-tools.cjs');
 
-test('ANGLE seals its generated binary token without a second source declaration',t=>{
+test('ANGLE seals its generated binary token without a second source declaration',requirements({sourceTree:'sources/maclauncher-android'}),t=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'angle-package-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  const definition=angleDefinition(),profile=definition.profiles.find(row=>row.id==='common'),angle=path.join(root,'angle');fs.mkdirSync(angle);
  assert.equal(Object.hasOwn(profile,'programBinaryVersion'),false);

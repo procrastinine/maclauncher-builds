@@ -6,9 +6,11 @@ import os from 'node:os';
 import {androidSource,ndkSource} from '../lib/android-source.mjs';
 import {readArtFfiInput} from '../tools/android-art-ffi-input.mjs';
 import {helperPackage,sha} from '../tools/helper-package.mjs';
+import {createRequire} from 'node:module';
+const requirements=createRequire(import.meta.url)('./support/requirements.cjs');
 const root=path.resolve(import.meta.dirname,'..'),json=file=>JSON.parse(fs.readFileSync(path.join(root,file)));
 
-test('included ART supplier retains the canonical acquisition metadata and source records',()=>{
+test('included ART supplier retains the canonical acquisition metadata and source records',requirements({sourceTree:'sources/maclauncher-android'}),()=>{
  const relative='runtime/src/modules/android/art/supplier.json',file=path.join(root,androidSource().directory,'src/modules/android/art/supplier.json');
  const supplier=JSON.parse(fs.readFileSync(file));assert.ok(supplier.imageAcquisition);assert.ok(supplier.sources);
  const profile=json('producers/included-helpers/profiles/android-launcher.json').inputs.find(row=>row.path===relative);

@@ -6,6 +6,8 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createRecipeBuildReporter} from '../tools/recipe-build-report.mjs';
 import {prepareBuildInputs} from '../tools/build-run-inputs.mjs';
+import {createRequire} from 'node:module';
+const requirements=createRequire(import.meta.url)('./support/requirements.cjs');
 
 const project=(id,command)=>({id,name:id,delivery:'downloadable',producer:{kind:'maclauncher',repository:'https://github.com/owner/builds',entries:[command]},upstreams:[],packageProfiles:[{version:'1.0.0',label:id}],build:{version:'1.0.0',architectures:['arm64'],command}});
 
@@ -110,7 +112,7 @@ test('the shared build action and the tools it runs are declared build code',t=>
  f.write('tools/package.mjs','export const pack = 2;');assert.notEqual(report().definitionDigest,before.definitionDigest);
 });
 
-test('only a definition that declares app-source.json carries the app pin and its declared app gitlinks',async()=>{
+test('only a definition that declares app-source.json carries the app pin and its declared app gitlinks',requirements({sourceTree:'sources/maclauncher'}),async()=>{
  const directory=path.resolve(import.meta.dirname,'..'),{readProjects}=await import('../lib/projects.mjs'),describe=createRecipeBuildReporter({directory});
  for(const project of readProjects(directory,{resolvePins:false}).projects.filter(project=>project.build)){
   const links=describe(project.id).definition.gitlinks.map(link=>link.path),declares=(project.producer.entries||[]).includes('producers/package-support/app-source.json');
@@ -119,7 +121,7 @@ test('only a definition that declares app-source.json carries the app pin and it
  }
 });
 
-test('every production definition excludes publication, catalog and planning files',async()=>{
+test('every production definition excludes publication, catalog and planning files',requirements({sourceTree:'sources/maclauncher'}),async()=>{
  const directory=path.resolve(import.meta.dirname,'..'),{readProjects}=await import('../lib/projects.mjs'),describe=createRecipeBuildReporter({directory});
  for(const project of readProjects(directory,{resolvePins:false}).projects.filter(project=>project.build)){
   for(const file of describe(project.id).definition.files)assert.doesNotMatch(file.path,/^tools\/(?:publication\/|publish-|plan-|dispatch-|catalog-|package-index|release-runtime|publication-authority)/,project.id+': '+file.path);
