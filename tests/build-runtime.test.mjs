@@ -9,10 +9,12 @@ import {execFileSync,spawnSync} from 'node:child_process';
 import {verifyProducer,main,buildPlan,runBuild,checkBuildRequest,RUNNERS,HOSTED_RUNNERS} from '../tools/build-runtime.mjs';
 import {findBuildTool} from '../tools/build-source.mjs';
 import {prepareBuildHost} from '../tools/build-host.mjs';
-import {initializeSources} from '../tools/init-runtime-sources.mjs';
+import {initializeSources,initializeGitlinks} from '../tools/init-runtime-sources.mjs';
 import {prepareRelease} from '../tools/release-runtime.mjs';
 import {readProjects,buildRecord,buildRecords} from '../lib/projects.mjs';
 const root=path.resolve(import.meta.dirname,'..');
+// The paths one git command names after `--`.
+const named=args=>args.includes('--')?args.slice(args.indexOf('--')+1):[];
 // The app checkout is the gitlink that app-source.json declares.
 const appCheckout=path.join(root,sourceCheckout(JSON.parse(fs.readFileSync(path.join(root,'producers/package-support/app-source.json')))));
 
@@ -26,9 +28,9 @@ test('Android recipes initialize the producer whose metadata they read from a co
   }});
   const build=buildRecord(readProjects(root,{resolvePins:false}).projects.find(row=>row.id===project));
   assert.deepEqual(result.initialized,build.submodules.map(path=>({path,recursive:false})),project);
-  assert.ok(!commands.some(({args})=>args.at(-1)==='sources/maclauncher'),'A build that declares no app file never initializes the app');
+  assert.ok(!commands.some(({args})=>named(args).includes('sources/maclauncher')),'A build that declares no app file never initializes the app');
   assert.ok(commands.every(({args})=>!args.includes('--recursive')),'Shared source owners do not initialize unrelated upstream trees');
-  assert.ok(commands.some(({args})=>args[0]==='submodule'&&args.includes('--init')&&args.at(-1)==='sources/maclauncher-android'),project);
+  assert.ok(commands.some(({args})=>args[0]==='submodule'&&args.includes('--init')&&named(args).includes('sources/maclauncher-android')),project);
  }
 });
 
@@ -47,6 +49,34 @@ test('only a build that declares app-source.json initializes the app, with the a
  assert.ok(!initialize('innoextract').some(path=>path==='sources/maclauncher'||path.startsWith('sources/maclauncher/')));
 });
 
+test('sources initialize with one submodule update per superproject and recursion group, listing each superproject once',t=>{
+ const directory=fs.mkdtempSync(path.join(os.tmpdir(),'source-groups-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
+ fs.mkdirSync(path.join(directory,'producers/package-support'),{recursive:true});fs.writeFileSync(path.join(directory,'producers/package-support/app-source.json'),JSON.stringify({gitlink:'sources/maclauncher'}));
+ const links={[directory]:['a','b','c','p','q'],[directory+'/b']:['x','y'],[directory+'/q']:['z']},calls=[],listed=[];
+ const run=(args,cwd)=>{
+  if(args[0]==='ls-files'){listed.push(cwd);return (links[cwd]||[]).map(link=>'160000 '+'a'.repeat(40)+' 0\t'+link).join('\n')+'\n';}
+  calls.push({cwd,args});return '';
+ };
+ const plain=initializeGitlinks({paths:['a','b/x','b/y','c'],directory,run});
+ assert.deepEqual(plain.map(row=>row.path),['a','b','b/x','b/y','c'],'Newly initialized gitlinks keep the order of the paths that name them');
+ assert.deepEqual(calls.map(({cwd,args})=>[cwd,named(args)]),[[directory,['a','b','c']],[directory+'/b',['x','y']]]);
+ assert.ok(calls.every(({args})=>args.includes('--depth')&&args[args.indexOf('--jobs')+1]==='8'));
+ assert.deepEqual(listed,[directory,directory+'/b'],'Each superproject is listed once');
+ calls.length=0;
+ const recursive=initializeGitlinks({paths:['p','q/z'],directory,run,allowRecursive:true});
+ assert.deepEqual(recursive,[{path:'p',recursive:true},{path:'q',recursive:false},{path:'q/z',recursive:true}]);
+ assert.deepEqual(calls.map(({cwd,args})=>[cwd,args.includes('--recursive'),named(args)]),[[directory,true,['p']],[directory,false,['q']],[directory+'/q',true,['z']]]);
+});
+
+test('a dumb HTTP source falls back to one full fetch of the same group',()=>{
+ const calls=[];
+ initializeGitlinks({paths:['a','b'],directory:'/fixture',run:(args,cwd)=>{
+  if(args[0]==='ls-files')return '160000 '+'a'.repeat(40)+' 0\ta\n160000 '+'a'.repeat(40)+' 0\tb\n';
+  calls.push(args);if(args.includes('--depth'))throw Object.assign(Error('fetch failed'),{stderr:'fatal: dumb http transport does not support shallow capabilities'});return '';
+ }});
+ assert.deepEqual(calls.map(args=>[args.includes('--depth'),named(args)]),[[true,['a','b']],[false,['a','b']]]);
+});
+
 test('a recursive build recurses into its own sources and never into the shared source owners',()=>{
  const build=buildRecord(readProjects(root,{resolvePins:false}).projects.find(project=>project.id==='ai5'));
  assert.equal(build.recursiveSubmodules,true);
@@ -56,7 +86,7 @@ test('a recursive build recurses into its own sources and never into the shared 
   if(args[0]==='ls-files'){const links=cwd===root?['sources/maclauncher','sources/maclauncher-android','sources/maclauncher-kosmickrisp',...build.submodules]:cwd===appCheckout?['src/external/maclauncher-android','src/external/maclauncher-kosmickrisp']:['sources/maclauncher'];return links.map(path=>'160000 '+'a'.repeat(40)+' 0\t'+path).join('\n')+'\n';}
   return '';
  }});
- assert.deepEqual(commands.filter(args=>args.includes('--recursive')).map(args=>args.at(-1)),build.submodules);
+ assert.deepEqual(commands.filter(args=>args.includes('--recursive')).flatMap(named),build.submodules);
 });
 
 test('producer routing never substitutes Android for a different project',()=>{
