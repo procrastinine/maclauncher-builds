@@ -6,7 +6,8 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {buildInput,llvmMingwInput} from './build-input.mjs';
-import {recipeMain,pythonBuildTools} from './build-source.mjs';
+import {recipeMain} from './build-source.mjs';
+import {pythonBuildTools} from './python-build-tools.mjs';
 import {publicDeclaration} from './runtime-package.mjs';
 import {buildProvider} from '../producers/vkd3d-proton/build.mjs';
 const require=createRequire(import.meta.url),B=require('../lib/package-format.cjs'),{readPeExports}=require('../lib/pe-exports.cjs');
@@ -18,7 +19,7 @@ export async function compile({work}){
   const archive=await buildInput(llvmMingwInput());
   const toolchain=path.join(work,'llvm-mingw');fs.mkdirSync(toolchain,{recursive:true});
   execFileSync('/usr/bin/tar',['-xf',archive,'--strip-components','1','-C',toolchain],{stdio:'inherit'});
-  const tools=pythonBuildTools(path.join(work,'build-tools'),path.join(root,'tools/sdk27-build-requirements.txt'));
+  const tools=await pythonBuildTools(path.join(work,'build-tools'),path.join(root,'tools/sdk27-build-requirements.json'));
   const built=buildProvider({work:path.join(work,'translator'),output:path.join(work,'payload'),mingw:path.join(toolchain,'bin'),
     meson:path.join(tools.bin,'meson'),ninja:path.join(tools.bin,'ninja')});
  return {built};

@@ -7,7 +7,8 @@ import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
-import {pythonBuildTools,recipeMain} from './build-source.mjs';
+import {recipeMain} from './build-source.mjs';
+import {pythonBuildTools} from './python-build-tools.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Native=require('../producers/package-support/scripts/native-binary-tools.cjs');
 const run=(command,args,options={})=>String(execFileSync(command,args,{encoding:'utf8',maxBuffer:Infinity,...options})||'').trim();
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -26,7 +27,7 @@ export function sdkCompressionPkgConfig({sdk,directory}){
 /** Compile libmpv and the render host that loads it. */
 export async function compile({work}){
  fs.mkdirSync(work,{recursive:true});
- const tools=pythonBuildTools(work,path.join(root,'tools/sdk27-build-requirements.txt'));
+ const tools=await pythonBuildTools(work,path.join(root,'tools/sdk27-build-requirements.json'));
  const producer=path.join(root,'producers/mpv-render/v7'),source=path.join(root,'producers/package-support/src/external/mpv-player');
  const Builder=require(path.join(producer,'scripts/build-mpv-library.cjs'));
  const sdk=process.env.SDKROOT||run('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path']);

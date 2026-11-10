@@ -10,7 +10,8 @@ import {pathToFileURL} from 'node:url';
 import {sealRuntime} from '../../tools/seal-runtime.mjs';
 import {buildZstd} from '../../tools/build-zstd.mjs';
 import {buildSpirvTools} from '../../tools/build-spirv-tools.mjs';
-import {pythonBuildTools,recipeMain} from '../../tools/build-source.mjs';
+import {recipeMain} from '../../tools/build-source.mjs';
+import {pythonBuildTools} from '../../tools/python-build-tools.mjs';
 const root=path.resolve(import.meta.dirname,'../..');
 // The pinned maclauncher-kosmickrisp repository holds the adaptations and the build recipe over its Mesa pin.
 const adaptation=path.join(root,'sources/maclauncher-kosmickrisp');
@@ -21,10 +22,10 @@ export async function compile({project:id,arch,work}){
  fs.mkdirSync(work,{recursive:true});
  const {buildKosmic}=await import(pathToFileURL(path.join(adaptation,'kosmickrisp-build.mjs')));
  const {buildKosmicLoader}=await import(pathToFileURL(path.join(adaptation,'kosmickrisp-targets.mjs')));
- const requirements=path.join(root,'tools/sdk27-build-requirements.txt');
- const tools=pythonBuildTools(work,requirements),meson=path.join(tools.bin,'meson'),ninja=path.join(tools.bin,'ninja');
+ const requirements=path.join(root,'tools/sdk27-build-requirements.json');
+ const tools=await pythonBuildTools(work,requirements),meson=path.join(tools.bin,'meson'),ninja=path.join(tools.bin,'ninja');
  const pin=JSON.parse(fs.readFileSync(path.join(adaptation,'kosmickrisp-source.json'))),inputs=JSON.parse(fs.readFileSync(path.join(adaptation,'kosmickrisp-targets.json'))),source=path.join(adaptation,sourceCheckout(pin));
- const pythonVersions=Object.fromEntries(fs.readFileSync(requirements,'utf8').split(/\r?\n/).filter(line=>line.includes('==')).map(line=>line.split('==')));
+ const pythonVersions=Object.fromEntries(JSON.parse(fs.readFileSync(requirements,'utf8')).packages.map(row=>[row.name,row.version]));
  const llvm=prefix('llvm'),observedInputs={...inputs,tools:{...pythonVersions,llvm:run(path.join(llvm,'bin/llvm-config'),['--version']),spirvLLVMTranslator:run('pkg-config',['--modversion','LLVMSPIRVLib'])}};
  // Mesa's system shader compilers execute on the Apple Silicon build host.
  // Cross-built x64 drivers consume their output without target LLVM libraries.

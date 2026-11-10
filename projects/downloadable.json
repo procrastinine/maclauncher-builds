@@ -2592,7 +2592,8 @@
         "tools/build-zstd.mjs",
         "tools/helper-package.mjs",
         "tools/manager-declaration.mjs",
-        "tools/sdk27-build-requirements.txt",
+        "tools/python-build-tools.mjs",
+        "tools/sdk27-build-requirements.json",
         "tools/seal-runtime.mjs"
       ],
       "sourceDirectory": "producers/package-support"
@@ -2668,6 +2669,10 @@
         {
           "file": "producers/dependencies/zstd.json",
           "pointer": ""
+        },
+        {
+          "file": "tools/sdk27-build-requirements.json",
+          "pointer": "/packages"
         }
       ]
     }
@@ -3099,9 +3104,11 @@
         "producers/mpv-render",
         "producers/package-support/app-source.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "tools/build-input.mjs",
         "tools/build-source.mjs",
         "tools/manager-declaration.mjs",
-        "tools/sdk27-build-requirements.txt",
+        "tools/python-build-tools.mjs",
+        "tools/sdk27-build-requirements.json",
         "tools/seal-runtime.mjs"
       ],
       "appEntries": [
@@ -3172,6 +3179,12 @@
         "libplacebo",
         "luajit",
         "mujs"
+      ],
+      "archives": [
+        {
+          "file": "tools/sdk27-build-requirements.json",
+          "pointer": "/packages"
+        }
       ]
     }
   },
@@ -4182,7 +4195,8 @@
         "tools/build-input.mjs",
         "tools/build-source.mjs",
         "tools/helper-package.mjs",
-        "tools/sdk27-build-requirements.txt"
+        "tools/python-build-tools.mjs",
+        "tools/sdk27-build-requirements.json"
       ],
       "buildEntry": "producers/vkd3d-proton/build.mjs"
     },
@@ -4232,6 +4246,10 @@
         {
           "file": "producers/dependencies/llvmMingw.json",
           "pointer": ""
+        },
+        {
+          "file": "tools/sdk27-build-requirements.json",
+          "pointer": "/packages"
         }
       ]
     }
@@ -4258,7 +4276,8 @@
         "tools/build-zstd.mjs",
         "tools/helper-package.mjs",
         "tools/manager-declaration.mjs",
-        "tools/sdk27-build-requirements.txt",
+        "tools/python-build-tools.mjs",
+        "tools/sdk27-build-requirements.json",
         "tools/seal-runtime.mjs"
       ],
       "sourceDirectory": "producers/kosmickrisp"
@@ -4336,6 +4355,10 @@
         {
           "file": "producers/dependencies/zstd.json",
           "pointer": ""
+        },
+        {
+          "file": "tools/sdk27-build-requirements.json",
+          "pointer": "/packages"
         }
       ]
     }
@@ -4367,7 +4390,8 @@
         "tools/build-input.mjs",
         "tools/build-source.mjs",
         "tools/helper-package.mjs",
-        "tools/sdk27-build-requirements.txt"
+        "tools/python-build-tools.mjs",
+        "tools/sdk27-build-requirements.json"
       ],
       "buildEntry": "producers/dxvk/build.mjs"
     },
@@ -4407,6 +4431,10 @@
         {
           "file": "producers/dependencies/llvmMingw.json",
           "pointer": ""
+        },
+        {
+          "file": "tools/sdk27-build-requirements.json",
+          "pointer": "/packages"
         }
       ]
     }
