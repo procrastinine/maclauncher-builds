@@ -84,14 +84,20 @@ export function initializeCheckSources({directory=root,run=runGit}={}){
  const linked=repositories.flatMap(repository=>fs.existsSync(path.join(directory,repository,'.git'))?checkoutGitlinkFiles(path.join(directory,repository)).map(row=>repository+'/'+row.gitlink):[]);
  return [...initialized,...initializeGitlinks({paths:[...new Set(linked)],directory,run,state})];
 }
-/** One build initializes only its declared sources: its build submodules and, when it declares
- * app-source.json, the app and the app gitlinks its declared app files lie in. */
+/** One build initializes only its declared sources: its build submodules with the gitlinks their
+ * own symlinks point into, and, when it declares app-source.json, the app and the app gitlinks its
+ * declared app files lie in. */
 export function initializeSources({project:id,version,directory=root,run=runGit}){
  const {resolveProject,buildRecord}=require('../lib/projects.mjs'),project=resolveProject(id,directory,{resolvePins:false}),build=buildRecord(project,version);
  // Recursion applies only to the build's own sources; the app and its gitlinks are never recursive.
  const state=sourceState(),app=readsApp(project)?[...initializeGitlinks({paths:toolPaths(directory),directory,run,state})]:[];
  if(readsApp(project))app.push(...initializeGitlinks({paths:nestedAppPaths([project],directory),directory,run,state}));
- return {project:id,version:build.version,initialized:[...app,...initializeGitlinks({paths:build.submodules||[],directory,run,allowRecursive:build.recursiveSubmodules===true,state})]};
+ const declared=initializeGitlinks({paths:build.submodules||[],directory,run,allowRecursive:build.recursiveSubmodules===true,state});
+ // A declared source's symlink into one of its own gitlinks (a helper it shares with a pinned
+ // source) reads that gitlink's file, so the gitlink is a source of the build too.
+ const linked=declared.filter(row=>!row.recursive&&fs.existsSync(path.join(directory,row.path,'.git')))
+  .flatMap(row=>checkoutGitlinkFiles(path.join(directory,row.path)).map(file=>row.path+'/'+file.gitlink));
+ return {project:id,version:build.version,initialized:[...app,...declared,...initializeGitlinks({paths:[...new Set(linked)],directory,run,state})]};
 }
 /** The one source preparation entry for every job: no arguments for the
  * publication and index tools, --metadata for planning, --checks for npm test,

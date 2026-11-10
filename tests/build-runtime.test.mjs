@@ -156,6 +156,23 @@ test('GitHub build records name a contained command, exclusive universal builds 
  assert.throws(()=>buildRecord({...project({}),producer:{kind:'prebuilt'}}),/command/);
 });
 
+test('a build initializes the gitlinks that its declared sources link files into, and no other',t=>{
+ const root=githubFixture(t);
+ const git=(cwd,...args)=>execFileSync('git',['-c','user.name=Build test','-c','user.email=test@example.invalid','-c','protocol.file.allow=always',...args],{cwd,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim();
+ const repository=(name,files)=>{const dir=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'runtime-github-'+name+'-')));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+  git(dir,'init','-q');for(const [file,text] of Object.entries(files))fs.writeFileSync(path.join(dir,file),text);git(dir,'add','.');git(dir,'commit','-qm',name);return dir;};
+ const helper=repository('helper',{'helper.mjs':'export {};\n'}),unused=repository('unused',{'unused.txt':'unused\n'}),upstream=repository('upstream',{'source.c':'int main(void){return 0;}\n'});
+ git(upstream,'submodule','add','-q',helper,'helper');git(upstream,'submodule','add','-q',unused,'unused');
+ fs.symlinkSync('helper/helper.mjs',path.join(upstream,'shared.mjs'));git(upstream,'add','.');git(upstream,'commit','-qm','links a helper');
+ git(root,'init','-q');git(root,'submodule','add','-q',upstream,'producers/engine/upstream');git(root,'add','.');git(root,'commit','-qm','fixture');
+ git(root,'submodule','deinit','-q','--all');
+ const run=(args,cwd)=>execFileSync('git',['-c','protocol.file.allow=always',...args],{cwd,encoding:'utf8',stdio:['ignore','pipe','pipe']});
+ assert.deepEqual(initializeSources({project:'engine',directory:root,run}).initialized,
+  [{path:'producers/engine/upstream',recursive:false},{path:'producers/engine/upstream/helper',recursive:false}]);
+ assert.ok(fs.existsSync(path.join(root,'producers/engine/upstream/shared.mjs'))&&fs.readFileSync(path.join(root,'producers/engine/upstream/shared.mjs'),'utf8')==='export {};\n');
+ assert.equal(fs.existsSync(path.join(root,'producers/engine/upstream/unused/unused.txt')),false);
+});
+
 test('a materialized GitHub build runs the command in a tree holding only its build definition',t=>{
  const fixtureRunners=process.platform==='linux'?{arm64:'ubuntu-24.04',x64:'ubuntu-24.04'}:undefined;
  const root=githubFixture(t,{architectures:['arm64','x64'],tools:undefined,submodules:['producers/engine/upstream','producers/engine/linked'],...(fixtureRunners?{runners:fixtureRunners}:{})}),command=path.join(root,'producers/engine/build.mjs');
