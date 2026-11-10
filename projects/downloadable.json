@@ -2951,6 +2951,16 @@
         "cmake",
         "ninja",
         "pkgconf"
+      ],
+      "archives": [
+        {
+          "file": "producers/nxnative/dependencies.json",
+          "pointer": "/python"
+        },
+        {
+          "file": "producers/anyps5/dependencies.json",
+          "pointer": "/artifacts"
+        }
       ]
     }
   },

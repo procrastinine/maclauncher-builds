@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {recipe,inputs,verifySources,prepareSourceProjection,writeChanged} from './source-projection.mjs';
 import {pathToFileURL} from 'node:url';
-import {downloadBytes} from '../../tools/download.mjs';
+import {buildInput} from '../../tools/build-input.mjs';
 
 const root=path.resolve(import.meta.dirname,'../..');
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
@@ -18,9 +18,7 @@ async function prepareFfmpeg(buildDirectory){
  const cache=path.join(buildDirectory,'downloads',artifact.id+'.zip');
  if(!fs.existsSync(cache)||digest(fs.readFileSync(cache))!==artifact.sha256){
   fs.mkdirSync(path.dirname(cache),{recursive:true});
-  const bytes=await downloadBytes(artifact.url);
-  if(bytes.length!==artifact.bytes||digest(bytes)!==artifact.sha256)throw Error('FFmpeg package checksum mismatch.');
-  writeChanged(cache,bytes);
+  fs.copyFileSync(await buildInput(artifact),cache);
  }
  const directory=path.join(buildDirectory,'dependencies',artifact.id),identity=path.join(directory,'.package-sha256');
  if(!fs.existsSync(identity)||fs.readFileSync(identity,'utf8').trim()!==artifact.sha256){

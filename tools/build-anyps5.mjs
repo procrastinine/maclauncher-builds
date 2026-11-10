@@ -16,7 +16,7 @@ export async function compile({project,version,arch,work}){
  fs.mkdirSync(work,{recursive:true});
  const pythonPin=arch==='arm64'?JSON.parse(fs.readFileSync(path.join(root,'producers/nxnative/dependencies.json'))).python:JSON.parse(fs.readFileSync(path.join(root,'producers/anyps5/dependencies.json'))).artifacts.find(input=>input.id==='build-python-'+arch);
  if(!pythonPin)throw Error('The requested CPU has no declared Python build interpreter.');
- const archive=await buildInput(pythonPin,path.join(work,'downloads')),pythonBase=path.join(work,'python-source'),pythonEnvironment=path.join(work,'python');
+ const archive=await buildInput(pythonPin),pythonBase=path.join(work,'python-source'),pythonEnvironment=path.join(work,'python');
  fs.mkdirSync(pythonBase);execFileSync('/usr/bin/tar',['-xzf',archive,'-C',pythonBase],{maxBuffer:Infinity});
  execFileSync(path.join(pythonBase,'python/bin/python3'),['-m','venv','--without-pip',pythonEnvironment],{maxBuffer:Infinity,stdio:'inherit'});
  const python=path.join(pythonEnvironment,'bin/python3');
