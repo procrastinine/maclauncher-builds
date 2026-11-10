@@ -1965,6 +1965,12 @@
       "cleanupRunner": true,
       "submodules": [
         "sources/maclauncher-android"
+      ],
+      "archives": [
+        {
+          "file": "producers/android-image-data/source.json",
+          "pointer": "/archive"
+        }
       ]
     },
     "versionBindings": [
@@ -2048,6 +2054,12 @@
       "cleanupRunner": true,
       "submodules": [
         "sources/maclauncher-android"
+      ],
+      "archives": [
+        {
+          "file": "producers/android-image-data/source.json",
+          "pointer": "/archive"
+        }
       ]
     },
     "versionBindings": [
@@ -2131,6 +2143,12 @@
       "cleanupRunner": true,
       "submodules": [
         "sources/maclauncher-android"
+      ],
+      "archives": [
+        {
+          "file": "producers/android-image-data/source.json",
+          "pointer": "/archive"
+        }
       ]
     },
     "versionBindings": [
@@ -2214,6 +2232,12 @@
       "cleanupRunner": true,
       "submodules": [
         "sources/maclauncher-android"
+      ],
+      "archives": [
+        {
+          "file": "producers/android-image-data/source.json",
+          "pointer": "/archive"
+        }
       ]
     },
     "versionBindings": [
@@ -2297,6 +2321,12 @@
       "cleanupRunner": true,
       "submodules": [
         "sources/maclauncher-android"
+      ],
+      "archives": [
+        {
+          "file": "producers/android-image-data/source.json",
+          "pointer": "/archive"
+        }
       ]
     },
     "versionBindings": [

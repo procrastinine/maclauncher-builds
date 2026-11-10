@@ -123,7 +123,7 @@ export async function packageImageData({project,version,arch,output,work,tool,in
 export async function compile({work}){
  const profile={...JSON.parse(fs.readFileSync(descriptor)),...aimSource()};
  fs.mkdirSync(work,{recursive:true});
- const archive=await buildInput(profile.archive,path.join(work,'archive-cache')),tool=buildImageDataTool({work});
+ const archive=await buildInput(profile.archive),tool=buildImageDataTool({work});
  const input=path.join(work,'decoded');
  run(tool.executable,['export',archive,path.join(work,'root'),input],{env:tool.env});
  return {tool,input};
@@ -132,7 +132,7 @@ export async function compile({work}){
 export async function assemble({compiled:{tool,input},...options}){
  const {work}=options,result=await packageImageData({...options,tool,input});
 
- for(const relative of ['archive-cache','target','cargo','decoded'])fs.rmSync(path.join(work,relative),{recursive:true,force:true});
+ for(const relative of ['target','cargo','decoded'])fs.rmSync(path.join(work,relative),{recursive:true,force:true});
  return result;
 }
 recipeMain(import.meta,{compile,assemble});
