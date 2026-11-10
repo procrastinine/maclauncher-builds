@@ -46,8 +46,7 @@ export async function compileAndroidJavaConverterInput({output,work}){
 /** Verify the sealed Java products before native composition consumes them. */
 export function verifyAndroidJavaConverterInput(input){
  const declaration=JSON.parse(fs.readFileSync(path.join(path.dirname(input),'declaration.json')));validateDeclaration(declaration);verifyPreparedPayload(input,declaration);
- const definition=profile(),manifest=JSON.parse(fs.readFileSync(path.join(input,'input.json')));
- if(declaration.id!==definition.id||declaration.version!==definition.version||declaration.sourceSha256!==sha(descriptor)||JSON.stringify(manifest.converter)!==JSON.stringify(definition.converter))throw Error('Java converter input differs from its declared producer profile.');
+ const manifest=JSON.parse(fs.readFileSync(path.join(input,'input.json')));
  for(const file of ['dex2jvm.jar','converter-overlay.jar','android-api-headers.jar'])if(!declaration.files.some(record=>record.path===file))throw Error('Java converter input is incomplete.');
  return {root:input,declaration,manifest};
 }

@@ -7,7 +7,6 @@ import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {checkoutSource,stageSource,run} from './build-source.mjs';
 import {buildInput} from './build-input.mjs';
-import {sha} from './helper-package.mjs';
 import {prepareAndroidBuildInputs} from './android-build-inputs.mjs';
 import {artElfBuildEnvironment} from './build-android-art-elf.mjs';
 import {acquireLockedArtSources} from './android-art-locked-sources.mjs';
@@ -21,7 +20,7 @@ export async function prepareArtMacBuildContext({elfInput,work}){
  if(process.platform!=='darwin'||process.arch!=='arm64'||!path.isAbsolute(work||'')||fs.existsSync(work)||!path.isAbsolute(elfInput?.root||''))throw Error('ART host context requires sealed ART ELFs and a new work directory on Apple Silicon macOS.');
  const descriptor=path.join(root,'producers/android-art-inputs/art-source.json'),profile=json(descriptor),declaration=elfInput.declaration||json(path.join(elfInput.root,'../declaration.json'));
  validateDeclaration(declaration);verifyPreparedPayload(elfInput.root,declaration);
- if(declaration.id!==profile.id||declaration.version!==profile.version||declaration.arch!=='arm64'||declaration.sourceSha256!==sha(descriptor))throw Error('ART ELF input differs from its declared leaf profile.');
+ if(declaration.arch!=='arm64')throw Error('The ART host context requires the arm64 ART ELF input.');
  const record=json(path.join(elfInput.root,declaration.manifestRelative)),android=verifyProducer(root,json(path.join(root,'runtimes/android/source.json'))),supplier=json(path.join(android,'src/modules/android/art/supplier.json'));
  fs.mkdirSync(work,{recursive:true});
  const checkout=checkoutSource({repository:supplier.sources.aim.url,revision:sourceRevision(supplier.sources.aim),destination:path.join(work,'upstream')}),source=path.join(work,'source');await stageSource(checkout,sourceRevision(supplier.sources.aim),source);

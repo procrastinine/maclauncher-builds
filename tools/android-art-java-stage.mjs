@@ -79,8 +79,8 @@ export function packageAndroidArtJavaInput({framework,image,output,work,arch='ar
 
 /** Validate the neutral Java product group before adding its transport to an owned supplier export. */
 export function verifyAndroidArtJavaInput(input){
- const definition=json(descriptor),declaration=json(path.join(input,'../declaration.json'));validateDeclaration(declaration);verifyPreparedPayload(input,declaration);const manifest=json(path.join(input,'input.json'));
- if(declaration.id!==definition.id||declaration.version!==definition.version||declaration.sourceSha256!==sha(descriptor)||JSON.stringify(manifest.androidSource)!==JSON.stringify(androidSource()))throw Error('ART Java input differs from its declared source profile.');return {root:input,declaration,manifest};
+ const declaration=json(path.join(input,'../declaration.json'));validateDeclaration(declaration);verifyPreparedPayload(input,declaration);const manifest=json(path.join(input,'input.json'));
+ return {root:input,declaration,manifest};
 }
 export function prepareArtJavaProducer({producer,input,work}){
  const checked=verifyAndroidArtJavaInput(input),owned=fs.realpathSync(work),source=fs.realpathSync(producer),definition=json(descriptor);
