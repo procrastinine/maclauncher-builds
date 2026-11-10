@@ -36,8 +36,8 @@ export function nativeStackInput(input,{arch,work,fonts,audio,sdk=process.env.SD
  return stack;
 }
 
-export async function nativeStackArchives(catalog,{work}={}){
- const archives={};for(const pin of catalog.dependencies||[])archives[pin.id]=await buildInput({url:pin.archiveUrl,sha256:pin.archiveSha256,bytes:pin.archiveBytes},path.join(work,'archives'));
+export async function nativeStackArchives(catalog){
+ const archives={};for(const pin of catalog.dependencies||[])archives[pin.id]=await buildInput({url:pin.archiveUrl,sha256:pin.archiveSha256,bytes:pin.archiveBytes});
  return archives;
 }
 
@@ -83,8 +83,8 @@ export function stageNativeStack({built,kind,arch,output,work}){
 
 /** Compile one native library stack from its declared archives. */
 export async function compileNativeStack({arch,work,kind,dependencyStacks,archives:providedArchives}){
- const Builder=stackModule(kind),archives={...providedArchives,...await nativeStackArchives(Builder.PIN,{work})},options={archives,workRoot:path.join(work,'compile'),architecture:arch,pathMappings:[{from:work,to:'NATIVE_STACK_BUILD'}],dependencies:{readSDK:()=>process.env.SDKROOT||command('/usr/bin/xcrun',['--show-sdk-path'])}};
- return kind==='movie'?await Builder.buildDependencies({...options,archive:await buildInput(Builder.PIN.source,path.join(work,'archives'))}):kind==='mixer'?await Builder.buildMixer({...options,dependencyStacks}):await Builder.buildDependencies(options);
+ const Builder=stackModule(kind),archives={...providedArchives,...await nativeStackArchives(Builder.PIN)},options={archives,workRoot:path.join(work,'compile'),architecture:arch,pathMappings:[{from:work,to:'NATIVE_STACK_BUILD'}],dependencies:{readSDK:()=>process.env.SDKROOT||command('/usr/bin/xcrun',['--show-sdk-path'])}};
+ return kind==='movie'?await Builder.buildDependencies({...options,archive:await buildInput(Builder.PIN.source)}):kind==='mixer'?await Builder.buildMixer({...options,dependencyStacks}):await Builder.buildDependencies(options);
 }
 /** Stage and describe a compiled native stack as its build-input package. */
 export function assembleNativeStack({project,version,arch,output,work,kind,compiled:built}){

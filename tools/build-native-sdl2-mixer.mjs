@@ -6,7 +6,7 @@ export async function compile(options){
  const fonts=nativeStackInput(preparedBuildInput('native-sdl2-fonts'),{arch:options.arch,work:options.work+'-fonts'}),audio=nativeStackInput(preparedBuildInput('native-sndfile'),{arch:options.arch,work:options.work+'-audio'});
  // The existing mixer validates original archive identities even when its
  // complete font and audio compiler prefixes are supplied instead of rebuilt.
- const archives={...await nativeStackArchives(stackModule('fonts').PIN,{work:options.work}),...await nativeStackArchives(stackModule('audio').PIN,{work:options.work})};
+ const archives={...await nativeStackArchives(stackModule('fonts').PIN),...await nativeStackArchives(stackModule('audio').PIN)};
  return compileNativeStack({...options,kind:'mixer',dependencyStacks:{fonts,audio},archives});
 }
 export const assemble=options=>assembleNativeStack({...options,kind:'mixer'});
