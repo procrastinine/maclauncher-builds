@@ -352,7 +352,7 @@ const inputs = new Map([
   ...temporalInputs,
 
 ]);
-if(nativeFiles.includes("shaderc-offline"))pins.push(` ${shaderc.revision} third_party/shaderc-headers`);
+if(nativeFiles.includes("shaderc-offline"))pins.push(` ${sourceRevision(shaderc)} third_party/shaderc-headers`);
 if(fs.existsSync(path.join(ownedSource,"src/color-source.json"))){
   const colorSource=JSON.parse(fs.readFileSync(path.join(ownedSource,"src/color-source.json"),"utf8"));
   pins.push(` ${sourceRevision(colorSource)} third_party/Khronos-ToneMapping`);

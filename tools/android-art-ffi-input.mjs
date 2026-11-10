@@ -1,5 +1,6 @@
 import './producer-environment.mjs';
 import libffi from '../producers/dependencies/libffi.json' with {type:'json'};
+import {sourceRevision} from '../lib/pins.mjs';
 import {verifyPreparedPayload} from './prepared-build-inputs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -14,5 +15,5 @@ export function readArtFfiInput(input){
  verifyPreparedPayload(payload,declaration);
 
  for(const relative of ['lib/libffi.a','include/ffi.h','include/ffitarget.h'])B.readRegular(path.join(payload,relative),Infinity);
- return {archive:path.join(payload,'lib/libffi.a'),include:path.join(payload,'include'),revision:libffi.revision};
+ return {archive:path.join(payload,'lib/libffi.a'),include:path.join(payload,'include'),revision:sourceRevision(libffi)};
 }
