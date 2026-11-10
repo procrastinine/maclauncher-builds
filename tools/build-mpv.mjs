@@ -27,7 +27,7 @@ export function sdkCompressionPkgConfig({sdk,directory}){
 /** Compile libmpv and the render host that loads it. */
 export async function compile({work}){
  fs.mkdirSync(work,{recursive:true});
- const tools=await pythonBuildTools(work,path.join(root,'tools/sdk27-build-requirements.json'));
+ const tools=await pythonBuildTools(work,'sdk27');
  const producer=path.join(root,'producers/mpv-render/v7'),source=path.join(root,'producers/package-support/src/external/mpv-player');
  const Builder=require(path.join(producer,'scripts/build-mpv-library.cjs'));
  const sdk=process.env.SDKROOT||run('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path']);

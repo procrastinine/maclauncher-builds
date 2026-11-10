@@ -2592,8 +2592,8 @@
         "tools/build-zstd.mjs",
         "tools/helper-package.mjs",
         "tools/manager-declaration.mjs",
+        "tools/python-build-tools.json",
         "tools/python-build-tools.mjs",
-        "tools/sdk27-build-requirements.json",
         "tools/seal-runtime.mjs"
       ],
       "sourceDirectory": "producers/package-support"
@@ -2671,8 +2671,8 @@
           "pointer": ""
         },
         {
-          "file": "tools/sdk27-build-requirements.json",
-          "pointer": "/packages"
+          "file": "tools/python-build-tools.json",
+          "pointer": "/wheels"
         }
       ]
     }
@@ -2717,14 +2717,15 @@
         "lib/licenses.mjs",
         "producers/package-support/helper-builds/mkxpz.json",
         "producers/package-support/scripts/build-mkxpz-nfc.cjs",
-        "producers/package-support/scripts/graphics-build-requirements.txt",
         "producers/package-support/src/modules/rgss",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/mkxpz",
         "tools/build-input.mjs",
         "tools/build-source.mjs",
         "tools/helper-package.mjs",
-        "tools/manager-declaration.mjs"
+        "tools/manager-declaration.mjs",
+        "tools/python-build-tools.json",
+        "tools/python-build-tools.mjs"
       ],
       "sourceDirectory": "producers/package-support"
     },
@@ -2793,6 +2794,10 @@
         {
           "file": "runtimes/mkxpz/baseline.json",
           "pointer": "/upstream"
+        },
+        {
+          "file": "tools/python-build-tools.json",
+          "pointer": "/wheels"
         }
       ]
     }
@@ -3107,8 +3112,8 @@
         "tools/build-input.mjs",
         "tools/build-source.mjs",
         "tools/manager-declaration.mjs",
+        "tools/python-build-tools.json",
         "tools/python-build-tools.mjs",
-        "tools/sdk27-build-requirements.json",
         "tools/seal-runtime.mjs"
       ],
       "appEntries": [
@@ -3182,8 +3187,8 @@
       ],
       "archives": [
         {
-          "file": "tools/sdk27-build-requirements.json",
-          "pointer": "/packages"
+          "file": "tools/python-build-tools.json",
+          "pointer": "/wheels"
         }
       ]
     }
@@ -4195,8 +4200,8 @@
         "tools/build-input.mjs",
         "tools/build-source.mjs",
         "tools/helper-package.mjs",
-        "tools/python-build-tools.mjs",
-        "tools/sdk27-build-requirements.json"
+        "tools/python-build-tools.json",
+        "tools/python-build-tools.mjs"
       ],
       "buildEntry": "producers/vkd3d-proton/build.mjs"
     },
@@ -4248,8 +4253,8 @@
           "pointer": ""
         },
         {
-          "file": "tools/sdk27-build-requirements.json",
-          "pointer": "/packages"
+          "file": "tools/python-build-tools.json",
+          "pointer": "/wheels"
         }
       ]
     }
@@ -4276,8 +4281,8 @@
         "tools/build-zstd.mjs",
         "tools/helper-package.mjs",
         "tools/manager-declaration.mjs",
+        "tools/python-build-tools.json",
         "tools/python-build-tools.mjs",
-        "tools/sdk27-build-requirements.json",
         "tools/seal-runtime.mjs"
       ],
       "sourceDirectory": "producers/kosmickrisp"
@@ -4357,8 +4362,8 @@
           "pointer": ""
         },
         {
-          "file": "tools/sdk27-build-requirements.json",
-          "pointer": "/packages"
+          "file": "tools/python-build-tools.json",
+          "pointer": "/wheels"
         }
       ]
     }
@@ -4390,8 +4395,8 @@
         "tools/build-input.mjs",
         "tools/build-source.mjs",
         "tools/helper-package.mjs",
-        "tools/python-build-tools.mjs",
-        "tools/sdk27-build-requirements.json"
+        "tools/python-build-tools.json",
+        "tools/python-build-tools.mjs"
       ],
       "buildEntry": "producers/dxvk/build.mjs"
     },
@@ -4433,8 +4438,8 @@
           "pointer": ""
         },
         {
-          "file": "tools/sdk27-build-requirements.json",
-          "pointer": "/packages"
+          "file": "tools/python-build-tools.json",
+          "pointer": "/wheels"
         }
       ]
     }

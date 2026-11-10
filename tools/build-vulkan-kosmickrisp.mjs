@@ -18,7 +18,7 @@ const prefix=name=>run('brew',['--prefix',name]);
 /** Compile the KosmicKrisp driver, its SPIR-V tools, zstd and the Vulkan loader. */
 export async function compile({arch,work}){
  fs.mkdirSync(work,{recursive:true});
- const tools=await pythonBuildTools(work,path.join(root,'tools/sdk27-build-requirements.json')),meson=path.join(tools.bin,'meson'),ninja=path.join(tools.bin,'ninja');
+ const tools=await pythonBuildTools(work,'sdk27'),meson=path.join(tools.bin,'meson'),ninja=path.join(tools.bin,'ninja');
  const native=path.join(root,'producers/package-support/src/modules/shared/vulkan/native'),pin=JSON.parse(fs.readFileSync(path.join(native,'kosmickrisp-source.json'))),inputs=JSON.parse(fs.readFileSync(path.join(native,'kosmickrisp-targets.json'))),source=path.join(root,inputs.sourcePath);
  const llvm=prefix('llvm'),observedInputs={...inputs,tools:{...inputs.tools,llvm:run(path.join(llvm,'bin/llvm-config'),['--version']),spirvLLVMTranslator:run('pkg-config',['--modversion','LLVMSPIRVLib'])}};
  const spirv=await buildSpirvTools({work:path.join(work,'spirv-tools'),ninja,python:tools.python,architecture:arch,jobs:2});

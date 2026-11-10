@@ -269,7 +269,6 @@
         "producers/dependencies/spirvCross.json",
         "producers/package-support/app-source.json",
         "producers/package-support/scripts/build-graphics-runtime.mjs",
-        "producers/package-support/scripts/graphics-build-requirements.txt",
         "producers/package-support/scripts/graphics-runtime.json",
         "producers/package-support/scripts/payload-aliases.mjs",
         "producers/package-support/scripts/stage-fsr4-provider.mjs",
@@ -289,7 +288,9 @@
         "tools/build-input.mjs",
         "tools/build-source.mjs",
         "tools/graphics-producer.mjs",
-        "tools/helper-package.mjs"
+        "tools/helper-package.mjs",
+        "tools/python-build-tools.json",
+        "tools/python-build-tools.mjs"
       ],
       "sourceDirectory": "producers/package-support",
       "sourceRepository": "https://github.com/procrastinine/maclauncher",
@@ -690,6 +691,12 @@
         "bison",
         "flex",
         "git-lfs"
+      ],
+      "archives": [
+        {
+          "file": "tools/python-build-tools.json",
+          "pointer": "/wheels"
+        }
       ]
     }
   },

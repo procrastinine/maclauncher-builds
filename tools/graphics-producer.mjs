@@ -3,6 +3,7 @@ import {appSourceRoot} from './app-source.mjs';
 import sdlHeaders from '../producers/dependencies/sdlHeaders.json' with {type:'json'};
 import spirvCross from '../producers/dependencies/spirvCross.json' with {type:'json'};
 import {placeDeclaredSource} from './build-source.mjs';
+import {pythonBuildTools} from './python-build-tools.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -24,8 +25,7 @@ export async function buildGraphicsSource({version,arch,output,work,sdkPath,sour
  if(!fs.existsSync(context))fs.writeFileSync(context,JSON.stringify(identity)+"\n",{flag:"wx"});
  if(!tools.meson||!tools.ninja){
   const environment=path.join(work,'build-tools');
-  if(!fs.existsSync(environment))execFileSync('uv',['venv','--python','3.13',environment],{maxBuffer:Infinity,stdio:'inherit',timeout:120000});
-  execFileSync('uv',['pip','install','--python',path.join(environment,'bin/python'),'--no-deps','--requirement',path.join(root,'producers/package-support/scripts/graphics-build-requirements.txt')],{maxBuffer:Infinity,stdio:'inherit',timeout:120000});
+  await pythonBuildTools(work,'graphics',environment);
   Object.assign(tools,{meson:path.join(environment,'bin/meson'),ninja:path.join(environment,'bin/ninja'),python:path.join(environment,'bin/python')});
  }
  for(const input of Object.values(initial.inputs))if(input.state==='fetchable')await fetchInput(input.id,work);

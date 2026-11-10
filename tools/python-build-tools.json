@@ -1,7 +1,26 @@
 {
   "python": "3.13",
-  "platform": "aarch64-apple-darwin",
-  "packages": [
+  "platforms": [
+    "aarch64-apple-darwin",
+    "x86_64-apple-darwin"
+  ],
+  "sets": {
+    "sdk27": [
+      "meson",
+      "ninja",
+      "Mako",
+      "MarkupSafe",
+      "packaging",
+      "PyYAML"
+    ],
+    "graphics": [
+      "meson",
+      "ninja",
+      "Jinja2",
+      "MarkupSafe"
+    ]
+  },
+  "wheels": [
     {
       "name": "meson",
       "version": "1.12.1",
@@ -26,6 +45,13 @@
     {
       "name": "MarkupSafe",
       "version": "3.0.3",
+      "url": "https://files.pythonhosted.org/packages/38/2f/907b9c7bbba283e68f20259574b13d005c121a0fa4c175f9bed27c4597ff/markupsafe-3.0.3-cp313-cp313-macosx_10_13_x86_64.whl",
+      "sha256": "e1cf1972137e83c5d4c136c43ced9ac51d0e124706ee1c8aa8532c1287fa8795",
+      "bytes": 11622
+    },
+    {
+      "name": "MarkupSafe",
+      "version": "3.0.3",
       "url": "https://files.pythonhosted.org/packages/9c/d9/5f7756922cdd676869eca1c4e3c0cd0df60ed30199ffd775e319089cb3ed/markupsafe-3.0.3-cp313-cp313-macosx_11_0_arm64.whl",
       "sha256": "116bb52f642a37c115f517494ea5feb03889e04df47eeff5b130b1808ce7c219",
       "bytes": 12029
@@ -43,6 +69,20 @@
       "url": "https://files.pythonhosted.org/packages/b1/16/95309993f1d3748cd644e02e38b75d50cbc0d9561d21f390a76242ce073f/pyyaml-6.0.3-cp313-cp313-macosx_11_0_arm64.whl",
       "sha256": "2283a07e2c21a2aa78d9c4442724ec1eb15f5e42a723b99cb3d822d48f5f7ad1",
       "bytes": 173252
+    },
+    {
+      "name": "PyYAML",
+      "version": "6.0.3",
+      "url": "https://files.pythonhosted.org/packages/d1/11/0fd08f8192109f7169db964b5707a2f1e8b745d4e239b784a5a1dd80d1db/pyyaml-6.0.3-cp313-cp313-macosx_10_13_x86_64.whl",
+      "sha256": "8da9669d359f02c0b91ccc01cac4a67f16afec0dac22c2ad09f46bee0697eba8",
+      "bytes": 181669
+    },
+    {
+      "name": "Jinja2",
+      "version": "3.1.6",
+      "url": "https://files.pythonhosted.org/packages/62/a1/3d680cbfd5f4b8f15abc1d571870c5fc3e594bb582bc3b64ea099db13e56/jinja2-3.1.6-py3-none-any.whl",
+      "sha256": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+      "bytes": 134899
     }
   ]
 }
