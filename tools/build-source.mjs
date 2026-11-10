@@ -5,6 +5,8 @@ import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import {retryNetwork} from './download.mjs';
+import {sourceCheckout,sourceRevision} from '../lib/pins.mjs';
+import {readProjects} from '../lib/projects.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Source=require('../producers/package-support/src/modules/shared/runtime/pinned-native-build.js');
 /** A build tool from the declared Homebrew formulae, then from PATH. */
 export const findBuildTool=Source.findBuildTool;
@@ -20,6 +22,16 @@ export function checkoutSource({repository,revision,destination}){
  run('git',['init',destination]);run('git',['-C',destination,'remote','add','origin',repository]);
  retryNetwork(()=>run('git',['-C',destination,'fetch','--depth','1','--no-tags','origin',revision]));run('git',['-C',destination,'checkout','--detach','FETCH_HEAD']);
  if(git(destination,['rev-parse','HEAD'])!==revision)throw Error('Fetched source differs from its declared revision.');return destination;
+}
+/** A declared source, read in place. The input step initializes its Builds gitlink from the build's
+ * submodules, so the build reads that checkout at its pinned commit and fetches nothing. Name a
+ * source record that has a gitlink, or a project and one of its upstreams pinned by a gitlink. */
+export function declaredSource(record,upstream){
+ if(typeof record==='string')record=readProjects(root,{resolvePins:false}).projects.find(project=>project.id===record)?.upstreams.find(row=>row.id===upstream)?.pin;
+ const link=record&&sourceCheckout(record);if(typeof link!=='string')throw Error('A declared source names its Builds gitlink.');
+ const directory=path.join(root,link);
+ if(!fs.existsSync(path.join(directory,'.git'))||git(directory,['rev-parse','HEAD'])!==sourceRevision(record))throw Error('Initialize '+link+' at its pinned commit; the build declares it among its submodules.');
+ return directory;
 }
 /** Export pinned source before applying owned adaptations or compiling. */
 export async function stageSource(source,revision,destination){
