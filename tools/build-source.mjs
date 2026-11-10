@@ -7,6 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {retryNetwork} from './download.mjs';
 import {sourceCheckout,sourceRevision} from '../lib/pins.mjs';
 import {readProjects} from '../lib/projects.mjs';
+import {checkoutGitlinkFiles} from './app-source.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Source=require('../producers/package-support/src/modules/shared/runtime/pinned-native-build.js');
 /** A build tool from the declared Homebrew formulae, then from PATH. */
 export const findBuildTool=Source.findBuildTool;
@@ -21,7 +22,12 @@ export function checkoutSource({repository,revision,destination}){
  const url=new URL(repository);if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash||!/^[a-f0-9]{40}$/.test(revision||'')||!path.isAbsolute(destination||'')||fs.existsSync(destination))throw Error('Source checkout needs a public HTTPS origin, exact revision and new absolute directory.');
  run('git',['init',destination]);run('git',['-C',destination,'remote','add','origin',repository]);
  retryNetwork(()=>run('git',['-C',destination,'fetch','--depth','1','--no-tags','origin',revision]));run('git',['-C',destination,'checkout','--detach','FETCH_HEAD']);
- if(git(destination,['rev-parse','HEAD'])!==revision)throw Error('Fetched source differs from its declared revision.');return destination;
+ if(git(destination,['rev-parse','HEAD'])!==revision)throw Error('Fetched source differs from its declared revision.');
+ // A tracked symlink into one of the source's own gitlinks reads that gitlink's file at the commit the
+ // source records: those gitlinks, and no other, are initialized at depth 1, as init-runtime-sources does.
+ const linked=[...new Set(checkoutGitlinkFiles(destination).map(row=>row.gitlink))];
+ if(linked.length)run('git',['-C',destination,'submodule','update','--init','--depth','1','--',...linked]);
+ return destination;
 }
 /** A declared source, read in place. The input step initializes its Builds gitlink from the build's
  * submodules, so the build reads that checkout at its pinned commit and fetches nothing. Name a

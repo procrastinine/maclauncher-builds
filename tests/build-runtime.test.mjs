@@ -7,7 +7,7 @@ import path from 'node:path';
 
 import {execFileSync,spawnSync} from 'node:child_process';
 import {verifyProducer,main,buildPlan,runBuild,checkBuildRequest,RUNNERS,HOSTED_RUNNERS} from '../tools/build-runtime.mjs';
-import {findBuildTool} from '../tools/build-source.mjs';
+import {findBuildTool,checkoutSource} from '../tools/build-source.mjs';
 import {prepareBuildHost} from '../tools/build-host.mjs';
 import {initializeSources,initializeGitlinks} from '../tools/init-runtime-sources.mjs';
 import {prepareRelease} from '../tools/release-runtime.mjs';
@@ -42,7 +42,7 @@ test('Android recipes initialize the producer whose metadata they read from a co
   const commands=[],result=initializeSources({project,directory:root,run:(args,cwd,input)=>{
    commands.push({args,cwd});
    if(args[0]==='ls-files'){
-    if(cwd===android)return [...gitlinkRows(androidGitlinks),...androidSymlinks.map(row=>'120000 '+row.object+' 0\t'+row.file)].join('\n')+'\n';
+    if(cwd===android)return [...gitlinkRows(androidGitlinks),...androidSymlinks.map(row=>'120000 '+row.object+' 0\t'+row.file)].map(row=>row+(args.includes('-z')?'\0':'\n')).join('');
     return gitlinkRows(cwd===root?['sources/maclauncher','sources/maclauncher-android','sources/maclauncher-kosmickrisp']:cwd===appCheckout?['src/external/maclauncher-android','src/external/maclauncher-kosmickrisp']:[]).join('\n')+'\n';
    }
    // `cat-file --batch` answers each object named on its input with its header and bytes.
@@ -185,6 +185,26 @@ test('GitHub build records name a contained command, exclusive universal builds 
   [{command:'producers/other/build.mjs'},/command/],[{command:'producers/engine/../build.mjs'},/command/],[{command:'producers/engine/build.sh'},/command/],
   [{tools:['meson; rm']},/tools/],[{version:'2.0'},/declared/],[{version:undefined},/declared/],[{submodules:['../outside']},/submodules/],[{runner:'self-hosted'},/command/]])assert.throws(()=>buildRecord(project(build)),error);
  assert.throws(()=>buildRecord({...project({}),producer:{kind:'prebuilt'}}),/command/);
+});
+
+// A recipe's own checkout of a source (android-java-converter checks Android out into its work
+// directory) reads Android's native/upstream/source-files.mjs, a symlink into Android's app gitlink.
+test("a recipe's source checkout initializes the gitlinks its tracked symlinks point into, at depth 1, and no other",t=>{
+ const base=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'recipe-checkout-')));t.after(()=>fs.rmSync(base,{recursive:true,force:true}));
+ // The fixture's public URLs resolve to local repositories, for this process and the git it runs.
+ const saved=Object.fromEntries(Object.keys(process.env).filter(name=>/^GIT_CONFIG_(COUNT|KEY_|VALUE_)/.test(name)).map(name=>[name,process.env[name]]));
+ const config=[['protocol.file.allow','always'],...['helper','unused','upstream'].map(name=>['url.file://'+path.join(base,name)+'.insteadOf','https://example.invalid/'+name])];
+ config.forEach(([key,value],index)=>{process.env['GIT_CONFIG_KEY_'+index]=key;process.env['GIT_CONFIG_VALUE_'+index]=value;});process.env.GIT_CONFIG_COUNT=String(config.length);
+ t.after(()=>{for(const name of Object.keys(process.env).filter(name=>/^GIT_CONFIG_(COUNT|KEY_|VALUE_)/.test(name)))delete process.env[name];Object.assign(process.env,saved);});
+ const git=(cwd,...args)=>execFileSync('git',['-c','user.name=Build test','-c','user.email=test@example.invalid',...args],{cwd,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim();
+ const repository=(name,files)=>{const dir=path.join(base,name);fs.mkdirSync(dir);git(dir,'init','-q');for(const [file,text] of Object.entries(files))fs.writeFileSync(path.join(dir,file),text);git(dir,'add','.');git(dir,'commit','-qm',name);return dir;};
+ repository('helper',{'helper.mjs':'export {};\n'});repository('unused',{'unused.txt':'unused\n'});const upstream=repository('upstream',{'source.c':'int main(void){return 0;}\n'});
+ git(upstream,'submodule','add','-q','https://example.invalid/helper','helper');git(upstream,'submodule','add','-q','https://example.invalid/unused','unused');
+ fs.symlinkSync('helper/helper.mjs',path.join(upstream,'shared.mjs'));git(upstream,'add','.');git(upstream,'commit','-qm','links a helper');
+ const checkout=checkoutSource({repository:'https://example.invalid/upstream',revision:git(upstream,'rev-parse','HEAD'),destination:path.join(base,'work/upstream')});
+ assert.equal(fs.readFileSync(path.join(checkout,'shared.mjs'),'utf8'),'export {};\n');
+ assert.equal(git(path.join(checkout,'helper'),'rev-parse','--is-shallow-repository'),'true');
+ assert.equal(fs.existsSync(path.join(checkout,'unused/unused.txt')),false);
 });
 
 test('a build initializes the gitlinks that its declared sources link files into, and no other',t=>{

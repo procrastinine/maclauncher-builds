@@ -1,15 +1,13 @@
 import './producer-environment.mjs';
 import path from 'node:path';
 import fs from 'node:fs';
-import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {createRequire} from 'node:module';
 import {retryNetwork} from './download.mjs';
-import {appNestedFiles} from './app-source.mjs';
+import {appNestedFiles,checkoutGitlinkFiles,runGit} from './app-source.mjs';
 const root=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url);
 // This tool runs before any source exists; the project registry it reads names no file inside a source.
 /** Initialize only declared Gitlink paths, including nested production sources. */
-const runGit=(args,cwd,input)=>execFileSync('git',args,{cwd,encoding:'utf8',input,stdio:[input===undefined?'ignore':'pipe','pipe','pipe'],maxBuffer:Infinity});
 const appSource=directory=>JSON.parse(fs.readFileSync(path.join(directory,'producers/package-support/app-source.json'),'utf8'));
 /** Sources the publication and index tools read: the pinned app source. */
 const toolPaths=directory=>[appSource(directory).gitlink];
@@ -26,27 +24,9 @@ const gitlinks=(directory,run,state=sourceState())=>{
  if(!state.listed.has(directory))state.listed.set(directory,String(run(['ls-files','--stage'],directory)).split('\n').flatMap(line=>{const match=line.match(/^160000 [a-f0-9]{40} 0\t(.+)$/);return match?[match[1]]:[];}));
  return state.listed.get(directory);
 };
-/** The gitlinks of a checkout that its own tracked symlinks point into, read through `run` from the
- * checkout's index and the symlinks' blobs (one `cat-file --batch`, the object names on its input).
- * A checkout that is not initialized lists none. */
-const symlinkedGitlinks=(checkout,run)=>{
- let stage;try{stage=String(run(['ls-files','--stage'],checkout));}catch{return [];}
- const rows=stage.split('\n').flatMap(line=>{const match=/^(120000|160000) ([a-f0-9]{40}) 0\t(.+)$/.exec(line);return match?[{mode:match[1],object:match[2],path:match[3]}]:[];});
- const links=rows.filter(row=>row.mode==='160000').map(row=>row.path),symlinks=rows.filter(row=>row.mode==='120000');
- if(!links.length||!symlinks.length)return [];
- // Each answer is `<object> <type> <size>` and the blob's bytes, or `<object> missing`.
- const output=Buffer.from(String(run(['cat-file','--batch'],checkout,symlinks.map(row=>row.object).join('\n')+'\n'))),targets=new Map();
- for(let offset=0;offset<output.length;){
-  const end=output.indexOf(10,offset);if(end<0)break;const [object,type,size]=output.subarray(offset,end).toString().split(' ');
-  if(type==='missing'||!/^\d+$/.test(size||'')){offset=end+1;continue;}
-  targets.set(object,output.subarray(end+1,end+1+Number(size)).toString());offset=end+1+Number(size)+1;
- }
- return [...new Set(symlinks.flatMap(row=>{
-  if(!targets.has(row.object))return [];
-  const target=path.posix.normalize(path.posix.join(path.posix.dirname(row.path),targets.get(row.object)));
-  return links.filter(link=>target.startsWith(link+'/'));
- }))];
-};
+/** The gitlinks of a checkout that its own tracked symlinks point into, read through `run` by the
+ * shared symlink reader. A checkout that is not initialized lists none. */
+const symlinkedGitlinks=(checkout,run)=>{let rows;try{rows=checkoutGitlinkFiles(checkout,undefined,run);}catch{return [];}return [...new Set(rows.map(row=>row.gitlink))];};
 const registry=directory=>require('../lib/projects.mjs').readProjects(directory,{resolvePins:false}).projects;
 // Parallel clones within one submodule update.
 const CLONE_JOBS='8';

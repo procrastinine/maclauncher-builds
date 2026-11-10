@@ -23,18 +23,27 @@ export function appSourceRoot(repository=root){
  verified.set(repository,result);
  return result;
 }
+/** Git in `cwd`, with `input` on its standard input when given. */
+export const runGit=(args,cwd,input)=>execFileSync('git',args,{cwd,encoding:'utf8',input,stdio:[input===undefined?'ignore':'pipe','pipe','pipe'],maxBuffer:Infinity});
 /** The tracked symlinks of a checkout that point into one of its own gitlinks, among entries
  * (files, or directories naming every file below; every symlink when omitted). A reader of such a
- * symlink reads that gitlink's file at the commit the checkout records. */
-export function checkoutGitlinkFiles(directory,entries){
- const stage=git(directory,['ls-files','-s','-z']).split('\0').filter(Boolean).map(line=>{const match=/^(\d+) ([a-f0-9]{40}) \d\t(.+)$/s.exec(line);return {mode:match[1],object:match[2],path:match[3]};});
+ * symlink reads that gitlink's file at the commit the checkout records. Read through `run`: the
+ * checkout's index, then every symlink target with one `cat-file --batch`. */
+export function checkoutGitlinkFiles(directory,entries,run=runGit){
+ const stage=String(run(['ls-files','-s','-z'],directory)).split('\0').filter(Boolean).flatMap(line=>{const match=/^(\d+) ([a-f0-9]{40}) \d\t(.+)$/s.exec(line);return match?[{mode:match[1],object:match[2],path:match[3]}]:[];});
  const links=stage.filter(row=>row.mode==='160000'),declared=entries?.map(entry=>entry.replace(/\/$/,''));
  const symlinks=stage.filter(row=>row.mode==='120000'&&(!declared||declared.some(entry=>row.path===entry||row.path.startsWith(entry+'/'))));
  if(!symlinks.length||!links.length)return [];
- const output=execFileSync('git',['-C',directory,'cat-file','--batch'],{input:symlinks.map(row=>row.object).join('\n')+'\n',encoding:'utf8',maxBuffer:Infinity}),targets=[];
- for(let offset=0;offset<output.length;){const end=output.indexOf('\n',offset),size=Number(output.slice(offset,end).split(' ')[2]);targets.push(output.slice(end+1,end+1+size));offset=end+1+size+1;}
- return symlinks.flatMap((row,index)=>{
-  const resolved=path.posix.normalize(path.posix.join(path.posix.dirname(row.path),targets[index])),link=links.find(link=>resolved.startsWith(link.path+'/'));
+ // Each answer is `<object> <type> <size>` and the blob's bytes, or `<object> missing`.
+ const output=Buffer.from(String(run(['cat-file','--batch'],directory,symlinks.map(row=>row.object).join('\n')+'\n'))),targets=new Map();
+ for(let offset=0;offset<output.length;){
+  const end=output.indexOf(10,offset);if(end<0)break;const [object,type,size]=output.subarray(offset,end).toString().split(' ');
+  if(type==='missing'||!/^\d+$/.test(size||'')){offset=end+1;continue;}
+  targets.set(object,output.subarray(end+1,end+1+Number(size)).toString());offset=end+1+Number(size)+1;
+ }
+ return symlinks.flatMap(row=>{
+  if(!targets.has(row.object))return [];
+  const resolved=path.posix.normalize(path.posix.join(path.posix.dirname(row.path),targets.get(row.object))),link=links.find(link=>resolved.startsWith(link.path+'/'));
   return link?[{file:row.path,gitlink:link.path,revision:link.object,inner:resolved.slice(link.path.length+1)}]:[];
  });
 }
