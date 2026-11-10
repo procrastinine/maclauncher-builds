@@ -22,14 +22,14 @@ export async function compileAndroidJavaConverterInput({output,work}){
  fs.mkdirSync(work,{recursive:true});fs.mkdirSync(output,{recursive:true});
  const android=checkoutSource({...androidSource(),destination:path.join(work,'android')}),native=path.join(android,'src/modules/android/native');
  const converter=checkoutSource({...definition.converter,destination:path.join(work,'converter')});
- const cache=path.join(work,'archives'),jdkArchive=await buildInput(jdkPin,cache),jdkRoot=path.join(work,'jdk');fs.mkdirSync(jdkRoot);
+ const jdkArchive=await buildInput(jdkPin),jdkRoot=path.join(work,'jdk');fs.mkdirSync(jdkRoot);
  run('/usr/bin/tar',['-xzf',jdkArchive,'-C',jdkRoot]);fs.unlinkSync(jdkArchive);
  const homes=fs.readdirSync(jdkRoot).map(name=>path.join(jdkRoot,name,...(process.platform==='darwin'?['Contents','Home']:[]))).filter(home=>fs.existsSync(path.join(home,'bin/javac')));
  if(homes.length!==1)throw Error('The original JDK input must supply one Java compiler.');
  const jdk=homes[0],tools=path.join(work,'tools');fs.mkdirSync(tools);
  const catalogs=Object.fromEntries(['asm','apksig'].map(name=>[name,JSON.parse(fs.readFileSync(path.join(native,name+'-binary.json')))]));
  for(const catalog of Object.values(catalogs))for(const file of catalog.files){
-  const archive=await buildInput({url:file.url||catalog.url,sha256:file.sha256,bytes:file.size},cache);
+  const archive=await buildInput({url:file.url||catalog.url,sha256:file.sha256,bytes:file.size});
   fs.copyFileSync(archive,path.join(tools,file.path),fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);fs.unlinkSync(archive);
  }
  const {javaSources}=await import(pathToFileURL(path.join(native,'framework-build.mjs'))),classes=path.join(converter,'build/classes');fs.mkdirSync(classes,{recursive:true});

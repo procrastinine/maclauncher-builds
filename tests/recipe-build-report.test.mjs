@@ -102,6 +102,11 @@ test('archive pins list the archive records they select, each fetched only for t
  await prepareBuildInputs({project:'recipe',output:path.join(f.directory,'prepared'),directory:f.directory,environment:{RELEASE_SELECTION:'recipe=1.0.0',BUILD_ARCH:'x64',BUILD_REPORTS:JSON.stringify({recipe:report})},fetchArchive:async archive=>{fetched.push(archive.url);}});
  assert.deepEqual(fetched,['https://example.com/runtime.tar.gz','https://example.com/sdk-x64.tar.gz','https://example.com/tool.tar.gz']);
 });
+test('a files row without its own url reads the url of the record that lists it',t=>{
+ const recipe=project('recipe','tools/recipe.cjs'),file='tools/catalog.json';recipe.build.archives=[{file,pointer:''}];
+ const f=fixture(t,{'tools/recipe.cjs':'module.exports = {};\n',[file]:{url:'https://example.com/main.jar',files:[{path:'main.jar',size:5,sha256:'a'.repeat(64)},{path:'extra.jar',url:'https://example.com/extra.jar',sha256:'b'.repeat(64)}],member:{path:'lib.dylib',size:3,sha256:'c'.repeat(64)}}},[recipe]);
+ assert.deepEqual(createRecipeBuildReporter({directory:f.directory})('recipe').definition.archives,[{url:'https://example.com/extra.jar',sha256:'b'.repeat(64)},{url:'https://example.com/main.jar',sha256:'a'.repeat(64),bytes:5}]);
+});
 test('a directory entry declares every tracked file below it',t=>{
  const recipe=project('recipe','tools/recipe.cjs');recipe.producer.entries.push('native/base');
  const f=fixture(t,{'tools/recipe.cjs':'module.exports = {};\n','native/base/src/compile.cpp':'int main() {}\n','native/base/THIRD_PARTY.md':'notices\n','native/other.cpp':'int other;\n'},[recipe]);

@@ -96,7 +96,8 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   const listed=[];
   for(const build of builds)for(const pin of build.archives||[]){
    const selected=checkPin(pin,'projects.json'),found=[];if(selected===undefined)continue;
-   const visit=value=>{if(!value||typeof value!=='object')return;const archive=Array.isArray(value)?undefined:archiveInput(value,linkRevisions);if(archive)found.push(archive);else for(const child of Object.values(value))visit(child);};visit(selected);
+   // A row of a record's files list without its own url reads the record's url.
+   const visit=(value,url)=>{if(!value||typeof value!=='object')return;const archive=Array.isArray(value)?undefined:archiveInput(url&&value.url===undefined?{...value,url}:value,linkRevisions);if(archive)found.push(archive);else for(const [key,child] of Object.entries(value))visit(child,Array.isArray(value)?url:key==='files'&&typeof value.url==='string'?value.url:undefined);};visit(selected);
    if(found.length)listed.push(...found.map(archive=>pin.arch?{...archive,arch:pin.arch}:archive));else problem('projects',JSON.stringify(pin),'archive','The archive pin selects no archive record.');
   }
   for(const name of project.producer.entries||[])entry(name,'projects');

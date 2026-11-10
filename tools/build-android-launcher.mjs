@@ -13,7 +13,7 @@ const root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers
 /** Compile the launcher classes against the Android framework input. */
 export async function compile({project:id,work}){
  const project=resolveProject(id,root,{resolvePins:false}),profile=JSON.parse(fs.readFileSync(path.join(root,'producers/included-helpers/profiles/android-launcher.json'))),input=JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/java-converter.json')));
- fs.mkdirSync(work,{recursive:true});const cache=path.join(work,'archives');
+ fs.mkdirSync(work,{recursive:true});
  try {
   // Android's android-host.jar classes and android-framework.jar are this build stage's products, unchanged.
   const framework=preparedBuildInput('android-java-framework');if(!framework)throw Error('The Android launcher build needs the android-java-framework input.');
@@ -21,7 +21,7 @@ export async function compile({project:id,work}){
   let jdk;
   if(process.platform==='linux'){
    const pin=input.jdk?.['linux-'+process.arch];if(!pin)throw Error('No JDK input is declared for this Linux host.');
-   const archive=await buildInput(pin,cache),directory=path.join(work,'jdk');fs.mkdirSync(directory);
+   const archive=await buildInput(pin),directory=path.join(work,'jdk');fs.mkdirSync(directory);
    execFileSync('/usr/bin/tar',['-xzf',archive,'-C',directory],{maxBuffer:Infinity});fs.unlinkSync(archive);
    const homes=fs.readdirSync(directory).map(name=>path.join(directory,name)).filter(home=>fs.existsSync(path.join(home,'bin/javac')));
    if(homes.length!==1)throw Error('The pinned JDK must contain one Java compiler.');jdk=homes[0];

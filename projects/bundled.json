@@ -1083,6 +1083,12 @@
       ],
       "inputs": [
         "android-java-framework"
+      ],
+      "archives": [
+        {
+          "file": "producers/android-inputs/java-converter.json",
+          "pointer": "/jdk/linux-x64"
+        }
       ]
     }
   },
@@ -1647,6 +1653,20 @@
       },
       "submodules": [
         "sources/maclauncher-android"
+      ],
+      "archives": [
+        {
+          "file": "producers/android-inputs/java-converter.json",
+          "pointer": "/jdk/linux-x64"
+        },
+        {
+          "file": "sources/maclauncher-android/src/modules/android/native/asm-binary.json",
+          "pointer": ""
+        },
+        {
+          "file": "sources/maclauncher-android/src/modules/android/native/apksig-binary.json",
+          "pointer": ""
+        }
       ]
     },
     "versionBindings": [
@@ -1885,6 +1905,24 @@
       ],
       "submodules": [
         "sources/maclauncher-android"
+      ],
+      "archives": [
+        {
+          "file": "producers/android-inputs/java-converter.json",
+          "pointer": "/jdk/linux-x64"
+        },
+        {
+          "file": "sources/maclauncher-android/src/modules/android/native/framework-binary.json",
+          "pointer": ""
+        },
+        {
+          "file": "sources/maclauncher-android/src/modules/android/native/asm-binary.json",
+          "pointer": ""
+        },
+        {
+          "file": "sources/maclauncher-android/src/modules/android/art/dex-tools.json",
+          "pointer": "/artifacts"
+        }
       ]
     },
     "versionBindings": [
