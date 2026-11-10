@@ -7,10 +7,11 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {checkoutSource,run,recipeMain} from './build-source.mjs';
 import {helperPackage,sha} from './helper-package.mjs';
+import {buildPython} from './python-build-tools.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
 const descriptor=path.join(root,'producers/android-inputs/angle.json');
-export function angleDefinition(){const definition=JSON.parse(fs.readFileSync(descriptor));return {...definition,angle:androidSourceJson(definition.angleSource),pythonVersion:JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/aim.json'))).pythonVersion};}
+export function angleDefinition(){const definition=JSON.parse(fs.readFileSync(descriptor));return {...definition,angle:androidSourceJson(definition.angleSource)};}
 const read=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8',...options}).trim();
 
 function selectedProfile(value,kind='id'){
@@ -41,11 +42,7 @@ export async function buildAngleInput({output,work,profile:profileId='common'}){
  const dependencies=path.join(work,'dependencies');fs.mkdirSync(dependencies);
  for(const dependency of pins.dependencies.filter(item=>!item.backends||item.backends.includes(definition.backend)))checkoutSource({repository:dependency.url,revision:sourceRevision(dependency),destination:path.join(dependencies,path.basename(dependency.directory))});
  const gnSource=checkoutSource({...definition.gn,destination:path.join(work,'gn-source')});
- const pythonRoot=path.join(work,'python');
- const pythonEnv={...process.env,UV_CACHE_DIR:path.join(work,'uv-cache'),UV_PYTHON_INSTALL_DIR:pythonRoot,UV_PYTHON_BIN_DIR:path.join(work,'python-bin')};
- run('uv',['python','install',definition.pythonVersion],{env:pythonEnv});
- const python=read('uv',['python','find','--managed-python','--system',definition.pythonVersion],{env:pythonEnv});
- if(!fs.realpathSync(python).startsWith(fs.realpathSync(pythonRoot)+path.sep))throw Error('The selected Python interpreter is outside the declared build input directory.');
+ const python=await buildPython(work);
  const gnBuild=path.join(work,'gn-build');fs.mkdirSync(gnBuild);
  // GN's source build accepts an externally supplied version header. The position
  // and revision are from the exact ANGLE DEPS GN pin, independently of clone depth.

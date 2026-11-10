@@ -5,6 +5,7 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {run} from './build-source.mjs';
 import {buildInput} from './build-input.mjs';
+import {buildPython} from './python-build-tools.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 const read=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infinity,encoding:'utf8',...options}).trim();
 function lockValue(file,key){
@@ -41,10 +42,7 @@ export async function prepareAndroidBuildInputs({source,work,image,cache=path.jo
  // The supplier only reads this verified archive. Share immutable bytes on one volume.
  try{fs.linkSync(archive,destination);}catch(error){if(error.code!=='EXDEV')throw error;fs.copyFileSync(archive,destination,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);}
  }
- const pythonRoot=path.join(work,'python');
- const pythonEnv={...process.env,UV_CACHE_DIR:path.join(work,'uv-cache'),UV_PYTHON_INSTALL_DIR:pythonRoot,UV_PYTHON_BIN_DIR:path.join(work,'python-bin')};run('uv',['python','install',inputs.pythonVersion],{env:pythonEnv});
- const python=read('uv',['python','find','--managed-python','--system',inputs.pythonVersion],{env:pythonEnv});
- if(!fs.realpathSync(python).startsWith(fs.realpathSync(pythonRoot)+path.sep))throw Error('The selected Python interpreter is outside the declared build input directory.');
+ const python=await buildPython(work);
  return {sdk,python,archive,cache};
 }
 

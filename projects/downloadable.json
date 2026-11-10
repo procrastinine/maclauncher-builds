@@ -84,6 +84,8 @@
         "tools/helper-package.mjs",
         "tools/package-android-common.mjs",
         "tools/package-android.mjs",
+        "tools/python-build-tools.json",
+        "tools/python-build-tools.mjs",
         "tools/repackage-android.mjs"
       ]
     },
@@ -222,6 +224,12 @@
         "android-java-converter",
         "android-java-framework",
         "native-sdl3"
+      ],
+      "archives": [
+        {
+          "file": "tools/python-build-tools.json",
+          "pointer": "/interpreters"
+        }
       ]
     }
   },
@@ -311,7 +319,9 @@
         "tools/build-android-angle.mjs",
         "tools/build-input.mjs",
         "tools/build-source.mjs",
-        "tools/helper-package.mjs"
+        "tools/helper-package.mjs",
+        "tools/python-build-tools.json",
+        "tools/python-build-tools.mjs"
       ],
       "sourceDirectory": "producers/package-support"
     },
@@ -381,6 +391,12 @@
       "cleanupRunner": true,
       "inputs": [
         "android-angle"
+      ],
+      "archives": [
+        {
+          "file": "tools/python-build-tools.json",
+          "pointer": "/interpreters"
+        }
       ]
     }
   },
@@ -2675,6 +2691,10 @@
         {
           "file": "tools/python-build-tools.json",
           "pointer": "/wheels"
+        },
+        {
+          "file": "tools/python-build-tools.json",
+          "pointer": "/interpreters"
         }
       ]
     }
@@ -2800,6 +2820,10 @@
         {
           "file": "tools/python-build-tools.json",
           "pointer": "/wheels"
+        },
+        {
+          "file": "tools/python-build-tools.json",
+          "pointer": "/interpreters"
         }
       ]
     }
@@ -3191,6 +3215,10 @@
         {
           "file": "tools/python-build-tools.json",
           "pointer": "/wheels"
+        },
+        {
+          "file": "tools/python-build-tools.json",
+          "pointer": "/interpreters"
         }
       ]
     }
@@ -3211,7 +3239,10 @@
         "producers/dependencies/vulkanHeaders.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "producers/prosper",
-        "tools/build-source.mjs"
+        "tools/build-input.mjs",
+        "tools/build-source.mjs",
+        "tools/python-build-tools.json",
+        "tools/python-build-tools.mjs"
       ],
       "buildEntry": "producers/prosper/build.mjs"
     },
@@ -3268,6 +3299,12 @@
       ],
       "inputs": [
         "vulkan-moltenvk-scene"
+      ],
+      "archives": [
+        {
+          "file": "tools/python-build-tools.json",
+          "pointer": "/interpreters"
+        }
       ]
     },
     "versionBindings": [
@@ -4257,6 +4294,10 @@
         {
           "file": "tools/python-build-tools.json",
           "pointer": "/wheels"
+        },
+        {
+          "file": "tools/python-build-tools.json",
+          "pointer": "/interpreters"
         }
       ]
     }
@@ -4366,6 +4407,10 @@
         {
           "file": "tools/python-build-tools.json",
           "pointer": "/wheels"
+        },
+        {
+          "file": "tools/python-build-tools.json",
+          "pointer": "/interpreters"
         }
       ]
     }
@@ -4442,6 +4487,10 @@
         {
           "file": "tools/python-build-tools.json",
           "pointer": "/wheels"
+        },
+        {
+          "file": "tools/python-build-tools.json",
+          "pointer": "/interpreters"
         }
       ]
     }

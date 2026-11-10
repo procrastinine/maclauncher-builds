@@ -1,8 +1,22 @@
 {
-  "python": "3.13",
+  "python": "3.13.11",
   "platforms": [
     "aarch64-apple-darwin",
     "x86_64-apple-darwin"
+  ],
+  "interpreters": [
+    {
+      "platform": "aarch64-apple-darwin",
+      "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20260127/cpython-3.13.11%2B20260127-aarch64-apple-darwin-install_only_stripped.tar.gz",
+      "sha256": "718a87bf84d81cb81355488ca37be1f66c2252304be2090721016948de96e7ca",
+      "bytes": 17656375
+    },
+    {
+      "platform": "x86_64-apple-darwin",
+      "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20260127/cpython-3.13.11%2B20260127-x86_64-apple-darwin-install_only_stripped.tar.gz",
+      "sha256": "2a84ac3dff6892d857b3bf7fc00f88335ed97f4ac4577e0651a56cc7f13239d7",
+      "bytes": 17623164
+    }
   ],
   "sets": {
     "sdk27": [

@@ -9,6 +9,7 @@ import {checkoutAndroidCommonSources} from './android-common-sources.mjs';
 import {prepareAndroidCommonPublisherInputs} from './android-common-publisher-inputs.mjs';
 import {packageAndroidCommon} from './package-android-common.mjs';
 import {run} from './build-source.mjs';
+import {buildPython} from './python-build-tools.mjs';
 import {verifyAndroidJavaConverterInput} from './build-android-java-converter.mjs';
 import {verifyAndroidJavaFrameworkInput} from './build-android-java-framework.mjs';
 import {prepareAndroidCommonJavaProducer} from './android-common-java-inputs.mjs';
@@ -37,12 +38,8 @@ export async function buildAndroidCommonInput({version,output,work,angle,codecs,
   const from=path.join(platformPackages,file.path),to=path.join(publisher.framework,file.path);
   fs.copyFileSync(from,to,fs.constants.COPYFILE_EXCL|fs.constants.COPYFILE_FICLONE);
  }
- const buildEnvironment=rustEnvironment({work,minimumMacOS:'13.0'}),pythonRoot=path.join(work,'python'),cargoHome=buildEnvironment.CARGO_HOME;fs.mkdirSync(cargoHome,{recursive:true});
- const pythonEnvironment={...process.env,UV_CACHE_DIR:path.join(work,'uv-cache'),UV_PYTHON_INSTALL_DIR:pythonRoot,UV_PYTHON_BIN_DIR:path.join(work,'python-bin')};
- const pythonVersion=JSON.parse(fs.readFileSync(path.join(root,'producers/android-inputs/aim.json'))).pythonVersion;
- run('uv',['python','install',pythonVersion],{env:pythonEnvironment});
- const python=read('uv',['python','find','--managed-python','--system',pythonVersion],{env:pythonEnvironment});
- if(!fs.realpathSync(python).startsWith(fs.realpathSync(pythonRoot)+path.sep))throw Error('The selected Python interpreter is outside the declared build input directory.');
+ const buildEnvironment=rustEnvironment({work,minimumMacOS:'13.0'}),cargoHome=buildEnvironment.CARGO_HOME;fs.mkdirSync(cargoHome,{recursive:true});
+ const python=await buildPython(work);
  const buildWork=path.join(work,'compiler'),build=path.join(work,'build-output'),tools={jdk:publisher.jdk,python,ninja:writeAndroidNinjaLauncher({output:path.join(work,'ninja.mjs'),ninja:read('which',['ninja'])}),rustToolchain:read('rustc',['--print','sysroot']),aidl:publisher.aidl,aconfig,blueprintParser:blueprint.parser,cargoHome};
  // Build in a separate owned clone: immutable upstream inputs retain no generated files.
  const converter=path.join(work,'converter');run('git',['clone','--no-local',sources.converter,converter]);

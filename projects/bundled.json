@@ -696,6 +696,10 @@
         {
           "file": "tools/python-build-tools.json",
           "pointer": "/wheels"
+        },
+        {
+          "file": "tools/python-build-tools.json",
+          "pointer": "/interpreters"
         }
       ]
     }
@@ -1421,8 +1425,11 @@
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "runtimes/android",
         "tools/build-android-angle.mjs",
+        "tools/build-input.mjs",
         "tools/build-source.mjs",
-        "tools/helper-package.mjs"
+        "tools/helper-package.mjs",
+        "tools/python-build-tools.json",
+        "tools/python-build-tools.mjs"
       ]
     },
     "upstreams": [
@@ -1487,6 +1494,12 @@
       "cleanupRunner": true,
       "submodules": [
         "sources/maclauncher-android"
+      ],
+      "archives": [
+        {
+          "file": "tools/python-build-tools.json",
+          "pointer": "/interpreters"
+        }
       ]
     },
     "versionBindings": [
@@ -1519,7 +1532,9 @@
         "tools/build-android-art-elf.mjs",
         "tools/build-input.mjs",
         "tools/build-source.mjs",
-        "tools/helper-package.mjs"
+        "tools/helper-package.mjs",
+        "tools/python-build-tools.json",
+        "tools/python-build-tools.mjs"
       ]
     },
     "upstreams": [
@@ -1573,7 +1588,13 @@
       "rustComponents": [
         "rustfmt"
       ],
-      "cleanupRunner": true
+      "cleanupRunner": true,
+      "archives": [
+        {
+          "file": "tools/python-build-tools.json",
+          "pointer": "/interpreters"
+        }
+      ]
     },
     "versionBindings": [
       {
