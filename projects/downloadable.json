@@ -3730,8 +3730,7 @@
         "url": "https://github.com/xmoezzz/siglus_rs",
         "repository": "xmoezzz/siglus_rs",
         "pin": {
-          "file": "producers/vn-adaptations/source.json",
-          "pointer": "/projects/siglus/upstream/revision"
+          "gitlink": "producers/package-support/src/external/siglus-rs"
         }
       }
     ],
@@ -3762,6 +3761,9 @@
       "version": "0.1.0-MCLv7",
       "architectures": [
         "arm64"
+      ],
+      "submodules": [
+        "producers/package-support/src/external/siglus-rs"
       ],
       "command": "tools/build-siglus.mjs",
       "tools": [

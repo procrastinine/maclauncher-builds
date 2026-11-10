@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
-import {checkoutSource,stageSource,run,recipeMain} from "./build-source.mjs";
+import {declaredSource,stageSource,run,recipeMain} from "./build-source.mjs";
 import {rustEnvironment} from "./rust-build.mjs";
 import {sealRuntime} from './seal-runtime.mjs';
 
@@ -14,7 +14,7 @@ const root=path.resolve(import.meta.dirname,'..'),hash=file=>crypto.createHash('
 export async function compile({project,arch,work}){
  const owned=path.join(root,'producers/vn-adaptations/siglus'),hostSource=path.join(owned,'host.m'),pin=JSON.parse(fs.readFileSync(path.join(root,'producers/vn-adaptations/source.json'))).projects.siglus;
  fs.mkdirSync(work,{recursive:true});
- const sourceRoot=checkoutSource({repository:pin.upstream.url,revision:sourceRevision(pin.upstream),destination:path.join(work,'upstream')}),source=path.join(work,'source');
+ const sourceRoot=declaredSource(pin.upstream),source=path.join(work,'source');
  const staged=await stageSource(sourceRoot,sourceRevision(pin.upstream),source),target=arch==='arm64'?'aarch64-apple-darwin':'x86_64-apple-darwin',env=rustEnvironment({work,minimumMacOS:'13.0'});
  for(const relative of ['src/app_path.rs','src/text_render.rs']){
   const file=path.join(source,'crates/siglus_scene_vm',relative),original=fs.readFileSync(file,'utf8'),before='let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));';

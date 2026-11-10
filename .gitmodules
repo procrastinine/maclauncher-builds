@@ -314,3 +314,6 @@
 [submodule "producers/package-support/src/external/zstd"]
 	path = producers/package-support/src/external/zstd
 	url = https://github.com/facebook/zstd
+[submodule "producers/package-support/src/external/siglus-rs"]
+	path = producers/package-support/src/external/siglus-rs
+	url = https://github.com/xmoezzz/siglus_rs
