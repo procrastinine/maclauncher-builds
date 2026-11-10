@@ -701,6 +701,16 @@
           "file": "tools/python-build-tools.json",
           "pointer": "/interpreters"
         }
+      ],
+      "locks": [
+        {
+          "tool": "cargo",
+          "file": "producers/package-support/src/external/librashader/Cargo.lock"
+        },
+        {
+          "tool": "cargo",
+          "file": "sources/maclauncher/src/modules/shared/reshade/native/retroarch-prepare/Cargo.lock"
+        }
       ]
     }
   },

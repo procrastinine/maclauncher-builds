@@ -1,6 +1,7 @@
 import {appPath,appRequire,exportAppFile} from '../../../../../../../tools/app-source.mjs';
 import {gitlink,sourceRevision} from '../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
+import {LOCKED_ENVIRONMENT} from '../../../../../../../tools/build-locks.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -32,13 +33,15 @@ function compile(){
  for(const name of ['main.rs','Cargo.lock'])exportAppFile(native+'/retroarch-prepare/'+name,path.join(project,name));
  const manifest=fs.readFileSync(appPath(native+'/retroarch-prepare/Cargo.toml'),'utf8');
  fs.writeFileSync(path.join(project,'Cargo.toml'),manifest.replaceAll('../../../../../external/librashader',source));
- const env={...process.env,MACOSX_DEPLOYMENT_TARGET:'13.0',CFLAGS:[process.env.CFLAGS||'','-ffile-prefix-map='+os.homedir()+'=BuildHome -ffile-prefix-map='+output+'=retroarch-build'].join(' '),CXXFLAGS:[process.env.CXXFLAGS||'','-ffile-prefix-map='+os.homedir()+'=BuildHome -ffile-prefix-map='+output+'=retroarch-build'].join(' '),RUSTFLAGS:[process.env.RUSTFLAGS||'', '--remap-path-prefix='+os.homedir()+'=BuildHome','--remap-path-prefix='+source+'=librashader','--remap-path-prefix='+project+'=retroarch-prepare','--remap-path-prefix='+output+'=retroarch-build'].join(' ')};
+ // Cargo reads the packages of the build's declared locks offline, from the Cargo home that prepare filled;
+ // the compiled files name that home BuildHome/.cargo wherever it lies.
+ const locked=LOCKED_ENVIRONMENT.cargo(),cargoHome=locked.CARGO_HOME;
+ const env={...process.env,...locked,MACOSX_DEPLOYMENT_TARGET:'13.0',CFLAGS:[process.env.CFLAGS||'','-ffile-prefix-map='+os.homedir()+'=BuildHome -ffile-prefix-map='+cargoHome+'=BuildHome/.cargo -ffile-prefix-map='+output+'=retroarch-build'].join(' '),CXXFLAGS:[process.env.CXXFLAGS||'','-ffile-prefix-map='+os.homedir()+'=BuildHome -ffile-prefix-map='+cargoHome+'=BuildHome/.cargo -ffile-prefix-map='+output+'=retroarch-build'].join(' '),RUSTFLAGS:[process.env.RUSTFLAGS||'', '--remap-path-prefix='+os.homedir()+'=BuildHome','--remap-path-prefix='+cargoHome+'=BuildHome/.cargo','--remap-path-prefix='+source+'=librashader','--remap-path-prefix='+project+'=retroarch-prepare','--remap-path-prefix='+output+'=retroarch-build'].join(' ')};
  const capiTarget=path.join(output,'capi-target'),helperTarget=path.join(output,'target');
  const targets=arch==='universal'?['aarch64-apple-darwin','x86_64-apple-darwin']:[arch==='x64'?'x86_64-apple-darwin':'aarch64-apple-darwin'];
  const cargo=process.env.CARGO||'cargo';
- // Public builds fetch the dependencies described by the existing exact locks;
- // compilation then uses the same offline dependency set on each CPU.
- for(const manifest of [path.join(source,'Cargo.toml'),path.join(project,'Cargo.toml')])run(cargo,['fetch','--locked','--manifest-path',manifest],{env,timeout:900000});
+ // Both manifests' Cargo.lock files are the build's declared locks: prepare fetched their packages, and every
+ // CPU compiles from that offline set.
  const libraries=[],helpers=[];
  for(const target of targets){
   run(cargo,['build','--release','--locked','--offline','--target',target,'--no-default-features','--features','runtime-metal','--package','librashader-capi','--manifest-path',path.join(source,'Cargo.toml'),'--target-dir',capiTarget,'--jobs','6'],{env,timeout:900000});
