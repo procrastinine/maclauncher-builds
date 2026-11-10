@@ -1,0 +1,24 @@
+diff --git a/audio/out/ao_coreaudio.c b/audio/out/ao_coreaudio.c
+index 4a582bb..7d42139 100644
+--- a/audio/out/ao_coreaudio.c
++++ b/audio/out/ao_coreaudio.c
+@@ -168,9 +168,6 @@ static int init(struct ao *ao)
+     if (!reinit_device(ao))
+         goto coreaudio_error;
+ 
+-    if (!register_hotplug_cb(ao))
+-        goto coreaudio_error;
+-
+     if (p->change_physical_format)
+         init_physical_format(ao);
+ 
+@@ -188,6 +185,9 @@ static int init(struct ao *ao)
+     if (!r)
+         goto coreaudio_error;
+ 
++    if (!register_hotplug_cb(ao))
++        goto coreaudio_error;
++
+     reinit_latency(ao);
+     ao->device_buffer = av_rescale(p->hw_latency_ns, ao->samplerate, 1000000000) * 2;
+ 

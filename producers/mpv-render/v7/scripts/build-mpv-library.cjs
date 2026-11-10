@@ -32,7 +32,8 @@ function build({ sourceCheckout, workDirectory, pkgConfigPath, toolsDirectory, m
       if (result.error || result.status !== 0 || /Skipped patch/i.test(result.stderr))
         throw result.error || new Error("The media source overlay was not applied: " + result.stderr.trim());
     };
-    for (const revision of BACKPORTS) apply(run("git", ["-C", sourceCheckout, "format-patch", "-1", "--stdout", revision], { env: applyEnvironment }));
+    // Each backport is the upstream change of that commit, kept as a diff beside this producer.
+    for (const revision of BACKPORTS) apply(fs.readFileSync(path.join(__dirname, "../backports", revision + ".patch")));
     for (const patch of patches) apply(fs.readFileSync(patch.file));
     fs.writeFileSync(sourceRecord, JSON.stringify(sourceInputs, null, 2) + "\n");
   }

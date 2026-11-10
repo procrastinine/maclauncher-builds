@@ -8,7 +8,6 @@ import {createRequire} from 'node:module';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 import {pythonBuildTools,recipeMain} from './build-source.mjs';
-import {retryNetwork} from './download.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Native=require('../producers/package-support/scripts/native-binary-tools.cjs');
 const run=(command,args,options={})=>String(execFileSync(command,args,{encoding:'utf8',maxBuffer:Infinity,...options})||'').trim();
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -30,7 +29,6 @@ export async function compile({work}){
  const tools=pythonBuildTools(work,path.join(root,'tools/sdk27-build-requirements.txt'));
  const producer=path.join(root,'producers/mpv-render/v7'),source=path.join(root,'producers/package-support/src/external/mpv-player');
  const Builder=require(path.join(producer,'scripts/build-mpv-library.cjs'));
- retryNetwork(()=>run('git',['-C',source,'fetch','--depth','2','origin',Builder.REVISION,...Builder.BACKPORTS],{stdio:'inherit'}));
  const sdk=process.env.SDKROOT||run('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path']);
  const sdkPackages=sdkCompressionPkgConfig({sdk,directory:path.join(work,'sdk-pkgconfig')});
  const pkgConfigPath=[sdkPackages,process.env.PKG_CONFIG_PATH,run('pkgconf',['--variable','pc_path','pkg-config'])].filter(Boolean).join(path.delimiter);
