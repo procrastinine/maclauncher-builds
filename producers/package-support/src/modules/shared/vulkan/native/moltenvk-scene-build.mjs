@@ -7,8 +7,10 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {source,sceneSources} from './moltenvk-scene-overlay.mjs';
+import {sourceRevision} from '../../../../../../../lib/pins.mjs';
 import {applyTemporalSource,temporalSources} from '../../../../../../../producers/moltenvk/build.mjs';
 import {writeChanged,prepareSourceTree} from './source-files.mjs';
+const revision=sourceRevision(source);
 const Bundled=appRequire('src/modules/shared/runtime/bundled-native.js');
 const root=path.dirname(fileURLToPath(import.meta.url));
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
@@ -23,7 +25,7 @@ export function prepareSceneSource({repository,work}){
  let adapted;
  // Offline archive is the original public source, never a modified checkout.
  const archive=path.join(work,'upstream-source.tar');
- run('git',['-C',repository,'archive','--format=tar','--output='+archive,source.revision],{env:gitEnvironment});
+ run('git',['-C',repository,'archive','--format=tar','--output='+archive,revision],{env:gitEnvironment});
  try{prepareSourceTree(projected,temporary=>{run('/usr/bin/tar',['-xf',archive,'-C',temporary]);const temporal=applyTemporalSource(temporary);adapted=sceneSources(repository,file=>fs.readFileSync(path.join(temporary,file),'utf8'));for(const file of temporal)if(!adapted.has(file))adapted.set(file,fs.readFileSync(path.join(temporary,file)));for(const[file,bytes]of adapted)writeChanged(path.join(temporary,file),bytes);});}
  finally{fs.unlinkSync(archive);}
  const temporalRoot=path.resolve(root,'../../../../../../../producers/moltenvk');
@@ -41,11 +43,11 @@ export function checkSceneSource({projected,includes=[],compiler='/usr/bin/clang
   '-DMVK_USE_CEREAL=0','-DMVK_EXCLUDE_SPIRV_TOOLS=1',
   ...[path.join(projected,'MoltenVK/include'),path.join(projected,'Common'),path.join(projected,'MoltenVKShaderConverter'),...internal,...includes].map(value=>'-I'+path.resolve(value)),
   path.join(base,'Commands/MVKCommandPool.mm')];
- run(compiler,args);return {architecture,source:source.revision};
+ run(compiler,args);return {architecture,source:revision};
 }
 export function buildSceneProvider({projected,work,dependencies,architecture='arm64',jobs=2}){
  if(!['arm64','x86_64'].includes(architecture)||!Number.isInteger(jobs)||jobs<1||jobs>2)throw Error('Invalid native compiler configuration');
- const actual={};for(const item of source.dependencies){const input=dependencies?.[item.id];if(!input||!fs.statSync(input).isDirectory())throw Error('Missing original offline source: '+item.id+' '+item.revision);actual[item.id]=fs.realpathSync(input);}
+ const actual={};for(const item of source.dependencies){const input=dependencies?.[item.id];if(!input||!fs.statSync(input).isDirectory())throw Error('Missing original offline source: '+item.id+' '+sourceRevision(item));actual[item.id]=fs.realpathSync(input);}
  const buildInputs=JSON.parse(fs.readFileSync(path.join(work,'scene-source.json')));
  if(JSON.stringify(buildInputs.profile)!==JSON.stringify(source)||buildInputs.files.some(row=>digest(fs.readFileSync(path.join(projected,row.file)))!==row.sha256))throw Error('Prepared scene source inputs changed');
  const wrapper=path.resolve(work,'project'),build=path.resolve(work,'build-'+architecture);fs.mkdirSync(wrapper,{recursive:true});writeChanged(path.join(wrapper,'CMakeLists.txt'),fs.readFileSync(path.join(root,'moltenvk-scene-project.cmake')));
@@ -104,10 +106,10 @@ export function publishScenePackage({providerDirectory,peerDirectory,output}){
   provider.files=provider.files.map(row=>row.path===provider.library?{...row,sha256:digest(fs.readFileSync(path.join(temporary,row.path))),size:fs.statSync(path.join(temporary,row.path)).size}:row);
   writeChanged(path.join(temporary,'provider.json'),JSON.stringify(provider,null,2)+'\n');
   const files=Bundled.fileInventory(temporary).map(file=>{const stored=Bundled.readRegular(path.join(temporary,file),Bundled.LIMITS.fileBytes);return {path:file,size:stored.size,mode:stored.mode,sha256:stored.sha256,...(file===provider.library?{architectures}:{})};});
-  const manifest={schemaVersion:1,managerId:source.projectId,version:source.version,upstreamRevision:source.revision,
+  const manifest={schemaVersion:1,managerId:source.projectId,version:source.version,upstreamRevision:revision,
    platform:'darwin',arch:inputs.length===2?'universal':architectures[0]==='x86_64'?'x64':'arm64',minimumMacOS:source.minimumMacOS,
    executableRelative:provider.library,files,dependencies:[{file:provider.library,links:first.links}],provider,
-   provenance:{sourceRevision:source.revision,sourceUrl:source.repository,upstreamVersion:source.upstreamVersion,
+   provenance:{sourceRevision:revision,sourceUrl:source.repository,upstreamVersion:source.upstreamVersion,
     adaptationVersion:source.adaptationVersion,buildInputs:provider.buildInputs,packageProducer:provider.buildInputs.producer.find(row=>row.file==='moltenvk-scene-build.mjs')}};
   Bundled.validateManifest(manifest);Bundled.verifyPayload(temporary,manifest);
   writeChanged(path.join(temporary,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');

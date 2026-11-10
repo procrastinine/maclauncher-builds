@@ -3440,8 +3440,7 @@
         "url": "https://github.com/KhronosGroup/MoltenVK",
         "repository": "KhronosGroup/MoltenVK",
         "pin": {
-          "file": "producers/package-support/src/modules/shared/vulkan/native/moltenvk-scene-source.json",
-          "pointer": ""
+          "gitlink": "producers/package-support/src/external/graphics-moltenvk"
         }
       }
     ],
@@ -3481,6 +3480,10 @@
         "cmake"
       ],
       "submodules": [
+        "producers/package-support/src/external/graphics-moltenvk",
+        "producers/package-support/src/external/graphics-moltenvk-deps/cereal",
+        "producers/package-support/src/external/graphics-moltenvk-deps/spirv-cross",
+        "producers/package-support/src/external/graphics-moltenvk-deps/vulkan-headers",
         "producers/vkd3d-proton/source",
         "sources/maclauncher"
       ]

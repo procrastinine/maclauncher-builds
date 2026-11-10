@@ -3,8 +3,7 @@
   "version": "1.4.2-MCLv11",
   "upstreamVersion": "1.4.2",
   "repository": "https://github.com/KhronosGroup/MoltenVK.git",
-  "submodule": "src/external/graphics-moltenvk",
-  "revision": "db66022459ffb663aa2b50f6b018bc2e124f5edf",
+  "gitlink": "producers/package-support/src/external/graphics-moltenvk",
   "adaptationVersion": 3,
   "sceneOperationAPI": 1,
   "sceneStagingAPI": 1,
@@ -20,19 +19,18 @@
   "dependencies": [
     {
       "id": "SPIRV-Cross",
-      "submodule": "src/external/graphics-moltenvk-deps/spirv-cross",
+      "gitlink": "producers/package-support/src/external/graphics-moltenvk-deps/spirv-cross",
       "repository": "https://github.com/KhronosGroup/SPIRV-Cross.git"
     },
     {
       "id": "Vulkan-Headers",
-      "submodule": "src/external/graphics-moltenvk-deps/vulkan-headers",
+      "gitlink": "producers/package-support/src/external/graphics-moltenvk-deps/vulkan-headers",
       "repository": "https://github.com/KhronosGroup/Vulkan-Headers.git"
     },
     {
       "id": "cereal",
-      "submodule": "src/external/graphics-moltenvk-deps/cereal",
-      "repository": "https://github.com/USCiLab/cereal.git",
-      "revision": "a56bad8bbb770ee266e930c95d37fff2a5be7fea"
+      "gitlink": "producers/package-support/src/external/graphics-moltenvk-deps/cereal",
+      "repository": "https://github.com/USCiLab/cereal.git"
     }
   ],
   "temporalCarrier": "VkTemporalFrameInfoMVK"

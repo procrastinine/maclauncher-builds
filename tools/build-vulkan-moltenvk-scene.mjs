@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {pathToFileURL} from 'node:url';
-import {checkoutSource,recipeMain} from './build-source.mjs';
+import {placeDeclaredSource,recipeMain} from './build-source.mjs';
 import {resolveProject,buildRecord} from '../lib/projects.mjs';
 import {root,base,read,assemble as sceneAssemble} from './scene-runtime.mjs';
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -11,12 +11,12 @@ const native=path.join(base,'src/modules/shared/vulkan/native'),producer=()=>imp
 const cpus=arch=>arch==='universal'?['arm64','x86_64']:[arch==='x64'?'x86_64':arch];
 /** The named scene library of one CPU: the compile phase's only output. */
 const compiledLibrary=(work,architecture)=>path.join(work,'compiled',architecture,'libMoltenVK-scene.dylib');
-/** Fetch the declared MoltenVK sources and project the scene source; nothing is compiled. */
+/** Place the declared MoltenVK sources and project the scene source; nothing is compiled. */
 export async function prepare({work}){
  fs.mkdirSync(work,{recursive:true});
  const source=read(path.join(native,'moltenvk-scene-source.json'));
- const repository=checkoutSource({...source,destination:path.join(work,'moltenvk')}),dependencies={};
- for(const dependency of source.dependencies)dependencies[dependency.id]=checkoutSource({...dependency,revision:dependency.revision||fs.readFileSync(path.join(repository,'ExternalRevisions',dependency.id+'_repo_revision'),'utf8').trim(),destination:path.join(work,dependency.id)});
+ const repository=placeDeclaredSource(source,path.join(work,'moltenvk')),dependencies={};
+ for(const dependency of source.dependencies)dependencies[dependency.id]=placeDeclaredSource(dependency,path.join(work,dependency.id));
  const prepared=path.join(work,'provider-build');
  return {dependencies,prepared,projected:(await producer()).prepareSceneSource({repository,work:prepared})};
 }

@@ -317,3 +317,15 @@
 [submodule "producers/package-support/src/external/siglus-rs"]
 	path = producers/package-support/src/external/siglus-rs
 	url = https://github.com/xmoezzz/siglus_rs
+[submodule "producers/package-support/src/external/graphics-moltenvk"]
+	path = producers/package-support/src/external/graphics-moltenvk
+	url = https://github.com/KhronosGroup/MoltenVK
+[submodule "producers/package-support/src/external/graphics-moltenvk-deps/spirv-cross"]
+	path = producers/package-support/src/external/graphics-moltenvk-deps/spirv-cross
+	url = https://github.com/KhronosGroup/SPIRV-Cross
+[submodule "producers/package-support/src/external/graphics-moltenvk-deps/vulkan-headers"]
+	path = producers/package-support/src/external/graphics-moltenvk-deps/vulkan-headers
+	url = https://github.com/KhronosGroup/Vulkan-Headers
+[submodule "producers/package-support/src/external/graphics-moltenvk-deps/cereal"]
+	path = producers/package-support/src/external/graphics-moltenvk-deps/cereal
+	url = https://github.com/USCiLab/cereal
