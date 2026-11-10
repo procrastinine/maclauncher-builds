@@ -1497,6 +1497,11 @@
       "architectures": [
         "arm64"
       ],
+      "submodules": [
+        "producers/package-support/src/external/OpenGMK",
+        "producers/package-support/src/external/ramen",
+        "producers/package-support/src/external/udon"
+      ],
       "tools": [
         "cmake",
         "ninja"

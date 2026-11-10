@@ -3,7 +3,7 @@ import {addLicenses} from '../lib/licenses.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
-import {checkoutSource,stageSource,run,recipeMain} from "./build-source.mjs";
+import {declaredSource,stageSource,run,recipeMain} from "./build-source.mjs";
 import {rustEnvironment} from "./rust-build.mjs";
 import {sealRuntime} from './seal-runtime.mjs';
 
@@ -13,8 +13,9 @@ const Emulator=require(path.join(overlays,'apply-emulator.js')),Ramen=require(pa
 /** Compile the OpenGMK emulator with its ramen and libsoundio overlays. */
 export async function compile({arch,work}){
  fs.mkdirSync(work,{recursive:true});
- const inputs=[['OpenGMK','https://github.com/OpenGMK/OpenGMK',Emulator.REVISION],['ramen','https://github.com/viriuwu/ramen',Ramen.REVISION],['udon','https://github.com/Adamcake/udon',Audio.REVISION]];
- const sources=inputs.map(([name,repository,revision])=>({name,repository,revision,source:checkoutSource({repository,revision,destination:path.join(work,'upstream-'+name)})}));
+ const pins=require(path.join(overlays,'sources.json'));
+ const inputs=[['OpenGMK','https://github.com/OpenGMK/OpenGMK',Emulator.REVISION,declaredSource('opengmk','opengmk')],['ramen','https://github.com/viriuwu/ramen',Ramen.REVISION,declaredSource(pins.ramen)],['udon','https://github.com/Adamcake/udon',Audio.REVISION,declaredSource(pins.udon)]];
+ const sources=inputs.map(([name,repository,revision,source])=>({name,repository,revision,source}));
  const source=path.join(work,'source'),ramen=path.join(work,'ramen'),audio=path.join(work,'audio'),udon=path.join(work,'udon');
  const provenance=await stageSource(sources[0].source,Emulator.REVISION,source);
  Ramen.applyRamenOverlay({sourceDir:sources[1].source,destination:ramen});Audio.applyAudioOverlay({sourceDir:path.join(sources[2].source,'libsoundio-sys'),destination:audio});
