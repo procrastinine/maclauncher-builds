@@ -1,5 +1,6 @@
 import {retryNetwork} from '../../tools/download.mjs';
-import {recipeMain} from '../../tools/build-source.mjs';
+import {declaredSource,recipeMain} from '../../tools/build-source.mjs';
+import {sourceRevision} from '../../lib/pins.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -66,16 +67,12 @@ export async function compile({project,arch,work,sources={}}){
  const pin=profiles[project];
 
  fs.mkdirSync(work,{recursive:true});
- const source=sources[project]||path.join(work,'source');
- if(!sources[project]){
-  retryNetwork(()=>run('git',['clone','--filter=blob:none','--no-checkout',pin.repository,source]));
-  run('git',['-C',source,'checkout','--detach',pin.revision]);
- }
+ const source=sources[project]||declaredSource(pin);
  const result=await BUILDS[project].build({pin,arch,source,work});
  return {source,pin,result};
 }
 /** Seal the compiled tool. */
 export async function assemble({project,version,arch,output,compiled:{source,pin,result}}){
- return sealRuntime({project,version,arch,output,sourceRoot:source,upstreamRevision:pin.revision,...result});
+ return sealRuntime({project,version,arch,output,sourceRoot:source,upstreamRevision:sourceRevision(pin),...result});
 }
 recipeMain(import.meta,{compile,assemble});

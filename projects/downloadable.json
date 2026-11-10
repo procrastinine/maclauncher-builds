@@ -3365,6 +3365,9 @@
         "arm64",
         "x64"
       ],
+      "submodules": [
+        "producers/package-support/src/external/uosc"
+      ],
       "tools": [
         "go"
       ]
@@ -3477,6 +3480,9 @@
       "architectures": [
         "arm64",
         "x64"
+      ],
+      "submodules": [
+        "producers/package-support/src/external/scummvm-tools"
       ],
       "tools": [
         "cmake",

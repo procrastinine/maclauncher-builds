@@ -3,12 +3,12 @@
   "projects": {
     "uosc-helper": {
       "repository": "https://github.com/tomasklaen/uosc",
-      "revision": "d124c2c930d69446448022851373e00ae592390d",
+      "gitlink": "producers/package-support/src/external/uosc",
       "version": "5.13.0"
     },
     "scummvm-tools": {
       "repository": "https://github.com/scummvm/scummvm-tools",
-      "revision": "516246735618120eb9439cb9673a32430c18d604",
+      "gitlink": "producers/package-support/src/external/scummvm-tools",
       "version": "2.9.0",
       "dependencies": [
         {
