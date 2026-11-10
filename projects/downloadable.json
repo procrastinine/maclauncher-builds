@@ -3287,6 +3287,24 @@
       ],
       "submodules": [
         "sources/maclauncher"
+      ],
+      "archives": [
+        {
+          "file": "producers/dependencies/crossoverWine.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/package-support/src/modules/crossover/temporal/vulkan/source.json",
+          "pointer": "/buildTools/bison"
+        },
+        {
+          "file": "producers/dependencies/moltenvk.json",
+          "pointer": "/archive"
+        },
+        {
+          "file": "producers/dependencies/llvmMingw.json",
+          "pointer": ""
+        }
       ]
     },
     "versionBindings": [
@@ -3369,6 +3387,12 @@
         "producers/package-support/src/external/fsr3-sdk",
         "producers/package-support/src/external/sdl-headers",
         "sources/maclauncher"
+      ],
+      "archives": [
+        {
+          "file": "producers/dependencies/llvmMingw.json",
+          "pointer": ""
+        }
       ]
     },
     "versionBindings": [

@@ -12,10 +12,10 @@ const compiled=work=>path.join(work,'compiled');
 /** Download the declared Wine, Bison and MoltenVK archives and the toolchain, and project the Wine source; nothing is compiled. */
 export async function prepare({work}){
  fs.mkdirSync(work,{recursive:true});
- const source=read(path.join(directory,'source.json')),downloads=path.join(work,'downloads');
+ const source=read(path.join(directory,'source.json'));
  const [archive,bisonArchive,moltenvkArchive,compiler]=await Promise.all([
-  buildInput(read(path.join(import.meta.dirname,'../producers/dependencies',source.archiveDependency+'.json')),downloads),buildInput(source.buildTools.bison,downloads),
-  buildInput(moltenvk.archive,downloads),mingw(work)]);
+  buildInput(read(path.join(import.meta.dirname,'../producers/dependencies',source.archiveDependency+'.json'))),buildInput(source.buildTools.bison),
+  buildInput(moltenvk.archive),mingw(work)]);
  const wine=path.join(work,'wine');
  return {bisonArchive,moltenvkArchive,mingw:compiler,wine,source:await (await producer()).prepareSource({archive,work:wine})};
 }
