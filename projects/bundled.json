@@ -626,10 +626,14 @@
       {
         "version": "0.3.8",
         "label": "MacLauncher graphics 0.3.8"
+      },
+      {
+        "version": "0.3.9",
+        "label": "MacLauncher graphics 0.3.9"
       }
     ],
     "build": {
-      "version": "0.3.8",
+      "version": "0.3.9",
       "command": "tools/build-graphics.mjs",
       "architectures": [
         "universal",
