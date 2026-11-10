@@ -3,11 +3,11 @@ import glslangNx from '../dependencies/glslangNx.json' with {type:'json'};
 import spirvCross from '../dependencies/spirvCross.json' with {type:'json'};
 import zstd from '../dependencies/zstd.json' with {type:'json'};
 import {addLicense,addLicenses} from '../../lib/licenses.mjs';
+import {excludedReason} from '../../lib/runtime-content.cjs';
 import fs from 'node:fs/promises';
 import { constants as fsConstants } from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { createRequire } from 'node:module';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
@@ -16,7 +16,6 @@ import { downloadBytes } from '../../tools/download.mjs';
 
 const execute = promisify(execFile);
 const directory = path.dirname(fileURLToPath(import.meta.url));
-const repository = path.resolve(directory, '../..');
 const lock = JSON.parse(await fs.readFile(path.join(directory, 'dependencies.json'), 'utf8'));
 
 async function run(program, args, options = {}) {
@@ -164,8 +163,6 @@ export async function prepareDependencies({ work, output, jobs = 4 }) {
   output = path.resolve(output);
   if (work === output || work.startsWith(output + path.sep) || output === path.parse(output).root)
     throw new Error('Dependency work and payload directories must be separate');
-  const require = createRequire(import.meta.url);
-  const { excludedReason } = require(path.join(repository, lock.payloadPolicy));
   await fs.mkdir(work, { recursive: true });
   await fs.mkdir(path.join(work, 'wheels'), { recursive: true });
   await fs.mkdir(path.join(output, 'bin'), { recursive: true });
