@@ -975,6 +975,12 @@
       "rustTargets": [
         "aarch64-apple-darwin",
         "x86_64-apple-darwin"
+      ],
+      "locks": [
+        {
+          "tool": "cargo",
+          "file": "producers/package-support/src/modules/android/native/apk-metadata/Cargo.lock"
+        }
       ]
     }
   },
@@ -1171,6 +1177,12 @@
       ],
       "submodules": [
         "sources/maclauncher-android"
+      ],
+      "locks": [
+        {
+          "tool": "cargo",
+          "file": "sources/maclauncher-android/src/external/aim-custom/Cargo.lock"
+        }
       ]
     }
   },
@@ -1311,6 +1323,12 @@
         {
           "file": "producers/android-inputs/aconfig/source.json",
           "pointer": "/sdk/files"
+        }
+      ],
+      "locks": [
+        {
+          "tool": "cargo",
+          "file": "producers/android-inputs/aconfig/Cargo.lock"
         }
       ]
     },
@@ -1615,6 +1633,12 @@
         {
           "file": "sources/maclauncher-android/src/modules/android/art/supplier.json",
           "pointer": ""
+        }
+      ],
+      "locks": [
+        {
+          "tool": "cargo",
+          "file": "sources/maclauncher-android/src/external/aim-custom/Cargo.lock"
         }
       ]
     },
@@ -2061,6 +2085,12 @@
           "file": "producers/android-image-data/source.json",
           "pointer": "/archive"
         }
+      ],
+      "locks": [
+        {
+          "tool": "cargo",
+          "file": "sources/maclauncher-android/src/external/aim-custom/Cargo.lock"
+        }
       ]
     },
     "versionBindings": [
@@ -2149,6 +2179,12 @@
         {
           "file": "producers/android-image-data/source.json",
           "pointer": "/archive"
+        }
+      ],
+      "locks": [
+        {
+          "tool": "cargo",
+          "file": "sources/maclauncher-android/src/external/aim-custom/Cargo.lock"
         }
       ]
     },
@@ -2239,6 +2275,12 @@
           "file": "producers/android-image-data/source.json",
           "pointer": "/archive"
         }
+      ],
+      "locks": [
+        {
+          "tool": "cargo",
+          "file": "sources/maclauncher-android/src/external/aim-custom/Cargo.lock"
+        }
       ]
     },
     "versionBindings": [
@@ -2328,6 +2370,12 @@
           "file": "producers/android-image-data/source.json",
           "pointer": "/archive"
         }
+      ],
+      "locks": [
+        {
+          "tool": "cargo",
+          "file": "sources/maclauncher-android/src/external/aim-custom/Cargo.lock"
+        }
       ]
     },
     "versionBindings": [
@@ -2416,6 +2464,12 @@
         {
           "file": "producers/android-image-data/source.json",
           "pointer": "/archive"
+        }
+      ],
+      "locks": [
+        {
+          "tool": "cargo",
+          "file": "sources/maclauncher-android/src/external/aim-custom/Cargo.lock"
         }
       ]
     },
@@ -2540,6 +2594,12 @@
         {
           "file": "producers/android-image-data/source.json",
           "pointer": "/archive"
+        }
+      ],
+      "locks": [
+        {
+          "tool": "cargo",
+          "file": "sources/maclauncher-android/src/external/aim-custom/Cargo.lock"
         }
       ]
     },

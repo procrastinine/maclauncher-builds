@@ -1,4 +1,4 @@
-import {retryNetwork} from '../../tools/download.mjs';
+import {LOCKED_ENVIRONMENT} from '../../tools/build-locks.mjs';
 import {declaredSource,recipeMain} from '../../tools/build-source.mjs';
 import {sourceRevision} from '../../lib/pins.mjs';
 import fs from 'node:fs';
@@ -18,9 +18,10 @@ const run=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',
 
 function goBuild({pin,arch,source,work}){
  const environment={...process.env,GOOS:'darwin',GOARCH:arch==='x64'?'amd64':'arm64',CGO_ENABLED:'0',GOWORK:'off',
-  GOCACHE:path.join(work,'go-cache'),GOMODCACHE:path.join(work,'go-modules'),GOPATH:path.join(work,'go-path'),
-  GOFLAGS:'-mod=readonly',GOTOOLCHAIN:'local'};
- const execute=args=>{const action=()=>run('go',args,{cwd:source,env:environment});return ['list','mod'].includes(args[0])?retryNetwork(action):action();};
+  GOCACHE:path.join(work,'go-cache'),GOPATH:path.join(work,'go-path'),GOTOOLCHAIN:'local',
+  // Modules come from the declared go.sum's cache, filled by build-runtime --prepare, with no network access.
+  ...LOCKED_ENVIRONMENT.go()};
+ const execute=args=>run('go',args,{cwd:source,env:environment});
  const executable=path.join(work,'ziggy-darwin');
  execute(['build','-trimpath','-buildvcs=false','-ldflags=-s -w -buildid=','-o',executable,'./src/ziggy/ziggy.go']);
  addLicense(path.dirname(work),'github.com/atotto/clipboard',path.join(import.meta.dirname,'licenses/clipboard.txt'));

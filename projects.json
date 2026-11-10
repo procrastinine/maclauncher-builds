@@ -27,6 +27,7 @@
     "producers/package-support/scripts/native-binary-tools.cjs",
     "tools/app-source.mjs",
     "tools/build-host.mjs",
+    "tools/build-locks.mjs",
     "tools/build-run-inputs.mjs",
     "tools/build-runtime.mjs",
     "tools/build-tools.mjs",

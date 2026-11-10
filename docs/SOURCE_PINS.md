@@ -55,3 +55,15 @@ Build-input downloads use one HTTP transport with up to six attempts and exponen
 Git source fetches and submodule initialization use the same transient-only policy as attestation, artifact transfers and release API requests.
 
 Recipes add component licence texts to `licenses/`. Texts with the same bytes after whitespace is removed share one file; `licenses/components.txt` records each component’s file. Missing or unreadable sources produce a warning. Licence files are ordinary payload files: inventories, archive digests and attestations cover their bytes. Included package payloads keep their existing licence directories.
+
+## Package-manager locks
+
+A build lists the package-manager locks its compile reads in its `locks` field. Each entry names a `tool` and a tracked `file`: `cargo` with a Cargo.lock (version 3 or 4, under any file name ending in `.lock`), `go` with a `go.sum` whose `go.mod` sits beside it, or `nuget` with a NuGet `packages.lock.json`. A lock inside a Gitlink is read from that Gitlink's declared checkout, and the build definition lists every lock file. `build-runtime --prepare` fetches each lock after initializing the build's sources, through a generated manifest that requires exactly the locked packages, so a recipe can still compose its own manifest during compilation:
+
+| Tool | Fetch | Verification | Cache the compile reads |
+| --- | --- | --- | --- |
+| `cargo` | `cargo fetch` of a package requiring every registry and Git package at its locked version, with the declared lock as the previous resolve | Cargo compares the lock with the registry index, and each fetched crate's SHA-256 equals its locked checksum | `CARGO_HOME`, with `CARGO_NET_OFFLINE=true` |
+| `go` | `go mod download` with a copy of `go.mod` and the lock | Go checks each module against the lock, which already holds every checksum Go records | `GOMODCACHE`, with `GOPROXY=off` and `GOFLAGS=-mod=readonly` |
+| `nuget` | `dotnet restore --locked-mode` of a project with the lock's frameworks, runtime identifiers and direct references | NuGet checks each package's content hash against the lock | `NUGET_PACKAGES`, which is also the only restore source |
+
+Each tool has one cache in the system temporary directory, shared by every lock of that tool. The build environment points the tool at it, and the compile reads it without network access. A missing lock, a package that differs from its locked checksum or content hash, or a checksum missing from the lock fails the preparation; the error names the package, the lock and the rejected locked package. `rustEnvironment` maps the Cargo cache to `cargo` in compiled source paths.

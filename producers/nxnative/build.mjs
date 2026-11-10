@@ -8,6 +8,7 @@ import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {applyOverlays} from './overlays/apply.mjs';
 import {prepareDependencies} from './dependencies.mjs';
+import {LOCKED_ENVIRONMENT,lockCache} from '../../tools/build-locks.mjs';
 
 const require = createRequire(import.meta.url);
 const B = require('../../lib/package-format.cjs');
@@ -108,10 +109,11 @@ export async function buildNxNative({work,output,dependencyWork,jobs=4,version=p
     fs.mkdirSync(work,{recursive:true});fs.mkdirSync(output,{recursive:true});
     const owned=inputFiles(),identity=sha(JSON.stringify({source:sourceProvenance(pin.source),owned})),projected=exportSource(source,work,identity);
     const dependencies=await prepareDependencies({work:dependencyWork||path.join(work,'dependencies'),output,jobs});
-    const env={...process.env,PATH:[path.join(output,'bin'),path.join(output,'python/bin'),path.join(output,'dotnet'),process.env.PATH].join(path.delimiter),SPIRV_CROSS:path.join(output,'bin/spirv-cross'),DOTNET_ROOT:path.join(output,'dotnet'),DOTNET_CLI_TELEMETRY_OPTOUT:'1',DOTNET_CLI_HOME:path.join(work,'dotnet-home'),NUGET_PACKAGES:path.join(work,'nuget'),PYTHONDONTWRITEBYTECODE:'1'};
+    const env={...process.env,PATH:[path.join(output,'bin'),path.join(output,'python/bin'),path.join(output,'dotnet'),process.env.PATH].join(path.delimiter),SPIRV_CROSS:path.join(output,'bin/spirv-cross'),DOTNET_ROOT:path.join(output,'dotnet'),DOTNET_CLI_TELEMETRY_OPTOUT:'1',DOTNET_CLI_HOME:path.join(work,'dotnet-home'),...LOCKED_ENVIRONMENT.nuget(),PYTHONDONTWRITEBYTECODE:'1'};
     const sdk=read('/usr/bin/which',['dotnet']),sdkEnvironment={...env};delete sdkEnvironment.DOTNET_ROOT;
     const nxProject=path.join(projected,'dm/tools/nx_extract/nx_extract.csproj'),lock=path.join(producer,'nx-extract.lock.json');
-    run(sdk,['restore',nxProject,'--runtime','osx-arm64','--locked-mode','--lock-file-path',lock],{env:sdkEnvironment});
+    // The locked packages come from the cache build-runtime --prepare filled; the restore has no other source.
+    run(sdk,['restore',nxProject,'--runtime','osx-arm64','--locked-mode','--lock-file-path',lock,'--source',lockCache('nuget')],{env:sdkEnvironment});
     run(sdk,['publish',nxProject,'--no-restore','--runtime','osx-arm64','--self-contained','false','-c','Release','-o',path.join(output,'tools/nx_extract'),'-p:DebugType=None','-p:DebugSymbols=false','-p:PathMap='+projected+'=/nxnative'],{env:sdkEnvironment});
     metalTool(output);
     const python=path.join(output,'python/bin/python3');

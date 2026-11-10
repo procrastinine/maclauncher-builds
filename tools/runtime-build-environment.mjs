@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {linuxToolSelection,installedToolsDirectory} from './build-tools.mjs';
+import {lockedEnvironment} from './build-locks.mjs';
 const systemDirectories=process.platform==='win32'?[]:['/usr/bin','/bin','/usr/sbin','/sbin'];
 const locate=(name,env)=>{try{return execFileSync('/usr/bin/which',[name],{maxBuffer:Infinity,encoding:'utf8',env,stdio:['ignore','pipe','ignore']}).trim();}catch{return undefined;}};
 /** Limit additional executable and library discovery to declared build tools. */
@@ -60,6 +61,8 @@ export function runtimeBuildEnvironment(build,{environment=process.env,platform=
   env.PKG_CONFIG_PATH=configs.join(path.delimiter);
   env.PKG_CONFIG_LIBDIR=env.PKG_CONFIG_PATH;
   env.CMAKE_PREFIX_PATH=prefixes.join(path.delimiter);
+  // Package managers read the declared locks' caches, filled by build-runtime --prepare, with no network access.
+  Object.assign(env,lockedEnvironment(build));
   return {env,formulae:[...names],dispose:()=>fs.rmSync(aliases,{recursive:true,force:true})};
  }catch(error){fs.rmSync(aliases,{recursive:true,force:true});throw error;}
 }

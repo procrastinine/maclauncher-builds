@@ -14,6 +14,7 @@ import {RUST_TOOLCHAIN} from './rust-build.mjs';
 import {runtimeBuildEnvironment} from './runtime-build-environment.mjs';
 import {prepareBuildHost,assertBuildHost} from './build-host.mjs';
 import {initializeSources} from './init-runtime-sources.mjs';
+import {resolveLocks} from './build-locks.mjs';
 import {publicDeclaration} from './runtime-package.mjs';
 import {sealBuildInputReport} from './seal-build-input-report.mjs';
 import {preparePackageLayout} from './package-layout.mjs';
@@ -86,7 +87,7 @@ export function checkBuildOutput({project,arch,output}){
 }
 
 /** Prepare one declared version and architecture on its selected hosted image. */
-export function prepareBuild({project:id,arch,version,directory=root,environment=process.env,initialize=initializeSources,...hostOptions}){
+export function prepareBuild({project:id,arch,version,directory=root,environment=process.env,initialize=initializeSources,locks=resolveLocks,...hostOptions}){
  const {project,build}=githubBuild(id,directory,version);
  if(Array.isArray(project.build)&&version===undefined)throw Error('Select one declared build version with --version.');
  if(!build.architectures.includes(arch))throw Error(project.name+' builds '+build.architectures.join(' and ')+' packages on GitHub.');
@@ -95,9 +96,11 @@ export function prepareBuild({project:id,arch,version,directory=root,environment
  const prepared=prepareBuildHost({build,label:runner,runner:host,rustToolchain:RUST_TOOLCHAIN,environment,...hostOptions});
  const env={...environment,...prepared.env,PATH:[...prepared.paths,environment.PATH].filter(Boolean).join(path.delimiter)};
  const {initialized}=initialize({project:project.id,version:build.version,directory,run:(args,cwd)=>execFileSync('git',args,{cwd,env,encoding:'utf8',stdio:['ignore','pipe','pipe'],maxBuffer:Infinity})});
+ // The declared package-manager locks are fetched here, into the caches the compile reads offline.
+ const resolved=locks({project:project.id,locks:build.locks,directory,env});
  if(environment.GITHUB_ENV)fs.appendFileSync(environment.GITHUB_ENV,Object.entries(prepared.env).map(([key,value])=>key+'='+value+'\n').join(''));
  if(environment.GITHUB_PATH&&prepared.paths.length)fs.appendFileSync(environment.GITHUB_PATH,prepared.paths.join('\n')+'\n');
- return {project:project.id,version:build.version,arch,runner,...prepared,initialized};
+ return {project:project.id,version:build.version,arch,runner,...prepared,initialized,locks:resolved};
 }
 
 /** Validate the declared version and CPU, output/work paths and execution host. */

@@ -272,6 +272,24 @@
           "file": "producers/android-art-inputs/hwui.json",
           "pointer": "/hidlGen"
         }
+      ],
+      "locks": [
+        {
+          "tool": "cargo",
+          "file": "sources/maclauncher-android/src/external/aim-custom/Cargo.lock"
+        },
+        {
+          "tool": "cargo",
+          "file": "sources/maclauncher-android/src/modules/android/native/hwui/Cargo.lock"
+        },
+        {
+          "tool": "cargo",
+          "file": "sources/maclauncher-android/src/modules/android/native/keystore/rust/Cargo.lock"
+        },
+        {
+          "tool": "cargo",
+          "file": "sources/maclauncher-android/src/modules/android/native/keystore/rust/bindgen-Cargo.lock"
+        }
       ]
     }
   },
@@ -453,6 +471,12 @@
         {
           "file": "producers/android-image-data/source.json",
           "pointer": "/archive"
+        }
+      ],
+      "locks": [
+        {
+          "tool": "cargo",
+          "file": "sources/maclauncher-android/src/external/aim-custom/Cargo.lock"
         }
       ]
     }
@@ -926,6 +950,12 @@
       ],
       "rustComponents": [
         "rust-docs"
+      ],
+      "locks": [
+        {
+          "tool": "cargo",
+          "file": "producers/package-support/helper-builds/gm8-decompiler.lock"
+        }
       ]
     }
   },
@@ -1908,6 +1938,12 @@
       ],
       "rustTargets": [
         "aarch64-apple-darwin"
+      ],
+      "locks": [
+        {
+          "tool": "cargo",
+          "file": "producers/package-support/helper-builds/opengmk.lock"
+        }
       ]
     }
   },
@@ -1986,6 +2022,12 @@
         {
           "file": "producers/package-support/src/modules/shared/runtime/portable-ffmpeg.json",
           "pointer": "/source"
+        }
+      ],
+      "locks": [
+        {
+          "tool": "cargo",
+          "file": "producers/package-support/src/external/ReMinori/Cargo.lock"
         }
       ]
     }
@@ -3175,6 +3217,12 @@
           "file": "producers/nxnative/dependencies.json",
           "pointer": "/wheels"
         }
+      ],
+      "locks": [
+        {
+          "tool": "nuget",
+          "file": "producers/nxnative/nx-extract.lock.json"
+        }
       ]
     }
   },
@@ -3976,6 +4024,12 @@
       ],
       "rustTargets": [
         "aarch64-apple-darwin"
+      ],
+      "locks": [
+        {
+          "tool": "cargo",
+          "file": "producers/package-support/src/external/siglus-rs/Cargo.lock"
+        }
       ]
     }
   },
@@ -4048,6 +4102,12 @@
       ],
       "tools": [
         "go"
+      ],
+      "locks": [
+        {
+          "tool": "go",
+          "file": "producers/package-support/src/external/uosc/go.sum"
+        }
       ]
     }
   },

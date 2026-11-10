@@ -100,6 +100,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    const visit=(value,url)=>{if(!value||typeof value!=='object')return;const archive=Array.isArray(value)?undefined:archiveInput(url&&value.url===undefined?{...value,url}:value,linkRevisions);if(archive)found.push(archive);else for(const [key,child] of Object.entries(value))visit(child,Array.isArray(value)?url:key==='files'&&typeof value.url==='string'?value.url:undefined);};visit(selected);
    if(found.length)listed.push(...found.map(archive=>pin.arch?{...archive,arch:pin.arch}:archive));else problem('projects',JSON.stringify(pin),'archive','The archive pin selects no archive record.');
   }
+  for(const build of builds)for(const lock of build.locks||[])entry(lock.file,'projects');
   for(const name of project.producer.entries||[])entry(name,'projects');
   for(const name of project.producer.appEntries||[])entry(APP_REFERENCE+name,'projects');
   if(project.producer.recipe)entry(project.producer.recipe,'projects');
