@@ -7,6 +7,7 @@ import {buildInput} from './build-input.mjs';
 import {recipeMain} from './build-source.mjs';
 import {sealRuntime} from './seal-runtime.mjs';
 import {resolveProject} from '../lib/projects.mjs';
+import {archiveInput} from '../lib/pins.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
 import {nativeStackInput} from './native-stack.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),modules=path.join(root,'producers/package-support/src/modules');
@@ -24,7 +25,6 @@ const RECIPES=Object.freeze({
 const CATALOGS={mixer:()=>Mixer.PIN,producer:Builder=>Builder.PIN};
 const ARCHIVES={movie:()=>Movie.PIN.source,python:()=>require(path.join(modules,'shared/runtime/portable-python-v2.js')).PIN.source};
 const STACKS={fonts:{module:Fonts,option:'fontStack',suffix:'-fonts'},audio:{module:Audio,option:'audioStack',suffix:'-audio'},movie:{module:Movie,option:'movieStack',suffix:'-movies',archive:'ffmpeg'}};
-const archiveInput=pin=>pin.archiveUrl?{url:pin.archiveUrl,sha256:pin.archiveSha256,bytes:pin.archiveBytes}:pin;
 export function recipeInputs({project}){
  const recipe=RECIPES[project];if(!recipe)throw Error('No portable runtime recipe is declared for '+project+'.');
  return ['native-sdl2-fonts','native-sndfile',...(recipe.stacks?.includes('movie')||recipe.reuse==='av-dependencies'?['native-ffmpeg']:[]),...(recipe.reuse?.startsWith('mixer-')?['native-sdl2-mixer']:[])];

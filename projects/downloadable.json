@@ -2652,6 +2652,12 @@
         "spirv-tools",
         "zstd",
         "spirv-llvm-translator"
+      ],
+      "archives": [
+        {
+          "file": "producers/dependencies/zstd.json",
+          "pointer": ""
+        }
       ]
     }
   },
@@ -4308,7 +4314,13 @@
       ],
       "runners": {
         "x64": "xcode-27"
-      }
+      },
+      "archives": [
+        {
+          "file": "producers/dependencies/zstd.json",
+          "pointer": ""
+        }
+      ]
     }
   },
   {

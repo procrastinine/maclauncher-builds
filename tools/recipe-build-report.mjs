@@ -35,7 +35,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
  const tracked=trackedFiles&&new Set(trackedFiles);
  const isFile=relative=>tracked?tracked.has(relative):fs.statSync(path.join(root,relative),{throwIfNoEntry:false})?.isFile()===true;
  const filesBelow=relative=>trackedFiles?trackedFiles.filter(file=>file.startsWith(relative+'/')):fs.statSync(path.join(root,relative),{throwIfNoEntry:false})?.isDirectory()?fs.readdirSync(path.join(root,relative),{recursive:true}).map(name=>path.posix.join(relative,name.split(path.sep).join('/'))).filter(file=>fs.statSync(path.join(root,file)).isFile()):[];
- const linkOf=relative=>gitlinks.find(link=>relative===link.path||relative.startsWith(link.path+'/'))??null;
+ const linkOf=relative=>gitlinks.find(link=>relative===link.path||relative.startsWith(link.path+'/'))??null,linkRevisions=new Map(gitlinks.map(link=>[link.path,link.revision]));
  // The pinned app checkout is read in place, as tools/app-source.mjs reads it, and only for a
  // project that declares app-source.json: no other build initializes the app.
  const APP_SOURCE='producers/package-support/app-source.json',appProfile=fs.existsSync(path.join(root,APP_SOURCE));let appState=null;
@@ -96,7 +96,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   const listed=[];
   for(const build of builds)for(const pin of build.archives||[]){
    const selected=checkPin(pin,'projects.json'),found=[];if(selected===undefined)continue;
-   const visit=value=>{if(!value||typeof value!=='object')return;const archive=Array.isArray(value)?undefined:archiveInput(value);if(archive)found.push(archive);else for(const child of Object.values(value))visit(child);};visit(selected);
+   const visit=value=>{if(!value||typeof value!=='object')return;const archive=Array.isArray(value)?undefined:archiveInput(value,linkRevisions);if(archive)found.push(archive);else for(const child of Object.values(value))visit(child);};visit(selected);
    if(found.length)listed.push(...found.map(archive=>pin.arch?{...archive,arch:pin.arch}:archive));else problem('projects',JSON.stringify(pin),'archive','The archive pin selects no archive record.');
   }
   for(const name of project.producer.entries||[])entry(name,'projects');
