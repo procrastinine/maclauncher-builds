@@ -2931,6 +2931,7 @@
         "src/modules/shared/runtime/guards.js",
         "src/modules/shared/runtime/host-capabilities.js",
         "src/modules/shared/runtime/local-native.js",
+        "src/modules/shared/runtime/package-contract.cjs",
         "src/modules/shared/runtime/pe-exports.js",
         "src/modules/shared/runtime/verified-identity.js",
         "src/modules/shared/vulkan/native/scene-command.hpp",
