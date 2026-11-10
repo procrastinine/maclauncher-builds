@@ -1,5 +1,5 @@
 import {appFiles,appPath,appSourceRoot,exportAppFile,recipePath} from '../../../../../../../tools/app-source.mjs';
-import {checkoutSource} from '../../../../../../../tools/build-source.mjs';
+import {declaredSource} from '../../../../../../../tools/build-source.mjs';
 import spirvCross from '../../../../../../dependencies/spirvCross.json' with {type:'json'};
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import {gitlink,sourceRevision} from '../../../../../../../lib/pins.mjs';
@@ -23,7 +23,7 @@ export function materializeSource({output,sources={},baseOnly=false}){
  try{
  const directories={};
  for(const entry of processor.sources){
-  const directory=path.resolve(sources[entry.id]||(entry.id==='macfx-spirv-cross'?checkoutSource({...spirvCross,destination:path.join(output,'.source-inputs/spirv-cross')}):path.join(repository,entry.submodulePath)));
+  const directory=path.resolve(sources[entry.id]||(entry.id==='macfx-spirv-cross'?declaredSource(spirvCross):path.join(repository,entry.submodulePath)));
   directories[entry.sourcePath]=directory;
  }
   addLicenses(output,"ReShade",base);

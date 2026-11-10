@@ -337,9 +337,7 @@
         "url": "https://github.com/KhronosGroup/SPIRV-Cross",
         "repository": "KhronosGroup/SPIRV-Cross",
         "pin": {
-          "file": "producers/dependencies/spirvCross.json",
-          "pointer": "/revision",
-          "repositoryPointer": "/repository"
+          "gitlink": "producers/package-support/src/external/spirv-cross"
         }
       },
       {
@@ -669,6 +667,7 @@
         "producers/package-support/src/external/macfx-vkd3d",
         "producers/package-support/src/external/sdl-headers",
         "producers/package-support/src/external/sgsr2",
+        "producers/package-support/src/external/spirv-cross",
         "producers/package-support/src/external/streamline-camera",
         "producers/package-support/src/external/xess"
       ],

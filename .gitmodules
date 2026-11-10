@@ -305,3 +305,6 @@
 [submodule "producers/package-support/src/external/source-revisions/hashlink-1-12"]
 	path = producers/package-support/src/external/source-revisions/hashlink-1-12
 	url = https://github.com/HaxeFoundation/hashlink
+[submodule "producers/package-support/src/external/spirv-cross"]
+	path = producers/package-support/src/external/spirv-cross
+	url = https://github.com/KhronosGroup/SPIRV-Cross

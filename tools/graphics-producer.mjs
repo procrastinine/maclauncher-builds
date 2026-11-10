@@ -2,7 +2,7 @@ import './producer-environment.mjs';
 import {appSourceRoot} from './app-source.mjs';
 import sdlHeaders from '../producers/dependencies/sdlHeaders.json' with {type:'json'};
 import spirvCross from '../producers/dependencies/spirvCross.json' with {type:'json'};
-import {checkoutSource,placeDeclaredSource} from './build-source.mjs';
+import {placeDeclaredSource} from './build-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -13,9 +13,7 @@ export async function buildGraphicsSource({version,arch,output,work,sdkPath,sour
  const {plan,build,fetchInput}=await import('../producers/package-support/scripts/build-graphics-runtime.mjs');
  if(!version)throw Error('An exact registered graphics source-stage version is required.');
  if(tools.meson&&!tools.python){const candidate=path.join(path.dirname(tools.meson),"python");if(fs.existsSync(candidate))tools.python=candidate;}
- const cross=path.join(work,'spirv-cross-source');
- if(!fs.existsSync(path.join(cross,'.git')))checkoutSource({...spirvCross,destination:cross});
- sources['macfx-spirv-cross']=cross;
+ sources['macfx-spirv-cross']=placeDeclaredSource(spirvCross,path.join(work,'spirv-cross-source'));
  if(!sources['sdl-vulkan'])sources['sdl-vulkan']=placeDeclaredSource(sdlHeaders,path.join(work,'sdl-headers-source'));
  const options={jobs:6,work,arch,sdkPath,sources,reuse,tools,inputs},initial=plan(options);
  const blocked=initial.unresolved.filter(value=>(!value.startsWith('input ')||!value.endsWith(': fetchable'))&&!['tool meson: missing','tool ninja: missing'].includes(value));
