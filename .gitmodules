@@ -308,3 +308,9 @@
 [submodule "producers/package-support/src/external/spirv-cross"]
 	path = producers/package-support/src/external/spirv-cross
 	url = https://github.com/KhronosGroup/SPIRV-Cross
+[submodule "producers/package-support/src/external/glslang-nxnative"]
+	path = producers/package-support/src/external/glslang-nxnative
+	url = https://github.com/KhronosGroup/glslang
+[submodule "producers/package-support/src/external/zstd"]
+	path = producers/package-support/src/external/zstd
+	url = https://github.com/facebook/zstd

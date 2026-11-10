@@ -1,4 +1,4 @@
-import {checkoutSource} from '../../tools/build-source.mjs';
+import {placeDeclaredSource} from '../../tools/build-source.mjs';
 import {sourceRevision} from '../../lib/pins.mjs';
 import glslangNx from '../dependencies/glslangNx.json' with {type:'json'};
 import spirvCross from '../dependencies/spirvCross.json' with {type:'json'};
@@ -64,9 +64,8 @@ async function extractTar(archive, destination, selected) {
 
 async function buildTool(tool, { work, output, jobs }) {
   const pin={glslangValidator:glslangNx,'spirv-cross':spirvCross,zstd}[tool.name];
-  const {gitlink,...record}=pin,fields={...record,revision:sourceRevision(pin)};
-  const source=checkoutSource({repository:fields.repository,revision:fields.revision,destination:path.join(work,'source',tool.name)});
-  tool.source={...tool.source,...fields};
+  const source=placeDeclaredSource(pin,path.join(work,'source',tool.name));
+  tool.source={...tool.source,...Object.fromEntries(Object.entries(pin).map(([key,value])=>key==='gitlink'?['revision',sourceRevision(pin)]:[key,value]))};
   const build = path.join(work, 'build', tool.name);
   const log = path.join(work, tool.name + '.log');
   await fs.mkdir(build, { recursive: true });

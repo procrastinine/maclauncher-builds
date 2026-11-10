@@ -3016,6 +3016,9 @@
       ],
       "command": "tools/build-nxnative.mjs",
       "submodules": [
+        "producers/package-support/src/external/glslang-nxnative",
+        "producers/package-support/src/external/spirv-cross",
+        "producers/package-support/src/external/zstd",
         "sources/nxnative"
       ],
       "tools": [
