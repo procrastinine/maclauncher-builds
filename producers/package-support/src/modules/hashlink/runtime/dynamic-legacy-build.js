@@ -6,7 +6,7 @@ const path = require("node:path");
 
 const UPSTREAM_VERSION = "1.12";
 const VERSION = "1.12-MCLv1";
-const REVISION = require("./source-1.12.json").revision;
+const REVISION = upstreamRevision("hashlink", "hashlink-1-12");
 const SDL_REVISION = sourceRevision(sdlHeaders);
 const OPENAL_REVISION = upstreamRevision("native-openal", "openal-soft");
 

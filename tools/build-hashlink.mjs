@@ -4,7 +4,7 @@ import sdlHeaders from '../producers/dependencies/sdlHeaders.json' with {type:'j
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
-import {checkoutSource,stageSource,run,recipeMain} from "./build-source.mjs";
+import {declaredSource,stageSource,run,recipeMain} from "./build-source.mjs";
 import {sealRuntime} from './seal-runtime.mjs';
 import {resolveProject} from '../lib/projects.mjs';
 import {preparedBuildInput} from './prepared-build-inputs.mjs';
@@ -28,8 +28,8 @@ function bytecodeFacts(source){
 export async function compile({project,arch,version,output,work,sourceRoot:cachedSourceRoot}){
  fs.mkdirSync(work,{recursive:true});const legacy=hashLinkProfile(version,resolveProject(project,root,{resolvePins:false}))==='1.9',Builder=hashlink(legacy?'legacy-build.js':'dynamic-legacy-build.js');
  let sourceRoot=path.join(root,'producers/package-support/src/external/source-revisions/hashlink-1-9');
- if(!legacy)sourceRoot=cachedSourceRoot||checkoutSource({repository:'https://github.com/HaxeFoundation/hashlink',revision:Builder.REVISION,destination:path.join(work,'upstream')});
- const sdlRoot=checkoutSource({...sdlHeaders,destination:path.join(work,'sdl-upstream')});
+ if(!legacy)sourceRoot=cachedSourceRoot||declaredSource('hashlink','hashlink-1-12');
+ const sdlRoot=declaredSource(sdlHeaders);
  const source=path.join(work,'source'),sdl=path.join(work,'sdl'),openal=path.join(work,'openal');
  await stageSource(sourceRoot,Builder.REVISION,source);await stageSource(sdlRoot,Builder.SDL_REVISION,sdl);const openalStack=nativeStackInput(preparedBuildInput('native-openal'),{arch,work:path.join(work,'openal-prefix')});
  Builder.adaptSource(source,sdl);const flags=Paths.compilerFlags(Paths.compilerPathMappings({source,sdlSource:sdl,openalSource:openal,build:work,runtime:output})),overlay=path.join(work,'compiler-paths.cmake');

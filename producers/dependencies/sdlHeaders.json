@@ -1,4 +1,4 @@
 {
   "repository": "https://github.com/libsdl-org/SDL",
-  "revision": "53dea9830964eee8b5c2a7ee0a65d6e268dc78a1"
+  "gitlink": "producers/package-support/src/external/sdl-headers"
 }

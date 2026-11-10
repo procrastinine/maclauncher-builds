@@ -869,7 +869,6 @@
         "producers/package-support/src/modules/hashlink/runtime/compiler-paths.js",
         "producers/package-support/src/modules/hashlink/runtime/dynamic-legacy-build.js",
         "producers/package-support/src/modules/hashlink/runtime/legacy-build.js",
-        "producers/package-support/src/modules/hashlink/runtime/source-1.12.json",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
         "tools/build-input.mjs",
         "tools/build-source.mjs",
@@ -896,8 +895,7 @@
         "url": "https://github.com/HaxeFoundation/hashlink",
         "repository": "HaxeFoundation/hashlink",
         "pin": {
-          "file": "producers/package-support/src/modules/hashlink/runtime/source-1.12.json",
-          "pointer": ""
+          "gitlink": "producers/package-support/src/external/source-revisions/hashlink-1-12"
         }
       }
     ],
@@ -971,6 +969,8 @@
           "x64"
         ],
         "submodules": [
+          "producers/package-support/src/external/sdl-headers",
+          "producers/package-support/src/external/source-revisions/hashlink-1-12",
           "producers/package-support/src/external/source-revisions/hashlink-1-9"
         ],
         "tools": [
@@ -989,6 +989,7 @@
           "x64"
         ],
         "submodules": [
+          "producers/package-support/src/external/sdl-headers",
           "producers/package-support/src/external/source-revisions/hashlink-1-9"
         ],
         "tools": [

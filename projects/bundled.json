@@ -667,6 +667,7 @@
         "producers/package-support/src/external/macfx-reshade-shaders",
         "producers/package-support/src/external/macfx-reshade/deps/spirv",
         "producers/package-support/src/external/macfx-vkd3d",
+        "producers/package-support/src/external/sdl-headers",
         "producers/package-support/src/external/sgsr2",
         "producers/package-support/src/external/streamline-camera",
         "producers/package-support/src/external/xess"

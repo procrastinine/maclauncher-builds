@@ -299,3 +299,9 @@
 [submodule "producers/package-support/src/external/vulkan-headers"]
 	path = producers/package-support/src/external/vulkan-headers
 	url = https://github.com/KhronosGroup/Vulkan-Headers
+[submodule "producers/package-support/src/external/sdl-headers"]
+	path = producers/package-support/src/external/sdl-headers
+	url = https://github.com/libsdl-org/SDL
+[submodule "producers/package-support/src/external/source-revisions/hashlink-1-12"]
+	path = producers/package-support/src/external/source-revisions/hashlink-1-12
+	url = https://github.com/HaxeFoundation/hashlink
