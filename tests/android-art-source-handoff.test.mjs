@@ -3,11 +3,14 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import {createRequire} from 'node:module';
 import {buildAndroidArtSupplier} from '../tools/build-android-art-supplier.mjs';
-import {arm32BuildProducts} from '../sources/maclauncher-android/src/modules/android/native/arm32/components.mjs';
-import {nativeBridgeTrees} from '../sources/maclauncher-android/src/modules/android/art/source-archive.mjs';
+const requirements=createRequire(import.meta.url)('./support/requirements.cjs');
 
-test('ART supplier hands generated ARM32 source records to the source exporter',t=>{
+// The Android modules link into the Android repository's own app checkout.
+test('ART supplier hands generated ARM32 source records to the source exporter',requirements({sourceTree:['sources/maclauncher-android','sources/maclauncher-android/sources/maclauncher']}),async t=>{
+ const {arm32BuildProducts}=await import('../sources/maclauncher-android/src/modules/android/native/arm32/components.mjs');
+ const {nativeBridgeTrees}=await import('../sources/maclauncher-android/src/modules/android/art/source-archive.mjs');
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'art-source-handoff-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
  const arm32=arm32BuildProducts(directory),revision='a'.repeat(40);fs.mkdirSync(arm32.sources);
  fs.writeFileSync(path.join(arm32.sources,'bionic.json'),JSON.stringify({revision,files:['linker/source.cpp']}));

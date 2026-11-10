@@ -4,8 +4,10 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
+import {createRequire} from 'node:module';
+const requirements=createRequire(import.meta.url)('./support/requirements.cjs');
 
-test('the helper preserves Windows argv and raw quoted values in the child command line',t=>{
+test('the helper preserves Windows argv and raw quoted values in the child command line',requirements({sourceTree:'sources/steam-bridge-wine-headers'}),t=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'steam-command-line-'));
  t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  // Compile the parser from the declared Wine input; do not duplicate its

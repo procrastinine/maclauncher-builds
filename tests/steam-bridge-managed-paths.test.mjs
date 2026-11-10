@@ -5,7 +5,9 @@ import os from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {helperClientSource} from '../producers/steam-bridge/helper-subset.mjs';
-test('managed helper writes only Steam discovery values with its own PID and managed paths',t=>{
+import {createRequire} from 'node:module';
+const requirements=createRequire(import.meta.url)('./support/requirements.cjs');
+test('managed helper writes only Steam discovery values with its own PID and managed paths',requirements({sourceTree:'sources/steam-bridge-notproton'}),t=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'bridge-registry-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  const source=path.join(root,'registry.cpp'),binary=path.join(root,'registry');
  fs.writeFileSync(source, String.raw`#include <cwchar>
