@@ -2190,6 +2190,7 @@
       ],
       "submodules": [
         "producers/package-support/src/external/mesa",
+        "producers/package-support/src/external/vulkan-headers",
         "sources/vulkan-loader"
       ],
       "tools": [
@@ -2730,6 +2731,8 @@
         "x64"
       ],
       "submodules": [
+        "producers/package-support/src/external/sdl3-prosper",
+        "producers/package-support/src/external/vulkan-headers",
         "sources/prosper"
       ],
       "tools": [
@@ -3735,6 +3738,7 @@
         "x64"
       ],
       "submodules": [
+        "producers/package-support/src/external/vulkan-headers",
         "sources/maclauncher-kosmickrisp/sources/mesa",
         "sources/vulkan-loader"
       ],

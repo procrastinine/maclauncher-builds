@@ -6,12 +6,15 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
-import {downloadBytes,retryNetwork} from '../../tools/download.mjs';
+import {downloadBytes} from '../../tools/download.mjs';
+import {placeDeclaredSource} from '../../tools/build-source.mjs';
 
 const root=path.resolve(import.meta.dirname,'../..');
 export const recipe=JSON.parse(fs.readFileSync(new URL('./source.json',import.meta.url)));
 export const inputs=JSON.parse(fs.readFileSync(new URL('./dependencies.json',import.meta.url)));
-for(const entry of inputs.dependencies)Object.assign(entry,entry.id==='sdl3'?sdl3Prosper:vulkanHeaders);
+// Each dependency is a declared source gitlink; the recorded entry names its repository and revision.
+const declared=new Map(inputs.dependencies.map(entry=>[entry.id,entry.id==='sdl3'?sdl3Prosper:vulkanHeaders]));
+for(const entry of inputs.dependencies){const record=declared.get(entry.id);Object.assign(entry,{repository:record.repository,revision:sourceRevision(record)});}
 inputs.artifacts=JSON.parse(fs.readFileSync(new URL('../anyps5/dependencies.json',import.meta.url))).artifacts.filter(entry=>entry.id==='ffmpeg-macos-x64');
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
@@ -36,11 +39,7 @@ function vulkanInput(library){
  throw Error('Choose a library from an existing managed Vulkan runtime with its source manifest.');
 }
 async function dependency(entry,buildDirectory){
- const selected=path.join(buildDirectory,'dependencies',entry.id);
- if(!fs.existsSync(path.join(selected,'.git'))){fs.mkdirSync(path.dirname(selected),{recursive:true});retryNetwork(()=>run('git',['clone','--filter=blob:none','--no-checkout',entry.repository,selected]));}
- try{verify(entry,selected);return selected;}catch{}
- if(fs.readdirSync(selected).some(name=>name!=='.git')&&git(selected,['status','--porcelain']).trim())throw Error('Dependency checkout has local changes: '+entry.id);
- retryNetwork(()=>run('git',['-C',selected,'fetch','--depth','1','origin',entry.revision]));run('git',['-C',selected,'checkout','--detach',entry.revision]);verify(entry,selected);return selected;
+ return placeDeclaredSource(declared.get(entry.id),path.join(buildDirectory,'dependencies',entry.id));
 }
 async function ffmpeg(buildDirectory,downloads){
  const entry=inputs.artifacts[0],cache=path.join(buildDirectory,'downloads',entry.id+'.zip');

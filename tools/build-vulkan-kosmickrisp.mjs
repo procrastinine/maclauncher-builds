@@ -1,5 +1,5 @@
 import './producer-environment.mjs';
-import {checkoutSource} from './build-source.mjs';
+import {placeDeclaredSource} from './build-source.mjs';
 import vulkanHeaders from '../producers/dependencies/vulkanHeaders.json' with {type:'json'};
 import {gitlink,sourceRevision} from '../lib/pins.mjs';
 import fs from 'node:fs';
@@ -23,7 +23,7 @@ export async function compile({arch,work}){
  const spirv=await buildSpirvTools({work:path.join(work,'spirv-tools'),ninja,python:tools.python,architecture:arch,jobs:2});
  const zstd=await buildZstd({work:path.join(work,'zstd'),architecture:arch,jobs:2,ninja});
  const built=buildKosmic({source,work:path.join(work,'mesa'),meson,ninja,llvm,architecture:arch,jobs:2,pkgConfigPath:[zstd.pkgConfigPath,spirv.pkgConfigPath,process.env.PKG_CONFIG_PATH].filter(Boolean).join(path.delimiter)});
- const loader=buildKosmicLoader({source:path.join(root,inputs.vulkanLoader.path),headersSource:checkoutSource({...vulkanHeaders,destination:path.join(work,'vulkan-headers')}),work:path.join(work,'loader'),architecture:arch,jobs:2});
+ const loader=buildKosmicLoader({source:path.join(root,inputs.vulkanLoader.path),headersSource:placeDeclaredSource(vulkanHeaders,path.join(work,'vulkan-headers')),work:path.join(work,'loader'),architecture:arch,jobs:2});
  return {source,pin,built,loader,observedInputs,spirv,zstd};
 }
 /** Seal the compiled driver with its loader and recorded inputs. */

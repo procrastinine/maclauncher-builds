@@ -293,3 +293,9 @@
 [submodule "producers/package-support/src/external/uosc"]
 	path = producers/package-support/src/external/uosc
 	url = https://github.com/tomasklaen/uosc
+[submodule "producers/package-support/src/external/sdl3-prosper"]
+	path = producers/package-support/src/external/sdl3-prosper
+	url = https://github.com/libsdl-org/SDL
+[submodule "producers/package-support/src/external/vulkan-headers"]
+	path = producers/package-support/src/external/vulkan-headers
+	url = https://github.com/KhronosGroup/Vulkan-Headers

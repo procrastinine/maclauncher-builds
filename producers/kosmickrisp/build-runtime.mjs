@@ -1,4 +1,4 @@
-import {checkoutSource} from '../../tools/build-source.mjs';
+import {placeDeclaredSource} from '../../tools/build-source.mjs';
 import vulkanHeaders from '../dependencies/vulkanHeaders.json' with {type:'json'};
 import {sourceCheckout,sourceRevision} from '../../lib/pins.mjs';
 import {upstreamRevision} from '../../lib/projects.mjs';
@@ -35,7 +35,7 @@ export async function compile({project:id,arch,work}){
  const built=buildKosmic({source,work:path.join(work,'mesa'),meson,ninja,llvm,architecture:arch,jobs:6,
   pkgConfigPath:[zstd.pkgConfigPath,spirv.pkgConfigPath,process.env.PKG_CONFIG_PATH].filter(Boolean).join(path.delimiter),
   targetPkgConfigPath:[targetZstd.pkgConfigPath,targetSpirv.pkgConfigPath].join(path.delimiter)});
- const loader=buildKosmicLoader({source:path.join(root,'sources/vulkan-loader'),loaderRevision:upstreamRevision(id,'vulkan-loader'),headersRevision:sourceRevision(vulkanHeaders),headersSource:checkoutSource({...vulkanHeaders,destination:path.join(work,'vulkan-headers')}),work:path.join(work,'loader'),jobs:6});
+ const loader=buildKosmicLoader({source:path.join(root,'sources/vulkan-loader'),loaderRevision:upstreamRevision(id,'vulkan-loader'),headersRevision:sourceRevision(vulkanHeaders),headersSource:placeDeclaredSource(vulkanHeaders,path.join(work,'vulkan-headers')),work:path.join(work,'loader'),jobs:6});
  return {built,source,pin,loader,observedInputs,targetSpirv,targetZstd};
 }
 /** Add the Mesa notices and seal the compiled driver with its loader. */
