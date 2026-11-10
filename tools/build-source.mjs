@@ -5,7 +5,7 @@ import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import {retryNetwork} from './download.mjs';
-import {sourceCheckout} from '../lib/pins.mjs';
+import {sourceCheckout,sourceRevision} from '../lib/pins.mjs';
 import {readProjects} from '../lib/projects.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),Source=require('../producers/package-support/src/modules/shared/runtime/pinned-native-build.js');
 /** A build tool from the declared Homebrew formulae, then from PATH. */
@@ -30,6 +30,14 @@ export function declaredSource(record,upstream){
  if(typeof record==='string')record=readProjects(root,{resolvePins:false}).projects.find(project=>project.id===record)?.upstreams.find(row=>row.id===upstream)?.pin;
  const link=record&&sourceCheckout(record);if(typeof link!=='string')throw Error('A declared source names its Builds gitlink.');
  return path.join(root,link);
+}
+/** A declared source placed at a work path the build names, for a build whose path maps or
+ * configuration expect it there: a linked worktree of the declared checkout at its pinned commit,
+ * made offline. A worktree this placed earlier at that path is reused as it is. */
+export function placeDeclaredSource(record,destination){
+ if(!path.isAbsolute(destination||''))throw Error('Place a declared source at an absolute work path.');
+ if(!fs.existsSync(path.join(destination,'.git'))){fs.mkdirSync(path.dirname(destination),{recursive:true});execFileSync('git',['-C',declaredSource(record),'worktree','add','--quiet','--detach','--force',destination,sourceRevision(record)],{stdio:['ignore','inherit','inherit']});}
+ return destination;
 }
 /** Export pinned source before applying owned adaptations or compiling. */
 export async function stageSource(source,revision,destination){
