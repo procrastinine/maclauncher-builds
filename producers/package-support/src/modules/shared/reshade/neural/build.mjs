@@ -1,6 +1,7 @@
 import {appPath,appRequire,exportModuleTree} from '../../../../../../../tools/app-source.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
-import {sourceRevision} from '../../../../../../../lib/pins.mjs';
+import {sourceRevision,archiveInput} from '../../../../../../../lib/pins.mjs';
+import {buildInput} from '../../../../../../../tools/build-input.mjs';
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -22,14 +23,15 @@ const cacheDirectory = path.join(os.homedir(), "Library", "Caches", "maclauncher
 export function buildProvider({ output = path.join(cacheDirectory, "output"),
   sourceDirectory = path.join(repository, "src/external/MLX-DLSS"),
   buildRoot = path.join(cacheDirectory, "build"),
-  cacheRoot = path.join(cacheDirectory, "swiftpm"), phase = null } = {}) {
+  cacheRoot = path.join(cacheDirectory, "swiftpm"), metalArchive, phase = null } = {}) {
   sourceDirectory = fs.realpathSync(sourceDirectory);
   output = path.resolve(output);
-  if(phase!=="assemble")compile({output,sourceDirectory,buildRoot,cacheRoot});
+  if(phase!=="assemble")compile({output,sourceDirectory,buildRoot,cacheRoot,metalArchive});
   return phase==="compile"?{output}:assemble({output,sourceDirectory,buildRoot});
 }
 /** Build the native provider into the output directory. */
-function compile({output,sourceDirectory,buildRoot,cacheRoot}){
+function compile({output,sourceDirectory,buildRoot,cacheRoot,metalArchive}){
+  if(!metalArchive)throw new Error("The neural provider build needs the declared MLX archive.");
   if (process.platform !== "darwin" || process.arch !== "arm64")
     throw new Error("The neural rendering provider build requires Apple Silicon macOS.");
   fs.mkdirSync(output, { recursive: true });
@@ -42,7 +44,7 @@ function compile({output,sourceDirectory,buildRoot,cacheRoot}){
   exportModuleTree("src/modules/shared/reshade",path.join(stagedShared,"reshade"),name=>!name.split("/").includes("Packages")&&!Content.excludedReason("reshade/"+name));
   execFileSync("/bin/bash", [path.join(projection,"build.sh"), output], {
     cwd: repository, stdio: "inherit", env: { ...process.env,
-      MACLAUNCHER_BUILD_DOWNLOAD: path.resolve(repository, "../../tools/download.mjs"),
+      MACLAUNCHER_MLX_ARCHIVE: metalArchive,
       MACLAUNCHER_NEURAL_PREPARE_UPSTREAM: path.join(directory, "native/prepare-upstream.mjs"),
       MACLAUNCHER_MLX_DLSS_SOURCE: sourceDirectory,
       MACLAUNCHER_NEURAL_BUILD_ROOT: path.resolve(buildRoot),
@@ -78,7 +80,10 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const options={};
   if(arguments_.length===1&&!arguments_[0].startsWith("--"))options.output=arguments_[0];
   else for(let i=0;i<arguments_.length;i+=2){const key=arguments_[i];if(!["--output","--source","--work","--cache","--phase"].includes(key)||!arguments_[i+1]||Object.hasOwn(options,key))throw Error("Use --source, --work, --cache, --phase and --output.");options[key]=arguments_[i+1];}
-  const result=buildProvider({output:options.output||options["--output"],sourceDirectory:options["--source"],buildRoot:options["--work"],cacheRoot:options["--cache"],phase:options["--phase"]||null});
+  const phase=options["--phase"]||null;
+  // The declared MLX archive, read from the build inputs that the input step fetched.
+  const metalArchive=phase==="assemble"?undefined:await buildInput(archiveInput(JSON.parse(fs.readFileSync(path.join(directory,"native/upstream.json"),"utf8")).metalLibrary));
+  const result=buildProvider({metalArchive,output:options.output||options["--output"],sourceDirectory:options["--source"],buildRoot:options["--work"],cacheRoot:options["--cache"],phase});
   if(result.descriptor)console.log(JSON.stringify({ output: result.output, providerABI: result.descriptor.providerABI,
     commit: result.descriptor.commit, files: result.descriptor.files.length }));
 }

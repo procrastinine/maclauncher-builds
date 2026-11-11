@@ -700,6 +700,47 @@
         {
           "file": "tools/python-build-tools.json",
           "pointer": "/interpreters"
+        },
+        {
+          "file": "producers/dependencies/shaderc.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/package-support/src/modules/shared/reshade/libplacebo/dependencies.json",
+          "pointer": "/sources"
+        },
+        {
+          "file": "producers/package-support/src/modules/shared/reshade/isf/source.json",
+          "pointer": "/compilerSources"
+        },
+        {
+          "file": "producers/dependencies/llvmMingw.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/moltenvk.json",
+          "pointer": "/archive"
+        },
+        {
+          "file": "producers/package-support/scripts/graphics-runtime.json",
+          "pointer": "/pins/dxmt-templates"
+        },
+        {
+          "file": "producers/package-support/scripts/graphics-runtime.json",
+          "pointer": "/inputs/streamline-reference"
+        },
+        {
+          "file": "producers/package-support/src/modules/shared/reshade/temporal/fsr4/lite2.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/package-support/src/modules/crossover/temporal/streamline/source.json",
+          "pointer": "/referenceProfiles"
+        },
+        {
+          "arch": "universal",
+          "file": "producers/package-support/src/modules/shared/reshade/neural/native/upstream.json",
+          "pointer": "/metalLibrary"
         }
       ],
       "locks": [

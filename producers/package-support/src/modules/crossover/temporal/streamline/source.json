@@ -4,7 +4,9 @@
   "referenceProfiles": [
     {
       "version": "2.2.1",
+      "repository": "https://github.com/NVIDIA-RTX/Streamline",
       "revision": "7ac42e47c7dd55b5b6dd6176c0228048636541b2",
+      "path": "bin/x64/sl.interposer.dll",
       "sha256": "b15b4060b25a57f9c3293582489720b4ee1895e0610b20b3aa0f2e3f6c151106"
     }
   ]

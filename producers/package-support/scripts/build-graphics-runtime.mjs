@@ -10,7 +10,7 @@ import {execFileSync, spawnSync} from "node:child_process";
 import {pathToFileURL} from "node:url";
 import {createRequire} from "node:module";
 import {buildInput} from "../../../tools/build-input.mjs";
-import {sourceRevision} from "../../../lib/pins.mjs";
+import {sourceRevision,archiveInput,declaredArchive} from "../../../lib/pins.mjs";
 import {upstreamRevision} from "../../../lib/projects.mjs";
 import {APP_REFERENCE,appPath,recipePath} from "../../../tools/app-source.mjs";
 
@@ -107,11 +107,13 @@ function inputLocation(id, work) {
     const files = Object.fromEntries(archives.filter(row => row.file).map(row => [row.file, row.fileSha256 || null]));
     return {entry, archives, files, directory, fetched: directory};
   }
-  const url = entry.url && expand(entry.url, values), sha256 = entry.sha256 && expand(entry.sha256, values);
+  // A fetched input is the one archive its pinned record declares, or the entry's own url and sha256.
+  const archive = ["file", "archive"].includes(entry.kind) ? declaredArchive(entry.pin ? values : entry) : undefined;
+  const url = archive?.url, sha256 = archive?.sha256;
   const files = Object.fromEntries(Object.entries(entry.files || {}).map(([relative, expected]) => [relative, expected && expand(expected, values)]));
   const member = entry.entry === undefined ? null : expand(entry.entry, values), fileSha256 = entry.fileSha256 && expand(entry.fileSha256, values);
   const fetched = directory && (entry.kind === "archive" ? path.join(directory, member) : url && path.join(directory, path.basename(new URL(url).pathname)));
-  return {entry, url, sha256, files, member, fileSha256, directory, fetched};
+  return {entry, archive, url, sha256, files, member, fileSha256, directory, fetched};
 }
 function verifyInput({entry, files = {}, fileSha256}, file, sha256) {
   if (!fs.existsSync(file)) return "missing";
@@ -150,16 +152,14 @@ export function resolveInput(id, {overrides = {}, work, coreRoot = work && path.
 export async function fetchInput(id, work) {
   if(id==='compiler-sources')return (await prepareSources({work:path.join(work,'inputs',id)})).source;
   if(['isf-spirv-tools','isf-spirv-headers'].includes(id)){
-    const name=id.slice(4),glslang=await fetchInput('isf-glslang',work);
-    const upstream=JSON.parse(fs.readFileSync(path.join(glslang,'known_good.json'),'utf8')).commits.find(row=>row.name===(name==='spirv-tools'?'spirv-tools':'spirv-tools/external/spirv-headers'));
-    const source=JSON.parse(fs.readFileSync(path.join(repository,'src/modules/shared/reshade/isf/source.json'),'utf8')).compilerSources.find(row=>row.id===name);
-    const archive=await buildInput({url:'https://github.com/'+upstream.subrepo+'/archive/'+upstream.commit+'.tar.gz',sha256:source.sha256}),target=path.join(work,'inputs',id,'source',name);
+    const name=id.slice(4),source=JSON.parse(fs.readFileSync(path.join(repository,'src/modules/shared/reshade/isf/source.json'),'utf8')).compilerSources.find(row=>row.id===name);
+    const archive=await buildInput(archiveInput(source)),target=path.join(work,'inputs',id,'source',name);
     fs.mkdirSync(target,{recursive:true});execFileSync('tar',['-xf',archive,'--strip-components=1','-C',target],{stdio:'inherit'});return target;
   }
-  const {entry, url, sha256, archives, member, directory, fetched} = inputLocation(id, work);
+  const {entry, archive, url, sha256, archives, member, directory, fetched} = inputLocation(id, work);
   if (!(archives || [{url, sha256}]).every(row => row.url && row.sha256)) throw Error("This graphics input has no pinned download: " + id);
   if (fs.existsSync(fetched)) return fetched;
-  const download=(address,expected)=>buildInput({url:address,sha256:expected,headers:entry.headers||{}});
+  const download=(address,expected)=>buildInput(archive?.url===address&&archive.sha256===expected?archive:{url:address,sha256:expected});
   // Archives extract into a staging directory that becomes the input only when complete.
   const staging = directory + ".partial";
   fs.rmSync(staging, {recursive: true, force: true});fs.mkdirSync(staging, {recursive: true});

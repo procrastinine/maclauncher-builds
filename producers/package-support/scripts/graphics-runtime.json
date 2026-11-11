@@ -173,8 +173,6 @@
         "file": "../dependencies/llvmMingw.json",
         "pointer": ""
       },
-      "url": "{repository}/releases/download/{version}/{asset}",
-      "sha256": "{sha256}",
       "entry": "llvm-mingw-{version}-ucrt-macos-universal/bin",
       "files": {
         "x86_64-w64-mingw32-clang": null,
@@ -187,9 +185,7 @@
       "pin": {
         "file": "src/modules/shared/reshade/temporal/fsr4/lite2.json",
         "pointer": ""
-      },
-      "url": "{repository}/raw/{revision}/{path}",
-      "sha256": "{sha256}"
+      }
     },
     "streamline-reference": {
       "kind": "archive",
@@ -206,9 +202,7 @@
       "pin": {
         "file": "src/modules/crossover/temporal/streamline/source.json",
         "pointer": "/referenceProfiles/0"
-      },
-      "url": "https://media.githubusercontent.com/media/NVIDIA-RTX/Streamline/{revision}/bin/x64/sl.interposer.dll",
-      "sha256": "{sha256}"
+      }
     },
     "dxmt-wine": {
       "kind": "archive",
@@ -220,8 +214,6 @@
           "version": "1.0.21"
         }
       },
-      "url": "{asset.url}",
-      "sha256": "{asset.sha256}",
       "entry": "Template-{version}.app/Contents/Frameworks/renderer/dxmt/wine",
       "extract": true,
       "files": {
@@ -232,13 +224,11 @@
     },
     "moltenvk": {
       "kind": "archive",
-      "description": "MoltenVK release directory whose dynamic macOS library matches libplacebo-build.mjs",
+      "description": "MoltenVK release directory whose dynamic macOS library matches the declared MoltenVK record",
       "pin": {
-        "file": "src/modules/shared/reshade/libplacebo-build.mjs",
-        "pointer": "/MOLTENVK"
+        "file": "../dependencies/moltenvk.json",
+        "pointer": ""
       },
-      "url": "{archive.url}",
-      "sha256": "{archive.sha256}",
       "entry": "",
       "files": {
         "MoltenVK/MoltenVK/dynamic/dylib/macOS/libMoltenVK.dylib": "{sha256}"
@@ -275,8 +265,6 @@
         "file": "src/modules/shared/reshade/isf/source.json",
         "pointer": "/compilerSources/0"
       },
-      "url": "{repository}/archive/{revision}.tar.gz",
-      "sha256": "{sha256}",
       "entry": "glslang-{revision}"
     },
     "isf-spirv-cross": {
@@ -286,8 +274,6 @@
         "file": "src/modules/shared/reshade/isf/source.json",
         "pointer": "/compilerSources/1"
       },
-      "url": "{repository}/archive/{revision}.tar.gz",
-      "sha256": "{sha256}",
       "entry": "SPIRV-Cross-{revision}"
     },
     "isf-spirv-tools": {

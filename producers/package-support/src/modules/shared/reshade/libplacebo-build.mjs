@@ -59,7 +59,7 @@ function describe({moltenvk,source,dependencySources,work,output,architectures})
  addLicenses(output,'compiler-dependencies',dependencyLicenses);
  const catalog=JSON.parse(run(path.join(output,'libplacebo-prepare'),['--filters']));
  const inputs=architectures.flatMap(architecture=>{const scene=JSON.parse(fs.readFileSync(path.join(output,sceneName(architecture)),'utf8'));
-  return [{name:'libplacebo',...scene.source,architecture,sha256:scene.sha256,headerInputs:scene.headerInputs,source:scene.source.origin,dependencies:[scene.vulkanHeaders,...(scene.fastFloat?[scene.fastFloat]:[])]},...dependencyRecords(dependencySources).map(row=>({...row,name:row.id,architecture})),{name:'MoltenVK',...MOLTENVK}];});
+  return [{name:'libplacebo',...scene.source,architecture,sha256:scene.sha256,headerInputs:scene.headerInputs,source:scene.source.origin,dependencies:[scene.vulkanHeaders,...(scene.fastFloat?[scene.fastFloat]:[])]},...dependencyRecords().map(row=>({...row,name:row.id,architecture})),{name:'MoltenVK',...MOLTENVK}];});
  const metadata={schema:1,provider:'libplacebo',version:'7.360.1',derivedPlanes:true,imageFiltersAPI:catalog.imageFiltersAPI,imageFilters:catalog.imageFilters,sceneInputsAPI:catalog.sceneInputsAPI||0,sceneInputRoles:catalog.sceneInputRoles||[],architectures,minimumMacOS:profile.minimumMacOS,library:'libmacfx-libplacebo.dylib',helper:'libplacebo-prepare',filters:catalog.filters,files:inventory(output),inputs};fs.writeFileSync(path.join(output,'provider.json'),JSON.stringify(metadata,null,2)+'\n');return metadata;
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){

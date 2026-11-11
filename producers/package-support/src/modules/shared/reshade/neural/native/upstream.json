@@ -8,7 +8,7 @@
     "version": "0.31.6"
   },
   "metalLibrary": {
-    "url": "https://github.com/ml-explore/mlx-swift/releases/download/0.31.6/Cmlx.xcframework.zip",
+    "archiveUrl": "https://github.com/ml-explore/mlx-swift/releases/download/0.31.6/Cmlx.xcframework.zip",
     "archiveBytes": 202476839,
     "archiveSha256": "a202bf1dcfe1e64404adabfeb5eb363332e3a6221d18e4289ca0663fa3ab86c9",
     "entry": "Cmlx.xcframework/macos-arm64_x86_64/Cmlx.framework/Versions/A/Resources/default.metallib",

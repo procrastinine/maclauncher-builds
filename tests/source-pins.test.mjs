@@ -169,4 +169,13 @@ test('archive records name one archive each, a shared record taking its revision
  const gitiles='https://android.googlesource.com/platform/tools';
  assert.deepEqual(archiveInput({repository:gitiles,revision:current,path:'bin/tool',sha256:'d'.repeat(64),bytes:3,transport:{sha256,bytes:4}}),{url:gitiles+'/+/'+current+'/bin/tool?format=TEXT',sha256,bytes:4});
  assert.equal(archiveInput({repository:gitiles,revision:current,path:'bin/tool',sha256}),undefined);
+ assert.deepEqual(archiveInput({repository,revision:current,path:'bin/x64/tool.dll',sha256}),{url:repository+'/raw/'+current+'/bin/x64/tool.dll',sha256});
+ assert.equal(archiveInput({repository,revision:current,path:'../tool.dll',sha256}),undefined);
+});
+
+test('a release record names its one archive itself or in one field',async()=>{
+ const {declaredArchive}=await import('../lib/pins.mjs'),sha256='c'.repeat(64),url='https://example.com/tool.tar.gz';
+ assert.deepEqual(declaredArchive({url,sha256}),{url,sha256});
+ assert.deepEqual(declaredArchive({version:'1.0',sha256:'d'.repeat(64),archive:{url,sha256}}),{url,sha256});
+ assert.equal(declaredArchive({first:{url,sha256},second:{url,sha256}}),undefined);
 });

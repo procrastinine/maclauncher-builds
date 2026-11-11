@@ -88,18 +88,13 @@ for binary in libMacLauncherNeural.dylib maclauncher-neural-video maclauncher-ne
   /usr/bin/codesign --force --sign - --timestamp=none "$destination/$binary"
 done
 
-metal_hash="4cb8ef6cbb43e43f4c07d466fe0944801987a45b1354324cf4810ec131278bf5"
+# The Metal library comes from the declared MLX archive (upstream.json metalLibrary), which the build's
+# input step fetched; the caller passes its verified path.
+metal_record() { node -e 'process.stdout.write(String(require(process.argv[1]).metalLibrary[process.argv[2]]))' "$native_root/upstream.json" "$1"; }
+metal_hash="$(metal_record sha256)"
 if [[ ! -f "$destination/mlx.metallib" || "$(shasum -a 256 "$destination/mlx.metallib" | cut -d ' ' -f 1)" != "$metal_hash" ]]; then
-  archive="$cache_root/Cmlx-0.31.6.xcframework.zip"
-  archive_hash="a202bf1dcfe1e64404adabfeb5eb363332e3a6221d18e4289ca0663fa3ab86c9"
-  if [[ ! -f "$archive" ]]; then
-    node "${MACLAUNCHER_BUILD_DOWNLOAD:-$repo_root/../../tools/download.mjs}" \
-      https://github.com/ml-explore/mlx-swift/releases/download/0.31.6/Cmlx.xcframework.zip "$archive.download"
-    mv "$archive.download" "$archive"
-  fi
-  [[ "$(shasum -a 256 "$archive" | cut -d ' ' -f 1)" == "$archive_hash" ]] || { echo 'MLX artifact checksum mismatch' >&2; exit 1; }
-  unzip -p "$archive" Cmlx.xcframework/macos-arm64_x86_64/Cmlx.framework/Versions/A/Resources/default.metallib \
-    > "$destination/mlx.metallib.download"
+  archive="${MACLAUNCHER_MLX_ARCHIVE:?The neural provider build needs the declared MLX archive}"
+  unzip -p "$archive" "$(metal_record entry)" > "$destination/mlx.metallib.download"
   [[ "$(shasum -a 256 "$destination/mlx.metallib.download" | cut -d ' ' -f 1)" == "$metal_hash" ]] || { echo 'MLX Metal library checksum mismatch' >&2; exit 1; }
   mv "$destination/mlx.metallib.download" "$destination/mlx.metallib"
 fi
