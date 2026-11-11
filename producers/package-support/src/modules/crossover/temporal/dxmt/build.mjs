@@ -9,6 +9,8 @@ import { spawn, execFileSync } from 'node:child_process';
 import { fileURLToPath,pathToFileURL } from 'node:url';
 import {appPath} from '../../../../../../../tools/app-source.mjs';
 
+import {applyStartupOverlay} from './startup-overlay.mjs';
+
 const here = path.dirname(fileURLToPath(import.meta.url));
 const [upstreamArg, vendorArg, compilerArg, outputArg] = process.argv.slice(2);
 const nativeOnly = process.argv.includes('--native-only');
@@ -53,6 +55,7 @@ const shared = appPath('src/modules/shared/reshade/temporal');
 for (const file of ['camera.h', 'frame.h']) fs.copyFileSync(path.join(shared, file), path.join(source, 'include', file));
 for(const file of ['camera-transport.hpp','streamline-transport.hpp','streamline-native.h','streamline-snapshot.hpp'])fs.copyFileSync(path.join(owned,file),path.join(source,'include',file));
 for(const [name,file]of [['scene-aovs.h',path.join(shared,'scene-aovs.h')],['image-color.h',path.resolve(shared,'../native/image-color.h')]])fs.copyFileSync(file,path.join(source,'include',name));
+applyStartupOverlay(source);
 applyCameraOverlay(source);
 applyTemporalD3D12(source);
 fs.writeFileSync(path.join(source, 'include/version.h'), `#pragma once\n#define DXMT_VERSION "v0.80-244-g7c8dee1-maclauncher-camera1"\n`);
