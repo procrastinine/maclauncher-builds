@@ -60,6 +60,28 @@ function applyOpenGLPolicy(root) {
   fs.writeFileSync(file, original.replace(needle,
     'SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, SDL_getenv("MACLAUNCHER_ALLOW_SOFTWARE_OPENGL") && SDL_strcmp(SDL_getenv("MACLAUNCHER_ALLOW_SOFTWARE_OPENGL"), "1") == 0 ? 0 : 1);'));
 }
+function applyGameIdentity(root) {
+  const file = path.join(root, "src/FNAPlatform/SDL3_FNAPlatform.cs");
+  let text = fs.readFileSync(file, "utf8");
+  const replace = (before, after) => {
+    if (text.split(before).length !== 2) throw new Error("Pinned FNA game identity boundary changed.");
+    text = text.replace(before, after);
+  };
+  replace("// This _should_ be the first real SDL call we make...", 'string gameName = Environment.GetEnvironmentVariable("MACLAUNCHER_GAME_NAME");\n\t\t\tif (!String.IsNullOrEmpty(gameName)) SDL.SDL_SetAppMetadataProperty("SDL.app.metadata.name", gameName);\n\t\t\t// This _should_ be the first real SDL call we make...');
+  replace("string title = MonoGame.Utilities.AssemblyHelper.GetDefaultWindowTitle();", 'string gameTitle = Environment.GetEnvironmentVariable("MACLAUNCHER_GAME_NAME");\n\t\t\tstring title = String.IsNullOrEmpty(gameTitle) ? MonoGame.Utilities.AssemblyHelper.GetDefaultWindowTitle() : gameTitle;');
+  replace("INTERNAL_SetIcon(sdlWindow, title);", "INTERNAL_SetIcon(sdlWindow, MonoGame.Utilities.AssemblyHelper.GetDefaultWindowTitle());");
+  fs.writeFileSync(file, text);
+}
+function applyNativeIdentity(root) {
+  const file=path.join(root,"src/video/cocoa/SDL_cocoaevents.m"),text=fs.readFileSync(file,"utf8"),anchor="        if (NSApp == nil) {";
+  if(text.split(anchor).length!==2)throw new Error("Pinned FNA Cocoa startup boundary changed.");
+  let patched=text.replace(anchor,'        const char *game_name = SDL_getenv("MACLAUNCHER_GAME_NAME");\n        if (game_name && *game_name) {\n            NSString *name = [NSString stringWithUTF8String:game_name];\n            if (name.length) NSProcessInfo.processInfo.processName = name;\n        }\n'+anchor);
+  patched=patched.replace('[SDL3Application sharedApplication];','[SDL3Application sharedApplication];\n            const char *artwork = SDL_getenv("MACLAUNCHER_GAME_ICON");\n            NSImage *image = artwork && *artwork ? [[NSImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String:artwork]] : nil;\n            if (image) NSApp.applicationIconImage = image;');
+  fs.writeFileSync(file,patched);
+  const iconFile=path.join(root,"src/video/cocoa/SDL_cocoawindow.m"),icons=fs.readFileSync(iconFile,"utf8"),iconAnchor="NSImage *nsimage = Cocoa_CreateImage(icon);";
+  if(icons.split(iconAnchor).length!==2)throw new Error("Pinned FNA Cocoa icon boundary changed.");
+  fs.writeFileSync(iconFile,icons.replace(iconAnchor,'const char *artwork = SDL_getenv("MACLAUNCHER_GAME_ICON");\n        NSImage *nsimage = artwork && *artwork ? [[NSImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String:artwork]] : nil;\n        if (!nsimage) nsimage = Cocoa_CreateImage(icon);'));
+}
 function writeCompilerResponse(file, { sources, references, resources = [], output, target = "library", unsafe = false, define = "" }) {
   // Roslyn response files have their own quote syntax; never pass shell commands.
   if ([...sources, ...references, ...resources.map(resource => resource.file), output].some(value => /[\r\n"]/.test(value)) ||
@@ -141,6 +163,7 @@ async function compileRuntime({ unpacked, pin, logger, signal, sourcePath, fna3d
       writeCompilerResponse(response, { sources, references, output, ...extra });
       await run(dotnet, ["exec", "--runtimeconfig", configPath, csc, "@" + response], { logPath, signal });
     }
+    applyGameIdentity(framework);
     const embeddedResources = frameworkResources(framework);
     await compile(frameworkFiles(framework), path.join(unpacked, "FNA.dll"), { unsafe: true, define: "NET;NET8_0;NETCOREAPP", resources: embeddedResources });
     const hostSource = path.resolve(__dirname, "../overlays/ManagedHost.cs");
@@ -173,6 +196,7 @@ async function compileRuntime({ unpacked, pin, logger, signal, sourcePath, fna3d
       await run(cmake, ["--install", output], { logPath, signal, env });
     }
     const sdlRoot = path.join(sdlSource, "SDL3-3.4.18"), fna3dRoot = path.join(framework, "lib", "FNA3D"), faudioRoot = path.join(framework, "lib", "FAudio");
+    applyNativeIdentity(sdlRoot);
     await cmakeLibrary(sdlRoot, "sdl", ["-DSDL_SHARED=ON", "-DSDL_STATIC=OFF", "-DSDL_TESTS=OFF", "-DSDL_TEST_LIBRARY=OFF", "-DSDL_EXAMPLES=OFF"]);
     await cmakeLibrary(fna3dRoot, "fna3d", ["-DBUILD_SDL3=ON", "-DBUILD_TESTS=OFF"]);
     await cmakeLibrary(faudioRoot, "faudio", ["-DBUILD_SDL3=ON", "-DBUILD_TESTS=OFF", "-DBUILD_UTILS=OFF"]);
@@ -225,4 +249,4 @@ function describeRuntime({ unpacked, temporary, framework, fna3dRoot, faudioRoot
 
 
 module.exports = { PROFILE, FNA_REVISION, FNA3D_REVISION, DOTNET_VERSION, PACKAGES, compileRuntime, describeRuntime,
-  __test: { frameworkFiles, frameworkResources, applyOpenGLPolicy, stageAbiSource, resolveBuildTool, writeCompilerResponse, runtimeConfig, hostDependencies, CAPABILITIES } };
+  __test: { applyNativeIdentity, applyGameIdentity, frameworkFiles, frameworkResources, applyOpenGLPolicy, stageAbiSource, resolveBuildTool, writeCompilerResponse, runtimeConfig, hostDependencies, CAPABILITIES } };
