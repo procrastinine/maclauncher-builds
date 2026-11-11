@@ -28,7 +28,12 @@ function adaptEngine(sourceRoot, sourceDir) {
   requireOwnedSource(sourceRoot, sourceDir);
   const file = path.join(sourceRoot, "CMakeLists.txt"), original = fs.readFileSync(file);
   fs.copyFileSync(path.join(__dirname, "portable-native/CMakeLists.txt"), file);
-  return { files: [{ path: "CMakeLists.txt", sourceSha256: hash(original) }] };
+  require("../../runtime/application-identity").attach(sourceRoot, "onsyuri");
+  const game = path.join(sourceRoot, "src/onsyuri/ONScripter.cpp");
+  const before = fs.readFileSync(game, "utf8"), anchor = '    wm_title_string = new char[ strlen(DEFAULT_WM_TITLE) + 1 ];\n    memcpy( wm_title_string, DEFAULT_WM_TITLE, strlen(DEFAULT_WM_TITLE) + 1 );';
+  if (before.split(anchor).length !== 2) throw new Error("Pinned Yuri window identity boundary changed.");
+  fs.writeFileSync(game, before.replace(anchor, '    const char *game_name = SDL_getenv("MACLAUNCHER_GAME_NAME");\n    if (!game_name || !*game_name) game_name = DEFAULT_WM_TITLE;\n    wm_title_string = new char[ strlen(game_name) + 1 ];\n    memcpy( wm_title_string, game_name, strlen(game_name) + 1 );'));
+  return { files: [{ path: "CMakeLists.txt", sourceSha256: hash(original) }, {path:"src/onsyuri/ONScripter.cpp",sourceSha256:hash(before)}] };
 }
 
 function adaptLua(sourceRoot) {
