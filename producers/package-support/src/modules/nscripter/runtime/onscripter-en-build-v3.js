@@ -59,6 +59,14 @@ function sourceFiles(root, depth = 0, prefix = "", output = []) {
   return output;
 }
 
+function applyIdentity(source, overlay) {
+  const file=path.join(source,"ONScripterLabel.cpp");let text=fs.readFileSync(file,"utf8");
+  const replace=(before,after)=>{if(text.split(before).length!==2)throw new Error("Pinned NScripter identity boundary changed.");text=text.replace(before,after);};
+  replace('setStr(&wm_title_string, DEFAULT_WM_TITLE);','const char *game_name = SDL_getenv("MACLAUNCHER_GAME_NAME");\n    setStr(&wm_title_string, game_name && *game_name ? game_name : DEFAULT_WM_TITLE);');
+  replace('SDL_Surface* icon = IMG_Load("icon.png");','const char *artwork = SDL_getenv("MACLAUNCHER_GAME_ICON");\n    SDL_Surface* icon = artwork && *artwork ? IMG_Load(artwork) : NULL;\n    if (icon) use_app_icons = false;\n    else icon = IMG_Load("icon.png");');
+  fs.writeFileSync(file,text);
+  require("../../shared/runtime/application-identity").attach(overlay,"onscripter-en");
+}
 async function buildRuntime({ manager, userDataDir, version, packageVersion, sourceDir, architecture = process.arch, retainBuildDirectory = false, logger, signal, onProgress, dependencies = {} } = {}) {
   const PROFILE = "MCLv1-0126", REVISION = SNAPSHOT_REVISION;
   const selected = version || PROFILE, outputVersion = packageVersion === undefined ? selected : packageVersion;
@@ -112,6 +120,7 @@ async function buildRuntime({ manager, userDataDir, version, packageVersion, sou
     const prefix = path.join(work, "deps"), arch = architecture === "x64" ? "x86_64" : "arm64";
     const overlaySource = path.resolve(__dirname, "../overlays/onscripter-en-v3"), overlay = path.join(work, "overlay");
     fs.cpSync(overlaySource, overlay, { recursive: true });
+    applyIdentity(source, overlay);
     const prefixMaps = compilerPrefixMaps({ work, source, overlay, packageRoots, profile: selected });
     const compilerFlags = compilerPathFlags(prefixMaps);
     async function build(sourceRoot, name, options = []) {
@@ -173,4 +182,4 @@ async function buildRuntime({ manager, userDataDir, version, packageVersion, sou
   } finally { if (!retainBuildDirectory) fs.rmSync(work, { recursive: true, force: true }); building.delete(destination); }
 }
 
-module.exports = { SOURCE_SCOPE, PACKAGES, buildRuntime, sourceFiles, compilerPrefixMaps, compilerPathFlags };
+module.exports = { applyIdentity, SOURCE_SCOPE, PACKAGES, buildRuntime, sourceFiles, compilerPrefixMaps, compilerPathFlags };
