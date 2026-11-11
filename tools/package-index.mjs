@@ -9,7 +9,7 @@ import {catalogIndex} from './release-runtime.mjs';
 import {buildCoverage} from './build-coverage.mjs';
 import {readProjects} from '../lib/projects.mjs';
 const root=path.resolve(import.meta.dirname,'..');
-import {escape,verifyCommand,renderIndex,renderPackagePage} from './package-pages.mjs';
+import {escape,verifyCommand,renderIndex,renderPackagePage,orderedArchitectures} from './package-pages.mjs';
 export {renderIndex,renderPackagePage} from './package-pages.mjs';
 // Both download and verification pages consume the same signed-build coverage.
 const archiveIdentity=({filename,sha256,bytes})=>({filename,sha256,bytes});
@@ -29,14 +29,14 @@ export function renderVerification(index){
  const status={match:'Byte-for-byte match',different:'Archive bytes differ',unavailable:'Rebuild unavailable','not-recorded':'Not recorded'};
  const projectList=projects=>'<ul>'+projects.map(project=>'<li><strong>'+escape(project.name||project.projectId)+'</strong> <code>'+escape(project.projectId)+'</code>'+(project.authorityPolicy==='supplied-publisher'?' · Supplied files'+(project.hasPublisherProof===false?' proof missing':project.hasPublisherProof===true?' proof available':''):'')+'</li>').join('')+'</ul>';
  const table=records=>{
-  const rows=records.map(record=>{
+  const rows=orderedArchitectures(records).map(record=>{
    const rebuild=record.rebuild,label=status[rebuild.status]||'Not recorded',report=typeof rebuild.reportUrl==='string'&&rebuild.reportUrl.startsWith('https://')?rebuild.reportUrl:undefined;
    return `<tr data-verification-state="${escape(record.state)}"><td><a href="${escape(record.asset.url)}">${escape(record.name||record.projectId)}</a><small>${escape(record.projectId)}</small></td><td><code>${escape(record.version)}</code><small>SHA-256: ${escape(record.asset.sha256)}</small></td><td>${escape(record.arch)}</td><td>${record.minimumMacOS?escape(record.minimumMacOS)+'+':'Not recorded'}</td><td><a href="${escape(record.recipe.url)}"><code>${escape(record.recipe.commit.slice(0,12))}</code></a></td><td><a href="${escape(record.build.url)}">${escape(record.build.runId)}</a></td><td>${record.attestation.verified?'Verified · ':''}<a href="${escape(record.attestation.url)}">Find build record</a><details><summary>Verify the archive</summary><code>${escape(record.attestation.command)}</code></details></td><td>${report?'<a href="'+escape(report)+'">'+escape(label)+'</a>':escape(label)}${rebuild.summary?'<small>'+escape(rebuild.summary)+'</small>':''}</td></tr>`;
   }).join('\n');
   return `<div class="scroll"><table><thead><tr><th scope="col">Package</th><th scope="col">Version and archive</th><th scope="col">CPU</th><th scope="col">Minimum macOS</th><th scope="col">Recipe commit</th><th scope="col">Build run</th><th scope="col">Build record</th><th scope="col">Rebuild result</th></tr></thead><tbody>${rows}</tbody></table></div>`;
  };
  const publisherTable=records=>{
-  const rows=records.map(record=>{
+  const rows=orderedArchitectures(records).map(record=>{
    const proof=record.publisherProof,target=record.state==='publisher-published'?record.asset.url:proof.publisherRecord;
    const title=target?'<a href="'+escape(target)+'">'+escape(record.name||record.projectId)+'</a>':escape(record.name||record.projectId);
    return `<tr data-verification-state="${escape(record.state)}"><td>${title}<small>${escape(record.projectId)}</small><small>${record.catalogPublished?'Published':'Awaiting publication'}</small></td><td><code>${escape(record.version)}</code><small>SHA-256: ${escape(record.asset.sha256)}</small></td><td>${escape(record.arch)}</td><td>${record.minimumMacOS?escape(record.minimumMacOS)+'+':'Not recorded'}</td><td>${escape(proof.publisherVersion)}</td><td>${escape(proof.publisherFiles)} unchanged files</td><td><a href="${escape(proof.publisherInput)}">Input inventory</a><small><a href="${escape(proof.publisherRecord)}">Equality record</a></small></td><td>Not established by file equality</td></tr>`;

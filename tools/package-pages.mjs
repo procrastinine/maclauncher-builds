@@ -21,17 +21,43 @@ const groups=[
  {id:'downloadable',label:'Downloadable runtimes and tools',description:'Installed through MacLauncher Runtimes or when a game needs them.'},
  {id:'bundled',label:'Included components',description:'Core graphics components and internal helpers included in the app.'}
 ];
+function commitUrl(repository,revision){
+ if(!repository||!revision)return null;
+ let url;try{url=new URL(repository);}catch{return null;}
+ if(url.protocol!=='https:'||url.username||url.password)return null;
+ const origin=repository.replace(/\.git$/,'').replace(/\/$/,'');
+ if(url.hostname==='github.com')return origin+'/commit/'+encodeURIComponent(revision);
+ if(url.hostname.includes('gitlab'))return origin+'/-/commit/'+encodeURIComponent(revision);
+ if(url.hostname.endsWith('googlesource.com'))return origin+'/+/'+encodeURIComponent(revision);
+ return null;
+}
+function pinValue(value){
+ if(!value)return '';
+ const hash=value.revision?.slice(0,7),url=commitUrl(value.repository,value.revision);
+ const revision=hash?(url?'<a href="'+escape(url)+'"><code>'+escape(hash)+'</code></a>':'<code>'+escape(hash)+'</code>'):'';
+ return value.version?escape(value.version)+(revision?' ('+revision+')':''):revision||'recorded input';
+}
+function pinChange(input){
+ const path=input.name.startsWith('gitlink:')?input.name.slice('gitlink:'.length):input.name;
+ const label=escape(path.startsWith('sources/')?path:path.split('/').at(-1));
+ if(!input.before)return '<li>'+label+' added at '+pinValue(input.after)+'</li>';
+ if(!input.after)return '<li>'+label+' removed (was '+pinValue(input.before)+')</li>';
+ return '<li>'+label+' '+pinValue(input.before)+' → '+pinValue(input.after)+'</li>';
+}
+const architectureOrder=['arm64','x64','universal'];
+export function orderedArchitectures(releases){
+ const groups=Map.groupBy(releases,release=>(release.projectId||'')+'\0'+release.version);
+ return [...groups.values()].flatMap(group=>group.toSorted((a,b)=>
+  architectureOrder.indexOf(a.arch)-architectureOrder.indexOf(b.arch)));
+}
 function changeDetails(entry,repository){
  if(!entry)return '<p>No generated changes are recorded.</p>';
- const items=entry.inputs.map(input=>{
-  const before=escape(JSON.stringify(input.before)),after=escape(JSON.stringify(input.after));
-  return '<li>'+escape(input.name)+': '+before+' → '+after+'</li>';
- }).join('');
+ const items=entry.inputs.map(pinChange).join('');
  const commits=entry.commits.map(commit=>{
   const origin=commit.repository||'https://github.com/'+repository;
-  const url=escape(origin.replace(/\.git$/,''))+'/commit/'+escape(commit.revision);
+  const url=commitUrl(origin,commit.revision);
   const label=commit.repository?commit.repository.replace(/^https:\/\/github.com\//,'')+': ':'';
-  return '<li><a href="'+url+'">'+escape(label+commit.subject)+'</a></li>';
+  return '<li>'+(url?'<a href="'+escape(url)+'">'+escape(label+commit.subject)+'</a>':escape(label+commit.subject))+'</li>';
  }).join('');
  const unrecorded=(entry.unrecordedInputs||[]).map(input=>
   escape(input.name+': '+input.reason)).join(', ');
@@ -96,7 +122,7 @@ function aliases(project,used){
 }
 
 function downloads(releases,delivery){
- return releases.map(release=>{
+ return orderedArchitectures(releases).map(release=>{
   const arch={arm64:'Apple Silicon',x64:'Intel',universal:'Universal'}[release.arch]||release.arch;
   return '<a class="download" href="'+escape(release.asset.url)+'">'+
    (delivery==='bundled'?'Archive':'Download')+' · '+escape(arch)+' <span>'+size(release.asset.bytes)+'</span></a>';
@@ -114,11 +140,11 @@ export function renderIndex(index){
    return '<tr data-project="'+escape(project.projectId)+'" id="'+escape(project.projectId)+'">'+
     '<td>'+aliases(project,used)+'<a data-package-page href="packages/'+escape(project.projectId)+'.html">'+
     '<strong>'+escape(project.name)+'</strong></a><span class="secondary">'+escape(project.projectId)+'</span></td>'+
-    '<td>'+(group.id==='bundled'?'Included':'Downloadable')+'</td><td><code>'+escape(latest)+'</code></td>'+
+    '<td><code>'+escape(latest)+'</code></td>'+
     '<td><div class="downloads">'+downloads(releases,group.id)+'</div></td></tr>';
   }).join('\n');
   return '<section><h2>'+escape(group.label)+'</h2><p>'+escape(group.description)+'</p>'+
-   '<div class="table-scroll"><table><thead><tr><th>Package</th><th>Delivery</th><th>Latest version</th><th>Downloads</th></tr></thead>'+
+   '<div class="table-scroll"><table><thead><tr><th>Package</th><th>Latest version</th><th>Downloads</th></tr></thead>'+
    '<tbody>'+rows+'</tbody></table></div></section>';
  }).join('\n');
  const header='<header><h1>MacLauncher packages</h1><p>Versioned macOS binaries for '+
@@ -147,7 +173,7 @@ export function renderPackagePage(project,changes,catalog,repository){
   const releases=project.releases.filter(release=>release.version===version);
   const entry=entries.get(version);
   const alias=aliases({releases},used);
-  const files=releases.map(release=>{
+  const files=orderedArchitectures(releases).map(release=>{
    const source='https://github.com/'+repository+'/tree/'+encodeURIComponent(release.tag);
    return '<tr><td>'+platform(release)+'</td><td>'+downloads([release],project.delivery)+
     '<div class="links"><a href="'+escape(source)+'">Source</a></div>'+

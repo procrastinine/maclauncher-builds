@@ -166,3 +166,27 @@ test('static version pages render Markdown notes before generated changes withou
  assert.equal(html.includes('<script>'),false);
  assert.ok(html.includes('../catalogs/hashlink.json'));assert.ok(html.includes('../changes/hashlink.json'));
 });
+
+
+test('package pages use readable linked pin moves and a consistent CPU order',t=>{
+ const {index,directory}=indexFixture(t),project=index.projects[0];
+ const catalog=JSON.parse(fs.readFileSync(path.join(directory,'catalogs/hashlink.json')));
+ project.releases[2].version=project.releases[0].version;
+ catalog.packages[2].version=catalog.packages[0].version;
+ const changes={projectId:'hashlink',releases:[...new Set(catalog.packages.map(record=>record.version))].map(version=>({
+  version,previousVersion:'1.8',commits:[],inputs:[
+   {name:'gitlink:producers/support/sdl-headers',before:null,
+    after:{repository:'https://github.com/libsdl-org/SDL.git',revision:'a'.repeat(40)}},
+   {name:'gitlink:sources/maclauncher',before:{revision:'b'.repeat(40)},after:{revision:'c'.repeat(40)}}
+  ]
+ }))};
+ const page=renderPackagePage(project,changes,catalog,index.repository),main=renderIndex(index);
+ for(const html of [page,main]){
+  assert.ok(html.indexOf('Apple Silicon')<html.indexOf('Intel'));
+  assert.ok(html.indexOf('Intel')<html.indexOf('Universal'));
+ }
+ assert.ok(page.includes('sdl-headers added at <a href="https://github.com/libsdl-org/SDL/commit/'+ 'a'.repeat(40)+'"><code>aaaaaaa</code></a>'));
+ assert.ok(page.includes('sources/maclauncher <code>bbbbbbb</code> → <code>ccccccc</code>'));
+ assert.equal(page.includes('&quot;revision&quot;'),false);
+ assert.equal(/<th[^>]*>Delivery<\/th>/.test(main),false);
+});

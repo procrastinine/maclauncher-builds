@@ -6,7 +6,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {packageChanges} from '../lib/package-changes.mjs';
 import {treeSource} from '../lib/tree-source.mjs';
-import {readProjects,resolveProject,buildRecord} from '../lib/projects.mjs';
+import {readProjects,resolveProject,buildRecord,declaredRecipeEntries} from '../lib/projects.mjs';
 import {registerSelection} from '../tools/release-selection.mjs';
 import {canonicalReport} from '../lib/canonical-report.mjs';
 
@@ -39,7 +39,8 @@ test('catalog versions alone determine history, input deltas, scoped commits, no
  f.write('source.json',{repository:'https://github.com/owner/source',revision:'2'.repeat(40)});
  f.write('recipe.mjs','// second\n');const second=f.commit('Update demo recipe');
  f.projects.push({...structuredClone(f.project),id:'other',name:'Other project'});
- const third=f.commit('Change only another project declaration');
+ f.write('producers/other/recipe.mjs','// unrelated producer\n');
+ const third=f.commit('Change only another project declaration and producer');
  f.git('tag','demo/v9.9.9/arm64');
  const records=[{version:'1.0.0',arch:'arm64',build:{sourceRevision:first}},
   {version:'1.1.0',arch:'arm64',build:{sourceRevision:second}},
@@ -195,4 +196,17 @@ test('project Markdown notes affect exactly named published versions; unknown he
  assert.equal(demo.releases.find(release=>release.version==='1.0.0').notes,undefined);
  assert.deepEqual(after.projects.find(project=>project.projectId==='control'),before.projects.find(project=>project.projectId==='control'));
  assert.equal(warnings.length,1);assert.match(warnings[0],/9\.9\.9/);
+});
+
+
+test('package source paths exclude global orchestration and narrow materialized app directories',()=>{
+ const project={producer:{entries:['producers/demo','producers/shared/build.mjs','tools/orchestrate.mjs'],
+  appEntries:['package.json','src/graphics']},build:{command:'tools/build-demo.mjs'}};
+ const manifest={buildCode:['tools/source.mjs','lib/projects.mjs']};
+ const source={files:entry=>entry==='producers/demo'?['producers/demo/materialization.json']:[],
+  json:()=>({files:[{source:'app:src/graphics/native/source.mm',path:'source.mm'}]})};
+ assert.deepEqual(declaredRecipeEntries(project,manifest,{packageSources:true,source}),[
+  'app:src/graphics/native/source.mm','producers/demo','producers/shared/build.mjs','tools/build-demo.mjs'
+ ]);
+ assert.ok(declaredRecipeEntries(project,manifest).includes('tools/source.mjs'));
 });
