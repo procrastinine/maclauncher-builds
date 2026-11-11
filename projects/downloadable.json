@@ -1415,7 +1415,9 @@
         "producers/vn-adaptations/source.json",
         "tools/build-source.mjs",
         "tools/manager-declaration.mjs",
-        "tools/seal-runtime.mjs"
+        "tools/seal-runtime.mjs",
+        "producers/package-support/src/modules/shared/runtime/application-identity.js",
+        "producers/package-support/src/modules/shared/runtime/application-identity.m"
       ]
     },
     "upstreams": [

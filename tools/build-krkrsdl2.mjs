@@ -19,6 +19,7 @@ export function stageKag3Resources(work){
 export async function compile({arch,work}){
  fs.mkdirSync(work,{recursive:true});const sourceRoot=path.join(root,'producers/package-support/src/external/krkrsdl2'),source=path.join(work,'source'),build=path.join(work,'build');
  const staged=await stageSource(sourceRoot,Compat.REVISION,source),overlay=Compat.prepareSource({sourceRoot:source,revision:Compat.REVISION});
+ Compat.applyIdentity(source);
  const header=path.join(root,'producers/package-support/src/modules/kirikiri/overlays/macos-compat.h'),cpu=arch==='x64'?'x86_64':'arm64';
  const flags=['-ffile-prefix-map='+work+'=krkrsdl2-build','-fdebug-prefix-map='+work+'=krkrsdl2-build','-include '+header].join(' ');
  run('cmake',['-S',source,'-B',build,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_ARCHITECTURES='+cpu,'-DCMAKE_OSX_DEPLOYMENT_TARGET=13.0','-DCMAKE_POLICY_VERSION_MINIMUM=3.12','-DOPTION_BUILD_MACOS_BUNDLE=OFF','-DOPTION_ENABLE_EXTERNAL_PLUGINS=OFF','-DFETCHCONTENT_FULLY_DISCONNECTED=ON','-DFETCHCONTENT_UPDATES_DISCONNECTED=ON','-DSDL_SHARED=OFF','-DSDL_STATIC=ON','-DSDL_TEST=OFF','-DCMAKE_C_FLAGS='+flags,'-DCMAKE_CXX_FLAGS='+flags+' -DKRKRSDL2_RENDERER_FULL_UPDATES']);

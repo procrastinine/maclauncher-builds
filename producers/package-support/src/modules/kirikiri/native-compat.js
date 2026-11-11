@@ -29,4 +29,10 @@ function prepareSource({ sourceRoot, revision, signal }) {
     operations: ["actual local/archive directory listing", "process-local native FreeType font loading", "dialog rectangle positioning against actual SDL monitor work areas"] };
 }
 
-module.exports = { REVISION, OVERLAY_REVISION, prepareSource };
+function applyIdentity(root) {
+  const file=path.join(root,"src/core/sdl2/SDLApplication.cpp"),text=fs.readFileSync(file,"utf8"),anchor='this->window = SDL_CreateWindow("krkrsdl2", new_window_x, new_window_y, new_window_w, new_window_h, window_flags);';
+  if(text.split(anchor).length!==2)throw new Error("Pinned KiriKiri initial window boundary changed.");
+  fs.writeFileSync(file,text.replace(anchor,'const char *game_name = SDL_getenv("MACLAUNCHER_GAME_NAME");\n\tthis->window = SDL_CreateWindow(game_name && *game_name ? game_name : "krkrsdl2", new_window_x, new_window_y, new_window_w, new_window_h, window_flags);'));
+  require("../shared/runtime/application-identity").attach(root,"krkrsdl2");
+}
+module.exports = { applyIdentity, REVISION, OVERLAY_REVISION, prepareSource };
