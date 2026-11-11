@@ -80,9 +80,19 @@ function nativeFile({ pkgConfig, sdk, architecture = process.arch, pathMappings 
   }
   const maps = pathMappings.flatMap(mapping => ["file", "debug", "macro"].map(kind => `-f${kind}-prefix-map=${mapping.from}=${mapping.to}`));
   const flags = ["-arch", architecture === "x64" ? "x86_64" : "arm64", "-mmacosx-version-min=13.0", "-isysroot", sdk];
-  return `[binaries]\nc = '/usr/bin/clang'\nar = '/usr/bin/ar'\nstrip = '/usr/bin/strip'\npkg-config = ${literal(pkgConfig)}\n\n[built-in options]\nc_args = [${[...flags, ...maps, "-Werror=unguarded-availability-new"].map(literal).join(", ")}]\nc_link_args = [${[...flags, "-Wl,-headerpad_max_install_names", ...libraryDirectories.map(value => "-Wl,-rpath," + value)].map(literal).join(", ")}]\n`;
+  const text = `[binaries]\nc = '/usr/bin/clang'\nobjc = '/usr/bin/clang'\nar = '/usr/bin/ar'\nstrip = '/usr/bin/strip'\npkg-config = ${literal(pkgConfig)}\n\n[built-in options]\nc_args = [${[...flags, ...maps, "-Werror=unguarded-availability-new"].map(literal).join(", ")}]\nc_link_args = [${[...flags, "-Wl,-headerpad_max_install_names", ...libraryDirectories.map(value => "-Wl,-rpath," + value)].map(literal).join(", ")}]\n`;
+  return text.replace(/^c_args = (.*)$/m, (line, flags) => line + "\nobjc_args = " + flags).replace(/^c_link_args = (.*)$/m, (line, flags) => line + "\nobjc_link_args = " + flags);
 }
 
+function applyIdentity(root) {
+  const video=path.join(root,"src/gfx.c"),text=fs.readFileSync(video,"utf8"),anchor="\tgfx.window_id = SDL_GetWindowID(gfx.window);";
+  if(text.split(anchor).length!==2)throw new Error("Pinned AI5 window identity boundary changed.");
+  fs.writeFileSync(video,text.replace(anchor,'\tconst char *display_name = SDL_getenv("MACLAUNCHER_GAME_NAME");\n\tif (display_name && *display_name) SDL_SetWindowTitle(gfx.window, display_name);\n'+anchor));
+  const file=path.join(root,"meson.build"),meson=fs.readFileSync(file,"utf8"),entry="executable('ai5', sources,";
+  if(meson.split(entry).length!==2)throw new Error("Pinned AI5 native target changed.");
+  fs.copyFileSync(path.join(__dirname,"../../shared/runtime/application-identity.m"),path.join(root,"maclauncher-application-identity.m"));
+  fs.writeFileSync(file,meson.replace(entry,"if host_machine.system() == 'darwin'\n  add_languages('objc', native : false)\n  sources += 'maclauncher-application-identity.m'\n  deps += dependency('appleframeworks', modules : ['AppKit'])\nendif\n\n"+entry).replace("  c_args : ['-Wno-unused-parameter'],","  c_args : ['-Wno-unused-parameter'],\n  objc_args : ['-fobjc-arc', '-fblocks'],"));
+}
 async function buildPortableAI5({ sourceDir = Previous.sourcePath, workRoot, fontStack, audioStack, movieStack,
   architecture = process.arch, pathMappings = [], signal, onProgress, dependencies = {} }) {
   throwIfAborted(signal);
@@ -94,6 +104,7 @@ async function buildPortableAI5({ sourceDir = Previous.sourcePath, workRoot, fon
   const sourceRoot = path.join(workRoot, "source"), outputRoot = path.join(workRoot, "output"), prefix = path.join(workRoot, "prefix");
   Source.stagePinnedFiles(sourceDir, source.files, sourceRoot);
   const sourceOverlay = adaptSource(sourceRoot);
+  applyIdentity(sourceRoot);
   const tool = dependencies.findBuildTool || Source.findBuildTool;
   const tools = { meson: tool("meson"), ninja: tool("ninja"), pkgConfig: tool("pkg-config") };
   const sdk = fontStack.sdk, file = path.join(workRoot, "native.ini");
@@ -119,4 +130,4 @@ async function buildPortableAI5({ sourceDir = Previous.sourcePath, workRoot, fon
     dependencyClosure: { fonts: fontStack, audio: audioStack, movie: movieStack } };
 }
 
-module.exports = { VERSION, REVISION, SOURCE_SHA256, PROFILE, ORIGINALS, adaptSource, dependencyPrefixes, nativeFile, buildPortableAI5 };
+module.exports = { applyIdentity, VERSION, REVISION, SOURCE_SHA256, PROFILE, ORIGINALS, adaptSource, dependencyPrefixes, nativeFile, buildPortableAI5 };
