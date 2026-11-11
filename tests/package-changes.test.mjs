@@ -24,11 +24,12 @@ function fixture(t){
  const project={id:'demo',name:'Demo',delivery:'downloadable',producer:{kind:'maclauncher',repository:'https://github.com/owner/builds',entries:['recipe.mjs']},
   upstreams:[{id:'source',provider:'github',repository:'owner/source',url:'https://github.com/owner/source',pin:{file:'source.json',pointer:''}}],
   packageProfiles:[{version:'1.0.0',label:'Demo'}],build:{version:'1.0.0',command:'tools/build.mjs',architectures:['arm64'],notes:'Initial package.'}};
- const registry=()=>write('projects.json',{schemaVersion:1,repository:'owner/builds',updatePolicy:'manual',projects:[project]});
+ const projects=[project];
+ const registry=()=>write('projects.json',{schemaVersion:1,repository:'owner/builds',updatePolicy:'manual',projects});
  const commit=subject=>{registry();git('add','.');git('commit','-qm',subject);return git('rev-parse','HEAD');};
  write('recipe.mjs','// first\n');write('tools/build.mjs','// command\n');
  write('source.json',{repository:'https://github.com/owner/source',revision:'1'.repeat(40)});
- return {directory,git,write,project,registry,commit};
+ return {directory,git,write,project,projects,registry,commit};
 }
 
 test('catalog versions alone determine history, input deltas, scoped commits, notes and first release',t=>{
@@ -37,7 +38,8 @@ test('catalog versions alone determine history, input deltas, scoped commits, no
  f.project.packageProfiles.push({version:'1.1.0',label:'Demo 1.1'});
  f.write('source.json',{repository:'https://github.com/owner/source',revision:'2'.repeat(40)});
  f.write('recipe.mjs','// second\n');const second=f.commit('Update demo recipe');
- f.write('unrelated.txt','unrelated');const third=f.commit('Unrelated change');
+ f.projects.push({...structuredClone(f.project),id:'other',name:'Other project'});
+ const third=f.commit('Change only another project declaration');
  f.git('tag','demo/v9.9.9/arm64');
  const records=[{version:'1.0.0',arch:'arm64',build:{sourceRevision:first}},
   {version:'1.1.0',arch:'arm64',build:{sourceRevision:second}},
@@ -94,4 +96,82 @@ test('real changelog project ids and versions exactly equal the catalogs without
  const changes=packageChanges({directory:root});
  assert.deepEqual(changes.projects.map(project=>({projectId:project.projectId,versions:project.releases.map(r=>r.version).sort()})),expected);
  for(const [i,file] of files.entries())assert.deepEqual(fs.readFileSync(path.join(root,'catalogs',file)),original[i]);
+});
+
+test('missing Builds commits and conflicting architecture records never abort the history',t=>{
+ const f=fixture(t),first=f.commit('Initial recipe');
+ f.write('recipe.mjs','// changed\n');const second=f.commit('Recipe update');
+ f.write('catalogs/demo.json',{projectId:'demo',packages:[
+  {version:'1.0.0',arch:'arm64',build:{sourceRevision:first}},
+  {version:'1.1.0',arch:'arm64',build:{sourceRevision:first}},
+  {version:'1.1.0',arch:'x64',build:{sourceRevision:second}},
+  {version:'1.2.0',arch:'arm64',build:{sourceRevision:'f'.repeat(40)}}
+ ]});
+ const releases=packageChanges({directory:f.directory}).projects[0].releases;
+ assert.equal(releases.length,3);
+ assert.equal(releases[1].sourceRevision,null);
+ assert.match(releases[1].unrecordedInputs[0].reason,/different Builds commits/);
+ assert.ok(releases[2].unrecordedInputs.some(input=>input.name==='sourceRevision'));
+});
+
+test('source subjects use consumed paths and shallow submodules retain pins without partial history',t=>{
+ const f=fixture(t);
+ const upstream=fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()),'changes-upstream-'));
+ const run=(directory,...args)=>execFileSync('git',['-C',directory,...args],{
+  encoding:'utf8',stdio:['ignore','pipe','pipe']
+ }).trim();
+ t.after(()=>fs.rmSync(upstream,{recursive:true,force:true}));
+ run(upstream,'init','-q');run(upstream,'config','user.name','procrastinine');
+ run(upstream,'config','user.email','24549552+procrastinine@users.noreply.github.com');
+ fs.writeFileSync(path.join(upstream,'consumed.txt'),'first');
+ fs.writeFileSync(path.join(upstream,'other.txt'),'first');
+ fs.writeFileSync(path.join(upstream,'pin.json'),JSON.stringify({revision:'a'.repeat(40)}));
+ const commit=subject=>{
+  run(upstream,'add','.');run(upstream,'commit','-qm',subject);
+  return run(upstream,'rev-parse','HEAD');
+ };
+ const before=commit('Original source');
+ fs.writeFileSync(path.join(upstream,'consumed.txt'),'second');commit('Consumed source correction');
+ fs.writeFileSync(path.join(upstream,'other.txt'),'second');const after=commit('Unrelated source edit');
+ const checkout=path.join(f.directory,'sources/engine');
+ fs.mkdirSync(path.dirname(checkout),{recursive:true});
+ run(upstream,'worktree','add','--detach',checkout,after);
+ f.write('.gitmodules','[submodule "engine"]\n path = sources/engine\n url = https://github.com/owner/source\n');
+ f.project.producer.entries.push('sources/engine/consumed.txt');
+ f.project.build.submodules=['sources/engine'];
+ f.project.upstreams[0].pin={gitlink:'sources/engine'};
+ f.project.upstreams.push({id:'nested',provider:'github',repository:'owner/nested',
+  url:'https://github.com/owner/nested',pin:{file:'sources/engine/pin.json',pointer:''}});
+ f.git('add','.');f.git('update-index','--cacheinfo','160000,'+before+',sources/engine');
+ // Stage the recorded Gitlink without replacing it with the checkout's current HEAD.
+ const save=subject=>{
+  f.registry();f.git('add','projects.json');f.git('commit','-qm',subject);
+  return f.git('rev-parse','HEAD');
+ };
+ const first=save('Package original source');
+ f.git('update-index','--cacheinfo','160000,'+after+',sources/engine');
+ const second=save('Package corrected source');
+ f.write('catalogs/demo.json',{projectId:'demo',packages:[
+  {version:'1.0.0',arch:'arm64',build:{sourceRevision:first}},
+  {version:'1.1.0',arch:'arm64',build:{sourceRevision:second}}
+ ]});
+ let release=packageChanges({directory:f.directory}).projects[0].releases.at(-1);
+ assert.deepEqual(release.commits.filter(row=>row.repository).map(row=>row.subject),['Consumed source correction']);
+ run(upstream,'worktree','remove','--force',checkout);
+ fs.mkdirSync(checkout);run(checkout,'init','-q');
+ run(checkout,'fetch','--depth=1','file://'+upstream,after);
+ run(checkout,'checkout','--detach','FETCH_HEAD');
+ assert.equal(run(checkout,'rev-parse','--is-shallow-repository'),'true');
+ let changes=packageChanges({directory:f.directory});
+ assert.ok(changes.projects[0].releases[0].unrecordedInputs.some(input=>input.name==='nested'));
+ release=changes.projects[0].releases.at(-1);
+ assert.deepEqual(release.commits.filter(row=>row.repository),[]);
+ assert.ok(release.unrecordedInputs.some(input=>input.name==='commits:gitlink:sources/engine'));
+ const pin=release.inputs.find(input=>input.name==='gitlink:sources/engine');
+ assert.equal(pin.before.revision,before);assert.equal(pin.after.revision,after);
+ // Both endpoints may exist while a shallow boundary still hides the commits between them.
+ run(checkout,'fetch','--depth=1','file://'+upstream,before);
+ release=packageChanges({directory:f.directory}).projects[0].releases.at(-1);
+ assert.deepEqual(release.commits.filter(row=>row.repository),[]);
+ assert.ok(release.unrecordedInputs.some(input=>input.name==='commits:gitlink:sources/engine'));
 });

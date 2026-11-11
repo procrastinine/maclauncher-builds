@@ -208,11 +208,13 @@ The package site publishes `changes.json` beside `index.json`. Its project ids a
 | `sourceRevision` | Catalog `build.sourceRevision`, or `source.revision` when it identifies the Builds repository; `null` when neither is recorded |
 | `previousVersion` | Preceding catalog version, or `null` for the first version |
 | `inputs` | Changed input records, each with `name`, `before` and `after`; `null` identifies an addition or removal |
-| `commits` | Recipe commits with `revision`, `date` and `subject`, limited to the project's declared paths between the two recorded Builds commits |
+| `commits` | Commits with `revision`, `date` and `subject`; source repository commits also name `repository` |
 | `notes` | Optional sentence from the matching project `build` record |
 | `unrecordedInputs` | Inputs the resolver cannot read as recorded data, each with `name` and `reason` |
 
-The project resolver reads source pins from the recorded Git commit as data. Historical producer code is never executed or parsed for pin values. Inputs without a recorded pin remain explicit in `unrecordedInputs`. The first version lists its recorded inputs without a commit range. Releases are ordered by source commit date and then version; commits by date and revision. Input names, architecture arrays and object keys have stable sorted order. The file has no generation timestamp.
+Builds commit subjects are limited to the project’s declared files and shared build code. Project registry files are excluded from commit ranges. Changed Gitlinks also include source commit subjects when the local repository contains the complete comparison range, limited to the paths the project consumes from that repository. The app paths declared by a graphics recipe determine its app-source commit range. Source subjects identify their repository and link to its commits.
+
+The project resolver reads source pins from the recorded Git commit as data. Historical producer code is never executed or parsed for pin values. Inputs without a recorded pin remain explicit in `unrecordedInputs`. Missing Git objects, shallow comparison ranges and conflicting architecture source revisions also remain explicit there. A conflicting architecture record has `sourceRevision: null`. Unavailable history leaves the recorded revision changes intact and does not prevent package-index generation. The first version lists its recorded inputs without a commit range. Releases are ordered by source commit date and then version; commits by date and revision. Input names, architecture arrays and object keys have stable sorted order. The file has no generation timestamp.
 
 An optional `notes` string on a project's `build` record adds one human sentence to that version's generated changes. It is recorded in the same commit that requests the version through the project registry and `releases.txt`. Omit the field for generated entries alone. Selecting a new version does not copy the preceding version's notes. Notes do not alter the build definition digest.
 
