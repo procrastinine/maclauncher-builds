@@ -197,7 +197,9 @@ Downloadable records give the upstream repository and commit in `source: {reposi
 
 ### Version changes
 
-The package site publishes `changes.json` beside `index.json`. Its project ids and versions are exactly those in the package catalogs. Records for several architectures of the same version form one release entry. Each version row has a **Changes** disclosure, and the header links to the JSON history. The app reads catalogs and package declarations independently of this file.
+The package index lists one row per project, with its latest version and architecture-specific downloads. Each name links to `packages/<projectId>.html`, which lists every catalog version, newest first, with downloads and readable changes. These pages work without scripts. App links to project ids and registered ABI section anchors forward from the index to the corresponding package page.
+
+The site publishes the combined `changes.json` beside `index.json`, and one `changes/<projectId>.json` per catalog project. A project file contains `schemaVersion`, `projectId` and `releases`; its project data is the same entry found in the combined file’s `projects` array. Records for several architectures of the same version form one release entry. Raw catalog and changes downloads appear at the bottom of each package page. The app reads catalogs and package declarations independently of these changelog files.
 
 | Field | Contents |
 | --- | --- |
@@ -209,14 +211,16 @@ The package site publishes `changes.json` beside `index.json`. Its project ids a
 | `previousVersion` | Preceding catalog version, or `null` for the first version |
 | `inputs` | Changed input records, each with `name`, `before` and `after`; `null` identifies an addition or removal |
 | `commits` | Commits with `revision`, `date` and `subject`; source repository commits also name `repository` |
-| `notes` | Optional sentence from the matching project `build` record |
+| `notes` | Optional Markdown text from the version section in `changelog/<projectId>.md`; projects without that file retain the matching `build.notes` sentence |
 | `unrecordedInputs` | Inputs the resolver cannot read as recorded data, each with `name` and `reason` |
 
 Builds commit subjects are limited to the project’s declared files and shared build code. Project registry files are excluded from commit ranges. Changed Gitlinks also include source commit subjects when the local repository contains the complete comparison range, limited to the paths the project consumes from that repository. The app paths declared by a graphics recipe determine its app-source commit range. Source subjects identify their repository and link to its commits.
 
 The project resolver reads source pins from the recorded Git commit as data. Historical producer code is never executed or parsed for pin values. Inputs without a recorded pin remain explicit in `unrecordedInputs`. Missing Git objects, shallow comparison ranges and conflicting architecture source revisions also remain explicit there. A conflicting architecture record has `sourceRevision: null`. Unavailable history leaves the recorded revision changes intact and does not prevent package-index generation. The first version lists its recorded inputs without a commit range. Releases are ordered by source commit date and then version; commits by date and revision. Input names, architecture arrays and object keys have stable sorted order. The file has no generation timestamp.
 
-An optional `notes` string on a project's `build` record adds one human sentence to that version's generated changes. It is recorded in the same commit that requests the version through the project registry and `releases.txt`. Omit the field for generated entries alone. Selecting a new version does not copy the preceding version's notes. Notes do not alter the build definition digest.
+Optional hand-written notes live in `changelog/<projectId>.md`, with one `## <version>` section per noted version, newest first. The section’s Markdown text becomes that version’s `notes` field and appears before the generated changes on its package page. Paragraphs, lists, inline code, emphasis and HTTP or HTTPS links are rendered; HTML is displayed as text. A project with a notes file gets notes only on versions with a section. A heading naming no published or pending version prints a warning and does not stop generation. Pending versions come from the registered build records and `releases.txt`.
+
+For projects without a notes file, the optional `build.notes` sentence remains supported. Selecting a new version does not copy that sentence. Notes do not alter package declarations, catalogs or the build definition digest.
 
 ## Android producer
 

@@ -175,3 +175,24 @@ test('source subjects use consumed paths and shallow submodules retain pins with
  assert.deepEqual(release.commits.filter(row=>row.repository),[]);
  assert.ok(release.unrecordedInputs.some(input=>input.name==='commits:gitlink:sources/engine'));
 });
+
+test('project Markdown notes affect exactly named published versions; unknown headings only warn',t=>{
+ const f=fixture(t);
+ f.projects.push({...structuredClone(f.project),id:'control',name:'Control'});
+ const first=f.commit('Initial recipes');
+ f.write('recipe.mjs','// updated\n');const second=f.commit('Recipe change');
+ for(const id of ['demo','control'])f.write('catalogs/'+id+'.json',{projectId:id,packages:[
+  {version:'1.1.0',arch:'arm64',build:{sourceRevision:second}},
+  {version:'1.0.0',arch:'arm64',build:{sourceRevision:first}}
+ ]});
+ const before=packageChanges({directory:f.directory});
+ f.write('releases.txt','demo=2.0.0');
+ f.write('changelog/demo.md','# Demo\n\n## 2.0.0\n\nPending note.\n\n## 1.1.0\n\n**New option**.\n\n- Retains settings.\n\n## 9.9.9\n\nUnmatched note.\n');
+ const warnings=[];
+ const after=packageChanges({directory:f.directory,warn:message=>warnings.push(message)});
+ const demo=after.projects.find(project=>project.projectId==='demo');
+ assert.equal(demo.releases.find(release=>release.version==='1.1.0').notes,'**New option**.\n\n- Retains settings.');
+ assert.equal(demo.releases.find(release=>release.version==='1.0.0').notes,undefined);
+ assert.deepEqual(after.projects.find(project=>project.projectId==='control'),before.projects.find(project=>project.projectId==='control'));
+ assert.equal(warnings.length,1);assert.match(warnings[0],/9\.9\.9/);
+});

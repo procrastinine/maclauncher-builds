@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import vm from 'node:vm';
 import {createHash} from 'node:crypto';
-import {buildIndex,renderIndex} from '../tools/package-index.mjs';
+import {buildIndex,renderIndex,renderPackagePage} from '../tools/package-index.mjs';
 import {buildCoverage,currentBuildOutputs} from '../tools/build-coverage.mjs';
 import {readProjects} from '../lib/projects.mjs';
 import {assetName,releaseTag} from '../lib/project-identity.mjs';
@@ -41,6 +41,8 @@ test('a project with a build record is covered when its current version and CPU 
 });
 test('download and verification pages include only exact verified archive authorities',async t=>{
  const output=fs.mkdtempSync(path.join(os.tmpdir(),'package-index-'));t.after(()=>fs.rmSync(output,{recursive:true,force:true}));
+ fs.mkdirSync(path.join(output,'changes'));fs.writeFileSync(path.join(output,'changes','stale.json'),'{}');
+ fs.mkdirSync(path.join(output,'packages'));fs.writeFileSync(path.join(output,'packages','stale.html'),'stale');
  const coverage=await buildCoverage(root),result=await buildIndex({directory:root,output}),index=JSON.parse(fs.readFileSync(path.join(output,'index.json'))),html=fs.readFileSync(path.join(output,'index.html'),'utf8');
  const registry=readProjects(root,{resolvePins:false});
  const catalogRows=coverage.catalogPackages;
@@ -61,14 +63,32 @@ test('download and verification pages include only exact verified archive author
   const catalogBytes=fs.readFileSync(path.join(output,'catalogs',project.projectId+'.json'));assert.equal(catalogBytes.length,project.catalog.bytes);assert.equal(createHash('sha256').update(catalogBytes).digest('hex'),project.catalog.sha256);assert.equal(project.catalog.url,'https://procrastinine.github.io/maclauncher-builds/catalogs/'+project.projectId+'.json');
   assert.equal(project.releases.length,supplied.packages.length);
   assert.deepEqual(project.releases.map(release=>[release.version,release.arch,release.asset]),supplied.packages.map(release=>[release.version,release.arch,release.asset]));
-  for(const release of project.releases){const identity={id:project.projectId,...release};assert.equal(release.asset.filename,assetName(identity));assert.equal(release.tag,releaseTag(identity));assert.ok(html.includes('href="'+release.asset.url+'"'));assert.ok(html.includes(release.asset.sha256));}
+  for(const release of project.releases){const identity={id:project.projectId,...release};assert.equal(release.asset.filename,assetName(identity));assert.equal(release.tag,releaseTag(identity));const page=fs.readFileSync(path.join(output,'packages',project.projectId+'.html'),'utf8');assert.ok(page.includes('href="'+release.asset.url+'"'));assert.ok(page.includes(release.asset.sha256));}
  }
- assert.equal((html.match(/<tr data-package/g)||[]).length,total);
+ assert.equal((html.match(/<tr data-project=/g)||[]).length,index.projects.length);
+ const combined=JSON.parse(fs.readFileSync(path.join(output,'changes.json')));
+ const files=combined.projects.map(project=>project.projectId).sort();
+ assert.deepEqual(fs.readdirSync(path.join(output,'changes')).sort(),files.map(id=>id+'.json').sort());
+ assert.deepEqual(fs.readdirSync(path.join(output,'packages')).sort(),files.map(id=>id+'.html').sort());
+ for(const project of combined.projects){
+  const single=JSON.parse(fs.readFileSync(path.join(output,'changes',project.projectId+'.json')));
+  assert.deepEqual(single,{schemaVersion:combined.schemaVersion,...project});
+  const page=fs.readFileSync(path.join(output,'packages',project.projectId+'.html'),'utf8');
+  const catalog=JSON.parse(fs.readFileSync(path.join(root,'catalogs',project.projectId+'.json')));
+  assert.deepEqual([...page.matchAll(/data-version="([^"]+)"/g)].map(match=>match[1]),
+   [...new Set(catalog.packages.map(record=>record.version))]);
+  assert.equal(page.includes('<script>'),false);
+ }
+ const expectedLatest=index.projects.flatMap(project=>project.releases.filter(release=>release.version===project.releases[0].version));
+ const downloads=[...html.matchAll(/class="download" href="([^"]+)"/g)].map(match=>match[1]).sort();
+ assert.deepEqual(downloads,expectedLatest.map(release=>release.asset.url).sort());
+ assert.equal(html.includes('changes.json'),false);
+ assert.equal(html.includes('Changes'),false);
+ assert.equal(html.includes('data-version='),false);
  for(const delivery of ['downloadable','bundled']){
   const supplied=published.filter(row=>row.project.delivery===delivery);
   assert.equal(index.projects.filter(project=>project.delivery===delivery).length,supplied.length);
-  const rows=new RegExp('data-package data-project="[^"\\n]+" data-delivery="'+delivery+'"','g');
-  assert.equal((html.match(rows)||[]).length,supplied.reduce((count,row)=>count+row.packages.length,0));
+
  }
  const verification=JSON.parse(fs.readFileSync(path.join(output,'verification.json'))),verifiedHtml=fs.readFileSync(path.join(output,'verification.html'),'utf8');
  const githubRows=verification.packages.filter(row=>row.origin==='github');assert.equal(githubRows.length,coverage.githubBuilds.length);
@@ -82,25 +102,27 @@ test('download and verification pages include only exact verified archive author
  for(const project of index.projects){assert.ok(html.includes('id="'+project.projectId+'"'));assert.ok(project.pageUrl.endsWith('/#'+project.projectId));}
  assert.ok(fs.existsSync(path.join(output,'.nojekyll')));
 });
-test('package groups, search, keyboard tabs and deep links operate entirely offline',()=>{
- const html=renderIndex({repository:'owner/builds',projects:[]}),script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
- const row=(textContent,delivery,project)=>({textContent,dataset:{delivery,project},closest(){return this;},scrollIntoView(){this.scrolled=true;}});
- const rows=[row('HashLink 1.9 ABI x64','downloadable','hashlink'),row('HashLink 1.12 ABI x64','downloadable','hashlink'),row('Steamworks4j 1.10 JNI ABI arm64','bundled','java-steamworks')];
- const tab=group=>({dataset:{group},handlers:{},addEventListener(name,fn){this.handlers[name]=fn;},setAttribute(name,value){this[name]=value;},focus(){this.focused=true;}});
- const tabs=[tab('downloadable'),tab('bundled')],panels=tabs.map(tab=>({dataset:{delivery:tab.dataset.group}})),count={},empty={},input={value:'',addEventListener(name,fn){this.onInput=fn;}},location={hash:''},events={};
- vm.runInNewContext(script,{document:{querySelector:selector=>({'#search':input,'#count':count,'#empty':empty})[selector],querySelectorAll:selector=>({'[data-package]':rows,'[role=tab]':tabs,'[data-panel]':panels})[selector],getElementById:id=>({'hashlink-1-12':rows[1],'java-steamworks-1-10':rows[2]})[id]},window:{location,addEventListener(name,fn){events[name]=fn;}},requestAnimationFrame:fn=>fn()});
- assert.deepEqual(panels.map(panel=>panel.hidden),[false,true]);assert.equal(count.textContent,'2 of 2 packages · 1 project');
- input.value='hashlink 1.12 x64';input.onInput();assert.deepEqual(rows.map(row=>row.hidden),[true,false,true]);assert.equal(count.textContent,'1 of 2 packages · 1 project');assert.equal(empty.hidden,true);
- tabs[1].handlers.click();assert.deepEqual(panels.map(panel=>panel.hidden),[true,false]);assert.equal(empty.hidden,false);assert.equal(tabs[1]['aria-selected'],'true');assert.equal(tabs[0].tabIndex,-1);
- input.value='Steamworks4j 1.10';input.onInput();assert.equal(empty.hidden,true);assert.equal(count.textContent,'1 of 1 packages · 1 project');
- let prevented=false;tabs[1].handlers.keydown({key:'ArrowLeft',preventDefault(){prevented=true;}});assert.equal(prevented,true);assert.equal(tabs[0].focused,true);assert.deepEqual(panels.map(panel=>panel.hidden),[false,true]);
- location.hash='#java-steamworks-1-10';events.hashchange();assert.equal(input.value,'');assert.deepEqual(panels.map(panel=>panel.hidden),[true,false]);assert.equal(rows[2].scrolled,true);
- location.hash='#hashlink-1-12';events.hashchange();assert.deepEqual(panels.map(panel=>panel.hidden),[false,true]);assert.equal(rows[1].scrolled,true);
+test('app project and HashLink section hashes forward to static pages without fetching',()=>{
+ const html=renderIndex({repository:'owner/builds',projects:[]});
+ const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
+ const destinations=[],events={},location={hash:'',replace:value=>destinations.push(value)};
+ const row=id=>({dataset:{project:id},querySelector:()=>({getAttribute:()=> 'packages/'+id+'.html'})});
+ const projects={reshade:row('reshade'),'maclauncher-kosmickrisp':row('maclauncher-kosmickrisp'),hashlink:row('hashlink')};
+ const anchors=Object.fromEntries(Object.entries(projects).map(([id,value])=>[id,{closest:()=>value}]));
+ anchors['hashlink-1-12']={closest:()=>projects.hashlink};
+ vm.runInNewContext(script,{document:{getElementById:id=>anchors[id]},window:{location,addEventListener:(name,fn)=>events[name]=fn}});
+ assert.deepEqual(destinations,[]);
+ location.hash='#reshade';events.hashchange();
+ assert.deepEqual(destinations,['packages/reshade.html']);
+ location.hash='#maclauncher-kosmickrisp';events.hashchange();
+ location.hash='#hashlink-1-12';events.hashchange();
+ assert.deepEqual(destinations,['packages/reshade.html','packages/maclauncher-kosmickrisp.html','packages/hashlink.html#hashlink-1-12']);
  location.hash='#%invalid';assert.doesNotThrow(()=>events.hashchange());
+ location.hash='#missing';events.hashchange();assert.equal(destinations.length,3);
 });
-test('package names and ABI labels are escaped before rendering public HTML',t=>{
- const {index}=indexFixture(t);index.projects[0].name='<script>bad()</script>';index.projects[0].releases[0].profile='ABI <unsafe>';
- const html=renderIndex(index);assert.ok(html.includes('&lt;script&gt;bad()&lt;/script&gt;'));assert.ok(html.includes('ABI &lt;unsafe&gt;'));assert.equal(html.includes('<script>bad()'),false);
+test('package names and latest versions are escaped before rendering public HTML',t=>{
+ const {index}=indexFixture(t);index.projects[0].name='<script>bad()</script>';index.projects[0].releases[0].version='Version <unsafe>';
+ const html=renderIndex(index);assert.ok(html.includes('&lt;script&gt;bad()&lt;/script&gt;'));assert.ok(html.includes('Version &lt;unsafe&gt;'));assert.equal(html.includes('<script>bad()'),false);
 });
 test('ABI profile metadata rejects duplicate versions and incomplete labels',requirements({sourceTree:'sources/maclauncher-android'}),t=>{
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'package-profiles-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
@@ -109,7 +131,10 @@ test('ABI profile metadata rejects duplicate versions and incomplete labels',req
 });
 
 test('each package states its CPU architecture and the Mac CPUs that can run it',t=>{
- const {index,directory}=indexFixture(t),html=renderIndex(index);
+ const {index,directory}=indexFixture(t);
+ const catalog=JSON.parse(fs.readFileSync(path.join(directory,'catalogs/hashlink.json')));
+ const changes={projectId:'hashlink',releases:[...new Set(catalog.packages.map(record=>record.version))].map(version=>({version,previousVersion:null,inputs:[],commits:[]}))};
+ const html=renderPackagePage(index.projects[0],changes,catalog,index.repository);
  for(const project of index.projects)for(const release of project.releases){
   assert.ok(['arm64','x64','universal'].includes(release.arch));
   const catalog=JSON.parse(fs.readFileSync(path.join(directory,'catalogs',project.projectId+'.json'))),record=catalog.packages.find(row=>row.version===release.version&&row.arch===release.arch);
@@ -125,4 +150,19 @@ test('ABI links have one anchor when a family gains versions and CPU rows',t=>{
  const {index}=indexFixture(t),project=index.projects[0],release=project.releases.find(r=>r.anchor==='hashlink-1-9');
  assert.ok(release);project.releases.unshift({...release,version:'1.9-MCLv2'},{...release,version:'1.9-MCLv2',arch:'arm64'});
  const html=renderIndex(index);assert.equal((html.match(/id="hashlink-1-9"/g)||[]).length,1);assert.ok(html.includes('1.9-MCLv2'));assert.ok(html.includes('Apple Silicon'));
+});
+
+test('static version pages render Markdown notes before generated changes without scripts',t=>{
+ const {index,directory}=indexFixture(t),project=index.projects[0];
+ const catalog=JSON.parse(fs.readFileSync(path.join(directory,'catalogs/hashlink.json')));
+ const changes={projectId:'hashlink',releases:[...new Set(catalog.packages.map(record=>record.version))].map(version=>({
+  version,previousVersion:null,notes:'**Readable note** with `code`.\n\n- A setting.\n- <script>unsafe</script>',
+  inputs:[],commits:[{revision:'a'.repeat(40),date:'2026-11-11T00:00:00Z',subject:'Generated subject'}]
+ }))};
+ const html=renderPackagePage(project,changes,catalog,index.repository);
+ assert.ok(html.includes('<strong>Readable note</strong> with <code>code</code>'));
+ assert.ok(html.includes('&lt;script&gt;unsafe&lt;/script&gt;'));
+ assert.ok(html.indexOf('Readable note')<html.indexOf('Generated subject'));
+ assert.equal(html.includes('<script>'),false);
+ assert.ok(html.includes('../catalogs/hashlink.json'));assert.ok(html.includes('../changes/hashlink.json'));
 });
