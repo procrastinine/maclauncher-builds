@@ -103,7 +103,7 @@ jobs:
         env:
           NODE_OPTIONS: --max-http-header-size=32768
         with:
-          inputs: '{"subject-path":"${{ runner.temp }}/runtime/*/*","github-token":"${{ github.token }}"}'
+          inputs: '{"subject-path":"${{ runner.temp }}/runtime/**","github-token":"${{ github.token }}"}'
 
   # A package version publishes only when every one of its architectures built.
   # Packages publish in level order, so inputs are public before their consumers.
