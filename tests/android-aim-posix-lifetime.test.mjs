@@ -16,6 +16,8 @@ function run(command,args,options={}) {
   assert.ifError(r.error);assert.equal(r.signal,null,r.stdout+r.stderr);
   assert.equal(r.status,0,r.stdout+r.stderr);return r.stdout;
 }
+// Compiles share busy CI machines with the rest of the suite, so only a hung compiler stops them; the compiled programs keep the 30-second bound.
+function compile(command,args,options={}) {return run(command,args,{timeout:600000,...options});}
 
 test('AIM holder isolation changes only its spawn group and required import',requirements({sourceTree:'sources/maclauncher-android'}),async t=>{const {adaptPosixHolderProcessGroup}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
   const root=process.env.ANDROID_AIM_POSIX_SOURCE||fileURLToPath(new URL('../sources/maclauncher-android/src/external/aim-custom',import.meta.url));
@@ -25,7 +27,7 @@ test('AIM holder isolation changes only its spawn group and required import',req
   assert.throws(()=>adaptPosixHolderProcessGroup(fixed),/no longer matches/);
 });
 
-test('actual original POSIX controller preserves lock ownership across group TERM and retires after controller death',{timeout:45000,...requirements({sourceTree:'sources/maclauncher-android'})},async t=>{const {adaptPosixHolderProcessGroup}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
+test('actual original POSIX controller preserves lock ownership across group TERM and retires after controller death',requirements({sourceTree:'sources/maclauncher-android'}),async t=>{const {adaptPosixHolderProcessGroup}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
   const inputs=process.env.ANDROID_AIM_POSIX_NATIVE_INPUTS;
   if(process.platform!=='darwin'||process.arch!=='arm64'||!inputs)return t.skip('Requires cached AIM source libraries and the original lock holder');
   const native=JSON.parse(fs.readFileSync(inputs,'utf8'));
@@ -40,7 +42,7 @@ test('actual original POSIX controller preserves lock ownership across group TER
     const executable=path.join(root,kind),output=path.join(root,kind+'-children');fs.mkdirSync(output);
     const args=['--edition=2024',fixture,'--extern','aim_storage='+library,'--extern','libc='+native.libc,'-C','debuginfo=0','-o',executable];
     for(const directory of native.dependencyDirectories)args.push('-L','dependency='+directory);
-    run(native.rustc,args,{env});run('/usr/bin/codesign',['--force','--sign','-',executable],{env});
+    compile(native.rustc,args,{env});run('/usr/bin/codesign',['--force','--sign','-',executable],{env});
     try {
       const result=run(executable,[output,native.holder,kind],{env});
       if(kind==='original')assert.match(result,/same: SHUTDOWN errno=Some\(10\)/);

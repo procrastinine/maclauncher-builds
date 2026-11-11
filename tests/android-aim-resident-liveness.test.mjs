@@ -14,6 +14,8 @@ const run=(command,args,options={})=>{
  assert.ifError(result.error);assert.equal(result.signal,null,result.stdout+result.stderr);
  assert.equal(result.status,0,result.stdout+result.stderr);return result;
 };
+// Compiles share busy CI machines with the rest of the suite, so only a hung compiler stops them; the compiled programs keep the 30-second bound.
+const compile=(command,args,options={})=>run(command,args,{timeout:600000,...options});
 
 test('resident liveness changes only the kernel zombie condition',requirements({sourceTree:'sources/maclauncher-android'}),async t=>{const {adaptResidentProcessLiveness,adaptResidentWorkerDrain}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
  const source=process.env.ANDROID_AIM_RESIDENT_SOURCE;
@@ -35,7 +37,7 @@ test('registered worker drain uses the existing finish budget without changing s
  assert.throws(()=>adaptResidentWorkerDrain(adapted),/no longer matches/);
 });
 
-test('actual resident code recognizes a real unreaped zombie as ended',{timeout:45000,...requirements({sourceTree:'sources/maclauncher-android'})},async t=>{const {adaptResidentProcessLiveness,adaptResidentWorkerDrain}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
+test('actual resident code recognizes a real unreaped zombie as ended',requirements({sourceTree:'sources/maclauncher-android'}),async t=>{const {adaptResidentProcessLiveness,adaptResidentWorkerDrain}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
  const source=process.env.ANDROID_AIM_RESIDENT_SOURCE,inputs=process.env.ANDROID_AIM_RESIDENT_NATIVE_INPUTS;
  if(process.platform!=='darwin'||process.arch!=='arm64'||!source||!inputs)
   return t.skip('Requires AIM source and cached native compiler inputs');
@@ -51,7 +53,7 @@ test('actual resident code recognizes a real unreaped zombie as ended',{timeout:
  const args=['--edition=2024','--crate-name','aimctl','--test',path.join(directory,'main.rs'),'-C','opt-level=1','-C','debuginfo=0','-o',executable];
  for(const directory of native.dependencyDirectories)args.push('-L','dependency='+directory);
  for(const[name,file]of Object.entries(native.externs))args.push('--extern',name+'='+file);
- run(native.rustc,args);
+ compile(native.rustc,args);
  const result=run(executable,['resident::liveness_regression_fixture','--nocapture','--test-threads=1']);
  assert.match(result.stdout,/3 passed; 0 failed/);
  assert.match(result.stdout,/actual resident: live birth retained, stale birth cannot signal, unreaped SZOMB ended, registry errors retained/);

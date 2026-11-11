@@ -25,6 +25,8 @@ function run(command,args,options={}) {
   assert.ifError(r.error);assert.equal(r.signal,null,r.stdout+r.stderr);
   assert.equal(r.status,0,r.stdout+r.stderr);return r.stdout;
 }
+// Compiles share busy CI machines with the rest of the suite, so only a hung compiler stops them; the compiled programs keep the 30-second bound.
+function compile(compiler,args) {return run(compiler,args,{timeout:600000});}
 
 test('AIM display adaptation only moves the guarded initial draw after serving begins',requirements({sourceTree:'sources/maclauncher-android'}),async t=>{const {adaptDisplayReadiness,adaptDisplayTitle}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
   const text=original(t);if(!text)return;
@@ -38,7 +40,7 @@ test('AIM display adaptation only moves the guarded initial draw after serving b
   assert.throws(()=>adaptDisplayReadiness(fixed),/no longer matches/);
 });
 
-test('actual startup block accepts a Unix handshake while the first render is blocked',{timeout:45000,...requirements({sourceTree:'sources/maclauncher-android'})},async t=>{const {adaptDisplayReadiness,adaptDisplayTitle}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
+test('actual startup block accepts a Unix handshake while the first render is blocked',requirements({sourceTree:'sources/maclauncher-android'}),async t=>{const {adaptDisplayReadiness,adaptDisplayTitle}=await import('../producers/package-support/src/modules/android/providers/aim/source.mjs');
   const text=original(t);if(!text)return;
   const root=fs.mkdtempSync(path.join(os.tmpdir(),'aim-display-readiness-'));
   t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
@@ -47,7 +49,7 @@ test('actual startup block accepts a Unix handshake while the first render is bl
   for(const [name,source]of [['original',text],['fixed',adaptDisplayReadiness(text)]]) {
     const sourceFile=path.join(root,name+'.rs'),executable=path.join(root,name);
     fs.writeFileSync(sourceFile,fixture.replace('/* ORIGINAL_STARTUP */',startup(source)));
-    run(compiler,['--edition=2024','--crate-name','display_readiness',sourceFile,'-o',executable]);
+    compile(compiler,['--edition=2024','--crate-name','display_readiness',sourceFile,'-o',executable]);
     t.diagnostic(run(executable,[name,path.join(root,name+'.sock')]).trim());
     if(name==='fixed')t.diagnostic(run(executable,['early',path.join(root,'early.sock')]).trim());
   }
@@ -65,7 +67,7 @@ test('actual display argument parser uses its bundle title, falls back, and hono
   const fixture=fs.readFileSync(fileURLToPath(new URL('fixtures/android-aim-display/title.rs',import.meta.url)),'utf8');
   const source=path.join(root,'title.rs'),executable=path.join(root,'title');
   fs.writeFileSync(source,fixture.replace('/* ORIGINAL_ARGUMENT_PARSER */',fixed.slice(start,end)));
-  run(process.env.ANDROID_AIM_RUSTC||'rustc',['--edition=2024',source,'-o',executable]);
+  compile(process.env.ANDROID_AIM_RUSTC||'rustc',['--edition=2024',source,'-o',executable]);
   const env={...process.env};delete env.AIM_TEST_BUNDLE_TITLE;
   assert.equal(run(executable,[],{env}).trim(),'Android');
   assert.equal(run(executable,[],{env:{...env,AIM_TEST_BUNDLE_TITLE:'Shattered Pixel Dungeon'}}).trim(),'Shattered Pixel Dungeon');
