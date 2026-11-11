@@ -26,7 +26,16 @@ function adapt(relative, bytes) {
 {
   if (argc > 1) {
     @autoreleasepool {
+      const char* title = getenv("MACLAUNCHER_GAME_NAME");
+      NSString* name = title && *title ? [NSString stringWithUTF8String:title] : nil;
+      if (name.length) NSProcessInfo.processInfo.processName = name;
       NSApplication* app = [NSApplication sharedApplication];
+      const char* icon = getenv("MACLAUNCHER_GAME_ICON");
+      if (icon && *icon) {
+        NSImage* image = [[NSImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String:icon]];
+        if (image) app.applicationIconImage = image;
+        [image release];
+      }
       CocoaWrapper* delegate = [[CocoaWrapper alloc] init];
       [app setDelegate:delegate];
       [app setActivationPolicy:NSApplicationActivationPolicyRegular];
