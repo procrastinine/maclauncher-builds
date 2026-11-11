@@ -25,6 +25,7 @@ jobs:
         with:
           ref: ${{ inputs.source-revision || github.sha }}
           persist-credentials: false
+          fetch-depth: 0
       - uses: ./.github/actions/setup-node
       - name: Install locked build-tool dependencies
         run: npm ci --ignore-scripts

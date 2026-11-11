@@ -16,7 +16,7 @@ function slot(value,pointer){const keys=parsePointer(pointer),key=keys.pop();for
 /** Locale-independent string order, so the build definition and its digest match on every runner. */
 const ordinal=(a,b)=>a<b?-1:a>b?1:0;
 function normalizedBuilds(builds){
- const commands=new Map();for(const {version,...build} of builds){let combined=commands.get(build.command);if(!combined){combined={command:build.command};commands.set(build.command,combined);}for(const [key,value] of Object.entries(build)){if(key==='command')continue;if(Array.isArray(value))combined[key]=[...new Set([...(combined[key]||[]),...value])].sort();else if(value&&typeof value==='object')combined[key]={...combined[key],...value};else if(typeof value==='boolean')combined[key]=!!(combined[key]||value);else combined[key]=value;}}
+ const commands=new Map();for(const {version,notes,...build} of builds){let combined=commands.get(build.command);if(!combined){combined={command:build.command};commands.set(build.command,combined);}for(const [key,value] of Object.entries(build)){if(key==='command')continue;if(Array.isArray(value))combined[key]=[...new Set([...(combined[key]||[]),...value])].sort();else if(value&&typeof value==='object')combined[key]={...combined[key],...value};else if(typeof value==='boolean')combined[key]=!!(combined[key]||value);else combined[key]=value;}}
  return [...commands.values()].sort((a,b)=>ordinal(a.command,b.command));
 }
 
@@ -26,6 +26,10 @@ function normalizedBuilds(builds){
  * plus the pins and package references inside the declared JSON records. Code
  * is never read for discovery. This is the one validation of records and pins.
  */
+export function declaredRecipeEntries(project,manifest){
+ const builds=project.build?(Array.isArray(project.build)?project.build:[project.build]):[];
+ return [...new Set([...(manifest.buildCode||[]),...builds.flatMap(build=>[build.command]),...(project.producer.entries||[]),...(project.producer.appEntries||[]).map(name=>APP_REFERENCE+name),project.producer.recipe].filter(Boolean))].sort();
+}
 export function createRecipeBuildReporter({directory=path.resolve(import.meta.dirname,'..')}={}){
  const root=fs.realpathSync(directory),registry=readProjects(root,{resolvePins:false}),projects=new Map(registry.projects.map(project=>[project.id,project])),cache=new Map(),problems=new Map();
  const manifest=JSON.parse(fs.readFileSync(path.join(root,'projects.json'))),registryFiles=new Set(['projects.json',...Object.values(manifest.registries||{})]);
@@ -88,8 +92,8 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    if(below.length)for(const file of below)addApp(file,from);
    else problem(from,APP_REFERENCE+name,'missing');
   }
-  for(const name of manifest.buildCode||[])entry(name,'projects.json');
-  for(const build of builds){entry(build.command,'projects');for(const name of submodules)if(!useLink(name,"projects"))problem('projects',name,'missing');
+  for(const name of declaredRecipeEntries(project,manifest))entry(name,(manifest.buildCode||[]).includes(name)?'projects.json':'projects');
+  for(const build of builds){for(const name of submodules)if(!useLink(name,"projects"))problem('projects',name,'missing');
    for(const input of build.inputs||[])if(projects.has(input)&&input!==id)inputs.add(input);else problem('projects',input,'input','A package input names another registered project.');}
   // A build's archive pins select the archive records it reads; each is listed for the input step,
   // with the pin's architecture when it has one.
@@ -101,9 +105,6 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    if(found.length)listed.push(...found.map(archive=>pin.arch?{...archive,arch:pin.arch}:archive));else problem('projects',JSON.stringify(pin),'archive','The archive pin selects no archive record.');
   }
   for(const build of builds)for(const lock of build.locks||[])entry(lock.file,'projects');
-  for(const name of project.producer.entries||[])entry(name,'projects');
-  for(const name of project.producer.appEntries||[])entry(APP_REFERENCE+name,'projects');
-  if(project.producer.recipe)entry(project.producer.recipe,'projects');
   for(const upstream of project.upstreams)if(upstream.pin){
    const expression=JSON.stringify(upstream.pin);
    try{validatePinReference(upstream.pin);}catch(error){problem("projects",expression,"pin",error.message);continue;}

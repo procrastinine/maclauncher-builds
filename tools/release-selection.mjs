@@ -43,7 +43,7 @@ export function registerSelection({selection,directory=path.resolve(import.meta.
   const records=buildRecords(project),matched=records.filter(record=>base(record.version)===base(request.version));
   const sources=matched.length?matched:records.filter(record=>base(record.version)===base(records[0].version));
   const family=base(sources[0].version),familyKey=request.id+'='+family;if(families.has(familyKey))throw Error('Select only one new version for an ABI line: '+familyKey);families.add(familyKey);
-  const output={...clone(sources[0]),version:request.version,architectures:[]};
+  const output={...clone(sources[0]),version:request.version,architectures:[]};delete output.notes;
   for(const source of sources){if(source.command!==output.command)throw Error('ABI line has conflicting build recipes.');for(const arch of source.architectures)if(!output.architectures.includes(arch))output.architectures.push(arch);for(const key of ['tools','submodules','rustTargets','rustComponents'])if(source[key])output[key]=[...new Set([...(output[key]||[]),...source[key]])];if(source.runners)output.runners={...output.runners,...source.runners};if(source.cleanupRunner)output.cleanupRunner=true;if(source.recursiveSubmodules)output.recursiveSubmodules=true;}
   for(const arch of output.architectures)include.push({project:request.id,version:request.version,arch});
   plans.push({request,project:mutable.get(request.id),sources,family,output});
