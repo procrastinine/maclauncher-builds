@@ -195,6 +195,27 @@ Packages of tagged upstream releases use versions such as `1.2.3-MCLv1`, and the
 
 Downloadable records give the upstream repository and commit in `source: {repository, revision, path?}`, matching the package's manifest, and the package's game and runtime requirements in a `capabilities` object. `launcherContract` is a positive integer; a record without it uses contract 1. Records of bundled components identify exactly the package that MacLauncher selected.
 
+### Version changes
+
+The package site publishes `changes.json` beside `index.json`. Its project ids and versions are exactly those in the package catalogs. Records for several architectures of the same version form one release entry. Each version row has a **Changes** disclosure, and the header links to the JSON history. The app reads catalogs and package declarations independently of this file.
+
+| Field | Contents |
+| --- | --- |
+| `schemaVersion` | `1` |
+| `projects[].projectId` | Catalog project id |
+| `projects[].releases[].version` | Catalog version |
+| `architectures` | Sorted architecture names from that version's catalog records |
+| `sourceRevision` | Catalog `build.sourceRevision`, or `source.revision` when it identifies the Builds repository; `null` when neither is recorded |
+| `previousVersion` | Preceding catalog version, or `null` for the first version |
+| `inputs` | Changed input records, each with `name`, `before` and `after`; `null` identifies an addition or removal |
+| `commits` | Recipe commits with `revision`, `date` and `subject`, limited to the project's declared paths between the two recorded Builds commits |
+| `notes` | Optional sentence from the matching project `build` record |
+| `unrecordedInputs` | Inputs the resolver cannot read as recorded data, each with `name` and `reason` |
+
+The project resolver reads source pins from the recorded Git commit as data. Historical producer code is never executed or parsed for pin values. Inputs without a recorded pin remain explicit in `unrecordedInputs`. The first version lists its recorded inputs without a commit range. Releases are ordered by source commit date and then version; commits by date and revision. Input names, architecture arrays and object keys have stable sorted order. The file has no generation timestamp.
+
+An optional `notes` string on a project's `build` record adds one human sentence to that version's generated changes. It is recorded in the same commit that requests the version through the project registry and `releases.txt`. Omit the field for generated entries alone. Selecting a new version does not copy the preceding version's notes. Notes do not alter the build definition digest.
+
 ## Android producer
 
 The recipe for the `android` project builds from `sources/maclauncher-android`, a submodule fixed at an exact commit. A build needs that checkout without local changes, and explicit paths to the build inputs.
@@ -284,15 +305,3 @@ The [graphics recipe](../tools/build-graphics.mjs) builds the core and its decla
 The [Innoextract recipe](../tools/build-innoextract.mjs) builds the extractor and its JSON inspection companion for the selected CPU, using Boost sources and headers at recorded versions, XZ headers and the compression libraries of the macOS SDK. The [System3 recipe](../tools/build-system3.mjs) builds the shared SDL and font libraries for that CPU and packages the resources that the executable loads from beside it. Both recipes use the native packager to collect and package the libraries they depend on.
 
 The [GameMaker 8 decompiler recipe](../tools/build-gm8-decompiler.mjs) compiles MacLauncher's adaptation of the decompiler's Rust workspace with the exact dependency versions in its Cargo lock file, then uses this packager. [APK metadata](../tools/build-apk-metadata.mjs), [Android integration JARs](../tools/build-android-launcher.mjs), [Java Steamworks](../tools/build-java-steamworks.mjs), [LuaSteam](../tools/build-luasteam.mjs) and the [iOS storage adapter](../tools/build-ios-helper.mjs) have separate build commands. Their finished helper manifests include the file list that MacLauncher reads. Java Steamworks keeps the publisher's JNI libraries and compiles MacLauncher's own Java loader, and the Android JAR recipe compiles against a public Android API archive with a recorded checksum.
-
-## Version changes
-
-The package site publishes `changes.json` beside `index.json`. Each project lists its tagged versions, the preceding version, source pin additions, removals and changes, and the subjects and identities of recipe commits between the two release tags. Recipe paths come from the project's declared build command, producer entries, upstream pins, submodules and shared build code. The first published version lists its recorded inputs without a commit range. Historical inputs absent from the available Git objects are listed as `unavailableInputs`.
-
-Each version row has a **Changes** disclosure. The header links to the complete JSON history. Catalog schemas and installation records are independent of this history.
-
-An optional `notes` string on a project's `build` record adds one human sentence to that version's generated changes. It is recorded in the same commit that requests the version through the project registry and `releases.txt`. Omit the field for generated entries alone. Selecting a new version does not copy the preceding version's notes. Notes do not alter the build definition digest.
-
-The JSON has `schemaVersion: 1` and a `projects` array. Each project has `projectId` and `releases`. A release contains its `version`, sorted `tags`, source `revision`, commit `date`, `versionSources` (`tags`, `catalog`, or both), `previousVersion`, `pins` and `commits`. Releases are ordered by commit date and then version; commits are ordered by date and revision. Object keys and input identities use ordinal ordering. There is no generation timestamp.
-
-Each pin has an `input` identity and `before` and `after` records; `null` identifies an addition or removal. Commit records contain `revision`, `date` and `subject`. JSON records, Gitlinks and unambiguous literal revision exports in older producer modules supply pin values. Historical producer modules are read without execution.

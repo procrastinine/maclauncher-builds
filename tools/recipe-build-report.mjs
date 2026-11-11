@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
-import {readProjects,buildRecords} from '../lib/projects.mjs';
+import {readProjects,buildRecords,declaredRecipeEntries} from '../lib/projects.mjs';
 import {resolveUpstream,validatePinReference} from "../lib/source-pins.mjs";
 import {sourceRecordProblem,sourceArchive,archiveInput,lockValue} from '../lib/pins.mjs';
 import {APP_REFERENCE,appSourceRoot,appNestedFiles} from './app-source.mjs';
@@ -26,10 +26,6 @@ function normalizedBuilds(builds){
  * plus the pins and package references inside the declared JSON records. Code
  * is never read for discovery. This is the one validation of records and pins.
  */
-export function declaredRecipeEntries(project,manifest){
- const builds=project.build?(Array.isArray(project.build)?project.build:[project.build]):[];
- return [...new Set([...(manifest.buildCode||[]),...builds.flatMap(build=>[build.command]),...(project.producer.entries||[]),...(project.producer.appEntries||[]).map(name=>APP_REFERENCE+name),project.producer.recipe].filter(Boolean))].sort();
-}
 export function createRecipeBuildReporter({directory=path.resolve(import.meta.dirname,'..')}={}){
  const root=fs.realpathSync(directory),registry=readProjects(root,{resolvePins:false}),projects=new Map(registry.projects.map(project=>[project.id,project])),cache=new Map(),problems=new Map();
  const manifest=JSON.parse(fs.readFileSync(path.join(root,'projects.json'))),registryFiles=new Set(['projects.json',...Object.values(manifest.registries||{})]);

@@ -11,7 +11,11 @@ export const APP_REFERENCE='app:';
 const verified=new Map();
 /** The app is the source authority; Builds reads its exact clean pin in place.
  * The pin is the gitlink that producers/package-support/app-source.json names. */
-export function appSourceRoot(repository=root){
+export function appSourceRoot(repository=root,{source}={}){
+ if(source?.at){
+  const profile=source.json('producers/package-support/app-source.json');
+  return {directory:path.join(repository,sourceCheckout(profile)),revision:source.revision(profile)};
+ }
  if(verified.has(repository))return verified.get(repository);
  const profile=JSON.parse(fs.readFileSync(path.join(repository,'producers/package-support/app-source.json')));
  const directory=path.join(repository,sourceCheckout(profile)),revision=sourceRevision(profile,repository);

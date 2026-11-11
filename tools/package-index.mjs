@@ -4,7 +4,7 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import {canonicalReport} from '../lib/canonical-report.mjs';
-import {packageChanges} from './package-changes.mjs';
+import {packageChanges} from '../lib/package-changes.mjs';
 import {catalogIndex} from './release-runtime.mjs';
 import {buildCoverage} from './build-coverage.mjs';
 import {readProjects} from '../lib/projects.mjs';
@@ -22,12 +22,25 @@ const groups=[
  {id:'downloadable',label:'Downloadable runtimes and tools',description:'Installed through MacLauncher Runtimes or when a game needs them.'},
  {id:'bundled',label:'Included components',description:'Core graphics components and internal helpers included in the app.'}
 ];
-const changeDetails=(changes,id,version)=>{
+function changeDetails(changes,id,version){
  const entry=changes?.projects.find(row=>row.projectId===id)?.releases.find(row=>row.version===version);
  if(!entry)return '';
- const items=entry.pins.map(pin=>'<li>'+escape(pin.input)+': '+escape(JSON.stringify(pin.before))+' → '+escape(JSON.stringify(pin.after))+'</li>').join('');
- return '<details><summary>Changes</summary>'+(entry.previousVersion?'<p>Since '+escape(entry.previousVersion)+'</p>':'<p>First published version; recorded source inputs.</p>')+(entry.notes?'<p>'+escape(entry.notes)+'</p>':'')+(items?'<ul>'+items+'</ul>':'')+(entry.commits.length?'<ul>'+entry.commits.map(commit=>'<li><a href="https://github.com/procrastinine/maclauncher-builds/commit/'+escape(commit.revision)+'">'+escape(commit.subject)+'</a></li>').join('')+'</ul>':'')+(entry.unavailableInputs?.length?'<p>Historical inputs unavailable: '+entry.unavailableInputs.map(escape).join(', ')+'</p>':'')+'</details>';
-};
+ const items=entry.inputs.map(input=>{
+  const before=escape(JSON.stringify(input.before)),after=escape(JSON.stringify(input.after));
+  return '<li>'+escape(input.name)+': '+before+' → '+after+'</li>';
+ }).join('');
+ const commits=entry.commits.map(commit=>{
+  const url='https://github.com/procrastinine/maclauncher-builds/commit/'+escape(commit.revision);
+  return '<li><a href="'+url+'">'+escape(commit.subject)+'</a></li>';
+ }).join('');
+ const unrecorded=(entry.unrecordedInputs||[]).map(input=>
+  escape(input.name+': '+input.reason)).join(', ');
+ const since=entry.previousVersion?'Since '+escape(entry.previousVersion):'First published version; recorded source inputs.';
+ return '<details><summary>Changes</summary><p>'+since+'</p>'+
+  (entry.notes?'<p>'+escape(entry.notes)+'</p>':'')+
+  (items?'<ul>'+items+'</ul>':'')+(commits?'<ul>'+commits+'</ul>':'')+
+  (unrecorded?'<p>Inputs without a recorded pin: '+unrecorded+'</p>':'')+'</details>';
+}
 export function renderIndex(index,changes){
  if(index.projects.some(project=>!groups.some(group=>group.id===project.delivery)))throw Error('Every indexed project requires a delivery classification.');
  const anchors=new Set(index.projects.map(project=>project.projectId));
@@ -114,7 +127,7 @@ export async function buildIndex({directory=root,output}){
  if(!output)throw Error('An output directory is required.');
  const coverage=await buildCoverage(directory),index=catalogIndex(directory,{coverage});fs.mkdirSync(output,{recursive:true});
  if(fs.realpathSync(output)===fs.realpathSync(directory))throw Error('Package index output must be separate from its source tree.');
- const changes=packageChanges({directory,projects:readProjects(directory,{resolvePins:false}).projects.map(project=>({projectId:project.id}))});fs.writeFileSync(path.join(output,'changes.json'),JSON.stringify(JSON.parse(canonicalReport(changes)),null,2)+'\n');
+ const changes=packageChanges({directory});fs.writeFileSync(path.join(output,'changes.json'),JSON.stringify(JSON.parse(canonicalReport(changes)),null,2)+'\n');
  fs.writeFileSync(path.join(output,'index.json'),JSON.stringify(index,null,2)+'\n');fs.writeFileSync(path.join(output,'index.html'),renderIndex(index,changes));fs.writeFileSync(path.join(output,'.nojekyll'),'');
  const catalogsDirectory=path.join(output,'catalogs');
  if(fs.existsSync(catalogsDirectory)&&fs.lstatSync(catalogsDirectory).isSymbolicLink())throw Error('Generated catalogs must use an ordinary directory.');

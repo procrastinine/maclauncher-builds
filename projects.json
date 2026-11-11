@@ -22,6 +22,7 @@
     "lib/runtime-content.cjs",
     "lib/source-ownership.mjs",
     "lib/source-pins.mjs",
+    "lib/tree-source.mjs",
     "package.json",
     "producers/package-support/package.json",
     "producers/package-support/scripts/native-binary-tools.cjs",
