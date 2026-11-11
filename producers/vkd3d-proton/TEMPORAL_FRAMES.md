@@ -42,6 +42,8 @@ HUD-less color follows the backbuffer color space and postprocessing. UI RGB is 
 
 In both APIs the NGX core passes `DLSS.Input.Bias.Current.Color.Mask` and its subrect base as the reactive mask. DLSS reserves its transparency mask, so NGX frames carry none.
 
+MacLauncher's FidelityFX API proxy (the `fidelityfx-api` package) records each FidelityFX upscale dispatch the same ways: on Vulkan, the frame and the following barrier in the dispatch's command buffer, when the device's `driverInfo` names `temporal-sr` and it has `vkCmdPipelineBarrier2`; on D3D12, through `ID3D12GraphicsCommandListMetalFX`. Its frames carry FidelityFX's reactive and transparency-and-composition masks at the origin, and the camera near and far planes and vertical field of view as `CameraValid` values; FidelityFX has no camera matrices. Feature ids of these Vulkan frames carry `0x464658` ("FFX") in their top bytes.
+
 The NGX core takes the camera from MacLauncher's Streamline proxy, which passes the camera of the game's Streamline constants through the core's `MacLauncherSetTemporalCamera` export as the graphics pipeline's 64-byte `RSTemporalCamera`. An evaluation without Streamline constants has no camera.
 
 ## Driver

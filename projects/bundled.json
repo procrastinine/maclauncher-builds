@@ -137,7 +137,7 @@
   },
   {
     "id": "love-luasteam",
-    "name": "LÖVE LuaSteam bridge",
+    "name": "L\u00d6VE LuaSteam bridge",
     "purpose": "LuaSteam 4 binding against the selected host Lua VM.",
     "producer": {
       "kind": "maclauncher",
@@ -634,10 +634,14 @@
       {
         "version": "0.3.10",
         "label": "MacLauncher graphics 0.3.10"
+      },
+      {
+        "version": "0.3.11",
+        "label": "MacLauncher graphics 0.3.11"
       }
     ],
     "build": {
-      "version": "0.3.10",
+      "version": "0.3.11",
       "command": "tools/build-graphics.mjs",
       "architectures": [
         "universal",

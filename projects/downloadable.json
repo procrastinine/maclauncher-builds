@@ -3514,7 +3514,7 @@
   {
     "id": "fidelityfx-api",
     "name": "FidelityFX API adapter",
-    "purpose": "Original-preserving FidelityFX API proxy and native Vulkan scene producer.",
+    "purpose": "FidelityFX API proxies for Vulkan and Direct3D 12 that record upscale dispatches as MacLauncher temporal frames.",
     "producer": {
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
@@ -3522,10 +3522,12 @@
         "lib/abort.cjs",
         "lib/licenses.mjs",
         "producers/dependencies/llvmMingw.json",
-        "producers/dependencies/sdlHeaders.json",
+        "producers/dependencies/vulkanHeaders.json",
         "producers/package-support/app-source.json",
         "producers/package-support/src/modules/crossover/temporal/fidelityfx",
         "producers/package-support/src/modules/shared/runtime/pinned-native-build.js",
+        "producers/vkd3d-proton/vk_temporal_frame.h",
+        "producers/vkd3d-proton/vkd3d_metalfx.h",
         "tools/build-input.mjs",
         "tools/build-source.mjs",
         "tools/helper-package.mjs",
@@ -3536,17 +3538,9 @@
         "package.json",
         "src/modules/crossover/temporal/fidelityfx",
         "src/modules/crossover/temporal/streamline/pe-exports.js",
-        "src/modules/crossover/temporal/vulkan/scene-request.h",
-        "src/modules/shared/reshade/native/generation-provider.h",
-        "src/modules/shared/reshade/native/image-color.h",
-        "src/modules/shared/reshade/native/recorded-scene.h",
-        "src/modules/shared/reshade/native/vulkan-scene.h",
         "src/modules/shared/reshade/temporal/frame.h",
-        "src/modules/shared/reshade/temporal/scene-aovs.h",
-        "src/modules/shared/reshade/temporal/scene-matrices.h",
         "src/modules/shared/runtime/guards.js",
-        "src/modules/shared/runtime/pe-version.js",
-        "src/modules/shared/vulkan/native/scene-interop.h"
+        "src/modules/shared/runtime/pe-version.js"
       ]
     },
     "upstreams": [
@@ -3572,17 +3566,22 @@
       {
         "version": "1.0.1-MCLv6",
         "label": "FidelityFX API 1.0.1 Vulkan 1.0.1-MCLv6"
+      },
+      {
+        "version": "1.0.1-MCLv8",
+        "label": "FidelityFX API 1.0.1 Vulkan and Direct3D 12 1.0.1-MCLv8"
       }
     ],
     "build": {
-      "version": "1.0.1-MCLv6",
+      "version": "1.0.1-MCLv8",
       "command": "tools/build-fidelityfx-api.mjs",
       "architectures": [
         "x64"
       ],
       "submodules": [
         "producers/package-support/src/external/fsr3-sdk",
-        "producers/package-support/src/external/sdl-headers",
+        "producers/package-support/src/external/vulkan-headers",
+        "producers/vkd3d-proton/source",
         "sources/maclauncher"
       ],
       "archives": [
@@ -3854,7 +3853,7 @@
   {
     "id": "vnds-love",
     "name": "VNDS-LOVE",
-    "purpose": "Adapted VNDS interpreter for the managed LÖVE host.",
+    "purpose": "Adapted VNDS interpreter for the managed L\u00d6VE host.",
     "producer": {
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
