@@ -751,6 +751,10 @@
         {
           "tool": "cargo",
           "file": "sources/maclauncher/src/modules/shared/reshade/native/retroarch-prepare/Cargo.lock"
+        },
+        {
+          "tool": "swiftpm",
+          "file": "producers/package-support/src/external/MLX-DLSS/Package.resolved"
         }
       ]
     }

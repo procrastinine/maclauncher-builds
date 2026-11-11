@@ -6,11 +6,11 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {retryNetwork} from './download.mjs';
 
-/** Package-manager locks. A build declares, as `locks`, the Cargo.lock, go.sum and NuGet packages.lock.json
- *  files its compile reads; `build-runtime --prepare` fetches what each one names into one cache per tool,
+/** Package-manager locks. A build declares, as `locks`, the Cargo.lock, go.sum, NuGet packages.lock.json and
+ *  SwiftPM Package.resolved files its compile reads; `build-runtime --prepare` fetches what each one names into one cache per tool,
  *  and the compile reads that cache offline. Each lock is fetched from the lock alone, through a generated
  *  manifest that requires every locked package, so a recipe may compose its own manifest at compile time. */
-export const LOCK_TOOLS=['cargo','go','nuget'];
+export const LOCK_TOOLS=['cargo','go','nuget','swiftpm'];
 export const lockCache=tool=>{if(!LOCK_TOOLS.includes(tool))throw Error('Unknown lock tool: '+tool);return path.join(os.tmpdir(),'maclauncher-build-locks',tool);};
 const execute=(command,args,options)=>execFileSync(command,args,{encoding:'utf8',stdio:['ignore','pipe','pipe'],maxBuffer:Infinity,timeout:1800000,...options});
 const digest=text=>crypto.createHash('sha256').update(text).digest('hex');
@@ -40,6 +40,18 @@ export function cargoLockManifest(text){
  });
  return '[package]\nname = "maclauncher-locked-packages"\nversion = "0.0.0"\nedition = "2021"\npublish = false\n\n[lib]\npath = "lib.rs"\n\n[dependencies]\n'+rows.join('\n')+'\n';
 }
+/** The pinned Git repositories of a version 2 or 3 SwiftPM Package.resolved. */
+export function swiftResolvedPins(text){
+ const lock=JSON.parse(text);
+ if(![2,3].includes(lock?.version)||!Array.isArray(lock.pins)||!lock.pins.length)throw Error('the lock is not a version 2 or 3 Package.resolved');
+ return lock.pins.map(pin=>{
+  if(pin?.kind!=='remoteSourceControl'||!/^https:\/\/[^\s]+$/.test(pin.location||'')||!/^[a-f0-9]{40}$/.test(pin.state?.revision||''))throw Error((pin?.identity||'a pin')+' is not a remote Git repository at an exact revision');
+  return {location:pin.location,revision:pin.state.revision,...(typeof pin.state.version==='string'?{tag:pin.state.version}:{})};
+ });
+}
+// Each repository a SwiftPM lock reaches has one bare repository in the cache, named by its address.
+const swiftMirrors=()=>path.join(lockCache('swiftpm'),'mirrors.json');
+const readMirrors=()=>fs.existsSync(swiftMirrors())?JSON.parse(fs.readFileSync(swiftMirrors(),'utf8')):{};
 /** The NuGet packages of a packages.lock.json, with their frameworks, runtimes and direct references. */
 export function nugetLockProject(text){
  const lock=JSON.parse(text);
@@ -91,6 +103,31 @@ const RESOLVERS={
   const added=fs.readFileSync(path.join(directory,'go.sum'),'utf8').split('\n').filter(line=>line&&!text.split('\n').includes(line));
   if(added.length)throw Error('the lock has no checksum for '+[...new Set(added.map(line=>line.split(' ').slice(0,2).join(' ')))].join(', '));
  },
+ swiftpm({text,env,run}){
+  // Each pinned revision and its version tag, then, through the same repositories, the submodule commits its tree
+  // records, which SwiftPM checks out with the package.
+  const mirrors=readMirrors(),pending=swiftResolvedPins(text),seen=new Set();
+  while(pending.length){
+   const {location,revision,tag}=pending.shift();if(seen.has(location+'#'+revision))continue;seen.add(location+'#'+revision);
+   const mirror=mirrors[location]||path.join(lockCache('swiftpm'),digest(location).slice(0,24)+'.git'),git=args=>run('git',['-C',mirror,...args],{env:{...env,GIT_TERMINAL_PROMPT:'0'}});
+   if(!fs.existsSync(path.join(mirror,'HEAD')))run('git',['init','--quiet','--bare',mirror],{env});
+   mirrors[location]=mirror;
+   git(['fetch','--quiet','--no-tags',location,'+'+revision+':refs/locked/'+revision,...(tag?['+refs/tags/'+tag+':refs/tags/'+tag]:[])]);
+   if(tag&&git(['rev-parse','refs/tags/'+tag+'^{commit}']).trim()!==revision)throw Error(location+' '+tag+' is not the locked revision '+revision);
+   if(!git(['ls-tree',revision,'.gitmodules']).trim())continue;
+   const modules={};
+   for(const line of git(['config','--blob',revision+':.gitmodules','--get-regexp','^submodule\\..*\\.(path|url)$']).split('\n').filter(Boolean)){
+    const [,name,key,value]=/^submodule\.(.+)\.(path|url) (.*)$/.exec(line);(modules[name]??={})[key]=value;
+   }
+   for(const {path:entry,url} of Object.values(modules)){
+    const commit=/^160000 commit ([a-f0-9]{40})\t/.exec(git(['ls-tree',revision,'--',entry]))?.[1];
+    if(!commit||!url)throw Error(location+' '+revision+' has no submodule commit at '+entry);
+    // A relative submodule address is relative to the repository's own address, as Git resolves it.
+    pending.push({location:/^\.\.?\//.test(url)?new URL(url,location.replace(/\/?$/,'/')).href.replace(/\/$/,''):url,revision:commit});
+   }
+  }
+  fs.writeFileSync(swiftMirrors(),JSON.stringify(mirrors,null,1)+'\n');
+ },
  nuget({file,text,env,run}){
   const directory=scratch('nuget',text),project=path.join(directory,'locked-packages.csproj');
   fs.writeFileSync(project,nugetLockProject(text));
@@ -120,6 +157,12 @@ export function resolveLocks({project,locks=[],directory,env=process.env,run=(co
 export const LOCKED_ENVIRONMENT={
  cargo:()=>({CARGO_HOME:lockCache('cargo'),CARGO_NET_OFFLINE:'true'}),
  go:()=>({GOMODCACHE:lockCache('go'),GOPROXY:'off',GOFLAGS:'-mod=readonly'}),
- nuget:()=>({NUGET_PACKAGES:lockCache('nuget')})
+ nuget:()=>({NUGET_PACKAGES:lockCache('nuget')}),
+ // Git, which SwiftPM runs, reads each locked repository from its cached bare repository and reaches no other address.
+ swiftpm:()=>{
+  const first=Number(process.env.GIT_CONFIG_COUNT)||0,rules=Object.entries(readMirrors());
+  return {GIT_ALLOW_PROTOCOL:'file',GIT_CONFIG_COUNT:String(first+rules.length),
+   ...Object.fromEntries(rules.flatMap(([location,mirror],index)=>[['GIT_CONFIG_KEY_'+(first+index),'url.'+mirror+'.insteadOf'],['GIT_CONFIG_VALUE_'+(first+index),location]]))};
+ }
 };
 export function lockedEnvironment(build){return Object.assign({},...[...new Set((build.locks||[]).map(lock=>lock.tool))].map(tool=>LOCKED_ENVIRONMENT[tool]()));}
