@@ -12,6 +12,12 @@ const REVISION = upstreamRevision("system3", "system3-sdl2");
 const SOURCE_SHA256 = "7d5074ef5cce68c9f0f4246fb91f17ba8482f7ae798ddda9dd6208d8530f695c";
 const sourcePath = path.resolve(__dirname, "../../external/system3-sdl2");
 
+function applyIdentity(sourceRoot) {
+  const file=path.join(sourceRoot,"src/sdlmain.cpp"),text=fs.readFileSync(file,"utf8"),anchor="\tSDL_Init(SDL_INIT_VIDEO);";
+  if(text.split(anchor).length!==2)throw new Error("Pinned System3 window identity boundary changed.");
+  fs.writeFileSync(file,text.replace(anchor,'\tconst char *game_name = SDL_getenv("MACLAUNCHER_GAME_NAME");\n\tif (game_name && *game_name) title = game_name;\n'+anchor));
+  require("../shared/runtime/application-identity").attach(sourceRoot,"system3");
+}
 async function buildPortableSystem3({ sourceDir = sourcePath, archives, workRoot, fontStack, architecture = process.arch, pathMappings = [], signal, onProgress, dependencies = {} }) {
   workRoot = Fonts.assertFreshBuildRoot(workRoot, { readOnlyRoots: [sourceDir] });
   const source = await Source.pinnedFiles(sourceDir, REVISION, { signal });
@@ -22,6 +28,7 @@ async function buildPortableSystem3({ sourceDir = sourcePath, archives, workRoot
   const sourceRoot = path.join(workRoot, "system3-source");
   Source.stagePinnedFiles(sourceDir, source.files, sourceRoot);
   const sourceOverlay = Resources.apply(sourceRoot, { sourceDir });
+  applyIdentity(sourceRoot);
   const build = await Fonts.buildProject({ sourceRoot, outputRoot: path.join(workRoot, "system3"), prefix: stack.prefix, sdk: stack.sdk,
     tools: stack.tools, architecture, pathMappings, options: ["-DSYSTEM3_SDL_VERSION=2", "-DBUILD_SHARED_LIBS=OFF"], signal, onProgress, dependencies });
   const executable = path.join(stack.prefix, "bin/system3");
@@ -30,4 +37,4 @@ async function buildPortableSystem3({ sourceDir = sourcePath, archives, workRoot
     ...build, dependencyClosure: stack };
 }
 
-module.exports = { VERSION, REVISION, SOURCE_SHA256, sourcePath, buildPortableSystem3 };
+module.exports = { applyIdentity, VERSION, REVISION, SOURCE_SHA256, sourcePath, buildPortableSystem3 };
