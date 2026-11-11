@@ -300,6 +300,7 @@
         "scripts/native-supplementals.cjs",
         "scripts/reshade-effect-sources.mjs",
         "scripts/runtime-content.cjs",
+        "src/core/runtime-inventory-revision.js",
         "src/modules/crossover/temporal/dxmt",
         "src/modules/crossover/temporal/streamline",
         "src/modules/crossover/temporal/xess",
