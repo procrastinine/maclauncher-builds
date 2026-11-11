@@ -200,7 +200,7 @@ test('project Markdown notes affect exactly named published versions; unknown he
 
 
 test('package source paths exclude global orchestration and narrow materialized app directories',()=>{
- const project={producer:{entries:['producers/demo','producers/shared/build.mjs','tools/orchestrate.mjs'],
+ const project={producer:{entries:['producers/demo','producers/shared/build.mjs','tools/source.mjs'],
   appEntries:['package.json','src/graphics']},build:{command:'tools/build-demo.mjs'}};
  const manifest={buildCode:['tools/source.mjs','lib/projects.mjs']};
  const source={files:entry=>entry==='producers/demo'?['producers/demo/materialization.json']:[],
@@ -209,4 +209,24 @@ test('package source paths exclude global orchestration and narrow materialized 
   'app:src/graphics/native/source.mm','producers/demo','producers/shared/build.mjs','tools/build-demo.mjs'
  ]);
  assert.ok(declaredRecipeEntries(project,manifest).includes('tools/source.mjs'));
+});
+
+
+test('shared recipe helpers remain in scope while another producer-only request stays out',t=>{
+ const f=fixture(t);
+ f.project.producer.entries.push('tools/shared.mjs');
+ f.write('tools/shared.mjs','// original');
+ const first=f.commit('Original packages');
+ f.write('tools/shared.mjs','// shared correction');
+ const second=f.commit('Correct a shared recipe helper');
+ f.projects.push({...structuredClone(f.project),id:'other',name:'Other'});
+ f.write('tools/shared.mjs','// other producer support');
+ f.write('producers/other/build.mjs','// other recipe');
+ const third=f.commit('Declare another producer and extend its shared helper');
+ f.write('catalogs/demo.json',{projectId:'demo',packages:[
+  {version:'1.0.0',arch:'arm64',build:{sourceRevision:first}},
+  {version:'1.1.0',arch:'arm64',build:{sourceRevision:third}}
+ ]});
+ const release=packageChanges({directory:f.directory}).projects[0].releases.at(-1);
+ assert.deepEqual(release.commits.map(commit=>commit.revision),[second]);
 });
