@@ -1,6 +1,26 @@
 #import <AppKit/AppKit.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
+
+__attribute__((constructor)) static void configure_game_identity(void) {
+    @autoreleasepool {
+        const char *title = getenv("MACLAUNCHER_MINORI_TITLE"), *icon = getenv("MACLAUNCHER_GAME_ICON");
+        NSString *name = title && *title ? [NSString stringWithUTF8String:title] : nil;
+        if (name.length) NSProcessInfo.processInfo.processName = name;
+        if (icon && *icon) {
+            NSString *file = [NSString stringWithUTF8String:icon];
+            __block id observer;
+            observer = [NSNotificationCenter.defaultCenter addObserverForName:NSApplicationDidFinishLaunchingNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
+                (void)note;
+                NSImage *image = [[NSImage alloc] initWithContentsOfFile:file];
+                if (image) NSApp.applicationIconImage = image;
+                [NSNotificationCenter.defaultCenter removeObserver:observer]; observer = nil;
+            }];
+        }
+    }
+}
+
 @interface MLMinoriMenuTarget : NSObject
 @property NSInteger selected;
 - (void)choose:(id)sender;
