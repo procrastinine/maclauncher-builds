@@ -1157,7 +1157,9 @@
         "tools/helper-package.mjs",
         "tools/manager-declaration.mjs",
         "tools/native-stack.mjs",
-        "tools/seal-runtime.mjs"
+        "tools/seal-runtime.mjs",
+        "producers/package-support/src/modules/shared/runtime/application-identity.js",
+        "producers/package-support/src/modules/shared/runtime/application-identity.m"
       ],
       "sourceDirectory": "producers/package-support"
     },

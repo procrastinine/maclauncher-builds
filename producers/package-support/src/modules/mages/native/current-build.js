@@ -19,6 +19,15 @@ const PROFILE = "windows-mpk2-sc3-sfx-macos13-v9";
 const PATCH = path.join(__dirname, "current-windows.patch");
 const ABI_PROFILE = Object.freeze({ input: "windows-sc3-input-v1", audio: "windows-sc3-voice-v1",
   checkpoint: "windows-sc3-checkpoint-u16-v1", backlog: "backlog-zero-capacity-v1", soundEffect: "windows-sc3-sfx-v1" });
+function applyIdentity(directory) {
+  const file=path.join(directory,"src/renderer/window.cpp");let text=fs.readFileSync(file,"utf8");
+  const replace=(before,after)=>{if(text.split(before).length!==2)throw new Error("Pinned Impacto game identity boundary changed.");text=text.replace(before,after);};
+  replace('SDLWindow = SDL_CreateWindow("Impacto", WindowWidth, WindowHeight, flags);','const char *game_name = SDL_getenv("MACLAUNCHER_GAME_NAME");\n  SDLWindow = SDL_CreateWindow(game_name && *game_name ? game_name : "Impacto", WindowWidth, WindowHeight, flags);');
+  replace('SDL_SetWindowTitle(SDLWindow, Profile::Game::WindowName.c_str());','const char *game_name = SDL_getenv("MACLAUNCHER_GAME_NAME");\n  SDL_SetWindowTitle(SDLWindow, game_name && *game_name ? game_name : Profile::Game::WindowName.c_str());');
+  replace('void SetWindowIcon(SDL_Window* window) {','void SetWindowIcon(SDL_Window* window) {\n  const char *file = SDL_getenv("MACLAUNCHER_GAME_ICON");\n  if (file && *file) {\n    int width, height, channels;\n    if (uint8_t *pixels = stbi_load(file, &width, &height, &channels, STBI_rgb_alpha)) {\n      SDL_Surface *icon = SDL_CreateSurfaceFrom(width, height, SDL_PIXELFORMAT_RGBA32, pixels, width * 4);\n      if (icon) { SDL_SetWindowIcon(window, icon); SDL_DestroySurface(icon); }\n      stbi_image_free(pixels);\n      if (icon) return;\n    }\n  }');
+  fs.writeFileSync(file,text);
+  require("../../shared/runtime/application-identity").attach(directory,"impacto");
+}
 async function applyCurrentOverlay(directory, { logPath, signal } = {}) {
   return { upstreamRevision: REVISION,
     ...await Patches.applyPinnedPatch(directory, PATCH, { logPath, signal }) };
@@ -43,6 +52,7 @@ async function buildCurrentImpacto({ sourceDir, workRoot, dependencyStack, ffmpe
   Source.stagePinnedFiles(sourceDir, source.files, projected);
   const logPath = path.join(workRoot, "build.log");
   const sourceOverlay = await applyCurrentOverlay(projected, { logPath, signal });
+  applyIdentity(projected);
   const atrac9 = path.join(workRoot, "atrac9");
   fs.cpSync(atrac9Source, atrac9, { recursive: true, verbatimSymlinks: true,
     filter: file => path.basename(file) !== ".git" });
@@ -76,4 +86,4 @@ async function buildCurrentImpacto({ sourceDir, workRoot, dependencyStack, ffmpe
 }
 
 module.exports = { VERSION, SOURCES, REVISION, PROFILE, ABI_PROFILE,
-  applyCurrentOverlay, buildCurrentImpacto };
+  applyIdentity, applyCurrentOverlay, buildCurrentImpacto };
