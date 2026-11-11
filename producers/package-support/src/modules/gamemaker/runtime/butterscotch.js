@@ -7,6 +7,16 @@ const { promisify } = require("node:util");
 const run = promisify(execFile);
 const { findBuildTool } = require("../../shared/runtime/pinned-native-build");
 
+function applyIdentity(root) {
+  const file=path.join(root,"src/backends/appkit.m");let text=fs.readFileSync(file,"utf8");
+  const replace=(before,after)=>{if(text.split(before).length!==2)throw new Error("Pinned Butterscotch identity boundary changed.");text=text.replace(before,after);};
+  replace('    [NSApplication sharedApplication];','    const char *game_name = getenv("MACLAUNCHER_GAME_NAME"), *artwork = getenv("MACLAUNCHER_GAME_ICON");\n    NSString *display_name = game_name && *game_name ? [NSString stringWithUTF8String:game_name] : nil;\n    if (display_name.length) { NSProcessInfo.processInfo.processName = display_name; title = game_name; }\n    [NSApplication sharedApplication];\n    if (artwork && *artwork) {\n        NSImage *image = [[NSImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String:artwork]];\n        if (image) NSApp.applicationIconImage = image;\n        [image release];\n    }');
+  replace('NSMenu* createAppMenu() {','NSMenu* createAppMenu() {\n    const char *game_name = getenv("MACLAUNCHER_GAME_NAME");\n    NSString *display_name = game_name && *game_name ? [NSString stringWithUTF8String:game_name] : nil;');
+  replace('initWithTitle:@"About"','initWithTitle:display_name.length ? [@"About " stringByAppendingString:display_name] : @"About"');
+  replace('initWithTitle:@"Hide"','initWithTitle:display_name.length ? [@"Hide " stringByAppendingString:display_name] : @"Hide"');
+  replace('[window setTitle:[NSString stringWithFormat:@"Butterscotch - %s", title]];','const char *game_name = getenv("MACLAUNCHER_GAME_NAME");\n    [window setTitle:game_name && *game_name ? [NSString stringWithUTF8String:title] : [NSString stringWithFormat:@"Butterscotch - %s", title]];');
+  fs.writeFileSync(file,text);
+}
 async function buildRuntime({ userDataDir, version, sourceDir, architecture = process.arch, logger, signal, runtimeManager } = {}) {
   if (!["arm64", "x64"].includes(architecture)) throw new Error("Select an arm64 or x64 Butterscotch build.");
   if (process.platform !== "darwin") throw new Error("Butterscotch AppKit builds require macOS.");
@@ -36,6 +46,7 @@ async function buildRuntime({ userDataDir, version, sourceDir, architecture = pr
     fs.rmSync(archive);
     const overlay = pin.gameArguments === "repeat-game-arg-v1"
       ? require("../overlays/butterscotch-game-arguments").apply(snapshot) : null;
+    applyIdentity(snapshot);
     const options = { ...abortOptions, timeout: 15 * 60 * 1000, maxBuffer: Infinity};
     const cmake = findBuildTool("cmake");
     const maps = ["-ffile-prefix-map", "-fmacro-prefix-map", "-fdebug-prefix-map"].flatMap(option =>
@@ -72,4 +83,4 @@ async function buildRuntime({ userDataDir, version, sourceDir, architecture = pr
   } finally { fs.rmSync(temporary, { recursive: true, force: true }); }
 }
 
-module.exports = { buildRuntime };
+module.exports = { applyIdentity, buildRuntime };
