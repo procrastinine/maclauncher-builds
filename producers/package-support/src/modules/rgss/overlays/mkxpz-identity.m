@@ -62,11 +62,12 @@ static void apply_icon(void) {
 }
 
 void mkxpz_configure_display_identity(const char *name, const char *icon) {
-  (void)name; // Native application metadata supplies the game name.
   if (configured) return;
   configured = YES;
   @autoreleasepool {
     @try {
+      NSString *title = name && *name ? [[NSString alloc] initWithUTF8String:name] : nil;
+      if (title.length) NSProcessInfo.processInfo.processName = title;
       if (icon && *icon && strnlen(icon, PATH_MAX) < PATH_MAX) game_icon_path = [[NSString alloc] initWithUTF8String:icon];
       if (game_icon_path.isAbsolutePath) {
         if (NSApp && NSRunningApplication.currentApplication.finishedLaunching) apply_icon();
