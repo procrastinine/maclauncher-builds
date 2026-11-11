@@ -364,7 +364,8 @@ static void presented(void *token,uint64_t,double time,double,uint32_t outcome) 
  [_osdDisplayLink addToRunLoop:NSRunLoop.mainRunLoop forMode:NSRunLoopCommonModes];
  NSRect screen=NSScreen.mainScreen.visibleFrame;NSRect frame=NSMakeRect(0,0,std::min(1100.0,screen.size.width*.8),std::min(700.0,screen.size.height*.8));
  _window=[[NSWindow alloc]initWithContentRect:frame styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskResizable backing:NSBackingStoreBuffered defer:NO];
- _window.title=_media.lastPathComponent;_window.delegate=self;_window.restorable=NO;_window.acceptsMouseMovedEvents=YES;
+ const char *title=getenv("MACLAUNCHER_GAME_NAME");
+ _window.title=title&&*title?[NSString stringWithUTF8String:title]:_media.lastPathComponent;_window.delegate=self;_window.restorable=NO;_window.acceptsMouseMovedEvents=YES;
  MLVideoView *view=[[MLVideoView alloc]initWithFrame:frame];view.player=self;view.wantsLayer=YES;
  view.layer=[CALayer layer];view.layer.backgroundColor=NSColor.blackColor.CGColor;[view.layer addSublayer:_layer];[view.layer addSublayer:_osdLayer];_window.contentView=view;
  [_window center];[_window makeFirstResponder:view];
@@ -647,9 +648,14 @@ int main(int argc,const char **argv) {
   if(const auto explicitHost=reinterpret_cast<int(*)(uint32_t,int)>(dlsym(RTLD_DEFAULT,"rsSetExplicitHost")))explicitHost(1,1);
   NSMutableArray<NSString*> *arguments=[NSMutableArray array];for(int n=1;n<argc;n++)[arguments addObject:[NSString stringWithUTF8String:argv[n]]];
   if([arguments containsObject:@"--maclauncher-info"]||[arguments containsObject:@"--scale=help"])return inspectLibrary(arguments);
+  const char *title=getenv("MACLAUNCHER_GAME_NAME"), *artwork=getenv("MACLAUNCHER_GAME_ICON");
+  NSString *gameName=title&&*title?[NSString stringWithUTF8String:title]:nil;
+  if(gameName.length)NSProcessInfo.processInfo.processName=gameName;
   NSApplication *application=NSApplication.sharedApplication;[application setActivationPolicy:argumentActivationPolicy(arguments)];
+  if(artwork&&*artwork){NSImage *image=[[NSImage alloc]initWithContentsOfFile:[NSString stringWithUTF8String:artwork]];if(image)application.applicationIconImage=image;}
   NSMenu *menu=[NSMenu new],*appMenu=[NSMenu new];NSMenuItem *item=[NSMenuItem new];item.submenu=appMenu;[menu addItem:item];
-  [appMenu addItemWithTitle:@"Quit" action:@selector(terminate:) keyEquivalent:@"q"];application.mainMenu=menu;
+  if(gameName.length){appMenu.title=gameName;item.title=gameName;[appMenu addItemWithTitle:[@"About " stringByAppendingString:gameName] action:@selector(orderFrontStandardAboutPanel:) keyEquivalent:@""];[appMenu addItemWithTitle:[@"Hide " stringByAppendingString:gameName] action:@selector(hide:) keyEquivalent:@"h"];[appMenu addItem:[NSMenuItem separatorItem]];}
+  [appMenu addItemWithTitle:gameName.length?[@"Quit " stringByAppendingString:gameName]:@"Quit" action:@selector(terminate:) keyEquivalent:@"q"];application.mainMenu=menu;
   NSMenu *file=[NSMenu new];NSMenuItem *fileItem=[NSMenuItem new];fileItem.title=@"File";fileItem.submenu=file;[menu addItem:fileItem];
   [file addItemWithTitle:@"Close" action:@selector(performClose:) keyEquivalent:@"w"];
   NSMenu *view=[NSMenu new];NSMenuItem *viewItem=[NSMenuItem new];viewItem.title=@"View";viewItem.submenu=view;[menu addItem:viewItem];
