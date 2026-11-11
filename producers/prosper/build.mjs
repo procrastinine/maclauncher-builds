@@ -53,6 +53,23 @@ async function ffmpeg(buildDirectory,downloads){
  if(!fs.existsSync(marker)||fs.readFileSync(marker,'utf8').trim()!==entry.sha256){fs.mkdirSync(directory,{recursive:true});run('cmake',['-E','tar','xf',cache],{cwd:directory});write(marker,entry.sha256+'\n');}
  return directory;
 }
+export function applyNativeIdentity(directory) {
+ const file=path.join(directory,'src/video/cocoa/SDL_cocoaevents.m'),text=fs.readFileSync(file,'utf8'),anchor='        if (NSApp == nil) {';
+ if(text.split(anchor).length!==2)throw Error('Pinned Prosper Cocoa startup boundary changed.');
+ let patched=text.replace(anchor,'        const char *game_name = SDL_getenv("MACLAUNCHER_GAME_NAME");\n        if (game_name && *game_name) {\n            NSString *name = [NSString stringWithUTF8String:game_name];\n            if (name.length) NSProcessInfo.processInfo.processName = name;\n        }\n'+anchor);
+ patched=patched.replace('[SDL3Application sharedApplication];','[SDL3Application sharedApplication];\n            const char *artwork = SDL_getenv("MACLAUNCHER_GAME_ICON");\n            NSImage *image = artwork && *artwork ? [[NSImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String:artwork]] : nil;\n            if (image) NSApp.applicationIconImage = image;');
+ write(file,patched);
+ const iconFile=path.join(directory,'src/video/cocoa/SDL_cocoawindow.m'),icons=fs.readFileSync(iconFile,'utf8'),iconAnchor='NSImage *nsimage = Cocoa_CreateImage(icon);';
+ if(icons.split(iconAnchor).length!==2)throw Error('Pinned Prosper Cocoa icon boundary changed.');
+ write(iconFile,icons.replace(iconAnchor,'const char *artwork = SDL_getenv("MACLAUNCHER_GAME_ICON");\n        NSImage *nsimage = artwork && *artwork ? [[NSImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String:artwork]] : nil;\n        if (!nsimage) nsimage = Cocoa_CreateImage(icon);'));
+}
+export function applyGameIdentity(directory) {
+ const file=path.join(directory,'prosper/frontends/prosper-app/main.cpp');let text=fs.readFileSync(file,'utf8');
+ const replace=(before,after)=>{if(text.split(before).length!==2)throw Error('Pinned Prosper game identity boundary changed.');text=text.replace(before,after);};
+ replace('int main(int argc, char** argv) {', 'int main(int argc, char** argv) {\n    const char* game_name = getenv("MACLAUNCHER_GAME_NAME");\n    if (game_name && *game_name) SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_NAME_STRING, game_name);');
+ replace('std::string title = window_title_for(dump, testPattern);','std::string title = game_name && *game_name ? game_name : window_title_for(dump, testPattern);');
+ fs.writeFileSync(file,text);
+}
 export async function build({buildDirectory=path.join(root,'out/prosper'),vulkanLibrary,downloads,python,jobs=4,check=false,configureOnly=false}={}){
  const source=path.join(root,sourceCheckout(recipe.source));verify(sourceProvenance(recipe.source),source);
  if(check)return{id:recipe.id,revision:sourceRevision(recipe.source),redistribution:recipe.redistribution,dependencies:inputs.dependencies};
@@ -71,9 +88,18 @@ export async function build({buildDirectory=path.join(root,'out/prosper'),vulkan
   // Keep framework name/flag pairs together when CMake deduplicates imported link options.
   const cmakeFile=path.join(staged,'prosper/CMakeLists.txt'),cmake=fs.readFileSync(cmakeFile,'utf8');
   write(cmakeFile,cmake.replace('  if(PROSPER_AJM_FFMPEG_FOUND)\n    add_library(prosper_ajm_ffmpeg STATIC',"  if(PROSPER_AJM_FFMPEG_FOUND)\n    string(REGEX REPLACE \"-framework;([^;]+)\" \"SHELL:-framework \\\\1\" PROSPER_AJM_FFMPEG_LDFLAGS_OTHER \"${PROSPER_AJM_FFMPEG_LDFLAGS_OTHER}\")\n    set_property(TARGET PkgConfig::PROSPER_AJM_FFMPEG PROPERTY INTERFACE_LINK_OPTIONS \"${PROSPER_AJM_FFMPEG_LDFLAGS_OTHER}\")\n    add_library(prosper_ajm_ffmpeg STATIC"));
+  applyGameIdentity(staged);
   run('git',['apply',path.join(import.meta.dirname,'non-solid-fill.patch')],{cwd:staged});
   sync(staged,projection);
  }finally{fs.rmSync(staged,{recursive:true,force:true});}
+ // SDL is a declared read-only checkout; adapt only its exported build input.
+ const sdlExport=path.join(projection,'sdl3'),sdlArchive=path.join(buildDirectory,'sdl3-source.tar');
+ fs.mkdirSync(sdlExport,{recursive:true});
+ try{
+  run('git',['-C',dependencies.sdl3,'archive','--format=tar','--output='+sdlArchive,sourceRevision(sdl3Prosper)]);
+  run('/usr/bin/tar',['-xf',sdlArchive,'-C',sdlExport]);
+ }finally{fs.rmSync(sdlArchive,{force:true});}
+ applyNativeIdentity(sdlExport);dependencies.sdl3=sdlExport;
  if(!python){try{python=execFileSync('uv',['python','find'],{encoding:'utf8'}).trim();}catch{throw Error('A Python interpreter from uv or --python is required for upstream build metadata.');}}
  const maps='-ffile-prefix-map='+projection+'=/prosper -ffile-prefix-map='+path.join(buildDirectory,'dependencies')+'=/prosper-dependencies';
  run('cmake',['-S',path.join(projection,'prosper'),'-B',binary,'-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_ARCHITECTURES=x86_64','-DCMAKE_OSX_DEPLOYMENT_TARGET=26.0',
