@@ -17,6 +17,12 @@ const REVISION = upstreamRevision("xsystem35", "xsystem35-sdl2");
 const SOURCE_SHA256 = "73e633b7b9f3ecbbc760179347b542e4fe69fd18023981ff50224d099f2275a8";
 const sourcePath = path.resolve(__dirname, "../../external/xsystem35-sdl2");
 
+function applyIdentity(sourceRoot) {
+  const file=path.join(sourceRoot,"src/gfx_video.c"),text=fs.readFileSync(file,"utf8"),anchor='const char title[] = "XSystem35 Version " VERSION;';
+  if(text.split(anchor).length!==2)throw new Error("Pinned xsystem35 window identity boundary changed.");
+  fs.writeFileSync(file,text.replace(anchor,'const char *title = SDL_getenv("MACLAUNCHER_GAME_NAME");\n\tif (!title || !*title) title = "XSystem35 Version " VERSION;'));
+  require("../shared/runtime/application-identity").attach(sourceRoot,"xsystem35");
+}
 async function buildPortableSystem35({ sourceDir = sourcePath, archives, workRoot, dependencyStacks, architecture = process.arch, pathMappings = [], signal, onProgress, dependencies = {} }) {
   throwIfAborted(signal);
   if (process.platform !== "darwin" || !["arm64", "x64"].includes(architecture)) throw new Error("xsystem35 builds require macOS and an arm64 or x64 target.");
@@ -41,6 +47,7 @@ async function buildPortableSystem35({ sourceDir = sourcePath, archives, workRoo
   const sourceRoot = path.join(workRoot, "xsystem35-source");
   Source.stagePinnedFiles(sourceDir, source.files, sourceRoot);
   const sourceOverlay = Overlay.apply(sourceRoot, { sourceDir });
+  applyIdentity(sourceRoot);
   const build = await Fonts.buildProject({ sourceRoot, outputRoot: path.join(workRoot, "xsystem35"), prefix, sdk: mixer.sdk,
     tools: mixer.tools, architecture, pathMappings, options: ["-DXSYSTEM35_SDL_VERSION=2", "-DXSYSTEM35_FETCH_SDL3_MIXER=OFF",
       "-DENABLE_DEBUGGER=ON", "-DENABLE_WEBP=ON", "-DENABLE_PORTMIDI=OFF", "-DENABLE_GETTEXT=OFF"], signal, onProgress, dependencies });
@@ -54,4 +61,4 @@ async function buildPortableSystem35({ sourceDir = sourcePath, archives, workRoo
     features: { debugger: true, webp: true, sdl: "2.32.10", midi: "macOS AudioToolbox", ...mixer.features },
     ...build, dependencyClosure: { mixer, prefix, sources, sourceRoots } };
 }
-module.exports = { VERSION, REVISION, SOURCE_SHA256, PIN, sourcePath, buildPortableSystem35 };
+module.exports = { applyIdentity, VERSION, REVISION, SOURCE_SHA256, PIN, sourcePath, buildPortableSystem35 };
