@@ -22,8 +22,10 @@ function nativeFile({ prefix, sdk, pathMappings, tools, architecture = process.a
   const flags=Audio.compilerFlags(sdk,pathMappings,architecture).split(" ");
   const quote=value=>"'"+value.replaceAll("\\","\\\\").replaceAll("'","\\'")+"'";
   const list=values=>"["+values.map(quote).join(", ")+"]";
-  return "[binaries]\n"+Object.entries({c:"/usr/bin/clang",cpp:"/usr/bin/clang++",ar:"/usr/bin/ar",strip:"/usr/bin/strip",'pkg-config':tools.pkgconfig,bison:tools.bison,flex:tools.flex}).map(([key,value])=>key+" = "+quote(value)).join("\n")+
+  const text = "[binaries]\n"+Object.entries({c:"/usr/bin/clang",cpp:"/usr/bin/clang++",objc:"/usr/bin/clang",ar:"/usr/bin/ar",strip:"/usr/bin/strip",'pkg-config':tools.pkgconfig,bison:tools.bison,flex:tools.flex}).map(([key,value])=>key+" = "+quote(value)).join("\n")+
     "\n[built-in options]\nc_args = "+list(flags)+"\nc_link_args = "+list(["-arch",architecture==="x64"?"x86_64":"arm64","-mmacosx-version-min=13.0","-isysroot",sdk,"-Wl,-headerpad_max_install_names","-Wl,-rpath,"+path.join(prefix,"lib")])+"\ncmake_prefix_path = []\npkg_config_path = []\n";
+  return text.replace(/^c_args = (.*)$/m, (line, flags) => line + "\nobjc_args = " + flags)
+    .replace(/^c_link_args = (.*)$/m, (line, flags) => line + "\nobjc_link_args = " + flags);
 }
 
 function validateFeatures(outputRoot) {
@@ -36,6 +38,15 @@ function validateFeatures(outputRoot) {
     audioFormats:Audio.PIN.audioFormats,movieVersion:Movie.PIN.source.version,movieDecoders:Movie.PIN.decoders,movieDemuxers:Movie.PIN.demuxers,movieNetwork:false,movieExternalCodecs:false};
 }
 
+function applyIdentity(sourceRoot) {
+  const video=path.join(sourceRoot,"src/video.c"),text=fs.readFileSync(video,"utf8"),anchor="\tSDL_SetWindowTitle(sdl.window, title);";
+  if(text.split(anchor).length!==2)throw new Error("Pinned xsystem4 window identity boundary changed.");
+  fs.writeFileSync(video,text.replace(anchor,'\tconst char *display_name = SDL_getenv("MACLAUNCHER_GAME_NAME");\n\tSDL_SetWindowTitle(sdl.window, display_name && *display_name ? display_name : title);'));
+  const file=path.join(sourceRoot,"src/meson.build"),meson=fs.readFileSync(file,"utf8"),entry="executable('xsystem4', xsystem4,";
+  if(meson.split(entry).length!==2)throw new Error("Pinned xsystem4 native target changed.");
+  fs.copyFileSync(path.join(__dirname,"../shared/runtime/application-identity.m"),path.join(sourceRoot,"src/maclauncher-application-identity.m"));
+  fs.writeFileSync(file,meson.replace(entry,"if host_machine.system() == 'darwin'\n    add_languages('objc', native : false)\n    xsystem4 += 'maclauncher-application-identity.m'\n    xsystem4_deps += dependency('appleframeworks', modules : ['AppKit'])\nendif\n\n"+entry).replace("           c_args : ['-Wno-unused-parameter'],","           c_args : ['-Wno-unused-parameter'],\n           objc_args : ['-fobjc-arc', '-fblocks'],"));
+}
 async function buildPortableSystem4({ sourceDir=sourcePath,archives,workRoot,dependencyStacks,architecture=process.arch,pathMappings=[],signal,onProgress,dependencies={} }) {
   throwIfAborted(signal);
   if(process.platform!=="darwin"||!["arm64","x64"].includes(architecture))throw new Error("xsystem4 builds require macOS and an arm64 or x64 target.");
@@ -72,6 +83,7 @@ async function buildPortableSystem4({ sourceDir=sourcePath,archives,workRoot,dep
   }
   const sourceRoot=path.join(workRoot,"xsystem4-source");Source.stagePinnedFiles(sourceDir,source.files,sourceRoot);
   const sourceOverlay=Overlay.apply(sourceRoot,{sourceDir,version:VERSION});
+  applyIdentity(sourceRoot);
   const buildFile=path.join(workRoot,"native.ini");fs.writeFileSync(buildFile,nativeFile({prefix,sdk:fonts.sdk,architecture,pathMappings,tools}));
   const outputRoot=path.join(workRoot,"xsystem4"),logPath=path.join(workRoot,"xsystem4.log"),startedAt=new Date().toISOString();
   env.GIT_CEILING_DIRECTORIES=workRoot;env.NINJA=tools.ninja;
@@ -87,4 +99,4 @@ async function buildPortableSystem4({ sourceDir=sourcePath,archives,workRoot,dep
     sourceRoot,outputRoot,prefix,sdk:fonts.sdk,tools,configureOptions,startedAt,completedAt:new Date().toISOString(),logPath,
     dependencyClosure:{version:PIN.version,prefix,fonts,audio,movie,sources,sourceRoots}};
 }
-module.exports={VERSION,REVISION,SOURCE_SHA256,PIN,sourcePath,nativeFile,validateFeatures,buildPortableSystem4};
+module.exports={applyIdentity,VERSION,REVISION,SOURCE_SHA256,PIN,sourcePath,nativeFile,validateFeatures,buildPortableSystem4};
