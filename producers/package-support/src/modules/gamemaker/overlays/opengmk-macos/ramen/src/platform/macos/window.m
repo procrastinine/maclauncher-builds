@@ -210,9 +210,24 @@ int32_t ml_ramen_initialize(void) {
             if (!delegate) {
                 delegate = [MLRamenApplicationDelegate new]; [NSApp setDelegate:delegate];
                 [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+                const char *title = getenv("MACLAUNCHER_GAME_NAME"), *icon = getenv("MACLAUNCHER_GAME_ICON");
+                NSString *name = title && *title ? [NSString stringWithUTF8String:title] : nil;
+                if (name.length) [[NSProcessInfo processInfo] setProcessName:name];
+                if (icon && *icon) {
+                    NSImage *image = [[NSImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String:icon]];
+                    if (image) [NSApp setApplicationIconImage:image];
+                    [image release];
+                }
                 NSMenu *bar = [NSMenu new], *application = [NSMenu new];
+                if (name.length) {
+                    [application setTitle:name];
+                    [application addItemWithTitle:[@"About " stringByAppendingString:name] action:@selector(orderFrontStandardAboutPanel:) keyEquivalent:@""];
+                    [application addItem:[NSMenuItem separatorItem]];
+                    [application addItemWithTitle:[@"Hide " stringByAppendingString:name] action:@selector(hide:) keyEquivalent:@"h"];
+                    [application addItem:[NSMenuItem separatorItem]];
+                }
                 NSMenuItem *item = [NSMenuItem new]; [item setSubmenu:application]; [bar addItem:item];
-                NSMenuItem *quit = [[NSMenuItem alloc] initWithTitle:@"Quit OpenGMK" action:@selector(quitGame:) keyEquivalent:@"q"];
+                NSMenuItem *quit = [[NSMenuItem alloc] initWithTitle:name.length ? [@"Quit " stringByAppendingString:name] : @"Quit OpenGMK" action:@selector(quitGame:) keyEquivalent:@"q"];
                 [quit setTarget:delegate]; [application addItem:quit]; [NSApp setMainMenu:bar];
                 [quit release]; [item release]; [application release]; [bar release];
                 [NSApp finishLaunching];
