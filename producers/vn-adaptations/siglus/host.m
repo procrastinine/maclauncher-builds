@@ -42,7 +42,14 @@ int main(int argc, char **argv) {
     @autoreleasepool {
         // Winit owns finishLaunching/run. Calling them here prevents its
         // expected AppKit notifications and can break teardown.
+        const char *title = getenv("MACLAUNCHER_GAME_NAME"), *icon = getenv("MACLAUNCHER_GAME_ICON");
+        NSString *name = title && *title ? [NSString stringWithUTF8String:title] : nil;
+        if (name.length) NSProcessInfo.processInfo.processName = name;
         NSApplication *app = [NSApplication sharedApplication];
+        if (icon && *icon) {
+            NSImage *image = [[NSImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String:icon]];
+            if (image) app.applicationIconImage = image;
+        }
         [app setActivationPolicy:NSApplicationActivationPolicyRegular];
         int result = run(argv[3], encoding);
         fflush(stdout); fflush(stderr);
