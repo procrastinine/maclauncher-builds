@@ -11,7 +11,7 @@ export function signNgx({work,output,mingw,osslsigncode,openssl='openssl'}){
  const core=path.join(output,'x64/nvngx.dll'),signed=path.join(directory,'nvngx.dll');
  try {
   run(openssl,['req','-x509','-newkey','rsa:3072','-nodes','-keyout',key,'-out',certificate,'-days','3650','-subj','/CN=MacLauncher NGX',
-   '-addext','basicConstraints=critical,CA:TRUE','-addext','keyUsage=critical,digitalSignature,keyCertSign','-addext','extendedKeyUsage=codeSigning']);
+   '-addext','basicConstraints=critical,CA:TRUE','-addext','keyUsage=critical,digitalSignature,keyCertSign','-addext','extendedKeyUsage=codeSigning','-addext','subjectAltName=URI:https://github.com/procrastinine/maclauncher-builds/ngx']);
   fs.chmodSync(key,0o600);
   run(osslsigncode,['sign','-certs',certificate,'-key',key,'-n','MacLauncher NGX','-h','sha256','-in',core,'-out',signed]);
   run(osslsigncode,['verify','-CAfile',certificate,'-in',signed]);
