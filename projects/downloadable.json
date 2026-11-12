@@ -616,10 +616,14 @@
       {
         "version": "26.10-MCLv7",
         "label": ".NET 8 host 26.10-MCLv7"
+      },
+      {
+        "version": "26.10-MCLv8",
+        "label": ".NET 8 host 26.10-MCLv8"
       }
     ],
     "build": {
-      "version": "26.10-MCLv7",
+      "version": "26.10-MCLv8",
       "command": "tools/build-fna.mjs",
       "architectures": [
         "arm64"
