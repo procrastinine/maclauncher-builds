@@ -7,6 +7,9 @@ function replaceOnce(text,before,after,file){
 export function applyBuildOverlay(projectionRoot){
  const changes=[];
  const edit=(relative,adapt)=>{const file=path.join(projectionRoot,relative),before=fs.readFileSync(file,'utf8'),after=adapt(before,relative);if(before!==after){fs.writeFileSync(file,after);changes.push(relative);}};
+ edit('3rdparty/libpsl/src/psl-make-dafsa',(text,file)=>replaceOnce(text,
+  'bytes(psl_input_file, **codecs)',
+  'bytes(os.path.basename(psl_input_file), **codecs)',file));
  edit('core/libs/prx/libc/src/GuestHeap.cpp',(text,file)=>replaceOnce(text,
   '        static ArenaHeap heap;',
   '        // Exit handlers and static destructors can allocate after the first heap use.\n        static auto& heap = *new ArenaHeap;',file));
