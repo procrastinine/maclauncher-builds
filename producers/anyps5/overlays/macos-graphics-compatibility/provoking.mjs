@@ -21,8 +21,8 @@ export async function applyProvokingCompatibility(edit) {
         const inputs = 'struct DrawInputs {';
         source = replace(source, inputs, await fs.readFile(new URL('./ProvokingVertex.inc', import.meta.url), 'utf8') + '\n' + inputs);
         source = replace(source,
-            'DrawInputs prepareDrawInputs(const Context& context, const State& state, const Pm4::DrawParameters& draw, std::span<const CompiledShader> shaders, DrawOutcome& outcome, DrawTimer& timer, const DrawRecipe* recipe) {',
-            'DrawInputs prepareDrawInputs(const Context& context, const State& state, const Pm4::DrawParameters& draw, std::span<const CompiledShader> shaders, DrawOutcome& outcome, DrawTimer& timer, const DrawRecipe* recipe, const ProvokingRewrite* rewrite = nullptr) {');
+            'DrawInputs prepareDrawInputs(const Context& context, const State& state, const Pm4::DrawParameters& draw, std::span<const CompiledShader> shaders, const DrawPlan& drawPlan, DrawTimer& timer, PerformanceTimer& timing) {',
+            'DrawInputs prepareDrawInputs(const Context& context, const State& state, const Pm4::DrawParameters& draw, std::span<const CompiledShader> shaders, const DrawPlan& drawPlan, DrawTimer& timer, PerformanceTimer& timing, const ProvokingRewrite* rewrite = nullptr) {');
         source = replace(source,
             '    if (draw.indexed) GuestMemory::CheckRange(reinterpret_cast<const void*>(draw.indexAddress), static_cast<std::size_t>(indexBytes), draw.indexSize);',
             '    if (draw.indexed && rewrite == nullptr) GuestMemory::CheckRange(reinterpret_cast<const void*>(draw.indexAddress), static_cast<std::size_t>(indexBytes), draw.indexSize);');
@@ -39,7 +39,7 @@ export async function applyProvokingCompatibility(edit) {
         inputs.indexHandle = inputs.indices->Handle();
     } else if (state.quadList || StripPatches(state, shaders)) {`);
         source = replace(source, '    explicit PreparedDraw(bool profile) : timer(profile) {}', '    explicit PreparedDraw(bool profile) : timer(profile) {}\n    const ProvokingRewrite* provoking = nullptr;');
-        source = replace(source, '    inputs = prepareDrawInputs(context, state, draw, shaders, outcome, timer, nullptr);', '    inputs = prepareDrawInputs(context, state, draw, shaders, outcome, timer, nullptr, prepared.provoking);');
+        source = replace(source, '    inputs = prepareDrawInputs(context, state, draw, shaders, plan, timer, timing);', '    inputs = prepareDrawInputs(context, state, draw, shaders, plan, timer, timing, prepared.provoking);');
         const declaration = 'void Draw(const Context& context, const State& state, const Pm4::DrawParameters& draw, std::span<const CompiledShader> shaders, std::span<const GuestMemorySnapshot> snapshots, std::shared_ptr<const DrawRecipe>* recipeOut, const DrawTraceContext* trace, std::uint64_t shape) {';
         source = replace(source, declaration, 'static void drawWithProvoking(const Context& context, const State& state, const Pm4::DrawParameters& draw, std::span<const CompiledShader> shaders, std::span<const GuestMemorySnapshot> snapshots, std::shared_ptr<const DrawRecipe>* recipeOut, const DrawTraceContext* trace, std::uint64_t shape, const ProvokingRewrite* rewrite) {');
         source = replace(source, '    prepared.recipeOut = recipeOut;', '    prepared.recipeOut = recipeOut;\n    prepared.provoking = rewrite;');

@@ -68,7 +68,7 @@ void setReadableLease(std::shared_ptr<const Lease::Ranges> lease) {
 }
 
 std::uint64_t freshBacking() {`);
-  if (source.split('registry().readableLease.reset();').length !== 4) throw Error('AnyPS5 readable lease invalidation source changed');
+  if (source.split('registry().readableLease.reset();').length !== 5) throw Error('AnyPS5 readable lease invalidation source changed');
   source = source.replaceAll('registry().readableLease.reset();', 'setReadableLease(nullptr);');
   source = replace(source, `Lease GuestAllocationsAcquire_nid_postfix() {
     std::lock_guard lock(registry().mutex);
@@ -78,7 +78,9 @@ std::uint64_t freshBacking() {`);
 #endif
     std::lock_guard lock(registry().mutex);
     if (auto shared = heldReadableLease()) return Lease(std::move(shared));`);
-  source = replace(source, '    registry().readableLease = ranges;', '    setReadableLease(ranges);');
+  source = source.replaceAll('if (auto shared = registry().readableLease) return', 'if (auto shared = heldReadableLease()) return');
+  if (source.split('registry().readableLease = ranges;').length !== 3) throw Error('AnyPS5 readable lease publication source changed');
+  source = source.replaceAll('registry().readableLease = ranges;', 'setReadableLease(ranges);');
   await fs.writeFile(file, source);
 }
 

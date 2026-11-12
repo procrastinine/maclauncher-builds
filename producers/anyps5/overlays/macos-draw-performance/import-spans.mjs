@@ -52,8 +52,8 @@ const HostImport* findImport(HostImports& state, std::uint64_t begin, std::uint6
                 region.copySpans = importSpans(context, state, region.begin, region.end, importRanges());
 #endif
             const bool staged = recorder != nullptr && stagingEligible(region, addressable);`);
-  source = replace(source, '                region.copySourceBase = entry->base - entry->lead;\n            }',
-    '                region.copySourceBase = entry->base - entry->lead;\n#ifdef __APPLE__\n            } else if (!region.copySpans.empty()) {\n                copyOnGpu = true;\n                region.deviceLocal = false;\n                region.copySource = VK_NULL_HANDLE;\n#endif\n            }');
+  source = replace(source, '                region.copySourceAddress = start.device;\n            }',
+    '                region.copySourceAddress = start.device;\n#ifdef __APPLE__\n            } else if (!region.copySpans.empty()) {\n                copyOnGpu = true;\n                region.deviceLocal = false;\n                region.copySource = VK_NULL_HANDLE;\n                region.copySourceAddress = 0;\n#endif\n            }');
   source = replace(source, '        CopyBuffer(context, commands, copySource, copyOffset, region->buffer->Handle(), 0, bytes);', `#ifdef __APPLE__
         if (inputSnapshot == nullptr && !region->copySpans.empty()) {
             for (const auto& span : region->copySpans)
@@ -63,18 +63,16 @@ const HostImport* findImport(HostImports& state, std::uint64_t begin, std::uint6
         {
             CopyBuffer(context, commands, copySource, copyOffset, region->buffer->Handle(), 0, bytes);
         }`);
-  source = replace(source, '            CopyBuffer(context, commands, region.buffer->Handle(), from - region.begin, region.copySource, from - region.copySourceBase, to - from);', `#ifdef __APPLE__
-            if (!region.copySpans.empty()) {
+  source = replace(source, '            if (whole < wholeEnd) CopyBuffer(context, commands, region.buffer->Handle(), whole - region.begin, region.copySource, whole - region.copySourceBase, wholeEnd - whole);', `#ifdef __APPLE__
+            if (whole < wholeEnd && !region.copySpans.empty()) {
                 for (const auto& span : region.copySpans) {
-                    const auto first = std::max(from, span.begin);
-                    const auto last = std::min(to, span.end);
+                    const auto first = std::max(whole, span.begin);
+                    const auto last = std::min(wholeEnd, span.end);
                     if (first < last) CopyBuffer(context, commands, region.buffer->Handle(), first - region.begin, span.buffer, first - span.base, last - first);
                 }
             } else
 #endif
-            {
-                CopyBuffer(context, commands, region.buffer->Handle(), from - region.begin, region.copySource, from - region.copySourceBase, to - from);
-            }`);
+            if (whole < wholeEnd) CopyBuffer(context, commands, region.buffer->Handle(), whole - region.begin, region.copySource, whole - region.copySourceBase, wholeEnd - whole);`);
   await fs.writeFile(file, source);
 }
 

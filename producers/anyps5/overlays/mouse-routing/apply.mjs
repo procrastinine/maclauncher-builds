@@ -54,7 +54,7 @@ export function applyMouseRoutingOverlay(projectionRoot) {
     text = replaceOnce(text, '    InputAction{"Square", Pad::InputControl::Button, Pad::PadButton::Square},', '    InputAction{"Square", Pad::InputControl::Button, Pad::PadButton::Square},\n    InputAction{"TouchPad", Pad::InputControl::Button, Pad::PadButton::TouchPad},', file);
     return replaceOnce(text,
     '    auto& bindings = configuration.bindings;',
-    '    if (const char* routing = std::getenv("ANYPS5_MOUSE_ROUTING")) {\n        const auto value = upper(trim(routing));\n        if (value == "CONTROLLER") configuration.settings.mouseRouting = MouseRouting::Controller;\n        else if (value == "NATIVE") configuration.settings.mouseRouting = MouseRouting::Native;\n        else if (value == "AUTOMATIC") configuration.settings.mouseRouting = MouseRouting::Automatic;\n        else throw std::runtime_error("Pad: ANYPS5_MOUSE_ROUTING must be controller, native or automatic");\n    }\n    auto& bindings = configuration.bindings;', file);
+    '    if (const char* routing = std::getenv("ANYPS5_MOUSE_ROUTING")) {\n        const auto value = upper(trim(routing));\n        if (value == "CONTROLLER") configuration.settings.mouseRouting = Pad::MouseRouting::Controller;\n        else if (value == "NATIVE") configuration.settings.mouseRouting = Pad::MouseRouting::Native;\n        else if (value == "AUTOMATIC") configuration.settings.mouseRouting = Pad::MouseRouting::Automatic;\n        else throw std::runtime_error("Pad: ANYPS5_MOUSE_ROUTING must be controller, native or automatic");\n    }\n    auto& bindings = configuration.bindings;', file);
   });
   edit('core/libs/prx/libScePad/include/KeyboardMouse.hpp', (text, file) => {
     text = replaceOnce(text, '    bool MouseMode() const;',

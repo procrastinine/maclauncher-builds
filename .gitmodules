@@ -329,3 +329,7 @@
 [submodule "producers/package-support/src/external/graphics-moltenvk-deps/cereal"]
 	path = producers/package-support/src/external/graphics-moltenvk-deps/cereal
 	url = https://github.com/USCiLab/cereal
+
+[submodule "sources/anyps5-nghttp2"]
+	path = sources/anyps5-nghttp2
+	url = https://github.com/nghttp2/nghttp2.git

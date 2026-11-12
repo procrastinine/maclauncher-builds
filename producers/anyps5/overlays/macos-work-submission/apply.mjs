@@ -48,7 +48,7 @@ struct SpirvTarget {`);
         for (const [condition, reason] of [
             ['descriptor.Type() == 0u', 'buffer descriptor uses an unsupported type'],
             ['byteSize <= context.limits.maxStorageBufferRange', 'shader buffer exceeds descriptor range limit'],
-            ['target == nullptr || !overlap(address, size, target->address, target->bytes)', 'shader buffer aliases the render target'],
+            ['target == nullptr || !overlap(address, size, target->MemoryAddress(), target->bytes)', 'shader buffer aliases the render target'],
         ]) {
             const before = '    Require(' + condition + ', "' + reason + '");';
             source = replace(source, before, apple(before, '    if (!(' + condition + ')) throw UnrenderableDraw("AGC graphics: ' + reason + '");'));
@@ -58,7 +58,7 @@ struct SpirvTarget {`);
     await edit(graphics + 'src/GuestSamplerResource.cpp', source => {
         const signature = 'GuestSamplerResource DecodeSamplerResource(std::span<const std::uint32_t> words, bool unnormalizedProven, bool forceDegammaPaired, bool integerBorder) {';
         source = replace(source, signature, signature + '\n#ifdef __APPLE__\n    try {\n#endif');
-        return replace(source, '    return result;\n}\n\nstd::optional<std::array<std::uint32_t, 4>> SingleLevelSamplerWords', `    return result;
+        return replace(source, '    return result;\n}\n\nbool HoldsLodAtZero', `    return result;
 #ifdef __APPLE__
     } catch (const std::runtime_error& error) {
         throw UnrenderableDraw(error.what());
@@ -66,7 +66,7 @@ struct SpirvTarget {`);
 #endif
 }
 
-std::optional<std::array<std::uint32_t, 4>> SingleLevelSamplerWords`);
+bool HoldsLodAtZero`);
     });
     await edit(graphics + 'src/Sampler.cpp', source => {
         const first = source.indexOf('    void Sampler::Validate(');
@@ -83,11 +83,11 @@ std::optional<std::array<std::uint32_t, 4>> SingleLevelSamplerWords`);
 #endif
 `);
         validation = validation.replaceAll('        Require(', '        refuse(').replaceAll('            Require(', '            refuse(');
-        const bias = '        refuse(descriptor.lodBias >= -context.limits.maxSamplerLodBias && descriptor.lodBias <= context.limits.maxSamplerLodBias, "guest sampler descriptor requests a LOD bias beyond the device limit");';
+        const bias = '        refuse(ShaderAppliesLodBias(descriptor) || (descriptor.lodBias >= -context.limits.maxSamplerLodBias && descriptor.lodBias <= context.limits.maxSamplerLodBias), "guest sampler descriptor requests a LOD bias beyond the device limit");';
         validation = replace(validation, bias, '#ifndef __APPLE__\n' + bias + '\n#endif');
         source = source.slice(0, first) + validation + source.slice(last);
-        const before = '        info.mipLodBias = descriptor.lodBias;';
-        return replace(source, before, apple(before, '        info.mipLodBias = std::clamp(descriptor.lodBias, -context.limits.maxSamplerLodBias, context.limits.maxSamplerLodBias);'));
+        const before = '        info.mipLodBias = ShaderAppliesLodBias(descriptor) ? 0.0f : descriptor.lodBias;';
+        return replace(source, before, apple(before, '        info.mipLodBias = ShaderAppliesLodBias(descriptor) ? 0.0f : std::clamp(descriptor.lodBias, -context.limits.maxSamplerLodBias, context.limits.maxSamplerLodBias);'));
     });
     await edit('core/shader/recompiler/Optimization/src/ResourceMaterializer.cpp', source => {
         const first = source.indexOf('        if (decoded.Type() != 0u) {', source.indexOf('void materializeTables('));

@@ -20,10 +20,10 @@ export async function applyDescriptorReuseOverlay(root) {
   const end = original.indexOf('\nvoid ShaderResources::requireGuestBuffers(', begin);
   if (begin < 0 || end < 0) throw Error('AnyPS5 draw bindings source changed');
   let source = original.slice(begin, end);
-  source = replace(source, '    if (selected.empty()) return {};', `    if (selected.empty()) return {};
+  source = replace(source, '    if (selected.empty() && !rebound) return {};', `    if (selected.empty() && !rebound) return {};
 #ifdef __APPLE__
     static const bool reuseSets = std::getenv("APS5_NO_DRAW_SET_REUSE") == nullptr;
-    if (reuseSets) {
+    if (reuseSets && !rebound) {
         if (auto last = lastDrawBindings.lock(); last != nullptr && lastDrawSelected == selected && std::equal(last->snapshots.begin(), last->snapshots.end(), result->snapshots.begin(), result->snapshots.end(), [](const auto& left, const auto& right) {
             return left.address == right.address && left.buffer == right.buffer && left.offset == right.offset && left.bytes == right.bytes;
         })) {

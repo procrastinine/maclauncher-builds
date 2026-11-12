@@ -24,11 +24,6 @@ export function applyHostKernelOverlay(root){
         std::ifstream stream("/proc/self/cmdline", std::ios::binary);`,file);
   return source;
  });
- edit('prx/libSceLibcInternal/Spawn.cpp',(source,file)=>{
-  source='#ifdef __APPLE__\n#include "prx/libc/include/HostErrno.hpp"\n#endif\n'+source;
-  return replace(source,'        result = posix_spawn(&childPid, target.c_str(), usedActions, usedAttributes, arguments, hostEnvironment);',
-   '        result = posix_spawn(&childPid, target.c_str(), usedActions, usedAttributes, arguments, hostEnvironment);\n#ifdef __APPLE__\n        if (result != 0) result = GuestErrnoFromHost_nid_no_patch(result);\n#endif',file);
- });
  edit('prx/libc/src/HostErrno.cpp',(source,file)=>{
   source=replace(source,'extern "C" int GuestErrnoFromHost_nid_no_patch(int error) {',`extern "C" int GuestErrnoFromHost_nid_no_patch(int error) {
 #ifdef __APPLE__
@@ -61,6 +56,27 @@ export function applyHostKernelOverlay(root){
   const start=source.indexOf(marker),end=source.indexOf('\n}',start);
   if(start<0||end<0||source.indexOf(marker,start+1)>=0)throw Error('AnyPS5 Darwin errno boundary changed: '+file);
   return source.slice(0,start)+marker+'\n#ifdef __APPLE__\n    return SceKernelError(GuestErrnoFromHost_nid_no_patch(error));\n#else'+source.slice(start+marker.length,end)+'\n#endif'+source.slice(end);
+ });
+ edit('prx/libkernel/File/src/Stdio.cpp',(source,file)=>{
+  // Upstream moved shared statvfs conversion out of the descriptor's scope.
+  source=replace(source,`#ifdef __APPLE__
+    struct statfs mount{};
+    if (::fstatfs(descriptor, &mount) == 0 && (mount.f_flags & MNT_NOEXEC)) fs->f_flags |= KERNEL_MNT_NOEXEC;
+#else
+    if (host.f_flag & ST_NOEXEC) fs->f_flags |= KERNEL_MNT_NOEXEC;
+#endif`,`#ifndef __APPLE__
+    if (host.f_flag & ST_NOEXEC) fs->f_flags |= KERNEL_MNT_NOEXEC;
+#endif`,file);
+  source=replace(source,'    if (::fstatvfs(descriptor, &host) != 0) return SceErrorFromErrno(errno) & 0xffff;',`    if (::fstatvfs(descriptor, &host) != 0) return SceErrorFromErrno(errno) & 0xffff;
+#ifdef __APPLE__
+    struct statfs mount{};
+    if (::fstatfs(descriptor, &mount) == 0 && (mount.f_flags & MNT_NOEXEC)) fs->f_flags |= KERNEL_MNT_NOEXEC;
+#endif`,file);
+  return replace(source,'    if (::statvfs(path.c_str(), &host) != 0) return SceErrorFromErrno(errno == ENOENT ? NotFoundError_nid_no_patch(path) : errno) & 0xffff;',`    if (::statvfs(path.c_str(), &host) != 0) return SceErrorFromErrno(errno == ENOENT ? NotFoundError_nid_no_patch(path) : errno) & 0xffff;
+#ifdef __APPLE__
+    struct statfs mount{};
+    if (::statfs(path.c_str(), &mount) == 0 && (mount.f_flags & MNT_NOEXEC)) fs->f_flags |= KERNEL_MNT_NOEXEC;
+#endif`,file);
  });
  edit('prx/libkernel/Socket/src/Socket.cpp',(source,file)=>{
   source='#ifdef __APPLE__\n#include <sys/select.h>\n#endif\n'+source;
@@ -132,9 +148,64 @@ export function applyHostKernelOverlay(root){
   source=source.slice(0,method)+
    '    bool ChainSignal(int signal, void (*handler)(int)) {\n        if (!_available || (signal != SIGBUS && signal != SIGSEGV)) return false;\n        (signal == SIGBUS ? _guestBus : _guestSegv).store(handler, std::memory_order_release);\n        return true;\n    }\n\n'+source.slice(method);
   source=replace(source,'        const auto& previous = signal == SIGBUS ? watch._previousBus : watch._previousSegv;',
-   '        const auto chained = (signal == SIGBUS ? watch._guestBus : watch._guestSegv).load(std::memory_order_acquire);\n        if (chained != SIG_ERR) {\n            if (chained == SIG_IGN) return;\n            if (chained != SIG_DFL && chained != nullptr) { chained(signal); return; }\n            ::signal(signal, SIG_DFL);\n            return;\n        }\n        const auto& previous = signal == SIGBUS ? watch._previousBus : watch._previousSegv;',file);
+   '        reportUnownedFault(signal, info, context);\n        const auto chained = (signal == SIGBUS ? watch._guestBus : watch._guestSegv).load(std::memory_order_acquire);\n        if (chained != SIG_ERR) {\n            if (chained == SIG_IGN) return;\n            if (chained != SIG_DFL && chained != nullptr) { chained(signal); return; }\n            ::signal(signal, SIG_DFL);\n            return;\n        }\n        const auto& previous = signal == SIGBUS ? watch._previousBus : watch._previousSegv;',file);
   source=replace(source,'    struct sigaction _previousBus {};',
    '    using HostHandler = void (*)(int);\n    static_assert(std::atomic<HostHandler>::is_always_lock_free);\n    std::atomic<HostHandler> _guestBus{SIG_ERR};\n    std::atomic<HostHandler> _guestSegv{SIG_ERR};\n    struct sigaction _previousBus {};',file);
+  // Report faults that write-watch does not own, with frames and loaded images, using write(2) only.
+  source=replace(source,'#include <mach/semaphore.h>\n','#include <mach/semaphore.h>\n#include <execinfo.h>\n#include <mach-o/dyld.h>\n',file);
+  source=replace(source,'    static void fault(int signal, siginfo_t* info, void* context) {',String.raw`    // A fault that write-watch does not own is reported on standard error before it is chained or takes the
+    // default action: the signal, the fault address, the faulting thread's frames and the loaded images. Only
+    // write(2) is used. A fault loop reports its first four faults.
+    static void reportUnownedFault(int signal, const siginfo_t* info, void* context) {
+        static std::atomic<unsigned> reported{0};
+        if (reported.fetch_add(1, std::memory_order_relaxed) >= 4) return;
+        const auto text = [](const char* value) {
+            if (value != nullptr) static_cast<void>(::write(STDERR_FILENO, value, std::strlen(value)));
+        };
+        const auto hex = [](std::uint64_t value) {
+            char digits[18] = {'0', 'x'};
+            std::size_t length = 2;
+            int shift = 60;
+            while (shift > 0 && ((value >> shift) & 0xfu) == 0) shift -= 4;
+            for (; shift >= 0; shift -= 4) digits[length++] = "0123456789abcdef"[(value >> shift) & 0xfu];
+            static_cast<void>(::write(STDERR_FILENO, digits, length));
+        };
+        text("[fault] signal ");
+        hex(static_cast<std::uint32_t>(signal));
+        text(" code ");
+        hex(static_cast<std::uint32_t>(info->si_code));
+        text(" address ");
+        hex(reinterpret_cast<std::uintptr_t>(info->si_addr));
+#if defined(__x86_64__)
+        if (context != nullptr) {
+            if (const auto state = static_cast<ucontext_t*>(context)->uc_mcontext) {
+                text(" pc ");
+                hex(state->__ss.__rip);
+                text(" sp ");
+                hex(state->__ss.__rsp);
+                text(" fp ");
+                hex(state->__ss.__rbp);
+            }
+        }
+#else
+        static_cast<void>(context);
+#endif
+        text("\n");
+        void* frames[64];
+        ::backtrace_symbols_fd(frames, ::backtrace(frames, 64), STDERR_FILENO);
+        for (std::uint32_t index = 0, count = ::_dyld_image_count(); index < count; ++index) {
+            text("[fault] image ");
+            hex(reinterpret_cast<std::uintptr_t>(::_dyld_get_image_header(index)));
+            text(" ");
+            text(::_dyld_get_image_name(index));
+            text("\n");
+        }
+    }
+
+    static void fault(int signal, siginfo_t* info, void* context) {`,file);
+  // Line-buffered standard output keeps the last log lines when the process ends abnormally.
+  source=replace(source,'const bool g_opened = (Watch::Get(), true);\n#endif\n\n}',
+   '[[maybe_unused]] const bool g_lineBufferedOutput = ::isatty(STDOUT_FILENO) == 0 && std::setvbuf(stdout, nullptr, _IOLBF, 0) == 0;\nconst bool g_opened = (Watch::Get(), true);\n#endif\n\n}',file);
   return replace(source,'bool GuestWriteWatchAvailable_nid_postfix() {',
    '#ifdef __APPLE__\nbool GuestWriteWatchChainSignal_nid_no_patch(int signal, void (*handler)(int)) {\n    return Watch::Get().ChainSignal(signal, handler);\n}\n#endif\n\nbool GuestWriteWatchAvailable_nid_postfix() {',file);
  });

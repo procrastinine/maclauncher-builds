@@ -1,0 +1,183 @@
+diff --git a/core/libs/prx/libc/src/GuestArena.cpp b/core/libs/prx/libc/src/GuestArena.cpp
+index bd71b7505a..fe5a91df38 100644
+--- a/core/libs/prx/libc/src/GuestArena.cpp
++++ b/core/libs/prx/libc/src/GuestArena.cpp
+@@ -92,7 +92,7 @@ public:
+         RequireAllocatable(alignment);
+         std::lock_guard lock(_lock);
+         if (hint >= _end) throw std::runtime_error("mapping address hint is above the guest address space arena");
+-        return Claim(FindAtOrAbove(hint, bytes, alignment), bytes);
++        return Claim(FindAtOrAbove(hint, bytes, alignment), bytes, hint == 0 ? "an allocation" : "an allocation at or above the hint", hint, alignment);
+     }
+ 
+     void* AllocateFromHint(std::uintptr_t hint, std::size_t bytes, std::size_t alignment) {
+@@ -100,7 +100,7 @@ public:
+         std::lock_guard lock(_lock);
+         auto candidate = hint < _end ? FindAtOrAbove(hint, bytes, alignment) : 0;
+         if (candidate == 0 && hint > _base) candidate = FindAtOrAbove(hint < DefaultAllocationStart ? _base : DefaultAllocationStart, bytes, alignment);
+-        return Claim(candidate, bytes);
++        return Claim(candidate, bytes, hint == 0 ? "an allocation" : "an allocation from the hint", hint, alignment);
+     }
+ 
+     std::uintptr_t HighestFree(std::size_t bytes, std::size_t alignment) {
+@@ -391,12 +391,70 @@ private:
+         return candidate;
+     }
+ 
+-    void* Claim(std::uintptr_t candidate, std::size_t bytes) {
+-        if (candidate == 0) throw std::runtime_error("guest address space arena exhausted");
++    void* Claim(std::uintptr_t candidate, std::size_t bytes, const char* request, std::uintptr_t hint, std::size_t alignment) {
++        if (candidate == 0) ThrowExhausted(request, hint, bytes, alignment);
+         _used.emplace(candidate, candidate + bytes);
+         return reinterpret_cast<void*>(candidate);
+     }
+ 
++    static std::uintptr_t MergedBytes(std::vector<std::pair<std::uintptr_t, std::uintptr_t>> ranges, std::uintptr_t base, std::uintptr_t end) {
++        std::sort(ranges.begin(), ranges.end());
++        std::uintptr_t total = 0;
++        std::uintptr_t cursor = base;
++        for (const auto& [rangeStart, rangeEnd] : ranges) {
++            const auto first = std::max(std::clamp(rangeStart, base, end), cursor);
++            const auto last = std::clamp(rangeEnd, base, end);
++            if (last <= first) continue;
++            total += last - first;
++            cursor = last;
++        }
++        return total;
++    }
++
++    [[noreturn]] void ThrowExhausted(const char* request, std::uintptr_t hint, std::size_t bytes, std::size_t alignment) const {
++        std::uintptr_t cursor = _base;
++        std::uintptr_t covered = 0;
++        std::uintptr_t largestFree = 0;
++        std::uintptr_t largestFreeStart = 0;
++        std::uintptr_t largestGuest = 0;
++        std::uintptr_t largestGuestStart = 0;
++        std::size_t guestRanges = 0;
++        const auto noteFree = [&](std::uintptr_t start, std::uintptr_t end) {
++            if (end > start && end - start > largestFree) {
++                largestFree = end - start;
++                largestFreeStart = start;
++            }
++        };
++        for (const auto& [rangeStart, rangeEnd] : _used) {
++            const auto first = std::clamp(rangeStart, _base, _end);
++            const auto last = std::clamp(rangeEnd, _base, _end);
++            if (first > cursor) noteFree(cursor, first);
++            if (last > std::max(first, cursor)) covered += last - std::max(first, cursor);
++            cursor = std::max(cursor, last);
++            if (last > first && !OverlapsHostRegion(first, last - first)) {
++                ++guestRanges;
++                if (last - first > largestGuest) {
++                    largestGuest = last - first;
++                    largestGuestStart = first;
++                }
++            }
++        }
++        if (_end > cursor) noteFree(cursor, _end);
++        const auto host = std::min(covered, MergedBytes(_hostRegions, _base, _end));
++        char message[512];
++        std::snprintf(message, sizeof(message),
++            "guest address space arena exhausted: no room for %s of 0x%zx bytes aligned 0x%zx (hint 0x%llx); largest free block 0x%llx at 0x%llx; "
++            "arena 0x%llx-0x%llx holds 0x%llx free, 0x%llx host or unmappable, 0x%llx guest in %zu ranges (largest 0x%llx at 0x%llx)",
++            request, bytes, alignment, static_cast<unsigned long long>(hint),
++            static_cast<unsigned long long>(largestFree), static_cast<unsigned long long>(largestFreeStart),
++            static_cast<unsigned long long>(_base), static_cast<unsigned long long>(_end),
++            static_cast<unsigned long long>((_end - _base) - covered), static_cast<unsigned long long>(host),
++            static_cast<unsigned long long>(covered - host), guestRanges,
++            static_cast<unsigned long long>(largestGuest), static_cast<unsigned long long>(largestGuestStart));
++        std::fprintf(stderr, "[memory] %s\n", message);
++        throw std::runtime_error(message);
++    }
++
+     std::uintptr_t _base = 0;
+     std::uintptr_t _end = 0;
+     std::uintptr_t _occupiedPrefixEnd = ArenaStart;
+diff --git a/core/libs/prx/libkernel/DirectMemory/DirectMemory.cpp b/core/libs/prx/libkernel/DirectMemory/DirectMemory.cpp
+index 2b0e91a702..e50837bf16 100644
+--- a/core/libs/prx/libkernel/DirectMemory/DirectMemory.cpp
++++ b/core/libs/prx/libkernel/DirectMemory/DirectMemory.cpp
+@@ -973,7 +973,7 @@ void Unmap(void* addr, size_t len) {
+ #endif
+ }
+ 
+-void* MapPlaced(void* addr, size_t len, int prot, int flags, size_t alignment) {
++void* PlaceMapping(void* addr, size_t len, int prot, int flags, size_t alignment) {
+     ValidateLength(len);
+     alignment = ValidateAlignment(alignment);
+     constexpr int GuestMapFixed = 0x10;
+@@ -1146,8 +1146,18 @@ void RecordProtection(const void* addr, size_t len, int prot) {
+     if (prot >= 0) g_protections.emplace(start, ProtectedRange{start + len, ReportedProtection(prot)});
+ }
+ 
+-void* MapAligned(void* addr, size_t len, int prot, int flags, size_t alignment) {
+-    void* mapped = MapPlaced(addr, len, prot, flags, alignment);
++void* MapPlaced(const char* kind, void* addr, size_t len, int prot, int flags, size_t alignment) {
++    try {
++        return PlaceMapping(addr, len, prot, flags, alignment);
++    } catch (const std::exception& error) {
++        std::fprintf(stderr, "[memory] %s of 0x%zx bytes at 0x%llx (flags 0x%x, alignment 0x%zx) failed: %s\n", kind, len,
++            static_cast<unsigned long long>(reinterpret_cast<std::uintptr_t>(addr)), flags, alignment, error.what());
++        throw;
++    }
++}
++
++void* MapAligned(const char* kind, void* addr, size_t len, int prot, int flags, size_t alignment) {
++    void* mapped = MapPlaced(kind, addr, len, prot, flags, alignment);
+ #if defined(__linux__) || defined(__APPLE__)
+     GuestWriteWatch::GuestWriteWatchRegister_nid_postfix(mapped, len);
+ #endif
+@@ -1236,7 +1246,7 @@ int DoMapDirect(void** addr, size_t len, int prot, int flags, int64_t physStart,
+     RequireAliasesUnpinned(mutation, static_cast<std::uint64_t>(physStart), len);
+     std::lock_guard lock(g_directLock);
+     ValidatePhysicalRange(static_cast<std::uint64_t>(physStart), len);
+-    void* mapped = MapAligned(*addr, len, PROT_NONE, flags, alignment);
++    void* mapped = MapAligned("direct memory map", *addr, len, PROT_NONE, flags, alignment);
+     try {
+         AddMapping(reinterpret_cast<std::uintptr_t>(mapped), len, static_cast<std::uint64_t>(physStart), LinuxProtFromSce(prot));
+         mutation.Add(mapped, len, (prot & 3) != 0, (prot & 2) != 0, (prot & GuestProtGpuReadWrite) != 0);
+@@ -1264,7 +1274,7 @@ static int MapAnonymous(void** addr, size_t len, int prot, int flags, size_t ali
+         return 0;
+     }
+     ReplaceFixedOverlap(mutation, *addr, len, flags);
+-    void* mapped = MapAligned(*addr, len, zero ? PROT_NONE : LinuxProtFromSce(prot), flags, alignment);
++    void* mapped = MapAligned("anonymous map", *addr, len, zero ? PROT_NONE : LinuxProtFromSce(prot), flags, alignment);
+     try {
+ #ifdef _WIN32
+         if (zero) GuestArena::GuestArenaMapZero_nid_postfix(mapped, len);
+@@ -1356,7 +1366,7 @@ int DoMapFileBacked_nid_no_patch(void** addr, size_t len, int prot, int flags, i
+     flags = PlaceHintInReservation(*addr, len, placementFlags);
+     if (FixedNoOverwriteConflict(mutation, *addr, len, flags)) return SCE_KERNEL_ERROR_ENOMEM;
+     ReplaceFixedOverlap(mutation, *addr, len, flags);
+-    void* mapped = MapPlaced(*addr, len, PROT_NONE, flags, alignment);
++    void* mapped = MapPlaced("file map", *addr, len, PROT_NONE, flags, alignment);
+     GuestWriteWatch::GuestWriteWatchUnregister_nid_postfix(mapped, len);
+     const int nativeProtection = LinuxProtFromSce(prot);
+     const int nativeFlags = (shared ? MAP_SHARED : MAP_PRIVATE) | MAP_FIXED;
+@@ -1424,7 +1434,7 @@ int DoMapFileBacked_nid_no_patch(void** addr, size_t len, int prot, int flags, i
+             return SCE_KERNEL_ERROR_ENOMEM;
+         }
+         ReplaceFixedOverlap(mutation, *addr, len, flags);
+-        mapped = MapPlaced(*addr, len, PROT_NONE, flags, alignment);
++        mapped = MapPlaced("file map", *addr, len, PROT_NONE, flags, alignment);
+         GuestArena::GuestArenaMapFile_nid_postfix(mapped, len, section, offset, WinProtFromPosix(LinuxProtFromSce(prot)), viewProtection, static_cast<std::size_t>(std::min<std::uint64_t>(len, fileEnd - offset)));
+         mutation.Add(mapped, len, (prot & 3) != 0, (prot & 2) != 0, false);
+     } catch (...) {
+@@ -1454,7 +1464,7 @@ int DoMapShared(void** addr, size_t len, int prot, HostSharedMemory object) {
+     if (len == 0 || (len & (PS5_PAGE_SIZE - 1)) != 0) return SCE_KERNEL_ERROR_EINVAL;
+     const auto nativeProtection = LinuxProtFromSce(prot);
+     GuestAllocations::Mutation mutation;
+-    void* mapped = MapPlaced(*addr, len, PROT_NONE, 0, PS5_PAGE_SIZE);
++    void* mapped = MapPlaced("shared memory map", *addr, len, PROT_NONE, 0, PS5_PAGE_SIZE);
+     try {
+ #if defined(_WIN32)
+         GuestArena::GuestArenaMap_nid_postfix(mapped, len, object, 0, WinProtFromPosix(nativeProtection));
+@@ -1697,7 +1707,7 @@ int DoReserveVirtual(void** addr, size_t len, int flags, size_t alignment) {
+     }
+     if (fixed) mutation.RequireAvailable(*addr, len);
+     constexpr int GuestMapNoCoalesce = 0x400000;
+-    void* mapped = MapAligned(*addr, len, PROT_NONE, fixed ? GuestMapFixedFlag | (flags & GuestMapNoCoalesce) : 0, alignment);
++    void* mapped = MapAligned("virtual range reservation", *addr, len, PROT_NONE, fixed ? GuestMapFixedFlag | (flags & GuestMapNoCoalesce) : 0, alignment);
+     try {
+         mutation.Add(mapped, len, false, false, false);
+     } catch (...) {

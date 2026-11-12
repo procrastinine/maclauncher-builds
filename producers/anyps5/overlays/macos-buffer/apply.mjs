@@ -17,11 +17,6 @@ export async function applyBufferOverlay(root) {
 #else
             const HostImport* entry = region.direct != nullptr && state.epoch == importsEpoch ? region.direct : nullptr;
 #endif`);
-  source = replace(source, '#include <linux/udmabuf.h>', '#ifdef __linux__\n#include <linux/udmabuf.h>\n#endif');
-  for (const boundary of ['struct ImportFamilies {', '    ImportFamilies families;', 'int udmabufDevice() {', 'constexpr std::uint64_t ImportChunkBytes', 'struct BackingFile {', '    BackingFile backing;', '    if (BackingFile backing;']) {
-    source = replace(source, '#ifndef _WIN32\n' + boundary, '#ifdef __linux__\n' + boundary);
-  }
-  source = replace(source, '#else\n    const auto watching = importWatching(context, state, false, true, run.bytes);\n    BackingFile backing;', '#elif defined(__APPLE__)\n    return importWatching(context, state, false, true, run.bytes).hostPointer;\n#else\n    const auto watching = importWatching(context, state, false, true, run.bytes);\n    BackingFile backing;');
   source = replace(source, 'const char* createHostPointerImport(const Context& context, HostImport& entry, VkResult& failure) {\n    void* const host', `const char* createHostPointerImport(const Context& context, HostImport& entry, VkResult& failure) {
 #ifdef __APPLE__
     if (context.hostImportAlignment == 0) {
@@ -37,7 +32,6 @@ export async function applyBufferOverlay(root) {
     }
 #endif
     VkMemoryHostPointerPropertiesEXT pointer{VK_STRUCTURE_TYPE_MEMORY_HOST_POINTER_PROPERTIES_EXT};`);
-  source = replace(source, 'ImportProbe ProbeDmaBufImportWriteProtection(const Context& context) {\n    ImportProbe probe;\n#ifdef _WIN32\n    static_cast<void>(context);\n    probe.failure = "the Linux write watch";', 'ImportProbe ProbeDmaBufImportWriteProtection(const Context& context) {\n    ImportProbe probe;\n#ifndef __linux__\n    static_cast<void>(context);\n    probe.failure = "DMA-BUF import requires Linux";');
   await fs.writeFile(location, source);
 }
 

@@ -1,0 +1,117 @@
+diff --git a/core/libs/prx/libSceLibcInternal/InventoryExports.cpp b/core/libs/prx/libSceLibcInternal/InventoryExports.cpp
+index b46ebca..82435d6 100644
+--- a/core/libs/prx/libSceLibcInternal/InventoryExports.cpp
++++ b/core/libs/prx/libSceLibcInternal/InventoryExports.cpp
+@@ -3,6 +3,7 @@
+ #include "prx/libSceLibcInternal/include/InventoryExports.hpp"
+ #include "prx/libc/include/Api.hpp"
+ #include "prx/libc/include/General.hpp"
++#include "prx/libc/include/GuestHeap.hpp"
+ 
+ extern "C" {
+ 
+@@ -1260,10 +1261,10 @@ int APS5_VABI libSceLibcInternalInventory_271_nid_no_patch() {
+ }
+ APS5_EXPORT("20cUk0qX9zo", libSceLibcInternalInventory_271_nid_no_patch);
+ 
+-int APS5_VABI libSceLibcInternalInventory_272_nid_no_patch() {
+-    NotImplemented_nid_no_patch(__func__);
++int APS5_VABI _malloc_init_nid_no_patch() {
++    return GuestHeap::GuestHeapInitialize_nid_postfix();
+ }
+-APS5_EXPORT("z8GPiQwaAEY", libSceLibcInternalInventory_272_nid_no_patch);
++APS5_EXPORT("z8GPiQwaAEY", _malloc_init_nid_no_patch);
+ 
+ int APS5_VABI libSceLibcInternalInventory_273_nid_no_patch() {
+     NotImplemented_nid_no_patch(__func__);
+diff --git a/core/libs/prx/libSceLibcInternal/include/InventoryExports.hpp b/core/libs/prx/libSceLibcInternal/include/InventoryExports.hpp
+index e3dafc3..e6df6f0 100644
+--- a/core/libs/prx/libSceLibcInternal/include/InventoryExports.hpp
++++ b/core/libs/prx/libSceLibcInternal/include/InventoryExports.hpp
+@@ -261,7 +261,7 @@ void APS5_VABI libSceLibcInternalInventory_268_nid_no_patch(void);
+ std::uint64_t APS5_VABI libSceLibcInternalInventory_269_nid_no_patch(void);
+ int APS5_VABI libSceLibcInternalInventory_270_nid_no_patch();
+ int APS5_VABI libSceLibcInternalInventory_271_nid_no_patch();
+-int APS5_VABI libSceLibcInternalInventory_272_nid_no_patch();
++int APS5_VABI _malloc_init_nid_no_patch();
+ int APS5_VABI libSceLibcInternalInventory_273_nid_no_patch();
+ int APS5_VABI libSceLibcInternalInventory_274_nid_no_patch();
+ int APS5_VABI libSceLibcInternalInventory_275_nid_no_patch();
+diff --git a/core/libs/prx/libc/include/General.hpp b/core/libs/prx/libc/include/General.hpp
+index 01f896f..352c50b 100644
+--- a/core/libs/prx/libc/include/General.hpp
++++ b/core/libs/prx/libc/include/General.hpp
+@@ -16,6 +16,7 @@ extern "C" [[noreturn]] void NotImplemented_nid_no_patch(const char* funcName);
+ extern "C" [[noreturn]] void NotImplementedAt_nid_no_patch(const char* funcName, const char* file, int line);
+ #define NotImplemented_nid_no_patch(name) NotImplementedAt_nid_no_patch(name, __FILE__, __LINE__)
+ extern "C" std::uint64_t NotImplementedCalls_nid_no_patch();
++extern "C" [[noreturn]] void APS5_VABI UnresolvedImport_nid_no_patch(const char* name, const char* library);
+ extern "C" void CxaFinalize_nid_no_patch(void* dsoHandle);
+ extern "C" bool StopAtPrefixLetter_nid_no_patch(const char* str, char** endptr, int base);
+ extern "C" const char* NanSubjectEnd_nid_no_patch(const char* text);
+diff --git a/core/libs/prx/libc/include/GuestHeap.hpp b/core/libs/prx/libc/include/GuestHeap.hpp
+index 2b0f8ce..634d444 100644
+--- a/core/libs/prx/libc/include/GuestHeap.hpp
++++ b/core/libs/prx/libc/include/GuestHeap.hpp
+@@ -15,6 +15,7 @@ void* GuestHeapAlign_nid_postfix(std::size_t alignment, std::size_t bytes);
+ void* GuestHeapRealign_nid_postfix(void* pointer, std::size_t bytes, std::size_t alignment);
+ void* GuestHeapAlignForGpu_nid_postfix(std::size_t alignment, std::size_t bytes);
+ int GuestHeapStatsFast_nid_postfix(void* stats);
++int GuestHeapInitialize_nid_postfix();
+ 
+ }
+ 
+diff --git a/core/libs/prx/libc/src/General.cpp b/core/libs/prx/libc/src/General.cpp
+index 5909545..f7eb896 100644
+--- a/core/libs/prx/libc/src/General.cpp
++++ b/core/libs/prx/libc/src/General.cpp
+@@ -1051,6 +1051,16 @@ extern "C" [[noreturn]] void NotImplementedAt_nid_no_patch(const char* funcName,
+     throw std::runtime_error(std::string(funcName) + " not implemented");
+ }
+ 
++extern "C" [[noreturn]] void APS5_VABI UnresolvedImport_nid_no_patch(const char* name, const char* library) {
++    std::string function = "unresolved import ";
++    function += name != nullptr && *name != '\0' ? name : "(unnamed)";
++    if (library != nullptr && *library != '\0') {
++        function += " from ";
++        function += library;
++    }
++    NotImplementedAt_nid_no_patch(function.c_str(), "", 0);
++}
++
+ extern "C" std::uint64_t NotImplementedCalls_nid_no_patch() {
+     return notImplementedCalls.load(std::memory_order_relaxed);
+ }
+diff --git a/core/libs/prx/libc/src/GuestHeap.cpp b/core/libs/prx/libc/src/GuestHeap.cpp
+index b50b7b4..fec9321 100644
+--- a/core/libs/prx/libc/src/GuestHeap.cpp
++++ b/core/libs/prx/libc/src/GuestHeap.cpp
+@@ -424,4 +424,15 @@ int GuestHeapStatsFast_nid_postfix(void* stats) {
+     return 0;
+ }
+ 
++int GuestHeapInitialize_nid_postfix() {
++    try {
++        usage();
++        blocks();
++        if (GuestArena::GuestArenaAvailable_nid_postfix()) ArenaHeap::Get();
++    } catch (const std::bad_alloc&) {
++        return 12;
++    }
++    return 0;
++}
++
+ }
+diff --git a/core/libs/prx/libc/src/LocaleSupport.cpp b/core/libs/prx/libc/src/LocaleSupport.cpp
+index 2fd608e..92a5a13 100644
+--- a/core/libs/prx/libc/src/LocaleSupport.cpp
++++ b/core/libs/prx/libc/src/LocaleSupport.cpp
+@@ -866,6 +866,8 @@ void CheckSceV2LocaleName(const char* localeName) {
+ 
+ std::uint64_t _ZNSt8__sce_v25ctypeIcE2idE_nid_postfix = 0;
+ std::uint64_t _ZNSt8__sce_v25ctypeIwE2idE_nid_postfix = 0;
++std::uint64_t _ZNSt8__sce_v27collateIcE2idE_nid_postfix = 0;
++std::uint64_t _ZNSt8__sce_v27collateIwE2idE_nid_postfix = 0;
+ std::uint64_t _ZNSt8__sce_v28numpunctIcE2idE_nid_postfix = 0;
+ std::uint64_t _ZNSt8__sce_v27num_putIcNS_19ostreambuf_iteratorIcNS_11char_traitsIcEEEEE2idE_nid_postfix = 0;
+ std::uint64_t _ZNSt8__sce_v27codecvtIwc9_MbstatetE2idE_nid_postfix = 0;

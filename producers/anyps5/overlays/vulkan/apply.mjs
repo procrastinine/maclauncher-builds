@@ -18,6 +18,8 @@ export function adaptVulkanSources(sourceRoot) {
     device = include + device;
     device = replaceOnce(device, `#ifdef _WIN32
     state->library = SDL_LoadObject("vulkan-1.dll");
+#elif defined(__APPLE__)
+    state->library = SDL_LoadObject("libvulkan.1.dylib");
 #else
     state->library = SDL_LoadObject("libvulkan.so.1");
 #endif`, '    state->library = SDL_LoadObject(AnyPS5VulkanLibraryPath());', driver);
@@ -33,20 +35,16 @@ export function adaptVulkanSources(sourceRoot) {
     const instanceStart = device.indexOf('    std::vector<const char*> instanceExtensions;');
     const instanceEnd = device.indexOf('    const VkResult instanceResult = state->InstanceFunction<PFN_vkCreateInstance>');
     device = device.slice(0, instanceStart) + device.slice(instanceStart, instanceEnd).replace(/\bavailableCount\b/g, 'availableInstanceExtensionCount').replace(/\bavailable\b/g, 'availableInstanceExtensions') + device.slice(instanceEnd);
-    const extensionCounts = `        create.enabledExtensionCount = static_cast<std::uint32_t>(instanceExtensions.size());
-        create.ppEnabledExtensionNames = instanceExtensions.data();
-    }
-    const VkResult instanceResult = state->InstanceFunction<PFN_vkCreateInstance>`;
-    device = replaceOnce(device, extensionCounts, `    }
-    if (std::any_of(availableInstanceExtensions.begin(), availableInstanceExtensions.end(), [](const auto& item) { return std::strcmp(item.extensionName, VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME) == 0; })) {
-        if (std::none_of(instanceExtensions.begin(), instanceExtensions.end(), [](const char* name) { return std::strcmp(name, VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME) == 0; })) instanceExtensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+    // Portability enumeration is requested only when the selected library reports it.
+    device = replaceOnce(device, `#ifdef __APPLE__
+    instanceExtensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+    create.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
+`, `    if (std::any_of(availableInstanceExtensions.begin(), availableInstanceExtensions.end(), [](const auto& item) { return std::strcmp(item.extensionName, VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME) == 0; })) {
+        instanceExtensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
         create.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
     }
-    create.enabledExtensionCount = static_cast<std::uint32_t>(instanceExtensions.size());
-    create.ppEnabledExtensionNames = instanceExtensions.data();
-    const VkResult instanceResult = state->InstanceFunction<PFN_vkCreateInstance>`, driver);
-    device = replaceOnce(device, '    if (window != nullptr) deviceExtensions.assign(presentationExtensions.begin(), presentationExtensions.end());\n',
-        '    if (window != nullptr) deviceExtensions.assign(presentationExtensions.begin(), presentationExtensions.end());\n    if (hasExtension("VK_KHR_portability_subset")) deviceExtensions.push_back("VK_KHR_portability_subset");\n', driver);
+`, driver);
 
     let window = include + fs.readFileSync(path.join(sourceRoot, display), 'utf8');
     window = replaceOnce(window, '    AgcDriverLockVulkanLoader_nid_postfix();', `    const char* vulkanLibrary = AnyPS5VulkanLibraryPath();

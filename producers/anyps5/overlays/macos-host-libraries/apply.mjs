@@ -33,14 +33,6 @@ export function applyHostLibrariesOverlay(projectionRoot) {
   edit('core/libs/CMakeLists.txt', (text, file) => replaceOnce(text,
     'target_link_libraries(libSceUsbStorageDialog PRIVATE libSceUserService)',
     'target_link_libraries(libSceUsbStorageDialog PRIVATE libSceUserService)\n\nif(APPLE)\n    target_link_libraries(libSceNetCtl PRIVATE "-framework SystemConfiguration" "-framework CoreFoundation")\nendif()', file));
-  for (const library of ['libSceErrorDialog']) {
-    edit('core/libs/prx/' + library + '/Export.cpp', (text, file) => {
-      text = replaceOnce(text, '#ifdef _WIN32\n#include <windows.h>\n#endif',
-        '#ifdef _WIN32\n#include <windows.h>\n#elif defined(__APPLE__)\n#include "prx/libc/include/specifics/macos/VirtualMemory.hpp"\n#endif', file);
-      return replaceOnce(text, '#else\n    return p != nullptr;\n#endif',
-        '#elif defined(__APPLE__)\n    return p != nullptr && DarwinVirtualMemory::MemoryReadable(reinterpret_cast<std::uintptr_t>(p), n);\n#else\n    return p != nullptr;\n#endif', file);
-    });
-  }
   edit('core/libs/prx/libSceVideoOut/include/PadInput.hpp', (text, file) => {
     text = replaceOnce(text, '    bool MouseModeEnabled() const { return keyboardMouse.MouseMode(); }',
       '    bool MouseModeEnabled() const { return keyboardMouse.MouseMode(); }\n    bool GuestMouseCaptureAllowed() const { return guestMouseCaptureAllowed; }', file);
@@ -106,8 +98,8 @@ void windowDrawableSize(void* context, std::uint32_t* width, std::uint32_t* heig
       '            OnMainThread([&] { mouseInput->UpdateCapture(padInput->GuestMouseCaptureAllowed(), padInput->MouseModeEnabled()); });', file);
   });
   edit('core/libs/prx/libSceVideoOut/CMakeLists.txt', (text, file) => replaceOnce(text,
-    'target_link_libraries(libSceVideoOut PRIVATE libSceAgcDriver libScePad libSceUserService libSceMouse libSceKeyboard libSceIme libc libkernel decoder_png SDL2-static)',
-    'target_link_libraries(libSceVideoOut PRIVATE libSceAgcDriver libScePad libSceUserService libSceMouse libSceKeyboard libSceIme libc libkernel decoder_png SDL2-static)\nif(APPLE)\n    target_link_libraries(libSceVideoOut PRIVATE objc)\nendif()', file));
+    'target_link_libraries(libSceVideoOut PRIVATE libSceAgcDriver libScePad libSceUserService libSceMouse libSceKeyboard libSceIme libc libkernel decoder_png ${videoOutSdl})',
+    'target_link_libraries(libSceVideoOut PRIVATE libSceAgcDriver libScePad libSceUserService libSceMouse libSceKeyboard libSceIme libc libkernel decoder_png ${videoOutSdl})\nif(APPLE)\n    target_link_libraries(libSceVideoOut PRIVATE objc)\nendif()', file));
   edit('core/libs/prx/libSceAgcDriver/Execution/src/Driver/Presentation.cpp', (text, file) => replaceOnce(text,
     '            presentable = presenting->Presentable();', `            presentable = presenting->Presentable();
 #ifdef __APPLE__

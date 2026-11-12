@@ -11,40 +11,28 @@ export function applyBuildOverlay(projectionRoot){
   '        static ArenaHeap heap;',
   '        // Exit handlers and static destructors can allocate after the first heap use.\n        static auto& heap = *new ArenaHeap;',file));
  edit('core/libs/prx/libSceNpCommon/Runtime.cpp',(text)=>text.replace(/(reinterpret_cast<\w+>)\((\w+->vtable\[\d+\])\)/g,'$1(const_cast<void*>($2))'));
- edit('core/libs/prx/libkernel/File/src/NativeStat.cpp',(text,file)=>{
-  text=replaceOnce(text,'#else\n    sb->st_dev = static_cast<std::uint32_t>(st.st_dev);',
-   '#else\n#if defined(__APPLE__)\n    const auto& hostAccess = st.st_atimespec;\n    const auto& hostModified = st.st_mtimespec;\n    const auto& hostChanged = st.st_ctimespec;\n#else\n    const auto& hostAccess = st.st_atim;\n    const auto& hostModified = st.st_mtim;\n    const auto& hostChanged = st.st_ctim;\n#endif\n    sb->st_dev = static_cast<std::uint32_t>(st.st_dev);',file);
-  return text.replaceAll('>(st.st_atim.','>(hostAccess.').replaceAll('>(st.st_mtim.','>(hostModified.').replaceAll('>(st.st_ctim.','>(hostChanged.');
- });
- edit('core/libs/prx/libSceAgcDriver/Execution/src/Driver/Lifecycle.cpp',(text,file)=>{
-  for (const [name,value] of [
-   ['DriverMemoryAddress','0xfe0000000ull + GuestArena::GuestAddressOffset'],
-   ['FsTableAddress','DriverMemoryAddress + 0x40000ull'],
-   ['FsRoutineTableAddress','FsTableAddress + FsTableSlots * FsTableSlotBytes'],
-   ['FsRoutineAddress','FsRoutineTableAddress + FsRoutineTableBytes'],
-  ]) text=replaceOnce(text,'constexpr std::uint64_t '+name+' = '+value+';',
-   '#ifdef __APPLE__\nstd::uint64_t '+name+' = 0;\n#else\nconstexpr std::uint64_t '+name+' = '+value+';\n#endif',file);
-  text=replaceOnce(text,'#else\n    mapped = mmap(reinterpret_cast<void*>(DriverMemoryAddress)',
-   '#elif defined(__APPLE__)\n    mapped = GuestArena::GuestArenaAllocate_nid_postfix(DriverMemoryBytes, DriverMemoryBytes);\n    try {\n        GuestArena::GuestArenaCommit_nid_postfix(mapped, DriverMemoryBytes, 0x04u, DriverMemoryBytes);\n    } catch (...) {\n        GuestArena::GuestArenaRelease_nid_postfix(mapped, DriverMemoryBytes);\n        throw;\n    }\n    DriverMemoryAddress = reinterpret_cast<std::uint64_t>(mapped);\n    FsTableAddress = DriverMemoryAddress + 0x40000ull;\n    FsRoutineTableAddress = FsTableAddress + FsTableSlots * FsTableSlotBytes;\n    FsRoutineAddress = FsRoutineTableAddress + FsRoutineTableBytes;\n#else\n    mapped = mmap(reinterpret_cast<void*>(DriverMemoryAddress)',file);
-  return replaceOnce(text,'            pthread_attr_t attributes;',
-   '#ifdef __APPLE__\n            high = reinterpret_cast<std::uintptr_t>(pthread_get_stackaddr_np(pthread_self()));\n            low = high - pthread_get_stacksize_np(pthread_self());\n#else\n            pthread_attr_t attributes;',file).replace('            pthread_attr_destroy(&attributes);','            pthread_attr_destroy(&attributes);\n#endif');
- });
- edit('core/libs/prx/libSceAgcDriver/Execution/src/GuestMemory.cpp',(text,file)=>replaceOnce(text,'#else\n            pthread_attr_t attributes;',
-  '#elif defined(__APPLE__)\n            high = reinterpret_cast<std::uintptr_t>(pthread_get_stackaddr_np(pthread_self()));\n            low = high - pthread_get_stacksize_np(pthread_self());\n#else\n            pthread_attr_t attributes;',file));
+ // Upstream's Darwin page query intersects the Mach protection with the write-watch protection. Read-trapped
+ // texture-label pages are host PROT_NONE while still logically readable, and trap changes do not invalidate
+ // the page cache, so CheckRange and CopyMapped would report those pages as unmapped. This branch reports the
+ // write-watch protection for watched pages.
  edit('core/libs/prx/libSceAgcDriver/Execution/src/GuestMemory.cpp',(text,file)=>{
-  text=replaceOnce(text,'#include <link.h>','#include "prx/libc/include/specifics/linux/ElfTypes.hpp"\n#ifdef __APPLE__\n#include <sys/mman.h>\n#include <mach/mach.h>\n#include <mach/mach_vm.h>\n#endif',file);
   const branch=fs.readFileSync(new URL('./DarwinDescribePages.inc',import.meta.url),'utf8');
   return replaceOnce(text,'#else\n        const auto generation = GuestAllocations::GuestAllocationsGeneration_nid_postfix();',
    '#elif defined(__APPLE__)\n'+branch+'#else\n        const auto generation = GuestAllocations::GuestAllocationsGeneration_nid_postfix();',file);
  });
  edit('core/libs/prx/libkernel/System/src/Exception.cpp',(text,file)=>{
   text=replaceOnce(text,'#include <ucontext.h>','#ifdef __APPLE__\n#include <sys/ucontext.h>\n#include <mach/i386/thread_status.h>\n#else\n#include <ucontext.h>\n#endif',file);
-  const start=text.indexOf('void FromHost(const mcontext_t& host, GuestMcontext& m) {'),end=text.indexOf('\nvoid Deliver(int signum, siginfo_t*, void* context)',start);
+  const start=text.indexOf('void FromHost(const mcontext_t& host, GuestMcontext& m) {'),end=text.indexOf('\n#else\nvoid FromHost(const mcontext_t& host, GuestMcontext& m)',start);
   if(start<0||end<0)throw Error('AnyPS5 signal context overlay does not match '+file);
-  return text.slice(0,start)+'#ifdef __APPLE__\n'+fs.readFileSync(new URL('./DarwinSignalContext.inc',import.meta.url),'utf8')+'#else\n'+text.slice(start,end)+'#endif\n'+text.slice(end);
+  return text.slice(0,start)+fs.readFileSync(new URL('./DarwinSignalContext.inc',import.meta.url),'utf8')+text.slice(end);
  });
- edit('core/libs/prx/libSceAgcDriver/Execution/src/HostReportSources.cpp',(text,file)=>replaceOnce(text,
-  '#include <unistd.h>', '#include <unistd.h>\nextern char** environ;',file));
+ edit('core/libs/prx/libSceLibcInternal/BasicString.cpp',(text,file)=>replaceOnce(text,
+  '    return std::min(count, source->size - position);',
+  '    return std::min<std::uint64_t>(count, source->size - position);',file));
+ edit('core/libs/prx/libc/src/RunReport.cpp',(text,file)=>replaceOnce(text,
+  '#include <system_error>\n', '#include <system_error>\n#include <thread>\n',file));
+ edit('core/libs/prx/libSceAgcDriver/Execution/src/VulkanDevice.cpp',(text,file)=>replaceOnce(text,
+  '#include <unistd.h>\n#endif\n', '#include <unistd.h>\nextern char** environ;\n#endif\n',file));
  edit('core/libs/prx/libSceAgcDriver/Execution/src/VulkanDevice.cpp',(text,file)=>replaceOnce(text,
   '#ifndef _WIN32\n        state->dmaBufImport =', '#if defined(__linux__)\n        state->dmaBufImport =',file));
  edit('core/libs/prx/libSceAudioOut/src/AudioOut.cpp',(text,file)=>replaceOnce(text,
@@ -55,6 +43,12 @@ export function applyBuildOverlay(projectionRoot){
  edit('core/Decoder/Jpeg/CMakeLists.txt',(text,file)=>replaceOnce(text,
   '                -DCMAKE_OSX_ARCHITECTURES=${CMAKE_OSX_ARCHITECTURES}',
   '                -DCMAKE_OSX_ARCHITECTURES=${CMAKE_OSX_ARCHITECTURES}\n                -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}\n                "-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}"\n                "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}"',file));
+ edit('core/libs/prx/libcurl/CMakeLists.txt',(text,file)=>replaceOnce(text,
+  'ExternalProject_Add(anyps5_curl_build',
+  'if(APPLE)\n    list(APPEND curlBackendOptions\n        "-DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}"\n        "-DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}"\n        "-DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}"\n        "-DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}")\nendif()\n\nExternalProject_Add(anyps5_curl_build',file));
+ edit('core/libs/prx/libcurl/CMakeLists.txt',(text,file)=>replaceOnce(text,
+  'elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")\n    set_property(TARGET anyps5_curl_backend APPEND PROPERTY INTERFACE_LINK_LIBRARIES pthread)',
+  'elseif(APPLE)\n    set_property(TARGET anyps5_curl_backend APPEND PROPERTY INTERFACE_LINK_LIBRARIES "-framework CoreFoundation" "-framework SystemConfiguration")\nelseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")\n    set_property(TARGET anyps5_curl_backend APPEND PROPERTY INTERFACE_LINK_LIBRARIES pthread)',file));
  edit('core/libs/prx/libSceLibreSsl/CMakeLists.txt',(text)=>text+'\nif(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")\n    target_compile_options(libSceLibreSsl PRIVATE -fconstexpr-steps=10000000)\nendif()\n');
  return changes;
 }

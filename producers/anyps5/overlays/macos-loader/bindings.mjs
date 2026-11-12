@@ -23,14 +23,14 @@ export async function applyBindingsOverlay(root) {
     source=replace(source,'    std::vector<std::set<std::size_t>> dependencies(images.size());','    std::vector<std::set<std::size_t>> dependencies(images.size());\n    std::vector<std::map<std::size_t, std::size_t>> importProviders(images.size());');
     source=replace(source,'            if (provider != nullptr) {\n                if ((symbol.Info', '            if (provider != nullptr) {\n                if (macos) importProviders[index].emplace(symbolIndex, provider->Provider);\n                if ((symbol.Info');
     source=replace(source,'            std::vector<std::string> needed;\n            for (const auto dependency : dependencies[index]) {','            std::vector<std::string> needed;\n            std::map<std::size_t, std::int32_t> providerOrdinals;\n            for (const auto dependency : dependencies[index]) {\n                providerOrdinals.emplace(dependency, static_cast<std::int32_t>(needed.size() + 2));');
-    source=replace(source,'            const auto directory = image.SourcePath.parent_path();',`            std::map<std::size_t, std::int32_t> bindOrdinals;
+    source=replace(source,'            output = macos ?',`            std::map<std::size_t, std::int32_t> bindOrdinals;
             if (macos) {
                 for (const auto& [symbol, provider] : importProviders[index]) {
                     if (provider == index) bindOrdinals.emplace(symbol, 0);
                     else if (const auto found = providerOrdinals.find(provider); found != providerOrdinals.end()) bindOrdinals.emplace(symbol, found->second);
                 }
             }
-            const auto directory = image.SourcePath.parent_path();`);
+            output = macos ?`);
     return replace(source,'WriteMacOs(image, needed, guestRunPath, message)', 'WriteMacOs(image, needed, guestRunPath, message, bindOrdinals)');
   });
   await edit('core/relinker/elfpatcher/src/macos/MacOsGuestModuleWriter.cpp',source=>{

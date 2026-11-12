@@ -37,58 +37,6 @@ export async function applyHostGraphicsOverlay(root) {
     }
 #endif`);
   });
-  await edit('Graphics/include/Texture.hpp', source => {
-    source = replace(source, '    bool anyLayerPending() const;', `    bool anyLayerPending() const;
-#ifdef __APPLE__
-    bool storesAtOnce() const;
-    bool allPendingSaved() const;
-#endif`);
-    return replace(source, '    bool dirty = false;', `    bool dirty = false;
-#ifdef __APPLE__
-    bool deferUnsaved = false;
-#endif`);
-  });
-  await edit('Graphics/src/Texture.cpp', source => {
-    source = replace(source, 'bool StorageTexture::anyLayerPending() const {', `#ifdef __APPLE__
-bool StorageTexture::storesAtOnce() const {
-    return GuestMemory::WriteWatched() && !GuestMemory::Watched(descriptor.baseAddress, static_cast<std::size_t>(guestBytes));
-}
-
-bool StorageTexture::allPendingSaved() const {
-    for (std::uint32_t layer = 0; layer < trackedLayers; ++layer) {
-        if (layerPending[layer] && !layerOriginal[layer]) return false;
-    }
-    return true;
-}
-#endif
-
-bool StorageTexture::anyLayerPending() const {`);
-    source = replace(source, '    if (eager) {\n        WriteBack();\n        return;\n    }', `    if (eager) {
-        WriteBack();
-        return;
-    }
-#ifdef __APPLE__
-    if (storesAtOnce() && allPendingSaved()) {
-        deferUnsaved = true;
-        struct Restore {
-            bool& flag;
-            ~Restore() { flag = false; }
-        } restore{deferUnsaved};
-        const auto stored = layerPending;
-        WriteBack();
-        if (!anyLayerPending()) {
-            captureGuestBytes(&stored);
-            return;
-        }
-    }
-#endif`);
-    return replace(source, '    for (std::uint32_t layer = 0; layer < trackedLayers; ++layer) {\n        if (layers[layer]) forgetKeptAtUnwatch(layer);\n    }', `#ifdef __APPLE__
-    if (unsavedOutsideWatch && deferUnsaved) return;
-#endif
-    for (std::uint32_t layer = 0; layer < trackedLayers; ++layer) {
-        if (layers[layer]) forgetKeptAtUnwatch(layer);
-    }`);
-  });
   await edit('Graphics/src/ResidentMirror.cpp', source => {
     source = include + source;
     source = replace(source, 'struct Mapping {\n    std::uint64_t begin = 0;\n    std::uint64_t end = 0;\n    bool readable = false;\n    bool privateAnonymous = false;\n};', '#ifdef __APPLE__\nusing Mapping = DarwinAgcMemory::Mapping;\n#else\nstruct Mapping {\n    std::uint64_t begin = 0;\n    std::uint64_t end = 0;\n    bool readable = false;\n    bool privateAnonymous = false;\n};\n#endif');
@@ -112,6 +60,4 @@ bool StorageTexture::anyLayerPending() const {`);
  * Portions adapted from AnyPS5-ARM (GPL-2.0-only).
  * draw-committer priority:
  * https://github.com/AnyTogether/AnyPS5-ARM/commit/22b652177619befe067c9834ca7e06760465d7c6
- * unwatched storage-image write-back:
- * https://github.com/AnyTogether/AnyPS5-ARM/commit/9e163d751c11e6e98e6dbdc5672461d9ab12021e
  */

@@ -13,7 +13,7 @@ android-image-data-5=16.0.0-MCLv8
 android-java-converter=MCLv8
 android=0.2.7
 
-anyps5=MCLv10
+anyps5=MCLv12
 maclauncher-steam-bridge=1.0.0
 vkd3d-proton=3.1-MCLv1
 vulkan-moltenvk-scene=1.4.2-MCLv11

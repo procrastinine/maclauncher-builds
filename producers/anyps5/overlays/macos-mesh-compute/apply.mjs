@@ -26,12 +26,12 @@ export async function applyMeshComputeOverlay(root) {
         changed.push(relative);
     };
     await edit('core/shader/recompiler/ControlFlow/src/RequestSerializer.cpp', (source, file) => {
-        source = replace(source, 'writer.WriteU32(51u);', 'writer.WriteU32(54u);', file);
-        source = replace(source, 'version > 51u', 'version > 54u', file);
+        source = replace(source, 'writer.WriteU32(56u);', 'writer.WriteU32(57u);', file);
+        source = replace(source, 'version > 56u', 'version > 57u', file);
         source = replace(source, '    return base64Encode(buffer);', '    writer.WriteBool(request.target.meshAsCompute);\n    return base64Encode(buffer);', file);
-        return replace(source, '    if (version >= 21u && reader.Remaining() != 0u)', '    if (version >= 54u) result.request.target.meshAsCompute = reader.ReadBool();\n    if (version >= 21u && reader.Remaining() != 0u)', file);
+        return replace(source, '    if (version >= 21u && reader.Remaining() != 0u)', '    if (version >= 57u) result.request.target.meshAsCompute = reader.ReadBool();\n    if (version >= 21u && reader.Remaining() != 0u)', file);
     });
-    await edit('core/shader/recompiler/ShaderDiskCache.hpp', (source, file) => replace(source, 'FormatVersion = 50;', 'FormatVersion = 51;', file));
+    await edit('core/shader/recompiler/ShaderDiskCache.hpp', (source, file) => replace(source, 'FormatVersion = 68;', 'FormatVersion = 69;', file));
     await edit('core/shader/recompiler/CMakeLists.txt', (source, file) => replace(source,
         '    set(shaderCacheReviewedNames',
         '    set(shaderCacheReviewedNames\n        BuildMeshPassthroughVertexShader\n        MeshEmulationRole\n        EmulatedMeshSlots\n        MeshEmulationDescriptorSet', file));

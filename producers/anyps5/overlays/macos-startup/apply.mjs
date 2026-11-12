@@ -31,14 +31,6 @@ export async function applyStartupOverlay(root) {
   return source.slice(0,assembly)+source.slice(finish+5);
  });
  await edit('core/libs/prx/libkernel/Pthread/src/MainThreadMacOs.cpp',source=>{
-  source=replace(source,`    if (oldStack.high != oldStack.low) {
-        if (mach_vm_deallocate(mach_task_self(), oldStack.low, oldStack.high - oldStack.low) != KERN_SUCCESS) {
-            std::fprintf(stderr, "cannot release the host stack\\n");
-            std::abort();
-        }
-        GuestArena::GuestArenaReleaseHostRegion_nid_no_patch(reinterpret_cast<void*>(oldStack.low), oldStack.high - oldStack.low);
-    }`, `    // Darwin libraries retain pointers into the initial stack. Its mapping
-    // and guest-arena reservation remain valid after execution moves away.`);
   source=replace(source,'#include <cstdlib>','#include <cstdlib>\n#include <cstring>\n#include <exception>\n#include <stdexcept>\n#include <vector>\n#include <mach-o/dyld.h>\n#include <mach-o/getsect.h>\n#include <mach-o/loader.h>');
   source=replace(source,'struct GuestStart {','#include "GuestMainLifecycle.inc"\n\nstruct GuestStart {');
   source=replace(source,'    start.entry(start.block, nullptr);\n    std::fprintf(stderr, "guest entry returned\\n");\n    std::abort();','    guestMainThread = true;\n    const int result = Aps5CallGuestProcessEntry_nid_no_patch(reinterpret_cast<void*>(start.entry),start.block,FinalizeGuestImages);\n    FinalizeGuestImages();\n    LibcExit_nid_no_patch(result);');
@@ -50,41 +42,4 @@ export async function applyStartupOverlay(root) {
   source=replace(source,'extern "C" {','extern "C" {\n#ifdef __APPLE__\nvoid* Aps5GuestTlsGetAddr_nid_no_patch(const KernelTlsIndex*);\n#endif');
   return replace(source,'#elif defined(__linux__)\n    KernelTlsIndex host = *index;','#elif defined(__APPLE__)\n    return Aps5GuestTlsGetAddr_nid_no_patch(index);\n#elif defined(__linux__)\n    KernelTlsIndex host = *index;');
  });
- await edit('core/libs/tests/GuestMainStackMove.cpp', source => {
-  source = replace(source, '#include <mach/mach_vm.h>', '#include <mach/mach_vm.h>\n#include <mach-o/dyld.h>');
-  source = replace(source, '#include <string>', '#include <string>\n#include <vector>');
-  source = replace(source, 'std::string originalArgument;', 'std::string originalArgument;\nstd::string originalExecutablePath;');
-  source = replace(source, 'bool InArena(std::uintptr_t address) {', `std::string ExecutablePath() {
-    std::uint32_t bytes = 0;
-    Require(_NSGetExecutablePath(nullptr, &bytes) == -1 && bytes != 0, "the executable path size is available");
-    std::vector<char> path(bytes);
-    Require(_NSGetExecutablePath(path.data(), &bytes) == 0, "the executable path is available");
-    return path.data();
-}
-
-bool InArena(std::uintptr_t address) {`);
-  source = replace(source, `        const auto old = reinterpret_cast<const void*>(originalStack & ~(MappingAlignment - 1));
-        try {
-            GuestArena::GuestArenaMarkUsed_nid_postfix(old, MappingBytes);
-        } catch (const std::runtime_error&) {
-            Require(false, "a fixed guest mapping fits where the main thread stack was");
-        }
-        GuestArena::GuestArenaRelease_nid_postfix(old, MappingBytes);`, `        mach_vm_address_t retainedBegin = 0, retainedEnd = 0;
-        std::uint32_t retainedTag = 0;
-        Require(RegionOf(originalStack, retainedBegin, retainedEnd, retainedTag) && retainedTag == VM_MEMORY_STACK,
-            "the original main stack mapping survived the move");
-        const auto old = reinterpret_cast<const void*>(originalStack & ~(MappingAlignment - 1));
-        Require(GuestArena::GuestArenaOverlapsHostRegion_nid_no_patch(reinterpret_cast<std::uintptr_t>(old), MappingBytes),
-            "the original main stack remains a host region");
-        bool rejected = false;
-        try {
-            GuestArena::GuestArenaMarkUsed_nid_postfix(old, MappingBytes);
-        } catch (const std::runtime_error&) {
-            rejected = true;
-        }
-        if (!rejected) GuestArena::GuestArenaRelease_nid_postfix(old, MappingBytes);
-        Require(rejected, "a fixed guest mapping cannot replace the original main stack");`);
-  source = replace(source, '    Require(originalArgument == (*_NSGetArgv())[0], "argv survived the move");', '    Require(originalArgument == (*_NSGetArgv())[0], "argv survived the move");\n    Require(ExecutablePath() == originalExecutablePath, "the dyld executable path survived the move");');
-  return replace(source, '    originalArgument = argv[0];', '    originalArgument = argv[0];\n    originalExecutablePath = ExecutablePath();');
-});
 }

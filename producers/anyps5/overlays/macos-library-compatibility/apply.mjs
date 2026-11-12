@@ -49,82 +49,6 @@ static int ReadClock(int clockId, KernelTimespec* tp) {
     }
 #endif`]
   ]);
-  edit(root, `core/libs/prx/libSceFontFt/Export.cpp`, [
-    [`int APS5_VABI sceFontFtSupportSystemFonts(FontLibrary library) {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}`, `#ifdef __APPLE__
-int APS5_VABI sceFontFtSupportSystemFonts(FontLibrary library) {
-    return FontFt::SupportFormats(library, {"truetype", "cff"});
-}
-#else
-int APS5_VABI sceFontFtSupportSystemFonts(FontLibrary library) {
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-#endif`]
-  ]);
-  edit(root, `core/libs/prx/libSceVoice/Export.cpp`, [
-    [`int APS5_VABI sceVoiceWriteToIPort(uint32_t input_port_id, const void* data, uint32_t* size, int16_t frame_gaps) {
-    (void)input_port_id;
-    (void)data;
-    (void)size;
-    (void)frame_gaps;
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}`, `#ifdef __APPLE__
-int APS5_VABI sceVoiceWriteToIPort(uint32_t input_port_id, const void* data, uint32_t* size, int16_t frame_gaps) {
-    (void)frame_gaps;
-    auto& voice = State();
-    std::lock_guard lock(voice.mutex);
-    if (!voice.initialized) return NotInitialized;
-    if (data == nullptr || size == nullptr) return InvalidArgument;
-    const auto found = voice.ports.find(input_port_id);
-    if (found == voice.ports.end()) return PortNotFound;
-    const auto type = found->second.type;
-    if (type != PortInPcm && type != PortInVoice) return InvalidArgument;
-    return 0;
-}
-#else
-int APS5_VABI sceVoiceWriteToIPort(uint32_t input_port_id, const void* data, uint32_t* size, int16_t frame_gaps) {
-    (void)input_port_id;
-    (void)data;
-    (void)size;
-    (void)frame_gaps;
-    NotImplemented_nid_no_patch(__func__);
-    return 0;
-}
-#endif`]
-  ]);
-  edit(root, `core/libs/prx/libc/Export.cpp`, [
-    [`#include <cstdint>`, `#include <cstdint>
-#ifdef __APPLE__
-#include <cstdio>
-#include <cstdlib>
-#endif`],
-    [`int APS5_VABI _ZSt14_Atomic_assertPKcS0__nid_postfix() {
- NotImplemented_nid_no_patch(__func__);
- return 0;
-}`, `#ifdef __APPLE__
-[[noreturn]] void APS5_VABI _ZSt14_Atomic_assertPKcS0__nid_postfix(const char* expression, const char* location) {
-    std::fprintf(stderr, "[libc] guest atomic assertion failed: %s (%s)\\n", expression ? expression : "?", location ? location : "?");
-    std::fflush(stderr);
-    std::abort();
-}
-#else
-int APS5_VABI _ZSt14_Atomic_assertPKcS0__nid_postfix() {
- NotImplemented_nid_no_patch(__func__);
- return 0;
-}
-#endif`]
-  ]);
-  edit(root, `core/libs/prx/libc/include/Api.hpp`, [
-    [`int APS5_VABI _ZSt14_Atomic_assertPKcS0__nid_postfix();`, `#ifdef __APPLE__
-[[noreturn]] void APS5_VABI _ZSt14_Atomic_assertPKcS0__nid_postfix(const char* expression, const char* location);
-#else
-int APS5_VABI _ZSt14_Atomic_assertPKcS0__nid_postfix();
-#endif`]
-  ]);
   edit(root, `core/libs/prx/libc/src/exception/TypeInfo.cpp`, [
     [`static_assert(sizeof(TypeInfoVtable) == 11 * sizeof(void*));`, `static_assert(sizeof(TypeInfoVtable) == 11 * sizeof(void*));
 #ifdef __APPLE__
@@ -155,32 +79,32 @@ static_assert(offsetof(PointerTypeInfoVtable, pointerCatch) == 8 * sizeof(void*)
 #endif`],
     [`LibcException::TypeInfoVtable _ZTVN10__cxxabiv119__pointer_type_infoE_nid_postfix {
     0,
-    &typeid(__cxxabiv1::__pointer_type_info),
+    AsTypeInfo(_ZTIN10__cxxabiv119__pointer_type_infoE_nid_postfix),
     LibcException::DestroyTypeInfo,
     LibcException::DeleteTypeInfo,
     LibcException::IsPointerTypeInfoTrue
 };
 LibcException::TypeInfoVtable _ZTVN10__cxxabiv120__function_type_infoE_nid_postfix {
     0,
-    &typeid(__cxxabiv1::__function_type_info),
+    AsTypeInfo(_ZTIN10__cxxabiv120__function_type_infoE_nid_postfix),
     LibcException::DestroyTypeInfo,
     LibcException::DeleteTypeInfo,
     LibcException::IsPointerTypeInfo,
     LibcException::IsFunctionTypeInfoTrue
 };`, `#ifdef __APPLE__
-LibcException::PointerTypeInfoVtable _ZTVN10__cxxabiv119__pointer_type_infoE_nid_postfix {0, &typeid(__cxxabiv1::__pointer_type_info)};
-LibcException::FunctionTypeInfoVtable _ZTVN10__cxxabiv120__function_type_infoE_nid_postfix {0, &typeid(__cxxabiv1::__function_type_info)};
+LibcException::PointerTypeInfoVtable _ZTVN10__cxxabiv119__pointer_type_infoE_nid_postfix {0, AsTypeInfo(_ZTIN10__cxxabiv119__pointer_type_infoE_nid_postfix)};
+LibcException::FunctionTypeInfoVtable _ZTVN10__cxxabiv120__function_type_infoE_nid_postfix {0, AsTypeInfo(_ZTIN10__cxxabiv120__function_type_infoE_nid_postfix)};
 #else
 LibcException::TypeInfoVtable _ZTVN10__cxxabiv119__pointer_type_infoE_nid_postfix {
     0,
-    &typeid(__cxxabiv1::__pointer_type_info),
+    AsTypeInfo(_ZTIN10__cxxabiv119__pointer_type_infoE_nid_postfix),
     LibcException::DestroyTypeInfo,
     LibcException::DeleteTypeInfo,
     LibcException::IsPointerTypeInfoTrue
 };
 LibcException::TypeInfoVtable _ZTVN10__cxxabiv120__function_type_infoE_nid_postfix {
     0,
-    &typeid(__cxxabiv1::__function_type_info),
+    AsTypeInfo(_ZTIN10__cxxabiv120__function_type_infoE_nid_postfix),
     LibcException::DestroyTypeInfo,
     LibcException::DeleteTypeInfo,
     LibcException::IsPointerTypeInfo,
@@ -214,37 +138,7 @@ LibcException::TypeInfoVtable _ZTVN10__cxxabiv120__function_type_infoE_nid_postf
         }
 #endif`]
   ]);
-  edit(root, `core/libs/prx/libkernel/Time/TimedWait.cpp`, [
-    [`    while (nanosleep(&req, &req) == -1 && errno == EINTR) {}`, `#ifdef __APPLE__
-    const int savedErrno = errno;
-#endif
-    while (nanosleep(&req, &req) == -1 && errno == EINTR) {}
-#ifdef __APPLE__
-    errno = savedErrno;
-#endif`]
-  ]);
-  edit(root, `core/libs/prx/libSceAgc/Unimplemented.cpp`, [
-    [`#include "prx/libSceAgc/include/Agc.hpp"`, `#include "prx/libSceAgc/include/Agc.hpp"
-#ifdef __APPLE__
-#include "prx/libSceAgc/Command/include/Packet.hpp"
-#endif`],
-    [`int APS5_VABI sceAgcAcquireMemSetEngine(std::uint32_t* packet, std::uint8_t engine) {
- NotImplemented_nid_no_patch(__func__);
- return 0;
-}`, `#ifdef __APPLE__
-int APS5_VABI sceAgcAcquireMemSetEngine(std::uint32_t* packet, std::uint8_t engine) {
-    Agc::Command::ValidatePacket(packet, 0x58u, 8, __func__);
-    Agc::Command::CheckBits(engine, 1, __func__);
-    packet[1] = (packet[1] & 0x7fffffffu) | (static_cast<std::uint32_t>(engine) << 31u);
-    return 0;
-}
-#else
-int APS5_VABI sceAgcAcquireMemSetEngine(std::uint32_t* packet, std::uint8_t engine) {
- NotImplemented_nid_no_patch(__func__);
- return 0;
-}
-#endif`]
-  ]);
+  // Upstream preserves errno around SleepNanos on every POSIX host.
   edit(root, `core/shader/recompiler/RdnaDecoder/src/RdnaMemoryOpDecoder.cpp`, [
     [`        if (offset0 == offset1) {
             throw std::runtime_error("DS write exchange of one location through both offsets is not supported");
@@ -254,7 +148,7 @@ int APS5_VABI sceAgcAcquireMemSetEngine(std::uint32_t* packet, std::uint8_t engi
         }
 #endif`]
   ]);
-  return ["core/relinker/elfpatcher/src/macos/MacOsImage.cpp","core/libs/prx/libc/src/GuestAllocations.cpp","core/libs/prx/libkernel/Time/Time.cpp","core/libs/prx/libSceFontFt/Export.cpp","core/libs/prx/libSceVoice/Export.cpp","core/libs/prx/libc/Export.cpp","core/libs/prx/libc/include/Api.hpp","core/libs/prx/libc/src/exception/TypeInfo.cpp","core/libs/prx/libkernel/Socket/src/Udp.cpp","core/libs/prx/libkernel/Time/TimedWait.cpp","core/libs/prx/libSceAgc/Unimplemented.cpp","core/shader/recompiler/RdnaDecoder/src/RdnaMemoryOpDecoder.cpp"];
+  return ["core/relinker/elfpatcher/src/macos/MacOsImage.cpp","core/libs/prx/libc/src/GuestAllocations.cpp","core/libs/prx/libkernel/Time/Time.cpp","core/libs/prx/libSceFontFt/Export.cpp","core/libs/prx/libSceVoice/Export.cpp","core/libs/prx/libc/Export.cpp","core/libs/prx/libc/include/Api.hpp","core/libs/prx/libc/src/exception/TypeInfo.cpp","core/libs/prx/libkernel/Socket/src/Udp.cpp","core/shader/recompiler/RdnaDecoder/src/RdnaMemoryOpDecoder.cpp"];
 }
 
 /*

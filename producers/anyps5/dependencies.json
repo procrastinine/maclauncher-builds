@@ -6,8 +6,16 @@
       "repository": "https://github.com/4creators/jxrlib.git"
     },
     {
+      "path": "3rdparty/libfvad",
+      "repository": "https://github.com/dpirch/libfvad.git"
+    },
+    {
       "path": "3rdparty/SDL2",
       "repository": "https://github.com/libsdl-org/SDL.git"
+    },
+    {
+      "path": "3rdparty/libressl-openbsd",
+      "repository": "https://github.com/libressl/openbsd.git"
     },
     {
       "path": "3rdparty/Vulkan-Headers",
@@ -48,6 +56,10 @@
     {
       "path": "3rdparty/freetype/subprojects/dlg",
       "repository": "https://github.com/nyorain/dlg.git"
+    },
+    {
+      "path": "3rdparty/harfbuzz",
+      "repository": "https://github.com/harfbuzz/harfbuzz.git"
     },
     {
       "path": "3rdparty/stb",
@@ -99,7 +111,8 @@
     },
     {
       "path": "3rdparty/nghttp2",
-      "repository": "https://github.com/nghttp2/nghttp2.git"
+      "repository": "https://github.com/nghttp2/nghttp2.git",
+      "sourcePath": "sources/anyps5-nghttp2"
     },
     {
       "path": "3rdparty/nghttp2/third-party/mruby",
@@ -124,6 +137,42 @@
     {
       "path": "3rdparty/nghttp2/third-party/urlparse/http-parser",
       "repository": "https://github.com/nodejs/http-parser"
+    },
+    {
+      "path": "3rdparty/quickjs",
+      "repository": "https://github.com/quickjs-ng/quickjs.git"
+    },
+    {
+      "path": "3rdparty/sqlite",
+      "repository": "https://github.com/sqlite/sqlite.git"
+    },
+    {
+      "path": "3rdparty/fontconfig",
+      "repository": "https://github.com/fontconfig/fontconfig.git"
+    },
+    {
+      "path": "3rdparty/zlib",
+      "repository": "https://github.com/madler/zlib.git"
+    },
+    {
+      "path": "3rdparty/curl",
+      "repository": "https://github.com/curl/curl.git"
+    },
+    {
+      "path": "3rdparty/libxml2",
+      "repository": "https://github.com/GNOME/libxml2.git"
+    },
+    {
+      "path": "3rdparty/libpsl",
+      "repository": "https://github.com/rockdaboot/libpsl.git"
+    },
+    {
+      "path": "3rdparty/libpsl/list",
+      "repository": "https://github.com/publicsuffix/list"
+    },
+    {
+      "path": "3rdparty/icu",
+      "repository": "https://github.com/unicode-org/icu.git"
     }
   ],
   "artifacts": [

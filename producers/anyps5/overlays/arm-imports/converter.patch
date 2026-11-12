@@ -1,0 +1,240 @@
+diff --git a/core/relinker/elfpatcher/include/elfpatcher/macos/MacOsImage.hpp b/core/relinker/elfpatcher/include/elfpatcher/macos/MacOsImage.hpp
+index bb59a75..ac3061f 100644
+--- a/core/relinker/elfpatcher/include/elfpatcher/macos/MacOsImage.hpp
++++ b/core/relinker/elfpatcher/include/elfpatcher/macos/MacOsImage.hpp
+@@ -50,6 +50,12 @@ struct MacOsTraceImport {
+     std::string Library;
+ };
+ 
++struct MacOsFallbackImport {
++    std::uint32_t Rva;
++    std::string Name;
++    std::string Library;
++};
++
+ struct MacOsImageInput {
+     bool Executable = true;
+     bool FunctionSymbolRoots = false;
+@@ -73,6 +79,7 @@ struct MacOsImageInput {
+     const std::vector<Codegen::TrampolineSite>* Trampolines = nullptr;
+     bool TraceImports = false;
+     std::vector<MacOsTraceImport> Traced;
++    std::vector<MacOsFallbackImport> Fallbacks;
+     std::function<void(std::string_view)> Message;
+ };
+ 
+diff --git a/core/relinker/elfpatcher/src/macos/MacOsGuestModuleWriter.cpp b/core/relinker/elfpatcher/src/macos/MacOsGuestModuleWriter.cpp
+index a43274c..70783f7 100644
+--- a/core/relinker/elfpatcher/src/macos/MacOsGuestModuleWriter.cpp
++++ b/core/relinker/elfpatcher/src/macos/MacOsGuestModuleWriter.cpp
+@@ -77,7 +77,10 @@ std::vector<std::uint8_t> GuestModuleWriter::WriteMacOs(const Relinker::GuestIma
+                 } else {
+                     image.WritePointer(target, 0);
+                     const auto name = guest.UsePlatformTlsResolver && symbol.Name == "vNe1w4diLCs" ? std::string("Aps5GuestTlsGetAddr_nid_no_patch") : DynamicName(guest, symbolIndex);
+-                    input.Binds.push_back({"_" + name, rva, static_cast<std::int64_t>(addend), (symbol.Info >> 4) == 2, importOrdinal(symbolIndex)});
++                    const bool weak = (symbol.Info >> 4) == 2;
++                    const bool fallback = !weak && (type == 7 || (type == 6 && (symbol.Info & 15) == 2)) && addend == 0 && !name.empty();
++                    input.Binds.push_back({"_" + name, rva, static_cast<std::int64_t>(addend), weak || fallback, importOrdinal(symbolIndex)});
++                    if (fallback) input.Fallbacks.push_back({rva, name, symbol.Library});
+                 }
+             } else throw Domain::RelinkerException("Unsupported macOS guest relocation " + std::to_string(type), target);
+         }
+@@ -97,7 +100,10 @@ std::vector<std::uint8_t> GuestModuleWriter::WriteMacOs(const Relinker::GuestIma
+         input.Exports.push_back({name, image.GetRva(symbol.Value, guest.FunctionSymbolRoots && (symbol.Info & 15) == 2 ? 1 : std::max<std::uint64_t>(symbol.Size, 1)), flags});
+     }
+ 
+-    for (const auto& dependency : dependencies) input.Dylibs.push_back(MachODependency(dependency, "@loader_path"));
++    for (const auto& dependency : dependencies) {
++        auto path = MachODependency(dependency, "@loader_path");
++        if (std::find(input.Dylibs.begin(), input.Dylibs.end(), path) == input.Dylibs.end()) input.Dylibs.push_back(std::move(path));
++    }
+     if (std::find(input.Dylibs.begin(), input.Dylibs.end(), "@rpath/libkernel.prx") == input.Dylibs.end())
+         input.Dylibs.push_back("@rpath/libkernel.prx");
+     input.RunPaths = MachORunPaths(runPath, "@loader_path");
+diff --git a/core/relinker/elfpatcher/src/macos/MacOsImage.cpp b/core/relinker/elfpatcher/src/macos/MacOsImage.cpp
+index 56512fc..d453ac0 100644
+--- a/core/relinker/elfpatcher/src/macos/MacOsImage.cpp
++++ b/core/relinker/elfpatcher/src/macos/MacOsImage.cpp
+@@ -195,6 +195,57 @@ void PadTo(std::vector<std::uint8_t>& out, const std::size_t alignment) {
+     while (out.size() % alignment != 0) out.push_back(0);
+ }
+ 
++bool IsUnmappedPadding(const Windows::PeSection& section) {
++    return section.Name != ".amdstub" && section.Data.empty() &&
++        (section.Characteristics & (Windows::SectionRead | Windows::SectionWrite | Windows::SectionExecute)) == 0;
++}
++
++int PaddingAccessCost(const Windows::PeSection& section) {
++    if ((section.Characteristics & Windows::SectionExecute) != 0) return 2;
++    return (section.Characteristics & Windows::SectionWrite) != 0 ? 1 : 0;
++}
++
++void ExtendSectionOverPadding(Windows::PeSection& section, const Windows::PeSection& padding) {
++    const auto end = padding.Rva + padding.MemorySize();
++    if (padding.Rva == section.Rva + section.MemorySize()) {
++        section.VirtualSize = static_cast<std::uint32_t>(end - section.Rva);
++        if (!section.Data.empty() && (section.Characteristics & Windows::SectionWrite) == 0) section.Data.resize(section.VirtualSize);
++        return;
++    }
++    const auto memorySize = section.MemorySize();
++    if (!section.Data.empty()) section.Data.insert(section.Data.begin(), static_cast<std::size_t>(padding.MemorySize()), 0);
++    section.VirtualSize = static_cast<std::uint32_t>(memorySize + padding.MemorySize());
++    section.Rva = padding.Rva;
++}
++
++bool AbsorbUnmappedPadding(std::vector<Windows::PeSection>& sections) {
++    auto padding = sections.end();
++    auto chosen = sections.end();
++    int chosenCost = 0;
++    std::uint64_t chosenBytes = 0;
++    const auto consider = [&](const std::vector<Windows::PeSection>::iterator candidate, const std::vector<Windows::PeSection>::iterator neighbour) {
++        if (neighbour->Name == ".amdstub" || IsUnmappedPadding(*neighbour)) return;
++        const auto cost = PaddingAccessCost(*neighbour);
++        const auto bytes = candidate->MemorySize();
++        if (padding == sections.end() || cost < chosenCost || (cost == chosenCost && bytes < chosenBytes)) {
++            padding = candidate;
++            chosen = neighbour;
++            chosenCost = cost;
++            chosenBytes = bytes;
++        }
++    };
++    for (auto section = sections.begin(); section != sections.end(); ++section) {
++        if (!IsUnmappedPadding(*section)) continue;
++        if (section != sections.begin() && std::prev(section)->Rva + std::prev(section)->MemorySize() == section->Rva) consider(section, std::prev(section));
++        const auto next = std::next(section);
++        if (next != sections.end() && section->Rva + section->MemorySize() == next->Rva) consider(section, next);
++    }
++    if (padding == sections.end()) return false;
++    ExtendSectionOverPadding(*chosen, *padding);
++    sections.erase(padding);
++    return true;
++}
++
+ void FitDyldSegmentLimit(std::vector<Windows::PeSection>& sections, const std::size_t limit) {
+     while (sections.size() > limit) {
+         auto best = sections.end();
+@@ -210,7 +261,10 @@ void FitDyldSegmentLimit(std::vector<Windows::PeSection>& sections, const std::s
+                 bestGap = gap;
+             }
+         }
+-        if (best == sections.end()) return;
++        if (best == sections.end()) {
++            if (!AbsorbUnmappedPadding(sections)) return;
++            continue;
++        }
+         const auto next = std::next(best);
+         const auto memorySize = next->Rva + next->MemorySize() - best->Rva;
+         if (!next->Data.empty()) {
+@@ -569,6 +623,12 @@ std::vector<std::uint8_t> WriteMacOsImage(MacOsImageInput& input) {
+         input.Binds.push_back({"___aps5_get_pending_module_args_nid_no_patch", metaRva + static_cast<std::uint32_t>(moduleArgsSlot), 0, false, libraryOrdinal("@rpath/libkernel.prx")});
+         input.Binds.push_back({"___aps5_set_module_init_result_nid_no_patch", metaRva + static_cast<std::uint32_t>(moduleResultSlot), 0, false, libraryOrdinal("@rpath/libkernel.prx")});
+     }
++    std::uint64_t fallbackSlot = 0;
++    if (!input.Fallbacks.empty()) {
++        fallbackSlot = metaEnd;
++        metaEnd += 8;
++        input.Binds.push_back({"_UnresolvedImport_nid_no_patch", metaRva + static_cast<std::uint32_t>(fallbackSlot), 0, true, libraryOrdinal("@rpath/libc.prx")});
++    }
+     const auto lifecycle = AlignUp(metaEnd, 8);
+     metaEnd = lifecycle + 24;
+     meta.resize(metaEnd, 0);
+@@ -695,11 +755,45 @@ std::vector<std::uint8_t> WriteMacOsImage(MacOsImageInput& input) {
+         input.Binds.push_back({"___cxa_atexit", metaRva + static_cast<std::uint32_t>(MetaCxaAtexitSlot), 0, false, 1});
+     }
+ 
+-    const bool hasInit = hasTls || !input.TlsImports.empty() || input.InitRva != 0 || !input.InitArrayRvas.empty() || hasFini;
++    std::vector<std::uint32_t> fallbackStubs;
++    if (!input.Fallbacks.empty()) {
++        std::map<std::string, std::uint32_t> strings;
++        const auto intern = [&](const std::string& text) {
++            if (const auto found = strings.find(text); found != strings.end()) return found->second;
++            const auto rva = code.GetRva();
++            for (const auto character : text) code.Emit({static_cast<std::uint8_t>(character)});
++            code.Emit({0});
++            strings.emplace(text, rva);
++            return rva;
++        };
++        std::vector<std::pair<std::uint32_t, std::uint32_t>> names;
++        for (const auto& import : input.Fallbacks) {
++            if (import.Name.empty()) throw Domain::RelinkerException("Unnamed macOS fallback import", import.Rva);
++            const auto name = intern(import.Name);
++            names.emplace_back(name, intern(import.Library));
++        }
++        while (code.GetRva() % 16 != 0) code.Emit({0xcc});
++        for (const auto& [name, library] : names) {
++            fallbackStubs.push_back(code.GetRva());
++            code.Rip({0x48, 0x8d, 0x3d}, name);
++            code.Rip({0x48, 0x8d, 0x35}, library);
++            code.Rip({0x48, 0x8b, 0x05}, metaRva + static_cast<std::uint32_t>(fallbackSlot));
++            code.Emit({0x48, 0x85, 0xc0, 0x74, 0x02, 0xff, 0xe0, 0x0f, 0x0b});
++        }
++    }
++
++    const bool hasInit = hasTls || !input.TlsImports.empty() || input.InitRva != 0 || !input.InitArrayRvas.empty() || hasFini || !input.Fallbacks.empty();
+     std::vector<Section> dataSections{{"__meta", 0, metaSize, 0, 3}, {"__init_fini", lifecycle, 24, 0, 3}};
+     if (hasInit) {
+         const auto initStub = code.GetRva();
+         code.Emit({0x55, 0x48, 0x89, 0xe5});
++        for (std::size_t index = 0; index < input.Fallbacks.size(); ++index) {
++            const auto slot = input.Fallbacks[index].Rva;
++            code.Rip({0x48, 0x8b, 0x05}, slot);
++            code.Emit({0x48, 0x85, 0xc0, 0x75, 0x0e});
++            code.Rip({0x48, 0x8d, 0x05}, fallbackStubs[index]);
++            code.Rip({0x48, 0x89, 0x05}, slot);
++        }
+         if (hasTls) {
+             code.Rip({0x48, 0x8d, 0x3d}, descriptor);
+             code.Rip({0xff, 0x15}, metaRva + static_cast<std::uint32_t>(MetaRegisterSlot));
+diff --git a/core/relinker/elfpatcher/src/macos/MacOsMachOPatcher.cpp b/core/relinker/elfpatcher/src/macos/MacOsMachOPatcher.cpp
+index 6b586d1..017961f 100644
+--- a/core/relinker/elfpatcher/src/macos/MacOsMachOPatcher.cpp
++++ b/core/relinker/elfpatcher/src/macos/MacOsMachOPatcher.cpp
+@@ -3,6 +3,7 @@
+ #include <elfpatcher/general/ElfConstants.hpp>
+ #include <elfpatcher/windows/WindowsLoadImage.hpp>
+ #include <elfpatcher/windows/WindowsRelocationBuilder.hpp>
++#include <domain/ImportModule.hpp>
+ #include <io/BufferUtils.hpp>
+ #include <algorithm>
+ #include <set>
+@@ -40,6 +41,7 @@ std::vector<std::string> ReadNeededLibraries(const Domain::SysVDynamicSection& d
+         if (nameOffset >= dynamicSection.DynStrData.size()) throw Domain::RelinkerException("DT_NEEDED string offset is out of bounds", nameOffset);
+         auto name = Windows::ReadString(dynamicSection.DynStrData, static_cast<std::size_t>(nameOffset));
+         if (name.empty()) throw Domain::RelinkerException("Invalid DT_NEEDED library: " + name);
++        if (!name.starts_with("$ORIGIN")) name = Domain::NeededLibraryName(std::move(name));
+         if (unique.insert(name).second) result.push_back(std::move(name));
+     }
+     return result;
+@@ -48,7 +50,7 @@ std::vector<std::string> ReadNeededLibraries(const Domain::SysVDynamicSection& d
+ std::string MachODependency(const std::string& name, const std::string& origin) {
+     if (name.starts_with("$ORIGIN")) return MachOLoadPath(name, origin);
+     if (name.find('/') != std::string::npos) throw Domain::RelinkerException("Unsupported dependency path: " + name);
+-    return "@rpath/" + name;
++    return "@rpath/" + Domain::NeededLibraryName(name);
+ }
+ 
+ MacOsMachOPatcher::MacOsMachOPatcher(const std::optional<std::uint64_t> fixedBase, std::function<void(std::string_view)> message, const bool traceImports, const bool functionSymbolRoots) : fixedBase(fixedBase), message(std::move(message)), traceImports(traceImports), functionSymbolRoots(functionSymbolRoots) {
+@@ -100,7 +102,9 @@ std::vector<std::uint8_t> MacOsMachOPatcher::Patch(std::vector<std::uint8_t> sou
+     }
+     input.Rebases = relocations.BaseRelocations;
+     for (const auto& import : relocations.Imports) {
+-        input.Binds.push_back({"_" + import.Name, import.TargetRva, static_cast<std::int64_t>(import.Addend), import.Weak});
++        const bool fallback = import.Function && !import.Weak && import.Addend == 0 && !import.Name.empty();
++        input.Binds.push_back({"_" + import.Name, import.TargetRva, static_cast<std::int64_t>(import.Addend), import.Weak || fallback});
++        if (fallback) input.Fallbacks.push_back({import.TargetRva, import.Name, import.Library});
+         if (traceImports && import.Function && !import.Weak && import.Addend == 0 && !import.Name.empty())
+             input.Traced.push_back({import.TargetRva, import.Name, import.Library});
+     }
+diff --git a/core/relinker/relinker/src/guest/GuestModuleBuilder.cpp b/core/relinker/relinker/src/guest/GuestModuleBuilder.cpp
+index ddaa22f..ec33a36 100644
+--- a/core/relinker/relinker/src/guest/GuestModuleBuilder.cpp
++++ b/core/relinker/relinker/src/guest/GuestModuleBuilder.cpp
+@@ -415,7 +415,7 @@ std::vector<GuestArtifact> GuestModuleBuilder::Build(const std::filesystem::path
+     std::vector<std::string> hostLibraries;
+     std::vector<std::vector<std::string>> moduleHostLibraries(images.size());
+     std::set<std::string> uniqueHosts;
+-    const auto hostLibrary = [&](const std::string& name) { return windows || macos ? name : Domain::NeededLibraryName(name); };
++    const auto hostLibrary = [&](const std::string& name) { return windows ? name : Domain::NeededLibraryName(name); };
+     std::vector<std::filesystem::path> runDirectories;
+     bool runDirectoriesExist = !windows && !macos;
+     for (std::size_t begin = 0; runDirectoriesExist && begin <= runPath.size();) {

@@ -9,4 +9,9 @@ export function applySdlOverlay(root){
  if(!source.includes(add))throw Error('The pinned AnyPS5 SDL target changed.');
  source=source.replace(add,add+'\n    if(APPLE)\n        add_library(SDL2-static INTERFACE)\n        target_link_libraries(SDL2-static INTERFACE SDL2)\n        set_target_properties(SDL2 PROPERTIES\n            BUILD_WITH_INSTALL_RPATH ON\n            INSTALL_RPATH "@loader_path"\n            INSTALL_NAME_DIR "@rpath"\n            BUILD_WITH_INSTALL_NAME_DIR ON\n            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/core/libs/libs")\n    endif()');
  fs.writeFileSync(file,source);
+ // The Darwin producer shares one SDL dylib across the driver and video output.
+ const video=path.join(root,'core/libs/prx/libSceVideoOut/CMakeLists.txt');let links=fs.readFileSync(video,'utf8');
+ const before='    set(videoOutSdl libSceAgcDriver)';
+ if(links.indexOf(before)<0||links.indexOf(before)!==links.lastIndexOf(before))throw Error('The pinned AnyPS5 video SDL boundary changed.');
+ fs.writeFileSync(video,links.replace(before,'    set(videoOutSdl SDL2)'));
 }

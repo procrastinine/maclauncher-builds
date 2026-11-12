@@ -45,7 +45,7 @@ export async function applyPipelineStateOverlay(root) {
 export async function applyPipelineJournalStateOverlay(root) {
   const file = path.join(root, 'core/libs/prx/libSceAgcDriver/Graphics/src/PipelineJournal.cpp');
   let source = await fs.readFile(file, 'utf8');
-  source = replace(source, 'constexpr std::uint32_t FileFormat = 12u;', 'constexpr std::uint32_t FileFormat = 13u;');
+  source = replace(source, 'constexpr std::uint32_t FileFormat = 17u;', 'constexpr std::uint32_t FileFormat = 18u;');
   source = replace(source, '    canonical.blendConstants = state.blendConstants;', '    canonical.blendConstants = {};');
   await fs.writeFile(file, source);
 }

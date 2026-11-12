@@ -14,7 +14,7 @@ export async function applyShaderLoopsOverlay(root) {
     source = replace(source, '#include <string>', '#include <string>\n#include <unordered_map>\n#include <vector>\n#include <limits>');
     const split = await fs.readFile(new URL('./SplitContinueBodies.inc', import.meta.url), 'utf8');
     source = replace(source, 'namespace {\n', 'namespace {\n\n' + split + '\n');
-    source = replace(source, '    return state.module.Finalize();', '#ifdef __APPLE__\n    return SplitContinueBodies(state.module.Finalize());\n#else\n    return state.module.Finalize();\n#endif');
+    source = replace(source, '    auto words = state.module.Finalize();', '#ifdef __APPLE__\n    auto words = SplitContinueBodies(state.module.Finalize());\n#else\n    auto words = state.module.Finalize();\n#endif');
     await fs.writeFile(file, source);
     return [relative];
 }

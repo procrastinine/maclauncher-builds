@@ -105,6 +105,8 @@ inline VkPipelineStageFlags PipelineStages(std::span<const CompiledShader> shade
 `]
 ]},
 {file: "core/libs/prx/libSceAgcDriver/Graphics/src/Draw.cpp", replacements: [
+["struct DrawPlan {","struct DrawPlan {\n    const ShaderRecompiler::RecompileResult* emulatedMesh = nullptr;"],
+["    inputs.meshGroups = drawPlan.meshGroups;","    inputs.emulatedMesh = drawPlan.emulatedMesh;\n    inputs.meshGroups = drawPlan.meshGroups;"],
 [`            const auto& program = *shader.program;
             const bool generated = ((state.rectList || patches) && (shader.stage == Stage::TessellationControl || shader.stage == Stage::TessellationEvaluation)) || shader.stage == Stage::Geometry;
             if (!generated && program.PipelineVariantId() == 0) {
@@ -118,33 +120,17 @@ inline VkPipelineStageFlags PipelineStages(std::span<const CompiledShader> shade
     const ShaderRecompiler::RecompileResult* emulatedMesh = nullptr;
     std::uint32_t expandedIndexCount = 0;
 `],
-[`        APS5_LOG_CHARS_OUT_DEBUG("Mesh path");
-        Require(context.meshShader, "device does not support mesh shaders");
-        const auto& mesh = *state.stages.mesh;
-`, `        APS5_LOG_CHARS_OUT_DEBUG("Mesh path");
-        const auto emulated = std::find_if(shaders.begin(), shaders.end(), [](const CompiledShader& shader) { return EmulatedMesh(shader); });
-        if (emulated != shaders.end()) inputs.emulatedMesh = emulated->program;
-        Require(context.meshShader || (inputs.emulatedMesh != nullptr && args == nullptr), "device does not support mesh shaders");
-        const auto& mesh = *state.stages.mesh;
-`],
-[`            APS5_LOG_OUT_DEBUG("Mesh primitives=%u groups=%u", primitives, inputs.meshGroups);
-            Require(inputs.meshGroups <= context.meshLimits.maxMeshWorkGroupCount[0] && draw.instanceCount <= context.meshLimits.maxMeshWorkGroupCount[1] && static_cast<std::uint64_t>(inputs.meshGroups) * draw.instanceCount <= context.meshLimits.maxMeshWorkGroupTotalCount, "mesh draw exceeds workgroup count limits");
-        }
-`, `            APS5_LOG_OUT_DEBUG("Mesh primitives=%u groups=%u", primitives, inputs.meshGroups);
-            if (inputs.emulatedMesh != nullptr) {
-                Require(inputs.meshGroups <= context.limits.maxComputeWorkGroupCount[0] && draw.instanceCount <= context.limits.maxComputeWorkGroupCount[1], "emulated mesh draw exceeds compute workgroup count limits");
-            } else {
-            Require(inputs.meshGroups <= context.meshLimits.maxMeshWorkGroupCount[0] && draw.instanceCount <= context.meshLimits.maxMeshWorkGroupCount[1] && static_cast<std::uint64_t>(inputs.meshGroups) * draw.instanceCount <= context.meshLimits.maxMeshWorkGroupTotalCount, "mesh draw exceeds workgroup count limits");
-            }
-        }
-`],
+["        APS5_LOG_CHARS_OUT_DEBUG(\"Mesh path\");\n        Require(context.meshShader, \"device does not support mesh shaders\");\n        const auto& mesh = *state.stages.mesh;\n", "        APS5_LOG_CHARS_OUT_DEBUG(\"Mesh path\");\n        const auto emulated = std::find_if(shaders.begin(), shaders.end(), [](const CompiledShader& shader) { return EmulatedMesh(shader); });\n        if (emulated != shaders.end()) plan.emulatedMesh = emulated->program;\n        Require(context.meshShader || (plan.emulatedMesh != nullptr && args == nullptr), \"device does not support mesh shaders\");\n        const auto& mesh = *state.stages.mesh;\n"],
+["            const auto grid = MeshGridFor(context, groups, draw.instanceCount);\n            Require(grid.has_value(), \"mesh draw exceeds workgroup count limits\");\n            APS5_LOG_OUT_DEBUG(\"Mesh primitives=%u groups=%u as %u x %u\", primitives, groups, grid->groups, grid->layers);\n            plan.meshGroups = grid->groups;\n            plan.meshLayers = grid->layers;\n            plan.meshLayerStride = grid->layerStride;\n        }\n", "            if (plan.emulatedMesh != nullptr) {\n                Require(groups <= context.limits.maxComputeWorkGroupCount[0] && draw.instanceCount <= context.limits.maxComputeWorkGroupCount[1], \"emulated mesh draw exceeds compute workgroup count limits\");\n                APS5_LOG_OUT_DEBUG(\"Mesh primitives=%u groups=%u\", primitives, groups);\n                plan.meshGroups = groups;\n            } else {\n            const auto grid = MeshGridFor(context, groups, draw.instanceCount);\n            Require(grid.has_value(), \"mesh draw exceeds workgroup count limits\");\n            APS5_LOG_OUT_DEBUG(\"Mesh primitives=%u groups=%u as %u x %u\", primitives, groups, grid->groups, grid->layers);\n            plan.meshGroups = grid->groups;\n            plan.meshLayers = grid->layers;\n            plan.meshLayerStride = grid->layerStride;\n            }\n        }\n"],
 [`    const auto* args = indirect != nullptr ? indirect->args : nullptr;
     if (state.stages.mesh && (args != nullptr || state.tessellationCapture != nullptr)) {
 `, `    const auto* args = indirect != nullptr ? indirect->args : nullptr;
     if (inputs.emulatedMesh != nullptr) {
         const auto slots = ShaderRecompiler::EmulatedMeshSlots(*state.stages.mesh);
         context.Resolved(&DeviceFunctions::cmdDraw, "vkCmdDraw")(commands, inputs.meshGroups * draw.instanceCount * slots.primitives * 3u, 1, 0, 0);
-        return;
+        recorded(subdraw++);
+        emitted = true;
+        return true;
     }
     if (state.stages.mesh && (args != nullptr || state.tessellationCapture != nullptr)) {
 `],
@@ -208,10 +194,12 @@ std::array<VkBuffer, 3> recordMeshEmulation(const Context& context, VkCommandBuf
 bool WriteOnlyPasses() {
 `],
 [`    if (UsesMeshWindow(shaders)) PrepareMeshWindow(context);
-    const auto start = recorder->StartDrawPass(passKey, capture || readsTarget || gpuIndirect || meshIndirect || captured || PixelFunctionLdsSubgroup(shaders) != 0u, fenced, passAccess);
+    const auto start = recorder->StartDrawPass(passKey, capture || readsTarget || gpuIndirect || meshIndirect || captured || !record.staged.empty() || PixelFunctionLdsSubgroup(shaders) != 0u, fenced, passAccess);
+    if (record.spaceKeep != nullptr) *record.spaceKeep = reserveSpaceKeep(*recorder, resources);
     for (const auto& target : record.multisampleTargets) KeepMultisampleTarget_nid_no_patch(target);
 `, `    if (UsesMeshWindow(shaders)) PrepareMeshWindow(context);
-    const auto start = recorder->StartDrawPass(passKey, capture || readsTarget || gpuIndirect || meshIndirect || captured || inputs.emulatedMesh != nullptr || PixelFunctionLdsSubgroup(shaders) != 0u, fenced, passAccess);
+    const auto start = recorder->StartDrawPass(passKey, capture || readsTarget || gpuIndirect || meshIndirect || captured || !record.staged.empty() || inputs.emulatedMesh != nullptr || PixelFunctionLdsSubgroup(shaders) != 0u, fenced, passAccess);
+    if (record.spaceKeep != nullptr) *record.spaceKeep = reserveSpaceKeep(*recorder, resources);
     for (const auto& target : record.multisampleTargets) KeepMultisampleTarget_nid_no_patch(target);
 `],
 [`    std::shared_ptr<Buffer> meshArguments;
@@ -227,10 +215,10 @@ bool WriteOnlyPasses() {
         // Earlier recorded work (dispatches, the previous draw) wrote the images in the general
 `],
 [`    APS5_LOG_CHARS_OUT_DEBUG("Resources bound");
-    pushDrawConstants(*record.pipeline, commands, state, draw, shaders, resources, record.pushBytes, record.pushStages, meshArguments != nullptr ? meshArguments->DeviceAddress() : 0, !inputs.restartTable.empty());
+    pushDrawConstants(*record.pipeline, commands, state, draw, shaders, resources, record.pushBytes, record.pushStages, meshArguments != nullptr ? meshArguments->DeviceAddress() : 0, !inputs.restartTable.empty(), inputs.meshLayerStride);
 `, `    APS5_LOG_CHARS_OUT_DEBUG("Resources bound");
     if (inputs.emulatedMesh != nullptr) pushMeshBuffers(context, commands, VK_PIPELINE_BIND_POINT_GRAPHICS, record.pipeline->Layout(), meshBuffers);
-    pushDrawConstants(*record.pipeline, commands, state, draw, shaders, resources, record.pushBytes, record.pushStages, meshArguments != nullptr ? meshArguments->DeviceAddress() : 0, !inputs.restartTable.empty());
+    pushDrawConstants(*record.pipeline, commands, state, draw, shaders, resources, record.pushBytes, record.pushStages, meshArguments != nullptr ? meshArguments->DeviceAddress() : 0, !inputs.restartTable.empty(), inputs.meshLayerStride);
 `],
 [`    Require(lean || !multisampled, "multisampled draws are only rendered as recorded draws");
     for (const auto& binding : targets) {
@@ -239,10 +227,10 @@ bool WriteOnlyPasses() {
     for (const auto& binding : targets) {
 `],
 [`        // hit's proof is the template's ProveCurrent and nothing needs completion work.
-        if (recipeOut != nullptr && DrawRecipes() && cacheable && !outcome.waited && args == nullptr && resources->Reusable() && resolved.moved.empty() && !multisampled && !pipeline->ReordersSamples()) {
+        if (recipeOut != nullptr && DrawRecipes() && cacheable && !outcome.waited && args == nullptr && resources->Reusable() && !resources->SpaceReuse() && resolved.moved.empty() && !multisampled && !pipeline->ReordersSamples()) {
             auto recipe = std::make_shared<DrawRecipe>();
 `, `        // hit's proof is the template's ProveCurrent and nothing needs completion work.
-        if (recipeOut != nullptr && DrawRecipes() && cacheable && !outcome.waited && args == nullptr && resources->Reusable() && resolved.moved.empty() && !multisampled && inputs.emulatedMesh == nullptr && !pipeline->ReordersSamples()) {
+        if (recipeOut != nullptr && DrawRecipes() && cacheable && !outcome.waited && args == nullptr && resources->Reusable() && !resources->SpaceReuse() && resolved.moved.empty() && !multisampled && inputs.emulatedMesh == nullptr && !pipeline->ReordersSamples()) {
             auto recipe = std::make_shared<DrawRecipe>();
 `]
 ]},
@@ -301,7 +289,7 @@ bool libraryKeys(PipelineLibraryKeys& keys, const Context& context, const State&
             stages[i].module = _modules[i];
             stages[i].pName = "main";
             if (shaders[i].stage == ShaderRecompiler::ShaderStage::Mesh && context.meshWave32 && shader.hostSubgroupSize == 32u) stages[i].pNext = &meshSubgroup;
-            specializations.emplace_back(shader);
+            specializations.emplace_back(shader, state.meshLayerBase, state.meshLayerCount);
             stages[i].pSpecializationInfo = specializations.back().Info();
         }
 `, `        for (std::uint32_t i = 0; i < shaders.size(); ++i) {
@@ -313,7 +301,7 @@ bool libraryKeys(PipelineLibraryKeys& keys, const Context& context, const State&
             stages[i].module = _modules[i];
             stages[i].pName = "main";
             if (!emulated && shaders[i].stage == ShaderRecompiler::ShaderStage::Mesh && context.meshWave32 && shader.hostSubgroupSize == 32u) stages[i].pNext = &meshSubgroup;
-            specializations.emplace_back(shader);
+            specializations.emplace_back(shader, state.meshLayerBase, state.meshLayerCount);
             stages[i].pSpecializationInfo = specializations.back().Info();
         }
 `],
@@ -540,10 +528,10 @@ void Framebuffer::Abandon() noexcept {
                     Require((subgroup.supportedOperations & subgroupOperations) == subgroupOperations, "device lacks operations for subgroup capability " + std::to_string(instruction[1]));
 `],
 [`                }
-                Require(extension == "SPV_KHR_float_controls" || (imageInt64Atomics && extension == "SPV_EXT_shader_image_int64") || (viewportIndexLayer && extension == "SPV_EXT_shader_viewport_index_layer") || (fragment && demoteToHelperInvocation && extension == "SPV_EXT_demote_to_helper_invocation") || (mesh && (extension == "SPV_EXT_mesh_shader" || extension == "SPV_KHR_physical_storage_buffer")) || (fragment && !primitiveLocations.empty() && extension == "SPV_EXT_mesh_shader") || (geometry && state.tessellationCapture && extension == "SPV_KHR_physical_storage_buffer") || ((descriptorIndexing || runtimeDescriptorArray) && extension == "SPV_EXT_descriptor_indexing") || (shader.bdaAbiVersion == ShaderRecompiler::BdaAbi::Version && (extension == "SPV_KHR_physical_storage_buffer" || extension == "SPV_KHR_8bit_storage")), "unsupported SPIR-V extension");
+                Require(extension == "SPV_KHR_float_controls" || (fmaFloat16 && extension == "SPV_KHR_fma") || (imageInt64Atomics && extension == "SPV_EXT_shader_image_int64") || (viewportIndexLayer && extension == "SPV_EXT_shader_viewport_index_layer") || (fragment && demoteToHelperInvocation && extension == "SPV_EXT_demote_to_helper_invocation") || (mesh && (extension == "SPV_EXT_mesh_shader" || extension == "SPV_KHR_physical_storage_buffer")) || (fragment && !primitiveLocations.empty() && extension == "SPV_EXT_mesh_shader") || (geometry && state.tessellationCapture && extension == "SPV_KHR_physical_storage_buffer") || ((descriptorIndexing || runtimeDescriptorArray) && extension == "SPV_EXT_descriptor_indexing") || (shader.bdaAbiVersion == ShaderRecompiler::BdaAbi::Version && (extension == "SPV_KHR_physical_storage_buffer" || extension == "SPV_KHR_8bit_storage")), "unsupported SPIR-V extension");
                 break;
 `, `                }
-                Require(extension == "SPV_KHR_float_controls" || (imageInt64Atomics && extension == "SPV_EXT_shader_image_int64") || (viewportIndexLayer && extension == "SPV_EXT_shader_viewport_index_layer") || (fragment && demoteToHelperInvocation && extension == "SPV_EXT_demote_to_helper_invocation") || (passthrough && extension == "SPV_KHR_physical_storage_buffer") || (mesh && (extension == "SPV_EXT_mesh_shader" || extension == "SPV_KHR_physical_storage_buffer")) || (fragment && !primitiveLocations.empty() && extension == "SPV_EXT_mesh_shader") || (geometry && state.tessellationCapture && extension == "SPV_KHR_physical_storage_buffer") || ((descriptorIndexing || runtimeDescriptorArray) && extension == "SPV_EXT_descriptor_indexing") || (shader.bdaAbiVersion == ShaderRecompiler::BdaAbi::Version && (extension == "SPV_KHR_physical_storage_buffer" || extension == "SPV_KHR_8bit_storage")), "unsupported SPIR-V extension");
+                Require(extension == "SPV_KHR_float_controls" || (fmaFloat16 && extension == "SPV_KHR_fma") || (imageInt64Atomics && extension == "SPV_EXT_shader_image_int64") || (viewportIndexLayer && extension == "SPV_EXT_shader_viewport_index_layer") || (fragment && demoteToHelperInvocation && extension == "SPV_EXT_demote_to_helper_invocation") || (passthrough && extension == "SPV_KHR_physical_storage_buffer") || (mesh && (extension == "SPV_EXT_mesh_shader" || extension == "SPV_KHR_physical_storage_buffer")) || (fragment && !primitiveLocations.empty() && extension == "SPV_EXT_mesh_shader") || (geometry && state.tessellationCapture && extension == "SPV_KHR_physical_storage_buffer") || ((descriptorIndexing || runtimeDescriptorArray) && extension == "SPV_EXT_descriptor_indexing") || (shader.bdaAbiVersion == ShaderRecompiler::BdaAbi::Version && (extension == "SPV_KHR_physical_storage_buffer" || extension == "SPV_KHR_8bit_storage")), "unsupported SPIR-V extension");
                 break;
 `],
 [`        mode(spv::ExecutionModeLocalSize, {paired ? config.threadsPerGroup / 2u : config.threadsPerGroup, 1, 1});
@@ -581,13 +569,13 @@ void Framebuffer::Abandon() noexcept {
     if (mesh) Require(module.primitiveIndices == state.stages.mesh->outputPrimitiveSize, "mesh shader does not export primitive indices");
     if (fragment) Require(module.primitiveInputs == 0 || !primitiveLocations.empty(), "per-primitive pixel inputs need the barycentric emulation layout");
     if (fragment) Require(!module.meshCapability || module.primitiveInputs != 0, "a pixel shader declares mesh shading without a per-primitive input");
-    if (stage == Stage::Vertex || mesh || ((evaluation || geometry) && !state.rasterizerDiscard)) Require(module.position, "vertex shader does not export position");
+    if (mesh || ((stage == Stage::Vertex || evaluation || geometry) && !state.rasterizerDiscard)) Require(module.position, "vertex shader does not export position");
     return module;
 `, `    for (const auto id : module.interface) Require(module.variables.contains(id), "entry point interface contains an unknown variable");
     if (mesh && !meshCompute) Require(module.primitiveIndices == state.stages.mesh->outputPrimitiveSize, "mesh shader does not export primitive indices");
     if (fragment) Require(module.primitiveInputs == 0 || !primitiveLocations.empty(), "per-primitive pixel inputs need the barycentric emulation layout");
     if (fragment) Require(!module.meshCapability || module.primitiveInputs != 0, "a pixel shader declares mesh shading without a per-primitive input");
-    if (stage == Stage::Vertex || (mesh && !meshCompute) || ((evaluation || geometry) && !state.rasterizerDiscard)) Require(module.position, "vertex shader does not export position");
+    if ((mesh && !meshCompute) || ((stage == Stage::Vertex || evaluation || geometry) && !state.rasterizerDiscard)) Require(module.position, "vertex shader does not export position");
     return module;
 `],
 [`    Require(state.stages.mesh.has_value() == mesh && state.stages.tessellation.has_value() == tessellation, "graphics stage configuration disagrees with its path");
@@ -665,11 +653,9 @@ void Framebuffer::Abandon() noexcept {
     if (request.shader.stage == ShaderStage::Mesh && request.graphics) result.meshBarycentrics = request.graphics->meshBarycentrics;
 `],
 [`        if (op == spv::OpDecorate && count == 4u && materialized[cursor + 2u] == spv::DecorationBinding) bindingNumbers.emplace(materialized[cursor + 1u], materialized[cursor + 3u]);
-        if (op == spv::OpDecorate && count == 4u && materialized[cursor + 2u] == spv::DecorationDescriptorSet && (materialized[cursor + 3u] == PixelFunctionLdsDescriptorSet || materialized[cursor + 3u] == MeshWindowDescriptorSet)) functionLdsBuffer.insert(materialized[cursor + 1u]);
-        if (op == spv::OpVariable && count >= 4u && !functionLdsBuffer.contains(materialized[cursor + 2u])) {
+        if (op == spv::OpDecorate && count == 4u && materialized[cursor + 2u] == spv::DecorationDescriptorSet && (materialized[cursor + 3u] == PixelFunctionLdsDescriptorSet || materialized[cursor + 3u] == MeshWindowDescriptorSet || (compute && materialized[cursor + 3u] == WorkgroupMemoryDescriptorSet))) ldsBuffers.insert(materialized[cursor + 1u]);
 `, `        if (op == spv::OpDecorate && count == 4u && materialized[cursor + 2u] == spv::DecorationBinding) bindingNumbers.emplace(materialized[cursor + 1u], materialized[cursor + 3u]);
-        if (op == spv::OpDecorate && count == 4u && materialized[cursor + 2u] == spv::DecorationDescriptorSet && (materialized[cursor + 3u] == PixelFunctionLdsDescriptorSet || materialized[cursor + 3u] == MeshWindowDescriptorSet || materialized[cursor + 3u] == MeshEmulationDescriptorSet)) functionLdsBuffer.insert(materialized[cursor + 1u]);
-        if (op == spv::OpVariable && count >= 4u && !functionLdsBuffer.contains(materialized[cursor + 2u])) {
+        if (op == spv::OpDecorate && count == 4u && materialized[cursor + 2u] == spv::DecorationDescriptorSet && (materialized[cursor + 3u] == PixelFunctionLdsDescriptorSet || materialized[cursor + 3u] == MeshWindowDescriptorSet || materialized[cursor + 3u] == MeshEmulationDescriptorSet || (compute && materialized[cursor + 3u] == WorkgroupMemoryDescriptorSet))) ldsBuffers.insert(materialized[cursor + 1u]);
 `]
 ]},
 {file: "core/shader/recompiler/Recompiler.hpp", replacements: [
@@ -773,10 +759,8 @@ SpirvEmitterState::SpirvEmitterState(const IrProgram& program, const ShaderStage
 `],
 [`    EmitProgram(state);
     state.module.EmitEntryPoint(ExecutionModelForStage(state.program.Resources().stage), state.mainFunc, "main", state.interfaceVariables);
-    if (info != nullptr) {
 `, `    EmitProgram(state);
     state.module.EmitEntryPoint(state.meshAsCompute ? static_cast<std::uint32_t>(spv::ExecutionModelGLCompute) : ExecutionModelForStage(state.program.Resources().stage), state.mainFunc, "main", state.interfaceVariables);
-    if (info != nullptr) {
 `]
 ]},
 {file: "core/shader/recompiler/SpirvBackend/src/SpirvMemory/SpirvEmitterHelpers.cpp", replacements: [
@@ -792,12 +776,12 @@ void EmitBaseHeader(SpirvModule& module, const IrProgram& program, bool meshAsCo
     if (physical) {
 `],
 [`    }
-    if (state.requirements.ldsLock && std::none_of(state.inputs.begin(), state.inputs.end(), [](const SpirvInputBinding& input) {
+    if ((state.requirements.ldsLock || ScratchPoolActive(state)) && std::none_of(state.inputs.begin(), state.inputs.end(), [](const SpirvInputBinding& input) {
 `, `    }
     if (state.meshAsCompute && std::none_of(state.inputs.begin(), state.inputs.end(), [](const SpirvInputBinding& input) { return input.kind == StageInputKind::WorkgroupId; })) {
         state.inputs.push_back(SpirvInputBinding {{StageInputKind::WorkgroupId, 0u, 3u, "gl_WorkGroupID", false}});
     }
-    if (state.requirements.ldsLock && std::none_of(state.inputs.begin(), state.inputs.end(), [](const SpirvInputBinding& input) {
+    if ((state.requirements.ldsLock || ScratchPoolActive(state)) && std::none_of(state.inputs.begin(), state.inputs.end(), [](const SpirvInputBinding& input) {
 `]
 ]},
 {file: "core/shader/recompiler/SpirvBackend/src/SpirvMemory/SpirvModuleSetup.cpp", replacements: [

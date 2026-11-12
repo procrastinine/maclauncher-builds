@@ -18,9 +18,7 @@ export function applyModuleOrderingOverlay(root) {
         return !windows && !library.empty() && findGuest(library) == guestNames.end();
 #endif
     };`],
-    [`        if (declaresHost(executableModules[offset / 24])) continue;
-        const std::string base = name.substr(0, name.find('#'));`, `        const std::string base = name.substr(0, name.find('#'));
-        if (declaresHost(executableModules[offset / 24], base)) continue;`],
+    [`        if (declaresHost(executableModules[offset / 24])) continue;`, `        if (declaresHost(executableModules[offset / 24], base)) continue;`],
     [`    std::vector<std::set<std::size_t>> dependencies(images.size());`, `    std::vector<std::set<std::size_t>> dependencies(images.size());
 #ifdef __APPLE__
     std::vector<std::pair<std::size_t, std::size_t>> guestWins;

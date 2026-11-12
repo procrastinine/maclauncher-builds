@@ -23,6 +23,9 @@ function wrap(text,signature,file) {
 
 export function applyWindowOverlay(projectionRoot) {
  const changes=[];
+ const appNameHeader='core/libs/prx/libkernel/System/include/DarwinApplicationName.hpp';
+ fs.copyFileSync(new URL('./DarwinApplicationName.hpp',import.meta.url),path.join(projectionRoot,appNameHeader));
+ changes.push(appNameHeader);
  const edit=(relative,adapt)=>{
   const target=path.join(projectionRoot,relative),before=fs.readFileSync(target,'utf8'),after=adapt(before,relative);
   if(before!==after){fs.writeFileSync(target,after);changes.push(relative);}
@@ -33,7 +36,9 @@ export function applyWindowOverlay(projectionRoot) {
    '#elif defined(__APPLE__)\n    return Aps5IsGuestMainThread_nid_no_patch();\n#else\n    return std::this_thread::get_id() == initialThreadId;',file);
  });
  edit('core/libs/prx/libSceVideoOut/src/DisplayWindow.cpp',(text,file)=>{
-  text='#include "prx/libSceVideoOut/include/MainThread.hpp"\n'+text;
+  text='#include "prx/libSceVideoOut/include/MainThread.hpp"\n#ifdef __APPLE__\n#include "prx/libkernel/System/include/DarwinApplicationName.hpp"\n#endif\n'+text;
+  text=replaceOnce(text,'namespace {','namespace {\nconst char* HostAppTitle(const AppTitle& title) {\n#ifdef __APPLE__\n    const auto& bundle = DarwinApplicationName::BundleTitle();\n    if (!bundle.empty()) return bundle.c_str();\n#endif\n    return title.value;\n}\n',file);
+  text=text.replaceAll('SDL_CreateWindow(title.value,','SDL_CreateWindow(HostAppTitle(title),').replace('title.value, currentFps,','HostAppTitle(title), currentFps,');
   for(const signature of ['void DisplayWindow::Ensure(', 'void DisplayWindow::Destroy()', 'void DisplayWindow::ToggleFullscreen()', 'void DisplayWindow::DrawableSize(', 'void DisplayWindow::UpdateTitle()'])text=wrap(text,signature,file);
   return text;
  });
@@ -42,5 +47,10 @@ export function applyWindowOverlay(projectionRoot) {
   for(const signature of ['void PadInput::openAvailableControllers()', 'PadInput::~PadInput()'])text=wrap(text,signature,file);
   return text;
  });
+ edit('core/libs/prx/libkernel/Pthread/src/MainThreadMacOs.cpp',(text,file)=>replaceOnce('#include "prx/libkernel/System/include/DarwinApplicationName.hpp"\n'+text,
+  '    setprogname(strdup(getprogname()));',
+  '    const auto& bundleTitle = DarwinApplicationName::BundleTitle();\n    setprogname(strdup(bundleTitle.empty() ? getprogname() : bundleTitle.c_str()));',file));
+ edit('core/libs/prx/libkernel/CMakeLists.txt',(text)=>text+'\nif(APPLE)\n    target_link_libraries(libkernel PRIVATE "-framework CoreFoundation")\nendif()\n');
+ edit('core/libs/prx/libSceVideoOut/CMakeLists.txt',(text)=>text+'\nif(APPLE)\n    target_link_libraries(libSceVideoOut PRIVATE "-framework CoreFoundation")\nendif()\n');
  return changes;
 }

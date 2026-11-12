@@ -188,4 +188,5 @@ std::int32_t APS5_VABI sceKernelInternalMemoryGetModuleSegmentInfo_nid_postfix(I
     *result = {reinterpret_cast<std::uintptr_t>(address),size};return 0;
 }
 std::uint64_t GuestImageSegmentBytes_nid_no_patch() {return GuestSegmentBytes();}
+KernelModule APS5_VABI sceKernelGetExecutableModuleHandle() {return ModuleIdForImage_nid_no_patch(DarwinImage::Main());}
 }

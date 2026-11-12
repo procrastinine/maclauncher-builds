@@ -55,8 +55,8 @@ template <class Visit>
 void visitReadablePages`);
   memory=replace(memory,'        MEMORY_BASIC_INFORMATION memory{};\n        require(VirtualQuery(reinterpret_cast<const void*>(cursor), &memory, sizeof(memory)) == sizeof(memory), "cannot query guest memory after a failed committed read");\n        const bool readable = memory.State == MEM_COMMIT && (memory.Protect & (PAGE_GUARD | PAGE_NOACCESS)) == 0 && readableProtection(memory.Protect & 0xffu);\n        visit(offset, chunk, readable && readPages(destination + offset, cursor, chunk));',
    '#ifdef _WIN32\n        MEMORY_BASIC_INFORMATION memory{};\n        require(VirtualQuery(reinterpret_cast<const void*>(cursor), &memory, sizeof(memory)) == sizeof(memory), "cannot query guest memory after a failed committed read");\n        const bool readable = memory.State == MEM_COMMIT && (memory.Protect & (PAGE_GUARD | PAGE_NOACCESS)) == 0 && readableProtection(memory.Protect & 0xffu);\n        visit(offset, chunk, readable && readPages(destination + offset, cursor, chunk));\n#else\n        visit(offset, chunk, readPages(destination + offset, cursor, chunk));\n#endif');
-  memory=replace(memory,'#ifdef _WIN32\n    visitReadablePages(destination, source, bytes,', '#if defined(_WIN32) || defined(__APPLE__)\n    visitReadablePages(destination, source, bytes,');
-  memory=replace(memory,'#ifdef _WIN32\n    constexpr std::size_t ChunkBytes = 64 * PageBytes;', '#if defined(_WIN32) || defined(__APPLE__)\n    constexpr std::size_t ChunkBytes = 64 * PageBytes;');
+  memory=replace(memory,'#ifdef _WIN32\n    if (GuestArena::GuestArenaCopyOwned_nid_no_patch(source, destination, bytes)) return;\n    visitReadablePages(destination, source, bytes,', '#if defined(_WIN32) || defined(__APPLE__)\n#ifdef _WIN32\n    if (GuestArena::GuestArenaCopyOwned_nid_no_patch(source, destination, bytes)) return;\n#endif\n    visitReadablePages(destination, source, bytes,');
+  memory=replace(memory,'#ifdef _WIN32\n    bool same = false;\n    if (GuestArena::GuestArenaCompareOwned_nid_no_patch(address, expected, bytes, &same)) return same;\n    constexpr std::size_t ChunkBytes = 64 * PageBytes;', '#if defined(_WIN32) || defined(__APPLE__)\n#ifdef _WIN32\n    bool same = false;\n    if (GuestArena::GuestArenaCompareOwned_nid_no_patch(address, expected, bytes, &same)) return same;\n#endif\n    constexpr std::size_t ChunkBytes = 64 * PageBytes;');
   memory=replace(memory,'    std::memcpy(reinterpret_cast<void*>(address), source.data(), source.size());', `#ifdef __APPLE__
     GuestWriteWatch::GuestWriteWatchBeginHostWrite_nid_postfix(reinterpret_cast<const void*>(address), source.size());
 #endif
@@ -72,7 +72,6 @@ void visitReadablePages`);
   let arenaHeader=await fs.readFile(arenaHeaderFile,'utf8');
   arenaHeader=replace(arenaHeader,'bool GuestArenaBeginHostWrite_nid_postfix(void* pointer, std::size_t bytes);',`bool GuestArenaBeginHostWrite_nid_postfix(void* pointer, std::size_t bytes);
 #ifdef __APPLE__
-void GuestArenaSetHostWriteHook_nid_postfix(void (*hook)(std::uintptr_t address, std::size_t bytes));
 bool GuestArenaBeginImportWrite_nid_postfix(void* pointer, std::size_t bytes);
 #endif`);
   arenaHeader=replace(arenaHeader,'class HostWrite {\npublic:',`class HostWrite {
@@ -85,27 +84,14 @@ public:
   const arenaRelative='core/libs/prx/libc/src/GuestArena.cpp';
   const arenaFile=path.join(root,arenaRelative);
   let arena=await fs.readFile(arenaFile,'utf8');
-  arena=replace(arena,'std::atomic<void (*)(std::uintptr_t, std::size_t)> hostReadHook{nullptr};',`std::atomic<void (*)(std::uintptr_t, std::size_t)> hostReadHook{nullptr};
-#ifdef __APPLE__
-std::atomic<void (*)(std::uintptr_t, std::size_t)> hostWriteHook{nullptr};
-#endif`);
-  arena=replace(arena,'bool GuestArenaBeginHostWrite_nid_postfix(void* pointer, std::size_t bytes) {\n#ifdef _WIN32',`#ifdef __APPLE__
-void GuestArenaSetHostWriteHook_nid_postfix(void (*hook)(std::uintptr_t address, std::size_t bytes)) {
-    hostWriteHook.store(hook, std::memory_order_release);
-}
-
+  arena=replace(arena,'bool GuestArenaBeginHostWrite_nid_postfix(void* pointer, std::size_t bytes) {',`#ifdef __APPLE__
 bool GuestArenaBeginImportWrite_nid_postfix(void* pointer, std::size_t bytes) {
     GuestWriteWatch::GuestWriteWatchBeginHostWrite_nid_postfix(pointer, bytes);
     return true;
 }
 #endif
 
-bool GuestArenaBeginHostWrite_nid_postfix(void* pointer, std::size_t bytes) {
-#ifdef __APPLE__
-    if (const auto hook = hostWriteHook.load(std::memory_order_acquire); hook != nullptr && pointer != nullptr && bytes != 0)
-        hook(reinterpret_cast<std::uintptr_t>(pointer), bytes);
-    return GuestArenaBeginImportWrite_nid_postfix(pointer, bytes);
-#elif defined(_WIN32)`);
+bool GuestArenaBeginHostWrite_nid_postfix(void* pointer, std::size_t bytes) {`);
   await fs.writeFile(arenaFile,arena);changes.push(arenaRelative);
   const recorderRelative='core/libs/prx/libSceAgcDriver/Graphics/src/Recorder.cpp';
   const recorderFile=path.join(root,recorderRelative);
@@ -126,7 +112,7 @@ void FlushForHostWrite(std::uintptr_t address, std::size_t bytes) {
 void FlushForAccess(std::uint64_t address, std::size_t bytes) {`);
   recorder=replace(recorder,'    GuestMemory::SetFlushHook(&FlushForAccess);',`    GuestMemory::SetFlushHook(&FlushForAccess);
 #ifdef __APPLE__
-    GuestArena::GuestArenaSetHostWriteHook_nid_postfix(&FlushForHostWrite);
+    GuestArena::GuestArenaSetHostWriteHook_nid_no_patch(&FlushForHostWrite);
 #endif`);
   await fs.writeFile(recorderFile,recorder);changes.push(recorderRelative);
   for(const name of ['DarwinImage.hpp','DarwinModuleInfo.inc']) {
@@ -137,51 +123,16 @@ void FlushForAccess(std::uint64_t address, std::size_t bytes) {`);
     const file=path.join(base,relative),original=await fs.readFile(file,'utf8');
     await fs.writeFile(file,transform(original));changes.push('core/libs/prx/libkernel/'+relative);
   };
-  await edit('Module/src/DynamicLoader.cpp',source=>{
-    source=replace(source,'#include <link.h>','#ifdef __APPLE__\n#include "prx/libkernel/Module/DarwinImage.hpp"\n#else\n#include <link.h>\n#endif');
-    source=replace(source,'    bool global = false;','    bool global = false;\n#ifdef __APPLE__\n    const DarwinImage::Header* image = nullptr;\n#endif');
-    source=replace(source,'#ifndef _WIN32\nconst link_map* MainProgramMap()',`#if defined(__APPLE__)
-bool FromGuestModule(void* address) {
-    const auto* image = DarwinImage::Containing(address);
-    return image && DarwinImage::Guest(image);
-}
-void* DefaultScopeSymbol(const char* symbolName) {
-    auto* result = ::dlsym(RTLD_DEFAULT,symbolName);
-    return FromGuestModule(result) ? result : nullptr;
-}
-#elif !defined(_WIN32)
-const link_map* MainProgramMap()`);
-    source=replace(source,'#ifdef __linux__\n        if (path) InitializeLinuxGuestModule(module->native);\n#endif',`#ifdef __APPLE__
-        module->image = path ? DarwinImage::FindPath(resolved) : DarwinImage::Main();
-#elif defined(__linux__)
-        if (path) InitializeLinuxGuestModule(module->native);
-#endif`);
-    source=replace(source,'#else\n        mutation.UnregisterImage(reinterpret_cast<const void*>(static_cast<link_map*>(module->native)->l_addr));',`#elif defined(__APPLE__)
-        mutation.UnregisterImage(reinterpret_cast<const void*>(DarwinImage::LoadBias(module->image)));
-#else
-        mutation.UnregisterImage(reinterpret_cast<const void*>(static_cast<link_map*>(module->native)->l_addr));`);
-    source=replace(source,'        if (module->native == native) return static_cast<std::int32_t>(handle);',`#ifdef __APPLE__
+  // Module ids follow the Mach-O header that the Darwin module-info implementation reports.
+  await edit('Module/src/DynamicLoader.cpp',source=>replace(source,'        if (module->native == native) return static_cast<std::int32_t>(handle);',`#ifdef __APPLE__
         if (module->image == native) return static_cast<std::int32_t>(handle);
 #else
         if (module->native == native) return static_cast<std::int32_t>(handle);
-#endif`);
-    return source;
-  });
-  await edit('System/src/Rtld.cpp',source=>{
-    source=replace(source,'#include <link.h>','#ifdef __APPLE__\n#include "prx/libkernel/Module/DarwinImage.hpp"\n#else\n#include <link.h>\n#endif');
-    source=replace(source,'#else\n    Dl_info info{};',`#elif defined(__APPLE__)
-    const auto* image = DarwinImage::Containing(address);
-    if (!image) return nullptr;
-    if (reference && image != DarwinImage::Main()) {
-        const auto path = DarwinImage::Path(image);
-        handle = ::dlopen(path.c_str(),RTLD_LAZY | RTLD_NOLOAD);
-        if (!handle) throw std::runtime_error(std::string(caller) + ": cannot reference " + path);
-    }
-    return image;
-#else
-    Dl_info info{};`);
-    return source;
-  });
+#endif`));
+  // Upstream's Darwin module info reports a converted image's Mach-O __ELFn protection runs, fills no TLS fields
+  // or initializer addresses, and pairs the host __TEXT,__eh_frame with the guest eh_frame_hdr. This
+  // implementation reports the guest PT_LOAD, PT_TLS, PT_GNU_EH_FRAME and initializer data recorded in
+  // __APS5DATA, with module ids keyed by Mach-O header as in the DynamicLoader edit above.
   await edit('Module/src/ModuleInfo.cpp',source=>'#ifdef __APPLE__\n#include "prx/libkernel/Module/DarwinModuleInfo.inc"\n#else\n'+source+'\n#endif\n');
   await edit('Module/src/Module.cpp',source=>{
     source=replace(source,'specifics/linux/HostMapping.hpp','specifics/HostMapping.hpp');

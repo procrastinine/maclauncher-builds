@@ -9,10 +9,18 @@ const root=path.resolve(import.meta.dirname,'../..');
 export const recipe=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'source.json'),'utf8'));
 export const inputs=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'dependencies.json'),'utf8'));
 for(const entry of inputs.dependencies)Object.defineProperty(entry,'revision',{enumerable:true,get:()=>{
+ if(entry.sourcePath)return gitlink(entry.sourcePath);
  const parent=inputs.dependencies.findLast(candidate=>entry.path.startsWith(candidate.path+'/'))?.path||'';
  return git(path.join(root,sourceCheckout(recipe.source),parent),['rev-parse','HEAD:'+entry.path.slice(parent?parent.length+1:0)]).trim();
 }});
 const git=(directory,args)=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',maxBuffer: Infinity,stdio:['ignore','pipe','pipe']});
+
+// A separately pinned dependency keeps its upstream layout in the projection.
+export function sourceDirectory(source,entry){
+ if(!entry.sourcePath)return path.join(source,entry.path);
+ if(path.isAbsolute(entry.sourcePath)||path.posix.normalize(entry.sourcePath)!==entry.sourcePath||!entry.sourcePath.startsWith('sources/'))throw Error('Invalid owned dependency source path.');
+ return path.join(root,entry.sourcePath);
+}
 
 export function writeChanged(file,bytes,mode=0o644){
  fs.mkdirSync(path.dirname(file),{recursive:true});
@@ -23,8 +31,9 @@ export function verifySources({includeDependencies=true}={}){
  const source=fs.realpathSync(path.join(root,sourceCheckout(recipe.source)));
  const repositories=[{...sourceProvenance(recipe.source),path:''},...(includeDependencies?inputs.dependencies:[])];
  for(const entry of repositories){
-  const directory=entry===repositories[0]?source:path.join(source,entry.path);
-  if(git(directory,['remote','get-url','origin']).trim()!==entry.repository)throw Error('Source origin mismatch: '+entry.path);
+  const directory=entry===repositories[0]?source:sourceDirectory(source,entry);
+  if(git(directory,['rev-parse','HEAD']).trim()!==entry.revision)throw Error('Source pin mismatch: '+(entry.path||'AnyPS5'));
+  if(git(directory,['remote','get-url','origin']).trim().replace(/\.git$/,'')!==entry.repository.replace(/\.git$/,''))throw Error('Source origin mismatch: '+entry.path);
   if(git(directory,['status','--porcelain','--untracked-files=normal']).trim())throw Error('Source checkout has local changes: '+entry.path);
  }
  return {source,repositories};
@@ -32,7 +41,7 @@ export function verifySources({includeDependencies=true}={}){
 function exportSources(source,repositories,destination){
  fs.mkdirSync(destination,{recursive:true});
  for(const [index,entry]of repositories.entries()){
-  const directory=index===0?source:path.join(source,entry.path),output=index===0?destination:path.join(destination,entry.path);
+  const directory=index===0?source:sourceDirectory(source,entry),output=index===0?destination:path.join(destination,entry.path);
   const files=git(directory,['ls-files','--stage','-z']).split('\0').filter(Boolean);
   for(const record of files){
    const separator=record.indexOf('\t'),mode=record.slice(0,6),relative=record.slice(separator+1);
@@ -88,6 +97,9 @@ function applyExportedSourceMetadata(destination,repositories){
   metadata+='set(ANYPS5_EXPORTED_PIN_'+key+' "'+revision(entry)+'")\n';
  }
  writeChanged(path.join(destination,file),metadata);
+ // SDL reads REVISION.txt before asking Git, so its revision string names the exported commit.
+ const sdl=repositories.find(entry=>entry.path==='3rdparty/SDL2');
+ if(sdl)writeChanged(path.join(destination,'3rdparty/SDL2/REVISION.txt'),revision(sdl)+'\n');
  const adapt=(relative,before,after)=>{
   const target=path.join(destination,relative),source=fs.readFileSync(target,'utf8');
   if(source.indexOf(before)<0||source.indexOf(before)!==source.lastIndexOf(before))throw Error('AnyPS5 exported source metadata boundary changed: '+relative);
@@ -96,6 +108,10 @@ function applyExportedSourceMetadata(destination,repositories){
  // These tracked build-script adaptations make the export an adapted source.
  adapt('core/libs/prx/libSceAgcDriver/trace_revision.cmake','if(GIT)',
   'if(EXISTS "${SOURCE}/'+file+'")\n    include("${SOURCE}/'+file+'")\n    string(SUBSTRING "${ANYPS5_EXPORTED_REVISION}" 0 12 commit)\n    set(dirty "${ANYPS5_EXPORTED_DIRTY}")\nelseif(GIT)');
+ adapt('core/libs/prx/libc/run_report_revision.cmake','if(GIT)',
+  'if(EXISTS "${SOURCE}/'+file+'")\n    include("${SOURCE}/'+file+'")\n    set(commit "${ANYPS5_EXPORTED_REVISION}")\n    set(modified "${ANYPS5_EXPORTED_DIRTY}")\nelseif(GIT)');
+ adapt('core/relinker/revision.cmake','if(GIT)',
+  'if(EXISTS "${SOURCE}/'+file+'")\n    include("${SOURCE}/'+file+'")\n    string(SUBSTRING "${ANYPS5_EXPORTED_REVISION}" 0 12 revision)\n    if(ANYPS5_EXPORTED_DIRTY)\n        set(revision "${revision}-dirty")\n    endif()\nelseif(GIT)');
  adapt('core/shader/recompiler/ShaderCacheVersion.cmake','cmake_minimum_required(VERSION 3.20)',
   'cmake_minimum_required(VERSION 3.20)\nif(EXISTS "${ROOT}/'+file+'")\n    include("${ROOT}/'+file+'")\nendif()');
  adapt('core/shader/recompiler/ShaderCacheVersion.cmake','    set(commit)\n    if(GIT)',
@@ -104,10 +120,11 @@ function applyExportedSourceMetadata(destination,repositories){
   '    set(shaderCacheSubmoduleStamps "${PROJECT_SOURCE_DIR}/'+file+'")');
 }
 
-export const RELINKER_OVERLAYS=[['macos-loader','applyLoaderOverlay'],['macos-library-compatibility','applyLibraryCompatibilityOverlay'],['macos-module-ordering','applyModuleOrderingOverlay']];
+export const RELINKER_OVERLAYS=[['macos-loader','applyLoaderOverlay'],['macos-library-compatibility','applyLibraryCompatibilityOverlay'],['macos-module-ordering','applyModuleOrderingOverlay'],['arm-imports','applyArmImportConverterOverlay']];
 export const RUNTIME_OVERLAYS=[
  ["macos-startup","applyStartupOverlay"],
  ["vulkan","applyVulkanOverlay"],
+ ["host-interpolation","applyHostInterpolationOverlay"],
  ["macos-build","applyBuildOverlay"],
  ["macos-kernel","applyKernelOverlay"],
  ["macos-loader","applyLoaderOverlay"],
@@ -123,14 +140,15 @@ export const RUNTIME_OVERLAYS=[
  ["macos-shader-loops","applyShaderLoopsOverlay"],
  ["pipeline-state","applyPipelineStateOverlay"],
  ["resource-preparation","applyResourcePreparationOverlay"],
+ ["storage-remap","applyStorageRemapOverlay"],
  ["validation-cache","applyValidationCacheOverlay"],
  ["mouse-routing","applyMouseRoutingOverlay"],
  ["macos-aborts","applyAbortsOverlay"],
  ["macos-work-submission","applyWorkSubmissionOverlay"],
+ ["macos-worker-qos","applyWorkerQosOverlay"],
  ["macos-graphics-compatibility","applyGraphicsCompatibilityOverlay"],
  ["macos-library-compatibility","applyLibraryCompatibilityOverlay"],
  ["macos-addons","applyAddonsOverlay"],
- ["macos-write-watch/fault-ahead.mjs","applyFaultAheadOverlay"],
  ["macos-write-watch/coverage-leases.mjs","applyCoverageLeasesOverlay"],
  ["macos-draw-performance/pool-buffers.mjs","applyPooledBuffersOverlay"],
  ["macos-draw-performance/import-spans.mjs","applyImportSpansOverlay"],
@@ -138,6 +156,17 @@ export const RUNTIME_OVERLAYS=[
  ["macos-ngs2","applyNgs2Overlay"],
  ["macos-module-ordering","applyModuleOrderingOverlay"],
  ["macos-mesh-compute","applyMeshComputeOverlay"],
+ ["depth-render-control","applyDepthRenderControlOverlay"],
+ ["completion-wake","applyCompletionWakeOverlay"],
+ ["progress-reap","applyProgressReapOverlay"],
+ ["bda-range-memo","applyBdaRangeMemoOverlay"],
+ ["present-retire-count","applyPresentRetireCountOverlay"],
+ ["flip-overlap","applyFlipOverlapOverlay"],
+ ["arm-runtime","applyArmRuntimeOverlay"],
+ ["arm-imports","applyArmImportRuntimeOverlay"],
+ ["arm-imports","applyArmImportConverterOverlay"],
+ ["arm-faults","applyArmFaultOverlay"],
+ ["draw-pass-state","applyDrawPassStateOverlay"],
 ];
 
 export async function prepareSourceProjection({source,repositories},projection,{overlays=RUNTIME_OVERLAYS}={}){

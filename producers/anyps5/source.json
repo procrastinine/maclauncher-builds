@@ -12,7 +12,46 @@
       "repository": "https://github.com/AnyTogether/AnyPS5-ARM",
       "revision": "39b5662d380b2e41da3caac53c795ee47bd3dc6d",
       "license": "GPL-2.0-only",
-      "licenseFile": "licenses/AnyPS5-ARM.txt"
+      "licenseFile": "licenses/AnyPS5-ARM.txt",
+      "adaptations": [
+        {
+          "revision": "20e564c7c020f7c52a13c751ea834d829e164ba4",
+          "overlay": "overlays/arm-runtime"
+        },
+        {
+          "revision": "fcd2c91e21006e78ed2c3e5e829cd2ee56eead88",
+          "overlay": "overlays/arm-runtime"
+        },
+        {
+          "revision": "b2556b1e96260b7884c5a88614467ad9e2cb14c9",
+          "overlay": "overlays/arm-runtime"
+        },
+        {
+          "revision": "1347453a234d39932299b5d976785833d0668693",
+          "overlay": "overlays/arm-runtime"
+        },
+        {
+          "revision": "763900e97be59a0cb975902faadba7a50a657198",
+          "overlay": "overlays/arm-runtime"
+        },
+        {
+          "revision": "39d9838d532af080ec7d18c0be7e5ef933459e9e",
+          "overlay": "overlays/arm-imports"
+        },
+        {
+          "revision": "d4987cc0361fad9aa8edcf1068d7ef4c1bb1faa6",
+          "overlay": "overlays/arm-imports"
+        },
+        {
+          "revision": "abbbbfd0cfb73ea4ce08f347b5847ba22b14623d",
+          "overlay": "overlays/arm-faults"
+        },
+        {
+          "revision": "0e15d11c48b906481e2d1d4739c904a0fd55d682",
+          "sourcePath": "sources/anyps5-nghttp2",
+          "dependency": "3rdparty/nghttp2"
+        }
+      ]
     }
   ],
   "buildEntry": "producers/anyps5/build-relinker.mjs",

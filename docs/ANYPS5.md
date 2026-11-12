@@ -50,9 +50,13 @@ AnyPS5's Mach-O link-edit writer keeps its import and export logic; a small adap
 
 Optional import-call tracing uses a native JIT mapping and preserves call arguments and return values. Host CPU-mask pinning and per-sensor hardware temperature readings report an explicit unsupported result.
 
-Kernel file reads flush pending GPU writes under the GPU memory mutex before writing guest memory. Unwatched storage-image results are written back when their saved guest state permits it. Write-watch registrations reset contained ranges in place, sequential faults share the existing protection block, and allocation and coverage snapshots retain their owners during concurrent reads.
+Kernel file reads flush pending GPU writes under the GPU memory mutex before writing guest memory. Unwatched storage-image results are written back when their saved guest state permits it. Pending storage-image results are dropped when their memory is no longer registered. Re-registration under a new allocation drops only the affected units; other selected units retain their results. Protection changes and backing renewal within the same allocation preserve pending results. Write-watch registrations reset contained ranges in place, sequential faults share the existing protection block, and allocation and coverage snapshots retain their owners during concurrent reads.
+
+A SIGSEGV or SIGBUS that write-watch does not handle is reported on standard error before the guest handler chain or the default action runs. The report gives the signal, the fault address, the faulting thread's frames, the x86-64 program counter, stack pointer and frame pointer, and the loaded image list, and is written with write(2) only. A repeating fault is reported for its first four occurrences. Standard output is line-buffered when it is not a terminal.
 
 File and device event filters support low-water marks, Sysmodule unwind queries use kernel image metadata, and socket information accepts kernel socket descriptors. JIT memory uses shared Mach mappings. USB event handling preserves waiter ownership. Thread CPU clocks use Mach thread accounting, and spatial audio applies listener transforms, distance and cone attenuation, and Doppler adjustment.
+
+Recorder/submission workers, the draw committer and the presentation thread request Darwin user-interactive QoS through the shared thread-priority helper at thread start, independently of the optional upstream thread-priority setting. This scheduling request leaves core placement to macOS. A refused request is logged.
 
 ### Add-ons and updates
 
@@ -77,6 +81,15 @@ These renderer changes are general and independent of the Darwin host adapters:
 - Shader validation results are cached per exact module contents, binding metadata, draw state and device capabilities.
 - Copied shader headers use safe guest-memory reads. Null vertex descriptors and indices beyond every applicable vertex record fetch zeros without allocating padding up to the original index.
 - Buffer pools retain allocation capacity for explicitly ranged resources, adjacent host imports support GPU copies, and unchanged descriptor bindings reuse their allocations.
+- Command-buffer flips admit one next submission while waiting for the preceding GPU epoch. The wait retains its originating device and reaps completion labels and write-backs before returning. CPU flips, title-progress escapes and devices without timelines retain their existing ordering. `APS5_NO_FLIP_OVERLAP=1` keeps the GPU wait before admission.
+- Draws with a single-sample depth target do not drain the draw pipeline for DB_RENDER_CONTROL clear or expand bits, because only native multisample depth surfaces record the render control.
+- Address-based shader reads and writes keep a per-invocation record of the last page-table range each lookup kind found: read lookups and span reads share one record, write lookups another and atomic lookups a third. An access inside that range is translated without the table checks and the search; any other access performs the full lookup. The written-page note skips its table atomics when the same invocation already noted the same page.
+
+### Queue completion and diagnostics
+
+- A completion counted outside a queue worker, such as a CPU write-back over a GPU-stored completion label or a deferred end-of-pipe interrupt added by another queue, wakes the first graphics queue's idle worker. While recorded command batches exist, that worker's idle wait lasts at most 2 ms. `APS5_NO_BOUNDED_IDLE_WAIT=1` restores the untimed idle wait.
+- When the first graphics queue takes no submission and stays on the same packet for 5 seconds while completions, deferred interrupts, recorded work or command batches are pending, one `[watchdog]` line reports the worker's wait state and consecutive failed idle lock attempts, the GPU mutex holder with its thread, lock site and calling code address, the pending completion counts and the last packet of every queue. The line repeats only after that queue moves again. `APS5_QUEUE_WATCHDOG_MS` sets the interval in milliseconds; `0` turns the report off.
+- Under `APS5_PROFILE_DRAW` or a performance trace, a command batch whose timestamps were not yet available when it finished keeps its timestamp pool until the presentation that waited for it retires. The `[present]` line's and the trace summary's GPU busy time include such batches, and the `[present]` line counts them as timed at the retire.
 
 ### Renderer compatibility
 
