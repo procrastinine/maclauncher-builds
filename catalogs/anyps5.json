@@ -6,6 +6,49 @@
     {
       "schemaVersion": 2,
       "id": "anyps5",
+      "version": "MCLv12",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "26.0",
+      "manifestRelative": "runtime.json",
+      "manifestSha256": "f365f39bfd46b74495e437df994dfadadb9c089af566af8e80b1df4b85f6de07",
+      "sourceSha256": "1adf96119e53ad27a2c1726b7a15b833bd2708fb2176882a31d26156b323a1d9",
+      "updatePolicy": "manual",
+      "capabilities": {
+        "mouseRouting": true,
+        "touchPadBinding": true
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "3b396d438af4d4f215672fdebfae92a614b93b7d"
+      },
+      "asset": {
+        "filename": "anyps5-MCLv12-arm64.tar.gz",
+        "sha256": "7087fd6c90660e43cf06076f40a59333f516a06bf781cd1027088e3eb5e19140",
+        "bytes": 49571869,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/anyps5%2FvMCLv12%2Farm64/anyps5-MCLv12-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "3b396d438af4d4f215672fdebfae92a614b93b7d",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.2",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "43151477828",
+        "runAttempt": "1",
+        "definitionDigest": "5295f9de054a4c7f8b9bb2e24fe1fa122a56ce7445cf7ca7345d57c526254bc8"
+      },
+      "tag": "anyps5/vMCLv12/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "anyps5",
       "version": "MCLv10",
       "arch": "x64",
       "launcherArchitectures": [
