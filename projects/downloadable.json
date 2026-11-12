@@ -3486,7 +3486,7 @@
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "sourceDirectory": "producers/engine-adaptations",
       "entries": [
-        "producers/engine-adaptations/vnds-love/source.json"
+        "producers/engine-adaptations/vnds-love"
       ]
     },
     "upstreams": [

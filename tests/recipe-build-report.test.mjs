@@ -27,11 +27,29 @@ test('a definition holds the declared inputs and every tracked file their litera
   'tools/helpers/index.js':'module.exports = require("./more");\n','tools/helpers/more.js':'module.exports = 1;\n','tools/helpers/data.json':{version:'1.0.0'},
   'tools/imported.cjs':'module.exports = 2;\n','tools/computed.cjs':'module.exports = 5;\n','lib/shared.mjs':'import "./nested.mjs";\nexport const shared = 1;\n','lib/nested.mjs':'export {};\n'},[recipe],['lib/shared.mjs']);
  const describe=createRecipeBuildReporter({directory:f.directory}),report=describe('recipe');
- assert.deepEqual(paths(report),['lib/nested.mjs','lib/shared.mjs','tools/helpers/data.json','tools/helpers/index.js','tools/helpers/more.js','tools/imported.cjs','tools/recipe.cjs']);
+ assert.deepEqual(paths(report),['lib/nested.mjs','lib/shared.mjs','tools/computed.cjs','tools/helpers/data.json','tools/helpers/index.js','tools/helpers/more.js','tools/imported.cjs','tools/recipe.cjs']);
  assert.deepEqual(describe.unresolved('recipe'),[{file:'projects',expression:'tools/missing.cjs',reason:'missing'}]);
- // A computed-path load is not an import edge: that file is declared as an entry or is not an input.
- f.write('tools/computed.cjs','module.exports = 6;\n');assert.equal(createRecipeBuildReporter({directory:f.directory})('recipe').definitionDigest,report.definitionDigest);
+ // A literal path assembled from __dirname is an input too.
+ f.write('tools/computed.cjs','module.exports = 6;\n');assert.notEqual(createRecipeBuildReporter({directory:f.directory})('recipe').definitionDigest,report.definitionDigest);
  f.write('tools/imported.cjs','module.exports = 3;\n');assert.notEqual(createRecipeBuildReporter({directory:f.directory})('recipe').definitionDigest,report.definitionDigest);
+});
+
+test('a definition holds the literal paths its code builds from its own location',t=>{
+ const recipe=project('recipe','tools/recipe.mjs');
+ const f=fixture(t,{'tools/recipe.mjs':'import fs from "node:fs";\nimport path from "node:path";\nimport {base} from "./places.mjs";\nconst root=path.resolve(import.meta.dirname,".."),native=path.join(base,"native");\n'+
+  'fs.readFileSync(path.join(root,"data/source.json"));fs.readFileSync(path.join(native,"scene.json"));fs.readFileSync(new URL("../data/url.json",import.meta.url));fs.readFileSync(path.join(root,process.env.NAME||"data/dynamic.json"));\n',
+  'tools/places.mjs':'import path from "node:path";\nexport const root=path.resolve(import.meta.dirname,".."),base=path.join(root,"producers/support");\n',
+  'data/source.json':{a:1},'data/url.json':{b:1},'data/dynamic.json':{c:1},'producers/support/native/scene.json':{d:1}},[recipe]);
+ assert.deepEqual(paths(createRecipeBuildReporter({directory:f.directory})('recipe')),['data/source.json','data/url.json','producers/support/native/scene.json','tools/places.mjs','tools/recipe.mjs']);
+});
+
+for(const [project,file] of [['siglus','producers/vn-adaptations/source.json'],['vulkan-moltenvk-scene','producers/package-support/src/modules/shared/vulkan/native/moltenvk-scene-source.json']])test(project+' definitions hold the data their recipes read through literal paths',()=>{
+ assert.ok(paths(createRecipeBuildReporter()(project)).includes(file));
+});
+
+test('vnds-love definitions hold the data their recipes copy from source lists',()=>{
+ const engine='producers/engine-adaptations/vnds-love',files=paths(createRecipeBuildReporter()('vnds-love'));
+ for(const file of Object.keys(JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'..',engine,'source.json'),'utf8')).files))assert.ok(files.includes(engine+'/'+file),file);
 });
 
 test('java-steamworks declares the steamworks4j notice of every publisher release it builds',()=>{
