@@ -5,5 +5,5 @@
   "architecture": "arm64",
   "minimumMacOS": "26.0",
   "library": "libvulkan_kosmickrisp.dylib",
-  "gitlink": "producers/package-support/src/external/mesa"
+  "gitlink": "sources/maclauncher-kosmickrisp/sources/mesa"
 }

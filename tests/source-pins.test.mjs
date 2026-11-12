@@ -179,3 +179,22 @@ test('a release record names its one archive itself or in one field',async()=>{
  assert.deepEqual(declaredArchive({version:'1.0',sha256:'d'.repeat(64),archive:{url,sha256}}),{url,sha256});
  assert.equal(declaredArchive({first:{url,sha256},second:{url,sha256}}),undefined);
 });
+
+test('a Gitlink inside a pinned repository resolves through that repository at its pinned commit',async t=>{
+ const {resolveUpstream}=await import('../lib/source-pins.mjs'),{execFileSync}=await import('node:child_process');
+ const repository=(files,gitlinks)=>{
+  const directory=fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()),'nested-pin-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
+  const run=(...args)=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim();
+  run('init','-q');run('config','user.name','fixture');run('config','user.email','fixture@example.invalid');
+  for(const [file,text] of Object.entries(files))fs.writeFileSync(path.join(directory,file),text);
+  run('add','-A');for(const [gitlink,commit] of Object.entries(gitlinks))run('update-index','--add','--cacheinfo','160000,'+commit+','+gitlink);
+  run('commit','-q','-m','fixture');return {directory,head:run('rev-parse','HEAD')};
+ };
+ const module=(gitlink,url)=>`[submodule "${gitlink}"]\n\tpath = ${gitlink}\n\turl = ${url}\n`;
+ const inner='4'.repeat(40),owner=repository({'.gitmodules':module('sources/library','https://example.invalid/library/library.git')},{'sources/library':inner});
+ const builds=repository({'.gitmodules':module('sources/owner','https://example.invalid/owner/owner.git')},{'sources/owner':owner.head});
+ const upstream={id:'library',provider:'git',url:'https://example.invalid/library/library',pin:{gitlink:'sources/owner/sources/library'}};
+ assert.throws(()=>resolveUpstream(upstream,builds.directory),/Initialize owner to resolve the Gitlink sources\/library inside it/);
+ fs.mkdirSync(path.join(builds.directory,'sources'));execFileSync('git',['clone','-q','--no-checkout',owner.directory,path.join(builds.directory,'sources/owner')],{stdio:'ignore'});
+ assert.deepEqual(resolveUpstream(upstream,builds.directory),{id:'library',provider:'git',url:upstream.url,revision:inner});
+});

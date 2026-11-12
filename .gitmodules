@@ -133,10 +133,6 @@
 	path = producers/package-support/src/external/magic-enum
 	url = https://github.com/Neargye/magic_enum.git
 
-[submodule "producers/package-support/src/external/mesa"]
-	path = producers/package-support/src/external/mesa
-	url = https://gitlab.freedesktop.org/mesa/mesa
-
 [submodule "producers/package-support/src/external/mkxp-z"]
 	path = producers/package-support/src/external/mkxp-z
 	url = https://github.com/mkxp-z/mkxp-z

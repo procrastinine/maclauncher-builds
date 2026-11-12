@@ -10,7 +10,7 @@
     "kk_clc"
   ],
   "nativeCompilerSource": "kosmickrisp-source.json",
-  "sourcePath": "producers/package-support/src/external/mesa",
+  "sourcePath": "sources/maclauncher-kosmickrisp/sources/mesa",
   "vulkanLoader": {
     "path": "sources/vulkan-loader",
     "repository": "https://chromium.googlesource.com/external/github.com/KhronosGroup/Vulkan-Loader",

@@ -2473,7 +2473,7 @@
         "provider": "git",
         "url": "https://gitlab.freedesktop.org/mesa/mesa",
         "pin": {
-          "gitlink": "producers/package-support/src/external/mesa"
+          "gitlink": "sources/maclauncher-kosmickrisp/sources/mesa"
         }
       },
       {
@@ -2521,8 +2521,8 @@
         "arm64"
       ],
       "submodules": [
-        "producers/package-support/src/external/mesa",
         "producers/package-support/src/external/vulkan-headers",
+        "sources/maclauncher-kosmickrisp/sources/mesa",
         "sources/vulkan-loader"
       ],
       "tools": [
