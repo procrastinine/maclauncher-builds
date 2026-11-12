@@ -6,6 +6,46 @@
     {
       "schemaVersion": 2,
       "id": "ai5",
+      "version": "1.5.0-MCLv9",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "63d4417b059757c51ea0f5f6afda00ca3196b8f8cb8002920c62ac7db234436a",
+      "sourceSha256": "63d4417b059757c51ea0f5f6afda00ca3196b8f8cb8002920c62ac7db234436a",
+      "updatePolicy": "manual",
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0a43c3bbff81e88bb8945eea6e4282a61fd5e6f0"
+      },
+      "asset": {
+        "filename": "ai5-1.5.0-MCLv9-x64.tar.gz",
+        "sha256": "7fdeaf70fb9857734b2a21c31ec3c9e17cdf3a79a6b93e4682a6c0dd3849bd5c",
+        "bytes": 11715409,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/ai5%2Fv1.5.0-MCLv9%2Fx64/ai5-1.5.0-MCLv9-x64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "0a43c3bbff81e88bb8945eea6e4282a61fd5e6f0",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "43329939673",
+        "runAttempt": "1",
+        "definitionDigest": "2cbd185de16683d1edc6c4479673ad0e1f889d7c8a06c762aa4459e42d4ec2a2"
+      },
+      "tag": "ai5/v1.5.0-MCLv9/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "ai5",
       "version": "1.5.0-MCLv8",
       "arch": "arm64",
       "launcherArchitectures": [
