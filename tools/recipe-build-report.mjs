@@ -41,6 +41,8 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
  const APP_SOURCE='producers/package-support/app-source.json',appProfile=fs.existsSync(path.join(root,APP_SOURCE));let appState=null;
  const app=()=>{if(!appState){const source=appSourceRoot(root),tracked=execFileSync('git',['-C',source.directory,'ls-files','-z'],{encoding:'utf8',maxBuffer:Infinity}).split('\0').filter(Boolean);appState={directory:source.directory,tracked,set:new Set(tracked)};}return appState;};
  const bytesOf=new Map(),read=absolute=>{if(!bytesOf.has(absolute))bytesOf.set(absolute,fs.readFileSync(absolute));return bytesOf.get(absolute);};
+ // The checkout as declaredRecipeEntries reads it to derive the files that declared code imports.
+ const workingSource={files:relative=>isFile(relative)?[relative]:filesBelow(relative),readFile:relative=>read(path.join(root,relative)).toString('utf8')};
  function normalizedJson(file,value){
   value=structuredClone(value);
   for(const binding of bindings.get(file)||[]){const target=slot(value,binding.pointer);if(!target)continue;
@@ -88,7 +90,7 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    if(below.length)for(const file of below)addApp(file,from);
    else problem(from,APP_REFERENCE+name,'missing');
   }
-  for(const name of declaredRecipeEntries(project,manifest))entry(name,(manifest.buildCode||[]).includes(name)?'projects.json':'projects');
+  for(const name of declaredRecipeEntries(project,manifest,{source:workingSource}))entry(name,(manifest.buildCode||[]).includes(name)?'projects.json':'projects');
   for(const build of builds){for(const name of submodules)if(!useLink(name,"projects"))problem('projects',name,'missing');
    for(const input of build.inputs||[])if(projects.has(input)&&input!==id)inputs.add(input);else problem('projects',input,'input','A package input names another registered project.');}
   // A build's archive pins select the archive records it reads; each is listed for the input step,

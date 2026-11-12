@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import {gitlink} from '../lib/pins.mjs';
 import path from 'node:path';
 import {resolveProject} from '../lib/projects.mjs';
+import {recipeBuildReport} from '../tools/recipe-build-report.mjs';
 import {main as build} from '../tools/build-runtime.mjs';
 import {catalog} from '../tools/runtime-package.mjs';
 import {validateCatalog} from '../lib/project-identity.mjs';
@@ -14,7 +15,8 @@ test('MKXP-Z uses its owned source recipe and one Gitlink source identity',()=>{
  const project=resolveProject('mkxpz',root);
  assert.equal(project.producer.kind,'maclauncher');
  assert.equal(project.producer.repository,'https://github.com/procrastinine/maclauncher-builds');
- for(const entry of ['producers/package-support/helper-builds/mkxpz.json','producers/package-support/scripts/build-mkxpz-nfc.cjs','tools/python-build-tools.json','producers/package-support/src/modules/rgss','runtimes/mkxpz'])assert.ok(project.producer.entries.includes(entry),entry);
+ const definition=recipeBuildReport({id:'mkxpz',directory:root}).definition.files.map(file=>file.path);
+ for(const entry of ['producers/package-support/helper-builds/mkxpz.json','producers/package-support/scripts/build-mkxpz-nfc.cjs','tools/python-build-tools.json','producers/package-support/src/modules/rgss','runtimes/mkxpz'])assert.ok(definition.some(file=>file===entry||file.startsWith(entry+'/')),entry);
  assert.equal(project.upstreams.find(row=>row.id==='sdl2-image').revision,JSON.parse(fs.readFileSync(path.join(root,'producers/package-support/helper-builds/mkxpz.json'))).sdlImage.revision);
  assert.ok(project.packageProfiles.some(row=>row.version===project.build.version));assert.equal(project.build.command,'tools/build-mkxpz.mjs');
  assert.deepEqual(project.build.architectures,['arm64']);

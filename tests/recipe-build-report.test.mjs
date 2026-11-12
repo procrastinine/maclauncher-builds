@@ -21,15 +21,24 @@ function fixture(t,files,projects=[project('recipe','tools/recipe.cjs')],buildCo
 }
 const paths=report=>report.definition.files.map(file=>file.path).sort();
 
-test('a definition holds exactly the declared inputs, never files discovered from code',t=>{
+test('a definition holds the declared inputs and every tracked file their literal imports name',t=>{
  const recipe=project('recipe','tools/recipe.cjs');recipe.producer.entries.push('tools/helpers','tools/missing.cjs');
- const f=fixture(t,{'tools/recipe.cjs':'require("./helpers"); require("./undeclared.cjs"); require("../lib/shared.mjs");\n','tools/helpers/index.js':'module.exports = 1;\n','tools/helpers/data.json':{version:'1.0.0'},
-  'tools/undeclared.cjs':'module.exports = 2;\n','lib/shared.mjs':'export const shared = 1;\n'},[recipe],['lib/shared.mjs']);
+ const f=fixture(t,{'tools/recipe.cjs':'const path=require("node:path");require("./helpers"); require("./imported.cjs"); require("../lib/shared.mjs"); require(path.join(__dirname,"computed.cjs"));\n',
+  'tools/helpers/index.js':'module.exports = require("./more");\n','tools/helpers/more.js':'module.exports = 1;\n','tools/helpers/data.json':{version:'1.0.0'},
+  'tools/imported.cjs':'module.exports = 2;\n','tools/computed.cjs':'module.exports = 5;\n','lib/shared.mjs':'import "./nested.mjs";\nexport const shared = 1;\n','lib/nested.mjs':'export {};\n'},[recipe],['lib/shared.mjs']);
  const describe=createRecipeBuildReporter({directory:f.directory}),report=describe('recipe');
- assert.deepEqual(paths(report),['lib/shared.mjs','tools/helpers/data.json','tools/helpers/index.js','tools/recipe.cjs']);
+ assert.deepEqual(paths(report),['lib/nested.mjs','lib/shared.mjs','tools/helpers/data.json','tools/helpers/index.js','tools/helpers/more.js','tools/imported.cjs','tools/recipe.cjs']);
  assert.deepEqual(describe.unresolved('recipe'),[{file:'projects',expression:'tools/missing.cjs',reason:'missing'}]);
- f.write('tools/undeclared.cjs','module.exports = 3;\n');assert.equal(createRecipeBuildReporter({directory:f.directory})('recipe').definitionDigest,report.definitionDigest);
- f.write('tools/helpers/index.js','module.exports = 4;\n');assert.notEqual(createRecipeBuildReporter({directory:f.directory})('recipe').definitionDigest,report.definitionDigest);
+ // A computed-path load is not an import edge: that file is declared as an entry or is not an input.
+ f.write('tools/computed.cjs','module.exports = 6;\n');assert.equal(createRecipeBuildReporter({directory:f.directory})('recipe').definitionDigest,report.definitionDigest);
+ f.write('tools/imported.cjs','module.exports = 3;\n');assert.notEqual(createRecipeBuildReporter({directory:f.directory})('recipe').definitionDigest,report.definitionDigest);
+});
+
+test('Builds definitions hold the helpers their recipes import without listing them',()=>{
+ // origin/main before the closure: mpv omitted tools/helper-package.mjs and java-steamworks tools/build-input.mjs.
+ const describe=createRecipeBuildReporter();
+ assert.ok(paths(describe('mpv')).includes('tools/helper-package.mjs'));
+ assert.ok(paths(describe('java-steamworks')).includes('tools/build-input.mjs'));
 });
 
 test('a declared .js file brings the package.json whose type Node loads it by',t=>{

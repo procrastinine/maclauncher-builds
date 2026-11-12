@@ -212,6 +212,16 @@ test('package source paths exclude global orchestration and narrow materialized 
 });
 
 
+test('package source paths add the recipe import closure, without the shared build code closure',()=>{
+ const files={'tools/build-demo.mjs':'import "./own.mjs";\nimport "./shared-helper.mjs";\n','tools/own.mjs':'export {};\n',
+  'tools/shared-helper.mjs':'export {};\n','tools/orchestrate.mjs':'import "./shared-helper.mjs";\n'};
+ const source={files:entry=>Object.keys(files).filter(file=>file===entry||file.startsWith(entry+'/')),readFile:file=>files[file],json:()=>({})};
+ const project={producer:{entries:[]},build:{command:'tools/build-demo.mjs'}},manifest={buildCode:['tools/orchestrate.mjs']};
+ assert.deepEqual(declaredRecipeEntries(project,manifest,{packageSources:true,source}),['tools/build-demo.mjs','tools/own.mjs']);
+ assert.deepEqual(declaredRecipeEntries(project,manifest,{source}),['tools/build-demo.mjs','tools/orchestrate.mjs','tools/own.mjs','tools/shared-helper.mjs']);
+});
+
+
 test('shared recipe helpers remain in scope while another producer-only request stays out',t=>{
  const f=fixture(t);
  f.project.producer.entries.push('tools/shared.mjs');
