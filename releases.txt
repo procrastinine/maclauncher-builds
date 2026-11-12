@@ -15,7 +15,6 @@ android=0.2.7
 
 anyps5=MCLv12
 maclauncher-steam-bridge=1.0.0
-vkd3d-proton=3.1-MCLv1
 vulkan-moltenvk-scene=1.4.2-MCLv11
 maclauncher-kosmickrisp=27.0.0-devel-MCLv13
 nxnative-tools=MCLv9
@@ -34,3 +33,5 @@ onsyuri=0.7.7beta-MCLv9
 system3=1.8.0-MCLv9
 xsystem35=2.20.0-MCLv9
 xsystem4=MCLv10
+
+vkd3d-proton=3.1-MCLv2
