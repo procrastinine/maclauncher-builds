@@ -7,7 +7,7 @@ The WineVulkan and MoltenVK recipes run in three steps. Preparation downloads th
 | Package | Version | CPU | Minimum macOS | Inputs |
 | --- | --- | --- | --- | --- |
 | WineVulkan scene adapter | 26.3.0-MCLv1 | Intel; Rosetta on Apple Silicon | 10.15 | CrossOver 26.3 Wine source, Bison 3.8.2, LLVM-MinGW, MoltenVK 1.4.2 link input |
-| FidelityFX API adapter | 1.0.1-MCLv8 | Windows x64 DLLs | 10.15 host | FidelityFX SDK 1.1.4, Vulkan-Headers 1.4.335, the VKD3D-Proton producer's carrier headers, LLVM-MinGW |
+| FidelityFX API adapter | 1.0.1-MCLv9 | Windows x64 DLLs | 10.15 host | FidelityFX SDK 1.1.4, Vulkan-Headers 1.4.335, the VKD3D-Proton producer's carrier headers, LLVM-MinGW |
 | MoltenVK scene adaptation | 1.4.2-MCLv10 | Universal | 13 | MoltenVK 1.4.2, SPIRV-Cross, Vulkan-Headers and cereal |
 
 WineVulkan builds the original native module and both Windows forwarding modules, with the scene recording additions. Its recipe checks the complete original export set. The declared MoltenVK library supplies Wine's configure link probe and is not included in the package.

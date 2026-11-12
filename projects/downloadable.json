@@ -1468,12 +1468,12 @@
         "label": "KiriKiri SDL2 macOS MCLv7"
       },
       {
-        "version": "MCLv8",
-        "label": "KiriKiri SDL2 macOS MCLv8"
+        "version": "MCLv9",
+        "label": "KiriKiri SDL2 macOS MCLv9"
       }
     ],
     "build": {
-      "version": "MCLv8",
+      "version": "MCLv9",
       "command": "tools/build-krkrsdl2.mjs",
       "architectures": [
         "arm64",
@@ -3568,12 +3568,12 @@
         "label": "FidelityFX API 1.0.1 Vulkan 1.0.1-MCLv6"
       },
       {
-        "version": "1.0.1-MCLv8",
-        "label": "FidelityFX API 1.0.1 Vulkan and Direct3D 12 1.0.1-MCLv8"
+        "version": "1.0.1-MCLv9",
+        "label": "FidelityFX API 1.0.1 Vulkan and Direct3D 12 1.0.1-MCLv9"
       }
     ],
     "build": {
-      "version": "1.0.1-MCLv8",
+      "version": "1.0.1-MCLv9",
       "command": "tools/build-fidelityfx-api.mjs",
       "architectures": [
         "x64"
