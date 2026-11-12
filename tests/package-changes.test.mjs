@@ -80,11 +80,32 @@ test('new versions do not inherit notes and invalid notes are rejected',t=>{
 });
 
 test('Git-tree HEAD resolution equals working-tree resolution for every registered project',()=>{
- const working=treeSource(root),committed=treeSource(root,{at:'HEAD'});
+ // A checkout need not initialize every Gitlink (GitHub jobs and new worktrees initialize only what a
+ // build declares). A pin reading a file inside a Gitlink with no local repository is unavailable from
+ // both trees alike; every other project resolves identically from both.
+ const working=treeSource(root),committed=treeSource(root,{at:'HEAD'}),links=[...working.gitlinks().keys()];
+ const unavailable=new Set(links.filter(link=>!fs.existsSync(path.join(root,link,'.git'))&&
+  !fs.existsSync(path.join(path.resolve(root,execFileSync('git',['-C',root,'rev-parse','--git-path','modules/'+link],{encoding:'utf8'}).trim()),'HEAD'))));
+ const outcome=(id,source)=>{try{return {value:resolveProject(id,{directory:root,source})};}catch(error){return {error:error.message};}};
  for(const project of readProjects(root,{resolvePins:false}).projects){
-  assert.deepEqual(resolveProject(project.id,{directory:root,source:committed}),
-   resolveProject(project.id,{directory:root,source:working}),project.id);
+  const fromTree=outcome(project.id,committed),fromCheckout=outcome(project.id,working);
+  if(fromTree.error||fromCheckout.error){
+   const reads=project.upstreams.map(upstream=>upstream.pin?.file).filter(file=>file&&[...unavailable].some(link=>file.startsWith(link+'/')));
+   assert.ok(fromTree.error&&fromCheckout.error&&reads.length,project.id+': '+(fromTree.error||fromCheckout.error));
+  }else assert.deepEqual(fromTree.value,fromCheckout.value,project.id);
  }
+});
+
+test('a Git tree reads a Gitlink file from the module repository when the checkout is not initialized',t=>{
+ const directory=fs.mkdtempSync(path.join(os.tmpdir(),'tree-gitlink-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
+ const git=(cwd,...args)=>execFileSync('git',['-C',cwd,'-c','user.name=test','-c','user.email=test@example.invalid','-c','protocol.file.allow=always',...args],{encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
+ const inner=path.join(directory,'inner'),outer=path.join(directory,'outer');
+ fs.mkdirSync(inner);git(inner,'init','-q');fs.writeFileSync(path.join(inner,'record.json'),'{"revision":"a"}');git(inner,'add','-A');git(inner,'commit','-qm','inner');
+ fs.mkdirSync(outer);git(outer,'init','-q');git(outer,'submodule','add','-q',inner,'sources/inner');git(outer,'commit','-qm','outer');
+ git(outer,'submodule','--quiet','deinit','-f','sources/inner');
+ assert.deepEqual(treeSource(outer,{at:'HEAD'}).json('sources/inner/record.json'),{revision:'a'});
+ fs.rmSync(path.join(outer,'.git','modules'),{recursive:true,force:true});
+ assert.throws(()=>treeSource(outer,{at:'HEAD'}).json('sources/inner/record.json'),/Gitlink sources\/inner has no local repository/);
 });
 
 test('real changelog project ids and versions exactly equal the catalogs without altering bytes',()=>{
