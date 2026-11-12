@@ -251,7 +251,7 @@ test('a build initializes the gitlinks that its declared sources link files into
 test('a materialized GitHub build runs the command in a tree holding only its build definition',t=>{
  const fixtureRunners=process.platform==='linux'?{arm64:'ubuntu-24.04',x64:'ubuntu-24.04'}:undefined;
  const root=githubFixture(t,{architectures:['arm64','x64'],tools:undefined,submodules:['producers/engine/upstream','producers/engine/linked'],...(fixtureRunners?{runners:fixtureRunners}:{})}),command=path.join(root,'producers/engine/build.mjs');
- fs.appendFileSync(command,"const tree=path.resolve(import.meta.dirname,'../..');if(tree!==path.join(path.dirname(o.work),'tree')||fs.existsSync(path.join(tree,'undeclared.txt')))process.exitCode=4;\n");
+ fs.appendFileSync(command,"const tree=path.resolve(import.meta.dirname,'../..');if(tree!==path.join(path.dirname(o.work),'tree')||fs.existsSync(path.join(tree,['undeclared','txt'].join('.'))))process.exitCode=4;\n");
  fs.writeFileSync(path.join(root,'undeclared.txt'),'not part of the definition');
  const git=(cwd,...args)=>execFileSync('git',['-c','user.name=Build test','-c','user.email=test@example.invalid','-c','protocol.file.allow=always',...args],{cwd,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim();
  const upstream=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'runtime-github-upstream-')));t.after(()=>fs.rmSync(upstream,{recursive:true,force:true}));
