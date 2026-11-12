@@ -7,6 +7,61 @@
       "schemaVersion": 2,
       "id": "butterscotch",
       "version": "MCLv9",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "6cd962f59ffef60c97049644805907cb349ec0770bd07cc6508fab6f5f7ac49c",
+      "sourceSha256": "6cd962f59ffef60c97049644805907cb349ec0770bd07cc6508fab6f5f7ac49c",
+      "updatePolicy": "manual",
+      "capabilities": {
+        "gameArguments": "repeat-game-arg-v1",
+        "wadVersions": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17
+        ],
+        "sourceKind": "commit"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0a43c3bbff81e88bb8945eea6e4282a61fd5e6f0"
+      },
+      "asset": {
+        "filename": "butterscotch-MCLv9-arm64.tar.gz",
+        "sha256": "d6a8007cca84c79a27569f72e9f3cd87f10b7185d5bdf7c9cbab404b30d9450d",
+        "bytes": 1300746,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/butterscotch%2FvMCLv9%2Farm64/butterscotch-MCLv9-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "0a43c3bbff81e88bb8945eea6e4282a61fd5e6f0",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.2",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "43329943488",
+        "runAttempt": "1",
+        "definitionDigest": "1b93ec75fd43fc9d0595c47199a523c5845a5032ccedc9e7a88d600e455cf55f"
+      },
+      "tag": "butterscotch/vMCLv9/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "butterscotch",
+      "version": "MCLv9",
       "arch": "x64",
       "launcherArchitectures": [
         "arm64",
