@@ -6,6 +6,45 @@
     {
       "schemaVersion": 2,
       "id": "impacto",
+      "version": "0.10.8.937-MCLv2",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "f374822848f5bfbf01118d299712d8084f533cf7e6bc7f6bcb15cf26c742ac6e",
+      "sourceSha256": "f374822848f5bfbf01118d299712d8084f533cf7e6bc7f6bcb15cf26c742ac6e",
+      "updatePolicy": "manual",
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0a43c3bbff81e88bb8945eea6e4282a61fd5e6f0"
+      },
+      "asset": {
+        "filename": "impacto-0.10.8.937-MCLv2-arm64.tar.gz",
+        "sha256": "20f432e8e1df28299b18a41cf1c205ac07f53e7910761f133710b424a1fa8ab0",
+        "bytes": 94942515,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/impacto%2Fv0.10.8.937-MCLv2%2Farm64/impacto-0.10.8.937-MCLv2-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "0a43c3bbff81e88bb8945eea6e4282a61fd5e6f0",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.2",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "43329951290",
+        "runAttempt": "1",
+        "definitionDigest": "2e7dcf110fb5837e80d9d7acf10eabc8ac00862a6cfb59a9e153ce9b0c59b387"
+      },
+      "tag": "impacto/v0.10.8.937-MCLv2/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "impacto",
       "version": "0.10.8.937-MCLv1",
       "arch": "arm64",
       "launcherArchitectures": [
