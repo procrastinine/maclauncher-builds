@@ -2024,10 +2024,14 @@
       {
         "version": "1.8.0-MCLv8",
         "label": "System3 SDL2 1.8.0-MCLv8"
+      },
+      {
+        "version": "1.8.0-MCLv9",
+        "label": "System3 SDL2 1.8.0-MCLv9"
       }
     ],
     "build": {
-      "version": "1.8.0-MCLv8",
+      "version": "1.8.0-MCLv9",
       "command": "tools/build-system3.mjs",
       "architectures": [
         "x64",
