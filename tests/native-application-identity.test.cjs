@@ -1,0 +1,13 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path'),cp=require('node:child_process');
+const Identity=require('../producers/package-support/src/modules/shared/runtime/application-identity.js');
+test('identity attachment compiles and links a target defined in a child directory with ARC and blocks',{skip:process.platform!=='darwin'},t=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'native-identity-cmake-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));fs.mkdirSync(root+'/src');
+ fs.writeFileSync(root+'/CMakeLists.txt','cmake_minimum_required(VERSION 3.18)\nproject(identity C)\nadd_subdirectory(src)\n');fs.writeFileSync(root+'/src/CMakeLists.txt','add_executable(host main.c)\ntarget_precompile_headers(host PRIVATE <stddef.h>)\n');fs.writeFileSync(root+'/src/main.c','int main(void){return 0;}\n');
+ Identity.attach(root,'host');cp.execFileSync('cmake',['-S',root,'-B',root+'/build','-G','Ninja','-DCMAKE_EXPORT_COMPILE_COMMANDS=ON'],{stdio:'pipe'});cp.execFileSync('cmake',['--build',root+'/build','--parallel','2'],{stdio:'pipe'});
+ const row=JSON.parse(fs.readFileSync(root+'/build/compile_commands.json')).find(r=>r.file.endsWith('maclauncher-application-identity.m'));assert.ok(row);assert.match(row.command,/-fobjc-arc/);assert.match(row.command,/-fblocks/);assert.ok(fs.statSync(root+'/build/src/host').isFile());
+ const wrong=root+'/wrong';fs.mkdirSync(wrong);fs.writeFileSync(wrong+'/CMakeLists.txt','cmake_minimum_required(VERSION 3.18)\nproject(missing C)\n');Identity.attach(wrong,'absent');const failed=cp.spawnSync('cmake',['-S',wrong,'-B',wrong+'/build','-G','Ninja'],{encoding:'utf8'});assert.notEqual(failed.status,0);assert.match(failed.stderr,/Native application identity target is missing: absent/);
+});
+test('SDL identity adapters reject a missing or repeated application creation anchor',async t=>{
+ const FNA=require('../producers/package-support/src/modules/fna/runtime/build.js').__test,Prosper=await import('../producers/prosper/build.mjs');
+ for(const apply of [FNA.applyNativeIdentity,Prosper.applyNativeIdentity])for(const count of [0,2]){const root=fs.mkdtempSync(path.join(os.tmpdir(),'native-identity-anchor-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));fs.mkdirSync(root+'/src/video/cocoa',{recursive:true});fs.writeFileSync(root+'/src/video/cocoa/SDL_cocoaevents.m','        if (NSApp == nil) {\n'+Array(count).fill('[SDL3Application sharedApplication];').join('\n'));fs.writeFileSync(root+'/src/video/cocoa/SDL_cocoawindow.m','NSImage *nsimage = Cocoa_CreateImage(icon);');assert.throws(()=>apply(root),/application creation boundary changed/);}
+});

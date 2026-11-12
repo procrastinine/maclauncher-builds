@@ -78,6 +78,7 @@ function applyNativeIdentity(root) {
   const file=path.join(root,"src/video/cocoa/SDL_cocoaevents.m"),text=fs.readFileSync(file,"utf8"),anchor="        if (NSApp == nil) {";
   if(text.split(anchor).length!==2)throw new Error("Pinned FNA Cocoa startup boundary changed.");
   let patched=text.replace(anchor,'        const char *game_name = SDL_getenv("MACLAUNCHER_GAME_NAME");\n        if (game_name && *game_name) {\n            NSString *name = [NSString stringWithUTF8String:game_name];\n            if (name.length) NSProcessInfo.processInfo.processName = name;\n        }\n'+anchor);
+  if (patched.split('[SDL3Application sharedApplication];').length !== 2) throw new Error('Pinned FNA Cocoa application creation boundary changed.');
   patched=patched.replace('[SDL3Application sharedApplication];','[SDL3Application sharedApplication];\n            const char *artwork = SDL_getenv("MACLAUNCHER_GAME_ICON");\n            NSImage *image = artwork && *artwork ? [[NSImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String:artwork]] : nil;\n            if (image) NSApp.applicationIconImage = image;');
   fs.writeFileSync(file,patched);
   const iconFile=path.join(root,"src/video/cocoa/SDL_cocoawindow.m"),icons=fs.readFileSync(iconFile,"utf8"),iconAnchor="NSImage *nsimage = Cocoa_CreateImage(icon);";
