@@ -2703,10 +2703,14 @@
       {
         "version": "MCLv8",
         "label": "Butterscotch MCLv8"
+      },
+      {
+        "version": "MCLv9",
+        "label": "Butterscotch MCLv9"
       }
     ],
     "build": {
-      "version": "MCLv8",
+      "version": "MCLv9",
       "command": "tools/build-butterscotch.mjs",
       "architectures": [
         "x64",
