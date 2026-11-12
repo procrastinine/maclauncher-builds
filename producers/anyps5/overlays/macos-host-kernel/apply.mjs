@@ -57,7 +57,11 @@ export function applyHostKernelOverlay(root){
   if(start<0||end<0||source.indexOf(marker,start+1)>=0)throw Error('AnyPS5 Darwin errno boundary changed: '+file);
   return source.slice(0,start)+marker+'\n#ifdef __APPLE__\n    return SceKernelError(GuestErrnoFromHost_nid_no_patch(error));\n#else'+source.slice(start+marker.length,end)+'\n#endif'+source.slice(end);
  });
+ fs.copyFileSync(new URL('./DarwinPipe.hpp',import.meta.url),path.join(root,'core/libs/prx/libkernel/File/src/DarwinPipe.hpp'));
  edit('prx/libkernel/File/src/Stdio.cpp',(source,file)=>{
+  source='#ifdef __APPLE__\n#include "DarwinPipe.hpp"\n#endif\n'+source;
+  source=replace(source,'    const int result = ::pipe2(native, hostFlags);',
+   '#ifdef __APPLE__\n    const int result = AnyPS5Darwin::CreatePipe(native, hostFlags);\n#else\n    const int result = ::pipe2(native, hostFlags);\n#endif',file);
   // Upstream moved shared statvfs conversion out of the descriptor's scope.
   source=replace(source,`#ifdef __APPLE__
     struct statfs mount{};
