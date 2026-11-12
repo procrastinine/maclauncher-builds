@@ -267,6 +267,7 @@ test('a materialized GitHub build runs the command in a tree holding only its bu
  assert.equal(built.arch,'x64');
  assert.ok(fs.existsSync(path.join(work,'tree/producers/engine/build.mjs'))&&fs.existsSync(path.join(work,'tree/projects/downloadable.json')));
  assert.equal(fs.existsSync(path.join(work,'tree/undeclared.txt')),false);
+ assert.equal(fs.readFileSync(path.join(work,'tree/.gitmodules'),'utf8'),fs.readFileSync(path.join(root,'.gitmodules'),'utf8'),'Source origins remain available to Gitlink pin readers.');
  assert.equal(git(path.join(work,'tree/producers/engine/upstream'),'rev-parse','HEAD'),git(upstream,'rev-parse','HEAD'));
  assert.ok(fs.existsSync(path.join(work,'tree/producers/engine/upstream/source.c')));
  assert.ok(fs.existsSync(path.join(work,'tree/producers/engine/linked/shared.c')));

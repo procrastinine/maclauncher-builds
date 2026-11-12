@@ -16,7 +16,7 @@ export function materializeBuild({project,directory,tree}){
  if(!path.isAbsolute(tree||'')||fs.existsSync(tree))throw Error('Choose a new absolute build tree.');
  const root=fs.realpathSync(directory),{definition}=recipeBuildReport({id:project,directory:root});
  const registry=JSON.parse(fs.readFileSync(path.join(root,'projects.json'),'utf8'));
- const files=[...new Set(['projects.json',...Object.values(registry.registries||{}),...definition.files.map(row=>row.path).filter(file=>!file.startsWith(APP_REFERENCE))])].sort(),declared=new Set(files);
+ const files=[...new Set(['projects.json',...(definition.gitlinks.length?['.gitmodules']:[]),...Object.values(registry.registries||{}),...definition.files.map(row=>row.path).filter(file=>!file.startsWith(APP_REFERENCE))])].sort(),declared=new Set(files);
  const changed=execFileSync('git',['status','--porcelain=v1','-z','--untracked-files=no','--ignore-submodules=all'],{cwd:root,encoding:'utf8',maxBuffer:Infinity}).split('\0').filter(Boolean).map(entry=>entry.slice(3));
  if(changed.some(file=>declared.has(file)))throw Error('Commit the declared build files before a materialized build.');
  const app=definition.files.some(row=>row.path.startsWith(APP_REFERENCE))?[path.relative(root,appSourceRoot(root).directory)]:[];
