@@ -7,6 +7,55 @@
       "schemaVersion": 2,
       "id": "krkrsdl2",
       "version": "MCLv10",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "771cbbffcdf9ddffafe98f55c9c8009ba292b707336d0e331ca5cf1f2b03e56d",
+      "sourceSha256": "771cbbffcdf9ddffafe98f55c9c8009ba292b707336d0e331ca5cf1f2b03e56d",
+      "updatePolicy": "manual",
+      "capabilities": {
+        "buildProfile": "macos-storage-font-monitor-v3-kag3",
+        "nativeFeatures": [
+          "storage.dirlist",
+          "system.addFont",
+          "monitor.adjust"
+        ],
+        "kag3Resources": 1
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0a43c3bbff81e88bb8945eea6e4282a61fd5e6f0"
+      },
+      "asset": {
+        "filename": "krkrsdl2-MCLv10-x64.tar.gz",
+        "sha256": "80384cb87eec9a939df371b4932d429c8cf09a977e5a584d0b83cd6d7a6d4f45",
+        "bytes": 5176828,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/krkrsdl2%2FvMCLv10%2Fx64/krkrsdl2-MCLv10-x64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "0a43c3bbff81e88bb8945eea6e4282a61fd5e6f0",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "43329935796",
+        "runAttempt": "1",
+        "definitionDigest": "8de75e6034b9bb459420b2000456ab8a108b5c2704297808c1c98ff76a7cd811"
+      },
+      "tag": "krkrsdl2/vMCLv10/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "krkrsdl2",
+      "version": "MCLv10",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
