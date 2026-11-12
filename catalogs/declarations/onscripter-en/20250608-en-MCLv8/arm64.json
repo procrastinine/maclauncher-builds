@@ -1,0 +1,152 @@
+{
+  "id": "onscripter-en",
+  "version": "20250608-en-MCLv8",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "onscripter-en/20250608-en-MCLv8/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "f51b8bfe9186a0b832430047b3e4d79621727090a17ad68f0ac371d53d7a52f1",
+  "sourceSha256": "f51b8bfe9186a0b832430047b3e4d79621727090a17ad68f0ac371d53d7a52f1",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "files/bin/onscripter-en",
+      "size": 2317216,
+      "sha256": "9ae7a16531ba040b41baff9259dce587a78179eb2457b352325ef892311302bb",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libSDL-1.2.0.dylib",
+      "size": 232656,
+      "sha256": "9f83902b6269b52537512e3aed5292269f26e812bcd80db4d97db81e56eee2b2",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/lib/libSDL2-2.0.0.dylib",
+      "size": 1661040,
+      "sha256": "beea497001a1ebc8fe4138a4172a65af5367d8e2e8b7beab7b90920c99593bda",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/licenses/bzip2-1.0.8.txt",
+      "size": 1896,
+      "sha256": "c6dbbf828498be844a89eaa3b84adbab3199e342eb5cb2ed2f0d4ba7ec0f38a3",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 515,
+      "sha256": "b41daac22fb1bdee5b88ebacc01ac2ea9c480f228514b93fe9a50d10569b76d4",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/freetype-2.13.0.txt",
+      "size": 2074,
+      "sha256": "2e3bbb7d7c5c396368dd0853a790ec29ce5b8647163dde42a0493fb0d6556b2b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/FreeType-FTL.txt",
+      "size": 6743,
+      "sha256": "08c135755dd589039470f1fdbb400daaabaaa50d0b366d19cebff4d22986baa1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/IJG-JPEG.txt",
+      "size": 18719,
+      "sha256": "7c25493a9f64fed34d01445467341bda77bc1cdbeccbe33558659ef173fb9ff2",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/libogg-1.3.5.txt",
+      "size": 1466,
+      "sha256": "d2ab5758336489da61c12cc5bb757da5339c4ae9001f9bb0562b4370249af814",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/libpng-1.6.39.txt",
+      "size": 5345,
+      "sha256": "dfe5a536b0e5a531f844fb9c101a3089aca60772a503893b8e15f9457e369960",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/libvorbis-1.3.7.txt",
+      "size": 1470,
+      "sha256": "ec1815db59fcd302846df949d7424876cb2e2dc5ed1606c5fb0b36787b1cf43a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/onscripter-en.txt",
+      "size": 17992,
+      "sha256": "32b1062f7da84967e7019d01ab805935caa7ab7321a7ced0e30ebe75e5df1670",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL_image-1.2.12.txt",
+      "size": 976,
+      "sha256": "653649692218d56e5807bdc5b72f51aa6067bc44d30b757e18c03b32bcaf98da",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL_mixer-1.2.12.txt",
+      "size": 974,
+      "sha256": "bc4c3bc32b311044d81c32b5e5402a6bc971a3b235850bb63445ec14bb6fe59e",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL_ttf-2.0.11.txt",
+      "size": 988,
+      "sha256": "b609721d3d4ac67facaf86f068c8b311b6c5f6cef89b6d84268aa38b7867ab7b",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/sdl12-compat.txt",
+      "size": 1033,
+      "sha256": "ee6c6e9b76b0fc135029b2650146dc975039b4e7b1302563a45ca46352f34b41",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SDL2.txt",
+      "size": 884,
+      "sha256": "97f35b302b361680ec1e891e95d2d52097bb95abff361434916d99dc1305f127",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/SMPEG-video.txt",
+      "size": 1076,
+      "sha256": "e6c3d8cbeb4f00807aee68782a7052c5a399a9e61fa9de88cdad97c353399136",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/smpeg.txt",
+      "size": 25265,
+      "sha256": "94b03f1a60a7fd5007149530626a895a6ef5a8b9342abfd56860c5f3956f5d23",
+      "mode": 420
+    },
+    {
+      "path": "files/onscripter-en-runtime.json",
+      "size": 1813,
+      "sha256": "d3727c0b2d1f69badf7576b05ed02d4f12e9bfb22c4c0d9d51966405240a923b",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 7027,
+      "mode": 420,
+      "sha256": "f51b8bfe9186a0b832430047b3e4d79621727090a17ad68f0ac371d53d7a52f1"
+    }
+  ],
+  "redistribution": "bundle"
+}
