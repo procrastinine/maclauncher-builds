@@ -820,8 +820,7 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/java/runtime/steamworks/MacLauncherSteamAgent.java",
-        "producers/package-support/src/modules/java/runtime/steamworks/build-agent.cjs"
+        "producers/package-support/src/modules/java/runtime/steamworks"
       ],
       "sourceDirectory": "producers/package-support"
     },

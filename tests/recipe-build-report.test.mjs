@@ -34,6 +34,13 @@ test('a definition holds the declared inputs and every tracked file their litera
  f.write('tools/imported.cjs','module.exports = 3;\n');assert.notEqual(createRecipeBuildReporter({directory:f.directory})('recipe').definitionDigest,report.definitionDigest);
 });
 
+test('java-steamworks declares the steamworks4j notice of every publisher release it builds',()=>{
+ // The recipe reads steamworks4j-<version>-MIT.txt through a computed path, so a declaration must cover it.
+ const base='producers/package-support/src/modules/java/runtime/steamworks',files=paths(createRecipeBuildReporter()('java-steamworks'));
+ for(const release of JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'..',base,'publisher-releases.json'),'utf8')))
+  assert.ok(files.includes(base+'/steamworks4j-'+release.version+'-MIT.txt'),release.version);
+});
+
 test('Builds definitions hold the helpers their recipes import without listing them',()=>{
  // origin/main before the closure: mpv omitted tools/helper-package.mjs and java-steamworks tools/build-input.mjs.
  const describe=createRecipeBuildReporter();
