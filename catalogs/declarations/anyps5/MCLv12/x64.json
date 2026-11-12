@@ -1,0 +1,4483 @@
+{
+  "id": "anyps5",
+  "version": "MCLv12",
+  "arch": "x64",
+  "launcherArchitectures": [
+    "x64"
+  ],
+  "minimumMacOS": "26.0",
+  "directoryRelative": "anyps5/MCLv12/x64",
+  "sourceRelative": "source.json",
+  "sourceSha256": "1adf96119e53ad27a2c1726b7a15b833bd2708fb2176882a31d26156b323a1d9",
+  "manifestRelative": "runtime.json",
+  "manifestSha256": "f3ad0211bc03e12d4453d51e5d87a0f17182a34a38d0474cb276a560cf7469d1",
+  "files": [
+    {
+      "path": "libs/libAacs.prx",
+      "size": 96704,
+      "mode": 493,
+      "sha256": "22a98dcb5175b84ab69e7500e145cbabb0ebe7c2b558c8decc39a23fad22e38c",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libc.prx",
+      "size": 1950208,
+      "mode": 493,
+      "sha256": "c49900625cf924fb45ebcf8ec4b313fa3a496df02a9b963050016c2289211734",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libcairo.prx",
+      "size": 80608,
+      "mode": 493,
+      "sha256": "67944495a7704dce63dca27e4cd80e3e8836c5e9f14db67b473b4b17d8521b80",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libCprm.prx",
+      "size": 41312,
+      "mode": 493,
+      "sha256": "c060e7eb2380c7ab7c293d4c2160481ed478dea6309b2fb68743f7120b6e524b",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libCss.prx",
+      "size": 46000,
+      "mode": 493,
+      "sha256": "196829ddc15f8ab3b86078fd3eb6cf475c832a89f35c8f52e37a33ad990020bf",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libcurl.prx",
+      "size": 1279856,
+      "mode": 493,
+      "sha256": "4540a94f03a5d30443c174cdc84f0c7f3c0b31c243a4e135ee30a6374610d6a5",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libfontconfig.prx",
+      "size": 103360,
+      "mode": 493,
+      "sha256": "c4311d663ada494d103a1ef1a3a0372c91870997cb949848c198b45a04c9c58e",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libfreetype.prx",
+      "size": 167584,
+      "mode": 493,
+      "sha256": "df69caba5fd308265f8c067259204719d271a16dbd55c228489546b1fc8773ea",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libharfbuzz.prx",
+      "size": 1278656,
+      "mode": 493,
+      "sha256": "11ffa6b82c7a3ee1312306834d15ce9f92b32ab8f22331d96673e54f089d95c0",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libkernel_sys.prx",
+      "size": 306576,
+      "mode": 493,
+      "sha256": "a2e4d4610a0582f711f0a867e671e3c3ef84f33824c1c35eefa7a4d48bf08f7c",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libkernel_web.prx",
+      "size": 39936,
+      "mode": 493,
+      "sha256": "53eb790c514820a15fe988ea06b68ca8bf1500affe1d2d8d5b241d1c0a7eccae",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libkernel.prx",
+      "size": 1237536,
+      "mode": 493,
+      "sha256": "43d8e85e0ae4af4c2648ab0b309869f7e54499593c2f92a22e8c8c5988ed67ec",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libmdbg_syscore.prx",
+      "size": 58080,
+      "mode": 493,
+      "sha256": "a2b7895b50e93336c801b306011ca0fab0cc34a39aab4e553bccc1324d0c28c5",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libmimalloc.dylib",
+      "size": 276048,
+      "mode": 493,
+      "sha256": "04078193bc3167192c3046d1e7bdab8bea8932a54de938855a61e3fcff5b7de3",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libMozaSDK.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "a7b0944d5227aef4ccbf90edbe7672c2494effab567fc106ab1df69b5724777e",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libReactNative.Modules.Vsh.prx",
+      "size": 40944,
+      "mode": 493,
+      "sha256": "3bf39769e191036986e5bcf194dc47ac14ade919b08e05005bef2cd4e7c36115",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libReactNative.Modules.Vsh.WebAppLauncher.prx",
+      "size": 38560,
+      "mode": 493,
+      "sha256": "49edc13c34d1be55698c92c2842c41f241ade176da7957e716df9f5ebe68bfa5",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAbstractLocal.prx",
+      "size": 47856,
+      "mode": 493,
+      "sha256": "bee0cf99a5bd33c3d90da281e5f7f61703b392ebea100f3ab65a8ecb975ab4f4",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAbstractStorage.prx",
+      "size": 60112,
+      "mode": 493,
+      "sha256": "3505d2f31c429dd179df2927fd18f8e11591c21201037c24028a933ba4cfe352",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAbstractTcs.prx",
+      "size": 42672,
+      "mode": 493,
+      "sha256": "42ded546b9df14668081594f870eed9631682809ee4b31bf7d7f61dc40a1d175",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAbstractTwitter.prx",
+      "size": 47600,
+      "mode": 493,
+      "sha256": "1added4a038a9a15baf5e6ebad680c32fb368e874c368c343397a12a555b4593",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAbstractYoutube.prx",
+      "size": 48560,
+      "mode": 493,
+      "sha256": "03fe0823683c1de59fe0751cd9d6d1a27b46537ac08d8b4dea5707874914f712",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAc3Enc.prx",
+      "size": 31312,
+      "mode": 493,
+      "sha256": "bd511220a3b3653938bf56190f11d068458ffed898a64527a73ffc9b2901b810",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAcm.prx",
+      "size": 70432,
+      "mode": 493,
+      "sha256": "0ace3250ff4513b97542b1f5881a71ede6d92bed6a482c4b3cb83f79b8ab2ff7",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAddressSanitizer.prx",
+      "size": 66912,
+      "mode": 493,
+      "sha256": "e21ce16237d9a71a4f8085b14966fb1458643a98119792c8dc2a923e78c31ac3",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAgc.prx",
+      "size": 220928,
+      "mode": 493,
+      "sha256": "35d31f711fba3c9c70aa21c31a8143c0aefa7944ae75eff10669221f43250407",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAgcDriver.prx",
+      "size": 14658768,
+      "mode": 493,
+      "sha256": "29c254cd9fb3c40931b17d6e0ccbc46f642549f840ceed2cba677207e5baa31f",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAgcResourceRegistration.prx",
+      "size": 31008,
+      "mode": 493,
+      "sha256": "0360c7267258bf8103f561e094346e56613f65f7b2a90ab0095ac7592ca59fab",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAgcVsh.prx",
+      "size": 213776,
+      "mode": 493,
+      "sha256": "6a450e6cffde20b5947b7e3e498fcf915603e550fcf4a255d365099882f71b5f",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAgcVshDebug.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "255e94ec8e2979f1f02f166daa93740ec528a622a41d80b8fb2942bb75bac034",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAjm.native.prx",
+      "size": 8014496,
+      "mode": 493,
+      "sha256": "fa8af5f55f00cd51fb474379ad85b0839e76e68d228e36a16c9c26f0125faeb6",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAjm.prx",
+      "size": 8014464,
+      "mode": 493,
+      "sha256": "df2d6d3bf4e09e204688cacc37a700a4569df3ad7bb84324558ea395edf6e7ad",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAjmi.prx",
+      "size": 32848,
+      "mode": 493,
+      "sha256": "fc6f9c98df169895b7e260dd7e538f5404c22aaa0a92e9edfa944a4efa7723fc",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAmpr.prx",
+      "size": 81088,
+      "mode": 493,
+      "sha256": "2b9c9463a3cc5732c7c2b6ba4bb777cb1ea1cbdc469971c306c30e31dbcf55a8",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAppChecker.prx",
+      "size": 31088,
+      "mode": 493,
+      "sha256": "1db61a16731fdc86604872c9e3abb9519c3368486cdc754288f26b83c9e573cb",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAppContent.prx",
+      "size": 95696,
+      "mode": 493,
+      "sha256": "a5de1c5376c067d4c5579e9cd63347bb722c62410610d2ab1f42b84412202293",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAppDbShellCoreClient.prx",
+      "size": 40512,
+      "mode": 493,
+      "sha256": "ef079685b099dc10e6f3ec77190b3ad7176fadc6d34247cf66df0b35f3d35a13",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAppDbShellCoreClientForSystemService.prx",
+      "size": 31024,
+      "mode": 493,
+      "sha256": "b0ee7cea6d6b391452affa740d463ff88306e253da4cedce39a7bc5559c3f15d",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAppInstUtil.prx",
+      "size": 64368,
+      "mode": 493,
+      "sha256": "9da6a1007f5e771a4e13b7afe50f40f79f1be8d08f25f9e85e50b89974d2c3e0",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAsyncStorageInternal.prx",
+      "size": 39504,
+      "mode": 493,
+      "sha256": "ecab3319cbd4429843cf59f9e554472a3dfb04ec69c8beed00a1ffc2326e8522",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAt9Enc.prx",
+      "size": 31200,
+      "mode": 493,
+      "sha256": "3ed24f4567b5ae1de1223af2fd2f019916d95c48b0a9cbf6b4a8fcb5cfc79188",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudio.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "8dac46112244e292a5f5aee96014d6042949e5810cc23fa6c8e9d2d13776bd24",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudio3d.prx",
+      "size": 79824,
+      "mode": 493,
+      "sha256": "6b6b951ca9424221737ff1422234268260e7d32d780e4310cb0dfd96c6ba9b02",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudiodec.native.prx",
+      "size": 7873040,
+      "mode": 493,
+      "sha256": "a3618d26b61fbdc018d547eed174c307c669a3446082312bec8eaf045f2147b6",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudiodec.prx",
+      "size": 7867776,
+      "mode": 493,
+      "sha256": "5352c628d4e7f71cd94ee8606e9ef601e6078f3de58ac25ef0288be7d323c938",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudiodecCpu.prx",
+      "size": 36208,
+      "mode": 493,
+      "sha256": "eb7fb08906f96b06b1bb343087af652256aca177dc5b4db89ed3907cade8a2e2",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudiodecCpuAlac.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "ed01af3443e5f386ce941b7dc785044cc020774178c8f1bf5e0e67a3385e6a7d",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudiodecCpuDdp.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "1814a5a4443dda7db4ab0bb642a784f1010847741eb6f6fb0a7906e1c49ae32d",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudiodecCpuDts.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "0c5ba9e28bdbf2881c493405193edc5a6f3b7aaf6e6cdc981d0d057f367059b6",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudiodecCpuDtsHdLbr.prx",
+      "size": 31008,
+      "mode": 493,
+      "sha256": "182b1a05acbaacf42cf5ea1678f029926944a2a3291f7795c266040cb3785197",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudiodecCpuDtsHdMa.prx",
+      "size": 31008,
+      "mode": 493,
+      "sha256": "1c4c10489f4b69fcf710f4d5dec7a820bd8970f61f2ed4754f2fcb0c4a9fae90",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudiodecCpuFlac.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "6b1c48a5e6d9a5726d1b5d6a42a377a94df248a8e225bdd2ce93115cdb8f8165",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudiodecCpuLpcm.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "4f343e1c4459967e7c5900fc1749402628c4f882c4397694ebf5fe002d14c01e",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudiodecCpuM4aac.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "fc1e92f6b842a0099fdc083dad0d29997b59fc07f3a4e5d2650ffbdd8faa3da6",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudiodecCpuTrhd.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "55430d9f0d9d002b157c8f69290b2860a25db4320cc3e53fe3570895596a3a3d",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudiodReport.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "49e86d5e8b62efe55c3deef575f8ce78f2cdeefcd8bfb60692ad675f243415f6",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudioIn.prx",
+      "size": 48544,
+      "mode": 493,
+      "sha256": "745c439041c95453ea241bc7386aca2664ea0a43c4c85c00898e7cbfbc50d0b5",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudioLatencyEstimation.prx",
+      "size": 31232,
+      "mode": 493,
+      "sha256": "4b39ca1d2514bf511e573d3e18a00a47200632254449285519c68c9d946c3e93",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudioOut.prx",
+      "size": 195728,
+      "mode": 493,
+      "sha256": "027a978e51e6ad15d6384698e82c39398a8ef1c20227fa92be526b81f5461a98",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudioPropagation.prx",
+      "size": 94720,
+      "mode": 493,
+      "sha256": "96c01374a1ef2f1ca6b8f53398af86d0f3de4353bde34f414192524597587ed9",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAudioSystem.prx",
+      "size": 45264,
+      "mode": 493,
+      "sha256": "88e46ef10efa0925bc8e0eb89f244002ccb6d35924049afe62ce199217569e30",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAutoMounterClient.prx",
+      "size": 31808,
+      "mode": 493,
+      "sha256": "6fa5bc84f705a9a88c6a5b989915ca7a81ac0bc8564c21223f8c67826f36ad94",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAvcap2.prx",
+      "size": 40720,
+      "mode": 493,
+      "sha256": "658c1b9c9e3b08df48f8b73f868158e06ca32f413475bcd38590253bdc936b7c",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAvcap2mvr.prx",
+      "size": 33376,
+      "mode": 493,
+      "sha256": "22251a062deed21e63d39816fbc57983b773fd44c20a429efd13c4e2c2349fb3",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAvPlayer.native.prx",
+      "size": 9544368,
+      "mode": 493,
+      "sha256": "a26b937603e6d395350b06812fd8fa8c43fa35822a716039eb15a269c6fddea8",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAvPlayer.prx",
+      "size": 9544288,
+      "mode": 493,
+      "sha256": "3ba784adc8e5b76389e020e279dcd36e8410354003f19c12b0f3a814d117f9e9",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAvPlayerStreaming.prx",
+      "size": 37392,
+      "mode": 493,
+      "sha256": "39df2ba45fa514bb3d87b40d30641dfcc127d62055436532e0e8d3ba1a4c544e",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceAvSetting.prx",
+      "size": 59024,
+      "mode": 493,
+      "sha256": "84f8588719d0f22ef62803a900f3fb187f01729acccb891aa9c88940f2b2275d",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceBackupRestoreUtil.prx",
+      "size": 32544,
+      "mode": 493,
+      "sha256": "925b7b9b01b78bf5b9408afe3be6fdffb20ffe995f1768d0ef3180aa6a84c9a3",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceBeisobmf.prx",
+      "size": 54624,
+      "mode": 493,
+      "sha256": "8b6296fe4ea0eaacbe63f19f7c9b58bbc05dbe0a07cf656e933ab37893ca7f80",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceBemp2sys.prx",
+      "size": 38304,
+      "mode": 493,
+      "sha256": "0ebbef5e9fb9a39486cc97e6485a6af0c4bb6ac8111dd0d2680b5b80ba64c38a",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceBgft.prx",
+      "size": 48128,
+      "mode": 493,
+      "sha256": "0000b76eee4f4d3d58aff7928fa9ae4d92f26442ac137f0c9c353f738ff20656",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceBgsStorage.prx",
+      "size": 34128,
+      "mode": 493,
+      "sha256": "8dc53a48f9981c8547f683235d7956315ab5eab94787367bb952096f03c679c7",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceBluetoothHid.prx",
+      "size": 41968,
+      "mode": 493,
+      "sha256": "720ffd1c57d87f6db9f528cf311dd0688f2fc1f6ffd566696d6890c92e184761",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceCamera.prx",
+      "size": 63328,
+      "mode": 493,
+      "sha256": "d0a0900c807db6586465878f15c07d236c33e8736bf8c5754d0300306aec85d2",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceCdlgAdIdClient.prx",
+      "size": 31888,
+      "mode": 493,
+      "sha256": "f42ba5216baf77b28ca6360798de4e43103d6d7d70afc6f3cdd69bca6ecd5506",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceCdlgG2P.prx",
+      "size": 35808,
+      "mode": 493,
+      "sha256": "46bb281305e9a15c3089b8b100c8bf54c4d734538079bd1b69faf6a7cece19a6",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceCdlgPlayerReview.prx",
+      "size": 35888,
+      "mode": 493,
+      "sha256": "0ef58f906a68b2a3ef6e0b3e9554fd86ca3cf0f0dfc50c0474c1d6595aaf84f2",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceCdlgUtilServer.prx",
+      "size": 44368,
+      "mode": 493,
+      "sha256": "b6a6411ddbd1b31ade6dbd69d8d94f70ffc065e8c4be82d6367565760cca7800",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceCesCs-module.prx",
+      "size": 457344,
+      "mode": 493,
+      "sha256": "e3a85136e974eb3f3653930bce60f286dce1adae9d4114fd975438e0d893bb7c",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceCesCs.prx",
+      "size": 457344,
+      "mode": 493,
+      "sha256": "4fb784cbd7d755fe6ad0265b26299ab74031b10d71f43577dd0f71a172e48dce",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceCffMgr.prx",
+      "size": 32352,
+      "mode": 493,
+      "sha256": "0e196899787a6c85e1029e18ec95b4662378248f6ae4a2750f2dcc477b348368",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceCloudMessaging.prx",
+      "size": 31632,
+      "mode": 493,
+      "sha256": "bfd5ab2646cff3e071ec54ea5d7d9e01e87efe9059a97773d01710fcca9af587",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceCommonDialog.prx",
+      "size": 39072,
+      "mode": 493,
+      "sha256": "4a881dc8df3f40a76b8702d096ba0178ba5838283b4d76ccfd54dc76d4e05f4c",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceCompanionHttpd.prx",
+      "size": 32320,
+      "mode": 493,
+      "sha256": "fdb7f5b0d129c4dd498d2b020dbea966655237a89f76d4333053d754b9271d7c",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceCompanionUtil.prx",
+      "size": 26992,
+      "mode": 493,
+      "sha256": "afe071c9575737a1a23e86b6e80496e0806f424a07489f994b71fb99f35721d1",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceComposite.prx",
+      "size": 52144,
+      "mode": 493,
+      "sha256": "2f269bf26965cd8623ea7c7745ec014f6e01dc84d7ed650da5401f6daa17ec78",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceCompositeExt.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "4f867383ba69088dc428f10e7abeafe11b1c00953a069947a0ee12e1e0910615",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceConnectAccountDialog.prx",
+      "size": 31504,
+      "mode": 493,
+      "sha256": "7b2bfe4844e76567116ff96f518e8ccb4c063f578ccef42c98210a35496daf32",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceContentDelete.prx",
+      "size": 33424,
+      "mode": 493,
+      "sha256": "4bb879ac9a54abd2cb35131f7d461142e96cfe27ef106880213a8d4d368a07c7",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceContentExport.prx",
+      "size": 55504,
+      "mode": 493,
+      "sha256": "3d579b925f411f9d4d205880c8381366f31abc6b104ab2042db1209d7e9d534d",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceContentListController.prx",
+      "size": 32304,
+      "mode": 493,
+      "sha256": "a3887029218f63488f1799ac18378309d2c1b759a438e996b48c59692a4084e2",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceContentSearch.prx",
+      "size": 44144,
+      "mode": 493,
+      "sha256": "b7617e37fb0f9df22aef3044b136f67897636aa89a4530369b9fefa9690dd6af",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceConvertKeycode.prx",
+      "size": 173504,
+      "mode": 493,
+      "sha256": "2cdbca303cfce05214bd0945fd6d5b74a2383261a144baa97985ccfb8b0c7ecc",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceCtrlp.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "6e947257534c0305137d6e0e6d9b5d1d3e26a3a973ff58b227ab363e2df2b526",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceCustomMusicAudioOut.prx",
+      "size": 31648,
+      "mode": 493,
+      "sha256": "05da3fdb7d59a0d034adfcd11311ae4125cbe6e1f52d0d68c7d62c448cb1bec6",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceCustomMusicCore.prx",
+      "size": 38400,
+      "mode": 493,
+      "sha256": "46f665b4f93419f7ff21dde3561b4c4e515a4cc293792eb81038f36f5ba07f1a",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceCustomMusicPlayReady4.prx",
+      "size": 52752,
+      "mode": 493,
+      "sha256": "a7fd223cddb0fde3f6624365f3be91ea848e2f71d02570a953a4646c2a5e826f",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceCustomMusicSysCallWrapper.prx",
+      "size": 53440,
+      "mode": 493,
+      "sha256": "d0445af698811e64f9e21678b1dfcaff8b35b2c10d86ae8ab802b067bffaac3e",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDataTransfer.prx",
+      "size": 45968,
+      "mode": 493,
+      "sha256": "c3bd8f9f7c27ba24bc6eb580bd05b7a228944a9a07b0fc6f9edc45bb3b63aca5",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDbg.prx",
+      "size": 32912,
+      "mode": 493,
+      "sha256": "7b57c7b3c07315f8e65684d1be8469b6223750b4b25915486f0a213f8c47ac6b",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDbgAssist.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "19a2a447ae586875230c63489f16ef2dd93bf609134b5df22fc7872aafb134ae",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDbgThreadSanitizer.prx",
+      "size": 26752,
+      "mode": 493,
+      "sha256": "8a2eda4da5777a14f15474677432e4aa4e3725b96a8731076bd2b02a00926e19",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDeci5.prx",
+      "size": 31296,
+      "mode": 493,
+      "sha256": "d4bc0d1e606462d425d061d0db17133da3221ca7173e3f961f81e3c548d4c1d4",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDeci5Appmp.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "0152a816b7bf616a7e00bbc777a98f1c1e9a8d02c73afa7f5636bb1e7327495c",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDeci5CpComm.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "9be18a2183b5d60eeca17df02c900c1ab79e734087eb3f7039f06cab0bb969f8",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDeci5Ctrlp.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "7e0c43dcbdfdb11aa76ddc89b21b78df1d0c60f34870ccdd83751f01958dddbb",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDeci5Dbgp.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "43e3dce67759e4fd65dea538bd2c9f38bf89b893264841cfb98ba5fa6230185b",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDeci5Drfp.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "56cfd71f489ef54a4dd78fb27a586892db86bd3fc8cada98a1de1d933c0919e8",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDeci5Eventp.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "26dee96345aa72f8311ebe9fd0d7166903f91560c12cafe40a9c23940d48e2c8",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDeci5Fsmp.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "32e15967e853bf69c93c8556f5b27292f3b9610e925e119465d67932177f9d8a",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDeci5Pgcmp.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "91d79187317fb28af8a3db1d0d5d2c72bf285ea12184777c697df1fa978666c4",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDeci5Rdrfp.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "dd0dbf1afd644a2b6f335a1b5bf7bf1f1eac3a9160906212152ae967f5e6fba6",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDeci5Tsmp.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "aed3d60046f94a43d7056cc5d0d58946529845fdea111dd6f1bcd0f50e78278c",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDeci5Ttyp.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "5e202ebe4c50d5e45fefa3c520be215245edddb660a6318ec5f0c0a7915b06d8",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDeci5UlpCommon.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "81d3063cd4440c62e8547c8a8943bcee33fcee518ea91b0d14d6a699a6fe9cbc",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDepth.prx",
+      "size": 38160,
+      "mode": 493,
+      "sha256": "7009f2d202cbece953765fc1743d73f4039f5bf5171f88ee5baebd7ea37b608c",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDepth2.prx",
+      "size": 31760,
+      "mode": 493,
+      "sha256": "7e0aad5480d15d247a3337cfa0089d701867ff5e071ab89b1d7cdbe5eb36dd1c",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDipsw.prx",
+      "size": 31584,
+      "mode": 493,
+      "sha256": "4efb1aefe7f1067cc2cc079de8d2242f8a8be0baf03bd9a7987434d012ba9c7a",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDiscId.prx",
+      "size": 31168,
+      "mode": 493,
+      "sha256": "08776fcea28c5db0d38fe4d56aa36983f492687fdceeea58f3141479a014309f",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDiscMap.prx",
+      "size": 31600,
+      "mode": 493,
+      "sha256": "c6401d816f7559ca00a4c5b882e497b0082bd2a4b6f01a1b9d7d8cde485798f0",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDolbyVision.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "ad04c00c310f28b569f2b2cdefee0b46ba5f4ad138e37519826e0d52aeefb7f2",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDseehx.prx",
+      "size": 31120,
+      "mode": 493,
+      "sha256": "d44ade6ed033ae1848897c08f823d143a6d34b9f9786eab8a32b182d652758d3",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDtcpIp.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "470f307e26e7423d0af91adae95088b4fe29d4c544fa06ee17d4539472bb99df",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceDtsEnc.prx",
+      "size": 31312,
+      "mode": 493,
+      "sha256": "1e59f93d54088df5cc05a3880485ca1d49dd6121d0d234297264501916a695c7",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceEditMp4.prx",
+      "size": 31696,
+      "mode": 493,
+      "sha256": "0cbc9ad05f59c7fe1d7d33a95c5ea233074c365d0848edd6ea8963e6778c6cba",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceEmbeddedTts.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "2e3442ae3eb405ff7692458ddd700c5bfe7eae0a27d34c922ebc1e6f0a216708",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceEmbeddedTtsCoreG3.prx",
+      "size": 31008,
+      "mode": 493,
+      "sha256": "0e477b9535ad10c4a906c354b347e41a6752f4194ca0f9eee4998b6b00bb8aa3",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceErrorDialog.prx",
+      "size": 48032,
+      "mode": 493,
+      "sha256": "3079fea75f851f658d41140fd84597ebb2c57320d44722351a043a0b6b6b52de",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceEsvm.prx",
+      "size": 38656,
+      "mode": 493,
+      "sha256": "e43d32cd2da44d9ecaa4f8d67205d545e0f19df1c05fb35f95bc74600f8056e4",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceEsvmEngine.prx",
+      "size": 39776,
+      "mode": 493,
+      "sha256": "9c36e98875b68a4831bdc19c64e3385ac02a886071e1cf7b9183e7376b440c69",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceFiber.prx",
+      "size": 49536,
+      "mode": 493,
+      "sha256": "3ef23ffd4f4279bda708d724467f262888f3d3cf6fee600e2531146ae4f23929",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceFios2.prx",
+      "size": 235184,
+      "mode": 493,
+      "sha256": "519810a927bbe1657b8d365cbd5cb10039c86905abc33006504dc5f09ebaf1c9",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceFlexContent.prx",
+      "size": 32064,
+      "mode": 493,
+      "sha256": "e6f9a8c723ca093ec7d17a090664e321576e2f45fd914f816ad198000a994b12",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceFont-module.prx",
+      "size": 968784,
+      "mode": 493,
+      "sha256": "a8888db3a859f7a3944609b739fd433ca101a909bb748536d955d83a18c862b5",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceFont.native.prx",
+      "size": 968752,
+      "mode": 493,
+      "sha256": "87516d51c69bc45885702d3dadfd2957c5ec7ec180174da543d3a9c477c38155",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceFont.prx",
+      "size": 968784,
+      "mode": 493,
+      "sha256": "0d98c5d151f1116bb108f4625b94ab286fb363161d97c2797b9040cccec5b0c7",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceFontFt-module.prx",
+      "size": 838624,
+      "mode": 493,
+      "sha256": "d94d63e23e09a73ae6bb94db95b5c79ed6b3c8ccc666f2161c8e45e0255c725f",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceFontFt.prx",
+      "size": 838624,
+      "mode": 493,
+      "sha256": "c3809d6d697c38a57f64aa1f71e2498457b8199d54bf78c9295cdb752867c4d5",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceFontGs.native.prx",
+      "size": 35760,
+      "mode": 493,
+      "sha256": "0827af8a3edee456ccda23b0d69124c19e3fbd0882c37144c23bd6ee00e359b4",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceFontGs.prx",
+      "size": 40672,
+      "mode": 493,
+      "sha256": "dc9dcd86b504e8b49814c0f9178517770f16ed81de34717ce886ea9c9419c42e",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceFreeType.prx",
+      "size": 935648,
+      "mode": 493,
+      "sha256": "475e93ddaf2f676876423cc1a177a1829bd4a05c00cf327ebdb8f5b45f23e789",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceFreeTypeOl.prx",
+      "size": 893520,
+      "mode": 493,
+      "sha256": "09e802fbcc86262db4270710eeb6fdaefc7cae762cbfd0d9b77552e1415b7acd",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceFreeTypeOptOl.prx",
+      "size": 31344,
+      "mode": 493,
+      "sha256": "a8f0764f6ca43a7d0746f783a9bfbfe17fa6b184c3a928f49f45d9c45c76af2f",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceFreeTypeOt.prx",
+      "size": 170992,
+      "mode": 493,
+      "sha256": "3e23629e9172c69ae5b4fce6166aa7d48ba358441103ca3487bdbb97727d73e5",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceFrontPanelDisplay.prx",
+      "size": 31168,
+      "mode": 493,
+      "sha256": "803f8ff1455f3ad2e540d6dca04f65cbed593923a4deb1da5b3b2d08aa836058",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceFsInternalForVsh.prx",
+      "size": 83248,
+      "mode": 493,
+      "sha256": "20d6b1dbad54a1270a41993e28b5fd1d958a73eaba9faba2c234db69135df088",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceGameCustomDataDialog.prx",
+      "size": 31696,
+      "mode": 493,
+      "sha256": "89c5cffd75c57cf178574844da882047a763dd03d313a03ce12b7e187d5da112",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceGameLiveStreaming.prx",
+      "size": 50128,
+      "mode": 493,
+      "sha256": "efab3063745a186b668d84c77e8d7627ad643ef7b6a77211c7fbf9d77127f574",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceGameUpdate.prx",
+      "size": 40672,
+      "mode": 493,
+      "sha256": "c86affcdd018203da909e909a0198e9c1867607999016d838d169c58dfab9212",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceGic.prx",
+      "size": 31056,
+      "mode": 493,
+      "sha256": "9db1834b606c18313cb0e62143290137371ac9e89f06bed2172cfdb29cef4aab",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceGifParser.prx",
+      "size": 38384,
+      "mode": 493,
+      "sha256": "73efeb045e6ed14cd387afb1d2bbbba4e13c464dbd45f91349626c9fc8a64cb8",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceGLSlimVSH.prx",
+      "size": 196832,
+      "mode": 493,
+      "sha256": "4c6d95e69a0a46923cf747a3c24f527121d9681364bb114837fd53f2f1ea8032",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceGnmDriver.prx",
+      "size": 66576,
+      "mode": 493,
+      "sha256": "f59995a441e5d1cd904adf4eb39c4beb78c50ba7116b547f32fe039eda038aa8",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceGnmDriverCompat1.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "1f2778b734321c9c2dab0b5f1be6bf2d74a00be1183ea5319f487e37022710c2",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceGnmDriverForNeoMode.prx",
+      "size": 56400,
+      "mode": 493,
+      "sha256": "3e6ecd2307a8ca20dd26af1713adf406003e40e5ad4f5a18bd78cd3ab3a92e77",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceGpuCapture.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "564f10744bbb31f97513b0ebac5c61ec544f58972f53e45a6fd384b35acf017d",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceGpuTrace.prx",
+      "size": 31408,
+      "mode": 493,
+      "sha256": "968f05375981ed3d12ad9348030fae80735e6bd7559a3dcecfccad03c86c9950",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceGvMp4Parser.prx",
+      "size": 39440,
+      "mode": 493,
+      "sha256": "61438ab1f87b8139a25394d52835858ee198fdf22de80627e4a2596eef4b0399",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceHand.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "c013fbfc48dcd6bf52bd0d5d825b333fb445ea2584c1c403d18b1bef4b965802",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceHandTracker.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "f75d7490806e3a36a7e6aedf1d0b8b2cf8bd38d2cd0ff5837c4c59c3b320cc0f",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceHdrScopes.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "c120378433339d9bcf2a270e940a0117289a4586915fab864e17884b22593f8d",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceHeadTracker.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "eac0eaae503709ec6adaa11ad8b32a56adb794c71a64522fc72a0a95fa6da5ca",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceHidControl.prx",
+      "size": 51424,
+      "mode": 493,
+      "sha256": "a3d4f4d6d7d750882d7ca43e98dea94e05104c1f7583791e42ae5d3dd5048b99",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceHmd.prx",
+      "size": 61568,
+      "mode": 493,
+      "sha256": "bcbe038213f87850adc1407e6add182fdf7cb5bf2cf75e5027d1c010015db78e",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceHmd2.prx",
+      "size": 76992,
+      "mode": 493,
+      "sha256": "6a5590d21e57a48cd8ee617557dcc400ec95bbbee32a46a5cc44beaf95d07db4",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceHmdSetupDialog.prx",
+      "size": 31424,
+      "mode": 493,
+      "sha256": "0c5131387ff4e9892831e5e5b65c6638b36650ab355b55e30cf738dc068ee87d",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceHttp.prx",
+      "size": 172496,
+      "mode": 493,
+      "sha256": "5f106a9fe3432678e2c10e038808f2da3715c10c99d6d80fa6156450ece2a3bd",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceHttp2.prx",
+      "size": 453712,
+      "mode": 493,
+      "sha256": "dbad742e80b7db986e72f90a98d2b7a6e43d66fc34b39cef7eb8cf085b3d9056",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceHttpCache.prx",
+      "size": 114688,
+      "mode": 493,
+      "sha256": "7156120bad33f6cf7cce65fb23f9e26e63864f4cbf04d50a3c34af27942cc84a",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceHubAppUtil.prx",
+      "size": 31184,
+      "mode": 493,
+      "sha256": "e44bfb974d3fdaaac0df9470278a134ca81069768d6149d6fb6cb56c8a5ea700",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceIcu.prx",
+      "size": 1820560,
+      "mode": 493,
+      "sha256": "5dbf9405f5f191fd85d754f05dd1a1b4bf100fb7499b45bc827842ba8a27d553",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceIdu.prx",
+      "size": 32576,
+      "mode": 493,
+      "sha256": "6de1a7568de3afaad8de438d71d6bbe159efca090424318dbc4ef8d5fd2bfdc2",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceImageUtil.prx",
+      "size": 34352,
+      "mode": 493,
+      "sha256": "3a28cd87bc2f1a803c532a52a89a5a245ea0e0539d2cdbec5154c04ef83635f0",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceIme.prx",
+      "size": 106480,
+      "mode": 493,
+      "sha256": "47f767d1ee64d361000becbbe11cedae558fb5937d011a9491a5fa872fd34a26",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceImeBackend.prx",
+      "size": 99872,
+      "mode": 493,
+      "sha256": "bdc21567113f836ed94ccac2317486327b91b22646fdcf5950dd3f690e3274b0",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceImeDialog.prx",
+      "size": 80704,
+      "mode": 493,
+      "sha256": "2e9901ef1bda971e7498e7bff40da641df35d9f3d549f42ae05c7f9b7baa58eb",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceInvitationDialog.prx",
+      "size": 48736,
+      "mode": 493,
+      "sha256": "d06364b0e9d2b887aa2096d5a1fd8e856583467e307fb8637a51ab743c1e072d",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceIpmi.prx",
+      "size": 48128,
+      "mode": 493,
+      "sha256": "e57e346fd5fafa01d3ac8134673ea4fad7e39fbdef5456a6f0fac2f4e72f6069",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceJemspace.prx",
+      "size": 31648,
+      "mode": 493,
+      "sha256": "529ff0d924f4c117733298d806a7e8e976c9d0e9d8c3b17290114f5bd5ef7f0c",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceJitBridge.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "1bf5bf5bb4444ae612abeb1ae095a80de17c68cfc6e9b160757362e771d278a2",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceJobManager.prx",
+      "size": 72240,
+      "mode": 493,
+      "sha256": "6a1e524c4084fd729013270e62bfb8696bffa25e1ade63bb159eb911d01f3f8c",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceJpegDec.prx",
+      "size": 1175984,
+      "mode": 493,
+      "sha256": "d2f4e6497258bfdbe80364aab26fbd8699bea7c829d52133d251a5e1e216b61f",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceJpegEnc.prx",
+      "size": 1162560,
+      "mode": 493,
+      "sha256": "4e2b5aaf420d1f5d0c41cb177587bae51aaae8e197af27013818c52a7c150a36",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceJpegParser.prx",
+      "size": 31664,
+      "mode": 493,
+      "sha256": "6757c6924113c50c6576c8325e551234931d072e3d2c0054536ad88756001817",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceJsc.prx",
+      "size": 235616,
+      "mode": 493,
+      "sha256": "2f4eee51c6c1dddfaf115fb436a8a0399f9055a3d873df506b3bf1eced32d423",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceJscCompiler.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "fb252f190f0d0bcc7efa13e935b6b00da9af9d5b356baf5cdddc070301cfc16c",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceJson.prx",
+      "size": 39232,
+      "mode": 493,
+      "sha256": "680da71929810c47a180c85daf294b13a997e6c10aa45fe25c8d9f485b31524a",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceJson2.prx",
+      "size": 169328,
+      "mode": 493,
+      "sha256": "61a17cfd736cc7971f2aee793dd242fcd17f3448d1571f23e52328d70f5dbb62",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceJxr.prx",
+      "size": 525584,
+      "mode": 493,
+      "sha256": "817e16c4817ed857aa3ca42119f1c65de681017e2767c4fd9a607f4eb67f849f",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceJxrParser.prx",
+      "size": 32288,
+      "mode": 493,
+      "sha256": "67331f88c9b7119049c4014667a4c9543b2da87c1f647a4b295871964ce5ca31",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceKbEmulate.prx",
+      "size": 31056,
+      "mode": 493,
+      "sha256": "603e67277a9bd7276c5f7d411c8d82e8693bba778d981799f58d95ab24991841",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceKeyboard.prx",
+      "size": 47904,
+      "mode": 493,
+      "sha256": "a35050cf05757996276afe7ebe2de971db7163a589c0c6cd2e297d758a0c757c",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceLibcInternal.prx",
+      "size": 372272,
+      "mode": 493,
+      "sha256": "48db61a744736f296b48e6d3f674467de5a7f445e94925fc30a14efef2b1ec85",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceLibreSsl.prx",
+      "size": 819920,
+      "mode": 493,
+      "sha256": "4bfd592d3d8e4b35cb20fa11c12b5215110354be9855045fb8e5d753e8d6f767",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceLibreSsl3.prx",
+      "size": 180304,
+      "mode": 493,
+      "sha256": "afd147a5b1d9ef4eee17a8e397724d82f7a5fb1116efcc42283136c7ac326514",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceLoginDialog.prx",
+      "size": 31600,
+      "mode": 493,
+      "sha256": "d5fce8c7061b1bc9b2c2eb61b096ce8eae48049e302f11604a652f2d59e1b610",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceLoginMgrServer.prx",
+      "size": 38720,
+      "mode": 493,
+      "sha256": "237111a21fe591fa1c05f07b1292451230774ac7bb3cceb37785a22c6090d3ed",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceLoginService.prx",
+      "size": 31152,
+      "mode": 493,
+      "sha256": "ead06c90bafa098bf88b4430da3d75805d8c6f7458874dccfc7628db49cf1ab1",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceM4aacEnc.prx",
+      "size": 36272,
+      "mode": 493,
+      "sha256": "0569d67845a60150170457b563b9d130478b0f49bb541096e8495a89c662e373",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceMarlin.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "9f2d2e0b464debfe9936d4c0c252f5284594f220a63f6265c83d761acd0046c7",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceMat.prx",
+      "size": 38176,
+      "mode": 493,
+      "sha256": "cfce0c8829ff7ecc75bde43e52b55bcb394b4fdff985fb60cfdfe2f3c9b11a8f",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceMbus.prx",
+      "size": 49968,
+      "mode": 493,
+      "sha256": "441ce8ddd5771d1ac2596d86871384543b32ea0cc3740d348ba752f932a0121c",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceMediaAppSharedStorage.prx",
+      "size": 34192,
+      "mode": 493,
+      "sha256": "ca4d633fd8243eaedfdb77d62272f0db4317a17558bd1b06ececaab305356857",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceMediaFrameworkInterface.prx",
+      "size": 61504,
+      "mode": 493,
+      "sha256": "fd648fa821f596bca4982d6d87699b64f70a60c4fca396e339c0e9c6525c115a",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceMediaFrameworkUtil.prx",
+      "size": 31472,
+      "mode": 493,
+      "sha256": "fa180c80bbd813432ac61865abd6b8a0b450caf0d30ca441c25d26373808b140",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceMetadataReaderWriter.prx",
+      "size": 40880,
+      "mode": 493,
+      "sha256": "8f7a5ec473939b82b97e2207044f039128dc8cc02d956520b043fde06b8d5ecc",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceMouse.prx",
+      "size": 48480,
+      "mode": 493,
+      "sha256": "3dedbf070b3af65eff8ee7692c4e022e316b5cadeda5c12c66556e20facbb543",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceMove.prx",
+      "size": 46992,
+      "mode": 493,
+      "sha256": "7000eb1f822e2f2ded224333793be431cc05892ed035a0c8cc62cd57662b8eba",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceMoveTracker.prx",
+      "size": 32272,
+      "mode": 493,
+      "sha256": "bebfe4253398b273a0c70009ba6699b1a55815d428f2c81ff1b3c446303c8077",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceMsgDialog.native.prx",
+      "size": 47808,
+      "mode": 493,
+      "sha256": "35ad4fea00fa146932a3888bf47c590dc16494fb03252be39a269434036493f6",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceMsgDialog.prx",
+      "size": 48592,
+      "mode": 493,
+      "sha256": "4792e35191a3d1532698b088a0586a7a521aae13ad40abcb3a939c51d0fbcc91",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceMusicCoreInterface.prx",
+      "size": 31568,
+      "mode": 493,
+      "sha256": "7756d7793626968d2ed7212edcb1e670721d59027c3c241c1765860eb85974bb",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceMusicFrameworkInterface.prx",
+      "size": 37408,
+      "mode": 493,
+      "sha256": "3ea498e9ba99f0b99be58cab4ef36de1e24171d2b50d9d6b0ff74f1c380ec1a9",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNet.prx",
+      "size": 203424,
+      "mode": 493,
+      "sha256": "05399c5eb405f8b7b75f839361ddb54d496b539f24c74133fbb82cf4ab5d230e",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNetCtl.prx",
+      "size": 98528,
+      "mode": 493,
+      "sha256": "649851dc0b3f3ed96a621200cbb0df8dbeb612e36abfd229eb44e47004cd24bc",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNetCtlAp.prx",
+      "size": 41136,
+      "mode": 493,
+      "sha256": "636bbcfbce98aed146da5f9f810a0898f676086954a8cc70f470db45538fd928",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNetCtlApDialog.prx",
+      "size": 31824,
+      "mode": 493,
+      "sha256": "8bf95cb9318c150116da9d3a8752f116ae5d4ee48bdd8fda44a86cdf05bb388b",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNgs2.native.prx",
+      "size": 449264,
+      "mode": 493,
+      "sha256": "347cd25926f057d5795d04bce480b9dba91ff3b63652df2a5963f5b54aa6ae44",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNgs2.prx",
+      "size": 444912,
+      "mode": 493,
+      "sha256": "10251aaad44eb5ef50ba2bee1fe5d82983514037c44c0731e188083122a7caf8",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNKWeb.prx",
+      "size": 31600,
+      "mode": 493,
+      "sha256": "4897c24ed44d2d8a2e8547c488bfe9b89b5ea642bbbddc5a6e4bc558b1a728cb",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNKWebCdlgInjectedBundle.prx",
+      "size": 31104,
+      "mode": 493,
+      "sha256": "c14be85812b9a24d210585ab022bf16c0ad47933eacbd35e5c13b6e60ecaf87b",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNKWebKit.prx",
+      "size": 4223952,
+      "mode": 493,
+      "sha256": "bb6a9bd5ddb93575c87e07124f8334efd5730c722eba34edd382205e4ac212f0",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNKWebKitRequirements.prx",
+      "size": 2133264,
+      "mode": 493,
+      "sha256": "f1ca1f15bad4fa4855b9a9fe1ed99971f6a17303d7197816536fa347587e9559",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNotification.prx",
+      "size": 41296,
+      "mode": 493,
+      "sha256": "77c139cb37e4b315516db7b5c07f29ae58742d62f4cc038028f2e3cf0ba2f615",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNotificationClient.prx",
+      "size": 31008,
+      "mode": 493,
+      "sha256": "9c5ad4e8363d23d69bcae2b72804ff4b62f6147eed010505c78da39cf7b9c5ad",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpAuth.prx",
+      "size": 46144,
+      "mode": 493,
+      "sha256": "2329d7f93302633acd66126cc406152a07039524c254374fd7d8040fbfa00eab",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpAuthAuthorizedAppDialog.prx",
+      "size": 36256,
+      "mode": 493,
+      "sha256": "85d78ad3e71272df79f429c9aaa985226c87df0d02724d9e0814db1cca389ffd",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpCommerce.prx",
+      "size": 37216,
+      "mode": 493,
+      "sha256": "2be657113f30976ad34de17f3de15751d03ca72c08f3d413da5d71cf0adc0d80",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpCommon.prx",
+      "size": 162144,
+      "mode": 493,
+      "sha256": "fa032c9722b5665ed75037106fa370ead6c124e8485944af1a532f63795da55e",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpCppWebApi.prx",
+      "size": 462976,
+      "mode": 493,
+      "sha256": "e1869f89ebd0d72a6e4f36457348594ba5226a87af6c1d4ea94201f7cb6ae7e7",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpEntitlementAccess.prx",
+      "size": 65488,
+      "mode": 493,
+      "sha256": "fe10fed20d36fd358203cbe31886ebfa8282d78b91765729de80406292867b03",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpEulaDialog.prx",
+      "size": 31488,
+      "mode": 493,
+      "sha256": "f739db78e3726b8d73ad3d7e9e77217da5c27b99d5c39144f1f6d9e6935893ad",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpFriendListDialog.prx",
+      "size": 35904,
+      "mode": 493,
+      "sha256": "b9633f97af9474fd752db5ef320e49128b5a82716708c965614dd35bb683d503",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpGameIntent.prx",
+      "size": 39216,
+      "mode": 493,
+      "sha256": "94dc6b408bda0a5dfeeac9d3782e08ac4335f1fb7296a4419f7342775c24c17a",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpManager.prx",
+      "size": 151952,
+      "mode": 493,
+      "sha256": "141ef2938d574a93aef6e70144e415227b263c0c251fe53fa6ef239fafb93fe6",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpMatching2.prx",
+      "size": 55280,
+      "mode": 493,
+      "sha256": "86eb9d31f9fa9a3a1bdae0c3b4d713a975a6f297788c1b1119da418b6f919385",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpPartner001.prx",
+      "size": 37424,
+      "mode": 493,
+      "sha256": "90801bbf05de96f3c36dbed7fae20371397d9854d4c17821af056edde81e7491",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpPartnerSubscription.prx",
+      "size": 31104,
+      "mode": 493,
+      "sha256": "167cc9a72d8c4d99b10bc77d35f1789f92b704431dc01e9f9e3d1b94a41f0070",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpParty.prx",
+      "size": 46208,
+      "mode": 493,
+      "sha256": "ca28a006f6a0046d93fa3396c0b7212a802b6b4b1d122074bbc6f479de21a44b",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpProfileDialog.prx",
+      "size": 47952,
+      "mode": 493,
+      "sha256": "d32eeb383be692993e811221fa5c39a33ff5e2b1efcafa8b825606c297fcedef",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpRemotePlaySessionSignaling.prx",
+      "size": 37168,
+      "mode": 493,
+      "sha256": "633e187d94781add3c4ee7148c620c25c956753af505da993e95dd81f857baea",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpScoreRanking.prx",
+      "size": 58720,
+      "mode": 493,
+      "sha256": "adcd0774a910ab4a38da2c7b6230de1c3e21e0f91ed680889f92f11f2ba7eae0",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpSessionSignaling.prx",
+      "size": 46496,
+      "mode": 493,
+      "sha256": "fdc0ae1cd6d691b501cc162f498b643cc6bf143a1f579886515538e62bdceaac",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpSessionSignalingCrossplay.prx",
+      "size": 32256,
+      "mode": 493,
+      "sha256": "4241d3af95ed22735c646b200fa20e34622ab82d169a134742bd8dbc30569ce9",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpSignaling.prx",
+      "size": 50992,
+      "mode": 493,
+      "sha256": "42277965fefa1e83f31d2759c76a8399e61cc67df5acb7c725499b88b885d61d",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpSns.prx",
+      "size": 32384,
+      "mode": 493,
+      "sha256": "34e986e29abe7693f7b117de64379c4c8e757f511a727468fb488b161bddb7d0",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpSnsFacebookDialog.prx",
+      "size": 31568,
+      "mode": 493,
+      "sha256": "936bf9f78ba1c510b53e657214a63624b2b52ebb0efe70fddadac3f361b10211",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpSnsYouTubeDialog.prx",
+      "size": 31408,
+      "mode": 493,
+      "sha256": "b89b0dc149ac230515627ef068e0dbbe1afb553134bd8bece8644626eb359e68",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpSpeechToText.prx",
+      "size": 31456,
+      "mode": 493,
+      "sha256": "7088009fe6c72a88182e16bef1b0eb5c951a3c7c6bebc069a9614309ef0962d0",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpTcs.prx",
+      "size": 31632,
+      "mode": 493,
+      "sha256": "e4f26164ba40401b8a6ea62988466cbb205eed9c5b28485272628038b6daf991",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpTextToSpeech.prx",
+      "size": 32496,
+      "mode": 493,
+      "sha256": "36d7b00a4a74adf3160a014edf5663b42729f6827511d53e7c72b9644b307f13",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpTrophy.prx",
+      "size": 94080,
+      "mode": 493,
+      "sha256": "6766a9616839cd913c93ce3e3c8b623042f8e69374cc84f0b9645555cc4766ff",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpTrophy2.prx",
+      "size": 238928,
+      "mode": 493,
+      "sha256": "f76dfd2f87fb9f3c21834bc4f74e4925502cb8d3b7834ed241f664b25d127d36",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpTus.prx",
+      "size": 72992,
+      "mode": 493,
+      "sha256": "5a1dab4e4383442792d347612416c75b3579f3cecfc9bbccb076e6b9111faca2",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpUniversalDataSystem.prx",
+      "size": 169888,
+      "mode": 493,
+      "sha256": "ecbf45ae849550c1427b55e49ca2e47a6219ec325fa101e798ee4b272795708f",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpUtility.prx",
+      "size": 72992,
+      "mode": 493,
+      "sha256": "7a3e93f6faceece8176c879ff25aab98db6845b0deafae7467df81b0eecdafb9",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpWebApi.prx",
+      "size": 85232,
+      "mode": 493,
+      "sha256": "a373556494de9eac413abb81ccb56d57428518c4c8c394a0ef8f9810a68ca26f",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceNpWebApi2.prx",
+      "size": 55232,
+      "mode": 493,
+      "sha256": "e65979218b21f6e428cfd423632473ebe1fc2faf42964a0b4c17c524fdc10fc8",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceOpusCeltDec.prx",
+      "size": 265408,
+      "mode": 493,
+      "sha256": "61c4e429d331c153771706c4cd1e8a661752a524504509cc8913f8505996fff8",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceOpusCeltEnc.prx",
+      "size": 528384,
+      "mode": 493,
+      "sha256": "db394327d41bb0479a94c8f9c639da197b74aeb581b9692d84b269672eb4f7b5",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceOpusDec.prx",
+      "size": 272528,
+      "mode": 493,
+      "sha256": "c5efd7feeba70d1e1a72a3b90a068cb0279312592b86c6f5a6828321a24f4538",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceOpusSilkEnc.prx",
+      "size": 528400,
+      "mode": 493,
+      "sha256": "bc5e4db068f7ffa251b8e071240624b450890455bd3937b3f2c604e15a245699",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceOrbisCompat.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "e8b4e65e91a1fb5c2edceaf511b29ee5041a62479381f3731dbffe1ebd9be1b6",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePad.prx",
+      "size": 134848,
+      "mode": 493,
+      "sha256": "4b2613d08d8d3c3570291cbccf8ce366d45c1e2167184951b77529d684094072",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePadTracker.prx",
+      "size": 31472,
+      "mode": 493,
+      "sha256": "13463a1cd0b37386d6b0e17582a5ca2e791f779c57feeec35c4f62dafee4254a",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePatchCheckerClient.prx",
+      "size": 31776,
+      "mode": 493,
+      "sha256": "e1054ab78c7262c7aa15c6580c58817c89d005be7b51dd89dd48a9ed013916a0",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePerf.prx",
+      "size": 40400,
+      "mode": 493,
+      "sha256": "9ab31034ec23b0502245f4f5b703beaebfa61935eb77ce5090afed5ec747b175",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePfs.prx",
+      "size": 31504,
+      "mode": 493,
+      "sha256": "2cfb91edf7727836369be98722a63b102f93317a119197da0b327ca74a25c3cf",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePlayerInvitationDialog.prx",
+      "size": 42208,
+      "mode": 493,
+      "sha256": "086c9f0ab47d48773cc760ea291a946dca808b66fe59b87069b91b8b69081da9",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePlayerSelectionDialog.prx",
+      "size": 36208,
+      "mode": 493,
+      "sha256": "805b372370b3f4dfb22d9a4e1f6ec71c8df7dca3ef491062d1b342944f26d38e",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePlayGo.prx",
+      "size": 145952,
+      "mode": 493,
+      "sha256": "571b67a26479ff875c7f100aaebae81359ca0098162ac469559797af4bc1cd26",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePlayGoDialog.prx",
+      "size": 31568,
+      "mode": 493,
+      "sha256": "f2b1fd75a8ca02e42b7d6477d8dd28b639b665dd352f6a3450207487e6a70800",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePlayReady.prx",
+      "size": 38912,
+      "mode": 493,
+      "sha256": "dccd71243518ae338b942247df7b5646a7777ced1c9e8999087c5f1ee384b8d2",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePlayReady2.prx",
+      "size": 32144,
+      "mode": 493,
+      "sha256": "0680cca6deaf03f73334537e850589267f8128a7e8b2faa4671f2c9f6d04e7c7",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePlayReady4.prx",
+      "size": 51088,
+      "mode": 493,
+      "sha256": "f4454dd51bd214e735a292204a0838389da1fff21b8890ed7eae03f6a1f606ee",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePlayReady4L.prx",
+      "size": 32000,
+      "mode": 493,
+      "sha256": "54b2f7ceb285fd9f22b3d5e5a03015291dec4f3044bf921b6aea9d0065286052",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePngDec.prx",
+      "size": 106496,
+      "mode": 493,
+      "sha256": "651215c859d267023c9b952cc5f4ff3557ae000661066e07259d60f4bc07b9d9",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePngEnc.prx",
+      "size": 89936,
+      "mode": 493,
+      "sha256": "86cb731dc3dde04460f2e4319dc1c4f5bc966269c92ff4141cb0a3828639e634",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePngParser.prx",
+      "size": 38368,
+      "mode": 493,
+      "sha256": "6d555371ac27f272ee9a436689972c4ad39d5236c28792636ebb5fcc88930426",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePosixForWebKit.prx",
+      "size": 72048,
+      "mode": 493,
+      "sha256": "f2f5c9620374a10bf931277d7609e32a335ccb8dd381746a3d4434366e5c0e60",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceProprietaryVoiceChatHelper.native.prx",
+      "size": 30976,
+      "mode": 493,
+      "sha256": "5ed403f65b4f1d176d25a3c55a2af02daa62ca02cf9dbea8ae54977b6e1a0ce5",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceProprietaryVoiceChatHelperPrx.prx",
+      "size": 42432,
+      "mode": 493,
+      "sha256": "82054cfca0e8d0681ab6310a9d2cda78e6897ab43eca2e462cbe2099010d2005",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePs2EmuMenuDialog.prx",
+      "size": 27104,
+      "mode": 493,
+      "sha256": "9c6bb920a9700f59027fcacd3bb5123b8e055275840340fe3d19d1983984cc23",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePsm.prx",
+      "size": 55264,
+      "mode": 493,
+      "sha256": "422b8313ab669fcf7285807fddd2c1e7eb46f087a133f2c7890bd30e4eb384f8",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePsml_debug.prx",
+      "size": 38464,
+      "mode": 493,
+      "sha256": "bf54cfd4dd737119005e7392d661ce459d7c768dfa980682afed8e01dd4d0683",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePsml.prx",
+      "size": 38464,
+      "mode": 493,
+      "sha256": "00faf78eccb948db18bce8398a0546430528e1c065ab1862a41e6543fd69c413",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePsmUtil.prx",
+      "size": 31168,
+      "mode": 493,
+      "sha256": "ab6ec23f49b8c0e2d78a37b8841a3a45a2a22dbaf5cac806ec176999c50670fc",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libScePSNowGkp.prx",
+      "size": 31504,
+      "mode": 493,
+      "sha256": "cfc598f1b27148b26285fda2be18179cd5596660a82730c34708d8d4a1882fdc",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceRandom.prx",
+      "size": 31232,
+      "mode": 493,
+      "sha256": "e9e0c646447bc37295fa0f724d66a164d645b128d340857fbf2fe2c717e2a6a1",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceRazorCpu_debug.prx",
+      "size": 31136,
+      "mode": 493,
+      "sha256": "d459b7ae3b13e6ee99b20641e5a313e45a72ee8d0a5448c81983906deca6330c",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceRazorCpu.prx",
+      "size": 33744,
+      "mode": 493,
+      "sha256": "4963f7702bb86f9bdea2592e4d10dadb93e93fdad98df9ac808d7eed07a1af92",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceRegMgr.prx",
+      "size": 57648,
+      "mode": 493,
+      "sha256": "8f2ca4fe787b439c09b2c14828cf4920f199aa994c31ce0848ca3bdb88c69f66",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceRemoteplay.prx",
+      "size": 43376,
+      "mode": 493,
+      "sha256": "aebbe28d1c72f81fc9fd60f0f7528825bb47410e97724e956302a82235a58460",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceRemotePlayClientIpc.prx",
+      "size": 33888,
+      "mode": 493,
+      "sha256": "e1d6efc7e5bffafcbb927753c31daf63f762eaf7f8d1ecb7089561fd3bf4308a",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceResourceArbitrator.prx",
+      "size": 32928,
+      "mode": 493,
+      "sha256": "0746ca42bed089998844314fdc967b7f1677e709f8841228f243cc7f22a19c03",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceRnpsAppMgr.prx",
+      "size": 37488,
+      "mode": 493,
+      "sha256": "d4ca1faf82fef85dbb111783d71f6b3d23b26950da1e6a81a5f72f5a26c1bb1a",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceRnpsBundle.prx",
+      "size": 31200,
+      "mode": 493,
+      "sha256": "c99bc2da8611548c9b4ee5deae6fe742611f49634f7d44185d36f9ac80c8f14c",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceRnpsNKInjectedBundle.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "6ff6136003ca9167b28ac64c472e3ed8f3ab808527e90f8998d89cb335ab40c2",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceRtc.prx",
+      "size": 66864,
+      "mode": 493,
+      "sha256": "63fbd38908c64a634d1508e4abb5d48f688250f28d671d0d43268a5cee3342cd",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceRudp.prx",
+      "size": 77728,
+      "mode": 493,
+      "sha256": "822d364c236150a6edf722ab27117aad47a0277581dad054a5f8e13a884de2af",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceS3da.prx",
+      "size": 35616,
+      "mode": 493,
+      "sha256": "8f0e3c0ee4bf8d0cf0dc54fbdd15a1154ee19044fecf9c69eef062bdab009cd8",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceS3DConversion.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "acbbb5d83ba8d6f0be45cc6ac900f1691c6f5af594c8e905b8447937a4a03a5b",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSaveData.native.prx",
+      "size": 248816,
+      "mode": 493,
+      "sha256": "6714e9ad03dc995ca262f15e6cd0b7ea77ed6d6974951ad8d3d32cda0b906e5d",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSaveData.prx",
+      "size": 256448,
+      "mode": 493,
+      "sha256": "79c6b19c49ce93f97d0f8050e081f0353651814cb6edd73bcf58debf59f2f752",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSaveDataDialog.native.prx",
+      "size": 31984,
+      "mode": 493,
+      "sha256": "227831a3c50b5db86fc9d73372db46760655c588fc754fc8a4d0b448a5310cee",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSaveDataDialog.prx",
+      "size": 32016,
+      "mode": 493,
+      "sha256": "8809c7a61ee6b6fd856d06ac6ec83fec5852bed97e52e4ff1311cc2c50cee778",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceScm.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "8c392b2d12b1aae97a2e18e4a557bf20a409568da58319374e253723c716c40b",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceScreenShot.prx",
+      "size": 38400,
+      "mode": 493,
+      "sha256": "54508dda52b6645b3385e29588d8fa0416c2c3905c22979c5bb7c5786884b9d9",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSdma.prx",
+      "size": 73296,
+      "mode": 493,
+      "sha256": "501855cfc1fb9a4ee02b49e64abe5c2f3edaa42f73a1297d7820a7211f49e119",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceShare.native.prx",
+      "size": 30960,
+      "mode": 493,
+      "sha256": "c07490d68d5d9aa65ef81ef0a5e3cd243fad72a550caa942a43495edaba61e17",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceShare.prx",
+      "size": 33376,
+      "mode": 493,
+      "sha256": "08a76cf30fcc31f8ee099d4d0da3cf97669dbf23a60e14fd4c4331b0f7b12429",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceShareFactoryUtil.prx",
+      "size": 31408,
+      "mode": 493,
+      "sha256": "f67e9d21378ac946d053aa5f1e38e279ad125726af5843371d75534965829643",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceShareInternal.native.prx",
+      "size": 33328,
+      "mode": 493,
+      "sha256": "e21865864e8e7f6d2b4d7b01d74828cf379bfe392900078d7e1ca48d010fe08a",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSharePlay.prx",
+      "size": 42160,
+      "mode": 493,
+      "sha256": "d2043a721cce009989bd525e76d36a14ca4ae0598f3e40cfca642ab7a2d02973",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceShareUtility.prx",
+      "size": 32624,
+      "mode": 493,
+      "sha256": "91e657c4b077706f23f7aff2e5c6e4d199fb9a482808570fa3fd8d62c334f5b8",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceShellUIUtil.prx",
+      "size": 32320,
+      "mode": 493,
+      "sha256": "c3b79be4ca42d0552b5edc8c90a70fed6f55441554144695c64cb8f46a9452be",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSigninDialog.prx",
+      "size": 31392,
+      "mode": 493,
+      "sha256": "0067ddb972b64da3b1e5cea1f5162198d41d2c168d9d9e6c3db32c727336d500",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSisrSys.prx",
+      "size": 31040,
+      "mode": 493,
+      "sha256": "e31f3cf4b79b9365947998efb85e67be52a32349975260cbca37a87b04af58ae",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSmart.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "bd6d050de32c631d3d882579b5716d01b164039fb2a294ca73ebecb03b222195",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSocialScreen.prx",
+      "size": 32048,
+      "mode": 493,
+      "sha256": "4fdc457b3573c24652cf6329a3e5df6d9819936465612d890d0e030376a81f87",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSocialScreenDialog.prx",
+      "size": 31456,
+      "mode": 493,
+      "sha256": "c2d81d0980f066799f0399aa74965108f6e4ac95cfefa8f1ce38a6a556018948",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSpSysCallWrapper.prx",
+      "size": 41328,
+      "mode": 493,
+      "sha256": "e35b90d3b8f7227be9dee246d5dd3b35dbcc5eaa91523649f134153bf2a4f650",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSrcUtl.prx",
+      "size": 31984,
+      "mode": 493,
+      "sha256": "e6c306af257624b82246fa8606d8e936ec68feb03103b18861a91db8932b1b72",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSsl.prx",
+      "size": 764576,
+      "mode": 493,
+      "sha256": "da0fda6cf55e2ca6e847e2f8f9bd8841939d49ef1682ddd4b5b09e4b9995f64c",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSulphaDrv.prx",
+      "size": 31632,
+      "mode": 493,
+      "sha256": "40cd8c4f243875e16bfdca6e8546ae95a2f843cf4d1b5ba2ca87580d8d34a045",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSysBridge.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "1e595340081c84e3b70cc8f1c17544f1a9504ceefa8e1278929ec8aac040000f",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSysCore.prx",
+      "size": 37568,
+      "mode": 493,
+      "sha256": "a4c08619957284a3c86afd5a58b6428d2148980663208eb0dc09e3a2f624c451",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSysmodule.prx",
+      "size": 74640,
+      "mode": 493,
+      "sha256": "fdf0bd85f38e1d21c3225802c5bb583405bc2ab0b043f50ca9b88d5b7488023e",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSystemGesture.prx",
+      "size": 52640,
+      "mode": 493,
+      "sha256": "d9c5b2e730db7cc2b0e0d1b4b507e71dab7ad7902944777d7176fb21a46c3baf",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSystemLogger.prx",
+      "size": 40192,
+      "mode": 493,
+      "sha256": "6d19fc351b306ea19b594c2b9529bc7ad7ee0efe7ba823f3dbf3524252c4cd51",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSystemLogger2.prx",
+      "size": 32304,
+      "mode": 493,
+      "sha256": "e2324bd5f4edd24a4fb01f15e2432357aa11a3da3d377757d9dedfc53654eed7",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSystemLogger2Delivery.prx",
+      "size": 31472,
+      "mode": 493,
+      "sha256": "f7ed128a1d5612bd78c29ba8bc731e14cba5c1c22d643caefd423186cdc1a8f6",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSystemLogger2Game.prx",
+      "size": 31168,
+      "mode": 493,
+      "sha256": "00432cf061676e8606dc22e80473aa8a010191372853e3a0162c05d60f8d1422",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSystemLogger2NativeQueueClient.prx",
+      "size": 32144,
+      "mode": 493,
+      "sha256": "39d32174ecdf1ec3440f001bad571e5ae376650ebb29fe4303ef9cd83e54b778",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSystemService.prx",
+      "size": 246176,
+      "mode": 493,
+      "sha256": "eba027c0f42273eab6fd13c89d4bfe327eab50d1863c17d36455efa55e7c05cf",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSystemTts.prx",
+      "size": 31696,
+      "mode": 493,
+      "sha256": "73e21e922cc7950468267df176942ac9b574693c74660ae837e0f396fec1feca",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceSysUtil.prx",
+      "size": 37424,
+      "mode": 493,
+      "sha256": "6b610c9d885c44abae94bf6004712fec2da68963be4b573d14788711e759a9b5",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceTEEClient.prx",
+      "size": 32704,
+      "mode": 493,
+      "sha256": "af8375dcfcf487baf7fbdb2862a8ab7db443448b8bb52d3ebd8679d875d7068e",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceTextToSpeech.prx",
+      "size": 31968,
+      "mode": 493,
+      "sha256": "05ec60f8486a99fd3631a8d93ab1fb54b2c42f65e62a8755cd21cf146a89a07f",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceTextToSpeech2.prx",
+      "size": 31824,
+      "mode": 493,
+      "sha256": "95e284df96b7897b0abc15782b46334b1cb14d78c4c5ed750add24df391453d7",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceTtsCoreG3Bc.prx",
+      "size": 34400,
+      "mode": 493,
+      "sha256": "d5a311f9d8f3501a483f5621980ddbc84e0e0805acbb1d85f17543d1b715b8f0",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceTtsEngine.prx",
+      "size": 31696,
+      "mode": 493,
+      "sha256": "3ba02672f4a52e33a3152d18c2574a3fd5f024e8870382ca5e27533dd301e4f2",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceUgcBgUploaderClient.prx",
+      "size": 32960,
+      "mode": 493,
+      "sha256": "e80ab6494e6ddf81dfb6aea02709626707f704d9574a4cda17262d4933bdcffe",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceUgcServiceS3.prx",
+      "size": 32608,
+      "mode": 493,
+      "sha256": "8ca3edd3d3484ea04a89581fa5f9ade182208a03f5ea943afaa157b507919e84",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceUlt.prx",
+      "size": 123632,
+      "mode": 493,
+      "sha256": "ce4905a85ec78718a90df8ee1d1da13621d431c66abefe7cd1a97d4899b492ea",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceUpdateService.prx",
+      "size": 39904,
+      "mode": 493,
+      "sha256": "ddd9e1616479ca9d0b901253e6cfe42273c10d5a5cb1ae26344af2a2f360b303",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceUrlConfigResolver.prx",
+      "size": 46368,
+      "mode": 493,
+      "sha256": "ad1110df5da3c74aae5c16607ef1f32e8d94a273d619336b82626521bbcb073a",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceUsbd.prx",
+      "size": 207536,
+      "mode": 493,
+      "sha256": "14ebd7c195c3db50556112d1d539b92805f6929ba013cc0266ebca66ac2d9245",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceUsbStorage.prx",
+      "size": 113744,
+      "mode": 493,
+      "sha256": "dfc1e972856e77a5aca02592107b354377e0612c147cd1c9a0ef007815a88bef",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceUsbStorageDialog.prx",
+      "size": 36496,
+      "mode": 493,
+      "sha256": "4eb662650a5b1f396805b90635c9880026dc2c00359967422256bbecdbe9f190",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceUserService.prx",
+      "size": 180960,
+      "mode": 493,
+      "sha256": "a4577ece4793f26682432c314bee46c72ac1cbf5171465fb993fa6b5c49a7fe5",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVcodec.prx",
+      "size": 41056,
+      "mode": 493,
+      "sha256": "8445850fe20d66da5d3f88d99ec0fb33dd9cd43fd708f89377c697d79d8147a2",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVdecCore.native.prx",
+      "size": 31152,
+      "mode": 493,
+      "sha256": "99e489a9dc108a1413389cf0e39da8e634787722a2199d198783cc724e6fbba3",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVdecCore.prx",
+      "size": 8876432,
+      "mode": 493,
+      "sha256": "6e939056a8d4744c3d008c27554ac1debe4ff573f29c46b2d886ad442e20d118",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVdecSavc.prx",
+      "size": 31264,
+      "mode": 493,
+      "sha256": "5009e82c3f9a44d443b85bf6b7b7c08977a8dbb543a16df1afd84088e6ead726",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVdecSavc2.native.prx",
+      "size": 30960,
+      "mode": 493,
+      "sha256": "42ccab138facab9a4eb925bc803903e581a5dd35ba362f5f7be7b2fd4f932095",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVdecSavc2.prx",
+      "size": 31264,
+      "mode": 493,
+      "sha256": "eee8b61771673244313f1f43fd3d8e2cc915e2435084cc3aac3197d24d53c2d9",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVdecShevc.native.prx",
+      "size": 30960,
+      "mode": 493,
+      "sha256": "42caad5455c4d827b4dc31aef84d61060de21025f6c7ae040bf7b561c78c18a4",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVdecShevc.prx",
+      "size": 32592,
+      "mode": 493,
+      "sha256": "a6e5128f92328e7d26aa02b56d73596df56b6ad0f3e4d51dabe9b22877f3d01b",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVdecSvp9.native.prx",
+      "size": 30960,
+      "mode": 493,
+      "sha256": "99e546bb3cf585df9d6182a70940561834f529fe3e961309ade885fc7683c37b",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVdecSvp9.prx",
+      "size": 33024,
+      "mode": 493,
+      "sha256": "ff21d033750bd44faf9fc59aa077901eaf8d215d97a3164f90700ca19d9711bd",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVdecsw.prx",
+      "size": 75696,
+      "mode": 493,
+      "sha256": "d3840e955a06499e4a4e9922b9d84f8cafbc4d06eb8fcd4a9622beab118bae5e",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVdecwrap.prx",
+      "size": 31664,
+      "mode": 493,
+      "sha256": "6a1bcb20618c540f43d2e0b6b71bb026f68f7329879f3a784f26b33c4666360b",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVenc.prx",
+      "size": 37648,
+      "mode": 493,
+      "sha256": "0532f58078c87e518e3ed237da1cc695091075ef77237cec25d48f7c4da8be19",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVideoArbitration.prx",
+      "size": 31120,
+      "mode": 493,
+      "sha256": "a6fbec77a25af20a0a33ce3a4f537d794ec50e30327f560792fdea67f4f8adb8",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVideoCoreInterface.prx",
+      "size": 31232,
+      "mode": 493,
+      "sha256": "43916a358ea74109bd1f998f1ddbc7ef72aa42194b0be4eddb30fb8ae7d41a5a",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVideoCoreServerInterface.prx",
+      "size": 44528,
+      "mode": 493,
+      "sha256": "20668e313e84802001b3c869c50e6150d73ea4e5fb9c9ac814a3d522fffcfc21",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVideodec.prx",
+      "size": 48224,
+      "mode": 493,
+      "sha256": "da576444c32a16268f17c0897eae4a414f5d9470510ce05d862fdc781e2223ce",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVideodec2.prx",
+      "size": 8966528,
+      "mode": 493,
+      "sha256": "314c05ef67008da95f41f80fd37b19f0570ccdedcce6e2ede6b6a7ae6e6d10d5",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVideoDecoderArbitration.prx",
+      "size": 31248,
+      "mode": 493,
+      "sha256": "08d0f831d11a6eef1a1a2ff1a2ef9cadb57fb1b8fa9296957b7c1c72c107557f",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVideoNativeExtEssential.prx",
+      "size": 31584,
+      "mode": 493,
+      "sha256": "58e7e6b831ed4fc9e89b362fc9529bfa23c06562cc58af422bf7d43224d3bee0",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVideoOut.prx",
+      "size": 441152,
+      "mode": 493,
+      "sha256": "7bfda7fbd983b4d588b95fd4093ba01847ae8e61a234fa8bd0e93a363707ebb1",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVideoOutSecondary.prx",
+      "size": 31424,
+      "mode": 493,
+      "sha256": "81605247240e2cb3df55989a89f619892cfd25dfa7ab7bf48c93d57fed48624d",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVideoRecording.native.prx",
+      "size": 37616,
+      "mode": 493,
+      "sha256": "f0692077eea4598e42ac3eef2e2e95a2ad1c67a86d4cf3f41268d23d1d58a3ee",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVideoRecording.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "93e8f86f1d356c79728c9756ccb1387ad3c981001a12d2bf434df6727e8f976b",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVideoRecordingP.prx",
+      "size": 36944,
+      "mode": 493,
+      "sha256": "cacf7018d32895341604b70d34b51a12c3d664a40b1ffe5ac04024c93e9f85be",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVideoStreamingEngine_sys.prx",
+      "size": 31008,
+      "mode": 493,
+      "sha256": "6e09c9a88e1efa323f0143696dcd4dfe29285b519d6ee08ffc306f2ff571a027",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVideoStreamingEngine.prx",
+      "size": 40928,
+      "mode": 493,
+      "sha256": "941e3735f99d2e8348c58b86e4e11bae7b0b5a48d0c846a3df6c33687a6952db",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVideoStreamingEngineAudioOnly.prx",
+      "size": 31568,
+      "mode": 493,
+      "sha256": "6546ae951079b7d31a3f66e823bf7aae3feea94e1b8f0013a44c2b13d627bacb",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVisionManager.prx",
+      "size": 40992,
+      "mode": 493,
+      "sha256": "31dedab194c38a1aa26f6aa59a76ab95d5eafddf0e85dd69ea47196841d18348",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVnaInternal.prx",
+      "size": 40800,
+      "mode": 493,
+      "sha256": "6a2d88773178f7b05ad572cee15700f0cbff42b1968024c7bb32448fce566f60",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVnaWebsocket.prx",
+      "size": 40240,
+      "mode": 493,
+      "sha256": "502ad6b8e19dd535861b7bb56bd5831813620b7886814846deee77231e7c4cfe",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVoice.prx",
+      "size": 60640,
+      "mode": 493,
+      "sha256": "edf6d9607341997f6d68712536d4d9d0b4e813f5c8dd3c13b2bd8acbbffd77d1",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVoiceChat.prx",
+      "size": 47600,
+      "mode": 493,
+      "sha256": "5fd5e9eede198cf6134ce979d6c27110ff24977a04047fd44fce8bdad3b9e350",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVoiceCommand.prx",
+      "size": 32688,
+      "mode": 493,
+      "sha256": "425d8343c026f4bb6ebc23157876401e6cbd34f4344e45f694aa44fec434c4d6",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVoiceQoS.prx",
+      "size": 48896,
+      "mode": 493,
+      "sha256": "82e45398fa1e8fed5aa30f81112db486275e45a73010938a994e79fcb199f680",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVorbisDec.prx",
+      "size": 369392,
+      "mode": 493,
+      "sha256": "0d86e517d78065a5179ca8cd157f35b1ab181e4d8202fde16c230765a77cc6f1",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVrHand.prx",
+      "size": 31648,
+      "mode": 493,
+      "sha256": "069a22f12fb1bfbf30025bfcca065a0906aac324e95ac426c77f2f35c6d2cfbe",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVrServiceDialog.prx",
+      "size": 31424,
+      "mode": 493,
+      "sha256": "b31ad05e216dd63c171e4578fe471eaf187dc6e6eb7dcb34ad4b784d3aedce7f",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVrSetupDialog.prx",
+      "size": 31616,
+      "mode": 493,
+      "sha256": "6e2f07627a3b7ea7bbd8ef5b2c34c97c3aefbf8e5397949a8e64f8c6a7d84779",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVrTracker.prx",
+      "size": 43392,
+      "mode": 493,
+      "sha256": "59320c3266326fc8a8106249feb34edc7a4e405b48e0d55811f4dbc25a1e133e",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVrTracker2.prx",
+      "size": 52960,
+      "mode": 493,
+      "sha256": "61132c20a63983ec8383188ce1ce7ea8f509da91236e87fb40de53f29919d03b",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceVsePlugin.prx",
+      "size": 35456,
+      "mode": 493,
+      "sha256": "4d0fa633a91624f17232b90e06ffc7622541c978134c020b222e24030299ae82",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceWeb.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "d36cc135e17169dbb5ed94306b189c3c81c97c6b390d82f0b3e3f73694a6a26e",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceWebBrowserDialog.prx",
+      "size": 36640,
+      "mode": 493,
+      "sha256": "2ddd95119566cfa2e24cc501fa1c1bca4b04724c71df8f2959bf17357575216b",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceWebKit2.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "ea43b95c8da0519377f4c830db55faef4a8ec93509891f08fea571c8fcd28b25",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceWebKit2Secure.prx",
+      "size": 30992,
+      "mode": 493,
+      "sha256": "a1749672ee0affbc4f85d939aba03a4799f898138c3781d396781ab9fc154010",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceWebmParserMdrw.prx",
+      "size": 32272,
+      "mode": 493,
+      "sha256": "69fe39a5963b55bd43c912d2bdc57907d4f0370b6488aaf3be50bc7c826e9738",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceWebRtc.prx",
+      "size": 31760,
+      "mode": 493,
+      "sha256": "962e181f39202d88c4754332f55536048381d1bc685a2c42b495ee8bb3a69150",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceWebTransport.prx",
+      "size": 42304,
+      "mode": 493,
+      "sha256": "ded09a8995a0b4a43e3e558301a170a753cc92e60aedcd20adcf41aa495f9f25",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceWkFontConfig.prx",
+      "size": 31312,
+      "mode": 493,
+      "sha256": "f39119d01095c7445cb256df76558e77edfffa5e8c37f80e3be10b6e2068d516",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceWorkspace.prx",
+      "size": 32128,
+      "mode": 493,
+      "sha256": "7f6ab5a00af285944fa174402e69ca480f10b154f3aef6601cd99d1862f54c16",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceXml.prx",
+      "size": 148400,
+      "mode": 493,
+      "sha256": "b88be1ff2eb2c9faea162c727cb2fc87e24233ced4d08f269bb7c374c5a2a46e",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSceZlib.prx",
+      "size": 81280,
+      "mode": 493,
+      "sha256": "17ef1cf7d5389bda487be57201587a3763d22474c0331d520b50c89e6bda1760",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libSDL2-2.0.0.dylib",
+      "size": 1494512,
+      "mode": 493,
+      "sha256": "87137197f5abd0bf4a88389be6bb9c73c657cd080cc1e353b4abe496fef1aaba",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libwebrtc.prx",
+      "size": 663104,
+      "mode": 493,
+      "sha256": "3cc4add35548dfc55cb2860c5da0c62a168a5a9a2417e36ce72b08d96f46a5bf",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/libwvoec.prx",
+      "size": 45040,
+      "mode": 493,
+      "sha256": "a9888349c78199d4f25577ece23874ae2e5437ec70e512ffa63949a24592c297",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "libs/ulobjmgr.prx",
+      "size": 31712,
+      "mode": 493,
+      "sha256": "1e95c3947764e8162ec968aafba284f54773eec9384317f475673cc5acd9791a",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "licenses/3rdparty-curl.txt",
+      "size": 1088,
+      "mode": 420,
+      "sha256": "6fd1a1c008b5ef4c4741dd188c3f8af6944c14c25afa881eb064f98fb98358e7"
+    },
+    {
+      "path": "licenses/3rdparty-ffmpeg-core.txt",
+      "size": 26526,
+      "mode": 420,
+      "sha256": "b634ab5640e258563c536e658cad87080553df6f34f62269a21d554844e58bfe"
+    },
+    {
+      "path": "licenses/3rdparty-fontconfig.txt",
+      "size": 8616,
+      "mode": 420,
+      "sha256": "51a51aa9823704fd90bccc616cdd17ebabb5b2b3e9cbde886ca02c7002288067"
+    },
+    {
+      "path": "licenses/3rdparty-freetype-subprojects-dlg.txt",
+      "size": 1338,
+      "mode": 420,
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566"
+    },
+    {
+      "path": "licenses/3rdparty-freetype.txt",
+      "size": 2149,
+      "mode": 420,
+      "sha256": "bd36c8b474855fa294c2ec5c184544478ef3720aad37d65a6296a4f264fd2d3b"
+    },
+    {
+      "path": "licenses/3rdparty-glslang-2.txt",
+      "size": 1731,
+      "mode": 420,
+      "sha256": "e6ead88c5894007be86546cfd24d6c0b9fafcbf832fc27d8330eb7d46cedc84a"
+    },
+    {
+      "path": "licenses/3rdparty-glslang.txt",
+      "size": 54705,
+      "mode": 420,
+      "sha256": "adb783e734e906d1f46db5df29991dbde84bdb0ceab502ac2febb44fe3c2b5f4"
+    },
+    {
+      "path": "licenses/3rdparty-harfbuzz.txt",
+      "size": 1971,
+      "mode": 420,
+      "sha256": "ba8f810f2455c2f08e2d56bb49b72f37fcf68f1f4fade38977cfd7372050ad64"
+    },
+    {
+      "path": "licenses/3rdparty-icu.txt",
+      "size": 27718,
+      "mode": 420,
+      "sha256": "e55522d81edc687a341a4411e0776e54ca654e90147f354a90458aaced4116af"
+    },
+    {
+      "path": "licenses/3rdparty-jxrlib.txt",
+      "size": 1313,
+      "mode": 420,
+      "sha256": "c5f651028d89cdc3b3825d6571deebb58b6081c2465a3d061d8a8e1263de8ca4"
+    },
+    {
+      "path": "licenses/3rdparty-LibAtrac9.txt",
+      "size": 1068,
+      "mode": 420,
+      "sha256": "cdb280ff931233bdefef0dfdd1d884217d97cb24a96530a41ce7848790df86f7"
+    },
+    {
+      "path": "licenses/3rdparty-libfvad.txt",
+      "size": 1543,
+      "mode": 420,
+      "sha256": "78b16d4e803975e0c5d826339c607d0676192a40e2c510c10b2cb4ab4cde416a"
+    },
+    {
+      "path": "licenses/3rdparty-libjpeg-turbo.txt",
+      "size": 6077,
+      "mode": 420,
+      "sha256": "ba6bceebcba0fdd35488477c2cca8c4632ce82c74dbfbc87d886ce6fc4433579"
+    },
+    {
+      "path": "licenses/3rdparty-libpsl-list.txt",
+      "size": 16727,
+      "mode": 420,
+      "sha256": "66a3107d5ad6a058aab753eaac2047ccb2ed0e39465dd0fe5844da3e300d5172"
+    },
+    {
+      "path": "licenses/3rdparty-libpsl.txt",
+      "size": 1060,
+      "mode": 420,
+      "sha256": "322392e6001b2b3b0fca705dc9f11f26e12441188ecde50eb1d22909980b2925"
+    },
+    {
+      "path": "licenses/3rdparty-libxml2.txt",
+      "size": 1289,
+      "mode": 420,
+      "sha256": "c5c63674f8a83c4d2e385d96d1c670a03cb871ba2927755467017317878574bd"
+    },
+    {
+      "path": "licenses/3rdparty-mbedtls-framework.txt",
+      "size": 29861,
+      "mode": 420,
+      "sha256": "11402351e38392230bb8934ba1095c0c0049a296c0f8821f76e4672dff54b490"
+    },
+    {
+      "path": "licenses/3rdparty-mbedtls.txt",
+      "size": 29852,
+      "mode": 420,
+      "sha256": "9b405ef4c89342f5eae1dd828882f931747f71001cfba7d114801039b52ad09b"
+    },
+    {
+      "path": "licenses/3rdparty-mimalloc.txt",
+      "size": 1096,
+      "mode": 420,
+      "sha256": "82ade5d7d9b029044b5fbbc326207fc47c2d44ee4dd71e8a559c36d728217de9"
+    },
+    {
+      "path": "licenses/3rdparty-nghttp2-tests-munit.txt",
+      "size": 1106,
+      "mode": 420,
+      "sha256": "551a04ab9278e48e3d4ef8b0381ad54e54e84fac1a225c50247fa3669dfdef75"
+    },
+    {
+      "path": "licenses/3rdparty-nghttp2-third-party-mruby.txt",
+      "size": 1061,
+      "mode": 420,
+      "sha256": "07dc3c033f3f0ee600f76ac52211a04cbb67e722f8da44767687e86151586170"
+    },
+    {
+      "path": "licenses/3rdparty-nghttp2-third-party-neverbleed.txt",
+      "size": 1094,
+      "mode": 420,
+      "sha256": "5d9c50d175db903e7b777ca8a72f8f03cb9345e1ea6b0d466d83728a2a92d357"
+    },
+    {
+      "path": "licenses/3rdparty-nghttp2-third-party-urlparse-http-parser.txt",
+      "size": 1077,
+      "mode": 420,
+      "sha256": "79e6ba8b687cb54786207342b9b6fcee0ac10218453ed9009b84d949b2233cc0"
+    },
+    {
+      "path": "licenses/3rdparty-nghttp2-third-party-urlparse.txt",
+      "size": 1082,
+      "mode": 420,
+      "sha256": "2751a9e2545f4e971f7daf4e9fb3fb7a48770eac6b02d4f3cfa5ae3034f1c86f"
+    },
+    {
+      "path": "licenses/3rdparty-nghttp2.txt",
+      "size": 1156,
+      "mode": 420,
+      "sha256": "6b94f3abc1aabd0c72a7c7d92a77f79dda7c8a0cb3df839a97890b4116a2de2a"
+    },
+    {
+      "path": "licenses/3rdparty-ogg.txt",
+      "size": 1466,
+      "mode": 420,
+      "sha256": "d2ab5758336489da61c12cc5bb757da5339c4ae9001f9bb0562b4370249af814"
+    },
+    {
+      "path": "licenses/3rdparty-opus-2.txt",
+      "size": 703,
+      "mode": 420,
+      "sha256": "7efb4989e0cd1b256229bdf2f09300c5d14e35db0e7476bfb87fac243498273d"
+    },
+    {
+      "path": "licenses/3rdparty-opus.txt",
+      "size": 1945,
+      "mode": 420,
+      "sha256": "01e1167d54a096d123cf6dfbbeb19587278845c6481d2d66d545669846079551"
+    },
+    {
+      "path": "licenses/3rdparty-quickjs.txt",
+      "size": 1212,
+      "mode": 420,
+      "sha256": "96f73f9d2a16c21a36b418f06073be26e7d6d5e7c1bc99756b21a4f2c74ef171"
+    },
+    {
+      "path": "licenses/3rdparty-SDL2.txt",
+      "size": 884,
+      "mode": 420,
+      "sha256": "1c040b8271b37e5076359f8fd54240e371114112924d2df81ef87c7d6a1dfdfd"
+    },
+    {
+      "path": "licenses/3rdparty-SPIRV-Headers-2.txt",
+      "size": 17023,
+      "mode": 420,
+      "sha256": "d557539df68e771cc1eedcc91d13f70fca930e508d11eedcafa4b15db49e3744"
+    },
+    {
+      "path": "licenses/3rdparty-SPIRV-Headers-3.txt",
+      "size": 1087,
+      "mode": 420,
+      "sha256": "6d7c9e9d7d12c8d3753bdb24417b84819ba4d6c2f025c37948113d86dc81eef9"
+    },
+    {
+      "path": "licenses/3rdparty-SPIRV-Headers.txt",
+      "size": 23503,
+      "mode": 420,
+      "sha256": "ea43b1de38a6f90c488800d66dec1ed671e68cda530266bc96951fb5b6307613"
+    },
+    {
+      "path": "licenses/3rdparty-sqlite.txt",
+      "size": 3850,
+      "mode": 420,
+      "sha256": "ee6af51062b30d532991face5164136ae6f84e265ecf8abe89dc69dac45ca1e7"
+    },
+    {
+      "path": "licenses/3rdparty-stb.txt",
+      "size": 2510,
+      "mode": 420,
+      "sha256": "bebfe904b14301657e4e5d655c811d51fd31b97c455b9cc2d8600d6bac6cff63"
+    },
+    {
+      "path": "licenses/3rdparty-tracy.txt",
+      "size": 1618,
+      "mode": 420,
+      "sha256": "27ab6b51e57f7e263a6e953d9c8984cd26e69d2f7606bde81e4b3048acf30732"
+    },
+    {
+      "path": "licenses/3rdparty-vgmstream.txt",
+      "size": 1314,
+      "mode": 420,
+      "sha256": "fcc26d35c4c4365e31f21734f846e4ee362ff0b57ba696085605a7b4768d8763"
+    },
+    {
+      "path": "licenses/3rdparty-vorbis.txt",
+      "size": 1470,
+      "mode": 420,
+      "sha256": "ec1815db59fcd302846df949d7424876cb2e2dc5ed1606c5fb0b36787b1cf43a"
+    },
+    {
+      "path": "licenses/3rdparty-Vulkan-Headers-2.txt",
+      "size": 11358,
+      "mode": 420,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "licenses/3rdparty-Vulkan-Headers-3.txt",
+      "size": 1084,
+      "mode": 420,
+      "sha256": "1ca3502222d967f3be5751c55f6b7ee735b5383909c3b501495f54b216dbf227"
+    },
+    {
+      "path": "licenses/3rdparty-Vulkan-Headers.txt",
+      "size": 458,
+      "mode": 420,
+      "sha256": "ac24e5ea920e4318e4d02c4086ae51f53cfb03feed06c18df1019e7ada1ec7bc"
+    },
+    {
+      "path": "licenses/3rdparty-VulkanMemoryAllocator.txt",
+      "size": 1099,
+      "mode": 420,
+      "sha256": "52df2c03d6cfc9ffec13c9d3626c530fc9ce0cbe41d5ea3d10cd46edeb1aeb38"
+    },
+    {
+      "path": "licenses/3rdparty-ZArchive.txt",
+      "size": 899,
+      "mode": 420,
+      "sha256": "efe6b7a9113e0dbe3a8922026fc72ae3ee835c163d182967a015783f7d72e562"
+    },
+    {
+      "path": "licenses/3rdparty-zlib-2.txt",
+      "size": 4482,
+      "mode": 420,
+      "sha256": "5eebcb61a9c1ef91ff6c8e6d37b32554f5eefff825b190b1b5e5982f35d87534"
+    },
+    {
+      "path": "licenses/3rdparty-zlib-3.txt",
+      "size": 28222,
+      "mode": 420,
+      "sha256": "6c19c87d46da17c2be84e30fa690de710f9b5b07ac60dfedb170a4e1e3c5d642"
+    },
+    {
+      "path": "licenses/3rdparty-zlib-4.txt",
+      "size": 103848,
+      "mode": 420,
+      "sha256": "818667d6ab6a37fe7469cb06a7f0cb2c2cb2f2c948a03e5accf1a4a74bf3020a"
+    },
+    {
+      "path": "licenses/3rdparty-zlib-5.txt",
+      "size": 1662,
+      "mode": 420,
+      "sha256": "684411bd6fbcd5b377ca5a3e813e4195ac5e7db1976c8f975875b6204d1d6a8e"
+    },
+    {
+      "path": "licenses/3rdparty-zlib-6.txt",
+      "size": 377,
+      "mode": 420,
+      "sha256": "654f0fc5633cac92b031f3afdc9622901e222afaf7801ff3c49430f9f1216c0a"
+    },
+    {
+      "path": "licenses/3rdparty-zlib-7.txt",
+      "size": 268,
+      "mode": 420,
+      "sha256": "b40b72f1726380f0575283b6a4a4bec781d4d3d994638b490a10b3156a10f508"
+    },
+    {
+      "path": "licenses/3rdparty-zlib.txt",
+      "size": 1002,
+      "mode": 420,
+      "sha256": "e32ff4e00d9d94930537635291da39e7e612703334bf6fde8c7f1686fe8a45a2"
+    },
+    {
+      "path": "licenses/3rdparty-zstd-2.txt",
+      "size": 1549,
+      "mode": 420,
+      "sha256": "7055266497633c9025b777c78eb7235af13922117480ed5c674677adc381c9d8"
+    },
+    {
+      "path": "licenses/3rdparty-zstd.txt",
+      "size": 18091,
+      "mode": 420,
+      "sha256": "f9c375a1be4a41f7b70301dd83c91cb89e41567478859b77eef375a52d782505"
+    },
+    {
+      "path": "licenses/anyps5.txt",
+      "size": 17983,
+      "mode": 420,
+      "sha256": "de124e5a899ae4074ebf5c0f790494178ab66d310606b86203d67a6f3ef45168"
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 2737,
+      "mode": 420,
+      "sha256": "d3bf595db913cf5b60a7a45997cab5a5a60240e1931827cf246fd59061f1ad9d"
+    },
+    {
+      "path": "licenses/FidelityFX-FSR.txt",
+      "size": 1094,
+      "mode": 420,
+      "sha256": "db089274ce766da70f5b7d791029c3486f9f9e27c8c79c652689603d3192e802"
+    },
+    {
+      "path": "licenses/FreeType-2.txt",
+      "size": 17994,
+      "mode": 420,
+      "sha256": "c4120c6752c910c299e3bd9cb3a46ff262c268303ca2069b61f92f10a5656c18"
+    },
+    {
+      "path": "licenses/FreeType.txt",
+      "size": 6743,
+      "mode": 420,
+      "sha256": "5a5ee54c5001bbad1cdc1a57cc3dd4c42199b2da09d39c7ee41fab002d02967f"
+    },
+    {
+      "path": "licenses/libjpeg-turbo.txt",
+      "size": 12799,
+      "mode": 420,
+      "sha256": "75815e3bf6484201a3c3d17a1bbf10f2e8e3237f84df10a2357ea896db2a81d6"
+    },
+    {
+      "path": "runtime.json",
+      "size": 138958,
+      "mode": 420,
+      "sha256": "f3ad0211bc03e12d4453d51e5d87a0f17182a34a38d0474cb276a560cf7469d1"
+    },
+    {
+      "path": "source.json",
+      "size": 39239,
+      "mode": 420,
+      "sha256": "1adf96119e53ad27a2c1726b7a15b833bd2708fb2176882a31d26156b323a1d9"
+    },
+    {
+      "path": "tools/relinker",
+      "size": 1895632,
+      "mode": 493,
+      "sha256": "b2cabe04512d375651d8e80e8383717a25228028c62830ad1a4d80df441a9c4e",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "tools/unwrap-self.cjs",
+      "size": 15721,
+      "mode": 420,
+      "sha256": "d9ea89b354dfc6e1b2058ac34d4e68d73c413b5236b9afba8a0abe87eab9a9a6"
+    }
+  ],
+  "redistribution": "bundle"
+}
