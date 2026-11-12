@@ -1340,10 +1340,14 @@
       {
         "version": "MCLv9",
         "label": "KiriKiri SDL2 macOS MCLv9"
+      },
+      {
+        "version": "MCLv10",
+        "label": "KiriKiri SDL2 macOS MCLv10"
       }
     ],
     "build": {
-      "version": "MCLv9",
+      "version": "MCLv10",
       "command": "tools/build-krkrsdl2.mjs",
       "architectures": [
         "arm64",
