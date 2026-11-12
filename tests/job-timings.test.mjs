@@ -43,8 +43,9 @@ test('compare adds a delta column matched by job name',()=>{
  assert.match(text,/\| skipped .* \| new \|\n/);
  assert.match(text,/\| waiting .* \| new \|\n/);
 });
-test('GITHUB_STEP_SUMMARY and stdout contain the same report',async()=>{
- const dir=fs.mkdtempSync(path.join(os.tmpdir(),'timings-')),input=path.join(dir,'jobs.json'),summary=path.join(dir,'summary.md');
+test('GITHUB_STEP_SUMMARY and stdout contain the same report',async t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'timings-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ const input=path.join(dir,'jobs.json'),summary=path.join(dir,'summary.md');
  fs.writeFileSync(input,JSON.stringify({jobs}));fs.writeFileSync(summary,'existing\n');
  let out='';const stdout={write:text=>{out+=text;}};
  await main(['--jobs',input],{env:{GITHUB_STEP_SUMMARY:summary},stdout});

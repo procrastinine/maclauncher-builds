@@ -1,4 +1,4 @@
-import test from 'node:test';
+import test,{after} from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -7,7 +7,9 @@ import crypto from 'node:crypto';
 import {cargoLockManifest,nugetLockProject,swiftResolvedPins,resolveLocks,lockCache,lockRoot,lockedEnvironment} from '../tools/build-locks.mjs';
 import {buildRecord} from '../lib/projects.mjs';
 
-process.env.TMPDIR=fs.mkdtempSync(path.join(os.tmpdir(),'build-locks-'));
+const previousTemporary=process.env.TMPDIR,temporary=fs.mkdtempSync(path.join(os.tmpdir(),'build-locks-'));
+after(()=>{if(previousTemporary===undefined)delete process.env.TMPDIR;else process.env.TMPDIR=previousTemporary;fs.rmSync(temporary,{recursive:true,force:true});});
+process.env.TMPDIR=temporary;
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const crate=Buffer.from('serde 1.0.0 crate bytes');
 const cargoLock=checksum=>'version = 4\n\n[[package]]\nname = "app"\nversion = "0.1.0"\ndependencies = [\n "n2",\n "serde",\n]\n\n'+
