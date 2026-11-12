@@ -3106,7 +3106,8 @@
       ],
       "command": "tools/build-anyps5.mjs",
       "submodules": [
-        "sources/anyps5"
+        "sources/anyps5",
+        "sources/anyps5-nghttp2"
       ],
       "recursiveSubmodules": true,
       "tools": [
