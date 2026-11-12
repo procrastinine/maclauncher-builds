@@ -6,6 +6,46 @@
     {
       "schemaVersion": 2,
       "id": "fidelityfx-api",
+      "version": "1.0.1-MCLv9",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "10.15",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "76ce84da5721f7cf5763a04a24e659812bb8ee6b480813d2ce924bc1c25ae4c5",
+      "sourceSha256": "b5c4c109ca8c9f4c0b18fbccfa6ea09b4bdc25a943598b215ea058ed20c2806b",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "fidelityfx-api-1.0.1-MCLv9-x64.tar.gz",
+        "sha256": "d01d2dd68412b8b7acae99224e49a4e4cf87c12f3e387483d944df01de0dbdc8",
+        "bytes": 532256,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/fidelityfx-api%2Fv1.0.1-MCLv9%2Fx64/fidelityfx-api-1.0.1-MCLv9-x64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "36718fb6050bf3b6f69ffab3b554b74ff9012231",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "43139039686",
+        "runAttempt": "1",
+        "definitionDigest": "4ee466ec9acb23c6f6fe949e8c11e9e1fda3cb5db836927e54df35800921aab0"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "36718fb6050bf3b6f69ffab3b554b74ff9012231"
+      },
+      "tag": "fidelityfx-api/v1.0.1-MCLv9/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "fidelityfx-api",
       "version": "1.0.1-MCLv6",
       "arch": "x64",
       "launcherArchitectures": [

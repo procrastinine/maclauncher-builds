@@ -1,0 +1,91 @@
+{
+  "id": "fidelityfx-api",
+  "version": "1.0.1-MCLv9",
+  "arch": "x64",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "10.15",
+  "sourceRelative": null,
+  "sourceSha256": "b5c4c109ca8c9f4c0b18fbccfa6ea09b4bdc25a943598b215ea058ed20c2806b",
+  "directoryRelative": "fidelityfx-api/1.0.1-MCLv9/x64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "76ce84da5721f7cf5763a04a24e659812bb8ee6b480813d2ce924bc1c25ae4c5",
+  "files": [
+    {
+      "path": "amd_fidelityfx_dx12.dll",
+      "size": 764928,
+      "mode": 493,
+      "sha256": "4e3aa06da742378f4adf4aeb972d6403c7a0db42fb1be91c38a6b20965ad88db",
+      "format": "pe",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "amd_fidelityfx_vk.dll",
+      "size": 766976,
+      "mode": 493,
+      "sha256": "7925c53461287fa6954772a15a6c545d628a56d166600f620b1ea78d44f86e93",
+      "format": "pe",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 208,
+      "mode": 420,
+      "sha256": "4903194ce28456bfae304e53640f024e1b7078b08b499ebe126d2550cab88705"
+    },
+    {
+      "path": "licenses/FidelityFX-SDK.txt",
+      "size": 1115,
+      "mode": 420,
+      "sha256": "82cf74fc23885107c7f69249ac3f1dac55898ff68320eb2c753984cae6b2d78a"
+    },
+    {
+      "path": "licenses/VKD3D-Proton-2.txt",
+      "size": 26530,
+      "mode": 420,
+      "sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551"
+    },
+    {
+      "path": "licenses/VKD3D-Proton.txt",
+      "size": 800,
+      "mode": 420,
+      "sha256": "f51ad4bf5a3bd2b5f383fe28150b23d01e6f5d7b620b194150e7c6a620c43c1f"
+    },
+    {
+      "path": "licenses/Vulkan-Headers-2.txt",
+      "size": 11358,
+      "mode": 420,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "licenses/Vulkan-Headers-3.txt",
+      "size": 1084,
+      "mode": 420,
+      "sha256": "1ca3502222d967f3be5751c55f6b7ee735b5383909c3b501495f54b216dbf227"
+    },
+    {
+      "path": "licenses/Vulkan-Headers.txt",
+      "size": 458,
+      "mode": 420,
+      "sha256": "ac24e5ea920e4318e4d02c4086ae51f53cfb03feed06c18df1019e7ada1ec7bc"
+    },
+    {
+      "path": "manifest.json",
+      "size": 3707,
+      "mode": 420,
+      "sha256": "76ce84da5721f7cf5763a04a24e659812bb8ee6b480813d2ce924bc1c25ae4c5"
+    },
+    {
+      "path": "provider.json",
+      "size": 1405,
+      "mode": 420,
+      "sha256": "67a4d3d02ed384434580ecd29549fe73cd4ba916152c784914b2af5d9a334090"
+    }
+  ]
+}

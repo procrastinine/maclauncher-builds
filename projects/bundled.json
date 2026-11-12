@@ -137,7 +137,7 @@
   },
   {
     "id": "love-luasteam",
-    "name": "L\u00d6VE LuaSteam bridge",
+    "name": "LÖVE LuaSteam bridge",
     "purpose": "LuaSteam 4 binding against the selected host Lua VM.",
     "producer": {
       "kind": "maclauncher",
