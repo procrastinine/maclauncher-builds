@@ -40,7 +40,7 @@ export async function assemble({project,version,arch,output,compiled:{built}}){
   const payload=path.join(output,'payload');fs.mkdirSync(output,{recursive:true});
   fs.cpSync(built.output,payload,{recursive:true});
   const source={repository:'https://github.com/procrastinine/maclauncher-builds',revision:execFileSync('git',['-C',root,'rev-parse','HEAD'],{encoding:'utf8'}).trim(),
-    upstream:built.source,ngx:built.ngx};
+    upstream:built.source,ngx:built.ngx,...(built.streamline?{streamline:built.streamline}:{}),...(built.minhook?{minhook:built.minhook}:{})};
   fs.writeFileSync(path.join(payload,'source.json'),JSON.stringify(source,null,2)+'\n');
   fs.writeFileSync(path.join(payload,'manifest.json'),JSON.stringify({schemaVersion:1,managerId:project,version,arch,platform:'windows',
     guestArchitectures:['x86','x86_64'],minimumMacOS,upstreamRevision:built.source.revision,ngxTrust:built.ngxTrust},null,2)+'\n');

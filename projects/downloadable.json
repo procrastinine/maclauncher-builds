@@ -3975,7 +3975,10 @@
         "producers/vkd3d-proton/vkd3d_metalfx.h",
         "tools/python-build-tools.json",
         "producers/dependencies/osslsigncode.json",
-        "producers/vkd3d-proton/ngx-trust.c"
+        "producers/vkd3d-proton/ngx-trust.c",
+        "producers/vkd3d-proton/ngx_camera.h",
+        "producers/vkd3d-proton/ngx_streamline.cpp",
+        "producers/vkd3d-proton/streamline_camera.hpp"
       ],
       "buildEntry": "producers/vkd3d-proton/build.mjs"
     },
@@ -3996,6 +3999,24 @@
         "repository": "metalsharp/VKD3D-Proton-MacOS",
         "pin": {
           "gitlink": "producers/vkd3d-proton/ngx"
+        }
+      },
+      {
+        "id": "streamline",
+        "provider": "github",
+        "url": "https://github.com/NVIDIA-RTX/Streamline",
+        "repository": "NVIDIA-RTX/Streamline",
+        "pin": {
+          "gitlink": "producers/package-support/src/external/streamline-camera"
+        }
+      },
+      {
+        "id": "minhook",
+        "provider": "github",
+        "url": "https://github.com/TsudaKageyu/minhook",
+        "repository": "TsudaKageyu/minhook",
+        "pin": {
+          "gitlink": "producers/package-support/src/external/minhook"
         }
       }
     ],
@@ -4018,7 +4039,9 @@
       ],
       "submodules": [
         "producers/vkd3d-proton/source",
-        "producers/vkd3d-proton/ngx"
+        "producers/vkd3d-proton/ngx",
+        "producers/package-support/src/external/streamline-camera",
+        "producers/package-support/src/external/minhook"
       ],
       "recursiveSubmodules": true,
       "tools": [

@@ -320,3 +320,6 @@
 [submodule "sources/anyps5-nghttp2"]
 	path = sources/anyps5-nghttp2
 	url = https://github.com/nghttp2/nghttp2.git
+[submodule "producers/package-support/src/external/minhook"]
+	path = producers/package-support/src/external/minhook
+	url = https://github.com/TsudaKageyu/minhook.git
