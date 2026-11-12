@@ -1,5 +1,5 @@
 android-aim=0.1.0-MCLv9
-prosper=MCLv8
+prosper=MCLv9
 reshade=0.3.13
 android-art-elf=16.0.0-MCLv8
 android-art-image-extractor=0.1.0-MCLv8
@@ -22,4 +22,15 @@ nxnative-tools=MCLv9
 
 dxvk=3.1.1-MCLv1
 fidelityfx-api=1.0.1-MCLv9
-krkrsdl2=MCLv9
+krkrsdl2=MCLv10
+
+ai5=1.5.0-MCLv9
+butterscotch=MCLv9
+fna=26.10-MCLv8
+impacto=0.10.8.937-MCLv2
+mpv=0.41.0-MCLv12
+onscripter-en=20250608-en-MCLv8
+onsyuri=0.7.7beta-MCLv9
+system3=1.8.0-MCLv9
+xsystem35=2.20.0-MCLv9
+xsystem4=MCLv10
