@@ -1,0 +1,10 @@
+{
+  "arm64": {
+    "url": "https://github.com/mtrojnar/osslsigncode/releases/download/2.15/osslsigncode-2.15-macos-arm64.zip",
+    "sha256": "57b9d09bedcbba8043bc0e203dbc00d600361bbc1900a84b575b8047420cf668"
+  },
+  "x64": {
+    "url": "https://github.com/mtrojnar/osslsigncode/releases/download/2.15/osslsigncode-2.15-macos-amd64.zip",
+    "sha256": "9df7884210c2d05d298f2e0301fefe1996dd5c2300ddc3257cd2a39b1e449677"
+  }
+}

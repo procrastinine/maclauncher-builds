@@ -9,6 +9,8 @@ import {buildInput,llvmMingwInput} from './build-input.mjs';
 import {recipeMain} from './build-source.mjs';
 import {pythonBuildTools} from './python-build-tools.mjs';
 import {publicDeclaration} from './runtime-package.mjs';
+import {signNgx} from '../producers/vkd3d-proton/ngx-signing.mjs';
+import {addLicenses} from '../lib/licenses.mjs';
 import {buildProvider} from '../producers/vkd3d-proton/build.mjs';
 const require=createRequire(import.meta.url),B=require('../lib/package-format.cjs'),{readPeExports}=require('../lib/pe-exports.cjs');
 const root=path.resolve(import.meta.dirname,'..'),sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
@@ -22,6 +24,14 @@ export async function compile({work}){
   const tools=await pythonBuildTools(path.join(work,'build-tools'),'sdk27');
   const built=buildProvider({work:path.join(work,'translator'),output:path.join(work,'payload'),mingw:path.join(toolchain,'bin'),
     meson:path.join(tools.bin,'meson'),ninja:path.join(tools.bin,'ninja')});
+ const signingPin=JSON.parse(fs.readFileSync(path.join(root,'producers/dependencies/osslsigncode.json')))[process.arch];
+  if(!signingPin)throw Error('NGX signing requires an arm64 or x64 macOS host.');
+  const signingArchive=await buildInput(signingPin),signingTools=path.join(work,'osslsigncode');fs.mkdirSync(signingTools);
+  execFileSync('/usr/bin/unzip',['-q',signingArchive,'-d',signingTools]);
+  const signingRoot=path.join(signingTools,fs.readdirSync(signingTools)[0]);
+  const openssl=path.join(execFileSync('brew',['--prefix','openssl@3'],{encoding:'utf8'}).trim(),'bin/openssl');
+  built.ngxTrust=signNgx({work,output:built.output,mingw:path.join(toolchain,'bin'),osslsigncode:path.join(signingRoot,'osslsigncode'),openssl});
+  addLicenses(built.output,'osslsigncode',signingRoot);
  return {built};
 }
 /** Stage, describe and declare the compiled translator. */
@@ -33,9 +43,9 @@ export async function assemble({project,version,arch,output,compiled:{built}}){
     upstream:built.source,ngx:built.ngx};
   fs.writeFileSync(path.join(payload,'source.json'),JSON.stringify(source,null,2)+'\n');
   fs.writeFileSync(path.join(payload,'manifest.json'),JSON.stringify({schemaVersion:1,managerId:project,version,arch,platform:'windows',
-    guestArchitectures:['x86','x86_64'],minimumMacOS,upstreamRevision:built.source.revision},null,2)+'\n');
+    guestArchitectures:['x86','x86_64'],minimumMacOS,upstreamRevision:built.source.revision,ngxTrust:built.ngxTrust},null,2)+'\n');
   const files=B.fileInventory(payload).map(relative=>{
-    const file=path.join(payload,relative),bytes=fs.readFileSync(file),pe=relative.endsWith('.dll')?readPeExports(file):null,mode=pe?0o755:0o644;
+    const file=path.join(payload,relative),bytes=fs.readFileSync(file),pe=/\.(dll|exe)$/.test(relative)?readPeExports(file):null,mode=pe?0o755:0o644;
     fs.chmodSync(file,mode);
     return {path:relative,size:bytes.length,sha256:sha(bytes),mode,...(pe?{format:'pe',architectures:[pe.architecture]}:{})};
   });

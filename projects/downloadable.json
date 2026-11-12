@@ -3973,7 +3973,9 @@
         "producers/vkd3d-proton/ngx.patch",
         "producers/vkd3d-proton/vk_temporal_frame.h",
         "producers/vkd3d-proton/vkd3d_metalfx.h",
-        "tools/python-build-tools.json"
+        "tools/python-build-tools.json",
+        "producers/dependencies/osslsigncode.json",
+        "producers/vkd3d-proton/ngx-trust.c"
       ],
       "buildEntry": "producers/vkd3d-proton/build.mjs"
     },
@@ -4002,10 +4004,14 @@
       {
         "version": "3.1-MCLv1",
         "label": "VKD3D-Proton 3.1 with MetalFX upscaling"
+      },
+      {
+        "version": "3.1-MCLv2",
+        "label": "VKD3D-Proton 3.1 with signed NGX forwarding"
       }
     ],
     "build": {
-      "version": "3.1-MCLv1",
+      "version": "3.1-MCLv2",
       "command": "tools/build-vkd3d-proton.mjs",
       "architectures": [
         "universal"
@@ -4017,7 +4023,8 @@
       "recursiveSubmodules": true,
       "tools": [
         "uv",
-        "glslang"
+        "glslang",
+        "openssl@3"
       ],
       "archives": [
         {
@@ -4031,6 +4038,14 @@
         {
           "file": "tools/python-build-tools.json",
           "pointer": "/interpreters"
+        },
+        {
+          "file": "producers/dependencies/osslsigncode.json",
+          "pointer": "/arm64"
+        },
+        {
+          "file": "producers/dependencies/osslsigncode.json",
+          "pointer": "/x64"
         }
       ]
     }
