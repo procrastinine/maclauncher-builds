@@ -7,10 +7,8 @@ import {buildInput} from './build-input.mjs';
 import {declaredSource,run,recipeMain} from "./build-source.mjs";
 import {sealRuntime} from './seal-runtime.mjs';
 const require=createRequire(import.meta.url),Builder=require('../producers/package-support/src/modules/fna/runtime/build.js');
-export const RUNTIMES=Object.freeze({
- arm64:{url:'https://builds.dotnet.microsoft.com/dotnet/Runtime/8.0.32/dotnet-runtime-8.0.32-osx-arm64.tar.gz',sha256:'0e36796c3415bd95c25184fe81386bfc5a5a0b1668ce2f7d8127e03009dec73c',bytes:29113232},
- x64:{url:'https://builds.dotnet.microsoft.com/dotnet/Runtime/8.0.32/dotnet-runtime-8.0.32-osx-x64.tar.gz',sha256:'bb31ec5f4e6f6b85225672f061fd5ffbc463691a03c1338319e4c57403d30aab',bytes:30745959}
-});
+// The .NET runtime archives are declared build inputs (the build record's archives).
+export const RUNTIMES=Object.freeze(require('../producers/package-support/src/modules/fna/runtime/archives.json').dotnetRuntime);
 
 /** Compile the FNA runtime from its pinned sources and the .NET runtime archive. */
 export async function compile({arch,work}){

@@ -707,6 +707,24 @@
       "tools": [
         "cmake",
         "ninja"
+      ],
+      "archives": [
+        {
+          "file": "producers/package-support/src/modules/fna/runtime/archives.json",
+          "pointer": "/dotnetRuntime/arm64"
+        },
+        {
+          "file": "producers/package-support/src/modules/fna/runtime/archives.json",
+          "pointer": "/compiler"
+        },
+        {
+          "file": "producers/package-support/src/modules/fna/runtime/archives.json",
+          "pointer": "/references"
+        },
+        {
+          "file": "producers/dependencies/sdl3.json",
+          "pointer": ""
+        }
       ]
     },
     "recordMetadata": {

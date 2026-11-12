@@ -1,0 +1,26 @@
+{
+  "dotnetRuntime": {
+    "arm64": {
+      "url": "https://builds.dotnet.microsoft.com/dotnet/Runtime/8.0.32/dotnet-runtime-8.0.32-osx-arm64.tar.gz",
+      "sha256": "0e36796c3415bd95c25184fe81386bfc5a5a0b1668ce2f7d8127e03009dec73c",
+      "bytes": 29113232
+    },
+    "x64": {
+      "url": "https://builds.dotnet.microsoft.com/dotnet/Runtime/8.0.32/dotnet-runtime-8.0.32-osx-x64.tar.gz",
+      "sha256": "bb31ec5f4e6f6b85225672f061fd5ffbc463691a03c1338319e4c57403d30aab",
+      "bytes": 30745959
+    }
+  },
+  "compiler": {
+    "filename": "roslyn-4.8.0.zip",
+    "url": "https://api.nuget.org/v3-flatcontainer/microsoft.net.compilers.toolset/4.8.0/microsoft.net.compilers.toolset.4.8.0.nupkg",
+    "sha256": "37333f4f1e2ce55e621355d6da651dc23d4cb5f94a8f76b9478816e87f110ad9",
+    "bytes": 21868065
+  },
+  "references": {
+    "filename": "net8-reference-pack.zip",
+    "url": "https://api.nuget.org/v3-flatcontainer/microsoft.netcore.app.ref/8.0.32/microsoft.netcore.app.ref.8.0.32.nupkg",
+    "sha256": "6088b3ebfe5af44511eaf8d592e029e1ef870da01b1fcb80aa790a6536bc14db",
+    "bytes": 6767209
+  }
+}
