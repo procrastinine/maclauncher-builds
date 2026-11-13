@@ -1,0 +1,228 @@
+{
+  "id": "vkd3d-proton",
+  "version": "3.1-MCLv2",
+  "arch": "universal",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "vkd3d-proton/3.1-MCLv2/universal",
+  "sourceRelative": "source.json",
+  "sourceSha256": "e61dfe6ea355751d8fb5e1cba24e6627116398aa0fddc321afd956699d5e3e6b",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "6601e9e5f4bf3ae129c8e791ae50fcb2c93d576702ea87962a8e3971fb22197c",
+  "files": [
+    {
+      "path": "licenses/components.txt",
+      "size": 865,
+      "sha256": "f2cb2b3438306d02df3933721ab39e1432dedba1755faace4fdb958b43828166",
+      "mode": 420
+    },
+    {
+      "path": "licenses/dxil-spirv.txt",
+      "size": 3744,
+      "sha256": "b3ec61378a66f09835a73f53926d9b5cf79a09c9e2fe8bdd0e39aa5403325e1e",
+      "mode": 420
+    },
+    {
+      "path": "licenses/LLVM-MinGW.txt",
+      "size": 15141,
+      "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MacLauncher.txt",
+      "size": 1081,
+      "sha256": "cd6baee943e564e7f405204fd5ade2c995b45ff6dfe6f7609c020b07509a17f7",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MinGW-w64-x64-2.txt",
+      "size": 12155,
+      "sha256": "1db8da07b436c68833c0673ffee3d9fcb2526047f3820b81661865dfedc79a1f",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MinGW-w64-x64-3.txt",
+      "size": 5905,
+      "sha256": "f38e6194bd3bfa1b654f118e5acefe0aead437bbe669eee43957ccc65a7127f1",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MinGW-w64-x64-4.txt",
+      "size": 2883,
+      "sha256": "63263614cdd29f2f93cba85e992f041b31f9fc7b4033692f31269489a8a1b177",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MinGW-w64-x64-5.txt",
+      "size": 1099,
+      "sha256": "fa7368d1f93d890c173177475d8ec7aff265a7d08f1f364d66f74d138978ce36",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MinGW-w64-x64.txt",
+      "size": 2326,
+      "sha256": "99a69660981156c21336fdb5661f89341b013c94e4bf9e1c7467b4745718397f",
+      "mode": 420
+    },
+    {
+      "path": "licenses/MinHook.txt",
+      "size": 4365,
+      "sha256": "d5c2224982b0b95a16b098a561335fa93f3eaf4d0aa964b7843edb986df78dc8",
+      "mode": 420
+    },
+    {
+      "path": "licenses/osslsigncode-2.txt",
+      "size": 1530,
+      "sha256": "e8ee078b1f2515f333481a411b9955aaca3eab70d742b08d26777edb7086124d",
+      "mode": 420
+    },
+    {
+      "path": "licenses/osslsigncode.txt",
+      "size": 35147,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "mode": 420
+    },
+    {
+      "path": "licenses/SPIRV-Headers-2.txt",
+      "size": 17023,
+      "sha256": "d557539df68e771cc1eedcc91d13f70fca930e508d11eedcafa4b15db49e3744",
+      "mode": 420
+    },
+    {
+      "path": "licenses/SPIRV-Headers-3.txt",
+      "size": 1087,
+      "sha256": "6d7c9e9d7d12c8d3753bdb24417b84819ba4d6c2f025c37948113d86dc81eef9",
+      "mode": 420
+    },
+    {
+      "path": "licenses/SPIRV-Headers.txt",
+      "size": 23503,
+      "sha256": "ea43b1de38a6f90c488800d66dec1ed671e68cda530266bc96951fb5b6307613",
+      "mode": 420
+    },
+    {
+      "path": "licenses/Streamline.txt",
+      "size": 1591,
+      "sha256": "7b6f23e7d6f3ad6292f9308d2b42cdc3d82ae4e9b2abb55f230279d83bedd43d",
+      "mode": 420
+    },
+    {
+      "path": "licenses/VKD3D-Proton-2.txt",
+      "size": 26530,
+      "sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+      "mode": 420
+    },
+    {
+      "path": "licenses/VKD3D-Proton.txt",
+      "size": 800,
+      "sha256": "f51ad4bf5a3bd2b5f383fe28150b23d01e6f5d7b620b194150e7c6a620c43c1f",
+      "mode": 420
+    },
+    {
+      "path": "licenses/Vulkan-Headers-2.txt",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "licenses/Vulkan-Headers-3.txt",
+      "size": 1084,
+      "sha256": "1ca3502222d967f3be5751c55f6b7ee735b5383909c3b501495f54b216dbf227",
+      "mode": 420
+    },
+    {
+      "path": "licenses/Vulkan-Headers.txt",
+      "size": 495,
+      "sha256": "95ad366d23fadf701d355bc45fb8b82ae2d700239471d35d41286ac3b08ff903",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 382,
+      "sha256": "6601e9e5f4bf3ae129c8e791ae50fcb2c93d576702ea87962a8e3971fb22197c",
+      "mode": 420
+    },
+    {
+      "path": "ngx-signing/certificate.der",
+      "size": 1156,
+      "sha256": "c94d238f1b6b3115adaa780f4dc00ebae5739d99a740da1c1e342e4cf974d163",
+      "mode": 420
+    },
+    {
+      "path": "source.json",
+      "size": 711,
+      "sha256": "e61dfe6ea355751d8fb5e1cba24e6627116398aa0fddc321afd956699d5e3e6b",
+      "mode": 420
+    },
+    {
+      "path": "version",
+      "size": 6,
+      "sha256": "b2f44d3b6e29f8b1b73ea4735f006affc4d198e1fd9c7d50e736159b1ef636c6",
+      "mode": 420
+    },
+    {
+      "path": "x64/d3d12.dll",
+      "size": 167936,
+      "sha256": "cd9be1ff4a3a0a654a86c24e94082fb18e47f805230ce2901469863f03e0d2a1",
+      "mode": 493,
+      "format": "pe",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "x64/d3d12core.dll",
+      "size": 6189056,
+      "sha256": "5f09df88ce00caad9910f06e1fea4c70f0d1fb24993a4df03f1151f4b333b823",
+      "mode": 493,
+      "format": "pe",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "x64/ngx-trust.exe",
+      "size": 24064,
+      "sha256": "b94fe842be0e7aa7ad9b41b176e2b8e26c45f08f67ee0d628b3c94579f5de422",
+      "mode": 493,
+      "format": "pe",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "x64/nvngx.dll",
+      "size": 617928,
+      "sha256": "cc0bf0cfe94dfd37ca05d13830b62b7da489389c81eb1fe65f8951a2743bbdcd",
+      "mode": 493,
+      "format": "pe",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "path": "x86/d3d12.dll",
+      "size": 159744,
+      "sha256": "18394849ccd89a5e2de848785de90088386b78d3a4a99e8bd96b817779123f12",
+      "mode": 493,
+      "format": "pe",
+      "architectures": [
+        "x86"
+      ]
+    },
+    {
+      "path": "x86/d3d12core.dll",
+      "size": 5922816,
+      "sha256": "c8b8c3ffe7474b22c73c93487fb06dbb0781c3d00a0d14cbaf977b14a6866b44",
+      "mode": 493,
+      "format": "pe",
+      "architectures": [
+        "x86"
+      ]
+    }
+  ],
+  "redistribution": "bundle"
+}
