@@ -424,33 +424,6 @@
         }
       },
       {
-        "id": "fsr4-sdk-headers",
-        "provider": "github",
-        "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-        "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-        "pin": {
-          "gitlink": "producers/package-support/src/external/fsr4-sdk-headers"
-        }
-      },
-      {
-        "id": "fsr4-sdk-model",
-        "provider": "github",
-        "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-        "repository": "GPUOpen-LibrariesAndSDKs/FidelityFX-SDK",
-        "pin": {
-          "gitlink": "producers/package-support/src/external/fsr4-sdk-model"
-        }
-      },
-      {
-        "id": "fsr4-int8",
-        "provider": "github",
-        "url": "https://github.com/int3rrobang/fsr4-int8-reverse-engineering",
-        "repository": "int3rrobang/fsr4-int8-reverse-engineering",
-        "pin": {
-          "gitlink": "producers/package-support/src/external/fsr4-int8"
-        }
-      },
-      {
         "id": "fsr4-lite2",
         "provider": "github",
         "url": "https://github.com/zgauthier2000/fsr4-shader-performance-overrides",

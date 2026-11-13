@@ -51,23 +51,14 @@
 	path = producers/package-support/src/external/fsr3-sdk
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK
 
-[submodule "producers/package-support/src/external/fsr4-int8"]
-	path = producers/package-support/src/external/fsr4-int8
-	url = https://github.com/int3rrobang/fsr4-int8-reverse-engineering
 
 [submodule "producers/package-support/src/external/fsr4-metal"]
 	path = producers/package-support/src/external/fsr4-metal
 	url = https://github.com/UzenUPoZiTiV4ik/fsr4-native-macos
 
 # FSR4 helper headers use their matching SDK snapshot alongside the separate model-weight input.
-[submodule "producers/package-support/src/external/fsr4-sdk-headers"]
-	path = producers/package-support/src/external/fsr4-sdk-headers
-	url = https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK
 
 # FSR4 model weights use the SDK snapshot that contains the selected model.
-[submodule "producers/package-support/src/external/fsr4-sdk-model"]
-	path = producers/package-support/src/external/fsr4-sdk-model
-	url = https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK
 
 [submodule "producers/package-support/src/external/gemrb"]
 	path = producers/package-support/src/external/gemrb

@@ -1,5 +1,6 @@
 import {sourceRevision} from '../../../lib/pins.mjs';
 import fs from "node:fs";
+import {fsr4SourceCommits} from "../src/modules/shared/reshade/temporal/fsr4/provenance.mjs";
 import path from "node:path";
 const safe=name=>typeof name==="string"&&!path.isAbsolute(name)&&!name.split(/[\\/]/).some(part=>!part||part==="."||part==="..");
 export function stageFSR4Provider({directory,upstream}){
@@ -20,5 +21,5 @@ export function stageFSR4Provider({directory,upstream}){
   files.set("provider.json",path.join(directory,"provider.json"));
   return {files:new Map([...files].map(([name,file])=>["temporal/fsr4/"+name,file])),owned,profiles:[...metadata.supportedProfiles],
     source:{directory:upstream,relative:"third_party/fsr4-native-macos",commit:revision},
-    pins:[` ${revision} third_party/fsr4-native-macos`,` ${sourceRevision(lite2)} third_party/fsr4-lite2-weights`,...['fsr4-sdk-headers','fsr4-sdk-model','fsr4-int8'].map((name,index)=>` ${sourceRevision({gitlink:'producers/package-support/src/external/'+name})} third_party/fsr4-input-${index+1}`)]};
+    pins:[` ${revision} third_party/fsr4-native-macos`,` ${sourceRevision(lite2)} third_party/fsr4-lite2-weights`,...fsr4SourceCommits(upstream).map((commit,index)=>` ${commit} third_party/fsr4-input-${index+1}`)]};
 }

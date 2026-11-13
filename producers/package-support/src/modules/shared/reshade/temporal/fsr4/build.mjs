@@ -1,6 +1,7 @@
 import {sourceRevision} from '../../../../../../../../lib/pins.mjs';
 const revision=sourceRevision({gitlink:'producers/package-support/src/external/fsr4-metal'});
 import {addLicenses} from '../../../../../../../../lib/licenses.mjs';
+import {fsr4SourceCommits} from './provenance.mjs';
 import {appPath} from '../../../../../../../../tools/app-source.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import {spawn} from 'node:child_process';
@@ -252,6 +253,7 @@ async function assemble() {
         sha256 : hash(await fs.readFile(file))
       });
   }
+  const sourceCommits = fsr4SourceCommits(source);
   await fs.writeFile(path.join(payload, 'provider.json'), JSON.stringify({
     repository : pin.repository,
     commit : revision,
@@ -261,8 +263,7 @@ async function assemble() {
     architectures : pin.architectures,
     sources : pin.sources.map((row, index) => ({
       ...row,
-      commit : sourceRevision({gitlink : 'producers/package-support/src/external/' +
-                                         [ 'fsr4-sdk-headers', 'fsr4-sdk-model', 'fsr4-int8' ][index]})
+      commit : sourceCommits[index]
     })),
     supportedProfiles : pin.supportedProfiles,
     profiles : pin.profiles,
