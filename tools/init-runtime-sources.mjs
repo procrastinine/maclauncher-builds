@@ -73,8 +73,9 @@ export function initializeToolSources({directory=root,run=runGit}={}){return ini
  * declared nested gitlinks when any project reads the app. */
 export function initializeMetadataSources({directory=root,run=runGit,state=sourceState()}={}){
  const projects=registry(directory),appProjects=projects.filter(readsApp);
- const named=projects.flatMap(project=>[...(project.producer?.entries||[]),...(project.upstreams||[]).flatMap(upstream=>typeof upstream.pin?.file==='string'?[upstream.pin.file]:[]),
+ const named=projects.flatMap(project=>[...(project.producer?.entries||[]),...(project.upstreams||[]).flatMap(upstream=>typeof upstream.pin?.file==='string'?[upstream.pin.file]:typeof upstream.pin?.gitlink==='string'?[upstream.pin.gitlink]:[]),
   ...(project.build?require('../lib/projects.mjs').buildRecords(project):[]).flatMap(build=>(build.archives||[]).map(pin=>pin.file))]);
+ // A gitlink pin inside a gitlink (Mesa in the KosmicKrisp source) needs the containing checkout, not its own.
  const holding=(superproject,prefix)=>gitlinks(superproject,run,state).map(link=>prefix+link).filter(link=>named.some(name=>name.startsWith(link+'/')));
  const initialized=[];
  // A gitlink inside an initialized gitlink is listed from that checkout, one level at a time.

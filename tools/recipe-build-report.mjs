@@ -141,7 +141,13 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
    if(Object.hasOwn(value,'commit')||Object.hasOwn(value,'gitlink')||typeof value.revision==='string'){
     const detail=sourceRecordProblem(value);
     if(detail)problem(from,pointer||'/',  'record',detail);
-    else if(value.gitlink&&!from.startsWith(APP_REFERENCE)){if(!gitlinks.some(link=>link.path===value.gitlink))problem(from,pointer||'/','record','The gitlink names no submodule of this repository.');else useLink(value.gitlink,from);}
+    else if(value.gitlink&&!from.startsWith(APP_REFERENCE)){
+     // A gitlink inside a pinned checkout (Mesa in the KosmicKrisp source) is read from that checkout.
+     const outer=linkOf(value.gitlink);
+     if(!outer)problem(from,pointer||'/','record','The gitlink names no submodule of this repository.');
+     else if(outer.path!==value.gitlink){try{gitlink(value.gitlink,root);useLink(value.gitlink,from);}catch{problem(from,pointer||'/','submodule','Initialize '+outer.path+' to read the gitlink '+value.gitlink+' inside it.');}}
+     else useLink(value.gitlink,from);
+    }
     else if(value.archive!==undefined&&typeof value.revision==='string'){
      if(!/^https:\/\/github\.com\/[^/]+\/[^/]+$/.test(String(value.repository).replace(/\.git$/,''))||!/^[a-f0-9]{64}$/.test(value.archive?.sha256||''))problem(from,pointer||'/','record','A source archive names a GitHub repository, its exact revision and the archive SHA-256.');
      else addArchive(sourceArchive(value));

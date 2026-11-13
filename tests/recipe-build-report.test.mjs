@@ -191,7 +191,8 @@ test('a source pinned by a gitlink inside a pinned checkout records that checkou
  const root=path.resolve(import.meta.dirname,'..'),outer='sources/maclauncher-kosmickrisp',inner=outer+'/sources/mesa';
  if(!fs.existsSync(path.join(root,outer,'.git')))return t.skip('KosmicKrisp source is not initialized');
  const recorded=execFileSync('git',['-C',path.join(root,outer),'rev-parse',execFileSync('git',['-C',root,'rev-parse','HEAD:'+outer],{encoding:'utf8'}).trim()+':sources/mesa'],{encoding:'utf8'}).trim();
- const definition=createRecipeBuildReporter({directory:root})('vulkan-kosmickrisp-gles32').definition;
+ const reporter=createRecipeBuildReporter({directory:root}),definition=reporter('vulkan-kosmickrisp-gles32').definition;
  const source=definition.sources.find(row=>row.pin?.gitlink===inner);
  assert.equal(source.gitlink,recorded);
+ assert.deepEqual(reporter.unresolved('vulkan-kosmickrisp-gles32'),[]);
 });
