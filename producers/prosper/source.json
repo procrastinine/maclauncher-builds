@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "prosper",
-  "version": "MCLv8",
+  "version": "MCLv9",
   "source": {
     "gitlink": "sources/prosper",
     "repository": "https://github.com/mattias800/prosper.git"

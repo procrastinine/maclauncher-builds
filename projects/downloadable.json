@@ -3090,10 +3090,14 @@
       {
         "version": "MCLv8",
         "label": "Prosper x86-64 MCLv8"
+      },
+      {
+        "version": "MCLv9",
+        "label": "Prosper x86-64 MCLv9"
       }
     ],
     "build": {
-      "version": "MCLv8",
+      "version": "MCLv9",
       "command": "tools/build-prosper.mjs",
       "architectures": [
         "x64"
