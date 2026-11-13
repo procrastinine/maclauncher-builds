@@ -61,8 +61,10 @@ int main() {
   for (const [id, method] of [["original", Page.ORIGINAL], ["adapted", Page.ADAPTED]]) {
     const source = path.join(root, id + ".cpp"), binary = path.join(root, id);
     fs.writeFileSync(source, prefix + method + suffix);
-    const result = spawnSync(compiler, ["-std=c++17", ...(process.platform === "darwin" ? ["-mmacosx-version-min=13.0"] : []), source, "-o", binary], { encoding: "utf8", timeout: 30000 });
-    assert.equal(result.status, 0, result.stderr);
+    // Source-check workers can share a compiler runner; compilation has its own allowance.
+    const result = spawnSync(compiler, ["-std=c++17", ...(process.platform === "darwin" ? ["-mmacosx-version-min=13.0"] : []), source, "-o", binary], { encoding: "utf8", timeout: 120000 });
+    assert.ifError(result.error);
+    assert.equal(result.status, 0, result.stderr || `C++ compiler ended with signal ${result.signal}`);
     // Fresh native executables can take several seconds to launch on macOS.
     const run = spawnSync(binary, [], { encoding: "utf8", timeout: 10000 });
     assert.ifError(run.error);
