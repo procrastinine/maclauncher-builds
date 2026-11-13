@@ -7,6 +7,46 @@
       "schemaVersion": 2,
       "id": "onsyuri",
       "version": "0.7.7beta-MCLv9",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "f056c7408c55d47f3280f5f0ef497c768dbe7f653b264714be4d2534f517d3ed",
+      "sourceSha256": "f056c7408c55d47f3280f5f0ef497c768dbe7f653b264714be4d2534f517d3ed",
+      "updatePolicy": "manual",
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0a43c3bbff81e88bb8945eea6e4282a61fd5e6f0"
+      },
+      "asset": {
+        "filename": "onsyuri-0.7.7beta-MCLv9-x64.tar.gz",
+        "sha256": "2e6a5dd6e767cf75c3ada9c9cf52e6c29db428a3cafd4dead98f49e9de8387dc",
+        "bytes": 4007682,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/onsyuri%2Fv0.7.7beta-MCLv9%2Fx64/onsyuri-0.7.7beta-MCLv9-x64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "0a43c3bbff81e88bb8945eea6e4282a61fd5e6f0",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "43329959279",
+        "runAttempt": "2",
+        "definitionDigest": "ce859ad989f17fa6e1ca979bebc9ec9cc19f6db6be818b49f88acaa1d040876c"
+      },
+      "tag": "onsyuri/v0.7.7beta-MCLv9/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "onsyuri",
+      "version": "0.7.7beta-MCLv9",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
