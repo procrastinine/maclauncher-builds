@@ -11,7 +11,11 @@ import {retryNetwork} from './download.mjs';
  *  and the compile reads that cache offline. Each lock is fetched from the lock alone, through a generated
  *  manifest that requires every locked package, so a recipe may compose its own manifest at compile time. */
 export const LOCK_TOOLS=['cargo','go','nuget','swiftpm'];
-export const lockCache=tool=>{if(!LOCK_TOOLS.includes(tool))throw Error('Unknown lock tool: '+tool);return path.join(os.tmpdir(),'maclauncher-build-locks',tool);};
+/** The lock caches persist per user. On macOS they live in the user's Caches folder: the daily temporary-folder cleanup deletes files
+ *  there that have not been read for three days and keeps directories and newer files, which leaves unpacked crates empty behind
+ *  cargo's completion markers. Elsewhere they live in the temporary folder. */
+export const lockRoot=(platform=process.platform)=>platform==='darwin'?path.join(os.homedir(),'Library','Caches','maclauncher-build-locks'):path.join(os.tmpdir(),'maclauncher-build-locks');
+export const lockCache=tool=>{if(!LOCK_TOOLS.includes(tool))throw Error('Unknown lock tool: '+tool);return path.join(lockRoot(),tool);};
 const execute=(command,args,options)=>execFileSync(command,args,{encoding:'utf8',stdio:['ignore','pipe','pipe'],maxBuffer:Infinity,timeout:1800000,...options});
 const digest=text=>crypto.createHash('sha256').update(text).digest('hex');
 const quote=value=>JSON.stringify(String(value));

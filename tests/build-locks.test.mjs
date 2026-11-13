@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import {cargoLockManifest,nugetLockProject,swiftResolvedPins,resolveLocks,lockCache,lockedEnvironment} from '../tools/build-locks.mjs';
+import {cargoLockManifest,nugetLockProject,swiftResolvedPins,resolveLocks,lockCache,lockRoot,lockedEnvironment} from '../tools/build-locks.mjs';
 import {buildRecord} from '../lib/projects.mjs';
 
 process.env.TMPDIR=fs.mkdtempSync(path.join(os.tmpdir(),'build-locks-'));
@@ -16,6 +16,17 @@ const cargoLock=checksum=>'version = 4\n\n[[package]]\nname = "app"\nversion = "
 const checkout=files=>{const directory=fs.mkdtempSync(path.join(os.tmpdir(),'lock-checkout-'));for(const [name,text] of Object.entries(files)){fs.mkdirSync(path.dirname(path.join(directory,name)),{recursive:true});fs.writeFileSync(path.join(directory,name),text);}return directory;};
 // The stand-in cargo stores each fetched crate where cargo's registry cache keeps it.
 const cargoRun=calls=>(command,args,options)=>{calls.push({command,args,env:options.env});const cache=path.join(options.env.CARGO_HOME,'registry/cache/index.crates.io-1949cf8c6b5b557f');fs.mkdirSync(cache,{recursive:true});fs.writeFileSync(path.join(cache,'serde-1.0.0.crate'),crate);return '';};
+
+// On macOS the lock caches live under the home folder; the suite gives them a home inside its temporary folder.
+process.env.HOME=fs.mkdtempSync(path.join(os.tmpdir(),'home-'));
+
+test('lock caches persist in the user Caches folder on macOS, outside the temporary folder the system cleans',()=>{
+ if(process.platform==='darwin'){
+  assert.equal(lockCache('cargo'),path.join(os.homedir(),'Library','Caches','maclauncher-build-locks','cargo'));
+  assert.notEqual(path.dirname(lockCache('cargo')),path.join(os.tmpdir(),'maclauncher-build-locks'));
+ }
+ assert.equal(lockRoot('linux'),path.join(os.tmpdir(),'maclauncher-build-locks'));
+});
 
 test('a declared Cargo.lock is fetched through a manifest requiring every locked registry and Git package',()=>{
  const manifest=cargoLockManifest(cargoLock(sha(crate)));
