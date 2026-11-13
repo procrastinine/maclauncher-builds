@@ -5,7 +5,7 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {readProjects,buildRecords,declaredRecipeEntries} from '../lib/projects.mjs';
 import {resolveUpstream,validatePinReference} from "../lib/source-pins.mjs";
-import {sourceRecordProblem,sourceArchive,archiveInput,lockValue} from '../lib/pins.mjs';
+import {gitlink,sourceRecordProblem,sourceArchive,archiveInput,lockValue} from '../lib/pins.mjs';
 import {APP_REFERENCE,appSourceRoot,appNestedFiles} from './app-source.mjs';
 import {canonicalReport,reportDigest} from '../lib/canonical-report.mjs';
 export {canonicalReport,reportDigest};
@@ -159,8 +159,10 @@ export function createRecipeBuildReporter({directory=path.resolve(import.meta.di
   for(const relative of [...appFiles.keys()])if(relative.endsWith('.js')){const found=nearestPackage(relative,name=>app().set.has(name));if(found)addApp(found,'node');}
   const sources=project.upstreams.map(upstream=>{
    // A gitlink pin is the upstream's own commit; a record inside a checkout is read through its pointer.
+   // A gitlink inside a pinned checkout (Mesa in the KosmicKrisp source) is the commit that checkout records.
    const link=upstream.pin?.gitlink&&linkOf(upstream.pin.gitlink);
-   if(link)return {...upstream,gitlink:link.revision};
+   if(link&&link.path===upstream.pin.gitlink)return {...upstream,gitlink:link.revision};
+   if(link){try{return {...upstream,gitlink:gitlink(upstream.pin.gitlink,root)};}catch{problem("projects",JSON.stringify(upstream.pin),"submodule","Initialize "+link.path+" to read the gitlink "+upstream.pin.gitlink+" inside it.");return {...upstream};}}
    // A pin the resolver already reported is not read.
    if(upstream.pin&&unresolved.some(row=>row.expression===JSON.stringify(upstream.pin)))return {...upstream};
    let resolved;try{resolved=resolveUpstream(upstream,root);}catch(error){problem("projects",JSON.stringify(upstream.pin??upstream.id),"pin",error.message);return {...upstream};}

@@ -186,3 +186,12 @@ test('every production definition excludes publication, catalog and planning fil
   for(const file of describe(project.id).definition.files)assert.doesNotMatch(file.path,/^tools\/(?:publication\/|publish-|plan-|dispatch-|catalog-|package-index|release-runtime|publication-authority)/,project.id+': '+file.path);
  }
 });
+
+test('a source pinned by a gitlink inside a pinned checkout records that checkout\'s commit for it',t=>{
+ const root=path.resolve(import.meta.dirname,'..'),outer='sources/maclauncher-kosmickrisp',inner=outer+'/sources/mesa';
+ if(!fs.existsSync(path.join(root,outer,'.git')))return t.skip('KosmicKrisp source is not initialized');
+ const recorded=execFileSync('git',['-C',path.join(root,outer),'rev-parse',execFileSync('git',['-C',root,'rev-parse','HEAD:'+outer],{encoding:'utf8'}).trim()+':sources/mesa'],{encoding:'utf8'}).trim();
+ const definition=createRecipeBuildReporter({directory:root})('vulkan-kosmickrisp-gles32').definition;
+ const source=definition.sources.find(row=>row.pin?.gitlink===inner);
+ assert.equal(source.gitlink,recorded);
+});
