@@ -95,7 +95,8 @@ export function prepareBuild({project:id,arch,version,directory=root,environment
  if(host.os==='linux')linuxToolSelection(build.tools||[]);
  const prepared=prepareBuildHost({build,label:runner,runner:host,rustToolchain:RUST_TOOLCHAIN,environment,...hostOptions});
  const env={...environment,...prepared.env,PATH:[...prepared.paths,environment.PATH].filter(Boolean).join(path.delimiter)};
- const {initialized}=initialize({project:project.id,version:build.version,directory,run:(args,cwd)=>execFileSync('git',args,{cwd,env,encoding:'utf8',stdio:['ignore','pipe','pipe'],maxBuffer:Infinity})});
+ // The initializer passes standard input to some reads (one cat-file --batch for a checkout's symlink targets).
+ const {initialized}=initialize({project:project.id,version:build.version,directory,run:(args,cwd,input)=>execFileSync('git',args,{cwd,env,encoding:'utf8',input,stdio:[input===undefined?'ignore':'pipe','pipe','pipe'],maxBuffer:Infinity})});
  // The declared package-manager locks are fetched here, into the caches the compile reads offline.
  const resolved=locks({project:project.id,locks:build.locks,directory,env});
  if(environment.GITHUB_ENV)fs.appendFileSync(environment.GITHUB_ENV,Object.entries(prepared.env).map(([key,value])=>key+'='+value+'\n').join(''));
