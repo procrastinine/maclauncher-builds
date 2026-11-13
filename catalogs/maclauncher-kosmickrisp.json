@@ -7,6 +7,46 @@
       "schemaVersion": 2,
       "id": "maclauncher-kosmickrisp",
       "version": "27.0.0-devel-MCLv13",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "26.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "c43e3b4e976eba64412bd6125ca402b2bee7254f31888f4a0819ed737a0a4374",
+      "sourceSha256": "c43e3b4e976eba64412bd6125ca402b2bee7254f31888f4a0819ed737a0a4374",
+      "updatePolicy": "manual",
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "8494b800b3c127e66c0ce1d86f8f6478187fe44f"
+      },
+      "asset": {
+        "filename": "maclauncher-kosmickrisp-27.0.0-devel-MCLv13-x64.tar.gz",
+        "sha256": "d724cce94cdb7b99f62bb2369f65a93e5ea4a0c97115c58c8e4a1f7b3ce0a31f",
+        "bytes": 4954243,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/maclauncher-kosmickrisp%2Fv27.0.0-devel-MCLv13%2Fx64/maclauncher-kosmickrisp-27.0.0-devel-MCLv13-x64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "8494b800b3c127e66c0ce1d86f8f6478187fe44f",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.2",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "43348284338",
+        "runAttempt": "1",
+        "definitionDigest": "278d8836722a380db7fbc3f660d00ec91cb8fe493b75ccd8eb979607d7460a1c"
+      },
+      "tag": "maclauncher-kosmickrisp/v27.0.0-devel-MCLv13/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "maclauncher-kosmickrisp",
+      "version": "27.0.0-devel-MCLv13",
       "arch": "arm64",
       "launcherArchitectures": [
         "arm64"
