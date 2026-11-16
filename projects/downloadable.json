@@ -3980,7 +3980,11 @@
         "producers/vkd3d-proton/ngx-trust.c",
         "producers/vkd3d-proton/ngx_camera.h",
         "producers/vkd3d-proton/ngx_streamline.cpp",
-        "producers/vkd3d-proton/streamline_camera.hpp"
+        "producers/vkd3d-proton/streamline_camera.hpp",
+        "producers/vkd3d-proton/ngx_scene_packet.h",
+        "producers/vkd3d-proton/streamline_scene.hpp",
+        "producers/vkd3d-proton/streamline_inputs.hpp",
+        "producers/vkd3d-proton/streamline_demand.hpp"
       ],
       "buildEntry": "producers/vkd3d-proton/build.mjs"
     },

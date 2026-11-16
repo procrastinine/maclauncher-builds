@@ -25,6 +25,7 @@
 #include "vkd3d_private.h"
 #include "vkd3d_metalfx.h"
 #include "vk_temporal_frame.h"
+#include "ngx_scene_packet.h"
 
 void d3d12_command_list_metalfx_record(struct d3d12_command_list *list, const void *scale,
         struct d3d12_resource **resources, unsigned int count);
@@ -131,6 +132,24 @@ static BOOL STDMETHODCALLTYPE d3d12_command_list_metalfx_SupportsDenoisedUpscale
     return vkd3d_metalfx_driver_has(impl_from_ID3D12GraphicsCommandListMetalFX(iface)->device, "temporal-rr");
 }
 
+/* Optional attachments can be wrapped COM resources even after a successful
+ * resource/device query in the core. Only native resources may enter the
+ * translator's impl_from helper; decline the attachment before that cast. */
+static ID3D12Resource *vkd3d_metalfx_scene_image(struct d3d12_command_list *list, ID3D12Resource *image)
+{
+    extern CONST_VTBL struct ID3D12Resource2Vtbl d3d12_resource_vtbl;
+    struct d3d12_resource *resource;
+
+    if (!image || (const void *)image->lpVtbl != (const void *)&d3d12_resource_vtbl)
+        return NULL;
+    resource = impl_from_ID3D12Resource(image);
+    if (resource->device != list->device || resource->desc.Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D
+            || resource->desc.DepthOrArraySize != 1 || resource->desc.SampleDesc.Count != 1
+            || !resource->format || !resource->res.vk_image)
+        return NULL;
+    return image;
+}
+
 /* Fills in the images and the feature's identity, and records the frame with the ids released since the last one.
  * Every image is a texture. The masks, when either is present, follow the frame in its pNext chain. */
 static HRESULT vkd3d_metalfx_record(struct d3d12_command_list *list, VkTemporalFrameInfoMVK *info,
@@ -214,6 +233,30 @@ static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_TemporalUpscale(ID3D
     images[TEMPORAL_MOTION] = desc->MotionVector;
     images[TEMPORAL_OUTPUT] = desc->Output;
     images[TEMPORAL_EXPOSURE] = desc->ExposureTexture;
+    /* A private packet is synchronous, versioned and bound to this exact
+     * command-list/descriptor tuple. Old callers keep their descriptor ABI.
+     * Consume once before validation, so a rejected packet cannot be reused. */
+    {
+        NgxScenePacketV1 packet;
+        UINT size = 0;
+        if (SUCCEEDED(vkd3d_get_private_data(&list->private_store, &ngx_scene_packet_guid, &size, NULL))
+                && size == sizeof(packet)
+                && SUCCEEDED(vkd3d_get_private_data(&list->private_store, &ngx_scene_packet_guid, &size, &packet))
+                && size == sizeof(packet) && packet.size == sizeof(packet) && packet.version == 1)
+        {
+            vkd3d_set_private_data(&list->private_store, &ngx_scene_packet_guid, 0, NULL, NULL, NULL);
+            if (ngx_scene_packet_matches(&packet, (uintptr_t)&list->ID3D12GraphicsCommandList_iface, desc))
+            {
+                if (packet.flags & NGX_SCENE_MATRICES)
+                {
+                    memcpy(info.worldToViewMatrix, packet.worldToView, sizeof(info.worldToViewMatrix));
+                    memcpy(info.viewToClipMatrix, packet.viewToClip, sizeof(info.viewToClipMatrix));
+                }
+                images[TEMPORAL_HUDLESS] = vkd3d_metalfx_scene_image(list, (ID3D12Resource *)(uintptr_t)packet.hudless);
+                images[TEMPORAL_UI] = vkd3d_metalfx_scene_image(list, (ID3D12Resource *)(uintptr_t)packet.ui);
+            }
+        }
+    }
     mask_images[0] = desc->ReactiveMask;
     mask_images[1] = desc->TransparencyMask;
     masks.reactiveX = desc->ReactiveX;

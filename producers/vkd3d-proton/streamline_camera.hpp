@@ -5,10 +5,33 @@
 #include <cmath>
 #include <cstdint>
 #include <initializer_list>
+#include <cstring>
+#include <utility>
 #include <sl_core_types.h>
 #include "ngx_camera.h"
 
 namespace ngx_streamline {
+struct SceneMatrices {
+  float worldToView[16]{}, viewToClip[16]{};
+};
+inline bool invert(const float *source, float *target) {
+  double rows[4][8]{};
+  for(unsigned r=0;r<4;++r)for(unsigned c=0;c<4;++c){const float value=source[r*4+c];if(!std::isfinite(value)||value==FLT_MAX)return false;rows[r][c]=value;rows[r][4+c]=r==c;}
+  for(unsigned c=0;c<4;++c){unsigned pivot=c;for(unsigned r=c+1;r<4;++r)if(std::abs(rows[r][c])>std::abs(rows[pivot][c]))pivot=r;if(std::abs(rows[pivot][c])<1e-12)return false;for(unsigned i=0;i<8;++i)std::swap(rows[c][i],rows[pivot][i]);const double scale=rows[c][c];for(double &value:rows[c])value/=scale;for(unsigned r=0;r<4;++r)if(r!=c){const double scale=rows[r][c];for(unsigned i=0;i<8;++i)rows[r][i]-=scale*rows[c][i];}}
+  for(unsigned r=0;r<4;++r)for(unsigned c=0;c<4;++c){target[r*4+c]=float(rows[r][4+c]);if(!std::isfinite(target[r*4+c]))return false;}return true;
+}
+// The SDK's row-vector camera-to-world basis (sl_matrix_helpers.h) supplies
+// the view transform. Copy the full unjittered projection exactly, including
+// valid shifted/orthographic projections that the scalar adapter declines.
+inline bool matrices(const sl::Constants &value, SceneMatrices &out) {
+  out={};if(value.structType!=sl::Constants::s_structType||value.structVersion<1||value.structVersion>2)return false;
+  const sl::float3 basis[]={value.cameraRight,value.cameraUp,value.cameraFwd};
+  for(unsigned i=0;i<3;++i){const float *a=&basis[i].x;double norm=0;for(unsigned c=0;c<3;++c){if(!std::isfinite(a[c])||a[c]==FLT_MAX)return false;norm+=double(a[c])*a[c];}if(std::abs(norm-1)>1e-3)return false;for(unsigned j=0;j<i;++j){const float*b=&basis[j].x;double dot=0;for(unsigned c=0;c<3;++c)dot+=double(a[c])*b[c];if(std::abs(dot)>1e-3)return false;}}
+  const float *position=&value.cameraPos.x;for(unsigned c=0;c<3;++c)if(!std::isfinite(position[c])||position[c]==FLT_MAX)return false;
+  float cameraToWorld[16]={basis[0].x,basis[0].y,basis[0].z,0,basis[1].x,basis[1].y,basis[1].z,0,basis[2].x,basis[2].y,basis[2].z,0,position[0],position[1],position[2],1},unused[16];
+  SceneMatrices next;if(!invert(cameraToWorld,next.worldToView)||!invert(&value.cameraViewToClip.row[0].x,unused))return false;
+  std::memcpy(next.viewToClip,&value.cameraViewToClip.row[0].x,sizeof(next.viewToClip));out=next;return true;
+}
 // Streamline's public matrices are unjittered, row-major view-to-clip matrices. Only perspective projections that the
 // near and far distances and vertical field of view describe are accepted: orthographic, oblique and shifted
 // projections are not, and an unspecified far plane only with an infinite perspective plane.
@@ -87,18 +110,18 @@ inline bool viewport(const sl::BaseStructure **inputs, uint32_t count, uint32_t 
 }
 
 // The cameras of recent frames and viewports, replaced oldest first.
-template <unsigned N> class CameraCache {
+template <unsigned N, class Value = RSTemporalCamera> class CameraCache {
   struct Entry {
     uint64_t age = 0;
     uint32_t frame = 0, viewport = 0;
     bool valid = false;
-    RSTemporalCamera value{};
+    Value value{};
   };
   Entry entries[N];
   uint64_t age = 0;
 
 public:
-  void remember(uint32_t frame, uint32_t viewport, const RSTemporalCamera *value) {
+  void remember(uint32_t frame, uint32_t viewport, const Value *value) {
     Entry *target = &entries[0];
     for (auto &entry : entries) {
       if (entry.age && entry.frame == frame && entry.viewport == viewport) {
@@ -108,9 +131,9 @@ public:
       if (entry.age < target->age)
         target = &entry;
     }
-    *target = {++age, frame, viewport, value != nullptr, value ? *value : RSTemporalCamera{}};
+    *target = {++age, frame, viewport, value != nullptr, value ? *value : Value{}};
   }
-  bool lookup(uint32_t frame, uint32_t viewport, RSTemporalCamera &value) const {
+  bool lookup(uint32_t frame, uint32_t viewport, Value &value) const {
     for (const auto &entry : entries)
       if (entry.age && entry.frame == frame && entry.viewport == viewport) {
         if (entry.valid)

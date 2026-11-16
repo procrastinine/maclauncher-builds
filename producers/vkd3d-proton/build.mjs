@@ -63,7 +63,7 @@ export function buildProvider({work,output,mingw,glslang,source=path.join(here,'
     run('git',['apply','--unsafe-paths','--directory='+exported,path.join(here,'raw-companion-range.patch')],{cwd:path.resolve(here,'../..')});
     run('git',['apply','--unsafe-paths','--directory='+exported,path.join(here,'metalfx.patch')],{cwd:path.resolve(here,'../..')});
     fs.copyFileSync(path.join(here,'metalfx.c'),path.join(exported,'libs/vkd3d/metalfx.c'));
-    for(const name of ['vkd3d_metalfx.h','vk_temporal_frame.h'])fs.copyFileSync(path.join(here,name),path.join(exported,'include/private',name));
+    for(const name of ['vkd3d_metalfx.h','vk_temporal_frame.h','ngx_scene_packet.h'])fs.copyFileSync(path.join(here,name),path.join(exported,'include/private',name));
     const cross=path.join(root,'cross.ini'),tool=name=>quote(path.join(mingw,name));
     fs.writeFileSync(cross,`[binaries]\nc = ${tool(prefix+'-clang')}\ncpp = ${tool(prefix+'-clang++')}\nar = ${tool('llvm-ar')}\nstrip = ${tool('llvm-strip')}\nwidl-mingw-tools-fallback = ${tool(prefix+'-widl')}\n[properties]\nneeds_exe_wrapper = true\n[host_machine]\nsystem = 'windows'\ncpu_family = '${architecture==='x64'?'x86_64':'x86'}'\ncpu = '${architecture==='x64'?'x86_64':'i686'}'\nendian = 'little'\n`);
     const env={...process.env,CFLAGS:'',CXXFLAGS:'',CPPFLAGS:'',LDFLAGS:'',GIT_CEILING_DIRECTORIES:root,PATH:providerPath({glslang,ninja,mingw})};

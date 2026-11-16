@@ -11,17 +11,38 @@
 #include <psapi.h>
 
 #include <cstring>
+#include <array>
+#include <atomic>
+#include <mutex>
+#include <memory>
+#include <d3d11.h>
+#include <d3d12.h>
+#include <wrl/client.h>
 
 #include <MinHook.h>
 #include <sl_core_api.h>
 
 #include "ngx_camera.h"
 #include "streamline_camera.hpp"
+#include "streamline_inputs.hpp"
+#include "vkd3d_metalfx.h"
+#include "streamline_scene.hpp"
+#include "streamline_demand.hpp"
 #include "common/lane.hpp"
 
 static_assert(sizeof(void *) == 8, "the NGX core is x64");
 
 namespace {
+using Microsoft::WRL::ComPtr;
+std::unique_ptr<ngx_streamline::SceneDemand> scene_demand;
+std::once_flag demand_once;
+void InitDemand(){std::call_once(demand_once,[]{scene_demand=std::make_unique<ngx_streamline::SceneDemand>();});}
+bool SceneActive()noexcept{return scene_demand&&scene_demand->active();}
+thread_local ngx::TemporalScene *selected_scene=nullptr;
+struct SceneScope {ngx::TemporalScene *previous=selected_scene;explicit SceneScope(ngx::TemporalScene *next){selected_scene=next;}~SceneScope(){selected_scene=previous;}};
+struct CameraScope {RSTemporalCamera previous;explicit CameraScope(const RSTemporalCamera *value):previous(ngx::ExchangeTemporalCamera(value)){}~CameraScope(){ngx::RestoreTemporalCamera(previous);}};
+
+using ngx_streamline::TagImage;using ngx_streamline::TagBatch;using ngx_streamline::SceneCache;using ngx_streamline::CaptureTags;
 using SetConstants = sl::Result (*)(const sl::Constants &, const sl::FrameToken &, const sl::ViewportHandle &);
 using EvaluateFeature = sl::Result (*)(sl::Feature, const sl::FrameToken &, const sl::BaseStructure **, uint32_t,
                                        sl::CommandBuffer *);
@@ -33,6 +54,9 @@ struct Slot {
   void *set_target = nullptr, *evaluate_target = nullptr;
   SetConstants set = nullptr;
   EvaluateFeature evaluate = nullptr;
+  void *tag_target=nullptr,*framed_target=nullptr;
+  PFun_slSetTag *tag=nullptr;PFun_slSetTagForFrame *framed=nullptr;
+  SceneCache scene;
 };
 Slot slots[kSlots];
 SRWLOCK install_lock = SRWLOCK_INIT;
@@ -40,22 +64,24 @@ SRWLOCK install_lock = SRWLOCK_INIT;
 ngx_streamline::CameraCache<128> cameras;
 SRWLOCK camera_lock = SRWLOCK_INIT;
 
-sl::Result Capture(SetConstants original, const sl::Constants &values, const sl::FrameToken &frame,
+sl::Result Capture(Slot &slot,SetConstants original, const sl::Constants &values, const sl::FrameToken &frame,
                    const sl::ViewportHandle &view) {
   const uint32_t frame_id = uint32_t(frame), view_id = uint32_t(view);
   RSTemporalCamera camera;
   const bool valid = ngx_streamline::camera(values, frame_id, view_id, camera);
+  const auto epoch=slot.scene.begin(SceneActive());const bool extra=epoch!=0;ngx_streamline::SceneMatrices matrices;bool matrix_valid=false;
+  if(extra)try{matrix_valid=ngx_streamline::matrices(values,matrices);}catch(...){}
   const sl::Result result = original(values, frame, view);
   AcquireSRWLockExclusive(&camera_lock);
   cameras.remember(frame_id, view_id, valid && result == sl::Result::eOk ? &camera : nullptr);
   ReleaseSRWLockExclusive(&camera_lock);
+  if(extra)try{slot.scene.begin(SceneActive());slot.scene.constants(frame_id,view_id,matrix_valid?&matrices:nullptr,result==sl::Result::eOk,epoch);}catch(...){}
   return result;
 }
 
-sl::Result Select(EvaluateFeature original, sl::Feature feature, const sl::FrameToken &frame,
+sl::Result Select(Slot &slot,EvaluateFeature original, sl::Feature feature, const sl::FrameToken &frame,
                   const sl::BaseStructure **inputs, uint32_t count, sl::CommandBuffer *commands) {
-  if (feature != sl::kFeatureDLSS)
-    return original(feature, frame, inputs, count, commands);
+  if (feature != sl::kFeatureDLSS){if(slot.scene.enabled(SceneActive()))try{slot.scene.discard(uint32_t(frame));}catch(...){}SceneScope none(nullptr);return original(feature, frame, inputs, count, commands);}
   uint32_t view_id = 0;
   RSTemporalCamera camera;
   bool valid = ngx_streamline::viewport(inputs, count, view_id);
@@ -64,22 +90,32 @@ sl::Result Select(EvaluateFeature original, sl::Feature feature, const sl::Frame
     valid = cameras.lookup(uint32_t(frame), view_id, camera);
     ReleaseSRWLockShared(&camera_lock);
   }
-  // nested evaluations restore their caller's camera
-  const RSTemporalCamera previous = ngx::ExchangeTemporalCamera(valid ? &camera : nullptr);
-  const sl::Result result = original(feature, frame, inputs, count, commands);
-  ngx::RestoreTemporalCamera(previous);
-  return result;
+  ngx::TemporalScene scene;std::array<TagImage,2> retained;
+  const auto epoch=slot.scene.begin(SceneActive());if(epoch)try{if(ngx_streamline::viewport(inputs,count,view_id)){
+    ngx_streamline::SceneMatrices full;bool has_matrices=false;retained=slot.scene.take(uint32_t(frame),view_id,full,has_matrices,commands);
+    scene.commands=commands;scene.captureOwner=&slot.scene;scene.captureEpoch=epoch;scene.packet.frameId=uint64_t(uint32_t(frame))+1;scene.packet.viewportId=view_id;
+    if(has_matrices){scene.packet.flags|=NGX_SCENE_MATRICES;std::memcpy(scene.packet.worldToView,full.worldToView,sizeof(full.worldToView));std::memcpy(scene.packet.viewToClip,full.viewToClip,sizeof(full.viewToClip));}
+    for(unsigned i=0;i<2;++i)scene.images[i]={retained[i].resource,retained[i].commands,retained[i].extent.left,retained[i].extent.top,retained[i].extent.width,retained[i].extent.height};
+  }else slot.scene.discard(uint32_t(frame));}catch(...){scene={};retained={};}
+  // Both scopes restore nested evaluations, including C++ exception exits.
+  CameraScope camera_scope(valid?&camera:nullptr);SceneScope scene_scope(scene.commands?&scene:nullptr);
+  return original(feature,frame,inputs,count,commands);
 }
 
 template <unsigned N>
 sl::Result SetConstantsHook(const sl::Constants &values, const sl::FrameToken &frame, const sl::ViewportHandle &view) {
-  return Capture(slots[N].set, values, frame, view);
+  return Capture(slots[N],slots[N].set, values, frame, view);
 }
 template <unsigned N>
 sl::Result EvaluateFeatureHook(sl::Feature feature, const sl::FrameToken &frame, const sl::BaseStructure **inputs,
                                uint32_t count, sl::CommandBuffer *commands) {
-  return Select(slots[N].evaluate, feature, frame, inputs, count, commands);
+  return Select(slots[N],slots[N].evaluate, feature, frame, inputs, count, commands);
 }
+void AttachDuringEvaluation(TagBatch batch,bool accepted){if(!selected_scene)return;if(!accepted||!batch.valid||batch.reset){selected_scene->images={};return;}for(unsigned i=0;i<2;++i)if(batch.images[i].supplied){const auto &image=batch.images[i];selected_scene->images[i]={image.resource,image.commands,image.extent.left,image.extent.top,image.extent.width,image.extent.height};}}
+template<unsigned N>sl::Result SetTagHook(const sl::ViewportHandle &view,const sl::ResourceTag *tags,uint32_t count,sl::CommandBuffer *commands){auto &slot=slots[N];const auto epoch=slot.scene.begin(SceneActive());if(!epoch||!commands)return slot.tag(view,tags,count,commands);const bool inline_scope=selected_scene&&selected_scene->captureOwner==&slot.scene&&selected_scene->commands==commands&&selected_scene->packet.viewportId==uint32_t(view);TagBatch batch;try{batch=CaptureTags(tags,count,commands,inline_scope);}catch(...){batch.valid=false;}const auto result=slot.tag(view,tags,count,commands);try{slot.scene.begin(SceneActive());if(slot.scene.current(epoch)){if(inline_scope)AttachDuringEvaluation(std::move(batch),result==sl::Result::eOk);else slot.scene.remember(false,0,uint32_t(view),std::move(batch),result==sl::Result::eOk,epoch);}}catch(...){}return result;}
+template<unsigned N>sl::Result SetTagForFrameHook(const sl::FrameToken &frame,const sl::ViewportHandle &view,const sl::ResourceTag *tags,uint32_t count,sl::CommandBuffer *commands){auto &slot=slots[N];const auto epoch=slot.scene.begin(SceneActive());if(!epoch)return slot.framed(frame,view,tags,count,commands);TagBatch batch;try{batch=CaptureTags(tags,count,commands);}catch(...){batch.valid=false;}const auto result=slot.framed(frame,view,tags,count,commands);try{slot.scene.begin(SceneActive());if(!slot.scene.current(epoch))return result;if(selected_scene&&selected_scene->captureOwner==&slot.scene&&selected_scene->packet.frameId==uint64_t(uint32_t(frame))+1&&selected_scene->packet.viewportId==uint32_t(view)&&(!commands||selected_scene->commands==commands))AttachDuringEvaluation(std::move(batch),result==sl::Result::eOk);else slot.scene.remember(true,uint32_t(frame),uint32_t(view),std::move(batch),result==sl::Result::eOk,epoch);}catch(...){}return result;}
+PFun_slSetTag *const tag_hooks[kSlots]={SetTagHook<0>,SetTagHook<1>,SetTagHook<2>,SetTagHook<3>};
+PFun_slSetTagForFrame *const framed_hooks[kSlots]={SetTagForFrameHook<0>,SetTagForFrameHook<1>,SetTagForFrameHook<2>,SetTagForFrameHook<3>};
 const SetConstants set_hooks[kSlots] = {SetConstantsHook<0>, SetConstantsHook<1>, SetConstantsHook<2>,
                                         SetConstantsHook<3>};
 const EvaluateFeature evaluate_hooks[kSlots] = {EvaluateFeatureHook<0>, EvaluateFeatureHook<1>,
@@ -97,6 +133,19 @@ bool Detoured(const void *target, const void *detour) {
   uint64_t address;
   std::memcpy(&address, relay + 6, sizeof(address));
   return relay[0] == 0xFF && relay[1] == 0x25 && address == uint64_t(uintptr_t(detour));
+}
+
+void HookTags(unsigned n,HMODULE module){
+  auto &slot=slots[n];
+  auto install=[&](const char *name,void *detour,void *&saved,void **original){
+    auto target=reinterpret_cast<void*>(GetProcAddress(module,name));if(!target)return;
+    if(saved==target&&Detoured(target,detour))return;
+    MH_RemoveHook(target);
+    if(MH_CreateHook(target,detour,original)!=MH_OK)return;
+    if(MH_EnableHook(target)!=MH_OK){MH_RemoveHook(target);return;}saved=target;
+  };
+  install("slSetTag",reinterpret_cast<void*>(tag_hooks[n]),slot.tag_target,reinterpret_cast<void**>(&slot.tag));
+  install("slSetTagForFrame",reinterpret_cast<void*>(framed_hooks[n]),slot.framed_target,reinterpret_cast<void**>(&slot.framed));
 }
 
 bool Hook(unsigned n, HMODULE module, void *set_target, void *evaluate_target) {
@@ -125,6 +174,7 @@ bool Hook(unsigned n, HMODULE module, void *set_target, void *evaluate_target) {
 } // namespace
 
 void ngx::HookStreamline() {
+  try{InitDemand();}catch(...){}
   AcquireSRWLockExclusive(&install_lock);
   // a new Streamline session starts with new frame tokens
   AcquireSRWLockExclusive(&camera_lock);
@@ -151,8 +201,9 @@ void ngx::HookStreamline() {
         current = Detoured(set_target, reinterpret_cast<void *>(set_hooks[s])) &&
                   Detoured(evaluate_target, reinterpret_cast<void *>(evaluate_hooks[s]));
       }
-    if (current)
+    if (current){HookTags(n,module);
       continue;
+    }
     for (unsigned s = 0; s < kSlots && n == kSlots; s++)
       if (!slots[s].module)
         n = s;
@@ -173,10 +224,14 @@ void ngx::HookStreamline() {
     }
     wchar_t name[MAX_PATH] = L"";
     GetModuleFileNameW(module, name, MAX_PATH);
-    if (Hook(n, module, set_target, evaluate_target))
+    if (Hook(n, module, set_target, evaluate_target)) {
+      {std::lock_guard guard(slots[n].scene.mutex);slots[n].scene.clear();}
+      HookTags(n,module);
       lane::log("info", "Streamline camera capture in %ls", name);
-    else
+    } else
       lane::log("err", "Streamline camera capture: could not hook %ls", name);
   }
   ReleaseSRWLockExclusive(&install_lock);
 }
+
+const ngx::TemporalScene *ngx::CurrentTemporalScene()noexcept{if(!SceneActive()||!selected_scene)return nullptr;return !selected_scene->captureOwner||static_cast<SceneCache*>(selected_scene->captureOwner)->current(selected_scene->captureEpoch)?selected_scene:nullptr;}
