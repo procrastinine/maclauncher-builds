@@ -35,7 +35,7 @@ export async function buildBoost({source,prefix,slice,cpu,work,env}){
  run(path.join(engine,'b2'),['--ignore-site-config','--user-config='+config,'--build-dir='+path.join(slice,'boost-build'),'--prefix='+prefix,'--layout=system','-j2','toolset=clang-rlvm','target-os=darwin','architecture='+(cpu==='arm64'?'arm':'x86'),'address-model=64','variant=release','link=static','threading=multi','cxxstd=14','cxxflags='+flags,'linkflags='+flags,...['filesystem','iostreams','program_options','serialization','thread','date_time'].map(name=>'--with-'+name),'install'],{cwd:exported,env});
 }
 function compilerArguments(args){return args.map(arg=>arg.startsWith('-DCMAKE_C_COMPILER=')?'-DCMAKE_C_COMPILER='+(process.env.CC||'/usr/bin/clang'):arg.startsWith('-DCMAKE_CXX_COMPILER=')?'-DCMAKE_CXX_COMPILER='+(process.env.CXX||'/usr/bin/clang++'):arg);}
-async function buildSlice({architecture,work,sources,engineSource}){
+export async function buildSlice({architecture,work,sources,engineSource}){
  const cpu=architecture==='x64'?'x86_64':'arm64',slice=path.join(work,architecture),prefix=path.join(slice,'prefix'),sdk=execFileSync('/usr/bin/xcrun',['--show-sdk-path'],{encoding:'utf8'}).trim();
  fs.mkdirSync(prefix,{recursive:true});const tools={cmake:findBuildTool('cmake'),ninja:findBuildTool('ninja')},pathMappings=[{from:work,to:'RLVM_BUILD'}],env=Fonts.buildEnvironment(prefix,sdk);
  const build=async(id,options=[])=>Fonts.buildProject({sourceRoot:sources[id],outputRoot:path.join(slice,id),prefix,sdk,tools,architecture,pathMappings,options,dependencies:{runBuildCommand:(tool,args,options)=>Source.runBuildCommand(tool,compilerArguments(args),options)}});
