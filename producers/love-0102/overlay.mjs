@@ -15,6 +15,7 @@ export function applyBuildOverlay({love,megasource,luaLibrary,luaInclude}){
  applySdlTimerDeclarationsOverlay({megasource});
  applySdlCocoaEventDeclarationsOverlay({megasource});
  applySdlCocoaMessageboxModeDeclarationsOverlay({megasource});
+ applySdlCocoaMouseDeclarationsOverlay({megasource});
  replace(path.join(megasource,'libs/physfs-2.0.3/CMakeLists.txt'),'SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} " -framework Carbon -framework IOKit")','SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} "-framework Carbon" "-framework IOKit")');
  replace(path.join(megasource,'libs/libtheora-1.1.1/CMakeLists.txt'),'\tadd_library(theora SHARED ${THEORA_SRC} lib/theora.def)','\tset(THEORA_SHARED_PLATFORM_SOURCES)\n\tif(WIN32)\n\t\tlist(APPEND THEORA_SHARED_PLATFORM_SOURCES lib/theora.def)\n\tendif()\n\tadd_library(theora SHARED ${THEORA_SRC} ${THEORA_SHARED_PLATFORM_SOURCES})');
 
@@ -123,4 +124,21 @@ export function applySdlCocoaMessageboxModeDeclarationsOverlay({megasource}){
  const modes=path.join(megasource,'libs/SDL2/src/video/cocoa/SDL_cocoamodes.m');
  replace(modes,'    const CGRect cgrect = CGDisplayBounds(cgdisplay);','    /* Preserve the constant display queries after the existing screen guard. */\n    {\n    const CGRect cgrect = CGDisplayBounds(cgdisplay);');
  replace(modes,'    return 0;\n}\n\nint\nCocoa_GetDisplayDPI','    return 0;\n    }\n}\n\nint\nCocoa_GetDisplayDPI');
+}
+
+/** Scope observed Cocoa mouse declarations without moving any initializer or call. */
+export function applySdlCocoaMouseDeclarationsOverlay({megasource}){
+ const file=path.join(megasource,'libs/SDL2/src/video/cocoa/SDL_cocoamouse.m');
+ replace(file,'    const CGPoint point = CGPointMake((float)x, (float)y);','    /* Preserve mouse initializers at their existing execution points. */\n    {\n    const CGPoint point = CGPointMake((float)x, (float)y);');
+ replace(file,'    return 0;\n}\n\nstatic void\nCocoa_WarpMouse(','    return 0;\n    }\n}\n\nstatic void\nCocoa_WarpMouse(');
+ replace(file,'    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;','    {\n    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;');
+ replace(file,'    CGError result;','    {\n    CGError result;');
+ replace(file,'    return 0;\n}\n\nstatic int\nCocoa_CaptureMouse','    return 0;\n    }\n    }\n}\n\nstatic int\nCocoa_CaptureMouse');
+ replace(file,'    Cocoa_InitMouseEventTap(mouse->driverdata);\n\n    SDL_MouseData *driverdata','    Cocoa_InitMouseEventTap(mouse->driverdata);\n\n    {\n    SDL_MouseData *driverdata');
+ replace(file,'    driverdata->lastMoveY = location.y;\n}\n\nvoid\nCocoa_HandleMouseEvent','    driverdata->lastMoveY = location.y;\n    }\n}\n\nvoid\nCocoa_HandleMouseEvent');
+ replace(file,'    SDL_Mouse *mouse = SDL_GetMouse();\n    SDL_MouseData *driverdata','    {\n    SDL_Mouse *mouse = SDL_GetMouse();\n    SDL_MouseData *driverdata');
+ replace(file,'    const SDL_bool seenWarp = driverdata->seenWarp;','    {\n    const SDL_bool seenWarp = driverdata->seenWarp;');
+ replace(file,'    driverdata->seenWarp = NO;\n\n    const NSPoint location','    driverdata->seenWarp = NO;\n\n    {\n    const NSPoint location');
+ replace(file,'    float deltaX = [event deltaX];','    {\n    float deltaX = [event deltaX];');
+ replace(file,'    SDL_SendMouseMotion(mouse->focus, mouse->mouseID, 1, (int)deltaX, (int)deltaY);\n}','    SDL_SendMouseMotion(mouse->focus, mouse->mouseID, 1, (int)deltaX, (int)deltaY);\n    }\n    }\n    }\n    }\n}');
 }
