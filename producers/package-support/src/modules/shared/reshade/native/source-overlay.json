@@ -1306,6 +1306,10 @@
     {
       "source": "app:src/modules/shared/reshade/native/temporal-frame-policy.hpp",
       "path": "src/temporal-frame-policy.hpp"
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/presentation-capture-policy.hpp",
+      "path": "src/presentation-capture-policy.hpp"
     }
   ]
 }
