@@ -51,7 +51,19 @@
       "core/libs/prx/libc/src/Process.cpp",
       "core/libs/prx/libc/src/HostErrno.cpp",
       "core/libs/prx/libc/src/FileAndHeap.cpp",
-      "core/libs/prx/libc/src/AllocatingStrings.cpp"
+      "core/libs/prx/libc/src/AllocatingStrings.cpp",
+      "core/libs/prx/libc/src/GuestArena.cpp",
+      "core/libs/prx/libc/src/HostEntropy.cpp",
+      "core/libs/prx/libc/src/RunReport.cpp",
+      "core/libs/prx/libc/src/GuestWriteWatch.cpp",
+      "core/libs/prx/libkernel/File/src/SharedMemory.cpp",
+      "core/libs/prx/libkernel/Socket/src/Socket.cpp",
+      "core/libs/prx/libkernel/Equeue/src/Kqueue.cpp",
+      "core/libs/prx/libkernel/Equeue/Equeue.cpp",
+      "core/libs/prx/libkernel/DirectMemory/Jit.cpp",
+      "core/libs/prx/libkernel/Socket/src/Udp.cpp",
+      "core/libs/prx/libkernel/Socket/src/SocketOptions.cpp",
+      "core/libs/prx/libc/src/PreciseWait.cpp"
     ],
     "runtimeOverlays": [
       ["macos-host-kernel", "applyHostKernelOverlay"],

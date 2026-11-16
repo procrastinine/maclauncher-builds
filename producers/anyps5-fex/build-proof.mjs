@@ -125,7 +125,7 @@ const objects=recipe.anyps5.objects.map(source=>{
  const object=path.join(options.out,'objects',source.replace(/\.cpp$/,'.arm64.o'));
  fs.mkdirSync(path.dirname(object),{recursive:true});
  run('clang++',['-std=c++20','-arch','arm64','-O2','-c','-I',path.join(options.out,'anyps5/core/libs'),'-I',path.join(options.out,'anyps5/3rdparty/ZArchive/include'),
-  path.join(options.out,'anyps5',source),'-o',object]);
+  '-I',path.join(options.out,'anyps5/core/libs/nid/include'),path.join(options.out,'anyps5',source),'-o',object]);
  return object;
 });
 // One thunk translation unit per source, plus the part and data tables (generate-thunks.py prints the files).
@@ -149,6 +149,17 @@ process.stdout.write(proof+'\n'+abi+' '+guestText+' '+guestOffsets.join(' ')+'\n
  const usage=spawnSync(start,[],{encoding:'utf8',timeout:20000});
  if(usage.status!==2)throw Error(path.basename(start)+' did not reach main (status '+usage.status+', signal '+usage.signal+
   '): a static initializer called a symbol the proof does not link; see the crash report for the initializer.');
+}
+// Every link stub that an AnyPS5 export reaches through direct calls, with one call path each, in reachable-stubs.txt.
+if(fs.existsSync(path.join(options.out,'anyps5-unreached-exports.s'))){
+ const exports=objects.flatMap(object=>execFileSync('nm',['-gU','-j',object],{encoding:'utf8'}).split('\n')).filter(symbol=>symbol.endsWith('_nid_postfix'));
+ const roots=path.join(options.out,'reachable-roots.txt'),report=path.join(options.out,'reachable-stubs.txt');
+ fs.writeFileSync(roots,[...new Set(exports)].join('\n')+'\n');
+ const reach=spawnSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,'reachable-stubs.py'),start,
+  path.join(options.out,'anyps5-unreached-exports.s'),'@'+roots],{encoding:'utf8',maxBuffer:Infinity});
+ if(reach.status!==0)throw Error('reachable-stubs.py failed: '+reach.stderr);
+ fs.writeFileSync(report,reach.stdout);
+ process.stdout.write(reach.stderr.trim().split('\n').pop()+'; see '+report+'\n');
 }
 if(options.check){
  const [eboot,functionAddress,slot,bss,main]=options.check;

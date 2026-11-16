@@ -22,6 +22,8 @@ for symbol in undefined:
     if symbol not in wanted and readable not in wanted:
         continue
     body = 'ret' if symbol.startswith('_Register') else 'brk #0xf00d'
-    lines += ['.globl ' + symbol, '.p2align 2', symbol + ':', '  ' + body]
+    # Weak, so a target that links the real definition (Nid::Sha1 in the start host, say) uses that one, and private to
+    # the image, so calls bind at link time instead of through dyld's symbol stubs.
+    lines += ['.globl ' + symbol, '.private_extern ' + symbol, '.weak_definition ' + symbol, '.p2align 2', symbol + ':', '  ' + body]
 open(out, 'w').write('\n'.join(lines) + '\n')
-print(len(lines) // 4 if len(lines) > 1 else 0, 'symbols')
+print((len(lines) - 1) // 6, 'symbols')
