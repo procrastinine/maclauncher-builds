@@ -48,3 +48,34 @@ storage. Native Darwin FILE objects are not guest FILE objects.
 arm64 Mach-O libraries are unsigned before NID rewriting and signed ad hoc
 afterward. Their export lists retain the selected libc exports. The arm64
 unwind selection keeps native compact unwind information.
+
+## Guest contexts and nonlocal transfers
+
+`contexts.mjs` keeps the existing user-context validation and provides arm64
+entries for `getcontext`, `setcontext`, `swapcontext`, `setjmp`, `_setjmp`,
+`longjmp`, `_longjmp`, `sigsetjmp` and `siglongjmp`. The x86_64 implementations
+remain unchanged.
+
+`GuestContextInstallHost_nid_no_patch` copies the two required register capture
+and restore callbacks into libc. `GuestContext::RegisterFrame` has the existing
+AnyPS5 layout: twenty 64-bit general/control register fields followed by a
+512-byte FXSAVE64 image, aligned to 16 bytes. Capture reads the current guest
+thread's state. Capture of a guest call saves its return address from the guest
+stack and advances the saved stack pointer by eight bytes.
+
+Restore follows the existing x86 implementation: CS and SS stay current, and
+only RFLAGS bits in `0x254dd5` change. The legacy FXSAVE image does not replace
+upper YMM state. The host must supply the guest's defined floating-point state;
+native arm64 registers and fixed default values cannot stand in for it.
+
+After committing a restored frame, the library throws
+`GuestContext::Transfer`, carrying the destination instruction and stack
+pointers. The translation host catches this control transfer before writing an
+ordinary call result or popping a return address. A transfer across nested
+native callbacks belongs to the matching guest continuation. Other C++
+exceptions retain their normal handling.
+
+The jump-buffer layouts retain their existing distinctions: `setjmp` saves
+MXCSR and the x87 control word, `_longjmp` preserves current MXCSR status bits,
+and signal jumps save the x87 control word and optional signal mask in their
+original fields.

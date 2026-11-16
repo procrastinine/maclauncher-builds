@@ -2,6 +2,8 @@
 // ARM64 build/signing adaptations from AnyTogether/AnyPS5-ARM; see origin.json.
 import fs from 'node:fs';
 import path from 'node:path';
+import {applyArm64ContextsOverlay} from './contexts.mjs';
+export {copyArm64GuestContextSources} from './contexts.mjs';
 
 function replace(source, before, after, file) {
     if (source.indexOf(before) < 0 || source.indexOf(before) !== source.lastIndexOf(before)) {
@@ -89,6 +91,7 @@ export function applyArm64LibrariesOverlay(root) {
             'FileStream* __stdinp_nid_postfix = &input;\nFileStream* __stdoutp_nid_postfix = &_Stdout_nid_postfix;\nFileStream* __stderrp_nid_postfix = &_Stderr_nid_postfix;\n', '', file);
     });
     edit(libc + 'CMakeLists.txt', source => source + '\ntarget_sources(libc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/StandardStreamObjects.cpp)\n');
+    applyArm64ContextsOverlay(root);
     edit('core/libs/prx/libc/src/AtomicBuiltins.cpp', (source, file) => {
         source = replace(source,
         'bool CompareExchange16(Uint128* target, Uint128& expected, Uint128 desired) {',
