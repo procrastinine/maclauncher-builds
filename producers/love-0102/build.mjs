@@ -7,6 +7,8 @@ import {createRequire} from 'node:module';
 const Native=createRequire(import.meta.url)('../package-support/scripts/native-binary-tools.cjs');
 import {applyBuildOverlay} from './overlay.mjs';
 const here=import.meta.dirname;
+// Match the publisher's declared macOS closure rather than optional host libraries.
+export const nativeProfileOptions=['-DWITH_HarfBuzz=OFF','-DALSOFT_BACKEND_PORTAUDIO=OFF','-DALSOFT_BACKEND_COREAUDIO=ON'];
 export const sources=JSON.parse(fs.readFileSync(path.join(here,'sources.json')));
 const digest=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const run=(program,args,options={})=>execFileSync(program,args,{stdio:'inherit',...options});
@@ -32,7 +34,7 @@ export function compile({work,prepared,architectures=['arm64','x86_64'],cc=proce
   run('/usr/bin/make',['-C',roots.luajit,'-j'+jobs,'BUILDMODE=dynamic','CC='+cc,'HOST_CC='+cc,'TARGET_FLAGS=-arch '+arch+' -isysroot '+sdk+' -mmacosx-version-min=12.0','XCFLAGS='+maps],{env:{...process.env,MACOSX_DEPLOYMENT_TARGET:'12.0'}});
   const luaLibrary=path.join(roots.luajit,'src/libluajit.so');if(!fs.existsSync(luaLibrary))throw Error('LuaJIT build did not produce its dynamic library.');
   applyBuildOverlay({love:roots.love,megasource:roots.megasource,luaLibrary,luaInclude:path.join(roots.luajit,'src')});
-  const build=path.join(slice,'build'),options=['-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DCMAKE_C_COMPILER='+cc,'-DCMAKE_CXX_COMPILER='+cxx,'-DCMAKE_OSX_ARCHITECTURES='+arch,'-DCMAKE_OSX_DEPLOYMENT_TARGET=12.0','-DCMAKE_OSX_SYSROOT='+sdk,'-DCMAKE_POLICY_VERSION_MINIMUM=3.5','-DCMAKE_POSITION_INDEPENDENT_CODE=ON','-DCMAKE_C_FLAGS='+maps,'-DCMAKE_CXX_FLAGS='+maps,'-DBUILD_SHARED_LIBS=ON','-DMEGA_LOVE='+roots.love,'-DLOVE_JIT=ON','-DOGG_BUILD_SHARED=ON','-DVORBIS_BUILD_SHARED=ON','-DVORBISFILE_BUILD_SHARED=ON','-DTHEORA_BUILD_SHARED=ON','-DMODPLUG_BUILD_SHARED=ON','-DPHYSFS_BUILD_SHARED=ON','-DSDL_SHARED=ON','-DSDL_STATIC=OFF','-DSDL_TEST=OFF','-DSDL_X11=OFF','-DALSOFT_EXAMPLES=OFF','-DALSOFT_UTILS=OFF','-DALSOFT_TESTS=OFF'];
+  const build=path.join(slice,'build'),options=[...nativeProfileOptions,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DCMAKE_C_COMPILER='+cc,'-DCMAKE_CXX_COMPILER='+cxx,'-DCMAKE_OSX_ARCHITECTURES='+arch,'-DCMAKE_OSX_DEPLOYMENT_TARGET=12.0','-DCMAKE_OSX_SYSROOT='+sdk,'-DCMAKE_POLICY_VERSION_MINIMUM=3.5','-DCMAKE_POSITION_INDEPENDENT_CODE=ON','-DCMAKE_C_FLAGS='+maps,'-DCMAKE_CXX_FLAGS='+maps,'-DBUILD_SHARED_LIBS=ON','-DMEGA_LOVE='+roots.love,'-DLOVE_JIT=ON','-DOGG_BUILD_SHARED=ON','-DVORBIS_BUILD_SHARED=ON','-DVORBISFILE_BUILD_SHARED=ON','-DTHEORA_BUILD_SHARED=ON','-DMODPLUG_BUILD_SHARED=ON','-DPHYSFS_BUILD_SHARED=ON','-DSDL_SHARED=ON','-DSDL_STATIC=OFF','-DSDL_TEST=OFF','-DSDL_X11=OFF','-DALSOFT_EXAMPLES=OFF','-DALSOFT_UTILS=OFF','-DALSOFT_TESTS=OFF'];
   run('cmake',['-S',roots.megasource,'-B',build,...options]);
   run('cmake',['--build',build,'--target','love','--parallel',String(jobs)]);
   const outputs=fs.readFileSync(path.join(build,'love-outputs.txt'),'utf8').trim().split(/\r?\n/);for(const file of outputs)if(!fs.existsSync(file))throw Error('Declared compiled output missing: '+file);
@@ -47,14 +49,14 @@ export async function assemble({compiled,output,version='0.10.2-MCLv1'}){
  if(compiled.slices.length!==2||new Set(compiled.slices.map(s=>s.architecture)).size!==2)throw Error('Both native slices are required for the universal package.');
  const payload=path.join(output,'payload'),bundle=path.join(payload,'love.app'),frameworks=path.join(bundle,'Contents/Frameworks'),macos=path.join(bundle,'Contents/MacOS');
  if(fs.existsSync(payload))throw Error('Payload output already exists.');fs.mkdirSync(frameworks,{recursive:true});fs.mkdirSync(macos,{recursive:true});
- const first=compiled.slices[0],binaries=[],aliases=new Map();
+ const first=compiled.slices[0],binaries=[],aliases=new Map(),copiedFrameworks=new Set();
  let minimumMacOS='12.0';
  for(let i=0;i<first.outputs.length;i++){
   const input=first.outputs[i];let target;
   if(i===0)target=path.join(macos,'love');else{
    const marker=input.indexOf('.framework/');if(marker<0)throw Error('External native output is not a framework.');
    const start=input.lastIndexOf('/',marker)+1,frameworkRoot=input.slice(0,marker+10),name=path.basename(frameworkRoot);
-   fs.cpSync(frameworkRoot,path.join(frameworks,name),{recursive:true,verbatimSymlinks:true});target=path.join(frameworks,input.slice(start));
+   if(!copiedFrameworks.has(frameworkRoot)){fs.cpSync(frameworkRoot,path.join(frameworks,name),{recursive:true,verbatimSymlinks:true});copiedFrameworks.add(frameworkRoot);}target=path.join(frameworks,input.slice(start));
   }
   const slices=compiled.slices.map(s=>s.outputs[i]);run('/usr/bin/lipo',['-create',...slices,'-output',target]);
   binaries.push(target);for(const file of slices){aliases.set(file,target);for(const id of Native.libraryIds(file))aliases.set(id,target);}
