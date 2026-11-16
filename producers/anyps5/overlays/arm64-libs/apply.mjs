@@ -34,6 +34,13 @@ export function applyArm64LibrariesOverlay(root) {
     };
     edit('CMakeLists.txt', (source, file) => {
         source = replace(source,
+            '    set(CMAKE_APPLE_SILICON_PROCESSOR x86_64 CACHE STRING "Host processor CMake reports on Apple silicon")',
+            '    if(ANYPS5_ARM64_LIBS)\n' +
+            '        set(CMAKE_APPLE_SILICON_PROCESSOR arm64)\n' +
+            '    else()\n' +
+            '        set(CMAKE_APPLE_SILICON_PROCESSOR x86_64 CACHE STRING "Host processor CMake reports on Apple silicon")\n' +
+            '    endif()', file);
+        source = replace(source,
             'if(APPLE AND NOT CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")',
             'option(ANYPS5_ARM64_LIBS "Build PS5 libraries for an arm64 translation host" OFF)\n' +
             'if(ANYPS5_ARM64_LIBS AND (NOT APPLE OR NOT CMAKE_OSX_ARCHITECTURES STREQUAL "arm64"))\n' +
