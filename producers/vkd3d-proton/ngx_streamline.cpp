@@ -255,6 +255,14 @@ void LateTags(const sl::ResourceTag *tags, uint32_t count, sl::CommandBuffer *co
     if (!direct_evaluated.load(std::memory_order_acquire)) { ReportLateTag(2, "no direct evaluation yet"); return; }
     std::call_once(late_once, [] { late_file = std::make_unique<ngx_late_camera::File>(); });
     if (!late_file->get()) { ReportLateTag(3, "no enabled late camera channel"); return; }
+    // One declaration per buffer type, including empty/reset resources. Distinguishes real images from a tag pointer.
+    static std::atomic<uint64_t> seenTypes{0};
+    if (tags && count<=256) for (uint32_t i=0;i<count;++i) {
+      const auto &tag=tags[i];if(tag.structType!=sl::ResourceTag::s_structType||tag.structVersion!=1||tag.type>=64)continue;
+      const uint64_t bit=uint64_t(1)<<tag.type;if(seenTypes.fetch_or(bit)&bit)continue;
+      const auto *r=tag.resource;
+      Report("Late tag declaration: type %u lifecycle %u resource-version %u native %s zero-metadata %s command-list yes", unsigned(tag.type), unsigned(tag.lifecycle),r?unsigned(r->structVersion):0,r&&r->native?"present":"none",r&&!r->next&&r->structType==sl::StructType{}&&!r->structVersion?"yes":"no");
+    }
     // The late scene copies these images inline, before this tag hook returns to the caller.
     const TagBatch batch = CaptureTags(tags, count, commands, true, true);
     if (!batch.valid || batch.reset || (!batch.images[0].resource && !batch.images[1].resource)) {

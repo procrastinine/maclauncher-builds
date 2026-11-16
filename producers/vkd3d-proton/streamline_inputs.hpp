@@ -51,7 +51,12 @@ inline TagBatch CaptureTags(const sl::ResourceTag *tags,uint32_t count,void *com
     if(!allow_present&&(tag.lifecycle!=sl::eValidUntilEvaluate||!commands))continue;
     if(tag.lifecycle==sl::eValidUntilEvaluate&&!commands)continue;
     auto extension=tag.next;unsigned links=0;bool precision=true;while(extension&&links++<32){if(extension->structType==sl::PrecisionInfo::s_structType){auto p=static_cast<const sl::PrecisionInfo*>(extension);precision&=p->structVersion==1&&p->conversionFormula==sl::PrecisionInfo::eNoTransform;}else precision=false;extension=extension->next;}if(extension||!precision)continue;
-    const auto &resource=*tag.resource;if(resource.structType!=sl::Resource::s_structType||resource.structVersion!=1||resource.type!=sl::ResourceType::eTex2d||!resource.native)continue;
+    const auto &resource=*tag.resource;
+    // Streamline 2.2.1 consumes Resource's native field even when its metadata prefix is zeroed by the producer.
+    // Keep the declared Resource layout; only typed inline D3D12 intake accepts this exact metadata shape.
+    const bool versioned=resource.structType==sl::Resource::s_structType&&resource.structVersion==1;
+    const bool zeroMetadata=immediate&&commands&&!resource.next&&resource.structType==sl::StructType{}&&!resource.structVersion;
+    if((!versioned&&!zeroMetadata)||resource.type!=sl::ResourceType::eTex2d||!resource.native)continue;
     // These two lifecycles guarantee the borrowed input through the next
     // evaluation. Do not cast or AddRef an API-ambiguous native handle here.
     // Typed NGX dispatch validates it synchronously inside that evaluation.

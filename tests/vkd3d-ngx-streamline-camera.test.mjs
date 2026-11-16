@@ -253,11 +253,20 @@ test('immediate late tags retain valid-now inputs and reject another frame or vi
 #include <cassert>
 int main(){using namespace ngx_streamline;
  sl::Resource resource(sl::ResourceType::eTex2d,reinterpret_cast<void*>(0x1234));
+ assert(sizeof(sl::ResourceTag)==64 && sizeof(sl::Resource)==112);
+ assert(reinterpret_cast<const char*>(&resource.native)-reinterpret_cast<const char*>(&resource)==40);
+ assert(reinterpret_cast<const char*>(&resource.reserved)-reinterpret_cast<const char*>(&resource)==104);
  sl::ResourceTag tag(&resource,sl::kBufferTypeHUDLessColor,sl::eOnlyValidNow);
  void* commands=reinterpret_cast<void*>(0x5678);
  assert(!CaptureTags(&tag,1,commands).images[0].resource);
  assert(CaptureTags(&tag,1,commands,true,true).images[0].resource==resource.native);
  assert(!CaptureTags(&tag,1,nullptr,true,true).images[0].resource);
+ resource.structType={};resource.structVersion=0;
+ assert(CaptureTags(&tag,1,commands,true,true).images[0].resource==resource.native);
+ assert(!CaptureTags(&tag,1,commands).images[0].resource);
+ resource.structType.data1=1;assert(!CaptureTags(&tag,1,commands,true,true).images[0].resource);
+ resource.structType={};resource.structVersion=2;assert(!CaptureTags(&tag,1,commands,true,true).images[0].resource);
+ resource.structType=sl::Resource::s_structType;resource.structVersion=1;
  tag.lifecycle=sl::eValidUntilPresent;assert(CaptureTags(&tag,1,commands,true,true).images[0].resource==resource.native);
  tag.lifecycle=sl::eValidUntilEvaluate;assert(CaptureTags(&tag,1,commands).images[0].resource==resource.native);
  tag.lifecycle=static_cast<sl::ResourceLifecycle>(99);assert(!CaptureTags(&tag,1,commands,true,true).images[0].resource);
