@@ -3157,7 +3157,8 @@
         "src/modules/shared/reshade/temporal/frame.h",
         "src/modules/shared/reshade/temporal/scene-aovs.h",
         "src/modules/shared/reshade/temporal/scene-matrices.h",
-        "src/modules/shared/vulkan/native/scene-interop.h"
+        "src/modules/shared/vulkan/native/scene-interop.h",
+        "src/modules/shared/reshade/native/generation-provider.h"
       ]
     },
     "upstreams": [],

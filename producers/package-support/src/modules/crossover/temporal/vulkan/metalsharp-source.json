@@ -57,7 +57,8 @@
     "reshade/temporal/frame.h",
     "reshade/temporal/scene-aovs.h",
     "reshade/temporal/scene-matrices.h",
-    "reshade/native/image-color.h"
+    "reshade/native/image-color.h",
+    "reshade/native/generation-provider.h"
   ],
   "ownedFiles": [
     "source.json",
