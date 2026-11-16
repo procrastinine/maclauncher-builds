@@ -18,6 +18,7 @@ include(${CMAKE_CURRENT_BINARY_DIR}/upstream-sources.cmake)
 include_directories(${RLVM_SOURCE}/src ${RLVM_SOURCE}/vendor ${CMAKE_CURRENT_BINARY_DIR}
  ${SDL_INCLUDE_DIR} ${SDL_INCLUDE_DIR}/SDL ${INTL_INCLUDE_DIR}
  ${RLVM_SOURCE}/vendor/SDL_image/include ${RLVM_SOURCE}/vendor/SDL_mixer/include
+ ${RLVM_SOURCE}/vendor/SDL_image/include/SDL ${RLVM_SOURCE}/vendor/SDL_mixer/include/SDL
  ${RLVM_SOURCE}/vendor/SDL_ttf/include ${RLVM_SOURCE}/vendor/GLEW/include
  ${RLVM_SOURCE}/vendor/guichan/include ${RLVM_SOURCE}/vendor/SDL_mixer/src)
 add_compile_definitions(HAVE_CONFIG_H ENABLE_NLS CASE_SENSITIVE_FILESYSTEM _THREAD_SAFE
