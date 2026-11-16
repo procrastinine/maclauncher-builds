@@ -13,6 +13,7 @@ export function applyBuildOverlay({love,megasource,luaLibrary,luaInclude}){
  applySdlArm64SpinlockOverlay({megasource});
  applySdlCoreaudioDeclarationsOverlay({megasource});
  applySdlTimerDeclarationsOverlay({megasource});
+ applySdlCocoaEventDeclarationsOverlay({megasource});
  replace(path.join(megasource,'libs/physfs-2.0.3/CMakeLists.txt'),'SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} " -framework Carbon -framework IOKit")','SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} "-framework Carbon" "-framework IOKit")');
  replace(path.join(megasource,'libs/libtheora-1.1.1/CMakeLists.txt'),'\tadd_library(theora SHARED ${THEORA_SRC} lib/theora.def)','\tset(THEORA_SHARED_PLATFORM_SOURCES)\n\tif(WIN32)\n\t\tlist(APPEND THEORA_SHARED_PLATFORM_SOURCES lib/theora.def)\n\tendif()\n\tadd_library(theora SHARED ${THEORA_SRC} ${THEORA_SHARED_PLATFORM_SOURCES})');
 
@@ -86,4 +87,26 @@ export function applySdlTimerDeclarationsOverlay({megasource}){
  const file=path.join(megasource,'libs/SDL2/src/timer/unix/SDL_systimer.c');
  replace(file,'SDL_TicksInit(void)\n{\n    if (ticks_started) {','SDL_TicksInit(void)\n{\n#if !HAVE_CLOCK_GETTIME && defined(__APPLE__)\n    /* Keep the Mach result declaration before statements. */\n    kern_return_t ret;\n#endif\n    if (ticks_started) {');
  replace(file,'    kern_return_t ret = mach_timebase_info(&mach_base_info);','    ret = mach_timebase_info(&mach_base_info);');
+}
+
+/** Keep Cocoa event and keyboard initializers at their original observable execution points. */
+export function applySdlCocoaEventDeclarationsOverlay({megasource}){
+ const events=path.join(megasource,'libs/SDL2/src/video/cocoa/SDL_cocoaevents.m');
+ replace(events,'- (void)focusSomeWindow:(NSNotification *)aNotification\n{','- (void)focusSomeWindow:(NSNotification *)aNotification\n{\n    /* Declarations precede statements; initialization remains below the guard. */\n    SDL_VideoDevice *device;');
+ replace(events,'    SDL_VideoDevice *device = SDL_GetVideoDevice();','    device = SDL_GetVideoDevice();');
+ replace(events,'    if (NSApp == nil) {\n        [SDLApplication sharedApplication];','    if (NSApp == nil) {\n        NSDictionary *appDefaults;\n        [SDLApplication sharedApplication];');
+ replace(events,'        NSDictionary *appDefaults = [[NSDictionary alloc] initWithObjectsAndKeys:','        appDefaults = [[NSDictionary alloc] initWithObjectsAndKeys:');
+ const keyboard=path.join(megasource,'libs/SDL2/src/video/cocoa/SDL_cocoakeyboard.m');
+ replace(keyboard,'HIDCallback(void *context, IOReturn result, void *sender, IOHIDValueRef value)\n{','HIDCallback(void *context, IOReturn result, void *sender, IOHIDValueRef value)\n{\n    /* Declarations precede statements; callback queries remain below their guards. */\n    IOHIDElementRef elem;\n    CFIndex pressed;');
+ replace(keyboard,'    IOHIDElementRef elem = IOHIDValueGetElement(value);','    elem = IOHIDValueGetElement(value);');
+ replace(keyboard,'    CFIndex pressed = IOHIDValueGetIntegerValue(value);','    pressed = IOHIDValueGetIntegerValue(value);');
+ replace(keyboard,'InitHIDCallback()\n{','InitHIDCallback()\n{\n    CFDictionaryRef keyboard, keypad;\n    CFArrayRef matches;\n    CFDictionaryRef matchesList[2];');
+ replace(keyboard,'    CFDictionaryRef keyboard = NULL, keypad = NULL;\n    CFArrayRef matches = NULL;','    keyboard = NULL;\n    keypad = NULL;\n    matches = NULL;');
+ replace(keyboard,'    CFDictionaryRef matchesList[] = { keyboard, keypad };','    matchesList[0] = keyboard;\n    matchesList[1] = keypad;');
+ replace(keyboard,'    SDL_Keycode keymap[SDL_NUM_SCANCODES];','    SDL_Keycode keymap[SDL_NUM_SCANCODES];\n    CFDataRef uchrDataRef;');
+ replace(keyboard,'    CFDataRef uchrDataRef = TISGetInputSourceProperty(key_layout, kTISPropertyUnicodeKeyLayoutData);','    uchrDataRef = TISGetInputSourceProperty(key_layout, kTISPropertyUnicodeKeyLayoutData);');
+ replace(keyboard,'    NSWindow *nswindow = nil;','    NSWindow *nswindow = nil;\n    NSView *parentView;');
+ replace(keyboard,'    NSView *parentView = [nswindow contentView];','    parentView = [nswindow contentView];');
+ replace(keyboard,'Cocoa_HandleKeyEvent(_THIS, NSEvent *event)\n{\n    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;','Cocoa_HandleKeyEvent(_THIS, NSEvent *event)\n{\n    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;\n    unsigned short scancode;\n    SDL_Scancode code;\n#if 0\n    const char *text;\n#endif');
+ replace(keyboard,'    unsigned short scancode = [event keyCode];\n    SDL_Scancode code;\n#if 0\n    const char *text;\n#endif','    scancode = [event keyCode];');
 }
