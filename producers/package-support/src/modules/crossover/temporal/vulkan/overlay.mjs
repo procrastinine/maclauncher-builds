@@ -61,6 +61,14 @@ export function profileSources(directory,profile=source) {
     files.set(modulePath+'loader.c',original('loader.c')+'\nBOOL maclauncher_scene_initialize(void)\n{\n    return wine_vk_init_once();\n}\n');
     files.set(modulePath+'Makefile.in',replaceOnce(original('Makefile.in'),'SOURCES = \\\n','SOURCES = \\\n\tscene-pe.c \\\n\tscene-unix.c \\\n'));
     files.set(modulePath+'winevulkan.spec',original('winevulkan.spec')+'\n@ stdcall MacLauncherWineVulkanSceneAPI1()\n@ stdcall MacLauncherWineVulkanRecordScene1(ptr)\n@ stdcall MacLauncherWineVulkanSceneContext1(ptr)\n');
+    if (profile.clientModule) {
+        if (!/^[a-z][a-z0-9-]*$/.test(profile.clientModule)) throw Error('Invalid WineVulkan client module name.');
+        // Wine searches a builtin PE's export name, then binds its matching Unix name.
+        // An owned name avoids the publisher's already-installed builtin of the same name.
+        files.set(modulePath+'Makefile.in',replaceOnce(files.get(modulePath+'Makefile.in'),
+            'MODULE    = winevulkan.dll','MODULE    = '+profile.clientModule+'.dll'));
+        files.set(modulePath+profile.clientModule+'.spec',files.get(modulePath+'winevulkan.spec'));
+    }
     for (const name of profile.ownedFiles.filter(name=>/\.(?:c|h)$/.test(name))) {
         if (fs.existsSync(path.join(directory,modulePath,name))) throw Error('The original source already contains an owned WineVulkan entry.');
         let owned=fs.readFileSync(path.join(app,name),'utf8');

@@ -116,5 +116,6 @@
     "bytes": 87069297,
     "directory": "MetalSharp-Wine-dd1f6c2f9801327d30fd82f2d55071177824fb99",
     "stripComponents": 1
-  }
+  },
+  "clientModule": "maclauncher-winevulkan-scene"
 }

@@ -91,7 +91,10 @@ export async function buildModule(options){
     const prepared=options.prepared||await prepareSource({archive:options.archive,work,profile:options.profile});
     if(options.prepareOnly)return prepared;
     const profile=prepared.profile||source,minimumMacOS=profile.minimumMacOS;
-    const peArchitectures=options.hostOnly?[]:profile.architectures.pe;
+    if (options.hostOnly && options.peOnly) throw Error('Select Unix-only or PE-only output.');
+    const peArchitectures=options.hostOnly?[]:(options.peArchitectures||profile.architectures.pe);
+    if (!peArchitectures.every(cpu=>profile.architectures.pe.includes(cpu))) throw Error('Unknown Wine PE architecture.');
+    const clientModule=profile.clientModule||'winevulkan';
     const mingw=fs.realpathSync(options.mingw),build=path.join(work,'build-'+host.arch),vulkan=await prepareVulkanLink({...options,work});
     for(const name of peArchitectures.map(arch=>({i386:'i686',aarch64:'aarch64',arm64ec:'arm64ec',x86_64:'x86_64'}[arch]||arch)+'-w64-mingw32-clang'))fs.accessSync(path.join(mingw,name),fs.constants.X_OK);
     const bison=options.bison?fs.realpathSync(options.bison):options.bisonArchive?await buildBison({archive:options.bisonArchive,work,jobs}):'bison';
@@ -111,7 +114,7 @@ exec ${[cc,'-arch',host.macho,'-isysroot',sdk,'-mmacosx-version-min='+minimumMac
         SDKROOT:sdk,MACOSX_DEPLOYMENT_TARGET:minimumMacOS,
         CFLAGS:'-O2',CPPFLAGS:'',LDFLAGS:'-L'+linkDirectory,BISON:bison};
     fs.mkdirSync(build,{recursive:true});
-    const configured=path.join(build,'configuration.json'),environmentKey=digest(Buffer.from(JSON.stringify({CC:environment.CC,LDFLAGS:environment.LDFLAGS,bison,mingw,sdk,vulkan: vulkan.sha256}))),configureKey=digest(Buffer.from(JSON.stringify({source:prepared.key,environmentKey})));
+    const configured=path.join(build,'configuration.json'),environmentKey=digest(Buffer.from(JSON.stringify({CC:environment.CC,LDFLAGS:environment.LDFLAGS,bison,mingw,sdk,vulkan: vulkan.sha256}))),configureKey=digest(Buffer.from(JSON.stringify({source:prepared.key,environmentKey,peArchitectures})));
     if(!fs.existsSync(configured)||JSON.parse(fs.readFileSync(configured)).key!==configureKey){
         if(fs.existsSync(path.join(build,'config.cache'))&&(!fs.existsSync(configured)||JSON.parse(fs.readFileSync(configured)).environmentKey!==environmentKey))fs.unlinkSync(path.join(build,'config.cache'));
         const configureArgs=[path.join(prepared.directory,'configure'),'--host='+(host.arch==='arm64'?'aarch64':'x86_64')+'-apple-darwin','--enable-archs='+(peArchitectures.length?peArchitectures.join(','):'none'),'--disable-tests','--without-x','--without-freetype','--cache-file=config.cache'];
@@ -131,12 +134,12 @@ exec ${[cc,'-arch',host.macho,'-isysroot',sdk,'-mmacosx-version-min='+minimumMac
     const linkerFile=path.join(build,'module-pe-linker-flags.json'),linkerIdentity=JSON.stringify(peLinkerFlags)+'\n';
     if(!fs.existsSync(linkerFile)||fs.readFileSync(linkerFile,'utf8')!==linkerIdentity)
         for(const architecture of Object.keys(peLinkerFlags))
-            fs.rmSync(path.join(build,'dlls/winevulkan',architecture+'-windows/winevulkan.dll'),{force:true});
+            fs.rmSync(path.join(build,'dlls/winevulkan',architecture+'-windows/'+clientModule+'.dll'),{force:true});
     runMake(['-j'+jobs,...peArchitectures.map(architecture=>architecture+'_CFLAGS='+flags),
-        ...Object.entries(peLinkerFlags).map(([architecture,value])=>architecture+'_LDFLAGS='+value),options.hostOnly?'dlls/winevulkan/winevulkan.so':'dlls/winevulkan/all'],{cwd:build,env:environment});
+        ...Object.entries(peLinkerFlags).map(([architecture,value])=>architecture+'_LDFLAGS='+value),...(options.peOnly?peArchitectures.map(cpu=>'dlls/winevulkan/'+cpu+'-windows/'+clientModule+'.dll'):[options.hostOnly?'dlls/winevulkan/winevulkan.so':'dlls/winevulkan/all'])],{cwd:build,env:environment});
     writeChanged(flagFile,flags+'\n');
     writeChanged(linkerFile,linkerIdentity);
-    const modules=modulePaths(host.arch,peArchitectures).filter((_,index)=>!options.hostOnly||index===0);
+    const modules=modulePaths(host.arch,peArchitectures,clientModule).filter(([name],index)=>options.peOnly?name.endsWith('.dll'):!options.hostOnly||index===0);
     const files=modules.map(([,file])=>file);
     for(const file of files)if(!fs.statSync(path.join(build,file),{throwIfNoEntry:false})?.isFile())throw Error('The paired module output is missing: '+file);
     const result={...prepared,build,files,modules,arch:host.arch,readobj:path.join(mingw,'llvm-readobj'),strip:path.join(mingw,'llvm-strip')};
@@ -144,18 +147,18 @@ exec ${[cc,'-arch',host.macho,'-isysroot',sdk,'-mmacosx-version-min='+minimumMac
     return result;
 }
 // The shipped module libraries, each with its place in the Wine build.
-export const modulePaths=(arch='x64',peArchitectures=['x86_64','i386'])=>[[wineHost(arch).unix+'/winevulkan.so','dlls/winevulkan/winevulkan.so'],...peArchitectures.map(cpu=>[cpu+'-windows/winevulkan.dll','dlls/winevulkan/'+cpu+'-windows/winevulkan.dll'])];
+export const modulePaths=(arch='x64',peArchitectures=['x86_64','i386'],clientModule='winevulkan')=>[[wineHost(arch).unix+'/winevulkan.so','dlls/winevulkan/winevulkan.so'],...peArchitectures.map(cpu=>[cpu+'-windows/winevulkan.dll','dlls/winevulkan/'+cpu+'-windows/'+clientModule+'.dll'])];
 const MODULES=modulePaths();
 /** The shipped module library paths. */
 export const MODULE_FILES=MODULES.map(([name])=>name);
 /** Check the complete PE export set of the built modules and stage them as shipped:
  * the PE libraries without debug sections, the Unix library ad hoc signed. */
 export function finishModule(built,output){
-    const MODULES=built.modules||modulePaths(built.arch,built.profile?.architectures.pe);
+    const MODULES=built.modules||modulePaths(built.arch,built.profile?.architectures.pe,built.profile?.clientModule);
     if(fs.existsSync(output))throw Error('The immutable module output already exists.');
     const originalSpec=fs.readFileSync(path.join(built.directory,'dlls/winevulkan/winevulkan.spec'),'utf8');
     const expected=[...originalSpec.matchAll(/^@\s+\S+\s+(?:-\S+\s+)*([A-Za-z0-9_]+)(?:\(|\s*$)/gm)].map(row=>row[1]).sort();
-    for(const [,file]of MODULES.slice(1)){
+    for(const [,file]of MODULES.filter(([name])=>name.endsWith('.dll'))){
         const actual=[...read(built.readobj,['--coff-exports',path.join(built.build,file)]).matchAll(/^\s+Name: ([A-Za-z0-9_]+)$/gm)].map(row=>row[1]).sort();
         if(JSON.stringify(actual)!==JSON.stringify(expected))throw Error('The complete PE Vulkan export set differs: '+file);
     }
@@ -168,7 +171,7 @@ export function finishModule(built,output){
     return output;
 }
 /** Describe staged module libraries from the projected Wine source: licenses, provider record, manifest, payload and declaration. */
-export function describeModule({directory,output,arch='x64',profile=source,modules=modulePaths(arch,profile.architectures.pe),readobj}){
+export function describeModule({directory,output,arch='x64',profile=source,modules=modulePaths(arch,profile.architectures.pe,profile.clientModule),readobj}){
     const host=wineHost(arch),minimumMacOS=profile.minimumMacOS,MODULES=modules;
     const architectures=file=>{
         if(file.endsWith('.so'))return read('/usr/bin/lipo',['-archs',file]).split(/\s+/);
