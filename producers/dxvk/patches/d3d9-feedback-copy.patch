@@ -191,17 +191,18 @@ index 83d72c2f..846b25e5 100644
  
      DxvkDepthBiasRepresentation     m_depthBiasRepresentation = { VK_DEPTH_BIAS_REPRESENTATION_LEAST_REPRESENTABLE_VALUE_FORMAT_EXT, false };
 diff --git a/src/d3d9/d3d9_options.cpp b/src/d3d9/d3d9_options.cpp
-index e46864e2..70d19b91 100644
+index e46864e2..cae8633e 100644
 --- a/src/d3d9/d3d9_options.cpp
 +++ b/src/d3d9/d3d9_options.cpp
-@@ -58,6 +58,11 @@ namespace dxvk {
+@@ -58,6 +58,12 @@ namespace dxvk {
      this->disableA8RT                   = config.getOption<bool>        ("d3d9.disableA8RT",                   false);
      this->memoryTrackTest               = config.getOption<bool>        ("d3d9.memoryTrackTest",               false);
      this->forceSamplerTypeSpecConstants = config.getOption<bool>        ("d3d9.forceSamplerTypeSpecConstants", false);
-+    // MoltenVK cannot provide the attachment feedback loop used for live RT reads.
++    // Preserve the native feedback-loop path when the device supports it.
++    // Otherwise use snapshots rather than sampling a live color attachment.
 +    const Tristate hazardCopies = config.getOption<Tristate>("d3d9.renderTargetHazardCopies", Tristate::Auto);
 +    this->renderTargetHazardCopies = hazardCopies == Tristate::Auto
-+      ? adapter != nullptr && adapter->matchesDriver(VK_DRIVER_ID_MOLTENVK)
++      ? device != nullptr && !device->features().extAttachmentFeedbackLoopLayout.attachmentFeedbackLoopLayout
 +      : hazardCopies == Tristate::True;
      this->forceSampleRateShading        = config.getOption<bool>        ("d3d9.forceSampleRateShading",        false);
      this->forceAspectRatio              = config.getOption<std::string> ("d3d9.forceAspectRatio",              "");

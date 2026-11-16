@@ -18,7 +18,7 @@ KosmicKrisp joins DXVK's descriptor heap Auto allow-list. VK_EXT_descriptor_heap
 
 ## D3D9 render-target feedback
 
-When a draw samples a color render target that it also writes, d3d9.renderTargetHazardCopies=Auto samples a snapshot on MoltenVK. True enables snapshots on other drivers; False retains the upstream live-image feedback barriers. Render targets that are not sampled by a writing draw require no snapshot.
+When a draw samples a color render target that it also writes, d3d9.renderTargetHazardCopies=Auto samples a snapshot when the device lacks the attachmentFeedbackLoopLayout feature. Devices with that feature retain the live-image feedback route. True explicitly enables snapshots; False retains the upstream live-image feedback barriers. Render targets that are not sampled by a writing draw require no snapshot.
 
 The sampled view's mip levels and array layers are copied before each hazardous draw and bound through the ordinary texture slots. Copy allocations are reused, but their contents are refreshed for every draw, including after render-target writes, clears, uploads, copies and target replacement. Samplers return to their original images when the hazard ends. Depth/stencil hazards retain the existing feedback barriers and layout transitions.
 
