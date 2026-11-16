@@ -37,6 +37,10 @@
       "core/libs/prx/libScePad/Export.cpp",
       "core/libs/prx/libScePad/src/PadState.cpp"
     ],
+    "runtimeOverlays": [
+      ["macos-host-kernel", "applyHostKernelOverlay"],
+      ["macos-aborts", "applyAbortsOverlay"]
+    ],
     "arm64Libraries": {
       "script": "../anyps5/overlays/arm64-libs/apply.mjs",
       "exports": [

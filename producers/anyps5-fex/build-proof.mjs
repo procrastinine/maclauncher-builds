@@ -104,6 +104,10 @@ const fex=verifyCheckout(recipe.source),anyps5=verifyCheckout(recipe.anyps5);
 fs.rmSync(path.join(options.out,'fex'),{recursive:true,force:true});fs.rmSync(path.join(options.out,'anyps5'),{recursive:true,force:true});
 project(fex,path.join(options.out,'fex'));project(anyps5,path.join(options.out,'anyps5'),recipe.anyps5.paths);
 for(const overlay of recipe.overlays)applyOverlay(path.join(options.out,overlay.target),overlay);
+// Darwin overlays from producers/anyps5 RUNTIME_OVERLAYS that the compiled objects need and that edit only core/libs,
+// applied in that list's order.
+for(const [directory,method] of recipe.anyps5.runtimeOverlays)
+ (await import(new URL('../anyps5/overlays/'+directory+'/apply.mjs',import.meta.url)))[method](path.join(options.out,'anyps5'));
 // The arm64 library overlay's shared sources (GuestCpuArm64, owned by the PS5 library lane) go into the AnyPS5 projection.
 const arm64Libraries=await import(new URL(recipe.anyps5.arm64Libraries.script,import.meta.url));
 for(const name of recipe.anyps5.arm64Libraries.exports)arm64Libraries[name](path.join(options.out,'anyps5'));
