@@ -4335,5 +4335,62 @@
         }
       ]
     }
+  },
+  {
+    "id": "freearc",
+    "name": "FreeArc decoders",
+    "purpose": "Native FreeArc decoding with a Windows CLS plugin host",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "tools/build-freearc.mjs",
+        "producers/freearc/notices/NOTICE.txt",
+        "producers/freearc/notices/GPL-2.0.txt",
+        "producers/freearc/notices/LGPL-2.1.txt"
+      ],
+      "sourceDirectory": "producers/package-support"
+    },
+    "upstreams": [
+      {
+        "id": "freearc",
+        "provider": "github",
+        "url": "https://github.com/M-Gonzalo/FreeArc",
+        "repository": "M-Gonzalo/FreeArc",
+        "pin": {
+          "gitlink": "producers/package-support/src/external/freearc"
+        }
+      },
+      {
+        "id": "porter-helpers",
+        "provider": "github",
+        "url": "https://github.com/KarmSakha/mac-game-porter",
+        "repository": "KarmSakha/mac-game-porter",
+        "pin": {
+          "gitlink": "producers/package-support/src/external/mac-game-porter"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.67-MCLv1",
+        "label": "FreeArc 0.67 decoders"
+      }
+    ],
+    "build": {
+      "version": "0.67-MCLv1",
+      "command": "tools/build-freearc.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "submodules": [
+        "producers/package-support/src/external/freearc",
+        "producers/package-support/src/external/mac-game-porter"
+      ],
+      "tools": [
+        "mingw-w64"
+      ]
+    }
   }
 ]
