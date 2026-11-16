@@ -132,13 +132,15 @@ inline bool projectionCamera(const sl::Constants &value, uint32_t frame, uint32_
 
 // The camera of a Super Resolution evaluation that a game makes through NGX itself, outside Streamline's
 // slEvaluateFeature, while it sets Streamline constants of each frame (Unreal Engine's DLSS plugin beside its
-// Streamline plugin). Neither call names the other's frame. An evaluation takes the constants of the same frame
-// only when exactly one frame and viewport set constants since the previous such evaluation, so the constants are
-// this frame's or the previous frame's, and their jitter offset is the evaluation's (equal, or negated on both axes,
-// as the two plugins' conventions may differ) and not the previous evaluation's in either convention. A temporal
-// upscaler's jitter changes every frame, so that is the same frame. Constants that come after their frame's
-// evaluation are never given to the next one, and two consecutive jitter offsets that are each other's negation
-// leave that evaluation without a camera.
+// Streamline plugin). Neither call names the other's frame; the jitter offset does, because a temporal upscaler's
+// jitter changes every frame. The two plugins' sign conventions may differ, so an offset matches when it is equal or
+// negated on both axes; the first exact binding fixes the game's convention, since a nonzero offset is never both.
+// take(), at an evaluation: the constants set before it, when exactly one frame and viewport set constants since
+// the previous evaluation, their offset is the evaluation's and not the previous evaluation's.
+// follow(), at the constants: the evaluation they follow (Unreal Engine sets them after its DLSS pass), when they are
+// the first constants since the latest evaluation, their offset is that evaluation's and not the one before it.
+// Constants are never given to another frame's evaluation, and an offset that matches both evaluations leaves the
+// frame without a camera.
 class DirectCameras {
   struct Constants {
     uint32_t frame = 0, viewport = 0;
@@ -146,17 +148,28 @@ class DirectCameras {
     float jitter[2]{};
     RSTemporalCamera camera{};
   };
+  enum Convention { Unknown, Equal, Negated };
   Constants pending_{};
   unsigned count_ = 0;
-  bool several_ = false, evaluated_ = false;
-  float previous_[2]{};
-  static bool same(const float *constants, float x, float y) {
-    return (constants[0] == x && constants[1] == y) || (constants[0] == -x && constants[1] == -y);
+  bool several_ = false, evaluated_ = false, before_valid_ = false;
+  float previous_[2]{}, before_[2]{};
+  uint64_t evaluations_ = 0;
+  Convention convention_ = Unknown;
+  bool same(const float *constants, float x, float y) const {
+    const bool equal = constants[0] == x && constants[1] == y, negated = constants[0] == -x && constants[1] == -y;
+    return convention_ == Equal ? equal : convention_ == Negated ? negated : equal || negated;
   }
+  void learn(const float *constants, float x, float y) {
+    if (convention_ == Unknown)
+      convention_ = constants[0] == x && constants[1] == y ? Equal : Negated;
+  }
+  static bool jittered(float x, float y) { return std::isfinite(x) && std::isfinite(y) && (x != 0 || y != 0); }
 
 public:
   enum Result { Bound, NoConstants, SeveralFrames, Unjittered, InvalidCamera, ConstantsFollow, OtherFrame, AmbiguousJitter,
                 FirstEvaluation };
+  enum Follow { Followed, NoEvaluation, SeveralConstants, FollowUnjittered, FollowInvalidCamera, FollowOtherFrame,
+                FollowAmbiguous };
   void remember(uint32_t frame, uint32_t viewport, float jitterX, float jitterY, const RSTemporalCamera *camera) {
     if (count_ && (pending_.frame != frame || pending_.viewport != viewport))
       several_ = true;
@@ -173,14 +186,18 @@ public:
     pending_ = {};
     count_ = 0;
     several_ = false;
+    before_valid_ = evaluated_;
+    before_[0] = previous_[0];
+    before_[1] = previous_[1];
     evaluated_ = true;
+    ++evaluations_;
     previous_[0] = jitterX;
     previous_[1] = jitterY;
     if (!count)
       return NoConstants;
     if (several)
       return SeveralFrames;
-    if (!std::isfinite(jitterX) || !std::isfinite(jitterY) || (jitterX == 0 && jitterY == 0))
+    if (!jittered(jitterX, jitterY))
       return Unjittered;
     if (!evaluated)
       return FirstEvaluation;
@@ -193,8 +210,33 @@ public:
       return OtherFrame;
     if (!pending.valid)
       return InvalidCamera;
+    learn(pending.jitter, jitterX, jitterY);
     out = pending.camera;
     return Bound;
+  }
+  // Call after remember() for the same constants. evaluation is the 1-based number of the evaluation they follow.
+  Follow follow(uint64_t &evaluation, RSTemporalCamera &out) {
+    out = {};
+    evaluation = 0;
+    if (!evaluated_)
+      return NoEvaluation;
+    if (count_ != 1)
+      return SeveralConstants;
+    const float *jitter = pending_.jitter;
+    if (!jittered(jitter[0], jitter[1]) || !jittered(previous_[0], previous_[1]))
+      return FollowUnjittered;
+    const bool current = same(jitter, previous_[0], previous_[1]),
+               earlier = before_valid_ && same(jitter, before_[0], before_[1]);
+    if (current && earlier)
+      return FollowAmbiguous;
+    if (!current)
+      return FollowOtherFrame;
+    if (!pending_.valid)
+      return FollowInvalidCamera;
+    learn(jitter, previous_[0], previous_[1]);
+    evaluation = evaluations_;
+    out = pending_.camera;
+    return Followed;
   }
   void clear() { *this = DirectCameras{}; }
 };

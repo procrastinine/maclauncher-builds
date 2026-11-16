@@ -92,8 +92,12 @@ int main() {
     assert(direct.take(.25f, -.5f, bound) == Direct::NoConstants && !bound.size);checks++;
     direct.remember(41, 0, .125f, .375f, &projected);
     assert(direct.take(.125f, .375f, bound) == Direct::Bound && bound.size == 64 && bound.nearPlane == 10.f);checks++;
+    // the first binding fixes the game's sign convention (equal here)
     direct.remember(42, 0, -.3f, .1f, &projected);
-    assert(direct.take(.3f, -.1f, bound) == Direct::Bound);checks++;
+    assert(direct.take(.3f, -.1f, bound) == Direct::OtherFrame && !bound.size);checks++;
+    {Direct negated;negated.take(.9f, .9f, bound);negated.remember(42, 0, -.3f, .1f, &projected);
+     assert(negated.take(.3f, -.1f, bound) == Direct::Bound);checks++;
+     negated.remember(43, 0, .2f, .4f, &projected);assert(negated.take(.2f, .4f, bound) == Direct::OtherFrame);checks++;}
     assert(direct.take(.2f, .2f, bound) == Direct::NoConstants && !bound.size);checks++;
     // constants after their frame's evaluation are never given to the next evaluation
     direct.remember(43, 0, .2f, .2f, &projected);
@@ -108,14 +112,35 @@ int main() {
     assert(direct.take(.1f, .2f, bound) == Direct::Bound);checks++;
     direct.remember(49, 0, 0.f, 0.f, &projected);assert(direct.take(0.f, 0.f, bound) == Direct::Unjittered && !bound.size);checks++;
     direct.remember(50, 0, .3f, .3f, nullptr);assert(direct.take(.3f, .3f, bound) == Direct::InvalidCamera && !bound.size);checks++;
-    // the previous frame's constants are excluded in either sign convention
+    // with the convention known, consecutive negated offsets no longer collide
     assert(direct.take(.125f, .25f, bound) == Direct::NoConstants);
-    direct.remember(53, 0, -.125f, -.25f, &projected);assert(direct.take(-.125f, -.25f, bound) == Direct::AmbiguousJitter && !bound.size);checks++;
-    direct.remember(54, 0, .125f, .25f, &projected);assert(direct.take(.5f, .5f, bound) == Direct::ConstantsFollow && !bound.size);checks++;
+    direct.remember(53, 0, -.125f, -.25f, &projected);assert(direct.take(-.125f, -.25f, bound) == Direct::Bound);checks++;
+    direct.remember(54, 0, .125f, .25f, &projected);assert(direct.take(.5f, .5f, bound) == Direct::OtherFrame && !bound.size);checks++;
     direct.remember(51, 0, .3f, .4f, &projected);direct.clear();assert(direct.take(.3f, .4f, bound) == Direct::NoConstants);checks++;
+    // before the convention is known, the previous frame's offset is excluded in either sign convention
+    {Direct unknown;unknown.take(.125f, .25f, bound);unknown.remember(53, 0, -.125f, -.25f, &projected);
+     assert(unknown.take(-.125f, -.25f, bound) == Direct::AmbiguousJitter && !bound.size);checks++;
+     unknown.remember(54, 0, .125f, .25f, &projected);assert(unknown.take(.5f, .5f, bound) == Direct::ConstantsFollow && !bound.size);checks++;}
     // the first evaluation cannot exclude constants of a frame before it
     Direct first;first.remember(1, 0, .1f, .2f, &projected);assert(first.take(.1f, .2f, bound) == Direct::FirstEvaluation && !bound.size);checks++;
     first.remember(2, 0, .3f, .1f, &projected);assert(first.take(.3f, .1f, bound) == Direct::Bound);checks++;
+    // constants set after their frame's evaluation follow it: Unreal Engine's order (evaluation, then constants)
+    {Direct ue;uint64_t evaluation = 0;
+     ue.remember(9, 0, .5f, .5f, &projected);assert(ue.follow(evaluation, bound) == Direct::NoEvaluation && !evaluation);checks++;
+     ue.take(.25f, -.166667f, bound);ue.remember(10, 0, .25f, -.166667f, &projected);
+     assert(ue.follow(evaluation, bound) == Direct::Followed && evaluation == 1 && bound.size == 64 && bound.nearPlane == 10.f &&
+            (bound.flags & RS_TEMPORAL_DEPTH_INFINITE) && bound.farPlane == 0.f);checks++;
+     ue.remember(10, 0, .25f, -.166667f, &projected);assert(ue.follow(evaluation, bound) == Direct::SeveralConstants && !bound.size);checks++;
+     assert(ue.take(-.25f, .388889f, bound) == Direct::ConstantsFollow);
+     ue.remember(11, 0, -.25f, .388889f, &projected);assert(ue.follow(evaluation, bound) == Direct::Followed && evaluation == 2);checks++;
+     // the convention is fixed (equal): the next frame's negated offset follows its own evaluation only
+     ue.take(.25f, -.388889f, bound);ue.remember(12, 0, .25f, -.388889f, &projected);
+     assert(ue.follow(evaluation, bound) == Direct::Followed && evaluation == 3);checks++;
+     ue.take(.125f, .1f, bound);ue.remember(13, 0, .3f, .3f, &projected);assert(ue.follow(evaluation, bound) == Direct::FollowOtherFrame && !evaluation);checks++;
+     ue.take(.4f, .2f, bound);ue.remember(14, 0, .4f, .2f, nullptr);assert(ue.follow(evaluation, bound) == Direct::FollowInvalidCamera && !bound.size);checks++;
+     ue.take(0.f, 0.f, bound);ue.remember(15, 0, 0.f, 0.f, &projected);assert(ue.follow(evaluation, bound) == Direct::FollowUnjittered);checks++;}
+    {Direct ambiguous;uint64_t evaluation = 0;ambiguous.take(.125f, .25f, bound);ambiguous.take(-.125f, -.25f, bound);
+     ambiguous.remember(3, 0, -.125f, -.25f, &projected);assert(ambiguous.follow(evaluation, bound) == Direct::FollowAmbiguous && !evaluation);checks++;}
   }
   std::printf("ok %u\n", checks);
 }

@@ -8,11 +8,13 @@
 // return the original result unchanged. Streamline's DLSS feature is 0; NGX numbers its features separately.
 // A game that sets Streamline constants but evaluates Super Resolution through NGX itself (Unreal Engine's DLSS
 // plugin beside its Streamline plugin) gets the camera of the same frame's constants on that direct evaluation:
-// DirectEvaluationCamera binds them by equal jitter offset and declines anything else.
+// DirectEvaluationCamera binds them by equal jitter offset and declines anything else. Constants set after their
+// frame's evaluation (Unreal Engine's order) are matched to that evaluation the same way and reported.
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <psapi.h>
 
+#include <cstdarg>
 #include <cstdio>
 #include <cstring>
 #include <string>
@@ -73,6 +75,47 @@ SRWLOCK camera_lock = SRWLOCK_INIT;
 thread_local unsigned streamline_evaluations = 0;
 std::atomic<bool> streamline_hooked{false};
 struct EvaluationDepth {EvaluationDepth(){++streamline_evaluations;}~EvaluationDepth(){--streamline_evaluations;}};
+// Diagnostic lines go to the NGX core's log and to the debugger output (Wine's debugstr channel): a game without a
+// console has no stderr.
+void Report(const char *format, ...) {
+  char text[256];
+  va_list values;
+  va_start(values, format);
+  vsnprintf(text, sizeof(text), format, values);
+  va_end(values);
+  lane::log("info", "%s", text);
+  OutputDebugStringA((std::string("vkd3d-ngx: ") + text + "\n").c_str());
+}
+// Constants that follow their frame's direct evaluation (Unreal Engine's order): each outcome once per process, and
+// after 1000 such constants how many followed their evaluation exactly.
+void ReportFollow(ngx_streamline::DirectCameras::Follow result, float jitter_x, float jitter_y, uint64_t evaluation,
+                  const RSTemporalCamera &camera) {
+  using Direct = ngx_streamline::DirectCameras;
+  if (result == Direct::NoEvaluation)
+    return;
+  static std::atomic<unsigned> reported{0}, total{0}, followed{0};
+  const unsigned count = total.fetch_add(1) + 1, exact = followed.fetch_add(result == Direct::Followed ? 1 : 0) +
+                                                        (result == Direct::Followed ? 1 : 0);
+  if (count == 1000)
+    Report("Streamline constants after direct NGX evaluations: %u of %u follow their evaluation exactly", exact, count);
+  const unsigned bit = 1u << unsigned(result);
+  if (reported.fetch_or(bit) & bit)
+    return;
+  static const char *const reasons[] = {"followed", "", "constants of several frames or viewports since the evaluation",
+                                        "no jitter offset", "the constants' projection is not a perspective camera",
+                                        "the constants' jitter is not the latest evaluation's",
+                                        "the jitter offset matches both latest evaluations"};
+  if (result == Direct::Followed) {
+    char far_plane[32] = "infinite";
+    if (!(camera.flags & RS_TEMPORAL_DEPTH_INFINITE))
+      snprintf(far_plane, sizeof(far_plane), "%g", camera.farPlane);
+    Report("Streamline constants follow direct NGX evaluation %llu exactly: frame %llu near %g far %s fov %.4f",
+           (unsigned long long)evaluation, (unsigned long long)camera.frameId - 1, double(camera.nearPlane), far_plane,
+           double(camera.verticalFov));
+  } else
+    Report("Streamline constants (jitter %g, %g) follow no direct NGX evaluation exactly: %s", double(jitter_x),
+           double(jitter_y), reasons[unsigned(result)]);
+}
 
 sl::Result Capture(Slot &slot,SetConstants original, const sl::Constants &values, const sl::FrameToken &frame,
                    const sl::ViewportHandle &view) {
@@ -88,7 +131,11 @@ sl::Result Capture(Slot &slot,SetConstants original, const sl::Constants &values
   cameras.remember(frame_id, view_id, valid && result == sl::Result::eOk ? &camera : nullptr);
   direct_cameras.remember(frame_id, view_id, values.jitterOffset.x, values.jitterOffset.y,
                           projection_valid && result == sl::Result::eOk ? &projected : nullptr);
+  uint64_t evaluation = 0;
+  RSTemporalCamera followed;
+  const auto follow = direct_cameras.follow(evaluation, followed);
   ReleaseSRWLockExclusive(&camera_lock);
+  ReportFollow(follow, values.jitterOffset.x, values.jitterOffset.y, evaluation, followed);
   if(extra)try{slot.scene.begin(SceneActive());slot.scene.constants(frame_id,view_id,matrix_valid?&matrices:nullptr,result==sl::Result::eOk,epoch);}catch(...){}
   return result;
 }
@@ -263,15 +310,8 @@ bool ngx::DirectEvaluationCamera(float jitter_x, float jitter_y, RSTemporalCamer
   AcquireSRWLockExclusive(&camera_lock);
   const auto result = direct_cameras.take(jitter_x, jitter_y, camera);
   ReleaseSRWLockExclusive(&camera_lock);
-  // each outcome once per process: the first binding, and why evaluations had no camera. A game without a console
-  // has no stderr, so each line also goes to the debugger output (Wine's debugstr channel).
+  // each outcome once per process: the first binding, and why evaluations had no camera
   static std::atomic<unsigned> reported{0};
-  const auto report = [](const char *format, auto... values) {
-    char text[256];
-    snprintf(text, sizeof(text), format, values...);
-    lane::log("info", "%s", text);
-    OutputDebugStringA((std::string("vkd3d-ngx: ") + text + "\n").c_str());
-  };
   const unsigned bit = 1u << unsigned(result);
   if (!(reported.fetch_or(bit) & bit)) {
     using Direct = ngx_streamline::DirectCameras;
@@ -285,11 +325,11 @@ bool ngx::DirectEvaluationCamera(float jitter_x, float jitter_y, RSTemporalCamer
       char far_plane[32] = "infinite";
       if (!(camera.flags & RS_TEMPORAL_DEPTH_INFINITE))
         snprintf(far_plane, sizeof(far_plane), "%g", camera.farPlane);
-      report("Streamline camera on a direct NGX evaluation: frame %llu viewport %llu near %g far %s fov %.4f",
+      Report("Streamline camera on a direct NGX evaluation: frame %llu viewport %llu near %g far %s fov %.4f",
              (unsigned long long)camera.frameId - 1, (unsigned long long)camera.viewportId, double(camera.nearPlane),
              far_plane, double(camera.verticalFov));
     } else
-      report("No Streamline camera on a direct NGX evaluation (jitter %g, %g): %s", double(jitter_x), double(jitter_y),
+      Report("No Streamline camera on a direct NGX evaluation (jitter %g, %g): %s", double(jitter_x), double(jitter_y),
              reasons[unsigned(result)]);
   }
   return result == ngx_streamline::DirectCameras::Bound;
