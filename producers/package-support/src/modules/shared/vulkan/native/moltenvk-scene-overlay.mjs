@@ -17,10 +17,34 @@ export const commonHeaders={
 };
 function original(repository,file){return execFileSync('git',['-C',repository,'show',sourceRevision(source)+':'+file],{encoding:'utf8',env:{...process.env,GIT_NO_LAZY_FETCH:'1'},maxBuffer: Infinity});}
 function replace(text,from,to,file){if(text.split(from).length!==2)throw Error('MoltenVK source anchor changed: '+file);return text.replace(from,to);}
+// Apache-2.0 adaptation of Highball 53741235af002eac43a214c347864ad83dbceb8d.
+// Author: Gauthier Piarrette <gauthierpiarrette@gmail.com>, 2026-10-12.
+// Source: https://github.com/gauthierpiarrette/highball-engine
+// moltenvk-arm64/moltenvk/0001-Bind-a-descriptor-set-again-after-MoltenVK-s-own-hel.patch
+// at 161d7a8495d041d2901d07ff3b4fffeed9be1a4b. Upstream MoltenVK notices are retained.
+export function descriptorBindingSource(text){
+ const file='MoltenVK/MoltenVK/Commands/MVKCommandEncoderState.mm';
+ const invalidate='\tif (index < kMVKMaxDescriptorSetCount) { exists.descriptorSetData.clear(index); }\n';
+ // Helpers replace the argument buffer at a descriptor set's Metal buffer index.
+ const assertion='\tassert(index < kMVKMaxBufferCount);\n';
+ for(const name of ['bindBuffer','bindBytes']){
+  const start=text.indexOf('static void '+name+'('),end=text.indexOf('\n}',start);
+  if(start<0||end<0)throw Error('MoltenVK source anchor changed: '+file+' '+name);
+  const body=text.slice(start,end);
+  text=text.slice(0,start)+replace(body,assertion,assertion+invalidate,file)+text.slice(end);
+ }
+ const restore='\texists.descriptorSetData |= resources.resources.descriptorSetData;\n';
+ text=replace(text,restore,'',file);
+ const loopEnd='\t\tbindBuffer(encoder, set->gpuBufferObject, set->gpuBufferOffset, idx, exists, bindings, binder);\n\t}\n';
+ // Restore the set bits after bindBuffer invalidates each index in the loop.
+ return replace(text,loopEnd,loopEnd+restore,file);
+}
 export function sceneSources(repository,readSource=file=>original(repository,file)){
  const files=new Map();
  const edit=(file,changes)=>{let text=readSource(file);for(const[from,to]of changes)text=replace(text,from,to,file);files.set(file,text);};
  const commands='MoltenVK/MoltenVK/Commands/';
+ const bindings=commands+'MVKCommandEncoderState.mm';
+ files.set(bindings,descriptorBindingSource(readSource(bindings)));
  edit(commands+'MVKCommandPool.h',[
   ['#include "MVKCmdDebug.h"','#include "MVKCmdDebug.h"\n#include "scene-command.hpp"'],
   ['#pragma mark Command resources','MVKCommandTypePool<MVKCmdMacfxScene> _cmdMacfxScenePool;\n\n#pragma mark Command resources']
