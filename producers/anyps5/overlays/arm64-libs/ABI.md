@@ -106,3 +106,7 @@ survives the existing guest-exit host jump and ends after guest cleanup. Main
 entry uses the same contract. Guest stacks are independent mappings allocated
 through libkernel's existing memory APIs, with a protected PS5-page guard;
 the original x86 shared-stack assembly remains in its original branch.
+
+`GuestFloat::X87` is a trivially copyable 16-byte value with 16-byte alignment: the 64-bit significand occupies bytes 0..7, the sign/exponent bytes 8..9, and six padding bytes complete the guest slot. Its explicit80-bit load/store operations touch ten bytes; slot operations touch sixteen. The native `strtold` and `wcstold` exports return this raw type on arm64. The host thunk classifies it as guest X87 before generic aggregate rules, consumes 16-byte-aligned System V arguments and returns the ten value bytes in guest ST0 without a double intermediate.
+
+The numeric parser uses the committed NetBSD gdtoa snapshot declared by `gdtoa/origin.json`. Separate owned adapters supply the Darwin platform and locking boundary. Parser precision is 64 significand bits with x87 exponent limits and explicit rounding selection; class, range and inexact metadata remain available. Native FPCR/FPSR and errno are saved and restored around provider arithmetic. The Strings wrapper retains its existing NaN/end-pointer/signed-zero and errno conventions and commits arithmetic flags through the actual guest x87 accessors.
