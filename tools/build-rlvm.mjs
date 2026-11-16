@@ -61,6 +61,7 @@ export async function compile({arch='universal',work}){
  fs.mkdirSync(work,{recursive:true});const source=path.join(work,'rlvm-source'),sourceRoot=path.join(here,'source'),revision=upstreamRevision('rlvm','rlvm');
  const staged=await stageSource(sourceRoot,revision,source);
  run('git',['apply','--unsafe-paths','--directory='+source,path.join(here,'vorbis-callback-const.patch')],{cwd:root});
+ run('git',['apply','--unsafe-paths','--directory='+source,path.join(here,'boost-parent-path.patch')],{cwd:root});
  const sources=await dependencySources(work),slices=[];
  for(const architecture of ['arm64','x64'])slices.push(await buildSlice({architecture,work,sources,engineSource:source}));
  return {slices,source,sourceRoot,revision,staged,sources};
