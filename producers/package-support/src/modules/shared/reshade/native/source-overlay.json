@@ -1023,6 +1023,14 @@
       "path": "src/vulkan-features.c"
     },
     {
+      "source": "app:src/modules/shared/reshade/native/winemetal-layer.c",
+      "path": "src/winemetal-layer.c"
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/winemetal-runtime.tbd",
+      "path": "src/winemetal-runtime.tbd"
+    },
+    {
       "source": "app:src/modules/shared/reshade/native/retroarch-external.h",
       "path": "src/retroarch-external.h"
     },

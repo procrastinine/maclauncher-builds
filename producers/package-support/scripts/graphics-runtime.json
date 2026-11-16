@@ -30,6 +30,7 @@
       "maclauncher-graphics-video",
       "maclauncher-graphics-hardware",
       "maclauncher-vulkan-features",
+      "maclauncher-winemetal",
       "maclauncher-graphics-window"
     ],
     "macOSSDKByArchitecture": {

@@ -65,6 +65,7 @@ if(features.graphics.hardwareQueryAPI===1){
 if(features.graphics.vulkanFeatureQueryAPI===1){
   nativeFiles.push("maclauncher-vulkan-features");
 }
+if(fs.existsSync(path.join(build,"maclauncher-winemetal.so")))nativeFiles.push("maclauncher-winemetal.so");
 const retroarchInputs = new Map();
 const extraSources=[];
 const optionalInputs=new Map(),optionalLoad=new Map(),extraOwned=new Map();
