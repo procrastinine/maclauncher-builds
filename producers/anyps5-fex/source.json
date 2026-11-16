@@ -64,7 +64,13 @@
     ],
     "guest": {
       "source": "guest-abi.c",
-      "entry": "guest_abi"
+      "symbols": [
+        "guest_abi",
+        "guest_callback"
+      ]
+    },
+    "generator": {
+      "script": "generate-thunks.py"
     }
   }
 }

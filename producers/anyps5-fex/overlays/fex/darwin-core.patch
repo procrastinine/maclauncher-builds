@@ -230,7 +230,7 @@ index 6e8df9553..f0071518e 100644
  
    // Load the values returned by the kernel
 diff --git a/FEXCore/Source/Interface/Core/SharedCodeBufferManager.cpp b/FEXCore/Source/Interface/Core/SharedCodeBufferManager.cpp
-index eee502364..9a08c14df 100644
+index eee502364..7439239e1 100644
 --- a/FEXCore/Source/Interface/Core/SharedCodeBufferManager.cpp
 +++ b/FEXCore/Source/Interface/Core/SharedCodeBufferManager.cpp
 @@ -1,4 +1,5 @@
@@ -239,7 +239,7 @@ index eee502364..9a08c14df 100644
  #include "Interface/Core/LookupCache.h"
  #include "Interface/Core/SharedCodeBufferManager.h"
  
-@@ -22,8 +23,14 @@ CodeBuffer::CodeBuffer(size_t Size, bool ShouldBeNamed)
+@@ -22,10 +23,25 @@ CodeBuffer::CodeBuffer(size_t Size, bool ShouldBeNamed)
    LOGMAN_THROW_A_FMT(!!Ptr, "Couldn't allocate code buffer");
  
    // Protect the last page of the allocated buffer to trigger SIGSEGV on write access
@@ -254,9 +254,20 @@ index eee502364..9a08c14df 100644
 +  uintptr_t LastPageAddr = AlignDown(reinterpret_cast<uintptr_t>(Ptr) + Size - 1, GuardPageSize);
 +  if (!FEXCore::Allocator::VirtualProtect(reinterpret_cast<void*>(LastPageAddr), GuardPageSize,
                                            FEXCore::Allocator::ProtectOptions::None)) {
++#ifdef __APPLE__
++    // macOS can refuse PROT_NONE inside a MAP_JIT mapping; the code buffer then has no guard page.
++    static bool Reported = false;
++    if (!Reported) {
++      Reported = true;
++      LogMan::Msg::DFmt("No guard page at the end of the MAP_JIT code buffer.");
++    }
++#else
      LogMan::Msg::EFmt("Failed to mprotect last page of code buffer.");
++#endif
    }
-@@ -57,7 +64,7 @@ SharedCodeBufferManager::SharedCodeBufferManager() {
+ 
+   if (ShouldBeNamed) {
+@@ -57,7 +73,7 @@ SharedCodeBufferManager::SharedCodeBufferManager() {
  }
  
  fextl::shared_ptr<CodeBuffer> SharedCodeBufferManager::AllocateNew(size_t Size) {
@@ -592,6 +603,27 @@ index af59a6efb..5c6967ccb 100644
  template<typename Pred, typename T>
  static inline void WaitPred(T* Futex, T ComparisonValue) {
    auto AtomicFutex = std::atomic_ref<T>(*Futex);
+diff --git a/FEXCore/include/FEXCore/Utils/ThreadPoolAllocator.h b/FEXCore/include/FEXCore/Utils/ThreadPoolAllocator.h
+index 69e410c1f..faeade755 100644
+--- a/FEXCore/include/FEXCore/Utils/ThreadPoolAllocator.h
++++ b/FEXCore/include/FEXCore/Utils/ThreadPoolAllocator.h
+@@ -421,10 +421,16 @@ private:
+   void* Alloc(size_t Size) override {
+     auto Ptr = FEXCore::Allocator::VirtualAlloc(Size);
+     uintptr_t LastPageAddr = AlignDown(reinterpret_cast<uintptr_t>(Ptr) + Size - 1, FEXCore::Utils::FEX_PAGE_SIZE);
++#ifdef __APPLE__
++    // The guard is one 4 KB page, which a 16 KB-page host cannot protect without covering the end of the buffer, so
++    // these buffers have no guard page.
++    (void)LastPageAddr;
++#else
+     if (!FEXCore::Allocator::VirtualProtect(reinterpret_cast<void*>(LastPageAddr), FEXCore::Utils::FEX_PAGE_SIZE,
+                                             FEXCore::Allocator::ProtectOptions::None)) {
+       LogMan::Msg::EFmt("Failed to mprotect last page of code buffer.");
+     }
++#endif
+     if (Name) {
+       FEXCore::Allocator::VirtualName(Name, Ptr, Size);
+     }
 diff --git a/FEXCore/include/FEXCore/Utils/WritePriorityMutex.h b/FEXCore/include/FEXCore/Utils/WritePriorityMutex.h
 index bf1bd2bbc..823a44e47 100644
 --- a/FEXCore/include/FEXCore/Utils/WritePriorityMutex.h

@@ -28,10 +28,12 @@ namespace FexGuest {
 using FEXCore::Core::CPUState;
 namespace X86 = FEXCore::X86State;
 
-// Stub page layout: offset 0 is the HLT that ends the run (the guest entry's return address), thunk i is the HLT at
-// ThunkStubOffset + i * ThunkStubSize, X87ReturnStub loads st(0) from X87ReturnSlot and returns to the guest caller.
+// Stub page layout: offset 0 is the HLT that ends the run (the guest entry's return address), offset 8 the HLT that
+// ends a guest callback (CallGuest), thunk i is the HLT at ThunkStubOffset + i * ThunkStubSize, and X87ReturnStub
+// loads st(0) from X87ReturnSlot and returns to the guest caller.
 inline std::uint64_t StubBase = 0;
 constexpr std::uint64_t StackSize = 1 << 20;
+constexpr std::uint64_t CallbackReturnOffset = 8;
 constexpr std::uint64_t ThunkStubOffset = 16;
 constexpr std::uint64_t ThunkStubSize = 16;
 constexpr std::uint64_t StubPageSize = 0x10000;
@@ -170,6 +172,7 @@ inline void MapStubs(std::size_t ThunkCount) {
   auto* Stubs = static_cast<std::uint8_t*>(MapGuest(StubPageSize));
   StubBase = reinterpret_cast<std::uint64_t>(Stubs);
   Stubs[0] = 0xF4;
+  Stubs[CallbackReturnOffset] = 0xF4;
   for (std::size_t i = 0; i < ThunkCount; ++i) {
     Stubs[ThunkStubOffset + i * ThunkStubSize] = 0xF4;
   }
@@ -190,12 +193,82 @@ inline std::uint64_t MapStack() {
   return Stack;
 }
 
+inline FEXCore::Context::Context* CTX = nullptr;
+inline FEXCore::Core::InternalThreadState* Thread = nullptr;
+inline std::span<const Thunk> ActiveThunks;
+inline std::uint64_t* ActiveThunkCalls = nullptr;
+
+// Executes the guest thread until its rip is StopAt or Breakpoint (0 for none), dispatching thunks on the way.
+inline void Loop(std::uint64_t StopAt, std::uint64_t Breakpoint) {
+  auto& Guest = Thread->CurrentFrame->State;
+  for (;;) {
+    CTX->ExecuteThread(Thread);
+    if (Guest.rip == StopAt || (Breakpoint != 0 && Guest.rip == Breakpoint)) {
+      return;
+    }
+    const std::uint64_t Stop = Guest.rip - StubBase;
+    if (Guest.rip < StubBase || Stop < ThunkStubOffset || (Stop - ThunkStubOffset) % ThunkStubSize != 0 ||
+        (Stop - ThunkStubOffset) / ThunkStubSize >= ActiveThunks.size()) {
+      std::printf("guest stopped at 0x%llx outside the thunk stubs\nFAIL\n", static_cast<unsigned long long>(Guest.rip));
+      std::exit(1);
+    }
+    ++*ActiveThunkCalls;
+    if (ActiveThunks[(Stop - ThunkStubOffset) / ThunkStubSize](Guest) == After::Return) {
+      auto& RSP = Guest.gregs[X86::REG_RSP];
+      Guest.rip = *reinterpret_cast<std::uint64_t*>(RSP);
+      RSP += 8;
+    }
+  }
+}
+
+struct GuestResult {
+  std::uint64_t Rax;
+  std::uint64_t Xmm0;
+};
+
+// Calls a guest function from inside a host thunk, on the same guest thread: System V integer and float arguments in
+// registers, a frame below the caller's red zone, and the callback-return HLT as its return address. The interrupted
+// guest state is restored afterwards, so callbacks nest.
+inline GuestResult CallGuest(std::uint64_t Function, std::span<const std::uint64_t> Integers, std::span<const double> Floats) {
+  static constexpr int Registers[] = {X86::REG_RDI, X86::REG_RSI, X86::REG_RDX, X86::REG_RCX, X86::REG_R8, X86::REG_R9};
+  if (Integers.size() > 6 || Floats.size() > 8) {
+    std::printf("guest callback with stack arguments is not supported yet\nFAIL\n");
+    std::exit(1);
+  }
+  auto& Guest = Thread->CurrentFrame->State;
+  std::uint64_t SavedGregs[16];
+  std::uint64_t SavedXmm[16][2];
+  std::memcpy(SavedGregs, Guest.gregs, sizeof(SavedGregs));
+  std::memcpy(SavedXmm, Guest.xmm.sse.data, sizeof(SavedXmm));
+  const std::uint64_t SavedRip = Guest.rip;
+
+  std::uint64_t RSP = ((Guest.gregs[X86::REG_RSP] - 128) & ~15ULL) - 8;
+  *reinterpret_cast<std::uint64_t*>(RSP) = StubBase + CallbackReturnOffset;
+  Guest.gregs[X86::REG_RSP] = RSP;
+  for (std::size_t i = 0; i < Integers.size(); ++i) {
+    Guest.gregs[Registers[i]] = Integers[i];
+  }
+  for (std::size_t i = 0; i < Floats.size(); ++i) {
+    std::memcpy(&Guest.xmm.sse.data[i][0], &Floats[i], 8);
+    Guest.xmm.sse.data[i][1] = 0;
+  }
+  Guest.gregs[X86::REG_RAX] = Floats.size();
+  Guest.rip = Function;
+  Loop(StubBase + CallbackReturnOffset, 0);
+
+  const GuestResult Result {Guest.gregs[X86::REG_RAX], Guest.xmm.sse.data[0][0]};
+  std::memcpy(Guest.gregs, SavedGregs, sizeof(SavedGregs));
+  std::memcpy(Guest.xmm.sse.data, SavedXmm, sizeof(SavedXmm));
+  Guest.rip = SavedRip;
+  return Result;
+}
+
 // Runs the guest from Initial until it returns to stub 0 or reaches Breakpoint (a HLT the caller placed), dispatching
 // thunks. The first call creates the FEXCore context and the guest thread; later calls reuse that thread with the rip,
 // general registers and FS base of Initial. Returns the guest state, which lives as long as the process.
 inline const CPUState& Run(CPUState& Initial, std::span<const Thunk> Thunks, std::uint64_t& ThunkCalls, std::uint64_t Breakpoint = 0) {
-  static FEXCore::Context::Context* CTX = nullptr;
-  static FEXCore::Core::InternalThreadState* Thread = nullptr;
+  ActiveThunks = Thunks;
+  ActiveThunkCalls = &ThunkCalls;
   if (CTX) {
     auto& Guest = Thread->CurrentFrame->State;
     Guest.rip = Initial.rip;
@@ -242,25 +315,7 @@ inline const CPUState& Run(CPUState& Initial, std::span<const Thunk> Thunks, std
     Guest.callret_sp = CallRet + PageSize + CallRetSize / 4;
     std::printf("guest thread created; running 0x%llx\n", static_cast<unsigned long long>(Guest.rip));
   }
-  auto& Guest = Thread->CurrentFrame->State;
-
-  for (;;) {
-    CTX->ExecuteThread(Thread);
-    const std::uint64_t Stop = Guest.rip - StubBase;
-    if (Stop == 0 || (Breakpoint != 0 && Guest.rip == Breakpoint)) {
-      return Guest;
-    }
-    if (Guest.rip < StubBase || Stop < ThunkStubOffset || (Stop - ThunkStubOffset) % ThunkStubSize != 0 ||
-        (Stop - ThunkStubOffset) / ThunkStubSize >= Thunks.size()) {
-      std::printf("guest stopped at 0x%llx outside the thunk stubs\nFAIL\n", static_cast<unsigned long long>(Guest.rip));
-      std::exit(1);
-    }
-    ++ThunkCalls;
-    if (Thunks[(Stop - ThunkStubOffset) / ThunkStubSize](Guest) == After::Return) {
-      auto& RSP = Guest.gregs[X86::REG_RSP];
-      Guest.rip = *reinterpret_cast<std::uint64_t*>(RSP);
-      RSP += 8;
-    }
-  }
+  Loop(StubBase, Breakpoint);
+  return Thread->CurrentFrame->State;
 }
 } // namespace FexGuest

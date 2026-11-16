@@ -9,13 +9,20 @@ struct Slots {
   long double (*scale)(long double, int);
   double (*weigh)(double, double, double, double, double, double, double, double, double, double);
   Pair (*pair)(long long, double);
+  int (*apply)(int (*)(int, int), int, int);
 };
-struct Inputs { long long i[10]; double d[10]; long double x; int n; long long tag; double value; };
-struct Results { Big big; long double scaled; double weighed; Pair pair; };
+struct Inputs { long long i[10]; double d[10]; long double x; int n; long long tag; double value; int (*callback)(int, int); };
+struct Results { Big big; long double scaled; double weighed; Pair pair; int applied; };
+
+// Called back by the host through the function pointer in Inputs.
+int guest_callback(int a, int b) {
+  return a * 10 + b;
+}
 
 void guest_abi(const struct Slots* s, const struct Inputs* in, struct Results* out) {
   out->big = s->make_big(in->i[0], in->i[1], in->i[2], in->i[3], in->i[4], in->i[5], in->i[6], in->i[7], in->i[8], in->i[9]);
   out->scaled = s->scale(in->x, in->n);
   out->weighed = s->weigh(in->d[0], in->d[1], in->d[2], in->d[3], in->d[4], in->d[5], in->d[6], in->d[7], in->d[8], in->d[9]);
   out->pair = s->pair(in->tag, in->value);
+  out->applied = s->apply(in->callback, 3, 4);
 }

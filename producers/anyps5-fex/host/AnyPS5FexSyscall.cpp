@@ -3,9 +3,12 @@
 // host's SyscallHandler::HandleSyscall must see those values in the frame, with rcx holding the return RIP. The
 // handler writes a result to rax and advances rip past the instruction; the stub returns and the guest stores rax
 // and stops at a HLT.
+// With a PS5 module, the check also runs one of its functions whose import slot points at the same kind of stub, the
+// shape in which RAX was once seen corrupted: DOOM's I_GetTime calls sceKernelGetProcessTime through its GOT, and the
+// handler answers with a time from which the function's tic count is known.
 //
-// Usage: anyps5-fex-syscall
-#include "FexGuest.h"
+// Usage: anyps5-fex-syscall [<eboot.elf> <function vaddr> <GOT slot vaddr> <bss vaddr>]
+#include "Ps5Module.h"
 
 #include <array>
 #include <cinttypes>
@@ -13,6 +16,7 @@
 namespace {
 std::uint64_t Seen[5] {};
 std::uint64_t Calls = 0;
+std::uint64_t Answer = 0x600DCAFE;
 
 class CheckingHandler final : public FEXCore::HLE::SyscallHandler {
 public:
@@ -25,7 +29,7 @@ public:
     Seen[3] = S.gregs[X86::REG_RDX];
     Seen[4] = S.gregs[X86::REG_RCX];
     ++Calls;
-    S.gregs[X86::REG_RAX] = 0x600DCAFE;
+    S.gregs[X86::REG_RAX] = Answer;
     S.rip += 2;
   }
   FEXCore::HLE::ExecutableRangeInfo QueryGuestExecutableRange(FEXCore::Core::InternalThreadState*, std::uint64_t Address) override {
@@ -37,7 +41,11 @@ public:
 };
 } // namespace
 
-int main() {
+int main(int argc, char** argv) {
+  if (argc != 1 && argc != 5) {
+    std::fprintf(stderr, "usage: %s [<eboot.elf> <function vaddr> <GOT slot vaddr> <bss vaddr>]\n", argv[0]);
+    return 2;
+  }
   FexGuest::InstallFaultReport();
   FexGuest::InitConfig();
   FexGuest::MapStubs(0);
@@ -66,8 +74,27 @@ int main() {
 
   std::printf("HandleSyscall saw rax 0x%" PRIx64 " rdi 0x%" PRIx64 " rsi 0x%" PRIx64 " rdx 0x%" PRIx64 " rcx 0x%" PRIx64 "; guest stored 0x%" PRIx64 "\n",
               Seen[0], Seen[1], Seen[2], Seen[3], Seen[4], Result[0]);
-  const bool Pass = Calls == 1 && Seen[0] == 0x5A000001 && Seen[1] == 0x11 && Seen[2] == 0x22 && Seen[3] == 0x33 && Seen[4] == SyscallReturn &&
-                    Result[0] == 0x600DCAFE;
+  bool Pass = Calls == 1 && Seen[0] == 0x5A000001 && Seen[1] == 0x11 && Seen[2] == 0x22 && Seen[3] == 0x33 && Seen[4] == SyscallReturn &&
+              Result[0] == 0x600DCAFE;
+
+  if (argc == 5) {
+    auto Module = Ps5::Load(argv[1], "eboot.elf");
+    // mov r10, rcx; mov eax, 0x5a000000; syscall; ret
+    const std::uint8_t ImportStub[] = {0x49, 0x89, 0xCA, 0xB8, 0x00, 0x00, 0x00, 0x5A, 0x0F, 0x05, 0xC3};
+    std::memcpy(Page + 0x100, ImportStub, sizeof(ImportStub));
+    *reinterpret_cast<std::uint64_t*>(Module.Base + std::strtoull(argv[3], nullptr, 0)) = reinterpret_cast<std::uint64_t>(Page) + 0x100;
+    // The function returns (now - base) * 35 / 1000000; base 1 and now 2000001 microseconds give 70 tics.
+    *reinterpret_cast<std::uint64_t*>(Module.Base + std::strtoull(argv[4], nullptr, 0)) = 1;
+    Answer = 2000001;
+    Calls = 0;
+    FexGuest::CPUState Call {};
+    Call.rip = Module.Base + std::strtoull(argv[2], nullptr, 0);
+    Call.gregs[FexGuest::X86::REG_RSP] = FexGuest::MapStack();
+    const auto& Final = FexGuest::Run(Call, std::span<const FexGuest::Thunk> {}, ThunkCalls);
+    const std::uint64_t Tics = Final.gregs[FexGuest::X86::REG_RAX];
+    std::printf("module function: HandleSyscall saw rax 0x%" PRIx64 "; the function returned %" PRIu64 " tics, want 70\n", Seen[0], Tics);
+    Pass = Pass && Calls == 1 && Seen[0] == 0x5A000000 && Tics == 70;
+  }
   std::printf("%s\n", Pass ? "PASS" : "FAIL");
   return Pass ? 0 : 1;
 }

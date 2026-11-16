@@ -10,12 +10,18 @@
 // - structs over 16 bytes: returned through a hidden pointer in rdi, which shifts the integer arguments by one, with
 //   that pointer returned in rax;
 // - structs of 16 bytes or less: each eightbyte in the next of rax/rdx (INTEGER) or xmm0/xmm1 (SSE), by the classes
-//   that SysVEightbytes<T> gives; generated thunks take them from the classification of the prototype's type.
+//   that SysVEightbytes<T> gives; generated thunks take them from the classification of the prototype's type;
+// - function pointer arguments: guest code addresses; the export receives a host function pointer that runs the
+//   guest function under FEXCore (GuestFunction, through FexGuest::CallGuest).
+// ThunkFor<Export>() is the thunk, or nullptr for a prototype these rules do not cover yet (by-value struct arguments,
+// small struct returns without SysVEightbytes, variadic functions).
 #pragma once
 
 #include "FexGuest.h"
 
+#include <array>
 #include <bit>
+#include <utility>
 #include <cmath>
 #include <tuple>
 #include <type_traits>
@@ -76,6 +82,71 @@ constexpr bool IsMemoryStruct = [] {
   }
 }();
 
+template<class T>
+constexpr bool IsGuestFunctionPointer = std::is_pointer_v<T> && std::is_function_v<std::remove_pointer_t<T>>;
+
+// Host function pointers that call guest functions of one signature: a fixed pool of slots per signature.
+template<class F>
+struct GuestFunction;
+
+template<class R, class... A>
+struct GuestFunction<R(A...)> {
+  static constexpr std::size_t SlotCount = 32;
+  static inline std::uint64_t Targets[SlotCount] {};
+
+  static R Invoke(std::uint64_t Target, A... Values) {
+    std::uint64_t Integers[sizeof...(A) + 1] {};
+    double Floats[sizeof...(A) + 1] {};
+    std::size_t Int = 0, Vector = 0;
+    auto Add = [&](auto Value) {
+      using T = decltype(Value);
+      if constexpr (std::is_floating_point_v<T>) {
+        Floats[Vector++] = static_cast<double>(Value);
+      } else if constexpr (std::is_pointer_v<T>) {
+        Integers[Int++] = reinterpret_cast<std::uint64_t>(Value);
+      } else {
+        Integers[Int++] = static_cast<std::uint64_t>(Value);
+      }
+    };
+    (Add(Values), ...);
+    const auto Result = FexGuest::CallGuest(Target, std::span<const std::uint64_t>(Integers, Int), std::span<const double>(Floats, Vector));
+    if constexpr (std::is_void_v<R>) {
+      return;
+    } else if constexpr (std::is_floating_point_v<R>) {
+      return static_cast<R>(std::bit_cast<double>(Result.Xmm0));
+    } else if constexpr (std::is_pointer_v<R>) {
+      return reinterpret_cast<R>(Result.Rax);
+    } else {
+      return static_cast<R>(Result.Rax);
+    }
+  }
+
+  template<std::size_t N>
+  static R Call(A... Values) {
+    return Invoke(Targets[N], Values...);
+  }
+
+  template<std::size_t... N>
+  static constexpr auto Table(std::index_sequence<N...>) {
+    return std::array<R (*)(A...), SlotCount> {&Call<N>...};
+  }
+
+  static R (*Wrap(std::uint64_t Target))(A...) {
+    if (Target == 0) {
+      return nullptr;
+    }
+    static constexpr auto Calls = Table(std::make_index_sequence<SlotCount> {});
+    for (std::size_t i = 0; i < SlotCount; ++i) {
+      if (Targets[i] == Target || Targets[i] == 0) {
+        Targets[i] = Target;
+        return Calls[i];
+      }
+    }
+    std::printf("more than %zu guest callbacks of one signature\nFAIL\n", SlotCount);
+    std::exit(1);
+  }
+};
+
 class Arguments {
 public:
   explicit Arguments(CPUState& State)
@@ -104,6 +175,8 @@ public:
       return std::bit_cast<double>(Sse());
     } else if constexpr (std::is_same_v<T, float>) {
       return std::bit_cast<float>(static_cast<std::uint32_t>(Sse()));
+    } else if constexpr (IsGuestFunctionPointer<T>) {
+      return GuestFunction<std::remove_pointer_t<T>>::Wrap(Integer());
     } else if constexpr (std::is_same_v<T, bool>) {
       return (Integer() & 0xff) != 0;
     } else if constexpr (std::is_integral_v<T> || std::is_enum_v<T>) {
@@ -188,5 +261,34 @@ After Call(R (*Export)(A...), CPUState& State) {
 template<auto Export>
 After Thunk(CPUState& State) {
   return Call(Export, State);
+}
+
+template<class T>
+constexpr bool SupportedArgument = std::is_arithmetic_v<T> || std::is_enum_v<T> || std::is_pointer_v<T>;
+
+template<class R>
+constexpr bool SupportedReturn = [] {
+  if constexpr (std::is_void_v<R> || std::is_arithmetic_v<R> || std::is_enum_v<R> || std::is_pointer_v<R>) {
+    return true;
+  } else if constexpr (std::is_class_v<R>) {
+    return IsMemoryStruct<R> || requires { SysVEightbytes<R>::Classes; };
+  } else {
+    return false;
+  }
+}();
+
+template<class F>
+struct Supported : std::false_type {};
+template<class R, class... A>
+struct Supported<R (*)(A...)> : std::bool_constant<SupportedReturn<R> && (SupportedArgument<A> && ...)> {};
+
+// The thunk for Export, or nullptr when its prototype needs a case the thunks do not cover yet.
+template<auto Export>
+constexpr FexGuest::Thunk ThunkFor() {
+  if constexpr (Supported<decltype(Export)>::value) {
+    return Thunk<Export>;
+  } else {
+    return nullptr;
+  }
 }
 } // namespace SysV

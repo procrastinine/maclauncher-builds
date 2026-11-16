@@ -2,6 +2,7 @@
 // Builds the AnyPS5 under FEXCore proof host for arm64 macOS from pinned sources and owned overlays.
 //
 //   node producers/anyps5-fex/build-proof.mjs --out <directory> [--check <eboot.elf> <function> <slot> <bss> <main>]
+//     [--only proof,abi,start,syscall]
 //
 // The FEX checkout (with the submodules source.json lists) and the AnyPS5 paths are projected into
 // <directory>, the overlays are applied there, AnyPS5's arm64 library objects are compiled, and the
@@ -35,6 +36,7 @@ function argumentsOf(argv){
  for(let at=0;at<argv.length;at++){
   if(argv[at]==='--out')options.out=path.resolve(argv[++at]);
   else if(argv[at]==='--check'){options.check=argv.slice(at+1,at+6);at+=5;}
+  else if(argv[at]==='--only')options.only=new Set(argv[++at].split(','));
   else throw Error('Unknown argument: '+argv[at]);
  }
  if(!options.out)throw Error('--out is required.');
@@ -77,7 +79,7 @@ function link(out,objects,log){
  const build=path.join(out,'build');
  run('cmake',['-S',path.join(out,'fex'),'-B',build,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DBUILD_TESTING=OFF','-DBUILD_FEXCONFIG=OFF',
   '-DENABLE_JEMALLOC_GLIBC_ALLOC=OFF','-DENABLE_OFFLINE_TELEMETRY=OFF','-DENABLE_CCACHE=OFF','-DENABLE_LTO=OFF','-DTUNE_CPU=none','-DTUNE_ARCH=generic',
-  '-DANYPS5_ARM64_OBJECTS='+objects.join(';'),'-DANYPS5_SOURCE_DIR='+path.join(out,'anyps5')],{stdio:['ignore','ignore','inherit']});
+  '-DANYPS5_ARM64_OBJECTS='+objects.join(';'),'-DANYPS5_SOURCE_DIR='+path.join(out,'anyps5'),'-DANYPS5_GENERATED_THUNKS='+path.join(out,'generated-thunks.cpp')],{stdio:['ignore','ignore','inherit']});
  const result=spawnSync('ninja',['-C',build,...recipe.host.targets],{encoding:'utf8',maxBuffer:Infinity});
  fs.writeFileSync(log,result.stdout+result.stderr);
  return result.status===0;
@@ -95,6 +97,9 @@ function check(binary,args,failing,passing){
 const options=argumentsOf(process.argv.slice(2));
 if(process.platform!=='darwin'||process.arch!=='arm64')throw Error('The proof builds on arm64 macOS.');
 lowestPriority();
+let niceness='unavailable';
+try{niceness=execFileSync('ps',['-o','ni=','-p',String(process.pid)],{encoding:'utf8'}).trim();}catch{}
+process.stdout.write('build priority (ps -o ni): '+niceness+'\n');
 const fex=verifyCheckout(recipe.source),anyps5=verifyCheckout(recipe.anyps5);
 fs.rmSync(path.join(options.out,'fex'),{recursive:true,force:true});fs.rmSync(path.join(options.out,'anyps5'),{recursive:true,force:true});
 project(fex,path.join(options.out,'fex'));project(anyps5,path.join(options.out,'anyps5'),recipe.anyps5.paths);
@@ -106,12 +111,15 @@ for(const file of recipe.host.sources)fs.copyFileSync(path.join(import.meta.dirn
 const guestObject=path.join(options.out,'guest-abi.x86_64.o'),guestText=path.join(options.out,'guest-abi.bin');
 run('clang',['-arch','x86_64','-O2','-ffreestanding','-fno-builtin','-fno-stack-protector','-fno-asynchronous-unwind-tables','-c',
  path.join(import.meta.dirname,recipe.host.directory,recipe.host.guest.source),'-o',guestObject]);
-const guestEntry=execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,'macho-text.py'),guestObject,recipe.host.guest.entry,guestText],{encoding:'utf8'}).trim();
+const guestOffsets=execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,'macho-text.py'),guestObject,guestText,...recipe.host.guest.symbols],{encoding:'utf8'}).trim().split(' ');
 const objects=recipe.anyps5.objects.map(source=>{
  const object=path.join(options.out,path.basename(source,'.cpp')+'.arm64.o');
  run('clang++',['-std=c++20','-arch','arm64','-O2','-c','-I',path.join(options.out,'anyps5/core/libs'),path.join(options.out,'anyps5',source),'-o',object]);
  return object;
 });
+const generatedThunks=path.join(options.out,'generated-thunks.cpp');
+execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,recipe.host.generator.script),generatedThunks,
+ path.join(options.out,'anyps5/core/libs'),...recipe.anyps5.objects.map(source=>path.join(options.out,'anyps5',source)),'--',...objects],{stdio:'inherit'});
 const firstLog=path.join(options.out,'link-exports.log');
 if(!link(options.out,objects,firstLog)){
  if(!/Undefined symbols/.test(fs.readFileSync(firstLog,'utf8')))throw Error('The proof build failed; see '+firstLog);
@@ -128,13 +136,17 @@ if(!link(options.out,objects,firstLog)){
  if(!link(options.out,[...objects,stubs],secondLog))throw Error('The proof build failed; see '+secondLog);
 }
 const [proof,abi,start,syscall]=recipe.host.targets.map(target=>path.join(options.out,'build/Bin',target));
-process.stdout.write(proof+'\n'+abi+' '+guestText+' '+guestEntry+'\n'+start+'\n'+syscall+'\n');
+process.stdout.write(proof+'\n'+abi+' '+guestText+' '+guestOffsets.join(' ')+'\n'+start+'\n'+syscall+'\n');
 if(options.check){
  const [eboot,functionAddress,slot,bss,main]=options.check;
- check(proof,[eboot,functionAddress,slot,bss],'unbound','bound');
- check(abi,[guestText,guestEntry],'generic','thunks');
- check(start,[path.dirname(eboot),main],'eboot-only','modules');
- const entry=spawnSync(syscall,[],{encoding:'utf8',timeout:20000});
+ // A check whose inputs did not change is not rerun: --only names the ones to run.
+ const runs=name=>!options.only||options.only.has(name);
+ if(runs('proof'))check(proof,[eboot,functionAddress,slot,bss],'unbound','bound');
+ if(runs('abi'))check(abi,[guestText,...guestOffsets],'generic','thunks');
+ if(runs('start'))check(start,[path.dirname(eboot),main],'eboot-only','modules');
+ if(runs('syscall')){
+ const entry=spawnSync(syscall,[eboot,functionAddress,slot,bss],{encoding:'utf8',timeout:20000});
  process.stdout.write('--- '+path.basename(syscall)+' (exit '+entry.status+')\n'+entry.stdout);
  if(entry.status!==0||!/^PASS$/m.test(entry.stdout))throw Error('The SYSCALL entry check failed.');
+ }
 }

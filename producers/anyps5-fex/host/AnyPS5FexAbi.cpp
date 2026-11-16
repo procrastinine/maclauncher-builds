@@ -2,10 +2,11 @@
 // Per-signature thunk proof: x86-64 guest code (guest-abi.c) runs under FEXCore and calls four arm64 exports through
 // slots holding thunk stubs. The exports cover the signature classes a generic register shim gets wrong: a struct over
 // 16 bytes returned through a hidden pointer in rdi with 10 integer arguments (5 on the guest stack), long double in and
-// out, 10 double arguments (2 on the guest stack), and a 16-byte INTEGER+SSE struct return. Each result the guest
-// stores must equal the result of calling the export directly.
+// out, 10 double arguments (2 on the guest stack), a 16-byte INTEGER+SSE struct return, and a guest function pointer
+// that the export calls back twice. Each result the guest stores must equal the result of calling the export directly
+// (with the callback computed on the host).
 //
-// Usage: anyps5-fex-abi <guest-abi.bin> <entry offset> thunks|generic
+// Usage: anyps5-fex-abi <guest-abi.bin> <entry offset> <callback offset> thunks|generic
 //   thunks:  SysVThunk<Export> per export.
 //   generic: the generic shim (GenericBridge.S); expected to fail.
 #include "SysVThunk.h"
@@ -46,11 +47,17 @@ double AbiWeigh(double d1, double d2, double d3, double d4, double d5, double d6
 Pair AbiPair(long long tag, double value) {
   return {tag * 3, value * 4};
 }
+int AbiApply(int (*Callback)(int, int), int a, int b) {
+  return Callback(a, b) + Callback(b, a);
+}
+}
+int HostCallback(int a, int b) {
+  return a * 10 + b;
 }
 
 // The guest structures with their x86-64 layout (long double is 16 bytes, 16-byte aligned).
 struct GuestSlots {
-  std::uint64_t MakeBig, Scale, Weigh, Pair;
+  std::uint64_t MakeBig, Scale, Weigh, Pair, Apply;
 };
 struct GuestInputs {
   long long i[10];
@@ -59,17 +66,19 @@ struct GuestInputs {
   int n;
   long long tag;
   double value;
+  std::uint64_t callback;
 };
 static_assert(offsetof(GuestInputs, x) == 160 && offsetof(GuestInputs, n) == 176 && offsetof(GuestInputs, tag) == 184 &&
-              offsetof(GuestInputs, value) == 192 && sizeof(GuestInputs) == 208);
+              offsetof(GuestInputs, value) == 192 && offsetof(GuestInputs, callback) == 200 && sizeof(GuestInputs) == 208);
 struct GuestResults {
   Big big;
   alignas(16) std::uint8_t scaled[16];
   double weighed;
   Pair pair;
+  int applied;
 };
 static_assert(offsetof(GuestResults, scaled) == 32 && offsetof(GuestResults, weighed) == 48 && offsetof(GuestResults, pair) == 56 &&
-              sizeof(GuestResults) == 80);
+              offsetof(GuestResults, applied) == 72 && sizeof(GuestResults) == 80);
 
 struct BridgeRegisters {
   std::uint64_t X[8];
@@ -104,10 +113,10 @@ SysV::After GenericThunk(FexGuest::CPUState& State) {
 }
 
 namespace {
-constexpr std::array<FexGuest::Thunk, 4> PerSignature {SysV::Thunk<&AbiMakeBig>, SysV::Thunk<&AbiScale>, SysV::Thunk<&AbiWeigh>,
-                                                       SysV::Thunk<&AbiPair>};
-constexpr std::array<FexGuest::Thunk, 4> Generic {GenericThunk<&AbiMakeBig>, GenericThunk<&AbiScale>, GenericThunk<&AbiWeigh>,
-                                                  GenericThunk<&AbiPair>};
+constexpr std::array<FexGuest::Thunk, 5> PerSignature {SysV::ThunkFor<&AbiMakeBig>(), SysV::ThunkFor<&AbiScale>(), SysV::ThunkFor<&AbiWeigh>(),
+                                                       SysV::ThunkFor<&AbiPair>(), SysV::ThunkFor<&AbiApply>()};
+constexpr std::array<FexGuest::Thunk, 5> Generic {GenericThunk<&AbiMakeBig>, GenericThunk<&AbiScale>, GenericThunk<&AbiWeigh>,
+                                                  GenericThunk<&AbiPair>, GenericThunk<&AbiApply>};
 
 std::vector<std::uint8_t> ReadFile(const char* Path) {
   std::vector<std::uint8_t> Data;
@@ -128,13 +137,13 @@ std::vector<std::uint8_t> ReadFile(const char* Path) {
 } // namespace
 
 int main(int argc, char** argv) {
-  if (argc != 4 || (std::string(argv[3]) != "thunks" && std::string(argv[3]) != "generic")) {
-    std::fprintf(stderr, "usage: %s <guest-abi.bin> <entry offset> thunks|generic\n", argv[0]);
+  if (argc != 5 || (std::string(argv[4]) != "thunks" && std::string(argv[4]) != "generic")) {
+    std::fprintf(stderr, "usage: %s <guest-abi.bin> <entry offset> <callback offset> thunks|generic\n", argv[0]);
     return 2;
   }
   FexGuest::InstallFaultReport();
   FexGuest::InitConfig();
-  const bool PerSignatureThunks = std::string(argv[3]) == "thunks";
+  const bool PerSignatureThunks = std::string(argv[4]) == "thunks";
   const auto& Thunks = PerSignatureThunks ? PerSignature : Generic;
 
   const auto Code = ReadFile(argv[1]);
@@ -159,6 +168,7 @@ int main(int argc, char** argv) {
   Inputs->n = 3;
   Inputs->tag = 42;
   Inputs->value = 2.5;
+  Inputs->callback = reinterpret_cast<std::uint64_t>(CodePage) + std::strtoull(argv[3], nullptr, 0);
 
   FexGuest::CPUState Initial {};
   Initial.rip = reinterpret_cast<std::uint64_t>(CodePage) + std::strtoull(argv[2], nullptr, 0);
@@ -173,12 +183,14 @@ int main(int argc, char** argv) {
   const double WantScaled = AbiScale(X, 3);
   const double WantWeighed = AbiWeigh(1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5);
   const Pair WantPair = AbiPair(42, 2.5);
+  const int WantApplied = AbiApply(HostCallback, 3, 4);
   const double GotScaled = SysV::X87ToDouble(Results->scaled);
 
   const bool BigOk = std::memcmp(&Results->big, &WantBig, sizeof(Big)) == 0;
   const bool ScaledOk = GotScaled == WantScaled;
   const bool WeighedOk = Results->weighed == WantWeighed;
   const bool PairOk = Results->pair.tag == WantPair.tag && Results->pair.value == WantPair.value;
+  const bool AppliedOk = Results->applied == WantApplied;
   std::printf("%s thunks, %" PRIu64 " calls\n", PerSignatureThunks ? "per-signature" : "generic", ThunkCalls);
   std::printf("struct over 16 bytes, 10 integer arguments: got {%lld, %lld, %lld, %lld}, want {%lld, %lld, %lld, %lld} %s\n",
               Results->big.a, Results->big.b, Results->big.c, Results->big.d, WantBig.a, WantBig.b, WantBig.c, WantBig.d,
@@ -187,7 +199,8 @@ int main(int argc, char** argv) {
   std::printf("10 double arguments: got %.17g, want %.17g %s\n", Results->weighed, WantWeighed, WeighedOk ? "ok" : "WRONG");
   std::printf("INTEGER+SSE struct return: got {%lld, %.17g}, want {%lld, %.17g} %s\n", Results->pair.tag, Results->pair.value, WantPair.tag,
               WantPair.value, PairOk ? "ok" : "WRONG");
-  const bool Pass = ThunkCalls == 4 && BigOk && ScaledOk && WeighedOk && PairOk;
+  std::printf("guest callback called twice by the export: got %d, want %d %s\n", Results->applied, WantApplied, AppliedOk ? "ok" : "WRONG");
+  const bool Pass = ThunkCalls == 5 && BigOk && ScaledOk && WeighedOk && PairOk && AppliedOk;
   std::printf("%s\n", Pass ? "PASS" : "FAIL");
   return Pass ? 0 : 1;
 }

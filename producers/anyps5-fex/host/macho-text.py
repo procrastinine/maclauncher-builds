@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
-# Writes the __TEXT,__text bytes of an x86-64 Mach-O object and prints the offset of one symbol in them.
+# Writes the __TEXT,__text bytes of an x86-64 Mach-O object and prints the offsets of the named symbols in them.
 # Refuses an object whose text has relocations: the proof host maps the bytes as they are.
-# Usage: macho-text.py <object.o> <symbol> <out.bin>
+# Usage: macho-text.py <object.o> <out.bin> <symbol>...
 import struct, sys
 
 data = open(sys.argv[1], 'rb').read()
@@ -28,12 +28,14 @@ for _ in range(ncmds):
 if text is None or symtab is None:
     sys.exit('no __text section or symbol table')
 symoff, nsyms, stroff, _ = symtab
+offsets = {}
 for i in range(nsyms):
     strx, ntype, nsect, _, value = struct.unpack_from('<IBBHQ', data, symoff + 16 * i)
     name = data[stroff + strx:data.index(b'\0', stroff + strx)].decode()
-    if name == '_' + sys.argv[2] and nsect == text[0]:
-        open(sys.argv[3], 'wb').write(text[2])
-        print(value - text[1])
-        break
-else:
-    sys.exit('symbol not found in __text: ' + sys.argv[2])
+    if nsect == text[0]:
+        offsets[name.removeprefix('_')] = value - text[1]
+missing = [s for s in sys.argv[3:] if s not in offsets]
+if missing:
+    sys.exit('symbols not found in __text: ' + ' '.join(missing))
+open(sys.argv[2], 'wb').write(text[2])
+print(' '.join(str(offsets[s]) for s in sys.argv[3:]))
