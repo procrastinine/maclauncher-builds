@@ -13,7 +13,10 @@
 #include "GuestCpuHost.h"
 #include "SysVThunk.h"
 
+#include <atomic>
 #include <dirent.h>
+#include <pthread.h>
+#include <thread>
 #include <nid/NidCompute.hpp>
 #include <string>
 #include <unordered_map>
@@ -153,6 +156,27 @@ struct Counts {
   std::unordered_map<std::string, int> Guest, Generated, StandIn, Data, Stub;
 } Bound;
 std::unordered_map<std::string, int> Source; // NID -> 0 generated, 1 stand-in
+
+// Past main, a watch thread samples where the guest thread is: SIGUSR2 interrupts it, and the handler maps the host pc
+// in translated code back to the guest RIP of its block. A guest that loops without calling the host shows up here.
+void Describe(std::uint64_t Address, char* Text, std::size_t Size);
+void SampleGuest(int, siginfo_t*, void* Context) {
+  const auto PC = __darwin_arm_thread_state64_get_pc(static_cast<ucontext_t*>(Context)->uc_mcontext->__ss);
+  char Text[256];
+  int Length;
+  if (FexGuest::CTX->IsAddressInCodeBuffer(FexGuest::Thread, PC)) {
+    const auto Rip = FexGuest::CTX->RestoreRIPFromHostPC(FexGuest::Thread, PC);
+    char Where[96];
+    Describe(Rip, Where, sizeof(Where));
+    Length = std::snprintf(Text, sizeof(Text), "sample: guest code, guest rip 0x%llx (%s)\n", static_cast<unsigned long long>(Rip), Where);
+  } else {
+    Dl_info Info {};
+    dladdr(reinterpret_cast<void*>(PC), &Info);
+    Length = std::snprintf(Text, sizeof(Text), "sample: host code at pc 0x%llx (%s), last guest rip 0x%llx\n", static_cast<unsigned long long>(PC),
+                           Info.dli_sname ? Info.dli_sname : "?", static_cast<unsigned long long>(FexGuest::Thread->CurrentFrame->State.rip));
+  }
+  write(STDOUT_FILENO, Text, Length);
+}
 
 // "module+0xoffset" for a guest address in a loaded module.
 void Describe(std::uint64_t Address, char* Text, std::size_t Size) {
@@ -380,8 +404,23 @@ int main(int argc, char** argv) {
   Next.fs_cached = Final.fs_cached;
   Next.gs_cached = Final.gs_cached;
   std::printf("running main\n");
+  struct sigaction Sample {};
+  Sample.sa_sigaction = SampleGuest;
+  Sample.sa_flags = SA_SIGINFO;
+  sigaction(SIGUSR2, &Sample, nullptr);
+  const pthread_t GuestThread = pthread_self();
+  std::thread([GuestThread, &ThunkCalls] {
+    for (int Second = 5; Second <= 55; Second += 5) {
+      std::this_thread::sleep_for(std::chrono::seconds(5));
+      std::printf("watch %ds: %llu host calls past main, %llu stub calls\n", Second,
+                  static_cast<unsigned long long>(ThunkCalls - HostCallsAtMain), static_cast<unsigned long long>(StubCalls));
+      pthread_kill(GuestThread, SIGUSR2);
+    }
+  }).detach();
   FexGuest::Run(Next, Table, ThunkCalls);
   std::printf("main and _start returned to the host after %llu host calls past main, %llu of them to stubs\n",
               static_cast<unsigned long long>(ThunkCalls - HostCallsAtMain), static_cast<unsigned long long>(StubCalls));
-  return 0;
+  // The watch thread still reads ThunkCalls: end the process without unwinding main's frame.
+  std::fflush(stdout);
+  std::_Exit(0);
 }
