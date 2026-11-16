@@ -1286,6 +1286,10 @@
     {
       "source": "app:src/modules/shared/reshade/native/layer-composition.h",
       "path": "src/layer-composition.h"
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/temporal-frame-policy.hpp",
+      "path": "src/temporal-frame-policy.hpp"
     }
   ]
 }
