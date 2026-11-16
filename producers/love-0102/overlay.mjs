@@ -11,6 +11,7 @@ export function applyBuildOverlay({love,megasource,luaLibrary,luaInclude}){
  applyFreetypeDarwinOverlay({megasource});
  applySdlCocoaDeclarationsOverlay({megasource});
  applySdlArm64SpinlockOverlay({megasource});
+ applySdlCoreaudioDeclarationsOverlay({megasource});
  replace(path.join(megasource,'libs/physfs-2.0.3/CMakeLists.txt'),'SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} " -framework Carbon -framework IOKit")','SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} "-framework Carbon" "-framework IOKit")');
  replace(path.join(megasource,'libs/libtheora-1.1.1/CMakeLists.txt'),'\tadd_library(theora SHARED ${THEORA_SRC} lib/theora.def)','\tset(THEORA_SHARED_PLATFORM_SOURCES)\n\tif(WIN32)\n\t\tlist(APPEND THEORA_SHARED_PLATFORM_SOURCES lib/theora.def)\n\tendif()\n\tadd_library(theora SHARED ${THEORA_SRC} ${THEORA_SHARED_PLATFORM_SOURCES})');
 
@@ -69,4 +70,12 @@ export function applySdlArm64SpinlockOverlay({megasource}){
  const file=path.join(megasource,'libs/SDL2/src/atomic/SDL_spinlock.c');
  replace(file,'#elif defined(_MSC_VER)\n    SDL_COMPILE_TIME_ASSERT(locksize, sizeof(*lock) == sizeof(long));','#elif defined(__APPLE__) && (defined(__aarch64__) || defined(__arm64__))\n    /* Apple arm64 uses compiler atomics with explicit ordering. */\n    int expected = 0;\n    return __atomic_compare_exchange_n(lock, &expected, 1, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST) ? SDL_TRUE : SDL_FALSE;\n\n#elif defined(_MSC_VER)\n    SDL_COMPILE_TIME_ASSERT(locksize, sizeof(*lock) == sizeof(long));');
  replace(file,'#if defined(_MSC_VER)\n    _ReadWriteBarrier();','#if defined(__APPLE__) && (defined(__aarch64__) || defined(__arm64__))\n    /* Pair the successful compare-and-swap with an ordered atomic unlock. */\n    __atomic_store_n(lock, 0, __ATOMIC_SEQ_CST);\n\n#elif defined(_MSC_VER)\n    _ReadWriteBarrier();');
+}
+
+/** Keep the constant drain interval initialized after AudioQueueStop within its own scope. */
+export function applySdlCoreaudioDeclarationsOverlay({megasource}){
+ const file=path.join(megasource,'libs/SDL2/src/audio/coreaudio/SDL_coreaudio.m');
+ const before='        AudioQueueStop(this->hidden->audioQueue, 0);\n        const CFTimeInterval secs = (((this->spec.size / (SDL_AUDIO_BITSIZE(this->spec.format) / 8)) / this->spec.channels) / ((CFTimeInterval) this->spec.freq)) * 2.0;\n        CFRunLoopRunInMode(kCFRunLoopDefaultMode, secs, 0);';
+ const after='        AudioQueueStop(this->hidden->audioQueue, 0);\n        /* Scope the constant interval after stopping playback. */\n        {\n            const CFTimeInterval secs = (((this->spec.size / (SDL_AUDIO_BITSIZE(this->spec.format) / 8)) / this->spec.channels) / ((CFTimeInterval) this->spec.freq)) * 2.0;\n            CFRunLoopRunInMode(kCFRunLoopDefaultMode, secs, 0);\n        }';
+ replace(file,before,after);
 }
