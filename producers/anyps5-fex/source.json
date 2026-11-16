@@ -27,7 +27,11 @@
     "objects": [
       "core/libs/prx/libkernel/Time/Time.cpp",
       "core/libs/prx/libc/src/GuestCpuArm64.cpp",
-      "core/libs/prx/libc/src/StandardStreamObjects.cpp"
+      "core/libs/prx/libc/src/StandardStreamObjects.cpp",
+      "core/libs/prx/libkernel/Time/SleepWake.cpp",
+      "core/libs/prx/libkernel/System/src/Notification.cpp",
+      "core/libs/prx/libkernel/File/src/Open.cpp",
+      "core/libs/prx/libSceUserService/Export.cpp"
     ],
     "arm64Libraries": {
       "script": "../anyps5/overlays/arm64-libs/apply.mjs",
@@ -83,7 +87,8 @@
       "GenericBridge.S",
       "AnyPS5FexSyscall.cpp",
       "fex-entry.cmake",
-      "GuestCpuHost.h"
+      "GuestCpuHost.h",
+      "KernelThreadRecord.cpp"
     ],
     "guest": {
       "source": "guest-abi.c",

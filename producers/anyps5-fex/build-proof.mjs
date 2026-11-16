@@ -79,7 +79,7 @@ function link(out,objects,log){
  const build=path.join(out,'build');
  run('cmake',['-S',path.join(out,'fex'),'-B',build,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DBUILD_TESTING=OFF','-DBUILD_FEXCONFIG=OFF',
   '-DENABLE_JEMALLOC_GLIBC_ALLOC=OFF','-DENABLE_OFFLINE_TELEMETRY=OFF','-DENABLE_CCACHE=OFF','-DENABLE_LTO=OFF','-DTUNE_CPU=none','-DTUNE_ARCH=generic',
-  '-DCMAKE_PROJECT_FEX_INCLUDE='+path.join(out,'host',recipe.host.entry),'-DANYPS5_ARM64_OBJECTS='+objects.join(';'),'-DANYPS5_SOURCE_DIR='+path.join(out,'anyps5'),'-DANYPS5_GENERATED_THUNKS='+path.join(out,'generated-thunks.cpp')],{stdio:['ignore','ignore','inherit']});
+  '-DCMAKE_PROJECT_FEX_INCLUDE='+path.join(out,'host',recipe.host.entry),'-DANYPS5_ARM64_OBJECTS='+objects.join(';'),'-DANYPS5_SOURCE_DIR='+path.join(out,'anyps5'),'-DANYPS5_GENERATED_THUNKS='+generatedFiles.join(';')],{stdio:['ignore','ignore','inherit']});
  const result=spawnSync('ninja',['-C',build,...recipe.host.targets],{encoding:'utf8',maxBuffer:Infinity});
  fs.writeFileSync(log,result.stdout+result.stderr);
  return result.status===0;
@@ -121,20 +121,15 @@ const objects=recipe.anyps5.objects.map(source=>{
  run('clang++',['-std=c++20','-arch','arm64','-O2','-c','-I',path.join(options.out,'anyps5/core/libs'),path.join(options.out,'anyps5',source),'-o',object]);
  return object;
 });
+// One thunk translation unit per source, plus the part and data tables (generate-thunks.py prints the files).
 const generatedThunks=path.join(options.out,'generated-thunks.cpp');
-execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,recipe.host.generator.script),generatedThunks,
- path.join(options.out,'anyps5/core/libs'),...recipe.anyps5.objects.map(source=>path.join(options.out,'anyps5',source)),'--',...objects],{stdio:'inherit'});
+const generatedFiles=execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,recipe.host.generator.script),generatedThunks,
+ path.join(options.out,'anyps5/core/libs'),...recipe.anyps5.objects.map(source=>path.join(options.out,'anyps5',source)),'--',...objects],{encoding:'utf8',stdio:['ignore','pipe','inherit']}).trim().split('\n');
 const firstLog=path.join(options.out,'link-exports.log');
 if(!link(options.out,objects,firstLog)){
  if(!/Undefined symbols/.test(fs.readFileSync(firstLog,'utf8')))throw Error('The proof build failed; see '+firstLog);
  const assembly=path.join(options.out,'anyps5-unreached-exports.s'),stubs=path.join(options.out,'anyps5-unreached-exports.o');
- const list=[];
- for(const object of objects){
-  const part=assembly+'.'+list.length;
-  execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,'unreached-exports.py'),object,firstLog,part],{stdio:'inherit'});
-  list.push(fs.readFileSync(part,'utf8'));
- }
- fs.writeFileSync(assembly,list.join('\n'));
+ execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,'unreached-exports.py'),firstLog,assembly,...objects],{stdio:'inherit'});
  run('clang',['-c','-arch','arm64',assembly,'-o',stubs]);
  const secondLog=path.join(options.out,'link-proof.log');
  if(!link(options.out,[...objects,stubs],secondLog))throw Error('The proof build failed; see '+secondLog);
