@@ -1,9 +1,9 @@
 diff --git a/FEXCore/include/FEXCore/Darwin/ContextState.h b/FEXCore/include/FEXCore/Darwin/ContextState.h
 new file mode 100644
-index 00000000..9e25e1bb
+index 0000000..a614d95
 --- /dev/null
 +++ b/FEXCore/include/FEXCore/Darwin/ContextState.h
-@@ -0,0 +1,114 @@
+@@ -0,0 +1,119 @@
 +// SPDX-License-Identifier: MIT
 +#pragma once
 +
@@ -54,8 +54,10 @@ index 00000000..9e25e1bb
 +  WriteFXField<uint64_t>(Bytes, 8, CPU.FIP);
 +  WriteFXField<uint32_t>(Bytes, 24, Mxcsr());
 +  WriteFXField<uint32_t>(Bytes, 28, MxcsrMask());
++  const size_t Top = (X87Status() >> 11) & 7;
 +  for (size_t Index = 0; Index != 8; ++Index) {
-+    std::memcpy(Bytes + 32 + Index * 16, CPU.mm[Index], 16);
++    // FXSAVE stores logical ST0..ST7; the core's register slots are physical.
++    std::memcpy(Bytes + 32 + Index * 16, CPU.mm[(Top + Index) & 7], 10);
 +  }
 +  std::array<__uint128_t, 16> Low {}, High {};
 +  T.CTX->ReconstructXMMRegisters(&T, Low.data(), High.data());
@@ -73,8 +75,11 @@ index 00000000..9e25e1bb
 +  SetMxcsr(MXCSR);
 +  // Retain status present in a raw captured frame. The selected core's generated SSE status remains separate.
 +  CPU.mxcsr = MXCSR & 0xffff;
++  const size_t Top = (X87Status() >> 11) & 7;
 +  for (size_t Index = 0; Index != 8; ++Index) {
-+    std::memcpy(CPU.mm[Index], Bytes + 32 + Index * 16, 16);
++    auto& Physical = CPU.mm[(Top + Index) & 7];
++    std::memset(Physical, 0, sizeof(Physical));
++    std::memcpy(Physical, Bytes + 32 + Index * 16, 10);
 +  }
 +  std::array<__uint128_t, 16> Low {}, High {};
 +  // A legacy FX restore changes the low XMM halves and leaves the current upper YMM halves intact.
