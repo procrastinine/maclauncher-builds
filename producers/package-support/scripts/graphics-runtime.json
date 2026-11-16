@@ -568,7 +568,9 @@
             "--reference",
             "{input:streamline-reference}",
             "--compat-reference-2.2.1",
-            "{input:streamline-reference-2.2.1}"
+            "{input:streamline-reference-2.2.1}",
+            "--arch",
+            "{wineArch}"
           ]
         }
       ]
@@ -585,7 +587,9 @@
             "{source:dxmt}",
             "{input:dxmt-wine}",
             "{input:llvm-mingw}",
-            "{output}"
+            "{output}",
+            "--arch",
+            "{wineArch}"
           ]
         }
       ]
@@ -686,7 +690,9 @@
             "--vulkan-source",
             "{source:sdl-vulkan}",
             "--out",
-            "{output}"
+            "{output}",
+            "--arch",
+            "{wineArch}"
           ]
         }
       ]

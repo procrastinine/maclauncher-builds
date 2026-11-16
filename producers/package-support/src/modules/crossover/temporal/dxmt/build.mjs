@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {wineHost} from '../../../../../../../tools/wine-host.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import {sourceRevision as recordRevision} from '../../../../../../../lib/pins.mjs';
 import fs from 'node:fs';
@@ -16,6 +17,8 @@ import {applyCompilerShutdownOverlay} from './compiler-shutdown-overlay.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const [upstreamArg, vendorArg, compilerArg, outputArg] = process.argv.slice(2);
+const host=wineHost(process.argv.includes('--arch')?process.argv[process.argv.indexOf('--arch')+1]:undefined);
+const hostOnly=process.argv.includes('--host-only');
 const nativeOnly = process.argv.includes('--native-only');
 if (!outputArg) throw new Error('Usage: build.mjs DXMT_SOURCE DXMT_WINE_DIRECTORY LLVM_MINGW_BIN OUTPUT [--native-only]');
 const [upstream, vendor, toolchain, output] = [upstreamArg, vendorArg, compilerArg, outputArg].map(p => path.resolve(p));
@@ -28,7 +31,7 @@ const revision = recordRevision(JSON.parse(fs.readFileSync(path.join(here, 'sour
 const phase=process.argv.includes('--phase')?process.argv[process.argv.indexOf('--phase')+1]:null;
 const source = path.join(output, 'source'), objects = path.join(output, 'objects'), payload = path.join(output, 'payload');
 const sha = p => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
-const vendorPE = path.join(vendor, 'x86_64-windows'), vendorUnix = path.join(vendor, 'x86_64-unix/winemetal.so');
+const vendorPE = path.join(vendor, 'x86_64-windows'), vendorUnix = path.join(vendor, host.unix,'winemetal.so');
 // The unchanged portable command library is taken from the installed renderer.
 // This does not rebuild its shader compiler or introduce a Metal toolchain at play.
 function commandLibraries(){
@@ -47,7 +50,7 @@ function tableCount(){
  const table = unixSource.match(/const void \*__wine_unix_call_funcs\[\] = \{([\s\S]+?)\};/)[1];
  return table.split(',').filter(s => s.trim()).length;
 }
-const unixOut = path.join(payload, 'x86_64-unix/winemetal.so');
+const unixOut = path.join(payload, host.unix,'winemetal.so');
 /** Copy, adapt and compile DXMT into the payload. */
 async function compile(){
 fs.mkdirSync(output, { recursive: true });
@@ -58,6 +61,7 @@ const shared = appPath('src/modules/shared/reshade/temporal');
 for (const file of ['camera.h', 'frame.h']) fs.copyFileSync(path.join(shared, file), path.join(source, 'include', file));
 for(const file of ['camera-transport.hpp','streamline-transport.hpp','streamline-native.h','streamline-snapshot.hpp'])fs.copyFileSync(path.join(owned,file),path.join(source,'include',file));
 for(const [name,file]of [['scene-aovs.h',path.join(shared,'scene-aovs.h')],['image-color.h',path.resolve(shared,'../native/image-color.h')]])fs.copyFileSync(file,path.join(source,'include',name));
+if(hostOnly){buildNative();return;}
 applyStartupOverlay(source);
 applyReferenceOwnershipOverlay(source);
 applyRingCapacityOverlay(source);
@@ -150,10 +154,15 @@ if(!nativeOnly){
   const text=exported(dll);for(const name of names)if(!text.includes('Name: '+name+'\n'))throw Error('Missing D3D12 temporal producer export: '+name);
  }
 }
+buildNative();
+}
+function buildNative(){
+const include = ['include','src/winemetal'].map(p=>'-I'+path.join(source,p));
+fs.mkdirSync(path.dirname(unixOut),{recursive:true});
 const count = tableCount();
-await run('xcrun', ['clang', '-x','objective-c','-fblocks','-arch', 'x86_64', '-mmacosx-version-min=13.0', '-std=c2x', '-dynamiclib', '-O2',
+execFileSync('xcrun', ['clang', '-x','objective-c','-fblocks','-arch', host.macho, '-mmacosx-version-min=13.0', '-std=c2x', '-dynamiclib', '-O2',
   '-DML_UNIX_CALL_COUNT=' + count, ...include, '-Wl,-install_name,@rpath/winemetal.so',
-  path.join(owned, 'unix-forwarder.c'),'-framework','Foundation','-framework','Metal','-framework','MetalFX', '-o', unixOut]);
+  path.join(owned, 'unix-forwarder.c'),'-framework','Foundation','-framework','Metal','-framework','MetalFX', '-o', unixOut],{stdio:'inherit'});
 execFileSync('codesign', ['--force', '--sign', '-', unixOut], { stdio: 'pipe' });
 }
 /** Write the licenses and camera-bridge.json from the compiled payload and the declared inputs. */
@@ -161,14 +170,14 @@ function assemble(){
 addLicenses(payload,'DXMT',upstream);
 const files = {};
 for (const file of fs.readdirSync(path.join(payload,'x86_64-windows')).filter(name=>name.endsWith('.dll'))) files['x86_64-windows/'+file]=sha(path.join(payload,'x86_64-windows',file));
-files['x86_64-unix/winemetal.so'] = sha(unixOut);
+files[host.unix+'/winemetal.so'] = sha(unixOut);
 fs.writeFileSync(path.join(payload, 'camera-bridge.json'), JSON.stringify({
   schema: 1, id: 'dxmt-camera1', resourceTagAPI:1,resourceSnapshotAPI:1,temporalD3D12API:1,source: { url: 'https://github.com/3Shain/dxmt', revision },
-  architecture: 'x86_64', minimumMacOS: '14.0.0', tableCount: tableCount(),
+  architecture: host.macho, minimumMacOS: '14.0.0', tableCount: tableCount(),
   base: { nativeSha256: sha(vendorUnix), thunkSha256: sha(path.join(vendorPE, 'winemetal.dll')),
     commandLibrarySha256: crypto.createHash('sha256').update(commandLibraries()[0]).digest('hex') }, files,
 }, null, 2) + '\n');
 }
 if(phase!=='assemble')await compile();
-if(phase!=='compile')assemble();
+if(phase!=='compile'&&!hostOnly)assemble();
 console.log(payload);

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {wineHost} from '../../../tools/wine-host.mjs';
 import sdlHeaders from '../../dependencies/sdlHeaders.json' with {type:'json'};
 import {prepareSources} from '../src/modules/shared/reshade/libplacebo/dependencies-build.mjs';
 // Builds the shared graphics runtime from owned sources, exact Git pins and
@@ -189,9 +190,10 @@ function requirements(id) {
 }
 
 /** Resolve the complete build and staging plan without building. */
-export function plan({work, arch="universal", sdkPath, only, skip = [], reuse = {}, sources: sourceOverrides = {}, inputs: inputOverrides = {}, tools: toolOverrides = {}} = {}) {
+export function plan({work, arch="universal", wineArch=arch==="arm64"?"arm64":"x64", sdkPath, only, skip = [], reuse = {}, sources: sourceOverrides = {}, inputs: inputOverrides = {}, tools: toolOverrides = {}} = {}) {
   if (work && !path.isAbsolute(work)) throw Error("Use an absolute graphics build directory.");
   if(!["arm64","x64","universal"].includes(arch))throw Error("Choose arm64, x64 or universal graphics.");
+  wineArch=wineHost(wineArch).arch;
   const names = ["core", ...Object.keys(recipe.providers)];
   for (const name of [...(only || []), ...skip, ...Object.keys(reuse)]) if (!names.includes(name)) throw Error("Unknown graphics component: " + name);
   const selected = names.filter(name => (!only || only.includes(name)) && !skip.includes(name) && (name === "core" || !recipe.providers[name].architectures || recipe.providers[name].architectures.includes(arch === "universal" ? "arm64" : arch)));
@@ -219,7 +221,7 @@ export function plan({work, arch="universal", sdkPath, only, skip = [], reuse = 
     const root = work && path.join(work, "providers", name), values = {work: root && path.join(root, "work"), output: root && path.join(root, "output")};
     payloads[name] = root && path.join(root, provider.payload);
     for (const step of provider.steps) steps.push({provider: name, phased: step.phased === true, marker: path.join(payloads[name] || "", provider.marker || "provider.json"),
-      argv: [path.join(repository, step.recipe), ...step.args.map(argument => argument.startsWith(APP_REFERENCE) ? recipePath(repository, argument) : argument.replaceAll("{arch}",arch).replace(/\{(work|output)\}|\{(source|input|tool):([^}]+)\}/g, (_, local, kind, id) =>
+      argv: [path.join(repository, step.recipe), ...step.args.map(argument => argument.startsWith(APP_REFERENCE) ? recipePath(repository, argument) : argument.replaceAll("{arch}",arch).replaceAll("{wineArch}",wineArch).replace(/\{(work|output)\}|\{(source|input|tool):([^}]+)\}/g, (_, local, kind, id) =>
         local ? values[local] ?? `<${local}>` : (kind === "source" ? sources : kind === "input" ? inputs : tools)[id].path ?? `<${kind}:${id}>`))]});
   }
   for (const [kind, rows] of Object.entries({source: sources, input: inputs, tool: tools}))

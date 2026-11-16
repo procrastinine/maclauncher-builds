@@ -9,14 +9,14 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 const root=path.resolve(import.meta.dirname,'..');
 /** Build one graphics package; SDK and deployment requirements stay separate. */
-export async function buildGraphicsSource({version,arch,output,work,sdkPath,sources={},sourceRoot,reuse={},tools={},inputs={}}){
+export async function buildGraphicsSource({version,arch,wineArch=arch==='arm64'?'arm64':'x64',output,work,sdkPath,sources={},sourceRoot,reuse={},tools={},inputs={}}){
  appSourceRoot();
  const {plan,build,fetchInput}=await import('../producers/package-support/scripts/build-graphics-runtime.mjs');
  if(!version)throw Error('An exact registered graphics source-stage version is required.');
  if(tools.meson&&!tools.python){const candidate=path.join(path.dirname(tools.meson),"python");if(fs.existsSync(candidate))tools.python=candidate;}
  sources['macfx-spirv-cross']=placeDeclaredSource(spirvCross,path.join(work,'spirv-cross-source'));
  if(!sources['sdl-vulkan'])sources['sdl-vulkan']=placeDeclaredSource(sdlHeaders,path.join(work,'sdl-headers-source'));
- const options={jobs:6,work,arch,sdkPath,sources,reuse,tools,inputs},initial=plan(options);
+ const options={jobs:6,work,arch,wineArch,sdkPath,sources,reuse,tools,inputs},initial=plan(options);
  const blocked=initial.unresolved.filter(value=>(!value.startsWith('input ')||!value.endsWith(': fetchable'))&&!['tool meson: missing','tool ninja: missing'].includes(value));
  if(blocked.length)throw Error('Unresolved graphics build inputs:\n  '+blocked.join('\n  '));
  fs.mkdirSync(work,{recursive:true});

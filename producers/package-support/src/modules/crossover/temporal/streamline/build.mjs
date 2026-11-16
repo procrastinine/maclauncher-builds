@@ -1,5 +1,5 @@
 import {appRequire,appSourceRoot} from '../../../../../../../tools/app-source.mjs';
-import {CAMERA_BRIDGE,buildCameraBridge} from '../camera-bridge/build.mjs';
+import {cameraBridge,buildCameraBridge} from '../camera-bridge/build.mjs';
 import {gitlink,sourceRevision} from '../../../../../../../lib/pins.mjs';
 import {addLicenses} from '../../../../../../../lib/licenses.mjs';
 import fs from "node:fs";
@@ -17,6 +17,7 @@ const app = appSourceRoot(), owned = path.join(app.directory, "src/modules/cross
 // --phase compile builds the adapters and the camera bridge; --phase assemble writes the licenses and
 // provider.json from their outputs and the declared inputs alone. Without --phase both run.
 const phase = args.phase || null;
+const CAMERA_BRIDGE=cameraBridge(args.arch);
 const inspect = appRequire("src/modules/crossover/temporal/streamline/pe-exports.js").inspect;
 const hash = file => crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 const core = [...fs.readFileSync(path.join(source, "include/sl_core_api.h"), "utf8").matchAll(/^sl::Result (sl\w+)\(|^SL_API sl::Result (sl\w+)\(/gm)].map(match => match[1] || match[2]);
@@ -89,7 +90,7 @@ const compiler = path.resolve(args.compiler);
 function compile() {
 compileAdapter(reference, output);
 for (const row of compatProfiles) compileAdapter(row.referenceFile, path.join(output, row.directory));
-buildCameraBridge({compiler:path.join(path.dirname(compiler),"x86_64-w64-mingw32-clang"),output});
+buildCameraBridge({compiler:path.join(path.dirname(compiler),"x86_64-w64-mingw32-clang"),output,arch:args.arch});
 }
 function assemble() {
 const metadata = adapterRecord(reference,output);
