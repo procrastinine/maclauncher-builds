@@ -91,11 +91,12 @@ export async function buildModule(options){
     const cc=read('xcrun',['--find','clang']),sdk=process.env.SDKROOT||read('xcrun',['--sdk','macosx','--show-sdk-path']);
     const wrapper=path.join(work,'clang-'+host.arch),linkDirectory=path.join(work,'vulkan-link');
     writeChanged(wrapper,`#!/bin/sh
-exec /usr/bin/nice -n 19 /bin/sh -c '
-effective=$(ps -o nice= -p $$ | tr -d " ")
-[ "$effective" = 19 ] || exit 76
-exec "$@"
-' wine-cc ${[cc,'-arch',host.macho,'-isysroot',sdk,'-mmacosx-version-min='+minimumMacOS].map(quote).join(' ')} "$@"
+current=$(ps -o nice= -p $$ | tr -d " ")
+if [ "$current" = 0 ]; then
+    exec /usr/bin/nice -n 19 "$0" "$@"
+fi
+[ "$current" = 19 ] || { echo "Wine compiler priority $current, expected 19" >&2; exit 76; }
+exec ${[cc,'-arch',host.macho,'-isysroot',sdk,'-mmacosx-version-min='+minimumMacOS].map(quote).join(' ')} "$@"
 `,0o755);
     writeChanged(path.join(linkDirectory,'libMoltenVK.dylib'),fs.readFileSync(vulkan.library));
     const environment={...process.env,PATH:mingw+path.delimiter+path.dirname(bison)+path.delimiter+process.env.PATH,
