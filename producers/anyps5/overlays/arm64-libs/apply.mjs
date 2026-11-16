@@ -4,6 +4,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {applyArm64ContextsOverlay} from './contexts.mjs';
 import {applyArm64TlsOverlay} from './tls.mjs';
+import {applyArm64ThreadsOverlay} from './threads.mjs';
+export {copyArm64GuestThreadSources} from './threads.mjs';
 export {copyArm64GuestContextSources} from './contexts.mjs';
 
 function replace(source, before, after, file) {
@@ -94,6 +96,7 @@ export function applyArm64LibrariesOverlay(root) {
     edit(libc + 'CMakeLists.txt', source => source + '\ntarget_sources(libc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/StandardStreamObjects.cpp)\n');
     applyArm64ContextsOverlay(root);
     applyArm64TlsOverlay(root);
+    applyArm64ThreadsOverlay(root);
     edit('core/libs/prx/libc/src/AtomicBuiltins.cpp', (source, file) => {
         source = replace(source,
         'bool CompareExchange16(Uint128* target, Uint128& expected, Uint128 desired) {',

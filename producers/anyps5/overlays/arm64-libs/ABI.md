@@ -81,3 +81,27 @@ and signal jumps save the x87 control word and optional signal mask in their
 original fields.
 
 The macOS TLS allocator keeps its custom guest RAX convention on arm64. Its native entry captures the guest call frame, reads the descriptor from RAX, invokes the unchanged pthread-key-backed allocation and commits the returned thread pointer to guest RAX. Context restoration returns through `GuestContext::Transfer`; it does not call guest code as a native function. Captured GPRs and the legacy FXSAVE image are retained, and the host context adapter preserves the existing upper YMM halves. `Aps5GuestTlsAvx_nid_no_patch` selects only the native x86 assembly scratch-save path; its arm64 value is zero because that path is absent. Guest AVX features continue to come from the bound guest CPU context.
+
+`GuestThreadInstallHost_nid_no_patch` installs one copied libc-authoritative
+`GuestThread::HostAccessors` table. All three callbacks are mandatory:
+
+```cpp
+void* Bind(std::uintptr_t stackLow, std::size_t stackBytes);
+void Release(void* binding) noexcept;
+std::uint64_t Call(std::uintptr_t entry, std::uint64_t arg0, std::uint64_t arg1);
+```
+
+`Bind` creates and binds initialized FEX state on the current OS thread for the
+supplied real guest stack range and returns its non-null lifetime token.
+`Release` restores the preceding binding and destroys that token on the same
+thread after guest cleanup. `Call` enters guest code with zero, one or two
+integer arguments and returns guest RAX. It handles guest return and nested
+native callbacks through the FEX dispatcher; the native library has no direct
+function-pointer fallback. CPU/context installers precede thread creation.
+
+The native worker's binding scope lives outside its host `_setjmp` region and
+is established before the initialized promise and guest fenv/TLS setup. It
+survives the existing guest-exit host jump and ends after guest cleanup. Main
+entry uses the same contract. Guest stacks are independent mappings allocated
+through libkernel's existing memory APIs, with a protected PS5-page guard;
+the original x86 shared-stack assembly remains in its original branch.
