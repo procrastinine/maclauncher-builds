@@ -19,4 +19,8 @@ The CPU accessors reflect the selected FEXCore representation. The MXCSR write m
 
 `0005-darwin-single-step-writes.patch` opens the same scoped JIT write mode for single-instruction compilation as ordinary block compilation. This covers the code publication used when resuming a self-modifying instruction or the guest trap flag.
 
+`0006-x87-status.patch` preserves the x87 exception-status bits across environment restoration, status reads, FNCLEX and FNINIT. `0007-precise-memory-pop.patch` commits RSP after a memory POP store succeeds, while retaining the post-incremented address calculation for RSP-relative destinations.
+
 The overlay is MIT-licensed. The core platform patch derives from the existing Darwin adaptation in this producer. Signal state reconstruction follows FEX's MIT Linux frontend, `Source/Tools/LinuxEmulation/LinuxSyscalls/SignalDelegator.cpp` and `SyscallsSMCTracking.cpp`. Existing FEX copyright and license notices remain in the selected source. The Darwin context and mapping code is an independent implementation and has no Wine dependency.
+
+The x87 status change is by Avery Felts from the MetalSharp-Wine FEX series. The memory POP change is by Alexander Theißen from the Mach9 FEX fork. Both retain their original authorship, MIT license, source commit and origin in the patch metadata; the x87 adaptation includes only the generic FEXCore changes.
