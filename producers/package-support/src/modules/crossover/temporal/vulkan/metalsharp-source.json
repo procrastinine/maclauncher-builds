@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "id": "winevulkan-scene",
+  "version": "11.20-MCLv1",
+  "profile": "metalsharp-wine11.20-scene-v1",
+  "sourcePage": "https://github.com/metalsharp/MetalSharp-Wine",
+  "wineVersion": "Wine version 11.20",
+  "wineVulkanDriverVersion": 48,
+  "unixCallCount": 746,
+  "minimumMacOS": "15.0",
+  "peLinkerFlags": [
+    "-Wl,-timestamp:0"
+  ],
+  "architectures": {
+    "unix": [
+      "arm64"
+    ],
+    "pe": [
+      "aarch64",
+      "arm64ec",
+      "i386"
+    ]
+  },
+  "originalFiles": {
+    "include/ntuser.h": "2b0a8438b3a8c2526314583dd8c4d285ca800d4a70cc96fb253f5c810235c473",
+    "include/wine/unixlib.h": "ad6a07fa3c4990ca4e9fbc3353a178105f58d32592b01a8968a0221dbb11d80b",
+    "include/wine/vulkan.h": "753fb37b8b89dbdaf0752c6e4d3ebec74d6b693bd2f62bfa6d2beb488d3a47a8",
+    "include/wine/vulkan_driver.h": "3587acb9e6b908c735124daadb24e95f6db5b0874ebc4ddac3d366126fa0e705",
+    "configure.ac": "48e74f20cc19a4b95130c4e27e03afb02f8d925b5d2e64ae2172d9ec52880d84",
+    "dlls/winevulkan/vulkan_loader.h": "cf4c284ffa0d3cf59ab8c1398bc11b449b346badf2a7c260709abaed44d71e2a",
+    "dlls/winevulkan/vulkan_thunks.h": "642d7e3d30885df0c73dd93682804e1736d152019196abdbefd1fb2402fa06c6",
+    "dlls/winevulkan/loader.c": "00669ab341904b567ada54aee7a7f17fd6c3fa21ed051ac90d6bca5ecb166df2",
+    "dlls/winevulkan/winevk.xml": "f09da265b144d3bd58427b120bc2ca4e8aaf212df8663c744a6056007b21d59e",
+    "dlls/winevulkan/loader_thunks.c": "70eaf841f7b8e115a9c6fb3499feb88c3735f18092e0e8ea444cfee4b6764de5",
+    "dlls/winevulkan/vulkan_private.h": "b92493be07e5800d87490da0cd6e281159affd4b8385f4c41a80a041fabedc86",
+    "dlls/winevulkan/winevulkan.spec": "69e97f1d7976c9036fc122b03aac587b2116405035470ef01cd6f0ba081487a6",
+    "dlls/winevulkan/make_vulkan": "98d2691e948fc9f6010486edbb5a2deb2e971c1ef23cde9569d8382c61a3a822",
+    "dlls/winevulkan/vulkan_thunks.c": "84045b1146c422a7351e990b38346962987830a4bb6e026cc7821135b282e6d8",
+    "dlls/winevulkan/loader_thunks.h": "0d325ee04684b8049f8b009af2dd82e8f42ef2a7bb6f3ddc399f81f6d715a276",
+    "dlls/winevulkan/winevulkan.rc": "3f799c360bdfd485bbab529dc51c4c8ffa31a85bd977c672b79d7b7482ca283f",
+    "dlls/winevulkan/winevulkan.json": "0947fde3a7cf0efea1fad4c0b0ea1822e122a56e0c821e39df68daf561ca50f8",
+    "dlls/winevulkan/vulkan.c": "6d3df402e5f31debd30293c648328691cae52b2f991ffbb66e9e20d33cda48d1",
+    "dlls/winevulkan/Makefile.in": "087cd7b9f698e92b5edd5f82093ff62c9f49d3ff4669a7f2a7f3addff07bb34b",
+    "VERSION": "3f719c567d2fd628577ce88b3dbfc496af79ffcc31f9630780d29b8f705a1d97",
+    "dlls/win32u/win32u_private.h": "f179ccba2a10a960f504a234d955bedbbbd817bf2ee0ba29183056c5e695bc77",
+    "dlls/win32u/vulkan.c": "07758f09ebcf0703f90f05f7fb6b17e47b63bd86037ebea91c147dd240726436",
+    "dlls/win32u/Makefile.in": "3930bcf68e0885cfc17aa6c08ab37665b092e229604132549671cda9a158b942",
+    "dlls/winemac.drv/unixlib.h": "210ed99192d37c333fe408cf8574d877cbcf3e7088224ecf17c0eb7878876615",
+    "dlls/winemac.drv/vulkan.c": "e92658f44f8ff33e473dbaf93f5a84d4ed3c945dce741d268916c680a2747360",
+    "dlls/winemac.drv/macdrv.h": "f59cacf67b1502d8a32bfff5072aadfd6fbfdf032a9101fd380fad20efa17eb7",
+    "dlls/winemac.drv/Makefile.in": "28d9efcac2876b31351d9e8096f65cf75fffee33a23f102dec374ae49e750dfe"
+  },
+  "sharedHeaders": [
+    "vulkan/native/scene-interop.h",
+    "reshade/native/vulkan-scene.h",
+    "reshade/native/recorded-scene.h",
+    "reshade/temporal/frame.h",
+    "reshade/temporal/scene-aovs.h",
+    "reshade/temporal/scene-matrices.h",
+    "reshade/native/image-color.h"
+  ],
+  "ownedFiles": [
+    "source.json",
+    "overlay.mjs",
+    "build.mjs",
+    "scene-request.h",
+    "scene-pe.c",
+    "scene-unix.c",
+    "scene-metadata.h",
+    "scene-metadata-native.h",
+    "scene-admission.h"
+  ],
+  "peExports": [
+    "MacLauncherWineVulkanSceneAPI1",
+    "MacLauncherWineVulkanRecordScene1",
+    "MacLauncherWineVulkanSceneContext1"
+  ],
+  "nativeExports": [
+    "rsWineVulkanSceneNativeAPI",
+    "rsWineVulkanSetSceneProvider1",
+    "rsWineVulkanResolveSceneDevice1"
+  ],
+  "buildTools": {
+    "bison": {
+      "version": "3.8.2",
+      "url": "https://ftp.gnu.org/gnu/bison/bison-3.8.2.tar.xz",
+      "sha256": "9bba0214ccf7f1079c5d59210045227bcf619519840ebfa80cd3849cff5a5bf2",
+      "format": "tar.xz",
+      "directory": "bison-3.8.2",
+      "checksumSource": "https://lists.gnu.org/archive/html/bug-bison/2021-09/msg00056.html",
+      "bytes": 2817324
+    }
+  },
+  "vulkanLinkInput": {
+    "library": "libMoltenVK.dylib",
+    "file": "MoltenVK/MoltenVK/dynamic/dylib/macOS/libMoltenVK.dylib",
+    "architecture": "x86_64",
+    "archiveFormat": "tar",
+    "usage": "Normal Wine configure link probe; the library is not copied into the paired module package."
+  },
+  "runtimeProfile": {
+    "id": "metalsharp-wine11.20-scene-v1",
+    "product": "MetalSharp Wine",
+    "wineRevision": "dd1f6c2f9801327d30fd82f2d55071177824fb99",
+    "driverVersion": 48,
+    "unixCallCount": 746,
+    "files": []
+  },
+  "repository": "https://github.com/metalsharp/MetalSharp-Wine",
+  "revision": "dd1f6c2f9801327d30fd82f2d55071177824fb99",
+  "archive": {
+    "url": "https://codeload.github.com/metalsharp/MetalSharp-Wine/tar.gz/dd1f6c2f9801327d30fd82f2d55071177824fb99",
+    "sha256": "ff1b037ff30ccf82cb077ba86d1b63b82c1cd65a6c1694bd1e06393e82bbadd9",
+    "bytes": 87069297,
+    "directory": "MetalSharp-Wine-dd1f6c2f9801327d30fd82f2d55071177824fb99",
+    "stripComponents": 1
+  }
+}

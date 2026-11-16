@@ -64,7 +64,10 @@
     "build.mjs",
     "scene-request.h",
     "scene-pe.c",
-    "scene-unix.c"
+    "scene-unix.c",
+    "scene-metadata.h",
+    "scene-metadata-native.h",
+    "scene-admission.h"
   ],
   "peExports": [
     "MacLauncherWineVulkanSceneAPI1",
@@ -136,5 +139,8 @@
       }
     ]
   },
-  "archiveDependency": "crossoverWine"
+  "archiveDependency": "crossoverWine",
+  "hostProfiles": {
+    "arm64": "metalsharp-source.json"
+  }
 }

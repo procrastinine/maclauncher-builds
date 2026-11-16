@@ -3144,7 +3144,8 @@
       "entries": [
         "producers/dependencies/crossoverWine.json",
         "producers/package-support/app-source.json",
-        "producers/package-support/src/modules/crossover/temporal/vulkan"
+        "producers/package-support/src/modules/crossover/temporal/vulkan",
+        "tools/wine-host.mjs"
       ],
       "sourceDirectory": "producers/package-support",
       "sourceRepository": "https://github.com/wine-mirror/wine",
@@ -3176,42 +3177,83 @@
       {
         "version": "26.3.0-MCLv6",
         "label": "WineVulkan scene adapter 26.3.0-MCLv6"
+      },
+      {
+        "version": "11.20-MCLv1",
+        "label": "Wine 11.20 Vulkan scene adapter"
       }
     ],
-    "build": {
-      "version": "26.3.0-MCLv6",
-      "command": "tools/build-winevulkan-scene.mjs",
-      "architectures": [
-        "x64"
-      ],
-      "tools": [
-        "pkgconf"
-      ],
-      "submodules": [
-        "sources/maclauncher"
-      ],
-      "archives": [
-        {
-          "file": "producers/dependencies/crossoverWine.json",
-          "pointer": ""
-        },
-        {
-          "file": "producers/package-support/src/modules/crossover/temporal/vulkan/source.json",
-          "pointer": "/buildTools/bison"
-        },
-        {
-          "file": "producers/dependencies/moltenvk.json",
-          "pointer": "/archive"
-        },
-        {
-          "file": "producers/dependencies/llvmMingw.json",
-          "pointer": ""
-        }
-      ]
-    },
+    "build": [
+      {
+        "version": "26.3.0-MCLv6",
+        "command": "tools/build-winevulkan-scene.mjs",
+        "architectures": [
+          "x64"
+        ],
+        "tools": [
+          "pkgconf"
+        ],
+        "submodules": [
+          "sources/maclauncher"
+        ],
+        "archives": [
+          {
+            "file": "producers/dependencies/crossoverWine.json",
+            "pointer": ""
+          },
+          {
+            "file": "producers/package-support/src/modules/crossover/temporal/vulkan/source.json",
+            "pointer": "/buildTools/bison"
+          },
+          {
+            "file": "producers/dependencies/moltenvk.json",
+            "pointer": "/archive"
+          },
+          {
+            "file": "producers/dependencies/llvmMingw.json",
+            "pointer": ""
+          }
+        ]
+      },
+      {
+        "version": "11.20-MCLv1",
+        "command": "tools/build-winevulkan-scene.mjs",
+        "architectures": [
+          "arm64"
+        ],
+        "tools": [
+          "pkgconf"
+        ],
+        "submodules": [
+          "sources/maclauncher"
+        ],
+        "archives": [
+          {
+            "file": "producers/package-support/src/modules/crossover/temporal/vulkan/metalsharp-source.json",
+            "pointer": "/archive"
+          },
+          {
+            "file": "producers/package-support/src/modules/crossover/temporal/vulkan/source.json",
+            "pointer": "/buildTools/bison"
+          },
+          {
+            "file": "producers/dependencies/moltenvk.json",
+            "pointer": "/archive"
+          },
+          {
+            "file": "producers/dependencies/llvmMingw.json",
+            "pointer": ""
+          }
+        ]
+      }
+    ],
     "versionBindings": [
       {
         "file": "producers/package-support/src/modules/crossover/temporal/vulkan/source.json",
+        "pointer": "/version"
+      },
+      {
+        "file": "producers/package-support/src/modules/crossover/temporal/vulkan/metalsharp-source.json",
         "pointer": "/version"
       }
     ]

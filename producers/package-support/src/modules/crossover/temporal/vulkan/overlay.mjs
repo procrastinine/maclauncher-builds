@@ -23,16 +23,16 @@ export function unixTables(text) {
     for (const match of text.matchAll(re)) result.push({name:match[1],body:match[2],entries:match[2].split('\n').map(x=>x.trim()).filter(Boolean)});
     return result;
 }
-export function profileSources(directory) {
+export function profileSources(directory,profile=source) {
     directory = fs.realpathSync(directory);
-    for (const [file, expected] of Object.entries(source.originalFiles))
+    for (const [file, expected] of Object.entries(profile.originalFiles))
         if (hash(fs.readFileSync(path.join(directory, file))) !== expected)
-            throw Error('The CrossOver source profile differs: '+file);
+            throw Error('The Wine source profile differs: '+file);
     const original = file => fs.readFileSync(path.join(directory,modulePath,file),'utf8');
     const enumBefore = original('loader_thunks.h');
     const enumEntries = enumBefore.match(/enum unix_call\s*\{([\s\S]*?)\};/)?.[1].split('\n').map(x=>x.trim()).filter(x=>x.startsWith('unix_')&&x!=='unix_count,');
     const tablesBefore = unixTables(original('vulkan_thunks.c'));
-    if (enumEntries?.length!==source.unixCallCount || tablesBefore.length!==2 || tablesBefore.some(x=>x.entries.length!==source.unixCallCount))
+    if (enumEntries?.length!==profile.unixCallCount || tablesBefore.length!==2 || tablesBefore.some(x=>x.entries.length!==profile.unixCallCount))
         throw Error('The original WineVulkan Unix-call layout differs.');
     const files = new Map();
     files.set(modulePath+'loader_thunks.h',replaceOnce(enumBefore,'    unix_count,','    unix_maclauncher_scene_record,\n    unix_count,'));
@@ -42,7 +42,7 @@ export function profileSources(directory) {
         native = replaceOnce(native,body+'\n};',body+'\n    maclauncher_scene_record'+(i===0?'64':'32')+',\n};');
     }
     const tablesAfter = unixTables(native);
-    if (tablesAfter.some((table,i)=>JSON.stringify(table.entries.slice(0,source.unixCallCount))!==JSON.stringify(tablesBefore[i].entries)||table.entries.length!==source.unixCallCount+1))
+    if (tablesAfter.some((table,i)=>JSON.stringify(table.entries.slice(0,profile.unixCallCount))!==JSON.stringify(tablesBefore[i].entries)||table.entries.length!==profile.unixCallCount+1))
         throw Error('The original WineVulkan call indices changed.');
     files.set(modulePath+'vulkan_thunks.c',native);
     let vulkan = replaceOnce(original('vulkan.c'),'#include "vulkan_private.h"','#include "vulkan_private.h"\n#include "scene-request.h"');
@@ -52,14 +52,16 @@ export function profileSources(directory) {
     files.set(modulePath+'loader.c',original('loader.c')+'\nBOOL maclauncher_scene_initialize(void)\n{\n    return wine_vk_init_once();\n}\n');
     files.set(modulePath+'Makefile.in',replaceOnce(original('Makefile.in'),'SOURCES = \\\n','SOURCES = \\\n\tscene-pe.c \\\n\tscene-unix.c \\\n'));
     files.set(modulePath+'winevulkan.spec',original('winevulkan.spec')+'\n@ stdcall MacLauncherWineVulkanSceneAPI1()\n@ stdcall MacLauncherWineVulkanRecordScene1(ptr)\n@ stdcall MacLauncherWineVulkanSceneContext1(ptr)\n');
-    for (const name of ['scene-request.h','scene-pe.c','scene-unix.c']) {
+    for (const name of profile.ownedFiles.filter(name=>/\.(?:c|h)$/.test(name))) {
         if (fs.existsSync(path.join(directory,modulePath,name))) throw Error('The original source already contains an owned WineVulkan entry.');
-        files.set(modulePath+name,fs.readFileSync(path.join(app,name)));
+        let owned=fs.readFileSync(path.join(app,name),'utf8');
+        if(name==='scene-unix.c')owned=replaceOnce(owned,'WINE_VULKAN_DRIVER_VERSION == 47','WINE_VULKAN_DRIVER_VERSION == '+profile.wineVulkanDriverVersion);
+        files.set(modulePath+name,owned);
     }
     // The matched Wine header already declares the exact Vulkan C types.
     if (fs.existsSync(path.join(directory,'include/vulkan/vulkan.h'))) throw Error('The Vulkan header layout changed.');
     files.set('include/vulkan/vulkan.h','#pragma once\n#include "wine/vulkan.h"\n');
-    for (const file of source.sharedHeaders) {
+    for (const file of profile.sharedHeaders) {
         let bytes=fs.readFileSync(path.resolve(app,'../../../shared',file));
         // Wine's dependency scanner reads every include branch. Use the
         // existing canonical layout rather than its optional flat aliases.
@@ -73,12 +75,12 @@ export function profileSources(directory) {
         bytes=Buffer.from(text);
         files.set(modulePath+'macfx-shared/'+file,bytes);
     }
-    return {files,originalCalls:source.unixCallCount,calls:source.unixCallCount+1};
+    return {files,originalCalls:profile.unixCallCount,calls:profile.unixCallCount+1};
 }
-export function applyProfile(directory) {
-    const result = profileSources(directory);
+export function applyProfile(directory,profile=source) {
+    const result = profileSources(directory,profile);
     for (const [file,bytes] of result.files) {
         const target=path.join(directory,file);fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,bytes);
     }
-    return {profile:source.profile,originalCalls:result.originalCalls,calls:result.calls,files:[...result.files.keys()]};
+    return {profile:profile.profile,originalCalls:result.originalCalls,calls:result.calls,files:[...result.files.keys()]};
 }
