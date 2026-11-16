@@ -27,8 +27,8 @@ const build = path.resolve(source, args[0] && !args[0].startsWith("--") ? args.s
 const options = {};
 while (args.length) {
   const key = args.shift(), value = args.shift();
-  if (!["--version", "--arch", "--output", "--declaration", "--source-root", "--owned-source", "--spirv-cross-source", "--isf", "--xess-host", "--fsr", "--fsr4", "--fsr4-source", "--asr", "--asr-source", "--sgsr2", "--sgsr2-source", "--fsr3-generation", "--godot", "--streamline", "--dxmt", "--xess", "--retroarch", "--libplacebo", "--neural"].includes(key) || !value || value.startsWith("--") || options[key])
-    throw new Error("Usage: node scripts/stage-reshade.mjs <source> [build] [--owned-source <source>] [--spirv-cross-source <checkout>] [--isf <payload>] [--xess-host <payload>] [--fsr <payload>] [--fsr4 <payload>] [--fsr4-source <checkout>] [--asr <payload>] [--asr-source <checkout>] [--sgsr2 <payload>] [--sgsr2-source <checkout>] [--fsr3-generation <payload>] [--godot <payload>] [--streamline <payload>] [--dxmt <payload>] [--xess <payload>] [--retroarch <payload>] [--libplacebo <payload>] [--neural <payload>]");
+  if (!["--version", "--arch", "--output", "--declaration", "--source-root", "--owned-source", "--spirv-cross-source", "--isf", "--xess-host", "--fsr", "--fsr4", "--fsr4-source", "--asr", "--asr-source", "--sgsr2", "--sgsr2-source", "--fsr3-generation", "--anr-generation", "--godot", "--streamline", "--dxmt", "--xess", "--retroarch", "--libplacebo", "--neural"].includes(key) || !value || value.startsWith("--") || options[key])
+    throw new Error("Usage: node scripts/stage-reshade.mjs <source> [build] [--owned-source <source>] [--spirv-cross-source <checkout>] [--isf <payload>] [--xess-host <payload>] [--fsr <payload>] [--fsr4 <payload>] [--fsr4-source <checkout>] [--asr <payload>] [--asr-source <checkout>] [--sgsr2 <payload>] [--sgsr2-source <checkout>] [--fsr3-generation <payload>] [--anr-generation <payload>] [--godot <payload>] [--streamline <payload>] [--dxmt <payload>] [--xess <payload>] [--retroarch <payload>] [--libplacebo <payload>] [--neural <payload>]");
   options[key] = ["--version","--arch"].includes(key) ? value : path.resolve(value);
 }
 const upstreamRoot=options["--source-root"]||path.resolve(import.meta.dirname,"..");
@@ -193,6 +193,17 @@ if(options["--retroarch"]) {
 const temporalInputs = new Map();
 const temporalExecutionArchitectures = new Map();
 if(options["--fsr4-source"]&&!options["--fsr4"])throw Error("An FSR 4 source checkout requires its provider payload.");
+if(options["--anr-generation"]){
+  const directory=options["--anr-generation"],descriptor=JSON.parse(fs.readFileSync(path.join(directory,"provider.json"),"utf8"));
+  if(descriptor.method!=="anr"||descriptor.providerABI!==1||descriptor.complete!==true||descriptor.preparation!==1)throw Error("ANR provider payload is incomplete.");
+  for(const relative of fs.readdirSync(directory,{recursive:true}).sort()){
+    const file=path.join(directory,relative),stat=fs.lstatSync(file);
+    if(stat.isSymbolicLink()||!stat.isFile()&&!stat.isDirectory())throw Error("ANR payload requires regular files.");
+    if(stat.isFile())temporalInputs.set("generation/anr/"+relative,file);
+  }
+  for(const relative of fs.readdirSync(appPath("src/modules/shared/reshade/generation/anr"),{recursive:true})){const file=appPath("src/modules/shared/reshade/generation/anr/"+relative);if(fs.statSync(file).isFile())extraOwned.set("maclauncher/generation/anr/"+relative,file);}
+  features.graphics.anrGenerationAPI=1;features.graphics.frameGenerationMethods=[...new Set([...(features.graphics.frameGenerationMethods||[]),"anr"])];
+}
 if(options["--fsr3-generation"]){
   const directory=options["--fsr3-generation"];
   for(const relative of fs.readdirSync(directory,{recursive:true}).sort()){

@@ -1248,6 +1248,15 @@
     {
       "source": "app:src/modules/shared/reshade/native/iosurface-texture.hpp",
       "path": "src/iosurface-texture.hpp"
+    },
+    {
+      "path": "src/anr-generation.mm",
+      "source": "app:src/modules/shared/reshade/native/anr-generation.mm",
+      "nativeLink": true
+    },
+    {
+      "path": "src/anr-submission.h",
+      "source": "app:src/modules/shared/reshade/generation/anr/native/submission.h"
     }
   ]
 }
