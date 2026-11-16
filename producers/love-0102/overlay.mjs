@@ -10,6 +10,7 @@ export function applyBuildOverlay({love,megasource,luaLibrary,luaInclude}){
  applyZlibDarwinOverlay({megasource});
  applyFreetypeDarwinOverlay({megasource});
  applySdlCocoaDeclarationsOverlay({megasource});
+ applySdlArm64SpinlockOverlay({megasource});
  replace(path.join(megasource,'libs/physfs-2.0.3/CMakeLists.txt'),'SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} " -framework Carbon -framework IOKit")','SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} "-framework Carbon" "-framework IOKit")');
  replace(path.join(megasource,'libs/libtheora-1.1.1/CMakeLists.txt'),'\tadd_library(theora SHARED ${THEORA_SRC} lib/theora.def)','\tset(THEORA_SHARED_PLATFORM_SOURCES)\n\tif(WIN32)\n\t\tlist(APPEND THEORA_SHARED_PLATFORM_SOURCES lib/theora.def)\n\tendif()\n\tadd_library(theora SHARED ${THEORA_SRC} ${THEORA_SHARED_PLATFORM_SOURCES})');
 
@@ -61,4 +62,11 @@ export function applySdlCocoaDeclarationsOverlay({megasource}){
  const file=path.join(megasource,'libs/SDL2/src/file/cocoa/SDL_rwopsbundlesupport.m');
  replace(file,'    FILE* fp = NULL;','    /* Declaration placement adapted for the existing C warning policy. */\n    FILE* fp = NULL;\n    NSFileManager* file_manager;\n    NSString* resource_path;\n    NSString* ns_string_file_component;\n    NSString* full_path_with_file_to_try;');
  for(const [type,name] of [['NSFileManager','file_manager'],['NSString','resource_path'],['NSString','ns_string_file_component'],['NSString','full_path_with_file_to_try']])replace(file,'    '+type+'* '+name+' = ','    '+name+' = ');
+}
+
+/** Supply paired strongly ordered operations for the Apple arm64 spinlock boundary. */
+export function applySdlArm64SpinlockOverlay({megasource}){
+ const file=path.join(megasource,'libs/SDL2/src/atomic/SDL_spinlock.c');
+ replace(file,'#elif defined(_MSC_VER)\n    SDL_COMPILE_TIME_ASSERT(locksize, sizeof(*lock) == sizeof(long));','#elif defined(__APPLE__) && (defined(__aarch64__) || defined(__arm64__))\n    /* Apple arm64 uses compiler atomics with explicit ordering. */\n    int expected = 0;\n    return __atomic_compare_exchange_n(lock, &expected, 1, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST) ? SDL_TRUE : SDL_FALSE;\n\n#elif defined(_MSC_VER)\n    SDL_COMPILE_TIME_ASSERT(locksize, sizeof(*lock) == sizeof(long));');
+ replace(file,'#if defined(_MSC_VER)\n    _ReadWriteBarrier();','#if defined(__APPLE__) && (defined(__aarch64__) || defined(__arm64__))\n    /* Pair the successful compare-and-swap with an ordered atomic unlock. */\n    __atomic_store_n(lock, 0, __ATOMIC_SEQ_CST);\n\n#elif defined(_MSC_VER)\n    _ReadWriteBarrier();');
 }
