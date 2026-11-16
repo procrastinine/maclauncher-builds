@@ -1019,6 +1019,10 @@
       "path": "src/graphics-hardware.mm"
     },
     {
+      "source": "app:src/modules/shared/reshade/native/vulkan-features.c",
+      "path": "src/vulkan-features.c"
+    },
+    {
       "source": "app:src/modules/shared/reshade/native/retroarch-external.h",
       "path": "src/retroarch-external.h"
     },

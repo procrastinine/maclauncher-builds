@@ -29,6 +29,7 @@
       "shaderc-offline",
       "maclauncher-graphics-video",
       "maclauncher-graphics-hardware",
+      "maclauncher-vulkan-features",
       "maclauncher-graphics-window"
     ],
     "macOSSDKByArchitecture": {

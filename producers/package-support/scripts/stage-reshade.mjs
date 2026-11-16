@@ -62,6 +62,9 @@ if(features.graphics.windowSourceAPI===2){
 if(features.graphics.hardwareQueryAPI===1){
   nativeFiles.push("maclauncher-graphics-hardware");
 }
+if(features.graphics.vulkanFeatureQueryAPI===1){
+  nativeFiles.push("maclauncher-vulkan-features");
+}
 const retroarchInputs = new Map();
 const extraSources=[];
 const optionalInputs=new Map(),optionalLoad=new Map(),extraOwned=new Map();
