@@ -12,6 +12,7 @@ import {appPath} from '../../../../../../../tools/app-source.mjs';
 import {applyStartupOverlay} from './startup-overlay.mjs';
 import {applyReferenceOwnershipOverlay} from './reference-ownership-overlay.mjs';
 import {applyRingCapacityOverlay} from './ring-capacity-overlay.mjs';
+import {applyCompilerShutdownOverlay} from './compiler-shutdown-overlay.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const [upstreamArg, vendorArg, compilerArg, outputArg] = process.argv.slice(2);
@@ -60,6 +61,7 @@ for(const [name,file]of [['scene-aovs.h',path.join(shared,'scene-aovs.h')],['ima
 applyStartupOverlay(source);
 applyReferenceOwnershipOverlay(source);
 applyRingCapacityOverlay(source);
+applyCompilerShutdownOverlay(source);
 applyCameraOverlay(source);
 applyTemporalD3D12(source);
 fs.writeFileSync(path.join(source, 'include/version.h'), `#pragma once\n#define DXMT_VERSION "v0.80-244-g7c8dee1-maclauncher-camera1"\n`);
