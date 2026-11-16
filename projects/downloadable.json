@@ -4499,7 +4499,8 @@
         "url": "https://github.com/pnggroup/libpng",
         "repository": "pnggroup/libpng",
         "pin": {
-          "file": "producers/dependencies/libpng.json"
+          "file": "producers/dependencies/libpng.json",
+          "pointer": ""
         }
       }
     ],
