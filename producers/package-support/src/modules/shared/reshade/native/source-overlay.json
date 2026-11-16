@@ -1270,6 +1270,22 @@
       "source": "app:src/modules/shared/reshade/native/caller-copy.mm",
       "path": "src/caller-copy.mm",
       "nativeLink": true
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/hud-split.hpp",
+      "path": "src/hud-split.hpp"
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/hud-difference.hpp",
+      "path": "src/hud-difference.hpp"
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/late-camera.hpp",
+      "path": "src/late-camera.hpp"
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/layer-composition.h",
+      "path": "src/layer-composition.h"
     }
   ]
 }
