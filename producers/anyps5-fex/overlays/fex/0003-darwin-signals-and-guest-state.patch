@@ -1,9 +1,9 @@
 diff --git a/FEXCore/include/FEXCore/Darwin/GuestState.h b/FEXCore/include/FEXCore/Darwin/GuestState.h
 new file mode 100644
-index 0000000..acc6615
+index 0000000..dd0bf88
 --- /dev/null
 +++ b/FEXCore/include/FEXCore/Darwin/GuestState.h
-@@ -0,0 +1,146 @@
+@@ -0,0 +1,152 @@
 +// SPDX-License-Identifier: MIT
 +#pragma once
 +
@@ -115,7 +115,13 @@ index 0000000..acc6615
 +}
 +inline uint16_t X87Tag() {
 +  auto& CPU = State();
-+  return FPState::ConvertFromAbridgedFTW(X87Status(), CPU.mm, CPU.AbridgedFTW);
++  uint16_t Tags {};
++  // CPUState slots and abridged tag bits are physical. ConvertFromAbridgedFTW expects stack-relative payload slots.
++  for (unsigned Register = 0; Register != 8; ++Register) {
++    const auto Tag = FPState::GetX87Tag(CPU.mm[Register], CPU.AbridgedFTW & (1U << Register));
++    Tags |= static_cast<uint16_t>(Tag) << (Register * 2);
++  }
++  return Tags;
 +}
 +inline std::array<uint32_t, 7> X87Environment() {
 +  // 32-bit FNSTENV layout: reserved upper words are all ones. FEX tracks FIP; selectors and FOP are zero.
@@ -152,10 +158,10 @@ index 0000000..acc6615
 +} // namespace FEXCore::Darwin
 diff --git a/FEXCore/include/FEXCore/Darwin/SignalDelegator.h b/FEXCore/include/FEXCore/Darwin/SignalDelegator.h
 new file mode 100644
-index 0000000..f5bdff2
+index 0000000..177b9a7
 --- /dev/null
 +++ b/FEXCore/include/FEXCore/Darwin/SignalDelegator.h
-@@ -0,0 +1,297 @@
+@@ -0,0 +1,299 @@
 +// SPDX-License-Identifier: MIT
 +#pragma once
 +
@@ -267,6 +273,10 @@ index 0000000..f5bdff2
 +    const auto FaultAddress = reinterpret_cast<uintptr_t>(Info->si_addr);
 +    auto* CTX = Thread->CTX;
 +    const bool InJIT = CTX->IsAddressInCodeBuffer(Thread, PC);
++    const uint32_t ESR = Machine.__es.__esr;
++    const uint32_t ExceptionClass = ESR >> 26;
++    const bool DataAbort = ExceptionClass == 0x24 || ExceptionClass == 0x25;
++    const bool AlignmentFault = DataAbort && (ESR & 0x3f) == 0x21;
 +
 +    // Emission-buffer overflow is a compiler fault, not a guest-memory fault. The pool is ordinary RW memory.
 +    if ((Signal == SIGBUS || Signal == SIGSEGV) && Thread->JITGuardPage &&
@@ -280,7 +290,8 @@ index 0000000..f5bdff2
 +      return true;
 +    }
 +
-+    if (InJIT && Signal == SIGBUS && Info->si_code == BUS_ADRALN) {
++    // Darwin also uses SIGBUS/code1 for protection faults; only ESR identifies an actual alignment fault.
++    if (InJIT && Signal == SIGBUS && Info->si_code == BUS_ADRALN && AlignmentFault) {
 +      auto GPRs = ReadGPRs(Machine.__ss);
 +      std::optional<int32_t> Advance;
 +      {
@@ -297,9 +308,6 @@ index 0000000..f5bdff2
 +    }
 +
 +    // ESR.WnR is meaningful only for a data abort, never an instruction-fetch abort or an alignment exception.
-+    const uint32_t ESR = Machine.__es.__esr;
-+    const uint32_t ExceptionClass = ESR >> 26;
-+    const bool DataAbort = ExceptionClass == 0x24 || ExceptionClass == 0x25;
 +    const bool WriteFault = DataAbort && (ESR & (1U << 6));
 +    if ((Signal == SIGBUS || Signal == SIGSEGV) && WriteFault &&
 +        HandleCodeWrite(Thread, FaultAddress, Context, InJIT)) {
