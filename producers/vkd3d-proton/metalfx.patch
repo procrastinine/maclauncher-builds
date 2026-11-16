@@ -14,7 +14,7 @@ index c6f6ee8..4cf8400 100644
          return S_OK;
      }
  
-+    if (IsEqualGUID(iid, &IID_ID3D12GraphicsCommandListMetalFX))
++    if (IsEqualGUID(iid, &IID_ID3D12GraphicsCommandListMetalFX) || IsEqualGUID(iid, &IID_ID3D12GraphicsCommandListMetalFX1))
 +    {
 +        ID3D12GraphicsCommandList10_AddRef(iface);
 +        *object = &command_list->ID3D12GraphicsCommandListMetalFX_vtbl;
@@ -64,7 +64,7 @@ index c6f6ee8..4cf8400 100644
  }
  
  extern CONST_VTBL struct ID3D12GraphicsCommandListExt2Vtbl d3d12_command_list_vkd3d_ext_vtbl;
-+extern CONST_VTBL struct ID3D12GraphicsCommandListMetalFXVtbl d3d12_command_list_metalfx_vtbl;
++extern CONST_VTBL struct ID3D12GraphicsCommandListMetalFX1Vtbl d3d12_command_list_metalfx_vtbl;
  
  static void d3d12_command_list_init_attachment_info(VkRenderingAttachmentInfo *attachment_info)
  {
@@ -96,7 +96,7 @@ index 8024485..a5155c8 100644
  {
      d3d12_command_list_iface ID3D12GraphicsCommandList_iface;
      d3d12_command_list_vkd3d_ext_iface ID3D12GraphicsCommandListExt_iface;
-+    /* ID3D12GraphicsCommandListMetalFX (metalfx.c, vkd3d_metalfx.h): this member is its vtable pointer */
++    /* ID3D12GraphicsCommandListMetalFX and MetalFX1 (metalfx.c, vkd3d_metalfx.h): this member is its vtable pointer */
 +    const void *ID3D12GraphicsCommandListMetalFX_vtbl;
      LONG refcount;
  

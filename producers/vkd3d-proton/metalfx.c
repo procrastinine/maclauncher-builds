@@ -4,6 +4,8 @@
  * Each evaluation is one VkTemporalFrameInfoMVK in the pNext chain of a vkCmdPipelineBarrier2: the frame's
  * images and values. Wine's 64-bit Vulkan thunk hands that chain to the driver unchanged, and KosmicKrisp
  * forwards the frame in command order to MacLauncher's graphics pipeline, which runs the selected upscaler.
+ * ID3D12GraphicsCommandListMetalFX1 adds the late scene: the HUD-less color, UI color and alpha and camera that a
+ * game supplies after an evaluation, recorded where it supplies them with that evaluation's feature and frame.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -98,36 +100,36 @@ static bool vkd3d_metalfx_driver_has(const struct d3d12_device *device, const ch
 }
 
 static inline struct d3d12_command_list *impl_from_ID3D12GraphicsCommandListMetalFX(
-        ID3D12GraphicsCommandListMetalFX *iface)
+        ID3D12GraphicsCommandListMetalFX1 *iface)
 {
     return CONTAINING_RECORD(iface, struct d3d12_command_list, ID3D12GraphicsCommandListMetalFX_vtbl);
 }
 
-static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_QueryInterface(ID3D12GraphicsCommandListMetalFX *iface,
+static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_QueryInterface(ID3D12GraphicsCommandListMetalFX1 *iface,
         REFIID iid, void **object)
 {
     struct d3d12_command_list *list = impl_from_ID3D12GraphicsCommandListMetalFX(iface);
     return d3d12_command_list_QueryInterface(&list->ID3D12GraphicsCommandList_iface, iid, object);
 }
 
-static ULONG STDMETHODCALLTYPE d3d12_command_list_metalfx_AddRef(ID3D12GraphicsCommandListMetalFX *iface)
+static ULONG STDMETHODCALLTYPE d3d12_command_list_metalfx_AddRef(ID3D12GraphicsCommandListMetalFX1 *iface)
 {
     struct d3d12_command_list *list = impl_from_ID3D12GraphicsCommandListMetalFX(iface);
     return d3d12_command_list_AddRef(&list->ID3D12GraphicsCommandList_iface);
 }
 
-static ULONG STDMETHODCALLTYPE d3d12_command_list_metalfx_Release(ID3D12GraphicsCommandListMetalFX *iface)
+static ULONG STDMETHODCALLTYPE d3d12_command_list_metalfx_Release(ID3D12GraphicsCommandListMetalFX1 *iface)
 {
     struct d3d12_command_list *list = impl_from_ID3D12GraphicsCommandListMetalFX(iface);
     return d3d12_command_list_Release(&list->ID3D12GraphicsCommandList_iface);
 }
 
-static BOOL STDMETHODCALLTYPE d3d12_command_list_metalfx_SupportsTemporalUpscale(ID3D12GraphicsCommandListMetalFX *iface)
+static BOOL STDMETHODCALLTYPE d3d12_command_list_metalfx_SupportsTemporalUpscale(ID3D12GraphicsCommandListMetalFX1 *iface)
 {
     return vkd3d_metalfx_driver_has(impl_from_ID3D12GraphicsCommandListMetalFX(iface)->device, "temporal-sr");
 }
 
-static BOOL STDMETHODCALLTYPE d3d12_command_list_metalfx_SupportsDenoisedUpscale(ID3D12GraphicsCommandListMetalFX *iface)
+static BOOL STDMETHODCALLTYPE d3d12_command_list_metalfx_SupportsDenoisedUpscale(ID3D12GraphicsCommandListMetalFX1 *iface)
 {
     return vkd3d_metalfx_driver_has(impl_from_ID3D12GraphicsCommandListMetalFX(iface)->device, "temporal-rr");
 }
@@ -150,15 +152,11 @@ static ID3D12Resource *vkd3d_metalfx_scene_image(struct d3d12_command_list *list
     return image;
 }
 
-/* Fills in the images and the feature's identity, and records the frame with the ids released since the last one.
- * Every image is a texture. The masks, when either is present, follow the frame in its pNext chain. */
-static HRESULT vkd3d_metalfx_record(struct d3d12_command_list *list, VkTemporalFrameInfoMVK *info,
-        ID3D12Resource *const *images, VkTemporalFrameMasksInfoMVK *masks, ID3D12Resource *const *mask_images,
-        ID3D12MetalFXScaler **iface)
+/* Fills in the frame's images, and the masks when either is present (they follow the frame in its pNext chain).
+ * Every image is a texture. */
+static HRESULT vkd3d_metalfx_images(VkTemporalFrameInfoMVK *info, ID3D12Resource *const *images,
+        VkTemporalFrameMasksInfoMVK *masks, ID3D12Resource *const *mask_images, struct d3d12_resource **resources)
 {
-    struct d3d12_resource *resources[TEMPORAL_IMAGES + 2] = {0};
-    uint64_t released[ARRAY_SIZE(vkd3d_metalfx_released)];
-    struct vkd3d_metalfx_scaler *scaler;
     unsigned int i;
 
     for (i = 0; i < TEMPORAL_IMAGES + 2; i++)
@@ -194,6 +192,21 @@ static HRESULT vkd3d_metalfx_record(struct d3d12_command_list *list, VkTemporalF
         masks->pNext = info->pNext;
         info->pNext = masks;
     }
+    return S_OK;
+}
+
+/* Fills in the images and the feature's identity, and records the frame with the ids released since the last one. */
+static HRESULT vkd3d_metalfx_record(struct d3d12_command_list *list, VkTemporalFrameInfoMVK *info,
+        ID3D12Resource *const *images, VkTemporalFrameMasksInfoMVK *masks, ID3D12Resource *const *mask_images,
+        ID3D12MetalFXScaler **iface)
+{
+    struct d3d12_resource *resources[TEMPORAL_IMAGES + 2] = {0};
+    uint64_t released[ARRAY_SIZE(vkd3d_metalfx_released)];
+    struct vkd3d_metalfx_scaler *scaler;
+    HRESULT hr;
+
+    if (FAILED(hr = vkd3d_metalfx_images(info, images, masks, mask_images, resources)))
+        return hr;
     if (!(scaler = vkd3d_metalfx_scaler(iface)))
         return *iface ? E_INVALIDARG : E_OUTOFMEMORY;
     info->featureId = scaler->id;
@@ -210,7 +223,7 @@ static HRESULT vkd3d_metalfx_record(struct d3d12_command_list *list, VkTemporalF
     return S_OK;
 }
 
-static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_TemporalUpscale(ID3D12GraphicsCommandListMetalFX *iface,
+static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_TemporalUpscale(ID3D12GraphicsCommandListMetalFX1 *iface,
         const VKD3D_METALFX_TEMPORAL_DESC *desc, ID3D12MetalFXScaler **scaler)
 {
     struct d3d12_command_list *list = impl_from_ID3D12GraphicsCommandListMetalFX(iface);
@@ -266,7 +279,7 @@ static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_TemporalUpscale(ID3D
     return vkd3d_metalfx_record(list, &info, images, &masks, mask_images, scaler);
 }
 
-static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_DenoisedUpscale(ID3D12GraphicsCommandListMetalFX *iface,
+static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_DenoisedUpscale(ID3D12GraphicsCommandListMetalFX1 *iface,
         const VKD3D_METALFX_DENOISED_DESC *desc, ID3D12MetalFXScaler **scaler)
 {
     struct d3d12_command_list *list = impl_from_ID3D12GraphicsCommandListMetalFX(iface);
@@ -311,18 +324,67 @@ static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_DenoisedUpscale(ID3D
 }
 
 /* Frame Generation is not offered: the NGX core then reports it unsupported. */
-static BOOL STDMETHODCALLTYPE d3d12_command_list_metalfx_SupportsFrameInterpolation(ID3D12GraphicsCommandListMetalFX *iface)
+static BOOL STDMETHODCALLTYPE d3d12_command_list_metalfx_SupportsFrameInterpolation(ID3D12GraphicsCommandListMetalFX1 *iface)
 {
     return FALSE;
 }
 
-static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_FrameInterpolate(ID3D12GraphicsCommandListMetalFX *iface,
+static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_FrameInterpolate(ID3D12GraphicsCommandListMetalFX1 *iface,
         const VKD3D_METALFX_FRAME_INTERPOLATE_DESC *desc, ID3D12MetalFXScaler **interpolator)
 {
     return E_NOTIMPL;
 }
 
-CONST_VTBL struct ID3D12GraphicsCommandListMetalFXVtbl d3d12_command_list_metalfx_vtbl =
+/* This implementation's scaler; NULL for another implementation's. */
+static struct vkd3d_metalfx_scaler *vkd3d_metalfx_existing_scaler(ID3D12MetalFXScaler *iface)
+{
+    return iface && iface->lpVtbl == &vkd3d_metalfx_scaler_vtbl
+            ? CONTAINING_RECORD(iface, struct vkd3d_metalfx_scaler, ID3D12MetalFXScaler_iface) : NULL;
+}
+
+static UINT64 STDMETHODCALLTYPE d3d12_command_list_metalfx_TemporalFrameId(ID3D12GraphicsCommandListMetalFX1 *iface,
+        ID3D12MetalFXScaler *scaler)
+{
+    struct vkd3d_metalfx_scaler *own = vkd3d_metalfx_existing_scaler(scaler);
+
+    TRACE("iface %p, scaler %p.\n", iface, scaler);
+
+    return own ? own->frames : 0;
+}
+
+/* An earlier evaluation's frame of the scaler's feature gains the scene supplied after it. The images are read where
+ * this command list records them; nothing is released and the scaler's frame count is unchanged. */
+static HRESULT STDMETHODCALLTYPE d3d12_command_list_metalfx_LateScene(ID3D12GraphicsCommandListMetalFX1 *iface,
+        const VKD3D_METALFX_LATE_SCENE_DESC *desc, ID3D12MetalFXScaler *scaler_iface)
+{
+    struct d3d12_command_list *list = impl_from_ID3D12GraphicsCommandListMetalFX(iface);
+    struct vkd3d_metalfx_scaler *scaler = vkd3d_metalfx_existing_scaler(scaler_iface);
+    struct d3d12_resource *resources[TEMPORAL_IMAGES + 2] = {0};
+    ID3D12Resource *images[TEMPORAL_IMAGES] = {0};
+    VkTemporalFrameInfoMVK info;
+    HRESULT hr;
+
+    TRACE("iface %p, desc %p, scaler %p.\n", iface, desc, scaler_iface);
+
+    if (!desc || !scaler || !desc->FrameId || desc->FrameId > scaler->frames)
+        return E_INVALIDARG;
+    images[TEMPORAL_HUDLESS] = vkd3d_metalfx_scene_image(list, desc->HudLess);
+    images[TEMPORAL_UI] = vkd3d_metalfx_scene_image(list, desc->UI);
+    if (!images[TEMPORAL_HUDLESS] && !images[TEMPORAL_UI] && !desc->CameraValid)
+        return E_INVALIDARG;
+    if (!vkd3d_metalfx_driver_has(list->device, "temporal-sr"))
+        return E_NOTIMPL;
+
+    memset(&info, 0, sizeof(info));
+    vk_temporal_late_scene(&info, desc);
+    if (FAILED(hr = vkd3d_metalfx_images(&info, images, NULL, NULL, resources)))
+        return hr;
+    info.featureId = scaler->id;
+    d3d12_command_list_metalfx_record(list, &info, resources, ARRAY_SIZE(resources));
+    return S_OK;
+}
+
+CONST_VTBL struct ID3D12GraphicsCommandListMetalFX1Vtbl d3d12_command_list_metalfx_vtbl =
 {
     /* IUnknown methods */
     d3d12_command_list_metalfx_QueryInterface,
@@ -336,4 +398,8 @@ CONST_VTBL struct ID3D12GraphicsCommandListMetalFXVtbl d3d12_command_list_metalf
     d3d12_command_list_metalfx_DenoisedUpscale,
     d3d12_command_list_metalfx_SupportsFrameInterpolation,
     d3d12_command_list_metalfx_FrameInterpolate,
+
+    /* ID3D12GraphicsCommandListMetalFX1 methods */
+    d3d12_command_list_metalfx_TemporalFrameId,
+    d3d12_command_list_metalfx_LateScene,
 };

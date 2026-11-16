@@ -10,7 +10,7 @@ A temporal frame is one DLSS Super Resolution or Ray Reconstruction evaluation, 
 | --- | --- |
 | `featureId` | The temporal history: one per NGX feature, unique within the process. |
 | `frameId` | Greater than 0 and new for every evaluation of the feature. |
-| `featureType` | 1 for Super Resolution, 2 for Ray Reconstruction. |
+| `featureType` | 1 for Super Resolution, 2 for Ray Reconstruction, 3 for a late scene. |
 | `images`, `formats` | Slots: color, depth, motion, output, exposure, diffuse albedo, specular albedo, normals, roughness, specular hit distance, HUD-less color and UI. Color, depth, motion and output are required. A format other than `VK_FORMAT_UNDEFINED` is the view to read: integer-typed images are read as the float format of their bits. |
 | Offsets and extents | Color, depth and motion are read at their offsets over the render extent, or over the output extent when motion is at display resolution. Output is written at its offset over the output extent. An extent of 0 means the image's extent less the offset. |
 | `flags` | Auto exposure 0x1, reset 0x2, reversed depth 0x4, display-resolution motion 0x8, jittered motion 0x10, HDR (linear) color 0x20, valid camera 0x40, infinite far plane 0x80, roughness in normal alpha 0x100. |
@@ -27,6 +27,8 @@ A temporal frame is one DLSS Super Resolution or Ray Reconstruction evaluation, 
 
 A format of `VK_FORMAT_UNDEFINED` is the image's own. A frame without the structure, or with `VK_NULL_HANDLE` in a slot, has no such mask.
 
+A late scene (`featureType` 3) completes an earlier frame of the same feature: `featureId` and `frameId` are that evaluation's. It carries only the HUD-less color and UI slots, each optional, and the reversed-depth, valid-camera and infinite-far-plane flags with the camera values; every other member is 0 and it releases no features. A game supplies these after its evaluation of the frame: Unreal Engine's Streamline plugin tags its HUD-less color and UI color and alpha, and sets the frame's camera, after its own DLSS pass. The late scene is recorded where the game supplies them, so their contents are those of that frame, and it serves that frame's frame generation.
+
 ## Scene attachments
 
 Drivers bind supplied matrices and AOVs with `rsBindTemporalSceneMatrices` and `rsBindTemporalSceneAovs` before processing the same classic command buffer. Both matrix contracts use row-major row vectors, so supplied finite, nonzero arrays are copied unchanged. Zero or nonfinite matrices remain absent. No clip-range flag is inferred.
@@ -37,7 +39,7 @@ HUD-less color follows the backbuffer color space and postprocessing. UI RGB is 
 
 ## Producers
 
-- D3D12: VKD3D-Proton's `ID3D12GraphicsCommandListMetalFX` records the frame in the game's command list, followed by a barrier without the structure.
+- D3D12: VKD3D-Proton's `ID3D12GraphicsCommandListMetalFX` records the frame in the game's command list, followed by a barrier without the structure. `ID3D12GraphicsCommandListMetalFX1` ([vkd3d_metalfx.h](vkd3d_metalfx.h)), which every command list also answers with the same methods followed by two more, adds the late scene: `TemporalFrameId` returns the frame id of a scaler's latest evaluation, and `LateScene` records a late scene for one of the scaler's evaluated frames in the command list that supplies it, with the same following barrier. It declines a missing scaler, frame 0, a frame the scaler has not evaluated, and a scene with no readable image and no camera.
 - D3D11: the NGX core records the frame and the same following barrier in a command buffer of its own. It submits that command buffer on DXVK's queue, after the immediate context's flushed commands, through DXVK's interop interfaces (`IDXGIVkInteropDevice`, `IDXGIVkInteropSurface`).
 
 In both APIs the NGX core passes `DLSS.Input.Bias.Current.Color.Mask` and its subrect base as the reactive mask. DLSS reserves its transparency mask, so NGX frames carry none.
