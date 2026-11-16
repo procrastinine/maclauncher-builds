@@ -50,6 +50,15 @@ export function compressedCopySource(text){
   '                dstExtent.height = mvkCeilingDivide(dstExtent.height, srcBlockExtent.height);',
   'MoltenVK/MoltenVK/Commands/MVKCmdTransfer.mm');
 }
+// Apache-2.0 adaptation by Gauthier Piarrette (Highball 6d12171c6edf531c1c62f82f4cdca5e1773bd4ec).
+// https://github.com/gauthierpiarrette/highball at 4ebe4fe0e4df4090b52e3f638d799a2a801ce927,
+// spike/patches/moltenvk-cache-drawid-present.patch, direct draw-ID initialization hunks only.
+// Highball credits alexdremov / MoltenVK-Detroit; upstream correspondence: bc0d5bf7333c26ac4838146144514531eb298937 (utzcoz).
+export function drawIdSource(text){
+ const from='memset([tempDrawIDBuff->_mtlBuffer contents], 0, sizeof(uint32_t));';
+ if(text.split(from).length!==3)throw Error('MoltenVK direct draw-ID source anchors changed');
+ return text.replaceAll(from,'*(uint32_t*)tempDrawIDBuff->getContents() = 0;');
+}
 export function sceneSources(repository,readSource=file=>original(repository,file)){
  const files=new Map();
  const edit=(file,changes)=>{let text=readSource(file);for(const[from,to]of changes)text=replace(text,from,to,file);files.set(file,text);};
@@ -58,6 +67,8 @@ export function sceneSources(repository,readSource=file=>original(repository,fil
  files.set(bindings,descriptorBindingSource(readSource(bindings)));
  const transfer=commands+'MVKCmdTransfer.mm';
  files.set(transfer,compressedCopySource(readSource(transfer)));
+ const draw=commands+'MVKCmdDraw.mm';
+ files.set(draw,drawIdSource(readSource(draw)));
  edit(commands+'MVKCommandPool.h',[
   ['#include "MVKCmdDebug.h"','#include "MVKCmdDebug.h"\n#include "scene-command.hpp"'],
   ['#pragma mark Command resources','MVKCommandTypePool<MVKCmdMacfxScene> _cmdMacfxScenePool;\n\n#pragma mark Command resources']
