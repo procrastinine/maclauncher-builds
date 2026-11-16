@@ -1,0 +1,437 @@
+diff --git a/FEXCore/include/FEXCore/Darwin/GuestState.h b/FEXCore/include/FEXCore/Darwin/GuestState.h
+new file mode 100644
+index 00000000..74476509
+--- /dev/null
++++ b/FEXCore/include/FEXCore/Darwin/GuestState.h
+@@ -0,0 +1,151 @@
++// SPDX-License-Identifier: MIT
++#pragma once
++
++#include <FEXCore/Core/Context.h>
++#include <FEXCore/Core/CoreState.h>
++#include <FEXCore/Core/X86Enums.h>
++#include <FEXCore/Debug/InternalThreadState.h>
++
++#include <array>
++#include <bit>
++#include <csignal>
++#include <cstdint>
++#include <cstdlib>
++
++namespace FEXCore::Darwin {
++// Bind the guest that is executing on this OS thread. Native callbacks may nest guest execution.
++inline thread_local Core::InternalThreadState* CurrentThread {};
++class ThreadScope final {
++public:
++  explicit ThreadScope(Core::InternalThreadState* Thread) : Previous {CurrentThread} { CurrentThread = Thread; }
++  ~ThreadScope() { CurrentThread = Previous; }
++  ThreadScope(const ThreadScope&) = delete;
++  ThreadScope& operator=(const ThreadScope&) = delete;
++private:
++  Core::InternalThreadState* Previous;
++};
++
++namespace GuestState {
++// An unmasked native-library FP exception must leave the current host thunk through its exception path.
++// The embedding host supplies this non-returning continuation; it owns native-to-guest stack transitions.
++using FPExceptionHandler = void (*)(Core::InternalThreadState*, int, uint8_t);
++inline thread_local FPExceptionHandler FloatingExceptionHandler {};
++inline Core::InternalThreadState& Thread() {
++  if (!CurrentThread) { std::abort(); }
++  return *CurrentThread;
++}
++inline Core::CPUState& State() { return Thread().CurrentFrame->State; }
++inline std::array<uint32_t, 4> Cpuid(uint32_t Leaf, uint32_t Subleaf) {
++  const auto Result = Thread().CTX->RunCPUIDFunction(Leaf, Subleaf);
++  return {Result.eax, Result.ebx, Result.ecx, Result.edx};
++}
++inline uint64_t Xgetbv(uint32_t Index) {
++  const auto Result = Thread().CTX->RunXCRFunction(Index);
++  return (uint64_t {Result.edx} << 32) | Result.eax;
++}
++inline uint64_t ReadTsc() {
++  uint64_t Counter;
++  asm volatile("isb\n\tmrs %0, cntvct_el0" : "=r"(Counter));
++  const auto Ratio = Thread().CTX->RunCPUIDFunction(0x15, 0);
++  // FEX's RDTSC scales CNTVCT by the same ratio advertised by CPUID.15h.
++  if (!Ratio.eax) { std::abort(); }
++  return Counter * Ratio.ebx / Ratio.eax;
++}
++// Accessors run at a host-call boundary after FEX has spilled guest state.
++inline uint32_t Mxcsr() { return State().mxcsr; }
++inline void SetMxcsr(uint32_t Value) { State().mxcsr = Value & 0xffc0; }
++// This is the mask emitted by the selected FEXCore FXSAVE/XSAVE implementation.
++inline uint32_t MxcsrMask() { return 0xffc0; }
++inline uint16_t X87Control() { return State().FCW; }
++inline void SetX87Control(uint16_t Value) { State().FCW = Value; }
++inline uint16_t X87Status() {
++  const auto& Flags = State().flags;
++  uint16_t Value {};
++  for (unsigned Bit = 0; Bit != 11; ++Bit) {
++    Value |= (Flags[X86State::X87FLAG_BASE + Bit] & 1) << Bit;
++  }
++  Value |= (Flags[X86State::X87FLAG_TOP_LOC] & 7) << 11;
++  Value |= (Flags[X86State::X87FLAG_C3_LOC] & 1) << 14;
++  Value |= (Flags[X86State::X87FLAG_B_LOC] & 1) << 15;
++  return Value;
++}
++inline void SetX87Status(uint16_t Value) {
++  auto& Flags = State().flags;
++  for (unsigned Bit = 0; Bit != 11; ++Bit) {
++    Flags[X86State::X87FLAG_BASE + Bit] = (Value >> Bit) & 1;
++  }
++  Flags[X86State::X87FLAG_TOP_LOC] = (Value >> 11) & 7;
++  Flags[X86State::X87FLAG_C3_LOC] = (Value >> 14) & 1;
++  Flags[X86State::X87FLAG_B_LOC] = (Value >> 15) & 1;
++}
++inline void X87ClearExceptions() { SetX87Status(X87Status() & ~uint16_t {0x80ff}); }
++[[noreturn]] inline void FloatingException(int Signal, uint8_t Trap) {
++  if (FloatingExceptionHandler) { FloatingExceptionHandler(&Thread(), Signal, Trap); }
++  // Returning from the exception continuation would falsely report a completed native operation.
++  std::abort();
++}
++inline void X87Wait() {
++  if ((X87Status() & ~X87Control() & 0x3f) != 0) {
++    FloatingException(SIGFPE, X86State::X86_TRAPNO_MF);
++  }
++}
++inline void RaiseInvalidForSignalingNan(float Value) {
++  const uint32_t Bits = std::bit_cast<uint32_t>(Value);
++  if ((Bits & 0x7f800000) == 0x7f800000 && (Bits & 0x7fffff) && !(Bits & 0x400000)) {
++    State().mxcsr |= 1;
++    if (!(State().mxcsr & 0x80)) { FloatingException(SIGFPE, X86State::X86_TRAPNO_XF); }
++  }
++}
++inline uint16_t X87Tag() {
++  const auto& CPU = State();
++  uint16_t Tags {};
++  for (unsigned Register = 0; Register != 8; ++Register) {
++    unsigned Tag = 3;
++    if (CPU.AbridgedFTW & (1U << Register)) {
++      const auto Significand = CPU.mm[Register][0];
++      const unsigned Exponent = CPU.mm[Register][1] & 0x7fff;
++      Tag = Exponent == 0 && Significand == 0 ? 1 :
++            Exponent == 0 || Exponent == 0x7fff || !(Significand >> 63) ? 2 : 0;
++    }
++    Tags |= Tag << (Register * 2);
++  }
++  return Tags;
++}
++inline std::array<uint32_t, 7> X87Environment() {
++  // 32-bit FNSTENV layout: reserved upper words are all ones. FEX tracks FIP; selectors and FOP are zero.
++  const auto& CPU = State();
++  return {0xffff0000U | CPU.FCW, 0xffff0000U | X87Status(), 0xffff0000U | X87Tag(),
++          static_cast<uint32_t>(CPU.FIP), 0, 0, 0xffff0000U};
++}
++inline void SetX87Environment(const std::array<uint32_t, 7>& Environment) {
++  auto& CPU = State();
++  CPU.FCW = Environment[0];
++  SetX87Status(Environment[1]);
++  CPU.AbridgedFTW = 0;
++  for (unsigned Register = 0; Register != 8; ++Register) {
++    if (((Environment[2] >> (Register * 2)) & 3) != 3) {
++      CPU.AbridgedFTW |= 1U << Register;
++    }
++  }
++  CPU.FIP = Environment[3];
++}
++// The embedding library owns its accessor type. No guest-OS library is a dependency of FEXCore.
++template<typename Accessors> void InstallHostAccessors(Accessors& Host) {
++  Host.Cpuid = Cpuid;
++  Host.ReadTsc = ReadTsc;
++  Host.Mxcsr = Mxcsr;
++  Host.SetMxcsr = SetMxcsr;
++  Host.X87Control = X87Control;
++  Host.SetX87Control = SetX87Control;
++  Host.X87Status = X87Status;
++  Host.SetX87Status = SetX87Status;
++  Host.Xgetbv = Xgetbv;
++  Host.X87Environment = X87Environment;
++  Host.SetX87Environment = SetX87Environment;
++  Host.X87ClearExceptions = X87ClearExceptions;
++  Host.X87Wait = X87Wait;
++  Host.MxcsrMask = MxcsrMask;
++  Host.RaiseInvalidForSignalingNan = RaiseInvalidForSignalingNan;
++}
++} // namespace GuestState
++} // namespace FEXCore::Darwin
+diff --git a/FEXCore/include/FEXCore/Darwin/SignalDelegator.h b/FEXCore/include/FEXCore/Darwin/SignalDelegator.h
+new file mode 100644
+index 00000000..9e652a1e
+--- /dev/null
++++ b/FEXCore/include/FEXCore/Darwin/SignalDelegator.h
+@@ -0,0 +1,274 @@
++// SPDX-License-Identifier: MIT
++#pragma once
++
++#include <FEXCore/Core/SignalDelegator.h>
++#include <FEXCore/Darwin/GuestState.h>
++#include <FEXCore/Utils/ArchHelpers/Arm64.h>
++#include <FEXCore/Utils/JITWriteScope.h>
++#include <FEXCore/Utils/LongJump.h>
++
++#include <array>
++#include <cerrno>
++#include <csignal>
++#include <cstdint>
++#include <cstring>
++#include <mach/arm/thread_status.h>
++#include <pthread.h>
++#include <sys/mman.h>
++#include <sys/ucontext.h>
++#include <type_traits>
++#include <unistd.h>
++
++namespace FEXCore::Darwin {
++struct GuestMemoryRegion {
++  uintptr_t Base {};
++  size_t Size {};
++  // Actual guest permissions, independent of the temporary host write trap.
++  bool Writable {};
++  bool Executable {};
++  bool WriteProtectedForCode {};
++};
++
++struct GuestException {
++  int Signal {};
++  int Code {};
++  uint8_t TrapNo {};
++  uint16_t ErrorCode {};
++  uintptr_t Address {};
++  uint64_t GuestRIP {};
++};
++
++// Callbacks execute in the faulting thread. QueryMemory reads the embedding host's stable mapping metadata.
++// InvalidateCode flushes every guest thread's cache, plus shared aliases, under the host's thread/mapping locks.
++// It must finish before this delegator restores write access. No callback may invoke guest code recursively.
++struct SignalCallbacks {
++  void* Opaque {};
++  bool (*QueryMemory)(Core::InternalThreadState*, uintptr_t, GuestMemoryRegion&, void*) {};
++  bool (*InvalidateCode)(Core::InternalThreadState*, uintptr_t, size_t, void*) {};
++  // Return true after editing guest state to the exception-handler entry or the selected continuation.
++  bool (*DeliverException)(Core::InternalThreadState*, const GuestException&, void*) {};
++};
++
++class SignalDelegator final : public FEXCore::SignalDelegator {
++public:
++  explicit SignalDelegator(SignalCallbacks Callbacks = {}) : Callbacks {Callbacks} {
++    Config = {};
++  }
++  ~SignalDelegator() override { Uninstall(); }
++  SignalDelegator(const SignalDelegator&) = delete;
++  SignalDelegator& operator=(const SignalDelegator&) = delete;
++
++  // Install before guest threads start, uninstall after they join. A process has one signal owner.
++  bool Install() {
++    if (Installed) { return Active == this; }
++    if (Active) { return false; }
++    Active = this;
++    struct sigaction Action {};
++    Action.sa_sigaction = Dispatch;
++    Action.sa_flags = SA_SIGINFO | SA_ONSTACK;
++    sigemptyset(&Action.sa_mask);
++    for (const auto Signal : Signals) { sigaddset(&Action.sa_mask, Signal); }
++    size_t Count {};
++    for (; Count != Signals.size(); ++Count) {
++      if (sigaction(Signals[Count], &Action, &Previous[Count]) != 0) {
++        const int Error = errno;
++        while (Count) { --Count; sigaction(Signals[Count], &Previous[Count], nullptr); }
++        Active = nullptr;
++        errno = Error;
++        return false;
++      }
++    }
++    Installed = true;
++    return true;
++  }
++  void Uninstall() {
++    if (!Installed) { return; }
++    for (size_t Index = 0; Index != Signals.size(); ++Index) {
++      struct sigaction Current {};
++      // A later owner retains its handler.
++      if (sigaction(Signals[Index], nullptr, &Current) == 0 &&
++          (Current.sa_flags & SA_SIGINFO) && Current.sa_sigaction == Dispatch) {
++        sigaction(Signals[Index], &Previous[Index], nullptr);
++      }
++    }
++    Installed = false;
++    if (Active == this) { Active = nullptr; }
++  }
++
++  bool Handle(int Signal, siginfo_t* Info, ucontext_t* Context) {
++    auto* Thread = CurrentThread;
++    if (!Thread || !Thread->CurrentFrame || !Info || !Context || !Context->uc_mcontext) { return false; }
++    auto& Machine = *Context->uc_mcontext;
++    const uintptr_t PC = __darwin_arm_thread_state64_get_pc(Machine.__ss);
++    const auto FaultAddress = reinterpret_cast<uintptr_t>(Info->si_addr);
++    auto* CTX = Thread->CTX;
++    const bool InJIT = CTX->IsAddressInCodeBuffer(Thread, PC);
++
++    // Emission-buffer overflow is a compiler fault, not a guest-memory fault. The pool is ordinary RW memory.
++    if ((Signal == SIGBUS || Signal == SIGSEGV) && Thread->JITGuardPage &&
++        FaultAddress >= Thread->JITGuardPage && FaultAddress - Thread->JITGuardPage < PageSize()) {
++      auto GPRs = ReadGPRs(Machine.__ss);
++      uint64_t ResumePC {};
++      FEXCore::UncheckedLongJump::ManuallyLoadJumpBuf(Thread->RestartJump, Thread->JITGuardOverflowArgument,
++                                                     GPRs.data(), Machine.__ns.__v, &ResumePC);
++      WriteGPRs(Machine.__ss, GPRs);
++      __darwin_arm_thread_state64_set_pc_fptr(Machine.__ss, reinterpret_cast<void*>(ResumePC));
++      return true;
++    }
++
++    if (InJIT && Signal == SIGBUS && Info->si_code == BUS_ADRALN) {
++      auto GPRs = ReadGPRs(Machine.__ss);
++      std::optional<int32_t> Advance;
++      {
++        // HandleUnalignedAccess rewrites actual instructions in MAP_JIT memory.
++        FEXCore::Utils::JITWriteScope Write;
++        Advance = ArchHelpers::Arm64::HandleUnalignedAccess(Thread, ArchHelpers::Arm64::UnalignedHandlerType::HalfBarrier,
++                                                           PC, GPRs.data());
++      }
++      if (Advance) {
++        WriteGPRs(Machine.__ss, GPRs);
++        __darwin_arm_thread_state64_set_pc_fptr(Machine.__ss, reinterpret_cast<void*>(PC + *Advance));
++        return true;
++      }
++    }
++
++    // ESR.WnR is meaningful only for a data abort, never an instruction-fetch abort or an alignment exception.
++    const uint32_t ESR = Machine.__es.__esr;
++    const uint32_t ExceptionClass = ESR >> 26;
++    const bool DataAbort = ExceptionClass == 0x24 || ExceptionClass == 0x25;
++    const bool WriteFault = DataAbort && (ESR & (1U << 6));
++    if (InJIT && (Signal == SIGBUS || Signal == SIGSEGV) && WriteFault &&
++        HandleCodeWrite(Thread, FaultAddress, Context)) {
++      return true;
++    }
++
++    auto& Fault = Thread->CurrentFrame->SynchronousFaultData;
++    const bool Generated = Fault.FaultToTopAndGeneratedException && PC >= Config.DispatcherBegin && PC < Config.DispatcherEnd;
++    if ((!InJIT && !Generated) || !Callbacks.DeliverException) { return false; }
++
++    GuestException Exception {Signal, Info->si_code, 0, 0, FaultAddress, 0};
++    if (Generated) {
++      Exception.Signal = Fault.Signal;
++      Exception.Code = Fault.si_code;
++      Exception.TrapNo = Fault.TrapNo;
++      Exception.ErrorCode = Fault.err_code;
++      Exception.Address = Fault.FaultAddress;
++    } else {
++      Spill(Thread, Machine);
++      if (Signal == SIGBUS || Signal == SIGSEGV) {
++        Exception.TrapNo = X86State::X86_TRAPNO_PF;
++        Exception.ErrorCode = (Info->si_code == SEGV_ACCERR ? 1 : 0) | (WriteFault ? 2 : 0) | 4;
++        if (ExceptionClass == 0x20 || ExceptionClass == 0x21) { Exception.ErrorCode |= 16; }
++      } else if (Signal == SIGTRAP) {
++        Exception.TrapNo = X86State::X86_TRAPNO_BP;
++      } else if (Signal == SIGILL) {
++        Exception.TrapNo = X86State::X86_TRAPNO_UD;
++      } else if (Signal == SIGFPE) {
++        Exception.TrapNo = X86State::X86_TRAPNO_XF;
++      }
++    }
++    Exception.GuestRIP = Thread->CurrentFrame->State.rip;
++    if (!Callbacks.DeliverException(Thread, Exception, Callbacks.Opaque)) { return false; }
++    Fault.FaultToTopAndGeneratedException = false;
++    ResumeDispatcher(Thread, Machine, false);
++    return true;
++  }
++
++private:
++  using MachineContext = std::remove_pointer_t<mcontext_t>;
++  static constexpr std::array<int, 5> Signals {SIGBUS, SIGSEGV, SIGILL, SIGTRAP, SIGFPE};
++  inline static SignalDelegator* Active {};
++  SignalCallbacks Callbacks;
++  std::array<struct sigaction, Signals.size()> Previous {};
++  bool Installed {};
++
++  static size_t PageSize() { return static_cast<size_t>(getpagesize()); }
++  using GPRArray = std::array<uint64_t, 32>;
++  static GPRArray ReadGPRs(const arm_thread_state64_t& State) {
++    GPRArray Result {};
++    for (unsigned Index = 0; Index != 29; ++Index) { Result[Index] = State.__x[Index]; }
++    Result[29] = __darwin_arm_thread_state64_get_fp(State);
++    Result[30] = __darwin_arm_thread_state64_get_lr(State);
++    Result[31] = __darwin_arm_thread_state64_get_sp(State);
++    return Result;
++  }
++  static void WriteGPRs(arm_thread_state64_t& State, const GPRArray& GPRs) {
++    for (unsigned Index = 0; Index != 29; ++Index) { State.__x[Index] = GPRs[Index]; }
++    __darwin_arm_thread_state64_set_fp(State, GPRs[29]);
++    __darwin_arm_thread_state64_set_lr_fptr(State, reinterpret_cast<void*>(GPRs[30]));
++    __darwin_arm_thread_state64_set_sp(State, GPRs[31]);
++  }
++  void Spill(Core::InternalThreadState* Thread, MachineContext& Machine) {
++    auto& State = Thread->CurrentFrame->State;
++    const auto GPRs = ReadGPRs(Machine.__ss);
++    const auto PC = __darwin_arm_thread_state64_get_pc(Machine.__ss);
++    State.rip = Thread->CTX->RestoreRIPFromHostPC(Thread, PC);
++    const uint32_t Ignore = Thread->CurrentFrame->InSyscallInfo & 0xffff;
++    for (size_t Index = 0; Index < Config.SRAGPRCount; ++Index) {
++      const auto Host = Config.SRAGPRMapping[Index];
++      if (!(Ignore & (1U << Host))) { State.gregs[Index] = GPRs[Host]; }
++    }
++    // Darwin exposes 128-bit NEON registers; SVE guest storage is disabled for this host.
++    for (size_t Index = 0; Index < Config.SRAFPRCount; ++Index) {
++      std::memcpy(&State.xmm.sse.data[Index][0], &Machine.__ns.__v[Config.SRAFPRMapping[Index]], sizeof(__uint128_t));
++    }
++    State.callret_sp = GPRs[25];
++    Thread->CTX->SetFlagsFromCompactedEFLAGS(Thread,
++      Thread->CTX->ReconstructCompactedEFLAGS(Thread, true, GPRs.data(), Machine.__ss.__cpsr));
++  }
++  void ResumeDispatcher(Core::InternalThreadState* Thread, MachineContext& Machine, bool SingleInstruction) {
++    // x28 is FEX's frame pointer; x1 selects its single-instruction compilation entry.
++    Machine.__ss.__x[28] = reinterpret_cast<uintptr_t>(Thread->CurrentFrame);
++    Machine.__ss.__x[25] = Thread->CurrentFrame->State.callret_sp;
++    Machine.__ss.__x[1] = SingleInstruction ? 1 : 0;
++    __darwin_arm_thread_state64_set_pc_fptr(Machine.__ss, reinterpret_cast<void*>(Config.AbsoluteLoopTopAddressFillSRA));
++  }
++  bool HandleCodeWrite(Core::InternalThreadState* Thread, uintptr_t Address, ucontext_t* Context) {
++    if (!Callbacks.QueryMemory || !Callbacks.InvalidateCode) { return false; }
++    GuestMemoryRegion Region {};
++    if (!Callbacks.QueryMemory(Thread, Address, Region, Callbacks.Opaque) || !Region.Writable ||
++        !Region.Executable || !Region.WriteProtectedForCode || Address < Region.Base || Address - Region.Base >= Region.Size) {
++      return false;
++    }
++    const size_t Size = PageSize();
++    const uintptr_t Page = Address & ~(Size - 1);
++    // The host owns the complete physical page. A sub-page region never grants protection over neighbours.
++    if (Page < Region.Base || Size > Region.Size || Page - Region.Base > Region.Size - Size) { return false; }
++    const bool Restart = !Thread->CTX->IsCurrentBlockSingleInst(Thread) &&
++                         Thread->CTX->IsAddressInCurrentBlock(Thread, Page, Size);
++    if (Restart) { Spill(Thread, *Context->uc_mcontext); }
++    {
++      FEXCore::Utils::JITWriteScope Write;
++      if (!Callbacks.InvalidateCode(Thread, Page, Size, Callbacks.Opaque)) { return false; }
++    }
++    if (mprotect(reinterpret_cast<void*>(Page), Size, PROT_READ | PROT_WRITE) != 0) { return false; }
++    if (Restart) { ResumeDispatcher(Thread, *Context->uc_mcontext, true); }
++    return true;
++  }
++  static void Dispatch(int Signal, siginfo_t* Info, void* Context) {
++    const int Error = errno;
++    auto* Owner = Active;
++    if (Owner && Owner->Handle(Signal, Info, static_cast<ucontext_t*>(Context))) { errno = Error; return; }
++    if (Owner) { Owner->Chain(Signal, Info, Context); }
++    errno = Error;
++  }
++  void Chain(int Signal, siginfo_t* Info, void* Context) {
++    size_t Index {};
++    while (Index != Signals.size() && Signals[Index] != Signal) { ++Index; }
++    if (Index == Signals.size()) { return; }
++    auto Action = Previous[Index];
++    if (Action.sa_handler == SIG_IGN) { return; }
++    if (Action.sa_handler == SIG_DFL) {
++      sigaction(Signal, &Action, nullptr);
++      sigset_t Set;
++      sigemptyset(&Set);
++      sigaddset(&Set, Signal);
++      pthread_sigmask(SIG_UNBLOCK, &Set, nullptr);
++      raise(Signal);
++      _exit(128 + Signal);
++    }
++    if (Action.sa_flags & SA_SIGINFO) { Action.sa_sigaction(Signal, Info, Context); }
++    else { Action.sa_handler(Signal); }
++  }
++};
++} // namespace FEXCore::Darwin

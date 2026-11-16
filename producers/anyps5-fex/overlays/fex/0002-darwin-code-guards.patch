@@ -1,0 +1,147 @@
+diff --git a/FEXCore/Source/Interface/Core/SharedCodeBufferManager.cpp b/FEXCore/Source/Interface/Core/SharedCodeBufferManager.cpp
+index 9a08c14d..41acb6df 100644
+--- a/FEXCore/Source/Interface/Core/SharedCodeBufferManager.cpp
++++ b/FEXCore/Source/Interface/Core/SharedCodeBufferManager.cpp
+@@ -7,6 +7,7 @@
+ #include <FEXCore/Utils/AllocatorHooks.h>
+ #include <FEXCore/Utils/LogManager.h>
+ #include <FEXCore/Utils/MathUtils.h>
++#include <FEXCore/Utils/MemoryGuard.h>
+
+ #ifndef _WIN32
+ #include <FEXCore/Utils/PrctlUtils.h>
+@@ -18,22 +19,23 @@ static constexpr size_t INITIAL_CODE_SIZE = 1024 * 1024 * 16;
+ static constexpr size_t MAX_CODE_SIZE = 1024 * 1024 * 128;
+
+ CodeBuffer::CodeBuffer(size_t Size, bool ShouldBeNamed)
+-  : AllocatedSize(Size) {
+-  Ptr = static_cast<uint8_t*>(FEXCore::Allocator::VirtualAlloc(Size, true));
++  : AllocatedSize(AlignUp(Size, FEXCore::Utils::CodeGuardSize())) {
++  Ptr = static_cast<uint8_t*>(FEXCore::Allocator::VirtualAlloc(AllocatedSize, true));
+   LOGMAN_THROW_A_FMT(!!Ptr, "Couldn't allocate code buffer");
+
+-  // Protect the last page of the allocated buffer to trigger SIGSEGV on write access
++  // The final host page is outside the linear allocator's usable range.
+ #ifdef __APPLE__
+-  // Apple silicon hosts protect 16 KB pages.
+-  const size_t GuardPageSize = static_cast<size_t>(getpagesize());
++  if (!FEXCore::Utils::InstallDarwinJITGuard(Ptr, AllocatedSize)) {
++    FEXCore::Allocator::VirtualFree(Ptr, AllocatedSize);
++    LOGMAN_THROW_A_FMT(false, "Couldn't install Darwin code-buffer guard");
++  }
+ #else
+-  const size_t GuardPageSize = FEXCore::Utils::FEX_PAGE_SIZE;
+-#endif
+-  uintptr_t LastPageAddr = AlignDown(reinterpret_cast<uintptr_t>(Ptr) + Size - 1, GuardPageSize);
+-  if (!FEXCore::Allocator::VirtualProtect(reinterpret_cast<void*>(LastPageAddr), GuardPageSize,
+-                                          FEXCore::Allocator::ProtectOptions::None)) {
++  uintptr_t LastPageAddr = reinterpret_cast<uintptr_t>(Ptr) + UsableSize();
++  if (!FEXCore::Allocator::VirtualProtect(reinterpret_cast<void*>(LastPageAddr), FEXCore::Utils::CodeGuardSize(),
++                                         FEXCore::Allocator::ProtectOptions::None)) {
+     LogMan::Msg::EFmt("Failed to mprotect last page of code buffer.");
+   }
++#endif
+
+   if (ShouldBeNamed) {
+     FEXCore::Allocator::VirtualName("FEXMemJIT", Ptr, Size);
+diff --git a/FEXCore/Source/Interface/Core/SharedCodeBufferManager.h b/FEXCore/Source/Interface/Core/SharedCodeBufferManager.h
+index be7de210..c0009b3f 100644
+--- a/FEXCore/Source/Interface/Core/SharedCodeBufferManager.h
++++ b/FEXCore/Source/Interface/Core/SharedCodeBufferManager.h
+@@ -9,6 +9,7 @@ $end_info$
+
+ #include <FEXCore/fextl/memory.h>
+ #include <FEXCore/Utils/MathUtils.h>
++#include <FEXCore/Utils/MemoryGuard.h>
+ #include <FEXCore/Utils/SignalScopeGuards.h>
+ #include <FEXCore/Utils/TypeDefines.h>
+
+@@ -68,7 +69,7 @@ struct CodeBuffer {
+
+   // Returns the total number of bytes available for storing code
+   size_t UsableSize() const {
+-    return AllocatedSize - FEXCore::Utils::FEX_PAGE_SIZE;
++    return AllocatedSize - FEXCore::Utils::CodeGuardSize();
+   }
+
+   // Returns the full size of the buffer, including the guard page.
+diff --git a/FEXCore/include/FEXCore/Utils/ThreadPoolAllocator.h b/FEXCore/include/FEXCore/Utils/ThreadPoolAllocator.h
+index 69e410c1..3f810eac 100644
+--- a/FEXCore/include/FEXCore/Utils/ThreadPoolAllocator.h
++++ b/FEXCore/include/FEXCore/Utils/ThreadPoolAllocator.h
+@@ -1,5 +1,6 @@
+ // SPDX-License-Identifier: MIT
+ #pragma once
++#include <FEXCore/Utils/MemoryGuard.h>
+
+ #include <FEXCore/Utils/Allocator.h>
+ #include <FEXCore/Utils/LogManager.h>
+@@ -420,8 +421,8 @@ public:
+ private:
+   void* Alloc(size_t Size) override {
+     auto Ptr = FEXCore::Allocator::VirtualAlloc(Size);
+-    uintptr_t LastPageAddr = AlignDown(reinterpret_cast<uintptr_t>(Ptr) + Size - 1, FEXCore::Utils::FEX_PAGE_SIZE);
+-    if (!FEXCore::Allocator::VirtualProtect(reinterpret_cast<void*>(LastPageAddr), FEXCore::Utils::FEX_PAGE_SIZE,
++    uintptr_t LastPageAddr = AlignDown(reinterpret_cast<uintptr_t>(Ptr) + Size - 1, FEXCore::Utils::CodeGuardSize());
++    if (!FEXCore::Allocator::VirtualProtect(reinterpret_cast<void*>(LastPageAddr), FEXCore::Utils::CodeGuardSize(),
+                                             FEXCore::Allocator::ProtectOptions::None)) {
+       LogMan::Msg::EFmt("Failed to mprotect last page of code buffer.");
+     }
+diff --git a/FEXCore/Source/Interface/Core/JIT/JIT.cpp b/FEXCore/Source/Interface/Core/JIT/JIT.cpp
+index cae94c3a..cd706362 100644
+--- a/FEXCore/Source/Interface/Core/JIT/JIT.cpp
++++ b/FEXCore/Source/Interface/Core/JIT/JIT.cpp
+@@ -894,13 +894,13 @@ CPUBackend::CompiledCode Arm64JITCore::EmitJITCode(uint64_t Entry, uint64_t Size
+
+   // Fairly excessive buffer range to make sure we don't overflow
+   // One page baseline, plus SSANodeMultipler bytes, plus another page for guard page.
+-  const uint32_t DesiredBufferRange = AlignUp(FEXCore::Utils::FEX_PAGE_SIZE * 2 + SSACount * SSANodeMultiplier, FEXCore::Utils::FEX_PAGE_SIZE);
++  const uint32_t DesiredBufferRange = AlignUp(FEXCore::Utils::CodeGuardSize() * 2 + SSACount * SSANodeMultiplier, FEXCore::Utils::CodeGuardSize());
+
+   // JIT output is first written to a temporary buffer and later relocated to the CodeBuffer.
+   // This minimizes lock contention of CodeBufferWriteMutex.
+   auto TempCodeBufferInfo = TempCodeBufferAllocator.ReownOrClaimBufferWithSize(DesiredBufferRange);
+   auto TempCodeBuffer = TempCodeBufferInfo.Ptr;
+-  const uint32_t UsableBufferRange = TempCodeBufferInfo.Size - FEXCore::Utils::FEX_PAGE_SIZE;
++  const uint32_t UsableBufferRange = TempCodeBufferInfo.Size - FEXCore::Utils::CodeGuardSize();
+
+   SetBuffer(TempCodeBuffer, UsableBufferRange);
+
+diff --git a/FEXCore/include/FEXCore/Utils/MemoryGuard.h b/FEXCore/include/FEXCore/Utils/MemoryGuard.h
+new file mode 100644
+index 00000000..0a79a688
+--- /dev/null
++++ b/FEXCore/include/FEXCore/Utils/MemoryGuard.h
+@@ -0,0 +1,32 @@
++// SPDX-License-Identifier: MIT
++#pragma once
++
++#include <FEXCore/Utils/TypeDefines.h>
++#include <cstdint>
++
++#ifdef __APPLE__
++#include <sys/mman.h>
++#include <unistd.h>
++#endif
++
++namespace FEXCore::Utils {
++inline size_t CodeGuardSize() {
++#ifdef __APPLE__
++  return static_cast<size_t>(getpagesize());
++#else
++  return FEX_PAGE_SIZE;
++#endif
++}
++
++#ifdef __APPLE__
++// Replace only the owned final host page. This creates an ordinary PROT_NONE mapping atomically,
++// without mprotect on MAP_JIT memory or a forbidden MAP_FIXED | MAP_JIT allocation.
++inline bool InstallDarwinJITGuard(void* Allocation, size_t Size) {
++  const size_t Page = CodeGuardSize();
++  const auto Base = reinterpret_cast<uintptr_t>(Allocation);
++  if (!Allocation || Base % Page || Size < Page || Size % Page) { return false; }
++  void* Guard = reinterpret_cast<void*>(Base + Size - Page);
++  return mmap(Guard, Page, PROT_NONE, MAP_PRIVATE | MAP_ANON | MAP_FIXED, -1, 0) == Guard;
++}
++#endif
++} // namespace FEXCore::Utils
