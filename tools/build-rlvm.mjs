@@ -6,6 +6,7 @@ import {buildInput} from './build-input.mjs';import {upstreamRevision} from '../
 import {helperPackage,sha} from './helper-package.mjs';import {addLicenses} from '../lib/licenses.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
 const Fonts=require('../producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js');
+const Source=require('../producers/package-support/src/modules/shared/runtime/pinned-native-build.js');
 const Tools=require('../producers/package-support/scripts/native-binary-tools.cjs');
 const MachO=require('../lib/macho-load-commands.cjs');
 const here=path.join(root,'producers/rlvm');
@@ -21,10 +22,22 @@ export function projectSources(source,build){
  return {engine,vendor};
 }
 async function dependencySources(work){const result={};for(const [id,pin]of Object.entries(dependencyInputs())){const archive=await buildInput(pin),source=path.join(work,'sources',id);if(!fs.existsSync(source)){fs.mkdirSync(source,{recursive:true});run('/usr/bin/tar',['-xf',archive,'--strip-components','1','-C',source]);}result[id]=source;}return result;}
+// The shared Boost archive is the release's Boost.Build export, not a CMake tree.
+export async function buildBoost({source,prefix,slice,cpu,work,env}){
+ const exported=path.join(slice,'boost-source');
+ if(!fs.existsSync(exported))fs.cpSync(source,exported,{recursive:true,mode:fs.constants.COPYFILE_FICLONE});
+ for(const file of ['Jamroot','boost-build.jam','tools/build/src/engine/build.sh'])if(!fs.existsSync(path.join(exported,file)))throw Error('Boost.Build export is missing '+file);
+ const cxx=process.env.CXX||'/usr/bin/clang++',engine=path.join(exported,'tools/build/src/engine');
+ run('/bin/sh',[path.join(engine,'build.sh'),'cxx','--cxx='+cxx,'--cxxflags=-ffile-prefix-map='+work+'=RLVM_BUILD'],{cwd:engine,env});
+ const config=path.join(slice,'boost-user-config.jam');fs.writeFileSync(config,'using clang : rlvm : "'+cxx+'" ;\n');
+ const flags='-arch '+cpu+' -mmacosx-version-min=13.0 -ffile-prefix-map='+work+'=RLVM_BUILD';
+ run(path.join(engine,'b2'),['--ignore-site-config','--user-config='+config,'--build-dir='+path.join(slice,'boost-build'),'--prefix='+prefix,'--layout=system','-j2','toolset=clang-rlvm','target-os=darwin','architecture='+(cpu==='arm64'?'arm':'x86'),'address-model=64','variant=release','link=static','threading=multi','cxxstd=14','cxxflags='+flags,'linkflags='+flags,...['filesystem','iostreams','program_options','serialization','thread','date_time'].map(name=>'--with-'+name),'install'],{cwd:exported,env});
+}
+function compilerArguments(args){return args.map(arg=>arg.startsWith('-DCMAKE_C_COMPILER=')?'-DCMAKE_C_COMPILER='+(process.env.CC||'/usr/bin/clang'):arg.startsWith('-DCMAKE_CXX_COMPILER=')?'-DCMAKE_CXX_COMPILER='+(process.env.CXX||'/usr/bin/clang++'):arg);}
 async function buildSlice({architecture,work,sources,engineSource}){
  const cpu=architecture==='x64'?'x86_64':'arm64',slice=path.join(work,architecture),prefix=path.join(slice,'prefix'),sdk=execFileSync('/usr/bin/xcrun',['--show-sdk-path'],{encoding:'utf8'}).trim();
  fs.mkdirSync(prefix,{recursive:true});const tools={cmake:findBuildTool('cmake'),ninja:findBuildTool('ninja')},pathMappings=[{from:work,to:'RLVM_BUILD'}],env=Fonts.buildEnvironment(prefix,sdk);
- const build=async(id,options=[])=>Fonts.buildProject({sourceRoot:sources[id],outputRoot:path.join(slice,id),prefix,sdk,tools,architecture,pathMappings,options});
+ const build=async(id,options=[])=>Fonts.buildProject({sourceRoot:sources[id],outputRoot:path.join(slice,id),prefix,sdk,tools,architecture,pathMappings,options,dependencies:{runBuildCommand:(tool,args,options)=>Source.runBuildCommand(tool,compilerArguments(args),options)}});
  Fonts.sdkCompressionMetadata(sdk,prefix);
  await build('sdl2',['-DSDL_SHARED=ON','-DSDL_STATIC=OFF','-DSDL_TEST=OFF','-DSDL_TESTS=OFF']);
  await build('libpng',['-DPNG_SHARED=ON','-DPNG_STATIC=OFF','-DPNG_TESTS=OFF','-DPNG_TOOLS=OFF','-DPNG_EXECUTABLES=OFF']);
@@ -33,13 +46,13 @@ async function buildSlice({architecture,work,sources,engineSource}){
  await build('vorbis',['-DBUILD_SHARED_LIBS=ON','-DBUILD_TESTING=OFF']);
  await build('sdl12Compat',['-DSDL12DEVEL=ON','-DSDL12TESTS=OFF','-DSDL12COMPAT_STATIC=OFF']);
  // Boost is built from the one shared source declaration; no host package is linked.
- await build('boost',['-DBUILD_SHARED_LIBS=OFF','-DBOOST_INCLUDE_LIBRARIES=filesystem;iostreams;program_options;serialization;thread;date_time','-DBUILD_TESTING=OFF']);
+ await buildBoost({source:sources.boost,prefix,slice,cpu,work,env});
  const intlBuild=path.join(slice,'intl');fs.mkdirSync(intlBuild,{recursive:true});
  const flags='-arch '+cpu+' -mmacosx-version-min=13.0 -ffile-prefix-map='+work+'=RLVM_BUILD';
  run(path.join(sources.gettext,'gettext-runtime/configure'),['--prefix='+prefix,'--host='+(cpu==='arm64'?'aarch64':'x86_64')+'-apple-darwin','--disable-shared','--enable-static','--disable-java','--disable-csharp','--disable-libasprintf'],{cwd:intlBuild,env:{...env,CC:process.env.CC||'/usr/bin/clang',CFLAGS:flags,LDFLAGS:flags}});
  run('/usr/bin/make',['-C',path.join(intlBuild,'intl'),'-j2','install'],{env});
  const buildRoot=path.join(slice,'rlvm');const lists=projectSources(engineSource,buildRoot);
- run(tools.cmake,['-S',here,'-B',buildRoot,...Fonts.cmakeOptions({prefix,sdk,ninja:tools.ninja,architecture,pathMappings,options:[]}),'-DRLVM_SOURCE='+engineSource],{env});
+ run(tools.cmake,compilerArguments(['-S',here,'-B',buildRoot,...Fonts.cmakeOptions({prefix,sdk,ninja:tools.ninja,architecture,pathMappings,options:[]}),'-DRLVM_SOURCE='+engineSource]),{env});
  run(tools.cmake,['--build',buildRoot,'--parallel','2'],{env});
  return {architecture,cpu,prefix,binary:path.join(buildRoot,'rlvm'),lists};
 }
