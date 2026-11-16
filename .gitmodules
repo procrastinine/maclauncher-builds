@@ -326,3 +326,9 @@
 [submodule "rlvm"]
 	path = producers/rlvm/source
 	url = https://github.com/eglaysher/rlvm.git
+[submodule "producers/package-support/src/external/freearc"]
+	path = producers/package-support/src/external/freearc
+	url = https://github.com/M-Gonzalo/FreeArc.git
+[submodule "producers/package-support/src/external/mac-game-porter"]
+	path = producers/package-support/src/external/mac-game-porter
+	url = https://github.com/KarmSakha/mac-game-porter

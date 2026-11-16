@@ -1,0 +1,120 @@
+FreeArc 0.67 (GPL-2.0) decoder component notices
+
+Source: https://github.com/M-Gonzalo/FreeArc/tree/e6ea6f4048fa51afd08e2ddc1bda1a60d3229103
+FreeArc project: https://sourceforge.net/projects/freearc/ (GPLv2 project metadata)
+
+Compression/LZ4/lz4.c
+/*
+   LZ4 - Fast LZ compression algorithm
+   Copyright (C) 2011-2012, Yann Collet.
+   BSD 2-Clause License (http://www.opensource.org/licenses/bsd-license.php)
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
+   met:
+
+       * Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+       * Redistributions in binary form must reproduce the above
+   copyright notice, this list of conditions and the following disclaimer
+   in the documentation and/or other materials provided with the
+   distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+   You can contact the author at :
+   - LZ4 homepage : http://fastcompression.blogspot.com/p/lz4.html
+   - LZ4 source repository : http://code.google.com/p/lz4/
+*/
+
+Compression/GRZip/C_GRZip.cpp
+/*--
+  This file is a part of GRZipII and/or libGRZip, a program
+  and library for lossless, block-sorting data compression.
+
+  Copyright (C) 2002-2004 Grebnov Ilya. All rights reserved.
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+  Grebnov Ilya, Ivanovo, Russian Federation.
+  Ilya.Grebnov@magicssoft.ru, http://magicssoft.ru/
+
+  This program is based on (at least) the work of:
+  Juergen Abel, Jon L. Bentley, Edgar Binder,
+  Charles Bloom, Mike Burrows, Andrey Cadach,
+  Damien Debin, Sebastian Deorowicz, Peter Fenwick,
+  George Plechanov, Michael Schindler, Robert Sedgewick,
+  Julian Seward, David Wheeler, Vadim Yoockin.
+
+  BWT compression mode:
+    Compression     memory use : [6-9]*BlockLen  + 1Mb   (6 for fast bwt, 9 for strong bwt)
+    Decompression   memory use : 5*BlockLen      + 1Mb
+  ST4 compression mode:
+    Compression     memory use : 5*BlockLen      + 1Mb
+    Decompression   memory use : 5.125*BlockLen  + 1Mb
+
+  For more information on these sources, see the manual.
+--*/
+
+Compression/MM/tta.cpp
+/*
+ * ttaenc.c
+ *
+ * Description:  TTA lossless audio encoder/decoder.
+ * Developed by: Alexander Djourik <sasha@iszf.irk.ru>
+ *               Pavel Zhilin <pzh@iszf.irk.ru>
+ *
+ * Copyright (c) 1999-2003 Alexander Djourik. All rights reserved.
+ *
+ */
+
+/*
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * aint with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ * Please see the file COPYING in this directory for full copyright
+ * information.
+ */
+
+Compression/LZMA2/C/LzmaDec.c
+/* LzmaDec.c -- LZMA Decoder
+2008-11-06 : Igor Pavlov : Public domain */
+
+Compression/PPMD/Model.cpp
+/****************************************************************************
+ *  This file is part of PPMd project                                       *
+ *  Written and distributed to public domain by Dmitry Shkarin 1997,        *
+ *  1999-2001                                                               *
+ *  Contents: PPMII model description and encoding/decoding routines        *
+ ****************************************************************************/
+
+GPL-2.0.txt and LGPL-2.1.txt reproduce the GNU licence texts from https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt and https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt.
