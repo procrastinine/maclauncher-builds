@@ -22,7 +22,7 @@ class SceneAttachmentLeases11 {
 public:
   static constexpr unsigned slots=4;
   void submitted(unsigned slot,SceneAttachments11 &&value)noexcept{images[slot]=std::move(value);}
-  void completed(unsigned slot)noexcept{images[slot]={};}
+  bool completed(unsigned slot,bool success=true)noexcept{if(!success&&(images[slot][0]||images[slot][1]))return false;images[slot]={};return true;}
 };
 inline bool SceneExtent(const SceneImage &image,uint64_t width,uint64_t height){return width&&height&&width<=UINT32_MAX&&height<=UINT32_MAX&&!image.left&&!image.top&&((!image.width&&!image.height)||(image.width==width&&image.height==height));}
 inline Microsoft::WRL::ComPtr<ID3D12Resource> SceneResource(ID3D12GraphicsCommandList *list,const SceneImage &image){

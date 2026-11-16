@@ -480,10 +480,10 @@ index 4563930..0ecebc3 100644
 +  unsigned slot = q.next;
 +  q.next = (slot + 1) % Queue11::SLOTS;
 +  if (q.pending[slot]) {
-+    q.WaitForFences(q.device, 1, &q.fences[slot], VK_TRUE, UINT64_MAX);
++    const VkResult waited = q.WaitForFences(q.device, 1, &q.fences[slot], VK_TRUE, UINT64_MAX);
++    if (!q.attachments.completed(slot, waited == VK_SUCCESS)) return false;
 +    q.ResetFences(q.device, 1, &q.fences[slot]);
 +    q.pending[slot] = false;
-+    q.attachments.completed(slot);
 +  }
 +  std::vector<uint64_t> released;
 +  {
