@@ -121,8 +121,11 @@ run('clang',['-arch','x86_64','-O2','-ffreestanding','-fno-builtin','-fno-stack-
  path.join(import.meta.dirname,recipe.host.directory,recipe.host.guest.source),'-o',guestObject]);
 const guestOffsets=execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,'macho-text.py'),guestObject,guestText,...recipe.host.guest.symbols],{encoding:'utf8'}).trim().split(' ');
 const objects=recipe.anyps5.objects.map(source=>{
- const object=path.join(options.out,path.basename(source,'.cpp')+'.arm64.o');
- run('clang++',['-std=c++20','-arch','arm64','-O2','-c','-I',path.join(options.out,'anyps5/core/libs'),path.join(options.out,'anyps5',source),'-o',object]);
+ // Named after the whole source path: several libraries have an Export.cpp or a Process.cpp.
+ const object=path.join(options.out,'objects',source.replace(/\.cpp$/,'.arm64.o'));
+ fs.mkdirSync(path.dirname(object),{recursive:true});
+ run('clang++',['-std=c++20','-arch','arm64','-O2','-c','-I',path.join(options.out,'anyps5/core/libs'),'-I',path.join(options.out,'anyps5/3rdparty/ZArchive/include'),
+  path.join(options.out,'anyps5',source),'-o',object]);
  return object;
 });
 // One thunk translation unit per source, plus the part and data tables (generate-thunks.py prints the files).

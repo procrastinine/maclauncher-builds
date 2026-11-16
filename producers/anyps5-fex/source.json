@@ -21,8 +21,12 @@
     "gitlink": "sources/anyps5",
     "repository": "https://github.com/boykopovar/AnyPS5.git",
     "license": "GPL-2.0-only",
+    "submodules": [
+      "3rdparty/ZArchive"
+    ],
     "paths": [
-      "core/libs"
+      "core/libs",
+      "3rdparty/ZArchive/include"
     ],
     "objects": [
       "core/libs/prx/libkernel/Time/Time.cpp",
@@ -35,7 +39,17 @@
       "core/libs/prx/libc/src/General.cpp",
       "core/libs/prx/libkernel/File/src/Stdio.cpp",
       "core/libs/prx/libScePad/Export.cpp",
-      "core/libs/prx/libScePad/src/PadState.cpp"
+      "core/libs/prx/libScePad/src/PadState.cpp",
+      "core/libs/prx/libkernel/File/src/RandomDevice.cpp",
+      "core/libs/prx/libkernel/File/src/DescriptorControl.cpp",
+      "core/libs/prx/libkernel/Time/TimedWait.cpp",
+      "core/libs/prx/libkernel/File/src/ArchivedFile.cpp",
+      "core/libs/prx/libkernel/File/src/DirectoryDescriptor.cpp",
+      "core/libs/prx/libkernel/File/src/NativeStat.cpp",
+      "core/libs/prx/libkernel/File/src/HostStreams.cpp",
+      "core/libs/prx/libc/src/AppArchive.cpp",
+      "core/libs/prx/libc/src/Process.cpp",
+      "core/libs/prx/libc/src/HostErrno.cpp"
     ],
     "runtimeOverlays": [
       ["macos-host-kernel", "applyHostKernelOverlay"],
