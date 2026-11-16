@@ -8,6 +8,7 @@ export function applyBuildOverlay({love,megasource,luaLibrary,luaInclude}){
  applyLuaSocketRegistrationTypeOverlay({love});
  replace(cmake,'\tif(APPLE)\n\t\tmessage(FATAL_ERROR "JIT not supported yet on Mac. Please use -DLOVE_JIT=0.")\n\tendif()','\t# LuaJIT 2.1 supplies Darwin arm64 and x86_64 with the Lua 5.1 ABI.');
  const mega=path.join(megasource,'CMakeLists.txt');
+ applyTheoraEncoderSelectionOverlay({megasource});
  applyZlibDarwinOverlay({megasource});
  applyFreetypeDarwinOverlay({megasource});
  applySdlCocoaDeclarationsOverlay({megasource});
@@ -196,4 +197,9 @@ export function applyLuaSocketRegistrationTypeOverlay({love}){
   if((text.match(/\bluaL_reg\b/g)||[]).length!==count)throw Error('LuaSocket registration type anchor changed: '+name);
   fs.writeFileSync(file,text.replace(/\bluaL_reg\b/g,'luaL_Reg'));
  }
+}
+
+/** Select the complete encoder, matching upstream's enabled-encoder source branch. */
+export function applyTheoraEncoderSelectionOverlay({megasource}){
+ replace(path.join(megasource,'libs/libtheora-1.1.1/CMakeLists.txt'),'    lib/encoder_disabled.c\n','    # Full encoder APIs are supplied by encode.c and encapiwrapper.c.\n');
 }
