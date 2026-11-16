@@ -160,7 +160,9 @@ export function finishModule(built,output){
     const originalSpec=fs.readFileSync(path.join(built.directory,'dlls/winevulkan/winevulkan.spec'),'utf8');
     const expected=[...originalSpec.matchAll(/^@\s+\S+\s+(?:-\S+\s+)*([A-Za-z0-9_]+)(?:\(|\s*$)/gm)].map(row=>row[1]).sort();
     for(const [,file]of MODULES.filter(([name])=>name.endsWith('.dll'))){
-        const actual=[...read(built.readobj,['--coff-exports',path.join(built.build,file)]).matchAll(/^\s+Name: ([A-Za-z0-9_]+)$/gm)].map(row=>row[1]).sort();
+        const pe=appRequire('src/modules/shared/runtime/pe-exports').readPeExports(path.join(built.build,file));
+        if(!pe)throw Error('The complete PE Vulkan export directory is unavailable: '+file);
+        const actual=[...pe.exports.keys()].sort();
         if(JSON.stringify(actual)!==JSON.stringify(expected))throw Error('The complete PE Vulkan export set differs: '+file);
     }
     fs.mkdirSync(output,{recursive:true});
