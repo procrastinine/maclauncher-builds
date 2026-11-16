@@ -8,17 +8,18 @@ diff --git a/src/platforms/osx/SDLMain.mm b/src/platforms/osx/SDLMain.mm
 --- a/src/platforms/osx/SDLMain.mm
 +++ b/src/platforms/osx/SDLMain.mm
 @@ -58,3 +58,3 @@ static NSString *getApplicationName(void)
- 
+
 -@interface SDLApplication : NSApplication
 +@interface RLVMCocoaApplication : NSApplication
  @end
 @@ -67,3 +67,3 @@ NSEvent* GetLastRightClickEvent() {
- 
+
 -@implementation SDLApplication
 +@implementation RLVMCocoaApplication
  /* Invoked from the Quit menu item */
-@@ -276,3 +276,3 @@ static void CustomApplicationMain (int argc, char **argv)
+@@ -276,4 +276,4 @@ static void CustomApplicationMain (int argc, char **argv)
      /* Ensure the application object is initialised */
 -    [SDLApplication sharedApplication];
 +    [RLVMCocoaApplication sharedApplication];
- 
+
+     /* Set up the menubar */
