@@ -68,17 +68,23 @@ export async function assemble({compiled,output,version='0.10.2-MCLv1'}){
  fs.symlinkSync('A',path.join(luaRoot,'Versions/Current'));fs.symlinkSync('Versions/Current/Lua',path.join(luaRoot,'Lua'));
  const luaResources=path.join(luaVersion,'Resources');fs.mkdirSync(luaResources);fs.symlinkSync('Versions/Current/Resources',path.join(luaRoot,'Resources'));
  fs.writeFileSync(path.join(luaResources,'Info.plist'),`<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>CFBundleExecutable</key><string>Lua</string><key>CFBundleIdentifier</key><string>org.luajit.LuaJIT</string><key>CFBundleName</key><string>Lua</string><key>CFBundlePackageType</key><string>FMWK</string><key>CFBundleVersion</key><string>2.1</string></dict></plist>`);
- for(const file of binaries){
-  for(const linked of Native.links(file)){
-   if(linked.startsWith('/System/')||linked.startsWith('/usr/lib/'))continue;
-   const target=aliases.get(linked);if(!target)throw Error('Unresolved packaged native dependency: '+linked);
-   const replacement='@loader_path/'+path.relative(path.dirname(file),target);run('/usr/bin/install_name_tool',['-change',linked,replacement,file]);
+ const relocationRoot=path.join(output,'relocation-slices');fs.mkdirSync(relocationRoot);
+ for(const [index,file] of binaries.entries()){
+  const relocated=[];
+  for(const cpu of Native.macho(file)||[]){
+   const thin=path.join(relocationRoot,String(index)+'-'+cpu);fs.copyFileSync(file,thin);
+   Native.thinStagedMachO(thin,relocationRoot,cpu);
+   const ids=new Set(Native.libraryIds(thin,cpu));
+   for(const linked of Native.links(thin,cpu)){
+    if(ids.has(linked)||linked.startsWith('/System/')||linked.startsWith('/usr/lib/'))continue;
+    const target=aliases.get(linked);if(!target)throw Error('Unresolved packaged native dependency: '+linked);
+    run('/usr/bin/install_name_tool',['-change',linked,'@loader_path/'+path.relative(path.dirname(file),target),thin]);
+   }
+   if(ids.size)run('/usr/bin/install_name_tool',['-id','@rpath/'+path.relative(frameworks,file),thin]);
+   for(const rpath of new Set(Native.loadCommands(thin,cpu).rpaths))if(path.isAbsolute(rpath))run('/usr/bin/install_name_tool',['-delete_rpath',rpath,thin]);
+   relocated.push(thin);
   }
-  if(libraryIds(file).length)run('/usr/bin/install_name_tool',['-id','@rpath/'+path.relative(frameworks,file),file]);
-  const lines=execFileSync('/usr/bin/otool',['-l',file],{encoding:'utf8'}).split('\n');
-  for(let i=0;i<lines.length;i++)if(lines[i].trim()==='cmd LC_RPATH'){
-   const rpath=lines.slice(i+1,i+5).join('\n').match(/path (.+) \(offset/)?.[1];if(rpath&&path.isAbsolute(rpath))run('/usr/bin/install_name_tool',['-delete_rpath',rpath,file]);
-  }
+  run('/usr/bin/lipo',['-create',...relocated,'-output',file]);
   const cpus=(Native.macho(file)||[]).sort();
   for(const cpu of cpus){const actual=Native.loadCommands(file,cpu).minimumMacOS;if(!actual)throw Error('Compiled binary has no measured macOS floor: '+path.basename(file));if(actual.localeCompare(minimumMacOS,undefined,{numeric:true})>0)minimumMacOS=actual;}
   if(JSON.stringify(cpus)!==JSON.stringify(['arm64','x86_64']))throw Error('Actual universal slices missing: '+path.relative(payload,file));
