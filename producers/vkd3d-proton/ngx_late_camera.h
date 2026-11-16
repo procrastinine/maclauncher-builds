@@ -3,8 +3,9 @@
 // MacLauncher's graphics pipeline (its native late-camera.hpp reads the same layout). Unreal Engine's Streamline plugin
 // sets each frame's constants after its own DLSS pass, so the evaluation itself carries no camera. The NGX core
 // publishes the matched camera with the evaluation's exact jitter offset in effect-plan.temporal-camera, a 4096-byte
-// file that the core creates and clears beside effect-plan.json at its first direct evaluation; both sides map it once. Each slot is sequence-locked: odd
-// while written, the next even value when complete. One writer: callers serialize publish(). The process maps the
+// file beside effect-plan.json. The launcher creates it while an enabled frame-generation row consumes the camera; the
+// core maps and clears it at its first direct evaluation, and the graphics pipeline maps it once it exists. Each slot
+// is sequence-locked: odd while written, the next even value when complete. One writer: callers serialize publish(). The process maps the
 // file with ngx_late_camera_file.h.
 #pragma once
 #include <cstddef>

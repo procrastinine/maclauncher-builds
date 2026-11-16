@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
-// Creates effect-plan.temporal-camera (ngx_late_camera.h) beside RESHADE_EFFECT_PLAN, clears it for this process and maps
-// it once for writing.
+// Maps effect-plan.temporal-camera (ngx_late_camera.h) beside RESHADE_EFFECT_PLAN once for writing and clears it for this
+// process. The launcher creates the file at its full size while an enabled frame-generation row consumes the camera
+// and removes it otherwise; this core never creates or resizes it.
 #pragma once
 #include <windows.h>
 #include <string>
 #include "ngx_late_camera.h"
 
 namespace ngx_late_camera {
-// The file beside RESHADE_EFFECT_PLAN, created or cleared and mapped once for writing; null without an effect plan.
+// The file beside RESHADE_EFFECT_PLAN, cleared and mapped once for writing; null without the launcher's file.
 class File {
   Mailbox *mailbox_ = nullptr;
 
@@ -36,20 +37,14 @@ public:
       if (!dos)
         return;
       const HANDLE file = CreateFileW(dos, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr,
-                                      OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+                                      OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
       HeapFree(GetProcessHeap(), 0, dos);
       if (file == INVALID_HANDLE_VALUE)
         return;
       LARGE_INTEGER size{};
       HANDLE mapping = nullptr;
-      if (GetFileSizeEx(file, &size) && size.QuadPart != fileSize) {
-        LARGE_INTEGER end{};
-        end.QuadPart = fileSize;
-        if (!SetFilePointerEx(file, end, nullptr, FILE_BEGIN) || !SetEndOfFile(file))
-          size.QuadPart = 0;
-        else
-          size.QuadPart = fileSize;
-      }
+      if (!GetFileSizeEx(file, &size))
+        size.QuadPart = 0;
       if (size.QuadPart == fileSize)
         mapping = CreateFileMappingW(file, nullptr, PAGE_READWRITE, 0, 0, nullptr);
       CloseHandle(file);

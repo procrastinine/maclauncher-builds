@@ -192,6 +192,10 @@ test('a direct NGX Super Resolution evaluation outside slEvaluateFeature takes t
  // constants after their evaluation publish that evaluation's own jitter for generation
  assert.match(hooks,/const auto follow = direct_cameras\.follow\(evaluation, evaluation_jitter, followed\);/);
  assert.match(hooks,/ngx_late_camera::publish\(\*mailbox, evaluation_jitter\[0\], evaluation_jitter\[1\], evaluation, followed\);/);
+ // MacLauncher creates the file only while a frame-generation row consumes the camera; the core never creates or resizes it
+ const file=fs.readFileSync(path.join(producer,'ngx_late_camera_file.h'),'utf8');
+ assert.match(file,/CreateFileW\(dos, GENERIC_READ \| GENERIC_WRITE, FILE_SHARE_READ \| FILE_SHARE_WRITE, nullptr,\n\s*OPEN_EXISTING,/);
+ assert.doesNotMatch(file,/OPEN_ALWAYS|CREATE_ALWAYS|CREATE_NEW|SetEndOfFile/);
 });
 
 test('the NGX core is built with its Streamline capture, MinHook and the official headers, from declared inputs',()=>{
