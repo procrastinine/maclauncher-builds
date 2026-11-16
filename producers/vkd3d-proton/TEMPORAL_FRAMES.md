@@ -46,6 +46,14 @@ MacLauncher's FidelityFX API proxy (the `fidelityfx-api` package) records each F
 
 The NGX core takes the camera from the game's own Streamline interposer, which stays the game's NVIDIA-signed file. Streamline passes the camera only in `slSetConstants`; its DLSS plugin gives NGX none. When NVIDIA's NGX library initializes the core in the game's process, the core finds the loaded module that exports Streamline's application API (`slInit`, `slGetNewFrameToken`, `slSetConstants` and `slEvaluateFeature`) and installs in-memory MinHook detours on `slSetConstants` and `slEvaluateFeature` ([ngx_streamline.cpp](ngx_streamline.cpp)). `slSetConstants` copies validated perspective constants for its frame token and viewport ([streamline_camera.hpp](streamline_camera.hpp)); orthographic, oblique and shifted projections, and constants Streamline rejects, give none. `slEvaluateFeature(kFeatureDLSS)` selects the copy of its frame token and viewport as the camera of the evaluations on its thread, as the graphics pipeline's 64-byte `RSTemporalCamera`, and restores the previous camera after the original call, so nested evaluations keep their caller's camera. Both detours return the original result unchanged and add one copy and an uncontended lock per call. An evaluation without matching Streamline constants has no camera. The core stays loaded while the detours exist; an interposer loaded again later is detoured again.
 
+## Frame-generation API boundary
+
+The command-list interface retains `SupportsFrameInterpolation` and `FrameInterpolate` for ABI compatibility. They return `FALSE` and `E_NOTIMPL`. The NGX core therefore reports DLSS-G unavailable. Its Streamline detours capture constants for Super Resolution evaluation; they do not capture the present-time DLSS-G tags.
+
+The carrier's HUD-less and UI slots and camera matrices are scene attachments. Driver bindings retain supplied HUD/UI textures, but their color domain and matching composition pass remain unknown unless a producer declares them. Slot presence alone does not establish the inputs required for HUD-separated interpolation.
+
+A frame-generation producer must identify a real frame and transfer generated-image scheduling to the shared presenter. Streamline's DLSS-G plugin uses a proxy swapchain to schedule the NGX interpolated output followed by its real output. Returning a generated image through that contract while also scheduling shared generation would create two presentation owners. The existing Super Resolution carrier does not establish an input-only DLSS-G contract.
+
 ## Driver
 
 - **Forwarding.** The driver forwards the frame with `rsProcessTemporalFrame` (graphics `frame.h`). It does this in command order: after every earlier command on the queue has completed, and before any later command starts. The method is `rsGetTemporalMethod`, or MetalFX when none is selected. The driver creates and encodes no MetalFX scaler, interpolator or other upscaler of its own.
