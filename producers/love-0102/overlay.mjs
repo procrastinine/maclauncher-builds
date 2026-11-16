@@ -16,6 +16,7 @@ export function applyBuildOverlay({love,megasource,luaLibrary,luaInclude}){
  applySdlCocoaEventDeclarationsOverlay({megasource});
  applySdlCocoaMessageboxModeDeclarationsOverlay({megasource});
  applySdlCocoaMouseDeclarationsOverlay({megasource});
+ applySdlCocoaShapeDeclarationsOverlay({megasource});
  replace(path.join(megasource,'libs/physfs-2.0.3/CMakeLists.txt'),'SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} " -framework Carbon -framework IOKit")','SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} "-framework Carbon" "-framework IOKit")');
  replace(path.join(megasource,'libs/libtheora-1.1.1/CMakeLists.txt'),'\tadd_library(theora SHARED ${THEORA_SRC} lib/theora.def)','\tset(THEORA_SHARED_PLATFORM_SOURCES)\n\tif(WIN32)\n\t\tlist(APPEND THEORA_SHARED_PLATFORM_SOURCES lib/theora.def)\n\tendif()\n\tadd_library(theora SHARED ${THEORA_SRC} ${THEORA_SHARED_PLATFORM_SOURCES})');
 
@@ -141,4 +142,13 @@ export function applySdlCocoaMouseDeclarationsOverlay({megasource}){
  replace(file,'    driverdata->seenWarp = NO;\n\n    const NSPoint location','    driverdata->seenWarp = NO;\n\n    {\n    const NSPoint location');
  replace(file,'    float deltaX = [event deltaX];','    {\n    float deltaX = [event deltaX];');
  replace(file,'    SDL_SendMouseMotion(mouse->focus, mouse->mouseID, 1, (int)deltaX, (int)deltaY);\n}','    SDL_SendMouseMotion(mouse->focus, mouse->mouseID, 1, (int)deltaX, (int)deltaY);\n    }\n    }\n    }\n    }\n}');
+}
+
+/** Preserve the original Cocoa shaper initialization sequence using local declaration scopes. */
+export function applySdlCocoaShapeDeclarationsOverlay({megasource}){
+ const file=path.join(megasource,'libs/SDL2/src/video/cocoa/SDL_cocoashape.m');
+ replace(file,'    SDL_WindowShaper* result = result = malloc(sizeof(SDL_WindowShaper));','    /* Scope declarations without moving shaper initialization across window calls. */\n    {\n    SDL_WindowShaper* result = result = malloc(sizeof(SDL_WindowShaper));');
+ replace(file,'    SDL_ShapeData* data = malloc(sizeof(SDL_ShapeData));','    {\n    SDL_ShapeData* data = malloc(sizeof(SDL_ShapeData));');
+ replace(file,'    int resized_properly = Cocoa_ResizeWindowShape(window);','    {\n    int resized_properly = Cocoa_ResizeWindowShape(window);');
+ replace(file,'    return result;\n}','    return result;\n    }\n    }\n    }\n}');
 }
