@@ -88,16 +88,28 @@ export async function assemble({project='rlvm',version,arch='universal',output,c
  const payload=path.join(output,'payload'),app=path.join(payload,'rlvm.app'),bin=path.join(app,'Contents/MacOS'),libs=path.join(app,'Contents/Frameworks'),resources=path.join(app,'Contents/Resources');
  for(const dir of [bin,libs,resources])fs.mkdirSync(dir,{recursive:true});const maps=compiled.slices.map(closure),names=[...maps[0].keys()].sort();
  if(JSON.stringify(names)!==JSON.stringify([...maps[1].keys()].sort()))throw Error('RLVM slice dependency closures differ.');
- const merge=(inputs,target)=>{for(let i=0;i<inputs.length;i++)if(!MachO.readMachOLoadCommands(inputs[i]).architectures.includes(compiled.slices[i].cpu))throw Error('Native build output lacks requested slice: '+inputs[i]);run('/usr/bin/lipo',['-create',...inputs,'-output',target]);};
+ // Relocate each owned thin copy using its own load commands before merging.
+ const staging=path.join(output,'relocated-slices');fs.mkdirSync(staging,{recursive:true});
+ const merge=(inputs,target)=>{
+  const relocated=inputs.map((input,i)=>{
+   const slice=compiled.slices[i],directory=path.join(staging,slice.cpu);fs.mkdirSync(directory,{recursive:true});
+   const copy=path.join(directory,path.basename(target));fs.copyFileSync(input,copy,fs.constants.COPYFILE_FICLONE);fs.chmodSync(copy,0o755);
+   Tools.thinStagedMachO(copy,staging,slice.cpu,run);
+   const commands=Tools.loadCommands(copy,slice.cpu),ids=Tools.libraryIds(copy,slice.cpu);
+   for(const link of Tools.links(copy,slice.cpu))if(!link.startsWith('/usr/lib/')&&!link.startsWith('/System/Library/')&&!ids.includes(link)){
+    const dependency=Tools.resolveLink(link,input,slice.binary,commands.rpaths,slice.cpu),name=dependency&&path.basename(dependency);
+    if(!dependency||maps[i].get(name)!==dependency)throw Error('Relocation dependency is outside the compiled closure: '+link);
+    run('/usr/bin/install_name_tool',['-change',link,'@executable_path/../Frameworks/'+name,copy]);
+   }
+   for(const rpath of new Set(commands.rpaths))if(path.isAbsolute(rpath)&&!rpath.startsWith('/System/'))run('/usr/bin/install_name_tool',['-delete_rpath',rpath,copy]);
+   if(target!==path.join(bin,'rlvm'))run('/usr/bin/install_name_tool',['-id','@rpath/'+path.basename(target),copy]);
+   return copy;
+  });
+  run('/usr/bin/lipo',['-create',...relocated,'-output',target]);
+  fs.chmodSync(target,0o755);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);
+ };
  const executable=path.join(bin,'rlvm');merge(compiled.slices.map(s=>s.binary),executable);
  for(const name of names)merge(maps.map(m=>m.get(name)),path.join(libs,name));
- for(const target of [executable,...names.map(name=>path.join(libs,name))]){
-  const commands=Tools.loadCommands(target,'arm64');
-  for(const link of new Set(compiled.slices.flatMap(s=>Tools.links(target,s.cpu))))if(!link.startsWith('/usr/lib/')&&!link.startsWith('/System/Library/'))run('/usr/bin/install_name_tool',['-change',link,'@executable_path/../Frameworks/'+path.basename(link),target]);
-  for(const rpath of commands.rpaths)if(path.isAbsolute(rpath)&&!rpath.startsWith('/System/'))run('/usr/bin/install_name_tool',['-delete_rpath',rpath,target]);
-  if(target!==executable)run('/usr/bin/install_name_tool',['-id','@rpath/'+path.basename(target),target]);
-  fs.chmodSync(target,0o755);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);
- }
  fs.copyFileSync(path.join(compiled.source,'src/platforms/osx/Info.plist.in'),path.join(app,'Contents/Info.plist'));
  fs.copyFileSync(path.join(compiled.source,'resources/rlvm.icns'),path.join(resources,'rlvm.icns'));
  run('msgfmt',['-o',path.join(resources,'rlvm.mo'),path.join(compiled.source,'po/ja.po')]);
