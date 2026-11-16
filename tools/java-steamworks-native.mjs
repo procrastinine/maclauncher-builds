@@ -8,7 +8,10 @@ import {sha} from './helper-package.mjs';
 const root=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url);
 const Native=require('../lib/package-format.cjs');
 const inputs=JSON.parse(fs.readFileSync(path.join(root,'producers/java-steamworks/inputs.json')));
-const run=(command,args,options={})=>execFileSync(command,args,{maxBuffer:Infinity,stdio:'pipe',timeout:180000,...options});
+const run=(command,args,options={})=>{
+ try{return execFileSync(command,args,{maxBuffer:Infinity,stdio:'pipe',timeout:180000,...options});}
+ catch(error){if(error.stderr)process.stderr.write(error.stderr);throw error;}
+};
 const files=(directory,suffix)=>fs.readdirSync(directory,{withFileTypes:true}).flatMap(entry=>{
  const file=path.join(directory,entry.name);return entry.isDirectory()?files(file,suffix):entry.isFile()&&file.endsWith(suffix)?[file]:[];
 }).sort();
@@ -27,7 +30,10 @@ export async function compileNative({original,arch,work,jdkBin}){
  run(path.join(jdkBin,'javac'),['--release','8','-cp',jars.join(path.delimiter),'-d',generator,...files(path.join(source,'jnigen/src/main/java'),'.java')]);
  fs.copyFileSync(path.join(root,'producers/java-steamworks/javah.cjs'),path.join(bin,'javah'));fs.chmodSync(path.join(bin,'javah'),0o755);
  run(path.join(jdkBin,'java'),['-cp',[generator,classes,serverClasses,...jars].join(path.delimiter),'com.codedisaster.steamworks.jnigen.JNICodeGenerator'],{cwd:source,env:{...process.env,PATH:[bin,path.dirname(process.execPath),process.env.PATH].join(path.delimiter),STEAMWORKS_JNI_HEADERS:headers}});
- const native=path.join(wrapper,'src/main/native'),dependency=path.join(sdk,'redistributable_bin/osx/libsteam_api.dylib');
+ const native=path.join(wrapper,'src/main/native'),publisherDependency=path.join(sdk,'redistributable_bin/osx/libsteam_api.dylib'),dependency=path.join(work,'libsteam_api.dylib');
+ // The original SDK also ships i386. Project only the requested 64-bit slices
+ // into owned staging before using the package reader, which accepts 64-bit code.
+ run('/usr/bin/lipo',[publisherDependency,...cpus.flatMap(cpu=>['-extract',cpu]),'-output',dependency]);
  const dependencyCPUs=Native.readMachOArchitectures(dependency,{allowLibrary:true});
  if(cpus.some(cpu=>!dependencyCPUs.includes(cpu)))throw Error('The original Steam SDK library lacks a requested CPU: '+dependencyCPUs.join(', '));
  const slices=[];
@@ -48,5 +54,5 @@ export async function compileNative({original,arch,work,jdkBin}){
  run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',library]);
  const actual=Native.readMachOArchitectures(library,{allowLibrary:true}).sort();
  if(JSON.stringify(actual)!==JSON.stringify(cpus.slice().sort()))throw Error('The JNI output differs from its requested CPUs.');
- return {library,dependency,sdk,source,classes,sourceBuild:{sourceRevision:inputs.source.revision,sourceArchiveSha256:inputs.source.sha256,sdkRevision:inputs.sdk.revision,sdkLibrarySha256:sha(dependency),jnigenSha256:inputs.jnigen.sha256,javaparserSha256:inputs.javaparser.sha256}};
+ return {library,dependency,sdk,source,classes,sourceBuild:{sourceRevision:inputs.source.revision,sourceArchiveSha256:inputs.source.sha256,sdkRevision:inputs.sdk.revision,sdkPublisherLibrarySha256:sha(publisherDependency),sdkLibrarySha256:sha(dependency),jnigenSha256:inputs.jnigen.sha256,javaparserSha256:inputs.javaparser.sha256}};
 }

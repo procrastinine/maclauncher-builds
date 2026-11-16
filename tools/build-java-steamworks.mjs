@@ -31,7 +31,7 @@ export async function compile({project:id,version,arch,output,work}){
   else fs.writeFileSync(library,execFileSync('/usr/bin/unzip',['-p',publisher,'libsteamworks4j.dylib'],{maxBuffer:Infinity}),{mode:0o755});
   const agent=build(jdkBin,path.join(payload,'steam-agent.jar'));
   return {original,project,agent,jdkBin,library,rebuilt};
- }catch(error){fs.rmSync(output,{recursive:true,force:true});fs.rmSync(work,{recursive:true,force:true});throw error;}
+ }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }
 /** Add the notices and describe the payload. */
 export async function assemble({arch,version,output,work,compiled:{original,project,agent,jdkBin,library,rebuilt}}){
