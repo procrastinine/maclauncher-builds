@@ -6,18 +6,28 @@
 // The FEX checkout (with the submodules source.json lists) and the AnyPS5 paths are projected into
 // <directory>, the overlays are applied there, AnyPS5's arm64 library objects are compiled, and the
 // proof executable is linked against static FEXCore. AnyPS5 internals that the selected exports
-// reference but the proof never reaches are linked as trapping stubs (proof/unreached-exports.py).
-// --check runs the module function twice: with the import slot unbound (must fail) and bound to the
-// thunk (must print PASS).
+// reference but the proof never reaches are linked as trapping stubs (host/unreached-exports.py).
+// The ABI proof's guest code (host/guest-abi.c) is compiled for x86-64 and its text extracted for the host to map.
+// --check runs the module function twice, with the import slot unbound (must fail) and bound to the thunk (must
+// print PASS), and the ABI proof twice, through the generic register shim (must fail) and through per-signature
+// thunks (must print PASS).
 import {gitlink} from '../../lib/pins.mjs';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import {execFileSync,spawnSync} from 'node:child_process';
 
 const root=path.resolve(import.meta.dirname,'../..');
 const recipe=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'source.json'),'utf8'));
 const git=(directory,args,options={})=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',maxBuffer:Infinity,stdio:['ignore','pipe','pipe'],...options});
-const niced=(command,args,options={})=>execFileSync('nice',['-n','19',command,...args],{stdio:'inherit',...options});
+const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
+
+// Native builds run at the lowest priority. The process lowers its own priority first, so every compiler, CMake and
+// Ninja child inherits it, and nothing builds when that is not permitted.
+function lowestPriority(){
+ try{os.setPriority(19);}catch(error){throw Error('Cannot lower the build priority to 19 ('+(error.info?.code||error.code)+'); nothing was built.');}
+ if(os.getPriority()!==19)throw Error('The build priority is '+os.getPriority()+', not 19; nothing was built.');
+}
 
 function argumentsOf(argv){
  const options={};
@@ -64,35 +74,41 @@ function applyOverlay(target,overlay){
 
 function link(out,objects,log){
  const build=path.join(out,'build');
- niced('cmake',['-S',path.join(out,'fex'),'-B',build,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DBUILD_TESTING=OFF','-DBUILD_FEXCONFIG=OFF',
+ run('cmake',['-S',path.join(out,'fex'),'-B',build,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DBUILD_TESTING=OFF','-DBUILD_FEXCONFIG=OFF',
   '-DENABLE_JEMALLOC_GLIBC_ALLOC=OFF','-DENABLE_OFFLINE_TELEMETRY=OFF','-DENABLE_CCACHE=OFF','-DENABLE_LTO=OFF','-DTUNE_CPU=none','-DTUNE_ARCH=generic',
   '-DANYPS5_ARM64_OBJECTS='+objects.join(';')],{stdio:['ignore','ignore','inherit']});
- const result=spawnSync('nice',['-n','19','ninja','-C',build,recipe.proof.target],{encoding:'utf8',maxBuffer:Infinity});
+ const result=spawnSync('ninja',['-C',build,...recipe.host.targets],{encoding:'utf8',maxBuffer:Infinity});
  fs.writeFileSync(log,result.stdout+result.stderr);
  return result.status===0;
 }
 
-function check(binary,[module,functionAddress,slot,bss]){
- const run=mode=>spawnSync(binary,[module,functionAddress,slot,bss,mode],{encoding:'utf8',timeout:20000});
- const unbound=run('unbound'),bound=run('bound');
- process.stdout.write('--- unbound (exit '+unbound.status+')\n'+unbound.stdout+'--- bound (exit '+bound.status+')\n'+bound.stdout);
- if(unbound.status===0||/^PASS$/m.test(unbound.stdout))throw Error('The unbound run passed; the check proves nothing.');
- if(bound.status!==0||!/^PASS$/m.test(bound.stdout))throw Error('The bound run failed.');
+// Runs one binary in a failing and a passing mode; the failing mode must not pass.
+function check(binary,args,failing,passing){
+ const run=mode=>spawnSync(binary,[...args,mode],{encoding:'utf8',timeout:20000});
+ const fail=run(failing),pass=run(passing);
+ process.stdout.write('--- '+path.basename(binary)+' '+failing+' (exit '+fail.status+')\n'+fail.stdout+'--- '+path.basename(binary)+' '+passing+' (exit '+pass.status+')\n'+pass.stdout);
+ if(fail.status===0||/^PASS$/m.test(fail.stdout))throw Error('The '+failing+' run passed; the check proves nothing.');
+ if(pass.status!==0||!/^PASS$/m.test(pass.stdout))throw Error('The '+passing+' run failed.');
 }
 
 const options=argumentsOf(process.argv.slice(2));
 if(process.platform!=='darwin'||process.arch!=='arm64')throw Error('The proof builds on arm64 macOS.');
+lowestPriority();
 const fex=verifyCheckout(recipe.source),anyps5=verifyCheckout(recipe.anyps5);
 fs.rmSync(path.join(options.out,'fex'),{recursive:true,force:true});fs.rmSync(path.join(options.out,'anyps5'),{recursive:true,force:true});
 project(fex,path.join(options.out,'fex'));project(anyps5,path.join(options.out,'anyps5'),recipe.anyps5.paths);
 for(const overlay of recipe.overlays)applyOverlay(path.join(options.out,overlay.target),overlay);
 const proofSource=path.join(options.out,'fex/Source/AnyPS5FexProof');
 fs.mkdirSync(proofSource,{recursive:true});
-for(const file of ['CMakeLists.txt','AnyPS5FexProof.cpp'])fs.copyFileSync(path.join(import.meta.dirname,recipe.proof.directory,file),path.join(proofSource,file));
+for(const file of recipe.host.sources)fs.copyFileSync(path.join(import.meta.dirname,recipe.host.directory,file),path.join(proofSource,file));
 
+const guestObject=path.join(options.out,'guest-abi.x86_64.o'),guestText=path.join(options.out,'guest-abi.bin');
+run('clang',['-arch','x86_64','-O2','-ffreestanding','-fno-builtin','-fno-stack-protector','-fno-asynchronous-unwind-tables','-c',
+ path.join(import.meta.dirname,recipe.host.directory,recipe.host.guest.source),'-o',guestObject]);
+const guestEntry=execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,'macho-text.py'),guestObject,recipe.host.guest.entry,guestText],{encoding:'utf8'}).trim();
 const objects=recipe.anyps5.objects.map(source=>{
  const object=path.join(options.out,path.basename(source,'.cpp')+'.arm64.o');
- niced('clang++',['-std=c++20','-arch','arm64','-O2','-c','-I',path.join(options.out,'anyps5/core/libs'),path.join(options.out,'anyps5',source),'-o',object]);
+ run('clang++',['-std=c++20','-arch','arm64','-O2','-c','-I',path.join(options.out,'anyps5/core/libs'),path.join(options.out,'anyps5',source),'-o',object]);
  return object;
 });
 const firstLog=path.join(options.out,'link-exports.log');
@@ -102,14 +118,14 @@ if(!link(options.out,objects,firstLog)){
  const list=[];
  for(const object of objects){
   const part=assembly+'.'+list.length;
-  execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.proof.directory,'unreached-exports.py'),object,firstLog,part],{stdio:'inherit'});
+  execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,'unreached-exports.py'),object,firstLog,part],{stdio:'inherit'});
   list.push(fs.readFileSync(part,'utf8'));
  }
  fs.writeFileSync(assembly,list.join('\n'));
- niced('clang',['-c','-arch','arm64',assembly,'-o',stubs]);
+ run('clang',['-c','-arch','arm64',assembly,'-o',stubs]);
  const secondLog=path.join(options.out,'link-proof.log');
  if(!link(options.out,[...objects,stubs],secondLog))throw Error('The proof build failed; see '+secondLog);
 }
-const binary=path.join(options.out,'build/Bin',recipe.proof.target);
-process.stdout.write(binary+'\n');
-if(options.check)check(binary,options.check);
+const [proof,abi]=recipe.host.targets.map(target=>path.join(options.out,'build/Bin',target));
+process.stdout.write(proof+'\n'+abi+' '+guestText+' '+guestEntry+'\n');
+if(options.check){check(proof,options.check,'unbound','bound');check(abi,[guestText,guestEntry],'generic','thunks');}
