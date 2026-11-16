@@ -31,6 +31,7 @@
 
 #include "ngx_camera.h"
 #include "streamline_camera.hpp"
+#include "ngx_late_camera_file.h"
 #include "streamline_inputs.hpp"
 #include "vkd3d_metalfx.h"
 #include "streamline_scene.hpp"
@@ -70,6 +71,10 @@ SRWLOCK install_lock = SRWLOCK_INIT;
 
 ngx_streamline::CameraCache<128> cameras;
 ngx_streamline::DirectCameras direct_cameras;
+std::unique_ptr<ngx_late_camera::File> late_file;
+std::once_flag late_once;
+// a direct NGX evaluation happened in this process (Streamline-evaluated games never report projections)
+std::atomic<bool> direct_evaluated{false};
 SRWLOCK camera_lock = SRWLOCK_INIT;
 // slEvaluateFeature calls on this thread: NGX evaluations inside them are Streamline's, never direct ones
 thread_local unsigned streamline_evaluations = 0;
@@ -78,13 +83,28 @@ struct EvaluationDepth {EvaluationDepth(){++streamline_evaluations;}~EvaluationD
 // Diagnostic lines go to the NGX core's log and to the debugger output (Wine's debugstr channel): a game without a
 // console has no stderr.
 void Report(const char *format, ...) {
-  char text[256];
+  char text[512];
   va_list values;
   va_start(values, format);
   vsnprintf(text, sizeof(text), format, values);
   va_end(values);
   lane::log("info", "%s", text);
   OutputDebugStringA((std::string("vkd3d-ngx: ") + text + "\n").c_str());
+}
+// Why the constants' projection gives no camera, once per reason, with the matrix and the declarations.
+void ReportProjection(ngx_streamline::Projection reason, const sl::Constants &values) {
+  static std::atomic<unsigned> reported{0};
+  const unsigned bit = 1u << unsigned(reason);
+  if (reported.fetch_or(bit) & bit)
+    return;
+  static const char *const reasons[] = {"", "not Streamline constants", "orthographic", "not finite", "not a perspective shape",
+                                        "depth direction", "near, far or field of view"};
+  const float *m = &values.cameraViewToClip.row[0].x;
+  Report("Streamline projection gives no camera (%s): version %u depthInverted %d orthographic %d "
+         "[%g %g %g %g | %g %g %g %g | %g %g %g %g | %g %g %g %g]",
+         reasons[unsigned(reason)], unsigned(values.structVersion), int(values.depthInverted), int(values.orthographicProjection),
+         double(m[0]), double(m[1]), double(m[2]), double(m[3]), double(m[4]), double(m[5]), double(m[6]), double(m[7]),
+         double(m[8]), double(m[9]), double(m[10]), double(m[11]), double(m[12]), double(m[13]), double(m[14]), double(m[15]));
 }
 // Constants that follow their frame's direct evaluation (Unreal Engine's order): each outcome once per process, and
 // after 1000 such constants how many followed their evaluation exactly.
@@ -122,8 +142,11 @@ sl::Result Capture(Slot &slot,SetConstants original, const sl::Constants &values
   const uint32_t frame_id = uint32_t(frame), view_id = uint32_t(view);
   RSTemporalCamera camera, projected;
   const bool valid = ngx_streamline::camera(values, frame_id, view_id, camera);
-  bool projection_valid = false;
-  try{projection_valid = ngx_streamline::projectionCamera(values, frame_id, view_id, projected);}catch(...){}
+  auto projection = ngx_streamline::Projection::Structure;
+  try{projection = ngx_streamline::projectionReason(values, frame_id, view_id, projected);}catch(...){}
+  const bool projection_valid = projection == ngx_streamline::Projection::Valid;
+  if (!projection_valid && direct_evaluated.load(std::memory_order_relaxed))
+    ReportProjection(projection, values);
   const auto epoch=slot.scene.begin(SceneActive());const bool extra=epoch!=0;ngx_streamline::SceneMatrices matrices;bool matrix_valid=false;
   if(extra)try{matrix_valid=ngx_streamline::matrices(values,matrices);}catch(...){}
   const sl::Result result = original(values, frame, view);
@@ -132,10 +155,25 @@ sl::Result Capture(Slot &slot,SetConstants original, const sl::Constants &values
   direct_cameras.remember(frame_id, view_id, values.jitterOffset.x, values.jitterOffset.y,
                           projection_valid && result == sl::Result::eOk ? &projected : nullptr);
   uint64_t evaluation = 0;
+  float evaluation_jitter[2]{};
   RSTemporalCamera followed;
-  const auto follow = direct_cameras.follow(evaluation, followed);
+  const auto follow = direct_cameras.follow(evaluation, evaluation_jitter, followed);
+  bool published = false;
+  if (follow == ngx_streamline::DirectCameras::Followed) {
+    std::call_once(late_once, [] { late_file = std::make_unique<ngx_late_camera::File>(); });
+    if (auto mailbox = late_file->get()) {
+      ngx_late_camera::publish(*mailbox, evaluation_jitter[0], evaluation_jitter[1], evaluation, followed);
+      published = true;
+    }
+  }
   ReleaseSRWLockExclusive(&camera_lock);
   ReportFollow(follow, values.jitterOffset.x, values.jitterOffset.y, evaluation, followed);
+  if (follow == ngx_streamline::DirectCameras::Followed) {
+    static std::atomic<unsigned> reported{0};
+    if (!(reported.fetch_or(published ? 1u : 2u) & (published ? 1u : 2u)))
+      Report(published ? "Late camera published for generation in effect-plan.temporal-camera"
+                       : "No late camera file beside the effect plan; generation receives no camera");
+  }
   if(extra)try{slot.scene.begin(SceneActive());slot.scene.constants(frame_id,view_id,matrix_valid?&matrices:nullptr,result==sl::Result::eOk,epoch);}catch(...){}
   return result;
 }
@@ -307,6 +345,9 @@ bool ngx::DirectEvaluationCamera(float jitter_x, float jitter_y, RSTemporalCamer
     return false;
   if (!streamline_hooked.load(std::memory_order_acquire))
     return false;
+  direct_evaluated.store(true, std::memory_order_relaxed);
+  // the late camera file exists before this frame's generation looks for it
+  std::call_once(late_once, [] { late_file = std::make_unique<ngx_late_camera::File>(); });
   AcquireSRWLockExclusive(&camera_lock);
   const auto result = direct_cameras.take(jitter_x, jitter_y, camera);
   ReleaseSRWLockExclusive(&camera_lock);

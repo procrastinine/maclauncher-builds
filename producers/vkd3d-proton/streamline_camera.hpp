@@ -83,38 +83,43 @@ inline bool camera(const sl::Constants &value, uint32_t frame, uint32_t viewport
   return true;
 }
 
-// The camera that the unjittered perspective view-to-clip matrix alone defines. Unreal Engine's Streamline plugin
-// declares its own r.Streamline.CustomCameraNearPlane/FarPlane values, which do not need to match its projection, so
-// near and far come from the matrix's depth terms and the vertical field of view from its vertical scale. The matrix's
-// depth direction must be the declared one. A depth term at exactly the far depth is an infinite far plane: Unreal
-// Engine's reversed-Z projection gives near = GNearClippingPlane and an infinite far plane.
-inline bool projectionCamera(const sl::Constants &value, uint32_t frame, uint32_t viewport, RSTemporalCamera &out) {
+// The camera that the perspective view-to-clip matrix alone defines. Unreal Engine's Streamline plugin declares its
+// own r.Streamline.CustomCameraNearPlane/FarPlane values, which do not need to match its projection, so near and far
+// come from the matrix's depth terms and the vertical field of view from its vertical scale. The depth row's x and y
+// terms (a jitter or off-centre offset) move only x and y and are allowed. The depth terms define the direction: a
+// declared direction must agree, and an undeclared one is the matrix's. A depth term at exactly the far depth is an
+// infinite far plane: Unreal Engine's reversed-Z projection gives near = GNearClippingPlane and an infinite far plane.
+enum class Projection { Valid, Structure, Orthographic, NotFinite, Shape, DepthDirection, Planes };
+inline Projection projectionReason(const sl::Constants &value, uint32_t frame, uint32_t viewport, RSTemporalCamera &out) {
   out = {};
-  if (value.structType != sl::Constants::s_structType || value.structVersion < 1 || value.structVersion > 2 ||
-      value.orthographicProjection != sl::Boolean::eFalse ||
-      (value.depthInverted != sl::Boolean::eTrue && value.depthInverted != sl::Boolean::eFalse))
-    return false;
+  if (value.structType != sl::Constants::s_structType || value.structVersion < 1)
+    return Projection::Structure;
+  if (value.orthographicProjection == sl::Boolean::eTrue)
+    return Projection::Orthographic;
   const float *m = &value.cameraViewToClip.row[0].x;
   for (unsigned i = 0; i < 16; ++i)
     if (!std::isfinite(m[i]) || m[i] == FLT_MAX)
-      return false;
+      return Projection::NotFinite;
   const float w = m[11], scale = std::abs(w);
   if (scale < 1e-8f || std::abs(m[0]) < 1e-8f || std::abs(m[5]) < 1e-8f)
-    return false;
-  for (unsigned i : {1u, 2u, 3u, 4u, 6u, 7u, 8u, 9u, 12u, 13u, 15u})
+    return Projection::Shape;
+  for (unsigned i : {1u, 2u, 3u, 4u, 6u, 7u, 12u, 13u, 15u})
     if (std::abs(m[i]) > scale * 1e-5f)
-      return false;
-  // NDC depth at view distance d is a + b / d
-  const bool reversed = value.depthInverted == sl::Boolean::eTrue;
-  const double a = double(m[10]) / w, b = double(m[14]) / scale, farDepth = reversed ? 0 : 1;
-  if (reversed ? !(b > 0 && a <= 0) : !(b < 0 && a >= 1))
-    return false;
+      return Projection::Shape;
+  // NDC depth at view distance d is a + b / d; reversed depth falls with distance (b > 0)
+  const double a = double(m[10]) / w, b = double(m[14]) / scale;
+  const bool reversed = b > 0;
+  if (reversed ? !(a <= 0) : !(b < 0 && a >= 1))
+    return Projection::DepthDirection;
+  if ((value.depthInverted == sl::Boolean::eTrue && !reversed) || (value.depthInverted == sl::Boolean::eFalse && reversed))
+    return Projection::DepthDirection;
+  const double farDepth = reversed ? 0 : 1;
   const bool infinite = std::abs(a - farDepth) <= 1e-7;
   const double nearPlane = reversed ? b / (1 - a) : -b / a, farPlane = infinite ? 0 : reversed ? -b / a : b / (1 - a);
   const double fov = 2 * std::atan(double(scale) / std::abs(double(m[5])));
   if (!std::isfinite(nearPlane) || !(nearPlane > 0) || nearPlane >= FLT_MAX || !(fov > 0) || !(fov < 3.141592653589793) ||
       (!infinite && (!std::isfinite(farPlane) || !(farPlane > nearPlane) || farPlane >= FLT_MAX)))
-    return false;
+    return Projection::Planes;
   out.size = sizeof(out);
   out.version = 1;
   out.frameId = uint64_t(frame) + 1;
@@ -125,9 +130,14 @@ inline bool projectionCamera(const sl::Constants &value, uint32_t frame, uint32_
   out.flags = (reversed ? RS_TEMPORAL_DEPTH_REVERSED : 0) | (infinite ? RS_TEMPORAL_DEPTH_INFINITE : 0) |
               (value.reset == sl::Boolean::eTrue ? RS_TEMPORAL_RESET : 0) |
               (value.motionVectorsJittered == sl::Boolean::eTrue ? RS_TEMPORAL_JITTERED_MOTION : 0);
-  if (!(out.farPlane > out.nearPlane) && !infinite)
+  if (!(out.farPlane > out.nearPlane) && !infinite) {
     out = {};
-  return out.size != 0;
+    return Projection::Planes;
+  }
+  return Projection::Valid;
+}
+inline bool projectionCamera(const sl::Constants &value, uint32_t frame, uint32_t viewport, RSTemporalCamera &out) {
+  return projectionReason(value, frame, viewport, out) == Projection::Valid;
 }
 
 // The camera of a Super Resolution evaluation that a game makes through NGX itself, outside Streamline's
@@ -214,10 +224,12 @@ public:
     out = pending.camera;
     return Bound;
   }
-  // Call after remember() for the same constants. evaluation is the 1-based number of the evaluation they follow.
-  Follow follow(uint64_t &evaluation, RSTemporalCamera &out) {
+  // Call after remember() for the same constants. evaluation is the 1-based number of the evaluation they follow and
+  // jitter that evaluation's own offset.
+  Follow follow(uint64_t &evaluation, float (&jitter_out)[2], RSTemporalCamera &out) {
     out = {};
     evaluation = 0;
+    jitter_out[0] = jitter_out[1] = 0;
     if (!evaluated_)
       return NoEvaluation;
     if (count_ != 1)
@@ -235,6 +247,8 @@ public:
       return FollowInvalidCamera;
     learn(jitter, previous_[0], previous_[1]);
     evaluation = evaluations_;
+    jitter_out[0] = previous_[0];
+    jitter_out[1] = previous_[1];
     out = pending_.camera;
     return Followed;
   }

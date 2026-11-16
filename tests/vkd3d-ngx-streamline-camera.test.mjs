@@ -12,6 +12,7 @@ const fixture=String.raw`
 #include <cstdio>
 #include <cstring>
 #include "streamline_camera.hpp"
+#include "ngx_late_camera.h"
 static sl::Constants perspective(bool reversed = false, bool rightHanded = false, bool infinite = false) {
   sl::Constants c{};std::memset(&c.cameraViewToClip, 0, sizeof(c.cameraViewToClip));
   c.cameraNear = .1f;c.cameraFar = infinite ? INFINITY : 1000.f;c.cameraFOV = 1.1f;
@@ -80,12 +81,19 @@ int main() {
     assert(ngx_streamline::projectionCamera(c, 40, 0, result));checks++;
     assert(result.nearPlane == 10.f && result.farPlane == 0 && (result.flags & RS_TEMPORAL_DEPTH_INFINITE) && (result.flags & RS_TEMPORAL_DEPTH_REVERSED));
     assert(std::abs(result.verticalFov - 2 * std::atan(1.f / m[5])) < 1e-6f);
-    auto bad = c;bad.depthInverted = sl::Boolean::eFalse;assert(!ngx_streamline::projectionCamera(bad, 40, 0, result) && !result.size);checks++;
-    bad = c;bad.orthographicProjection = sl::Boolean::eTrue;assert(!ngx_streamline::projectionCamera(bad, 40, 0, result));checks++;
-    bad = c;bad.cameraViewToClip.row[2].x = .25f;assert(!ngx_streamline::projectionCamera(bad, 40, 0, result));checks++;
-    bad = c;bad.cameraViewToClip.row[3].z = -1.f;assert(!ngx_streamline::projectionCamera(bad, 40, 0, result));checks++;
-    bad = c;bad.cameraViewToClip.row[2].z = .5f;assert(!ngx_streamline::projectionCamera(bad, 40, 0, result));checks++;
-    bad = c;bad.cameraViewToClip.row[0].x = NAN;assert(!ngx_streamline::projectionCamera(bad, 40, 0, result));checks++;
+    using P = ngx_streamline::Projection;
+    auto bad = c;bad.depthInverted = sl::Boolean::eFalse;assert(ngx_streamline::projectionReason(bad, 40, 0, result) == P::DepthDirection && !result.size);checks++;
+    bad = c;bad.orthographicProjection = sl::Boolean::eTrue;assert(ngx_streamline::projectionReason(bad, 40, 0, result) == P::Orthographic);checks++;
+    // the depth row's jitter terms move only x and y: the same camera
+    auto jittered = c;jittered.cameraViewToClip.row[2].x = 3.1e-4f;jittered.cameraViewToClip.row[2].y = -5.6e-4f;
+    assert(ngx_streamline::projectionCamera(jittered, 40, 0, result) && result.nearPlane == 10.f && (result.flags & RS_TEMPORAL_DEPTH_INFINITE));checks++;
+    // an undeclared depth direction is the matrix's; an invalid orthographic declaration is not orthographic
+    auto undeclared = c;undeclared.depthInverted = sl::Boolean::eInvalid;undeclared.orthographicProjection = sl::Boolean::eInvalid;
+    assert(ngx_streamline::projectionCamera(undeclared, 40, 0, result) && (result.flags & RS_TEMPORAL_DEPTH_REVERSED) && result.nearPlane == 10.f);checks++;
+    bad = c;bad.cameraViewToClip.row[0].y = .25f;assert(ngx_streamline::projectionReason(bad, 40, 0, result) == P::Shape);checks++;
+    bad = c;bad.cameraViewToClip.row[3].z = -1.f;assert(ngx_streamline::projectionReason(bad, 40, 0, result) == P::DepthDirection);checks++;
+    bad = c;bad.cameraViewToClip.row[2].z = .5f;assert(ngx_streamline::projectionReason(bad, 40, 0, result) == P::DepthDirection);checks++;
+    bad = c;bad.cameraViewToClip.row[0].x = NAN;assert(ngx_streamline::projectionReason(bad, 40, 0, result) == P::NotFinite);checks++;
     // direct NGX evaluations take only the same frame's constants, proven by equal jitter
     RSTemporalCamera projected{}, bound{};assert(ngx_streamline::projectionCamera(c, 40, 0, projected));
     using Direct = ngx_streamline::DirectCameras;Direct direct;
@@ -125,22 +133,38 @@ int main() {
     Direct first;first.remember(1, 0, .1f, .2f, &projected);assert(first.take(.1f, .2f, bound) == Direct::FirstEvaluation && !bound.size);checks++;
     first.remember(2, 0, .3f, .1f, &projected);assert(first.take(.3f, .1f, bound) == Direct::Bound);checks++;
     // constants set after their frame's evaluation follow it: Unreal Engine's order (evaluation, then constants)
-    {Direct ue;uint64_t evaluation = 0;
-     ue.remember(9, 0, .5f, .5f, &projected);assert(ue.follow(evaluation, bound) == Direct::NoEvaluation && !evaluation);checks++;
+    {Direct ue;uint64_t evaluation = 0;float ej[2]{};
+     ue.remember(9, 0, .5f, .5f, &projected);assert(ue.follow(evaluation, ej, bound) == Direct::NoEvaluation && !evaluation);checks++;
      ue.take(.25f, -.166667f, bound);ue.remember(10, 0, .25f, -.166667f, &projected);
-     assert(ue.follow(evaluation, bound) == Direct::Followed && evaluation == 1 && bound.size == 64 && bound.nearPlane == 10.f &&
-            (bound.flags & RS_TEMPORAL_DEPTH_INFINITE) && bound.farPlane == 0.f);checks++;
-     ue.remember(10, 0, .25f, -.166667f, &projected);assert(ue.follow(evaluation, bound) == Direct::SeveralConstants && !bound.size);checks++;
+     assert(ue.follow(evaluation, ej, bound) == Direct::Followed && evaluation == 1 && bound.size == 64 && bound.nearPlane == 10.f &&
+            (bound.flags & RS_TEMPORAL_DEPTH_INFINITE) && bound.farPlane == 0.f && ej[0] == .25f && ej[1] == -.166667f);checks++;
+     ue.remember(10, 0, .25f, -.166667f, &projected);assert(ue.follow(evaluation, ej, bound) == Direct::SeveralConstants && !bound.size);checks++;
      assert(ue.take(-.25f, .388889f, bound) == Direct::ConstantsFollow);
-     ue.remember(11, 0, -.25f, .388889f, &projected);assert(ue.follow(evaluation, bound) == Direct::Followed && evaluation == 2);checks++;
+     ue.remember(11, 0, -.25f, .388889f, &projected);assert(ue.follow(evaluation, ej, bound) == Direct::Followed && evaluation == 2);checks++;
      // the convention is fixed (equal): the next frame's negated offset follows its own evaluation only
      ue.take(.25f, -.388889f, bound);ue.remember(12, 0, .25f, -.388889f, &projected);
-     assert(ue.follow(evaluation, bound) == Direct::Followed && evaluation == 3);checks++;
-     ue.take(.125f, .1f, bound);ue.remember(13, 0, .3f, .3f, &projected);assert(ue.follow(evaluation, bound) == Direct::FollowOtherFrame && !evaluation);checks++;
-     ue.take(.4f, .2f, bound);ue.remember(14, 0, .4f, .2f, nullptr);assert(ue.follow(evaluation, bound) == Direct::FollowInvalidCamera && !bound.size);checks++;
-     ue.take(0.f, 0.f, bound);ue.remember(15, 0, 0.f, 0.f, &projected);assert(ue.follow(evaluation, bound) == Direct::FollowUnjittered);checks++;}
-    {Direct ambiguous;uint64_t evaluation = 0;ambiguous.take(.125f, .25f, bound);ambiguous.take(-.125f, -.25f, bound);
-     ambiguous.remember(3, 0, -.125f, -.25f, &projected);assert(ambiguous.follow(evaluation, bound) == Direct::FollowAmbiguous && !evaluation);checks++;}
+     assert(ue.follow(evaluation, ej, bound) == Direct::Followed && evaluation == 3);checks++;
+     ue.take(.125f, .1f, bound);ue.remember(13, 0, .3f, .3f, &projected);assert(ue.follow(evaluation, ej, bound) == Direct::FollowOtherFrame && !evaluation);checks++;
+     ue.take(.4f, .2f, bound);ue.remember(14, 0, .4f, .2f, nullptr);assert(ue.follow(evaluation, ej, bound) == Direct::FollowInvalidCamera && !bound.size);checks++;
+     ue.take(0.f, 0.f, bound);ue.remember(15, 0, 0.f, 0.f, &projected);assert(ue.follow(evaluation, ej, bound) == Direct::FollowUnjittered);checks++;}
+    // with negated constants, the published offset is the evaluation's own
+    {Direct neg;uint64_t evaluation = 0;float ej[2]{};neg.take(.3f, -.1f, bound);neg.remember(1, 0, -.3f, .1f, &projected);
+     assert(neg.follow(evaluation, ej, bound) == Direct::Followed && ej[0] == .3f && ej[1] == -.1f);checks++;}
+    {Direct ambiguous;uint64_t evaluation = 0;float ej[2]{};ambiguous.take(.125f, .25f, bound);ambiguous.take(-.125f, -.25f, bound);
+     ambiguous.remember(3, 0, -.125f, -.25f, &projected);assert(ambiguous.follow(evaluation, ej, bound) == Direct::FollowAmbiguous && !evaluation);checks++;}
+  }
+  {
+    // the late camera record: the evaluation's own jitter, sequence-locked slots, magic after the first record
+    namespace late = ngx_late_camera;late::Mailbox m{};RSTemporalCamera ue{};ue.size = sizeof(ue);ue.nearPlane = 10.f;
+    ue.flags = RS_TEMPORAL_DEPTH_REVERSED | RS_TEMPORAL_DEPTH_INFINITE;
+    late::publish(m, .25f, -.166667f, 7, ue);
+    assert(m.magic == late::magic && m.version == 1 && m.slotCount == 4 && m.published == 1);checks++;
+    assert(m.slot[0].sequence == 2 && m.slot[0].publication == 1 && m.slot[0].jitterX == .25f && m.slot[0].jitterY == -.166667f &&
+           m.slot[0].evaluation == 7 && m.slot[0].camera.nearPlane == 10.f);checks++;
+    for (uint64_t e = 8; e < 12; ++e) late::publish(m, float(e), 1.f, e, ue);
+    assert(m.published == 5 && m.slot[0].publication == 5 && m.slot[0].sequence == 4 && m.slot[0].evaluation == 11 && m.slot[3].publication == 4);checks++;
+    // a slot left odd by an interrupted writer becomes complete on its next record
+    m.slot[1].sequence += 1;late::publish(m, 3.f, 3.f, 12, ue);assert(m.slot[1].sequence == 4 && m.slot[1].publication == 6);checks++;
   }
   std::printf("ok %u\n", checks);
 }
@@ -165,6 +189,9 @@ test('a direct NGX Super Resolution evaluation outside slEvaluateFeature takes t
  assert.match(hooks,/direct_cameras\.remember\(frame_id, view_id, values\.jitterOffset\.x, values\.jitterOffset\.y,/);
  assert.match(hooks,/sl::CommandBuffer \*commands\) \{\n  EvaluationDepth depth;/,'every slEvaluateFeature scope excludes direct binding');
  assert.match(hooks,/if \(streamline_evaluations\)\n    return false;/);
+ // constants after their evaluation publish that evaluation's own jitter for generation
+ assert.match(hooks,/const auto follow = direct_cameras\.follow\(evaluation, evaluation_jitter, followed\);/);
+ assert.match(hooks,/ngx_late_camera::publish\(\*mailbox, evaluation_jitter\[0\], evaluation_jitter\[1\], evaluation, followed\);/);
 });
 
 test('the NGX core is built with its Streamline capture, MinHook and the official headers, from declared inputs',()=>{
