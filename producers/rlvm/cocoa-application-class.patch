@@ -1,0 +1,24 @@
+RLVM: give the engine Cocoa application subclass a distinct Objective-C name.
+
+SDL2 supplies its own SDLApplication. Keep the engine subclass methods and
+custom non-NIB entry intact, and rename only its three local class references.
+Upstream SDLMain authorship and RLVM GPL-3.0-or-later notices remain unchanged.
+
+diff --git a/src/platforms/osx/SDLMain.mm b/src/platforms/osx/SDLMain.mm
+--- a/src/platforms/osx/SDLMain.mm
++++ b/src/platforms/osx/SDLMain.mm
+@@ -58,3 +58,3 @@ static NSString *getApplicationName(void)
+ 
+-@interface SDLApplication : NSApplication
++@interface RLVMCocoaApplication : NSApplication
+ @end
+@@ -67,3 +67,3 @@ NSEvent* GetLastRightClickEvent() {
+ 
+-@implementation SDLApplication
++@implementation RLVMCocoaApplication
+ /* Invoked from the Quit menu item */
+@@ -276,3 +276,3 @@ static void CustomApplicationMain (int argc, char **argv)
+     /* Ensure the application object is initialised */
+-    [SDLApplication sharedApplication];
++    [RLVMCocoaApplication sharedApplication];
+ 

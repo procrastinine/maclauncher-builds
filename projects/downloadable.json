@@ -4316,7 +4316,8 @@
         "producers/rlvm/boost-parent-path.patch",
         "producers/rlvm/boost-directory-header.patch",
         "producers/rlvm/standard-stream-headers.patch",
-        "producers/rlvm/boost-system-directory-header.patch"
+        "producers/rlvm/boost-system-directory-header.patch",
+        "producers/rlvm/cocoa-application-class.patch"
       ]
     },
     "upstreams": [

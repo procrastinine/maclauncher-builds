@@ -66,6 +66,7 @@ export async function compile({arch='universal',work}){
  run('git',['apply','--unsafe-paths','--directory='+source,path.join(here,'boost-directory-header.patch')],{cwd:root});
  run('git',['apply','--unsafe-paths','--directory='+source,path.join(here,'standard-stream-headers.patch')],{cwd:root});
  run('git',['apply','--unsafe-paths','--directory='+source,path.join(here,'boost-system-directory-header.patch')],{cwd:root});
+ run('git',['apply','--unsafe-paths','--directory='+source,path.join(here,'cocoa-application-class.patch')],{cwd:root});
  const sources=await dependencySources(work),slices=[];
  for(const architecture of ['arm64','x64'])slices.push(await buildSlice({architecture,work,sources,engineSource:source}));
  return {slices,source,sourceRoot,revision,staged,sources};
