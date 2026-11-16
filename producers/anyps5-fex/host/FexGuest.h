@@ -34,8 +34,10 @@ inline std::uint64_t StubBase = 0;
 constexpr std::uint64_t StackSize = 1 << 20;
 constexpr std::uint64_t ThunkStubOffset = 16;
 constexpr std::uint64_t ThunkStubSize = 16;
-constexpr std::uint64_t X87ReturnStubOffset = 0x1000;
-constexpr std::uint64_t X87ReturnSlotOffset = 0x1100;
+constexpr std::uint64_t StubPageSize = 0x10000;
+constexpr std::uint64_t X87ReturnStubOffset = 0xF000;
+constexpr std::uint64_t X87ReturnSlotOffset = 0xF100;
+constexpr std::size_t MaximumThunks = (X87ReturnStubOffset - ThunkStubOffset) / ThunkStubSize;
 inline std::uint64_t X87ReturnStub() {
   return StubBase + X87ReturnStubOffset;
 }
@@ -158,7 +160,11 @@ inline void InitConfig() {
 
 // Maps the stub page with HLTs for the final return and ThunkCount thunks, and the x87 return stub.
 inline void MapStubs(std::size_t ThunkCount) {
-  auto* Stubs = static_cast<std::uint8_t*>(MapGuest(0x4000));
+  if (ThunkCount > MaximumThunks) {
+    std::printf("%zu thunks exceed the stub page\nFAIL\n", ThunkCount);
+    std::exit(1);
+  }
+  auto* Stubs = static_cast<std::uint8_t*>(MapGuest(StubPageSize));
   StubBase = reinterpret_cast<std::uint64_t>(Stubs);
   Stubs[0] = 0xF4;
   for (std::size_t i = 0; i < ThunkCount; ++i) {
@@ -181,51 +187,64 @@ inline std::uint64_t MapStack() {
   return Stack;
 }
 
-// Runs the guest from Initial until it returns to stub 0, dispatching thunks; returns the final guest state, which
-// lives as long as the process.
-inline const CPUState& Run(CPUState& Initial, std::span<const Thunk> Thunks, std::uint64_t& ThunkCalls) {
-  // The context lives for the rest of the process.
-  auto* CTX = FEXCore::Context::Context::CreateNewContext(DarwinHostFeatures()).release();
-  static SignalDelegator Signals;
-  static SyscallHandler Syscalls;
-  CTX->SetSignalDelegator(&Signals);
-  CTX->SetSyscallHandler(&Syscalls);
-  CTX->EnableExitOnHLT();
-  if (!CTX->InitCore()) {
-    std::printf("InitCore failed\nFAIL\n");
-    std::exit(1);
+// Runs the guest from Initial until it returns to stub 0 or reaches Breakpoint (a HLT the caller placed), dispatching
+// thunks. The first call creates the FEXCore context and the guest thread; later calls reuse that thread with the rip,
+// general registers and FS base of Initial. Returns the guest state, which lives as long as the process.
+inline const CPUState& Run(CPUState& Initial, std::span<const Thunk> Thunks, std::uint64_t& ThunkCalls, std::uint64_t Breakpoint = 0) {
+  static FEXCore::Context::Context* CTX = nullptr;
+  static FEXCore::Core::InternalThreadState* Thread = nullptr;
+  if (CTX) {
+    auto& Guest = Thread->CurrentFrame->State;
+    Guest.rip = Initial.rip;
+    std::memcpy(Guest.gregs, Initial.gregs, sizeof(Guest.gregs));
+    Guest.fs_cached = Initial.fs_cached;
+    Guest.gs_cached = Initial.gs_cached;
+    std::printf("guest thread resumed; running 0x%llx\n", static_cast<unsigned long long>(Guest.rip));
+  } else {
+    // The context lives for the rest of the process.
+    CTX = FEXCore::Context::Context::CreateNewContext(DarwinHostFeatures()).release();
+    static SignalDelegator Signals;
+    static SyscallHandler Syscalls;
+    CTX->SetSignalDelegator(&Signals);
+    CTX->SetSyscallHandler(&Syscalls);
+    CTX->EnableExitOnHLT();
+    if (!CTX->InitCore()) {
+      std::printf("InitCore failed\nFAIL\n");
+      std::exit(1);
+    }
+    std::printf("FEXCore initialized\n");
+
+    Initial.mxcsr = 0x1F80;
+    Thread = CTX->CreateThread(&Initial);
+    auto& Guest = Thread->CurrentFrame->State;
+
+    // A flat 64-bit code segment, as FEX's Linux frontend sets up for a new thread.
+    static CPUState::gdt_segment GDT[32] {};
+    Guest.segment_arrays[CPUState::SEGMENT_ARRAY_INDEX_GDT] = GDT;
+    Guest.segment_arrays[CPUState::SEGMENT_ARRAY_INDEX_LDT] = GDT;
+    Guest.cs_idx = CPUState::DEFAULT_USER_CS << 3;
+    auto* CodeSegment = CPUState::GetSegmentFromIndex(Guest, Guest.cs_idx);
+    CPUState::SetGDTBase(CodeSegment, 0);
+    CPUState::SetGDTLimit(CodeSegment, 0xF'FFFFU);
+    CodeSegment->L = 1;
+    CodeSegment->D = 0;
+    Guest.cs_cached = 0;
+
+    // The call-return stack FEXCore uses to predict returns, with a guard page on each side.
+    const std::uint64_t PageSize = getpagesize();
+    const std::uint64_t CallRetSize = FEXCore::Core::InternalThreadState::CALLRET_STACK_SIZE;
+    auto CallRet = reinterpret_cast<std::uint64_t>(mmap(nullptr, CallRetSize + 2 * PageSize, PROT_NONE, MAP_PRIVATE | MAP_ANON, -1, 0));
+    Thread->CallRetStackBase = reinterpret_cast<void*>(CallRet + PageSize);
+    mprotect(Thread->CallRetStackBase, CallRetSize, PROT_READ | PROT_WRITE);
+    Guest.callret_sp = CallRet + PageSize + CallRetSize / 4;
+    std::printf("guest thread created; running 0x%llx\n", static_cast<unsigned long long>(Guest.rip));
   }
-  std::printf("FEXCore initialized\n");
-
-  Initial.mxcsr = 0x1F80;
-  auto* Thread = CTX->CreateThread(&Initial);
   auto& Guest = Thread->CurrentFrame->State;
-
-  // A flat 64-bit code segment, as FEX's Linux frontend sets up for a new thread.
-  static CPUState::gdt_segment GDT[32] {};
-  Guest.segment_arrays[CPUState::SEGMENT_ARRAY_INDEX_GDT] = GDT;
-  Guest.segment_arrays[CPUState::SEGMENT_ARRAY_INDEX_LDT] = GDT;
-  Guest.cs_idx = CPUState::DEFAULT_USER_CS << 3;
-  auto* CodeSegment = CPUState::GetSegmentFromIndex(Guest, Guest.cs_idx);
-  CPUState::SetGDTBase(CodeSegment, 0);
-  CPUState::SetGDTLimit(CodeSegment, 0xF'FFFFU);
-  CodeSegment->L = 1;
-  CodeSegment->D = 0;
-  Guest.cs_cached = 0;
-
-  // The call-return stack FEXCore uses to predict returns, with a guard page on each side.
-  const std::uint64_t PageSize = getpagesize();
-  const std::uint64_t CallRetSize = FEXCore::Core::InternalThreadState::CALLRET_STACK_SIZE;
-  auto CallRet = reinterpret_cast<std::uint64_t>(mmap(nullptr, CallRetSize + 2 * PageSize, PROT_NONE, MAP_PRIVATE | MAP_ANON, -1, 0));
-  Thread->CallRetStackBase = reinterpret_cast<void*>(CallRet + PageSize);
-  mprotect(Thread->CallRetStackBase, CallRetSize, PROT_READ | PROT_WRITE);
-  Guest.callret_sp = CallRet + PageSize + CallRetSize / 4;
-  std::printf("guest thread created; running 0x%llx\n", static_cast<unsigned long long>(Guest.rip));
 
   for (;;) {
     CTX->ExecuteThread(Thread);
     const std::uint64_t Stop = Guest.rip - StubBase;
-    if (Stop == 0) {
+    if (Stop == 0 || (Breakpoint != 0 && Guest.rip == Breakpoint)) {
       return Guest;
     }
     if (Guest.rip < StubBase || Stop < ThunkStubOffset || (Stop - ThunkStubOffset) % ThunkStubSize != 0 ||

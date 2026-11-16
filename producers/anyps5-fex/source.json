@@ -47,14 +47,17 @@
     "license": "GPL-2.0-only",
     "targets": [
       "anyps5-fex-proof",
-      "anyps5-fex-abi"
+      "anyps5-fex-abi",
+      "anyps5-fex-start"
     ],
     "sources": [
       "CMakeLists.txt",
       "FexGuest.h",
       "SysVThunk.h",
+      "Ps5Module.h",
       "AnyPS5FexProof.cpp",
       "AnyPS5FexAbi.cpp",
+      "AnyPS5FexStart.cpp",
       "GenericBridge.S"
     ],
     "guest": {

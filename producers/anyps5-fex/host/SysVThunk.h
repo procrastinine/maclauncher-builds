@@ -68,7 +68,13 @@ template<class T>
 struct SysVEightbytes;
 
 template<class T>
-constexpr bool IsMemoryStruct = std::is_class_v<T> && (sizeof(T) > 16);
+constexpr bool IsMemoryStruct = [] {
+  if constexpr (std::is_class_v<T>) {
+    return sizeof(T) > 16;
+  } else {
+    return false;
+  }
+}();
 
 class Arguments {
 public:

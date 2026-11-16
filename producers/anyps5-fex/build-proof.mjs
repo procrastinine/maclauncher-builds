@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 // Builds the AnyPS5 under FEXCore proof host for arm64 macOS from pinned sources and owned overlays.
 //
-//   node producers/anyps5-fex/build-proof.mjs --out <directory> [--check <module.elf> <function> <slot> <bss>]
+//   node producers/anyps5-fex/build-proof.mjs --out <directory> [--check <eboot.elf> <function> <slot> <bss> <main>]
 //
 // The FEX checkout (with the submodules source.json lists) and the AnyPS5 paths are projected into
 // <directory>, the overlays are applied there, AnyPS5's arm64 library objects are compiled, and the
@@ -10,7 +10,8 @@
 // The ABI proof's guest code (host/guest-abi.c) is compiled for x86-64 and its text extracted for the host to map.
 // --check runs the module function twice, with the import slot unbound (must fail) and bound to the thunk (must
 // print PASS), and the ABI proof twice, through the generic register shim (must fail) and through per-signature
-// thunks (must print PASS).
+// thunks (must print PASS), and the start host twice, without the game's sce_module PRX modules (must stop) and with
+// them (must reach main and print PASS).
 import {gitlink} from '../../lib/pins.mjs';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -33,11 +34,11 @@ function argumentsOf(argv){
  const options={};
  for(let at=0;at<argv.length;at++){
   if(argv[at]==='--out')options.out=path.resolve(argv[++at]);
-  else if(argv[at]==='--check'){options.check=argv.slice(at+1,at+5);at+=4;}
+  else if(argv[at]==='--check'){options.check=argv.slice(at+1,at+6);at+=5;}
   else throw Error('Unknown argument: '+argv[at]);
  }
  if(!options.out)throw Error('--out is required.');
- if(options.check&&options.check.length!==4)throw Error('--check takes a module and three addresses.');
+ if(options.check&&options.check.length!==5)throw Error('--check takes an eboot and four addresses.');
  return options;
 }
 
@@ -76,7 +77,7 @@ function link(out,objects,log){
  const build=path.join(out,'build');
  run('cmake',['-S',path.join(out,'fex'),'-B',build,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DBUILD_TESTING=OFF','-DBUILD_FEXCONFIG=OFF',
   '-DENABLE_JEMALLOC_GLIBC_ALLOC=OFF','-DENABLE_OFFLINE_TELEMETRY=OFF','-DENABLE_CCACHE=OFF','-DENABLE_LTO=OFF','-DTUNE_CPU=none','-DTUNE_ARCH=generic',
-  '-DANYPS5_ARM64_OBJECTS='+objects.join(';')],{stdio:['ignore','ignore','inherit']});
+  '-DANYPS5_ARM64_OBJECTS='+objects.join(';'),'-DANYPS5_SOURCE_DIR='+path.join(out,'anyps5')],{stdio:['ignore','ignore','inherit']});
  const result=spawnSync('ninja',['-C',build,...recipe.host.targets],{encoding:'utf8',maxBuffer:Infinity});
  fs.writeFileSync(log,result.stdout+result.stderr);
  return result.status===0;
@@ -126,6 +127,11 @@ if(!link(options.out,objects,firstLog)){
  const secondLog=path.join(options.out,'link-proof.log');
  if(!link(options.out,[...objects,stubs],secondLog))throw Error('The proof build failed; see '+secondLog);
 }
-const [proof,abi]=recipe.host.targets.map(target=>path.join(options.out,'build/Bin',target));
-process.stdout.write(proof+'\n'+abi+' '+guestText+' '+guestEntry+'\n');
-if(options.check){check(proof,options.check,'unbound','bound');check(abi,[guestText,guestEntry],'generic','thunks');}
+const [proof,abi,start]=recipe.host.targets.map(target=>path.join(options.out,'build/Bin',target));
+process.stdout.write(proof+'\n'+abi+' '+guestText+' '+guestEntry+'\n'+start+'\n');
+if(options.check){
+ const [eboot,functionAddress,slot,bss,main]=options.check;
+ check(proof,[eboot,functionAddress,slot,bss],'unbound','bound');
+ check(abi,[guestText,guestEntry],'generic','thunks');
+ check(start,[path.dirname(eboot),main],'eboot-only','modules');
+}
