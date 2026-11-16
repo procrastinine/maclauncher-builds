@@ -73,6 +73,9 @@ public:
 // tracking yet, so WriteProtectedForCode stays false.
 inline std::vector<FEXCore::Darwin::GuestMemoryRegion> OwnedRanges;
 
+// Set by a host that loads guest modules: writes "module+0xoffset" for a guest address. Runs in signal context.
+inline void (*DescribeGuestAddress)(std::uint64_t Address, char* Text, std::size_t Size) = nullptr;
+
 inline FEXCore::Darwin::SignalCallbacks GuestSignalCallbacks() {
   FEXCore::Darwin::SignalCallbacks Callbacks {};
   Callbacks.QueryMemory = [](FEXCore::Core::InternalThreadState*, std::uintptr_t Address, FEXCore::Darwin::GuestMemoryRegion& Region, void*) {
@@ -90,10 +93,14 @@ inline FEXCore::Darwin::SignalCallbacks GuestSignalCallbacks() {
   };
   // The host has no guest exception handlers yet: report the guest exception, then let the fault report end the run.
   Callbacks.DeliverException = [](FEXCore::Core::InternalThreadState*, const FEXCore::Darwin::GuestException& Exception, void*) {
-    char Text[192];
-    const int Length = std::snprintf(Text, sizeof(Text), "guest exception: signal %d, trap %u, error 0x%x, address 0x%llx, guest rip 0x%llx\n",
+    char Where[96] = "?";
+    if (DescribeGuestAddress) {
+      DescribeGuestAddress(Exception.GuestRIP, Where, sizeof(Where));
+    }
+    char Text[256];
+    const int Length = std::snprintf(Text, sizeof(Text), "guest exception: signal %d, trap %u, error 0x%x, address 0x%llx, guest rip 0x%llx (%s)\n",
                                      Exception.Signal, Exception.TrapNo, Exception.ErrorCode,
-                                     static_cast<unsigned long long>(Exception.Address), static_cast<unsigned long long>(Exception.GuestRIP));
+                                     static_cast<unsigned long long>(Exception.Address), static_cast<unsigned long long>(Exception.GuestRIP), Where);
     write(STDOUT_FILENO, Text, Length);
     return false;
   };

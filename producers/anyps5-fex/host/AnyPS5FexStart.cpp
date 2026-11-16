@@ -23,6 +23,15 @@
 // case the thunks do not cover yet.
 extern const std::pair<const char*, FexGuest::Thunk> GeneratedThunks[];
 extern const std::size_t GeneratedThunkCount;
+// Generated as well: exported data objects of the arm64 AnyPS5 objects (name without _nid_postfix, address), such as
+// libc's standard stream pointers, which guest code reads directly.
+extern const std::pair<const char*, void*> GeneratedData[];
+extern const std::size_t GeneratedDataCount;
+
+namespace {
+std::uint64_t HostCallsAtMain = 0;
+std::uint64_t* ThunkCallCounter = nullptr;
+}
 
 namespace Kernel {
 // The minimum of libkernel that a PS5 libc needs before main, for one guest thread. These are host functions in the
@@ -84,6 +93,13 @@ void Free(void* Pointer) {
 int PosixMemalign(void** Result, std::uint64_t Alignment, std::uint64_t Size) {
   return posix_memalign(Result, std::max<std::uint64_t>(Alignment, sizeof(void*)), Size);
 }
+// The guest process ends: report it and end the host process with the guest's status.
+[[noreturn]] void Exit(int Status) {
+  std::printf("guest _exit(%d) after %llu host calls past main\n", Status,
+              static_cast<unsigned long long>(ThunkCallCounter ? *ThunkCallCounter - HostCallsAtMain : 0));
+  std::fflush(stdout);
+  std::_Exit(Status == 0 ? 0 : 4);
+}
 } // namespace Kernel
 
 namespace {
@@ -118,6 +134,7 @@ const std::pair<const char*, FexGuest::Thunk> HostFunctions[] = {
   {"malloc", SysV::Thunk<&Kernel::Malloc>},
   {"free", SysV::Thunk<&Kernel::Free>},
   {"posix_memalign", SysV::Thunk<&Kernel::PosixMemalign>},
+  {"_exit", SysV::Thunk<&Kernel::Exit>},
 };
 
 std::vector<FexGuest::Thunk> Table;
@@ -125,6 +142,7 @@ std::vector<std::string> TableNids;
 std::unordered_map<std::string, std::size_t> HostByNid;
 std::unordered_map<std::string, std::string> NameByNid;
 std::unordered_map<std::string, std::uint64_t> Objects;
+std::unordered_map<std::string, std::pair<const char*, void*>> DataByNid;
 std::vector<Ps5::Module*> Modules;
 std::size_t FirstStub = 0;
 std::uint64_t StubCalls = 0;
@@ -135,6 +153,17 @@ struct Counts {
   std::unordered_map<std::string, int> Guest, Generated, StandIn, Data, Stub;
 } Bound;
 std::unordered_map<std::string, int> Source; // NID -> 0 generated, 1 stand-in
+
+// "module+0xoffset" for a guest address in a loaded module.
+void Describe(std::uint64_t Address, char* Text, std::size_t Size) {
+  for (auto* M : Modules) {
+    if (Address >= M->Base && Address - M->Base < M->Size) {
+      std::snprintf(Text, Size, "%s+0x%llx", M->Name.c_str(), static_cast<unsigned long long>(Address - M->Base));
+      return;
+    }
+  }
+  std::snprintf(Text, Size, "0x%llx", static_cast<unsigned long long>(Address));
+}
 
 std::uint64_t StubAddress(std::size_t Index) {
   return FexGuest::StubBase + FexGuest::ThunkStubOffset + Index * FexGuest::ThunkStubSize;
@@ -147,16 +176,10 @@ FexGuest::After Unimplemented(FexGuest::CPUState& State) {
   if (!StubLogged[Index - FirstStub]) {
     StubLogged[Index - FirstStub] = true;
     const std::uint64_t Return = Ps5::Guest<std::uint64_t>(State.gregs[FexGuest::X86::REG_RSP]);
-    const char* Caller = "?";
-    std::uint64_t Offset = Return;
-    for (auto* M : Modules) {
-      if (Return >= M->Base && Return - M->Base < 0x10000000) {
-        Caller = M->Name.c_str();
-        Offset = Return - M->Base;
-      }
-    }
-    std::printf("import %s has no host function; called from %s+0x%llx, returning SCE_KERNEL_ERROR_ENOSYS\n", TableNids[Index].c_str(), Caller,
-                static_cast<unsigned long long>(Offset));
+    char Caller[96];
+    Describe(Return, Caller, sizeof(Caller));
+    std::printf("import %s has no host function; called from %s (guest rip 0x%llx), returning SCE_KERNEL_ERROR_ENOSYS\n", TableNids[Index].c_str(),
+                Caller, static_cast<unsigned long long>(Return));
   }
   State.gregs[FexGuest::X86::REG_RAX] = 0xFFFF'FFFF'8002'004EULL;
   return FexGuest::After::Return;
@@ -172,6 +195,13 @@ std::uint64_t Resolve(const Ps5::Symbol& S) {
   }
   if (S.IsObject()) {
     Bound.Data[Nid]++;
+    // An object the arm64 AnyPS5 libraries own, such as libc's __stdoutp: the guest reads the library's own object.
+    if (auto Owned = DataByNid.find(Nid); Owned != DataByNid.end()) {
+      if (Objects.try_emplace(Nid, reinterpret_cast<std::uint64_t>(Owned->second.second)).second) {
+        std::printf("data import %s bound to the arm64 AnyPS5 object %s\n", Owned->second.first, Owned->second.first);
+      }
+      return reinterpret_cast<std::uint64_t>(Owned->second.second);
+    }
     // A data import from a system library: zeroed storage, with the values a libc reads before main.
     auto [Object, Inserted] = Objects.try_emplace(Nid, 0);
     if (Inserted) {
@@ -223,10 +253,12 @@ std::vector<std::string> SceModules(const std::string& Directory) {
 } // namespace
 
 int main(int argc, char** argv) {
-  if (argc != 4 || (std::string(argv[3]) != "modules" && std::string(argv[3]) != "eboot-only")) {
-    std::fprintf(stderr, "usage: %s <game directory> <main vaddr> modules|eboot-only\n", argv[0]);
+  const std::string Mode = argc == 4 ? argv[3] : "";
+  if (Mode != "modules" && Mode != "eboot-only" && Mode != "past-main") {
+    std::fprintf(stderr, "usage: %s <game directory> <main vaddr> modules|eboot-only|past-main\n", argv[0]);
     return 2;
   }
+  FexGuest::DescribeGuestAddress = Describe;
   FexGuest::InstallFaultReport();
   FexGuest::InstallGuestCpuHost();
   FexGuest::InitConfig();
@@ -259,6 +291,9 @@ int main(int argc, char** argv) {
     }
   }
   FirstStub = Table.size();
+  for (std::size_t i = 0; i < GeneratedDataCount; ++i) {
+    DataByNid.try_emplace(Nid::ComputeNid(GeneratedData[i].first, ""), GeneratedData[i]);
+  }
   std::printf("%zu generated thunks (%zu more exports have prototypes the thunks do not cover yet), %zu stand-in host functions\n",
               GeneratedThunkCount - Unsupported, Unsupported, std::size(HostFunctions));
   for (const char* Name : {"__stack_chk_guard", "__progname"}) {
@@ -268,7 +303,7 @@ int main(int argc, char** argv) {
 
   auto Eboot = Ps5::Load(Directory + "/eboot.elf", "eboot.elf");
   std::vector<Ps5::Module> Prx;
-  if (std::string(argv[3]) == "modules") {
+  if (Mode != "eboot-only") {
     for (const auto& Name : SceModules(Directory)) {
       Prx.push_back(Ps5::Load(Directory + "/sce_module/" + Name, Name));
     }
@@ -290,8 +325,10 @@ int main(int argc, char** argv) {
               Bound.Guest.size(), Bound.Generated.size(), Bound.StandIn.size(), Bound.Data.size(), Bound.Stub.size());
 
   const std::uint64_t Main = Eboot.Base + MainOffset;
+  const std::uint8_t MainByte = *reinterpret_cast<std::uint8_t*>(Main);
   *reinterpret_cast<std::uint8_t*>(Main) = 0xF4;
   std::uint64_t ThunkCalls = 0;
+  ThunkCallCounter = &ThunkCalls;
   FexGuest::CPUState State {};
   State.fs_cached = Kernel::ThreadPointer;
   for (auto& M : Prx) {
@@ -326,6 +363,25 @@ int main(int argc, char** argv) {
               Argc ? reinterpret_cast<const char*>(Argv[0]) : "", static_cast<unsigned long long>(ThunkCalls),
               static_cast<unsigned long long>(StubCalls));
   const bool Pass = StubCalls == 0 && Argc == 1 && std::strcmp(reinterpret_cast<const char*>(Argv[0]), "eboot.bin") == 0;
-  std::printf("%s\n", Pass ? "PASS" : "FAIL");
-  return Pass ? 0 : 1;
+  if (Mode != "past-main" || !Pass) {
+    std::printf("%s\n", Pass ? "PASS" : "FAIL");
+    return Pass ? 0 : 1;
+  }
+
+  // Past main: the original first byte goes back, FEX drops the block it compiled with the HLT, and main runs with the
+  // arguments _start passed. Each unbound import logs its NID once; the run ends at the guest's _exit, a fault or the
+  // caller's time limit.
+  *reinterpret_cast<std::uint8_t*>(Main) = MainByte;
+  FexGuest::CTX->InvalidateCodeBuffersCodeRange(Main, 1);
+  HostCallsAtMain = ThunkCalls;
+  FexGuest::CPUState Next {};
+  Next.rip = Main;
+  std::memcpy(Next.gregs, Final.gregs, sizeof(Next.gregs));
+  Next.fs_cached = Final.fs_cached;
+  Next.gs_cached = Final.gs_cached;
+  std::printf("running main\n");
+  FexGuest::Run(Next, Table, ThunkCalls);
+  std::printf("main and _start returned to the host after %llu host calls past main, %llu of them to stubs\n",
+              static_cast<unsigned long long>(ThunkCalls - HostCallsAtMain), static_cast<unsigned long long>(StubCalls));
+  return 0;
 }

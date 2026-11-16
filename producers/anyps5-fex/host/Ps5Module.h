@@ -43,6 +43,7 @@ struct Module {
   std::uint64_t Base = 0;
   std::uint64_t Entry = 0;
   std::uint64_t Init = 0;
+  std::uint64_t Size = 0; // the mapped image, from Base
   std::uint64_t ProcParam = 0;
   std::uint64_t TlsImage = 0, TlsFileSize = 0, TlsMemSize = 0, TlsAlign = 1;
   std::uint64_t TlsOffset = 0; // the block is at TP - TlsOffset
@@ -106,7 +107,8 @@ inline Module Load(const std::string& Path, const std::string& Name) {
     }
   }
   const std::uint64_t PageSize = getpagesize();
-  M.Base = reinterpret_cast<std::uint64_t>(FexGuest::MapGuest((End + PageSize - 1) & ~(PageSize - 1)));
+  M.Size = (End + PageSize - 1) & ~(PageSize - 1);
+  M.Base = reinterpret_cast<std::uint64_t>(FexGuest::MapGuest(M.Size));
   for (unsigned i = 0; i < PhNum; ++i) {
     const auto O = PhOff + i * PhEntSize;
     const auto Type = Read<std::uint32_t>(File, O);

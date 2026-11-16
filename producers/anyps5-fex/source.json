@@ -26,12 +26,14 @@
     ],
     "objects": [
       "core/libs/prx/libkernel/Time/Time.cpp",
-      "core/libs/prx/libc/src/GuestCpuArm64.cpp"
+      "core/libs/prx/libc/src/GuestCpuArm64.cpp",
+      "core/libs/prx/libc/src/StandardStreamObjects.cpp"
     ],
     "arm64Libraries": {
       "script": "../anyps5/overlays/arm64-libs/apply.mjs",
       "exports": [
-        "copyArm64GuestCpuSources"
+        "copyArm64GuestCpuSources",
+        "copyArm64StandardStreamObjects"
       ]
     }
   },

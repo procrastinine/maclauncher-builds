@@ -5,7 +5,8 @@
 # generated C++ includes those headers, so each thunk is instantiated from the export's own prototype (SysVThunk.h). An export whose name ends in
 # _nid_postfix is listed under the name without it, which is the name its NID is computed from.
 # Variadic exports are left out (they need the va_list path); prototypes the thunks do not cover yet compile to
-# nullptr through SysV::ThunkFor.
+# nullptr through SysV::ThunkFor. Exported C data objects named X_nid_postfix (libc's standard stream objects, for
+# example) are listed in GeneratedData under X, so a guest data import reads the library's own object.
 #
 # Usage: generate-thunks.py <out.cpp> <include dir> <source.cpp>... -- <arm64 object>...
 import re
@@ -20,13 +21,16 @@ for source in sources:
         if header not in headers:
             headers.append(header)
 
-defined = set()
+defined, data = set(), []
 for obj in objects:
     listing = subprocess.run(['nm', '-gU', obj], check=True, capture_output=True, text=True).stdout
     for line in listing.splitlines():
         parts = line.split()
-        if len(parts) == 3 and parts[1] in 'TtDdSs':
+        if len(parts) == 3 and parts[1] in 'TtDdSsBb':
             defined.add(parts[2].removeprefix('_'))
+        # A C (unmangled) data symbol: Mach-O adds one leading underscore.
+        if len(parts) == 3 and parts[1] in 'DdSsBb' and parts[2].endswith('_nid_postfix') and not parts[2].startswith('__Z'):
+            data.append(parts[2])
 
 declaration = re.compile(r'\bAPS5_VABI\s+(\w+)\s*\(([^;{]*)\)\s*(?:noexcept\s*)?;', re.S)
 entries, variadic = [], []
@@ -54,4 +58,12 @@ with open(out, 'w', encoding='utf-8') as f:
     f.write(f'extern const std::size_t GeneratedThunkCount = {len(names)};\n')
     if variadic:
         f.write('// Variadic exports left out: ' + ', '.join(sorted(set(variadic))) + '\n')
-print(f'{len(names)} generated thunks, {len(set(variadic))} variadic exports left out')
+    symbols = sorted(set(data))
+    for i, symbol in enumerate(symbols):
+        f.write(f'extern "C" char GeneratedData{i} __asm__("{symbol}");\n')
+    f.write('extern const std::pair<const char*, void*> GeneratedData[] = {\n')
+    for i, symbol in enumerate(symbols):
+        f.write(f'  {{"{symbol[1:].removesuffix("_nid_postfix")}", &GeneratedData{i}}},\n')
+    f.write('  {nullptr, nullptr},\n};\n')
+    f.write(f'extern const std::size_t GeneratedDataCount = {len(symbols)};\n')
+print(f'{len(names)} generated thunks, {len(set(variadic))} variadic exports left out, {len(set(data))} data objects')
