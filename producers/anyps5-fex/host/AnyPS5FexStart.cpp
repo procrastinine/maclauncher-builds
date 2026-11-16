@@ -396,7 +396,7 @@ int main(int argc, char** argv) {
   // arguments _start passed. Each unbound import logs its NID once; the run ends at the guest's _exit, a fault or the
   // caller's time limit.
   *reinterpret_cast<std::uint8_t*>(Main) = MainByte;
-  FexGuest::CTX->InvalidateCodeBuffersCodeRange(Main, 1);
+  FexGuest::InvalidateGuestCode(FexGuest::Thread, Main, 1);
   HostCallsAtMain = ThunkCalls;
   FexGuest::CPUState Next {};
   Next.rip = Main;

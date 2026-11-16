@@ -13,6 +13,7 @@
 #include <FEXCore/Debug/InternalThreadState.h>
 #include <FEXCore/HLE/SyscallHandler.h>
 #include <FEXCore/Utils/LogManager.h>
+#include <FEXCore/Utils/SignalScopeGuards.h>
 
 #include <cstdint>
 #include <cstdio>
@@ -76,6 +77,16 @@ inline std::vector<FEXCore::Darwin::GuestMemoryRegion> OwnedRanges;
 // Set by a host that loads guest modules: writes "module+0xoffset" for a guest address. Runs in signal context.
 inline void (*DescribeGuestAddress)(std::uint64_t Address, char* Text, std::size_t Size) = nullptr;
 
+// Drops FEX's translated code for a guest range: the shared code buffers and the host's one guest thread's cache.
+// FEX requires its code invalidation mutex held uniquely around both calls. Its check of that, try_lock(), is still
+// evaluated with assertions off, so a call without the lock takes the mutex and keeps it, and the thread's next
+// compile then waits for it forever (test-sequence 0481: __ulock_wait2 with the guest at main).
+inline void InvalidateGuestCode(FEXCore::Core::InternalThreadState* Calling, std::uint64_t Start, std::uint64_t Length) {
+  auto Lock = FEXCore::GuardSignalDeferringSection(Calling->CTX->GetCodeInvalidationMutex(), Calling);
+  Calling->CTX->InvalidateCodeBuffersCodeRange(Start, Length);
+  Calling->CTX->InvalidateThreadCachedCodeRange(Calling, Start, Length);
+}
+
 inline FEXCore::Darwin::SignalCallbacks GuestSignalCallbacks() {
   FEXCore::Darwin::SignalCallbacks Callbacks {};
   Callbacks.QueryMemory = [](FEXCore::Core::InternalThreadState*, std::uintptr_t Address, FEXCore::Darwin::GuestMemoryRegion& Region, void*) {
@@ -88,7 +99,7 @@ inline FEXCore::Darwin::SignalCallbacks GuestSignalCallbacks() {
     return false;
   };
   Callbacks.InvalidateCode = [](FEXCore::Core::InternalThreadState* Thread, std::uintptr_t Start, std::size_t Length, void*) {
-    Thread->CTX->InvalidateCodeBuffersCodeRange(Start, Length);
+    InvalidateGuestCode(Thread, Start, Length);
     return true;
   };
   // The host has no guest exception handlers yet: report the guest exception, then let the fault report end the run.
