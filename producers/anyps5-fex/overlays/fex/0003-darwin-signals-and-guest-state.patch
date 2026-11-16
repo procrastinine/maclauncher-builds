@@ -1,6 +1,6 @@
 diff --git a/FEXCore/include/FEXCore/Darwin/GuestState.h b/FEXCore/include/FEXCore/Darwin/GuestState.h
 new file mode 100644
-index 00000000..acc66158
+index 0000000..acc6615
 --- /dev/null
 +++ b/FEXCore/include/FEXCore/Darwin/GuestState.h
 @@ -0,0 +1,146 @@
@@ -152,10 +152,10 @@ index 00000000..acc66158
 +} // namespace FEXCore::Darwin
 diff --git a/FEXCore/include/FEXCore/Darwin/SignalDelegator.h b/FEXCore/include/FEXCore/Darwin/SignalDelegator.h
 new file mode 100644
-index 00000000..2c6502a5
+index 0000000..f5bdff2
 --- /dev/null
 +++ b/FEXCore/include/FEXCore/Darwin/SignalDelegator.h
-@@ -0,0 +1,274 @@
+@@ -0,0 +1,297 @@
 +// SPDX-License-Identifier: MIT
 +#pragma once
 +
@@ -166,6 +166,7 @@ index 00000000..2c6502a5
 +#include <FEXCore/Utils/LongJump.h>
 +
 +#include <array>
++#include <atomic>
 +#include <cerrno>
 +#include <csignal>
 +#include <cstdint>
@@ -220,6 +221,7 @@ index 00000000..2c6502a5
 +  bool Install() {
 +    if (Installed) { return Active == this; }
 +    if (Active) { return false; }
++    for (auto& Reset : PriorReset) { Reset.store(false, std::memory_order_relaxed); }
 +    Active = this;
 +    struct sigaction Action {};
 +    Action.sa_sigaction = Dispatch;
@@ -228,13 +230,15 @@ index 00000000..2c6502a5
 +    for (const auto Signal : Signals) { sigaddset(&Action.sa_mask, Signal); }
 +    size_t Count {};
 +    for (; Count != Signals.size(); ++Count) {
-+      if (sigaction(Signals[Count], &Action, &Previous[Count]) != 0) {
-+        const int Error = errno;
-+        while (Count) { --Count; sigaction(Signals[Count], &Previous[Count], nullptr); }
-+        Active = nullptr;
-+        errno = Error;
-+        return false;
++      if (sigaction(Signals[Count], nullptr, &Previous[Count]) == 0) {
++        Action.sa_flags = SA_SIGINFO | SA_ONSTACK | (Previous[Count].sa_flags & SA_RESTART);
++        if (sigaction(Signals[Count], &Action, nullptr) == 0) { continue; }
 +      }
++      const int Error = errno;
++      while (Count) { --Count; sigaction(Signals[Count], &Previous[Count], nullptr); }
++      Active = nullptr;
++      errno = Error;
++      return false;
 +    }
 +    Installed = true;
 +    return true;
@@ -246,7 +250,9 @@ index 00000000..2c6502a5
 +      // A later owner retains its handler.
 +      if (sigaction(Signals[Index], nullptr, &Current) == 0 &&
 +          (Current.sa_flags & SA_SIGINFO) && Current.sa_sigaction == Dispatch) {
-+        sigaction(Signals[Index], &Previous[Index], nullptr);
++        auto Action = Previous[Index];
++        if (PriorReset[Index].load(std::memory_order_relaxed)) { Action = {}; Action.sa_handler = SIG_DFL; }
++        sigaction(Signals[Index], &Action, nullptr);
 +      }
 +    }
 +    Installed = false;
@@ -338,6 +344,7 @@ index 00000000..2c6502a5
 +  inline static SignalDelegator* Active {};
 +  SignalCallbacks Callbacks;
 +  std::array<struct sigaction, Signals.size()> Previous {};
++  std::array<std::atomic_bool, Signals.size()> PriorReset {};
 +  bool Installed {};
 +
 +  static size_t PageSize() { return static_cast<size_t>(getpagesize()); }
@@ -379,6 +386,7 @@ index 00000000..2c6502a5
 +    Machine.__ss.__x[28] = reinterpret_cast<uintptr_t>(Thread->CurrentFrame);
 +    Machine.__ss.__x[25] = Thread->CurrentFrame->State.callret_sp;
 +    Machine.__ss.__x[1] = SingleInstruction ? 1 : 0;
++    Thread->CurrentFrame->InSyscallInfo = 0;
 +    __darwin_arm_thread_state64_set_pc_fptr(Machine.__ss, reinterpret_cast<void*>(Config.AbsoluteLoopTopAddressFillSRA));
 +  }
 +  bool HandleCodeWrite(Core::InternalThreadState* Thread, uintptr_t Address, ucontext_t* Context, bool InJIT) {
@@ -415,6 +423,12 @@ index 00000000..2c6502a5
 +    while (Index != Signals.size() && Signals[Index] != Signal) { ++Index; }
 +    if (Index == Signals.size()) { return; }
 +    auto Action = Previous[Index];
++    // Darwin keeps SIGILL/SIGTRAP dispositions even when SA_RESETHAND is requested.
++    if (Signal != SIGILL && Signal != SIGTRAP && (Action.sa_flags & SA_RESETHAND) &&
++        PriorReset[Index].exchange(true, std::memory_order_relaxed)) {
++      Action = {};
++      Action.sa_handler = SIG_DFL;
++    }
 +    if (Action.sa_handler == SIG_IGN) { return; }
 +    if (Action.sa_handler == SIG_DFL) {
 +      sigaction(Signal, &Action, nullptr);
@@ -425,8 +439,17 @@ index 00000000..2c6502a5
 +      raise(Signal);
 +      _exit(128 + Signal);
 +    }
++    auto* UC = static_cast<ucontext_t*>(Context);
++    sigset_t Mask = UC->uc_sigmask;
++    for (int Item = 1; Item < NSIG; ++Item) {
++      if (sigismember(&Action.sa_mask, Item) == 1) { sigaddset(&Mask, Item); }
++    }
++    if (!(Action.sa_flags & SA_NODEFER)) { sigaddset(&Mask, Signal); }
++    sigset_t SavedMask;
++    pthread_sigmask(SIG_SETMASK, &Mask, &SavedMask);
 +    if (Action.sa_flags & SA_SIGINFO) { Action.sa_sigaction(Signal, Info, Context); }
 +    else { Action.sa_handler(Signal); }
++    pthread_sigmask(SIG_SETMASK, &SavedMask, nullptr);
 +  }
 +};
 +} // namespace FEXCore::Darwin
