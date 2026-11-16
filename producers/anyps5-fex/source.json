@@ -80,7 +80,16 @@
       "core/libs/prx/libc/src/StandardStreams.cpp",
       "core/libs/prx/libc/src/Time.cpp",
       "core/libs/prx/libc/src/Multibyte.cpp",
-      "core/libs/prx/libc/src/BoundsChecking.cpp"
+      "core/libs/prx/libc/src/BoundsChecking.cpp",
+      "core/libs/prx/libc/src/Filesystem.cpp",
+      "core/libs/prx/libkernel/DirectMemory/PosixMemory.cpp",
+      "core/libs/prx/libkernel/DirectMemory/Export.cpp",
+      "core/libs/prx/libkernel/DirectMemory/DirectMemory.cpp",
+      "core/libs/prx/libkernel_sys/Export.cpp",
+      "core/libs/prx/libSceSysmodule/Export.cpp",
+      "core/libs/prx/libc/src/GuestAllocations.cpp",
+      "core/libs/prx/libkernel/DirectMemory/MemoryPool.cpp",
+      "core/libs/prx/libkernel/AppMetadata/src/ParamJsonParser.cpp"
     ],
     "objectLibraries": [
       "core/libs/prx/libc/gdtoa/Build.cmake"
