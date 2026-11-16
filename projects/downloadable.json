@@ -4312,7 +4312,8 @@
         "producers/dependencies/vorbis.json",
         "producers/dependencies/gettext.json",
         "producers/rlvm/vorbis-callback-const.patch",
-        "producers/rlvm/boost-parent-path.patch"
+        "producers/rlvm/boost-parent-path.patch",
+        "producers/rlvm/boost-directory-header.patch"
       ]
     },
     "upstreams": [
