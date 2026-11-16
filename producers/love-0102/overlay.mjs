@@ -8,6 +8,7 @@ export function applyBuildOverlay({love,megasource,luaLibrary,luaInclude}){
  replace(cmake,'\tif(APPLE)\n\t\tmessage(FATAL_ERROR "JIT not supported yet on Mac. Please use -DLOVE_JIT=0.")\n\tendif()','\t# LuaJIT 2.1 supplies Darwin arm64 and x86_64 with the Lua 5.1 ABI.');
  const mega=path.join(megasource,'CMakeLists.txt');
  applyZlibDarwinOverlay({megasource});
+ applyFreetypeDarwinOverlay({megasource});
  replace(path.join(megasource,'libs/physfs-2.0.3/CMakeLists.txt'),'SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} " -framework Carbon -framework IOKit")','SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} "-framework Carbon" "-framework IOKit")');
  replace(path.join(megasource,'libs/libtheora-1.1.1/CMakeLists.txt'),'\tadd_library(theora SHARED ${THEORA_SRC} lib/theora.def)','\tset(THEORA_SHARED_PLATFORM_SOURCES)\n\tif(WIN32)\n\t\tlist(APPEND THEORA_SHARED_PLATFORM_SOURCES lib/theora.def)\n\tendif()\n\tadd_library(theora SHARED ${THEORA_SRC} ${THEORA_SHARED_PLATFORM_SOURCES})');
 
@@ -47,4 +48,9 @@ endif()
 /** Darwin provides POSIX fdopen; the classic Mac fallback must not replace it. */
 export function applyZlibDarwinOverlay({megasource}){
  replace(path.join(megasource,'libs/zlib-1.2.8/zutil.h'),'#if defined(MACOS) || defined(TARGET_OS_MAC)','#if (defined(MACOS) || defined(TARGET_OS_MAC)) && !(defined(__APPLE__) && defined(__MACH__))');
+}
+
+/** Keep the bundled gzip unsigned-byte typedef on Darwin, where TARGET_OS_MAC is also set. */
+export function applyFreetypeDarwinOverlay({megasource}){
+ replace(path.join(megasource,'libs/freetype-2.6.5/src/gzip/zconf.h'),'#if !defined(MACOS) && !defined(TARGET_OS_MAC)','#if (!defined(MACOS) && !defined(TARGET_OS_MAC)) || (defined(__APPLE__) && defined(__MACH__))');
 }
