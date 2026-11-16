@@ -128,6 +128,22 @@ const objects=recipe.anyps5.objects.map(source=>{
   '-I',path.join(options.out,'anyps5/core/libs/nid/include'),path.join(options.out,'anyps5',source),'-o',object]);
  return object;
 });
+// AnyPS5 builds each PRX as its own library, and two libraries can export the same name (libc's and libkernel's exit,
+// say). In this one image, a strong symbol that an earlier object already defines becomes local to the later object,
+// whose own calls keep using its definition; imports bind to the first.
+{
+ const defined=new Set();
+ for(const object of objects){
+  const symbols=execFileSync('nm',['-gUm',object],{encoding:'utf8'}).split('\n').filter(line=>line&&!/\bweak\b/.test(line)).map(line=>line.trim().split(' ').pop());
+  const repeated=symbols.filter(symbol=>defined.has(symbol));
+  for(const symbol of symbols)defined.add(symbol);
+  if(!repeated.length)continue;
+  const local=object.replace(/\.o$/,'.local.o');
+  run('ld',['-r','-arch','arm64',object,'-o',local,...repeated.flatMap(symbol=>['-unexported_symbol',symbol])]);
+  fs.renameSync(local,object);
+  process.stdout.write(path.relative(options.out,object)+': '+repeated.length+' symbols an earlier object defines made local\n');
+ }
+}
 // One thunk translation unit per source, plus the part and data tables (generate-thunks.py prints the files).
 const generatedThunks=path.join(options.out,'generated-thunks.cpp');
 const generatedFiles=execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,recipe.host.generator.script),generatedThunks,
@@ -147,8 +163,14 @@ process.stdout.write(proof+'\n'+abi+' '+guestText+' '+guestOffsets.join(' ')+'\n
 // its usage message (exit 2) unless an initializer reaches one of the unreached-export stubs above (SIGTRAP).
 {
  const usage=spawnSync(start,[],{encoding:'utf8',timeout:20000});
- if(usage.status!==2)throw Error(path.basename(start)+' did not reach main (status '+usage.status+', signal '+usage.signal+
-  '): a static initializer called a symbol the proof does not link; see the crash report for the initializer.');
+ if(usage.status!==2){
+  // Name the stubs that the initializers reach directly.
+  const initializers=execFileSync('nm',['-j',start],{encoding:'utf8'}).split('\n').filter(symbol=>symbol.includes('GLOBAL__sub_I'));
+  const reach=spawnSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,'reachable-stubs.py'),start,
+   path.join(options.out,'anyps5-unreached-exports.s'),...initializers],{encoding:'utf8',maxBuffer:Infinity});
+  throw Error(path.basename(start)+' did not reach main (status '+usage.status+', signal '+usage.signal+
+   '): a static initializer called a symbol the proof does not link.\n'+reach.stdout+reach.stderr);
+ }
 }
 // Every link stub that an AnyPS5 export reaches through direct calls, with one call path each, in reachable-stubs.txt.
 if(fs.existsSync(path.join(options.out,'anyps5-unreached-exports.s'))){

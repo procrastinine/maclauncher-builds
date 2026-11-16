@@ -64,6 +64,8 @@
       "core/libs/prx/libkernel/Socket/src/Udp.cpp",
       "core/libs/prx/libkernel/Socket/src/SocketOptions.cpp",
       "core/libs/prx/libc/src/PreciseWait.cpp",
+      "core/libs/prx/libkernel/System/src/Process.cpp",
+      "core/libs/prx/libc/src/Syslog.cpp",
       "core/libs/prx/libSceSystemService/Export.cpp",
       "core/libs/prx/libSceSystemService/LoadExec.cpp",
       "core/libs/prx/libSceSystemService/HostUrlLauncherPosix.cpp",
