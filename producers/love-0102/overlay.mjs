@@ -26,6 +26,8 @@ if(APPLE)
   endif()
   set_target_properties(\${target} PROPERTIES FRAMEWORK TRUE FRAMEWORK_VERSION A OUTPUT_NAME "\${name}" MACOSX_FRAMEWORK_IDENTIFIER "org.love2d.\${name}" BUILD_WITH_INSTALL_NAME_DIR TRUE INSTALL_NAME_DIR "@rpath")
  endforeach()
+ # Framework linkage is added from the parent dependency project.
+ cmake_policy(SET CMP0079 NEW)
  target_link_libraries(liblove "-framework Cocoa" "-framework Foundation" "-framework OpenGL")
  set_target_properties(love PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "@executable_path/../Frameworks")
  file(GENERATE OUTPUT "\${CMAKE_BINARY_DIR}/love-outputs.txt" CONTENT "$<TARGET_FILE:love>\\n$<TARGET_FILE:liblove>\\n$<TARGET_FILE:ogg>\\n$<TARGET_FILE:vorbis>\\n$<TARGET_FILE:vorbisfile>\\n$<TARGET_FILE:theora>\\n$<TARGET_FILE:modplug>\\n$<TARGET_FILE:physfs>\\n$<TARGET_FILE:freetype>\\n$<TARGET_FILE:SDL2>\\n$<TARGET_FILE:openal>\\n$<TARGET_FILE:mpg123>\\n")
