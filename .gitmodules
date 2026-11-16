@@ -323,3 +323,6 @@
 [submodule "producers/package-support/src/external/minhook"]
 	path = producers/package-support/src/external/minhook
 	url = https://github.com/TsudaKageyu/minhook.git
+[submodule "rlvm"]
+	path = producers/rlvm/source
+	url = https://github.com/eglaysher/rlvm.git

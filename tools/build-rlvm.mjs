@@ -1,0 +1,90 @@
+// SPDX-License-Identifier: MIT
+import './producer-environment.mjs';
+import fs from 'node:fs';import path from 'node:path';import {createRequire} from 'node:module';import {execFileSync} from 'node:child_process';
+import {stageSource,run,recipeMain,findBuildTool} from './build-source.mjs';
+import {buildInput} from './build-input.mjs';import {upstreamRevision} from '../lib/projects.mjs';
+import {helperPackage,sha} from './helper-package.mjs';import {addLicenses} from '../lib/licenses.mjs';
+const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..');
+const Fonts=require('../producers/package-support/src/modules/shared/runtime/portable-sdl2-fonts.js');
+const Tools=require('../producers/package-support/scripts/native-binary-tools.cjs');
+const MachO=require('../lib/macho-load-commands.cjs');
+const here=path.join(root,'producers/rlvm');
+const read=name=>JSON.parse(fs.readFileSync(path.join(root,'producers/dependencies',name+'.json')));
+export function dependencyInputs(){return Object.fromEntries(['sdl2','sdl12Compat','boost','libpng','freetype','ogg','vorbis','gettext'].map(id=>{const p=read(id);return [id,{...p,url:p.url||p.repository+'/archive/'+p.revision+'.tar.gz'}];}));}
+function sourceList(source,file,name){const text=fs.readFileSync(path.join(source,file),'utf8'),body=text.match(new RegExp('\\b'+name+'\\s*=\\s*\\[([\\s\\S]*?)\\]'))?.[1];if(!body)throw Error('Missing upstream production source list: '+file+':'+name);return [...body.matchAll(/"([^"\n]+\.(?:cc|cpp|c|mm))"/g)].map(m=>path.join(path.dirname(file),m[1]));}
+export function projectSources(source,build){
+ const engine=[...['librlvm_files','libsystemsdl_files','guichan_platform'].flatMap(name=>sourceList(source,'SConscript',name)),...sourceList(source,'SConscript.cocoa','cocoarlvm_files')];
+ const vendor=[['SDL_image','libsdl_image_files'],['SDL_mixer','libsdl_mixer_files'],['SDL_ttf','libsdl_ttf_files'],['GLEW','libglew_files'],['guichan','libguichan_files']].flatMap(([dir,name])=>sourceList(source,'vendor/'+dir+'/SConscript',name));
+ for(const name of [...engine,...vendor])if(!fs.existsSync(path.join(source,name)))throw Error('Missing upstream source '+name);
+ const quote=value=>'"'+value.replaceAll('\\','/').replaceAll('"','\\"')+'"';
+ fs.mkdirSync(build,{recursive:true});fs.writeFileSync(path.join(build,'upstream-sources.cmake'),[['engine_sources',engine],['vendor_sources',vendor]].map(([name,files])=>'set('+name+'\n'+files.map(file=>quote(path.join(source,file))).join('\n')+'\n)\n').join(''));
+ return {engine,vendor};
+}
+async function dependencySources(work){const result={};for(const [id,pin]of Object.entries(dependencyInputs())){const archive=await buildInput(pin),source=path.join(work,'sources',id);if(!fs.existsSync(source)){fs.mkdirSync(source,{recursive:true});run('/usr/bin/tar',['-xf',archive,'--strip-components','1','-C',source]);}result[id]=source;}return result;}
+async function buildSlice({architecture,work,sources,engineSource}){
+ const cpu=architecture==='x64'?'x86_64':'arm64',slice=path.join(work,architecture),prefix=path.join(slice,'prefix'),sdk=execFileSync('/usr/bin/xcrun',['--show-sdk-path'],{encoding:'utf8'}).trim();
+ fs.mkdirSync(prefix,{recursive:true});const tools={cmake:findBuildTool('cmake'),ninja:findBuildTool('ninja')},pathMappings=[{from:work,to:'RLVM_BUILD'}],env=Fonts.buildEnvironment(prefix,sdk);
+ const build=async(id,options=[])=>Fonts.buildProject({sourceRoot:sources[id],outputRoot:path.join(slice,id),prefix,sdk,tools,architecture,pathMappings,options});
+ Fonts.sdkCompressionMetadata(sdk,prefix);
+ await build('sdl2',['-DSDL_SHARED=ON','-DSDL_STATIC=OFF','-DSDL_TEST=OFF','-DSDL_TESTS=OFF']);
+ await build('libpng',['-DPNG_SHARED=ON','-DPNG_STATIC=OFF','-DPNG_TESTS=OFF','-DPNG_TOOLS=OFF','-DPNG_EXECUTABLES=OFF']);
+ await build('freetype',['-DFT_DISABLE_HARFBUZZ=ON','-DFT_DISABLE_BROTLI=ON','-DFT_DISABLE_PNG=ON','-DFT_DISABLE_BZIP2=ON']);
+ await build('ogg',['-DBUILD_SHARED_LIBS=ON','-DBUILD_TESTING=OFF']);
+ await build('vorbis',['-DBUILD_SHARED_LIBS=ON','-DBUILD_TESTING=OFF']);
+ await build('sdl12Compat',['-DSDL12DEVEL=ON','-DSDL12TESTS=OFF','-DSDL12COMPAT_STATIC=OFF']);
+ // Boost is built from the one shared source declaration; no host package is linked.
+ await build('boost',['-DBUILD_SHARED_LIBS=OFF','-DBOOST_INCLUDE_LIBRARIES=filesystem;iostreams;program_options;serialization;thread;date_time','-DBUILD_TESTING=OFF']);
+ const intlBuild=path.join(slice,'intl');fs.mkdirSync(intlBuild,{recursive:true});
+ const flags='-arch '+cpu+' -mmacosx-version-min=13.0 -ffile-prefix-map='+work+'=RLVM_BUILD';
+ run(path.join(sources.gettext,'gettext-runtime/configure'),['--prefix='+prefix,'--host='+(cpu==='arm64'?'aarch64':'x86_64')+'-apple-darwin','--disable-shared','--enable-static','--disable-java','--disable-csharp','--disable-libasprintf'],{cwd:intlBuild,env:{...env,CC:process.env.CC||'/usr/bin/clang',CFLAGS:flags,LDFLAGS:flags}});
+ run('/usr/bin/make',['-C',path.join(intlBuild,'intl'),'-j2','install'],{env});
+ const buildRoot=path.join(slice,'rlvm');const lists=projectSources(engineSource,buildRoot);
+ run(tools.cmake,['-S',here,'-B',buildRoot,...Fonts.cmakeOptions({prefix,sdk,ninja:tools.ninja,architecture,pathMappings,options:[]}),'-DRLVM_SOURCE='+engineSource],{env});
+ run(tools.cmake,['--build',buildRoot,'--parallel','2'],{env});
+ return {architecture,cpu,prefix,binary:path.join(buildRoot,'rlvm'),lists};
+}
+export async function compile({arch='universal',work}){
+ if(arch!=='universal')throw Error('RLVM engine producer builds the universal engine.');
+ fs.mkdirSync(work,{recursive:true});const source=path.join(work,'rlvm-source'),sourceRoot=path.join(here,'source'),revision=upstreamRevision('rlvm','rlvm');
+ const staged=await stageSource(sourceRoot,revision,source);const sources=await dependencySources(work),slices=[];
+ for(const architecture of ['arm64','x64'])slices.push(await buildSlice({architecture,work,sources,engineSource:source}));
+ return {slices,source,sourceRoot,revision,staged,sources};
+}
+function closure(slice){
+ const result=new Map(),pending=[slice.binary],seen=new Set();
+ for(let i=0;i<pending.length;i++){const binary=fs.realpathSync(pending[i]);if(seen.has(binary))continue;seen.add(binary);
+  const commands=Tools.loadCommands(binary,slice.cpu),ids=Tools.libraryIds(binary,slice.cpu);
+  for(const link of Tools.links(binary,slice.cpu)){if(link.startsWith('/usr/lib/')||link.startsWith('/System/Library/')||ids.includes(link))continue;
+   const source=Tools.resolveLink(link,binary,slice.binary,commands.rpaths,slice.cpu);if(!source)throw Error('Unresolved runtime dependency '+link);
+   const name=path.basename(source);if(result.has(name)&&result.get(name)!==source)throw Error('Dependency basename collision '+name);result.set(name,source);pending.push(source);
+  }
+ }
+ // SDL1.2-compat loads SDL2 dynamically; include that declared runtime dependency.
+ const sdl2=fs.realpathSync(path.join(slice.prefix,'lib/libSDL2.dylib'));result.set(path.basename(sdl2),sdl2);
+ return result;
+}
+export async function assemble({project='rlvm',version,arch='universal',output,compiled}){
+ if(fs.existsSync(output))throw Error('Immutable RLVM output exists.');
+ const payload=path.join(output,'payload'),app=path.join(payload,'rlvm.app'),bin=path.join(app,'Contents/MacOS'),libs=path.join(app,'Contents/Frameworks'),resources=path.join(app,'Contents/Resources');
+ for(const dir of [bin,libs,resources])fs.mkdirSync(dir,{recursive:true});const maps=compiled.slices.map(closure),names=[...maps[0].keys()].sort();
+ if(JSON.stringify(names)!==JSON.stringify([...maps[1].keys()].sort()))throw Error('RLVM slice dependency closures differ.');
+ const merge=(inputs,target)=>{for(let i=0;i<inputs.length;i++)if(!MachO.readMachOLoadCommands(inputs[i]).architectures.includes(compiled.slices[i].cpu))throw Error('Native build output lacks requested slice: '+inputs[i]);run('/usr/bin/lipo',['-create',...inputs,'-output',target]);};
+ const executable=path.join(bin,'rlvm');merge(compiled.slices.map(s=>s.binary),executable);
+ for(const name of names)merge(maps.map(m=>m.get(name)),path.join(libs,name));
+ for(const target of [executable,...names.map(name=>path.join(libs,name))]){
+  const commands=Tools.loadCommands(target,'arm64');
+  for(const link of new Set(compiled.slices.flatMap(s=>Tools.links(target,s.cpu))))if(!link.startsWith('/usr/lib/')&&!link.startsWith('/System/Library/'))run('/usr/bin/install_name_tool',['-change',link,'@executable_path/../Frameworks/'+path.basename(link),target]);
+  for(const rpath of commands.rpaths)if(path.isAbsolute(rpath)&&!rpath.startsWith('/System/'))run('/usr/bin/install_name_tool',['-delete_rpath',rpath,target]);
+  if(target!==executable)run('/usr/bin/install_name_tool',['-id','@rpath/'+path.basename(target),target]);
+  fs.chmodSync(target,0o755);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);
+ }
+ fs.copyFileSync(path.join(compiled.source,'src/platforms/osx/Info.plist.in'),path.join(app,'Contents/Info.plist'));
+ fs.copyFileSync(path.join(compiled.source,'resources/rlvm.icns'),path.join(resources,'rlvm.icns'));
+ run('msgfmt',['-o',path.join(resources,'rlvm.mo'),path.join(compiled.source,'po/ja.po')]);
+ const locale=path.join(resources,'locale/ja/LC_MESSAGES');fs.mkdirSync(locale,{recursive:true});fs.renameSync(path.join(resources,'rlvm.mo'),path.join(locale,'rlvm.mo'));
+ for(const [name,source] of Object.entries({...compiled.sources,rlvm:compiled.source}))addLicenses(payload,name,source);
+ for(const name of ['SDL_image','SDL_mixer','SDL_ttf','GLEW','guichan','xclannad','utf8cpp'])addLicenses(payload,name,path.join(compiled.source,'vendor',name));
+ run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',app]);
+ return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(path.join(here,'CMakeLists.txt')),manifestRelative:'manifest.json',record:{managerId:project,executableRelative:'rlvm.app/Contents/MacOS/rlvm',upstreamRevision:compiled.revision,dependencies:dependencyInputs()}});
+}
+recipeMain(import.meta,{compile,assemble});
