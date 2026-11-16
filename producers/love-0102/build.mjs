@@ -57,16 +57,15 @@ export async function assemble({compiled,output,version='0.10.2-MCLv1'}){
   if(i===0)target=path.join(macos,'love');else{
    const marker=input.indexOf('.framework/');if(marker<0)throw Error('External native output is not a framework.');
    const start=input.lastIndexOf('/',marker)+1,frameworkRoot=input.slice(0,marker+10),name=path.basename(frameworkRoot);
-   if(!copiedFrameworks.has(frameworkRoot)){fs.cpSync(frameworkRoot,path.join(frameworks,name),{recursive:true,verbatimSymlinks:true});copiedFrameworks.add(frameworkRoot);}target=path.join(frameworks,input.slice(start));
+   if(!copiedFrameworks.has(frameworkRoot)){Native.copyTree(path.join(frameworkRoot,'Versions/A'),path.join(frameworks,name));copiedFrameworks.add(frameworkRoot);}target=path.join(frameworks,name,path.relative(path.join(frameworkRoot,'Versions/A'),input));
   }
   const slices=compiled.slices.map(s=>s.outputs[i]);run('/usr/bin/lipo',['-create',...slices,'-output',target]);
   binaries.push(target);for(const file of slices){aliases.set(file,target);for(const id of Native.libraryIds(file))aliases.set(id,target);}
  }
- const luaRoot=path.join(frameworks,'Lua.framework'),luaVersion=path.join(luaRoot,'Versions/A');fs.mkdirSync(luaVersion,{recursive:true});
+ const luaRoot=path.join(frameworks,'Lua.framework'),luaVersion=luaRoot;fs.mkdirSync(luaVersion,{recursive:true});
  const lua=path.join(luaVersion,'Lua');run('/usr/bin/lipo',['-create',...compiled.slices.map(s=>s.luaLibrary),'-output',lua]);binaries.push(lua);
  for(const s of compiled.slices){aliases.set(s.luaLibrary,lua);for(const id of Native.libraryIds(s.luaLibrary))aliases.set(id,lua);}
- fs.symlinkSync('A',path.join(luaRoot,'Versions/Current'));fs.symlinkSync('Versions/Current/Lua',path.join(luaRoot,'Lua'));
- const luaResources=path.join(luaVersion,'Resources');fs.mkdirSync(luaResources);fs.symlinkSync('Versions/Current/Resources',path.join(luaRoot,'Resources'));
+ const luaResources=path.join(luaVersion,'Resources');fs.mkdirSync(luaResources);
  fs.writeFileSync(path.join(luaResources,'Info.plist'),`<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>CFBundleExecutable</key><string>Lua</string><key>CFBundleIdentifier</key><string>org.luajit.LuaJIT</string><key>CFBundleName</key><string>Lua</string><key>CFBundlePackageType</key><string>FMWK</string><key>CFBundleVersion</key><string>2.1</string></dict></plist>`);
  const relocationRoot=path.join(output,'relocation-slices');fs.mkdirSync(relocationRoot);
  for(const [index,file] of binaries.entries()){
@@ -95,12 +94,13 @@ export async function assemble({compiled,output,version='0.10.2-MCLv1'}){
  for(const folder of fs.readdirSync(path.join(first.roots.megasource,'libs')))addLicenses(payload,folder,path.join(first.roots.megasource,'libs',folder));
  // Sign companion libraries first, then their containing frameworks, then the application.
  for(const name of fs.readdirSync(frameworks)){
-  const framework=path.join(frameworks,name),primary=path.join(framework,'Versions/A',path.basename(name,'.framework'));
+  const framework=path.join(frameworks,name),primary=path.join(framework,path.basename(name,'.framework'));
   for(const binary of binaries)if(binary.startsWith(framework+path.sep)&&binary!==primary)run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',binary]);
   run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',framework]);
  }
  run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',bundle]);
  run('/usr/bin/codesign',['--verify','--deep','--strict',bundle]);
+ const dependencies=binaries.map(file=>({file:path.relative(payload,file),links:[...new Set((Native.macho(file)||[]).flatMap(cpu=>{const ids=new Set(Native.libraryIds(file,cpu));return Native.links(file,cpu).filter(link=>!ids.has(link));}))]}));
  const sourceHash=crypto.createHash('sha256').update(JSON.stringify(sources)).digest('hex');
  // Store framework links using the package format's existing file aliases.
  const packageAliases={},links=[],payloadRoot=fs.realpathSync(payload);
@@ -122,7 +122,7 @@ export async function assemble({compiled,output,version='0.10.2-MCLv1'}){
  const actualLinks=[...new Map(links.map(link=>[link.file,link])).values()];
  for(const link of actualLinks)fs.unlinkSync(link.file);
  let result;
- try{result=helperPackage({id:'love',version,arch:'universal',output,minimumMacOS,sourceSha256:sourceHash,record:{upstreamVersion:'0.10.2',sources,luaApi:'5.1',luaImplementation:'LuaJIT 2.1',nativeBinaries:binaries.map(f=>path.relative(payload,f))}});}
+ try{result=helperPackage({id:'love',version,arch:'universal',output,minimumMacOS,sourceSha256:sourceHash,record:{managerId:'love',platform:'darwin',upstreamRevision:sources.find(source=>source.id==='love').revision,executableRelative:'love.app/Contents/MacOS/love',dependencies,upstreamVersion:'0.10.2',sources,luaApi:'5.1',luaImplementation:'LuaJIT 2.1',nativeBinaries:binaries.map(f=>path.relative(payload,f))}});}
  finally{for(const link of actualLinks)fs.symlinkSync(link.target,link.file);}
  const declarationFile=path.join(output,'declaration.json'),declaration=JSON.parse(fs.readFileSync(declarationFile));
  declaration.aliases={schema:1,files:packageAliases};
