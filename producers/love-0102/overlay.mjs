@@ -14,6 +14,7 @@ export function applyBuildOverlay({love,megasource,luaLibrary,luaInclude}){
  applySdlCoreaudioDeclarationsOverlay({megasource});
  applySdlTimerDeclarationsOverlay({megasource});
  applySdlCocoaEventDeclarationsOverlay({megasource});
+ applySdlCocoaMessageboxModeDeclarationsOverlay({megasource});
  replace(path.join(megasource,'libs/physfs-2.0.3/CMakeLists.txt'),'SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} " -framework Carbon -framework IOKit")','SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} "-framework Carbon" "-framework IOKit")');
  replace(path.join(megasource,'libs/libtheora-1.1.1/CMakeLists.txt'),'\tadd_library(theora SHARED ${THEORA_SRC} lib/theora.def)','\tset(THEORA_SHARED_PLATFORM_SOURCES)\n\tif(WIN32)\n\t\tlist(APPEND THEORA_SHARED_PLATFORM_SOURCES lib/theora.def)\n\tendif()\n\tadd_library(theora SHARED ${THEORA_SRC} ${THEORA_SHARED_PLATFORM_SOURCES})');
 
@@ -109,4 +110,17 @@ export function applySdlCocoaEventDeclarationsOverlay({megasource}){
  replace(keyboard,'    NSView *parentView = [nswindow contentView];','    parentView = [nswindow contentView];');
  replace(keyboard,'Cocoa_HandleKeyEvent(_THIS, NSEvent *event)\n{\n    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;','Cocoa_HandleKeyEvent(_THIS, NSEvent *event)\n{\n    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;\n    unsigned short scancode;\n    SDL_Scancode code;\n#if 0\n    const char *text;\n#endif');
  replace(keyboard,'    unsigned short scancode = [event keyCode];\n    SDL_Scancode code;\n#if 0\n    const char *text;\n#endif','    scancode = [event keyCode];');
+}
+
+/** Use local scopes to preserve every Cocoa message-box and display initializer in place. */
+export function applySdlCocoaMessageboxModeDeclarationsOverlay({megasource}){
+ const messagebox=path.join(megasource,'libs/SDL2/src/video/cocoa/SDL_cocoamessagebox.m');
+ replace(messagebox,'    Cocoa_RegisterApp();\n\n    NSAlert* alert','    Cocoa_RegisterApp();\n\n    /* Keep declarations at their original initialization points in local scopes. */\n    {\n    NSAlert* alert');
+ replace(messagebox,'    const SDL_MessageBoxButtonData *buttons = messageboxdata->buttons;','    {\n    const SDL_MessageBoxButtonData *buttons = messageboxdata->buttons;');
+ replace(messagebox,'    SDLMessageBoxPresenter* presenter =','    {\n    SDLMessageBoxPresenter* presenter =');
+ replace(messagebox,'    int returnValue = 0;','    {\n    int returnValue = 0;');
+ replace(messagebox,'    return returnValue;\n}}','    return returnValue;\n    }\n    }\n    }\n    }\n}}');
+ const modes=path.join(megasource,'libs/SDL2/src/video/cocoa/SDL_cocoamodes.m');
+ replace(modes,'    const CGRect cgrect = CGDisplayBounds(cgdisplay);','    /* Preserve the constant display queries after the existing screen guard. */\n    {\n    const CGRect cgrect = CGDisplayBounds(cgdisplay);');
+ replace(modes,'    return 0;\n}\n\nint\nCocoa_GetDisplayDPI','    return 0;\n    }\n}\n\nint\nCocoa_GetDisplayDPI');
 }
