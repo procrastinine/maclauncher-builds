@@ -18,6 +18,6 @@ set_target_properties(anyps5_gdtoa80 PROPERTIES POSITION_INDEPENDENT_CODE ON C_V
 target_include_directories(anyps5_gdtoa80 PRIVATE ${anyps5Gdtoa}/port ${anyps5Gdtoa}/vendor/arch ${anyps5Gdtoa}/vendor)
 target_include_directories(anyps5_gdtoa80 PRIVATE ${LIBS_INCLUDE_DIR})
 target_compile_definitions(anyps5_gdtoa80 PRIVATE MULTIPLE_THREADS=1)
-target_compile_options(anyps5_gdtoa80 PRIVATE -include ${anyps5Gdtoa}/port/GuestGdtoaPlatform.h)
+target_compile_options(anyps5_gdtoa80 PRIVATE -ffp-contract=off -fno-fast-math -include ${anyps5Gdtoa}/port/GuestGdtoaPlatform.h)
 target_sources(libc PRIVATE $<TARGET_OBJECTS:anyps5_gdtoa80>)
 add_dependencies(libc anyps5_gdtoa80)
