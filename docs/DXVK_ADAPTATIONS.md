@@ -24,6 +24,12 @@ The sampled view's mip levels and array layers are copied before each hazardous 
 
 This implementation adapts Avery Felts's [render-target feedback change](https://github.com/metalsharp/DXVK-MacOS/commit/b400bccffe46a1836e743f7220f5423c28ce3af7) to DXVK 3.1.1's existing sampler bindings. It retains the DXVK zlib notice.
 
+## Flip-model buffer counts
+
+CreateSwapChainBase requires 2 to 16 buffers for FLIP_DISCARD and FLIP_SEQUENTIAL swap effects. Counts outside that range return E_INVALIDARG before the function normalizes dimensions or queries the device. Legacy swap effects retain their existing buffer-count behavior.
+
+The validation derives from Avery Felts's [DXGI buffer-count change](https://github.com/metalsharp/DXVK-MacOS/commit/93d57c744ab563084b4fe0ac52ba831c94000e21), under the DXVK zlib license.
+
 ## Cache environment
 
 DXVK_SHADER_CACHE_PATH selects the shader IR cache directory. For a launcher-owned runtime directory the integration supplies a Wine-visible absolute path to cache/dxvk, alongside Mesa's cache/mesa directory selected by MESA_SHADER_CACHE_DIR. The DXVK setting takes a Windows path in the PE renderer, so a host POSIX path must be translated through the Wine host's existing path mapping.
