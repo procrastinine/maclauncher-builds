@@ -35,5 +35,7 @@ bool DirectEvaluationCamera(float jitterX, float jitterY, RSTemporalCamera &came
 // After a direct evaluation's TemporalUpscale on list: remembers the frame id that VKD3D-Proton gave it, which the
 // HUD-less and UI images tagged after it name in their late scene. ForgetEvaluationFrames before a scaler's Destroy.
 void DirectEvaluationFrame(ID3D12GraphicsCommandList *list, ID3D12MetalFXScaler *scaler) noexcept;
+// Records the preceding evaluation's exactly followed camera before the next evaluation advances its scaler.
+void DirectEvaluationLateCamera(ID3D12GraphicsCommandList *list, ID3D12MetalFXScaler *scaler) noexcept;
 void ForgetEvaluationFrames(ID3D12MetalFXScaler *scaler) noexcept;
 } // namespace ngx

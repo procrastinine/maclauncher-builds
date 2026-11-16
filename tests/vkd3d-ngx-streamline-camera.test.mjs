@@ -26,6 +26,12 @@ static sl::Constants perspective(bool reversed = false, bool rightHanded = false
 }
 int main() {
   RSTemporalCamera result{};unsigned checks = 0;
+  int scalerA=0, scalerB=0;ngx_streamline::LateFrame<int> late{&scalerA, 41, 99};
+  assert(late.matches(&scalerA, 41, 99));checks++;
+  assert(!late.matches(&scalerB, 41, 99));checks++;
+  assert(!late.matches(&scalerA, 42, 99));checks++;
+  assert(!late.matches(&scalerA, 41, 100));checks++;
+  late={};assert(!late.matches(&scalerA, 41, 99));checks++;
   for (bool reversed : {false, true}) for (bool rh : {false, true}) for (bool infinite : {false, true}) {
     auto c = perspective(reversed, rh, infinite);assert(ngx_streamline::camera(c, 0, 37, result));checks++;
     assert(result.size == 64 && result.version == 1 && result.frameId == 1 && result.viewportId == 37 && result.frameTimeMs == 0);
@@ -223,10 +229,19 @@ test('the HUD-less and UI images tagged after a direct NGX evaluation are record
  assert.match(hooks,/const uint64_t frame = metalfx\.iface->lpVtbl->TemporalFrameId\(metalfx\.iface, scaler\);\n  AcquireSRWLockExclusive\(&camera_lock\);\n  late_frame = \{scaler, frame, direct_cameras\.evaluations\(\)\};/);
  // every accepted tag call, framed or not, outside slEvaluateFeature, only while the launcher's late camera file exists
  assert.equal((hooks.match(/if\(result==sl::Result::eOk\)LateTags\(tags,count,commands\);return result;/g)||[]).length,2);
- assert.match(hooks,/if \(!commands \|\| selected_scene \|\| streamline_evaluations \|\| !direct_evaluated\.load\(std::memory_order_acquire\)\)\n      return;/);
- assert.match(hooks,/if \(!late_file->get\(\)\)\n      return;/);
+ assert.match(hooks,/if \(!commands\) \{ ReportLateTag\(0, "tag call has no command list"\); return; \}/);
+ assert.match(hooks,/if \(!late_file->get\(\)\) \{ ReportLateTag\(3,/);
  // the camera rides along only when the constants followed the same evaluation
  assert.match(hooks,/const bool camera = frame\.evaluation && followed_evaluation == frame\.evaluation;/);
  assert.match(hooks,/followed_evaluation = evaluation;\n    followed_camera = followed;/);
  assert.match(hooks,/metalfx\.iface->lpVtbl->LateScene\(metalfx\.iface, &desc, frame\.scaler\)/);
+});
+
+
+test('an exactly followed direct camera is recorded before the next evaluation, with the scaler frame identity',()=>{
+ const hooks=fs.readFileSync(path.join(producer,'ngx_streamline.cpp'),'utf8'),patch=fs.readFileSync(path.join(producer,'ngx.patch'),'utf8');
+ assert.match(patch,/DirectEvaluationLateCamera\(list, dlss->scaler\);[\s\S]{0,80}TemporalUpscale\(metalfx/);
+ assert.match(hooks,/frame\.matches\(scaler, current_frame, followed_evaluation\)/);
+ assert.match(hooks,/desc\.FrameId = frame\.frame;/);
+ assert.match(hooks,/Late camera scene recorded for frame/);
 });

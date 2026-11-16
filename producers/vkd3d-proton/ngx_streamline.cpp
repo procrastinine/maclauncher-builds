@@ -78,10 +78,7 @@ std::atomic<bool> direct_evaluated{false};
 SRWLOCK camera_lock = SRWLOCK_INIT;
 // The latest direct evaluation's frame in VKD3D-Proton and the camera of the constants that followed it, for the late
 // scene of the HUD-less and UI images that the game tags after it (vkd3d_metalfx.h LateScene). Under camera_lock.
-struct LateFrame {
-  ID3D12MetalFXScaler *scaler = nullptr;
-  uint64_t frame = 0, evaluation = 0;
-};
+using LateFrame = ngx_streamline::LateFrame<ID3D12MetalFXScaler>;
 LateFrame late_frame;
 uint64_t followed_evaluation = 0;
 RSTemporalCamera followed_camera{};
@@ -245,27 +242,32 @@ struct MetalFX1 {
 // and the next name the latest one. They are recorded as its late scene in the tagging command list, where their
 // contents are complete, with the camera of the constants that followed the same evaluation. Only while MacLauncher's
 // late camera file exists (an enabled frame-generation row consumes the scene) and never inside slEvaluateFeature.
+void ReportLateTag(unsigned reason, const char *text) {
+  static std::atomic<unsigned> reported{0};
+  const unsigned bit = 1u << reason;
+  if (!(reported.fetch_or(bit) & bit))
+    Report("No late tagged scene: %s", text);
+}
 void LateTags(const sl::ResourceTag *tags, uint32_t count, sl::CommandBuffer *commands) noexcept {
   try {
-    if (!commands || selected_scene || streamline_evaluations || !direct_evaluated.load(std::memory_order_acquire))
-      return;
+    if (!commands) { ReportLateTag(0, "tag call has no command list"); return; }
+    if (selected_scene || streamline_evaluations) { ReportLateTag(1, "tag call belongs to a Streamline evaluation"); return; }
+    if (!direct_evaluated.load(std::memory_order_acquire)) { ReportLateTag(2, "no direct evaluation yet"); return; }
     std::call_once(late_once, [] { late_file = std::make_unique<ngx_late_camera::File>(); });
-    if (!late_file->get())
-      return;
+    if (!late_file->get()) { ReportLateTag(3, "no enabled late camera channel"); return; }
     const TagBatch batch = CaptureTags(tags, count, commands);
-    if (!batch.valid || batch.reset || (!batch.images[0].resource && !batch.images[1].resource))
-      return;
+    if (!batch.valid || batch.reset || (!batch.images[0].resource && !batch.images[1].resource)) {
+      ReportLateTag(4, "tag batch has no readable HUD-less or UI image"); return;
+    }
     AcquireSRWLockShared(&camera_lock);
     const LateFrame frame = late_frame;
     const bool camera = frame.evaluation && followed_evaluation == frame.evaluation;
     const RSTemporalCamera followed = followed_camera;
     ReleaseSRWLockShared(&camera_lock);
-    if (!frame.scaler || !frame.frame)
-      return;
+    if (!frame.scaler || !frame.frame) { ReportLateTag(5, "no direct scaler frame"); return; }
     // a D3D12 game's tags name its command list and resources (the evaluation was recorded through the same device)
     MetalFX1 metalfx(static_cast<IUnknown *>(static_cast<void *>(commands)));
-    if (!metalfx.iface)
-      return;
+    if (!metalfx.iface) { ReportLateTag(6, "tag command list has no late scene interface"); return; }
     VKD3D_METALFX_LATE_SCENE_DESC desc = {};
     desc.FrameId = frame.frame;
     desc.HudLess = static_cast<ID3D12Resource *>(batch.images[0].resource);
@@ -322,6 +324,7 @@ void HookTags(unsigned n,HMODULE module){
     MH_RemoveHook(target);
     if(MH_CreateHook(target,detour,original)!=MH_OK)return;
     if(MH_EnableHook(target)!=MH_OK){MH_RemoveHook(target);return;}saved=target;
+    Report("Streamline late scene tag capture installed: %s", name);
   };
   install("slSetTag",reinterpret_cast<void*>(tag_hooks[n]),slot.tag_target,reinterpret_cast<void**>(&slot.tag));
   install("slSetTagForFrame",reinterpret_cast<void*>(framed_hooks[n]),slot.framed_target,reinterpret_cast<void**>(&slot.framed));
@@ -453,6 +456,37 @@ bool ngx::DirectEvaluationCamera(float jitter_x, float jitter_y, RSTemporalCamer
              reasons[unsigned(result)]);
   }
   return result == ngx_streamline::DirectCameras::Bound;
+}
+
+void ngx::DirectEvaluationLateCamera(ID3D12GraphicsCommandList *list, ID3D12MetalFXScaler *scaler) noexcept {
+  if (!list || !scaler || streamline_evaluations || !late_file || !late_file->get())
+    return;
+  MetalFX1 metalfx(list);
+  if (!metalfx.iface)
+    return;
+  const uint64_t current_frame = metalfx.iface->lpVtbl->TemporalFrameId(metalfx.iface, scaler);
+  AcquireSRWLockShared(&camera_lock);
+  const LateFrame frame = late_frame;
+  const bool matches = frame.matches(scaler, current_frame, followed_evaluation);
+  const RSTemporalCamera camera = followed_camera;
+  ReleaseSRWLockShared(&camera_lock);
+  if (!matches)
+    return;
+  VKD3D_METALFX_LATE_SCENE_DESC desc = {};
+  desc.FrameId = frame.frame;
+  desc.CameraValid = TRUE;
+  desc.DepthReversed = bool(camera.flags & RS_TEMPORAL_DEPTH_REVERSED);
+  desc.DepthInfinite = bool(camera.flags & RS_TEMPORAL_DEPTH_INFINITE);
+  desc.NearPlane = camera.nearPlane;
+  desc.FarPlane = camera.farPlane;
+  desc.VerticalFov = camera.verticalFov;
+  const HRESULT result = metalfx.iface->lpVtbl->LateScene(metalfx.iface, &desc, scaler);
+  static std::atomic<unsigned> reported{0};
+  const unsigned bit = SUCCEEDED(result) ? 1u : 2u;
+  if (!(reported.fetch_or(bit) & bit))
+    Report(SUCCEEDED(result) ? "Late camera scene recorded for frame %llu before the next evaluation"
+                             : "Late camera scene of frame %llu not recorded (0x%08lx)",
+           (unsigned long long)frame.frame, (unsigned long)result);
 }
 
 void ngx::DirectEvaluationFrame(ID3D12GraphicsCommandList *list, ID3D12MetalFXScaler *scaler) noexcept {

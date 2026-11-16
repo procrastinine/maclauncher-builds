@@ -11,6 +11,16 @@
 #include "ngx_camera.h"
 
 namespace ngx_streamline {
+// A direct evaluation's real scaler frame, distinct from Streamline's token and the capture's evaluation counter.
+// A camera arriving afterwards belongs to it only when the constants followed exactly and the scaler still names
+// that frame. The next evaluation records it on its live command list before advancing that scaler.
+template<class Scaler> struct LateFrame {
+  Scaler *scaler = nullptr;
+  uint64_t frame = 0, evaluation = 0;
+  bool matches(Scaler *current, uint64_t currentFrame, uint64_t followedEvaluation) const {
+    return scaler && scaler == current && frame && frame == currentFrame && evaluation && evaluation == followedEvaluation;
+  }
+};
 struct SceneMatrices {
   float worldToView[16]{}, viewToClip[16]{};
 };
