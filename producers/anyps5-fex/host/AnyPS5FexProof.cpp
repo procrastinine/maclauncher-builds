@@ -5,6 +5,7 @@
 // the guest's RET and resumes the guest.
 //
 // Usage: anyps5-fex-proof <eboot.elf> <function vaddr> <GOT slot vaddr> <bss vaddr> bound|unbound
+#include "GuestCpuHost.h"
 #include "SysVThunk.h"
 
 #include <array>
@@ -70,6 +71,7 @@ int main(int argc, char** argv) {
   }
   // Without a binding the guest jumps through an empty import slot and faults.
   FexGuest::InstallFaultReport();
+  FexGuest::InstallGuestCpuHost();
   const std::uint64_t Function = std::strtoull(argv[2], nullptr, 0);
   const std::uint64_t Slot = std::strtoull(argv[3], nullptr, 0);
   const std::uint64_t BaseTimeVariable = std::strtoull(argv[4], nullptr, 0);

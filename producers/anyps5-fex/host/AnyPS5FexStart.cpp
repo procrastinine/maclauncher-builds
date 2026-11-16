@@ -10,6 +10,7 @@
 // Usage: anyps5-fex-start <game directory> <main vaddr> modules|eboot-only
 //   eboot-only leaves out the sce_module PRX modules, so their exports stay unbound (expected to fail).
 #include "Ps5Module.h"
+#include "GuestCpuHost.h"
 #include "SysVThunk.h"
 
 #include <dirent.h>
@@ -227,6 +228,7 @@ int main(int argc, char** argv) {
     return 2;
   }
   FexGuest::InstallFaultReport();
+  FexGuest::InstallGuestCpuHost();
   FexGuest::InitConfig();
   const std::string Directory = argv[1];
   const std::uint64_t MainOffset = std::strtoull(argv[2], nullptr, 0);

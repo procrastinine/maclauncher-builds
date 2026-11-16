@@ -9,6 +9,7 @@
 #include <FEXCore/Core/HostFeatures.h>
 #include <FEXCore/Core/SignalDelegator.h>
 #include <FEXCore/Core/X86Enums.h>
+#include <FEXCore/Darwin/SignalDelegator.h>
 #include <FEXCore/Debug/InternalThreadState.h>
 #include <FEXCore/HLE/SyscallHandler.h>
 #include <FEXCore/Utils/LogManager.h>
@@ -23,6 +24,7 @@
 #include <sys/mman.h>
 #include <sys/sysctl.h>
 #include <unistd.h>
+#include <vector>
 
 namespace FexGuest {
 using FEXCore::Core::CPUState;
@@ -66,7 +68,37 @@ public:
   }
 };
 
-class SignalDelegator final : public FEXCore::SignalDelegator {};
+// Guest memory the host owns: every MapGuest allocation. The Darwin signal delegator asks for these ranges; faults
+// outside them go to the handlers installed before it (InstallFaultReport). No guest page is write-protected for code
+// tracking yet, so WriteProtectedForCode stays false.
+inline std::vector<FEXCore::Darwin::GuestMemoryRegion> OwnedRanges;
+
+inline FEXCore::Darwin::SignalCallbacks GuestSignalCallbacks() {
+  FEXCore::Darwin::SignalCallbacks Callbacks {};
+  Callbacks.QueryMemory = [](FEXCore::Core::InternalThreadState*, std::uintptr_t Address, FEXCore::Darwin::GuestMemoryRegion& Region, void*) {
+    for (const auto& Owned : OwnedRanges) {
+      if (Address >= Owned.Base && Address - Owned.Base < Owned.Size) {
+        Region = Owned;
+        return true;
+      }
+    }
+    return false;
+  };
+  Callbacks.InvalidateCode = [](FEXCore::Core::InternalThreadState* Thread, std::uintptr_t Start, std::size_t Length, void*) {
+    Thread->CTX->InvalidateCodeBuffersCodeRange(Start, Length);
+    return true;
+  };
+  // The host has no guest exception handlers yet: report the guest exception, then let the fault report end the run.
+  Callbacks.DeliverException = [](FEXCore::Core::InternalThreadState*, const FEXCore::Darwin::GuestException& Exception, void*) {
+    char Text[192];
+    const int Length = std::snprintf(Text, sizeof(Text), "guest exception: signal %d, trap %u, error 0x%x, address 0x%llx, guest rip 0x%llx\n",
+                                     Exception.Signal, Exception.TrapNo, Exception.ErrorCode,
+                                     static_cast<unsigned long long>(Exception.Address), static_cast<unsigned long long>(Exception.GuestRIP));
+    write(STDOUT_FILENO, Text, Length);
+    return false;
+  };
+  return Callbacks;
+}
 
 // A host that handles SYSCALL itself sets this before the first Run.
 inline FEXCore::HLE::SyscallHandler* SyscallHandlerOverride = nullptr;
@@ -106,15 +138,17 @@ inline FEXCore::HostFeatures DarwinHostFeatures() {
   Features.SupportsI8MM = Sysctl("hw.optional.arm.FEAT_I8MM");
   Features.SupportsDotProd = Sysctl("hw.optional.arm.FEAT_DotProd");
   Features.SupportsMOPS = Sysctl("hw.optional.arm.FEAT_MOPS");
-  Features.SupportsSVE128 = false;
-  Features.SupportsSVE256 = false;
   std::uint64_t DCZID = 0;
   __asm volatile("mrs %0, dczid_el0" : "=r"(DCZID));
   Features.SupportsCLZERO = (DCZID & 0x10) == 0 && (4U << (DCZID & 0xf)) == 64;
   Features.Supports3DNow = true;
-  Features.SupportsAVX = true;
   Features.SupportsAES256 = Features.SupportsAES;
-  Features.HostType = FEXCore::HostFeatures::HostTypeEnum::Unknown;
+  // Process-level features (FEX 2611): an x86-64 guest with AVX and no SVE, on a host that is neither Linux nor Windows.
+  Features.ProcessFeatures.HostType = FEXCore::HostFeatures::HostTypeEnum::Unknown;
+  Features.ProcessFeatures.Is64BitMode = 1;
+  Features.ProcessFeatures.SupportsAVX = 1;
+  Features.ProcessFeatures.SupportsSVE128 = 0;
+  Features.ProcessFeatures.SupportsSVE256 = 0;
   Features.ProcessPID = getpid();
   return Features;
 }
@@ -125,6 +159,7 @@ inline void* MapGuest(std::uint64_t Size) {
     std::perror("mmap");
     std::exit(2);
   }
+  OwnedRanges.push_back({reinterpret_cast<std::uintptr_t>(Result), Size, true, true, false});
   return Result;
 }
 
@@ -279,7 +314,12 @@ inline const CPUState& Run(CPUState& Initial, std::span<const Thunk> Thunks, std
   } else {
     // The context lives for the rest of the process.
     CTX = FEXCore::Context::Context::CreateNewContext(DarwinHostFeatures()).release();
-    static SignalDelegator Signals;
+    // Installed once, after InstallFaultReport, which stays the handler for faults the delegator does not own.
+    static FEXCore::Darwin::SignalDelegator Signals {GuestSignalCallbacks()};
+    if (!Signals.Install()) {
+      std::printf("Darwin signal delegator install failed\nFAIL\n");
+      std::exit(1);
+    }
     static SyscallHandler Syscalls;
     CTX->SetSignalDelegator(&Signals);
     CTX->SetSyscallHandler(SyscallHandlerOverride ? SyscallHandlerOverride : &Syscalls);
@@ -315,6 +355,8 @@ inline const CPUState& Run(CPUState& Initial, std::span<const Thunk> Thunks, std
     Guest.callret_sp = CallRet + PageSize + CallRetSize / 4;
     std::printf("guest thread created; running 0x%llx\n", static_cast<unsigned long long>(Guest.rip));
   }
+  // Binds the guest to this OS thread for translated code and for the thunks, which run between HLT exits.
+  FEXCore::Darwin::ThreadScope Bound {Thread};
   Loop(StubBase, Breakpoint);
   return Thread->CurrentFrame->State;
 }

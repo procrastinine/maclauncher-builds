@@ -4,7 +4,7 @@
   "source": {
     "gitlink": "sources/fex",
     "repository": "https://github.com/FEX-Emu/FEX.git",
-    "version": "FEX-2610",
+    "version": "FEX-2611.1",
     "license": "MIT",
     "submodules": [
       "External/drm-headers",
@@ -25,15 +25,34 @@
       "core/libs"
     ],
     "objects": [
-      "core/libs/prx/libkernel/Time/Time.cpp"
-    ]
+      "core/libs/prx/libkernel/Time/Time.cpp",
+      "core/libs/prx/libc/src/GuestCpuArm64.cpp"
+    ],
+    "arm64Libraries": {
+      "script": "../anyps5/overlays/arm64-libs/apply.mjs",
+      "exports": [
+        "copyArm64GuestCpuSources"
+      ]
+    }
   },
   "overlays": [
     {
-      "file": "overlays/fex/darwin-core.patch",
+      "file": "overlays/fex/0001-darwin-core.patch",
       "target": "fex",
       "license": "MIT",
-      "summary": "FEXCore and FEXHeaderUtils for arm64 macOS: CMake Darwin gate, MAP_JIT allocations with per-thread write scopes, x18 kept out of register allocation, os_sync futex replacement, Darwin syscall wrappers and allocator hooks"
+      "summary": "FEXCore for an embedding host on arm64 macOS: Darwin platform boundary, MAP_JIT allocations with per-thread write scopes, x18 kept out of register allocation"
+    },
+    {
+      "file": "overlays/fex/0002-darwin-code-guards.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "host-page guards for code buffers; the final owned MAP_JIT page replaced by an inaccessible mapping"
+    },
+    {
+      "file": "overlays/fex/0003-darwin-signals-and-guest-state.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "FEXCore/Darwin/SignalDelegator.h and GuestState.h: signal installation, code-write faults, guest exception delivery, per-thread guest binding and CPU accessors"
     },
     {
       "file": "overlays/anyps5/guestcpu-arm64.patch",
@@ -60,7 +79,9 @@
       "AnyPS5FexAbi.cpp",
       "AnyPS5FexStart.cpp",
       "GenericBridge.S",
-      "AnyPS5FexSyscall.cpp"
+      "AnyPS5FexSyscall.cpp",
+      "fex-entry.cmake",
+      "GuestCpuHost.h"
     ],
     "guest": {
       "source": "guest-abi.c",
@@ -71,6 +92,7 @@
     },
     "generator": {
       "script": "generate-thunks.py"
-    }
+    },
+    "entry": "fex-entry.cmake"
   }
 }

@@ -79,7 +79,7 @@ function link(out,objects,log){
  const build=path.join(out,'build');
  run('cmake',['-S',path.join(out,'fex'),'-B',build,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DBUILD_TESTING=OFF','-DBUILD_FEXCONFIG=OFF',
   '-DENABLE_JEMALLOC_GLIBC_ALLOC=OFF','-DENABLE_OFFLINE_TELEMETRY=OFF','-DENABLE_CCACHE=OFF','-DENABLE_LTO=OFF','-DTUNE_CPU=none','-DTUNE_ARCH=generic',
-  '-DANYPS5_ARM64_OBJECTS='+objects.join(';'),'-DANYPS5_SOURCE_DIR='+path.join(out,'anyps5'),'-DANYPS5_GENERATED_THUNKS='+path.join(out,'generated-thunks.cpp')],{stdio:['ignore','ignore','inherit']});
+  '-DCMAKE_PROJECT_FEX_INCLUDE='+path.join(out,'host',recipe.host.entry),'-DANYPS5_ARM64_OBJECTS='+objects.join(';'),'-DANYPS5_SOURCE_DIR='+path.join(out,'anyps5'),'-DANYPS5_GENERATED_THUNKS='+path.join(out,'generated-thunks.cpp')],{stdio:['ignore','ignore','inherit']});
  const result=spawnSync('ninja',['-C',build,...recipe.host.targets],{encoding:'utf8',maxBuffer:Infinity});
  fs.writeFileSync(log,result.stdout+result.stderr);
  return result.status===0;
@@ -104,9 +104,13 @@ const fex=verifyCheckout(recipe.source),anyps5=verifyCheckout(recipe.anyps5);
 fs.rmSync(path.join(options.out,'fex'),{recursive:true,force:true});fs.rmSync(path.join(options.out,'anyps5'),{recursive:true,force:true});
 project(fex,path.join(options.out,'fex'));project(anyps5,path.join(options.out,'anyps5'),recipe.anyps5.paths);
 for(const overlay of recipe.overlays)applyOverlay(path.join(options.out,overlay.target),overlay);
-const proofSource=path.join(options.out,'fex/Source/AnyPS5FexProof');
-fs.mkdirSync(proofSource,{recursive:true});
-for(const file of recipe.host.sources)fs.copyFileSync(path.join(import.meta.dirname,recipe.host.directory,file),path.join(proofSource,file));
+// The arm64 library overlay's shared sources (GuestCpuArm64, owned by the PS5 library lane) go into the AnyPS5 projection.
+const arm64Libraries=await import(new URL(recipe.anyps5.arm64Libraries.script,import.meta.url));
+for(const name of recipe.anyps5.arm64Libraries.exports)arm64Libraries[name](path.join(options.out,'anyps5'));
+// The host sources sit outside the FEX projection; fex-entry.cmake adds them to FEX's build.
+const hostSource=path.join(options.out,'host');
+fs.rmSync(hostSource,{recursive:true,force:true});fs.mkdirSync(hostSource,{recursive:true});
+for(const file of recipe.host.sources)fs.copyFileSync(path.join(import.meta.dirname,recipe.host.directory,file),path.join(hostSource,file));
 
 const guestObject=path.join(options.out,'guest-abi.x86_64.o'),guestText=path.join(options.out,'guest-abi.bin');
 run('clang',['-arch','x86_64','-O2','-ffreestanding','-fno-builtin','-fno-stack-protector','-fno-asynchronous-unwind-tables','-c',
