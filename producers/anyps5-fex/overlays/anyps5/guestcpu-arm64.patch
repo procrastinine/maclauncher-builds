@@ -1,48 +1,12 @@
 diff --git a/core/libs/prx/libc/include/GuestCpu.hpp b/core/libs/prx/libc/include/GuestCpu.hpp
-index 53598c1..0136f0c 100644
 --- a/core/libs/prx/libc/include/GuestCpu.hpp
 +++ b/core/libs/prx/libc/include/GuestCpu.hpp
-@@ -81,8 +81,45 @@ inline void RaiseInvalidForSignalingNan(const float value) {
+@@ -81,8 +81,10 @@ inline void RaiseInvalidForSignalingNan(const float value) {
  
  }
  
 +#elif defined(__aarch64__)
-+#include <cstdlib>
-+// On an arm64 host the guest x86-64 code runs under a translator, which owns the guest CPU state (MXCSR, the x87
-+// control and status words, CPUID results). The translator host installs these accessors before guest code runs;
-+// the time-stamp counter is the host's virtual counter, as the translator reports it to RDTSC.
-+namespace GuestCpu {
-+struct HostAccessors {
-+    std::array<std::uint32_t, 4> (*Cpuid)(std::uint32_t leaf, std::uint32_t subleaf) = nullptr;
-+    std::uint32_t (*Mxcsr)() = nullptr;
-+    void (*SetMxcsr)(std::uint32_t value) = nullptr;
-+    std::uint16_t (*X87Control)() = nullptr;
-+    void (*SetX87Control)(std::uint16_t value) = nullptr;
-+    std::uint16_t (*X87Status)() = nullptr;
-+    void (*SetX87Status)(std::uint16_t value) = nullptr;
-+};
-+inline HostAccessors Host {};
-+template<typename F> inline F Require(F function) {
-+    if (function == nullptr) std::abort();
-+    return function;
-+}
-+inline std::uint64_t ReadTsc() {
-+    std::uint64_t value;
-+    asm volatile("isb\n\tmrs %0, cntvct_el0" : "=r"(value));
-+    return value;
-+}
-+inline std::array<std::uint32_t, 4> Cpuid(const std::uint32_t leaf, const std::uint32_t subleaf) { return Require(Host.Cpuid)(leaf, subleaf); }
-+inline std::uint64_t Xgetbv(const std::uint32_t index) { return index == 0 ? 0x7 : 0; }
-+inline std::uint32_t Mxcsr() { return Require(Host.Mxcsr)(); }
-+inline void SetMxcsr(const std::uint32_t value) { Require(Host.SetMxcsr)(value); }
-+inline std::uint16_t X87Control() { return Require(Host.X87Control)(); }
-+inline void SetX87Control(const std::uint16_t value) { Require(Host.SetX87Control)(value); }
-+inline std::uint16_t X87Status() { return Require(Host.X87Status)(); }
-+inline void SetX87Status(const std::uint16_t value) { Require(Host.SetX87Status)(value); }
-+inline void X87ClearExceptions() { SetX87Status(0); }
-+inline void X87Wait() {}
-+inline std::uint32_t MxcsrMask() { return 0xffffu; }
-+}
++#include "GuestCpuArm64.hpp"
  #else
 -#error "GuestCpu.hpp supports only x86-64 targets"
 +#error "GuestCpu.hpp supports only x86-64 and arm64 targets"
