@@ -1,0 +1,20 @@
+{
+  "source": {
+    "repository": "https://github.com/code-disaster/steamworks4j",
+    "revision": "33ae54e87657afe8464eb01845e62b79403f5bfa",
+    "sha256": "881fe7d0a602ec03811b99c6ff62ccde7b7a6bbc5f0ec48fe0e7894f1e6a8db6"
+  },
+  "sdk": {
+    "repository": "https://github.com/rlabrecque/SteamworksSDK",
+    "revision": "0410352777823f25e59eb79d54caef07c831ce4b",
+    "sha256": "f0a6a5954756ef93dca2a6f959ca0a28c60af28360d1fc96bcd1d4415d809b8e"
+  },
+  "jnigen": {
+    "url": "https://repo.maven.apache.org/maven2/com/badlogicgames/gdx/gdx-jnigen/1.9.0/gdx-jnigen-1.9.0.jar",
+    "sha256": "49fe00b9b49784aa45bf415ccf0038efa2d30789b21dc3c711c796102a8feb02"
+  },
+  "javaparser": {
+    "url": "https://repo.maven.apache.org/maven2/com/github/javaparser/javaparser-core/2.3.0/javaparser-core-2.3.0.jar",
+    "sha256": "13884eff710c662cdc5556d6af80a7d7d51d93d6d1c1d01cf39ed3a47737d7a8"
+  }
+}
