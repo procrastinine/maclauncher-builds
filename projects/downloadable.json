@@ -3970,6 +3970,7 @@
         "producers/dependencies/llvmMingw.json",
         "producers/vkd3d-proton/metalfx.c",
         "producers/vkd3d-proton/decompression-count.patch",
+        "producers/vkd3d-proton/raw-companion-range.patch",
         "producers/vkd3d-proton/metalfx.patch",
         "producers/vkd3d-proton/ngx.patch",
         "producers/vkd3d-proton/vk_temporal_frame.h",
