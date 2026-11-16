@@ -53,7 +53,7 @@ export async function buildSlice({architecture,work,sources,engineSource}){
  run(path.join(sources.gettext,'gettext-runtime/configure'),['--prefix='+prefix,'--host='+(cpu==='arm64'?'aarch64':'x86_64')+'-apple-darwin','--disable-shared','--enable-static','--disable-java','--disable-csharp','--disable-libasprintf'],{cwd:intlBuild,env:{...env,CC:process.env.CC||'/usr/bin/clang',CFLAGS:flags,LDFLAGS:flags}});
  run('/usr/bin/make',['-C',path.join(intlBuild,'intl'),'-j2','install'],{env});
  const buildRoot=path.join(slice,'rlvm');const lists=projectSources(engineSource,buildRoot);
- run(tools.cmake,compilerArguments(['-S',here,'-B',buildRoot,...Fonts.cmakeOptions({prefix,sdk,ninja:tools.ninja,architecture,pathMappings,options:[]}),'-DRLVM_SOURCE='+engineSource]),{env});
+ run(tools.cmake,compilerArguments(['-S',here,'-B',buildRoot,...Fonts.cmakeOptions({prefix,sdk,ninja:tools.ninja,architecture,pathMappings,options:[]}),'-DRLVM_SOURCE='+engineSource,'-DNODE_EXECUTABLE='+process.execPath]),{env});
  run(tools.cmake,['--build',buildRoot,'--parallel','2'],{env});
  return {architecture,cpu,prefix,binary:path.join(buildRoot,'rlvm'),lists};
 }
