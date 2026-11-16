@@ -1,9 +1,9 @@
 diff --git a/FEXCore/include/FEXCore/Darwin/GuestState.h b/FEXCore/include/FEXCore/Darwin/GuestState.h
 new file mode 100644
-index 00000000..74476509
+index 00000000..acc66158
 --- /dev/null
 +++ b/FEXCore/include/FEXCore/Darwin/GuestState.h
-@@ -0,0 +1,151 @@
+@@ -0,0 +1,146 @@
 +// SPDX-License-Identifier: MIT
 +#pragma once
 +
@@ -11,6 +11,7 @@ index 00000000..74476509
 +#include <FEXCore/Core/CoreState.h>
 +#include <FEXCore/Core/X86Enums.h>
 +#include <FEXCore/Debug/InternalThreadState.h>
++#include <FEXCore/Utils/FPState.h>
 +
 +#include <array>
 +#include <bit>
@@ -59,7 +60,17 @@ index 00000000..74476509
 +}
 +// Accessors run at a host-call boundary after FEX has spilled guest state.
 +inline uint32_t Mxcsr() { return State().mxcsr; }
-+inline void SetMxcsr(uint32_t Value) { State().mxcsr = Value & 0xffc0; }
++inline void SetMxcsr(uint32_t Value) {
++  State().mxcsr = Value & 0xffc0;
++  // Match the core's SetRoundingMode emitter. Native guest-library calls and resumed SSE code share FPCR.
++  const uint64_t Round = (Value >> 13) & 3;
++  const uint64_t ArmRound = ((Round & 1) << 1) | ((Round & 2) >> 1);
++  uint64_t FPCR;
++  asm volatile("mrs %0, fpcr" : "=r"(FPCR));
++  FPCR = (FPCR & ~((uint64_t {3} << 22) | (uint64_t {1} << 24))) |
++         (ArmRound << 22) | (uint64_t {(Value >> 15) & 1} << 24);
++  asm volatile("msr fpcr, %0" : : "r"(FPCR) : "memory");
++}
 +// This is the mask emitted by the selected FEXCore FXSAVE/XSAVE implementation.
 +inline uint32_t MxcsrMask() { return 0xffc0; }
 +inline uint16_t X87Control() { return State().FCW; }
@@ -103,19 +114,8 @@ index 00000000..74476509
 +  }
 +}
 +inline uint16_t X87Tag() {
-+  const auto& CPU = State();
-+  uint16_t Tags {};
-+  for (unsigned Register = 0; Register != 8; ++Register) {
-+    unsigned Tag = 3;
-+    if (CPU.AbridgedFTW & (1U << Register)) {
-+      const auto Significand = CPU.mm[Register][0];
-+      const unsigned Exponent = CPU.mm[Register][1] & 0x7fff;
-+      Tag = Exponent == 0 && Significand == 0 ? 1 :
-+            Exponent == 0 || Exponent == 0x7fff || !(Significand >> 63) ? 2 : 0;
-+    }
-+    Tags |= Tag << (Register * 2);
-+  }
-+  return Tags;
++  auto& CPU = State();
++  return FPState::ConvertFromAbridgedFTW(X87Status(), CPU.mm, CPU.AbridgedFTW);
 +}
 +inline std::array<uint32_t, 7> X87Environment() {
 +  // 32-bit FNSTENV layout: reserved upper words are all ones. FEX tracks FIP; selectors and FOP are zero.
@@ -127,12 +127,7 @@ index 00000000..74476509
 +  auto& CPU = State();
 +  CPU.FCW = Environment[0];
 +  SetX87Status(Environment[1]);
-+  CPU.AbridgedFTW = 0;
-+  for (unsigned Register = 0; Register != 8; ++Register) {
-+    if (((Environment[2] >> (Register * 2)) & 3) != 3) {
-+      CPU.AbridgedFTW |= 1U << Register;
-+    }
-+  }
++  CPU.AbridgedFTW = FPState::ConvertToAbridgedFTW(Environment[2]);
 +  CPU.FIP = Environment[3];
 +}
 +// The embedding library owns its accessor type. No guest-OS library is a dependency of FEXCore.
