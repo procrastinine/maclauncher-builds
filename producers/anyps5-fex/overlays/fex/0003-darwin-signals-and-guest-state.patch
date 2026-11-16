@@ -157,7 +157,7 @@ index 00000000..74476509
 +} // namespace FEXCore::Darwin
 diff --git a/FEXCore/include/FEXCore/Darwin/SignalDelegator.h b/FEXCore/include/FEXCore/Darwin/SignalDelegator.h
 new file mode 100644
-index 00000000..9e652a1e
+index 00000000..2c6502a5
 --- /dev/null
 +++ b/FEXCore/include/FEXCore/Darwin/SignalDelegator.h
 @@ -0,0 +1,274 @@
@@ -300,8 +300,8 @@ index 00000000..9e652a1e
 +    const uint32_t ExceptionClass = ESR >> 26;
 +    const bool DataAbort = ExceptionClass == 0x24 || ExceptionClass == 0x25;
 +    const bool WriteFault = DataAbort && (ESR & (1U << 6));
-+    if (InJIT && (Signal == SIGBUS || Signal == SIGSEGV) && WriteFault &&
-+        HandleCodeWrite(Thread, FaultAddress, Context)) {
++    if ((Signal == SIGBUS || Signal == SIGSEGV) && WriteFault &&
++        HandleCodeWrite(Thread, FaultAddress, Context, InJIT)) {
 +      return true;
 +    }
 +
@@ -386,7 +386,7 @@ index 00000000..9e652a1e
 +    Machine.__ss.__x[1] = SingleInstruction ? 1 : 0;
 +    __darwin_arm_thread_state64_set_pc_fptr(Machine.__ss, reinterpret_cast<void*>(Config.AbsoluteLoopTopAddressFillSRA));
 +  }
-+  bool HandleCodeWrite(Core::InternalThreadState* Thread, uintptr_t Address, ucontext_t* Context) {
++  bool HandleCodeWrite(Core::InternalThreadState* Thread, uintptr_t Address, ucontext_t* Context, bool InJIT) {
 +    if (!Callbacks.QueryMemory || !Callbacks.InvalidateCode) { return false; }
 +    GuestMemoryRegion Region {};
 +    if (!Callbacks.QueryMemory(Thread, Address, Region, Callbacks.Opaque) || !Region.Writable ||
@@ -397,7 +397,7 @@ index 00000000..9e652a1e
 +    const uintptr_t Page = Address & ~(Size - 1);
 +    // The host owns the complete physical page. A sub-page region never grants protection over neighbours.
 +    if (Page < Region.Base || Size > Region.Size || Page - Region.Base > Region.Size - Size) { return false; }
-+    const bool Restart = !Thread->CTX->IsCurrentBlockSingleInst(Thread) &&
++    const bool Restart = InJIT && !Thread->CTX->IsCurrentBlockSingleInst(Thread) &&
 +                         Thread->CTX->IsAddressInCurrentBlock(Thread, Page, Size);
 +    if (Restart) { Spill(Thread, *Context->uc_mcontext); }
 +    {
