@@ -13,7 +13,9 @@ export const commonHeaders={
  'scene-aovs.h':'../../reshade/temporal/scene-aovs.h',
  'scene-matrices.h':'../../reshade/temporal/scene-matrices.h',
  'image-color.h':'../../reshade/native/image-color.h',
- 'vulkan-scene.h':'../../reshade/native/vulkan-scene.h'
+ 'vulkan-scene.h':'../../reshade/native/vulkan-scene.h',
+ 'recorded-scene.h':'../../reshade/native/recorded-scene.h',
+ 'generation-provider.h':'../../reshade/native/generation-provider.h'
 };
 function original(repository,file){return execFileSync('git',['-C',repository,'show',sourceRevision(source)+':'+file],{encoding:'utf8',env:{...process.env,GIT_NO_LAZY_FETCH:'1'},maxBuffer: Infinity});}
 function replace(text,from,to,file){if(text.split(from).length!==2)throw Error('MoltenVK source anchor changed: '+file);return text.replace(from,to);}
