@@ -5,6 +5,7 @@ function replace(file,before,after){const text=fs.readFileSync(file,'utf8').repl
 /** Adapt build boundaries in disposable copies of the exact 0.10.2 inputs. */
 export function applyBuildOverlay({love,megasource,luaLibrary,luaInclude}){
  const cmake=path.join(love,'CMakeLists.txt');
+ applyLuaSocketRegistrationTypeOverlay({love});
  replace(cmake,'\tif(APPLE)\n\t\tmessage(FATAL_ERROR "JIT not supported yet on Mac. Please use -DLOVE_JIT=0.")\n\tendif()','\t# LuaJIT 2.1 supplies Darwin arm64 and x86_64 with the Lua 5.1 ABI.');
  const mega=path.join(megasource,'CMakeLists.txt');
  applyZlibDarwinOverlay({megasource});
@@ -185,4 +186,14 @@ export function applySdlCocoaWindowDeclarationsOverlay({megasource}){
  replace(file,'        [nswindow setFrame:frameRect display:NO];','        [nswindow setFrame:frameRect display:NO];\n        }');
  replace(file,'        NSArray *contexts = [[data->nscontexts copy] autorelease];','        {\n        NSArray *contexts = [[data->nscontexts copy] autorelease];');
  replace(file,'        [data->nscontexts release];','        }\n        [data->nscontexts release];');
+}
+
+/** Use the Lua 5.1 registration type declared by the selected LuaJIT headers. */
+export function applyLuaSocketRegistrationTypeOverlay({love}){
+ const root=path.join(love,'src/libraries/luasocket/libluasocket');
+ for(const [name,count] of [['auxiliar.c',1],['auxiliar.h',1],['except.c',1],['inet.c',1],['luasocket.c',2],['mime.c',1],['select.c',1],['tcp.c',2],['timeout.c',1],['udp.c',2],['unix.c',2]]){
+  const file=path.join(root,name),text=fs.readFileSync(file,'utf8');
+  if((text.match(/\bluaL_reg\b/g)||[]).length!==count)throw Error('LuaSocket registration type anchor changed: '+name);
+  fs.writeFileSync(file,text.replace(/\bluaL_reg\b/g,'luaL_Reg'));
+ }
 }
