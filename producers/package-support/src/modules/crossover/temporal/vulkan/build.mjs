@@ -173,17 +173,17 @@ export function finishModule(built,output){
     }
     return output;
 }
+/** Read all Mach-O slices and PE hybrid metadata for the shipped modules. */
+export function moduleArchitectures(file){
+    const facts=appRequire('src/core/binary-arch').inspectBinary(file);
+    if(facts.format==='macho')return facts.architectures;
+    if(facts.format==='pe'&&facts.machine)return [facts.machine];
+    throw Error('Unrecognized module binary format: '+file);
+}
 /** Describe staged module libraries from the projected Wine source: licenses, provider record, manifest, payload and declaration. */
 export function describeModule({directory,output,arch='x64',profile=source,modules=modulePaths(arch,profile.architectures.pe,profile.clientModule),readobj}){
     const host=wineHost(arch),minimumMacOS=profile.minimumMacOS,MODULES=modules;
-    const architectures=file=>{
-        if(file.endsWith('.so'))return read('/usr/bin/lipo',['-archs',file]).split(/\s+/);
-        const header=read(readobj,['--file-headers',file]);
-        const machine=header.match(/Machine: IMAGE_FILE_MACHINE_([A-Z0-9_]+)/)?.[1];
-        const cpu={AMD64:'x86_64',I386:'i386',ARM64:'arm64',ARM64EC:'arm64ec',ARM64X:'arm64x'}[machine];
-        if(!cpu)throw Error('Unrecognized PE output machine: '+file);
-        return [cpu];
-    };
+    const architectures=moduleArchitectures;
     addLicenses(output,'Wine',directory);
     addLicense(output,'Wine authors',path.join(directory,'AUTHORS'));
     addLicenses(output,'Khronos Vulkan',here);
