@@ -1,4 +1,3 @@
-import {adaptLiteTiledPost} from './adapt-lite-post.mjs';
 import {sourceRevision} from '../../../../../../../../lib/pins.mjs';
 const revision=sourceRevision({gitlink:'producers/package-support/src/external/fsr4-metal'});
 import {addLicenses} from '../../../../../../../../lib/licenses.mjs';
@@ -86,7 +85,7 @@ async function compile() {
   await fs.writeFile(path.join(work, 'tools/compile_fsr411.py'), compiler);
   compiler = compiler.replace('speck=args.profile == "lossy2"', 'speck=args.profile == "lossy2" and os.environ.get("MACLAUNCHER_LEGACY_LOSSY2") != "1"');
   await fs.writeFile(path.join(work, 'tools/compile_fsr411.py'), compiler);
-  await fs.writeFile(path.join(work, 'src/fsr412_session.inc'), adaptLiteTiledPost(adaptLiteSession(await fs.readFile(path.join(work, 'src/fsr412_session.inc'), 'utf8'))));
+  await fs.writeFile(path.join(work, 'src/fsr412_session.inc'), adaptLiteSession(await fs.readFile(path.join(work, 'src/fsr412_session.inc'), 'utf8')));
   const runtime = adaptRuntime(
       await fs.readFile(path.join(work, 'src/fsr411_runtime.h'), 'utf8'));
   await fs.writeFile(path.join(work, 'src/fsr411_runtime.h'), runtime.source);
