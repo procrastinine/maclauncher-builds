@@ -1,19 +1,23 @@
 // SPDX-License-Identifier: GPL-2.0-only
 // Starts a PS5 game under FEXCore in an arm64 process and runs it to its main function. The eboot and its bundled
-// sce_module PRX modules are loaded as guest code and imports between them bind by NID. Imports of system library
-// functions bind to per-signature thunks (SysVThunk.h): first the thunks generate-thunks.py generated from the AnyPS5
-// export prototypes for the arm64 objects linked in, then the stand-in host functions below. An import with neither
-// binds to a stub that logs its NID once and returns SCE_KERNEL_ERROR_ENOSYS. The PRX modules' DT_INIT functions run
-// first, then the eboot entry with the PS5 argument block; a HLT placed at main ends the run there. The run passes when
-// it reaches main without calling any stub.
+// sce_module PRX modules are loaded as guest code. An import binds by NID to a guest module's export when the module it
+// declares is that guest module (or it declares none). Every other import is a system library function and binds to a
+// per-signature thunk (SysVThunk.h): first the thunks generate-thunks.py generated from the AnyPS5 export prototypes for
+// the arm64 objects linked in, then the stand-in host functions below. An import with neither binds to a stub that
+// logs its NID once and returns SCE_KERNEL_ERROR_ENOSYS. The PRX modules' DT_INIT functions run first, then the eboot
+// entry with the PS5 argument block; a HLT placed at main ends the "modules" run there, which passes when it reaches
+// main without calling any stub. "past-main" goes on into main.
 //
-// Usage: anyps5-fex-start <game directory> <main vaddr> modules|eboot-only
+// Usage: anyps5-fex-start <game directory> <game data directory> <main vaddr> modules|eboot-only|past-main
 //   eboot-only leaves out the sce_module PRX modules, so their exports stay unbound (expected to fail).
 #include "Ps5Module.h"
 #include "GuestCpuHost.h"
+#include "GuestImages.h"
 #include "SysVThunk.h"
 
 #include <atomic>
+#include <cmath>
+#include <cstdlib>
 #include <dirent.h>
 #include <filesystem>
 #include <pthread.h>
@@ -108,6 +112,34 @@ int PosixMemalign(void** Result, std::uint64_t Alignment, std::uint64_t Size) {
 }
 } // namespace Kernel
 
+// libc's Math.cpp does not build for arm64 yet: its x87 remainder and extended-precision paths are architecture
+// boundaries the arm64 library overlay has not adapted. The double and float functions DOOM imports run on Darwin's libm.
+namespace Math {
+double Sin(double X) {
+  return std::sin(X);
+}
+double Exp(double X) {
+  return std::exp(X);
+}
+double Exp2(double X) {
+  return std::exp2(X);
+}
+float Exp2f(float X) {
+  return std::exp2f(X);
+}
+double Log10(double X) {
+  return std::log10(X);
+}
+std::lldiv_t Lldiv(long long Numerator, long long Denominator) {
+  return std::lldiv(Numerator, Denominator);
+}
+} // namespace Math
+
+template<>
+struct SysV::SysVEightbytes<std::lldiv_t> {
+  static constexpr char Classes[] = {'I', 'I'};
+};
+
 namespace {
 const std::pair<const char*, FexGuest::Thunk> HostFunctions[] = {
   {"__error", SysV::Thunk<&Kernel::Error>},
@@ -141,6 +173,12 @@ const std::pair<const char*, FexGuest::Thunk> HostFunctions[] = {
   {"free", SysV::Thunk<&Kernel::Free>},
   {"posix_memalign", SysV::Thunk<&Kernel::PosixMemalign>},
   {"_exit", SysV::Thunk<&Kernel::Exit>},
+  {"sin", SysV::Thunk<&Math::Sin>},
+  {"exp", SysV::Thunk<&Math::Exp>},
+  {"exp2", SysV::Thunk<&Math::Exp2>},
+  {"exp2f", SysV::Thunk<&Math::Exp2f>},
+  {"log10", SysV::Thunk<&Math::Log10>},
+  {"lldiv", SysV::Thunk<&Math::Lldiv>},
 };
 
 std::vector<FexGuest::Thunk> Table;
@@ -212,9 +250,16 @@ FexGuest::After Unimplemented(FexGuest::CPUState& State) {
   return FexGuest::After::Return;
 }
 
-std::uint64_t Resolve(const Ps5::Symbol& S) {
+// An import that names its module binds to that module's export when the module is a loaded guest module, and to the
+// host otherwise, as AnyPS5's relinker binds them: DOOM's bundled libc.prx exports the C library under the same NIDs
+// that the eboot imports from libSceLibcInternal, but each of its functions only returns 0.
+std::uint64_t Resolve(const Ps5::Module& Importer, const Ps5::Symbol& S) {
   const std::string Nid = Ps5::NidOf(S.Name);
+  const std::string Declared = Ps5::DeclaredModule(Importer, S.Name);
   for (auto* M : Modules) {
+    if (!Declared.empty() && !Ps5::Provides(*M, Declared)) {
+      continue;
+    }
     if (auto Export = M->Exports.find(Nid); Export != M->Exports.end()) {
       Bound.Guest[Nid]++;
       return Export->second;
@@ -363,10 +408,14 @@ int main(int argc, char** argv) {
   for (auto& M : Prx) {
     Modules.push_back(&M);
   }
+  // AnyPS5's libraries find the guest images, and the main image's process parameters, through dl_iterate_phdr.
+  for (auto* M : Modules) {
+    FexGuest::RegisterGuestImage({M == &Eboot ? "" : M->Name.c_str(), M->Base, M->ProgramHeaders.data(), M->ProgramHeaderCount});
+  }
   Kernel::ThreadPointer = Ps5::SetUpStaticTls(Modules);
   Kernel::ProcParam = Eboot.ProcParam;
   for (auto* M : Modules) {
-    Ps5::Relocate(*M, Resolve);
+    Ps5::Relocate(*M, [M](const Ps5::Symbol& S) { return Resolve(*M, S); });
   }
   if (Table.size() > FexGuest::MaximumThunks) {
     std::printf("%zu imports exceed the stub page\nFAIL\n", Table.size());

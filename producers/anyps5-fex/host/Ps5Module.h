@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <functional>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -44,6 +45,8 @@ struct Module {
   std::uint64_t Entry = 0;
   std::uint64_t Init = 0;
   std::uint64_t Size = 0; // the mapped image, from Base
+  std::vector<std::uint8_t> ProgramHeaders; // the ELF program header table, PhEntSize bytes each
+  std::uint16_t ProgramHeaderCount = 0;
   std::uint64_t ProcParam = 0;
   std::uint64_t TlsImage = 0, TlsFileSize = 0, TlsMemSize = 0, TlsAlign = 1;
   std::uint64_t TlsOffset = 0; // the block is at TP - TlsOffset
@@ -51,7 +54,51 @@ struct Module {
   std::vector<Symbol> Symbols;
   std::vector<Relocation> Relocations;
   std::unordered_map<std::string, std::uint64_t> Exports; // NID -> guest address
+  // The names other modules know this one by: its file name, DT_SONAME and its SCE module names.
+  std::vector<std::string> Identities;
+  // The modules this one imports from, by the module ID that ends each imported symbol's name.
+  std::unordered_map<std::uint64_t, std::string> ImportModules;
 };
+
+// A module name without its .prx, .sprx, .suprx or .debug_prx suffix.
+inline std::string ModuleStem(const std::string& Name) {
+  for (const char* Suffix : {".prx", ".sprx", ".suprx", ".debug_prx"}) {
+    const std::size_t Length = std::strlen(Suffix);
+    if (Name.size() > Length && Name.compare(Name.size() - Length, Length, Suffix) == 0) {
+      return Name.substr(0, Name.size() - Length);
+    }
+  }
+  return Name;
+}
+
+// The module an imported symbol "<NID>#<library>#<module>" names, or "" for a name without a module ID.
+inline std::string DeclaredModule(const Module& Importer, const std::string& Name) {
+  const auto First = Name.find('#');
+  const auto Second = First == std::string::npos ? std::string::npos : Name.find('#', First + 1);
+  if (Second == std::string::npos) {
+    return {};
+  }
+  static constexpr std::string_view Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-";
+  std::uint64_t Id = 0;
+  for (const char Character : std::string_view(Name).substr(Second + 1)) {
+    const auto Digit = Alphabet.find(Character);
+    if (Digit == std::string_view::npos) {
+      return {};
+    }
+    Id = Id * 64 + Digit;
+  }
+  const auto Found = Importer.ImportModules.find(Id);
+  return Found == Importer.ImportModules.end() ? std::string {} : Found->second;
+}
+
+// Whether a module is the one an import names, as AnyPS5's relinker matches them: by file name, DT_SONAME or SCE
+// module name, with or without the module suffix.
+inline bool Provides(const Module& M, const std::string& Declared) {
+  const auto Stem = ModuleStem(Declared);
+  return std::any_of(M.Identities.begin(), M.Identities.end(), [&](const std::string& Identity) {
+    return Identity == Declared || ModuleStem(Identity) == Stem;
+  });
+}
 
 inline std::vector<std::uint8_t> ReadFile(const std::string& Path) {
   std::vector<std::uint8_t> Data;
@@ -100,6 +147,12 @@ inline Module Load(const std::string& Path, const std::string& Name) {
   M.Name = Name;
   const std::uint64_t PhOff = Read<std::uint64_t>(File, 32), PhEntSize = Read<std::uint16_t>(File, 54), PhNum = Read<std::uint16_t>(File, 56);
   std::uint64_t End = 0, Dynamic = 0, DynamicSize = 0;
+  if (PhEntSize != 56) {
+    std::printf("%s has %llu-byte program headers\nFAIL\n", Path.c_str(), static_cast<unsigned long long>(PhEntSize));
+    std::exit(2);
+  }
+  M.ProgramHeaders.assign(File.begin() + PhOff, File.begin() + PhOff + PhNum * PhEntSize);
+  M.ProgramHeaderCount = static_cast<std::uint16_t>(PhNum);
   for (unsigned i = 0; i < PhNum; ++i) {
     const auto O = PhOff + i * PhEntSize;
     if (Read<std::uint32_t>(File, O) == PT_LOAD) {
@@ -131,12 +184,19 @@ inline Module Load(const std::string& Path, const std::string& Name) {
   M.Entry = Read<std::uint64_t>(File, 24);
 
   std::unordered_map<std::uint64_t, std::uint64_t> Tags;
+  std::vector<std::pair<std::uint64_t, std::uint64_t>> Repeated; // tags that occur once per module
+  constexpr std::uint64_t DT_SONAME = 14, DT_SCE_MODULE_INFO = 0x6100000d, DT_SCE_NEEDED_MODULE = 0x6100000f,
+                          DT_SCE_MODULE_INFO_PS5 = 0x61000043, DT_SCE_NEEDED_MODULE_PS5 = 0x61000045;
   for (std::uint64_t O = Dynamic; O + 16 <= Dynamic + DynamicSize; O += 16) {
     const auto Tag = Read<std::uint64_t>(File, O);
     if (Tag == 0) {
       break;
     }
     Tags.try_emplace(Tag, Read<std::uint64_t>(File, O + 8));
+    if (Tag == DT_SONAME || Tag == DT_SCE_MODULE_INFO || Tag == DT_SCE_NEEDED_MODULE || Tag == DT_SCE_MODULE_INFO_PS5 ||
+        Tag == DT_SCE_NEEDED_MODULE_PS5) {
+      Repeated.emplace_back(Tag, Read<std::uint64_t>(File, O + 8));
+    }
   }
   constexpr std::uint64_t DT_INIT = 12, DT_STRTAB = 5, DT_SYMTAB = 6, DT_RELA = 7, DT_RELASZ = 8, DT_JMPREL = 23, DT_PLTRELSZ = 2,
                           DT_SCE_SYMTABSZ = 0x6100003f;
@@ -144,6 +204,15 @@ inline Module Load(const std::string& Path, const std::string& Name) {
     M.Init = M.Base + Tags[DT_INIT];
   }
   const std::uint64_t Strings = M.Base + Tags.at(DT_STRTAB), SymbolTable = M.Base + Tags.at(DT_SYMTAB);
+  M.Identities.push_back(Name);
+  for (const auto& [Tag, Value] : Repeated) {
+    const std::string Text = reinterpret_cast<const char*>(Strings + (Value & 0xffff'ffffULL));
+    if (Tag == DT_SCE_NEEDED_MODULE || Tag == DT_SCE_NEEDED_MODULE_PS5) {
+      M.ImportModules.try_emplace(Value >> 48, Text);
+    } else if (!Text.empty()) {
+      M.Identities.push_back(Text);
+    }
+  }
   for (std::uint64_t i = 0; i < Tags.at(DT_SCE_SYMTABSZ) / 24; ++i) {
     const std::uint64_t S = SymbolTable + i * 24;
     Symbol Entry {reinterpret_cast<const char*>(Strings + Guest<std::uint32_t>(S)), Guest<std::uint8_t>(S + 4), Guest<std::uint16_t>(S + 6),

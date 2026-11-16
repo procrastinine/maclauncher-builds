@@ -19,6 +19,7 @@
 
 #include "FexGuest.h"
 
+#include <algorithm>
 #include <array>
 #include <bit>
 #include <utility>
@@ -188,6 +189,17 @@ public:
     }
   }
 
+  // Where va_start would leave a va_list after the arguments read so far.
+  unsigned Integers() const {
+    return Int;
+  }
+  unsigned Vectors() const {
+    return Vector;
+  }
+  std::uint64_t StackArguments() const {
+    return Stack;
+  }
+
 private:
   std::uint64_t Memory8() {
     std::uint64_t Value;
@@ -263,6 +275,58 @@ After Thunk(CPUState& State) {
   return Call(Export, State);
 }
 
+template<class F>
+struct FunctionTraits;
+template<class R, class... A>
+struct FunctionTraits<R (*)(A...)> {
+  using Parameters = std::tuple<A...>;
+};
+
+// A variadic export runs as its va_list counterpart (snprintf as vsnprintf), whose last parameter points to a System V
+// va_list. The thunk reads the fixed arguments as usual and passes a va_list that starts after them, as va_start would
+// in the guest: the six argument registers and xmm0-xmm7 in a register save area, then the guest's stack arguments.
+struct alignas(16) RegisterSaveArea {
+  std::uint64_t Integers[6];
+  std::uint64_t Vectors[8][2];
+};
+struct GuestVaList {
+  std::uint32_t GpOffset;
+  std::uint32_t FpOffset;
+  std::uint64_t OverflowArgArea;
+  std::uint64_t RegSaveArea;
+};
+static_assert(sizeof(RegisterSaveArea) == 176 && sizeof(GuestVaList) == 24);
+
+template<class R, class... P, std::size_t... I>
+After CallVariadic(R (*Export)(P...), CPUState& State, std::index_sequence<I...>) {
+  using Parameters = std::tuple<P...>;
+  using ListPointer = std::tuple_element_t<sizeof...(P) - 1, Parameters>;
+  Arguments In(State);
+  std::tuple<std::tuple_element_t<I, Parameters>...> Fixed {In.template Next<std::tuple_element_t<I, Parameters>>()...};
+  static constexpr int Registers[] = {X86::REG_RDI, X86::REG_RSI, X86::REG_RDX, X86::REG_RCX, X86::REG_R8, X86::REG_R9};
+  RegisterSaveArea Save;
+  for (int i = 0; i < 6; ++i) {
+    Save.Integers[i] = State.gregs[Registers[i]];
+  }
+  for (int i = 0; i < 8; ++i) {
+    Save.Vectors[i][0] = State.xmm.sse.data[i][0];
+    Save.Vectors[i][1] = State.xmm.sse.data[i][1];
+  }
+  GuestVaList List {std::min(In.Integers(), 6u) * 8, 48 + std::min(In.Vectors(), 8u) * 16, In.StackArguments(), reinterpret_cast<std::uint64_t>(&Save)};
+  auto Run = [&](auto... Values) { return Export(Values..., reinterpret_cast<ListPointer>(&List)); };
+  if constexpr (std::is_void_v<R>) {
+    std::apply(Run, Fixed);
+    return After::Return;
+  } else {
+    return Store(State, std::apply(Run, Fixed), 0);
+  }
+}
+
+template<auto Export>
+After VariadicThunk(CPUState& State) {
+  return CallVariadic(Export, State, std::make_index_sequence<std::tuple_size_v<typename FunctionTraits<decltype(Export)>::Parameters> - 1> {});
+}
+
 template<class T>
 constexpr bool SupportedArgument = std::is_arithmetic_v<T> || std::is_enum_v<T> || std::is_pointer_v<T>;
 
@@ -281,6 +345,33 @@ template<class F>
 struct Supported : std::false_type {};
 template<class R, class... A>
 struct Supported<R (*)(A...)> : std::bool_constant<SupportedReturn<R> && (SupportedArgument<A> && ...)> {};
+
+// The variadic thunk for VaListExport, the va_list counterpart of a variadic export: its last parameter points to a
+// 24-byte System V va_list and its other parameters are ones the thunks cover. nullptr otherwise.
+template<class F>
+struct SupportedVaList : std::false_type {};
+template<class R, class... A>
+struct SupportedVaList<R (*)(A...)> {
+  using Last = std::tuple_element_t<sizeof...(A) - 1, std::tuple<A...>>;
+  static constexpr bool value = [] {
+    if constexpr (!std::is_pointer_v<Last>) {
+      return false;
+    } else if constexpr (!std::is_class_v<std::remove_pointer_t<Last>>) {
+      return false;
+    } else {
+      return sizeof(std::remove_pointer_t<Last>) == sizeof(GuestVaList) && SupportedReturn<R> && (SupportedArgument<A> && ...);
+    }
+  }();
+};
+
+template<auto VaListExport>
+constexpr FexGuest::Thunk VariadicThunkFor() {
+  if constexpr (SupportedVaList<decltype(VaListExport)>::value) {
+    return VariadicThunk<VaListExport>;
+  } else {
+    return nullptr;
+  }
+}
 
 // The thunk for Export, or nullptr when its prototype needs a case the thunks do not cover yet.
 template<auto Export>

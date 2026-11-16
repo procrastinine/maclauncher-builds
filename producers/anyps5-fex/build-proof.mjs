@@ -94,6 +94,33 @@ function check(binary,args,failing,passing){
  if(pass.status!==0||!/^PASS$/m.test(pass.stdout))throw Error('The '+passing+' run failed.');
 }
 
+// The sources of an AnyPS5 CMake object library and their flags, read from the .cmake file that libc's CMakeLists.txt
+// includes (the arm64 overlay's gdtoa/Build.cmake, which sits one directory below libc). It knows only the commands
+// such a file uses and stops at any other, so a changed file is read again by hand rather than half understood.
+function objectLibrary(file){
+ const libraryDirectory=path.dirname(path.dirname(file)),root=path.join(options.out,'anyps5');
+ const variables={CMAKE_CURRENT_SOURCE_DIR:libraryDirectory,LIBS_INCLUDE_DIR:path.join(root,'core/libs')};
+ const expand=text=>text.replace(/\$\{(\w+)\}/g,(_,name)=>{if(!(name in variables))throw Error(file+': unknown variable '+name);return variables[name];});
+ const text=fs.readFileSync(file,'utf8').replace(/#.*$/gm,'');
+ let sources=[];const common=[],c=[];
+ for(const [,command,body] of text.matchAll(/(\w+)\(([^)]*)\)/g)){
+  const words=body.trim().split(/\s+/).map(word=>word.replace(/^"(.*)"$/,'$1'));
+  if(command==='set')variables[words[0]]=expand(words[1]);
+  else if(command==='add_library'){if(words[1]!=='OBJECT')throw Error(file+': not an object library');sources=words.slice(2).map(expand);}
+  else if(command==='set_target_properties'){
+   for(let i=2;i<words.length;i+=2){
+    if(words[i]==='C_VISIBILITY_PRESET')c.push('-fvisibility='+words[i+1]);
+    else if(words[i]!=='POSITION_INDEPENDENT_CODE')throw Error(file+': unknown property '+words[i]);
+   }
+  }
+  else if(command==='target_include_directories')common.push(...words.slice(2).flatMap(directory=>['-I',expand(directory)]));
+  else if(command==='target_compile_definitions')common.push(...words.slice(2).map(definition=>'-D'+definition));
+  else if(command==='target_compile_options')common.push(...words.slice(2).map(expand));
+  else if(command!=='target_sources'&&command!=='add_dependencies')throw Error(file+': unknown command '+command);
+ }
+ return sources.map(source=>[path.relative(root,source),[...common,...(source.endsWith('.c')?c:[])]]);
+}
+
 const options=argumentsOf(process.argv.slice(2));
 if(process.platform!=='darwin'||process.arch!=='arm64')throw Error('The proof builds on arm64 macOS.');
 lowestPriority();
@@ -108,9 +135,14 @@ for(const overlay of recipe.overlays)applyOverlay(path.join(options.out,overlay.
 // applied in that list's order.
 for(const [directory,method] of recipe.anyps5.runtimeOverlays)
  (await import(new URL('../anyps5/overlays/'+directory+'/apply.mjs',import.meta.url)))[method](path.join(options.out,'anyps5'));
-// The arm64 library overlay's shared sources (GuestCpuArm64, owned by the PS5 library lane) go into the AnyPS5 projection.
-const arm64Libraries=await import(new URL(recipe.anyps5.arm64Libraries.script,import.meta.url));
-for(const name of recipe.anyps5.arm64Libraries.exports)arm64Libraries[name](path.join(options.out,'anyps5'));
+// This producer's own overlays for the arm64 translation host (producers/anyps5-fex/overlays), after those.
+for(const [directory,method] of recipe.anyps5.hostOverlays)
+ (await import(new URL('overlays/'+directory+'/apply.mjs',import.meta.url)))[method](path.join(options.out,'anyps5'));
+// The arm64 library overlay's steps that the per-source objects need (owned by the PS5 library lane): its shared sources
+// (GuestCpuArm64, the standard stream objects) and its raw x87 long double parsing and formatting, each a function of
+// a module in that overlay's directory, in the listed order.
+for(const [script,name] of recipe.anyps5.arm64Libraries.steps)
+ (await import(new URL(recipe.anyps5.arm64Libraries.directory+'/'+script,import.meta.url)))[name](path.join(options.out,'anyps5'));
 // The host sources sit outside the FEX projection; fex-entry.cmake adds them to FEX's build.
 const hostSource=path.join(options.out,'host');
 fs.rmSync(hostSource,{recursive:true,force:true});fs.mkdirSync(hostSource,{recursive:true});
@@ -120,14 +152,17 @@ const guestObject=path.join(options.out,'guest-abi.x86_64.o'),guestText=path.joi
 run('clang',['-arch','x86_64','-O2','-ffreestanding','-fno-builtin','-fno-stack-protector','-fno-asynchronous-unwind-tables','-c',
  path.join(import.meta.dirname,recipe.host.directory,recipe.host.guest.source),'-o',guestObject]);
 const guestOffsets=execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,'macho-text.py'),guestObject,guestText,...recipe.host.guest.symbols],{encoding:'utf8'}).trim().split(' ');
-const objects=recipe.anyps5.objects.map(source=>{
+const compile=(source,flags=[])=>{
  // Named after the whole source path: several libraries have an Export.cpp or a Process.cpp.
- const object=path.join(options.out,'objects',source.replace(/\.cpp$/,'.arm64.o'));
+ const object=path.join(options.out,'objects',source.replace(/\.(cpp|c)$/,'.arm64.o'));
  fs.mkdirSync(path.dirname(object),{recursive:true});
- run('clang++',['-std=c++20','-arch','arm64','-O2','-c','-I',path.join(options.out,'anyps5/core/libs'),'-I',path.join(options.out,'anyps5/3rdparty/ZArchive/include'),
-  '-I',path.join(options.out,'anyps5/core/libs/nid/include'),path.join(options.out,'anyps5',source),'-o',object]);
+ const cxx=source.endsWith('.cpp');
+ run(cxx?'clang++':'clang',[...(cxx?['-std=c++20']:[]),'-arch','arm64','-O2','-c','-I',path.join(options.out,'anyps5/core/libs'),'-I',path.join(options.out,'anyps5/3rdparty/ZArchive/include'),
+  '-I',path.join(options.out,'anyps5/core/libs/nid/include'),...flags,path.join(options.out,'anyps5',source),'-o',object]);
  return object;
-});
+};
+const objects=[...recipe.anyps5.objects.map(source=>compile(source)),
+ ...recipe.anyps5.objectLibraries.flatMap(file=>objectLibrary(path.join(options.out,'anyps5',file)).map(([source,flags])=>compile(source,flags)))];
 // AnyPS5 builds each PRX as its own library, and two libraries can export the same name (libc's and libkernel's exit,
 // say). In this one image, a strong symbol that an earlier object already defines becomes local to the later object,
 // whose own calls keep using its definition; imports bind to the first.

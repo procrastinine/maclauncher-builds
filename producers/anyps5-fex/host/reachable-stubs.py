@@ -2,7 +2,7 @@
 # Lists the unreached-export stubs that the given functions can reach through direct calls and tail calls in a linked
 # arm64 binary, each with one call path. Calls through function pointers and virtual calls are not followed.
 # Usage: reachable-stubs.py <binary> <unreached-exports.s> <root symbol or @file of roots>...
-# A root is a Mach-O symbol (with its leading underscore) or an AnyPS5 export name: <name>_nid_postfix, else <name>.
+# A root is an AnyPS5 export name (<name>_nid_postfix, else <name>) or a Mach-O symbol with its leading underscore.
 import collections
 import re
 import subprocess
@@ -27,7 +27,7 @@ stubs = {symbol for symbol in listed if first.get(symbol) == 'brk'}
 known = set(first) | set(calls) | {callee for callees in calls.values() for callee in callees}
 starts = []
 for root in roots:
-    candidates = [root] if root.startswith('_') else ['_' + root + '_nid_postfix', '_' + root]
+    candidates = ['_' + root + '_nid_postfix', '_' + root, root]
     symbol = next((candidate for candidate in candidates if candidate in known), None)
     if symbol is None:
         print('root not found: ' + root, file=sys.stderr)

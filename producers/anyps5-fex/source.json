@@ -24,10 +24,7 @@
     "submodules": [
       "3rdparty/ZArchive"
     ],
-    "paths": [
-      "core/libs",
-      "3rdparty/ZArchive/include"
-    ],
+    "paths": ["core/libs", "3rdparty/ZArchive/include"],
     "objects": [
       "core/libs/prx/libkernel/Time/Time.cpp",
       "core/libs/prx/libc/src/GuestCpuArm64.cpp",
@@ -66,22 +63,44 @@
       "core/libs/prx/libc/src/PreciseWait.cpp",
       "core/libs/prx/libkernel/System/src/Process.cpp",
       "core/libs/prx/libc/src/Syslog.cpp",
+      "core/libs/prx/libc/src/ApplicationProcessParameters.cpp",
+      "core/libs/prx/libc/src/ApplicationHeap.cpp",
+      "core/libs/prx/libc/src/GuestHeap.cpp",
+      "core/libs/prx/libc/src/RuntimeSupport.cpp",
+      "core/libs/prx/libc/src/Rename.cpp",
       "core/libs/prx/libSceSystemService/Export.cpp",
       "core/libs/prx/libSceSystemService/LoadExec.cpp",
       "core/libs/prx/libSceSystemService/HostUrlLauncherPosix.cpp",
       "core/libs/prx/libc/src/LogFile.cpp",
-      "core/libs/prx/libc/src/LogFilePlatform.cpp"
+      "core/libs/prx/libc/src/LogFilePlatform.cpp",
+      "core/libs/prx/libc/src/Strings.cpp",
+      "core/libs/prx/libc/src/StringExtensions.cpp",
+      "core/libs/prx/libc/src/Formatting.cpp",
+      "core/libs/prx/libc/src/LocaleSupport.cpp",
+      "core/libs/prx/libc/src/StandardStreams.cpp",
+      "core/libs/prx/libc/src/Time.cpp",
+      "core/libs/prx/libc/src/Multibyte.cpp",
+      "core/libs/prx/libc/src/BoundsChecking.cpp"
+    ],
+    "objectLibraries": [
+      "core/libs/prx/libc/gdtoa/Build.cmake"
     ],
     "runtimeOverlays": [
       ["macos-kernel", "applyKernelOverlay"],
       ["macos-host-kernel", "applyHostKernelOverlay"],
       ["macos-aborts", "applyAbortsOverlay"]
     ],
+    "hostOverlays": [
+      ["arm64-standard-streams", "applyStandardStreamsOverlay"],
+      ["guest-va-list", "applyGuestVaListOverlay"]
+    ],
     "arm64Libraries": {
-      "script": "../anyps5/overlays/arm64-libs/apply.mjs",
-      "exports": [
-        "copyArm64GuestCpuSources",
-        "copyArm64StandardStreamObjects"
+      "directory": "../anyps5/overlays/arm64-libs",
+      "steps": [
+        ["apply.mjs", "copyArm64GuestCpuSources"],
+        ["apply.mjs", "copyArm64StandardStreamObjects"],
+        ["floating80.mjs", "applyArm64FloatStringsOverlay"],
+        ["formatting80.mjs", "applyArm64FormattingOverlay"]
       ]
     }
   },
@@ -132,7 +151,9 @@
       "AnyPS5FexSyscall.cpp",
       "fex-entry.cmake",
       "GuestCpuHost.h",
-      "KernelThreadRecord.cpp"
+      "KernelThreadRecord.cpp",
+      "GuestImages.cpp",
+      "GuestImages.h"
     ],
     "guest": {
       "source": "guest-abi.c",
