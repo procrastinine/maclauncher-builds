@@ -4303,6 +4303,7 @@
       "sourceDirectory": "producers/rlvm",
       "entries": [
         "producers/rlvm/CMakeLists.txt",
+        "producers/rlvm/resources.mjs",
         "producers/dependencies/sdl2.json",
         "producers/dependencies/sdl12Compat.json",
         "producers/dependencies/boost.json",

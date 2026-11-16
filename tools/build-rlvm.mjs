@@ -12,14 +12,15 @@ const MachO=require('../lib/macho-load-commands.cjs');
 const here=path.join(root,'producers/rlvm');
 const read=name=>JSON.parse(fs.readFileSync(path.join(root,'producers/dependencies',name+'.json')));
 export function dependencyInputs(){return Object.fromEntries(['sdl2','sdl12Compat','boost','libpng','freetype','ogg','vorbis','gettext'].map(id=>{const p=read(id);return [id,{...p,url:p.url||p.repository+'/archive/'+p.revision+'.tar.gz'}];}));}
-function sourceList(source,file,name){const text=fs.readFileSync(path.join(source,file),'utf8'),body=text.match(new RegExp('\\b'+name+'\\s*=\\s*\\[([\\s\\S]*?)\\]'))?.[1];if(!body)throw Error('Missing upstream production source list: '+file+':'+name);return [...body.matchAll(/"([^"\n]+\.(?:cc|cpp|c|mm))"/g)].map(m=>path.join(path.dirname(file),m[1]));}
+function sourceList(source,file,name){const text=fs.readFileSync(path.join(source,file),'utf8'),body=text.match(new RegExp('\\b'+name+'\\s*=\\s*\\[([\\s\\S]*?)\\]'))?.[1];if(!body)throw Error('Missing upstream production source list: '+file+':'+name);return [...body.matchAll(/"([^"\n]+\.(?:cc|cpp|c|mm|png))"/g)].map(m=>path.join(path.dirname(file),m[1]));}
 export function projectSources(source,build){
  const engine=[...['librlvm_files','libsystemsdl_files','guichan_platform'].flatMap(name=>sourceList(source,'SConscript',name)),...sourceList(source,'SConscript.cocoa','cocoarlvm_files')];
  const vendor=[['SDL_image','libsdl_image_files'],['SDL_mixer','libsdl_mixer_files'],['SDL_ttf','libsdl_ttf_files'],['GLEW','libglew_files'],['guichan','libguichan_files']].flatMap(([dir,name])=>sourceList(source,'vendor/'+dir+'/SConscript',name));
- for(const name of [...engine,...vendor])if(!fs.existsSync(path.join(source,name)))throw Error('Missing upstream source '+name);
+ const resources=sourceList(source,'SConscript','guichan_resources');
+ for(const name of [...engine,...vendor,...resources])if(!fs.existsSync(path.join(source,name)))throw Error('Missing upstream source '+name);
  const quote=value=>'"'+value.replaceAll('\\','/').replaceAll('"','\\"')+'"';
- fs.mkdirSync(build,{recursive:true});fs.writeFileSync(path.join(build,'upstream-sources.cmake'),[['engine_sources',engine],['vendor_sources',vendor]].map(([name,files])=>'set('+name+'\n'+files.map(file=>quote(path.join(source,file))).join('\n')+'\n)\n').join(''));
- return {engine,vendor};
+ fs.mkdirSync(build,{recursive:true});fs.writeFileSync(path.join(build,'upstream-sources.cmake'),[['engine_sources',engine],['vendor_sources',vendor],['resource_inputs',resources]].map(([name,files])=>'set('+name+'\n'+files.map(file=>quote(path.join(source,file))).join('\n')+'\n)\n').join(''));
+ return {engine,vendor,resources};
 }
 async function dependencySources(work){const result={};for(const [id,pin]of Object.entries(dependencyInputs())){const archive=await buildInput(pin),source=path.join(work,'sources',id);if(!fs.existsSync(source)){fs.mkdirSync(source,{recursive:true});run('/usr/bin/tar',['-xf',archive,'--strip-components','1','-C',source]);}result[id]=source;}return result;}
 // The shared Boost archive is the release's Boost.Build export, not a CMake tree.

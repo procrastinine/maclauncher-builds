@@ -30,6 +30,13 @@ target_link_libraries(rlvm_vendor PUBLIC Freetype::Freetype PNG::PNG Ogg::ogg Vo
 # This upstream unit uses a source-root-relative include; keep other object commands unchanged.
 set_property(SOURCE "${RLVM_SOURCE}/src/systems/base/hik_renderer.cc"
  APPEND PROPERTY INCLUDE_DIRECTORIES "${RLVM_SOURCE}")
-add_executable(rlvm ${engine_sources})
+find_program(NODE_EXECUTABLE node REQUIRED)
+# Embed the same pinned guichan_resources bytes and mutable filename symbols as wxInclude.
+add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/resource_header.h"
+ COMMAND "${NODE_EXECUTABLE}" "${CMAKE_CURRENT_LIST_DIR}/resources.mjs"
+  "${CMAKE_CURRENT_BINARY_DIR}/resource_header.h" ${resource_inputs}
+ DEPENDS "${CMAKE_CURRENT_LIST_DIR}/resources.mjs" "${RLVM_SOURCE}/SConscript" ${resource_inputs}
+ VERBATIM)
+add_executable(rlvm ${engine_sources} "${CMAKE_CURRENT_BINARY_DIR}/resource_header.h")
 target_link_libraries(rlvm PRIVATE rlvm_vendor Boost::filesystem Boost::iostreams Boost::program_options Boost::serialization Boost::thread Boost::date_time ${INTL_LIBRARY} iconv z bz2
  "-framework Cocoa" "-framework OpenGL" "-framework ApplicationServices" "-framework AudioToolbox" "-framework AudioUnit" "-framework CoreFoundation")
