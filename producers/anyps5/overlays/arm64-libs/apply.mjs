@@ -6,6 +6,8 @@ import {applyArm64ContextsOverlay} from './contexts.mjs';
 import {applyArm64TlsOverlay} from './tls.mjs';
 import {applyArm64ThreadsOverlay} from './threads.mjs';
 import {applyArm64FloatStringsOverlay} from './floating80.mjs';
+import {applyArm64FormattingOverlay} from './formatting80.mjs';
+export {applyArm64FormattingOverlay};
 export {copyArm64GuestFloatSources} from './floating80.mjs';
 export {copyArm64GuestThreadSources} from './threads.mjs';
 export {copyArm64GuestContextSources} from './contexts.mjs';
@@ -100,6 +102,7 @@ export function applyArm64LibrariesOverlay(root) {
     applyArm64TlsOverlay(root);
     applyArm64ThreadsOverlay(root);
     applyArm64FloatStringsOverlay(root);
+    applyArm64FormattingOverlay(root);
     edit('core/libs/prx/libc/src/AtomicBuiltins.cpp', (source, file) => {
         source = replace(source,
         'bool CompareExchange16(Uint128* target, Uint128& expected, Uint128 desired) {',
