@@ -11,6 +11,7 @@ struct HostAccessors {
     void* (*Bind)(std::uintptr_t stackLow, std::size_t stackBytes);
     void (*Release)(void* binding) noexcept;
     std::uint64_t (*Call)(std::uintptr_t entry, std::uint64_t arg0, std::uint64_t arg1);
+    int (*CallProcess)(std::uintptr_t entry, std::uintptr_t block, void (*cleanup)());
 };
 
 class Scope {
@@ -27,6 +28,7 @@ private:
 };
 
 std::uint64_t Call(std::uintptr_t entry, std::uint64_t arg0, std::uint64_t arg1 = 0);
+int CallProcess(std::uintptr_t entry, std::uintptr_t block, void (*cleanup)());
 
 }
 

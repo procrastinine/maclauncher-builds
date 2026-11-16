@@ -80,15 +80,16 @@ MXCSR and the x87 control word, `_longjmp` preserves current MXCSR status bits,
 and signal jumps save the x87 control word and optional signal mask in their
 original fields.
 
-The macOS TLS allocator keeps its custom guest RAX convention on arm64. Its native entry captures the guest call frame, reads the descriptor from RAX, invokes the unchanged pthread-key-backed allocation and commits the returned thread pointer to guest RAX. Context restoration returns through `GuestContext::Transfer`; it does not call guest code as a native function. Captured GPRs and the legacy FXSAVE image are retained, and the host context adapter preserves the existing upper YMM halves. `Aps5GuestTlsAvx_nid_no_patch` selects only the native x86 assembly scratch-save path; its arm64 value is zero because that path is absent. Guest AVX features continue to come from the bound guest CPU context.
+The macOS TLS allocator keeps its custom guest RAX convention on arm64. Its native entry captures the guest call frame, reads the descriptor from RAX, invokes the unchanged pthread-key-backed allocation and commits the returned thread pointer to guest RAX. Context restoration returns through `GuestContext::Transfer`; it does not call guest code as a native function. Captured GPRs and the legacy FXSAVE image are retained, and the host context adapter preserves the existing upper YMM halves. The production `Aps5GuestVectorState_nid_no_patch` object describes only the native x86 assembly scratch-save path; its arm64 mask/size/useXsave fields are zero because that path is absent. Guest AVX features and vector state continue to come from the bound guest CPU context.
 
 `GuestThreadInstallHost_nid_no_patch` installs one copied libc-authoritative
-`GuestThread::HostAccessors` table. All three callbacks are mandatory:
+`GuestThread::HostAccessors` table. All four callbacks are mandatory:
 
 ```cpp
 void* Bind(std::uintptr_t stackLow, std::size_t stackBytes);
 void Release(void* binding) noexcept;
 std::uint64_t Call(std::uintptr_t entry, std::uint64_t arg0, std::uint64_t arg1);
+int CallProcess(std::uintptr_t entry, std::uintptr_t block, void (*cleanup)());
 ```
 
 `Bind` creates and binds initialized FEX state on the current OS thread for the
@@ -97,7 +98,7 @@ supplied real guest stack range and returns its non-null lifetime token.
 thread after guest cleanup. `Call` enters guest code with zero, one or two
 integer arguments and returns guest RAX. It handles guest return and nested
 native callbacks through the FEX dispatcher; the native library has no direct
-function-pointer fallback. CPU/context installers precede thread creation.
+function-pointer fallback. `CallProcess` marshals the process block and a guest-callable thunk for the typed native cleanup callback, preserving the startup exit/finalization lifecycle. An ARM callback address is never placed directly in a guest argument register. CPU/context installers precede thread creation.
 
 The native worker's binding scope lives outside its host `_setjmp` region and
 is established before the initialized promise and guest fenv/TLS setup. It

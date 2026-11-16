@@ -20,7 +20,8 @@ const GuestThread::HostAccessors& Accessors() {
 }
 
 extern "C" void GuestThreadInstallHost_nid_no_patch(const GuestThread::HostAccessors* accessors) {
-    if (accessors == nullptr || accessors->Bind == nullptr || accessors->Release == nullptr || accessors->Call == nullptr)
+    if (accessors == nullptr || accessors->Bind == nullptr || accessors->Release == nullptr ||
+        accessors->Call == nullptr || accessors->CallProcess == nullptr)
         throw std::invalid_argument("Guest thread host accessors are incomplete");
     std::lock_guard lock(installMutex);
     if (installed.load(std::memory_order_relaxed)) throw std::logic_error("Guest thread host accessors are already installed");
@@ -44,6 +45,11 @@ Scope::~Scope() {
 std::uint64_t Call(std::uintptr_t entry, std::uint64_t arg0, std::uint64_t arg1) {
     if (entry == 0) throw std::invalid_argument("Guest thread entry is null");
     return Accessors().Call(entry, arg0, arg1);
+}
+
+int CallProcess(std::uintptr_t entry, std::uintptr_t block, void (*cleanup)()) {
+    if (entry == 0) throw std::invalid_argument("Guest process entry is null");
+    return Accessors().CallProcess(entry, block, cleanup);
 }
 
 }

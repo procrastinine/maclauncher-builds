@@ -66,11 +66,15 @@ export function applyArm64ThreadsOverlay(root) {
         replace('#include "prx/libc/include/GuestArena.hpp"',
             '#include "prx/libc/include/GuestArena.hpp"\n#if defined(__aarch64__)\n' +
             '#include "prx/libc/include/GuestThreadArm64.hpp"\n#include "GuestThreadStackArm64.hpp"\n#endif');
-        replace('    start.entry(start.block, nullptr);',
+        replace('#include "GuestMainLifecycle.inc"',
+            '#include "GuestMainLifecycle.inc"\n#if defined(__aarch64__)\n' +
+            'extern "C" int Aps5CallGuestProcessEntry_nid_no_patch(void* entry, const void* block, void (*callback)()) {\n' +
+            '    return GuestThread::CallProcess(reinterpret_cast<std::uintptr_t>(entry), reinterpret_cast<std::uintptr_t>(block), callback);\n' +
+            '}\n#endif');
+        replace('    guestMainThread = true;',
             '#if defined(__aarch64__)\n' +
             '    GuestThread::MappedStack stack(guestStackBytes);\n' +
             '    GuestThread::Scope guestScope(stack.Low(), stack.Bytes());\n' +
-            '    GuestThread::Call(reinterpret_cast<std::uintptr_t>(start.entry), reinterpret_cast<std::uintptr_t>(start.block), 0);\n' +
-            '#else\n    start.entry(start.block, nullptr);\n#endif');
+            '#endif\n    guestMainThread = true;');
     });
 }
