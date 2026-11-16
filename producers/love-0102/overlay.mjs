@@ -17,6 +17,7 @@ export function applyBuildOverlay({love,megasource,luaLibrary,luaInclude}){
  applySdlCocoaMessageboxModeDeclarationsOverlay({megasource});
  applySdlCocoaMouseDeclarationsOverlay({megasource});
  applySdlCocoaShapeDeclarationsOverlay({megasource});
+ applySdlCocoaWindowDeclarationsOverlay({megasource});
  replace(path.join(megasource,'libs/physfs-2.0.3/CMakeLists.txt'),'SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} " -framework Carbon -framework IOKit")','SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} "-framework Carbon" "-framework IOKit")');
  replace(path.join(megasource,'libs/libtheora-1.1.1/CMakeLists.txt'),'\tadd_library(theora SHARED ${THEORA_SRC} lib/theora.def)','\tset(THEORA_SHARED_PLATFORM_SOURCES)\n\tif(WIN32)\n\t\tlist(APPEND THEORA_SHARED_PLATFORM_SOURCES lib/theora.def)\n\tendif()\n\tadd_library(theora SHARED ${THEORA_SRC} ${THEORA_SHARED_PLATFORM_SOURCES})');
 
@@ -151,4 +152,37 @@ export function applySdlCocoaShapeDeclarationsOverlay({megasource}){
  replace(file,'    SDL_ShapeData* data = malloc(sizeof(SDL_ShapeData));','    {\n    SDL_ShapeData* data = malloc(sizeof(SDL_ShapeData));');
  replace(file,'    int resized_properly = Cocoa_ResizeWindowShape(window);','    {\n    int resized_properly = Cocoa_ResizeWindowShape(window);');
  replace(file,'    return result;\n}','    return result;\n    }\n    }\n    }\n}');
+}
+
+/** Scope the observed Cocoa window locals without moving declarations or initializers across calls. */
+export function applySdlCocoaWindowDeclarationsOverlay({megasource}){
+ const file=path.join(megasource,'libs/SDL2/src/video/cocoa/SDL_cocoawindow.m');
+ replace(file,'    id delegate = [self delegate];','    /* Preserve Cocoa window initialization order with local declaration scopes. */\n    {\n    id delegate = [self delegate];');
+ replace(file,'        [delegate windowDidFinishMoving];\n    }\n}','        [delegate windowDidFinishMoving];\n    }\n    }\n}');
+ replace(file,'    NSData *data = [pasteboard dataForType:desiredType];','    {\n    NSData *data = [pasteboard dataForType:desiredType];');
+ replace(file,'    NSArray *array = [pasteboard propertyListForType:@"NSFilenamesPboardType"];','    {\n    NSArray *array = [pasteboard propertyListForType:@"NSFilenamesPboardType"];');
+ replace(file,'    SDL_SendDropComplete(sdlwindow);\n    return YES;\n}}','    SDL_SendDropComplete(sdlwindow);\n    return YES;\n    }\n    }\n}}');
+ replace(file,'        isMoving = NO;\n\n        SDL_Mouse *mouse','        isMoving = NO;\n\n        {\n        SDL_Mouse *mouse');
+ replace(file,'            mouse->SetRelativeMouseMode(SDL_TRUE);\n        }\n    }\n}\n\n- (BOOL)windowShouldClose','            mouse->SetRelativeMouseMode(SDL_TRUE);\n        }\n        }\n    }\n}\n\n- (BOOL)windowShouldClose');
+ replace(file,'    SDL_Window *window = _data->window;\n    NSWindow *nswindow = _data->nswindow;\n    int x, y, w, h;','    {\n    SDL_Window *window = _data->window;\n    NSWindow *nswindow = _data->nswindow;\n    int x, y, w, h;');
+ replace(file,'    const BOOL zoomed = [nswindow isZoomed];','    {\n    const BOOL zoomed = [nswindow isZoomed];');
+ replace(file,'        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MAXIMIZED, 0, 0);\n    }\n}\n\n- (void)windowDidMiniaturize','        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MAXIMIZED, 0, 0);\n    }\n    }\n    }\n}\n\n- (void)windowDidMiniaturize');
+ replace(file,'    const unsigned int newflags = [NSEvent modifierFlags] & NSAlphaShiftKeyMask;','    {\n    const unsigned int newflags = [NSEvent modifierFlags] & NSAlphaShiftKeyMask;');
+ replace(file,'    SDL_ToggleModState(KMOD_CAPS, newflags != 0);\n}','    SDL_ToggleModState(KMOD_CAPS, newflags != 0);\n    }\n}');
+ replace(file,'#if !SDL_MAC_NO_SANDBOX\n            CGPoint cgpoint;','#if !SDL_MAC_NO_SANDBOX\n            {\n            CGPoint cgpoint;');
+ replace(file,'            Cocoa_HandleMouseWarp(cgpoint.x, cgpoint.y);\n#endif','            Cocoa_HandleMouseWarp(cgpoint.x, cgpoint.y);\n            }\n#endif');
+ replace(file,'        const SDL_FingerID fingerId = (SDL_FingerID)(intptr_t)[touch identity];','        {\n        const SDL_FingerID fingerId = (SDL_FingerID)(intptr_t)[touch identity];');
+ replace(file,'            SDL_SendTouchMotion(touchId, fingerId, x, y, 1.0f);\n            break;\n        default:\n            break;\n        }\n    }','            SDL_SendTouchMotion(touchId, fingerId, x, y, 1.0f);\n            break;\n        default:\n            break;\n        }\n        }\n    }');
+ replace(file,'    [super resetCursorRects];\n    SDL_Mouse *mouse','    [super resetCursorRects];\n    {\n    SDL_Mouse *mouse');
+ replace(file,'                     cursor:[NSCursor invisibleCursor]];\n    }\n}','                     cursor:[NSCursor invisibleCursor]];\n    }\n    }\n}');
+ replace(file,'    NSScreen *screen = nil;','    {\n    NSScreen *screen = nil;');
+ replace(file,'    SDLView *contentView = [[SDLView alloc] initWithFrame:rect];','    {\n    SDLView *contentView = [[SDLView alloc] initWithFrame:rect];');
+ replace(file,'    [contentView release];','    [contentView release];\n    }');
+ replace(file,'    return 0;\n}}\n\nint\nCocoa_CreateWindowFrom','    return 0;\n    }\n}}\n\nint\nCocoa_CreateWindowFrom');
+ replace(file,'        NSRect screenRect = [[nswindow screen] frame];','        {\n        NSRect screenRect = [[nswindow screen] frame];');
+ replace(file,'        [nswindow setStyleMask:NSBorderlessWindowMask];','        }\n        [nswindow setStyleMask:NSBorderlessWindowMask];');
+ replace(file,'        NSRect frameRect = [nswindow frame];','        {\n        NSRect frameRect = [nswindow frame];');
+ replace(file,'        [nswindow setFrame:frameRect display:NO];','        [nswindow setFrame:frameRect display:NO];\n        }');
+ replace(file,'        NSArray *contexts = [[data->nscontexts copy] autorelease];','        {\n        NSArray *contexts = [[data->nscontexts copy] autorelease];');
+ replace(file,'        [data->nscontexts release];','        }\n        [data->nscontexts release];');
 }
