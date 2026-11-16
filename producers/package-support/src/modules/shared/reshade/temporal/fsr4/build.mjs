@@ -11,7 +11,7 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 
 const here = import.meta.dirname, app = appPath('src/modules/shared/reshade/temporal/fsr4'),
-      {adaptHelpers, adaptRuntime} = await import(pathToFileURL(path.join(app, 'adapt-runtime.mjs')).href),
+      {adaptHelpers, adaptRuntime, adaptLiteSession} = await import(pathToFileURL(path.join(app, 'adapt-runtime.mjs')).href),
       pin = JSON.parse(await fs.readFile(path.join(app, 'source.json'))),
       lite2 = JSON.parse(await fs.readFile(path.join(here, 'lite2.json'))),
       [ sourceArg, destinationArg, ...flags ] = process.argv.slice(2);
@@ -27,13 +27,13 @@ for (let i = 0; i < flags.length; i++) {
     phase = flags[++i];
     continue;
   }
-  if (!['--tools', '--lite2-weights']
+  if (!['--tools', '--lite2-weights', '--lossy412-archive']
            .includes(flags[i]) ||
       !flags[i + 1] || options[flags[i]])
     throw Error('Unknown or repeated build option.');
   options[flags[i]] = path.resolve(flags[++i]);
 }
-for (const name of ['--tools', '--lite2-weights'])
+for (const name of ['--tools', '--lite2-weights', '--lossy412-archive'])
   if (!options[name])
     throw Error('Missing ' + name);
 const hash = b => createHash('sha256').update(b).digest('hex'),
@@ -83,6 +83,9 @@ async function compile() {
       '        # Portable MSL is compiled by Metal during resource preparation.');
   compiler = compiler.replaceAll('.metallib', '.metal');
   await fs.writeFile(path.join(work, 'tools/compile_fsr411.py'), compiler);
+  compiler = compiler.replace('speck=args.profile == "lossy2"', 'speck=args.profile == "lossy2" and os.environ.get("MACLAUNCHER_LEGACY_LOSSY2") != "1"');
+  await fs.writeFile(path.join(work, 'tools/compile_fsr411.py'), compiler);
+  await fs.writeFile(path.join(work, 'src/fsr412_session.inc'), adaptLiteSession(await fs.readFile(path.join(work, 'src/fsr412_session.inc'), 'utf8')));
   const runtime = adaptRuntime(
       await fs.readFile(path.join(work, 'src/fsr411_runtime.h'), 'utf8'));
   await fs.writeFile(path.join(work, 'src/fsr411_runtime.h'), runtime.source);
@@ -96,7 +99,7 @@ async function compile() {
   await fs.mkdir(build, {recursive : true});
   // The translation tools use only the standard library; a cache inside the
   // output directory keeps uv from writing outside the build.
-  const python = (script, args) => run(
+  const python = (script, args, environment = {}) => run(
       'uv',
       [
         'run', '--offline', '--python', process.env.MACLAUNCHER_GRAPHICS_PYTHON || '3.12', '--no-project',
@@ -106,23 +109,28 @@ async function compile() {
         env : {
           ...process.env,
           UV_CACHE_DIR : path.join(destination, 'uv-cache'),
-          FSR4_LOSSY2_WEIGHTS : options['--lite2-weights']
+          FSR4_LOSSY2_WEIGHTS : options['--lite2-weights'], ...environment
         }
       });
+  const lossy412Weights=path.join(work,'build/fsr411_lossy2/weights_lossy2.npz');
+  await python('tools/fsr411/fetch_lossy2_weights.py',['--archive',options['--lossy412-archive'],'--out',lossy412Weights]);
   for (const tier of [ 1080, 2160, 4320 ])
     for (const ultra of [ 0, 1 ])
-      for (const profile of pin.profiles) {
+      for (const profile of pin.profiles.filter(p=>!p.userData)) {
+        const legacy=profile.id==='lite2', profileBuild=legacy?path.join(build,'legacy-lite2'):build;
+        const weights=profile.id==='lossy2-412'?lossy412Weights:options['--lite2-weights'];
+        const environment={FSR4_LOSSY2_WEIGHTS:weights,MACLAUNCHER_LEGACY_LOSSY2:legacy?'1':'0'};
         const suffix = ultra ? '_ultraperformance' : '',
               profileSuffix = profile.id === 'exact-fast'
                                   ? ''
                                   : '_' + profile.upstreamProfile,
               native = path.join(
-                  build, `fsr411_native_${tier}${suffix}${profileSuffix}`);
+                  profileBuild, `fsr411_native_${tier}${suffix}${profileSuffix}`);
         await python('tools/gen_fsr411_native.py', [
           '--tier', String(tier), '--profile', profile.nativeProfile,
           '--preset', ultra ? 'ultraperformance' : 'normal', '--lossy2-weights',
-          options['--lite2-weights'], '--outdir', native
-        ]);
+          weights, '--outdir', native
+        ], environment);
         for (const depth of [ 0, 1 ])
           for (const low of [ 0, 1 ])
             for (const jitter of [ 0, 1 ])
@@ -131,7 +139,7 @@ async function compile() {
                   '--root',
                   work,
                   '--builddir',
-                  build,
+                  profileBuild,
                   '--res',
                   String(tier),
                   '--profile',
@@ -152,38 +160,41 @@ async function compile() {
                   String(exposure),
                   '--ultra-performance',
                   String(ultra)
-                ]);
+                ], environment);
       }
   await fs.mkdir(path.join(payload, 'build/libraries'), {recursive : true});
   const copied = new Set();
-  for (const dir of await fs.readdir(build)) {
+  for (const namespace of ['', 'legacy-lite2']) {
+  const sourceBuild=path.join(build,namespace);
+  for (const dir of await fs.readdir(sourceBuild)) {
     if (!/^fsr411_\d|^fsr411_native_/.test(dir))
       continue;
-    const to = path.join(payload, 'build', dir);
+    const to = path.join(payload, 'build', namespace, dir);
     await fs.mkdir(to, {recursive : true});
     if (/^fsr411_\d/.test(dir)) {
       const manifest =
-          JSON.parse(await fs.readFile(path.join(build, dir, 'bindings.json')));
+          JSON.parse(await fs.readFile(path.join(sourceBuild, dir, 'bindings.json')));
       for (const entry of Object.values(manifest.kernels))
         for (const property of ['library', 'literal_tables']) {
           if (!entry[property])
             continue;
           const bytes =
-              await fs.readFile(path.resolve(build, dir, entry[property])),
+              await fs.readFile(path.resolve(sourceBuild, dir, entry[property])),
                 name = hash(bytes) + path.extname(entry[property]);
           if (!copied.has(name)) {
             await fs.writeFile(path.join(payload, 'build/libraries', name),
                                bytes);
             copied.add(name);
           }
-          entry[property] = '../libraries/' + name;
+          entry[property] = (namespace?'../../':'../')+'libraries/' + name;
         }
       await fs.writeFile(path.join(to, 'bindings.json'),
                          JSON.stringify(manifest) + '\n');
     } else
-      for (const file of await fs.readdir(path.join(build, dir)))
+      for (const file of await fs.readdir(path.join(sourceBuild, dir)))
         if (/\.bin$|^fsr411_native_manifest\.json$/.test(file))
-          await fs.copyFile(path.join(build, dir, file), path.join(to, file));
+          await fs.copyFile(path.join(sourceBuild, dir, file), path.join(to, file));
+  }
   }
   await fs.mkdir(path.join(payload, 'src'), {recursive : true});
   for (const file
@@ -191,6 +202,13 @@ async function compile() {
                'fsr411_simd.metal', 'fsr411_reference.metal'])
     await fs.copyFile(path.join(work, 'src', file),
                       path.join(payload, 'src', file));
+  await fs.copyFile(path.join(work,'tools/fsr411_msl.py'),path.join(payload,'fsr411_msl.py'));
+  for(const file of ['fsr411_model.h','fsr411_simd_weights.h','fsr411_mpp_policy.h','fsr411_scratch_layout.h','fsr412_mpp_policy.h','fsr412_neural_tile.h'])
+    await fs.copyFile(path.join(work,'src',file),path.join(payload,'src',file));
+  await fs.mkdir(path.join(payload,'preparation/fsr412'),{recursive:true});
+  for(const file of ['compile_fsr412.py','optimization.py','model_data.py','native_model.py','lossy_weights.py','lossy_shaders.py','new_look.py','neural_tiling.py','fetch_lossy_weights.py','shader_catalog.json'])
+    await fs.copyFile(path.join(work,'tools/fsr412',file),path.join(payload,'preparation/fsr412',file));
+  await fs.copyFile(path.join(app,'prepare-model.py'),path.join(payload,'preparation/prepare-model.py'));
   await fs.mkdir(path.join(payload, 'third_party/fsr411'), {recursive : true});
   await fs.rm(path.join(payload, 'third_party/fsr411/weights_lossy2.npz'),
               {force : true});
@@ -200,6 +218,8 @@ async function compile() {
   await fs.mkdir(path.join(destination, 'source-inputs'), {recursive : true});
   await fs.copyFile(options['--lite2-weights'],
                     path.join(destination, 'source-inputs/weights_lossy2.npz'));
+  await fs.copyFile(lossy412Weights,path.join(destination,'source-inputs/weights_lossy412.npz'));
+  await fs.copyFile(options['--lossy412-archive'],path.join(destination,'source-inputs/lossy412-release.7z'));
   for (const arch of ['arm64', 'x86_64'])
     await run('xcrun', [
       'clang++',
@@ -277,7 +297,8 @@ async function assemble() {
     maximumOutput : [ 7680, 4320 ],
     library : 'libmaclauncher-fsr4.dylib',
     resolvedPaths : [ 'build/fsr411_native_' ],
-    sourceInputs : [ {
+    sourceInputs : [ {path:'source-inputs/weights_lossy412.npz',sha256:'1e619693f4a3e191e8128946a133560e317ed425b04724637ebedec8d2deaa35',license:'GPL-2.0-or-later'},
+      {path:'source-inputs/lossy412-release.7z',sha256:'140249629eb4867737a60fb400a801aaa9900d24d857bbe5d12b8156c28d2121',url:'https://github.com/zgauthier2000/fsr4-shader-performance-overrides/releases/download/dll-2026-10-29/fsr4.1.2-cyboman-rx7000-2026-10-29.7z',license:'GPL-2.0-or-later'}, {
       path : 'source-inputs/weights_lossy2.npz',
       size : (await fs.stat(options['--lite2-weights'])).size,
       sha256 : lite2.sha256,

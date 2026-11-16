@@ -297,6 +297,12 @@
         "spirv-headers/CMakeLists.txt": null,
         "lcms2/meson.build": null
       }
+    },
+    "lossy412-archive": {
+      "kind": "file",
+      "description": "FSR 4.1.2 Lossy training source release",
+      "url": "https://github.com/zgauthier2000/fsr4-shader-performance-overrides/releases/download/dll-2026-10-29/fsr4.1.2-cyboman-rx7000-2026-10-29.7z",
+      "sha256": "140249629eb4867737a60fb400a801aaa9900d24d857bbe5d12b8156c28d2121"
     }
   },
   "tools": {
@@ -407,7 +413,9 @@
             "--tools",
             "{input:shader-tools}",
             "--lite2-weights",
-            "{input:lite2-weights}"
+            "{input:lite2-weights}",
+            "--lossy412-archive",
+            "{input:lossy412-archive}"
           ]
         }
       ]
