@@ -12,6 +12,7 @@ export function applyBuildOverlay({love,megasource,luaLibrary,luaInclude}){
  applySdlCocoaDeclarationsOverlay({megasource});
  applySdlArm64SpinlockOverlay({megasource});
  applySdlCoreaudioDeclarationsOverlay({megasource});
+ applySdlTimerDeclarationsOverlay({megasource});
  replace(path.join(megasource,'libs/physfs-2.0.3/CMakeLists.txt'),'SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} " -framework Carbon -framework IOKit")','SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} "-framework Carbon" "-framework IOKit")');
  replace(path.join(megasource,'libs/libtheora-1.1.1/CMakeLists.txt'),'\tadd_library(theora SHARED ${THEORA_SRC} lib/theora.def)','\tset(THEORA_SHARED_PLATFORM_SOURCES)\n\tif(WIN32)\n\t\tlist(APPEND THEORA_SHARED_PLATFORM_SOURCES lib/theora.def)\n\tendif()\n\tadd_library(theora SHARED ${THEORA_SRC} ${THEORA_SHARED_PLATFORM_SOURCES})');
 
@@ -78,4 +79,11 @@ export function applySdlCoreaudioDeclarationsOverlay({megasource}){
  const before='        AudioQueueStop(this->hidden->audioQueue, 0);\n        const CFTimeInterval secs = (((this->spec.size / (SDL_AUDIO_BITSIZE(this->spec.format) / 8)) / this->spec.channels) / ((CFTimeInterval) this->spec.freq)) * 2.0;\n        CFRunLoopRunInMode(kCFRunLoopDefaultMode, secs, 0);';
  const after='        AudioQueueStop(this->hidden->audioQueue, 0);\n        /* Scope the constant interval after stopping playback. */\n        {\n            const CFTimeInterval secs = (((this->spec.size / (SDL_AUDIO_BITSIZE(this->spec.format) / 8)) / this->spec.channels) / ((CFTimeInterval) this->spec.freq)) * 2.0;\n            CFRunLoopRunInMode(kCFRunLoopDefaultMode, secs, 0);\n        }';
  replace(file,before,after);
+}
+
+/** Declare the Mach status before code while preserving the timer call's execution point. */
+export function applySdlTimerDeclarationsOverlay({megasource}){
+ const file=path.join(megasource,'libs/SDL2/src/timer/unix/SDL_systimer.c');
+ replace(file,'SDL_TicksInit(void)\n{\n    if (ticks_started) {','SDL_TicksInit(void)\n{\n#if !HAVE_CLOCK_GETTIME && defined(__APPLE__)\n    /* Keep the Mach result declaration before statements. */\n    kern_return_t ret;\n#endif\n    if (ticks_started) {');
+ replace(file,'    kern_return_t ret = mach_timebase_info(&mach_base_info);','    ret = mach_timebase_info(&mach_base_info);');
 }
