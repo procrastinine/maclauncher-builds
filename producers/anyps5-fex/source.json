@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "anyps5-fex-proof",
+  "source": {
+    "gitlink": "sources/fex",
+    "repository": "https://github.com/FEX-Emu/FEX.git",
+    "version": "FEX-2610",
+    "license": "MIT",
+    "submodules": [
+      "External/drm-headers",
+      "External/fmt",
+      "External/range-v3",
+      "External/rpmalloc",
+      "External/unordered_dense",
+      "External/vixl",
+      "External/xxhash",
+      "Source/Common/cpp-optparse"
+    ]
+  },
+  "anyps5": {
+    "gitlink": "sources/anyps5",
+    "repository": "https://github.com/boykopovar/AnyPS5.git",
+    "license": "GPL-2.0-only",
+    "paths": ["core/libs"],
+    "objects": ["core/libs/prx/libkernel/Time/Time.cpp"]
+  },
+  "overlays": [
+    {
+      "file": "overlays/fex-darwin-core.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "FEXCore and FEXHeaderUtils for arm64 macOS: CMake Darwin gate, MAP_JIT allocations with per-thread write scopes, x18 kept out of register allocation, os_sync futex replacement, Darwin syscall wrappers and allocator hooks"
+    },
+    {
+      "file": "overlays/anyps5-guestcpu-arm64.patch",
+      "target": "anyps5",
+      "license": "GPL-2.0-only",
+      "summary": "GuestCpu.hpp arm64 branch: guest x86 state accessors supplied by the host, counter-timer TSC"
+    }
+  ],
+  "proof": {
+    "directory": "proof",
+    "license": "GPL-2.0-only",
+    "target": "anyps5-fex-proof"
+  }
+}

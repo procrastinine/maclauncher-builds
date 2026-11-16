@@ -323,3 +323,6 @@
 [submodule "producers/package-support/src/external/minhook"]
 	path = producers/package-support/src/external/minhook
 	url = https://github.com/TsudaKageyu/minhook.git
+[submodule "sources/fex"]
+	path = sources/fex
+	url = https://github.com/FEX-Emu/FEX.git
