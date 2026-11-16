@@ -26,6 +26,24 @@ export function copyObjectSources(readSource){
  edit('spirv_glsl.cpp',dependencies,dependencies+'\n\t\t\t\tif (pointer && rhs_expr->access_chain)\n\t\t\t\t\te.access_chain = true;');
  return files;
 }
+// Apache-2.0 adaptation of steamac 93761ea526c1d653e621b4f4df9f2c87e3f50832.
+// Author: steamac <steamac@localhost>.
+// https://github.com/fxgl/steamac/blob/32a66354a24cc62d4c9ec1d263c5df7a0b1e1d7e/host/moltenvk/patches/spirv-cross/0023-MSL-No-__restrict-on-buffers-that-share-an-argument-.patch
+export function overlappingBindingSources(readSource){
+ const files=new Map();let msl=readSource('spirv_msl.cpp');
+ const edit=(from,to)=>{if(msl.split(from).length!==2)throw Error('SPIRV-Cross overlapping-binding anchor changed');msl=msl.replace(from,to);};
+ const qualifier='const char *CompilerMSL::to_restrict(uint32_t id, bool space)\n{';
+ edit(qualifier,qualifier+'\n\tif (argument_buffer_overlapping_vars.count(id))\n\t\treturn "";');
+ const analysis='void CompilerMSL::analyze_argument_buffers()\n{';
+ edit(analysis,analysis+'\n\targument_buffer_overlapping_vars.clear();');
+ const overlap='\t\t\t\tset_extended_decoration(r2.var->self, SPIRVCrossDecorationOverlappingBinding, r2.overlapping_var_id);';
+ edit(overlap,overlap+'\n\t\t\t\targument_buffer_overlapping_vars.insert(r2.overlapping_var_id);\n\t\t\t\targument_buffer_overlapping_vars.insert(r2.var->self);');
+ files.set('spirv_msl.cpp',msl);
+ const header=readSource('spirv_msl.hpp'),member='\tSmallVector<uint32_t> buffer_aliases_discrete;';
+ if(header.split(member).length!==2)throw Error('SPIRV-Cross overlapping-binding member anchor changed');
+ files.set('spirv_msl.hpp',header.replace(member,member+'\n\t// Rebuilt at argument-buffer analysis; retained through emission pass resets.\n\tstd::unordered_set<uint32_t> argument_buffer_overlapping_vars;'));
+ return files;
+}
 /** Export the declared compiler pin, then adapt only the owned projection. */
 export function prepareSpirvCrossSource({repository,work}){
  repository=fs.realpathSync(repository);work=path.resolve(work);
@@ -35,7 +53,8 @@ export function prepareSpirvCrossSource({repository,work}){
  execFileSync('git',['-C',repository,'archive','--format=tar','--output='+archive,revision],{env:{...process.env,GIT_NO_LAZY_FETCH:'1'}});
  try{prepareSourceTree(directory,temporary=>{
   execFileSync('/usr/bin/tar',['-xf',archive,'-C',temporary]);
-  files=copyObjectSources(file=>fs.readFileSync(path.join(temporary,file),'utf8'));
+  const read=file=>fs.readFileSync(path.join(temporary,file),'utf8');
+  files=new Map([...copyObjectSources(read),...overlappingBindingSources(read)]);
   for(const[file,text]of files)writeChanged(path.join(temporary,file),text);
  });}finally{fs.unlinkSync(archive);}
  return {directory,inputs:{id:profile.id,repository:profile.repository,revision,files:[...files].map(([file,text])=>({file,sha256:digest(text)}))}};
