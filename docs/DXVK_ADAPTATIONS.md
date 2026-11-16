@@ -16,6 +16,14 @@ The implementation derives from [dxvk-gplasync](https://gitlab.com/Ph42oN/dxvk-g
 
 KosmicKrisp joins DXVK's descriptor heap Auto allow-list. VK_EXT_descriptor_heap and descriptorHeap must be advertised. dxvk.enableDescriptorHeap=False retains precedence. The existing descriptor-buffer selection remains unchanged; when neither selected path is available DXVK uses classic descriptor sets. No extension or feature is fabricated.
 
+## D3D9 render-target feedback
+
+When a draw samples a color render target that it also writes, d3d9.renderTargetHazardCopies=Auto samples a snapshot on MoltenVK. True enables snapshots on other drivers; False retains the upstream live-image feedback barriers. Render targets that are not sampled by a writing draw require no snapshot.
+
+The sampled view's mip levels and array layers are copied before each hazardous draw and bound through the ordinary texture slots. Copy allocations are reused, but their contents are refreshed for every draw, including after render-target writes, clears, uploads, copies and target replacement. Samplers return to their original images when the hazard ends. Depth/stencil hazards retain the existing feedback barriers and layout transitions.
+
+This implementation adapts Avery Felts's [render-target feedback change](https://github.com/metalsharp/DXVK-MacOS/commit/b400bccffe46a1836e743f7220f5423c28ce3af7) to DXVK 3.1.1's existing sampler bindings. It retains the DXVK zlib notice.
+
 ## Cache environment
 
 DXVK_SHADER_CACHE_PATH selects the shader IR cache directory. For a launcher-owned runtime directory the integration supplies a Wine-visible absolute path to cache/dxvk, alongside Mesa's cache/mesa directory selected by MESA_SHADER_CACHE_DIR. The DXVK setting takes a Windows path in the PE renderer, so a host POSIX path must be translated through the Wine host's existing path mapping.

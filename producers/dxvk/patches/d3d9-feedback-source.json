@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/metalsharp/DXVK-MacOS",
+  "revision": "b400bccffe46a1836e743f7220f5423c28ce3af7",
+  "reviewSnapshot": "a7ed93c450a215fbd96f59d9f6129ef46b92de65",
+  "author": "Avery Felts <averyfelts@aol.com>",
+  "license": "Zlib",
+  "base": "b1a1c99ab52b687cf950d62c88bc2fa316b41663",
+  "changes": "Independent render-target snapshot adaptation using DXVK 3.1.1 texture slot bindings. Allocations are reused but contents refresh before every hazardous draw. Depth/stencil barriers and layouts are retained. No sampler de-aliasing, feature relaxation or cross-draw content reuse."
+}
