@@ -15,6 +15,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <string>
 #include <array>
 #include <atomic>
 #include <mutex>
@@ -244,6 +245,7 @@ void ngx::HookStreamline() {
       HookTags(n,module);
       streamline_hooked.store(true, std::memory_order_release);
       lane::log("info", "Streamline camera capture in %ls", name);
+      OutputDebugStringW((std::wstring(L"vkd3d-ngx: Streamline camera capture in ") + name + L"\n").c_str());
     } else
       lane::log("err", "Streamline camera capture: could not hook %ls", name);
   }
@@ -261,8 +263,15 @@ bool ngx::DirectEvaluationCamera(float jitter_x, float jitter_y, RSTemporalCamer
   AcquireSRWLockExclusive(&camera_lock);
   const auto result = direct_cameras.take(jitter_x, jitter_y, camera);
   ReleaseSRWLockExclusive(&camera_lock);
-  // each outcome once per process: the first binding, and why evaluations had no camera
+  // each outcome once per process: the first binding, and why evaluations had no camera. A game without a console
+  // has no stderr, so each line also goes to the debugger output (Wine's debugstr channel).
   static std::atomic<unsigned> reported{0};
+  const auto report = [](const char *format, auto... values) {
+    char text[256];
+    snprintf(text, sizeof(text), format, values...);
+    lane::log("info", "%s", text);
+    OutputDebugStringA((std::string("vkd3d-ngx: ") + text + "\n").c_str());
+  };
   const unsigned bit = 1u << unsigned(result);
   if (!(reported.fetch_or(bit) & bit)) {
     using Direct = ngx_streamline::DirectCameras;
@@ -276,12 +285,12 @@ bool ngx::DirectEvaluationCamera(float jitter_x, float jitter_y, RSTemporalCamer
       char far_plane[32] = "infinite";
       if (!(camera.flags & RS_TEMPORAL_DEPTH_INFINITE))
         snprintf(far_plane, sizeof(far_plane), "%g", camera.farPlane);
-      lane::log("info", "Streamline camera on a direct NGX evaluation: frame %llu viewport %llu near %g far %s fov %.4f",
-                (unsigned long long)camera.frameId - 1, (unsigned long long)camera.viewportId, camera.nearPlane,
-                far_plane, camera.verticalFov);
+      report("Streamline camera on a direct NGX evaluation: frame %llu viewport %llu near %g far %s fov %.4f",
+             (unsigned long long)camera.frameId - 1, (unsigned long long)camera.viewportId, double(camera.nearPlane),
+             far_plane, double(camera.verticalFov));
     } else
-      lane::log("info", "No Streamline camera on a direct NGX evaluation (jitter %g, %g): %s", jitter_x, jitter_y,
-                reasons[unsigned(result)]);
+      report("No Streamline camera on a direct NGX evaluation (jitter %g, %g): %s", double(jitter_x), double(jitter_y),
+             reasons[unsigned(result)]);
   }
   return result == ngx_streamline::DirectCameras::Bound;
 }
