@@ -12,7 +12,12 @@ export function applyBuildOverlay({love,megasource,luaLibrary,luaInclude}){
 
  for(const[from,to]of [['set(OGG_LIBRARY ogg-static)','set(OGG_LIBRARY ogg)'],['set(MEGA_PHYSFS physfs-static)','set(MEGA_PHYSFS physfs)'],['set(MEGA_LIBOGG ogg-static)','set(MEGA_LIBOGG ogg)'],['set(MEGA_LIBVORBIS vorbis-static)','set(MEGA_LIBVORBIS vorbis)'],['set(MEGA_LIBVORBISFILE vorbisfile-static)','set(MEGA_LIBVORBISFILE vorbisfile)'],['set(MEGA_LIBTHEORA theora-static)','set(MEGA_LIBTHEORA theora)'],['set(MEGA_MODPLUG modplug-static)','set(MEGA_MODPLUG modplug)']])replace(mega,from,to);
  replace(mega,'if(EXISTS ${MEGA_LOVE}/CMakeLists.txt)',`if(APPLE)
- set(MEGA_LUAJIT_LIB "${luaLibrary}")
+ if(NOT EXISTS "${luaLibrary}" OR NOT EXISTS "${luaInclude}/lua.h" OR NOT EXISTS "${luaInclude}/luajit.h")
+  message(FATAL_ERROR "The prepared LuaJIT library and headers are required.")
+ endif()
+ add_library(luajit SHARED IMPORTED GLOBAL)
+ set_target_properties(luajit PROPERTIES IMPORTED_LOCATION "${luaLibrary}" INTERFACE_INCLUDE_DIRECTORIES "${luaInclude}")
+ set(MEGA_LUAJIT_LIB luajit)
  set(MEGA_LUAJIT_INCLUDE "${luaInclude}")
  # Embedded production helpers remain static; external native libraries are frameworks.
  set(BUILD_SHARED_LIBS OFF)
