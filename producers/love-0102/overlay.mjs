@@ -3,12 +3,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 function replace(file,before,after){const text=fs.readFileSync(file,'utf8').replace(/\r\n/g,'\n');if(text.split(before).length!==2)throw Error('LÖVE 0.10.2 source anchor changed: '+path.basename(file));fs.writeFileSync(file,text.replace(before,after));}
 /** Adapt build boundaries in disposable copies of the exact 0.10.2 inputs. */
-export function applyBuildOverlay({love,megasource,luaLibrary,luaInclude}){
+export function applyBuildOverlay({love,megasource,luaLibrary,luaInclude,libpng}){
  const cmake=path.join(love,'CMakeLists.txt');
  applyLuaSocketRegistrationTypeOverlay({love});
  replace(cmake,'\tif(APPLE)\n\t\tmessage(FATAL_ERROR "JIT not supported yet on Mac. Please use -DLOVE_JIT=0.")\n\tendif()','\t# LuaJIT 2.1 supplies Darwin arm64 and x86_64 with the Lua 5.1 ABI.');
  const mega=path.join(megasource,'CMakeLists.txt');
  applyTheoraEncoderSelectionOverlay({megasource});
+ applyPngDependencyOverlay({megasource,libpng});
  applyZlibDarwinOverlay({megasource});
  applyFreetypeDarwinOverlay({megasource});
  applySdlCocoaDeclarationsOverlay({megasource});
@@ -202,4 +203,30 @@ export function applyLuaSocketRegistrationTypeOverlay({love}){
 /** Select the complete encoder, matching upstream's enabled-encoder source branch. */
 export function applyTheoraEncoderSelectionOverlay({megasource}){
  replace(path.join(megasource,'libs/libtheora-1.1.1/CMakeLists.txt'),'    lib/encoder_disabled.c\n','    # Full encoder APIs are supplied by encode.c and encapiwrapper.c.\n');
+}
+
+/** Build the declared PNG source against Megasource zlib before FreeType discovery. */
+export function applyPngDependencyOverlay({megasource,libpng}){
+ if(!libpng||!fs.existsSync(path.join(libpng,'png.h')))throw Error('Declared libpng source is required.');
+ const pngSource=libpng.replaceAll('\\','/').replaceAll('"','\\"');
+ replace(path.join(megasource,'CMakeLists.txt'),'add_subdirectory("libs/freetype-${MEGA_FREETYPE_VER}" ${CMAKE_BINARY_DIR}/freetype)',`# The declared PNG/zlib targets supply FreeType's complete PNG support.
+ set(ZLIB_INCLUDE_DIR "\${CMAKE_CURRENT_SOURCE_DIR}/libs/zlib-\${MEGA_ZLIB_VER}")
+ set(ZLIB_INCLUDE_DIRS "\${ZLIB_INCLUDE_DIR}" "\${CMAKE_BINARY_DIR}/zlib")
+ set(ZLIB_LIBRARY zlibstatic)
+ if(NOT TARGET ZLIB::ZLIB)
+  add_library(ZLIB::ZLIB ALIAS zlibstatic)
+ endif()
+ set(PNG_SHARED OFF)
+ set(PNG_STATIC ON)
+ set(PNG_FRAMEWORK OFF)
+ set(PNG_TESTS OFF)
+ set(PNG_TOOLS OFF)
+ add_subdirectory("${pngSource}" "\${CMAKE_BINARY_DIR}/libpng")
+ set(PNG_PNG_INCLUDE_DIR "${pngSource}")
+ add_library(PNG::PNG ALIAS png_static)
+ set(PNG_LIBRARY png_static)
+ set(PNG_LIBRARY_RELEASE png_static)
+ set(PNG_LIBRARY_DEBUG png_static)
+ set(PNG_LIBRARIES png_static)
+ add_subdirectory("libs/freetype-\${MEGA_FREETYPE_VER}" \${CMAKE_BINARY_DIR}/freetype)`);
 }

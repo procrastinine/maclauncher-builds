@@ -8,8 +8,9 @@ const Native=createRequire(import.meta.url)('../package-support/scripts/native-b
 import {applyBuildOverlay} from './overlay.mjs';
 const here=import.meta.dirname;
 // Match the publisher's declared macOS closure rather than optional host libraries.
-export const nativeProfileOptions=['-DWITH_HarfBuzz=OFF','-DALSOFT_BACKEND_PORTAUDIO=OFF','-DALSOFT_BACKEND_COREAUDIO=ON'];
-export const sources=JSON.parse(fs.readFileSync(path.join(here,'sources.json')));
+export const nativeProfileOptions=['-DWITH_HarfBuzz=OFF','-DWITH_PNG=ON','-DALSOFT_BACKEND_PORTAUDIO=OFF','-DALSOFT_BACKEND_COREAUDIO=ON'];
+const pngSource=JSON.parse(fs.readFileSync(path.join(here,'../dependencies/libpng.json')));
+export const sources=[...JSON.parse(fs.readFileSync(path.join(here,'sources.json'))),{id:'libpng',repository:pngSource.repository,revision:pngSource.revision,archive:{sha256:pngSource.sha256},bytes:pngSource.bytes}];
 const digest=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const run=(program,args,options={})=>execFileSync(program,args,{stdio:'inherit',...options});
 /** Stage the exact release and vendored dependency source archives without changing their inputs. */
@@ -33,7 +34,7 @@ export function compile({work,prepared,architectures=['arm64','x86_64'],cc=proce
   const maps=['file','debug','macro'].map(kind=>'-f'+kind+'-prefix-map='+work+'=LOVE_0102_BUILD').join(' ');
   run('/usr/bin/make',['-C',roots.luajit,'-j'+jobs,'BUILDMODE=dynamic','CC='+cc,'HOST_CC='+cc,'TARGET_FLAGS=-arch '+arch+' -isysroot '+sdk+' -mmacosx-version-min=12.0','XCFLAGS='+maps],{env:{...process.env,MACOSX_DEPLOYMENT_TARGET:'12.0'}});
   const luaLibrary=path.join(roots.luajit,'src/libluajit.so');if(!fs.existsSync(luaLibrary))throw Error('LuaJIT build did not produce its dynamic library.');
-  applyBuildOverlay({love:roots.love,megasource:roots.megasource,luaLibrary,luaInclude:path.join(roots.luajit,'src')});
+  applyBuildOverlay({love:roots.love,megasource:roots.megasource,luaLibrary,luaInclude:path.join(roots.luajit,'src'),libpng:roots.libpng});
   const build=path.join(slice,'build'),options=[...nativeProfileOptions,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DCMAKE_C_COMPILER='+cc,'-DCMAKE_CXX_COMPILER='+cxx,'-DCMAKE_OSX_ARCHITECTURES='+arch,'-DCMAKE_OSX_DEPLOYMENT_TARGET=12.0','-DCMAKE_OSX_SYSROOT='+sdk,'-DCMAKE_POLICY_VERSION_MINIMUM=3.5','-DCMAKE_POSITION_INDEPENDENT_CODE=ON','-DCMAKE_C_FLAGS='+maps,'-DCMAKE_CXX_FLAGS='+maps,'-DBUILD_SHARED_LIBS=ON','-DMEGA_LOVE='+roots.love,'-DLOVE_JIT=ON','-DOGG_BUILD_SHARED=ON','-DVORBIS_BUILD_SHARED=ON','-DVORBISFILE_BUILD_SHARED=ON','-DTHEORA_BUILD_SHARED=ON','-DMODPLUG_BUILD_SHARED=ON','-DPHYSFS_BUILD_SHARED=ON','-DSDL_SHARED=ON','-DSDL_STATIC=OFF','-DSDL_TEST=OFF','-DSDL_X11=OFF','-DALSOFT_EXAMPLES=OFF','-DALSOFT_UTILS=OFF','-DALSOFT_TESTS=OFF'];
   run('cmake',['-S',roots.megasource,'-B',build,...options]);
   run('cmake',['--build',build,'--target','love','--parallel',String(jobs)]);
