@@ -66,6 +66,9 @@ public:
 
 class SignalDelegator final : public FEXCore::SignalDelegator {};
 
+// A host that handles SYSCALL itself sets this before the first Run.
+inline FEXCore::HLE::SyscallHandler* SyscallHandlerOverride = nullptr;
+
 inline bool Sysctl(const char* Name) {
   int Value = 0;
   size_t Size = sizeof(Value);
@@ -206,7 +209,7 @@ inline const CPUState& Run(CPUState& Initial, std::span<const Thunk> Thunks, std
     static SignalDelegator Signals;
     static SyscallHandler Syscalls;
     CTX->SetSignalDelegator(&Signals);
-    CTX->SetSyscallHandler(&Syscalls);
+    CTX->SetSyscallHandler(SyscallHandlerOverride ? SyscallHandlerOverride : &Syscalls);
     CTX->EnableExitOnHLT();
     if (!CTX->InitCore()) {
       std::printf("InitCore failed\nFAIL\n");

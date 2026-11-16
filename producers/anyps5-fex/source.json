@@ -48,7 +48,8 @@
     "targets": [
       "anyps5-fex-proof",
       "anyps5-fex-abi",
-      "anyps5-fex-start"
+      "anyps5-fex-start",
+      "anyps5-fex-syscall"
     ],
     "sources": [
       "CMakeLists.txt",
@@ -58,7 +59,8 @@
       "AnyPS5FexProof.cpp",
       "AnyPS5FexAbi.cpp",
       "AnyPS5FexStart.cpp",
-      "GenericBridge.S"
+      "GenericBridge.S",
+      "AnyPS5FexSyscall.cpp"
     ],
     "guest": {
       "source": "guest-abi.c",

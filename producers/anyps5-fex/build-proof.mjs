@@ -11,7 +11,7 @@
 // --check runs the module function twice, with the import slot unbound (must fail) and bound to the thunk (must
 // print PASS), and the ABI proof twice, through the generic register shim (must fail) and through per-signature
 // thunks (must print PASS), and the start host twice, without the game's sce_module PRX modules (must stop) and with
-// them (must reach main and print PASS).
+// them (must reach main and print PASS), and the SYSCALL entry check once (must print PASS).
 import {gitlink} from '../../lib/pins.mjs';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -127,11 +127,14 @@ if(!link(options.out,objects,firstLog)){
  const secondLog=path.join(options.out,'link-proof.log');
  if(!link(options.out,[...objects,stubs],secondLog))throw Error('The proof build failed; see '+secondLog);
 }
-const [proof,abi,start]=recipe.host.targets.map(target=>path.join(options.out,'build/Bin',target));
-process.stdout.write(proof+'\n'+abi+' '+guestText+' '+guestEntry+'\n'+start+'\n');
+const [proof,abi,start,syscall]=recipe.host.targets.map(target=>path.join(options.out,'build/Bin',target));
+process.stdout.write(proof+'\n'+abi+' '+guestText+' '+guestEntry+'\n'+start+'\n'+syscall+'\n');
 if(options.check){
  const [eboot,functionAddress,slot,bss,main]=options.check;
  check(proof,[eboot,functionAddress,slot,bss],'unbound','bound');
  check(abi,[guestText,guestEntry],'generic','thunks');
  check(start,[path.dirname(eboot),main],'eboot-only','modules');
+ const entry=spawnSync(syscall,[],{encoding:'utf8',timeout:20000});
+ process.stdout.write('--- '+path.basename(syscall)+' (exit '+entry.status+')\n'+entry.stdout);
+ if(entry.status!==0||!/^PASS$/m.test(entry.stdout))throw Error('The SYSCALL entry check failed.');
 }
