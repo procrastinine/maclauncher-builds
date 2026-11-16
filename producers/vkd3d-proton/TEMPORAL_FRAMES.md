@@ -52,7 +52,9 @@ The command-list interface retains `SupportsFrameInterpolation` and `FrameInterp
 
 The carrier's HUD-less and UI slots and camera matrices are scene attachments. Driver bindings retain supplied HUD/UI textures, but their color domain and matching composition pass remain unknown unless a producer declares them. Slot presence alone does not establish the inputs required for HUD-separated interpolation.
 
-A frame-generation producer must identify a real frame and transfer generated-image scheduling to the shared presenter. Streamline's DLSS-G plugin uses a proxy swapchain to schedule the NGX interpolated output followed by its real output. Returning a generated image through that contract while also scheduling shared generation would create two presentation owners. The existing Super Resolution carrier does not establish an input-only DLSS-G contract.
+A frame-generation producer must identify a real frame and establish one presentation owner. Streamline's DLSS-G plugin uses a proxy swapchain to schedule the NGX interpolated output followed by its real output. Returning a generated image through that contract while also scheduling shared generation would create two presentation owners. The existing Super Resolution carrier does not establish an input-only DLSS-G contract.
+
+D3DMetal's native MetalFX interpolation follows a separate caller-owned contract in the shared graphics processor. One enabled 2× generation row can write the exact output requested by the SDK call, while the game retains presentation. The classic Metal observer follows complete copies and registered format views to current drawables on the actual device and queue. Immutable image versions, enqueue order and acquisition identity establish both presentation endpoints; unobserved writes, partial copies, other queues and reused acquisitions retain the original SDK output. The consumed interval follows these exact images into the shared presenter and suppresses another generation pass. Off adds no input capture or provider load. This native SDK route also serves native MetalFX applications and does not change this NGX interface or its capability advertisement.
 
 ## Driver
 

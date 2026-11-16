@@ -1257,6 +1257,19 @@
     {
       "path": "src/anr-submission.h",
       "source": "app:src/modules/shared/reshade/generation/anr/native/submission.h"
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/image-copy-chain.hpp",
+      "path": "src/image-copy-chain.hpp"
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/caller-copy.hpp",
+      "path": "src/caller-copy.hpp"
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/caller-copy.mm",
+      "path": "src/caller-copy.mm",
+      "nativeLink": true
     }
   ]
 }
