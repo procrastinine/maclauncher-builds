@@ -9,6 +9,7 @@ export function applyBuildOverlay({love,megasource,luaLibrary,luaInclude}){
  const mega=path.join(megasource,'CMakeLists.txt');
  applyZlibDarwinOverlay({megasource});
  applyFreetypeDarwinOverlay({megasource});
+ applySdlCocoaDeclarationsOverlay({megasource});
  replace(path.join(megasource,'libs/physfs-2.0.3/CMakeLists.txt'),'SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} " -framework Carbon -framework IOKit")','SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} "-framework Carbon" "-framework IOKit")');
  replace(path.join(megasource,'libs/libtheora-1.1.1/CMakeLists.txt'),'\tadd_library(theora SHARED ${THEORA_SRC} lib/theora.def)','\tset(THEORA_SHARED_PLATFORM_SOURCES)\n\tif(WIN32)\n\t\tlist(APPEND THEORA_SHARED_PLATFORM_SOURCES lib/theora.def)\n\tendif()\n\tadd_library(theora SHARED ${THEORA_SRC} ${THEORA_SHARED_PLATFORM_SOURCES})');
 
@@ -53,4 +54,11 @@ export function applyZlibDarwinOverlay({megasource}){
 /** Keep the bundled gzip unsigned-byte typedef on Darwin, where TARGET_OS_MAC is also set. */
 export function applyFreetypeDarwinOverlay({megasource}){
  replace(path.join(megasource,'libs/freetype-2.6.5/src/gzip/zconf.h'),'#if !defined(MACOS) && !defined(TARGET_OS_MAC)','#if (!defined(MACOS) && !defined(TARGET_OS_MAC)) || (defined(__APPLE__) && defined(__MACH__))');
+}
+
+/** Preserve initialization order while placing Cocoa bundle locals before statements. */
+export function applySdlCocoaDeclarationsOverlay({megasource}){
+ const file=path.join(megasource,'libs/SDL2/src/file/cocoa/SDL_rwopsbundlesupport.m');
+ replace(file,'    FILE* fp = NULL;','    /* Declaration placement adapted for the existing C warning policy. */\n    FILE* fp = NULL;\n    NSFileManager* file_manager;\n    NSString* resource_path;\n    NSString* ns_string_file_component;\n    NSString* full_path_with_file_to_try;');
+ for(const [type,name] of [['NSFileManager','file_manager'],['NSString','resource_path'],['NSString','ns_string_file_component'],['NSString','full_path_with_file_to_try']])replace(file,'    '+type+'* '+name+' = ','    '+name+' = ');
 }
