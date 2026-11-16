@@ -79,3 +79,5 @@ The jump-buffer layouts retain their existing distinctions: `setjmp` saves
 MXCSR and the x87 control word, `_longjmp` preserves current MXCSR status bits,
 and signal jumps save the x87 control word and optional signal mask in their
 original fields.
+
+The macOS TLS allocator keeps its custom guest RAX convention on arm64. Its native entry captures the guest call frame, reads the descriptor from RAX, invokes the unchanged pthread-key-backed allocation and commits the returned thread pointer to guest RAX. Context restoration returns through `GuestContext::Transfer`; it does not call guest code as a native function. Captured GPRs and the legacy FXSAVE image are retained, and the host context adapter preserves the existing upper YMM halves. `Aps5GuestTlsAvx_nid_no_patch` selects only the native x86 assembly scratch-save path; its arm64 value is zero because that path is absent. Guest AVX features continue to come from the bound guest CPU context.
