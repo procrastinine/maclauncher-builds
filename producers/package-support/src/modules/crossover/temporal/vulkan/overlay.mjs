@@ -1,9 +1,10 @@
+import {projectSharedHeaders} from './shared-headers.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import moltenvkRecord from '../../../../../../dependencies/moltenvk.json' with {type:'json'};
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import {appPath} from '../../../../../../../tools/app-source.mjs';
+import {appPath,moduleFile} from '../../../../../../../tools/app-source.mjs';
 const declared = JSON.parse(fs.readFileSync(new URL('./source.json', import.meta.url)));
 // The MoltenVK release is declared once in the shared dependencies.
 const {archiveFormat, ...link} = declared.vulkanLinkInput, moltenvk = moltenvkRecord;
@@ -22,6 +23,14 @@ export function unixTables(text) {
     const re = /const unixlib_entry_t (__wine_unix_call(?:_wow64)?_funcs)\[\]\s*=[^{}]*\{\n([\s\S]*?)\n\};/g;
     for (const match of text.matchAll(re)) result.push({name:match[1],body:match[2],entries:match[2].split('\n').map(x=>x.trim()).filter(Boolean)});
     return result;
+}
+export function sharedHeaderInputs(profile=source) {
+    const entries=new Set(profile.sharedHeaders);
+    for(const name of profile.ownedFiles.filter(name=>/\.(?:c|h)$/.test(name))) {
+        const text=fs.readFileSync(moduleFile('src/modules/crossover/temporal/vulkan/'+name),'utf8');
+        for(const match of text.matchAll(/^\s*#\s*include\s*"macfx-shared\/([^"]+)"/gm))entries.add(match[1]);
+    }
+    return projectSharedHeaders(path.resolve(app,'../../../shared'),entries);
 }
 export function profileSources(directory,profile=source) {
     directory = fs.realpathSync(directory);
@@ -61,20 +70,8 @@ export function profileSources(directory,profile=source) {
     // The matched Wine header already declares the exact Vulkan C types.
     if (fs.existsSync(path.join(directory,'include/vulkan/vulkan.h'))) throw Error('The Vulkan header layout changed.');
     files.set('include/vulkan/vulkan.h','#pragma once\n#include "wine/vulkan.h"\n');
-    for (const file of profile.sharedHeaders) {
-        let bytes=fs.readFileSync(path.resolve(app,'../../../shared',file));
-        // Wine's dependency scanner reads every include branch. Use the
-        // existing canonical layout rather than its optional flat aliases.
-        let text=bytes.toString();
-        if(file==='vulkan/native/scene-interop.h')text=text.replace(/#if __has_include\("vulkan-scene.h"\)[\s\S]*?#endif\n/,
-            '#include "../../reshade/native/vulkan-scene.h"\n');
-        else if(file==='reshade/native/vulkan-scene.h')text=text.replace(/#if __has_include\("temporal-frame.h"\)[\s\S]*?#endif\n/,
-            '#include "../temporal/frame.h"\n#include "../temporal/scene-aovs.h"\n#include "../temporal/scene-matrices.h"\n');
-        else if(file.startsWith('reshade/temporal/'))text=text.replace(/#if __has_include\("temporal-frame.h"\)[\s\S]*?#endif\n/,'#include "frame.h"\n')
-            .replace(/#if __has_include\("image-color.h"\)[\s\S]*?#endif\n/,'#include "../native/image-color.h"\n');
-        bytes=Buffer.from(text);
+    for (const [file,bytes] of sharedHeaderInputs(profile))
         files.set(modulePath+'macfx-shared/'+file,bytes);
-    }
     return {files,originalCalls:profile.unixCallCount,calls:profile.unixCallCount+1};
 }
 export function applyProfile(directory,profile=source) {

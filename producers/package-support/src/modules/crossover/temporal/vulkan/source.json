@@ -68,7 +68,8 @@
     "scene-unix.c",
     "scene-metadata.h",
     "scene-metadata-native.h",
-    "scene-admission.h"
+    "scene-admission.h",
+    "shared-headers.mjs"
   ],
   "peExports": [
     "MacLauncherWineVulkanSceneAPI1",
