@@ -30,6 +30,8 @@ extern const std::size_t GeneratedThunkPartCount;
 // libc's standard stream pointers, which guest code reads directly.
 extern const std::pair<const char*, void*> GeneratedData[];
 extern const std::size_t GeneratedDataCount;
+// libc General.cpp: guest path prefixes resolved to host directories.
+extern "C" void AddPathAlias_nid_no_patch(const char* guestPrefix, const char* hostPath);
 
 namespace {
 std::uint64_t HostCallsAtMain = 0;
@@ -287,6 +289,8 @@ int main(int argc, char** argv) {
   FexGuest::InstallGuestCpuHost();
   FexGuest::InitConfig();
   const std::string Directory = argv[1];
+  // The game directory is the guest's /app0, as the AnyPS5 runner lays it out.
+  AddPathAlias_nid_no_patch("/app0", Directory.c_str());
   const std::uint64_t MainOffset = std::strtoull(argv[2], nullptr, 0);
 
   // Generated thunks of AnyPS5 exports first, then the stand-ins for what is not built for arm64 yet.

@@ -31,7 +31,11 @@
       "core/libs/prx/libkernel/Time/SleepWake.cpp",
       "core/libs/prx/libkernel/System/src/Notification.cpp",
       "core/libs/prx/libkernel/File/src/Open.cpp",
-      "core/libs/prx/libSceUserService/Export.cpp"
+      "core/libs/prx/libSceUserService/Export.cpp",
+      "core/libs/prx/libc/src/General.cpp",
+      "core/libs/prx/libkernel/File/src/Stdio.cpp",
+      "core/libs/prx/libScePad/Export.cpp",
+      "core/libs/prx/libScePad/src/PadState.cpp"
     ],
     "arm64Libraries": {
       "script": "../anyps5/overlays/arm64-libs/apply.mjs",
