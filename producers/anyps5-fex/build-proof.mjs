@@ -143,6 +143,13 @@ if(!link(options.out,objects,firstLog)){
 }
 const [proof,abi,start,syscall]=recipe.host.targets.map(target=>path.join(options.out,'build/Bin',target));
 process.stdout.write(proof+'\n'+abi+' '+guestText+' '+guestOffsets.join(' ')+'\n'+start+'\n'+syscall+'\n');
+// The start host's static initializers include the AnyPS5 objects' registrations. Run without arguments, it stops at
+// its usage message (exit 2) unless an initializer reaches one of the unreached-export stubs above (SIGTRAP).
+{
+ const usage=spawnSync(start,[],{encoding:'utf8',timeout:20000});
+ if(usage.status!==2)throw Error(path.basename(start)+' did not reach main (status '+usage.status+', signal '+usage.signal+
+  '): a static initializer called a symbol the proof does not link; see the crash report for the initializer.');
+}
 if(options.check){
  const [eboot,functionAddress,slot,bss,main]=options.check;
  // A check whose inputs did not change is not rerun: --only names the ones to run.

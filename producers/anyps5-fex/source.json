@@ -49,7 +49,9 @@
       "core/libs/prx/libkernel/File/src/HostStreams.cpp",
       "core/libs/prx/libc/src/AppArchive.cpp",
       "core/libs/prx/libc/src/Process.cpp",
-      "core/libs/prx/libc/src/HostErrno.cpp"
+      "core/libs/prx/libc/src/HostErrno.cpp",
+      "core/libs/prx/libc/src/FileAndHeap.cpp",
+      "core/libs/prx/libc/src/AllocatingStrings.cpp"
     ],
     "runtimeOverlays": [
       ["macos-host-kernel", "applyHostKernelOverlay"],
