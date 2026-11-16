@@ -102,7 +102,33 @@ export async function assemble({compiled,output,version='0.10.2-MCLv1'}){
  run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',bundle]);
  run('/usr/bin/codesign',['--verify','--deep','--strict',bundle]);
  const sourceHash=crypto.createHash('sha256').update(JSON.stringify(sources)).digest('hex');
- return helperPackage({id:'love',version,arch:'universal',output,minimumMacOS,sourceSha256:sourceHash,record:{upstreamVersion:'0.10.2',sources,luaApi:'5.1',luaImplementation:'LuaJIT 2.1',nativeBinaries:binaries.map(f=>path.relative(payload,f))}});
+ // Store framework links using the package format's existing file aliases.
+ const packageAliases={},links=[],payloadRoot=fs.realpathSync(payload);
+ function collect(directory,logical=directory){
+  for(const name of fs.readdirSync(directory)){
+   const file=path.join(directory,name),logicalFile=path.join(logical,name),stat=fs.lstatSync(file);
+   if(stat.isSymbolicLink()){
+    const target=fs.realpathSync(file);
+    if(!target.startsWith(payloadRoot+path.sep))throw Error('Framework alias leaves the payload.');
+    links.push({file,target:fs.readlinkSync(file)});
+    if(fs.statSync(target).isDirectory())collect(target,logicalFile);
+    else packageAliases[path.relative(payload,logicalFile)]=path.relative(payload,target);
+   }else if(stat.isDirectory())collect(file,logicalFile);
+   else if(logicalFile!==file)packageAliases[path.relative(payload,logicalFile)]=path.relative(payload,fs.realpathSync(file));
+  }
+ }
+ collect(payload);
+ // Only remove actual links; logical directory aliases expand into file aliases.
+ const actualLinks=[...new Map(links.map(link=>[link.file,link])).values()];
+ for(const link of actualLinks)fs.unlinkSync(link.file);
+ let result;
+ try{result=helperPackage({id:'love',version,arch:'universal',output,minimumMacOS,sourceSha256:sourceHash,record:{upstreamVersion:'0.10.2',sources,luaApi:'5.1',luaImplementation:'LuaJIT 2.1',nativeBinaries:binaries.map(f=>path.relative(payload,f))}});}
+ finally{for(const link of actualLinks)fs.symlinkSync(link.target,link.file);}
+ const declarationFile=path.join(output,'declaration.json'),declaration=JSON.parse(fs.readFileSync(declarationFile));
+ declaration.aliases={schema:1,files:packageAliases};
+ createRequire(import.meta.url)('../../lib/package-contract.cjs').validateDeclaration(declaration);
+ fs.writeFileSync(declarationFile,JSON.stringify(declaration,null,2)+'\n');
+ return result;
 }
 function libraryIds(file){return [...new Set(execFileSync('/usr/bin/otool',['-D',file],{encoding:'utf8'}).split('\n').map(l=>l.trim()).filter(l=>l&&!l.endsWith(':')&&(l.startsWith('@')||l.startsWith('/'))))];}
 function libraryLinks(file){const ids=libraryIds(file);return [...new Set(execFileSync('/usr/bin/otool',['-L',file],{encoding:'utf8'}).split('\n').map(l=>/^\s+(.+?) \(compatibility version /.exec(l)?.[1]).filter(l=>l&&!ids.includes(l)))];}
