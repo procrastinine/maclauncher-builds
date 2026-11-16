@@ -576,6 +576,10 @@
       {
         "version": "0.3.13",
         "label": "MacLauncher graphics 0.3.13"
+      },
+      {
+        "version": "0.3.14-local-60578fe9",
+        "label": "MacLauncher graphics 0.3.14-local-60578fe9"
       }
     ],
     "build": {
