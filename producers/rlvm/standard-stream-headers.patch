@@ -7,20 +7,16 @@ behavior and upstream RLVM copyright/GPL-3.0-or-later notices are unchanged.
 diff --git a/src/systems/base/gan_graphics_object_data.cc b/src/systems/base/gan_graphics_object_data.cc
 --- a/src/systems/base/gan_graphics_object_data.cc
 +++ b/src/systems/base/gan_graphics_object_data.cc
-@@ -37,6 +37,7 @@
- 
+@@ -38,4 +38,5 @@
  #include <boost/serialization/export.hpp>
  #include <boost/filesystem/fstream.hpp>
 +#include <iostream>
  #include <string>
  #include <vector>
- 
 diff --git a/src/systems/base/graphics_object.cc b/src/systems/base/graphics_object.cc
 --- a/src/systems/base/graphics_object.cc
 +++ b/src/systems/base/graphics_object.cc
-@@ -36,6 +36,7 @@
- #include <boost/serialization/shared_ptr.hpp>
- 
+@@ -38,4 +38,5 @@
  #include <algorithm>
 +#include <iostream>
  #include <numeric>
