@@ -17,6 +17,10 @@ namespace ngx_streamline {
 template<class Scaler> struct LateFrame {
   Scaler *scaler = nullptr;
   uint64_t frame = 0, evaluation = 0;
+  bool tagMatches(uint64_t followedEvaluation, const RSTemporalCamera &camera, uint32_t viewport, bool framed, uint32_t token) const {
+    return scaler && frame && evaluation && evaluation == followedEvaluation && camera.size == sizeof(camera) &&
+           camera.frameId && camera.viewportId == viewport && (!framed || camera.frameId == uint64_t(token) + 1);
+  }
   bool matches(Scaler *current, uint64_t currentFrame, uint64_t followedEvaluation) const {
     return scaler && scaler == current && frame && frame == currentFrame && evaluation && evaluation == followedEvaluation;
   }

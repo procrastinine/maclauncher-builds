@@ -43,10 +43,11 @@ struct SceneCache {
   void discard(uint32_t frame){std::lock_guard guard(mutex);for(auto &entry:tags)if(entry.age&&(!entry.framed||entry.frame==frame))entry={};close(frame,UINT32_MAX);}
 };
 inline int TagSlot(sl::BufferType type){return type==sl::kBufferTypeHUDLessColor?0:type==sl::kBufferTypeUIColorAndAlpha?1:-1;}
-inline TagBatch CaptureTags(const sl::ResourceTag *tags,uint32_t count,void *commands,bool allow_present=true){
+inline TagBatch CaptureTags(const sl::ResourceTag *tags,uint32_t count,void *commands,bool allow_present=true,bool immediate=false){
   TagBatch result;result.reset=!tags;if(count>256||(count&&!tags)){result.valid=false;return result;}
   for(uint32_t i=0;i<count;++i){const auto &tag=tags[i];if(tag.structType!=sl::ResourceTag::s_structType||tag.structVersion!=1){result.valid=false;return result;}const int slot=TagSlot(tag.type);if(slot<0)continue;auto &image=result.images[slot];image={};image.supplied=true;
-    if(!tag.resource||(tag.lifecycle!=sl::eValidUntilEvaluate&&tag.lifecycle!=sl::eValidUntilPresent))continue;
+    // Valid-now inputs are consumed only by an inline late-scene copy on this command list.
+    if(!tag.resource||(tag.lifecycle!=sl::eValidUntilEvaluate&&tag.lifecycle!=sl::eValidUntilPresent&&!(immediate&&commands&&tag.lifecycle==sl::eOnlyValidNow)))continue;
     if(!allow_present&&(tag.lifecycle!=sl::eValidUntilEvaluate||!commands))continue;
     if(tag.lifecycle==sl::eValidUntilEvaluate&&!commands)continue;
     auto extension=tag.next;unsigned links=0;bool precision=true;while(extension&&links++<32){if(extension->structType==sl::PrecisionInfo::s_structType){auto p=static_cast<const sl::PrecisionInfo*>(extension);precision&=p->structVersion==1&&p->conversionFormula==sl::PrecisionInfo::eNoTransform;}else precision=false;extension=extension->next;}if(extension||!precision)continue;

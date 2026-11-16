@@ -248,26 +248,35 @@ void ReportLateTag(unsigned reason, const char *text) {
   if (!(reported.fetch_or(bit) & bit))
     Report("No late tagged scene: %s", text);
 }
-void LateTags(const sl::ResourceTag *tags, uint32_t count, sl::CommandBuffer *commands) noexcept {
+void LateTags(const sl::ResourceTag *tags, uint32_t count, sl::CommandBuffer *commands, uint32_t viewport, bool framed, uint32_t token) noexcept {
   try {
     if (!commands) { ReportLateTag(0, "tag call has no command list"); return; }
     if (selected_scene || streamline_evaluations) { ReportLateTag(1, "tag call belongs to a Streamline evaluation"); return; }
     if (!direct_evaluated.load(std::memory_order_acquire)) { ReportLateTag(2, "no direct evaluation yet"); return; }
     std::call_once(late_once, [] { late_file = std::make_unique<ngx_late_camera::File>(); });
     if (!late_file->get()) { ReportLateTag(3, "no enabled late camera channel"); return; }
-    const TagBatch batch = CaptureTags(tags, count, commands);
+    // The late scene copies these images inline, before this tag hook returns to the caller.
+    const TagBatch batch = CaptureTags(tags, count, commands, true, true);
     if (!batch.valid || batch.reset || (!batch.images[0].resource && !batch.images[1].resource)) {
-      ReportLateTag(4, "tag batch has no readable HUD-less or UI image"); return;
+      ReportLateTag(4, "tag batch has no readable HUD-less or UI image");
+      static std::atomic<unsigned> shapes{0};
+      if (shapes.fetch_add(1) < 8 && tags && count <= 256) for (uint32_t i=0;i<count;++i) {
+        const auto &tag=tags[i];
+        Report("Late tag shape: type %u lifecycle %u version %u resource %s resource-version %u resource-type %u", unsigned(tag.type), unsigned(tag.lifecycle), unsigned(tag.structVersion), tag.resource ? "present" : "none", tag.resource ? unsigned(tag.resource->structVersion) : 0, tag.resource ? unsigned(tag.resource->type) : 0);
+      }
+      return;
     }
     AcquireSRWLockShared(&camera_lock);
     const LateFrame frame = late_frame;
-    const bool camera = frame.evaluation && followed_evaluation == frame.evaluation;
+    const bool camera = frame.tagMatches(followed_evaluation, followed_camera, viewport, framed, token);
     const RSTemporalCamera followed = followed_camera;
     ReleaseSRWLockShared(&camera_lock);
     if (!frame.scaler || !frame.frame) { ReportLateTag(5, "no direct scaler frame"); return; }
+    if (!camera) { ReportLateTag(7, "tag frame or viewport does not match the followed evaluation"); return; }
     // a D3D12 game's tags name its command list and resources (the evaluation was recorded through the same device)
     MetalFX1 metalfx(static_cast<IUnknown *>(static_cast<void *>(commands)));
     if (!metalfx.iface) { ReportLateTag(6, "tag command list has no late scene interface"); return; }
+    if (metalfx.iface->lpVtbl->TemporalFrameId(metalfx.iface, frame.scaler) != frame.frame) { ReportLateTag(8, "tag scaler advanced beyond its followed frame"); return; }
     VKD3D_METALFX_LATE_SCENE_DESC desc = {};
     desc.FrameId = frame.frame;
     desc.HudLess = static_cast<ID3D12Resource *>(batch.images[0].resource);
@@ -292,9 +301,9 @@ void LateTags(const sl::ResourceTag *tags, uint32_t count, sl::CommandBuffer *co
   }
 }
 template<unsigned N>sl::Result SetTagHook(const sl::ViewportHandle &view,const sl::ResourceTag *tags,uint32_t count,sl::CommandBuffer *commands){
-  const auto result=SetTagScene(slots[N],view,tags,count,commands);if(result==sl::Result::eOk)LateTags(tags,count,commands);return result;}
+  const auto result=SetTagScene(slots[N],view,tags,count,commands);if(result==sl::Result::eOk)LateTags(tags,count,commands,uint32_t(view),false,0);return result;}
 template<unsigned N>sl::Result SetTagForFrameHook(const sl::FrameToken &frame,const sl::ViewportHandle &view,const sl::ResourceTag *tags,uint32_t count,sl::CommandBuffer *commands){
-  const auto result=SetTagForFrameScene(slots[N],frame,view,tags,count,commands);if(result==sl::Result::eOk)LateTags(tags,count,commands);return result;}
+  const auto result=SetTagForFrameScene(slots[N],frame,view,tags,count,commands);if(result==sl::Result::eOk)LateTags(tags,count,commands,uint32_t(view),true,uint32_t(frame));return result;}
 PFun_slSetTag *const tag_hooks[kSlots]={SetTagHook<0>,SetTagHook<1>,SetTagHook<2>,SetTagHook<3>};
 PFun_slSetTagForFrame *const framed_hooks[kSlots]={SetTagForFrameHook<0>,SetTagForFrameHook<1>,SetTagForFrameHook<2>,SetTagForFrameHook<3>};
 const SetConstants set_hooks[kSlots] = {SetConstantsHook<0>, SetConstantsHook<1>, SetConstantsHook<2>,

@@ -228,11 +228,12 @@ test('the HUD-less and UI images tagged after a direct NGX evaluation are record
  assert.match(patch,/^\+    if \(dlss->scaler\) \{\n\+      ForgetEvaluationFrames\(dlss->scaler\);\n       dlss->scaler->lpVtbl->Destroy\(dlss->scaler\);\n\+    \}$/m);
  assert.match(hooks,/const uint64_t frame = metalfx\.iface->lpVtbl->TemporalFrameId\(metalfx\.iface, scaler\);\n  AcquireSRWLockExclusive\(&camera_lock\);\n  late_frame = \{scaler, frame, direct_cameras\.evaluations\(\)\};/);
  // every accepted tag call, framed or not, outside slEvaluateFeature, only while the launcher's late camera file exists
- assert.equal((hooks.match(/if\(result==sl::Result::eOk\)LateTags\(tags,count,commands\);return result;/g)||[]).length,2);
+ assert.match(hooks,/LateTags\(tags,count,commands,uint32_t\(view\),false,0\)/);
+ assert.match(hooks,/LateTags\(tags,count,commands,uint32_t\(view\),true,uint32_t\(frame\)\)/);
  assert.match(hooks,/if \(!commands\) \{ ReportLateTag\(0, "tag call has no command list"\); return; \}/);
  assert.match(hooks,/if \(!late_file->get\(\)\) \{ ReportLateTag\(3,/);
  // the camera rides along only when the constants followed the same evaluation
- assert.match(hooks,/const bool camera = frame\.evaluation && followed_evaluation == frame\.evaluation;/);
+ assert.match(hooks,/const bool camera = frame\.tagMatches\(followed_evaluation, followed_camera, viewport, framed, token\);/);
  assert.match(hooks,/followed_evaluation = evaluation;\n    followed_camera = followed;/);
  assert.match(hooks,/metalfx\.iface->lpVtbl->LateScene\(metalfx\.iface, &desc, frame\.scaler\)/);
 });
@@ -244,4 +245,31 @@ test('an exactly followed direct camera is recorded before the next evaluation, 
  assert.match(hooks,/frame\.matches\(scaler, current_frame, followed_evaluation\)/);
  assert.match(hooks,/desc\.FrameId = frame\.frame;/);
  assert.match(hooks,/Late camera scene recorded for frame/);
+});
+
+test('immediate late tags retain valid-now inputs and reject another frame or viewport',t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'late-tags-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ const source=String.raw`#include "streamline_inputs.hpp"
+#include <cassert>
+int main(){using namespace ngx_streamline;
+ sl::Resource resource(sl::ResourceType::eTex2d,reinterpret_cast<void*>(0x1234));
+ sl::ResourceTag tag(&resource,sl::kBufferTypeHUDLessColor,sl::eOnlyValidNow);
+ void* commands=reinterpret_cast<void*>(0x5678);
+ assert(!CaptureTags(&tag,1,commands).images[0].resource);
+ assert(CaptureTags(&tag,1,commands,true,true).images[0].resource==resource.native);
+ assert(!CaptureTags(&tag,1,nullptr,true,true).images[0].resource);
+ tag.lifecycle=sl::eValidUntilPresent;assert(CaptureTags(&tag,1,commands,true,true).images[0].resource==resource.native);
+ tag.lifecycle=sl::eValidUntilEvaluate;assert(CaptureTags(&tag,1,commands).images[0].resource==resource.native);
+ tag.lifecycle=static_cast<sl::ResourceLifecycle>(99);assert(!CaptureTags(&tag,1,commands,true,true).images[0].resource);
+ sl::PrecisionInfo precision(sl::PrecisionInfo::eLinearTransform,0,1);tag.lifecycle=sl::eOnlyValidNow;tag.next=&precision;
+ assert(!CaptureTags(&tag,1,commands,true,true).images[0].resource);
+ int scaler;LateFrame<int> frame{&scaler,45,7};RSTemporalCamera camera{};camera.size=sizeof(camera);camera.frameId=104;camera.viewportId=3;
+ assert(frame.tagMatches(7,camera,3,true,103));assert(frame.tagMatches(7,camera,3,false,0));
+ assert(!frame.tagMatches(7,camera,4,true,103));assert(!frame.tagMatches(7,camera,3,true,104));
+ assert(!frame.tagMatches(8,camera,3,true,103));assert(!frame.tagMatches(7,camera,4,false,0));
+ camera={};assert(!frame.tagMatches(7,camera,3,false,0));
+}`;
+ fs.writeFileSync(dir+'/check.cpp',source);const headers=process.env.STREAMLINE_HEADERS||root+'/producers/package-support/src/external/streamline-camera/include';
+ const c=spawnSync(process.env.CXX||'/usr/bin/clang++',['-std=c++20','-Wall','-Werror','-I'+producer,'-I'+headers,dir+'/check.cpp','-o',dir+'/check'],{encoding:'utf8'});assert.equal(c.status,0,c.stderr);
+ const r=spawnSync(dir+'/check',[],{encoding:'utf8'});assert.equal(r.status,0,r.stderr);
 });
