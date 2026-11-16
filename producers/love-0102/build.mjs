@@ -66,6 +66,8 @@ export async function assemble({compiled,output,version='0.10.2-MCLv1'}){
  const lua=path.join(luaVersion,'Lua');run('/usr/bin/lipo',['-create',...compiled.slices.map(s=>s.luaLibrary),'-output',lua]);binaries.push(lua);
  for(const s of compiled.slices){aliases.set(s.luaLibrary,lua);for(const id of Native.libraryIds(s.luaLibrary))aliases.set(id,lua);}
  fs.symlinkSync('A',path.join(luaRoot,'Versions/Current'));fs.symlinkSync('Versions/Current/Lua',path.join(luaRoot,'Lua'));
+ const luaResources=path.join(luaVersion,'Resources');fs.mkdirSync(luaResources);fs.symlinkSync('Versions/Current/Resources',path.join(luaRoot,'Resources'));
+ fs.writeFileSync(path.join(luaResources,'Info.plist'),`<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>CFBundleExecutable</key><string>Lua</string><key>CFBundleIdentifier</key><string>org.luajit.LuaJIT</string><key>CFBundleName</key><string>Lua</string><key>CFBundlePackageType</key><string>FMWK</string><key>CFBundleVersion</key><string>2.1</string></dict></plist>`);
  for(const file of binaries){
   for(const linked of Native.links(file)){
    if(linked.startsWith('/System/')||linked.startsWith('/usr/lib/'))continue;
@@ -80,12 +82,19 @@ export async function assemble({compiled,output,version='0.10.2-MCLv1'}){
   const cpus=(Native.macho(file)||[]).sort();
   for(const cpu of cpus){const actual=Native.loadCommands(file,cpu).minimumMacOS;if(!actual)throw Error('Compiled binary has no measured macOS floor: '+path.basename(file));if(actual.localeCompare(minimumMacOS,undefined,{numeric:true})>0)minimumMacOS=actual;}
   if(JSON.stringify(cpus)!==JSON.stringify(['arm64','x86_64']))throw Error('Actual universal slices missing: '+path.relative(payload,file));
-  fs.chmodSync(file,0o755);run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',file]);
+  fs.chmodSync(file,0o755);
  }
  fs.writeFileSync(path.join(bundle,'Contents/Info.plist'),`<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>CFBundleExecutable</key><string>love</string><key>CFBundleIdentifier</key><string>org.love2d.love</string><key>CFBundleName</key><string>LÖVE</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleShortVersionString</key><string>0.10.2</string><key>LSMinimumSystemVersion</key><string>${minimumMacOS}</string><key>NSHighResolutionCapable</key><true/></dict></plist>`);
  for(const source of Object.values(first.roots))addLicenses(payload,'LÖVE 0.10.2',source);
  for(const folder of fs.readdirSync(path.join(first.roots.megasource,'libs')))addLicenses(payload,folder,path.join(first.roots.megasource,'libs',folder));
+ // Sign companion libraries first, then their containing frameworks, then the application.
+ for(const name of fs.readdirSync(frameworks)){
+  const framework=path.join(frameworks,name),primary=path.join(framework,'Versions/A',path.basename(name,'.framework'));
+  for(const binary of binaries)if(binary.startsWith(framework+path.sep)&&binary!==primary)run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',binary]);
+  run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',framework]);
+ }
  run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',bundle]);
+ run('/usr/bin/codesign',['--verify','--deep','--strict',bundle]);
  const sourceHash=crypto.createHash('sha256').update(JSON.stringify(sources)).digest('hex');
  return helperPackage({id:'love',version,arch:'universal',output,minimumMacOS,sourceSha256:sourceHash,record:{upstreamVersion:'0.10.2',sources,luaApi:'5.1',luaImplementation:'LuaJIT 2.1',nativeBinaries:binaries.map(f=>path.relative(payload,f))}});
 }
