@@ -136,7 +136,7 @@ exec ${[cc,'-arch',host.macho,'-isysroot',sdk,'-mmacosx-version-min='+minimumMac
         for(const architecture of Object.keys(peLinkerFlags))
             fs.rmSync(path.join(build,'dlls/winevulkan',architecture+'-windows/'+clientModule+'.dll'),{force:true});
     runMake(['-j'+jobs,...peArchitectures.map(architecture=>architecture+'_CFLAGS='+flags),
-        ...Object.entries(peLinkerFlags).map(([architecture,value])=>architecture+'_LDFLAGS='+value),...(options.peOnly?peArchitectures.map(cpu=>'dlls/winevulkan/'+cpu+'-windows/'+clientModule+'.dll'):[options.hostOnly?'dlls/winevulkan/winevulkan.so':'dlls/winevulkan/all'])],{cwd:build,env:environment});
+        ...Object.entries(peLinkerFlags).map(([architecture,value])=>architecture+'_LDFLAGS='+value),...(options.peOnly?modulePaths(host.arch,peArchitectures,clientModule).filter(([name])=>name.endsWith('.dll')).map(([,target])=>target):[options.hostOnly?'dlls/winevulkan/winevulkan.so':'dlls/winevulkan/all'])],{cwd:build,env:environment});
     writeChanged(flagFile,flags+'\n');
     writeChanged(linkerFile,linkerIdentity);
     const modules=modulePaths(host.arch,peArchitectures,clientModule).filter(([name],index)=>options.peOnly?name.endsWith('.dll'):!options.hostOnly||index===0);
@@ -147,7 +147,8 @@ exec ${[cc,'-arch',host.macho,'-isysroot',sdk,'-mmacosx-version-min='+minimumMac
     return result;
 }
 // The shipped module libraries, each with its place in the Wine build.
-export const modulePaths=(arch='x64',peArchitectures=['x86_64','i386'],clientModule='winevulkan')=>[[wineHost(arch).unix+'/winevulkan.so','dlls/winevulkan/winevulkan.so'],...peArchitectures.map(cpu=>[cpu+'-windows/winevulkan.dll','dlls/winevulkan/'+cpu+'-windows/'+clientModule+'.dll'])];
+// With both architectures enabled, Wine links ARM64EC into the AArch64 ARM64X DLL.
+export const modulePaths=(arch='x64',peArchitectures=['x86_64','i386'],clientModule='winevulkan')=>[[wineHost(arch).unix+'/winevulkan.so','dlls/winevulkan/winevulkan.so'],...peArchitectures.filter(cpu=>cpu!=='arm64ec'||!peArchitectures.includes('aarch64')).map(cpu=>[cpu+'-windows/winevulkan.dll','dlls/winevulkan/'+cpu+'-windows/'+clientModule+'.dll'])];
 const MODULES=modulePaths();
 /** The shipped module library paths. */
 export const MODULE_FILES=MODULES.map(([name])=>name);
