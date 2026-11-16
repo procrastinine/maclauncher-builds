@@ -39,12 +39,25 @@ export function descriptorBindingSource(text){
  // Restore the set bits after bindBuffer invalidates each index in the loop.
  return replace(text,loopEnd,loopEnd+restore,file);
 }
+// Apache-2.0 adaptation by Gauthier Piarrette, 2026-10-16.
+// https://github.com/gauthierpiarrette/highball-engine at 161d7a8495d041d2901d07ff3b4fffeed9be1a4b,
+// moltenvk-arm64/moltenvk/0014-Copy-every-partial-edge-block-of-a-compressed-image.patch.
+export function compressedCopySource(text){
+ return replace(text,
+  '                dstExtent.width /= srcBlockExtent.width;\n                dstExtent.height /= srcBlockExtent.height;',
+  '                // Partial edge blocks still occupy a complete destination texel.\n'+
+  '                dstExtent.width = mvkCeilingDivide(dstExtent.width, srcBlockExtent.width);\n'+
+  '                dstExtent.height = mvkCeilingDivide(dstExtent.height, srcBlockExtent.height);',
+  'MoltenVK/MoltenVK/Commands/MVKCmdTransfer.mm');
+}
 export function sceneSources(repository,readSource=file=>original(repository,file)){
  const files=new Map();
  const edit=(file,changes)=>{let text=readSource(file);for(const[from,to]of changes)text=replace(text,from,to,file);files.set(file,text);};
  const commands='MoltenVK/MoltenVK/Commands/';
  const bindings=commands+'MVKCommandEncoderState.mm';
  files.set(bindings,descriptorBindingSource(readSource(bindings)));
+ const transfer=commands+'MVKCmdTransfer.mm';
+ files.set(transfer,compressedCopySource(readSource(transfer)));
  edit(commands+'MVKCommandPool.h',[
   ['#include "MVKCmdDebug.h"','#include "MVKCmdDebug.h"\n#include "scene-command.hpp"'],
   ['#pragma mark Command resources','MVKCommandTypePool<MVKCmdMacfxScene> _cmdMacfxScenePool;\n\n#pragma mark Command resources']
