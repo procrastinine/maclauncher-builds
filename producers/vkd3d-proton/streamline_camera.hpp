@@ -83,6 +83,122 @@ inline bool camera(const sl::Constants &value, uint32_t frame, uint32_t viewport
   return true;
 }
 
+// The camera that the unjittered perspective view-to-clip matrix alone defines. Unreal Engine's Streamline plugin
+// declares its own r.Streamline.CustomCameraNearPlane/FarPlane values, which do not need to match its projection, so
+// near and far come from the matrix's depth terms and the vertical field of view from its vertical scale. The matrix's
+// depth direction must be the declared one. A depth term at exactly the far depth is an infinite far plane: Unreal
+// Engine's reversed-Z projection gives near = GNearClippingPlane and an infinite far plane.
+inline bool projectionCamera(const sl::Constants &value, uint32_t frame, uint32_t viewport, RSTemporalCamera &out) {
+  out = {};
+  if (value.structType != sl::Constants::s_structType || value.structVersion < 1 || value.structVersion > 2 ||
+      value.orthographicProjection != sl::Boolean::eFalse ||
+      (value.depthInverted != sl::Boolean::eTrue && value.depthInverted != sl::Boolean::eFalse))
+    return false;
+  const float *m = &value.cameraViewToClip.row[0].x;
+  for (unsigned i = 0; i < 16; ++i)
+    if (!std::isfinite(m[i]) || m[i] == FLT_MAX)
+      return false;
+  const float w = m[11], scale = std::abs(w);
+  if (scale < 1e-8f || std::abs(m[0]) < 1e-8f || std::abs(m[5]) < 1e-8f)
+    return false;
+  for (unsigned i : {1u, 2u, 3u, 4u, 6u, 7u, 8u, 9u, 12u, 13u, 15u})
+    if (std::abs(m[i]) > scale * 1e-5f)
+      return false;
+  // NDC depth at view distance d is a + b / d
+  const bool reversed = value.depthInverted == sl::Boolean::eTrue;
+  const double a = double(m[10]) / w, b = double(m[14]) / scale, farDepth = reversed ? 0 : 1;
+  if (reversed ? !(b > 0 && a <= 0) : !(b < 0 && a >= 1))
+    return false;
+  const bool infinite = std::abs(a - farDepth) <= 1e-7;
+  const double nearPlane = reversed ? b / (1 - a) : -b / a, farPlane = infinite ? 0 : reversed ? -b / a : b / (1 - a);
+  const double fov = 2 * std::atan(double(scale) / std::abs(double(m[5])));
+  if (!std::isfinite(nearPlane) || !(nearPlane > 0) || nearPlane >= FLT_MAX || !(fov > 0) || !(fov < 3.141592653589793) ||
+      (!infinite && (!std::isfinite(farPlane) || !(farPlane > nearPlane) || farPlane >= FLT_MAX)))
+    return false;
+  out.size = sizeof(out);
+  out.version = 1;
+  out.frameId = uint64_t(frame) + 1;
+  out.viewportId = viewport;
+  out.nearPlane = float(nearPlane);
+  out.farPlane = float(farPlane);
+  out.verticalFov = float(fov);
+  out.flags = (reversed ? RS_TEMPORAL_DEPTH_REVERSED : 0) | (infinite ? RS_TEMPORAL_DEPTH_INFINITE : 0) |
+              (value.reset == sl::Boolean::eTrue ? RS_TEMPORAL_RESET : 0) |
+              (value.motionVectorsJittered == sl::Boolean::eTrue ? RS_TEMPORAL_JITTERED_MOTION : 0);
+  if (!(out.farPlane > out.nearPlane) && !infinite)
+    out = {};
+  return out.size != 0;
+}
+
+// The camera of a Super Resolution evaluation that a game makes through NGX itself, outside Streamline's
+// slEvaluateFeature, while it sets Streamline constants of each frame (Unreal Engine's DLSS plugin beside its
+// Streamline plugin). Neither call names the other's frame. An evaluation takes the constants of the same frame
+// only when exactly one frame and viewport set constants since the previous such evaluation, so the constants are
+// this frame's or the previous frame's, and their jitter offset is the evaluation's (equal, or negated on both axes,
+// as the two plugins' conventions may differ) and not the previous evaluation's in either convention. A temporal
+// upscaler's jitter changes every frame, so that is the same frame. Constants that come after their frame's
+// evaluation are never given to the next one, and two consecutive jitter offsets that are each other's negation
+// leave that evaluation without a camera.
+class DirectCameras {
+  struct Constants {
+    uint32_t frame = 0, viewport = 0;
+    bool valid = false;
+    float jitter[2]{};
+    RSTemporalCamera camera{};
+  };
+  Constants pending_{};
+  unsigned count_ = 0;
+  bool several_ = false, evaluated_ = false;
+  float previous_[2]{};
+  static bool same(const float *constants, float x, float y) {
+    return (constants[0] == x && constants[1] == y) || (constants[0] == -x && constants[1] == -y);
+  }
+
+public:
+  enum Result { Bound, NoConstants, SeveralFrames, Unjittered, InvalidCamera, ConstantsFollow, OtherFrame, AmbiguousJitter,
+                FirstEvaluation };
+  void remember(uint32_t frame, uint32_t viewport, float jitterX, float jitterY, const RSTemporalCamera *camera) {
+    if (count_ && (pending_.frame != frame || pending_.viewport != viewport))
+      several_ = true;
+    pending_ = {frame, viewport, camera != nullptr, {jitterX, jitterY}, camera ? *camera : RSTemporalCamera{}};
+    if (count_ < 2)
+      ++count_;
+  }
+  Result take(float jitterX, float jitterY, RSTemporalCamera &out) {
+    out = {};
+    const Constants pending = pending_;
+    const unsigned count = count_;
+    const bool several = several_, evaluated = evaluated_;
+    const float previous[2] = {previous_[0], previous_[1]};
+    pending_ = {};
+    count_ = 0;
+    several_ = false;
+    evaluated_ = true;
+    previous_[0] = jitterX;
+    previous_[1] = jitterY;
+    if (!count)
+      return NoConstants;
+    if (several)
+      return SeveralFrames;
+    if (!std::isfinite(jitterX) || !std::isfinite(jitterY) || (jitterX == 0 && jitterY == 0))
+      return Unjittered;
+    if (!evaluated)
+      return FirstEvaluation;
+    const bool current = same(pending.jitter, jitterX, jitterY), earlier = same(pending.jitter, previous[0], previous[1]);
+    if (current && earlier)
+      return AmbiguousJitter;
+    if (earlier)
+      return ConstantsFollow;
+    if (!current)
+      return OtherFrame;
+    if (!pending.valid)
+      return InvalidCamera;
+    out = pending.camera;
+    return Bound;
+  }
+  void clear() { *this = DirectCameras{}; }
+};
+
 // The viewport an evaluation names: exactly one ViewportHandle, possibly repeated, in its inputs and their chains.
 inline bool viewport(const sl::BaseStructure **inputs, uint32_t count, uint32_t &id) {
   if (!inputs || count > 256)

@@ -62,6 +62,61 @@ int main() {
   cache.remember(7, 3, &first);for (uint32_t f = 10; f < 13; ++f) cache.remember(f, 3, &first);
   assert(!cache.lookup(7, 4, out) && cache.lookup(7, 3, out) && cache.lookup(12, 3, out));checks++;
   cache.clear();assert(!cache.lookup(12, 3, out));checks++;
+  // a camera from the projection alone: Unreal Engine declares unrelated scalar near and far planes
+  for (bool reversed : {false, true}) for (bool rh : {false, true}) for (bool infinite : {false, true}) {
+    auto c = perspective(reversed, rh, infinite);c.cameraNear = .01f;c.cameraFar = 75000.f;c.cameraFOV = 2.5f;
+    assert(!ngx_streamline::camera(c, 2, 1, result));
+    assert(ngx_streamline::projectionCamera(c, 2, 1, result));checks++;
+    assert(result.size == 64 && result.frameId == 3 && result.viewportId == 1);
+    assert(std::abs(result.nearPlane - .1f) < 1e-6f && std::abs(result.verticalFov - 1.1f) < 1e-5f);
+    assert(bool(result.flags & RS_TEMPORAL_DEPTH_REVERSED) == reversed && bool(result.flags & RS_TEMPORAL_DEPTH_INFINITE) == infinite);
+    assert(infinite ? result.farPlane == 0 : std::abs(result.farPlane - 1000.f) < 1.f);
+  }
+  {
+    // Unreal Engine 4's reversed-Z infinite projection: near is the matrix's depth translation, far is infinite
+    sl::Constants c{};std::memset(&c.cameraViewToClip, 0, sizeof(c.cameraViewToClip));auto m = &c.cameraViewToClip.row[0].x;
+    m[0] = 1.f / std::tan(.8f);m[5] = m[0] * 16.f / 9.f;m[11] = 1.f;m[10] = 0.f;m[14] = 10.f;
+    c.depthInverted = sl::Boolean::eTrue;c.orthographicProjection = sl::Boolean::eFalse;c.cameraNear = .01f;c.cameraFar = 75000.f;
+    assert(ngx_streamline::projectionCamera(c, 40, 0, result));checks++;
+    assert(result.nearPlane == 10.f && result.farPlane == 0 && (result.flags & RS_TEMPORAL_DEPTH_INFINITE) && (result.flags & RS_TEMPORAL_DEPTH_REVERSED));
+    assert(std::abs(result.verticalFov - 2 * std::atan(1.f / m[5])) < 1e-6f);
+    auto bad = c;bad.depthInverted = sl::Boolean::eFalse;assert(!ngx_streamline::projectionCamera(bad, 40, 0, result) && !result.size);checks++;
+    bad = c;bad.orthographicProjection = sl::Boolean::eTrue;assert(!ngx_streamline::projectionCamera(bad, 40, 0, result));checks++;
+    bad = c;bad.cameraViewToClip.row[2].x = .25f;assert(!ngx_streamline::projectionCamera(bad, 40, 0, result));checks++;
+    bad = c;bad.cameraViewToClip.row[3].z = -1.f;assert(!ngx_streamline::projectionCamera(bad, 40, 0, result));checks++;
+    bad = c;bad.cameraViewToClip.row[2].z = .5f;assert(!ngx_streamline::projectionCamera(bad, 40, 0, result));checks++;
+    bad = c;bad.cameraViewToClip.row[0].x = NAN;assert(!ngx_streamline::projectionCamera(bad, 40, 0, result));checks++;
+    // direct NGX evaluations take only the same frame's constants, proven by equal jitter
+    RSTemporalCamera projected{}, bound{};assert(ngx_streamline::projectionCamera(c, 40, 0, projected));
+    using Direct = ngx_streamline::DirectCameras;Direct direct;
+    assert(direct.take(.25f, -.5f, bound) == Direct::NoConstants && !bound.size);checks++;
+    direct.remember(41, 0, .125f, .375f, &projected);
+    assert(direct.take(.125f, .375f, bound) == Direct::Bound && bound.size == 64 && bound.nearPlane == 10.f);checks++;
+    direct.remember(42, 0, -.3f, .1f, &projected);
+    assert(direct.take(.3f, -.1f, bound) == Direct::Bound);checks++;
+    assert(direct.take(.2f, .2f, bound) == Direct::NoConstants && !bound.size);checks++;
+    // constants after their frame's evaluation are never given to the next evaluation
+    direct.remember(43, 0, .2f, .2f, &projected);
+    assert(direct.take(-.4f, .3f, bound) == Direct::ConstantsFollow && !bound.size);checks++;
+    direct.remember(44, 0, .7f, .7f, &projected);
+    assert(direct.take(.1f, .3f, bound) == Direct::OtherFrame && !bound.size);checks++;
+    direct.remember(45, 0, .1f, .1f, &projected);direct.remember(45, 1, .1f, .1f, &projected);
+    assert(direct.take(.1f, .1f, bound) == Direct::SeveralFrames && !bound.size);checks++;
+    direct.remember(46, 0, .1f, .1f, &projected);direct.remember(47, 0, .2f, .1f, &projected);
+    assert(direct.take(.2f, .1f, bound) == Direct::SeveralFrames);checks++;
+    direct.remember(48, 0, .1f, .1f, &projected);direct.remember(48, 0, .1f, .2f, &projected);
+    assert(direct.take(.1f, .2f, bound) == Direct::Bound);checks++;
+    direct.remember(49, 0, 0.f, 0.f, &projected);assert(direct.take(0.f, 0.f, bound) == Direct::Unjittered && !bound.size);checks++;
+    direct.remember(50, 0, .3f, .3f, nullptr);assert(direct.take(.3f, .3f, bound) == Direct::InvalidCamera && !bound.size);checks++;
+    // the previous frame's constants are excluded in either sign convention
+    assert(direct.take(.125f, .25f, bound) == Direct::NoConstants);
+    direct.remember(53, 0, -.125f, -.25f, &projected);assert(direct.take(-.125f, -.25f, bound) == Direct::AmbiguousJitter && !bound.size);checks++;
+    direct.remember(54, 0, .125f, .25f, &projected);assert(direct.take(.5f, .5f, bound) == Direct::ConstantsFollow && !bound.size);checks++;
+    direct.remember(51, 0, .3f, .4f, &projected);direct.clear();assert(direct.take(.3f, .4f, bound) == Direct::NoConstants);checks++;
+    // the first evaluation cannot exclude constants of a frame before it
+    Direct first;first.remember(1, 0, .1f, .2f, &projected);assert(first.take(.1f, .2f, bound) == Direct::FirstEvaluation && !bound.size);checks++;
+    first.remember(2, 0, .3f, .1f, &projected);assert(first.take(.3f, .1f, bound) == Direct::Bound);checks++;
+  }
   std::printf("ok %u\n", checks);
 }
 `;
@@ -76,6 +131,15 @@ test('the NGX core selects only valid Streamline perspective cameras, by frame t
  const ran=spawnSync(path.join(directory,'camera'),{encoding:'utf8',timeout:60000});
  assert.equal(ran.status,0,ran.stderr+ran.stdout);
  assert.match(ran.stdout.trim(),/^ok \d+$/);
+});
+
+test('a direct NGX Super Resolution evaluation outside slEvaluateFeature takes the same frame\'s Streamline camera',()=>{
+ const patch=fs.readFileSync(path.join(producer,'ngx.patch'),'utf8'),hooks=fs.readFileSync(path.join(producer,'ngx_streamline.cpp'),'utf8');
+ assert.match(patch,/^\+  const bool own = !temporal_camera\.size && DirectEvaluationCamera\(desc\.JitterOffsetX, desc\.JitterOffsetY, direct\) &&$/m);
+ assert.match(patch,/^\+  const RSTemporalCamera &camera = own \? direct : temporal_camera;$/m);
+ assert.match(hooks,/direct_cameras\.remember\(frame_id, view_id, values\.jitterOffset\.x, values\.jitterOffset\.y,/);
+ assert.match(hooks,/sl::CommandBuffer \*commands\) \{\n  EvaluationDepth depth;/,'every slEvaluateFeature scope excludes direct binding');
+ assert.match(hooks,/if \(streamline_evaluations\)\n    return false;/);
 });
 
 test('the NGX core is built with its Streamline capture, MinHook and the official headers, from declared inputs',()=>{

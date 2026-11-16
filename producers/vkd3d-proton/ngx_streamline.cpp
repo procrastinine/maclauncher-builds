@@ -6,10 +6,14 @@
 // for its frame token and viewport. slEvaluateFeature(kFeatureDLSS) selects the copy of its frame token and viewport
 // as the camera of the evaluations on its thread, calls the original and restores the previous camera. Both always
 // return the original result unchanged. Streamline's DLSS feature is 0; NGX numbers its features separately.
+// A game that sets Streamline constants but evaluates Super Resolution through NGX itself (Unreal Engine's DLSS
+// plugin beside its Streamline plugin) gets the camera of the same frame's constants on that direct evaluation:
+// DirectEvaluationCamera binds them by equal jitter offset and declines anything else.
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <psapi.h>
 
+#include <cstdio>
 #include <cstring>
 #include <array>
 #include <atomic>
@@ -62,18 +66,27 @@ Slot slots[kSlots];
 SRWLOCK install_lock = SRWLOCK_INIT;
 
 ngx_streamline::CameraCache<128> cameras;
+ngx_streamline::DirectCameras direct_cameras;
 SRWLOCK camera_lock = SRWLOCK_INIT;
+// slEvaluateFeature calls on this thread: NGX evaluations inside them are Streamline's, never direct ones
+thread_local unsigned streamline_evaluations = 0;
+std::atomic<bool> streamline_hooked{false};
+struct EvaluationDepth {EvaluationDepth(){++streamline_evaluations;}~EvaluationDepth(){--streamline_evaluations;}};
 
 sl::Result Capture(Slot &slot,SetConstants original, const sl::Constants &values, const sl::FrameToken &frame,
                    const sl::ViewportHandle &view) {
   const uint32_t frame_id = uint32_t(frame), view_id = uint32_t(view);
-  RSTemporalCamera camera;
+  RSTemporalCamera camera, projected;
   const bool valid = ngx_streamline::camera(values, frame_id, view_id, camera);
+  bool projection_valid = false;
+  try{projection_valid = ngx_streamline::projectionCamera(values, frame_id, view_id, projected);}catch(...){}
   const auto epoch=slot.scene.begin(SceneActive());const bool extra=epoch!=0;ngx_streamline::SceneMatrices matrices;bool matrix_valid=false;
   if(extra)try{matrix_valid=ngx_streamline::matrices(values,matrices);}catch(...){}
   const sl::Result result = original(values, frame, view);
   AcquireSRWLockExclusive(&camera_lock);
   cameras.remember(frame_id, view_id, valid && result == sl::Result::eOk ? &camera : nullptr);
+  direct_cameras.remember(frame_id, view_id, values.jitterOffset.x, values.jitterOffset.y,
+                          projection_valid && result == sl::Result::eOk ? &projected : nullptr);
   ReleaseSRWLockExclusive(&camera_lock);
   if(extra)try{slot.scene.begin(SceneActive());slot.scene.constants(frame_id,view_id,matrix_valid?&matrices:nullptr,result==sl::Result::eOk,epoch);}catch(...){}
   return result;
@@ -81,6 +94,7 @@ sl::Result Capture(Slot &slot,SetConstants original, const sl::Constants &values
 
 sl::Result Select(Slot &slot,EvaluateFeature original, sl::Feature feature, const sl::FrameToken &frame,
                   const sl::BaseStructure **inputs, uint32_t count, sl::CommandBuffer *commands) {
+  EvaluationDepth depth;
   if (feature != sl::kFeatureDLSS){if(slot.scene.enabled(SceneActive()))try{slot.scene.discard(uint32_t(frame));}catch(...){}SceneScope none(nullptr);return original(feature, frame, inputs, count, commands);}
   uint32_t view_id = 0;
   RSTemporalCamera camera;
@@ -179,6 +193,7 @@ void ngx::HookStreamline() {
   // a new Streamline session starts with new frame tokens
   AcquireSRWLockExclusive(&camera_lock);
   cameras.clear();
+  direct_cameras.clear();
   ReleaseSRWLockExclusive(&camera_lock);
   HMODULE modules[1024];
   DWORD bytes = 0;
@@ -227,6 +242,7 @@ void ngx::HookStreamline() {
     if (Hook(n, module, set_target, evaluate_target)) {
       {std::lock_guard guard(slots[n].scene.mutex);slots[n].scene.clear();}
       HookTags(n,module);
+      streamline_hooked.store(true, std::memory_order_release);
       lane::log("info", "Streamline camera capture in %ls", name);
     } else
       lane::log("err", "Streamline camera capture: could not hook %ls", name);
@@ -235,3 +251,37 @@ void ngx::HookStreamline() {
 }
 
 const ngx::TemporalScene *ngx::CurrentTemporalScene()noexcept{if(!SceneActive()||!selected_scene)return nullptr;return !selected_scene->captureOwner||static_cast<SceneCache*>(selected_scene->captureOwner)->current(selected_scene->captureEpoch)?selected_scene:nullptr;}
+
+bool ngx::DirectEvaluationCamera(float jitter_x, float jitter_y, RSTemporalCamera &camera) noexcept {
+  camera = {};
+  if (streamline_evaluations)
+    return false;
+  if (!streamline_hooked.load(std::memory_order_acquire))
+    return false;
+  AcquireSRWLockExclusive(&camera_lock);
+  const auto result = direct_cameras.take(jitter_x, jitter_y, camera);
+  ReleaseSRWLockExclusive(&camera_lock);
+  // each outcome once per process: the first binding, and why evaluations had no camera
+  static std::atomic<unsigned> reported{0};
+  const unsigned bit = 1u << unsigned(result);
+  if (!(reported.fetch_or(bit) & bit)) {
+    using Direct = ngx_streamline::DirectCameras;
+    static const char *const reasons[] = {"bound", "no Streamline constants since the previous evaluation",
+                                          "constants of several frames or viewports since the previous evaluation",
+                                          "the evaluation has no jitter offset", "the constants' projection is not a perspective camera",
+                                          "the constants follow their frame's evaluation", "the constants' jitter is another frame's",
+                                          "consecutive jitter offsets are each other's negation",
+                                          "the first evaluation has no previous frame to exclude"};
+    if (result == Direct::Bound) {
+      char far_plane[32] = "infinite";
+      if (!(camera.flags & RS_TEMPORAL_DEPTH_INFINITE))
+        snprintf(far_plane, sizeof(far_plane), "%g", camera.farPlane);
+      lane::log("info", "Streamline camera on a direct NGX evaluation: frame %llu viewport %llu near %g far %s fov %.4f",
+                (unsigned long long)camera.frameId - 1, (unsigned long long)camera.viewportId, camera.nearPlane,
+                far_plane, camera.verticalFov);
+    } else
+      lane::log("info", "No Streamline camera on a direct NGX evaluation (jitter %g, %g): %s", jitter_x, jitter_y,
+                reasons[unsigned(result)]);
+  }
+  return result == ngx_streamline::DirectCameras::Bound;
+}

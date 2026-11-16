@@ -26,4 +26,7 @@ RSTemporalCamera ExchangeTemporalCamera(const RSTemporalCamera *camera);
 void RestoreTemporalCamera(const RSTemporalCamera &camera);
 // Installs the camera capture in the process's Streamline interposer, once per loaded interposer.
 void HookStreamline();
+// The camera of a Super Resolution evaluation that the game makes through NGX itself, outside Streamline's
+// slEvaluateFeature: that of the same frame's Streamline constants (ngx_streamline.cpp), or false.
+bool DirectEvaluationCamera(float jitterX, float jitterY, RSTemporalCamera &camera) noexcept;
 } // namespace ngx
