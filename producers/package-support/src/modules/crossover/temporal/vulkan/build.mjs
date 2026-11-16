@@ -14,6 +14,13 @@ const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const quote=value=>"'"+String(value).replaceAll("'","'\\''")+"'";
 const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
 const read=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',maxBuffer: Infinity,...options}).trim();
+// A nice19 parent must not receive a second relative priority adjustment.
+function runMake(args,options={}){
+    const priority=read('ps',['-o','nice=','-p',String(process.pid)]);
+    if(priority==='19')return run('make',args,options);
+    if(priority==='0')return run('/usr/bin/nice',['-n','19','make',...args],options);
+    throw Error('Wine make parent priority '+priority+', expected 0 or 19.');
+}
 async function verifyArchive(file,description){
     file=fs.realpathSync(file);const hash=crypto.createHash('sha256');
     for await(const bytes of fs.createReadStream(file))hash.update(bytes);
@@ -54,8 +61,8 @@ async function buildBison({archive,work,jobs}){
     if(!fs.existsSync(sourceDir)){fs.mkdirSync(sourceDir,{recursive:true});run('/usr/bin/tar',['-xf',archive,'--no-same-owner','--strip-components=1','-C',sourceDir,tool.directory]);}
     fs.mkdirSync(build,{recursive:true});
     if(!fs.existsSync(path.join(build,'Makefile')))run('/bin/sh',[path.join(sourceDir,'configure'),'--prefix='+prefix,'--disable-nls'],{cwd:build});
-    run('/usr/bin/nice',['-n','19','make','-j'+jobs],{cwd:build});
-    run('/usr/bin/nice',['-n','19','make','install'],{cwd:build});
+    runMake(['-j'+jobs],{cwd:build});
+    runMake(['install'],{cwd:build});
     if(!read(executable,['--version']).startsWith('bison (GNU Bison) '+tool.version))throw Error('The declared Bison tool did not build.');
     return executable;
 }
@@ -114,7 +121,7 @@ exec ${[cc,'-arch',host.macho,'-isysroot',sdk,'-mmacosx-version-min='+minimumMac
     if(options.configureOnly)return {...prepared,build};
     const flags='-g -O2 '+[work,fs.realpathSync(work),prepared.directory,fs.realpathSync(prepared.directory)].map(root=>'-ffile-prefix-map='+root+'=WineSource').join(' '),flagFile=path.join(build,'module-compiler-flags.txt');
     if(!fs.existsSync(flagFile)||fs.readFileSync(flagFile,'utf8')!==flags+'\n')
-        run('/usr/bin/nice',['-n','19','make','dlls/winevulkan/clean'],{cwd:build,env:environment});
+        runMake(['dlls/winevulkan/clean'],{cwd:build,env:environment});
     const makefile=fs.readFileSync(path.join(build,'Makefile'),'utf8');
     const peLinkerFlags=Object.fromEntries(peArchitectures.map(architecture=>{
         const match=makefile.match(new RegExp('^'+architecture+'_LDFLAGS = (.*)$','m'));
@@ -125,7 +132,7 @@ exec ${[cc,'-arch',host.macho,'-isysroot',sdk,'-mmacosx-version-min='+minimumMac
     if(!fs.existsSync(linkerFile)||fs.readFileSync(linkerFile,'utf8')!==linkerIdentity)
         for(const architecture of Object.keys(peLinkerFlags))
             fs.rmSync(path.join(build,'dlls/winevulkan',architecture+'-windows/winevulkan.dll'),{force:true});
-    run('/usr/bin/nice',['-n','19','make','-j'+jobs,...peArchitectures.map(architecture=>architecture+'_CFLAGS='+flags),
+    runMake(['-j'+jobs,...peArchitectures.map(architecture=>architecture+'_CFLAGS='+flags),
         ...Object.entries(peLinkerFlags).map(([architecture,value])=>architecture+'_LDFLAGS='+value),options.hostOnly?'dlls/winevulkan/winevulkan.so':'dlls/winevulkan/all'],{cwd:build,env:environment});
     writeChanged(flagFile,flags+'\n');
     writeChanged(linkerFile,linkerIdentity);
