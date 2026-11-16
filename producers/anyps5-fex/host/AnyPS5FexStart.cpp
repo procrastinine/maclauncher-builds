@@ -15,6 +15,7 @@
 
 #include <atomic>
 #include <dirent.h>
+#include <filesystem>
 #include <pthread.h>
 #include <thread>
 #include <nid/NidCompute.hpp>
@@ -279,19 +280,37 @@ std::vector<std::string> SceModules(const std::string& Directory) {
 } // namespace
 
 int main(int argc, char** argv) {
-  const std::string Mode = argc == 4 ? argv[3] : "";
+  const std::string Mode = argc == 5 ? argv[4] : "";
   if (Mode != "modules" && Mode != "eboot-only" && Mode != "past-main") {
-    std::fprintf(stderr, "usage: %s <game directory> <main vaddr> modules|eboot-only|past-main\n", argv[0]);
+    std::fprintf(stderr, "usage: %s <game directory> <game data directory> <main vaddr> modules|eboot-only|past-main\n", argv[0]);
     return 2;
   }
   FexGuest::DescribeGuestAddress = Describe;
   FexGuest::InstallFaultReport();
   FexGuest::InstallGuestCpuHost();
   FexGuest::InitConfig();
-  const std::string Directory = argv[1];
-  // The game directory is the guest's /app0, as the AnyPS5 runner lays it out.
+  std::error_code Error;
+  const std::string Directory = std::filesystem::absolute(argv[1], Error).string();
+  // The game's own AnyPS5 folder (games/<id>/modules/anyps5 in the launcher profile) holds its writable mounts. The
+  // process works in it, as libc resolves a guest path outside every mount against the working directory.
+  const std::filesystem::path Data = std::filesystem::absolute(argv[2], Error);
+  if (Error || !std::filesystem::is_directory(Data)) {
+    std::fprintf(stderr, "game data directory %s does not exist\n", argv[2]);
+    return 2;
+  }
+  for (const char* Mount : {"download0", "data"}) {
+    std::filesystem::create_directories(Data / Mount, Error);
+    if (Error) {
+      std::fprintf(stderr, "cannot create %s: %s\n", (Data / Mount).c_str(), Error.message().c_str());
+      return 2;
+    }
+  }
+  std::filesystem::current_path(Data);
+  // The game directory is the guest's /app0; /download0 and /data are the game data folder's subdirectories.
   AddPathAlias_nid_no_patch("/app0", Directory.c_str());
-  const std::uint64_t MainOffset = std::strtoull(argv[2], nullptr, 0);
+  AddPathAlias_nid_no_patch("/download0", (Data / "download0").c_str());
+  AddPathAlias_nid_no_patch("/data", (Data / "data").c_str());
+  const std::uint64_t MainOffset = std::strtoull(argv[3], nullptr, 0);
 
   // Generated thunks of AnyPS5 exports first, then the stand-ins for what is not built for arm64 yet.
   std::size_t Unsupported = 0, GeneratedThunkCount = 0;

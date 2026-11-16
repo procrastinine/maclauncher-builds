@@ -24,7 +24,7 @@ for line in disassembly.stdout.splitlines():
             calls[function].add(call.group(1))
 # A listed stub that a real definition replaced (the stubs are weak) is not a stub in the binary.
 stubs = {symbol for symbol in listed if first.get(symbol) == 'brk'}
-known = set(calls) | {callee for callees in calls.values() for callee in callees}
+known = set(first) | set(calls) | {callee for callees in calls.values() for callee in callees}
 starts = []
 for root in roots:
     candidates = [root] if root.startswith('_') else ['_' + root + '_nid_postfix', '_' + root]

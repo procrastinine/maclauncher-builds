@@ -167,7 +167,10 @@ if(options.check){
  const runs=name=>!options.only||options.only.has(name);
  if(runs('proof'))check(proof,[eboot,functionAddress,slot,bss],'unbound','bound');
  if(runs('abi'))check(abi,[guestText,...guestOffsets],'generic','thunks');
- if(runs('start'))check(start,[path.dirname(eboot),main],'eboot-only','modules');
+ // The start check's game data folder is a build directory, not a launcher profile.
+ const startData=path.join(options.out,'start-data');
+ fs.mkdirSync(startData,{recursive:true});
+ if(runs('start'))check(start,[path.dirname(eboot),startData,main],'eboot-only','modules');
  if(runs('syscall')){
  const entry=spawnSync(syscall,[eboot,functionAddress,slot,bss],{encoding:'utf8',timeout:20000});
  process.stdout.write('--- '+path.basename(syscall)+' (exit '+entry.status+')\n'+entry.stdout);
