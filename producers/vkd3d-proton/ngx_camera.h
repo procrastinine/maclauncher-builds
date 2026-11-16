@@ -20,6 +20,9 @@ enum : uint32_t {
   RS_TEMPORAL_CAMERA_FLAGS = 0x6f,
 };
 
+struct ID3D12GraphicsCommandList;
+struct ID3D12MetalFXScaler;
+
 namespace ngx {
 // Sets the camera of the next evaluations on this thread (none when invalid or null) and returns the previous one.
 RSTemporalCamera ExchangeTemporalCamera(const RSTemporalCamera *camera);
@@ -29,4 +32,8 @@ void HookStreamline();
 // The camera of a Super Resolution evaluation that the game makes through NGX itself, outside Streamline's
 // slEvaluateFeature: that of the same frame's Streamline constants (ngx_streamline.cpp), or false.
 bool DirectEvaluationCamera(float jitterX, float jitterY, RSTemporalCamera &camera) noexcept;
+// After a direct evaluation's TemporalUpscale on list: remembers the frame id that VKD3D-Proton gave it, which the
+// HUD-less and UI images tagged after it name in their late scene. ForgetEvaluationFrames before a scaler's Destroy.
+void DirectEvaluationFrame(ID3D12GraphicsCommandList *list, ID3D12MetalFXScaler *scaler) noexcept;
+void ForgetEvaluationFrames(ID3D12MetalFXScaler *scaler) noexcept;
 } // namespace ngx

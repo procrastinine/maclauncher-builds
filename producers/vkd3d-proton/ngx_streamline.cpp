@@ -76,6 +76,15 @@ std::once_flag late_once;
 // a direct NGX evaluation happened in this process (Streamline-evaluated games never report projections)
 std::atomic<bool> direct_evaluated{false};
 SRWLOCK camera_lock = SRWLOCK_INIT;
+// The latest direct evaluation's frame in VKD3D-Proton and the camera of the constants that followed it, for the late
+// scene of the HUD-less and UI images that the game tags after it (vkd3d_metalfx.h LateScene). Under camera_lock.
+struct LateFrame {
+  ID3D12MetalFXScaler *scaler = nullptr;
+  uint64_t frame = 0, evaluation = 0;
+};
+LateFrame late_frame;
+uint64_t followed_evaluation = 0;
+RSTemporalCamera followed_camera{};
 // slEvaluateFeature calls on this thread: NGX evaluations inside them are Streamline's, never direct ones
 thread_local unsigned streamline_evaluations = 0;
 std::atomic<bool> streamline_hooked{false};
@@ -160,6 +169,8 @@ sl::Result Capture(Slot &slot,SetConstants original, const sl::Constants &values
   const auto follow = direct_cameras.follow(evaluation, evaluation_jitter, followed);
   bool published = false;
   if (follow == ngx_streamline::DirectCameras::Followed) {
+    followed_evaluation = evaluation;
+    followed_camera = followed;
     std::call_once(late_once, [] { late_file = std::make_unique<ngx_late_camera::File>(); });
     if (auto mailbox = late_file->get()) {
       ngx_late_camera::publish(*mailbox, evaluation_jitter[0], evaluation_jitter[1], evaluation, followed);
@@ -212,8 +223,76 @@ sl::Result EvaluateFeatureHook(sl::Feature feature, const sl::FrameToken &frame,
   return Select(slots[N],slots[N].evaluate, feature, frame, inputs, count, commands);
 }
 void AttachDuringEvaluation(TagBatch batch,bool accepted){if(!selected_scene)return;if(!accepted||!batch.valid||batch.reset){selected_scene->images={};return;}for(unsigned i=0;i<2;++i)if(batch.images[i].supplied){const auto &image=batch.images[i];selected_scene->images[i]={image.resource,image.commands,image.extent.left,image.extent.top,image.extent.width,image.extent.height};}}
-template<unsigned N>sl::Result SetTagHook(const sl::ViewportHandle &view,const sl::ResourceTag *tags,uint32_t count,sl::CommandBuffer *commands){auto &slot=slots[N];const auto epoch=slot.scene.begin(SceneActive());if(!epoch||!commands)return slot.tag(view,tags,count,commands);const bool inline_scope=selected_scene&&selected_scene->captureOwner==&slot.scene&&selected_scene->commands==commands&&selected_scene->packet.viewportId==uint32_t(view);TagBatch batch;try{batch=CaptureTags(tags,count,commands,inline_scope);}catch(...){batch.valid=false;}const auto result=slot.tag(view,tags,count,commands);try{slot.scene.begin(SceneActive());if(slot.scene.current(epoch)){if(inline_scope)AttachDuringEvaluation(std::move(batch),result==sl::Result::eOk);else slot.scene.remember(false,0,uint32_t(view),std::move(batch),result==sl::Result::eOk,epoch);}}catch(...){}return result;}
-template<unsigned N>sl::Result SetTagForFrameHook(const sl::FrameToken &frame,const sl::ViewportHandle &view,const sl::ResourceTag *tags,uint32_t count,sl::CommandBuffer *commands){auto &slot=slots[N];const auto epoch=slot.scene.begin(SceneActive());if(!epoch)return slot.framed(frame,view,tags,count,commands);TagBatch batch;try{batch=CaptureTags(tags,count,commands);}catch(...){batch.valid=false;}const auto result=slot.framed(frame,view,tags,count,commands);try{slot.scene.begin(SceneActive());if(!slot.scene.current(epoch))return result;if(selected_scene&&selected_scene->captureOwner==&slot.scene&&selected_scene->packet.frameId==uint64_t(uint32_t(frame))+1&&selected_scene->packet.viewportId==uint32_t(view)&&(!commands||selected_scene->commands==commands))AttachDuringEvaluation(std::move(batch),result==sl::Result::eOk);else slot.scene.remember(true,uint32_t(frame),uint32_t(view),std::move(batch),result==sl::Result::eOk,epoch);}catch(...){}return result;}
+sl::Result SetTagScene(Slot &slot,const sl::ViewportHandle &view,const sl::ResourceTag *tags,uint32_t count,sl::CommandBuffer *commands){const auto epoch=slot.scene.begin(SceneActive());if(!epoch||!commands)return slot.tag(view,tags,count,commands);const bool inline_scope=selected_scene&&selected_scene->captureOwner==&slot.scene&&selected_scene->commands==commands&&selected_scene->packet.viewportId==uint32_t(view);TagBatch batch;try{batch=CaptureTags(tags,count,commands,inline_scope);}catch(...){batch.valid=false;}const auto result=slot.tag(view,tags,count,commands);try{slot.scene.begin(SceneActive());if(slot.scene.current(epoch)){if(inline_scope)AttachDuringEvaluation(std::move(batch),result==sl::Result::eOk);else slot.scene.remember(false,0,uint32_t(view),std::move(batch),result==sl::Result::eOk,epoch);}}catch(...){}return result;}
+sl::Result SetTagForFrameScene(Slot &slot,const sl::FrameToken &frame,const sl::ViewportHandle &view,const sl::ResourceTag *tags,uint32_t count,sl::CommandBuffer *commands){const auto epoch=slot.scene.begin(SceneActive());if(!epoch)return slot.framed(frame,view,tags,count,commands);TagBatch batch;try{batch=CaptureTags(tags,count,commands);}catch(...){batch.valid=false;}const auto result=slot.framed(frame,view,tags,count,commands);try{slot.scene.begin(SceneActive());if(!slot.scene.current(epoch))return result;if(selected_scene&&selected_scene->captureOwner==&slot.scene&&selected_scene->packet.frameId==uint64_t(uint32_t(frame))+1&&selected_scene->packet.viewportId==uint32_t(view)&&(!commands||selected_scene->commands==commands))AttachDuringEvaluation(std::move(batch),result==sl::Result::eOk);else slot.scene.remember(true,uint32_t(frame),uint32_t(view),std::move(batch),result==sl::Result::eOk,epoch);}catch(...){}return result;}
+// A command list's late scene interface (a C interface), released at scope end; null without one.
+struct MetalFX1 {
+  ID3D12GraphicsCommandListMetalFX1 *iface = nullptr;
+  explicit MetalFX1(IUnknown *list) noexcept {
+    void *found = nullptr;
+    if (list && SUCCEEDED(list->QueryInterface(IID_ID3D12GraphicsCommandListMetalFX1, &found)))
+      iface = static_cast<ID3D12GraphicsCommandListMetalFX1 *>(found);
+  }
+  ~MetalFX1() {
+    if (iface)
+      iface->lpVtbl->Release(iface);
+  }
+  MetalFX1(const MetalFX1 &) = delete;
+  MetalFX1 &operator=(const MetalFX1 &) = delete;
+};
+// The HUD-less color and UI color and alpha that a game tags after its direct NGX evaluation of a frame (Unreal
+// Engine's Streamline plugin tags them after its own DLSS pass) are that frame's: tags between one direct evaluation
+// and the next name the latest one. They are recorded as its late scene in the tagging command list, where their
+// contents are complete, with the camera of the constants that followed the same evaluation. Only while MacLauncher's
+// late camera file exists (an enabled frame-generation row consumes the scene) and never inside slEvaluateFeature.
+void LateTags(const sl::ResourceTag *tags, uint32_t count, sl::CommandBuffer *commands) noexcept {
+  try {
+    if (!commands || selected_scene || streamline_evaluations || !direct_evaluated.load(std::memory_order_acquire))
+      return;
+    std::call_once(late_once, [] { late_file = std::make_unique<ngx_late_camera::File>(); });
+    if (!late_file->get())
+      return;
+    const TagBatch batch = CaptureTags(tags, count, commands);
+    if (!batch.valid || batch.reset || (!batch.images[0].resource && !batch.images[1].resource))
+      return;
+    AcquireSRWLockShared(&camera_lock);
+    const LateFrame frame = late_frame;
+    const bool camera = frame.evaluation && followed_evaluation == frame.evaluation;
+    const RSTemporalCamera followed = followed_camera;
+    ReleaseSRWLockShared(&camera_lock);
+    if (!frame.scaler || !frame.frame)
+      return;
+    // a D3D12 game's tags name its command list and resources (the evaluation was recorded through the same device)
+    MetalFX1 metalfx(static_cast<IUnknown *>(static_cast<void *>(commands)));
+    if (!metalfx.iface)
+      return;
+    VKD3D_METALFX_LATE_SCENE_DESC desc = {};
+    desc.FrameId = frame.frame;
+    desc.HudLess = static_cast<ID3D12Resource *>(batch.images[0].resource);
+    desc.UI = static_cast<ID3D12Resource *>(batch.images[1].resource);
+    if (camera) {
+      desc.CameraValid = TRUE;
+      desc.DepthReversed = bool(followed.flags & RS_TEMPORAL_DEPTH_REVERSED);
+      desc.DepthInfinite = bool(followed.flags & RS_TEMPORAL_DEPTH_INFINITE);
+      desc.NearPlane = followed.nearPlane;
+      desc.FarPlane = followed.farPlane;
+      desc.VerticalFov = followed.verticalFov;
+    }
+    const HRESULT result = metalfx.iface->lpVtbl->LateScene(metalfx.iface, &desc, frame.scaler);
+    static std::atomic<unsigned> reported{0};
+    const unsigned bit = SUCCEEDED(result) ? 1u : 2u;
+    if (!(reported.fetch_or(bit) & bit))
+      Report(SUCCEEDED(result) ? "Late scene recorded for frame %llu: HUD-less %s, UI %s, camera %s"
+                               : "Late scene of frame %llu not recorded: HUD-less %s, UI %s, camera %s (0x%08lx)",
+             (unsigned long long)frame.frame, desc.HudLess ? "yes" : "no", desc.UI ? "yes" : "no", camera ? "yes" : "no",
+             (unsigned long)result);
+  } catch (...) {
+  }
+}
+template<unsigned N>sl::Result SetTagHook(const sl::ViewportHandle &view,const sl::ResourceTag *tags,uint32_t count,sl::CommandBuffer *commands){
+  const auto result=SetTagScene(slots[N],view,tags,count,commands);if(result==sl::Result::eOk)LateTags(tags,count,commands);return result;}
+template<unsigned N>sl::Result SetTagForFrameHook(const sl::FrameToken &frame,const sl::ViewportHandle &view,const sl::ResourceTag *tags,uint32_t count,sl::CommandBuffer *commands){
+  const auto result=SetTagForFrameScene(slots[N],frame,view,tags,count,commands);if(result==sl::Result::eOk)LateTags(tags,count,commands);return result;}
 PFun_slSetTag *const tag_hooks[kSlots]={SetTagHook<0>,SetTagHook<1>,SetTagHook<2>,SetTagHook<3>};
 PFun_slSetTagForFrame *const framed_hooks[kSlots]={SetTagForFrameHook<0>,SetTagForFrameHook<1>,SetTagForFrameHook<2>,SetTagForFrameHook<3>};
 const SetConstants set_hooks[kSlots] = {SetConstantsHook<0>, SetConstantsHook<1>, SetConstantsHook<2>,
@@ -374,4 +453,23 @@ bool ngx::DirectEvaluationCamera(float jitter_x, float jitter_y, RSTemporalCamer
              reasons[unsigned(result)]);
   }
   return result == ngx_streamline::DirectCameras::Bound;
+}
+
+void ngx::DirectEvaluationFrame(ID3D12GraphicsCommandList *list, ID3D12MetalFXScaler *scaler) noexcept {
+  if (!list || !scaler || streamline_evaluations || !streamline_hooked.load(std::memory_order_acquire))
+    return;
+  MetalFX1 metalfx(list);
+  if (!metalfx.iface)
+    return;
+  const uint64_t frame = metalfx.iface->lpVtbl->TemporalFrameId(metalfx.iface, scaler);
+  AcquireSRWLockExclusive(&camera_lock);
+  late_frame = {scaler, frame, direct_cameras.evaluations()};
+  ReleaseSRWLockExclusive(&camera_lock);
+}
+
+void ngx::ForgetEvaluationFrames(ID3D12MetalFXScaler *scaler) noexcept {
+  AcquireSRWLockExclusive(&camera_lock);
+  if (late_frame.scaler == scaler)
+    late_frame = {};
+  ReleaseSRWLockExclusive(&camera_lock);
 }

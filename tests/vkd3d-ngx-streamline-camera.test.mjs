@@ -214,3 +214,19 @@ test('the NGX core is built with its Streamline capture, MinHook and the officia
  assert(!/^\+.*MacLauncherSetTemporalCamera/m.test(patch),'the core no longer exports the replaced interposer\'s camera setter');
  assert.equal((patch.match(/^\+  HookStreamline\(\);$/gm)||[]).length,8,'every D3D12 and D3D11 Init installs the capture');
 });
+
+test('the HUD-less and UI images tagged after a direct NGX evaluation are recorded as that frame\'s late scene',()=>{
+ const patch=fs.readFileSync(path.join(producer,'ngx.patch'),'utf8'),hooks=fs.readFileSync(path.join(producer,'ngx_streamline.cpp'),'utf8');
+ // the frame id that VKD3D-Proton gave the evaluation, read right after it on the same thread
+ assert.match(patch,/^\+    if \(FAILED\(metalfx\.iface->lpVtbl->TemporalUpscale\(metalfx\.iface, &desc, &dlss->scaler\)\)\)\n\+      return NVNGX_RESULT_FAIL;\n\+    \/\/ [^\n]*\n\+    DirectEvaluationFrame\(list, dlss->scaler\);\n\+    return NVNGX_RESULT_OK;$/m);
+ assert.match(patch,/^\+    if \(dlss->scaler\) \{\n\+      ForgetEvaluationFrames\(dlss->scaler\);\n       dlss->scaler->lpVtbl->Destroy\(dlss->scaler\);\n\+    \}$/m);
+ assert.match(hooks,/const uint64_t frame = metalfx\.iface->lpVtbl->TemporalFrameId\(metalfx\.iface, scaler\);\n  AcquireSRWLockExclusive\(&camera_lock\);\n  late_frame = \{scaler, frame, direct_cameras\.evaluations\(\)\};/);
+ // every accepted tag call, framed or not, outside slEvaluateFeature, only while the launcher's late camera file exists
+ assert.equal((hooks.match(/if\(result==sl::Result::eOk\)LateTags\(tags,count,commands\);return result;/g)||[]).length,2);
+ assert.match(hooks,/if \(!commands \|\| selected_scene \|\| streamline_evaluations \|\| !direct_evaluated\.load\(std::memory_order_acquire\)\)\n      return;/);
+ assert.match(hooks,/if \(!late_file->get\(\)\)\n      return;/);
+ // the camera rides along only when the constants followed the same evaluation
+ assert.match(hooks,/const bool camera = frame\.evaluation && followed_evaluation == frame\.evaluation;/);
+ assert.match(hooks,/followed_evaluation = evaluation;\n    followed_camera = followed;/);
+ assert.match(hooks,/metalfx\.iface->lpVtbl->LateScene\(metalfx\.iface, &desc, frame\.scaler\)/);
+});

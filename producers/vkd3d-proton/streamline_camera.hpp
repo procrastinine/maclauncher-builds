@@ -178,6 +178,8 @@ class DirectCameras {
 public:
   enum Result { Bound, NoConstants, SeveralFrames, Unjittered, InvalidCamera, ConstantsFollow, OtherFrame, AmbiguousJitter,
                 FirstEvaluation };
+  // the 1-based number of the latest direct evaluation (take); 0 before the first
+  uint64_t evaluations() const { return evaluations_; }
   enum Follow { Followed, NoEvaluation, SeveralConstants, FollowUnjittered, FollowInvalidCamera, FollowOtherFrame,
                 FollowAmbiguous };
   void remember(uint32_t frame, uint32_t viewport, float jitterX, float jitterY, const RSTemporalCamera *camera) {
