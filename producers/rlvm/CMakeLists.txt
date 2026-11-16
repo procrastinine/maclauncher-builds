@@ -27,6 +27,9 @@ add_compile_options(-funsigned-char -Wno-narrowing -Wno-deprecated-declarations)
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/config.h "#define HAVE_LIBSDL_image 1\n#define HAVE_LIBSDL_mixer 1\n#define HAVE_LIBSDL_ttf 1\n")
 add_library(rlvm_vendor STATIC ${vendor_sources})
 target_link_libraries(rlvm_vendor PUBLIC Freetype::Freetype PNG::PNG Ogg::ogg Vorbis::vorbis Vorbis::vorbisfile ${SDL_LIBRARY})
+# This upstream unit uses a source-root-relative include; keep other object commands unchanged.
+set_property(SOURCE "${RLVM_SOURCE}/src/systems/base/hik_renderer.cc"
+ APPEND PROPERTY INCLUDE_DIRECTORIES "${RLVM_SOURCE}")
 add_executable(rlvm ${engine_sources})
 target_link_libraries(rlvm PRIVATE rlvm_vendor Boost::filesystem Boost::iostreams Boost::program_options Boost::serialization Boost::thread Boost::date_time ${INTL_LIBRARY} iconv z bz2
  "-framework Cocoa" "-framework OpenGL" "-framework ApplicationServices" "-framework AudioToolbox" "-framework AudioUnit" "-framework CoreFoundation")
