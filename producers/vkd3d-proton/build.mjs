@@ -59,6 +59,7 @@ export function buildProvider({work,output,mingw,glslang,source=path.join(here,'
     const root=path.join(work,architecture),exported=path.join(root,'source'),build=path.join(root,'build');
     fs.mkdirSync(root,{recursive:true});
     fs.cpSync(source,exported,{recursive:true,filter:file=>!path.basename(file).startsWith('.git')});
+    run('git',['apply','--unsafe-paths','--directory='+exported,path.join(here,'decompression-count.patch')],{cwd:path.resolve(here,'../..')});
     run('git',['apply','--unsafe-paths','--directory='+exported,path.join(here,'metalfx.patch')],{cwd:path.resolve(here,'../..')});
     fs.copyFileSync(path.join(here,'metalfx.c'),path.join(exported,'libs/vkd3d/metalfx.c'));
     for(const name of ['vkd3d_metalfx.h','vk_temporal_frame.h'])fs.copyFileSync(path.join(here,name),path.join(exported,'include/private',name));
