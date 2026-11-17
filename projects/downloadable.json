@@ -4184,10 +4184,14 @@
       {
         "version": "27.0.0-devel-MCLv13",
         "label": "MacLauncher KosmicKrisp 27.0.0-devel-MCLv13"
+      },
+      {
+        "version": "27.0.0-devel-MCLv14",
+        "label": "MacLauncher KosmicKrisp 27.0.0-devel-MCLv14"
       }
     ],
     "build": {
-      "version": "27.0.0-devel-MCLv13",
+      "version": "27.0.0-devel-MCLv14",
       "command": "producers/kosmickrisp/build-runtime.mjs",
       "architectures": [
         "arm64",

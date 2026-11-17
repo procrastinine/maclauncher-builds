@@ -1,0 +1,205 @@
+{
+  "id": "rlvm",
+  "version": "0.14-MCLv1",
+  "arch": "universal",
+  "minimumMacOS": "13.0",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "5a46a24ee392a2af44d40c95adb2224f3ebb61072b97f8ce2bcd48534591a05e",
+  "directoryRelative": "rlvm/0.14-MCLv1/universal",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "b84c85dbee1976486bfff3e2793ca9f12430ea08eb961c722c3ad2947dd12775",
+  "files": [
+    {
+      "path": "licenses/boost.txt",
+      "size": 1338,
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "mode": 420
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 230,
+      "sha256": "504436e08bc2e5c38ee0f54d8f91628e19dd867e886e093a638dac75bad2d5c0",
+      "mode": 420
+    },
+    {
+      "path": "licenses/freetype.txt",
+      "size": 2149,
+      "sha256": "bd36c8b474855fa294c2ec5c184544478ef3720aad37d65a6296a4f264fd2d3b",
+      "mode": 420
+    },
+    {
+      "path": "licenses/gettext.txt",
+      "size": 35151,
+      "sha256": "e79e9c8a0c85d735ff98185918ec94ed7d175efc377012787aebcf3b80f0d90b",
+      "mode": 420
+    },
+    {
+      "path": "licenses/libpng-2.txt",
+      "size": 878,
+      "sha256": "8876cdca96eb380d16d5ea32bf4529d85e87dedc7765ae2861a9bec7f34acbed",
+      "mode": 420
+    },
+    {
+      "path": "licenses/libpng-3.txt",
+      "size": 1036,
+      "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+      "mode": 420
+    },
+    {
+      "path": "licenses/libpng.txt",
+      "size": 5345,
+      "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526",
+      "mode": 420
+    },
+    {
+      "path": "licenses/ogg.txt",
+      "size": 1466,
+      "sha256": "d2ab5758336489da61c12cc5bb757da5339c4ae9001f9bb0562b4370249af814",
+      "mode": 420
+    },
+    {
+      "path": "licenses/rlvm-2.txt",
+      "size": 35147,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "mode": 420
+    },
+    {
+      "path": "licenses/rlvm.txt",
+      "size": 23367,
+      "sha256": "ed871d8d46e75641c58516970d407772fa8aee4a4104629349528b5f58f5a39e",
+      "mode": 420
+    },
+    {
+      "path": "licenses/sdl12Compat.txt",
+      "size": 1033,
+      "sha256": "ee6c6e9b76b0fc135029b2650146dc975039b4e7b1302563a45ca46352f34b41",
+      "mode": 420
+    },
+    {
+      "path": "licenses/sdl2.txt",
+      "size": 884,
+      "sha256": "97f35b302b361680ec1e891e95d2d52097bb95abff361434916d99dc1305f127",
+      "mode": 420
+    },
+    {
+      "path": "licenses/vorbis.txt",
+      "size": 1470,
+      "sha256": "ec1815db59fcd302846df949d7424876cb2e2dc5ed1606c5fb0b36787b1cf43a",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 5635,
+      "sha256": "b84c85dbee1976486bfff3e2793ca9f12430ea08eb961c722c3ad2947dd12775",
+      "mode": 420
+    },
+    {
+      "path": "rlvm.app/Contents/_CodeSignature/CodeResources",
+      "size": 4715,
+      "sha256": "0be5a16ca7e3b78bab7ff28183c34743885bb4eb8dd3ad4c0546dc94fbff1c5e",
+      "mode": 420
+    },
+    {
+      "path": "rlvm.app/Contents/Frameworks/libfreetype.6.20.6.dylib",
+      "size": 1580848,
+      "sha256": "fbacd25e7a15e6205c647beb4e4ef46f9c00a56b4dc78375c0ec485b93734baa",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "rlvm.app/Contents/Frameworks/libogg.0.8.6.dylib",
+      "size": 119200,
+      "sha256": "f242cc456ed5ae43aff1bffec711cd9fe0bd70f0e90642701637b2bbaee78b0d",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "rlvm.app/Contents/Frameworks/libSDL-1.2.0.dylib",
+      "size": 494800,
+      "sha256": "ea4f003f15775c1663497d8943ea4b67503e439bdb53533b9e8f206fcb79c05f",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "rlvm.app/Contents/Frameworks/libSDL2-2.0.0.dylib",
+      "size": 3479664,
+      "sha256": "33657c06bdc791e31e93f1e4ce9075966ce6c657dd19a6716be1e9be4e2d15eb",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "rlvm.app/Contents/Frameworks/libvorbis.0.4.9.dylib",
+      "size": 535664,
+      "sha256": "6beacae7c39f78ab1db881f6fb6ca910c806aa0b1113418a827dd61397b46898",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "rlvm.app/Contents/Frameworks/libvorbisfile.3.3.8.dylib",
+      "size": 120784,
+      "sha256": "0e3059a0ec6d79e67d60d6837b594361dc7453f1fc1edb4b88f13c91aa49f5a2",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "rlvm.app/Contents/Frameworks/png",
+      "size": 503872,
+      "sha256": "f215865befbd6b91bc10465786a3eda0b6a4baad9e0476691e799c38951f804e",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "rlvm.app/Contents/Info.plist",
+      "size": 936,
+      "sha256": "40cd01ee3694347cb235e5fc27879924f9718482b38085eb623a0f4a7c4d5926",
+      "mode": 420
+    },
+    {
+      "path": "rlvm.app/Contents/MacOS/rlvm",
+      "size": 10573392,
+      "sha256": "0b1faac4683bb8b442205888a12fc2724f23661154266aed116bcbc2711a1a89",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "rlvm.app/Contents/Resources/locale/ja/LC_MESSAGES/rlvm.mo",
+      "size": 2625,
+      "sha256": "48d0e4c13a4b9ab243b5ab30f12a1dc5e82ac2e0b63de6da419a19e822ed3462",
+      "mode": 420
+    },
+    {
+      "path": "rlvm.app/Contents/Resources/rlvm.icns",
+      "size": 129677,
+      "sha256": "b7c9eac7fd0bf64582d5ef4f01aea9ec0f9f8ea4a0b87e6c404ed2018cd4b5a2",
+      "mode": 420
+    }
+  ]
+}
