@@ -6,6 +6,8 @@ The `mpv` project in this repository is a native host for decoded video frames, 
 
 In version `0.41.0-MCLv7`, decoded PQ/BT.2020 frames reach the presenter as RGBA16Float, and the presenter outputs linear Display P3 using the display's actual headroom. Decoder metadata and video-filter metadata each keep their own source luminance information. When playback starts paused, the first decoded image stays visible, and the video layer fits the source aspect ratio inside the window.
 
+Seeks retain the prepared graphics contract when the selected graphics runtime exports `rsBeginFramePresenterContentEpoch`. The host retires the old presentation epoch, retries while submitted work drains and ignores swap callbacks from retired epochs. Changes to source dimensions, luminance or stream identity create a new presenter. Earlier graphics runtimes use presenter recreation.
+
 ## Source and build
 
 `tools/build-mpv.mjs` builds the package. `producers/mpv-render/v7/scripts/build-mpv-library.cjs` builds libmpv from the submodule `producers/package-support/src/external/mpv-player` at its pinned commit, with the backported changes listed in `producers/mpv-render/v7/source.json` and the two patches in `producers/mpv-render/v7/native`. The host is compiled from the sources in the same directory against the shared presenter interface headers, read from the pinned MacLauncher source because the host presents through the shared graphics presenter. Building requires Node.js 24 or later, Apple's command-line tools and the build tools named in the project record.
