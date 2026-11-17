@@ -61,7 +61,7 @@ export async function prepare({arch='universal',work}){
  if(arch!=='universal')throw Error('RLVM engine producer builds the universal engine.');
  fs.mkdirSync(work,{recursive:true});const source=path.join(work,'rlvm-source'),sourceRoot=path.join(here,'source'),revision=upstreamRevision('rlvm','rlvm');
  const staged=await stageSource(sourceRoot,revision,source);
- run('git',['apply','--unsafe-paths','--directory='+source,path.join(here,'vorbis-callback-const.patch')],{cwd:root});
+ run('git',['apply','--unidiff-zero','--unsafe-paths','--directory='+source,path.join(here,'vorbis-callback-const.patch')],{cwd:root});
  run('git',['apply','--unsafe-paths','--directory='+source,path.join(here,'boost-parent-path.patch')],{cwd:root});
  run('git',['apply','--unsafe-paths','--directory='+source,path.join(here,'boost-directory-header.patch')],{cwd:root});
  run('git',['apply','--unsafe-paths','--directory='+source,path.join(here,'standard-stream-headers.patch')],{cwd:root});
