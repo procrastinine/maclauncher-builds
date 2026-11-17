@@ -102,10 +102,6 @@
   "runtimeProfile": {
     "id": "crossover-26.3.0-winevulkan-scene-v1",
     "product": "CrossOver",
-    "version": "26.3",
-    "build": "26.3.0.39832",
-    "driverVersion": 47,
-    "unixCallCount": 674,
     "wineVersion": "11.0"
   },
   "archiveDependency": "crossoverWine",

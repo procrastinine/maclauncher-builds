@@ -103,9 +103,6 @@
   "runtimeProfile": {
     "id": "metalsharp-wine11.20-scene-v1",
     "product": "MetalSharp Wine",
-    "wineRevision": "dd1f6c2f9801327d30fd82f2d55071177824fb99",
-    "driverVersion": 48,
-    "unixCallCount": 746,
     "wineVersion": "11.20"
   },
   "repository": "https://github.com/metalsharp/MetalSharp-Wine",
