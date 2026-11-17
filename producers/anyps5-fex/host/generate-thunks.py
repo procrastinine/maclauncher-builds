@@ -45,7 +45,6 @@ for obj in objects:
 
 declaration = re.compile(r'\bAPS5_VABI\s+(\w+)\s*\(([^;{]*)\)\s*(?:noexcept\s*)?;', re.S)
 generated, variadic, files = set(), set(), []
-structs = struct_index(includes[0])
 structs_listed = []
 counterparts = 0
 stem = out.removesuffix('.cpp')
@@ -161,7 +160,7 @@ def members(body, structs, prefix=''):
         if text.startswith(('static ', 'static_assert', 'using ', 'typedef ', 'friend ', 'enum ', 'struct ')):
             continue
         if '(' in text:
-            pointer = re.search(r'\(\s*\*\s*(\w+)\s*\)\s*\(', text)
+            pointer = re.search(r'\((?:\s*\w+)?\s*\*\s*(\w+)\s*\)\s*\(', text)  # a function pointer, with or without a calling convention
             if pointer:
                 designators.append(prefix + pointer.group(1))
             continue  # a member function or constructor
@@ -274,6 +273,7 @@ def top_lines(source):
     return lines + ['#endif'] * depth, headers
 
 
+structs = struct_index(includes[0])
 for source in sources:
     prelude, headers = top_lines(source)
     headers = list(dict.fromkeys(headers))

@@ -6,7 +6,8 @@
 // - integer and pointer arguments: rdi, rsi, rdx, rcx, r8, r9, then the guest stack;
 // - float and double arguments: xmm0-xmm7, then the guest stack, interleaved with integer stack arguments in order;
 // - long double: an 80-bit x87 value in a 16-byte aligned guest stack slot; returned in st(0). On Apple arm64 long
-//   double is a 64-bit double, so the thunk converts in both directions;
+//   double is a 64-bit double, so the thunk converts in both directions. AnyPS5's GuestFloat::X87, the guest's 80-bit
+//   value kept bit for bit, takes the same slot and return without conversion;
 // - __int128: two INTEGER eightbytes, in two registers when both are free, otherwise in a 16-byte aligned stack slot;
 //   returned in rax and rdx;
 // - structs over 16 bytes: passed as a copy on the guest stack; returned through a hidden pointer in rdi, which shifts
@@ -22,6 +23,12 @@
 #pragma once
 
 #include "FexGuest.h"
+
+// The AnyPS5 libraries' 80-bit guest long double, for the hosts that link them.
+#if __has_include("prx/libc/include/GuestFloat80.hpp")
+#include "prx/libc/include/GuestFloat80.hpp"
+#define SYSV_GUEST_FLOAT80 1
+#endif
 
 #include <FEXCore/Utils/JITWriteScope.h>
 
@@ -154,6 +161,14 @@ constexpr bool HasEightbytes = [] {
     return false;
   }
 }();
+
+template<class T>
+constexpr bool IsX87 =
+#ifdef SYSV_GUEST_FLOAT80
+  std::is_same_v<std::remove_cv_t<T>, GuestFloat::X87>;
+#else
+  false;
+#endif
 
 template<class T>
 constexpr bool IsInt128 = std::is_same_v<std::remove_cv_t<T>, __int128> || std::is_same_v<std::remove_cv_t<T>, unsigned __int128>;
@@ -347,6 +362,12 @@ public:
         Words[1] = Memory8();
       }
       return static_cast<T>((static_cast<unsigned __int128>(Words[1]) << 64) | Words[0]);
+    } else if constexpr (IsX87<T>) {
+      Stack = (Stack + 15) & ~15ULL;
+      std::array<unsigned char, sizeof(T)> Bytes {};
+      std::memcpy(Bytes.data(), reinterpret_cast<const void*>(Stack), 10);
+      Stack += 16;
+      return std::bit_cast<T>(Bytes);
     } else if constexpr (std::is_class_v<T>) {
       return Struct<T>();
     } else if constexpr (std::is_integral_v<T> || std::is_enum_v<T>) {
@@ -415,6 +436,11 @@ After Store(CPUState& State, const R& Result, std::uint64_t Hidden) {
   } else if constexpr (std::is_same_v<R, long double>) {
     // The x87 return stub loads st(0) and performs the guest's RET.
     DoubleToX87(Result, FexGuest::X87ReturnSlot());
+    State.rip = FexGuest::X87ReturnStub();
+    return After::Continue;
+  } else if constexpr (IsX87<R>) {
+    std::memcpy(FexGuest::X87ReturnSlot(), &Result, 10);
+    std::memset(static_cast<std::uint8_t*>(FexGuest::X87ReturnSlot()) + 10, 0, 6);
     State.rip = FexGuest::X87ReturnStub();
     return After::Continue;
   } else if constexpr (std::is_same_v<R, double>) {
@@ -544,6 +570,8 @@ template<class T>
 constexpr bool SupportedArgument = [] {
   if constexpr (IsGuestFunctionPointer<T>) {
     return SupportedCallback<std::remove_pointer_t<T>>::value;
+  } else if constexpr (IsX87<T>) {
+    return true;
   } else if constexpr (std::is_class_v<T>) {
     return std::is_trivially_copyable_v<T> && (IsMemoryStruct<T> || HasEightbytes<T>);
   } else {
@@ -553,7 +581,7 @@ constexpr bool SupportedArgument = [] {
 
 template<class R>
 constexpr bool SupportedReturn = [] {
-  if constexpr (std::is_void_v<R> || std::is_arithmetic_v<R> || std::is_enum_v<R> || std::is_pointer_v<R>) {
+  if constexpr (std::is_void_v<R> || std::is_arithmetic_v<R> || std::is_enum_v<R> || std::is_pointer_v<R> || IsX87<R>) {
     return true;
   } else if constexpr (std::is_class_v<R>) {
     return std::is_trivially_copyable_v<R> && (IsMemoryStruct<R> || HasEightbytes<R>);
