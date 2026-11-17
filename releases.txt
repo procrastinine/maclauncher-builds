@@ -35,3 +35,6 @@ xsystem35=2.20.0-MCLv9
 xsystem4=MCLv10
 
 vkd3d-proton=3.1-MCLv2
+
+java-steamworks=1.9.0-MCLv8
+love=0.10.2-MCLv1

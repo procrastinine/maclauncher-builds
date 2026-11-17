@@ -1,0 +1,29 @@
+[
+  {
+    "id": "love",
+    "repository": "https://github.com/love2d/love",
+    "revision": "9e139779956ddba89333eece8104bd7b1b4ff2e7",
+    "archive": {
+      "sha256": "b1e894d6b95deb96820e6a7da63be860ff874448f6129ca1bd4f8f5860f0fe11"
+    },
+    "bytes": 2282629
+  },
+  {
+    "id": "megasource",
+    "repository": "https://github.com/love2d/megasource",
+    "revision": "1fdca985b3e69882b34753346d196ff8fa65dc8f",
+    "archive": {
+      "sha256": "a150e496630f3df36eee528d79da8d0e62a672883173e441bebf73bd8d323872"
+    },
+    "bytes": 16892092
+  },
+  {
+    "id": "luajit",
+    "repository": "https://github.com/LuaJIT/LuaJIT",
+    "revision": "45b771bb2c693a4cc7e34e79b7d30ab10bb7776a",
+    "archive": {
+      "sha256": "9cc18db57d0a2dfdeb262762715d51505f6ae6cce1c5a43f3cd420ba7e4ae30c"
+    },
+    "bytes": 1093186
+  }
+]
