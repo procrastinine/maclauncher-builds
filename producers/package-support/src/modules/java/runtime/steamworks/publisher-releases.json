@@ -1,7 +1,6 @@
 [
   {
     "version": "1.9.0",
-    "sourceRevision": "33ae54e87657afe8464eb01845e62b79403f5bfa",
     "sourceUrl": "https://github.com/code-disaster/steamworks4j/tree/1.9.0",
     "archiveUrl": "https://repo.maven.apache.org/maven2/com/code-disaster/steamworks4j/steamworks4j/1.9.0/steamworks4j-1.9.0.jar",
     "archiveSha256": "f5e70a648f77d09b3a665af5f8b110495b14f7e568280313b8a56903a4740379",
@@ -30,7 +29,14 @@
       "SteamInternal_ContextInit",
       "SteamInternal_FindOrCreateGameServerInterface",
       "SteamInternal_FindOrCreateUserInterface"
-    ]
+    ],
+    "source": {
+      "repository": "https://github.com/code-disaster/steamworks4j",
+      "revision": "33ae54e87657afe8464eb01845e62b79403f5bfa",
+      "archive": {
+        "sha256": "881fe7d0a602ec03811b99c6ff62ccde7b7a6bbc5f0ec48fe0e7894f1e6a8db6"
+      }
+    }
   },
   {
     "version": "1.10.0",

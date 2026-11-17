@@ -4519,6 +4519,24 @@
       "tools": [
         "cmake",
         "ninja"
+      ],
+      "archives": [
+        {
+          "file": "producers/love-0102/sources.json",
+          "pointer": "/0"
+        },
+        {
+          "file": "producers/love-0102/sources.json",
+          "pointer": "/1"
+        },
+        {
+          "file": "producers/love-0102/sources.json",
+          "pointer": "/2"
+        },
+        {
+          "file": "producers/dependencies/libpng.json",
+          "pointer": ""
+        }
       ]
     }
   },

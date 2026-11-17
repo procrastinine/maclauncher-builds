@@ -18,10 +18,10 @@ const files=(directory,suffix)=>fs.readdirSync(directory,{withFileTypes:true}).f
 /** Build the original 1.9 JNI ABI with its original SDK, for each requested Mac CPU. */
 export async function compileNative({original,arch,work,jdkBin}){
  const cpus={arm64:['arm64'],x64:['x86_64'],universal:['arm64','x86_64']}[arch];
- if(!cpus||original.sourceRevision!==inputs.source.revision)throw Error('The source build requires the original Steamworks4j 1.9 ABI.');
+ if(!cpus||!original.source)throw Error('The source build requires the original Steamworks4j 1.9 ABI.');
  const source=path.join(work,'source'),sdk=path.join(work,'sdk'),headers=path.join(work,'jni-headers'),bin=path.join(work,'bin');
  for(const directory of [source,sdk,headers,bin])fs.mkdirSync(directory,{recursive:true});
- for(const [record,destination] of [[inputs.source,source],[inputs.sdk,sdk]])run('/usr/bin/tar',['-xzf',await buildInput(archiveInput(record)),'--strip-components=1','-C',destination]);
+ for(const [record,destination] of [[original.source,source],[inputs.sdk,sdk]])run('/usr/bin/tar',['-xzf',await buildInput(archiveInput(record)),'--strip-components=1','-C',destination]);
  const jars=await Promise.all([inputs.jnigen,inputs.javaparser].map(record=>buildInput(archiveInput(record))));
  const wrapper=path.join(source,'java-wrapper'),server=path.join(source,'server'),classes=path.join(wrapper,'target/classes'),serverClasses=path.join(server,'target/classes'),generator=path.join(work,'generator');
  for(const directory of [classes,serverClasses,generator])fs.mkdirSync(directory,{recursive:true});
@@ -54,5 +54,5 @@ export async function compileNative({original,arch,work,jdkBin}){
  run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',library]);
  const actual=Native.readMachOArchitectures(library,{allowLibrary:true}).sort();
  if(JSON.stringify(actual)!==JSON.stringify(cpus.slice().sort()))throw Error('The JNI output differs from its requested CPUs.');
- return {library,dependency,sdk,source,classes,sourceBuild:{sourceRevision:inputs.source.revision,sourceArchiveSha256:inputs.source.sha256,sdkRevision:inputs.sdk.revision,sdkPublisherLibrarySha256:sha(publisherDependency),sdkLibrarySha256:sha(dependency),jnigenSha256:inputs.jnigen.sha256,javaparserSha256:inputs.javaparser.sha256}};
+ return {library,dependency,sdk,source,classes,sourceBuild:{sourceRevision:original.sourceRevision,sourceArchiveSha256:original.source.archive.sha256,sdkRevision:inputs.sdk.revision,sdkPublisherLibrarySha256:sha(publisherDependency),sdkLibrarySha256:sha(dependency),jnigenSha256:inputs.jnigen.sha256,javaparserSha256:inputs.javaparser.sha256}};
 }

@@ -797,6 +797,7 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
+        "LICENSE",
         "producers/package-support/src/modules/java/runtime/steamworks",
         "producers/java-steamworks",
         "tools/java-steamworks-native.mjs"
@@ -811,7 +812,7 @@
         "repository": "code-disaster/steamworks4j",
         "pin": {
           "file": "producers/package-support/src/modules/java/runtime/steamworks/publisher-releases.json",
-          "pointer": "/0/sourceRevision"
+          "pointer": "/0/source"
         }
       },
       {
@@ -877,19 +878,6 @@
       }
     ],
     "build": [
-      {
-        "version": "1.9.0-MCLv7",
-        "command": "tools/build-java-steamworks.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "archives": [
-          {
-            "file": "producers/package-support/src/modules/java/runtime/steamworks/publisher-releases.json",
-            "pointer": ""
-          }
-        ]
-      },
       {
         "version": "1.10.0-MCLv7",
         "command": "tools/build-java-steamworks.mjs",
