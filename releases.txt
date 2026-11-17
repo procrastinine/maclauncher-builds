@@ -40,3 +40,4 @@ java-steamworks=1.9.0-MCLv8
 love=0.10.2-MCLv1
 freearc=0.67-MCLv1
 rlvm=0.14-MCLv1
+dxmt=0.80-244-g7c8dee1-MCLv1
