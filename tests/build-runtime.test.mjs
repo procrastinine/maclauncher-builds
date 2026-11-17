@@ -340,17 +340,21 @@ test('build jobs cannot mutate repository contents',()=>{
 test('registered GitHub build commands reject architectures their projects do not build',async t=>{
  const work=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'github-build-commands-')));t.after(()=>fs.rmSync(work,{recursive:true,force:true}));
  const request=(project,arch)=>({project,arch,output:path.join(work,project+'-'+arch),work:path.join(work,project+'-'+arch+'-work')});
- const registry=readProjects(root,{resolvePins:false}),selected=(id,arch)=>buildRecords(registry.projects.find(p=>p.id===id)).find(b=>b.architectures.includes(arch));
- assert.throws(()=>checkBuildRequest(request('vnds-love','arm64')),/builds universal packages/);
- assert.throws(()=>checkBuildRequest(request('rlvm-adapter','x64')),/builds universal packages/);
- assert.throws(()=>checkBuildRequest({...request('sys3-decompiler','universal'),version:selected('sys3-decompiler','arm64').version}),/builds .*packages/);
- assert.throws(()=>checkBuildRequest(request('web-renderer-network','ppc')),/builds arm64 and x64 packages/);
+ const registry=readProjects(root,{resolvePins:false});
+ // Every registered build accepts exactly the architectures its record declares. The expectations
+ // come from the registry, so adding or changing a package needs no edit here.
+ for(const project of registry.projects.filter(project=>project.build))for(const build of buildRecords(project)){
+  const version=Array.isArray(project.build)?build.version:undefined,label=project.id+' '+build.version;
+  for(const arch of ['arm64','x64','universal','ppc']){
+   const check=()=>checkBuildRequest({...request(project.id,arch),version});
+   if(!build.architectures.includes(arch)){assert.throws(check,{message:project.name+' builds '+build.architectures.join(' and ')+' packages on GitHub.'},label+' '+arch);continue;}
+   // A declared architecture passes this check; the request may still stop at the build host check.
+   try{check();}catch(error){assert.doesNotMatch(error.message,/packages on GitHub/,label+' '+arch);}
+  }
+ }
  const {compile:compileDecompiler}=await import('../producers/package-support/scripts/build-decompiler.mjs');
  await assert.rejects(compileDecompiler({project:'gemrb',arch:'arm64',output:path.join(work,'gemrb'),work:path.join(work,'gemrb-work')}),/decompiler profiles have no release/);
  assert.throws(()=>checkBuildRequest({...request('sys3-decompiler','arm64'),version:'0.5.0'}),/builds version|declared|version/);
- for(const [id,architectures] of [['sys3-decompiler',['arm64','x64']],['xsys35-decompiler',['arm64','x64']],['gm8-decompiler',['arm64','x64']],['catsystem2-kif-crypto',['arm64','x64']],['web-renderer-network',['arm64','x64']]])assert.deepEqual(buildRecords(registry.projects.find(project=>project.id===id)).flatMap(build=>build.architectures).sort(),architectures);
- const java=buildRecords(registry.projects.find(project=>project.id==='java-steamworks'));
- for(const [base,architectures] of [['1.9.0',['x64']],['1.10.0',['universal']]])assert.deepEqual(java.find(build=>build.version.startsWith(base+'-MCLv'))?.architectures,architectures);
  const {helperProfile}=await import('../tools/build-helper.mjs');
  assert.throws(()=>helperProfile('gemrb'),/ENOENT|helper-builds/);
  for(const id of ['catsystem2-kif-crypto','web-renderer-network','steam-api-helper','steam-ticket-loader','mkxpz-config-helper'])assert.ok(registry.projects.find(project=>project.id===id).packageProfiles.some(profile=>profile.version===helperProfile(id).profile.version));
