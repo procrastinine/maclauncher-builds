@@ -17,6 +17,7 @@ import {stageFSR4Provider} from "./stage-fsr4-provider.mjs";
 const {SCENE_SHADER_INPUTS}=appRequire('src/modules/shared/effects/operation-contracts.mjs');
 import {stageLibplaceboScene} from "./stage-libplacebo-scene.mjs";
 import {stageStreamlineSnapshots} from "./stage-streamline-snapshots.mjs";
+import {stageWineVulkan} from "./stage-winevulkan.mjs";
 import {ALIAS_INDEX,aliasIndex,deduplicate,resolvedPrefixes} from "./payload-aliases.mjs";
 const features = JSON.parse(fs.readFileSync(appPath("src/modules/shared/reshade/features.json"), "utf8"));
 const effectSources = appRequire("scripts/reshade-effect-sources.mjs").resolveEffectSources();
@@ -27,8 +28,8 @@ const build = path.resolve(source, args[0] && !args[0].startsWith("--") ? args.s
 const options = {};
 while (args.length) {
   const key = args.shift(), value = args.shift();
-  if (!["--version", "--arch", "--output", "--declaration", "--source-root", "--owned-source", "--spirv-cross-source", "--isf", "--xess-host", "--fsr", "--fsr4", "--fsr4-source", "--asr", "--asr-source", "--sgsr2", "--sgsr2-source", "--fsr3-generation", "--anr-generation", "--godot", "--streamline", "--dxmt", "--xess", "--retroarch", "--libplacebo", "--neural"].includes(key) || !value || value.startsWith("--") || options[key])
-    throw new Error("Usage: node scripts/stage-reshade.mjs <source> [build] [--owned-source <source>] [--spirv-cross-source <checkout>] [--isf <payload>] [--xess-host <payload>] [--fsr <payload>] [--fsr4 <payload>] [--fsr4-source <checkout>] [--asr <payload>] [--asr-source <checkout>] [--sgsr2 <payload>] [--sgsr2-source <checkout>] [--fsr3-generation <payload>] [--anr-generation <payload>] [--godot <payload>] [--streamline <payload>] [--dxmt <payload>] [--xess <payload>] [--retroarch <payload>] [--libplacebo <payload>] [--neural <payload>]");
+  if (!["--version", "--arch", "--output", "--declaration", "--source-root", "--owned-source", "--spirv-cross-source", "--isf", "--xess-host", "--fsr", "--fsr4", "--fsr4-source", "--asr", "--asr-source", "--sgsr2", "--sgsr2-source", "--fsr3-generation", "--anr-generation", "--godot", "--streamline", "--dxmt", "--winevulkan", "--xess", "--retroarch", "--libplacebo", "--neural"].includes(key) || !value || value.startsWith("--") || options[key])
+    throw new Error("Usage: node scripts/stage-reshade.mjs <source> [build] [--owned-source <source>] [--spirv-cross-source <checkout>] [--isf <payload>] [--xess-host <payload>] [--fsr <payload>] [--fsr4 <payload>] [--fsr4-source <checkout>] [--asr <payload>] [--asr-source <checkout>] [--sgsr2 <payload>] [--sgsr2-source <checkout>] [--fsr3-generation <payload>] [--anr-generation <payload>] [--godot <payload>] [--streamline <payload>] [--dxmt <payload>] [--winevulkan <complete module payload>] [--xess <payload>] [--retroarch <payload>] [--libplacebo <payload>] [--neural <payload>]");
   options[key] = ["--version","--arch"].includes(key) ? value : path.resolve(value);
 }
 const upstreamRoot=options["--source-root"]||path.resolve(import.meta.dirname,"..");
@@ -69,6 +70,12 @@ if(fs.existsSync(path.join(build,"maclauncher-winemetal.so")))nativeFiles.push("
 const retroarchInputs = new Map();
 const extraSources=[];
 const optionalInputs=new Map(),optionalLoad=new Map(),extraOwned=new Map();
+const wineVulkan=options["--winevulkan"]?stageWineVulkan(options["--winevulkan"]):null;
+if(wineVulkan){
+  for(const [relative,file]of wineVulkan.files)optionalInputs.set(relative,file);
+  extraOwned.set("maclauncher/crossover/temporal/vulkan/module-manifest.json",wineVulkan.manifestFile);
+  extraOwned.set("maclauncher/stage-winevulkan.mjs",path.resolve(import.meta.dirname,"stage-winevulkan.mjs"));
+}
 if(options["--xess-host"]){
   const directory=options["--xess-host"],module="src/modules/shared/reshade/xess",metadata=JSON.parse(fs.readFileSync(path.join(directory,"provider.json")));
   const generation=metadata.generation;
@@ -391,7 +398,7 @@ fs.mkdirSync(destination, { recursive: true });
 for (const directory of ["include", "effects"]) fs.mkdirSync(path.join(destination, directory), { recursive: true });
 addLicenses(destination,"ReShade",source);
 if(options["--xess-host"]){addLicenses(destination,"Intel-XeSS",xessSource);addLicense(destination,"Intel-XeSS headers",path.join(xessSource,"inc/MIT.txt"));addLicense(destination,"Intel-XeSS dependencies",path.join(xessSource,"third-party-programs.txt"));}
-for(const option of ["--godot","--streamline","--dxmt"])if(options[option])includeLicenses(destination,`${options[option]}/licenses`);
+for(const option of ["--godot","--streamline","--dxmt","--winevulkan"])if(options[option])includeLicenses(destination,`${options[option]}/licenses`);
 addLicenses(destination,"native filters",path.resolve(import.meta.dirname,"../src/modules/shared/reshade/native"));
 addLicense(destination,"MacShade",path.resolve(import.meta.dirname,"../src/modules/shared/reshade/native/licenses/macshade-BSD.txt"),"MacShade-BSD-3-Clause");
 addLicense(destination,"MetalDuck",path.resolve(import.meta.dirname,"../src/modules/shared/reshade/native/licenses/metalduck-MIT.txt"),"MetalDuck-MIT");
@@ -399,16 +406,24 @@ const files = [];
 for (const [relative, input] of inputs) {
   const output = path.join(destination, relative);
   fs.mkdirSync(path.dirname(output), { recursive: true });
-  const executable = nativeFiles.includes(relative);
-  if(executable&&packageArch!=="universal"&&nativeArchitectures.get(relative)?.length>1){
+  const externalModule=wineVulkan?.records.get(relative),externalBinary=externalModule&&["mach-o","pe"].includes(externalModule.format);
+  const executable = nativeFiles.includes(relative)||externalBinary;
+  if(executable&&!externalModule&&packageArch!=="universal"&&nativeArchitectures.get(relative)?.length>1){
     execFileSync("/usr/bin/lipo",[input,"-thin",packageCPUs[0],"-output",output]);nativeArchitectures.set(relative,[packageCPUs[0]]);
   }else fs.copyFileSync(input, output, fs.constants.COPYFILE_FICLONE);
   fs.chmodSync(output, executable ? 0o755 : 0o644);
-  if (executable) execFileSync("/usr/bin/codesign", ["--force", "--sign", "-", "--timestamp=none", output], { stdio: "pipe" });
+  if (executable&&!externalModule) execFileSync("/usr/bin/codesign", ["--force", "--sign", "-", "--timestamp=none", output], { stdio: "pipe" });
+  if(externalModule&&(fs.statSync(output).size!==externalModule.size||digest(fs.readFileSync(output))!==externalModule.sha256))
+    throw Error("A WineVulkan module input changed while staging: "+relative);
   files.push({ path: relative, sha256: digest(fs.readFileSync(output)), size: fs.statSync(output).size,
-    mode: executable ? 0o755 : 0o644, ...(executable ? { architectures: nativeArchitectures.get(relative),
+    mode: executable ? 0o755 : 0o644, ...(externalBinary?{format:externalModule.format,architectures:externalModule.architectures,
+      ...(externalModule.executionArchitecture?{executionArchitecture:externalModule.executionArchitecture}:{}),
+      ...(externalModule.format==="mach-o"?{optionalLoad:{architectures:externalModule.architectures,minimumMacOS:wineVulkan.provider.minimumMacOS}}:{})}:executable ? { architectures: nativeArchitectures.get(relative),
       ...(relative.startsWith("temporal/dxmt/") ? { executionArchitecture: "x86_64" } : temporalExecutionArchitectures.has(relative) ? { executionArchitecture: temporalExecutionArchitectures.get(relative) } : {}),
       ...(optionalLoad.has(relative)?{optionalLoad:{...optionalLoad.get(relative),architectures:nativeArchitectures.get(relative)}}:{}) } : {}) });
+}
+if(wineVulkan)for(const [relative,bytes]of wineVulkan.generated){
+  const output=path.join(destination,relative);fs.mkdirSync(path.dirname(output),{recursive:true});fs.writeFileSync(output,bytes,{flag:"wx",mode:0o644});
 }
 // The camera provider's source is available in the tagged producer repository.
 if(options["--xess-host"]){
@@ -426,6 +441,7 @@ if (inputs.has('temporal/dxmt/camera-bridge.json')) {
 if(packageArch!=="universal"){
  const jsonFiles=files.filter(row=>row.path.endsWith(".json")).sort((a,b)=>b.path.split("/").length-a.path.split("/").length);
  for(const entry of jsonFiles){
+  if(wineVulkan&&entry.path.startsWith("temporal/vulkan/"))continue;
   const file=path.join(destination,entry.path);let metadata;try{metadata=JSON.parse(fs.readFileSync(file));}catch{continue;}
   let changed=false;
   if(Array.isArray(metadata.architectures)&&metadata.architectures.includes(packageCPUs[0])){metadata.architectures=[packageCPUs[0]];changed=true;}
