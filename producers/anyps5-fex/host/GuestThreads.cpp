@@ -1232,7 +1232,40 @@ bool OwnsExport(const char* Name) {
   return View.starts_with("scePthread") || View.starts_with("pthread_");
 }
 
+// A host thread that calls a guest function (a library's own worker running a callback the game registered) gets a
+// thread record, static TLS and a guest stack on its first call, as a thread the guest creates does, and keeps them
+// until it exits.
+struct HostAdoption {
+  std::pair<std::uint64_t, std::uint64_t> Stack {};
+  ~HostAdoption() {
+    if (Stack.second) {
+      ReturnStack(Stack);
+    }
+  }
+};
+thread_local HostAdoption Adoption;
+void AdoptHostThread() {
+  auto* T = new Thread;
+  T->Id = NextThreadId.fetch_add(1);
+  T->Name = "host";
+  T->Detached = true;
+  T->ThreadPointer = Ps5::AllocateStaticTls();
+  reinterpret_cast<std::uint64_t*>(T->ThreadPointer)[2] = reinterpret_cast<std::uint64_t>(T);
+  Adoption.Stack = TakeStack(std::max(T->Settings.StackSize, MinimumStackSize));
+  T->Settings.StackAddr = Adoption.Stack.first;
+  T->Settings.StackSize = Adoption.Stack.second;
+  Self = T;
+  FexGuest::ThreadException = &T->Exception;
+  {
+    std::lock_guard Lock(T->Lock);
+    T->Host = pthread_self();
+    T->Started = true;
+  }
+  FexGuest::AdoptCallingThread(Adoption.Stack.first + Adoption.Stack.second, T->ThreadPointer);
+}
+
 void AdoptInitialThread(std::uint64_t ThreadPointer) {
+  FexGuest::AdoptHostThread = AdoptHostThread;
   Self = &InitialThread;
   InitialThread.ThreadPointer = ThreadPointer;
   InitialThread.Name = "main";

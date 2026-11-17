@@ -23,7 +23,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <dlfcn.h>
+#include <mach/mach.h>
+#include <mach/mach_vm.h>
 #include <mutex>
+#include <optional>
 #include <pthread.h>
 #include <signal.h>
 #include <span>
@@ -219,8 +222,28 @@ inline void DescribeCode(std::uint64_t Address, char* Text, std::size_t Size) {
   }
 }
 
+// Writes the mapping that holds Address: its range, protection and VM tag (the tag names JIT and allocator memory).
+inline int DescribeMapping(const char* Label, std::uint64_t Address, char* Text, std::size_t Size) {
+  mach_vm_address_t Start = Address;
+  mach_vm_size_t Length = 0;
+  vm_region_extended_info_data_t Info {};
+  mach_msg_type_number_t Count = VM_REGION_EXTENDED_INFO_COUNT;
+  mach_port_t Object = MACH_PORT_NULL;
+  if (mach_vm_region(mach_task_self(), &Start, &Length, VM_REGION_EXTENDED_INFO, reinterpret_cast<vm_region_info_t>(&Info), &Count, &Object) !=
+        KERN_SUCCESS ||
+      Start > Address) {
+    return std::snprintf(Text, Size, "  %s 0x%llx: not mapped\n", Label, static_cast<unsigned long long>(Address));
+  }
+  return std::snprintf(Text, Size, "  %s 0x%llx: mapping 0x%llx-0x%llx %c%c%c tag %u\n", Label, static_cast<unsigned long long>(Address),
+                       static_cast<unsigned long long>(Start), static_cast<unsigned long long>(Start + Length), (Info.protection & VM_PROT_READ) ? 'r' : '-',
+                       (Info.protection & VM_PROT_WRITE) ? 'w' : '-', (Info.protection & VM_PROT_EXECUTE) ? 'x' : '-', Info.user_tag);
+}
+// The faulting thread's guest side (defined below, after the thread state it reads).
+inline void ReportGuestState(void* Context);
+
 // The host has no guest fault handling yet, so a fault ends the run with its signal number, the faulting host code and
 // its callers (the link register, then the frame-pointer chain on this thread's host stack) instead of a crash report.
+// It also names the exception syndrome, the thread, the mappings of the pc and the address, and the guest state.
 inline void InstallFaultReport() {
   std::setvbuf(stdout, nullptr, _IONBF, 0);
   for (int Signal : {SIGSEGV, SIGBUS, SIGILL, SIGTRAP}) {
@@ -238,6 +261,14 @@ inline void InstallFaultReport() {
                                  static_cast<unsigned long long>(reinterpret_cast<std::uintptr_t>(Info->si_addr)),
                                  static_cast<unsigned long long>(PC), Where);
       write(STDOUT_FILENO, Text, Length);
+      char Name[64] = "";
+      pthread_getname_np(pthread_self(), Name, sizeof(Name));
+      Length = std::snprintf(Text, sizeof(Text), "  esr 0x%x, si_code %d, thread \"%s\"\n", static_cast<ucontext_t*>(Context)->uc_mcontext->__es.__esr,
+                             Info->si_code, Name);
+      write(STDOUT_FILENO, Text, Length);
+      write(STDOUT_FILENO, Text, DescribeMapping("pc", PC, Text, sizeof(Text)));
+      write(STDOUT_FILENO, Text, DescribeMapping("address", reinterpret_cast<std::uintptr_t>(Info->si_addr), Text, sizeof(Text)));
+      ReportGuestState(Context);
       DescribeCode(__darwin_arm_thread_state64_get_lr(*State), Where, sizeof(Where));
       Length = std::snprintf(Text, sizeof(Text), "  lr %s\n", Where);
       write(STDOUT_FILENO, Text, Length);
@@ -363,14 +394,26 @@ struct GuestResult {
   std::uint64_t Xmm0;
 };
 
+// Set by the thread layer (GuestThreads::AdoptHostThread): gives the calling OS thread, which runs no guest yet, a guest
+// thread of its own through AdoptCallingThread, so a library's own worker thread can call the game's callbacks.
+inline void (*AdoptHostThread)() = nullptr;
+
 // Calls a guest function from inside a host thunk, on the same guest thread: System V integer and float arguments in
 // registers, a frame below the caller's red zone, and the callback-return HLT as its return address. The interrupted
-// guest state is restored afterwards, so callbacks nest.
+// guest state is restored afterwards, so callbacks nest. A host thread without a guest thread gets one first.
 inline GuestResult CallGuest(std::uint64_t Function, std::span<const std::uint64_t> Integers, std::span<const double> Floats) {
   static constexpr int Registers[] = {X86::REG_RDI, X86::REG_RSI, X86::REG_RDX, X86::REG_RCX, X86::REG_R8, X86::REG_R9};
   if (Integers.size() > 6 || Floats.size() > 8) {
     std::printf("guest callback with stack arguments is not supported yet\nFAIL\n");
     std::exit(1);
+  }
+  if (!Thread) {
+    if (!AdoptHostThread) {
+      std::printf("a host thread calls guest function 0x%llx, and no thread layer gives it a guest thread\nFAIL\n",
+                  static_cast<unsigned long long>(Function));
+      std::exit(1);
+    }
+    AdoptHostThread();
   }
   auto& Guest = Thread->CurrentFrame->State;
   std::uint64_t SavedGregs[16];
@@ -414,15 +457,63 @@ inline GuestResult CallGuest(std::uint64_t Function, std::span<const std::uint64
 //
 // Host code that calls a guest function pointer it read from guest memory (Agc keeps a command buffer's out-of-space
 // callback in the guest's buffer struct) jumps into x86-64 code, and the instruction fetch faults (test-sequence 0721:
-// SIGBUS at Hollow Knight's eboot+0x3ae140). On a guest thread inside a host call, the handler turns that jump into a call
-// of the host's HostToGuestBridge, which runs the function with CallGuest: x16, which a call may clobber, carries the
-// guest function, and the host caller's x0-x5, d0-d7, stack pointer and return address stay as they were.
-inline struct sigaction DelegatorActions[2] {};
-inline bool (*ClaimHostFault)(siginfo_t* Info, void* Context) = nullptr;
+// SIGBUS at Hollow Knight's eboot+0x3ae140). On a guest thread inside a host call, and on a host thread with or without a
+// guest thread of its own (CallGuest adopts it), the handler turns that jump into a call of the host's HostToGuestBridge,
+// which runs the function with CallGuest: x16, which a call may clobber, carries the guest function, and the host
+// caller's x0-x5, d0-d7, stack pointer and return address stay as they were.
+//
+// FEX keeps x86's memory order with acquire loads and release stores (LDAPR, STLR) and atomics, which take an alignment
+// fault when an unaligned access crosses 16 bytes. The delegator rewrites such an instruction only when the pc is in
+// the faulting thread's own code buffers; HandleUnownedUnaligned gives the same rewrite to one outside them that is
+// neither host code nor a guest module (another thread's newer shared code buffer, for instance), on a guest thread.
 inline void (*HostToGuestBridge)() = nullptr;
 inline bool (*IsGuestCode)(std::uint64_t Address) = nullptr;
+inline bool HandleUnownedUnaligned(void* Context) {
+  auto* Bound = Thread;
+  if (!Bound || FEXCore::Darwin::CurrentThread != Bound) {
+    return false;
+  }
+  auto& State = static_cast<ucontext_t*>(Context)->uc_mcontext->__ss;
+  const std::uint64_t PC = __darwin_arm_thread_state64_get_pc(State);
+  Dl_info Image {};
+  if (CTX->IsAddressInCodeBuffer(Bound, PC) || dladdr(reinterpret_cast<void*>(PC), &Image) || (IsGuestCode && IsGuestCode(PC))) {
+    return false;
+  }
+  std::uint64_t GPRs[32];
+  for (unsigned Index = 0; Index != 29; ++Index) {
+    GPRs[Index] = State.__x[Index];
+  }
+  GPRs[29] = __darwin_arm_thread_state64_get_fp(State);
+  GPRs[30] = __darwin_arm_thread_state64_get_lr(State);
+  GPRs[31] = __darwin_arm_thread_state64_get_sp(State);
+  std::optional<std::int32_t> Advance;
+  {
+    FEXCore::Utils::JITWriteScope Write;
+    Advance = FEXCore::ArchHelpers::Arm64::HandleUnalignedAccess(Bound, FEXCore::ArchHelpers::Arm64::UnalignedHandlerType::HalfBarrier, PC, GPRs);
+  }
+  if (!Advance) {
+    return false;
+  }
+  for (unsigned Index = 0; Index != 29; ++Index) {
+    State.__x[Index] = GPRs[Index];
+  }
+  __darwin_arm_thread_state64_set_fp(State, GPRs[29]);
+  __darwin_arm_thread_state64_set_lr_fptr(State, reinterpret_cast<void*>(GPRs[30]));
+  __darwin_arm_thread_state64_set_sp(State, GPRs[31]);
+  __darwin_arm_thread_state64_set_pc_fptr(State, reinterpret_cast<void*>(PC + *Advance));
+  static std::atomic<int> Logged {0};
+  if (Logged.fetch_add(1, std::memory_order_relaxed) < 8) {
+    char Text[160];
+    const int Length = std::snprintf(Text, sizeof(Text), "unaligned access at pc 0x%llx, outside this thread's code buffers, rewritten\n",
+                                     static_cast<unsigned long long>(PC));
+    write(STDOUT_FILENO, Text, Length);
+  }
+  return true;
+}
+inline struct sigaction DelegatorActions[2] {};
+inline bool (*ClaimHostFault)(siginfo_t* Info, void* Context) = nullptr;
 inline void CallRetGuard(int Signal, siginfo_t* Info, void* Context) {
-  if (HostToGuestBridge && IsGuestCode && Thread && InHostCall) {
+  if (HostToGuestBridge && IsGuestCode && (Thread ? InHostCall : AdoptHostThread != nullptr)) {
     auto* Machine = static_cast<ucontext_t*>(Context)->uc_mcontext;
     const std::uint64_t PC = __darwin_arm_thread_state64_get_pc(Machine->__ss);
     if (PC == reinterpret_cast<std::uintptr_t>(Info->si_addr) && IsGuestCode(PC)) {
@@ -440,12 +531,13 @@ inline void CallRetGuard(int Signal, siginfo_t* Info, void* Context) {
       return;
     }
   }
-  if (ClaimHostFault) {
-    const auto ESR = static_cast<ucontext_t*>(Context)->uc_mcontext->__es.__esr;
-    const bool Alignment = ((ESR >> 26) == 0x24 || (ESR >> 26) == 0x25) && (ESR & 0x3f) == 0x21;
-    if (!Alignment && ClaimHostFault(Info, Context)) {
-      return;
-    }
+  const auto ESR = static_cast<ucontext_t*>(Context)->uc_mcontext->__es.__esr;
+  const bool Alignment = ((ESR >> 26) == 0x24 || (ESR >> 26) == 0x25) && (ESR & 0x3f) == 0x21;
+  if (Alignment && Signal == SIGBUS && HandleUnownedUnaligned(Context)) {
+    return;
+  }
+  if (ClaimHostFault && !Alignment && ClaimHostFault(Info, Context)) {
+    return;
   }
   const auto& Next = DelegatorActions[Signal == SIGBUS ? 0 : 1];
   if (Next.sa_flags & SA_SIGINFO) {
@@ -551,6 +643,32 @@ inline bool InCurrentBlock(FEXCore::Core::InternalThreadState* Bound, std::uint6
   const std::uint32_t TailOffset = *reinterpret_cast<const std::uint32_t*>(Begin);  // JITCodeHeader::OffsetToBlockTail
   const std::size_t Size = *reinterpret_cast<const std::size_t*>(Begin + TailOffset); // JITCodeTail::Size
   return PC > Begin && PC < Begin + Size;
+}
+
+inline void ReportGuestState(void* Context) {
+  char Text[320];
+  int Length;
+  if (!Thread) {
+    Length = std::snprintf(Text, sizeof(Text), "  no guest thread on this OS thread\n");
+    write(STDOUT_FILENO, Text, Length);
+    return;
+  }
+  const std::uint64_t PC = __darwin_arm_thread_state64_get_pc(static_cast<ucontext_t*>(Context)->uc_mcontext->__ss);
+  const bool Translated = CTX->IsAddressInCodeBuffer(Thread, PC);
+  const auto* Config = Delegator ? &Delegator->GetConfig() : nullptr;
+  const bool Dispatcher = Config && PC >= Config->DispatcherBegin && PC < Config->DispatcherEnd;
+  const std::uint64_t Rip = Translated && InCurrentBlock(Thread, PC) ? CTX->RestoreRIPFromHostPC(Thread, PC) : Thread->CurrentFrame->State.rip;
+  char Where[96] = "?";
+  if (DescribeGuestAddress) {
+    DescribeGuestAddress(Rip, Where, sizeof(Where));
+  }
+  Length = std::snprintf(Text, sizeof(Text),
+                         "  guest thread: pc in translated code %d, in the dispatcher %d (0x%llx-0x%llx), in a host call %d, interrupt depth %d, "
+                         "bound %d; guest rip 0x%llx (%s)\n",
+                         Translated, Dispatcher, Config ? static_cast<unsigned long long>(Config->DispatcherBegin) : 0ULL,
+                         Config ? static_cast<unsigned long long>(Config->DispatcherEnd) : 0ULL, InHostCall, InterruptDepth,
+                         FEXCore::Darwin::CurrentThread == Thread, static_cast<unsigned long long>(Rip), Where);
+  write(STDOUT_FILENO, Text, Length);
 }
 
 // Darwin arm64 system calls a blocked thread waits in (x16 at the SVC): reads, polls, kevents, pthread and ulock
@@ -702,6 +820,34 @@ inline FEXCore::Core::InternalThreadState* NewThread(CPUState& Initial) {
   mprotect(Created->CallRetStackBase, CallRetSize, PROT_READ | PROT_WRITE);
   Guest.callret_sp = CallRet + PageSize + CallRetSize / 4;
   return Created;
+}
+
+// A host thread's own guest thread (AdoptHostThread): created on its first guest call, bound to the OS thread with
+// InHostCall set (the thread runs host code between guest calls), and destroyed when the OS thread exits.
+struct AdoptedGuest {
+  FEXCore::Darwin::ThreadScope* Scope = nullptr;
+  ~AdoptedGuest() {
+    if (!Scope) {
+      return;
+    }
+    delete Scope;
+    const std::uint64_t PageSize = getpagesize();
+    auto* CallRet = static_cast<std::uint8_t*>(Thread->CallRetStackBase) - PageSize;
+    CTX->DestroyThread(Thread);
+    Thread = nullptr;
+    munmap(CallRet, FEXCore::Core::InternalThreadState::CALLRET_STACK_SIZE + 2 * PageSize);
+  }
+};
+inline thread_local AdoptedGuest Adopted;
+inline void AdoptCallingThread(std::uint64_t StackTop, std::uint64_t FsBase) {
+  CPUState Initial {};
+  Initial.rip = StubBase;
+  Initial.gregs[X86::REG_RSP] = (StackTop & ~15ULL) - 8;
+  Initial.fs_cached = FsBase;
+  InstallSignalStack();
+  Thread = NewThread(Initial);
+  Adopted.Scope = new FEXCore::Darwin::ThreadScope(Thread);
+  InHostCall = true;
 }
 
 // Runs a new guest thread on the calling OS thread, which must have none: Entry(Argument) on a guest stack whose top is
