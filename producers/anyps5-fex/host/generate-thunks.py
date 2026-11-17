@@ -63,6 +63,29 @@ class Unit(list):
                     f.write(text)
 
 
+def namespaces(text):
+    """The namespace qualifier ("A::B::") in effect at each APS5_VABI declaration of a header, by its match start:
+    `namespace A {` and `namespace A::B {` blocks counted by braces, with comments, strings and character literals
+    blanked first so their braces do not count. Other blocks (extern "C", classes, function bodies) add nothing."""
+    blank = lambda m: re.sub(r'[^\n]', ' ', m.group(0))
+    code = re.sub(r'//[^\n]*|/\*.*?\*/|"(?:\\.|[^"\\\n])*"|\'(?:\\.|[^\'\\\n])*\'', blank, text, flags=re.S)
+    opening = re.compile(r'\bnamespace\s+([A-Za-z_][\w:]*)\s*\{')
+    stack, result, at = [], {}, 0
+    starts = sorted(m.start() for m in declaration.finditer(code))
+    for position, character in ((m.start(), m.group(0)) for m in re.finditer(r'[{}]', code)):
+        while starts and starts[0] < position:
+            result[starts.pop(0)] = ''.join(name + '::' for name in stack if name)
+        if character == '{':
+            named = opening.search(code, at, position + 1)
+            stack.append(named.group(1) if named and named.end() == position + 1 else None)
+        elif stack:
+            stack.pop()
+        at = position + 1
+    for start in starts:
+        result[start] = ''.join(name + '::' for name in stack if name)
+    return result
+
+
 def top_lines(source):
     """The preprocessor lines before the source's first line of code, with any condition still open there closed.
     Includes of .inc, .c and .cpp files are left out, since they define things rather than declare them."""
@@ -115,8 +138,9 @@ for source in sources:
         if found is None:
             raise SystemExit(f'{source}: {header} is in no include directory')
         text = open(found, encoding='utf-8').read()
+        scope = namespaces(text)
         for match in declaration.finditer(text):
-            prototypes.setdefault(match.group(1), match.group(2))
+            prototypes.setdefault(match.group(1), (match.group(2), scope.get(match.start(), '')))
         for match in declaration.finditer(text):
             name, parameters = match.group(1), match.group(2)
             if name not in defined or name.endswith('_nid_no_patch') or name in generated:
@@ -125,12 +149,13 @@ for source in sources:
                 pending.append(name)
                 continue
             generated.add(name)
-            names.append((name, name, 'ThunkFor'))
+            names.append((name, scope.get(match.start(), '') + name, 'ThunkFor'))
     for name in pending:
         counterpart = 'v' + name
-        if counterpart in defined and 'VaList' in prototypes.get(counterpart, '').rsplit(',', 1)[-1]:
+        parameters, qualifier = prototypes.get(counterpart, ('', ''))
+        if counterpart in defined and 'VaList' in parameters.rsplit(',', 1)[-1]:
             generated.add(name)
-            names.append((name, counterpart, 'VariadicThunkFor'))
+            names.append((name, qualifier + counterpart, 'VariadicThunkFor'))
             counterparts += 1
         else:
             variadic.add(name)

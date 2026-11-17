@@ -86,9 +86,11 @@ function project(directory,destination,paths=[]){
 function cmakeLibraries(arm64,names,compiled,overlaid){
  const build=path.join(arm64,'build'),manifest=fs.readFileSync(path.join(build,'build.ninja'),'utf8').split('\n');
  const excluded=new Set(['core/libs/libs/unpatched/libc.prx','core/libs/libs/unpatched/libkernel.prx']);
+ // No object needs a linked PRX library to compile: the order-only PRX inputs CMake adds would link libraries (and
+ // through them libc.prx and libkernel.prx) that the host never uses.
  fs.writeFileSync(path.join(build,'objects-only.ninja'),manifest.map(line=>{
   if(!line.startsWith('build ')||!line.includes(' || '))return line;
-  const at=line.indexOf(' || '),kept=line.slice(at+4).split(' ').filter(target=>!excluded.has(target));
+  const at=line.indexOf(' || '),kept=line.slice(at+4).split(' ').filter(target=>!excluded.has(target)&&!/^core\/libs\/libs\/unpatched\/\S+\.prx$/.test(target));
   return line.slice(0,at)+(kept.some(Boolean)?' || '+kept.join(' '):'');
  }).join('\n'));
  const edges=new Map();
@@ -124,7 +126,9 @@ function cmakeLibraries(arm64,names,compiled,overlaid){
    // thunk units that include these sources' headers need as well.
    for(const [,directory] of (commandOf.get(object)||'').matchAll(/(?:^|\s)(?:-I|-isystem\s+)(\S+)/g))includes.push(path.resolve(build,directory));
    // And their definitions (APS5_ENABLE_TIMING_LOG, VK_ENABLE_BETA_EXTENSIONS), apart from each library's <name>_EXPORTS.
-   for(const [,definition] of (commandOf.get(object)||'').matchAll(/(?:^|\s)-D(\S+)/g)){
+   for(const [,written] of (commandOf.get(object)||'').matchAll(/(?:^|\s)-D(\S+)/g)){
+    // The command is shell text: MBEDTLS_USER_CONFIG_FILE=\"<path>\" names a header in quotes.
+    const definition=written.replace(/\\(.)/g,'$1');
     if(/_EXPORTS$/.test(definition))continue;
     const name=definition.split('=')[0];
     if(defines.has(name)&&defines.get(name)!==definition)throw Error('The arm64 AnyPS5 libraries define '+name+' differently: '+defines.get(name)+', '+definition);
@@ -135,9 +139,9 @@ function cmakeLibraries(arm64,names,compiled,overlaid){
   for(let at=0;at<words.length;at++){
    const word=words[at];
    if(word.endsWith('.prx'))pending.push(word);
-   else if(word.endsWith('.a'))archives.push(path.join(build,word));
+   else if(word.endsWith('.a'))archives.push(path.resolve(build,word));
    else if(word==='-framework')link.push(word+' '+words[++at]);
-   else if(word.endsWith('.dylib'))link.push(path.join(build,word));
+   else if(word.endsWith('.dylib'))link.push(path.resolve(build,word));
    else if(word.startsWith('-l'))link.push(word);
    else if(!word.startsWith('-Wl,-rpath,'))throw Error('Unknown link input of '+target+': '+word);
   }
@@ -145,7 +149,10 @@ function cmakeLibraries(arm64,names,compiled,overlaid){
  }
  const unique=list=>[...new Set(list)];
  // The unedited objects of the edited sources are built too, which makes the generated headers they include.
- run('ninja',['-C',build,'-f','objects-only.ninja',...unique([...objects,...changed.map(([object])=>object)]).map(file=>path.relative(build,file)),...unique(archives).map(file=>path.relative(build,file))]);
+ // Static libraries outside the build tree (the prepared FFmpeg) are inputs only.
+ const built=unique(archives).filter(file=>!path.relative(build,file).startsWith('..'));
+ for(const file of unique(archives))if(!built.includes(file)&&!fs.existsSync(file))throw Error('The arm64 AnyPS5 build links a missing library '+file);
+ run('ninja',['-C',build,'-f','objects-only.ninja',...unique([...objects,...changed.map(([object])=>object)]).map(file=>path.relative(build,file)),...built.map(file=>path.relative(build,file))]);
  for(const [object,edited] of new Map(changed)){
   const words=commandOf.get(object).split(' '),source=sourceOf.get(object),output=path.join(path.dirname(overlaid),'objects-cmake',path.relative(path.join(arm64,'source'),source)+'.o');
   if(/["'\\]/.test(commandOf.get(object)))throw Error('The CMake command of '+object+' is quoted; it is read word by word.');

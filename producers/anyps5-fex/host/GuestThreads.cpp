@@ -533,6 +533,24 @@ int RwlockTrywrlock(std::uint64_t* Slot) {
 int RwlockUnlock(std::uint64_t* Slot) {
   return Slot ? pthread_rwlock_unlock(&RwLockOf(Slot)->Host) : EINVAL;
 }
+// macOS has no timed read-write lock: the lock is tried until the deadline, 50 us apart.
+template<int (*Try)(pthread_rwlock_t*)>
+int RwlockLockFor(std::uint64_t* Slot, std::chrono::steady_clock::time_point Deadline) {
+  if (!Slot) {
+    return EINVAL;
+  }
+  auto* L = RwLockOf(Slot);
+  for (;;) {
+    const int Result = Try(&L->Host);
+    if (Result != EBUSY) {
+      return Result;
+    }
+    if (std::chrono::steady_clock::now() >= Deadline) {
+      return ETIMEDOUT;
+    }
+    std::this_thread::sleep_for(std::chrono::microseconds(50));
+  }
+}
 int RwlockattrInit(std::uint64_t* Slot) {
   if (!Slot) {
     return EINVAL;
@@ -759,6 +777,23 @@ int Getprio(std::uint64_t Handle, int* Priority) {
   *Priority = ThreadOf(Handle)->Settings.Priority;
   return 0;
 }
+// The policy and priority are kept for the guest to read back; host threads keep the default scheduling.
+int Setschedparam(std::uint64_t Handle, int Policy, const int* Parameter) {
+  if (!Handle || !Parameter) {
+    return EINVAL;
+  }
+  ThreadOf(Handle)->Settings.Policy = Policy;
+  ThreadOf(Handle)->Settings.Priority = *Parameter;
+  return 0;
+}
+int Getschedparam(std::uint64_t Handle, int* Policy, int* Parameter) {
+  if (!Handle || !Policy || !Parameter) {
+    return EINVAL;
+  }
+  *Policy = ThreadOf(Handle)->Settings.Policy;
+  *Parameter = ThreadOf(Handle)->Settings.Priority;
+  return 0;
+}
 int Setaffinity(std::uint64_t Handle, std::uint64_t Mask) {
   if (!Handle) {
     return ESRCH;
@@ -842,6 +877,12 @@ int SceCondTimedwait(std::uint64_t* Slot, std::uint64_t* MutexSlot, std::uint32_
 }
 int SceRwlockInit(std::uint64_t* Slot, const std::uint64_t* Attributes, const char*) {
   return Sce(RwlockInit(Slot, Attributes));
+}
+int SceRwlockTimedrdlock(std::uint64_t* Slot, std::uint32_t Microseconds) {
+  return Sce(RwlockLockFor<pthread_rwlock_tryrdlock>(Slot, DeadlineAfter(Microseconds)));
+}
+int SceRwlockTimedwrlock(std::uint64_t* Slot, std::uint32_t Microseconds) {
+  return Sce(RwlockLockFor<pthread_rwlock_trywrlock>(Slot, DeadlineAfter(Microseconds)));
 }
 std::uint64_t SceGetspecific(std::uint32_t Key) {
   return GetSpecific(Key);
@@ -955,6 +996,8 @@ const std::pair<const char*, FexGuest::Thunk> Functions[] = {
   {"scePthreadRwlockTryrdlock", SysV::Thunk<&SceOf<&RwlockTryrdlock, std::uint64_t*>>},
   {"scePthreadRwlockTrywrlock", SysV::Thunk<&SceOf<&RwlockTrywrlock, std::uint64_t*>>},
   {"scePthreadRwlockUnlock", SysV::Thunk<&SceOf<&RwlockUnlock, std::uint64_t*>>},
+  {"scePthreadRwlockTimedrdlock", SysV::Thunk<&SceRwlockTimedrdlock>},
+  {"scePthreadRwlockTimedwrlock", SysV::Thunk<&SceRwlockTimedwrlock>},
   {"scePthreadRwlockattrInit", SysV::Thunk<&SceOf<&RwlockattrInit, std::uint64_t*>>},
   {"scePthreadRwlockattrDestroy", SysV::Thunk<&SceOf<&RwlockattrDestroy, std::uint64_t*>>},
   {"scePthreadAttrInit", SysV::Thunk<&SceOf<&AttrInit, std::uint64_t*>>},
@@ -977,6 +1020,10 @@ const std::pair<const char*, FexGuest::Thunk> Functions[] = {
   {"scePthreadGetthreadid", SysV::Thunk<&Getthreadid>},
   {"scePthreadSetprio", SysV::Thunk<&SceOf<&Setprio, std::uint64_t, int>>},
   {"scePthreadGetprio", SysV::Thunk<&SceOf<&Getprio, std::uint64_t, int*>>},
+  {"scePthreadSetschedparam", SysV::Thunk<&SceOf<&Setschedparam, std::uint64_t, int, const int*>>},
+  {"scePthreadGetschedparam", SysV::Thunk<&SceOf<&Getschedparam, std::uint64_t, int*, int*>>},
+  {"pthread_setschedparam", SysV::Thunk<&Setschedparam>},
+  {"pthread_getschedparam", SysV::Thunk<&Getschedparam>},
   {"scePthreadSetaffinity", SysV::Thunk<&SceOf<&Setaffinity, std::uint64_t, std::uint64_t>>},
   {"scePthreadGetaffinity", SysV::Thunk<&SceOf<&Getaffinity, std::uint64_t, std::uint64_t*>>},
   {"scePthreadRename", SysV::Thunk<&SceOf<&Rename, std::uint64_t, const char*>>},

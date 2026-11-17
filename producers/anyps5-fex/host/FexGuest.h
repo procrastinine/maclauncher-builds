@@ -343,7 +343,12 @@ inline GuestResult CallGuest(std::uint64_t Function, std::span<const std::uint64
 // without returns run into one; FEX's Linux frontend then puts x25 back at the stack's default position and resumes the
 // faulting instruction (SyscallsSMCTracking.cpp, HandleSegfault). This handler does the same for the calling thread's
 // stack and passes every other SIGBUS or SIGSEGV to the Darwin signal delegator installed before it.
+//
+// A host that write-protects memory to track writes (AnyPS5's guest write watch, for the GPU's copies of guest memory)
+// sets ClaimHostFault: a write fault it claims (it reopens the page) resumes the faulting instruction, from host code
+// and from translated guest code alike. An unaligned access stays the delegator's, which rewrites the instruction.
 inline struct sigaction DelegatorActions[2] {};
+inline bool (*ClaimHostFault)(siginfo_t* Info, void* Context) = nullptr;
 inline void CallRetGuard(int Signal, siginfo_t* Info, void* Context) {
   if (auto* Bound = Thread; Bound && Bound->CallRetStackBase) {
     const std::uintptr_t Base = reinterpret_cast<std::uintptr_t>(Bound->CallRetStackBase), Page = getpagesize();
@@ -351,6 +356,13 @@ inline void CallRetGuard(int Signal, siginfo_t* Info, void* Context) {
     constexpr std::uintptr_t Size = FEXCore::Core::InternalThreadState::CALLRET_STACK_SIZE;
     if (Fault >= Base - Page && Fault < Base + Size + Page) {
       static_cast<ucontext_t*>(Context)->uc_mcontext->__ss.__x[25] = Base + Size / 4;
+      return;
+    }
+  }
+  if (ClaimHostFault) {
+    const auto ESR = static_cast<ucontext_t*>(Context)->uc_mcontext->__es.__esr;
+    const bool Alignment = ((ESR >> 26) == 0x24 || (ESR >> 26) == 0x25) && (ESR & 0x3f) == 0x21;
+    if (!Alignment && ClaimHostFault(Info, Context)) {
       return;
     }
   }

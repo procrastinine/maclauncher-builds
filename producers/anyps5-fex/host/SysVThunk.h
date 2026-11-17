@@ -86,9 +86,32 @@ constexpr bool IsMemoryStruct = [] {
 template<class T>
 constexpr bool IsGuestFunctionPointer = std::is_pointer_v<T> && std::is_function_v<std::remove_pointer_t<T>>;
 
-// Host function pointers that call guest functions of one signature: a fixed pool of slots per signature.
+// Host function pointers that call guest functions of one signature: a fixed pool of slots per signature. A reference
+// parameter or result is the object's address, as the System V ABI passes it.
 template<class F>
 struct GuestFunction;
+
+// A callback signature GuestFunction can call: scalar, pointer and lvalue-reference parameters and results.
+template<class T>
+constexpr bool CallbackValue = (std::is_arithmetic_v<T> && !std::is_same_v<T, long double>) || std::is_enum_v<T> || std::is_pointer_v<T> ||
+                               std::is_lvalue_reference_v<T>;
+template<class F>
+struct SupportedCallback : std::false_type {};
+template<class R, class... A>
+struct SupportedCallback<R(A...)> : std::bool_constant<(std::is_void_v<R> || CallbackValue<R>) && (CallbackValue<A> && ...)> {};
+
+template<class T>
+void AddCallbackArgument(std::uint64_t* Integers, double* Floats, std::size_t& Int, std::size_t& Vector, T Value) {
+  if constexpr (std::is_lvalue_reference_v<T>) {
+    Integers[Int++] = reinterpret_cast<std::uint64_t>(&Value);
+  } else if constexpr (std::is_floating_point_v<T>) {
+    Floats[Vector++] = static_cast<double>(Value);
+  } else if constexpr (std::is_pointer_v<T>) {
+    Integers[Int++] = reinterpret_cast<std::uint64_t>(Value);
+  } else {
+    Integers[Int++] = static_cast<std::uint64_t>(Value);
+  }
+}
 
 template<class R, class... A>
 struct GuestFunction<R(A...)> {
@@ -99,17 +122,7 @@ struct GuestFunction<R(A...)> {
     std::uint64_t Integers[sizeof...(A) + 1] {};
     double Floats[sizeof...(A) + 1] {};
     std::size_t Int = 0, Vector = 0;
-    auto Add = [&](auto Value) {
-      using T = decltype(Value);
-      if constexpr (std::is_floating_point_v<T>) {
-        Floats[Vector++] = static_cast<double>(Value);
-      } else if constexpr (std::is_pointer_v<T>) {
-        Integers[Int++] = reinterpret_cast<std::uint64_t>(Value);
-      } else {
-        Integers[Int++] = static_cast<std::uint64_t>(Value);
-      }
-    };
-    (Add(Values), ...);
+    (AddCallbackArgument<A>(Integers, Floats, Int, Vector, Values), ...);
     const auto Result = FexGuest::CallGuest(Target, std::span<const std::uint64_t>(Integers, Int), std::span<const double>(Floats, Vector));
     if constexpr (std::is_void_v<R>) {
       return;
@@ -117,6 +130,8 @@ struct GuestFunction<R(A...)> {
       return static_cast<R>(std::bit_cast<double>(Result.Xmm0));
     } else if constexpr (std::is_pointer_v<R>) {
       return reinterpret_cast<R>(Result.Rax);
+    } else if constexpr (std::is_lvalue_reference_v<R>) {
+      return *reinterpret_cast<std::remove_reference_t<R>*>(Result.Rax);
     } else {
       return static_cast<R>(Result.Rax);
     }
@@ -330,8 +345,15 @@ After VariadicThunk(CPUState& State) {
   return CallVariadic(Export, State, std::make_index_sequence<std::tuple_size_v<typename FunctionTraits<decltype(Export)>::Parameters> - 1> {});
 }
 
+// A function pointer argument is a guest callback; its own signature has to be one GuestFunction can call.
 template<class T>
-constexpr bool SupportedArgument = std::is_arithmetic_v<T> || std::is_enum_v<T> || std::is_pointer_v<T>;
+constexpr bool SupportedArgument = [] {
+  if constexpr (IsGuestFunctionPointer<T>) {
+    return SupportedCallback<std::remove_pointer_t<T>>::value;
+  } else {
+    return std::is_arithmetic_v<T> || std::is_enum_v<T> || std::is_pointer_v<T>;
+  }
+}();
 
 template<class R>
 constexpr bool SupportedReturn = [] {

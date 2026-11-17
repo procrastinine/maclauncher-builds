@@ -95,7 +95,16 @@
       "core/libs/prx/libc/src/FailureReport.cpp",
       "core/libs/prx/libkernel/System/src/HostCpu.cpp",
       "core/libs/prx/libc/src/CreationMask.cpp",
-      "core/libs/prx/libc/src/Environment.cpp"
+      "core/libs/prx/libc/src/Environment.cpp",
+      "core/libs/prx/libc/src/StdioExtras.cpp",
+      "core/libs/prx/libc/src/Mspace.cpp",
+      "core/libs/prx/libc/src/HeapDiagnostics.cpp",
+      "core/libs/prx/libkernel/Semaphore/src/Semaphore.cpp",
+      "core/libs/prx/libkernel/EventFlag/src/EventFlag.cpp",
+      "core/libs/prx/libkernel/SyncOnAddress/src/SyncOnAddress.cpp",
+      "core/libs/prx/libkernel/Apr/src/Apr.cpp",
+      "core/libs/prx/libkernel/System/src/Sanitizer.cpp",
+      "core/libs/prx/libkernel/Equeue/src/EventAccessors.cpp"
     ],
     "objectLibraries": [
       "core/libs/prx/libc/gdtoa/Build.cmake"
@@ -112,9 +121,13 @@
     "arm64HostOverlays": [
       ["arm64-standard-streams", "applyStandardStreamDeclarations"],
       ["guest-va-list", "applyGuestVaListOverlay"],
-      ["arm64-driver-memory", "applyDriverMemoryWindow"]
+      ["arm64-driver-memory", "applyDriverMemoryWindow"],
+      ["arm64-sync-on-address", "applySyncOnAddressLoad"]
     ],
-    "cmakeLibraries": ["libSceVideoOut", "libSceAgc", "libSceAgcDriver", "libSceAudioOut"],
+    "cmakeLibraries": ["libSceVideoOut", "libSceAgc", "libSceAgcDriver", "libSceAudioOut", "libSceLibcInternal", "libSceJson2", "libSceNet",
+      "libSceHttp2", "libSceAvPlayer", "libSceAjm", "libSceSsl", "libSceNpWebApi2", "libSceAppContent", "libSceSaveData", "libSceImeDialog",
+      "libSceAmpr", "libSceWebBrowserDialog", "libSceNpManager", "libSceMsgDialog", "libSceHttp", "libSceAudioIn", "libSceRazorCpu",
+      "ulobjmgr", "libSceRtc", "libSceRemoteplay", "libSceFont", "libSceRandom", "libSceNetCtl", "libSceCommonDialog"],
     "arm64Libraries": {
       "directory": "../anyps5/overlays/arm64-libs",
       "steps": [

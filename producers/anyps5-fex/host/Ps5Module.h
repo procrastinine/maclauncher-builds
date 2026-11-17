@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <mutex>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -243,17 +244,26 @@ inline Module Load(const std::string& Path, const std::string& Name) {
 // Static TLS: each module's block below the thread pointer, the TCB at the thread pointer (self pointer, the DTV, then
 // the thread's record for the host's pthread layer). LayOutStaticTls places the blocks once, before relocation (TPOFF64
 // relocations use the offsets); AllocateStaticTls then gives each thread, the initial one included, its own copy of the
-// relocated TLS images and returns its thread pointer, the guest FS base.
+// relocated TLS images and returns its thread pointer, the guest FS base. As FreeBSD's rtld does, the static area keeps
+// a surplus below the startup modules' blocks for modules loaded later (AddRuntimeTls): their code may address its TLS
+// at a fixed offset from the thread pointer too.
+constexpr std::uint64_t StaticTlsSurplus = 0x10000;
+constexpr std::uint64_t DtvOffset = 0x1000, DtvEntries = 0x600;
 struct StaticTlsLayout {
   std::vector<Module*> Modules;
-  std::uint64_t Blocks = 0;
+  std::uint64_t Blocks = 0; // the whole static area below the thread pointer, surplus included
+  std::uint64_t Used = 0;   // the offsets taken so far
+  std::uint64_t Indices = 0;
+  std::vector<std::uint64_t> ThreadPointers; // every thread's, for the blocks of modules loaded later
 };
 inline StaticTlsLayout TlsLayout;
+inline std::mutex TlsLock;
 
 inline std::uint64_t AllocateStaticTls() {
+  std::lock_guard Lock(TlsLock);
   auto* Area = static_cast<std::uint8_t*>(FexGuest::MapGuest(TlsLayout.Blocks + 0x4000));
   const std::uint64_t TP = reinterpret_cast<std::uint64_t>(Area) + TlsLayout.Blocks;
-  auto* Dtv = reinterpret_cast<std::uint64_t*>(TP + 0x1000);
+  auto* Dtv = reinterpret_cast<std::uint64_t*>(TP + DtvOffset);
   Dtv[0] = 1;
   for (auto* M : TlsLayout.Modules) {
     if (M->TlsIndex == 0) {
@@ -265,21 +275,51 @@ inline std::uint64_t AllocateStaticTls() {
   }
   reinterpret_cast<std::uint64_t*>(TP)[0] = TP;
   reinterpret_cast<std::uint64_t*>(TP)[1] = reinterpret_cast<std::uint64_t>(Dtv);
+  TlsLayout.ThreadPointers.push_back(TP);
   return TP;
 }
 
-inline void LayOutStaticTls(std::vector<Module*> Modules) {
-  std::uint64_t Offset = 0, Index = 0, Align = 16;
-  for (auto* M : Modules) {
-    if (M->TlsMemSize == 0) {
-      continue;
-    }
-    Offset = (Offset + M->TlsMemSize + M->TlsAlign - 1) & ~(M->TlsAlign - 1);
-    M->TlsOffset = Offset;
-    M->TlsIndex = ++Index;
-    Align = std::max(Align, M->TlsAlign);
+// Places M's block after the blocks taken so far; false when the block does not fit in the static area.
+inline bool PlaceTls(Module& M, std::uint64_t Limit) {
+  const auto Offset = (TlsLayout.Used + M.TlsMemSize + M.TlsAlign - 1) & ~(M.TlsAlign - 1);
+  if (Offset > Limit || TlsLayout.Indices + 1 >= DtvEntries) {
+    return false;
   }
-  TlsLayout = {std::move(Modules), (Offset + Align - 1) & ~(Align - 1)};
+  TlsLayout.Used = Offset;
+  M.TlsOffset = Offset;
+  M.TlsIndex = ++TlsLayout.Indices;
+  return true;
+}
+
+inline void LayOutStaticTls(std::vector<Module*> Modules) {
+  std::uint64_t Align = 16;
+  for (auto* M : Modules) {
+    if (M->TlsMemSize != 0) {
+      PlaceTls(*M, ~0ULL);
+      Align = std::max(Align, M->TlsAlign);
+    }
+  }
+  TlsLayout.Modules = std::move(Modules);
+  TlsLayout.Blocks = (TlsLayout.Used + StaticTlsSurplus + Align - 1) & ~(Align - 1);
+}
+
+// A module loaded after the threads started: its block comes from the surplus, and every thread gets the initial image
+// and the DTV entry; the threads created later get both from AllocateStaticTls.
+inline bool AddRuntimeTls(Module& M) {
+  std::lock_guard Lock(TlsLock);
+  if (M.TlsMemSize == 0) {
+    TlsLayout.Modules.push_back(&M);
+    return true;
+  }
+  if (M.TlsAlign > 16 || !PlaceTls(M, TlsLayout.Blocks)) {
+    return false;
+  }
+  for (const auto TP : TlsLayout.ThreadPointers) {
+    std::memcpy(reinterpret_cast<void*>(TP - M.TlsOffset), reinterpret_cast<const void*>(M.Base + M.TlsImage), M.TlsFileSize);
+    reinterpret_cast<std::uint64_t*>(TP + DtvOffset)[M.TlsIndex] = TP - M.TlsOffset;
+  }
+  TlsLayout.Modules.push_back(&M);
+  return true;
 }
 
 // Applies the module's relocations. Resolve returns the guest address of an imported symbol.
