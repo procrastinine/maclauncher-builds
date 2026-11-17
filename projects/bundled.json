@@ -124,7 +124,7 @@
   },
   {
     "id": "love-luasteam",
-    "name": "LÖVE LuaSteam bridge",
+    "name": "L\u00d6VE LuaSteam bridge",
     "purpose": "LuaSteam 4 binding against the selected host Lua VM.",
     "producer": {
       "kind": "maclauncher",
@@ -793,7 +793,10 @@
       "kind": "maclauncher",
       "repository": "https://github.com/procrastinine/maclauncher-builds",
       "entries": [
-        "producers/package-support/src/modules/java/runtime/steamworks"
+        "LICENSE",
+        "producers/package-support/src/modules/java/runtime/steamworks",
+        "producers/java-steamworks",
+        "tools/java-steamworks-native.mjs"
       ],
       "sourceDirectory": "producers/package-support"
     },
@@ -805,7 +808,7 @@
         "repository": "code-disaster/steamworks4j",
         "pin": {
           "file": "producers/package-support/src/modules/java/runtime/steamworks/publisher-releases.json",
-          "pointer": "/0/sourceRevision"
+          "pointer": "/0/source"
         }
       },
       {
@@ -816,6 +819,17 @@
         "pin": {
           "file": "producers/package-support/src/modules/java/runtime/steamworks/publisher-releases.json",
           "pointer": "/1/sourceRevision"
+        }
+      },
+      {
+        "id": "steamworks-sdk-1-53",
+        "provider": "github",
+        "url": "https://github.com/rlabrecque/SteamworksSDK",
+        "repository": "rlabrecque/SteamworksSDK",
+        "pin": {
+          "file": "producers/java-steamworks/inputs.json",
+          "pointer": "/sdk/revision",
+          "repositoryPointer": "/sdk/repository"
         }
       }
     ],
@@ -853,22 +867,13 @@
       {
         "version": "1.9.0-MCLv7",
         "label": "Steamworks4j 1.9.0 JNI ABI 1.9.0-MCLv7"
+      },
+      {
+        "version": "1.9.0-MCLv8",
+        "label": "Steamworks4j 1.9.0 JNI ABI"
       }
     ],
     "build": [
-      {
-        "version": "1.9.0-MCLv7",
-        "command": "tools/build-java-steamworks.mjs",
-        "architectures": [
-          "x64"
-        ],
-        "archives": [
-          {
-            "file": "producers/package-support/src/modules/java/runtime/steamworks/publisher-releases.json",
-            "pointer": ""
-          }
-        ]
-      },
       {
         "version": "1.10.0-MCLv7",
         "command": "tools/build-java-steamworks.mjs",
@@ -879,6 +884,23 @@
           {
             "file": "producers/package-support/src/modules/java/runtime/steamworks/publisher-releases.json",
             "pointer": ""
+          }
+        ]
+      },
+      {
+        "version": "1.9.0-MCLv8",
+        "command": "tools/build-java-steamworks.mjs",
+        "architectures": [
+          "universal"
+        ],
+        "archives": [
+          {
+            "file": "producers/java-steamworks/inputs.json",
+            "pointer": ""
+          },
+          {
+            "file": "producers/package-support/src/modules/java/runtime/steamworks/publisher-releases.json",
+            "pointer": "/0"
           }
         ]
       }
