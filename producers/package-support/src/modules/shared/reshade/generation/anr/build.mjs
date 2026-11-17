@@ -17,7 +17,7 @@ const priority=Number(execFileSync('ps',['-o','nice=','-p',String(process.pid)],
 run('cmake',['-S',path.join(source,'native'),'-B',build,'-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64','-DCMAKE_INSTALL_PREFIX='+payload,'-DANR_SHARED_INCLUDE='+appPath('src/modules/shared/reshade/native'),'-DANR_TEMPORAL_INCLUDE='+appPath('src/modules/shared/reshade/temporal'),'-DANR_CONVERTER_INCLUDE='+headers]);
 run('cmake',['--build',build,'-j6']);run('cmake',['--install',build]);
 for(const name of ['libmaclauncher-anr-generation.dylib','anr-convert-dxil','anr-verify'])run('codesign',['--force','--sign','-',path.join(payload,name)]);
-fs.writeFileSync(path.join(payload,'provider.json'),JSON.stringify({method:'anr',providerABI:1,complete:true,preparation:1,architectures:['arm64','x86_64'],minimumMacOS:pin.minimumMacOS,source:{repository:pin.repository,commit:pin.commit},converterHeaders:pin.converterHeaders,userSideAssets:true},null,2)+'\n');
+fs.writeFileSync(path.join(payload,'provider.json'),JSON.stringify({method:'anr',providerABI:1,complete:true,preparation:1,architectures:['arm64','x86_64'],minimumMacOS:pin.minimumMacOS,source:{repository:pin.repository,commit:pin.revision},converterHeaders:pin.converterHeaders,userSideAssets:true},null,2)+'\n');
 for(const name of ['NOTICE.md','LICENSE.txt'])addLicense(payload,'ANR Metal provider',path.join(source,name),'anr-'+name);
 
 addLicense(payload,'Apple Metal Shader Converter headers',path.join(headers,'metal_irconverter/LICENSE.txt'),'apple-metal-converter-headers');
