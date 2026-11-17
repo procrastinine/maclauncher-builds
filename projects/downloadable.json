@@ -4243,5 +4243,97 @@
         }
       ]
     }
+  },
+  {
+    "id": "love",
+    "name": "LÖVE",
+    "purpose": "LÖVE 0.10.2 with its Lua VM and native framework libraries.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/love-0102",
+      "entries": [
+        "producers/love-0102",
+        "producers/dependencies/libpng.json",
+        "tools/build-love0102.mjs"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "love",
+        "provider": "github",
+        "url": "https://github.com/love2d/love",
+        "repository": "love2d/love",
+        "pin": {
+          "file": "producers/love-0102/sources.json",
+          "pointer": "/0"
+        }
+      },
+      {
+        "id": "megasource",
+        "provider": "github",
+        "url": "https://github.com/love2d/megasource",
+        "repository": "love2d/megasource",
+        "pin": {
+          "file": "producers/love-0102/sources.json",
+          "pointer": "/1"
+        }
+      },
+      {
+        "id": "luajit",
+        "provider": "github",
+        "url": "https://github.com/LuaJIT/LuaJIT",
+        "repository": "LuaJIT/LuaJIT",
+        "pin": {
+          "file": "producers/love-0102/sources.json",
+          "pointer": "/2"
+        }
+      },
+      {
+        "id": "libpng",
+        "provider": "github",
+        "url": "https://github.com/pnggroup/libpng",
+        "repository": "pnggroup/libpng",
+        "pin": {
+          "file": "producers/dependencies/libpng.json",
+          "pointer": ""
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.10.2-MCLv1",
+        "label": "LÖVE 0.10.2"
+      }
+    ],
+    "build": {
+      "version": "0.10.2-MCLv1",
+      "command": "tools/build-love0102.mjs",
+      "architectures": [
+        "universal"
+      ],
+      "tools": [
+        "cmake",
+        "ninja"
+      ],
+      "archives": [
+        {
+          "file": "producers/love-0102/sources.json",
+          "pointer": "/0"
+        },
+        {
+          "file": "producers/love-0102/sources.json",
+          "pointer": "/1"
+        },
+        {
+          "file": "producers/love-0102/sources.json",
+          "pointer": "/2"
+        },
+        {
+          "file": "producers/dependencies/libpng.json",
+          "pointer": ""
+        }
+      ]
+    }
   }
 ]
