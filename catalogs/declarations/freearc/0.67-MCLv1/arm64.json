@@ -1,0 +1,80 @@
+{
+  "id": "freearc",
+  "version": "0.67-MCLv1",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "13.0",
+  "directoryRelative": "freearc/0.67-MCLv1/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "62e4e0b6ceb398dcae1d71b38d444f390ac06363ae4ad2a7aa792201179dfb1c",
+  "sourceSha256": "62e4e0b6ceb398dcae1d71b38d444f390ac06363ae4ad2a7aa792201179dfb1c",
+  "sourceRelative": "manifest.json",
+  "files": [
+    {
+      "path": "files/bin/clshost.exe",
+      "size": 14848,
+      "sha256": "e533ec331c8eb5850281c6861e3cb0ce22ff472721293a6b6df14d02d25a95ce",
+      "mode": 493
+    },
+    {
+      "path": "files/bin/fa-filter",
+      "size": 301920,
+      "sha256": "f164762294de5d757836761bf96de111bf562461c9286e32c74228aa69bdd9ab",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "files/licenses/Cellar-FreeArc-mapper-notice.txt",
+      "size": 1067,
+      "sha256": "974b432bff362d86cab002b2c5d64e00ac7368ae1c6fbfbba595cca90b2e165f",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/components.txt",
+      "size": 232,
+      "sha256": "2af769b65d8130635b499ee79d39b2c21aeb5827a7eef00d371c31da388e508a",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/FreeArc-_TABI.txt",
+      "size": 1472,
+      "sha256": "e0d048e8918b535dcb9fdd76a2dc7f7557a70dc684b0bc894df6d1c5c68d9fe1",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/GPL-2.0.txt",
+      "size": 17984,
+      "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/LGPL-2.1.txt",
+      "size": 26419,
+      "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/mac-game-porter.txt",
+      "size": 1299,
+      "sha256": "1d6135e1627b14d460c6fe04c1ed7db663f589582be44e63b38153d703f9ff36",
+      "mode": 420
+    },
+    {
+      "path": "files/licenses/NOTICE.txt",
+      "size": 5214,
+      "sha256": "6a8fa5f5ab0242a7c2d477661422abaab4addb0f6ad1a2d50f35fb1b06b7c7cc",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 2883,
+      "mode": 420,
+      "sha256": "62e4e0b6ceb398dcae1d71b38d444f390ac06363ae4ad2a7aa792201179dfb1c"
+    }
+  ],
+  "redistribution": "bundle"
+}
