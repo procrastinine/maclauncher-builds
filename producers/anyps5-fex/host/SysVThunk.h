@@ -19,13 +19,19 @@
 
 #include "FexGuest.h"
 
+#include <FEXCore/Utils/JITWriteScope.h>
+
 #include <algorithm>
 #include <array>
 #include <bit>
-#include <utility>
 #include <cmath>
+#include <libkern/OSCacheControl.h>
+#include <mutex>
+#include <sys/mman.h>
 #include <tuple>
 #include <type_traits>
+#include <unordered_map>
+#include <utility>
 
 namespace SysV {
 using FexGuest::After;
@@ -113,8 +119,48 @@ void AddCallbackArgument(std::uint64_t* Integers, double* Floats, std::size_t& I
   }
 }
 
+// Host-callable stubs for guest function pointers. Each guest target gets 32 bytes of arm64 code that loads the target
+// into the integer argument register after the signature's own integer arguments and branches to the signature's
+// CallWith, which takes it as one more argument:
+//   ldr x<Register>, Target; ldr x16, Entry; br x16; nop; Target; Entry
+// A library keeps as many callbacks as it registers (a C++ module's static destructors through __cxa_atexit).
+namespace CallbackStubs {
+inline std::mutex Mutex;
+inline std::uint8_t* Next = nullptr;
+inline std::size_t Left = 0;
+inline void* Make(std::uint32_t Register, std::uint64_t Target, std::uint64_t Entry) {
+  constexpr std::size_t Size = 32, Chunk = 1 << 16;
+  std::lock_guard Lock(Mutex);
+  if (Left < Size) {
+    void* Page = mmap(nullptr, Chunk, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANON | MAP_JIT, -1, 0);
+    if (Page == MAP_FAILED) {
+      std::printf("guest callback stubs: mmap failed\nFAIL\n");
+      std::exit(1);
+    }
+    Next = static_cast<std::uint8_t*>(Page);
+    Left = Chunk;
+  }
+  auto* Stub = Next;
+  Next += Size;
+  Left -= Size;
+  const std::uint32_t Code[4] = {0x58000080U | Register, 0x580000B0U, 0xD61F0200U, 0xD503201FU};
+  {
+    FEXCore::Utils::JITWriteScope Write;
+    std::memcpy(Stub, Code, sizeof(Code));
+    std::memcpy(Stub + 16, &Target, 8);
+    std::memcpy(Stub + 24, &Entry, 8);
+  }
+  sys_icache_invalidate(Stub, Size);
+  return Stub;
+}
+} // namespace CallbackStubs
+
 template<class R, class... A>
 struct GuestFunction<R(A...)> {
+  // Arguments the arm64 caller passes in x0-x7 and v0-v7.
+  static constexpr std::size_t IntegerArguments = (std::size_t {0} + ... + (std::is_floating_point_v<A> ? 0 : 1));
+  static constexpr std::size_t FloatArguments = (std::size_t {0} + ... + (std::is_floating_point_v<A> ? 1 : 0));
+  static constexpr bool Stubbed = IntegerArguments < 8 && FloatArguments <= 8;
   static constexpr std::size_t SlotCount = 32;
   static inline std::uint64_t Targets[SlotCount] {};
 
@@ -142,6 +188,10 @@ struct GuestFunction<R(A...)> {
     return Invoke(Targets[N], Values...);
   }
 
+  static R CallWith(A... Values, std::uint64_t Target) {
+    return Invoke(Target, Values...);
+  }
+
   template<std::size_t... N>
   static constexpr auto Table(std::index_sequence<N...>) {
     return std::array<R (*)(A...), SlotCount> {&Call<N>...};
@@ -151,6 +201,19 @@ struct GuestFunction<R(A...)> {
     if (Target == 0) {
       return nullptr;
     }
+    if constexpr (Stubbed) {
+      static std::mutex Mutex;
+      static std::unordered_map<std::uint64_t, R (*)(A...)> Stubs;
+      std::lock_guard Lock(Mutex);
+      auto& Stub = Stubs[Target];
+      if (!Stub) {
+        R (*Entry)(A..., std::uint64_t) = &CallWith;
+        Stub = reinterpret_cast<R (*)(A...)>(
+          CallbackStubs::Make(static_cast<std::uint32_t>(IntegerArguments), Target, reinterpret_cast<std::uint64_t>(Entry)));
+      }
+      return Stub;
+    }
+    // Signatures with stack arguments keep a fixed table of slots.
     static constexpr auto Calls = Table(std::make_index_sequence<SlotCount> {});
     for (std::size_t i = 0; i < SlotCount; ++i) {
       if (Targets[i] == Target || Targets[i] == 0) {

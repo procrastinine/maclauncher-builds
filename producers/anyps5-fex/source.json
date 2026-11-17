@@ -126,8 +126,8 @@
     ],
     "cmakeLibraries": ["libSceVideoOut", "libSceAgc", "libSceAgcDriver", "libSceAudioOut", "libSceLibcInternal", "libSceJson2", "libSceNet",
       "libSceHttp2", "libSceAvPlayer", "libSceAjm", "libSceSsl", "libSceNpWebApi2", "libSceAppContent", "libSceSaveData", "libSceImeDialog",
-      "libSceAmpr", "libSceWebBrowserDialog", "libSceNpManager", "libSceMsgDialog", "libSceHttp", "libSceAudioIn", "libSceRazorCpu",
-      "ulobjmgr", "libSceRtc", "libSceRemoteplay", "libSceFont", "libSceRandom", "libSceNetCtl", "libSceCommonDialog"],
+      "libSceAmpr", "libSceWebBrowserDialog", "libSceNpManager", "libSceMsgDialog.native", "libSceHttp", "libSceAudioIn", "libSceRazorCpu",
+      "ulobjmgr", "libSceRtc", "libSceRemoteplay", "libSceFont", "libSceRandom", "libSceNetCtl", "libSceCommonDialog", "libSceErrorDialog", "libSceSigninDialog", "libSceVrSetupDialog", "libSceGameUpdate", "libSceNpAuth", "libSceNpCommerce", "libSceNpEntitlementAccess", "libSceNpGameIntent", "libSceNpSessionSignaling", "libSceNpTrophy2", "libSceNpUniversalDataSystem", "libSceNpUtility", "libScePlayerInvitationDialog", "libSceSaveDataDialog", "libSceShare"],
     "arm64Libraries": {
       "directory": "../anyps5/overlays/arm64-libs",
       "steps": [
