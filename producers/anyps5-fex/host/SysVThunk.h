@@ -7,14 +7,18 @@
 // - float and double arguments: xmm0-xmm7, then the guest stack, interleaved with integer stack arguments in order;
 // - long double: an 80-bit x87 value in a 16-byte aligned guest stack slot; returned in st(0). On Apple arm64 long
 //   double is a 64-bit double, so the thunk converts in both directions;
-// - structs over 16 bytes: returned through a hidden pointer in rdi, which shifts the integer arguments by one, with
-//   that pointer returned in rax;
-// - structs of 16 bytes or less: each eightbyte in the next of rax/rdx (INTEGER) or xmm0/xmm1 (SSE), by the classes
-//   that SysVEightbytes<T> gives; generated thunks take them from the classification of the prototype's type;
+// - __int128: two INTEGER eightbytes, in two registers when both are free, otherwise in a 16-byte aligned stack slot;
+//   returned in rax and rdx;
+// - structs over 16 bytes: passed as a copy on the guest stack; returned through a hidden pointer in rdi, which shifts
+//   the integer arguments by one, with that pointer returned in rax;
+// - structs of 16 bytes or less: each eightbyte in the next integer register (INTEGER) or xmm register (SSE), by the
+//   classes SysVEightbytes<T> gives, or the whole struct on the guest stack when the registers left do not hold all
+//   of it; returned in rax/rdx and xmm0/xmm1 by the same classes. generate-thunks.py writes SysVEightbytes for the
+//   structs the exports pass by value from the struct's field list, and Classify checks that list against the layout;
 // - function pointer arguments: guest code addresses; the export receives a host function pointer that runs the
 //   guest function under FEXCore (GuestFunction, through FexGuest::CallGuest).
-// ThunkFor<Export>() is the thunk, or nullptr for a prototype these rules do not cover yet (by-value struct arguments,
-// small struct returns without SysVEightbytes, variadic functions).
+// ThunkFor<Export>() is the thunk, or nullptr for a prototype these rules do not cover yet (a small struct without a
+// valid SysVEightbytes, variadic functions without a va_list counterpart).
 #pragma once
 
 #include "FexGuest.h"
@@ -24,6 +28,8 @@
 #include <algorithm>
 #include <array>
 #include <bit>
+#include <cstddef>
+#include <cstring>
 #include <cmath>
 #include <libkern/OSCacheControl.h>
 #include <mutex>
@@ -76,9 +82,81 @@ inline void DoubleToX87(double Value, void* Destination) {
   std::memset(static_cast<std::uint8_t*>(Destination) + 10, 0, 6);
 }
 
-// Eightbyte classes of a struct of 16 bytes or less: 'I' for INTEGER, 'S' for SSE.
+// Eightbyte classes of a struct of 16 bytes or less: 'I' for INTEGER, 'S' for SSE. A specialization has Valid and
+// Classes, as Classify computes them.
 template<class T>
 struct SysVEightbytes;
+
+// A member of a struct as generate-thunks.py lists it (SYSV_FIELD), in declaration order; nested structs are listed by
+// their own members.
+struct Field {
+  std::size_t Offset, Size, Align;
+  bool Floating; // float or double, or an array of them
+  bool Other;    // a struct, union or long double, which this list cannot classify
+};
+template<class M>
+using FieldType = std::remove_all_extents_t<std::remove_cvref_t<M>>;
+#define SYSV_FIELD(T, Member)                                                                                                  \
+  ::SysV::Field {offsetof(T, Member), sizeof(std::declval<T&>().Member),                                                     \
+                 alignof(std::remove_reference_t<decltype(std::declval<T&>().Member)>),                                      \
+                 std::is_same_v<::SysV::FieldType<decltype(std::declval<T&>().Member)>, float> ||                             \
+                   std::is_same_v<::SysV::FieldType<decltype(std::declval<T&>().Member)>, double>,                            \
+                 std::is_class_v<::SysV::FieldType<decltype(std::declval<T&>().Member)>> ||                                   \
+                   std::is_union_v<::SysV::FieldType<decltype(std::declval<T&>().Member)>> ||                                 \
+                   std::is_same_v<::SysV::FieldType<decltype(std::declval<T&>().Member)>, long double>}
+
+struct Classification {
+  bool Valid = false;
+  std::array<char, 2> Classes {'I', 'I'};
+};
+
+// The System V classes of T's eightbytes: an eightbyte is SSE when every member byte in it is float or double, INTEGER
+// otherwise. The list must account for the layout, or the result is not valid and the prototype stays uncovered: each
+// member starts at or after the end of the one before it, with less than its own alignment of padding between them,
+// and the last one ends where T's size rounds down to its alignment. Bit-fields have no offset: with Bitfields, the
+// listed members (the others) must all be integers, and every eightbyte is INTEGER.
+template<class T, std::size_t N>
+constexpr Classification Classify(const Field (&Fields)[N], bool Bitfields) {
+  Classification Result;
+  if constexpr (sizeof(T) > 16 || !std::is_trivially_copyable_v<T>) {
+    return Result;
+  } else {
+    bool Floating[2] = {true, true};
+    std::size_t End = 0;
+    for (const auto& F : Fields) {
+      if (F.Other || (Bitfields && F.Floating)) {
+        return Result;
+      }
+      if (!Bitfields && (F.Offset < End || F.Offset - End >= F.Align)) {
+        return Result;
+      }
+      for (std::size_t Byte = F.Offset; Byte < F.Offset + F.Size; Byte += 8 - Byte % 8) {
+        Floating[Byte / 8] = Floating[Byte / 8] && F.Floating;
+      }
+      End = F.Offset + F.Size;
+    }
+    if (!Bitfields && (End + alignof(T) - 1) / alignof(T) * alignof(T) != sizeof(T)) {
+      return Result;
+    }
+    for (std::size_t i = 0; i < (sizeof(T) + 7) / 8; ++i) {
+      Result.Classes[i] = !Bitfields && Floating[i] ? 'S' : 'I';
+    }
+    Result.Valid = true;
+    return Result;
+  }
+}
+
+template<class T>
+constexpr bool HasEightbytes = [] {
+  if constexpr (requires { SysVEightbytes<T>::Valid; }) {
+    return SysVEightbytes<T>::Valid;
+  } else {
+    return false;
+  }
+}();
+
+template<class T>
+constexpr bool IsInt128 = std::is_same_v<std::remove_cv_t<T>, __int128> || std::is_same_v<std::remove_cv_t<T>, unsigned __int128>;
 
 template<class T>
 constexpr bool IsMemoryStruct = [] {
@@ -258,6 +336,19 @@ public:
       return GuestFunction<std::remove_pointer_t<T>>::Wrap(Integer());
     } else if constexpr (std::is_same_v<T, bool>) {
       return (Integer() & 0xff) != 0;
+    } else if constexpr (IsInt128<T>) {
+      std::uint64_t Words[2];
+      if (Int + 2 <= 6) {
+        Words[0] = Integer();
+        Words[1] = Integer();
+      } else {
+        Stack = (Stack + 15) & ~15ULL;
+        Words[0] = Memory8();
+        Words[1] = Memory8();
+      }
+      return static_cast<T>((static_cast<unsigned __int128>(Words[1]) << 64) | Words[0]);
+    } else if constexpr (std::is_class_v<T>) {
+      return Struct<T>();
     } else if constexpr (std::is_integral_v<T> || std::is_enum_v<T>) {
       return static_cast<T>(Integer());
     } else if constexpr (std::is_pointer_v<T>) {
@@ -279,6 +370,30 @@ public:
   }
 
 private:
+  template<class T>
+  T Struct() {
+    std::array<unsigned char, sizeof(T)> Bytes {};
+    if constexpr (!IsMemoryStruct<T>) {
+      constexpr auto& Classes = SysVEightbytes<T>::Classes;
+      constexpr unsigned Words = (sizeof(T) + 7) / 8;
+      constexpr unsigned Integers = (Classes[0] == 'I') + (Words > 1 && Classes[1] == 'I');
+      if (Int + Integers <= 6 && Vector + (Words - Integers) <= 8) {
+        std::uint64_t Values[2] {};
+        for (unsigned i = 0; i < Words; ++i) {
+          Values[i] = Classes[i] == 'I' ? Integer() : Sse();
+        }
+        std::memcpy(Bytes.data(), Values, sizeof(T));
+        return std::bit_cast<T>(Bytes);
+      }
+    }
+    // MEMORY, or registers too few for the whole struct: a copy on the stack, 8-byte aligned (16 for a 16-byte aligned
+    // type), in 8-byte units.
+    Stack = alignof(T) > 8 ? (Stack + 15) & ~15ULL : Stack;
+    std::memcpy(Bytes.data(), reinterpret_cast<const void*>(Stack), sizeof(T));
+    Stack += (sizeof(T) + 7) & ~7ULL;
+    return std::bit_cast<T>(Bytes);
+  }
+
   std::uint64_t Memory8() {
     std::uint64_t Value;
     std::memcpy(&Value, reinterpret_cast<const void*>(Stack), 8);
@@ -308,6 +423,9 @@ After Store(CPUState& State, const R& Result, std::uint64_t Hidden) {
   } else if constexpr (std::is_same_v<R, float>) {
     State.xmm.sse.data[0][0] = std::bit_cast<std::uint32_t>(Result);
     State.xmm.sse.data[0][1] = 0;
+  } else if constexpr (IsInt128<R>) {
+    State.gregs[X86::REG_RAX] = static_cast<std::uint64_t>(Result);
+    State.gregs[X86::REG_RDX] = static_cast<std::uint64_t>(static_cast<unsigned __int128>(Result) >> 64);
   } else if constexpr (std::is_integral_v<R> || std::is_enum_v<R>) {
     State.gregs[X86::REG_RAX] = static_cast<std::uint64_t>(Result);
   } else if constexpr (std::is_pointer_v<R>) {
@@ -362,6 +480,19 @@ struct FunctionTraits<R (*)(A...)> {
 // noexcept is part of a function's type, and many AnyPS5 exports are declared noexcept.
 template<class R, class... A>
 struct FunctionTraits<R (*)(A...) noexcept> : FunctionTraits<R (*)(A...)> {};
+// An export's parameter I and result types, which generated SysVEightbytes specializations name.
+template<auto Export, std::size_t I>
+using Parameter = std::remove_cvref_t<std::tuple_element_t<I, typename FunctionTraits<decltype(Export)>::Parameters>>;
+template<class F>
+struct ResultOf;
+template<class R, class... A>
+struct ResultOf<R (*)(A...)> {
+  using Type = R;
+};
+template<class R, class... A>
+struct ResultOf<R (*)(A...) noexcept> : ResultOf<R (*)(A...)> {};
+template<auto Export>
+using Result = std::remove_cvref_t<typename ResultOf<decltype(Export)>::Type>;
 
 // A variadic export runs as its va_list counterpart (snprintf as vsnprintf), whose last parameter points to a System V
 // va_list. The thunk reads the fixed arguments as usual and passes a va_list that starts after them, as va_start would
@@ -413,6 +544,8 @@ template<class T>
 constexpr bool SupportedArgument = [] {
   if constexpr (IsGuestFunctionPointer<T>) {
     return SupportedCallback<std::remove_pointer_t<T>>::value;
+  } else if constexpr (std::is_class_v<T>) {
+    return std::is_trivially_copyable_v<T> && (IsMemoryStruct<T> || HasEightbytes<T>);
   } else {
     return std::is_arithmetic_v<T> || std::is_enum_v<T> || std::is_pointer_v<T>;
   }
@@ -423,7 +556,7 @@ constexpr bool SupportedReturn = [] {
   if constexpr (std::is_void_v<R> || std::is_arithmetic_v<R> || std::is_enum_v<R> || std::is_pointer_v<R>) {
     return true;
   } else if constexpr (std::is_class_v<R>) {
-    return IsMemoryStruct<R> || requires { SysVEightbytes<R>::Classes; };
+    return std::is_trivially_copyable_v<R> && (IsMemoryStruct<R> || HasEightbytes<R>);
   } else {
     return false;
   }

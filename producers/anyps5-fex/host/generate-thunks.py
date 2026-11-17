@@ -12,6 +12,11 @@
 # whose last parameter is a VaList*, through SysV::VariadicThunkFor; a variadic export without one is left out.
 # Prototypes the thunks do not cover yet compile to nullptr through SysV::ThunkFor.
 #
+# A struct an export takes or returns by value gets a SysV::SysVEightbytes specialization in the unit, listing its
+# members (SYSV_FIELD), when the AnyPS5 tree defines a struct of that name exactly once and its members are plain
+# declarations; nested structs are listed by their own members. SysV::Classify computes the eightbyte classes from the
+# list and checks it against the compiled layout, so a list that misses a member leaves the prototype uncovered.
+#
 # <out> lists the parts in GeneratedThunkParts, and the exported C data objects named X_nid_postfix (libc's standard
 # stream objects, for example) in GeneratedData under X, so a guest data import reads the library's own object.
 #
@@ -40,6 +45,8 @@ for obj in objects:
 
 declaration = re.compile(r'\bAPS5_VABI\s+(\w+)\s*\(([^;{]*)\)\s*(?:noexcept\s*)?;', re.S)
 generated, variadic, files = set(), set(), []
+structs = struct_index(includes[0])
+structs_listed = []
 counterparts = 0
 stem = out.removesuffix('.cpp')
 class Unit(list):
@@ -61,6 +68,144 @@ class Unit(list):
             if not os.path.isfile(self.path) or open(self.path, encoding='utf-8').read() != text:
                 with open(self.path, 'w', encoding='utf-8') as f:
                     f.write(text)
+
+
+def blank_comments(text):
+    """text with comments, strings and character literals blanked (newlines kept), so their braces do not count."""
+    blank = lambda m: re.sub(r'[^\n]', ' ', m.group(0))
+    return re.sub(r'//[^\n]*|/\*.*?\*/|"(?:\\.|[^"\\\n])*"|\'(?:\\.|[^\'\\\n])*\'', blank, text, flags=re.S)
+
+
+def closing(code, opening):
+    """The index of the brace that closes the one at opening."""
+    depth = 0
+    for index in range(opening, len(code)):
+        if code[index] == '{':
+            depth += 1
+        elif code[index] == '}':
+            depth -= 1
+            if depth == 0:
+                return index
+    return -1
+
+
+def struct_index(root):
+    """Struct bodies of the AnyPS5 tree by name; a name defined more than once maps to None."""
+    index = {}
+    head = re.compile(r'\b(?:struct|class)\s+(?:alignas\s*\([^)]*\)\s*)?(\w+)\s*(?:final\s*)?\{')
+    anonymous = re.compile(r'\btypedef\s+struct\s*(?:\w+\s*)?\{')
+    for directory, _, names in os.walk(root):
+        for file in names:
+            if not file.endswith(('.hpp', '.h')):
+                continue
+            code = blank_comments(open(os.path.join(directory, file), encoding='utf-8', errors='replace').read())
+            for match in head.finditer(code):
+                before = code[max(0, match.start() - 200):match.start()]
+                if re.search(r'\benum\s*$', before) or re.search(r'template\s*<[^{};]*>\s*$', before):
+                    continue
+                end = closing(code, match.end() - 1)
+                if end > 0:
+                    name = match.group(1)
+                    index[name] = None if name in index else code[match.end():end]
+            for match in anonymous.finditer(code):
+                end = closing(code, match.end() - 1)
+                named = re.match(r'\s*(\w+)\s*;', code[end + 1:]) if end > 0 else None
+                if named:
+                    name = named.group(1)
+                    index[name] = None if name in index else code[match.end():end]
+    return index
+
+
+def split_top(text, separator):
+    """text split at separator outside (), [], {} and <>."""
+    parts, depth, current = [], 0, ''
+    for character in text:
+        if character in '([{<':
+            depth += 1
+        elif character in ')]}>':
+            depth -= 1
+        if character == separator and depth == 0:
+            parts.append(current)
+            current = ''
+        else:
+            current += character
+    return parts + [current]
+
+
+def members(body, structs, prefix=''):
+    """(member designators, has bit-fields) for a struct body, or None when a declaration is not a plain member: an
+    access specifier other than public, a nested type, a template, a virtual function, an array of structs."""
+    designators, bitfields = [], False
+    statements, depth, current = [], 0, ''
+    for character in body:
+        current += character
+        if character in '({':
+            depth += 1
+        elif character in ')}':
+            depth -= 1
+            if character == '}' and depth == 0:
+                statements.append(current)
+                current = ''
+        elif character == ';' and depth == 0:
+            statements.append(current[:-1])
+            current = ''
+    for statement in statements:
+        text = ' '.join(statement.split())
+        text = re.sub(r'^(public\s*:\s*)+', '', text)
+        if not text:
+            continue
+        if re.match(r'(private|protected)\s*:', text) or text.startswith(('template', 'union', 'class ')) or 'virtual' in text:
+            return None
+        if text.startswith('struct ') and '{' in text:
+            return None
+        if text.startswith(('static ', 'static_assert', 'using ', 'typedef ', 'friend ', 'enum ', 'struct ')):
+            continue
+        if '(' in text:
+            pointer = re.search(r'\(\s*\*\s*(\w+)\s*\)\s*\(', text)
+            if pointer:
+                designators.append(prefix + pointer.group(1))
+            continue  # a member function or constructor
+        text = re.sub(r'\s*(=.*|\{.*\})$', '', text)
+        if re.search(r'(?<!:):(?!:)\s*\w+\s*$', text):
+            bitfields = True
+            continue
+        declarators = split_top(text, ',')
+        first = re.match(r'(.*?)([*&\s]*)(\w+)\s*((?:\[[^\]]*\]\s*)*)$', declarators[0])
+        if not first:
+            return None
+        kind = first.group(1).strip()
+        kind_name = re.sub(r'\b(const|volatile|mutable|struct)\b', '', kind).strip().split('::')[-1]
+        for declarator in declarators:
+            parsed = re.match(r'.*?([*&\s]*)(\w+)\s*((?:\[[^\]]*\]\s*)*)$', declarator.strip())
+            if not parsed:
+                return None
+            pointer, name, extent = parsed.groups()
+            if kind_name in structs and '*' not in pointer and '&' not in pointer:
+                nested = structs[kind_name]
+                if nested is None or extent:
+                    return None
+                inner = members(nested, structs, prefix + name + '.')
+                if inner is None:
+                    return None
+                designators += inner[0]
+                bitfields = bitfields or inner[1]
+            else:
+                designators.append(prefix + name)
+    return designators, bitfields
+
+
+def by_value_struct(type_text, structs):
+    """The struct name a parameter or result type names by value, when the tree defines it once; None otherwise."""
+    text = re.sub(r'\s*=.*$', '', type_text).strip()
+    if not text or any(mark in text for mark in '*&([<'):
+        return None
+    words = [word for word in re.findall(r'[\w:]+', text) if word not in ('const', 'volatile', 'struct', 'class', 'extern', 'static', 'inline')]
+    if len(words) == 2:
+        words = words[:1]  # the parameter's name
+    if len(words) != 1:
+        return None
+    name = words[0].split('::')[-1]
+    return name if structs.get(name) is not None else None
 
 
 def namespaces(text):
@@ -144,8 +289,12 @@ for source in sources:
             if nested not in headers:
                 headers.append(nested)
         scope = namespaces(text)
+        code = blank_comments(text)
         for match in declaration.finditer(text):
-            prototypes.setdefault(match.group(1), (match.group(2), scope.get(match.start(), '')))
+            start = max(code.rfind(mark, 0, match.start()) for mark in ';{}')
+            result = ' '.join(line for line in code[start + 1:match.start()].split('\n') if not line.strip().startswith('#'))
+            result = re.sub(r'^\s*(extern\b\s*(?:"C")?|\[\[[^\]]*\]\]|\s)*', '', result)
+            prototypes.setdefault(match.group(1), (match.group(2), scope.get(match.start(), ''), result))
         for match in declaration.finditer(text):
             name, parameters = match.group(1), match.group(2)
             if name not in defined or name.endswith('_nid_no_patch') or name in generated:
@@ -157,7 +306,7 @@ for source in sources:
             names.append((name, scope.get(match.start(), '') + name, 'ThunkFor'))
     for name in pending:
         counterpart = 'v' + name
-        parameters, qualifier = prototypes.get(counterpart, ('', ''))
+        parameters, qualifier, _ = prototypes.get(counterpart, ('', '', ''))
         if counterpart in defined and 'VaList' in parameters.rsplit(',', 1)[-1]:
             generated.add(name)
             names.append((name, qualifier + counterpart, 'VariadicThunkFor'))
@@ -175,6 +324,28 @@ for source in sources:
         # <sys/event.h>, whose macros would replace names those headers declare.
         f.write('\n'.join(prelude) + '\n')
         f.write('#include "SysVThunk.h"\n')
+        # The structs these exports pass by value, each once: its members for SysV::Classify.
+        listed = set()
+        for name, export, thunk in sorted(names):
+            parameters, _, result = prototypes[export.split('::')[-1]]
+            types = [(f'SysV::Result<&::{export}>', result)]
+            types += [(f'SysV::Parameter<&::{export}, {i}>', p) for i, p in enumerate(split_top(parameters, ',')) if p.strip() not in ('', 'void')]
+            for alias, text in types:
+                struct = by_value_struct(text, structs)
+                if struct is None or struct in listed:
+                    continue
+                parsed = members(structs[struct], structs)
+                if not parsed or (not parsed[0] and not parsed[1]):
+                    continue
+                listed.add(struct)
+                fields = ', '.join(f'SYSV_FIELD(T, {designator})' for designator in parsed[0]) or 'SysV::Field {0, 0, 1, false, false}'
+                f.write(f'template<>\nstruct SysV::SysVEightbytes<{alias}> {{ // {struct}\n'
+                        f'  using T = {alias};\n'
+                        f'  static constexpr SysV::Field Fields[] = {{{fields}}};\n'
+                        f'  static constexpr SysV::Classification Classified = SysV::Classify<T>(Fields, {"true" if parsed[1] else "false"});\n'
+                        f'  static constexpr bool Valid = Classified.Valid;\n'
+                        f'  static constexpr std::array<char, 2> Classes = Classified.Classes;\n}};\n')
+                structs_listed.append(struct)
         f.write(f'\nextern const std::pair<const char*, FexGuest::Thunk> GeneratedThunks{index}[] = {{\n')
         for name, export, thunk in sorted(names):
             f.write(f'  {{"{name.removesuffix("_nid_postfix")}", SysV::{thunk}<&::{export}>()}},\n')
@@ -206,6 +377,6 @@ with Unit(out) as f:
 files.insert(0, out)
 parts = len(files) - 1
 print(f'{len(generated)} generated thunks in {parts} parts from {len(sources)} sources ({counterparts} variadic through their va_list counterparts), '
-      f'{len(variadic)} variadic exports left out, '
+      f'{len(variadic)} variadic exports left out, {len(set(structs_listed))} by-value structs listed, '
       f'{len(set(data))} data objects', file=sys.stderr)
 print('\n'.join(files))
