@@ -184,6 +184,13 @@
       "sha256": "b92c60ac99f9b2277f62d42e7424c24bc991d5723f4fa388a5d2e452be18f40b"
     },
     {
+      "id": "ffmpeg-macos-arm64",
+      "repository": "https://github.com/KytyPS5/ext-ffmpeg-core.git",
+      "url": "https://github.com/KytyPS5/ext-ffmpeg-core/releases/download/9ac4cfd195f1/ffmpeg-macos-arm64.zip",
+      "bytes": 13316412,
+      "sha256": "458933af900b2bf0bf3d4422e3ae1c7aef46f671cd4af99c42ffe99d43ca9170"
+    },
+    {
       "id": "build-python-x64",
       "version": "3.12.15",
       "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261013/cpython-3.12.15%2B20261013-x86_64-apple-darwin-install_only_stripped.tar.gz",

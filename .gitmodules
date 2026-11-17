@@ -332,3 +332,6 @@
 [submodule "producers/package-support/src/external/mac-game-porter"]
 	path = producers/package-support/src/external/mac-game-porter
 	url = https://github.com/KarmSakha/mac-game-porter
+[submodule "sources/fex"]
+	path = sources/fex
+	url = https://github.com/FEX-Emu/FEX.git

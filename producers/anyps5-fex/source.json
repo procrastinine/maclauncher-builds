@@ -1,0 +1,252 @@
+{
+  "schemaVersion": 1,
+  "id": "anyps5-fex-proof",
+  "source": {
+    "gitlink": "sources/fex",
+    "repository": "https://github.com/FEX-Emu/FEX.git",
+    "version": "FEX-2611.1",
+    "license": "MIT",
+    "submodules": [
+      "External/drm-headers",
+      "External/fmt",
+      "External/range-v3",
+      "External/rpmalloc",
+      "External/unordered_dense",
+      "External/vixl",
+      "External/xxhash",
+      "Source/Common/cpp-optparse"
+    ]
+  },
+  "anyps5": {
+    "gitlink": "sources/anyps5",
+    "repository": "https://github.com/boykopovar/AnyPS5.git",
+    "license": "GPL-2.0-only",
+    "submodules": [
+      "3rdparty/ZArchive"
+    ],
+    "paths": ["core/libs", "core/shader", "3rdparty/ZArchive/include"],
+    "objects": [
+      "core/libs/prx/libkernel/Time/Time.cpp",
+      "core/libs/prx/libc/src/GuestCpuArm64.cpp",
+      "core/libs/prx/libc/src/StandardStreamObjects.cpp",
+      "core/libs/prx/libkernel/Time/SleepWake.cpp",
+      "core/libs/prx/libkernel/System/src/Notification.cpp",
+      "core/libs/prx/libkernel/File/src/Open.cpp",
+      "core/libs/prx/libSceUserService/Export.cpp",
+      "core/libs/prx/libc/src/General.cpp",
+      "core/libs/prx/libkernel/File/src/Stdio.cpp",
+      "core/libs/prx/libScePad/Export.cpp",
+      "core/libs/prx/libScePad/src/PadState.cpp",
+      "core/libs/prx/libkernel/File/src/RandomDevice.cpp",
+      "core/libs/prx/libkernel/File/src/DescriptorControl.cpp",
+      "core/libs/prx/libkernel/Time/TimedWait.cpp",
+      "core/libs/prx/libkernel/File/src/ArchivedFile.cpp",
+      "core/libs/prx/libkernel/File/src/DirectoryDescriptor.cpp",
+      "core/libs/prx/libkernel/File/src/NativeStat.cpp",
+      "core/libs/prx/libkernel/File/src/HostStreams.cpp",
+      "core/libs/prx/libc/src/AppArchive.cpp",
+      "core/libs/prx/libc/src/Process.cpp",
+      "core/libs/prx/libc/src/HostErrno.cpp",
+      "core/libs/prx/libc/src/FileAndHeap.cpp",
+      "core/libs/prx/libc/src/AllocatingStrings.cpp",
+      "core/libs/prx/libc/src/GuestArena.cpp",
+      "core/libs/prx/libc/src/HostEntropy.cpp",
+      "core/libs/prx/libc/src/RunReport.cpp",
+      "core/libs/prx/libc/src/GuestWriteWatch.cpp",
+      "core/libs/prx/libkernel/File/src/SharedMemory.cpp",
+      "core/libs/prx/libkernel/Socket/src/Socket.cpp",
+      "core/libs/prx/libkernel/Socket/src/AddressConversion.cpp",
+      "core/libs/prx/libkernel/Equeue/src/Kqueue.cpp",
+      "core/libs/prx/libkernel/Equeue/Equeue.cpp",
+      "core/libs/prx/libkernel/DirectMemory/Jit.cpp",
+      "core/libs/prx/libkernel/Socket/src/Udp.cpp",
+      "core/libs/prx/libkernel/Socket/src/SocketOptions.cpp",
+      "core/libs/prx/libc/src/PreciseWait.cpp",
+      "core/libs/prx/libkernel/System/src/Process.cpp",
+      "core/libs/prx/libc/src/Syslog.cpp",
+      "core/libs/prx/libc/src/ApplicationProcessParameters.cpp",
+      "core/libs/prx/libc/src/ApplicationHeap.cpp",
+      "core/libs/prx/libc/src/GuestHeap.cpp",
+      "core/libs/prx/libc/src/RuntimeSupport.cpp",
+      "core/libs/prx/libc/src/Rename.cpp",
+      "core/libs/prx/libSceSystemService/Export.cpp",
+      "core/libs/prx/libSceSystemService/LoadExec.cpp",
+      "core/libs/prx/libSceSystemService/HostUrlLauncherPosix.cpp",
+      "core/libs/prx/libc/src/LogFile.cpp",
+      "core/libs/prx/libc/src/LogFilePlatform.cpp",
+      "core/libs/prx/libc/src/Strings.cpp",
+      "core/libs/prx/libc/src/StringExtensions.cpp",
+      "core/libs/prx/libc/src/Formatting.cpp",
+      "core/libs/prx/libc/src/LocaleSupport.cpp",
+      "core/libs/prx/libc/src/StandardStreams.cpp",
+      "core/libs/prx/libc/src/Time.cpp",
+      "core/libs/prx/libc/src/Multibyte.cpp",
+      "core/libs/prx/libc/src/BoundsChecking.cpp",
+      "core/libs/prx/libc/src/Filesystem.cpp",
+      "core/libs/prx/libkernel/DirectMemory/PosixMemory.cpp",
+      "core/libs/prx/libkernel/DirectMemory/Export.cpp",
+      "core/libs/prx/libkernel/DirectMemory/DirectMemory.cpp",
+      "core/libs/prx/libkernel_sys/Export.cpp",
+      "core/libs/prx/libSceSysmodule/Export.cpp",
+      "core/libs/prx/libc/src/GuestAllocations.cpp",
+      "core/libs/prx/libkernel/DirectMemory/MemoryPool.cpp",
+      "core/libs/prx/libkernel/AppMetadata/src/ParamJsonParser.cpp",
+      "core/libs/prx/libkernel/AppMetadata/src/AppMetadata.cpp",
+      "core/libs/prx/libkernel/AppMetadata/src/ParamSfoParser.cpp",
+      "core/libs/prx/libc/src/FailureReport.cpp",
+      "core/libs/prx/libkernel/System/src/HostCpu.cpp",
+      "core/libs/prx/libc/src/CreationMask.cpp",
+      "core/libs/prx/libc/src/Environment.cpp",
+      "core/libs/prx/libc/src/StdioExtras.cpp",
+      "core/libs/prx/libc/src/Mspace.cpp",
+      "core/libs/prx/libc/src/HeapDiagnostics.cpp",
+      "core/libs/prx/libkernel/Semaphore/src/Semaphore.cpp",
+      "core/libs/prx/libkernel/EventFlag/src/EventFlag.cpp",
+      "core/libs/prx/libkernel/SyncOnAddress/src/SyncOnAddress.cpp",
+      "core/libs/prx/libkernel/Apr/src/Apr.cpp",
+      "core/libs/prx/libkernel/System/src/Sanitizer.cpp",
+      "core/libs/prx/libkernel/Equeue/src/EventAccessors.cpp",
+      "core/libs/prx/libc/src/RuneLocale.cpp",
+      "core/libs/prx/libc/src/ScanWideField.cpp",
+      "core/libs/prx/libc/src/Directory.cpp",
+      "core/libs/prx/libc/src/Errors.cpp",
+      "core/libs/prx/libc/src/VersionedFilesystemCalls.cpp",
+      "core/libs/prx/libc/src/CxxAbiSupport.cpp",
+      "core/libs/prx/libc/src/GuestStacks.cpp",
+      "core/libs/prx/libc/src/LegacySignals.cpp",
+      "core/libs/prx/libc/src/Threads.cpp",
+      "core/libs/prx/libc/src/GuestContextArm64.cpp",
+      "core/libs/prx/libc/src/JumpBuffer.cpp",
+      "core/libs/prx/libc/src/exception/Exports.cpp",
+      "core/libs/prx/libkernel/System/src/SystemConfiguration.cpp",
+      "core/libs/prx/libkernel/System/src/Login.cpp",
+      "core/libs/prx/libkernel/System/src/Sandbox.cpp",
+      "core/libs/prx/libkernel/System/src/UserContext.cpp",
+      "core/libs/prx/libkernel/Equeue/src/FileEvent.cpp",
+      "core/libs/prx/libkernel/Equeue/src/EdgeWatch.cpp",
+      "core/libs/prx/libkernel/Semaphore/src/Ksem.cpp"
+    ],
+    "archives": ["libzarchive.a"],
+    "objectLibraries": [
+      "core/libs/prx/libc/gdtoa/Build.cmake"
+    ],
+    "runtimeOverlays": [
+      ["macos-kernel", "applyKernelOverlay"],
+      ["macos-host-kernel", "applyHostKernelOverlay"],
+      ["macos-aborts", "applyAbortsOverlay"]
+    ],
+    "hostOverlays": [
+      ["arm64-standard-streams", "applyStandardStreamsOverlay"],
+      ["guest-va-list", "applyGuestVaListOverlay"]
+    ],
+    "arm64HostOverlays": [
+      ["arm64-standard-streams", "applyStandardStreamDeclarations"],
+      ["guest-va-list", "applyGuestVaListOverlay"],
+      ["arm64-driver-memory", "applyDriverMemoryWindow"],
+      ["arm64-sync-on-address", "applySyncOnAddressLoad"]
+    ],
+    "cmakeLibraries": ["libSceVideoOut", "libSceAgc", "libSceAgcDriver", "libSceAudioOut", "libSceLibcInternal", "libSceJson2", "libSceNet",
+      "libSceHttp2", "libSceAvPlayer", "libSceAjm", "libSceSsl", "libSceNpWebApi2", "libSceAppContent", "libSceSaveData", "libSceImeDialog",
+      "libSceAmpr", "libSceWebBrowserDialog", "libSceNpManager", "libSceMsgDialog.native", "libSceHttp", "libSceAudioIn", "libSceRazorCpu",
+      "ulobjmgr", "libSceRtc", "libSceRemoteplay", "libSceFont", "libSceRandom", "libSceNetCtl", "libSceCommonDialog", "libSceErrorDialog", "libSceSigninDialog", "libSceVrSetupDialog", "libSceGameUpdate", "libSceNpAuth", "libSceNpCommerce", "libSceNpEntitlementAccess", "libSceNpGameIntent", "libSceNpSessionSignaling", "libSceNpTrophy2", "libSceNpUniversalDataSystem", "libSceNpUtility", "libScePlayerInvitationDialog", "libSceSaveDataDialog", "libSceShare"],
+    "arm64Libraries": {
+      "directory": "../anyps5/overlays/arm64-libs",
+      "steps": [
+        ["apply.mjs", "copyArm64GuestCpuSources"],
+        ["apply.mjs", "copyArm64StandardStreamObjects"],
+        ["floating80.mjs", "applyArm64FloatStringsOverlay"],
+        ["formatting80.mjs", "applyArm64FormattingOverlay"]
+      ]
+    }
+  },
+  "overlays": [
+    {
+      "file": "overlays/fex/0001-darwin-core.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "FEXCore for an embedding host on arm64 macOS: Darwin platform boundary, MAP_JIT allocations with per-thread write scopes, x18 kept out of register allocation"
+    },
+    {
+      "file": "overlays/fex/0002-darwin-code-guards.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "host-page guards for code buffers; the final owned MAP_JIT page replaced by an inaccessible mapping"
+    },
+    {
+      "file": "overlays/fex/0003-darwin-signals-and-guest-state.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "FEXCore/Darwin/SignalDelegator.h and GuestState.h: signal installation, code-write faults, guest exception delivery, per-thread guest binding and CPU accessors"
+    },
+    {
+      "file": "overlays/fex/0004-darwin-context-state.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "FEXCore/Darwin/ContextState.h: guest register and FXSAVE64 capture and restore for the embedding library"
+    },
+    {
+      "file": "overlays/fex/0005-darwin-single-step-writes.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "scoped JIT writes for single-instruction compilation"
+    },
+    {
+      "file": "overlays/fex/0006-x87-status.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "x87 exception status kept through environment restoration, status reads, FNCLEX and FNINIT (Avery Felts, MetalSharp-Wine FEX series)"
+    },
+    {
+      "file": "overlays/fex/0007-precise-memory-pop.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "RSP committed after a memory POP store succeeds (Alexander Thei\u00dfen, Mach9 FEX fork)"
+    },
+    {
+      "file": "overlays/anyps5/guestcpu-arm64.patch",
+      "target": "anyps5",
+      "license": "GPL-2.0-only",
+      "summary": "GuestCpu.hpp arm64 branch: guest x86 state accessors supplied by the host, counter-timer TSC"
+    }
+  ],
+  "host": {
+    "directory": "host",
+    "license": "GPL-2.0-only",
+    "targets": [
+      "anyps5-fex-proof",
+      "anyps5-fex-abi",
+      "anyps5-fex-start",
+      "anyps5-fex-syscall"
+    ],
+    "sources": [
+      "CMakeLists.txt",
+      "FexGuest.h",
+      "SysVThunk.h",
+      "Ps5Module.h",
+      "AnyPS5FexProof.cpp",
+      "AnyPS5FexAbi.cpp",
+      "AnyPS5FexStart.cpp",
+      "GenericBridge.S",
+      "AnyPS5FexSyscall.cpp",
+      "fex-entry.cmake",
+      "GuestCpuHost.h",
+      "KernelThreadRecord.cpp",
+      "GuestImages.cpp",
+      "GuestImages.h",
+      "GuestThreads.cpp",
+      "GuestThreads.h",
+      "HostLibc.cpp"
+    ],
+    "guest": {
+      "source": "guest-abi.c",
+      "symbols": [
+        "guest_abi",
+        "guest_callback"
+      ]
+    },
+    "generator": {
+      "script": "generate-thunks.py"
+    },
+    "entry": "fex-entry.cmake"
+  }
+}

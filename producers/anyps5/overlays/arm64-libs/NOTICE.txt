@@ -1,0 +1,13 @@
+SPDX-License-Identifier: GPL-2.0-only
+
+This overlay adapts the arm64 library build, unwind selection and NID signing
+changes from AnyPS5-ARM's native-arm64 branch, revision
+116bf5e0b9ac2dd1b375d3eff9970804353870b8:
+https://github.com/AnyTogether/AnyPS5-ARM
+
+The adapted source is AnyPS5, selected by the sources/anyps5 Git pin:
+https://github.com/boykopovar/AnyPS5
+
+AnyPS5 and AnyPS5-ARM are licensed under GPL-2.0-only. Their copyright and
+license notices remain applicable. The full GNU General Public License version
+2 is distributed at producers/anyps5/licenses/AnyPS5-ARM.txt.

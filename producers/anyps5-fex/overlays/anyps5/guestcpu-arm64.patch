@@ -1,0 +1,15 @@
+diff --git a/core/libs/prx/libc/include/GuestCpu.hpp b/core/libs/prx/libc/include/GuestCpu.hpp
+--- a/core/libs/prx/libc/include/GuestCpu.hpp
++++ b/core/libs/prx/libc/include/GuestCpu.hpp
+@@ -81,8 +81,10 @@ inline void RaiseInvalidForSignalingNan(const float value) {
+ 
+ }
+ 
++#elif defined(__aarch64__)
++#include "GuestCpuArm64.hpp"
+ #else
+-#error "GuestCpu.hpp supports only x86-64 targets"
++#error "GuestCpu.hpp supports only x86-64 and arm64 targets"
+ #endif
+ 
+ #endif
