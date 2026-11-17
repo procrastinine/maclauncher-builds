@@ -9,6 +9,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { execFileSync } from "node:child_process";
 const Native=appRequire('src/modules/shared/runtime/local-native.js');
+import {nativeProviderArchitectures,verifyGraphicsExecutableModes} from './graphics-native-files.mjs';
 const Content=appRequire('scripts/runtime-content.cjs');
 import { productionOwnedFiles } from "./stage-reshade-source.mjs";
 import {stageTemporalProvider} from "./stage-temporal-provider.mjs";
@@ -66,7 +67,7 @@ if(features.graphics.hardwareQueryAPI===1){
 if(features.graphics.vulkanFeatureQueryAPI===1){
   nativeFiles.push("maclauncher-vulkan-features");
 }
-if(fs.existsSync(path.join(build,"maclauncher-winemetal.so")))nativeFiles.push("maclauncher-winemetal.so");
+nativeFiles.push("maclauncher-winemetal.so");
 const retroarchInputs = new Map();
 const extraSources=[];
 const optionalInputs=new Map(),optionalLoad=new Map(),extraOwned=new Map();
@@ -312,9 +313,11 @@ for(const [relative,file] of retroarchInputs)if(nativeFiles.includes(relative))n
 for(const relative of optionalLoad.keys()){nativeFiles.push(relative);nativePaths.set(relative,optionalInputs.get(relative));}
 if(nativeFiles.includes("maclauncher-graphics-video")) optionalLoad.set("maclauncher-graphics-video", {architectures: ["arm64", "x86_64"], minimumMacOS: "14.0"});
 if(nativeFiles.includes("maclauncher-graphics-window")) optionalLoad.set("maclauncher-graphics-window", {architectures: ["arm64", "x86_64"], minimumMacOS: "15.2"});
-for (const [relative, file] of temporalInputs) if (/\.(dylib|so)$/.test(relative)) {
+for (const [relative, file] of temporalInputs) {
+ const architectures=nativeProviderArchitectures(file);
+ if(!architectures){if(/\.(dylib|so)$/.test(relative))throw Error("Native provider has no Mach-O header: "+relative);continue;}
  nativeFiles.push(relative);nativePaths.set(relative,file);
- const architectures=Native.readMachOArchitectures(file,{allowLibrary:true}),floors=[...execFileSync("xcrun",["vtool","-show-build",file],{encoding:"utf8"}).matchAll(/minos\s+(\d+(?:\.\d+)+)/g)].map(match=>match[1]);
+ const floors=[...execFileSync("xcrun",["vtool","-show-build",file],{encoding:"utf8"}).matchAll(/minos\s+(\d+(?:\.\d+)+)/g)].map(match=>match[1]);
  // DXMT runs in its separate Intel host; it is not loaded into the launcher.
  if(!relative.startsWith("temporal/dxmt/")&&!temporalExecutionArchitectures.has(relative))optionalLoad.set(relative,{architectures,minimumMacOS:["13.0",...floors].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).at(-1)});
 }
@@ -467,6 +470,7 @@ const manifest = record("runtime.json"); files.push(manifest);
 const declaration = { id: "reshade", version, arch: packageArch, launcherArchitectures: packageArch==="universal"?["arm64","x64"]:[packageArch], minimumMacOS,
   sourceRelative: null, sourceSha256: sourceHash, directoryRelative,
   manifestRelative: manifest.path, manifestSha256: manifest.sha256, files};
+verifyGraphicsExecutableModes(destination,files);
 const selectedDeclaration=options["--declaration"], declarationTemporary=selectedDeclaration+"."+crypto.randomBytes(8).toString("hex")+".tmp";
 try{
  fs.writeFileSync(declarationTemporary,JSON.stringify(declaration,null,2)+"\n",{flag:"wx",mode:0o644});fs.renameSync(declarationTemporary,selectedDeclaration);
