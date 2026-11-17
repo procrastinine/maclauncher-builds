@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
-// FEXCore setup shared by the proof hosts: one x86-64 guest thread in an arm64 macOS process. Guest calls into the host
-// arrive at HLT stubs; FEXCore returns to the host at each HLT, the host runs the thunk and resumes the guest.
+// FEXCore setup shared by the proof hosts: x86-64 guest threads in an arm64 macOS process, each bound to its own OS
+// thread. Guest calls into the host arrive at HLT stubs; FEXCore returns to the host at each HLT, the host runs the
+// thunk and resumes the guest.
 #pragma once
 
 #include <FEXCore/Config/Config.h>
@@ -15,11 +16,13 @@
 #include <FEXCore/Utils/LogManager.h>
 #include <FEXCore/Utils/SignalScopeGuards.h>
 
+#include <atomic>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <dlfcn.h>
+#include <mutex>
 #include <signal.h>
 #include <span>
 #include <sys/mman.h>
@@ -71,8 +74,23 @@ public:
 
 // Guest memory the host owns: every MapGuest allocation. The Darwin signal delegator asks for these ranges; faults
 // outside them go to the handlers installed before it (InstallFaultReport). No guest page is write-protected for code
-// tracking yet, so WriteProtectedForCode stays false.
-inline std::vector<FEXCore::Darwin::GuestMemoryRegion> OwnedRanges;
+// tracking yet, so WriteProtectedForCode stays false. Any thread maps guest memory, and a fault handler on any thread
+// reads the table, so entries are only appended: a writer fills the next entry under the mutex, then publishes the
+// count.
+constexpr std::size_t MaximumOwnedRanges = 1 << 16;
+inline FEXCore::Darwin::GuestMemoryRegion OwnedRanges[MaximumOwnedRanges];
+inline std::atomic<std::size_t> OwnedRangeCount {0};
+inline std::mutex OwnedRangeMutex;
+inline void AddOwnedRange(const FEXCore::Darwin::GuestMemoryRegion& Region) {
+  std::lock_guard Lock(OwnedRangeMutex);
+  const std::size_t Index = OwnedRangeCount.load(std::memory_order_relaxed);
+  if (Index == MaximumOwnedRanges) {
+    std::printf("more than %zu guest memory ranges\nFAIL\n", MaximumOwnedRanges);
+    std::exit(1);
+  }
+  OwnedRanges[Index] = Region;
+  OwnedRangeCount.store(Index + 1, std::memory_order_release);
+}
 
 // Set by a host that loads guest modules: writes "module+0xoffset" for a guest address. Runs in signal context.
 inline void (*DescribeGuestAddress)(std::uint64_t Address, char* Text, std::size_t Size) = nullptr;
@@ -90,7 +108,9 @@ inline void InvalidateGuestCode(FEXCore::Core::InternalThreadState* Calling, std
 inline FEXCore::Darwin::SignalCallbacks GuestSignalCallbacks() {
   FEXCore::Darwin::SignalCallbacks Callbacks {};
   Callbacks.QueryMemory = [](FEXCore::Core::InternalThreadState*, std::uintptr_t Address, FEXCore::Darwin::GuestMemoryRegion& Region, void*) {
-    for (const auto& Owned : OwnedRanges) {
+    const std::size_t Count = OwnedRangeCount.load(std::memory_order_acquire);
+    for (std::size_t i = 0; i < Count; ++i) {
+      const auto& Owned = OwnedRanges[i];
       if (Address >= Owned.Base && Address - Owned.Base < Owned.Size) {
         Region = Owned;
         return true;
@@ -177,7 +197,7 @@ inline void* MapGuest(std::uint64_t Size) {
     std::perror("mmap");
     std::exit(2);
   }
-  OwnedRanges.push_back({reinterpret_cast<std::uintptr_t>(Result), Size, true, true, false});
+  AddOwnedRange({reinterpret_cast<std::uintptr_t>(Result), Size, true, true, false});
   return Result;
 }
 
@@ -247,11 +267,14 @@ inline std::uint64_t MapStack() {
 }
 
 inline FEXCore::Context::Context* CTX = nullptr;
-inline FEXCore::Core::InternalThreadState* Thread = nullptr;
+// The guest thread bound to this OS thread.
+inline thread_local FEXCore::Core::InternalThreadState* Thread = nullptr;
+// Set by the first Run, before any other guest thread starts; read by every thread afterwards.
 inline std::span<const Thunk> ActiveThunks;
 inline std::uint64_t* ActiveThunkCalls = nullptr;
 
-// Executes the guest thread until its rip is StopAt or Breakpoint (0 for none), dispatching thunks on the way.
+// Executes this OS thread's guest thread until its rip is StopAt or Breakpoint (0 for none), dispatching thunks on the
+// way.
 inline void Loop(std::uint64_t StopAt, std::uint64_t Breakpoint) {
   auto& Guest = Thread->CurrentFrame->State;
   for (;;) {
@@ -265,7 +288,7 @@ inline void Loop(std::uint64_t StopAt, std::uint64_t Breakpoint) {
       std::printf("guest stopped at 0x%llx outside the thunk stubs\nFAIL\n", static_cast<unsigned long long>(Guest.rip));
       std::exit(1);
     }
-    ++*ActiveThunkCalls;
+    __atomic_fetch_add(ActiveThunkCalls, 1, __ATOMIC_RELAXED);
     if (ActiveThunks[(Stop - ThunkStubOffset) / ThunkStubSize](Guest) == After::Return) {
       auto& RSP = Guest.gregs[X86::REG_RSP];
       Guest.rip = *reinterpret_cast<std::uint64_t*>(RSP);
@@ -316,6 +339,65 @@ inline GuestResult CallGuest(std::uint64_t Function, std::span<const std::uint64
   return Result;
 }
 
+// A FEX guest thread with Initial's state: a flat 64-bit code segment, as FEX's Linux frontend sets up for a new
+// thread, and the call-return stack FEXCore uses to predict returns, with a guard page on each side.
+inline FEXCore::Core::InternalThreadState* NewThread(CPUState& Initial) {
+  static std::mutex CreateMutex;
+  std::lock_guard Lock(CreateMutex);
+  Initial.mxcsr = 0x1F80;
+  auto* Created = CTX->CreateThread(&Initial);
+  auto& Guest = Created->CurrentFrame->State;
+  static CPUState::gdt_segment GDT[32] {};
+  Guest.segment_arrays[CPUState::SEGMENT_ARRAY_INDEX_GDT] = GDT;
+  Guest.segment_arrays[CPUState::SEGMENT_ARRAY_INDEX_LDT] = GDT;
+  Guest.cs_idx = CPUState::DEFAULT_USER_CS << 3;
+  auto* CodeSegment = CPUState::GetSegmentFromIndex(Guest, Guest.cs_idx);
+  CPUState::SetGDTBase(CodeSegment, 0);
+  CPUState::SetGDTLimit(CodeSegment, 0xF'FFFFU);
+  CodeSegment->L = 1;
+  CodeSegment->D = 0;
+  Guest.cs_cached = 0;
+  const std::uint64_t PageSize = getpagesize();
+  const std::uint64_t CallRetSize = FEXCore::Core::InternalThreadState::CALLRET_STACK_SIZE;
+  auto CallRet = reinterpret_cast<std::uint64_t>(mmap(nullptr, CallRetSize + 2 * PageSize, PROT_NONE, MAP_PRIVATE | MAP_ANON, -1, 0));
+  Created->CallRetStackBase = reinterpret_cast<void*>(CallRet + PageSize);
+  mprotect(Created->CallRetStackBase, CallRetSize, PROT_READ | PROT_WRITE);
+  Guest.callret_sp = CallRet + PageSize + CallRetSize / 4;
+  return Created;
+}
+
+// Runs a new guest thread on the calling OS thread, which must have none: Entry(Argument) on a guest stack whose top is
+// StackTop, with FS base FsBase, until the entry returns to stub 0. Finish (if any) then runs while the guest thread
+// still exists. Returns its rax. A thunk that ends the thread (pthread_exit) throws, and the exception leaves through
+// here after the guest thread is destroyed.
+inline std::uint64_t RunNewThread(std::uint64_t Entry, std::uint64_t Argument, std::uint64_t StackTop, std::uint64_t FsBase,
+                                  void (*Finish)() = nullptr) {
+  CPUState Initial {};
+  StackTop = (StackTop & ~15ULL) - 8;
+  *reinterpret_cast<std::uint64_t*>(StackTop) = StubBase;
+  Initial.rip = Entry;
+  Initial.gregs[X86::REG_RDI] = Argument;
+  Initial.gregs[X86::REG_RSP] = StackTop;
+  Initial.fs_cached = FsBase;
+  Thread = NewThread(Initial);
+  struct Release {
+    ~Release() {
+      const std::uint64_t PageSize = getpagesize();
+      auto* CallRet = static_cast<std::uint8_t*>(Thread->CallRetStackBase) - PageSize;
+      CTX->DestroyThread(Thread);
+      Thread = nullptr;
+      munmap(CallRet, FEXCore::Core::InternalThreadState::CALLRET_STACK_SIZE + 2 * PageSize);
+    }
+  } Destroy;
+  FEXCore::Darwin::ThreadScope Bound {Thread};
+  Loop(StubBase, 0);
+  const std::uint64_t Result = Thread->CurrentFrame->State.gregs[X86::REG_RAX];
+  if (Finish) {
+    Finish();
+  }
+  return Result;
+}
+
 // Runs the guest from Initial until it returns to stub 0 or reaches Breakpoint (a HLT the caller placed), dispatching
 // thunks. The first call creates the FEXCore context and the guest thread; later calls reuse that thread with the rip,
 // general registers and FS base of Initial. Returns the guest state, which lives as long as the process.
@@ -348,30 +430,8 @@ inline const CPUState& Run(CPUState& Initial, std::span<const Thunk> Thunks, std
     }
     std::printf("FEXCore initialized\n");
 
-    Initial.mxcsr = 0x1F80;
-    Thread = CTX->CreateThread(&Initial);
-    auto& Guest = Thread->CurrentFrame->State;
-
-    // A flat 64-bit code segment, as FEX's Linux frontend sets up for a new thread.
-    static CPUState::gdt_segment GDT[32] {};
-    Guest.segment_arrays[CPUState::SEGMENT_ARRAY_INDEX_GDT] = GDT;
-    Guest.segment_arrays[CPUState::SEGMENT_ARRAY_INDEX_LDT] = GDT;
-    Guest.cs_idx = CPUState::DEFAULT_USER_CS << 3;
-    auto* CodeSegment = CPUState::GetSegmentFromIndex(Guest, Guest.cs_idx);
-    CPUState::SetGDTBase(CodeSegment, 0);
-    CPUState::SetGDTLimit(CodeSegment, 0xF'FFFFU);
-    CodeSegment->L = 1;
-    CodeSegment->D = 0;
-    Guest.cs_cached = 0;
-
-    // The call-return stack FEXCore uses to predict returns, with a guard page on each side.
-    const std::uint64_t PageSize = getpagesize();
-    const std::uint64_t CallRetSize = FEXCore::Core::InternalThreadState::CALLRET_STACK_SIZE;
-    auto CallRet = reinterpret_cast<std::uint64_t>(mmap(nullptr, CallRetSize + 2 * PageSize, PROT_NONE, MAP_PRIVATE | MAP_ANON, -1, 0));
-    Thread->CallRetStackBase = reinterpret_cast<void*>(CallRet + PageSize);
-    mprotect(Thread->CallRetStackBase, CallRetSize, PROT_READ | PROT_WRITE);
-    Guest.callret_sp = CallRet + PageSize + CallRetSize / 4;
-    std::printf("guest thread created; running 0x%llx\n", static_cast<unsigned long long>(Guest.rip));
+    Thread = NewThread(Initial);
+    std::printf("guest thread created; running 0x%llx\n", static_cast<unsigned long long>(Thread->CurrentFrame->State.rip));
   }
   // Binds the guest to this OS thread for translated code and for the thunks, which run between HLT exits.
   FEXCore::Darwin::ThreadScope Bound {Thread};

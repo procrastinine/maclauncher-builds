@@ -162,7 +162,9 @@
       "GuestCpuHost.h",
       "KernelThreadRecord.cpp",
       "GuestImages.cpp",
-      "GuestImages.h"
+      "GuestImages.h",
+      "GuestThreads.cpp",
+      "GuestThreads.h"
     ],
     "guest": {
       "source": "guest-abi.c",

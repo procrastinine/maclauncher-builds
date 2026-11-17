@@ -13,6 +13,7 @@
 #include "Ps5Module.h"
 #include "GuestCpuHost.h"
 #include "GuestImages.h"
+#include "GuestThreads.h"
 #include "SysVThunk.h"
 
 #include <atomic>
@@ -44,25 +45,25 @@ std::uint64_t* ThunkCallCounter = nullptr;
 }
 
 namespace Kernel {
-// The minimum of libkernel that a PS5 libc needs before main, for one guest thread. These are host functions in the
-// shared address space, so pointers they return are guest pointers too.
+// The minimum of libkernel that a PS5 libc needs before main. These are host functions in the shared address space, so
+// pointers they return are guest pointers too. Threads, locks and thread-specific data are GuestThreads.cpp's.
 std::uint64_t ProcParam = 0;
 std::uint64_t ThreadPointer = 0;
-int Errno = 0;
-alignas(16) std::uint8_t MainThread[0x400] {};
-std::vector<void*> Specific(1);
 
 int Zero() {
   return 0;
 }
+// The calling thread's errno, which AnyPS5's libraries set (libc Process.cpp's __error returns the same).
 int* Error() {
-  return &Errno;
+  return &errno;
 }
 std::uint64_t GetProcParam() {
   return ProcParam;
 }
+// The calling guest thread's DTV, from its thread pointer (FS base).
 void* TlsGetAddr(const std::uint64_t* Index) {
-  const auto* Dtv = reinterpret_cast<const std::uint64_t*>(reinterpret_cast<const std::uint64_t*>(ThreadPointer)[1]);
+  const auto TP = FexGuest::Thread->CurrentFrame->State.fs_cached;
+  const auto* Dtv = reinterpret_cast<const std::uint64_t*>(reinterpret_cast<const std::uint64_t*>(TP)[1]);
   return reinterpret_cast<void*>(Dtv[Index[0]] + Index[1]);
 }
 int MapNamedFlexibleMemory(void** Address, std::uint64_t Length, int, int, const char*) {
@@ -71,24 +72,6 @@ int MapNamedFlexibleMemory(void** Address, std::uint64_t Length, int, int, const
     return static_cast<int>(0x8002000c); // SCE_KERNEL_ERROR_ENOMEM
   }
   *Address = Memory;
-  return 0;
-}
-void* PthreadSelf() {
-  return MainThread;
-}
-int KeyCreate(std::uint32_t* Key, void*) {
-  *Key = static_cast<std::uint32_t>(Specific.size());
-  Specific.push_back(nullptr);
-  return 0;
-}
-void* GetSpecific(std::uint32_t Key) {
-  return Key < Specific.size() ? Specific[Key] : nullptr;
-}
-int SetSpecific(std::uint32_t Key, void* Value) {
-  if (Key >= Specific.size()) {
-    return static_cast<int>(0x80020016); // SCE_KERNEL_ERROR_EINVAL
-  }
-  Specific[Key] = Value;
   return 0;
 }
 long Write(int Descriptor, const void* Buffer, std::uint64_t Length) {
@@ -150,24 +133,6 @@ const std::pair<const char*, FexGuest::Thunk> HostFunctions[] = {
   {"_sceKernelSetThreadAtexitCount", SysV::Thunk<&Kernel::Zero>},
   {"_sceKernelSetThreadAtexitReport", SysV::Thunk<&Kernel::Zero>},
   {"_sceKernelSetThreadDtors", SysV::Thunk<&Kernel::Zero>},
-  {"scePthreadSelf", SysV::Thunk<&Kernel::PthreadSelf>},
-  {"scePthreadKeyCreate", SysV::Thunk<&Kernel::KeyCreate>},
-  {"scePthreadGetspecific", SysV::Thunk<&Kernel::GetSpecific>},
-  {"scePthreadSetspecific", SysV::Thunk<&Kernel::SetSpecific>},
-  // One guest thread: locks are uncontended.
-  {"scePthreadMutexInit", SysV::Thunk<&Kernel::Zero>},
-  {"scePthreadMutexDestroy", SysV::Thunk<&Kernel::Zero>},
-  {"scePthreadMutexLock", SysV::Thunk<&Kernel::Zero>},
-  {"scePthreadMutexTrylock", SysV::Thunk<&Kernel::Zero>},
-  {"scePthreadMutexUnlock", SysV::Thunk<&Kernel::Zero>},
-  {"scePthreadMutexattrInit", SysV::Thunk<&Kernel::Zero>},
-  {"scePthreadMutexattrSettype", SysV::Thunk<&Kernel::Zero>},
-  {"scePthreadMutexattrDestroy", SysV::Thunk<&Kernel::Zero>},
-  {"pthread_mutex_lock", SysV::Thunk<&Kernel::Zero>},
-  {"pthread_mutex_unlock", SysV::Thunk<&Kernel::Zero>},
-  {"pthread_rwlock_rdlock", SysV::Thunk<&Kernel::Zero>},
-  {"pthread_rwlock_wrlock", SysV::Thunk<&Kernel::Zero>},
-  {"pthread_rwlock_unlock", SysV::Thunk<&Kernel::Zero>},
   {"_write", SysV::Thunk<&Kernel::Write>},
   {"malloc", SysV::Thunk<&Kernel::Malloc>},
   {"free", SysV::Thunk<&Kernel::Free>},
@@ -357,8 +322,19 @@ int main(int argc, char** argv) {
   AddPathAlias_nid_no_patch("/data", (Data / "data").c_str());
   const std::uint64_t MainOffset = std::strtoull(argv[3], nullptr, 0);
 
-  // Generated thunks of AnyPS5 exports first, then the stand-ins for what is not built for arm64 yet.
-  std::size_t Unsupported = 0, GeneratedThunkCount = 0;
+  // The host's thread layer first: its exports' objects are host records that AnyPS5's own thread code cannot read.
+  for (std::size_t i = 0; i < GuestThreads::FunctionCount; ++i) {
+    const auto& [Name, Thunk] = GuestThreads::Functions[i];
+    const auto Nid = Nid::ComputeNid(Name, "");
+    if (HostByNid.try_emplace(Nid, Table.size()).second) {
+      NameByNid.emplace(Nid, Name);
+      Source[Nid] = 1;
+      Table.push_back(Thunk);
+      TableNids.push_back(Nid);
+    }
+  }
+  // Then generated thunks of AnyPS5 exports, then the stand-ins for what is not built for arm64 yet.
+  std::size_t Unsupported = 0, GeneratedThunkCount = 0, ThreadExports = 0;
   for (std::size_t Part = 0; Part < GeneratedThunkPartCount; ++Part) {
     const auto [Thunks, Count] = GeneratedThunkParts[Part];
     GeneratedThunkCount += *Count;
@@ -366,6 +342,10 @@ int main(int argc, char** argv) {
       const auto& [Name, Thunk] = Thunks[i];
       if (!Thunk) {
         ++Unsupported;
+        continue;
+      }
+      if (GuestThreads::OwnsExport(Name)) {
+        ++ThreadExports;
         continue;
       }
       const auto Nid = Nid::ComputeNid(Name, "");
@@ -390,8 +370,9 @@ int main(int argc, char** argv) {
   for (std::size_t i = 0; i < GeneratedDataCount; ++i) {
     DataByNid.try_emplace(Nid::ComputeNid(GeneratedData[i].first, ""), GeneratedData[i]);
   }
-  std::printf("%zu generated thunks (%zu more exports have prototypes the thunks do not cover yet), %zu stand-in host functions\n",
-              GeneratedThunkCount - Unsupported, Unsupported, std::size(HostFunctions));
+  std::printf("%zu generated thunks (%zu more exports have prototypes the thunks do not cover yet, %zu thread exports left to "
+              "the host's thread layer), %zu stand-in host functions, %zu thread functions\n",
+              GeneratedThunkCount - Unsupported - ThreadExports, Unsupported, ThreadExports, std::size(HostFunctions), GuestThreads::FunctionCount);
   for (const char* Name : {"__stack_chk_guard", "__progname"}) {
     NameByNid.emplace(Nid::ComputeNid(Name, ""), Name);
   }
@@ -412,11 +393,13 @@ int main(int argc, char** argv) {
   for (auto* M : Modules) {
     FexGuest::RegisterGuestImage({M == &Eboot ? "" : M->Name.c_str(), M->Base, M->ProgramHeaders.data(), M->ProgramHeaderCount});
   }
-  Kernel::ThreadPointer = Ps5::SetUpStaticTls(Modules);
+  Ps5::LayOutStaticTls(Modules);
   Kernel::ProcParam = Eboot.ProcParam;
   for (auto* M : Modules) {
     Ps5::Relocate(*M, [M](const Ps5::Symbol& S) { return Resolve(*M, S); });
   }
+  Kernel::ThreadPointer = Ps5::AllocateStaticTls();
+  GuestThreads::AdoptInitialThread(Kernel::ThreadPointer);
   if (Table.size() > FexGuest::MaximumThunks) {
     std::printf("%zu imports exceed the stub page\nFAIL\n", Table.size());
     return 1;

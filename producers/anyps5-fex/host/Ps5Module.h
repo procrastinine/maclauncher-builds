@@ -240,25 +240,22 @@ inline Module Load(const std::string& Path, const std::string& Name) {
   return M;
 }
 
-// Static TLS for the initial thread: each module's block below the thread pointer, the TCB at the thread pointer
-// (self pointer, then the DTV). Returns the thread pointer, the guest FS base.
-inline std::uint64_t SetUpStaticTls(std::vector<Module*> Modules) {
-  std::uint64_t Offset = 0, Index = 0, Align = 16;
-  for (auto* M : Modules) {
-    if (M->TlsMemSize == 0) {
-      continue;
-    }
-    Offset = (Offset + M->TlsMemSize + M->TlsAlign - 1) & ~(M->TlsAlign - 1);
-    M->TlsOffset = Offset;
-    M->TlsIndex = ++Index;
-    Align = std::max(Align, M->TlsAlign);
-  }
-  const std::uint64_t Blocks = (Offset + Align - 1) & ~(Align - 1);
-  auto* Area = static_cast<std::uint8_t*>(FexGuest::MapGuest(Blocks + 0x4000));
-  const std::uint64_t TP = reinterpret_cast<std::uint64_t>(Area) + Blocks;
+// Static TLS: each module's block below the thread pointer, the TCB at the thread pointer (self pointer, the DTV, then
+// the thread's record for the host's pthread layer). LayOutStaticTls places the blocks once, before relocation (TPOFF64
+// relocations use the offsets); AllocateStaticTls then gives each thread, the initial one included, its own copy of the
+// relocated TLS images and returns its thread pointer, the guest FS base.
+struct StaticTlsLayout {
+  std::vector<Module*> Modules;
+  std::uint64_t Blocks = 0;
+};
+inline StaticTlsLayout TlsLayout;
+
+inline std::uint64_t AllocateStaticTls() {
+  auto* Area = static_cast<std::uint8_t*>(FexGuest::MapGuest(TlsLayout.Blocks + 0x4000));
+  const std::uint64_t TP = reinterpret_cast<std::uint64_t>(Area) + TlsLayout.Blocks;
   auto* Dtv = reinterpret_cast<std::uint64_t*>(TP + 0x1000);
   Dtv[0] = 1;
-  for (auto* M : Modules) {
+  for (auto* M : TlsLayout.Modules) {
     if (M->TlsIndex == 0) {
       continue;
     }
@@ -269,6 +266,20 @@ inline std::uint64_t SetUpStaticTls(std::vector<Module*> Modules) {
   reinterpret_cast<std::uint64_t*>(TP)[0] = TP;
   reinterpret_cast<std::uint64_t*>(TP)[1] = reinterpret_cast<std::uint64_t>(Dtv);
   return TP;
+}
+
+inline void LayOutStaticTls(std::vector<Module*> Modules) {
+  std::uint64_t Offset = 0, Index = 0, Align = 16;
+  for (auto* M : Modules) {
+    if (M->TlsMemSize == 0) {
+      continue;
+    }
+    Offset = (Offset + M->TlsMemSize + M->TlsAlign - 1) & ~(M->TlsAlign - 1);
+    M->TlsOffset = Offset;
+    M->TlsIndex = ++Index;
+    Align = std::max(Align, M->TlsAlign);
+  }
+  TlsLayout = {std::move(Modules), (Offset + Align - 1) & ~(Align - 1)};
 }
 
 // Applies the module's relocations. Resolve returns the guest address of an imported symbol.
