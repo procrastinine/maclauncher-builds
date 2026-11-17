@@ -52,11 +52,14 @@ export function registerSelection({selection,directory=path.resolve(import.meta.
   const previous=sources[0].version,records=Array.isArray(project.build)?project.build:[project.build],remaining=records.filter(record=>base(record.version)!==family);
   const next=[output,...remaining];project.build=next.length===1?next[0]:next;
   if(!project.packageProfiles.some(profile=>profile.version===request.version)){const template=project.packageProfiles.find(profile=>profile.version===previous),identity=clone(template);project.packageProfiles.push({...identity,version:request.version,label:template.label.includes(previous)?template.label.replace(previous,request.version):template.label+' '+request.version});}
-  validateVersionBindings(project.versionBindings);
+  validateVersionBindings(project.versionBindings);let moved=false;
   for(const binding of project.versionBindings||[]){const value=load(binding.file),{parent,key}=location(value,binding.pointer);
-   if(binding.select){const rows=parent[key];if(!Array.isArray(rows))throw Error('Selected version binding must address an array.');const matches=rows.filter(row=>Object.entries(binding.select).every(([field,expected])=>row?.[field]===(expected==='$version'?previous:expected)));if(matches.length!==1)throw Error('Version binding must select exactly one identity object.');const selected=matches[0];if(binding.select.version==='$version'){if(!rows.some(row=>row.version===request.version))rows.unshift({...clone(selected),version:request.version});}else{if(!sources.some(source=>source.version===selected.version))throw Error('Version binding differs from the selected package identity.');selected.version=request.version;}}
-   else{if(typeof parent[key]!=='string'||!sources.some(source=>source.version===parent[key]))throw Error('Version binding differs from the selected package identity: '+binding.file+binding.pointer);parent[key]=request.version;}
+   if(binding.select){moved=true;const rows=parent[key];if(!Array.isArray(rows))throw Error('Selected version binding must address an array.');const matches=rows.filter(row=>Object.entries(binding.select).every(([field,expected])=>row?.[field]===(expected==='$version'?previous:expected)));if(matches.length!==1)throw Error('Version binding must select exactly one identity object.');const selected=matches[0];if(binding.select.version==='$version'){if(!rows.some(row=>row.version===request.version))rows.unshift({...clone(selected),version:request.version});}else{if(!sources.some(source=>source.version===selected.version))throw Error('Version binding differs from the selected package identity.');selected.version=request.version;}}
+   // A binding that holds another ABI line's version belongs to that line.
+   else{if(typeof parent[key]==='string'&&base(parent[key])!==family&&records.some(record=>record.version===parent[key]))continue;
+    if(typeof parent[key]!=='string'||!sources.some(source=>source.version===parent[key]))throw Error('Version binding differs from the selected package identity: '+binding.file+binding.pointer);parent[key]=request.version;moved=true;}
   }
+  if(project.versionBindings?.length&&!moved)throw Error('No version binding holds the selected ABI line: '+request.id+'='+family);
  }
  // Validate generated build/profile contracts without resolving source checkouts.
  for(const {project} of plans)buildRecords(project);
