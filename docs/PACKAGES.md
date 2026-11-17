@@ -45,7 +45,7 @@ Other projects keep a different architecture for a fixed reason:
 | `universal` | The native code is loaded into a game's process, and on Apple Silicon a game can run as either CPU type | Steam API helper, Steam ticket adapter, LuaSteam bridge, Steamworks4j 1.10, MKXP-Z configuration helper, GameMaker OpenGL helper, RLVM adapter, MacLauncher graphics |
 | `universal` | No native code | VNDS-LOVE, Android launcher integrations |
 | `universal` | The publisher's binary is universal | Flash projector |
-| `arm64` | The package runs ARM64 Android, iOS or Switch code, or serves Android games, all of which need Apple Silicon | `android`, `android-art`, `android-aim`, `android-privacy`, `nxnative-tools`, `ios-playtools-paths` |
+| `arm64` | The package runs ARM64 Android, iOS or Switch code, or serves Android games, all of which need Apple Silicon | `android`, `android-aim`, `android-privacy`, `nxnative-tools`, `ios-playtools-paths` |
 | `arm64` | The sealed media closure requires macOS 27 | `mpv` |
 | `arm64` | KosmicKrisp uses Apple GPU features available from macOS 26 | `vulkan-kosmickrisp-gles32` |
 | `x64` | HashLink 1.9 and 1.12 compile games to x86-64 code at run time, and the publisher's Steamworks4j 1.9 library is x86-64 only; on Apple Silicon these packages run through Rosetta | HashLink 1.9 and 1.12, Steamworks4j 1.9 |
@@ -71,7 +71,6 @@ The internal `android-art-image-extractor` input package compiles AIM’s origin
 | Project | Package ID | Build contents |
 | --- | --- | --- |
 | [MacLauncher Android](../sources/maclauncher-android) | `android` | Shared Android framework, JVM execution and native host adaptations |
-| [MacLauncher Android ART adapter](../sources/maclauncher-android) | `android-art` | ART execution, compiled framework data, native services and image reader |
 | [AIM](https://github.com/hahnlee/aim) | `android-aim` | Private storage, display routing and process integration |
 | [AI5 SDL2](https://github.com/nunuhara/ai5-sdl2) | `ai5` | Disc/archive access, save paths and font routing |
 | [AnyPS5](https://github.com/boykopovar/AnyPS5) | `anyps5` | ARM64 converter for PS5 executables and the x86-64 macOS system libraries for converted games |
@@ -137,7 +136,7 @@ The KosmicKrisp package contains only the adapted driver; the unmodified driver 
 | --- | --- | --- |
 | [Adobe Flash Player projector](FLASH_PROJECTOR.md) | `flash-projector` | Adobe Animate’s unchanged 35.0.0.60 app, universal ARM64 and Intel |
 
-The Flash projector is Adobe’s universal Flash Player 35.0.0.60 app from Adobe Animate. Builds hosts its unchanged app bundle and notices because Adobe’s public projector downloads are Intel only. Its package uses the publisher’s version without an MCL suffix. The earlier 35.0.0.60-MCLv1 record remains available for existing installations.
+The Flash projector is Adobe’s universal Flash Player 35.0.0.60 app from Adobe Animate. Builds hosts its unchanged app bundle and notices because Adobe’s public projector downloads are Intel only. Its package version is 35.0.0.60-MCLv1.
 
 Prebuilt projects contain unmodified publisher files. They are listed separately from source builds and do not count as projects missing a GitHub build.
 
@@ -230,15 +229,12 @@ The recipe for the `android` project builds from `sources/maclauncher-android`, 
 git submodule update --init sources/maclauncher-android
 node tools/build-runtime.mjs --project android --check
 node tools/build-runtime.mjs --project android --inputs /absolute/path/to/build-inputs.json
-node tools/build-runtime.mjs --project android-art --check
-node tools/build-runtime.mjs --project android-art --inputs /absolute/path/to/art-inputs.json
 ```
 
 `tools/build-runtime.mjs` runs the producer registered for the selected project and never substitutes another project's producer. For a project whose producer has no single build entry, `--check` lists the producer's entry files, which are run directly. A prebuilt project has nothing to build and keeps its supplied binary.
 
 ### ART adapter
 
-The `android-art` command uses the same Android checkout and its ART producer entries. Its input file contains the options of the source project's `buildArt` function, a `sources` object with absolute `source`, `klepton` and `glesHeaders` paths, and optional `runner` build options. The Android source project's `tools/build-art.mjs` producer returns the root of the built ART runtime and its matching `sourceArchive`.
 
 Without an explicit archive, `sources.aosp` supplies the original AOSP source subsets selected by AIM's ART source lock, and `sourceCheckouts` supplies the checkouts of other registered components. The source exporter reuses the normal HWUI and native bridge source inputs; `hwuiSources` and `nativeBridgeSources` select the original inputs for the components the package keeps. A complete `sourceArchive` given explicitly is used unchanged. Source export does not download anything.
 
@@ -255,9 +251,9 @@ The producer prepares the original AIM source with mutable code enabled and pass
 
 ### Catalogs and images
 
-The `android` catalog contains the shared framework and JVM runtime, and the separate `android-art` catalog contains the ART adapter with its native services and helpers. The two projects have separate versions, release tags and archive names. The native runtime, the ART producers and the ART package assembly are part of the MacLauncher Android source project.
+The `android` catalog contains the shared framework and JVM runtime. Its ART inputs are delivered through the `android-art-elf`, `android-art-ffi`, `android-art-java` and `android-art-image-extractor` packages. The native runtime, the ART producers and the ART package assembly are part of the MacLauncher Android source project.
 
-The `android-art` package does not contain the Android system image; MacLauncher downloads Google's original image separately. MacLauncher's [Android](https://github.com/procrastinine/maclauncher/blob/master/docs/game-types/ANDROID.md) page describes how games use the runtime.
+The Android runtime packages do not contain the Android system image; MacLauncher downloads Google's original image separately. MacLauncher's [Android](https://github.com/procrastinine/maclauncher/blob/master/docs/game-types/ANDROID.md) page describes how games use the runtime.
 
 The source project records its upstream checkouts and build prerequisites. Android images, toolchains and portable dependency artifacts are separate inputs and are not in its Git history. Framework and image updates stay on Android 16 (API 36).
 

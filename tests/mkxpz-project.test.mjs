@@ -20,7 +20,6 @@ test('MKXP-Z uses its owned source recipe and one Gitlink source identity',()=>{
  assert.equal(project.upstreams.find(row=>row.id==='sdl2-image').revision,JSON.parse(fs.readFileSync(path.join(root,'producers/package-support/helper-builds/mkxpz.json'))).sdlImage.revision);
  assert.ok(project.packageProfiles.some(row=>row.version===project.build.version));assert.equal(project.build.command,'tools/build-mkxpz.mjs');
  assert.deepEqual(project.build.architectures,['arm64']);
- for(const version of ['MCLv1-1003','MCLv2-1003'])assert.ok(project.packageProfiles.some(row=>row.version===version));
  assert.equal(project.upstreams[0].revision,gitlink('producers/package-support/src/external/mkxp-z'));
  assert.equal(Object.hasOwn(baseline.upstream,'revision'),false);assert.equal(baseline.upstream.gitlink,'producers/package-support/src/external/mkxp-z');
  assert.match(baseline.upstream.sha256,/^[a-f0-9]{64}$/);

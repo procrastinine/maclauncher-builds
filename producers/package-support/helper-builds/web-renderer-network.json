@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "web-renderer-network",
-  "version": "1.1.0",
+  "version": "1.1.5",
   "compiler": "clang",
   "kind": "bundle",
   "output": "renderer-network.node",

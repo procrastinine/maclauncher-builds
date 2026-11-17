@@ -237,68 +237,6 @@
     }
   },
   {
-    "id": "android-art",
-    "name": "MacLauncher Android ART adapter",
-    "purpose": "ART execution adapters, compiled framework data and native services for MacLauncher Android; the original Android system image is acquired separately.",
-    "producer": {
-      "kind": "maclauncher",
-      "repository": "https://github.com/procrastinine/maclauncher-builds",
-      "entries": [
-        "sources/maclauncher-android/tools/build-art.mjs",
-        "sources/maclauncher-android/src/modules/android/art/source.mjs",
-        "sources/maclauncher-android/src/modules/android/art/build-runner.mjs",
-        "sources/maclauncher-android/src/modules/android/art/build.mjs",
-        "sources/maclauncher-android/src/modules/android/art/build-image-extractor.mjs",
-        "sources/maclauncher-android/src/modules/android/art/package.mjs"
-      ],
-      "buildEntry": "tools/build-android-art.mjs",
-      "sourceProject": "android",
-      "sourceDirectory": "sources/maclauncher-android"
-    },
-    "upstreams": [
-      {
-        "id": "aim",
-        "provider": "github",
-        "url": "https://github.com/hahnlee/aim",
-        "repository": "hahnlee/aim",
-        "pin": {
-          "file": "sources/maclauncher-android/upstreams.json",
-          "pointer": "/projects/0/revision",
-          "repositoryPointer": "/projects/0/repository"
-        }
-      },
-      {
-        "id": "aosp-art",
-        "provider": "gitiles",
-        "url": "https://android.googlesource.com/platform/art",
-        "pin": {
-          "file": "sources/maclauncher-android/src/modules/android/native/source-pins.json",
-          "pointer": "/aospArt"
-        }
-      },
-      {
-        "id": "aosp-bionic",
-        "provider": "gitiles",
-        "url": "https://android.googlesource.com/platform/bionic",
-        "pin": {
-          "file": "sources/maclauncher-android/src/modules/android/native/source-pins.json",
-          "pointer": "/aospBionic"
-        }
-      }
-    ],
-    "compatibility": "Android 16 / API 36; uses the matching Android common framework and a separately acquired original system image.",
-    "packageProfiles": [
-      {
-        "version": "0.2.0",
-        "label": "MacLauncher Android ART adapter 0.2.0"
-      },
-      {
-        "version": "0.1.0",
-        "label": "MacLauncher Android ART adapter 0.1.0"
-      }
-    ]
-  },
-  {
     "id": "android-aim",
     "name": "AIM with MacLauncher integration",
     "purpose": "Private runtime/data paths, display routing and process integration.",

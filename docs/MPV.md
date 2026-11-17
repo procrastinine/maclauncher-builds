@@ -4,7 +4,7 @@ The `mpv` project in this repository is a native host for decoded video frames, 
 
 ## Presentation
 
-In version `0.41.0-MCLv7`, decoded PQ/BT.2020 frames reach the presenter as RGBA16Float, and the presenter outputs linear Display P3 using the display's actual headroom. Decoder metadata and video-filter metadata each keep their own source luminance information. When playback starts paused, the first decoded image stays visible, and the video layer fits the source aspect ratio inside the window.
+Decoded PQ/BT.2020 frames reach the presenter as RGBA16Float, and the presenter outputs linear Display P3 using the display's actual headroom. Decoder metadata and video-filter metadata each keep their own source luminance information. When playback starts paused, the first decoded image stays visible, and the video layer fits the source aspect ratio inside the window.
 
 ## Source and build
 

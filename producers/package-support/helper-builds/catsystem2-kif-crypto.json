@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "catsystem2-kif-crypto",
-  "version": "1.1.0",
+  "version": "1.1.5",
   "compiler": "clang",
   "kind": "executable",
   "output": "kif-crypto",

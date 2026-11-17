@@ -88,7 +88,7 @@
   },
   {
     "id": "love-luasteam",
-    "name": "L\u00d6VE LuaSteam bridge",
+    "name": "LÖVE LuaSteam bridge",
     "purpose": "LuaSteam 4 binding against the selected host Lua VM.",
     "producer": {
       "kind": "maclauncher",
@@ -799,14 +799,10 @@
       {
         "version": "1.1.5",
         "label": "Android package metadata helper 1.1.5"
-      },
-      {
-        "version": "1.1.6",
-        "label": "Android package metadata helper 1.1.6"
       }
     ],
     "build": {
-      "version": "1.1.6",
+      "version": "1.1.5",
       "command": "tools/build-apk-metadata.mjs",
       "architectures": [
         "arm64",
