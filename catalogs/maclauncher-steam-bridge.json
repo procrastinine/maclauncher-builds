@@ -6,6 +6,46 @@
     {
       "schemaVersion": 2,
       "id": "maclauncher-steam-bridge",
+      "version": "1.0.4",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "ebc98b63507da6b7ef9a085a42ffa004b513adc52cabd7a4db7a89bb22576d60",
+      "sourceSha256": "b106c9880786b02933f9ac8eb05771db7d6cb914f7d632778cdce2edf9c8351c",
+      "updatePolicy": "manual",
+      "asset": {
+        "filename": "maclauncher-steam-bridge-1.0.4-universal.tar.gz",
+        "sha256": "830c574d1b286752d45c16a0610e2283ad1fcc28caa0f79cc85b29d4240a2476",
+        "bytes": 10446055,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/maclauncher-steam-bridge%2Fv1.0.4%2Funiversal/maclauncher-steam-bridge-1.0.4-universal.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "6ade0359935a984fd9f219ceb238586e3177b6be",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.2",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "44121818531",
+        "runAttempt": "1",
+        "definitionDigest": "cfdf60b9c5d7fcbae53b419ff9af3146bbd632301d9949b9e44d2e4b1bac9eb9"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "6ade0359935a984fd9f219ceb238586e3177b6be"
+      },
+      "tag": "maclauncher-steam-bridge/v1.0.4/universal"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "maclauncher-steam-bridge",
       "version": "1.0.0",
       "arch": "universal",
       "launcherArchitectures": [

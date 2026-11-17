@@ -3928,10 +3928,14 @@
       {
         "version": "1.0.0",
         "label": "Steam client bridge 1.0.0"
+      },
+      {
+        "version": "1.0.4",
+        "label": "Steam client bridge 1.0.4"
       }
     ],
     "build": {
-      "version": "1.0.0",
+      "version": "1.0.4",
       "command": "producers/steam-bridge/build.mjs",
       "architectures": [
         "universal"
