@@ -26,11 +26,15 @@ export function stageWineVulkan(directory) {
   const manifestBytes = read(manifestFile, 4 * 1024 * 1024), manifest = JSON.parse(manifestBytes), provider = manifest.provider;
   if (manifest.schemaVersion !== 1 || provider?.schema !== 1 || !Array.isArray(manifest.files) || !manifest.files.length ||
       manifest.files.length > 20000 || !Array.isArray(provider.files) || !provider.libraries || typeof provider.libraries !== 'object' ||
-      Array.isArray(provider.libraries) || !Array.isArray(provider.runtimeProfile?.files) || !provider.runtimeProfile.files.length ||
-      !/^\d+\.\d+(?:\.\d+)?$/.test(provider.minimumMacOS || ''))
-    throw Error('A complete WineVulkan module with an exact installed Wine profile is required.');
+      Array.isArray(provider.libraries) || !/^\d+\.\d+(?:\.\d+)?$/.test(provider.minimumMacOS || '') ||
+      !(/^\d+\.\d+(?:\.\d+)?$/.test(provider.runtimeProfile?.wineVersion || '') ||
+        Array.isArray(provider.runtimeProfile?.files) && provider.runtimeProfile.files.length))
+    throw Error('A complete WineVulkan module with a Wine release or exact installed Wine profile is required.');
+  // A Wine release binding is matched on the user's Mac against the release
+  // and library exports measured from the installed Wine; file digests bind
+  // modules built against one exact Wine installation.
   const profileNames = new Set();
-  for (const row of provider.runtimeProfile.files) {
+  for (const row of provider.runtimeProfile.files || []) {
     if (!safe(row?.relative) || !/^[a-f0-9]{64}$/.test(row.sha256 || '') || profileNames.has(row.relative))
       throw Error('The WineVulkan installed Wine profile is invalid.');
     profileNames.add(row.relative);
