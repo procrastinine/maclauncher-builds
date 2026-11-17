@@ -260,6 +260,8 @@ const std::pair<const char*, const char*> SameFunctions[] = {
 std::unordered_map<std::string, std::pair<FexGuest::Thunk, int>> Available;
 std::vector<FexGuest::Thunk> Table;
 std::vector<std::string> TableNids;
+// Each slot's export name (its NID when the host has no name for it), for the watch output.
+std::vector<std::string> TableNames;
 std::unordered_map<std::string, std::size_t> HostByNid;
 std::unordered_map<std::string, std::string> NameByNid;
 std::unordered_map<std::string, std::uint64_t> Objects;
@@ -289,8 +291,17 @@ void SampleGuest(int, siginfo_t*, void* Context) {
   } else {
     Dl_info Info {};
     dladdr(reinterpret_cast<void*>(PC), &Info);
-    Length = std::snprintf(Text, sizeof(Text), "sample: host code at pc 0x%llx (%s), last guest rip 0x%llx\n", static_cast<unsigned long long>(PC),
-                           Info.dli_sname ? Info.dli_sname : "?", static_cast<unsigned long long>(FexGuest::Thread->CurrentFrame->State.rip));
+    const auto& Guest = FexGuest::Thread->CurrentFrame->State;
+    // In a thunk: the import's NID and the guest caller its return address names.
+    const std::uint64_t Offset = Guest.rip - FexGuest::StubBase;
+    const char* Import = "";
+    char Caller[96] = "";
+    if (Guest.rip >= FexGuest::StubBase && Offset >= FexGuest::ThunkStubOffset && (Offset - FexGuest::ThunkStubOffset) / FexGuest::ThunkStubSize < TableNids.size()) {
+      Import = TableNames[(Offset - FexGuest::ThunkStubOffset) / FexGuest::ThunkStubSize].c_str();
+      Describe(Ps5::Guest<std::uint64_t>(Guest.gregs[FexGuest::X86::REG_RSP]), Caller, sizeof(Caller));
+    }
+    Length = std::snprintf(Text, sizeof(Text), "sample: host code at pc 0x%llx (%s), last guest rip 0x%llx (import %s from %s)\n", static_cast<unsigned long long>(PC),
+                           Info.dli_sname ? Info.dli_sname : "?", static_cast<unsigned long long>(Guest.rip), Import, Caller);
   }
   write(STDOUT_FILENO, Text, Length);
 }
@@ -385,11 +396,62 @@ std::uint64_t Resolve(const Ps5::Module& Importer, const Ps5::Symbol& S) {
   HostByNid.emplace(Nid, Table.size());
   Table.push_back(Function == Available.end() ? Unimplemented : Function->second.first);
   TableNids.push_back(Nid);
+  TableNames.push_back(NameByNid.contains(Nid) ? NameByNid[Nid] : Nid);
   StubLogged.push_back(false);
   return StubAddress(Table.size() - 1);
 }
 
+bool IsGuestCode(std::uint64_t Address) {
+  for (auto* M : Modules) {
+    if (Address >= M->Base && Address - M->Base < M->Size) {
+      return true;
+    }
+  }
+  return false;
+}
+
 } // namespace
+
+// FexGuest::HostToGuestBridge, entered in place of a guest function that host code called directly, with the guest
+// function in x16: the host caller's x0-x5 and d0-d7 become its System V arguments, and its rax and xmm0 come back in x0
+// and d0. The frame record sits just below the saved d0-d7, so the host caller's return address is Floats[-1].
+extern "C" FexGuest::GuestResult AnyPS5FexHostToGuestCall(std::uint64_t A0, std::uint64_t A1, std::uint64_t A2, std::uint64_t A3, std::uint64_t A4,
+                                                          std::uint64_t A5, const double* Floats, std::uint64_t Target) {
+  static std::mutex Lock;
+  static std::vector<std::uint64_t> Logged;
+  {
+    std::lock_guard Hold(Lock);
+    if (std::find(Logged.begin(), Logged.end(), Target) == Logged.end()) {
+      Logged.push_back(Target);
+      char Caller[128], Function[96];
+      FexGuest::DescribeCode(reinterpret_cast<const std::uint64_t*>(Floats)[-1], Caller, sizeof(Caller));
+      Describe(Target, Function, sizeof(Function));
+      std::printf("host code at %s calls guest function %s directly; it runs as a guest call\n", Caller, Function);
+    }
+  }
+  const std::uint64_t Integers[] = {A0, A1, A2, A3, A4, A5};
+  return FexGuest::CallGuest(Target, Integers, std::span<const double>(Floats, 8));
+}
+asm(R"(
+  .text
+  .p2align 2
+  .globl _AnyPS5FexHostToGuestBridge
+  .private_extern _AnyPS5FexHostToGuestBridge
+_AnyPS5FexHostToGuestBridge:
+  stp x29, x30, [sp, #-80]!
+  mov x29, sp
+  stp d0, d1, [sp, #16]
+  stp d2, d3, [sp, #32]
+  stp d4, d5, [sp, #48]
+  stp d6, d7, [sp, #64]
+  add x6, sp, #16
+  mov x7, x16
+  bl _AnyPS5FexHostToGuestCall
+  fmov d0, x1
+  ldp x29, x30, [sp], #80
+  ret
+)");
+extern "C" void AnyPS5FexHostToGuestBridge();
 
 namespace RuntimeModules {
 std::string Directory, Executables; // the guest's /app0, and the folder with the original executables
@@ -811,6 +873,8 @@ int RunGame(int argc, char** argv) {
     return 2;
   }
   FexGuest::DescribeGuestAddress = Describe;
+  FexGuest::HostToGuestBridge = AnyPS5FexHostToGuestBridge;
+  FexGuest::IsGuestCode = IsGuestCode;
   FexGuest::InstallFaultReport();
   // libc's guest write watch installs its SIGBUS and SIGSEGV handler in a static constructor, before main, and the fault
   // report replaces it; the faults it owns come to it through the host's first handler instead.
@@ -844,6 +908,7 @@ int RunGame(int argc, char** argv) {
 
   Table.reserve(FexGuest::MaximumThunks);
   TableNids.reserve(FexGuest::MaximumThunks);
+  TableNames.reserve(FexGuest::MaximumThunks);
   StubLogged.reserve(FexGuest::MaximumThunks);
   Modules.reserve(1024);
   // The host's thread layer first: its exports' objects are host records that AnyPS5's own thread code cannot read.
@@ -1007,10 +1072,26 @@ int RunGame(int argc, char** argv) {
     sigaction(SIGUSR2, &Sample, nullptr);
     const pthread_t GuestThread = pthread_self();
     std::thread([GuestThread, &ThunkCalls] {
+      std::vector<std::uint64_t> Previous(FexGuest::MaximumThunks);
       for (int Second = 5; Second <= 55; Second += 5) {
         std::this_thread::sleep_for(std::chrono::seconds(5));
         std::printf("watch %ds: %llu host calls past main, %llu stub calls\n", Second,
                     static_cast<unsigned long long>(ThunkCalls - HostCallsAtMain), static_cast<unsigned long long>(StubCalls));
+        // The imports every guest thread called most in these 5 s.
+        std::vector<std::pair<std::uint64_t, std::size_t>> Busiest;
+        for (std::size_t Slot = 0; Slot < FexGuest::MaximumThunks; ++Slot) {
+          const auto Calls = __atomic_load_n(&FexGuest::SlotCalls[Slot], __ATOMIC_RELAXED);
+          if (Calls != Previous[Slot]) {
+            Busiest.emplace_back(Calls - Previous[Slot], Slot);
+          }
+          Previous[Slot] = Calls;
+        }
+        std::sort(Busiest.begin(), Busiest.end(), std::greater<> {});
+        std::string Line = "  busiest imports:";
+        for (std::size_t Rank = 0; Rank < Busiest.size() && Rank < 8; ++Rank) {
+          Line += " " + TableNames[Busiest[Rank].second] + " " + std::to_string(Busiest[Rank].first);
+        }
+        std::printf("%s\n", Line.c_str());
         pthread_kill(GuestThread, SIGUSR2);
       }
     }).detach();

@@ -24,6 +24,7 @@
 #include <cstring>
 #include <dlfcn.h>
 #include <mutex>
+#include <pthread.h>
 #include <signal.h>
 #include <span>
 #include <sys/mman.h>
@@ -205,21 +206,58 @@ inline void* MapGuest(std::uint64_t Size) {
   return Result;
 }
 
-// The host has no guest fault handling yet, so a fault ends the run with its signal number instead of a crash report.
+// Writes "symbol+0xoffset" for a host code address, or the guest module offset for a guest one.
+inline void DescribeCode(std::uint64_t Address, char* Text, std::size_t Size) {
+  Dl_info Where {};
+  if (dladdr(reinterpret_cast<void*>(Address), &Where) && Where.dli_sname) {
+    std::snprintf(Text, Size, "%s+0x%llx", Where.dli_sname,
+                  static_cast<unsigned long long>(Address - reinterpret_cast<std::uintptr_t>(Where.dli_saddr)));
+  } else if (DescribeGuestAddress) {
+    DescribeGuestAddress(Address, Text, Size);
+  } else {
+    std::snprintf(Text, Size, "0x%llx", static_cast<unsigned long long>(Address));
+  }
+}
+
+// The host has no guest fault handling yet, so a fault ends the run with its signal number, the faulting host code and
+// its callers (the link register, then the frame-pointer chain on this thread's host stack) instead of a crash report.
 inline void InstallFaultReport() {
   std::setvbuf(stdout, nullptr, _IONBF, 0);
   for (int Signal : {SIGSEGV, SIGBUS, SIGILL, SIGTRAP}) {
     struct sigaction Action {};
     Action.sa_sigaction = [](int Signal, siginfo_t* Info, void* Context) {
+      static std::atomic<bool> Reporting {false};
+      if (Reporting.exchange(true)) {
+        _exit(1);
+      }
       const auto* State = &static_cast<ucontext_t*>(Context)->uc_mcontext->__ss;
-      Dl_info Where {};
-      dladdr(reinterpret_cast<void*>(__darwin_arm_thread_state64_get_pc(*State)), &Where);
-      char Text[256];
-      const int Length = std::snprintf(Text, sizeof(Text), "host signal %d at address 0x%llx, pc 0x%llx (%s)\nFAIL\n", Signal,
-                                       static_cast<unsigned long long>(reinterpret_cast<std::uintptr_t>(Info->si_addr)),
-                                       static_cast<unsigned long long>(__darwin_arm_thread_state64_get_pc(*State)),
-                                       Where.dli_sname ? Where.dli_sname : "?");
+      const std::uint64_t PC = __darwin_arm_thread_state64_get_pc(*State);
+      char Where[128], Text[320];
+      DescribeCode(PC, Where, sizeof(Where));
+      int Length = std::snprintf(Text, sizeof(Text), "host signal %d at address 0x%llx, pc 0x%llx (%s)\n", Signal,
+                                 static_cast<unsigned long long>(reinterpret_cast<std::uintptr_t>(Info->si_addr)),
+                                 static_cast<unsigned long long>(PC), Where);
       write(STDOUT_FILENO, Text, Length);
+      DescribeCode(__darwin_arm_thread_state64_get_lr(*State), Where, sizeof(Where));
+      Length = std::snprintf(Text, sizeof(Text), "  lr %s\n", Where);
+      write(STDOUT_FILENO, Text, Length);
+      const std::uintptr_t Top = reinterpret_cast<std::uintptr_t>(pthread_get_stackaddr_np(pthread_self()));
+      const std::uintptr_t Bottom = Top - pthread_get_stacksize_np(pthread_self());
+      std::uintptr_t Frame = __darwin_arm_thread_state64_get_fp(*State);
+      for (int Depth = 0; Depth < 24 && Frame >= Bottom && Frame + 16 <= Top && (Frame & 7) == 0; ++Depth) {
+        const auto* Record = reinterpret_cast<const std::uint64_t*>(Frame);
+        if (!Record[1]) {
+          break;
+        }
+        DescribeCode(Record[1], Where, sizeof(Where));
+        Length = std::snprintf(Text, sizeof(Text), "  #%d %s\n", Depth, Where);
+        write(STDOUT_FILENO, Text, Length);
+        if (Record[0] <= Frame) {
+          break;
+        }
+        Frame = Record[0];
+      }
+      write(STDOUT_FILENO, "FAIL\n", 5);
       _exit(1);
     };
     Action.sa_flags = SA_SIGINFO;
@@ -281,6 +319,8 @@ inline thread_local FEXCore::Core::InternalThreadState* Thread = nullptr;
 // Set by the first Run, before any other guest thread starts; read by every thread afterwards.
 inline std::span<const Thunk> ActiveThunks;
 inline std::uint64_t* ActiveThunkCalls = nullptr;
+// Calls of each stub slot, for the host's watch output.
+inline std::uint64_t SlotCalls[MaximumThunks] {};
 
 // Whether this OS thread is running a thunk, where its guest state is in memory and consistent.
 inline thread_local bool InHostCall = false;
@@ -306,6 +346,7 @@ inline void Loop(std::uint64_t StopAt, std::uint64_t Breakpoint) {
       std::exit(1);
     }
     __atomic_fetch_add(ActiveThunkCalls, 1, __ATOMIC_RELAXED);
+    __atomic_fetch_add(&SlotCalls[(Stop - ThunkStubOffset) / ThunkStubSize], 1, __ATOMIC_RELAXED);
     InHostCall = true;
     const After Next = ActiveThunks[(Stop - ThunkStubOffset) / ThunkStubSize](Guest);
     InHostCall = false;
@@ -370,9 +411,26 @@ inline GuestResult CallGuest(std::uint64_t Function, std::span<const std::uint64
 // A host that write-protects memory to track writes (AnyPS5's guest write watch, for the GPU's copies of guest memory)
 // sets ClaimHostFault: a write fault it claims (it reopens the page) resumes the faulting instruction, from host code
 // and from translated guest code alike. An unaligned access stays the delegator's, which rewrites the instruction.
+//
+// Host code that calls a guest function pointer it read from guest memory (Agc keeps a command buffer's out-of-space
+// callback in the guest's buffer struct) jumps into x86-64 code, and the instruction fetch faults (test-sequence 0721:
+// SIGBUS at Hollow Knight's eboot+0x3ae140). On a guest thread inside a host call, the handler turns that jump into a call
+// of the host's HostToGuestBridge, which runs the function with CallGuest: x16, which a call may clobber, carries the
+// guest function, and the host caller's x0-x5, d0-d7, stack pointer and return address stay as they were.
 inline struct sigaction DelegatorActions[2] {};
 inline bool (*ClaimHostFault)(siginfo_t* Info, void* Context) = nullptr;
+inline void (*HostToGuestBridge)() = nullptr;
+inline bool (*IsGuestCode)(std::uint64_t Address) = nullptr;
 inline void CallRetGuard(int Signal, siginfo_t* Info, void* Context) {
+  if (HostToGuestBridge && IsGuestCode && Thread && InHostCall) {
+    auto* Machine = static_cast<ucontext_t*>(Context)->uc_mcontext;
+    const std::uint64_t PC = __darwin_arm_thread_state64_get_pc(Machine->__ss);
+    if (PC == reinterpret_cast<std::uintptr_t>(Info->si_addr) && IsGuestCode(PC)) {
+      Machine->__ss.__x[16] = PC;
+      __darwin_arm_thread_state64_set_pc_fptr(Machine->__ss, reinterpret_cast<void*>(HostToGuestBridge));
+      return;
+    }
+  }
   if (auto* Bound = Thread; Bound && Bound->CallRetStackBase) {
     const std::uintptr_t Base = reinterpret_cast<std::uintptr_t>(Bound->CallRetStackBase), Page = getpagesize();
     const std::uintptr_t Fault = reinterpret_cast<std::uintptr_t>(Info->si_addr);
