@@ -6,32 +6,22 @@ function-pointer declaration. No cast is added to the static assignment.
 Upstream SDL_mixer notices remain unchanged (LGPL-2.0-or-later).
 
 diff --git a/vendor/SDL_mixer/src/dynamic_ogg.h b/vendor/SDL_mixer/src/dynamic_ogg.h
+index 5e4454269..7a09fd13d 100644
 --- a/vendor/SDL_mixer/src/dynamic_ogg.h
 +++ b/vendor/SDL_mixer/src/dynamic_ogg.h
-@@ -34,7 +34,11 @@ typedef struct {
- 	void *handle;
- 	int (*ov_clear)(OggVorbis_File *vf);
- 	vorbis_info *(*ov_info)(OggVorbis_File *vf,int link);
+@@ -34,0 +35 @@ typedef struct {
 +#ifdef OGG_USE_TREMOR
- 	int (*ov_open_callbacks)(void *datasource, OggVorbis_File *vf, char *initial, long ibytes, ov_callbacks callbacks);
+@@ -35,0 +37,3 @@ typedef struct {
 +#else
 +	int (*ov_open_callbacks)(void *datasource, OggVorbis_File *vf, const char *initial, long ibytes, ov_callbacks callbacks);
 +#endif
- 	ogg_int64_t (*ov_pcm_total)(OggVorbis_File *vf,int i);
- #ifdef OGG_USE_TREMOR
- 	long (*ov_read)(OggVorbis_File *vf,char *buffer,int length, int *bitstream);
 diff --git a/vendor/SDL_mixer/src/dynamic_ogg.c b/vendor/SDL_mixer/src/dynamic_ogg.c
+index 15b3fca5e..76933dc5d 100644
 --- a/vendor/SDL_mixer/src/dynamic_ogg.c
 +++ b/vendor/SDL_mixer/src/dynamic_ogg.c
-@@ -53,7 +53,11 @@ int Mix_InitOgg()
- 			return -1;
- 		}
- 		vorbis.ov_open_callbacks =
+@@ -55,0 +56 @@ int Mix_InitOgg()
 +#ifdef OGG_USE_TREMOR
- 			(int (*)(void *, OggVorbis_File *, char *, long, ov_callbacks))
+@@ -56,0 +58,3 @@ int Mix_InitOgg()
 +#else
 +			(int (*)(void *, OggVorbis_File *, const char *, long, ov_callbacks))
 +#endif
- 			SDL_LoadFunction(vorbis.handle, "ov_open_callbacks");
- 		if ( vorbis.ov_open_callbacks == NULL ) {
- 			SDL_UnloadObject(vorbis.handle);

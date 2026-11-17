@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 2,
+  "projectId": "freearc",
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "freearc",
+      "version": "0.67-MCLv1",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "61766a762e3d82c28d9280a2a6ff8623cf222e3dec408f5e6c15469a2fbd6a8b",
+      "sourceSha256": "61766a762e3d82c28d9280a2a6ff8623cf222e3dec408f5e6c15469a2fbd6a8b",
+      "updatePolicy": "manual",
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "b11622ae422b516ffa2c3fdf89bcf09e13d15485"
+      },
+      "asset": {
+        "filename": "freearc-0.67-MCLv1-x64.tar.gz",
+        "sha256": "fa4a9f02286919d21be77ac320cfd3cd4efea5499aa13c21c20011562457040d",
+        "bytes": 156347,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/freearc%2Fv0.67-MCLv1%2Fx64/freearc-0.67-MCLv1-x64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "b11622ae422b516ffa2c3fdf89bcf09e13d15485",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "44035548437",
+        "runAttempt": "1",
+        "definitionDigest": "cf4172d6a6cfba2e3f46ca8650fca84eb088bcf1c7b9da70bdf322f9d1d9773e"
+      },
+      "tag": "freearc/v0.67-MCLv1/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "freearc",
+      "version": "0.67-MCLv1",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "62e4e0b6ceb398dcae1d71b38d444f390ac06363ae4ad2a7aa792201179dfb1c",
+      "sourceSha256": "62e4e0b6ceb398dcae1d71b38d444f390ac06363ae4ad2a7aa792201179dfb1c",
+      "updatePolicy": "manual",
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "b11622ae422b516ffa2c3fdf89bcf09e13d15485"
+      },
+      "asset": {
+        "filename": "freearc-0.67-MCLv1-arm64.tar.gz",
+        "sha256": "3db542ec2df3f88bac5f3dec3280d2b34fc86a6178fdda7c906de667ac785d0a",
+        "bytes": 150180,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/freearc%2Fv0.67-MCLv1%2Farm64/freearc-0.67-MCLv1-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "b11622ae422b516ffa2c3fdf89bcf09e13d15485",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.2",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "44035548437",
+        "runAttempt": "1",
+        "definitionDigest": "cf4172d6a6cfba2e3f46ca8650fca84eb088bcf1c7b9da70bdf322f9d1d9773e"
+      },
+      "tag": "freearc/v0.67-MCLv1/arm64"
+    }
+  ]
+}

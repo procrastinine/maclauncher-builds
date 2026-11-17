@@ -57,19 +57,27 @@ export async function buildSlice({architecture,work,sources,engineSource}){
  run(tools.cmake,['--build',buildRoot,'--parallel','2'],{env});
  return {architecture,cpu,prefix,binary:path.join(buildRoot,'rlvm'),lists};
 }
-export async function compile({arch='universal',work}){
+export async function prepare({arch='universal',work}){
  if(arch!=='universal')throw Error('RLVM engine producer builds the universal engine.');
  fs.mkdirSync(work,{recursive:true});const source=path.join(work,'rlvm-source'),sourceRoot=path.join(here,'source'),revision=upstreamRevision('rlvm','rlvm');
  const staged=await stageSource(sourceRoot,revision,source);
- run('git',['apply','--unsafe-paths','--directory='+source,path.join(here,'vorbis-callback-const.patch')],{cwd:root});
+ run('git',['apply','--unidiff-zero','--unsafe-paths','--directory='+source,path.join(here,'vorbis-callback-const.patch')],{cwd:root});
  run('git',['apply','--unsafe-paths','--directory='+source,path.join(here,'boost-parent-path.patch')],{cwd:root});
  run('git',['apply','--unsafe-paths','--directory='+source,path.join(here,'boost-directory-header.patch')],{cwd:root});
  run('git',['apply','--unsafe-paths','--directory='+source,path.join(here,'standard-stream-headers.patch')],{cwd:root});
  run('git',['apply','--unsafe-paths','--directory='+source,path.join(here,'boost-system-directory-header.patch')],{cwd:root});
  run('git',['apply','--unsafe-paths','--directory='+source,path.join(here,'cocoa-application-class.patch')],{cwd:root});
- const sources=await dependencySources(work),slices=[];
- for(const architecture of ['arm64','x64'])slices.push(await buildSlice({architecture,work,sources,engineSource:source}));
- return {slices,source,sourceRoot,revision,staged,sources};
+ const sources=await dependencySources(work);
+ return {source,sourceRoot,revision,staged,sources};
+}
+export async function compile({arch='universal',work,prepared}){
+ if(arch!=='universal')throw Error('RLVM engine producer builds the universal engine.');
+ prepared ||= await prepare({arch,work});
+ const slices=[];
+ for(const architecture of ['arm64','x64'])slices.push(await buildSlice({architecture,work,sources:prepared.sources,engineSource:prepared.source}));
+ const compiled={...prepared,slices};
+ fs.writeFileSync(path.join(work,'compiled.json'),JSON.stringify(compiled,null,2)+'\n');
+ return compiled;
 }
 function closure(slice){
  const result=new Map(),pending=[slice.binary],seen=new Set();
@@ -84,7 +92,8 @@ function closure(slice){
  const sdl2=fs.realpathSync(path.join(slice.prefix,'lib/libSDL2.dylib'));result.set(path.basename(sdl2),sdl2);
  return result;
 }
-export async function assemble({project='rlvm',version,arch='universal',output,compiled}){
+export async function assemble({project='rlvm',version,arch='universal',output,work,compiled}){
+ compiled ||= JSON.parse(fs.readFileSync(path.join(work,'compiled.json'),'utf8'));
  if(fs.existsSync(output))throw Error('Immutable RLVM output exists.');
  const payload=path.join(output,'payload'),app=path.join(payload,'rlvm.app'),bin=path.join(app,'Contents/MacOS'),libs=path.join(app,'Contents/Frameworks'),resources=path.join(app,'Contents/Resources');
  for(const dir of [bin,libs,resources])fs.mkdirSync(dir,{recursive:true});const maps=compiled.slices.map(closure),names=[...maps[0].keys()].sort();
@@ -118,6 +127,6 @@ export async function assemble({project='rlvm',version,arch='universal',output,c
  for(const [name,source] of Object.entries({...compiled.sources,rlvm:compiled.source}))addLicenses(payload,name,source);
  for(const name of ['SDL_image','SDL_mixer','SDL_ttf','GLEW','guichan','xclannad','utf8cpp'])addLicenses(payload,name,path.join(compiled.source,'vendor',name));
  run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',app]);
- return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(path.join(here,'CMakeLists.txt')),manifestRelative:'manifest.json',record:{managerId:project,executableRelative:'rlvm.app/Contents/MacOS/rlvm',upstreamRevision:compiled.revision,dependencies:dependencyInputs()}});
+ return helperPackage({id:project,version,arch,output,minimumMacOS:'13.0',sourceSha256:sha(path.join(here,'CMakeLists.txt')),manifestRelative:'manifest.json',record:{managerId:project,platform:'darwin',executableRelative:'rlvm.app/Contents/MacOS/rlvm',upstreamRevision:compiled.revision,dependencies:[]}});
 }
-recipeMain(import.meta,{compile,assemble});
+recipeMain(import.meta,{prepare,compile,assemble});
