@@ -170,6 +170,12 @@ function applyOverlay(target,overlay){
  git(target,['apply','--whitespace=nowarn',path.join(import.meta.dirname,overlay.file)],{env:{...process.env,GIT_CEILING_DIRECTORIES:path.dirname(target)}});
 }
 
+// Paths in the binaries (__FILE__, debug information) name the build directory as /anyps5-fex, so no local path is
+// recorded in them; __FILE__ of an AnyPS5 source reads core/libs/..., as AnyPS5's own build records it.
+function prefixMaps(out){
+ return ['-ffile-prefix-map='+out+'=/anyps5-fex','-fmacro-prefix-map='+path.join(out,'anyps5')+'/=','-fmacro-prefix-map='+out+'=/anyps5-fex'];
+}
+
 function link(out,objects,log){
  const build=path.join(out,'build');
  run('cmake',['-S',path.join(out,'fex'),'-B',build,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DBUILD_TESTING=OFF','-DBUILD_FEXCONFIG=OFF',
@@ -276,7 +282,7 @@ const compile=(source,flags=[])=>{
  const object=path.join(options.out,'objects',source.replace(/\.(cpp|c)$/,'.arm64.o'));
  fs.mkdirSync(path.dirname(object),{recursive:true});
  const cxx=source.endsWith('.cpp');
- run(cxx?'clang++':'clang',[...(cxx?['-std=c++20']:[]),'-arch','arm64','-O2','-c','-I',path.join(options.out,'anyps5/core/libs'),'-I',path.join(options.out,'anyps5/3rdparty/ZArchive/include'),
+ run(cxx?'clang++':'clang',[...(cxx?['-std=c++20']:[]),'-arch','arm64','-O2','-c',...prefixMaps(options.out),'-I',path.join(options.out,'anyps5/core/libs'),'-I',path.join(options.out,'anyps5/3rdparty/ZArchive/include'),
   '-I',path.join(options.out,'anyps5/core/libs/nid/include'),...flags,path.join(options.out,'anyps5',source),'-o',object]);
  return object;
 };

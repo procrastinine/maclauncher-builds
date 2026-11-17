@@ -16,8 +16,8 @@ foreach(Target anyps5-fex-proof anyps5-fex-start)
   target_include_directories(${Target} PRIVATE ${H} ${ANYPS5_SOURCE_DIR}/core/libs ${ANYPS5_SOURCE_DIR}/core/libs/nid/include ${ANYPS5_ARM64_INCLUDES})
   target_link_libraries(${Target} PRIVATE ${ANYPS5_ARM64_LINK})
   target_compile_definitions(${Target} PRIVATE ${ANYPS5_ARM64_DEFINES})
-  # A dynamic library among them (SDL) sits next to the executable.
-  set_target_properties(${Target} PROPERTIES BUILD_RPATH "@executable_path")
+  # A dynamic library among them (SDL) sits next to the executable, the only place the executables look for one.
+  set_target_properties(${Target} PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "@executable_path")
 endforeach()
 # The start host serves the main dispatch queue on the main thread with a CFRunLoop.
 target_link_libraries(anyps5-fex-start PRIVATE "-framework CoreFoundation")

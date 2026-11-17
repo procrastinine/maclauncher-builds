@@ -25,6 +25,8 @@
 #include <dirent.h>
 #include <dispatch/dispatch.h>
 #include <exception>
+#include <mach/mach.h>
+#include <mach/mach_vm.h>
 #include <filesystem>
 #include <pthread.h>
 #include <stdexcept>
@@ -295,6 +297,52 @@ std::vector<std::string> SceModules(const std::string& Directory) {
 }
 } // namespace
 
+// AnyPS5 keeps 0x7FFFFC000-0x1000000000 for the system (libc GuestArena's SystemReserved range), and AgcDriver maps its
+// driver memory at 0xEE0000000 there with an address hint (Driver/DriverMemory.hpp). The guest arena reserves the
+// application area around that range, so the host's own mappings without an address (FEX, Vulkan, Metal, large malloc
+// regions) fill that range once the space below 8 GiB is used. The host reserves it before anything else runs, all
+// but the driver's 2 MiB.
+namespace SystemRange {
+constexpr std::uint64_t Begin = 0x7FFFFC000ull;
+constexpr std::uint64_t End = 0x1000000000ull;
+constexpr std::uint64_t Driver = 0xEE0000000ull;
+constexpr std::uint64_t DriverBytes = 2ull << 20;
+
+void Reserve(std::uint64_t From, std::uint64_t To) {
+  constexpr std::uint64_t Chunk = 1ull << 30;
+  for (auto Cursor = From; Cursor < To;) {
+    const auto Bytes = std::min(Chunk - Cursor % Chunk, To - Cursor);
+    mach_vm_address_t Wanted = Cursor;
+    // A chunk something already maps stays as it is.
+    mach_vm_map(mach_task_self(), &Wanted, Bytes, 0, VM_FLAGS_FIXED, MEMORY_OBJECT_NULL, 0, FALSE, VM_PROT_NONE, VM_PROT_ALL,
+                VM_INHERIT_DEFAULT);
+    Cursor += Bytes;
+  }
+}
+
+__attribute__((constructor(101))) void ReserveAtStart() {
+  Reserve(Begin, Driver);
+  Reserve(Driver + DriverBytes, End);
+}
+
+// The mappings between From and To, with their protection and VM tag, for a failure report.
+void Describe(std::uint64_t From, std::uint64_t To) {
+  for (mach_vm_address_t Address = From; Address < To;) {
+    mach_vm_size_t Size = 0;
+    natural_t Depth = 0;
+    vm_region_submap_info_data_64_t Info {};
+    mach_msg_type_number_t Count = VM_REGION_SUBMAP_INFO_COUNT_64;
+    if (mach_vm_region_recurse(mach_task_self(), &Address, &Size, &Depth, reinterpret_cast<vm_region_recurse_info_t>(&Info), &Count) != KERN_SUCCESS ||
+        Address >= To) {
+      break;
+    }
+    std::fprintf(stderr, "  0x%llx-0x%llx prot %d tag %u\n", static_cast<unsigned long long>(Address),
+                 static_cast<unsigned long long>(Address + Size), Info.protection, Info.user_tag);
+    Address += Size;
+  }
+}
+} // namespace SystemRange
+
 // AnyPS5's VideoOut and AgcDriver run SDL and the game window on the process's main thread, through
 // Aps5RunOnMainThread (libkernel's MainThreadMacOs.cpp on the Rosetta route). Here the game runs on a second thread and
 // the main thread serves the main dispatch queue until the game ends the process.
@@ -549,6 +597,22 @@ int RunGame(int argc, char** argv) {
 } // namespace
 
 int main(int argc, char** argv) {
+  // An exception no AnyPS5 caller catches ends the run; its message and the system range's mappings are reported.
+  std::set_terminate([] {
+    if (const auto Error = std::current_exception()) {
+      try {
+        std::rethrow_exception(Error);
+      } catch (const std::exception& Exception) {
+        std::fprintf(stderr, "uncaught exception: %s\n", Exception.what());
+      } catch (...) {
+        std::fprintf(stderr, "uncaught exception of an unknown type\n");
+      }
+    }
+    std::fprintf(stderr, "mappings in the system range 0x%llx-0x%llx:\n", static_cast<unsigned long long>(SystemRange::Begin),
+                 static_cast<unsigned long long>(SystemRange::End));
+    SystemRange::Describe(SystemRange::Begin, SystemRange::End);
+    std::abort();
+  });
   struct Arguments {
     int Count;
     char** Values;
